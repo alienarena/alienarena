@@ -6,10 +6,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "cmdlib.h"
-#include "mathlib.h"
-#include "bspfile.h"
-#include "threads.h"
+#include "qrad.h"
 
 #define	ON_EPSILON	0.1
 
@@ -19,6 +16,7 @@ typedef struct tnode_s
 	vec3_t	normal;
 	float	dist;
 	int		children[2];
+	int		children_face[2]; //valid if the corresponding child is a leaf
     int     pad;
 } tnode_t;
 
@@ -53,6 +51,7 @@ void MakeTnode (int nodenum)
 		if (node->children[i] < 0)
 		{
             t->children[i] = (dleafs[-node->children[i] - 1].contents & tnode_mask) | (1<<31);
+            t->children_face[i] = dleafs[-node->children[i] - 1].firstleafface;
 		}
 		else
 		{
@@ -84,7 +83,66 @@ void MakeTnodes (dmodel_t *bm)
 
 //==========================================================
 
-int TestLine_r (int node, vec3_t set_start, vec3_t stop)
+/*
+=============
+BuildPolygons
+
+Applies the same basic algorithm as r_surf.c:BSP_BuildPolygonFromSurface to
+every surface in the BSP, precomputing the xyz and st coordinates of each 
+vertex of each polygon. Skip non-translucent surfaces for now.
+=============
+*/
+void BuildPolygons (void)
+{
+	//TODO implement
+}
+
+/*
+=============
+GetSTCoords
+
+Gets the ST coordinates within the texture of the polygon of a 3D point on the
+polygon.
+=============
+*/
+void GetSTCoords (int facenum, vec3_t point, int *output)
+{
+	//TODO implement
+	//algorithm idea: http://stackoverflow.com/questions/5766830/texture-coordinates-for-point-in-polygon
+	//also look at what's being one in BSP_BuildPolygonFromSurface to get the
+	//ST data for each polygon vertex; that might be useful too.
+	output[0] = output[1] = 0;
+}
+
+/*
+=============
+GetRGBASample
+
+Gets the RGBA value within the texture of the polygon of a 3D point on the 
+polygon.
+=============
+*/
+void GetRGBASample (int facenum, vec3_t point, float *output)
+{
+	//TODO test this
+	int st_coords[2];
+	int texture_offset;
+	int texnum;
+	byte *cur_texture_data;
+	int i;
+	texnum = dfaces[facenum].texinfo;
+	cur_texture_data = texture_data[texnum];
+	GetSTCoords (facenum, point, st_coords);
+	texture_offset = st_coords[1]*texture_sizes[texnum][0]+st_coords[0]*4;
+	for (i = 0; i < 4; i++)
+	{
+		output[i] = cur_texture_data[i+texture_offset];
+	}
+}
+
+//==========================================================
+
+int TestLine_r (int node, int node_face, vec3_t set_start, vec3_t stop)
 {
 	tnode_t	*tnode;
 	float	front, back;
@@ -98,31 +156,13 @@ int TestLine_r (int node, vec3_t set_start, vec3_t stop)
 
 re_test:
 
+	r = 0;
 	if (node & (1<<31))
 	{
-		if ((r = node & ~(1<<31)) == CONTENTS_WINDOW)
+		if ((r = node & ~(1<<31)) != CONTENTS_WINDOW)
 		{
-			return 0;
-	        /*TODO: open the texture up, check the transparency.
-	        We should have a vec3_t output argument to this function so we
-	        can indicate how much of each color is occluded. Here's what I 
-	        propose:
-	            float rgba_sample[4]; //range 0..1 on each axis
-	            get_rgba_sample(texture, coordinates, rgba_sample);
-	            for (i = 0; i < 3; i++) {
-	                occlusion[i] *= rgba_sample[i]*rgba_sample[3];
-	                if (occlusion[i] < 0.01)
-	                    occlusion[i] = 0.0;
-	            }
-	            if (VectorLength(occlusion) < 0.1)
-	                return 1; //occluded
-	            return 0; //not occluded
-	        Note that occlusion would start out as {1.0,1.0,1.0} and have each
-	        color reduced as the trace passed through more translucent 
-	        textures.
-	        */
+			return r;	// nonzero means occluded, 0 means not occluded
 		}
-		return r;	// nonzero means occluded, 0 means not occluded
 	}
 
 	tnode = &tnodes[node];
@@ -145,16 +185,47 @@ re_test:
 		back = (stop[0]*tnode->normal[0] + stop[1]*tnode->normal[1] + stop[2]*tnode->normal[2]) - tnode->dist;
 		break;
 	}
+	
+	if (r) //translucent, so check texture
+	{		       
+        frac = front / (front-back);
+
+		mid[0] = start[0] + (stop[0] - start[0])*frac;
+		mid[1] = start[1] + (stop[1] - start[1])*frac;
+		mid[2] = start[2] + (stop[2] - start[2])*frac;
+		
+		/*TODO: open the texture up, check the transparency.
+        We should have a vec3_t output argument to this function so we
+        can indicate how much of each color is occluded. Here's what I 
+        propose:
+            float rgba_sample[4]; //range 0..1 on each axis
+            get_rgba_sample(node_face, mid, rgba_sample);
+            for (i = 0; i < 3; i++) {
+                occlusion[i] *= rgba_sample[i]*rgba_sample[3];
+                if (occlusion[i] < 0.01)
+                    occlusion[i] = 0.0;
+            }
+            if (VectorLength(occlusion) < 0.1)
+                return 1; //occluded
+            return 0; //not occluded
+        Note that occlusion would start out as {1.0,1.0,1.0} and have each
+        color reduced as the trace passed through more translucent 
+        textures.
+        */
+        return 0; //not occluded
+    }
 
 	if (front >= -ON_EPSILON && back >= -ON_EPSILON)
 	{
         node = tnode->children[0];
+        node_face = tnode->children_face[0];
         goto re_test;
 	}
 	
 	if (front < ON_EPSILON && back < ON_EPSILON)
 	{
         node = tnode->children[1];
+        node_face = tnode->children_face[1];
         goto re_test;
 	}
 
@@ -167,10 +238,11 @@ re_test:
 	mid[2] = start[2] + (stop[2] - start[2])*frac;
 
 
-    if (r = TestLine_r (tnode->children[side], start, mid))
+    if (r = TestLine_r (tnode->children[side], tnode->children_face[side], start, mid))
 		return r;
 
     node = tnode->children[!side];
+    node = tnode->children_face[!side];
 
     start = _start;
     start[0] = mid[0];
@@ -182,7 +254,7 @@ re_test:
 
 int TestLine (vec3_t start, vec3_t stop)
 {
-	return TestLine_r (0, start, stop);
+	return TestLine_r (0, 0, start, stop);
 }
 
 /*

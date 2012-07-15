@@ -100,6 +100,9 @@ extern	float	lightscale;
 
 void MakeShadowSplits (void);
 
+byte			*texture_data[MAX_MAP_TEXINFO];
+int				texture_sizes[MAX_MAP_TEXINFO][2];
+
 //==============================================
 
 
@@ -131,7 +134,7 @@ void FinalLightFace (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
-int TestLine_r (int node, vec3_t start, vec3_t stop);
+int TestLine (vec3_t start, vec3_t stop);
 
 void CreateDirectLights (void);
 
