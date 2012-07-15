@@ -31,6 +31,7 @@ MakeTnode
 Converts the disk node structure into the efficient tracing structure
 ==============
 */
+static int tnode_mask;
 void MakeTnode (int nodenum)
 {
 	tnode_t			*t;
@@ -51,7 +52,7 @@ void MakeTnode (int nodenum)
 	{
 		if (node->children[i] < 0)
 		{
-            t->children[i] = (dleafs[-node->children[i] - 1].contents & CONTENTS_SOLID) | (1<<31);
+            t->children[i] = (dleafs[-node->children[i] - 1].contents & tnode_mask) | (1<<31);
 		}
 		else
 		{
@@ -75,6 +76,8 @@ void MakeTnodes (dmodel_t *bm)
 	tnodes = malloc( (numnodes+1) * sizeof(tnode_t));
 	tnodes = (tnode_t *)(((int)tnodes + 31)&~31);
 	tnode_p = tnodes;
+	tnode_mask = CONTENTS_SOLID;
+	//TODO: or-in CONTENTS_WINDOW in response to a command-line argument
 
 	MakeTnode (0);
 }
@@ -97,7 +100,29 @@ re_test:
 
 	if (node & (1<<31))
 	{
-		return node & ~(1<<31);	// leaf node
+		if ((r = node & ~(1<<31)) == CONTENTS_WINDOW)
+		{
+			return 0;
+	        /*TODO: open the texture up, check the transparency.
+	        We should have a vec3_t output argument to this function so we
+	        can indicate how much of each color is occluded. Here's what I 
+	        propose:
+	            float rgba_sample[4]; //range 0..1 on each axis
+	            get_rgba_sample(texture, coordinates, rgba_sample);
+	            for (i = 0; i < 3; i++) {
+	                occlusion[i] *= rgba_sample[i]*rgba_sample[3];
+	                if (occlusion[i] < 0.01)
+	                    occlusion[i] = 0.0;
+	            }
+	            if (VectorLength(occlusion) < 0.1)
+	                return 1; //occluded
+	            return 0; //not occluded
+	        Note that occlusion would start out as {1.0,1.0,1.0} and have each
+	        color reduced as the trace passed through more translucent 
+	        textures.
+	        */
+		}
+		return r;	// nonzero means occluded, 0 means not occluded
 	}
 
 	tnode = &tnodes[node];
