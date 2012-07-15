@@ -702,7 +702,7 @@ void CalcPoints (lightinfo_t *l, float sofs, float tofs)
 				leaf = PointInLeaf (surf);
 				if (leaf->contents != CONTENTS_SOLID)
 				{
-					if (!TestLine_r (0, facemid, surf))
+					if (!TestLine (facemid, surf))
 						break;	// got it
 				}
 
@@ -1139,7 +1139,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 	if (dot <= 0.001)
 		return;		// behind sample surface
 
-	if (!noblock && TestLine_r (0, pos, l->origin))
+	if (!noblock && TestLine (pos, l->origin))
 		return;		// occluded
 
 	if( l->type == emit_sky )
@@ -1168,7 +1168,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 				if( !RayPlaneIntersect(
 					l->plane->normal, l->plane->dist, pos, sun_pos, target )
 					||
-					TestLine_r( 0, pos, target )
+					TestLine (pos, target )
 				)
 				{
 					set_main = *sun_main_once;

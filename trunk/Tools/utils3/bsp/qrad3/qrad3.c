@@ -441,7 +441,7 @@ void MakeTransfers (int i)
 
 		if (trans > patch_cutoff)
 		{
-            if (!test_trace && !noblock && TestLine_r (0, patch->origin, patch2->origin))
+            if (!test_trace && !noblock && TestLine (patch->origin, patch2->origin))
 			{
                 transfers[j] = 0;
 				continue;

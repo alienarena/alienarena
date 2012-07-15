@@ -23,7 +23,7 @@ void CalcTextureReflectivity (void)
 {
 	int i, j, count;
 	int texels;
-	float color[3];
+	float color[3], cur_color[3], a;
 	char path[1024];
 	float r, c;
 	byte* pbuffer;
@@ -32,6 +32,11 @@ void CalcTextureReflectivity (void)
 
 	// for TGA RGBA texture images
 
+	//TODO Instead of looking at the entire texture, figure out what parts of
+	//each texture are shown on each face individually, and calculate the 
+	//reflectivity for those. This would allow breaking faces up along 
+	//boundaries within the texture (done manually by the mapper) to improve
+	//lighting in some areas.
 	for( i = 0; i < numtexinfo; i++ )
 	{
 		// default
@@ -45,6 +50,7 @@ void CalcTextureReflectivity (void)
 			if (!strcmp (texinfo[i].texture, texinfo[j].texture))
 			{
 				VectorCopy(texture_reflectivity[j], texture_reflectivity[i]);
+				texture_data[i] = texture_data[j];
 				break;
 			}
 		}
@@ -87,13 +93,21 @@ void CalcTextureReflectivity (void)
 		ptexel = pbuffer;
 		for ( count = texels;  count--; )
 		{
-			color[0] += (float)(*ptexel++); // r
-			color[1] += (float)(*ptexel++); // g
-			color[2] += (float)(*ptexel++); // b
-			ptexel++; // a
+			cur_color[0] = (float)(*ptexel++); // r
+			cur_color[1] = (float)(*ptexel++); // g
+			cur_color[2] = (float)(*ptexel++); // b
+			a = (float)(*ptexel++)/255.0; // a
+			for (j = 0; j < 3; j++)
+			{
+				color[j] += cur_color[j]*a;
+			}
 		}
 
-		free( pbuffer );  // malloc'ed in LoadTarga
+		//never freed but we'll need it up until the end
+		texture_data[i] = pbuffer; 
+		
+		texture_sizes[i][0] = width;
+		texture_sizes[i][1] = height;
 
 		for( j = 0; j < 3; j++ )
 		{ // average RGB for the texture to 0.0..1.0 range
