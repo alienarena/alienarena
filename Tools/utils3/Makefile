@@ -9,7 +9,7 @@
 #
 
 # BUILD = RELEASE or DEBUG
-BUILD ?= DEBUG
+BUILD ?= RELEASE
 
 # Where programs will be installed on 'make install'
 INSTALL_DIR ?= /usr/local/bin
