@@ -1,5 +1,6 @@
 
 #include "qrad.h"
+#include <assert.h>
 
 vec3_t	texture_reflectivity[MAX_MAP_TEXINFO];
 
@@ -28,6 +29,7 @@ void CalcTextureReflectivity (void)
 	float r, c;
 	byte* pbuffer;
 	byte* ptexel;
+	float *fbuffer, *ftexel;
 	int width, height;
 
 	// for TGA RGBA texture images
@@ -44,6 +46,7 @@ void CalcTextureReflectivity (void)
 		texture_reflectivity[i][1] = 0.5f;
 		texture_reflectivity[i][2] = 0.5f;
 
+#if 1
 		// see if an earlier texinfo already got the value
 		for (j=0 ; j<i ; j++)
 		{
@@ -51,11 +54,14 @@ void CalcTextureReflectivity (void)
 			{
 				VectorCopy(texture_reflectivity[j], texture_reflectivity[i]);
 				texture_data[i] = texture_data[j];
+				texture_sizes[i][0] = texture_sizes[j][0];
+				texture_sizes[i][1] = texture_sizes[j][1];
 				break;
 			}
 		}
 		if (j != i)
 			continue;
+#endif
 
 		// buffer is RGBA  (A  set to 255 for 24 bit format)
 		// looks in arena/textures and then data1/textures
@@ -91,20 +97,43 @@ void CalcTextureReflectivity (void)
 		}
 		color[0] = color[1] = color[2] = 0.0f;
 		ptexel = pbuffer;
+		fbuffer = malloc (texels*4*sizeof(float));
+		ftexel = fbuffer;
 		for ( count = texels;  count--; )
 		{
 			cur_color[0] = (float)(*ptexel++); // r
 			cur_color[1] = (float)(*ptexel++); // g
 			cur_color[2] = (float)(*ptexel++); // b
-			a = (float)(*ptexel++)/255.0; // a
+			if ((texinfo[i].flags & SURF_TRANS33) && (texinfo[i].flags & SURF_TRANS66))
+			{
+				a = (float)(*ptexel++)/255.0;
+			} 
+			else if (texinfo[i].flags & SURF_TRANS33)
+			{
+				a = 0.333333;
+				ptexel++;
+			}
+			else if (texinfo[i].flags & SURF_TRANS66)
+			{
+				a = 0.666667;
+				ptexel++;
+			}
+			else
+			{
+				a = 1.0;
+				ptexel++;
+			}
 			for (j = 0; j < 3; j++)
 			{
+				*ftexel++ = cur_color[j]/255.0;
 				color[j] += cur_color[j]*a;
 			}
+			*ftexel++ = a;
 		}
 
 		//never freed but we'll need it up until the end
-		texture_data[i] = pbuffer; 
+		texture_data[i] = fbuffer; 
+		free (pbuffer);
 		
 		texture_sizes[i][0] = width;
 		texture_sizes[i][1] = height;
