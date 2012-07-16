@@ -100,8 +100,11 @@ extern	float	lightscale;
 
 void MakeShadowSplits (void);
 
-byte			*texture_data[MAX_MAP_TEXINFO];
+float			*texture_data[MAX_MAP_TEXINFO];
 int				texture_sizes[MAX_MAP_TEXINFO][2];
+
+
+qboolean		doing_texcheck;
 
 //==============================================
 

@@ -815,6 +815,7 @@ void RadWorld (void)
 	
 	// build initial facelights
 	RunThreadsOnIndividual (numfaces, true, BuildFacelights);
+	doing_texcheck = false;
 	
 	if (numbounce > 0)
 	{
@@ -1000,6 +1001,10 @@ int main (int argc, char **argv)
 		{
 			noblock = true;
 			printf ("noblock = true\n");
+		}
+		else if (!strcmp(param,"-texcheck"))
+		{
+			doing_texcheck = true;
 		}
 //		else if (!strcmp(param,"-memory"))
 //		{
