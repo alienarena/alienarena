@@ -1114,12 +1114,13 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 									qboolean *sun_ambient_once
 								)
 {
-	vec3_t			delta, target;
+	vec3_t			delta, target, occluded;
 	float			dot, dot2;
 	float			dist;
 	float			scale = 0.0f;
 	float			inv;
     float           main_val;
+    int				i;
 	qboolean		set_main;
 
 	VectorClear (color);
@@ -1139,7 +1140,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 	if (dot <= 0.001)
 		return;		// behind sample surface
 
-	if (!noblock && TestLine (pos, l->origin))
+	if (!noblock && TestLine_color (pos, l->origin, occluded))
 		return;		// occluded
 
 	if( l->type == emit_sky )
@@ -1168,7 +1169,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 				if( !RayPlaneIntersect(
 					l->plane->normal, l->plane->dist, pos, sun_pos, target )
 					||
-					TestLine (pos, target )
+					TestLine_color (pos, target, occluded)
 				)
 				{
 					set_main = *sun_main_once;
@@ -1225,6 +1226,8 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 			VectorScale ( l->color, scale, color );
 		}
 	}
+	for (i = 0; i < 3; i++)
+		color[i] *= occluded[i];
 }
 
 /*

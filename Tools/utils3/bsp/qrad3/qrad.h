@@ -138,6 +138,7 @@ void FinalLightFace (int facenum);
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
 int TestLine (vec3_t start, vec3_t stop);
+int TestLine_color (vec3_t start, vec3_t stop, vec3_t occluded);
 
 void CreateDirectLights (void);
 
