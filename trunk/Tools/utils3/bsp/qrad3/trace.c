@@ -285,6 +285,7 @@ Gets the RGBA value within the texture of the polygon of a 3D point on the
 polygon.
 =============
 */
+const float opaque[4] = {0.0, 0.0, 0.0, 1.0};
 inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 {
 	int 		s, t, smax, tmax;
@@ -294,6 +295,8 @@ inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 	float		*res;
 	
 	texnum = GetNodeFace (node_leaf, orig_start, orig_stop, point);
+	if (texnum < 0)
+	    return opaque; //FIXME: is this the right thing to do? Where is this coming from?
 	tex = &texinfo[texnum];
 	
 	smax = texture_sizes[texnum][0];
@@ -317,7 +320,7 @@ inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 //==========================================================
 
 //with texture checking
-int TestLine_r_texcheck (int node, int node_leaf, vec3_t orig_start, vec3_t orig_stop, vec3_t set_start, vec3_t stop)
+int TestLine_r_texcheck (int node, int node_leaf, vec3_t orig_start, vec3_t orig_stop, vec3_t set_start, vec3_t stop, vec3_t occluded)
 {
 	tnode_t	*tnode;
 	float	front, back;
@@ -326,6 +329,7 @@ int TestLine_r_texcheck (int node, int node_leaf, vec3_t orig_start, vec3_t orig
 	float	frac;
 	int		side;
 	int		r;
+	int		i;
 
     start = set_start;
 
@@ -335,34 +339,30 @@ re_test:
 	if (node & (1<<31))
 	{
 		float *rgba_sample;
+		float occluded_len_squared = 0;
 		if ((r = node & ~(1<<31)) != CONTENTS_WINDOW)
 		{
 			return r;
 		}
 		//translucent, so check texture
+		//occluded starts out as {1.0,1.0,1.0} and has each color reduced as
+		//the trace passes through more translucent textures.
 		rgba_sample = GetRGBASample (node_leaf, orig_start, orig_stop);
-		if (rgba_sample[3] > 0.8)
-			return 1;
-		return 0;
-		return (rgba_sample[3] > 0.8); //TODO more sophisticated alpha checking
-		/*TODO: open the texture up, check the transparency.
-        We should have a vec3_t output argument to this function so we
-        can indicate how much of each color is occluded. Here's what I 
-        propose:
-            float rgba_sample[4]; //range 0..1 on each axis
-            get_rgba_sample(node_face, mid, rgba_sample);
-            for (i = 0; i < 3; i++) {
-                occlusion[i] *= rgba_sample[i]*rgba_sample[3];
-                if (occlusion[i] < 0.01)
-                    occlusion[i] = 0.0;
-            }
-            if (VectorLength(occlusion) < 0.1)
-                return 1; //occluded
-            return 0; //not occluded
-        Note that occlusion would start out as {1.0,1.0,1.0} and have each
-        color reduced as the trace passed through more translucent 
-        textures.
-        */
+		if (rgba_sample[3] == 0.0)
+			return 0; //not occluded
+		if (rgba_sample[3] == 1.0)
+			return 1; //occluded
+		for (i = 0; i < 3; i++) {
+			occluded[i] *= rgba_sample[i]*(1.0-rgba_sample[3]);
+			if (occluded[i] < 0.01)
+				occluded[i] = 0.0;
+			occluded_len_squared += occluded[i]*occluded[i];
+		}
+		if (occluded_len_squared < 0.001)
+		{
+			return 1; //occluded
+		}
+		return 0; //not occluded
 	}
 
 	tnode = &tnodes[node];
@@ -409,7 +409,7 @@ re_test:
 	mid[2] = start[2] + (stop[2] - start[2])*frac;
 
 
-    if (r = TestLine_r_texcheck (tnode->children[side], tnode->children_leaf[side], orig_start, orig_stop, start, mid))
+    if (r = TestLine_r_texcheck (tnode->children[side], tnode->children_leaf[side], orig_start, orig_stop, start, mid, occluded))
 		return r;
 
     node = tnode->children[!side];
@@ -506,8 +506,18 @@ re_test:
 
 int TestLine (vec3_t start, vec3_t stop)
 {
+    vec3_t occluded;
 	if (doing_texcheck)
-		return TestLine_r_texcheck (0, 0, start, stop, start, stop);
+		return TestLine_r_texcheck (0, 0, start, stop, start, stop, occluded);
+	else
+		return TestLine_r (0, start, stop);
+}
+
+int TestLine_color (vec3_t start, vec3_t stop, vec3_t occluded)
+{
+	occluded[0] = occluded[1] = occluded[2] = 1.0;
+	if (doing_texcheck)
+		return TestLine_r_texcheck (0, 0, start, stop, start, stop, occluded);
 	else
 		return TestLine_r (0, start, stop);
 }
