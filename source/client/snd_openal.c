@@ -240,7 +240,7 @@ const struct source_default_s
 	ALfloat cone_outer_gain;
 	ALfloat cone_inner_angle;
 	ALfloat cone_outer_angle;
-	int stop_timer_delay;
+	// int stop_timer_delay;
 } source_default =
 {
 		(ALfloat)1.0f, //    AL_PITCH

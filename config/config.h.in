@@ -287,6 +287,9 @@
 /* Enable X86 VidMode support */
 #undef HAVE_XXF86VM
 
+/* Enable ZLib support */
+#undef HAVE_ZLIB
+
 /* Define to 1 if you have the `_begin_thread' function. */
 #undef HAVE__BEGIN_THREAD
 

@@ -90,6 +90,9 @@ where the location of header files differs between systems.
 /* Define to 1 if you have the <vorbis/vorbisfile.h> header file. */
 #define HAVE_VORBIS_VORBISFILE_H 1
 
+/* Enable ZLib support (for CRX Engine, not cURL) */
+/* #define HAVE_ZLIB 1  UNCOMMENT THIS WHEN READY */
+
 /* Define to 1 if you have the <jpeg/jpeglib.h> header file. */
 #define HAVE_JPEG_JPEGLIB_H 1
 

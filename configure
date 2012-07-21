@@ -627,6 +627,8 @@ XXF86VM_LIBS
 XXF86VM_CFLAGS
 X11_LIBS
 X11_CFLAGS
+ZLIB_LIBS
+ZLIB_CFLAGS
 PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
@@ -763,6 +765,7 @@ enable_ansi_color
 with_system_libode
 enable_documents
 with_icondir
+with_zlib
 with_xf86vm
 with_xf86dga
 enable_debugging_symbols
@@ -792,6 +795,8 @@ PKG_CONFIG_LIBDIR
 XMKMF
 GL_LIBDIR
 ALIENARENA_HOMEDIR
+ZLIB_CFLAGS
+ZLIB_LIBS
 X11_CFLAGS
 X11_LIBS
 XXF86VM_CFLAGS
@@ -1465,6 +1470,7 @@ Optional Packages:
   --with(out)-system-libode
                           use system-supplied libode (default:without)
   --with-icondir=DIR      icon install directory (default:DATADIR/icons)
+  --with(out)-zlib        include Zlib compression support (default: check)
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: without)
 
@@ -1488,6 +1494,8 @@ Some influential environment variables:
   GL_LIBDIR   directory containing libGL.dylib
   ALIENARENA_HOMEDIR
               User data and cfg subdirectory in $HOME
+  ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
+  ZLIB_LIBS   linker flags for ZLIB, overriding pkg-config
   X11_CFLAGS  C compiler flags for X11, overriding pkg-config
   X11_LIBS    linker flags for X11, overriding pkg-config
   XXF86VM_CFLAGS
@@ -5769,7 +5777,6 @@ if test "$ac_res" != no; then :
 fi
 
 
-
 if test -z "$BUILD_CLIENT_TRUE"; then :
 
 
@@ -6176,7 +6183,118 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   PTHREAD_LIBS="-pthread"
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
+
+# Check whether --with-zlib was given.
+if test "${with_zlib+set}" = set; then :
+  withval=$with_zlib;
+else
+  with_zlib=check
+fi
+
+	have_zlib=no
+	if  test "x$with_zlib" != "xno" ; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ZLIB" >&5
+$as_echo_n "checking for ZLIB... " >&6; }
+
+if test -n "$ZLIB_CFLAGS"; then
+    pkg_cv_ZLIB_CFLAGS="$ZLIB_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"zlib\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "zlib") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZLIB_CFLAGS=`$PKG_CONFIG --cflags "zlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$ZLIB_LIBS"; then
+    pkg_cv_ZLIB_LIBS="$ZLIB_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"zlib\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "zlib") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZLIB_LIBS=`$PKG_CONFIG --libs "zlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        ZLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "zlib" 2>&1`
+        else
+	        ZLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "zlib" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ZLIB_PKG_ERRORS" >&5
+
+
+			have_zlib=no
+			if  test "x$with_zlib" = "xyes" ; then :
+
+				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-zlib specified, but the library or headers could not be found
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+			have_zlib=no
+			if  test "x$with_zlib" = "xyes" ; then :
+
+				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-zlib specified, but the library or headers could not be found
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+else
+	ZLIB_CFLAGS=$pkg_cv_ZLIB_CFLAGS
+	ZLIB_LIBS=$pkg_cv_ZLIB_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+			have_zlib=yes
+
+$as_echo "#define HAVE_ZLIB 1" >>confdefs.h
+
+
+fi
+
+fi
+
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
 $as_echo_n "checking for library containing jpeg_read_header... " >&6; }
 if ${ac_cv_search_jpeg_read_header+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -6233,6 +6351,7 @@ if test "$ac_res" != no; then :
 else
   as_fn_error $? "\"Required jpeg library not found.\"" "$LINENO" 5
 fi
+
 
 
 	if test -z "$BUILD_UNIX_TRUE"; then :
@@ -6438,8 +6557,6 @@ $as_echo "#define HAVE_XXF86VM 1" >>confdefs.h
 fi
 
 fi
-
-
 
 
 # Check whether --with-xf86dga was given.
@@ -10129,6 +10246,7 @@ fi
 			$as_echo " System ODE library ..... ${system_ode}"
 			$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
 			$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+			$as_echo " Zlib support: .......... ${have_zlib}"
 
 fi
 		$as_echo " Shared Data ............ ${srcdir}"
@@ -10145,6 +10263,7 @@ else
 			$as_echo " System ODE library ..... ${system_ode}"
 			$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
 			$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+			$as_echo " Zlib support: .......... ${have_zlib}"
 			if  test x"${unix_host}" = xdarwin ; then :
 
 				$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"

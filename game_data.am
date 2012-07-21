@@ -1018,7 +1018,9 @@ nobase_nodist_maps_DATA = \
 	data1/maps/scripts/tca-extermination.mus \
 	data1/maps/scripts/tca-purgatory.fog \
 	data1/maps/scripts/tca-purgatory.mus \
-	data1/maps/scripts/tca-zion2k9.mus
+	data1/maps/scripts/tca-zion2k9.mus \
+	data1/maps/shadowtest.bsp \
+	data1/maps/shadowtest.lightmap
 
 
 modelsdir = $(pkgdatadir)
