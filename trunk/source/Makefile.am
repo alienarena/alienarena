@@ -59,7 +59,8 @@ alienarena_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(DEPS_CFLAGS) \
 	$(ODE_CFLAGS) \
 	$(XXF86VM_CFLAGS) \
-	$(XXF86DGA_CFLAGS)
+	$(XXF86DGA_CFLAGS) \
+	$(ZLIB_CFLAGS)
 
 if USE_SYSTEM_LIBODE
 #
@@ -71,7 +72,8 @@ alienarena_LDADD = libgame.a \
 	$(DEPS_LIBS) \
 	$(ODE_LIBS) \
 	$(XXF86VM_LIBS) \
-	$(XXF86DGA_LIBS)
+	$(XXF86DGA_LIBS) \
+	$(ZLIB_LIBS)
 
 else
 #
@@ -84,6 +86,7 @@ alienarena_LDADD = libgame.a \
 	$(DEPS_LIBS) \
 	$(XXF86VM_LIBS) \
 	$(XXF86DGA_LIBS) \
+	$(ZLIB_LIBS) \
 	-lstdc++
 	
 libode_a_CPPFLAGS = -I$(top_srcdir)/source/unix/odesrc/OPCODE \

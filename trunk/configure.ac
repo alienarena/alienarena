@@ -248,7 +248,6 @@ AC_SEARCH_LIBS([acos],[m])
 AC_SEARCH_LIBS([dlopen],[dl])
 AC_SEARCH_LIBS([clock_gettime],[rt])
 
-
 dnl
 dnl start of client-only library requirements
 dnl
@@ -261,8 +260,35 @@ AM_COND_IF([BUILD_CLIENT],
 #
 	AS_IF([ test "x$PTHREAD_LIBS" = "x" ],[PTHREAD_LIBS="-pthread"])
 
+	dnl
+	dnl zlib support
+	dnl
+	dnl If no option is specified, then check for the library and act accordingly.
+	dnl If "--without-zlib" is specified, do not check, and disable the library.
+	dnl If "--with-zlib" is specified, check and bail out if it cannot be found.
+	dnl
+	AC_ARG_WITH([zlib],
+		[AS_HELP_STRING([--with(out)-zlib],[include Zlib compression support (default: check)])],
+		[],
+		[with_zlib=check])
+	have_zlib=no
+	AS_IF([ test "x$with_zlib" != "xno" ],[
+		PKG_CHECK_MODULES([ZLIB],[zlib],[
+			have_zlib=yes
+			AC_DEFINE([HAVE_ZLIB],1,[Enable ZLib support])
+		],[
+			have_zlib=no
+			AS_IF([ test "x$with_zlib" = "xyes" ],[
+				AC_MSG_FAILURE([--with-zlib specified, but the library or headers could not be found])
+			])
+		])
+	])
+
+
+	dnl IJG libjpeg required  
 	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
 		[AC_MSG_ERROR(["Required jpeg library not found."])])
+
 
 	AM_COND_IF([BUILD_UNIX],
 	[
@@ -296,8 +322,6 @@ AM_COND_IF([BUILD_CLIENT],
 				])
 			])
 		])
-
-
 
 		dnl
 		dnl XF86 DGA extension
@@ -638,6 +662,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 			AS_ECHO([" System ODE library ..... ${system_ode}"])
 			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
 			])
 		AS_ECHO([" Shared Data ............ ${srcdir}"])
 		AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
@@ -654,6 +679,7 @@ dnl
 			AS_ECHO([" System ODE library ..... ${system_ode}"])
 			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
 			AS_IF([ test x"${unix_host}" = xdarwin ],[
 				AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 			])
