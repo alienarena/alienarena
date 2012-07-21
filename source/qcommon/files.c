@@ -150,7 +150,7 @@ they shouldn't.
 #if !defined HAVE__GETCWD && defined HAVE_GETCWD
 #define _getcwd getcwd
 #endif
-\
+
 char fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
 
