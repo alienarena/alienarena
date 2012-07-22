@@ -890,6 +890,12 @@ void SV_Init (void);
 void SV_Shutdown (char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
 
+
+//
+// compression
+//
+void qdecompress (sizebuf_t *src, sizebuf_t *dst, int type);
+
 #endif /* Q_COMMON_H_ */
 
 

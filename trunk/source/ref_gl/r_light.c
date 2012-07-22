@@ -346,7 +346,7 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int smax, int tmax, int stri
 {
 	int			r, g, b, a, max;
 	int			i, j, size;
-	byte		*lightmap;
+	byte		*lightmap, *old_dest;
 	float		scale[4];
 	int			nummaps;
 	float		*bl;
@@ -422,7 +422,7 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int smax, int tmax, int stri
 		int maps;
 
 		memset( s_blocklights, 0, sizeof( s_blocklights[0] ) * size * 3 );
-
+		
 		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;
 			 maps++)
 		{
@@ -459,6 +459,8 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int smax, int tmax, int stri
 store:
 	stride -= (smax<<2);
 	bl = s_blocklights;
+	
+	old_dest = dest;
 
 	for (i=0 ; i<tmax ; i++, dest += stride)
 	{
@@ -508,6 +510,73 @@ store:
 
 			bl += 3;
 			dest += 4;
+		}
+	}
+
+	#define GET_SAMPLE(x,y) (old_dest+((y*smax+x)*4)+y*stride)
+	#define SAMPLEDIST(a,b) sqrt((float)((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2])))
+	for (i = 1; i < smax-1; i++)
+	{
+		for (j = 1; j < tmax-1; j++)
+		{
+			byte *cur = GET_SAMPLE(i,j);
+			byte *up = GET_SAMPLE(i,j-1);
+			byte *left = GET_SAMPLE(i-1,j);
+			byte *right = GET_SAMPLE(i+1,j);
+			byte *down = GET_SAMPLE(i,j+1);
+			float updist = SAMPLEDIST(cur,up);
+			float leftdist = SAMPLEDIST(cur,left);
+			float rightdist = SAMPLEDIST(cur,right);
+			float downdist = SAMPLEDIST(cur,down);
+			float ul_dist = SAMPLEDIST(up,left);
+			float ur_dist = SAMPLEDIST(up,right);
+			float ll_dist = SAMPLEDIST(down,left);
+			float lr_dist = SAMPLEDIST(down,right);
+			float avedist = (updist+leftdist+rightdist+downdist)/4.0;
+			float avedev = (fabs(updist-avedist)+fabs(leftdist-avedist)+fabs(rightdist-avedist)+fabs(downdist-avedist))/4.0;
+/*			float notup_avedev = (leftdist+rightdist+downdist)/3.0;*/
+/*			float notleft_avedev = (updist+rightdist+downdist)/3.0;*/
+/*			float notright_avedev = (updist+leftdist+downdist)/3.0;*/
+/*			float notdown_avedev = (updist+leftdist+rightdist)/3.0;*/
+/*			float ul_avedev = (updist+leftdist)/2.0;*/
+/*			float ur_avedev = (updist+rightdist)/2.0;*/
+/*			float ll_avedev = (downdist+leftdist)/2.0;*/
+/*			float lr_avedev = (downdist+rightdist)/2.0;*/
+/*			float numdiff = (fabs(updist-avedev) > 40.0)+*/
+/*							(fabs(leftdist-avedev) > 40.0)+*/
+/*							(fabs(rightdist-avedev) > 40.0)+*/
+/*							(fabs(downdist-avedev) > 40.0);*/
+/*			float numdiff = (notup_avedev < avedev - 40.0)+*/
+/*							(notleft_avedev < avedev - 40.0)+*/
+/*							(notright_avedev < avedev - 40.0)+*/
+/*							(notdown_avedev < avedev - 40.0);*/
+/*			float numdiff = (ul_avedev < avedev && lr_avedev < avedev)+*/
+/*							(ur_avedev < avedev && ll_avedev < avedev);*/
+/*			float numdiff = ((ul_dev < ur_dev || ul_dev < ll_dev) && (lr_dev < ur_dev || lr_dev < ll_dev))+*/
+/*							((ur_dev < ul_dev || ll_dev < ul_dev) && (ll_dev < lr_dev || ll_dev < lr_dev));*/
+/*			float numdiff = (ul_dev < updist || ul_dev < leftdist)+*/
+/*							(ur_dev < updist || ur_dev < rightdist)+*/
+/*							(ll_dev < downdist || ll_dev < leftdist)+*/
+/*							(lr_dev < downdist || lr_dev < rightdist);*/
+/*			float numdiff = (ul_dev*2.0 < updist+leftdist)+*/
+/*							(ur_dev*2.0 < updist+rightdist)+*/
+/*							(ll_dev*2.0 < downdist+leftdist)+*/
+/*							(lr_dev*2.0 < downdist+rightdist);*/
+			float numdiff = (fabs(ul_dist-avedist) < avedev);
+			if (numdiff && 0)
+				cur[3] = 0;
+		}
+	}
+	for (i = 1; i < smax-1; i++)
+	{
+		for (j = 1; j < tmax-1; j++)
+		{
+			byte *cur = GET_SAMPLE(i,j);
+			if (cur[3] == 0) 
+			{
+				cur[3] = 255;
+				cur[0] = 255;
+			}
 		}
 	}
 }
