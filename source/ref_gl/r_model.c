@@ -1119,6 +1119,7 @@ void Mod_LoadRefineFaceLookups (lump_t *l)
 	
 	out = lfacelookups;
 	
+	Com_Printf ("%f\n", in->xscale);
 	for (i = 0; i < count; i++, out++, in++)
 	{
 		out->override = LittleLong(in->override);
@@ -1139,9 +1140,16 @@ void Mod_LoadRefineLighting (lump_t *l)
 	memcpy (override_lightdata, lightmap_header + l->fileofs, l->filelen);
 }
 
+//more than necessary
+#define SIZEOF_LIGHTMAP_UNCOMPRESSED (\
+	sizeof(lightmapheader_t)+\
+	sizeof(ltmp_facelookup_t)*MAX_MAP_FACES+\
+	MAX_OVERRIDE_LIGHTING+16\
+)
 void Mod_LoadRefineLightmap (char *bsp_name)
 {
-	unsigned 			*buf;
+	byte 				*buf;
+	unsigned			uncompressed_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
 	lightmapheader_t	header;
 	int					length;
 	char				name[MAX_OSPATH];
@@ -1149,6 +1157,14 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	int					lightmap_file_lump_order[LTMP_LUMPS] = {
 		LTMP_LUMP_FACELOOKUP, LTMP_LUMP_LIGHTING
 	};
+	
+	sizebuf_t			in, out;
+
+#ifndef HAVE_ZLIB
+	Com_Printf ("Zlib support must be enabled to use HD lightmaps!\n");
+	Com_Printf ("Please recompile with Zlib support.\n");
+	return;
+#endif
 	
 	strncpy (name, bsp_name, MAX_OSPATH-1-strlen(".lightmap")+strlen(".bsp"));
 	extension = strstr (name, ".bsp");
@@ -1164,15 +1180,21 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	}
 	else
 		Com_Printf ("Loaded %s\n", name);
-	lightmap_header = (byte *)buf;
-	header = *(lightmapheader_t *)buf;
+	
+	SZ_Init (&in, buf, length);
+	SZ_Init (&out, (byte *)uncompressed_buf, SIZEOF_LIGHTMAP_UNCOMPRESSED);
+	qdecompress (&in, &out, compression_zlib_header);
+	FS_FreeFile (buf);
+	
+	lightmap_header = (byte *)uncompressed_buf;
+	header = *(lightmapheader_t *)uncompressed_buf;
 	
 	if (header.ident != IDLIGHTMAPHEADER)
 		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid magic number");
 	if (header.version != LTMPVERSION)
 		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid version");
 	
-	if (checkLumps (header.lumps, lightmap_file_lump_order, buf, LTMP_LUMPS, length))
+	if (checkLumps (header.lumps, lightmap_file_lump_order, uncompressed_buf, LTMP_LUMPS, length))
 		Com_Error (ERR_DROP,"Mod_LoadRefineLightmap: lumps in %s don't add up right!\n"
 							"The file is likely corrupt, please obtain a fresh copy.",name);
 	

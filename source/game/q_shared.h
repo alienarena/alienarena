@@ -978,4 +978,14 @@ typedef struct
 #define MAX_LATENT_CMDS 64
 //unlagged - lag simulation #2
 
+//
+// types of compression
+//
+enum compressiontypes_e  {
+    compression_zlib_raw,
+    compression_lzo,
+    compression_zlib_header,
+    last_compressiontype_known
+};
+
 #endif  /* Q_SHARED_H_ */

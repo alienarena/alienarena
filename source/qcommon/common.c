@@ -27,6 +27,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <setjmp.h>
 
+//zlib currently not needed server-side (FOR NOW!)
+//Also, due to the ld flags for zlib not being used server side, it won't
+//compile without this workaround.
+#ifdef DEDICATED_ONLY
+#undef HAVE_ZLIB
+#endif 
+
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 #define	MAXPRINTMSG	8192
 
 #define MAX_NUM_ARGVS	50
@@ -1790,3 +1801,90 @@ Qcommon_Shutdown
 void Qcommon_Shutdown (void)
 {
 }
+
+
+
+
+
+
+
+
+
+#ifdef HAVE_ZLIB
+//This compression code was originally from the Lua branch. More of it will
+//eventually be merged when packet compression is added, but currently we 
+//are only decompressing zlib data and only need it on the client side.
+
+//Following function ripped off from R1Q2, then modified to use sizebufs
+int ZLibDecompress (sizebuf_t *in, sizebuf_t *out, int wbits) {
+	z_stream zs;
+	int result;
+
+	memset (&zs, 0, sizeof(zs));
+
+
+	zs.next_in = in->data + in->readcount;
+	zs.avail_in = 0;
+
+	zs.next_out = out->data + out->cursize;
+	zs.avail_out = out->maxsize - out->cursize;
+
+	result = inflateInit2(&zs, wbits);
+	if (result != Z_OK)
+	{
+		Com_Error (ERR_DROP, "ZLib data error! Error %d on inflateInit.\nMessage: %s", result, zs.msg);
+		return 0;
+	}
+
+	zs.avail_in = in->cursize;
+
+	result = inflate(&zs, Z_FINISH);
+	if (result != Z_STREAM_END)
+	{
+		Com_Error (ERR_DROP, "ZLib data error! Error %d on inflate.\nMessage: %s", result, zs.msg);
+		zs.total_out = 0;
+	}
+
+	result = inflateEnd(&zs);
+	if (result != Z_OK)
+	{
+		Com_Error (ERR_DROP, "ZLib data error! Error %d on inflateEnd.\nMessage: %s", result, zs.msg);
+		return 0;
+	}
+
+	return zs.total_out;
+}
+#endif //HAVE_ZLIB
+
+void qdecompress (sizebuf_t *src, sizebuf_t *dst, int type){
+	int newsize;
+
+	switch (type) {
+#ifdef HAVE_ZLIB
+		case compression_zlib_raw:
+			//raw DEFLATE data, no header/trailer
+			newsize = ZLibDecompress (src, dst, -15);
+			break;
+#endif
+#if 0 
+        case compression_lzo:
+            newsize = LzoDecompress (src, dst);
+            break;
+#endif
+#ifdef HAVE_ZLIB
+		case compression_zlib_header: 
+			//automatically detect gzip/zlib header/trailer
+			newsize = ZLibDecompress (src, dst, 47); 
+			break;
+#endif
+	} 
+        
+	if ( newsize == 0)
+		dst->cursize = 0;
+	else
+		dst->cursize += newsize;
+	
+}
+
+
+
