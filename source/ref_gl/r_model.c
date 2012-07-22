@@ -1146,10 +1146,10 @@ void Mod_LoadRefineLighting (lump_t *l)
 	sizeof(ltmp_facelookup_t)*MAX_MAP_FACES+\
 	MAX_OVERRIDE_LIGHTING+16\
 )
+unsigned			uncompressed_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
 void Mod_LoadRefineLightmap (char *bsp_name)
 {
 	byte 				*buf;
-	unsigned			uncompressed_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
 	lightmapheader_t	header;
 	int					length;
 	char				name[MAX_OSPATH];
@@ -1182,6 +1182,7 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 		Com_Printf ("Loaded %s\n", name);
 	
 	SZ_Init (&in, buf, length);
+	in.cursize = length;
 	SZ_Init (&out, (byte *)uncompressed_buf, SIZEOF_LIGHTMAP_UNCOMPRESSED);
 	qdecompress (&in, &out, compression_zlib_header);
 	FS_FreeFile (buf);
@@ -1194,7 +1195,7 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	if (header.version != LTMPVERSION)
 		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid version");
 	
-	if (checkLumps (header.lumps, lightmap_file_lump_order, uncompressed_buf, LTMP_LUMPS, length))
+	if (checkLumps (header.lumps, lightmap_file_lump_order, uncompressed_buf, LTMP_LUMPS, out.cursize))
 		Com_Error (ERR_DROP,"Mod_LoadRefineLightmap: lumps in %s don't add up right!\n"
 							"The file is likely corrupt, please obtain a fresh copy.",name);
 	
