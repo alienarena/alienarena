@@ -286,15 +286,23 @@ polygon.
 =============
 */
 const float opaque[4] = {0.0, 0.0, 0.0, 1.0};
+const float transparent[4] = {0.0, 0.0, 0.0, 0.0};
 inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 {
-	int 		s, t, smax, tmax;
+	int 		s, t, smax, tmax, i;
 	int			texnum;
-	vec3_t		point;
+	vec3_t		point, start_to_point, start_to_stop;
 	texinfo_t 	*tex;
 	float		*res;
 	
 	texnum = GetNodeFace (node_leaf, orig_start, orig_stop, point);
+	VectorSubtract(point, orig_start, start_to_point);
+	VectorNormalize(start_to_point, start_to_point);
+	VectorSubtract(orig_stop, orig_start, start_to_stop);
+	VectorNormalize(start_to_stop, start_to_stop);
+	for (i = 0; i < 3; i++)
+		if (fabs(start_to_point[i]-start_to_stop[i]) > 0.001)
+			return transparent; //FIXME: where are these coming from?
 	if (texnum < 0)
 	    return opaque; //FIXME: is this the right thing to do? Where is this coming from?
 	tex = &texinfo[texnum];
@@ -354,8 +362,6 @@ re_test:
 			return 1; //occluded
 		for (i = 0; i < 3; i++) {
 			occluded[i] *= rgba_sample[i]*(1.0-rgba_sample[3]);
-			if (occluded[i] < 0.01)
-				occluded[i] = 0.0;
 			occluded_len_squared += occluded[i]*occluded[i];
 		}
 		if (occluded_len_squared < 0.001)
@@ -445,7 +451,7 @@ re_test:
 		{
 			return r;
 		}
-		return 1;
+		return 0;
 	}
 
 	tnode = &tnodes[node];
@@ -507,6 +513,7 @@ re_test:
 int TestLine (vec3_t start, vec3_t stop)
 {
     vec3_t occluded;
+    occluded[0] = occluded[1] = occluded[2] = 1.0;
 	if (doing_texcheck)
 		return TestLine_r_texcheck (0, 0, start, stop, start, stop, occluded);
 	else
