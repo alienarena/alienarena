@@ -41,10 +41,10 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 2.	SYSTEM REQUIREMENTS
 
-1 GHz
-256 MB RAM
-500 MB hard disk space
-3D Accelerator
+1.8 GHz CPU
+1.5 GiB RAM
+1.2 GiB hard disk space
+3D Accelerator with at least 128 MiB texture memory available
 
 3.	GETTING STARTED
 
