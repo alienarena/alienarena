@@ -24,7 +24,7 @@ void CalcTextureReflectivity (void)
 {
 	int i, j, count;
 	int texels;
-	float color[3], cur_color[3], a;
+	float color[3], cur_color[3], tex_a, a;
 	char path[1024];
 	float r, c;
 	byte* pbuffer;
@@ -104,25 +104,28 @@ void CalcTextureReflectivity (void)
 			cur_color[0] = (float)(*ptexel++); // r
 			cur_color[1] = (float)(*ptexel++); // g
 			cur_color[2] = (float)(*ptexel++); // b
-			if ((texinfo[i].flags & SURF_TRANS33) && (texinfo[i].flags & SURF_TRANS66))
+			tex_a = (float)(*ptexel++);
+			if (texinfo[i].flags & SURF_WARP)
 			{
-				a = (float)(*ptexel++)/255.0;
+				a = 0.0;
+			}
+			else if ((texinfo[i].flags & SURF_TRANS33) && (texinfo[i].flags & SURF_TRANS66))
+			{
+				a = tex_a/255.0;
 			} 
 			else if (texinfo[i].flags & SURF_TRANS33)
 			{
-				a = 0.333333;
-				ptexel++;
+				a = tex_a/765.0;
 			}
 			else if (texinfo[i].flags & SURF_TRANS66)
 			{
-				a = 0.666667;
-				ptexel++;
+				a = tex_a/382.5;
 			}
 			else
 			{
 				a = 1.0;
-				ptexel++;
 			}
+
 			for (j = 0; j < 3; j++)
 			{
 				*ftexel++ = cur_color[j]/255.0;
