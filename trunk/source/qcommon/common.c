@@ -1818,6 +1818,7 @@ void Qcommon_Shutdown (void)
 //Following function ripped off from R1Q2, then modified to use sizebufs
 int ZLibDecompress (sizebuf_t *in, sizebuf_t *out, int wbits) {
 	z_stream zs;
+	char *err_summary;
 	int result;
 
 	memset (&zs, 0, sizeof(zs));
@@ -1832,7 +1833,14 @@ int ZLibDecompress (sizebuf_t *in, sizebuf_t *out, int wbits) {
 	result = inflateInit2(&zs, wbits);
 	if (result != Z_OK)
 	{
-		Com_Error (ERR_DROP, "ZLib data error! Error %d on inflateInit.\nMessage: %s", result, zs.msg);
+		switch (result)
+		{
+			default: err_summary = "unknown"; break;
+			case Z_MEM_ERROR: err_summary = "system memory exhausted"; break;
+			case Z_STREAM_ERROR: err_summary = "invalid z_stream"; break;
+			case Z_VERSION_ERROR: err_summary = "incompatible zlib version"; break;
+		}
+		Com_Printf ("ZLib data error! Error %d on inflateInit.\nMessage: %s\n", result, zs.msg);
 		return 0;
 	}
 
@@ -1841,14 +1849,30 @@ int ZLibDecompress (sizebuf_t *in, sizebuf_t *out, int wbits) {
 	result = inflate(&zs, Z_FINISH);
 	if (result != Z_STREAM_END)
 	{
-		Com_Error (ERR_DROP, "ZLib data error! Error %d on inflate.\nMessage: %s", result, zs.msg);
-		zs.total_out = 0;
+	    switch (result)
+		{
+			default: err_summary = "unknown"; break;
+			case Z_STREAM_END: err_summary = "premature end of stream"; break;
+			case Z_NEED_DICT: err_summary = "missing preset dictionary"; break;
+			case Z_STREAM_ERROR: err_summary = "invalid z_stream"; break;
+			case Z_DATA_ERROR: err_summary = "corrupted data"; break;
+			case Z_BUF_ERROR: err_summary = "too much compressed data"; break;
+			case Z_OK: err_summary = "shouldn't happen with Z_FINISH"; break;
+		}
+		Com_Printf ("ZLib data error! Error %d (%s) on inflate.\nMessage: %s\n", result, err_summary, zs.msg);
+		return 0;
 	}
 
 	result = inflateEnd(&zs);
 	if (result != Z_OK)
 	{
-		Com_Error (ERR_DROP, "ZLib data error! Error %d on inflateEnd.\nMessage: %s", result, zs.msg);
+		switch (result)
+		{
+			default: err_summary = "unknown"; break;
+			case Z_STREAM_ERROR: err_summary = "invalid z_stream"; break;
+			case Z_DATA_ERROR: err_summary = "prematurely freed z_stream"; break;
+		}
+		Com_Printf ("ZLib data error! Error %d (%s) on inflateEnd.\nMessage: %s\n", result, err_summary, zs.msg);
 		return 0;
 	}
 
