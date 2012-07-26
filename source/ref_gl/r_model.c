@@ -1146,7 +1146,7 @@ void Mod_LoadRefineLighting (lump_t *l)
 	sizeof(ltmp_facelookup_t)*MAX_MAP_FACES+\
 	MAX_OVERRIDE_LIGHTING+16\
 )
-unsigned			uncompressed_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
+byte			uncompressed_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
 void Mod_LoadRefineLightmap (char *bsp_name)
 {
 	byte 				*buf;
@@ -1187,17 +1187,36 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	qdecompress (&in, &out, compression_zlib_header);
 	FS_FreeFile (buf);
 	
+	if (!out.cursize)
+	{
+		Com_Printf ("Mod_LoadRefineLightmap: unable to decompress data in %s!\n",name);
+		return;
+	}
+	
 	lightmap_header = (byte *)uncompressed_buf;
 	header = *(lightmapheader_t *)uncompressed_buf;
 	
 	if (header.ident != IDLIGHTMAPHEADER)
-		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid magic number");
+	{
+		Com_Printf ("Mod_LoadRefineLightmap: invalid magic number in %s!\n"
+					"The file is likely corrupt, please obtain a fresh copy.\n", name);
+					
+		return;
+	}
 	if (header.version != LTMPVERSION)
-		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid version");
+	{
+		Com_Printf ("Mod_LoadRefineLightmap: invalid version number in %s!\n"
+					"Version %d of the format is not supported. Most recent supported is %d\n", 
+					name, header.ident, LTMPVERSION);
+		return;
+	}
 	
 	if (checkLumps (header.lumps, lightmap_file_lump_order, uncompressed_buf, LTMP_LUMPS, out.cursize))
-		Com_Error (ERR_DROP,"Mod_LoadRefineLightmap: lumps in %s don't add up right!\n"
-							"The file is likely corrupt, please obtain a fresh copy.",name);
+	{
+		Com_Printf ("Mod_LoadRefineLightmap: lumps in %s don't add up right!\n"
+					"The file is likely corrupt, please obtain a fresh copy.\n",name);
+		return;
+	}
 	
 	Mod_LoadRefineFaceLookups (&header.lumps[LTMP_LUMP_FACELOOKUP]);
 	Mod_LoadRefineLighting (&header.lumps[LTMP_LUMP_LIGHTING]);
