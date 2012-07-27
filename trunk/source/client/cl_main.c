@@ -498,7 +498,7 @@ void CL_Pause_f (void)
 		return;
 	}
 
-	Cvar_SetValue ("paused", !cl_paused->value);
+	Cvar_SetValue ("paused", !cl_paused->integer);
 }
 
 /*
@@ -929,12 +929,12 @@ void CL_ParseGetServersResponse()
 	MSG_ReadLong (&net_message);	// skip the -1
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
-	if (!noudp->value)
+	if (!noudp->integer)
 	{
 		adr.type = NA_BROADCAST;
 	}
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
-	if (!noipx->value)
+	if (!noipx->integer)
 	{
 		adr.type = NA_BROADCAST_IPX;
 	}
@@ -1002,7 +1002,7 @@ void CL_PingServers_f (void)
 	Com_Printf ("pinging broadcast...\n");
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
-	if (!noudp->value)
+	if (!noudp->integer)
 	{
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
@@ -1010,7 +1010,7 @@ void CL_PingServers_f (void)
 
 	}
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
-	if (!noipx->value)
+	if (!noipx->integer)
 	{
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
@@ -1311,7 +1311,7 @@ void CL_FixUpGender(void)
 	char *p;
 	char sk[80];
 
-	if (gender_auto->value)
+	if (gender_auto->integer)
 	{
 		if (gender->modified)
 		{
@@ -1388,12 +1388,12 @@ void CL_RequestNextDownload (void)
 	if (cls.state != ca_connected)
 		return;
 
-	if (!allow_download->value && precache_check < ENV_CNT)
+	if (!allow_download->integer && precache_check < ENV_CNT)
 		precache_check = ENV_CNT;
 
 	if (precache_check == CS_MODELS) { // confirm map
 		precache_check = CS_MODELS+2; // 0 isn't used
-		if (allow_download_maps->value)
+		if (allow_download_maps->integer)
 			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
 				return; // started a download
 	}
@@ -1401,7 +1401,7 @@ void CL_RequestNextDownload (void)
 redoSkins:
 	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS)
 	{
-		if (allow_download_models->value)
+		if (allow_download_models->integer)
 		{
 			while (precache_check < CS_MODELS+MAX_MODELS &&
 				cl.configstrings[precache_check][0])
@@ -1496,7 +1496,7 @@ redoSkins:
 
 	if (precache_check >= CS_SOUNDS && precache_check < CS_SOUNDS+MAX_SOUNDS)
 	{
-		if (allow_download_sounds->value)
+		if (allow_download_sounds->integer)
 		{
 			if (precache_check == CS_SOUNDS)
 				precache_check++; // zero is blank
@@ -1530,7 +1530,7 @@ redoSkins:
 	}
 	if (precache_check >= CS_PLAYERSKINS && precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
 	{
-		if (allow_download_players->value)
+		if (allow_download_players->integer)
 		{
 			while (precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
 			{
@@ -1635,7 +1635,7 @@ redoSkins:
 
 	if (precache_check > ENV_CNT && precache_check < TEXTURE_CNT)
 	{
-			if (allow_download->value && allow_download_maps->value)
+			if (allow_download->integer && allow_download_maps->integer)
 			{
 				while (precache_check < TEXTURE_CNT)
 				{
@@ -1662,7 +1662,7 @@ redoSkins:
 		extern int			numtexinfo;
 		extern mapsurface_t	map_surfaces[];
 
-		if (allow_download->value && allow_download_maps->value)
+		if (allow_download->integer && allow_download_maps->integer)
 		{
 			while (precache_tex < numtexinfo)
 			{
@@ -1680,7 +1680,7 @@ redoSkins:
 	if (precache_check == SCRIPT_CNT)
 	{
 		precache_check = SCRIPT_CNT+1;
-		if (allow_download_maps->value)
+		if (allow_download_maps->integer)
 		{
 			//get fog files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
@@ -1701,7 +1701,7 @@ redoSkins:
 	if (precache_check == SCRIPT_CNT+1)
 	{
 		precache_check = SCRIPT_CNT+2;
-		if (allow_download_maps->value)
+		if (allow_download_maps->integer)
 		{
 			//get mus files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
@@ -1720,7 +1720,7 @@ redoSkins:
 	if (precache_check == SCRIPT_CNT+2)
 	{
 		precache_check = SCRIPT_CNT+3;
-		if (allow_download_maps->value)
+		if (allow_download_maps->integer)
 		{
 			//get rscript files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
@@ -2504,10 +2504,10 @@ void CL_Frame( int msec )
 		}
 		else
 		{ // regular screen update
-			if ( host_speeds->value )
+			if ( host_speeds->integer )
 				time_before_ref = Sys_Milliseconds(); // TODO: obsolete test?
 			SCR_UpdateScreen();
-			if ( host_speeds->value )
+			if ( host_speeds->integer )
 				time_after_ref = Sys_Milliseconds();
 		}
 
@@ -2568,7 +2568,7 @@ CL_Init
 */
 void CL_Init (void)
 {
-	if (dedicated->value)
+	if (dedicated->integer)
 		return;		// nothing running on the client
 
 	// Initialise fonts

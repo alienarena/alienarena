@@ -132,7 +132,7 @@ static void drop_temp_touch (edict_t *ent, edict_t *other, cplane_t *plane, csur
 static void drop_make_touchable (edict_t *ent)
 {
 	ent->touch = Touch_Item;
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
 		ent->nextthink = level.time + 29;
 		ent->think = G_FreeEdict;
@@ -145,7 +145,7 @@ void SpawnMinderaser(edict_t *ent)
 	edict_t *minderaser, *cl_ent;
 	int i;
 
-	for (i = 0; i < g_maxclients->value; i++)
+	for (i = 0; i < g_maxclients->integer; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || cl_ent->is_bot)
@@ -265,11 +265,11 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
 		int randomSpawn;
 		//Phenax - Add random time to quad spawn
-		if(ent->item->use == Use_Quad && g_randomquad->value)
+		if(ent->item->use == Use_Quad && g_randomquad->integer)
 			randomSpawn = 10 + rand() % (30 - 10); //10 to 30 seconds randomness
 		else
 			randomSpawn = 0;
@@ -299,13 +299,13 @@ void Drop_General (edict_t *ent, gitem_t *item)
 
 qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
 {
-	if (!deathmatch->value)
+	if (!deathmatch->integer)
 		other->max_health += 1;
 
 	if (other->health < other->max_health)
 		other->health = other->max_health;
 
-	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->integer))
 		SetRespawn (ent, ent->item->quantity);
 
 	return true;
@@ -540,11 +540,11 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	if (weapon && !oldcount)
 	{
-		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
+		if (other->client->pers.weapon != ent->item && ( !deathmatch->integer || other->client->pers.weapon == FindItem("blaster") ) )
 			other->client->newweapon = ent->item;
 	}
 
-	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
+	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->integer))
 		SetRespawn (ent, 30);
 	return true;
 }
@@ -586,7 +586,7 @@ void MegaHealth_think (edict_t *self)
 		return;
 	}
 
-	if (!(self->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+	if (!(self->spawnflags & DROPPED_ITEM) && (deathmatch->integer))
 		SetRespawn (self, 20);
 	else
 		G_FreeEdict (self);
@@ -629,7 +629,7 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 	}
 	else
 	{
-		if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+		if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->integer))
 			SetRespawn (ent, 30);
 	}
 
@@ -728,7 +728,7 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 		}
 	}
 
-	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->integer))
 		SetRespawn (ent, 20);
 
 	return true;
@@ -1038,7 +1038,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	}
 
 	// some items will be prevented in deathmatch
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
 		if ( dmflags->integer & DF_NO_ARMOR )
 		{
@@ -1072,7 +1072,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 				return;
 			}
 		}
-		if(excessive->value || instagib->value || rocket_arena->value || insta_rockets->value )
+		if(excessive->integer || instagib->integer || rocket_arena->integer || insta_rockets->integer )
 		{
 			if (item->flags == IT_AMMO || (strcmp(ent->classname, "weapon_bfg") == 0) ||
 				(strcmp(ent->classname, "weapon_hyperblaster") == 0) ||
@@ -1091,7 +1091,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 
 	//CTF
 	//Don't spawn the flags unless enabled
-	if (!ctf->value &&
+	if (!ctf->integer &&
 		(strcmp(ent->classname, "item_flag_red") == 0 ||
 		strcmp(ent->classname, "item_flag_blue") == 0)) {
 		G_FreeEdict(ent);
@@ -2019,7 +2019,7 @@ gives +1 to maximum health
 */
 void SP_item_health (edict_t *self)
 {
-	if ( deathmatch->value && (dmflags->integer & DF_NO_HEALTH) )
+	if ( deathmatch->integer && (dmflags->integer & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
@@ -2035,7 +2035,7 @@ void SP_item_health (edict_t *self)
 */
 void SP_item_health_small (edict_t *self)
 {
-	if ( deathmatch->value && (dmflags->integer & DF_NO_HEALTH) )
+	if ( deathmatch->integer && (dmflags->integer & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
@@ -2053,7 +2053,7 @@ void SP_item_health_small (edict_t *self)
 */
 void SP_item_health_large (edict_t *self)
 {
-	if ( deathmatch->value && (dmflags->integer & DF_NO_HEALTH) )
+	if ( deathmatch->integer && (dmflags->integer & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
@@ -2070,7 +2070,7 @@ void SP_item_health_large (edict_t *self)
 */
 void SP_item_health_mega (edict_t *self)
 {
-	if ( deathmatch->value && (dmflags->integer & DF_NO_HEALTH) )
+	if ( deathmatch->integer && (dmflags->integer & DF_NO_HEALTH) )
 	{
 		G_FreeEdict (self);
 		return;
