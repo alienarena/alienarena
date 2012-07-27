@@ -1451,7 +1451,6 @@ static menuslider_s		s_options_sfxvolume_slider;
 static menuslider_s		s_options_bgvolume_slider;
 static menulist_s		s_options_joystick_box;
 static menulist_s		s_options_doppler_effect_list;
-static menulist_s		s_options_console_action;
 static menulist_s		s_options_bgmusic_box;
 static menulist_s		s_options_target_box;
 static menulist_s		s_options_ragdoll_box;
@@ -2802,11 +2801,6 @@ static void UltraGameFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "3" );
 	StartGame();
-}
-
-static void CreditsFunc( void *unused )
-{
-	M_Menu_Credits_f();
 }
 
 void Game_MenuInit( void )

@@ -1881,7 +1881,7 @@ int ZLibDecompress (sizebuf_t *in, sizebuf_t *out, int wbits) {
 #endif //HAVE_ZLIB
 
 void qdecompress (sizebuf_t *src, sizebuf_t *dst, int type){
-	int newsize;
+	int newsize = 0;
 
 	switch (type) {
 #ifdef HAVE_ZLIB
