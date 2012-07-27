@@ -582,6 +582,8 @@ AC_ARG_ENABLE([full-warnings],
 AS_IF([ test "x$gcc_whining" = "xyes" ],[
 	AX_APPEND_FLAG([-Wall],[CFLAGS])
 	AX_APPEND_FLAG([-Wall],[CXXFLAGS])
+	AX_APPEND_FLAG([-Wextra],[CFLAGS])
+	AX_APPEND_FLAG([-Wextra],[CXXFLAGS])
 	debug=yes
 ])
 
