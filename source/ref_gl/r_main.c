@@ -325,7 +325,7 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	int		i;
 	cplane_t *p;
 
-	if (r_nocull->value)
+	if (r_nocull->integer)
 		return false;
 
 	for (i=0,p=frustum ; i<4; i++,p++)
@@ -453,7 +453,7 @@ void R_DrawEntitiesOnList (void)
 	char    shortname[MAX_QPATH];
 	float	fadeshadow_cutoff;
 
-	if (!r_drawentities->value)
+	if (!r_drawentities->integer)
 		return;
 
 	if ( !r_odeinit_success )
@@ -468,7 +468,7 @@ void R_DrawEntitiesOnList (void)
 		if (currententity->flags & RF_TRANSLUCENT)
 			continue;	// transluscent
 
-		if (currententity->model && r_shaders->value)
+		if (currententity->model && r_shaders->integer)
 		{
 			rs=(rscript_t *)currententity->model->script;
 
@@ -554,7 +554,7 @@ void R_DrawEntitiesOnList (void)
 		if (!(currententity->flags & RF_TRANSLUCENT))
 			continue;	// solid
 
-		if (currententity->model && r_shaders->value)
+		if (currententity->model && r_shaders->integer)
 		{
 			rs=(rscript_t *)currententity->model->script;
 
@@ -606,7 +606,7 @@ void R_DrawViewEntitiesOnList (void)
 	rscript_t	*rs = NULL;
 	char    shortname[MAX_QPATH];
 
-	if (!r_drawentities->value)
+	if (!r_drawentities->integer)
 		return;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
@@ -619,7 +619,7 @@ void R_DrawViewEntitiesOnList (void)
 		if (currententity->flags & RF_TRANSLUCENT)
 			continue;	// transluscent
 
-		if (currententity->model && r_shaders->value)
+		if (currententity->model && r_shaders->integer)
 		{
 			rs=(rscript_t *)currententity->model->script;
 
@@ -668,7 +668,7 @@ void R_DrawViewEntitiesOnList (void)
 		if (!(currententity->flags & RF_TRANSLUCENT))
 			continue;	// solid
 
-		if (currententity->model && r_shaders->value)
+		if (currententity->model && r_shaders->integer)
 		{
 			rs=(rscript_t *)currententity->model->script;
 
@@ -721,12 +721,12 @@ R_PolyBlend
 */
 void R_PolyBlend (void)
 {
-	if (!gl_polyblend->value)
+	if (!gl_polyblend->integer)
 		return;
 	if (!v_blend[3])
 		return;
 
-	if(!r_drawing_fbeffect && cl_paindist->value) {
+	if(!r_drawing_fbeffect && cl_paindist->integer) {
 		if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) {
 			r_drawing_fbeffect = true;
 			r_fbFxType = 2; //FLASH DISTORTION
@@ -936,7 +936,7 @@ void R_SetupGL (void)
 	// set drawing parms
 	//
 
-	if (gl_cull->value)
+	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
 	qglDisable(GL_BLEND);
@@ -956,9 +956,9 @@ extern qboolean have_stencil;
 void R_Clear (void)
 {
 	qglClearColor(0,0,0,1);
-	if (gl_clear->value)
+	if (gl_clear->integer)
 		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	else if (!cl_add_blend->value && info_spectator->value && (CM_PointContents(r_newrefdef.vieworg, 0) & CONTENTS_SOLID))
+	else if (!cl_add_blend->integer && info_spectator->integer && (CM_PointContents(r_newrefdef.vieworg, 0) & CONTENTS_SOLID))
 		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //out of map
 	else
 		qglClear (GL_DEPTH_BUFFER_BIT);
@@ -970,9 +970,9 @@ void R_Clear (void)
 	qglDepthRange (gldepthmin, gldepthmax);
 
 	//our shadow system uses a combo of shadmaps and stencil volumes.
-	if (have_stencil && (gl_shadows->integer || gl_shadowmaps->value)) {
+	if (have_stencil && (gl_shadows->integer || gl_shadowmaps->integer)) {
 
-		if(gl_shadowmaps->value)
+		if(gl_shadowmaps->integer)
 			qglClearStencil(0);
 		else
 			qglClearStencil(1);
@@ -1000,13 +1000,13 @@ void R_RenderView (refdef_t *fd)
 
 	numRadarEnts = 0;
 
-	if (r_norefresh->value)
+	if (r_norefresh->integer)
 		return;
 
 	r_newrefdef = *fd;
 
 	//shadowmaps
-	if(gl_shadowmaps->value) {
+	if(gl_shadowmaps->integer) {
 
 		qglEnable(GL_DEPTH_TEST);
 		qglClearColor(0,0,0,1.0f);
@@ -1039,7 +1039,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_PushDlights ();
 
-	if (gl_finish->value)
+	if (gl_finish->integer)
 		qglFinish ();
 
 	R_SetupFrame ();
@@ -1064,7 +1064,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawRSSurfaces();
 
-	if(r_lensflare->value)
+	if(r_lensflare->integer)
 		R_RenderFlares ();
 
 	R_DrawEntitiesOnList ();
@@ -1087,7 +1087,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawParticles ();
 
-	if(gl_mirror->value) 
+	if(gl_mirror->integer) 
 	{
 		qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
@@ -1285,18 +1285,18 @@ qboolean R_SetMode (void)
 	if ( vid_fullscreen->modified && !gl_config.allow_cds )
 	{
 		Com_Printf ("R_SetMode() - CDS not allowed with this driver\n" );
-		Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value );
+		Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->integer );
 		vid_fullscreen->modified = false;
 	}
 
-	fullscreen = vid_fullscreen->value;
+	fullscreen = vid_fullscreen->integer;
 
 	vid_fullscreen->modified = false;
 	gl_mode->modified = false;
 
-	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->value, fullscreen ) ) == rserr_ok )
+	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->integer, fullscreen ) ) == rserr_ok )
 	{
-		gl_state.prev_mode = gl_mode->value;
+		gl_state.prev_mode = gl_mode->integer;
 	}
 	else
 	{
@@ -1305,7 +1305,7 @@ qboolean R_SetMode (void)
 			Cvar_SetValue( "vid_fullscreen", 0);
 			vid_fullscreen->modified = false;
 			Com_Printf ("ref_gl::R_SetMode() - fullscreen unavailable in this mode\n" );
-			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->value, false ) ) == rserr_ok )
+			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->integer, false ) ) == rserr_ok )
 				return true;
 		}
 		else if ( err == rserr_invalid_mode )
@@ -1589,7 +1589,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 	if (strstr(gl_config.extensions_string, "GL_EXT_point_parameters"))
 	{
-		if(gl_ext_pointparameters->value)
+		if(gl_ext_pointparameters->integer)
 		{
 			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
 			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
@@ -1633,7 +1633,7 @@ int R_Init( void *hinstance, void *hWnd )
 	R_LoadGLSLPrograms();
 
 	//if running for the very first time, automatically set video settings
-	if(!r_firstrun->value)
+	if(!r_firstrun->integer)
 	{
 		qboolean ati_nvidia = false;
 		double CPUTotalSpeed = 4000.0; //default to this
@@ -1819,11 +1819,11 @@ void R_BeginFrame( float camera_separation )
 
 	if ( gl_log->modified )
 	{
-		GLimp_EnableLogging( gl_log->value );
+		GLimp_EnableLogging( gl_log->integer );
 		gl_log->modified = false;
 	}
 
-	if ( gl_log->value )
+	if ( gl_log->integer )
 	{
 		GLimp_LogNewFrame();
 	}

@@ -865,12 +865,12 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 		}
 	}
 
-	if(g_callvote->value)
+	if(g_callvote->integer)
 		safe_bprintf(PRINT_HIGH, "Call voting is ^2ENABLED\n");
 	else
 		safe_bprintf(PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
-	if(g_antilag->value)
+	if(g_antilag->integer)
 		safe_bprintf(PRINT_HIGH, "Antilag is ^2ENABLED\n");
 	else
 		safe_bprintf(PRINT_HIGH, "Antilag is ^1DISABLED\n");
@@ -893,7 +893,7 @@ void CheckDMRules (void)
 	
 	gi.cvar_set ("g_teamgame", va("%d", TEAM_GAME));
 
-	if ( !tca->value && !ctf->value && !cp->value && !(dmflags->integer & DF_SKINTEAMS) )
+	if ( !tca->integer && !ctf->integer && !cp->integer && !(dmflags->integer & DF_SKINTEAMS) )
 	{
 		/*--- non-team game warmup ---*/
 		/*
@@ -952,12 +952,12 @@ void CheckDMRules (void)
 	if (level.intermissiontime)
 		return;
 
-	if (!deathmatch->value)
+	if (!deathmatch->integer)
 		return;
 
 	if (timelimit->value)
 	{
-		if (level.time >= timelimit->value*60 && ((tca->value || ctf->value  || cp->value || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+		if (level.time >= timelimit->value*60.0 && ((tca->integer || ctf->integer  || cp->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 		{
 			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
@@ -965,19 +965,19 @@ void CheckDMRules (void)
 		}
 	}
 
-	if (fraglimit->value && ((tca->integer || ctf->integer || cp->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+	if (fraglimit->integer && ((tca->integer || ctf->integer || cp->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
 		//team scores
-		if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || cp->value) //it's all about the team!
+		if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || cp->integer) //it's all about the team!
 		{
-			if(blue_team_score >= fraglimit->value)
+			if(blue_team_score >= fraglimit->integer)
 			{
 				safe_bprintf(PRINT_HIGH, "Blue Team wins!\n");
 				bot_won = 0; //we don't care if it's a bot that wins
 				EndDMLevel();
 				return;
 			}
-			if(red_team_score >= fraglimit->value)
+			if(red_team_score >= fraglimit->integer)
 			{
 				safe_bprintf(PRINT_HIGH, "Red Team wins!\n");
 				bot_won = 0; //we don't care if it's a bot that wins
@@ -987,7 +987,7 @@ void CheckDMRules (void)
 		}
 		else {
 			top_score = 0;
-			for (i=0 ; i<g_maxclients->value ; i++)
+			for (i=0 ; i<g_maxclients->integer ; i++)
 			{
 				cl = game.clients + i;
 				if (!g_edicts[i+1].inuse)
@@ -996,7 +996,7 @@ void CheckDMRules (void)
 				if(cl->resp.score > top_score)
 					top_score = cl->resp.score; //grab the top score
 
-				if (cl->resp.score >= fraglimit->value)
+				if (cl->resp.score >= fraglimit->integer)
 				{
 					if(cl->is_bot){
 						bot_won = 1; //a bot has won the match
@@ -1012,12 +1012,12 @@ void CheckDMRules (void)
 					return;
 				}
 			}
-			if(!tca->value && !ctf->value && !cp->value) {
-				i = fraglimit->value - top_score;
+			if(!tca->integer && !ctf->integer && !cp->integer) {
+				i = fraglimit->integer - top_score;
 				switch(i) {
 					case 3:
 						if(!print3){
-							for (i=0 ; i<g_maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->integer ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
@@ -1031,7 +1031,7 @@ void CheckDMRules (void)
 						break;
 					case 2:
 						if(!print2) {
-							for (i=0 ; i<g_maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->integer ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
@@ -1045,7 +1045,7 @@ void CheckDMRules (void)
 						break;
 					case 1:
 						if(!print1) {
-							for (i=0 ; i<g_maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->integer ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
@@ -1124,7 +1124,7 @@ void ExitLevel (void)
 	EndIntermission();
 
 	// clear some things before going to next level
-	for (i=0 ; i<g_maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->integer ; i++)
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse)
@@ -1144,7 +1144,7 @@ void ExitLevel (void)
 		} else {
 			PutClientInServer (ent);
 		}
-		if(g_duel->value) {
+		if(g_duel->integer) {
 			ClientPlaceInQueue(ent);
 			ClientCheckQueue(ent);
 		}
@@ -1156,13 +1156,13 @@ void ExitLevel (void)
 		//remove podiums
 		if(!strcmp(ent->classname, "pad"))
 			G_FreeEdict(ent);
-		if(tca->value) {
+		if(tca->integer) {
 		    if(strstr(ent->classname, "spidernode"))
 		        ED_CallSpawn (ent);
 		    ent->powered = true;
 		}
 	}
-	if(tca->value) {
+	if(tca->integer) {
 		blue_team_score = red_team_score = 4;
 		red_team_matches = blue_team_matches = 0;
 	}
@@ -1486,14 +1486,14 @@ void G_RunFrame (void)
 			}
 		}
 
-		if (i > 0 && i <= g_maxclients->value)
+		if (i > 0 && i <= g_maxclients->integer)
 		{
 			ClientBeginServerFrame (ent);
 		}
 
 		if(ent->inuse && ent->client && !ent->is_bot)
 		{
-			if ( ent->s.number <= g_maxclients->value )
+			if ( ent->s.number <= g_maxclients->integer )
 			{ // count actual players, not deathcam entities
 				numActiveClients++;
 			}
@@ -1532,7 +1532,7 @@ void G_RunFrame (void)
 		level.frameStartTime = level.time;
 
 	//call voting
-	if(g_callvote->value && playervote.called) {
+	if(g_callvote->integer && playervote.called) {
 
 		playervote.time = level.time;
 		if(playervote.time-playervote.starttime > 15 ){ //15 seconds
@@ -1560,7 +1560,7 @@ void G_RunFrame (void)
 			playervote.command[0] = 0;
 
 			//do each ent
-			for (i=0 ; i<g_maxclients->value ; i++)
+			for (i=0 ; i<g_maxclients->integer ; i++)
 			{
 				ent = g_edicts + 1 + i;
 				if (!ent->inuse || ent->is_bot)
