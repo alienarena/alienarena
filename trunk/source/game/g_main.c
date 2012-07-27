@@ -795,7 +795,7 @@ ResetLevel
 */
 void ResetLevel (qboolean keepscores) //for resetting players and items after warmup
 {
-	int i, backup_score;
+	int i, backup_score = 0; //initialize to shut gcc up
 	edict_t	*ent;
 	gitem_t *item;
 
