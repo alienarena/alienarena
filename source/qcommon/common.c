@@ -1212,15 +1212,21 @@ void Info_Print (char *s)
 	char	key[512];
 	char	value[512];
 	char	*o;
-	int		l;
+	int		l, i;
 
 	if (*s == '\\')
 		s++;
 	while (*s)
 	{
 		o = key;
-		while (*s && *s != '\\')
+		i = 512;
+		while (--i && *s && *s != '\\')
 			*o++ = *s++;
+		if (*s && *s != '\\')
+		{
+			Com_Printf ("KEY TOO LONG\n");
+			return;
+		}
 
 		l = o - key;
 		if (l < 20)
@@ -1240,8 +1246,14 @@ void Info_Print (char *s)
 
 		o = value;
 		s++;
-		while (*s && *s != '\\')
+		i = 512;
+		while (--i && *s && *s != '\\')
 			*o++ = *s++;
+		if (*s && *s != '\\')
+		{
+			Com_Printf ("VALUE TOO LONG\n");
+			return;
+		}
 		*o = 0;
 
 		if (*s)
