@@ -3509,7 +3509,7 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	//playerinfo
 	rankTotal = 0;
 	strcpy (seps, " ");
-	while ((rLine = GetLine (&status_string, &result)) && players < 32) {
+	while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) {
 		/* Establish string and get the first token: */
 		token = strtok( rLine, seps);
 		score = atoi(token);
