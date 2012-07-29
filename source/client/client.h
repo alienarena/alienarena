@@ -698,6 +698,7 @@ qboolean server_is_team; //used for player visibility light code
 // menus
 //
 
+#define MAX_PLAYERS 64
 typedef struct _SERVERDATA {
 
 	char szHostName[64];
@@ -708,8 +709,8 @@ typedef struct _SERVERDATA {
 	char maxClients[32];
 	char fraglimit[32];
 	char timelimit[32];
-	char playerInfo[64][80];
-	int	 playerRankings[64];
+	char playerInfo[MAX_PLAYERS][80];
+	int	 playerRankings[MAX_PLAYERS];
 	char skill[32];
 	int players;
 	int ping;
