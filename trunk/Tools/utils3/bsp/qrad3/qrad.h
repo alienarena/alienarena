@@ -41,6 +41,7 @@ typedef struct directlight_s
 	float		stopdot;		// for spotlights
     dplane_t    *plane;
     dleaf_t     *leaf;
+    int			nodenum;
 
 } directlight_t;
 
@@ -139,8 +140,9 @@ void FinalLightFace (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
+int	PointInNodenum (vec3_t point);
 int TestLine (vec3_t start, vec3_t stop);
-int TestLine_color (vec3_t start, vec3_t stop, vec3_t occluded);
+int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded);
 int TestLine_r (int node, vec3_t start, vec3_t stop);
 
 void CreateDirectLights (void);

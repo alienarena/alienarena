@@ -157,6 +157,29 @@ void BuildPolygons (void)
 }
 #endif
 
+int	PointInNodenum (vec3_t point)
+{
+	int		nodenum, oldnodenum;
+	vec_t	dist;
+	dnode_t	*node;
+	dplane_t	*plane;
+
+	nodenum = 0;
+	while (nodenum >= 0)
+	{
+		node = &dnodes[nodenum];
+		plane = &dplanes[node->planenum];
+		dist = DotProduct (point, plane->normal) - plane->dist;
+		oldnodenum = nodenum;
+		if (dist > 0)
+			nodenum = node->children[0];
+		else
+			nodenum = node->children[1];
+	}
+
+	return oldnodenum;
+}
+
 /*
 ================
 PointInBrush
@@ -520,13 +543,13 @@ int TestLine (vec3_t start, vec3_t stop)
 		return TestLine_r (0, start, stop);
 }
 
-int TestLine_color (vec3_t start, vec3_t stop, vec3_t occluded)
+int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded)
 {
 	occluded[0] = occluded[1] = occluded[2] = 1.0;
 	if (doing_texcheck)
-		return TestLine_r_texcheck (0, 0, start, stop, start, stop, occluded);
+		return TestLine_r_texcheck (node, 0, start, stop, start, stop, occluded);
 	else
-		return TestLine_r (0, start, stop);
+		return TestLine_r (node, start, stop);
 }
 
 /*
