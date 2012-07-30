@@ -1,6 +1,5 @@
 
 #include "qrad.h"
-#include <assert.h>
 
 vec3_t	texture_reflectivity[MAX_MAP_TEXINFO];
 
@@ -559,30 +558,6 @@ void	DicePatch (patch_t *patch)
 
 	DicePatch (patch);
 	DicePatch (newp);
-}
-
-
-int	PointInNodenum (vec3_t point)
-{
-	int		nodenum, oldnodenum;
-	vec_t	dist;
-	dnode_t	*node;
-	dplane_t	*plane;
-
-	nodenum = 0;
-	while (nodenum >= 0)
-	{
-		node = &dnodes[nodenum];
-		plane = &dplanes[node->planenum];
-		dist = DotProduct (point, plane->normal) - plane->dist;
-		oldnodenum = nodenum;
-		if (dist > 0)
-			nodenum = node->children[0];
-		else
-			nodenum = node->children[1];
-	}
-
-	return oldnodenum;
 }
 
 /*

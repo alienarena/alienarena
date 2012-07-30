@@ -895,6 +895,7 @@ void CreateDirectLights (void)
 		if (dl->style < 0 || dl->style >= MAX_LSTYLES)
 			dl->style = 0;
 
+		dl->nodenum = PointInNodenum (dl->origin);
 		leaf = PointInLeaf (dl->origin);
 		cluster = leaf->cluster;
 
@@ -1102,12 +1103,54 @@ float SpotLight( float dot1, float intensity, float dist, float dot2, float stop
 	return scale;
 }
 
+static inline int lowestCommonNode (int nodeNum1, int nodeNum2)
+{
+	dnode_t *node;
+	int child1, tmp, headNode = 0;
+	
+	if (nodeNum1 > nodeNum2)
+	{
+		tmp = nodeNum1;
+		nodeNum1 = nodeNum2;
+		nodeNum2 = tmp;
+	}
+	
+re_test:
+	//headNode is guaranteed to be <= nodeNum1 and nodeNum1 is < nodeNum2
+	if (headNode == nodeNum1)
+		return headNode;
+
+	child1 = (node = dnodes+headNode)->children[1];
+	
+	if (nodeNum2 < child1) 
+		//Both nodeNum1 and nodeNum2 are less than child1.
+		//In this case, child0 is always a node, not a leaf, so we don't need
+		//to check to make sure.
+		headNode = node->children[0];
+	else if (nodeNum1 < child1)
+		//Child1 sits between nodeNum1 and nodeNum2. 
+		//This means that headNode is the lowest node which contains both 
+		//nodeNum1 and nodeNum2. 
+		return headNode;
+	else if (child1 > 0)
+		//Both nodeNum1 and nodeNum2 are greater than child1.
+		//If child1 is a node, that means it contains both nodeNum1 and 
+		//nodeNum2.
+		headNode = child1; 
+	else
+		//Child1 is a leaf, therefore by process of elimination child0 must be
+		//a node and must contain boste nodeNum1 and nodeNum2.
+		headNode = node->children[0];
+	//goto instead of while(1) because it makes the CPU branch predict easier
+	goto re_test; 
+}
+
 /*
 =============
 LightContributionToPoint
 =============
 */
-void LightContributionToPoint	(	directlight_t *l, vec3_t pos, 
+void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									vec3_t normal, vec3_t color, 
 									float lightscale2, 
 									qboolean *sun_main_once, 
@@ -1121,6 +1164,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 	float			inv;
     float           main_val;
     int				i;
+    int				lcn;
 	qboolean		set_main;
 
 	VectorClear (color);
@@ -1140,7 +1184,8 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 	if (dot <= 0.001)
 		return;		// behind sample surface
 
-	if (!noblock && TestLine_color (pos, l->origin, occluded))
+	lcn = lowestCommonNode(nodenum, l->nodenum);
+	if (!noblock && TestLine_color (lcn, pos, l->origin, occluded))
 		return;		// occluded
 
 	if( l->type == emit_sky )
@@ -1169,7 +1214,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos,
 				if( !RayPlaneIntersect(
 					l->plane->normal, l->plane->dist, pos, sun_pos, target )
 					||
-					TestLine_color (pos, target, occluded)
+					TestLine_color (0, pos, target, occluded)
 				)
 				{
 					set_main = *sun_main_once;
@@ -1247,12 +1292,14 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 	byte			pvs[(MAX_MAP_LEAFS+7)/8];
 	float			*dest;
 	vec3_t			color;
+	int				nodenum;
 
 	// get the PVS for the pos to limit the number of checks
 	if (!PvsForOrigin (pos, pvs))
 	{
 		return;
 	}
+	nodenum = PointInNodenum(pos);
 
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
@@ -1261,7 +1308,7 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint ( l, pos, normal, color, lightscale2, sun_main_once, sun_ambient_once);
+			LightContributionToPoint ( l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once);
 
 			// no contribution
 			if ( VectorCompare ( color, vec3_origin ) )

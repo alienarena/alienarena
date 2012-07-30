@@ -87,6 +87,7 @@ int		junk;
  *
  *
  */
+ #include <assert.h>
 float ambient = 0.0f;
 float lightscale = 1.0f;
 float maxlight = 255.0f;
@@ -207,7 +208,6 @@ int	PointInLeafnum (vec3_t point)
 
 	return -nodenum - 1;
 }
-
 
 dleaf_t		*PointInLeaf (vec3_t point)
 {
@@ -345,37 +345,46 @@ void DecompressBytes (int size, byte *in, byte *decompressed)
 
 static int trace_bytes = 0;
 
-static inline int lowestCommonNode (int headNode, int nodeNum1, int nodeNum2)
+static inline int lowestCommonNode (int nodeNum1, int nodeNum2)
 {
 	dnode_t *node;
-	int child0, child1, tmp;
+	int child1, tmp, headNode = 0;
 	
 	if (nodeNum1 > nodeNum2)
 	{
 		tmp = nodeNum1;
 		nodeNum1 = nodeNum2;
-		nodeNum2 = nodeNum1;
+		nodeNum2 = tmp;
 	}
 	
 re_test:
-	child0 = (node = dnodes+headNode)->children[0];
-	child1 = node->children[1];
-	
-	if (child1 > 0 && child0 > 0)
-	{
-		if (nodeNum2 < child1)
-			headNode = child0;
-		else if (nodeNum1 < child1)
-			return headNode;
-		else
-			headNode = child1;
-	} else if (child1 > 0 && nodeNum1 >= child1)
-		headNode = child1;
-	else if (child0 > 0 && nodeNum1 >= child0)
-		headNode = child0;
-	else
+	//headNode is guaranteed to be <= nodeNum1 and nodeNum1 is < nodeNum2
+	if (headNode == nodeNum1)
 		return headNode;
-	goto re_test;
+
+	child1 = (node = dnodes+headNode)->children[1];
+	
+	if (nodeNum2 < child1) 
+		//Both nodeNum1 and nodeNum2 are less than child1.
+		//In this case, child0 is always a node, not a leaf, so we don't need
+		//to check to make sure.
+		headNode = node->children[0];
+	else if (nodeNum1 < child1)
+		//Child1 sits between nodeNum1 and nodeNum2. 
+		//This means that headNode is the lowest node which contains both 
+		//nodeNum1 and nodeNum2. 
+		return headNode;
+	else if (child1 > 0)
+		//Both nodeNum1 and nodeNum2 are greater than child1.
+		//If child1 is a node, that means it contains both nodeNum1 and 
+		//nodeNum2.
+		headNode = child1; 
+	else
+		//Child1 is a leaf, therefore by process of elimination child0 must be
+		//a node and must contain boste nodeNum1 and nodeNum2.
+		headNode = node->children[0];
+	//goto instead of while(1) because it makes the CPU branch predict easier
+	goto re_test; 
 }
 
 void MakeTransfers (int i)
@@ -476,7 +485,7 @@ void MakeTransfers (int i)
 		{
             if (!test_trace && !noblock && 
             	patch2->nodenum != patch->nodenum && 
-            	TestLine_r (lowestCommonNode (0, patch->nodenum, patch2->nodenum), 
+            	TestLine_r (lowestCommonNode (patch->nodenum, patch2->nodenum), 
             				patch->origin, patch2->origin))
 			{
                 transfers[j] = 0;
