@@ -345,6 +345,39 @@ void DecompressBytes (int size, byte *in, byte *decompressed)
 
 static int trace_bytes = 0;
 
+static inline int lowestCommonNode (int headNode, int nodeNum1, int nodeNum2)
+{
+	dnode_t *node;
+	int child0, child1, tmp;
+	
+	if (nodeNum1 > nodeNum2)
+	{
+		tmp = nodeNum1;
+		nodeNum1 = nodeNum2;
+		nodeNum2 = nodeNum1;
+	}
+	
+re_test:
+	child0 = (node = dnodes+headNode)->children[0];
+	child1 = node->children[1];
+	
+	if (child1 > 0 && child0 > 0)
+	{
+		if (nodeNum2 < child1)
+			headNode = child0;
+		else if (nodeNum1 < child1)
+			return headNode;
+		else
+			headNode = child1;
+	} else if (child1 > 0 && nodeNum1 >= child1)
+		headNode = child1;
+	else if (child0 > 0 && nodeNum1 >= child0)
+		headNode = child0;
+	else
+		return headNode;
+	goto re_test;
+}
+
 void MakeTransfers (int i)
 {
 	int			j;
@@ -441,7 +474,10 @@ void MakeTransfers (int i)
 
 		if (trans > patch_cutoff)
 		{
-            if (!test_trace && !noblock && TestLine (patch->origin, patch2->origin))
+            if (!test_trace && !noblock && 
+            	patch2->nodenum != patch->nodenum && 
+            	TestLine_r (lowestCommonNode (0, patch->nodenum, patch2->nodenum), 
+            				patch->origin, patch2->origin))
 			{
                 transfers[j] = 0;
 				continue;

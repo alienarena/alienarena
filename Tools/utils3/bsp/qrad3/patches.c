@@ -562,6 +562,29 @@ void	DicePatch (patch_t *patch)
 }
 
 
+int	PointInNodenum (vec3_t point)
+{
+	int		nodenum, oldnodenum;
+	vec_t	dist;
+	dnode_t	*node;
+	dplane_t	*plane;
+
+	nodenum = 0;
+	while (nodenum >= 0)
+	{
+		node = &dnodes[nodenum];
+		plane = &dplanes[node->planenum];
+		dist = DotProduct (point, plane->normal) - plane->dist;
+		oldnodenum = nodenum;
+		if (dist > 0)
+			nodenum = node->children[0];
+		else
+			nodenum = node->children[1];
+	}
+
+	return oldnodenum;
+}
+
 /*
 =============
 SubdividePatches
@@ -580,6 +603,8 @@ void SubdividePatches (void)
 //		SubdividePatch (&patches[i]);
 		DicePatch (&patches[i]);
 	}
+	for (i=0; i<num_patches; i++)
+		patches[i].nodenum = PointInNodenum (patches[i].origin);
 	qprintf ("%i patches after subdivision\n", num_patches);
 	qprintf( "[? patch->cluster=-1 count is %i  ?in solid leaf?]\n", cluster_neg_one );
 }

@@ -64,6 +64,8 @@ typedef struct patch_s
 	int			numtransfers;
 	transfer_t	*transfers;
     byte *trace_hit;
+    
+    int			nodenum;
 
 	int			cluster;			// for pvs checking
 	vec3_t		origin;
@@ -139,6 +141,7 @@ qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
 int TestLine (vec3_t start, vec3_t stop);
 int TestLine_color (vec3_t start, vec3_t stop, vec3_t occluded);
+int TestLine_r (int node, vec3_t start, vec3_t stop);
 
 void CreateDirectLights (void);
 
