@@ -614,6 +614,7 @@ static void IN_MoveMenuMouse( int x , int y )
 	M_Think_MouseCursor();
 }
 
+extern cvar_t *fov;
 void IN_Move (usercmd_t *cmd)
 {
 	float fmx;
@@ -668,7 +669,7 @@ void IN_Move (usercmd_t *cmd)
 	}
 
 	// Game mouse
-	adjust *= sensitivity->value;
+	adjust *= sensitivity->value * cl.refdef.fov_x/fov->value;
 	fmx *= adjust;
 	fmy *= adjust;
 
