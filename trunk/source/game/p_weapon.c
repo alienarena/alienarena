@@ -530,25 +530,15 @@ A generic function to handle the basics of weapon thinking
 */
 #define FRAME_FIRE_FIRST		(FRAME_ACTIVATE_LAST + 1)
 #define FRAME_IDLE_FIRST		(FRAME_FIRE_LAST + 1)
-#define FRAME_DEACTIVATE_FIRST	(FRAME_IDLE_LAST + 1)
 
-void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
+void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
 {
 	int		n;
+	#define gunframe ent->client->ps.gunframe
 
 	if (ent->client->weaponstate == WEAPON_DROPPING)
 	{
-		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
-			ChangeWeapon (ent);
-			return;
-		}
-		else if (ent->client->ps.gunframe == FRAME_DEACTIVATE_LAST)
-		{
-			ChangeWeapon (ent);
-			return;
-		}
-
-		ent->client->ps.gunframe++;
+		ChangeWeapon (ent);
 		return;
 	}
 
@@ -556,29 +546,43 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 	{
 		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
 			ent->client->weaponstate = WEAPON_READY;
-			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
-			return;
+			gunframe = FRAME_IDLE_FIRST;
+			goto fire_begin; //velociraptors be damned
 		}
-		else if (ent->client->ps.gunframe == FRAME_ACTIVATE_LAST-2)
+		else if (gunframe == FRAME_ACTIVATE_LAST)
 		{
 			ent->client->weaponstate = WEAPON_READY;
-			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
+			gunframe = FRAME_IDLE_FIRST;
 			return;
 		}
+		else if ((ent->client->latched_buttons|ent->client->buttons) & (BUTTON_ATTACK|BUTTON_ATTACK2))
+		{
+			if (gunframe >= FRAME_ACTIVATE_LAST-3)
+			{
+				ent->client->weaponstate = WEAPON_READY;
+				gunframe = FRAME_IDLE_FIRST;
+				goto fire_begin; //velociraptors be damned
+			}
+		}
 
-		ent->client->ps.gunframe++;
+		gunframe++;
 		return;
 	}
 
-	if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING))
+	if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING || gunframe == FRAME_FIRE_FIRST || gunframe == FRAME_FIRE_LAST))
 	{
+		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
+			ChangeWeapon (ent);
+			return;
+		}
 		ent->client->weaponstate = WEAPON_DROPPING;
-		ent->client->ps.gunframe = FRAME_DEACTIVATE_FIRST+2;
+		gunframe = FRAME_DEACTIVATE-1;
 		return;
 	}
 
 	if (ent->client->weaponstate == WEAPON_READY)
 	{
+fire_begin:
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
 		{
 			ent->client->spawnprotected = false;
@@ -587,7 +591,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			if ((!ent->client->ammo_index) ||
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
-				ent->client->ps.gunframe = FRAME_FIRE_FIRST;
+				gunframe = FRAME_FIRE_FIRST;
 				ent->client->weaponstate = WEAPON_FIRING;
 
 				// start the animation
@@ -625,7 +629,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			if ((!ent->client->ammo_index) ||
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
-				ent->client->ps.gunframe = FRAME_FIRE_FIRST;
+				gunframe = FRAME_FIRE_FIRST;
 				ent->client->weaponstate = WEAPON_FIRING;
 
 				// start the animation
@@ -655,9 +659,8 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		}
 		else
 		{
-			if (ent->client->ps.gunframe == FRAME_IDLE_LAST)
+			if (gunframe == FRAME_IDLE_LAST)
 			{
-				ent->client->ps.gunframe = FRAME_IDLE_FIRST;
 				return;
 			}
 
@@ -665,7 +668,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			{
 				for (n = 0; pause_frames[n]; n++)
 				{
-					if (ent->client->ps.gunframe == pause_frames[n])
+					if (gunframe == pause_frames[n])
 					{
 						if (rand()&15)
 							return;
@@ -673,7 +676,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				}
 			}
 
-			ent->client->ps.gunframe++;
+			gunframe++;
 			return;
 		}
 	}
@@ -682,7 +685,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 	{
 		for (n = 0; fire_frames[n]; n++)
 		{
-			if (ent->client->ps.gunframe == fire_frames[n])
+			if (gunframe == fire_frames[n])
 			{
 				if (ent->client->quad_framenum > level.framenum)
 					gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
@@ -693,11 +696,12 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		}
 
 		if (!fire_frames[n])
-			ent->client->ps.gunframe++;
+			gunframe++;
 
-		if (ent->client->ps.gunframe == FRAME_IDLE_FIRST+1)
+		if (gunframe == FRAME_IDLE_FIRST+1)
 			ent->client->weaponstate = WEAPON_READY;
 	}
+	#undef gunframe
 }
 
 void weapon_plasma_fire (edict_t *ent)
