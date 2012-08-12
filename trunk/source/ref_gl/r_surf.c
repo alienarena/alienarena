@@ -1320,13 +1320,15 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	if (node->visframe != r_visframecount)
 		return;
 
-	if (!r_nocull->integer)
+	if (!r_nocull->integer && clipflags)
 	{
 		int i, clipped;
 		cplane_t *clipplane;
 
 		for (i=0,clipplane=frustum ; i<4 ; i++,clipplane++)
 		{
+			if (!(clipflags  & (1<<i)))
+				continue;
 			clipped = BoxOnPlaneSide (node->minmaxs, node->minmaxs+3, clipplane);
 
 			if (clipped == 1)
