@@ -214,6 +214,7 @@ typedef struct
 	int			(*ACESP_FindBotNum) (void);
 
 	void		(*RunFrame) (void);
+	void		(*ForceExitIntermission) (void); 
 
 	// ServerCommand will be called when an "sv <command>" command is issued on the
 	// server console.

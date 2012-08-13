@@ -732,6 +732,8 @@ gotnewcl:
 	newcl->datagram.allowoverflow = true;
 	newcl->lastmessage = svs.realtime;	// don't timeout
 	newcl->lastconnect = svs.realtime;
+	
+	ge->ForceExitIntermission ();
 }
 
 int Rcon_Validate (void)
