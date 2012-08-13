@@ -734,6 +734,7 @@ gotnewcl:
 	newcl->lastconnect = svs.realtime;
 	
 	ge->ForceExitIntermission ();
+	Cbuf_Execute ();
 }
 
 int Rcon_Validate (void)
