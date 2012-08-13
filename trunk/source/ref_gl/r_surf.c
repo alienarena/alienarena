@@ -544,6 +544,7 @@ Main polygon rendering routine(all standard surfaces)
 */
 int r_currTex = -9999; //only bind a texture if it is not the same as previous surface
 int r_currLMTex = -9999;
+mtexinfo_t	*r_currTexInfo = NULL;
 static void BSP_RenderLightmappedPoly( msurface_t *surf )
 {
 	float	scroll;
@@ -621,7 +622,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 		
 	c_brush_polys++;
 
-	if(surf->texinfo->image->texnum != r_currTex) 
+	if(surf->texinfo != r_currTexInfo) 
 	{
 	
 		if (SurfaceIsAlphaBlended(surf))
@@ -637,18 +638,21 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 				scroll = -64.0;
 		}
 	
-		glUniform1iARB( g_location_surfTexture, 0);
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
+		if(surf->texinfo->image->texnum != r_currTex) 
+		{
+			glUniform1iARB( g_location_surfTexture, 0);
+			qglActiveTextureARB(GL_TEXTURE0);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
 			
-		glUniform1iARB( g_location_heightTexture, 1);
-		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
+			glUniform1iARB( g_location_heightTexture, 1);
+			qglActiveTextureARB(GL_TEXTURE1);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
 		
-		glUniform1iARB( g_location_normalTexture, 2);
-		qglActiveTextureARB(GL_TEXTURE2);
-		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-		KillFlags |= KILL_TMU2_POINTER;
+			glUniform1iARB( g_location_normalTexture, 2);
+			qglActiveTextureARB(GL_TEXTURE2);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+			KillFlags |= KILL_TMU2_POINTER;
+		}
 
 		if (surf->texinfo->flags & SURF_BLOOD) 
 		{
@@ -731,7 +735,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 		r_normalsurfaces = surf;
 	}
 
-	if(surf->texinfo->image->texnum != r_currTex) 
+	if(surf->texinfo != r_currTexInfo) 
 	{
 		if (SurfaceIsAlphaBlended(surf))
 			qglEnable( GL_ALPHA_TEST );
@@ -753,18 +757,21 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			glUniform1iARB( g_location_parallax, 0);
 		}
 		
-		glUniform1iARB( g_location_surfTexture, 0);
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
+		if(surf->texinfo->image->texnum != r_currTex) 
+		{
+			glUniform1iARB( g_location_surfTexture, 0);
+			qglActiveTextureARB(GL_TEXTURE0);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
 			
-		glUniform1iARB( g_location_heightTexture, 1);
-		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
+			glUniform1iARB( g_location_heightTexture, 1);
+			qglActiveTextureARB(GL_TEXTURE1);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
 		
-		glUniform1iARB( g_location_normalTexture, 2);
-		qglActiveTextureARB(GL_TEXTURE2);
-		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-		KillFlags |= KILL_TMU2_POINTER;
+			glUniform1iARB( g_location_normalTexture, 2);
+			qglActiveTextureARB(GL_TEXTURE2);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+			KillFlags |= KILL_TMU2_POINTER;
+		}
 
 		if (surf->texinfo->flags & SURF_BLOOD) 
 		{
@@ -831,8 +838,6 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
 	
-	if (SurfaceIsAlphaBlended(surf))
-		qglDisable( GL_ALPHA_TEST);
 }
 
 void BSP_DrawGLSLSurfaces (void)
@@ -843,6 +848,7 @@ void BSP_DrawGLSLSurfaces (void)
 		return;
 
 	r_currTex = r_currLMTex = -99999;
+	r_currTexInfo = NULL;
 
 	glUseProgramObjectARB( g_programObj );
 	
@@ -873,6 +879,7 @@ void BSP_DrawGLSLSurfaces (void)
 		BSP_RenderGLSLLightmappedPoly(s);
 		r_currTex = s->texinfo->image->texnum;
 		r_currLMTex = s->lightmaptexturenum;
+		r_currTexInfo = s->texinfo;
 	}
 
 	qglDisable (GL_ALPHA_TEST);
@@ -929,6 +936,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		lightCutoffSquared *= lightCutoffSquared;		
 
 		r_currTex = r_currLMTex = -99999;		
+		r_currTexInfo = NULL;
 
 		glUniform3fARB( g_location_lightPosition, dynLight->origin[0], dynLight->origin[1], dynLight->origin[2]);
 		glUniform3fARB( g_location_lightColour, dynLight->color[0], dynLight->color[1], dynLight->color[2]);
@@ -955,6 +963,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		BSP_RenderGLSLDynamicLightmappedPoly(s);
 		r_currTex = s->texinfo->image->texnum;
 		r_currLMTex = s->lightmaptexturenum;
+		r_currTexInfo = s->texinfo;
 	}
 
 	qglDisable (GL_ALPHA_TEST);
@@ -1123,6 +1132,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	{
 		BSP_RenderLightmappedPoly(surf);
 		r_currTex = surf->texinfo->image->texnum;
+		r_currTexInfo = surf->texinfo;
 		r_currLMTex = surf->lightmaptexturenum;
 	}
 }
@@ -1149,6 +1159,7 @@ void BSP_DrawInlineBModel ( void )
 	}
 
 	r_currTex = r_currLMTex = -99999;
+	r_currTexInfo = NULL;
 		
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
@@ -1594,6 +1605,7 @@ void R_DrawWorld (void)
 	}
 
 	r_currTex = r_currLMTex = -99999;
+	r_currTexInfo = NULL;
 
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
