@@ -266,6 +266,25 @@ void ShutdownGame (void)
 	gi.FreeTags (TAG_GAME);
 }
 
+/*
+=============
+G_ForceExitIntermission
+
+To prevent those annoying occurrences when you join a server which has been 
+idling at intermission for a long time, then it instantly switches maps as 
+soon as the old one is done loading.
+
+Now new player joins will force intermission to end after twenty seconds, even
+if there are still players in the server.
+=============
+*/
+void ExitLevel (void);
+void G_ForceExitIntermission (void)
+{
+	if (level.time < level.intermissiontime + 20.0)
+		return;
+	ExitLevel();
+}
 
 /*
 =================
@@ -293,6 +312,7 @@ game_export_t *GetGameAPI (game_import_t *import)
 	globals.ACESP_FindBotNum = ACESP_FindBotNum;
 
 	globals.RunFrame = G_RunFrame;
+	globals.ForceExitIntermission = G_ForceExitIntermission;
 
 	globals.ServerCommand = ServerCommand;
 
