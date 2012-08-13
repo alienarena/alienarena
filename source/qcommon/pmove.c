@@ -1036,7 +1036,7 @@ void PM_CheckDuck (void)
 
 	if (pm->s.pm_flags & PMF_DUCKED)
 	{
-		pm->maxs[2] = 4;
+		pm->maxs[2] = 20;
 		pm->viewheight = -2;
 	}
 	else
