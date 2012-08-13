@@ -2251,6 +2251,7 @@ void CL_Frame( int msec )
 	int render_trigger;
 	int packet_trigger;
 	static perftest_t *speedometer = NULL;
+	static perftest_t *accelerometer = NULL;
 
 	if ( dedicated->integer )
 	{ // crx running as dedicated server crashes without this.
@@ -2273,6 +2274,16 @@ void CL_Frame( int msec )
             strcpy (speedometer->format, "speed %4.0f u/s");
             speedometer->scale = 1.0f;///12.3f;
         }
+    }
+    
+    if (!accelerometer) {
+    	accelerometer = get_perftest("acceleromter");
+    	if (accelerometer) {
+    		accelerometer->is_timerate = true;
+    		accelerometer->cvar = Cvar_Get("cl_showaccelerometer", "0", CVAR_ARCHIVE);
+    		strcpy (accelerometer->format, "accel %4.0f u/s/s");
+    		accelerometer->scale = 1.0f;
+    	}
     }
     
 
@@ -2473,6 +2484,17 @@ void CL_Frame( int msec )
 	        	if (speedometer->counter > cl_alltimespeedrecord->value) 
 	        		Cvar_SetValue ("cl_alltimespeedrecord", speedometer->counter);
 	        }
+	    }
+	    
+	    if (accelerometer && accelerometer->cvar->integer) {
+	    	static float old_vel;
+	    	float new_vel;
+	    	new_vel = sqrt(
+	            cl.predicted_velocity[0]*cl.predicted_velocity[0]+
+	            cl.predicted_velocity[1]*cl.predicted_velocity[1]
+	        );
+	        accelerometer->counter += new_vel-old_vel;
+	        old_vel = new_vel;
 	    }
 
 		/* retrigger packet send timer */
