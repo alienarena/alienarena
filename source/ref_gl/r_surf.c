@@ -36,8 +36,6 @@ dlight_t *dynLight;
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_rscript_surfaces;
 msurface_t	*r_normalsurfaces;
-msurface_t	*r_glsl_surfaces;
-msurface_t  *r_glsl_dynamic_surfaces;
 
 #define LIGHTMAP_BYTES 4
 
@@ -842,10 +840,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 
 void BSP_DrawGLSLSurfaces (void)
 {
-	msurface_t	*s = r_glsl_surfaces;
-
-	if(!s)
-		return;
+    int         i;
 
 	r_currTex = r_currLMTex = -99999;
 	r_currTexInfo = NULL;
@@ -875,32 +870,35 @@ void BSP_DrawGLSLSurfaces (void)
 	glUniform1iARB( g_location_dynamic, 0);
 	glUniform1iARB( g_location_parallax, 1);
 	
-	for (; s; s = s->glslchain) {
-		BSP_RenderGLSLLightmappedPoly(s);
-		r_currTex = s->texinfo->image->texnum;
-		r_currLMTex = s->lightmaptexturenum;
-		r_currTexInfo = s->texinfo;
+	for (i = 0; i < currentmodel->numtexinfo; i++)
+    {
+    	msurface_t	*s = currentmodel->texinfo[i].glsl_surfaces;
+    	if (!s)
+    		continue;
+		for (; s; s = s->glslchain) {
+			BSP_RenderGLSLLightmappedPoly(s);
+			r_currTex = s->texinfo->image->texnum;
+			r_currLMTex = s->lightmaptexturenum;
+			r_currTexInfo = s->texinfo;
+		}
+		currentmodel->texinfo[i].glsl_surfaces = NULL;
 	}
 
 	qglDisable (GL_ALPHA_TEST);
 
 	glUseProgramObjectARB( 0 );
 
-	r_glsl_surfaces = NULL;
 }
 
 void BSP_DrawGLSLDynamicSurfaces (void)
 {
-	msurface_t	*s = r_glsl_dynamic_surfaces;
+	int         i;
 	dlight_t	*dl = NULL;
 	int			lnum, sv_lnum = 0;
 	float		add, brightest = 0;
 	vec3_t		lightVec;
 	float		lightCutoffSquared = 0.0f;
 	qboolean	foundLight = false;
-
-	if(!s)
-		return;
 
 	dl = r_newrefdef.dlights;
 	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
@@ -958,12 +956,18 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 	glUniform1iARB( g_location_dynamic, foundLight);
 	
-	for (; s; s = s->glsldynamicchain) 
-	{
-		BSP_RenderGLSLDynamicLightmappedPoly(s);
-		r_currTex = s->texinfo->image->texnum;
-		r_currLMTex = s->lightmaptexturenum;
-		r_currTexInfo = s->texinfo;
+	for (i = 0; i < currentmodel->numtexinfo; i++)
+    {
+    	msurface_t	*s = currentmodel->texinfo[i].glsl_dynamic_surfaces;
+    	if (!s)
+    		continue;
+		for (; s; s = s->glsldynamicchain) {
+			BSP_RenderGLSLDynamicLightmappedPoly(s);
+			r_currTex = s->texinfo->image->texnum;
+			r_currLMTex = s->lightmaptexturenum;
+			r_currTexInfo = s->texinfo;
+		}
+		currentmodel->texinfo[i].glsl_dynamic_surfaces = NULL;
 	}
 
 	qglDisable (GL_ALPHA_TEST);
@@ -972,8 +976,6 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglDisable (GL_TEXTURE_2D);	
-
-	r_glsl_dynamic_surfaces = NULL;
 }
 
 /*
@@ -1118,15 +1120,15 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	if(is_dynamic && surf->texinfo->has_normalmap
 		&& gl_state.glsl_shaders && gl_glsl_shaders->integer) //always glsl for dynamic if it has a normalmap
 	{
-		surf->glsldynamicchain = r_glsl_dynamic_surfaces;
-		r_glsl_dynamic_surfaces = surf;
+		surf->glsldynamicchain = surf->texinfo->glsl_dynamic_surfaces;
+		surf->texinfo->glsl_dynamic_surfaces = surf;
 	}
 	else if(gl_normalmaps->integer && surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
 	{
-		surf->glslchain = r_glsl_surfaces;
-		r_glsl_surfaces = surf;
+		surf->glslchain = surf->texinfo->glsl_surfaces;
+		surf->texinfo->glsl_surfaces = surf;
 	}
 	else 
 	{
