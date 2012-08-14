@@ -897,7 +897,8 @@ void BSP_DrawGLSLSurfaces (void)
 		currentmodel->texinfo[i].glsl_surfaces = NULL;
 	}
 
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    if (gl_state.vbo)
+	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	
 	qglDisable (GL_ALPHA_TEST);
 
@@ -994,7 +995,8 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		currentmodel->texinfo[i].glsl_dynamic_surfaces = NULL;
 	}
 	
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	if (gl_state.vbo)
+	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
 	qglDisable (GL_ALPHA_TEST);
 
@@ -1638,7 +1640,8 @@ void R_DrawWorld (void)
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 	
 	r_vboOn = false;
-	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
+	if (gl_state.vbo)
+	    qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 	R_KillVArrays ();
 
 	//render all GLSL surfaces
