@@ -205,6 +205,8 @@ typedef struct mtexinfo_s
 	qboolean	has_heightmap;
 	struct		rscript_s	*script;
 	int			value;
+	
+	struct 		msurface_s	*glsl_surfaces, *glsl_dynamic_surfaces;
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10
