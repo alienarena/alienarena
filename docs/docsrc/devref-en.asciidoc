@@ -43,9 +43,10 @@ a2x --format=xhtml --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.a
 pdf::
 a2x --format=pdf --fop --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.asciidoc
 
-Where 'CSSPATH' is something like:
+Where 'CSSPATH' is something like: 'docbook-xsl.css'
 
-'/usr/share/asciidoc/stylesheets/docbook-xsl.css'
+Which references something like:  '/usr/share/asciidoc/stylesheets/docbook-xsl.css'
+
 
 == Subversion Repository ==
 
@@ -72,7 +73,7 @@ Doing so could cause confusion and consternation.
 - Run 'premake' to generate 'config.h' for libode.
 - Open the '.sln' file in Visual Studio.
 - Select the Release build and run it.
-- Copy 'VS2010\bin\Release\crx.exe' to the top directory.
+- Copy 'VS2010\bin\Release\alienarena.exe' to the top directory.
 
 NOTE: For the libode 'config.h' (and maybe some other files), an
 alternative is to get a copy from someone who has a working
@@ -194,7 +195,7 @@ alienarena_w32\::
        *** libvorbisfile.vcxproj
        *** zlib.vcxproj
       bin\::::
-        Target directory. The 'crx.exe' executable is placed
+        Target directory. The 'alienarena.exe' executable is placed
         here. There are 'RELEASE' and 'DEBUG' subdirectories
         created by the build procedure.
       lib\::::
@@ -207,7 +208,7 @@ alienarena_w32\::
         Header files. The build procedure copies header files
         from the 'libsrc' subdirectories to these directories
         for most of the libraries.
-      *** config.h -- 'config.h' for 'crx.exe' and 'game.lib'.
+      *** config.h -- 'config.h' for 'alienarena.exe' and 'game.lib'.
       *** curl\
       *** jpeg\
       *** ode\
@@ -227,7 +228,7 @@ parallel with a current one.
 
 === The config.h file ===
 
-The 'config.h' file for 'crx.exe' and 'game.lib' is an artifact
+The 'config.h' file for 'alienarena.exe' and 'game.lib' is an artifact
 from the Unix/Linux build. In Unix/Linux, 'config.h' is generated
 by the 'configure' procedure. For Windows, it is manually editted.
 
@@ -291,7 +292,8 @@ They are declared in 'game/game.h' and 'qcommon/qcommon.h'.
 They are defined in 'qcommon/files.c'.
 
 The name of the stand-alone dedicated server is changed from
-'crded' to 'crx-ded'.  The purpose is to make it simple to
+'crded' to 'crx-ded'. (With the 7.60 release, updated to 'alienarena-ded').
+The purpose is to make it simple to
 change the name of the executable files using the standard
 built-in configure option.
 
@@ -307,6 +309,12 @@ To download Alien Arena from the SVN Repository:
 
 - Create a ''PATH'' for installation somewhere in your home directory.
 - Run: 'svn checkout svn://icculus.org/alienarena/trunk PATH'.
+
+For example:
+
++cd ~+
++mkdir alienarena+
++svn checkout svn://icculus.org/alienarena/trunk alienarena+
 
 
 ==== Autotools Related Files ====
@@ -338,8 +346,7 @@ problems with a developer's Autotools version.
  INSTALL .............. GNU build/install reference
  COPYING .............. GNU GPL
 
-
-*Comments on game_data.am*
+=== The game_data.am File ===
 
 The file, 'game_data.am' contains a *long* list of game
 resources.  It is used to generate the distribution archive and
@@ -350,7 +357,54 @@ handles the copying of game resources. For 'make uninstall'
 it handles deletion of what 'make install' installed.
 
 For development, when using the standard install, use 'make
-install-exec' to limit copying to the executables.
+install-exec' to limit copying to the executables. Note that
+the alternate install always just copies the executables.
+
+*Version 7.60 changes to game_data.am*
+
+With the game resource additions of 7.60, the 'game_data.am' list exceeded
+the command line length limit. After much agonizing and lamenting,
+a solution was found. The list is subdivided by the subdirectories of
+'data1/'. This works ok for the 'install' procedure. Unfortunately,
+it does not work for the distribution creation procedure. For that,
+a copy procedure is added to 'dist-hook' in 'Makefile.am'.
+
+*Is this a PITA, or what?*
+
+Yes, it is. It would be nice not to have to reconfigure when game assets
+are added or deleted. The way to do this is to implement a custom
+'install' procedure that uses the game data file list to copy files
+when installing and deleting files when uninstalling. The game data file
+list would also be used for distribution creation. The method in version
+7.60 is crude; there is probably a faster way.  (However, speed is not
+important for tarball generation.)
+
+*Another issue*
+
+We should support separate source and data tarballs.  This would
+make us more popular with distro packagers. I think they have to do this
+split because the source and data are under different licenses.
+
+=== Adding new source files ===
+
+New source files are added to the 'source/Makefile.am' file. Add the
+new source to the applicable '*_SOURCE' lists. Header ('.h') files must
+be included, because the list is used to generate the tarball.
+
+=== Maintainer's Reconfigure ===
+
+TODO
+
+=== Adding a system library to the build ===
+
+For common system libraries, there will usually be an .m4 macro available.
+These may be part of autoconf (AC_*), or they may be extensions from
+the GNU Autoconf Archive (AX_*).
+
+After adding new AX_ macros to configure.ac, the .m4 file needs to be added to
+the m4 subdirectory. This is done with the following command.
+
++aclocal -I m4 --force --install+
 
 === Configure options ===
 
@@ -397,11 +451,11 @@ are 'configure' options added for Alien Arena.
   Note: If 'with' is specified, then the library is required.
 
 --with(out)-xf86dga::
-  include XF86 DGA support (default: check)
+  include XF86 DGA support (default: without)
+  Note: default is changed from 'check' in version 7.60
   Note: DGA appears to only used for mouse pointer input and
-  does not appear to be required. It is disabled when
-  Xxf86dga is not installed, _without_xf86dga_ is specified,
-  or when the cvar, _in_dgamouse_, is set to 0.
+  is optional. It is disabled by default, or when the cvar, 
+  _in_dgamouse_, is set to 0.
   Note: If 'with' is specified, then the library is required.
 
 
@@ -421,23 +475,27 @@ Wextra::
   and signed/unsigned comparisons. With just -Wall, a few unused variable 
   warnings are produced, which are easily fixed. Some bogus uninitialized
   warnings are produced; it is possible, but annoying, to eliminate these. 
+  Use the '--enable-full-warnings' 'configure' option to turn these on.
   
 O2::
 O3::
-  O3 produces different warning messages.
+  Optimization levels. O3 produces different warning messages, so should
+  be tested before releases.
 
 m32::
 m64::
-  TBD.
+  Specify 32bit or 64bit build. Only needed when cross-compiling. 
 
 march::
 mtune::
   Set for specific architectures. Might give better performance
   than generic builds. For instance, `-march=core2` enables
-  higher performance features.
+  higher performance features. Use `-mtune=generic` when building
+  release binaries; for Desura, for instance.
 
 mfpmath::
-  Testing shows that `-mfpmath=sse` gives better performance.
+  Testing shows that `-mfpmath=sse` gives better performance when
+  compiling with GNU gcc. 
 
 Wp::
   TBD.
@@ -457,7 +515,6 @@ param::
 fasynchronous-unwind-tables::
   From fedora. TBD.
 
-
 === Generating an Archive Package for Distribution ===
 
 ==== Verify Autotools Versions ====
@@ -465,8 +522,18 @@ fasynchronous-unwind-tables::
 Verify that your versions of 'autoconf', 'automake', and
 'autoconf-archive' are current.
 
-The 7.50 release uses 'autoconf 2.65', 'automake 1.11' and
-'autoconf-archive 2010.07.06'
+The 7.60 release uses 'autoconf 2.68' and 'automake 1.11'. If more than
+one dev is committing autotool related changes to SVN, it will be less
+confusing if all are using the same versions. 
+
+The 'autoconf-archive' is an evolving set of macros maintained 
+on the GNU website. (On gentoo it is installed in '/usr/share/aclocal').
+We use a few of these. Each file has a 'serial' number in a comment. Care
+should be take not to commit an earlier version of a '.m4' into the SVN 'm4'
+subdirectory. Also, if a file we use is updated in the archive, update it
+in the repository and do a complete reconfigure. Changes will appear in
+the generated 'aclocal.m4' file. See below for commands to update the
+macro files.
 
 ==== Verify Alien Arena Version ====
 
@@ -496,7 +563,7 @@ Run this command to build and verify the distribution package:
 
 +make distcheck+
 
-If this succeeds, the alienarena-7.50.tar.gz has been created.
+If this succeeds, the alienarena-<version>.tar.gz has been created.
 
 ==== Test the Distribution Package ====
 
@@ -535,7 +602,7 @@ $ ./configure
 $ make
 $ sudo make install
 $ cd ~
-$ crx
+$ alienarena
 ------------------------------------------------------------------------------
 
 ==== BASH script for distribution tarball generation ====
@@ -630,10 +697,12 @@ compilation in the common code.
 === Open Dynamics Engine (ODE) Integration ===
 
 A static library, 'libode.a', is built and linked with the main
-program, 'crx'. Only files that are used in the library build
+program, 'alienarena'. Only files that are used in the library build
 are included in the source tree in SVN and in the distribution.
 There is only one 'config.h' and it includes what is needed
 for building 'libode.a'.
+
+TODO: 7.60 note on ODE 0.12
 
 
 === Reading List for Autotools ===
@@ -706,4 +775,16 @@ and customizing '-I' options, but it is possible to do an
 alternate build with a small subset of sources in an alternate
 source subdirectory.  Good for experimenting with optimizations.
 
+
+== Static Analysis == 
+
+TODO:
+
+== Phoronix Test Suite ==
+
+TODO:
+
+== Desura ==
+
+TODO:
 
