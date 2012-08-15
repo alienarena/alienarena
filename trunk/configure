@@ -5869,8 +5869,8 @@ ax_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mt
 # --thread-safe: KAI C++
 # pthread-config: use pthread-config program (for GNU Pth library)
 
-case "${host_cpu}-${host_os}" in
-        *solaris*)
+case ${host_os} in
+        solaris*)
 
         # On Solaris (at least, for some versions), libc contains stubbed
         # (non-functional) versions of the pthreads routines, so link-based
@@ -5883,7 +5883,7 @@ case "${host_cpu}-${host_os}" in
         ax_pthread_flags="-pthreads pthread -mt -pthread $ax_pthread_flags"
         ;;
 
-        *-darwin*)
+        darwin*)
         ax_pthread_flags="-pthread $ax_pthread_flags"
         ;;
 esac
@@ -6048,10 +6048,10 @@ _ACEOF
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking if more special flags are required for pthreads" >&5
 $as_echo_n "checking if more special flags are required for pthreads... " >&6; }
         flag=no
-        case "${host_cpu}-${host_os}" in
-            *-aix* | *-freebsd* | *-darwin*) flag="-D_THREAD_SAFE";;
-            *-osf* | *-hpux*) flag="-D_REENTRANT";;
-            *solaris*)
+        case ${host_os} in
+            aix* | freebsd* | darwin*) flag="-D_THREAD_SAFE";;
+            osf* | hpux*) flag="-D_REENTRANT";;
+            solaris*)
             if test "$GCC" = "yes"; then
                 flag="-D_REENTRANT"
             else
@@ -8587,6 +8587,50 @@ fi
    esac
 else
   CXXFLAGS="-Wall"
+fi
+
+	if ${CFLAGS+:} false; then :
+  case " $CFLAGS " in
+    *" -Wextra "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wextra"; } >&5
+  (: CFLAGS already contains -Wextra) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -Wextra\""; } >&5
+  (: CFLAGS="$CFLAGS -Wextra") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CFLAGS="$CFLAGS -Wextra"
+      ;;
+   esac
+else
+  CFLAGS="-Wextra"
+fi
+
+	if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
+    *" -Wextra "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -Wextra"; } >&5
+  (: CXXFLAGS already contains -Wextra) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -Wextra\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS -Wextra") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CXXFLAGS="$CXXFLAGS -Wextra"
+      ;;
+   esac
+else
+  CXXFLAGS="-Wextra"
 fi
 
 	debug=yes

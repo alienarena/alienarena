@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Alien Arena Developer Reference</title><link rel="stylesheet" href="CSSPATH" type="text/css" /><meta name="generator" content="DocBook XSL Stylesheets V1.75.2" /></head><body><div xml:lang="en" class="article" title="Alien Arena Developer Reference" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="id305912"></a>Alien Arena Developer Reference</h2></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#_about_this_document">1. About this Document</a></span></dt><dt><span class="section"><a href="#_subversion_repository">2. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_visual_c_2010_build">3. Visual C++ 2010 Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_windows_subversion_client">3.1. Windows Subversion Client</a></span></dt><dt><span class="section"><a href="#_microsoft_visual_c_2010_express">3.2. Microsoft Visual C++ 2010 Express</a></span></dt><dt><span class="section"><a href="#_libraries">3.3. Libraries</a></span></dt><dt><span class="section"><a href="#_openal_1_1_sdk">3.4. OpenAL 1.1 SDK</a></span></dt><dt><span class="section"><a href="#_directory_tree">3.5. Directory Tree</a></span></dt><dt><span class="section"><a href="#_the_config_h_file">3.6. The config.h file</a></span></dt></dl></dd><dt><span class="section"><a href="#_unix_linux_build">4. Unix/Linux Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_introduction">4.1. Introduction</a></span></dt><dt><span class="section"><a href="#_program_changes_in_7_50">4.2. Program Changes in 7.50</a></span></dt><dt><span class="section"><a href="#_subversion_repository_2">4.3. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_configure_options">4.4. Configure options</a></span></dt><dt><span class="section"><a href="#_gcc_compiler_options">4.5. GCC Compiler Options</a></span></dt><dt><span class="section"><a href="#_generating_an_archive_package_for_distribution">4.6. Generating an Archive Package for Distribution</a></span></dt><dt><span class="section"><a href="#_config_h">4.7. config.h</a></span></dt><dt><span class="section"><a href="#_open_dynamics_engine_ode_integration">4.8. Open Dynamics Engine (ODE) Integration</a></span></dt><dt><span class="section"><a href="#_reading_list_for_autotools">4.9. Reading List for Autotools</a></span></dt></dl></dd><dt><span class="section"><a href="#_mingw_build">5. MinGW Build</a></span></dt><dt><span class="section"><a href="#_mac_os_x_darwin_x11_build">6. Mac OS X / Darwin X11 Build</a></span></dt><dt><span class="section"><a href="#_developer_8217_s_not_autotools_makefile">7. Developer’s Not-Autotools Makefile</a></span></dt></dl></div><p>Copyright © 2011 COR Entertainment, LLC.</p><pre class="screen">$Id: devref-en.asciidoc 2447 2011-05-17 03:24:21Z strat $</pre><div class="section" title="1. About this Document"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_about_this_document"></a>1. About this Document</h2></div></div></div><div class="warning" title="Warning" style="margin-left: 0; margin-right: 10%;"><table border="0" summary="Warning"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="/etc/asciidoc/images/icons//warning.png" /></td><th align="left"></th></tr><tr><td align="left" valign="top"><p><span class="emphasis"><em>This is an informal document and assumes general knowledge
-of programming and specific knowledge of Alien Arena development.</em></span></p></td></tr></table></div><p>This document is intended to be informal reference for Alien
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Alien Arena Developer Reference</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.76.1" /></head><body><div xml:lang="en" class="article" title="Alien Arena Developer Reference" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp134840"></a>Alien Arena Developer Reference</h2></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_about_this_document">1. About this Document</a></span></dt><dt><span class="section"><a href="#_subversion_repository">2. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_visual_c_2010_build">3. Visual C++ 2010 Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_windows_subversion_client">3.1. Windows Subversion Client</a></span></dt><dt><span class="section"><a href="#_microsoft_visual_c_2010_express">3.2. Microsoft Visual C++ 2010 Express</a></span></dt><dt><span class="section"><a href="#_libraries">3.3. Libraries</a></span></dt><dt><span class="section"><a href="#_openal_1_1_sdk">3.4. OpenAL 1.1 SDK</a></span></dt><dt><span class="section"><a href="#_directory_tree">3.5. Directory Tree</a></span></dt><dt><span class="section"><a href="#_the_config_h_file">3.6. The config.h file</a></span></dt></dl></dd><dt><span class="section"><a href="#_unix_linux_build">4. Unix/Linux Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_introduction">4.1. Introduction</a></span></dt><dt><span class="section"><a href="#_program_changes_in_7_50">4.2. Program Changes in 7.50</a></span></dt><dt><span class="section"><a href="#_subversion_repository_2">4.3. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_the_game_data_am_file">4.4. The game_data.am File</a></span></dt><dt><span class="section"><a href="#_adding_new_source_files">4.5. Adding new source files</a></span></dt><dt><span class="section"><a href="#_maintainer_8217_s_reconfigure">4.6. Maintainer’s Reconfigure</a></span></dt><dt><span class="section"><a href="#_adding_a_system_library_to_the_build">4.7. Adding a system library to the build</a></span></dt><dt><span class="section"><a href="#_configure_options">4.8. Configure options</a></span></dt><dt><span class="section"><a href="#_gcc_compiler_options">4.9. GCC Compiler Options</a></span></dt><dt><span class="section"><a href="#_generating_an_archive_package_for_distribution">4.10. Generating an Archive Package for Distribution</a></span></dt><dt><span class="section"><a href="#_config_h">4.11. config.h</a></span></dt><dt><span class="section"><a href="#_open_dynamics_engine_ode_integration">4.12. Open Dynamics Engine (ODE) Integration</a></span></dt><dt><span class="section"><a href="#_reading_list_for_autotools">4.13. Reading List for Autotools</a></span></dt></dl></dd><dt><span class="section"><a href="#_mingw_build">5. MinGW Build</a></span></dt><dt><span class="section"><a href="#_mac_os_x_darwin_x11_build">6. Mac OS X / Darwin X11 Build</a></span></dt><dt><span class="section"><a href="#_developer_8217_s_not_autotools_makefile">7. Developer’s Not-Autotools Makefile</a></span></dt><dt><span class="section"><a href="#_static_analysis">8. Static Analysis</a></span></dt><dt><span class="section"><a href="#_phoronix_test_suite">9. Phoronix Test Suite</a></span></dt><dt><span class="section"><a href="#_desura">10. Desura</a></span></dt></dl></div><p>Copyright © 2011 COR Entertainment, LLC.</p><pre class="screen">$Id: devref-en.asciidoc 2482 2011-06-13 18:59:50Z blackice $</pre><div class="section" title="1. About this Document"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_about_this_document"></a>1. About this Document</h2></div></div></div><div class="warning" title="Warning" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Warning</h3><p><span class="emphasis"><em>This is an informal document and assumes general knowledge
+of programming and specific knowledge of Alien Arena development.</em></span></p></div><p>This document is intended to be informal reference for Alien
 Arena development.  Its reason for being is it organize
 general information, notes, and details about development
 tools, build procedures, packaging, etc. In 2010, the Windows
@@ -26,13 +26,13 @@ a2x --format=xhtml --destination-dir=. --stylesheet=<span class="emphasis"><em>C
 pdf
 </span></dt><dd>
 a2x --format=pdf --fop --destination-dir=. --stylesheet=<span class="emphasis"><em>CSSPATH</em></span> docsrc/devref-en.asciidoc
-</dd></dl></div><p>Where <span class="emphasis"><em>CSSPATH</em></span> is something like:</p><p><span class="emphasis"><em>/usr/share/asciidoc/stylesheets/docbook-xsl.css</em></span></p></div><div class="section" title="2. Subversion Repository"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_subversion_repository"></a>2. Subversion Repository</h2></div></div></div><p>Alien Arena resources are stored in a Subversion (SVN)
+</dd></dl></div><p>Where <span class="emphasis"><em>CSSPATH</em></span> is something like: <span class="emphasis"><em>docbook-xsl.css</em></span></p><p>Which references something like:  <span class="emphasis"><em>/usr/share/asciidoc/stylesheets/docbook-xsl.css</em></span></p></div><div class="section" title="2. Subversion Repository"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_subversion_repository"></a>2. Subversion Repository</h2></div></div></div><p>Alien Arena resources are stored in a Subversion (SVN)
 repository at <a class="ulink" href="http://icculus.org" target="_top">http://icculus.org</a>.  To browse the repository,
 go to <a class="ulink" href="http://svn.icculus.org/alienarena/trunk" target="_top">http://svn.icculus.org/alienarena/trunk</a>.  Use a Subversion
 client program for downloading.  Read access to the repository
-is not restricted.  Irritant administers commit access.</p><div class="caution" title="Caution" style="margin-left: 0; margin-right: 10%;"><table border="0" summary="Caution"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="/etc/asciidoc/images/icons//caution.png" /></td><th align="left"></th></tr><tr><td align="left" valign="top"><p>The SVN versions of the <span class="emphasis"><em>.sln</em></span> and <span class="emphasis"><em>.vcxproj</em></span> files are
+is not restricted.  Irritant administers commit access.</p><div class="caution" title="Caution" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Caution</h3><p>The SVN versions of the <span class="emphasis"><em>.sln</em></span> and <span class="emphasis"><em>.vcxproj</em></span> files are
 official. Do not commit these without clearance from Irritant.
-Doing so could cause confusion and consternation.</p></td></tr></table></div></div><div class="section" title="3. Visual C++ 2010 Build"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_visual_c_2010_build"></a>3. Visual C++ 2010 Build</h2></div></div></div><p><span class="strong"><strong>Steps for building Release version with Visual C:</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+Doing so could cause confusion and consternation.</p></div></div><div class="section" title="3. Visual C++ 2010 Build"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_visual_c_2010_build"></a>3. Visual C++ 2010 Build</h2></div></div></div><p><span class="strong"><strong>Steps for building Release version with Visual C:</strong></span></p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
 Install TortoiseSVN.
 </li><li class="listitem">
 Checkout Alien Arena from SVN.
@@ -51,10 +51,10 @@ Open the <span class="emphasis"><em>.sln</em></span> file in Visual Studio.
 </li><li class="listitem">
 Select the Release build and run it.
 </li><li class="listitem">
-Copy <span class="emphasis"><em>VS2010\bin\Release\crx.exe</em></span> to the top directory.
-</li></ul></div><div class="note" title="Note" style="margin-left: 0; margin-right: 10%;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="/etc/asciidoc/images/icons//note.png" /></td><th align="left"></th></tr><tr><td align="left" valign="top"><p>For the libode <span class="emphasis"><em>config.h</em></span> (and maybe some other files), an
+Copy <span class="emphasis"><em>VS2010\bin\Release\alienarena.exe</em></span> to the top directory.
+</li></ul></div><div class="note" title="Note" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Note</h3><p>For the libode <span class="emphasis"><em>config.h</em></span> (and maybe some other files), an
 alternative is to get a copy from someone who has a working
-installation.</p></td></tr></table></div><div class="section" title="3.1. Windows Subversion Client"><div class="titlepage"><div><div><h3 class="title"><a id="_windows_subversion_client"></a>3.1. Windows Subversion Client</h3></div></div></div><p>Install TortoiseSVN, the free Subversion client from Tigris.
+installation.</p></div><div class="section" title="3.1. Windows Subversion Client"><div class="titlepage"><div><div><h3 class="title"><a id="_windows_subversion_client"></a>3.1. Windows Subversion Client</h3></div></div></div><p>Install TortoiseSVN, the free Subversion client from Tigris.
 The website is <a class="ulink" href="http://tortoisesvn.net/" target="_top">http://tortoisesvn.net/</a></p><p>To download Alien Arena from the SVN Repository:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
 In Windows Explorer, go to the <span class="emphasis"><em>Computer → C: folder</em></span>.
 </li><li class="listitem">
@@ -94,9 +94,9 @@ some work to get the build details correct and consistent.</p></div><div class="
 <a class="ulink" href="http://www.openal.org/" target="_top">http://www.openal.org/</a>. (Redirects to the CreativeLabs
 site.) In the Download section, get the <span class="emphasis"><em>OpenAL 1.1 Core
 SDK</em></span>. Install it in the default location; the build
-procedure is setup to look for it there.</p><div class="caution" title="Caution" style="margin-left: 0; margin-right: 10%;"><table border="0" summary="Caution"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="/etc/asciidoc/images/icons//caution.png" /></td><th align="left"></th></tr><tr><td align="left" valign="top"><p>On an x86 system, for example an old XP box, you
+procedure is setup to look for it there.</p><div class="caution" title="Caution" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Caution</h3><p>On an x86 system, for example an old XP box, you
 will need to change the path to use "Program files (x86)"
-instead of the default.</p></td></tr></table></div><p>Run the <span class="emphasis"><em>oalinst.exe</em></span> program to setup the OpenAL driver,
+instead of the default.</p></div><p>Run the <span class="emphasis"><em>oalinst.exe</em></span> program to setup the OpenAL driver,
 if you have not done that previously.</p><p>The <span class="emphasis"><em>oalinst.exe</em></span> program installs whatever is required for
 OpenAL to use a particular systems sound hardware. It is
 included in the Alien Arena Windows distribution and is in SVN.</p></div><div class="section" title="3.5. Directory Tree"><div class="titlepage"><div><div><h3 class="title"><a id="_directory_tree"></a>3.5. Directory Tree</h3></div></div></div><p>Here are the directories and files related to the Windows build.</p><div class="variablelist"><dl><dt><span class="term">
@@ -155,7 +155,7 @@ zlib.vcxproj
 </li></ul></div></dd><dt><span class="term">
 bin\
 </span></dt><dd>
-        Target directory. The <span class="emphasis"><em>crx.exe</em></span> executable is placed
+        Target directory. The <span class="emphasis"><em>alienarena.exe</em></span> executable is placed
         here. There are <span class="emphasis"><em>RELEASE</em></span> and <span class="emphasis"><em>DEBUG</em></span> subdirectories
         created by the build procedure.
 </dd><dt><span class="term">
@@ -175,7 +175,7 @@ include\
         from the <span class="emphasis"><em>libsrc</em></span> subdirectories to these directories
         for most of the libraries.
 </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-config.h — <span class="emphasis"><em>config.h</em></span> for <span class="emphasis"><em>crx.exe</em></span> and <span class="emphasis"><em>game.lib</em></span>.
+config.h — <span class="emphasis"><em>config.h</em></span> for <span class="emphasis"><em>alienarena.exe</em></span> and <span class="emphasis"><em>game.lib</em></span>.
 </li><li class="listitem">
 curl\
 </li><li class="listitem">
@@ -201,7 +201,7 @@ ftstdlib.h
 </li></ul></div></li></ul></div></dd></dl></div></dd></dl></div></dd></dl></div><p>The build procedure populates the <span class="emphasis"><em>include</em></span> directories for
 the various libraries. Makes the build more complicated, but
 should make it easier to work with a new library version in
-parallel with a current one.</p></div><div class="section" title="3.6. The config.h file"><div class="titlepage"><div><div><h3 class="title"><a id="_the_config_h_file"></a>3.6. The config.h file</h3></div></div></div><p>The <span class="emphasis"><em>config.h</em></span> file for <span class="emphasis"><em>crx.exe</em></span> and <span class="emphasis"><em>game.lib</em></span> is an artifact
+parallel with a current one.</p></div><div class="section" title="3.6. The config.h file"><div class="titlepage"><div><div><h3 class="title"><a id="_the_config_h_file"></a>3.6. The config.h file</h3></div></div></div><p>The <span class="emphasis"><em>config.h</em></span> file for <span class="emphasis"><em>alienarena.exe</em></span> and <span class="emphasis"><em>game.lib</em></span> is an artifact
 from the Unix/Linux build. In Unix/Linux, <span class="emphasis"><em>config.h</em></span> is generated
 by the <span class="emphasis"><em>configure</em></span> procedure. For Windows, it is manually editted.</p><p></p></div></div><div class="section" title="4. Unix/Linux Build"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_unix_linux_build"></a>4. Unix/Linux Build</h2></div></div></div><div class="section" title="4.1. Introduction"><div class="titlepage"><div><div><h3 class="title"><a id="_introduction"></a>4.1. Introduction</h3></div></div></div><p>Beginning in August of 2010 the Unix/Linux build for Alien Arena
 was converted from a Makefile to Autotools.  There are two main
@@ -243,43 +243,65 @@ functions supply the full filesystem path when given a relative
 path.  The functions are <span class="strong"><strong>FullPath()</strong></span> and <span class="strong"><strong>FullWritePath()</strong></span>.
 They are declared in <span class="emphasis"><em>game/game.h</em></span> and <span class="emphasis"><em>qcommon/qcommon.h</em></span>.
 They are defined in <span class="emphasis"><em>qcommon/files.c</em></span>.</p><p>The name of the stand-alone dedicated server is changed from
-<span class="emphasis"><em>crded</em></span> to <span class="emphasis"><em>crx-ded</em></span>.  The purpose is to make it simple to
+<span class="emphasis"><em>crded</em></span> to <span class="emphasis"><em>crx-ded</em></span>. (With the 7.60 release, updated to <span class="emphasis"><em>alienarena-ded</em></span>).
+The purpose is to make it simple to
 change the name of the executable files using the standard
-built-in configure option.</p></div><div class="section" title="4.3. Subversion Repository"><div class="titlepage"><div><div><h3 class="title"><a id="_subversion_repository_2"></a>4.3. Subversion Repository</h3></div></div></div><div class="section" title="4.3.1. Linux Subversion Client"><div class="titlepage"><div><div><h4 class="title"><a id="_linux_subversion_client"></a>4.3.1. Linux Subversion Client</h4></div></div></div><p>Install the free Apache (formerly Tigris) Subversion client
+built-in configure option.</p></div><div class="section" title="4.3. Subversion Repository"><div class="titlepage"><div><div><h3 class="title"><a id="_subversion_repository_2"></a>4.3. Subversion Repository</h3></div></div></div><div class="section" title="Linux Subversion Client"><div class="titlepage"><div><div><h4 class="title"><a id="_linux_subversion_client"></a>Linux Subversion Client</h4></div></div></div><p>Install the free Apache (formerly Tigris) Subversion client
 using your package manager.  Or download it from the website
 at <a class="ulink" href="http://subversion.apache.org/" target="_top">http://subversion.apache.org/</a> .</p><p>To download Alien Arena from the SVN Repository:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
 Create a <span class="emphasis"><em>'PATH</em></span>' for installation somewhere in your home directory.
 </li><li class="listitem">
 Run: <span class="emphasis"><em>svn checkout svn://icculus.org/alienarena/trunk PATH</em></span>.
-</li></ul></div></div><div class="section" title="4.3.2. Autotools Related Files"><div class="titlepage"><div><div><h4 class="title"><a id="_autotools_related_files"></a>4.3.2. Autotools Related Files</h4></div></div></div><div class="warning" title="Warning" style="margin-left: 0; margin-right: 10%;"><table border="0" summary="Warning"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="/etc/asciidoc/images/icons//warning.png" /></td><th align="left"></th></tr><tr><td align="left" valign="top"><p>Certain files necessary for non-developer users to
+</li></ul></div><p>For example:</p><p><code class="literal">cd ~</code>
+<code class="literal">mkdir alienarena</code>
+<code class="literal">svn checkout svn://icculus.org/alienarena/trunk alienarena</code></p></div><div class="section" title="Autotools Related Files"><div class="titlepage"><div><div><h4 class="title"><a id="_autotools_related_files"></a>Autotools Related Files</h4></div></div></div><div class="warning" title="Warning" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Warning</h3><p>Certain files necessary for non-developer users to
 build the program are in the repository.  These include the
 generated configure script and Autotools-supplied scripts in the
 <span class="emphasis"><em>config/</em></span> and <span class="emphasis"><em>m4/</em></span> subdirectory.  Normally, these scripts are
 automatically added to the distribution package by Autotools.
 Having them in the repository can lead to version mismatch
-problems with a developer’s Autotools version.</p></td></tr></table></div><p title="SOURCE FILES:"><b>SOURCE FILES: </b>
+problems with a developer’s Autotools version.</p></div><p title="SOURCE FILES:"><strong>SOURCE FILES: </strong>
 </p><pre class="literallayout">configure.ac ......... source file for autoconf
 Makefile.am .......... top source file for automake
 game_data.am ......... included in Makefile.am
 source/Makefile.am ... subdirectory source file for automake</pre><p title="SOURCE FILES:">
-</p><p title="GENERATED FILES:"><b>GENERATED FILES: </b>
+</p><p title="GENERATED FILES:"><strong>GENERATED FILES: </strong>
 </p><pre class="literallayout">configure ............ the user's configure script
 Makefile.in .......... template for the user's top directory Makefile
 source/Makefile.in ... template for the user's subdirectory Makefile
 aclocal.m4 ........... generated by aclocal
 config/config.h.in ... template for the user's config.h</pre><p title="GENERATED FILES:">
-</p><p title="COPIED FILES:"><b>COPIED FILES: </b>
+</p><p title="COPIED FILES:"><strong>COPIED FILES: </strong>
 </p><pre class="literallayout">m4/*.m4 .............. ax_* m4 macros, from autoconf-archive
 INSTALL .............. GNU build/install reference
 COPYING .............. GNU GPL</pre><p title="COPIED FILES:">
-</p><p><span class="strong"><strong>Comments on game_data.am</strong></span></p><p>The file, <span class="emphasis"><em>game_data.am</em></span> contains a <span class="strong"><strong>long</strong></span> list of game
+</p></div></div><div class="section" title="4.4. The game_data.am File"><div class="titlepage"><div><div><h3 class="title"><a id="_the_game_data_am_file"></a>4.4. The game_data.am File</h3></div></div></div><p>The file, <span class="emphasis"><em>game_data.am</em></span> contains a <span class="strong"><strong>long</strong></span> list of game
 resources.  It is used to generate the distribution archive and
 for copying files to the <span class="emphasis"><em>datadir</em></span> in a standard install. The
 downside is that it needs to be kept up-to-date with additions
 and deletions. The advantage is that the <span class="emphasis"><em>install</em></span> program
 handles the copying of game resources. For <span class="emphasis"><em>make uninstall</em></span>
 it handles deletion of what <span class="emphasis"><em>make install</em></span> installed.</p><p>For development, when using the standard install, use <span class="emphasis"><em>make
-install-exec</em></span> to limit copying to the executables.</p></div></div><div class="section" title="4.4. Configure options"><div class="titlepage"><div><div><h3 class="title"><a id="_configure_options"></a>4.4. Configure options</h3></div></div></div><p>Run <code class="literal">./configure --help</code> to see all <span class="emphasis"><em>configure</em></span> options. These
+install-exec</em></span> to limit copying to the executables. Note that
+the alternate install always just copies the executables.</p><p><span class="strong"><strong>Version 7.60 changes to game_data.am</strong></span></p><p>With the game resource additions of 7.60, the <span class="emphasis"><em>game_data.am</em></span> list exceeded
+the command line length limit. After much agonizing and lamenting,
+a solution was found. The list is subdivided by the subdirectories of
+<span class="emphasis"><em>data1/</em></span>. This works ok for the <span class="emphasis"><em>install</em></span> procedure. Unfortunately,
+it does not work for the distribution creation procedure. For that,
+a copy procedure is added to <span class="emphasis"><em>dist-hook</em></span> in <span class="emphasis"><em>Makefile.am</em></span>.</p><p><span class="strong"><strong>Is this a PITA, or what?</strong></span></p><p>Yes, it is. It would be nice not to have to reconfigure when game assets
+are added or deleted. The way to do this is to implement a custom
+<span class="emphasis"><em>install</em></span> procedure that uses the game data file list to copy files
+when installing and deleting files when uninstalling. The game data file
+list would also be used for distribution creation. The method in version
+7.60 is crude; there is probably a faster way.  (However, speed is not
+important for tarball generation.)</p><p><span class="strong"><strong>Another issue</strong></span></p><p>We should support separate source and data tarballs.  This would
+make us more popular with distro packagers. I think they have to do this
+split because the source and data are under different licenses.</p></div><div class="section" title="4.5. Adding new source files"><div class="titlepage"><div><div><h3 class="title"><a id="_adding_new_source_files"></a>4.5. Adding new source files</h3></div></div></div><p>New source files are added to the <span class="emphasis"><em>source/Makefile.am</em></span> file. Add the
+new source to the applicable <span class="emphasis"><em>*_SOURCE</em></span> lists. Header (<span class="emphasis"><em>.h</em></span>) files must
+be included, because the list is used to generate the tarball.</p></div><div class="section" title="4.6. Maintainer’s Reconfigure"><div class="titlepage"><div><div><h3 class="title"><a id="_maintainer_8217_s_reconfigure"></a>4.6. Maintainer’s Reconfigure</h3></div></div></div><p>TODO</p></div><div class="section" title="4.7. Adding a system library to the build"><div class="titlepage"><div><div><h3 class="title"><a id="_adding_a_system_library_to_the_build"></a>4.7. Adding a system library to the build</h3></div></div></div><p>For common system libraries, there will usually be an .m4 macro available.
+These may be part of autoconf (AC_*), or they may be extensions from
+the GNU Autoconf Archive (AX_*).</p><p>After adding new AX_ macros to configure.ac, the .m4 file needs to be added to
+the m4 subdirectory. This is done with the following command.</p><p><code class="literal">aclocal -I m4 --force --install</code></p></div><div class="section" title="4.8. Configure options"><div class="titlepage"><div><div><h3 class="title"><a id="_configure_options"></a>4.8. Configure options</h3></div></div></div><p>Run <code class="literal">./configure --help</code> to see all <span class="emphasis"><em>configure</em></span> options. These
 are <span class="emphasis"><em>configure</em></span> options added for Alien Arena.</p><div class="variablelist"><dl><dt><span class="term">
 --disable-client
 </span></dt><dd>
@@ -333,13 +355,13 @@ are <span class="emphasis"><em>configure</em></span> options added for Alien Are
 </dd><dt><span class="term">
 --with(out)-xf86dga
 </span></dt><dd>
-  include XF86 DGA support (default: check)
+  include XF86 DGA support (default: without)
+  Note: default is changed from <span class="emphasis"><em>check</em></span> in version 7.60
   Note: DGA appears to only used for mouse pointer input and
-  does not appear to be required. It is disabled when
-  Xxf86dga is not installed, <span class="emphasis"><em>without_xf86dga</em></span> is specified,
-  or when the cvar, <span class="emphasis"><em>in_dgamouse</em></span>, is set to 0.
+  is optional. It is disabled by default, or when the cvar,
+  <span class="emphasis"><em>in_dgamouse</em></span>, is set to 0.
   Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
-</dd></dl></div></div><div class="section" title="4.5. GCC Compiler Options"><div class="titlepage"><div><div><h3 class="title"><a id="_gcc_compiler_options"></a>4.5. GCC Compiler Options</h3></div></div></div><p>Linux distro’s use a variety of different gcc compile
+</dd></dl></div></div><div class="section" title="4.9. GCC Compiler Options"><div class="titlepage"><div><div><h3 class="title"><a id="_gcc_compiler_options"></a>4.9. GCC Compiler Options</h3></div></div></div><p>Linux distro’s use a variety of different gcc compile
 options. These can give more error warnings; and in rare cases
 program errors.</p><p>Also for users who compile from source, there are CPU
 dependendent options that might give better performance. Might
@@ -352,18 +374,20 @@ Wextra
   and signed/unsigned comparisons. With just -Wall, a few unused variable
   warnings are produced, which are easily fixed. Some bogus uninitialized
   warnings are produced; it is possible, but annoying, to eliminate these.
+  Use the <span class="emphasis"><em>--enable-full-warnings</em></span> <span class="emphasis"><em>configure</em></span> option to turn these on.
 </dd><dt><span class="term">
 O2
 , </span><span class="term">
 O3
 </span></dt><dd>
-  O3 produces different warning messages.
+  Optimization levels. O3 produces different warning messages, so should
+  be tested before releases.
 </dd><dt><span class="term">
 m32
 , </span><span class="term">
 m64
 </span></dt><dd>
-  TBD.
+  Specify 32bit or 64bit build. Only needed when cross-compiling.
 </dd><dt><span class="term">
 march
 , </span><span class="term">
@@ -371,11 +395,13 @@ mtune
 </span></dt><dd>
   Set for specific architectures. Might give better performance
   than generic builds. For instance, <code class="literal">-march=core2</code> enables
-  higher performance features.
+  higher performance features. Use <code class="literal">-mtune=generic</code> when building
+  release binaries; for Desura, for instance.
 </dd><dt><span class="term">
 mfpmath
 </span></dt><dd>
-  Testing shows that <code class="literal">-mfpmath=sse</code> gives better performance.
+  Testing shows that <code class="literal">-mfpmath=sse</code> gives better performance when
+  compiling with GNU gcc.
 </dd><dt><span class="term">
 Wp
 </span></dt><dd>
@@ -400,19 +426,27 @@ param
 fasynchronous-unwind-tables
 </span></dt><dd>
   From fedora. TBD.
-</dd></dl></div></div><div class="section" title="4.6. Generating an Archive Package for Distribution"><div class="titlepage"><div><div><h3 class="title"><a id="_generating_an_archive_package_for_distribution"></a>4.6. Generating an Archive Package for Distribution</h3></div></div></div><div class="section" title="4.6.1. Verify Autotools Versions"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_autotools_versions"></a>4.6.1. Verify Autotools Versions</h4></div></div></div><p>Verify that your versions of <span class="emphasis"><em>autoconf</em></span>, <span class="emphasis"><em>automake</em></span>, and
-<span class="emphasis"><em>autoconf-archive</em></span> are current.</p><p>The 7.50 release uses <span class="emphasis"><em>autoconf 2.65</em></span>, <span class="emphasis"><em>automake 1.11</em></span> and
-<span class="emphasis"><em>autoconf-archive 2010.07.06</em></span></p></div><div class="section" title="4.6.2. Verify Alien Arena Version"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_alien_arena_version"></a>4.6.2. Verify Alien Arena Version</h4></div></div></div><p>Verify that the version in <span class="emphasis"><em>configure.ac</em></span> is correct.</p></div><div class="section" title="4.6.3. Export from Subversion Repository"><div class="titlepage"><div><div><h4 class="title"><a id="_export_from_subversion_repository"></a>4.6.3. Export from Subversion Repository</h4></div></div></div><p>Export from the SVN trunk to a directory for the distribution
+</dd></dl></div></div><div class="section" title="4.10. Generating an Archive Package for Distribution"><div class="titlepage"><div><div><h3 class="title"><a id="_generating_an_archive_package_for_distribution"></a>4.10. Generating an Archive Package for Distribution</h3></div></div></div><div class="section" title="Verify Autotools Versions"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_autotools_versions"></a>Verify Autotools Versions</h4></div></div></div><p>Verify that your versions of <span class="emphasis"><em>autoconf</em></span>, <span class="emphasis"><em>automake</em></span>, and
+<span class="emphasis"><em>autoconf-archive</em></span> are current.</p><p>The 7.60 release uses <span class="emphasis"><em>autoconf 2.68</em></span> and <span class="emphasis"><em>automake 1.11</em></span>. If more than
+one dev is committing autotool related changes to SVN, it will be less
+confusing if all are using the same versions.</p><p>The <span class="emphasis"><em>autoconf-archive</em></span> is an evolving set of macros maintained
+on the GNU website. (On gentoo it is installed in <span class="emphasis"><em>/usr/share/aclocal</em></span>).
+We use a few of these. Each file has a <span class="emphasis"><em>serial</em></span> number in a comment. Care
+should be take not to commit an earlier version of a <span class="emphasis"><em>.m4</em></span> into the SVN <span class="emphasis"><em>m4</em></span>
+subdirectory. Also, if a file we use is updated in the archive, update it
+in the repository and do a complete reconfigure. Changes will appear in
+the generated <span class="emphasis"><em>aclocal.m4</em></span> file. See below for commands to update the
+macro files.</p></div><div class="section" title="Verify Alien Arena Version"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_alien_arena_version"></a>Verify Alien Arena Version</h4></div></div></div><p>Verify that the version in <span class="emphasis"><em>configure.ac</em></span> is correct.</p></div><div class="section" title="Export from Subversion Repository"><div class="titlepage"><div><div><h4 class="title"><a id="_export_from_subversion_repository"></a>Export from Subversion Repository</h4></div></div></div><p>Export from the SVN trunk to a directory for the distribution
 build.</p><p>Verify that the files in <span class="emphasis"><em>config/</em></span> and <span class="emphasis"><em>m4/</em></span> subdirectories
 are current.  One way to do this is to rename the <span class="emphasis"><em>config/</em></span>
 and <span class="emphasis"><em>m4/</em></span> directories and then run:</p><p><code class="literal">aclocal --force --install -I m4</code></p><p><code class="literal">autoreconf --force --install</code></p><p>Compare the files in the new <span class="emphasis"><em>config/</em></span> and <span class="emphasis"><em>m4/</em></span> with the
 previous ones.  If they match, proceed. If not, then the files
 in SVN need to be updated.  The cleanest thing to do would be
-to update SVN and do a new export.</p></div><div class="section" title="4.6.4. Generate the Distribution Archive"><div class="titlepage"><div><div><h4 class="title"><a id="_generate_the_distribution_archive"></a>4.6.4. Generate the Distribution Archive</h4></div></div></div><p>Run this command to build and verify the distribution package:</p><p><code class="literal">make distcheck</code></p><p>If this succeeds, the alienarena-7.50.tar.gz has been created.</p></div><div class="section" title="4.6.5. Test the Distribution Package"><div class="titlepage"><div><div><h4 class="title"><a id="_test_the_distribution_package"></a>4.6.5. Test the Distribution Package</h4></div></div></div><p>In a test directory, extract the distribution archive.
+to update SVN and do a new export.</p></div><div class="section" title="Generate the Distribution Archive"><div class="titlepage"><div><div><h4 class="title"><a id="_generate_the_distribution_archive"></a>Generate the Distribution Archive</h4></div></div></div><p>Run this command to build and verify the distribution package:</p><p><code class="literal">make distcheck</code></p><p>If this succeeds, the alienarena-&lt;version&gt;.tar.gz has been created.</p></div><div class="section" title="Test the Distribution Package"><div class="titlepage"><div><div><h4 class="title"><a id="_test_the_distribution_package"></a>Test the Distribution Package</h4></div></div></div><p>In a test directory, extract the distribution archive.
 Run the configure, make, make install sequence.  Use the
 --prefix configure option to install into a test directory.</p><p>To test the dedicated server only build, create a subdirectory
 and build with an alternative test directory.  In the
-subdirectory, <span class="emphasis"><em>configure</em></span> is invoked with <span class="emphasis"><em>../configure</em></span>.</p><p>For completeness, the alternate install should also be tested.</p></div><div class="section" title="4.6.6. Example"><div class="titlepage"><div><div><h4 class="title"><a id="_example"></a>4.6.6. Example</h4></div></div></div><p>An example of distribution package generation:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+subdirectory, <span class="emphasis"><em>configure</em></span> is invoked with <span class="emphasis"><em>../configure</em></span>.</p><p>For completeness, the alternate install should also be tested.</p></div><div class="section" title="Example"><div class="titlepage"><div><div><h4 class="title"><a id="_example"></a>Example</h4></div></div></div><p>An example of distribution package generation:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
 With a development directory in <span class="emphasis"><em>$HOME/alienarena.</em></span>
 </li><li class="listitem">
 Using standard install into <span class="emphasis"><em>/usr/local</em></span>.
@@ -433,7 +467,7 @@ $ ./configure
 $ make
 $ sudo make install
 $ cd ~
-$ crx</pre></div><div class="section" title="4.6.7. BASH script for distribution tarball generation"><div class="titlepage"><div><div><h4 class="title"><a id="_bash_script_for_distribution_tarball_generation"></a>4.6.7. BASH script for distribution tarball generation</h4></div></div></div><p>This script uses several SVN <span class="emphasis"><em>export</em></span> commands to retrieve the
+$ alienarena</pre></div><div class="section" title="BASH script for distribution tarball generation"><div class="titlepage"><div><div><h4 class="title"><a id="_bash_script_for_distribution_tarball_generation"></a>BASH script for distribution tarball generation</h4></div></div></div><p>This script uses several SVN <span class="emphasis"><em>export</em></span> commands to retrieve the
 subset of files needed for the release tarball. It then invokes
 <span class="emphasis"><em>make dist-check</em></span> to build the tarball. Run the script in a
 RELEASE directory.</p><p>The following commands generate the checksums and then run a <span class="emphasis"><em>diff</em></span> to check
@@ -488,7 +522,7 @@ svn export --ignore-externals \
 # --- tarball construction ---
 cd alienarena
 ./configure --enable-maintainer-mode
- make distcheck</pre></div></div><div class="section" title="4.7. config.h"><div class="titlepage"><div><div><h3 class="title"><a id="_config_h"></a>4.7. config.h</h3></div></div></div><p>The config.h file is auto-generated for configurable builds
+ make distcheck</pre></div></div><div class="section" title="4.11. config.h"><div class="titlepage"><div><div><h3 class="title"><a id="_config_h"></a>4.11. config.h</h3></div></div></div><p>The config.h file is auto-generated for configurable builds
 (e.g Linux).  It is manually edited for non-configurable builds
 (e.g. Windows). The <span class="emphasis"><em>configure.ac</em></span> file does generate Windows
 related definitions in <span class="emphasis"><em>config.h</em></span> so it can be used as a
@@ -497,11 +531,11 @@ symbols (and some others related to targets) are defined:
 <span class="emphasis"><em>WIN32_VARIANT</em></span> and <span class="emphasis"><em>UNIX_VARIANT</em></span>.  This should make it easier
 to keep system dependent variations organized. It is a good
 idea, of course, to minimize system dependent conditional
-compilation in the common code.</p></div><div class="section" title="4.8. Open Dynamics Engine (ODE) Integration"><div class="titlepage"><div><div><h3 class="title"><a id="_open_dynamics_engine_ode_integration"></a>4.8. Open Dynamics Engine (ODE) Integration</h3></div></div></div><p>A static library, <span class="emphasis"><em>libode.a</em></span>, is built and linked with the main
-program, <span class="emphasis"><em>crx</em></span>. Only files that are used in the library build
+compilation in the common code.</p></div><div class="section" title="4.12. Open Dynamics Engine (ODE) Integration"><div class="titlepage"><div><div><h3 class="title"><a id="_open_dynamics_engine_ode_integration"></a>4.12. Open Dynamics Engine (ODE) Integration</h3></div></div></div><p>A static library, <span class="emphasis"><em>libode.a</em></span>, is built and linked with the main
+program, <span class="emphasis"><em>alienarena</em></span>. Only files that are used in the library build
 are included in the source tree in SVN and in the distribution.
 There is only one <span class="emphasis"><em>config.h</em></span> and it includes what is needed
-for building <span class="emphasis"><em>libode.a</em></span>.</p></div><div class="section" title="4.9. Reading List for Autotools"><div class="titlepage"><div><div><h3 class="title"><a id="_reading_list_for_autotools"></a>4.9. Reading List for Autotools</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+for building <span class="emphasis"><em>libode.a</em></span>.</p><p>TODO: 7.60 note on ODE 0.12</p></div><div class="section" title="4.13. Reading List for Autotools"><div class="titlepage"><div><div><h3 class="title"><a id="_reading_list_for_autotools"></a>4.13. Reading List for Autotools</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
 John Calcote.
   <span class="emphasis"><em>Autotools: A Practitioner’s Guild to GNU Autoconf, Automake, and LibTool.</em></span>
 </li><li class="listitem">
@@ -552,4 +586,4 @@ the <span class="emphasis"><em>dev-makefile</em></span> file.</p><p>It is simple
 is not necessary. It takes some trickiness setting up <span class="emphasis"><em>vpaths</em></span>
 and customizing <span class="emphasis"><em>-I</em></span> options, but it is possible to do an
 alternate build with a small subset of sources in an alternate
-source subdirectory.  Good for experimenting with optimizations.</p></div></div></body></html>
+source subdirectory.  Good for experimenting with optimizations.</p></div><div class="section" title="8. Static Analysis"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_static_analysis"></a>8. Static Analysis</h2></div></div></div><p>TODO:</p></div><div class="section" title="9. Phoronix Test Suite"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_phoronix_test_suite"></a>9. Phoronix Test Suite</h2></div></div></div><p>TODO:</p></div><div class="section" title="10. Desura"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_desura"></a>10. Desura</h2></div></div></div><p>TODO:</p></div></div></body></html>
