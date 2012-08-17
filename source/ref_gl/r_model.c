@@ -1015,6 +1015,7 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i;
+	float 	temp_tangentSpaceTransform[3][3];
 
 	for (; p; p = p->chain)
 	{
@@ -1054,9 +1055,9 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 
 		VectorNormalize( normal ); //we have the largest normal
 
-		surf->tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
-		surf->tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
-		surf->tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
+		temp_tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
+		temp_tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
+		temp_tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
 
 		//now get the tangent
 		s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
@@ -1071,9 +1072,9 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 		VectorScale( temp3, s, tangent );
 		VectorNormalize( tangent );
 
-		surf->tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
-		surf->tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
-		surf->tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
+		temp_tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
+		temp_tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
+		temp_tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
 
 		//now get the binormal
 		VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
@@ -1082,9 +1083,32 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 		VectorScale( temp3, s, binormal );
 		VectorNormalize( binormal );
 
-		surf->tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
-		surf->tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
-		surf->tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
+		temp_tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
+		temp_tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
+		temp_tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
+		
+		//Try to find this tangentSpaceTransform in the existing array or else
+		//add it. This is not a RAM-saving measure, it's to allow comparison 
+		//of different tangentSpaceTransforms using the == operator, which is
+		//more efficient.
+		{
+			float *tst;
+			int i;
+			int j;
+			for (tst = loadmodel->tangentSpaceTransforms, i = 0; i < loadmodel->numTangentSpaceTransforms; i++, tst += 9)
+			{
+				if (!memcmp (tst, temp_tangentSpaceTransform, 9*sizeof(float)))
+					break;
+			}
+			surf->tangentSpaceTransform = tst;
+			if (i == loadmodel->numTangentSpaceTransforms)
+			{
+				for (i = 0; i < 3; i++)
+					for (j = 0; j < 3; j++)
+						*(tst++) = temp_tangentSpaceTransform[i][j];
+				loadmodel->numTangentSpaceTransforms++;
+			}
+		}
 	}
 }
 
@@ -1250,6 +1274,9 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 
 	loadmodel->surfaces = out;
 	loadmodel->numsurfaces = count;
+	
+	//we are guaranteed not to need more than this
+	loadmodel->tangentSpaceTransforms = Hunk_Alloc (sizeof(float)*9*count);
 
 	currentmodel = loadmodel;
 	

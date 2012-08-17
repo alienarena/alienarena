@@ -544,6 +544,7 @@ int 		r_currTex = -9999; //only bind a texture if it is not the same as previous
 int 		r_currLMTex = -9999;
 mtexinfo_t	*r_currTexInfo = NULL;
 qboolean	r_vboOn = false;
+float		*r_currTangentSpaceTransform;
 static void BSP_RenderLightmappedPoly( msurface_t *surf )
 {
 	float	scroll;
@@ -552,7 +553,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	glpoly_t *p = surf->polys;
 
 	c_brush_polys++;
-
+	
 	if (SurfaceIsAlphaBlended(surf))
 		qglEnable( GL_ALPHA_TEST );
 
@@ -570,8 +571,14 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 		qglBindTexture(GL_TEXTURE_2D, image->texnum );
 	}
 	
-	qglActiveTextureARB(GL_TEXTURE1);
-	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );
+	
+	if (lmtex != r_currLMTex || !gl_glsl_shaders->integer || !gl_state.glsl_shaders) 
+	{
+		//FIXME why does this optimization go pear shaped when enabled without
+		//GLSL?
+		qglActiveTextureARB(GL_TEXTURE1);
+		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );
+	}
 
 	if(surf->texinfo->has_normalmap) 
 	{
@@ -584,24 +591,13 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	{
 		if (!r_vboOn)
 		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+			GL_SetupWorldVBO ();
 			r_vboOn = true;
 		}
 
-		qglEnableClientState( GL_VERTEX_ARRAY );
-		qglVertexPointer(3, GL_FLOAT, 0, (void *)surf->vbo_pos);
-
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);	
-		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size));
-
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);	
-		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size + surf->st_size));
-
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 				
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		qglDrawArrays (GL_POLYGON, surf->vbo_first_vert, p->numverts);
 	}
 	else
 	{
@@ -694,28 +690,29 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 		KillFlags |= KILL_TMU3_POINTER;
 	}
 
-	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+	if (r_currTangentSpaceTransform != surf->tangentSpaceTransform)
+	{
+		glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
+	}
 	
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
 		if (!r_vboOn)
 		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+			GL_SetupWorldVBO ();
 			r_vboOn = true;
 		}
 
-		qglVertexPointer(3, GL_FLOAT, 0, (void *)surf->vbo_pos);
-
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size));
-
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size + surf->st_size));
-
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		qglDrawArrays (GL_POLYGON, surf->vbo_first_vert, p->numverts);
 	}
 	else
 	{
+		if (r_vboOn)
+		{
+			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+			r_vboOn = false;
+		}
 		R_InitVArrays (VERT_MULTI_TEXTURED);
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
@@ -810,25 +807,21 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 		KillFlags |= KILL_TMU3_POINTER;	
 	}
 	
-	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+	if (r_currTangentSpaceTransform != surf->tangentSpaceTransform)
+	{
+		glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
+	}
 	
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
 		if (!r_vboOn)
 		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+			GL_SetupWorldVBO ();
 			r_vboOn = true;
 		}
 
-		qglVertexPointer(3, GL_FLOAT, 0, (void *)surf->vbo_pos);
-
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size));
-
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size + surf->st_size));
-
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		qglDrawArrays (GL_POLYGON, surf->vbo_first_vert, p->numverts);
 	}
 	else
 	{
@@ -848,6 +841,7 @@ void BSP_DrawGLSLSurfaces (void)
 
 	r_currTex = r_currLMTex = -99999;
 	r_currTexInfo = NULL;
+	r_currTangentSpaceTransform = NULL;
 
 	glUseProgramObjectARB( g_programObj );
 	
@@ -951,6 +945,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 		r_currTex = r_currLMTex = -99999;		
 		r_currTexInfo = NULL;
+		r_currTangentSpaceTransform = NULL;
 
 		glUniform3fARB( g_location_lightPosition, dynLight->origin[0], dynLight->origin[1], dynLight->origin[2]);
 		glUniform3fARB( g_location_lightColour, dynLight->color[0], dynLight->color[1], dynLight->color[2]);
@@ -1162,6 +1157,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	{
 		BSP_RenderLightmappedPoly(surf);
 		r_currTex = surf->texinfo->image->texnum;
+		r_currLMTex = surf->lightmaptexturenum;
 	}
 }
 
@@ -1636,7 +1632,14 @@ void R_DrawWorld (void)
 	r_currTex = r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	r_vboOn = false;
-
+	
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	qglClientActiveTextureARB (GL_TEXTURE1);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+	
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 	
 	r_vboOn = false;

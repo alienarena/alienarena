@@ -26,8 +26,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 GLuint vboId = 0;
-int	vboPosition;
 int	totalVBObufferSize;
+int currVertexNum;
+size_t	vbo_xyz_base, vbo_xyz_pos, 
+		vbo_st_base, vbo_st_pos, 
+		vbo_lm_base, vbo_lm_pos;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -72,6 +75,9 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	float map[MAX_VBO_XYZs];
 	float map2[MAX_VBO_XYZs];
 	float map3[MAX_VBO_XYZs];
+	int		xyz_size, st_size, lm_size;
+	
+	GLenum err;
 
 	if (gl_state.vbo)
 	{
@@ -91,25 +97,37 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 			map3[m++] = v[6];
 		}
 
-		surf->vbo_pos = vboPosition;
-
-		surf->xyz_size = n*sizeof(float);
-		surf->st_size = l*sizeof(float);
-		surf->lm_size = m*sizeof(float);
+		xyz_size = n*sizeof(float);
+		st_size = l*sizeof(float);
+		lm_size = m*sizeof(float);
 
 		surf->has_vbo = true;
+		surf->vbo_first_vert  = currVertexNum;
 		
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition, surf->xyz_size, &map);                             
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size, surf->st_size, &map2);                
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size + surf->st_size, surf->lm_size, &map3);  
+		currVertexNum += p->numverts;
+		
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_lm_pos, lm_size, &map3);  
 
-		vboPosition += (surf->xyz_size + surf->st_size + surf->lm_size);
+		vbo_xyz_pos += xyz_size;
+		vbo_st_pos += st_size;
+		vbo_lm_pos += lm_size;
+		
+		err = qglGetError();
+		if (err != GL_NO_ERROR)
+			Com_Printf ("ERR %d\n");
 	}
 }
 
 void VB_BuildWorldVBO(void)
 {
 	msurface_t *surf;
+	int num_vertexes = totalVBObufferSize/7;
+	currVertexNum = 0;
+	vbo_xyz_base = vbo_xyz_pos = 0;
+	vbo_st_base = vbo_st_pos = num_vertexes*3*sizeof(float);
+	vbo_lm_base = vbo_lm_pos = num_vertexes*5*sizeof(float);
 
 	qglGenBuffersARB(1, &vboId);
 		
@@ -142,6 +160,18 @@ void VB_BuildVBOBufferSize(msurface_t *surf)
 	{
 		totalVBObufferSize += 7*p->numverts;
 	}
+}
+
+void GL_SetupWorldVBO (void)
+{
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+	qglVertexPointer(3, GL_FLOAT, 0, (void *)vbo_xyz_base);
+	
+	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglTexCoordPointer(2, GL_FLOAT, 0, (void *)vbo_st_base);
+	
+	qglClientActiveTextureARB (GL_TEXTURE1);
+	qglTexCoordPointer(2, GL_FLOAT, 0, (void *)vbo_lm_base);
 }
 
 void GL_BindVBO(vertCache_t *cache)
@@ -320,7 +350,6 @@ void VB_VCInit()
 			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
 	}
 
-	vboPosition = 0;
 	totalVBObufferSize = 0;	
 
 	memset(&vcm, 0, sizeof(vcm));
