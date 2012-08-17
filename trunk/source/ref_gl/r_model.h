@@ -260,17 +260,14 @@ typedef struct msurface_s
 
 	entity_t	*entity;
 
-	float	tangentSpaceTransform[3][3];
+	float		*tangentSpaceTransform;
 
 	vec3_t mins;
 	vec3_t maxs;
 
 	//vbo
-	size_t vbo_pos;
-	int	xyz_size;
-	int st_size;
-	int lm_size;
 	int has_vbo;
+	int vbo_first_vert;
 
 } msurface_t;
 
@@ -379,6 +376,9 @@ typedef struct model_s
 
 	int			numsurfaces;
 	msurface_t	*surfaces;
+	
+	int			numTangentSpaceTransforms;
+	float		*tangentSpaceTransforms;
 
 	int			numsurfedges;
 	int			*surfedges;
