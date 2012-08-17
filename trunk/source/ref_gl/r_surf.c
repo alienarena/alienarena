@@ -646,15 +646,19 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 	
 		if(surf->texinfo->image->texnum != r_currTex) 
 		{
-			glUniform1iARB( g_location_surfTexture, 0);
+			if (!r_currTexInfo)
+			{
+				glUniform1iARB( g_location_surfTexture, 0);
+				glUniform1iARB( g_location_heightTexture, 1);
+				glUniform1iARB( g_location_normalTexture, 2);
+			}
+				
 			qglActiveTextureARB(GL_TEXTURE0);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
 			
-			glUniform1iARB( g_location_heightTexture, 1);
 			qglActiveTextureARB(GL_TEXTURE1);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
 		
-			glUniform1iARB( g_location_normalTexture, 2);
 			qglActiveTextureARB(GL_TEXTURE2);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU2_POINTER;
@@ -761,23 +765,31 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 		}
 
 		if(gl_normalmaps->integer && surf->texinfo->has_heightmap) 
-			glUniform1iARB( g_location_parallax, 1);
+		{
+			if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
+				glUniform1iARB( g_location_parallax, 1);
+		}
 		else
 		{
-			glUniform1iARB( g_location_parallax, 0);
+			if (!r_currTexInfo || r_currTexInfo->has_heightmap);
+				glUniform1iARB( g_location_parallax, 0);
 		}
 		
 		if(surf->texinfo->image->texnum != r_currTex) 
 		{
-			glUniform1iARB( g_location_surfTexture, 0);
+			if (!r_currTexInfo)
+			{
+				glUniform1iARB( g_location_surfTexture, 0);
+				glUniform1iARB( g_location_heightTexture, 1);
+				glUniform1iARB( g_location_normalTexture, 2);
+			}
+				
 			qglActiveTextureARB(GL_TEXTURE0);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
 			
-			glUniform1iARB( g_location_heightTexture, 1);
 			qglActiveTextureARB(GL_TEXTURE1);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
 		
-			glUniform1iARB( g_location_normalTexture, 2);
 			qglActiveTextureARB(GL_TEXTURE2);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU2_POINTER;
