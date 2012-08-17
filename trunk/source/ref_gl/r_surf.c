@@ -626,9 +626,15 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 	{
 	
 		if (SurfaceIsAlphaBlended(surf))
-			qglEnable( GL_ALPHA_TEST );
+		{
+			if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
+				qglEnable( GL_ALPHA_TEST );
+		}
 		else
-			qglDisable( GL_ALPHA_TEST );
+		{
+			if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
+				qglDisable( GL_ALPHA_TEST );
+		}
 
 		scroll = 0;
 		if (surf->texinfo->flags & SURF_FLOWING)
@@ -678,7 +684,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 			qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
 			KillFlags |= KILL_TMU4_POINTER;
 		}
-		else
+		else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER))
 			glUniform1iARB( g_location_liquid, 0 );
 	}
 	
@@ -736,10 +742,16 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 	if(surf->texinfo != r_currTexInfo) 
 	{
 		if (SurfaceIsAlphaBlended(surf))
-			qglEnable( GL_ALPHA_TEST );
+		{
+			if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
+				qglEnable( GL_ALPHA_TEST );
+		}
 		else
-			qglDisable( GL_ALPHA_TEST );
-
+		{
+			if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
+				qglDisable( GL_ALPHA_TEST );
+		}
+		
 		scroll = 0;
 		if (surf->texinfo->flags & SURF_FLOWING)
 		{
@@ -795,7 +807,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
 			KillFlags |= KILL_TMU4_POINTER;
 		}
-		else
+		else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER))
 			glUniform1iARB( g_location_liquid, 0 );
 	}
 
