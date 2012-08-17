@@ -1097,7 +1097,21 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 			int j;
 			for (tst = loadmodel->tangentSpaceTransforms, i = 0; i < loadmodel->numTangentSpaceTransforms; i++, tst += 9)
 			{
-				if (!memcmp (tst, temp_tangentSpaceTransform, 9*sizeof(float)))
+				qboolean match = true;
+				for (j = 0; j < 9; j++)
+				{
+					// If we reduce our precision to just 4 decimal places,
+					// we can cut the number of transforms by a factor of more
+					// than 5. Single-precision floating point is precise to
+					// just 6 places anyway, so we're not loosing too much.
+					// Subjectively, it still looks fine.
+					if (fabs (tst[j]-temp_tangentSpaceTransform[j/3][j%3]) > 0.0001)
+					{
+						match = false;
+						break;
+					}
+				}
+				if (match)
 					break;
 			}
 			surf->tangentSpaceTransform = tst;
