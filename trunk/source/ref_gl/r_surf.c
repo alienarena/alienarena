@@ -849,6 +849,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 
 	if(surf->texinfo != r_currTexInfo) 
 	{
+		BSP_FlushVBOAccum ();
 		if (SurfaceIsAlphaBlended(surf))
 		{
 			if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
@@ -929,6 +930,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 
 	if (lmtex != r_currLMTex)
 	{
+		BSP_FlushVBOAccum ();
 		glUniform1iARB( g_location_lmTexture, 3);
 		qglActiveTextureARB(GL_TEXTURE3);
 		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
@@ -937,22 +939,18 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 	
 	if (r_currTangentSpaceTransform != surf->tangentSpaceTransform)
 	{
+		BSP_FlushVBOAccum ();
 		glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
 	}
 	
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
-		if (!r_vboOn)
-		{
-			GL_SetupWorldVBO ();
-			r_vboOn = true;
-		}
-
-		qglDrawArrays (GL_TRIANGLES, surf->vbo_first_vert, surf->vbo_num_verts);
+		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
 	else
 	{
+		BSP_FlushVBOAccum ();
 		if (r_vboOn)
 		{
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
@@ -1170,6 +1168,8 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		}
 		currentmodel->texinfo[i].glsl_dynamic_surfaces = NULL;
 	}
+	
+	BSP_FlushVBOAccum ();
 	
 	if (gl_state.vbo)
 	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
