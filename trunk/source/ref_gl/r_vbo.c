@@ -72,17 +72,18 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	float	*v;
 	int		i;
 	int		l, m, n;
+	int		trinum;
 	float map[MAX_VBO_XYZs];
 	float map2[MAX_VBO_XYZs];
 	float map3[MAX_VBO_XYZs];
 	int		xyz_size, st_size, lm_size;
 	
-	GLenum err;
-
 	if (gl_state.vbo)
 	{
-		for (v = p->verts[0], i = 0, l = 0, m = 0, n = 0; i < p->numverts; i++, v += VERTEXSIZE)
+		for (trinum = 1, l = 0, m = 0, n = 0; trinum < p->numverts-1; trinum++)
 		{
+			v = p->verts[0];
+			
 			// copy in vertex data
 			map[n++] = v[0];
 			map[n++] = v[1];
@@ -95,6 +96,22 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 			// lightmap texture coords
 			map3[m++] = v[5];
 			map3[m++] = v[6];
+			
+			for (v = p->verts[trinum], i = 0; i < 2; i++, v += VERTEXSIZE)
+			{
+				// copy in vertex data
+				map[n++] = v[0];
+				map[n++] = v[1];
+				map[n++] = v[2];
+
+				// world texture coords
+				map2[l++] = v[3];
+				map2[l++] = v[4];
+
+				// lightmap texture coords
+				map3[m++] = v[5];
+				map3[m++] = v[6];
+			}
 		}
 
 		xyz_size = n*sizeof(float);
@@ -103,8 +120,9 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 
 		surf->has_vbo = true;
 		surf->vbo_first_vert  = currVertexNum;
+		surf->vbo_num_verts = 3*(p->numverts-2);
 		
-		currVertexNum += p->numverts;
+		currVertexNum += 3*(p->numverts-2);
 		
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
@@ -113,10 +131,6 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 		vbo_xyz_pos += xyz_size;
 		vbo_st_pos += st_size;
 		vbo_lm_pos += lm_size;
-		
-		err = qglGetError();
-		if (err != GL_NO_ERROR)
-			Com_Printf ("ERR %d\n");
 	}
 }
 
@@ -158,7 +172,7 @@ void VB_BuildVBOBufferSize(msurface_t *surf)
 
 	if (!( surf->flags & SURF_DRAWTURB ) )
 	{
-		totalVBObufferSize += 7*p->numverts;
+		totalVBObufferSize += 7*3*(p->numverts-2);
 	}
 }
 

@@ -66,6 +66,7 @@ int last_c_alias_polys, c_alias_polys;
 int c_flares;
 int c_grasses;
 int c_beams;
+extern int c_vbo_batches;
 extern int c_visible_lightmaps;
 extern int c_visible_textures;
 
@@ -1036,6 +1037,7 @@ void R_RenderView (refdef_t *fd)
 	c_flares = 0;
 	c_grasses = 0;
 	c_beams = 0;
+	c_vbo_batches = 0;
 
 	R_PushDlights ();
 

@@ -96,12 +96,14 @@ cvar_t *rspeed_epolys;
 cvar_t *rspeed_flares;
 cvar_t *rspeed_grasses;
 cvar_t *rspeed_beams;
+cvar_t *rspeed_vbobatches;
 
 extern int c_brush_polys;  /* "wpoly"   polygons from brushes */
 extern int c_alias_polys;  /* "epoly"   polygons from .md2 meshes */
 extern int c_flares;       /* "flares"  lens flares */
 extern int c_grasses;      /* "grasses" vegetation instances */
 extern int c_beams;        /* "beams"   light beams (?) */
+extern int c_vbo_batches;  /* "vbobatches" batched draw commands */
 
 /*
 ===============================================================================
@@ -487,6 +489,7 @@ void SCR_Init (void)
 	rspeed_flares   = Cvar_Get("rspeed_flares",  "0", 0);
 	rspeed_grasses  = Cvar_Get("rspeed_grasses", "0", 0);
 	rspeed_beams    = Cvar_Get("rspeed_beams",   "0", 0);
+	rspeed_vbobatches = Cvar_Get("rspeed_vbobatches", "0", 0);
 	
 	memset (perftests, 0, sizeof(perftests));
 
@@ -1944,6 +1947,7 @@ void SCR_showRSpeeds( void )
 	static perftest_t *test_flares   = NULL;
 	static perftest_t *test_grasses  = NULL;
 	static perftest_t *test_beams    = NULL;
+	static perftest_t *test_vbobatches = NULL;
 
 	show_rspeed_helper( rspeed_wpolys, test_wpoly,
 			"wpolys", "%5.0f wpolys", c_brush_polys );
@@ -1959,6 +1963,9 @@ void SCR_showRSpeeds( void )
 
 	show_rspeed_helper( rspeed_beams, test_beams,
 			"beams", "%5.0f beams", c_beams );
+	
+	show_rspeed_helper( rspeed_vbobatches, test_vbobatches,
+			"vbobatches", "%5.0f vbobatches", c_vbo_batches );
 
 }
 

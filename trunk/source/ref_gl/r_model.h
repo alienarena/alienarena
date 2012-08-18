@@ -207,7 +207,7 @@ typedef struct mtexinfo_s
 	struct		rscript_s	*script;
 	int			value;
 	
-	struct 		msurface_s	*glsl_surfaces, *glsl_dynamic_surfaces;
+	struct 		msurface_s	*glsl_surfaces, *glsl_dynamic_surfaces, *lightmap_surfaces;
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10
@@ -269,6 +269,7 @@ typedef struct msurface_s
 	//vbo
 	int has_vbo;
 	int vbo_first_vert;
+	int vbo_num_verts;
 
 } msurface_t;
 
