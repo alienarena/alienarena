@@ -226,44 +226,6 @@ void BSP_DrawTexturelessBrushModel (entity_t *e)
 
 
 /*
-** BSP_DrawTriangleOutlines
-*/
-void BSP_DrawTriangleOutlines (void)
-{
-	int			i, j;
-	glpoly_t	*p;
-
-	if (!gl_showtris->integer)
-		return;
-
-	qglDisable (GL_TEXTURE_2D);
-	qglDisable (GL_DEPTH_TEST);
-	qglColor4f (1,1,1,1);
-
-	for (i=0 ; i<MAX_LIGHTMAPS ; i++)
-	{
-		msurface_t *surf;
-
-		for ( surf = gl_lms.lightmap_surfaces[i]; surf != 0; surf = surf->lightmapchain )
-		{
-			p = surf->polys;
-			for (j=2 ; j<p->numverts ; j++ )
-			{
-				qglBegin (GL_LINE_STRIP);
-				qglVertex3fv (p->verts[0]);
-				qglVertex3fv (p->verts[j-1]);
-				qglVertex3fv (p->verts[j]);
-				qglVertex3fv (p->verts[0]);
-				qglEnd ();
-			}
-		}
-	}
-
-	qglEnable (GL_DEPTH_TEST);
-	qglEnable (GL_TEXTURE_2D);
-}
-
-/*
 ================
 BSP_RenderBrushPoly
 ================
@@ -534,17 +496,154 @@ void R_DrawRSSurfaces (void)
 }
 
 /*
+=========================================
+BSP Surface Rendering
+=========================================
+*/
+
+// State variables
+int 		r_currTex = -9999; //only bind a texture if it is not the same as previous surface
+int 		r_currLMTex = -9999; //lightmap texture
+mtexinfo_t	*r_currTexInfo = NULL; //texinfo struct
+qboolean	r_vboOn = false;
+float		*r_currTangentSpaceTransform;
+
+// VBO batching
+// This system allows contiguous sequences of polygons to be merged into 
+// batches, even if they are added out of order.
+
+// There is a linked list of these, but they are not dynamically allocated.
+// They are allocated from a static array. This prevents us wasting CPU with
+// lots of malloc/free calls.
+typedef struct vbobatch_s {
+	int					first_vert, last_vert;
+	struct vbobatch_s 	*next, *prev;
+} vbobatch_t;
+
+#define MAX_VBO_BATCHES 100	// 100 ought to be enough. If we run out, we can 
+							// always just draw some prematurely. Some space
+							// will be wasted, since we don't bother 
+							// "defragmenting" the array, but whatever.
+int num_vbo_batches; 
+vbobatch_t vbobatch_buffer[MAX_VBO_BATCHES];
+vbobatch_t *first_vbobatch;
+
+static inline void BSP_ClearVBOAccum (void)
+{
+	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
+	num_vbo_batches = 0;
+	first_vbobatch = NULL;
+}
+
+int c_vbo_batches;
+static inline void BSP_FlushVBOAccum (void)
+{
+	vbobatch_t *batch = first_vbobatch;
+	
+	if (!batch)
+		return;
+	
+	if (!r_vboOn)
+	{
+		GL_SetupWorldVBO ();
+		r_vboOn = true;
+	}
+	
+	for (; batch; batch = batch->next)
+	{
+		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
+		c_vbo_batches++;
+	}
+	
+	BSP_ClearVBOAccum ();
+}
+
+static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
+{
+	vbobatch_t *batch = first_vbobatch;
+	vbobatch_t *new;
+	
+	if (!batch)
+	{
+		batch = first_vbobatch = vbobatch_buffer;
+		batch->first_vert = first_vert;
+		batch->last_vert = last_vert;
+		num_vbo_batches++;
+		return;
+	}
+	
+	while (batch->next && batch->next->first_vert < first_vert)
+		batch = batch->next;
+	
+	if (batch->next && batch->next->first_vert == last_vert)
+		batch = batch->next;
+	
+	if (batch->last_vert == first_vert)
+	{
+		batch->last_vert = last_vert;
+		if (batch->next && batch->next->first_vert == last_vert)
+		{
+			batch->last_vert = batch->next->last_vert;
+			if (batch->next == &vbobatch_buffer[num_vbo_batches-1])
+				num_vbo_batches--;
+			batch->next = batch->next->next;
+		}
+	}
+	else if (batch->first_vert == last_vert)
+	{
+		batch->first_vert = first_vert;
+		if (batch->prev && batch->prev->last_vert == first_vert)
+		{
+			batch->first_vert = batch->prev->first_vert;
+			if (batch->prev == &vbobatch_buffer[num_vbo_batches-1])
+				num_vbo_batches--;
+			if (batch->prev->prev)
+				batch->prev->prev->next = batch;
+			else
+				first_vbobatch = batch;
+			batch->prev = batch->prev->prev;
+		}
+	}
+	else if (batch->last_vert < first_vert)
+	{
+		new = &vbobatch_buffer[num_vbo_batches++];
+		new->prev = batch;
+		new->next = batch->next;
+		if (new->next)
+			new->next->prev = new;
+		batch->next = new;
+		new->first_vert = first_vert;
+		new->last_vert = last_vert;
+	}
+	else if (batch->first_vert > last_vert)
+	{
+		new = &vbobatch_buffer[num_vbo_batches++];
+		new->next = batch;
+		new->prev = batch->prev;
+		if (new->prev)
+			new->prev->next = new;
+		else
+			first_vbobatch = new;
+		batch->prev = new;
+		new->first_vert = first_vert;
+		new->last_vert = last_vert;
+	}
+	
+	//running out of space
+	if (num_vbo_batches == MAX_VBO_BATCHES)
+	{
+/*		Com_Printf ("MUSTFLUSH\n");*/
+		BSP_FlushVBOAccum ();
+	}
+}
+
+/*
 ================
 BSP_RenderLightmappedPoly
 
 Main polygon rendering routine(all standard surfaces)
 ================
 */
-int 		r_currTex = -9999; //only bind a texture if it is not the same as previous surface
-int 		r_currLMTex = -9999;
-mtexinfo_t	*r_currTexInfo = NULL;
-qboolean	r_vboOn = false;
-float		*r_currTangentSpaceTransform;
 static void BSP_RenderLightmappedPoly( msurface_t *surf )
 {
 	float	scroll;
@@ -555,11 +654,26 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	c_brush_polys++;
 	
 	if (SurfaceIsAlphaBlended(surf))
-		qglEnable( GL_ALPHA_TEST );
+	{
+		if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
+		{
+			BSP_FlushVBOAccum ();
+			qglEnable( GL_ALPHA_TEST );
+		}
+	}
+	else
+	{
+		if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
+		{
+			BSP_FlushVBOAccum ();
+			qglDisable( GL_ALPHA_TEST );
+		}
+	}
 
 	scroll = 0;
 	if (surf->texinfo->flags & SURF_FLOWING)
 	{
+		BSP_FlushVBOAccum ();
 		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
 		if (scroll == 0.0)
 			scroll = -64.0;
@@ -567,15 +681,16 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 		
 	if(image->texnum != r_currTex)
 	{
+		BSP_FlushVBOAccum ();
 		qglActiveTextureARB(GL_TEXTURE0);
 		qglBindTexture(GL_TEXTURE_2D, image->texnum );
+		r_currTex = image->texnum;
 	}
 	
 	
-	if (lmtex != r_currLMTex || !gl_glsl_shaders->integer || !gl_state.glsl_shaders) 
+	if (lmtex != r_currLMTex)
 	{
-		//FIXME why does this optimization go pear shaped when enabled without
-		//GLSL?
+		BSP_FlushVBOAccum ();
 		qglActiveTextureARB(GL_TEXTURE1);
 		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );
 	}
@@ -589,18 +704,11 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
-		if (!r_vboOn)
-		{
-			GL_SetupWorldVBO ();
-			r_vboOn = true;
-		}
-
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-				
-		qglDrawArrays (GL_POLYGON, surf->vbo_first_vert, p->numverts);
+		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
 	else
 	{
+		BSP_FlushVBOAccum ();
 		if (r_vboOn)
 		{
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
@@ -610,8 +718,6 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
 	
-	if (SurfaceIsAlphaBlended(surf))
-		qglDisable( GL_ALPHA_TEST);
 }
 
 static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
@@ -621,10 +727,11 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 	glpoly_t *p = surf->polys;
 		
 	c_brush_polys++;
-
+	
 	if(surf->texinfo != r_currTexInfo) 
 	{
 	
+		BSP_FlushVBOAccum ();
 		if (SurfaceIsAlphaBlended(surf))
 		{
 			if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
@@ -694,6 +801,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 	
 	if (lmtex != r_currLMTex)
 	{
+		BSP_FlushVBOAccum ();
 		glUniform1iARB( g_location_lmTexture, 3);
 		qglActiveTextureARB(GL_TEXTURE3);
 		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
@@ -702,22 +810,18 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 
 	if (r_currTangentSpaceTransform != surf->tangentSpaceTransform)
 	{
+		BSP_FlushVBOAccum ();
 		glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
 	}
 	
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
-		if (!r_vboOn)
-		{
-			GL_SetupWorldVBO ();
-			r_vboOn = true;
-		}
-
-		qglDrawArrays (GL_POLYGON, surf->vbo_first_vert, p->numverts);
+		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
 	else
 	{
+		BSP_FlushVBOAccum ();
 		if (r_vboOn)
 		{
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
@@ -845,7 +949,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			r_vboOn = true;
 		}
 
-		qglDrawArrays (GL_POLYGON, surf->vbo_first_vert, p->numverts);
+		qglDrawArrays (GL_TRIANGLES, surf->vbo_first_vert, surf->vbo_num_verts);
 	}
 	else
 	{
@@ -859,6 +963,53 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 	}
 }
 
+void BSP_DrawNonGLSLSurfaces (void)
+{
+    int         i;
+
+	r_currTex = r_currLMTex = -99999;
+	r_currTexInfo = NULL;
+	r_currTangentSpaceTransform = NULL;
+	
+	BSP_FlushVBOAccum ();
+
+	r_vboOn = false;
+	
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	qglClientActiveTextureARB (GL_TEXTURE1);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+	
+	for (i = 0; i < currentmodel->numtexinfo; i++)
+    {
+    	msurface_t	*s = currentmodel->texinfo[i].lightmap_surfaces;
+    	if (!s)
+    		continue;
+		for (; s; s = s->lightmapchain) {
+			BSP_RenderLightmappedPoly(s);
+			r_currTex = s->texinfo->image->texnum;
+			r_currLMTex = s->lightmaptexturenum;
+			r_currTexInfo = s->texinfo;
+		}
+		currentmodel->texinfo[i].lightmap_surfaces = NULL;
+	}
+	
+	BSP_FlushVBOAccum ();
+	
+	qglActiveTextureARB(GL_TEXTURE1);
+	qglBindTexture(GL_TEXTURE_2D, 0 );
+
+    if (gl_state.vbo)
+	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	
+	qglDisable (GL_ALPHA_TEST);
+
+	glUseProgramObjectARB( 0 );
+
+}
+
 void BSP_DrawGLSLSurfaces (void)
 {
     int         i;
@@ -866,6 +1017,8 @@ void BSP_DrawGLSLSurfaces (void)
 	r_currTex = r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	r_currTangentSpaceTransform = NULL;
+	
+	BSP_ClearVBOAccum ();
 
 	glUseProgramObjectARB( g_programObj );
 	
@@ -914,6 +1067,8 @@ void BSP_DrawGLSLSurfaces (void)
 		}
 		currentmodel->texinfo[i].glsl_surfaces = NULL;
 	}
+	
+	BSP_FlushVBOAccum ();
 
     if (gl_state.vbo)
 	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
@@ -970,6 +1125,8 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		r_currTex = r_currLMTex = -99999;		
 		r_currTexInfo = NULL;
 		r_currTangentSpaceTransform = NULL;
+		
+		BSP_ClearVBOAccum ();
 
 		glUniform3fARB( g_location_lightPosition, dynLight->origin[0], dynLight->origin[1], dynLight->origin[2]);
 		glUniform3fARB( g_location_lightColour, dynLight->color[0], dynLight->color[1], dynLight->color[2]);
@@ -1179,9 +1336,8 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	}
 	else 
 	{
-		BSP_RenderLightmappedPoly(surf);
-		r_currTex = surf->texinfo->image->texnum;
-		r_currLMTex = surf->lightmaptexturenum;
+		surf->lightmapchain = surf->texinfo->lightmap_surfaces;
+		surf->texinfo->lightmap_surfaces = surf;
 	}
 }
 
@@ -1209,6 +1365,8 @@ void BSP_DrawInlineBModel ( void )
 	r_currTex = r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	r_vboOn = false;
+	
+	BSP_ClearVBOAccum ();
 		
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
@@ -1233,6 +1391,7 @@ void BSP_DrawInlineBModel ( void )
 			}
 			else
 			{
+				BSP_FlushVBOAccum ();
 				GL_EnableMultitexture( false );
 				BSP_RenderBrushPoly( psurf );
 				GL_EnableMultitexture( true );
@@ -1241,7 +1400,11 @@ void BSP_DrawInlineBModel ( void )
 			psurf->visframe = r_framecount;
 		}
 	}
+	
+	R_KillVArrays ();
 
+	BSP_DrawNonGLSLSurfaces();
+	
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
 	{
@@ -1657,6 +1820,8 @@ void R_DrawWorld (void)
 	r_currTexInfo = NULL;
 	r_vboOn = false;
 	
+	BSP_ClearVBOAccum ();
+	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	qglClientActiveTextureARB (GL_TEXTURE0);
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1666,10 +1831,14 @@ void R_DrawWorld (void)
 	
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 	
+	BSP_FlushVBOAccum ();
+	
 	r_vboOn = false;
 	if (gl_state.vbo)
 	    qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 	R_KillVArrays ();
+
+	BSP_DrawNonGLSLSurfaces();
 
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
@@ -1692,8 +1861,6 @@ void R_DrawWorld (void)
 	qglDepthMask(0);
 	R_DrawSkyBox();
 	qglDepthMask(1);
-
-	BSP_DrawTriangleOutlines ();
 }
 
 
