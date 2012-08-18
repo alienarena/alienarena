@@ -695,7 +695,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );
 	}
 
-	if(surf->texinfo->has_normalmap) 
+	if(surf->texinfo->has_normalmap && !r_test->integer) 
 	{
 		//add to normal chain
 		surf->normalchain = r_normalsurfaces;
@@ -1327,7 +1327,8 @@ void BSP_AddToTextureChain(msurface_t *surf)
 		surf->glsldynamicchain = surf->texinfo->glsl_dynamic_surfaces;
 		surf->texinfo->glsl_dynamic_surfaces = surf;
 	}
-	else if(gl_normalmaps->integer && surf->texinfo->has_heightmap
+	else if(!r_test->integer && gl_normalmaps->integer 
+			&& surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
 	{
