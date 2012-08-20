@@ -202,10 +202,25 @@ typedef struct entity_s
 	int		team;
 
 	float	bob;
+	
+	int		number; //edict number;
 
 	struct rscript_s *script;
 
 } entity_t;
+
+//for saving persistent data about entities across frames
+typedef struct {
+	/*
+	** for saving non-dynamic lighting of static meshes
+	*/
+	qboolean			setlightstuff;
+	float				oldnumlights;
+	vec3_t				oldlightadd;
+} cl_entity_pers_t;
+
+cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS];
+
 
 #define ENTITY_FLAGS  68
 
