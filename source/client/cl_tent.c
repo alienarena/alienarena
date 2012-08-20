@@ -152,7 +152,7 @@ void CL_ParseSteam (void)
 		s->magnitude = 30;
 		s->endtime = cl.time + 10000000;
 		s->think = CL_ParticleSteamEffect;
-		s->thinkinterval = 1;
+		s->thinkinterval = 16; //~ 60 fps
 		s->nextthink = cl.time;
 	}
 	else
@@ -200,7 +200,7 @@ void CL_ParseFire (void)
 			s->magnitude = 150;//MSG_ReadShort (&net_message);
 			s->endtime = cl.time + 10000000;//MSG_ReadLong (&net_message);
 			s->think = CL_ParticleFireEffect2;
-			s->thinkinterval = 1;
+			s->thinkinterval = 16; //~ 60 fps
 			s->nextthink = cl.time;
 		}
 		else
@@ -252,7 +252,7 @@ void CL_ParseSmoke (void)
 			s->magnitude = 400;//MSG_ReadShort (&net_message);
 			s->endtime = cl.time + 10000000;//MSG_ReadLong (&net_message);
 			s->think = CL_ParticleSmokeEffect2;
-			s->thinkinterval = 1;
+			s->thinkinterval = 16; //~ 60 fps
 			s->nextthink = cl.time;
 		}
 		else

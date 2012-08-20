@@ -34,17 +34,30 @@ PART_DrawParticles
 ===============
 */
 static float yawOrRoll;
+static int compare_particle (const void *_a, const void *_b)
+{
+	particle_t *a = *(particle_t **)_a;
+	particle_t *b = *(particle_t **)_b;
+	if (a->texnum != b->texnum)
+		return a->texnum-b->texnum;
+	if (a->blendsrc != b->blendsrc)
+		return a->blendsrc-b->blendsrc;
+	if (a->blenddst != b->blenddst)
+		return a->blenddst-b->blenddst;
+	return 0;
+}
 void PART_DrawParticles( int num_particles, particle_t **particles, const unsigned colortable[768])
 {
 	particle_t **p1;
 	particle_t *p;
-	int				i, k;
+	int				i, k, j;
 	vec3_t			corner[4], up, right, pup, pright, dir;
-	float			scale, oldscale=0.0f;
-	byte			color[4], oldcolor[4]= {0,0,0,0};
-	int			    oldtype;
+	float			scale;
+	byte			color[4];
+	int			    oldtexnum = -1, oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
 	float			*corner0 = corner[0];
+	int				va = 0;
 	vec3_t move, delta, v;
 
 	if ( !num_particles )
@@ -54,9 +67,11 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	qglEnable( GL_BLEND);
 	GL_TexEnv( GL_MODULATE );
 
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-	for ( p1 = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p1++)
+	R_InitVArrays (VERT_COLOURED_TEXTURED);
+	
+	qsort (particles, num_particles, sizeof (particle_t *), compare_particle);
+	
+	for ( p1 = particles, i=0; i < num_particles ; i++,p1++)
 	{
 	    p = *p1;
 
@@ -70,45 +85,45 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 			*(int *)color = colortable[p->current_color];
 			scale = 1;
+			VectorCopy (vup, up);
+			VectorCopy (vright, right);
 		}
 		else {
 			texnum = p->texnum;
 			blendsrc = p->blendsrc;
 			blenddst = p->blenddst;
 			scale = p->current_scale;
+			VectorScale (vup, scale, up);
+			VectorScale (vright, scale, right);
 			*(int *)color = colortable[p->current_color];
 		}
 
 		color[3] = p->current_alpha*255;
 
-		if (
-			p->type != oldtype
-			|| color[0] != oldcolor[0] || color[1] != oldcolor[1]
-			|| color[2] != oldcolor[2] || color[3] != oldcolor[3] || scale != oldscale)
+		if (texnum != oldtexnum || oldblendsrc != blendsrc || 
+			oldblenddst != blenddst)
 		{
-			if ( scale != 1 )
+			if (va)
 			{
-				VectorScale (vup, scale, up);
-				VectorScale (vright, scale, right);
+				R_DrawVarrays(GL_QUADS, 0, va, false);
+				VArray = &VArrayVerts[0];
+				va = 0;
 			}
-			else
-			{
-				VectorCopy (vup, up);
-				VectorCopy (vright, right);
-			}
-
-			oldtype = p->type;
-			oldscale = scale;
-			oldcolor[3] = color[3];
-			VectorCopy ( color, oldcolor );
-
-			GL_Bind ( texnum );
-			qglBlendFunc ( blendsrc, blenddst );
-			if(p->type == PARTICLE_RAISEDDECAL) {
-				qglColor4f(1,1,1,1);
-			}
-			else
-				qglColor4ubv( color );
+			
+			if (oldtexnum != texnum)
+				qglBindTexture (GL_TEXTURE_2D, texnum);
+			
+			if (oldblendsrc != blendsrc || oldblenddst != blenddst)
+				qglBlendFunc ( blendsrc, blenddst );
+			
+			oldtexnum = texnum;
+			oldblendsrc = blendsrc;
+			oldblenddst = blenddst;
+		}
+		
+		if(p->type == PARTICLE_RAISEDDECAL) {
+			for (k = 0; k < 4; k++)
+				color[k] = 255;
 		}
 
 		if(p->type == PARTICLE_BEAM) {
@@ -177,8 +192,6 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			VectorScale ( up, p->dist, pup );
 		}
 		
-		VArray = &VArrayVerts[0];
-
         if (p->type == PARTICLE_CHAINED && p->chain_prev) {
         	particle_t *pr;
         	vec3_t pspan, prev_pspan;
@@ -243,13 +256,22 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 					VArray[4] = 0;
 					break;
 			 }
+			 
+			 for (j = 0; j < 4; j++)
+			 	VArray[5+j] = (float)color[j]/255.0f;
 
-			 VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			 VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+			 va++;
 		}
-
-		R_DrawVarrays(GL_QUADS, 0, 4, false);
 	}
-
+	
+	if (va)
+	{
+		R_DrawVarrays(GL_QUADS, 0, va, false);
+		va = 0;
+		VArray = &VArrayVerts[0];
+	}
+	
 	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
