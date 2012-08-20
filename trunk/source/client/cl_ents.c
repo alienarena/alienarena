@@ -652,6 +652,8 @@ void CL_AddPacketEntities (frame_t *frame)
 		s1 = &cl_parse_entities[(frame->parse_entities+pnum)&(MAX_PARSE_ENTITIES-1)];
 
 		cent = &cl_entities[s1->number];
+		
+		ent.number = s1->number;
 
 		playermodel = false;
 		

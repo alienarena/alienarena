@@ -804,6 +804,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 	vec3_t mins, maxs;
 	float numlights, weight;
 	float bob;
+	qboolean copy;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -822,27 +823,49 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++)
+	
+	copy = cl_persistent_ents[currententity->number].setlightstuff;
+	for (i = 0; i < 3; i++)
 	{
-		if(!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
-			r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
-		else
-			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-
-		if(r_trace.fraction == 1.0)
+		if (fabs(meshOrigin[i] - currententity->oldorigin[i]) > 0.0001)
 		{
-			VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
-			dist = VectorLength(temp);
-			if(dist == 0)
-				dist = 1;
-			dist = dist*dist;
-			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-			for(j = 0; j < 3; j++)
-				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-			numlights+=weight;
+			copy = false;
+			break;
 		}
 	}
+	
+	if (copy)
+	{
+		numlights =  cl_persistent_ents[currententity->number].oldnumlights;
+		VectorCopy ( cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
+	}
+	else
+	{
+		for (i=0; i<r_lightgroups; i++)
+		{
+			if(!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
+				r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
+			else
+				r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 
+			if(r_trace.fraction == 1.0)
+			{
+				VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
+				dist = VectorLength(temp);
+				if(dist == 0)
+					dist = 1;
+				dist = dist*dist;
+				weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+				for(j = 0; j < 3; j++)
+					lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+				numlights+=weight;
+			}
+		}
+		cl_persistent_ents[currententity->number].oldnumlights = numlights;
+		VectorCopy (lightAdd,  cl_persistent_ents[currententity->number].oldlightadd);
+		cl_persistent_ents[currententity->number].setlightstuff = true;
+	}
+	
 	dynFactor = 0;
 	if(dynamic)
 	{
