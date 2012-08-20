@@ -2135,14 +2135,14 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 					p->vel[j] = crand()*velscale;
 				}
 
-				p->alphavel = -1.0 / (20+frand()*1.4); //smoke lingers longer
+				p->alphavel = -1.0 / (10+frand()*1.4); //smoke lingers longer
 				p->alpha = .07;
 				p->type = PARTICLE_STANDARD;
 				p->texnum = r_smoketexture->texnum;
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 				p->scale = 1 + (rand()&4);
-				p->scalevel = 12.0;
+				p->scalevel = 15.0;
 				p->color = 15;
 				p->accel[2] = 20;
 			}
