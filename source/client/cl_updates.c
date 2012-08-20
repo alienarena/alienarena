@@ -86,7 +86,7 @@ void getLatestGameVersion( void )
 	if (curl_easy_setopt( easyhandle, CURLOPT_URL, url ) != CURLE_OK) return ;
 
 	// time out in 5s
-	if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return ;
+	if (curl_easy_setopt(easyhandle, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return ;
 
 	if (curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) != CURLE_OK) return ;
 
