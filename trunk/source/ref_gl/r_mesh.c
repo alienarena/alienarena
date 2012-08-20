@@ -827,7 +827,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 	copy = cl_persistent_ents[currententity->number].setlightstuff;
 	for (i = 0; i < 3; i++)
 	{
-		if (fabs(meshOrigin[i] - currententity->oldorigin[i]) > 0.0001)
+		if (fabs(meshOrigin[i] - cl_persistent_ents[currententity->number].oldorigin[i]) > 0.0001)
 		{
 			copy = false;
 			break;
@@ -862,8 +862,9 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 			}
 		}
 		cl_persistent_ents[currententity->number].oldnumlights = numlights;
-		VectorCopy (lightAdd,  cl_persistent_ents[currententity->number].oldlightadd);
+		VectorCopy (lightAdd, cl_persistent_ents[currententity->number].oldlightadd);
 		cl_persistent_ents[currententity->number].setlightstuff = true;
+		VectorCopy (currententity->origin, cl_persistent_ents[currententity->number].oldorigin);
 	}
 	
 	dynFactor = 0;

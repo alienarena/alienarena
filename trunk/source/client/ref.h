@@ -217,6 +217,7 @@ typedef struct {
 	qboolean			setlightstuff;
 	float				oldnumlights;
 	vec3_t				oldlightadd;
+	vec3_t				oldorigin;
 } cl_entity_pers_t;
 
 cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS];
