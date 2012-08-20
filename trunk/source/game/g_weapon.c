@@ -812,7 +812,10 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->movetype = MOVETYPE_FLYMISSILE;
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
-	rocket->s.effects |= EF_ROCKET | EF_ROCKETEXHAUST ;
+	rocket->s.effects |= EF_ROCKETEXHAUST ;
+	if (!excessive->integer && self->client->invincible_framenum <= level.framenum)
+		//With too many rockets, lots of smoke trails hurt performance.
+		rocket->s.effects |= EF_ROCKET;
 	VectorClear (rocket->mins);
 	VectorClear (rocket->maxs);
 	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
