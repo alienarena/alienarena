@@ -53,6 +53,7 @@ PFNGLUNIFORM2FARBPROC				glUniform2fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
 PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
+PFNGLUNIFORMMATRIX3X4FVARBPROC		glUniformMatrix3x4fvARB		= NULL;
 PFNGLVERTEXATTRIBPOINTERARBPROC     glVertexAttribPointerARB	= NULL;
 PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB = NULL;
 PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
@@ -117,6 +118,8 @@ GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
 GLuint		g_location_useScatter;
+GLuint		g_location_outframe;
+GLuint		g_location_useGPUanim;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -644,8 +647,12 @@ static char mesh_vertex_program[] =
 "uniform vec3 lightPos;\n"
 "uniform float time;\n"
 "uniform int FOG;\n"
+"uniform mat3x4 bonemats[80];\n"
+"uniform int GPUANIM;\n"
 
 "attribute vec4 tangent;\n"
+"attribute vec4 weights;\n"
+"attribute vec4 bones;\n"
 
 "varying vec3 LightDir;\n"
 "varying vec3 EyeDir;\n"
@@ -662,23 +669,49 @@ static char mesh_vertex_program[] =
 
 "void main()\n"
 "{\n"
+
+"	vec3 n;\n"
 "	vec3 t;\n"
 "	vec3 b;\n"
 
-"	vec4 ecPos = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
-"	subScatterVS(ecPos);\n"
+"	if(GPUANIM > 0)\n"
+"	{\n"
+"		mat3x4 m = bonemats[int(bones.x)] * weights.x;\n"
+"		m += bonemats[int(bones.y)] * weights.y;\n"
+"		m += bonemats[int(bones.z)] * weights.z;\n"
+"		m += bonemats[int(bones.w)] * weights.w;\n"
+"		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);\n"
+"		gl_Position = gl_ModelViewProjectionMatrix * mpos;\n"
 
-"	gl_Position = ftransform();\n"
+"		mat3 madjtrans = mat3(cross(m[1].xyz, m[2].xyz), cross(m[2].xyz, m[0].xyz), cross(m[0].xyz, m[1].xyz));\n"
 
-"	EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);\n"
-"	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+"		subScatterVS(gl_ModelViewProjectionMatrix * mpos);\n"
 
-"	vec3 n = normalize(gl_NormalMatrix * gl_Normal);\n"
+"		n = normalize(gl_NormalMatrix * (gl_Normal * madjtrans));\n"
+
+"		t = normalize(gl_NormalMatrix * (tangent.xyz * madjtrans));\n"
+
+"		b = gl_NormalMatrix * (tangent.w * cross(n, t));\n"
+
+"		EyeDir = vec3(gl_ModelViewMatrix * mpos);\n"
+"	}\n"
+"	else\n"
+"	{\n"	
+"		subScatterVS(gl_ModelViewProjectionMatrix * gl_Vertex);\n"
+
+"		gl_Position = ftransform();\n"
+
+"		n = normalize(gl_NormalMatrix * gl_Normal);\n"
+
+"		t = normalize(gl_NormalMatrix * tangent.xyz);\n"
+
+"		b = tangent.w * cross(n, t);\n"
+
+"		EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);\n"
+"	}\n"
+
 "	worldNormal = n;\n"
-
-"	vec3 tangent3 = vec3(tangent);\n"
-"	t = normalize(gl_NormalMatrix * tangent3);\n"
-"	b = tangent[3] * cross(n, t);\n"
+"	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 
 "	vec3 v;\n"
 "	v.x = dot(lightPos, t);\n"
@@ -698,10 +731,11 @@ static char mesh_vertex_program[] =
 "	gl_TexCoord[1] = texco;\n"
 
 "	//fog\n"
-"   if(FOG > 0){\n"
+"   if(FOG > 0) {\n"
 "		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
 "		fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear\n"
 "   }\n"
+
 "}\n";
 
 static char mesh_fragment_program[] =
@@ -1216,6 +1250,7 @@ void R_LoadGLSLPrograms(void)
 		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
+		glUniformMatrix3x4fvARB	  = (PFNGLUNIFORMMATRIX3X4FVARBPROC)qwglGetProcAddress("glUniformMatrix3x4fv");
 		glVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)qwglGetProcAddress("glVertexAttribPointerARB");
 		glEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)qwglGetProcAddress("glEnableVertexAttribArrayARB");
 		glDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)qwglGetProcAddress("glDisableVertexAttribArrayARB");
@@ -1226,7 +1261,8 @@ void R_LoadGLSLPrograms(void)
 		    !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 		    !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
 				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB ||
-				!glVertexAttribPointerARB || !glEnableVertexAttribArrayARB ||
+				!glUniformMatrix3x4fvARB || !glVertexAttribPointerARB 
+				|| !glEnableVertexAttribArrayARB ||
 				!glBindAttribLocationARB)
 		{
 			Com_Printf("...One or more GL_ARB_shader_objects functions were not found\n");
@@ -1418,6 +1454,8 @@ void R_LoadGLSLPrograms(void)
 		}
 
 		glBindAttribLocationARB(g_meshprogramObj, 1, "tangent");
+		glBindAttribLocationARB(g_meshprogramObj, 6, "weights");
+		glBindAttribLocationARB(g_meshprogramObj, 7, "bones");
 		glLinkProgramARB( g_meshprogramObj );
 		glGetObjectParameterivARB( g_meshprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
 
@@ -1443,6 +1481,8 @@ void R_LoadGLSLPrograms(void)
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
 		g_location_useScatter = glGetUniformLocationARB( g_meshprogramObj, "useScatter");
+		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
+		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 
 		//fullscreen distortion effects
 

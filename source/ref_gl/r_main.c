@@ -52,7 +52,7 @@ cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
 
 entity_t	*currententity;
-model_t	*currentmodel;
+model_t		*currentmodel;
 
 cplane_t	frustum[4];
 
@@ -186,6 +186,9 @@ extern cvar_t *cl_noblood;
 
 //first time running game
 cvar_t	*r_firstrun;
+
+//gpu animation(incomplete)
+cvar_t *r_gpuanim;
 
 //for testing
 cvar_t  *r_test;
@@ -1255,8 +1258,11 @@ void R_Register( void )
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
 	r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
+
 	r_ragdolls = Cvar_Get ("r_ragdolls", "1", CVAR_ARCHIVE );
 	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", CVAR_ARCHIVE );
+
+	r_gpuanim = Cvar_Get("r_gpuanim", "0", CVAR_ARCHIVE);
 
 	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);

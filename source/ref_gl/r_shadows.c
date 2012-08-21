@@ -190,22 +190,6 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 	daliasframe_t *frame;
 	dtrivertx_t *verts;
 
-	//check for vbo
-#ifdef SHADOWVBO
-	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
-	{
-		currentmodel->vbo_shadowxyz = R_VCFindCache(VBO_STORE_SHADOWXYZ, currententity);
-		{
-			if (currentmodel->vbo_shadowxyz) 
-			{
-				currentmodel->vbo_shadowindices = R_VCFindCache(VBO_STORE_SHADOWINDICES, currententity);
-				if(currentmodel->vbo_shadowindices)
-					goto skipLoad;
-			}
-		}
-	}
-#endif
-
 	frame = (daliasframe_t *) ((byte *) hdr + hdr->ofs_frames
 							   + currententity->frame * hdr->framesize);
 	verts = frame->verts;
@@ -389,45 +373,16 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		ShadowIndex[index++] = shadow_vert+0;
 		shadow_vert +=3;
 	}
-#ifdef SHADOWVBO
-	//store vbo
-	if(gl_state.vbo && !lerp)
+
+	if(shadow_vert > 0)
 	{
-		currentmodel->vbo_shadowxyz = R_VCLoadData(VBO_DYNAMIC, index*sizeof(vec3_t), ShadowArray, VBO_STORE_SHADOWXYZ, currententity);
-		currentmodel->vbo_shadowindices = R_VCLoadData(VBO_DYNAMIC, index*sizeof(unsigned int), ShadowIndex, VBO_STORE_SHADOWINDICES, currententity);
-		//Com_Printf("Loading shadow vbo\n");
-	}
+		if ( qglLockArraysEXT != 0 )
+		   qglLockArraysEXT( 0, shadow_vert );
 
-skipLoad:
+		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
 
-	if(gl_state.vbo && !lerp)
-	{		
-        GL_BindVBO(currentmodel->vbo_shadowxyz);
-		qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), 0);
-
-        GL_BindIBO(currentmodel->vbo_shadowindices);
-	
-		qglDrawElements(GL_TRIANGLES, currentmodel->vbo_shadowxyz->size/sizeof(vec3_t), GL_UNSIGNED_INT, 0);
-
-		GL_BindVBO(NULL);
-		GL_BindIBO(NULL);
-	}
-	else
-#endif
-	{
-		if(shadow_vert > 0)
-		{
-			if(gl_state.vbo)
-				GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
-
-			if ( qglLockArraysEXT != 0 )
-			   qglLockArraysEXT( 0, shadow_vert );
-
-			qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
-
-			if ( qglUnlockArraysEXT != 0 )
-				 qglUnlockArraysEXT();
-		}
+		if ( qglUnlockArraysEXT != 0 )
+			 qglUnlockArraysEXT();
 	}
 }
 
@@ -974,7 +929,7 @@ void SHD_DrawRagDollShadowVolume(int RagDollID)
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
 
-	IQM_AnimateRagdoll(RagDollID);
+	IQM_AnimateRagdoll(RagDollID, false);
 
 	SHD_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
 	
@@ -1035,6 +990,9 @@ void R_CastShadow(void)
 		if (currentmodel->type != mod_alias && currentmodel->type != mod_iqm)
 			continue;
 
+		if(currentmodel->type == mod_iqm && r_gpuanim->integer)
+			continue;
+
 		if(r_ragdolls->value && currentmodel->type == mod_iqm && currentmodel->hasRagDoll)
 		{			
 			//Do not render deathframes if using ragdolls
@@ -1089,7 +1047,7 @@ void R_CastShadow(void)
 	//render volumes for ragdolls
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
-		if(RagDoll[RagDollID].destroyed)
+		if(RagDoll[RagDollID].destroyed || r_gpuanim->integer)
 	        continue;
 
 		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION - 2500)
@@ -1121,14 +1079,13 @@ void R_CastShadow(void)
 		VectorSubtract(r_origin, RagDoll[RagDollID].origin, dist);
 
 		//cull by distance if soft shadows(to do - test/tweak this)
-		if	(	VectorLength(dist) > LOD_DIST*(1024.0/500.0) && 
+		if	(VectorLength(dist) > LOD_DIST*(1024.0/500.0) && 
 				gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		SHD_DrawRagDollShadowVolume(RagDollID);
 	}
-
-
+	
 	qglDisableClientState(GL_VERTEX_ARRAY);
 	qglColorMask(1,1,1,1);
 
@@ -1137,7 +1094,6 @@ void R_CastShadow(void)
 	qglDisable(GL_POLYGON_OFFSET_FILL);
 
 	R_ShadowBlend(0.3);
-
 }
 
 

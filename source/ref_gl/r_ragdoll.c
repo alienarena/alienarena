@@ -1195,7 +1195,7 @@ void R_RenderAllRagdolls ( void )
 				shellEffect = true;
 			}
 
-			IQM_AnimateRagdoll(RagDollID);
+			IQM_AnimateRagdoll(RagDollID, shellEffect);
 
 			IQM_DrawRagDollFrame(RagDollID, RagDoll[RagDollID].texnum, shellAlpha, shellEffect);
 
