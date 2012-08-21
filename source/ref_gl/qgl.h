@@ -723,6 +723,9 @@ extern	PFNGLUNIFORM2FARBPROC				glUniform2fARB;
 extern	PFNGLUNIFORM1IARBPROC				glUniform1iARB;
 extern  PFNGLUNIFORM1FARBPROC				glUniform1fARB;
 extern  PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB;
+#ifndef PFNGLUNIFORMMATRIX3X4FVARBPROC //FIXME HACK to get it compiling on Linux
+typedef void (APIENTRYP PFNGLUNIFORMMATRIX3X4FVARBPROC) (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+#endif
 extern  PFNGLUNIFORMMATRIX3X4FVARBPROC		glUniformMatrix3x4fvARB;
 extern	PFNGLVERTEXATTRIBPOINTERARBPROC		glVertexAttribPointerARB;
 extern	PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB;
