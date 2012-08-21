@@ -1919,6 +1919,8 @@ void IQM_DrawFrame(int skinnum)
 				currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
 				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
 				currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+
+				Com_Printf("loaded vbo for %s\n", currentmodel->name);
 			}
 
 			if(has_vbo && stage->normalmap) 

@@ -213,21 +213,9 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod)
 	{
 		next = cache->next;
 
-		if(store == VBO_STORE_INDICES)
-		{
-			if (cache->store == store && cache->mod == mod)
-			{	//already cached!
-				GL_BindIBO(cache);
-				return cache;
-			}
-		}
-		else
-		{
-			if (cache->store == store && cache->mod == mod)
-			{	// already cached!
-				GL_BindVBO(cache);
-				return cache;
-			}
+		if (cache->store == store && cache->mod == mod)
+		{	// already cached!
+			return cache;
 		}
 	}
 
