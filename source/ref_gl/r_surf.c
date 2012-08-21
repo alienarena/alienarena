@@ -876,7 +876,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 		}
 		else
 		{
-			if (!r_currTexInfo || r_currTexInfo->has_heightmap);
+			if (!r_currTexInfo || r_currTexInfo->has_heightmap)
 				glUniform1iARB( g_location_parallax, 0);
 		}
 		
