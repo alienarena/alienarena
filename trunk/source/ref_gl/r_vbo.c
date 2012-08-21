@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 GLuint vboId = 0;
+GLuint eboId = 0;
 int	totalVBObufferSize;
 int currVertexNum;
 size_t	vbo_xyz_base, vbo_xyz_pos, 
@@ -191,9 +192,7 @@ void GL_SetupWorldVBO (void)
 void GL_BindVBO(vertCache_t *cache)
 {
 	if (cache) 
-	{
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, cache->id);
-	}
 	else
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
@@ -201,37 +200,28 @@ void GL_BindVBO(vertCache_t *cache)
 void GL_BindIBO(vertCache_t *cache)
 {
 	if (cache) 
-	{
 		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, cache->id);
-	}
 	else
 		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
+vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod)
 {
-	model_t		*mod;
 	vertCache_t	*cache, *next;
-
-	mod = ent->model;
 
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
 	{
 		next = cache->next;
-#ifdef SHADOWVBO
-		if(store == VBO_STORE_SHADOWINDICES || store == VBO_STORE_SHADOWXYZ)
+
+		if(store == VBO_STORE_INDICES)
 		{
-			if (cache->store == store && cache->ent == ent)
-			{	// already cached!
-				if(store == VBO_STORE_SHADOWINDICES)
-					GL_BindIBO(cache);
-				else
-					GL_BindVBO(cache);
+			if (cache->store == store && cache->mod == mod)
+			{	//already cached!
+				GL_BindIBO(cache);
 				return cache;
 			}
 		}
 		else
-#endif
 		{
 			if (cache->store == store && cache->mod == mod)
 			{	// already cached!
@@ -244,7 +234,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 	return NULL;
 }
 
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent)
+vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, model_t *mod)
 {
 	vertCache_t *cache;
 
@@ -256,12 +246,8 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	cache->size = size;
 	cache->pointer = buffer;
 	cache->store = store;
-	cache->mod = ent->model;
-#ifdef SHADOWVBO
-	cache->ent = ent;
-#endif
-	VectorCopy(ent->origin, cache->position);
-
+	cache->mod = mod;
+	
 	// link
 	vcm.freeVertCache = vcm.freeVertCache->next;
 
@@ -270,48 +256,30 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 
 	vcm.activeVertCache.next->prev = cache;
 	vcm.activeVertCache.next = cache;
-#ifdef SHADOWVBO
-	if(store == VBO_STORE_SHADOWINDICES)
+
+	if(store == VBO_STORE_INDICES)
 		GL_BindIBO(cache);
 	else
-#endif
 		GL_BindVBO(cache);
 
 	switch (cache->mode)
 	{
 		case VBO_STATIC:
-#ifdef SHADOWVBO
-			if(store == VBO_STORE_SHADOWINDICES)
+			if(store == VBO_STORE_INDICES)
 				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
 			else
-#endif
 				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
 			break;
 		case VBO_DYNAMIC:
-#ifdef SHADOWVBO
-			if(store == VBO_STORE_SHADOWINDICES)
+			if(store == VBO_STORE_INDICES)
 				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
 			else
-#endif
 				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
 			break;
 	}
 
 	return cache;
 }
-
-
-vertCache_t *R_VCCreate(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent)
-{
-	vertCache_t	*cache;
-
-	cache = R_VCFindCache(store, ent);
-	if (cache)
-		return cache;
-
-	return R_VCLoadData(mode, size, buffer, store, ent);
-}
-
 
 void R_VCFree(vertCache_t *cache)
 {

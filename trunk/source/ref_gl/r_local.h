@@ -203,6 +203,8 @@ extern	cvar_t	*sys_priority;
 extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
 
+extern	cvar_t	*r_gpuanim; //incomplete gpu animation code
+
 extern  cvar_t  *r_test;
 
 extern	int		gl_lightmap_format;
@@ -297,6 +299,7 @@ void R_FB_InitTextures(void);
 
 //VBO
 extern GLuint vboId;
+extern GLuint eboId;
 extern int totalVBOsize;
 extern int	vboPosition;
 extern void R_LoadVBOSubsystem(void);
@@ -307,8 +310,8 @@ extern void VB_BuildWorldVBO(void);
 void GL_SetupWorldVBO (void);
 void GL_BindVBO(vertCache_t *cache);
 void GL_BindIBO(vertCache_t *cache);
-vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent);
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent);
+vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod);
+vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, model_t *mod);
 
 //Light Bloom
 extern void R_BloomBlend( refdef_t *fd );
@@ -673,6 +676,8 @@ extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
 extern GLuint		g_location_useScatter;
+extern GLuint		g_location_outframe;
+extern GLuint		g_location_useGPUanim;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
@@ -726,7 +731,7 @@ extern void R_DrawINTERQUAKEMODEL(void);
 extern void IQM_AnimateFrame(float curframe, int nextframe);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern int IQM_NextFrame(int frame);
-extern void IQM_AnimateRagdoll(int RagDollID);
+extern void IQM_AnimateRagdoll(int RagDollID, int shellEffect);
 extern void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
 extern void IQM_DrawShadow(vec3_t origin);
 

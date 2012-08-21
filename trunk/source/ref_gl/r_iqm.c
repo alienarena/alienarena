@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_iqm.h"
 #include "r_ragdoll.h"
 
+//#define RAGDOLLGPU
+
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
@@ -465,13 +467,15 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		case IQM_BLENDWEIGHTS:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
 			{
-				vblendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				memcpy(vblendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
+				/*vblendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
+				memcpy(vblendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));*/
+				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
+				memcpy(mod->blendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
 			break;
 		}
 	}
-	if (!vposition || !vtexcoord || !mod->blendindexes || !vblendweights)
+	if (!vposition || !vtexcoord || !mod->blendindexes || !mod->blendweights)
 	{
 		Com_Printf("%s is missing vertex array data\n", mod->name);
 		return false;
@@ -757,7 +761,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	{
 		inelements = (const int *) (pbase + header->ofs_neighbors);
 
-		mod->neighbors = Hunk_Alloc(header->num_triangles * sizeof(neighbors_t));
+		mod->neighbors = (neighbors_t*)Hunk_Alloc(header->num_triangles * sizeof(neighbors_t));
 
 		for (i = 0;i < (int)header->num_triangles;i++)
 		{
@@ -773,7 +777,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	// load texture coodinates
     mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
-	mod->blendweights = (float *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(float));
+	//mod->blendweights = (float *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(float));
 
 	for (i = 0;i < (int)header->num_vertexes;i++)
 	{
@@ -782,10 +786,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 		vtexcoord+=2;
 
-		for(j = 0; j < 4; j++)
-			mod->blendweights[i*4+j] = vblendweights[j]/255.0f;
+		/*for(j = 0; j < 4; j++)
+			mod->blendweights[i*4+j] = vblendweights[j]blendweights;
 
-		vblendweights+=4;
+		vblendweights+=4;*/
 	}
 
 	/*
@@ -820,6 +824,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 	}
 
+	//test - this is probably not needed
+	mod->vbo_xyz =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec3_t));
+	mod->vbo_st =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec2_t));
+	mod->vbo_normals =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec3_t));
+	mod->vbo_tangents =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec4_t));
+	mod->vbo_indices =(vertCache_t*)Hunk_Alloc (mod->num_triangles*3*sizeof(unsigned int));
+
 	/*
 	 * get ragdoll info from <model>.rgd file
 	 */
@@ -838,6 +849,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
+qboolean has_vbo;
 void IQM_AnimateFrame(float curframe, int nextframe)
 {
 	int i, j;
@@ -1013,14 +1025,44 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 		const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;
 		const mnormal_t *srcnorm = (const mnormal_t *)currentmodel->normal;
 		const mtangent_t *srctan = (const mtangent_t *)currentmodel->tangent;
-
+				
 		mvertex_t *dstpos = (mvertex_t *)currentmodel->animatevertexes;
 		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
 		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
 
 		const unsigned char *index = currentmodel->blendindexes;
 
-		float *weight = currentmodel->blendweights;
+		const unsigned char *weight = currentmodel->blendweights;
+
+		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
+		has_vbo = false;
+		//a lot of conditions need to be enabled in order to use GPU animation
+		if ((gl_state.vbo && currententity->script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
+			(r_shaders->integer || ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))))
+		{
+			currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
+			if (currentmodel->vbo_xyz) 
+			{						
+				currentmodel->vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
+				if(currentmodel->vbo_st)
+				{
+					currentmodel->vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
+					if(currentmodel->vbo_normals)
+					{
+						currentmodel->vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
+						if(currentmodel->vbo_tangents)
+						{
+							currentmodel->vbo_indices = R_VCFindCache(VBO_STORE_INDICES, currentmodel);
+							if(currentmodel->vbo_indices)
+							{
+								has_vbo = true;
+								goto skipLoad;
+							}
+						}
+					}
+				}
+			}
+		}					
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
 		{
@@ -1035,11 +1077,11 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 			// sorted order from highest weight to lowest weight. Weights with
 			// 0 values, which are always at the end, are unused.
 
-			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]);
+			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]/255.0f);
 
 			for(j = 1; j < 4 && weight[j]; j++)
 			{
-				Matrix3x4_ScaleAdd (&mat, &currentmodel->outframe[index[j]], weight[j], &mat);
+				Matrix3x4_ScaleAdd (&mat, &currentmodel->outframe[index[j]], weight[j]/255.0f, &mat);
 			}
 
 			// Transform attributes by the blended matrix.
@@ -1076,11 +1118,13 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 			index += 4;
 			weight += 4;
-		}
+		}		
+skipLoad: ;
 	}
 }
 
-void IQM_AnimateRagdoll(int RagDollID)
+qboolean has_rd_vbo;
+void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 {
 	//we only deal with one frame
 
@@ -1110,9 +1154,6 @@ void IQM_AnimateRagdoll(int RagDollID)
 				{
 					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
 					{
-
-
-
 						int object = RagDollBinds[j].object;
 						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
 						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
@@ -1150,17 +1191,48 @@ void IQM_AnimateRagdoll(int RagDollID)
 		mtangent_t *dsttan = (mtangent_t *)RagDoll[RagDollID].ragDollMesh->animatetangent;
 
 		const unsigned char *index = RagDoll[RagDollID].ragDollMesh->blendindexes;
-		float *weight = RagDoll[RagDollID].ragDollMesh->blendweights;
+		const unsigned char *weight = RagDoll[RagDollID].ragDollMesh->blendweights;
 
+		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
+		has_rd_vbo = false;
+		//a lot of conditions need to be enabled in order to use GPU animation
+#ifdef RAGDOLLGPU
+		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
+			(r_shaders->integer || shellEffect))
+		{
+			RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+			if (RagDoll[RagDollID].ragDollMesh->vbo_xyz) 
+			{						
+				RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCFindCache(VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+				if(RagDoll[RagDollID].ragDollMesh->vbo_st)
+				{
+					RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+					if(RagDoll[RagDollID].ragDollMesh->vbo_normals)
+					{
+						RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+						if(RagDoll[RagDollID].ragDollMesh->vbo_tangents)
+						{
+							RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCFindCache(VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+							if(RagDoll[RagDollID].ragDollMesh->vbo_indices)
+							{
+								has_vbo = true;
+								goto skipLoad;
+							}
+						}
+					}
+				}
+			}
+		}		
+#endif
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
 		{
 			matrix3x4_t mat;
 
-			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]);
+			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]/255.0f);
 
 			for(j = 1; j < 4 && weight[j]; j++)
 			{
-				Matrix3x4_ScaleAdd (&mat, &RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j], &mat);
+				Matrix3x4_ScaleAdd (&mat, &RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j]/255.0f, &mat);
 			}
 
 			Matrix3x4_Transform(dstpos, mat, *srcpos);
@@ -1179,6 +1251,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 			index += 4;
 			weight += 4;
 		}
+skipLoad: ;
 	}
 }
 
@@ -1266,10 +1339,13 @@ void IQM_DrawFrame(int skinnum)
 
             vec3_t lightVec, lightVal;
 
-			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-            glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+			if(!has_vbo)
+			{
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+			}
 
             R_GetLightVals(currententity->origin, false, false);
 
@@ -1332,35 +1408,94 @@ void IQM_DrawFrame(int skinnum)
 		else
 			shellscale = 1.6;
 
-		for (i=0; i<currentmodel->num_triangles; i++)
-        {
-            for (j=0; j<3; j++)
-            {
-                index_xyz = index_st = currentmodel->tris[i].vertex[j];
+		if(!has_vbo)
+		{
+			if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+				glUniform1iARB(g_location_useGPUanim, 0);
 
-				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
-                VArray[1] = currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
-                VArray[2] = currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
+			for (i=0; i<currentmodel->num_triangles; i++)
+			{
+				for (j=0; j<3; j++)
+				{
+					index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
-				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
-                VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
+					VArray[0] = currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
+					VArray[1] = currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
+					VArray[2] = currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
 
-				VArray[5] = shadelight[0];
-				VArray[6] = shadelight[1];
-				VArray[7] = shadelight[2];
-				VArray[8] = 0.33;
+					VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
+					VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
-                if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
-                    VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
-                    Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
-                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
-                } else
-                    VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
-                va++;
-            }
-        }
+					VArray[5] = shadelight[0];
+					VArray[6] = shadelight[1];
+					VArray[7] = shadelight[2];
+					VArray[8] = 0.33;
 
-		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
+					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
+						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
+						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
+						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
+					} else
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
+					va++;
+				}
+			}
+		}
+		else if(r_gpuanim->integer)
+		{
+			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
+										
+			glUniform1iARB(g_location_useGPUanim, 1);
+
+			//send outframe, blendweights, and blendindexes to shader
+			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+						
+		}
+
+		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
+		{
+			currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
+			currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
+			currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
+			currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
+			currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+		}
+
+		if(has_vbo) 
+		{				
+			qglEnableClientState( GL_VERTEX_ARRAY );
+			GL_BindVBO(currentmodel->vbo_xyz);
+			qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+			qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			GL_BindVBO(currentmodel->vbo_st);
+			qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+			qglEnableClientState( GL_NORMAL_ARRAY );
+			GL_BindVBO(currentmodel->vbo_normals);
+			qglNormalPointer(GL_FLOAT, 0, 0);
+
+			glEnableVertexAttribArrayARB (1);
+			GL_BindVBO(currentmodel->vbo_tangents);
+			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+				
+			GL_BindVBO(NULL);
+
+			GL_BindIBO(currentmodel->vbo_indices);								
+
+			glEnableVertexAttribArrayARB(6);
+			glEnableVertexAttribArrayARB(7);
+			glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights);
+			glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 				
+
+			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
+			{
+				qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
+			}
+
+			GL_BindIBO(NULL);
+	    }
+		else if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
 			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
@@ -1562,11 +1697,14 @@ void IQM_DrawFrame(int skinnum)
 			{
 				vec3_t lightVec, lightVal;
 
-				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				glEnableVertexAttribArrayARB (1);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-
+				if(!has_vbo)
+				{
+					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+					glEnableVertexAttribArrayARB (1);
+					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
+				}
+				
 				R_GetLightVals(currententity->origin, false, true);
 
 				//send light level and color to shader, ramp up a bit
@@ -1663,20 +1801,35 @@ void IQM_DrawFrame(int skinnum)
 				
 				vertsize = VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 				
-				for (i=0; i<currentmodel->num_triangles; i++)
+				if(!has_vbo)
 				{
-					COPY_VERTEX(i,0);
-					COPY_NMDATA;
-					INC_VARRAY;
-					va++;
-					COPY_VERTEX(i,1);
-					COPY_NMDATA;
-					INC_VARRAY;
-					va++;
-					COPY_VERTEX(i,2);
-					COPY_NMDATA;
-					INC_VARRAY;
-					va++;
+					glUniform1iARB(g_location_useGPUanim, 0);
+
+					for (i=0; i<currentmodel->num_triangles; i++)
+					{
+						COPY_VERTEX(i,0);
+						COPY_NMDATA;
+						INC_VARRAY;
+						va++;
+						COPY_VERTEX(i,1);
+						COPY_NMDATA;
+						INC_VARRAY;
+						va++;
+						COPY_VERTEX(i,2);
+						COPY_NMDATA;
+						INC_VARRAY;
+						va++;
+					}
+				}	
+				else if(r_gpuanim->integer)
+				{
+					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
+										
+					glUniform1iARB(g_location_useGPUanim, 1);
+
+					//send outframe, blendweights, and blendindexes to shader
+					glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+						
 				}
 			}
 			else
@@ -1759,7 +1912,50 @@ void IQM_DrawFrame(int skinnum)
 				va = currentmodel->num_triangles*3;
 			}
 
-			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
+			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
+			{
+				currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
+				currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
+				currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
+				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
+				currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+			}
+
+			if(has_vbo && stage->normalmap) 
+			{				
+				qglEnableClientState( GL_VERTEX_ARRAY );
+				GL_BindVBO(currentmodel->vbo_xyz);
+				qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				GL_BindVBO(currentmodel->vbo_st);
+				qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+				qglEnableClientState( GL_NORMAL_ARRAY );
+				GL_BindVBO(currentmodel->vbo_normals);
+				qglNormalPointer(GL_FLOAT, 0, 0);
+
+				glEnableVertexAttribArrayARB (1);
+				GL_BindVBO(currentmodel->vbo_tangents);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+				
+				GL_BindVBO(NULL);
+
+				GL_BindIBO(currentmodel->vbo_indices);								
+
+				glEnableVertexAttribArrayARB(6);
+				glEnableVertexAttribArrayARB(7);
+				glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights);
+				glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 				
+
+				if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
+				{
+					qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
+				}
+
+				GL_BindIBO(NULL);
+	        }
+			else if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
 				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 			}
@@ -1783,10 +1979,10 @@ done:
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
-
-	qglDisableClientState( GL_NORMAL_ARRAY);
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	
+	glDisableVertexAttribArrayARB(1);
+	glDisableVertexAttribArrayARB(6);
+	glDisableVertexAttribArrayARB(7);
 
 	R_KillVArrays ();
 
@@ -1844,10 +2040,13 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
             vec3_t lightVec, lightVal;
 
-			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-            glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+			if(!has_rd_vbo)
+			{
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+			}
 
             R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
@@ -1905,41 +2104,101 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 		}
 
-		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
-        {
-            for (j=0; j<3; j++)
-            {
-                index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
+		if(!has_rd_vbo)
+		{
 
-				VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0] +
-					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[0]*shellscale;
-                VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
-					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[1]*shellscale;
-                VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] +
-					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[2]*shellscale;
+			if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+				glUniform1iARB(g_location_useGPUanim, 0);
 
-				VArray[3] = (RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
-					RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
-                VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
+			for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
+			{
+				for (j=0; j<3; j++)
+				{
+					index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
 
-				VArray[5] = shadelight[0];
-				VArray[6] = shadelight[1];
-				VArray[7] = shadelight[2];
-				VArray[8] = shellAlpha; //decrease over time
+					VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0] +
+						RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[0]*shellscale;
+					VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
+						RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[1]*shellscale;
+					VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] +
+						RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[2]*shellscale;
 
-                if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-                {
-                    VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
-                    Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
-                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
-                }
-                else
-                    VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
-                va++;
-            }
-        }
+					VArray[3] = (RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
+						RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
+					VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
-		R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+					VArray[5] = shadelight[0];
+					VArray[6] = shadelight[1];
+					VArray[7] = shadelight[2];
+					VArray[8] = shellAlpha; //decrease over time
+
+					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+					{
+						VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
+						Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
+						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
+					}
+					else
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
+					va++;
+				}
+			}
+		}
+#ifdef RAGDOLLGPU		
+		else if(r_gpuanim->integer)
+		{
+			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
+										
+			glUniform1iARB(g_location_useGPUanim, 1);
+
+			//send outframe, blendweights, and blendindexes to shader
+			glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
+						
+		}
+
+		if(gl_state.vbo && !has_rd_vbo && r_gpuanim->integer)
+		{
+			RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+			RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+			RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+			RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+			RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+		}
+
+		if(has_rd_vbo) 
+		{				
+			qglEnableClientState( GL_VERTEX_ARRAY );
+			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_xyz);
+			qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+			qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_st);
+			qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+			qglEnableClientState( GL_NORMAL_ARRAY );
+			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_normals);
+			qglNormalPointer(GL_FLOAT, 0, 0);
+
+			glEnableVertexAttribArrayARB (1);
+			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_tangents);
+			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+				
+			GL_BindVBO(NULL);
+
+			GL_BindIBO(RagDoll[RagDollID].ragDollMesh->vbo_indices);								
+
+			glEnableVertexAttribArrayARB(6);
+			glEnableVertexAttribArrayARB(7);
+			glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, RagDoll[RagDollID].ragDollMesh->blendweights);
+			glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, RagDoll[RagDollID].ragDollMesh->blendindexes); 				
+
+			qglDrawElements(GL_TRIANGLES, RagDoll[RagDollID].ragDollMesh->num_triangles*3, GL_UNSIGNED_INT, 0);	
+			
+			GL_BindIBO(NULL);
+	    }
+		else
+#endif
+			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 		{
@@ -2102,10 +2361,13 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			{
 				vec3_t lightVec, lightVal;
 
-				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				glEnableVertexAttribArrayARB (1);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+				if(!has_rd_vbo)
+				{
+					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+					glEnableVertexAttribArrayARB (1);
+					glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+				}
 
 				R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
@@ -2177,58 +2439,116 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}
 
-			for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
-			{
-				for (j=0; j<3; j++)
+			if(!has_rd_vbo)
+			{				
+				glUniform1iARB(g_location_useGPUanim, 0);
+				
+				for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
 				{
-					index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
-
-					VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
-					VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
-					VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
-
-					VArray[3] = RagDoll[RagDollID].ragDollMesh->st[index_st].s;
-					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
-
-					if(stage->normalmap) { //send normals and tangents to shader
-						VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]);
-						Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
-						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
-					}
-					else
+					for (j=0; j<3; j++)
 					{
-						float red = 1, green = 1, blue = 1;
+						index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
 
-						if (stage->lightmap)
-						{
-							IQM_Vlight (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
-							red = lightcolor[0];
-							green = lightcolor[1];
-							blue = lightcolor[2];
-						}
-						if(mirror)
-						{
-							VArray[7] = red;
-							VArray[8] = green;
-							VArray[9] = blue;
-							VArray[10] = alpha;
+						VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
+						VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
+						VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
+
+						VArray[3] = RagDoll[RagDollID].ragDollMesh->st[index_st].s;
+						VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
+
+						if(stage->normalmap) { //send normals and tangents to shader
+							VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]);
+							Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
+							VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
 						}
 						else
 						{
-							VArray[5] = red;
-							VArray[6] = green;
-							VArray[7] = blue;
-							VArray[8] = alpha;
+							float red = 1, green = 1, blue = 1;
+
+							if (stage->lightmap)
+							{
+								IQM_Vlight (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
+								red = lightcolor[0];
+								green = lightcolor[1];
+								blue = lightcolor[2];
+							}
+							if(mirror)
+							{
+								VArray[7] = red;
+								VArray[8] = green;
+								VArray[9] = blue;
+								VArray[10] = alpha;
+							}
+							else
+							{
+								VArray[5] = red;
+								VArray[6] = green;
+								VArray[7] = blue;
+								VArray[8] = alpha;
+							}
+
+							VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 						}
 
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
+						va++;
 					}
-
-					va++;
 				}
 			}
+#ifdef RAGDOLLGPU			
+			else if(r_gpuanim->integer)
+			{
+				KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
+										
+				glUniform1iARB(g_location_useGPUanim, 1);
 
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+				//send outframe, blendweights, and blendindexes to shader
+				glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
+						
+			}
+
+			if(gl_state.vbo && stage->normalmap && !has_rd_vbo && r_gpuanim->integer)
+			{
+				RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+				RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+				RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+				RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+				RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+			}
+
+			if(has_rd_vbo && stage->normalmap) 
+			{				
+				qglEnableClientState( GL_VERTEX_ARRAY );
+				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_xyz);
+				qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_st);
+				qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+				qglEnableClientState( GL_NORMAL_ARRAY );
+				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_normals);
+				qglNormalPointer(GL_FLOAT, 0, 0);
+
+				glEnableVertexAttribArrayARB (1);
+				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_tangents);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+				
+				GL_BindVBO(NULL);
+
+				GL_BindIBO(RagDoll[RagDollID].ragDollMesh->vbo_indices);								
+
+				glEnableVertexAttribArrayARB(6);
+				glEnableVertexAttribArrayARB(7);
+				glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, RagDoll[RagDollID].ragDollMesh->blendweights);
+				glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, RagDoll[RagDollID].ragDollMesh->blendindexes); 				
+
+				qglDrawElements(GL_TRIANGLES, RagDoll[RagDollID].ragDollMesh->num_triangles*3, GL_UNSIGNED_INT, 0);	
+				
+				GL_BindIBO(NULL);
+	        }
+			else
+#endif
+				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 			qglColor4f(1,1,1,1);
 
@@ -2250,9 +2570,9 @@ done:
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
 
-	qglDisableClientState( GL_NORMAL_ARRAY);
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glDisableVertexAttribArrayARB(1);
+	glDisableVertexAttribArrayARB(6);
+	glDisableVertexAttribArrayARB(7);
 
 	R_KillVArrays ();
 
@@ -2820,7 +3140,7 @@ void IQM_DrawRagDollCaster ( int RagDollID )
 
     qglPushMatrix ();
 
-	IQM_AnimateRagdoll(RagDollID);
+	IQM_AnimateRagdoll(RagDollID, false);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
 

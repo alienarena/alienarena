@@ -419,7 +419,7 @@ typedef struct model_s
 	mtangent_t		*tangent;
 	mtangent_t		*animatetangent;
 	unsigned char	*blendindexes;
-	float			*blendweights;
+	unsigned char	*blendweights;
 	char			skinname[MAX_QPATH];
 	char			*jointname;
 	//end iqm
@@ -440,6 +440,7 @@ typedef struct model_s
 	vertCache_t	*vbo_color;
 	vertCache_t	*vbo_normals;
 	vertCache_t *vbo_tangents;
+	vertCache_t *vbo_indices;
 	vertCache_t *vbo_shadowxyz;
 	vertCache_t *vbo_shadowindices;
 
