@@ -813,6 +813,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
 	rocket->s.effects |= EF_ROCKETEXHAUST ;
+	rocket->s.renderfx |= RF_FULLBRIGHT ;
 	if (!excessive->integer && self->client->invincible_framenum <= level.framenum)
 		//With too many rockets, lots of smoke trails hurt performance.
 		rocket->s.effects |= EF_ROCKET;
