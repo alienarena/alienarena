@@ -689,7 +689,7 @@ static char mesh_vertex_program[] =
 
 "		t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));\n"
 
-"		b = (gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t);\n" //this is not perfect but it is very close?
+"		b = normalize(gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t);\n" //this is not perfect but it is very close?
 //"		b = tangent.w * cross(n, t);\n" //this should be correct, but it is way off for some reason
 
 "		EyeDir = vec3(gl_ModelViewMatrix * mpos);\n"
