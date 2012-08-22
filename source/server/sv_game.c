@@ -230,66 +230,6 @@ void PF_WriteDir (vec3_t dir) {MSG_WriteDir (&sv.multicast, dir);}
 void PF_WriteAngle (float f) {MSG_WriteAngle (&sv.multicast, f);}
 
 
-/*
-=================
-PF_inPVS
-
-Also checks portalareas so that doors block sight
-=================
-*/
-qboolean PF_inPVS (vec3_t p1, vec3_t p2)
-{
-	int		leafnum;
-	int		cluster;
-	int		area1, area2;
-	byte	*mask;
-
-	leafnum = CM_PointLeafnum (p1);
-	cluster = CM_LeafCluster (leafnum);
-	area1 = CM_LeafArea (leafnum);
-	mask = CM_ClusterPVS (cluster);
-
-	leafnum = CM_PointLeafnum (p2);
-	cluster = CM_LeafCluster (leafnum);
-	area2 = CM_LeafArea (leafnum);
-	if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
-		return false;
-	if (!CM_AreasConnected (area1, area2))
-		return false;		// a door blocks sight
-	return true;
-}
-
-
-/*
-=================
-PF_inPHS
-
-Also checks portalareas so that doors block sound
-=================
-*/
-qboolean PF_inPHS (vec3_t p1, vec3_t p2)
-{
-	int		leafnum;
-	int		cluster;
-	int		area1, area2;
-	byte	*mask;
-
-	leafnum = CM_PointLeafnum (p1);
-	cluster = CM_LeafCluster (leafnum);
-	area1 = CM_LeafArea (leafnum);
-	mask = CM_ClusterPHS (cluster);
-
-	leafnum = CM_PointLeafnum (p2);
-	cluster = CM_LeafCluster (leafnum);
-	area2 = CM_LeafArea (leafnum);
-	if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
-		return false;		// more than one bounce away
-	if (!CM_AreasConnected (area1, area2))
-		return false;		// a door blocks hearing
-
-	return true;
-}
-
 void PF_StartSound (edict_t *entity, int channel, int sound_num, float volume,
     float attenuation, float timeofs)
 {
@@ -350,8 +290,8 @@ void SV_InitGameProgs (void)
 	import.trace = SV_Trace;
 	import.pointcontents = SV_PointContents;
 	import.setmodel = PF_setmodel;
-	import.inPVS = PF_inPVS;
-	import.inPHS = PF_inPHS;
+	import.inPVS = CM_inPVS;
+	import.inPHS = CM_inPHS;
 	import.Pmove = Pmove;
 
 	import.modelindex = SV_ModelIndex;
