@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_iqm.h"
 #include "r_ragdoll.h"
 
+#define RAGDOLLVBO 0
+
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
@@ -1193,7 +1195,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
-
+#if RAGDOLLVBO
 		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
@@ -1220,7 +1222,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 				}
 			}
 		}		
-
+#endif
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
 		{
 			matrix3x4_t mat;
@@ -2140,7 +2142,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				}
 			}
 		}
-
+#if RAGDOLLVBO
 		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
 		{
 			RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
@@ -2192,6 +2194,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			GL_BindIBO(NULL);
 	    }
 		else
+#endif
 			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
@@ -2488,7 +2491,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					}
 				}
 			}
-
+#if RAGDOLLVBO
 			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
 			{
 				RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
@@ -2540,6 +2543,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				GL_BindIBO(NULL);
 	        }
 			else
+#endif
 				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 			qglColor4f(1,1,1,1);
