@@ -685,7 +685,7 @@ static char mesh_vertex_program[] =
 
 "		subScatterVS(gl_Position);\n"
 
-"		n =  normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m));\n"
+"		n = normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m));\n"
 
 "		t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));\n"
 
