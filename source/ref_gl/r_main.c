@@ -189,6 +189,7 @@ cvar_t	*r_firstrun;
 
 //gpu animation(incomplete)
 cvar_t *r_gpuanim;
+cvar_t *r_gpuanim_debug;
 
 //for testing
 cvar_t  *r_test;
@@ -1263,6 +1264,7 @@ void R_Register( void )
 	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", CVAR_ARCHIVE );
 
 	r_gpuanim = Cvar_Get("r_gpuanim", "0", CVAR_ARCHIVE);
+	r_gpuanim_debug = Cvar_Get("r_gpuanim_debug", "0", CVAR_ARCHIVE);
 
 	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);

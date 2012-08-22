@@ -477,6 +477,9 @@ void R_DrawDynamicCaster(void)
 	if(!dynLight)  
 		return; //we have no lights of consequence
 
+	if(r_gpuanim->integer)
+		return; //for now until more is sorted out
+
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);

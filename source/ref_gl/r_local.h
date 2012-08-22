@@ -204,6 +204,7 @@ extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
 
 extern	cvar_t	*r_gpuanim; //incomplete gpu animation code
+extern  cvar_t  *r_gpuanim_debug;
 
 extern  cvar_t  *r_test;
 
