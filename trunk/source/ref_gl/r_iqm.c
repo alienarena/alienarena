@@ -25,8 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_iqm.h"
 #include "r_ragdoll.h"
 
-#define RAGDOLLGPU 0
-
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
@@ -823,8 +821,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				RS_ReadyScript( (rscript_t *)mod->script );
 		}
 	}
-
-	//test - this is probably not needed
+	
+	//alloc mem for vbo use
 	mod->vbo_xyz =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec3_t));
 	mod->vbo_st =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec2_t));
 	mod->vbo_normals =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec3_t));
@@ -1034,7 +1032,7 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 		const unsigned char *weight = currentmodel->blendweights;
 
-		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
+		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage as well)
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
 		if ((gl_state.vbo && currententity->script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
@@ -1123,7 +1121,6 @@ skipLoad: ;
 	}
 }
 
-qboolean has_rd_vbo;
 void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 {
 	//we only deal with one frame
@@ -1194,9 +1191,9 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		const unsigned char *weight = RagDoll[RagDollID].ragDollMesh->blendweights;
 
 		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
-		has_rd_vbo = false;
+		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
-#if RAGDOLLGPU
+
 		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
@@ -1223,7 +1220,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 				}
 			}
 		}		
-#endif
+
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
 		{
 			matrix3x4_t mat;
@@ -1441,16 +1438,6 @@ void IQM_DrawFrame(int skinnum)
 				}
 			}
 		}
-		else if(r_gpuanim->integer)
-		{
-			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
-										
-			glUniform1iARB(g_location_useGPUanim, 1);
-
-			//send outframe, blendweights, and blendindexes to shader
-			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-						
-		}
 
 		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
 		{
@@ -1465,7 +1452,14 @@ void IQM_DrawFrame(int skinnum)
 		}
 
 		if(has_vbo) 
-		{				
+		{			
+			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
+										
+			glUniform1iARB(g_location_useGPUanim, 1);
+
+			//send outframe, blendweights, and blendindexes to shader
+			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+
 			qglEnableClientState( GL_VERTEX_ARRAY );
 			GL_BindVBO(currentmodel->vbo_xyz);
 			qglVertexPointer(3, GL_FLOAT, 0, 0);
@@ -1824,16 +1818,6 @@ void IQM_DrawFrame(int skinnum)
 						va++;
 					}
 				}	
-				else if(r_gpuanim->integer)
-				{
-					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
-										
-					glUniform1iARB(g_location_useGPUanim, 1);
-
-					//send outframe, blendweights, and blendindexes to shader
-					glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-						
-				}
 			}
 			else
 			{
@@ -1928,7 +1912,14 @@ void IQM_DrawFrame(int skinnum)
 			}
 
 			if(has_vbo && stage->normalmap) 
-			{				
+			{			
+				KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
+										
+				glUniform1iARB(g_location_useGPUanim, 1);
+
+				//send outframe, blendweights, and blendindexes to shader
+				glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+
 				qglEnableClientState( GL_VERTEX_ARRAY );
 				GL_BindVBO(currentmodel->vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
@@ -1951,8 +1942,8 @@ void IQM_DrawFrame(int skinnum)
 
 				glEnableVertexAttribArrayARB(6);
 				glEnableVertexAttribArrayARB(7);
-				glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights);
-				glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 				
+				glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights); //to do - these should also be vbo
+				glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); //to do - these should also be vbo				
 
 				if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
 				{
@@ -2042,11 +2033,11 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
-
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
+		{
             vec3_t lightVec, lightVal;
 
-			if(!has_rd_vbo)
+			if(!has_vbo)
 			{
 				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
@@ -2110,9 +2101,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 		}
 
-		if(!has_rd_vbo)
+		if(!has_vbo)
 		{
-
 			if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 				glUniform1iARB(g_location_useGPUanim, 0);
 
@@ -2150,19 +2140,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				}
 			}
 		}
-#if RAGDOLLGPU		
-		else if(r_gpuanim->integer)
-		{
-			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
-										
-			glUniform1iARB(g_location_useGPUanim, 1);
 
-			//send outframe, blendweights, and blendindexes to shader
-			glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
-						
-		}
-
-		if(gl_state.vbo && !has_rd_vbo && r_gpuanim->integer)
+		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
 		{
 			RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
 			RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
@@ -2174,8 +2153,15 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
 		}
 
-		if(has_rd_vbo) 
-		{				
+		if(has_vbo) 
+		{			
+			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
+										
+			glUniform1iARB(g_location_useGPUanim, 1);
+
+			//send outframe, blendweights, and blendindexes to shader
+			glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
+
 			qglEnableClientState( GL_VERTEX_ARRAY );
 			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_xyz);
 			qglVertexPointer(3, GL_FLOAT, 0, 0);
@@ -2206,7 +2192,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			GL_BindIBO(NULL);
 	    }
 		else
-#endif
 			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
@@ -2370,7 +2355,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			{
 				vec3_t lightVec, lightVal;
 
-				if(!has_rd_vbo)
+				if(!has_vbo)
 				{
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
@@ -2448,7 +2433,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}
 
-			if(!has_rd_vbo)
+			if(!has_vbo)
 			{				
 				glUniform1iARB(g_location_useGPUanim, 0);
 				
@@ -2503,19 +2488,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					}
 				}
 			}
-#if RAGDOLLGPU			
-			else if(r_gpuanim->integer)
-			{
-				KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
-										
-				glUniform1iARB(g_location_useGPUanim, 1);
 
-				//send outframe, blendweights, and blendindexes to shader
-				glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
-						
-			}
-
-			if(gl_state.vbo && stage->normalmap && !has_rd_vbo && r_gpuanim->integer)
+			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
 			{
 				RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
 				RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
@@ -2527,8 +2501,15 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
 			}
 
-			if(has_rd_vbo && stage->normalmap) 
+			if(has_vbo && stage->normalmap) 
 			{				
+				KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
+										
+				glUniform1iARB(g_location_useGPUanim, 1);
+
+				//send outframe, blendweights, and blendindexes to shader
+				glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
+		
 				qglEnableClientState( GL_VERTEX_ARRAY );
 				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
@@ -2559,7 +2540,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				GL_BindIBO(NULL);
 	        }
 			else
-#endif
 				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 			qglColor4f(1,1,1,1);
