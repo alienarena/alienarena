@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_iqm.h"
 #include "r_ragdoll.h"
 
-//#define RAGDOLLGPU
+#define RAGDOLLGPU 0
 
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
@@ -1196,7 +1196,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
 		has_rd_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
-#ifdef RAGDOLLGPU
+#if RAGDOLLGPU
 		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
@@ -1459,6 +1459,9 @@ void IQM_DrawFrame(int skinnum)
 			currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
 			currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
 			currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+
+			if(r_gpuanim_debug->integer)
+				Com_Printf("loaded vbo for %s\n", currentmodel->name);
 		}
 
 		if(has_vbo) 
@@ -1920,7 +1923,8 @@ void IQM_DrawFrame(int skinnum)
 				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
 				currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
 
-				Com_Printf("loaded vbo for %s\n", currentmodel->name);
+				if(r_gpuanim_debug->integer)
+					Com_Printf("loaded vbo for %s\n", currentmodel->name);
 			}
 
 			if(has_vbo && stage->normalmap) 
@@ -2146,7 +2150,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				}
 			}
 		}
-#ifdef RAGDOLLGPU		
+#if RAGDOLLGPU		
 		else if(r_gpuanim->integer)
 		{
 			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
@@ -2165,6 +2169,9 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
 			RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
 			RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+		
+			if(r_gpuanim_debug->integer)
+				Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
 		}
 
 		if(has_rd_vbo) 
@@ -2496,7 +2503,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					}
 				}
 			}
-#ifdef RAGDOLLGPU			
+#if RAGDOLLGPU			
 			else if(r_gpuanim->integer)
 			{
 				KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
@@ -2515,6 +2522,9 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
 				RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
 				RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+			
+				if(r_gpuanim_debug->integer)
+					Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
 			}
 
 			if(has_rd_vbo && stage->normalmap) 

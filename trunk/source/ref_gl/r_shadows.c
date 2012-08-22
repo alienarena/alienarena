@@ -950,6 +950,9 @@ void R_CastShadow(void)
 	if (!gl_shadowmaps->value)
 		return;
 
+	if(r_gpuanim->integer)
+		return; //for now until more is sorted out
+
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
