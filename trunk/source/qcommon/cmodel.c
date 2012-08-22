@@ -1926,3 +1926,62 @@ qboolean CM_HeadnodeVisible (int nodenum, byte *visbits)
 	return CM_HeadnodeVisible(node->children[1], visbits);
 }
 
+
+/*
+=================
+CM_inPVS
+
+Also checks portalareas so that doors block sight
+=================
+*/
+qboolean CM_inPVS (vec3_t p1, vec3_t p2)
+{
+	int		leafnum;
+	int		cluster;
+	int		area1, area2;
+	byte	*mask;
+
+	leafnum = CM_PointLeafnum (p1);
+	cluster = CM_LeafCluster (leafnum);
+	area1 = CM_LeafArea (leafnum);
+	mask = CM_ClusterPVS (cluster);
+
+	leafnum = CM_PointLeafnum (p2);
+	cluster = CM_LeafCluster (leafnum);
+	area2 = CM_LeafArea (leafnum);
+	if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
+		return false;
+	if (!CM_AreasConnected (area1, area2))
+		return false;		// a door blocks sight
+	return true;
+}
+
+/*
+=================
+CM_inPHS
+
+Also checks portalareas so that doors block sound
+=================
+*/
+qboolean CM_inPHS (vec3_t p1, vec3_t p2)
+{
+	int		leafnum;
+	int		cluster;
+	int		area1, area2;
+	byte	*mask;
+
+	leafnum = CM_PointLeafnum (p1);
+	cluster = CM_LeafCluster (leafnum);
+	area1 = CM_LeafArea (leafnum);
+	mask = CM_ClusterPHS (cluster);
+
+	leafnum = CM_PointLeafnum (p2);
+	cluster = CM_LeafCluster (leafnum);
+	area2 = CM_LeafArea (leafnum);
+	if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
+		return false;		// more than one bounce away
+	if (!CM_AreasConnected (area1, area2))
+		return false;		// a door blocks hearing
+
+	return true;
+}
