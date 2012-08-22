@@ -683,15 +683,14 @@ static char mesh_vertex_program[] =
 "		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);\n"
 "		gl_Position = gl_ModelViewProjectionMatrix * mpos;\n"
 
-"		mat3 madjtrans = mat3(cross(m[1].xyz, m[2].xyz), cross(m[2].xyz, m[0].xyz), cross(m[0].xyz, m[1].xyz));\n"
+"		subScatterVS(gl_Position);\n"
 
-"		subScatterVS(gl_ModelViewProjectionMatrix * mpos);\n"
+"		n =  normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m));\n"
 
-"		n = normalize(gl_NormalMatrix * (gl_Normal * madjtrans));\n"
+"		t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));\n"
 
-"		t = normalize(gl_NormalMatrix * (tangent.xyz * madjtrans));\n"
-
-"		b = gl_NormalMatrix * (tangent.w * cross(n, t));\n"
+"		b = (gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t);\n" //this is not perfect but it is very close?
+//"		b = tangent.w * cross(n, t);\n" //this should be correct, but it is way off for some reason
 
 "		EyeDir = vec3(gl_ModelViewMatrix * mpos);\n"
 "	}\n"
