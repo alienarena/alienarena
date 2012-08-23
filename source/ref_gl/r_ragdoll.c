@@ -1197,6 +1197,8 @@ void R_RenderAllRagdolls ( void )
 
 			IQM_AnimateRagdoll(RagDollID, shellEffect);
 
+			currentmodel = RagDoll[RagDollID].ragDollMesh;
+
 			IQM_DrawRagDollFrame(RagDollID, RagDoll[RagDollID].texnum, shellAlpha, shellEffect);
 
 			GL_TexEnv( GL_REPLACE );

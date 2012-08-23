@@ -34,6 +34,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static vec3_t NormalsArray[MAX_VERTICES];
 static vec4_t TangentsArray[MAX_VERTICES];
 
+static vertCache_t	*vbo_st;
+static vertCache_t	*vbo_xyz;
+static vertCache_t	*vbo_normals;
+static vertCache_t *vbo_tangents;
+static vertCache_t *vbo_indices;
+
 float modelpitch;
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
@@ -824,13 +830,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 	}
 	
-	//alloc mem for vbo use
-	mod->vbo_xyz =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec3_t));
-	mod->vbo_st =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec2_t));
-	mod->vbo_normals =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec3_t));
-	mod->vbo_tangents =(vertCache_t*)Hunk_Alloc (mod->numvertexes*sizeof(vec4_t));
-	mod->vbo_indices =(vertCache_t*)Hunk_Alloc (mod->num_triangles*3*sizeof(unsigned int));
-
 	/*
 	 * get ragdoll info from <model>.rgd file
 	 */
@@ -1040,20 +1039,20 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 		if ((gl_state.vbo && currententity->script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))))
 		{
-			currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
-			if (currentmodel->vbo_xyz) 
+			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
+			if (vbo_xyz) 
 			{						
-				currentmodel->vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
-				if(currentmodel->vbo_st)
+				vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
+				if(vbo_st)
 				{
-					currentmodel->vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
-					if(currentmodel->vbo_normals)
+					vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
+					if(vbo_normals)
 					{
-						currentmodel->vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
-						if(currentmodel->vbo_tangents)
+						vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
+						if(vbo_tangents)
 						{
-							currentmodel->vbo_indices = R_VCFindCache(VBO_STORE_INDICES, currentmodel);
-							if(currentmodel->vbo_indices)
+							vbo_indices = R_VCFindCache(VBO_STORE_INDICES, currentmodel);
+							if(vbo_indices)
 							{
 								has_vbo = true;
 								goto skipLoad;
@@ -1199,20 +1198,20 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
-			RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
-			if (RagDoll[RagDollID].ragDollMesh->vbo_xyz) 
+			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+			if (vbo_xyz) 
 			{						
-				RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCFindCache(VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
-				if(RagDoll[RagDollID].ragDollMesh->vbo_st)
+				vbo_st = R_VCFindCache(VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+				if(vbo_st)
 				{
-					RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
-					if(RagDoll[RagDollID].ragDollMesh->vbo_normals)
+					vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+					if(vbo_normals)
 					{
-						RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
-						if(RagDoll[RagDollID].ragDollMesh->vbo_tangents)
+						vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+						if(vbo_tangents)
 						{
-							RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCFindCache(VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
-							if(RagDoll[RagDollID].ragDollMesh->vbo_indices)
+							vbo_indices = R_VCFindCache(VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+							if(vbo_indices)
 							{
 								has_vbo = true;
 								goto skipLoad;
@@ -1443,11 +1442,11 @@ void IQM_DrawFrame(int skinnum)
 
 		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
 		{
-			currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
-			currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
-			currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
-			currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
-			currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+			vbo_xyz = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
+			vbo_st = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
+			vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
+			vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
+			vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
 
 			if(r_gpuanim_debug->integer)
 				Com_Printf("loaded vbo for %s\n", currentmodel->name);
@@ -1463,24 +1462,24 @@ void IQM_DrawFrame(int skinnum)
 			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
 			qglEnableClientState( GL_VERTEX_ARRAY );
-			GL_BindVBO(currentmodel->vbo_xyz);
+			GL_BindVBO(vbo_xyz);
 			qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 			qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			GL_BindVBO(currentmodel->vbo_st);
+			GL_BindVBO(vbo_st);
 			qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 			qglEnableClientState( GL_NORMAL_ARRAY );
-			GL_BindVBO(currentmodel->vbo_normals);
+			GL_BindVBO(vbo_normals);
 			qglNormalPointer(GL_FLOAT, 0, 0);
 
 			glEnableVertexAttribArrayARB (1);
-			GL_BindVBO(currentmodel->vbo_tangents);
+			GL_BindVBO(vbo_tangents);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 				
 			GL_BindVBO(NULL);
 
-			GL_BindIBO(currentmodel->vbo_indices);								
+			GL_BindIBO(vbo_indices);								
 
 			glEnableVertexAttribArrayARB(6);
 			glEnableVertexAttribArrayARB(7);
@@ -1903,11 +1902,11 @@ void IQM_DrawFrame(int skinnum)
 
 			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
 			{
-				currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
-				currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
-				currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
-				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
-				currentmodel->vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+				vbo_xyz = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
+				vbo_st = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
+				vbo_normals = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
+				vbo_tangents = R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
+				vbo_indices = R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
 
 				if(r_gpuanim_debug->integer)
 					Com_Printf("loaded vbo for %s\n", currentmodel->name);
@@ -1923,24 +1922,24 @@ void IQM_DrawFrame(int skinnum)
 				glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
 				qglEnableClientState( GL_VERTEX_ARRAY );
-				GL_BindVBO(currentmodel->vbo_xyz);
+				GL_BindVBO(vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				GL_BindVBO(currentmodel->vbo_st);
+				GL_BindVBO(vbo_st);
 				qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 				qglEnableClientState( GL_NORMAL_ARRAY );
-				GL_BindVBO(currentmodel->vbo_normals);
+				GL_BindVBO(vbo_normals);
 				qglNormalPointer(GL_FLOAT, 0, 0);
 
 				glEnableVertexAttribArrayARB (1);
-				GL_BindVBO(currentmodel->vbo_tangents);
+				GL_BindVBO(vbo_tangents);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 				
 				GL_BindVBO(NULL);
 
-				GL_BindIBO(currentmodel->vbo_indices);								
+				GL_BindIBO(vbo_indices);								
 
 				glEnableVertexAttribArrayARB(6);
 				glEnableVertexAttribArrayARB(7);
@@ -2145,11 +2144,11 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 #if RAGDOLLVBO
 		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
 		{
-			RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
-			RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
-			RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
-			RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
-			RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+			vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+			vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+			vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+			vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+			vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
 		
 			if(r_gpuanim_debug->integer)
 				Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
@@ -2165,24 +2164,24 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
 
 			qglEnableClientState( GL_VERTEX_ARRAY );
-			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_xyz);
+			GL_BindVBO(vbo_xyz);
 			qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 			qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_st);
+			GL_BindVBO(vbo_st);
 			qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 			qglEnableClientState( GL_NORMAL_ARRAY );
-			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_normals);
+			GL_BindVBO(vbo_normals);
 			qglNormalPointer(GL_FLOAT, 0, 0);
 
 			glEnableVertexAttribArrayARB (1);
-			GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_tangents);
+			GL_BindVBO(vbo_tangents);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 				
 			GL_BindVBO(NULL);
 
-			GL_BindIBO(RagDoll[RagDollID].ragDollMesh->vbo_indices);								
+			GL_BindIBO(vbo_indices);								
 
 			glEnableVertexAttribArrayARB(6);
 			glEnableVertexAttribArrayARB(7);
@@ -2494,11 +2493,11 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 #if RAGDOLLVBO
 			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
 			{
-				RagDoll[RagDollID].ragDollMesh->vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
-				RagDoll[RagDollID].ragDollMesh->vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
-				RagDoll[RagDollID].ragDollMesh->vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
-				RagDoll[RagDollID].ragDollMesh->vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
-				RagDoll[RagDollID].ragDollMesh->vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+				vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+				vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+				vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+				vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+				vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
 			
 				if(r_gpuanim_debug->integer)
 					Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
@@ -2514,24 +2513,24 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
 		
 				qglEnableClientState( GL_VERTEX_ARRAY );
-				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_xyz);
+				GL_BindVBO(vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_st);
+				GL_BindVBO(vbo_st);
 				qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 				qglEnableClientState( GL_NORMAL_ARRAY );
-				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_normals);
+				GL_BindVBO(vbo_normals);
 				qglNormalPointer(GL_FLOAT, 0, 0);
 
 				glEnableVertexAttribArrayARB (1);
-				GL_BindVBO(RagDoll[RagDollID].ragDollMesh->vbo_tangents);
+				GL_BindVBO(vbo_tangents);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 				
 				GL_BindVBO(NULL);
 
-				GL_BindIBO(RagDoll[RagDollID].ragDollMesh->vbo_indices);								
+				GL_BindIBO(vbo_indices);								
 
 				glEnableVertexAttribArrayARB(6);
 				glEnableVertexAttribArrayARB(7);
@@ -3056,31 +3055,68 @@ void IQM_DrawCasterFrame ()
 	int     i, j;
     int     index_xyz, index_st;
     int     va;
+	
+	if(!has_vbo)
+	{
+		va=0;
 
-    va=0;
+		R_InitVArrays (VERT_NO_TEXTURE);
 
-    R_InitVArrays (VERT_NO_TEXTURE);
+		for (i=0; i<currentmodel->num_triangles; i++)
+		{
+			for (j=0; j<3; j++)
+			{
+				index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
-    for (i=0; i<currentmodel->num_triangles; i++)
-    {
-        for (j=0; j<3; j++)
-        {
-            index_xyz = index_st = currentmodel->tris[i].vertex[j];
+				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
+				VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
+				VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
 
-            VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
-            VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
-            VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
+				VArray[3] = currentmodel->st[index_st].s;
+				VArray[4] = currentmodel->st[index_st].t;
 
-            VArray[3] = currentmodel->st[index_st].s;
-            VArray[4] = currentmodel->st[index_st].t;
+				// increment pointer and counter
+				VArray += VertexSizes[VERT_NO_TEXTURE];
+				va++;
+			}
+		}
 
-            // increment pointer and counter
-            VArray += VertexSizes[VERT_NO_TEXTURE];
-            va++;
-        }
-    }
+		R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+	}
+	else 
+	{			
+		//no need to load up a new vbo - this has already been done by the full mesh render!
 
-	R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+		//to do - just use a very basic shader for this instead of the normal mesh shader
+		glUseProgramObjectARB( g_meshprogramObj );
+		    
+        glUniform1iARB( g_location_useFX, 0);
+
+        glUniform1iARB( g_location_useGlow, 0);
+
+		glUniform1iARB( g_location_useScatter, 0);
+		        
+        glUniform1iARB( g_location_meshFog, 0);	
+
+		glUniform1iARB(g_location_useGPUanim, 1);
+
+		//send outframe, blendweights, and blendindexes to shader
+		glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+
+		qglEnableClientState( GL_VERTEX_ARRAY );
+		GL_BindVBO(vbo_xyz);
+		qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+		GL_BindVBO(NULL);
+
+		GL_BindIBO(vbo_indices);								
+
+		qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
+	
+		GL_BindIBO(NULL);
+
+		glUseProgramObjectARB( 0 );
+	}
 
 	R_KillVArrays ();
 }

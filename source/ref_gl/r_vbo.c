@@ -266,6 +266,11 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 			break;
 	}
 
+	if(store == VBO_STORE_INDICES)
+		GL_BindIBO(NULL);
+	else
+		GL_BindVBO(NULL);	
+
 	return cache;
 }
 
