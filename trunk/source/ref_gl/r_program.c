@@ -519,7 +519,7 @@ static char bsp_fragment_program[] =
 "       Offset = Offset * 0.04 - 0.02;\n"
 "       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
 
-"		displacement =texco.st;\n"
+"		displacement = texco.st;\n"
 
 "		noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;\n"
 "		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"

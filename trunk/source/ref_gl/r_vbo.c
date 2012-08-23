@@ -213,7 +213,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod)
 	{
 		next = cache->next;
 
-		if (cache->store == store && cache->mod == mod)
+		if (cache->store == store && !strcmp(cache->mod->name, mod->name))
 		{	// already cached!
 			return cache;
 		}

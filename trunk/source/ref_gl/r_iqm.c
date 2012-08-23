@@ -39,6 +39,7 @@ static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
 static vertCache_t *vbo_tangents;
 static vertCache_t *vbo_indices;
+qboolean has_vbo;
 
 float modelpitch;
 
@@ -848,7 +849,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-qboolean has_vbo;
 void IQM_AnimateFrame(float curframe, int nextframe)
 {
 	int i, j;
@@ -2120,6 +2120,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] +
 						RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[2]*shellscale;
 
+					//to do - need to approximate this in the shader!
 					VArray[3] = (RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
 						RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
 					VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
@@ -2142,18 +2143,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			}
 		}
 #if RAGDOLLVBO
-		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
-		{
-			vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
-			vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
-			vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
-			vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
-			vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
 		
-			if(r_gpuanim_debug->integer)
-				Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
-		}
-
 		if(has_vbo) 
 		{			
 			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
@@ -2491,19 +2481,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				}
 			}
 #if RAGDOLLVBO
-			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
-			{
-				vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
-				vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
-				vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
-				vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
-				vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
 			
-				if(r_gpuanim_debug->integer)
-					Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
-			}
-
-			if(has_vbo && stage->normalmap) 
+			if(has_vbo /*&& stage->normalmap*/) 
 			{				
 				KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
 										
