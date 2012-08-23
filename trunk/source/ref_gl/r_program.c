@@ -305,7 +305,7 @@ static char bsp_vertex_program[] =
 
 "    gl_FrontColor = gl_Color;\n"
 
-"    EyeDir = normalize (tangentSpaceTransform * ( Eye - gl_Vertex.xyz ));\n"
+"    EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );\n"
 "    if (DYNAMIC > 0){\n"
 "      LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
 "    }\n"
@@ -476,6 +476,8 @@ static char bsp_fragment_program[] =
 "   varyingLightColour = lightColour;\n"
 "   varyingLightCutoffSquared = lightCutoffSquared;\n"
 
+"	vec3 relativeEyeDirection = normalize( EyeDir );\n"
+
 "   vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
 "   vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;\n"
 
@@ -515,7 +517,7 @@ static char bsp_fragment_program[] =
 
 "       vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "       Offset = Offset * 0.04 - 0.02;\n"
-"       vec2 TexCoords = Offset.xy * EyeDir.xy + gl_TexCoord[0].xy;\n"
+"       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
 
 "		displacement =texco.st;\n"
 
@@ -563,16 +565,19 @@ static char bsp_fragment_program[] =
 "      //do the parallax mapping\n"
 "      vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "      Offset = Offset * 0.04 - 0.02;\n"
-"      vec2 TexCoords = Offset.xy * EyeDir.xy + gl_TexCoord[0].xy + displacement4.xy;\n"
+"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;\n"
 
 "      diffuse = texture2D( surfTexture, TexCoords );\n"
 
-"      diffuseTerm = clamp( dot( normal, StaticLightDir ), 0.0, 1.0 );\n"
+"	   distanceSquared = dot( StaticLightDir, StaticLightDir );\n"
+"      relativeLightDirection = StaticLightDir / sqrt( distanceSquared );\n"
+
+"      diffuseTerm = clamp( dot( normal, relativeLightDirection  ), 0.0, 1.0 );\n"
 "      colour = vec3( 0.0, 0.0, 0.0 );\n"
 
 "	   if( diffuseTerm > 0.0 )\n"
 "	   {\n"
-"		 halfAngleVector = normalize( StaticLightDir + EyeDir );\n"
+"		 halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
 
 "        specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
 "        specularTerm = pow( specularTerm, 32.0 );\n"
@@ -604,7 +609,7 @@ static char bsp_fragment_program[] =
 
 "      if( diffuseTerm > 0.0 )\n"
 "      {\n"
-"         halfAngleVector = normalize( relativeLightDirection + EyeDir );\n"
+"         halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
 
 "         float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
 "         specularTerm = pow( specularTerm, 32.0 );\n"
