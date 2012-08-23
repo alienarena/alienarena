@@ -47,6 +47,12 @@ static vec2_t TexCoordArray[MAX_VERTICES];
 static vec3_t NormalsArray[MAX_VERTICES];
 static vec4_t TangentsArray[MAX_VERTICES];
 
+static vertCache_t	*vbo_st;
+static vertCache_t	*vbo_xyz;
+static vertCache_t	*vbo_normals;
+static vertCache_t *vbo_tangents;
+static vertCache_t *vbo_indices;
+
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
 float	shadelight[3];
@@ -1579,19 +1585,18 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 				if (gl_state.vbo && !lerped)
 				{
-					currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
-					if (currentmodel->vbo_xyz) 
+					vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
+					if (vbo_xyz) 
 					{						
-						currentmodel->vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
-						if(currentmodel->vbo_st)
+						vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
+						if(vbo_st)
 						{
-							currentmodel->vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
-							if(currentmodel->vbo_normals)
+							vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
+							if(vbo_normals)
 							{
-								currentmodel->vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
-								if(currentmodel->vbo_tangents)
+								vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
+								if(vbo_tangents)
 								{
-									//Com_Printf("skipped\n");
 									goto skipLoad;
 								}
 							}
@@ -1748,29 +1753,28 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 			if(dovbo && normalmap)
 			{
-                currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
-				currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, currentmodel);
-				currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currentmodel);
-				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currentmodel);
-				//Com_Printf("Loading mesh vbo.\n");
+                vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
+				vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, currentmodel);
+				vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currentmodel);
+				vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currentmodel);
             }
 skipLoad:
 			if(gl_state.vbo && !lerped && normalmap) 
 			{
 				qglEnableClientState( GL_VERTEX_ARRAY );
-				GL_BindVBO(currentmodel->vbo_xyz);
+				GL_BindVBO(vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				GL_BindVBO(currentmodel->vbo_st);
+				GL_BindVBO(vbo_st);
 				qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 				qglEnableClientState( GL_NORMAL_ARRAY );
-				GL_BindVBO(currentmodel->vbo_normals);
+				GL_BindVBO(vbo_normals);
 				qglNormalPointer(GL_FLOAT, 0, 0);
 
 				glEnableVertexAttribArrayARB (1);
-				GL_BindVBO(currentmodel->vbo_tangents);
+				GL_BindVBO(vbo_tangents);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 
 				if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
@@ -2350,10 +2354,9 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 	if (gl_state.vbo && !lerped)
 	{
-		currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
-		if (currentmodel->vbo_xyz) 
+		vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
+		if (vbo_xyz) 
 		{
-			//Com_Printf("Skipped.\n");
 			goto skipLoad;
 		}
 	}
@@ -2394,15 +2397,14 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 	if(gl_state.vbo && !lerped)
 	{
-		currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
-		//Com_Printf("Loading mesh vbo.\n");
+		vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
     }
 
 skipLoad:
 	if(gl_state.vbo && !lerped) 
 	{
 		qglEnableClientState( GL_VERTEX_ARRAY );
-		GL_BindVBO(currentmodel->vbo_xyz);
+		GL_BindVBO(vbo_xyz);
 		qglVertexPointer(3, GL_FLOAT, 0, 0);   
 
 		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);

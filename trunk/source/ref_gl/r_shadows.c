@@ -376,6 +376,10 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 
 	if(shadow_vert > 0)
 	{
+		//GL_BindVBO(NULL);
+
+		//GL_BindIBO(NULL);	
+
 		if ( qglLockArraysEXT != 0 )
 		   qglLockArraysEXT( 0, shadow_vert );
 
@@ -939,6 +943,7 @@ void SHD_DrawRagDollShadowVolume(int RagDollID)
 
 #include "r_lodcalc.h"
 
+//to do - all of this will be replaced by shadowmapping
 void R_CastShadow(void)
 {
 	int i, RagDollID;
@@ -949,9 +954,6 @@ void R_CastShadow(void)
 	//note - we use a combination of stencil volumes(for world light shadows) and shadowmaps(for dynamic shadows)
 	if (!gl_shadowmaps->value)
 		return;
-
-	if(r_gpuanim->integer)
-		return; //for now until more is sorted out
 
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
