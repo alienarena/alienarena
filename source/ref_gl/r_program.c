@@ -310,7 +310,7 @@ static char bsp_vertex_program[] =
 "      LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
 "    }\n"
 "    if (PARALLAX > 0){\n"
-"      StaticLightDir = normalize (tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz));\n"
+"      StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);\n"
 "    }\n"
 
 "    // pass any active texunits through\n"
