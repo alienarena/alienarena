@@ -288,6 +288,8 @@ static char bsp_vertex_program[] =
 "uniform float rsTime;\n"
 "uniform int LIQUID;\n"
 "uniform int FOG;\n"
+"uniform int PARALLAX;\n"
+"uniform int DYNAMIC;\n"
 
 "varying vec3 EyeDir;\n"
 "varying vec3 LightDir;\n"
@@ -303,9 +305,13 @@ static char bsp_vertex_program[] =
 
 "    gl_FrontColor = gl_Color;\n"
 
-"    EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );\n"
-"    LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
-"    StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);\n"
+"    EyeDir = normalize (tangentSpaceTransform * ( Eye - gl_Vertex.xyz ));\n"
+"    if (DYNAMIC > 0){\n"
+"      LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
+"    }\n"
+"    if (PARALLAX > 0){\n"
+"      StaticLightDir = normalize (tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz));\n"
+"    }\n"
 
 "    // pass any active texunits through\n"
 "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
@@ -470,7 +476,6 @@ static char bsp_fragment_program[] =
 "   varyingLightColour = lightColour;\n"
 "   varyingLightCutoffSquared = lightCutoffSquared;\n"
 
-"   vec3 relativeEyeDirection = normalize( EyeDir );\n"
 "   vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
 "   vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;\n"
 
@@ -510,7 +515,7 @@ static char bsp_fragment_program[] =
 
 "       vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "       Offset = Offset * 0.04 - 0.02;\n"
-"       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
+"       vec2 TexCoords = Offset.xy * EyeDir.xy + gl_TexCoord[0].xy;\n"
 
 "		displacement =texco.st;\n"
 
@@ -558,37 +563,26 @@ static char bsp_fragment_program[] =
 "      //do the parallax mapping\n"
 "      vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "      Offset = Offset * 0.04 - 0.02;\n"
-"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;\n"
+"      vec2 TexCoords = Offset.xy * EyeDir.xy + gl_TexCoord[0].xy + displacement4.xy;\n"
 
 "      diffuse = texture2D( surfTexture, TexCoords );\n"
 
-"      distanceSquared = dot( StaticLightDir, StaticLightDir );\n"
-"      relativeLightDirection = StaticLightDir / sqrt( distanceSquared );\n"
-
-"      diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );\n"
+"      diffuseTerm = clamp( dot( normal, StaticLightDir ), 0.0, 1.0 );\n"
 "      colour = vec3( 0.0, 0.0, 0.0 );\n"
 
 "	   if( diffuseTerm > 0.0 )\n"
 "	   {\n"
-"		 halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
+"		 halfAngleVector = normalize( StaticLightDir + EyeDir );\n"
 
 "        specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
 "        specularTerm = pow( specularTerm, 32.0 );\n"
 
-"        colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;\n"
+"        colour = specularTerm + ( ( 2.9765625 * diffuseTerm ) + 0.0234375 ) * textureColour;\n"
 "      }\n"
-"      attenuation = 0.25;\n"
-"      swamp = attenuation;\n"
-"      swamp *= swamp;\n"
-"      swamp *= swamp;\n"
-"      swamp *= swamp;\n"
 
-"      colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 4.0;\n"
-
-"      litColour = vec4( attenuation * colour, 1.0 );\n"
-"      litColour = litColour * lightmap * 6.0;\n"
-"      gl_FragColor = max(litColour, diffuse * lightmap * 2.0);\n"
-"	   gl_FragColor = gl_FragColor + bloodColor;\n"
+"      litColour = vec4( colour, 6.0 );\n"
+"      gl_FragColor = max(litColour, diffuse * 2.0);\n"
+"	   gl_FragColor = (gl_FragColor * lightmap) + bloodColor;\n"
 "	   gl_FragColor = (gl_FragColor * statshadowval);\n"
 "   }\n"
 "   else {\n"
@@ -610,7 +604,7 @@ static char bsp_fragment_program[] =
 
 "      if( diffuseTerm > 0.0 )\n"
 "      {\n"
-"         halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
+"         halfAngleVector = normalize( relativeLightDirection + EyeDir );\n"
 
 "         float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
 "         specularTerm = pow( specularTerm, 32.0 );\n"
