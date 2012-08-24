@@ -146,6 +146,9 @@ GLuint		g_location_drParams;
 GLuint g_location_lightPositionOnScreen;
 GLuint g_location_sunTex;
 
+//doesn't work with ARB shaders, unfortunately, due to the #comments
+#define STRINGIFY(...) #__VA_ARGS__
+
 static char water_ARB_program[] =
 "!!ARBfp1.0\n"
 
@@ -280,366 +283,369 @@ void R_LoadARBPrograms(void)
 //GLSL Programs
 
 //BSP Surfaces
-static char bsp_vertex_program[] =
-"uniform mat3 tangentSpaceTransform;\n"
-"uniform vec3 Eye;\n"
-"uniform vec3 lightPosition;\n"
-"uniform vec3 staticLightPosition;\n"
-"uniform float rsTime;\n"
-"uniform int LIQUID;\n"
-"uniform int FOG;\n"
-"uniform int PARALLAX;\n"
-"uniform int DYNAMIC;\n"
-
-"varying vec3 EyeDir;\n"
-"varying vec3 LightDir;\n"
-"varying vec3 StaticLightDir;\n"
-"varying vec4 sPos;\n"
-"varying float fog;\n"
-
-"void main( void )\n"
-"{\n"
-"    sPos = gl_Vertex;\n"
-
-"    gl_Position = ftransform();\n"
-
-"    gl_FrontColor = gl_Color;\n"
-
-"    EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );\n"
-"    if (DYNAMIC > 0){\n"
-"      LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
-"    }\n"
-"    if (PARALLAX > 0){\n"
-"      StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);\n"
-"    }\n"
-
-"    // pass any active texunits through\n"
-"    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
-"    gl_TexCoord[1] = gl_MultiTexCoord1;\n"
-
-"    //fog\n"
-"    if(FOG > 0){\n"
-"      fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
-"      fog = clamp(fog, 0.0, 1.0);\n"
-"    }\n"
-"}\n";
-
-static char bsp_fragment_program[] =
-"uniform sampler2D surfTexture;\n"
-"uniform sampler2D HeightTexture;\n"
-"uniform sampler2D NormalTexture;\n"
-"uniform sampler2D lmTexture;\n"
-"uniform sampler2D liquidTexture;\n"
-"uniform sampler2D liquidNormTex;\n"
-"uniform sampler2D ShadowMap;\n"
-"uniform sampler2D StatShadowMap;\n"
-"uniform vec3 lightColour;\n"
-"uniform float lightCutoffSquared;\n"
-"uniform int FOG;\n"
-"uniform int PARALLAX;\n"
-"uniform int DYNAMIC;\n"
-"uniform int STATSHADOW;\n"
-"uniform int SHADOWMAP;\n"
-"uniform int LIQUID;\n"
-"uniform float rsTime;\n"
-
-"varying vec4 sPos;\n"
-"varying vec3 EyeDir;\n"
-"varying vec3 LightDir;\n"
-"varying vec3 StaticLightDir;\n"
-"varying float fog;\n"
-
-"float lookupDynshadow( void )\n"
-"{\n"
-"	vec4 ShadowCoord;\n"
-"	vec4 shadowCoordinateWdivide;\n"
-"	float distanceFromLight;\n"
-"    	vec4 tempShadowCoord;\n"
-"    	float shadow1 = 1.0;\n"
-"    	float shadow2 = 1.0;\n"
-"    	float shadow3 = 1.0;\n"
-"    	float shadows = 1.0;\n"
-
-"	if(SHADOWMAP > 0) {\n"
-
-"	   ShadowCoord = gl_TextureMatrix[7] * sPos;\n"
-
-"      shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;\n"
-"      // Used to lower moir pattern and self-shadowing\n"
-"      shadowCoordinateWdivide.z += 0.0005;\n"
-
-"      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
-
-"      if (ShadowCoord.w > 0.0)\n"
-"		shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;\n"
-
-"	   //Blur shadows a bit\n"
-"      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
-"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
-"      shadowCoordinateWdivide.z += 0.0005;\n"
-
-"      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
-
-"      if (ShadowCoord.w > 0.0)\n"
-"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;\n"
-
-"      tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);\n"
-"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
-"      shadowCoordinateWdivide.z += 0.0005;\n"
-
-"      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
-
-"      if (ShadowCoord.w > 0.0)\n"
-"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;\n"
-
-"      shadows = 0.33 * (shadow1 + shadow2 + shadow3);\n"
-
-"    }\n"
-
-"    return shadows;\n"
-"}\n"
-
-"float lookupStatshadow( void )\n"
-"{\n"
-"	vec4 ShadowCoord;\n"
-"	vec4 shadowCoordinateWdivide;\n"
-"	float distanceFromLight;\n"
-"    	vec4 tempShadowCoord;\n"
-"    	float shadow1 = 1.0;\n"
-"    	float shadow2 = 1.0;\n"
-"    	float shadow3 = 1.0;\n"
-"    	float shadows = 1.0;\n"
-
-"	if(SHADOWMAP > 0) {\n"
-
-"      ShadowCoord = gl_TextureMatrix[6] * sPos;\n"
-
-"      shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;\n"
-"      // Used to lower moir pattern and self-shadowing\n"
-"      shadowCoordinateWdivide.z += 0.0005;\n"
-
-"      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
-
-"      if (ShadowCoord.w > 0.0)\n"
-"		shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;\n"
-
-"	   //Blur shadows a bit\n"
-"      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
-"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
-"      shadowCoordinateWdivide.z += 0.0005;\n"
-
-"      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
-
-"      if (ShadowCoord.w > 0.0)\n"
-"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;\n"
-
-"      tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);\n"
-"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
-"      shadowCoordinateWdivide.z += 0.0005;\n"
-
-"      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
-
-"      if (ShadowCoord.w > 0.0)\n"
-"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;\n"
-
-"      shadows = 0.33 * (shadow1 + shadow2 + shadow3);\n"
-
-"    }\n"
-
-"    return shadows;\n"
-"}\n"
-
-"void main( void )\n"
-"{\n"
-"   vec4 diffuse;\n"
-"   vec4 lightmap;\n"
-"	vec4 alphamask;\n"
-"	vec4 bloodColor;\n"
-"   float distanceSquared;\n"
-"   vec3 relativeLightDirection;\n"
-"   float diffuseTerm;\n"
-"   vec3 halfAngleVector;\n"
-"   float specularTerm;\n"
-"   float swamp;\n"
-"   float attenuation;\n"
-"   vec4 litColour;\n"
-"   vec3 varyingLightColour;\n"
-"   float varyingLightCutoffSquared;\n"
-"   float dynshadowval;\n"
-"	float statshadowval;\n"
-"	vec2 displacement;\n"
-"	vec2 displacement2;\n"
-"	vec2 displacement3;\n"
-"	vec2 displacement4;\n"
-
-"   varyingLightColour = lightColour;\n"
-"   varyingLightCutoffSquared = lightCutoffSquared;\n"
-
-"	vec3 relativeEyeDirection = normalize( EyeDir );\n"
-
-"   vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
-"   vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;\n"
-
-"   lightmap = texture2D( lmTexture, gl_TexCoord[1].st );\n"
-"	alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );\n"
-
-"   //shadows\n"
-"	if(DYNAMIC > 0)\n"
-"		dynshadowval = lookupDynshadow();\n"
-"	else\n"
-"		dynshadowval = 0.0;\n"
-
-"	if(STATSHADOW > 0)\n"
-"		statshadowval = lookupStatshadow();\n"
-"	else\n"
-"		statshadowval = 1.0;\n"
-
-"	bloodColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
-"	displacement4 = vec2(0.0, 0.0);\n"
-"	if(LIQUID > 0)\n"
-"	{\n"
-"		vec3 noiseVec;\n"
-"		vec3 noiseVec2;\n"
-"		vec3 noiseVec3;\n"
-
-"		//for liquid fx scrolling\n"
-"		vec4 texco = gl_TexCoord[0];\n"
-"		texco.t = texco.t - rsTime*1.0/LIQUID;\n"
-
-"		vec4 texco2 = gl_TexCoord[0];\n"
-"		texco2.t = texco2.t - rsTime*0.9/LIQUID;\n"
-"		//shift the horizontal here a bit\n"
-"		texco2.s = texco2.s/1.5;\n"
-
-"		vec4 texco3 = gl_TexCoord[0];\n"
-"		texco3.t = texco3.t - rsTime*0.6/LIQUID;\n"
-
-"       vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
-"       Offset = Offset * 0.04 - 0.02;\n"
-"       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
-
-"		displacement = texco.st;\n"
-
-"		noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;\n"
-"		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
-
-"		displacement2 = texco2.st;\n"
-
-"		noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;\n"
-"		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
-
-"		if(LIQUID > 2)\n"
-"		{\n"
-"			displacement3 = texco3.st;\n"
-
-"			noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;\n"
-"			noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;\n"
-"		}\n"
-"		else\n"
-"		{\n"
-"			//used for water effect only\n"
-"			displacement4.x = noiseVec.x + noiseVec2.x;\n"
-"			displacement4.y = noiseVec.y + noiseVec2.y;\n"
-"		}\n"
-
-"		displacement.x = texco.s + noiseVec.x + TexCoords.x;\n"
-"		displacement.y = texco.t + noiseVec.y + TexCoords.y;\n"
-"		displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;\n"
-"		displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;\n"
-"		displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;\n"
-"		displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;\n"
-
-"		if(LIQUID > 2)\n"
-"		{\n"
-"			vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);\n"
-"			vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);\n"
-"			vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);\n"
-"			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);\n"
-"			bloodColor = max(diffuse1, diffuse2);\n"
-"			bloodColor = max(bloodColor, diffuse3);\n"
-"		}\n"
-"	}\n"
-
-"   if(PARALLAX > 0) {\n"
-"      //do the parallax mapping\n"
-"      vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
-"      Offset = Offset * 0.04 - 0.02;\n"
-"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;\n"
-
-"      diffuse = texture2D( surfTexture, TexCoords );\n"
-
-"	   relativeLightDirection = normalize (StaticLightDir);\n"
-
-"      diffuseTerm = dot( normal, relativeLightDirection  );\n"
-
-"	   if( diffuseTerm > 0.0 )\n"
-"	   {\n"
-"		 halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
-
-"        specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
-"        specularTerm = pow( specularTerm, 32.0 );\n"
-
-"        litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);\n"
-"      }\n"
-"      else\n"
-"	   {\n"
-"        litColour = vec4( 0.0, 0.0, 0.0, 6.0 );\n"
-"      }\n"
-
-"      gl_FragColor = max(litColour, diffuse * 2.0);\n"
-"	   gl_FragColor = (gl_FragColor * lightmap) + bloodColor;\n"
-"	   gl_FragColor = (gl_FragColor * statshadowval);\n"
-"   }\n"
-"   else {\n"
-"      diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);\n"
-"      gl_FragColor = (diffuse * lightmap * 2.0);\n"
-"	   gl_FragColor = (gl_FragColor * statshadowval);\n"
-"   }\n"
-
-"   if(DYNAMIC > 0) {\n"
-
-"	   lightmap = texture2D(lmTexture, gl_TexCoord[1].st);\n"
-
-"      //now do the dynamic lighting\n"
-"      distanceSquared = dot( LightDir, LightDir );\n"
-"      relativeLightDirection = LightDir / sqrt( distanceSquared );\n"
-
-"      diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );\n"
-"      vec3 colour = vec3( 0.0, 0.0, 0.0 );\n"
-
-"      if( diffuseTerm > 0.0 )\n"
-"      {\n"
-"         halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
-
-"         float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
-"         specularTerm = pow( specularTerm, 32.0 );\n"
-
-"         colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;\n"
-"      }\n"
-
-"      attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );\n"
-
-"      swamp = attenuation;\n"
-"      swamp *= swamp;\n"
-"      swamp *= swamp;\n"
-"      swamp *= swamp;\n"
-
-"      colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;\n"
-
-"      vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );\n"
-"      if(PARALLAX > 0) {\n"
-"         dynamicColour = max(dynamicColour, gl_FragColor);\n"
-"      }\n"
-"      else {\n"
-"         dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);\n"
-"      }\n"
-"      gl_FragColor = dynamicColour;\n"
-"   }\n"
-
-"	gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);\n"
-"   if(FOG > 0)\n"
-"      gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
-"}\n";
+static char bsp_vertex_program[] = STRINGIFY (
+	uniform mat3 tangentSpaceTransform;
+	uniform vec3 Eye;
+	uniform vec3 lightPosition;
+	uniform vec3 staticLightPosition;
+	uniform float rsTime;
+	uniform int LIQUID;
+	uniform int FOG;
+	uniform int PARALLAX;
+	uniform int DYNAMIC;
+
+	varying vec3 EyeDir;
+	varying vec3 LightDir;
+	varying vec3 StaticLightDir;
+	varying vec4 sPos;
+	varying float fog;
+
+	void main( void )
+	{
+		sPos = gl_Vertex;
+
+		gl_Position = ftransform();
+
+		gl_FrontColor = gl_Color;
+
+		EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
+		if (DYNAMIC > 0){
+			LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);
+		}
+		if (PARALLAX > 0){
+			StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);
+		}
+
+		// pass any active texunits through
+		gl_TexCoord[0] = gl_MultiTexCoord0;
+		gl_TexCoord[1] = gl_MultiTexCoord1;
+
+		//fog
+		if(FOG > 0){
+			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+			fog = clamp(fog, 0.0, 1.0);
+		}
+	}
+);
+
+static char bsp_fragment_program[] = STRINGIFY (
+	uniform sampler2D surfTexture;
+	uniform sampler2D HeightTexture;
+	uniform sampler2D NormalTexture;
+	uniform sampler2D lmTexture;
+	uniform sampler2D liquidTexture;
+	uniform sampler2D liquidNormTex;
+	uniform sampler2D ShadowMap;
+	uniform sampler2D StatShadowMap;
+	uniform vec3 lightColour;
+	uniform float lightCutoffSquared;
+	uniform int FOG;
+	uniform int PARALLAX;
+	uniform int DYNAMIC;
+	uniform int STATSHADOW;
+	uniform int SHADOWMAP;
+	uniform int LIQUID;
+	uniform float rsTime;
+
+	varying vec4 sPos;
+	varying vec3 EyeDir;
+	varying vec3 LightDir;
+	varying vec3 StaticLightDir;
+	varying float fog;
+
+	float lookupDynshadow( void )
+	{
+		vec4 ShadowCoord;
+		vec4 shadowCoordinateWdivide;
+		float distanceFromLight;
+		vec4 tempShadowCoord;
+		float shadow1 = 1.0;
+		float shadow2 = 1.0;
+		float shadow3 = 1.0;
+		float shadows = 1.0;
+
+		if(SHADOWMAP > 0) {
+		
+			ShadowCoord = gl_TextureMatrix[7] * sPos;
+			
+			shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
+			// Used to lower moir pattern and self-shadowing
+			shadowCoordinateWdivide.z += 0.0005;
+			
+			distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
+			
+			if (ShadowCoord.w > 0.0)
+				shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+		
+			//Blur shadows a bit
+			tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);
+			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
+			shadowCoordinateWdivide.z += 0.0005;
+			
+			distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
+			
+			if (ShadowCoord.w > 0.0)
+				shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+			
+			tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);
+			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
+			shadowCoordinateWdivide.z += 0.0005;
+			
+			distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
+			
+			if (ShadowCoord.w > 0.0)
+				shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+			
+			shadows = 0.33 * (shadow1 + shadow2 + shadow3);
+
+		}
+
+		return shadows;
+	}
+
+	float lookupStatshadow( void )
+	{
+		vec4 ShadowCoord;
+		vec4 shadowCoordinateWdivide;
+		float distanceFromLight;
+		vec4 tempShadowCoord;
+		float shadow1 = 1.0;
+		float shadow2 = 1.0;
+		float shadow3 = 1.0;
+		float shadows = 1.0;
+
+		if(SHADOWMAP > 0) {
+			
+			ShadowCoord = gl_TextureMatrix[6] * sPos;
+			
+			shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
+			// Used to lower moir pattern and self-shadowing
+			shadowCoordinateWdivide.z += 0.0005;
+			
+			distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
+			
+			if (ShadowCoord.w > 0.0)
+				shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
+			
+			//Blur shadows a bit
+			tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);
+			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
+			shadowCoordinateWdivide.z += 0.0005;
+			
+			distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
+			
+			if (ShadowCoord.w > 0.0)
+				shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
+		
+			tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);
+			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
+			shadowCoordinateWdivide.z += 0.0005;
+			
+			distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
+			
+			if (ShadowCoord.w > 0.0)
+				shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
+			
+			shadows = 0.33 * (shadow1 + shadow2 + shadow3);
+
+		}
+
+		return shadows;
+	}
+
+	void main( void )
+	{
+		vec4 diffuse;
+		vec4 lightmap;
+		vec4 alphamask;
+		vec4 bloodColor;
+		float distanceSquared;
+		vec3 relativeLightDirection;
+		float diffuseTerm;
+		vec3 halfAngleVector;
+		float specularTerm;
+		float swamp;
+		float attenuation;
+		vec4 litColour;
+		vec3 varyingLightColour;
+		float varyingLightCutoffSquared;
+		float dynshadowval;
+		float statshadowval;
+		vec2 displacement;
+		vec2 displacement2;
+		vec2 displacement3;
+		vec2 displacement4;
+
+		varyingLightColour = lightColour;
+		varyingLightCutoffSquared = lightCutoffSquared;
+
+		vec3 relativeEyeDirection = normalize( EyeDir );
+
+		vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
+		vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
+
+		lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
+		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
+
+	   	//shadows
+		if(DYNAMIC > 0)
+			dynshadowval = lookupDynshadow();
+		else
+			dynshadowval = 0.0;
+
+		if(STATSHADOW > 0)
+			statshadowval = lookupStatshadow();
+		else
+			statshadowval = 1.0;
+
+		bloodColor = vec4(0.0, 0.0, 0.0, 0.0);
+		displacement4 = vec2(0.0, 0.0);
+		if(LIQUID > 0)
+		{
+			vec3 noiseVec;
+			vec3 noiseVec2;
+			vec3 noiseVec3;
+
+			//for liquid fx scrolling
+			vec4 texco = gl_TexCoord[0];
+			texco.t = texco.t - rsTime*1.0/LIQUID;
+
+			vec4 texco2 = gl_TexCoord[0];
+			texco2.t = texco2.t - rsTime*0.9/LIQUID;
+			//shift the horizontal here a bit
+			texco2.s = texco2.s/1.5;
+
+			vec4 texco3 = gl_TexCoord[0];
+			texco3.t = texco3.t - rsTime*0.6/LIQUID;
+
+			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
+			Offset = Offset * 0.04 - 0.02;
+			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;
+
+			displacement = texco.st;
+
+			noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;
+			noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
+
+			displacement2 = texco2.st;
+
+			noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;
+			noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
+
+			if(LIQUID > 2)
+			{
+				displacement3 = texco3.st;
+
+				noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;
+				noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
+			}
+			else
+			{
+				//used for water effect only
+				displacement4.x = noiseVec.x + noiseVec2.x;
+				displacement4.y = noiseVec.y + noiseVec2.y;
+			}
+
+			displacement.x = texco.s + noiseVec.x + TexCoords.x;
+			displacement.y = texco.t + noiseVec.y + TexCoords.y;
+			displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
+			displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
+			displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;
+			displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;
+
+			if(LIQUID > 2)
+			{
+				vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
+				vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
+				vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);
+				vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
+				bloodColor = max(diffuse1, diffuse2);
+				bloodColor = max(bloodColor, diffuse3);
+			}
+		}
+
+	   if(PARALLAX > 0) {
+			//do the parallax mapping
+			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
+			Offset = Offset * 0.04 - 0.02;
+			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
+
+			diffuse = texture2D( surfTexture, TexCoords );
+
+			relativeLightDirection = normalize (StaticLightDir);
+
+			diffuseTerm = dot( normal, relativeLightDirection  );
+
+			if( diffuseTerm > 0.0 )
+			{
+				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
+
+				specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
+				specularTerm = pow( specularTerm, 32.0 );
+
+				litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);
+			}
+			else
+			{
+				litColour = vec4( 0.0, 0.0, 0.0, 6.0 );
+			}
+
+			gl_FragColor = max(litColour, diffuse * 2.0);
+			gl_FragColor = (gl_FragColor * lightmap) + bloodColor;
+			gl_FragColor = (gl_FragColor * statshadowval);
+	   }
+	   else
+	   {
+			diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);
+			gl_FragColor = (diffuse * lightmap * 2.0);
+			gl_FragColor = (gl_FragColor * statshadowval);
+	   }
+
+	   if(DYNAMIC > 0) {
+
+			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
+
+			//now do the dynamic lighting
+			distanceSquared = dot( LightDir, LightDir );
+			relativeLightDirection = LightDir / sqrt( distanceSquared );
+
+			diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );
+			vec3 colour = vec3( 0.0, 0.0, 0.0 );
+
+			if( diffuseTerm > 0.0 )
+			{
+				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
+
+				float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
+				specularTerm = pow( specularTerm, 32.0 );
+
+				colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;
+			}
+
+			attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );
+
+			swamp = attenuation;
+			swamp *= swamp;
+			swamp *= swamp;
+			swamp *= swamp;
+
+			colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
+
+			vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
+			if(PARALLAX > 0) {
+				dynamicColour = max(dynamicColour, gl_FragColor);
+			}
+			else {
+				dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
+			}
+			gl_FragColor = dynamicColour;
+	   }
+
+		gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
+		if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
+	}
+);
 
 //MESHES
 static char mesh_vertex_program[] =
