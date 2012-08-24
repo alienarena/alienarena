@@ -342,7 +342,6 @@ void VB_VCInit()
 		qglGenBuffersARB(1, &vcm.vertCacheList[i].id);
 }
 
-
 void R_VCShutdown()
 {
 	int			i;
@@ -353,13 +352,16 @@ void R_VCShutdown()
 
 	//delete buffers
 	qglDeleteBuffersARB(1, &vboId);
+	
+	for (i=0; i<MAX_VERTEX_CACHES; i++)
+	{
+		if(&vcm.vertCacheList[i])
+			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
+	}
 
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
 	{
 		next = cache->next;
 		R_VCFree(cache);
 	}
-
-	for (i=0; i<MAX_VERTEX_CACHES; i++)
-		qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
 }
