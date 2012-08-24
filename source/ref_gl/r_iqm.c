@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_iqm.h"
 #include "r_ragdoll.h"
 
-#define RAGDOLLVBO 0
+#define RAGDOLLVBO 1
 
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
@@ -2143,6 +2143,18 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			}
 		}
 #if RAGDOLLVBO
+
+		if(gl_state.vbo && !has_vbo && r_gpuanim->integer)
+        {
+            vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+            vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+            vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+            vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+            vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+
+            if(r_gpuanim_debug->integer)
+                Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
+        }
 		
 		if(has_vbo) 
 		{			
@@ -2481,6 +2493,18 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				}
 			}
 #if RAGDOLLVBO
+
+			if(gl_state.vbo && stage->normalmap && !has_vbo && r_gpuanim->integer)
+            {
+                vbo_xyz = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
+                vbo_st = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t), RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST, RagDoll[RagDollID].ragDollMesh);
+                vbo_normals = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t), RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL, RagDoll[RagDollID].ragDollMesh);
+                vbo_tangents = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t), RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT, RagDoll[RagDollID].ragDollMesh);
+                vbo_indices = R_VCLoadData(VBO_STATIC, RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int), RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES, RagDoll[RagDollID].ragDollMesh);
+
+                if(r_gpuanim_debug->integer)
+                    Com_Printf("loaded vbo for %s\n", RagDoll[RagDollID].ragDollMesh->name);
+            }
 			
 			if(has_vbo /*&& stage->normalmap*/) 
 			{				

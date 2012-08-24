@@ -102,14 +102,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 		if (texnum != oldtexnum || oldblendsrc != blendsrc || 
 			oldblenddst != blenddst)
-		{
-			if (va)
-			{
-				R_DrawVarrays(GL_QUADS, 0, va, false);
-				VArray = &VArrayVerts[0];
-				va = 0;
-			}
-			
+		{	
 			if (oldtexnum != texnum)
 				qglBindTexture (GL_TEXTURE_2D, texnum);
 			
@@ -232,8 +225,10 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 				corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
 		}
 
-		for(k = 0; k < 4; k++) {
+		VArray = &VArrayVerts[0];
 
+		for(k = 0; k < 4; k++) 
+		{
 			 VArray[0] = corner[k][0];
              VArray[1] = corner[k][1];
              VArray[2] = corner[k][2];
@@ -261,16 +256,10 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			 	VArray[5+j] = (float)color[j]/255.0f;
 
 			 VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-			 va++;
 		}
-	}
-	
-	if (va)
-	{
-		R_DrawVarrays(GL_QUADS, 0, va, false);
-		va = 0;
-		VArray = &VArrayVerts[0];
-	}
+
+		R_DrawVarrays(GL_QUADS, 0, 4, false);
+	}	
 	
 	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
