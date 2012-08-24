@@ -51,7 +51,6 @@ static vertCache_t	*vbo_st;
 static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
 static vertCache_t *vbo_tangents;
-static vertCache_t *vbo_indices;
 
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
@@ -1586,21 +1585,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				if (gl_state.vbo && !lerped)
 				{
 					vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
-					if (vbo_xyz) 
-					{						
-						vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
-						if(vbo_st)
-						{
-							vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
-							if(vbo_normals)
-							{
-								vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
-								if(vbo_tangents)
-								{
-									goto skipLoad;
-								}
-							}
-						}
+					vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
+					vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
+					vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
+					if(vbo_xyz && vbo_st && vbo_normals && vbo_tangents)
+					{
+						goto skipLoad;
 					}
 				}
 			}			
