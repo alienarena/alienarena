@@ -569,8 +569,7 @@ static char bsp_fragment_program[] =
 
 "      diffuse = texture2D( surfTexture, TexCoords );\n"
 
-"	   distanceSquared = dot( StaticLightDir, StaticLightDir );\n"
-"      relativeLightDirection = StaticLightDir / sqrt( distanceSquared );\n"
+"	   relativeLightDirection = normalize (StaticLightDir);\n"
 
 "      diffuseTerm = clamp( dot( normal, relativeLightDirection  ), 0.0, 1.0 );\n"
 "      colour = vec3( 0.0, 0.0, 0.0 );\n"
