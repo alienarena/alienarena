@@ -458,7 +458,6 @@ static char bsp_fragment_program[] =
 "   float distanceSquared;\n"
 "   vec3 relativeLightDirection;\n"
 "   float diffuseTerm;\n"
-"   vec3 colour;\n"
 "   vec3 halfAngleVector;\n"
 "   float specularTerm;\n"
 "   float swamp;\n"
@@ -571,8 +570,7 @@ static char bsp_fragment_program[] =
 
 "	   relativeLightDirection = normalize (StaticLightDir);\n"
 
-"      diffuseTerm = clamp( dot( normal, relativeLightDirection  ), 0.0, 1.0 );\n"
-"      colour = vec3( 0.0, 0.0, 0.0 );\n"
+"      diffuseTerm = dot( normal, relativeLightDirection  );\n"
 
 "	   if( diffuseTerm > 0.0 )\n"
 "	   {\n"
@@ -581,10 +579,13 @@ static char bsp_fragment_program[] =
 "        specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
 "        specularTerm = pow( specularTerm, 32.0 );\n"
 
-"        colour = specularTerm + ( ( 2.9765625 * diffuseTerm ) + 0.0234375 ) * textureColour;\n"
+"        litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);\n"
+"      }\n"
+"      else\n"
+"	   {\n"
+"        litColour = vec4( 0.0, 0.0, 0.0, 6.0 );\n"
 "      }\n"
 
-"      litColour = vec4( colour, 6.0 );\n"
 "      gl_FragColor = max(litColour, diffuse * 2.0);\n"
 "	   gl_FragColor = (gl_FragColor * lightmap) + bloodColor;\n"
 "	   gl_FragColor = (gl_FragColor * statshadowval);\n"
@@ -604,7 +605,7 @@ static char bsp_fragment_program[] =
 "      relativeLightDirection = LightDir / sqrt( distanceSquared );\n"
 
 "      diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );\n"
-"      colour = vec3( 0.0, 0.0, 0.0 );\n"
+"      vec3 colour = vec3( 0.0, 0.0, 0.0 );\n"
 
 "      if( diffuseTerm > 0.0 )\n"
 "      {\n"
