@@ -1127,8 +1127,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		else if (alpha > 1.0)
 			alpha = 1.0;
 
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
-
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
+		{
             vec3_t lightVec, lightVal;
 
 			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
@@ -1179,6 +1179,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
             glUniform1iARB( g_location_useGlow, 0);
 
 			glUniform1iARB( g_location_useScatter, 0);
+
+			glUniform1iARB( g_location_useShell, 0);
 
             glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
@@ -1567,6 +1569,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					glUniform1iARB( g_location_useGlow, 0);
 
 				glUniform1iARB( g_location_useScatter, 1);
+
+				glUniform1iARB( g_location_useShell, 0);
 
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 

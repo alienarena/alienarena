@@ -677,8 +677,9 @@ extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
 extern GLuint		g_location_useScatter;
-extern GLuint		g_location_outframe;
+extern GLuint		g_location_useShell;
 extern GLuint		g_location_useGPUanim;
+extern GLuint		g_location_outframe;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;

@@ -1407,7 +1407,10 @@ void IQM_DrawFrame(int skinnum)
 		if(!has_vbo)
 		{
 			if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+			{
 				glUniform1iARB(g_location_useGPUanim, 0);
+				glUniform1iARB( g_location_useShell, 0);
+			}
 
 			for (i=0; i<currentmodel->num_triangles; i++)
 			{
@@ -1443,6 +1446,7 @@ void IQM_DrawFrame(int skinnum)
 			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
 										
 			glUniform1iARB(g_location_useGPUanim, 1);
+			glUniform1iARB( g_location_useShell, 1);
 
 			//send outframe, blendweights, and blendindexes to shader
 			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
@@ -1771,6 +1775,8 @@ void IQM_DrawFrame(int skinnum)
 
 				glUniform1iARB( g_location_useScatter, 1);
 
+				glUniform1iARB( g_location_useShell, 0);
+
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
@@ -2079,7 +2085,10 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		if(!has_vbo)
 		{
 			if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+			{
 				glUniform1iARB(g_location_useGPUanim, 0);
+				glUniform1iARB( g_location_useShell, 1);
+			}
 
 			for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
 			{
@@ -2123,6 +2132,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
 										
 			glUniform1iARB(g_location_useGPUanim, 1);
+			glUniform1iARB( g_location_useShell, 1);
 
 			//send outframe, blendweights, and blendindexes to shader
 			glUniformMatrix3x4fvARB( g_location_outframe, RagDoll[RagDollID].ragDollMesh->num_joints, GL_FALSE, (const GLfloat *) RagDoll[RagDollID].ragDollMesh->outframe );
@@ -2385,6 +2395,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					glUniform1iARB( g_location_useGlow, 0);
 
 				glUniform1iARB( g_location_useScatter, 1);
+
+				glUniform1iARB( g_location_useShell, 0);
 
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 

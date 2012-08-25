@@ -118,8 +118,9 @@ GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
 GLuint		g_location_useScatter;
-GLuint		g_location_outframe;
+GLuint		g_location_useShell;
 GLuint		g_location_useGPUanim;
+GLuint		g_location_outframe;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -309,10 +310,12 @@ static char bsp_vertex_program[] = STRINGIFY (
 		gl_FrontColor = gl_Color;
 
 		EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
-		if (DYNAMIC > 0){
+		if (DYNAMIC > 0)
+		{
 			LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);
 		}
-		if (PARALLAX > 0){
+		if (PARALLAX > 0)
+		{
 			StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);
 		}
 
@@ -364,8 +367,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 		float shadow3 = 1.0;
 		float shadows = 1.0;
 
-		if(SHADOWMAP > 0) {
-		
+		if(SHADOWMAP > 0) 
+		{		
 			ShadowCoord = gl_TextureMatrix[7] * sPos;
 			
 			shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
@@ -414,8 +417,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 		float shadow3 = 1.0;
 		float shadows = 1.0;
 
-		if(SHADOWMAP > 0) {
-			
+		if(SHADOWMAP > 0) 
+		{			
 			ShadowCoord = gl_TextureMatrix[6] * sPos;
 			
 			shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
@@ -564,7 +567,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 			}
 		}
 
-	   if(PARALLAX > 0) {
+	   if(PARALLAX > 0) 
+	   {
 			//do the parallax mapping
 			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
 			Offset = Offset * 0.04 - 0.02;
@@ -601,8 +605,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 			gl_FragColor = (gl_FragColor * statshadowval);
 	   }
 
-	   if(DYNAMIC > 0) {
-
+	   if(DYNAMIC > 0) 
+	   {
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 
 			//now do the dynamic lighting
@@ -632,10 +636,12 @@ static char bsp_fragment_program[] = STRINGIFY (
 			colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
 
 			vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
-			if(PARALLAX > 0) {
+			if(PARALLAX > 0) 
+			{
 				dynamicColour = max(dynamicColour, gl_FragColor);
 			}
-			else {
+			else 
+			{
 				dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
 			}
 			gl_FragColor = dynamicColour;
@@ -648,210 +654,215 @@ static char bsp_fragment_program[] = STRINGIFY (
 );
 
 //MESHES
-static char mesh_vertex_program[] =
-"uniform vec3 lightPos;\n"
-"uniform float time;\n"
-"uniform int FOG;\n"
-"uniform mat3x4 bonemats[80];\n"
-"uniform int GPUANIM;\n"
+static char mesh_vertex_program[] = STRINGIFY (
+	uniform vec3 lightPos;
+	uniform float time;
+	uniform int FOG;
+	uniform mat3x4 bonemats[80];
+	uniform int GPUANIM;
+	uniform int useShell;
 
-"attribute vec4 tangent;\n"
-"attribute vec4 weights;\n"
-"attribute vec4 bones;\n"
+	attribute vec4 tangent;
+	attribute vec4 weights;
+	attribute vec4 bones;
 
-"varying vec3 LightDir;\n"
-"varying vec3 EyeDir;\n"
-"varying float fog;\n"
+	varying vec3 LightDir;
+	varying vec3 EyeDir;
+	varying float fog;
 
-"varying vec3 vertPos, lightVec;\n"
-"varying vec3 worldNormal;\n"
+	varying vec3 vertPos, lightVec;
+	varying vec3 worldNormal;
 
-"void subScatterVS(in vec4 ecVert)\n"
-"{\n"
-"	lightVec = lightPos - ecVert.xyz;\n"
-"	vertPos = ecVert.xyz;\n"
-"}\n"
+	void subScatterVS(in vec4 ecVert)
+	{
+		lightVec = lightPos - ecVert.xyz;
+		vertPos = ecVert.xyz;
+	}
 
-"void main()\n"
-"{\n"
+	void main()
+	{
+		vec3 n;
+		vec3 t;
+		vec3 b;
 
-"	vec3 n;\n"
-"	vec3 t;\n"
-"	vec3 b;\n"
+		if(GPUANIM > 0)
+		{
+			mat3x4 m = bonemats[int(bones.x)] * weights.x;
+			m += bonemats[int(bones.y)] * weights.y;
+			m += bonemats[int(bones.z)] * weights.z;
+			m += bonemats[int(bones.w)] * weights.w;
+			vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
+			gl_Position = gl_ModelViewProjectionMatrix * mpos;
 
-"	if(GPUANIM > 0)\n"
-"	{\n"
-"		mat3x4 m = bonemats[int(bones.x)] * weights.x;\n"
-"		m += bonemats[int(bones.y)] * weights.y;\n"
-"		m += bonemats[int(bones.z)] * weights.z;\n"
-"		m += bonemats[int(bones.w)] * weights.w;\n"
-"		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);\n"
-"		gl_Position = gl_ModelViewProjectionMatrix * mpos;\n"
+			subScatterVS(gl_Position);
 
-"		subScatterVS(gl_Position);\n"
+			n = normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m));
 
-"		n = normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m));\n"
+			t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));
 
-"		t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));\n"
+			b = normalize(gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t); 
 
-"		b = normalize(gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t);\n" //this is not perfect but it is very close?
-//"		b = tangent.w * cross(n, t);\n" //this should be correct, but it is way off for some reason
+			EyeDir = vec3(gl_ModelViewMatrix * mpos);
+		}
+		else
+		{	
+			subScatterVS(gl_ModelViewProjectionMatrix * gl_Vertex);
 
-"		EyeDir = vec3(gl_ModelViewMatrix * mpos);\n"
-"	}\n"
-"	else\n"
-"	{\n"	
-"		subScatterVS(gl_ModelViewProjectionMatrix * gl_Vertex);\n"
+			gl_Position = ftransform();
 
-"		gl_Position = ftransform();\n"
+			n = normalize(gl_NormalMatrix * gl_Normal);
 
-"		n = normalize(gl_NormalMatrix * gl_Normal);\n"
+			t = normalize(gl_NormalMatrix * tangent.xyz);
 
-"		t = normalize(gl_NormalMatrix * tangent.xyz);\n"
+			b = tangent.w * cross(n, t);
 
-"		b = tangent.w * cross(n, t);\n"
+			EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
+		}
 
-"		EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);\n"
-"	}\n"
+		worldNormal = n;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
 
-"	worldNormal = n;\n"
-"	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+		vec3 v;
+		v.x = dot(lightPos, t);
+		v.y = dot(lightPos, b);
+		v.z = dot(lightPos, n);
+		LightDir = normalize(v);
 
-"	vec3 v;\n"
-"	v.x = dot(lightPos, t);\n"
-"	v.y = dot(lightPos, b);\n"
-"	v.z = dot(lightPos, n);\n"
-"	LightDir = normalize(v);\n"
+		v.x = dot(EyeDir, t);
+		v.y = dot(EyeDir, b);
+		v.z = dot(EyeDir, n);
+		EyeDir = normalize(v);
 
-"	v.x = dot(EyeDir, t);\n"
-"	v.y = dot(EyeDir, b);\n"
-"	v.z = dot(EyeDir, n);\n"
-"	EyeDir = normalize(v);\n"
+		//for scrolling fx
+		vec4 texco = gl_MultiTexCoord0;
+		texco.s = texco.s + time*1.0;
+		texco.t = texco.t + time*1.0;
+		gl_TexCoord[1] = texco;
 
-"	//for scrolling fx\n"
-"	vec4 texco = gl_MultiTexCoord0;\n"
-"	texco.s = texco.s + time*1.0;\n"
-"	texco.t = texco.t + time*1.0;\n"
-"	gl_TexCoord[1] = texco;\n"
+		if(useShell)
+			gl_TexCoord[0] = texco;
 
-"	//fog\n"
-"   if(FOG > 0) {\n"
-"		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
-"		fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear\n"
-"   }\n"
+		//fog
+	   if(FOG > 0) 
+	   {
+			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
+	   }
+	}
+);
 
-"}\n";
+static char mesh_fragment_program[] = STRINGIFY (
+	uniform sampler2D baseTex;
+	uniform sampler2D normalTex;
+	uniform sampler2D fxTex;
+	uniform vec3 baseColor;
+	uniform int FOG;
+	uniform int useFX;
+	uniform int useGlow;
+	uniform int useScatter;
+	uniform int useShell;
+	uniform float minLight;
+	uniform vec3 lightPos;
+	const float SpecularFactor = 0.5;
 
-static char mesh_fragment_program[] =
-"uniform sampler2D baseTex;\n"
-"uniform sampler2D normalTex;\n"
-"uniform sampler2D fxTex;\n"
-"uniform vec3 baseColor;\n"
-"uniform int FOG;\n"
-"uniform int useFX;\n"
-"uniform int useGlow;\n"
-"uniform int useScatter;\n"
-"uniform float minLight;\n"
-"uniform vec3 lightPos;\n"
-"const float SpecularFactor = 0.5;\n"
+	varying vec3 LightDir;
+	varying vec3 EyeDir;
+	varying float fog;
 
-"varying vec3 LightDir;\n"
-"varying vec3 EyeDir;\n"
-"varying float fog;\n"
+	//next group could be made uniforms if we want to control this 
+	const float MaterialThickness = 2.0; //this val seems good for now
+	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
+	const float RimScalar = 10.0; //intensity of the rim effect
 
-//next group could be made uniforms if we want to control this 
-"const float MaterialThickness = 2.0;\n" //this val seems good for now
-"const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20);\n" //controls subsurface value
-"const float RimScalar = 10.0;\n" //intensity of the rim effect
+	varying vec3 vertPos, lightVec, worldNormal; 
 
-"varying vec3 vertPos, lightVec, worldNormal;\n" 
+	float halfLambert(in vec3 vect1, in vec3 vect2)
+	{
+		float product = dot(vect1,vect2);
+		return product * 0.5 + 0.5;
+	}
 
-"float halfLambert(in vec3 vect1, in vec3 vect2)\n"
-"{\n"
-"	float product = dot(vect1,vect2);\n"
-"	return product * 0.5 + 0.5;\n"
-"}\n"
+	float blinnPhongSpecular(in vec3 normalVec, in vec3 lightVec, in float specPower)
+	{
+		vec3 halfAngle = normalize(normalVec + lightVec);
+		return pow(clamp(0.0,1.0,dot(normalVec,halfAngle)),specPower);
+	}
 
-"float blinnPhongSpecular(in vec3 normalVec, in vec3 lightVec, in float specPower)\n"
-"{\n"
-"	vec3 halfAngle = normalize(normalVec + lightVec);\n"
-"	return pow(clamp(0.0,1.0,dot(normalVec,halfAngle)),specPower);\n"
-"}\n"
+	void main()
+	{
+		vec3 litColor;
+		vec4 fx;
+		vec4 glow;
+		vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);
 
-"void main()\n"
-"{\n"
-"	vec3 litColor;\n"
-"	vec4 fx;\n"
-"	vec4 glow;\n"
-"	vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);\n"
+		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
+		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
 
-"   vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;\n"
-"   vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
+		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
+		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
-"	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);\n"
-"	vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);\n"
+		if(useScatter > 0)
+		{
+			vec4 SpecColor = vec4(baseColor, 1.0)/2.0;
 
-"	if(useScatter > 0)\n"
-"	{\n"
-"		vec4 SpecColor = vec4(baseColor, 1.0)/2.0;\n"
+			float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos)); 
+			vec3 wNorm = worldNormal;
+			vec3 eVec = EyeDir;
+			vec3 lVec = normalize(lightVec);
 
-"		float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos));\n" 
-"		vec3 wNorm = worldNormal;\n"
-"		vec3 eVec = EyeDir;\n"
-"		vec3 lVec = normalize(lightVec);\n"
+			vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);
 
-"		vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);\n"
+			vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm, lVec)));
+			indirectLightComponent += MaterialThickness * halfLambert(-eVec, lVec);
+			indirectLightComponent *= attenuation;
+			indirectLightComponent.r *= ExtinctionCoefficient.r;
+			indirectLightComponent.g *= ExtinctionCoefficient.g;
+			indirectLightComponent.b *= ExtinctionCoefficient.b;
 
-"		vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm, lVec)));\n"
-"		indirectLightComponent += MaterialThickness * halfLambert(-eVec, lVec);\n"
-"		indirectLightComponent *= attenuation;\n"
-"		indirectLightComponent.r *= ExtinctionCoefficient.r;\n"
-"		indirectLightComponent.g *= ExtinctionCoefficient.g;\n"
-"		indirectLightComponent.b *= ExtinctionCoefficient.b;\n"
+			vec3 rim = vec3(1.0 - max(0.0,dot(wNorm, eVec)));
+			rim *= rim;
+			rim *= max(0.0,dot(wNorm, lVec)) * SpecColor.rgb;
 
-"		vec3 rim = vec3(1.0 - max(0.0,dot(wNorm, eVec)));\n"
-"		rim *= rim;\n"
-"		rim *= max(0.0,dot(wNorm, lVec)) * SpecColor.rgb;\n"
+			scatterCol = dotLN + vec4(indirectLightComponent, 1.0);
+			scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);
+			scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);
+			scatterCol.rgb *= baseColor;
+			scatterCol.rgb /= (specmask.a*specmask.a);//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
+		}
 
-"		scatterCol = dotLN + vec4(indirectLightComponent, 1.0);\n"
-"		scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);\n"
-"		scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);\n"
-"		scatterCol.rgb *= baseColor;\n" 
-"		scatterCol.rgb /= (specmask.a*specmask.a);\n"//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
-"	}\n"
+		//moving fx texture
+		if(useFX > 0)
+			fx = texture2D( fxTex, gl_TexCoord[1].xy );
+		else
+			fx = vec4(0.0, 0.0, 0.0, 0.0);
 
-"	//moving fx texture\n"
-"	if(useFX > 0)\n"
-"		fx = texture2D( fxTex, gl_TexCoord[1].xy );\n"
-"	else\n"
-"		fx = vec4(0.0, 0.0, 0.0, 0.0);\n"
+		//glowing fx texture
+		if(useGlow > 0)
+			glow = texture2D(fxTex, gl_TexCoord[0].xy );
 
-"	//glowing fx texture\n"
-"	if(useGlow > 0)\n"
-"		glow = texture2D(fxTex, gl_TexCoord[0].xy );\n"
+		litColor = textureColour * max(dot(normal, LightDir), 0.0);
+		vec3 reflectDir = reflect(LightDir, normal);
 
-"	litColor = textureColour * max(dot(normal, LightDir), 0.0);\n"
-"	vec3 reflectDir = reflect(LightDir, normal);\n"
+		float spec = max(dot(EyeDir, reflectDir), 0.0);
+		spec = pow(spec, 6.0);
+		spec *= (SpecularFactor*specmask.a);
+		litColor = min(litColor + spec, vec3(1.0));
 
-"	float spec = max(dot(EyeDir, reflectDir), 0.0);\n"
-"	spec = pow(spec, 6.0);\n"
-"	spec *= (SpecularFactor*specmask.a);\n"
-"	litColor = min(litColor + spec, vec3(1.0));\n"
+		//keep shadows from making meshes completely black
+		litColor = max(litColor, (textureColour * vec3(minLight)));
 
-"	//keep shadows from making meshes completely black\n"
-"	litColor = max(litColor, (textureColour * vec3(minLight)));\n"
+		gl_FragColor = vec4(litColor * baseColor, 1.0);
 
-"	gl_FragColor = vec4(litColor * baseColor, 1.0);\n"
+	//	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect alone
+		gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);
 
-//"	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect alone
-"	gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);\n"
+		if(useGlow > 0)
+			gl_FragColor = mix(gl_FragColor, glow, glow.a);
 
-"	if(useGlow > 0)\n"
-"		gl_FragColor = mix(gl_FragColor, glow, glow.a);\n"
-
-"	if(FOG > 0)\n"
-"		gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
-"}\n";
+		if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
+	}
+);
 
 static char water_vertex_program[] =
 "const float Eta = 0.66;\n"
@@ -1485,8 +1496,9 @@ void R_LoadGLSLPrograms(void)
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
 		g_location_useScatter = glGetUniformLocationARB( g_meshprogramObj, "useScatter");
-		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
+		g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell");
 		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
+		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
 
 		//fullscreen distortion effects
 
