@@ -620,6 +620,7 @@ extern unsigned int g_water_program_id;
 extern GLhandleARB	g_programObj;
 extern GLhandleARB	g_waterprogramObj;
 extern GLhandleARB	g_meshprogramObj;
+extern GLhandleARB  g_glassprogramObj;
 extern GLhandleARB	g_fbprogramObj;
 extern GLhandleARB	g_blurprogramObj;
 extern GLhandleARB	g_rblurprogramObj;
@@ -680,6 +681,11 @@ extern GLuint		g_location_useScatter;
 extern GLuint		g_location_useShell;
 extern GLuint		g_location_useGPUanim;
 extern GLuint		g_location_outframe;
+
+//glass
+extern GLuint		g_location_gmirTexture;
+extern GLuint		g_location_grefTexture;
+extern GLuint		g_location_cameraPos;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;

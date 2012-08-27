@@ -62,6 +62,7 @@ PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
 GLhandleARB g_programObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
+GLhandleARB g_glassprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
 GLhandleARB g_rblurprogramObj;
@@ -121,6 +122,11 @@ GLuint		g_location_useScatter;
 GLuint		g_location_useShell;
 GLuint		g_location_useGPUanim;
 GLuint		g_location_outframe;
+
+//glass
+GLuint		g_location_gmirTexture;
+GLuint		g_location_grefTexture;
+GLuint		g_location_cameraPos;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -864,6 +870,30 @@ static char mesh_fragment_program[] = STRINGIFY (
 	}
 );
 
+//GLASS 
+static char glass_vertex_program[] = STRINGIFY (
+	uniform vec4 CameraPos;
+
+	void main(void)
+	{
+		vec3 directionw = gl_Vertex.xyz - CameraPos.xyz;
+		gl_TexCoord[0].xyz = reflect(directionw, normalize(gl_Normal));
+		gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;
+	}
+);
+
+static char glass_fragment_program[] = STRINGIFY (
+	uniform sampler2D refTexture;
+	uniform sampler2D mirTexture;
+
+	void main (void)
+	{
+		vec4 t0 = vec4( texture2D(refTexture, gl_TexCoord[0].xy).rgb, 1.0);
+		vec4 t1 = vec4( texture2D(mirTexture, gl_TexCoord[0].xy).rgb, 1.0);
+		gl_FragColor = mix(t0, t1, 1.0);
+	}
+);
+
 static char water_vertex_program[] =
 "const float Eta = 0.66;\n"
 "const float FresnelPower = 5.0;\n"
@@ -1500,6 +1530,61 @@ void R_LoadGLSLPrograms(void)
 		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
 
+		//Glass
+
+		g_glassprogramObj = glCreateProgramObjectARB();
+
+		//
+		// Vertex shader
+		//
+
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)glass_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_glassprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Glass Vertex Shader Compile Error\n");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)glass_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_glassprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Glass Fragment Shader Compile Error\n");
+		}
+
+		glLinkProgramARB( g_glassprogramObj );
+		glGetObjectParameterivARB( g_glassprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_glassprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Glass Shader Linking Error\n");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_gmirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
+		g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
+		g_location_cameraPos = glGetUniformLocationARB( g_glassprogramObj, "CameraPos" );
+		
 		//fullscreen distortion effects
 
 		g_fbprogramObj = glCreateProgramObjectARB();
