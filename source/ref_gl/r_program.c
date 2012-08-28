@@ -126,7 +126,9 @@ GLuint		g_location_outframe;
 //glass
 GLuint		g_location_gmirTexture;
 GLuint		g_location_grefTexture;
-GLuint		g_location_cameraPos;
+GLuint		g_location_gLightPos;
+GLuint		g_location_gFog;
+GLuint		g_location_gOutframe;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -872,25 +874,71 @@ static char mesh_fragment_program[] = STRINGIFY (
 
 //GLASS 
 static char glass_vertex_program[] = STRINGIFY (
-	uniform vec4 CameraPos;
+	uniform mat3x4 bonemats[80];
+	uniform int FOG;
+
+	attribute vec4 weights;
+	attribute vec4 bones;
+
+	varying vec3 r;
+	varying float fog;
+	varying vec3 normal, vert;
 
 	void main(void)
 	{
-		vec3 directionw = gl_Vertex.xyz - CameraPos.xyz;
-		gl_TexCoord[0].xyz = reflect(directionw, normalize(gl_Normal));
-		gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;
+		mat3x4 m = bonemats[int(bones.x)] * weights.x;
+		m += bonemats[int(bones.y)] * weights.y;
+		m += bonemats[int(bones.z)] * weights.z;
+		m += bonemats[int(bones.w)] * weights.w;
+		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
+		gl_Position = gl_ModelViewProjectionMatrix * mpos;
+
+		vec3 u = normalize( vec3(gl_ModelViewMatrix * mpos) ); 	
+		vec3 n = normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m)); 
+
+		r = reflect( u, n );
+
+		normal = n;
+		vert = vec3( gl_ModelViewMatrix * mpos );
+
+		//fog
+	   if(FOG > 0) 
+	   {
+			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
+	   }
 	}
 );
 
 static char glass_fragment_program[] = STRINGIFY (
+	uniform vec3 LightPos;
 	uniform sampler2D refTexture;
 	uniform sampler2D mirTexture;
+	uniform int FOG;
+
+	varying vec3 r;
+	varying float fog;
+	varying vec3 normal, vert;
 
 	void main (void)
 	{
-		vec4 t0 = vec4( texture2D(refTexture, gl_TexCoord[0].xy).rgb, 1.0);
-		vec4 t1 = vec4( texture2D(mirTexture, gl_TexCoord[0].xy).rgb, 1.0);
-		gl_FragColor = mix(t0, t1, 1.0);
+		vec3 light_dir = normalize( LightPos - vert );  	
+		vec3 eye_dir = normalize( -vert.xyz );  	
+		vec3 ref = normalize( -reflect( light_dir, normal ) );  
+	
+		vec4 ld = max( dot(normal, light_dir), 0.0 ); 	
+		vec4 ls = 0.75 * pow( max( dot(ref, eye_dir), 0.0 ), 0.70 ); //0.75 specular, .7 shininess
+
+		float m = -1.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) ); 	
+		vec2 coord = -vec2(r.x/m + 0.5, r.y/m + 0.5); 	
+
+		vec4 t0 = texture2D(refTexture, coord.st);
+		vec4 t1 = texture2D(mirTexture, coord.st);
+
+		gl_FragColor = 0.3 * t0 + 0.3 * t1 * (ld + ls);
+
+		if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
 );
 
@@ -1568,6 +1616,8 @@ void R_LoadGLSLPrograms(void)
 			Com_Printf("...Glass Fragment Shader Compile Error\n");
 		}
 
+		glBindAttribLocationARB(g_glassprogramObj, 6, "weights");
+		glBindAttribLocationARB(g_glassprogramObj, 7, "bones");
 		glLinkProgramARB( g_glassprogramObj );
 		glGetObjectParameterivARB( g_glassprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
 
@@ -1581,9 +1631,11 @@ void R_LoadGLSLPrograms(void)
 		// Locate some parameters by name so we can set them later...
 		//
 
+		g_location_gOutframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
+		g_location_gFog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
+		g_location_gLightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
 		g_location_gmirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
 		g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
-		g_location_cameraPos = glGetUniformLocationARB( g_glassprogramObj, "CameraPos" );
 		
 		//fullscreen distortion effects
 
