@@ -685,7 +685,9 @@ extern GLuint		g_location_outframe;
 //glass
 extern GLuint		g_location_gmirTexture;
 extern GLuint		g_location_grefTexture;
-extern GLuint		g_location_cameraPos;
+extern GLuint		g_location_gLightPos;
+extern GLuint		g_location_gFog;
+extern GLuint		g_location_gOutframe;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
