@@ -2429,7 +2429,7 @@ int IQM_NextFrame(int frame)
 			break;
 		//player jumping
 		case 71:
-			outframe = 66;
+			outframe = 0;
 			break;
 		//player crouched
 		case 153:
