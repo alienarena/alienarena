@@ -545,25 +545,16 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
 #define VERT_NORMAL_COLOURED_TEXTURED	9		// verts and st for 1tmu and color, with normals
 
-#if 0
-// vertex array kill flags
+// looks like these should be bit flags (2010-08)
+// apparently not - this was not working as bit flags, works fine as ints
 #define KILL_TMU0_POINTER	1
 #define KILL_TMU1_POINTER	2
 #define KILL_TMU2_POINTER	3
 #define KILL_TMU3_POINTER	4
-#define KILL_RGBA_POINTER	5
-#define KILL_NORMAL_POINTER 6
-#else
-// looks like these should be bit flags (2010-08)
-#define KILL_TMU0_POINTER	0x01
-#define KILL_TMU1_POINTER	0x02
-#define KILL_TMU2_POINTER	0x04
-#define KILL_TMU3_POINTER	0x08
-#define KILL_TMU4_POINTER   0x10
-#define KILL_TMU5_POINTER	0x20
-#define KILL_RGBA_POINTER	0x40
-#define KILL_NORMAL_POINTER 0x80
-#endif
+#define KILL_TMU4_POINTER   5
+#define KILL_TMU5_POINTER	6
+#define KILL_RGBA_POINTER	7
+#define KILL_NORMAL_POINTER 8
 
 // vertex array subsystem
 extern void R_InitVArrays (int varraytype);

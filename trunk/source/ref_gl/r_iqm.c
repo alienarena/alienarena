@@ -1204,7 +1204,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
-#if RAGDOLLVBO
+
 		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
@@ -1219,7 +1219,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 				goto skipLoad;
 			}
 		}		
-#endif
+
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
 		{
 			matrix3x4_t mat;
@@ -1258,15 +1258,15 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
 
 	VectorScale(baselight, gl_modulate->value, lightOut);
 
-	//removed for now - maybe we can get a faster algorithm and redo one day
-	/*if(!gl_vlights->integer)
+	//probably will remove this - maybe we can get a faster algorithm and redo one day
+	if(!gl_vlights->integer)
 		return;
 
 	lscale = 3.0;
 
     l = lscale * VLight_GetLightValue (normal->dir, lightPosition, angles[PITCH], angles[YAW]);
 
-    VectorScale(baselight, l, lightOut);*/
+    VectorScale(baselight, l, lightOut);
 }
 
 void IQM_DrawFrame(int skinnum)
@@ -1279,7 +1279,6 @@ void IQM_DrawFrame(int skinnum)
 	vec3_t	lightcolor;
 	int		index_xyz, index_st;
 	int		va = 0;
-	int		vertsize;
 	qboolean mirror = false;
 	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
@@ -1315,8 +1314,6 @@ void IQM_DrawFrame(int skinnum)
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
 		//shell render
-		va=0;
-		VArray = &VArrayVerts[0];
 
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
 		{
@@ -1540,8 +1537,6 @@ void IQM_DrawFrame(int skinnum)
 	{
 		//glass surfaces
 		//base render, no vbo, no shaders
-		va=0;
-		VArray = &VArrayVerts[0];
 
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -1625,10 +1620,7 @@ void IQM_DrawFrame(int skinnum)
 
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			if(va > 0)
-			{
-				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
-			}
+			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
 
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
@@ -1741,10 +1733,6 @@ void IQM_DrawFrame(int skinnum)
 		{
 			glUniform1iARB(g_location_useGPUanim, 0);
 
-			vertsize = VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-			va=0;
-			VArray = &VArrayVerts[0];
-
 			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 			glEnableVertexAttribArrayARB (1);
@@ -1825,8 +1813,6 @@ void IQM_DrawFrame(int skinnum)
 	else
 	{	
 		//base render no shaders
-		va=0;
-		VArray = &VArrayVerts[0];
 
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
 
@@ -1861,10 +1847,7 @@ void IQM_DrawFrame(int skinnum)
 
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			if(va > 0)
-			{
-				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
-			}
+			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}		
 	}
 
@@ -1878,9 +1861,6 @@ void IQM_DrawFrame(int skinnum)
 
 	R_KillVArrays ();
 
-	//fix me - this should not be needed!
-	qglDisableClientState( GL_COLOR_ARRAY );
-
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
 }
@@ -1891,7 +1871,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 	int		i, j;
 	vec3_t	vectors[3];
 	rscript_t *rs = NULL;
-	//float	alpha, basealpha;
 	vec3_t	lightcolor;
 	int		index_xyz, index_st;
 	int		va = 0;
@@ -1910,8 +1889,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 	{
 		//shell render
 		float shellscale = 1.6;
-		va=0;
-		VArray = &VArrayVerts[0];
 
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -2226,8 +2203,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 	else
 	{	
 		//base render no shaders
-		va=0;
-		VArray = &VArrayVerts[0];
 
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
 
@@ -2275,9 +2250,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
 	R_KillVArrays ();
 
-	//fix me - this should not be needed!
-	qglDisableClientState( GL_COLOR_ARRAY );
-
 	if ( shellEffect )
 		qglEnable( GL_TEXTURE_2D );
 }
@@ -2309,7 +2281,6 @@ void IQM_DrawShadow(vec3_t origin)
 		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
 	}
 	
-	VArray = &VArrayVerts[0];
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	vertsize = VertexSizes[VERT_SINGLE_TEXTURED];
 
@@ -2458,7 +2429,7 @@ int IQM_NextFrame(int frame)
 			break;
 		//player jumping
 		case 71:
-			outframe = 0;
+			outframe = 66;
 			break;
 		//player crouched
 		case 153:
@@ -2657,7 +2628,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	//Basic stencil shadows
 	if	(	!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && fadeShadow >= 0.01 && 
-			gl_shadows->integer && !gl_shadowmaps->integer && 
+		gl_shadows->integer && !gl_shadowmaps->integer && !r_gpuanim->integer &&
 			!(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS))
 		)
 	{
@@ -2760,12 +2731,10 @@ void IQM_DrawCasterFrame ()
 {
 	int     i, j;
     int     index_xyz, index_st;
-    int     va;
+    int     va = 0;
 	
 	if(!has_vbo)
 	{
-		va=0;
-
 		R_InitVArrays (VERT_NO_TEXTURE);
 
 		for (i=0; i<currentmodel->num_triangles; i++)
