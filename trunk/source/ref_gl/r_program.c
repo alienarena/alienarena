@@ -764,6 +764,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
 	uniform vec3 baseColor;
+	uniform int GPUANIM;
 	uniform int FOG;
 	uniform int useFX;
 	uniform int useGlow;
@@ -852,7 +853,10 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec3 reflectDir = reflect(LightDir, normal);
 
 		float spec = max(dot(EyeDir, reflectDir), 0.0);
-		spec = pow(spec, 6.0);
+		if(GPUANIM > 0)
+			spec = pow(spec, 4.0);
+		else
+			spec = pow(spec, 6.0);
 		spec *= (SpecularFactor*specmask.a);
 		litColor = min(litColor + spec, vec3(1.0));
 
