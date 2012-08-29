@@ -281,7 +281,7 @@ if there are still players in the server.
 void ExitLevel (void);
 void G_ForceExitIntermission (void)
 {
-	if (level.time < level.intermissiontime + 20.0)
+	if (level.time < level.intermissiontime + 20.0 || !level.intermissiontime)
 		return;
 	ExitLevel();
 }
