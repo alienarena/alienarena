@@ -836,14 +836,14 @@ Mod_LoadTexinfo
 */
 void Mod_LoadTexinfo (lump_t *l)
 {
-	texinfo_t *in;
+	texinfo_t *in, *in_base;
 	mtexinfo_t *out, *step;
-	int 	i, j, count;
+	int 	i, j, count, num_unique;
 	char	name[MAX_QPATH];
 	char	sv_name[MAX_QPATH];
 	int		next;
 
-	in = (void *)(mod_base + l->fileofs);
+	in_base = in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
@@ -867,6 +867,8 @@ void Mod_LoadTexinfo (lump_t *l)
 			out->next = loadmodel->texinfo + next;
 		else
 		    out->next = NULL;
+		
+		out->equiv = out;
 
 		Com_sprintf (name, sizeof(name), "textures/%s.wal", in->texture);
 		out->image = GL_FindImage (name, it_wall);
@@ -924,6 +926,25 @@ void Mod_LoadTexinfo (lump_t *l)
 		for (step = out->next ; step && step != out ; step=step->next)
 			out->numframes++;
 	}
+	
+	//find equivalent texinfos
+	num_unique = count;
+	for (i = 0; i < count; i++)
+	{
+		for (j = 0; j < i; j++)
+		{
+			if (in_base[i].flags == in_base[j].flags && 
+				in_base[i].nexttexinfo == in_base[j].nexttexinfo && 
+				!strcmp (in_base[i].texture, in_base[j].texture))
+			{
+				loadmodel->texinfo[i].equiv = loadmodel->texinfo[j].equiv;
+				num_unique--;
+				break;
+			}
+		}
+	}
+	
+	Com_Printf ("Condensed ^2%i texinfos into ^2%i equivalent texinfos\n", count, num_unique);
 }
 
 /*
