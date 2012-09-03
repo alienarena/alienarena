@@ -199,6 +199,7 @@ typedef struct mtexinfo_s
 	int			flags;
 	int			numframes;
 	struct mtexinfo_s	*next;		// animation chain
+	struct mtexinfo_s	*equiv;		// equivalent texinfo
 	image_t		*image;
 	image_t		*normalMap;
 	image_t		*heightMap;
