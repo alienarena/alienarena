@@ -1023,9 +1023,9 @@ void BSP_DrawNonGLSLSurfaces (void)
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
-	for (i = 0; i < currentmodel->numtexinfo; i++)
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
-    	msurface_t	*s = currentmodel->texinfo[i].lightmap_surfaces;
+    	msurface_t	*s = currentmodel->unique_texinfo[i]->lightmap_surfaces;
     	if (!s)
     		continue;
 		for (; s; s = s->lightmapchain) {
@@ -1034,7 +1034,7 @@ void BSP_DrawNonGLSLSurfaces (void)
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
-		currentmodel->texinfo[i].lightmap_surfaces = NULL;
+		currentmodel->unique_texinfo[i]->lightmap_surfaces = NULL;
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -1095,9 +1095,9 @@ void BSP_DrawGLSLSurfaces (void)
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
-	for (i = 0; i < currentmodel->numtexinfo; i++)
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
-    	msurface_t	*s = currentmodel->texinfo[i].glsl_surfaces;
+    	msurface_t	*s = currentmodel->unique_texinfo[i]->glsl_surfaces;
     	if (!s)
     		continue;
 		for (; s; s = s->glslchain) {
@@ -1106,7 +1106,7 @@ void BSP_DrawGLSLSurfaces (void)
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
-		currentmodel->texinfo[i].glsl_surfaces = NULL;
+		currentmodel->unique_texinfo[i]->glsl_surfaces = NULL;
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -1198,9 +1198,9 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
-	for (i = 0; i < currentmodel->numtexinfo; i++)
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
-    	msurface_t	*s = currentmodel->texinfo[i].glsl_dynamic_surfaces;
+    	msurface_t	*s = currentmodel->unique_texinfo[i]->glsl_dynamic_surfaces;
     	if (!s)
     		continue;
 		for (; s; s = s->glsldynamicchain) {
@@ -1209,7 +1209,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
-		currentmodel->texinfo[i].glsl_dynamic_surfaces = NULL;
+		currentmodel->unique_texinfo[i]->glsl_dynamic_surfaces = NULL;
 	}
 	
 	BSP_FlushVBOAccum ();
