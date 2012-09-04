@@ -83,6 +83,7 @@ vec3_t	vup;
 vec3_t	vpn;
 vec3_t	vright;
 vec3_t	r_origin;
+int		r_origin_leafnum;
 
 float	r_world_matrix[16];
 float	r_project_matrix[16];
@@ -815,7 +816,7 @@ R_SetupFrame
 void R_SetupFrame (void)
 {
 	int i;
-	mleaf_t	*leaf;
+	mleaf_t *leaf;
 
 	r_framecount++;
 
@@ -830,6 +831,7 @@ void R_SetupFrame (void)
 		r_oldviewcluster = r_viewcluster;
 		r_oldviewcluster2 = r_viewcluster2;
 		leaf = Mod_PointInLeaf (r_origin, r_worldmodel);
+		r_origin_leafnum = CM_PointLeafnum (r_origin);
 		r_viewcluster = r_viewcluster2 = leaf->cluster;
 
 		// check above and below so crossing solid water doesn't draw wrong

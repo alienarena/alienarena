@@ -222,6 +222,8 @@ extern	float	r_project_matrix[16];
 extern	int		r_viewport[4];
 extern	float	r_farclip, r_farclip_min, r_farclip_bias;
 
+extern	int		r_origin_leafnum;
+
 //Image
 extern void R_InitImageSubsystem(void);
 extern void GL_Bind (int texnum);

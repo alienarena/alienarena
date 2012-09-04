@@ -716,6 +716,7 @@ void		CM_WritePortalState (FILE *f);
 void		CM_ReadPortalState (FILE *f);
 
 qboolean 	CM_inPVS (vec3_t p1, vec3_t p2);
+qboolean	CM_inPVS_leafs (int leafnum1, int leafnum2);
 qboolean 	CM_inPHS (vec3_t p1, vec3_t p2);
 
 extern char map_name[MAX_QPATH];
