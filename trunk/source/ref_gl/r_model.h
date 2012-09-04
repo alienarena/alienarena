@@ -376,6 +376,8 @@ typedef struct model_s
 
 	int			numtexinfo;
 	mtexinfo_t	*texinfo;
+	int			num_unique_texinfos;
+	mtexinfo_t	**unique_texinfo;
 
 	int			numsurfaces;
 	msurface_t	*surfaces;

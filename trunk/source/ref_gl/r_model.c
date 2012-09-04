@@ -834,10 +834,17 @@ void Mod_LoadEdges (lump_t *l)
 Mod_LoadTexinfo
 =================
 */
+
+int compare_unique_texinfo (const void *_a, const void *_b)
+{
+	mtexinfo_t *a = *(mtexinfo_t **)_a, *b = *(mtexinfo_t **)_b;
+	return a->image->texnum-b->image->texnum;
+}
+
 void Mod_LoadTexinfo (lump_t *l)
 {
 	texinfo_t *in, *in_base;
-	mtexinfo_t *out, *step;
+	mtexinfo_t *out, *step, **unique_temp;
 	int 	i, j, count, num_unique;
 	char	name[MAX_QPATH];
 	char	sv_name[MAX_QPATH];
@@ -928,7 +935,8 @@ void Mod_LoadTexinfo (lump_t *l)
 	}
 	
 	//find equivalent texinfos
-	num_unique = count;
+	num_unique = 0;
+	unique_temp = Z_Malloc (sizeof(mtexinfo_t*)*count);
 	for (i = 0; i < count; i++)
 	{
 		for (j = 0; j < i; j++)
@@ -938,11 +946,21 @@ void Mod_LoadTexinfo (lump_t *l)
 				!strcmp (in_base[i].texture, in_base[j].texture))
 			{
 				loadmodel->texinfo[i].equiv = loadmodel->texinfo[j].equiv;
-				num_unique--;
 				break;
 			}
 		}
+		if (j == i)
+		{
+			unique_temp[num_unique++] = loadmodel->texinfo[i].equiv;
+		}
 	}
+	
+	qsort (unique_temp, num_unique, sizeof(mtexinfo_t*), compare_unique_texinfo);
+	
+	loadmodel->unique_texinfo = Hunk_Alloc (num_unique*sizeof(mtexinfo_t*));
+	memcpy (loadmodel->unique_texinfo, unique_temp, num_unique*sizeof(mtexinfo_t*));
+	Z_Free (unique_temp);
+	loadmodel->num_unique_texinfos = num_unique;
 	
 	Com_Printf ("Condensed ^2%i texinfos into ^2%i equivalent texinfos\n", count, num_unique);
 }
