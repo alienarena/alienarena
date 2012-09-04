@@ -1956,6 +1956,26 @@ qboolean CM_inPVS (vec3_t p1, vec3_t p2)
 	return true;
 }
 
+//similar to CM_inPVS but with leafnums
+qboolean CM_inPVS_leafs (int leafnum1, int leafnum2)
+{
+	int		cluster;
+	int		area1, area2;
+	byte	*mask;
+
+	cluster = CM_LeafCluster (leafnum1);
+	area1 = CM_LeafArea (leafnum1);
+	mask = CM_ClusterPVS (cluster);
+
+	cluster = CM_LeafCluster (leafnum2);
+	area2 = CM_LeafArea (leafnum2);
+	if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
+		return false;
+	if (!CM_AreasConnected (area1, area2))
+		return false;		// a door blocks sight
+	return true;
+}
+
 /*
 =================
 CM_inPHS

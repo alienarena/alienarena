@@ -406,6 +406,8 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
      VectorCopy(origin, light->origin);
 
      light->style = type;
+     
+     light->leafnum = CM_PointLeafnum (light->origin);
 
      free (buffer);
 }
@@ -495,6 +497,9 @@ void R_RenderFlares (void)
 
 		// periodically test visibility to ramp alpha
 		if(rs_realtime - l->time > 0.02){
+
+			if (!CM_inPVS_leafs (r_origin_leafnum, l->leafnum))
+	        	continue;
 
 			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
@@ -770,6 +775,8 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 	grass->size = size;
 	strcpy(grass->name, name);
 	grass->type = type;
+	
+	grass->leafnum = CM_PointLeafnum (grass->origin);
 
 	if(grass->type == 1)
 		r_hasleaves = true;
@@ -835,8 +842,12 @@ void R_DrawVegetationSurface ( void )
 
 		if(!grass->type) 
 		{
-			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-			visible = r_trace.fraction == 1.0;
+			visible = CM_inPVS_leafs (r_origin_leafnum, grass->leafnum);
+			if (visible)
+			{
+				r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+				visible = r_trace.fraction == 1.0;
+			}
 		}
 		else
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
@@ -1015,6 +1026,8 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	beam->xang = xang;
 	beam->yang = yang;
 	beam->rotating = rotating;
+	
+	beam->leafnum = CM_PointLeafnum (beam->origin);
 }
 
 //Rendering
@@ -1031,7 +1044,7 @@ void R_DrawBeamSurface ( void )
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-
+	
 	beam = r_beams;
 
 	VectorSet(mins, 32, 32, 64);
@@ -1041,6 +1054,9 @@ void R_DrawBeamSurface ( void )
 
     for (i=0; i<r_numbeams; i++, beam++) {
 		float movdir;
+		
+		if (!CM_inPVS_leafs (r_origin_leafnum, beam->leafnum))
+	        continue;
 
 		scale = 10.0*beam->size;
 
@@ -1098,6 +1114,8 @@ void R_DrawBeamSurface ( void )
 		VectorScale(right, scale, right);
 		VectorScale(up, scale, up);
 		
+		// TODO: establish if we should even be using CM_BoxTrace at all--
+		// performance-wise it's very bad to use it a lot.
 		r_trace = CM_BoxTrace(r_origin, beam->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
 
@@ -1333,6 +1351,8 @@ void R_AddSimpleItem (int type, vec3_t origin)
 
 	item = &r_simpleitems[r_numsimpleitems++];
 	VectorCopy(origin, item->origin);
+	
+	item->leafnum = CM_PointLeafnum (item->origin);
 
 	item->type = type;
 }
@@ -1370,6 +1390,9 @@ void R_DrawSimpleItems ( void )
     for (i=0; i<r_numsimpleitems; i++, item++)
 	{
 		int va = 0;
+		
+		if (!CM_inPVS_leafs (r_origin_leafnum, item->leafnum))
+	        continue;
 
 		R_InitVArrays (VERT_SINGLE_TEXTURED);
 		VArray = &VArrayVerts[0];

@@ -45,6 +45,7 @@ typedef struct
 	int style;
 	float alpha;
 	float time;
+	int leafnum;
 } flare_t;
 
 typedef struct
@@ -56,6 +57,7 @@ typedef struct
 	int texsize;
 	int texnum;
 	char name[MAX_QPATH];
+	int leafnum;
 } grass_t;
 
 typedef struct
@@ -70,12 +72,14 @@ typedef struct
 	int texsize;
 	int texnum;
 	char name[MAX_QPATH];
+	int leafnum;
 } beam_t;
 
 typedef struct
 {
 	int type;
 	vec3_t origin;
+	int leafnum;
 } simpleitem_t;
 
 #define SHELL_RED_COLOR		0xF2
