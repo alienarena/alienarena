@@ -90,6 +90,8 @@ struct edict_s
 	solid_t		solid;
 	int			clipmask;
 	edict_t		*owner;
+	
+	int			redirect_number;	//for ghost mode
 
 	// the game dll can add anything it wants after
 	// this point in the structure

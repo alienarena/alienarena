@@ -440,6 +440,7 @@ void SV_BuildClientFrame (client_t *client)
 	vec3_t	org;
 	edict_t	*ent;
 	edict_t	*clent;
+	edict_t	*orig_clent;
 	client_frame_t	*frame;
 	entity_state_t	*state;
 	int		l;
@@ -448,8 +449,27 @@ void SV_BuildClientFrame (client_t *client)
 	int		c_fullsend;
 	byte	*clientphs;
 	byte	*bitvector;
-
-	clent = client->edict;
+	
+	client_t	*redir_client;
+	int			redir_num;
+	
+	orig_clent = client->edict;
+	if (!orig_clent->client)
+		return;		// not in game yet
+		
+	redir_num = client->edict->redirect_number;
+	if (redir_num != client->edict->s.number)
+	{
+		for (i=0, redir_client = svs.clients ; i<maxclients->integer; i++, redir_client++)
+			if (redir_num == redir_client->edict->s.number)
+				break;
+		if (i == maxclients->integer)
+			redir_client = client;
+	}
+	else
+		redir_client = client;
+	
+	clent = redir_client->edict;
 	if (!clent->client)
 		return;		// not in game yet
 
@@ -471,6 +491,14 @@ void SV_BuildClientFrame (client_t *client)
 
 	// grab the current player_state_t
 	frame->ps = clent->client->ps;
+	
+	if (client != redir_client)
+	{
+		//some adjustments for ghost mode
+		if (frame->ps.pmove.pm_type != PM_DEAD)
+			frame->ps.pmove.pm_type = PM_FREEZE;
+		frame->ps.fov = client->edict->client->ps.fov;
+	}
 
 
 	SV_FatPVS (org);
@@ -545,16 +573,25 @@ void SV_BuildClientFrame (client_t *client)
 					continue;
 			}
 		}
-
-		// add it to the circular client_entities array
-		state = &svs.client_entities[svs.next_client_entities%svs.num_client_entities];
+		
 		if (ent->s.number != e)
 		{ // note: server has limited info about entities
 			Com_DPrintf("Fixing ent->s.number: %i to %i for a %s\n",
 					ent->s.number, e, (ent->client ? "client" : "non-client") );
 			ent->s.number = e;
 		}
+		
+		if (ent == orig_clent && orig_clent != clent)
+		{
+			Com_Printf ("CAN'T HAPPEN?\n");
+			continue;
+		}
+		
+		// add it to the circular client_entities array
+		state = &svs.client_entities[svs.next_client_entities%svs.num_client_entities];
 		*state = ent->s;
+		if (ent == clent && orig_clent != clent)
+			state->number = orig_clent->s.number;
 
 		// don't mark players missiles as solid
 		if (ent->owner == client->edict)

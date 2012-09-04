@@ -1461,6 +1461,8 @@ struct edict_s
 	solid_t		solid;
 	int			clipmask;
 	edict_t		*owner;
+	
+	int			redirect_number;	//for ghost mode
 
 
 	// DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
