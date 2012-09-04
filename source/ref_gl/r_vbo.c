@@ -143,24 +143,24 @@ void VB_BuildWorldVBO(void)
 	vbo_xyz_base = vbo_xyz_pos = 0;
 	vbo_st_base = vbo_st_pos = num_vertexes*3*sizeof(float);
 	vbo_lm_base = vbo_lm_pos = num_vertexes*5*sizeof(float);
+	int i;
 
 	qglGenBuffersARB(1, &vboId);
 		
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 
-	for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
-	{
-		if (surf->texinfo->flags & SURF_SKY)
-		{   // no skies here
-			continue;
-		}
-		else
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
+    {
+		for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
 		{
-			if (!( surf->flags & SURF_DRAWTURB ) )
-			{
-				VB_BuildSurfaceVBO(surf);
+			if ((currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
+				(surf->texinfo->flags & SURF_SKY) || 
+				(surf->flags & SURF_DRAWTURB))
+			{   // no skies here
+				continue;
 			}
+			VB_BuildSurfaceVBO(surf);
 		}
 	}
 
