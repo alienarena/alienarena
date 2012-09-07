@@ -666,7 +666,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 	uniform vec3 lightPos;
 	uniform float time;
 	uniform int FOG;
-	uniform mat3x4 bonemats[80];
+	uniform mat3x4 bonemats[60];
 	uniform int GPUANIM;
 	uniform int useShell;
 
@@ -878,7 +878,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 
 //GLASS 
 static char glass_vertex_program[] = STRINGIFY (
-	uniform mat3x4 bonemats[80];
+	uniform mat3x4 bonemats[60];
 	uniform int FOG;
 
 	attribute vec4 weights;
