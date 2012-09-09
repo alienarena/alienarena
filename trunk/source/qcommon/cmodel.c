@@ -1726,6 +1726,11 @@ byte	phsrow[MAX_MAP_LEAFS/8];
 
 byte	*CM_ClusterPVS (int cluster)
 {
+	static int old_cluster = -1;
+	if (cluster == old_cluster)
+		return pvsrow;
+	old_cluster = cluster;
+	
 	if (cluster == -1)
 		memset (pvsrow, 0, (numclusters+7)>>3);
 	else
@@ -1735,6 +1740,11 @@ byte	*CM_ClusterPVS (int cluster)
 
 byte	*CM_ClusterPHS (int cluster)
 {
+	static int old_cluster = -1;
+	if (cluster == old_cluster)
+		return phsrow;
+	old_cluster = cluster;
+
 	if (cluster == -1)
 		memset (phsrow, 0, (numclusters+7)>>3);
 	else
