@@ -1096,6 +1096,11 @@ void ClientEndServerFrame (edict_t *ent)
 	int		i;
 	current_player = ent;
 	current_client = ent->client;
+	
+	if (ent->client->chase_target != NULL && ent->client->resp.spectator != 0)
+		ent->redirect_number = ent->client->chase_target->s.number;
+	else
+		ent->redirect_number = ent->s.number;
 
 	//
 	// If the origin or velocity have changed since ClientThink(),

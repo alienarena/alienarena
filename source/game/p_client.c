@@ -2474,6 +2474,7 @@ void ClientChangeSkin (edict_t *ent)
 	// fix player name if corrupted
 	if ( s != NULL && s[0] )
 	{
+
 		Q_strncpyz2( tmp_playername, s, sizeof(tmp_playername ) );
 		ValidatePlayerName( tmp_playername, sizeof(tmp_playername ) );
 		Q_strncpyz2(ent->client->pers.netname, tmp_playername,
@@ -3336,8 +3337,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// monster sighting AI
 	ent->light_level = ucmd->lightlevel;
 
-	ent->redirect_number = ent->s.number;
-	
 	if ( client->resp.spectator == 0 )
 	{ // regular (non-spectator) mode
 		if (client->latched_buttons & BUTTON_ATTACK)
@@ -3351,7 +3350,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 	else
 	{ // spectator mode
-
 		if ( TEAM_GAME && client->resp.spectator < 2 )
 		{ // team selection state
 			ClientTeamSelection( ent , client , ucmd );
