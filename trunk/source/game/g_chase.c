@@ -41,11 +41,6 @@ void UpdateChaseCam(edict_t *ent)
 		}
 	}
 	
-	// Server netcode now looks at redirect_number and sends client the data
-	// from that entity instead.
-	// -Max
-	ent->redirect_number = ent->client->chase_target->s.number;
-
 	gi.linkentity(ent);
 }
 
