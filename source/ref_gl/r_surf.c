@@ -1660,20 +1660,20 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	switch (plane->type)
 	{
 	case PLANE_X:
-		dot = modelorg[0] - plane->dist;
+		dot = modelorg[0];
 		break;
 	case PLANE_Y:
-		dot = modelorg[1] - plane->dist;
+		dot = modelorg[1];
 		break;
 	case PLANE_Z:
-		dot = modelorg[2] - plane->dist;
+		dot = modelorg[2];
 		break;
 	default:
-		dot = DotProduct (modelorg, plane->normal) - plane->dist;
+		dot = DotProduct (modelorg, plane->normal);
 		break;
 	}
 
-	side = !(dot >= 0);
+	side = dot < plane->dist;
 
 	// recurse down the children, front side first
 	BSP_RecursiveWorldNode (node->children[side], clipflags);
@@ -1687,8 +1687,17 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if(surf->texinfo->flags & SURF_NODRAW)
 			continue;
 
+		/* XXX: this doesn't seem to cull any surfaces AT ALL when positioned
+		 * here! The surf->visframe check seems to catch any back-facing 
+		 * surfaces, but the back-facing surface check seems to allow some
+		 * surfaces which are later caught by the surf->visframe check. So the
+		 * visframe check renders the planeback check redundant and useless.
+		 * I'm pretty sure it's because the map compiler structures the BSP 
+		 * tree in such a way as to avoid back-facing surfaces being drawn.
+		 * -M
 		if ( (surf->flags & SURF_PLANEBACK) != side )
 			continue;		// wrong side
+		*/
 
 		if ( !( surf->flags & SURF_DRAWTURB ) )
 		{
