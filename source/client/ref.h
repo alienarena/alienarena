@@ -73,6 +73,7 @@ typedef struct
 	int texnum;
 	char name[MAX_QPATH];
 	int leafnum;
+	int leafnum2;
 } beam_t;
 
 typedef struct
