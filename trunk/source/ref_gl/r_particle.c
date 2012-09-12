@@ -431,13 +431,7 @@ void PART_RenderFlare (flare_t *light)
 	if(dist > 10*light->size)
 		dist = 10*light->size;
 
-	R_InitQuadVarrays();
-
-	qglDisable(GL_DEPTH_TEST);
-	qglEnable (GL_TEXTURE_2D);
 	GL_Bind(flaretex);
-	qglEnableClientState( GL_COLOR_ARRAY );
-	GL_TexEnv( GL_MODULATE );
 
 	VectorScale(light->color, light->alpha, tmp );
 	for (j=0; j<4; j++)
@@ -462,13 +456,6 @@ void PART_RenderFlare (flare_t *light)
 
 	R_DrawVarrays(GL_QUADS, 0 , 4, false);
 
-	GL_TexEnv( GL_REPLACE );
-	qglEnable(GL_DEPTH_TEST);
-	qglDisable (GL_TEXTURE_2D);
-	qglDisableClientState(GL_COLOR_ARRAY);
-
-	R_KillVArrays();
-
 }
 
 void R_RenderFlares (void)
@@ -490,6 +477,13 @@ void R_RenderFlares (void)
 	qglShadeModel (GL_SMOOTH);
 	qglEnable (GL_BLEND);
 	qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
+	
+	R_InitQuadVarrays();
+
+	qglDisable(GL_DEPTH_TEST);
+	qglEnable (GL_TEXTURE_2D);
+	qglEnableClientState( GL_COLOR_ARRAY );
+	GL_TexEnv( GL_MODULATE );
 
     l = r_flares;
     for (i=0; i<r_numflares ; i++, l++)
@@ -520,6 +514,14 @@ void R_RenderFlares (void)
 				c_flares++;
 		}
 	}
+	
+	GL_TexEnv( GL_REPLACE );
+	qglEnable(GL_DEPTH_TEST);
+	qglDisable (GL_TEXTURE_2D);
+	qglDisableClientState(GL_COLOR_ARRAY);
+
+	R_KillVArrays();
+	
 	qglColor3f (1,1,1);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
