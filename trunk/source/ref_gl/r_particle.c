@@ -969,7 +969,7 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	vec3_t poly_center, mins, maxs;
 	float *v;
 	int i;
-	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
+	vec3_t origin = {0,0,0}, binormal, tangent, tmp, absmins, absmaxs;
 
 	if (r_numbeams >= MAX_BEAMS)
 			return;
@@ -1033,8 +1033,44 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	beam->xang = xang;
 	beam->yang = yang;
 	beam->rotating = rotating;
+	beam->leafnum = 0;
 	
-	beam->leafnum = CM_PointLeafnum (beam->origin);
+	if (!beam->rotating)
+	{
+		vec3_t start, end;
+		double maxang;
+		float movdir;
+		
+		if(fabs(beam->xang) > fabs(beam->yang))
+			maxang = beam->xang;
+		else
+			maxang = beam->yang;
+			
+		if(maxang >= 0.0)
+			movdir = 1.0;
+		else
+			movdir = 0;
+		
+		VectorCopy(beam->origin, start);
+		if(!beam->type)
+			start[2] -= (2.5 - (10.0*maxang))*beam->size*movdir;
+		else
+			start[2] += (2.5 - (10.0*maxang))*beam->size*movdir;
+		
+		VectorCopy(start, end);
+		if(!beam->type)
+			end[2] -= (2.5 + pow(fabs(maxang),2)*10)*beam->size;
+		else
+			end[2] += (2.5 + pow(fabs(maxang),2)*10)*beam->size;
+
+		end[0] += (pow(fabs(maxang*10), 3)*beam->xang)*beam->size; //angle in rads
+		end[1] += (pow(fabs(maxang*10), 3)*beam->yang)*beam->size;
+		
+		beam->leafnum = CM_PointLeafnum (start);
+		beam->leafnum2 = CM_PointLeafnum (end);
+		if (beam->leafnum == beam->leafnum2)
+			beam->leafnum2 = 0;
+	}
 }
 
 //Rendering
@@ -1044,7 +1080,7 @@ void R_DrawBeamSurface ( void )
     int		i, j, k;
 	beam_t *beam;
     double   scale, maxang;
-	vec3_t	start, end, mins, maxs, angle, right, up, move, delta, vec, corner[4];
+	vec3_t	start, end, mins, maxs, angle, right, up, delta, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
@@ -1067,7 +1103,12 @@ void R_DrawBeamSurface ( void )
     for (i=0; i<r_numbeams; i++, beam++) {
 		float movdir;
 		
-		if (!CM_inPVS_leafs (r_origin_leafnum, beam->leafnum))
+		if (	beam->leafnum && beam->leafnum2 && 
+				!CM_inPVS_leafs (r_origin_leafnum, beam->leafnum) && 
+				!CM_inPVS_leafs (r_origin_leafnum, beam->leafnum2))
+			continue;
+		if (	beam->leafnum && !beam->leafnum2 && 
+				!CM_inPVS_leafs (r_origin_leafnum, beam->leafnum))
 			continue;
 		
 		scale = 10.0*beam->size;
@@ -1107,18 +1148,16 @@ void R_DrawBeamSurface ( void )
 			end[1] += (pow(fabs(maxang*10), 3)*beam->yang)*beam->size;
 		}
 
-		VectorSubtract(end, start, vec);
+		VectorSubtract(end, start, up);
 		if(!beam->type)
-			VectorScale(vec, beam->size, vec);
+			VectorScale(up, -beam->size, up);
 		else
-			VectorScale(vec, -beam->size, vec);
+			VectorScale(up, beam->size, up);
 
-		VectorAdd(start, vec, angle);
+		VectorAdd(start, up, angle);
+		
+		VectorNormalize(up);
 
-		VectorSubtract(start, angle, move);
-		VectorNormalize(move);
-
-		VectorCopy(move, up);
 		VectorSubtract(r_newrefdef.vieworg, angle, delta);
 		CrossProduct(up, delta, right);
 		VectorNormalize(right);
@@ -1167,7 +1206,7 @@ void R_DrawBeamSurface ( void )
 		// performance-wise it's very bad to use it a lot.
 		r_trace = CM_BoxTrace(r_origin, beam->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
-
+		
 		if(visible) {
 			//render polygon
 			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
