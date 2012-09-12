@@ -431,28 +431,33 @@ void PART_RenderFlare (flare_t *light)
 	if(dist > 10*light->size)
 		dist = 10*light->size;
 
-	GL_Bind(flaretex);
-
-	VectorScale(light->color, light->alpha, tmp );
-	for (j=0; j<4; j++)
-	   VA_SetElem4(col_array[j], tmp[0],tmp[1],tmp[2], 1);
-
-
 	VectorMA (light->origin, -1-dist, vup, vert_array[0]);
 	VectorMA (vert_array[0], 1+dist, vright, vert_array[0]);
-    VA_SetElem2(tex_array[0], 0, 1);
 
 	VectorMA (light->origin, -1-dist, vup, vert_array[1]);
 	VectorMA (vert_array[1], -1-dist, vright, vert_array[1]);
-    VA_SetElem2(tex_array[1], 0, 0);
 
     VectorMA (light->origin, 1+dist, vup, vert_array[2]);
 	VectorMA (vert_array[2], -1-dist, vright, vert_array[2]);
-    VA_SetElem2(tex_array[2], 1, 0);
 
 	VectorMA (light->origin, 1+dist, vup, vert_array[3]);
 	VectorMA (vert_array[3], 1+dist, vright, vert_array[3]);
-    VA_SetElem2(tex_array[3], 1, 1);
+	
+	if (R_CullBox (vert_array[1], vert_array[3]))
+		return;
+	
+	c_flares++;
+	
+	GL_Bind(flaretex);
+	
+	VectorScale(light->color, light->alpha, tmp );
+	for (j=0; j<4; j++)
+		VA_SetElem4(col_array[j], tmp[0],tmp[1],tmp[2], 1);
+
+	VA_SetElem2(tex_array[0], 0, 1);
+	VA_SetElem2(tex_array[1], 0, 0);
+	VA_SetElem2(tex_array[2], 1, 0);
+	VA_SetElem2(tex_array[3], 1, 1);
 
 	R_DrawVarrays(GL_QUADS, 0 , 4, false);
 
@@ -511,7 +516,6 @@ void R_RenderFlares (void)
 		if (l->alpha > 0)
 		{
 			PART_RenderFlare (l);
-				c_flares++;
 		}
 	}
 	
@@ -810,6 +814,7 @@ void R_DrawVegetationSurface ( void )
 	qglDepthMask( GL_FALSE );
 	qglEnable( GL_BLEND);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_Bind (0);
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
 	GL_TexEnv( GL_MODULATE );
@@ -1036,13 +1041,14 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 
 void R_DrawBeamSurface ( void )
 {
-    int		i, k;
+    int		i, j, k;
 	beam_t *beam;
     double   scale, maxang;
 	vec3_t	start, end, mins, maxs, angle, right, up, move, delta, vec, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
+	vec3_t	absmins, absmaxs;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
@@ -1053,13 +1059,17 @@ void R_DrawBeamSurface ( void )
 	VectorSet(maxs, -32, -32, -64);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
+	qglDepthMask( GL_FALSE );
+	qglEnable( GL_BLEND);
+	qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
+	GL_TexEnv( GL_MODULATE );
 
     for (i=0; i<r_numbeams; i++, beam++) {
 		float movdir;
 		
 		if (!CM_inPVS_leafs (r_origin_leafnum, beam->leafnum))
-	        continue;
-
+			continue;
+		
 		scale = 10.0*beam->size;
 
 		if(fabs(beam->xang) > fabs(beam->yang))
@@ -1116,42 +1126,53 @@ void R_DrawBeamSurface ( void )
 		VectorScale(right, scale, right);
 		VectorScale(up, scale, up);
 		
+		VectorCopy (beam->origin, absmins);
+		VectorCopy (beam->origin, absmaxs);
+		
+		VectorSet (corner[0],
+			end[0] + (up[0] + right[0])*(-0.5),
+			end[1] + (up[1] + right[1])*(-0.5),
+			end[2] + (up[2] + right[2])*(-0.5));
+
+		VectorSet ( corner[1],
+			corner0[0] + up[0],
+			corner0[1] + up[1],
+			corner0[2] + up[2]);
+
+		VectorSet ( corner[2],
+			corner0[0] + (up[0]+right[0]),
+			corner0[1] + (up[1]+right[1]),
+			corner0[2] + (up[2]+right[2]));
+
+		VectorSet ( corner[3],
+			corner0[0] + right[0],
+			corner0[1] + right[1],
+			corner0[2] + right[2]);
+		
+		for (j = 0; j < 4; j++)
+		{
+			for (k = 0; k < 3; k++)
+			{
+				if (corner[j][k] < absmins[k])
+					absmins[k] = corner[j][k];
+				else if (corner[j][k] > absmaxs[k])
+					absmaxs[k] = corner[j][k];
+			}
+		}
+		
+		if (R_CullBox (absmins, absmaxs))
+			continue;
+		
 		// TODO: establish if we should even be using CM_BoxTrace at all--
 		// performance-wise it's very bad to use it a lot.
 		r_trace = CM_BoxTrace(r_origin, beam->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
 
 		if(visible) {
-
 			//render polygon
-			qglDepthMask( GL_FALSE );
-			qglEnable( GL_BLEND);
-			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
-
 			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
-			GL_TexEnv( GL_MODULATE );
 
 			GL_Bind(beam->texnum);
-
-			VectorSet (corner[0],
-				end[0] + (up[0] + right[0])*(-0.5),
-				end[1] + (up[1] + right[1])*(-0.5),
-				end[2] + (up[2] + right[2])*(-0.5));
-
-			VectorSet ( corner[1],
-				corner0[0] + up[0],
-				corner0[1] + up[1],
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0]),
-				corner0[1] + (up[1]+right[1]),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
 
 			VArray = &VArrayVerts[0];
 
@@ -1381,6 +1402,7 @@ void R_DrawSimpleItems ( void )
 
 	qglEnable( GL_BLEND);
 	qglBlendFunc ( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+	GL_Bind (0);
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
 	GL_TexEnv( GL_MODULATE );
