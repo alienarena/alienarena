@@ -131,7 +131,6 @@ extern	cvar_t	*gl_bitdepth;
 extern	cvar_t	*gl_mode;
 extern	cvar_t	*gl_log;
 extern	cvar_t	*gl_lightmap;
-extern	cvar_t	*gl_shadows;
 extern	cvar_t	*gl_dynamic;
 extern	cvar_t	*gl_nobind;
 extern	cvar_t	*gl_picmip;
@@ -477,31 +476,31 @@ typedef struct
 
 typedef struct
 {
-	float		inverse_intensity;
-	qboolean	fullscreen;
+	 float       inverse_intensity;
+    qboolean    fullscreen;
 
-	int			prev_mode;
+    int         prev_mode;
 
-	unsigned char *d_16to8table;
+    unsigned char *d_16to8table;
 
-	int			lightmap_textures;
+    int         lightmap_textures;
 
-	int			currenttextures[3];
-	int			currenttmu;
+    int         currenttextures[3];
+    int         currenttmu;
 
-	float		camera_separation;
-	qboolean	stereo_enabled;
+    float       camera_separation;
+    qboolean    stereo_enabled;
 
-	qboolean	alpha_test;
-	qboolean	blend;
-	qboolean	texgen;
-	qboolean	fragment_program;
-	qboolean	glsl_shaders;
-	qboolean	separateStencil;
-	qboolean	stencil_wrap;
-	qboolean	vbo;
-	qboolean	fbo;
-	qboolean	hasFBOblit;
+    qboolean    alpha_test;
+    qboolean    blend;
+    qboolean    texgen;
+    qboolean    fragment_program;
+    qboolean    glsl_shaders;
+    qboolean    separateStencil;
+    qboolean    stencil_wrap;
+    qboolean    vbo;
+    qboolean    fbo;
+    qboolean    hasFBOblit;
 
 } glstate_t;
 
@@ -564,24 +563,25 @@ extern void R_KillVArrays (void);
 extern void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo);
 extern void R_InitQuadVarrays(void);
 extern void R_AddSurfToVArray (msurface_t *surf);
+extern void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
 extern void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 extern void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
 extern void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 extern void R_KillNormalTMUs(void);
 
 //shadows
+extern  void R_InitShadowSubsystem(void);
+extern  void R_CastShadow(void);
 extern	cvar_t		*r_shadowmapratio;
 extern  int			r_lightgroups;
 extern  image_t		*r_depthtexture;
 extern	image_t		*r_depthtexture2;
 extern  image_t		*r_colorbuffer;
-extern  image_t		*r_shadowbuffer;
-extern	image_t		*r_shadowbufferBlur;
 extern GLuint   fboId[3];
 extern GLuint	rboId;
 extern vec3_t	r_worldLightVec;
-extern qboolean have_stencil;
-typedef struct	LightGroup {
+typedef struct	LightGroup 
+{
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
 	float	avg_intensity;
@@ -590,14 +590,16 @@ typedef struct	LightGroup {
 extern			LightGroup_t LightGroups[MAX_LIGHTS];
 
 extern void		R_GenerateShadowFBO(void);
-extern void		R_InitShadowSubsystem(void);
 extern void		MD2_DrawCaster (void);
 extern void		IQM_DrawCaster (void);
 extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);
-extern void		R_CastShadow(void);
-extern float	SHD_ShadowLight (vec3_t pos, vec3_t angles, vec3_t lightAdd, int type);
+extern void		R_DrawEntityCaster(entity_t *ent);
+extern void		R_GenerateEntityShadow( void );
+extern void		R_GenerateRagdollShadow( int RagDollID );
+extern void		BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin);
+extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
 cvar_t			*r_shadowcutoff;
@@ -611,14 +613,16 @@ extern unsigned int g_water_program_id;
 
 //glsl
 extern GLhandleARB	g_programObj;
+extern GLhandleARB  g_shadowprogramObj;
 extern GLhandleARB	g_waterprogramObj;
 extern GLhandleARB	g_meshprogramObj;
 extern GLhandleARB  g_glassprogramObj;
+extern GLhandleARB	g_blankmeshprogramObj;
 extern GLhandleARB	g_fbprogramObj;
 extern GLhandleARB	g_blurprogramObj;
 extern GLhandleARB	g_rblurprogramObj;
 extern GLhandleARB  g_dropletsprogramObj;
-extern GLhandleARB g_godraysprogramObj;
+extern GLhandleARB  g_godraysprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -638,6 +642,8 @@ extern GLuint		g_location_parallax;
 extern GLuint		g_location_dynamic;
 extern GLuint		g_location_shadowmap;
 extern GLuint		g_Location_statshadow;
+extern GLuint		g_location_xOffs;
+extern GLuint		g_location_yOffs;
 extern GLuint		g_location_lightPosition;
 extern GLuint		g_location_staticLightPosition;
 extern GLuint		g_location_lightColour;
@@ -646,6 +652,12 @@ extern GLuint		g_location_liquid;
 extern GLuint		g_location_rsTime;
 extern GLuint		g_location_liquidTexture;
 extern GLuint		g_location_liquidNormTex;
+
+//shadows on white bsp surface
+extern GLuint		g_location_entShadow;
+extern GLuint		g_location_fadeShadow;
+extern GLuint		g_location_xOffset;
+extern GLuint		g_location_yOffset;
 
 //water
 extern GLuint		g_location_baseTexture;
@@ -664,13 +676,11 @@ extern GLuint		g_location_baseTex;
 extern GLuint		g_location_normTex;
 extern GLuint		g_location_fxTex;
 extern GLuint		g_location_color;
-extern GLuint		g_location_minLight;
 extern GLuint		g_location_meshNormal;
 extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
-extern GLuint		g_location_useScatter;
 extern GLuint		g_location_useShell;
 extern GLuint		g_location_useGPUanim;
 extern GLuint		g_location_outframe;
@@ -681,6 +691,9 @@ extern GLuint		g_location_grefTexture;
 extern GLuint		g_location_gLightPos;
 extern GLuint		g_location_gFog;
 extern GLuint		g_location_gOutframe;
+
+//blank mesh
+extern GLuint		g_location_bmOutframe;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
@@ -719,6 +732,7 @@ extern m_dlight_t model_dlights[128];
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
 vec3_t lightPosition;
+vec3_t statLightPosition;
 float  dynFactor;
 extern void		R_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);

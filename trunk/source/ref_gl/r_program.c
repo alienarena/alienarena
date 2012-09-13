@@ -60,9 +60,11 @@ PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
 PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
 
 GLhandleARB g_programObj;
+GLhandleARB g_shadowprogramObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
 GLhandleARB g_glassprogramObj;
+GLhandleARB g_blankmeshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
 GLhandleARB g_rblurprogramObj;
@@ -86,6 +88,8 @@ GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
 GLuint		g_location_shadowmap;
 GLuint		g_Location_statshadow;
+GLuint		g_location_xOffs;
+GLuint		g_location_yOffs;
 GLuint	    g_location_lightPosition;
 GLuint		g_location_staticLightPosition;
 GLuint		g_location_lightColour;
@@ -94,6 +98,12 @@ GLuint		g_location_liquid;
 GLuint		g_location_rsTime;
 GLuint		g_location_liquidTexture;
 GLuint		g_location_liquidNormTex;
+
+//shadow on white bsp polys
+GLuint		g_location_entShadow;
+GLuint		g_location_fadeShadow;
+GLuint		g_location_xOffset;
+GLuint		g_location_yOffset;
 
 //water
 GLuint		g_location_baseTexture;
@@ -112,13 +122,11 @@ GLuint		g_location_baseTex;
 GLuint		g_location_normTex;
 GLuint		g_location_fxTex;
 GLuint		g_location_color;
-GLuint		g_location_minLight;
 GLuint		g_location_meshNormal;
 GLuint		g_location_meshTime;
 GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
-GLuint		g_location_useScatter;
 GLuint		g_location_useShell;
 GLuint		g_location_useGPUanim;
 GLuint		g_location_outframe;
@@ -129,6 +137,9 @@ GLuint		g_location_grefTexture;
 GLuint		g_location_gLightPos;
 GLuint		g_location_gFog;
 GLuint		g_location_gOutframe;
+
+//blank mesh
+GLuint		g_location_bmOutframe;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -346,8 +357,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 	uniform sampler2D lmTexture;
 	uniform sampler2D liquidTexture;
 	uniform sampler2D liquidNormTex;
-	uniform sampler2D ShadowMap;
-	uniform sampler2D StatShadowMap;
+	uniform sampler2DShadow ShadowMap;
+	uniform sampler2DShadow StatShadowMap;
 	uniform vec3 lightColour;
 	uniform float lightCutoffSquared;
 	uniform int FOG;
@@ -357,6 +368,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 	uniform int SHADOWMAP;
 	uniform int LIQUID;
 	uniform float rsTime;
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
 
 	varying vec4 sPos;
 	varying vec3 EyeDir;
@@ -364,105 +377,35 @@ static char bsp_fragment_program[] = STRINGIFY (
 	varying vec3 StaticLightDir;
 	varying float fog;
 
-	float lookupDynshadow( void )
+	vec4 ShadowCoord;
+	
+	float lookup( vec2 offSet, sampler2DShadow Map)
 	{
-		vec4 ShadowCoord;
-		vec4 shadowCoordinateWdivide;
-		float distanceFromLight;
-		vec4 tempShadowCoord;
-		float shadow1 = 1.0;
-		float shadow2 = 1.0;
-		float shadow3 = 1.0;
-		float shadows = 1.0;
-
-		if(SHADOWMAP > 0) 
-		{		
-			ShadowCoord = gl_TextureMatrix[7] * sPos;
-			
-			shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
-			// Used to lower moir pattern and self-shadowing
-			shadowCoordinateWdivide.z += 0.0005;
-			
-			distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
-			
-			if (ShadowCoord.w > 0.0)
-				shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
-		
-			//Blur shadows a bit
-			tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);
-			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
-			shadowCoordinateWdivide.z += 0.0005;
-			
-			distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
-			
-			if (ShadowCoord.w > 0.0)
-				shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
-			
-			tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);
-			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
-			shadowCoordinateWdivide.z += 0.0005;
-			
-			distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
-			
-			if (ShadowCoord.w > 0.0)
-				shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
-			
-			shadows = 0.33 * (shadow1 + shadow2 + shadow3);
-
-		}
-
-		return shadows;
+		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
 	}
 
-	float lookupStatshadow( void )
+	float lookupShadow( sampler2DShadow Map )
 	{
-		vec4 ShadowCoord;
-		vec4 shadowCoordinateWdivide;
-		float distanceFromLight;
-		vec4 tempShadowCoord;
-		float shadow1 = 1.0;
-		float shadow2 = 1.0;
-		float shadow3 = 1.0;
-		float shadows = 1.0;
+		float shadow;
 
 		if(SHADOWMAP > 0) 
 		{			
-			ShadowCoord = gl_TextureMatrix[6] * sPos;
-			
-			shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
-			// Used to lower moir pattern and self-shadowing
-			shadowCoordinateWdivide.z += 0.0005;
-			
-			distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
-			
-			if (ShadowCoord.w > 0.0)
-				shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
-			
-			//Blur shadows a bit
-			tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);
-			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
-			shadowCoordinateWdivide.z += 0.0005;
-			
-			distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
-			
-			if (ShadowCoord.w > 0.0)
-				shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
-		
-			tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);
-			shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
-			shadowCoordinateWdivide.z += 0.0005;
-			
-			distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
-			
-			if (ShadowCoord.w > 0.0)
-				shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
-			
-			shadows = 0.33 * (shadow1 + shadow2 + shadow3);
-
+			if (ShadowCoord.w > 1.0)
+			{
+				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+				
+				shadow += lookup(vec2(-1.5, 1.5) + o, Map);
+				shadow += lookup(vec2( 0.5, 1.5) + o, Map);
+				shadow += lookup(vec2(-1.5, -0.5) + o, Map);
+				shadow += lookup(vec2( 0.5, -0.5) + o, Map);
+				shadow *= 0.25 ;
+			}
+	
+			return shadow + 0.5;
 		}
-
-		return shadows;
-	}
+		else
+			return 1.0;
+	}	
 
 	void main( void )
 	{
@@ -500,12 +443,18 @@ static char bsp_fragment_program[] = STRINGIFY (
 
 	   	//shadows
 		if(DYNAMIC > 0)
-			dynshadowval = lookupDynshadow();
+		{
+			ShadowCoord = gl_TextureMatrix[7] * sPos;
+			dynshadowval = lookupShadow(ShadowMap);
+		}
 		else
 			dynshadowval = 0.0;
 
 		if(STATSHADOW > 0)
-			statshadowval = lookupStatshadow();
+		{
+			ShadowCoord = gl_TextureMatrix[6] * sPos;
+			statshadowval = lookupShadow(StatShadowMap);
+		}
 		else
 			statshadowval = 1.0;
 
@@ -661,6 +610,63 @@ static char bsp_fragment_program[] = STRINGIFY (
 	}
 );
 
+static char shadow_vertex_program[] = STRINGIFY (
+		
+	varying vec4 sPos;
+
+	void main( void )
+	{
+		sPos = gl_Vertex;
+
+		gl_Position = ftransform();
+	}
+);
+
+static char shadow_fragment_program[] = STRINGIFY (
+
+	uniform sampler2DShadow StatShadowMap;
+	uniform float fadeShadow;
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
+
+	varying vec4 sPos;
+
+	vec4 ShadowCoord;
+	
+	float lookup( vec2 offSet)
+	{
+		return shadow2DProj(StatShadowMap, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+	}
+
+	float lookupStatshadow( void )
+	{
+		float shadow;
+
+		if (ShadowCoord.w > 1.0)
+		{
+			vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+				
+			shadow += lookup(vec2(-1.5, 1.5) + o);
+			shadow += lookup(vec2( 0.5, 1.5) + o);
+			shadow += lookup(vec2(-1.5, -0.5) + o);
+			shadow += lookup(vec2( 0.5, -0.5) + o);
+			shadow *= 0.25 ;
+		}
+	
+		return shadow + 0.5;
+	}
+
+	void main( void )
+	{
+		ShadowCoord = gl_TextureMatrix[6] * sPos;
+
+	    float statshadowval = 1/fadeShadow * lookupStatshadow();	  
+
+		gl_FragColor = vec4(1.0);
+		gl_FragColor = (gl_FragColor * statshadowval);	   
+	}
+);
+
 //MESHES
 static char mesh_vertex_program[] = STRINGIFY (
 	uniform vec3 lightPos;
@@ -683,8 +689,11 @@ static char mesh_vertex_program[] = STRINGIFY (
 
 	void subScatterVS(in vec4 ecVert)
 	{
-		lightVec = lightPos - ecVert.xyz;
-		vertPos = ecVert.xyz;
+		if(useShell == 0)
+		{
+			lightVec = lightPos - ecVert.xyz;
+			vertPos = ecVert.xyz;
+		}
 	}
 
 	void main()
@@ -744,7 +753,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 		//for scrolling fx
 		vec4 texco = gl_MultiTexCoord0;
 		texco.s = texco.s + time*1.0;
-		texco.t = texco.t + time*1.0;
+		texco.t = texco.t + time*2.0;
 		gl_TexCoord[1] = texco;
 
 		if(useShell)
@@ -768,9 +777,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform int FOG;
 	uniform int useFX;
 	uniform int useGlow;
-	uniform int useScatter;
 	uniform int useShell;
-	uniform float minLight;
 	uniform vec3 lightPos;
 	const float SpecularFactor = 0.5;
 
@@ -802,15 +809,15 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec3 litColor;
 		vec4 fx;
 		vec4 glow;
-		vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);
+		vec4 scatterCol = vec4(0.0);
 
 		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
-		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
+		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5 ) );
 
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
-		if(useScatter > 0)
+		if(useShell == 0)
 		{
 			vec4 SpecColor = vec4(baseColor, 1.0)/2.0;
 
@@ -861,7 +868,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		litColor = min(litColor + spec, vec3(1.0));
 
 		//keep shadows from making meshes completely black
-		litColor = max(litColor, (textureColour * vec3(minLight)));
+		litColor = max(litColor, (textureColour * vec3(0.15)));
 
 		gl_FragColor = vec4(litColor * baseColor, 1.0);
 
@@ -945,6 +952,32 @@ static char glass_fragment_program[] = STRINGIFY (
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
 );
+
+//NO TEXTURE 
+static char blankmesh_vertex_program[] = STRINGIFY (
+	uniform mat3x4 bonemats[60];
+
+	attribute vec4 weights;
+	attribute vec4 bones;
+
+	void main(void)
+	{
+		mat3x4 m = bonemats[int(bones.x)] * weights.x;
+		m += bonemats[int(bones.y)] * weights.y;
+		m += bonemats[int(bones.z)] * weights.z;
+		m += bonemats[int(bones.w)] * weights.w;
+		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
+		gl_Position = gl_ModelViewProjectionMatrix * mpos;		
+	}
+);
+
+static char blankmesh_fragment_program[] = STRINGIFY (
+	void main (void)
+	{		
+		gl_FragColor = vec4(1.0);
+	}
+);
+
 
 static char water_vertex_program[] =
 "const float Eta = 0.66;\n"
@@ -1442,6 +1475,8 @@ void R_LoadGLSLPrograms(void)
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
 		g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
 		g_Location_statshadow = glGetUniformLocationARB( g_programObj, "STATSHADOW" );
+		g_location_xOffs = glGetUniformLocationARB( g_programObj, "xPixelOffset" );
+		g_location_yOffs = glGetUniformLocationARB( g_programObj, "yPixelOffset" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
 		g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
@@ -1450,6 +1485,62 @@ void R_LoadGLSLPrograms(void)
 		g_location_rsTime = glGetUniformLocationARB( g_programObj, "rsTime" );
 		g_location_liquidTexture = glGetUniformLocationARB( g_programObj, "liquidTexture" );
 		g_location_liquidNormTex = glGetUniformLocationARB( g_programObj, "liquidNormTex" );
+
+		//shadowed white bsp surfaces
+
+		g_shadowprogramObj = glCreateProgramObjectARB();
+
+		//
+		// Vertex shader
+		//
+
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)shadow_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_shadowprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Shadow Vertex Shader Compile Error\n");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)shadow_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_shadowprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Shadow Fragment Shader Compile Error\n");
+		}
+
+		glLinkProgramARB( g_shadowprogramObj );
+		glGetObjectParameterivARB( g_shadowprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_shadowprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Shadow Shader Linking Error\n");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
+		g_location_fadeShadow = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
+		g_location_xOffset = glGetUniformLocationARB( g_shadowprogramObj, "xPixelOffset" );
+		g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
 
 		//warp(water) bsp surfaces
 
@@ -1571,13 +1662,11 @@ void R_LoadGLSLPrograms(void)
 		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
 		g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
 		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
-		g_location_minLight = glGetUniformLocationARB( g_meshprogramObj, "minLight" );
 		g_location_meshNormal = glGetUniformLocationARB( g_meshprogramObj, "meshNormal" );
 		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
-		g_location_useScatter = glGetUniformLocationARB( g_meshprogramObj, "useScatter");
 		g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell");
 		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
@@ -1640,6 +1729,61 @@ void R_LoadGLSLPrograms(void)
 		g_location_gLightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
 		g_location_gmirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
 		g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
+
+		//Blank mesh (for shadowmapping efficiently)
+
+		g_blankmeshprogramObj = glCreateProgramObjectARB();
+
+		//
+		// Vertex shader
+		//
+
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)blankmesh_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_blankmeshprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Blankmesh Vertex Shader Compile Error\n");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)blankmesh_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_blankmeshprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Blankmesh Fragment Shader Compile Error\n");
+		}
+
+		glBindAttribLocationARB(g_blankmeshprogramObj, 6, "weights");
+		glBindAttribLocationARB(g_blankmeshprogramObj, 7, "bones");
+		glLinkProgramARB( g_blankmeshprogramObj );
+		glGetObjectParameterivARB( g_blankmeshprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_blankmeshprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Blankmesh Shader Linking Error\n");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_bmOutframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
 		
 		//fullscreen distortion effects
 

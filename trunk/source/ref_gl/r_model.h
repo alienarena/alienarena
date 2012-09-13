@@ -246,7 +246,6 @@ typedef struct msurface_s
 	struct  msurface_s	*glsldynamicchain;
 	struct  msurface_s	*lightmapchain;
 	struct	msurface_s	*rscriptchain;
-	struct  msurface_s	*normalchain;
 
 	mtexinfo_t	*texinfo;
 	float		c_s, c_t;

@@ -116,6 +116,11 @@ void R_GenerateShadowFBO()
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 
+	// This is to allow usage of shadow2DProj function in the shader
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
+
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
 	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	qglBindTexture(GL_TEXTURE_2D, 0);
@@ -151,6 +156,11 @@ void R_GenerateShadowFBO()
 	// Remove artefact on the edges of the shadowmap
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+	// This is to allow usage of shadow2DProj function in the shader
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
 
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
 	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
@@ -223,7 +233,6 @@ void R_GenerateShadowFBO()
 
 #define M3D_INV_PI_DIV_180 (57.2957795130823229)
 #define m3dRadToDeg(x)	((x)*M3D_INV_PI_DIV_180)
-
 
 static void normalize( float vec[3] )
 {
@@ -329,6 +338,7 @@ void SM_SetTextureMatrix( qboolean mapnum )
 	qglMatrixMode(GL_MODELVIEW);
 
 	qglActiveTextureARB(GL_TEXTURE0);
+
 }
 
 /*
@@ -422,13 +432,133 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	SM_RecursiveWorldNode (node->children[1], clipflags);
 }
 
+/*
+================
+SM_RecursiveWorldNode2 - this variant of the classic routine renders only one side for shadowing
+================
+*/
+
+void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
+{
+	int			c, side;
+	cplane_t	*plane;
+	msurface_t	*surf, **mark;
+	mleaf_t		*pleaf;
+	float		dot;
+
+	if (node->contents == CONTENTS_SOLID)
+		return;		// solid
+
+	if (node->visframe != r_visframecount)
+		return;
+
+	if (!r_nocull->value)
+	{
+		int i, clipped;
+		cplane_t *clipplane;
+
+		for (i=0,clipplane=frustum ; i<4 ; i++,clipplane++)
+		{
+			clipped = BoxOnPlaneSide (node->minmaxs, node->minmaxs+3, clipplane);
+
+			if (clipped == 1)
+				clipflags &= ~(1<<i);	// node is entirely on screen
+			else if (clipped == 2)
+				return;					// fully clipped
+		}
+	}
+
+	// if a leaf node, draw stuff
+	if (node->contents != -1)
+	{
+		pleaf = (mleaf_t *)node;
+
+		// check for door connected areas
+		if (r_newrefdef.areabits)
+		{
+			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
+				return;		// not visible
+		}
+
+		mark = pleaf->firstmarksurface;
+		if (! (c = pleaf->nummarksurfaces) )
+			return;
+
+		do
+		{
+			(*mark++)->visframe = r_framecount;
+		} while (--c);
+
+		return;
+	}
+
+	// node is just a decision point, so go down the apropriate sides
+
+	// find which side of the node we are on
+	plane = node->plane;
+
+	switch (plane->type)
+	{
+	case PLANE_X:
+		dot = r_newrefdef.vieworg[0] - plane->dist;
+		break;
+	case PLANE_Y:
+		dot = r_newrefdef.vieworg[1] - plane->dist;
+		break;
+	case PLANE_Z:
+		dot = r_newrefdef.vieworg[2] - plane->dist;
+		break;
+	default:
+		dot = DotProduct (r_newrefdef.vieworg, plane->normal) - plane->dist;
+		break;
+	}
+
+	side = !(dot >= 0);
+
+	// recurse down the children, front side first
+	SM_RecursiveWorldNode2 (node->children[0], clipflags, origin);
+
+	// draw stuff
+	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
+	{
+		if (surf->visframe != r_framecount)
+			continue;
+
+		if ( (surf->flags & SURF_PLANEBACK) != side )
+			continue;		// wrong side
+
+		if (R_CullBox (surf->mins, surf->maxs)) 
+			continue;
+			
+		if (surf->texinfo->flags & SURF_SKY)
+		{	// no skies here
+			continue;
+		}
+		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaBlended(surf))
+		{	// no trans surfaces
+			continue;
+		}
+		else
+		{
+			if (!( surf->flags & SURF_DRAWTURB ) )
+			{
+				BSP_DrawShadowPoly (surf, origin);
+			}
+		}
+	}
+
+	// recurse down the back side
+	SM_RecursiveWorldNode2 (node->children[1], clipflags, origin);
+}
+
 
 /*
 =============
 R_DrawWorld
 =============
 */
-void R_DrawShadowMapWorld (void)
+
+void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 {
 	int i;
 
@@ -438,25 +568,49 @@ void R_DrawShadowMapWorld (void)
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
 		return;
 
-	SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
-
-	//draw brush models
-	for (i=0 ; i<r_newrefdef.num_entities ; i++)
+	if(forEnt)
 	{
-		currententity = &r_newrefdef.entities[i];
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
+		glUseProgramObjectARB( g_shadowprogramObj );
 
-		currentmodel = currententity->model;
+		glUniform1iARB( g_location_entShadow, 6);
+		qglActiveTextureARB(GL_TEXTURE6);
+		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
-		if (!currentmodel)
+		glUniform1fARB( g_location_xOffset, 1.0/(viddef.width*r_shadowmapratio->value));
+		glUniform1fARB( g_location_yOffset, 1.0/(viddef.height*r_shadowmapratio->value));
+
+		glUniform1fARB( g_location_fadeShadow, fadeShadow );
+
+		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin);
+
+		glUseProgramObjectARB( 0 );
+
+		qglActiveTextureARB(GL_TEXTURE0);
+
+		return;
+	}
+	else
+	{
+		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
+
+		//draw brush models(not for ent shadow, for now)
+		for (i=0 ; i<r_newrefdef.num_entities ; i++)
 		{
-			continue;
+			currententity = &r_newrefdef.entities[i];
+			if (currententity->flags & RF_TRANSLUCENT)
+				continue;	// transluscent
+
+			currentmodel = currententity->model;
+
+			if (!currentmodel)
+			{
+				continue;
+			}
+			if( currentmodel->type == mod_brush)
+				BSP_DrawTexturelessBrushModel (currententity);
+			else
+				continue;
 		}
-		if( currentmodel->type == mod_brush)
-			BSP_DrawTexturelessBrushModel (currententity);
-		else
-			continue;
 	}
 }
 
@@ -468,6 +622,7 @@ void R_DrawDynamicCaster(void)
 	vec3_t	dist, mins, maxs;
 	trace_t	r_trace;
 	int		RagDollID;
+	vec3_t origin = {0, 0, 0};
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -476,9 +631,6 @@ void R_DrawDynamicCaster(void)
 		
 	if(!dynLight)  
 		return; //we have no lights of consequence
-
-	//if(r_gpuanim->integer)
-	//	return; //for now until more is sorted out
 
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
@@ -506,7 +658,7 @@ void R_DrawDynamicCaster(void)
     qglPolygonOffset( 0.5f, 0.5f );
 
 	//render world - very basic geometry
-	R_DrawShadowMapWorld();
+	R_DrawShadowMapWorld(false, origin);
 
 	//render entities near light
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -654,8 +806,8 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
-    for (i=0; i<r_numgrasses; i++, grass++) {
-
+    for (i=0; i<r_numgrasses; i++, grass++) 
+	{
 		if(!grass->type)
 			continue; //only deal with leaves, grass shadows look kind of bad
 
@@ -676,8 +828,8 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 		r_trace = CM_BoxTrace(r_sunLight->origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;		
 
-		if(visible) {
-
+		if(visible) 
+		{
 			//render grass polygon
 			
 			GL_SelectTexture( GL_TEXTURE0);
@@ -711,13 +863,14 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 			VArray = &VArrayVerts[0];
 
-			for(k = 0; k < 4; k++) {
-
+			for(k = 0; k < 4; k++) 
+			{
 				VArray[0] = corner[k][0];
 				VArray[1] = corner[k][1];
 				VArray[2] = corner[k][2];
 
-				switch(k) {
+				switch(k) 
+				{
 					case 0:
 						VArray[3] = 1;
 						VArray[4] = 1;
@@ -793,4 +946,301 @@ void R_DrawVegetationCaster(void)
 	qglPolygonOffset( 0.0f, 0.0f );
     qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
+}
+
+void R_DrawEntityCaster(entity_t *ent)
+{		
+	vec3_t	dist, mins, maxs;
+	trace_t	r_trace;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	r_shadowmapcount = 0;
+
+	//check caster validity
+	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
+		return;
+
+	if(!ent->model)
+		return;	
+
+	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll)
+	{
+		if(ent->frame > 198)
+			return;
+	}
+		
+	//trace visibility from light - we don't render objects the light doesn't hit!
+	r_trace = CM_BoxTrace(statLightPosition, ent->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+	if(r_trace.fraction != 1.0)
+		return;
+
+	qglMatrixMode(GL_PROJECTION);
+    qglPushMatrix();
+    qglMatrixMode(GL_MODELVIEW);
+    qglPushMatrix();
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+
+	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  
+
+	//Clear previous frame values
+	qglClear( GL_DEPTH_BUFFER_BIT);
+
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	// Culling switching, rendering only frontfaces
+	qglDisable(GL_CULL_FACE);
+
+	// attach the texture to FBO depth attachment point
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
+
+	//get light origin 
+	//set camera
+	SM_SetupMatrices(statLightPosition[0],statLightPosition[1],statLightPosition[2]+64,ent->origin[0],ent->origin[1],ent->origin[2]-128);
+
+	qglEnable( GL_POLYGON_OFFSET_FILL );
+    qglPolygonOffset( 0.5f, 0.5f );	
+
+	//loop the entities here, and render any nearby models, to make sure we get shadows on the this entity if a mesh is nearby.
+
+	currentmodel = ent->model;
+
+	//get view distance
+	VectorSubtract(r_origin, ent->origin, dist);
+		
+	//set lod if available
+	if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
+	{
+		if(currententity->lod2)
+			currentmodel = currententity->lod2;
+	}
+	else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
+	{
+		if(currententity->lod1)
+			currentmodel = currententity->lod1;
+	}
+	if (currententity->lod2)
+	    currentmodel = currententity->lod2;
+
+	if(currentmodel->type == mod_iqm)
+		IQM_DrawCaster ();
+	else
+		MD2_DrawCaster ();
+	
+	SM_SetTextureMatrix(1);
+		
+	qglDepthMask (1);		// back to writing
+
+	qglPolygonOffset( 0.0f, 0.0f );
+    qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglEnable(GL_CULL_FACE);
+
+	qglViewport( 0, 0, viddef.width, viddef.height );
+
+	qglPopMatrix();
+    qglMatrixMode(GL_PROJECTION);
+    qglPopMatrix();
+    qglMatrixMode(GL_MODELVIEW);	
+
+	r_shadowmapcount = 1;
+}
+
+void R_GenerateEntityShadow( void )
+{
+	if(gl_shadowmaps->integer) 
+	{
+		vec3_t dist, tmp;
+		float rad, fadeshadow_cutoff;
+
+		if((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || (currententity->flags & RF_MENUMODEL))
+			return;
+
+		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 128))
+			return;
+
+		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
+		VectorScale (tmp, 1.666, tmp);
+		rad = VectorLength (tmp);		
+
+		if( R_CullSphere( currententity->origin, rad, 15 ) )
+			return;
+
+		//get view distance
+		VectorSubtract(r_origin, currententity->origin, dist);
+
+		//fade out shadows both by distance from view, and by distance from light
+		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST); 
+
+		if (r_shadowcutoff->value < 0.1)
+			fadeShadow = 1.0;
+		else if (VectorLength (dist) > fadeshadow_cutoff)
+		{
+			fadeShadow = VectorLength(dist) - fadeshadow_cutoff;
+			if (fadeShadow > 512)
+				return;
+			else
+				fadeShadow = 1.0 - fadeShadow/512.0; //fade out smoothly over 512 units.
+		}
+		else
+			fadeShadow = 1.0;		
+		
+		qglEnable(GL_DEPTH_TEST);
+		qglClearColor(0,0,0,1.0f);
+
+		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+		R_DrawEntityCaster(currententity);
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+		//Enabling color write (previously disabled for light POV z-buffer rendering)
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+		//re-render affected polys with shadowmap for this entity
+		if(r_shadowmapcount > 0)
+		{
+			qglEnable( GL_BLEND );
+			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+
+			R_DrawShadowMapWorld(true, currententity->origin);
+
+			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			qglDisable ( GL_BLEND );
+		}
+
+		currentmodel = currententity->model;	
+		
+		r_shadowmapcount = 0;
+	}
+}
+
+void R_DrawRagdollCaster(int RagDollID)
+{		
+	vec3_t mins, maxs;
+	trace_t	r_trace;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	r_shadowmapcount = 0;
+		
+	//trace visibility from light - we don't render objects the light doesn't hit!
+	r_trace = CM_BoxTrace(statLightPosition, RagDoll[RagDollID].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+	if(r_trace.fraction != 1.0)
+		return;
+
+	qglMatrixMode(GL_PROJECTION);
+    qglPushMatrix();
+    qglMatrixMode(GL_MODELVIEW);
+    qglPushMatrix();
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+
+	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  
+
+	//Clear previous frame values
+	qglClear( GL_DEPTH_BUFFER_BIT);
+
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	// Culling switching, rendering only frontfaces
+	qglDisable(GL_CULL_FACE);
+
+	// attach the texture to FBO depth attachment point
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
+
+	//get light origin 
+	//set camera
+	SM_SetupMatrices(statLightPosition[0],statLightPosition[1],statLightPosition[2]+64,RagDoll[RagDollID].origin[0],RagDoll[RagDollID].origin[1],RagDoll[RagDollID].origin[2]-128);
+
+	qglEnable( GL_POLYGON_OFFSET_FILL );
+    qglPolygonOffset( 0.5f, 0.5f );	
+	
+	IQM_DrawRagDollCaster ( RagDollID );
+	
+	SM_SetTextureMatrix(1);
+		
+	qglDepthMask (1);		// back to writing
+
+	qglPolygonOffset( 0.0f, 0.0f );
+    qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglEnable(GL_CULL_FACE);
+
+	qglViewport( 0, 0, viddef.width, viddef.height );
+
+	qglPopMatrix();
+    qglMatrixMode(GL_PROJECTION);
+    qglPopMatrix();
+    qglMatrixMode(GL_MODELVIEW);	
+
+	r_shadowmapcount = 1;
+}
+
+void R_GenerateRagdollShadow( int RagDollID )
+{
+	if(gl_shadowmaps->integer) 
+	{
+		vec3_t dist, tmp;
+		float rad, fadeshadow_cutoff;
+
+		VectorSubtract(RagDoll[RagDollID].ragDollMesh->maxs, RagDoll[RagDollID].ragDollMesh->mins, tmp);
+		VectorScale (tmp, 1.666, tmp);
+		rad = VectorLength (tmp);		
+
+		if( R_CullSphere( RagDoll[RagDollID].origin, rad, 15 ) )
+			return;
+
+		//get view distance
+		VectorSubtract(r_origin, RagDoll[RagDollID].origin, dist);
+
+		//fade out shadows both by distance from view, and by distance from light
+		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST); 
+
+		if (r_shadowcutoff->value < 0.1)
+			fadeShadow = 1.0;
+		else if (VectorLength (dist) > fadeshadow_cutoff)
+		{
+			fadeShadow = VectorLength(dist) - fadeshadow_cutoff;
+			if (fadeShadow > 512)
+				return;
+			else
+				fadeShadow = 1.0 - fadeShadow/512.0; //fade out smoothly over 512 units.
+		}
+		else
+			fadeShadow = 1.0;		
+		
+		qglEnable(GL_DEPTH_TEST);
+		qglClearColor(0,0,0,1.0f);
+
+		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+		R_DrawRagdollCaster(RagDollID);
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+		//Enabling color write (previously disabled for light POV z-buffer rendering)
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+		//re-render affected polys with shadowmap for this entity(note - blend "if darker").
+		if(r_shadowmapcount > 0)
+		{
+			qglEnable( GL_BLEND );
+			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+
+			R_DrawShadowMapWorld(true, RagDoll[RagDollID].origin);
+
+			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			qglDisable ( GL_BLEND );
+		}
+
+		currentmodel = RagDoll[RagDollID].ragDollMesh;	
+		
+		r_shadowmapcount = 0;
+	}
 }

@@ -969,7 +969,7 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	vec3_t poly_center, mins, maxs;
 	float *v;
 	int i;
-	vec3_t origin = {0,0,0}, binormal, tangent, tmp, absmins, absmaxs;
+	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
 
 	if (r_numbeams >= MAX_BEAMS)
 			return;
