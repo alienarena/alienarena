@@ -154,7 +154,6 @@ static void ShadowMapsCallback( void *s )
 	Cvar_SetValue("gl_shadowmaps", s_shadowmaps_box.curvalue);
 	if(s_shadowmaps_box.curvalue) { //must turn this on for shadowmaps
 		Cvar_SetValue("gl_glsl_shaders", s_shadowmaps_box.curvalue);
-		Cvar_SetValue("gl_shadows", 0);
 		s_glsl_box.curvalue = s_shadowmaps_box.curvalue;
 	}
 }
@@ -201,7 +200,6 @@ static void SetLowest( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 0);
-	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("gl_vlights", 0);
@@ -224,7 +222,6 @@ static void SetLow( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 0);
@@ -248,7 +245,6 @@ static void SetMedium( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
@@ -272,7 +268,6 @@ static void SetHigh( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
@@ -296,7 +291,6 @@ static void SetHighest( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);

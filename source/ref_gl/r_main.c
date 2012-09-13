@@ -132,7 +132,6 @@ cvar_t	*gl_bitdepth;
 cvar_t	*gl_drawbuffer;
 cvar_t	*gl_driver;
 cvar_t	*gl_lightmap;
-cvar_t	*gl_shadows;
 cvar_t	*gl_mode;
 cvar_t	*gl_dynamic;
 cvar_t	*gl_modulate;
@@ -396,6 +395,27 @@ qboolean R_CullOrigin(vec3_t origin)
 	return false;
 }
 
+qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags )
+{
+	int		i;
+	cplane_t *p;
+
+	if (r_nocull->value)
+		return false;
+
+	for (i=0,p=frustum ; i<4; i++,p++)
+	{
+		if ( !(clipflags & (1<<i)) ) {
+			continue;
+		}
+
+		if ( DotProduct ( centre, p->normal ) - p->dist <= -radius )
+			return true;
+	}
+
+	return false;
+}
+
 void R_RotateForEntity (entity_t *e)
 {
     qglTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
@@ -457,7 +477,6 @@ void R_DrawEntitiesOnList (void)
 	rscript_t	*rs = NULL;
 	vec3_t	dist;
 	char    shortname[MAX_QPATH];
-	float	fadeshadow_cutoff;
 
 	if (!r_drawentities->integer)
 		return;
@@ -496,26 +515,7 @@ void R_DrawEntitiesOnList (void)
 		currentmodel = currententity->model;
 
 		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);
-		
-		//fade out shadows. 
-		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST);
-		if (dist[2] < 0.1)
-			fadeShadow = 1.0;
-		else if (r_shadowcutoff->value < 0.1)
-			fadeShadow = 1.0;
-		else if (VectorLength (dist)-dist[2] > fadeshadow_cutoff)
-		{
-			//NOTE: this is designed to really emphasize height differences,
-			//since shadows are more visible from higher up.
-			fadeShadow = 100.0-VectorLength(dist)+dist[2]+fadeshadow_cutoff;
-			if (fadeShadow < 0.01)
-				fadeShadow = 0.0;
-			else
-				fadeShadow /= 100.0; //fade out smoothly over 100 units.
-		}
-		else
-			fadeShadow = 1.0;
+		VectorSubtract(r_origin, currententity->origin, dist);		
 		
 		//set lod if available
 		if(VectorLength(dist) > LOD_DIST*2.0)
@@ -976,16 +976,12 @@ void R_Clear (void)
 
 	qglDepthRange (gldepthmin, gldepthmax);
 
-	//our shadow system uses a combo of shadmaps and stencil volumes.
-	if (have_stencil && (gl_shadows->integer || gl_shadowmaps->integer)) {
+	 //our shadow system uses a combo of shadmaps and stencil volumes.
+    if (have_stencil && gl_shadowmaps->integer) {
 
-		if(gl_shadowmaps->integer)
-			qglClearStencil(0);
-		else
-			qglClearStencil(1);
-
-		qglClear(GL_STENCIL_BUFFER_BIT);
-	}
+        qglClearStencil(0);
+        qglClear(GL_STENCIL_BUFFER_BIT);
+    }
 }
 
 void R_Flash( void )
@@ -1080,7 +1076,7 @@ void R_RenderView (refdef_t *fd)
 	R_DrawVegetationSurface ();
 
 	R_DrawSimpleItems ();
-	
+
 	R_CastShadow();
 
 	R_RenderAllRagdolls(); //move back ahead of r_castshadow when we figure out shadow jitter bug
@@ -1194,7 +1190,6 @@ void R_Register( void )
 	gl_bitdepth = Cvar_Get( "gl_bitdepth", "0", 0 );
 	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
-	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
 	gl_skymip = Cvar_Get ("gl_skymip", "0", 0);
@@ -1248,7 +1243,7 @@ void R_Register( void )
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
-	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
+	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "1", CVAR_ARCHIVE );
 	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "880", CVAR_ARCHIVE );
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
@@ -1357,7 +1352,6 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 0);
-	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("gl_vlights", 0);
@@ -1385,7 +1379,6 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 0);
@@ -1413,7 +1406,6 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
@@ -1441,7 +1433,6 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
@@ -1469,7 +1460,6 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);

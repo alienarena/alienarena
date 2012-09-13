@@ -1054,85 +1054,6 @@ qboolean RGD_CullRagDolls( int RagDollID )
 	}
 }
 
-extern qboolean have_stencil;
-extern vec3_t lightspot;
-void RGD_DrawRagDollShadow(int RagDollID)
-{
-	vec3_t	point, point2, mins, maxs;
-	float	height;
-	int		i, j;
-	int		index_xyz, index_st;
-	int		va = 0;
-	trace_t r_trace;
-
-	//trace to get ground
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
-
-	VectorCopy(RagDoll[RagDollID].curPos, point);
-	point[2] += 24;
-	VectorCopy(RagDoll[RagDollID].curPos, point2);
-	point2[2] -= 1024;
-
-	r_trace = CM_BoxTrace(point, point2, mins, maxs, r_worldmodel->firstnode, MASK_SOLID);
-
-	if(r_trace.fraction == 1.0)
-		return;
-
-	height = r_trace.endpos[2] + 0.1f;
-
-	if (r_newrefdef.vieworg[2] < height)
-		return;
-
-	if (have_stencil)
-	{
-		qglDepthMask(0);
-		qglEnable(GL_STENCIL_TEST);
-		qglStencilFunc(GL_EQUAL,1,2);
-		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
-	}
-
-	va=0;
-	VArray = &VArrayVerts[0];
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-	for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
-    {
-        for (j=0; j<3; j++)
-        {
-            index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
-
-			memcpy( point, RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position, sizeof( point )  );
-
-			point[0] -= shadevector[0];
-			point[1] -= shadevector[1];
-			point[2] = height;
-
-			VArray[0] = point[0];
-			VArray[1] = point[1];
-			VArray[2] = point[2];
-
-			VArray[3] = currentmodel->st[index_st].s;
-            VArray[4] = currentmodel->st[index_st].t;
-
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			va++;
-		}
-	}
-
-	R_DrawVarrays(GL_TRIANGLES, 0, va, false);
-
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-
-	R_KillVArrays ();
-	qglDepthMask(1);
-	qglColor4f(1,1,1,1);
-	if (1)
-		qglDisable(GL_STENCIL_TEST);
-}
-
 void R_RenderAllRagdolls ( void )
 {
 	int RagDollID;
@@ -1195,6 +1116,11 @@ void R_RenderAllRagdolls ( void )
 				shellEffect = true;
 			}
 
+			R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
+
+			if(r_gpuanim->integer)
+				R_GenerateRagdollShadow(RagDollID);
+
 			IQM_AnimateRagdoll(RagDollID, shellEffect);
 
 			currentmodel = RagDoll[RagDollID].ragDollMesh;
@@ -1203,66 +1129,7 @@ void R_RenderAllRagdolls ( void )
 
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);
-
-			//simple stencil shadows
-			if (gl_shadows->integer && !shellEffect && !gl_shadowmaps->integer)
-			{
-				float casted;
-				float an = RagDoll[RagDollID].angles[1]/180*M_PI;
-				shadevector[0] = cos(-an);
-				shadevector[1] = sin(-an);
-				shadevector[2] = 1;
-				VectorNormalize (shadevector);
-
-				currentmodel = RagDoll[RagDollID].ragDollMesh;
-
-				switch (gl_shadows->integer)
-				{
-					case 0:
-						break;
-					case 1: //dynamic only - always cast something
-						casted = SHD_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 0);
-						qglDisable (GL_TEXTURE_2D);
-						qglEnable (GL_BLEND);
-
-						qglColor4f (0,0,0,0.3);
-
-						RGD_DrawRagDollShadow (RagDollID);
-
-						qglEnable (GL_TEXTURE_2D);
-						qglDisable (GL_BLEND);
-						break;
-					case 2: //dynamic and world
-						//world
-						casted = SHD_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 1);
-
-						qglDisable (GL_TEXTURE_2D);
-						qglEnable (GL_BLEND);
-
-						qglColor4f (0,0,0,casted);
-
-						RGD_DrawRagDollShadow (RagDollID);
-
-						qglEnable (GL_TEXTURE_2D);
-						qglDisable (GL_BLEND);
-						//dynamic
-						casted = 0;
-						casted = SHD_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 0);
-						if (casted > 0)
-						{ //only draw if there's a dynamic light there
-							qglDisable (GL_TEXTURE_2D);
-							qglEnable (GL_BLEND);
-
-							qglColor4f (0,0,0,casted);
-
-							RGD_DrawRagDollShadow (RagDollID);
-
-							qglEnable (GL_TEXTURE_2D);
-							qglDisable (GL_BLEND);
-						}
-						break;
-				}
-			}
+			
 			qglColor4f (1,1,1,1);
 
 			//apply forces from explosions

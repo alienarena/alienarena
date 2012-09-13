@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 #include "r_ragdoll.h"
+#include "r_lodcalc.h"
 
 /*
 =============================================================
@@ -786,17 +787,6 @@ void MD2_VlightModel( const vec3_t baselight, dtrivertx_t *verts, vec3_t lightOu
 }
 #endif
 
-void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3] )
-{
-    int i;
-    for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4)
-        {
-            lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
-            lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
-            lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
-        }
-}
-
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
 void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
@@ -885,6 +875,11 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 		VectorCopy (lightAdd, cl_persistent_ents[currententity->number].oldlightadd);
 		cl_persistent_ents[currententity->number].setlightstuff = true;
 		VectorCopy (currententity->origin, cl_persistent_ents[currententity->number].oldorigin);
+	}
+
+	if(numlights > 0.0) {
+		for(i = 0; i < 3; i++)
+			statLightPosition[i] = lightAdd[i]/numlights;
 	}
 	
 	dynFactor = 0;
@@ -1026,7 +1021,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	int		va = 0;
 	float shellscale;
 	vec3_t lightcolor;
-	float   *lerp;
 	fstvert_t *st;
 	float os, ot, os2, ot2;
 	unsigned offs, offs2;
@@ -1103,16 +1097,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			frontv[i] = frontlerp*frame->scale[i];
 			backv[i] = backlerp*oldframe->scale[i];
 		}
-
-		if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
-			if(gl_shadows->integer && !gl_shadowmaps->integer) {
-				lerp = s_lerped[0];
-				MD2_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
-				return;
-			}
-			else
-				return;
-		}
 	}
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
@@ -1135,8 +1119,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
             qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 			glEnableVertexAttribArrayARB (1);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-
-            R_GetLightVals(currententity->origin, false, true);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1178,9 +1160,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
             glUniform1iARB( g_location_useGlow, 0);
 
-			glUniform1iARB( g_location_useScatter, 0);
-
-			glUniform1iARB( g_location_useShell, 0);
+			glUniform1iARB( g_location_useShell, 1);
 
             glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
@@ -1488,8 +1468,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
 				}
 
-				R_GetLightVals(currententity->origin, false, true);
-
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
 				for(i = 0; i < 3; i++)
@@ -1568,17 +1546,9 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				else
 					glUniform1iARB( g_location_useGlow, 0);
 
-				glUniform1iARB( g_location_useScatter, 1);
-
 				glUniform1iARB( g_location_useShell, 0);
 
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
-
-				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
-				if(gl_shadowmaps->integer && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
-					glUniform1fARB( g_location_minLight, 0.20);
-				else
-					glUniform1fARB( g_location_minLight, 0.15);
 
 				glUniform1fARB( g_location_meshTime, rs_realtime);
 
@@ -1813,116 +1783,6 @@ done:
 
 }
 
-extern qboolean have_stencil;
-extern	vec3_t			lightspot;
-
-/*
-=============
-MD2_DrawShadow
-=============
-*/
-void MD2_DrawShadow(dmdl_t *paliashdr, qboolean lerped)
-{
-	dtrivertx_t	*verts;
-	float	height, lheight;
-	daliasframe_t	*frame;
-	fstvert_t	*st;
-	dtriangle_t		*tris;
-	int		i;
-	int		index_xyz, index_st;
-	int		vertsize;
-	vec_t	*position;
-
-	lheight = currententity->origin[2] - lightspot[2];
-
-	if(lerped)
-		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-			+ currententity->frame * paliashdr->framesize);
-	else
-		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
-
-	verts = frame->verts;
-
-	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
-
-	st = currentmodel->st;
-
-	height = -lheight + 0.1f;
-
-	// if above entity's origin, skip
-	if ((currententity->origin[2]+height) > currententity->origin[2])
-		return;
-
-	if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
-		return;
-
-	if (have_stencil) {
-
-		qglDepthMask(0);
-
-		qglEnable(GL_STENCIL_TEST);
-
-		qglStencilFunc(GL_EQUAL,1,2);
-
-		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
-
-	}
-
-	VArray = &VArrayVerts[0];
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-	vertsize = VertexSizes[VERT_SINGLE_TEXTURED];
-	
-	#define SHADOW_VARRAY_LERPED_ITER(trinum,vnum)\
-		index_xyz = tris[trinum].index_xyz[vnum];\
-		index_st = tris[trinum].index_st[vnum];\
-		position = s_lerped[index_xyz];\
-		VArray[0] = position[0]-shadevector[0]*(position[2]+lheight);\
-		VArray[1] = position[1]-shadevector[1]*(position[2]+lheight);\
-		VArray[2] = height;\
-		VArray[3] = st[index_st].s;\
-		VArray[4] = st[index_st].t;\
-		VArray += vertsize;
-	#define SHADOW_VARRAY_NONLERPED_ITER(trinum,vnum)\
-		index_xyz = tris[trinum].index_xyz[vnum];\
-		index_st = tris[trinum].index_st[vnum];\
-		position =  currentmodel->vertexes[index_xyz].position;\
-		VArray[0] = position[0]-shadevector[0]*(position[2]+lheight);\
-		VArray[1] = position[1]-shadevector[1]*(position[2]+lheight);\
-		VArray[2] = height;\
-		VArray[3] = st[index_st].s;\
-		VArray[4] = st[index_st].t;\
-		VArray += vertsize;
-
-	if (lerped)
-	{
-		for (i=0; i<paliashdr->num_tris; i++)
-		{
-			SHADOW_VARRAY_LERPED_ITER(i,0);
-			SHADOW_VARRAY_LERPED_ITER(i,1);
-			SHADOW_VARRAY_LERPED_ITER(i,2);
-		}
-	}
-	else
-	{
-		for (i=0; i<paliashdr->num_tris; i++)
-		{
-			SHADOW_VARRAY_NONLERPED_ITER(i,0);
-			SHADOW_VARRAY_NONLERPED_ITER(i,1);
-			SHADOW_VARRAY_NONLERPED_ITER(i,2);
-		}
-	}
-
-	R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
-
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-
-	R_KillVArrays ();
-	qglDepthMask(1);
-	qglColor4f(1,1,1,1);
-	if (have_stencil) qglDisable(GL_STENCIL_TEST);
-}
-
 /*
 =================
 R_DrawAliasModel - render alias models(using MD2 format)
@@ -1952,6 +1812,10 @@ void R_DrawAliasModel ( void )
 		if ( r_lefthand->integer == 2 )
 			return;
 	}
+
+	R_GetLightVals(currententity->origin, false, true);
+
+	//R_GenerateEntityShadow(); //not using this for now, it's generally a bit slower than the stencil volumes at the moment when dealing with static meshes
 
 	paliashdr = (dmdl_t *)currentmodel->extradata;
 
@@ -2176,97 +2040,7 @@ void R_DrawAliasModel ( void )
 	}
 	if (currententity->flags & RF_DEPTHHACK)
 		qglDepthRange (gldepthmin, gldepthmax);
-
-	//simple stencil shadows
-	if	(	!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && fadeShadow >= 0.01 &&
-			gl_shadows->integer && !gl_shadowmaps->integer && 
-			!(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS))
-		)
-	{
-		float casted;
-		float an = currententity->angles[1]/180*M_PI;
-		shadevector[0] = cos(-an);
-		shadevector[1] = sin(-an);
-		shadevector[2] = 1;
-		VectorNormalize (shadevector);
-
-		switch (gl_shadows->integer)
-		{
-		case 0:
-			break;
-		case 1: //dynamic only - always cast something
-			casted = SHD_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
-			qglPushMatrix ();
-			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
-			qglRotatef (currententity->angles[1], 0, 0, 1);
-			qglDisable (GL_TEXTURE_2D);
-			qglEnable (GL_BLEND);
-
-			if (currententity->flags & RF_TRANSLUCENT)
-				qglColor4f (0,0,0,0.3 * fadeShadow * currententity->alpha); //Knightmare- variable alpha
-			else
-				qglColor4f (0,0,0,0.3 * fadeShadow);
-
-			if(currententity->frame == 0 && currentmodel->num_frames == 1)
-				MD2_DrawShadow (paliashdr, false);
-			else
-				MD2_DrawShadow (paliashdr, true);
-
-			qglEnable (GL_TEXTURE_2D);
-			qglDisable (GL_BLEND);
-			qglPopMatrix ();
-
-			break;
-		case 2: //dynamic and world
-			//world
-			casted = SHD_ShadowLight (currententity->origin, currententity->angles, shadevector, 1);
-			qglPushMatrix ();
-			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
-			qglRotatef (currententity->angles[1], 0, 0, 1);
-			qglDisable (GL_TEXTURE_2D);
-			qglEnable (GL_BLEND);
-
-			if (currententity->flags & RF_TRANSLUCENT)
-				qglColor4f (0,0,0,casted * fadeShadow * currententity->alpha);
-			else
-				qglColor4f (0,0,0,casted * fadeShadow);
-
-			if(currententity->frame == 0 && currentmodel->num_frames == 1)
-				MD2_DrawShadow (paliashdr, false);
-			else
-				MD2_DrawShadow (paliashdr, true);
-
-			qglEnable (GL_TEXTURE_2D);
-			qglDisable (GL_BLEND);
-			qglPopMatrix ();
-			//dynamic
-			casted = 0;
-		 	casted = SHD_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
-			if (casted > 0) { //only draw if there's a dynamic light there
-				qglPushMatrix ();
-				qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
-				qglRotatef (currententity->angles[1], 0, 0, 1);
-				qglDisable (GL_TEXTURE_2D);
-				qglEnable (GL_BLEND);
-
-				if (currententity->flags & RF_TRANSLUCENT)
-					qglColor4f (0,0,0,casted * fadeShadow * currententity->alpha);
-				else
-					qglColor4f (0,0,0,casted * fadeShadow);
-
-				if(currententity->frame == 0 && currentmodel->num_frames == 1)
-					MD2_DrawShadow (paliashdr, false);
-				else
-					MD2_DrawShadow (paliashdr, true);
-
-				qglEnable (GL_TEXTURE_2D);
-				qglDisable (GL_BLEND);
-				qglPopMatrix ();
-			}
-
-			break;
-		}
-	}
+	
 	qglColor4f (1,1,1,1);
 
 	if(r_minimap->integer)
@@ -2284,7 +2058,6 @@ void R_DrawAliasModel ( void )
 		VectorCopy(currententity->origin,RadarEnts[numRadarEnts].org);
 		numRadarEnts++;
 	}
-
 }
 
 void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
