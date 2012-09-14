@@ -386,7 +386,7 @@ static char bsp_fragment_program[] = STRINGIFY (
 
 	float lookupShadow( sampler2DShadow Map )
 	{
-		float shadow;
+		float shadow = 1.0;
 
 		if(SHADOWMAP > 0) 
 		{			
@@ -401,11 +401,13 @@ static char bsp_fragment_program[] = STRINGIFY (
 				shadow *= 0.25 ;
 			}
 	
-			return shadow + 0.5;
+			shadow += 0.2;
+			if(shadow > 1.0)
+				shadow = 1.0;
 		}
-		else
-			return 1.0;
-	}	
+		
+		return shadow;
+	}		
 
 	void main( void )
 	{
