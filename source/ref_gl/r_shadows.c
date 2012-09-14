@@ -1077,5 +1077,5 @@ void R_CastShadow(void)
 	qglDepthFunc(GL_LEQUAL);
 	qglDisable(GL_POLYGON_OFFSET_FILL);
 
-	R_ShadowBlend(0.3);
+	R_ShadowBlend(0.4);
 }
