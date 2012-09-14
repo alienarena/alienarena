@@ -612,8 +612,7 @@ static char bsp_fragment_program[] = STRINGIFY (
 	}
 );
 
-static char shadow_vertex_program[] = STRINGIFY (
-		
+static char shadow_vertex_program[] = STRINGIFY (		
 	varying vec4 sPos;
 
 	void main( void )
@@ -625,7 +624,6 @@ static char shadow_vertex_program[] = STRINGIFY (
 );
 
 static char shadow_fragment_program[] = STRINGIFY (
-
 	uniform sampler2DShadow StatShadowMap;
 	uniform float fadeShadow;
 	uniform float xPixelOffset;
@@ -981,379 +979,388 @@ static char blankmesh_fragment_program[] = STRINGIFY (
 );
 
 
-static char water_vertex_program[] =
-"const float Eta = 0.66;\n"
-"const float FresnelPower = 5.0;\n"
+static char water_vertex_program[] = STRINGIFY (
+	const float Eta = 0.66;
+	const float FresnelPower = 5.0;
 
-"const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));\n"
-"varying float FresRatio;\n"
+	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
+	varying float FresRatio;
 
-"varying vec3 lightDir;\n"
-"varying vec3 eyeDir;\n"
-"varying vec3 reflectDir;\n"
-"varying vec3 refractDir;\n"
+	varying vec3 lightDir;
+	varying vec3 eyeDir;
+	varying vec3 reflectDir;
+	varying vec3 refractDir;
 
-"varying float fog;\n"
+	varying float fog;
 
-"uniform vec3 stangent;\n"
-"uniform vec3 LightPos;\n"
-"uniform float time;\n"
-"uniform int	REFLECT;\n"
-"uniform int FOG;\n"
+	uniform vec3 stangent;
+	uniform vec3 LightPos;
+	uniform float time;
+	uniform int	REFLECT;
+	uniform int FOG;
 
-"void main(void)\n"
-"{\n"
+	void main(void)
+	{
+		vec4 v = vec4(gl_Vertex);
+		gl_Position = ftransform();
 
-"	vec4 v = vec4(gl_Vertex);\n"
-"	gl_Position = ftransform();\n"
+		vec3 norm = normalize(gl_NormalMatrix * gl_Normal);
+		vec3 tang = normalize(gl_NormalMatrix * stangent);
+		vec3 binorm = cross(norm,tang);
 
-"	vec3 norm = normalize(gl_NormalMatrix * gl_Normal);\n"
-"	vec3 tang = normalize(gl_NormalMatrix * stangent);\n"
-"	vec3 binorm = cross(norm,tang);\n"
+		eyeDir = vec3(gl_ModelViewMatrix * v);
 
-"	eyeDir = vec3(gl_ModelViewMatrix * v);\n"
+		//for refraction
+		vec4 neyeDir = gl_ModelViewMatrix * v;
+		vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+		refeyeDir = normalize(refeyeDir);
 
-"	//for refraction\n"
-"	vec4 neyeDir = gl_ModelViewMatrix * v;\n"
-"	vec3 refeyeDir = neyeDir.xyz / neyeDir.w;\n"
-"	refeyeDir = normalize(refeyeDir);\n"
+		refeyeDir.x *= -1.0;
+		refeyeDir.y *= -1.0;
+		refeyeDir.z *= -1.0;
 
-"	refeyeDir.x *= -1.0;\n"
-"	refeyeDir.y *= -1.0;\n"
-"	refeyeDir.z *= -1.0;\n"
+		reflectDir = reflect(eyeDir,norm);
+		refractDir = refract(eyeDir,norm,Eta);
+		refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));
+		FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);
 
-"	reflectDir = reflect(eyeDir,norm);\n"
-"	refractDir = refract(eyeDir,norm,Eta);\n"
-"	refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));\n"
-"	FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);\n"
+		vec3 tmp;
+		tmp.x = dot(LightPos,tang);
+		tmp.y = dot(LightPos,binorm);
+		tmp.z = dot(LightPos,norm);
+		lightDir = normalize(tmp);
 
-"	vec3 tmp;\n"
-"	tmp.x = dot(LightPos,tang);\n"
-"	tmp.y = dot(LightPos,binorm);\n"
-"	tmp.z = dot(LightPos,norm);\n"
-"	lightDir = normalize(tmp);\n"
+		tmp.x = dot(eyeDir,tang);
+		tmp.y = dot(eyeDir,binorm);
+		tmp.z = dot(eyeDir,norm);
+		eyeDir = normalize(tmp);
 
-"	tmp.x = dot(eyeDir,tang);\n"
-"	tmp.y = dot(eyeDir,binorm);\n"
-"	tmp.z = dot(eyeDir,norm);\n"
-"	eyeDir = normalize(tmp);\n"
+		vec4 texco = gl_MultiTexCoord0;
+		if(REFLECT > 0) 
+		{
+			texco.s = texco.s - LightPos.x/256.0;
+			texco.t = texco.t + LightPos.y/256.0;
+		}
 
-"	vec4 texco = gl_MultiTexCoord0;\n"
-"	if(REFLECT > 0) {\n"
-"		texco.s = texco.s - LightPos.x/256.0;\n"
-"		texco.t = texco.t + LightPos.y/256.0;\n"
-"	}\n"
+		gl_TexCoord[0] = texco;
 
-"	gl_TexCoord[0] = texco;\n"
+		texco = gl_MultiTexCoord0;
+		texco.s = texco.s + time*0.05;
+		texco.t = texco.t + time*0.05;
 
-"	texco = gl_MultiTexCoord0;\n"
-"	texco.s = texco.s + time*0.05;\n"
-"	texco.t = texco.t + time*0.05;\n"
+		gl_TexCoord[1] = texco;
 
-"	gl_TexCoord[1] = texco;\n"
+		texco = gl_MultiTexCoord0;
+		texco.s = texco.s + -time*0.05;
+		texco.t = texco.t + -time*0.05;
+		gl_TexCoord[2] = texco;
 
-"	texco = gl_MultiTexCoord0;\n"
-"	texco.s = texco.s + -time*0.05;\n"
-"	texco.t = texco.t + -time*0.05;\n"
-"	gl_TexCoord[2] = texco;\n"
+		//fog
+	   if(FOG > 0)
+	   {
+			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+			fog = clamp(fog, 0.0, 1.0);
+	  	}
+	}
+);
 
-"	//fog\n"
-"   if(FOG > 0){\n"
-"		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
-"		fog = clamp(fog, 0.0, 1.0);\n"
-"  	}\n"
-"}\n";
+static char water_fragment_program[] = STRINGIFY (
+	varying vec3 lightDir;
+	varying vec3 eyeDir;
+	varying float FresRatio;
 
-static char water_fragment_program[] =
-"varying vec3 lightDir;\n"
-"varying vec3 eyeDir;\n"
-"varying float FresRatio;\n"
+	varying float fog;
 
-"varying float fog;\n"
+	uniform sampler2D refTexture;
+	uniform sampler2D normalMap;
+	uniform sampler2D baseTexture;
 
-"uniform sampler2D refTexture;\n"
-"uniform sampler2D normalMap;\n"
-"uniform sampler2D baseTexture;\n"
+	uniform int REFLECT;
+	uniform int TRANSPARENT;
+	uniform int FOG;
 
-"uniform int REFLECT;\n"
-"uniform int TRANSPARENT;\n"
-"uniform int FOG;\n"
+	void main (void)
+	{
+		vec4 refColor;
 
-"void main (void)\n"
-"{\n"
-"	vec4 refColor;\n"
+		float distSqr = dot(lightDir, lightDir);
+		float att = clamp(1.0 - 0.0 * sqrt(distSqr), 0.0, 1.0);
+		vec3 lVec = lightDir * inversesqrt(distSqr);
 
-"	float distSqr = dot(lightDir, lightDir);\n"
-"	float att = clamp(1.0 - 0.0 * sqrt(distSqr), 0.0, 1.0);\n"
-"	vec3 lVec = lightDir * inversesqrt(distSqr);\n"
+		vec3 vVec = normalize(eyeDir);
 
-"	vec3 vVec = normalize(eyeDir);\n"
+		vec4 base = vec4(0.15,0.67,0.93,1.0); //base water color
+		if(REFLECT > 0)
+			refColor = mix(base, texture2D(refTexture, gl_TexCoord[0].xy), 1.0);
+		else
+			refColor = mix(base, texture2D(baseTexture, gl_TexCoord[0].xy), 1.0);
 
-"	vec4 base = vec4(0.15,0.67,0.93,1.0); //base water color\n"
-"	if(REFLECT > 0)\n"
-"		refColor = mix(base, texture2D(refTexture, gl_TexCoord[0].xy), 1.0);\n"
-"	else\n"
-"		refColor = mix(base, texture2D(baseTexture, gl_TexCoord[0].xy), 1.0);\n"
+		vec3 bump = normalize( texture2D(normalMap, gl_TexCoord[1].xy).xyz * 2.0 - 1.0);
+		vec3 secbump = normalize( texture2D(normalMap, gl_TexCoord[2].xy).xyz * 2.0 - 1.0);
+		vec3 modbump = mix(secbump,bump,0.5);
 
-"	vec3 bump = normalize( texture2D(normalMap, gl_TexCoord[1].xy).xyz * 2.0 - 1.0);\n"
-"	vec3 secbump = normalize( texture2D(normalMap, gl_TexCoord[2].xy).xyz * 2.0 - 1.0);\n"
-"	vec3 modbump = mix(secbump,bump,0.5);\n"
+		vec3 reflection = reflect(eyeDir,modbump);
+		vec3 refraction = refract(eyeDir,modbump,0.66);
 
-"	vec3 reflection = reflect(eyeDir,modbump);\n"
-"	vec3 refraction = refract(eyeDir,modbump,0.66);\n"
+		vec4 Tl = texture2DProj(baseTexture, vec4(reflection.xy, 1.0, 1.0) );
+	   vec4 Tr = texture2DProj(baseTexture, vec4(refraction.xy, 1.0, 1.0) );
 
-"	vec4 Tl = texture2DProj(baseTexture, vec4(reflection.xy, 1.0, 1.0) );\n"
-"   vec4 Tr = texture2DProj(baseTexture, vec4(refraction.xy, 1.0, 1.0) );\n"
+		vec4 cubemap = mix(Tl,Tr,FresRatio);
 
-"	vec4 cubemap = mix(Tl,Tr,FresRatio);\n"
+		gl_FragColor = mix(cubemap,refColor,0.5);
+		if(TRANSPARENT > 0)
+			gl_FragColor.a = 0.5;
 
-"	gl_FragColor = mix(cubemap,refColor,0.5);\n"
-"	if(TRANSPARENT > 0)\n"
-"		gl_FragColor.a = 0.5;\n"
+		if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 
-"	if(FOG > 0)\n"
-"		gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
-
-"}\n";
+	}
+);
 
 //FRAMEBUFFER DISTORTION EFFECTS
-static char fb_vertex_program[] =
-"void main( void )\n"
-"{\n"
-"    gl_Position = ftransform();\n"
+static char fb_vertex_program[] = STRINGIFY (
+	void main( void )
+	{
+	    gl_Position = ftransform();
 
-"    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
-"}\n";
+	    gl_TexCoord[0] = gl_MultiTexCoord0;
+	}
+);
 
-static char fb_fragment_program[] =
-"uniform sampler2D fbtexture;\n"
-"uniform sampler2D distortiontexture;\n"
-"uniform vec2 dParams;\n"
-"uniform vec2 fxPos;\n"
+static char fb_fragment_program[] = STRINGIFY (
+	uniform sampler2D fbtexture;
+	uniform sampler2D distortiontexture;
+	uniform vec2 dParams;
+	uniform vec2 fxPos;
 
-"void main(void)\n"
-"{\n"
-"	vec3 noiseVec;\n"
-"	vec2 displacement;\n"
-"	float wScissor;\n"
-"	float hScissor;\n"
+	void main(void)
+	{
+		vec3 noiseVec;
+		vec2 displacement;
+		float wScissor;
+		float hScissor;
 
-"   displacement = gl_TexCoord[0].st;\n"
+	   displacement = gl_TexCoord[0].st;
 
-"	displacement.x -= fxPos.x;\n"
-"	displacement.y -= fxPos.y;\n"
+		displacement.x -= fxPos.x;
+		displacement.y -= fxPos.y;
 
-"	noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;\n"
-"	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
+		noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;
+		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
-"	//clamp edges to prevent artifacts\n"
+		//clamp edges to prevent artifacts
 
-"	wScissor = dParams.x - 0.008;\n"
-"	hScissor = dParams.y - 0.008;\n"
+		wScissor = dParams.x - 0.008;
+		hScissor = dParams.y - 0.008;
 
-"	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)\n"
-"		displacement.x = gl_TexCoord[0].s + noiseVec.x;\n"
-"	else\n"
-"		displacement.x = gl_TexCoord[0].s;\n"
+		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)
+			displacement.x = gl_TexCoord[0].s + noiseVec.x;
+		else
+			displacement.x = gl_TexCoord[0].s;
 
-"	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) \n"
-"		displacement.y = gl_TexCoord[0].t + noiseVec.y;\n"
-"	else\n"
-"		displacement.y = gl_TexCoord[0].t;\n"
+		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) 
+			displacement.y = gl_TexCoord[0].t + noiseVec.y;
+		else
+			displacement.y = gl_TexCoord[0].t;
 
-"	gl_FragColor = texture2D(fbtexture, displacement.xy);\n"
-"}\n";
+		gl_FragColor = texture2D(fbtexture, displacement.xy);
+	}
+);
 
 //GAUSSIAN BLUR EFFECTS
-static char blur_vertex_program[] =
-"void main()\n"
-"{\n"
-"	gl_Position = ftransform();\n"
-"	gl_TexCoord[0] =  gl_MultiTexCoord0;\n"
-"}\n";
+static char blur_vertex_program[] = STRINGIFY (
+	void main()
+	{
+		gl_Position = ftransform();
+		gl_TexCoord[0] =  gl_MultiTexCoord0;
+	}
+);
 
-static char blur_fragment_program[] =
-"uniform vec2 ScaleU;\n"
-"uniform sampler2D textureSource;\n"
+static char blur_fragment_program[] = STRINGIFY (
+	uniform vec2 ScaleU;
+	uniform sampler2D textureSource;
 
-"void main()\n"
-"{\n"
-"   vec4 sum = vec4(0.0);\n"
+	void main()
+	{
+	   vec4 sum = vec4(0.0);
 
-"   // take nine samples\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 4.0*ScaleU.x, gl_TexCoord[0].y - 4.0*ScaleU.y)) * 0.05;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 3.0*ScaleU.x, gl_TexCoord[0].y - 3.0*ScaleU.y)) * 0.09;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 2.0*ScaleU.x, gl_TexCoord[0].y - 2.0*ScaleU.y)) * 0.12;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - ScaleU.x, gl_TexCoord[0].y - ScaleU.y)) * 0.15;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y)) * 0.16;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + ScaleU.x, gl_TexCoord[0].y + ScaleU.y)) * 0.15;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 2.0*ScaleU.x, gl_TexCoord[0].y + 2.0*ScaleU.y)) * 0.12;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 3.0*ScaleU.x, gl_TexCoord[0].y + 3.0*ScaleU.y)) * 0.09;\n"
-"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 4.0*ScaleU.x, gl_TexCoord[0].y + 4.0*ScaleU.y)) * 0.05;\n"
+	   // take nine samples
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 4.0*ScaleU.x, gl_TexCoord[0].y - 4.0*ScaleU.y)) * 0.05;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 3.0*ScaleU.x, gl_TexCoord[0].y - 3.0*ScaleU.y)) * 0.09;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 2.0*ScaleU.x, gl_TexCoord[0].y - 2.0*ScaleU.y)) * 0.12;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - ScaleU.x, gl_TexCoord[0].y - ScaleU.y)) * 0.15;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y)) * 0.16;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + ScaleU.x, gl_TexCoord[0].y + ScaleU.y)) * 0.15;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 2.0*ScaleU.x, gl_TexCoord[0].y + 2.0*ScaleU.y)) * 0.12;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 3.0*ScaleU.x, gl_TexCoord[0].y + 3.0*ScaleU.y)) * 0.09;
+	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 4.0*ScaleU.x, gl_TexCoord[0].y + 4.0*ScaleU.y)) * 0.05;
 
-"   gl_FragColor = sum;\n"
-"}\n";
+	   gl_FragColor = sum;
+	}
+);
 
 //RADIAL BLUR EFFECTS // xy = radial center screen space position, z = radius attenuation, w = blur strength
-static char rblur_vertex_program[] =
-"void main()\n"
-"{\n"
-"	gl_Position = ftransform();\n"
-"	gl_TexCoord[0] =  gl_MultiTexCoord0;\n"
-"}\n";
+static char rblur_vertex_program[] = STRINGIFY (
+	void main()
+	{
+		gl_Position = ftransform();
+		gl_TexCoord[0] =  gl_MultiTexCoord0;
+	}
+);
 
-static char rblur_fragment_program[] =
-"uniform sampler2D rtextureSource;\n"
-"uniform vec3 radialBlurParams;\n" 
-"uniform vec3 rblurScale;\n"
+static char rblur_fragment_program[] = STRINGIFY (
+	uniform sampler2D rtextureSource;
+	uniform vec3 radialBlurParams;
+	uniform vec3 rblurScale;
 
-"void main(void)\n"
-"{\n"
-"	 float wScissor;\n"
-"	 float hScissor;\n"
+	void main(void)
+	{
+		float wScissor;
+		float hScissor;
 
-"    vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);\n" 
-"    float dist = sqrt(dir.x*dir.x + dir.y*dir.y);\n" 
-"  	 dir = dir/dist;\n" 
-"    vec4 color = texture2D(rtextureSource,gl_TexCoord[0].xy);\n" 
-"    vec4 sum = color;\n"
+	    vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);
+	    float dist = sqrt(dir.x*dir.x + dir.y*dir.y); 
+	  	dir = dir/dist;
+	    vec4 color = texture2D(rtextureSource,gl_TexCoord[0].xy); 
+	    vec4 sum = color;
 
-"	 float strength = radialBlurParams.z;\n"
-"	 vec2 pDir = vec2(rblurScale.y * 0.5 - gl_TexCoord[0].s, rblurScale.z * 0.5 - gl_TexCoord[0].t);\n" 
-"    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);\n"
-"	 clamp(pDist, 0.0, 1.0);\n"
+		float strength = radialBlurParams.z;
+		vec2 pDir = vec2(rblurScale.y * 0.5 - gl_TexCoord[0].s, rblurScale.z * 0.5 - gl_TexCoord[0].t);
+	    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);
+		clamp(pDist, 0.0, 1.0);
 
-"	 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.02 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.01 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.01 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.02 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.03 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.05 * strength * pDist );\n"
-"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.06 * strength * pDist );\n"
+		 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.02 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.01 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.01 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.02 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.03 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.05 * strength * pDist );
+	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.06 * strength * pDist );
 
-"    sum *= 1.0/11.0;\n"
+	    sum *= 1.0/11.0;
  
-"    float t = dist * rblurScale.x;\n"
-"    t = clamp( t ,0.0,1.0);\n" 
+	    float t = dist * rblurScale.x;
+	    t = clamp( t ,0.0,1.0);
 
-"    vec4 final = mix( color, sum, t );\n"
+	    vec4 final = mix( color, sum, t );
 
-"	//clamp edges to prevent artifacts\n"
+		//clamp edges to prevent artifacts
+		wScissor = rblurScale.y - 0.008;
+		hScissor = rblurScale.z - 0.008;
 
-"	wScissor = rblurScale.y - 0.008;\n"
-"	hScissor = rblurScale.z - 0.008;\n"
-
-"	if(gl_TexCoord[0].s > 0.008 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.008 && gl_TexCoord[0].t < hScissor)\n"
-"		gl_FragColor = final;\n"
-"	else\n"
-"		gl_FragColor = color;\n"
-"}\n";
+		if(gl_TexCoord[0].s > 0.008 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.008 && gl_TexCoord[0].t < hScissor)
+			gl_FragColor = final;
+		else
+			gl_FragColor = color;
+	}
+);
 
 //WATER DROPLETS
-static char droplets_vertex_program[] =
-"uniform float drTime;\n"
+static char droplets_vertex_program[] = STRINGIFY (
+	uniform float drTime;
 
-"void main( void )\n"
-"{\n"
-"    gl_Position = ftransform();\n"
+	void main( void )
+	{
+	    gl_Position = ftransform();
 
-"	 //for vertical scrolling\n"
-"	 vec4 texco = gl_MultiTexCoord0;\n"
-"	 texco.t = texco.t + drTime*1.0;\n"
-"	 gl_TexCoord[1] = texco;\n"
+		 //for vertical scrolling
+		 vec4 texco = gl_MultiTexCoord0;
+		 texco.t = texco.t + drTime*1.0;
+		 gl_TexCoord[1] = texco;
 
-"	 texco = gl_MultiTexCoord0;\n"
-"	 texco.t = texco.t + drTime*0.8;\n"
-"	 gl_TexCoord[2] = texco;\n"
+		 texco = gl_MultiTexCoord0;
+		 texco.t = texco.t + drTime*0.8;
+		 gl_TexCoord[2] = texco;
 
-"    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
-"}\n";
+	    gl_TexCoord[0] = gl_MultiTexCoord0;
+	}
+);
 
-static char droplets_fragment_program[] =
-"uniform sampler2D drSource;\n"
-"uniform sampler2D drTex;\n"
-"uniform vec2 drParams;\n"
+static char droplets_fragment_program[] = STRINGIFY (
+	uniform sampler2D drSource;
+	uniform sampler2D drTex;
+	uniform vec2 drParams;
 
-"void main(void)\n"
-"{\n"
-"	vec3 noiseVec;\n"
-"	vec3 noiseVec2;\n"
-"	vec2 displacement;\n"
-"	float wScissor;\n"
-"	float hScissor;\n"
+	void main(void)
+	{
+		vec3 noiseVec;
+		vec3 noiseVec2;
+		vec2 displacement;
+		float wScissor;
+		float hScissor;
 
-"   displacement = gl_TexCoord[1].st;\n"
+	   displacement = gl_TexCoord[1].st;
 
-"	noiseVec = normalize(texture2D(drTex, displacement.xy)).xyz;\n"
-"	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
+		noiseVec = normalize(texture2D(drTex, displacement.xy)).xyz;
+		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
-"   displacement = gl_TexCoord[2].st;\n"
+	    displacement = gl_TexCoord[2].st;
 
-"	noiseVec2 = normalize(texture2D(drTex, displacement.xy)).xyz;\n"
-"	noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
+		noiseVec2 = normalize(texture2D(drTex, displacement.xy)).xyz;
+		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
 
-"	//clamp edges to prevent artifacts\n"
+		//clamp edges to prevent artifacts
+		wScissor = drParams.x - 0.008;
+		hScissor = drParams.y - 0.028;
 
-"	wScissor = drParams.x - 0.008;\n"
-"	hScissor = drParams.y - 0.028;\n"
+		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)
+			displacement.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x;
+		else
+			displacement.x = gl_TexCoord[0].s;
 
-"	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)\n"
-"		displacement.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x;\n"
-"	else\n"
-"		displacement.x = gl_TexCoord[0].s;\n"
+		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) 
+			displacement.y = gl_TexCoord[0].t + noiseVec.y + noiseVec2.y;
+		else
+			displacement.y = gl_TexCoord[0].t;
 
-"	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) \n"
-"		displacement.y = gl_TexCoord[0].t + noiseVec.y + noiseVec2.y;\n"
-"	else\n"
-"		displacement.y = gl_TexCoord[0].t;\n"
+		gl_FragColor = texture2D(drSource, displacement.xy);
+	}
+);
 
-"	gl_FragColor = texture2D(drSource, displacement.xy);\n"
-"}\n";
+static char rgodrays_vertex_program[] = STRINGIFY (
+	void main()
+	{
+		gl_TexCoord[0] =  gl_MultiTexCoord0;
+		gl_Position = ftransform();
+	}
+);
 
-static char rgodrays_vertex_program[] =
-"void main()\n"
-"{\n"
-"	gl_TexCoord[0] =  gl_MultiTexCoord0;\n"
-"	gl_Position = ftransform();\n"
-"}\n";
+static char rgodrays_fragment_program[] = STRINGIFY (
+	uniform vec2 lightPositionOnScreen;
+	uniform sampler2D sunTexture;
 
-static char rgodrays_fragment_program[] =
+	//note - these could be made uniforms to control externally
+	const float exposure = 0.0034;
+	const float decay = 1.0;
+	const float density = 0.84;
+	const float weight = 5.65;
+	const int NUM_SAMPLES = 75;
 
-"uniform vec2 lightPositionOnScreen;\n"
-"uniform sampler2D sunTexture;\n"
+	void main()
+	{
+		vec2 deltaTextCoord = vec2( gl_TexCoord[0].st - lightPositionOnScreen.xy );
+		vec2 textCoo = gl_TexCoord[0].st;
+		deltaTextCoord *= 1.0 /  float(NUM_SAMPLES) * density;
+		float illuminationDecay = 1.0;
 
-//note - these could be made uniforms to control externally
-"const float exposure = 0.0034;\n"
-"const float decay = 1.0;\n"
-"const float density = 0.84;\n"
-"const float weight = 5.65;\n"
-"const int NUM_SAMPLES = 75;\n" 
-
-"void main()\n"
-"{\n"	
-"	vec2 deltaTextCoord = vec2( gl_TexCoord[0].st - lightPositionOnScreen.xy );\n"
-"	vec2 textCoo = gl_TexCoord[0].st;\n"
-"	deltaTextCoord *= 1.0 /  float(NUM_SAMPLES) * density;\n"
-"	float illuminationDecay = 1.0;\n"
-
-"	for(int i = 0; i < NUM_SAMPLES; i++)\n"
-"	{\n"
-"		textCoo -= deltaTextCoord;\n"
-"		vec4 sample = texture2D(sunTexture, textCoo );\n"
+		for(int i = 0; i < NUM_SAMPLES; i++)
+		{
+			textCoo -= deltaTextCoord;
+			vec4 sample = texture2D(sunTexture, textCoo );
 			
-"		sample *= illuminationDecay * weight;\n"
+			sample *= illuminationDecay * weight;
 			
-"		gl_FragColor += sample;\n"
+			gl_FragColor += sample;
 			
-"		illuminationDecay *= decay;\n"
-"	}\n"
-	
-"	gl_FragColor *= exposure;\n"
-"}\n";
+			illuminationDecay *= decay;
+		}
+		gl_FragColor *= exposure;
+	}
+);
 
 void R_LoadGLSLPrograms(void)
 {
