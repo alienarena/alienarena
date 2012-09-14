@@ -1116,6 +1116,17 @@ void R_RenderAllRagdolls ( void )
 				shellEffect = true;
 			}
 
+			//check for valid script
+			use_vbo = true;
+			if(RagDoll[RagDollID].script)
+			{
+				if(!strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture->name) || !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture2->name))
+				{
+					RagDoll[RagDollID].script = NULL; //bad shader!
+					use_vbo = false; //cannot use vbo without a valid shader
+				}
+			}
+
 			R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
 			if(r_gpuanim->integer)
