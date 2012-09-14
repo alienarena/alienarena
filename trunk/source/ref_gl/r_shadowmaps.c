@@ -108,7 +108,7 @@ void R_GenerateShadowFBO()
 	//FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
-	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
+	// GL_LINEAR does not make sense for depth texture.
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -149,7 +149,7 @@ void R_GenerateShadowFBO()
 	//Second FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
-	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
+	// GL_LINEAR does not make sense for depth texture. 
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
