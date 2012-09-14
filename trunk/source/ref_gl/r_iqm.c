@@ -40,7 +40,8 @@ static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
 static vertCache_t *vbo_tangents;
 static vertCache_t *vbo_indices;
-qboolean has_vbo;
+static qboolean has_vbo;
+qboolean use_vbo;
 
 float modelpitch;
 
@@ -1059,7 +1060,7 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage as well)
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
-		if ((gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
+		if (use_vbo && (gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))))
 		{
 			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
@@ -1206,7 +1207,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
 
-		if ((gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
+		if (use_vbo && (gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
 			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
@@ -2513,6 +2514,17 @@ void R_DrawINTERQUAKEMODEL ( void )
 		skin = r_notexture;	// fallback...
 	GL_Bind(skin->texnum);
 
+	//check for valid script
+	use_vbo = true;
+	if(currententity->script)
+	{
+		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || !strcmp("***r_notexture***", currententity->script->stage->texture2->name))
+		{
+			currententity->script = NULL; //bad shader!
+			use_vbo = false; //cannot use vbo without a valid shader
+		}
+	}
+
 	// draw it
 
 	qglShadeModel (GL_SMOOTH);
@@ -2673,6 +2685,7 @@ void IQM_DrawCaster ( void )
 
 	frame = currententity->frame + time;
 
+	use_vbo = true;
 	IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
 
 	IQM_DrawCasterFrame();
@@ -2687,6 +2700,7 @@ void IQM_DrawRagDollCaster ( int RagDollID )
 
     qglPushMatrix ();
 
+	use_vbo = true;
 	IQM_AnimateRagdoll(RagDollID, false);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;

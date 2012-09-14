@@ -300,6 +300,7 @@ void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
 //VBO
+extern qboolean use_vbo;
 extern GLuint vboId;
 extern GLuint eboId;
 extern int totalVBOsize;
