@@ -1329,8 +1329,6 @@ void IQM_DrawFrame(int skinnum)
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 			}
 
-            //R_GetLightVals(currententity->origin, false, false);
-
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
            
@@ -1472,9 +1470,6 @@ void IQM_DrawFrame(int skinnum)
 		vec3_t lightVec;
 		
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
-
-		//get lighting
-		//R_GetLightVals(currententity->origin, false, true);
 
 		R_ModelViewTransform(lightPosition, lightVec);		
 				
@@ -1634,8 +1629,6 @@ void IQM_DrawFrame(int skinnum)
 		vec3_t lightVec, lightVal;
 
 		GLSTATE_ENABLE_ALPHATEST		
-
-		//R_GetLightVals(currententity->origin, false, true);
 
 		//send light level and color to shader, ramp up a bit
 		VectorCopy(lightcolor, lightVal);
@@ -1811,8 +1804,6 @@ void IQM_DrawFrame(int skinnum)
 
 		GL_SelectTexture( GL_TEXTURE0);
 		qglBindTexture (GL_TEXTURE_2D, skinnum);
-
- 		//R_GetLightVals(currententity->origin, false, false);
 		
 		for (i=0; i<currentmodel->num_triangles; i++)
 		{
@@ -1889,8 +1880,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
 		{
             vec3_t lightVec, lightVal;
-
-            R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -2045,8 +2034,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		//render with shaders
 		vec3_t lightVec, lightVal;
 
-		R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
-
 		//send light level and color to shader, ramp up a bit
 		VectorCopy(lightcolor, lightVal);
 		for(i = 0; i < 3; i++)
@@ -2190,8 +2177,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
 		GL_SelectTexture( GL_TEXTURE0);
 		qglBindTexture (GL_TEXTURE_2D, skinnum);
-
-		R_GetLightVals(RagDoll[RagDollID].curPos, true, false);  
 		
 		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
 		{
