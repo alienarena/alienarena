@@ -613,11 +613,11 @@ static char bsp_fragment_program[] = STRINGIFY (
 );
 
 static char shadow_vertex_program[] = STRINGIFY (		
-	varying vec4 sPos;
+	varying vec4 ShadowCoord;
 
 	void main( void )
 	{
-		sPos = gl_Vertex;
+		ShadowCoord = gl_TextureMatrix[6] * gl_Vertex;
 
 		gl_Position = ftransform();
 	}
@@ -629,9 +629,7 @@ static char shadow_fragment_program[] = STRINGIFY (
 	uniform float xPixelOffset;
 	uniform float yPixelOffset;
 
-	varying vec4 sPos;
-
-	vec4 ShadowCoord;
+	varying vec4 ShadowCoord;
 	
 	float lookup( vec2 offSet)
 	{
@@ -658,8 +656,6 @@ static char shadow_fragment_program[] = STRINGIFY (
 
 	void main( void )
 	{
-		ShadowCoord = gl_TextureMatrix[6] * sPos;
-
 	    float statshadowval = 1/fadeShadow * lookupStatshadow();	  
 
 		gl_FragColor = vec4(1.0);
