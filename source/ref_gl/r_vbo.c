@@ -160,6 +160,25 @@ void VB_BuildWorldVBO(void)
 			{   // no skies here
 				continue;
 			}
+			if (surf->flags & SURF_PLANEBACK)
+			{
+				continue;
+			}
+			VB_BuildSurfaceVBO(surf);
+		}
+		
+		for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
+		{
+			if ((currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
+				(surf->texinfo->flags & SURF_SKY) || 
+				(surf->flags & SURF_DRAWTURB))
+			{   // no skies here
+				continue;
+			}
+			if (!(surf->flags & SURF_PLANEBACK))
+			{
+				continue;
+			}
 			VB_BuildSurfaceVBO(surf);
 		}
 	}
