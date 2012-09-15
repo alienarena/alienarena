@@ -1073,6 +1073,14 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 				has_vbo = true;
 				goto skipLoad;
 			}
+			else
+			{
+				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->vertexes, VBO_STORE_XYZ, currentmodel);
+				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec2_t), currentmodel->st, VBO_STORE_ST, currentmodel);
+				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
+				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
+				R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+			}
 		}					
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
@@ -1219,6 +1227,14 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 			{
 				has_vbo = true;
 				goto skipLoad;
+			}
+			else
+			{
+				R_VCLoadData(VBO_STATIC,  RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t),  RagDoll[RagDollID].ragDollMesh->vertexes, VBO_STORE_XYZ,  RagDoll[RagDollID].ragDollMesh);
+				R_VCLoadData(VBO_STATIC,  RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec2_t),  RagDoll[RagDollID].ragDollMesh->st, VBO_STORE_ST,  RagDoll[RagDollID].ragDollMesh);
+				R_VCLoadData(VBO_STATIC,  RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec3_t),  RagDoll[RagDollID].ragDollMesh->normal, VBO_STORE_NORMAL,  RagDoll[RagDollID].ragDollMesh);
+				R_VCLoadData(VBO_STATIC,  RagDoll[RagDollID].ragDollMesh->numvertexes*sizeof(vec4_t),  RagDoll[RagDollID].ragDollMesh->tangent, VBO_STORE_TANGENT,  RagDoll[RagDollID].ragDollMesh);
+				R_VCLoadData(VBO_STATIC,  RagDoll[RagDollID].ragDollMesh->num_triangles*3*sizeof(unsigned int),  RagDoll[RagDollID].ragDollMesh->tris, VBO_STORE_INDICES,  RagDoll[RagDollID].ragDollMesh);
 			}
 		}		
 
