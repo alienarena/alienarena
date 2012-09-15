@@ -290,6 +290,12 @@ void R_DrawParticles (void)
 }
 
 //lens flares
+// TODO: flare rendering is actually shockingly slow, and the reason is the 
+// overhead of each glDrawArrays call. It MIGHT be worth using a variation on 
+// this method: http://stackoverflow.com/a/1039082 and batching up all flares
+// of each texture into a single VArray consisting of vertex and vertex color
+// data, with a size attribute, one vertex per flare. This would reduce the 
+// usage of the PCI bus.
 
 void Mod_AddFlareSurface (msurface_t *surf, int type )
 {

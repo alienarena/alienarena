@@ -165,7 +165,7 @@ boundaries so that turbulent and sky warps
 can be done reasonably.
 ================
 */
-void R_SubdivideSurface (msurface_t *fa)
+void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges)
 {
 	vec3_t		verts[64];
 	int			numverts;
@@ -179,9 +179,9 @@ void R_SubdivideSurface (msurface_t *fa)
 	// convert edges back to a normal polygon
 	//
 	numverts = 0;
-	for (i=0 ; i<fa->numedges ; i++)
+	for (i=0 ; i<numedges ; i++)
 	{
-		lindex = loadmodel->surfedges[fa->firstedge + i];
+		lindex = loadmodel->surfedges[firstedge + i];
 
 		if (lindex > 0)
 			vec = loadmodel->vertexes[loadmodel->edges[lindex].v[0]].position;

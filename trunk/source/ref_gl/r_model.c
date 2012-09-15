@@ -972,7 +972,7 @@ CalcSurfaceExtents
 Fills in s->texturemins[] and s->extents[]
 ================
 */
-void CalcSurfaceExtents (msurface_t *s, qboolean override, int *smax, int *tmax, float *xscale, float *yscale)
+void CalcSurfaceExtents (msurface_t *s, qboolean override, int *smax, int *tmax, float *xscale, float *yscale, int firstedge, int numedges)
 {
 	float	mins[2], maxs[2], val;
 	int		i,j, e, vnum;
@@ -985,13 +985,13 @@ void CalcSurfaceExtents (msurface_t *s, qboolean override, int *smax, int *tmax,
 
 	tex = s->texinfo;
 
-	if (s->firstedge < 0 || s->firstedge+s->numedges-1 >= loadmodel->numsurfedges)
+	if (firstedge < 0 || firstedge+numedges-1 >= loadmodel->numsurfedges)
 		Com_Error (ERR_DROP,
 			"Map contains invalid value for s->firstedge!\n"
 			"The file is likely corrupted, please obtain a fresh copy.");
-	for (i=0 ; i<s->numedges ; i++)
+	for (i=0 ; i<numedges ; i++)
 	{
-		e = loadmodel->surfedges[s->firstedge+i];
+		e = loadmodel->surfedges[firstedge+i];
 		if (abs(e) > loadmodel->numedges)
 			Com_Error (ERR_DROP,	
 				"Map contains invalid edge offsets!\n"
@@ -1165,8 +1165,8 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	}
 }
 
-void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale);
-void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax);
+void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int light_s, int light_t, int firstedge, int lnumverts);
+void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax, int *light_s, int *light_t);
 void BSP_EndBuildingLightmaps (void);
 void BSP_BeginBuildingLightmaps (model_t *m);
 
@@ -1315,6 +1315,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 	int			planenum, side;
 	int			ti;
 	int			smax, tmax;
+	int			light_s, light_t;
 	float		xscale, yscale;
 	rscript_t	*rs;
 	vec3_t		color;
@@ -1343,8 +1344,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
-		out->firstedge = LittleLong(in->firstedge);
-		out->numedges = LittleShort(in->numedges);
+		int firstedge = LittleLong(in->firstedge);
+		int numedges = LittleShort(in->numedges);
 		out->flags = 0;
 		out->polys = NULL;
 
@@ -1372,11 +1373,11 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 			tmax=lfacelookups[surfnum].height;
 			xscale=lfacelookups[surfnum].xscale; 
 			yscale=lfacelookups[surfnum].yscale;
-			CalcSurfaceExtents (out, true, &smax, &tmax, &xscale, &yscale);
+			CalcSurfaceExtents (out, true, &smax, &tmax, &xscale, &yscale, firstedge, numedges);
 		}
 		else
 		{
-			CalcSurfaceExtents (out, false, &smax, &tmax, &xscale, &yscale);
+			CalcSurfaceExtents (out, false, &smax, &tmax, &xscale, &yscale, firstedge, numedges);
 		}
 
 	// lighting info
@@ -1402,17 +1403,18 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 				out->texturemins[i] = -8192;
 			}
 			if(!(gl_state.glsl_shaders && gl_glsl_shaders->value) || !strcmp(out->texinfo->normalMap->name, out->texinfo->image->name))
-				R_SubdivideSurface (out);	// cut up polygon for warps
+				R_SubdivideSurface (out, firstedge, numedges);	// cut up polygon for warps
 		}
 
 		// create lightmaps and polygons
+		light_s = light_t = 0;
 		if ( !SurfaceHasNoLightmap(out) )
 		{
-			BSP_CreateSurfaceLightmap (out, smax, tmax);
+			BSP_CreateSurfaceLightmap (out, smax, tmax, &light_s, &light_t);
 		}
 
 		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && strcmp(out->texinfo->normalMap->name, out->texinfo->image->name)))
-			BSP_BuildPolygonFromSurface(out, xscale, yscale);
+			BSP_BuildPolygonFromSurface(out, xscale, yscale, light_s, light_t, firstedge, numedges);
 
 		rs = (rscript_t *)out->texinfo->image->script;
 
@@ -1627,6 +1629,7 @@ void Mod_LoadSurfedges (lump_t *l)
 {
 	int		i, count;
 	int		*in, *out;
+
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))

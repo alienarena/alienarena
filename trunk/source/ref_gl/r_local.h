@@ -267,7 +267,7 @@ extern void R_DrawSkyBox (void);
 extern void Draw_InitLocal (void);
 
 //Renderer utils
-extern void R_SubdivideSurface (msurface_t *fa);
+extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );

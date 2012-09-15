@@ -222,32 +222,31 @@ typedef struct glpoly_s
 
 } glpoly_t;
 
+// FIXME: We really need a smaller version of this struct with less data in
+// it, for use by BSP_RecursiveWorldNode. This one is 136 bytes, which is huge
+// and killing our cache locality.
 typedef struct msurface_s
 {
 	int			visframe;		// should be drawn when node is crossed
+	
+	int			flags;
+	
+	mtexinfo_t	*texinfo;
 
 	cplane_t	*plane;
-	int			flags;
-
-	int			firstedge;	// look up in model->surfedges[], negative numbers
-	int			numedges;	// are backwards edges
+	
+	//texture chains for batching
+	struct	msurface_s	*texturechain;
+	struct	msurface_s	*rscriptchain;
+	
+	vec3_t mins;
+	vec3_t maxs;
 
 	int			texturemins[2];
 	int			extents[2];
 
-	int			light_s, light_t;	// gl lightmap coordinates
-	int			dlight_s, dlight_t; // gl lightmap coordinates for dynamic lightmaps
-
 	glpoly_t	*polys;				// multiple if warped
 
-	//texture chains for batching
-	struct	msurface_s	*texturechain;
-	struct	msurface_s	*glslchain;
-	struct  msurface_s	*glsldynamicchain;
-	struct  msurface_s	*lightmapchain;
-	struct	msurface_s	*rscriptchain;
-
-	mtexinfo_t	*texinfo;
 	float		c_s, c_t;
 
 // lighting info
@@ -262,9 +261,6 @@ typedef struct msurface_s
 	entity_t	*entity;
 
 	float		*tangentSpaceTransform;
-
-	vec3_t mins;
-	vec3_t maxs;
 
 	//vbo
 	int has_vbo;

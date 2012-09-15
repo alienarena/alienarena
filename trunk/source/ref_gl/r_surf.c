@@ -1013,7 +1013,7 @@ void BSP_DrawNonGLSLSurfaces (void)
     	msurface_t	*s = currentmodel->unique_texinfo[i]->lightmap_surfaces;
     	if (!s)
     		continue;
-		for (; s; s = s->lightmapchain) {
+		for (; s; s = s->texturechain) {
 			BSP_RenderLightmappedPoly(s);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
@@ -1032,8 +1032,6 @@ void BSP_DrawNonGLSLSurfaces (void)
 	
 	qglDisable (GL_ALPHA_TEST);
 
-	glUseProgramObjectARB( 0 );
-
 }
 
 void BSP_DrawGLSLSurfaces (void)
@@ -1043,6 +1041,11 @@ void BSP_DrawGLSLSurfaces (void)
 	r_currTex = r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	r_currTangentSpaceTransform = NULL;
+	
+	if (r_test->integer)
+	{
+		return;
+	}
 	
 	BSP_ClearVBOAccum ();
 
@@ -1088,7 +1091,7 @@ void BSP_DrawGLSLSurfaces (void)
     	msurface_t	*s = currentmodel->unique_texinfo[i]->glsl_surfaces;
     	if (!s)
     		continue;
-		for (; s; s = s->glslchain) {
+		for (; s; s = s->texturechain) {
 			BSP_RenderGLSLLightmappedPoly(s);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
@@ -1117,6 +1120,11 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	vec3_t		lightVec;
 	float		lightCutoffSquared = 0.0f;
 	qboolean	foundLight = false;
+	
+	if (gl_dynamic->integer == 0)
+	{
+		return;
+	}
 
 	dl = r_newrefdef.dlights;
 	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
@@ -1194,7 +1202,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
     	msurface_t	*s = currentmodel->unique_texinfo[i]->glsl_dynamic_surfaces;
     	if (!s)
     		continue;
-		for (; s; s = s->glsldynamicchain) {
+		for (; s; s = s->texturechain) {
 			BSP_RenderGLSLDynamicLightmappedPoly(s);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
@@ -1244,7 +1252,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	if(is_dynamic && surf->texinfo->has_normalmap
 		&& gl_state.glsl_shaders && gl_glsl_shaders->integer) //always glsl for dynamic if it has a normalmap
 	{
-		surf->glsldynamicchain = surf->texinfo->equiv->glsl_dynamic_surfaces;
+		surf->texturechain = surf->texinfo->equiv->glsl_dynamic_surfaces;
 		surf->texinfo->equiv->glsl_dynamic_surfaces = surf;
 	}
 	else if(!r_test->integer && gl_normalmaps->integer 
@@ -1252,12 +1260,12 @@ void BSP_AddToTextureChain(msurface_t *surf)
 			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
 	{
-		surf->glslchain = surf->texinfo->equiv->glsl_surfaces;
+		surf->texturechain = surf->texinfo->equiv->glsl_surfaces;
 		surf->texinfo->equiv->glsl_surfaces = surf;
 	}
 	else 
 	{
-		surf->lightmapchain = surf->texinfo->equiv->lightmap_surfaces;
+		surf->texturechain = surf->texinfo->equiv->lightmap_surfaces;
 		surf->texinfo->equiv->lightmap_surfaces = surf;
 	}
 }
@@ -1458,8 +1466,74 @@ void R_DrawBrushModel ( void )
 */
 
 /*
+=================
+R_CullBox
+
+Returns true if the box is completely outside the frustum
+
+Variant: uses clipflags
+=================
+*/
+qboolean R_CullBox_ClipFlags (vec3_t mins, vec3_t maxs, int clipflags)
+{
+	int		i;
+	cplane_t *p;
+
+	for (i=0,p=frustum ; i<4; i++,p++)
+	{
+		if (!(clipflags  & (1<<i)))
+			continue;
+		switch (p->signbits)
+		{
+		case 0:
+			if (p->normal[0]*maxs[0] + p->normal[1]*maxs[1] + p->normal[2]*maxs[2] < p->dist)
+				return true;
+			break;
+		case 1:
+			if (p->normal[0]*mins[0] + p->normal[1]*maxs[1] + p->normal[2]*maxs[2] < p->dist)
+				return true;
+			break;
+		case 2:
+			if (p->normal[0]*maxs[0] + p->normal[1]*mins[1] + p->normal[2]*maxs[2] < p->dist)
+				return true;
+			break;
+		case 3:
+			if (p->normal[0]*mins[0] + p->normal[1]*mins[1] + p->normal[2]*maxs[2] < p->dist)
+				return true;
+			break;
+		case 4:
+			if (p->normal[0]*maxs[0] + p->normal[1]*maxs[1] + p->normal[2]*mins[2] < p->dist)
+				return true;
+			break;
+		case 5:
+			if (p->normal[0]*mins[0] + p->normal[1]*maxs[1] + p->normal[2]*mins[2] < p->dist)
+				return true;
+			break;
+		case 6:
+			if (p->normal[0]*maxs[0] + p->normal[1]*mins[1] + p->normal[2]*mins[2] < p->dist)
+				return true;
+			break;
+		case 7:
+			if (p->normal[0]*mins[0] + p->normal[1]*mins[1] + p->normal[2]*mins[2] < p->dist)
+				return true;
+			break;
+		default:
+			return false;
+		}
+	}
+
+	return false;
+}
+/*
 ================
 BSP_RecursiveWorldNode
+
+node: the BSP node to work on
+clipflags: indicate which planes of the frustum may intersect the node
+
+Since each node is inside its parent in 3D space, if a frustum plane can be
+shown not to intersect a node at all, then it won't intersect either of its
+children. 
 ================
 */
 void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
@@ -1567,9 +1641,9 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 			continue;		// wrong side
 		*/
 
-		if ( !( surf->flags & SURF_DRAWTURB ) )
+		if (clipflags != 0 && !( surf->flags & SURF_DRAWTURB ))
 		{
-			if (R_CullBox (surf->mins, surf->maxs)) 
+			if (R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
 				continue;
 		}
 
@@ -1958,9 +2032,9 @@ static qboolean LM_AllocBlock (int w, int h, int *x, int *y)
 BSP_BuildPolygonFromSurface
 ================
 */
-void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
+void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int light_s, int light_t, int firstedge, int lnumverts)
 {
-	int			i, lindex, lnumverts;
+	int			i, lindex;
 	medge_t		*r_pedge;
 	float		*vec;
 	float		s, t;
@@ -1968,9 +2042,6 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
 
 	vec3_t surfmaxs = {-99999999, -99999999, -99999999};
 	vec3_t surfmins = {99999999, 99999999, 99999999};
-
-	// reconstruct the polygon
-	lnumverts = fa->numedges;
 
 	//
 	// draw texture
@@ -1982,7 +2053,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
 
 	for (i=0 ; i<lnumverts ; i++)
 	{
-		lindex = currentmodel->surfedges[fa->firstedge + i];
+		lindex = currentmodel->surfedges[firstedge + i];
 
 		if (lindex > 0)
 		{
@@ -2019,13 +2090,13 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
 		//
 		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
 		s -= fa->texturemins[0];
-		s += fa->light_s*xscale;
+		s += light_s*xscale;
 		s += xscale/2.0;
 		s /= LIGHTMAP_SIZE*xscale; //fa->texinfo->texture->width;
 
 		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t -= fa->texturemins[1];
-		t += fa->light_t*yscale;
+		t += light_t*yscale;
 		t += yscale/2.0;
 		t /= LIGHTMAP_SIZE*yscale; //fa->texinfo->texture->height;
 
@@ -2067,7 +2138,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
 BSP_CreateSurfaceLightmap
 ========================
 */
-void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax)
+void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax, int *light_s, int *light_t)
 {
 	byte	*base;
 
@@ -2077,11 +2148,11 @@ void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax)
 	if (surf->texinfo->flags & (SURF_SKY|SURF_WARP))
 		return; //may not need this?
 
-	if ( !LM_AllocBlock( smax, tmax, &surf->light_s, &surf->light_t ) )
+	if ( !LM_AllocBlock( smax, tmax, light_s, light_t ) )
 	{
 		LM_UploadBlock( false );
 		LM_InitBlock();
-		if ( !LM_AllocBlock( smax, tmax, &surf->light_s, &surf->light_t ) )
+		if ( !LM_AllocBlock( smax, tmax, light_s, light_t ) )
 		{
 			Com_Error( ERR_FATAL, "Consecutive calls to LM_AllocBlock(%d,%d) failed\n", smax, tmax );
 		}
@@ -2090,7 +2161,7 @@ void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax)
 	surf->lightmaptexturenum = gl_lms.current_lightmap_texture;
 
 	base = gl_lms.lightmap_buffer;
-	base += (surf->light_t * LIGHTMAP_SIZE + surf->light_s) * LIGHTMAP_BYTES;
+	base += ((*light_t) * LIGHTMAP_SIZE + *light_s) * LIGHTMAP_BYTES;
 
 	R_SetCacheState( surf );
 	R_BuildLightMap (surf, base, smax, tmax, LIGHTMAP_SIZE*LIGHTMAP_BYTES);
