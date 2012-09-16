@@ -748,6 +748,76 @@ int FS_LoadFile (char *path, void **buffer)
 }
 
 /*
+============
+FS_LoadFile_TryStatic
+
+Given relative path, and assuming statbuffer is already allocated with at 
+least statbuffer_len bytes,
+ if buffer or statbuffer arg is NULL, just return the file length. Otherwise,
+   If the file length is less than statbuffer_len, load file contents into it
+   and return it in the buffer output pointer. Otherwise,
+     Z_malloc a buffer, read the file into it, return pointer to the new
+     buffer.
+
+This is a variation on FS_LoadFile which attempts to reduce needless dynamic 
+memory allocations, by using a static buffer when possible.
+
+The calling function is responsible for comparing the value of *buffer with
+statbuffer, and determining whether or not to use FS_FreeFile on it.
+============
+*/
+int FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t statbuffer_len)
+{
+	FILE	*h;
+	byte	*buf = NULL;
+	int		len;
+	char lc_path[MAX_OSPATH];
+
+	len = FS_FOpenFile (path, &h);
+
+	//-JR
+	if (!h)
+	{
+		Q_strncpyz2( lc_path, FS_TolowerPath( path ), sizeof(lc_path) );
+		if ( strcmp( path, lc_path ) )
+		{ // lowercase conversion changed something
+			len = FS_FOpenFile( lc_path, &h);
+		}
+	}
+
+	if (!h)
+	{
+		if (buffer)
+			*buffer = NULL;
+		return -1;
+	}
+
+	if (buffer == NULL || statbuffer == NULL || statbuffer_len == 0)
+	{
+		FS_FCloseFile (h);
+		return len;
+	}
+	
+	if (statbuffer_len > len)
+	{
+		memset (statbuffer, 0, statbuffer_len);
+		buf = statbuffer;
+	}
+	else
+	{
+		buf = Z_Malloc(len+1);
+	}
+	buf[len] = 0;
+	*buffer = buf;
+
+	FS_Read (buf, len, h);
+
+	FS_FCloseFile (h);
+
+	return len;
+}
+
+/*
 =============
 FS_FreeFile
 =============
