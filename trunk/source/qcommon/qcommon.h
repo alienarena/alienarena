@@ -760,9 +760,7 @@ void	FS_FCloseFile (FILE *f);
 // note: this can't be called from another DLL, due to MS libc issues
 
 int		FS_LoadFile (char *path, void **buffer);
-int		FS_LoadFileZ (const char *path, void **buffer); // jit - null-terminated
-// a null buffer will just return the file length without loading
-// a -1 length is not present
+int		FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t statbuffer_len);
 
 void	FS_Read (void *buffer, int len, FILE *f);
 // properly handles partial reads

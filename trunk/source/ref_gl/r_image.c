@@ -516,6 +516,11 @@ void Scrap_Upload (void)
 	scrap_dirty = false;
 }
 
+//just a guessed size-- this isn't necessarily raw RGBA data, it's the
+//encoded image data.
+#define	STATIC_RAWDATA_SIZE	(1024*1024*4+256)
+byte	static_rawdata[STATIC_RAWDATA_SIZE];
+
 /*
 =================================================================
 
@@ -545,7 +550,8 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 	//
 	// load the file
 	//
-	len = FS_LoadFile (filename, (void **)&raw);
+	len = FS_LoadFile_TryStatic (	filename, (void **)&raw, static_rawdata, 
+									STATIC_RAWDATA_SIZE);
 	if (!raw)
 	{
 		return;
@@ -575,7 +581,8 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 		|| pcx->ymax >= 512)
 	{
 		Com_Printf ("Bad pcx file %s\n", filename);
-		FS_FreeFile (pcx);
+		if ((byte *)pcx != static_rawdata)
+			FS_FreeFile (pcx);
 		return;
 	}
 
@@ -623,7 +630,8 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 		*pic = NULL;
 	}
 
-	FS_FreeFile (pcx);
+	if ((byte *)pcx != static_rawdata)
+		FS_FreeFile (pcx);
 }
 /*
 =================================================================
@@ -686,6 +694,8 @@ void crjpg_mem_src(j_decompress_ptr cinfo, byte *mem, int len)
 LoadJPG
 ==============
 */
+#define	STATIC_SCANLINE_SIZE	(1024*3)
+byte	static_scanline[STATIC_SCANLINE_SIZE];
 void LoadJPG (char *filename, byte **pic, int *width, int *height)
 {
 	struct jpeg_decompress_struct	cinfo;
@@ -695,7 +705,8 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 
 	crjpg_corrupted = false;
 	// Load JPEG file into memory
-	rawsize = FS_LoadFile(filename, (void **)&rawdata);
+	rawsize = FS_LoadFile_TryStatic	(	filename, (void **)&rawdata,
+										static_rawdata, STATIC_RAWDATA_SIZE);
 	if (!rawdata)
 	{
 		return;
@@ -706,7 +717,8 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 		||	rawdata[7] != 'F'
 		||	rawdata[8] != 'I'
 		||	rawdata[9] != 'F') {
-		FS_FreeFile(rawdata);
+		if (rawdata != static_rawdata)
+			FS_FreeFile(rawdata);
 		return;
 	}
 
@@ -727,7 +739,8 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	if(cinfo.output_components != 3)
 	{
 		jpeg_destroy_decompress(&cinfo);
-		FS_FreeFile(rawdata);
+		if (rawdata != static_rawdata)
+			FS_FreeFile(rawdata);
 		return;
 	}
 
@@ -736,7 +749,8 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	if(!rgbadata)
 	{
 		jpeg_destroy_decompress(&cinfo);
-		FS_FreeFile(rawdata);
+		if (rawdata != static_rawdata)
+			FS_FreeFile(rawdata);
 		return;
 	}
 
@@ -744,13 +758,21 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	*width = cinfo.output_width; *height = cinfo.output_height;
 
 	// Allocate Scanline buffer
-	scanline = malloc(cinfo.output_width * 3);
-	if(!scanline)
+	if (cinfo.output_width * 3 < STATIC_SCANLINE_SIZE)
 	{
-		free(rgbadata);
-		jpeg_destroy_decompress(&cinfo);
-		FS_FreeFile(rawdata);
-		return;
+		scanline = &static_scanline[0];
+	}
+	else
+	{
+		scanline = malloc(cinfo.output_width * 3);
+		if(!scanline)
+		{
+			free(rgbadata);
+			jpeg_destroy_decompress(&cinfo);
+			if (rawdata != static_rawdata)
+				FS_FreeFile(rawdata);
+			return;
+		}
 	}
 
 	// Read Scanlines, and expand from RGB to RGBA
@@ -772,7 +794,8 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	}
 
 	// Free the scanline buffer
-	free(scanline);
+	if (scanline != &static_scanline[0])
+		free(scanline);
 
 	// Finish Decompression
 	jpeg_finish_decompress(&cinfo);
@@ -781,7 +804,8 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	jpeg_destroy_decompress(&cinfo);
 
 	// Free the raw data now that it's done being processed
-    FS_FreeFile(rawdata);
+	if (rawdata != static_rawdata)
+    	FS_FreeFile(rawdata);
     
     if (crjpg_corrupted)
     	Com_Printf ("JPEG file %s is likely corrupted, please obtain a fresh copy.\n", filename);
@@ -830,7 +854,8 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	//
 	// load the file
 	//
-	length = FS_LoadFile (name, (void **)&buffer);
+	length = FS_LoadFile_TryStatic	(	name, (void **)&buffer, 
+										static_rawdata, STATIC_RAWDATA_SIZE);
 	if (!buffer)
 	{
 		return;
@@ -865,14 +890,16 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	if (targa_header.image_type!=2
 		&& targa_header.image_type!=10) {
 		//Com_Error (ERR_DROP, "LoadTGA: Only type 2 and 10 targa RGB images supported\n");
-		FS_FreeFile (buffer);
+		if (buffer != static_rawdata)
+			FS_FreeFile (buffer);
 		return;
 	}
 
 	if (targa_header.colormap_type !=0
 		|| (targa_header.pixel_size!=32 && targa_header.pixel_size!=24)) {
 		//Com_Error (ERR_DROP, "LoadTGA: Only 32 or 24 bit images supported (no colormaps)\n");
-		FS_FreeFile (buffer);
+		if (buffer != static_rawdata)
+			FS_FreeFile (buffer);
 		return;
 	}
 
@@ -999,7 +1026,8 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		}
 	}
 
-	FS_FreeFile (buffer);
+	if (buffer != static_rawdata)
+		FS_FreeFile (buffer);
 }
 
 
