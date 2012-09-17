@@ -1129,8 +1129,7 @@ void R_RenderAllRagdolls ( void )
 
 			R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
-			if(r_gpuanim->integer)
-				R_GenerateRagdollShadow(RagDollID);
+			R_GenerateRagdollShadow(RagDollID);
 
 			IQM_AnimateRagdoll(RagDollID, shellEffect);
 
