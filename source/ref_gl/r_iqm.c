@@ -1042,7 +1042,7 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 			}
 		}
 	}
-	// to do - this entire section could be handled in a glsl shader, saving huge amounts of cpu overhead
+
 	// The actual vertex generation based on the matrixes follows...
 	{
 		const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;
@@ -1080,6 +1080,8 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
 				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
 				R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
+
+				//to do - find out why this even needed
 			}
 		}					
 
@@ -1375,7 +1377,7 @@ void IQM_DrawFrame(int skinnum)
 
 			glUniform1iARB( g_location_useShell, 1);
 
-            glUniform3fARB( g_location_color, 1.0, 1.0, 1.0);
+            glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
             glUniform1fARB( g_location_meshTime, rs_realtime);
 
@@ -2417,10 +2419,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 			return;
 	}
 
-	R_GetLightVals(currententity->origin, false, true);
-
-	if(r_gpuanim->integer)
-		R_GenerateEntityShadow();
+	R_GetLightVals(currententity->origin, false, true);	
+		
+	R_GenerateEntityShadow();
 
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
@@ -2497,7 +2498,8 @@ void R_DrawINTERQUAKEMODEL ( void )
 	}
 
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	modelpitch = degreeToRadian(currententity->angles[PITCH]);
+	if(!(gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer))
+		modelpitch = degreeToRadian(currententity->angles[PITCH]); 
 
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
@@ -2568,7 +2570,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}	
 	
-	qglColor4f (1,1,1,1);
+	qglColor4f (1,1,1,1);	
 
 	if(r_minimap->integer)
     {

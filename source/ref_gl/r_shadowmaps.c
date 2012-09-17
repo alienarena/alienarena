@@ -1005,7 +1005,9 @@ void R_DrawEntityCaster(entity_t *ent)
 	qglEnable( GL_POLYGON_OFFSET_FILL );
     qglPolygonOffset( 0.5f, 0.5f );	
 
-	//loop the entities here, and render any nearby models, to make sure we get shadows on the this entity if a mesh is nearby.
+	//we could loop the entities here, and render any nearby models, to make sure we get shadows on the this entity if a mesh is nearby. 
+	//this would be only if we want to do self shadowing, or have player shadows cast on other mesh objects.  At this time, I think that the
+	//performance losses would not be worth doing this, but we can revisit.
 
 	currentmodel = ent->model;
 
@@ -1051,7 +1053,7 @@ void R_DrawEntityCaster(entity_t *ent)
 
 void R_GenerateEntityShadow( void )
 {
-	if(gl_shadowmaps->integer) 
+	if((gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer))
 	{
 		vec3_t dist, tmp;
 		float rad, fadeshadow_cutoff;
@@ -1184,7 +1186,7 @@ void R_DrawRagdollCaster(int RagDollID)
 
 void R_GenerateRagdollShadow( int RagDollID )
 {
-	if(gl_shadowmaps->integer) 
+	if((gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer))
 	{
 		vec3_t dist, tmp;
 		float rad, fadeshadow_cutoff;
