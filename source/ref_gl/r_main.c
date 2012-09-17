@@ -163,6 +163,7 @@ cvar_t	*r_bloom;
 cvar_t	*r_lensflare;
 cvar_t	*r_lensflare_intens;
 cvar_t	*r_drawsun;
+cvar_t	*r_lightbeam;
 
 cvar_t	*r_hdlightmaps;
 
@@ -1085,7 +1086,8 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawAlphaSurfaces ();
 
-	R_DrawBeamSurface ();
+	if (r_lightbeam->integer)
+		R_DrawBeamSurface ();
 
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 
@@ -1249,6 +1251,7 @@ void R_Register( void )
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
 	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
+	r_lightbeam = Cvar_Get ("r_lightbeam", "1", CVAR_ARCHIVE);
 	
 	r_hdlightmaps = Cvar_Get("r_hdlightmaps", "1", CVAR_ARCHIVE);
 

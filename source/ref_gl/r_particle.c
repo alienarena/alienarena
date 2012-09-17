@@ -480,8 +480,6 @@ void R_RenderFlares (void)
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	if(!r_lensflare->value)
-		return;
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )return;
 	qglDepthMask (0);
 	qglDisable (GL_TEXTURE_2D);
