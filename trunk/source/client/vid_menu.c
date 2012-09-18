@@ -189,10 +189,7 @@ static void SetLowest( void *unused )
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
@@ -203,6 +200,8 @@ static void SetLowest( void *unused )
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("gl_vlights", 0);
+	Cvar_SetValue("r_lensflare", 0);
+	Cvar_SetValue("r_lightbeam", 0);
 
 	VID_MenuInit();
 }
@@ -211,10 +210,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
@@ -225,6 +221,8 @@ static void SetLow( void *unused )
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 0);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
 
 	VID_MenuInit();
 }
@@ -234,10 +232,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -248,6 +243,8 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
 
 	VID_MenuInit();
 }
@@ -257,10 +254,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -271,6 +265,8 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
 
 	VID_MenuInit();
 }
@@ -280,10 +276,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -294,6 +287,8 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
 
 	VID_MenuInit();
 }
