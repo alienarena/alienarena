@@ -1530,7 +1530,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->lensflare || stage->grass || stage->beam)
 			break; //handled elsewhere
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
-			break; //stage should not execute
+			continue; //stage should not execute
 
 		if(stage->lightmap)
 		{

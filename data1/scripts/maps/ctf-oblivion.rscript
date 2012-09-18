@@ -235,25 +235,63 @@ textures/arena10/metalfloor21w
 textures/arena10/neonsign11
 {
 
+	{ 
+		if ( $ rs_hasflag && ( $ rs_team == blue ) )
+			map textures/arena10/neonsign11b
+			scale static -1 static -1
+			blendFunc GL_ONE GL_ZERO
+    
+	}
+	
 	{
-		map gfx/purpleline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 2
-		scroll static 0 static 2
-		alphashift 10 0.05 0.5
-		nolightmap
+		if ( $ rs_hasflag && ( $ rs_team == blue ) )
+			map gfx/greenline.tga
+			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			scale static 2 static 2
+			scroll static 0 static -2
+			alphashift 10 0.05 0.5
+			nolightmap
+	}
+
+	{
+		if ( ! ( $ rs_hasflag && ( $ rs_team == blue ) ) )
+			map gfx/purpleline.tga
+			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			scale static 2 static 2
+			scroll static 0 static 2
+			alphashift 10 0.05 0.5
+			nolightmap
 	}
 }
 textures/arena10/neonsign11b
 {
 
+	{ 
+		if ( $ rs_hasflag && ( $ rs_team == red ) )
+			map textures/arena10/neonsign11
+			scale static -1 static -1
+			blendFunc GL_ONE GL_ZERO
+    
+	}
+	
 	{
-		map gfx/greenline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 2
-		scroll static 0 static 2
-		alphashift 10 0.05 0.5
-		nolightmap
+		if ( $ rs_hasflag && ( $ rs_team == red ) )
+			map gfx/purpleline.tga
+			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			scale static 2 static 2
+			scroll static 0 static -2
+			alphashift 10 0.05 0.5
+			nolightmap
+	}
+
+	{
+		if ( ! ( $ rs_hasflag && ( $ rs_team == red ) ) )
+			map gfx/greenline.tga
+			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			scale static 2 static 2
+			scroll static 0 static 2
+			alphashift 10 0.05 0.5
+			nolightmap
 	}
 }
 textures/arena10/neonsign6
