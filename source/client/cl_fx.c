@@ -1758,7 +1758,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 		return;
 
 	p->alpha = 1;
-	p->alphavel = -50.0;
+	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_shottexture->texnum;
 	p->scale = 8;
@@ -1780,7 +1780,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 		return;
 
 	p->alpha = 1;
-	p->alphavel = -50.0;
+	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_shottexture->texnum;
 	p->scale = 2;
@@ -1802,7 +1802,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 		return;
 
 	p->alpha = .95;
-	p->alphavel = -50.0;
+	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_STANDARD;
 	p->texnum = r_cflashtexture->texnum;
 	p->scale = 15+5*frand();
@@ -1850,7 +1850,7 @@ void CL_BlueTeamLight(vec3_t pos)
 		else
 			p->color = 0xd3;
 		p->scale = 10*i;
-		p->alphavel = -50;
+		p->alphavel = INSTANT_PARTICLE;
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = pos[j];
@@ -1878,7 +1878,7 @@ void CL_RedTeamLight(vec3_t pos)
 		p->blenddst = GL_ONE;
 		p->color = 0xe8;
 		p->scale = 10*i;
-		p->alphavel = -50;
+		p->alphavel = INSTANT_PARTICLE;
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = pos[j];
@@ -1909,7 +1909,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	else
 		p->color = 0xe8;
 	p->scale = 15;
-	p->alphavel = -50;
+	p->alphavel = INSTANT_PARTICLE;
 	for (i=0 ; i<3 ; i++)
 	{
 		p->org[i] = pos[i];
@@ -1933,7 +1933,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	else
 		p->color = 0xe8;
 	p->scale = 15;
-	p->alphavel = -50;
+	p->alphavel = INSTANT_PARTICLE;
 	for (i=0 ; i<3 ; i++)
 	{
 		p->org[i] = pos[i];
@@ -2299,7 +2299,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 	VectorClear (p->accel);
 
 	p->alpha = .3;
-	p->alphavel = -50.0;
+	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_bflashtexture->texnum;
 	p->scale = 5;
@@ -2323,7 +2323,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 	VectorClear (p->accel);
 
 	p->alpha = .7;
-	p->alphavel = -50.0;
+	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_STANDARD;
 	p->texnum = r_bflashtexture->texnum;
 	p->scale = 5;
@@ -2347,7 +2347,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 	VectorClear (p->accel);
 
 	p->alpha = .7;
-	p->alphavel = -50.0;
+	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_STANDARD;
 	p->texnum = r_flaretexture->texnum;
 	p->scale = 10;
