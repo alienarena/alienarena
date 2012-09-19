@@ -1779,28 +1779,6 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	if (!(p = new_particle()))
 		return;
 
-	p->alpha = 1;
-	p->alphavel = INSTANT_PARTICLE;
-	p->type = PARTICLE_ROTATINGROLL;
-	p->texnum = r_shottexture->texnum;
-	p->scale = 2;
-	p->angle[1] = cl.refdef.viewangles[0];
-	p->angle[0] = sin(len);
-	p->angle[2] = cl.refdef.viewangles[2];
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->color = 0x72;
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = move[j];
-		p->vel[j] = 0;
-		p->accel[j] = 0;
-	}
-
-	if (!(p = new_particle()))
-		return;
-
 	p->alpha = .95;
 	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_STANDARD;
