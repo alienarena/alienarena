@@ -789,7 +789,7 @@ void MD2_VlightModel( const vec3_t baselight, dtrivertx_t *verts, vec3_t lightOu
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
-void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
+void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 {
 	int i, j, lnum;
 	dlight_t	*dl;
@@ -883,7 +883,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 	}
 	
 	dynFactor = 0;
-	if(dynamic)
+	if(gl_dynamic->integer != 0)
 	{
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
@@ -1813,7 +1813,7 @@ void R_DrawAliasModel ( void )
 			return;
 	}
 
-	R_GetLightVals(currententity->origin, false, true);
+	R_GetLightVals(currententity->origin, false);
 
 	//R_GenerateEntityShadow(); //not using this for now, it's generally a bit slower than the stencil volumes at the moment when dealing with static meshes
 

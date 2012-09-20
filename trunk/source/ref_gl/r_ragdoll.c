@@ -1127,7 +1127,7 @@ void R_RenderAllRagdolls ( void )
 				}
 			}
 
-			R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
+			R_GetLightVals(RagDoll[RagDollID].curPos, true);
 
 			R_GenerateRagdollShadow(RagDollID);
 

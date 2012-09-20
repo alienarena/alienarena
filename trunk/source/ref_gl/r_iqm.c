@@ -2420,7 +2420,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
 	modelpitch = degreeToRadian(currententity->angles[PITCH]); 
 
-	R_GetLightVals(currententity->origin, false, true);	
+	R_GetLightVals(currententity->origin, false);	
 		
 	R_GenerateEntityShadow();
 
