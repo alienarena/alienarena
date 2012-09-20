@@ -139,10 +139,13 @@ V_AddLight
 
 =====================
 */
+extern	cvar_t	*gl_dynamic;
 void V_AddLight (vec3_t org, float intensity, float r, float g, float b)
 {
 	dlight_t	*dl;
 
+	if (gl_dynamic->integer == 0)
+		return;
 	if (r_numdlights >= MAX_DLIGHTS)
 		return;
 	dl = &r_dlights[r_numdlights++];
