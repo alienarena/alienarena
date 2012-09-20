@@ -151,27 +151,6 @@ void V_AddLight (vec3_t org, float intensity, float r, float g, float b)
 	dl->color[0] = r;
 	dl->color[1] = g;
 	dl->color[2] = b;
-	dl->team = 0;  //added for team lights
-}
-/*
-=====================
-V_AddTeamLight
-
-=====================
-*/
-void V_AddTeamLight (vec3_t org, float intensity, float r, float g, float b, int team)
-{
-	dlight_t	*dl;
-
-	if (r_numdlights >= MAX_DLIGHTS)
-		return;
-	dl = &r_dlights[r_numdlights++];
-	VectorCopy (org, dl->origin);
-	dl->intensity = intensity;
-	dl->color[0] = r;
-	dl->color[1] = g;
-	dl->color[2] = b;
-	dl->team = team;
 }
 
 /*
