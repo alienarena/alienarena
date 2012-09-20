@@ -163,6 +163,7 @@ extern cvar_t *r_ext_max_anisotropy;
 extern cvar_t	*r_overbrightbits;
 
 extern cvar_t	*gl_normalmaps;
+extern cvar_t	*gl_bspnormalmaps;
 extern cvar_t	*gl_shadowmaps;
 extern cvar_t	*gl_glsl_postprocess;
 
@@ -171,6 +172,7 @@ extern	cvar_t	*r_bloom;
 extern	cvar_t	*r_lensflare;
 extern	cvar_t	*r_lensflare_intens;
 extern	cvar_t	*r_drawsun;
+extern  cvar_t	*r_godrays;
 
 extern	cvar_t	*r_hdlightmaps;
 
@@ -201,9 +203,6 @@ extern	cvar_t	*sys_priority;
 
 extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
-
-extern	cvar_t	*r_gpuanim; //incomplete gpu animation code
-extern  cvar_t  *r_gpuanim_debug;
 
 extern  cvar_t  *r_test;
 

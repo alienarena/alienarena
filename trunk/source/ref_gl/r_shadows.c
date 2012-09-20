@@ -142,42 +142,6 @@ void SHD_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightO
 	}
 }
 
-void SHD_MarkIQMShadowTriangles(vec3_t lightOrg)
-{
-	vec3_t	r_triangleNormals[MAX_INDICES / 3];
-	vec3_t	temp, dir0, dir1;
-	int		i;
-	float	f;
-	float	*v0, *v1, *v2;
-
-	for (i = 0; i < currentmodel->num_triangles; i++)
-	{
-		v0 = (float*)currentmodel->animatevertexes[currentmodel->tris[i].vertex[0]].position;
-		v1 = (float*)currentmodel->animatevertexes[currentmodel->tris[i].vertex[1]].position;
-		v2 = (float*)currentmodel->animatevertexes[currentmodel->tris[i].vertex[2]].position;
-
-		//Calculate shadow volume triangle normals
-		VectorSubtract( v0, v1, dir0 );
-		VectorSubtract( v2, v1, dir1 );
-
-		CrossProduct( dir0, dir1, r_triangleNormals[i] );
-
-		// Find front facing triangles
-		VectorSubtract(lightOrg, v0, temp);
-		f = DotProduct(temp, r_triangleNormals[i]);
-
-		triangleFacingLight[i] = f > 0;
-	}
-}
-
-/* Notes on this section of code
-   In my tests, it appears that using VBO/IBO for rendering these shadows
-   is actually a tad slower than just building them each time.  There are also
-   some odd problems regarding the bobbing items, as well as the issue with gibs
-   or any other moving object.  The code is left here, commented out, because there
-   are some useful things that could be used in other places of the engine.  However
-   for shadows, it appears to be quite useless.  
-*/
 void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboolean lerp)
 {
 	dtriangle_t *ot, *tris;
@@ -376,10 +340,6 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 
 	if(shadow_vert > 0)
 	{
-		//GL_BindVBO(NULL);
-
-		//GL_BindIBO(NULL);	
-
 		if ( qglLockArraysEXT != 0 )
 		   qglLockArraysEXT( 0, shadow_vert );
 
@@ -387,168 +347,6 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 
 		if ( qglUnlockArraysEXT != 0 )
 			 qglUnlockArraysEXT();
-	}
-}
-
-
-void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
-{
-	int i, j, shadow_vert = 0, index = 0;
-	unsigned	ShadowIndex[MAX_INDICES];
-	vec3_t v0, v1, v2, v3;
-	vec3_t currentShadowLight;
-
-	SHD_MarkIQMShadowTriangles(light);
-
-	VectorCopy(light, currentShadowLight);
-
-	//note - do we really need this extra pointer stuff?  Just access it directly
-
-	for (i = 0;	i < currentmodel->num_triangles; i++)
-	{
-		if (!triangleFacingLight[i])
-			continue;
-
-		if (currentmodel->neighbors[i].n[0] < 0 || !triangleFacingLight[currentmodel->neighbors[i].n[0]])
-		{
-			for (j = 0; j < 3; j++)
-			{
-
-				v0[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[1]].position[j];
-				v1[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[0]].position[j];
-
-				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
-				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
-
-			}
-
-			VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
-
-
-			ShadowIndex[index++] = shadow_vert+0;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+2;
-			shadow_vert +=4;
-		}
-
-		if (currentmodel->neighbors[i].n[1] < 0 || !triangleFacingLight[currentmodel->neighbors[i].n[1]])
-		{
-			for (j = 0; j < 3; j++) {
-
-				v0[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[2]].position[j];
-				v1[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[1]].position[j];
-
-				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
-				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
-			}
-
-			VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
-
-
-			ShadowIndex[index++] = shadow_vert+0;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+2;
-			shadow_vert +=4;
-		}
-
-		if (currentmodel->neighbors[i].n[2] < 0 || !triangleFacingLight[currentmodel->neighbors[i].n[2]])
-		{
-			for (j = 0; j < 3; j++)
-			{
-
-				v0[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[0]].position[j];
-				v1[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[2]].position[j];
-
-				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
-				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
-			}
-
-			VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
-
-			ShadowIndex[index++] = shadow_vert+0;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+2;
-			shadow_vert +=4;
-		}
-	}
-
-	 // triangle is frontface and therefore casts shadow,
-     // output front and back caps for shadow volume front cap
-
-	for (i = 0; i < currentmodel->num_triangles; i++)
-	{
-		if (!triangleFacingLight[i])
-			continue;
-
-		for (j = 0; j < 3; j++)
-		{
-			v0[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[0]].position[j];
-			v1[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[1]].position[j];
-			v2[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[2]].position[j];
-		}
-
-		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-		VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-
-		ShadowIndex[index++] = shadow_vert+0;
-		ShadowIndex[index++] = shadow_vert+1;
-		ShadowIndex[index++] = shadow_vert+2;
-		shadow_vert +=3;
-
-		// rear cap (with flipped winding order)
-
-		for (j = 0; j < 3; j++)
-		{
-			v0[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[0]].position[j];
-			v1[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[1]].position[j];
-			v2[j] = currentmodel->animatevertexes[currentmodel->tris[i].vertex[2]].position[j];
-
-			v0[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
-			v1[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
-			v2[j] = v2[j] + ((v2[j] - light[j]) * projectdistance);
-		}
-
-		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-		VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-
-		ShadowIndex[index++] = shadow_vert+2;
-		ShadowIndex[index++] = shadow_vert+1;
-		ShadowIndex[index++] = shadow_vert+0;
-		shadow_vert +=3;
-	}
-
-	if(shadow_vert > 0)
-	{
-		if(gl_state.vbo)
-			GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
-
-		if ( qglLockArraysEXT != 0 )
-			qglLockArraysEXT( 0, shadow_vert );
-
-		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
-	
-		if ( qglUnlockArraysEXT != 0 )
-			qglUnlockArraysEXT();
 	}
 }
 
@@ -582,40 +380,6 @@ void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboole
 		qglCullFace(GL_FRONT);
 		qglStencilOp(GL_KEEP, decr, GL_KEEP);
 		SHD_BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
-	}
-}
-
-void SHD_RenderIQMVolumes(vec3_t lightdir, int projdist)
-{
-	int incr = gl_state.stencil_wrap ? GL_INCR_WRAP_EXT : GL_INCR;
-	int decr = gl_state.stencil_wrap ? GL_DECR_WRAP_EXT : GL_DECR;
-
-	if(VectorCompare(lightdir, vec3_origin))
-		return;
-
-	if(gl_state.separateStencil)
-	{
-		qglDisable(GL_CULL_FACE);
-
-		qglStencilOpSeparate(GL_BACK, GL_KEEP,  incr, GL_KEEP);
-		qglStencilOpSeparate(GL_FRONT, GL_KEEP, decr, GL_KEEP);
-
-		SHD_BuildIQMShadowVolume(lightdir, projdist);
-
-		qglEnable(GL_CULL_FACE);
-	}
-	else
-	{
-		qglEnable(GL_CULL_FACE);
-
-		qglCullFace(GL_BACK);
-		qglStencilOp(GL_KEEP, incr, GL_KEEP);
-
-		SHD_BuildIQMShadowVolume(lightdir, projdist);
-
-		qglCullFace(GL_FRONT);
-		qglStencilOp(GL_KEEP, decr, GL_KEEP);
-		SHD_BuildIQMShadowVolume(lightdir, projdist);
 	}
 }
 
@@ -705,92 +469,6 @@ void SHD_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	SHD_RenderVolumes(paliashdr, light, project, lerp);
 }
 
-void SHD_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagDoll )
-{
-	vec3_t light, temp, tempOrg;
-	int i, j, o;
-	float cost, sint;
-	float is, it, dist;
-	int worldlight = 0;
-	float numlights, weight;
-	float bob, project;
-	trace_t	r_trace;
-	vec3_t mins, maxs, lightAdd;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
-
-	if((currententity->flags & RF_BOBBING) && !RagDoll)
-		bob = currententity->bob;
-	else
-		bob = 0;
-
-	VectorCopy(meshOrigin, tempOrg);
-	tempOrg[2] -= bob;
-
-	VectorClear(light);
-
-	cost =  cos(-meshAngles[1] / 180 * M_PI),
-    sint =  sin(-meshAngles[1] / 180 * M_PI);
-
-	numlights = 0;
-	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++)
-	{
-		if(LightGroups[i].group_origin[2] < meshOrigin[2] - bob)
-			continue; //don't bother with world lights below the ent, creates undesirable shadows
-
-		//need a trace(not for self model, too jerky when lights are blocked and reappear)
-		if(!(currententity->flags & RF_VIEWERMODEL))
-		{
-			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-			if(r_trace.fraction != 1.0)
-				continue;
-		}
-
-		VectorSubtract(LightGroups[i].group_origin, meshOrigin, temp);
-
-		dist = VectorLength(temp);
-
-		//accum and weight
-		weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-		for(j = 0; j < 3; j++)
-			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-		numlights+=weight;
-
-		if(numlights > 0.0)
-		{
-			for(o = 0; o < 3; o++)
-				light[o] = -meshOrigin[o] + lightAdd[o]/numlights;
-
-			is = light[0], it = light[1];
-			light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
-			light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
-			light[2] += currentmodel->maxs[2] + 56;
-		}
-
-		worldlight++;
-	}
-
-	if(!worldlight)
-	{ //no lights found, create light straight down
-
-		VectorSet(light, 0, 0, 200);
-
-		is = light[0], it = light[1];
-		light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
-		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
-		light[2] += 8;
-	}
-
-	if(currentmodel->maxs[2] - currentmodel->mins[2] > 200)
-		project = 2.0;
-	else
-		project = 1.5;
-
-	SHD_RenderIQMVolumes(light, project);
-}
-
 void SHD_DrawShadowVolume()
 {
 	dmdl_t *paliashdr=NULL;
@@ -878,43 +556,6 @@ void SHD_DrawShadowVolume()
 
 	if(currentmodel->type == mod_alias)
 		SHD_DrawAliasShadowVolume(paliashdr, lerped);
-	else
-	{
-		float time, frame;
-				
-		modelpitch = degreeToRadian(currententity->angles[PITCH]);
-
-		//frame interpolation
-		time = (Sys_Milliseconds() - currententity->frametime) / 100;
-		if(time > 1.0)
-			time = 1.0;
-
-		if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
-			time = 0;
-
-		//Check for stopped death anims
-		if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
-			time = 0;
-
-		frame = currententity->frame + time;
-
-		IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
-
-		SHD_DrawIQMShadowVolume(currententity->origin, currententity->angles, false);
-	}
-
-	qglEnable(GL_TEXTURE_2D);
-	qglPopMatrix();
-}
-
-void SHD_DrawRagDollShadowVolume(int RagDollID)
-{
-	qglPushMatrix();
-	qglDisable(GL_TEXTURE_2D);
-
-	IQM_AnimateRagdoll(RagDollID, false);
-
-	SHD_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
 	
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
@@ -925,7 +566,7 @@ void SHD_DrawRagDollShadowVolume(int RagDollID)
 //to do - all of this will be replaced by shadowmapping
 void R_CastShadow(void)
 {
-	int i, RagDollID;
+	int i;
 	vec3_t dist, tmp;
 	float rad, thresh;
     trace_t r_trace;
@@ -971,18 +612,8 @@ void R_CastShadow(void)
 		if (!currentmodel)
 			continue;
 
-		if (currentmodel->type != mod_alias && currentmodel->type != mod_iqm)
+		if (currentmodel->type != mod_alias)
 			continue;
-
-		if(currentmodel->type == mod_iqm && r_gpuanim->integer)
-			continue;
-
-		if(r_ragdolls->value && currentmodel->type == mod_iqm && currentmodel->hasRagDoll)
-		{			
-			//Do not render deathframes if using ragdolls
-			if(currententity->frame > 198) 
-				continue;
-		}
 
 		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 128))
 			continue;
@@ -1026,48 +657,6 @@ void R_CastShadow(void)
 		}
 
 		SHD_DrawShadowVolume();
-	}
-
-	//render volumes for ragdolls
-	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
-	{
-		if(RagDoll[RagDollID].destroyed || r_gpuanim->integer)
-	        continue;
-
-		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION - 2500)
-			continue;
-
-		currentmodel = RagDoll[RagDollID].ragDollMesh;
-
-		if (!currentmodel)
-			continue;
-		
-		if (r_newrefdef.vieworg[2] < (RagDoll[RagDollID].curPos[2] - 10))
-			continue;
-
-		VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
-		VectorScale (tmp, 1.666, tmp);
-		rad = VectorLength (tmp);
-
-		if( R_CullSphere( RagDoll[RagDollID].curPos, rad, 15 ) )
-			continue;
-
-		if (r_worldmodel ) {
-			//occulusion culling - why draw shadows of entities we cannot see?
-			r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-			if(r_trace.fraction != 1.0)
-				continue;
-		}
-
-		//get distance, set lod if available
-		VectorSubtract(r_origin, RagDoll[RagDollID].origin, dist);
-
-		//cull by distance if soft shadows(to do - test/tweak this)
-		if	(VectorLength(dist) > LOD_DIST*(1024.0/500.0) && 
-				gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
-			continue;
-
-		SHD_DrawRagDollShadowVolume(RagDollID);
 	}
 	
 	qglDisableClientState(GL_VERTEX_ARRAY);

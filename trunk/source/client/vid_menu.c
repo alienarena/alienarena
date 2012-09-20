@@ -93,8 +93,6 @@ static menuslider_s		s_overbright_slider;
 static menuslider_s		s_modulate_slider;
 static menufield_s		s_height_field;
 static menufield_s		s_width_field;
-static menulist_s		s_normalmaps_box;
-static menulist_s		s_shadowmaps_box;
 static menulist_s		s_postprocess_box;
 static menulist_s		s_glsl_box;
 static menulist_s		s_vbo_box;
@@ -140,27 +138,10 @@ static void ModulateCallback( void *s )
 	Cvar_SetValue( "gl_modulate", slider->curvalue);
 }
 
-static void NormalMapsCallback( void *s )
-{
-	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
-	if(s_normalmaps_box.curvalue) { //must turn this on for normal
-		Cvar_SetValue("gl_glsl_shaders", s_normalmaps_box.curvalue);
-		s_glsl_box.curvalue = s_normalmaps_box.curvalue;
-	}
-}
-
-static void ShadowMapsCallback( void *s )
-{
-	Cvar_SetValue("gl_shadowmaps", s_shadowmaps_box.curvalue);
-	if(s_shadowmaps_box.curvalue) { //must turn this on for shadowmaps
-		Cvar_SetValue("gl_glsl_shaders", s_shadowmaps_box.curvalue);
-		s_glsl_box.curvalue = s_shadowmaps_box.curvalue;
-	}
-}
-
 static void PostProcessCallback( void *s )
 {
-	if(s_postprocess_box.curvalue) { 
+	if(s_postprocess_box.curvalue) 
+	{ 
 		Cvar_SetValue("gl_glsl_postprocess", s_postprocess_box.curvalue);
 		s_glsl_box.curvalue = s_postprocess_box.curvalue;
 	}
@@ -169,11 +150,8 @@ static void PostProcessCallback( void *s )
 static void GlslCallback( void *s )
 {
 	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
-	if(!s_glsl_box.curvalue) {
-		Cvar_SetValue("gl_normalmaps", s_glsl_box.curvalue);
-		s_normalmaps_box.curvalue = s_glsl_box.curvalue;
-		Cvar_SetValue("gl_shadowmaps", s_glsl_box.curvalue);
-		s_shadowmaps_box.curvalue = s_glsl_box.curvalue;
+	if(!s_glsl_box.curvalue) 
+	{
 		Cvar_SetValue("gl_glsl_postprocess", s_glsl_box.curvalue);
 		s_postprocess_box.curvalue = s_glsl_box.curvalue;
 	}
@@ -191,17 +169,20 @@ static void SetLowest( void *unused )
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("gl_usevbo", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
-	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_lensflare", 0);
 	Cvar_SetValue("r_lightbeam", 0);
+	Cvar_SetValue("r_drawsun", 0);
+	Cvar_SetValue("r_godrays", 0);
 
 	VID_MenuInit();
 }
@@ -211,40 +192,46 @@ static void SetLow( void *unused )
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
-	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 0);
+	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_lensflare", 1);
 	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 0);
+	Cvar_SetValue("r_godrays", 0);
 
 	VID_MenuInit();
 }
 
 static void SetMedium( void *unused )
 {
-	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_lensflare", 1);
 	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 2);
+	Cvar_SetValue("r_godrays", 0);
 
 	VID_MenuInit();
 }
@@ -256,17 +243,20 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 1); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_lensflare", 1);
 	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 2);
+	Cvar_SetValue("r_godrays", 0);
 
 	VID_MenuInit();
 }
@@ -278,17 +268,20 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 1); 
 	Cvar_SetValue("gl_shadowmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_lensflare", 1);
 	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 2);
+	Cvar_SetValue("r_godrays", 1);
 
 	VID_MenuInit();
 }
@@ -350,12 +343,8 @@ static void ApplyChanges( void *unused )
 			(s_overbright_slider.curvalue == 3.0f ? 4.0f : s_overbright_slider.curvalue) );
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
-	Cvar_SetValue( "gl_normalmaps", s_normalmaps_box.curvalue);
-	Cvar_SetValue( "gl_shadowmaps", s_shadowmaps_box.curvalue);
 	Cvar_SetValue( "gl_glsl_postprocess", s_postprocess_box.curvalue);
 	Cvar_SetValue( "gl_glsl_shaders", s_glsl_box.curvalue);
-	if(s_normalmaps_box.curvalue)
-		Cvar_SetValue("r_shaders", 1); //shaders must be enabled for this to work
 	Cvar_SetValue( "gl_usevbo", s_vbo_box.curvalue);
 
 	RS_FreeUnmarked();
@@ -438,10 +427,6 @@ void VID_MenuInit( void )
 		vid_width = Cvar_Get( "vid_width", "640", CVAR_ARCHIVE);
 	if ( !vid_height )
 		vid_height = Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
-	if (!gl_normalmaps)
-		gl_normalmaps = Cvar_Get( "gl_normalmaps", "0", CVAR_ARCHIVE);
-	if (!gl_shadowmaps)
-		gl_shadowmaps = Cvar_Get( "gl_shadowmaps", "0", CVAR_ARCHIVE);
 	if (!gl_glsl_postprocess)
 		gl_glsl_postprocess = Cvar_Get( "gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 	if (!gl_glsl_shaders)
@@ -558,25 +543,9 @@ void VID_MenuInit( void )
 	s_tq_slider.maxvalue = 3;
 	s_tq_slider.curvalue = 3-gl_picmip->value;
 
-	s_normalmaps_box.generic.type	= MTYPE_SPINCONTROL;
-	s_normalmaps_box.generic.x		= 24*scale;
-	s_normalmaps_box.generic.y		= FONTSCALE*160*scale;
-	s_normalmaps_box.generic.name	= "normal maps";
-	s_normalmaps_box.curvalue = gl_normalmaps->value;
-	s_normalmaps_box.itemnames = yesno_names;
-	s_normalmaps_box.generic.callback = NormalMapsCallback;
-
-	s_shadowmaps_box.generic.type	= MTYPE_SPINCONTROL;
-	s_shadowmaps_box.generic.x		= 24*scale;
-	s_shadowmaps_box.generic.y		= FONTSCALE*170*scale;
-	s_shadowmaps_box.generic.name	= "shadow maps";
-	s_shadowmaps_box.curvalue = gl_shadowmaps->value;
-	s_shadowmaps_box.itemnames = yesno_names;
-	s_shadowmaps_box.generic.callback = ShadowMapsCallback;
-
 	s_postprocess_box.generic.type	= MTYPE_SPINCONTROL;
 	s_postprocess_box.generic.x		= 24*scale;
-	s_postprocess_box.generic.y		= FONTSCALE*180*scale;
+	s_postprocess_box.generic.y		= FONTSCALE*160*scale;
 	s_postprocess_box.generic.name	= "post process effects";
 	s_postprocess_box.curvalue = gl_glsl_postprocess->value;
 	s_postprocess_box.itemnames = yesno_names;
@@ -584,7 +553,7 @@ void VID_MenuInit( void )
 
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
 	s_glsl_box.generic.x		= 24*scale;
-	s_glsl_box.generic.y		= FONTSCALE*190*scale;
+	s_glsl_box.generic.y		= FONTSCALE*170*scale;
 	s_glsl_box.generic.name	= "GLSL shaders";
 	s_glsl_box.curvalue = gl_glsl_shaders->value;
 	s_glsl_box.itemnames = yesno_names;
@@ -592,7 +561,7 @@ void VID_MenuInit( void )
 
 	s_vbo_box.generic.type	= MTYPE_SPINCONTROL;
 	s_vbo_box.generic.x		= 24*scale;
-	s_vbo_box.generic.y		= FONTSCALE*200*scale;
+	s_vbo_box.generic.y		= FONTSCALE*180*scale;
 	s_vbo_box.generic.name	= "vertex buffer objects";
 	s_vbo_box.curvalue = gl_usevbo->value;
 	s_vbo_box.itemnames = yesno_names;
@@ -601,64 +570,64 @@ void VID_MenuInit( void )
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24*scale;
-	s_finish_box.generic.y	= FONTSCALE*210*scale;
+	s_finish_box.generic.y	= FONTSCALE*190*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 24*scale;
-    s_vsync_box.generic.y  = FONTSCALE*220*scale;
+    s_vsync_box.generic.y  = FONTSCALE*200*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 24*scale;
-	s_windowed_mouse.generic.y  = FONTSCALE*230*scale;
+	s_windowed_mouse.generic.y  = FONTSCALE*210*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
 
 	s_lowest_action.generic.type = MTYPE_ACTION;
-	s_lowest_action.generic.name = "lowest settings";
+	s_lowest_action.generic.name = "high compatibility";
 	s_lowest_action.generic.x    = 24*scale;
-	s_lowest_action.generic.y    = FONTSCALE*250*scale;
+	s_lowest_action.generic.y    = FONTSCALE*230*scale;
 	s_lowest_action.generic.callback = SetLowest;
-	s_lowest_action.generic.statusbar = "no shaders, no dynamic lighting";
+	s_lowest_action.generic.statusbar = "use when all other modes fail or run slowly";
 
 	s_low_action.generic.type = MTYPE_ACTION;
-	s_low_action.generic.name = "low settings";
+	s_low_action.generic.name = "high performance";
 	s_low_action.generic.x    = 24*scale;
-	s_low_action.generic.y    = FONTSCALE*260*scale;
+	s_low_action.generic.y    = FONTSCALE*240*scale;
 	s_low_action.generic.callback = SetLow;
-	s_low_action.generic.statusbar = "shaders, but no dynamic lighting";
+	s_low_action.generic.statusbar = "fast rendering, many effects disabled";
 
 	s_medium_action.generic.type = MTYPE_ACTION;
-	s_medium_action.generic.name = "medium settings";
+	s_medium_action.generic.name = "performance";
 	s_medium_action.generic.x    = 24*scale;
-	s_medium_action.generic.y    = FONTSCALE*270*scale;
+	s_medium_action.generic.y    = FONTSCALE*250*scale;
 	s_medium_action.generic.callback = SetMedium;
-	s_medium_action.generic.statusbar = "GLSL per-pixel dynamic lighting and postprocess";
+	s_medium_action.generic.statusbar = "GLSL per-pixel lighting and postprocess";
 
 	s_high_action.generic.type = MTYPE_ACTION;
-	s_high_action.generic.name = "high settings";
+	s_high_action.generic.name = "quality";
 	s_high_action.generic.x    = 24*scale;
-	s_high_action.generic.y    = FONTSCALE*280*scale;
+	s_high_action.generic.y    = FONTSCALE*260*scale;
 	s_high_action.generic.callback = SetHigh;
-	s_high_action.generic.statusbar = "GLSL per-pixel effects on most surfaces";
+	s_high_action.generic.statusbar = "GLSL per-pixel effects on all surfaces";
 
 	s_highest_action.generic.type = MTYPE_ACTION;
-	s_highest_action.generic.name = "highest settings";
+	s_highest_action.generic.name = "high quality";
 	s_highest_action.generic.x    = 24*scale;
-	s_highest_action.generic.y    = FONTSCALE*290*scale;
+	s_highest_action.generic.y    = FONTSCALE*270*scale;
 	s_highest_action.generic.callback = SetHighest;
-	s_highest_action.generic.statusbar = "GLSL per-pixel effects on all surfaces";
+	s_highest_action.generic.statusbar = "GLSL, shadows, light shafts from sun";
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24*scale;
-	s_apply_action.generic.y    = FONTSCALE*310*scale;
+	s_apply_action.generic.y    = FONTSCALE*290*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -672,8 +641,6 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normalmaps_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_shadowmaps_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_postprocess_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_glsl_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vbo_box );

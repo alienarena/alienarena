@@ -46,6 +46,7 @@ glconfig_t		gl_config;
 glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
+cvar_t	*gl_bspnormalmaps;
 cvar_t  *gl_shadowmaps;
 cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program;
@@ -164,6 +165,7 @@ cvar_t	*r_lensflare;
 cvar_t	*r_lensflare_intens;
 cvar_t	*r_drawsun;
 cvar_t	*r_lightbeam;
+cvar_t	*r_godrays;
 
 cvar_t	*r_hdlightmaps;
 
@@ -187,10 +189,6 @@ extern cvar_t *cl_noblood;
 
 //first time running game
 cvar_t	*r_firstrun;
-
-//gpu animation(incomplete)
-cvar_t *r_gpuanim;
-cvar_t *r_gpuanim_debug;
 
 //for testing
 cvar_t  *r_test;
@@ -1241,7 +1239,8 @@ void R_Register( void )
 
 	gl_vlights = Cvar_Get("gl_vlights", "1", CVAR_ARCHIVE);
 
-	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
+	gl_normalmaps = Cvar_Get("gl_normalmaps", "1", CVAR_ARCHIVE);
+	gl_bspnormalmaps = Cvar_Get("gl_bspnormalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
@@ -1252,6 +1251,7 @@ void R_Register( void )
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
 	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
 	r_lightbeam = Cvar_Get ("r_lightbeam", "1", CVAR_ARCHIVE);
+	r_godrays = Cvar_Get ("r_godrays", "0", CVAR_ARCHIVE);
 	
 	r_hdlightmaps = Cvar_Get("r_hdlightmaps", "1", CVAR_ARCHIVE);
 
@@ -1262,9 +1262,6 @@ void R_Register( void )
 
 	r_ragdolls = Cvar_Get ("r_ragdolls", "1", CVAR_ARCHIVE );
 	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", CVAR_ARCHIVE );
-
-	r_gpuanim = Cvar_Get("r_gpuanim", "0", CVAR_ARCHIVE);
-	r_gpuanim_debug = Cvar_Get("r_gpuanim_debug", "0", CVAR_ARCHIVE);
 
 	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);
@@ -1346,20 +1343,22 @@ void R_SetLowest(void)
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("gl_usevbo", 0);
 	Cvar_SetValue("r_shaders", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
-	Cvar_SetValue("gl_vlights", 0);
+	Cvar_SetValue("r_lensflare", 0);
+	Cvar_SetValue("r_lightbeam", 0);
+	Cvar_SetValue("r_drawsun", 0);
+	Cvar_SetValue("r_godrays", 0);
 
-	Com_Printf("...autodetected LOWEST game setting\n");
+	Com_Printf("...autodetected MAX COMPATIBILITY game setting\n");
 }
 
 /*
@@ -1373,20 +1372,22 @@ void R_SetLow( void )
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
-	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
-	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 0);
+	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 0);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 0);
+	Cvar_SetValue("r_godrays", 0);
 
-	Com_Printf("...autodetected LOW game setting\n");
+	Com_Printf("...autodetected MAX PERFORMANCE game setting\n");
 }
 
 /*
@@ -1397,23 +1398,25 @@ R_SetMedium
 
 void R_SetMedium( void )
 {
-	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
-	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 1);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 2);
+	Cvar_SetValue("r_godrays", 0);
 
-	Com_Printf("...autodetected MEDIUM game setting\n");
+	Com_Printf("...autodetected PERFORMANCE game setting\n");
 }
 
 /*
@@ -1427,20 +1430,22 @@ void R_SetHigh( void )
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 1); 
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 1);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 2);
+	Cvar_SetValue("r_godrays", 0);
 
-	Com_Printf("...autodetected HIGH game setting\n");
+	Com_Printf("...autodetected QUALITY game setting\n");
 }
 
 /*
@@ -1454,20 +1459,22 @@ void R_SetHighest( void )
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_bspnormalmaps", 1); 
 	Cvar_SetValue("gl_shadowmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("gl_vlights", 1);
+	Cvar_SetValue("r_lensflare", 1);
+	Cvar_SetValue("r_lightbeam", 1);
+	Cvar_SetValue("r_drawsun", 2);
+	Cvar_SetValue("r_godrays", 1);
 
-	Com_Printf("...autodetected HIGHEST game setting\n");
+	Com_Printf("...autodetected MAX QUALITY game setting\n");
 }
 
 #if defined WIN32_VARIANT
@@ -1694,18 +1701,18 @@ cpuinfo_exit:
 
 		if(OGLVer < 2)
 		{
-			//weak GPU, set low
-			R_SetLow();
+			//weak GPU, set to maximum compatibility
+			R_SetLowest();
 		}
-		else if(OGLVer == 3)
+		else if(OGLVer >= 3)
 		{
 			//GPU is modern, check CPU
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHighest();
 			else
-				R_SetMedium();
+				R_SetHigh();
 		}
-		else
+		else 
 		{
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHigh();
