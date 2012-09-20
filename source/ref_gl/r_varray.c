@@ -557,16 +557,12 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 			VArray[3] = v[3] + scroll;
 			VArray[4] = v[4];
 
-			VectorCopy(surf->plane->normal, NormalsArray[VertexCounter]);
-
 			// nothing else is needed
 			// increment pointer and counter
 			VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 			VertexCounter++;
 		}				
 	}
-
-	qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 
 	// draw the polys
 	R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
