@@ -162,7 +162,7 @@ static void VboCallback( void *s )
 	Cvar_SetValue("gl_usevbo", s_vbo_box.curvalue);
 }
 
-static void SetLowest( void *unused )
+static void SetCompatibility( void *unused )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -186,7 +186,7 @@ static void SetLowest( void *unused )
 
 	VID_MenuInit();
 }
-static void SetLow( void *unused )
+static void SetMaxPerformance( void *unused )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -201,7 +201,7 @@ static void SetLow( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("r_lensflare", 1);
 	Cvar_SetValue("r_lightbeam", 1);
@@ -211,7 +211,7 @@ static void SetLow( void *unused )
 	VID_MenuInit();
 }
 
-static void SetMedium( void *unused )
+static void SetPerformance( void *unused )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -236,7 +236,7 @@ static void SetMedium( void *unused )
 	VID_MenuInit();
 }
 
-static void SetHigh( void *unused )
+static void SetQuality( void *unused )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -261,7 +261,7 @@ static void SetHigh( void *unused )
 	VID_MenuInit();
 }
 
-static void SetHighest( void *unused )
+static void SetMaxQuality( void *unused )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -593,35 +593,35 @@ void VID_MenuInit( void )
 	s_lowest_action.generic.name = "high compatibility";
 	s_lowest_action.generic.x    = 24*scale;
 	s_lowest_action.generic.y    = FONTSCALE*230*scale;
-	s_lowest_action.generic.callback = SetLowest;
+	s_lowest_action.generic.callback = SetCompatibility;
 	s_lowest_action.generic.statusbar = "use when all other modes fail or run slowly";
 
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "high performance";
 	s_low_action.generic.x    = 24*scale;
 	s_low_action.generic.y    = FONTSCALE*240*scale;
-	s_low_action.generic.callback = SetLow;
+	s_low_action.generic.callback = SetMaxPerformance;
 	s_low_action.generic.statusbar = "fast rendering, many effects disabled";
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "performance";
 	s_medium_action.generic.x    = 24*scale;
 	s_medium_action.generic.y    = FONTSCALE*250*scale;
-	s_medium_action.generic.callback = SetMedium;
+	s_medium_action.generic.callback = SetPerformance;
 	s_medium_action.generic.statusbar = "GLSL per-pixel lighting and postprocess";
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "quality";
 	s_high_action.generic.x    = 24*scale;
 	s_high_action.generic.y    = FONTSCALE*260*scale;
-	s_high_action.generic.callback = SetHigh;
+	s_high_action.generic.callback = SetQuality;
 	s_high_action.generic.statusbar = "GLSL per-pixel effects on all surfaces";
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "high quality";
 	s_highest_action.generic.x    = 24*scale;
 	s_highest_action.generic.y    = FONTSCALE*270*scale;
-	s_highest_action.generic.callback = SetHighest;
+	s_highest_action.generic.callback = SetMaxQuality;
 	s_highest_action.generic.statusbar = "GLSL, shadows, light shafts from sun";
 
 	s_apply_action.generic.type = MTYPE_ACTION;
