@@ -221,7 +221,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	float		s, t, os, ot;
 	float		scroll;
 	float		rdt = r_newrefdef.time;
-	vec3_t		nv, tangent;
+	vec3_t		nv;
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
@@ -229,8 +229,8 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		scroll = 0.0f;
 	  
 	if(gl_state.glsl_shaders && gl_glsl_shaders->value
-		&& fa->texinfo->has_normalmap) {
-
+		&& fa->texinfo->has_normalmap)
+	{
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
 
@@ -244,20 +244,19 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
 		glUniform1iARB( g_location_baseTexture, 0);
 
-		//note - moving this to tmu2 fixed a very odd, obsure bug.  It isn't clear yet why it fixes it, but it does
 		qglActiveTextureARB(GL_TEXTURE1);
 		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
 		glUniform1iARB( g_location_normTexture, 1);
-
-		if(fa->texinfo->flags &(SURF_TRANS33|SURF_TRANS66))
-			glUniform1iARB( g_location_trans, 1);
-		else
-			glUniform1iARB( g_location_trans, 0);
 
 		qglActiveTextureARB(GL_TEXTURE2);
 		qglBindTexture(GL_TEXTURE_2D, texnum);
 		glUniform1iARB( g_location_refTexture, 2);
 
+		if(fa->texinfo->flags &(SURF_TRANS33|SURF_TRANS66))
+			glUniform1iARB( g_location_trans, 1);
+		else
+			glUniform1iARB( g_location_trans, 0);
+		
 		if(texnum)
 		{
 			glUniform1iARB( g_location_reflect, 1);
@@ -266,11 +265,10 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		{
 			glUniform1iARB( g_location_reflect, 0);
 		}
-			
-		AngleVectors(fa->plane->normal, NULL, tangent, NULL);
 
 		//send these to the shader program	
-		glUniform3fARB( g_location_tangent, tangent[0], tangent[1], tangent[2]);
+		glUniformMatrix3fvARB( g_location_tangentSpaceTransform, 1, GL_FALSE, (const GLfloat *) fa->tangentSpaceTransform );
+		glUniform3fARB( g_location_waterEyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform3fARB( g_location_lightPos, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);

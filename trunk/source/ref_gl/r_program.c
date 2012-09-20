@@ -109,7 +109,8 @@ GLuint		g_location_yOffset;
 GLuint		g_location_baseTexture;
 GLuint		g_location_normTexture;
 GLuint		g_location_refTexture;
-GLuint		g_location_tangent;
+GLuint		g_location_waterEyePos;
+GLuint		g_location_tangentSpaceTransform;
 GLuint		g_location_time;
 GLuint		g_location_lightPos;
 GLuint		g_location_reflect;
@@ -623,6 +624,7 @@ static char shadow_vertex_program[] = STRINGIFY (
 	}
 );
 
+//SHADOWS
 static char shadow_fragment_program[] = STRINGIFY (
 	uniform sampler2DShadow StatShadowMap;
 	uniform float fadeShadow;
@@ -976,60 +978,46 @@ static char blankmesh_fragment_program[] = STRINGIFY (
 
 
 static char water_vertex_program[] = STRINGIFY (
-	const float Eta = 0.66;
-	const float FresnelPower = 5.0;
-
-	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
-	varying float FresRatio;
-
-	varying vec3 lightDir;
-	varying vec3 eyeDir;
-	varying vec3 reflectDir;
-	varying vec3 refractDir;
-
-	varying float fog;
-
-	uniform vec3 stangent;
+	uniform mat3 tangentSpaceTransform;
+	uniform vec3 Eye; 
 	uniform vec3 LightPos;
 	uniform float time;
 	uniform int	REFLECT;
 	uniform int FOG;
 
+	const float Eta = 0.66;
+	const float FresnelPower = 2.5;
+	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
+
+	varying float FresRatio;
+	varying vec3 lightDir;
+	varying vec3 eyeDir;
+	varying vec3 reflectDir;
+	varying vec3 refractDir;
+	varying float fog;
+
 	void main(void)
 	{
-		vec4 v = vec4(gl_Vertex);
 		gl_Position = ftransform();
 
-		vec3 norm = normalize(gl_NormalMatrix * gl_Normal);
-		vec3 tang = normalize(gl_NormalMatrix * stangent);
-		vec3 binorm = cross(norm,tang);
+		vec3 norm = vec3(0, 0, 1); //water always is up!
 
-		eyeDir = vec3(gl_ModelViewMatrix * v);
+		lightDir = tangentSpaceTransform * (LightPos - gl_Vertex.xyz);
 
-		//for refraction
-		vec4 neyeDir = gl_ModelViewMatrix * v;
-		vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
-		refeyeDir = normalize(refeyeDir);
+		vec4 neyeDir = gl_ModelViewMatrix * gl_Vertex;
+        vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+        refeyeDir = normalize(refeyeDir);
 
-		refeyeDir.x *= -1.0;
-		refeyeDir.y *= -1.0;
-		refeyeDir.z *= -1.0;
+        refeyeDir.x *= -1.0;
+        refeyeDir.y *= -1.0;
+        refeyeDir.z *= -1.0;
 
-		reflectDir = reflect(eyeDir,norm);
-		refractDir = refract(eyeDir,norm,Eta);
-		refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));
-		FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);
+        reflectDir = reflect(neyeDir,norm);
+        refractDir = refract(neyeDir,norm,Eta);
+        refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));
+        FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);
 
-		vec3 tmp;
-		tmp.x = dot(LightPos,tang);
-		tmp.y = dot(LightPos,binorm);
-		tmp.z = dot(LightPos,norm);
-		lightDir = normalize(tmp);
-
-		tmp.x = dot(eyeDir,tang);
-		tmp.y = dot(eyeDir,binorm);
-		tmp.z = dot(eyeDir,norm);
-		eyeDir = normalize(tmp);
+		eyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
 
 		vec4 texco = gl_MultiTexCoord0;
 		if(REFLECT > 0) 
@@ -1038,17 +1026,17 @@ static char water_vertex_program[] = STRINGIFY (
 			texco.t = texco.t + LightPos.y/256.0;
 		}
 
-		gl_TexCoord[0] = texco;
+		gl_TexCoord[0] = texco * 1.0;
 
 		texco = gl_MultiTexCoord0;
-		texco.s = texco.s + time*0.05;
-		texco.t = texco.t + time*0.05;
+		texco.s = texco.s *1.0 + time*0.05;
+		texco.t = texco.t * 1.0 + time*0.05;
 
 		gl_TexCoord[1] = texco;
 
 		texco = gl_MultiTexCoord0;
-		texco.s = texco.s + -time*0.05;
-		texco.t = texco.t + -time*0.05;
+		texco.s = texco.s * 1.0 + -time*0.05;
+		texco.t = texco.t *1.0 + -time*0.05;
 		gl_TexCoord[2] = texco;
 
 		//fog
@@ -1079,10 +1067,6 @@ static char water_fragment_program[] = STRINGIFY (
 	{
 		vec4 refColor;
 
-		float distSqr = dot(lightDir, lightDir);
-		float att = clamp(1.0 - 0.0 * sqrt(distSqr), 0.0, 1.0);
-		vec3 lVec = lightDir * inversesqrt(distSqr);
-
 		vec3 vVec = normalize(eyeDir);
 
 		vec4 base = vec4(0.15,0.67,0.93,1.0); //base water color
@@ -1095,17 +1079,20 @@ static char water_fragment_program[] = STRINGIFY (
 		vec3 secbump = normalize( texture2D(normalMap, gl_TexCoord[2].xy).xyz * 2.0 - 1.0);
 		vec3 modbump = mix(secbump,bump,0.5);
 
-		vec3 reflection = reflect(eyeDir,modbump);
-		vec3 refraction = refract(eyeDir,modbump,0.66);
+		vec3 reflection = reflect(vVec,modbump);
+		vec3 refraction = refract(vVec,modbump,0.66);
 
 		vec4 Tl = texture2DProj(baseTexture, vec4(reflection.xy, 1.0, 1.0) );
-	   vec4 Tr = texture2DProj(baseTexture, vec4(refraction.xy, 1.0, 1.0) );
+	    vec4 Tr = texture2DProj(baseTexture, vec4(refraction.xy, 1.0, 1.0) );
 
 		vec4 cubemap = mix(Tl,Tr,FresRatio);
 
 		gl_FragColor = mix(cubemap,refColor,0.5);
+
 		if(TRANSPARENT > 0)
 			gl_FragColor.a = 0.5;
+		else
+			gl_FragColor.a = 0.75;
 
 		if(FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
@@ -1601,7 +1588,8 @@ void R_LoadGLSLPrograms(void)
 		g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
 		g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
 		g_location_refTexture = glGetUniformLocationARB( g_waterprogramObj, "refTexture" );
-		g_location_tangent = glGetUniformLocationARB( g_waterprogramObj, "stangent" );
+		g_location_waterEyePos = glGetUniformLocationARB( g_waterprogramObj, "Eye" );
+		g_location_tangentSpaceTransform = glGetUniformLocationARB( g_waterprogramObj, "tangentSpaceTransform");
 		g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
 		g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );
 		g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );

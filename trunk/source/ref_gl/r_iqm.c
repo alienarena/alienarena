@@ -1080,8 +1080,6 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec3_t), currentmodel->normal, VBO_STORE_NORMAL, currentmodel);
 				R_VCLoadData(VBO_STATIC, currentmodel->numvertexes*sizeof(vec4_t), currentmodel->tangent, VBO_STORE_TANGENT, currentmodel);
 				R_VCLoadData(VBO_STATIC, currentmodel->num_triangles*3*sizeof(unsigned int), currentmodel->tris, VBO_STORE_INDICES, currentmodel);
-
-				//to do - find out why this even needed
 			}
 		}					
 
@@ -2419,6 +2417,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 			return;
 	}
 
+	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	modelpitch = degreeToRadian(currententity->angles[PITCH]); 
+
 	R_GetLightVals(currententity->origin, false, true);	
 		
 	R_GenerateEntityShadow();
@@ -2495,11 +2496,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			if (shadelight[i] < minlight)
 				shadelight[i] = minlight;
 		}
-	}
-
-	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	if(!(gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer))
-		modelpitch = degreeToRadian(currententity->angles[PITCH]); 
+	}	
 
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
