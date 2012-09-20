@@ -1334,11 +1334,11 @@ qboolean R_SetMode (void)
 
 /*
 ===============
-R_SetLowest
+R_SetCompatibility
 ===============
 */
 
-void R_SetLowest(void)
+void R_SetCompatibility(void)
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -1363,11 +1363,11 @@ void R_SetLowest(void)
 
 /*
 ===============
-R_SetLow
+R_SetMaxPerformance
 ===============
 */
 
-void R_SetLow( void )
+void R_SetMaxPerformance( void )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -1380,7 +1380,7 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("gl_usevbo", 1);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("r_lensflare", 1);
 	Cvar_SetValue("r_lightbeam", 1);
@@ -1392,11 +1392,11 @@ void R_SetLow( void )
 
 /*
 ===============
-R_SetMedium
+R_SetPerformance
 ===============
 */
 
-void R_SetMedium( void )
+void R_SetPerformance( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -1421,11 +1421,11 @@ void R_SetMedium( void )
 
 /*
 ===============
-R_SetHigh
+R_SetQuality
 ===============
 */
 
-void R_SetHigh( void )
+void R_SetQuality( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -1450,11 +1450,11 @@ void R_SetHigh( void )
 
 /*
 ===============
-R_SetHighest
+R_SetMaxQuality
 ===============
 */
 
-void R_SetHighest( void )
+void R_SetMaxQuality( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -1635,7 +1635,7 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE);
 	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	Cvar_SetValue("r_firstrun", 1);
-	R_SetLow();
+	R_SetMaxPerformance();
 	Com_Printf("...Development Workaround. Low game settings forced.\n");
 #else
 
@@ -1702,22 +1702,22 @@ cpuinfo_exit:
 		if(OGLVer < 2)
 		{
 			//weak GPU, set to maximum compatibility
-			R_SetLowest();
+			R_SetCompatibility();
 		}
 		else if(OGLVer >= 3)
 		{
 			//GPU is modern, check CPU
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
-				R_SetHighest();
+				R_SetMaxQuality();
 			else
-				R_SetHigh();
+				R_SetQuality();
 		}
 		else 
 		{
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
-				R_SetHigh();
+				R_SetQuality();
 			else
-				R_SetMedium();
+				R_SetPerformance();
 		}
 
 		//never run again
