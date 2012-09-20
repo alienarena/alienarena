@@ -1057,10 +1057,10 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 		const unsigned char *weight = currentmodel->blendweights;
 
-		//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage as well)
+		//we need to skip this vbo check if not using a shader - since the animation is done in the shader
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
-		if (use_vbo && (gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
+		if (use_vbo && (gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) &&
 			(r_shaders->integer || ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))))
 		{
 			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
@@ -1215,7 +1215,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		has_vbo = false;
 		//a lot of conditions need to be enabled in order to use GPU animation
 
-		if (use_vbo && (gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer && r_gpuanim->integer) &&
+		if (use_vbo && (gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) &&
 			(r_shaders->integer || shellEffect))
 		{
 			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, RagDoll[RagDollID].ragDollMesh);
@@ -1277,7 +1277,7 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
 	VectorScale(baselight, gl_modulate->value, lightOut);
 
 	//probably will remove this - maybe we can get a faster algorithm and redo one day
-	if(!gl_vlights->integer)
+	//if(!gl_vlights->integer)
 		return;
 
 	lscale = 3.0;

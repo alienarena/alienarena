@@ -878,7 +878,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 				scroll = -64.0;
 		}
 
-		if(gl_normalmaps->integer && surf->texinfo->has_heightmap) 
+		if(gl_bspnormalmaps->integer && surf->texinfo->has_heightmap) 
 		{
 			if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
 			{
@@ -1042,7 +1042,7 @@ void BSP_DrawGLSLSurfaces (void)
 	r_currTexInfo = NULL;
 	r_currTangentSpaceTransform = NULL;
 	
-	if (r_test->integer)
+	if (!gl_bspnormalmaps->integer)
 	{
 		return;
 	}
@@ -1255,7 +1255,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 		surf->texturechain = surf->texinfo->equiv->glsl_dynamic_surfaces;
 		surf->texinfo->equiv->glsl_dynamic_surfaces = surf;
 	}
-	else if(!r_test->integer && gl_normalmaps->integer 
+	else if(gl_bspnormalmaps->integer
 			&& surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
