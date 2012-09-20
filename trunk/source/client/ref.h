@@ -229,7 +229,6 @@ typedef struct
 	vec3_t	origin;
 	vec3_t	color;
 	float	intensity;
-	int		team;				//so we can add team lights like UT
 } dlight_t;
 
 typedef struct
