@@ -640,7 +640,7 @@ static char shadow_fragment_program[] = STRINGIFY (
 
 	float lookupStatshadow( void )
 	{
-		float shadow;
+		float shadow = 1.0;
 
 		if (ShadowCoord.w > 1.0)
 		{
@@ -652,9 +652,12 @@ static char shadow_fragment_program[] = STRINGIFY (
 			shadow += lookup(vec2( 0.5, -0.5) + o);
 			shadow *= 0.25 ;
 		}
+		shadow += 0.3;
+		if(shadow > 1.0)
+			shadow = 1.0;
 	
-		return shadow + 0.5;
-	}
+		return shadow;
+	}		
 
 	void main( void )
 	{
