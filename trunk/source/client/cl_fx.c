@@ -3877,6 +3877,7 @@ void CL_AddParticles (void)
 		else
 		{
 			p->current_alpha = p->alpha;
+			p->alpha = p->alphavel = 0.0;
 		}
 		if(p->scalevel > 1) {
 			time = (cl.time - p->time)*0.001;
@@ -3957,12 +3958,6 @@ void CL_AddParticles (void)
         }
         
 		V_AddParticle (p);
-		// PMM
-		if (p->alphavel == INSTANT_PARTICLE)
-		{
-			p->alphavel = 0.0;
-			p->alpha = 0.0;
-		}
 	}
 
 	active_particles = active;
