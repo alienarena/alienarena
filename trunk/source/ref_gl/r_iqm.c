@@ -843,29 +843,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	{
 		mod->hasRagDoll = IQM_ReadRagDollFile( fullname, mod );
 	}
-
-	//load VBO
-	if(gl_state.vbo)
-	{
-		//shouldn't really need this, but make sure a cache doesn't already exist for this model 
-		//in the event this routine is called for any reason(model being flushed, etc).
-		vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
-		vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
-		vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
-		vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
-		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
-
-		//if any are missing, go ahead and reload the VBO
-		if(!(vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices))
-		{
-			R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->vertexes, VBO_STORE_XYZ, mod);
-			R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), mod->st, VBO_STORE_ST, mod);
-			R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->normal, VBO_STORE_NORMAL, mod);
-			R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), mod->tangent, VBO_STORE_TANGENT, mod);
-			R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), mod->tris, VBO_STORE_INDICES, mod);
-		}
-	}
-
+	
 	//free temp non hunk mem
 	if(inversebaseframe)
 		free(inversebaseframe);
