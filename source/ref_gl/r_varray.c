@@ -380,7 +380,7 @@ void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin)
 		VArray = &VArrayVerts[0];
 		VertexCounter = 0;
 
-		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
+		VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
 		//to do - scale this by angle to light - this is producing poor results with this method thus far
 		/*CrossProduct(currententity->origin, statLightPosition, cross);
 		angle = atan2(VectorNormalize(cross), DotProduct(currententity->origin, statLightPosition));
