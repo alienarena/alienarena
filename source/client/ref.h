@@ -325,9 +325,6 @@ typedef struct
 	int			num_particles;
 	particle_t	**particles;
 
-	int         num_flares;
-    flare_t     *flares;
-
 	int			num_grasses;
 	grass_t		*grasses;
 
