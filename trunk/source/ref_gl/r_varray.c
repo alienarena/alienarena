@@ -324,7 +324,7 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo)
 	if(!vbo)
 	{
 		if(qglLockArraysEXT)
-			qglLockArraysEXT(0, count);
+			qglLockArraysEXT(first, count);
 
 		qglDrawArrays (mode, first, count);
 
