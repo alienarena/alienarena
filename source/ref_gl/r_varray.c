@@ -313,7 +313,6 @@ void R_KillVArrays (void)
 }
 
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo)
-
 {
 	if(count < 1)
 		return; //do not send arrays of zero size to GPU!
@@ -321,18 +320,7 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo)
 	if(gl_state.vbo)
 		GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
 
-	if(!vbo)
-	{
-		if(qglLockArraysEXT)
-			qglLockArraysEXT(first, count);
-
-		qglDrawArrays (mode, first, count);
-
-		if(qglUnlockArraysEXT)
-			qglUnlockArraysEXT();
-	}
-	else
-		qglDrawArrays (mode, first, count);
+	qglDrawArrays (mode, first, count);
 }
 
 void R_AddSurfToVArray (msurface_t *surf)
