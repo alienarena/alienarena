@@ -2502,7 +2502,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			use_vbo = false; //cannot use vbo without a valid shader
 		}
 	}
-	else
+	else if(!(currententity->flags & RF_TRANSLUCENT))
 		use_vbo = false;
 
 	// draw it
