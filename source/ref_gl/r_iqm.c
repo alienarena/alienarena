@@ -2502,6 +2502,8 @@ void R_DrawINTERQUAKEMODEL ( void )
 			use_vbo = false; //cannot use vbo without a valid shader
 		}
 	}
+	else
+		use_vbo = false;
 
 	// draw it
 
