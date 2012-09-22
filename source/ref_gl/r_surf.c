@@ -781,6 +781,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 			BSP_FlushVBOAccum ();
 			//need to bind the blood drop normal map, and set flag, and time
 			glUniform1iARB( g_location_liquid, 8 ); //blood type 8, water 1
+			glUniform1iARB( g_location_shiny, 0 );
 			glUniform1fARB( g_location_rsTime, rs_realtime);
 			glUniform1iARB( g_location_liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
 			qglActiveTextureARB(GL_TEXTURE4);
@@ -796,16 +797,29 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 			BSP_FlushVBOAccum ();
 			//need to bind the water drop normal map, and set flag, and time
 			glUniform1iARB( g_location_liquid, 1 ); 
+			glUniform1iARB( g_location_shiny, 0 );
 			glUniform1fARB( g_location_rsTime, rs_realtime);
 			glUniform1iARB( g_location_liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
 			qglActiveTextureARB(GL_TEXTURE4);
 			qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
 			KillFlags |= KILL_TMU4_POINTER;
 		}
-		else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER))
+		else if (surf->texinfo->flags & SURF_SHINY)
 		{
 			BSP_FlushVBOAccum ();
 			glUniform1iARB( g_location_liquid, 0 );
+			glUniform1iARB( g_location_shiny, 1 );
+ 
+			glUniform1iARB( g_location_chromeTex, 4); 
+			qglActiveTextureARB(GL_TEXTURE4);
+			qglBindTexture(GL_TEXTURE_2D, r_mirrorspec->texnum);
+			KillFlags |= KILL_TMU4_POINTER;
+		}
+		else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY))
+		{
+			BSP_FlushVBOAccum ();
+			glUniform1iARB( g_location_liquid, 0 );
+			glUniform1iARB( g_location_shiny, 0 );
 		}
 	}
 	

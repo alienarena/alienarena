@@ -559,7 +559,7 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 
 			// nothing else is needed
 			// increment pointer and counter
-			VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+			VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 			VertexCounter++;
 		}				
 	}

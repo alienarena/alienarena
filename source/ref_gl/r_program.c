@@ -95,9 +95,11 @@ GLuint		g_location_staticLightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
 GLuint		g_location_liquid;
+GLuint		g_location_shiny;
 GLuint		g_location_rsTime;
 GLuint		g_location_liquidTexture;
 GLuint		g_location_liquidNormTex;
+GLuint		g_location_chromeTex;
 
 //shadow on white bsp polys
 GLuint		g_location_entShadow;
@@ -314,7 +316,15 @@ static char bsp_vertex_program[] = STRINGIFY (
 	uniform int FOG;
 	uniform int PARALLAX;
 	uniform int DYNAMIC;
+	uniform int SHINY;
 
+	const float Eta = 0.66;
+    const float FresnelPower = 5.0;
+    const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
+
+    varying float FresRatio;
+	varying vec3 reflectDir;
+    varying vec3 refractDir;
 	varying vec3 EyeDir;
 	varying vec3 LightDir;
 	varying vec3 StaticLightDir;
@@ -326,6 +336,24 @@ static char bsp_vertex_program[] = STRINGIFY (
 		sPos = gl_Vertex;
 
 		gl_Position = ftransform();
+
+		if(SHINY > 0)
+		{
+			vec3 norm = vec3(0, 0, 1); 
+
+			vec4 neyeDir = gl_ModelViewMatrix * gl_Vertex;
+			vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+			refeyeDir = normalize(refeyeDir);
+
+			refeyeDir.x *= -1.0;
+			refeyeDir.y *= -1.0;
+			refeyeDir.z *= -1.0;
+
+			reflectDir = reflect(neyeDir,norm);
+			refractDir = refract(neyeDir,norm,Eta);
+			refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));
+			FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);
+		}
 
 		gl_FrontColor = gl_Color;
 
@@ -358,6 +386,7 @@ static char bsp_fragment_program[] = STRINGIFY (
 	uniform sampler2D lmTexture;
 	uniform sampler2D liquidTexture;
 	uniform sampler2D liquidNormTex;
+	uniform sampler2D chromeTex;
 	uniform sampler2DShadow ShadowMap;
 	uniform sampler2DShadow StatShadowMap;
 	uniform vec3 lightColour;
@@ -368,10 +397,14 @@ static char bsp_fragment_program[] = STRINGIFY (
 	uniform int STATSHADOW;
 	uniform int SHADOWMAP;
 	uniform int LIQUID;
+	uniform int SHINY;
 	uniform float rsTime;
 	uniform float xPixelOffset;
 	uniform float yPixelOffset;
 
+	varying float FresRatio;
+	varying vec3 reflectDir;
+    varying vec3 refractDir;
 	varying vec4 sPos;
 	varying vec3 EyeDir;
 	varying vec3 LightDir;
@@ -607,8 +640,22 @@ static char bsp_fragment_program[] = STRINGIFY (
 			gl_FragColor = dynamicColour;
 	   }
 
-		gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
-		if(FOG > 0)
+	   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
+
+	   if(SHINY > 0)
+	   {
+		   vec3 reflection = reflect(relativeEyeDirection, normal);
+		   vec3 refraction = refract(relativeEyeDirection, normal, 0.66);
+
+		   vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
+		   vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
+
+		   vec4 cubemap = mix(Tl,Tr,FresRatio);  
+
+		   gl_FragColor = max(gl_FragColor, (cubemap * 0.05 * alphamask.a));
+	   }
+
+	   if(FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
 );
@@ -1477,9 +1524,11 @@ void R_LoadGLSLPrograms(void)
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
 		g_location_liquid = glGetUniformLocationARB( g_programObj, "LIQUID" );
+		g_location_shiny = glGetUniformLocationARB( g_programObj, "SHINY" );
 		g_location_rsTime = glGetUniformLocationARB( g_programObj, "rsTime" );
 		g_location_liquidTexture = glGetUniformLocationARB( g_programObj, "liquidTexture" );
 		g_location_liquidNormTex = glGetUniformLocationARB( g_programObj, "liquidNormTex" );
+		g_location_chromeTex = glGetUniformLocationARB( g_programObj, "chromeTex" );
 
 		//shadowed white bsp surfaces
 
