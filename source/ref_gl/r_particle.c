@@ -437,20 +437,20 @@ void PART_RenderFlare (flare_t *light)
 	if(dist > 10*light->size)
 		dist = 10*light->size;
 
-	VectorMA (light->origin, -1-dist, vup, vert_array[0]);
-	VectorMA (vert_array[0], 1+dist, vright, vert_array[0]);
-
 	VectorMA (light->origin, -1-dist, vup, vert_array[1]);
 	VectorMA (vert_array[1], -1-dist, vright, vert_array[1]);
-
-    VectorMA (light->origin, 1+dist, vup, vert_array[2]);
-	VectorMA (vert_array[2], -1-dist, vright, vert_array[2]);
 
 	VectorMA (light->origin, 1+dist, vup, vert_array[3]);
 	VectorMA (vert_array[3], 1+dist, vright, vert_array[3]);
 	
 	if (R_CullBox (vert_array[1], vert_array[3]))
 		return;
+	
+	VectorMA (light->origin, -1-dist, vup, vert_array[0]);
+	VectorMA (vert_array[0], 1+dist, vright, vert_array[0]);
+	
+	VectorMA (light->origin, 1+dist, vup, vert_array[2]);
+	VectorMA (vert_array[2], -1-dist, vright, vert_array[2]);
 	
 	c_flares++;
 	
