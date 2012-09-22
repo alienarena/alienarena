@@ -649,9 +649,11 @@ extern GLuint		g_location_staticLightPosition;
 extern GLuint		g_location_lightColour;
 extern GLuint		g_location_lightCutoffSquared;
 extern GLuint		g_location_liquid;
+extern GLuint		g_location_shiny;
 extern GLuint		g_location_rsTime;
 extern GLuint		g_location_liquidTexture;
 extern GLuint		g_location_liquidNormTex;
+extern GLuint		g_location_chromeTex;
 
 //shadows on white bsp surface
 extern GLuint		g_location_entShadow;
