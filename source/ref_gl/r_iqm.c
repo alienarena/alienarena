@@ -794,11 +794,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		mod->st[i].t = LittleFloat(vtexcoord[1]);
 
 		vtexcoord+=2;
-
-		/*for(j = 0; j < 4; j++)
-			mod->blendweights[i*4+j] = vblendweights[j]blendweights;
-
-		vblendweights+=4;*/
 	}
 
 	/*
