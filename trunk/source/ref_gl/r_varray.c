@@ -354,56 +354,68 @@ void R_AddSurfToVArray (msurface_t *surf)
 }
 
 void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin)
-{
-	glpoly_t *p = surf->polys;
-	float	*v;
-	int i;
-	float dist, angle;
-	vec3_t vDist, tmp, cross;
-	qboolean renderPoly;
+ {
+     glpoly_t *p = surf->polys;
+     float    *v;
+     int i;
+ /*---- start change ----*/
+     // float angle;
+     float  sq_len;
+     vec3_t vDist;
+     vec3_t tmp;
+     // vec3_t cross;
+ /*---- end changed ----*/
+ 
+    qboolean renderPoly;
+ 
+    for (; p; p = p->chain)
+     {
+         // reset pointer and counter
+         VArray = &VArrayVerts[0];
+         VertexCounter = 0;
+ 
+        VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+         //to do - scale this by angle to light - this is producing poor results with this method thus far
+         /*CrossProduct(currententity->origin, statLightPosition, cross);
+         angle = atan2(VectorNormalize(cross), DotProduct(currententity->origin, statLightPosition));
+         VectorScale (tmp, angle, tmp);*/
 
-	for (; p; p = p->chain)
-	{
-		// reset pointer and counter
-		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
-
-		VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
-		//to do - scale this by angle to light - this is producing poor results with this method thus far
-		/*CrossProduct(currententity->origin, statLightPosition, cross);
-		angle = atan2(VectorNormalize(cross), DotProduct(currententity->origin, statLightPosition));
-		VectorScale (tmp, angle, tmp);*/
-
-		dist = VectorLength (tmp); 
-		if(dist < 64)
-			dist = 64;
-		if(dist > 256)
-			dist = 256;
-		
-		renderPoly = false;
-
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		{
-			VectorSubtract(origin, v, vDist);
-			if(abs(VectorLength(vDist)) < dist)
-				renderPoly = true;
-	
-			// copy in vertex data
-			VArray[0] = v[0];
-			VArray[1] = v[1];
-			VArray[2] = v[2];
-
-			// nothing else is needed
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_NO_TEXTURE];
-			VertexCounter++;
-		}
-
-		// draw the poly
-		if(renderPoly)
-			R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
-	}
-}
+         /* lengths used for comparison only, so squared lengths may be used.*/
+         sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
+         if ( sq_len <  4096.0f )
+             sq_len = 4096.0f; /* 64^2 */
+         else if ( sq_len > 65536.0f )
+             sq_len = 65536.0f; /* 256^2 */
+         renderPoly = false;
+         for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
+         {
+             if ( !renderPoly )
+             { /* once set, no need for calculation */
+                 float vsq_len;
+                 VectorSubtract( origin, v, vDist );
+                 vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
+                 if ( vsq_len < sq_len )
+                 {
+                     renderPoly = true;
+                 }
+             }
+ 
+            // copy in vertex data
+             VArray[0] = v[0];
+             VArray[1] = v[1];
+             VArray[2] = v[2];
+ 
+            // nothing else is needed
+             // increment pointer and counter
+             VArray += VertexSizes[VERT_NO_TEXTURE];
+             VertexCounter++;
+         }
+ 
+        // draw the poly
+         if(renderPoly)
+             R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+     }
+ }
 
 /*
 =================
