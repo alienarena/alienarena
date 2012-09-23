@@ -423,6 +423,7 @@ void PART_RenderFlare (flare_t *light)
 	vec3_t	v, tmp;
 	int j;
 	float	dist;
+	float	alpha;
 	unsigned	flaretex;
 
 	if(light->style == 0)
@@ -432,7 +433,15 @@ void PART_RenderFlare (flare_t *light)
 
 	VectorSubtract (light->origin, r_origin, v);
 	dist = VectorLength(v) * (light->size*0.01);
-
+	
+	// Flares which are very close are too small to see; fade them out as we 
+	// get closer.
+	alpha = light->alpha;
+	if (dist < 2.0*light->size)
+		alpha *= 0.5*(dist-(float)light->size)/(float)light->size;
+	if (alpha < 0.0)
+		return;
+	
 	//limit their size to reasonable.
 	if(dist > 10*light->size)
 		dist = 10*light->size;
@@ -456,7 +465,7 @@ void PART_RenderFlare (flare_t *light)
 	
 	GL_Bind(flaretex);
 	
-	VectorScale(light->color, light->alpha, tmp );
+	VectorScale(light->color, alpha, tmp );
 	for (j=0; j<4; j++)
 		VA_SetElem4(col_array[j], tmp[0],tmp[1],tmp[2], 1);
 
