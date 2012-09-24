@@ -1063,12 +1063,6 @@ void BSP_DrawGLSLSurfaces (void)
 	
 	BSP_ClearVBOAccum ();
 
-	glUseProgramObjectARB( g_programObj );
-	
-	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-	glUniform1iARB( g_location_fog, map_fog);
-	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-		
 	if(r_shadowmapcount == 2)
 	{
 		//static vegetation shadow
@@ -1121,8 +1115,6 @@ void BSP_DrawGLSLSurfaces (void)
 	
 	qglDisable (GL_ALPHA_TEST);
 
-	glUseProgramObjectARB( 0 );
-
 }
 
 void BSP_DrawGLSLDynamicSurfaces (void)
@@ -1151,12 +1143,6 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 			sv_lnum = lnum; //remember the position of most influencial light
 		}
 	}
-
-	glUseProgramObjectARB( g_programObj );
-	
-	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-	glUniform1iARB( g_location_fog, map_fog);
-	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
 	if(brightest > 0) 
 	{ 
@@ -1232,8 +1218,6 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 	qglDisable (GL_ALPHA_TEST);
 
-	glUseProgramObjectARB( 0 );
-	
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglDisable (GL_TEXTURE_2D);	
 }
@@ -1351,8 +1335,13 @@ void BSP_DrawInlineBModel ( void )
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
 	{
+		glUseProgramObjectARB( g_programObj );
+		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+		glUniform1iARB( g_location_fog, map_fog);
+		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		BSP_DrawGLSLSurfaces();
 		BSP_DrawGLSLDynamicSurfaces();
+		glUseProgramObjectARB(0);
 	}
 
 	qglDisable (GL_BLEND);
@@ -1852,8 +1841,13 @@ void R_DrawWorld (void)
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
 	{
+		glUseProgramObjectARB( g_programObj );
+		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+		glUniform1iARB( g_location_fog, map_fog);
+		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		BSP_DrawGLSLSurfaces(); 
 		BSP_DrawGLSLDynamicSurfaces();
+		glUseProgramObjectARB( 0 );
 	}
 	
 	GL_EnableMultitexture( false );
