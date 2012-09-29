@@ -241,12 +241,12 @@ image_t	*R_RegisterParticlePic (const char *name)
 	if (name[0] != '/' && name[0] != '\\')
 	{
 		Com_sprintf (fullname, sizeof(fullname), "particles/%s.tga", name);
-		gl = GL_FindImage (fullname, it_pic);
+		gl = GL_FindImage (fullname, it_particle);
 	}
 	else
 	{ // 2010-10 match above workaround (paranoid)
 		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_pic );
+		gl = GL_FindImage( fullname, it_particle );
 	}
 
 	return gl;

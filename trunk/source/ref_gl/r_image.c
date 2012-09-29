@@ -338,7 +338,7 @@ void GL_TextureMode( char *string )
 	// change all the existing mipmap texture objects
 	for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
 	{
-		if (glt->type != it_pic && glt->type != it_sky )
+		if (glt->type != it_pic && glt->type != it_particle && glt->type != it_sky )
 		{
 			GL_Bind (glt->texnum);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
@@ -433,6 +433,9 @@ void	GL_ImageList_f (void)
 		case it_pic:
 			Com_Printf ("P");
 			break;
+		case it_particle:
+			Com_Printf ("A");
+			break;
 		default:
 			Com_Printf (" ");
 			break;
@@ -457,11 +460,11 @@ void	GL_ImageList_f (void)
 */
 
 #define	MAX_SCRAPS		1
-#define	BLOCK_WIDTH		256
-#define	BLOCK_HEIGHT	256
+#define	BLOCK_WIDTH		1024
+#define	BLOCK_HEIGHT	512
 
 int			scrap_allocated[MAX_SCRAPS][BLOCK_WIDTH];
-byte		scrap_texels[MAX_SCRAPS][BLOCK_WIDTH*BLOCK_HEIGHT];
+byte		scrap_texels[MAX_SCRAPS][BLOCK_WIDTH*BLOCK_HEIGHT*4];
 qboolean	scrap_dirty;
 
 // returns a texture number and the position inside it
@@ -503,7 +506,7 @@ int Scrap_AllocBlock (int w, int h, int *x, int *y)
 	}
 
 	return -1;
-//	Sys_Error ("Scrap_AllocBlock: full");
+/*	Sys_Error ("Scrap_AllocBlock: full");*/
 }
 
 int	scrap_uploads;
@@ -512,7 +515,7 @@ void Scrap_Upload (void)
 {
 	scrap_uploads++;
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
+	GL_Upload32 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
 	scrap_dirty = false;
 }
 
@@ -1411,23 +1414,24 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 		R_FloodFillSkin(pic, width, height);
 
 	// load little pics into the scrap
-	if (image->type == it_pic && bits == 8
-		&& image->width < 64 && image->height < 64)
+	if (image->type == it_particle && bits != 8
+		&& image->width <= 128 && image->height <= 128)
 	{
 		int		x, y;
-		int		i, j, k;
+		int		i, j, k, k_s, l;
 		int		texnum;
 
 		texnum = Scrap_AllocBlock (image->width, image->height, &x, &y);
 		if (texnum == -1)
 			goto nonscrap;
 		scrap_dirty = true;
-
+		
 		// copy the texels into the scrap block
 		k = 0;
 		for (i=0 ; i<image->height ; i++)
-			for (j=0 ; j<image->width ; j++, k++)
-				scrap_texels[texnum][(y+i)*BLOCK_WIDTH + x + j] = pic[k];
+			for (j=0 ; j<image->width ; j++)
+			    for (l = 0; l < 4; l++, k++)
+				    scrap_texels[texnum][((y+i)*BLOCK_WIDTH + x + j)*4+l] = pic[k];
 		image->texnum = TEXNUM_SCRAPS + texnum;
 		image->scrap = true;
 		image->has_alpha = true;
@@ -1647,7 +1651,7 @@ void GL_FreeUnusedImages (void)
 			continue;		// used this sequence
 		if (!image->registration_sequence)
 			continue;		// free image_t slot
-		if (image->type == it_pic || image->type == it_sprite)
+		if (image->type == it_pic || image->type == it_sprite || image->type == it_particle)
 			continue;		// don't free pics or particles
 		// free it
 		qglDeleteTextures (1, (unsigned *)&image->texnum );

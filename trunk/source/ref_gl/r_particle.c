@@ -38,8 +38,8 @@ static int compare_particle (const void *_a, const void *_b)
 {
 	particle_t *a = *(particle_t **)_a;
 	particle_t *b = *(particle_t **)_b;
-	if (a->texnum != b->texnum)
-		return a->texnum-b->texnum;
+	if (a->image->texnum != b->image->texnum)
+		return a->image->texnum-b->image->texnum;
 	if (a->blendsrc != b->blendsrc)
 		return a->blendsrc-b->blendsrc;
 	if (a->blenddst != b->blenddst)
@@ -57,7 +57,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	int			    oldtexnum = -1, oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
 	float			*corner0 = corner[0];
-	int				va = 0;
+	int				va = 0, numbinds = 0;
 	vec3_t move, delta, v;
 
 	if ( !num_particles )
@@ -89,7 +89,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			VectorCopy (vright, right);
 		}
 		else {
-			texnum = p->texnum;
+			texnum = p->image->texnum;
 			blendsrc = p->blendsrc;
 			blenddst = p->blenddst;
 			scale = p->current_scale;
@@ -104,7 +104,10 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			oldblenddst != blenddst)
 		{	
 			if (oldtexnum != texnum)
+			{
+			    numbinds++;
 				qglBindTexture (GL_TEXTURE_2D, texnum);
+			}
 			
 			if (oldblendsrc != blendsrc || oldblenddst != blenddst)
 				qglBlendFunc ( blendsrc, blenddst );
@@ -235,20 +238,20 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 			 switch(k) {
 				case 0:
-					VArray[3] = 1;
-					VArray[4] = 1;
+					VArray[3] = p->image->sh;
+					VArray[4] = p->image->th;
 					break;
 				case 1:
-					VArray[3] = 0;
-					VArray[4] = 1;
+					VArray[3] = p->image->sl;
+					VArray[4] = p->image->th;
 					break;
 				case 2:
-					VArray[3] = 0;
-					VArray[4] = 0;
+					VArray[3] = p->image->sl;
+					VArray[4] = p->image->tl;
 					break;
 				case 3:
-					VArray[3] = 1;
-					VArray[4] = 0;
+					VArray[3] = p->image->sh;
+					VArray[4] = p->image->tl;
 					break;
 			 }
 			 
@@ -260,6 +263,8 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 		R_DrawVarrays(GL_QUADS, 0, 4, false);
 	}	
+	
+	Com_Printf (" %d\n", numbinds);
 	
 	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
