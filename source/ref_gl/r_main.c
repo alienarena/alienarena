@@ -1649,7 +1649,7 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		qboolean ati_nvidia = false;
 		double CPUTotalSpeed = 4000.0; //default to this
-		int OGLVer = atoi(&gl_config.version_string[0]);
+		double OGLVer = atof(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
 
 #if defined WIN32_VARIANT
@@ -1699,7 +1699,7 @@ cpuinfo_exit:
 		if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc.") || !strcmp(gl_config.vendor_string, "NVIDIA Corporation"))
 			ati_nvidia = true;
 
-		if(OGLVer < 2)
+		if(OGLVer < 2.1)
 		{
 			//weak GPU, set to maximum compatibility
 			R_SetCompatibility();

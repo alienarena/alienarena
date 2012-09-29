@@ -678,6 +678,7 @@ extern GLuint		g_location_meshlightPosition;
 extern GLuint		g_location_baseTex;
 extern GLuint		g_location_normTex;
 extern GLuint		g_location_fxTex;
+extern GLuint		g_location_fx2Tex;
 extern GLuint		g_location_color;
 extern GLuint		g_location_meshNormal;
 extern GLuint		g_location_meshTime;
@@ -685,6 +686,7 @@ extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
 extern GLuint		g_location_useShell;
+extern GLuint		g_location_useCube;
 extern GLuint		g_location_useGPUanim;
 extern GLuint		g_location_outframe;
 

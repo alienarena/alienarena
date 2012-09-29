@@ -1118,9 +1118,11 @@ void R_RenderAllRagdolls ( void )
 
 			//check for valid script
 			use_vbo = true;
-			if(RagDoll[RagDollID].script)
+			if(RagDoll[RagDollID].script && RagDoll[RagDollID].script->stage)
 			{
-				if(!strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture->name) || !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture2->name))
+				if(!strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture->name) || 
+					((RagDoll[RagDollID].script->stage->fx || RagDoll[RagDollID].script->stage->glow) && !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture2->name)) ||
+					(RagDoll[RagDollID].script->stage->cube && !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture3->name)))
 				{
 					RagDoll[RagDollID].script = NULL; //bad shader!
 					use_vbo = false; //cannot use vbo without a valid shader

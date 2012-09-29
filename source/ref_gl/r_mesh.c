@@ -1146,19 +1146,19 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
             glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
-            GL_SelectTexture( GL_TEXTURE1);
+            qglActiveTextureARB( GL_TEXTURE1);
             qglBindTexture (GL_TEXTURE_2D, r_shelltexture2->texnum);
             glUniform1iARB( g_location_baseTex, 1);
 
-            GL_SelectTexture( GL_TEXTURE0);
+            qglActiveTextureARB( GL_TEXTURE0);
             qglBindTexture (GL_TEXTURE_2D, r_shellnormal->texnum);
             glUniform1iARB( g_location_normTex, 0);
-
-            GL_SelectTexture( GL_TEXTURE0);
 
             glUniform1iARB( g_location_useFX, 0);
 
             glUniform1iARB( g_location_useGlow, 0);
+
+			glUniform1iARB( g_location_useCube, 0);
 
 			glUniform1iARB( g_location_useShell, 1);
 
@@ -1351,6 +1351,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 		stage=rs->stage;
 
+		//to do - we can safely now remove multipass mesh stages - all will be done in a single glsl pass only
 		while (stage)
 		{
 			qboolean normalmap;
@@ -1457,7 +1458,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				
 				if(gl_state.vbo && !lerped)
 				{
-					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
+					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER);
 				}
 				else 
 				{
@@ -1466,6 +1467,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 					glEnableVertexAttribArrayARB (1);
 					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
+
+					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
 				}
 
 				//send light level and color to shader, ramp up a bit
@@ -1522,19 +1525,23 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
-				GL_SelectTexture( GL_TEXTURE1);
+				qglActiveTextureARB( GL_TEXTURE1);
 				qglBindTexture (GL_TEXTURE_2D, skinnum);
 				glUniform1iARB( g_location_baseTex, 1);
 
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
 				glUniform1iARB( g_location_normTex, 0);
 
-				GL_SelectTexture( GL_TEXTURE2);
+				qglActiveTextureARB( GL_TEXTURE2);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
 				glUniform1iARB( g_location_fxTex, 2);
 
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB(GL_TEXTURE3);
+				qglBindTexture (GL_TEXTURE_2D, stage->texture3->texnum);
+				glUniform1iARB( g_location_fx2Tex, 3);
+
+				qglActiveTextureARB( GL_TEXTURE0);
 
 				if(stage->fx)
 					glUniform1iARB( g_location_useFX, 1);
@@ -1545,6 +1552,11 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					glUniform1iARB( g_location_useGlow, 1);
 				else
 					glUniform1iARB( g_location_useGlow, 0);
+
+				if(stage->cube)
+					glUniform1iARB( g_location_useCube, 1);
+				else
+					glUniform1iARB( g_location_useCube, 0);
 
 				glUniform1iARB( g_location_useShell, 0);
 

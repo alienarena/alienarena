@@ -2487,9 +2487,11 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	//check for valid script
 	use_vbo = true;
-	if(currententity->script)
+	if(currententity->script && currententity->script->stage)
 	{
-		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || !strcmp("***r_notexture***", currententity->script->stage->texture2->name))
+		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || 
+			((currententity->script->stage->fx || currententity->script->stage->glow) && !strcmp("***r_notexture***", currententity->script->stage->texture2->name)) ||
+			(currententity->script->stage->cube && !strcmp("***r_notexture***", currententity->script->stage->texture3->name)))
 		{
 			currententity->script = NULL; //bad shader!
 			use_vbo = false; //cannot use vbo without a valid shader

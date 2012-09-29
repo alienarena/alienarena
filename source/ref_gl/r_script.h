@@ -94,9 +94,11 @@ typedef struct rs_cond_val_s
 typedef struct rs_stage_s 
 {
 	image_t					*texture;				// texture
-	char					name[MAX_OSPATH];		// tex name
+	char					name[MAX_OSPATH];		// texture name
 	image_t					*texture2;				// texture for combining(GLSL)
 	char					name2[MAX_OSPATH];		// texture name
+	image_t					*texture3;				// texture for combining(GLSL)
+	char					name3[MAX_OSPATH];		// texture name
 
 	char					model[MAX_OSPATH];		// name of model
 	
@@ -149,6 +151,7 @@ typedef struct rs_stage_s
 	
 	qboolean				fx;				// for glsl effect layer
 	qboolean				glow;			// for glsl effect layer
+	qboolean				cube;			// for glsl effect layer
 
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;
