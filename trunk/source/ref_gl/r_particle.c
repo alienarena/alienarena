@@ -57,7 +57,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	int			    oldtexnum = -1, oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
 	float			*corner0 = corner[0];
-	int				va = 0, numbinds = 0;
+	int				va = 0;
 	vec3_t move, delta, v;
 
 	if ( !num_particles )
@@ -104,10 +104,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			oldblenddst != blenddst)
 		{	
 			if (oldtexnum != texnum)
-			{
-			    numbinds++;
 				qglBindTexture (GL_TEXTURE_2D, texnum);
-			}
 			
 			if (oldblendsrc != blendsrc || oldblenddst != blenddst)
 				qglBlendFunc ( blendsrc, blenddst );
@@ -263,8 +260,6 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 		R_DrawVarrays(GL_QUADS, 0, 4, false);
 	}	
-	
-	Com_Printf (" %d\n", numbinds);
 	
 	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
