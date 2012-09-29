@@ -1707,7 +1707,6 @@ void R_LoadGLSLPrograms(void)
 		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
 		g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
 		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
-		g_location_meshNormal = glGetUniformLocationARB( g_meshprogramObj, "meshNormal" );
 		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );

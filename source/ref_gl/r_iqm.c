@@ -1483,8 +1483,6 @@ void IQM_DrawFrame(int skinnum)
 
 		glUniform1iARB( g_location_gFog, map_fog);
 										
-		glUniform1iARB(g_location_useGPUanim, 1);
-
 		glUniformMatrix3x4fvARB( g_location_gOutframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
 		qglEnableClientState( GL_VERTEX_ARRAY );
