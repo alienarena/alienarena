@@ -215,6 +215,7 @@ void RS_ClearStage (rs_stage_t *stage)
 
 	stage->texture = NULL;
 	stage->texture2 = NULL;
+	stage->texture3 = NULL;
 
 	stage->depthhack = 0;
 	stage->envmap = false;
@@ -231,6 +232,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->rotating = false;
 	stage->fx = false;
 	stage->glow = false;
+	stage->cube = false;
 
 	stage->lightmap = true;
 
@@ -290,6 +292,7 @@ rs_stage_t *RS_NewStage (rscript_t *rs)
 
 	strncpy (stage->name, "***r_notexture***", sizeof(stage->name));
 	strncpy (stage->name2, "***r_notexture***", sizeof(stage->name2));
+	strncpy (stage->name3, "***r_notexture***", sizeof(stage->name3));
 
 	stage->rand_stage = NULL;
 	stage->anim_stage = NULL;
@@ -437,6 +440,10 @@ void RS_ReadyScript (rscript_t *rs)
 			stage->texture2 = GL_FindImage (stage->name2, mode);
 		if (!stage->texture2)
 			stage->texture2 = r_notexture;
+		if (stage->name3[0])
+			stage->texture3 = GL_FindImage (stage->name3, mode);
+		if (!stage->texture3)
+			stage->texture3 = r_notexture;
 
 		//check alpha
 		if (stage->blendfunc.blend)
@@ -500,7 +507,8 @@ scriptname
 	safe
 	{
 		map <texturename>
-		map2 <texturename>
+		map2 <texturename> - specific to "fx"
+		map3 <texturename> - specific to "cube"
 		scroll <xtype> <xspeed> <ytype> <yspeed>
 		blendfunc <source> <dest>
 		alphashift <speed> <min> <max>
@@ -520,6 +528,7 @@ scriptname
 		rotating
 		fx
 		glow
+		cube
 	}
 }
 */
@@ -536,6 +545,13 @@ void rs_stage_map2 (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 
 	strncpy (stage->name2, *token, sizeof(stage->name2));
+}
+
+void rs_stage_map3 (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+
+	strncpy (stage->name3, *token, sizeof(stage->name3));
 }
 
 void rs_stage_model (rs_stage_t *stage, char **token)
@@ -831,6 +847,10 @@ void rs_stage_glow (rs_stage_t *stage, char **token)
 {
 	stage->glow = true;
 }
+void rs_stage_cube (rs_stage_t *stage, char **token)
+{
+	stage->cube = true;
+}
 
 typedef struct 
 {
@@ -955,6 +975,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"colormap",		&rs_stage_colormap		},
 	{	"map",			&rs_stage_map			},
 	{	"map2",			&rs_stage_map2			},
+	{	"map3",			&rs_stage_map3			},
 	{	"model",		&rs_stage_model			},
 	{	"scroll",		&rs_stage_scroll		},
 	{	"frames",		&rs_stage_frames		},
@@ -984,6 +1005,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"rotating",		&rs_stage_rotating		},
 	{	"fx",			&rs_stage_fx			},
 	{	"glow",			&rs_stage_glow			},
+	{	"cube",			&rs_stage_cube			},
 	{	"if",			&rs_stage_if			},
 
 	{	NULL,			NULL					}

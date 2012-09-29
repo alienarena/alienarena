@@ -124,6 +124,7 @@ GLuint		g_location_meshlightPosition;
 GLuint		g_location_baseTex;
 GLuint		g_location_normTex;
 GLuint		g_location_fxTex;
+GLuint		g_location_fx2Tex;
 GLuint		g_location_color;
 GLuint		g_location_meshNormal;
 GLuint		g_location_meshTime;
@@ -131,6 +132,7 @@ GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
 GLuint		g_location_useShell;
+GLuint		g_location_useCube;
 GLuint		g_location_useGPUanim;
 GLuint		g_location_outframe;
 
@@ -306,7 +308,7 @@ void R_LoadARBPrograms(void)
 //GLSL Programs
 
 //BSP Surfaces
-static char bsp_vertex_program[] = STRINGIFY (
+static char bsp_vertex_program[] = "#version 120\n" STRINGIFY (
 	uniform mat3 tangentSpaceTransform;
 	uniform vec3 Eye;
 	uniform vec3 lightPosition;
@@ -323,8 +325,6 @@ static char bsp_vertex_program[] = STRINGIFY (
     const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
 
     varying float FresRatio;
-	varying vec3 reflectDir;
-    varying vec3 refractDir;
 	varying vec3 EyeDir;
 	varying vec3 LightDir;
 	varying vec3 StaticLightDir;
@@ -345,19 +345,13 @@ static char bsp_vertex_program[] = STRINGIFY (
 			vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
 			refeyeDir = normalize(refeyeDir);
 
-			refeyeDir.x *= -1.0;
-			refeyeDir.y *= -1.0;
-			refeyeDir.z *= -1.0;
-
-			reflectDir = reflect(neyeDir,norm);
-			refractDir = refract(neyeDir,norm,Eta);
-			refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));
-			FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);
+			FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir,norm)),FresnelPower);
 		}
 
 		gl_FrontColor = gl_Color;
 
 		EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
+
 		if (DYNAMIC > 0)
 		{
 			LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);
@@ -379,7 +373,7 @@ static char bsp_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char bsp_fragment_program[] = STRINGIFY (
+static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2D surfTexture;
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
@@ -403,8 +397,6 @@ static char bsp_fragment_program[] = STRINGIFY (
 	uniform float yPixelOffset;
 
 	varying float FresRatio;
-	varying vec3 reflectDir;
-    varying vec3 refractDir;
 	varying vec4 sPos;
 	varying vec3 EyeDir;
 	varying vec3 LightDir;
@@ -660,7 +652,7 @@ static char bsp_fragment_program[] = STRINGIFY (
 	}
 );
 
-static char shadow_vertex_program[] = STRINGIFY (		
+static char shadow_vertex_program[] = "#version 120\n" STRINGIFY (		
 	varying vec4 ShadowCoord;
 
 	void main( void )
@@ -672,7 +664,7 @@ static char shadow_vertex_program[] = STRINGIFY (
 );
 
 //SHADOWS
-static char shadow_fragment_program[] = STRINGIFY (
+static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2DShadow StatShadowMap;
 	uniform float fadeShadow;
 	uniform float xPixelOffset;
@@ -716,28 +708,34 @@ static char shadow_fragment_program[] = STRINGIFY (
 );
 
 //MESHES
-static char mesh_vertex_program[] = STRINGIFY (
+static char mesh_vertex_program[] = "#version 120\n" STRINGIFY (
+
 	uniform vec3 lightPos;
 	uniform float time;
 	uniform int FOG;
 	uniform mat3x4 bonemats[70];
 	uniform int GPUANIM;
 	uniform int useShell;
+	uniform int useCube;
 
 	attribute vec4 tangent;
 	attribute vec4 weights;
 	attribute vec4 bones;
+	
+	const float Eta = 0.66;
+	const float FresnelPower = 5.0;
+	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
 
 	varying vec3 LightDir;
 	varying vec3 EyeDir;
 	varying float fog;
-
+	varying float FresRatio;
 	varying vec3 vertPos, lightVec;
 	varying vec3 worldNormal;
 
 	void subScatterVS(in vec4 ecVert)
 	{
-		if(useShell == 0)
+		if(useShell == 0 && useCube == 0)
 		{
 			lightVec = lightPos - ecVert.xyz;
 			vertPos = ecVert.xyz;
@@ -749,6 +747,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 		vec3 n;
 		vec3 t;
 		vec3 b;
+		vec4 neyeDir;
 
 		if(GPUANIM > 0)
 		{
@@ -768,6 +767,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 			b = normalize(gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t); 
 
 			EyeDir = vec3(gl_ModelViewMatrix * mpos);
+			neyeDir = gl_ModelViewMatrix * mpos;
 		}
 		else
 		{	
@@ -782,6 +782,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 			b = tangent.w * cross(n, t);
 
 			EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
+			neyeDir = gl_ModelViewMatrix * gl_Vertex;;
 		}
 
 		worldNormal = n;
@@ -804,8 +805,16 @@ static char mesh_vertex_program[] = STRINGIFY (
 		texco.t = texco.t + time*2.0;
 		gl_TexCoord[1] = texco;
 
-		if(useShell)
+		if(useShell > 0)
 			gl_TexCoord[0] = texco;
+
+		if(useCube > 0)
+		{
+			vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+			refeyeDir = normalize(refeyeDir);
+
+			FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir, n)), FresnelPower);
+		}
 
 		//fog
 	   if(FOG > 0) 
@@ -816,28 +825,30 @@ static char mesh_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char mesh_fragment_program[] = STRINGIFY (
+static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
+
 	uniform sampler2D baseTex;
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
+	uniform sampler2D fx2Tex;
 	uniform vec3 baseColor;
 	uniform int GPUANIM;
 	uniform int FOG;
 	uniform int useFX;
+	uniform int useCube;
 	uniform int useGlow;
 	uniform int useShell;
 	uniform vec3 lightPos;
 	const float SpecularFactor = 0.5;
-
-	varying vec3 LightDir;
-	varying vec3 EyeDir;
-	varying float fog;
-
 	//next group could be made uniforms if we want to control this 
 	const float MaterialThickness = 2.0; //this val seems good for now
 	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
 	const float RimScalar = 10.0; //intensity of the rim effect
 
+	varying vec3 LightDir;
+	varying vec3 EyeDir;
+	varying float fog;
+	varying float FresRatio;
 	varying vec3 vertPos, lightVec, worldNormal; 
 
 	float halfLambert(in vec3 vect1, in vec3 vect2)
@@ -865,7 +876,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
-		if(useShell == 0)
+		if(useShell == 0 && useCube == 0)
 		{
 			vec4 SpecColor = vec4(baseColor, 1.0)/2.0;
 
@@ -893,7 +904,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 			scatterCol.rgb *= baseColor;
 			scatterCol.rgb /= (specmask.a*specmask.a);//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
 		}
-
+		
 		//moving fx texture
 		if(useFX > 0)
 			fx = texture2D( fxTex, gl_TexCoord[1].xy );
@@ -923,6 +934,24 @@ static char mesh_fragment_program[] = STRINGIFY (
 	//	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect alone
 		gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);
 
+		if(useCube > 0)
+		{			
+			vec3 relEyeDir = normalize(EyeDir);
+					
+			vec3 reflection = reflect(relEyeDir, normal);
+            vec3 refraction = refract(relEyeDir, normal, 0.66);
+
+            vec4 Tl = texture2DProj(fx2Tex, vec4(reflection.xy, 1.0, 1.0) );
+            vec4 Tr = texture2DProj(fx2Tex, vec4(refraction.xy, 1.0, 1.0) );
+
+            vec4 cubemap = mix(Tl,Tr,FresRatio);
+
+			//cubemap.a = specmask.a; 
+
+			gl_FragColor = mix(gl_FragColor, cubemap, 0.5);
+
+		}
+
 		if(useGlow > 0)
 			gl_FragColor = mix(gl_FragColor, glow, glow.a);
 
@@ -932,7 +961,8 @@ static char mesh_fragment_program[] = STRINGIFY (
 );
 
 //GLASS 
-static char glass_vertex_program[] = STRINGIFY (
+static char glass_vertex_program[] = "#version 120\n" STRINGIFY (
+
 	uniform mat3x4 bonemats[70];
 	uniform int FOG;
 
@@ -969,7 +999,8 @@ static char glass_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char glass_fragment_program[] = STRINGIFY (
+static char glass_fragment_program[] = "#version 120\n" STRINGIFY (
+
 	uniform vec3 LightPos;
 	uniform sampler2D refTexture;
 	uniform sampler2D mirTexture;
@@ -985,8 +1016,8 @@ static char glass_fragment_program[] = STRINGIFY (
 		vec3 eye_dir = normalize( -vert.xyz );  	
 		vec3 ref = normalize( -reflect( light_dir, normal ) );  
 	
-		vec4 ld = max( dot(normal, light_dir), 0.0 ); 	
-		vec4 ls = 0.75 * pow( max( dot(ref, eye_dir), 0.0 ), 0.70 ); //0.75 specular, .7 shininess
+		float ld = max( dot(normal, light_dir), 0.0 ); 	
+		float ls = 0.75 * pow( max( dot(ref, eye_dir), 0.0 ), 0.70 ); //0.75 specular, .7 shininess
 
 		float m = -1.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) ); 	
 		vec2 coord = -vec2(r.x/m + 0.5, r.y/m + 0.5); 	
@@ -994,7 +1025,8 @@ static char glass_fragment_program[] = STRINGIFY (
 		vec4 t0 = texture2D(refTexture, coord.st);
 		vec4 t1 = texture2D(mirTexture, coord.st);
 
-		gl_FragColor = 0.3 * t0 + 0.3 * t1 * (ld + ls);
+		//gl_FragColor = 0.3 * t0 + 0.3 * t1 * (ld + ls);
+		gl_FragColor = 0.3 * t0 + 0.3 * t1 * vec4(ld + ls);
 
 		if(FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
@@ -1002,7 +1034,7 @@ static char glass_fragment_program[] = STRINGIFY (
 );
 
 //NO TEXTURE 
-static char blankmesh_vertex_program[] = STRINGIFY (
+static char blankmesh_vertex_program[] = "#version 120\n" STRINGIFY (
 	uniform mat3x4 bonemats[70];
 
 	attribute vec4 weights;
@@ -1019,7 +1051,7 @@ static char blankmesh_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char blankmesh_fragment_program[] = STRINGIFY (
+static char blankmesh_fragment_program[] = "#version 120\n" STRINGIFY (
 	void main (void)
 	{		
 		gl_FragColor = vec4(1.0);
@@ -1027,7 +1059,7 @@ static char blankmesh_fragment_program[] = STRINGIFY (
 );
 
 
-static char water_vertex_program[] = STRINGIFY (
+static char water_vertex_program[] = "#version 120\n" STRINGIFY (
 	uniform mat3 tangentSpaceTransform;
 	uniform vec3 Eye; 
 	uniform vec3 LightPos;
@@ -1042,8 +1074,6 @@ static char water_vertex_program[] = STRINGIFY (
 	varying float FresRatio;
 	varying vec3 lightDir;
 	varying vec3 eyeDir;
-	varying vec3 reflectDir;
-	varying vec3 refractDir;
 	varying float fog;
 
 	void main(void)
@@ -1058,14 +1088,7 @@ static char water_vertex_program[] = STRINGIFY (
         vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
         refeyeDir = normalize(refeyeDir);
 
-        refeyeDir.x *= -1.0;
-        refeyeDir.y *= -1.0;
-        refeyeDir.z *= -1.0;
-
-        reflectDir = reflect(neyeDir,norm);
-        refractDir = refract(neyeDir,norm,Eta);
-        refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));
-        FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);
+        FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir,norm)),FresnelPower);
 
 		eyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
 
@@ -1098,7 +1121,7 @@ static char water_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char water_fragment_program[] = STRINGIFY (
+static char water_fragment_program[] = "#version 120\n" STRINGIFY (
 	varying vec3 lightDir;
 	varying vec3 eyeDir;
 	varying float FresRatio;
@@ -1151,7 +1174,7 @@ static char water_fragment_program[] = STRINGIFY (
 );
 
 //FRAMEBUFFER DISTORTION EFFECTS
-static char fb_vertex_program[] = STRINGIFY (
+static char fb_vertex_program[] = "#version 120\n" STRINGIFY (
 	void main( void )
 	{
 	    gl_Position = ftransform();
@@ -1160,7 +1183,7 @@ static char fb_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char fb_fragment_program[] = STRINGIFY (
+static char fb_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2D fbtexture;
 	uniform sampler2D distortiontexture;
 	uniform vec2 dParams;
@@ -1201,7 +1224,7 @@ static char fb_fragment_program[] = STRINGIFY (
 );
 
 //GAUSSIAN BLUR EFFECTS
-static char blur_vertex_program[] = STRINGIFY (
+static char blur_vertex_program[] = "#version 120\n" STRINGIFY (
 	void main()
 	{
 		gl_Position = ftransform();
@@ -1209,7 +1232,7 @@ static char blur_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char blur_fragment_program[] = STRINGIFY (
+static char blur_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform vec2 ScaleU;
 	uniform sampler2D textureSource;
 
@@ -1233,7 +1256,7 @@ static char blur_fragment_program[] = STRINGIFY (
 );
 
 //RADIAL BLUR EFFECTS // xy = radial center screen space position, z = radius attenuation, w = blur strength
-static char rblur_vertex_program[] = STRINGIFY (
+static char rblur_vertex_program[] = "#version 120\n" STRINGIFY (
 	void main()
 	{
 		gl_Position = ftransform();
@@ -1241,7 +1264,7 @@ static char rblur_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char rblur_fragment_program[] = STRINGIFY (
+static char rblur_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2D rtextureSource;
 	uniform vec3 radialBlurParams;
 	uniform vec3 rblurScale;
@@ -1293,7 +1316,7 @@ static char rblur_fragment_program[] = STRINGIFY (
 );
 
 //WATER DROPLETS
-static char droplets_vertex_program[] = STRINGIFY (
+static char droplets_vertex_program[] = "#version 120\n" STRINGIFY (
 	uniform float drTime;
 
 	void main( void )
@@ -1313,7 +1336,7 @@ static char droplets_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char droplets_fragment_program[] = STRINGIFY (
+static char droplets_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2D drSource;
 	uniform sampler2D drTex;
 	uniform vec2 drParams;
@@ -1354,7 +1377,7 @@ static char droplets_fragment_program[] = STRINGIFY (
 	}
 );
 
-static char rgodrays_vertex_program[] = STRINGIFY (
+static char rgodrays_vertex_program[] = "#version 120\n" STRINGIFY (
 	void main()
 	{
 		gl_TexCoord[0] =  gl_MultiTexCoord0;
@@ -1362,7 +1385,7 @@ static char rgodrays_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char rgodrays_fragment_program[] = STRINGIFY (
+static char rgodrays_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform vec2 lightPositionOnScreen;
 	uniform sampler2D sunTexture;
 
@@ -1471,7 +1494,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_programObj, g_vertexShader );
 		else
 		{
-			Com_Printf("...Vertex Shader Compile Error\n");
+			Com_Printf("...BSP Vertex Shader Compile Error\n");
 		}
 
 		//
@@ -1488,7 +1511,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_programObj, g_fragmentShader );
 		else
 		{
-			Com_Printf("...Fragment Shader Compile Error\n");
+			Com_Printf("...BSP Fragment Shader Compile Error\n");
 		}
 
 		glLinkProgramARB( g_programObj );
@@ -1706,12 +1729,14 @@ void R_LoadGLSLPrograms(void)
 		g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
 		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
 		g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
+		g_location_fx2Tex = glGetUniformLocationARB( g_meshprogramObj, "fx2Tex" );
 		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
 		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
-		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
-		g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell");
+		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow" );
+		g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell" );
+		g_location_useCube = glGetUniformLocationARB( g_meshprogramObj, "useCube" );
 		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
 
