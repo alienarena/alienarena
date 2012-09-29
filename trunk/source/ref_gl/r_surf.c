@@ -1241,7 +1241,10 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	int map;
 	qboolean is_dynamic = false;
 
-	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->integer)
+	// XXX: we could require gl_bspnormalmaps here, but that would result in
+	// weird inconsistency with only meshes lighting up. Better to fall back
+	// on GLSL for dynamically lit surfaces, even with gl_bspnormalmaps 0.
+	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->integer && gl_dynamic->integer)
 	{
 		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 		{
@@ -1253,11 +1256,8 @@ void BSP_AddToTextureChain(msurface_t *surf)
 		if ( ( surf->dlightframe == r_framecount ) )
 		{
 	dynamic:
-			if ( gl_dynamic->integer )
-			{
-				if ( !SurfaceHasNoLightmap(surf) )
-					is_dynamic = true;
-			}
+			if ( !SurfaceHasNoLightmap(surf) )
+				is_dynamic = true;
 		}
 	}
 
