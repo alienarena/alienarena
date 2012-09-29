@@ -269,7 +269,7 @@ typedef struct particle_s
 	float		alpha;
 	float		alphavel;
 	int			type;		// 0 standard, 1 smoke, etc etc...
-	int			texnum;
+	struct image_s *image;
 	int			blenddst;
 	int			blendsrc;
 	float		scale;
