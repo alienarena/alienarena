@@ -38,6 +38,12 @@ static int compare_particle (const void *_a, const void *_b)
 {
 	particle_t *a = *(particle_t **)_a;
 	particle_t *b = *(particle_t **)_b;
+	if (a->image != NULL && b->image == NULL)
+		return 1;
+	if (a->image == NULL && b->image != NULL)
+		return -1;
+	if (a->image == NULL && b->image == NULL)
+		return 0;
 	if (a->image->texnum != b->image->texnum)
 		return a->image->texnum-b->image->texnum;
 	if (a->blendsrc != b->blendsrc)
@@ -59,6 +65,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	float			*corner0 = corner[0];
 	int				va = 0;
 	vec3_t move, delta, v;
+	float			sh, th, sl, tl;
 
 	if ( !num_particles )
 		return;
@@ -89,7 +96,10 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			VectorCopy (vright, right);
 		}
 		else {
-			texnum = p->image->texnum;
+			if (p->image != NULL)
+				texnum = p->image->texnum;
+			else
+				texnum = 0;
 			blendsrc = p->blendsrc;
 			blenddst = p->blenddst;
 			scale = p->current_scale;
@@ -226,31 +236,44 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 		}
 
 		VArray = &VArrayVerts[0];
+		
+		if (p->image != NULL)
+		{
+			sh = p->image->sh;
+			th = p->image->th;
+			sl = p->image->sl;
+			tl = p->image->tl;
+		}
+		else
+		{
+			sh = th = 1;
+			sl = tl = 0;
+		}
 
 		for(k = 0; k < 4; k++) 
 		{
-			 VArray[0] = corner[k][0];
-             VArray[1] = corner[k][1];
-             VArray[2] = corner[k][2];
+			VArray[0] = corner[k][0];
+			VArray[1] = corner[k][1];
+			VArray[2] = corner[k][2];
 
-			 switch(k) {
-				case 0:
-					VArray[3] = p->image->sh;
-					VArray[4] = p->image->th;
-					break;
-				case 1:
-					VArray[3] = p->image->sl;
-					VArray[4] = p->image->th;
-					break;
-				case 2:
-					VArray[3] = p->image->sl;
-					VArray[4] = p->image->tl;
-					break;
-				case 3:
-					VArray[3] = p->image->sh;
-					VArray[4] = p->image->tl;
-					break;
-			 }
+			switch(k) {
+			case 0:
+				VArray[3] = sh;
+				VArray[4] = th;
+				break;
+			case 1:
+				VArray[3] = sl;
+				VArray[4] = th;
+				break;
+			case 2:
+				VArray[3] = sl;
+				VArray[4] = tl;
+				break;
+			case 3:
+				VArray[3] = sh;
+				VArray[4] = tl;
+				break;
+			}
 			 
 			 for (j = 0; j < 4; j++)
 			 	VArray[5+j] = (float)color[j]/255.0f;
