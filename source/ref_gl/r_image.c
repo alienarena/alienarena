@@ -513,9 +513,8 @@ int	scrap_uploads;
 
 void Scrap_Upload (void)
 {
-	scrap_uploads++;
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload32 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
+	GL_Upload32 ((unsigned *)scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
 	scrap_dirty = false;
 }
 
@@ -1437,8 +1436,8 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 		image->has_alpha = true;
 		image->sl = (x+0.01)/(float)BLOCK_WIDTH;
 		image->sh = (x+image->width-0.01)/(float)BLOCK_WIDTH;
-		image->tl = (y+0.01)/(float)BLOCK_WIDTH;
-		image->th = (y+image->height-0.01)/(float)BLOCK_WIDTH;
+		image->tl = (y+0.01)/(float)BLOCK_HEIGHT;
+		image->th = (y+image->height-0.01)/(float)BLOCK_HEIGHT;
 	}
 	else
 	{
