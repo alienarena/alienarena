@@ -771,8 +771,8 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 		}
 
 		if (r_currTexInfo && 
-			(surf->texinfo->flags & (SURF_BLOOD|SURF_WATER)) == 
-			(r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER)))
+			(surf->texinfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)) == 
+			(r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)))
 		{
 			//no change to GL state is needed
 		}
