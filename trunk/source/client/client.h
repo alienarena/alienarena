@@ -527,8 +527,6 @@ void CL_SendMove (usercmd_t *cmd);
 
 void CL_ClearState (void);
 
-void CL_ReadPackets (void);
-
 int  CL_ReadFromServer (void);
 void CL_WriteToServer (usercmd_t *cmd);
 void CL_BaseMove (usercmd_t *cmd);

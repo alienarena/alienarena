@@ -50,6 +50,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 static int	m_main_cursor;
 
+extern int CL_GetPingStartTime(netadr_t adr);
+
 extern void RS_LoadScript(char *script);
 extern void RS_LoadSpecialScripts(void);
 extern void RS_ScanPathForScripts(void);
@@ -3317,7 +3319,6 @@ static char local_server_info[256][256];
 static char local_server_data[6][64];
 static char local_mods_data[16][53]; //53 is measured max tooltip width
 static int	local_server_rankings[64];
-int starttime;
 
 //Lists for all stock mutators and game modes, plus some of the more popular
 //custom ones. (NOTE: For non-boolean cvars, i.e. those which have values
@@ -3452,11 +3453,17 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	int result;
 	char playername[PLAYERNAME_SIZE];
 	char szServerinfoF[25];
-	int score, ping, rankTotal, i, x;
+	int score, ping, rankTotal, i, x, starttime;
 	PLAYERSTATS	player;
 
 	destserver->local_server_netadr = adr;
-	destserver->ping = Sys_Milliseconds() - starttime;
+        // starttime now sourced per server.
+        starttime = CL_GetPingStartTime(adr);
+        if (starttime != 0)
+                destserver->ping = Sys_Milliseconds() - starttime;
+        else
+                // Local LAN?
+                destserver->ping = 1;
 	if ( destserver->ping < 1 )
 		destserver->ping = 1; /* for LAN and address book entries */
 
