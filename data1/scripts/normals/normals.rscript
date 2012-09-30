@@ -124,41 +124,6 @@ players/enforcer/stryker
 		glow
 	}	
 }
-players/cybergirl/blue
-{
-	{
-		map players/cybergirl/default_normal.tga
-		normalmap
-	}	
-}
-players/cybergirl/red
-{
-	{
-		map players/cybergirl/default_normal.tga
-		normalmap
-	}	
-}
-players/cybergirl/default
-{
-	{
-		map players/cybergirl/default_normal.tga
-		normalmap
-	}	
-}
-players/cybergirl/green
-{
-	{
-		map players/cybergirl/default_normal.tga
-		normalmap
-	}	
-}
-players/cybergirl/grey
-{
-	{
-		map players/cybergirl/default_normal.tga
-		normalmap
-	}	
-}
 players/martiancyborg/blue
 {
 	{
@@ -305,6 +270,8 @@ models/items/ammo/rockets/medium/skin
 		normalmap
 		map2 gfx/redlightning.tga
 		fx
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/ammo/cells/medium/cell
@@ -315,6 +282,8 @@ models/items/ammo/cells/medium/cell
 		normalmap
 		map2 gfx/greenlightning.tga
 		fx
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/ammo/shells/medium/skin
@@ -325,6 +294,8 @@ models/items/ammo/shells/medium/skin
 		normalmap
 		map2 gfx/bluelightning.tga
 		fx
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/ammo/bullets/medium/skin
@@ -335,6 +306,8 @@ models/items/ammo/bullets/medium/skin
 		normalmap
 		map2 gfx/greenlightning.tga
 		fx
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/ammo/grenades/medium/skin
@@ -345,6 +318,8 @@ models/items/ammo/grenades/medium/skin
 		normalmap
 		map2 gfx/redlightning.tga
 		fx
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/armor/combat/skin
