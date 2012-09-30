@@ -197,14 +197,14 @@ typedef struct _SERVERINFO {
 	char szMapName[256];
 	int curClients;
 	int maxClients;
+	int starttime;
 	int	ping;
 	PLAYERINFO players[64];
 	int temporary;
 } SERVERINFO;
 
 SERVERINFO servers[64];
-int numServers = 0;
-extern int starttime;
+static int numServers = 0;
 
 static size_t szr; // just for unused result warnings
 
@@ -884,8 +884,8 @@ GetServerList
 Get a list of servers from the master
 ===================
 */
-void GetServerList (void) {
-
+static void GetServerList (void)
+{
 	char *requeststring;
 	netadr_t adr;
 
@@ -908,6 +908,21 @@ void GetServerList (void) {
 	{
 		Com_Printf( "Bad address: %s\n", cl_master->string);
 	}
+
+	// Query secondary server
+	Com_Printf( "querying %s...\n", cl_master2->string );
+	if ( NET_StringToAdr( cl_master2->string, &adr ) ) {
+		if ( !adr.port )
+			adr.port = BigShort( PORT_MASTER );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master2->string);
+	}
+
+	// Reset server list for incoming responses.
+	numServers = 0;
 }
 /*
 =================
@@ -916,7 +931,7 @@ CL_ParseGetServersResponse
 Handle a reply from getservers message to master server
 =================
 */
-void CL_ParseGetServersResponse()
+static void CL_ParseGetServersResponse()
 {
 	cvar_t		*noudp;
 	cvar_t		*noipx;
@@ -924,6 +939,9 @@ void CL_ParseGetServersResponse()
 	char		adrString[32];
 	byte		addr[4];
 	byte		port[2];
+	int			idx;
+	unsigned short	uport;
+	qboolean	dupe;
 
 	MSG_BeginReading (&net_message);
 	MSG_ReadLong (&net_message);	// skip the -1
@@ -938,22 +956,38 @@ void CL_ParseGetServersResponse()
 	{
 		adr.type = NA_BROADCAST_IPX;
 	}
-	numServers = 0;
 
 	if ( net_message.readcount + 8 < net_message.cursize )
 		net_message.readcount += 8;
 
 	while( net_message.readcount +6 <= net_message.cursize )
 	{
+		if (numServers == 64)
+			break;		// No room left.
+
 		MSG_ReadData( &net_message, addr, 4 );
 		Com_sprintf( adrString, sizeof( adrString ), "%u.%u.%u.%u",
 				addr[0], addr[1], addr[2], addr[3]);
-		memcpy( &servers[numServers].ip, adrString, sizeof(servers[numServers].ip) );
-
 		MSG_ReadData( &net_message, port, 2 ); /* network byte order (bigendian) */
 		/* convert to unsigned short in host byte order */
-		servers[numServers].port =
-				(((unsigned short)port[0]) * 256 ) + (unsigned short)port[1] ;
+		uport = (unsigned short) ((port[0] << 8) + port[1]);
+
+		dupe = false;
+		// Check that we don't have a duplicate entry.
+		for (idx = 0; idx < numServers; idx++) {
+			if (	!strcmp(servers[idx].ip, adrString) &&
+					servers[idx].port == uport) {
+				Com_Printf("Already have: %s:%u\n", adrString,
+						uport);
+				dupe = true;
+				break;
+			}
+		}
+		if (dupe)
+			continue;
+
+		memcpy( &servers[numServers].ip, adrString, sizeof(servers[numServers].ip) );
+		servers[numServers].port = uport;
 
 		if (!NET_StringToAdr (servers[numServers].ip, &adr))
 		{
@@ -970,13 +1004,35 @@ void CL_ParseGetServersResponse()
 			adr.port = BigShort(PORT_SERVER);
 		}
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
+		servers[numServers].starttime = Sys_Milliseconds();
 
-		if (++numServers == 64)
-			break;
+		++numServers;
 	}
-	//set the start time for pings
-	starttime = Sys_Milliseconds();
+}
 
+/*
+=================
+CL_GetPingStartTime
+
+Return ping starttime for server given its address.  Returns 0 if not found.
+=================
+*/
+int CL_GetPingStartTime(netadr_t adr)
+{
+	int		idx;
+	char		adrString[32];
+	unsigned short	port;
+
+	Com_sprintf(adrString, sizeof(adrString), "%u.%u.%u.%u",
+			adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3]);
+	port = (unsigned short) BigShort(adr.port);
+	for (idx = 0; idx < numServers; idx++) {
+		if (! strcmp(adrString, servers[idx].ip) &&
+				port == servers[idx].port) {
+			return servers[idx].starttime;
+		}
+	}
+	return 0;
 }
 
 /*
@@ -996,7 +1052,7 @@ void CL_PingServers_f (void)
 
 	NET_Config (true);		// allow remote
 
-	GetServerList();//get list from COR master server
+	GetServerList();        //get list from COR master server
 
 	// send a broadcast packet
 	Com_Printf ("pinging broadcast...\n");
@@ -1038,11 +1094,6 @@ void CL_PingServers_f (void)
 
 	}
 
-	/* for local lan and address book entries. not be accurate but it 
-	 * prevents pings calculated from uninitialized or previous starttime
-	 */
-	starttime = Sys_Milliseconds() + 1000;
-
 	// -JD restart the menu music that was stopped during this procedure
 	S_StartMenuMusic();
 }
@@ -1078,7 +1129,7 @@ CL_ConnectionlessPacket
 Responses to broadcasts, etc
 =================
 */
-void CL_ConnectionlessPacket (void)
+static void CL_ConnectionlessPacket (void)
 {
 	char	*s;
 	char	*c;
@@ -1106,6 +1157,7 @@ void CL_ConnectionlessPacket (void)
 		switch(currLoginState.requestType)
 		{
 			case STATSLOGIN:
+
 				STATS_AuthenticateStats(s);
 				break;
 			case STATSPWCHANGE:
@@ -1246,7 +1298,7 @@ void CL_DumpPackets (void)
 CL_ReadPackets
 =================
 */
-void CL_ReadPackets (void)
+static void CL_ReadPackets (void)
 {
 	while (NET_GetPacket (NS_CLIENT, &net_from, &net_message))
 	{
