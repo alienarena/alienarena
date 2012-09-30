@@ -929,9 +929,8 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 		//keep shadows from making meshes completely black
 		litColor = max(litColor, (textureColour * vec3(0.15)));
 
-		gl_FragColor = vec4(litColor * baseColor, 1.0);
+		gl_FragColor = vec4(litColor * baseColor, 1.0);		
 
-	//	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect alone
 		gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);
 
 		if(useCube > 0)
@@ -941,17 +940,16 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 			vec3 reflection = reflect(relEyeDir, normal);
             vec3 refraction = refract(relEyeDir, normal, 0.66);
 
-            vec4 Tl = texture2DProj(fx2Tex, vec4(reflection.xy, 1.0, 1.0) );
-            vec4 Tr = texture2DProj(fx2Tex, vec4(refraction.xy, 1.0, 1.0) );
+            vec4 Tl = texture2D(fx2Tex, reflection.xy );
+            vec4 Tr = texture2D(fx2Tex, refraction.xy );
 
             vec4 cubemap = mix(Tl,Tr,FresRatio);
+			
+			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor);
 
-			//cubemap.a = specmask.a; 
-
-			gl_FragColor = mix(gl_FragColor, cubemap, 0.5);
-
+			gl_FragColor = mix(cubemap, gl_FragColor, specmask.a);
 		}
-
+		
 		if(useGlow > 0)
 			gl_FragColor = mix(gl_FragColor, glow, glow.a);
 
