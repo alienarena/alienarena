@@ -712,7 +712,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	
 }
 
-static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
+static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf, qboolean dynamic)
 {
 	static float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
@@ -738,7 +738,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 				qglDisable( GL_ALPHA_TEST );
 			}
 		}
-
+		
 		scroll = 0;
 		if (surf->texinfo->flags & SURF_FLOWING)
 		{
@@ -747,165 +747,24 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 			if (scroll == 0.0)
 				scroll = -64.0;
 		}
-	
-		if(surf->texinfo->image->texnum != r_currTex) 
+
+		if (dynamic)
 		{
-			if (!r_currTexInfo)
+			if(gl_bspnormalmaps->integer && surf->texinfo->has_heightmap) 
 			{
-				glUniform1iARB( g_location_surfTexture, 0);
-				glUniform1iARB( g_location_heightTexture, 1);
-				glUniform1iARB( g_location_normalTexture, 2);
+				if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
+				{
+					BSP_FlushVBOAccum ();
+					glUniform1iARB( g_location_parallax, 1);
+				}
 			}
 			else
-				BSP_FlushVBOAccum ();
-				
-			qglActiveTextureARB(GL_TEXTURE0);
-			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
-			
-			qglActiveTextureARB(GL_TEXTURE1);
-			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
-		
-			qglActiveTextureARB(GL_TEXTURE2);
-			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-			KillFlags |= KILL_TMU2_POINTER;
-		}
-
-		if (r_currTexInfo && 
-			(surf->texinfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)) == 
-			(r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)))
-		{
-			//no change to GL state is needed
-		}
-		else if (surf->texinfo->flags & SURF_BLOOD) 
-		{
-			BSP_FlushVBOAccum ();
-			//need to bind the blood drop normal map, and set flag, and time
-			glUniform1iARB( g_location_liquid, 8 ); //blood type 8, water 1
-			glUniform1iARB( g_location_shiny, 0 );
-			glUniform1fARB( g_location_rsTime, rs_realtime);
-			glUniform1iARB( g_location_liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
-			qglActiveTextureARB(GL_TEXTURE4);
-			qglBindTexture(GL_TEXTURE_2D, r_blooddroplets->texnum);
-			KillFlags |= KILL_TMU4_POINTER;
-			glUniform1iARB( g_location_liquidNormTex, 5); 
-			qglActiveTextureARB(GL_TEXTURE5);
-			qglBindTexture(GL_TEXTURE_2D, r_blooddroplets_nm->texnum);
-			KillFlags |= KILL_TMU5_POINTER;
-		}
-		else if (surf->texinfo->flags & SURF_WATER) 
-		{
-			BSP_FlushVBOAccum ();
-			//need to bind the water drop normal map, and set flag, and time
-			glUniform1iARB( g_location_liquid, 1 ); 
-			glUniform1iARB( g_location_shiny, 0 );
-			glUniform1fARB( g_location_rsTime, rs_realtime);
-			glUniform1iARB( g_location_liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
-			qglActiveTextureARB(GL_TEXTURE4);
-			qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
-			KillFlags |= KILL_TMU4_POINTER;
-		}
-		else if (surf->texinfo->flags & SURF_SHINY)
-		{
-			BSP_FlushVBOAccum ();
-			glUniform1iARB( g_location_liquid, 0 );
-			glUniform1iARB( g_location_shiny, 1 );
- 
-			glUniform1iARB( g_location_chromeTex, 4); 
-			qglActiveTextureARB(GL_TEXTURE4);
-			qglBindTexture(GL_TEXTURE_2D, r_mirrorspec->texnum);
-			KillFlags |= KILL_TMU4_POINTER;
-		}
-		else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY))
-		{
-			BSP_FlushVBOAccum ();
-			glUniform1iARB( g_location_liquid, 0 );
-			glUniform1iARB( g_location_shiny, 0 );
-		}
-	}
-	
-	if (lmtex != r_currLMTex)
-	{
-		BSP_FlushVBOAccum ();
-		glUniform1iARB( g_location_lmTexture, 3);
-		qglActiveTextureARB(GL_TEXTURE3);
-		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
-		KillFlags |= KILL_TMU3_POINTER;
-	}
-
-	if (r_currTangentSpaceTransform != surf->tangentSpaceTransform)
-	{
-		BSP_FlushVBOAccum ();
-		glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
-		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
-	}
-	
-	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
-	{
-		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
-	}
-	else
-	{
-		BSP_FlushVBOAccum ();
-		if (r_vboOn)
-		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-			r_vboOn = false;
-		}
-		R_InitVArrays (VERT_MULTI_TEXTURED);
-		R_AddLightMappedSurfToVArray (surf, scroll);
-	}
-}
-
-static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
-{
-	static float	scroll;
-	unsigned lmtex = surf->lightmaptexturenum;
-	glpoly_t *p = surf->polys;
-		
-	c_brush_polys++;
-	
-	if(surf->texinfo->equiv != r_currTexInfo) 
-	{
-		if (SurfaceIsAlphaBlended(surf))
-		{
-			if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
 			{
-				BSP_FlushVBOAccum ();
-				qglEnable( GL_ALPHA_TEST );
-			}
-		}
-		else
-		{
-			if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
-			{
-				BSP_FlushVBOAccum ();
-				qglDisable( GL_ALPHA_TEST );
-			}
-		}
-		
-		scroll = 0;
-		if (surf->texinfo->flags & SURF_FLOWING)
-		{
-			BSP_FlushVBOAccum ();
-			scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-			if (scroll == 0.0)
-				scroll = -64.0;
-		}
-
-		if(gl_bspnormalmaps->integer && surf->texinfo->has_heightmap) 
-		{
-			if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
-			{
-				BSP_FlushVBOAccum ();
-				glUniform1iARB( g_location_parallax, 1);
-			}
-		}
-		else
-		{
-			if (!r_currTexInfo || r_currTexInfo->has_heightmap)
-			{
-				BSP_FlushVBOAccum ();
-				glUniform1iARB( g_location_parallax, 0);
+				if (!r_currTexInfo || r_currTexInfo->has_heightmap)
+				{
+					BSP_FlushVBOAccum ();
+					glUniform1iARB( g_location_parallax, 0);
+				}
 			}
 		}
 		
@@ -1114,7 +973,7 @@ void BSP_DrawGLSLSurfaces (void)
     	if (!s)
     		continue;
 		for (; s; s = s->texturechain) {
-			BSP_RenderGLSLLightmappedPoly(s);
+			BSP_RenderGLSLLightmappedPoly(s, false);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
@@ -1217,7 +1076,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
     	if (!s)
     		continue;
 		for (; s; s = s->texturechain) {
-			BSP_RenderGLSLDynamicLightmappedPoly(s);
+			BSP_RenderGLSLLightmappedPoly(s, true);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
