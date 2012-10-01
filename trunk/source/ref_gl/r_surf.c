@@ -712,7 +712,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	
 }
 
-static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf, qboolean dynamic)
+static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
 {
 	static float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
@@ -748,9 +748,9 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf, qboolean dynamic)
 				scroll = -64.0;
 		}
 
-		if (dynamic)
+		if (gl_bspnormalmaps->integer)
 		{
-			if(gl_bspnormalmaps->integer && surf->texinfo->has_heightmap) 
+			if(surf->texinfo->has_heightmap) 
 			{
 				if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
 				{
@@ -956,7 +956,7 @@ void BSP_DrawGLSLSurfaces (void)
 	}
 
 	glUniform1iARB( g_location_dynamic, 0);
-	glUniform1iARB( g_location_parallax, 1);
+	glUniform1iARB( g_location_parallax, 0);
 	
 	r_vboOn = false;
 	
@@ -973,7 +973,7 @@ void BSP_DrawGLSLSurfaces (void)
     	if (!s)
     		continue;
 		for (; s; s = s->texturechain) {
-			BSP_RenderGLSLLightmappedPoly(s, false);
+			BSP_RenderGLSLLightmappedPoly(s);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
@@ -1060,6 +1060,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	}
 
 	glUniform1iARB( g_location_dynamic, foundLight);
+	glUniform1iARB( g_location_parallax, 0);
 	
 	r_vboOn = false;
 	
@@ -1076,7 +1077,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
     	if (!s)
     		continue;
 		for (; s; s = s->texturechain) {
-			BSP_RenderGLSLLightmappedPoly(s, true);
+			BSP_RenderGLSLLightmappedPoly(s);
 			r_currTex = s->texinfo->image->texnum;
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
