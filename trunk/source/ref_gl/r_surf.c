@@ -956,7 +956,7 @@ void BSP_DrawGLSLSurfaces (void)
 	}
 
 	glUniform1iARB( g_location_dynamic, 0);
-	glUniform1iARB( g_location_parallax, 0);
+	glUniform1iARB( g_location_parallax, 0);  
 	
 	r_vboOn = false;
 	

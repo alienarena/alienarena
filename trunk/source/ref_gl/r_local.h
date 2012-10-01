@@ -689,6 +689,7 @@ extern GLuint		g_location_useShell;
 extern GLuint		g_location_useCube;
 extern GLuint		g_location_useGPUanim;
 extern GLuint		g_location_outframe;
+extern GLuint		g_location_fromView;
 
 //glass
 extern GLuint		g_location_gmirTexture;

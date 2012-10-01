@@ -135,6 +135,7 @@ GLuint		g_location_useShell;
 GLuint		g_location_useCube;
 GLuint		g_location_useGPUanim;
 GLuint		g_location_outframe;
+GLuint		g_location_fromView;
 
 //glass
 GLuint		g_location_gmirTexture;
@@ -838,6 +839,7 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform int useCube;
 	uniform int useGlow;
 	uniform int useShell;
+	uniform int fromView;
 	uniform vec3 lightPos;
 	const float SpecularFactor = 0.5;
 	//next group could be made uniforms if we want to control this 
@@ -935,7 +937,12 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 
 		if(useCube > 0)
 		{			
-			vec3 relEyeDir = normalize(EyeDir);
+			vec3 relEyeDir;
+			
+			if(fromView > 0)
+				relEyeDir = normalize(LightDir);
+			else
+				relEyeDir = normalize(EyeDir);
 					
 			vec3 reflection = reflect(relEyeDir, normal);
             vec3 refraction = refract(relEyeDir, normal, 0.66);
@@ -1737,6 +1744,7 @@ void R_LoadGLSLPrograms(void)
 		g_location_useCube = glGetUniformLocationARB( g_meshprogramObj, "useCube" );
 		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
+		g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
 
 		//Glass
 

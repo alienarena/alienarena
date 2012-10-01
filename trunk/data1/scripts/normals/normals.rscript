@@ -237,6 +237,8 @@ models/weapons/v_chain/skin
 	{
 		map models/weapons/v_chain/skin_normal.tga
 		normalmap
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/weapons/v_shotg2/skin
@@ -244,6 +246,8 @@ models/weapons/v_shotg2/skin
 	{
 		map models/weapons/v_shotg2/skin_normal.tga
 		normalmap
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 maps/meshes/generator
@@ -330,6 +334,8 @@ models/items/armor/combat/skin
 		normalmap
 		map2 gfx/bluelightning.tga
 		fx
+		map3 gfx/chrome.tga
+		cube
 	}
 }
 models/items/armor/body/skin
@@ -340,6 +346,8 @@ models/items/armor/body/skin
 		normalmap
 		map2 gfx/redlightning.tga
 		fx
+		map3 gfx/chrome.tga
+		cube
 	}
 }
 models/items/armor/jacket/skin
@@ -350,6 +358,8 @@ models/items/armor/jacket/skin
 		normalmap
 		map2 gfx/greenlightning.tga
 		fx
+		map3 gfx/chrome.tga
+		cube
 	}
 }
 models/objects/spud/skin
@@ -752,6 +762,8 @@ models/items/armor/shard/skin
 		normalmap
 		map2 gfx/shard_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 maps/meshes/injector

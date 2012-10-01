@@ -1554,7 +1554,13 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					glUniform1iARB( g_location_useGlow, 0);
 
 				if(stage->cube)
+				{
 					glUniform1iARB( g_location_useCube, 1);
+					if(currententity->flags & RF_WEAPONMODEL)
+						glUniform1iARB( g_location_fromView, 1);
+					else
+						glUniform1iARB( g_location_fromView, 0);
+				}
 				else
 					glUniform1iARB( g_location_useCube, 0);
 
