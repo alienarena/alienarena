@@ -1460,6 +1460,8 @@ void IQM_DrawFrame(int skinnum)
 		
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
 
+		qglDepthMask(false);
+
 		R_ModelViewTransform(lightPosition, lightVec);		
 				
 		glUseProgramObjectARB( g_glassprogramObj );
@@ -1514,16 +1516,13 @@ void IQM_DrawFrame(int skinnum)
 		GL_BindIBO(NULL);
 
 		glUseProgramObjectARB( 0 );
+
+		qglDepthMask(true);
 	}
 	else if(mirror || glass)
 	{
 		//glass surfaces
-		//base render, no vbo, no shaders
-
-		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
-			R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-		else
-			R_InitVArrays (VERT_COLOURED_TEXTURED);
+		//base render, no vbo, no shaders	
 
 		qglDepthMask(false);
 
@@ -1531,6 +1530,7 @@ void IQM_DrawFrame(int skinnum)
 		{
 			if( !(currententity->flags & RF_WEAPONMODEL))
 			{
+				R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
 				GL_EnableMultitexture( true );
 				GL_SelectTexture( GL_TEXTURE0);
 				GL_TexEnv ( GL_COMBINE_EXT );
@@ -1546,12 +1546,14 @@ void IQM_DrawFrame(int skinnum)
 			}
 			else
 			{
+				R_InitVArrays (VERT_COLOURED_TEXTURED);
 				GL_SelectTexture( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 			}
 		}
 		else
 		{
+			R_InitVArrays (VERT_COLOURED_TEXTURED);
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
 		}
@@ -1696,7 +1698,9 @@ void IQM_DrawFrame(int skinnum)
 		else
 			glUniform1iARB( g_location_useGlow, 0);
 
-		glUniform1iARB( g_location_useShell, 0);				
+		glUniform1iARB( g_location_useShell, 0);	
+
+		glUniform1iARB( g_location_useCube, 0); //for now - we will add code for this 
 
 		glUniform1fARB( g_location_meshTime, rs_realtime);
 

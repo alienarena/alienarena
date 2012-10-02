@@ -341,6 +341,8 @@ void SM_SetTextureMatrix( qboolean mapnum )
 
 }
 
+static int r_shadowframecount = 0;
+
 /*
 ================
 SM_RecursiveWorldNode - this variant of the classic routine renders both sides for shadowing
@@ -366,6 +368,8 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 		for (i=0,clipplane=frustum ; i<4 ; i++,clipplane++)
 		{
+			if (!(clipflags & (1<<i)))
+				continue;
 			clipped = BoxOnPlaneSide (node->minmaxs, node->minmaxs+3, clipplane);
 
 			if (clipped == 1)
@@ -393,7 +397,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 		do
 		{
-			(*mark++)->visframe = r_framecount;
+			(*mark++)->visframe = r_shadowframecount;
 		} while (--c);
 
 		return;
@@ -405,7 +409,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
-		if (surf->visframe != r_framecount)
+		if (surf->visframe != r_shadowframecount)
 			continue;
 
 		if (R_CullBox (surf->mins, surf->maxs)) 
@@ -432,6 +436,22 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	SM_RecursiveWorldNode (node->children[1], clipflags);
 }
 
+
+inline float point_dist_from_plane (cplane_t *plane, vec3_t point)
+{
+	switch (plane->type)
+	{
+	case PLANE_X:
+		return point[0] - plane->dist;
+	case PLANE_Y:
+		return point[1] - plane->dist;
+	case PLANE_Z:
+		return point[2] - plane->dist;
+	default:
+		return DotProduct (point, plane->normal) - plane->dist;
+	}
+}
+
 /*
 ================
 SM_RecursiveWorldNode2 - this variant of the classic routine renders only one side for shadowing
@@ -440,11 +460,12 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 
 void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 {
-	int			c, side;
+	int			c;
+	float		dist, dist_model, dist_light;
+	int			side, side_model, side_light;
 	cplane_t	*plane;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
-	float		dot;
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
@@ -459,6 +480,8 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 
 		for (i=0,clipplane=frustum ; i<4 ; i++,clipplane++)
 		{
+			if (!(clipflags & (1<<i)))
+				continue;
 			clipped = BoxOnPlaneSide (node->minmaxs, node->minmaxs+3, clipplane);
 
 			if (clipped == 1)
@@ -486,7 +509,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 
 		do
 		{
-			(*mark++)->visframe = r_framecount;
+			(*mark++)->visframe = r_shadowframecount;
 		} while (--c);
 
 		return;
@@ -496,36 +519,33 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 
 	// find which side of the node we are on
 	plane = node->plane;
-
-	switch (plane->type)
-	{
-	case PLANE_X:
-		dot = r_newrefdef.vieworg[0] - plane->dist;
-		break;
-	case PLANE_Y:
-		dot = r_newrefdef.vieworg[1] - plane->dist;
-		break;
-	case PLANE_Z:
-		dot = r_newrefdef.vieworg[2] - plane->dist;
-		break;
-	default:
-		dot = DotProduct (r_newrefdef.vieworg, plane->normal) - plane->dist;
-		break;
-	}
-
-	side = !(dot >= 0);
-
+	
+	dist = point_dist_from_plane (plane, r_origin);
+	dist_model = point_dist_from_plane (plane, origin);
+	dist_light = point_dist_from_plane (plane, statLightPosition);
+	
+	side = dist < 0;
+	side_model = dist_model < 0;
+	side_light = dist_light < 0;
+	
+	dist = fabs (dist);
+	dist_model = fabs (dist_model);
+	dist_light = fabs (dist_light);
+	
+	if (side != side_model && side_light != side)
+		if (dist_light < dist_model)
+			goto skip_draw;
+	if (side != side_model && side_light == side)
+		goto skip_draw;
+	
 	// recurse down the children, front side first
-	SM_RecursiveWorldNode2 (node->children[0], clipflags, origin);
+	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
-		if (surf->visframe != r_framecount)
+		if (surf->visframe != r_shadowframecount)
 			continue;
-
-		if ( (surf->flags & SURF_PLANEBACK) != side )
-			continue;		// wrong side
 
 		if (R_CullBox (surf->mins, surf->maxs)) 
 			continue;
@@ -546,9 +566,17 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 			}
 		}
 	}
+	
+	if (side == side_model && side == side_light)
+		if (dist_light < dist_model)
+			return;
+	if (side == side_model && side != side_light)
+		return;
+	
+skip_draw:
 
 	// recurse down the back side
-	SM_RecursiveWorldNode2 (node->children[1], clipflags, origin);
+	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin);
 }
 
 
@@ -580,8 +608,14 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		glUniform1fARB( g_location_yOffset, 1.0/(viddef.height*r_shadowmapratio->value));
 
 		glUniform1fARB( g_location_fadeShadow, fadeShadow );
+		
+		R_InitVArrays(VERT_NO_TEXTURE);
+		
+		r_shadowframecount++;
 
 		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin);
+		
+		R_KillVArrays();
 
 		glUseProgramObjectARB( 0 );
 
@@ -591,7 +625,13 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 	}
 	else
 	{
+		R_InitVArrays(VERT_NO_TEXTURE);
+		
+		r_shadowframecount++;
+		
 		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
+		
+		R_KillVArrays();
 
 		//draw brush models(not for ent shadow, for now)
 		for (i=0 ; i<r_newrefdef.num_entities ; i++)
