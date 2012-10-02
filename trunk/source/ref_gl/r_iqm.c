@@ -2636,9 +2636,6 @@ void IQM_DrawCaster ( void )
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
 		return;
 
-	if ( IQM_CullModel() )
-		return;
-
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
 	modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
