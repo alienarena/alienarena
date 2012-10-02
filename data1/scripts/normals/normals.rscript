@@ -237,8 +237,6 @@ models/weapons/v_chain/skin
 	{
 		map models/weapons/v_chain/skin_normal.tga
 		normalmap
-		map3 gfx/chrome2.tga
-		cube
 	}
 }
 models/weapons/v_shotg2/skin
@@ -246,7 +244,7 @@ models/weapons/v_shotg2/skin
 	{
 		map models/weapons/v_shotg2/skin_normal.tga
 		normalmap
-		map3 gfx/chrome2.tga
+		map3 gfx/chrome.tga
 		cube
 	}
 }
@@ -491,6 +489,8 @@ models/weapons/v_blast/skin
 		normalmap
 		map2 gfx/blasterfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/weapons/v_violator/skin
@@ -509,6 +509,8 @@ models/weapons/v_violator/violator
 		normalmap
 		map2 gfx/violator2fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/weapons/v_hyperb/disruptor
@@ -528,6 +530,8 @@ models/weapons/v_rail/beamgun
 		normalmap
 		map2 gfx/beamgunfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/weapons/v_bfg/skin
@@ -537,6 +541,8 @@ models/weapons/v_bfg/skin
 		normalmap
 		map2 gfx/vapormask.tga
 		glow
+		map3 gfx/mirrorspec.tga
+		cube
 	}
 }
 models/weapons/v_minderaser/minderaser
@@ -726,6 +732,8 @@ models/items/quaddama/skin
 		normalmap
 		map2 gfx/greenlightning.tga
 		fx
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/sproing/skin
@@ -744,6 +752,8 @@ models/items/adrenaline/skin
 		normalmap
 		map2 gfx/greenlightning.tga
 		fx
+		map3 gfx/chrome.tga
+		cube
 	}
 }
 models/items/invulner/skin
