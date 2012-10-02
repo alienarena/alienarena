@@ -293,7 +293,7 @@ void R_InitParticleTexture (void)
 	if (!r_bubbletexture) {
 		r_bubbletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
-	r_reflecttexture = R_RegisterParticlePic("reflect");
+	r_reflecttexture = R_RegisterGfxPic("reflect");
 	if (!r_reflecttexture) {
 		r_reflecttexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
