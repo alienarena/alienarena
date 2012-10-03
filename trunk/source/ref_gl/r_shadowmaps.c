@@ -579,7 +579,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 	
 skip_draw:
 
-	if (dist >= fadeshadow_cutoff)
+	if (dist >= fadeshadow_cutoff+512)
 		return;
 
 	// recurse down the back side
