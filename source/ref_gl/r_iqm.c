@@ -2633,6 +2633,7 @@ void IQM_DrawCasterFrame ()
 void IQM_DrawCaster ( void )
 {
 	float		frame, time;
+	vec3_t		sv_angles;
 
 	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
@@ -2646,9 +2647,11 @@ void IQM_DrawCaster ( void )
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
 	modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
+	VectorCopy(currententity->angles, sv_angles);
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 	R_RotateForEntity (currententity);
+	VectorCopy(sv_angles, currententity->angles);
 
 	//frame interpolation
 	time = (Sys_Milliseconds() - currententity->frametime) / 100;
