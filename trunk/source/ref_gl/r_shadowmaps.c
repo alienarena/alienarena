@@ -458,7 +458,7 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 ================
 */
 
-void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
+void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
 {
 	int			c;
 	float		dist, dist_model, dist_light;
@@ -536,10 +536,11 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 		if (dist_light < dist_model)
 			goto skip_draw;
 	if (side != side_model && side_light == side)
-		goto skip_draw;
+		if (BoxOnPlaneSide (absmins, absmaxs, plane) != 3)
+			goto skip_draw;
 	
 	// recurse down the children, front side first
-	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin);
+	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin, absmins, absmaxs);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
@@ -571,12 +572,13 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin)
 		if (dist_light < dist_model)
 			return;
 	if (side == side_model && side != side_light)
-		return;
+		if (BoxOnPlaneSide (absmins, absmaxs, plane) != 3)
+			return;
 	
 skip_draw:
 
 	// recurse down the back side
-	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin);
+	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin, absmins, absmaxs);
 }
 
 
@@ -598,6 +600,8 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 
 	if(forEnt)
 	{
+		vec3_t absmins, absmaxs;
+		
 		glUseProgramObjectARB( g_shadowprogramObj );
 
 		glUniform1iARB( g_location_entShadow, 6);
@@ -611,9 +615,12 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		
 		R_InitVArrays(VERT_NO_TEXTURE);
 		
+		VectorAdd (currentmodel->mins, origin, absmins);
+		VectorAdd (currentmodel->maxs, origin, absmaxs);
+		
 		r_shadowframecount++;
 
-		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin);
+		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs);
 		
 		R_KillVArrays();
 
@@ -824,6 +831,7 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 	angles[YAW] = yaw;
 	angles[ROLL] = 0.0f;
 }
+
 
 void R_DrawVegetationCasters ( qboolean forShadows )
 {
