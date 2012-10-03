@@ -458,6 +458,8 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 ================
 */
 
+static float fadeshadow_cutoff;
+
 void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
 {
 	int			c;
@@ -576,6 +578,9 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 			return;
 	
 skip_draw:
+
+	if (side != side_light && dist >= fadeshadow_cutoff)
+		return;
 
 	// recurse down the back side
 	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin, absmins, absmaxs);
@@ -831,7 +836,6 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 	angles[YAW] = yaw;
 	angles[ROLL] = 0.0f;
 }
-
 
 void R_DrawVegetationCasters ( qboolean forShadows )
 {
@@ -1104,7 +1108,7 @@ void R_GenerateEntityShadow( void )
 	if(gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 	{
 		vec3_t dist, tmp;
-		float rad, fadeshadow_cutoff;
+		float rad;
 
 		if((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || (currententity->flags & RF_MENUMODEL))
 			return;
@@ -1237,7 +1241,7 @@ void R_GenerateRagdollShadow( int RagDollID )
 	if(gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 	{
 		vec3_t dist, tmp;
-		float rad, fadeshadow_cutoff;
+		float rad;
 
 		VectorSubtract(RagDoll[RagDollID].ragDollMesh->maxs, RagDoll[RagDollID].ragDollMesh->mins, tmp);
 		VectorScale (tmp, 1.666, tmp);
