@@ -386,35 +386,32 @@ void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin)
         renderPoly = false;
         for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
         {
-         	if (r_test->integer)
-         	{
-         		// Generate plane out of the triangle between v, v+1, and the 
-		     	// light point. This plane will be one of the borders of the
-		     	// 3D volume within which an object may cast a shadow on the
-		     	// world polygon.
-		     	vec3_t plane_line_1, plane_line_2;
-		     	cplane_t plane;
+         	// Generate plane out of the triangle between v, v+1, and the 
+		    // light point. This plane will be one of the borders of the
+		    // 3D volume within which an object may cast a shadow on the
+		    // world polygon.
+		    vec3_t plane_line_1, plane_line_2;
+		    cplane_t plane;
 		     	
-		     	// generate two vectors representing two sides of the triangle
-		     	VectorSubtract (v, statLightPosition, plane_line_1);
-		     	v2 = p->verts[(i+1)%p->numverts];
-		     	VectorSubtract (v2, v, plane_line_2);
+		    // generate two vectors representing two sides of the triangle
+		    VectorSubtract (v, statLightPosition, plane_line_1);
+		    v2 = p->verts[(i+1)%p->numverts];
+		    VectorSubtract (v2, v, plane_line_2);
 		     	
-		     	// generate the actual plane
-		     	CrossProduct (plane_line_1, plane_line_2, plane.normal);
-		     	VectorNormalize (plane.normal);
-		     	plane.type = PLANE_ANYZ;
-		     	plane.dist = DotProduct (v, plane.normal);
-		     	plane.signbits = SignbitsForPlane (&plane);
+		    // generate the actual plane
+		    CrossProduct (plane_line_1, plane_line_2, plane.normal);
+		    VectorNormalize (plane.normal);
+		    plane.type = PLANE_ANYZ;
+		    plane.dist = DotProduct (v, plane.normal);
+		    plane.signbits = SignbitsForPlane (&plane);
 		     	
-		     	// CullBox-type operation
-	     		if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
-	     		{
-	     			//completely clipped; we can skip this surface
-	     			return;
-	     		}
+		    // CullBox-type operation
+	     	if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
+	     	{
+	     		//completely clipped; we can skip this surface
+	     		return;
 	     	}
-         		
+	     	         		
              if ( !renderPoly )
              { /* once set, no need for calculation */
                  float vsq_len;
