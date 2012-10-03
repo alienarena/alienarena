@@ -739,6 +739,7 @@ extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
 vec3_t lightPosition;
 vec3_t statLightPosition;
+float statLightIntensity;
 float  dynFactor;
 extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);

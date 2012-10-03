@@ -797,7 +797,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	vec3_t	temp, tempOrg, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
-	float numlights, weight;
+	float numlights, nonweighted_numlights, weight;
 	float bob;
 	qboolean copy;
 
@@ -816,8 +816,9 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	VectorCopy(meshOrigin, tempOrg);
 		tempOrg[2] += 24 - bob; //generates more consistent tracing
 
-	numlights = 0;
+	numlights = nonweighted_numlights = 0;
 	VectorClear(lightAdd);
+	statLightIntensity = 0.0;
 	
 	if (!RagDoll)
 	{
@@ -840,6 +841,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	{
 		numlights =  cl_persistent_ents[currententity->number].oldnumlights;
 		VectorCopy ( cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
+		statLightIntensity = cl_persistent_ents[currententity->number].oldlightintens;
 	}
 	else
 	{
@@ -867,19 +869,30 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 				dist = dist*dist;
 				weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
 				for(j = 0; j < 3; j++)
+				{
 					lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+				}
+				statLightIntensity += LightGroups[i].avg_intensity;
 				numlights+=weight;
+				nonweighted_numlights++;
 			}
 		}
+		
+		if (numlights > 0.0)
+			statLightIntensity /= (float)nonweighted_numlights;
+		
 		cl_persistent_ents[currententity->number].oldnumlights = numlights;
 		VectorCopy (lightAdd, cl_persistent_ents[currententity->number].oldlightadd);
 		cl_persistent_ents[currententity->number].setlightstuff = true;
 		VectorCopy (currententity->origin, cl_persistent_ents[currententity->number].oldorigin);
+		cl_persistent_ents[currententity->number].oldlightintens = statLightIntensity;
 	}
 
 	if(numlights > 0.0) {
 		for(i = 0; i < 3; i++)
+		{
 			statLightPosition[i] = lightAdd[i]/numlights;
+		}
 	}
 	
 	dynFactor = 0;
