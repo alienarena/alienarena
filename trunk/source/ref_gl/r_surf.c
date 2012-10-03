@@ -145,9 +145,7 @@ void BSP_DrawTexturelessPoly (msurface_t *fa)
 
 void BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin)
 {
-	R_InitVArrays(VERT_NO_TEXTURE);
 	R_AddShadowSurfToVArray (fa, origin);
-	R_KillVArrays();
 }
 
 void BSP_DrawTexturelessInlineBModel (entity_t *e)
