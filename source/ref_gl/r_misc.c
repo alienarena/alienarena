@@ -357,7 +357,7 @@ void R_InitParticleTexture (void)
 	if (!r_trashtexture) {
 		r_trashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
-	r_splashtexture = R_RegisterParticleNormal("ripples");
+	r_splashtexture = R_RegisterParticlePic("ripples");
 	if (!r_splashtexture) {
 		r_splashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
