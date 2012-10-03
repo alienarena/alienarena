@@ -1140,7 +1140,19 @@ void R_GenerateEntityShadow( void )
 				fadeShadow = 1.0 - fadeShadow/512.0; //fade out smoothly over 512 units.
 		}
 		else
-			fadeShadow = 1.0;		
+			fadeShadow = 1.0;
+		
+		if (r_test->integer)
+		{
+			vec3_t lightvec;
+			float lightdist, ratio;
+			VectorSubtract (statLightPosition, currententity->origin, lightvec);
+			lightdist = VectorLength (lightvec);
+			ratio = sqrt(sqrt(sqrt (statLightIntensity / lightdist)));
+			fadeShadow *= ratio;
+			if (fadeShadow > 1.0)
+				fadeShadow = 1.0;
+		}
 		
 		qglEnable(GL_DEPTH_TEST);
 		qglClearColor(0,0,0,1.0f);
