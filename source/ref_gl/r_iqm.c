@@ -1895,6 +1895,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
             GL_EnableMultitexture( true );
 
+			qglDepthMask(false);
+
             glUseProgramObjectARB( g_meshprogramObj );
 
             glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
@@ -2017,6 +2019,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		{
             glUseProgramObjectARB( 0 );
             GL_EnableMultitexture( false );
+			qglDepthMask(true);
         }
 
 	}	
