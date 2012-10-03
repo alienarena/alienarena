@@ -927,7 +927,6 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 				unsigned char red,green,blue,alphabyte;
 				switch (targa_header.pixel_size) {
 					case 24:
-
 							blue = *buf_p++;
 							green = *buf_p++;
 							red = *buf_p++;
@@ -1434,10 +1433,10 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 		image->texnum = TEXNUM_SCRAPS + texnum;
 		image->scrap = true;
 		image->has_alpha = true;
-		image->sl = (x+0.01)/(float)BLOCK_WIDTH;
-		image->sh = (x+image->width-0.01)/(float)BLOCK_WIDTH;
-		image->tl = (y+0.01)/(float)BLOCK_HEIGHT;
-		image->th = (y+image->height-0.01)/(float)BLOCK_HEIGHT;
+		image->sl = (double)(x+0.5)/(double)BLOCK_WIDTH;
+		image->sh = (double)(x+image->width-0.5)/(double)BLOCK_WIDTH;
+		image->tl = (double)(y+0.5)/(double)BLOCK_HEIGHT;
+		image->th = (double)(y+image->height-0.5)/(double)BLOCK_HEIGHT;
 	}
 	else
 	{
