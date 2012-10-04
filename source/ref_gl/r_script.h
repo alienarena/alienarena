@@ -120,7 +120,8 @@ typedef struct rs_stage_s
 	rs_scale_t				scale;			// tcmod
 	
 	float					rot_speed;		// rotate speed (0 for no rotate);
-	float					depthhack;		// fake zdepth
+
+	qboolean				depthhack;		// fake zdepth
 
 	vec3_t					origin;			//origin for models;
 	vec3_t					angle;			//angles for models;

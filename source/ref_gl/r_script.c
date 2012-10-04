@@ -217,7 +217,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->texture2 = NULL;
 	stage->texture3 = NULL;
 
-	stage->depthhack = 0;
+	stage->depthhack = false;
 	stage->envmap = false;
 	stage->dynamic = false;
 	stage->lensflare = false;
@@ -709,8 +709,7 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 
 void rs_stage_depthhack (rs_stage_t *stage, char **token)
 {
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->depthhack = (float)atof(*token);
+	stage->depthhack = true;
 }
 
 void rs_stage_envmap (rs_stage_t *stage, char **token)
