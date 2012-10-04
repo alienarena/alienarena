@@ -468,6 +468,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 	cplane_t	*plane;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
+	qboolean	caster_off_plane;
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
@@ -534,12 +535,19 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 	dist_model = fabs (dist_model);
 	dist_light = fabs (dist_light);
 	
-	if (side != side_model && side_light != side)
-		if (dist_light < dist_model)
+	//TODO: figure out the cutoff distance based on mins and maxs?
+	caster_off_plane = (dist > 64.0f) || (BoxOnPlaneSide (absmins, absmaxs, plane) != 3);
+	
+	if (side != side_model && caster_off_plane)
+	{
+		if (side != side_light)
+		{
+			if (dist_light < dist_model)
+				goto skip_draw;
+		}
+		else
 			goto skip_draw;
-	if (side != side_model && side_light == side)
-		if (BoxOnPlaneSide (absmins, absmaxs, plane) != 3)
-			goto skip_draw;
+	}
 	
 	// recurse down the children, front side first
 	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin, absmins, absmaxs);
@@ -570,12 +578,16 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 		}
 	}
 	
-	if (side == side_model && side == side_light)
-		if (dist_light < dist_model)
+	if (side == side_model && caster_off_plane)
+	{
+		if (side == side_light)
+		{
+			if (dist_light < dist_model)
+				return;
+		}
+		else
 			return;
-	if (side == side_model && side != side_light)
-		if (BoxOnPlaneSide (absmins, absmaxs, plane) != 3)
-			return;
+	}
 	
 skip_draw:
 
