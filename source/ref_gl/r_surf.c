@@ -985,6 +985,9 @@ void BSP_DrawGLSLSurfaces (void)
 	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	
 	qglDisable (GL_ALPHA_TEST);
+	
+	qglActiveTextureARB (GL_TEXTURE1);
+	qglDisable (GL_TEXTURE_2D);	
 
 }
 
