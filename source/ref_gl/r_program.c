@@ -382,8 +382,10 @@ static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2D liquidTexture;
 	uniform sampler2D liquidNormTex;
 	uniform sampler2D chromeTex;
-	uniform sampler2DShadow ShadowMap;
-	uniform sampler2DShadow StatShadowMap;
+	uniform sampler2D ShadowMap;
+	uniform sampler2D StatShadowMap;
+	//uniform sampler2DShadow ShadowMap;
+	//uniform sampler2DShadow StatShadowMap;
 	uniform vec3 lightColour;
 	uniform float lightCutoffSquared;
 	uniform int FOG;
@@ -406,12 +408,30 @@ static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 
 	vec4 ShadowCoord;
 	
-	float lookup( vec2 offSet, sampler2DShadow Map)
+//	float lookup( vec2 offSet, sampler2DShadow Map)
+	float lookup( vec2 offSet, sampler2D Map)
 	{
-		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+
+		float shadow = 1.0;	
+
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		// Used to lower moir pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;
+
+		float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
+
+		if (ShadowCoord.w > 0.0)
+			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+
+		return shadow;
+
+		//return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+
 	}
 
-	float lookupShadow( sampler2DShadow Map )
+
+	float lookupShadow( sampler2D Map )
+//	float lookupShadow( sampler2DShadow Map )
 	{
 		float shadow = 1.0;
 
@@ -428,7 +448,7 @@ static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 				shadow *= 0.25 ;
 			}
 	
-			shadow += 0.2;
+			//shadow += 0.2;
 			if(shadow > 1.0)
 				shadow = 1.0;
 		}
@@ -653,6 +673,7 @@ static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
+//SHADOWS
 static char shadow_vertex_program[] = "#version 120\n" STRINGIFY (		
 	varying vec4 ShadowCoord;
 
@@ -661,12 +682,15 @@ static char shadow_vertex_program[] = "#version 120\n" STRINGIFY (
 		ShadowCoord = gl_TextureMatrix[6] * gl_Vertex;
 
 		gl_Position = ftransform();
+
+		gl_Position.z -= 0.05; //eliminate z-fighting on some drivers
 	}
 );
 
-//SHADOWS
 static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
-	uniform sampler2DShadow StatShadowMap;
+
+	uniform sampler2D StatShadowMap;
+//	uniform sampler2DShadow StatShadowMap;
 	uniform float fadeShadow;
 	uniform float xPixelOffset;
 	uniform float yPixelOffset;
@@ -675,7 +699,20 @@ static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
 	
 	float lookup( vec2 offSet)
 	{
-		return shadow2DProj(StatShadowMap, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+		float shadow = 1.0;	
+
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		// Used to lower moir pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;
+
+		float distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
+
+		if (ShadowCoord.w > 0.0)
+			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+
+		return shadow;
+
+		//return shadow2DProj(StatShadowMap, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
 	}
 
 	float lookupStatshadow( void )
@@ -692,7 +729,7 @@ static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
 			shadow += lookup(vec2( 0.5, -0.5) + o);
 			shadow *= 0.25 ;
 		}
-		shadow += 0.3;
+		//shadow += 0.3;
 		if(shadow > 1.0)
 			shadow = 1.0;
 	
