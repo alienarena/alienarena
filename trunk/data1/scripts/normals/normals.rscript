@@ -264,6 +264,37 @@ maps/meshes/clamps
 		nolightmap
 	}
 }
+models/items/healing/small/skin
+{
+
+	{
+		map models/items/healing/health_normal.tga
+		normalmap
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
+models/items/healing/medium/skin
+{
+
+	{
+		map models/items/healing/health_normal.tga
+		normalmap
+
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
+models/items/healing/large/skin
+{
+
+	{
+		map models/items/healing/health_normal.tga
+		normalmap
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
 models/items/ammo/rockets/medium/skin
 {
 
@@ -1258,5 +1289,59 @@ maps/meshes/urban/yellowlantern
 		normalmap
 		map2 maps/meshes/urban/yellowlantern_fx.tga
 		glow
+	}
+}
+maps/meshes/tech/rotimage1
+{
+	{
+		map maps/meshes/tech/rotimage1
+		normalmap
+		map2 maps/meshes/tech/rotimage1
+		glow
+		map3 gfx/mirrorspec.tga
+		cube
+		depthhack
+	}
+}
+maps/meshes/tech/rotimage2
+{
+	{
+		map maps/meshes/tech/rotimage2
+		normalmap
+		map2 maps/meshes/tech/rotimage2
+		glow
+		map3 gfx/mirrorspec.tga
+		cube
+		depthhack
+	}
+}
+maps/meshes/tech/rotimage3
+{
+	{
+		map maps/meshes/tech/rotimage3
+		normalmap
+		map2 maps/meshes/tech/rotimage3
+		glow
+		depthhack
+	}
+}
+maps/meshes/tech/rotimage4
+{
+	{
+		map maps/meshes/tech/rotimage4
+		normalmap
+		map2 maps/meshes/tech/rotimage4
+		glow
+		depthhack
+	}
+}
+maps/meshes/monitor
+{
+	
+	{
+		map maps/meshes/monitor_normal.tga
+		normalmap
+		map3 gfx/mirrorspec.tga
+		cube
 	}
 }

@@ -1142,6 +1142,9 @@ void R_GenerateEntityShadow( void )
 		else
 			fadeShadow = 1.0;
 		
+		//Note - this would only really be usefull if all entities used shadowmaps, for now it creates 
+		//disparity since other objects using stencil volumes cannot fade.  Also, might be fast and more accurate to 
+		//use the actual lightmap info stored in shadelight.
 		if (r_test->integer)
 		{
 			vec3_t lightvec;
