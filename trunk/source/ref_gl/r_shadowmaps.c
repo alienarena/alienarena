@@ -536,7 +536,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 	dist_light = fabs (dist_light);
 	
 	//TODO: figure out the cutoff distance based on mins and maxs?
-	caster_off_plane = (dist > 64.0f) || (BoxOnPlaneSide (absmins, absmaxs, plane) != 3);
+	caster_off_plane = (dist_model > 64.0f) || (BoxOnPlaneSide (absmins, absmaxs, plane) != 3);
 	
 	if (side != side_model && caster_off_plane)
 	{
