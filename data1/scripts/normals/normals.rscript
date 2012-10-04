@@ -551,6 +551,8 @@ models/weapons/v_hyperb/disruptor
 		normalmap
 		map2 gfx/disruptorfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 		
 }
@@ -583,6 +585,8 @@ models/weapons/v_minderaser/minderaser
 		normalmap
 		map2 gfx/minderaser_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/weapons/v_shotg/skin
