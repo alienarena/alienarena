@@ -1,3 +1,9 @@
+textures/arena9/hexfloor2
+{
+	{
+		cube
+	}
+}
 textures/arena7/light1
 {
 	{
