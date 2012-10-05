@@ -109,12 +109,12 @@ void R_GenerateShadowFBO()
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
 	// GL_LINEAR does not make sense for depth texture.
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Remove artefact on the edges of the shadowmap
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+	/*qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );*/
 
 	// This is to allow usage of shadow2DProj function in the shader
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
@@ -122,7 +122,7 @@ void R_GenerateShadowFBO()
 	qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
 
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
-	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
 	// create a framebuffer object
@@ -150,12 +150,12 @@ void R_GenerateShadowFBO()
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
 	// GL_LINEAR does not make sense for depth texture. 
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Remove artefact on the edges of the shadowmap
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+	/*qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );*/
 
 	// This is to allow usage of shadow2DProj function in the shader
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
@@ -163,7 +163,7 @@ void R_GenerateShadowFBO()
 	qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
 
 	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
-	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
 	// create a framebuffer object
@@ -341,8 +341,6 @@ void SM_SetTextureMatrix( qboolean mapnum )
 
 }
 
-static int r_shadowframecount = 0;
-
 /*
 ================
 SM_RecursiveWorldNode - this variant of the classic routine renders both sides for shadowing
@@ -397,7 +395,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 		do
 		{
-			(*mark++)->visframe = r_shadowframecount;
+			(*mark++)->visframe = r_framecount;
 		} while (--c);
 
 		return;
@@ -409,7 +407,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
-		if (surf->visframe != r_shadowframecount)
+		if (surf->visframe != r_framecount)
 			continue;
 
 		if (R_CullBox (surf->mins, surf->maxs)) 
@@ -512,7 +510,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 
 		do
 		{
-			(*mark++)->visframe = r_shadowframecount;
+			(*mark++)->visframe = r_framecount;
 		} while (--c);
 
 		return;
@@ -555,7 +553,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
-		if (surf->visframe != r_shadowframecount)
+		if (surf->visframe != r_framecount)
 			continue;
 
 		if (R_CullBox (surf->mins, surf->maxs)) 
@@ -634,8 +632,6 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		
 		VectorAdd (currentmodel->mins, origin, absmins);
 		VectorAdd (currentmodel->maxs, origin, absmaxs);
-		
-		r_shadowframecount++;
 
 		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs);
 		
@@ -650,8 +646,6 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 	else
 	{
 		R_InitVArrays(VERT_NO_TEXTURE);
-		
-		r_shadowframecount++;
 		
 		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
 		
