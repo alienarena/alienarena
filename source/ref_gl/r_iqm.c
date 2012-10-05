@@ -1686,6 +1686,10 @@ void IQM_DrawFrame(int skinnum)
 		qglBindTexture (GL_TEXTURE_2D, rs->stage->texture2->texnum);
 		glUniform1iARB( g_location_fxTex, 2);
 
+		qglActiveTextureARB(GL_TEXTURE3);
+		qglBindTexture (GL_TEXTURE_2D, rs->stage->texture3->texnum);
+		glUniform1iARB( g_location_fx2Tex, 3);
+
 		GL_SelectTexture( GL_TEXTURE0);
 
 		if(rs->stage->fx)
@@ -1700,7 +1704,16 @@ void IQM_DrawFrame(int skinnum)
 
 		glUniform1iARB( g_location_useShell, 0);	
 
-		glUniform1iARB( g_location_useCube, 0); //for now - we will add code for this 
+		if(rs->stage->cube)
+		{
+			glUniform1iARB( g_location_useCube, 1);
+			if(currententity->flags & RF_WEAPONMODEL)
+				glUniform1iARB( g_location_fromView, 1);
+			else
+				glUniform1iARB( g_location_fromView, 0);
+		}
+		else
+			glUniform1iARB( g_location_useCube, 0);
 
 		glUniform1fARB( g_location_meshTime, rs_realtime);
 
