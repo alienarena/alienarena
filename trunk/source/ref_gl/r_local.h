@@ -502,6 +502,8 @@ typedef struct
     qboolean    fbo;
     qboolean    hasFBOblit;
 
+	qboolean	ati;
+
 } glstate_t;
 
 extern glconfig_t  gl_config;
