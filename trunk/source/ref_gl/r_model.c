@@ -1443,6 +1443,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 					Mod_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype,
 						stage->xang, stage->yang, stage->rotating);
 				}
+				if (stage->cube)
+					out->texinfo->flags |= SURF_SHINY;
 			} while ( (stage = stage->next) );
 		}
 		Mod_CalcSurfaceNormals(out);

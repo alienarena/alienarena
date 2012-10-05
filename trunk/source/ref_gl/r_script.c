@@ -1548,7 +1548,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	lightmaptoggle = true;
 	do
 	{
-		if (stage->lensflare || stage->grass || stage->beam)
+		if (stage->lensflare || stage->grass || stage->beam || stage->cube)
 			break; //handled elsewhere
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute

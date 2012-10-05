@@ -280,7 +280,6 @@ models/items/healing/medium/skin
 	{
 		map models/items/healing/health_normal.tga
 		normalmap
-
 		map3 gfx/chrome2.tga
 		cube
 	}
