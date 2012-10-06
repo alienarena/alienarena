@@ -574,7 +574,7 @@ extern void R_KillNormalTMUs(void);
 //shadows
 extern  void R_InitShadowSubsystem(void);
 extern  void R_CastShadow(void);
-extern	cvar_t		*r_shadowmapratio;
+extern	cvar_t		*r_shadowmapscale;
 extern  int			r_lightgroups;
 extern  image_t		*r_depthtexture;
 extern	image_t		*r_depthtexture2;
