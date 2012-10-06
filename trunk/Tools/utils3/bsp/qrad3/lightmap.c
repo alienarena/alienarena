@@ -1765,6 +1765,7 @@ void BlurFace (int facenum)
 	{
 		for (s = 0; s < width; s++)
 		{
+			int i, j;
 			double red = 0, green = 0, blue = 0, nsamples, blur_avg;
 			
 			if (fl->blur_amt[t*width+s].num_lights == 0)
@@ -1777,7 +1778,7 @@ void BlurFace (int facenum)
 			
 			//blurring by distance needs a little work
 			blur_avg = sqrt(sqrt(fl->blur_amt[t*width+s].total_blur/(double)fl->blur_amt[t*width+s].num_lights));
-			nsamples = 2.0*(1.0-blur_avg);
+			nsamples = 4.0*(1.0-blur_avg);
 			
 			src = &src_buf[(t*width+s)*3];
 			red = nsamples*src[0];
@@ -1792,20 +1793,22 @@ void BlurFace (int facenum)
 			blue += weight*src[2];
 			
 #define SAMPLES(sd,td) \
-			if (	((sd == -1 && s) || (sd == 1 && s < width-1) || !sd) &&\
-					((td == -1 && t) || (td == 1 && t < height-1) || !td)) \
+			if (	((sd < 0 && s+sd >= 0) || (sd > 0 && s < width-sd) || !sd) &&\
+					((td < 0 && t+td >= 0) || (td > 0 && t < height-td) || !td)) \
 			{\
-				SAMPLE((s+sd),(t+td),blur_avg/sqrt(abs(sd)+abs(td)))\
+				SAMPLE((s+sd),(t+td),blur_avg/sqrt(sd*sd+td*td))\
 			}
 			
-			SAMPLES(-1,-1)
-			SAMPLES(-1,0);
-			SAMPLES(-1,1);
-			SAMPLES(0,-1);
-			SAMPLES(0,1);
-			SAMPLES(1,-1);
-			SAMPLES(1,0);
-			SAMPLES(1,1);
+			for (i = -2; i < 3; i++)
+			{
+				for (j = -2; j < 3; j++)
+				{
+					if (i != 0 || j != 0)
+					{
+						SAMPLES(i,j);
+					}
+				}
+			}
 			
 			dest = &dest_buf[(t*width+s)*3];
 			dest[0] = (int)(red/nsamples);
