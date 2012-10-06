@@ -957,6 +957,8 @@ int main (int argc, char **argv)
 
     LoadConfigurationFile("qrad3", 0);
     LoadConfiguration(argc-1, argv+1);
+    
+    dlightdata_ptr = dlightdata;
 
     while((param = WalkConfiguration()) != NULL)
 	{
@@ -1050,6 +1052,12 @@ int main (int argc, char **argv)
 		else if (!strcmp(param,"-texcheck"))
 		{
 			doing_texcheck = true;
+		}
+		else if (!strcmp(param,"-blur"))
+		{
+			doing_blur = true;
+			dlightdata_ptr = dlightdata_raw;
+			
 		}
 //		else if (!strcmp(param,"-memory"))
 //		{
@@ -1185,6 +1193,9 @@ int main (int argc, char **argv)
  	}
 
 	RadWorld ();
+	
+	if (doing_blur)
+	    RunThreadsOnIndividual (numfaces, true, BlurFace);
 
 	if (refine_setting > 0)
 	{
