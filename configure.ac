@@ -44,8 +44,10 @@ dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz
 AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules ])
 AM_SILENT_RULES([yes])
 
-dnl use --enable-maintainer-mode to get full set of make targets
-dnl debated issue, but this is better for non-developers updating from svn.
+dnl use --enable-maintainer-mode to get full set of make targets.
+dnl autotools generated files will not be updated otherwise.
+dnl without --enable-maintainer-mode, autotools programs are not needed
+dnl to build the program, which is better for non-developers.   
 AM_MAINTAINER_MODE
 
 AC_CANONICAL_HOST
@@ -540,8 +542,6 @@ AM_COND_IF([BUILD_WIN32],
 	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
 ])
 
-
-
 #
 # required gcc/g++ options.
 #  fast-math because strict adherence to IEEE standard is not needed.
@@ -551,91 +551,6 @@ AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 AX_APPEND_FLAG([-ffast-math],[CXXFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CXXFLAGS])
-
-
-#########################################################################################################
-# DEBUGGING OPTIONS
-#########################################################################################################
-
-debug=no
-
-# Debugging support + symbols removal
-# Note: removing symbols applies to alternate install only
-#   use make install-strip or custom CFLAGS for standard install
-#
-
-AC_ARG_ENABLE([debugging-symbols],
-	[AS_HELP_STRING([--enable-debugging-symbols],
-		[Compile Alien Arena with full debugging information (default:no)])],
-	[debug_syms=${enableval}],[debug_syms=no])
-AS_IF([ test "x$debug_syms" = "xyes" ],[
-	AX_APPEND_FLAG([-g3],[CFLAGS])
-	AX_APPEND_FLAG([-g3],[CXXFLAGS])
-	debug=yes
-])
-AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
-
-# Compiler warnings
-AC_ARG_ENABLE([full-warnings],
-	[AS_HELP_STRING([--enable-full-warnings],[Display all compiler warnings (default:no)])],
-	[gcc_whining=${enableval}],[gcc_whining=no])
-AS_IF([ test "x$gcc_whining" = "xyes" ],[
-	AX_APPEND_FLAG([-Wall],[CFLAGS])
-	AX_APPEND_FLAG([-Wall],[CXXFLAGS])
-	AX_APPEND_FLAG([-Wextra],[CFLAGS])
-	AX_APPEND_FLAG([-Wextra],[CXXFLAGS])
-	debug=yes
-])
-
-# IRC client debugging
-AC_ARG_ENABLE([irc-debugging],
-	[AS_HELP_STRING([--enable-irc-debugging],[Debug IRC messages (default: no)])],
-	[irc_debug=${enableval}],[irc_debug=no])
-AS_IF([ test "x$irc_debug" = "xyes" ],[
-	AC_DEFINE([DEBUG_DUMP_IRC],1,[Enable IRC message debugging])
-	debug=yes
-])
-
-# Buffer size debugging
-AC_ARG_ENABLE([buffer-debugging],
-	[AS_HELP_STRING([--enable-buffer-debugging],[Debug buffers (default: no)])],
-	[buffer_debug=${enableval}],[buffer_debug=no])
-AS_IF([ test "x$buffer_debug" = "xyes" ],[
-	AC_DEFINE([BUFFER_DEBUG],1,[Enable buffer debugging])
-	debug=yes
-])
-
-# Paranoid message checking
-AC_ARG_ENABLE([paranoid-io],
-	[AS_HELP_STRING([--enable-paranoid-io],
-		[Activate paranoid, speed-sapping message checking (default: no)])
-	],[paranoid_io=${enableval}],[paranoid_io=no])
-AS_IF([ test "x$paranoid_io" = "xyes" ],[
-	AC_DEFINE([PARANOID],1,[Enable paranoid, speed-sapping message checking])
-	debug=yes
-])
-
-# Enable assert statements
-AC_ARG_ENABLE([assert-statements],
-	[AS_HELP_STRING([--enable-assert-statements],
-		[Enable debug assert() statements (default: no)])
-	],[assert_stmts=${enableval}],[assert_stmts=no])
-AS_IF([ test "x$assert_stmts" = "xyes" ],
-	[debug=yes],[
-	AX_APPEND_FLAG([-DNDEBUG],[CPPFLAGS])
-])
-
-# Enable ODE debug
-AC_ARG_ENABLE([ode-debug],
-	[AS_HELP_STRING([--enable-ode-debug],
-		[Enable debug code and assertion statements in integrated ODE (default:no)])
-	],[ode_debug=${enableval}],[ode_debug=no])
-AS_IF([ test "x$ode_debug" = "xyes" && test "x$use_system_libode" != "xyes" ],[debug=yes])
-AM_CONDITIONAL([ODE_NODEBUG],[ test "x$ode_debug" != "xyes" ])
-
-#########################################################################################################
-# END OF DEBUGGING OPTIONS
-#########################################################################################################
 
 # outputs
 AC_CONFIG_FILES([ Makefile source/Makefile ])
@@ -648,6 +563,7 @@ AC_ARG_ENABLE([build-status],[AS_HELP_STRING([--disable-build-status],
 			[hide_status=${enableval}],[hide_status=no])
 
 AS_IF([test "x$hide_status" = "xno"],[
+	AS_ECHO()
 	AS_ECHO(["-------------------------------------------"])
 	AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
 	AS_ECHO([" OS: .................... ${host_os}"])
@@ -691,20 +607,20 @@ dnl
 		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
 	])
 
-	AS_IF([ test "x$debug" = "xyes" ],[
-		AS_ECHO(["- DEBUGGING OPTIONS ------------------------"])
-		AS_ECHO(["   All compiler warnings: .... ${gcc_whining}"])
-		AS_ECHO(["   Debugging symbols: ........ ${debug_syms}"])
-		AS_ECHO(["   IRC protocol dump: ........ ${irc_debug}"])
-		AS_ECHO(["   Buffer debugging: ......... ${buffer_debug}"])
-		AS_ECHO(["   Paranoid message checks: .. ${paranoid_io}"])
-		AS_ECHO(["   Assert statements: ........ ${assert_stmts}"])
-		AS_ECHO(["   ODE debug: ................ ${ode_debug}"])
-	])
+	AS_ECHO()		
 
 	AM_COND_IF([ALTERNATE_INSTALL],
 		[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
 		[AS_ECHO(["Run \"make\" to build, then \"sudo make install\" to install."])])
+		
+	AS_ECHO()		
+	AS_ECHO(["Advanced Build Information:"])
+	AS_ECHO([" See README for information and recommendations."])
+	AS_ECHO([" Run ./configure --help for configure options."])
+	AS_ECHO([" Compiler options:"])
+	AS_ECHO(["  CFLAGS:.... ${CFLAGS}"])
+	AS_ECHO(["  CXXFLAGS:.. ${CXXFLAGS}"])
+	AS_ECHO()		
 
 	AS_ECHO(["--------------------------------------------"])
 ])

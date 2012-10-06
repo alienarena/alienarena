@@ -749,6 +749,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/metpipe3.md2 \
 	data1/maps/meshes/mhelmet.md2 \
 	data1/maps/meshes/monitor2.md2 \
+	data1/maps/meshes/monitor_normal.tga \
 	data1/maps/meshes/monitor.jpg \
 	data1/maps/meshes/monitormask.tga \
 	data1/maps/meshes/monitor.md2 \
@@ -827,9 +828,13 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/tech/rotator.jpg \
 	data1/maps/meshes/tech/rotator.md2 \
 	data1/maps/meshes/tech/rotator_normal.jpg \
+	data1/maps/meshes/tech/rotimage1_normal.tga \
 	data1/maps/meshes/tech/rotimage1.tga \
+	data1/maps/meshes/tech/rotimage2_normal.tga \
 	data1/maps/meshes/tech/rotimage2.tga \
+	data1/maps/meshes/tech/rotimage3_normal.tga \
 	data1/maps/meshes/tech/rotimage3.tga \
+	data1/maps/meshes/tech/rotimage4_normal.tga \
 	data1/maps/meshes/tech/rotimage4.tga \
 	data1/maps/meshes/tech/slimegen2.md2 \
 	data1/maps/meshes/tech/slimegen.jpg \
@@ -1063,6 +1068,7 @@ nobase_nodist_models_DATA = \
 	data1/models/items/haste/tris.md2 \
 	data1/models/items/healing/globe/skin.tga \
 	data1/models/items/healing/globe/tris.md2 \
+	data1/models/items/healing/health_normal.tga \
 	data1/models/items/healing/large/skin.tga \
 	data1/models/items/healing/large/tris.md2 \
 	data1/models/items/healing/medium/skin.tga \
@@ -1153,21 +1159,21 @@ nobase_nodist_models_DATA = \
 	data1/models/weapons/v_bfg/tris.md2 \
 	data1/models/weapons/v_blast/cover.md2 \
 	data1/models/weapons/v_blast/skin.jpg \
-	data1/models/weapons/v_blast/skin_normal.jpg \
+	data1/models/weapons/v_blast/skin_normal.tga \
 	data1/models/weapons/v_blast/tris.md2 \
 	data1/models/weapons/v_chain/skin.jpg \
 	data1/models/weapons/v_chain/skin_normal.tga \
 	data1/models/weapons/v_chain/tris.md2 \
 	data1/models/weapons/v_hyperb/cover.md2 \
 	data1/models/weapons/v_hyperb/disruptor.jpg \
-	data1/models/weapons/v_hyperb/disruptor_normal.jpg \
+	data1/models/weapons/v_hyperb/disruptor_normal.tga \
 	data1/models/weapons/v_hyperb/tris.md2 \
 	data1/models/weapons/v_machn/tris.md2 \
 	data1/models/weapons/v_minderaser/minderaser.jpg \
-	data1/models/weapons/v_minderaser/minderaser_normal.jpg \
+	data1/models/weapons/v_minderaser/minderaser_normal.tga \
 	data1/models/weapons/v_minderaser/tris.md2 \
 	data1/models/weapons/v_rail/beamgun.jpg \
-	data1/models/weapons/v_rail/beamgun_normal.jpg \
+	data1/models/weapons/v_rail/beamgun_normal.tga \
 	data1/models/weapons/v_rail/tris.md2 \
 	data1/models/weapons/v_rocket/cover.md2 \
 	data1/models/weapons/v_rocket/skin.jpg \
@@ -1183,7 +1189,7 @@ nobase_nodist_models_DATA = \
 	data1/models/weapons/v_violator/skin_normal.jpg \
 	data1/models/weapons/v_violator/tris.md2 \
 	data1/models/weapons/v_violator/violator.jpg \
-	data1/models/weapons/v_violator/violator_normal.jpg
+	data1/models/weapons/v_violator/violator_normal.tga
 
 
 particlesdir = $(pkgdatadir)
@@ -2240,7 +2246,6 @@ nobase_nodist_scripts_DATA = \
 	data1/scripts/models.rscript \
 	data1/scripts/normals/normals.rscript \
 	data1/scripts/normals/tron.rscript \
-	data1/scripts/players.rscript \
 	data1/scripts/textures.rscript
 
 

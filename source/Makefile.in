@@ -75,16 +75,15 @@ host_triplet = @host@
 
 # CPP flags for standard installation
 @ALTERNATE_INSTALL_FALSE@am__append_1 = -DDATADIR='"$(pkgdatadir)"'
-@ODE_NODEBUG_TRUE@@USE_SYSTEM_LIBODE_FALSE@am__append_2 = -DNDEBUG -DdNODEBUG
 @BUILD_WIN32_FALSE@bin_PROGRAMS = alienarena-ded$(EXEEXT) \
 @BUILD_WIN32_FALSE@	$(am__EXEEXT_1)
 @BUILD_WIN32_TRUE@bin_PROGRAMS = alienarena$(EXEEXT) $(am__EXEEXT_1)
-@BUILD_WIN32_TRUE@am__append_3 = $(WIN32_LIBS)
-@BUILD_WIN32_TRUE@am__append_4 = -DCURL_STATICLIB -DNDEBUG
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@am__append_5 = alienarena
+@BUILD_WIN32_TRUE@am__append_2 = $(WIN32_LIBS)
+@BUILD_WIN32_TRUE@am__append_3 = -DCURL_STATICLIB -DNDEBUG
+@BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@am__append_4 = alienarena
 
 # Unix Client sources
-@BUILD_UNIX_TRUE@am__append_6 = \
+@BUILD_UNIX_TRUE@am__append_5 = \
 @BUILD_UNIX_TRUE@	unix/gl_glx.c \
 @BUILD_UNIX_TRUE@	unix/glw_unix.h \
 @BUILD_UNIX_TRUE@	unix/net_udp.c \
@@ -99,7 +98,7 @@ host_triplet = @host@
 
 
 # Win32 MinGW Client sources
-@BUILD_WIN32_TRUE@am__append_7 = \
+@BUILD_WIN32_TRUE@am__append_6 = \
 @BUILD_WIN32_TRUE@	win32/conproc.c \
 @BUILD_WIN32_TRUE@	win32/conproc.h \
 @BUILD_WIN32_TRUE@	win32/glw_imp.c \
@@ -632,7 +631,7 @@ alienarena_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
 # Client libraries and flags
 alienarena_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 	$(DEPS_CFLAGS) $(ODE_CFLAGS) $(XXF86VM_CFLAGS) \
-	$(XXF86DGA_CFLAGS) $(ZLIB_CFLAGS) $(am__append_4)
+	$(XXF86DGA_CFLAGS) $(ZLIB_CFLAGS) $(am__append_3)
 
 #
 # alienarena with integrated libode
@@ -641,7 +640,7 @@ alienarena_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(PTHREAD_LIBS) $(X11_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(DEPS_LIBS) $(XXF86VM_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(XXF86DGA_LIBS) $(ZLIB_LIBS) \
-@USE_SYSTEM_LIBODE_FALSE@	-lstdc++ $(am__append_3)
+@USE_SYSTEM_LIBODE_FALSE@	-lstdc++ $(am__append_2)
 
 #
 # alienarena with system libode
@@ -649,11 +648,13 @@ alienarena_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 @USE_SYSTEM_LIBODE_TRUE@alienarena_LDADD = libgame.a $(PTHREAD_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(X11_LIBS) $(DEPS_LIBS) $(ODE_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(XXF86VM_LIBS) $(XXF86DGA_LIBS) \
-@USE_SYSTEM_LIBODE_TRUE@	$(ZLIB_LIBS) $(am__append_3)
+@USE_SYSTEM_LIBODE_TRUE@	$(ZLIB_LIBS) $(am__append_2)
+
+# ODE has an additional custom "no debug" variable 	
 @USE_SYSTEM_LIBODE_FALSE@libode_a_CPPFLAGS = -I$(top_srcdir)/source/unix/odesrc/OPCODE \
 @USE_SYSTEM_LIBODE_FALSE@	-isystem $(top_srcdir)/source/unix \
 @USE_SYSTEM_LIBODE_FALSE@	-DdDOUBLE -DdTRIMESH_ENABLED \
-@USE_SYSTEM_LIBODE_FALSE@	-DdTRIMESH_OPCODE $(am__append_2)
+@USE_SYSTEM_LIBODE_FALSE@	-DdTRIMESH_OPCODE -DNDEBUG -DdNODEBUG
 
 # common client sources
 alienarena_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
@@ -688,7 +689,7 @@ alienarena_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
 	server/sv_init.c server/sv_main.c server/sv_send.c \
 	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
-	$(am__append_6) $(am__append_7)
+	$(am__append_5) $(am__append_6)
 
 # Dedicated Server sources (Unix only)
 alienarena_ded_SOURCES = \

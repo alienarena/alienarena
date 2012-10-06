@@ -606,10 +606,6 @@ ac_header_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
-ODE_NODEBUG_FALSE
-ODE_NODEBUG_TRUE
-REMOVE_SYMBOLS_FALSE
-REMOVE_SYMBOLS_TRUE
 ALLOCA
 LIBOBJS
 EGREP
@@ -768,13 +764,6 @@ with_icondir
 with_zlib
 with_xf86vm
 with_xf86dga
-enable_debugging_symbols
-enable_full_warnings
-enable_irc_debugging
-enable_buffer_debugging
-enable_paranoid_io
-enable_assert_statements
-enable_ode_debug
 enable_build_status
 '
       ac_precious_vars='build_alias
@@ -1444,22 +1433,6 @@ Optional Features:
                           (default:no)
   --enable-ansi-color     ANSI terminal color (default: no)
   --disable-documents     Disable document installation (default: no)
-  --enable-debugging-symbols
-                          Compile Alien Arena with full debugging information
-                          (default:no)
-  --enable-full-warnings  Display all compiler warnings (default:no)
-  --enable-irc-debugging  Debug IRC messages (default: no)
-  --enable-buffer-debugging
-                          Debug buffers (default: no)
-  --enable-paranoid-io    Activate paranoid, speed-sapping message checking
-                          (default: no)
-
-  --enable-assert-statements
-                          Enable debug assert() statements (default: no)
-
-  --enable-ode-debug      Enable debug code and assertion statements in
-                          integrated ODE (default:no)
-
   --disable-build-status  hide the status message at the end of the
                           configuration script (default:no)
 
@@ -8362,8 +8335,6 @@ $as_echo "#define OPENAL_DRIVER \"OpenAL32.dll\"" >>confdefs.h
 
 fi
 
-
-
 #
 # required gcc/g++ options.
 #  fast-math because strict adherence to IEEE standard is not needed.
@@ -8457,297 +8428,6 @@ else
   CXXFLAGS="-fno-strict-aliasing"
 fi
 
-
-
-#########################################################################################################
-# DEBUGGING OPTIONS
-#########################################################################################################
-
-debug=no
-
-# Debugging support + symbols removal
-# Note: removing symbols applies to alternate install only
-#   use make install-strip or custom CFLAGS for standard install
-#
-
-# Check whether --enable-debugging-symbols was given.
-if test "${enable_debugging_symbols+set}" = set; then :
-  enableval=$enable_debugging_symbols; debug_syms=${enableval}
-else
-  debug_syms=no
-fi
-
-if  test "x$debug_syms" = "xyes" ; then :
-
-	if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -g3 "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -g3"; } >&5
-  (: CFLAGS already contains -g3) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -g3\""; } >&5
-  (: CFLAGS="$CFLAGS -g3") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CFLAGS="$CFLAGS -g3"
-      ;;
-   esac
-else
-  CFLAGS="-g3"
-fi
-
-	if ${CXXFLAGS+:} false; then :
-  case " $CXXFLAGS " in
-    *" -g3 "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -g3"; } >&5
-  (: CXXFLAGS already contains -g3) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -g3\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS -g3") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CXXFLAGS="$CXXFLAGS -g3"
-      ;;
-   esac
-else
-  CXXFLAGS="-g3"
-fi
-
-	debug=yes
-
-fi
- if  test "x$debug_syms" = "xno" ; then
-  REMOVE_SYMBOLS_TRUE=
-  REMOVE_SYMBOLS_FALSE='#'
-else
-  REMOVE_SYMBOLS_TRUE='#'
-  REMOVE_SYMBOLS_FALSE=
-fi
-
-
-# Compiler warnings
-# Check whether --enable-full-warnings was given.
-if test "${enable_full_warnings+set}" = set; then :
-  enableval=$enable_full_warnings; gcc_whining=${enableval}
-else
-  gcc_whining=no
-fi
-
-if  test "x$gcc_whining" = "xyes" ; then :
-
-	if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -Wall "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wall"; } >&5
-  (: CFLAGS already contains -Wall) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -Wall\""; } >&5
-  (: CFLAGS="$CFLAGS -Wall") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CFLAGS="$CFLAGS -Wall"
-      ;;
-   esac
-else
-  CFLAGS="-Wall"
-fi
-
-	if ${CXXFLAGS+:} false; then :
-  case " $CXXFLAGS " in
-    *" -Wall "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -Wall"; } >&5
-  (: CXXFLAGS already contains -Wall) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -Wall\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS -Wall") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CXXFLAGS="$CXXFLAGS -Wall"
-      ;;
-   esac
-else
-  CXXFLAGS="-Wall"
-fi
-
-	if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -Wextra "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wextra"; } >&5
-  (: CFLAGS already contains -Wextra) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -Wextra\""; } >&5
-  (: CFLAGS="$CFLAGS -Wextra") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CFLAGS="$CFLAGS -Wextra"
-      ;;
-   esac
-else
-  CFLAGS="-Wextra"
-fi
-
-	if ${CXXFLAGS+:} false; then :
-  case " $CXXFLAGS " in
-    *" -Wextra "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -Wextra"; } >&5
-  (: CXXFLAGS already contains -Wextra) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -Wextra\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS -Wextra") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CXXFLAGS="$CXXFLAGS -Wextra"
-      ;;
-   esac
-else
-  CXXFLAGS="-Wextra"
-fi
-
-	debug=yes
-
-fi
-
-# IRC client debugging
-# Check whether --enable-irc-debugging was given.
-if test "${enable_irc_debugging+set}" = set; then :
-  enableval=$enable_irc_debugging; irc_debug=${enableval}
-else
-  irc_debug=no
-fi
-
-if  test "x$irc_debug" = "xyes" ; then :
-
-
-$as_echo "#define DEBUG_DUMP_IRC 1" >>confdefs.h
-
-	debug=yes
-
-fi
-
-# Buffer size debugging
-# Check whether --enable-buffer-debugging was given.
-if test "${enable_buffer_debugging+set}" = set; then :
-  enableval=$enable_buffer_debugging; buffer_debug=${enableval}
-else
-  buffer_debug=no
-fi
-
-if  test "x$buffer_debug" = "xyes" ; then :
-
-
-$as_echo "#define BUFFER_DEBUG 1" >>confdefs.h
-
-	debug=yes
-
-fi
-
-# Paranoid message checking
-# Check whether --enable-paranoid-io was given.
-if test "${enable_paranoid_io+set}" = set; then :
-  enableval=$enable_paranoid_io; paranoid_io=${enableval}
-else
-  paranoid_io=no
-fi
-
-if  test "x$paranoid_io" = "xyes" ; then :
-
-
-$as_echo "#define PARANOID 1" >>confdefs.h
-
-	debug=yes
-
-fi
-
-# Enable assert statements
-# Check whether --enable-assert-statements was given.
-if test "${enable_assert_statements+set}" = set; then :
-  enableval=$enable_assert_statements; assert_stmts=${enableval}
-else
-  assert_stmts=no
-fi
-
-if  test "x$assert_stmts" = "xyes" ; then :
-  debug=yes
-else
-
-	if ${CPPFLAGS+:} false; then :
-  case " $CPPFLAGS " in
-    *" -DNDEBUG "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -DNDEBUG"; } >&5
-  (: CPPFLAGS already contains -DNDEBUG) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS -DNDEBUG\""; } >&5
-  (: CPPFLAGS="$CPPFLAGS -DNDEBUG") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CPPFLAGS="$CPPFLAGS -DNDEBUG"
-      ;;
-   esac
-else
-  CPPFLAGS="-DNDEBUG"
-fi
-
-
-fi
-
-# Enable ODE debug
-# Check whether --enable-ode-debug was given.
-if test "${enable_ode_debug+set}" = set; then :
-  enableval=$enable_ode_debug; ode_debug=${enableval}
-else
-  ode_debug=no
-fi
-
-if  test "x$ode_debug" = "xyes" && test "x$use_system_libode" != "xyes" ; then :
-  debug=yes
-fi
- if  test "x$ode_debug" != "xyes" ; then
-  ODE_NODEBUG_TRUE=
-  ODE_NODEBUG_FALSE='#'
-else
-  ODE_NODEBUG_TRUE='#'
-  ODE_NODEBUG_FALSE=
-fi
-
-
-#########################################################################################################
-# END OF DEBUGGING OPTIONS
-#########################################################################################################
 
 # outputs
 ac_config_files="$ac_config_files Makefile source/Makefile"
@@ -8908,14 +8588,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SYSTEM_LIBODE_TRUE}" && test -z "${USE_SYSTEM_LIBODE_FALSE}"; then
   as_fn_error $? "conditional \"USE_SYSTEM_LIBODE\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${REMOVE_SYMBOLS_TRUE}" && test -z "${REMOVE_SYMBOLS_FALSE}"; then
-  as_fn_error $? "conditional \"REMOVE_SYMBOLS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${ODE_NODEBUG_TRUE}" && test -z "${ODE_NODEBUG_FALSE}"; then
-  as_fn_error $? "conditional \"ODE_NODEBUG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -10265,6 +9937,7 @@ fi
 
 if test "x$hide_status" = "xno"; then :
 
+	$as_echo
 	$as_echo "-------------------------------------------"
 	$as_echo "Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"
 	$as_echo " OS: .................... ${host_os}"
@@ -10321,24 +9994,22 @@ fi
 
 fi
 
-	if  test "x$debug" = "xyes" ; then :
-
-		$as_echo "- DEBUGGING OPTIONS ------------------------"
-		$as_echo "   All compiler warnings: .... ${gcc_whining}"
-		$as_echo "   Debugging symbols: ........ ${debug_syms}"
-		$as_echo "   IRC protocol dump: ........ ${irc_debug}"
-		$as_echo "   Buffer debugging: ......... ${buffer_debug}"
-		$as_echo "   Paranoid message checks: .. ${paranoid_io}"
-		$as_echo "   Assert statements: ........ ${assert_stmts}"
-		$as_echo "   ODE debug: ................ ${ode_debug}"
-
-fi
+	$as_echo
 
 	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
   $as_echo "Run \"make\" to build, then \"make install-alternate\" to install."
 else
   $as_echo "Run \"make\" to build, then \"sudo make install\" to install."
 fi
+
+	$as_echo
+	$as_echo "Advanced Build Information:"
+	$as_echo " See README for information and recommendations."
+	$as_echo " Run ./configure --help for configure options."
+	$as_echo " Compiler options:"
+	$as_echo "  CFLAGS:.... ${CFLAGS}"
+	$as_echo "  CXXFLAGS:.. ${CXXFLAGS}"
+	$as_echo
 
 	$as_echo "--------------------------------------------"
 
