@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena Reloaded
-.\" 2010-11-30. Revised: 2012-06-29
+.\" 2010-11-30. Revised: 2012-10-04
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -10,7 +10,12 @@
 .nr topic 0 1
 
 .tl ''Alien Arena Reloaded''
-.tl ''Version 7.60''
+.tl ''Version 7.60 (updated)''
+
+ATTENTION: There is a bug fix release: 7.60.1.
+It corrects a buffer overflow when connecting to servers with many players.
+
+ATTENTION: Maintainer mode is enabled. If you do not know what this means, it is safe to ignore.   
 
 ATTENTION: Build and install for 7.60 has some significant differences from 7.53.
 
@@ -364,12 +369,22 @@ Some to try, depending on system hardware are:
 .nf
 .in +2m
 * -O3 (-O2 is the default)
-*  -march=native
+* -march=native
 * -msse, -msse2, -msse3 or other sse options, and -mfpmath=sse
 .in 0
 .fi
 If you modify CFLAGS, you probably also want the "--disable-silent-rules" configure option.
 
+Linux distributions commonly add protection against buffer overflows.
+This is a good thing. This is done by adding the following to CFLAGS:
+.nf
+.in +2m
+-Wp,-D_FORTIFY_SOURCE=2 -fstack-protector --param=ssp-buffer-size=4
+.in 0
+.fi
+
+If the System ODE library is NOT being used, then CXXFLAGS should be set the same as CFLAGS.
+The integrated ODE is build with c++.
 
 \n+[topic]. Custom Configure Options
 

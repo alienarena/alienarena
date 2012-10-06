@@ -95,9 +95,8 @@ libode_a_CPPFLAGS = -I$(top_srcdir)/source/unix/odesrc/OPCODE \
 	-DdTRIMESH_ENABLED \
 	-DdTRIMESH_OPCODE
 	
-if ODE_NODEBUG
+# ODE has an additional custom "no debug" variable 	
 libode_a_CPPFLAGS += -DNDEBUG -DdNODEBUG
-endif
 	
 endif
 

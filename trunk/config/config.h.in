@@ -3,9 +3,6 @@
 /* Enable ANSI terminal color codes in stdout */
 #undef ANSI_COLOR
 
-/* Enable buffer debugging */
-#undef BUFFER_DEBUG
-
 /* Canonical OS identification */
 #undef BUILDSTRING
 
@@ -22,9 +19,6 @@
 
 /* darwin-specific conditional compile */
 #undef DARWIN_SPECIAL_CASE
-
-/* Enable IRC message debugging */
-#undef DEBUG_DUMP_IRC
 
 /* non-specific unix conditional compile */
 #undef GENERIC_UNIX
@@ -349,9 +343,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* Enable paranoid, speed-sapping message checking */
-#undef PARANOID
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */

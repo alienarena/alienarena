@@ -411,6 +411,14 @@ the m4 subdirectory. This is done with the following command.
 Run `./configure --help` to see all 'configure' options. These
 are 'configure' options added for Alien Arena.
 
+Post 7.60 release, certain debug options have been removed. Some were
+obsolete, but mostly this is a "philosophical" issue: debug options,
+including compiler warning options, may be confusing to the non-developer.
+For developers, specifying CFLAGS is more flexible. (Note: when the debug
+options were added, strat questioned these but deferred to blackice's 
+greater expertise with autotools. But time has shown them to be an 
+unnecessary complication.)
+
 --disable-client::
   build dedicated server only, not the client (default:no)
 
@@ -420,26 +428,6 @@ are 'configure' options added for Alien Arena.
 
 --enable-ansi-color::
   ANSI terminal color (default: no) Added in 7.51.
-
---enable-debugging-symbols::
-  Compile Alien Arena with full debugging information
-  (default:no)
-
---enable-full-warnings::
-  Display all compiler warnings (default:no)
-
---enable-irc-debugging::
-  Debug IRC messages (default: no)
-
---enable-buffer-debugging::
-  Debug buffers (default: no)
-
---enable-paranoid-io::
-  Activate paranoid, speed-sapping message checking (default:
-  no)
-
---enable-assert-statements::
-  Enable debug assert() statements (default: no)
 
 --disable-build-status::
   hide  the  status message at the end of the configuration
@@ -458,6 +446,13 @@ are 'configure' options added for Alien Arena.
   _in_dgamouse_, is set to 0.
   Note: If 'with' is specified, then the library is required.
 
+--with(out)-zlib::
+  include Zlib compression support (default: check)
+  Note: If 'with' is specified, then the library is required.
+
+--with-icondir=DIR::
+  icon install directory (default:DATADIR/icons)
+
 
 === GCC Compiler Options ===
 
@@ -475,7 +470,6 @@ Wextra::
   and signed/unsigned comparisons. With just -Wall, a few unused variable 
   warnings are produced, which are easily fixed. Some bogus uninitialized
   warnings are produced; it is possible, but annoying, to eliminate these. 
-  Use the '--enable-full-warnings' 'configure' option to turn these on.
   
 O2::
 O3::
@@ -497,20 +491,17 @@ mfpmath::
   Testing shows that `-mfpmath=sse` gives better performance when
   compiling with GNU gcc. 
 
-Wp::
-  TBD.
-
 FORTIFY_SOURCE::
-  From fedora: `-Wp,D_FORTIFY_SOURCE=2` TBD.
+  `-Wp,D_FORTIFY_SOURCE=2` part of "stack smashing" protection
 
 fexceptions::
   TBD.
 
 fstack-protector::
-  TBD.
+  Part of "stack smashing" protection. 
 
 param::
-  From fedora: `--param=ssp-buffer-size=4`. TBD.
+  `--param=ssp-buffer-size=4`. Part of "stack smashing" detection.
 
 fasynchronous-unwind-tables::
   From fedora. TBD.
@@ -702,7 +693,9 @@ are included in the source tree in SVN and in the distribution.
 There is only one 'config.h' and it includes what is needed
 for building 'libode.a'.
 
-TODO: 7.60 note on ODE 0.12
+The ODE update to version 0.12 removed a function that we use. As of
+this writing there is no alternative. So ODE 0.12 cannot be used, yet.
+So the build with ODE 0.11 integrated is preferred. 
 
 
 === Reading List for Autotools ===
@@ -775,16 +768,16 @@ and customizing '-I' options, but it is possible to do an
 alternate build with a small subset of sources in an alternate
 source subdirectory.  Good for experimenting with optimizations.
 
+== Desura ==
+
+TODO:
+
 
 == Static Analysis == 
 
 TODO:
 
 == Phoronix Test Suite ==
-
-TODO:
-
-== Desura ==
 
 TODO:
 

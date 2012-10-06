@@ -75,15 +75,9 @@ install-alternate:
 if ALTERNATE_INSTALL
 if BUILD_CLIENT
 	cp $(top_builddir)/source/alienarena@EXEEXT@ $(srcdir)/alienarena@EXEEXT@
-if REMOVE_SYMBOLS
-	strip $(srcdir)/alienarena@EXEEXT@
-endif
 endif	
 if BUILD_UNIX	
 	cp $(top_builddir)/source/alienarena-ded $(srcdir)/alienarena-ded
-if REMOVE_SYMBOLS
-	strip $(srcdir)/alienarena-ded
-endif
 endif
 else
 	@echo "make install-alternate requires configuring with --enable-alternate-install"
