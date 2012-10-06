@@ -944,8 +944,8 @@ void BSP_DrawGLSLSurfaces (void)
 		glUniform1iARB( g_location_shadowmap, 1);
 		glUniform1iARB( g_Location_statshadow, 1 );
 
-		glUniform1fARB( g_location_xOffs, 1.0/(viddef.width*r_shadowmapratio->value));
-        glUniform1fARB( g_location_yOffs, 1.0/(viddef.height*r_shadowmapratio->value));
+		glUniform1fARB( g_location_xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
+        glUniform1fARB( g_location_yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
 	}
 	else
 	{
@@ -1053,8 +1053,8 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 			glUniform1iARB( g_location_shadowmap, 1);
 
-			glUniform1fARB( g_location_xOffs, 1.0/(viddef.width*r_shadowmapratio->value));
-			glUniform1fARB( g_location_yOffs, 1.0/(viddef.height*r_shadowmapratio->value));
+			glUniform1fARB( g_location_xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
+			glUniform1fARB( g_location_yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
 		}
 		else
 			glUniform1iARB( g_location_shadowmap, 0);		

@@ -77,8 +77,8 @@ void getOpenGLFunctionPointers(void)
 //used for post process stencil volume blurring and shadowmapping
 void R_GenerateShadowFBO()
 {
-	int shadowMapWidth = vid.width * r_shadowmapratio->value;
-    int shadowMapHeight = vid.height * r_shadowmapratio->value;
+	int shadowMapWidth = vid.width * r_shadowmapscale->value;
+    int shadowMapHeight = vid.height * r_shadowmapscale->value;
 	GLenum FBOstatus;
 
 	gl_state.fbo = true;
@@ -623,8 +623,8 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		qglActiveTextureARB(GL_TEXTURE6);
 		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
-		glUniform1fARB( g_location_xOffset, 1.0/(viddef.width*r_shadowmapratio->value));
-		glUniform1fARB( g_location_yOffset, 1.0/(viddef.height*r_shadowmapratio->value));
+		glUniform1fARB( g_location_xOffset, 1.0/(viddef.width*r_shadowmapscale->value));
+		glUniform1fARB( g_location_yOffset, 1.0/(viddef.height*r_shadowmapscale->value));
 
 		glUniform1fARB( g_location_fadeShadow, fadeShadow );
 		
@@ -695,7 +695,7 @@ void R_DrawDynamicCaster(void)
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  
+	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
 	// Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
@@ -973,7 +973,7 @@ void R_DrawVegetationCaster(void)
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value)); 
+	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value)); 
 
 	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
@@ -1042,7 +1042,7 @@ void R_DrawEntityCaster(entity_t *ent)
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  
+	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
 	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
@@ -1216,7 +1216,7 @@ void R_DrawRagdollCaster(int RagDollID)
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  
+	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
 	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);

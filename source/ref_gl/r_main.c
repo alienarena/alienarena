@@ -107,7 +107,7 @@ cvar_t	*r_lefthand;
 
 cvar_t  *r_wave; // Water waves
 
-cvar_t	*r_shadowmapratio;
+cvar_t	*r_shadowmapscale;
 
 cvar_t	*r_overbrightbits;
 
@@ -1244,7 +1244,7 @@ void R_Register( void )
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
-	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "1", CVAR_ARCHIVE );
+	r_shadowmapscale = Cvar_Get( "r_shadowmapscale", "1", CVAR_ARCHIVE );
 	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "880", CVAR_ARCHIVE );
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
