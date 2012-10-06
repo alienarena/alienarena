@@ -747,6 +747,12 @@ void CalcPoints (lightinfo_t *l, float sofs, float tofs)
 //==============================================================
 
 
+//for each sample, we keep track of how much blurring we should do
+typedef struct {
+	//divide these for a weighted blur average for a single sample
+	double	total_blur;
+	int		num_lights;
+} sample_blur_t;
 
 #define	MAX_STYLES	32
 typedef struct
@@ -756,6 +762,7 @@ typedef struct
 	int			numstyles;
 	int			stylenums[MAX_STYLES];
 	float		*samples[MAX_STYLES];
+	sample_blur_t	*blur_amt;
 } facelight_t;
 
 directlight_t	*directlights[MAX_MAP_LEAFS];
@@ -1154,10 +1161,11 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									vec3_t normal, vec3_t color, 
 									float lightscale2, 
 									qboolean *sun_main_once, 
-									qboolean *sun_ambient_once
+									qboolean *sun_ambient_once,
+									float *lightweight
 								)
 {
-	vec3_t			delta, target, occluded;
+	vec3_t			delta, target, occluded, color_nodist;
 	float			dot, dot2;
 	float			dist;
 	float			scale = 0.0f;
@@ -1170,6 +1178,8 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 	VectorClear (color);
 	VectorSubtract (l->origin, pos, delta);
 	dist = DotProduct (delta, delta);
+	
+	*lightweight = 0;
 
 	if (dist == 0)
 		return;
@@ -1264,15 +1274,24 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 			Error("Invalid light entity type.\n" );
 			break;
 		} /* switch() */
-
+		
 		if ( scale > 0.0f )
 		{
 			scale *= lightscale2; // adjust for multisamples, -extra cmd line arg
 			VectorScale ( l->color, scale, color );
 		}
 	}
+	
+	// 441.67 = roughly (sqrt(3*255^2))
+	VectorScale (l->color, l->intensity/441.67, color_nodist);
+	
 	for (i = 0; i < 3; i++)
+	{
+		color_nodist[i] *= occluded[i];
 		color[i] *= occluded[i];
+	}
+	
+	*lightweight = VectorLength (color_nodist);
 }
 
 /*
@@ -1283,7 +1302,7 @@ Lightscale2 is the normalizer for multisampling, -extra cmd line arg
 =============
 */
 
-void GatherSampleLight (vec3_t pos, vec3_t normal,
+void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 			float **styletable, int offset, int mapsize, float lightscale2,
 			qboolean *sun_main_once, qboolean *sun_ambient_once)
 {
@@ -1293,6 +1312,7 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 	float			*dest;
 	vec3_t			color;
 	int				nodenum;
+	float			lightweight;
 
 	// get the PVS for the pos to limit the number of checks
 	if (!PvsForOrigin (pos, pvs))
@@ -1308,7 +1328,7 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint ( l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once);
+			LightContributionToPoint ( l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once, &lightweight);
 
 			// no contribution
 			if ( VectorCompare ( color, vec3_origin ) )
@@ -1325,6 +1345,12 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 			dest[0] += color[0];
 			dest[1] += color[1];
 			dest[2] += color[2];
+			
+			if (doing_blur)
+			{
+				blur->total_blur += lightweight;
+				blur->num_lights++;
+			}
 		}
 	}
 
@@ -1445,17 +1471,19 @@ void BuildFacelights (int facenum)
 	fl = &facelight[facenum];
 	fl->numsamples = liteinfo[0].numsurfpt;
 	fl->origins = malloc (tablesize);
+	fl->blur_amt = malloc (liteinfo[0].numsurfpt * sizeof(sample_blur_t));
 	memcpy (fl->origins, liteinfo[0].surfpt, tablesize);
 
 	for (i=0 ; i<liteinfo[0].numsurfpt ; i++)
 	{
         sun_ambient_once = false;
         sun_main_once = false;
-
+		fl->blur_amt[i].total_blur = 0;
+		fl->blur_amt[i].num_lights = 0;
 
 		for (j=0 ; j<numsamples ; j++)
 		{
-			GatherSampleLight (liteinfo[j].surfpt[i], liteinfo[0].facenormal, styletable,
+			GatherSampleLight (liteinfo[j].surfpt[i], &fl->blur_amt[i], liteinfo[0].facenormal, styletable,
 				i*3, tablesize, 1.0/numsamples, &sun_main_once, &sun_ambient_once);
 		}
 
@@ -1612,7 +1640,7 @@ void FinalLightFace (int facenum)
 	// 2010-09 - probably not used, too crude
  	minlight = FloatForKey (face_entity[facenum], "_minlight") * 128;
 */
-	dest = &dlightdata[f->lightofs];
+	dest = &dlightdata_ptr[f->lightofs];
 
 	if (fl->numstyles > MAXLIGHTMAPS)
 	{
@@ -1708,4 +1736,81 @@ void FinalLightFace (int facenum)
 
 	if (numbounce > 0)
 		FreeTriangulation (trian);
+}
+
+
+/*
+=============
+BlurFace
+
+Simple blur for each face
+=============
+*/
+void BlurFace (int facenum)
+{
+	dface_t		*f;
+	facelight_t	*fl;
+	byte		*src_buf, *dest_buf, *src, *dest;
+	int			width, height, s, t;
+	
+	f = &dfaces[facenum];
+	fl = &facelight[facenum];
+	src_buf = &dlightdata_raw[f->lightofs];
+	dest_buf = &dlightdata[f->lightofs];
+	
+	width = lfacelookups[facenum].width;
+	height = lfacelookups[facenum].height;
+	
+	for (t = 0; t < height; t++)
+	{
+		for (s = 0; s < width; s++)
+		{
+			double red = 0, green = 0, blue = 0, nsamples, blur_avg;
+			
+			if (fl->blur_amt[t*width+s].num_lights == 0)
+			{
+				//special case
+				dest = &dest_buf[(t*width+s)*3];
+				dest[0] = dest[1] = dest[2] = 0;
+				continue;
+			}
+			
+			//blurring by distance needs a little work
+			blur_avg = sqrt(sqrt(fl->blur_amt[t*width+s].total_blur/(double)fl->blur_amt[t*width+s].num_lights));
+			nsamples = 2.0*(1.0-blur_avg);
+			
+			src = &src_buf[(t*width+s)*3];
+			red = nsamples*src[0];
+			green = nsamples*src[1];
+			blue = nsamples*src[2];
+			
+#define SAMPLE(s,t,weight) \
+			src = &src_buf[(t*width+s)*3];\
+			nsamples += weight;\
+			red += weight*src[0];\
+			green += weight*src[1];\
+			blue += weight*src[2];
+			
+#define SAMPLES(sd,td) \
+			if (	((sd == -1 && s) || (sd == 1 && s < width-1) || !sd) &&\
+					((td == -1 && t) || (td == 1 && t < height-1) || !td)) \
+			{\
+				SAMPLE((s+sd),(t+td),blur_avg/sqrt(abs(sd)+abs(td)))\
+			}
+			
+			SAMPLES(-1,-1)
+			SAMPLES(-1,0);
+			SAMPLES(-1,1);
+			SAMPLES(0,-1);
+			SAMPLES(0,1);
+			SAMPLES(1,-1);
+			SAMPLES(1,0);
+			SAMPLES(1,1);
+			
+			dest = &dest_buf[(t*width+s)*3];
+			dest[0] = (int)(red/nsamples);
+			dest[1] = (int)(green/nsamples);
+			dest[2] = (int)(blue/nsamples);
+		}
+	}
 }

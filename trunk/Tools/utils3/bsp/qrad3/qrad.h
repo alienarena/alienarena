@@ -108,6 +108,7 @@ int				texture_sizes[MAX_MAP_TEXINFO][2];
 
 
 qboolean		doing_texcheck;
+qboolean		doing_blur;
 
 //==============================================
 
@@ -137,6 +138,7 @@ void BuildLightmaps (void);
 void BuildFacelights (int facenum);
 
 void FinalLightFace (int facenum);
+void BlurFace (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
@@ -173,3 +175,6 @@ void MakePatches (void);
 void SubdividePatches (void);
 void PairEdges (void);
 void CalcTextureReflectivity (void);
+
+byte	*dlightdata_ptr; 
+byte	dlightdata_raw[MAX_OVERRIDE_LIGHTING];
