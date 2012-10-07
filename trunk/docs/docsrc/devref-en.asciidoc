@@ -245,12 +245,55 @@ various Linux distributions' package maintainence process.
 The other, to improve portability and ease of installation
 for users.
 
-It is important to recognize that the goal of GNU Autotools
-is NOT to make the developer's job easier.  From a coder's
-viewpoint, it is not, nor is it intended to be, the ideal
-software construction tool.  There are alternatives, but for
-open source software, none have developed to the point of
-being generally adopted as standard.
+It is important to recognize that the goal of GNU Autotools is NOT to
+make the developer's job easier.  From a coder's viewpoint, it is not,
+nor is it intended to be, the ideal software construction tool. The mere
+mention of Autotools elicits groans from most developers.  There are
+alternatives, but for open source software, none have developed to the
+point of being generally adopted as standard. There are some who disagree
+with that statement, but they are mistaken.
+
+For development purposes it is sometimes better to use a plain makefile.
+See 'Developer's Not-Autotools Makefile' below.
+
+==== Reading List for Autotools ====
+
+- John Calcote.
+  'Autotools: A Practitioner's Guild to GNU Autoconf, Automake, and LibTool.'
+
+- Diego E. "Flameeyes" Petteno.
+  'Autotools Mythbuster'
+  http://www.flameeyes.eu/autotools-mythbuster/.
+
+- David MacKenzie, Ben Elliston, Akim Demaille.
+  'Autoconf: Creating Automatic Configuration Scripts'
+  For version 2.65, 4 November 2009.
+
+- David MacKenzie, Tom Tromey, Alexandre Duret-Lutz.
+  'GNU Automake'.
+  For version 1.11.1, 8 December 2009.
+
+- Richard M. Stallman, Roland McGrath, Paul D. Smith.
+  'GNU Make: A Program for Directing Recompilation'.
+  GNU make Version 3.81, April 2006.
+
+- Gordon Matzigkeit, Alexandre Oliva, Thomas Tanner, Gary V. Vaughan.
+  'GNU Libtool'.
+  For version 2.2.6, 1 August 2008.
+
+- Richard Stallman, et al.
+  'GNU Coding Standards'.
+  last updated June 10, 2008.
+
+- Edited by Rusty Russell, Daniel Quinlan, Christopher Yeoh.
+  'Filesystem Hierarchy Standard'
+  Filesystem Hierarchy Standard Group.
+
+- Gary V. Vaughan, Ben Elliston, Tom Tromey and Ian Lance Taylor.
+  'GNU AutoConf, AutoMake, and LibTool'
+  "The Goat Book", Version 1.5, February 2006.
+  http://sourceware.org/autobook.
+
 
 === Program Changes in 7.50 ===
 
@@ -291,11 +334,11 @@ path.  The functions are *FullPath()* and *FullWritePath()*.
 They are declared in 'game/game.h' and 'qcommon/qcommon.h'.
 They are defined in 'qcommon/files.c'.
 
-The name of the stand-alone dedicated server is changed from
-'crded' to 'crx-ded'. (With the 7.60 release, updated to 'alienarena-ded').
-The purpose is to make it simple to
-change the name of the executable files using the standard
-built-in configure option.
+The name of the stand-alone dedicated server was changed from 'crded' to
+'crx-ded'. The purpose was to make it simple to change the name of the
+executable files using the standard built-in configure option. With the
+7.60 release, the dedicated server name was updated to 'alienarena-ded'.
+
 
 === Subversion Repository ===
 
@@ -316,51 +359,114 @@ For example:
 +mkdir alienarena+
 +svn checkout svn://icculus.org/alienarena/trunk alienarena+
 
+=== Maintainer's Guide ===
 
-==== Autotools Related Files ====
+==== Autotools Source Files ====
 
-WARNING: Certain files necessary for non-developer users to
-build the program are in the repository.  These include the
-generated configure script and Autotools-supplied scripts in the
-'config/' and 'm4/' subdirectory.  Normally, these scripts are
-automatically added to the distribution package by Autotools.
-Having them in the repository can lead to version mismatch
-problems with a developer's Autotools version.
+These are Autotools-related files that are manually edited:
+
+configure.ac::
+  source file for 'autoconf'.
+Makefile.am::
+  top level source file for 'automake'.
+game_data.am::
+  lists of game asset files. included in 'Makefile.am'.
+source/Makefile.am::
+  'source' subdirectory source file for 'automake'
+  
+  
+Some Autotools files are just copied without change:
+
+m4/*.m4::
+  m4 macros from the autoconf-archive.
+INSTALL::
+  GNU build/install reference.
+COPYING::
+  GNU GPL, Version 2.
+
+==== Autotools Generated Files ====
+
+The Alien Arena Autotools build uses *Maintainer Mode*. The upside of
+this is that the end user does *not* need the Autotools programs and can
+run the well-known './configure, make, sudo make install' procedure. The
+downside is that if 'configure' is run without '--enable-maintainer-mode',
+some of the generated files will not be updated.
+
+The *Generated Files* are:
+
+configure:: 
+  the user's configure script.
+Makefile.in::
+  template for the user's top directory Makefile.
+source/Makefile.in::
+  template for the user's source subdirectory Makefile.
+config/config.h.in::
+  template for the user's config.h.
+aclocal.m4::
+  all the .m4 macros used by 'configure'. generated by 'aclocal'.
+
+The 'Generated Files' need to be regenerated when any of following occur:
+
+- Source files (.c, .h, etc.) are added, removed or renamed.
+- System libraries are added or removed (in configure.ac, Makefile.am files).
+- Asset files (textures, models, etc.) are added, removed or renamed.
+- Autotools files (configure.ac, Makefile.am, etc.) are modified.
+
+*Note*
+There are other intermediate files generated by Autotools. Refer to Autotools
+documentation.
+
+==== Autotools Prerequisites ====
+
+The Autotools packages are:
+
+- 'autoconf'
+- 'automake',
+- 'autoconf-archive'
+
+To avoid confusion, developers committing to the repository should all be
+using the same versions of these packages.
+
+The 'autoconf-archive' is an evolving set of macros maintained on the GNU
+website. We use a few of these. The file names are normally prefixed with
+'ax_' and the macros prefixed with 'AX_'. Each file has a 'serial' number
+in a comment. Care should be take not to commit an earlier version of a
+'.m4' file into the SVN 'm4' subdirectory. If a file we use is updated in
+the archive, update it in the repository.
+
+After adding new 'AX_' macros to 'configure.ac', the '.m4' file needs to be
+added to the 'm4' subdirectory. This is done with the following command.
+
++aclocal -I m4 --force --install+
+
+==== Adding, Removing, Renaming Program Source Files ====
+
+Source files are modified in the 'source/Makefile.am' file. Modify the
+source in the applicable '*_SOURCE' lists. Header ('.h') files must
+be included, because the list is used to generate the tarball.
+
+Certain files may appear in several lists. For example, ''alienarena_SOURCES',
+'alienarena-ded_SOURCES' and 'libgame_a_SOURCES' all have 'qcommon/qfiles.h'.
+
+==== Adding, Removing, Renaming Game Asset Files ====
+
+The file, 'game_data.am' contains lists of game asset files. It
+is included in the top-level 'Makefile.am'. It is used to generate
+the distribution archive and for copying files to the 'datadir' in a
+'standard install'.
+
+The downside is that 'game_data.am' needs to be kept up-to-date with
+additions and deletions. The advantage is that the 'install' program
+handles the copying of game resources. For 'make uninstall' it handles
+deletion of what 'make install' installed.
 
 
-.SOURCE FILES:
- configure.ac ......... source file for autoconf
- Makefile.am .......... top source file for automake
- game_data.am ......... included in Makefile.am
- source/Makefile.am ... subdirectory source file for automake
+To make modifications, find the appropriate list and add, delete or
+modify the file entry. Makefile syntax requires that there be no trailing
+spaces after the '\'. Each entry should be preceeded by one TAB character.
+The files are listed in (mostly) alphabetical order. 
 
-.GENERATED FILES:
- configure ............ the user's configure script
- Makefile.in .......... template for the user's top directory Makefile
- source/Makefile.in ... template for the user's subdirectory Makefile
- aclocal.m4 ........... generated by aclocal
- config/config.h.in ... template for the user's config.h
-
-.COPIED FILES:
- m4/*.m4 .............. ax_* m4 macros, from autoconf-archive
- INSTALL .............. GNU build/install reference
- COPYING .............. GNU GPL
-
-=== The game_data.am File ===
-
-The file, 'game_data.am' contains a *long* list of game
-resources.  It is used to generate the distribution archive and
-for copying files to the 'datadir' in a standard install. The
-downside is that it needs to be kept up-to-date with additions
-and deletions. The advantage is that the 'install' program
-handles the copying of game resources. For 'make uninstall'
-it handles deletion of what 'make install' installed.
-
-For development, when using the standard install, use 'make
-install-exec' to limit copying to the executables. Note that
-the alternate install always just copies the executables.
-
-*Version 7.60 changes to game_data.am*
+===== Version 7.60 changes to game_data.am =====
 
 With the game resource additions of 7.60, the 'game_data.am' list exceeded
 the command line length limit. After much agonizing and lamenting,
@@ -369,144 +475,61 @@ a solution was found. The list is subdivided by the subdirectories of
 it does not work for the distribution creation procedure. For that,
 a copy procedure is added to 'dist-hook' in 'Makefile.am'.
 
-*Is this a PITA, or what?*
+===== Is this a PITA, or what? =====
 
 Yes, it is. It would be nice not to have to reconfigure when game assets
-are added or deleted. The way to do this is to implement a custom
+are added or deleted. The way to avoid this is to implement a custom
 'install' procedure that uses the game data file list to copy files
 when installing and deleting files when uninstalling. The game data file
 list would also be used for distribution creation. The method in version
 7.60 is crude; there is probably a faster way.  (However, speed is not
 important for tarball generation.)
 
-*Another issue*
+It would be good to support separate source and data tarballs.  This would
+make us more popular with distro packagers. Some distros split the tarball,
+possibly because the source code and game assets are under different licenses.
 
-We should support separate source and data tarballs.  This would
-make us more popular with distro packagers. I think they have to do this
-split because the source and data are under different licenses.
+==== Adding or Removing System Libraries ====
 
-=== Adding new source files ===
+The details of changing the system library settings are way beyond
+the scope of this document. Some knowledge of autoconf and automake
+is required.
 
-New source files are added to the 'source/Makefile.am' file. Add the
-new source to the applicable '*_SOURCE' lists. Header ('.h') files must
-be included, because the list is used to generate the tarball.
-
-=== Maintainer's Reconfigure ===
-
-TODO
-
-=== Adding a system library to the build ===
-
-For common system libraries, there will usually be an .m4 macro available.
+For common system libraries, there *may* be a helpful '.m4' macro available.
 These may be part of autoconf (AC_*), or they may be extensions from
-the GNU Autoconf Archive (AX_*).
+the Autoconf Archive (AX_*).
 
-After adding new AX_ macros to configure.ac, the .m4 file needs to be added to
-the m4 subdirectory. This is done with the following command.
+==== Procedures ====
 
-+aclocal -I m4 --force --install+
+There are various clean options, besides the usual, that remove more than
+object files. Some useful ones are:
 
-=== Configure options ===
+maintainer-clean::
+  removes most generated files. run 'autoreconf' to rebuild them.
+distclean::
+  removes files generated by 'configure'.
 
-Run `./configure --help` to see all 'configure' options. These
-are 'configure' options added for Alien Arena.
+Following changes, run:
 
-Post 7.60 release, certain debug options have been removed. Some were
-obsolete, but mostly this is a "philosophical" issue: debug options,
-including compiler warning options, may be confusing to the non-developer.
-For developers, specifying CFLAGS is more flexible. (Note: when the debug
-options were added, strat questioned these but deferred to blackice's 
-greater expertise with autotools. But time has shown them to be an 
-unnecessary complication.)
+- +autoreconf --verbose+
+- +./configure --enable-maintainer-mode <other options>+
+- +make+
+- 	+sudo make install+
 
---disable-client::
-  build dedicated server only, not the client (default:no)
+There are variations for the 'configure' and 'make install' commands, of course.
+See below for 'configure' options and compiler options.
 
---enable-alternate-install::
-  traditional single directory, in-place installation
-  (default:no)
+Run some tests and, if all this goes well, commit the changed files to the
+repository. The 'svn status' command will show which files were modified.
 
---enable-ansi-color::
-  ANSI terminal color (default: no) Added in 7.51.
+===== Installation Notes =====
 
---disable-build-status::
-  hide  the  status message at the end of the configuration
-  script (default:no)
-
---with(out)-xf86vm::
-  include XF86 VidMode support (default: check)
-  Note: Needed to support full-screen mode.
-  Note: If 'with' is specified, then the library is required.
-
---with(out)-xf86dga::
-  include XF86 DGA support (default: without)
-  Note: default is changed from 'check' in version 7.60
-  Note: DGA appears to only used for mouse pointer input and
-  is optional. It is disabled by default, or when the cvar, 
-  _in_dgamouse_, is set to 0.
-  Note: If 'with' is specified, then the library is required.
-
---with(out)-zlib::
-  include Zlib compression support (default: check)
-  Note: If 'with' is specified, then the library is required.
-
---with-icondir=DIR::
-  icon install directory (default:DATADIR/icons)
+For the 'standard install', use 'make install-exec' to limit 
+copying to the executables. Note that the 'alternate install'
+always just copies the executables.
 
 
-=== GCC Compiler Options ===
-
-Linux distro's use a variety of different gcc compile
-options. These can give more error warnings; and in rare cases
-program errors.
-
-Also for users who compile from source, there are CPU
-dependendent options that might give better performance. Might
-be good to document some of these in the README.
-
-Wall::
-Wextra::
-  With -Wextra many warnings are produced, especially for unused parameters
-  and signed/unsigned comparisons. With just -Wall, a few unused variable 
-  warnings are produced, which are easily fixed. Some bogus uninitialized
-  warnings are produced; it is possible, but annoying, to eliminate these. 
-  
-O2::
-O3::
-  Optimization levels. O3 produces different warning messages, so should
-  be tested before releases.
-
-m32::
-m64::
-  Specify 32bit or 64bit build. Only needed when cross-compiling. 
-
-march::
-mtune::
-  Set for specific architectures. Might give better performance
-  than generic builds. For instance, `-march=core2` enables
-  higher performance features. Use `-mtune=generic` when building
-  release binaries; for Desura, for instance.
-
-mfpmath::
-  Testing shows that `-mfpmath=sse` gives better performance when
-  compiling with GNU gcc. 
-
-FORTIFY_SOURCE::
-  `-Wp,D_FORTIFY_SOURCE=2` part of "stack smashing" protection
-
-fexceptions::
-  TBD.
-
-fstack-protector::
-  Part of "stack smashing" protection. 
-
-param::
-  `--param=ssp-buffer-size=4`. Part of "stack smashing" detection.
-
-fasynchronous-unwind-tables::
-  From fedora. TBD.
-
-=== Generating an Archive Package for Distribution ===
+=== Packager's Guide ===
 
 ==== Verify Autotools Versions ====
 
@@ -517,18 +540,14 @@ The 7.60 release uses 'autoconf 2.68' and 'automake 1.11'. If more than
 one dev is committing autotool related changes to SVN, it will be less
 confusing if all are using the same versions. 
 
-The 'autoconf-archive' is an evolving set of macros maintained 
-on the GNU website. (On gentoo it is installed in '/usr/share/aclocal').
-We use a few of these. Each file has a 'serial' number in a comment. Care
-should be take not to commit an earlier version of a '.m4' into the SVN 'm4'
-subdirectory. Also, if a file we use is updated in the archive, update it
-in the repository and do a complete reconfigure. Changes will appear in
-the generated 'aclocal.m4' file. See below for commands to update the
-macro files.
-
 ==== Verify Alien Arena Version ====
 
-Verify that the version in 'configure.ac' is correct.
+Verify that the version number in 'configure.ac' is correct.
+
+==== Verify Autotools Files ====
+
+See the 'Maintainer's Guide' above. Verify that all Autotools-related
+files are up-to-date.
 
 ==== Export from Subversion Repository ====
 
@@ -666,8 +685,108 @@ svn export --ignore-externals \
 # --- tarball construction ---
 cd alienarena
 ./configure --enable-maintainer-mode
- make distcheck
+ make distcheckDeveloper's Not-Autotools Makefile
 --------------------------------------------------------------------------------
+
+=== Configure options ===
+
+Run `./configure --help` to see all 'configure' options. These
+are 'configure' options added for Alien Arena.
+
+Post 7.60 release, certain debug options have been removed. Some were
+obsolete, but mostly this is a "philosophical" issue: debug options,
+including compiler warning options, may be confusing to the non-developer.
+For developers, specifying CFLAGS is more flexible. (Note: when the debug
+options were added, strat questioned these but deferred to blackice's 
+greater expertise with autotools. But time has shown them to be an 
+unnecessary complication.)
+
+--disable-client::
+  build dedicated server only, not the client (default:no)
+
+--enable-alternate-install::
+  traditional single directory, in-place installation
+  (default:no)
+
+--enable-ansi-color::
+  ANSI terminal color (default: no) Added in 7.51.
+
+--disable-build-status::
+  hide  the  status message at the end of the configuration
+  script (default:no)
+
+--with(out)-xf86vm::
+  include XF86 VidMode support (default: check)
+  Note: Needed to support full-screen mode.
+  Note: If 'with' is specified, then the library is required.
+
+--with(out)-xf86dga::
+  include XF86 DGA support (default: without)
+  Note: default is changed from 'check' in version 7.60
+  Note: DGA appears to only used for mouse pointer input and
+  is optional. It is disabled by default, or when the cvar, 
+  _in_dgamouse_, is set to 0.
+  Note: If 'with' is specified, then the library is required.
+
+--with(out)-zlib::
+  include Zlib compressDeveloper's Not-Autotools Makefileion support (default: check)
+  Note: If 'with' is specified, then the library is required.
+
+--with-icondir=DIR::
+  icon install directory (default:DATADIR/icons)
+
+
+=== GCC Compiler Options ===
+
+Linux distro's use a variety of different gcc compile
+options. These can give more error warnings; and in rare cases
+program errors.
+
+Also for users who compile from source, there are CPU
+dependendent options that might give better performance. Might
+be good to document some of these in the README.
+
+Wall::
+Wextra::
+  With -Wextra many warnings are produced, especially for unused parameters
+  and signed/unsigned comparisons. With just -Wall, a few unused variable 
+  warnings are produced, which are easily fixed. Some bogus uninitialized
+  warnings are produced; it is possible, but annoying, to eliminate these. 
+  
+O2::
+O3::
+  Optimization levels. O3 produces different warning messages, so should
+  be tested before releases.
+
+m32::
+m64::
+  Specify 32bit or 64bit build. Only needed when cross-compiling. 
+
+march::
+mtune::
+  Set for specific architectures. Might give better performance
+  than generic builds. For instance, `-march=core2` enables
+  higher performance features. Use `-mtune=generic` when building
+  release binaries; for Desura, for instance.
+
+mfpmath::
+  Testing shows that `-mfpmath=sse` gives better performance when
+  compiling with GNU gcc. 
+
+FORTIFY_SOURCE::
+  `-Wp,D_FORTIFY_SOURCE=2` part of "stack smashing" protection
+
+fexceptions::
+  TBD.
+
+fstack-protector::
+  Part of "stack smashing" protection. 
+
+param::
+  `--param=ssp-buffer-size=4`. Part of "stack smashing" detection.
+
+fasynchronous-unwind-tables::
+  From fedora. TBD.
 
 
 === config.h ===
@@ -688,7 +807,7 @@ compilation in the common code.
 === Open Dynamics Engine (ODE) Integration ===
 
 A static library, 'libode.a', is built and linked with the main
-program, 'alienarena'. Only files that are used in the library build
+program, 'alienarena'. Only files that are used in the Developer's Not-Autotools Makefilelibrary build
 are included in the source tree in SVN and in the distribution.
 There is only one 'config.h' and it includes what is needed
 for building 'libode.a'.
@@ -698,43 +817,6 @@ this writing there is no alternative. So ODE 0.12 cannot be used, yet.
 So the build with ODE 0.11 integrated is preferred. 
 
 
-=== Reading List for Autotools ===
-
-- John Calcote.
-  'Autotools: A Practitioner's Guild to GNU Autoconf, Automake, and LibTool.'
-
-- Diego E. "Flameeyes" Petteno.
-  'Autotools Mythbuster'
-  http://www.flameeyes.eu/autotools-mythbuster/.
-
-- David MacKenzie, Ben Elliston, Akim Demaille.
-  'Autoconf: Creating Automatic Configuration Scripts'
-  For version 2.65, 4 November 2009.
-
-- David MacKenzie, Tom Tromey, Alexandre Duret-Lutz.
-  'GNU Automake'.
-  For version 1.11.1, 8 December 2009.
-
-- Richard M. Stallman, Roland McGrath, Paul D. Smith.
-  'GNU Make: A Program for Directing Recompilation'.
-  GNU make Version 3.81, April 2006.
-
-- Gordon Matzigkeit, Alexandre Oliva, Thomas Tanner, Gary V. Vaughan.
-  'GNU Libtool'.
-  For version 2.2.6, 1 August 2008.
-
-- Richard Stallman, et al.
-  'GNU Coding Standards'.
-  last updated June 10, 2008.
-
-- Edited by Rusty Russell, Daniel Quinlan, Christopher Yeoh.
-  'Filesystem Hierarchy Standard'
-  Filesystem Hierarchy Standard Group.
-
-- Gary V. Vaughan, Ben Elliston, Tom Tromey and Ian Lance Taylor.
-  'GNU AutoConf, AutoMake, and LibTool'
-  "The Goat Book", Version 1.5, February 2006.
-  http://sourceware.org/autobook.
 
 
 == MinGW Build ==
@@ -771,7 +853,6 @@ source subdirectory.  Good for experimenting with optimizations.
 == Desura ==
 
 TODO:
-
 
 == Static Analysis == 
 

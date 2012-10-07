@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Alien Arena Developer Reference</title><link rel="stylesheet" type="text/css" href="stylesheets/docbook-xsl.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp100672"></a>Alien Arena Developer Reference</h2></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_about_this_document">1. About this Document</a></span></dt><dt><span class="section"><a href="#_subversion_repository">2. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_visual_c_2010_build">3. Visual C++ 2010 Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_windows_subversion_client">3.1. Windows Subversion Client</a></span></dt><dt><span class="section"><a href="#_microsoft_visual_c_2010_express">3.2. Microsoft Visual C++ 2010 Express</a></span></dt><dt><span class="section"><a href="#_libraries">3.3. Libraries</a></span></dt><dt><span class="section"><a href="#_openal_1_1_sdk">3.4. OpenAL 1.1 SDK</a></span></dt><dt><span class="section"><a href="#_directory_tree">3.5. Directory Tree</a></span></dt><dt><span class="section"><a href="#_the_config_h_file">3.6. The config.h file</a></span></dt></dl></dd><dt><span class="section"><a href="#_unix_linux_build">4. Unix/Linux Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_introduction">4.1. Introduction</a></span></dt><dt><span class="section"><a href="#_program_changes_in_7_50">4.2. Program Changes in 7.50</a></span></dt><dt><span class="section"><a href="#_subversion_repository_2">4.3. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_the_game_data_am_file">4.4. The game_data.am File</a></span></dt><dt><span class="section"><a href="#_adding_new_source_files">4.5. Adding new source files</a></span></dt><dt><span class="section"><a href="#_maintainer_8217_s_reconfigure">4.6. Maintainer’s Reconfigure</a></span></dt><dt><span class="section"><a href="#_adding_a_system_library_to_the_build">4.7. Adding a system library to the build</a></span></dt><dt><span class="section"><a href="#_configure_options">4.8. Configure options</a></span></dt><dt><span class="section"><a href="#_gcc_compiler_options">4.9. GCC Compiler Options</a></span></dt><dt><span class="section"><a href="#_generating_an_archive_package_for_distribution">4.10. Generating an Archive Package for Distribution</a></span></dt><dt><span class="section"><a href="#_config_h">4.11. config.h</a></span></dt><dt><span class="section"><a href="#_open_dynamics_engine_ode_integration">4.12. Open Dynamics Engine (ODE) Integration</a></span></dt><dt><span class="section"><a href="#_reading_list_for_autotools">4.13. Reading List for Autotools</a></span></dt></dl></dd><dt><span class="section"><a href="#_mingw_build">5. MinGW Build</a></span></dt><dt><span class="section"><a href="#_mac_os_x_darwin_x11_build">6. Mac OS X / Darwin X11 Build</a></span></dt><dt><span class="section"><a href="#_developer_8217_s_not_autotools_makefile">7. Developer’s Not-Autotools Makefile</a></span></dt><dt><span class="section"><a href="#_desura">8. Desura</a></span></dt><dt><span class="section"><a href="#_static_analysis">9. Static Analysis</a></span></dt><dt><span class="section"><a href="#_phoronix_test_suite">10. Phoronix Test Suite</a></span></dt></dl></div><p>Copyright © 2011 COR Entertainment, LLC.</p><pre class="screen">$Id: devref-en.asciidoc 3084 2012-08-15 06:07:04Z strat $</pre><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_about_this_document"></a>1. About this Document</h2></div></div></div><div class="warning" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Warning</h3><p><span class="emphasis"><em>This is an informal document and assumes general knowledge
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Alien Arena Developer Reference</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp133616"></a>Alien Arena Developer Reference</h2></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_about_this_document">1. About this Document</a></span></dt><dt><span class="section"><a href="#_subversion_repository">2. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_visual_c_2010_build">3. Visual C++ 2010 Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_windows_subversion_client">3.1. Windows Subversion Client</a></span></dt><dt><span class="section"><a href="#_microsoft_visual_c_2010_express">3.2. Microsoft Visual C++ 2010 Express</a></span></dt><dt><span class="section"><a href="#_libraries">3.3. Libraries</a></span></dt><dt><span class="section"><a href="#_openal_1_1_sdk">3.4. OpenAL 1.1 SDK</a></span></dt><dt><span class="section"><a href="#_directory_tree">3.5. Directory Tree</a></span></dt><dt><span class="section"><a href="#_the_config_h_file">3.6. The config.h file</a></span></dt></dl></dd><dt><span class="section"><a href="#_unix_linux_build">4. Unix/Linux Build</a></span></dt><dd><dl><dt><span class="section"><a href="#_introduction">4.1. Introduction</a></span></dt><dt><span class="section"><a href="#_program_changes_in_7_50">4.2. Program Changes in 7.50</a></span></dt><dt><span class="section"><a href="#_subversion_repository_2">4.3. Subversion Repository</a></span></dt><dt><span class="section"><a href="#_maintainer_8217_s_guide">4.4. Maintainer’s Guide</a></span></dt><dt><span class="section"><a href="#_packager_8217_s_guide">4.5. Packager’s Guide</a></span></dt><dt><span class="section"><a href="#_configure_options">4.6. Configure options</a></span></dt><dt><span class="section"><a href="#_gcc_compiler_options">4.7. GCC Compiler Options</a></span></dt><dt><span class="section"><a href="#_config_h">4.8. config.h</a></span></dt><dt><span class="section"><a href="#_open_dynamics_engine_ode_integration">4.9. Open Dynamics Engine (ODE) Integration</a></span></dt></dl></dd><dt><span class="section"><a href="#_mingw_build">5. MinGW Build</a></span></dt><dt><span class="section"><a href="#_mac_os_x_darwin_x11_build">6. Mac OS X / Darwin X11 Build</a></span></dt><dt><span class="section"><a href="#_developer_8217_s_not_autotools_makefile">7. Developer’s Not-Autotools Makefile</a></span></dt><dt><span class="section"><a href="#_desura">8. Desura</a></span></dt><dt><span class="section"><a href="#_static_analysis">9. Static Analysis</a></span></dt><dt><span class="section"><a href="#_phoronix_test_suite">10. Phoronix Test Suite</a></span></dt></dl></div><p>Copyright © 2011 COR Entertainment, LLC.</p><pre class="screen">$Id: devref-en.asciidoc 3224 2012-10-06 06:13:22Z strat $</pre><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_about_this_document"></a>1. About this Document</h2></div></div></div><div class="warning" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Warning</h3><p><span class="emphasis"><em>This is an informal document and assumes general knowledge
 of programming and specific knowledge of Alien Arena development.</em></span></p></div><p>This document is intended to be informal reference for Alien
 Arena development.  Its reason for being is it organize
 general information, notes, and details about development
@@ -207,12 +207,50 @@ was converted from a Makefile to Autotools.  There are two main
 goals for the implementation: One, to improve support for the
 various Linux distributions' package maintainence process.
 The other, to improve portability and ease of installation
-for users.</p><p>It is important to recognize that the goal of GNU Autotools
-is NOT to make the developer’s job easier.  From a coder’s
-viewpoint, it is not, nor is it intended to be, the ideal
-software construction tool.  There are alternatives, but for
-open source software, none have developed to the point of
-being generally adopted as standard.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_program_changes_in_7_50"></a>4.2. Program Changes in 7.50</h3></div></div></div><p>Previous versions had support for configurable <span class="emphasis"><em>DATADIR</em></span> and
+for users.</p><p>It is important to recognize that the goal of GNU Autotools is NOT to
+make the developer’s job easier.  From a coder’s viewpoint, it is not,
+nor is it intended to be, the ideal software construction tool. The mere
+mention of Autotools elicits groans from most developers.  There are
+alternatives, but for open source software, none have developed to the
+point of being generally adopted as standard. There are some who disagree
+with that statement, but they are mistaken.</p><p>For development purposes it is sometimes better to use a plain makefile.
+See <span class="emphasis"><em>Developer’s Not-Autotools Makefile</em></span> below.</p><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_reading_list_for_autotools"></a>Reading List for Autotools</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+John Calcote.
+  <span class="emphasis"><em>Autotools: A Practitioner’s Guild to GNU Autoconf, Automake, and LibTool.</em></span>
+</li><li class="listitem">
+Diego E. "Flameeyes" Petteno.
+  <span class="emphasis"><em>Autotools Mythbuster</em></span>
+  <a class="ulink" href="http://www.flameeyes.eu/autotools-mythbuster/" target="_top">http://www.flameeyes.eu/autotools-mythbuster/</a>.
+</li><li class="listitem">
+David MacKenzie, Ben Elliston, Akim Demaille.
+  <span class="emphasis"><em>Autoconf: Creating Automatic Configuration Scripts</em></span>
+  For version 2.65, 4 November 2009.
+</li><li class="listitem">
+David MacKenzie, Tom Tromey, Alexandre Duret-Lutz.
+  <span class="emphasis"><em>GNU Automake</em></span>.
+  For version 1.11.1, 8 December 2009.
+</li><li class="listitem">
+Richard M. Stallman, Roland McGrath, Paul D. Smith.
+  <span class="emphasis"><em>GNU Make: A Program for Directing Recompilation</em></span>.
+  GNU make Version 3.81, April 2006.
+</li><li class="listitem">
+Gordon Matzigkeit, Alexandre Oliva, Thomas Tanner, Gary V. Vaughan.
+  <span class="emphasis"><em>GNU Libtool</em></span>.
+  For version 2.2.6, 1 August 2008.
+</li><li class="listitem">
+Richard Stallman, et al.
+  <span class="emphasis"><em>GNU Coding Standards</em></span>.
+  last updated June 10, 2008.
+</li><li class="listitem">
+Edited by Rusty Russell, Daniel Quinlan, Christopher Yeoh.
+  <span class="emphasis"><em>Filesystem Hierarchy Standard</em></span>
+  Filesystem Hierarchy Standard Group.
+</li><li class="listitem">
+Gary V. Vaughan, Ben Elliston, Tom Tromey and Ian Lance Taylor.
+  <span class="emphasis"><em>GNU AutoConf, AutoMake, and LibTool</em></span>
+  "The Goat Book", Version 1.5, February 2006.
+  <a class="ulink" href="http://sourceware.org/autobook" target="_top">http://sourceware.org/autobook</a>.
+</li></ul></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_program_changes_in_7_50"></a>4.2. Program Changes in 7.50</h3></div></div></div><p>Previous versions had support for configurable <span class="emphasis"><em>DATADIR</em></span> and
 <span class="emphasis"><em>LIBDIR</em></span> installation paths.  However, the implementation was
 not complete; due largely to the file system organization
 inherited from the Quake source.  The installation procedure
@@ -241,11 +279,10 @@ a <span class="emphasis"><em>botinfo</em></span> directory, in user-writeable fi
 functions supply the full filesystem path when given a relative
 path.  The functions are <span class="strong"><strong>FullPath()</strong></span> and <span class="strong"><strong>FullWritePath()</strong></span>.
 They are declared in <span class="emphasis"><em>game/game.h</em></span> and <span class="emphasis"><em>qcommon/qcommon.h</em></span>.
-They are defined in <span class="emphasis"><em>qcommon/files.c</em></span>.</p><p>The name of the stand-alone dedicated server is changed from
-<span class="emphasis"><em>crded</em></span> to <span class="emphasis"><em>crx-ded</em></span>. (With the 7.60 release, updated to <span class="emphasis"><em>alienarena-ded</em></span>).
-The purpose is to make it simple to
-change the name of the executable files using the standard
-built-in configure option.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_subversion_repository_2"></a>4.3. Subversion Repository</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_linux_subversion_client"></a>Linux Subversion Client</h4></div></div></div><p>Install the free Apache (formerly Tigris) Subversion client
+They are defined in <span class="emphasis"><em>qcommon/files.c</em></span>.</p><p>The name of the stand-alone dedicated server was changed from <span class="emphasis"><em>crded</em></span> to
+<span class="emphasis"><em>crx-ded</em></span>. The purpose was to make it simple to change the name of the
+executable files using the standard built-in configure option. With the
+7.60 release, the dedicated server name was updated to <span class="emphasis"><em>alienarena-ded</em></span>.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_subversion_repository_2"></a>4.3. Subversion Repository</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_linux_subversion_client"></a>Linux Subversion Client</h4></div></div></div><p>Install the free Apache (formerly Tigris) Subversion client
 using your package manager.  Or download it from the website
 at <a class="ulink" href="http://subversion.apache.org/" target="_top">http://subversion.apache.org/</a> .</p><p>To download Alien Arena from the SVN Repository:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
 Create a <span class="emphasis"><em>'PATH</em></span>' for installation somewhere in your home directory.
@@ -253,173 +290,136 @@ Create a <span class="emphasis"><em>'PATH</em></span>' for installation somewher
 Run: <span class="emphasis"><em>svn checkout svn://icculus.org/alienarena/trunk PATH</em></span>.
 </li></ul></div><p>For example:</p><p><code class="literal">cd ~</code>
 <code class="literal">mkdir alienarena</code>
-<code class="literal">svn checkout svn://icculus.org/alienarena/trunk alienarena</code></p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_autotools_related_files"></a>Autotools Related Files</h4></div></div></div><div class="warning" style="margin-left: 0; margin-right: 10%;"><h3 class="title">Warning</h3><p>Certain files necessary for non-developer users to
-build the program are in the repository.  These include the
-generated configure script and Autotools-supplied scripts in the
-<span class="emphasis"><em>config/</em></span> and <span class="emphasis"><em>m4/</em></span> subdirectory.  Normally, these scripts are
-automatically added to the distribution package by Autotools.
-Having them in the repository can lead to version mismatch
-problems with a developer’s Autotools version.</p></div><p><strong>SOURCE FILES: </strong>
-</p><pre class="literallayout">configure.ac ......... source file for autoconf
-Makefile.am .......... top source file for automake
-game_data.am ......... included in Makefile.am
-source/Makefile.am ... subdirectory source file for automake</pre><p>
-</p><p><strong>GENERATED FILES: </strong>
-</p><pre class="literallayout">configure ............ the user's configure script
-Makefile.in .......... template for the user's top directory Makefile
-source/Makefile.in ... template for the user's subdirectory Makefile
-aclocal.m4 ........... generated by aclocal
-config/config.h.in ... template for the user's config.h</pre><p>
-</p><p><strong>COPIED FILES: </strong>
-</p><pre class="literallayout">m4/*.m4 .............. ax_* m4 macros, from autoconf-archive
-INSTALL .............. GNU build/install reference
-COPYING .............. GNU GPL</pre><p>
-</p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_the_game_data_am_file"></a>4.4. The game_data.am File</h3></div></div></div><p>The file, <span class="emphasis"><em>game_data.am</em></span> contains a <span class="strong"><strong>long</strong></span> list of game
-resources.  It is used to generate the distribution archive and
-for copying files to the <span class="emphasis"><em>datadir</em></span> in a standard install. The
-downside is that it needs to be kept up-to-date with additions
-and deletions. The advantage is that the <span class="emphasis"><em>install</em></span> program
-handles the copying of game resources. For <span class="emphasis"><em>make uninstall</em></span>
-it handles deletion of what <span class="emphasis"><em>make install</em></span> installed.</p><p>For development, when using the standard install, use <span class="emphasis"><em>make
-install-exec</em></span> to limit copying to the executables. Note that
-the alternate install always just copies the executables.</p><p><span class="strong"><strong>Version 7.60 changes to game_data.am</strong></span></p><p>With the game resource additions of 7.60, the <span class="emphasis"><em>game_data.am</em></span> list exceeded
+<code class="literal">svn checkout svn://icculus.org/alienarena/trunk alienarena</code></p></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_maintainer_8217_s_guide"></a>4.4. Maintainer’s Guide</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_autotools_source_files"></a>Autotools Source Files</h4></div></div></div><p>These are Autotools-related files that are manually edited:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+configure.ac
+</span></dt><dd>
+  source file for <span class="emphasis"><em>autoconf</em></span>.
+</dd><dt><span class="term">
+Makefile.am
+</span></dt><dd>
+  top level source file for <span class="emphasis"><em>automake</em></span>.
+</dd><dt><span class="term">
+game_data.am
+</span></dt><dd>
+  lists of game asset files. included in <span class="emphasis"><em>Makefile.am</em></span>.
+</dd><dt><span class="term">
+source/Makefile.am
+</span></dt><dd>
+  <span class="emphasis"><em>source</em></span> subdirectory source file for <span class="emphasis"><em>automake</em></span>
+</dd></dl></div><p>Some Autotools files are just copied without change:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+m4/*.m4
+</span></dt><dd>
+  m4 macros from the autoconf-archive.
+</dd><dt><span class="term">
+INSTALL
+</span></dt><dd>
+  GNU build/install reference.
+</dd><dt><span class="term">
+COPYING
+</span></dt><dd>
+  GNU GPL, Version 2.
+</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_autotools_generated_files"></a>Autotools Generated Files</h4></div></div></div><p>The Alien Arena Autotools build uses <span class="strong"><strong>Maintainer Mode</strong></span>. The upside of
+this is that the end user does <span class="strong"><strong>not</strong></span> need the Autotools programs and can
+run the well-known <span class="emphasis"><em>./configure, make, sudo make install</em></span> procedure. The
+downside is that if <span class="emphasis"><em>configure</em></span> is run without <span class="emphasis"><em>--enable-maintainer-mode</em></span>,
+some of the generated files will not be updated.</p><p>The <span class="strong"><strong>Generated Files</strong></span> are:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+configure
+</span></dt><dd>
+  the user’s configure script.
+</dd><dt><span class="term">
+Makefile.in
+</span></dt><dd>
+  template for the user’s top directory Makefile.
+</dd><dt><span class="term">
+source/Makefile.in
+</span></dt><dd>
+  template for the user’s source subdirectory Makefile.
+</dd><dt><span class="term">
+config/config.h.in
+</span></dt><dd>
+  template for the user’s config.h.
+</dd><dt><span class="term">
+aclocal.m4
+</span></dt><dd>
+  all the .m4 macros used by <span class="emphasis"><em>configure</em></span>. generated by <span class="emphasis"><em>aclocal</em></span>.
+</dd></dl></div><p>The <span class="emphasis"><em>Generated Files</em></span> need to be regenerated when any of following occur:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+Source files (.c, .h, etc.) are added, removed or renamed.
+</li><li class="listitem">
+System libraries are added or removed (in configure.ac, Makefile.am files).
+</li><li class="listitem">
+Asset files (textures, models, etc.) are added, removed or renamed.
+</li><li class="listitem">
+Autotools files (configure.ac, Makefile.am, etc.) are modified.
+</li></ul></div><p><span class="strong"><strong>Note</strong></span>
+There are other intermediate files generated by Autotools. Refer to Autotools
+documentation.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_autotools_prerequisites"></a>Autotools Prerequisites</h4></div></div></div><p>The Autotools packages are:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<span class="emphasis"><em>autoconf</em></span>
+</li><li class="listitem">
+<span class="emphasis"><em>automake</em></span>,
+</li><li class="listitem">
+<span class="emphasis"><em>autoconf-archive</em></span>
+</li></ul></div><p>To avoid confusion, developers committing to the repository should all be
+using the same versions of these packages.</p><p>The <span class="emphasis"><em>autoconf-archive</em></span> is an evolving set of macros maintained on the GNU
+website. We use a few of these. The file names are normally prefixed with
+<span class="emphasis"><em>ax_</em></span> and the macros prefixed with <span class="emphasis"><em>AX_</em></span>. Each file has a <span class="emphasis"><em>serial</em></span> number
+in a comment. Care should be take not to commit an earlier version of a
+<span class="emphasis"><em>.m4</em></span> file into the SVN <span class="emphasis"><em>m4</em></span> subdirectory. If a file we use is updated in
+the archive, update it in the repository.</p><p>After adding new <span class="emphasis"><em>AX_</em></span> macros to <span class="emphasis"><em>configure.ac</em></span>, the <span class="emphasis"><em>.m4</em></span> file needs to be
+added to the <span class="emphasis"><em>m4</em></span> subdirectory. This is done with the following command.</p><p><code class="literal">aclocal -I m4 --force --install</code></p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_adding_removing_renaming_program_source_files"></a>Adding, Removing, Renaming Program Source Files</h4></div></div></div><p>Source files are modified in the <span class="emphasis"><em>source/Makefile.am</em></span> file. Modify the
+source in the applicable <span class="emphasis"><em>*_SOURCE</em></span> lists. Header (<span class="emphasis"><em>.h</em></span>) files must
+be included, because the list is used to generate the tarball.</p><p>Certain files may appear in several lists. For example, <span class="emphasis"><em>'alienarena_SOURCES</em></span>,
+<span class="emphasis"><em>alienarena-ded_SOURCES</em></span> and <span class="emphasis"><em>libgame_a_SOURCES</em></span> all have <span class="emphasis"><em>qcommon/qfiles.h</em></span>.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_adding_removing_renaming_game_asset_files"></a>Adding, Removing, Renaming Game Asset Files</h4></div></div></div><p>The file, <span class="emphasis"><em>game_data.am</em></span> contains lists of game asset files. It
+is included in the top-level <span class="emphasis"><em>Makefile.am</em></span>. It is used to generate
+the distribution archive and for copying files to the <span class="emphasis"><em>datadir</em></span> in a
+<span class="emphasis"><em>standard install</em></span>.</p><p>The downside is that <span class="emphasis"><em>game_data.am</em></span> needs to be kept up-to-date with
+additions and deletions. The advantage is that the <span class="emphasis"><em>install</em></span> program
+handles the copying of game resources. For <span class="emphasis"><em>make uninstall</em></span> it handles
+deletion of what <span class="emphasis"><em>make install</em></span> installed.</p><p>To make modifications, find the appropriate list and add, delete or
+modify the file entry. Makefile syntax requires that there be no trailing
+spaces after the <span class="emphasis"><em>\</em></span>. Each entry should be preceeded by one TAB character.
+The files are listed in (mostly) alphabetical order.</p><div class="section"><div class="titlepage"><div><div><h5 class="title"><a id="_version_7_60_changes_to_game_data_am"></a>Version 7.60 changes to game_data.am</h5></div></div></div><p>With the game resource additions of 7.60, the <span class="emphasis"><em>game_data.am</em></span> list exceeded
 the command line length limit. After much agonizing and lamenting,
 a solution was found. The list is subdivided by the subdirectories of
 <span class="emphasis"><em>data1/</em></span>. This works ok for the <span class="emphasis"><em>install</em></span> procedure. Unfortunately,
 it does not work for the distribution creation procedure. For that,
-a copy procedure is added to <span class="emphasis"><em>dist-hook</em></span> in <span class="emphasis"><em>Makefile.am</em></span>.</p><p><span class="strong"><strong>Is this a PITA, or what?</strong></span></p><p>Yes, it is. It would be nice not to have to reconfigure when game assets
-are added or deleted. The way to do this is to implement a custom
+a copy procedure is added to <span class="emphasis"><em>dist-hook</em></span> in <span class="emphasis"><em>Makefile.am</em></span>.</p></div><div class="section"><div class="titlepage"><div><div><h5 class="title"><a id="_is_this_a_pita_or_what"></a>Is this a PITA, or what?</h5></div></div></div><p>Yes, it is. It would be nice not to have to reconfigure when game assets
+are added or deleted. The way to avoid this is to implement a custom
 <span class="emphasis"><em>install</em></span> procedure that uses the game data file list to copy files
 when installing and deleting files when uninstalling. The game data file
 list would also be used for distribution creation. The method in version
 7.60 is crude; there is probably a faster way.  (However, speed is not
-important for tarball generation.)</p><p><span class="strong"><strong>Another issue</strong></span></p><p>We should support separate source and data tarballs.  This would
-make us more popular with distro packagers. I think they have to do this
-split because the source and data are under different licenses.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_adding_new_source_files"></a>4.5. Adding new source files</h3></div></div></div><p>New source files are added to the <span class="emphasis"><em>source/Makefile.am</em></span> file. Add the
-new source to the applicable <span class="emphasis"><em>*_SOURCE</em></span> lists. Header (<span class="emphasis"><em>.h</em></span>) files must
-be included, because the list is used to generate the tarball.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_maintainer_8217_s_reconfigure"></a>4.6. Maintainer’s Reconfigure</h3></div></div></div><p>TODO</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_adding_a_system_library_to_the_build"></a>4.7. Adding a system library to the build</h3></div></div></div><p>For common system libraries, there will usually be an .m4 macro available.
+important for tarball generation.)</p><p>It would be good to support separate source and data tarballs.  This would
+make us more popular with distro packagers. Some distros split the tarball,
+possibly because the source code and game assets are under different licenses.</p></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_adding_or_removing_system_libraries"></a>Adding or Removing System Libraries</h4></div></div></div><p>The details of changing the system library settings are way beyond
+the scope of this document. Some knowledge of autoconf and automake
+is required.</p><p>For common system libraries, there <span class="strong"><strong>may</strong></span> be a helpful <span class="emphasis"><em>.m4</em></span> macro available.
 These may be part of autoconf (AC_*), or they may be extensions from
-the GNU Autoconf Archive (AX_*).</p><p>After adding new AX_ macros to configure.ac, the .m4 file needs to be added to
-the m4 subdirectory. This is done with the following command.</p><p><code class="literal">aclocal -I m4 --force --install</code></p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_configure_options"></a>4.8. Configure options</h3></div></div></div><p>Run <code class="literal">./configure --help</code> to see all <span class="emphasis"><em>configure</em></span> options. These
-are <span class="emphasis"><em>configure</em></span> options added for Alien Arena.</p><p>Post 7.60 release, certain debug options have been removed. Some were
-obsolete, but mostly this is a "philosophical" issue: debug options,
-including compiler warning options, may be confusing to the non-developer.
-For developers, specifying CFLAGS is more flexible. (Note: when the debug
-options were added, strat questioned these but deferred to blackice’s
-greater expertise with autotools. But time has shown them to be an
-unnecessary complication.)</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
---disable-client
+the Autoconf Archive (AX_*).</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_procedures"></a>Procedures</h4></div></div></div><p>There are various clean options, besides the usual, that remove more than
+object files. Some useful ones are:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+maintainer-clean
 </span></dt><dd>
-  build dedicated server only, not the client (default:no)
+  removes most generated files. run <span class="emphasis"><em>autoreconf</em></span> to rebuild them.
 </dd><dt><span class="term">
---enable-alternate-install
+distclean
 </span></dt><dd>
-  traditional single directory, in-place installation
-  (default:no)
-</dd><dt><span class="term">
---enable-ansi-color
-</span></dt><dd>
-  ANSI terminal color (default: no) Added in 7.51.
-</dd><dt><span class="term">
---disable-build-status
-</span></dt><dd>
-  hide  the  status message at the end of the configuration
-  script (default:no)
-</dd><dt><span class="term">
---with(out)-xf86vm
-</span></dt><dd>
-  include XF86 VidMode support (default: check)
-  Note: Needed to support full-screen mode.
-  Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
-</dd><dt><span class="term">
---with(out)-xf86dga
-</span></dt><dd>
-  include XF86 DGA support (default: without)
-  Note: default is changed from <span class="emphasis"><em>check</em></span> in version 7.60
-  Note: DGA appears to only used for mouse pointer input and
-  is optional. It is disabled by default, or when the cvar,
-  <span class="emphasis"><em>in_dgamouse</em></span>, is set to 0.
-  Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
-</dd><dt><span class="term">
---with(out)-zlib
-</span></dt><dd>
-  include Zlib compression support (default: check)
-  Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
-</dd><dt><span class="term">
---with-icondir=DIR
-</span></dt><dd>
-  icon install directory (default:DATADIR/icons)
-</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_gcc_compiler_options"></a>4.9. GCC Compiler Options</h3></div></div></div><p>Linux distro’s use a variety of different gcc compile
-options. These can give more error warnings; and in rare cases
-program errors.</p><p>Also for users who compile from source, there are CPU
-dependendent options that might give better performance. Might
-be good to document some of these in the README.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
-Wall
-, </span><span class="term">
-Wextra
-</span></dt><dd>
-  With -Wextra many warnings are produced, especially for unused parameters
-  and signed/unsigned comparisons. With just -Wall, a few unused variable
-  warnings are produced, which are easily fixed. Some bogus uninitialized
-  warnings are produced; it is possible, but annoying, to eliminate these.
-</dd><dt><span class="term">
-O2
-, </span><span class="term">
-O3
-</span></dt><dd>
-  Optimization levels. O3 produces different warning messages, so should
-  be tested before releases.
-</dd><dt><span class="term">
-m32
-, </span><span class="term">
-m64
-</span></dt><dd>
-  Specify 32bit or 64bit build. Only needed when cross-compiling.
-</dd><dt><span class="term">
-march
-, </span><span class="term">
-mtune
-</span></dt><dd>
-  Set for specific architectures. Might give better performance
-  than generic builds. For instance, <code class="literal">-march=core2</code> enables
-  higher performance features. Use <code class="literal">-mtune=generic</code> when building
-  release binaries; for Desura, for instance.
-</dd><dt><span class="term">
-mfpmath
-</span></dt><dd>
-  Testing shows that <code class="literal">-mfpmath=sse</code> gives better performance when
-  compiling with GNU gcc.
-</dd><dt><span class="term">
-FORTIFY_SOURCE
-</span></dt><dd>
-  <code class="literal">-Wp,D_FORTIFY_SOURCE=2</code> part of "stack smashing" protection
-</dd><dt><span class="term">
-fexceptions
-</span></dt><dd>
-  TBD.
-</dd><dt><span class="term">
-fstack-protector
-</span></dt><dd>
-  Part of "stack smashing" protection.
-</dd><dt><span class="term">
-param
-</span></dt><dd>
-  <code class="literal">--param=ssp-buffer-size=4</code>. Part of "stack smashing" detection.
-</dd><dt><span class="term">
-fasynchronous-unwind-tables
-</span></dt><dd>
-  From fedora. TBD.
-</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_generating_an_archive_package_for_distribution"></a>4.10. Generating an Archive Package for Distribution</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_autotools_versions"></a>Verify Autotools Versions</h4></div></div></div><p>Verify that your versions of <span class="emphasis"><em>autoconf</em></span>, <span class="emphasis"><em>automake</em></span>, and
+  removes files generated by <span class="emphasis"><em>configure</em></span>.
+</dd></dl></div><p>Following changes, run:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<code class="literal">autoreconf --verbose</code>
+</li><li class="listitem">
+<code class="literal">./configure --enable-maintainer-mode &lt;other options&gt;</code>
+</li><li class="listitem">
+<code class="literal">make</code>
+</li><li class="listitem">
+<code class="literal">sudo make install</code>
+</li></ul></div><p>There are variations for the <span class="emphasis"><em>configure</em></span> and <span class="emphasis"><em>make install</em></span> commands, of course.
+See below for <span class="emphasis"><em>configure</em></span> options and compiler options.</p><p>Run some tests and, if all this goes well, commit the changed files to the
+repository. The <span class="emphasis"><em>svn status</em></span> command will show which files were modified.</p><div class="section"><div class="titlepage"><div><div><h5 class="title"><a id="_installation_notes"></a>Installation Notes</h5></div></div></div><p>For the <span class="emphasis"><em>standard install</em></span>, use <span class="emphasis"><em>make install-exec</em></span> to limit
+copying to the executables. Note that the <span class="emphasis"><em>alternate install</em></span>
+always just copies the executables.</p></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_packager_8217_s_guide"></a>4.5. Packager’s Guide</h3></div></div></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_autotools_versions"></a>Verify Autotools Versions</h4></div></div></div><p>Verify that your versions of <span class="emphasis"><em>autoconf</em></span>, <span class="emphasis"><em>automake</em></span>, and
 <span class="emphasis"><em>autoconf-archive</em></span> are current.</p><p>The 7.60 release uses <span class="emphasis"><em>autoconf 2.68</em></span> and <span class="emphasis"><em>automake 1.11</em></span>. If more than
 one dev is committing autotool related changes to SVN, it will be less
-confusing if all are using the same versions.</p><p>The <span class="emphasis"><em>autoconf-archive</em></span> is an evolving set of macros maintained
-on the GNU website. (On gentoo it is installed in <span class="emphasis"><em>/usr/share/aclocal</em></span>).
-We use a few of these. Each file has a <span class="emphasis"><em>serial</em></span> number in a comment. Care
-should be take not to commit an earlier version of a <span class="emphasis"><em>.m4</em></span> into the SVN <span class="emphasis"><em>m4</em></span>
-subdirectory. Also, if a file we use is updated in the archive, update it
-in the repository and do a complete reconfigure. Changes will appear in
-the generated <span class="emphasis"><em>aclocal.m4</em></span> file. See below for commands to update the
-macro files.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_alien_arena_version"></a>Verify Alien Arena Version</h4></div></div></div><p>Verify that the version in <span class="emphasis"><em>configure.ac</em></span> is correct.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_export_from_subversion_repository"></a>Export from Subversion Repository</h4></div></div></div><p>Export from the SVN trunk to a directory for the distribution
+confusing if all are using the same versions.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_alien_arena_version"></a>Verify Alien Arena Version</h4></div></div></div><p>Verify that the version number in <span class="emphasis"><em>configure.ac</em></span> is correct.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_verify_autotools_files"></a>Verify Autotools Files</h4></div></div></div><p>See the <span class="emphasis"><em>Maintainer’s Guide</em></span> above. Verify that all Autotools-related
+files are up-to-date.</p></div><div class="section"><div class="titlepage"><div><div><h4 class="title"><a id="_export_from_subversion_repository"></a>Export from Subversion Repository</h4></div></div></div><p>Export from the SVN trunk to a directory for the distribution
 build.</p><p>Verify that the files in <span class="emphasis"><em>config/</em></span> and <span class="emphasis"><em>m4/</em></span> subdirectories
 are current.  One way to do this is to rename the <span class="emphasis"><em>config/</em></span>
 and <span class="emphasis"><em>m4/</em></span> directories and then run:</p><p><code class="literal">aclocal --force --install -I m4</code></p><p><code class="literal">autoreconf --force --install</code></p><p>Compare the files in the new <span class="emphasis"><em>config/</em></span> and <span class="emphasis"><em>m4/</em></span> with the
@@ -505,7 +505,116 @@ svn export --ignore-externals \
 # --- tarball construction ---
 cd alienarena
 ./configure --enable-maintainer-mode
- make distcheck</pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_config_h"></a>4.11. config.h</h3></div></div></div><p>The config.h file is auto-generated for configurable builds
+ make distcheckDeveloper's Not-Autotools Makefile</pre></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_configure_options"></a>4.6. Configure options</h3></div></div></div><p>Run <code class="literal">./configure --help</code> to see all <span class="emphasis"><em>configure</em></span> options. These
+are <span class="emphasis"><em>configure</em></span> options added for Alien Arena.</p><p>Post 7.60 release, certain debug options have been removed. Some were
+obsolete, but mostly this is a "philosophical" issue: debug options,
+including compiler warning options, may be confusing to the non-developer.
+For developers, specifying CFLAGS is more flexible. (Note: when the debug
+options were added, strat questioned these but deferred to blackice’s
+greater expertise with autotools. But time has shown them to be an
+unnecessary complication.)</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+--disable-client
+</span></dt><dd>
+  build dedicated server only, not the client (default:no)
+</dd><dt><span class="term">
+--enable-alternate-install
+</span></dt><dd>
+  traditional single directory, in-place installation
+  (default:no)
+</dd><dt><span class="term">
+--enable-ansi-color
+</span></dt><dd>
+  ANSI terminal color (default: no) Added in 7.51.
+</dd><dt><span class="term">
+--disable-build-status
+</span></dt><dd>
+  hide  the  status message at the end of the configuration
+  script (default:no)
+</dd><dt><span class="term">
+--with(out)-xf86vm
+</span></dt><dd>
+  include XF86 VidMode support (default: check)
+  Note: Needed to support full-screen mode.
+  Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
+</dd><dt><span class="term">
+--with(out)-xf86dga
+</span></dt><dd>
+  include XF86 DGA support (default: without)
+  Note: default is changed from <span class="emphasis"><em>check</em></span> in version 7.60
+  Note: DGA appears to only used for mouse pointer input and
+  is optional. It is disabled by default, or when the cvar,
+  <span class="emphasis"><em>in_dgamouse</em></span>, is set to 0.
+  Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
+</dd><dt><span class="term">
+--with(out)-zlib
+</span></dt><dd>
+  include Zlib compressDeveloper’s Not-Autotools Makefileion support (default: check)
+  Note: If <span class="emphasis"><em>with</em></span> is specified, then the library is required.
+</dd><dt><span class="term">
+--with-icondir=DIR
+</span></dt><dd>
+  icon install directory (default:DATADIR/icons)
+</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_gcc_compiler_options"></a>4.7. GCC Compiler Options</h3></div></div></div><p>Linux distro’s use a variety of different gcc compile
+options. These can give more error warnings; and in rare cases
+program errors.</p><p>Also for users who compile from source, there are CPU
+dependendent options that might give better performance. Might
+be good to document some of these in the README.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+Wall
+, </span><span class="term">
+Wextra
+</span></dt><dd>
+  With -Wextra many warnings are produced, especially for unused parameters
+  and signed/unsigned comparisons. With just -Wall, a few unused variable
+  warnings are produced, which are easily fixed. Some bogus uninitialized
+  warnings are produced; it is possible, but annoying, to eliminate these.
+</dd><dt><span class="term">
+O2
+, </span><span class="term">
+O3
+</span></dt><dd>
+  Optimization levels. O3 produces different warning messages, so should
+  be tested before releases.
+</dd><dt><span class="term">
+m32
+, </span><span class="term">
+m64
+</span></dt><dd>
+  Specify 32bit or 64bit build. Only needed when cross-compiling.
+</dd><dt><span class="term">
+march
+, </span><span class="term">
+mtune
+</span></dt><dd>
+  Set for specific architectures. Might give better performance
+  than generic builds. For instance, <code class="literal">-march=core2</code> enables
+  higher performance features. Use <code class="literal">-mtune=generic</code> when building
+  release binaries; for Desura, for instance.
+</dd><dt><span class="term">
+mfpmath
+</span></dt><dd>
+  Testing shows that <code class="literal">-mfpmath=sse</code> gives better performance when
+  compiling with GNU gcc.
+</dd><dt><span class="term">
+FORTIFY_SOURCE
+</span></dt><dd>
+  <code class="literal">-Wp,D_FORTIFY_SOURCE=2</code> part of "stack smashing" protection
+</dd><dt><span class="term">
+fexceptions
+</span></dt><dd>
+  TBD.
+</dd><dt><span class="term">
+fstack-protector
+</span></dt><dd>
+  Part of "stack smashing" protection.
+</dd><dt><span class="term">
+param
+</span></dt><dd>
+  <code class="literal">--param=ssp-buffer-size=4</code>. Part of "stack smashing" detection.
+</dd><dt><span class="term">
+fasynchronous-unwind-tables
+</span></dt><dd>
+  From fedora. TBD.
+</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_config_h"></a>4.8. config.h</h3></div></div></div><p>The config.h file is auto-generated for configurable builds
 (e.g Linux).  It is manually edited for non-configurable builds
 (e.g. Windows). The <span class="emphasis"><em>configure.ac</em></span> file does generate Windows
 related definitions in <span class="emphasis"><em>config.h</em></span> so it can be used as a
@@ -514,49 +623,13 @@ symbols (and some others related to targets) are defined:
 <span class="emphasis"><em>WIN32_VARIANT</em></span> and <span class="emphasis"><em>UNIX_VARIANT</em></span>.  This should make it easier
 to keep system dependent variations organized. It is a good
 idea, of course, to minimize system dependent conditional
-compilation in the common code.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_open_dynamics_engine_ode_integration"></a>4.12. Open Dynamics Engine (ODE) Integration</h3></div></div></div><p>A static library, <span class="emphasis"><em>libode.a</em></span>, is built and linked with the main
-program, <span class="emphasis"><em>alienarena</em></span>. Only files that are used in the library build
+compilation in the common code.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_open_dynamics_engine_ode_integration"></a>4.9. Open Dynamics Engine (ODE) Integration</h3></div></div></div><p>A static library, <span class="emphasis"><em>libode.a</em></span>, is built and linked with the main
+program, <span class="emphasis"><em>alienarena</em></span>. Only files that are used in the Developer’s Not-Autotools Makefilelibrary build
 are included in the source tree in SVN and in the distribution.
 There is only one <span class="emphasis"><em>config.h</em></span> and it includes what is needed
 for building <span class="emphasis"><em>libode.a</em></span>.</p><p>The ODE update to version 0.12 removed a function that we use. As of
 this writing there is no alternative. So ODE 0.12 cannot be used, yet.
-So the build with ODE 0.11 integrated is preferred.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_reading_list_for_autotools"></a>4.13. Reading List for Autotools</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
-John Calcote.
-  <span class="emphasis"><em>Autotools: A Practitioner’s Guild to GNU Autoconf, Automake, and LibTool.</em></span>
-</li><li class="listitem">
-Diego E. "Flameeyes" Petteno.
-  <span class="emphasis"><em>Autotools Mythbuster</em></span>
-  <a class="ulink" href="http://www.flameeyes.eu/autotools-mythbuster/" target="_top">http://www.flameeyes.eu/autotools-mythbuster/</a>.
-</li><li class="listitem">
-David MacKenzie, Ben Elliston, Akim Demaille.
-  <span class="emphasis"><em>Autoconf: Creating Automatic Configuration Scripts</em></span>
-  For version 2.65, 4 November 2009.
-</li><li class="listitem">
-David MacKenzie, Tom Tromey, Alexandre Duret-Lutz.
-  <span class="emphasis"><em>GNU Automake</em></span>.
-  For version 1.11.1, 8 December 2009.
-</li><li class="listitem">
-Richard M. Stallman, Roland McGrath, Paul D. Smith.
-  <span class="emphasis"><em>GNU Make: A Program for Directing Recompilation</em></span>.
-  GNU make Version 3.81, April 2006.
-</li><li class="listitem">
-Gordon Matzigkeit, Alexandre Oliva, Thomas Tanner, Gary V. Vaughan.
-  <span class="emphasis"><em>GNU Libtool</em></span>.
-  For version 2.2.6, 1 August 2008.
-</li><li class="listitem">
-Richard Stallman, et al.
-  <span class="emphasis"><em>GNU Coding Standards</em></span>.
-  last updated June 10, 2008.
-</li><li class="listitem">
-Edited by Rusty Russell, Daniel Quinlan, Christopher Yeoh.
-  <span class="emphasis"><em>Filesystem Hierarchy Standard</em></span>
-  Filesystem Hierarchy Standard Group.
-</li><li class="listitem">
-Gary V. Vaughan, Ben Elliston, Tom Tromey and Ian Lance Taylor.
-  <span class="emphasis"><em>GNU AutoConf, AutoMake, and LibTool</em></span>
-  "The Goat Book", Version 1.5, February 2006.
-  <a class="ulink" href="http://sourceware.org/autobook" target="_top">http://sourceware.org/autobook</a>.
-</li></ul></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_mingw_build"></a>5. MinGW Build</h2></div></div></div><p>Experimentally, Alien Arena has been built using MinGW using
+So the build with ODE 0.11 integrated is preferred.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_mingw_build"></a>5. MinGW Build</h2></div></div></div><p>Experimentally, Alien Arena has been built using MinGW using
 the Autotools build.  In the future, details and procedures
 may appear here.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_mac_os_x_darwin_x11_build"></a>6. Mac OS X / Darwin X11 Build</h2></div></div></div><p>The Autotools build has experimental support for Mac OS X
 using the Darwin X11 environment. There are reports of some
