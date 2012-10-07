@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #endif
 
 #include "server.h"
+#include "stdint.h"
 
 /*
 =============================================================================
@@ -445,6 +446,8 @@ void SV_DemoCompleted (void)
 	{
 		fclose (sv.demofile);
 		sv.demofile = NULL;
+		FS_FreeFile (sv.demobuf);
+		sv.demosize = sv.demo_ofs = 0;
 	}
 	SV_Nextserver ();
 }
@@ -507,13 +510,14 @@ void SV_SendClientMessages (void)
 		else
 		{
 			// get the next message
-			r = fread (&msglen, 4, 1, sv.demofile);
-			if (r != 1)
+			if (sv.demo_ofs+4 >= sv.demosize)
 			{
 				SV_DemoCompleted ();
 				return;
 			}
+			msglen = *(int32_t *)(sv.demobuf+sv.demo_ofs);
 			msglen = LittleLong (msglen);
+			sv.demo_ofs += sizeof (int32_t);
 			if (msglen == -1)
 			{
 				SV_DemoCompleted ();
@@ -521,12 +525,14 @@ void SV_SendClientMessages (void)
 			}
 			if (msglen > MAX_MSGLEN)
 				Com_Error (ERR_DROP, "SV_SendClientMessages: msglen > MAX_MSGLEN");
-			r = fread (msgbuf, msglen, 1, sv.demofile);
-			if (r != 1)
+			
+			if (sv.demo_ofs+msglen >= sv.demosize)
 			{
 				SV_DemoCompleted ();
 				return;
 			}
+			memcpy (msgbuf, sv.demobuf+sv.demo_ofs, msglen);
+			sv.demo_ofs += msglen;
 		}
 	}
 
