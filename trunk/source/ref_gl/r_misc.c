@@ -466,6 +466,26 @@ void GL_ScreenShot_JPEG(void)
 	FILE			*f;
 	char			picname[80], checkname[MAX_OSPATH];
 	int			i, offset;
+	cvar_t		*blocking_cvars[20];
+	int			nblocking = 0;
+
+	// Yes, you can set gl_picmip to 40. No, we don't want you to show anyone.
+	if (gl_picmip->integer > 1)
+		blocking_cvars[nblocking++] = gl_picmip;
+	// TODO: check for other avant-garde video settings here.
+	
+	if (nblocking > 0)
+	{
+		Com_Printf ("Screenshots are disabled because of your settings for the following cvar");
+		if (nblocking > 1)
+			Com_Printf ("s");
+		Com_Printf (":\n");
+		for (i = 0; i < nblocking; i++)
+		{
+			Com_Printf ("    %s: %s\n", blocking_cvars[i]->name, blocking_cvars[i]->string);
+		}
+		return;
+	}
 
 	/* Create the scrnshots directory if it doesn't exist */
 	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot/", FS_Gamedir());
