@@ -1169,6 +1169,8 @@ void BSP_DrawInlineBModel ( void )
 	r_vboOn = false;
 	
 	BSP_ClearVBOAccum ();
+	
+	GL_EnableMultitexture( false );
 		
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
@@ -1193,7 +1195,6 @@ void BSP_DrawInlineBModel ( void )
 			}
 			else
 			{
-				BSP_FlushVBOAccum ();
 				GL_EnableMultitexture( false );
 				BSP_RenderBrushPoly( psurf );
 				GL_EnableMultitexture( true );
@@ -1412,6 +1413,8 @@ clipflags: indicate which planes of the frustum may intersect the node
 Since each node is inside its parent in 3D space, if a frustum plane can be
 shown not to intersect a node at all, then it won't intersect either of its
 children. 
+
+TODO: stripped-down function for use when spectating outside the world
 ================
 */
 void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
@@ -1423,6 +1426,9 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	float		dot;
 	image_t		*image;
 	rscript_t *rs_shader;
+	
+	if (r_test->integer && r_viewcluster != -1)
+	    return;
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
@@ -1502,9 +1508,6 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
 		if (surf->visframe != r_framecount)
-			continue;
-
-		if(surf->texinfo->flags & SURF_NODRAW)
 			continue;
 
 		/* XXX: this doesn't seem to cull any surfaces AT ALL when positioned
@@ -1643,8 +1646,6 @@ void R_DrawWorld (void)
 
 	R_CalcWorldLights();
 
-	R_ClearSkyBox ();
-
 	GL_EnableMultitexture( true );
 
 	GL_SelectTexture( GL_TEXTURE0);
@@ -1736,6 +1737,8 @@ void R_DrawWorld (void)
 	qglDepthMask(0);
 	R_DrawSkyBox();
 	qglDepthMask(1);
+	
+	R_ClearSkyBox ();
 }
 
 
@@ -1749,27 +1752,37 @@ cluster
 */
 void R_MarkLeaves (void)
 {
-	byte	*vis;
-	byte	fatvis[MAX_MAP_LEAFS/8];
+	static byte	*vis;
+	static byte	fatvis[MAX_MAP_LEAFS/8];
 	mnode_t	*node;
 	int		i, c;
 	mleaf_t	*leaf;
 	int		cluster;
+	int		oldrtest;
 
-	if (r_oldviewcluster == r_viewcluster && r_oldviewcluster2 == r_viewcluster2 && !r_novis->integer && r_viewcluster != -1)
+	if	(	r_oldviewcluster == r_viewcluster && 
+			r_oldviewcluster2 == r_viewcluster2 && 
+			!r_novis->integer && r_viewcluster != -1 && 
+			!r_test->integer && r_test->integer != oldrtest)
 		return;
-
+	oldrtest = r_test->integer;
+	
+	if	(	r_oldviewcluster == r_viewcluster && 
+			r_oldviewcluster2 == r_viewcluster2 && r_test->integer)
+		goto skip_decompress;
+	
+	
 	// development aid to let you run around and see exactly where
 	// the pvs ends
 	if (gl_lockpvs->integer)
 		return;
 
-	r_visframecount++;
 	r_oldviewcluster = r_viewcluster;
 	r_oldviewcluster2 = r_viewcluster2;
 
 	if (r_novis->integer || r_viewcluster == -1 || !r_worldmodel->vis)
 	{
+		r_visframecount++;
 		// mark everything
 		for (i=0 ; i<r_worldmodel->numleafs ; i++)
 			r_worldmodel->leafs[i].visframe = r_visframecount;
@@ -1789,22 +1802,130 @@ void R_MarkLeaves (void)
 			((int *)fatvis)[i] |= ((int *)vis)[i];
 		vis = fatvis;
 	}
+	
+skip_decompress:
+	r_visframecount++;
 
-	for (i=0,leaf=r_worldmodel->leafs ; i<r_worldmodel->numleafs ; i++, leaf++)
+	if (r_test->integer && r_viewcluster != -1)
 	{
-		cluster = leaf->cluster;
-		if (cluster == -1)
-			continue;
-		if (vis[cluster>>3] & (1<<(cluster&7)))
+		for (i=0,leaf=r_worldmodel->leafs ; i<r_worldmodel->numleafs ; i++, leaf++)
 		{
-			node = (mnode_t *)leaf;
-			do
+			msurface_t **mark, *surf;
+			int c, clipflags = 15;
+			qboolean    fully_clipped = false;
+			
+			cluster = leaf->cluster;
+			if (cluster == -1)
+				continue;
+			if (vis[cluster>>3] & (1<<(cluster&7)))
 			{
-				if (node->visframe == r_visframecount)
-					break;
-				node->visframe = r_visframecount;
-				node = node->parent;
-			} while (node);
+			    image_t		*image;
+			    rscript_t	*rs_shader;
+			    
+			    if (r_newrefdef.areabits) {
+				    // not visible
+				    if (! (r_newrefdef.areabits[leaf->area>>3] & (1<<(leaf->area&7)) ) ) continue;
+			    }
+			    
+			    mark = leaf->firstmarksurface;
+			    if (! (c = leaf->nummarksurfaces) )
+				    continue;
+				
+				if (!r_nocull->integer)
+	            {
+		            int j, clipped;
+		            cplane_t *clipplane;
+
+		            for (j=0,clipplane=frustum ; j<4 ; j++,clipplane++)
+		            {
+			            clipped = BoxOnPlaneSide (leaf->minmaxs, leaf->minmaxs+3, clipplane);
+
+			            if (clipped == 1)
+				            clipflags &= ~(1<<i);	// node is entirely on screen
+			            else if (clipped == 2)
+                        {
+                            fully_clipped = true;
+				            break;
+				        }
+		            }
+	            }
+	            
+	            if (fully_clipped)
+	                continue;
+
+			    do
+			    {
+			        surf = *mark++;
+			        if (surf->visframe == r_framecount)
+			            continue;
+			        if ((DotProduct(r_origin, surf->plane->normal) < (surf->plane->dist + 1)) != ((surf->flags & SURF_PLANEBACK) && true))
+						continue;
+			        if (clipflags & R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
+					    continue;
+				    surf->visframe = r_framecount;
+				    
+				    if (surf->texinfo->flags & SURF_SKY)
+			        {	// just adds to visible sky bounds
+				        R_AddSkySurface (surf);
+			        }
+			        else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
+			        {	// add to the translucent chain
+				        surf->texturechain = r_alpha_surfaces;
+				        r_alpha_surfaces = surf;
+				        surf->entity = NULL;
+			        }
+			        else
+			        {
+				        if ( !( surf->flags & SURF_DRAWTURB ) )
+				        {
+					        BSP_AddToTextureChain( surf );
+				        }
+				        else
+				        {
+					        // the polygon is visible, so add it to the texture
+					        // sorted chain
+
+					        // FIXME: this is a hack for animation
+					        image = BSP_TextureAnimation (surf->texinfo);
+
+					        surf->texturechain = image->texturechain;
+					        image->texturechain = surf;
+
+				        }
+				        
+				        if(r_shaders->integer) { //only add to the chain if there is actually a shader
+					        rs_shader = (rscript_t *)surf->texinfo->image->script;
+					        if(rs_shader) {
+						        surf->rscriptchain = r_rscript_surfaces;
+						        r_rscript_surfaces = surf;
+					        }
+				        }
+			        }
+			    } while (--c);
+			}
+		}
+	}
+	else
+	{
+		for (i=0,leaf=r_worldmodel->leafs ; i<r_worldmodel->numleafs ; i++, leaf++)
+		{
+			msurface_t **mark, *surf;
+			int c;
+		
+			cluster = leaf->cluster;
+			if (cluster == -1)
+				continue;
+			if (vis[cluster>>3] & (1<<(cluster&7)))
+			{
+				node = (mnode_t *)leaf;
+				do
+				{
+					if (node->visframe == r_visframecount)
+						break;
+					node->visframe = r_visframecount;
+					node = node->parent;
+				} while (node);
+			}
 		}
 	}
 }
@@ -2145,6 +2266,7 @@ void R_RecursiveRadarNode (mnode_t *node)
 		distance = 1024.0;
 	}
 
+
 	if ( r_origin[0]+distance < node->minmaxs[0] ||
 		 r_origin[0]-distance > node->minmaxs[3] ||
 		 r_origin[1]+distance < node->minmaxs[1] ||
@@ -2413,4 +2535,3 @@ void R_DrawRadar(void)
     qglColor4f(1,1,1,1);
 
 }
-
