@@ -1547,6 +1547,7 @@ void Mod_LoadLeafs (lump_t *l)
 	dleaf_t 	*in;
 	mleaf_t 	*out;
 	int			i, j, count, p;
+	int			to_subtract = 0; //for removing SURF_NODRAW surfaces
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -1581,6 +1582,23 @@ void Mod_LoadLeafs (lump_t *l)
 			Com_Error (ERR_DROP,
 				"Map file has invalid leaf surface offsets!\n"
 				"The file is likely corrupted, please obtain a fresh copy.");
+		
+		out->firstmarksurface -= to_subtract;
+		
+		// Remove SURF_NODRAW surfaces. We do this hear instead of in 
+		// Mod_LoadMarkSurfaces so we can correct the offsets in each leaf.
+		for (j = 0; j < out->nummarksurfaces; j++)
+		{
+			out->firstmarksurface[j] = out->firstmarksurface[j+to_subtract];
+			msurface_t *s = out->firstmarksurface[j];
+			if (s->flags & SURF_NODRAW || (SurfaceIsTranslucent(s) && 
+				!strcasecmp(s->texinfo->image->name, "textures/arena6/blacktrans.wal")))
+			{
+				to_subtract++;
+				j--;
+				out->nummarksurfaces--;
+			}
+		}
 
 		// gl underwater warp
 		if (out->contents & MASK_WATER )
@@ -1591,6 +1609,10 @@ void Mod_LoadLeafs (lump_t *l)
 			}
 		}
 	}
+	
+	loadmodel->nummarksurfaces -= to_subtract;
+	
+	Com_Printf ("Eliminated ^2%i invisible surfaces.\n", to_subtract);
 }
 
 /*
