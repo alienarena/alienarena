@@ -51,6 +51,7 @@ cvar_t  *gl_shadowmaps;
 cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
+cvar_t	*gl_fog;
 
 entity_t	*currententity;
 model_t		*currentmodel;
@@ -268,6 +269,12 @@ void R_ReadFogScript( char *config_file )
 		free( buffer );
 	}
 	fclose( fp );
+	
+	if (gl_fog->integer < 1)
+	{
+		map_fog = false;
+		r_weather = false;
+	}
 
 	return;
 }
@@ -1243,6 +1250,7 @@ void R_Register( void )
 	gl_bspnormalmaps = Cvar_Get("gl_bspnormalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
+	gl_fog = Cvar_Get ("gl_fog", "1", CVAR_ARCHIVE);
 
 	r_shadowmapscale = Cvar_Get( "r_shadowmapscale", "1", CVAR_ARCHIVE );
 	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "880", CVAR_ARCHIVE );
@@ -1376,6 +1384,7 @@ void R_SetMaxPerformance( void )
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
+
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("gl_usevbo", 1);

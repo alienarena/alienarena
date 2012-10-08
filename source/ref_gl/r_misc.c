@@ -472,6 +472,8 @@ void GL_ScreenShot_JPEG(void)
 	// Yes, you can set gl_picmip to 40. No, we don't want you to show anyone.
 	if (gl_picmip->integer > 1)
 		blocking_cvars[nblocking++] = gl_picmip;
+	if (gl_fog->integer < 1)
+		blocking_cvars[nblocking++] = gl_fog;
 	// TODO: check for other avant-garde video settings here.
 	
 	if (nblocking > 0)
