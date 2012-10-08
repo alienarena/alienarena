@@ -110,14 +110,16 @@ void R_InitImageSubsystem(void)
 	{
 		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
 
-		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
+		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "1", CVAR_ARCHIVE );
 		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
 
 		r_anisotropic = Cvar_Get("r_anisotropic", "16", CVAR_ARCHIVE);
-		if (r_anisotropic->value >= r_ext_max_anisotropy->value)
-			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->value);
+		if (r_anisotropic->integer >= r_ext_max_anisotropy->integer)
+			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->integer);
+		if (r_anisotropic->integer <= 0)
+			Cvar_SetValue("r_anisotropic", 1);
 
-		aniso_level = r_anisotropic->value;
+		aniso_level = r_anisotropic->integer;
 
 		if (r_anisotropic->integer == 1)
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
