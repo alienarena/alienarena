@@ -82,6 +82,13 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	unsigned int map4[MAX_VBO_XYZs];
 	int		xyz_size, st_size, lm_size, ebo_size;
 	
+	// NOTE: annoyingly, we can't use glDrawElements to have neighboring map
+	// surfaces sharing vertexes with each other, since a neighboring surface
+	// may have a different texture and/or lightmap texture, so each vertex 
+	// may be used multiple times with different texcoords. This is probably
+	// part of the benefit of MegaTexture. Anyway, since we are now breaking
+	// up various-size polygons (mostly quads) into triangles, glDrawElements
+	// does still have some benefits.
 	if (gl_state.vbo)
 	{
 		for (i = 0, l = 0, m = 0, n = 0; i < p->numverts; i++)
