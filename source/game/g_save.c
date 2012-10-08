@@ -185,7 +185,7 @@ void InitGame (void)
 	gi.cvar ("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar ("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);
 
-	g_maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+	g_maxclients = gi.cvar ("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH);
 	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
 	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH);
 	ctf = gi.cvar ("ctf", "0", CVAR_LATCH|CVAR_GAMEINFO);
@@ -240,7 +240,13 @@ void InitGame (void)
 	g_randomquad = gi.cvar("g_randomquad", "0", CVAR_LATCH);
 
 	//warmup time
-	warmuptime = gi.cvar("warmuptime", "30", CVAR_LATCH);
+	if (g_maxclients->integer > 1)
+		warmuptime = gi.cvar("warmuptime", "30", CVAR_LATCH);
+	else
+		// You can override this default if you want to, but a default of 0 is
+		// nice if you're just loading a map to test code or to test the map 
+		// itself, over and over again.
+		warmuptime = gi.cvar("warmuptime", "0", CVAR_LATCH);
 
 	//spawn protection
 	g_spawnprotect = gi.cvar("g_spawnprotect", "2", CVAR_SERVERINFO);
@@ -314,13 +320,13 @@ void InitGame (void)
 	Com_sprintf (game.helpmessage2, sizeof(game.helpmessage2), "");
 
 	// initialize all entities for this game
-	game.maxentities = maxentities->value;
+	game.maxentities = maxentities->integer;
 	g_edicts =  gi.TagMalloc (game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
 	globals.edicts = g_edicts;
 	globals.max_edicts = game.maxentities;
 
 	// initialize all clients for this game
-	game.maxclients = g_maxclients->value;
+	game.maxclients = g_maxclients->integer;
 	game.clients = gi.TagMalloc (game.maxclients * sizeof(game.clients[0]), TAG_GAME);
 	globals.num_edicts = game.maxclients+1;
 
