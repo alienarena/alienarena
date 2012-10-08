@@ -699,11 +699,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	else
 	{
 		BSP_FlushVBOAccum ();
-		if (r_vboOn)
-		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-			r_vboOn = false;
-		}
+		r_vboOn = false;
 		R_InitVArrays (VERT_MULTI_TEXTURED);
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
@@ -864,11 +860,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
 	else
 	{
 		BSP_FlushVBOAccum ();
-		if (r_vboOn)
-		{
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-			r_vboOn = false;
-		}
+		r_vboOn = false;
 		R_InitVArrays (VERT_MULTI_TEXTURED);
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
@@ -912,9 +904,6 @@ void BSP_DrawNonGLSLSurfaces (void)
 	qglActiveTextureARB(GL_TEXTURE1);
 	qglBindTexture(GL_TEXTURE_2D, 0 );
 
-    if (gl_state.vbo)
-	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-	
 	qglDisable (GL_ALPHA_TEST);
 
 }
@@ -981,9 +970,6 @@ void BSP_DrawGLSLSurfaces (void)
 	
 	BSP_FlushVBOAccum ();
 
-    if (gl_state.vbo)
-	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-	
 	qglDisable (GL_ALPHA_TEST);
 	
 	qglActiveTextureARB (GL_TEXTURE1);
@@ -1088,9 +1074,6 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	
 	BSP_FlushVBOAccum ();
 	
-	if (gl_state.vbo)
-	    qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
 	qglDisable (GL_ALPHA_TEST);
 
 	qglActiveTextureARB (GL_TEXTURE1);
@@ -1708,8 +1691,6 @@ void R_DrawWorld (void)
 	BSP_FlushVBOAccum ();
 	
 	r_vboOn = false;
-	if (gl_state.vbo)
-	    qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 	R_KillVArrays ();
 
 	BSP_DrawNonGLSLSurfaces();
