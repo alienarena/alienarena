@@ -1148,21 +1148,6 @@ void R_GenerateEntityShadow( void )
 		else
 			fadeShadow = 1.0;
 		
-		//Note - this would only really be usefull if all entities used shadowmaps, for now it creates 
-		//disparity since other objects using stencil volumes cannot fade.  Also, might be fast and more accurate to 
-		//use the actual lightmap info stored in shadelight.
-		if (r_test->integer)
-		{
-			vec3_t lightvec;
-			float lightdist, ratio;
-			VectorSubtract (statLightPosition, currententity->origin, lightvec);
-			lightdist = VectorLength (lightvec);
-			ratio = sqrt(sqrt(sqrt (statLightIntensity / lightdist)));
-			fadeShadow *= ratio;
-			if (fadeShadow > 1.0)
-				fadeShadow = 1.0;
-		}
-		
 		qglEnable(GL_DEPTH_TEST);
 		qglClearColor(0,0,0,1.0f);
 
