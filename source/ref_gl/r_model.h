@@ -174,7 +174,8 @@ typedef struct
 #define SURF_DRAWTURB		2
 #define SURF_UNDERWATER		0x80
 
-#define SurfaceIsTranslucent(surf) ((surf)->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
+#define TexinfoIsTranslucent(texinfo) ((texinfo)->flags & (SURF_TRANS33|SURF_TRANS66))
+#define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent((surf)->texinfo))
 #define TexinfoIsAlphaBlended(texinfo) ((texinfo)->flags & SURF_TRANS33 && (texinfo)->flags & SURF_TRANS66)
 #define SurfaceIsAlphaBlended(surf) (TexinfoIsAlphaBlended ((surf)->texinfo))
 #define SurfaceHasNoLightmap(surf) ((surf)->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) && !SurfaceIsAlphaBlended((surf)))

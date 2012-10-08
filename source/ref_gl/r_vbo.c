@@ -152,14 +152,18 @@ void VB_BuildWorldVBO(void)
 
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
+        if (currentmodel->unique_texinfo[i]->flags & SURF_SKY)
+            continue;
+        //TODO: use VBO for alpha surfaces? But for now they're just
+        //cluttering up the VBO.
+        if	(	TexinfoIsTranslucent(currentmodel->unique_texinfo[i]) && 
+        		!TexinfoIsAlphaBlended(currentmodel->unique_texinfo[i]))
+            continue;
 		for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
 		{
-			if ((currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-				(surf->texinfo->flags & SURF_SKY) || 
-				(surf->flags & SURF_DRAWTURB))
-			{   // no skies here
+			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
+				    (surf->flags & (SURF_DRAWTURB|SURF_NODRAW)))
 				continue;
-			}
 			VB_BuildSurfaceVBO(surf);
 		}
 	}
