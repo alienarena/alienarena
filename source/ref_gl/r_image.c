@@ -1285,8 +1285,13 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 		// let people sample down the world textures for speed
 		if (mipmap)
 		{
-			scaled_width >>= gl_picmip->integer;
-			scaled_height >>= gl_picmip->integer;
+		    for (i = 0; i < gl_picmip->integer; i++)
+		    {
+		    	if (scaled_width <= 1 || scaled_height <= 1)
+		    		break;
+				scaled_width >>= 1;
+				scaled_height >>= 1;
+			}
 		}
 		if (scaled_width > max_size)
 			scaled_width = max_size;
@@ -1447,7 +1452,7 @@ nonscrap:
 		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
 		} else {
-			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_bump );
+			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_particle && image->type != it_sky), image->type == it_bump );
 		}
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
