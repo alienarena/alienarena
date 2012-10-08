@@ -208,6 +208,7 @@ void GL_SetupWorldVBO (void)
 	qglClientActiveTextureARB (GL_TEXTURE1);
 	qglTexCoordPointer(2, GL_FLOAT, 0, (void *)vbo_lm_base);
 	
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, eboId);
 }
 

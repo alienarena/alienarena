@@ -1818,6 +1818,9 @@ void R_MarkLeaves (void)
 	
 skip_decompress:
 	r_visframecount++;
+	
+	if (!r_drawworld->integer)
+		return;
 
 	if (r_test->integer && r_viewcluster != -1)
 	{
