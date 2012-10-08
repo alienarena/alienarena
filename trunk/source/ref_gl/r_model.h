@@ -267,6 +267,8 @@ typedef struct msurface_s
 	int has_vbo;
 	int vbo_first_vert;
 	int vbo_num_verts;
+	int vbo_first_elem;
+	int vbo_num_elems;
 
 } msurface_t;
 
