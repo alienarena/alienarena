@@ -309,6 +309,8 @@ typedef struct mleaf_s
 
 	msurface_t	**firstmarksurface;
 	int			nummarksurfaces;
+	
+	int			minPVSleaf, maxPVSleaf;
 } mleaf_t;
 
 
@@ -393,6 +395,11 @@ typedef struct model_s
 	dvis_t		*vis;
 
 	byte		*lightdata;
+	
+	//minimum and maximum leaf indexes for each area
+	int			area_min_leaf[MAX_MAP_AREAS];
+	int			area_max_leaf[MAX_MAP_AREAS];
+	int			num_areas;
 
 	// for alias models and skins
 	image_t		*skins[MAX_MD2SKINS];

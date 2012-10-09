@@ -1713,6 +1713,65 @@ void Mod_LoadPlanes (lump_t *l)
 
 /*
 =================
+Mod_SummarizePVS
+
+Gather some statistics from the PVS data which allows the renderer to take 
+some shortcuts.
+=================
+*/
+void Mod_SummarizePVS (void)
+{
+	byte		*vis;
+	mleaf_t		*leaf, *leaf2; 
+	int			cluster;
+	int			i, j;
+	
+	loadmodel->num_areas = 0;
+	for (i = 0; i < MAX_MAP_AREAS; i++)
+	{
+		loadmodel->area_min_leaf[i] = loadmodel->numleafs-1;
+		loadmodel->area_max_leaf[i] = 0;
+	}
+	
+	for (i=0,leaf=loadmodel->leafs ; i<loadmodel->numleafs ; i++, leaf++)
+	{
+		cluster = leaf->cluster;
+		leaf->maxPVSleaf = 0;
+		leaf->minPVSleaf = loadmodel->numleafs;
+		if (cluster == -1)
+			continue;
+		
+		vis = Mod_ClusterPVS (cluster, loadmodel);
+		
+		if (loadmodel->area_min_leaf[leaf->area] > i)
+			loadmodel->area_min_leaf[leaf->area] = i;
+		if (loadmodel->area_max_leaf[leaf->area] < i)
+			loadmodel->area_max_leaf[leaf->area] = i;
+		if (leaf->area > loadmodel->num_areas)
+			loadmodel->num_areas = leaf->area;
+		
+		for (j=0,leaf2=loadmodel->leafs ; j<loadmodel->numleafs ; j++, leaf2++)
+		{
+			cluster = leaf2->cluster;
+			if ((leaf2->contents & CONTENTS_SOLID) || cluster == -1)
+				continue;
+			if (leaf2->nummarksurfaces == 0)
+				continue;
+			
+			if (vis[cluster>>3] & (1<<(cluster&7)))
+			{
+				if (j < leaf->minPVSleaf)
+					leaf->minPVSleaf = j;
+				if (j > leaf->maxPVSleaf)
+					leaf->maxPVSleaf = j;
+			}
+		}
+	}
+	loadmodel->num_areas++;
+}
+
+/*
+=================
 Mod_LoadBrushModel
 =================
 */
@@ -1777,6 +1836,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadVisibility (&header->lumps[LUMP_VISIBILITY]);
 	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS]);
 	Mod_LoadNodes (&header->lumps[LUMP_NODES]);
+	Mod_SummarizePVS ();
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
 	mod->num_frames = 2;		// regular and alternate animation
 

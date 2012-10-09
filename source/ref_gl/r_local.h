@@ -103,6 +103,7 @@ extern	int			gl_filter_min, gl_filter_max;
 //
 extern	refdef_t	r_newrefdef;
 extern	int		r_viewcluster, r_viewcluster2, r_oldviewcluster, r_oldviewcluster2;
+mleaf_t			*r_viewleaf, *r_viewleaf2;
 
 extern	cvar_t	*r_norefresh;
 extern	cvar_t	*r_lefthand;

@@ -1741,6 +1741,9 @@ void R_MarkLeaves (void)
 	int		i, c;
 	mleaf_t	*leaf;
 	int		cluster;
+	static int minleaf_allareas, maxleaf_allareas;
+	int minleaf, maxleaf;
+	
 
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
@@ -1774,9 +1777,15 @@ void R_MarkLeaves (void)
 	}
 
 	vis = Mod_ClusterPVS (r_viewcluster, r_worldmodel);
+	minleaf_allareas = r_viewleaf->minPVSleaf;
+	maxleaf_allareas = r_viewleaf->maxPVSleaf;
 	// may have to combine two clusters because of solid water boundaries
 	if (r_viewcluster2 != r_viewcluster)
 	{
+		if (r_viewleaf2->minPVSleaf < minleaf_allareas)
+			minleaf_allareas = r_viewleaf2->minPVSleaf;
+		if (r_viewleaf2->maxPVSleaf > maxleaf_allareas)
+			maxleaf_allareas = r_viewleaf2->maxPVSleaf;
 		memcpy (fatvis, vis, (r_worldmodel->numleafs+7)/8);
 		vis = Mod_ClusterPVS (r_viewcluster2, r_worldmodel);
 		c = (r_worldmodel->numleafs+31)/32;
@@ -1788,12 +1797,39 @@ void R_MarkLeaves (void)
 skip_decompress:
 	r_visframecount++;
 	
+	minleaf = minleaf_allareas;
+	maxleaf = maxleaf_allareas;
+	
+	//restrict leaf range further to the range leafs in connected areas.
+	if (r_newrefdef.areabits)
+	{
+		int areamax = 0;
+		int areamin = r_worldmodel->numleafs;
+		for (i = 0; i < r_worldmodel->num_areas; i++)
+		{
+			if (r_newrefdef.areabits[i>>3] & (1<<(i&7)))
+			{
+				if (r_worldmodel->area_max_leaf[i] > areamax)
+					areamax = r_worldmodel->area_max_leaf[i];
+				if (r_worldmodel->area_min_leaf[i] < areamin)
+					areamin = r_worldmodel->area_min_leaf[i];
+			}
+		}
+		if (areamin < areamax)
+		{
+			if (areamin > minleaf)
+				minleaf = areamin;
+			if (areamax < maxleaf)
+				maxleaf = areamax;
+		}
+	}
+	
 	if (!r_drawworld->integer)
 		return;
-
+	
 	if (r_test->integer && r_viewcluster != -1)
 	{
-		for (i=0,leaf=r_worldmodel->leafs ; i<r_worldmodel->numleafs ; i++, leaf++)
+		for (i=minleaf,leaf=r_worldmodel->leafs+minleaf ; i<=maxleaf ; i++, leaf++)
 		{
 			msurface_t **mark, *surf;
 			int c, clipflags = 15;
