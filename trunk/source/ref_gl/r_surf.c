@@ -1881,6 +1881,21 @@ skip_decompress:
 	            
 	            if (fully_clipped)
 	                continue;
+	            
+	            
+	            if (gl_shadowmaps->integer)
+	            {
+	            	// TODO: switch shadows over to this style of surface 
+	            	// checking.
+					node = (mnode_t *)leaf;
+					do
+					{
+						if (node->visframe == r_visframecount)
+							break;
+						node->visframe = r_visframecount;
+						node = node->parent;
+					} while (node);
+				}
 
 			    do
 			    {
