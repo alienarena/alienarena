@@ -1160,6 +1160,10 @@ void BSP_DrawInlineBModel ( void )
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
 	{
+		if (psurf->flags & SURF_NODRAW)
+			continue; //can skip dot product stuff
+			// TODO: remove these at load-time for inline models?
+		
 		// find which side of the plane we are on
 		pplane = psurf->plane;
 		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
