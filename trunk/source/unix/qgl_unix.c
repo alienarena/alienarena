@@ -129,6 +129,7 @@ void ( APIENTRY * qglDisableClientState )(GLenum array);
 void ( APIENTRY * qglDrawArrays )(GLenum mode, GLint first, GLsizei count);
 void ( APIENTRY * qglDrawBuffer )(GLenum mode);
 void ( APIENTRY * qglDrawElements )(GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);
+void ( APIENTRY * qglDrawRangeElements )(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
 void ( APIENTRY * qglDrawPixels )(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
 void ( APIENTRY * qglEdgeFlag )(GLboolean flag);
 void ( APIENTRY * qglEdgeFlagPointer )(GLsizei stride, const GLvoid *pointer);
@@ -2720,6 +2721,7 @@ void QGL_Shutdown( void )
 	qglDrawArrays                = NULL;
 	qglDrawBuffer                = NULL;
 	qglDrawElements              = NULL;
+	qglDrawRangeElements         = NULL;
 	qglDrawPixels                = NULL;
 	qglEdgeFlag                  = NULL;
 	qglEdgeFlagPointer           = NULL;
@@ -3126,6 +3128,7 @@ qboolean QGL_Init( const char *dllname )
 	qglDrawArrays                = dllDrawArrays = GPA( "glDrawArrays" );
 	qglDrawBuffer                = dllDrawBuffer = GPA( "glDrawBuffer" );
 	qglDrawElements              = dllDrawElements = GPA( "glDrawElements" );
+	qglDrawRangeElements         = GPA ("glDrawRangeElements");
 	qglDrawPixels                = dllDrawPixels = GPA( "glDrawPixels" );
 	qglEdgeFlag                  = dllEdgeFlag = GPA( "glEdgeFlag" );
 	qglEdgeFlagPointer           = dllEdgeFlagPointer = GPA( "glEdgeFlagPointer" );

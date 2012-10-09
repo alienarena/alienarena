@@ -552,7 +552,7 @@ static inline void BSP_FlushVBOAccum (void)
 		// argument here is treated as an offset instead of a pointer by
 		// OpenGL. Much as I hate casting integers to pointers, that's the 
 		// only way to get Visual Studio to accept it. -Max
-#if 0 //FIXME: add glDrawRangeElements!
+#ifdef UNIX_VARIANT //FIXME: add glDrawRangeElements on Windows!
 		qglDrawRangeElements(	GL_TRIANGLES, batch->first_vert, 
 								batch->last_vert, 
 								batch->last_elem-batch->first_elem, 

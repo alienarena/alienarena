@@ -108,6 +108,7 @@ extern  void ( APIENTRY * qglDisableClientState )(GLenum array);
 extern  void ( APIENTRY * qglDrawArrays )(GLenum mode, GLint first, GLsizei count);
 extern  void ( APIENTRY * qglDrawBuffer )(GLenum mode);
 extern  void ( APIENTRY * qglDrawElements )(GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);
+extern  void ( APIENTRY * qglDrawRangeElements )(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices);
 extern  void ( APIENTRY * qglDrawPixels )(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels);
 extern  void ( APIENTRY * qglEdgeFlag )(GLboolean flag);
 extern  void ( APIENTRY * qglEdgeFlagPointer )(GLsizei stride, const GLvoid *pointer);
