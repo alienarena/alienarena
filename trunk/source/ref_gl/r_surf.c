@@ -1829,9 +1829,15 @@ skip_decompress:
 			int c, clipflags = 15;
 			qboolean    fully_clipped = false;
 			
+			if (leaf->contents & CONTENTS_SOLID)
+				continue;
+			
 			cluster = leaf->cluster;
+			/*
+			The CONTENTS_SOLID check above catches all of these and then some.
 			if (cluster == -1)
 				continue;
+			*/
 			if (vis[cluster>>3] & (1<<(cluster&7)))
 			{
 			    image_t		*image;
