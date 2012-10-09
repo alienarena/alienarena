@@ -48,7 +48,7 @@ void *Hunk_Begin (int maxsize)
 	cursize = 0;
 	hunkmaxsize = maxsize;
 #ifdef VIRTUAL_ALLOC
-	membase = VirtualAlloc (NULL, maxsize, MEM_RESERVE, PAGE_NOACCESS);
+	membase = VirtualAlloc (NULL, maxsize, MEM_RESERVE|MEM_TOP_DOWN, PAGE_NOACCESS);
 #else
 	membase = malloc (maxsize);
 	memset (membase, 0, maxsize);
