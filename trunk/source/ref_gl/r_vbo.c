@@ -126,8 +126,8 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 
 		surf->has_vbo = true;
 		surf->vbo_first_vert = currVertexNum;
-		currVertexNum += 3*(p->numverts-2);
-		surf->vbo_num_verts = currVertexNum;
+		surf->vbo_num_verts = 3*(p->numverts-2);
+		currVertexNum += surf->vbo_num_verts;
 		
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
@@ -174,7 +174,6 @@ void VB_BuildWorldVBO(void)
 	}
 
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-	qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void VB_BuildVBOBufferSize(msurface_t *surf)

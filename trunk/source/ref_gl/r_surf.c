@@ -568,7 +568,6 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 		batch->first_vert = first_vert;
 		batch->last_vert = last_vert;
 		num_vbo_batches++;
-		BSP_FlushVBOAccum();
 		return;
 	}
 	
