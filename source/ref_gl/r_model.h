@@ -267,8 +267,9 @@ typedef struct msurface_s
 	int has_vbo;
 	int vbo_first_vert;
 	int vbo_num_verts;
-	int vbo_first_elem;
-	int vbo_num_elems;
+	
+	// XXX: for future reference, the glDrawRangeElements code was last seen
+	// here at revision 3246.
 
 } msurface_t;
 

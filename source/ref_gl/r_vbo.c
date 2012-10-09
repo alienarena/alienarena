@@ -32,8 +32,7 @@ int totalEBObufferSize;
 int currVertexNum, currElemNum;
 size_t	vbo_xyz_base, vbo_xyz_pos, 
 		vbo_st_base, vbo_st_pos, 
-		vbo_lm_base, vbo_lm_pos,
-		ebo_pos;
+		vbo_lm_base, vbo_lm_pos;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -79,21 +78,15 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	float map[MAX_VBO_XYZs];
 	float map2[MAX_VBO_XYZs];
 	float map3[MAX_VBO_XYZs];
-	unsigned int map4[MAX_VBO_XYZs];
-	int		xyz_size, st_size, lm_size, ebo_size;
+	int		xyz_size, st_size, lm_size;
 	
-	// NOTE: annoyingly, we can't use glDrawElements to have neighboring map
-	// surfaces sharing vertexes with each other, since a neighboring surface
-	// may have a different texture and/or lightmap texture, so each vertex 
-	// may be used multiple times with different texcoords. This is probably
-	// part of the benefit of MegaTexture. Anyway, since we are now breaking
-	// up various-size polygons (mostly quads) into triangles, glDrawElements
-	// does still have some benefits.
+	// XXX: for future reference, the glDrawRangeElements code was last seen
+	// here at revision 3246.
 	if (gl_state.vbo)
 	{
-		for (i = 0, l = 0, m = 0, n = 0; i < p->numverts; i++)
+		for (trinum = 1, l = 0, m = 0, n = 0; trinum < p->numverts-1; trinum++)
 		{
-			v = p->verts[i];
+			v = p->verts[0];
 			
 			// copy in vertex data
 			map[n++] = v[0];
@@ -107,40 +100,42 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 			// lightmap texture coords
 			map3[m++] = v[5];
 			map3[m++] = v[6];
-		}
-		
-		for (trinum = 1, o = 0; trinum < p->numverts-1; trinum++)
-		{
-			map4[o++] = currVertexNum;
-			for (i = trinum; i < trinum + 2; i++)
+			
+			for (i = trinum; i < trinum+2; i++)
 			{
-				map4[o++] = currVertexNum+i;
+				v = p->verts[i];
+			
+				// copy in vertex data
+				map[n++] = v[0];
+				map[n++] = v[1];
+				map[n++] = v[2];
+
+				// world texture coords
+				map2[l++] = v[3];
+				map2[l++] = v[4];
+
+				// lightmap texture coords
+				map3[m++] = v[5];
+				map3[m++] = v[6];
 			}
 		}
-
+		
 		xyz_size = n*sizeof(float);
 		st_size = l*sizeof(float);
 		lm_size = m*sizeof(float);
-		ebo_size = o*sizeof(unsigned int);
 
 		surf->has_vbo = true;
-		surf->vbo_first_vert  = currVertexNum;
-		surf->vbo_num_verts = p->numverts;
-		surf->vbo_first_elem = currElemNum;
-		surf->vbo_num_elems = 3*(p->numverts-2);
-		
-		currVertexNum += p->numverts;
-		currElemNum += 3*(p->numverts-2);
+		surf->vbo_first_vert = currVertexNum;
+		currVertexNum += 3*(p->numverts-2);
+		surf->vbo_num_verts = currVertexNum;
 		
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
 		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_lm_pos, lm_size, &map3);  
-		qglBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER, ebo_pos, ebo_size, &map4);  
 
 		vbo_xyz_pos += xyz_size;
 		vbo_st_pos += st_size;
 		vbo_lm_pos += lm_size;
-		ebo_pos += ebo_size;
 	}
 }
 
@@ -151,7 +146,7 @@ void VB_BuildWorldVBO(void)
 	int num_vertexes = totalVBObufferSize/7;
 	
 	currVertexNum = currElemNum = 0;
-	vbo_xyz_base = vbo_xyz_pos = ebo_pos = 0;
+	vbo_xyz_base = vbo_xyz_pos = 0;
 	vbo_st_base = vbo_st_pos = num_vertexes*3*sizeof(float);
 	vbo_lm_base = vbo_lm_pos = num_vertexes*5*sizeof(float);	
 
@@ -159,10 +154,6 @@ void VB_BuildWorldVBO(void)
 		
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
-	
-	qglGenBuffersARB(1, &eboId);
-	qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, eboId);
-	qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, totalEBObufferSize*sizeof(unsigned int), 0, GL_STATIC_DRAW_ARB);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
@@ -192,8 +183,7 @@ void VB_BuildVBOBufferSize(msurface_t *surf)
 
 	if (!( surf->flags & SURF_DRAWTURB ) )
 	{
-		totalVBObufferSize += 7*p->numverts;
-		totalEBObufferSize += 3*(p->numverts-2);
+		totalVBObufferSize += 7*3*(p->numverts-2);
 	}
 }
 
@@ -210,7 +200,6 @@ void GL_SetupWorldVBO (void)
 	qglTexCoordPointer(2, GL_FLOAT, 0, (void *)vbo_lm_base);
 	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-	qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, eboId);
 }
 
 void GL_BindVBO(vertCache_t *cache)
@@ -342,7 +331,6 @@ void VB_VCInit()
 
 	//clear out previous buffer
 	qglDeleteBuffersARB(1, &vboId);
-	qglDeleteBuffersARB(1, &eboId);
 
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 	{
@@ -377,7 +365,6 @@ void R_VCShutdown()
 
 	//delete buffers
 	qglDeleteBuffersARB(1, &vboId);
-	qglDeleteBuffersARB(1, &eboId);
 	
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 	{
