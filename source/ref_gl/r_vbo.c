@@ -149,6 +149,11 @@ void VB_BuildWorldVBO(void)
 	msurface_t *surf;
 	int i;
 	int num_vertexes = totalVBObufferSize/7;
+	
+	// Really stupid temporary method to try to fix the Windows crashes. If 
+	// this doesn't fix it, this commit should be reverted right away.
+	totalVBObufferSize *= 2;
+	
 	currVertexNum = currElemNum = 0;
 	vbo_xyz_base = vbo_xyz_pos = ebo_pos = 0;
 	vbo_st_base = vbo_st_pos = num_vertexes*3*sizeof(float);
