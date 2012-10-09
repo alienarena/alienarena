@@ -1202,6 +1202,7 @@ void BSP_DrawInlineBModel ( void )
 			{	// add to the translucent chain
 				psurf->texturechain = r_alpha_surfaces;
 				r_alpha_surfaces = psurf;
+				// TODO: do this once at load time
 				psurf->entity = currententity;
 			}
 			else if ( !( psurf->flags & SURF_DRAWTURB ) )
@@ -1551,7 +1552,6 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{	// add to the translucent chain
 			surf->texturechain = r_alpha_surfaces;
 			r_alpha_surfaces = surf;
-			surf->entity = NULL;
 		}
 		else
 		{
@@ -1832,25 +1832,27 @@ skip_decompress:
 			if (leaf->contents & CONTENTS_SOLID)
 				continue;
 			
+		    if (! (c = leaf->nummarksurfaces) )
+			    continue;
+			
 			cluster = leaf->cluster;
 			/*
 			The CONTENTS_SOLID check above catches all of these and then some.
 			if (cluster == -1)
 				continue;
 			*/
+			
+			if (r_newrefdef.areabits) {
+			    // not visible
+			    if (! (r_newrefdef.areabits[leaf->area>>3] & (1<<(leaf->area&7)) ) ) continue;
+		    }
+			
 			if (vis[cluster>>3] & (1<<(cluster&7)))
 			{
 			    image_t		*image;
 			    rscript_t	*rs_shader;
 			    
-			    if (r_newrefdef.areabits) {
-				    // not visible
-				    if (! (r_newrefdef.areabits[leaf->area>>3] & (1<<(leaf->area&7)) ) ) continue;
-			    }
-			    
 			    mark = leaf->firstmarksurface;
-			    if (! (c = leaf->nummarksurfaces) )
-				    continue;
 				
 				if (!r_nocull->integer)
 	            {
@@ -1893,7 +1895,6 @@ skip_decompress:
 			        {	// add to the translucent chain
 				        surf->texturechain = r_alpha_surfaces;
 				        r_alpha_surfaces = surf;
-				        surf->entity = NULL;
 			        }
 			        else
 			        {
