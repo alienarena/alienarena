@@ -1771,14 +1771,13 @@ void R_MarkLeaves (void)
 	int		i, c;
 	mleaf_t	*leaf;
 	int		cluster;
-	int		oldrtest;
 
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
 			!r_novis->integer && r_viewcluster != -1 && 
-			!r_test->integer && r_test->integer != oldrtest)
+			!r_test->integer && !r_test->modified)
 		return;
-	oldrtest = r_test->integer;
+	r_test->modified = false;
 	
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && r_test->integer)

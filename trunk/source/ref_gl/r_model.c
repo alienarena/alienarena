@@ -1589,10 +1589,10 @@ void Mod_LoadLeafs (lump_t *l)
 		// Mod_LoadMarkSurfaces so we can correct the offsets in each leaf.
 		for (j = 0; j < out->nummarksurfaces; j++)
 		{
+			msurface_t *s;
 			out->firstmarksurface[j] = out->firstmarksurface[j+to_subtract];
-			msurface_t *s = out->firstmarksurface[j];
-			if (s->flags & SURF_NODRAW || (SurfaceIsTranslucent(s) && 
-				!strcasecmp(s->texinfo->image->name, "textures/arena6/blacktrans.wal")))
+			s = out->firstmarksurface[j];
+			if (s->flags & SURF_NODRAW)
 			{
 				to_subtract++;
 				j--;
