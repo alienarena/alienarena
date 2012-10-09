@@ -836,7 +836,7 @@ void R_SetupFrame (void)
 	{
 		r_oldviewcluster = r_viewcluster;
 		r_oldviewcluster2 = r_viewcluster2;
-		leaf = Mod_PointInLeaf (r_origin, r_worldmodel);
+		r_viewleaf = leaf = Mod_PointInLeaf (r_origin, r_worldmodel);
 		r_origin_leafnum = CM_PointLeafnum (r_origin);
 		r_viewcluster = r_viewcluster2 = leaf->cluster;
 
@@ -847,7 +847,7 @@ void R_SetupFrame (void)
 
 			VectorCopy (r_origin, temp);
 			temp[2] -= 16;
-			leaf = Mod_PointInLeaf (temp, r_worldmodel);
+			r_viewleaf2 = leaf = Mod_PointInLeaf (temp, r_worldmodel);
 			if ( !(leaf->contents & CONTENTS_SOLID) &&
 				(leaf->cluster != r_viewcluster2) )
 				r_viewcluster2 = leaf->cluster;
@@ -858,7 +858,7 @@ void R_SetupFrame (void)
 
 			VectorCopy (r_origin, temp);
 			temp[2] += 16;
-			leaf = Mod_PointInLeaf (temp, r_worldmodel);
+			r_viewleaf2 = leaf = Mod_PointInLeaf (temp, r_worldmodel);
 			if ( !(leaf->contents & CONTENTS_SOLID) &&
 				(leaf->cluster != r_viewcluster2) )
 				r_viewcluster2 = leaf->cluster;
@@ -1384,7 +1384,6 @@ void R_SetMaxPerformance( void )
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_bspnormalmaps", 0); 
 	Cvar_SetValue("gl_shadowmaps", 0);
-
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("gl_usevbo", 1);
