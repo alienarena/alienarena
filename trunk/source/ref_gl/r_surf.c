@@ -513,7 +513,7 @@ float		*r_currTangentSpaceTransform;
 // They are allocated from a static array. This prevents us wasting CPU with
 // lots of malloc/free calls.
 typedef struct vbobatch_s {
-	int					first_vert, last_vert, first_elem, last_elem;
+	int					first_vert, last_vert;
 	struct vbobatch_s 	*next, *prev;
 } vbobatch_t;
 
@@ -546,38 +546,18 @@ static inline void BSP_FlushVBOAccum (void)
 		r_vboOn = true;
 	}
 	
+	// XXX: for future reference, the glDrawRangeElements code was last seen
+	// here at revision 3246.
 	for (; batch; batch = batch->next)
 	{
-		// NOTE: Due to the GL_ELEMENT_ARRAY_BUFFER binding, the final
-		// argument here is treated as an offset instead of a pointer by
-		// OpenGL. Much as I hate casting integers to pointers, that's the 
-		// only way to get Visual Studio to accept it. -Max
-#ifdef UNIX_VARIANT //FIXME: add glDrawRangeElements on Windows!
-		qglDrawRangeElements(	GL_TRIANGLES, batch->first_vert, 
-								batch->last_vert, 
-								batch->last_elem-batch->first_elem, 
-								GL_UNSIGNED_INT, 
-								(GLvoid *)
-								(batch->first_elem*sizeof(unsigned int)));
-#else
-		qglDrawElements	(	GL_TRIANGLES, batch->last_elem-batch->first_elem, 
-							GL_UNSIGNED_INT, 
-							(GLvoid *)
-							(batch->first_elem*sizeof(unsigned int)));
-#endif
+		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
 		c_vbo_batches++;
 	}
 	
-	// XXX: We don't unbind the element array buffer here. Not currently a 
-	// bug, but if we ever use glDrawElements with the indices NOT in a VBO
-	// (instead supplying a pointer to a buffer in main memory,) this would
-	// become a bug. But right now, it's not necessary to unbind it. If we did
-	// want to unbind it, the best place would be at the end of R_DrawWorld.
-	// -Max
 	BSP_ClearVBOAccum ();
 }
 
-static inline void BSP_AddToVBOAccum (int first_vert, int last_vert, int first_elem, int last_elem)
+static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 {
 	vbobatch_t *batch = first_vbobatch;
 	vbobatch_t *new;
@@ -587,39 +567,34 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert, int first_e
 		batch = first_vbobatch = vbobatch_buffer;
 		batch->first_vert = first_vert;
 		batch->last_vert = last_vert;
-		batch->first_elem = first_elem;
-		batch->last_elem = last_elem;
 		num_vbo_batches++;
+		BSP_FlushVBOAccum();
 		return;
 	}
 	
-	while (batch->next && batch->next->first_elem < first_elem)
+	while (batch->next && batch->next->first_vert < first_vert)
 		batch = batch->next;
 	
-	if (batch->next && batch->next->first_elem == last_elem)
+	if (batch->next && batch->next->first_vert == last_vert)
 		batch = batch->next;
 	
-	if (batch->last_elem == first_elem)
+	if (batch->last_vert == first_vert)
 	{
 		batch->last_vert = last_vert;
-		batch->last_elem = last_elem;
-		if (batch->next && batch->next->first_elem == last_elem)
+		if (batch->next && batch->next->first_vert == last_vert)
 		{
 			batch->last_vert = batch->next->last_vert;
-			batch->last_elem = batch->next->last_elem;
 			if (batch->next == &vbobatch_buffer[num_vbo_batches-1])
 				num_vbo_batches--;
 			batch->next = batch->next->next;
 		}
 	}
-	else if (batch->first_elem == last_elem)
+	else if (batch->first_vert == last_vert)
 	{
 		batch->first_vert = first_vert;
-		batch->first_elem = first_elem;
-		if (batch->prev && batch->prev->last_elem == first_elem)
+		if (batch->prev && batch->prev->last_vert == first_vert)
 		{
 			batch->first_vert = batch->prev->first_vert;
-			batch->first_elem = batch->prev->first_elem;
 			if (batch->prev == &vbobatch_buffer[num_vbo_batches-1])
 				num_vbo_batches--;
 			if (batch->prev->prev)
@@ -629,7 +604,7 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert, int first_e
 			batch->prev = batch->prev->prev;
 		}
 	}
-	else if (batch->last_elem < first_elem)
+	else if (batch->last_vert < first_vert)
 	{
 		new = &vbobatch_buffer[num_vbo_batches++];
 		new->prev = batch;
@@ -639,10 +614,8 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert, int first_e
 		batch->next = new;
 		new->first_vert = first_vert;
 		new->last_vert = last_vert;
-		new->first_elem = first_elem;
-		new->last_elem = last_elem;
 	}
-	else if (batch->first_elem > last_elem)
+	else if (batch->first_vert > last_vert)
 	{
 		new = &vbobatch_buffer[num_vbo_batches++];
 		new->next = batch;
@@ -654,8 +627,6 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert, int first_e
 		batch->prev = new;
 		new->first_vert = first_vert;
 		new->last_vert = last_vert;
-		new->first_elem = first_elem;
-		new->last_elem = last_elem;
 	}
 	
 	//running out of space
@@ -726,7 +697,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
-		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts, surf->vbo_first_elem, surf->vbo_first_elem+surf->vbo_num_elems);
+		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
 	else
 	{
@@ -887,7 +858,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
 	
 	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
-		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts, surf->vbo_first_elem, surf->vbo_first_elem+surf->vbo_num_elems);
+		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
 	else
 	{
