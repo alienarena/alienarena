@@ -498,7 +498,6 @@ void SV_SendClientMessages (void)
 	client_t	*c;
 	int			msglen;
 	byte		msgbuf[MAX_MSGLEN];
-	int			r;
 
 	msglen = 0;
 

@@ -46,6 +46,7 @@ qboolean use_vbo;
 float modelpitch;
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
+extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
 //these matrix functions should be moved to matrixlib.c or similar
 
@@ -438,7 +439,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		return false;
 	}
 
-	mod->extradata = Hunk_Begin (0x300000);
+	mod->extradata = Hunk_Begin (0x150000);
 
 	va = (iqmvertexarray_t *)(pbase + header->ofs_vertexarrays);
 	for (i = 0;i < (int)header->num_vertexarrays;i++)
@@ -1304,8 +1305,11 @@ void IQM_DrawFrame(int skinnum)
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
-		//shell render
 
+		qglEnable (GL_BLEND);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		//shell render
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
 		{
             vec3_t lightVec, lightVal;
@@ -1320,7 +1324,20 @@ void IQM_DrawFrame(int skinnum)
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
-           
+			 for(i = 0; i < 3; i++) 
+			 {
+                if(lightVal[i] < shadelight[i]/2)
+                    lightVal[i] = shadelight[i]/2; //never go completely black
+                lightVal[i] *= 5;
+                lightVal[i] += dynFactor;
+                if(lightVal[i] > 1.0+dynFactor)
+                    lightVal[i] = 1.0+dynFactor;
+            }
+			
+			//brighten things slightly
+            for (i = 0; i < 3; i++ )
+                lightVal[i] *= 2.5;
+			           
             //simple directional(relative light position)
             VectorSubtract(lightPosition, currententity->origin, lightVec);
             VectorMA(lightPosition, 1.0, lightVec, lightPosition);
@@ -1340,11 +1357,11 @@ void IQM_DrawFrame(int skinnum)
             qglBindTexture (GL_TEXTURE_2D, r_shellnormal->texnum);
             glUniform1iARB( g_location_normTex, 0);
 
-            GL_SelectTexture( GL_TEXTURE0);
-
             glUniform1iARB( g_location_useFX, 0);
 
             glUniform1iARB( g_location_useGlow, 0);
+
+			glUniform1iARB( g_location_useCube, 0);
 
 			glUniform1iARB( g_location_useShell, 1);
 
@@ -1824,9 +1841,9 @@ void IQM_DrawFrame(int skinnum)
 				
 				IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
 
-				VArray[5] = lightcolor[0];
-				VArray[6] = lightcolor[1];
-				VArray[7] = lightcolor[2];
+				VArray[5] = lightcolor[0] > 0.2 ? lightcolor[0] : 0.2;
+				VArray[6] = lightcolor[1] > 0.2 ? lightcolor[1] : 0.2;
+				VArray[7] = lightcolor[2] > 0.2 ? lightcolor[2] : 0.2;
 				VArray[8] = alpha;
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter				
 				va++;
@@ -2200,9 +2217,9 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				
 				IQM_Vlight (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
 
-				VArray[5] = lightcolor[0];
-				VArray[6] = lightcolor[1];
-				VArray[7] = lightcolor[2];
+				VArray[5] = lightcolor[0] > 0.2 ? lightcolor[0] : 0.2;
+				VArray[6] = lightcolor[1] > 0.2 ? lightcolor[1] : 0.2;
+				VArray[7] = lightcolor[2] > 0.2 ? lightcolor[2] : 0.2;
 				VArray[8] = 1.0;
 
 				// increment pointer and counter
@@ -2390,6 +2407,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 
+	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->integer == 2)
+		return;
+
 	//do culling
 	if ( IQM_CullModel() )
 		return;
@@ -2489,9 +2509,38 @@ void R_DrawINTERQUAKEMODEL ( void )
 		}
 	}	
 
-    qglPushMatrix ();
-	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
-	R_RotateForEntity (currententity);
+	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
+		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
+
+	if (currententity->flags & RF_WEAPONMODEL)
+    {
+		qglMatrixMode(GL_PROJECTION);
+		qglPushMatrix();
+		qglLoadIdentity();
+
+		if (r_lefthand->integer == 1)
+		{
+			qglScalef(-1, 1, 1);
+			qglCullFace(GL_BACK);
+		}
+		if(r_newrefdef.fov_y < 75.0f)
+			MYgluPerspective(r_newrefdef.fov_y, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
+		else
+			MYgluPerspective(75.0f, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
+
+		qglMatrixMode(GL_MODELVIEW);
+
+		qglPushMatrix ();
+		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+		R_RotateForEntity (currententity);
+		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+    }
+	else
+	{
+		qglPushMatrix ();
+		currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
+		R_RotateForEntity (currententity);
+	}
 
 	// select skin
 	if (currententity->skin) {
@@ -2556,11 +2605,22 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	qglPopMatrix ();
 
+	if ( ( currententity->flags & RF_WEAPONMODEL ) )
+	{
+		qglMatrixMode( GL_PROJECTION );
+		qglPopMatrix();
+		qglMatrixMode( GL_MODELVIEW );
+		qglCullFace( GL_FRONT );
+	}
+
 	if ( currententity->flags & RF_TRANSLUCENT )
 	{
 		qglDisable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}	
+
+	if (currententity->flags & RF_DEPTHHACK)
+		qglDepthRange (gldepthmin, gldepthmax);
 	
 	qglColor4f (1,1,1,1);	
 

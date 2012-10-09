@@ -1141,7 +1141,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
-            for(i = 0; i < 3; i++) {
+            for(i = 0; i < 3; i++) 
+			{
                 if(lightVal[i] < shadelight[i]/2)
                     lightVal[i] = shadelight[i]/2; //never go completely black
                 lightVal[i] *= 5;
@@ -1738,9 +1739,9 @@ skipLoad:
 					VArray[3] = st[index_st].s;
 					VArray[4] = st[index_st].t;
 
-					VArray[5] = lightcolor[0];
-					VArray[6] = lightcolor[1];
-					VArray[7] = lightcolor[2];
+					VArray[5] = lightcolor[0] > 0.2 ? lightcolor[0] : 0.2;
+					VArray[6] = lightcolor[1] > 0.2 ? lightcolor[1] : 0.2;
+					VArray[7] = lightcolor[2] > 0.2 ? lightcolor[2] : 0.2;
 					VArray[8] = alpha;
 				}
 
