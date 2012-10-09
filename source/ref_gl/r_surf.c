@@ -1883,7 +1883,7 @@ skip_decompress:
 			            continue;
 			        if ((DotProduct(r_origin, surf->plane->normal) < (surf->plane->dist + 1)) != ((surf->flags & SURF_PLANEBACK) && true))
 						continue;
-			        if (clipflags & R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
+			        if (!(surf->flags & SURF_DRAWTURB) && clipflags & R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
 					    continue;
 				    surf->visframe = r_framecount;
 				    
