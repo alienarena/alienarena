@@ -147,8 +147,8 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 void VB_BuildWorldVBO(void)
 {
 	msurface_t *surf;
-	int num_vertexes = totalVBObufferSize/7;
 	int i;
+	int num_vertexes = totalVBObufferSize/7;
 	currVertexNum = currElemNum = 0;
 	vbo_xyz_base = vbo_xyz_pos = ebo_pos = 0;
 	vbo_st_base = vbo_st_pos = num_vertexes*3*sizeof(float);
