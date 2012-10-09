@@ -548,22 +548,22 @@ static inline void BSP_FlushVBOAccum (void)
 	
 	for (; batch; batch = batch->next)
 	{
-		// NOTE: the compiler warning here is harmless. Due to the 
-		// GL_ELEMENT_ARRAY_BUFFER binding, the final argument here is treated
-		// as an offset instead of a pointer by OpenGL. I could cast it to a
-		// pointer, but casting some random integer to a pointer seems like
-		// the lesser of two evils compared with letting the compiler complain
-		// a little. -Max
+		// NOTE: Due to the GL_ELEMENT_ARRAY_BUFFER binding, the final
+		// argument here is treated as an offset instead of a pointer by
+		// OpenGL. Much as I hate casting integers to pointers, that's the 
+		// only way to get Visual Studio to accept it. -Max
 #if 0 //FIXME: add glDrawRangeElements!
 		qglDrawRangeElements(	GL_TRIANGLES, batch->first_vert, 
 								batch->last_vert, 
 								batch->last_elem-batch->first_elem, 
 								GL_UNSIGNED_INT, 
-								batch->first_elem*sizeof(unsigned int));
+								(GLvoid *)
+								(batch->first_elem*sizeof(unsigned int)));
 #else
 		qglDrawElements	(	GL_TRIANGLES, batch->last_elem-batch->first_elem, 
 							GL_UNSIGNED_INT, 
-							batch->first_elem*sizeof(unsigned int));
+							(GLvoid *)
+							(batch->first_elem*sizeof(unsigned int)));
 #endif
 		c_vbo_batches++;
 	}
