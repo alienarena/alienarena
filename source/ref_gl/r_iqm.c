@@ -1945,6 +1945,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
             glUniform1iARB( g_location_useGlow, 0);
 			
+			glUniform1iARB( g_location_useCube, 0);
+
 			glUniform1iARB( g_location_useShell, 1);
 
             glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
@@ -2112,6 +2114,14 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			glUniform1iARB( g_location_useGlow, 0);
 
 		glUniform1iARB( g_location_useShell, 0);
+
+		if(rs->stage->cube)
+		{
+			glUniform1iARB( g_location_useCube, 1);
+			glUniform1iARB( g_location_fromView, 0);
+		}
+		else
+			glUniform1iARB( g_location_useCube, 0);
 
 		glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
