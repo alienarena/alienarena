@@ -108,13 +108,13 @@ void R_GenerateShadowFBO()
 	//FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
-	// GL_LINEAR does not make sense for depth texture.
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// GL_LINEAR removes pixelation - GL_NEAREST removes artifacts on outer edges in some cases
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// Remove artefact on the edges of the shadowmap
-	/*qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );*/
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 
 	// This is to allow usage of shadow2DProj function in the shader
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
@@ -149,13 +149,9 @@ void R_GenerateShadowFBO()
 	//Second FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
-	// GL_LINEAR does not make sense for depth texture. 
+	// GL_LINEAR removes pixelation - GL_NEAREST removes artifacts on outer edges in some cases
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Remove artefact on the edges of the shadowmap
-	/*qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );*/
 
 	// This is to allow usage of shadow2DProj function in the shader
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
