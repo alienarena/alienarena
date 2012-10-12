@@ -509,8 +509,9 @@ CL_ParseFrame
 void CL_ParseFrame (void)
 {
 	int			cmd;
-	int			len;
+	int			len, len2;
 	frame_t		*old;
+	byte		new_areabits[MAX_MAP_AREAS/8];
 
 	memset (&cl.frame, 0, sizeof(cl.frame));
 
@@ -564,7 +565,12 @@ void CL_ParseFrame (void)
 
 	// read areabits
 	len = MSG_ReadByte (&net_message);
-	MSG_ReadData (&net_message, &cl.frame.areabits, len);
+	MSG_ReadData (&net_message, &new_areabits, len);
+	if (memcmp (cl.frame.areabits, new_areabits, len))
+	{
+		memcpy (cl.frame.areabits, new_areabits, len);
+		areabits_changed = true;
+	}
 
 	// read playerinfo
 	cmd = MSG_ReadByte (&net_message);
