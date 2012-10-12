@@ -1423,9 +1423,6 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	image_t		*image;
 	rscript_t *rs_shader;
 	
-	if (r_test->integer && r_viewcluster != -1)
-	    return;
-
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
 
@@ -1757,15 +1754,8 @@ void R_MarkLeaves (void)
 
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
-			!r_novis->integer && r_viewcluster != -1 && 
-			!r_test->integer && !r_test->modified)
+			!r_novis->integer && r_viewcluster != -1)
 		return;
-	r_test->modified = false;
-	
-	if	(	r_oldviewcluster == r_viewcluster && 
-			r_oldviewcluster2 == r_viewcluster2 && r_test->integer)
-		goto skip_decompress;
-	
 	
 	// development aid to let you run around and see exactly where
 	// the pvs ends
@@ -1804,7 +1794,6 @@ void R_MarkLeaves (void)
 		vis = fatvis;
 	}
 	
-skip_decompress:
 	r_visframecount++;
 	
 	minleaf = minleaf_allareas;
@@ -1837,148 +1826,24 @@ skip_decompress:
 	if (!r_drawworld->integer)
 		return;
 	
-	if (r_test->integer && r_viewcluster != -1)
+	for (i=minleaf,leaf=r_worldmodel->leafs+minleaf ; i<=maxleaf ; i++, leaf++)
 	{
-		for (i=minleaf,leaf=r_worldmodel->leafs+minleaf ; i<=maxleaf ; i++, leaf++)
+		msurface_t **mark, *surf;
+		int c;
+	
+		cluster = leaf->cluster;
+		if (cluster == -1)
+			continue;
+		if (vis[cluster>>3] & (1<<(cluster&7)))
 		{
-			msurface_t **mark, *surf;
-			int c, clipflags = 15;
-			qboolean    fully_clipped = false;
-			
-			if (leaf->contents & CONTENTS_SOLID)
-				continue;
-			
-		    if (! (c = leaf->nummarksurfaces) )
-			    continue;
-			
-			cluster = leaf->cluster;
-			/*
-			The CONTENTS_SOLID check above catches all of these and then some.
-			if (cluster == -1)
-				continue;
-			*/
-			
-			if (r_newrefdef.areabits) {
-			    // not visible
-			    if (! (r_newrefdef.areabits[leaf->area>>3] & (1<<(leaf->area&7)) ) ) continue;
-		    }
-			
-			if (vis[cluster>>3] & (1<<(cluster&7)))
+			node = (mnode_t *)leaf;
+			do
 			{
-			    image_t		*image;
-			    rscript_t	*rs_shader;
-			    
-			    mark = leaf->firstmarksurface;
-				
-				if (!r_nocull->integer)
-	            {
-		            int j, clipped;
-		            cplane_t *clipplane;
-
-		            for (j=0,clipplane=frustum ; j<4 ; j++,clipplane++)
-		            {
-			            clipped = BoxOnPlaneSide (leaf->minmaxs, leaf->minmaxs+3, clipplane);
-
-			            if (clipped == 1)
-				            clipflags &= ~(1<<i);	// node is entirely on screen
-			            else if (clipped == 2)
-                        {
-                            fully_clipped = true;
-				            break;
-				        }
-		            }
-	            }
-	            
-	            if (fully_clipped)
-	                continue;
-	            
-	            
-	            if (gl_shadowmaps->integer)
-	            {
-	            	// TODO: switch shadows over to this style of surface 
-	            	// checking.
-					node = (mnode_t *)leaf;
-					do
-					{
-						if (node->visframe == r_visframecount)
-							break;
-						node->visframe = r_visframecount;
-						node = node->parent;
-					} while (node);
-				}
-
-			    do
-			    {
-			        surf = *mark++;
-			        if (surf->visframe == r_framecount)
-			            continue;
-			        if ((DotProduct(r_origin, surf->plane->normal) < (surf->plane->dist + 1)) != ((surf->flags & SURF_PLANEBACK) && true))
-						continue;
-			        if (!(surf->flags & SURF_DRAWTURB) && clipflags & R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
-					    continue;
-				    surf->visframe = r_framecount;
-				    
-				    if (surf->texinfo->flags & SURF_SKY)
-			        {	// just adds to visible sky bounds
-				        R_AddSkySurface (surf);
-			        }
-			        else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
-			        {	// add to the translucent chain
-				        surf->texturechain = r_alpha_surfaces;
-				        r_alpha_surfaces = surf;
-			        }
-			        else
-			        {
-				        if ( !( surf->flags & SURF_DRAWTURB ) )
-				        {
-					        BSP_AddToTextureChain( surf );
-				        }
-				        else
-				        {
-					        // the polygon is visible, so add it to the texture
-					        // sorted chain
-
-					        // FIXME: this is a hack for animation
-					        image = BSP_TextureAnimation (surf->texinfo);
-
-					        surf->texturechain = image->texturechain;
-					        image->texturechain = surf;
-
-				        }
-				        
-				        if(r_shaders->integer) { //only add to the chain if there is actually a shader
-					        rs_shader = (rscript_t *)surf->texinfo->image->script;
-					        if(rs_shader) {
-						        surf->rscriptchain = r_rscript_surfaces;
-						        r_rscript_surfaces = surf;
-					        }
-				        }
-			        }
-			    } while (--c);
-			}
-		}
-	}
-	else
-	{
-		for (i=0,leaf=r_worldmodel->leafs ; i<r_worldmodel->numleafs ; i++, leaf++)
-		{
-			msurface_t **mark, *surf;
-			int c;
-		
-			cluster = leaf->cluster;
-			if (cluster == -1)
-				continue;
-			if (vis[cluster>>3] & (1<<(cluster&7)))
-			{
-				node = (mnode_t *)leaf;
-				do
-				{
-					if (node->visframe == r_visframecount)
-						break;
-					node->visframe = r_visframecount;
-					node = node->parent;
-				} while (node);
-			}
+				if (node->visframe == r_visframecount)
+					break;
+				node->visframe = r_visframecount;
+				node = node->parent;
+			} while (node);
 		}
 	}
 }
