@@ -1119,6 +1119,8 @@ void R_RenderView (refdef_t *fd)
 		qglDisable(GL_FOG);
 
 	R_DrawRadar();
+	
+	*fd = r_newrefdef;
 }
 
 void	R_SetGL2D (void)
