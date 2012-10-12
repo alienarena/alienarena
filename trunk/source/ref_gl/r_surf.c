@@ -1428,6 +1428,25 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 	if (node->visframe != r_visframecount)
 		return;
+	
+	// if a leaf node, draw stuff (pt 1)
+	c = 0;
+	if (node->contents != -1)
+	{
+		pleaf = (mleaf_t *)node;
+		
+		if (! (c = pleaf->nummarksurfaces) )
+			return;
+
+		// check for door connected areas
+		if (r_newrefdef.areabits)
+		{
+			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
+				return;		// not visible
+		}
+
+		mark = pleaf->firstmarksurface;
+	}
 
 	if (!r_nocull->integer && clipflags)
 	{
@@ -1447,22 +1466,9 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		}
 	}
 
-	// if a leaf node, draw stuff
-	if (node->contents != -1)
+	//if a leaf node, draw stuff (pt 2)
+	if (c != 0)
 	{
-		pleaf = (mleaf_t *)node;
-
-		// check for door connected areas
-		if (r_newrefdef.areabits)
-		{
-			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
-				return;		// not visible
-		}
-
-		mark = pleaf->firstmarksurface;
-		if (! (c = pleaf->nummarksurfaces) )
-			return;
-
 		do
 		{
 			(*mark++)->visframe = r_framecount;
