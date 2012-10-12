@@ -1776,22 +1776,26 @@ void R_DrawWorld (void)
 	if	(	old_visframecount != r_visframecount ||
 			VectorLength (delta_origin) > 5.0 ||
 			VectorLength (delta_angle) > 2.0 ||
-			!r_test->integer
+			!r_test->integer //TODO: rename to r_optimize
 		)
 	{
 		R_ClearSkyBox ();
 		BSP_ClearWorldTextureChains ();
 		BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
+		
+		old_visframecount = r_visframecount;
+		VectorCopy (r_origin, old_origin);
+		VectorCopy (r_newrefdef.viewangles, old_angle);
 	}
-	
-	old_visframecount = r_visframecount;
-	VectorCopy (r_origin, old_origin);
-	VectorCopy (r_newrefdef.viewangles, old_angle);
 	
 	BSP_FlushVBOAccum ();
 	
 	r_vboOn = false;
 	R_KillVArrays ();
+	
+	//TODO: r_optimize could also store a list of GL commands and replay those
+	//instead of running through the whole linked list of surfaces, merging
+	//VBO batches, etc. 
 
 	BSP_DrawNonGLSLSurfaces(false);
 
