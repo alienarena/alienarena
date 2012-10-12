@@ -34,8 +34,8 @@ vec3_t	r_worldLightVec;
 dlight_t *dynLight;
 
 msurface_t	*r_alpha_surfaces;
+msurface_t	*r_ent_alpha_surfaces;
 msurface_t	*r_rscript_surfaces;
-msurface_t	*r_normalsurfaces;
 
 #define LIGHTMAP_BYTES 4
 
@@ -366,7 +366,7 @@ The BSP tree is waled front to back, so unwinding the chain
 of alpha_surfaces will draw back to front, giving proper ordering.
 ================
 */
-void R_DrawAlphaSurfaces (void)
+void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 {
 	msurface_t	*s;
 	float		intens;
@@ -379,7 +379,7 @@ void R_DrawAlphaSurfaces (void)
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
 
-	for (s=r_alpha_surfaces ; s ; s=s->texturechain)
+	for (s=chain ; s ; s=s->texturechain)
 	{
 		qglLoadMatrixf (r_world_matrix); //moving trans brushes
 
@@ -449,8 +449,13 @@ void R_DrawAlphaSurfaces (void)
 	qglColor4f (1,1,1,1);
 	qglDisable (GL_BLEND);
 	qglDepthMask ( GL_TRUE );
+}
 
-	r_alpha_surfaces = NULL;
+void R_DrawAlphaSurfaces (void)
+{
+	R_DrawAlphaSurfaces_chain (r_ent_alpha_surfaces);
+	r_ent_alpha_surfaces = NULL;
+	R_DrawAlphaSurfaces_chain (r_alpha_surfaces);
 }
 
 /*
@@ -488,8 +493,6 @@ void R_DrawRSSurfaces (void)
 	GLSTATE_DISABLE_ALPHATEST
 
 	qglDepthMask(true);
-
-	r_rscript_surfaces = NULL;
 }
 
 /*
@@ -872,7 +875,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
 	}
 }
 
-void BSP_DrawNonGLSLSurfaces (void)
+void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 {
     int         i;
 
@@ -894,7 +897,16 @@ void BSP_DrawNonGLSLSurfaces (void)
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
     	int			texnum;
-    	msurface_t	*s = currentmodel->unique_texinfo[i]->lightmap_surfaces;
+    	msurface_t	*s;
+    	if (forEnt)
+    	{
+    		s = currentmodel->unique_texinfo[i]->e_lightmap_surfaces;
+    		currentmodel->unique_texinfo[i]->e_lightmap_surfaces = NULL;
+    	}
+    	else
+    	{
+    		s = currentmodel->unique_texinfo[i]->w_lightmap_surfaces;
+    	}
     	if (!s)
     		continue;
     	// only have to do this once
@@ -904,7 +916,6 @@ void BSP_DrawNonGLSLSurfaces (void)
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
-		currentmodel->unique_texinfo[i]->lightmap_surfaces = NULL;
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -916,7 +927,7 @@ void BSP_DrawNonGLSLSurfaces (void)
 
 }
 
-void BSP_DrawGLSLSurfaces (void)
+void BSP_DrawGLSLSurfaces (qboolean forEnt)
 {
     int         i;
 
@@ -964,7 +975,16 @@ void BSP_DrawGLSLSurfaces (void)
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
-    	msurface_t	*s = currentmodel->unique_texinfo[i]->glsl_surfaces;
+    	msurface_t	*s;
+    	if (forEnt)
+    	{
+    		s = currentmodel->unique_texinfo[i]->e_glsl_surfaces;
+    		currentmodel->unique_texinfo[i]->e_glsl_surfaces = NULL;
+    	}
+    	else
+    	{
+    		s = currentmodel->unique_texinfo[i]->w_glsl_surfaces;
+    	}
     	if (!s)
     		continue;
 		for (; s; s = s->texturechain) {
@@ -973,7 +993,6 @@ void BSP_DrawGLSLSurfaces (void)
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
-		currentmodel->unique_texinfo[i]->glsl_surfaces = NULL;
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -985,7 +1004,7 @@ void BSP_DrawGLSLSurfaces (void)
 
 }
 
-void BSP_DrawGLSLDynamicSurfaces (void)
+void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 {
 	int         i;
 	dlight_t	*dl = NULL;
@@ -1068,7 +1087,16 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
-    	msurface_t	*s = currentmodel->unique_texinfo[i]->glsl_dynamic_surfaces;
+    	msurface_t	*s;
+    	if (forEnt)
+    	{
+    		s = currentmodel->unique_texinfo[i]->e_glsl_dynamic_surfaces;
+    		currentmodel->unique_texinfo[i]->e_glsl_dynamic_surfaces = NULL;
+    	}
+    	else
+    	{
+    		s = currentmodel->unique_texinfo[i]->w_glsl_dynamic_surfaces;
+    	}
     	if (!s)
     		continue;
 		for (; s; s = s->texturechain) {
@@ -1077,7 +1105,6 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
-		currentmodel->unique_texinfo[i]->glsl_dynamic_surfaces = NULL;
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -1086,6 +1113,20 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglDisable (GL_TEXTURE_2D);	
+}
+
+void BSP_ClearWorldTextureChains (void)
+{
+	int i;
+	
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
+    {
+    	currentmodel->unique_texinfo[i]->w_lightmap_surfaces = NULL;
+    	currentmodel->unique_texinfo[i]->w_glsl_surfaces = NULL;
+    	currentmodel->unique_texinfo[i]->w_glsl_dynamic_surfaces = NULL;
+    }
+    r_alpha_surfaces = NULL;
+    r_rscript_surfaces = NULL;
 }
 
 void BSP_AddToTextureChain(msurface_t *surf)
@@ -1116,21 +1157,45 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	if(is_dynamic && surf->texinfo->has_normalmap
 		&& gl_state.glsl_shaders && gl_glsl_shaders->integer) //always glsl for dynamic if it has a normalmap
 	{
-		surf->texturechain = surf->texinfo->equiv->glsl_dynamic_surfaces;
-		surf->texinfo->equiv->glsl_dynamic_surfaces = surf;
+		if (surf->entity)
+		{
+			surf->texturechain = surf->texinfo->equiv->e_glsl_dynamic_surfaces;
+			surf->texinfo->equiv->e_glsl_dynamic_surfaces = surf;
+		}
+		else
+		{
+			surf->texturechain = surf->texinfo->equiv->w_glsl_dynamic_surfaces;
+			surf->texinfo->equiv->w_glsl_dynamic_surfaces = surf;
+		}
 	}
 	else if(gl_bspnormalmaps->integer
 			&& surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
 	{
-		surf->texturechain = surf->texinfo->equiv->glsl_surfaces;
-		surf->texinfo->equiv->glsl_surfaces = surf;
+		if (surf->entity)
+		{
+			surf->texturechain = surf->texinfo->equiv->e_glsl_surfaces;
+			surf->texinfo->equiv->e_glsl_surfaces = surf;
+		}
+		else
+		{
+			surf->texturechain = surf->texinfo->equiv->w_glsl_surfaces;
+			surf->texinfo->equiv->w_glsl_surfaces = surf;
+		}
 	}
 	else 
 	{
-		surf->texturechain = surf->texinfo->equiv->lightmap_surfaces;
-		surf->texinfo->equiv->lightmap_surfaces = surf;
+		if (surf->entity)
+		{
+			surf->texturechain = surf->texinfo->equiv->e_lightmap_surfaces;
+			surf->texinfo->equiv->e_lightmap_surfaces = surf;
+		}
+		else
+		{
+			surf->texturechain = surf->texinfo->equiv->w_lightmap_surfaces;
+			surf->texinfo->equiv->w_lightmap_surfaces = surf;
+		}
 	}
 }
 
@@ -1178,12 +1243,13 @@ void BSP_DrawInlineBModel ( void )
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
 			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
 		{
+			// TODO: do this once at load time
+			psurf->entity = currententity;
+			
 			if (SurfaceIsTranslucent(psurf) && !SurfaceIsAlphaBlended(psurf))
 			{	// add to the translucent chain
-				psurf->texturechain = r_alpha_surfaces;
-				r_alpha_surfaces = psurf;
-				// TODO: do this once at load time
-				psurf->entity = currententity;
+				psurf->texturechain = r_ent_alpha_surfaces;
+				r_ent_alpha_surfaces = psurf;
 			}
 			else if ( !( psurf->flags & SURF_DRAWTURB ) )
 			{
@@ -1202,7 +1268,7 @@ void BSP_DrawInlineBModel ( void )
 	
 	R_KillVArrays ();
 
-	BSP_DrawNonGLSLSurfaces();
+	BSP_DrawNonGLSLSurfaces(true);
 	
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
@@ -1211,8 +1277,8 @@ void BSP_DrawInlineBModel ( void )
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
 		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-		BSP_DrawGLSLSurfaces();
-		BSP_DrawGLSLDynamicSurfaces();
+		BSP_DrawGLSLSurfaces(true);
+		BSP_DrawGLSLDynamicSurfaces(true);
 		glUseProgramObjectARB(0);
 	}
 
@@ -1409,8 +1475,6 @@ clipflags: indicate which planes of the frustum may intersect the node
 Since each node is inside its parent in 3D space, if a frustum plane can be
 shown not to intersect a node at all, then it won't intersect either of its
 children. 
-
-TODO: stripped-down function for use when spectating outside the world
 ================
 */
 void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
@@ -1617,7 +1681,10 @@ R_DrawWorld
 */
 void R_DrawWorld (void)
 {
-	entity_t	ent;
+	entity_t		ent;
+	static int		old_visframecount;
+	static vec3_t	old_origin, old_angle;
+	vec3_t			delta_origin, delta_angle;
 	
 	if (!r_drawworld->integer)
 		return;
@@ -1704,14 +1771,29 @@ void R_DrawWorld (void)
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
-	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
+	VectorSubtract (r_origin, old_origin, delta_origin);
+	VectorSubtract (r_newrefdef.viewangles, old_angle, delta_angle);
+	if	(	old_visframecount != r_visframecount ||
+			VectorLength (delta_origin) > 5.0 ||
+			VectorLength (delta_angle) > 2.0 ||
+			!r_test->integer
+		)
+	{
+		R_ClearSkyBox ();
+		BSP_ClearWorldTextureChains ();
+		BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
+	}
+	
+	old_visframecount = r_visframecount;
+	VectorCopy (r_origin, old_origin);
+	VectorCopy (r_newrefdef.viewangles, old_angle);
 	
 	BSP_FlushVBOAccum ();
 	
 	r_vboOn = false;
 	R_KillVArrays ();
 
-	BSP_DrawNonGLSLSurfaces();
+	BSP_DrawNonGLSLSurfaces(false);
 
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
@@ -1720,8 +1802,8 @@ void R_DrawWorld (void)
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
 		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-		BSP_DrawGLSLSurfaces(); 
-		BSP_DrawGLSLDynamicSurfaces();
+		BSP_DrawGLSLSurfaces(false); 
+		BSP_DrawGLSLDynamicSurfaces(false);
 		glUseProgramObjectARB( 0 );
 	}
 	
@@ -1736,8 +1818,6 @@ void R_DrawWorld (void)
 	qglDepthMask(0);
 	R_DrawSkyBox();
 	qglDepthMask(1);
-	
-	R_ClearSkyBox ();
 }
 
 
