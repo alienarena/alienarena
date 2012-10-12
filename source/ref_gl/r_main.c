@@ -1095,8 +1095,6 @@ void R_RenderView (refdef_t *fd)
 	if (r_lightbeam->integer)
 		R_DrawBeamSurface ();
 
-	qglLoadMatrixf (r_world_matrix); //moving trans brushes
-
 	R_DrawParticles ();
 
 	if(gl_mirror->integer) 
