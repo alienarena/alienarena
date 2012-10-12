@@ -373,7 +373,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	rscript_t	*rs_shader;
 	rs_stage_t	*stage = NULL;
 	int			texnum = 0;
-	float		scaleX = 1, scaleY = 1;
+	float		scaleX = 1.0f, scaleY = 1.0f;
 
 	// the textures are prescaled up for a better lighting range,
 	// so scale it back down
@@ -405,42 +405,34 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			s->entity->angles[0] = -s->entity->angles[0];	// stupid quake bug
 			s->entity->angles[2] = -s->entity->angles[2];	// stupid quake bug
 		}
+		
+		rs_shader = NULL;
+		if (r_shaders->integer)
+			rs_shader = (rscript_t *)s->texinfo->image->script;
 
 		if (s->flags & SURF_DRAWTURB) 
 		{
 			//water shaders
-			if(r_shaders->integer) 
+			scaleX = scaleY = 1.0f;
+			if(rs_shader) 
 			{
-				rs_shader = (rscript_t *)s->texinfo->image->script;
-				if(rs_shader) 
+				stage = rs_shader->stage;
+				if(stage) 
+				{	//for now, just map a reflection texture
+					texnum = stage->texture->texnum; //pass this to renderwaterpolys
+				}
+				if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
 				{
-					stage = rs_shader->stage;
-					if(stage) 
-					{	//for now, just map a reflection texture
-						texnum = stage->texture->texnum; //pass this to renderwaterpolys
-					}
-					if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
-					{
-						scaleX = stage->scale.scaleX;
-						scaleY = stage->scale.scaleY;
-					}
-				}qglLoadMatrixf (r_world_matrix); //moving trans brushes
+					scaleX = stage->scale.scaleX;
+					scaleY = stage->scale.scaleY;
+				}
 			}
 			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
 		}
-		else 
-		{
-			if(r_shaders->integer && !(s->texinfo->flags & SURF_FLOWING)) 
-			{
-				rs_shader = (rscript_t *)s->texinfo->image->script;
-				if(rs_shader) 
-					RS_Surface(s);
-				else
-					BSP_DrawPoly (s, s->texinfo->flags);
-			}
-			else
-				BSP_DrawPoly (s, s->texinfo->flags);
-		}
+		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
+			RS_Surface(s);
+		else
+			BSP_DrawPoly (s, s->texinfo->flags);
 		
 	}
 
