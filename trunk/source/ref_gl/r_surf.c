@@ -571,6 +571,11 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 		return;
 	}
 	
+	// This is optimal. Because of the way the surface linked lists are built
+	// by BSP_AddToTextureChain, they are usually in reverse order, so it's
+	// best to start toward the beginning of the list of VBO batches where
+	// you're more likely to merge something.
+	
 	while (batch->next && batch->next->first_vert < first_vert)
 		batch = batch->next;
 	
