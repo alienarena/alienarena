@@ -1439,11 +1439,8 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 			return;
 
 		// check for door connected areas
-		if (r_newrefdef.areabits)
-		{
-			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
-				return;		// not visible
-		}
+		if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
+			return;		// not visible
 
 		mark = pleaf->firstmarksurface;
 	}
@@ -1806,7 +1803,6 @@ void R_MarkLeaves (void)
 	maxleaf = maxleaf_allareas;
 	
 	//restrict leaf range further to the range leafs in connected areas.
-	if (r_newrefdef.areabits)
 	{
 		int areamax = 0;
 		int areamin = r_worldmodel->numleafs;
@@ -2202,10 +2198,8 @@ void R_RecursiveRadarNode (mnode_t *node)
 	if (node->contents != -1) {
 		pleaf = (mleaf_t *)node;
 		// check for door connected areas
-		if (r_newrefdef.areabits) {
-			// not visible
-			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) ) return;
-		}
+		if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
+			return; // not visible
 		mark = pleaf->firstmarksurface;
 		c = pleaf->nummarksurfaces;
 
