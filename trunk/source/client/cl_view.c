@@ -574,7 +574,7 @@ float CalcFov (float fov_x, float width, float height)
 SCR_DrawCrosshair
 =================
 */
-void SCR_DrawCrosshair (void)
+void SCR_DrawCrosshair (refdef_t *fd)
 {
 	if (!strcmp(crosshair->string, "none"))
 		return;
@@ -588,8 +588,8 @@ void SCR_DrawCrosshair (void)
 	if (!crosshair_pic[0])
 		return;
 
-	Draw_Pic (scr_vrect.x + ((scr_vrect.width - crosshair_width)>>1)
-	, scr_vrect.y + ((scr_vrect.height - crosshair_height)>>1), crosshair_pic);
+	Draw_Pic (fd->x + ((fd->width - crosshair_width)>>1)
+	, fd->y + ((fd->height - crosshair_height)>>1), crosshair_pic);
 }
 
 qboolean InFront (vec3_t target)
@@ -901,7 +901,7 @@ void V_RenderView( float stereo_separation )
 		fprintf( log_stats_file, "%i,%i,%i,",r_numentities, r_numdlights, r_numparticles);
 
 
-	SCR_DrawCrosshair ();
+	SCR_DrawCrosshair (&cl.refdef);
 
 	if(cl_showPlayerNames->integer) {
 		if(cl_showPlayerNames->integer == 2)
