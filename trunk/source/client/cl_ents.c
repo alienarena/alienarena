@@ -513,7 +513,10 @@ void CL_ParseFrame (void)
 	frame_t		*old;
 	byte		new_areabits[MAX_MAP_AREAS/8];
 
+	//HACK: reduce the number of areabit changes detected
+	memcpy (new_areabits, cl.frame.areabits, MAX_MAP_AREAS/8);
 	memset (&cl.frame, 0, sizeof(cl.frame));
+	memcpy (cl.frame.areabits, new_areabits, MAX_MAP_AREAS/8);
 
 	cl.frame.serverframe = MSG_ReadLong (&net_message);
 	cl.frame.deltaframe = MSG_ReadLong (&net_message);
