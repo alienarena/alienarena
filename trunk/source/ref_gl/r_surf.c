@@ -643,10 +643,9 @@ BSP_RenderLightmappedPoly
 Main polygon rendering routine(all standard surfaces)
 ================
 */
-static void BSP_RenderLightmappedPoly( msurface_t *surf )
+static void BSP_RenderLightmappedPoly( msurface_t *surf, int texnum)
 {
 	float	scroll;
-	image_t *image = BSP_TextureAnimation( surf->texinfo );
 	unsigned lmtex = surf->lightmaptexturenum;
 	glpoly_t *p = surf->polys;
 
@@ -678,12 +677,12 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}
 		
-	if(image->texnum != r_currTex)
+	if(texnum != r_currTex)
 	{
 		BSP_FlushVBOAccum ();
 		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, image->texnum );
-		r_currTex = image->texnum;
+		qglBindTexture(GL_TEXTURE_2D, texnum );
+		r_currTex = texnum;
 	}
 	
 	
@@ -889,12 +888,14 @@ void BSP_DrawNonGLSLSurfaces (void)
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
+    	int			texnum;
     	msurface_t	*s = currentmodel->unique_texinfo[i]->lightmap_surfaces;
     	if (!s)
     		continue;
+    	// only have to do this once
+    	texnum = BSP_TextureAnimation( s->texinfo )->texnum;
 		for (; s; s = s->texturechain) {
-			BSP_RenderLightmappedPoly(s);
-			r_currTex = s->texinfo->image->texnum;
+			BSP_RenderLightmappedPoly(s, texnum);
 			r_currLMTex = s->lightmaptexturenum;
 			r_currTexInfo = s->texinfo->equiv;
 		}
