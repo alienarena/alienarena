@@ -1100,12 +1100,18 @@ void R_RenderView (refdef_t *fd)
 
 	if(gl_mirror->integer) 
 	{
-		qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
-		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
-					0, 0, 0, 256, 512, 512);
+		int ms = Sys_Milliseconds ();
+		if (	ms < r_newrefdef.last_mirrorupdate_time || 
+				(ms-r_newrefdef.last_mirrorupdate_time) > 16)
+		{
+			qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
+			qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
+						0, 0, 0, 256, 512, 512);
+			r_newrefdef.last_mirrorupdate_time = ms;
+		}
 	}
 
-	R_BloomBlend( fd );//BLOOMS
+	R_BloomBlend( &r_newrefdef );//BLOOMS
 
 	R_RenderSun();
 

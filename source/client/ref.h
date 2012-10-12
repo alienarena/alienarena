@@ -310,7 +310,7 @@ typedef struct
 	float		time;				// time is uesed to auto animate
 	int			rdflags;			// RDF_UNDERWATER, etc
 
-	byte		*areabits;			// if not NULL, only areas with set bits will be drawn
+	byte		*areabits;			// must not be NULL if you want to do BSP rendering
 
 	lightstyle_t	*lightstyles;	// [MAX_LIGHTSTYLES]
 
@@ -331,6 +331,10 @@ typedef struct
 
 	int			num_beams;
 	beam_t		*beams;
+	
+	// Because the mirror texture doesn't have to updatea more than 60 times
+	// per second.
+	int			last_mirrorupdate_time; // in ms
 
 } refdef_t;
 
