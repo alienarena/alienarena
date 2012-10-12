@@ -378,11 +378,9 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	// the textures are prescaled up for a better lighting range,
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
-
+	
 	for (s=chain ; s ; s=s->texturechain)
 	{
-		qglLoadMatrixf (r_world_matrix); //moving trans brushes
-
 		qglDepthMask ( GL_FALSE );
 		qglEnable (GL_BLEND);
 		GL_TexEnv( GL_MODULATE );
@@ -400,6 +398,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		//moving trans brushes
 		if (s->entity)
 		{
+			qglLoadMatrixf (r_world_matrix); //moving trans brushes
 			s->entity->angles[0] = -s->entity->angles[0];	// stupid quake bug
 			s->entity->angles[2] = -s->entity->angles[2];	// stupid quake bug
 				R_RotateForEntity (s->entity);
@@ -425,7 +424,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 						scaleX = stage->scale.scaleX;
 						scaleY = stage->scale.scaleY;
 					}
-				}
+				}qglLoadMatrixf (r_world_matrix); //moving trans brushes
 			}
 			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
 		}
@@ -442,7 +441,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			else
 				BSP_DrawPoly (s, s->texinfo->flags);
 		}
-
+		
 	}
 
 	GL_TexEnv( GL_REPLACE );
@@ -454,6 +453,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 void R_DrawAlphaSurfaces (void)
 {
 	R_DrawAlphaSurfaces_chain (r_ent_alpha_surfaces);
+	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 	r_ent_alpha_surfaces = NULL;
 	R_DrawAlphaSurfaces_chain (r_alpha_surfaces);
 }
