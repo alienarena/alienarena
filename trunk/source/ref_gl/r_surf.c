@@ -1754,6 +1754,11 @@ void R_MarkLeaves (void)
 	static int minleaf_allareas, maxleaf_allareas;
 	int minleaf, maxleaf;
 	
+	if (!r_drawworld->integer)
+		return;
+
+	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
+		return;
 
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
