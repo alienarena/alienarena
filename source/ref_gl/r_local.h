@@ -175,6 +175,7 @@ extern	cvar_t	*r_lensflare;
 extern	cvar_t	*r_lensflare_intens;
 extern	cvar_t	*r_drawsun;
 extern  cvar_t	*r_godrays;
+extern	cvar_t	*r_optimize;
 
 extern	cvar_t	*r_hdlightmaps;
 
