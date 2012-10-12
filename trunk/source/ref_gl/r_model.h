@@ -209,7 +209,15 @@ typedef struct mtexinfo_s
 	struct		rscript_s	*script;
 	int			value;
 	
-	struct 		msurface_s	*glsl_surfaces, *glsl_dynamic_surfaces, *lightmap_surfaces;
+	//for BSP rendering-- not always cleared each frame
+	struct 		msurface_s	*w_glsl_surfaces, 
+							*w_glsl_dynamic_surfaces, 
+							*w_lightmap_surfaces;
+	
+	//for entity rendering-- cleared for each brush model drawn
+	struct 		msurface_s	*e_glsl_surfaces, 
+							*e_glsl_dynamic_surfaces, 
+							*e_lightmap_surfaces;
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10
