@@ -1624,6 +1624,12 @@ void R_DrawWorld (void)
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
 		return;
+	
+	if (r_newrefdef.areabits == NULL)
+	{
+		Com_Printf ("WARN: No area bits!\n");
+		return;
+	}
 
 	currentmodel = r_worldmodel;
 
@@ -1759,6 +1765,12 @@ void R_MarkLeaves (void)
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
 		return;
+	
+	if (r_newrefdef.areabits == NULL)
+	{
+		Com_Printf ("WARN: No area bits!\n");
+		return;
+	}
 
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
