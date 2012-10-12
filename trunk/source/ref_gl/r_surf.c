@@ -1776,7 +1776,7 @@ void R_DrawWorld (void)
 	if	(	old_visframecount != r_visframecount ||
 			VectorLength (delta_origin) > 5.0 ||
 			VectorLength (delta_angle) > 2.0 ||
-			!r_test->integer //TODO: rename to r_optimize
+			!r_optimize->integer
 		)
 	{
 		R_ClearSkyBox ();

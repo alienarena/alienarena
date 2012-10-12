@@ -167,6 +167,7 @@ cvar_t	*r_lensflare_intens;
 cvar_t	*r_drawsun;
 cvar_t	*r_lightbeam;
 cvar_t	*r_godrays;
+cvar_t	*r_optimize;
 
 cvar_t	*r_hdlightmaps;
 
@@ -1268,6 +1269,7 @@ void R_Register( void )
 	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
 	r_lightbeam = Cvar_Get ("r_lightbeam", "1", CVAR_ARCHIVE);
 	r_godrays = Cvar_Get ("r_godrays", "0", CVAR_ARCHIVE);
+	r_optimize = Cvar_Get ("r_optimize", "1", CVAR_ARCHIVE);
 	
 	r_hdlightmaps = Cvar_Get("r_hdlightmaps", "1", CVAR_ARCHIVE);
 
