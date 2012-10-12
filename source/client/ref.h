@@ -334,6 +334,8 @@ typedef struct
 
 } refdef_t;
 
+qboolean	areabits_changed;
+
 //
 // view origin moved from r_local.h. -M.
 //
