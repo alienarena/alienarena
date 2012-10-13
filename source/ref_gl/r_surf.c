@@ -108,29 +108,6 @@ image_t *BSP_TextureAnimation (mtexinfo_t *tex)
 
 /*
 ================
-BSP_DrawPoly
-================
-*/
-void BSP_DrawPoly (msurface_t *fa, int flags)
-{
-	float	scroll;
-
-	scroll = 0;
-	if (flags & SURF_FLOWING)
-	{
-		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-		if (scroll == 0.0)
-			scroll = -64.0;
-	}
-
-	R_InitVArrays(VERT_SINGLE_TEXTURED);
-	R_AddTexturedSurfToVArray (fa, scroll);
-	R_KillVArrays();
-
-}
-
-/*
-================
 BSP_DrawTexturelessPoly
 ================
 */
@@ -359,11 +336,38 @@ void DrawTextureChains (void)
 
 /*
 ================
+BSP_DrawAlphaPoly
+================
+*/
+void BSP_DrawAlphaPoly (msurface_t *fa, int flags)
+{
+	float	scroll;
+
+	scroll = 0;
+	if (flags & SURF_FLOWING)
+	{
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+	}
+
+	R_InitVArrays(VERT_SINGLE_TEXTURED);
+	R_AddTexturedSurfToVArray (fa, scroll);
+	R_KillVArrays();
+}
+
+/*
+================
 R_DrawAlphaSurfaces
 
 Draw water surfaces and windows.
-The BSP tree is waled front to back, so unwinding the chain
-of alpha_surfaces will draw back to front, giving proper ordering.
+
+Annoyingly, because alpha surfaces have to be drawn from back to front, 
+everything transparent-- water, rscripted surfs, and non-rscripted surfs-- has
+to be drawn in a single pass. This is an inherently inefficient process.
+
+The BSP tree is walked front to back, so unwinding the chain of alpha surfaces
+will draw back to front, giving proper ordering.
 ================
 */
 void R_DrawAlphaSurfaces_chain (msurface_t *chain)
@@ -379,12 +383,12 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
 	
+	qglDepthMask ( GL_FALSE );
+	qglEnable (GL_BLEND);
+	GL_TexEnv( GL_MODULATE );
+	
 	for (s=chain ; s ; s=s->texturechain)
 	{
-		qglDepthMask ( GL_FALSE );
-		qglEnable (GL_BLEND);
-		GL_TexEnv( GL_MODULATE );
-
 		GL_Bind(s->texinfo->image->texnum);
 		c_brush_polys++;
 
@@ -430,10 +434,13 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
 		}
 		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
+		{
 			RS_Surface(s);
+			qglEnable (GL_BLEND);
+			GL_TexEnv( GL_MODULATE );
+		}
 		else
-			BSP_DrawPoly (s, s->texinfo->flags);
-		
+			BSP_DrawAlphaPoly (s, s->texinfo->flags);
 	}
 
 	GL_TexEnv( GL_REPLACE );
