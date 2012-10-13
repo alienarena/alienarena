@@ -1585,7 +1585,7 @@ void Mod_LoadLeafs (lump_t *l)
 		
 		out->firstmarksurface -= to_subtract;
 		
-		// Remove SURF_NODRAW surfaces. We do this hear instead of in 
+		// Remove SURF_NODRAW surfaces. We do this here instead of in 
 		// Mod_LoadMarkSurfaces so we can correct the offsets in each leaf.
 		for (j = 0; j < out->nummarksurfaces; j++)
 		{

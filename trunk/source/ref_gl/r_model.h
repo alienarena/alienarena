@@ -169,10 +169,11 @@ typedef struct
 #define	SIDE_BACK	1
 #define	SIDE_ON		2
 
-
-#define	SURF_PLANEBACK		1
-#define SURF_DRAWTURB		2
-#define SURF_UNDERWATER		0x80
+//put these flags at the high end of the bitfield so we can keep adding new
+//surface flags sequentially
+#define	SURF_PLANEBACK		0x80000000
+#define SURF_DRAWTURB		0x40000000
+#define SURF_UNDERWATER		0x20000000
 
 #define TexinfoIsTranslucent(texinfo) ((texinfo)->flags & (SURF_TRANS33|SURF_TRANS66))
 #define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent((surf)->texinfo))

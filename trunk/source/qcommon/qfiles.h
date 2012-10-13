@@ -359,6 +359,7 @@ typedef struct
 #define SURF_BLOOD		0x400	// dripping blood surface
 #define SURF_WATER		0x800	// dripping water surface
 #define SURF_SHINY		0x1000  // shiny wet surface
+// Remember, 0x80000000, 0x40000000, and 0x20000000 are reserved elsewhere!
 
 typedef struct
 {
