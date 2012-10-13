@@ -367,7 +367,16 @@ everything transparent-- water, rscripted surfs, and non-rscripted surfs-- has
 to be drawn in a single pass. This is an inherently inefficient process.
 
 The BSP tree is walked front to back, so unwinding the chain of alpha surfaces
-will draw back to front, giving proper ordering.
+will draw back to front, giving proper ordering FOR BSP SURFACES! 
+
+It's a bit wrong for entity surfaces (i.e. glass doors.) Because they are in
+separate linked lists, the entity surfaces must be either always behind or
+always in front of the world surfaces. I chose always in front because that
+seems to fix all rendering issues, regardless of whether the entity actually 
+is in front. Search me why. NOTE: this bug existed even when it was all one
+linked list, although at that time entity surfaces were always behind map
+surfaces (added to the beginning of the linked list after all the BSP 
+rendering code.)
 ================
 */
 void R_DrawAlphaSurfaces_chain (msurface_t *chain)
@@ -451,10 +460,10 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 
 void R_DrawAlphaSurfaces (void)
 {
+	R_DrawAlphaSurfaces_chain (r_alpha_surfaces);
 	R_DrawAlphaSurfaces_chain (r_ent_alpha_surfaces);
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 	r_ent_alpha_surfaces = NULL;
-	R_DrawAlphaSurfaces_chain (r_alpha_surfaces);
 }
 
 /*
