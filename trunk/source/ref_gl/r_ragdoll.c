@@ -753,7 +753,7 @@ void RGD_BuildWorldTrimesh ( void )
         }
         else
         {
-            if (!( surf->flags & SURF_DRAWTURB ) )
+            if (!( surf->iflags & ISURF_DRAWTURB ) )
             {
                 RGD_BuildODEGeoms(surf);
             }

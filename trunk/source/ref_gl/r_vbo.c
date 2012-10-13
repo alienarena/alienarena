@@ -157,7 +157,7 @@ void VB_BuildWorldVBO(void)
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
-        if (currentmodel->unique_texinfo[i]->flags & SURF_SKY)
+        if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
             continue;
         //TODO: use VBO for alpha surfaces? But for now they're just
         //cluttering up the VBO.
@@ -167,7 +167,7 @@ void VB_BuildWorldVBO(void)
 		for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
 		{
 			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-				    (surf->flags & (SURF_DRAWTURB|SURF_NODRAW)))
+				    (surf->iflags & ISURF_DRAWTURB))
 				continue;
 			VB_BuildSurfaceVBO(surf);
 		}
@@ -180,7 +180,7 @@ void VB_BuildVBOBufferSize(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 
-	if (!( surf->flags & SURF_DRAWTURB ) )
+	if (!( surf->iflags & ISURF_DRAWTURB ) )
 	{
 		totalVBObufferSize += 7*3*(p->numverts-2);
 	}

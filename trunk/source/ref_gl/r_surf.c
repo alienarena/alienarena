@@ -221,7 +221,7 @@ void BSP_RenderBrushPoly (msurface_t *fa)
 
 	image = BSP_TextureAnimation (fa->texinfo);
 
-	if (fa->flags & SURF_DRAWTURB)
+	if (fa->iflags & ISURF_DRAWTURB)
 	{
 		GL_Bind( image->texnum );
 
@@ -307,7 +307,7 @@ void DrawTextureChains (void)
 
             for ( s = image->texturechain; s ; s=s->texturechain)
             {
-                if ( !( s->flags & SURF_DRAWTURB ) )
+                if ( !( s->iflags & ISURF_DRAWTURB ) )
                     BSP_RenderBrushPoly (s);
             }
         }
@@ -323,7 +323,7 @@ void DrawTextureChains (void)
 
             for ( ; s ; s=s->texturechain)
             {
-                if ( s->flags & SURF_DRAWTURB )
+                if ( s->iflags & ISURF_DRAWTURB )
                     BSP_RenderBrushPoly (s);
             }
 
@@ -423,7 +423,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		if (r_shaders->integer)
 			rs_shader = (rscript_t *)s->texinfo->image->script;
 
-		if (s->flags & SURF_DRAWTURB) 
+		if (s->iflags & ISURF_DRAWTURB) 
 		{
 			//water shaders
 			scaleX = scaleY = 1.0f;
@@ -1239,7 +1239,7 @@ void BSP_DrawInlineBModel ( void )
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
 	{
-		if (psurf->flags & SURF_NODRAW)
+		if (psurf->texinfo->flags & SURF_NODRAW)
 			continue; //can skip dot product stuff
 			// TODO: remove these at load-time for inline models?
 		
@@ -1248,8 +1248,8 @@ void BSP_DrawInlineBModel ( void )
 		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
 
 		// draw the polygon
-		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
-			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
+		if (((psurf->iflags & ISURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
+			(!(psurf->iflags & ISURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
 		{
 			// TODO: do this once at load time
 			psurf->entity = currententity;
@@ -1259,7 +1259,7 @@ void BSP_DrawInlineBModel ( void )
 				psurf->texturechain = r_ent_alpha_surfaces;
 				r_ent_alpha_surfaces = psurf;
 			}
-			else if ( !( psurf->flags & SURF_DRAWTURB ) )
+			else if ( !( psurf->iflags & ISURF_DRAWTURB ) )
 			{
 				BSP_AddToTextureChain( psurf );
 			}
@@ -1590,7 +1590,7 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 			continue;		// wrong side
 		*/
 
-		if (clipflags != 0 && !( surf->flags & SURF_DRAWTURB ))
+		if (clipflags != 0 && !( surf->iflags & ISURF_DRAWTURB ))
 		{
 			if (R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
 				continue;
@@ -1607,13 +1607,13 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		}
 		else
 		{
-			if ( !( surf->flags & SURF_DRAWTURB ) )
+			if ( !( surf->iflags & ISURF_DRAWTURB ) )
 			{
 				BSP_AddToTextureChain( surf );
 	
 				if(r_shaders->integer) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
-					if(rs_shader || (surf->flags & SURF_UNDERWATER)) {
+					if(rs_shader || (surf->iflags & ISURF_UNDERWATER)) {
 						surf->rscriptchain = r_rscript_surfaces;
 						r_rscript_surfaces = surf;
 					}
@@ -2280,7 +2280,7 @@ Mini map
 
 void R_RecursiveRadarNode (mnode_t *node)
 {
-	int			c, side, sidebit;
+	int			c, side;
 	cplane_t	*plane;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
@@ -2344,10 +2344,8 @@ void R_RecursiveRadarNode (mnode_t *node)
 
 	if (dot >= 0) {
 		side = 0;
-		sidebit = 0;
 	} else {
 		side = 1;
-		sidebit = SURF_PLANEBACK;
 	}
 
 // recurse down the children, front side first

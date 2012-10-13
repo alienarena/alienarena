@@ -1777,7 +1777,7 @@ void RS_Surface (msurface_t *surf)
 
 	//Underwater Caustics
 	if(rs_caustics)
-		if (surf->flags & SURF_UNDERWATER )
+		if (surf->iflags & ISURF_UNDERWATER )
 				RS_DrawSurfaceTexture(surf, rs_caustics);
 
 	//all other textures shaders

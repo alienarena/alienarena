@@ -284,6 +284,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 		R_DrawVarrays(GL_QUADS, 0, 4, false);
 	}	
 	
+
 	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -331,7 +332,10 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 	 vec3_t origin = {0,0,0}, color = {1,1,1}, tmp, rgbSum;
      vec3_t poly_center, mins, maxs, tmp1;
 
-     if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING|SURF_DRAWTURB|SURF_WARP))
+	if (surf->iflags & ISURF_DRAWTURB)
+		return;
+
+     if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING|SURF_WARP))
           return;
 
      if (!(surf->texinfo->flags & (SURF_LIGHT)))
@@ -426,7 +430,7 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 	==================================
 	*/
 
-     if (surf->flags & SURF_PLANEBACK)
+     if (surf->iflags & ISURF_PLANEBACK)
 		VectorNegate(surf->plane->normal, tmp);
      else
 		VectorCopy(surf->plane->normal, tmp);
@@ -796,7 +800,7 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 
 	VectorMA(origin, -32*frand(), tangent, origin);
 
-	if (surf->flags & SURF_PLANEBACK)
+	if (surf->iflags & ISURF_PLANEBACK)
 		VectorNegate(surf->plane->normal, tmp);
 	else
 		VectorCopy(surf->plane->normal, tmp);
@@ -1045,7 +1049,7 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	VectorNormalize(tangent);
 	VectorNormalize(binormal);
 
-	if (surf->flags & SURF_PLANEBACK)
+	if (surf->iflags & ISURF_PLANEBACK)
 		VectorNegate(surf->plane->normal, tmp);
 	else
 		VectorCopy(surf->plane->normal, tmp);

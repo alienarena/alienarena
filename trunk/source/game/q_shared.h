@@ -437,7 +437,9 @@ COLLISION DETECTION
 #define	SURF_NODRAW		0x80	// don't bother referencing the texture
 #define SURF_BLOOD		0x400	// dripping blood surface
 #define SURF_WATER		0x800	// dripping water surface
-// Remember, 0x80000000, 0x40000000, and 0x20000000 are reserved elsewhere!
+#define SURF_UNDERWATER	0x2000	// reflecting ripples; applied automatically 
+								// to underwater surfs but could be applied
+								// manually as well
 
 // content masks
 #define	MASK_ALL				(-1)

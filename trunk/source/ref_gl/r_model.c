@@ -1346,13 +1346,13 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 	{
 		int firstedge = LittleLong(in->firstedge);
 		int numedges = LittleShort(in->numedges);
-		out->flags = 0;
+		out->iflags = 0;
 		out->polys = NULL;
 
 		planenum = LittleShort(in->planenum);
 		side = LittleShort(in->side);
 		if (side)
-			out->flags |= SURF_PLANEBACK;
+			out->iflags |= ISURF_PLANEBACK;
 
 		if (planenum < 0 || planenum >= loadmodel->numplanes)
 			Com_Error (ERR_DROP, 
@@ -1396,7 +1396,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 		// set the drawing flags
 		if (out->texinfo->flags & SURF_WARP)
 		{
-			out->flags |= SURF_DRAWTURB;
+			out->iflags |= ISURF_DRAWTURB;
 			for (i=0 ; i<2 ; i++)
 			{
 				out->extents[i] = 16384;
@@ -1592,7 +1592,7 @@ void Mod_LoadLeafs (lump_t *l)
 			msurface_t *s;
 			out->firstmarksurface[j] = out->firstmarksurface[j+to_subtract];
 			s = out->firstmarksurface[j];
-			if (s->flags & SURF_NODRAW)
+			if (s->texinfo->flags & SURF_NODRAW)
 			{
 				to_subtract++;
 				j--;
@@ -1601,12 +1601,12 @@ void Mod_LoadLeafs (lump_t *l)
 		}
 
 		// gl underwater warp
-		if (out->contents & MASK_WATER )
+		for (j=0 ; j<out->nummarksurfaces ; j++)
 		{
-			for (j=0 ; j<out->nummarksurfaces ; j++)
-			{
-				out->firstmarksurface[j]->flags |= SURF_UNDERWATER;
-			}
+			msurface_t *s = out->firstmarksurface[j];
+			if	(	(out->contents & MASK_WATER) || 
+					(s->texinfo->flags & SURF_UNDERWATER))
+			out->firstmarksurface[j]->iflags |= ISURF_UNDERWATER;
 		}
 	}
 	
