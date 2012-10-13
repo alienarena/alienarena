@@ -169,11 +169,13 @@ typedef struct
 #define	SIDE_BACK	1
 #define	SIDE_ON		2
 
-//put these flags at the high end of the bitfield so we can keep adding new
-//surface flags sequentially
-#define	SURF_PLANEBACK		0x80000000
-#define SURF_DRAWTURB		0x40000000
-#define SURF_UNDERWATER		0x20000000
+//Internal surface flags, applied by the engine
+#define	ISURF_PLANEBACK		0x1
+#define ISURF_DRAWTURB		0x2
+// same effect as SURF_UNDERWATER, but has to be separate because
+// SURF_UNDERWATER applies to texinfos, whereas we have to work with
+// individual surfaces.
+#define ISURF_UNDERWATER	0x4 
 
 #define TexinfoIsTranslucent(texinfo) ((texinfo)->flags & (SURF_TRANS33|SURF_TRANS66))
 #define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent((surf)->texinfo))
@@ -239,7 +241,7 @@ typedef struct msurface_s
 {
 	int			visframe;		// should be drawn when node is crossed
 	
-	int			flags;
+	int			iflags;			// internal flags, applied by the engine
 	
 	mtexinfo_t	*texinfo;
 

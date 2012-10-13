@@ -70,9 +70,9 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
                    if (dist >= 0)                                                                              //Discoloda
                              sidebit = 0;                                                                      //Discoloda
                    else                                                                                        //Discoloda
-                             sidebit = SURF_PLANEBACK;                                                //Discoloda
+                             sidebit = ISURF_PLANEBACK;                                                //Discoloda
 
-                   if ( (surf->flags & SURF_PLANEBACK) != sidebit )                                   //Discoloda
+                   if ( (surf->iflags & ISURF_PLANEBACK) != sidebit )                                   //Discoloda
                              continue;                                                                //Discoloda
 
                    if (surf->dlightframe != r_dlightframecount)

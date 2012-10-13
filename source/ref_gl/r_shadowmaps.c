@@ -419,7 +419,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		}
 		else
 		{
-			if (!( surf->flags & SURF_DRAWTURB ) )
+			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
 				BSP_DrawTexturelessPoly (surf);
 			}
@@ -565,7 +565,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 		}
 		else
 		{
-			if (!( surf->flags & SURF_DRAWTURB ) )
+			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
 				BSP_DrawShadowPoly (surf, origin);
 			}
