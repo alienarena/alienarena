@@ -315,6 +315,8 @@ typedef struct
 
 	int			num_dlights;
 	dlight_t	*dlights;
+	qboolean	dlights_changed;
+	int			num_dlight_surfaces;
 
 	int			num_particles;
 	particle_t	**particles;
