@@ -40,6 +40,8 @@ DYNAMIC LIGHTS
 R_MarkLights
 =============
 */
+static int		num_dlight_surfaces, old_dlightframecount;
+static qboolean	new_dlight;
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 {
           cplane_t  *splitplane;
@@ -77,6 +79,9 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 
                    if (surf->dlightframe != r_dlightframecount)
                    {
+                             if (surf->dlightframe != old_dlightframecount)
+                                       new_dlight = true;
+                             num_dlight_surfaces++;
                              surf->dlightbits = bit;
                              surf->dlightframe = r_dlightframecount;
                    } else
@@ -95,14 +100,23 @@ R_PushDlights
 */
 void R_PushDlights (void)
 {
-	int		i;
+	int			i;
 	dlight_t	*l;
 
+	old_dlightframecount = r_dlightframecount;
+	new_dlight = false;
+	num_dlight_surfaces = 0;
+	
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
 											//  advanced yet for this frame
 	l = r_newrefdef.dlights;
 	for (i=0 ; i<r_newrefdef.num_dlights ; i++, l++)
 		R_MarkLights ( l, 1<<i, r_worldmodel->nodes );
+	
+	r_newrefdef.dlights_changed = false;
+	if (num_dlight_surfaces != r_newrefdef.num_dlight_surfaces || new_dlight)
+		r_newrefdef.dlights_changed = true;
+	r_newrefdef.num_dlight_surfaces = num_dlight_surfaces;
 }
 
 /*
