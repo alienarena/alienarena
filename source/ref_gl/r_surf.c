@@ -1242,8 +1242,6 @@ void BSP_DrawInlineBModel ( void )
 	
 	BSP_ClearVBOAccum ();
 	
-	GL_EnableMultitexture( false );
-		
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
 	{
