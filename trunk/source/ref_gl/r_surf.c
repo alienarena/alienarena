@@ -801,9 +801,17 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
 			KillFlags |= KILL_TMU2_POINTER;
 		}
 
-		if (r_currTexInfo && 
-			(surf->texinfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)) == 
-			(r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)))
+		if (!gl_bspnormalmaps->integer)
+		{
+			if (!r_currTexInfo)
+			{
+				glUniform1iARB( g_location_liquid, 0 );
+				glUniform1iARB( g_location_shiny, 0 );
+			}
+		}
+		else if	(r_currTexInfo &&
+				(surf->texinfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)) == 
+				(r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY)))
 		{
 			//no change to GL state is needed
 		}
