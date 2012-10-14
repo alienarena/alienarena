@@ -2425,8 +2425,12 @@ void R_DrawRadar(void)
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) return;
 	if(!r_minimap->integer) return;
+	
+	if (!r_newrefdef.areabits) return;
 
-	qglViewport (vid.width-r_minimap_size->value,0, r_minimap_size->value, r_minimap_size->value);
+	qglViewport	(	r_newrefdef.x+r_newrefdef.width-r_minimap_size->value,
+					vid.height-r_newrefdef.y-r_newrefdef.height, 
+					r_minimap_size->value, r_minimap_size->value);
 
 	qglDisable(GL_DEPTH_TEST);
   	qglMatrixMode(GL_PROJECTION);
