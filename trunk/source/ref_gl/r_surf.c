@@ -1867,9 +1867,9 @@ void R_MarkLeaves (void)
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
 			!r_novis->integer && r_viewcluster != -1 &&
-			!areabits_changed)
+			!r_newrefdef.areabits_changed)
 		return;
-	areabits_changed = false;
+	r_newrefdef.areabits_changed = false;
 	
 	// development aid to let you run around and see exactly where
 	// the pvs ends

@@ -285,6 +285,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	}	
 	
 
+
 	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -1444,37 +1445,22 @@ void R_SI_InitTextures( void )
 		s_item24 = GL_LoadPic ("***s_item24***", (byte *)nullpic, 16, 16, it_pic, 32);
 }
 
-void R_AddSimpleItem (int type, vec3_t origin)
-{
-    simpleitem_t  *item;
-
-	if (r_numsimpleitems >= MAX_SIMPLEITEMS)
-			return;
-
-	item = &r_simpleitems[r_numsimpleitems++];
-	VectorCopy(origin, item->origin);
-	
-	item->leafnum = CM_PointLeafnum (item->origin);
-
-	item->type = type;
-}
-
 //rendering
-
+extern cvar_t *cl_simpleitems;
 void R_DrawSimpleItems ( void )
 {
     int		i, k;
-	simpleitem_t *item;
     float   scale;
 	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
+	
+	if (!cl_simpleitems->integer)
+		return;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-
-	item = r_simpleitems;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
@@ -1488,120 +1474,59 @@ void R_DrawSimpleItems ( void )
 
 	qglDepthMask( GL_TRUE );
 	GLSTATE_ENABLE_ALPHATEST
-	qglColor4f( 1, 1, 1, 1 ); //uses texture for color unless specified
+	
 
-    for (i=0; i<r_numsimpleitems; i++, item++)
+    for (i=0 ; i<r_newrefdef.num_entities ; i++)
 	{
 		int va = 0;
+		currententity = &r_newrefdef.entities[i];
+		if (!currententity->model || !currententity->model->simple_texnum)
+			continue;
+		currentmodel = currententity->model;
 		
-		if (!CM_inPVS_leafs (r_origin_leafnum, item->leafnum))
-	        continue;
-
 		R_InitVArrays (VERT_SINGLE_TEXTURED);
 		VArray = &VArrayVerts[0];
 
-		scale = 20.0;
+		VectorCopy(currententity->origin, origin);
 
-		VectorCopy(item->origin, origin);
-
+		//PVS checking is not necessary; the server already does that for
+		//entities.
 		r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
 		
 		if(visible)
 		{
-			switch(item->type)
+			GL_Bind (currentmodel->simple_texnum);
+			switch (currentmodel->simple_color)
 			{
-				case 0:
-					//bind tex
-					GL_Bind(s_item0->texnum);
+				case simplecolor_white:
+					qglColor4f( 1, 1, 1, 1 ); //uses texture for color unless specified
 					break;
-				case 1:
-					GL_Bind(s_item1->texnum);
-					break;
-				case 2:
-					GL_Bind(s_item2->texnum);
-					break;
-				case 3:
-					GL_Bind(s_item3->texnum);
-					break;
-				case 4:
-					GL_Bind(s_item4->texnum);
-					break;
-				case 5:
-					GL_Bind(s_item5->texnum);
-					break;
-				case 6:
-					GL_Bind(s_item6->texnum);
-					break;
-				case 7:
-					GL_Bind(s_item7->texnum);
-					break;
-				case 8:
-					GL_Bind(s_item8->texnum);
-					break;
-				case 9:
-					GL_Bind(s_item9->texnum);
-					break;
-				case 10:
-					GL_Bind(s_item10->texnum);
-					break;
-				case 11:
-					GL_Bind(s_item11->texnum);
-					break;
-				case 12:
-					GL_Bind(s_item12->texnum);
-					break;
-				case 13:
-					GL_Bind(s_item13->texnum);
-					break;
-				case 14:
-					GL_Bind(s_item14->texnum);
+				case simplecolor_green:
 					qglColor4f( 0, 1, 0, 1 ); 
 					break;
-				case 15:
-					GL_Bind(s_item14->texnum);
+				case simplecolor_blue:
 					qglColor4f( 0, .3, 1, 1 ); 
 					break;
-				case 16:
-					GL_Bind(s_item14->texnum);
+				case simplecolor_purple:
 					qglColor4f( 1, 0, 1, 1 ); 
 					break;
-				case 17:
-					GL_Bind(s_item17->texnum);
-					scale = 40;
-					break;
-				case 18:
-					GL_Bind(s_item18->texnum);
-					scale = 40;
-					break;
-				case 19:
-					GL_Bind(s_item19->texnum);
-					scale = 40;
-					break;
-				case 20:
-					GL_Bind(s_item20->texnum);
-					scale = 40;
-					break;
-				case 21:
-					GL_Bind(s_item21->texnum);
-					scale = 40;
-					break;
-				case 22:
-					GL_Bind(s_item22->texnum);
-					scale = 40;
-					break;
-				case 23:
-					GL_Bind(s_item23->texnum);
-					scale = 40;
-					break;
-				case 24:
-					GL_Bind(s_item24->texnum);
-					scale = 40;
-					break;
-				default:
-					GL_Bind(s_item0->texnum);
-					break;
-			}			
+			}
+			if (	(currentmodel->simple_texnum == s_item17->texnum) ||
+					(currentmodel->simple_texnum == s_item18->texnum) ||
+					(currentmodel->simple_texnum == s_item19->texnum) ||
+					(currentmodel->simple_texnum == s_item20->texnum) ||
+					(currentmodel->simple_texnum == s_item21->texnum) ||
+					(currentmodel->simple_texnum == s_item22->texnum) ||
+					(currentmodel->simple_texnum == s_item23->texnum) ||
+					(currentmodel->simple_texnum == s_item24->texnum))
+			{
+				scale = 40.0;
+			}
+			else
+			{
+				scale = 20.0;
+			}
 					
 			VectorCopy(r_newrefdef.viewangles, angle);
 			
@@ -1665,8 +1590,6 @@ void R_DrawSimpleItems ( void )
 	
 			R_DrawVarrays(GL_QUADS, 0, va, false);
 
-			qglColor4f( 1, 1, 1, 1 );
-		
 			R_KillVArrays ();
 		}
 	}
@@ -1676,12 +1599,117 @@ void R_DrawSimpleItems ( void )
 	GLSTATE_DISABLE_ALPHATEST
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	GL_TexEnv( GL_REPLACE );
-
-	R_ClearSimpleItems();
 }
 
-void R_ClearSimpleItems(void)
+void R_SetSimpleTexnum (model_t *loadmodel, const char *pathname)
 {
-	memset(r_simpleitems, 0, sizeof(r_simpleitems));
-	r_numsimpleitems = 0;
+    loadmodel->simple_texnum = 0;
+    loadmodel->simple_color = simplecolor_white;
+	if (!Q_strcasecmp (pathname, "models/items/ammo/bullets/medium/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item0->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/ammo/cells/medium/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item1->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/ammo/grenades/medium/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item2->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/ammo/rockets/medium/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item3->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/ammo/shells/medium/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item4->texnum;
+	}
+	//powerups
+	else if (!Q_strcasecmp (pathname, "models/items/haste/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item5->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/invulner/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item6->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/quaddama/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item7->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/sproing/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item8->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/adrenaline/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item9->texnum;
+	}
+	//armor
+	else if (!Q_strcasecmp (pathname, "models/items/armor/shard/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item10->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/armor/jacket/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item11->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/armor/combat/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item12->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/armor/body/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item13->texnum;
+	}
+	//health
+	else if (!Q_strcasecmp (pathname, "models/items/healing/small/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item14->texnum;
+		loadmodel->simple_color = simplecolor_green;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/healing/medium/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item14->texnum;
+		loadmodel->simple_color = simplecolor_blue;
+	}
+	else if (!Q_strcasecmp (pathname, "models/items/healing/large/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item14->texnum;
+		loadmodel->simple_color = simplecolor_purple;
+	}
+	//weapons
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_rail/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item17->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_bfg/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item18->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_hyperb/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item19->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_chain/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item20->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_shotg/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item21->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_shotg2/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item22->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_rocket/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item23->texnum;
+	}
+	else if (!Q_strcasecmp (pathname, "models/weapons/g_minderaser/tris.md2"))
+	{
+		loadmodel->simple_texnum = s_item24->texnum;
+	}
 }

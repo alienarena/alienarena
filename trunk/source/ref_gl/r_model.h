@@ -345,6 +345,9 @@ typedef struct {
 
 typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias, mod_iqm } modtype_t;
 
+typedef enum	{	simplecolor_white, simplecolor_green, simplecolor_blue, 
+					simplecolor_purple	} simplecolor_t;
+
 typedef struct model_s
 {
 	char		name[MAX_QPATH];
@@ -453,6 +456,10 @@ typedef struct model_s
 	//ragdoll info
 	int hasRagDoll;
 	mragdoll_t ragdoll;
+	
+	//simple item texnum
+	int					simple_texnum;
+	simplecolor_t		simple_color;
 
 } model_t;
 

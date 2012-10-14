@@ -478,6 +478,7 @@ void R_DrawNullModel (void)
 R_DrawEntitiesOnList
 =============
 */
+extern cvar_t *cl_simpleitems;
 void R_DrawEntitiesOnList (void)
 {
 	int		i;
@@ -499,7 +500,7 @@ void R_DrawEntitiesOnList (void)
 		currententity = &r_newrefdef.entities[i];
 		if (currententity->flags & RF_TRANSLUCENT)
 			continue;	// transluscent
-
+		
 		if (currententity->model && r_shaders->integer)
 		{
 			rs=(rscript_t *)currententity->model->script;
@@ -520,6 +521,9 @@ void R_DrawEntitiesOnList (void)
 		}
 
 		currentmodel = currententity->model;
+		
+		if (cl_simpleitems->integer && currentmodel && currentmodel->simple_texnum)
+			continue;
 
 		//get distance
 		VectorSubtract(r_origin, currententity->origin, dist);		
@@ -1373,6 +1377,7 @@ void R_SetCompatibility(void)
 	Cvar_SetValue("r_lightbeam", 0);
 	Cvar_SetValue("r_drawsun", 0);
 	Cvar_SetValue("r_godrays", 0);
+
 
 	Com_Printf("...autodetected MAX COMPATIBILITY game setting\n");
 }
