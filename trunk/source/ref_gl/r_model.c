@@ -1351,12 +1351,12 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 		out->iflags = 0;
 		out->polys = NULL;
 
-		planenum = LittleShort(in->planenum);
+		planenum = (unsigned short)LittleShort(in->planenum);
 		side = LittleShort(in->side);
 		if (side)
 			out->iflags |= ISURF_PLANEBACK;
 
-		if (planenum < 0 || planenum >= loadmodel->numplanes)
+		if (planenum >= loadmodel->numplanes)
 			Com_Error (ERR_DROP, 
 				"Map has invalid plane offsets!\n"
 				"The file is likely corrupted, please obtain a fresh copy.");
@@ -1509,8 +1509,8 @@ void Mod_LoadNodes (lump_t *l)
 				"The file is likely corrupted, please obtain a fresh copy.");
 		out->plane = loadmodel->planes + p;
 
-		out->firstsurface = LittleShort (in->firstface);
-		out->numsurfaces = LittleShort (in->numfaces);
+		out->firstsurface = (unsigned short)LittleShort (in->firstface);
+		out->numsurfaces = (unsigned short)LittleShort (in->numfaces);
 		out->contents = -1;	// differentiate from leafs
 
 		for (j=0 ; j<2 ; j++)
