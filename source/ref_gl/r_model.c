@@ -533,7 +533,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
-
+	
 	//
 	// inline models are grabbed only from worldmodel
 	//
@@ -594,6 +594,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		mod_numknown++;
 	}
 	strcpy (mod->name, name);
+	
+	R_SetSimpleTexnum (mod, name);
 
 	//
 	// load the file

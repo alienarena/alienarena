@@ -35,7 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_FLARES      512
 #define MAX_GRASSES		2048
 #define MAX_BEAMS		128
-#define MAX_SIMPLEITEMS 256
 
 typedef struct
 {
@@ -75,13 +74,6 @@ typedef struct
 	int leafnum;
 	int leafnum2;
 } beam_t;
-
-typedef struct
-{
-	int type;
-	vec3_t origin;
-	int leafnum;
-} simpleitem_t;
 
 #define SHELL_RED_COLOR		0xF2
 #define SHELL_GREEN_COLOR	0xD0
@@ -311,6 +303,7 @@ typedef struct
 	int			rdflags;			// RDF_UNDERWATER, etc
 
 	byte		*areabits;			// must not be NULL if you want to do BSP rendering
+	qboolean	areabits_changed;
 
 	lightstyle_t	*lightstyles;	// [MAX_LIGHTSTYLES]
 
@@ -337,8 +330,6 @@ typedef struct
 	int			last_mirrorupdate_time; // in ms
 
 } refdef_t;
-
-qboolean	areabits_changed;
 
 //
 // view origin moved from r_local.h. -M.

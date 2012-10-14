@@ -349,12 +349,9 @@ extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
 
 //Simple Items
-int r_numsimpleitems;
-simpleitem_t r_simpleitems[MAX_SIMPLEITEMS];
 extern void R_SI_InitTextures( void );
-extern void R_AddSimpleItem(int type, vec3_t origin);
 extern void R_DrawSimpleItems( void );
-extern void R_ClearSimpleItems( void );
+void R_SetSimpleTexnum (model_t *loadmodel, const char *pathname);
 
 //Light beams/volumes
 int r_numbeams;
