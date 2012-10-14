@@ -1205,6 +1205,21 @@ void SCR_ExecuteLayoutString (char *s)
 	font = FNT_AutoGet( CL_gameFont );
 	charscale = font->size;
 	scale = charscale * 0.125;
+	
+	if (cl.refdef.width < 1024 || cl.refdef.height < 768)
+	{
+		// Below 1024x768, start scaling things down to make sure everything
+		// fits. We scale x and y by the same amount to keep things square,
+		// but we figure out the ratios separately and use the ratio which
+		// results in the smallest scale.
+		float xscale, yscale;
+		xscale = (float)cl.refdef.width/1024.0f;
+		yscale = (float)cl.refdef.height/768.0f;
+		if (xscale < yscale)
+			scale *= xscale;
+		else
+			scale *= yscale;
+	}
 
 	while (s)
 	{
