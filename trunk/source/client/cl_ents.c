@@ -873,18 +873,24 @@ void CL_AddPacketEntities (frame_t *frame)
 		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) 
 		{
 			//add clear cover
-			ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
-			ent.flags |= RF_TRANSLUCENT;
-			ent.alpha = 0.30;
-			V_AddEntity (&ent);
+			if (!cl_simpleitems->integer)
+			{
+				ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
+				ent.flags |= RF_TRANSLUCENT;
+				ent.alpha = 0.30;
+				V_AddEntity (&ent);
+			}
 		}	
 		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
 		{
 			//add clear cover
-			ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
-			ent.flags |= RF_TRANSLUCENT;
-			ent.alpha = 0.30;
-			V_AddEntity (&ent);
+			if (!cl_simpleitems->integer)
+			{
+				ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
+				ent.flags |= RF_TRANSLUCENT;
+				ent.alpha = 0.30;
+				V_AddEntity (&ent);
+			}
 		}	
 
 		if (s1->modelindex2)
