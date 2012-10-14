@@ -1698,7 +1698,7 @@ R_DrawWorld
 void R_DrawWorld (void)
 {
 	entity_t		ent;
-	static int		old_visframecount;
+	static int		old_visframecount, old_dlightcount;
 	static vec3_t	old_origin, old_angle;
 	vec3_t			delta_origin, delta_angle;
 	
@@ -1792,6 +1792,8 @@ void R_DrawWorld (void)
 	if	(	old_visframecount != r_visframecount ||
 			VectorLength (delta_origin) > 5.0 ||
 			VectorLength (delta_angle) > 2.0 ||
+			r_newrefdef.num_dlights != 0 ||
+			old_dlightcount != 0 ||
 			!r_optimize->integer
 		)
 	{
@@ -1803,6 +1805,7 @@ void R_DrawWorld (void)
 		VectorCopy (r_origin, old_origin);
 		VectorCopy (r_newrefdef.viewangles, old_angle);
 	}
+	old_dlightcount = r_newrefdef.num_dlights;
 	
 	BSP_FlushVBOAccum ();
 	
