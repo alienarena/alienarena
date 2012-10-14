@@ -1701,16 +1701,21 @@ int Draw_GetPalette (void)
 	return 0;
 }
 
+// TODO: have r_newrefdef available before calling these, put r_mirroretxture
+// in that struct, base it on the viewport specified in that struct. (Needed
+// for splitscreen.)
 void R_InitMirrorTextures( void )
 {
 	byte	*data;
 	int		size;
+	int		size_oneside;
 
 	//init the partial screen texture
-	size = 512 * 512 * 4;
+	size_oneside = ceil((512.0f/1080.0f)*(float)viddef.height);
+	size = size_oneside * size_oneside * 4;
 	data = malloc( size );
 	memset( data, 255, size );
-	r_mirrortexture = GL_LoadPic( "***r_mirrortexture***", (byte *)data, 512, 512, it_pic, 32 );
+	r_mirrortexture = GL_LoadPic( "***r_mirrortexture***", (byte *)data, size_oneside, size_oneside, it_pic, 32 );
 	free ( data );
 }
 
