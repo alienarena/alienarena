@@ -926,6 +926,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/quaddama/unit.md2"))
 			{
+				if(cl_simpleitems->value)
+					continue;
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
