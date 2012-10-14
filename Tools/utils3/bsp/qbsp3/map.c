@@ -329,6 +329,15 @@ int	BrushContents (mapbrush_t *b)
 			contents |= CONTENTS_WINDOW;
 		}
 	}
+	
+	if (trans & SURF_NODRAW)
+	{
+		if (contents & CONTENTS_DETAIL)
+		{
+			contents &= ~CONTENTS_SOLID;
+			contents |= CONTENTS_WINDOW;
+		}
+	}
 
 	return contents;
 }
