@@ -1109,7 +1109,9 @@ void R_RenderView (refdef_t *fd)
 		{
 			qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
 			qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
-						0, 0, 0, 256, 512, 512);
+						0, 0, 0, r_mirrortexture->upload_height/2, 
+						r_mirrortexture->upload_width, 
+						r_mirrortexture->upload_height);
 			r_newrefdef.last_mirrorupdate_time = ms;
 		}
 	}
