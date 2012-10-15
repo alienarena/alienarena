@@ -509,7 +509,7 @@ CL_ParseFrame
 void CL_ParseFrame (void)
 {
 	int			cmd;
-	int			len, len2;
+	int			len;
 	frame_t		*old;
 	byte		new_areabits[MAX_MAP_AREAS/8];
 

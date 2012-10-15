@@ -1662,13 +1662,9 @@ int R_Init( void *hinstance, void *hWnd )
 	Com_Printf("...Development Workaround. Low game settings forced.\n");
 #else
 
-#if defined WIN32_VARIANT
-	gl_state.ati = false; //ATI Windows drivers appear to be ok, we don't need to have special cases for them
-#else
-	//always do this check for Linux - ATI drivers are somewhat bugged in regards to shadowmapping and use of shadow2dproj command
+	//always do this check for ATI drivers - they are somewhat bugged in regards to shadowmapping and use of shadow2dproj command
 	if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc."))
-			gl_state.ati = true;
-#endif
+		gl_state.ati = true;
 
 	//load shader programs
 	R_LoadARBPrograms();
