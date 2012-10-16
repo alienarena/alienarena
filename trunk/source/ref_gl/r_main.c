@@ -1105,7 +1105,7 @@ void R_RenderView (refdef_t *fd)
 	{
 		int ms = Sys_Milliseconds ();
 		if (	ms < r_newrefdef.last_mirrorupdate_time || 
-				(ms-r_newrefdef.last_mirrorupdate_time) > 16)
+				(ms-r_newrefdef.last_mirrorupdate_time) >= 16)
 		{
 			qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
 			qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
