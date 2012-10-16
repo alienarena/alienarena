@@ -128,8 +128,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define HEAD_LOSTOP2 54
 #define HEAD_HISTOP2 55
 
-//to do - we eventually want to add contraints for hips, knees, shoulders, elbows, wrists, and head(hi, lo stops)
-
 dWorldID RagDollWorld;
 dSpaceID RagDollSpace;
 
