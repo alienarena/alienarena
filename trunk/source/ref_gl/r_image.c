@@ -1423,7 +1423,7 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 		&& image->width <= 128 && image->height <= 128)
 	{
 		int		x, y;
-		int		i, j, k, k_s, l;
+		int		i, j, k, l;
 		int		texnum;
 
 		texnum = Scrap_AllocBlock (image->width, image->height, &x, &y);

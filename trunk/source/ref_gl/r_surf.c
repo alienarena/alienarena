@@ -1949,9 +1949,6 @@ void R_MarkLeaves (void)
 	
 	for (i=minleaf,leaf=r_worldmodel->leafs+minleaf ; i<=maxleaf ; i++, leaf++)
 	{
-		msurface_t **mark, *surf;
-		int c;
-	
 		cluster = leaf->cluster;
 		if (cluster == -1)
 			continue;

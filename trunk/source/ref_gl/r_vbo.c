@@ -73,7 +73,7 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i;
-	int		l, m, n, o;
+	int		l, m, n;
 	int		trinum;
 	float map[MAX_VBO_XYZs];
 	float map2[MAX_VBO_XYZs];
