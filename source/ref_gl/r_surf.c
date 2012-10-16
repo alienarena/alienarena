@@ -1790,7 +1790,8 @@ void R_DrawWorld (void)
 	if	(	old_visframecount != r_visframecount ||
 			VectorLength (delta_origin) > 5.0 ||
 			VectorLength (delta_angle) > 2.0 ||
-			r_newrefdef.dlights_changed || 
+			r_newrefdef.num_dlights != 0 ||
+			old_dlightcount != 0 ||
 			!r_optimize->integer
 		)
 	{
