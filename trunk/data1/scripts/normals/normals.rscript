@@ -622,6 +622,8 @@ players/martianenforcer/weapon
 		normalmap
 		map2 gfx/beamgunfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/martianwarrior/weapon
@@ -631,6 +633,8 @@ players/martianwarrior/weapon
 		normalmap
 		map2 gfx/beamgunfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/martianoverlord/weapon
@@ -640,6 +644,8 @@ players/martianoverlord/weapon
 		normalmap
 		map2 gfx/beamgunfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/martiancyborg/weapon
@@ -649,6 +655,8 @@ players/martiancyborg/weapon
 		normalmap
 		map2 gfx/beamgunfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/lauren/weapon
@@ -658,6 +666,8 @@ players/lauren/weapon
 		normalmap
 		map2 gfx/blasterfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 players/enforcer/weapon
@@ -667,6 +677,8 @@ players/enforcer/weapon
 		normalmap
 		map2 gfx/blasterfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 players/slashbot/weapon
@@ -676,6 +688,8 @@ players/slashbot/weapon
 		normalmap
 		map2 gfx/blasterfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 players/commander/weapon
@@ -685,6 +699,8 @@ players/commander/weapon
 		normalmap
 		map2 gfx/blasterfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 vehicles/hover/skin
