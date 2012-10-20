@@ -108,7 +108,7 @@ DIST_COMMON = README $(am__configure_deps) $(am__dist_doc_DATA_DIST) \
 	$(nobase_dist_botinfo_DATA) $(nobase_dist_data1_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/game_data.am $(top_srcdir)/config/config.h.in \
-	$(top_srcdir)/configure INSTALL config/compile \
+	$(top_srcdir)/configure COPYING INSTALL config/compile \
 	config/config.guess config/config.sub config/depcomp \
 	config/install-sh config/missing
 subdir = .
@@ -1391,15 +1391,16 @@ nobase_nodist_models_DATA = \
 	data1/models/items/ammo/shells/medium/skin.tga \
 	data1/models/items/ammo/shells/medium/tris.md2 \
 	data1/models/items/ammo/skin_normal.tga \
-	data1/models/items/armor/body/skin.tga \
+	data1/models/items/armor/body/skin.jpg \
 	data1/models/items/armor/body/tris.md2 \
-	data1/models/items/armor/combat/skin.tga \
+	data1/models/items/armor/combat/skin.jpg \
 	data1/models/items/armor/combat/tris.md2 \
-	data1/models/items/armor/jacket/skin.tga \
+	data1/models/items/armor/jacket/skin.jpg \
 	data1/models/items/armor/jacket/tris.md2 \
 	data1/models/items/armor/shard/skin_normal.tga \
 	data1/models/items/armor/shard/skin.tga \
 	data1/models/items/armor/shard/tris.md2 \
+	data1/models/items/armor/skin_fx.tga \
 	data1/models/items/armor/skin_normal.tga \
 	data1/models/items/flags/blue.tga \
 	data1/models/items/flags/flag1.md2 \

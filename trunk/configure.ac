@@ -198,16 +198,17 @@ AC_ARG_WITH([system-libode],
 	[system_ode=no])
 
 #
-# Option for installation of documents to allow for custom
-# documentation installation. So, do not include this in
-#  the status message.
+# Option for disabling installation of documents to allow for custom
+# documentation installation. Normally only useful for distro packagers.
+# Do not put in status message, because  documents probably are being 
+# installed in a custom way.
 #
 AC_ARG_ENABLE([documents],
 	[AS_HELP_STRING([--disable-documents],
 			[Disable document installation (default: no)])],
-	[no_docs=${enableval}],
+	[no_docs=${documents}],
 	[no_docs=no])
-AM_CONDITIONAL([INSTALL_DOCS],[ test "x$no_docs" = "xno" ])
+AM_CONDITIONAL([INSTALL_DOCS],[ test "x${no_docs}" = "xno" ])
 
 #
 # Option for specifying where icon is installed.
