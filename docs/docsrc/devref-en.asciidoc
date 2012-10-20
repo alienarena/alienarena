@@ -383,6 +383,14 @@ INSTALL::
   GNU build/install reference.
 COPYING::
   GNU GPL, Version 2.
+config/compile::
+config/config.guess::
+config/config.sub::
+config/depcomp::
+config/install-sh::
+config/missing::
+  auxiliary shell scripts used by 'configure' and 'Makefiles'
+  
 
 ==== Autotools Generated Files ====
 
@@ -511,10 +519,14 @@ distclean::
 
 Following changes, run:
 
-- +autoreconf --verbose+
+- +autoreconf --verbose --force --install+
 - +./configure --enable-maintainer-mode <other options>+
 - +make+
 - 	+sudo make install+
+
+The '--force' and '--install' options to 'autoreconf' are not usually
+needed. Run 'autoreconf --help' for descriptions. The '--install' option
+copies files to 'm4/' and 'config/'.
 
 There are variations for the 'configure' and 'make install' commands, of course.
 See below for 'configure' options and compiler options.

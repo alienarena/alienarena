@@ -5514,18 +5514,19 @@ fi
 
 
 #
-# Option for installation of documents to allow for custom
-# documentation installation. So, do not include this in
-#  the status message.
+# Option for disabling installation of documents to allow for custom
+# documentation installation. Normally only useful for distro packagers.
+# Do not put in status message, because  documents probably are being
+# installed in a custom way.
 #
 # Check whether --enable-documents was given.
 if test "${enable_documents+set}" = set; then :
-  enableval=$enable_documents; no_docs=${enableval}
+  enableval=$enable_documents; no_docs=${documents}
 else
   no_docs=no
 fi
 
- if  test "x$no_docs" = "xno" ; then
+ if  test "x${no_docs}" = "xno" ; then
   INSTALL_DOCS_TRUE=
   INSTALL_DOCS_FALSE='#'
 else

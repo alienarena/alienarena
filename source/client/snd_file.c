@@ -127,7 +127,7 @@ qboolean ReadWavFile( const char *name, byte *wav, int wavlength,
 	int format;
 	int samples;
 
-	memset( info, 0, sizeof( info ) );
+	memset( info, 0, sizeof(pcminfo_t) );
 
 	if( !wav )
 		return false;
@@ -308,7 +308,7 @@ qboolean ReadVorbisFile( const char *name, byte *pdata, int filelength,
 
 	Com_DPrintf("ReadVorbisFile: %s\n", name );
 
-	memset( info, 0, sizeof( info ) ); // clear return data
+	memset( info, 0, sizeof(pcminfo_t) ); // clear return data
 	*pcmbfr = NULL;
 
 	info->width = 2; // always 16-bit
