@@ -360,9 +360,9 @@ models/items/armor/combat/skin
 	{
 		map models/items/armor/skin_normal.tga
 		normalmap
-		map2 gfx/bluelightning.tga
+		map2 models/items/armor/skin_fx.tga
 		fx
-		map3 gfx/chrome.tga
+		map3 gfx/chrome2.tga
 		cube
 	}
 }
@@ -372,9 +372,9 @@ models/items/armor/body/skin
 	{
 		map models/items/armor/skin_normal.tga
 		normalmap
-		map2 gfx/redlightning.tga
+		map2 models/items/armor/skin_fx.tga
 		fx
-		map3 gfx/chrome.tga
+		map3 gfx/chrome2.tga
 		cube
 	}
 }
@@ -384,9 +384,9 @@ models/items/armor/jacket/skin
 	{
 		map models/items/armor/skin_normal.tga
 		normalmap
-		map2 gfx/greenlightning.tga
+		map2 models/items/armor/skin_fx.tga
 		fx
-		map3 gfx/chrome.tga
+		map3 gfx/chrome2.tga
 		cube
 	}
 }
