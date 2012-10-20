@@ -564,6 +564,7 @@ void SHD_DrawShadowVolume()
 #include "r_lodcalc.h"
 
 //to do - all of this will be replaced by shadowmapping
+extern cvar_t *cl_simpleitems;
 void R_CastShadow(void)
 {
 	int i;
@@ -613,6 +614,9 @@ void R_CastShadow(void)
 			continue;
 
 		if (currentmodel->type != mod_alias)
+			continue;
+		
+		if (cl_simpleitems->integer && currentmodel->simple_texnum != 0)
 			continue;
 
 		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 128))
