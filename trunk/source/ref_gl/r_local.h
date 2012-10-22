@@ -175,6 +175,7 @@ extern	cvar_t	*r_lensflare;
 extern	cvar_t	*r_lensflare_intens;
 extern	cvar_t	*r_drawsun;
 extern  cvar_t	*r_godrays;
+extern  cvar_t	*r_godray_intensity;
 extern	cvar_t	*r_optimize;
 
 extern	cvar_t	*r_hdlightmaps;
@@ -725,9 +726,10 @@ extern GLuint		g_location_drTime;
 extern GLuint		g_location_drParams;
 
 //god rays
-extern GLuint g_location_lightPositionOnScreen;
-extern GLuint g_location_sunTex;
-
+extern GLuint		g_location_lightPositionOnScreen;
+extern GLuint		g_location_sunTex;
+extern GLuint		g_location_godrayScreenAspect;
+extern GLuint		g_location_sunRadius;
 
 //MD2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);

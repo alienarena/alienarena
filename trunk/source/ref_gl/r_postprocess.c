@@ -777,7 +777,7 @@ void R_GLSLGodRays(void)
 	//render occuders simple, textureless
 	//need to set up proper matrix for this view!
 
-	screenaspect = (float)r_newrefdef.width/r_newrefdef.height;
+	screenaspect = (float)r_newrefdef.width/(float)r_newrefdef.height;
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
 
@@ -830,6 +830,9 @@ void R_GLSLGodRays(void)
 
 	glUniform2fARB( g_location_lightPositionOnScreen, fxScreenPos[0], fxScreenPos[1]);
 
+	glUniform1fARB( g_location_godrayScreenAspect, screenaspect);
+    glUniform1fARB( g_location_sunRadius, sun_size*r_godray_intensity->value);
+    
 	//render quad 
 	qglEnable (GL_BLEND);
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE);

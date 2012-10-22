@@ -169,8 +169,10 @@ GLuint		g_location_drTime;
 GLuint		g_location_drParams;
 
 //god rays
-GLuint g_location_lightPositionOnScreen;
-GLuint g_location_sunTex;
+GLuint		g_location_lightPositionOnScreen;
+GLuint		g_location_sunTex;
+GLuint		g_location_godrayScreenAspect;
+GLuint		g_location_sunRadius;
 
 //doesn't work with ARB shaders, unfortunately, due to the #comments
 #define STRINGIFY(...) #__VA_ARGS__
@@ -1743,6 +1745,8 @@ static char rgodrays_vertex_program[] = "#version 120\n" STRINGIFY (
 static char rgodrays_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform vec2 lightPositionOnScreen;
 	uniform sampler2D sunTexture;
+	uniform float aspectRatio; //width/height
+	uniform float sunRadius;
 
 	//note - these could be made uniforms to control externally
 	const float exposure = 0.0034;
@@ -1755,18 +1759,37 @@ static char rgodrays_fragment_program[] = "#version 120\n" STRINGIFY (
 	{
 		vec2 deltaTextCoord = vec2( gl_TexCoord[0].st - lightPositionOnScreen.xy );
 		vec2 textCoo = gl_TexCoord[0].st;
+		float adjustedLength = length (vec2 (deltaTextCoord.x*aspectRatio, deltaTextCoord.y));
 		deltaTextCoord *= 1.0 /  float(NUM_SAMPLES) * density;
 		float illuminationDecay = 1.0;
 
-		for(int i = 0; i < NUM_SAMPLES; i++)
+		int lim = NUM_SAMPLES;
+
+		if (adjustedLength > sunRadius)
+		{		
+			//first simulate the part of the loop for which we won't get any
+			//samples anyway
+			float ratio = (adjustedLength-sunRadius)/adjustedLength;
+			lim = int (float(lim)*ratio);
+
+			textCoo -= deltaTextCoord*lim;
+			illuminationDecay *= pow (decay, lim);
+
+			//next set up the following loop so it gets the correct number of
+			//samples.
+			lim = NUM_SAMPLES-lim;
+		}
+
+		for(int i = 0; i < lim; i++)
 		{
 			textCoo -= deltaTextCoord;
+			
 			vec4 sample = texture2D(sunTexture, textCoo );
-			
+
 			sample *= illuminationDecay * weight;
-			
+
 			gl_FragColor += sample;
-			
+
 			illuminationDecay *= decay;
 		}
 		gl_FragColor *= exposure;
@@ -2492,6 +2515,8 @@ void R_LoadGLSLPrograms(void)
 
 		g_location_lightPositionOnScreen = glGetUniformLocationARB( g_godraysprogramObj, "lightPositionOnScreen" );
 		g_location_sunTex = glGetUniformLocationARB( g_godraysprogramObj, "sunTexture");
+		g_location_godrayScreenAspect = glGetUniformLocationARB( g_godraysprogramObj, "aspectRatio");
+		g_location_sunRadius = glGetUniformLocationARB( g_godraysprogramObj, "sunRadius");
 	}
 	else
 	{
