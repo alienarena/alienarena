@@ -1582,15 +1582,34 @@ static char fb_fragment_program[] = "#version 120\n" STRINGIFY (
 
 //GAUSSIAN BLUR EFFECTS
 static char blur_vertex_program[] = "#version 120\n" STRINGIFY (
+	varying vec2	texcoord1, texcoord2, texcoord3,
+					texcoord4, texcoord5, texcoord6,
+					texcoord7, texcoord8, texcoord9;
+	uniform vec2	ScaleU;
+	
 	void main()
 	{
 		gl_Position = ftransform();
-		gl_TexCoord[0] =  gl_MultiTexCoord0;
+		
+		// If we do all this math here, and let GLSL do its built-in
+		// interpolation of varying variables, the math still comes out right,
+		// but it's faster.
+		texcoord1 = gl_MultiTexCoord0.xy-4.0*ScaleU;
+		texcoord2 = gl_MultiTexCoord0.xy-3.0*ScaleU;
+		texcoord3 = gl_MultiTexCoord0.xy-2.0*ScaleU;
+		texcoord4 = gl_MultiTexCoord0.xy-ScaleU;
+		texcoord5 = gl_MultiTexCoord0.xy;
+		texcoord6 = gl_MultiTexCoord0.xy+ScaleU;
+		texcoord7 = gl_MultiTexCoord0.xy+2.0*ScaleU;
+		texcoord8 = gl_MultiTexCoord0.xy+3.0*ScaleU;
+		texcoord9 = gl_MultiTexCoord0.xy+4.0*ScaleU;
 	}
 );
 
 static char blur_fragment_program[] = "#version 120\n" STRINGIFY (
-	uniform vec2 ScaleU;
+	varying vec2	texcoord1, texcoord2, texcoord3,
+					texcoord4, texcoord5, texcoord6,
+					texcoord7, texcoord8, texcoord9;
 	uniform sampler2D textureSource;
 
 	void main()
@@ -1598,15 +1617,15 @@ static char blur_fragment_program[] = "#version 120\n" STRINGIFY (
 	   vec4 sum = vec4(0.0);
 
 	   // take nine samples
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 4.0*ScaleU.x, gl_TexCoord[0].y - 4.0*ScaleU.y)) * 0.05;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 3.0*ScaleU.x, gl_TexCoord[0].y - 3.0*ScaleU.y)) * 0.09;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 2.0*ScaleU.x, gl_TexCoord[0].y - 2.0*ScaleU.y)) * 0.12;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - ScaleU.x, gl_TexCoord[0].y - ScaleU.y)) * 0.15;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y)) * 0.16;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + ScaleU.x, gl_TexCoord[0].y + ScaleU.y)) * 0.15;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 2.0*ScaleU.x, gl_TexCoord[0].y + 2.0*ScaleU.y)) * 0.12;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 3.0*ScaleU.x, gl_TexCoord[0].y + 3.0*ScaleU.y)) * 0.09;
-	   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 4.0*ScaleU.x, gl_TexCoord[0].y + 4.0*ScaleU.y)) * 0.05;
+	   sum += texture2D(textureSource, texcoord1) * 0.05;
+	   sum += texture2D(textureSource, texcoord2) * 0.09;
+	   sum += texture2D(textureSource, texcoord3) * 0.12;
+	   sum += texture2D(textureSource, texcoord4) * 0.15;
+	   sum += texture2D(textureSource, texcoord5) * 0.16;
+	   sum += texture2D(textureSource, texcoord6) * 0.15;
+	   sum += texture2D(textureSource, texcoord7) * 0.12;
+	   sum += texture2D(textureSource, texcoord8) * 0.09;
+	   sum += texture2D(textureSource, texcoord9) * 0.05;
 
 	   gl_FragColor = sum;
 	}

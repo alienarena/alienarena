@@ -744,7 +744,7 @@ void R_GLSLGodRays(void)
 	vec2_t fxScreenPos;
 	vec3_t origin = {0, 0, 0};
 
-	if(!gl_glsl_postprocess->integer || !r_godrays->integer)
+	if(!gl_glsl_postprocess->integer || !r_godrays->integer || !r_drawsun->integer)
 		return;
 
 	if (R_CullOrigin(sun_origin))
