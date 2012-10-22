@@ -69,7 +69,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;USE_ZLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <AdditionalIncludeDirectories>C:\alienarena_w32\Tools\utils3\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
@@ -83,6 +83,9 @@
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -101,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\bsp\qrad3\qrad.h" />
+    <ClInclude Include="..\..\bsp\qrad3\zlib.h" />
     <ClInclude Include="..\..\common\bspfile.h" />
     <ClInclude Include="..\..\common\cmdlib.h" />
     <ClInclude Include="..\..\common\lbmlib.h" />
@@ -110,6 +114,9 @@
     <ClInclude Include="..\..\common\qfiles.h" />
     <ClInclude Include="..\..\common\scriplib.h" />
     <ClInclude Include="..\..\common\threads.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\bsp\qrad3\zlib.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
