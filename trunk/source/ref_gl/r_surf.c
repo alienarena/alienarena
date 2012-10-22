@@ -441,6 +441,8 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 				}
 			}
 			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
+			qglEnable (GL_BLEND);
+			GL_TexEnv( GL_MODULATE );
 		}
 		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
 		{
