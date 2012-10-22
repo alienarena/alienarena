@@ -1698,9 +1698,11 @@ R_DrawWorld
 void R_DrawWorld (void)
 {
 	entity_t		ent;
-	static int		old_visframecount, old_dlightcount;
+	static int		old_visframecount, old_dlightcount, last_bsp_time;
 	static vec3_t	old_origin, old_angle;
 	vec3_t			delta_origin, delta_angle;
+	qboolean		do_bsp;
+	int				cur_ms;
 	
 	if (!r_drawworld->integer)
 		return;
@@ -1789,13 +1791,32 @@ void R_DrawWorld (void)
 	
 	VectorSubtract (r_origin, old_origin, delta_origin);
 	VectorSubtract (r_newrefdef.viewangles, old_angle, delta_angle);
-	if	(	old_visframecount != r_visframecount ||
-			VectorLength (delta_origin) > 5.0 ||
-			VectorLength (delta_angle) > 2.0 ||
-			r_newrefdef.num_dlights != 0 ||
-			old_dlightcount != 0 ||
-			!r_optimize->integer
-		)
+	do_bsp =	old_visframecount != r_visframecount ||
+				VectorLength (delta_origin) > 5.0 ||
+				VectorLength (delta_angle) > 2.0 ||
+				r_newrefdef.num_dlights != 0 ||
+				old_dlightcount != 0 ||
+				!r_optimize->integer;
+	
+	cur_ms = Sys_Milliseconds ();
+	
+	// After a certain amount of time, increase the sensitivity to movement
+	// and angle. If we go too long without re-recursing the BSP tree, it 
+	// means the player is either moving very slowly or not moving at all. If
+	// the player is moving slowly enough, it can catch the r_optimize code
+	// napping and cause artefacts, so we should be extra vigilant just in 
+	// case. Something you basically have to do on purpose, but we go the 
+	// extra mile.
+	if (r_optimize->integer && !do_bsp)
+	{
+		// be sure to handle integer overflow of the millisecond counter
+		if (cur_ms < last_bsp_time || last_bsp_time+100 < cur_ms)
+			do_bsp =	VectorLength (delta_origin) > 0.5 ||
+						VectorLength (delta_angle) > 0.2;
+			
+	}
+	
+	if (do_bsp)
 	{
 		R_ClearSkyBox ();
 		BSP_ClearWorldTextureChains ();
@@ -1804,6 +1825,7 @@ void R_DrawWorld (void)
 		old_visframecount = r_visframecount;
 		VectorCopy (r_origin, old_origin);
 		VectorCopy (r_newrefdef.viewangles, old_angle);
+		last_bsp_time = cur_ms;
 	}
 	old_dlightcount = r_newrefdef.num_dlights;
 	
