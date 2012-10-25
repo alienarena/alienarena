@@ -1107,6 +1107,9 @@ int main (int argc, char **argv)
 		else
 			break;
 	}
+	
+	if (doing_blur && refine_amt < 8)
+		printf ("Recommend refine setting of 8 or 16 for -blur!\n");
 
     printf("-------------------------\n");
 	printf("ambient   : %f\n", ambient );
@@ -1119,8 +1122,11 @@ int main (int argc, char **argv)
 	printf("bounce    : %d\n", numbounce );
 	printf("radmin    : %f\n", patch_cutoff );
 	printf("subdiv    : %f\n", subdiv );
+	printf("refine    : %d\n", refine_amt );
 	if ( extrasamples )
 		printf("with extra samples\n");
+	if ( doing_blur )
+		printf("with blurring\n");
     printf("-------------------------\n");
 
 //    if (memory)

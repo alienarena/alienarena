@@ -1752,6 +1752,7 @@ void BlurFace (int facenum)
 	facelight_t	*fl;
 	byte		*src_buf, *dest_buf, *src, *dest;
 	int			width, height, s, t;
+	int			blur_radius;
 	
 	f = &dfaces[facenum];
 	fl = &facelight[facenum];
@@ -1760,6 +1761,11 @@ void BlurFace (int facenum)
 	
 	width = lfacelookups[facenum].width;
 	height = lfacelookups[facenum].height;
+	
+	if (refine_amt == 16)
+		blur_radius = 2;
+	else
+		blur_radius = 1;
 	
 	for (t = 0; t < height; t++)
 	{
@@ -1770,9 +1776,19 @@ void BlurFace (int facenum)
 			
 			if (fl->blur_amt[t*width+s].num_lights == 0)
 			{
-				//special case
+				// Special case-- this is for samples that have no direct 
+				// illumination, and are only lit up by radiosity bounces, if
+				// at all. Since radiosity isn't done at a high enough 
+				// resolution to actually cast shadows, it makes no sense to
+				// factor radiosity bouncing into the weighted average light
+				// distance, so we don't. Which means, for this sample, there
+				// *is* no weighted average light distance, so we don't do any
+				// blurring.
 				dest = &dest_buf[(t*width+s)*3];
-				dest[0] = dest[1] = dest[2] = 0;
+				src = &src_buf[(t*width+s)*3];
+				*dest++ = *src++;
+				*dest++ = *src++;
+				*dest++ = *src++;
 				continue;
 			}
 			
@@ -1799,9 +1815,9 @@ void BlurFace (int facenum)
 				SAMPLE((s+sd),(t+td),blur_avg/sqrt(sd*sd+td*td))\
 			}
 			
-			for (i = -2; i < 3; i++)
+			for (i = -blur_radius; i < blur_radius+1; i++)
 			{
-				for (j = -2; j < 3; j++)
+				for (j = -blur_radius; j < blur_radius+1; j++)
 				{
 					if (i != 0 || j != 0)
 					{
