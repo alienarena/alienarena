@@ -35,8 +35,7 @@ void MakeTnode (int nodenum)
 {
 	tnode_t			*t;
 	dplane_t		*plane;
-	dface_t			*face;
-	int				i, j;
+	int				i;
 	dnode_t 		*node;
 	
 	t = tnode_p++;
@@ -187,8 +186,8 @@ PointInBrush
 Adapted from CM_ClipBoxToBrush
 ================
 */
-int PointInBrush (vec3_t p1, vec3_t p2, vec3_t pt,
-					  dbrush_t *brush, float *fraction, int curface)
+int PointInBrush (const vec3_t p1, const vec3_t p2, vec3_t pt,
+					const dbrush_t *brush, float *fraction, int curface)
 {
 	int			i;
 	dplane_t	*plane, *clipplane;
@@ -276,12 +275,11 @@ GetNodeFace
 Adapted from CM_TraceToLeaf
 =============
 */
-int GetNodeFace (int leafnum, vec3_t start, vec3_t end, vec3_t pt)
+int GetNodeFace (int leafnum, const vec3_t start, const vec3_t end, vec3_t pt)
 {
 	int			k;
 	int			brushnum;
 	dleaf_t		*leaf;
-	dbrush_t	*b;
 	float 		fraction;
 	int 		curface;
 
@@ -292,12 +290,19 @@ int GetNodeFace (int leafnum, vec3_t start, vec3_t end, vec3_t pt)
 	for (k=0 ; k<leaf->numleafbrushes ; k++)
 	{
 		brushnum = dleafbrushes[leaf->firstleafbrush+k];
-		b = &dbrushes[brushnum];
-		curface = PointInBrush (start, end, pt, b, &fraction, curface);
+		curface = PointInBrush (start, end, pt, &dbrushes[brushnum], &fraction, curface);
 		if (!fraction)
 			return curface;
 	}
 	return curface;
+}
+
+// There is a standard function roundf() which we can't use because Microsoft
+// doesn't support C99. On the plus side, we have the luxury of assuming 
+// nonnegative numbers.
+inline int qround (float in)
+{
+	return (int)in+((int)(in+in)%2);
 }
 
 /*
@@ -312,11 +317,11 @@ const float opaque[4] = {0.0, 0.0, 0.0, 1.0};
 const float transparent[4] = {0.0, 0.0, 0.0, 0.0};
 inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 {
+	float		fs, ft;
 	int 		s, t, smax, tmax, i;
 	int			texnum;
 	vec3_t		point, start_to_point, start_to_stop;
 	texinfo_t 	*tex;
-	float		*res;
 	
 	texnum = GetNodeFace (node_leaf, orig_start, orig_stop, point);
 	VectorSubtract(point, orig_start, start_to_point);
@@ -333,19 +338,18 @@ inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 	smax = texture_sizes[texnum][0];
 	tmax = texture_sizes[texnum][1];
 	
-	s = DotProduct (point, tex->vecs[0]) + tex->vecs[0][3];
-	while (s < 0)
-		s += smax;
-	s %= smax;
+	fs = DotProduct (point, tex->vecs[0]) + tex->vecs[0][3];
+	while (fs < 0)
+		fs += smax;
+	s = qround(fs)%smax;
 	
-	t = DotProduct (point, tex->vecs[1]) + tex->vecs[1][3];
-	while (t < 0)
-		t += tmax;
-	t %= tmax;
+	ft = DotProduct (point, tex->vecs[1]) + tex->vecs[1][3];
+	while (ft < 0)
+		ft += tmax;
+	t = qround(ft)%tmax;
 
 	
-	res = texture_data[texnum]+(t*smax+s)*4;
-	return res;
+	return texture_data[texnum]+(t*smax+s)*4;
 }
 
 //==========================================================
