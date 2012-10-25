@@ -1098,7 +1098,15 @@ void ClientEndServerFrame (edict_t *ent)
 	current_client = ent->client;
 	
 	if (ent->client->chase_target != NULL && ent->client->resp.spectator != 0)
+	{
 		ent->redirect_number = ent->client->chase_target->s.number;
+		// This isn't needed to make spectators follow the chase target 
+		// around; the server code does that already. This is so that when you
+		// un-follow someone, you're dropped off right where they were. Due to
+		// the weird way bots are done, there's no easy way to copy view
+		// angles over.
+		VectorCopy (ent->client->chase_target->s.origin, ent->s.origin);
+	}
 	else
 		ent->redirect_number = ent->s.number;
 
