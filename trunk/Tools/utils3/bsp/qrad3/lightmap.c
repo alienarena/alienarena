@@ -1291,7 +1291,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 		color[i] *= occluded[i];
 	}
 	
-	*lightweight = VectorLength (color_nodist);
+	*lightweight = VectorLength (color_nodist)/sqrt(3.0);
 }
 
 /*
@@ -1794,7 +1794,7 @@ void BlurFace (int facenum)
 			
 			//blurring by distance needs a little work
 			blur_avg = sqrt(sqrt(fl->blur_amt[t*width+s].total_blur/(double)fl->blur_amt[t*width+s].num_lights));
-			nsamples = 4.0*(1.0-blur_avg);
+			nsamples = 2.0*(2.0-blur_avg);
 			
 			src = &src_buf[(t*width+s)*3];
 			red = nsamples*src[0];
@@ -1809,10 +1809,10 @@ void BlurFace (int facenum)
 			blue += weight*src[2];
 			
 #define SAMPLES(sd,td) \
-			if (	((sd < 0 && s+sd >= 0) || (sd > 0 && s < width-sd) || !sd) &&\
-					((td < 0 && t+td >= 0) || (td > 0 && t < height-td) || !td)) \
+			if (	((sd < 0 && s+sd >= 0) || (sd > 0 && s+sd < width) || !sd) &&\
+					((td < 0 && t+td >= 0) || (td > 0 && t+td < height) || !td)) \
 			{\
-				SAMPLE((s+sd),(t+td),blur_avg/sqrt(sd*sd+td*td))\
+				SAMPLE((s+sd),(t+td),(blur_avg/sqrt(sd*sd+td*td)))\
 			}
 			
 			for (i = -blur_radius; i < blur_radius+1; i++)
