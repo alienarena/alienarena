@@ -278,56 +278,34 @@ void DrawTextureChains (void)
 
     c_visible_textures = 0;
 
-    if ( !qglSelectTextureARB && !qglActiveTextureARB )
+    for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
     {
-        for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+        if (!image->registration_sequence)
+            continue;
+        if (!image->texturechain)
+            continue;
+        c_visible_textures++;
+
+        for ( s = image->texturechain; s ; s=s->texturechain)
         {
-            if (!image->registration_sequence)
-                continue;
-            s = image->texturechain;
-            if (!s)
-                continue;
-            c_visible_textures++;
-
-            for ( ; s ; s=s->texturechain)
+            if ( !( s->iflags & ISURF_DRAWTURB ) )
                 BSP_RenderBrushPoly (s);
-
-            image->texturechain = NULL;
         }
     }
-    else
+
+    GL_EnableMultitexture( false );
+    for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
     {
-        for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+        if (!image->registration_sequence)
+            continue;
+        s = image->texturechain;
+        if (!s)
+            continue;
+
+        for ( ; s ; s=s->texturechain)
         {
-            if (!image->registration_sequence)
-                continue;
-            if (!image->texturechain)
-                continue;
-            c_visible_textures++;
-
-            for ( s = image->texturechain; s ; s=s->texturechain)
-            {
-                if ( !( s->iflags & ISURF_DRAWTURB ) )
-                    BSP_RenderBrushPoly (s);
-            }
-        }
-
-        GL_EnableMultitexture( false );
-        for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
-        {
-            if (!image->registration_sequence)
-                continue;
-            s = image->texturechain;
-            if (!s)
-                continue;
-
-            for ( ; s ; s=s->texturechain)
-            {
-                if ( s->iflags & ISURF_DRAWTURB )
-                    BSP_RenderBrushPoly (s);
-            }
-
-            image->texturechain = NULL;
+            if ( s->iflags & ISURF_DRAWTURB )
+                BSP_RenderBrushPoly (s);
         }
     }
 
@@ -1136,6 +1114,7 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 void BSP_ClearWorldTextureChains (void)
 {
 	int i;
+	image_t     *image;
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
@@ -1143,6 +1122,12 @@ void BSP_ClearWorldTextureChains (void)
     	currentmodel->unique_texinfo[i]->w_glsl_surfaces = NULL;
     	currentmodel->unique_texinfo[i]->w_glsl_dynamic_surfaces = NULL;
     }
+    
+    for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+    {
+    	image->texturechain = NULL;
+    }
+    
     r_alpha_surfaces = NULL;
     r_rscript_surfaces = NULL;
 }
