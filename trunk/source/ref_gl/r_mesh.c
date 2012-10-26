@@ -1012,6 +1012,17 @@ static qboolean MD2_CullModel( vec3_t bbox[8] )
 	}
 }
 
+void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3] )
+{
+    int i;
+    for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4)
+        {
+            lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
+            lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
+            lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
+        }
+}
+
 /*
 =============
 MD2_DrawFrame - standard md2 rendering
@@ -1116,6 +1127,19 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
 			frontv[i] = frontlerp*frame->scale[i];
 			backv[i] = backlerp*oldframe->scale[i];
+		}
+
+		if(currententity->flags & RF_VIEWERMODEL) 
+		{ 
+			float   *lerp;
+			//lerp the vertices for self shadows, and leave
+			if(gl_shadowmaps->integer) {
+				lerp = s_lerped[0];
+				MD2_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
+				return;
+			}
+			else
+				return;
 		}
 	}
 
