@@ -80,7 +80,7 @@ void R_InitImageSubsystem(void)
 	}
 	else
 	{
-		Com_Printf ("...GL_ARB_multitexture not found\n" );
+		Com_Error (ERR_FATAL, "...GL_ARB_multitexture not found\n" );
 	}
 	
 	gl_config.mtexcombine = false;
