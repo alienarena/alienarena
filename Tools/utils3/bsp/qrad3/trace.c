@@ -297,14 +297,6 @@ int GetNodeFace (int leafnum, const vec3_t start, const vec3_t end, vec3_t pt)
 	return curface;
 }
 
-// There is a standard function roundf() which we can't use because Microsoft
-// doesn't support C99. On the plus side, we have the luxury of assuming 
-// nonnegative numbers.
-inline int qround (float in)
-{
-	return (int)in+((int)(in+in)%2);
-}
-
 /*
 =============
 GetRGBASample
@@ -317,7 +309,7 @@ const float opaque[4] = {0.0, 0.0, 0.0, 1.0};
 const float transparent[4] = {0.0, 0.0, 0.0, 0.0};
 inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 {
-	float		fs, ft;
+	float		fs, 	ft;
 	int 		s, t, smax, tmax, i;
 	int			texnum;
 	vec3_t		point, start_to_point, start_to_stop;
@@ -341,12 +333,12 @@ inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
 	fs = DotProduct (point, tex->vecs[0]) + tex->vecs[0][3];
 	while (fs < 0)
 		fs += smax;
-	s = qround(fs)%smax;
+	s = (int)fs%smax;
 	
 	ft = DotProduct (point, tex->vecs[1]) + tex->vecs[1][3];
 	while (ft < 0)
 		ft += tmax;
-	t = qround(ft)%tmax;
+	t = (int)ft%tmax;
 
 	
 	return texture_data[texnum]+(t*smax+s)*4;
