@@ -710,6 +710,8 @@ vehicles/hover/skin
 		normalmap
 		map2 vehicles/hover/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 vehicles/bomber/skin
@@ -719,6 +721,8 @@ vehicles/bomber/skin
 		normalmap
 		map2 vehicles/bomber/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 vehicles/strafer/skin
@@ -728,6 +732,8 @@ vehicles/strafer/skin
 		normalmap
 		map2 vehicles/strafer/skin_fx.tga
 		glow
+		map3 gfx/mirrorspec.tga
+		cube
 	}
 }
 vehicles/hover/console
