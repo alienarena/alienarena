@@ -162,11 +162,10 @@ void qprintf (char *format, ...)
 }
 
 /*
- * Simplified (and simple minded) path determination
+ * Path determination
  *
  * assumes
- *   .map/.bsp is in current working directory
- *   moddir is parent of cwd
+ *   moddir is parent of whatever directory contains the .map/.bsp
  *   gamedir is parent of moddir
  *   qdir is parent of gamedir
  */
@@ -176,9 +175,30 @@ char moddir[1024] = "";
 
 void SetQdirFromPath( char *path )
 {
-	char cwd_map[258];
+	char cwd_map[512];
+	char *lastslash;
+	
+	memset (cwd_map, 0, sizeof(cwd_map));
+	strncpy (cwd_map, path, sizeof(cwd_map)-1);
+	
+#ifdef WIN32
+	lastslash = strrchr (cwd_map, '\\');
+	// I believe Win32 can use either slash type. -Max
+	if (lastslash == NULL)
+#endif
+	lastslash = strrchr (cwd_map, '/');
 
-	Q_getwd( cwd_map ); // appends path separator
+	if (lastslash == NULL)
+	{
+		// no slashes: CWD
+		Q_getwd( cwd_map ); // appends path separator
+	}
+	else
+	{
+		// get rid of everything after last path separator
+		lastslash++;
+		*lastslash = '\0';
+	}
 
 	strcpy( moddir, cwd_map );
 #ifdef WIN32
