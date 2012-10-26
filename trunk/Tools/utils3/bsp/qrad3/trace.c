@@ -307,7 +307,7 @@ polygon.
 */
 const float opaque[4] = {0.0, 0.0, 0.0, 1.0};
 const float transparent[4] = {0.0, 0.0, 0.0, 0.0};
-inline float *GetRGBASample (int node_leaf, vec3_t orig_start, vec3_t orig_stop)
+inline const float *GetRGBASample (int node_leaf, const vec3_t orig_start, const vec3_t orig_stop)
 {
 	float		fs, 	ft;
 	int 		s, t, smax, tmax, i;
@@ -365,7 +365,7 @@ re_test:
 	r = 0;
 	if (node & (1<<31))
 	{
-		float *rgba_sample;
+		const float *rgba_sample;
 		float occluded_len_squared = 0;
 		if ((r = node & ~(1<<31)) != CONTENTS_WINDOW)
 		{
@@ -434,7 +434,7 @@ re_test:
 	mid[2] = start[2] + (stop[2] - start[2])*frac;
 
 
-    if (r = TestLine_r_texcheck (tnode->children[side], tnode->children_leaf[side], orig_start, orig_stop, start, mid, occluded))
+    if ((r = TestLine_r_texcheck (tnode->children[side], tnode->children_leaf[side], orig_start, orig_stop, start, mid, occluded)))
 		return r;
 
     node = tnode->children[!side];
@@ -515,7 +515,7 @@ re_test:
 	mid[2] = start[2] + (stop[2] - start[2])*frac;
 
 
-    if (r = TestLine_r (tnode->children[side], start, mid))
+    if ((r = TestLine_r (tnode->children[side], start, mid)))
 		return r;
 
     node = tnode->children[!side];
