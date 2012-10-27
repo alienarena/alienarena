@@ -100,8 +100,6 @@ typedef struct rs_stage_s
 	image_t					*texture3;				// texture for combining(GLSL)
 	char					name3[MAX_OSPATH];		// texture name
 
-	char					model[MAX_OSPATH];		// name of model
-	
 	rs_cond_val_t			*condv;			// conditional expression
 	
 	anim_stage_t			*anim_stage;	// first animation stage
@@ -123,11 +121,7 @@ typedef struct rs_stage_s
 
 	qboolean				depthhack;		// fake zdepth
 
-	vec3_t					origin;			//origin for models;
-	vec3_t					angle;			//angles for models;
 	rs_frames_t				frames;			//frames
-
-	qboolean				dynamic;		// dynamic texture
 
 	qboolean				envmap;			// fake envmapping - spheremapping
 	qboolean				lightmap;		// lightmap this stage?
