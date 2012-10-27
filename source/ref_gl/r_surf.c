@@ -514,19 +514,19 @@ typedef struct vbobatch_s {
 							// "defragmenting" the array, but whatever.
 int num_vbo_batches; 
 vbobatch_t vbobatch_buffer[MAX_VBO_BATCHES];
-vbobatch_t *first_vbobatch;
+vbobatch_t first_vbobatch[] = {{-1, -1, NULL, NULL}};
 
 static inline void BSP_ClearVBOAccum (void)
 {
 	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
 	num_vbo_batches = 0;
-	first_vbobatch = NULL;
+	first_vbobatch->next = NULL;
 }
 
 int c_vbo_batches;
 static inline void BSP_FlushVBOAccum (void)
 {
-	vbobatch_t *batch = first_vbobatch;
+	vbobatch_t *batch = first_vbobatch->next;
 	
 	if (!batch)
 		return;
@@ -550,12 +550,13 @@ static inline void BSP_FlushVBOAccum (void)
 
 static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 {
-	vbobatch_t *batch = first_vbobatch;
+	vbobatch_t *batch = first_vbobatch->next;
 	vbobatch_t *new;
 	
 	if (!batch)
 	{
-		batch = first_vbobatch = vbobatch_buffer;
+		batch = first_vbobatch->next = vbobatch_buffer;
+		batch->prev = first_vbobatch;
 		batch->first_vert = first_vert;
 		batch->last_vert = last_vert;
 		num_vbo_batches++;
@@ -592,10 +593,7 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 			batch->first_vert = batch->prev->first_vert;
 			if (batch->prev == &vbobatch_buffer[num_vbo_batches-1])
 				num_vbo_batches--;
-			if (batch->prev->prev)
-				batch->prev->prev->next = batch;
-			else
-				first_vbobatch = batch;
+			batch->prev->prev->next = batch;
 			batch->prev = batch->prev->prev;
 		}
 	}
@@ -615,10 +613,7 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 		new = &vbobatch_buffer[num_vbo_batches++];
 		new->next = batch;
 		new->prev = batch->prev;
-		if (new->prev)
-			new->prev->next = new;
-		else
-			first_vbobatch = new;
+		new->prev->next = new;
 		batch->prev = new;
 		new->first_vert = first_vert;
 		new->last_vert = last_vert;
