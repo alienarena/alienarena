@@ -204,10 +204,6 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->scroll.typeX = 0;
 	stage->scroll.typeY = 0;
 
-	stage->frames.enabled = false;
-	stage->frames.start = 0;
-	stage->frames.end = 0;
-
 	stage->rot_speed = 0;
 
 	stage->texture = NULL;
@@ -562,20 +558,6 @@ void rs_stage_colormap (rs_stage_t *stage, char **token)
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->colormap.blue = atof(*token);
-}
-
-void rs_stage_frames (rs_stage_t *stage, char **token)
-{
-	stage->frames.enabled = true;
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->frames.speed = atof(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->frames.start = atoi(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->frames.end = atoi(*token);
 }
 
 void rs_stage_scroll (rs_stage_t *stage, char **token)
@@ -962,7 +944,6 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"map2",			&rs_stage_map2			},
 	{	"map3",			&rs_stage_map3			},
 	{	"scroll",		&rs_stage_scroll		},
-	{	"frames",		&rs_stage_frames		},
 	{	"blendfunc",	&rs_stage_blendfunc		},
 	{	"alphashift",	&rs_stage_alphashift	},
 	{	"rand",			&rs_stage_random		},
@@ -991,6 +972,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	
 	// Depreciated stuff
 	{	"model",		&rs_stage_consume1		},
+	{	"frames",		&rs_stage_consume3		},
 	{	"origin",		&rs_stage_consume3		},
 	{	"angle",		&rs_stage_consume3		},
 	{	"dynamic",		&rs_stage_consume1		},

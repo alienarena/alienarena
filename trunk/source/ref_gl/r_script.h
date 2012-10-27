@@ -59,13 +59,6 @@ typedef struct
 	float		red, green, blue;	// colors - duh!
 } rs_colormap_t;
 
-typedef struct
-{
-	qboolean enabled;
-	float speed;
-	int	start, end;
-} rs_frames_t;
-
 //conditional operation types
 typedef enum
 {
@@ -120,8 +113,6 @@ typedef struct rs_stage_s
 	float					rot_speed;		// rotate speed (0 for no rotate);
 
 	qboolean				depthhack;		// fake zdepth
-
-	rs_frames_t				frames;			//frames
 
 	qboolean				envmap;			// fake envmapping - spheremapping
 	qboolean				lightmap;		// lightmap this stage?
