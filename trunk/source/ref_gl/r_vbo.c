@@ -141,8 +141,8 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 
 void VB_BuildWorldVBO(void)
 {
-	msurface_t *surf;
-	int i;
+	msurface_t *surf, *surfs;
+	int i, firstsurf, lastsurf;
 	int num_vertexes = totalVBObufferSize/7;
 	
 	currVertexNum = currElemNum = 0;
@@ -155,6 +155,10 @@ void VB_BuildWorldVBO(void)
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
+	// just to keep the lines of code short
+	surfs = r_worldmodel->surfaces;
+	lastsurf = r_worldmodel->nummodelsurfaces+r_worldmodel->firstmodelsurface;
+	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
         if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
@@ -164,10 +168,19 @@ void VB_BuildWorldVBO(void)
         if	(	TexinfoIsTranslucent(currentmodel->unique_texinfo[i]) && 
         		!TexinfoIsAlphaBlended(currentmodel->unique_texinfo[i]))
             continue;
-		for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
+		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
 			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-				    (surf->iflags & ISURF_DRAWTURB))
+				    (surf->iflags & ISURF_DRAWTURB) ||
+				    (surf->iflags & ISURF_PLANEBACK))
+				continue;
+			VB_BuildSurfaceVBO(surf);
+		}
+		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
+		{
+			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
+				    (surf->iflags & ISURF_DRAWTURB) ||
+				    !(surf->iflags & ISURF_PLANEBACK))
 				continue;
 			VB_BuildSurfaceVBO(surf);
 		}
