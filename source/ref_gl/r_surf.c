@@ -505,7 +505,7 @@ float		*r_currTangentSpaceTransform;
 // lots of malloc/free calls.
 typedef struct vbobatch_s {
 	int					first_vert, last_vert;
-	struct vbobatch_s 	*next, *prev;
+	struct vbobatch_s 	*next;
 } vbobatch_t;
 
 #define MAX_VBO_BATCHES 100	// 100 ought to be enough. If we run out, we can 
@@ -514,7 +514,7 @@ typedef struct vbobatch_s {
 							// "defragmenting" the array, but whatever.
 int num_vbo_batches; 
 vbobatch_t vbobatch_buffer[MAX_VBO_BATCHES];
-vbobatch_t first_vbobatch[] = {{-1, -1, NULL, NULL}};
+vbobatch_t first_vbobatch[] = {{-1, -1, NULL}};
 
 static inline void BSP_ClearVBOAccum (void)
 {
@@ -550,13 +550,12 @@ static inline void BSP_FlushVBOAccum (void)
 
 static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 {
-	vbobatch_t *batch = first_vbobatch->next;
+	vbobatch_t *batch = first_vbobatch->next, *prev = first_vbobatch;
 	vbobatch_t *new;
 	
 	if (!batch)
 	{
 		batch = first_vbobatch->next = vbobatch_buffer;
-		batch->prev = first_vbobatch;
 		batch->first_vert = first_vert;
 		batch->last_vert = last_vert;
 		num_vbo_batches++;
@@ -569,12 +568,20 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 	// you're more likely to merge something.
 	
 	while (batch->next && batch->next->first_vert < first_vert)
+	{
+		prev = batch;
 		batch = batch->next;
+	}
 	
-	if (batch->next && batch->next->first_vert == last_vert)
-		batch = batch->next;
-	
-	if (batch->last_vert == first_vert)
+	if (batch->first_vert > last_vert)
+	{
+		new = &vbobatch_buffer[num_vbo_batches++];
+		new->next = batch;
+		prev->next = new;
+		new->first_vert = first_vert;
+		new->last_vert = last_vert;
+	}
+	else if (batch->last_vert == first_vert)
 	{
 		batch->last_vert = last_vert;
 		if (batch->next && batch->next->first_vert == last_vert)
@@ -585,36 +592,20 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 			batch->next = batch->next->next;
 		}
 	}
+	else if (batch->next && batch->next->first_vert == last_vert)
+	{
+		batch = batch->next;
+		batch->first_vert = first_vert;
+	}
 	else if (batch->first_vert == last_vert)
 	{
 		batch->first_vert = first_vert;
-		if (batch->prev && batch->prev->last_vert == first_vert)
-		{
-			batch->first_vert = batch->prev->first_vert;
-			if (batch->prev == &vbobatch_buffer[num_vbo_batches-1])
-				num_vbo_batches--;
-			batch->prev->prev->next = batch;
-			batch->prev = batch->prev->prev;
-		}
 	}
-	else if (batch->last_vert < first_vert)
+	else //if (batch->last_vert < first_vert)
 	{
 		new = &vbobatch_buffer[num_vbo_batches++];
-		new->prev = batch;
 		new->next = batch->next;
-		if (new->next)
-			new->next->prev = new;
 		batch->next = new;
-		new->first_vert = first_vert;
-		new->last_vert = last_vert;
-	}
-	else if (batch->first_vert > last_vert)
-	{
-		new = &vbobatch_buffer[num_vbo_batches++];
-		new->next = batch;
-		new->prev = batch->prev;
-		new->prev->next = new;
-		batch->prev = new;
 		new->first_vert = first_vert;
 		new->last_vert = last_vert;
 	}
