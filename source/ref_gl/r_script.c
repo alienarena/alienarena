@@ -210,16 +210,12 @@ void RS_ClearStage (rs_stage_t *stage)
 
 	stage->rot_speed = 0;
 
-	VectorClear(stage->origin);
-	VectorClear(stage->angle);
-
 	stage->texture = NULL;
 	stage->texture2 = NULL;
 	stage->texture3 = NULL;
 
 	stage->depthhack = false;
 	stage->envmap = false;
-	stage->dynamic = false;
 	stage->lensflare = false;
 	stage->flaretype = 0;
 	stage->normalmap = false;
@@ -554,13 +550,6 @@ void rs_stage_map3 (rs_stage_t *stage, char **token)
 	strncpy (stage->name3, *token, sizeof(stage->name3));
 }
 
-void rs_stage_model (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-
-	strncpy (stage->model, *token, sizeof(stage->model));
-}
-
 void rs_stage_colormap (rs_stage_t *stage, char **token)
 {
 	stage->colormap.enabled = true;
@@ -717,11 +706,6 @@ void rs_stage_envmap (rs_stage_t *stage, char **token)
 	stage->envmap = true;
 }
 
-void rs_stage_dynamic (rs_stage_t *stage, char **token)
-{
-	stage->dynamic = true;
-}
-
 void rs_stage_nolightmap (rs_stage_t *stage, char **token)
 {
 	stage->lightmap = false;
@@ -736,30 +720,6 @@ void rs_stage_rotate (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->rot_speed = (float)atof(*token);
-}
-
-void rs_stage_origin (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->origin[0] = (float)atof(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->origin[1] = (float)atof(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->origin[2] = (float)atof(*token);
-}
-
-void rs_stage_angle (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->angle[0] = (float)atof(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->angle[1] = (float)atof(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->angle[2] = (float)atof(*token);
 }
 
 void rs_stage_scale (rs_stage_t *stage, char **token)
@@ -969,13 +929,38 @@ void rs_stage_if (rs_stage_t *stage, char **token)
 		Com_Printf ("ERROR in stage conditional!\n");
 }
 
+// For legacy origin and angle commands that aren't actually used in the code.
+// Some old rscripts still have the origin command in them, so we should parse
+// it anyway. Can't find any angle commands, but may as well handle those too.
+void rs_stage_consume3 (rs_stage_t *stage, char **token)
+{
+	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token); 
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	*token = strtok (NULL, TOK_DELIMINATORS);
+}
+
+// Used for the old "model" command, even though I can't find any rscripts 
+// that have that command.
+void rs_stage_consume1 (rs_stage_t *stage, char **token)
+{
+	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token); 
+	*token = strtok (NULL, TOK_DELIMINATORS);
+}
+
+// Used for the old "dynamic" command, even though I can't find any rscripts
+// that have that command.
+void rs_stage_consume0 (rs_stage_t *stage, char **token)
+{
+	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token);
+}
+
 static rs_stagekey_t rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
 	{	"map",			&rs_stage_map			},
 	{	"map2",			&rs_stage_map2			},
 	{	"map3",			&rs_stage_map3			},
-	{	"model",		&rs_stage_model			},
 	{	"scroll",		&rs_stage_scroll		},
 	{	"frames",		&rs_stage_frames		},
 	{	"blendfunc",	&rs_stage_blendfunc		},
@@ -987,10 +972,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"nolightmap",	&rs_stage_nolightmap	},
 	{	"alphamask",	&rs_stage_alphamask		},
 	{	"rotate",		&rs_stage_rotate		},
-	{	"origin",		&rs_stage_origin		},
-	{	"angle",		&rs_stage_angle			},
 	{	"scale",		&rs_stage_scale			},
-	{	"dynamic",		&rs_stage_dynamic		},
 	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{	"flaretype",	&rs_stage_flaretype		},
@@ -1006,6 +988,12 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"glow",			&rs_stage_glow			},
 	{	"cube",			&rs_stage_cube			},
 	{	"if",			&rs_stage_if			},
+	
+	// Depreciated stuff
+	{	"model",		&rs_stage_consume1		},
+	{	"origin",		&rs_stage_consume3		},
+	{	"angle",		&rs_stage_consume3		},
+	{	"dynamic",		&rs_stage_consume1		},
 
 	{	NULL,			NULL					}
 };
