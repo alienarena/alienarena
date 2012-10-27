@@ -586,20 +586,26 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 		batch->last_vert = last_vert;
 		if (batch->next && batch->next->first_vert == last_vert)
 		{
+			// This is the special case where the new surface bridges the gap
+			// between two existing batches, allowing us to merge them into 
+			// the first one. This is the only case where we actually remove a
+			// batch instead of growing one or adding one.
 			batch->last_vert = batch->next->last_vert;
 			if (batch->next == &vbobatch_buffer[num_vbo_batches-1])
 				num_vbo_batches--;
 			batch->next = batch->next->next;
 		}
+		return; //no need to check for maximum batch count being hit
 	}
 	else if (batch->next && batch->next->first_vert == last_vert)
 	{
-		batch = batch->next;
-		batch->first_vert = first_vert;
+		batch->next->first_vert = first_vert;
+		return; //no need to check for maximum batch count being hit
 	}
 	else if (batch->first_vert == last_vert)
 	{
 		batch->first_vert = first_vert;
+		return; //no need to check for maximum batch count being hit
 	}
 	else //if (batch->last_vert < first_vert)
 	{
