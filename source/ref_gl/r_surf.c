@@ -1773,7 +1773,7 @@ void R_DrawWorld (void)
 				VectorLength (delta_angle) > 2.0 ||
 				r_newrefdef.num_dlights != 0 ||
 				old_dlightcount != 0 ||
-				!r_optimize->integer;
+				!r_optimize->integer || draw_sun;
 	
 	cur_ms = Sys_Milliseconds ();
 	
