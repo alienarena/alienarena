@@ -307,7 +307,11 @@ polygon.
 */
 const float opaque[4] = {0.0, 0.0, 0.0, 1.0};
 const float transparent[4] = {0.0, 0.0, 0.0, 0.0};
+#ifdef WIN32
+__inline const float *GetRGBASample (int node_leaf, const vec3_t orig_start, const vec3_t orig_stop)
+#else
 inline const float *GetRGBASample (int node_leaf, const vec3_t orig_start, const vec3_t orig_stop)
+#endif
 {
 	float		fs, 	ft;
 	int 		s, t, smax, tmax, i;

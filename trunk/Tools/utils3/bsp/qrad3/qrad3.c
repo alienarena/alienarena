@@ -345,7 +345,11 @@ void DecompressBytes (int size, byte *in, byte *decompressed)
 
 static int trace_bytes = 0;
 
+#ifdef WIN32
+static __inline int lowestCommonNode (int nodeNum1, int nodeNum2)
+#else
 static inline int lowestCommonNode (int nodeNum1, int nodeNum2)
+#endif
 {
 	dnode_t *node;
 	int child1, tmp, headNode = 0;
