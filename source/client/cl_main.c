@@ -2339,12 +2339,6 @@ void CL_Frame( int msec )
     }
     
 
-	/* periodically override certain test and cheat cvars unless single player.*/
-	if ( (cl.time & 0xfff) == 0 )
-	{
-		CL_FixCvarCheats ();
-	}
-
 	/*
 	 * update maximum FPS.
 	 * framerate_cap is in msecs/frame and is user specified.
@@ -2516,6 +2510,9 @@ void CL_Frame( int msec )
 
 		/* send client commands to server */
 		CL_SendCmd();
+
+		/* clear various cvars unless single player */
+		CL_FixCvarCheats ();
 
 		/* resend a connection request if necessary */
 		CL_CheckForResend();
