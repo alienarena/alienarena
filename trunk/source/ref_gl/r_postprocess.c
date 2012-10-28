@@ -747,10 +747,7 @@ void R_GLSLGodRays(void)
 	if(!gl_glsl_postprocess->integer || !r_godrays->integer || !r_drawsun->integer)
 		return;
 
-	if (R_CullOrigin(sun_origin))
-        return;
-
-	if (sun_alpha <= 0)
+	 if (!draw_sun || sun_alpha <= 0)
 		return;
 
 	//switch to fbo
