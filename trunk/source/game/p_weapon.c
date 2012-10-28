@@ -549,12 +549,6 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			gunframe = FRAME_IDLE_FIRST;
 			goto fire_begin; //velociraptors be damned
 		}
-		else if (gunframe == FRAME_ACTIVATE_LAST)
-		{
-			ent->client->weaponstate = WEAPON_READY;
-			gunframe = FRAME_IDLE_FIRST;
-			return;
-		}
 		else if ((ent->client->latched_buttons|ent->client->buttons) & (BUTTON_ATTACK|BUTTON_ATTACK2))
 		{
 			if (gunframe >= FRAME_ACTIVATE_LAST-3)
@@ -564,7 +558,13 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				goto fire_begin; //velociraptors be damned
 			}
 		}
-
+		else if (gunframe == FRAME_ACTIVATE_LAST)
+		{
+			ent->client->weaponstate = WEAPON_READY;
+			gunframe = FRAME_IDLE_FIRST;
+			return;
+		}
+		
 		gunframe++;
 		return;
 	}
@@ -926,7 +926,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 		return;
 	}
 
-	if (!(ent->client->buttons & BUTTON_ATTACK))
+	if (!(ent->client->buttons & BUTTON_ATTACK) || (!ent->is_bot && ent->client->newweapon))
 	{
 		ent->client->ps.gunframe = 17;
 		return;
@@ -1381,7 +1381,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 	int		effect;
 	int		damage;
 
-	if (!((ent->client->buttons & BUTTON_ATTACK) || (ent->client->buttons & BUTTON_ATTACK2)))
+	if (!(ent->client->buttons & (BUTTON_ATTACK|BUTTON_ATTACK2)) || (!ent->is_bot && ent->client->newweapon))
 	{
 		ent->client->ps.gunframe = 25;
 	}
@@ -1565,14 +1565,24 @@ void Machinegun_Fire (edict_t *ent)
 
 	}
 	else if(!ent->altfire){
+		
 		if (!(ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe > 6) {
 			//Fast-forward through firing animation if not firing anymore.
 			//This is purely cosmetic, the player can resume firing at any
 			//point in this animation. 
 			//TODO: special sound effect here? 
 			ent->client->ps.gunframe+=2;
+			
+			// Make it easier to escape from the animation while not firing. 
+			// Since this is a rapid-fire weapon, there's no reason not to do
+			// this. (If it wasn't, allowing this would make it be possible to
+			// cheat the maximum fire rate.)
+			if (!ent->is_bot && ent->client->newweapon)
+				ent->client->ps.gunframe = 14;
+			
 			return; //Don't waste ammo
 		}
+		
 		for (i=0 ; i<shots ; i++)
 		{
 			VectorSet(offset, 1, 1, ent->viewheight-0.5);
@@ -1602,6 +1612,13 @@ void Machinegun_Fire (edict_t *ent)
 		gi.multicast (start, MULTICAST_PVS);
 		if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= shots;
+		
+		// Make it easier to escape from the animation while firing. Since 
+		// this is a rapid-fire weapon, there's no reason not to do this. (If
+		// it wasn't, allowing this would make it be possible to cheat the
+		// maximum fire rate.)
+		if (!ent->is_bot && ent->client->newweapon)
+			ent->client->ps.gunframe = 14;
 	}
 
 }
@@ -1835,13 +1852,31 @@ void Violator_Fire (edict_t *ent)
 	else
 		damage = 40;
 
-	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
+	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & (BUTTON_ATTACK|BUTTON_ATTACK2)))
 	{
 		ent->client->ps.gunframe = 14;
 		ent->client->weapon_sound = 0;
 		return;
 	}
-	else if (ent->client->ps.gunframe == 14 && (ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
+	else if (!ent->altfire && ent->client->ps.gunframe > 6 && !(ent->client->buttons & (BUTTON_ATTACK|BUTTON_ATTACK2)))
+	{
+		//Fast-forward through firing animation if not firing anymore.
+		//This is purely cosmetic, the player can resume firing at any point
+		//point in this animation. 
+		//TODO: special sound effect here? 
+		ent->client->ps.gunframe+=2;
+		ent->client->weapon_sound = 0;
+		
+		// Make it easier to escape from the animation while not firing. Since 
+		// this is a rapid-fire weapon, there's no reason not to do this. (If
+		// it wasn't, allowing this would make it be possible to cheat the
+		// maximum fire rate.)
+		if (!ent->is_bot && ent->client->newweapon)
+			ent->client->ps.gunframe = 14;
+		
+		return;
+	}
+	else if (ent->client->ps.gunframe == 14 && (ent->client->buttons & (BUTTON_ATTACK|BUTTON_ATTACK2)))
 	{
 		ent->client->ps.gunframe = 6;
 	}
@@ -1948,6 +1983,13 @@ void Violator_Fire (edict_t *ent)
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
+		
+		// Make it easier to escape from the animation while firing. Since 
+		// this is a rapid-fire weapon, there's no reason not to do this. (If
+		// it wasn't, allowing this would make it be possible to cheat the
+		// maximum fire rate.)
+		if (!ent->is_bot && ent->client->newweapon)
+			ent->client->ps.gunframe = 14;
 	}
 }
 
