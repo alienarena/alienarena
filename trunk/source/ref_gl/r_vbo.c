@@ -157,6 +157,7 @@ void VB_BuildWorldVBO(void)
 	
 	// just to keep the lines of code short
 	surfs = r_worldmodel->surfaces;
+	firstsurf = r_worldmodel->firstmodelsurface;
 	lastsurf = r_worldmodel->nummodelsurfaces+r_worldmodel->firstmodelsurface;
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
