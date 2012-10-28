@@ -1567,11 +1567,6 @@ void Machinegun_Fire (edict_t *ent)
 	else if(!ent->altfire){
 		
 		if (!(ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe > 6) {
-			//Fast-forward through firing animation if not firing anymore.
-			//This is purely cosmetic, the player can resume firing at any
-			//point in this animation. 
-			//TODO: special sound effect here? 
-			ent->client->ps.gunframe+=2;
 			
 			// Make it easier to escape from the animation while not firing. 
 			// Since this is a rapid-fire weapon, there's no reason not to do
@@ -1864,7 +1859,7 @@ void Violator_Fire (edict_t *ent)
 		//This is purely cosmetic, the player can resume firing at any point
 		//point in this animation. 
 		//TODO: special sound effect here? 
-		ent->client->ps.gunframe+=2;
+		ent->client->ps.gunframe+=1;
 		ent->client->weapon_sound = 0;
 		
 		// Make it easier to escape from the animation while not firing. Since 
