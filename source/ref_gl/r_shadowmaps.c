@@ -670,6 +670,7 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 
 #include "r_lodcalc.h"
 
+extern cvar_t *cl_simpleitems;
 void R_DrawDynamicCaster(void)
 {
 	int		i;
@@ -729,6 +730,9 @@ void R_DrawDynamicCaster(void)
 		{
 			continue;
 		}
+		
+		if (cl_simpleitems->integer && currententity->model->simple_texnum != 0)
+			continue; //TODO: simple items casting shadows?
 
 		if(r_ragdolls->value && currententity->model->type == mod_iqm && currententity->model->hasRagDoll)
 		{
@@ -1009,6 +1013,9 @@ void R_DrawEntityCaster(entity_t *ent)
 
 	if(!ent->model)
 		return;	
+	
+	if (cl_simpleitems->integer && ent->model->simple_texnum != 0)
+		return;
 
 	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll)
 	{
