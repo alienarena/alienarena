@@ -248,23 +248,26 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
 		glUniform1iARB( g_location_normTexture, 1);
 
-		qglActiveTextureARB(GL_TEXTURE2);
-		qglBindTexture(GL_TEXTURE_2D, texnum);
-		glUniform1iARB( g_location_refTexture, 2);
+        if (texnum)
+        {
+			qglActiveTextureARB(GL_TEXTURE2);
+			qglBindTexture(GL_TEXTURE_2D, texnum);
+			glUniform1iARB( g_location_refTexture, 2);
+		}
+		else
+		{
+			glUniform1iARB( g_location_refTexture, 0);
+		}
 
 		if(fa->texinfo->flags &(SURF_TRANS33|SURF_TRANS66))
-			glUniform1iARB( g_location_trans, 1);
+			glUniform1fARB( g_location_trans, 0.5);
 		else
-			glUniform1iARB( g_location_trans, 0);
+			glUniform1fARB( g_location_trans, 0.75);
 		
 		if(texnum)
-		{
 			glUniform1iARB( g_location_reflect, 1);
-		}
 		else
-		{
 			glUniform1iARB( g_location_reflect, 0);
-		}
 
 		//send these to the shader program	
 		glUniformMatrix3fvARB( g_location_tangentSpaceTransform, 1, GL_FALSE, (const GLfloat *) fa->tangentSpaceTransform );
