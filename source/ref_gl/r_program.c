@@ -1437,15 +1437,15 @@ static char water_vertex_program[] = "#version 120\n" STRINGIFY (
 	{
 		gl_Position = ftransform();
 
-		vec3 norm = vec3(0, 0, 1); //water always is up!
-
 		lightDir = tangentSpaceTransform * (LightPos - gl_Vertex.xyz);
 
 		vec4 neyeDir = gl_ModelViewMatrix * gl_Vertex;
         vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
         refeyeDir = normalize(refeyeDir);
 
-        FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir,norm)),FresnelPower);
+		// The normal is always 0, 0, 1 because water is always up. Thus, 
+		// dot (refeyeDir,norm) is always refeyeDir.z
+        FresRatio = F + (1.0-F) * pow((1.0-refeyeDir.z),FresnelPower);
 
 		eyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
 
@@ -1455,18 +1455,16 @@ static char water_vertex_program[] = "#version 120\n" STRINGIFY (
 			texco.s = texco.s - LightPos.x/256.0;
 			texco.t = texco.t + LightPos.y/256.0;
 		}
-
-		gl_TexCoord[0] = texco * 1.0;
+		gl_TexCoord[0] = texco;
 
 		texco = gl_MultiTexCoord0;
-		texco.s = texco.s *1.0 + time*0.05;
-		texco.t = texco.t * 1.0 + time*0.05;
-
+		texco.s = texco.s + time*0.05;
+		texco.t = texco.t + time*0.05;
 		gl_TexCoord[1] = texco;
 
 		texco = gl_MultiTexCoord0;
-		texco.s = texco.s * 1.0 + -time*0.05;
-		texco.t = texco.t *1.0 + -time*0.05;
+		texco.s = texco.s - time*0.05;
+		texco.t = texco.t - time*0.05;
 		gl_TexCoord[2] = texco;
 
 		//fog
@@ -1489,40 +1487,32 @@ static char water_fragment_program[] = "#version 120\n" STRINGIFY (
 	uniform sampler2D normalMap;
 	uniform sampler2D baseTexture;
 
-	uniform int REFLECT;
-	uniform int TRANSPARENT;
+	uniform float TRANSPARENT;
 	uniform int FOG;
-
+	
 	void main (void)
 	{
 		vec4 refColor;
 
 		vec3 vVec = normalize(eyeDir);
 
-		vec4 base = vec4(0.15,0.67,0.93,1.0); //base water color
-		if(REFLECT > 0)
-			refColor = mix(base, texture2D(refTexture, gl_TexCoord[0].xy), 1.0);
-		else
-			refColor = mix(base, texture2D(baseTexture, gl_TexCoord[0].xy), 1.0);
+		refColor = texture2D(refTexture, gl_TexCoord[0].xy);
 
-		vec3 bump = normalize( texture2D(normalMap, gl_TexCoord[1].xy).xyz * 2.0 - 1.0);
-		vec3 secbump = normalize( texture2D(normalMap, gl_TexCoord[2].xy).xyz * 2.0 - 1.0);
+		vec3 bump = normalize( texture2D(normalMap, gl_TexCoord[1].xy).xyz - 0.5);
+		vec3 secbump = normalize( texture2D(normalMap, gl_TexCoord[2].xy).xyz - 0.5);
 		vec3 modbump = mix(secbump,bump,0.5);
 
 		vec3 reflection = reflect(vVec,modbump);
 		vec3 refraction = refract(vVec,modbump,0.66);
 
-		vec4 Tl = texture2DProj(baseTexture, vec4(reflection.xy, 1.0, 1.0) );
-	    vec4 Tr = texture2DProj(baseTexture, vec4(refraction.xy, 1.0, 1.0) );
+		vec4 Tl = texture2D(baseTexture, reflection.xy);
+	    vec4 Tr = texture2D(baseTexture, refraction.xy);
 
 		vec4 cubemap = mix(Tl,Tr,FresRatio);
 
 		gl_FragColor = mix(cubemap,refColor,0.5);
 
-		if(TRANSPARENT > 0)
-			gl_FragColor.a = 0.5;
-		else
-			gl_FragColor.a = 0.75;
+		gl_FragColor.a = TRANSPARENT;
 
 		if(FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
