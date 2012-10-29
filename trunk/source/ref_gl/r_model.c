@@ -1872,6 +1872,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	R_ParseLightEntities();
 	R_FindSunEntity();
+	R_MarkGrassSunShadowCasters(loadmodel);
 }
 
 //=============================================================================

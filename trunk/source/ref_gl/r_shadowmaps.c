@@ -844,19 +844,14 @@ void R_DrawVegetationCasters ( qboolean forShadows )
     int		i, k;
 	grass_t *grass;
     float   scale;
-	vec3_t	dir, origin, mins, maxs, angle, right, up, corner[4];
+	vec3_t	dir, origin, angle, right, up, corner[4];
 	float	*corner0 = corner[0];
-	qboolean visible;
-	trace_t r_trace;
 	float	sway;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
 	grass = r_grasses;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
@@ -878,11 +873,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 		// adjust vertical position, scaled
 		origin[2] += (grass->texsize/32) * grass->size;
 
-		//cull for pathline to sunlight
-		r_trace = CM_BoxTrace(r_sunLight->origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-			visible = r_trace.fraction == 1.0;		
-
-		if(visible) 
+		if(grass->sunVisible) 
 		{
 			//render grass polygon
 			
