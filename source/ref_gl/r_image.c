@@ -1784,5 +1784,10 @@ void	GL_ShutdownImages (void)
 		qglDeleteTextures (1, (unsigned *)&image->texnum);
 		memset (image, 0, sizeof(*image));
 	}
+	
+	memset (scrap_allocated, 0, sizeof(scrap_allocated));
+	memset (scrap_texels, 0, sizeof(scrap_texels));
+	scrap_dirty = false;
+	scrap_uploads = 0;
 }
 
