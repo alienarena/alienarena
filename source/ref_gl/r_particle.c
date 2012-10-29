@@ -829,6 +829,35 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 		r_hasleaves = true;
 }
 
+// Mark any vegetation sprites that can cast shadows in sunlight
+void R_MarkGrassSunShadowCasters(model_t *mod)
+{
+	vec3_t orig2, mins, maxs;
+	trace_t	r_trace;
+	grass_t *grass;
+	int i;
+	
+	grass = r_grasses;
+	
+	VectorSet (mins, 0, 0, 0);
+	VectorSet (maxs, 0, 0, 0);
+	
+	for (i=0; i<r_numgrasses; i++, grass++) 
+	{
+		if (grass->type == 0)
+		{
+			grass->sunVisible = false;
+			continue; //only deal with leaves, grass shadows look kind of bad
+		}
+		
+		//cull for pathline to sunlight
+		VectorCopy (grass->origin, orig2);
+		orig2[2] += (grass->texsize/32) * grass->size;
+		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, mod->firstnode, MASK_VISIBILILITY);
+			grass->sunVisible = r_trace.fraction == 1.0;
+	}
+}
+
 //rendering
 
 void R_DrawVegetationSurface ( void )

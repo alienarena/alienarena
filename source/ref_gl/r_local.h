@@ -348,6 +348,7 @@ qboolean r_hasleaves;
 extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type);
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
+extern void R_MarkGrassSunShadowCasters(model_t *mod); 
 
 //Simple Items
 extern void R_SI_InitTextures( void );
