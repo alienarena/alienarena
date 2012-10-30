@@ -1784,8 +1784,7 @@ perftest_t *get_perftest(char *name) {
     strncpy (test->name, name, sizeof(test->name));
     
     return test;
-}
-    
+}    
 
 //slotnum is used for the vertical offset on the screen
 void SCR_showPerfTest (perftest_t *test, int slotnum) {

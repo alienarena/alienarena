@@ -859,7 +859,28 @@ void R_MarkGrassSunShadowCasters(model_t *mod)
 }
 
 //rendering
+int compare_grass (void const *_a, void const *_b)
+{
+	vec3_t dist;
+	int distA, distB;
 
+	grass_t a = *(grass_t *)_a;
+	grass_t b = *(grass_t *)_b;	
+
+	VectorSubtract(a.origin, r_origin, dist);
+	distA = VectorLength(dist);
+	VectorSubtract(b.origin, r_origin, dist);
+	distB = VectorLength(dist);
+
+	if (distA > distB)
+		return -1;
+	else if (distA < distB)
+		return 1;
+    
+	return 0;
+}
+
+static int g_lastGSort = 0;
 void R_DrawVegetationSurface ( void )
 {
     int		i, k;
@@ -875,7 +896,16 @@ void R_DrawVegetationSurface ( void )
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-
+	
+	//sort the grasses from furthest to closest(we can safely do this every 3/4 second
+	//instead of every frame since our POV shouldn't change that drastically enough
+	//to create artifacts.  Grasses must be sorted to prevent major artifacting.
+	if(g_lastGSort < Sys_Milliseconds() - 750)
+	{
+		qsort( r_grasses, r_numgrasses, sizeof( r_grasses[0] ), compare_grass );
+		g_lastGSort = Sys_Milliseconds();
+	}
+	
 	grass = r_grasses;
 
 	VectorSet(mins, 0, 0, 0);
@@ -885,8 +915,6 @@ void R_DrawVegetationSurface ( void )
 	qglEnable( GL_BLEND);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Bind (0);
-	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
-	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
 	GL_TexEnv( GL_MODULATE );
 
     for (i=0; i<r_numgrasses; i++, grass++)
@@ -915,7 +943,8 @@ void R_DrawVegetationSurface ( void )
 		VectorCopy(grass->origin, origin);
 
 		// adjust vertical position, scaled
-		origin[2] += (grass->texsize/32) * grass->size;
+		if(!grass->type)
+			origin[2] += (grass->texsize/32) * grass->size;
 
 		if(!grass->type) 
 		{
@@ -940,7 +969,10 @@ void R_DrawVegetationSurface ( void )
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
 					
-			VectorCopy(r_newrefdef.viewangles, angle);
+			if(grass->type)
+				VectorCopy(r_newrefdef.viewangles, angle);
+			else
+				VectorSet(angle, 0, 0, 0);	
 			
 			for(ng = 0; ng < gCount; ng ++)
 			{
@@ -1011,9 +1043,7 @@ void R_DrawVegetationSurface ( void )
 			R_KillVArrays ();
 		}
 	}
-	
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
 	qglDepthMask( GL_TRUE );
