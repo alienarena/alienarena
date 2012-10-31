@@ -938,6 +938,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/dm-goregrinder.bsp \
 	data1/maps/dm-horus.bsp \
 	data1/maps/dm-impact.bsp \
+	data1/maps/dm-impact.lightmap \
 	data1/maps/dm-invasion.bsp \
 	data1/maps/dm-leviathan2k12.bsp \
 	data1/maps/dm-liberation.bsp \
