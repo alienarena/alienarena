@@ -1216,6 +1216,12 @@ void R_RenderAllRagdolls ( void )
 
 		dSpaceCollide(RagDollSpace, 0, &near_callback);
 
+		/* ODE 0.12 Patch for REFERENCE and TESTING ONLY!!!
+		 * will link with ODE 0.12. but results in ugly ragdoll 'vibration'.
+		 *
+		 * replace following line with this:
+		 * dWorldQuickStep(RagDollWorld, (float)(frametime/1000.0f));
+		 */
 		dWorldStepFast1(RagDollWorld, (float)(frametime/1000.0f), ODEIterationsPerFrame);
 
 		// Remove all temporary collision joints now that the world has been stepped

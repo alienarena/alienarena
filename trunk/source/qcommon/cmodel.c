@@ -12,9 +12,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 // cmodel.c -- model loading
@@ -174,7 +174,7 @@ void CMod_LoadSubmodels (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadSubmodels: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
@@ -212,7 +212,7 @@ void CMod_LoadSurfaces (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadSurfaces: funny lump size");
 	count = l->filelen / sizeof(*in);
 	if (count < 1)
 		Com_Error (ERR_DROP, "Map with no surfaces");
@@ -247,7 +247,7 @@ void CMod_LoadNodes (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadNodes: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
@@ -285,7 +285,7 @@ void CMod_LoadBrushes (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadBrushes: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count > MAX_MAP_BRUSHES)
@@ -318,14 +318,14 @@ void CMod_LoadLeafs (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadLeafs: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
 		Com_Error (ERR_DROP, "Map with no leafs");
 	// need to save space for box planes
-	if (count > MAX_MAP_PLANES)
-		Com_Error (ERR_DROP, "Map has too many planes");
+	if (count > MAX_MAP_LEAFS)
+		Com_Error (ERR_DROP, "Map has too many leafs");
 
 	out = map_leafs;
 	numleafs = count;
@@ -374,7 +374,7 @@ void CMod_LoadPlanes (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadPlanes: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
@@ -416,11 +416,11 @@ void CMod_LoadLeafBrushes (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadLeafBrushes: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
-		Com_Error (ERR_DROP, "Map with no planes");
+		Com_Error (ERR_DROP, "Map with no leafbrushes");
 	// need to save space for box planes
 	if (count > MAX_MAP_LEAFBRUSHES)
 		Com_Error (ERR_DROP, "Map has too many leafbrushes");
@@ -447,12 +447,12 @@ void CMod_LoadBrushSides (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadBrushSides: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	// need to save space for box planes
 	if (count > MAX_MAP_BRUSHSIDES)
-		Com_Error (ERR_DROP, "Map has too many planes");
+		Com_Error (ERR_DROP, "Map has too many brushsides");
 
 	out = map_brushsides;
 	numbrushsides = count;
@@ -482,7 +482,7 @@ void CMod_LoadAreas (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadAreas: funny lump size");
 	count = l->filelen / sizeof(*in);
 
 	if (count > MAX_MAP_AREAS)
@@ -514,11 +514,11 @@ void CMod_LoadAreaPortals (lump_t *l)
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
-		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+		Com_Error (ERR_DROP, "CMod_LoadAreaPortals: funny lump size");
 	count = l->filelen / sizeof(*in);
 
-	if (count > MAX_MAP_AREAS)
-		Com_Error (ERR_DROP, "Map has too many areas");
+	if (count > MAX_MAP_AREAPORTALS)
+		Com_Error (ERR_DROP, "Map has too many areaportals");
 
 	out = map_areaportals;
 	numareaportals = count;
@@ -822,7 +822,10 @@ int		CM_LeafContents (int leafnum)
 int		CM_LeafCluster (int leafnum)
 {
 	if (leafnum < 0 || leafnum >= numleafs)
+	{
 		Com_Error (ERR_DROP, "CM_LeafCluster: bad number");
+		return 0; /* unreachable. quiets bogus compiler array index warning */
+	}
 	return map_leafs[leafnum].cluster;
 }
 
@@ -1129,26 +1132,30 @@ trace_t	trace_trace;
 int		trace_contents;
 qboolean	trace_ispoint;		// optimized case
 
-/*
-================
-CM_ClipBoxToBrush
-================
-*/
-void CM_ClipBoxToBrush (vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
-					  trace_t *trace, cbrush_t *brush)
+/**
+ * @brief  intersect test for axis-aligned box and a brush in a leaf.
+ *
+ * This is the innermost loop for CM_BoxTrace() general and point cases.
+ * Does not use file level static variables; not sure why.
+ *
+ * @returns  if intersection occurred, information about the brush in the
+ *           trace_t record. otherwise does not touch trace_t record
+ *
+ */
+void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
+		trace_t *trace, cbrush_t *brush )
 {
-	int			i, j;
-	cplane_t	*plane, *clipplane;
-	float		dist;
-	float		enterfrac, leavefrac;
-	vec3_t		ofs;
-	float		d1, d2;
-	qboolean	getout, startout;
-	float		f;
-	cbrushside_t	*side, *leadside;
+	int           i;
+	cplane_t     *plane, *clipplane;
+	float         dist;
+	float         enterfrac, leavefrac;
+	float         d1, d2;
+	qboolean      getout, startout;
+	float         f;
+	cbrushside_t *side, *leadside;
 
-	enterfrac = -1;
-	leavefrac = 1;
+	enterfrac = -1.0f;
+	leavefrac = 1.0f;
 	clipplane = NULL;
 
 	if (!brush->numsides)
@@ -1164,24 +1171,47 @@ void CM_ClipBoxToBrush (vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 	{
 		side = &map_brushsides[brush->firstbrushside+i];
 		plane = side->plane;
-
-		// FIXME: special case for axial
-
-		if (!trace_ispoint)
-		{	// general box case
-
-			// push the plane out apropriately for mins/maxs
-
-			// FIXME: use signbits into 8 way lookup for each mins/maxs
-			for (j=0 ; j<3 ; j++)
+		if ( !trace_ispoint )
+		{
+			switch ( plane->signbits ) /* bit2=z<0, bit1=y<0, bit0=x<0 */
 			{
-				if (plane->normal[j] < 0)
-					ofs[j] = maxs[j];
-				else
-					ofs[j] = mins[j];
+			case 0: /* 000b */
+				dist = plane->dist - (mins[0]*plane->normal[0] +
+						mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+				break;
+			case 1: /* 001b */
+				dist = plane->dist - (maxs[0]*plane->normal[0] +
+						mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+				break;
+			case 2: /* 010b */
+				dist = plane->dist - (mins[0]*plane->normal[0] +
+						maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+				break;
+			case 3: /* 011b */
+				dist = plane->dist - (maxs[0]*plane->normal[0] +
+						maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+				break;
+			case 4: /* 100b */
+				dist = plane->dist - (mins[0]*plane->normal[0] +
+						mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+				break;
+			case 5: /* 101b */
+				dist = plane->dist - (maxs[0]*plane->normal[0] +
+						mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+				break;
+			case 6: /* 110b */
+				dist = plane->dist - (mins[0]*plane->normal[0] +
+						maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+				break;
+			case 7: /* 111b */
+				dist = plane->dist - (maxs[0]*plane->normal[0] +
+						maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+				break;
+
+			default:
+				Com_Error( ERR_DROP, "CM_ClipBoxToBrush: bad plane signbits\n");
+				return; // unreachable. suppress bogus compiler warning
 			}
-			dist = DotProduct (ofs, plane->normal);
-			dist = plane->dist - dist;
 		}
 		else
 		{	// special point case
@@ -1191,16 +1221,16 @@ void CM_ClipBoxToBrush (vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 		d1 = DotProduct (p1, plane->normal) - dist;
 		d2 = DotProduct (p2, plane->normal) - dist;
 
-		if (d2 > 0)
-			getout = true;	// endpoint is not in solid
-		if (d1 > 0)
+		if ( d2 > 0.0f )
+			getout = true; // endpoint is not in solid
+		if ( d1 > 0.0f )
 			startout = true;
 
 		// if completely in front of face, no intersection
-		if (d1 > 0 && d2 >= d1)
+		if ( d1 > 0.0f && d2 >= d1 )
 			return;
 
-		if (d1 <= 0 && d2 <= 0)
+		if ( d1 <= 0.0f && d2 <= 0.0f )
 			continue;
 
 		// crosses face
@@ -1214,12 +1244,15 @@ void CM_ClipBoxToBrush (vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 				leadside = side;
 			}
 		}
-		else
+		else if ( d1 < d2 )
 		{	// leave
 			f = (d1+DIST_EPSILON) / (d1-d2);
 			if (f < leavefrac)
 				leavefrac = f;
 		}
+		/* else d1 == d2, line segment is parallel to plane, cannot intersect.
+		   formerly processed like d1 < d2. now just continue to next
+		   brushside plane.  */
 	}
 
 	if (!startout)
@@ -1519,11 +1552,40 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 	VectorCopy (mins, trace_mins);
 	VectorCopy (maxs, trace_maxs);
 
-	//
-	// check for position test special case
-	//
-	if (start[0] == end[0] && start[1] == end[1] && start[2] == end[2])
+	if ( !(start == end) &&
+			(start[0] != end[0] || start[1] != end[1] || start[2] != end[2]) )
 	{
+		if (( mins == maxs ) ||
+				( mins[0] == 0.0f && mins[1] == 0.0f && mins[2] == 0.0f &&
+				maxs[0] == 0.0f && maxs[1] == 0.0f && maxs[2] == 0.0f ))
+		{ // point special case
+			trace_ispoint = true;
+			VectorClear (trace_extents);
+		}
+		else
+		{ // general axis-aligned box case
+			trace_ispoint = false;
+			trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
+			trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
+			trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
+		}
+		//
+		// general sweeping through world
+		//
+		CM_RecursiveHullCheck (headnode, 0, 1, start, end);
+
+		if (trace_trace.fraction == 1)
+		{
+			VectorCopy (end, trace_trace.endpos);
+		}
+		else
+		{
+			for (i=0 ; i<3 ; i++)
+				trace_trace.endpos[i] = start[i] + trace_trace.fraction * (end[i] - start[i]);
+		}
+	}
+	else
+	{ // position test special case
 		int		leafs[1024];
 		int		i, numleafs;
 		vec3_t	c1, c2;
@@ -1545,40 +1607,8 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 				break;
 		}
 		VectorCopy (start, trace_trace.endpos);
-		return trace_trace;
 	}
 
-	//
-	// check for point special case
-	//
-	if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0
-		&& maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0)
-	{
-		trace_ispoint = true;
-		VectorClear (trace_extents);
-	}
-	else
-	{
-		trace_ispoint = false;
-		trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
-		trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
-		trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
-	}
-
-	//
-	// general sweeping through world
-	//
-	CM_RecursiveHullCheck (headnode, 0, 1, start, end);
-
-	if (trace_trace.fraction == 1)
-	{
-		VectorCopy (end, trace_trace.endpos);
-	}
-	else
-	{
-		for (i=0 ; i<3 ; i++)
-			trace_trace.endpos[i] = start[i] + trace_trace.fraction * (end[i] - start[i]);
-	}
 	return trace_trace;
 }
 
