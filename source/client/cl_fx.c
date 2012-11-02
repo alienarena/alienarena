@@ -2670,7 +2670,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len;
 	vec3_t		right, up;
-	particle_t	*p;
+	particle_t	*p, *pr;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
@@ -2707,11 +2707,52 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 			p->accel[j] = 0;
 		}
 	}
+	
+	//Dummy particle that won't get drawn -- the first particle in a chain is
+	//always skipped.
+	if (!(pr = new_particle ()))
+		return;
+	pr->alpha = 0.9;
+	pr->alphavel = -2.8;
+	pr->scale = 4;
+	pr->scalevel = 0;
+	VectorCopy (start, pr->org);
+	VectorClear (pr->vel);
+	pr->type = PARTICLE_CHAINED;
+	pr->color = 0xd4;
+	pr->image = r_beam2texture;
+	
+	if (!(p = new_particle()))
+		return;
+	
+	p->alpha = 0.9;
+	p->alphavel = -2.8;
+	p->blenddst = GL_ONE;
+	p->blendsrc = GL_SRC_ALPHA;
+
+	p->image = r_beam2texture;
+	p->scale = 4;
+	VectorCopy(move, p->angle);
+	p->type = PARTICLE_CHAINED;
+	p->scalevel = 0;
+
+	p->color = 0xd4;
+	p->chain_prev = pr;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = end[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
 
 	for (; len>0; len -= RAILTRAILSPACE)
 	{
 		VectorCopy (move, last);
 		VectorAdd (move, vec, move);
+		
+		if (len > 40)
+			continue;
 
 		if (!(p = new_particle()))
 				return;
@@ -2720,22 +2761,12 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 		p->alphavel = -2.8;
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
-		if(len <= 40) { //end blast
-			p->image = r_flaretexture;
-			p->scale = 24;
-			for(j=0; j< 3; j++)
-				p->angle[j] = 0;
-			p->type = PARTICLE_STANDARD;
-			p->scalevel = 12;
-		}
-		else {
-			p->image = r_beam2texture;
-			p->scale = 4;
-			VectorCopy(move, p->angle);
-			p->type = PARTICLE_BEAM;
-			p->scalevel = 0;
-		}
-
+		p->image = r_flaretexture;
+		p->scale = 24;
+		for(j=0; j< 3; j++)
+			p->angle[j] = 0;
+		p->type = PARTICLE_STANDARD;
+		p->scalevel = 12;
 		p->color = 0xd4;
 
 		for (j=0 ; j<3 ; j++)
@@ -2753,7 +2784,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len;
 	vec3_t		right, up;
-	particle_t	*p;
+	particle_t	*p, *pr;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
@@ -2791,38 +2822,47 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 			p->accel[j] = 0;
 		}
 	}
-
-	for (; len>0; len -= LASERTRAILSPACE)
+	
+	//Dummy particle that won't get drawn -- the first particle in a chain is
+	//always skipped.
+	if (!(pr = new_particle ()))
+		return;
+	pr->alpha = 0.9;
+	pr->alphavel = -1.8;
+	pr->scale = 2;
+	pr->scalevel = 0;
+	VectorCopy (start, pr->org);
+	VectorClear (pr->vel);
+	pr->type = PARTICLE_CHAINED;
+	pr->color = 0x74;
+	pr->image = r_beam2texture;
+	
+	for (i = 0; i < 3; i++)
 	{
-		VectorCopy (move, last);
-		VectorAdd (move, vec, move);
+		if (!(p = new_particle()))
+			return;
+		
+		p->alpha = 0.9;
+		p->alphavel = -1.8;
+		p->blenddst = GL_ONE;
+		p->blendsrc = GL_SRC_ALPHA;
 
-		for(i = 0; i < 3; i++) {
-			if (!(p = new_particle()))
-					return;
+		p->image = r_beam2texture;
+		p->scale = 2;
+		VectorCopy(move, p->angle);
+		p->type = PARTICLE_CHAINED;
+		p->scalevel = 0;
 
-			p->alpha = 0.9;
-			p->alphavel = -1.8;
-			p->blenddst = GL_ONE;
-			p->blendsrc = GL_SRC_ALPHA;
+		p->color = 0x74;
+		p->chain_prev = pr;
 
-			p->image = r_beam2texture;
-			p->scale = 2;
-			VectorCopy(move, p->angle);
-			p->type = PARTICLE_BEAM;
-			p->scalevel = 0;
-
-			p->color = 0x74;
-
-			for (j=0 ; j<3 ; j++)
-			{
-				p->org[j] = last[j];
-				p->vel[j] = 0;
-				p->accel[j] = 0;
-			}
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = end[j];
+			p->vel[j] = 0;
+			p->accel[j] = 0;
 		}
 	}
-
 }
 
 #define VAPORIZORTRAILSPACE 20
