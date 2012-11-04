@@ -332,6 +332,8 @@ libgame_a_SOURCES =  \
 	game/g_unlagged.c \
 	game/g_utils.c \
 	game/g_vehicles.c \
+	game/g_spider.c \
+	game/g_spider.h \
 	game/g_weapon.c \
 	game/m_move.c \
 	game/m_player.h \

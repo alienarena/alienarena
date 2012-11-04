@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
+
+#if defined WIN32_VARIANT
+
 //Temporary location of this code until Strat returns from vacation!
 
 #define FRAME_stand01          	0
@@ -294,6 +297,7 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 
 	gi.linkentity (self);
 
+
 	walkmonster_start (self);
 }
 
@@ -360,6 +364,8 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 
 	gi.linkentity (spider);
 }
+
+#endif
 
 //end temp spider code location
 
