@@ -380,6 +380,11 @@ void CL_ParseServerData (void)
 
 	cl.servercount = MSG_ReadLong (&net_message);
 	cl.attractloop = MSG_ReadByte (&net_message);
+	
+	// Hide console for demo playback. It interferes with timedemo results and
+	// is annoying when you just want to watch.
+	if (cl.attractloop)
+		M_ForceMenuOff ();
 
 	// game directory
 	str = MSG_ReadString (&net_message);
