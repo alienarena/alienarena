@@ -2068,6 +2068,11 @@ void R_BeginRegistration (char *model)
 	// check for fog file, using file system search path
 	path = NULL;
 	map_fog = false;
+	r_weather = false;
+	r_nosun = false;
+	r_sunX = 0;
+	r_sunY = 0;
+	r_sunZ = 0;
 	for(;;)
 	{
 		path = FS_NextPath( path );

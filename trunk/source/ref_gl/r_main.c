@@ -199,7 +199,7 @@ cvar_t  *r_test;
 //ODE initialization error check
 int r_odeinit_success; // 0 if dODEInit2() fails, 1 otherwise.
 
-//fog stuff
+//fog script stuff
 struct r_fog
 {
 	float red;
@@ -211,6 +211,9 @@ struct r_fog
 } fog;
 unsigned r_weather;
 unsigned r_nosun;
+float r_sunX;
+float r_sunY;
+float r_sunZ;
 
 /*
 =================
@@ -225,7 +228,7 @@ void R_ReadFogScript( char *config_file )
 	char a_string[128];
 	char *buffer;
 	char *s;
-	size_t result;
+	size_t result;	
 
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
@@ -259,6 +262,12 @@ void R_ReadFogScript( char *config_file )
 			r_weather = atoi(a_string);
 			strcpy( a_string, COM_Parse( &s ) );
 			r_nosun = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_sunX = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_sunY = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_sunZ = atof(a_string);
 
 			if(fog.density > 0)
 				map_fog = true;
