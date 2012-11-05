@@ -191,6 +191,9 @@ extern	char		map_music[MAX_OSPATH];
 #endif
 extern  unsigned	r_weather;
 extern unsigned		r_nosun;
+extern float		r_sunX;
+extern float		r_sunY;
+extern float		r_sunZ;
 
 extern  cvar_t		*r_minimap;
 extern  cvar_t		*r_minimap_size;
