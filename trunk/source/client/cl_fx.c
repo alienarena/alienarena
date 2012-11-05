@@ -2718,6 +2718,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 	pr->scalevel = 0;
 	VectorCopy (start, pr->org);
 	VectorClear (pr->vel);
+	VectorClear (pr->accel);
 	pr->type = PARTICLE_CHAINED;
 	pr->color = 0xd4;
 	pr->image = r_beam2texture;
@@ -2833,6 +2834,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 	pr->scalevel = 0;
 	VectorCopy (start, pr->org);
 	VectorClear (pr->vel);
+	VectorClear (pr->accel);
 	pr->type = PARTICLE_CHAINED;
 	pr->color = 0x74;
 	pr->image = r_beam2texture;
