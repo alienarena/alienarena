@@ -1735,7 +1735,7 @@ void Qcommon_Frame (int msec)
 		extern	int c_traces, c_brush_traces;
 		extern	int	c_pointcontents;
 
-		if ( c_traces > 0 || c_brush_traces > 0 | c_pointcontents > 0 )
+		if ( c_traces > 0 || c_brush_traces > 0 || c_pointcontents > 0 )
 		{
 			Com_Printf ("%4i traces %4i brush %4i points\n", c_traces, c_brush_traces, c_pointcontents);
 			c_traces = 0;

@@ -475,8 +475,11 @@ FS_FullPath
 Given a relative path to a file
   search for the file in the installation-dependent filesystem hierarchy
   if found, return true, with the constructed full path
-  otherwise, return false, with a constructed writeable full path
+  otherwise return false, with full_path set to zero-length string
 
+Corrected 2012-11, was:
+  otherwise, return false, with a constructed writeable full path
+  (which clearly it might not, and could not do).
 ===
  */
 qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
@@ -484,6 +487,8 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 	char search_path[MAX_OSPATH];
 	char * to_search;
 	qboolean found = false;
+
+	*full_path = 0;
 
 	if ( strlen( relative_path ) >= MAX_QPATH )
 	{
