@@ -982,10 +982,16 @@ void SP_misc_teleporter (edict_t *ent)
 		return;
 	}
 
+	// The actual misc_teleporter is converted into a cosmetic object for the
+	// glowing effect, while a new entity is spawned to act as the functioning
+	// teleporter. 
 	gi.setmodel (ent, "models/objects/blank/tris.md2");
 	ent->s.skinnum = 1;
 	ent->s.effects = EF_TELEPORTER;
-	ent->solid = SOLID_BBOX;
+	// Changed from SOLID_BBOX to fix "blocking teleporter" bug. If this
+	// causes problems, an alternate fix would be to increase the size of the
+	// actual teleporter object. -M
+	ent->solid = SOLID_NOT; 
 
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -16);
