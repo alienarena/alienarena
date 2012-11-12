@@ -641,7 +641,7 @@ void ACEND_LoadNodes(void)
 
 	if ( !gi.FullPath( filename, sizeof(filename), relative_path ) )
 	{
-		gi.dprintf("ACEND_LoadNodes: not found: %s\n", filename );
+		gi.dprintf("ACEND_LoadNodes: not found: %s\n", relative_path );
 	}
 
 	if((pIn = fopen(filename, "rb" )) == NULL)
