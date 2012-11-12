@@ -126,6 +126,8 @@ void CL_ParseSteam (void)
 	{
 		s->id = 25; //unused for now
 		s->count = MSG_ReadByte (&net_message);
+		if (!s->count)
+			s->count = 32;
 
 		MSG_ReadPos (&net_message, s->org);
 		MSG_ReadDir (&net_message, s->dir);
@@ -152,7 +154,7 @@ void CL_ParseSteam (void)
 		s->magnitude = 30;
 		s->endtime = cl.time + 10000000;
 		s->think = CL_ParticleSteamEffect;
-		s->thinkinterval = 16; //~ 60 fps
+		s->thinkinterval = 512/s->count; //~ 60 fps
 		s->nextthink = cl.time;
 	}
 	else
