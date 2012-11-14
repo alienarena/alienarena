@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Alteria_debug|Win32">
+      <Configuration>Alteria_debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="alteria|Win32">
       <Configuration>alteria</Configuration>
       <Platform>Win32</Platform>
@@ -26,6 +30,11 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -42,6 +51,10 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
@@ -103,6 +116,28 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(FreeTypeSrcDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;_CRT_SECURE_NO_WARNINGS;FT_DEBUG_LEVEL_ERROR;FT_DEBUG_LEVEL_TRACE;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib />
+    <PreBuildEvent>
+      <Message>Copy FreeType configuration headers</Message>
+      <Command>FOR %%h IN ( $(BuildDir)freetype-config\*.h ) DO copy %%h $(FreeTypeSrcDir)include\freetype\config\</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /E /I /Y $(FreeTypeSrcDir)include\*.* $(LocalIncludeDir)</Command>
+      <Message>Copy header files to common local include directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Disabled</Optimization>

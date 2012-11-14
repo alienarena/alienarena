@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Alteria_debug|Win32">
+      <Configuration>Alteria_debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="alteria|Win32">
       <Configuration>alteria</Configuration>
       <Platform>Win32</Platform>
@@ -26,6 +30,11 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -45,6 +54,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
@@ -57,6 +70,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'">
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
@@ -65,6 +81,37 @@
     <CustomBuildBeforeTargets />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;BUILDING_LIBCURL;CURL_STATICLIB;HAVE_ZLIB_H;HAVE_ZLIB;HAVE_LIBZ;CURL_DISABLE_LDAP;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LibcurlSrcDir)include\;$(LibcurlSrcDir)lib\;$(LibzlibSrcDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( 
+ $(LibcurlSrcDir)include\curl\curl.h
+ $(LibcurlSrcDir)include\curl\curlbuild.h
+ $(LibcurlSrcDir)include\curl\curlver.h 
+ $(LibcurlSrcDir)include\curl\curlrules.h 
+ $(LibcurlSrcDir)include\curl\easy.h
+ $(LibcurlSrcDir)include\curl\mprintf.h
+ $(LibcurlSrcDir)include\curl\multi.h
+ $(LibcurlSrcDir)include\curl\stdcheaders.h
+ $(LibcurlSrcDir)include\curl\types.h
+ ) DO copy %%h  $(LocalIncludeDir)curl\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy header files to common local include</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;BUILDING_LIBCURL;CURL_STATICLIB;HAVE_ZLIB_H;HAVE_ZLIB;HAVE_LIBZ;CURL_DISABLE_LDAP;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>

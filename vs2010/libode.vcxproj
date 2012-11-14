@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Alteria_debug|Win32">
+      <Configuration>Alteria_debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="alteria|Win32">
       <Configuration>alteria</Configuration>
       <Platform>Win32</Platform>
@@ -26,6 +30,11 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -45,6 +54,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
@@ -55,9 +68,30 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='alteria|Win32'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;dDOUBLE; WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LibodeSrcDir)include\;$(LibodeSrcDir)ode\src;$(LibodeSrcDir)ode\src\joints;$(LibodeSrcDir)OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDataBaseFileName>$(OutDir)libode.pdb</ProgramDataBaseFileName>
+    </Link>
+    <PostBuildEvent>
+      <Command>FOR %%h IN (
+ $(LibodeSrcDir)include\ode\*.h
+ ) DO copy %%h  $(LocalIncludeDir)ode\</Command>
+      <Message>Copy header files to common local include directory</Message>
+    </PostBuildEvent>
+    <Lib />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;dDOUBLE; WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
