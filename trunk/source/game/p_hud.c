@@ -1008,12 +1008,13 @@ void G_SetStats (edict_t *ent)
 			//tally bot scores
 			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->value; j++, e2++) {
 				if(!strcmp(ent->client->resp.bots[i].name, e2->client->pers.netname))
-					ent->client->ps.bots[i].score = e2->client->resp.score;
+					ent->client->ps.bots[i].score = e2->client->resp.score;			
 			}
 		}
 	}
 	//end bot score info
 
+#ifndef ALTERIA
 	//weapon/ammo inventories
 	for(i = 0; i < 7; i++)
 		ent->client->ps.stats[STAT_WEAPN1+i] = 0;
@@ -1052,6 +1053,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->pers.weapon != (FindItem("Alien Vaporizer"))) {
 			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("vaporizor");
 	}
+#endif
 
 	//
 	// current weapon

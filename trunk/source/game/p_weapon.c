@@ -653,6 +653,9 @@ fire_begin:
 		{
 			if (gunframe == FRAME_IDLE_LAST)
 			{
+#ifdef ALTERIA
+				gunframe = FRAME_IDLE_FIRST; //we can return this to alien arena if we ever decide to have idle animations again for weapons
+#endif
 				return;
 			}
 
