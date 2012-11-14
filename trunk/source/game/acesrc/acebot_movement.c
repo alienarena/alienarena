@@ -1003,6 +1003,7 @@ standardmove:
 	}
 	else if ( c > jump_thresh )
 	{
+#ifndef ALTERIA
 		c = random();
 		if ( self->health >= 70
 				&& self->skill >= 2
@@ -1023,6 +1024,7 @@ standardmove:
 			return;
 		}
 		else
+#endif
 		{ // Normal Jump
 			ucmd->upmove += 200;
 		}

@@ -2782,7 +2782,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 {
 
 	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
+	vec3_t		vec, point, vec2;
 	float		len;
 	vec3_t		right, up;
 	particle_t	*p, *pr;

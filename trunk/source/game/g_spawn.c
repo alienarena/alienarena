@@ -82,8 +82,10 @@ spawn_t	spawns[] = {
 	{"target_splash", SP_target_splash},
 	{"target_steam", SP_target_steam},
 	{"target_spawner", SP_target_spawner},
+#ifndef ALTERIA
 	{"target_blaster", SP_target_blaster},
 	{"target_laser", SP_target_laser},
+#endif
 	{"target_lightramp", SP_target_lightramp},
 	{"target_earthquake", SP_target_earthquake},
 	{"target_fire", SP_target_fire},
