@@ -28,6 +28,9 @@ qboolean	Pickup_Weapon (edict_t *ent, edict_t *other);
 void		Use_Weapon (edict_t *ent, gitem_t *inv);
 void		Drop_Weapon (edict_t *ent, gitem_t *inv);
 
+#ifdef ALTERIA
+void Weapon_Warrior_Punch ( edict_t *ent);
+#else
 void Weapon_Blaster (edict_t *ent);
 void Weapon_Violator (edict_t *ent);
 void Weapon_Smartgun (edict_t *ent);
@@ -42,6 +45,7 @@ void Weapon_Bomber (edict_t *ent);
 void Weapon_Strafer (edict_t *ent);
 void Weapon_Deathball (edict_t *ent);
 void Weapon_Hover (edict_t *ent);
+#endif
 
 gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
@@ -1284,6 +1288,7 @@ gitem_t	itemlist[] =
 /* precache */ "misc/blue_scores.wav misc/blue_takes.wav misc/blue_increases.wav misc/blue_wins.wav misc/blue_picked.wav"
 	},
 
+#ifndef ALTERIA
 /*QUAKED item_bomber (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
@@ -1436,6 +1441,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL
 	},
+#endif
 	//
 	// WEAPONS
 	//
@@ -1462,6 +1468,30 @@ always owned, never in the world
 		0,
 /* precache */ "weapons/electroball.wav"
 	},
+
+#ifdef ALTERIA
+	//note some of this is clearly temporary placeholder
+	{
+		"weapon_warrior_punch",
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_Warrior_Punch,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"models/weapons/v_warriorhands/tris.md2",
+/* icon */		"warriorpunch",
+/* pickup */	"Warriorpunch",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_VIOLATOR,
+		NULL,
+		0,
+/* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
+	},
+#else
 /* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
 always owned, never in the world
 */
@@ -1688,7 +1718,7 @@ always owned, never in the world
 		0,
 /* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},
-
+#endif
 	//
 	// AMMO ITEMS
 	//

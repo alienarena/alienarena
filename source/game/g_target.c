@@ -364,6 +364,7 @@ dmg		default is 15
 speed	default is 1000
 */
 
+#ifndef ALTERIA
 void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 {
 	int effect;
@@ -392,7 +393,7 @@ void SP_target_blaster (edict_t *self)
 
 	self->svflags = SVF_NOCLIENT;
 }
-
+#endif
 //==========================================================
 
 /*QUAKED target_laser (0 .5 .8) (-8 -8 -8) (8 8 8) START_ON RED GREEN BLUE YELLOW ORANGE FAT

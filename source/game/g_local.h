@@ -269,6 +269,7 @@ typedef struct
 #define IT_POWERUP		16
 #define IT_HEALTH		32
 
+//to do - add alteria items - will require a number of other changes, particularly in bot code as well
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1
 #define WEAP_SMARTGUN			2
@@ -285,8 +286,6 @@ typedef struct
 #define WEAP_STRAFER			15
 #define WEAP_DEATHBALL			16
 #define WEAP_HOVER				17
-
-
 
 typedef struct gitem_s
 {
@@ -317,8 +316,6 @@ typedef struct gitem_s
 	char		*precaches;		// string of all models, sounds, and images this item will use
 } gitem_t;
 
-
-
 //
 // this structure is left intact through an entire game
 // it should be initialized at dll load time, and read/written to
@@ -345,7 +342,6 @@ typedef struct
 
 	qboolean	autosaved;
 } game_locals_t;
-
 
 //
 // this structure is cleared as each map is entered
@@ -398,7 +394,6 @@ typedef struct
 
 } level_locals_t;
 
-
 // spawn_temp_t is only used to hold entity field values that
 // can be set from the editor, but aren't actualy present
 // in edict_t during gameplay
@@ -423,7 +418,6 @@ typedef struct
 	float		minpitch;
 	float		maxpitch;
 } spawn_temp_t;
-
 
 typedef struct
 {
@@ -454,7 +448,6 @@ typedef struct
 	float		decel_distance;
 	void		(*endfunc)(edict_t *);
 } moveinfo_t;
-
 
 typedef struct
 {
@@ -502,8 +495,6 @@ typedef struct
 	int			linkcount;
 
 } monsterinfo_t;
-
-
 
 extern	game_locals_t	game;
 extern	level_locals_t	level;
@@ -893,6 +884,9 @@ qboolean FacingIdeal(edict_t *self);
 void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin);
 void ThrowDebris2 (edict_t *self, char *modelname, float speed, vec3_t origin);
 
+#ifdef ALTERIA
+void fire_punch(edict_t *self, vec3_t start, vec3_t aimdir, int damage);
+#else
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
@@ -907,13 +901,12 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate);
 void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer);
 void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed);
-
-//new weapon code
 void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
 void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper);
 void fire_prox (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, float timer);
 void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int alt);
+#endif
 
 //deathball
 void fire_deathball (edict_t *self, vec3_t start, vec3_t dir, int speed);

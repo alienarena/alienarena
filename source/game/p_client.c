@@ -638,13 +638,18 @@ void TossClientWeapon (edict_t *self)
 	item = self->client->pers.weapon;
 	if (! self->client->pers.inventory[self->client->ammo_index] )
 		item = NULL;
+
+#ifdef ALTERIA
+	if (item && (strcmp (item->pickup_name, "Warriorpunch") == 0))
+		item = NULL;
+#else
 	if (item && (strcmp (item->pickup_name, "Blaster") == 0))
 		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Violator") == 0))
 		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Minderaser") == 0))
 		item = NULL;
-
+#endif
 	if (!(dmflags->integer & DF_QUAD_DROP))
 		quad = false;
 	else
@@ -994,6 +999,9 @@ void InitClientPersistant (gclient_t *client)
 	if(g_duel->value)
 		client->pers.queue = queue;
 
+#ifdef ALTERIA
+	item = FindItem("Warriorpunch");
+#else
 	if(!rocket_arena->value) 
 	{	//gets a violator, unless RA
 		item = FindItem("Violator");
@@ -1026,13 +1034,14 @@ void InitClientPersistant (gclient_t *client)
 	}
 	else
 		item = FindItem("Blaster");
-
+#endif
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[client->pers.selected_item] = 1;
 
 	client->pers.weapon = item;
 
-	if(excessive->value) {
+	if(excessive->value) 
+	{
 		//Allow custom health, even in excessive.
 		client->pers.health 		= g_spawnhealth->value * 3;
 		client->pers.max_bullets 	= g_maxbullets->value * 2.5;
@@ -1058,7 +1067,9 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = g_maxgrenades->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = g_maxseekers->value * 2;
-	} else {
+	} 
+	else 
+	{
 		client->pers.health 		= g_spawnhealth->value;
 		client->pers.max_bullets 	= g_maxbullets->value;
 		client->pers.max_shells		= g_maxshells->value;
@@ -1076,13 +1087,15 @@ void InitClientPersistant (gclient_t *client)
 	else
 		client->pers.max_health = g_maxhealth->value;
 
-	if(grapple->value) {
+	if(grapple->value) 
+	{
 		item = FindItem("Grapple");
 		client->pers.inventory[ITEM_INDEX(item)] = 1;
 	}
 
 	//if powered up, give back powerups
-	if(client->resp.powered) {
+	if(client->resp.powered) 
+	{
 		item = FindItem("Invisibility");
 		client->pers.inventory[ITEM_INDEX(item)] += 1;
 

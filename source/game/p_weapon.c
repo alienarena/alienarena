@@ -45,7 +45,6 @@ void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t f
 	G_ProjectSource (point, _distance, forward, right, result);
 }
 
-
 /*
 ===============
 PlayerNoise
@@ -116,7 +115,6 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
 	noise->teleport_time = level.time;
 	gi.linkentity (noise);
 }
-
 
 qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 {
@@ -223,13 +221,7 @@ void Q2_FindFile (char *filename, FILE **file)
 			gi.dprintf("Q2_FindFile: failed fopen for read: %s", full_path );
 		}
 	}
-
 }
-
-
-
-
-
 
 /*
 ===============
@@ -304,6 +296,9 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
+#ifdef ALTERIA
+	//add in Alteria definitions
+#else
 	if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_violator/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_rocket/tris.md2"))
@@ -326,6 +321,7 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_minderaser.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"vehicles/deathball/v_wep.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
+#endif
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
@@ -359,9 +355,7 @@ void ChangeWeapon (edict_t *ent)
 	{
 			ent->s.frame = FRAME_pain301;
 			ent->client->anim_end = FRAME_pain304;
-
 	}
-
 }
 
 /*
@@ -490,8 +484,6 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	// change to this weapon when down
 	ent->client->newweapon = item;
 }
-
-
 
 /*
 ================
@@ -704,6 +696,51 @@ fire_begin:
 	#undef gunframe
 }
 
+#ifdef ALTERIA
+	//add Alteria weapons here
+/*
+======================================================================
+
+VIOALATOR
+
+======================================================================
+*/
+
+void warrior_punch_Fire (edict_t *ent)
+{
+	vec3_t	offset, start;
+	vec3_t	forward, right;
+	int		damage;
+	float	damage_radius;
+	int		radius_damage;
+
+	damage = 30; 
+	
+	AngleVectors (ent->client->v_angle, forward, right, NULL);
+
+	VectorScale (forward, 2, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -1;
+
+	VectorSet(offset, 4, 4, ent->viewheight-2);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	fire_punch (ent, start, forward, damage);
+
+	ent->client->ps.gunframe++;
+
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+
+	//punch does not use ammo
+}
+
+void Weapon_Warrior_Punch (edict_t *ent)
+{
+	static int	pause_frames[]	= {52, 0};
+	static int	fire_frames[]	= {6, 0};
+	
+	Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, fire_frames, warrior_punch_Fire);
+}
+#else
 void weapon_plasma_fire (edict_t *ent)
 {
 	vec3_t		start;
@@ -1999,4 +2036,4 @@ void Weapon_Violator (edict_t *ent)
 		Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, fire_frames, Violator_Fire);
 
 }
-
+#endif
