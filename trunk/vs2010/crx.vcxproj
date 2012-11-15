@@ -272,10 +272,11 @@
     <ClInclude Include="$(SrcDir)client\qal.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(SrcDir)win32\Q2.ico" />
+    <ResourceCompile Include="$(SrcDir)win32\q2.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="$(SrcDir)win32\q2.rc" />
+    <None Include="..\source\win32\aa.ico" />
+    <None Include="..\source\win32\al.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

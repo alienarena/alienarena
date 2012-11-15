@@ -642,6 +642,8 @@ void TossClientWeapon (edict_t *self)
 #ifdef ALTERIA
 	if (item && (strcmp (item->pickup_name, "Warriorpunch") == 0))
 		item = NULL;
+	if (item && (strcmp (item->pickup_name, "Wizardpunch") == 0))
+		item = NULL;
 #else
 	if (item && (strcmp (item->pickup_name, "Blaster") == 0))
 		item = NULL;
@@ -1874,6 +1876,37 @@ void PutClientInServer (edict_t *ent)
 	ent->s.modelindex4 = 0;
 
 	//check for class file
+#ifdef ALTERIA
+	ent->ctype = 0; //wizard is default
+	sprintf(modelpath, "players/%s/human", playermodel);
+	Q2_FindFile (modelpath, &file);
+	if(file) 
+	{	//warrior
+		ent->ctype = 1;
+		
+		ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
+		armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+		client->pers.inventory[armor_index] += 30;
+		client->pers.inventory[ITEM_INDEX(FindItem("Warriorpunch"))] = 1;
+		item = FindItem("Warriorpunch");
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+		client->pers.weapon = item;
+		
+		fclose(file);
+	}
+	else 
+	{	//wizard
+		
+		ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
+		client->pers.inventory[ITEM_INDEX(FindItem("Wizardpunch"))] = 1;
+		//client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100; //to to - blue or yellow mana
+		item = FindItem("Wizardpunch");
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+		client->pers.weapon = item;
+	}
+#else
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
@@ -1920,6 +1953,7 @@ void PutClientInServer (edict_t *ent)
 			}
 		}
 	}
+#endif
 
 	ent->s.frame = 0;
 	VectorCopy (spawn_origin, ent->s.origin);

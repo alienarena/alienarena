@@ -709,13 +709,11 @@ VIOALATOR
 ======================================================================
 */
 
-void warrior_punch_Fire (edict_t *ent)
+void punch_fire (edict_t *ent)
 {
 	vec3_t	offset, start;
 	vec3_t	forward, right;
 	int		damage;
-	float	damage_radius;
-	int		radius_damage;
 
 	damage = 30; 
 	
@@ -736,13 +734,22 @@ void warrior_punch_Fire (edict_t *ent)
 	//punch does not use ammo
 }
 
-void Weapon_Warrior_Punch (edict_t *ent)
+void Weapon_Punch (edict_t *ent)
 {
 	static int	pause_frames[]	= {52, 0};
-	static int	fire_frames[]	= {6, 0};
+	static int	fire_frames[]	= {9, 0};
 	
-	Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, fire_frames, warrior_punch_Fire);
+	Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, fire_frames, punch_fire);
 }
+
+void Weapon_Wizard_Punch (edict_t *ent)
+{
+	static int	pause_frames[]	= {52, 0};
+	static int	fire_frames[]	= {9, 0};
+	
+	Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, fire_frames, punch_fire);
+}
+
 #else
 void weapon_plasma_fire (edict_t *ent)
 {

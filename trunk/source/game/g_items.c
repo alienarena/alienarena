@@ -29,7 +29,7 @@ void		Use_Weapon (edict_t *ent, gitem_t *inv);
 void		Drop_Weapon (edict_t *ent, gitem_t *inv);
 
 #ifdef ALTERIA
-void Weapon_Warrior_Punch ( edict_t *ent);
+void Weapon_Punch ( edict_t *ent);
 #else
 void Weapon_Blaster (edict_t *ent);
 void Weapon_Violator (edict_t *ent);
@@ -1476,12 +1476,33 @@ always owned, never in the world
 		NULL,
 		Use_Weapon,
 		NULL,
-		Weapon_Warrior_Punch,
+		Weapon_Punch,
 		"misc/w_pkup.wav",
 		NULL, 0,
 		"models/weapons/v_warriorhands/tris.md2",
 /* icon */		"warriorpunch",
 /* pickup */	"Warriorpunch",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_VIOLATOR,
+		NULL,
+		0,
+/* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
+	},
+
+	{
+		"weapon_wizard_punch",
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_Punch,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"models/weapons/v_wizardhands/tris.md2",
+/* icon */		"wizardpunch",
+/* pickup */	"Wizardpunch",
 		0,
 		0,
 		NULL,
