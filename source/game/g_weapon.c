@@ -39,30 +39,29 @@ void fire_punch(edict_t *self, vec3_t start, vec3_t aimdir, int damage)
 	if ( g_antilag->integer)
 		G_DoTimeShiftFor( self );
 
-	VectorMA (start, 6.4, aimdir, end);
+	VectorMA (start, 32, aimdir, end);
 	
 	VectorCopy (start, from);
 	ignore = self;
 
-	tr = gi.trace (from, NULL, NULL, end, ignore, MASK_PLAYERSOLID);
+	tr = gi.trace (from, NULL, NULL, end, ignore, MASK_SHOT);
 
-	if ((tr.ent != self) && (tr.ent->takedamage)) 
+	if (tr.ent != self) 
 	{
-		T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 4, 0, MOD_VIOLATOR); //add alteria mod types
+		if(tr.ent->takedamage || (tr.fraction < 1.0))
+		{
+			if(tr.ent->takedamage)
+				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 4, 0, MOD_VIOLATOR); //add alteria mod types
 
-		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0); //change to impact sound
 
-		//change this to smoke puffs or similar
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_LASER_SPARKS);
-		gi.WriteByte (4);
-		gi.WritePosition (tr.endpos);
-		gi.WriteDir (tr.plane.normal);
-		// skinnum is sometimes larger, why?, but does it matter?
-		gi.WriteByte( ((self->s.skinnum > 255) ? 0 : self->s.skinnum) );
-		gi.multicast (tr.endpos, MULTICAST_PVS);
+			//change this to smoke puffs or similar
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_CHAINGUNSMOKE); //note TE_SMOKE is available and unused if we want better impact effects
+			gi.WritePosition (tr.endpos);
+			gi.multicast (start, MULTICAST_PVS);
+		}
 	}
-	VectorCopy (tr.endpos, from);
 
 	if ( g_antilag->integer)
 		G_UndoTimeShiftFor( self );
