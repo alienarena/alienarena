@@ -848,6 +848,7 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	int		row, column;
 	byte	*buf_p;
 	byte	*buffer;
+	size_t	buf_end;
 	int		length;
 	TargaHeader		targa_header;
 	byte			*targa_rgba;
@@ -866,30 +867,47 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	}
 
 	buf_p = buffer;
+	buf_end = (size_t)(buffer+length);
 
-	targa_header.id_length = *buf_p++;
-	targa_header.colormap_type = *buf_p++;
-	targa_header.image_type = *buf_p++;
+#define GET_TGA_BYTE(dest) \
+	if ((size_t)buf_p<buf_end)\
+	{\
+		(dest) = *buf_p++;\
+	}\
+	else\
+	{\
+		/* We don't set *pic to NULL, so if the image is mostly intact,
+		 * whatever pixels were already there will still show up.
+		 */\
+		Com_Printf ("LoadTGA: %s is either truncated or corrupt, please obtain a fresh copy!\n", name);\
+		return;\
+	}
 
-	tmp[0] = buf_p[0];
-	tmp[1] = buf_p[1];
+	GET_TGA_BYTE (targa_header.id_length);
+	GET_TGA_BYTE (targa_header.colormap_type);
+	GET_TGA_BYTE (targa_header.image_type);
+
+	GET_TGA_BYTE (tmp[0]);
+	GET_TGA_BYTE (tmp[1]);
 	targa_header.colormap_index = LittleShort ( *((short *)tmp) );
-	buf_p+=2;
-	tmp[0] = buf_p[0];
-	tmp[1] = buf_p[1];
+	GET_TGA_BYTE (tmp[0]);
+	GET_TGA_BYTE (tmp[1]);
 	targa_header.colormap_length = LittleShort ( *((short *)tmp) );
-	buf_p+=2;
-	targa_header.colormap_size = *buf_p++;
-	targa_header.x_origin = LittleShort ( *((short *)buf_p) );
-	buf_p+=2;
-	targa_header.y_origin = LittleShort ( *((short *)buf_p) );
-	buf_p+=2;
-	targa_header.width = LittleShort ( *((short *)buf_p) );
-	buf_p+=2;
-	targa_header.height = LittleShort ( *((short *)buf_p) );
-	buf_p+=2;
-	targa_header.pixel_size = *buf_p++;
-	targa_header.attributes = *buf_p++;
+	GET_TGA_BYTE (targa_header.colormap_size);
+	GET_TGA_BYTE (tmp[0]);
+	GET_TGA_BYTE (tmp[1]);
+	targa_header.x_origin = LittleShort ( *((short *)tmp) );
+	GET_TGA_BYTE (tmp[0]);
+	GET_TGA_BYTE (tmp[1]);
+	targa_header.y_origin = LittleShort ( *((short *)tmp) );
+	GET_TGA_BYTE (tmp[0]);
+	GET_TGA_BYTE (tmp[1]);
+	targa_header.width = LittleShort ( *((short *)tmp) );
+	GET_TGA_BYTE (tmp[0]);
+	GET_TGA_BYTE (tmp[1]);
+	targa_header.height = LittleShort ( *((short *)tmp) );
+	GET_TGA_BYTE (targa_header.pixel_size);
+	GET_TGA_BYTE (targa_header.attributes);
 
 	if (targa_header.image_type!=2
 		&& targa_header.image_type!=10) {
@@ -917,8 +935,9 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		*height = rows;
 
 	targa_rgba = malloc (numPixels*4);
+	memset (targa_rgba, 0, numPixels*4);
 	*pic = targa_rgba;
-
+	
 	if (targa_header.id_length != 0)
 		buf_p += targa_header.id_length;  // skip TARGA image comment
 
@@ -927,27 +946,21 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; column++) {
 				unsigned char red,green,blue,alphabyte;
+				GET_TGA_BYTE (blue);
+				GET_TGA_BYTE (green);
+				GET_TGA_BYTE (red);
 				switch (targa_header.pixel_size) {
 					case 24:
-							blue = *buf_p++;
-							green = *buf_p++;
-							red = *buf_p++;
-							*pixbuf++ = red;
-							*pixbuf++ = green;
-							*pixbuf++ = blue;
-							*pixbuf++ = 255;
+							alphabyte = 255;
 							break;
 					case 32:
-							blue = *buf_p++;
-							green = *buf_p++;
-							red = *buf_p++;
-							alphabyte = *buf_p++;
-							*pixbuf++ = red;
-							*pixbuf++ = green;
-							*pixbuf++ = blue;
-							*pixbuf++ = alphabyte;
+							GET_TGA_BYTE (alphabyte);
 							break;
 				}
+				*pixbuf++ = red;
+				*pixbuf++ = green;
+				*pixbuf++ = blue;
+				*pixbuf++ = alphabyte;
 			}
 		}
 	}
@@ -956,29 +969,26 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
-				packetHeader= *buf_p++;
+				GET_TGA_BYTE (packetHeader);
 				packetSize = 1 + (packetHeader & 0x7f);
 				if (packetHeader & 0x80) {        // run-length packet
+					GET_TGA_BYTE (blue);
+					GET_TGA_BYTE (green);
+					GET_TGA_BYTE (red);
 					switch (targa_header.pixel_size) {
 						case 24:
-								blue = *buf_p++;
-								green = *buf_p++;
-								red = *buf_p++;
 								alphabyte = 255;
 								break;
 						case 32:
-								blue = *buf_p++;
-								green = *buf_p++;
-								red = *buf_p++;
-								alphabyte = *buf_p++;
+								GET_TGA_BYTE (alphabyte);
 								break;
 					}
 
 					for(j=0;j<packetSize;j++) {
-						*pixbuf++=red;
-						*pixbuf++=green;
-						*pixbuf++=blue;
-						*pixbuf++=alphabyte;
+						*pixbuf++ = red;
+						*pixbuf++ = green;
+						*pixbuf++ = blue;
+						*pixbuf++ = alphabyte;
 						column++;
 						if (column==columns) { // run spans across rows
 							column=0;
@@ -992,27 +1002,21 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 				}
 				else {                            // non run-length packet
 					for(j=0;j<packetSize;j++) {
+						GET_TGA_BYTE (blue);
+						GET_TGA_BYTE (green);
+						GET_TGA_BYTE (red);
 						switch (targa_header.pixel_size) {
 							case 24:
-									blue = *buf_p++;
-									green = *buf_p++;
-									red = *buf_p++;
-									*pixbuf++ = red;
-									*pixbuf++ = green;
-									*pixbuf++ = blue;
-									*pixbuf++ = 255;
+									alphabyte = 255;
 									break;
 							case 32:
-									blue = *buf_p++;
-									green = *buf_p++;
-									red = *buf_p++;
-									alphabyte = *buf_p++;
-									*pixbuf++ = red;
-									*pixbuf++ = green;
-									*pixbuf++ = blue;
-									*pixbuf++ = alphabyte;
+									GET_TGA_BYTE (alphabyte);
 									break;
 						}
+						*pixbuf++ = red;
+						*pixbuf++ = green;
+						*pixbuf++ = blue;
+						*pixbuf++ = alphabyte;
 						column++;
 						if (column==columns) { // pixel packet run spans across rows
 							column=0;
