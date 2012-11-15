@@ -870,17 +870,19 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	buf_end = (size_t)(buffer+length);
 
 #define GET_TGA_BYTE(dest) \
-	if ((size_t)buf_p<buf_end)\
 	{\
-		(dest) = *buf_p++;\
-	}\
-	else\
-	{\
-		/* We don't set *pic to NULL, so if the image is mostly intact,
-		 * whatever pixels were already there will still show up.
-		 */\
-		Com_Printf ("LoadTGA: %s is either truncated or corrupt, please obtain a fresh copy!\n", name);\
-		return;\
+		if ((size_t)buf_p<buf_end)\
+		{\
+			(dest) = *buf_p++;\
+		}\
+		else\
+		{\
+			/* We don't set *pic to NULL, so if the image is mostly intact,
+			 * whatever pixels were already there will still show up.
+			 */\
+			Com_Printf ("LoadTGA: %s is either truncated or corrupt, please obtain a fresh copy!\n", name);\
+			return;\
+		}\
 	}
 
 	GET_TGA_BYTE (targa_header.id_length);
@@ -945,17 +947,13 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; column++) {
-				unsigned char red,green,blue,alphabyte;
+				unsigned char red,green,blue,alphabyte=255;
 				GET_TGA_BYTE (blue);
 				GET_TGA_BYTE (green);
 				GET_TGA_BYTE (red);
-				switch (targa_header.pixel_size) {
-					case 24:
-							alphabyte = 255;
-							break;
-					case 32:
-							GET_TGA_BYTE (alphabyte);
-							break;
+				if (targa_header.pixel_size == 32)
+				{
+					GET_TGA_BYTE (alphabyte);
 				}
 				*pixbuf++ = red;
 				*pixbuf++ = green;
@@ -965,7 +963,7 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		}
 	}
 	else if (targa_header.image_type==10) {   // Runlength encoded RGB images
-		unsigned char red=0,green=0,blue=0,alphabyte=0,packetHeader,packetSize,j;
+		unsigned char red=0,green=0,blue=0,alphabyte=255,packetHeader,packetSize,j;
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
@@ -975,14 +973,8 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 					GET_TGA_BYTE (blue);
 					GET_TGA_BYTE (green);
 					GET_TGA_BYTE (red);
-					switch (targa_header.pixel_size) {
-						case 24:
-								alphabyte = 255;
-								break;
-						case 32:
-								GET_TGA_BYTE (alphabyte);
-								break;
-					}
+					if (targa_header.pixel_size == 32)
+						GET_TGA_BYTE (alphabyte);
 
 					for(j=0;j<packetSize;j++) {
 						*pixbuf++ = red;
@@ -1005,14 +997,8 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 						GET_TGA_BYTE (blue);
 						GET_TGA_BYTE (green);
 						GET_TGA_BYTE (red);
-						switch (targa_header.pixel_size) {
-							case 24:
-									alphabyte = 255;
-									break;
-							case 32:
-									GET_TGA_BYTE (alphabyte);
-									break;
-						}
+						if (targa_header.pixel_size == 32)
+							GET_TGA_BYTE (alphabyte);
 						*pixbuf++ = red;
 						*pixbuf++ = green;
 						*pixbuf++ = blue;
