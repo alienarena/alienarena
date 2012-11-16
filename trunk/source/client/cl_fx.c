@@ -3980,7 +3980,7 @@ void CL_AddParticles (void)
                 ( p->current_origin[1] - r_origin[1] ) * vpn[1] +
                 ( p->current_origin[2] - r_origin[2] ) * vpn[2];
 
-        if (p->dist < 0)
+        if (p->type != PARTICLE_CHAINED && p->dist < 0)
             continue;
         else if (p->dist >= 40)
             p->dist = 2 + p->dist * 0.004;

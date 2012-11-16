@@ -82,7 +82,17 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	{
 	    p = *p1;
 
-		if( R_CullSphere( p->current_origin, 64, 15 ) )
+		if( p->type == PARTICLE_CHAINED && p->chain_prev)
+		{
+			vec3_t span, beam_org;
+			VectorSubtract (p->current_origin, p->chain_prev->current_origin, span);
+			VectorAdd (p->current_origin, p->chain_prev->current_origin, beam_org);
+			VectorScale (beam_org, 0.5, beam_org);
+			VectorScale (span, 0.5, span);
+			if (R_CullSphere( beam_org, VectorLength (span), 15 ) )
+				continue;
+		}
+		else if (R_CullSphere( p->current_origin, 64, 15 ) )
 			continue;
 
 		if(p->type == PARTICLE_NONE) {
