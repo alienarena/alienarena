@@ -123,6 +123,24 @@ int		c_pointcontents;
 int		c_traces, c_brush_traces;
 
 
+/**
+ * calculate the 3 signbits for a plane normal.
+ *
+ * @param  plane
+ * @return the signbits
+ */
+static byte signbits_for_plane(const cplane_t *plane)
+{
+	byte bits;
+
+	bits =  plane->normal[0] < 0.0f ? (byte)0x01 : 0 ;
+	bits |= plane->normal[1] < 0.0f ? (byte)0x02 : 0 ;
+	bits |= plane->normal[2] < 0.0f ? (byte)0x04 : 0 ;
+
+	return bits;
+}
+
+
 /*
 ===============================================================================
 
@@ -366,11 +384,10 @@ CMod_LoadPlanes
 */
 void CMod_LoadPlanes (lump_t *l)
 {
-	int			i, j;
+	int			i;
 	cplane_t	*out;
 	dplane_t 	*in;
 	int			count;
-	int			bits;
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -385,20 +402,15 @@ void CMod_LoadPlanes (lump_t *l)
 
 	out = map_planes;
 	numplanes = count;
-
-	for ( i=0 ; i<count ; i++, in++, out++)
+	for ( ; count-- ; in++, out++)
 	{
-		bits = 0;
-		for (j=0 ; j<3 ; j++)
+		for (i=0 ; i<3 ; i++)
 		{
-			out->normal[j] = LittleFloat (in->normal[j]);
-			if (out->normal[j] < 0)
-				bits |= 1<<j;
+			out->normal[i] = LittleFloat( in->normal[i] );
 		}
-
 		out->dist = LittleFloat (in->dist);
 		out->type = LittleLong (in->type);
-		out->signbits = bits;
+		out->signbits = signbits_for_plane( out );
 	}
 }
 
@@ -902,15 +914,15 @@ void CM_InitBoxHull (void)
 		// planes
 		p = &box_planes[i*2];
 		p->type = i>>1;
-		p->signbits = 0;
 		VectorClear (p->normal);
 		p->normal[i>>1] = 1;
+		p->signbits = signbits_for_plane( p );
 
 		p = &box_planes[i*2+1];
 		p->type = 3 + (i>>1);
-		p->signbits = 0;
 		VectorClear (p->normal);
 		p->normal[i>>1] = -1;
+		p->signbits = signbits_for_plane( p );
 	}
 }
 
@@ -1142,18 +1154,6 @@ qboolean	trace_ispoint;		// optimized case
  *           trace_t record. otherwise does not touch trace_t record
  *
  */
-
-static byte signbits_for_plane(cplane_t *plane)
-{
-	byte bits;
-
-	bits =  plane->normal[0] < 0.0f ? (byte)0x01 : 0 ;
-	bits |= plane->normal[1] < 0.0f ? (byte)0x02 : 0 ;
-	bits |= plane->normal[2] < 0.0f ? (byte)0x04 : 0 ;
-
-	return bits;
-}
-
 void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
 		trace_t *trace, cbrush_t *brush )
 {
@@ -1185,51 +1185,69 @@ void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
 		plane = side->plane;
 		if ( !trace_ispoint )
 		{
-			/* HACK ALERT
-			**  TCA powernodes (and probably, transporters)
-			**  do not have valid signbits. Not sure why.
-			**  This fixes problems with touching TCA powernodes.
-			*/
-			plane->signbits = signbits_for_plane( plane );
-
-			switch ( plane->signbits ) /* bit2=z<0, bit1=y<0, bit0=x<0 */
+			switch ( plane->type )
 			{
-			case 0: /* 000b */
-				dist = plane->dist - (mins[0]*plane->normal[0] +
-						mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+			case PLANE_X:
+				if ( plane->signbits == 0x01 )
+					dist = plane->dist - (maxs[0]*plane->normal[0]);
+				else
+					dist = plane->dist - (mins[0]*plane->normal[0]);
 				break;
-			case 1: /* 001b */
-				dist = plane->dist - (maxs[0]*plane->normal[0] +
-						mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+
+			case PLANE_Y:
+				if ( plane->signbits == 0x02 )
+					dist = plane->dist - (maxs[1]*plane->normal[1]);
+				else
+					dist = plane->dist - (mins[1]*plane->normal[1]);
 				break;
-			case 2: /* 010b */
-				dist = plane->dist - (mins[0]*plane->normal[0] +
-						maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
-				break;
-			case 3: /* 011b */
-				dist = plane->dist - (maxs[0]*plane->normal[0] +
-						maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
-				break;
-			case 4: /* 100b */
-				dist = plane->dist - (mins[0]*plane->normal[0] +
-						mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-				break;
-			case 5: /* 101b */
-				dist = plane->dist - (maxs[0]*plane->normal[0] +
-						mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-				break;
-			case 6: /* 110b */
-				dist = plane->dist - (mins[0]*plane->normal[0] +
-						maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-				break;
-			case 7: /* 111b */
-				dist = plane->dist - (maxs[0]*plane->normal[0] +
-						maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+
+			case PLANE_Z:
+				if ( plane->signbits == 0x04 )
+					dist = plane->dist - (maxs[2]*plane->normal[2]);
+				else
+					dist = plane->dist - (mins[2]*plane->normal[2]);
 				break;
 
 			default:
-				Com_Error( ERR_DROP, "CM_ClipBoxToBrush: bad plane signbits\n");
-				return; // unreachable. suppress bogus compiler warning
+				switch ( plane->signbits ) /* bit2=z<0, bit1=y<0, bit0=x<0 */
+				{
+				case 0: /* 000b */
+					dist = plane->dist - (mins[0]*plane->normal[0] +
+							mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+					break;
+				case 1: /* 001b */
+					dist = plane->dist - (maxs[0]*plane->normal[0] +
+							mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+					break;
+				case 2: /* 010b */
+					dist = plane->dist - (mins[0]*plane->normal[0] +
+							maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+					break;
+				case 3: /* 011b */
+					dist = plane->dist - (maxs[0]*plane->normal[0] +
+							maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+					break;
+				case 4: /* 100b */
+					dist = plane->dist - (mins[0]*plane->normal[0] +
+							mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+					break;
+				case 5: /* 101b */
+					dist = plane->dist - (maxs[0]*plane->normal[0] +
+							mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+					break;
+				case 6: /* 110b */
+					dist = plane->dist - (mins[0]*plane->normal[0] +
+							maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+					break;
+				case 7: /* 111b */
+					dist = plane->dist - (maxs[0]*plane->normal[0] +
+							maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+					break;
+
+				default:
+					Com_Error( ERR_DROP, "CM_ClipBoxToBrush: bad plane signbits\n");
+					return; // unreachable. suppress bogus compiler warning
+				}
 			}
 		}
 		else
