@@ -1142,6 +1142,18 @@ qboolean	trace_ispoint;		// optimized case
  *           trace_t record. otherwise does not touch trace_t record
  *
  */
+
+static byte signbits_for_plane(cplane_t *plane)
+{
+	byte bits;
+
+	bits =  plane->normal[0] < 0.0f ? (byte)0x01 : 0 ;
+	bits |= plane->normal[1] < 0.0f ? (byte)0x02 : 0 ;
+	bits |= plane->normal[2] < 0.0f ? (byte)0x04 : 0 ;
+
+	return bits;
+}
+
 void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
 		trace_t *trace, cbrush_t *brush )
 {
@@ -1173,6 +1185,13 @@ void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
 		plane = side->plane;
 		if ( !trace_ispoint )
 		{
+			/* HACK ALERT
+			**  TCA powernodes (and probably, transporters)
+			**  do not have valid signbits. Not sure why.
+			**  This fixes problems with touching TCA powernodes.
+			*/
+			plane->signbits = signbits_for_plane( plane );
+
 			switch ( plane->signbits ) /* bit2=z<0, bit1=y<0, bit0=x<0 */
 			{
 			case 0: /* 000b */
