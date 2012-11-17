@@ -988,10 +988,7 @@ void SP_misc_teleporter (edict_t *ent)
 	gi.setmodel (ent, "models/objects/blank/tris.md2");
 	ent->s.skinnum = 1;
 	ent->s.effects = EF_TELEPORTER;
-	// Changed from SOLID_BBOX to fix "blocking teleporter" bug. If this
-	// causes problems, an alternate fix would be to increase the size of the
-	// actual teleporter object. -M
-	ent->solid = SOLID_NOT; 
+	ent->solid     = SOLID_BBOX;
 
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -16);
