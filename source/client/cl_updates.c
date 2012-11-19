@@ -33,8 +33,8 @@ static CURL *curl;
 extern cvar_t  *cl_latest_game_version_url;
 
 
-static char *versionstr;
-static size_t versionstr_sz;
+static char *versionstr = NULL;
+static size_t versionstr_sz = 0;
 
 static char* extend_versionstr ( size_t bytecount )
 {
@@ -98,6 +98,7 @@ void getLatestGameVersion( void )
         if ( atof ( versionstr ) )
             Cvar_SetValue ( "cl_latest_game_version", atof ( versionstr ) );
         free ( versionstr );
+        versionstr = NULL;
     }
 
 }
