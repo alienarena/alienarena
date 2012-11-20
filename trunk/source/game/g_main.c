@@ -69,6 +69,9 @@ cvar_t  *classbased;
 //duel mode
 cvar_t	*g_duel;
 
+//tactical mode
+cvar_t	*g_tactical;
+
 cvar_t	*g_losehealth;
 cvar_t	*g_losehealth_num;
 

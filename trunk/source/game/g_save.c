@@ -210,6 +210,9 @@ void InitGame (void)
 	//duel mode
 	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH|CVAR_GAMEINFO);
 
+	//tactical mode
+	g_tactical = gi.cvar ("g_tactical", "0", CVAR_LATCH|CVAR_GAMEINFO);
+
 	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH);
 	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH);
 
