@@ -1348,7 +1348,7 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	{
 		Com_Printf ("Mod_LoadRefineLightmap: invalid major version number in %s!\n"
 					"Version %d of the format is not supported. Current major version number is %d\n", 
-					name, header.ident, LTMPVERSION);
+					name, header.version, LTMPVERSION);
 		free (uncompressed_buf);
 		return;
 	}
