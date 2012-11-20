@@ -156,13 +156,13 @@ byte	*cmod_base;
 //BSP file format has been made less extensible, but we've tended to add more
 //data using separate files instead of adding lumps to the BSP, so I think we
 //can live with that.
-qboolean checkLumps (lump_t *l, int *lump_order, void *_file_base, int num_lumps, int file_len)
+qboolean checkLumps (lump_t *l, size_t header_size, int *lump_order, void *_file_base, int num_lumps, int file_len)
 {
 	int i = 0;
 	lump_t *in;
 	byte *lumpdata_base;
 	byte *file_base = (byte *)_file_base;
-	byte *lumpdata_next = file_base+2*sizeof(int)+sizeof(lump_t)*num_lumps;
+	byte *lumpdata_next = file_base+header_size+sizeof(lump_t)*num_lumps;
 	byte *file_end = file_base + file_len;
 	for (i = 0; i < num_lumps; i++)
 	{
@@ -689,7 +689,7 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 
 	cmod_base = (byte *)buf;
 	
-	if (checkLumps(header.lumps, bsp_lump_order, cmod_base, HEADER_LUMPS, length))
+	if (checkLumps(header.lumps, 2*sizeof(int), bsp_lump_order, cmod_base, HEADER_LUMPS, length))
 		Com_Error (ERR_DROP,"CMod_LoadBrushModel: lumps in %s don't add up right!\n"
 							"The file is likely corrupt, please obtain a fresh copy.",name);
 

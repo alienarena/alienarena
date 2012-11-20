@@ -1180,6 +1180,7 @@ int					lightdatasize;
 byte				override_lightdata[MAX_OVERRIDE_LIGHTING];
 byte				*lightmap_header;
 
+// choose up to one override for each map face
 void Mod_LoadRefineFaceLookups (lump_t *l)
 {
 	int i, count;
@@ -1193,42 +1194,96 @@ void Mod_LoadRefineFaceLookups (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Com_Error (ERR_DROP, "Mod_LoadRefineFaceLookups: funny lump size");
 	count = l->filelen / sizeof (*in);
-	if (count > MAX_MAP_FACES)
-		Com_Error (ERR_DROP, "Mod_LoadRefineFaceeLookups: too many faces");
-	
-	out = lfacelookups;
 	
 	Com_Printf ("%f\n", in->xscale);
-	for (i = 0; i < count; i++, out++, in++)
+	for (i = 0; i < count; i++, in++)
 	{
-		out->override = LittleLong(in->override);
-		out->width = LittleLong(in->width);
-		out->height = LittleLong(in->height);
+		int facenum, format, offset, size, width, height;
+
+		// Silently skip over pixel formats we don't understand. We do this
+		// check first so that in the future it can be used to work around the
+		// following two for backward compatibility.
+		format = LittleLong(in->format);
+		if (format >= LTMP_NUM_SUPPORTED_PIXFMTS)
+			continue;
+	    
+		// make a federal case out of bad face offsets
+		facenum = LittleLong(in->facenum);
+		if (facenum >= MAX_MAP_FACES || facenum < 0)
+			Com_Error (ERR_DROP, "Mod_LoadRefineFaceeLookups: bad facenum");
+
+		// make a federal case out of bad pixel data offsets
+		offset = LittleLong(in->offset);
+		width = LittleLong(in->width);
+		height = LittleLong(in->height);
+		switch (format)
+		{
+			case LTMP_PIXFMT_RGB24:
+				size = 3*width*height;
+				break;
+		}
+		if (offset < 1 || offset+size > MAX_OVERRIDE_LIGHTING*4)
+			Com_Error (ERR_DROP, "Mod_LoadRefineFaceeLookups: bad offset");
+
+		out = &lfacelookups[facenum];
+		out->offset = offset;
+		out->format = format;
+		out->width = width;
+		out->height = height;
 		out->xscale = LittleFloat(in->xscale);
 		out->yscale = LittleFloat(in->yscale);
 	}
 }
 
+// load only the lightmap data that will actually be used; readjust the 
+// pixel data offsets accordingly
 void Mod_LoadRefineLighting (lump_t *l)
 {
+	int					i;
+	byte				*in_buffer;
+	qboolean			overflowed = false;
+	
 	if (!l->filelen)
 		return;
-	if (l->filelen > MAX_OVERRIDE_LIGHTING)
+	if (l->filelen > MAX_OVERRIDE_LIGHTING*4)
 		Com_Error (ERR_DROP, "Mod_LoadRefineLighting: too much light data");
-	lightdatasize = l->filelen;
-	memcpy (override_lightdata, lightmap_header + l->fileofs, l->filelen);
+	
+	lightdatasize = 0;
+	in_buffer = lightmap_header + l->fileofs;
+	for (i = 0; i < loadmodel->numsurfaces; i++)
+	{
+		int in_offset = lfacelookups[i].offset;
+		if (in_offset)
+		{
+			int size = 0;
+			switch (lfacelookups[i].format)
+			{
+				case LTMP_PIXFMT_RGB24:
+					size = 3*lfacelookups[i].width*lfacelookups[i].height;
+					break;
+			}
+			if (lightdatasize + size >= MAX_OVERRIDE_LIGHTING)
+			{
+				overflowed = true;
+				break;
+			}
+			memcpy (override_lightdata+lightdatasize, in_buffer+in_offset-1, size);
+			lfacelookups[i].offset = lightdatasize+1;
+			lightdatasize += size;
+		}
+	}
+	
+	if (overflowed)
+	{
+		Com_Printf ("Mod_LoadRefineLighting: MAX_OVERRIDE_LIGHTING overflow!\n");
+		Com_Printf ("Disabling HD lightmaps for this map.\n");
+		memset (lfacelookups, 0, sizeof(lfacelookups));
+	}
 }
 
-//more than necessary
-#define SIZEOF_LIGHTMAP_UNCOMPRESSED (\
-	sizeof(lightmapheader_t)+\
-	sizeof(ltmp_facelookup_t)*MAX_MAP_FACES+\
-	MAX_OVERRIDE_LIGHTING+16\
-)
-byte			uncompressed_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
 void Mod_LoadRefineLightmap (char *bsp_name)
 {
-	byte 				*buf;
+	byte 				*buf, *uncompressed_buf;
 	lightmapheader_t	header;
 	int					length;
 	char				name[MAX_OSPATH];
@@ -1262,13 +1317,20 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	
 	SZ_Init (&in, buf, length);
 	in.cursize = length;
-	SZ_Init (&out, (byte *)uncompressed_buf, SIZEOF_LIGHTMAP_UNCOMPRESSED);
+	uncompressed_buf = malloc (LTMP_MAX_UNCOMPRESSED_DATA);
+	if (!uncompressed_buf)
+	{
+		Com_Printf ("Mod_LoadRefineLightmap: unable to allocate %d bytes!\n", LTMP_MAX_UNCOMPRESSED_DATA);
+		return;
+	}
+	SZ_Init (&out, (byte *)uncompressed_buf, LTMP_MAX_UNCOMPRESSED_DATA);
 	qdecompress (&in, &out, compression_zlib_header);
 	FS_FreeFile (buf);
 	
 	if (!out.cursize)
 	{
 		Com_Printf ("Mod_LoadRefineLightmap: unable to decompress data in %s!\n",name);
+		free (uncompressed_buf);
 		return;
 	}
 	
@@ -1279,26 +1341,30 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	{
 		Com_Printf ("Mod_LoadRefineLightmap: invalid magic number in %s!\n"
 					"The file is likely corrupt, please obtain a fresh copy.\n", name);
-					
+		free (uncompressed_buf);			
 		return;
 	}
 	if (header.version != LTMPVERSION)
 	{
-		Com_Printf ("Mod_LoadRefineLightmap: invalid version number in %s!\n"
-					"Version %d of the format is not supported. Most recent supported is %d\n", 
+		Com_Printf ("Mod_LoadRefineLightmap: invalid major version number in %s!\n"
+					"Version %d of the format is not supported. Current major version number is %d\n", 
 					name, header.ident, LTMPVERSION);
+		free (uncompressed_buf);
 		return;
 	}
 	
-	if (checkLumps (header.lumps, lightmap_file_lump_order, uncompressed_buf, LTMP_LUMPS, out.cursize))
+	if (checkLumps (header.lumps, sizeof(int)*3, lightmap_file_lump_order, uncompressed_buf, LTMP_LUMPS, out.cursize))
 	{
 		Com_Printf ("Mod_LoadRefineLightmap: lumps in %s don't add up right!\n"
 					"The file is likely corrupt, please obtain a fresh copy.\n",name);
+		free (uncompressed_buf);
 		return;
 	}
 	
 	Mod_LoadRefineFaceLookups (&header.lumps[LTMP_LUMP_FACELOOKUP]);
 	Mod_LoadRefineLighting (&header.lumps[LTMP_LUMP_LIGHTING]);
+	
+	free (uncompressed_buf);
 }
 
 /*
@@ -1369,7 +1435,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 				"The file is likely corrupted, please obtain a fresh copy.");
 		out->texinfo = loadmodel->texinfo + ti;
 
-		if (lfacelookups[surfnum].override)
+		if (lfacelookups[surfnum].offset)
 		{
 			smax=lfacelookups[surfnum].width;
 			tmax=lfacelookups[surfnum].height;
@@ -1390,8 +1456,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 
 		if (i < 0 || i >= lighting->filelen)
 			out->samples = NULL;
-		else if (lfacelookups[surfnum].override > 0 && lfacelookups[surfnum].override <= lightdatasize)
-			out->samples = override_lightdata + lfacelookups[surfnum].override-1;
+		else if (lfacelookups[surfnum].offset > 0 && lfacelookups[surfnum].offset <= lightdatasize)
+			out->samples = override_lightdata + lfacelookups[surfnum].offset-1;
 		else
 			out->samples = loadmodel->lightdata + i;
 
