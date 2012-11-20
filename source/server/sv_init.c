@@ -30,6 +30,7 @@ server_t		sv;					// local server
 extern cvar_t	*public_server;
 cvar_t		*sv_excessive;
 cvar_t		*sv_playerspeed;
+cvar_t		*sv_tactical;
 extern float pm_maxspeed;
 extern void SV_SetMaster_f(void);
 
@@ -284,8 +285,11 @@ void SV_InitGame (void)
 	//set player move speed according to excessive value
 	sv_excessive = Cvar_Get ("excessive", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	sv_playerspeed = Cvar_Get ("playerspeed", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	sv_tactical = Cvar_Get ("g_tactical", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	if(sv_excessive->value || sv_playerspeed->value)
 		pm_maxspeed = 450;
+	else if(sv_tactical->value)
+		pm_maxspeed = 200;
 	else
 		pm_maxspeed = 300;
 

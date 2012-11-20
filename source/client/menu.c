@@ -75,15 +75,16 @@ static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
 // static char *menu_background	= "misc/menuback.wav"; // unused
-int svridx;
-int playeridx;
-int modidx;
+static int svridx;
+static int playeridx;
+static int curridx;
+static int modidx;
 int hover_time;
 float mappicalpha;
 float banneralpha;
 float mainalpha;
-int montagepic = 1;
-int pNameUnique;
+static int montagepic = 1;
+static int pNameUnique;
 
 void M_Menu_Main_f (void);
 	void M_Menu_PlayerConfig_f (void);
@@ -92,6 +93,7 @@ void M_Menu_Main_f (void);
 	void M_Menu_JoinServer_f (void);
 			void M_Menu_AddressBook_f( void );
 			void M_Menu_PlayerRanking_f( void );
+			void M_Menu_Tactical_f( void );
 	void M_Menu_StartServer_f (void);
 			void M_Menu_DMOptions_f (void);
 	void M_Menu_IRC_f (void);
@@ -3354,6 +3356,7 @@ static char mod_names[] =
     "\\testcode"        "\\code testing"
     "\\testmap"         "\\map testing"
     "\\dodgedelay=0"    "\\rapid dodging"
+	"\\g_tactical"		"\\aa tactical"
     "\\";
 
 //Descriptions. If a cvar isn't recognized, "(no description)" is used.
@@ -3382,6 +3385,7 @@ static char mods_desc[] =
     "\\testcode"        "\\server is testing experimental code"
     "\\testmap"         "\\server is testing an unfinished map"
     "\\dodgedelay=0"    "\\no minimum time between dodges"
+	"\\g_tactical"		"\\humans vs martians, destroy enemy bases"
     "\\";
 
 int GetColorTokens( char *string)
@@ -3457,13 +3461,15 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	PLAYERSTATS	player;
 
 	destserver->local_server_netadr = adr;
-        // starttime now sourced per server.
-        starttime = CL_GetPingStartTime(adr);
-        if (starttime != 0)
-                destserver->ping = Sys_Milliseconds() - starttime;
-        else
-                // Local LAN?
-                destserver->ping = 1;
+    // starttime now sourced per server.
+    starttime = CL_GetPingStartTime(adr);
+    if (starttime != 0)
+		destserver->ping = Sys_Milliseconds() - starttime;
+    else
+	{
+		// Local LAN?
+        destserver->ping = 1;
+	}
 	if ( destserver->ping < 1 )
 		destserver->ping = 1; /* for LAN and address book entries */
 
@@ -3483,7 +3489,8 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 
 	/* Establish string and get the first token: */
 	token = strtok( rLine, seps );
-	while( token != NULL ) {
+	while( token != NULL ) 
+	{
 		/* While there are tokens in "string" */
 		if (!Q_strcasecmp (lasttoken, "admin"))
 			Com_sprintf(destserver->szAdmin, sizeof(destserver->szAdmin), "Admin: %s", token);
@@ -3516,7 +3523,8 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	//playerinfo
 	rankTotal = 0;
 	strcpy (seps, " ");
-	while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) {
+	while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) 
+	{
 		/* Establish string and get the first token: */
 		token = strtok( rLine, seps);
 		score = atoi(token);
@@ -3560,8 +3568,8 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 			bots++;
 	}
 
-	if(players) {
-
+	if(players) 
+	{
 		if(thisPlayer.ranking < (rankTotal/players) - 100)
 			strcpy(skillLevel, "Your Skill is ^1Higher");
 		else if(thisPlayer.ranking > (rankTotal/players + 100))
@@ -3581,16 +3589,19 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	//save off the raw name for tooltip use
 	strcpy(destserver->szRawName, destserver->szHostName);
 	x = 0;
-	for(i=0; i<32; i++) {
+	for(i=0; i<32; i++) 
+	{
 		if(!destserver->szHostName[i])
 			destserver->szHostName[i] = 32;
-		else if(destserver->szHostName[i] == '^' && i < strlen( destserver->szHostName )-1) {
+		else if(destserver->szHostName[i] == '^' && i < strlen( destserver->szHostName )-1) 
+		{
 			if(destserver->szHostName[i+1] != '^')
 				x += 2;
 		}
 	}
 	destserver->szHostName[20+x] = 0; //fix me this is dangerous
-	for(i=0; i<12; i++) {
+	for(i=0; i<12; i++) 
+	{
 		if(!destserver->szMapName[i])
 			destserver->szMapName[i] = 32;
 	}
@@ -3707,6 +3718,7 @@ void JoinServerFunc( void *self )
 	int     i;
 	char    modstring[64];
 	char    *token;
+	qboolean is_tactical = false;
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
@@ -3763,6 +3775,16 @@ void JoinServerFunc( void *self )
 	if(!pNameUnique) {
 		M_Menu_PlayerConfig_f();
 		return;
+	}
+
+	for ( i = 0; i < 6; i++)
+	{
+        if( !strcmp("g_tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
+		{
+			curridx = index;
+			M_Menu_Tactical_f();
+			return;
+		}
 	}
 
 	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index+svridx].local_server_netadr));
@@ -6950,6 +6972,458 @@ void M_Menu_PlayerConfig_f (void)
 	}
 	Menu_SetStatusBar( &s_options_menu, NULL );
 	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey );
+}
+
+/*
+=======================================================================
+
+ALIEN ARENA TACTICAL MENU
+
+=======================================================================
+*/
+
+static menuframework_s	s_tactical_menu;
+static menuaction_s s_tactical_title_action;
+static menuaction_s	s_choose_martianenforcer_action;
+static menuaction_s	s_choose_martianwarrior_action;
+static menuaction_s	s_choose_martianoverlord_action;
+static menuaction_s	s_choose_lauren_action;
+static menuaction_s	s_choose_enforcer_action;
+static menuaction_s	s_choose_commander_action;
+
+static void MartianenforcerActionFunc( void *unused )
+{
+	char buffer[128];
+
+	//set skin and model
+	Com_sprintf( buffer, sizeof( buffer ), "players/martianenforcer/default" );
+
+	Cvar_Set( "skin", buffer );
+
+	//join server
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[curridx+svridx].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+static void MartianwarriorActionFunc( void *unused )
+{
+	char buffer[128];
+
+	//set skin and model
+	Com_sprintf( buffer, sizeof( buffer ), "players/martianwarrior/default" );
+
+	Cvar_Set( "skin", buffer );
+
+	//join server
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[curridx+svridx].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+static void MartianoverlordActionFunc( void *unused )
+{
+	char buffer[128];
+
+	//set skin and model
+	Com_sprintf( buffer, sizeof( buffer ), "players/martianoverlord/default" );
+
+	Cvar_Set( "skin", buffer );
+
+	//join server
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[curridx+svridx].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+static void LaurenActionFunc( void *unused )
+{
+	char buffer[128];
+
+	//set skin and model
+	Com_sprintf( buffer, sizeof( buffer ), "players/lauren/default" );
+
+	Cvar_Set( "skin", buffer );
+
+	//join server
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[curridx+svridx].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+static void EnforcerActionFunc( void *unused )
+{
+	char buffer[128];
+
+	//set skin and model
+	Com_sprintf( buffer, sizeof( buffer ), "players/enforcer/default" );
+
+	Cvar_Set( "skin", buffer );
+
+	//join server
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[curridx+svridx].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+static void CommanderActionFunc( void *unused )
+{
+	char buffer[128];
+
+	//set skin and model
+	Com_sprintf( buffer, sizeof( buffer ), "players/commander/default" );
+
+	Cvar_Set( "skin", buffer );
+
+	//join server
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[curridx+svridx].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+qboolean Tactical_MenuInit( void )
+{
+	extern cvar_t *name;
+	int i = 0;
+	float scale;
+	int currentdirectoryindex = 0;
+	int currentskinindex = 0;
+	
+	scale = (float)(viddef.height)/600;
+
+	banneralpha = 0.1;
+
+	s_tactical_menu.x = viddef.width / 2 - 120;
+	s_tactical_menu.y = viddef.height / 2 - 158*scale;
+	s_tactical_menu.nitems = 0;
+
+	//TITLE
+	s_tactical_title_action.generic.type = MTYPE_COLORTXT;
+	s_tactical_title_action.generic.name = "^2choose ^1team/class";
+	s_tactical_title_action.generic.flags = QMF_LEFT_JUSTIFY;
+	s_tactical_title_action.generic.x = -140*scale;
+	s_tactical_title_action.generic.y = FONTSCALE*-75*scale;
+	
+	//ALIEN CLASSES
+	s_choose_martianenforcer_action.generic.type = MTYPE_ACTION;
+	s_choose_martianenforcer_action.generic.name	= "enforcer";
+	s_choose_martianenforcer_action.generic.x	= FONTSCALE*-30*scale;
+	s_choose_martianenforcer_action.generic.y	= FONTSCALE*90*scale;
+	s_choose_martianenforcer_action.generic.cursor_offset = -8;
+	s_choose_martianenforcer_action.generic.callback = MartianenforcerActionFunc;
+
+	s_choose_martianwarrior_action.generic.type = MTYPE_ACTION;
+	s_choose_martianwarrior_action.generic.name	= "warrior";
+	s_choose_martianwarrior_action.generic.x	= FONTSCALE*80*scale;
+	s_choose_martianwarrior_action.generic.y	= FONTSCALE*90*scale;
+	s_choose_martianwarrior_action.generic.cursor_offset = -8;
+	s_choose_martianwarrior_action.generic.callback = MartianwarriorActionFunc;
+
+	s_choose_martianoverlord_action.generic.type = MTYPE_ACTION;
+	s_choose_martianoverlord_action.generic.name	= "overlord";
+	s_choose_martianoverlord_action.generic.x	= FONTSCALE*200*scale;
+	s_choose_martianoverlord_action.generic.y	= FONTSCALE*90*scale;
+	s_choose_martianoverlord_action.generic.cursor_offset = -8;
+	s_choose_martianoverlord_action.generic.callback = MartianoverlordActionFunc;\
+
+	//HUMAN CLASSES
+	s_choose_lauren_action.generic.type = MTYPE_ACTION;
+	s_choose_lauren_action.generic.name	= "lauren";
+	s_choose_lauren_action.generic.x	= FONTSCALE*-40*scale;
+	s_choose_lauren_action.generic.y	= FONTSCALE*270*scale;
+	s_choose_lauren_action.generic.cursor_offset = -8;
+	s_choose_lauren_action.generic.callback = LaurenActionFunc;
+
+	s_choose_enforcer_action.generic.type = MTYPE_ACTION;
+	s_choose_enforcer_action.generic.name	= "enforcer";
+	s_choose_enforcer_action.generic.x	= FONTSCALE*80*scale;
+	s_choose_enforcer_action.generic.y	= FONTSCALE*270*scale;
+	s_choose_enforcer_action.generic.cursor_offset = -8;
+	s_choose_enforcer_action.generic.callback = EnforcerActionFunc;
+
+	s_choose_commander_action.generic.type = MTYPE_ACTION;
+	s_choose_commander_action.generic.name	= "commander";
+	s_choose_commander_action.generic.x	= FONTSCALE*210*scale;
+	s_choose_commander_action.generic.y	= FONTSCALE*270*scale;
+	s_choose_commander_action.generic.cursor_offset = -8;
+	s_choose_commander_action.generic.callback = CommanderActionFunc;
+
+	Menu_AddItem( &s_tactical_menu, &s_choose_martianenforcer_action );
+	Menu_AddItem( &s_tactical_menu, &s_choose_martianwarrior_action );
+	Menu_AddItem( &s_tactical_menu, &s_choose_martianoverlord_action );
+	Menu_AddItem( &s_tactical_menu, &s_choose_lauren_action );
+	Menu_AddItem( &s_tactical_menu, &s_choose_enforcer_action );
+	Menu_AddItem( &s_tactical_menu, &s_choose_commander_action );
+	Menu_AddItem( &s_tactical_menu, &s_tactical_title_action );
+
+	//add in shader support for player models, if the player goes into the menu before entering a
+	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
+	scriptsloaded = Cvar_Get("scriptsloaded", "0", 0);
+	if(!scriptsloaded->value)
+	{
+		Cvar_SetValue("scriptsloaded", 1); //this needs to be reset on vid_restart
+		RS_ScanPathForScripts();
+		RS_LoadScript("scripts/models.rscript");
+		RS_LoadScript("scripts/caustics.rscript");
+		RS_LoadSpecialScripts();
+	}
+
+	return true;
+}
+
+void Tactical_MenuDraw( void )
+{
+	extern float CalcFov( float fov_x, float w, float h );
+	refdef_t refdef;
+	char scratch[MAX_OSPATH];
+	int helmet = false;
+	float scale;
+	int i;
+
+	scale = (float)(viddef.height)/600;
+
+	banneralpha += cls.frametime;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
+	M_Background( "menu_back"); //draw black background first
+	M_Banner( "m_tactical", banneralpha );
+
+	memset( &refdef, 0, sizeof( refdef ) );
+
+	refdef.width = viddef.width;
+	refdef.height = viddef.height;
+	refdef.x = 0;
+	refdef.y = 0;
+	if((float)viddef.width/(float)viddef.height > 1.5)
+		refdef.fov_x = 90;
+	else
+		refdef.fov_x = 75;
+	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
+	refdef.time = cls.realtime*0.001;	
+	
+	if ( 1 )
+	{
+		static float mframe;
+		static float yaw;
+		entity_t entity[15];
+
+		memset( &entity, 0, sizeof( entity ) );
+
+		mframe += cls.frametime*150;
+		if ( mframe > 390 )
+			mframe = 10;
+		if ( mframe < 10)
+			mframe = 10;
+
+		yaw += cls.frametime*50;
+		if (yaw > 360)
+			yaw = 0;
+
+		//ALIEN CLASSES
+
+		//enforcer
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianenforcer/tris.md2" );
+		entity[0].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianenforcer/default.jpg" );
+		entity[0].skin = R_RegisterSkin( scratch );
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianenforcer/weapon.md2" );
+		entity[1].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianenforcer/weapon.tga" );
+		entity[1].skin = R_RegisterSkin( scratch );
+
+		//if a helmet or other special device
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianenforcer/helmet.md2" );
+		entity[2].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianenforcer/helmet.tga" );
+		entity[2].skin = R_RegisterSkin( scratch );
+		
+		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[0].origin[0] = 180;
+		entity[0].origin[1] = 60;
+		entity[0].origin[2] = 35;
+
+		entity[1].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[1].origin[0] = 180;
+		entity[1].origin[1] = 60;
+		entity[1].origin[2] = 35;
+
+		entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
+		entity[2].origin[0] = 180;
+		entity[2].origin[1] = 60;
+		entity[2].origin[2] = 35;
+		entity[2].alpha = 0.4;
+
+		//warrior
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianwarrior/tris.md2" );
+		entity[3].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianwarrior/default.jpg" );
+		entity[3].skin = R_RegisterSkin( scratch );
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianwarrior/weapon.md2" );
+		entity[4].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianwarrior/weapon.tga" );
+		entity[4].skin = R_RegisterSkin( scratch );
+
+		//if a helmet or other special device
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianwarrior/helmet.md2" );
+		entity[5].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianwarrior/helmet.tga" );
+		entity[5].skin = R_RegisterSkin( scratch );
+		
+		entity[3].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[3].origin[0] = 180;
+		entity[3].origin[1] = 0;
+		entity[3].origin[2] = 35;
+
+		entity[4].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[4].origin[0] = 180;
+		entity[4].origin[1] = 0;
+		entity[4].origin[2] = 35;
+
+		entity[5].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
+		entity[5].origin[0] = 180;
+		entity[5].origin[1] = 0;
+		entity[5].origin[2] = 35;
+		entity[5].alpha = 0.4;
+
+		//Overlord
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianoverlord/tris.md2" );
+		entity[6].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianoverlord/default.jpg" );
+		entity[6].skin = R_RegisterSkin( scratch );
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianoverlord/weapon.md2" );
+		entity[7].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianoverlord/weapon.tga" );
+		entity[7].skin = R_RegisterSkin( scratch );
+
+		//if a helmet or other special device
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianoverlord/helmet.md2" );
+		entity[8].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/martianoverlord/helmet.tga" );
+		entity[8].skin = R_RegisterSkin( scratch );
+		
+		entity[6].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[6].origin[0] = 180;
+		entity[6].origin[1] = -60;
+		entity[6].origin[2] = 35;
+
+		entity[7].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[7].origin[0] = 180;
+		entity[7].origin[1] = -60;
+		entity[7].origin[2] = 35;
+
+		entity[8].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
+		entity[8].origin[0] = 180;
+		entity[8].origin[1] = -60;
+		entity[8].origin[2] = 35;
+		entity[8].alpha = 0.4;
+
+		//HUMAN CLASSES
+
+		//Lauren
+		Com_sprintf( scratch, sizeof( scratch ), "players/lauren/tris.md2" );
+		entity[9].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/lauren/default.jpg" );
+		entity[9].skin = R_RegisterSkin( scratch );
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/lauren/weapon.md2" );
+		entity[10].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/lauren/weapon.tga" );
+		entity[10].skin = R_RegisterSkin( scratch );
+		
+		entity[9].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[9].origin[0] = 180;
+		entity[9].origin[1] = 60;
+		entity[9].origin[2] = -55;
+
+		entity[10].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[10].origin[0] = 180;
+		entity[10].origin[1] = 60;
+		entity[10].origin[2] = -55;
+
+		//Enforcer
+		Com_sprintf( scratch, sizeof( scratch ), "players/enforcer/tris.md2" );
+		entity[11].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/enforcer/default.jpg" );
+		entity[11].skin = R_RegisterSkin( scratch );
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/enforcer/weapon.md2" );
+		entity[12].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/enforcer/weapon.tga" );
+		entity[12].skin = R_RegisterSkin( scratch );
+		
+		entity[11].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[11].origin[0] = 180;
+		entity[11].origin[1] = 0;
+		entity[11].origin[2] = -55;
+
+		entity[12].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[12].origin[0] = 180;
+		entity[12].origin[1] = 0;
+		entity[12].origin[2] = -55;
+
+		//Commander
+		Com_sprintf( scratch, sizeof( scratch ), "players/commander/tris.md2" );
+		entity[13].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/commander/default.jpg" );
+		entity[13].skin = R_RegisterSkin( scratch );
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/commander/weapon.md2" );
+		entity[14].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/commander/weapon.tga" );
+		entity[14].skin = R_RegisterSkin( scratch );
+		
+		entity[13].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[13].origin[0] = 180;
+		entity[13].origin[1] = -60;
+		entity[13].origin[2] = -55;
+
+		entity[14].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+		entity[14].origin[0] = 180;
+		entity[14].origin[1] = -60;
+		entity[14].origin[2] = -55;		
+		
+		for(i = 0; i < 15; i++)
+		{
+			VectorCopy( entity[i].origin, entity[i].oldorigin );
+
+			entity[i].frame = (int)(mframe/10);
+			entity[i].oldframe = (int)(mframe/10) - 1;
+			entity[i].backlerp = 1.0;
+			entity[i].angles[1] = (int)yaw;
+		}
+
+		refdef.areabits = 0;
+		refdef.num_entities = 15;
+		
+		refdef.entities = entity;
+		refdef.lightstyles = 0;
+		refdef.rdflags = RDF_NOWORLDMODEL;	
+
+		Menu_Draw( &s_tactical_menu );
+		
+		refdef.height += 4;
+
+		R_RenderFramePlayerSetup( &refdef );
+	}
+}
+
+const char *Tactical_MenuKey (int key)
+{
+	return Default_MenuKey( &s_tactical_menu, key );
+}
+
+
+void M_Menu_Tactical_f (void)
+{
+	if (!Tactical_MenuInit())
+	{
+		return;
+	}
+	M_PushMenu( Tactical_MenuDraw, Tactical_MenuKey );
 }
 
 
