@@ -267,7 +267,7 @@ typedef struct
 	lump_t		lumps[HEADER_LUMPS];
 } dheader_t;
 
-qboolean checkLumps (lump_t *l, int *lump_order, void *_file_base, int num_lumps, int file_len);
+qboolean checkLumps (lump_t *l, size_t header_size, int *lump_order, void *_file_base, int num_lumps, int file_len);
 
 typedef struct
 {
@@ -470,33 +470,60 @@ typedef struct
 
 #define MAX_OVERRIDE_LIGHTING	0x6000000	//2048*2048*8*3
 
+// little-endian "LTMP" for "lightmap"
 #define IDLIGHTMAPHEADER	(('P'<<24)+('M'<<16)+('T'<<8)+'L')
-		// little-endian "LTMP" for "lightmap"
-#define LTMPVERSION			1
+// Increase this number whenever incompatible changes are made to the file 
+// format
+#define LTMPVERSION			2
+// Increase this number whenever backwards-compatible changes are made to the
+// file format
+#define LTMPVERSION_MINOR	0
 
 #define LTMP_LUMP_FACELOOKUP	0
 #define LTMP_LUMP_LIGHTING		1
 #define LTMP_LUMPS				2
 
-//TODO: add a file checksum to the header
+// Each override has its own pixel format. Currently, the only one is 24-bit
+// RGB, but we may eventually add S3TC/ASTC formats as well.
+#define LTMP_PIXFMT_RGB24			0
+#define LTMP_NUM_SUPPORTED_PIXFMTS	1
+
+// Current versions of the client will refuse to open lightmap files with more
+// data than this. However, current versions of the map compiler will refuse 
+// to create files anywhere near this big, and the client has other, stricter 
+// restrictions on how much lightmap data it will actually use.
+#define LTMP_MAX_UNCOMPRESSED_DATA (\
+	sizeof(lightmapheader_t)+\
+	sizeof(ltmp_facelookup_t)*MAX_MAP_FACES*4+\
+	MAX_OVERRIDE_LIGHTING*4+16\
+)
+
 typedef struct
 {
 	int			ident;
 	int			version;
+	int			version_minor;
 	lump_t		lumps[LTMP_LUMPS];
 } lightmapheader_t;
 
+// There may be zero or more of these for each surface (maximum total number 
+// of these is four times the maximum number of surfaces.) The client is
+// responsible for picking which if any to use for each surface. Current 
+// behavior of the client is to skip any pixel formats it doesn't understand,
+// and otherwise pick the last one in the list for each surface. However, that
+// behavior may change arbitrarily in the future.
 typedef struct
 {
-	// qrad3 may not override every single face in the future
-	int			override;	//either an offset in the data or else 0
-							//to default back to built in BSP lightmap
+	int			offset;		// an offset in LTMP_LUMP_LIGHTING, starting at 1
+	int			facenum;	// the face being overridden by this entry, 
+							// starting at 0
+	int			format;		// currently only LTMP_PIXFMT_RGB24
 	// qrad3 may output different hights/widths for each face at some point in
 	// the future
-	int			width;		//width in pixels
-	int			height;	 	//height in pixels
+	int			width;		// width in pixels
+	int			height;	 	// height in pixels
 	// qrad3 may output heights scaled differently from widths at some point
 	// in the future
-	float		xscale;     //xscale in game units per lightmap pixel
-	float		yscale;		//yscale in game units per lightmap pixel
+	float		xscale;     // xscale in game units per lightmap pixel
+	float		yscale;		// yscale in game units per lightmap pixel
 } ltmp_facelookup_t;
