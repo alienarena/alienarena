@@ -262,7 +262,9 @@ void SwapBSPFile (qboolean todisk)
 		dfaces[i].lightofs = LittleLong (dfaces[i].lightofs);
 		dfaces[i].firstedge = LittleLong (dfaces[i].firstedge);
 		dfaces[i].numedges = LittleShort (dfaces[i].numedges);
-		lfacelookups[i].override = LittleLong (lfacelookups[i].override);
+		lfacelookups[i].offset = LittleLong (lfacelookups[i].offset);
+		lfacelookups[i].facenum = LittleLong (lfacelookups[i].facenum);
+		lfacelookups[i].format = LittleLong (lfacelookups[i].format);
 		lfacelookups[i].width = LittleLong (lfacelookups[i].width);
 		lfacelookups[i].height = LittleLong (lfacelookups[i].height);
 		lfacelookups[i].xscale = LittleFloat (lfacelookups[i].xscale);
@@ -822,7 +824,11 @@ void 	GetVectorForKey (entity_t *ent, char *key, vec3_t vec)
 	vec[2] = v3;
 }
 
+lightmapheader_t	*lheader;
+
 //more than necessary
+//the client allocates an even bigger buffer than this, but we won't emit a
+//file with more data than this
 #define SIZEOF_LIGHTMAP_UNCOMPRESSED \
 	 (sizeof(lightmapheader_t)+sizeof(lfacelookups)+sizeof(dlightdata)+16)
 byte lightmap_data_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
@@ -843,7 +849,7 @@ void AddLumpToLightmapBuf (int lumpnum, void *data, int len, size_t *ofs)
 {
 	lump_t *lump;
 
-	lump = &header->lumps[lumpnum];
+	lump = &lheader->lumps[lumpnum];
 
 	lump->fileofs = LittleLong(*ofs);
 	lump->filelen = LittleLong(len);
@@ -855,20 +861,21 @@ void	WriteLTMPFile (char *filename)
 	size_t ofs = 0;
 	size_t start = 0;
 	int compressed_size;
-	header = (dheader_t *)(&lightmap_outheader);
-	memset (header, 0, sizeof(lightmapheader_t));
+	lheader = (lightmapheader_t *)(&lightmap_outheader);
+	memset (lheader, 0, sizeof(lightmapheader_t));
 
 	SwapBSPFile (true);
 
-	header->ident = LittleLong (IDLIGHTMAPHEADER);
-	header->version = LittleLong (LTMPVERSION);
+	lheader->ident = LittleLong (IDLIGHTMAPHEADER);
+	lheader->version = LittleLong (LTMPVERSION);
+	lheader->version_minor = LittleLong (LTMPVERSION_MINOR);
 
-	WriteToLightmapBuf (header, sizeof(lightmapheader_t), &ofs);	// overwritten later
+	WriteToLightmapBuf (lheader, sizeof(lightmapheader_t), &ofs);	// overwritten later
 
 	AddLumpToLightmapBuf (LTMP_LUMP_FACELOOKUP, lfacelookups, numfaces*sizeof(ltmp_facelookup_t), &ofs);
 	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING, dlightdata, lightdatasize, &ofs);
 
-	WriteToLightmapBuf (header, sizeof(lightmapheader_t), &start);
+	WriteToLightmapBuf (lheader, sizeof(lightmapheader_t), &start);
 #ifdef USE_ZLIB
 	compressed_size = ZLibCompress(lightmap_data_buf, ofs, lightmap_output_buf, SIZEOF_LIGHTMAP_COMPRESSED);
 	

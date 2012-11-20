@@ -907,12 +907,16 @@ void RadWorld (void)
 }
 
 
+// finalize any other changes to the lfacelookup data to make it ready to 
+// write to disk
 void TranslateRefine (void)
 {
 	int i;
 	for (i = 0; i < numfaces; i++)
 	{
-		lfacelookups[i].override = dfaces[i].lightofs+1;
+	    lfacelookups[i].facenum = i;
+	    lfacelookups[i].format = LTMP_PIXFMT_RGB24;
+		lfacelookups[i].offset = dfaces[i].lightofs+1;
 		lfacelookups[i].xscale = lfacelookups[i].yscale = 16.0/refine_amt;
 	}
 }
