@@ -1231,16 +1231,7 @@ void R_Register( void )
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
 
 // OPENGL_DRIVER defined by in config.h
-#if defined DARWIN_SPECIAL_CASE
-	// archiving gl_driver means the lib specified in config.h may be
-	//  overridden by what is in config.cfg. This defeats any attempt
-	//  by configure to specify a different location for the libGL.dylib
-	// for now make it a special case, but questionable whether it should
-	// be archived for others.
 	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, 0 );
-#else
-	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, CVAR_ARCHIVE );
-#endif
 
 	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
