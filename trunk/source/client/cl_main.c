@@ -1448,13 +1448,14 @@ void CL_RequestNextDownload (void)
 	if (!allow_download->integer && precache_check < ENV_CNT)
 		precache_check = ENV_CNT;
 
-	if (precache_check == CS_MODELS) { // confirm map
+	if (precache_check == CS_MODELS) // confirm map
+	{
 		precache_check = CS_MODELS+2; // 0 isn't used
 		if (allow_download_maps->integer)
 			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
 				return; // started a download
 	}
-
+	
 redoSkins:
 	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS)
 	{
@@ -1730,7 +1731,7 @@ redoSkins:
 					return; // started a download
 			}
 		}
-		precache_check = TEXTURE_CNT+999;
+		precache_check = SCRIPT_CNT;
 	}
 
 	//get map related scripts
@@ -1789,6 +1790,22 @@ redoSkins:
 
 			Com_sprintf(script, sizeof(script), "scripts/maps/%s.rscript", map);
 			if (!CL_CheckOrDownloadFile(script))
+				return; // started a download
+		}
+	}
+	
+	if (precache_check == SCRIPT_CNT+3) // try downloading lightmap
+	{
+		precache_check = SCRIPT_CNT+4;
+		if (allow_download_maps->integer)
+		{
+			char *extension;
+			strncpy (fn, cl.configstrings[CS_MODELS+1], MAX_OSPATH-1-strlen(".lightmap")+strlen(".bsp"));
+			extension = strstr (fn, ".bsp");
+			if (extension)
+				*extension = 0;
+			strcat (fn, ".lightmap"); 
+			if (!CL_CheckOrDownloadFile(fn))
 				return; // started a download
 		}
 	}
@@ -2197,8 +2214,9 @@ void CL_FixCvarCheats (void)
 	cheatvar_t	*var;
 
 	if ( !strcmp(cl.configstrings[CS_MAXCLIENTS], "1")
-		|| !cl.configstrings[CS_MAXCLIENTS][0] )
-		return;		// single player can cheat
+		|| !cl.configstrings[CS_MAXCLIENTS][0]
+		|| cl.attractloop )
+		return;		// single player or demo playback can cheat
 
 	// find all the cvars if we haven't done it yet
 	if (!numcheatvars)
