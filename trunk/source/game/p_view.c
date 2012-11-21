@@ -436,6 +436,8 @@ void ResetWeaponModel (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_alienblast/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_alienblaster.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_bfg/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_rail/tris.md2"))

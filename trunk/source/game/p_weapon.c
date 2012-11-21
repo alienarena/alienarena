@@ -187,7 +187,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	if (other->client->pers.weapon != ent->item &&
 		(other->client->pers.inventory[index] == 1) &&
-		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
+		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") || other->client->pers.weapon == FindItem("Alien Blaster")) )
 		other->client->newweapon = ent->item;
 	
 	if (other->client->pers.lastfailedswitch == ent->item &&
@@ -312,6 +312,8 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_alienblast/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_alienblaster.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_bfg/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_rail/tris.md2"))
@@ -414,7 +416,10 @@ void NoAmmoWeaponChange (edict_t *ent)
 		return;
 	}
 
-	ent->client->newweapon = FindItem ("blaster");
+	if(g_tactical->integer && ent->ctype == 0)
+		ent->client->newweapon = FindItem ("Alien Blaster");
+	else
+		ent->client->newweapon = FindItem ("Blaster");
 }
 
 /*
@@ -1120,7 +1125,8 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	if(!hyper) {
+	if(!hyper) 
+	{
 		VectorScale (forward, -3, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -3;
 	}
@@ -1134,21 +1140,29 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	VectorAdd (offset, g_offset, offset);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if(hyper) {
-		if(ent->client->buttons & BUTTON_ATTACK2) {//alt fire
+	if(hyper) 
+	{
+		if(ent->client->buttons & BUTTON_ATTACK2) 
+		{
+			//alt fire
 			ent->altfire = !ent->altfire;
-			if(ent->altfire) {
+			if(ent->altfire) 
+			{
 				gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/blastf1a.wav"), 1, ATTN_NORM, 0);
 				fire_blasterball (ent, start, forward, damage*3, 1000, effect, hyper);
 			}
 		}
-		else {
+		else 
+		{
 			// [no file]gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
 			fire_blaster (ent, start, forward, damage, 2800, effect, hyper);
 		}
 	}
-	else {
-		if(ent->client->buttons & BUTTON_ATTACK2) { //alt fire
+	else 
+	{
+		if(ent->client->buttons & BUTTON_ATTACK2) 
+		{ 
+			//alt fire
 			fire_blaster_beam (ent, start, forward, (int)((float)damage/1.4), 0, false);
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
 		}
@@ -1199,6 +1213,29 @@ void Weapon_Blaster (edict_t *ent)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, excessive_fire_frames, Weapon_Blaster_Fire);
 	else
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+}
+
+//to do - tactical - create different effect(i think same damage and behavior though).
+void Weapon_AlienBlaster_Fire (edict_t *ent)
+{
+	int		damage;
+
+	damage = 30;
+
+	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+	ent->client->ps.gunframe++;
+}
+
+void Weapon_AlienBlaster (edict_t *ent)
+{
+	static int	pause_frames[]	= {52, 0};
+	static int	fire_frames[]	= {5,0};
+	static int  excessive_fire_frames[] = {5,6,7,8,0};
+
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
+		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, excessive_fire_frames, Weapon_AlienBlaster_Fire);
+	else
+		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_AlienBlaster_Fire);
 }
 
 //vehicles
