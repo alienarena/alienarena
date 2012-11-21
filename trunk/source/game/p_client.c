@@ -630,7 +630,7 @@ void TossClientWeapon (edict_t *self)
 	qboolean	haste;
 	float		spread;
 
-	if ((!deathmatch->value) || instagib->value || rocket_arena->value || insta_rockets->value)
+	if ((!deathmatch->value) || instagib->integer || rocket_arena->integer || insta_rockets->value)
 	{
 		return;
 	}
@@ -993,19 +993,19 @@ void InitClientPersistant (gclient_t *client)
 	gitem_t		*item;
 	int			queue=0;
 
-	if(g_duel->value) //need to save this off in duel mode.  Potentially dangerous?
+	if(g_duel->integer) //need to save this off in duel mode.  Potentially dangerous?
 		queue = client->pers.queue;
 
 	memset (&client->pers, 0, sizeof(client->pers));
 
-	if(g_duel->value)
+	if(g_duel->integer)
 		client->pers.queue = queue;
 
 #ifdef ALTERIA
 	item = FindItem("Warriorpunch");
 #else
-	if(!rocket_arena->value) 
-	{	//gets a violator, unless RA
+	if(!rocket_arena->integer && !g_tactical->integer) 
+	{	//gets a violator, unless RA or Tactical
 		item = FindItem("Violator");
 		client->pers.selected_item = ITEM_INDEX(item);
 		client->pers.inventory[client->pers.selected_item] = 1;
@@ -1013,13 +1013,13 @@ void InitClientPersistant (gclient_t *client)
 	}
 
 	//mutator - will need to have item
-	if(instagib->value) 
+	if(instagib->integer) 
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
 		item = FindItem("Alien Disruptor");
 	}
-	else if(rocket_arena->value) 
+	else if(rocket_arena->integer) 
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
@@ -1865,7 +1865,8 @@ void PutClientInServer (edict_t *ent)
 
 	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
-	if(file) {
+	if(file) 
+	{
 		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
@@ -1907,12 +1908,16 @@ void PutClientInServer (edict_t *ent)
 		client->pers.weapon = item;
 	}
 #else
+
+	//note - to do - tactical - humans will spawn with blaster - aliens with a similar, new weapon for now, just used these 
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
-	if(file) { //human
+	if(file) 
+	{ 
+		//human
 		ent->ctype = 1;
-		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 		 {
 			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
 			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
@@ -1926,12 +1931,15 @@ void PutClientInServer (edict_t *ent)
 		}
 		fclose(file);
 	}
-	else { //robot
+	else 
+	{ 
+		//robot - not used in tactical
 		sprintf(modelpath, "players/%s/robot", playermodel);
 		Q2_FindFile (modelpath, &file);
-		if(file) {
+		if(file && !g_tactical->integer) 
+		{
 			ent->ctype = 2;
-			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+			if(classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value))
 			{
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Combat Armor"));
@@ -1940,8 +1948,9 @@ void PutClientInServer (edict_t *ent)
 			fclose(file);
 		}
 		else
-		{ //alien
-			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+		{ 
+			//alien
+			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
 				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
@@ -2000,13 +2009,15 @@ void PutClientInServer (edict_t *ent)
 	client->spawnprotecttime = level.time;
 
 	//unlagged
-	if ( g_antilag->integer) {
+	if ( g_antilag->integer) 
+	{
 		G_ResetHistory( ent );
 		// and this is as good a time as any to clear the saved state
 		client->saved.leveltime = 0;
 	}
 }
 
+//DUEL MODE
 void ClientPlaceInQueue(edict_t *ent)
 {
 	int		i;
@@ -2014,8 +2025,10 @@ void ClientPlaceInQueue(edict_t *ent)
 
 	highestpos = induel = numplayers = 0;
 
-	for (i = 0; i < g_maxclients->value; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+	for (i = 0; i < g_maxclients->value; i++) 
+	{
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client)
+		{
 			if(g_edicts[i+1].client->pers.queue > highestpos) //only count players that are actually in
 				highestpos = g_edicts[i+1].client->pers.queue;
 			if(g_edicts[i+1].client->pers.queue && g_edicts[i+1].client->pers.queue < 3)
@@ -2039,7 +2052,9 @@ void ClientCheckQueue(edict_t *ent)
 	int		i;
 	int		numplayers = 0;
 
-	if(ent->client->pers.queue > 2) { //everyone in line remains a spectator
+	if(ent->client->pers.queue > 2) 
+	{ 
+		//everyone in line remains a spectator
 		ent->client->pers.spectator = ent->client->resp.spectator = 1;
 		ent->client->chase_target = NULL;
 		ent->movetype = MOVETYPE_NOCLIP;
@@ -2048,9 +2063,12 @@ void ClientCheckQueue(edict_t *ent)
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
 	}
-	else {
-		for (i = 0; i < g_maxclients->value; i++) {
-			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+	else 
+	{
+		for (i = 0; i < g_maxclients->value; i++) 
+		{
+			if(g_edicts[i+1].inuse && g_edicts[i+1].client) 
+			{
 				if(!g_edicts[i+1].client->pers.spectator && g_edicts[i+1].client->pers.queue)
 					numplayers++;
 			}
@@ -2064,12 +2082,17 @@ void MoveClientsDownQueue(edict_t *ent)
 	int		i;
 	qboolean putonein = false;
 
-	for (i = 0; i < g_maxclients->value; i++) { //move everyone down
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+	for (i = 0; i < g_maxclients->value; i++) 
+	{ 
+		//move everyone down
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) 
+		{
 			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue)
 				g_edicts[i+1].client->pers.queue--;
 
-			if(!putonein && g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) { //make sure those who should be in game are
+			if(!putonein && g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) 
+			{ 
+				//make sure those who should be in game are
 				g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
 				g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
 				g_edicts[i+1].movetype = MOVETYPE_WALK;
@@ -2087,7 +2110,7 @@ void MoveClientsDownQueue(edict_t *ent)
 	if(ent->client)
 		ent->client->pers.queue = 0;
 }
-
+//END DUEL MODE
 
 #define MAX_MOTD_SIZE	500
 
@@ -2160,7 +2183,8 @@ void ClientBeginDeathmatch (edict_t *ent)
 	PutClientInServer (ent);
 
 	//in ctf, initially start in chase mode, and allow them to choose a team
-	if( TEAM_GAME ) {
+	if( TEAM_GAME ) 
+	{
 		ent->client->pers.spectator = 1;
 		ent->client->chase_target = NULL;
 		ent->client->resp.spectator = 1;
@@ -2181,7 +2205,8 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	//if duel mode, then check number of existing players.  If more there are already two in the game, force
 	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
-	else if(g_duel->value) {
+	else if(g_duel->integer) 
+	{
 		ClientPlaceInQueue(ent);
 		ClientCheckQueue(ent);
 	}
@@ -2289,8 +2314,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(whereFrom != SPAWN && whereFrom != CONNECT)
 		whereFrom = INGAME;
 
-	if(playervote.called && whereFrom == INGAME)
-		return; //do not allow people to change info during votes
+	if((playervote.called || g_tactical->integer ) && whereFrom == INGAME)
+		return; //do not allow people to change info during votes or in tactical mode(yet)
 
 	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
 		safe_bprintf (PRINT_MEDIUM, "Changing settings not allowed during a team game\n");
@@ -2308,14 +2333,16 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	// end name validate
 
 	//spectator mode
-	if ( !g_duel->value )
-	{ // never fool with spectating in duel mode
+	if ( !g_duel->integer )
+	{ 
+		// never fool with spectating in duel mode
 		// set spectator
 		s = Info_ValueForKey (userinfo, "spectator");
 		if ( TEAM_GAME )
 		{ //
 			if ( strcmp( s, "2" ) )
-			{ // not special team game spectate
+			{ 
+				// not special team game spectate
 				// so make sure it stays 0
 				Info_SetValueForKey( userinfo, "spectator", "0");
 			}
@@ -2387,10 +2414,10 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	//check for duplicates(but not on respawns)
 	duplicate = false;
-	if(whereFrom != SPAWN) {
-
-		for (j=0; j<g_maxclients->value ; j++) {
-
+	if(whereFrom != SPAWN) 
+	{
+		for (j=0; j<g_maxclients->value ; j++) 
+		{
 			cl_ent = g_edicts + 1 + j;
 			if (!cl_ent->inuse)
 				continue;
@@ -2402,7 +2429,9 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			}
 		}
 
-		if(duplicate && playernum < 100) { //just paranoia, should never be more than 64
+		if(duplicate && playernum < 100) 
+		{	
+			//just paranoia, should never be more than 64
 
 #if defined WIN32_VARIANT
 			i = sprintf_s(slot, sizeof(slot), "%i", playernum);
@@ -2446,7 +2475,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
-	if(file) {
+	if(file) 
+	{
 		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
@@ -2456,12 +2486,14 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	ent->s.modelindex4 = 0;
 
-	//do gib checking here
+	//do gib checking here - to do - let's replace these model specific gibs with class type specific(alien/robot/human)
 	//check for gib file
 	ent->usegibs = 0; //alien is default
 	sprintf(modelpath, "players/%s/usegibs", playermodel);
 	Q2_FindFile (modelpath, &file);
-	if(file) { //use model specific gibs
+	if(file) 
+	{ 
+		//use model specific gibs
 		ent->usegibs = 1;
 		sprintf(ent->head, "players/%s/head.md2", playermodel);
 		sprintf(ent->body, "players/%s/body.md2", playermodel);
@@ -2716,7 +2748,7 @@ void ClientDisconnect (edict_t *ent)
 		DeathcamRemove(ent, "off");
 
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
-	if(g_duel->value) {
+	if(g_duel->integer) {
 		MoveClientsDownQueue(ent);
 		if(!ent->client->resp.spectator) {
 			for (i = 0; i < g_maxclients->value; i++)  //clear scores if player was in duel
@@ -3177,7 +3209,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ucmd->forwardmove *= 1.3;
 
 		//tactical
-		if(g_tactical->value)
+		if(g_tactical->integer)
 		{
 			client->dodge = false;
 		}

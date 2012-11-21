@@ -1074,9 +1074,11 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	bot->ctype = 0;
 	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
-	if(file) { //human
+	if(file) 
+	{ 
+		//human
 		bot->ctype = 1;
-		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 		{
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
@@ -1089,12 +1091,15 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		}
 		fclose(file);
 	}
-	else {
+	else 
+	{
 		sprintf(modelpath, "players/%s/robot", playermodel);
 		Q2_FindFile (modelpath, &file);
-		if(file) { //robot
+		if(file && !g_tactical->integer) 
+		{ 
+			//robot - not used in tactical
 			bot->ctype = 2;
-			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+			if(classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value))
 			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
@@ -1102,8 +1107,10 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			}
 			fclose(file);
 		}
-		else { //alien
-			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+		else 
+		{ 
+			//alien
+			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
 				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
@@ -1483,7 +1490,7 @@ qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 
 	ACESP_SaveBots(); // update bots.tmp and clients bot information
 
-	if ( g_duel->value )
+	if ( g_duel->integer )
 	{
 		ClientPlaceInQueue( pbot );
 		ClientCheckQueue( pbot );
@@ -1526,7 +1533,7 @@ static void remove_bot( edict_t *bot )
 		DeadDropDeathball(bot);
 	}
 
-	if ( g_duel->value )
+	if ( g_duel->integer )
 	{// duel mode, we need to bump people down the queue if its the player in game leaving
 		MoveClientsDownQueue(bot);
 		if( !bot->client->resp.spectator )

@@ -133,6 +133,12 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		return false; //why pick them up in these modes?
 	}
 
+	if( g_tactical->integer && other->client->pers.inventory[index])
+	{
+		if ( ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM) )
+			return false; //don't pick up dropped weapon if you already have it
+	}
+
 	if ( ( (dmflags->integer & DF_WEAPONS_STAY))
 		&& other->client->pers.inventory[index])
 	{
@@ -161,13 +167,14 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				SetRespawn(ent->replaced_weapon, 5);
 		}
 
-		if (! (ent->spawnflags & DROPPED_PLAYER_ITEM) )
+		if ( !(ent->spawnflags & DROPPED_PLAYER_ITEM) )
 		{
 			if (deathmatch->value)
 			{
 				if (dmflags->integer & DF_WEAPONS_STAY)
 					ent->flags |= FL_RESPAWN;
-				else {
+				else 
+				{
 					//weapon = FindItem (ent->item->weapon);
 					if(ent->item->weapmodel == WEAP_VAPORIZER)
 						SetRespawn (ent, 10);
@@ -1889,7 +1896,7 @@ void Violator_Fire (edict_t *ent)
 	int			damage;
 	int			kick = 4;
 
-	if(excessive->value || instagib->value)
+	if(excessive->value || instagib->integer)
 		damage = 200;
 	else
 		damage = 40;
