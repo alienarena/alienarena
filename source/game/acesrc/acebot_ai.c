@@ -609,7 +609,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 
 		self->enemy = bestenemy;
 		//if using a blaster, and it's far away, don't fire, it's pointless
-		if((self->client->pers.weapon == FindItem("blaster")) && (bestweight > 1500)) {
+		if((self->client->pers.weapon == FindItem("Blaster") || self->client->pers.weapon == FindItem("Alien Blaster")) && (bestweight > 1500)) {
 			self->enemy = NULL;
 			return false;
 		}
@@ -1002,7 +1002,10 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		return;
 	}
 
-	selected = ACEIT_ChangeWeapon( self, FindItem( "Blaster" ) );
+	if(g_tactical->integer && self->ctype == 0)
+		selected = ACEIT_ChangeWeapon( self, FindItem( "Alien Blaster" ) );
+	else
+		selected = ACEIT_ChangeWeapon( self, FindItem( "Blaster" ) );
 	assert( selected );
 	self->accuracy = self->weapacc[ACCURACY_BLASTER];
 

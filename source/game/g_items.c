@@ -32,6 +32,7 @@ void		Drop_Weapon (edict_t *ent, gitem_t *inv);
 void Weapon_Punch ( edict_t *ent);
 #else
 void Weapon_Blaster (edict_t *ent);
+void Weapon_AlienBlaster (edict_t *ent);
 void Weapon_Violator (edict_t *ent);
 void Weapon_Smartgun (edict_t *ent);
 void Weapon_Chain (edict_t *ent);
@@ -548,7 +549,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	if (weapon && !oldcount)
 	{
-		if (other->client->pers.weapon != ent->item && ( !deathmatch->integer || other->client->pers.weapon == FindItem("blaster") ) )
+		if (other->client->pers.weapon != ent->item && ( !deathmatch->integer || other->client->pers.weapon == FindItem("Blaster") || other->client->pers.weapon == FindItem("Alien Blaster")) )
 			other->client->newweapon = ent->item;
 	}
 
@@ -1546,6 +1547,30 @@ always owned, never in the world
 		NULL,
 		0,
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+	},
+
+	/* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
+always owned, never in the world
+*/
+	{
+		"weapon_alienblaster",
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_AlienBlaster,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"models/weapons/v_alienblast/tris.md2",
+/* icon */		"alienblaster",
+/* pickup */	"Alien Blaster",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_BLASTER,
+		NULL,
+		0,
+/* precache */ "weapons/blastf1a.wav misc/lasfly.wav" //to do tactical - change sound
 	},
 
 	{

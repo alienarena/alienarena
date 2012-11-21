@@ -647,6 +647,8 @@ void TossClientWeapon (edict_t *self)
 #else
 	if (item && (strcmp (item->pickup_name, "Blaster") == 0))
 		item = NULL;
+	if (item && (strcmp (item->pickup_name, "Alien Blaster") == 0))
+		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Violator") == 0))
 		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Minderaser") == 0))
@@ -1910,6 +1912,7 @@ void PutClientInServer (edict_t *ent)
 #else
 
 	//note - to do - tactical - humans will spawn with blaster - aliens with a similar, new weapon for now, just used these 
+	//also - let's open this file, read in the armor and health values for each model/class type
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
@@ -1922,9 +1925,16 @@ void PutClientInServer (edict_t *ent)
 			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
 			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 			client->pers.inventory[armor_index] += 30;
-			client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-			client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-			item = FindItem("Rocket Launcher");
+			if(g_tactical->integer)
+			{
+				item = FindItem("Blaster");
+			}
+			else
+			{
+				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+				item = FindItem("Rocket Launcher");
+			}
 			client->pers.selected_item = ITEM_INDEX(item);
 			client->pers.inventory[client->pers.selected_item] = 1;
 			client->pers.weapon = item;
@@ -1933,7 +1943,7 @@ void PutClientInServer (edict_t *ent)
 	}
 	else 
 	{ 
-		//robot - not used in tactical
+		//robot - not used in tactical - should we kick them out at this point, or just let them continue on the alien team?  
 		sprintf(modelpath, "players/%s/robot", playermodel);
 		Q2_FindFile (modelpath, &file);
 		if(file && !g_tactical->integer) 
@@ -1953,9 +1963,16 @@ void PutClientInServer (edict_t *ent)
 			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
-				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
-				item = FindItem("Alien Disruptor");
+				if(g_tactical->integer)
+				{
+					item = FindItem("Alien Blaster");
+				}
+				else
+				{
+					client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+					client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+					item = FindItem("Alien Disruptor");
+				}
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
 				client->pers.weapon = item;

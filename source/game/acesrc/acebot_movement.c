@@ -933,7 +933,8 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	//machinegun/blaster/beamgun strafing for level 2/3 bots
 	if ( !joustmode->value
 			&& self->skill >= 2
-			&& (self->client->pers.weapon == FindItem( "blaster" )
+			&& (self->client->pers.weapon == FindItem( "Blaster" )
+					|| self->client->pers.weapon == FindItem( "Alien Blaster" )
 					|| self->client->pers.weapon == FindItem( "Pulse Rifle" )
 					|| self->client->pers.weapon == FindItem( "Disruptor" )))
 	{
@@ -1054,7 +1055,7 @@ attack:
 			// Base selection on distance.
 			ucmd->buttons = BUTTON_ATTACK;
 
-			if (self->client->pers.weapon == FindItem("blaster")) 
+			if (self->client->pers.weapon == FindItem("Blaster") || self->client->pers.weapon == FindItem("Alien Blaster")) 
 			{
 				if( range > 500)
 					ucmd->buttons = BUTTON_ATTACK2;
@@ -1062,7 +1063,7 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("alien disruptor")) 
+			if (self->client->pers.weapon == FindItem("Alien Disruptor")) 
 			{
 				if(range > 1000) {
 					ucmd->buttons = BUTTON_ATTACK2;
@@ -1073,7 +1074,7 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("flame thrower")) 
+			if (self->client->pers.weapon == FindItem("Flame Thrower")) 
 			{
 				if(range < 500)
 					ucmd->buttons = BUTTON_ATTACK;
@@ -1081,7 +1082,7 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK2;
 			}
 
-			if (self->client->pers.weapon == FindItem("pulse rifle")) 
+			if (self->client->pers.weapon == FindItem("Pulse Rifle")) 
 			{
 				if(range < 200)
 					ucmd->buttons = BUTTON_ATTACK2;
@@ -1089,7 +1090,7 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("disruptor")) 
+			if (self->client->pers.weapon == FindItem("Disruptor")) 
 			{
 				if(range < 300)
 					ucmd->buttons = BUTTON_ATTACK2;
@@ -1097,7 +1098,7 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("alien vaporizer")) 
+			if (self->client->pers.weapon == FindItem("Alien Vaporizer")) 
 			{
 				if(range < 300)
 					ucmd->buttons = BUTTON_ATTACK2;

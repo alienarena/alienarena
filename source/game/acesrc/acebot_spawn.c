@@ -1082,9 +1082,16 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		{
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
-				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-				item = FindItem("Rocket Launcher");
+				if(g_tactical->integer)
+				{
+					item = FindItem("Blaster");
+				}
+				else
+				{
+					client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+					client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+					item = FindItem("Rocket Launcher");
+				}
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
 				client->pers.weapon = item;
@@ -1113,9 +1120,16 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
-				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
-				item = FindItem("Alien Disruptor");
+				if(g_tactical->integer)
+				{
+					item = FindItem("Alien Blaster"); //To do - tactical - create new weapon for aliens to start with, another blaster type.
+				}
+				else
+				{
+					client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+					client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+					item = FindItem("Alien Disruptor");
+				}
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
 				client->pers.weapon = item;
