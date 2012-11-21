@@ -509,7 +509,7 @@ void EndIntermission(void)
 	int		i;
 	edict_t	*ent;
 
-	if(g_duel->value)
+	if(g_duel->integer)
 		CheckDuelWinner();
 
 	for (i=0 ; i<g_maxclients->value; i++)
@@ -565,6 +565,9 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	if (ent->is_bot)
 		return;
 
+	if (g_tactical->integer)
+		return; //no scoreboard in tactical mode
+
 	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
@@ -574,7 +577,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || (!g_duel->value && game.clients[i].resp.spectator))
+		if (!cl_ent->inuse || (!g_duel->integer && game.clients[i].resp.spectator))
 			continue;
 
 		score = game.clients[i].resp.score;

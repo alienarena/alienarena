@@ -138,8 +138,11 @@ static void drop_make_touchable (edict_t *ent)
 	ent->touch = Touch_Item;
 	if (deathmatch->integer)
 	{
-		ent->nextthink = level.time + 29;
-		ent->think = G_FreeEdict;
+		if(!g_tactical->integer) //in tactical mode, we don't remove dropped items
+		{
+			ent->nextthink = level.time + 29;
+			ent->think = G_FreeEdict;
+		}
 	}
 }
 
@@ -227,6 +230,7 @@ void DoRespawn (edict_t *ent)
 
 void SetRespawn (edict_t *ent, float delay)
 {
+
     if (	ent->item && g_duel->integer && 
     		ent->item->weapmodel != WEAP_MINDERASER		)
 	{
@@ -550,6 +554,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->integer))
 		SetRespawn (ent, 30);
+
 	return true;
 }
 
@@ -734,7 +739,7 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 
 	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->integer))
 		SetRespawn (ent, 20);
-
+	
 	return true;
 }
 
@@ -795,6 +800,12 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 
 	if (!taken)
 		return;
+
+	if(g_tactical->integer) //items do not respawn in tactical mode
+	{
+		G_FreeEdict (ent);
+		return;
+	}
 
 	if (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))
 	{

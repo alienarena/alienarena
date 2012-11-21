@@ -921,6 +921,8 @@ static void GetServerList (void)
 		Com_Printf( "Bad address: %s\n", cl_master2->string);
 	}
 
+	// Tactical mode to do:  Query third server - tactical servers will only reside on this server
+
 	// Reset server list for incoming responses.
 	numServers = 0;
 }
