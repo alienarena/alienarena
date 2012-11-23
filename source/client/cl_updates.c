@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern cvar_t  *cl_latest_game_version_url;
 
-static char *versionstr = NULL;
+static char versionstr[32];
 static size_t versionstr_sz = 0;
 
 struct dotted_triple
@@ -48,8 +48,9 @@ static char update_notice[256];
 /**
  *
  * valid dotted version numbers
- *   double  <0..99>.<1..99> (.point is 0)
- *   triple  <0..99>.<1..99>.<1..99>
+ *   double  <0..99>.<0..99> (.point is 0)
+ *   triple  <0..99>.<0..99>.<1..99>
+ *   with the exceptions: 0.0 and 0.0.d are not valid
  *
  * @param vstring      string from server
  * @param version_out  parsed dotted triple output
@@ -74,7 +75,8 @@ static qboolean parse_version( const char* vstring, struct dotted_triple *versio
 			if ( isdigit( *pch_start ) )
 			{
 				minor = strtoul( pch_start, &pch_end, 10 );
-				if ( minor >= 1 && minor <= 99UL )
+				if ( ((major >= 1UL && minor >= 0UL) ||
+						(major == 0UL && minor >= 1UL)) && minor <= 99UL )
 				{
 					if ( *pch_end == '.' )
 					{
@@ -176,39 +178,20 @@ static void update_version( const char* vstring )
 	}
 }
 
-static char* extend_versionstr ( size_t bytecount )
-{
-	char *new_versionstr;
-	size_t cur_sz = versionstr_sz;
-	if ( cur_sz ){
-	    versionstr_sz += bytecount;
-	    new_versionstr = realloc ( versionstr, versionstr_sz );
-	    if (new_versionstr == NULL) {
-	    	free (versionstr);
-	    	Com_Printf ("WARN: SYSTEM MEMORY EXHAUSTION!\n");
-	    	versionstr_sz = 0;
-	    	versionstr = NULL;
-	        return NULL;
-	    }
-	    versionstr = new_versionstr;
-	    return versionstr+cur_sz;
-	}
-	versionstr_sz = bytecount;
-	versionstr = malloc ( versionstr_sz );
-	return versionstr;
-}
-
 static size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
 {
-	char *buffer_pos;
 	size_t bytecount = size*nmemb;
 
-	buffer_pos = extend_versionstr ( bytecount );
-	if (!buffer_pos)
-	    return 0;
-
-	memcpy ( buffer_pos, buffer, bytecount );
-	buffer_pos[bytecount] = 0;
+	if ( (versionstr_sz + bytecount) < sizeof(versionstr) )
+	{
+		memcpy( &versionstr[versionstr_sz], buffer, bytecount );
+		versionstr_sz += bytecount;
+		versionstr[versionstr_sz] = 0;
+	}
+	else
+	{
+		bytecount = 0; // will cause curl to return an error
+	}
 
 	return bytecount;
 }
@@ -218,9 +201,10 @@ void getLatestGameVersion( void )
 	char url[128];
 	CURL* easyhandle;
 
-	easyhandle = curl_easy_init() ;
+    memset( versionstr, 0, sizeof(versionstr) );
+	versionstr_sz = 0;
 
-    versionstr_sz = 0;
+	easyhandle = curl_easy_init() ;
 
 	Com_sprintf(url, sizeof(url), "%s", cl_latest_game_version_url->string);
 
@@ -235,22 +219,7 @@ void getLatestGameVersion( void )
 
 	(void)curl_easy_cleanup( easyhandle );
 
-	if ( versionstr_sz > 0 )
-	{
-		if ( versionstr != NULL )
-		{ 
-			update_version( versionstr );
-	        free ( versionstr );
-	        versionstr = NULL;
-        }
-        versionstr_sz = 0;
-	}
-	else if ( versionstr != NULL )
-	{ // error: size <= 0
-		free( versionstr );
-		versionstr_sz = 0;
-		versionstr = NULL;
-	}
+	update_version( versionstr );
 }
 
 /**
