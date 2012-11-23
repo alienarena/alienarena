@@ -264,7 +264,15 @@ void SV_Status_f (void)
 		if (!cl->state)
 			continue;
 		Com_Printf ("%3i ", i);
-		Com_Printf ("%5i ", cl->edict->client->ps.stats[STAT_FRAGS]);
+
+		if ( cl->edict->client->ps.stats[STAT_SPECTATOR] == 0 )
+		{
+			Com_Printf ("%5i ", cl->edict->client->ps.stats[STAT_FRAGS]);
+		}
+		else
+		{
+			Com_Printf ("%s ", "SPEC");
+		}
 
 		if (cl->state == cs_connected)
 			Com_Printf ("CNCT ");

@@ -113,6 +113,7 @@ cvar_t	*m_side;
 //
 cvar_t	*info_password;
 cvar_t	*info_spectator;
+cvar_t  *info_spectator_password;
 cvar_t	*name;
 cvar_t  *stats_password;
 cvar_t	*pw_hashed;
@@ -155,7 +156,6 @@ cvar_t  *cl_dmlights;
 cvar_t  *cl_stats_server;
 
 //latest version of the game available
-cvar_t	*cl_latest_game_version;
 cvar_t	*cl_latest_game_version_url;
 
 cvar_t	*cl_speedrecord;
@@ -1974,6 +1974,7 @@ void CL_InitLocal (void)
 	//
 	info_password = Cvar_Get ("password", "", CVAR_USERINFO);
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
+	info_spectator_password = Cvar_Get ( "spectator_password", "", CVAR_USERINFO );
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 	Q_strncpyz2(currLoginState.old_password, stats_password->string, sizeof(currLoginState.old_password));
@@ -2005,7 +2006,6 @@ void CL_InitLocal (void)
 	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE);
 
 	//update checker
-	cl_latest_game_version = Cvar_Get("cl_latest_game_version", VERSION, CVAR_ARCHIVE);
 	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE);
 
 	//throwaway cvars

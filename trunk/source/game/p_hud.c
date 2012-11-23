@@ -36,7 +36,7 @@ INTERMISSION
 
 void MoveClientToIntermission (edict_t *ent)
 {
-	if (deathmatch->value)
+	if (deathmatch->integer)
 		ent->client->showscores = true;
 	VectorCopy (level.intermission_origin, ent->s.origin);
 	ent->client->ps.pmove.origin[0] = level.intermission_origin[0]*8;
@@ -74,12 +74,9 @@ void MoveClientToIntermission (edict_t *ent)
 
 	// add the layout
 
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
-		if(g_mapvote->value)
-			DeathmatchScoreboardMessage (ent, NULL, true);
-		else
-			DeathmatchScoreboardMessage (ent, NULL, false);
+		DeathmatchScoreboardMessage (ent, NULL, g_mapvote->integer);
 		gi.unicast (ent, true);
 	}
 
@@ -96,15 +93,9 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	edict_t *chasecam;
 	gclient_t *cl;
 	vec3_t forward, right, movedir, origin;
-	int zoffset; //for moving dead players to the right place
 
-	if(winner->deadflag == DEAD_DEAD)
-		zoffset = -40;
-	else  {
-		zoffset = 0;
-		if(winner->in_vehicle)
-			Reset_player(winner);
-	}
+	if(winner->in_vehicle)
+		Reset_player(winner);
 
 	VectorCopy (level.intermission_angle, winner->s.angles);
 
@@ -119,12 +110,10 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->ps.pmove.origin[1] = winner->s.origin[1];
 	winner->client->ps.pmove.origin[2] = winner->s.origin[2];
 
-	// 2011-05- no velocity nor angular velocity,
-	//  might stop bogus movement.
 	VectorClear( winner->velocity );
 	VectorClear( winner->avelocity );
 
-	if (deathmatch->value)
+	if (deathmatch->integer)
 		winner->client->showscores = true;
 
 	winner->client->ps.gunindex = 0;
@@ -149,12 +138,9 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	// add the layout
 
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
-		if(g_mapvote->value)
-			DeathmatchScoreboardMessage (winner, NULL, true);
-		else
-			DeathmatchScoreboardMessage (winner, NULL, false);
+		DeathmatchScoreboardMessage (winner, NULL, g_mapvote->integer);
 		gi.unicast (winner, true);
 	}
 
@@ -191,8 +177,6 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	//now we want to allow the winners to actually see themselves on the podium, creating a
 	//simple chasecam
-
-	winner->s.origin[2] += zoffset;
 
 	if(winner->is_bot) { //who cares if bots can not see themselves!
 		winner->takedamage = DAMAGE_NO; //so they stop burning and suiciding
@@ -274,17 +258,34 @@ void BeginIntermission (edict_t *targ)
 
 	game.autosaved = false;
 
-	// respawn any dead clients
-	for (i=0 ; i<g_maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->integer ; i++)
 	{
 		client = g_edicts + 1 + i;
 		if (!client->inuse)
 			continue;
-		if (client->health <= 0) {
-			respawn(client);
-			client->deadflag = DEAD_DEAD; //so we can know if he's dead for placement offsetting
+		// remove from vehicle.
+		//  note: vehicle hud is client-side, so may remain in view
+		if (client->in_vehicle)
+		{
+			Reset_player( client );
 		}
-		if(!client->is_bot && g_mapvote->value)
+		// respawn the dead
+		if (client->health <= 0)
+		{
+			respawn(client);
+		}
+		client->s.frame = 0;
+		// disconnect spectators from target to prevent point-of-view errors
+		if ( client->client && client->client->resp.spectator )
+		{
+			if ( client->client->chase_target != NULL )
+			{
+				client->client->chase_target = NULL;
+				client->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
+			}
+		}
+
+		if(!client->is_bot && g_mapvote->integer)
 			safe_centerprintf(client, "Use F1-F4 to vote for next map!");
 	}
 
@@ -382,7 +383,7 @@ void BeginIntermission (edict_t *targ)
 		secondrunnerup = g_edicts;
 
 	// move all clients but the winners to the intermission point
-	for (i=0 ; i<g_maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->integer ; i++)
 	{
 		client = g_edicts + 1 + i;
 		if (!client->inuse)
@@ -391,18 +392,18 @@ void BeginIntermission (edict_t *targ)
 			MoveClientToIntermission (client);
 	}
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //team stuff
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || tca->integer || cp->integer) //team stuff
 	{
 		if ( blue_team_score > red_team_score )
 		{
-			if(ctf->value || tca->value || cp->value)
+			if(ctf->integer || tca->integer || cp->integer)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins_ctf.wav"), 1, ATTN_NONE, 0);
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins.wav"), 1, ATTN_NONE, 0);
 		}
 		else if ( blue_team_score < red_team_score )
 		{
-			if(ctf->value || tca->value || cp->value)
+			if(ctf->integer || tca->integer || cp->integer)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins_ctf.wav"), 1, ATTN_NONE, 0);
 
 			else
@@ -445,7 +446,7 @@ int highestpos, numplayers;
 void MoveEveryoneDownQueue(void) {
 	int i, induel = 0;
 
-	for (i = 0; i < g_maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->integer; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			//move everyone else down a notch(never less than 0)
 			if(induel > 1 && g_edicts[i+1].client->pers.queue <= 3) //houston, we have a problem
@@ -466,7 +467,7 @@ void CheckDuelWinner(void) {
 	highestpos = 0;
 	induel = 0;
 
-	for (i = 0; i < g_maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->integer; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if(g_edicts[i+1].client->resp.score > highscore)
 				highscore = g_edicts[i+1].client->resp.score;
@@ -478,7 +479,7 @@ void CheckDuelWinner(void) {
 	if(highestpos < numplayers)
 		highestpos = numplayers;
 
-	for (i = 0; i < g_maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->integer; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
 				g_edicts[i+1].client->pers.queue = highestpos+1; //loser, kicked to the back of the line
@@ -493,7 +494,7 @@ void CheckDuelWinner(void) {
 	//check for any screwups and correct the queue
 	while(induel < 2 && numplayers > 1) {
 		induel = 0;
-		for (i = 0; i < g_maxclients->value; i++) {
+		for (i = 0; i < g_maxclients->integer; i++) {
 			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 				if(g_edicts[i+1].client->pers.queue < 3 && g_edicts[i+1].client->pers.queue)
 					induel++;
@@ -512,7 +513,7 @@ void EndIntermission(void)
 	if(g_duel->integer)
 		CheckDuelWinner();
 
-	for (i=0 ; i<g_maxclients->value; i++)
+	for (i=0 ; i<g_maxclients->integer; i++)
 	{
 		ent = g_edicts + 1 + i;
         if (!ent->inuse || ent->client->resp.spectator)
@@ -787,10 +788,8 @@ Note that it isn't that hard to overflow the 1400 byte message limit!
 */
 void DeathmatchScoreboard (edict_t *ent)
 {
-// ACEBOT_ADD
 	if (ent->is_bot)
 		return;
-// ACEBOT_END
 
 	DeathmatchScoreboardMessage (ent, ent->enemy, false);
 	gi.unicast (ent, true);
@@ -809,7 +808,7 @@ void Cmd_Score_f (edict_t *ent)
 	ent->client->showinventory = false;
 	ent->client->showhelp = false;
 
-	if (!deathmatch->value)
+	if (!deathmatch->integer)
 		return;
 
 	if (ent->client->showscores)
@@ -832,7 +831,7 @@ Display the current help message
 void Cmd_Help_f (edict_t *ent)
 {
 	// this is for backwards compatability
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
 		Cmd_Score_f (ent);
 		return;
@@ -943,7 +942,7 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
 
 	//ctf
-	if(ctf->value) {
+	if(ctf->integer) {
 		if (ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
 			ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ("i_flag1");
 		else if (ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
@@ -971,7 +970,7 @@ void G_SetStats (edict_t *ent)
 	//
 	ent->client->ps.stats[STAT_LAYOUTS] = 0;
 
-	if (deathmatch->value)
+	if (deathmatch->integer)
 	{
 		if (ent->client->pers.health <= 0 || level.intermissiontime
 			|| ent->client->showscores)
@@ -994,7 +993,7 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_DEATHS] = ent->client->resp.deaths;
 
 	// highest scorer
-	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->value; i++, e2++) {
+	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->integer; i++, e2++) {
 		if (!e2->inuse)
 			continue;
 
@@ -1009,7 +1008,7 @@ void G_SetStats (edict_t *ent)
 		for(i = 0; i < ent->client->resp.botnum; i++) {
 			strcpy(ent->client->ps.bots[i].name, ent->client->resp.bots[i].name);
 			//tally bot scores
-			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->value; j++, e2++) {
+			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->integer; j++, e2++) {
 				if(!strcmp(ent->client->resp.bots[i].name, e2->client->pers.netname))
 					ent->client->ps.bots[i].score = e2->client->resp.score;			
 			}
@@ -1093,7 +1092,7 @@ void G_CheckChaseStats (edict_t *ent)
 	int i;
 	gclient_t *cl;
 
-	for (i = 1; i <= g_maxclients->value; i++) {
+	for (i = 1; i <= g_maxclients->integer; i++) {
 		cl = g_edicts[i].client;
 		if (!g_edicts[i].inuse || cl->chase_target != ent)
 			continue;
@@ -1109,6 +1108,9 @@ G_SetSpectatorStats
 */
 void G_SetSpectatorStats (edict_t *ent)
 {
+	int i;
+	int j;
+	edict_t *e2;
 	gclient_t *cl = ent->client;
 
 	if (!cl->chase_target)
@@ -1118,8 +1120,10 @@ void G_SetSpectatorStats (edict_t *ent)
 
 	// layouts are independant in spectator
 	cl->ps.stats[STAT_LAYOUTS] = 0;
+
 	if (cl->pers.health <= 0 || level.intermissiontime || cl->showscores)
 		cl->ps.stats[STAT_LAYOUTS] |= 1;
+
 	if (cl->showinventory && cl->pers.health > 0)
 		cl->ps.stats[STAT_LAYOUTS] |= 2;
 
@@ -1128,5 +1132,26 @@ void G_SetSpectatorStats (edict_t *ent)
 			(cl->chase_target - g_edicts) - 1;
 	else
 		cl->ps.stats[STAT_CHASE] = 0;
+
+	//bot score info
+	// needed in case first (and only) client is a spectator,
+	ent->client->ps.botnum = ent->client->resp.botnum;
+	if ( ent->client->resp.botnum )
+	{
+		for(i = 0; i < ent->client->resp.botnum; i++)
+		{
+			strcpy(ent->client->ps.bots[i].name, ent->client->resp.bots[i].name);
+			//tally bot scores
+			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->integer; j++, e2++)
+			{
+				if(!strcmp(ent->client->resp.bots[i].name, e2->client->pers.netname))
+					ent->client->ps.bots[i].score = e2->client->resp.score;
+			}
+		}
+	}
+	//end bot score info
+
+
+
 }
 

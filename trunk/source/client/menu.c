@@ -422,11 +422,16 @@ higher res screens.
 */
 void M_DrawCharacter (int cx, int cy, int num)
 {
-	int		charscale;
+	float charscale;
 
-	charscale = (float)(viddef.height)*16/600;
+	charscale = (float)viddef.height * 16.0f/600.0f;
 
-	Draw_ScaledChar ( cx + viddef.width/3 - 3*charscale, cy + viddef.height/3 - 3*charscale, num, charscale, true);
+	Draw_ScaledChar (
+			(float)(cx + viddef.width/3)  - (3.0f * charscale),
+			(float)(cy + viddef.height/3) - (3.0f * charscale),
+			num,
+			charscale,
+			true ); // true means from menu
 }
 
 void M_Print (int cx, int cy, char *str)
@@ -445,7 +450,10 @@ void M_PrintWhite (int cx, int cy, char *str)
 	{
 		M_DrawCharacter (cx, cy, *str);
 		str++;
-		cx += 8;
+		if ( viddef.width > 1024 )
+			cx += 14;
+		else
+			cx += 8;
 	}
 }
 
@@ -591,11 +599,12 @@ void M_Main_Draw (void)
 	M_Background(backgroundpic);
 	M_MontagePic(montagepicname, mainalpha);
 
-	//if appropriate, draw the out-of-date warning
-	if ( cl_latest_game_version->value - atof(VERSION) > 0.00001f ) 
+
+	/* check for more recent program version */
+	version_warning = VersionUpdateNotice();	
+	if ( version_warning != NULL )
 	{
-	    version_warning = va("version %s available (%s currently installed)", cl_latest_game_version->string, VERSION);
-	    M_PrintWhite (0, 5*scale, version_warning);
+	    M_PrintWhite( 0, 5*scale, version_warning );
 	}
 
 	//draw the main menu buttons
