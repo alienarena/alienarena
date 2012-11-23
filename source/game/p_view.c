@@ -1108,6 +1108,8 @@ void ClientEndServerFrame (edict_t *ent)
 		// the weird way bots are done, there's no easy way to copy view
 		// angles over.
 		VectorCopy (ent->client->chase_target->s.origin, ent->s.origin);
+		ent->s.origin[2] += 24; // a little above the target
+
 	}
 	else
 		ent->redirect_number = ent->s.number;

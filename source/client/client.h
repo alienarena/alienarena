@@ -610,6 +610,8 @@ LOGINSTATE currLoginState;
 //
 
 void getLatestGameVersion( void );
+char* VersionUpdateNotice( void );
+
 
 //
 // cl_view.c

@@ -152,106 +152,88 @@ SV_StatusString
 Builds the string that is sent as heartbeats and status replies
 ===============
 */
-char	*SV_StatusString (void)
+char *SV_StatusString (void)
 {
-	char	player[1024];
-	static char	status[MAX_MSGLEN - 16];
-	int		i;
-#ifdef NOTUSED
-	int j, k;
-#endif
-	client_t	*cl;
-	int		statusLength;
-	int		playerLength;
-	char *name;
-	//char *s;
-	char nametxt[MAX_INFO_STRING];
+	static char status[MAX_MSGLEN - 16]; // static buffer for the status string
+	qboolean msg_overflow = false;
 
-	strcpy (status, Cvar_Serverinfo());
-	strcat (status, "\n");
-	statusLength = strlen(status);
+	char      player[MAX_INFO_STRING];
+	client_t *cl;
+	size_t    count;
 
-	for (i=0 ; i<maxclients->integer ; i++)
+	// server info string. MAX_INFO_STRING is always < sizeof(status)
+	strcpy( status, Cvar_Serverinfo() );
+	strcat( status, "\n" );
+
+	// real player score info
+	for ( cl=svs.clients, count=maxclients->integer ; count-- ; cl++ )
 	{
-		cl = &svs.clients[i];
 		if (cl->state == cs_connected || cl->state == cs_spawned )
 		{
-			name = cl->name;
-#ifdef NOTUSED
-			//handle color chars
-			nametxt[0] = 0;
-			k = 0;
-			while(j = *name) {
-				if ( Q_IsColorString( name ) ) {
-					name +=2;
-					continue;
-				}
-				nametxt[k] = j;
-				name++;
-				k++;
-				//failsafe - break at 32 chars
-				if(k>30)
-					break;
+			/* send score of 0 for spectators and players not yet in game
+			 *  statistics program uses this data when polling for scores
+			 */
+			int cl_score = 0;
+			if ( cl->state == cs_spawned
+					&& cl->edict->client->ps.stats[STAT_SPECTATOR] == 0 )
+			{
+				cl_score = cl->edict->client->ps.stats[STAT_FRAGS];;
 			}
-			nametxt[k]=0;
-#else
-			//allow color chars to be sent
-			Q_strncpyz2( nametxt, name, sizeof(nametxt) );
-#endif
-			//s = NET_AdrToString ( cl->netchan.remote_address); //fuck you Luigi
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
-				cl->edict->client->ps.stats[STAT_FRAGS], cl->ping, nametxt);
-			playerLength = strlen(player);
-			if (statusLength + playerLength >= sizeof(status) )
-				break;		// can't hold any more
-			strcpy (status + statusLength, player);
-			statusLength += playerLength;
-
+			/*
+			 * send color characters
+			 * do not send actual ip addresses for security/privacy reasons
+			 */
+			Com_sprintf( player, sizeof(player),
+					"%i %i \"%s\" \"127.0.0.1\"\n",
+					cl_score, cl->ping, cl->name);
+			if ( (strlen(status) + strlen(player) + 1) < sizeof(status) )
+			{
+				strncat( status, player, strlen(player) );
+			}
+			else
+			{
+				msg_overflow = true;
+				break;
+			}
 		}
 	}
-	//bot score info
-	for (i=0 ; i<maxclients->integer ; i++)
+
+	// bot score info
+	if ( !msg_overflow )
 	{
-		cl = &svs.clients[i];
-
-		if(cl->edict->client->ps.botnum) {
-			for(i = 0; i < cl->edict->client->ps.botnum; i++) {
-
-				name = cl->edict->client->ps.bots[i].name;
-#ifdef NOTUSED
-				//handle color chars
-				nametxt[0] = 0;
-				k = 0;
-				while(j = *name) {
-					if ( Q_IsColorString( name ) ) {
-						name +=2;
-						continue;
+		for ( cl=svs.clients, count=maxclients->integer ; count-- ; cl++ )
+		{
+			size_t bot_count;
+			bot_count = cl->edict->client->ps.botnum;
+			if ( bot_count )
+			{ // normally, first client contains the bot names and scores
+				bot_t* ps_bot;
+				for ( ps_bot = cl->edict->client->ps.bots ; bot_count-- ; ps_bot++ )
+				{
+					int bot_score = ps_bot->score;
+					Com_sprintf( player, sizeof(player),
+							"%i %i \"%s\" \"127.0.0.1\"\n",
+							bot_score,
+							0, // bot ping
+							ps_bot->name );
+					if ( (strlen(status) + strlen(player) + 1) < sizeof(status) )
+					{
+						strncat( status, player, strlen(player) );
 					}
-					nametxt[k] = j;
-					name++;
-					k++;
-					//failsafe - break at 32 chars
-					if(k>30)
+					else
+					{
+						msg_overflow = true;
 						break;
+					}
 				}
-				nametxt[k]=0;
-#else
-				//allow color chars to be sent
-				Q_strncpyz2( nametxt, name, sizeof(nametxt) );
-#endif
-
-				Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
-					cl->edict->client->ps.bots[i].score, 0, nametxt);
-				playerLength = strlen(player);
-				if (statusLength + playerLength >= sizeof(status) )
-					break;		// can't hold any more
-				strcpy (status + statusLength, player);
-				statusLength += playerLength;
 			}
 			break;
 		}
 	}
-	//end bot score info
+	if ( msg_overflow )
+	{
+		Com_DPrintf("SV_StatusString overflowed\n");
+	}
 
 	return status;
 }
@@ -494,8 +476,8 @@ void SVC_DirectConnect (void)
 	version = atoi(Cmd_Argv(1));
 	if (version != PROTOCOL_VERSION)
 	{
-		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %s\n", VERSION);
-		Com_DPrintf ("    rejected connect from version %i\n", version);
+		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is protocol version %s\n", PROTOCOL_VERSION);
+		Com_DPrintf ("    rejected connect from protocol version %i\n", version);
 		SV_LogEvent( adr , "RVR" , NULL );
 		return;
 	}

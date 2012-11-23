@@ -687,8 +687,14 @@ int PlayerSort (void const *a, void const *b)
 	anum = *(int *)a;
 	bnum = *(int *)b;
 
-	anum = game.clients[anum].ps.stats[STAT_FRAGS];
-	bnum = game.clients[bnum].ps.stats[STAT_FRAGS];
+	if ( game.clients[anum].ps.stats[STAT_SPECTATOR] == 0 )
+		anum = game.clients[anum].ps.stats[STAT_FRAGS];
+	else
+		anum = 0;
+	if ( game.clients[bnum].ps.stats[STAT_SPECTATOR] == 0 )
+		bnum = game.clients[bnum].ps.stats[STAT_FRAGS];
+	else
+		bnum = 0;
 
 	if (anum < bnum)
 		return -1;
@@ -726,9 +732,11 @@ void Cmd_Players_f (edict_t *ent)
 
 	for (i = 0 ; i < count ; i++)
 	{
+
 		Com_sprintf (small, sizeof(small), "%3i %s\n",
 			game.clients[index[i]].ps.stats[STAT_FRAGS],
 			game.clients[index[i]].pers.netname);
+
 		if (strlen (small) + strlen(large) > sizeof(large) - 100 )
 		{	// can't print all of them in one packet
 			strcat (large, "...\n");
