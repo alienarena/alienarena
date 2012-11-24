@@ -1315,6 +1315,13 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
+	if(!(strcmp("models/weapons/v_alienblast/tris.md2", gun.model->name))) 
+	{
+		gun.model = R_RegisterModel("models/weapons/v_alienblast/cover.md2");
+		gun.flags |= RF_TRANSLUCENT;
+		gun.alpha = 0.30;
+		V_AddViewEntity (&gun);
+	}
 }
 
 

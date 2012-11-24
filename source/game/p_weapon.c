@@ -1114,7 +1114,7 @@ BLASTER
 ======================================================================
 */
 
-void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect)
+void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qboolean alien, int effect)
 {
 	vec3_t	forward, right;
 	vec3_t	start;
@@ -1149,7 +1149,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 			if(ent->altfire) 
 			{
 				gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/blastf1a.wav"), 1, ATTN_NORM, 0);
-				fire_blasterball (ent, start, forward, damage*3, 1000, effect, hyper);
+				fire_blasterball (ent, start, forward, damage*3, 1000, effect, hyper, false);
 			}
 		}
 		else 
@@ -1163,11 +1163,11 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		if(ent->client->buttons & BUTTON_ATTACK2) 
 		{ 
 			//alt fire
-			fire_blaster_beam (ent, start, forward, (int)((float)damage/1.4), 0, false);
+			fire_blaster_beam (ent, start, forward, (int)((float)damage/1.4), 0, false, alien);
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
 		}
 		else
-			fire_blasterball (ent, start, forward, damage, 1200, effect, hyper);
+			fire_blasterball (ent, start, forward, damage, 1200, effect, hyper, alien);
 	}
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1199,7 +1199,7 @@ void Weapon_Blaster_Fire (edict_t *ent)
 
 	damage = 30;
 
-	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+	Blaster_Fire (ent, vec3_origin, damage, false, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
 
@@ -1222,7 +1222,7 @@ void Weapon_AlienBlaster_Fire (edict_t *ent)
 
 	damage = 30;
 
-	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
+	Blaster_Fire (ent, vec3_origin, damage, false, true, EF_ROCKET);
 	ent->client->ps.gunframe++;
 }
 
@@ -1335,7 +1335,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 	if(ent->client->buttons & BUTTON_ATTACK2)
 		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
 	else
-		fire_blaster_beam (ent, start, forward, damage, 0, true);
+		fire_blaster_beam (ent, start, forward, damage, 0, true, false);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1363,12 +1363,14 @@ void Weapon_Strafer_Fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if(ent->client->buttons & BUTTON_ATTACK2) {
+	if(ent->client->buttons & BUTTON_ATTACK2) 
+	{
 		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
 	}
-	else {
-		fire_blaster_beam (ent, start, forward, damage, 0, true);
+	else 
+	{
+		fire_blaster_beam (ent, start, forward, damage, 0, true, false);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
 	}
 
@@ -1422,7 +1424,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	if(ent->client->buttons & BUTTON_ATTACK2) {
-		fire_blasterball (ent, start, forward, damage*3, 1500, EF_ROCKET, false);
+		fire_blasterball (ent, start, forward, damage*3, 1500, EF_ROCKET, false, false);
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hypbrl1a.wav"), 1, ATTN_NORM, 0);
 	}
 	else if(ent->client->ps.gunframe == 6) {
@@ -1503,7 +1505,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 			else
 				damage = 7;
 
-			Blaster_Fire (ent, offset, damage, true, effect);
+			Blaster_Fire (ent, offset, damage, true, false, effect);
 			if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
 		}

@@ -523,6 +523,15 @@ models/weapons/v_blast/skin
 		cube
 	}
 }
+models/weapons/v_alienblast/skin
+{
+	{
+		map models/weapons/v_alienblast/skin_normal.jpg
+		normalmap
+		map2 models/weapons/v_alienblast/skin_fx.tga
+		glow
+	}
+}
 models/weapons/v_violator/skin
 {
 	{
