@@ -1059,7 +1059,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			else if (effects & EF_BLASTER)
 			{
 				CL_BlasterTrail(cent->lerp_origin, ent.origin, cent);
-				V_AddLight (ent.origin, 50, 0, .5, 1);
+				V_AddLight (ent.origin, 200, 0, .5, .1);
 			}
 		}
 end:
