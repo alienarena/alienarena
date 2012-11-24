@@ -404,7 +404,7 @@ edict_t *CreateTargetChangeLevel(char *map)
  *
  *--- weapon_hit[] incremented ---
  * 0 : blasterball_touch : Weapon_Beamgun, Weapon_Blaster, Weapon_Hover
- * 0 : fire_blaster_beam : Weapon_Beamgun, Weapon_Blaster, Weapon_Strafer
+ * 0 : fire_blaster_beam : Weapon_Beamgun, Weapon_Blaster, Weapon_Alienblaster, Weapon_Strafer
  * 1 : fire_plasma       : Weapon_Disruptor
  * 2 : floater_think     : Weapon_Smartgun
  * 3 : fire_lead         : Weapon_Chain

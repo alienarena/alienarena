@@ -1027,7 +1027,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
 		item = FindItem("Rocket Launcher");
 	}
-	else if ( insta_rockets->integer )
+	else if (insta_rockets->integer )
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
@@ -1036,7 +1036,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
 		item = FindItem("Alien Disruptor");
 	}
-	else
+	else 
 		item = FindItem("Blaster");
 #endif
 	client->pers.selected_item = ITEM_INDEX(item);
@@ -1965,6 +1965,10 @@ void PutClientInServer (edict_t *ent)
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
 				if(g_tactical->integer)
 				{
+					item = FindItem("Blaster");
+					client->pers.selected_item = ITEM_INDEX(item);
+					client->pers.inventory[client->pers.selected_item] = 0;
+				
 					item = FindItem("Alien Blaster");
 				}
 				else
@@ -1975,7 +1979,7 @@ void PutClientInServer (edict_t *ent)
 				}
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
-				client->pers.weapon = item;
+				client->pers.weapon = item;				
 			}
 		}
 	}

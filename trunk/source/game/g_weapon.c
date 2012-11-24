@@ -341,7 +341,7 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	G_FreeEdict (self);
 }
 
-void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)
+void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper, qboolean alien)
 {
 	edict_t	*bolt;
 	trace_t	tr;
@@ -359,11 +359,13 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	bolt->movetype = MOVETYPE_FLYMISSILE;
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
-	if(effect == EF_ROCKET) { //ack, kinda assbackwards, but the past mistakes haunt us
+	if(effect == EF_ROCKET) 
+	{	//ack, kinda assbackwards, but the past mistakes haunt us
 		bolt->s.effects |= EF_BLASTER;
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	}
-	else {
+	else 
+	{
 		bolt->s.effects |= EF_PLASMA;
 		bolt->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
 	}
@@ -387,8 +389,7 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 		bolt->touch (bolt, tr.ent, NULL, NULL);
 	}
 }
-void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage,
-int speed, int effect, qboolean hyper)
+void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper)
 {
 	vec3_t		from;
 	vec3_t		end;
@@ -417,7 +418,8 @@ int speed, int effect, qboolean hyper)
 	}
 	else
 	{
-		if ((tr.ent != self) && (tr.ent->takedamage)) {
+		if ((tr.ent != self) && (tr.ent->takedamage)) 
+		{
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
 			self->client->resp.weapon_hits[6]++;
 			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
@@ -443,7 +445,7 @@ int speed, int effect, qboolean hyper)
 
 	if ((tr.ent != self) && (tr.ent->takedamage))
 	{
-        	T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
+        T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
 		self->client->resp.weapon_hits[6]++;
 		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 	}
@@ -597,7 +599,7 @@ void stinger_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 	G_FreeEdict (ent);
 }
 
-void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate)
+void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate, qboolean alien)
 {
 	vec3_t		from;
 	vec3_t		end;
@@ -650,13 +652,19 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	VectorCopy (tr.endpos, from);
 
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BLASTERBEAM);
+	if(alien)
+		gi.WriteByte (TE_LASERBEAM);
+	else
+		gi.WriteByte (TE_BLASTERBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BLASTER);
+	if(alien)
+		gi.WriteByte (TE_SCREEN_SPARKS);
+	else
+		gi.WriteByte (TE_BLASTER);
 	gi.WritePosition (tr.endpos);
 	gi.WriteDir (tr.plane.normal);
 	gi.multicast (tr.endpos, MULTICAST_PVS);
