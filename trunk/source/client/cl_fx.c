@@ -2189,7 +2189,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 				return;
 
 			VectorClear (p->accel);
-			p->color = 0xc0 + (rand()&2);
+			p->color = 0xd0 + (rand()&2);
 			p->scale = 2 + (rand()&7);
 			p->scalevel = 5;
 			p->alpha = .3;
