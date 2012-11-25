@@ -143,6 +143,7 @@ inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, 
 	nvar->integer = atoi (nvar->string);
 	nvar->flags = flags;
 	nvar->hash_key = hash_key;
+	nvar->description = NULL;
 
 	return nvar;
 }
@@ -562,6 +563,7 @@ void Cvar_WriteVariables (char *path)
 ============
 Cvar_List_f
 
+List all cvars, also displaying their documentation if appropriate
 ============
 */
 void Cvar_List_f (void)
@@ -591,11 +593,84 @@ void Cvar_List_f (void)
 			Com_Printf ("L");
 		else
 			Com_Printf (" ");
-		Com_Printf (" %s \"%s\"\n", var->name, var->string);
+		Com_Printf (" %s \"%s\"", var->name, var->string);
+		if (var->description)
+			Com_Printf (" - %s", var->description);
+		Com_Printf ("\n");
 	}
 	Com_Printf ("%i cvars\n", i);
 }
 
+/*
+============
+Cvar_Help_f
+
+If the cvar exists, display its current value and documentation
+============
+*/
+void Cvar_Help_f (void)
+{
+	cvar_t	*var;
+	char	*var_name;
+	int		flags;
+	
+	if (Cmd_Argc() != 2)
+	{
+		Com_Printf ("Usage: help <variable>\n");
+		Com_Printf ("Displays the cvar's type, value, and help string if present.\n");
+		return;
+	}
+	
+	var_name = Cmd_Argv(1);
+	var = Cvar_Get (var_name, 0, 0);
+	
+	if (var == NULL)
+	{
+		Com_Printf ("Nonexistant cvar \"%s\"\n", var_name);
+		return;
+	}
+	
+	Com_Printf ("Name: \"%s\"\n", var_name);
+	
+	flags = var->flags;
+	if (flags != 0)
+	{
+		Com_Printf ("Type: ");
+		
+#define HANDLE_FLAG(flag,str)\
+		if (flags & (flag))\
+		{\
+			Com_Printf (str);\
+			flags &= ~(flag);\
+			if (flags != 0) \
+				Com_Printf (", ");\
+		}
+		
+		HANDLE_FLAG (CVAR_ARCHIVE, "saved in config.cfg");
+		HANDLE_FLAG (CVAR_USERINFO, "player setting");
+		HANDLE_FLAG (CVAR_SERVERINFO, "server setting");
+		HANDLE_FLAG (CVAR_NOSET, "can be set only at the command line");
+		HANDLE_FLAG (CVAR_LATCH, "changes not applied until next game");
+		HANDLE_FLAG (CVAR_ROM, "read-only");
+		HANDLE_FLAG (CVAR_GAMEINFO, "gameplay setting");
+		HANDLE_FLAG (CVAR_PROFILE, "saved in profile.cfg");
+		
+		// Usually, at most one of these will be set.
+		HANDLE_FLAG (CVARDOC_BOOL, "0 for disabled, nonzero for enabled");
+		HANDLE_FLAG (CVARDOC_STR, "not a number");
+		HANDLE_FLAG (CVARDOC_FLOAT, "floating-point number");
+		HANDLE_FLAG (CVARDOC_INT, "integer");
+			
+#undef HANDLE_FLAG
+		
+		Com_Printf ("\n");
+	}
+	
+	Com_Printf ("Value: \"%s\"\n", var->string);
+	
+	if (var->description != NULL)
+		Com_Printf ("Description: %s\n", var->description);
+}
 
 qboolean userinfo_modified;
 
@@ -665,6 +740,27 @@ char	*Cvar_Serverinfo (void)
     return info;
 }
 
+void	Cvar_Describe(cvar_t *var, char *description_string)
+{
+	if (var == NULL)
+		return;
+	if (var->description != NULL)
+		Z_Free (var->description);
+	if (description_string == NULL)
+		var->description = NULL;
+	else
+		var->description = CopyString (description_string);
+}
+
+void	Cvar_Describe_ByName(char *var_name, char *description_string)
+{
+	cvar_t *var;
+	if (var_name == NULL)
+		return;
+	var = Cvar_Get (var_name, 0, 0);
+	Cvar_Describe (var, description_string);
+}
+
 /*
 ============
 Cvar_Init
@@ -676,5 +772,6 @@ void Cvar_Init (void)
 {
 	Cmd_AddCommand ("set", Cvar_Set_f);
 	Cmd_AddCommand ("cvarlist", Cvar_List_f);
+	Cmd_AddCommand ("help", Cvar_Help_f);
 
 }

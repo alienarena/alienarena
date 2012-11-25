@@ -356,6 +356,9 @@ CVARS (console variables)
 #ifndef CVAR
 #define	CVAR
 
+// These are all the flags that actually do anything.
+// NOTE: there is no need to maintain any kind of compatibility, we can change
+// these if we want to.
 #define	CVAR_ARCHIVE	1	// set to cause it to be saved to vars.rc
 #define	CVAR_USERINFO	2	// added to userinfo  when changed
 #define	CVAR_SERVERINFO	4	// added to serverinfo when changed
@@ -366,6 +369,16 @@ CVARS (console variables)
 #define CVAR_GAMEINFO   64  // added to the 'mods' field of the serverinfo
                             // string when changed
 #define CVAR_PROFILE	128 // profile information
+
+// These flags are purely for documentation (used by the "help" command.)
+// Usually, at most one of these will be set. They are not "enforced" by the
+// code in any way.
+// TODO: go through and add all these flags for cvars as appropriate.
+// TODO: others like address, path, IP address, etc?
+#define CVARDOC_BOOL	512
+#define CVARDOC_STR		1024
+#define CVARDOC_FLOAT	2048
+#define CVARDOC_INT		4096
 
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s
@@ -378,7 +391,8 @@ typedef struct cvar_s
 	qboolean	modified;		// set each time the cvar is changed
 	float		value;
 	float		default_value;
-	int		integer;		//BLOOMS
+	int		integer;
+	char		*description; // Optional (may be NULL)
 	struct cvar_s	*next;
 } cvar_t;
 
