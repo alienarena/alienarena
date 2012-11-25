@@ -169,6 +169,7 @@ typedef struct
 	cvar_t	*(*cvar) (char *var_name, char *value, int flags);
 	void	(*cvar_set) (char *var_name, char *value);
 	cvar_t	*(*cvar_forceset) (char *var_name, char *value);
+	void	(*cvar_describe) (cvar_t *var, char *description_string);
 
 	// ClientCommand and ServerCommand parameter access
 	int		(*argc) (void);

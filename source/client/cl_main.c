@@ -1904,31 +1904,36 @@ void CL_InitLocal (void)
 //
 // register our variables
 //
-	cl_stereo_separation = Cvar_Get( "cl_stereo_separation", "0.4", CVAR_ARCHIVE );
-	cl_stereo = Cvar_Get( "cl_stereo", "0", 0 );
-	background_music = Cvar_Get("background_music", "1", CVAR_ARCHIVE);
-	background_music_vol = Cvar_Get("background_music_vol", "0.5", CVAR_ARCHIVE);
+	cl_stereo_separation = Cvar_Get( "cl_stereo_separation", "0.4", CVAR_ARCHIVE | CVARDOC_FLOAT );
+	cl_stereo = Cvar_Get( "cl_stereo", "0", CVARDOC_BOOL );
+	background_music = Cvar_Get("background_music", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	background_music_vol = Cvar_Get("background_music_vol", "0.5", CVAR_ARCHIVE | CVARDOC_FLOAT);
 
-	cl_add_blend = Cvar_Get ("cl_blend", "1", CVAR_ARCHIVE);
-	cl_add_lights = Cvar_Get ("cl_lights", "1", 0);
-	cl_add_particles = Cvar_Get ("cl_particles", "1", 0);
-	cl_add_entities = Cvar_Get ("cl_entities", "1", 0);
-	cl_gun = Cvar_Get ("cl_gun", "1", CVAR_ARCHIVE);
-	cl_footsteps = Cvar_Get ("cl_footsteps", "1", 0);
-	cl_noskins = Cvar_Get ("cl_noskins", "0", CVAR_ARCHIVE);
-	cl_autoskins = Cvar_Get ("cl_autoskins", "0", 0);
-	cl_predict = Cvar_Get ("cl_predict", "1", 0);
-	cl_maxfps = Cvar_Get ("cl_maxfps", "60", CVAR_ARCHIVE);
-	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
-	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE);
-	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE);
-	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE);
-	cl_brass = Cvar_Get ("cl_brass", "1", CVAR_ARCHIVE);
-	cl_dmlights = Cvar_Get("cl_dmlights", "1", CVAR_ARCHIVE);
-	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE);
-	cl_centerprint = Cvar_Get ("cl_centerprint", "1", CVAR_ARCHIVE);
-	cl_precachecustom = Cvar_Get ("cl_precachecustom", "0", CVAR_ARCHIVE);
-	cl_simpleitems = Cvar_Get ("cl_simpleitems", "0", CVAR_ARCHIVE);
+	cl_add_blend = Cvar_Get ("cl_blend", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_add_lights = Cvar_Get ("cl_lights", "1", CVARDOC_BOOL);
+	cl_add_particles = Cvar_Get ("cl_particles", "1", CVARDOC_BOOL);
+	cl_add_entities = Cvar_Get ("cl_entities", "1", CVARDOC_BOOL);
+	cl_gun = Cvar_Get ("cl_gun", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_footsteps = Cvar_Get ("cl_footsteps", "1", CVARDOC_BOOL);
+	cl_noskins = Cvar_Get ("cl_noskins", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_autoskins = Cvar_Get ("cl_autoskins", "0", CVARDOC_BOOL);
+	cl_predict = Cvar_Get ("cl_predict", "1", CVARDOC_BOOL);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "60", CVAR_ARCHIVE | CVARDOC_INT);
+	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (cl_showPlayerNames, "0 means no nametags, 1 means show one nametag in the center of the screen, 2 means show a nametag over each player.");
+	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_healthaura, "show glowing effects around health pickups.");
+	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (cl_disbeamclr, "beam color for the disruptor weapon. 0 = green, 1 = blue, 2 = red, 3 = yellow, 4 = purple.");
+	cl_brass = Cvar_Get ("cl_brass", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_dmlights = Cvar_Get("cl_dmlights", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_centerprint = Cvar_Get ("cl_centerprint", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_precachecustom = Cvar_Get ("cl_precachecustom", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_precachecustom, "precache 3rd-party and custom player skins at the first map load.");
+	cl_simpleitems = Cvar_Get ("cl_simpleitems", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_simpleitems, "show sprites instead of models for pickup items.");
 
 	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
 	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);
@@ -1941,17 +1946,17 @@ void CL_InitLocal (void)
 	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", 0);
 	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", 0);
 
-	cl_run = Cvar_Get ("cl_run", "0", CVAR_ARCHIVE);
-	freelook = Cvar_Get( "freelook", "0", CVAR_ARCHIVE );
-	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE);
-	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE);
-	m_accel	= Cvar_Get ("m_accel", "1",	CVAR_ARCHIVE);
-	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE);
-	menu_sensitivity = Cvar_Get("menu_sensitivity", "3", CVAR_ARCHIVE);
+	cl_run = Cvar_Get ("cl_run", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	freelook = Cvar_Get( "freelook", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	m_accel	= Cvar_Get ("m_accel", "1",	CVAR_ARCHIVE | CVARDOC_BOOL);
+	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE | CVARDOC_FLOAT);
+	menu_sensitivity = Cvar_Get("menu_sensitivity", "3", CVAR_ARCHIVE | CVARDOC_FLOAT);
 
-	m_smoothing = Cvar_Get("m_smoothing", "0", CVAR_ARCHIVE);
-	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE);
-	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE);
+	m_smoothing = Cvar_Get("m_smoothing", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE | CVARDOC_FLOAT);
+	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE | CVARDOC_FLOAT);
 	m_forward = Cvar_Get ("m_forward", "1", 0);
 	m_side = Cvar_Get ("m_side", "1", 0);
 
@@ -1960,56 +1965,59 @@ void CL_InitLocal (void)
 	cl_showclamp = Cvar_Get ("showclamp", "0", 0);
 	cl_timeout = Cvar_Get ("cl_timeout", "120", 0);
 	cl_paused = Cvar_Get ("paused", "0", 0);
-	cl_timedemo = Cvar_Get ("timedemo", "0", 0);
-	cl_demoquit = Cvar_Get ("demoquit", "0", 0);
+	cl_timedemo = Cvar_Get ("timedemo", "0", CVARDOC_BOOL);
+	Cvar_Describe (cl_timedemo, "play back demos (recorded games) in benchmark mode.");
+	cl_demoquit = Cvar_Get ("demoquit", "0", CVARDOC_BOOL);
+	Cvar_Describe (cl_demoquit, "quit automatically after a demo has finished.");
 	
-	cl_speedrecord = Cvar_Get ("cl_speedrecord", "450", 0);
-	cl_alltimespeedrecord = Cvar_Get ("cl_alltimespeedrecord", "450", CVAR_ARCHIVE);
+	cl_speedrecord = Cvar_Get ("cl_speedrecord", "450", CVARDOC_INT);
+	cl_alltimespeedrecord = Cvar_Get ("cl_alltimespeedrecord", "450", CVAR_ARCHIVE | CVARDOC_INT);
 
-	rcon_client_password = Cvar_Get ("rcon_password", "", 0);
-	rcon_address = Cvar_Get ("rcon_address", "", 0);
+	rcon_client_password = Cvar_Get ("rcon_password", "", CVARDOC_STR);
+	rcon_address = Cvar_Get ("rcon_address", "", CVARDOC_STR);
 
 	//
 	// userinfo
 	//
-	info_password = Cvar_Get ("password", "", CVAR_USERINFO);
-	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
-	info_spectator_password = Cvar_Get ( "spectator_password", "", CVAR_USERINFO );
-	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
-	stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	info_password = Cvar_Get ("password", "", CVAR_USERINFO | CVARDOC_STR);
+	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO | CVARDOC_BOOL);
+	info_spectator_password = Cvar_Get ( "spectator_password", "", CVAR_USERINFO | CVARDOC_STR);
+	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
+	stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE | CVARDOC_STR);
 	Q_strncpyz2(currLoginState.old_password, stats_password->string, sizeof(currLoginState.old_password));
 	currLoginState.hashed = false;
-	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
+	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE | CVARDOC_BOOL);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	/* */
-	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
-	rate = Cvar_Get ("rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE);	// FIXME
+	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
+	rate = Cvar_Get ("rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);	// FIXME
 	msg = Cvar_Get ("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
 	hand = Cvar_Get ("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
-	fov = Cvar_Get ("fov", "90", CVAR_USERINFO | CVAR_ARCHIVE);
-	gender = Cvar_Get ("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE);
+	fov = Cvar_Get ("fov", "90", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (fov, "horizontal field of view (in degrees.) Maximum 160.");
+	gender = Cvar_Get ("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
 	gender_auto = Cvar_Get ("gender_auto", "1", CVAR_ARCHIVE);
 	gender->modified = false; // clear this so we know when user sets it manually
 
-	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE);
-	cl_vehicle_huds = Cvar_Get ("cl_vehicle_huds", "1", CVAR_ARCHIVE);
+	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_vehicle_huds = Cvar_Get ("cl_vehicle_huds", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 
-	cl_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
-	cl_master2 = Cvar_Get ("cl_master2", "master2.corservers.com", CVAR_ARCHIVE);
+	cl_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_master2 = Cvar_Get ("cl_master2", "master2.corservers.com", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//custom huds
-	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
-	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE);
+	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//stats server
-	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE);
+	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//update checker
-	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE);
+	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//throwaway cvars
-	Cvar_Get("g_dm_lights", "1", CVAR_ARCHIVE); //mark this as archived even if game code doesn't run.
+	Cvar_Get("g_dm_lights", "1", CVAR_ARCHIVE | CVAR_GAMEINFO | CVARDOC_BOOL); //mark this as archived even if game code doesn't run.
 
 	//
 	// register our commands

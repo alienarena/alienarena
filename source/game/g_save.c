@@ -181,81 +181,85 @@ void InitGame (void)
 	g_dedicated = gi.cvar ("dedicated", "0", CVAR_NOSET);
 
 	// latched vars
-	sv_cheats = gi.cvar ("cheats", "0", CVAR_SERVERINFO|CVAR_LATCH);
+	sv_cheats = gi.cvar ("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar ("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar ("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);
 
-	g_maxclients = gi.cvar ("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH);
-	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
-	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH);
-	ctf = gi.cvar ("ctf", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	tca = gi.cvar ("tca", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	cp = gi.cvar ("cp", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	skill = gi.cvar ("skill", "1", CVAR_LATCH);
-	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
-	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH);
-	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH);
+	g_maxclients = gi.cvar ("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH | CVARDOC_INT);
+	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO | CVARDOC_INT);
+	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH | CVARDOC_BOOL);
+	ctf = gi.cvar ("ctf", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	tca = gi.cvar ("tca", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	cp = gi.cvar ("cp", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	skill = gi.cvar ("skill", "1", CVAR_LATCH | CVARDOC_INT);
+	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH | CVARDOC_INT);
+	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
+	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
+	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");
 
 	//mutator
-	instagib = gi.cvar ("instagib", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	rocket_arena = gi.cvar ("rocket_arena", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	insta_rockets = gi.cvar ("insta_rockets", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	low_grav = gi.cvar ("low_grav", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	regeneration = gi.cvar ("regeneration", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	vampire = gi.cvar ("vampire", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	excessive = gi.cvar ("excessive", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	grapple = gi.cvar ("grapple", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	classbased = gi.cvar ("classbased", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	instagib = gi.cvar ("instagib", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	rocket_arena = gi.cvar ("rocket_arena", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	insta_rockets = gi.cvar ("insta_rockets", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	low_grav = gi.cvar ("low_grav", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	regeneration = gi.cvar ("regeneration", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	vampire = gi.cvar ("vampire", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	excessive = gi.cvar ("excessive", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	grapple = gi.cvar ("grapple", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	classbased = gi.cvar ("classbased", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 
 	//duel mode
-	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 
 	//tactical mode
-	g_tactical = gi.cvar ("g_tactical", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	g_tactical = gi.cvar ("g_tactical", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 
-	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH);
-	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH);
+	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH | CVARDOC_BOOL);
+	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH | CVARDOC_INT);
 
 	//weapons
-	wep_selfdmgmulti = gi.cvar("wep_selfdmgmulti", "1.0", 0);
+	wep_selfdmgmulti = gi.cvar("wep_selfdmgmulti", "1.0", CVARDOC_FLOAT);
 
 	//health/max health/max ammo
-	g_spawnhealth = gi.cvar("g_spawnhealth", "125", 0);
-	g_maxhealth = gi.cvar("g_maxhealth", "100", 0);
-	g_maxbullets = gi.cvar("g_maxbullets", "200", 0);
-	g_maxshells = gi.cvar("g_maxshells", "100", 0);
-	g_maxrockets = gi.cvar("g_maxrockets", "50", 0);
-	g_maxgrenades = gi.cvar("g_maxgrenades", "50", 0);
-	g_maxcells = gi.cvar("g_maxcells", "200", 0);
-	g_maxslugs = gi.cvar("g_maxslugs", "50", 0);
-	g_maxseekers = gi.cvar("g_maxseekers", "1", 0);
+	g_spawnhealth = gi.cvar("g_spawnhealth", "125", CVARDOC_INT);
+	g_maxhealth = gi.cvar("g_maxhealth", "100", CVARDOC_INT);
+	g_maxbullets = gi.cvar("g_maxbullets", "200", CVARDOC_INT);
+	g_maxshells = gi.cvar("g_maxshells", "100", CVARDOC_INT);
+	g_maxrockets = gi.cvar("g_maxrockets", "50", CVARDOC_INT);
+	g_maxgrenades = gi.cvar("g_maxgrenades", "50", CVARDOC_INT);
+	g_maxcells = gi.cvar("g_maxcells", "200", CVARDOC_INT);
+	g_maxslugs = gi.cvar("g_maxslugs", "50", CVARDOC_INT);
+	g_maxseekers = gi.cvar("g_maxseekers", "1", CVARDOC_INT);
 
 	//quick weapon change
-	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_INT);
+	gi.cvar_describe (quickweap, "fast weapon switching.");
 
 	//anti-camp
-	anticamp = gi.cvar("anticamp", "0", CVAR_LATCH|CVAR_GAMEINFO);
-	camptime = gi.cvar("camptime", "10", CVAR_LATCH);
-	ac_frames = gi.cvar("ac_frames", "0", CVAR_LATCH);
-	ac_threshold = gi.cvar("ac_threshold", "0", CVAR_LATCH);
+	anticamp = gi.cvar("anticamp", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	camptime = gi.cvar("camptime", "10", CVAR_LATCH | CVARDOC_INT);
+	ac_frames = gi.cvar("ac_frames", "0", CVAR_LATCH | CVARDOC_INT);
+	ac_threshold = gi.cvar("ac_threshold", "0", CVAR_LATCH | CVARDOC_INT);
 
 	//random quad
-	g_randomquad = gi.cvar("g_randomquad", "0", CVAR_LATCH);
+	g_randomquad = gi.cvar("g_randomquad", "0", CVAR_LATCH | CVARDOC_BOOL);
 
 	//warmup time
 	if (g_maxclients->integer > 1)
-		warmuptime = gi.cvar("warmuptime", "30", CVAR_LATCH);
+		warmuptime = gi.cvar("warmuptime", "30", CVAR_LATCH | CVARDOC_INT);
 	else
 		// You can override this default if you want to, but a default of 0 is
 		// nice if you're just loading a map to test code or to test the map 
 		// itself, over and over again.
-		warmuptime = gi.cvar("warmuptime", "0", CVAR_LATCH);
+		warmuptime = gi.cvar("warmuptime", "0", CVAR_LATCH | CVARDOC_INT);
 
 	//spawn protection
-	g_spawnprotect = gi.cvar("g_spawnprotect", "2", CVAR_SERVERINFO);
+	g_spawnprotect = gi.cvar("g_spawnprotect", "2", CVAR_SERVERINFO | CVARDOC_INT);
+	gi.cvar_describe (g_spawnprotect, "number of seconds of spawn protection.");
 
 	//joust mode
-	joustmode = gi.cvar("sv_joustmode", "0", CVAR_SERVERINFO|CVAR_GAMEINFO);
+	joustmode = gi.cvar("sv_joustmode", "0", CVAR_SERVERINFO | CVAR_GAMEINFO | CVARDOC_BOOL);
+	gi.cvar_describe (joustmode, "players can jump in midair.");
 
 	//map voting
 	g_mapvote = gi.cvar("g_mapvote", "0", CVAR_SERVERINFO);
@@ -264,7 +268,7 @@ void InitGame (void)
 	g_votesame = gi.cvar("g_votesame", "1", 0);
 
 	//call voting
-	g_callvote = gi.cvar("g_callvote", "1", CVAR_SERVERINFO); //change after testing
+	g_callvote = gi.cvar("g_callvote", "1", CVAR_SERVERINFO | CVARDOC_BOOL); //change after testing
 
 	//forced autobalanced teams
 	g_autobalance = gi.cvar("g_autobalance", "0", 0);
@@ -289,7 +293,7 @@ void InitGame (void)
 
 	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
 	
-	g_dmlights = gi.cvar ("g_dm_lights", "0", CVAR_ARCHIVE|CVAR_GAMEINFO);
+	g_dmlights = gi.cvar ("g_dm_lights", "0", CVAR_ARCHIVE | CVAR_GAMEINFO);
 
 	run_pitch = gi.cvar ("run_pitch", "0.002", 0);
 	run_roll = gi.cvar ("run_roll", "0.005", 0);
@@ -314,7 +318,7 @@ void InitGame (void)
 	InitItems ();
 	
 	//set this if you're running experimental code on your server
-	gi.cvar("testcode", "0", CVAR_GAMEINFO|CVAR_ROM); 
+	gi.cvar("testcode", "0", CVAR_GAMEINFO | CVAR_ROM); 
 	//set this in your config if you're testing an unfinished map
 	gi.cvar("testmap", "0", CVAR_GAMEINFO);
 
