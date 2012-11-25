@@ -2086,7 +2086,6 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("chatbubble", NULL);
 	Cmd_AddCommand ("players", NULL);
 	Cmd_AddCommand ("score", NULL);
-	Cmd_AddCommand ("help", NULL);
 	Cmd_AddCommand ("vote", NULL);
 	Cmd_AddCommand ("putaway", NULL);
 	Cmd_AddCommand ("playerlist", NULL);
