@@ -809,6 +809,8 @@ void Cmd_Score_f (edict_t *ent)
 	ent->client->showhelp = false;
 
 	if (!deathmatch->integer)
+		// Should we ever wish to do a singleplayer game, we could bring the 
+		// "help computer" back here. 
 		return;
 
 	if (ent->client->showscores)
@@ -820,24 +822,6 @@ void Cmd_Score_f (edict_t *ent)
 	ent->client->showscores = true;
 	DeathmatchScoreboard (ent);
 }
-
-/*
-==================
-Cmd_Help_f
-
-Display the current help message
-==================
-*/
-void Cmd_Help_f (edict_t *ent)
-{
-	// this is for backwards compatability
-	if (deathmatch->integer)
-	{
-		Cmd_Score_f (ent);
-		return;
-	}
-}
-
 
 //=======================================================================
 

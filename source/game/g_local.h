@@ -736,7 +736,6 @@ extern float mindEraserTime;
 //
 // g_cmds.c
 //
-void Cmd_Help_f (edict_t *ent);
 void Cmd_Score_f (edict_t *ent);
 void Cmd_VoiceTaunt_f (edict_t *ent);
 

@@ -829,7 +829,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		CTFPlayerResetGrapple(self);
 
 		if (deathmatch->value)
-			Cmd_Help_f (self);		// show scores
+			Cmd_Score_f (self);		// show scores
 
 		if(self->health < -40 && attacker->client) 
 		{
