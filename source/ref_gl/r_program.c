@@ -1230,7 +1230,7 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
-		if(useShell == 0 && useCube == 0)
+		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
 		{
 			vec4 SpecColor = vec4(baseColor, 1.0)/2.0;
 
@@ -1287,7 +1287,7 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 
 		gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);
 
-		if(useCube > 0)
+		if(useCube > 0 && specmask.a < 1.0)
 		{			
 			vec3 relEyeDir;
 			
