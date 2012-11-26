@@ -1160,6 +1160,11 @@ nobase_nodist_models_DATA = \
 	data1/models/weapons/g_rocket/tris.md2 \
 	data1/models/weapons/g_shotg2/tris.md2 \
 	data1/models/weapons/g_shotg/tris.md2 \
+	data1/models/weapons/v_alienblast/cover.md2 \
+	data1/models/weapons/v_alienblast/skin_fx.tga \
+	data1/models/weapons/v_alienblast/skin_normal.jpg \
+	data1/models/weapons/v_alienblast/skin.jpg \
+	data1/models/weapons/v_alienblast/tris.md2 \
 	data1/models/weapons/v_bfg/skin.jpg \
 	data1/models/weapons/v_bfg/skin_normal.tga \
 	data1/models/weapons/v_bfg/tris.md2 \
