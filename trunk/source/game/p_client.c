@@ -1921,7 +1921,15 @@ void PutClientInServer (edict_t *ent)
 		//human
 		ent->ctype = 1;
 		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
-		 {
+		{
+			//read class file(tactical only)
+			//example:
+			//100-150 (health)
+			//0-3 (armor type)
+			//0-1 (can pickup vaporizer/ME)
+			//0-1 (has bomb)
+			//0-1 (has detonator)
+
 			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
 			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 			client->pers.inventory[armor_index] += 30;
