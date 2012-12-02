@@ -1134,10 +1134,9 @@ void ClientEndServerFrame (edict_t *ent)
 	//
 	if (level.intermissiontime)
 	{
-		// FIXME: add view drifting here?
 		current_client->ps.blend[3] = 0;
 		current_client->ps.fov = 90;
-		G_SetStats (ent);
+		G_UpdateStats (ent);
 		return;
 	}
 
@@ -1207,12 +1206,7 @@ void ClientEndServerFrame (edict_t *ent)
 	// should be determined by the client
 	SV_CalcBlend (ent);
 
-	// chase cam stuff
-	if (ent->client->resp.spectator)
-		G_SetSpectatorStats(ent);
-	else
-		G_SetStats (ent);
-	G_CheckChaseStats(ent);
+	G_UpdateStats (ent);
 
 	G_SetClientEvent (ent);
 

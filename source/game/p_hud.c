@@ -835,7 +835,7 @@ void G_SetStats (edict_t *ent)
 	gitem_t		*item;
 	int			index;
 	edict_t *e2;
-	int i, j;
+	int i;
 	int high_score = 0;
 	gitem_t *flag1_item, *flag2_item;
 
@@ -986,20 +986,6 @@ void G_SetStats (edict_t *ent)
 	}
 	ent->client->ps.stats[STAT_HIGHSCORE] = high_score;
 
-	//bot score info
-	ent->client->ps.botnum = ent->client->resp.botnum;
-	if(ent->client->resp.botnum) {
-		for(i = 0; i < ent->client->resp.botnum; i++) {
-			strcpy(ent->client->ps.bots[i].name, ent->client->resp.bots[i].name);
-			//tally bot scores
-			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->integer; j++, e2++) {
-				if(!strcmp(ent->client->resp.bots[i].name, e2->client->pers.netname))
-					ent->client->ps.bots[i].score = e2->client->resp.score;			
-			}
-		}
-	}
-	//end bot score info
-
 #ifndef ALTERIA
 	//weapon/ammo inventories
 	for(i = 0; i < 7; i++)
@@ -1049,8 +1035,6 @@ void G_SetStats (edict_t *ent)
 	else
 		ent->client->ps.stats[STAT_HELPICON] = 0;
 
-	ent->client->ps.stats[STAT_SPECTATOR] = 0;
-
 	ent->client->ps.stats[STAT_SCOREBOARD] = gi.imageindex ("i_score");
 
 	//team
@@ -1062,27 +1046,6 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_BLUE_MATCHES] = blue_team_matches;
 	}
 
-	//spectator mode
-	ent->client->ps.stats[STAT_SPECTATOR] = 0;
-}
-
-/*
-===============
-G_CheckChaseStats
-===============
-*/
-void G_CheckChaseStats (edict_t *ent)
-{
-	int i;
-	gclient_t *cl;
-
-	for (i = 1; i <= g_maxclients->integer; i++) {
-		cl = g_edicts[i].client;
-		if (!g_edicts[i].inuse || cl->chase_target != ent)
-			continue;
-		memcpy(cl->ps.stats, ent->client->ps.stats, sizeof(cl->ps.stats));
-		G_SetSpectatorStats(g_edicts + i);
-	}
 }
 
 /*
@@ -1092,17 +1055,8 @@ G_SetSpectatorStats
 */
 void G_SetSpectatorStats (edict_t *ent)
 {
-	int i;
-	int j;
-	edict_t *e2;
 	gclient_t *cl = ent->client;
 
-	if (!cl->chase_target)
-		G_SetStats (ent);
-
-	cl->ps.stats[STAT_SPECTATOR] = 1;
-
-	// layouts are independant in spectator
 	cl->ps.stats[STAT_LAYOUTS] = 0;
 
 	if (cl->pers.health <= 0 || level.intermissiontime || cl->showscores)
@@ -1116,26 +1070,43 @@ void G_SetSpectatorStats (edict_t *ent)
 			(cl->chase_target - g_edicts) - 1;
 	else
 		cl->ps.stats[STAT_CHASE] = 0;
-
-	//bot score info
-	// needed in case first (and only) client is a spectator,
-	ent->client->ps.botnum = ent->client->resp.botnum;
-	if ( ent->client->resp.botnum )
-	{
-		for(i = 0; i < ent->client->resp.botnum; i++)
-		{
-			strcpy(ent->client->ps.bots[i].name, ent->client->resp.bots[i].name);
-			//tally bot scores
-			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->integer; j++, e2++)
-			{
-				if(!strcmp(ent->client->resp.bots[i].name, e2->client->pers.netname))
-					ent->client->ps.bots[i].score = e2->client->resp.score;
-			}
-		}
-	}
-	//end bot score info
-
-
-
 }
 
+/**
+ * @brief  Update stats for scoreboard display on
+ *
+ * @detail  Spectator issues complicate things. Spectator sees chase target's
+ *          HUD information. But spectator needs to show zeroed scoring
+ *          data in status responses, player lists, etc. Real player clients
+ *          contain bot scoring info, which is updated by
+ *          acebot_spawn.c::ACESP_UpdateBots(), called for every server frame
+ *          and would be redundant if updated here. The server expects to see
+ *          the bot info in the first client, regardless of it being in use
+ *          or being a spectator.
+ *
+ * @param ent  entity for player or bot
+ */
+void G_UpdateStats( edict_t *ent )
+{
+	gclient_t *gcl = ent->client;
+
+	if ( gcl->resp.spectator && !ent->is_bot )
+	{
+		if ( gcl->chase_target != NULL && level.intermissiontime <= 0.0f )
+		{ // clone chase target's stats for hud
+			memcpy( gcl->ps.stats, gcl->chase_target->client->ps.stats,
+					sizeof( gcl->ps.stats ) );
+		}
+		else
+		{
+			memset( gcl->ps.stats, 0, sizeof(gcl->ps.stats));
+			G_SetSpectatorStats( ent);
+		}
+		gcl->ps.stats[STAT_SPECTATOR] = 1;
+	}
+	else
+	{
+		ent->client->ps.stats[STAT_SPECTATOR] = 0;
+		G_SetStats( ent );
+	}
+}

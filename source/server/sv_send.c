@@ -564,10 +564,21 @@ void SV_SendClientMessages (void)
 			SV_SendClientDatagram (c);
 		}
 		else
-		{
-	// just update reliable	if needed
-			if (c->netchan.message.cursize	|| curtime - c->netchan.last_sent > 1000 )
-				Netchan_Transmit (&c->netchan, 0, NULL);
+		{ // not spawned
+			/* send accumulated reliable messages when buffer has enough data
+			 * or when a time limit is reached whichever comes first.
+			 * time limit is 1 sec, buffer size trigger is 2800/4 = 700
+			 * keeps UDP packets mostly below 1000 bytes. some capture data
+			 * collected 2012-11 indicated packets occasionally could exceed
+			 * 1500 bytes which is not good. Possible cause of some overflow
+			 * disconnects and other net comm problems.
+			 */
+			int timeout = curtime - c->netchan.last_sent ;
+			int cursize = c->netchan.message.cursize ;
+			if ( timeout > 1000 || cursize >= (MAX_MSGLEN)/4 )
+			{
+				Netchan_Transmit( &c->netchan, 0, NULL );
+			}
 		}
 	}
 }
