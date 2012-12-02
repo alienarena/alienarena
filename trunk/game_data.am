@@ -1813,6 +1813,8 @@ nobase_nodist_players_DATA = \
 	data1/players/martiancyborg/tron_i.jpg \
 	data1/players/martiancyborg/tron.jpg \
 	data1/players/martiancyborg/tron_normal.tga \
+	data1/players/martiancyborg/w_alienblaster.iqm \
+	data1/players/martiancyborg/w_alienblaster.skin \
 	data1/players/martiancyborg/w_bfg.iqm \
 	data1/players/martiancyborg/w_bfg.md2 \
 	data1/players/martiancyborg/w_bfg.skin \
@@ -1905,6 +1907,8 @@ nobase_nodist_players_DATA = \
 	data1/players/martianenforcer/tron.jpg \
 	data1/players/martianenforcer/tron_normal.tga \
 	data1/players/martianenforcer/usegibs \
+	data1/players/martianenforcer/w_alienblaster.iqm \
+	data1/players/martianenforcer/w_alienblaster.skin \
 	data1/players/martianenforcer/w_bfg.iqm \
 	data1/players/martianenforcer/w_bfg.md2 \
 	data1/players/martianenforcer/w_bfg.skin \
@@ -1987,6 +1991,8 @@ nobase_nodist_players_DATA = \
 	data1/players/martianoverlord/tron_i.jpg \
 	data1/players/martianoverlord/tron.jpg \
 	data1/players/martianoverlord/tron_normal.tga \
+	data1/players/martianoverlord/w_alienblaster.iqm \
+	data1/players/martianoverlord/w_alienblaster.skin \
 	data1/players/martianoverlord/w_bfg.iqm \
 	data1/players/martianoverlord/w_bfg.md2 \
 	data1/players/martianoverlord/w_bfg.skin \
@@ -2071,6 +2077,8 @@ nobase_nodist_players_DATA = \
 	data1/players/martianwarrior/tron_i.jpg \
 	data1/players/martianwarrior/tron.jpg \
 	data1/players/martianwarrior/tron_normal.tga \
+	data1/players/martianwarrior/w_alienblaster.iqm \
+	data1/players/martianwarrior/w_alienblaster.skin \
 	data1/players/martianwarrior/w_bfg.iqm \
 	data1/players/martianwarrior/w_bfg.md2 \
 	data1/players/martianwarrior/w_bfg.skin \

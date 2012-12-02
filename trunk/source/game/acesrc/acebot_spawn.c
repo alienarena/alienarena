@@ -197,7 +197,7 @@ static size_t loadbots_readnext( char *p_userinfo_bfr )
  * count bots and update bot information in clients
  *
  * see:
- *  p_hud.c::G_SetStats(),
+ *  p_hud.c::G_UpdateStats()
  *  sv_main.c::SV_StatusString()
  *
  */
@@ -244,12 +244,14 @@ static int client_botupdate( void )
 			botname = Info_ValueForKey( pbot->client->pers.userinfo, "name" );
 			firstclient = true;
 			for ( pclient = &g_edicts[1], clients=game.maxclients ; clients--; ++pclient )
-			{ // for every client, always update first client for server
+			{ // for every active client, plus always update first client for server
 				if ( pclient->inuse || firstclient )
 				{
 					pclient->client->ps.botnum = pclient->client->resp.botnum = botnum;
 					strcpy( pclient->client->resp.bots[botidx].name, botname );
 					strcpy( pclient->client->ps.bots[botidx].name, botname );
+					pclient->client->resp.bots[botidx].score = pbot->client->resp.score;
+					pclient->client->ps.bots[botidx].score   = pbot->client->resp.score;
 					firstclient = false;
 				}
 			}
@@ -262,9 +264,9 @@ static int client_botupdate( void )
 }
 
 /**
- * \brief Update bot info in client records
+ * @brief Update bot info in client records
  *
- * \detail  Intended to be called once per frame, in RunFrame. First client
+ * @detail  Intended to be called once per frame, in RunFrame. First client
  *          record should always have current bot info, so that server status
  *          shows bots even when in intermission.
  *          In ACE debug mode, reports when bot count changes. ACE debug mode
