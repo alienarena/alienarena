@@ -1381,6 +1381,7 @@ void R_SetCompatibility(void)
 	Cvar_SetValue("r_lightbeam", 0);
 	Cvar_SetValue("r_drawsun", 0);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 0);
 
 
 	Com_Printf("...autodetected MAX COMPATIBILITY game setting\n");
@@ -1411,6 +1412,7 @@ void R_SetMaxPerformance( void )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 0);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	Com_Printf("...autodetected MAX PERFORMANCE game setting\n");
 }
@@ -1440,6 +1442,7 @@ void R_SetPerformance( void )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 2);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	Com_Printf("...autodetected PERFORMANCE game setting\n");
 }
@@ -1469,6 +1472,7 @@ void R_SetQuality( void )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 2);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	Com_Printf("...autodetected QUALITY game setting\n");
 }
@@ -1498,6 +1502,7 @@ void R_SetMaxQuality( void )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 2);
 	Cvar_SetValue("r_godrays", 1);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	Com_Printf("...autodetected MAX QUALITY game setting\n");
 }
