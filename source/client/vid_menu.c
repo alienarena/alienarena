@@ -183,6 +183,7 @@ static void SetCompatibility( void *unused )
 	Cvar_SetValue("r_lightbeam", 0);
 	Cvar_SetValue("r_drawsun", 0);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 0);
 
 	VID_MenuInit();
 }
@@ -207,6 +208,7 @@ static void SetMaxPerformance( void *unused )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 0);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	VID_MenuInit();
 }
@@ -232,6 +234,7 @@ static void SetPerformance( void *unused )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 2);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	VID_MenuInit();
 }
@@ -257,6 +260,7 @@ static void SetQuality( void *unused )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 2);
 	Cvar_SetValue("r_godrays", 0);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	VID_MenuInit();
 }
@@ -282,6 +286,7 @@ static void SetMaxQuality( void *unused )
 	Cvar_SetValue("r_lightbeam", 1);
 	Cvar_SetValue("r_drawsun", 2);
 	Cvar_SetValue("r_godrays", 1);
+	Cvar_SetValue("r_hdlightmaps", 1);
 
 	VID_MenuInit();
 }
