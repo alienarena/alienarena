@@ -2195,7 +2195,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 			p->alpha = .3;
 			p->alphavel = -1.0 / (3+frand()*0.2);
 			p->type = PARTICLE_STANDARD;
-			p->image = r_hittexture;
+			p->image = r_cflashtexture;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
 			for (j=0 ; j<3 ; j++)

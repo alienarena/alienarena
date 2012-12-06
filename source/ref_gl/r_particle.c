@@ -937,36 +937,30 @@ void R_DrawVegetationSurface ( void )
 
 		scale = 10.0*grass->size;
 
-		if(grass->type) 
-			gCount = 1; 
-		else
-			qglDisable( GL_CULL_FACE );
-
-		//the next two statements create a slight swaying in the wind
-		//perhaps we should add a parameter to control ammount in shader?
-
-		if(grass->type) 
-			sway = 3;
-		else
-			sway = 2;
-
 		VectorCopy(grass->origin, origin);
 
-		// adjust vertical position, scaled
-		if(!grass->type)
+		if(grass->type) 
+		{
+			sway = 3;
+			gCount = 1;
+
+			visible = true; //leaves tend to use much larger images, culling results in undesired effects
+		}
+		else
+		{
+			sway = 2;
+			qglDisable( GL_CULL_FACE );
+			
+			// adjust vertical position, scaled
 			origin[2] += (grass->texsize/32) * grass->size;
 
-		if(!grass->type) 
-		{
 			visible = CM_inPVS_leafs (r_origin_leafnum, grass->leafnum);
 			if (visible)
 			{
 				r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 				visible = r_trace.fraction == 1.0;
 			}
-		}
-		else
-			visible = true; //leaves tend to use much larger images, culling results in undesired effects
+		}		
 
 		if(visible)
 		{
@@ -986,9 +980,6 @@ void R_DrawVegetationSurface ( void )
 			
 			for(ng = 0; ng < gCount; ng ++)
 			{
-				if(!grass->type)
-					angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
-
 				AngleVectors(angle, NULL, right, up);
 				VectorScale(right, scale, right);
 				VectorScale(up, scale, up);			

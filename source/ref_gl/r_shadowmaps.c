@@ -864,21 +864,19 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 		if(!grass->type)
 			continue; //only deal with leaves, grass shadows look kind of bad
 
-		scale = 10.0*grass->size;
-
-		VectorSubtract(r_sunLight->origin, r_sunLight->target, dir);
-		R_Vectoangles(dir, angle);
-		
-		AngleVectors(angle, NULL, right, up);
-		VectorScale(right, scale, right);
-		VectorScale(up, scale, up);
-		VectorCopy(grass->origin, origin);
-
-		// adjust vertical position, scaled
-		origin[2] += (grass->texsize/32) * grass->size;
-
 		if(grass->sunVisible) 
 		{
+			scale = 10.0*grass->size;
+
+			VectorSubtract(r_sunLight->origin, r_sunLight->target, dir);
+			R_Vectoangles(dir, angle);
+		
+			AngleVectors(angle, NULL, right, up);
+			VectorScale(right, scale, right);
+			VectorScale(up, scale, up);
+
+			VectorCopy(grass->origin, origin);
+
 			//render grass polygon
 			
 			GL_SelectTexture( GL_TEXTURE0);

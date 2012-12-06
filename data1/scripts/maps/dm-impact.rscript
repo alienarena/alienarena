@@ -1,3 +1,13 @@
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 20 static 20
+		colormap .1 .1 .1
+		beam
+		lensflare
+	}
+}
 textures/rage/metallight_2
 {
 	{
@@ -36,5 +46,53 @@ textures/arena6/icerock
 		colormap 1 1 1
 		grass
 		grasstype 1
+	}
+}
+env/egyptup
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 .5 .5
+	}
+}
+env/egyptrt
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 .5 .5
+	}
+}
+env/egyptlf
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 .5 .5
+	}
+}
+env/egyptft
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 .5 .5
+	}
+}
+env/egyptbk
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 .5 .5
+	}
+}
+env/egyptdn
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 .5 .5
 	}
 }
