@@ -3727,7 +3727,6 @@ void JoinServerFunc( void *self )
 	int     i;
 	char    modstring[64];
 	char    *token;
-	qboolean is_tactical = false;
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
@@ -3786,9 +3785,9 @@ void JoinServerFunc( void *self )
 		return;
 	}
 
-	for ( i = 0; i < 6; i++)
+	for ( i = 0; i < 16; i++)
 	{
-        if( !strcmp("g_tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
+        if( !strcmp("aa tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
 		{
 			curridx = index;
 			M_Menu_Tactical_f();
