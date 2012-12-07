@@ -349,6 +349,9 @@ void ClientEndServerFrames (void)
 	int		i;
 	edict_t	*ent;
 
+	/* make sure bot info in first client is up to date */
+	ACESP_UpdateBots();
+
 	// calc the player views now that all pushing
 	// and damage has been added
 	for (i=0 ; i<g_maxclients->value ; i++)
