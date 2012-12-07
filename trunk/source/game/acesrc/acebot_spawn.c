@@ -233,6 +233,7 @@ static int client_botupdate( void )
 				pclient->client->ps.botnum = pclient->client->resp.botnum = 0;
 			}
 		}
+		return 0;
 	}
 
 	botidx = 0;

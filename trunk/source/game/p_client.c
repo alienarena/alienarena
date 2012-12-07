@@ -828,8 +828,12 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 		CTFPlayerResetGrapple(self);
 
-		if (deathmatch->value)
-			Cmd_Score_f (self);		// show scores
+		if (deathmatch->integer && !self->is_bot)
+		{
+			ACESP_UpdateBots();
+			self->client->showscores = false; // override toggle
+			Cmd_Score_f( self );
+		}
 
 		if(self->health < -40 && attacker->client) 
 		{
