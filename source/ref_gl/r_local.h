@@ -182,11 +182,6 @@ extern	cvar_t	*r_hdlightmaps;
 
 extern  cvar_t	*r_ragdolls;
 extern  cvar_t  *r_ragdoll_debug;
-#if !defined WIN32_VARIANT
-// !!!TEMPORARY!!!
-extern cvar_t   *rgd_cfm;
-extern cvar_t   *rgd_erp;
-#endif
 
 extern	qboolean	map_fog;
 #if defined WIN32_VARIANT

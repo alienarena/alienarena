@@ -1287,12 +1287,6 @@ void R_Register( void )
 	r_ragdolls = Cvar_Get ("r_ragdolls", "1", 0 );
 	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", 0 );
 
-#if !defined WIN32_VARIANT
-	// !!!TEMPORARY!!!
-	rgd_cfm = Cvar_Get("rgd_cfm", "0", CVAR_ARCHIVE | CVAR_LATCH );
-	rgd_erp = Cvar_Get("rgd_erp", "0", CVAR_ARCHIVE | CVAR_LATCH );
-#endif
-
 	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);
 
