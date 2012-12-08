@@ -26,7 +26,7 @@
 #  Mac OS X / Darwin using X11 - Experimental
 
 AC_PREREQ([2.68])
-AC_INIT([alienarena],[7.61],[alienrace@comcast.net])
+AC_INIT([alienarena],[7.65],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])

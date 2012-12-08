@@ -44,13 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 cvar_t *r_ragdolls;
 cvar_t *r_ragdoll_debug;
 
-#if !defined WIN32_VARIANT
-// !!!TEMPORARY!!! for testing and tuning
-cvar_t *rgd_cfm;
-cvar_t *rgd_erp;
-#endif
-
-
 vec3_t rightAxis, leftAxis, upAxis, downAxis, bkwdAxis, fwdAxis;
 
 signed int sign(signed int x)
@@ -268,48 +261,36 @@ void RGD_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int
 
 }
 
-void RGD_CreateWorldObject( void )
-{
 #if !defined WIN32_VARIANT
-	dReal world_cfm_setting = -1.0;
-	dReal world_erp_setting = -1.0;
-	qboolean set_cfm_erp = false;
-
-	// these cvars are temporary for tuning Constraint Force Mixing and
-	//  the associated Error Reduction Parameter
-	//  CFM is very small so the cvar value is 1e-9 times the actual CFM
-	//  ERP is the fraction of error correction applied per step
-	if ( rgd_erp != NULL && rgd_cfm != NULL )
-	{
-		if ( rgd_cfm->value > 0.0 )
-		{
-			world_cfm_setting = (dReal)rgd_cfm->value * (dReal)1e-9;
-			if ( rgd_erp->value >= 0.1 && rgd_erp->value <= 0.9 )
-			{
-				world_erp_setting = rgd_erp->value;
-				set_cfm_erp = true;
-			}
-		}
-	}
+/* Constants:
+ *  CFM -- "Constraint Force Mixing"
+ *  ERP -- "Error Reduction Parameter"
+ * See ODE documentation for more info.
+ *
+ * These are needed to get ragdolls to come to complete rest.
+ * They are determined empirically by observing when the ragdolls on
+ * the floor stop vibrating.
+ *
+ * We will just hard code them, until there is some reason not to.
+ */
+const dReal world_cfm_setting = 5.5e-6;
+const dReal world_erp_setting = 0.3;
 #endif
 
+void RGD_CreateWorldObject( void )
+{
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
 
 	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -512.0);
+
 #if !defined WIN32_VARIANT
-	if ( set_cfm_erp )
-	{
-		dWorldSetCFM( RagDollWorld, world_cfm_setting );
-		dWorldSetERP( RagDollWorld, world_erp_setting );
-		Com_Printf("RagDollWorld Settings: CFM (%.12f)  ERP (%.3f)\n",
-				world_cfm_setting, world_erp_setting );
-	}
-	else
-	{
-		Com_Printf("RagDollWorldSettings NOT SET: CFM (%.12f) and ERP (%.3f)\n",
-				world_cfm_setting, world_erp_setting );
-	}
+	/* Added to support dWorldQuickStep(), which is needed for ODE v0.12
+	 */
+	dWorldSetCFM( RagDollWorld, world_cfm_setting );
+	dWorldSetERP( RagDollWorld, world_erp_setting );
+	Com_Printf("RagDollWorld Settings: CFM (%.12f)  ERP (%.3f)\n",
+			world_cfm_setting, world_erp_setting );
 #endif
 
 	RagDollSpace = dSimpleSpaceCreate(0);
@@ -1267,8 +1248,7 @@ void R_RenderAllRagdolls ( void )
 	}
 #else
 	/* ODE library 0.12 does not support dWorldStepFast1.
-	 * Using dWorldQuickStep. CFM and ERP settings added to reduce
-	 * "vibrations" when ragdoll should be "at rest".
+	 * Using dWorldQuickStep. See RGD_CreateWorldObject(), above.
 	 */
 	if(r_DrawingRagDoll) //here we handle the physics
 	{
