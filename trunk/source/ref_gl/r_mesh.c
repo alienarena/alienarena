@@ -1039,7 +1039,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	vec3_t	frontv, backv;
 	int		i, j;
 	int		index_xyz, index_st;
-	qboolean depthmaskrscipt = false;
 	rscript_t *rs = NULL;
 	int		va = 0;
 	float shellscale;

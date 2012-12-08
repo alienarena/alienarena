@@ -367,7 +367,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	int i, j, k;
 	const int *inelements;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
-	unsigned char *vblendweights = NULL;
+	//unsigned char *vblendweights = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint = NULL;
 	iqmjoint2_t *joint2 = NULL;
@@ -1273,7 +1273,6 @@ void IQM_DrawFrame(int skinnum)
 	int		va = 0;
 	qboolean mirror = false;
 	qboolean glass = false;
-	qboolean depthmaskrscipt = false;
 
 	if (r_shaders->integer)
 		rs = currententity->script;

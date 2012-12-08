@@ -63,7 +63,6 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	int			    oldtexnum = -1, oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
 	float			*corner0 = corner[0];
-	int				va = 0;
 	vec3_t move, delta, v;
 	float			sh, th, sl, tl;
 
