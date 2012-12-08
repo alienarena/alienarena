@@ -7092,10 +7092,7 @@ static void CommanderActionFunc( void *unused )
 qboolean Tactical_MenuInit( void )
 {
 	extern cvar_t *name;
-	int i = 0;
 	float scale;
-	int currentdirectoryindex = 0;
-	int currentskinindex = 0;
 	
 	scale = (float)(viddef.height)/600;
 
@@ -7184,7 +7181,6 @@ void Tactical_MenuDraw( void )
 	extern float CalcFov( float fov_x, float w, float h );
 	refdef_t refdef;
 	char scratch[MAX_OSPATH];
-	int helmet = false;
 	float scale;
 	int i;
 

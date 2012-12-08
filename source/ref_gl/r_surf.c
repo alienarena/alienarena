@@ -635,7 +635,6 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, int texnum)
 {
 	float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
-	glpoly_t *p = surf->polys;
 
 	c_brush_polys++;
 	
@@ -699,7 +698,6 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf, qboolean dynamic)
 {
 	static float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
-	glpoly_t *p = surf->polys;
 		
 	c_brush_polys++;
 	

@@ -52,7 +52,7 @@ where the location of header files differs between systems.
 #endif
 
 /* Version number of package. UPDATE ON VERSION CHANGE */
-#define VERSION "7.61"
+#define VERSION "7.65"
 
 /* OpenAL dll name */
 #define OPENAL_DRIVER "OpenAL32.dll"
