@@ -3270,6 +3270,9 @@ nobase_nodist_textures_DATA = \
 	data1/textures/arena9/hexfloor2_hm.tga \
 	data1/textures/arena9/hexfloor2_nm.tga \
 	data1/textures/arena9/hexfloor2.tga \
+	data1/textures/arena9/hexfloor3_hm.tga \
+	data1/textures/arena9/hexfloor3_nm.tga \
+	data1/textures/arena9/hexfloor3.tga \
 	data1/textures/arena9/hexglass.tga \
 	data1/textures/arena9/hexgratefloor_hm.tga \
 	data1/textures/arena9/hexgratefloor_nm.tga \
