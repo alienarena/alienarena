@@ -979,11 +979,13 @@ int entitycmpfnc( const entity_t *a, const entity_t *b )
  * frame flush and page flipping are not done. Modified 2011-02 with
  * additional info in result. Use 'viewpos' (also modified) command
  * for repeatable, consistent positioning.
+ *
+ * Modified 2012-12
  */
 void SCR_TimeRefresh_f( void )
 {
-	int   start, stop;
-	float time;
+	int   t_start, t_stop;
+	float d_time;
 	float frames_per_sec;
 	float msec_per_frame;
 	float save_yaw;
@@ -991,62 +993,69 @@ void SCR_TimeRefresh_f( void )
 	float num_frames;
 	float yaw_increment;
 	float frame_yaw;
+	char  *cmd_arg;
 
 	if ( cls.state != ca_active )
 		return;
 
-	save_yaw = cl.refdef.viewangles[YAW];
-
-	num_frames = scr_timerefcount->value;
+	save_yaw    = cl.refdef.viewangles[YAW];
+	num_frames  = scr_timerefcount->value;
 	frame_count = scr_timerefcount->integer;
-	if ( frame_count < 1 || frame_count > 720 )
+	if ( frame_count < 1 || frame_count > 1440 )
 	{ // silently protect against unreasonable setting
 		num_frames = 128.0f;
 		frame_count = 128;
 	}
+	cmd_arg = Cmd_Argv(1);
 
-	frame_yaw = save_yaw; // start at original yaw
-	yaw_increment = 360.0f / num_frames;
-	start = Sys_Milliseconds();
-	if ( Cmd_Argc() == 2 )
-	{ // run without page flipping.
-		R_BeginFrame( 0 );
-		while ( --frame_count )
-		{
-			cl.refdef.viewangles[YAW] = frame_yaw;
-			R_RenderFrame( &cl.refdef );
-			frame_yaw += yaw_increment;
-		}
-		// last frame restores original yaw
-		cl.refdef.viewangles[YAW] = save_yaw;
-		R_RenderFrame( &cl.refdef );
-		R_EndFrame();
-
-	}
-	else
+	switch ( *cmd_arg )
 	{
-		while ( --frame_count )
-		{
-			cl.refdef.viewangles[YAW] = frame_yaw;
-			R_BeginFrame( 0 );
-			R_RenderFrame( &cl.refdef );
-			R_EndFrame();
-			frame_yaw += yaw_increment;
-		}
-		// last frame restores original yaw
-		cl.refdef.viewangles[YAW] = save_yaw;
+	case '1': // rotate
+		yaw_increment = 360.0f / num_frames;
+		break;
+
+	case '2': // no rotate
+		yaw_increment = 0.0f;
+		break;
+
+	default:
+		Com_Printf("usage: timerefresh <arg>, 1=rotate,2=fixed\n");
+		return;
+	}
+
+	// show position
+	Com_Printf ("x:%#1.0f y:%#1.0f z:%#1.0f yaw:%#1.0f pitch:%#1.0f\n",
+		cl.refdef.vieworg[0], cl.refdef.vieworg[1], cl.refdef.vieworg[2],
+		cl.refdef.viewangles[YAW], cl.refdef.viewangles[PITCH] );
+
+	// test loop
+	frame_yaw = save_yaw;
+	t_start = Sys_Milliseconds();
+	while ( frame_count-- )
+	{
+		cl.refdef.viewangles[YAW] = frame_yaw;
 		R_BeginFrame( 0 );
 		R_RenderFrame( &cl.refdef );
 		R_EndFrame();
+		frame_yaw += yaw_increment;
 	}
-	stop = Sys_Milliseconds();
-	time = (float)(stop - start);
+	t_stop = Sys_Milliseconds();
 
-	msec_per_frame = time / num_frames;
-	time /= 1000.0f;
-	frames_per_sec = num_frames / time;
+	// restore original yaw (not included in test frame count)
+	cl.refdef.viewangles[YAW] = save_yaw;
+	R_BeginFrame( 0 );
+	R_RenderFrame( &cl.refdef );
+	R_EndFrame();
+
+	// report
+	d_time = (float)(t_stop - t_start);
+	d_time += 0.5f;
+	msec_per_frame = d_time / num_frames;
+	d_time /= 1000.0f;
+	frames_per_sec = num_frames / d_time;
+
 	Com_Printf( "%1.0f frames, %1.3f sec, %1.3f msec/frame, %1.1f FPS\n",
-			num_frames, time, msec_per_frame, frames_per_sec );
+			num_frames, d_time, msec_per_frame, frames_per_sec );
 
 }
 
