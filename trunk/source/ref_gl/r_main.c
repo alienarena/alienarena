@@ -125,9 +125,7 @@ cvar_t	*gl_particle_att_a;
 cvar_t	*gl_particle_att_b;
 cvar_t	*gl_particle_att_c;
 
-cvar_t	*gl_ext_swapinterval;
 cvar_t	*gl_ext_pointparameters;
-cvar_t	*gl_ext_compiled_vertex_array;
 
 cvar_t	*gl_log;
 cvar_t	*gl_bitdepth;
@@ -1195,7 +1193,8 @@ void R_Register( void )
 
 	con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
 
-	r_lefthand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
+	r_lefthand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (r_lefthand, "0 means show gun on the right, 1 means show gun on the left, 2 means hide the gun altogether.");
 	r_norefresh = Cvar_Get ("r_norefresh", "0", 0);
 	r_fullbright = Cvar_Get ("r_fullbright", "0", 0);
 	r_drawentities = Cvar_Get ("r_drawentities", "1", 0);
@@ -1215,19 +1214,24 @@ void R_Register( void )
 	gl_particle_att_b = Cvar_Get( "gl_particle_att_b", "0.0", CVAR_ARCHIVE );
 	gl_particle_att_c = Cvar_Get( "gl_particle_att_c", "0.01", CVAR_ARCHIVE );
 
-	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE );
+	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE|CVARDOC_INT );
+	Cvar_Describe (gl_modulate, "Brightness setting. Higher means brighter.");
 	gl_log = Cvar_Get( "gl_log", "0", 0 );
 	gl_bitdepth = Cvar_Get( "gl_bitdepth", "0", 0 );
 	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
-	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
+	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_ARCHIVE|CVARDOC_INT);
+	Cvar_Describe (gl_picmip, "Texture detail. 0 means full detail. Each higher setting has 1/4 less detail.");
 	gl_skymip = Cvar_Get ("gl_skymip", "0", 0);
 	gl_showtris = Cvar_Get ("gl_showtris", "0", 0);
-	gl_showpolys = Cvar_Get ("gl_showpolys", "0", 0);
-	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_ARCHIVE);
-	gl_clear = Cvar_Get ("gl_clear", "0", 0);
-	gl_cull = Cvar_Get ("gl_cull", "1", 0);
+	gl_showpolys = Cvar_Get ("gl_showpolys", "0", CVARDOC_INT);
+	Cvar_Describe (gl_showpolys, "Useful tool for mappers. 1 means show world polygon outlines for visible surfaces. 2 means show outlines for all surfaces in the PVS, even if they are hidden. Only works with gl_usevbo 0.");
+	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
+	Cvar_Describe (gl_finish, "Waits for graphics driver to finish drawing each frame before drawing the next one. Hurts performance but may improve smoothness on very low-end machines.");
+	gl_clear = Cvar_Get ("gl_clear", "0", CVARDOC_BOOL);
+	gl_cull = Cvar_Get ("gl_cull", "1", CVARDOC_BOOL);
+	Cvar_Describe (gl_cull, "Avoid rendering anything that's off the edge of the screen. Good for performance, recommend leaving it on.");
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
 
 // OPENGL_DRIVER defined by in config.h
@@ -1238,62 +1242,68 @@ void R_Register( void )
 	gl_texturesolidmode = Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
 
-	gl_ext_swapinterval = Cvar_Get( "gl_ext_swapinterval", "1", CVAR_ARCHIVE );
 	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "0", CVAR_ARCHIVE );
-	gl_ext_compiled_vertex_array = Cvar_Get( "gl_ext_compiled_vertex_array", "1", CVAR_ARCHIVE );
 
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
-	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
+	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE|CVARDOC_BOOL );
+	Cvar_Describe (gl_swapinterval, "Sync to Vblank. Eliminates \"tearing\" effects, but it can hurt framerates.");
 
-	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE);
+	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
 
-	gl_usevbo = Cvar_Get("gl_usevbo", "1", CVAR_ARCHIVE );
+	gl_usevbo = Cvar_Get("gl_usevbo", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	Cvar_Describe (gl_usevbo, "Use VBOs for mesh and world geometry. Leave this on unless you've got a very old graphics card.");
 
-	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
+	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
-	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE );
+	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
 	vid_contrast = Cvar_Get( "vid_contrast", "1.0", CVAR_ARCHIVE);
-	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
+	//TODO: remove, unless we decide to add GL ES support or something.
+	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE|CVAR_ROM ); 
 
 	gl_vlights = Cvar_Get("gl_vlights", "1", CVAR_ARCHIVE);
 
-	gl_normalmaps = Cvar_Get("gl_normalmaps", "1", CVAR_ARCHIVE);
-	gl_bspnormalmaps = Cvar_Get("gl_bspnormalmaps", "0", CVAR_ARCHIVE);
-	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
-	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
-	gl_fog = Cvar_Get ("gl_fog", "1", CVAR_ARCHIVE);
+	gl_normalmaps = Cvar_Get("gl_normalmaps", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	gl_bspnormalmaps = Cvar_Get("gl_bspnormalmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
+	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
+	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	gl_fog = Cvar_Get ("gl_fog", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	Cvar_Describe (gl_fog, "Fog and weather effects.");
 
 	r_shadowmapscale = Cvar_Get( "r_shadowmapscale", "1", CVAR_ARCHIVE );
 	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "880", CVAR_ARCHIVE );
 
-	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
-	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
+	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE|CVARDOC_INT);
 	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
-	r_lightbeam = Cvar_Get ("r_lightbeam", "1", CVAR_ARCHIVE);
-	r_godrays = Cvar_Get ("r_godrays", "0", CVAR_ARCHIVE);
+	r_lightbeam = Cvar_Get ("r_lightbeam", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_godrays = Cvar_Get ("r_godrays", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	r_godray_intensity = Cvar_Get ("r_godray_intensity", "1.0", CVAR_ARCHIVE);
-	r_optimize = Cvar_Get ("r_optimize", "1", CVAR_ARCHIVE);
+	r_optimize = Cvar_Get ("r_optimize", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	Cvar_Describe (r_optimize, "Skip BSP recursion unless you move. Good for performance, recommend leaving it on.");
 	
-	r_hdlightmaps = Cvar_Get("r_hdlightmaps", "1", CVAR_ARCHIVE);
+	//TODO: rename cvar_t C variable as well.
+	r_hdlightmaps = Cvar_Get("r_lightmapfiles", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	Cvar_Describe (r_hdlightmaps, "Enables the loading of .lightmap files, with more detailed light and shadow. Turn this off if video RAM is limited.");
 
 	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
-	r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
+	r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE|CVARDOC_BOOL );
 
-	r_ragdolls = Cvar_Get ("r_ragdolls", "1", CVAR_ARCHIVE );
-	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", CVAR_ARCHIVE );
+	r_ragdolls = Cvar_Get ("r_ragdolls", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 
 	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);
 
-	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
-	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
+	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE|CVARDOC_STR);
+	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE|CVARDOC_INT);
 
-	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
+	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE|CVARDOC_BOOL); //first time running the game
+	Cvar_Describe (r_firstrun, "Set this to 0 if you want the game to auto detect your graphics settings next time you run it.");
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
 
