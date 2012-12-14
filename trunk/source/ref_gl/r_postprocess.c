@@ -769,14 +769,15 @@ void R_GLSLGodRays(void)
 
 	size = r_newrefdef.width * sun_size/4.0;
     PART_RenderSunFlare(sun2_object, 0, size, 1.0, 1.0, 1.0, 1.0);
+    
+	qglPopMatrix();
+    qglMatrixMode(GL_PROJECTION);
     qglPopMatrix();
+	qglLoadIdentity();
 
 	//render occuders simple, textureless
 	//need to set up proper matrix for this view!
-
-	screenaspect = (float)r_newrefdef.width/(float)r_newrefdef.height;
-	qglMatrixMode(GL_PROJECTION);
-    qglLoadIdentity ();
+	screenaspect = (float)r_newrefdef.width/(float)r_newrefdef.height;    
 
 	if(r_newrefdef.fov_y < 90)
 		MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4,  128000);
