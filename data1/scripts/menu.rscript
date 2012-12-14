@@ -133,3 +133,15 @@ pics/m_main_quit_sel
 		alphashift 15 0.1 0.9
 	}
 }
+pics/menu_back
+{
+	{
+		map pics/menu_back.jpg
+		alphamask
+	}
+	{
+		map pics/menu_back_fx.tga
+		blendFunc GL_SRC_ALPHA GL_ONE
+		alphashift 2.0 0.0 0.4
+	}
+}
