@@ -1789,6 +1789,7 @@ static char rgodrays_fragment_program[] = "#version 120\n" STRINGIFY (
 			lim = NUM_SAMPLES-lim;
 		}
 
+		gl_FragColor = vec4(0.0);
 		for(int i = 0; i < lim; i++)
 		{
 			textCoo -= deltaTextCoord;
