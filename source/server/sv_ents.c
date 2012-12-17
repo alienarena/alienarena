@@ -209,7 +209,13 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 	if (ps->rdflags != ops->rdflags)
 		pflags |= PS_RDFLAGS;
 
-	if (ps->gunframe != ops->gunframe)
+	if (ps->gunframe != ops->gunframe
+		|| (int)(ops->gunoffset[0]*4) != (int)(ps->gunoffset[0]*4)
+		|| (int)(ops->gunoffset[1]*4) != (int)(ps->gunoffset[1]*4)
+		|| (int)(ops->gunoffset[2]*4) != (int)(ps->gunoffset[2]*4)
+		|| (int)(ops->gunangles[0]*4) != (int)(ps->gunangles[0]*4)
+		|| (int)(ops->gunangles[1]*4) != (int)(ps->gunangles[1]*4)
+		|| (int)(ops->gunangles[2]*4) != (int)(ps->gunangles[2]*4) )
 		pflags |= PS_WEAPONFRAME;
 
 	pflags |= PS_WEAPONINDEX;

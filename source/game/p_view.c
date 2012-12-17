@@ -1164,12 +1164,12 @@ void ClientEndServerFrame (edict_t *ent)
 
 	xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
-	if (xyspeed < 5)
+	if (xyspeed < 5 || !ent->groundentity)
 	{
 		bobmove = 0;
 		current_client->bobtime = 0;	// start at beginning of cycle again
 	}
-	else if (ent->groundentity)
+	else
 	{	// so bobbing only cycles when on ground
 		if (xyspeed > 210)
 			bobmove = 0.25;
