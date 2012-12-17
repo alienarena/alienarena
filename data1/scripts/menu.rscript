@@ -16,7 +16,7 @@ pics/m_main
 	}
 	{
 		map gfx/menubar1.tga
-		blendFunc GL_ONE GL_ONE_MIMUS_SRC_ALPHA
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scroll static .2 static 0
 	}
 	{
