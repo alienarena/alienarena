@@ -53,10 +53,8 @@ EXTRA_DIST = \
 #
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
-	for gamefile in $(gamedata_files); do \
-		mkdir -p $(distdir)/`dirname $$gamefile` && \
-		cp -p $(srcdir)/$$gamefile  $(distdir)/$$gamefile; \
-	done
+	$(foreach GAMEDIR, $(sort $(dir $(gamedata_files))),$(shell mkdir -p $(distdir)/$(GAMEDIR) ))
+	$(foreach GAMEFILE, $(gamedata_files), $(shell cp -p $(srcdir)/$(GAMEFILE) $(distdir)/$(GAMEFILE)))
 
 #
 # Alternate Install
