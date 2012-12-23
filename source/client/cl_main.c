@@ -1236,11 +1236,16 @@ static void CL_ConnectionlessPacket (void)
 			    !memcmp(&net_from, &cls.netchan.remote_address, sizeof(netadr_t)))
 				M_UpdateConnectedServerInfo (net_from, s);
 			if (cls.key_dest == key_menu)
+			{
 				M_AddToServerList (net_from, s); //add net_from so we have the addy
-			playerinfo_start = strchr (s, '\n');
-			*playerinfo_start++ = '\0';
-			Info_Print (s);
-			Com_Printf ("%s", playerinfo_start);
+			}
+			else
+			{
+				playerinfo_start = strchr (s, '\n');
+				*playerinfo_start++ = '\0';
+				Info_Print (s);
+				Com_Printf ("%s", playerinfo_start);
+			}
 		}
 		else 
 			Com_Printf ("%s", s);
