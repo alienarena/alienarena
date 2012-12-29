@@ -1,0 +1,47 @@
+textures/arena7/glass
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light9
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light4
+{
+	{
+		lensflare
+	}
+}
+textures/arena3/light1
+{
+	{
+		lensflare
+     	}
+}
+textures/arena7/light14
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light14
+{
+	{
+		lensflare
+	}
+}
