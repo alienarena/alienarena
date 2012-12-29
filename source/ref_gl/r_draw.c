@@ -330,13 +330,24 @@ void Draw_GetPicSize (int *w, int *h, char *pic)
 }
 
 #define DIV254BY255 (0.9960784313725490196078431372549f)
-void Draw_ShaderPic (image_t *gl, float alphaval)
+/*
+=============
+Draw_AlphaStretchPic
+=============
+*/
+void Draw_AlphaStretchImage (int x, int y, int w, int h, image_t *gl, float alphaval)
 {
 	rscript_t *rs = NULL;
 	float	alpha,s,t;
 	rs_stage_t *stage;
 	char shortname[MAX_QPATH];
-
+	float xscale, yscale;
+	float cropped_x, cropped_y, cropped_w, cropped_h;
+	float sl, tl, sh, th;
+	
+	if (scrap_dirty)
+		Scrap_Upload ();
+	
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
 
@@ -347,7 +358,7 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		r_teamColor = 2;
 
 	R_InitQuadVarrays();
-
+	
 	if (!rs)
 	{
 		qglDisable (GL_ALPHA_TEST);
@@ -355,6 +366,25 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_ENABLE_BLEND
 		GL_TexEnv( GL_MODULATE );
+		
+		xscale = (float)w/(float)gl->upload_width;
+		yscale = (float)h/(float)gl->upload_height;
+		
+		cropped_x = x + xscale*(float)gl->crop_left;
+		cropped_y = y + yscale*(float)gl->crop_top;
+	
+		cropped_w = w - xscale*(float)(gl->crop_right + gl->crop_left);
+		cropped_h = h - yscale*(float)(gl->crop_bottom + gl->crop_top);
+		
+		VA_SetElem2(vert_array[0], cropped_x,			cropped_y);
+		VA_SetElem2(vert_array[1], cropped_x+cropped_w, cropped_y);
+		VA_SetElem2(vert_array[2], cropped_x+cropped_w, cropped_y+cropped_h);
+		VA_SetElem2(vert_array[3], cropped_x,			cropped_y+cropped_h);
+	
+		sl = gl->sl + (float)gl->crop_left/(float)gl->upload_width;
+		tl = gl->tl + (float)gl->crop_top/(float)gl->upload_height;
+		sh = gl->sh - (float)gl->crop_right/(float)gl->upload_width;
+		th = gl->th - (float)gl->crop_bottom/(float)gl->upload_height;
 
 		qglColor4f(1,1,1, alphaval);
 
@@ -373,10 +403,10 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		VA_SetElem4(col_array[2], 1,1,1,1);
 		VA_SetElem4(col_array[3], 1,1,1,1);
 		GL_Bind (gl->texnum);
-		VA_SetElem2(tex_array[0],gl->sl, gl->tl);
-		VA_SetElem2(tex_array[1],gl->sh, gl->tl);
-		VA_SetElem2(tex_array[2],gl->sh, gl->th);
-		VA_SetElem2(tex_array[3],gl->sl, gl->th);
+		VA_SetElem2(tex_array[0], sl, tl);
+		VA_SetElem2(tex_array[1], sh, tl);
+		VA_SetElem2(tex_array[2], sh, th);
+		VA_SetElem2(tex_array[3], sl, th);
 		R_DrawVarrays (GL_QUADS, 0, 4, false);
 		qglEnable (GL_ALPHA_TEST);
 		qglDisable (GL_BLEND);
@@ -384,6 +414,11 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 	}
 	else
 	{
+		VA_SetElem2(vert_array[0], x,	y);
+		VA_SetElem2(vert_array[1], x+w, y);
+		VA_SetElem2(vert_array[2], x+w, y+h);
+		VA_SetElem2(vert_array[3], x,	y+h);
+	
 		RS_ReadyScript(rs);
 
 		stage=rs->stage;
@@ -479,32 +514,6 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 
 /*
 =============
-Draw_StretchPic
-=============
-*/
-void Draw_StretchPic (int x, int y, int w, int h, char *pic)
-{
-	image_t *gl;
-
-	gl = R_RegisterPic (pic);
-	if (!gl)
-	{
-		return;
-	}
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-
-	VA_SetElem2(vert_array[0],x, y);
-	VA_SetElem2(vert_array[1],x+w, y);
-	VA_SetElem2(vert_array[2],x+w, y+h);
-	VA_SetElem2(vert_array[3],x, y+h);
-
-	Draw_ShaderPic(gl, DIV254BY255);
-}
-
-/*
-=============
 Draw_AlphaStretchPic
 =============
 */
@@ -517,16 +526,40 @@ void Draw_AlphaStretchPic (int x, int y, int w, int h, char *pic, float alphaval
 	{
 		return;
 	}
+	
+	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval);
+}
 
-	if (scrap_dirty)
-		Scrap_Upload ();
+/*
+=============
+Draw_StretchPic
+=============
+*/
+void Draw_StretchPic (int x, int y, int w, int h, char *pic)
+{
+	Draw_AlphaStretchPic (x, y, w, h, pic, DIV254BY255);
+}
 
-	VA_SetElem2(vert_array[0],x, y);
-	VA_SetElem2(vert_array[1],x+w, y);
-	VA_SetElem2(vert_array[2],x+w, y+h);
-	VA_SetElem2(vert_array[3],x, y+h);
+/*
+=============
+Draw_ScaledPic
+=============
+*/
+void Draw_ScaledPic (int x, int y, float scale, char *pic)
+{
+	image_t *gl;
+	float w, h;
 
-	Draw_ShaderPic(gl, alphaval);
+	gl = R_RegisterPic (pic);
+	if (!gl)
+	{
+		return;
+	}
+
+	w = (float)gl->width*scale;
+	h = (float)gl->height*scale;
+	
+	Draw_AlphaStretchImage (x, y, w, h, gl, DIV254BY255);
 }
 
 /*
@@ -536,64 +569,7 @@ Draw_Pic
 */
 void Draw_Pic (int x, int y, char *pic)
 {
-	image_t *gl;
-	int w, h;
-
-	gl = R_RegisterPic (pic);
-	if (!gl)
-	{
-//		Com_Printf ("Can't find pic: %s\n", pic);
-		return;
-	}
-
-	w = gl->width;
-	h = gl->height;
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-
-	VA_SetElem2(vert_array[0],x, y);
-	VA_SetElem2(vert_array[1],x+w, y);
-	VA_SetElem2(vert_array[2],x+w, y+h);
-	VA_SetElem2(vert_array[3],x, y+h);
-
-	Draw_ShaderPic(gl, DIV254BY255);
-}
-
-/*
-=============
-Draw_ScaledPic
-=============
-*/
-
-void Draw_ScaledPic (int x, int y, float scale, char *pic)
-{
-	image_t *gl;
-	int w, h;
-	float xoff, yoff;
-
-	gl = R_RegisterPic (pic);
-	if (!gl)
-	{
-//		Com_Printf ("Can't find pic: %s\n", pic);
-		return;
-	}
-
-	w = gl->width;
-	h = gl->height;
-
-	xoff = (w*scale-w);
-	yoff = (h*scale-h);
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-
-	VA_SetElem2(vert_array[0],x, y);
-	VA_SetElem2(vert_array[1],x+w+xoff, y);
-	VA_SetElem2(vert_array[2],x+w+xoff, y+h+yoff);
-	VA_SetElem2(vert_array[3],x, y+h+yoff);
-
-	Draw_ShaderPic(gl, DIV254BY255);
+	Draw_ScaledPic (x, y, 1.0, pic);
 }
 
 /*
@@ -610,47 +586,8 @@ void Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float a
 	{
 		return;
 	}
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-
-	VA_SetElem2(vert_array[0],x, y);
-	VA_SetElem2(vert_array[1],x+w, y);
-	VA_SetElem2(vert_array[2],x+w, y+h);
-	VA_SetElem2(vert_array[3],x, y+h);
-
-	Draw_ShaderPic(gl, alphaval);
-}
-/*
-=============
-Draw_TileClear
-
-This repeats a 64*64 tile graphic to fill the screen around a sized down
-refresh window.
-=============
-*/
-void Draw_TileClear (int x, int y, int w, int h, char *pic)
-{
-	image_t	*image;
-
-	image = R_RegisterPic (pic);
-	if (!image)
-	{
-//		Com_Printf ("Can't find pic: %s\n", pic);
-		return;
-	}
-
-	GL_Bind (image->texnum);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (x/64.0, y/64.0);
-	qglVertex2f (x, y);
-	qglTexCoord2f ( (x+w)/64.0, y/64.0);
-	qglVertex2f (x+w, y);
-	qglTexCoord2f ( (x+w)/64.0, (y+h)/64.0);
-	qglVertex2f (x+w, y+h);
-	qglTexCoord2f ( x/64.0, (y+h)/64.0 );
-	qglVertex2f (x, y+h);
-	qglEnd ();
+	
+	return Draw_AlphaStretchImage (x, y, w, h, gl, alphaval);
 }
 
 

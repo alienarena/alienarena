@@ -381,7 +381,6 @@ extern void	Draw_ScaledPic (int x, int y, float scale, char *pic);
 extern void	Draw_StretchPic (int x, int y, int w, int h, char *name);
 extern void	Draw_ScaledChar(float x, float y, int num, float scale, int from_menu);
 extern void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu);
-extern void	Draw_TileClear (int x, int y, int w, int h, char *name);
 extern void	Draw_Fill (int x, int y, int w, int h, int c);
 extern void	Draw_FadeScreen (void);
 
