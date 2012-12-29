@@ -154,6 +154,12 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 	vec3_t dir,forward,right,start,end,offset;
 	vec3_t top;
 	trace_t tr;
+	short mSpeed;
+
+	if(g_tactical->integer)
+		mSpeed = 200;
+	else 
+		mSpeed = 400;
 
 	// Get current direction
 	VectorCopy(self->client->ps.viewangles,dir);
@@ -185,9 +191,9 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 		if(!tr.allsolid)
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
-				ucmd->forwardmove = 400;
+				ucmd->forwardmove = mSpeed;
 			else if(ACEMV_CanMove(self, MOVE_BACK))
-				ucmd->forwardmove = -400;
+				ucmd->forwardmove = -mSpeed;
 			ucmd->upmove = -400;
 			return true;
 		}
@@ -200,9 +206,9 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 		if(!tr.allsolid)
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
-				ucmd->forwardmove = 400;
+				ucmd->forwardmove = mSpeed;
 			else if(ACEMV_CanMove(self, MOVE_BACK))
-				ucmd->forwardmove = -400;
+				ucmd->forwardmove = -mSpeed;
 			ucmd->upmove = 400;
 			return true;
 		}
@@ -226,9 +232,14 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	vec3_t  leftstart, rightstart,focalpoint;
 	vec3_t  upstart,upend;
 	vec3_t  dir,offset;
-
+	short mSpeed;
 	trace_t traceRight,traceLeft,traceUp, traceFront; // for eyesight
-
+	
+	if(g_tactical->integer)
+		mSpeed = 200;
+	else 
+		mSpeed = 400;
+	
 	// Get current angle and set up "eyes"
 
 /* make sure bot's "eyes" are straight ahead
@@ -258,7 +269,7 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	{
 		ucmd->upmove = 400;
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
-			ucmd->forwardmove = 400;
+			ucmd->forwardmove = mSpeed;
 		return true;
 	}
 
@@ -266,7 +277,7 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	if ( traceFront.fraction >= 1.0f )
 	{
 		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
-			ucmd->forwardmove = 400; //only try forward, bot should be looking to move in direction of eyes
+			ucmd->forwardmove = mSpeed; //only try forward, bot should be looking to move in direction of eyes
 		return true;
 	}
 
@@ -306,7 +317,7 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 			else
 				self->s.angles[YAW] += -(1.0 - traceRight.fraction) * 45.0;
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
-				ucmd->forwardmove = 400;
+				ucmd->forwardmove = mSpeed;
 			return true;
 		}
 	}
@@ -403,6 +414,13 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 {
+	short mSpeed;
+
+	if(g_tactical->integer)
+		mSpeed = 200;
+	else 
+		mSpeed = 400;
+
 	// If a rocket or grenade is around deal with it
 	// Simple, but effective (could be rewritten to be more accurate)
 	if(strcmp(self->movetarget->classname,"rocket") == 0 ||
@@ -420,7 +438,7 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 			//turn and run like hell away from it
 			//to do - needs improvement - bot should run when getting hit by seeker as well
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
-				ucmd->forwardmove = 400;
+				ucmd->forwardmove = mSpeed;
 		}
 		else
 		{
@@ -429,9 +447,9 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 
 			// strafe left/right
 			if(rand()%1 && ACEMV_CanMove(self, MOVE_LEFT))
-					ucmd->sidemove = -400;
+					ucmd->sidemove = -mSpeed;
 			else if(ACEMV_CanMove(self, MOVE_RIGHT))
-					ucmd->sidemove = 400;
+					ucmd->sidemove = mSpeed;
 		}
 		return;
 
@@ -444,13 +462,13 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 
 		//try moving forward, if blocked, strafe around it if possible.
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
-			ucmd->forwardmove = 400;
+			ucmd->forwardmove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_BACK))
-				ucmd->forwardmove = -400;
+				ucmd->forwardmove = -mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
-				ucmd->sidemove = 400;
+				ucmd->sidemove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
-				ucmd->sidemove = -400;
+				ucmd->sidemove = -mSpeed;
 		return;
 	}
 }
@@ -465,6 +483,12 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	int next_node_type=-1;
 	int i;
 	float c;
+	short mSpeed;
+
+	if(g_tactical->integer)
+		mSpeed = 200;
+	else 
+		mSpeed = 400;
 
 	// Get current and next node back from nav code.
 	if(!ACEND_FollowPath(self))
@@ -516,7 +540,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	  (current_node_type == NODE_JUMP && next_node_type != NODE_ITEM && nodes[self->next_node].origin[2] > self->s.origin[2]))
 	{
 		// Set up a jump move
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = mSpeed;
 		ucmd->upmove = 400;
 
 		ACEMV_ChangeBotAngle(self);
@@ -533,7 +557,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	if(next_node_type == NODE_LADDER && nodes[self->next_node].origin[2] > self->s.origin[2])
 	{
 		// Otherwise move as fast as we can
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = mSpeed;
 		self->velocity[2] = 320;
 
 		ACEMV_ChangeBotAngle(self);
@@ -545,7 +569,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	if(current_node_type == NODE_LADDER && next_node_type != NODE_LADDER &&
 	   nodes[self->next_node].origin[2] > self->s.origin[2])
 	{
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = mSpeed;
 		ucmd->upmove = 200;
 		self->velocity[2] = 200;
 		ACEMV_ChangeBotAngle(self);
@@ -591,19 +615,19 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 		self->s.angles[YAW] += random() * 180 - 90;
 		// Try moving foward, if not, try to strafe around obstacle
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
-			ucmd->forwardmove = 400;
+			ucmd->forwardmove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_BACK))
-			ucmd->forwardmove = -400;
+			ucmd->forwardmove = -mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
-				ucmd->sidemove = 400;
+				ucmd->sidemove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
-				ucmd->sidemove = -400;
+				ucmd->sidemove = -mSpeed;
 		return;
 	}
 
 	// Otherwise move as fast as we can
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = mSpeed;
 
 	if(self->skill == 3)
 	{	//ultra skill level(will be 3)
@@ -669,6 +693,12 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 {
 	vec3_t  temp;
 	float c;
+	short mSpeed;
+
+	if(g_tactical->integer)
+		mSpeed = 200;
+	else 
+		mSpeed = 400;
 
 	// Do not move
 	if(self->next_move_time > level.time)
@@ -720,7 +750,7 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 	{
 		//	safe_bprintf(PRINT_MEDIUM,"lava jump\n");
 		self->s.angles[YAW] += random() * 360 - 180;
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = mSpeed;
 		ucmd->upmove = 400;
 		return;
 	}
@@ -739,25 +769,25 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 
 		// Try to move forward, if blocked, try to strafe around obstacle
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
-			ucmd->forwardmove = 400;
+			ucmd->forwardmove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_BACK))
-			ucmd->forwardmove = -400;
+			ucmd->forwardmove = -mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
-				ucmd->sidemove = 400;
+				ucmd->sidemove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
-				ucmd->sidemove = -400;
+				ucmd->sidemove = -mSpeed;
 
 		if(!M_CheckBottom(self) || !self->groundentity) // if there is ground continue, otherwise wait for next move.
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
-				ucmd->forwardmove = 400;
+				ucmd->forwardmove = mSpeed;
 		}
 
 		return;
 	}
 
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
-		ucmd->forwardmove = 400;
+		ucmd->forwardmove = mSpeed;
 
 	if(self->skill == 3)
 	{ //ultra skill level(will be 3)
@@ -864,6 +894,12 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	float range = 0.0f;
 	vec3_t v;
 	qboolean use_fuzzy_aim;
+	short mSpeed;
+
+	if(g_tactical->integer)
+		mSpeed = 200;
+	else 
+		mSpeed = 400;
 
 	ucmd->buttons = 0;
 	use_fuzzy_aim = true; // unless overridden by special cases
@@ -941,11 +977,11 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		//strafe no matter what
 		if ( c < 0.5f && ACEMV_CanMove( self, MOVE_LEFT ) )
 		{
-			ucmd->sidemove -= 400;
+			ucmd->sidemove -= mSpeed;
 		}
 		else if ( c < 1.0f && ACEMV_CanMove( self, MOVE_RIGHT ) )
 		{
-			ucmd->sidemove += 400;
+			ucmd->sidemove += mSpeed;
 		}
 		else
 		{ //don't want high skill level bots just standing around
@@ -955,15 +991,15 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		//allow for some circle strafing
 		if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
 		{
-			ucmd->forwardmove -= 400;
+			ucmd->forwardmove -= mSpeed;
 		}
 		else if ( c < 0.6f && ACEMV_CanMove( self, MOVE_FORWARD ) )
 		{ //keep this at default, not make them TOO hard
-			ucmd->forwardmove += 400;
+			ucmd->forwardmove += mSpeed;
 		}
 		else if ( c < 0.8f && ACEMV_CanMove( self, MOVE_BACK ) )
 		{
-			ucmd->forwardmove -= 400;
+			ucmd->forwardmove -= mSpeed;
 		}
 		goto attack;
 		//skip any jumping or crouching
@@ -986,15 +1022,15 @@ standardmove:
 
 	if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
 	{ //run away if wounded
-		ucmd->forwardmove -= 400;
+		ucmd->forwardmove -= mSpeed;
 	}
 	else if ( c < 0.6f && ACEMV_CanMove( self, MOVE_FORWARD ) )
 	{ //keep this at default, not make them TOO hard
-		ucmd->forwardmove += 400;
+		ucmd->forwardmove += mSpeed;
 	}
 	else if ( c < 0.8f && ACEMV_CanMove( self, MOVE_BACK ) )
 	{
-		ucmd->forwardmove -= 400;
+		ucmd->forwardmove -= mSpeed;
 	}
 
 	c = random(); //really mix this up some
