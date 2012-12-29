@@ -434,7 +434,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 
 	GetPrivateProfileString("Galaxy", "name", defName, user.nick, 32, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
-	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 7_60/", CRXPath, MAX_PATH, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 7_65/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "server", "irc.planetarena.org", servidor, 100, "galaxy.ini");
 	//set the join flag for the dialog bool
