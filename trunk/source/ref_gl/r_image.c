@@ -1215,6 +1215,7 @@ void R_FilterTexture(unsigned *in, int width, int height)
 
 static int	powers_of_two[] = {16,32,64,128,256,512,1024,2048,4096};
 int		upload_width, upload_height;
+int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
 
 
@@ -1301,6 +1302,47 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 	if (mipmap)
 		qglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+	
+	crop_left = crop_right = crop_top = crop_bottom = 0;
+	if (samples == gl_alpha_format)
+	{
+		int			x, y;
+		qboolean 	found;
+		
+		scan = (byte*)scaled+3;
+		
+		for (y = 0; y < scaled_height; y++, crop_top++)
+		{
+			found = false;
+			for (x = 0; x < scaled_width; x++)
+			{
+				scan = ((byte*)scaled + (y*scaled_width+x)*4+3);
+				if (*scan != 0)
+					found = true;
+			}
+			if (found)
+				break;
+		}
+		
+		crop_left = scaled_width;
+		crop_right = scaled_width;
+		
+		for (; y < scaled_height; y++)
+		{
+			for (x = 0; x < scaled_width; x++)
+			{
+				scan = ((byte*)scaled + (y*scaled_width+x)*4+3);
+				if (*scan != 0)
+				{
+					if (x < crop_left)
+						crop_left = x;
+					if (scaled_width-x-1 < crop_right)
+						crop_right = scaled_width-x-1;
+					crop_bottom = scaled_height-y-1;
+				}
+			}
+		}
+	}
 
 	if (scaled_width != width || scaled_height != height)
 		free(scaled);
@@ -1446,6 +1488,10 @@ nonscrap:
 		} else {
 			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_particle && image->type != it_sky), image->type == it_bump );
 		}
+		image->crop_left = crop_left;
+		image->crop_right = crop_right;
+		image->crop_top = crop_top;
+		image->crop_bottom = crop_bottom;
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
 		image->paletted = uploaded_paletted;
