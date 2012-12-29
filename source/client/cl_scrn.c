@@ -1195,12 +1195,13 @@ void SCR_ExecuteLayoutString (char *s)
 	int			x, y, ny=0; //ny is coordinates used for new sb layout client tags only
 	int			value;
 	char *			token;
-	int			width;
+	int			numwidth = 3; //amount of digits of number being drawn
 	int			index;
 	clientinfo_t *		ci;
 	int			charscale;
 	float			scale;
 	qboolean		newSBlayout = false;
+	int				left, top, right, bottom, width, height, midx, midy;
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 		return;
@@ -1208,22 +1209,29 @@ void SCR_ExecuteLayoutString (char *s)
 	if (!s[0])
 		return;
 
-	x = 0;
-	y = 0;
-	width = 3;
 	font = FNT_AutoGet( CL_gameFont );
 	charscale = font->size;
 	scale = charscale * 0.125;
 	
-	if (cl.refdef.width < 1024 || cl.refdef.height < 768)
+	width = cl.refdef.width;
+	height = cl.refdef.height;
+	
+	x = left = cl.refdef.x;
+	y = ny = top = cl.refdef.y;
+	right = left+width;
+	bottom = top+height;
+	midx = left+width/2;
+	midy = top+height/2;
+	
+	if (width < 1024 || height < 768)
 	{
 		// Below 1024x768, start scaling things down to make sure everything
 		// fits. We scale x and y by the same amount to keep things square,
 		// but we figure out the ratios separately and use the ratio which
 		// results in the smallest scale.
 		float xscale, yscale;
-		xscale = (float)cl.refdef.width/1024.0f;
-		yscale = (float)cl.refdef.height/768.0f;
+		xscale = (float)width/1024.0f;
+		yscale = (float)height/768.0f;
 		if (xscale < yscale)
 			scale *= xscale;
 		else
@@ -1236,39 +1244,39 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "xl"))
 		{
 			token = COM_Parse (&s);
-			x = atoi(token)*scale;
+			x = left + atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "xr"))
 		{
 			token = COM_Parse (&s);
-			x = viddef.width + atoi(token)*scale;
+			x = right + atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "xv"))
 		{
 			token = COM_Parse (&s);
-			x = viddef.width/2 - 160*scale + atoi(token)*scale;
+			x = midx + (atoi(token) - 160)*scale;
 			continue;
 		}
 
 		if (!strcmp(token, "yt"))
 		{
 			token = COM_Parse (&s);
-			y = atoi(token)*scale;
+			y = top + atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "yb"))
 		{
 			token = COM_Parse (&s);
-			y = viddef.height + atoi(token)*scale;
+			y = bottom + atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "yv"))
 		{
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 100*scale + atoi(token)*scale;
-			ny = viddef.height/2 - 100*scale + atoi(token)*scale/2;
+			y = midy + (atoi(token) - 100)*scale;
+			ny = midy + (atoi(token)/2 - 100)*scale;
 			continue;
 		}
 
@@ -1313,8 +1321,8 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "newsb"))
 		{
 			//print header here
-			x = viddef.width/2 - 160*scale;
-			y = viddef.height/2 - 64*scale;
+			x = midx - 160*scale;
+			y = midy - 64*scale;
 
 			box.x = x + 4 * scale , box.y = y;
 			FNT_RawPrint( font , "Player" , 6 , false , box.x , box.y , FNT_colors[ 7 ] );
@@ -1332,10 +1340,10 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "newctfsb"))
 		{
 			//print header here
-			x = viddef.width/2 - 256*scale;
-			y = viddef.height/2 - 72*scale;
+			x = midx - 256*scale;
+			y = midy - 72*scale;
 
-			while ( x <= viddef.width/2 ) {
+			while ( x <= midx ) {
 				box.x = x + 14 * scale , box.y = y;
 				FNT_RawPrint( font , "Player" , 6 , false , box.x , box.y , FNT_colors[ 7 ] );
 				box.x += 118 * scale , box.width = 56 * scale , box.height = 0;
@@ -1357,12 +1365,12 @@ void SCR_ExecuteLayoutString (char *s)
 			int		timeColor;
 
 			token = COM_Parse (&s);
-			x = viddef.width/2 - 160*scale + atoi(token)*scale;
+			x = midx + (atoi(token) - 160)*scale;
 			token = COM_Parse (&s);
 			if(newSBlayout)
-				y = viddef.height/2 - 100*scale + atoi(token)*scale/2;
+				y = midy + (atoi(token)/2 - 100)*scale;
 			else
-				y = viddef.height/2 - 100*scale + atoi(token)*scale;
+				y = midy + (atoi(token) - 100)*scale;
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1441,13 +1449,13 @@ void SCR_ExecuteLayoutString (char *s)
 			int		team;
 
 			token = COM_Parse (&s);
-			x = viddef.width/2 - 160*scale + atoi(token)*scale;
+			x = midx + (atoi(token) - 160)*scale;
 			if(atoi(token) < 0)
 				team = 0;
 			else
 				team = 1;
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 100*scale + atoi(token)*scale;
+			y = midy + (atoi(token) - 100)*scale;
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1503,10 +1511,10 @@ void SCR_ExecuteLayoutString (char *s)
 		{	// draw a number
 			if(strcmp(cl_hudimage1->string, "none")) {
 				token = COM_Parse (&s);
-				width = atoi(token);
+				numwidth = atoi(token);
 				token = COM_Parse (&s);
 				value = cl.frame.playerstate.stats[atoi(token)];
-				SCR_DrawField (x, y, 0, width, value, scale);
+				SCR_DrawField (x, y, 0, numwidth, value, scale);
 			}
 
 			continue;
@@ -1517,7 +1525,7 @@ void SCR_ExecuteLayoutString (char *s)
 			if(strcmp(cl_hudimage1->string, "none")) {
 				int		color;
 
-				width = 3;
+				numwidth = 3;
 				value = cl.frame.playerstate.stats[STAT_HEALTH];
 				if (value > 25)
 					color = 0;	// green
@@ -1526,7 +1534,7 @@ void SCR_ExecuteLayoutString (char *s)
 				else
 					color = 1;
 
-				SCR_DrawField (x, y, color, width, value, scale);
+				SCR_DrawField (x, y, color, numwidth, value, scale);
 			}
 
 			//draw the zoom scope pic if we are using the zoom alt-fire of disruptor
@@ -1534,7 +1542,7 @@ void SCR_ExecuteLayoutString (char *s)
 			{
 				char zoompic[32];
 				sprintf(zoompic, "zoomscope%i", cl.frame.playerstate.stats[STAT_ZOOMED]);
-				Draw_StretchPic (0, 0, viddef.width, viddef.height, zoompic);
+				Draw_StretchPic (left, top, width, height, zoompic);
 			}
 
 			continue;
@@ -1545,7 +1553,7 @@ void SCR_ExecuteLayoutString (char *s)
 			if(strcmp(cl_hudimage1->string, "none")) {
 				int		color;
 
-				width = 3;
+				numwidth = 3;
 				value = cl.frame.playerstate.stats[STAT_AMMO];
 				if (value > 5)
 					color = 0;	// green
@@ -1554,7 +1562,7 @@ void SCR_ExecuteLayoutString (char *s)
 				else
 					continue;	// negative number = don't show
 
-				SCR_DrawField (x, y, color, width, value, scale);
+				SCR_DrawField (x, y, color, numwidth, value, scale);
 			}
 
 			continue;
@@ -1565,14 +1573,14 @@ void SCR_ExecuteLayoutString (char *s)
 			if(strcmp(cl_hudimage1->string, "none")) {
 				int		color;
 
-				width = 3;
+				numwidth = 3;
 				value = cl.frame.playerstate.stats[STAT_ARMOR];
 				if (value < 1)
 					continue;
 
 				color = 0;	// green
 
-				SCR_DrawField (x, y, color, width, value, scale);
+				SCR_DrawField (x, y, color, numwidth, value, scale);
 			}
 
 			continue;
@@ -1597,7 +1605,7 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "cstring"))
 		{
 			token = COM_Parse (&s);
-			box.width = 2*(x>(viddef.width/2)?(viddef.width-x):x); 
+			box.width = 2*(x>midx?(right-x):x); 
 			box.x = x-box.width/2;
 			box.y = y;
 			box.height = 0;
@@ -1610,7 +1618,7 @@ void SCR_ExecuteLayoutString (char *s)
 			token = COM_Parse (&s);
 			//this line is an Alien Arena specific hack of sorts, remove if needed
 			if(!strcmp(token, "Vote"))
-				Draw_ScaledPic (viddef.width/2 - 85*scale, y-8*scale, scale, "votebox");
+				Draw_ScaledPic (midx - 85*scale, y-8*scale, scale, "votebox");
 			FNT_RawPrint( font , token , strlen( token ) , false , x , y , FNT_colors[ 7 ] );
 			continue;
 		}
@@ -1618,7 +1626,7 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "cstring2"))
 		{
 			token = COM_Parse (&s);
-			box.width = 2*(x>(viddef.width/2)?(viddef.width-x):x); 
+			box.width = 2*(x>midx?(right-x):x); 
 			box.x = x-box.width/2;
 			box.y = y;
 			box.height = 0;

@@ -18,6 +18,6 @@ figure.
 #define LOD_BASE_DIST   500.0
 #define LOD_BASE_FOV    90.0
 #define LOD_DIST        (LOD_BASE_DIST*\
-                        (vid.width/LOD_BASE_W)*(vid.height/LOD_BASE_H)*\
+                        (r_newrefdef.width/LOD_BASE_W)*(r_newrefdef.height/LOD_BASE_H)*\
                         (LOD_BASE_FOV/r_newrefdef.fov_x)*\
                         (LOD_BASE_FOV/r_newrefdef.fov_x))
