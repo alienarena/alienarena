@@ -406,18 +406,18 @@ edict_t *CreateTargetChangeLevel(char *map)
  * 8: "violator"
  *
  *--- weapon_hit[] incremented ---
- * 0 : blasterball_touch : Weapon_Beamgun, Weapon_Blaster, Weapon_Hover
- * 0 : fire_blaster_beam : Weapon_Beamgun, Weapon_Blaster, Weapon_Alienblaster, Weapon_Strafer
- * 1 : fire_plasma       : Weapon_Disruptor
- * 2 : floater_think     : Weapon_Smartgun
- * 3 : fire_lead         : Weapon_Chain
- * 4 : fireball_touch    : Weapon_Flame
- * 4 : flame_touch       : Weapon_Flame
- * 5 : rocket_touch      : Weapon_RocketLauncher, Weapon_Bomber, Weapon_Strafer
- * 6 : fire_blaster      : Weapon_Beamgun, Weapon_Blaster
- * 7 : bomb_touch        : Weapon_Bomber, Weapon_Vaporizer
- * 7 : fire_energy_field : Weapon_Vaporizer
- * 8 : fire_violator     : Weapon_Violator
+ * 0 : blasterball_touch  : Weapon_Beamgun, Weapon_Blaster, Weapon_Hover
+ * 0 : fire_blaster_beam  : Weapon_Beamgun, Weapon_Blaster, Weapon_Alienblaster, Weapon_Strafer
+ * 1 : fire_disruptor     : Weapon_Disruptor
+ * 2 : smartgrenade_think : Weapon_Smartgun
+ * 3 : fire_lead          : Weapon_Chain
+ * 4 : fireball_touch     : Weapon_Flame
+ * 4 : flame_touch        : Weapon_Flame
+ * 5 : rocket_touch       : Weapon_RocketLauncher, Weapon_Bomber, Weapon_Strafer
+ * 6 : fire_blaster       : Weapon_Beamgun, Weapon_Blaster
+ * 7 : bomb_touch         : Weapon_Bomber, Weapon_Vaporizer
+ * 7 : fire_vaporizer     : Weapon_Vaporizer
+ * 8 : fire_violator      : Weapon_Violator
 
  * --- from sample.cfg accuracy
  * weapon_hit[] :to: bot weapacc[]

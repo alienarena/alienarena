@@ -956,7 +956,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 
 }
 
-void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_disruptor (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 {
 	vec3_t		from;
 	vec3_t		end;
@@ -1031,7 +1031,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 }
 
 //vaporizer code
-void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_vaporizer (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 {
 
 	vec3_t		from;
@@ -1387,11 +1387,11 @@ void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
 
 /*
 =================
-fire_floater
+fire_smartgrenade
 =================
 */
 
-void floater_think (edict_t *self)
+void smartgrenade_think (edict_t *self)
 {
 	edict_t	*ent;
 	edict_t *target = NULL;
@@ -1542,7 +1542,7 @@ void prox_think (edict_t *self)
 	}
 
 }
-void floater_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+void smartgrenade_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (other == ent->owner)
 		return;
@@ -1574,7 +1574,7 @@ void prox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	G_FreeEdict (self);
 }
 
-void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage, float timer)
+void fire_smartgrenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage, float timer)
 {
 	edict_t	*floater;
     vec3_t	dir, forward, right, up;
@@ -1599,9 +1599,9 @@ void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	VectorClear (floater->maxs);
 	floater->s.modelindex = gi.modelindex ("models/objects/electroball/tris.md2");
 	floater->owner = self;
-	floater->touch = floater_touch;
+	floater->touch = smartgrenade_touch;
 	floater->nextthink = level.time + .1;
-    floater->think = floater_think;
+    floater->think = smartgrenade_think;
     floater->dmg = damage;
 	floater->radius_dmg = radius_damage;
 	floater->dmg_radius = damage_radius;
@@ -1635,7 +1635,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	VectorClear (prox->maxs);
 	prox->s.modelindex = gi.modelindex ("models/objects/electroball/tris.md2");
 	prox->owner = self;
-	prox->touch = floater_touch;
+	prox->touch = smartgrenade_touch;
 	prox->nextthink = level.time + .1;
     prox->think = prox_think;
     prox->dmg = damage;

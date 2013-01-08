@@ -763,7 +763,7 @@ void Weapon_Wizard_Punch (edict_t *ent)
 }
 
 #else
-void weapon_plasma_fire (edict_t *ent)
+void weapon_disruptor_fire (edict_t *ent)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -808,7 +808,7 @@ void weapon_plasma_fire (edict_t *ent)
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_plasma (ent, start, forward, damage*damage_buildup, kick);
+	fire_disruptor (ent, start, forward, damage*damage_buildup, kick);
 
 	//alt fire - reset some things
 	ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
@@ -839,12 +839,12 @@ void Weapon_Disruptor (edict_t *ent)
 	static int	excessive_fire_frames[] = {5,7,9,11,0};
 
 	if(excessive->value || ent->client->invincible_framenum > level.framenum)
-		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, excessive_fire_frames, weapon_plasma_fire);
+		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, excessive_fire_frames, weapon_disruptor_fire);
 	else
-		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, fire_frames, weapon_plasma_fire);
+		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, fire_frames, weapon_disruptor_fire);
 }
 
-void weapon_energy_field_fire (edict_t *ent)
+void weapon_vaporizer_fire (edict_t *ent)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -908,7 +908,7 @@ void weapon_energy_field_fire (edict_t *ent)
 
 		}
 		else {
-				fire_energy_field (ent, start, forward, damage, kick);
+				fire_vaporizer (ent, start, forward, damage, kick);
 				if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 					ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;
 		}
@@ -939,7 +939,7 @@ void Weapon_Vaporizer (edict_t *ent)
 	static int	pause_frames[]	= {48, 0};
 	static int	fire_frames[]	= {6, 7, 12, 13, 0};
 
-	Weapon_Generic (ent, 5, 18, 48, 52, pause_frames, fire_frames, weapon_energy_field_fire);
+	Weapon_Generic (ent, 5, 18, 48, 52, pause_frames, fire_frames, weapon_vaporizer_fire);
 }
 
 /*
@@ -1720,7 +1720,7 @@ void Weapon_Chain (edict_t *ent)
 
 }
 
-void weapon_floater_fire (edict_t *ent)
+void weapon_smartgun_fire (edict_t *ent)
 {
 	vec3_t	offset, start;
 	vec3_t	forward, right;
@@ -1751,12 +1751,12 @@ void weapon_floater_fire (edict_t *ent)
 	if(ent->altfire) 
 	{
 		if(excessive->value)
-			fire_floater (ent, start, forward, damage, 400, damage_radius, radius_damage, 8);
+			fire_smartgrenade (ent, start, forward, damage, 400, damage_radius, radius_damage, 8);
 		else
 			fire_prox (ent, start, forward, damage-50, 200, damage_radius, radius_damage-50, 8);
 	}
 	else
-		fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8);
+		fire_smartgrenade (ent, start, forward, damage, 500, damage_radius, radius_damage, 8);
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1792,7 +1792,7 @@ void Weapon_Smartgun (edict_t *ent)
 	else if(ent->client->buttons & BUTTON_ATTACK)
 		ent->altfire = false;
 
-	Weapon_Generic (ent, 3, 11, 31, 35, pause_frames, fire_frames, weapon_floater_fire);
+	Weapon_Generic (ent, 3, 11, 31, 35, pause_frames, fire_frames, weapon_smartgun_fire);
 }
 
 void weapon_minderaser_fire (edict_t *ent)
