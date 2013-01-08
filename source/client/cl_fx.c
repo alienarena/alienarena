@@ -3423,7 +3423,7 @@ void Cl_WeatherEffects()
 			else
 				VectorCopy(tr.endpos, p->end);
 
-			p->type = PARTICLE_WEATHER;
+			p->type = PARTICLE_FLUTTERWEATHER;
 			// setup the particles
 			//trash
 			p->image = r_trashtexture;
@@ -3482,10 +3482,10 @@ void Cl_WeatherEffects()
 			else
 				VectorCopy(tr.endpos, p->end);
 
-			p->type = PARTICLE_WEATHER;
 			// setup the particles
 			if(r_weather == 3) //leaves
 			{
+				p->type = PARTICLE_FLUTTERWEATHER;
 				p->image = r_leaftexture;
 				p->vel[2] = -80;
 				p->accel[2] = 0;
@@ -3499,6 +3499,7 @@ void Cl_WeatherEffects()
 			}
 			else if(r_weather == 4) //embers
 			{
+				p->type = PARTICLE_WEATHER;
 				p->image = r_particletexture;
 				p->vel[2] = -80;
 				p->accel[2] = 0;
@@ -3909,7 +3910,7 @@ void CL_AddParticles (void)
 			p->current_alpha = p->alpha + time*p->alphavel;
 			if (p->current_alpha <= 0)
 			{	// faded out
-				if(p->type == PARTICLE_WEATHER)
+				if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_FLUTTERWEATHER)
 					weather_particles--;
 				p->next = free_particles;
 				free_particles = p;
@@ -3942,15 +3943,38 @@ void CL_AddParticles (void)
 		if(p->current_color < 0)
 		    p->current_color = 0;
 
-		// free up weather particles that have hit the ground
+		// update origin
 		for(i = 0; i < 3; i++) {
 			p->current_origin[i] = p->org[i] + p->vel[i]*time + p->accel[i]*(time*time);
 		}
-		if(p->type == PARTICLE_WEATHER && (p->current_origin[2] <= p->end[2])){
-			p->next = free_particles;
-			free_particles = p;
-			weather_particles--;
-			continue;
+		
+		// free up weather particles that have hit the ground
+		if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_FLUTTERWEATHER)
+		{
+			if (p->current_origin[2] <= p->end[2]){
+				p->next = free_particles;
+				free_particles = p;
+				weather_particles--;
+				continue;
+			}
+		}
+		
+		// some weather particles flutter around as they fall
+		if (p->type == PARTICLE_FLUTTERWEATHER)
+		{
+			// An accurate-looking model of particle rotation is to model the
+			// particle as a sphere rotating on a surface (or a circle on each
+			// axis.) If the particle was a marble moving on some hypothetical
+			// 3D tabletop, how many degrees in each direction has it rotated 
+			// since it was spawned? 
+			float circumference;
+			vec3_t distance;
+			
+			// Use a slightly larger radius so it rotates slower.
+			circumference = 2.0*M_PI*(3.5*p->current_scale);
+			
+			VectorSubtract (p->current_origin, p->org, distance);
+			VectorScale (distance, 360.0/circumference, p->angle);
 		}
 
 		p->next = NULL;
