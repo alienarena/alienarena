@@ -75,6 +75,8 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 	R_InitVArrays (VERT_COLOURED_TEXTURED);
 	
+	qglDisable (GL_CULL_FACE);
+	
 	qsort (particles, num_particles, sizeof (particle_t *), compare_particle);
 	
 	for ( p1 = particles, i=0; i < num_particles ; i++,p1++)
@@ -176,7 +178,13 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 				VectorScale(up, -5*scale, pup);
 			}
 		}
-		else if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_VERT){  // keep it vertical
+		else if(p->type == PARTICLE_FLUTTERWEATHER){
+			VectorCopy(p->angle, dir);
+			AngleVectors(dir, NULL, right, up);
+			VectorScale(right, 3*scale, pright);
+			VectorScale(up, 3*scale, pup);
+		}
+		else if(p->type == PARTICLE_VERT || p->type == PARTICLE_WEATHER){  // keep it vertical
 			VectorCopy(r_newrefdef.viewangles, v);
 			v[0] = 0;  // keep weather particles vertical by removing pitch
 			AngleVectors(v, NULL, right, up);
@@ -302,6 +310,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	qglDisable(GL_BLEND);
 	qglDepthMask( GL_TRUE );	// back to normal Z buffering
 	GL_TexEnv( GL_REPLACE );
+	qglEnable (GL_CULL_FACE);
 }
 
 /*
