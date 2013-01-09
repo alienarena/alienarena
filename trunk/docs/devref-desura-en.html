@@ -1,0 +1,267 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Alien Arena for Linux on Desura</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article"><div class="titlepage"><div><div><h1 class="title"><a name="idp1371424500"></a>Alien Arena for Linux on Desura</h1></div><div><div class="author"><h3 class="author"><span class="orgname">COR Entertainment, LLC.</span></h3></div></div><div><p class="releaseinfo">$Id$</p></div><div><p class="copyright">Copyright © 2012 COR Entertainment, LLC.</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#About">About this Document</a></span></dt><dt><span class="section"><a href="#Support">Support</a></span></dt><dt><span class="section"><a href="#Overview">Overview</a></span></dt><dt><span class="section"><a href="#SystemEnvironments">Create the System Environments</a></span></dt><dt><span class="section"><a href="#Build">Create the Build</a></span></dt><dt><span class="section"><a href="#InstallationDirectory">Create the Installation Directory</a></span></dt><dt><span class="section"><a href="#CustomDocuments">Customize Documents for Desura</a></span></dt><dt><span class="section"><a href="#VerifySettings">Verify the Dependencies and Install Settings</a></span></dt><dt><span class="section"><a href="#UploadMCF">Create and Upload the MCF</a></span></dt><dt><span class="section"><a href="#CommitMCF">Commit the MCF, Get Approval, Test</a></span></dt><dt><span class="section"><a href="#UploadTarball">Upload the Release Tarball</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="About"></a>About this Document</h2></div></div></div><p>
+      This document is a reference for installing and maintaining Alien
+      Arena on the Desura digital distribution service, http://www.desura.com.
+    </p><p>
+      Currently (January 2013), this covers the Linux versions.
+    </p><p>
+      This document is DocBook 5. The formatting program is
+      <span class="application">xsltproc</span>. The stylesheet is
+      <code class="filename">docbook/xsl-ns-stylesheets/html/docbook.xsl</code>,
+      which is specified within the heading.  So, providing docbook support
+      is installed,  a script to generate the <code class="filename">.html</code>
+      file is something like this:
+      </p><pre class="programlisting">#!/bin/sh
+xsltproc -o devref-desura-en.html docsrc/devref-desura-en.xml</pre><p>
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Support"></a>Support</h2></div></div></div><p>
+      Finding and deciphering the documentation for installing Desura,
+      installing games from Desura, and distributing games on Desura is a bit
+      of a chore. The adminstrators are helpful and respond quickly, though.
+    </p><p>
+      The Linux-related forum is at: 
+      
+        http://www.desura.com/groups/desura/linux
+      
+    </p><p>
+      There is a Wiki at:
+      
+        https://trac.moddb.com/app/wiki
+      
+      (It may not be well-maintained, and could be out-of-date.)
+    </p><p>
+      This document assumes the initial setup for publication has been
+      done. Only updating an existing project is covered here.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Overview"></a>Overview</h2></div></div></div><p>
+      Desura requires a binary executable that runs in the user's home
+      directory.  The builds for 7.60.1 AND 7.65 were done using Ubuntu
+      12.04 LTS.  Separate OS installations were used for x86 and x86_64.
+    </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Potential future headaches</h3><p>
+        The new Steam Linux implementation is similar. Currently, Steam
+        officially supports only Ubuntu. Desura's solution to problem
+        of supporting different Linux OS's, is to load various versions
+        of system libraries into the user's home directory. Steam may do
+        something similar in the future.  This technique is probably not a
+        good thing. It does not conform to common Linux standards, but, more
+        importantly, it will probably be a gigantic headache for developers.
+      </p></div><p>
+      These are the major steps for installation on Desura:
+      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Create the system build environments</p></li><li class="listitem"><p>Create the build</p></li><li class="listitem"><p>Create the installation directory</p></li><li class="listitem"><p>Create documents customized for Desura</p></li><li class="listitem"><p>Verify the dependencies and install settings</p></li><li class="listitem"><p>Create and upload the MCF</p></li><li class="listitem"><p>Commit, get approval and test</p></li><li class="listitem"><p>Upload the release tarball</p></li></ol></div><p>
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="SystemEnvironments"></a>Create the System Environments</h2></div></div></div><p>
+      Updating Desura requires a Desura/IndieDB/ModDB account, of course,
+      and, also developer access rights. (Access rights management can be
+      accessed through the Alien Arena Publish page; under the Profile list,
+      click on Access Rights.)
+    </p><p>
+      There are 2 OS system environments; 32-bit Linux x86 and 64-bit
+      Linux x86-64.  One could use either one and cross-compile to the
+      other. However, for testing purposes and for uploading to Desura it
+      may be best to have separate installations.  Ideally, this does not
+      need to be done for every release. Once the system environments are
+      in operation, they may be used for later releases.
+    </p><p>
+      For 7.60, I chose to use Ubuntu 12.04 LTS and create a multi-boot
+      environment on Gentoo x86 using "legacy" GRUB. The Ubuntu partitions are
+      about 30G each on a second drive using Extended Partitions.  The setup
+      one uses, of course, is mostly a matter of taste. The following is an
+      example and some notes.
+    </p><p>
+      The Ubuntu installation is not particularly happy with this arrangement,
+      and it requires some magic.  When installing from a DVD, after
+      selecting "Try Ubuntu", in a terminal do: <strong class="userinput"><code>ubiquity
+      --no-bootloader</code></strong> This prevents the installer,
+      <code class="filename">ubiquity</code>, from trying to create a boot sector
+      and install GRUB 2. The additions to <code class="filename">grub.conf</code>
+      look like this:
+    </p><p>
+      </p><div class="literallayout"><p><span class="emphasis"><em><br>
+title=Ubuntu Linux x86 (3.2.0-xx-generic-pae)<br>
+root (hd1,4)<br>
+kernel /vmlinuz  root=/dev/sdb5<br>
+initrd /initrd.img<br>
+<br>
+title=Ubuntu Linux x86_64 (3.2.0.xx-generic)<br>
+root (hd1,5)<br>
+kernel /vmlinuz root=/dev/sdb6<br>
+initrd /initrd.img<br>
+        </em></span></p></div><p>
+    </p><p>
+      And at the top level of the partitions, these soft links supply
+      references to the kernel boot files.
+    </p><p>
+      </p><div class="literallayout"><p><span class="emphasis"><em><br>
+for x86:<br>
+vmlinuz -&gt; boot/vmlinuz-3.2.0-32-generic-pae<br>
+initrd.img -&gt; /boot/initrd.img-3.2.0-32-generic-pae<br>
+<br>
+for x86-64:<br>
+vmlinuz -&gt; boot/vmlinuz-3.2.0-32-generic<br>
+initrd.img -&gt; /boot/initrd.img-3.2.0-32-generic<br>
+        </em></span><br>
+      </p></div><p>
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Build"></a>Create the Build</h2></div></div></div><p>
+      The directory for the build is separate from the Desura installation
+      directory. Normally, it would be created by unpacking a release tarball
+      according to usual instructions.
+    </p><p>
+      For Linux, Desura installs into the users home directory, so the
+      <span class="emphasis"><em>alternate install</em></span> configuration is used. The
+      compiler options should follow distro packaging practice for generating
+      an executable to run on different architectures. Distro's also use
+      stack protection, which is a good idea in this case.
+    </p><p>
+      <span class="command"><strong>export CFLAGS='-O2 -mtune=generic -fstack-protector-all
+        --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
+      </strong></span>
+    </p><p>
+      <span class="command"><strong>export CXXFLAGS='-O2 -mtune=generic
+        -fstack-protector-all --param=ssp-buffer-size=4
+        -D_FORTIFY_SOURCE=2'
+      </strong></span>
+    </p><p>
+      <span class="command"><strong>./configure --enable-alternate-install</strong></span>
+    </p><p>
+      To keep things simpler, the integrated libode should be used.
+      Other configure options that are probably preferred are:
+    </p><p>
+      <span class="command"><strong>--enable-maintainer-mode --disable-silent-rules</strong></span>
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="InstallationDirectory"></a>Create the Installation Directory</h2></div></div></div><p>
+      For Desura, the installation directory is created separately.  This may
+      not be strictly necessary, but if the build directory were used a
+      lot of unnecessary files would be included.  (Just FYI, according
+      to documentation, Desura will filter out <code class="filename">.svn</code>
+      subdirectories.)
+    </p><p>
+      The installation directory is normally, and officially, named
+      <code class="filename">alien-arena-2008</code>.  Other names may be used,
+      but Desura will install in the official directory on the user's
+      system.
+    </p><p>
+      The contents of the installation directory are:
+      </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+            <code class="filename">alienarena</code>
+          </span></dt><dd>
+            The Linux binary.
+          </dd><dt><span class="term">
+            <code class="filename">README</code>
+          </span></dt><dd>
+            The Desura custom top-level readme file (see below)
+          </dd><dt><span class="term">
+            <code class="filename">arena/motd.txt</code>
+          </span></dt><dd>
+            The stock message-of-the-day file
+          </dd><dt><span class="term">
+            <code class="filename">botinfo/</code>
+          </span></dt><dd>
+            All the bot and nav files in the release
+          </dd><dt><span class="term">
+            <code class="filename">data1/</code>
+          </span></dt><dd>
+            All the game resource files in the release
+          </dd><dt><span class="term">
+            <code class="filename">docs/</code>
+          </span></dt><dd>
+            Documentation customized for Desura (see below)
+          </dd></dl></div><p>
+    </p><p>
+      The Linux dedicated server is not included on purpose.
+      It is assumed that a user would download the full tarball,
+      if there was an interest in running that.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="CustomDocuments"></a>Customize Documents for Desura</h2></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+          <code class="filename">README</code>
+        </span></dt><dd>
+          A special README for Desura pointing to the other documents in
+          the doc subdirectory.  Has information about the compiler and
+          configuration used to generate the binary for Desura.
+        </dd><dt><span class="term">
+          <code class="filename">GAME_README.TXT</code>
+        </span></dt><dd>
+          This is the general <code class="filename">readme.txt</code> reformatted for
+          Linux.  If that file is modified, then this one should be updated.
+        </dd><dt><span class="term">
+          <code class="filename">TECH_README.TXT</code>
+        </span></dt><dd>
+          This is the top-level Unix/Linux README.
+          The changed name is the only difference.
+        </dd><dt><span class="term">
+          <code class="filename">LICENSE.TXT</code>
+        </span></dt><dd>
+          This is the COR Entertainment, LLC. copyright and license.  The same
+          content as <code class="filename">license.txt</code> reformatted for Linux.
+        </dd><dt><span class="term">
+          <code class="filename">GPL.TXT</code>
+        </span></dt><dd>
+          The GNU GENERAL PUBLIC LICENSE, Version 2.
+        </dd><dt><span class="term">
+          <code class="filename">LGPL.TXT</code>
+        , </span><span class="term">
+          <code class="filename">ODE_LICENSE.TXT</code>
+        </span></dt><dd>
+          The GNU LESSER GENERAL PUBLIC LICENSE Version 2.1 and
+          the Open Dynamics Engine (ODE) License.  Included because
+          the Desura binary uses the integrated ODE version of the
+          <code class="filename">alienarena</code> build.
+        </dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="VerifySettings"></a>Verify the Dependencies and Install Settings</h2></div></div></div><p>
+      If the program adds a shared library to its link, the install settings
+      may need updating. Otherwise, install settings do not usually need to
+      be modified. It is a good idea to verify the settings in any case.
+    </p><p>
+      Here is a menu sequence for getting to the Alien Arena Publish
+      page:
+    </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">Play</li><li class="listitem">On the Toolbar line (after Games and Favorities), Development
+      </li><li class="listitem">Right Click on AlienArena</li><li class="listitem">Tools</li><li class="listitem">Desura Page (tab name is "Publish")</li></ol></div><p>
+      Once on the Publish page, on the Releases list, click on Upload.
+      Then, click on the Full Linux, and Full Linux 64 branches and verify
+      that the Dependencies are correct.
+    </p><p>
+      The Install Settings, also on the Releases list, control the program
+      file paths and should not be changed.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="UploadMCF"></a>Create and Upload the MCF</h2></div></div></div><p>
+      The Managed Content File (MCF) is a Desura proprietary format used
+      to upload to the Desura Server. It is generated by Desura-supplied
+      procedures which calculate the difference between the current released
+      installation and the new version.
+    </p><p>
+      Initially, it can be confusing because the user-interface can be
+      mysterious.  The clickable links for the next step in the multi-step
+      process sometimes appear only after the current step is completed,
+      so it takes some "leaps of faith."  When there are no errors, the
+      process is easy. But when upload errors occur clearing the broken
+      upload and restarting does not always work.
+    </p><p>
+      Late in the process, a request for the changelog appears. It requires
+      changelog entries in a specific format. If possible, prepare this
+      beforehand.  Use the changelog for the Windows version, if it is
+      available.
+    </p><p>
+      Once the Installation Directory is ready, the MCF can be created and
+      uploaded.  Make sure the directory is clean with no extraneous files. If
+      the binary was built with debug symbols, they should be stripped.
+    </p><p>
+      The Create MCF command can be accessed through Play Menu. Access like
+      the sequence above, click on Create MCF rather than Desura Page.
+      Enter the path to the installation directory and wait. On success,
+      click on Upload MCF and upload the newly created MCF.
+    </p><p>
+      These commands may also be accessed through the Alien Arena Publish
+      page. Select Upload in the Release list. Then scroll to the Upload
+      section at the bottom of the page.
+    </p><p>
+      If the upload fails, clearing the upload and starting over does not
+      always work. Consult the support resources for work-arounds.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="CommitMCF"></a>Commit the MCF, Get Approval, Test</h2></div></div></div><p>
+      Once the MCF is successfully uploaded, there will be a Submit for
+      Approval command on the Publish page.  Desura administrators usually
+      approve in a few days.
+    </p><p>      
+      At that point, the <span class="emphasis"><em>test</em></span> command is activated.
+      On a system with an existing installation, it will be updated with
+      changes.  In case this is not obvious: this is not the same as the
+      installation directory used to generate the MCF.  It will be found in the
+      <code class="filename">desura/common</code> directory in the user home directory.
+      It is probably a good idea to test a clean install, also.
+    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="UploadTarball"></a>Upload the Release Tarball</h2></div></div></div><p>
+      Desura calls this the <span class="emphasis"><em>standalone</em></span>. The standalone
+      upload page can be accessed through the Upload section or by clicking
+      on the existing standalone package listing. The tarball download is
+      listed as the 32-bit version; uploading a 64-bit labeled version
+      would be redundant.
+    </p></div></div></body></html>
