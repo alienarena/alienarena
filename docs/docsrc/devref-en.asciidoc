@@ -824,11 +824,9 @@ are included in the source tree in SVN and in the distribution.
 There is only one 'config.h' and it includes what is needed
 for building 'libode.a'.
 
-The ODE update to version 0.12 removed a function that we use. As of
-this writing there is no alternative. So ODE 0.12 cannot be used, yet.
-So the build with ODE 0.11 integrated is preferred. 
-
-
+The ODE update to version 0.12 removed a function that we use.
+This has been corrected in version 7.65 so ODE 0.12 may be used.
+The integrated libode still uses version 0.11.1.
 
 
 == MinGW Build ==
@@ -843,9 +841,7 @@ The Autotools build has experimental support for Mac OS X
 using the Darwin X11 environment. There are reports of some
 progress with this using MacPorts and Homebrew.
 
-In February 2011, a native port to Mac OS X was developed.
-Details and test results to be reported as they become
-available.
+As of Version 7.65, there still is no official Mac OS X support.
 
 == Developer's Not-Autotools Makefile ==
 
@@ -864,7 +860,8 @@ source subdirectory.  Good for experimenting with optimizations.
 
 == Desura ==
 
-TODO:
+The information of Desura is in a separate document, devref-desura-en.html.
+It is generated from a docbook 5 source in docsrc/devref-desura-en.xml.
 
 == Static Analysis == 
 
@@ -872,5 +869,17 @@ TODO:
 
 == Phoronix Test Suite ==
 
-TODO:
+Some initial experimentation with PTS has been done.
+It has potential for collecting information about performance on 
+a variety of systems and for regression testing.
+The current (vers 7.65) benchmarking support in the code needs work.
+Briefly, 1) running timedemo benchmarks is not worthwhile without knowing
+what code is covered. 2) a benchmark mode is needed to simplify the 
+configuration. Normally, there should be no network activity, and sound
+should be disabled. Possible, but inconvenient to do with .cfgs.
+3) the benchmark output should be more detailed.
+
+An opinion: It would be nice to be included in set of games Phoronix
+uses to test hardware. But, there is not much point in that unless we
+can bring something new to the table. 
 
