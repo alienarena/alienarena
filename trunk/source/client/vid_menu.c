@@ -164,130 +164,31 @@ static void VboCallback( void *s )
 
 static void SetCompatibility( void *unused )
 {
-	Cvar_SetValue("r_bloom", 0);
-	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_bspnormalmaps", 0); 
-	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_glsl_postprocess", 0);
-	Cvar_SetValue("gl_glsl_shaders", 0);
-	Cvar_SetValue("gl_usevbo", 0);
-
-	//do other things that aren't in the vid menu per se, but are related "high end" effects
-	Cvar_SetValue("r_shaders", 0);
-	Cvar_SetValue("gl_dynamic", 0);
-	Cvar_SetValue("gl_mirror", 0);
-	Cvar_SetValue("r_lensflare", 0);
-	Cvar_SetValue("r_lightbeam", 0);
-	Cvar_SetValue("r_drawsun", 0);
-	Cvar_SetValue("r_godrays", 0);
-	Cvar_SetValue("r_hdlightmaps", 0);
-
+	Cmd_ExecuteString ("exec graphical_presets/compatibility.cfg");
 	VID_MenuInit();
 }
+
 static void SetMaxPerformance( void *unused )
 {
-	Cvar_SetValue("r_bloom", 0);
-	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_bspnormalmaps", 0); 
-	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_glsl_postprocess", 0);
-	Cvar_SetValue("gl_glsl_shaders", 1);
-	Cvar_SetValue("gl_usevbo", 1);
-
-	//do other things that aren't in the vid menu per se, but are related "high end" effects
-	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 0);
-	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("r_lensflare", 1);
-	Cvar_SetValue("r_lightbeam", 1);
-	Cvar_SetValue("r_drawsun", 0);
-	Cvar_SetValue("r_godrays", 0);
-	Cvar_SetValue("r_hdlightmaps", 1);
-
+	Cmd_ExecuteString ("exec graphical_presets/maxperformance.cfg");
 	VID_MenuInit();
 }
 
 static void SetPerformance( void *unused )
 {
-	Cvar_SetValue("r_bloom", 1);
-	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_bspnormalmaps", 0); 
-	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_glsl_postprocess", 1);
-	Cvar_SetValue("gl_glsl_shaders", 1);
-	Cvar_SetValue("gl_usevbo", 1);
-
-	//do other things that aren't in the vid menu per se, but are related "high end" effects
-	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("r_lensflare", 1);
-	Cvar_SetValue("r_lightbeam", 1);
-	Cvar_SetValue("r_drawsun", 2);
-	Cvar_SetValue("r_godrays", 0);
-	Cvar_SetValue("r_hdlightmaps", 1);
-
+	Cmd_ExecuteString ("exec graphical_presets/performance.cfg");
 	VID_MenuInit();
 }
 
 static void SetQuality( void *unused )
 {
-	Cvar_SetValue("r_bloom", 1);
-	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_bspnormalmaps", 1); 
-	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_glsl_postprocess", 1);
-	Cvar_SetValue("gl_glsl_shaders", 1);
-	Cvar_SetValue("gl_usevbo", 1);
-
-	//do other things that aren't in the vid menu per se, but are related "high end" effects
-	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("r_lensflare", 1);
-	Cvar_SetValue("r_lightbeam", 1);
-	Cvar_SetValue("r_drawsun", 2);
-	Cvar_SetValue("r_godrays", 0);
-	Cvar_SetValue("r_hdlightmaps", 1);
-
+	Cmd_ExecuteString ("exec graphical_presets/quality.cfg");
 	VID_MenuInit();
 }
 
 static void SetMaxQuality( void *unused )
 {
-	Cvar_SetValue("r_bloom", 1);
-	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_bspnormalmaps", 1); 
-	Cvar_SetValue("gl_shadowmaps", 1);
-	Cvar_SetValue("gl_glsl_postprocess", 1);
-	Cvar_SetValue("gl_glsl_shaders", 1);
-	Cvar_SetValue("gl_usevbo", 1);
-
-	//do other things that aren't in the vid menu per se, but are related "high end" effects
-	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_mirror", 1);
-	Cvar_SetValue("r_lensflare", 1);
-	Cvar_SetValue("r_lightbeam", 1);
-	Cvar_SetValue("r_drawsun", 2);
-	Cvar_SetValue("r_godrays", 1);
-	Cvar_SetValue("r_hdlightmaps", 1);
-
+	Cmd_ExecuteString ("exec graphical_presets/maxquality.cfg");
 	VID_MenuInit();
 }
 
