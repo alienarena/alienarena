@@ -165,18 +165,21 @@ static void VboCallback( void *s )
 static void SetCompatibility( void *unused )
 {
 	Cmd_ExecuteString ("exec graphical_presets/compatibility.cfg");
+	Cbuf_Execute ();
 	VID_MenuInit();
 }
 
 static void SetMaxPerformance( void *unused )
 {
 	Cmd_ExecuteString ("exec graphical_presets/maxperformance.cfg");
+	Cbuf_Execute ();
 	VID_MenuInit();
 }
 
 static void SetPerformance( void *unused )
 {
 	Cmd_ExecuteString ("exec graphical_presets/performance.cfg");
+	Cbuf_Execute ();
 	VID_MenuInit();
 }
 
@@ -189,6 +192,7 @@ static void SetQuality( void *unused )
 static void SetMaxQuality( void *unused )
 {
 	Cmd_ExecuteString ("exec graphical_presets/maxquality.cfg");
+	Cbuf_Execute ();
 	VID_MenuInit();
 }
 

@@ -1376,6 +1376,7 @@ R_SetCompatibility
 void R_SetCompatibility(void)
 {
 	Cmd_ExecuteString ("exec graphical_presets/compatibility.cfg");
+	Cbuf_Execute ();
 	Com_Printf("...autodetected MAX COMPATIBILITY game setting\n");
 }
 
@@ -1388,6 +1389,7 @@ R_SetMaxPerformance
 void R_SetMaxPerformance( void )
 {
 	Cmd_ExecuteString ("exec graphical_presets/maxperformance.cfg");
+	Cbuf_Execute ();
 	Com_Printf("...autodetected MAX PERFORMANCE game setting\n");
 }
 
@@ -1400,6 +1402,7 @@ R_SetPerformance
 void R_SetPerformance( void )
 {
 	Cmd_ExecuteString ("exec graphical_presets/performance.cfg");
+	Cbuf_Execute ();
 	Com_Printf("...autodetected PERFORMANCE game setting\n");
 }
 
@@ -1412,6 +1415,7 @@ R_SetQuality
 void R_SetQuality( void )
 {
 	Cmd_ExecuteString ("exec graphical_presets/quality.cfg");
+	Cbuf_Execute ();
 	Com_Printf("...autodetected QUALITY game setting\n");
 }
 
@@ -1424,6 +1428,7 @@ R_SetMaxQuality
 void R_SetMaxQuality( void )
 {
 	Cmd_ExecuteString ("exec graphical_presets/maxquality.cfg");
+	Cbuf_Execute ();
 	Com_Printf("...autodetected MAX QUALITY game setting\n");
 }
 
