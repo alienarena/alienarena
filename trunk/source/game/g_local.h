@@ -1648,6 +1648,13 @@ struct edict_s
 	//class(human = 0; alien = 1; robot = 2;)
 	int ctype;
 
+	//tactical mode
+	qboolean has_bomb;
+	qboolean has_detonator;
+	qboolean has_vaporizor;
+	qboolean has_minderaser;
+	int armor_type;
+
 	//model specific gibs
 	int usegibs;
 	char head[64];

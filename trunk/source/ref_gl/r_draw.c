@@ -586,8 +586,9 @@ void Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float a
 	{
 		return;
 	}
-	
-	return Draw_AlphaStretchImage (x, y, w, h, gl, alphaval);
+
+	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval);
+	return; 
 }
 
 

@@ -1731,6 +1731,74 @@ void spectator_respawn (edict_t *ent)
 
 /*
 ===========
+ParseClassFile
+
+Used in tactical mode for setting class items
+===========
+*/
+
+void ParseClassFile( char *config_file, edict_t *ent )
+{
+	FILE *fp;
+	int length;
+	char a_string[128];
+	char *buffer;
+	char *s;
+	size_t result;	
+
+	if((fp = fopen(config_file, "rb" )) == NULL)
+	{
+		return;
+	}
+		
+	if ( fseek(fp, 0, SEEK_END) )
+	{ // seek error
+		fclose( fp );
+		return;
+	}
+	if ( (length = ftell(fp)) == (size_t)-1L )
+	{ // tell error
+		fclose( fp );
+		return;
+	}
+	if ( fseek(fp, 0, SEEK_SET) )
+	{ // seek error
+		fclose( fp );
+		return;
+	}
+	
+	buffer = malloc( length + 1 );
+	if ( buffer != NULL )
+	{
+		buffer[length] = 0;
+		result = fread( buffer, length, 1, fp );
+		if ( result == 1 )
+		{
+			s = buffer;
+
+			strcpy( a_string, COM_Parse( &s ) );
+			ent->max_health = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			ent->armor_type = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			ent->has_bomb = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			ent->has_detonator = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			ent->has_minderaser = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			ent->has_vaporizor = atoi(a_string);
+		}
+		
+		free( buffer );
+	}
+	fclose( fp );
+	
+	return;
+}
+
+/*
+===========
 PutClientInServer
 
 Called when a player connects to a server or respawns in
@@ -1914,9 +1982,6 @@ void PutClientInServer (edict_t *ent)
 		client->pers.weapon = item;
 	}
 #else
-
-	//note - to do - tactical - humans will spawn with blaster - aliens with a similar, new weapon for now, just used these 
-	//also - let's open this file, read in the armor and health values for each model/class type
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
@@ -1925,24 +1990,57 @@ void PutClientInServer (edict_t *ent)
 		//human
 		ent->ctype = 1;
 		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
-		{
-			//read class file(tactical only)
-			//example:
-			//100-150 (health)
-			//0-3 (armor type)
-			//0-1 (can pickup vaporizer/ME)
-			//0-1 (has bomb)
-			//0-1 (has detonator)
-
-			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
-			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-			client->pers.inventory[armor_index] += 30;
+		{				
 			if(g_tactical->integer)
 			{
+				//read class file(tactical only)
+				//example:
+				//100-150 (health)
+				//0-3 (armor type)
+				//0-1 (has bomb)
+				//0-1 (has detonator)
+				//0-1 (has mind eraser)
+				//0-1 (has vaporizor)
+
+				ParseClassFile(modelpath, ent); 
+
+				if(ent->max_health > 0)
+					ent->health = client->pers.max_health = client->pers.health = ent->max_health;
+				else
+					ent->max_health = 100;
+				switch(ent->armor_type)
+				{
+					default:
+					case 0:
+						break;
+					case 1:
+						armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+						client->pers.inventory[armor_index] += 30;
+						break;
+					case 2:
+						armor_index = ITEM_INDEX(FindItem("Body Armor"));
+						client->pers.inventory[armor_index] += 50;
+						break;
+					case 3:
+						armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+						client->pers.inventory[armor_index] += 30;
+						break;
+				}
+
+				if(ent->has_vaporizor)
+				{
+					client->pers.inventory[ITEM_INDEX(FindItem("Vaporizor"))] = 1;
+					client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 10;
+				}
+
 				item = FindItem("Blaster");
 			}
 			else
 			{
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 30;
+				
 				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
 				item = FindItem("Rocket Launcher");
@@ -1977,9 +2075,44 @@ void PutClientInServer (edict_t *ent)
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
 				if(g_tactical->integer)
 				{
+					sprintf(modelpath, "players/%s/alien", playermodel);
+					Q2_FindFile (modelpath, &file);
+					if(file)
+					{
+						ParseClassFile(modelpath, ent); 
+
+						if(ent->max_health > 0)
+							ent->health = client->pers.max_health = client->pers.health = ent->max_health;
+						else
+							ent->max_health = 100;
+						switch(ent->armor_type)
+						{
+							default:
+							case 0:
+								break;
+							case 1:
+								armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+								client->pers.inventory[armor_index] += 30;
+								break;
+							case 2:
+								armor_index = ITEM_INDEX(FindItem("Body Armor"));
+								client->pers.inventory[armor_index] += 50;
+								break;
+							case 3:
+								armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+								client->pers.inventory[armor_index] += 30;
+								break;
+						}
+
+						if(ent->has_minderaser)
+						{
+							client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
+							client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = 1;
+						}
+					}
 					item = FindItem("Blaster");
 					client->pers.selected_item = ITEM_INDEX(item);
-					client->pers.inventory[client->pers.selected_item] = 0;
+					client->pers.inventory[client->pers.selected_item] = 0;					
 				
 					item = FindItem("Alien Blaster");
 				}
