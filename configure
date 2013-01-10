@@ -658,7 +658,6 @@ CC
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
-am__nodep
 AMDEPBACKSLASH
 AMDEP_FALSE
 AMDEP_TRUE
@@ -685,8 +684,6 @@ MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
 AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
-AM_DEFAULT_V
-AM_V
 am__untar
 am__tar
 AMTAR
@@ -2956,33 +2953,6 @@ yes) AM_DEFAULT_VERBOSITY=0;;
 no)  AM_DEFAULT_VERBOSITY=1;;
 *)   AM_DEFAULT_VERBOSITY=1;;
 esac
-am_make=${MAKE-make}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $am_make supports nested variables" >&5
-$as_echo_n "checking whether $am_make supports nested variables... " >&6; }
-if ${am_cv_make_support_nested_variables+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if $as_echo 'TRUE=$(BAR$(V))
-BAR0=false
-BAR1=true
-V=1
-am__doit:
-	@$(TRUE)
-.PHONY: am__doit' | $am_make -f - >/dev/null 2>&1; then
-  am_cv_make_support_nested_variables=yes
-else
-  am_cv_make_support_nested_variables=no
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_make_support_nested_variables" >&5
-$as_echo "$am_cv_make_support_nested_variables" >&6; }
-if test $am_cv_make_support_nested_variables = yes; then
-    AM_V='$(V)'
-  AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
-else
-  AM_V=$AM_DEFAULT_VERBOSITY
-  AM_DEFAULT_V=$AM_DEFAULT_VERBOSITY
-fi
 AM_BACKSLASH='\'
 
 if test "`cd $srcdir && pwd`" != "`pwd`"; then
@@ -3037,11 +3007,11 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
-# Always define AMTAR for backward compatibility.  Yes, it's still used
-# in the wild :-(  We should find a proper way to deprecate it ...
-AMTAR='$${TAR-tar}'
+# Always define AMTAR for backward compatibility.
 
-am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
+AMTAR=${AMTAR-"${am_missing_run}tar"}
+
+am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 
@@ -3057,33 +3027,6 @@ yes) AM_DEFAULT_VERBOSITY=0;;
 no)  AM_DEFAULT_VERBOSITY=1;;
 *)   AM_DEFAULT_VERBOSITY=0;;
 esac
-am_make=${MAKE-make}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $am_make supports nested variables" >&5
-$as_echo_n "checking whether $am_make supports nested variables... " >&6; }
-if ${am_cv_make_support_nested_variables+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if $as_echo 'TRUE=$(BAR$(V))
-BAR0=false
-BAR1=true
-V=1
-am__doit:
-	@$(TRUE)
-.PHONY: am__doit' | $am_make -f - >/dev/null 2>&1; then
-  am_cv_make_support_nested_variables=yes
-else
-  am_cv_make_support_nested_variables=no
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_make_support_nested_variables" >&5
-$as_echo "$am_cv_make_support_nested_variables" >&6; }
-if test $am_cv_make_support_nested_variables = yes; then
-    AM_V='$(V)'
-  AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
-else
-  AM_V=$AM_DEFAULT_VERBOSITY
-  AM_DEFAULT_V=$AM_DEFAULT_VERBOSITY
-fi
 AM_BACKSLASH='\'
 
 
@@ -3744,7 +3687,6 @@ fi
 if test "x$enable_dependency_tracking" != xno; then
   am_depcomp="$ac_aux_dir/depcomp"
   AMDEPBACKSLASH='\'
-  am__nodep='_no'
 fi
  if test "x$enable_dependency_tracking" != xno; then
   AMDEP_TRUE=
@@ -3769,7 +3711,6 @@ else
   # instance it was reported that on HP-UX the gcc test will end up
   # making a dummy file named `D' -- because `-MD' means `put the output
   # in D'.
-  rm -rf conftest.dir
   mkdir conftest.dir
   # Copy depcomp to subdir because otherwise we won't find it if we're
   # using a relative directory.
@@ -3829,7 +3770,7 @@ else
 	break
       fi
       ;;
-    msvc7 | msvc7msys | msvisualcpp | msvcmsys)
+    msvisualcpp | msvcmsys)
       # This compiler won't grok `-c -o', but also, the minuso test has
       # not run yet.  These depmodes are late enough in the game, and
       # so weak that their functioning should not be impacted.
@@ -4479,7 +4420,6 @@ else
   # instance it was reported that on HP-UX the gcc test will end up
   # making a dummy file named `D' -- because `-MD' means `put the output
   # in D'.
-  rm -rf conftest.dir
   mkdir conftest.dir
   # Copy depcomp to subdir because otherwise we won't find it if we're
   # using a relative directory.
@@ -4539,7 +4479,7 @@ else
 	break
       fi
       ;;
-    msvc7 | msvc7msys | msvisualcpp | msvcmsys)
+    msvisualcpp | msvcmsys)
       # This compiler won't grok `-c -o', but also, the minuso test has
       # not run yet.  These depmodes are late enough in the game, and
       # so weak that their functioning should not be impacted.
@@ -5378,7 +5318,7 @@ fi
 #
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build the client" >&5
 $as_echo_n "checking whether to build the client... " >&6; }
-if test -z "$BUILD_UNIX_TRUE"; then :
+if  test "x${cond_build_unix}" = xyes ; then
 
 	# Check whether --enable-client was given.
 if test "${enable_client+set}" = set; then :
@@ -5408,7 +5348,7 @@ fi
 # from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
 # for now, win32/mingw is always alternate install
 #
-if test -z "$BUILD_WIN32_TRUE"; then :
+if  test "x${cond_build_win32}" = xyes ; then
   alternate_install=yes
 else
 
@@ -5435,7 +5375,7 @@ else
 fi
 
 
-if test -z "$BUILD_UNIX_TRUE"; then :
+if  test "x${cond_build_unix}" = xyes ; then
 
 
 $as_echo "#define UNIX_VARIANT 1" >>confdefs.h
@@ -5479,7 +5419,7 @@ fi
 
 fi
 
-if test -z "$BUILD_WIN32_TRUE"; then :
+if  test "x${cond_build_win32}" = xyes ; then
 
 $as_echo "#define WIN32_VARIANT 1" >>confdefs.h
 
@@ -5751,7 +5691,7 @@ if test "$ac_res" != no; then :
 fi
 
 
-if test -z "$BUILD_CLIENT_TRUE"; then :
+if  test "x${build_client}" = xyes ; then
 
 
 
@@ -6328,7 +6268,7 @@ fi
 
 
 
-	if test -z "$BUILD_UNIX_TRUE"; then :
+	if  test "x${cond_build_unix}" = xyes ; then
 
 
 pkg_failed=no
@@ -6856,7 +6796,7 @@ $as_echo "yes" >&6; }
 fi
 
 			win32_syslibs=""
-	if test -z "$BUILD_WIN32_TRUE"; then :
+	if  test "x${cond_build_win32}" = xyes ; then
    win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"
 fi
 	WIN32_LIBS=$win32_syslibs
@@ -7226,7 +7166,7 @@ fi
 done
 
 
-if test -z "$BUILD_CLIENT_TRUE"; then :
+if  test "x${build_client}" = xyes ; then
 
 
 	jpeglib_h_found=no
@@ -7297,7 +7237,7 @@ fi
 
 done
 
-	if test -z "$BUILD_UNIX_TRUE"; then :
+	if  test "x${cond_build_unix}" = xyes ; then
   for ac_header in GL/glx.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "GL/glx.h" "ac_cv_header_GL_glx_h" "$ac_includes_default"
@@ -8289,7 +8229,7 @@ fi
 done
 
 
-if test -z "$BUILD_UNIX_TRUE"; then :
+if  test "x${cond_build_unix}" = xyes ; then
   case  ${unix_host}  in #(
    darwin ) :
     if  test x"${gl_dlopen_path}" = xdefault ; then :
@@ -8324,7 +8264,7 @@ esac
 
 fi
 
-if test -z "$BUILD_WIN32_TRUE"; then :
+if  test "x${cond_build_win32}" = xyes ; then
 
 
 $as_echo "#define OPENGL_DRIVER \"opengl32\"" >>confdefs.h
@@ -9943,8 +9883,9 @@ if test "x$hide_status" = "xno"; then :
 	$as_echo "Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"
 	$as_echo " OS: .................... ${host_os}"
 	$as_echo " CPU: ................... ${host_cpu}"
-	if test -z "$BUILD_WIN32_TRUE"; then :
-  else
+	if  test "x${cond_build_win32}" = xyes ; then
+  :
+else
 
 		if  test "x$build_client" = "xyes" ; then :
   dedicated_only=no
@@ -9957,9 +9898,9 @@ fi
 fi
 	$as_echo " Alternate install: ..... ${alternate_install}"
 
-	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
+	if  test "x${alternate_install}" = xyes ; then
 
-		if test -z "$BUILD_CLIENT_TRUE"; then :
+		if  test "x${build_client}" = xyes ; then
 
 			$as_echo " System ODE library ..... ${system_ode}"
 			$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
@@ -9976,7 +9917,7 @@ else
 		game_data=${datadir}/${PACKAGE_NAME}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
-		if test -z "$BUILD_CLIENT_TRUE"; then :
+		if  test "x${build_client}" = xyes ; then
 
 			$as_echo " System ODE library ..... ${system_ode}"
 			$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
@@ -9997,7 +9938,7 @@ fi
 
 	$as_echo
 
-	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
+	if  test "x${alternate_install}" = xyes ; then
   $as_echo "Run \"make\" to build, then \"make install-alternate\" to install."
 else
   $as_echo "Run \"make\" to build, then \"sudo make install\" to install."

@@ -3926,6 +3926,16 @@ nobase_nodist_vehicles_DATA = \
 	data1/vehicles/strafer/window.md2
 
 
+graphical_presetsdir = $(pkgdatadir)
+
+nobase_nodist_graphical_presets_DATA = \
+	data1/vehicles/graphical_presets/compatibility.cfg \
+	data1/vehicles/graphical_presets/maxperformance.cfg \
+	data1/vehicles/graphical_presets/performance.cfg \
+	data1/vehicles/graphical_presets/quality.cfg \
+	data1/vehicles/graphical_presets/maxquality.cfg 
+
+
 gamedata_files = \
  $(nobase_nodist_env_DATA) \
  $(nobase_nodist_fonts_DATA) \
@@ -3939,5 +3949,6 @@ gamedata_files = \
  $(nobase_nodist_scripts_DATA) \
  $(nobase_nodist_sound_DATA) \
  $(nobase_nodist_textures_DATA) \
- $(nobase_nodist_vehicles_DATA)
+ $(nobase_nodist_vehicles_DATA) \
+ $(nobase_nodist_graphical_presets_DATA)
 
