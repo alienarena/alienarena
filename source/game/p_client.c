@@ -1788,6 +1788,41 @@ void ParseClassFile( char *config_file, edict_t *ent )
 			ent->has_minderaser = atoi(a_string);
 			strcpy( a_string, COM_Parse( &s ) );
 			ent->has_vaporizor = atoi(a_string);
+
+			//note - we may or may not need the ent vars, for now keep them
+			if(ent->max_health > 0)
+				ent->health = ent->client->pers.max_health = ent->client->pers.health = ent->max_health;
+			else
+				ent->max_health = 100;
+
+			switch(ent->armor_type)
+			{
+				default:
+				case 0:
+					break;
+				case 1:
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
+					break;
+				case 2:
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Body Armor"))] += 50;
+					break;
+				case 3:
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
+					break;
+			}
+
+			if(ent->has_minderaser)
+			{
+				ent->client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
+				ent->client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = 1;
+			}
+
+			if(ent->has_vaporizor)
+			{
+				ent->client->pers.inventory[ITEM_INDEX(FindItem("Vaporizor"))] = 1;
+				ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 10;
+			}
+
 		}
 		
 		free( buffer );
@@ -2003,36 +2038,7 @@ void PutClientInServer (edict_t *ent)
 				//0-1 (has vaporizor)
 
 				ParseClassFile(modelpath, ent); 
-
-				if(ent->max_health > 0)
-					ent->health = client->pers.max_health = client->pers.health = ent->max_health;
-				else
-					ent->max_health = 100;
-				switch(ent->armor_type)
-				{
-					default:
-					case 0:
-						break;
-					case 1:
-						armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-						client->pers.inventory[armor_index] += 30;
-						break;
-					case 2:
-						armor_index = ITEM_INDEX(FindItem("Body Armor"));
-						client->pers.inventory[armor_index] += 50;
-						break;
-					case 3:
-						armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-						client->pers.inventory[armor_index] += 30;
-						break;
-				}
-
-				if(ent->has_vaporizor)
-				{
-					client->pers.inventory[ITEM_INDEX(FindItem("Vaporizor"))] = 1;
-					client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 10;
-				}
-
+				
 				item = FindItem("Blaster");
 			}
 			else
@@ -2079,36 +2085,7 @@ void PutClientInServer (edict_t *ent)
 					Q2_FindFile (modelpath, &file);
 					if(file)
 					{
-						ParseClassFile(modelpath, ent); 
-
-						if(ent->max_health > 0)
-							ent->health = client->pers.max_health = client->pers.health = ent->max_health;
-						else
-							ent->max_health = 100;
-						switch(ent->armor_type)
-						{
-							default:
-							case 0:
-								break;
-							case 1:
-								armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-								client->pers.inventory[armor_index] += 30;
-								break;
-							case 2:
-								armor_index = ITEM_INDEX(FindItem("Body Armor"));
-								client->pers.inventory[armor_index] += 50;
-								break;
-							case 3:
-								armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-								client->pers.inventory[armor_index] += 30;
-								break;
-						}
-
-						if(ent->has_minderaser)
-						{
-							client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
-							client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = 1;
-						}
+						ParseClassFile(modelpath, ent); 						
 					}
 					item = FindItem("Blaster");
 					client->pers.selected_item = ITEM_INDEX(item);
