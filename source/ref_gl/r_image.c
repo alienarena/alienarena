@@ -59,7 +59,7 @@ int		gl_filter_max = GL_LINEAR;
 
 void R_InitImageSubsystem(void)
 {
-	int		aniso_level, max_aniso;
+	int		max_aniso;
 
 	if ( strstr( gl_config.extensions_string, "GL_ARB_multitexture" ) )
 	{
@@ -113,15 +113,19 @@ void R_InitImageSubsystem(void)
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "1", CVAR_ARCHIVE );
 		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
 
-		r_anisotropic = Cvar_Get("r_anisotropic", "16", CVAR_ARCHIVE);
+		r_anisotropic = Cvar_Get("r_anisotropic", "1", CVAR_ARCHIVE);
 		if (r_anisotropic->integer >= r_ext_max_anisotropy->integer)
 			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->integer);
 		if (r_anisotropic->integer <= 0)
 			Cvar_SetValue("r_anisotropic", 1);
+		
+		r_alphamasked_anisotropic = Cvar_Get("r_alphamasked_anisotropic", "1", CVAR_ARCHIVE);
+		if (r_alphamasked_anisotropic->integer >= r_ext_max_anisotropy->integer)
+			Cvar_SetValue("r_alphamasked_anisotropic", r_ext_max_anisotropy->integer);
+		if (r_alphamasked_anisotropic->integer <= 0)
+			Cvar_SetValue("r_alphamasked_anisotropic", 1);
 
-		aniso_level = r_anisotropic->integer;
-
-		if (r_anisotropic->integer == 1)
+		if (r_anisotropic->integer == 1 && r_alphamasked_anisotropic == 1)
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
 		else
 			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
@@ -130,6 +134,7 @@ void R_InitImageSubsystem(void)
 	{
 		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
 		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
+		r_alphamasked_anisotropic = Cvar_Get("r_alphamasked_anisotropic", "0", CVAR_ARCHIVE);
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
 	}
 }
@@ -1213,13 +1218,79 @@ void R_FilterTexture(unsigned *in, int width, int height)
 
 }
 
+
+#define ALPHATEST_THRESHOLD 169
+// Uses the canonical mipmap generation algorithm, but unlike OpenGL's built-
+// in mipmapping, it this function knows when to quit-- that is, when the 
+// mipmaps have gotten too "mushy." Mushy mipmaps usually aren't a problem, 
+// but they're a huge one when dealing with alphatest surfaces.
+int GL_RecursiveGenerateAlphaMipmaps (byte *data, int width, int height, int depth)
+{
+	int			ret;
+	int			i = 0;
+	int			x, y;
+	int			newwidth, newheight;
+	int			upper_left_alpha;
+	qboolean	uniform = true;
+	byte		*mipmap, *scan, *scan2, *out;
+	
+	if (width == 1 && height == 1)
+		return depth;
+	
+	newwidth = width;
+	if (newwidth > 1)
+		newwidth /= 2;
+	newheight = height;
+	if (newheight > 1)
+		newheight /= 2;
+	
+	mipmap = malloc (newwidth*newheight*4); 
+	
+	for (y = 0; (y+1) < height; y += 2)
+	{
+		for (x = 0; (x+1) < width; x += 2)
+		{
+			scan = data + (y*width+x)*4;
+			scan2 = data + ((y+1)*width+x)*4;
+			out = mipmap + ((y/2)*(width/2)+(x/2))*4;
+			out[0] = (scan[0]+scan[4]+scan2[0]+scan2[4])/4;
+			out[1] = (scan[1]+scan[5]+scan2[1]+scan2[5])/4;
+			out[2] = (scan[2]+scan[6]+scan2[2]+scan2[6])/4;
+			out[3] = (scan[3]+scan[7]+scan2[3]+scan2[7])/4;
+			if (x == 0 && y == 0)
+				upper_left_alpha = out[3];
+			else if ((upper_left_alpha > ALPHATEST_THRESHOLD) != (out[3] > ALPHATEST_THRESHOLD))
+				uniform = false;
+		}
+	}
+	
+	if (uniform)
+	{
+		free (mipmap);
+		return depth;
+	}
+	
+	ret = GL_RecursiveGenerateAlphaMipmaps (mipmap, newwidth, newheight, depth+1);
+	
+	qglTexImage2D (GL_TEXTURE_2D, depth+1, gl_tex_alpha_format, newwidth, newheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mipmap);
+	
+	free (mipmap);
+	return ret;
+}
+
+int GL_GenerateAlphaMipmaps (byte *data, int width, int height)
+{
+	return GL_RecursiveGenerateAlphaMipmaps (data, width, height, 0);
+}
+
+
 static int	powers_of_two[] = {16,32,64,128,256,512,1024,2048,4096};
 int		upload_width, upload_height;
 int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
 
 
-qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap)
+qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qboolean is_normalmap)
 {
 	int		samples;
 	unsigned 	*scaled;
@@ -1299,7 +1370,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 		scaled=data;
 	}
 
-	if (mipmap)
+	if (mipmap && (samples != gl_alpha_format || is_normalmap))
 		qglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 	
@@ -1343,18 +1414,27 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 			}
 		}
 	}
+	
+	if (mipmap && samples == gl_alpha_format && !is_normalmap)
+	{
+		int generated_mipmaps = 
+			GL_GenerateAlphaMipmaps (scaled, scaled_width, scaled_height);
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, generated_mipmaps);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_alphamasked_anisotropic->integer);
+	}
+	else
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->integer);
 
 	if (scaled_width != width || scaled_height != height)
 		free(scaled);
 
 	upload_width = scaled_width;
 	upload_height = scaled_height;
-	if ( mipmap )
+	if ( mipmap)
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 	else
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
 
 	return (samples == gl_alpha_format);
 }
