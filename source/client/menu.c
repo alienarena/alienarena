@@ -7004,7 +7004,7 @@ static void MartianenforcerActionFunc( void *unused )
 	char buffer[128];
 
 	//set skin and model
-	Com_sprintf( buffer, sizeof( buffer ), "players/martianenforcer/default" );
+	Com_sprintf( buffer, sizeof( buffer ), "martianenforcer/default" );
 
 	Cvar_Set( "skin", buffer );
 
@@ -7019,7 +7019,7 @@ static void MartianwarriorActionFunc( void *unused )
 	char buffer[128];
 
 	//set skin and model
-	Com_sprintf( buffer, sizeof( buffer ), "players/martianwarrior/default" );
+	Com_sprintf( buffer, sizeof( buffer ), "martianwarrior/default" );
 
 	Cvar_Set( "skin", buffer );
 
@@ -7034,7 +7034,7 @@ static void MartianoverlordActionFunc( void *unused )
 	char buffer[128];
 
 	//set skin and model
-	Com_sprintf( buffer, sizeof( buffer ), "players/martianoverlord/default" );
+	Com_sprintf( buffer, sizeof( buffer ), "martianoverlord/default" );
 
 	Cvar_Set( "skin", buffer );
 
@@ -7049,7 +7049,7 @@ static void LaurenActionFunc( void *unused )
 	char buffer[128];
 
 	//set skin and model
-	Com_sprintf( buffer, sizeof( buffer ), "players/lauren/default" );
+	Com_sprintf( buffer, sizeof( buffer ), "lauren/default" );
 
 	Cvar_Set( "skin", buffer );
 
@@ -7064,7 +7064,7 @@ static void EnforcerActionFunc( void *unused )
 	char buffer[128];
 
 	//set skin and model
-	Com_sprintf( buffer, sizeof( buffer ), "players/enforcer/default" );
+	Com_sprintf( buffer, sizeof( buffer ), "enforcer/default" );
 
 	Cvar_Set( "skin", buffer );
 
@@ -7079,7 +7079,7 @@ static void CommanderActionFunc( void *unused )
 	char buffer[128];
 
 	//set skin and model
-	Com_sprintf( buffer, sizeof( buffer ), "players/commander/default" );
+	Com_sprintf( buffer, sizeof( buffer ), "commander/default" );
 
 	Cvar_Set( "skin", buffer );
 
