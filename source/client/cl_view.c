@@ -574,8 +574,11 @@ float CalcFov (float fov_x, float width, float height)
 SCR_DrawCrosshair
 =================
 */
+extern cvar_t *hand;
 void SCR_DrawCrosshair (refdef_t *fd)
 {
+	int x, y, crosshairposition;
+	
 	if (!strcmp(crosshair->string, "none"))
 		return;
 
@@ -588,8 +591,44 @@ void SCR_DrawCrosshair (refdef_t *fd)
 	if (!crosshair_pic[0])
 		return;
 
-	Draw_Pic (fd->x + ((fd->width - crosshair_width)>>1)
-	, fd->y + ((fd->height - crosshair_height)>>1), crosshair_pic);
+	x = fd->x + ((fd->width - crosshair_width)>>1);
+	y = fd->y + ((fd->height - crosshair_height)>>1);
+	
+	// get rid of the old crosshair adjustment built into the texture
+	x -= 4;
+	y -= 4;
+	
+	// add a new crosshair adjustment offset
+	crosshairposition = cl.frame.playerstate.stats[STAT_FLAGS] & STAT_FLAGS_CROSSHAIRPOSITION;
+	if (crosshairposition != STAT_FLAGS_CROSSHAIRCENTER)
+	{
+		double x_offs, y_offs;
+		switch (crosshairposition)
+		{
+			default: // other crosshair positions reserved for future use
+			case STAT_FLAGS_CROSSHAIRPOS1: // use the original default
+				x_offs = y_offs = 4.0;
+				break;
+			case STAT_FLAGS_CROSSHAIRPOS2:
+				x_offs = 2.0;
+				y_offs = 3.0;
+				break;
+		}
+		y_offs *= (double)fd->height/480.0;
+		x_offs *= (double)fd->width/640.0;
+		if (y_offs-(int)y_offs >= 0.5)
+			y_offs = (int)y_offs + 1;
+		if (x_offs-(int)x_offs >= 0.5)
+			x_offs = (int)x_offs + 1;
+		if (hand->integer == 1)
+			x_offs = -x_offs;
+		else if (hand->integer == 2)
+			x_offs = 0;
+		x += x_offs;
+		y += y_offs;
+	}
+	
+	Draw_Pic (x, y, crosshair_pic);
 }
 
 qboolean InFront (vec3_t target)
