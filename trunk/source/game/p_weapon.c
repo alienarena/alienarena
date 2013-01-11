@@ -765,7 +765,7 @@ void Weapon_Wizard_Punch (edict_t *ent)
 #else
 void weapon_disruptor_fire (edict_t *ent)
 {
-	vec3_t		start;
+	vec3_t		start, muzzle;
 	vec3_t		forward, right;
 	vec3_t		offset;
 
@@ -807,8 +807,10 @@ void weapon_disruptor_fire (edict_t *ent)
 	ent->client->kick_angles[0] = -3;
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
+	VectorSet(offset, 32, 0, ent->viewheight);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_disruptor (ent, start, forward, damage*damage_buildup, kick);
+	fire_disruptor (ent, start, muzzle, forward, damage*damage_buildup, kick);
 
 	//alt fire - reset some things
 	ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
@@ -1117,7 +1119,7 @@ BLASTER
 void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qboolean alien, int effect)
 {
 	vec3_t	forward, right;
-	vec3_t	start;
+	vec3_t	start, muzzle;
 	vec3_t	offset;
 
 	if (is_quad)
@@ -1138,7 +1140,14 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qb
 	else
 		VectorSet(offset, 30, 6, ent->viewheight-5);
 	VectorAdd (offset, g_offset, offset);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
+	if (hyper && (ent->client->buttons & BUTTON_ATTACK))
+	{
+		VectorSet(offset, 32, 0, ent->viewheight);
+		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	}
+	else
+		VectorCopy (muzzle, start);
 
 	if(hyper) 
 	{
@@ -1155,7 +1164,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qb
 		else 
 		{
 			// [no file]gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
-			fire_blaster (ent, start, forward, damage, 2800, effect, hyper);
+			fire_blaster (ent, start, muzzle, forward, damage, 2800, effect, hyper);
 		}
 	}
 	else 
@@ -1184,11 +1193,11 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qb
 	//create visual muzzle flash sprite!
 	if(!hyper || (ent->client->buttons & BUTTON_ATTACK2))
 	{
-		VectorAdd(start, forward, start);
+		VectorAdd(muzzle, forward, muzzle);
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
+		gi.WritePosition (muzzle);
+		gi.multicast (muzzle, MULTICAST_PVS);
 	}
 }
 
