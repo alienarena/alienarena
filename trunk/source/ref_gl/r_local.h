@@ -179,7 +179,7 @@ extern  cvar_t	*r_godrays;
 extern  cvar_t	*r_godray_intensity;
 extern	cvar_t	*r_optimize;
 
-extern	cvar_t	*r_hdlightmaps;
+extern	cvar_t	*r_lightmapfiles;
 
 extern  cvar_t	*r_ragdolls;
 extern  cvar_t  *r_ragdoll_debug;

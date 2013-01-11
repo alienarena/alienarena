@@ -1403,7 +1403,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 	currentmodel = loadmodel;
 	
 	memset (lfacelookups, 0, sizeof(lfacelookups));
-	if (r_hdlightmaps->integer)
+	if (r_lightmapfiles->integer)
 		Mod_LoadRefineLightmap (loadmodel->name);
 
 	BSP_BeginBuildingLightmaps (loadmodel);
