@@ -803,6 +803,13 @@ typedef struct
 
 #define	MAX_STATS				32
 
+// bit flags for use in STAT_FLAGS
+#define STAT_FLAGS_CROSSHAIRPOSITION	(4|8)
+#define STAT_FLAGS_CROSSHAIRPOS1		0 //default
+#define STAT_FLAGS_CROSSHAIRCENTER		4
+#define STAT_FLAGS_CROSSHAIRPOS2		8
+#define STAT_FLAGS_CROSSHAIRPOS3		12
+
 
 // dmflags->value flags
 #define	DF_NO_HEALTH		0x00000001	// 1
