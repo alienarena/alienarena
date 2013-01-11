@@ -653,6 +653,8 @@ void TossClientWeapon (edict_t *self)
 		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Minderaser") == 0))
 		item = NULL;
+	if (g_tactical->integer && item && (strcmp (item->pickup_name, "Alien Vaporizer") == 0))
+		item = NULL;
 #endif
 	if (!(dmflags->integer & DF_QUAD_DROP))
 		quad = false;
@@ -1739,6 +1741,7 @@ Used in tactical mode for setting class items
 
 void ParseClassFile( char *config_file, edict_t *ent )
 {
+	char full_path[MAX_OSPATH];
 	FILE *fp;
 	int length;
 	char a_string[128];
@@ -1746,88 +1749,91 @@ void ParseClassFile( char *config_file, edict_t *ent )
 	char *s;
 	size_t result;	
 
-	if((fp = fopen(config_file, "rb" )) == NULL)
+	if ( gi.FullPath( full_path, sizeof(full_path), config_file ) )
 	{
-		return;
-	}
-		
-	if ( fseek(fp, 0, SEEK_END) )
-	{ // seek error
-		fclose( fp );
-		return;
-	}
-	if ( (length = ftell(fp)) == (size_t)-1L )
-	{ // tell error
-		fclose( fp );
-		return;
-	}
-	if ( fseek(fp, 0, SEEK_SET) )
-	{ // seek error
-		fclose( fp );
-		return;
-	}
-	
-	buffer = malloc( length + 1 );
-	if ( buffer != NULL )
-	{
-		buffer[length] = 0;
-		result = fread( buffer, length, 1, fp );
-		if ( result == 1 )
+
+		if((fp = fopen(full_path, "rb" )) == NULL)
 		{
-			s = buffer;
-
-			strcpy( a_string, COM_Parse( &s ) );
-			ent->max_health = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
-			ent->armor_type = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
-			ent->has_bomb = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
-			ent->has_detonator = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
-			ent->has_minderaser = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
-			ent->has_vaporizor = atoi(a_string);
-
-			//note - we may or may not need the ent vars, for now keep them
-			if(ent->max_health > 0)
-				ent->health = ent->client->pers.max_health = ent->client->pers.health = ent->max_health;
-			else
-				ent->max_health = 100;
-
-			switch(ent->armor_type)
-			{
-				default:
-				case 0:
-					break;
-				case 1:
-					ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
-					break;
-				case 2:
-					ent->client->pers.inventory[ITEM_INDEX(FindItem("Body Armor"))] += 50;
-					break;
-				case 3:
-					ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
-					break;
-			}
-
-			if(ent->has_minderaser)
-			{
-				ent->client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
-				ent->client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = 1;
-			}
-
-			if(ent->has_vaporizor)
-			{
-				ent->client->pers.inventory[ITEM_INDEX(FindItem("Vaporizor"))] = 1;
-				ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 10;
-			}
-
+			return;
 		}
+		if ( fseek(fp, 0, SEEK_END) )
+		{ // seek error
+			fclose( fp );
+			return;
+		}
+		if ( (length = ftell(fp)) == (size_t)-1L )
+		{ // tell error
+			fclose( fp );
+			return;
+		}
+		if ( fseek(fp, 0, SEEK_SET) )
+		{ // seek error
+			fclose( fp );
+			return;
+		}
+	
+		buffer = malloc( length + 1 );
+		if ( buffer != NULL )
+		{
+			buffer[length] = 0;
+			result = fread( buffer, length, 1, fp );
+			if ( result == 1 )
+			{
+				s = buffer;
+
+				strcpy( a_string, COM_Parse( &s ) );
+				ent->max_health = atoi(a_string);
+				strcpy( a_string, COM_Parse( &s ) );
+				ent->armor_type = atoi(a_string);
+				strcpy( a_string, COM_Parse( &s ) );
+				ent->has_bomb = atoi(a_string);
+				strcpy( a_string, COM_Parse( &s ) );
+				ent->has_detonator = atoi(a_string);
+				strcpy( a_string, COM_Parse( &s ) );
+				ent->has_minderaser = atoi(a_string);
+				strcpy( a_string, COM_Parse( &s ) );
+				ent->has_vaporizor = atoi(a_string);
+
+				//note - we may or may not need the ent vars, for now keep them
+				if(ent->max_health > 0)
+					ent->health = ent->client->pers.max_health = ent->client->pers.health = ent->max_health;
+				else
+					ent->max_health = 100;
+
+				switch(ent->armor_type)
+				{
+					default:
+					case 0:
+						break;
+					case 1:
+						ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
+						break;
+					case 2:
+						ent->client->pers.inventory[ITEM_INDEX(FindItem("Body Armor"))] += 50;
+						break;
+					case 3:
+						ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
+						break;
+				}
+
+				if(ent->has_minderaser)
+				{
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = 1;
+				}
+
+				if(ent->has_vaporizor)
+				{
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] = 1;
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 4;
+				}
+
+			}
 		
-		free( buffer );
+			free( buffer );
+		}
+		fclose( fp );
 	}
-	fclose( fp );
 	
 	return;
 }
@@ -2022,6 +2028,8 @@ void PutClientInServer (edict_t *ent)
 	Q2_FindFile (modelpath, &file);
 	if(file) 
 	{ 
+		fclose(file);
+
 		//human
 		ent->ctype = 1;
 		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
@@ -2036,7 +2044,7 @@ void PutClientInServer (edict_t *ent)
 				//0-1 (has detonator)
 				//0-1 (has mind eraser)
 				//0-1 (has vaporizor)
-
+			
 				ParseClassFile(modelpath, ent); 
 				
 				item = FindItem("Blaster");
@@ -2054,8 +2062,7 @@ void PutClientInServer (edict_t *ent)
 			client->pers.selected_item = ITEM_INDEX(item);
 			client->pers.inventory[client->pers.selected_item] = 1;
 			client->pers.weapon = item;
-		}
-		fclose(file);
+		}		
 	}
 	else 
 	{ 
