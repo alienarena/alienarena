@@ -4226,11 +4226,11 @@ nobase_nodist_vehicles_DATA = \
 
 graphical_presetsdir = $(pkgdatadir)
 nobase_nodist_graphical_presets_DATA = \
-	data1/vehicles/graphical_presets/compatibility.cfg \
-	data1/vehicles/graphical_presets/maxperformance.cfg \
-	data1/vehicles/graphical_presets/performance.cfg \
-	data1/vehicles/graphical_presets/quality.cfg \
-	data1/vehicles/graphical_presets/maxquality.cfg 
+	data1/graphical_presets/compatibility.cfg \
+	data1/graphical_presets/maxperformance.cfg \
+	data1/graphical_presets/performance.cfg \
+	data1/graphical_presets/quality.cfg \
+	data1/graphical_presets/maxquality.cfg 
 
 gamedata_files = \
  $(nobase_nodist_env_DATA) \
