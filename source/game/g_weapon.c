@@ -433,7 +433,7 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 		bolt->touch (bolt, tr.ent, NULL, NULL);
 	}
 }
-void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper)
+void fire_blaster (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper)
 {
 	vec3_t		from;
 	vec3_t		end;
@@ -483,7 +483,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_LASERBEAM);
-	gi.WritePosition (start);
+	gi.WritePosition (muzzle);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
@@ -956,7 +956,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 
 }
 
-void fire_disruptor (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int kick)
 {
 	vec3_t		from;
 	vec3_t		end;
@@ -1006,7 +1006,7 @@ void fire_disruptor (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_RAILTRAIL);
-	gi.WritePosition (start);
+	gi.WritePosition (muzzle);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
