@@ -169,7 +169,7 @@ cvar_t	*r_godrays;
 cvar_t  *r_godray_intensity;
 cvar_t	*r_optimize;
 
-cvar_t	*r_hdlightmaps;
+cvar_t	*r_lightmapfiles;
 
 qboolean	map_fog;
 
@@ -1125,6 +1125,7 @@ void R_RenderView (refdef_t *fd)
 		}
 	}
 
+
 	R_BloomBlend( &r_newrefdef );//BLOOMS
 
 	R_RenderSun();
@@ -1285,9 +1286,8 @@ void R_Register( void )
 	r_optimize = Cvar_Get ("r_optimize", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	Cvar_Describe (r_optimize, "Skip BSP recursion unless you move. Good for performance, recommend leaving it on.");
 	
-	//TODO: rename cvar_t C variable as well.
-	r_hdlightmaps = Cvar_Get("r_lightmapfiles", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
-	Cvar_Describe (r_hdlightmaps, "Enables the loading of .lightmap files, with more detailed light and shadow. Turn this off if video RAM is limited.");
+	r_lightmapfiles = Cvar_Get("r_lightmapfiles", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	Cvar_Describe (r_lightmapfiles, "Enables the loading of .lightmap files, with more detailed light and shadow. Turn this off if video RAM is limited.");
 
 	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
