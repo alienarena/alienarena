@@ -565,16 +565,16 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define KILL_NORMAL_POINTER 8
 
 // vertex array subsystem
-extern void R_InitVArrays (int varraytype);
-extern void R_KillVArrays (void);
-extern void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo);
-extern void R_InitQuadVarrays(void);
-extern void R_AddSurfToVArray (msurface_t *surf);
-extern void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
-extern void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
-extern void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
-extern void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
-extern void R_KillNormalTMUs(void);
+void R_InitVArrays (int varraytype);
+void R_KillVArrays (void);
+void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
+void R_InitQuadVarrays(void);
+void R_AddSurfToVArray (msurface_t *surf);
+void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
+void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
+void R_KillNormalTMUs(void);
 
 //shadows
 extern  void R_InitShadowSubsystem(void);

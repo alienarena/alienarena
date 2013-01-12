@@ -1313,7 +1313,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 		{
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}
 
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
@@ -1454,7 +1454,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		           
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
 		{
-			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 		}
 
         if(mirror && !(currententity->flags & RF_WEAPONMODEL))
@@ -1701,14 +1701,10 @@ skipLoad:
 			glEnableVertexAttribArrayARB (1);
 			GL_BindVBO(vbo_tangents);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
-
-			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-				R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
 	    }
-        else if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-		{
-			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
-		}
+        
+        if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
+			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 
 		glUseProgramObjectARB( 0 );
 		GL_EnableMultitexture( false );
@@ -1776,7 +1772,7 @@ skipLoad:
 		}
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}
 	}
 
@@ -2186,13 +2182,9 @@ skipLoad:
 		qglEnableClientState( GL_VERTEX_ARRAY );
 		GL_BindVBO(vbo_xyz);
 		qglVertexPointer(3, GL_FLOAT, 0, 0);   
-
-		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
     }
-	else
-	{    
-		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
-	}
+    
+	R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 
 	R_KillVArrays ();
 }

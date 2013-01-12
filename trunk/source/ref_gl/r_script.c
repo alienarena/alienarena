@@ -1703,7 +1703,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			VertexCounter++;		
 		}
 
-		R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+		R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
 					
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)

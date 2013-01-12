@@ -173,7 +173,7 @@ void R_GLSLDistortion(void)
 		fxScreenPos[1] -= (float)frames*.001;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
-		R_DrawVarrays(GL_QUADS, 0, 4, false);
+		R_DrawVarrays(GL_QUADS, 0, 4);
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -192,7 +192,7 @@ void R_GLSLDistortion(void)
 
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 
-		R_DrawVarrays(GL_QUADS, 0, 4, false);
+		R_DrawVarrays(GL_QUADS, 0, 4);
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -297,7 +297,7 @@ void R_GLSLWaterDroplets(void)
 	
 	glUniform2fARB( g_location_drParams, wScissor, hScissor);
 
-	R_DrawVarrays(GL_QUADS, 0, 4, false);
+	R_DrawVarrays(GL_QUADS, 0, 4);
 
 	glUseProgramObjectARB( 0 );
 	
@@ -427,7 +427,7 @@ void R_ShadowBlend(float alpha)
 		VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
 		VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
 
-		R_DrawVarrays(GL_QUADS, 0, 4, false);
+		R_DrawVarrays(GL_QUADS, 0, 4);
 
 		//now blur horizontally
 
@@ -452,7 +452,7 @@ void R_ShadowBlend(float alpha)
 		VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
 		VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
 
-		R_DrawVarrays(GL_QUADS, 0, 4, false);
+		R_DrawVarrays(GL_QUADS, 0, 4);
 
 		R_KillVArrays();
 
@@ -608,7 +608,7 @@ void R_DrawVehicleHUD (void)
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity ();
 	
-	R_DrawVarrays(GL_QUADS, 0, 4, false);
+	R_DrawVarrays(GL_QUADS, 0, 4);
 	
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
@@ -673,7 +673,7 @@ void R_DrawVehicleHUD (void)
 			qglMatrixMode( GL_MODELVIEW );
 			qglLoadIdentity ();
 
-			R_DrawVarrays(GL_QUADS, 0, 4, false);
+			R_DrawVarrays(GL_QUADS, 0, 4);
 
 			stage=stage->next;
 		}	
@@ -725,7 +725,7 @@ void R_DrawBloodEffect (void)
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
 	
-	R_DrawVarrays(GL_QUADS, 0, 4, false);
+	R_DrawVarrays(GL_QUADS, 0, 4);
 
 	qglDisable (GL_BLEND);
 
@@ -853,7 +853,7 @@ void R_GLSLGodRays(void)
 	VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
 	VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
 	
-	R_DrawVarrays(GL_QUADS, 0, 4, false);
+	R_DrawVarrays(GL_QUADS, 0, 4);
 
 	qglDisable (GL_BLEND);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
