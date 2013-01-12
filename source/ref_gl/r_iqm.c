@@ -1418,7 +1418,7 @@ void IQM_DrawFrame(int skinnum)
 
 			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
-				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+				R_DrawVarrays(GL_TRIANGLES, 0, va);
 			}
 		}		
 		else
@@ -1620,7 +1620,7 @@ void IQM_DrawFrame(int skinnum)
 
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}
 
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
@@ -1767,7 +1767,7 @@ void IQM_DrawFrame(int skinnum)
 			
 			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
-				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+				R_DrawVarrays(GL_TRIANGLES, 0, va);
 			}
 		}					
 		else
@@ -1851,7 +1851,7 @@ void IQM_DrawFrame(int skinnum)
 
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}		
 	}
 
@@ -2005,7 +2005,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				}
 			}
 
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}
 		else
 		{			
@@ -2158,7 +2158,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					va++;
 				}
 			}
-			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}			
 		else
 		{				
@@ -2237,7 +2237,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			}
 		}
 
-		R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+		R_DrawVarrays(GL_TRIANGLES, 0, va);
 	}
 
 	GLSTATE_DISABLE_ALPHATEST
@@ -2676,7 +2676,7 @@ void IQM_DrawCasterFrame ()
 			}
 		}
 
-		R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+		R_DrawVarrays(GL_TRIANGLES, 0, va);
 	}
 	else 
 	{			

@@ -298,7 +298,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			 VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 		}
 
-		R_DrawVarrays(GL_QUADS, 0, 4, false);
+		R_DrawVarrays(GL_QUADS, 0, 4);
 	}	
 	
 
@@ -520,7 +520,7 @@ void PART_RenderFlare (flare_t *light)
 	VA_SetElem2(tex_array[2], 1, 0);
 	VA_SetElem2(tex_array[3], 1, 1);
 
-	R_DrawVarrays(GL_QUADS, 0 , 4, false);
+	R_DrawVarrays(GL_QUADS, 0 , 4);
 
 }
 
@@ -1047,7 +1047,7 @@ void R_DrawVegetationSurface ( void )
 
 			c_grasses++;
 	
-			R_DrawVarrays(GL_QUADS, 0, va, false);
+			R_DrawVarrays(GL_QUADS, 0, va);
 		
 			R_KillVArrays ();
 		}
@@ -1352,7 +1352,7 @@ void R_DrawBeamSurface ( void )
 				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
 
-			R_DrawVarrays(GL_QUADS, 0, 4, false);
+			R_DrawVarrays(GL_QUADS, 0, 4);
 
 			c_beams++;
 		}
@@ -1656,7 +1656,7 @@ void R_DrawSimpleItems ( void )
 				va++;								
 			}
 	
-			R_DrawVarrays(GL_QUADS, 0, va, false);
+			R_DrawVarrays(GL_QUADS, 0, va);
 
 			R_KillVArrays ();
 		}

@@ -312,7 +312,7 @@ void R_KillVArrays (void)
 	qglDisableClientState (GL_VERTEX_ARRAY);
 }
 
-void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo)
+void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
 {
 	if(count < 1)
 		return; //do not send arrays of zero size to GPU!
@@ -349,7 +349,7 @@ void R_AddSurfToVArray (msurface_t *surf)
 		}
 
 		// draw the poly
-		R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+		R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
 	}
 }
 
@@ -437,7 +437,7 @@ void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin)
  
         // draw the poly
          if(renderPoly)
-             R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+             R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
      }
  }
 
@@ -482,7 +482,7 @@ void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll)
 		}
 
 		// draw the poly
-		R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+		R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
 	}
 }
 
@@ -556,7 +556,7 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	}
 	
 	// draw the polys
-	R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+	R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
 }
 
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
@@ -590,7 +590,7 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 	}
 
 	// draw the polys
-	R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
+	R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
 }
 
 

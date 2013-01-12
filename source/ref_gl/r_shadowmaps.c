@@ -939,7 +939,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
 
-			R_DrawVarrays(GL_QUADS, 0, 4, false);
+			R_DrawVarrays(GL_QUADS, 0, 4);
 
 			if(forShadows)
 				r_shadowmapcount = 2;
