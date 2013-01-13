@@ -45,8 +45,8 @@ extern cvar_t	*cl_hudimage2;
 
 unsigned	d_8to24table[256];
 
-qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
-qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap);
+qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter);
+qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean filter, qboolean force_standard_mipmap);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -521,7 +521,7 @@ int	scrap_uploads;
 void Scrap_Upload (void)
 {
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload32 ((unsigned *)scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, true, true );
+	GL_Upload32 ((unsigned *)scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, false, true);
 	scrap_dirty = false;
 }
 
@@ -1290,8 +1290,7 @@ int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
 
 
-// TODO: rename is_normalmap
-qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qboolean is_normalmap)
+qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean filter, qboolean force_standard_mipmap)
 {
 	int		samples;
 	unsigned 	*scaled;
@@ -1300,7 +1299,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 	byte		*scan;
 	int comp;
 
-	if(mipmap && !is_normalmap)
+	if(filter)
 		R_FilterTexture(data, width, height);
 
 	uploaded_paletted = false;    // scan the texture for any non-255 alpha
@@ -1348,15 +1347,12 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 				break;
 		}
 		// let people sample down the world textures for speed
-		if (mipmap)
-		{
-		    for (i = 0; i < gl_picmip->integer; i++)
-		    {
-		    	if (scaled_width <= 1 || scaled_height <= 1)
-		    		break;
-				scaled_width >>= 1;
-				scaled_height >>= 1;
-			}
+	    for (i = 0; i < gl_picmip->integer; i++)
+	    {
+	    	if (scaled_width <= 1 || scaled_height <= 1)
+	    		break;
+			scaled_width >>= 1;
+			scaled_height >>= 1;
 		}
 		if (scaled_width > max_size)
 			scaled_width = max_size;
@@ -1371,7 +1367,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 		scaled=data;
 	}
 
-	if (mipmap && (samples != gl_alpha_format || is_normalmap))
+	if (samples != gl_alpha_format || force_standard_mipmap)
 		qglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
 	qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 	
@@ -1416,7 +1412,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 		}
 	}
 	
-	if (mipmap && samples == gl_alpha_format && !is_normalmap)
+	if (samples == gl_alpha_format && !force_standard_mipmap)
 	{
 		int generated_mipmaps = 
 			GL_GenerateAlphaMipmaps (scaled, scaled_width, scaled_height);
@@ -1431,10 +1427,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 
 	upload_width = scaled_width;
 	upload_height = scaled_height;
-	if ( mipmap)
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-	else
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 	return (samples == gl_alpha_format);
@@ -1447,7 +1440,7 @@ GL_Upload8
 Returns has_alpha
 ===============
 */
-qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky )
+qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter)
 {
 	unsigned	trans[512*256];
 	int			i, s;
@@ -1483,7 +1476,7 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
             ((byte *)&trans[i])[2] = ((byte *)&d_8to24table[p])[2];
         }
     }
-    return GL_Upload32 (trans, width, height, mipmap, false);
+    return GL_Upload32 (trans, width, height, filter, false);
 }
 
 /*
@@ -1565,9 +1558,9 @@ nonscrap:
 		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
 		if (bits == 8) {
-			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
+			image->has_alpha = GL_Upload8 (pic, width, height, image->type <= it_wall);
 		} else {
-			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_particle && image->type != it_sky), image->type == it_bump );
+			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, image->type <= it_wall, image->type >= it_bump);
 		}
 		image->crop_left = crop_left;
 		image->crop_right = crop_right;
