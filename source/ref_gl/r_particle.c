@@ -1416,6 +1416,7 @@ image_t		*s_item22;
 image_t		*s_item23;
 image_t		*s_item24;
 
+extern int gl_filter_max;
 void R_SI_InitTextures( void )
 {
 	byte	nullpic[16][16][4];
@@ -1435,97 +1436,41 @@ void R_SI_InitTextures( void )
 		}
 	}
 
-	s_item0 = GL_FindImage("pics/w_sshotgun.tga", it_pic);
-	if (!s_item0) 
-		s_item0 = GL_LoadPic ("***s_item0***", (byte *)nullpic, 16, 16, it_pic, 32);
+#define R_SI_InitTexture(itemnum,imgname) \
+    /* load the texture */ \
+    s_item ## itemnum = GL_FindImage ("pics/" #imgname ".tga,", it_pic);\
+    /* load a blank texture if it isn't found */ \
+    if (!s_item ## itemnum) \
+        s_item ## itemnum = GL_LoadPic ("***s_item" #itemnum "***", (byte *)nullpic, 16, 16, it_pic, 32); \
+    /* Disable more than one mipmap level. FIXME: improve mushy mipmap 
+     * detection so this isn't necessary.
+     */ \
+    GL_Bind(s_item ## itemnum ->texnum); \
+    qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
 
-	s_item1 = GL_FindImage("pics/w_railgun.tga", it_pic);
-	if (!s_item1) 
-		s_item1 = GL_LoadPic ("***s_item1***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item2 = GL_FindImage("pics/w_chaingun.tga", it_pic);
-	if (!s_item2) 
-		s_item2 = GL_LoadPic ("***s_item2***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item3 = GL_FindImage("pics/w_rlauncher.tga", it_pic);
-	if (!s_item3) 
-		s_item3 = GL_LoadPic ("***s_item3***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item4 = GL_FindImage("pics/w_shotgun.tga", it_pic);
-	if (!s_item4) 
-		s_item4 = GL_LoadPic ("***s_item4***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item5 = GL_FindImage("pics/p_haste.tga", it_pic);
-	if (!s_item5) 
-		s_item5 = GL_LoadPic ("***s_item5***", (byte *)nullpic, 16, 16, it_pic, 32);
-	
-	s_item6 = GL_FindImage("pics/p_invulnerability.tga", it_pic);
-	if (!s_item6) 
-		s_item6 = GL_LoadPic ("***s_item6***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item7 = GL_FindImage("pics/p_quad.tga", it_pic);
-	if (!s_item7) 
-		s_item7 = GL_LoadPic ("***s_item7***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item8 = GL_FindImage("pics/p_sproing.tga", it_pic);
-	if (!s_item8) 
-		s_item8 = GL_LoadPic ("***s_item8***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item9 = GL_FindImage("pics/p_adrenaline.tga", it_pic);
-	if (!s_item9) 
-		s_item9 = GL_LoadPic ("***s_item9***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item10 = GL_FindImage("pics/p_shard.tga", it_pic);
-	if (!s_item10) 
-		s_item10 = GL_LoadPic ("***s_item10***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item11 = GL_FindImage("pics/p_jacket.tga", it_pic);
-	if (!s_item11) 
-		s_item11 = GL_LoadPic ("***s_item11***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item12 = GL_FindImage("pics/p_combat.tga", it_pic);
-	if (!s_item12) 
-		s_item12 = GL_LoadPic ("***s_item12***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item13 = GL_FindImage("pics/p_body.tga", it_pic);
-	if (!s_item13) 
-		s_item13 = GL_LoadPic ("***s_item13***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item14 = GL_FindImage("pics/p_health.tga", it_pic);
-	if (!s_item14) 
-		s_item14 = GL_LoadPic ("***s_item14***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item17 = GL_FindImage("pics/i_beamgun.tga", it_pic);
-	if (!s_item17) 
-		s_item17 = GL_LoadPic ("***s_item17***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item18 = GL_FindImage("pics/i_vaporizer.tga", it_pic);
-	if (!s_item18) 
-		s_item18 = GL_LoadPic ("***s_item18***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item19 = GL_FindImage("pics/i_disruptor.tga", it_pic);
-	if (!s_item19) 
-		s_item19 = GL_LoadPic ("***s_item19***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item20 = GL_FindImage("pics/i_flamegun.tga", it_pic);
-	if (!s_item20) 
-		s_item20 = GL_LoadPic ("***s_item20***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item21 = GL_FindImage("pics/i_smartgun.tga", it_pic);
-	if (!s_item21) 
-		s_item21 = GL_LoadPic ("***s_item21***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item22 = GL_FindImage("pics/i_chaingun.tga", it_pic);
-	if (!s_item22) 
-		s_item22 = GL_LoadPic ("***s_item22***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item23 = GL_FindImage("pics/i_rocketlauncher.tga", it_pic);
-	if (!s_item23) 
-		s_item23 = GL_LoadPic ("***s_item23***", (byte *)nullpic, 16, 16, it_pic, 32);
-
-	s_item24 = GL_FindImage("pics/i_minderaser.tga", it_pic);
-	if (!s_item24) 
-		s_item24 = GL_LoadPic ("***s_item24***", (byte *)nullpic, 16, 16, it_pic, 32);
+    R_SI_InitTexture (0,  w_sshotgun);
+    R_SI_InitTexture (1,  w_railgun);
+    R_SI_InitTexture (2,  w_chaingun);
+    R_SI_InitTexture (3,  w_rlauncher);
+    R_SI_InitTexture (4,  w_shotgun);
+    R_SI_InitTexture (5,  p_haste);
+    R_SI_InitTexture (6,  p_invulnerability);
+    R_SI_InitTexture (7,  p_quad);
+    R_SI_InitTexture (8,  p_sproing);
+    R_SI_InitTexture (9,  p_adrenaline);
+    R_SI_InitTexture (10, p_shard);
+    R_SI_InitTexture (11, p_jacket);
+    R_SI_InitTexture (12, p_combat);
+    R_SI_InitTexture (13, p_body);
+    R_SI_InitTexture (14, p_health);
+    R_SI_InitTexture (17, i_beamgun);
+    R_SI_InitTexture (18, i_vaporizer);
+    R_SI_InitTexture (19, i_disruptor);
+    R_SI_InitTexture (20, i_flamegun);
+    R_SI_InitTexture (21, i_smartgun);
+    R_SI_InitTexture (22, i_chaingun);
+    R_SI_InitTexture (23, i_rocketlauncher);
+    R_SI_InitTexture (24, i_minderaser);
 }
 
 //rendering
