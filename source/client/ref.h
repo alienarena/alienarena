@@ -58,6 +58,7 @@ typedef struct
 	char name[MAX_QPATH];
 	int leafnum;
 	qboolean sunVisible; //can cast shadows in sunlight
+	vec3_t static_light;
 } grass_t;
 
 typedef struct
