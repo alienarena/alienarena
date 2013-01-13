@@ -275,26 +275,21 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 R_LightPoint
 ===============
 */
-void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
+void R_StaticLightPoint (vec3_t p, vec3_t color)
 {
-	vec3_t		end;
 	float		r;
-	int			lnum;
-	dlight_t	*dl;
-	float		light;
-	vec3_t		dist, dlightcolor;
-	float		add;
+	vec3_t		end;
 
 	if (!r_worldmodel->lightdata)
 	{
 		color[0] = color[1] = color[2] = 1.0;
 		return;
 	}
-
+	
 	end[0] = p[0];
 	end[1] = p[1];
 	end[2] = p[2] - 2048;
-
+	
 	r = RecursiveLightPoint (r_worldmodel->nodes, p, end);
 
 	if (r == -1)
@@ -305,10 +300,16 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
 	{
 		VectorCopy (pointcolor, color);
 	}
+}
 
-	if (!addDynamic)
-		return;
-
+void R_DynamicLightPoint (vec3_t p, vec3_t color)
+{
+	int			lnum;
+	dlight_t	*dl;
+	float		light;
+	vec3_t		dist, dlightcolor;
+	float		add;
+	
 	//
 	// add dynamic lights
 	//
@@ -327,8 +328,21 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
 			VectorMA (dlightcolor, add, dl->color, dlightcolor);
 		}
 	}
+	
+	VectorScale (dlightcolor, gl_modulate->value, color);
+}
 
-	VectorMA (color, gl_modulate->value, dlightcolor, color);
+
+void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
+{
+	vec3_t		dynamic;
+	
+	R_StaticLightPoint (p, color);
+	if (addDynamic)
+	{
+		R_DynamicLightPoint (p, dynamic);
+		VectorAdd (color, dynamic, color);
+	}
 }
 
 //===================================================================

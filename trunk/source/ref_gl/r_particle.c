@@ -847,21 +847,34 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 		r_hasleaves = true;
 }
 
-// Mark any vegetation sprites that can cast shadows in sunlight
-void R_MarkGrassSunShadowCasters(model_t *mod)
+// Mark any vegetation sprites that can cast shadows in sunlight, and get 
+// static light levels.
+void R_FinalizeGrass(model_t *mod)
 {
-	vec3_t orig2, mins, maxs;
+	vec3_t origin, orig2, mins, maxs;
 	trace_t	r_trace;
 	grass_t *grass;
 	int i;
+	model_t *old;
 	
 	grass = r_grasses;
 	
 	VectorSet (mins, 0, 0, 0);
 	VectorSet (maxs, 0, 0, 0);
 	
+	old = r_worldmodel;
+	
 	for (i=0; i<r_numgrasses; i++, grass++) 
 	{
+		// get static light once at load time
+		VectorCopy(grass->origin, origin);
+		if (grass->type == 0)
+			origin[2] += (grass->texsize/32) * grass->size;
+		// XXX: HACK!
+		r_worldmodel = mod;
+		R_StaticLightPoint (origin, grass->static_light);
+		r_worldmodel = old;
+	
 		if (grass->type == 0)
 		{
 			grass->sunVisible = false;
@@ -973,11 +986,13 @@ void R_DrawVegetationSurface ( void )
 		if(visible)
 		{
 			GL_Bind(grass->texnum);
-
+			
 			if(gl_dynamic->integer)
-				R_LightPoint (origin, lightLevel, true);
+				R_DynamicLightPoint (origin, lightLevel);
 			else
-				R_LightPoint (origin, lightLevel, false);
+				VectorClear (lightLevel);
+			VectorAdd (grass->static_light, lightLevel, lightLevel);
+			
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
 					
