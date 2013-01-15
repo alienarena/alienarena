@@ -395,8 +395,6 @@ extern void	R_SwapBuffers( int );
 extern void	R_SetPalette ( const unsigned char *palette);
 extern int	Draw_GetPalette (void);
 
-extern void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
-
 image_t *R_RegisterSkin (char *name);
 image_t *R_RegisterParticlePic(const char *name);
 image_t *R_RegisterParticleNormal(const char *name);
