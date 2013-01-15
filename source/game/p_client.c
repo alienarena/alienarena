@@ -1061,6 +1061,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_cells		= g_maxcells->value * 2.5;
 		client->pers.max_slugs		= g_maxslugs->value * 10;
 		client->pers.max_seekers	= g_maxseekers->value * 2;
+		client->pers.max_bombs		= g_maxbombs->value * 2;
 
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value * 10;
@@ -1077,6 +1078,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = g_maxgrenades->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = g_maxseekers->value * 2;
+		client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = g_maxbombs->value * 2;
 	} 
 	else 
 	{
@@ -1088,6 +1090,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_cells		= g_maxcells->value;
 		client->pers.max_slugs		= g_maxslugs->value;
 		client->pers.max_seekers	= g_maxseekers->value;
+		client->pers.max_bombs		= g_maxbombs->value;
 	}
 
 	if(vampire->value)
@@ -1827,7 +1830,6 @@ void ParseClassFile( char *config_file, edict_t *ent )
 					ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] = 1;
 					ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 4;
 				}
-
 			}
 		
 			free( buffer );
@@ -2046,7 +2048,11 @@ void PutClientInServer (edict_t *ent)
 				//0-1 (has vaporizor)
 			
 				ParseClassFile(modelpath, ent); 
-				
+				if(ent->has_bomb)
+				{
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Human Bomb"))] = 1;
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+				}				
 				item = FindItem("Blaster");
 			}
 			else
@@ -2083,6 +2089,7 @@ void PutClientInServer (edict_t *ent)
 		else
 		{ 
 			//alien
+			ent->ctype = 0;
 			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
@@ -2092,7 +2099,12 @@ void PutClientInServer (edict_t *ent)
 					Q2_FindFile (modelpath, &file);
 					if(file)
 					{
-						ParseClassFile(modelpath, ent); 						
+						ParseClassFile(modelpath, ent); 		
+						if(ent->has_bomb)
+						{
+							ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Bomb"))] = 1;
+							ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+						}
 					}
 					item = FindItem("Blaster");
 					client->pers.selected_item = ITEM_INDEX(item);
@@ -3354,6 +3366,19 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
 		{
 			pm.snapinitial = true;
+		}
+
+		if(g_tactical->integer)
+		{
+			//limit acceleration
+			if(ucmd->forwardmove > 200)
+				ucmd->forwardmove = 200;
+			if(ucmd->forwardmove < -200)
+				ucmd->forwardmove = -200;
+			if(ucmd->sidemove > 200)
+				ucmd->sidemove = 200;
+			if(ucmd->sidemove < -200)
+				ucmd->sidemove = -200;
 		}
 
 		ucmd->forwardmove *= 1.3;

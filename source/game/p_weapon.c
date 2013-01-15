@@ -1896,7 +1896,6 @@ void Weapon_Deathball_Fire (edict_t *ent)
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-
 	if(ent->client->ps.gunframe == 7) {
 
 		fire_deathball (ent, start, forward, 550);
@@ -1931,7 +1930,7 @@ void Weapon_Deathball (edict_t *ent)
 /*
 ======================================================================
 
-VIOALATOR
+VIOLATOR
 
 ======================================================================
 */
@@ -2100,5 +2099,54 @@ void Weapon_Violator (edict_t *ent)
 	else
 		Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, fire_frames, Violator_Fire);
 
+}
+
+//Tactical weapons - bombs, detonators, etc
+
+void Weapon_TacticalBomb_Fire (edict_t *ent)
+{
+	vec3_t		start;
+	vec3_t		forward, right;
+	vec3_t		offset;
+
+	AngleVectors (ent->client->v_angle, forward, right, NULL);
+
+	VectorScale (forward, -3, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -3;
+
+	VectorSet(offset, 32, 5,  ent->viewheight-5);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	if(ent->client->ps.gunframe == 7) {
+
+		fire_tacticalbomb (ent, start, forward, 250);
+
+		// send muzzle flash
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (ent-g_edicts);
+		gi.WriteByte (MZ_RAILGUN | is_silenced);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+		VectorAdd(start, forward, start);
+		start[2]+=6;
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
+		
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0); // to do - change me
+		ent->client->weapon_sound = 0;
+	}
+	ent->client->ps.gunframe++;
+
+	ent->client->pers.inventory[ent->client->ammo_index]--;
+
+}
+void Weapon_TacticalBomb (edict_t *ent)
+{
+	static int	pause_frames[]	= {33, 0};
+	static int	fire_frames[]	= {7,0};
+
+	Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_TacticalBomb_Fire);
 }
 #endif

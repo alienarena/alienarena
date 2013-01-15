@@ -122,7 +122,8 @@ typedef enum
 	AMMO_GRENADES,
 	AMMO_CELLS,
 	AMMO_SLUGS,
-	AMMO_SEEKERS
+	AMMO_SEEKERS,
+	AMMO_BOMBS
 } ammo_t;
 
 //teams
@@ -286,6 +287,8 @@ typedef struct
 #define WEAP_STRAFER			15
 #define WEAP_DEATHBALL			16
 #define WEAP_HOVER				17
+#define WEAP_ABOMB				18
+#define WEAP_HBOMB				19
 
 typedef struct gitem_s
 {
@@ -646,6 +649,7 @@ extern	cvar_t	*g_maxgrenades;
 extern	cvar_t	*g_maxcells;
 extern	cvar_t	*g_maxslugs;
 extern	cvar_t	*g_maxseekers;
+extern  cvar_t	*g_maxbombs;
 
 //quick weapon change
 extern  cvar_t  *quickweap;
@@ -908,6 +912,7 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 void fire_prox (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, float timer);
 void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int alt);
+void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed);
 #endif
 
 //deathball
@@ -1131,6 +1136,7 @@ extern void SP_misc_electroflash (edict_t *ent);
 #define BASE_GRENADES	50
 #define BASE_BULLETS	50
 #define BASE_SEEKERS	1
+#define BASE_BOMBS		1
 
 
 // client data that stays across multiple level loads
@@ -1162,6 +1168,7 @@ typedef struct
 	int			max_cells;
 	int			max_slugs;
 	int			max_seekers;
+	int			max_bombs;
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
@@ -1638,6 +1645,9 @@ struct edict_s
 	
 	//Prox mines and grenades
 	int		nade_timer;
+
+	//bombs
+	int		armed;
 
 	//alt-fires
 	qboolean altfire;

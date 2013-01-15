@@ -88,6 +88,7 @@ cvar_t	*g_maxgrenades;
 cvar_t	*g_maxcells;
 cvar_t	*g_maxslugs;
 cvar_t	*g_maxseekers;
+cvar_t	*g_maxbombs;
 
 //quick weapon change
 cvar_t  *quickweap;
