@@ -23,7 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   Mipmaps are generated for all texture types. If type <= it_wall, brightness
   and contrast settings are applied to it at load time. If type >= it_bump, 
   the standard mipmapping/anisotropic settings are always used, otherwise they
-  are only used if the entire texture has the same alpha value.
+  are only used if the entire texture has the same alpha value. If type !=
+  it_pic and type != it_particle, picmip settings are applied at load time.
 
 */
 
