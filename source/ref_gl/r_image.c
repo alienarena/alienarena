@@ -45,8 +45,8 @@ extern cvar_t	*cl_hudimage2;
 
 unsigned	d_8to24table[256];
 
-qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter);
-qboolean GL_Upload32 (byte *data, int width, int height, qboolean filter, qboolean force_standard_mipmap);
+qboolean GL_Upload8 (byte *data, int width, int height, int picmip, qboolean filter);
+qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean filter, qboolean force_standard_mipmap);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -521,7 +521,7 @@ int	scrap_uploads;
 void Scrap_Upload (void)
 {
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload32 (scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, false, true);
+	GL_Upload32 (scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, 0, false, true);
 	scrap_dirty = false;
 }
 
@@ -1287,7 +1287,7 @@ int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
 
 
-qboolean GL_Upload32 (byte *data, int width, int height, qboolean filter, qboolean force_standard_mipmap)
+qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean filter, qboolean force_standard_mipmap)
 {
 	int		samples;
 	byte 	*scaled;
@@ -1344,10 +1344,10 @@ qboolean GL_Upload32 (byte *data, int width, int height, qboolean filter, qboole
 				break;
 		}
 		// let people sample down the world textures for speed
-	    for (i = 0; i < gl_picmip->integer; i++)
-	    {
-	    	if (scaled_width <= 1 || scaled_height <= 1)
-	    		break;
+		for (i = 0; i < picmip; i++)
+		{
+			if (scaled_width <= 1 || scaled_height <= 1)
+				break;
 			scaled_width >>= 1;
 			scaled_height >>= 1;
 		}
@@ -1437,7 +1437,7 @@ GL_Upload8
 Returns has_alpha
 ===============
 */
-qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter)
+qboolean GL_Upload8 (byte *data, int width, int height, int picmip, qboolean filter)
 {
 	unsigned	trans[512*256]; // contains 32 bit RGBA color
 	int			i, s;
@@ -1473,7 +1473,7 @@ qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter)
             ((byte *)&trans[i])[2] = ((byte *)&d_8to24table[p])[2];
         }
     }
-    return GL_Upload32 ((byte*)trans, width, height, filter, false);
+    return GL_Upload32 ((byte*)trans, width, height, picmip, filter, false);
 }
 
 /*
@@ -1487,6 +1487,7 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 {
 	image_t		*image;
 	int			i;
+	int			picmip;
 
 	// find a free image_t
 	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
@@ -1520,9 +1521,14 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 
 	if (type == it_skin && bits == 8)
 		R_FloodFillSkin(pic, width, height);
+	
+	if (type == it_particle || type == it_pic)
+		picmip = 0;
+	else
+		picmip = gl_picmip->integer;
 
-	// load little pics into the scrap
-	if (image->type == it_particle && bits != 8
+	// load little particles into the scrap
+	if (type == it_particle && bits != 8
 		&& image->width <= 128 && image->height <= 128)
 	{
 		int		x, y;
@@ -1555,9 +1561,9 @@ nonscrap:
 		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
 		if (bits == 8) {
-			image->has_alpha = GL_Upload8 (pic, width, height, image->type <= it_wall);
+			image->has_alpha = GL_Upload8 (pic, width, height, picmip, type <= it_wall);
 		} else {
-			image->has_alpha = GL_Upload32 (pic, width, height, image->type <= it_wall, image->type >= it_bump);
+			image->has_alpha = GL_Upload32 (pic, width, height, picmip, type <= it_wall, type >= it_bump);
 		}
 		image->crop_left = crop_left;
 		image->crop_right = crop_right;
