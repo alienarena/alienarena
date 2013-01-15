@@ -867,9 +867,8 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 
 	for (i=0 ; i<6 ; i++)
 	{
-		// chop down rotating skies for less memory
-		if (gl_skymip->value || skyrotate)
-			gl_picmip->value++;
+		if (gl_skymip->integer)
+			gl_picmip->integer += gl_skymip->integer;
 
 		Com_sprintf (pathname, sizeof(pathname), "env/%s%s.tga", skyname, suf[i]);
 
@@ -912,9 +911,9 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 			spacebox = false; //we will change this to sun vs star
 		}
 
-		if (gl_skymip->value || skyrotate)
+		if (gl_skymip->integer)
 		{	// take less memory
-			gl_picmip->value--;
+			gl_picmip->integer -= gl_skymip->integer;
 			sky_min = 1.0/256;
 			sky_max = 255.0/256;
 		}
