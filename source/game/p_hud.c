@@ -827,17 +827,51 @@ void Cmd_Score_f (edict_t *ent)
 
 /*
 ===============
+G_SetScoreStats
+Common with G_SetStats and G_SetSpectatorStats
+===============
+*/
+
+void G_SetScoreStats (edict_t *ent)
+{
+	edict_t *e2;
+	int i;
+	int high_score = 0;
+	
+	// highest scorer
+	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->integer; i++, e2++) {
+		if (!e2->inuse)
+			continue;
+
+		if(e2->client->resp.score > high_score)
+			high_score = e2->client->resp.score;
+	}
+	ent->client->ps.stats[STAT_HIGHSCORE] = high_score;
+	
+	ent->client->ps.stats[STAT_SCOREBOARD] = gi.imageindex ("i_score");
+
+	//team
+	ent->client->ps.stats[STAT_REDSCORE] = red_team_score;
+	ent->client->ps.stats[STAT_BLUESCORE] = blue_team_score;
+	
+	if (tca->integer) {
+		ent->client->ps.stats[STAT_RED_MATCHES] = red_team_matches;
+		ent->client->ps.stats[STAT_BLUE_MATCHES] = blue_team_matches;
+	}
+}
+
+/*
+===============
 G_SetStats
 ===============
 */
+
 void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
 	int			index;
-	edict_t *e2;
-	int i;
-	int high_score = 0;
-	gitem_t *flag1_item, *flag2_item;
+	int			i;
+	gitem_t		*flag1_item, *flag2_item;
 
 
 	flag1_item = FindItemByClassname("item_flag_red");
@@ -975,16 +1009,8 @@ void G_SetStats (edict_t *ent)
 	//
 	ent->client->ps.stats[STAT_FRAGS] = ent->client->resp.score;
 	ent->client->ps.stats[STAT_DEATHS] = ent->client->resp.deaths;
-
-	// highest scorer
-	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->integer; i++, e2++) {
-		if (!e2->inuse)
-			continue;
-
-		if(e2->client->resp.score > high_score)
-			high_score = e2->client->resp.score;
-	}
-	ent->client->ps.stats[STAT_HIGHSCORE] = high_score;
+	
+	G_SetScoreStats (ent);
 
 #ifndef ALTERIA
 	//weapon/ammo inventories
@@ -1043,18 +1069,6 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_FLAGS] |= STAT_FLAGS_CROSSHAIRCENTER;
 	else if (ent->client->pers.weapon == FindItem ("Rocket Launcher"))
 		ent->client->ps.stats[STAT_FLAGS] |= STAT_FLAGS_CROSSHAIRPOS2;
-
-	ent->client->ps.stats[STAT_SCOREBOARD] = gi.imageindex ("i_score");
-
-	//team
-	ent->client->ps.stats[STAT_REDSCORE] = red_team_score;
-	ent->client->ps.stats[STAT_BLUESCORE] = blue_team_score;
-	
-	if (tca->integer) {
-		ent->client->ps.stats[STAT_RED_MATCHES] = red_team_matches;
-		ent->client->ps.stats[STAT_BLUE_MATCHES] = blue_team_matches;
-	}
-
 }
 
 /*
@@ -1066,19 +1080,19 @@ void G_SetSpectatorStats (edict_t *ent)
 {
 	gclient_t *cl = ent->client;
 
-	cl->ps.stats[STAT_LAYOUTS] = 0;
-
-	if (cl->pers.health <= 0 || level.intermissiontime || cl->showscores)
-		cl->ps.stats[STAT_LAYOUTS] |= 1;
-
-	if (cl->showinventory && cl->pers.health > 0)
-		cl->ps.stats[STAT_LAYOUTS] |= 2;
+	cl->ps.stats[STAT_LAYOUTS] = 1;
 
 	if (cl->chase_target && cl->chase_target->inuse)
+	{
+		// XXX: is this code ever active?
 		cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS +
 			(cl->chase_target - g_edicts) - 1;
+	}
 	else
+	{
 		cl->ps.stats[STAT_CHASE] = 0;
+		G_SetScoreStats (ent);
+	}
 }
 
 /**
