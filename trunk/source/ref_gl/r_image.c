@@ -46,7 +46,7 @@ extern cvar_t	*cl_hudimage2;
 unsigned	d_8to24table[256];
 
 qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter);
-qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean filter, qboolean force_standard_mipmap);
+qboolean GL_Upload32 (byte *data, int width, int height, qboolean filter, qboolean force_standard_mipmap);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -521,7 +521,7 @@ int	scrap_uploads;
 void Scrap_Upload (void)
 {
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload32 ((unsigned *)scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, false, true);
+	GL_Upload32 (scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, false, true);
 	scrap_dirty = false;
 }
 
@@ -1120,10 +1120,10 @@ void R_FloodFillSkin( byte *skin, int skinwidth, int skinheight )
 GL_ResampleTexture
 ================
 */
-void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight)
+void GL_ResampleTexture (byte *in, int inwidth, int inheight, byte *out, int outwidth, int outheight)
 {
 	int		i, j;
-	unsigned	*inrow, *inrow2;
+	byte	*inrow, *inrow2;
 	unsigned	frac, fracstep;
 	unsigned	p1[1024], p2[1024];
 	byte		*pix1, *pix2, *pix3, *pix4;
@@ -1143,21 +1143,21 @@ void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 		frac += fracstep;
 	}
 
-	for (i=0 ; i<outheight ; i++, out += outwidth)
+	for (i=0 ; i<outheight ; i++, out += outwidth*4)
 	{
-		inrow = in + inwidth*(int)((i+0.25)*inheight/outheight);
-		inrow2 = in + inwidth*(int)((i+0.75)*inheight/outheight);
+		inrow = in + 4*inwidth*(int)((i+0.25)*inheight/outheight);
+		inrow2 = in + 4*inwidth*(int)((i+0.75)*inheight/outheight);
 		frac = fracstep >> 1;
 		for (j=0 ; j<outwidth ; j++)
 		{
-			pix1 = (byte *)inrow + p1[j];
-			pix2 = (byte *)inrow + p2[j];
-			pix3 = (byte *)inrow2 + p1[j];
-			pix4 = (byte *)inrow2 + p2[j];
-			((byte *)(out+j))[0] = (pix1[0] + pix2[0] + pix3[0] + pix4[0])>>2;
-			((byte *)(out+j))[1] = (pix1[1] + pix2[1] + pix3[1] + pix4[1])>>2;
-			((byte *)(out+j))[2] = (pix1[2] + pix2[2] + pix3[2] + pix4[2])>>2;
-			((byte *)(out+j))[3] = (pix1[3] + pix2[3] + pix3[3] + pix4[3])>>2;
+			pix1 = inrow + p1[j];
+			pix2 = inrow + p2[j];
+			pix3 = inrow2 + p1[j];
+			pix4 = inrow2 + p2[j];
+			*(out+4*j+0) = (pix1[0] + pix2[0] + pix3[0] + pix4[0])>>2;
+			*(out+4*j+1) = (pix1[1] + pix2[1] + pix3[1] + pix4[1])>>2;
+			*(out+4*j+2) = (pix1[2] + pix2[2] + pix3[2] + pix4[2])>>2;
+			*(out+4*j+3) = (pix1[3] + pix2[3] + pix3[3] + pix4[3])>>2;
 		}
 	}
 }
@@ -1169,9 +1169,8 @@ Applies brightness and contrast to the specified image while optionally computin
 the image's average color.  Also handles image inversion and monochrome.  This is
 all munged into one function to reduce loops on level load.
 */
-void R_FilterTexture(unsigned *in, int width, int height)
+void R_FilterTexture(byte *in, int width, int height)
 {
-	byte *pcb;
 	int count;
 	float fcb;
 	int ix;
@@ -1204,16 +1203,15 @@ void R_FilterTexture(unsigned *in, int width, int height)
 	}
 
 	// apply to image
-	pcb = (byte*)in;
 	count = width * height;
 	while ( count-- ) {
-		*pcb = lut[*pcb];
-		++pcb;
-		*pcb = lut[*pcb];
-		++pcb;
-		*pcb = lut[*pcb];
-		++pcb;
-		++pcb;
+		*in = lut[*in];
+		++in;
+		*in = lut[*in];
+		++in;
+		*in = lut[*in];
+		++in;
+		++in;
 	}
 
 }
@@ -1227,7 +1225,6 @@ void R_FilterTexture(unsigned *in, int width, int height)
 int GL_RecursiveGenerateAlphaMipmaps (byte *data, int width, int height, int depth)
 {
 	int			ret;
-	int			i = 0;
 	int			x, y;
 	int			newwidth, newheight;
 	int			upper_left_alpha;
@@ -1290,10 +1287,10 @@ int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
 
 
-qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean filter, qboolean force_standard_mipmap)
+qboolean GL_Upload32 (byte *data, int width, int height, qboolean filter, qboolean force_standard_mipmap)
 {
 	int		samples;
-	unsigned 	*scaled;
+	byte 	*scaled;
 	int		scaled_width, scaled_height;
 	int		i, c;
 	byte		*scan;
@@ -1304,7 +1301,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean filter, qb
 
 	uploaded_paletted = false;    // scan the texture for any non-255 alpha
 	c = width*height;
-	scan = ((byte *)data) + 3;
+	scan = data + 3;
 	samples = gl_solid_format;
 	for (i=0 ; i<c ; i++, scan += 4)
 	{
@@ -1442,7 +1439,7 @@ Returns has_alpha
 */
 qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter)
 {
-	unsigned	trans[512*256];
+	unsigned	trans[512*256]; // contains 32 bit RGBA color
 	int			i, s;
 	int			p;
 
@@ -1476,7 +1473,7 @@ qboolean GL_Upload8 (byte *data, int width, int height, qboolean filter)
             ((byte *)&trans[i])[2] = ((byte *)&d_8to24table[p])[2];
         }
     }
-    return GL_Upload32 (trans, width, height, filter, false);
+    return GL_Upload32 ((byte*)trans, width, height, filter, false);
 }
 
 /*
@@ -1560,7 +1557,7 @@ nonscrap:
 		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, image->type <= it_wall);
 		} else {
-			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, image->type <= it_wall, image->type >= it_bump);
+			image->has_alpha = GL_Upload32 (pic, width, height, image->type <= it_wall, image->type >= it_bump);
 		}
 		image->crop_left = crop_left;
 		image->crop_right = crop_right;
