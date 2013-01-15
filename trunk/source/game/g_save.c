@@ -230,6 +230,7 @@ void InitGame (void)
 	g_maxcells = gi.cvar("g_maxcells", "200", CVARDOC_INT);
 	g_maxslugs = gi.cvar("g_maxslugs", "50", CVARDOC_INT);
 	g_maxseekers = gi.cvar("g_maxseekers", "1", CVARDOC_INT);
+	g_maxbombs = gi.cvar("g_maxbombs", "1", CVARDOC_INT);
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_INT);

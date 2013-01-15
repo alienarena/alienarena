@@ -125,7 +125,7 @@ void R_InitImageSubsystem(void)
 		if (r_alphamasked_anisotropic->integer <= 0)
 			Cvar_SetValue("r_alphamasked_anisotropic", 1);
 
-		if (r_anisotropic->integer == 1 && r_alphamasked_anisotropic == 1)
+		if (r_anisotropic->integer == 1 && r_alphamasked_anisotropic->integer == 1)
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
 		else
 			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");

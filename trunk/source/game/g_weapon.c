@@ -2092,4 +2092,145 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 		G_UndoTimeShiftFor( self );
 }
 
+//Tactical - bombs
+
+void tactical_bomb_think (edict_t *self)
+{	
+	self->nextthink = level.time + FRAMETIME;
+
+	if(self->armed)
+	{
+		self->s.frame = (self->s.frame + 1) % 23; 
+		self->nade_timer++; //this should only start after armed
+	}
+
+	if(self->nade_timer > 100) //10 seconds
+	{	//explode
+		
+		//avoid infinite recursion
+		self->takedamage = DAMAGE_NO;
+		
+		T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_R_SPLASH, 0);
+
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); //might want different, massive effect here
+		gi.WritePosition (self->s.origin);
+		gi.multicast (self->s.origin, MULTICAST_PHS);
+
+		G_FreeEdict (self);
+	}
+
+}
+void abomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other == ent->owner)
+		return;
+
+	//detonator will set arming
+
+	if (surf && (surf->flags & SURF_SKY))
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	//do we just want players with detonators to just touch them?  Touch for now...maybe actually fire one off in future?
+	if(other->has_detonator && other->ctype == 0)
+	{
+		//to do - play global sound, and print message to activator 
+		ent->armed = true;
+		other->has_detonator = false; //only get one
+	}
+
+	//just bounce off of everything
+	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/clank.wav"), 1, ATTN_NORM, 0);
+	return;
+
+}
+void hbomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other == ent->owner)
+		return;
+
+	//detonator will set arming
+
+	if (surf && (surf->flags & SURF_SKY))
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	//do we just want players with detonators to just touch them?  Touch for now...maybe actually fire one off in future?
+	if(other->has_detonator && other->ctype == 1)
+	{
+		//to do - play global sound, and print message to activator 
+		ent->armed = true;
+		other->has_detonator = false; //only get one
+	}
+
+	//just bounce off of everything
+	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/clank.wav"), 1, ATTN_NORM, 0);
+	return;
+
+}
+void bomb_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	//avoid infinite recursion
+	self->takedamage = DAMAGE_NO;
+	
+	//explode - much smaller explosion.
+	T_RadiusDamage(self, self->owner, self->radius_dmg/10.0, NULL, self->dmg_radius/10.0, MOD_R_SPLASH, 0);
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_BFG_BIGEXPLOSION);
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	G_FreeEdict (self);
+}
+void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
+{
+	edict_t	*bomb;
+    vec3_t	dir, forward, right, up;
+
+	vectoangles(aimdir, dir);
+	AngleVectors(dir, forward, right, up);
+
+	bomb = G_Spawn();
+	VectorCopy (start, bomb->s.origin);
+	VectorScale (aimdir, speed, bomb->velocity);
+	VectorMA (bomb->velocity, 20 + crandom() * 10.0, up, bomb->velocity);
+	VectorMA (bomb->velocity, crandom() * 10.0, right, bomb->velocity);
+	VectorSet (bomb->avelocity, 20, 20, 20);
+	bomb->movetype = MOVETYPE_BOUNCE;
+	bomb->clipmask = MASK_SHOT;
+	bomb->solid = SOLID_BBOX;
+	VectorClear (bomb->mins);
+	VectorClear (bomb->maxs);
+	if(self->ctype)
+	{
+		bomb->s.modelindex = gi.modelindex ("items/tactical/human_bomb.md2"); 
+		bomb->touch = hbomb_touch;
+	}
+	else
+	{
+		bomb->s.modelindex = gi.modelindex ("items/tactical/alien_bomb.md2");
+		bomb->touch = abomb_touch;
+	}
+	bomb->owner = self;
+	bomb->think = tactical_bomb_think; 
+	bomb->nextthink = level.time + .1;    
+    bomb->dmg = 1000; //insane amount of damage power
+	bomb->radius_dmg = 1000;
+	bomb->dmg_radius = 512;
+	bomb->classname = "bomb";
+	bomb->takedamage = DAMAGE_YES;
+	bomb->health = 200; //make it somewhat hard to destroy
+	bomb->die = bomb_die; 
+	bomb->armed = false;
+	bomb->nade_timer = 0;
+
+	gi.linkentity (bomb);
+}
+
 #endif
