@@ -531,7 +531,8 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				self->enemy = target;
 			target = findradius(target, self->s.origin, 200);
 		}
-		if(self->enemy) {
+		if(self->enemy) 
+		{
 			//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
 			self->movetarget = self->enemy;
 			self->goalentity= self->enemy; //face it, and fire

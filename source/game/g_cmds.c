@@ -49,6 +49,12 @@ qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
 	char	ent1Team [512];
 	char	ent2Team [512];
 
+	if(g_tactical->value)
+	{
+		if(ent1->ctype == ent2->ctype)
+			return true;
+	}
+
 	if (!((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value))
 		return false;
 
@@ -57,6 +63,7 @@ qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
 
 	if (strcmp(ent1Team, ent2Team) == 0)
 		return true;
+
 	return false;
 }
 

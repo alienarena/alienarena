@@ -1565,6 +1565,10 @@ nonscrap:
 		} else {
 			image->has_alpha = GL_Upload32 (pic, width, height, picmip, type <= it_wall, type >= it_bump);
 		}
+
+		if (type == it_pic)
+		    qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
 		image->crop_left = crop_left;
 		image->crop_right = crop_right;
 		image->crop_top = crop_top;
