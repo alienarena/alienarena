@@ -961,6 +961,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("misc/godlike.wav");
 	gi.soundindex ("misc/rampage.wav");
 	gi.soundindex ("misc/fight.wav");
+	gi.soundindex ("misc/minderaser.wav");
 
     //if maxclients is 0 or 1, it means someone is probably just testing a map
     //or testing some code, so we really don't need to precache all this crap
