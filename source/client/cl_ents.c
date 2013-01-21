@@ -810,9 +810,12 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		}
 
+		// Sigh, this is the reason for the RF_NODRAW workaround. 
+#if 0
 		// if set to invisible, skip
 		if (!s1->modelindex)
 			continue;
+#endif
 
 		if (effects & EF_PLASMA)
 		{
@@ -837,16 +840,19 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.team = 2;
 		}
 		
-		// add to refresh list
-		V_AddEntity (&ent);
-
-		// color shells generate a seperate entity for the main model
-		if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
+		if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 		{
+			// add to refresh list
+			V_AddEntity (&ent);
+
+			// color shells generate a seperate entity for the main model
+			if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
+			{
 		
-			ent.flags = renderfx | RF_TRANSLUCENT;
-			ent.alpha = 0.30;
-			V_AddViewEntity (&ent);			
+				ent.flags = renderfx | RF_TRANSLUCENT;
+				ent.alpha = 0.30;
+				V_AddViewEntity (&ent);			
+			}
 		}
 
 		ent.skin = NULL;		// never use a custom skin on others
@@ -859,39 +865,42 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
-		//give health an "aura"
-		if(cl_healthaura->value && !cl_simpleitems->value) 
+		if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 		{
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
-				CL_SmallHealthParticles(ent.origin);
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/medium/tris.md2"))
-				CL_MedHealthParticles(ent.origin);
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/large/tris.md2"))
-				CL_LargeHealthParticles(ent.origin);
-		}
+			//give health an "aura"
+			if(cl_healthaura->value && !cl_simpleitems->value) 
+			{
+				if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
+					CL_SmallHealthParticles(ent.origin);
+				if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/medium/tris.md2"))
+					CL_MedHealthParticles(ent.origin);
+				if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/large/tris.md2"))
+					CL_LargeHealthParticles(ent.origin);
+			}
 
-		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) 
-		{
-			//add clear cover
-			if (!cl_simpleitems->integer)
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) 
 			{
-				ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
-				ent.flags |= RF_TRANSLUCENT;
-				ent.alpha = 0.30;
-				V_AddEntity (&ent);
-			}
-		}	
-		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
-		{
-			//add clear cover
-			if (!cl_simpleitems->integer)
+				//add clear cover
+				if (!cl_simpleitems->integer)
+				{
+					ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
+					ent.flags |= RF_TRANSLUCENT;
+					ent.alpha = 0.30;
+					V_AddEntity (&ent);
+				}
+			}	
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
 			{
-				ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
-				ent.flags |= RF_TRANSLUCENT;
-				ent.alpha = 0.30;
-				V_AddEntity (&ent);
+				//add clear cover
+				if (!cl_simpleitems->integer)
+				{
+					ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
+					ent.flags |= RF_TRANSLUCENT;
+					ent.alpha = 0.30;
+					V_AddEntity (&ent);
+				}
 			}
-		}	
+		}
 
 		if (s1->modelindex2)
 		{
