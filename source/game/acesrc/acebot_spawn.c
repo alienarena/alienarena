@@ -1079,25 +1079,44 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	Q2_FindFile (modelpath, &file);
 	if(file) 
 	{ 
+		fclose(file);
+
 		//human
 		bot->ctype = 1;
 		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 		{
+			if(g_tactical->integer)
+			{
+				//read class file(tactical only)
+				//example:
+				//100-150 (health)
+				//0-3 (armor type)
+				//0-1 (has bomb)
+				//0-1 (has detonator)
+				//0-1 (has mind eraser)
+				//0-1 (has vaporizor)
+			
+				ParseClassFile(modelpath, bot); 
+				if(bot->has_bomb)
+				{
+					bot->client->pers.inventory[ITEM_INDEX(FindItem("Human Bomb"))] = 1;
+					bot->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+				}				
+				item = FindItem("Blaster");
+			}
+			else
+			{
+				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 100;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
-				if(g_tactical->integer)
-				{
-					item = FindItem("Blaster");
-				}
-				else
-				{
-					client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-					client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-					item = FindItem("Rocket Launcher");
-				}
-				client->pers.selected_item = ITEM_INDEX(item);
-				client->pers.inventory[client->pers.selected_item] = 1;
-				client->pers.weapon = item;
+				
+				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+				item = FindItem("Rocket Launcher");				
+			}			
+			client->pers.selected_item = ITEM_INDEX(item);
+			client->pers.inventory[client->pers.selected_item] = 1;
+			client->pers.weapon = item;
 		}
 		fclose(file);
 	}
@@ -1120,12 +1139,28 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		else 
 		{ 
 			//alien
+			bot->ctype = 0;
 			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
 				if(g_tactical->integer)
 				{
-					item = FindItem("Alien Blaster"); //To do - tactical - create new weapon for aliens to start with, another blaster type.
+					sprintf(modelpath, "players/%s/alien", playermodel);
+					Q2_FindFile (modelpath, &file);
+					if(file)
+					{
+						ParseClassFile(modelpath, bot); 		
+						if(bot->has_bomb)
+						{
+							bot->client->pers.inventory[ITEM_INDEX(FindItem("Alien Bomb"))] = 1;
+							bot->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+						}
+					}
+					item = FindItem("Blaster");
+					client->pers.selected_item = ITEM_INDEX(item);
+					client->pers.inventory[client->pers.selected_item] = 0;					
+				
+					item = FindItem("Alien Blaster");
 				}
 				else
 				{
@@ -1135,7 +1170,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 				}
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
-				client->pers.weapon = item;
+				client->pers.weapon = item;		
 			}
 		}
 	}
