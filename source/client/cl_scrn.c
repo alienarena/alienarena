@@ -154,8 +154,9 @@ typedef struct
 	int		color;
 } graphsamp_t;
 
+#define	DEBUGGRAPH_VALUES	4096
 static	int			current;
-static	graphsamp_t	values[1024];
+static	graphsamp_t	values[DEBUGGRAPH_VALUES];
 
 /*
 ==============
@@ -164,8 +165,12 @@ SCR_DebugGraph
 */
 void SCR_DebugGraph (float value, int color)
 {
-	values[current&1023].value = value;
-	values[current&1023].color = color;
+	int limit;
+	limit = scr_vrect.width;
+	if (limit > DEBUGGRAPH_VALUES)
+		limit = DEBUGGRAPH_VALUES;
+	values[current%limit].value = value;
+	values[current%limit].color = color;
 	current++;
 }
 
@@ -183,7 +188,10 @@ void SCR_DrawDebugGraph (void)
 	//
 	// draw the graph
 	//
+	
 	w = scr_vrect.width;
+	if (w > DEBUGGRAPH_VALUES)
+		w = DEBUGGRAPH_VALUES;
 
 	x = scr_vrect.x;
 	y = scr_vrect.y+scr_vrect.height;
@@ -192,7 +200,7 @@ void SCR_DrawDebugGraph (void)
 
 	for (a=0 ; a<w ; a++)
 	{
-		i = (current-1-a+1024) & 1023;
+		i = (current-1-a+w) % w;
 		v = values[i].value;
 		color = values[i].color;
 		v = v*scr_graphscale->value + scr_graphshift->value;
@@ -2094,7 +2102,7 @@ void SCR_UpdateScreen (void)
 			SCR_CheckDrawIRCString();
 
 			if (scr_timegraph->value)
-				SCR_DebugGraph (cls.frametime*300, 0);
+				SCR_DebugGraph (cls.frametime*600, 0);
 
 			if (scr_debuggraph->value || scr_timegraph->value || scr_netgraph->value)
 				SCR_DrawDebugGraph ();
