@@ -820,6 +820,10 @@ V_RenderView
 
 ==================
 */
+extern cvar_t		*scr_netgraph;
+extern cvar_t		*scr_timegraph;
+extern cvar_t		*scr_debuggraph;
+extern cvar_t		*scr_graphheight;
 void V_RenderView( float stereo_separation )
 {
 	extern int entitycmpfnc( const entity_t *, const entity_t * );
@@ -888,6 +892,10 @@ void V_RenderView( float stereo_separation )
 		cl.refdef.y = scr_vrect.y;
 		cl.refdef.width = scr_vrect.width;
 		cl.refdef.height = scr_vrect.height;
+		
+		if (scr_debuggraph->integer || scr_timegraph->integer || scr_netgraph->integer)
+			cl.refdef.height -= scr_graphheight->integer;
+		
 		cl.refdef.fov_y = CalcFov (cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
 		cl.refdef.time = cl.time*0.001;
 
