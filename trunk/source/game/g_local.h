@@ -962,6 +962,7 @@ void MoveClientsDownQueue(edict_t *ent);
 void SaveClientData (void);
 void FetchClientEntData (edict_t *ent);
 void TeamCensus( teamcensus_t* team_census );
+void ParseClassFile( char *config_file, edict_t *ent );
 
 //unlagged - g_unlagged.c
 void G_ResetHistory( edict_t *ent );

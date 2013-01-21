@@ -2110,6 +2110,8 @@ void tactical_bomb_think (edict_t *self)
 
 	if(self->armed)
 	{
+		//change skin so that it's got a red light
+		self->s.skinnum = 1;
 		self->s.frame = (self->s.frame + 1) % 23; 
 		self->nade_timer++; //this should only start after armed
 	}
@@ -2150,6 +2152,7 @@ void abomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
 		//to do - play global sound, and print message to activator 
 		ent->armed = true;
 		other->has_detonator = false; //only get one
+		safe_bprintf(PRINT_HIGH, "Bomb is armed!\n"); //leave until we get a sound
 	}
 
 	//just bounce off of everything
@@ -2185,11 +2188,19 @@ void hbomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
 }
 void bomb_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+	float div;
+
+	//blowing up an armed bomb is still pretty bad, but it would be smarter to get it prior to being armed.
+	if(self->armed)
+		div = 2;
+	else
+		div = 10;
+
 	//avoid infinite recursion
 	self->takedamage = DAMAGE_NO;
 	
 	//explode - much smaller explosion.
-	T_RadiusDamage(self, self->owner, self->radius_dmg/10.0, NULL, self->dmg_radius/10.0, MOD_R_SPLASH, 0);
+	T_RadiusDamage(self, self->owner, self->radius_dmg/div, NULL, self->dmg_radius/div, MOD_R_SPLASH, 0);
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
