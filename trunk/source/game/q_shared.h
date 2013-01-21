@@ -662,6 +662,7 @@ typedef struct
 #define	RF_SHELL_HALF_DAM	0x00020000
 #define RF_NOSHADOWS		0x00040000 //use this one for turning off shadows, etc.
 #define RF_MONSTER  		0x00080000
+#define	RF_NODRAW			0x00100000 //use this instead of a 0 modelindex for compatibility.
 #define RF_MENUMODEL		0x01280000 //for player menu
 
 

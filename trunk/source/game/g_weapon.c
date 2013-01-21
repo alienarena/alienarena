@@ -410,6 +410,11 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 		bolt->s.effects |= EF_PLASMA;
 		bolt->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
 	}
+	// All we care about is the effects. However, old clients will refuse to 
+	// draw them unless the modelindex is set. To work around this, newer
+	// clients have an RF_NODRAW flag. Newer clients also treat a 0 modelindex
+	// correctly, so future CRX games won't need this hack. 
+	bolt->s.renderfx |= RF_NODRAW;
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
@@ -1882,6 +1887,11 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	VectorClear (flame->mins);
 	VectorClear (flame->maxs);
 	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
+	// All we care about is the effects. However, old clients will refuse to 
+	// draw them unless the modelindex is set. To work around this, newer
+	// clients have an RF_NODRAW flag. Newer clients also treat a 0 modelindex
+	// correctly, so future CRX games won't need this hack. 
+	flame->s.renderfx |= RF_NODRAW;
 	flame->owner = self;
 	flame->touch = flame_touch;
 	flame->nextthink = level.time + 500/speed;
