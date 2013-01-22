@@ -3471,9 +3471,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		for (i=0 ; i<3 ; i++)
 		{
 			ent->s.origin[i] = pm.s.origin[i]*0.125;
-			//vehicles
-			if ( !Jet_Active(ent) || (Jet_Active(ent)&&(fabs((float)pm.s.velocity[i]*0.125) < fabs(ent->velocity[i]))) )
-				ent->velocity[i] = pm.s.velocity[i]*0.125;
+			ent->velocity[i] = pm.s.velocity[i]*0.125;
 		}
 
 		//check for a dodge, and peform if true

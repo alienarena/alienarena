@@ -1,6 +1,10 @@
 /*
 Copyright (C) 20?? COR Entertainment, LLC.
 
+Copyright (C) 1998 by "Attila." Based on the email address provided, Attila is
+likely the pseudonym of Jens Bohnwagner, but this isn't certain. Original
+code: http://www.quakewiki.net/archives/qdevels/quake2/1_2_98.html
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
