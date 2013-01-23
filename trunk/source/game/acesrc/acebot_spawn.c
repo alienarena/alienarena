@@ -1118,7 +1118,6 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			client->pers.inventory[client->pers.selected_item] = 1;
 			client->pers.weapon = item;
 		}
-		fclose(file);
 	}
 	else 
 	{
