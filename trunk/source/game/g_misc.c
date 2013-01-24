@@ -1150,6 +1150,12 @@ void rednode_think (edict_t *ent)
 }
 void SP_misc_rednode (edict_t *ent)
 {
+	if (!tca->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
@@ -1225,6 +1231,12 @@ void bluenode_think (edict_t *ent)
 }
 void SP_misc_bluenode (edict_t *ent)
 {
+	if (!tca->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
@@ -1279,6 +1291,12 @@ void redspidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, in
 }
 void SP_misc_redspidernode (edict_t *ent)
 {
+	if (!tca->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
@@ -1331,6 +1349,12 @@ void bluespidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 }
 void SP_misc_bluespidernode (edict_t *ent)
 {
+	if (!tca->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
