@@ -811,7 +811,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		}
 
 		// Sigh, this is the reason for the RF_NODRAW workaround. 
-#if 0
+#if 1 // TODO: replace this with an IFDEF for non Alien Arena CRX games
 		// if set to invisible, skip
 		if (!s1->modelindex)
 			continue;
