@@ -1080,7 +1080,10 @@ void G_SetSpectatorStats (edict_t *ent)
 {
 	gclient_t *cl = ent->client;
 
-	cl->ps.stats[STAT_LAYOUTS] = 1;
+	if (ent->client->showscores)
+		cl->ps.stats[STAT_LAYOUTS] = 1;
+	else
+		cl->ps.stats[STAT_LAYOUTS] = 0;
 
 	if (cl->chase_target && cl->chase_target->inuse)
 	{
