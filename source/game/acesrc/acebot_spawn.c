@@ -1610,6 +1610,7 @@ static void remove_bot( edict_t *bot )
 	bot->s.angles[2] = 0;  // ?
 	bot->s.sound = 0;
 	bot->client->weapon_sound = 0;
+	bot->s.effects = 0;
 
 	// remove powerups
 	bot->client->quad_framenum = 0;

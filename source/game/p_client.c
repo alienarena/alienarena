@@ -877,6 +877,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		{
 			/* If deathcam is active, switch client model to nothing */
 			self->s.modelindex = 0;
+			self->s.effects = 0; 
 			self->solid = SOLID_NOT;
 
 			number_of_gibs = DEATH_GIBS_TO_THROW;
@@ -1530,6 +1531,7 @@ void BodySink( edict_t *ent ) {
 		ent->s.modelindex2 = 0;
 		ent->s.modelindex3 = 0;
 		ent->s.modelindex4 = 0;
+		ent->s.effects = 0;
 		return;
 	}
 	ent->nextthink = level.time + .1;
@@ -2926,6 +2928,8 @@ void ClientDisconnect (edict_t *ent)
 
 	gi.unlinkentity (ent);
 	ent->s.modelindex = 0;
+	ent->s.effects = 0;
+	ent->s.sound = 0;
 	ent->solid = SOLID_NOT;
 	ent->inuse = false;
 	ent->classname = "disconnected";

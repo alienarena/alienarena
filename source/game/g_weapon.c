@@ -412,8 +412,7 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	}
 	// All we care about is the effects. However, old clients will refuse to 
 	// draw them unless the modelindex is set. To work around this, newer
-	// clients have an RF_NODRAW flag. Newer clients also treat a 0 modelindex
-	// correctly, so future CRX games won't need this hack. 
+	// clients have an RF_NODRAW flag. 
 	bolt->s.renderfx |= RF_NODRAW;
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
@@ -1538,6 +1537,7 @@ void prox_think (edict_t *self)
 		
 		T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_R_SPLASH, 2);
 
+
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		gi.WritePosition (self->s.origin);
@@ -1889,8 +1889,7 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
 	// All we care about is the effects. However, old clients will refuse to 
 	// draw them unless the modelindex is set. To work around this, newer
-	// clients have an RF_NODRAW flag. Newer clients also treat a 0 modelindex
-	// correctly, so future CRX games won't need this hack. 
+	// clients have an RF_NODRAW flag.
 	flame->s.renderfx |= RF_NODRAW;
 	flame->owner = self;
 	flame->touch = flame_touch;
