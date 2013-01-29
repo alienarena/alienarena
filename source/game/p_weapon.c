@@ -1528,7 +1528,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 void Weapon_Beamgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {53, 0};
-	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 0};
+	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 0};
 
 	Weapon_Generic (ent, 5, 24, 53, 57, pause_frames, fire_frames, Weapon_Beamgun_Fire);
 }
