@@ -180,30 +180,13 @@ V_TestParticles
 If cl_testparticles is set, create 4096 particles in the view
 ================
 */
+void CL_LogoutEffect (vec3_t org, int type);
 void V_TestParticles (void)
 {
-#if 0
-//TODO: this will probably need moving to cl_fx.c and to use new_particle
-	particle_t	*p;
-	int			i, j;
-	float		d, r, u;
-
-	r_numparticles = MAX_PARTICLES;
-	for (i=0 ; i<r_numparticles ; i++)
-	{
-		d = i*0.25;
-		r = 4*((i&7)-3.5);
-		u = 4*(((i>>3)&7)-3.5);
-		p = &r_particles[i];
-
-		for (j=0 ; j<3 ; j++)
-			p->current_origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j]*d +
-			cl.v_right[j]*r + cl.v_up[j]*u;
-
-		p->current_color = 8;
-		p->current_alpha = cl_testparticles->value;
-	}
-#endif
+    vec3_t  org;
+    
+    VectorMA (cl.refdef.vieworg, 128, cl.v_forward, org);
+    CL_LogoutEffect (org, MZ_LOGOUT);
 }
 
 /*
