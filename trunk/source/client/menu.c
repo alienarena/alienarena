@@ -3498,6 +3498,13 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 
 	/* Establish string and get the first token: */
 	token = strtok( rLine, seps );
+	if ( token != NULL )
+	{
+		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
+		token = strtok( NULL, seps );
+	}
+	
+	/* Loop through the rest of them */
 	while( token != NULL ) 
 	{
 		/* While there are tokens in "string" */
