@@ -1069,6 +1069,10 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 		vec = p->verts[0];
 		_VectorCopy(surf->plane->normal, normal);
 
+		// FIXME: on some maps, this code doesn't always initialize v02, 
+		// leading to Valgrind complaining about use of uninitialized memory.
+		// dm-infinity and dm-zorn2k11 are two such maps. Probably not a huge
+		// deal, doesn't seem to be causing any issues.
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
