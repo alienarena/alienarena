@@ -58,7 +58,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * Sound CVARS
  */
 #define MAX_SRC 128
-#define MIN_SRC_DEFAULT 96
+#define MAX_SRC_DEFAULT 96
+#define MIN_SRC_DEFAULT 64
 /*--- previous system ---*/
 // These 2 are defined in cl_main.c
 //cvar_t *background_music; //     enable/disable music
@@ -2865,7 +2866,7 @@ void sndCvarInit( void )
 	s_volume = Cvar_Get( "s_volume", "0.1", CVAR_ARCHIVE );
 	// OpenAL CVARs
 	s_doppler = Cvar_Get( "s_doppler", "0.0", CVAR_ARCHIVE );
-	Com_sprintf(cvarset, sizeof(cvarset),"%i", MAX_SRC );
+	Com_sprintf(cvarset, sizeof(cvarset),"%i", MAX_SRC_DEFAULT );
 	s_maxsources = Cvar_Get( "s_maxsources", cvarset , CVAR_ARCHIVE );
 	Com_sprintf(cvarset, sizeof(cvarset),"%i", MIN_SRC_DEFAULT );
 	s_minsources = Cvar_Get( "s_minsources", cvarset, CVAR_ARCHIVE );
