@@ -1,0 +1,216 @@
+players/commander/tron
+{
+	{
+		map players/commander/tron_normal.tga
+		normalmap
+		map2 gfx/tron_commanderfx.tga
+		glow
+	}	
+}
+players/enforcer/tron
+{
+	{
+		map players/enforcer/tron_normal.tga
+		normalmap
+		map2 gfx/tron_enforcerfx.tga
+		glow
+	}	
+}
+players/lauren/tron
+{
+	{
+		map players/lauren/tron_normal.tga
+		normalmap
+		map2 gfx/tron_laurenfx.tga
+		glow
+	}	
+}
+players/martiancyborg/tron
+{
+	{
+		map players/martiancyborg/tron_normal.tga
+		normalmap
+		map2 gfx/tron_cyborgfx.tga
+		glow
+	}	
+}
+players/martianenforcer/tron
+{
+	{
+		map players/martianenforcer/tron_normal.tga
+		normalmap
+		map2 gfx/tron_martianfx.tga
+		glow
+	}	
+}
+players/martianoverlord/tron
+{
+	{
+		map players/martianoverlord/tron_normal.tga
+		normalmap
+		map2 gfx/tron_overlordfx.tga
+		glow
+	}	
+}
+players/martianwarrior/tron
+{
+	{
+		map players/martianwarrior/tron_normal.tga
+		normalmap
+		map2 gfx/tron_warriorfx.tga
+		glow
+	}	
+}
+players/slashbot/tron
+{
+	{
+		map players/slashbot/tron_normal.tga
+		normalmap
+		map2 gfx/tron_slashbotfx.tga
+		glow
+	}	
+}
+players/commander/tron2
+{
+	{
+		map players/commander/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_commanderfx.tga
+		glow
+	}	
+}
+players/enforcer/tron2
+{
+	{
+		map players/enforcer/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_enforcerfx.tga
+		glow
+	}	
+}
+players/lauren/tron2
+{
+	{
+		map players/lauren/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_laurenfx.tga
+		glow
+	}	
+}
+players/martiancyborg/tron2
+{
+	{
+		map players/martiancyborg/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_cyborgfx.tga
+		glow
+	}	
+}
+players/martianenforcer/tron2
+{
+	{
+		map players/martianenforcer/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_martianfx.tga
+		glow
+	}	
+}
+players/martianoverlord/tron2
+{
+	{
+		map players/martianoverlord/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_overlordfx.tga
+		glow
+	}	
+}
+players/martianwarrior/tron2
+{
+	{
+		map players/martianwarrior/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_warriorfx.tga
+		glow
+	}	
+}
+players/slashbot/tron2
+{
+	{
+		map players/slashbot/tron_normal.tga
+		normalmap
+		map2 gfx/tron2_slashbotfx.tga
+		glow
+	}	
+}
+players/commander/tron3
+{
+	{
+		map players/commander/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_commanderfx.tga
+		glow
+	}	
+}
+players/enforcer/tron3
+{
+	{
+		map players/enforcer/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_enforcerfx.tga
+		glow
+	}	
+}
+players/lauren/tron3
+{
+	{
+		map players/lauren/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_laurenfx.tga
+		glow
+	}	
+}
+players/martiancyborg/tron3
+{
+	{
+		map players/martiancyborg/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_cyborgfx.tga
+		glow
+	}	
+}
+players/martianenforcer/tron3
+{
+	{
+		map players/martianenforcer/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_martianfx.tga
+		glow
+	}	
+}
+players/martianoverlord/tron3
+{
+	{
+		map players/martianoverlord/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_overlordfx.tga
+		glow
+	}	
+}
+players/martianwarrior/tron3
+{
+	{
+		map players/martianwarrior/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_warriorfx.tga
+		glow
+	}	
+}
+players/slashbot/tron3
+{
+	{
+		map players/slashbot/tron_normal.tga
+		normalmap
+		map2 gfx/tron3_slashbotfx.tga
+		glow
+	}	
+}
