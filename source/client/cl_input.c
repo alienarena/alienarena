@@ -642,9 +642,12 @@ void IN_Move (usercmd_t *cmd)
 		fmx = ( fmx + mouse_odiff_x ) * 0.5f;
 		fmy = ( fmy + mouse_odiff_y ) * 0.5f;
 	}
-	mouse_odiff_x = mouse_diff_x;
-	mouse_odiff_y = mouse_diff_y;
-	mouse_diff_x = mouse_diff_y = 0;
+	if (cmd)
+	{
+		mouse_odiff_x = mouse_diff_x;
+		mouse_odiff_y = mouse_diff_y;
+		mouse_diff_x = mouse_diff_y = 0;
+	}
 
 	// No mouse in console
 	if ( cls.key_dest == key_console ) {
@@ -675,14 +678,24 @@ void IN_Move (usercmd_t *cmd)
 
 	// Add mouse X/Y movement to cmd
 	if ( ( lookstrafe->integer && mlooking ) || ( in_strafe.state & 1 ) ) {
+		if (!cmd)
+			return;
 		cmd->sidemove += (short)( ( m_side->value * fmx ) + 0.5f );
 	} else {
-		cl.viewangles[ YAW ] -= m_yaw->value * fmx;
+		if (cmd)
+			cl.viewangles[ YAW ] -= m_yaw->value * fmx;
+		else
+			cl.predicted_angles[ YAW ] = cl.last_predicted_angles[ YAW ] - m_yaw->value * fmx;
 	}
 
 	if ( ( mlooking || freelook->integer ) && !( in_strafe.state & 1 ) ) {
-		cl.viewangles[ PITCH ] += m_pitch->value * fmy;
+		if (cmd)
+			cl.viewangles[ PITCH ] += m_pitch->value * fmy;
+		else
+			cl.predicted_angles[ PITCH ] = cl.last_predicted_angles[ PITCH ] + m_pitch->value * fmy;
 	} else {
+		if (!cmd)
+			return;
 		cmd->forwardmove -= (short)( ( m_forward->value * fmy )
 				+ 0.5f );
 	}

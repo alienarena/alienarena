@@ -108,6 +108,8 @@ cvar_t	*m_yaw;
 cvar_t	*m_forward;
 cvar_t	*m_side;
 
+cvar_t	*cl_test;
+
 //
 // userinfo
 //
@@ -1980,6 +1982,8 @@ void CL_InitLocal (void)
 
 	rcon_client_password = Cvar_Get ("rcon_password", "", CVARDOC_STR);
 	rcon_address = Cvar_Get ("rcon_address", "", CVARDOC_STR);
+	
+	cl_test = Cvar_Get ("cl_test", "0", 0);
 
 	//
 	// userinfo
@@ -2589,6 +2593,14 @@ void CL_Frame( int msec )
 	if ( render_trigger )
 	{
 		++render_counter; // counting renders since last packet
+		
+		if (!packet_trigger && cl_test->integer)
+		{
+			/* system dependent keyboard and mouse input event polling */
+			cls.frametime  = ((float)packet_timer) / 1000.0f;
+			Sys_SendKeyEvents();
+			IN_Move(NULL);
+		}
 
 		/*
 		 * calculate cls.frametime in seconds for render procedures.
