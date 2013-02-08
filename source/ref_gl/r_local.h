@@ -305,7 +305,6 @@ extern image_t *r_blooddroplets;
 extern image_t *r_blooddroplets_nm;
 extern void BSP_DrawTexturelessPoly (msurface_t *fa);
 extern void BSP_DrawTexturelessBrushModel (entity_t *e);
-extern void BSP_RenderBrushPoly (msurface_t *fa);
 
 //Postprocess
 void R_GLSLPostProcess(void);
