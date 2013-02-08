@@ -48,7 +48,6 @@ typedef struct image_s
 	int			width, height;			// source image
 	int			upload_width, upload_height;	// after power of two and picmip
 	int			registration_sequence;		// 0 = free
-	struct msurface_s	*texturechain;			// for sort-by-texture world drawing
 	int			texnum;				// gl texture binding
 	float			sl, tl, sh, th;			// 0,0 - 1,1 unless part of the scrap
 	int				crop_left, crop_top, crop_right, crop_bottom; //for cropped 2D drawing
