@@ -1449,10 +1449,12 @@ void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec3_t p2)
 	float		t1, t2, offset;
 	float		frac, frac2;
 	float		idist;
-	int			i;
 	vec3_t		mid;
 	int			side;
 	float		midf;
+	vec3_t		p1_copy;
+
+re_test:
 
 	if (trace_trace.fraction <= p1f)
 		return;		// already hit something nearer
@@ -1499,13 +1501,13 @@ return;
 	// see which sides we need to consider
 	if (t1 >= offset && t2 >= offset)
 	{
-		CM_RecursiveHullCheck (node->children[0], p1f, p2f, p1, p2);
-		return;
+		num = node->children[0];
+		goto re_test;
 	}
 	if (t1 < -offset && t2 < -offset)
 	{
-		CM_RecursiveHullCheck (node->children[1], p1f, p2f, p1, p2);
-		return;
+		num = node->children[1];
+		goto re_test;
 	}
 
 	// put the crosspoint DIST_EPSILON pixels on the near side
@@ -1537,10 +1539,15 @@ return;
 		frac = 1;
 
 	midf = p1f + (p2f - p1f)*frac;
-	for (i=0 ; i<3 ; i++)
-		mid[i] = p1[i] + frac*(p2[i] - p1[i]);
+	mid[0] = p1[0] + frac*(p2[0] - p1[0]);
+	mid[1] = p1[1] + frac*(p2[1] - p1[1]);
+	mid[2] = p1[2] + frac*(p2[2] - p1[2]);
+	
+	// so we can modify p1
+	VectorCopy (p1, p1_copy);
 
-	CM_RecursiveHullCheck (node->children[side], p1f, midf, p1, mid);
+	// this is the only case where the function actually recurses
+	CM_RecursiveHullCheck (node->children[side], p1f, midf, p1_copy, mid);
 
 
 	// go past the node
@@ -1549,11 +1556,13 @@ return;
 	if (frac2 > 1)
 		frac2 = 1;
 
-	midf = p1f + (p2f - p1f)*frac2;
-	for (i=0 ; i<3 ; i++)
-		mid[i] = p1[i] + frac2*(p2[i] - p1[i]);
-
-	CM_RecursiveHullCheck (node->children[side^1], midf, p2f, mid, p2);
+	p1f += (p2f - p1f)*frac2;
+	p1[0] += frac2*(p2[0] - p1[0]);
+	p1[1] += frac2*(p2[1] - p1[1]);
+	p1[2] += frac2*(p2[2] - p1[2]);
+	
+	num = node->children[side^1];
+	goto re_test;
 }
 
 
@@ -1570,6 +1579,7 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 						  int headnode, int brushmask)
 {
 	int		i;
+	vec3_t	local_start, local_end;
 
 	checkcount++;		// for multi-check avoidance
 
@@ -1588,7 +1598,7 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 	VectorCopy (end, trace_end);
 	VectorCopy (mins, trace_mins);
 	VectorCopy (maxs, trace_maxs);
-
+	
 	if ( !(start == end) &&
 			(start[0] != end[0] || start[1] != end[1] || start[2] != end[2]) )
 	{
@@ -1609,7 +1619,9 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 		//
 		// general sweeping through world
 		//
-		CM_RecursiveHullCheck (headnode, 0, 1, start, end);
+		VectorCopy (start, local_start); // so the function can modify these in-place
+		VectorCopy (end, local_end);
+		CM_RecursiveHullCheck (headnode, 0, 1, local_start, local_end);
 
 		if (trace_trace.fraction == 1)
 		{
