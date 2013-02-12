@@ -139,6 +139,7 @@ void BuildFacelights (int facenum);
 
 void FinalLightFace (int facenum);
 void BlurFace (int facenum);
+void DetectUniformColor (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 

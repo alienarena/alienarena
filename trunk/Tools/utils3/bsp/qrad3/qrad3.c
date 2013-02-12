@@ -766,6 +766,7 @@ void ShootLight (int patchnum)
 	}
 }
 
+
 /*
 =============
 BounceLight
@@ -1223,6 +1224,7 @@ int main (int argc, char **argv)
 	if (refine_setting > 0)
 	{
 		TranslateRefine ();
+		RunThreadsOnIndividual (numfaces, false, DetectUniformColor);
 		WriteLTMPFile (name);
 	}
 	else

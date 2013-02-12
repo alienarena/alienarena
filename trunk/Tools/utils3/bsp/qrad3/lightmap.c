@@ -1837,3 +1837,48 @@ void BlurFace (int facenum)
 		}
 	}
 }
+
+
+/*
+=============
+DetectUniformColor
+
+Detect if a face is all one color, and if so, shrink it to a 2x2 pixel block.
+It is impossible to have any lightmap block smaller than 2 in any direction, 
+because the game engine wants to save half a pixel on each side as a border.
+Nonetheless, even a reducing it to 4 pixels saves considerable space in video
+memory, allowing fewer lightmap textures to be used.
+
+TODO: actually exclude the redundant data from the file. Not so important to 
+do this, as file sizes are less important than final video memory usage, but
+may be worthwhile anyway.
+=============
+*/
+void DetectUniformColor (int facenum)
+{
+	byte		*sample_buf, *sample;
+	int			width, height, s, t;
+	
+	sample_buf = &dlightdata[dfaces[facenum].lightofs];
+	
+	width = lfacelookups[facenum].width;
+	height = lfacelookups[facenum].height;
+	
+	for (t = 0; t < height; t++)
+	{
+		for (s = 0; s < width; s++)
+		{
+			sample = &sample_buf[(t*width+s)*3];
+			if (sample[0] != sample_buf[0] || sample[1] != sample_buf[1] || sample[2] != sample_buf[2])
+				return;
+		}
+	}
+	
+	// just use a really big number
+	lfacelookups[facenum].xscale = 10e20;
+	lfacelookups[facenum].yscale = 10e20;
+	
+	lfacelookups[facenum].width = 2;
+	lfacelookups[facenum].height = 2;
+	
+}
