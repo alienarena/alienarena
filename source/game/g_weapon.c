@@ -2108,10 +2108,10 @@ void tactical_bomb_think (edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 
 	if(self->armed)
-	{
-		//change skin so that it's got a red light
-		self->s.skinnum = 1;
-		self->s.frame = (self->s.frame + 1) % 23; 
+	{		
+		self->s.frame++;
+		if(self->s.frame > 10)
+			self->s.frame = 10;
 		self->nade_timer++; //this should only start after armed
 	}
 
@@ -2148,10 +2148,11 @@ void abomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
 	//do we just want players with detonators to just touch them?  Touch for now...maybe actually fire one off in future?
 	if(other->has_detonator && other->ctype == 0)
 	{
-		//to do - play global sound, and print message to activator 
+		
 		ent->armed = true;
 		other->has_detonator = false; //only get one
-		safe_bprintf(PRINT_HIGH, "Bomb is armed!\n"); //leave until we get a sound
+		safe_bprintf(PRINT_HIGH, "Bomb is armed!\n"); 
+		gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "weapons/adetonatorup.wav" ), 1, ATTN_NONE, 0 );
 	}
 
 	//just bounce off of everything
@@ -2212,6 +2213,7 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 {
 	edict_t	*bomb;
     vec3_t	dir, forward, right, up;
+	float *v;
 
 	vectoangles(aimdir, dir);
 	AngleVectors(dir, forward, right, up);
@@ -2225,16 +2227,18 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	bomb->movetype = MOVETYPE_BOUNCE;
 	bomb->clipmask = MASK_SHOT;
 	bomb->solid = SOLID_BBOX;
-	VectorClear (bomb->mins);
-	VectorClear (bomb->maxs);
+	v = tv(-8,-8,0);
+	VectorCopy (v, bomb->mins);
+	v = tv(8,8,16);
+	VectorCopy (v, bomb->maxs);
 	if(self->ctype)
 	{
-		bomb->s.modelindex = gi.modelindex ("items/tactical/human_bomb.md2"); 
+		bomb->s.modelindex = gi.modelindex ("models/tactical/human_bomb.iqm"); 
 		bomb->touch = hbomb_touch;
 	}
 	else
 	{
-		bomb->s.modelindex = gi.modelindex ("items/tactical/alien_bomb.md2");
+		bomb->s.modelindex = gi.modelindex ("models/tactical/alien_bomb.iqm");
 		bomb->touch = abomb_touch;
 	}
 	bomb->owner = self;

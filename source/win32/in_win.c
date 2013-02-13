@@ -747,7 +747,7 @@ void IN_JoyMove (usercmd_t *cmd)
 		return;
 	}
 
-	if ( (in_speed.state & 1) ^ cl_run->integer)
+	if (!cl.tactical && ( (in_speed.state & 1) ^  cl_run->integer))
 		speed = 2;
 	else
 		speed = 1;

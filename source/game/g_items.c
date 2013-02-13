@@ -1383,7 +1383,7 @@ gitem_t	itemlist[] =
 		NULL, 
 		Weapon_TacticalBomb, //fire out bomb, not too far, like prox mines 
 		NULL,
-		"items/tactical/alien_bomb.md2", 0,
+		"models/tactical/alien_bomb.iqm", 0,
 		"vehicles/deathball/v_wep.md2", //will use db's vweap for bombs and detonators
 /* icon */		"abomb", 
 /* pickup */	"Alien Bomb",
@@ -1404,7 +1404,7 @@ gitem_t	itemlist[] =
 		NULL, 
 		Weapon_TacticalBomb, //fire out bomb, not too far, like prox mines 
 		NULL,
-		"items/tactical/human_bomb.md2", 0,
+		"models/tactical/human_bomb.iqm", 0,
 		"vehicles/deathball/v_wep.md2", //will use db's vweap for bombs and detonators
 /* icon */		"abomb", 
 /* pickup */	"Human Bomb",
