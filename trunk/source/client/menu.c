@@ -3735,6 +3735,8 @@ void JoinServerFunc( void *self )
 	char    modstring[64];
 	char    *token;
 
+	cl.tactical = false;
+
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
 	playeridx = s_playerlist_scrollbar.curvalue = 0;
@@ -7010,6 +7012,8 @@ static void MartianenforcerActionFunc( void *unused )
 {
 	char buffer[128];
 
+	cl.tactical = true;
+
 	//set skin and model
 	Com_sprintf( buffer, sizeof( buffer ), "martianenforcer/default" );
 
@@ -7024,6 +7028,8 @@ static void MartianenforcerActionFunc( void *unused )
 static void MartianwarriorActionFunc( void *unused )
 {
 	char buffer[128];
+
+	cl.tactical = true;
 
 	//set skin and model
 	Com_sprintf( buffer, sizeof( buffer ), "martianwarrior/default" );
@@ -7040,6 +7046,8 @@ static void MartianoverlordActionFunc( void *unused )
 {
 	char buffer[128];
 
+	cl.tactical = true;
+
 	//set skin and model
 	Com_sprintf( buffer, sizeof( buffer ), "martianoverlord/default" );
 
@@ -7055,6 +7063,8 @@ static void LaurenActionFunc( void *unused )
 {
 	char buffer[128];
 
+	cl.tactical = true;
+
 	//set skin and model
 	Com_sprintf( buffer, sizeof( buffer ), "lauren/default" );
 
@@ -7069,6 +7079,8 @@ static void LaurenActionFunc( void *unused )
 static void EnforcerActionFunc( void *unused )
 {
 	char buffer[128];
+
+	cl.tactical = true;
 
 	//set skin and model
 	Com_sprintf( buffer, sizeof( buffer ), "enforcer/default" );

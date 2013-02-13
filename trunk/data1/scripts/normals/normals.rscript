@@ -1371,3 +1371,14 @@ maps/meshes/monitor
 		cube
 	}
 }
+models/tactical/abomb
+{
+	{
+		map models/tactical/abomb_normal.tga
+		normalmap
+		map2 models/tactical/abomb_fx.tga
+		glow
+		map3 gfx/chrome2.tga
+		cube
+	}
+}

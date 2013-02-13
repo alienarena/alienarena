@@ -159,6 +159,7 @@ typedef struct
 	int			servercount;	// server identification for prespawns
 	char		gamedir[MAX_QPATH];
 	int			playernum;
+	qboolean	tactical; //used for certain client needs
 
 	// Alien Arena client/server protocol depends on MAX_QPATH being 64.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
