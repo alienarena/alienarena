@@ -1382,3 +1382,14 @@ models/tactical/abomb
 		cube
 	}
 }
+models/tactical/hbomb
+{
+	{
+		map models/tactical/hbomb_normal.tga
+		normalmap
+		map2 models/tactical/hbomb_fx.tga
+		glow
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
