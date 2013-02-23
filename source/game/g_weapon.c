@@ -2109,7 +2109,6 @@ void tactical_bomb_think (edict_t *self)
 
 	if(self->armed)
 	{		
-		//to do - depending on what the human bomb winds up like, animation cycle will be different for it
 		self->s.frame++;
 		if(self->s.frame > 10)
 			self->s.frame = 10;
@@ -2135,7 +2134,10 @@ void tactical_bomb_think (edict_t *self)
 		gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BFG_BIGEXPLOSION); //might want different, massive effect here
+		if(self->classname == "abomb")
+			gi.WriteByte (TE_BFG_BIGEXPLOSION);
+		else
+			gi.WriteByte (TE_ROCKET_EXPLOSION); //might want different, massive effect here
 		gi.WritePosition (self->s.origin);
 		gi.multicast (self->s.origin, MULTICAST_PHS);
 
@@ -2221,7 +2223,10 @@ void bomb_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	T_RadiusDamage(self, self->owner, self->radius_dmg/div, NULL, self->dmg_radius/div, MOD_R_SPLASH, 0);
 
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BFG_BIGEXPLOSION);
+	if(self->classname == "abomb")
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
+	else
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
