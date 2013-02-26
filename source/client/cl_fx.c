@@ -79,7 +79,7 @@ void CL_RunLightStyles (void)
 	int		i;
 	clightstyle_t	*ls;
 
-	ofs = cl.time / 100;
+	ofs = cl.time / 25;
 	if (ofs == lastofs)
 		return;
 	lastofs = ofs;
@@ -94,7 +94,17 @@ void CL_RunLightStyles (void)
 		if (ls->length == 1)
 			ls->value[0] = ls->value[1] = ls->value[2] = ls->map[0];
 		else
-			ls->value[0] = ls->value[1] = ls->value[2] = ls->map[ofs%ls->length];
+		{
+			// nonlinear interpolation of the lightstyles for smoothness while
+			// still preserving some "jaggedness"
+			float a, b, dist;
+			a = ls->map[(ofs/4)%ls->length];
+			b = ls->map[(ofs/4+1)%ls->length];
+			dist = (float)(ofs%4)/4.0f;
+			if (dist != 0.75)
+				dist = 0;
+			ls->value[0] = ls->value[1] = ls->value[2] = a+(b-a)*dist;
+		}
 	}
 }
 
