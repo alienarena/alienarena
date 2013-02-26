@@ -251,6 +251,9 @@ typedef struct msurface_s
 	struct	msurface_s	*texturechain;
 	struct	msurface_s	*rscriptchain;
 	
+	//texture chain for lightstyle updating
+	struct	msurface_s	*flickerchain;
+	
 	vec3_t mins;
 	vec3_t maxs;
 
@@ -264,6 +267,9 @@ typedef struct msurface_s
 // lighting info
 	int			dlightframe;
 	int			dlightbits;
+	
+	int			lightmins[2];
+	int			lightmaxs[2];
 
 	int			lightmaptexturenum;
 	byte		styles[MAXLIGHTMAPS];

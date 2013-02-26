@@ -531,9 +531,10 @@ store:
 				a = a*t;
 			}
 
-			dest[0] = r;
+            // GL_BGRA
+			dest[0] = b;
 			dest[1] = g;
-			dest[2] = b;
+			dest[2] = r;
 			dest[3] = a;
 
 			bl += 3;
