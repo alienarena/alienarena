@@ -279,6 +279,7 @@ extern  cvar_t	*cl_playtaunts;
 extern	cvar_t	*cl_centerprint;
 extern	cvar_t	*cl_precachecustom;
 extern  cvar_t	*cl_simpleitems;
+extern	cvar_t	*cl_flicker;
 
 extern	cvar_t	*cl_paindist;
 extern	cvar_t	*cl_explosiondist;

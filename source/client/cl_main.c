@@ -79,6 +79,7 @@ cvar_t	*cl_playtaunts;
 cvar_t	*cl_centerprint;
 cvar_t	*cl_precachecustom;
 cvar_t	*cl_simpleitems;
+cvar_t	*cl_flicker;
 
 cvar_t	*cl_paindist;
 cvar_t	*cl_explosiondist;
@@ -1941,6 +1942,8 @@ void CL_InitLocal (void)
 	Cvar_Describe (cl_precachecustom, "precache 3rd-party and custom player skins at the first map load.");
 	cl_simpleitems = Cvar_Get ("cl_simpleitems", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	Cvar_Describe (cl_simpleitems, "show sprites instead of models for pickup items.");
+	cl_flicker = Cvar_Get ("cl_flicker", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_flicker, "enable flickering world lighting.");
 
 	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
 	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);
