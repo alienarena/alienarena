@@ -86,7 +86,7 @@ void CL_RunLightStyles (void)
 
 	for (i=0,ls=cl_lightstyle ; i<MAX_LIGHTSTYLES ; i++, ls++)
 	{
-		if (!ls->length)
+		if (!ls->length || !cl_flicker->integer)
 		{
 			ls->value[0] = ls->value[1] = ls->value[2] = 1.0;
 			continue;
