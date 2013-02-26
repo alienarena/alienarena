@@ -1813,18 +1813,11 @@ void R_CalcWorldLights( void )
 
 /*
 =============
-R_DrawWorld
+R_DrawWorldSurfs
 =============
 */
-void R_DrawWorld (void)
+void R_DrawWorldSurfs (void)
 {
-	entity_t		ent;
-	static int		old_visframecount, old_dlightcount, last_bsp_time;
-	static vec3_t	old_origin, old_angle;
-	vec3_t			delta_origin, delta_angle;
-	qboolean		do_bsp;
-	int				cur_ms;
-	
 	if (!r_drawworld->integer)
 		return;
 
@@ -1836,67 +1829,8 @@ void R_DrawWorld (void)
 		Com_Printf ("WARN: No area bits!\n");
 		return;
 	}
-
-	currentmodel = r_worldmodel;
-
-	VectorCopy (r_newrefdef.vieworg, modelorg);
-
-	// auto cycle the world frame for texture animation
-	memset (&ent, 0, sizeof(ent));
-	ent.frame = (int)(r_newrefdef.time*2);
-	currententity = &ent;
-
-	gl_state.currenttextures[0] = gl_state.currenttextures[1] = -1;
-
+	
 	qglColor3f (1,1,1);
-
-	R_CalcWorldLights();
-
-	// r_optimize: only re-recurse the BSP tree if the player has moved enough
-	// to matter.
-	VectorSubtract (r_origin, old_origin, delta_origin);
-	VectorSubtract (r_newrefdef.viewangles, old_angle, delta_angle);
-	do_bsp =	old_visframecount != r_visframecount ||
-				VectorLength (delta_origin) > 5.0 ||
-				VectorLength (delta_angle) > 2.0 ||
-				r_newrefdef.num_dlights != 0 ||
-				old_dlightcount != 0 ||
-				!r_optimize->integer || draw_sun;
-	
-	cur_ms = Sys_Milliseconds ();
-	
-	// After a certain amount of time, increase the sensitivity to movement
-	// and angle. If we go too long without re-recursing the BSP tree, it 
-	// means the player is either moving very slowly or not moving at all. If
-	// the player is moving slowly enough, it can catch the r_optimize code
-	// napping and cause artefacts, so we should be extra vigilant just in 
-	// case. Something you basically have to do on purpose, but we go the 
-	// extra mile.
-	if (r_optimize->integer && !do_bsp)
-	{
-		// be sure to handle integer overflow of the millisecond counter
-		if (cur_ms < last_bsp_time || last_bsp_time+100 < cur_ms)
-			do_bsp =	VectorLength (delta_origin) > 0.5 ||
-						VectorLength (delta_angle) > 0.2;
-			
-	}
-	
-	if (do_bsp)
-	{
-		R_ClearSkyBox ();
-		BSP_ClearWorldTextureChains ();
-		BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
-		
-		old_visframecount = r_visframecount;
-		VectorCopy (r_origin, old_origin);
-		VectorCopy (r_newrefdef.viewangles, old_angle);
-		last_bsp_time = cur_ms;
-	}
-	old_dlightcount = r_newrefdef.num_dlights;
-	
-	//TODO: r_optimize could also store a list of GL commands and replay those
-	//instead of running through the whole linked list of surfaces, merging
-	//VBO batches, etc. 
 
 	BSP_DrawTextureChains ( false );	
 
@@ -1905,6 +1839,8 @@ void R_DrawWorld (void)
 	qglDepthMask(0);
 	R_DrawSkyBox();
 	qglDepthMask(1);
+	
+	R_DrawRSSurfaces();
 }
 
 /*
@@ -1926,18 +1862,6 @@ void R_MarkLeaves (void)
 	static int minleaf_allareas, maxleaf_allareas;
 	int minleaf, maxleaf;
 	
-	if (!r_drawworld->integer)
-		return;
-
-	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
-		return;
-	
-	if (r_newrefdef.areabits == NULL)
-	{
-		Com_Printf ("WARN: No area bits!\n");
-		return;
-	}
-
 	if	(	r_oldviewcluster == r_viewcluster && 
 			r_oldviewcluster2 == r_viewcluster2 && 
 			!r_novis->integer && r_viewcluster != -1 &&
@@ -2010,9 +1934,6 @@ void R_MarkLeaves (void)
 		}
 	}
 	
-	if (!r_drawworld->integer)
-		return;
-	
 	for (i=minleaf,leaf=r_worldmodel->leafs+minleaf ; i<=maxleaf ; i++, leaf++)
 	{
 		cluster = leaf->cluster;
@@ -2030,6 +1951,92 @@ void R_MarkLeaves (void)
 			} while (node);
 		}
 	}
+}
+
+/*
+===============
+R_MarkWorldSurfs
+
+Mark all surfaces that will need to be drawn this frame
+===============
+*/
+void R_MarkWorldSurfs (void)
+{
+	entity_t		ent;
+	static int		old_visframecount, old_dlightcount, last_bsp_time;
+	static vec3_t	old_origin, old_angle;
+	vec3_t			delta_origin, delta_angle;
+	qboolean		do_bsp;
+	int				cur_ms;
+	
+	if (!r_drawworld->integer)
+		return;
+
+	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
+		return;
+	
+	if (r_newrefdef.areabits == NULL)
+	{
+		Com_Printf ("WARN: No area bits!\n");
+		return;
+	}
+	
+	R_MarkLeaves ();
+
+	currentmodel = r_worldmodel;
+
+	VectorCopy (r_newrefdef.vieworg, modelorg);
+
+	// auto cycle the world frame for texture animation
+	memset (&ent, 0, sizeof(ent));
+	ent.frame = (int)(r_newrefdef.time*2);
+	currententity = &ent;
+
+	gl_state.currenttextures[0] = gl_state.currenttextures[1] = -1;
+
+	R_CalcWorldLights();
+
+	// r_optimize: only re-recurse the BSP tree if the player has moved enough
+	// to matter.
+	VectorSubtract (r_origin, old_origin, delta_origin);
+	VectorSubtract (r_newrefdef.viewangles, old_angle, delta_angle);
+	do_bsp =	old_visframecount != r_visframecount ||
+				VectorLength (delta_origin) > 5.0 ||
+				VectorLength (delta_angle) > 2.0 ||
+				r_newrefdef.num_dlights != 0 ||
+				old_dlightcount != 0 ||
+				!r_optimize->integer || draw_sun;
+	
+	cur_ms = Sys_Milliseconds ();
+	
+	// After a certain amount of time, increase the sensitivity to movement
+	// and angle. If we go too long without re-recursing the BSP tree, it 
+	// means the player is either moving very slowly or not moving at all. If
+	// the player is moving slowly enough, it can catch the r_optimize code
+	// napping and cause artefacts, so we should be extra vigilant just in 
+	// case. Something you basically have to do on purpose, but we go the 
+	// extra mile.
+	if (r_optimize->integer && !do_bsp)
+	{
+		// be sure to handle integer overflow of the millisecond counter
+		if (cur_ms < last_bsp_time || last_bsp_time+100 < cur_ms)
+			do_bsp =	VectorLength (delta_origin) > 0.5 ||
+						VectorLength (delta_angle) > 0.2;
+			
+	}
+	
+	if (do_bsp)
+	{
+		R_ClearSkyBox ();
+		BSP_ClearWorldTextureChains ();
+		BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
+		
+		old_visframecount = r_visframecount;
+		VectorCopy (r_origin, old_origin);
+		VectorCopy (r_newrefdef.viewangles, old_angle);
+		last_bsp_time = cur_ms;
+	}
+	old_dlightcount = r_newrefdef.num_dlights;
 }
 
 
