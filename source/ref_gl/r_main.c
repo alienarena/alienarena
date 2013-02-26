@@ -1050,7 +1050,7 @@ void R_RenderView (refdef_t *fd)
 
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
 		Com_Error (ERR_DROP, "R_RenderView: NULL worldmodel");
-
+	
 	// init r_speeds counters
 	last_c_brush_polys = c_brush_polys;
 	last_c_alias_polys = c_alias_polys;
@@ -1063,16 +1063,18 @@ void R_RenderView (refdef_t *fd)
 
 	R_PushDlights ();
 
-	if (gl_finish->integer)
-		qglFinish ();
-
 	R_SetupFrame ();
 
 	R_SetFrustum ();
+	
+	R_MarkWorldSurfs ();	// done here so we know if we're in water
+	
+	if (gl_finish->integer)
+		qglFinish ();
+	
+	// OpenGL calls come after here
 
 	R_SetupGL ();
-
-	R_MarkLeaves ();	// done here so we know if we're in water
 
 	if(map_fog)
 	{
@@ -1084,9 +1086,7 @@ void R_RenderView (refdef_t *fd)
 		qglEnable(GL_FOG);
 	}
 
-	R_DrawWorld ();
-
-	R_DrawRSSurfaces();
+	R_DrawWorldSurfs ();
 
 	if(r_lensflare->integer)
 		R_RenderFlares ();
