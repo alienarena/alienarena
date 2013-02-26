@@ -42,11 +42,11 @@ dlight_t *dynLight;
 int		c_visible_lightmaps;
 int		c_visible_textures;
 
-#define GL_LIGHTMAP_FORMAT GL_RGBA
+// This is supposed to be faster on some older hardware.
+#define GL_LIGHTMAP_FORMAT GL_BGRA 
 
 typedef struct
 {
-	int internal_format;
 	int	current_lightmap_texture;
 
 	// For each column, what is the last row where a pixel is used
@@ -242,6 +242,11 @@ msurface_t	*r_ent_alpha_surfaces;
 msurface_t	*r_rscript_surfaces; // no brush models can have rscript surfs
 msurface_t	*r_warp_surfaces;
 msurface_t	*r_ent_warp_surfaces;
+
+// This is a chain of surfaces that may need to have their lightmaps updated.
+// They are not rendered in the order of this chain and will be linked into
+// other chains for rendering.
+msurface_t	*r_flicker_surfaces;
 
 
 /*
@@ -1171,6 +1176,7 @@ void BSP_ClearWorldTextureChains (void)
     r_warp_surfaces = NULL;
     r_alpha_surfaces = NULL;
     r_rscript_surfaces = NULL;
+    r_flicker_surfaces = NULL;
 }
 
 /*
@@ -1187,6 +1193,7 @@ brushmodel entity or in the world's static geometry, followed by a single call
 to BSP_DrawTextureChains to render them all in one fell swoop.
 ================
 */
+void BSP_UpdateSurfaceLightmap (msurface_t *surf);
 void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 {
 	int			map;
@@ -1242,18 +1249,35 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// on GLSL for dynamically lit surfaces, even with gl_bspnormalmaps 0.
 	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->integer && gl_dynamic->integer)
 	{
-		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
-		{
-			if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map] )
-				goto dynamic;
-		}
-
 		// dynamic this frame or dynamic previously
 		if ( ( surf->dlightframe == r_framecount ) )
 		{
-	dynamic:
 			if ( !SurfaceHasNoLightmap(surf) )
 				is_dynamic = true;
+		}
+	}
+	
+	// reviving the ancient lightstyle system
+	if ( !SurfaceHasNoLightmap(surf) )
+	{
+		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
+		{
+			// Chain of surfaces that may need to have their lightmaps updated
+			// in future frames (for dealing with r_optimize)
+			if (surf->styles[map] != 0)
+			{
+				if (!forEnt)
+				{
+					surf->flickerchain = r_flicker_surfaces;
+					r_flicker_surfaces = surf;
+					break;
+				}
+				if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map])
+				{
+					BSP_UpdateSurfaceLightmap (surf);
+					break;
+				}
+			}
 		}
 	}
 
@@ -1326,8 +1350,25 @@ entity surfaces, reset the linked lists afterward.
 */
 void BSP_DrawTextureChains (qboolean forEnt)
 {
+	msurface_t	*flickersurf;
+	int			map;
+	
 	if (!forEnt)
+	{
 		R_KillVArrays (); // TODO: check if necessary
+		
+		for (flickersurf = r_flicker_surfaces; flickersurf != NULL; flickersurf = flickersurf->flickerchain)
+		{
+			for ( map = 0; map < MAXLIGHTMAPS && flickersurf->styles[map] != 255; map++ )
+			{
+				if ( r_newrefdef.lightstyles[flickersurf->styles[map]].white != flickersurf->cached_light[map])
+				{
+					BSP_UpdateSurfaceLightmap (flickersurf);
+					break;
+				}
+			}
+		}
+	}
 
 	// Setup GL state for lightmap render 
 	// (TODO: only necessary for fixed-function pipeline?)
@@ -2026,11 +2067,11 @@ static void LM_UploadBlock (void)
 	
 	qglTexImage2D( GL_TEXTURE_2D,
 				   0,
-				   gl_lms.internal_format,
+				   GL_RGBA,
 				   LIGHTMAP_SIZE, LIGHTMAP_SIZE,
 				   0,
 				   GL_LIGHTMAP_FORMAT,
-				   GL_UNSIGNED_BYTE,
+				   GL_UNSIGNED_INT_8_8_8_8_REV,
 				   gl_lms.lightmap_buffer );
 	
 #if 0
@@ -2221,12 +2262,32 @@ void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax, int *light
 	}
 
 	surf->lightmaptexturenum = gl_lms.current_lightmap_texture;
+	
+	surf->lightmins[0] = *light_s;
+	surf->lightmins[1] = *light_t;
+	surf->lightmaxs[0] = smax;
+	surf->lightmaxs[1] = tmax;
 
 	base = gl_lms.lightmap_buffer;
 	base += ((*light_t) * LIGHTMAP_SIZE + *light_s) * LIGHTMAP_BYTES;
 
 	R_SetCacheState( surf );
 	R_BuildLightMap (surf, base, smax, tmax, LIGHTMAP_SIZE*LIGHTMAP_BYTES);
+}
+
+void BSP_UpdateSurfaceLightmap (msurface_t *surf)
+{
+	R_SetCacheState (surf);
+	R_BuildLightMap (surf, gl_lms.lightmap_buffer, surf->lightmaxs[0], surf->lightmaxs[1], surf->lightmaxs[0]*LIGHTMAP_BYTES);
+	
+	GL_Bind( gl_state.lightmap_textures + surf->lightmaptexturenum );
+	qglTexSubImage2D( GL_TEXTURE_2D, 
+					  0,
+					  surf->lightmins[0], surf->lightmins[1],
+					  surf->lightmaxs[0], surf->lightmaxs[1],
+					  GL_LIGHTMAP_FORMAT,
+					  GL_UNSIGNED_INT_8_8_8_8_REV,
+					  gl_lms.lightmap_buffer );
 }
 
 /*
@@ -2263,8 +2324,6 @@ void BSP_BeginBuildingLightmaps (model_t *m)
 		gl_state.lightmap_textures	= TEXNUM_LIGHTMAPS;
 
 	gl_lms.current_lightmap_texture = 1;
-
-	gl_lms.internal_format = gl_tex_solid_format;
 
 }
 
