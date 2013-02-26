@@ -2238,11 +2238,8 @@ void BSP_BeginBuildingLightmaps (model_t *m)
 {
 	static lightstyle_t	lightstyles[MAX_LIGHTSTYLES];
 	int				i;
-	byte *dummy;
 
 	memset( gl_lms.allocated, 0, sizeof(gl_lms.allocated) );
-
-	dummy = Z_Malloc(LIGHTMAP_BYTES * LIGHTMAP_SIZE * LIGHTMAP_SIZE);
 
 	r_framecount = 1;		// no dlightcache
 
@@ -2269,22 +2266,6 @@ void BSP_BeginBuildingLightmaps (model_t *m)
 
 	gl_lms.internal_format = gl_tex_solid_format;
 
-	/*
-	** initialize the dynamic lightmap texture
-	*/
-	GL_Bind( gl_state.lightmap_textures + 0 );
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexImage2D( GL_TEXTURE_2D,
-				   0,
-				   gl_lms.internal_format,
-				   LIGHTMAP_SIZE, LIGHTMAP_SIZE,
-				   0,
-				   GL_LIGHTMAP_FORMAT,
-				   GL_UNSIGNED_BYTE,
-				   dummy );
-
-	Z_Free(dummy);
 }
 
 /*
