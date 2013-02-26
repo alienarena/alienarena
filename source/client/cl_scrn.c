@@ -1901,7 +1901,8 @@ void SCR_showFPS(void)
 }
 
 // Shows kilobytes per second from the server
-void SCR_showBandwidth (sizebuf_t *src) {
+extern int c_incoming_bytes;
+void SCR_showBandwidth (void) {
     static perftest_t *test = NULL;
     if (!test) {
         test = get_perftest("bandwidth");
@@ -1913,7 +1914,8 @@ void SCR_showBandwidth (sizebuf_t *src) {
         test->scale = 1.0f/1024.0f; //the SI is wrong, it's 1024
     }
     
-    test->counter += src->cursize;
+    test->counter += c_incoming_bytes;
+    c_incoming_bytes = 0;
 }
 
 // Shows number of frames per second which took longer than a configurable
@@ -2125,7 +2127,7 @@ void SCR_UpdateScreen (void)
 			
 			if(cl_drawbandwidth->integer)
 			{
-				SCR_showBandwidth(&net_message);
+				SCR_showBandwidth();
 			}
 			
 			if(cl_drawframesover->integer)

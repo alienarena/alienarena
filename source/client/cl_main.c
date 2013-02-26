@@ -1308,10 +1308,12 @@ void CL_DumpPackets (void)
 CL_ReadPackets
 =================
 */
+int c_incoming_bytes = 0;
 static void CL_ReadPackets (void)
 {
 	while (NET_GetPacket (NS_CLIENT, &net_from, &net_message))
 	{
+		c_incoming_bytes += net_message.cursize;
 
 		//
 		// remote command packet
