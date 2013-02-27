@@ -755,8 +755,8 @@ void Sys_SendKeyEvents (void)
 	}
 
 	if ( mouse_available && GetCursorPos( &current_pos) ) {
-		mouse_diff_x = current_pos.x - window_center_x;
-		mouse_diff_y = current_pos.y - window_center_y;
+		mouse_diff_x += current_pos.x - window_center_x;
+		mouse_diff_y += current_pos.y - window_center_y;
 		if ( mouse_diff_x || mouse_diff_y ) {
 			SetCursorPos( window_center_x, window_center_y );
 		}
