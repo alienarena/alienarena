@@ -1988,7 +1988,7 @@ void CL_InitLocal (void)
 	rcon_client_password = Cvar_Get ("rcon_password", "", CVARDOC_STR);
 	rcon_address = Cvar_Get ("rcon_address", "", CVARDOC_STR);
 	
-	cl_test = Cvar_Get ("cl_test", "0", 0);
+	cl_test = Cvar_Get ("cl_test", "0", CVAR_ARCHIVE);
 
 	//
 	// userinfo
