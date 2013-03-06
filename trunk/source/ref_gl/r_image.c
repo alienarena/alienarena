@@ -1798,7 +1798,21 @@ int Draw_GetPalette (void)
 
 	LoadPCX ("pics/colormap.pcx", &pic, &pal, &width, &height);
 	if (!pal)
-		Com_Error (ERR_FATAL, "Couldn't load pics/colormap.pcx");
+	{
+		Com_Error (ERR_FATAL,
+				"Couldn't load pics/colormap.pcx\n"
+				"The game executable cannot find its data files. This means\n"
+				"the game is likely not installed correctly."
+				// TODO: automatically generate a list of paths where the data
+				// files should be
+#if defined UNIX_VARIANT
+				" If you\ninstalled the game from the repository of a Linux\n"
+				"distribution, please report this to ther package\n"
+				"maintainers and have them check the README for packaging\n"
+				"instructions."
+#endif //UNIX_VARIANT
+			);
+	}
 
 	for (i=0 ; i<256 ; i++)
 	{
