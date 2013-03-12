@@ -1109,11 +1109,17 @@ extern void SP_misc_teleporter_dest (edict_t *self);
 extern void SP_npc_cow (edict_t *self);
 extern void SP_npc_deathray(edict_t *self);
 
+//TCA
 extern void SP_misc_spiderpod (edict_t *self);
 extern void SP_misc_rednode (edict_t *self);
 extern void SP_misc_bluenode (edict_t *self);
 extern void SP_misc_bluespidernode (edict_t *self);
 extern void SP_misc_redspidernode (edict_t *self);
+
+//Tactical
+extern void SP_misc_aliencomputer (edict_t *self);
+extern void SP_misc_humancomputer (edict_t *self);
+
 extern void SP_misc_mapmodel (edict_t *self);
 extern void SP_misc_watersplash (edict_t *ent);
 extern void SP_misc_electroflash (edict_t *ent);

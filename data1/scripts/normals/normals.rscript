@@ -1393,3 +1393,12 @@ models/tactical/hbomb
 		cube
 	}
 }
+models/tactical/acomputer
+{
+	{
+		map models/tactical/acomputer_normal.tga
+		normalmap
+		map2 models/tactical/acomputer_fx.tga
+		glow
+	}
+}

@@ -1374,6 +1374,84 @@ void SP_misc_bluespidernode (edict_t *ent)
 	M_droptofloor (ent);
 }
 
+//Tactical base items
+
+void computer_think (edict_t *ent)
+{
+	ent->s.frame = (ent->s.frame + 1) % 24;
+	ent->nextthink = level.time + FRAMETIME;
+}
+
+void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	self->takedamage = DAMAGE_NO;
+	self->activator = attacker;
+
+	gi.WriteByte (svc_temp_entity);
+	if(self->classname == "alien computer")
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - notify game rules of disabled computer.  Cause erratic behavior of turrets/rays/ammo depot of this team
+	else
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+	
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	G_FreeEdict (self);
+}
+
+void SP_misc_aliencomputer (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/acomputer.iqm");
+
+	VectorSet (ent->mins, -32, -32, 0);
+	VectorSet (ent->maxs, 32, 32, 64);
+	ent->health = 1500; //note - much testing needed, so this will likely be adjusted
+	ent->die = computer_die;
+	ent->think = computer_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "alien computer";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
+void SP_misc_humancomputer (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/hcomputer.iqm");
+
+	VectorSet (ent->mins, -32, -32, 0);
+	VectorSet (ent->maxs, 32, 32, 64);
+	ent->health = 1500; //note - much testing needed, so this will likely be adjusted
+	ent->die = computer_die;
+	ent->think = computer_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "human computer";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
 void misc_mapmodel_think (edict_t *ent)
 {
 	if(ent->spawnflags & 2)
