@@ -106,11 +106,17 @@ spawn_t	spawns[] = {
 	{"npc_cow", SP_npc_cow},
 	{"npc_deathray", SP_npc_deathray},
 
+	//TCA
 	{"misc_spiderpod", SP_misc_spiderpod},
 	{"misc_rednode", SP_misc_rednode},
 	{"misc_bluenode", SP_misc_bluenode},
 	{"misc_redspidernode", SP_misc_redspidernode},
 	{"misc_bluespidernode", SP_misc_bluespidernode},
+
+	//Tactical
+	{"misc_aliencomputer", SP_misc_aliencomputer},
+	{"misc_humancomputer", SP_misc_humancomputer},
+
 	{"misc_mapmodel", SP_misc_mapmodel},
 	{"misc_watersplash", SP_misc_watersplash},
 	{"misc_electroflash", SP_misc_electroflash},
