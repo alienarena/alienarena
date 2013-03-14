@@ -42,6 +42,7 @@ game_import_t	gi;
 game_export_t	globals;
 spawn_temp_t	st;
 g_vote_t		playervote;
+tactical_t		tacticalScore;
 
 int	sm_meat_index;
 int meansOfDeath;
@@ -855,6 +856,17 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 	blue_team_score = 0;
 	red_team_score = 0;
 
+	if(g_tactical->integer)
+	{
+		tacticalScore.alienAmmoDepot = 
+			tacticalScore.alienComputer = 
+			tacticalScore.alienPowerSource = 
+			tacticalScore.humanAmmoDepot = 
+			tacticalScore.humanComputer = 
+			tacticalScore.humanPowerSource =
+			true;
+	}
+
 	mindEraserTime = level.time;
 
 	//reset level items
@@ -941,21 +953,20 @@ void CheckDMRules (void)
 				--warmup_state;
 				switch ( warmup_state )
 				{
-				case 3:
-					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/three.wav" ), 1, ATTN_NONE, 0 );
-					break;
-				case 2:
-					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/two.wav" ), 1, ATTN_NONE, 0 );
-					break;
-				case 1:
-					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/one.wav" ), 1, ATTN_NONE, 0 );
-					break;
-				case 0:
-					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/fight.wav" ), 1, ATTN_NONE, 0 );
-					break;
-				default:
-					break;
-
+					case 3:
+						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/three.wav" ), 1, ATTN_NONE, 0 );
+						break;
+					case 2:
+						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/two.wav" ), 1, ATTN_NONE, 0 );
+						break;
+					case 1:
+						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/one.wav" ), 1, ATTN_NONE, 0 );
+						break;
+					case 0:
+						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/fight.wav" ), 1, ATTN_NONE, 0 );
+						break;
+					default:
+						break;
 				}
 				if ( warmup_state > 0 )
 				{
@@ -1012,7 +1023,8 @@ void CheckDMRules (void)
 				return;
 			}
 		}
-		else {
+		else 
+		{
 			top_score = 0;
 			for (i=0 ; i<g_maxclients->integer ; i++)
 			{
@@ -1025,7 +1037,8 @@ void CheckDMRules (void)
 
 				if (cl->resp.score >= fraglimit->integer)
 				{
-					if(cl->is_bot){
+					if(cl->is_bot)
+					{
 						bot_won = 1; //a bot has won the match
 						safe_bprintf (PRINT_HIGH, "Fraglimit hit by bot.\n");
 					}
@@ -1039,11 +1052,14 @@ void CheckDMRules (void)
 					return;
 				}
 			}
-			if(!tca->integer && !ctf->integer && !cp->integer) {
+			if(!tca->integer && !ctf->integer && !cp->integer) 
+			{
 				i = fraglimit->integer - top_score;
-				switch(i) {
+				switch(i) 
+				{
 					case 3:
-						if(!print3){
+						if(!print3)
+						{
 							for (i=0 ; i<g_maxclients->integer ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
@@ -1057,7 +1073,8 @@ void CheckDMRules (void)
 						}
 						break;
 					case 2:
-						if(!print2) {
+						if(!print2) 
+						{
 							for (i=0 ; i<g_maxclients->integer ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
@@ -1071,7 +1088,8 @@ void CheckDMRules (void)
 						}
 						break;
 					case 1:
-						if(!print1) {
+						if(!print1) 
+						{
 							for (i=0 ; i<g_maxclients->integer ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
@@ -1090,31 +1108,55 @@ void CheckDMRules (void)
 			}
 		}
 	}
-	if(tca->integer) {
-		if(red_team_matches == 2) {
+
+	if(tca->integer) 
+	{
+		if(red_team_matches == 2) 
+		{
 			safe_bprintf(PRINT_HIGH, "Red Team wins!\n");
 			bot_won = 0; //we don't care if it's a bot that wins
 			EndDMLevel();
 			return;
 		}
-		if(blue_team_matches == 2) {
+		if(blue_team_matches == 2) 
+		{
 			safe_bprintf(PRINT_HIGH, "Blue Team wins!\n");
 			bot_won = 0; //we don't care if it's a bot that wins
 			EndDMLevel();
 			return;
 		}
-		if (blue_team_score == 0) {
+		if (blue_team_score == 0) 
+		{
 			safe_bprintf(PRINT_HIGH, "Red Team wins match %d out of 3!\n", red_team_matches);
 			bot_won = 0;
 			ResetLevel(true);
 			blue_team_score = red_team_score = 4;
 			return;
 		}
-		if (red_team_score == 0) {
+		if (red_team_score == 0) 
+		{
 			safe_bprintf(PRINT_HIGH, "Blue Team wins match %d out of 3!\n", blue_team_matches);
 			bot_won = 0;
 			ResetLevel(true);
 			blue_team_score = red_team_score = 4;
+			return;
+		}
+	}
+
+	if(g_tactical->integer)
+	{
+		if(!tacticalScore.alienAmmoDepot && !tacticalScore.alienComputer && !tacticalScore.alienPowerSource)
+		{
+			safe_bprintf(PRINT_HIGH, "The Humans have defeated the Aliens!\n");
+			bot_won = 0; //we don't care if it's a bot that wins
+			EndDMLevel();
+			return;
+		}
+		if(!tacticalScore.humanAmmoDepot && !tacticalScore.humanComputer && !tacticalScore.humanPowerSource)
+		{
+			safe_bprintf(PRINT_HIGH, "The Humans have defeated the Aliens!\n");
+			bot_won = 0; //we don't care if it's a bot that wins
+			EndDMLevel();
 			return;
 		}
 	}
@@ -1131,7 +1173,8 @@ void ExitLevel (void)
 	edict_t		*ent;
 	char		command [256];
 
-	if(strcmp(level.mapname, level.changemap) || timelimit->value) {
+	if(strcmp(level.mapname, level.changemap) || timelimit->value) 
+	{
 		Com_sprintf( command, sizeof(command), "map \"%s\"\n", level.changemap );
 		gi.AddCommandString( command );
 	}
@@ -1166,37 +1209,57 @@ void ExitLevel (void)
 		ent->takedamage = DAMAGE_AIM;
 		ent->solid = SOLID_BBOX;
 		ent->deadflag = DEAD_NO;
-		if(ent->is_bot) {
+		if(ent->is_bot) 
+		{
 			ACESP_PutClientInServer( ent, true );
-		} else {
+		} 
+		else 
+		{
 			PutClientInServer (ent);
 		}
-		if(g_duel->integer) {
+		if(g_duel->integer) 
+		{
 			ClientPlaceInQueue(ent);
 			ClientCheckQueue(ent);
 		}
 	}
-	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
+	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) 
+	{
 
 		if (!ent->inuse || ent->client)
 			continue;
 		//remove podiums
 		if(!strcmp(ent->classname, "pad"))
 			G_FreeEdict(ent);
-		if(tca->integer) {
+		if(tca->integer) 
+		{
 		    if(strstr(ent->classname, "spidernode"))
 		        ED_CallSpawn (ent);
 		    ent->powered = true;
 		}
 	}
-	if(tca->integer) {
+	if(tca->integer) 
+	{
 		blue_team_score = red_team_score = 4;
 		red_team_matches = blue_team_matches = 0;
 	}
-	else {
+	else 
+	{
 		red_team_score = 0;
 		blue_team_score = 0;
 	}
+
+	if(g_tactical->integer)
+	{
+		tacticalScore.alienAmmoDepot = 
+			tacticalScore.alienComputer = 
+			tacticalScore.alienPowerSource = 
+			tacticalScore.humanAmmoDepot = 
+			tacticalScore.humanComputer = 
+			tacticalScore.humanPowerSource =
+			true;
+	}
+
 	print1 = print2 = print3 = false;
 
 }

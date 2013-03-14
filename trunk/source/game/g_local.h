@@ -499,12 +499,26 @@ typedef struct
 
 } monsterinfo_t;
 
+//tactical
+typedef struct
+{
+	qboolean alienComputer;
+	qboolean alienPowerSource;
+	qboolean alienAmmoDepot;
+
+	qboolean humanComputer;
+	qboolean humanPowerSource;
+	qboolean humanAmmoDepot;
+
+} tactical_t;
+
 extern	game_locals_t	game;
 extern	level_locals_t	level;
 extern	game_import_t	gi;
 extern	game_export_t	globals;
 extern	spawn_temp_t	st;
 extern	g_vote_t		playervote;
+extern  tactical_t		tacticalScore;
 
 extern	int	sm_meat_index;
 

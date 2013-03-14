@@ -1268,7 +1268,8 @@ void redspidernode_think (edict_t *ent)
 	ent->s.frame = (ent->s.frame + 1) % 13;
 	ent->nextthink = level.time + FRAMETIME;
 }
-void red_roundend(edict_t *ent) {
+void red_roundend(edict_t *ent) 
+{
 	red_team_score = 0;
 	blue_team_matches++;
 }
@@ -1326,7 +1327,8 @@ void bluespidernode_think (edict_t *ent)
 	ent->s.frame = (ent->s.frame + 1) % 13;
 	ent->nextthink = level.time + FRAMETIME;
 }
-void blue_roundend(edict_t *self) {
+void blue_roundend(edict_t *self) 
+{
 	blue_team_score = 0;
 	red_team_matches++;
 }
@@ -1375,6 +1377,11 @@ void SP_misc_bluespidernode (edict_t *ent)
 }
 
 //Tactical base items
+//Rules:  When a computer is destroyed, that base's turrents/deathrays will behave eratically, even firing on it's own team on occasion.  Laser barriers shut off.  
+//When a powersource is destroyed, the backup generators for the computer and ammo generator turn on(generator models will animate, emit sound).  Ammo will generate from depot at half speed.  Laser barriers shut off,
+//turrets and deathrays are weak.
+//When an ammo depot is destroyed, ammo stops being produced.
+//When all three are disabled, the other team wins.
 
 void computer_think (edict_t *ent)
 {
@@ -1389,9 +1396,15 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 
 	gi.WriteByte (svc_temp_entity);
 	if(self->classname == "alien computer")
-		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - notify game rules of disabled computer.  Cause erratic behavior of turrets/rays/ammo depot of this team
+	{
+		tacticalScore.alienComputer = false;
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - Cause erratic behavior of turrets/rays/ammo depot of this team.  Laser barriers shut off.
+	}
 	else
+	{
+		tacticalScore.humanComputer = false;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
+	}
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 	
@@ -1412,10 +1425,10 @@ void SP_misc_aliencomputer (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_YES;
 
-	ent->s.modelindex = gi.modelindex ("models/tactical/acomputer.iqm");
+	ent->s.modelindex = gi.modelindex ("models/tactical/alien_computer.iqm");
 
-	VectorSet (ent->mins, -32, -32, 0);
-	VectorSet (ent->maxs, 32, 32, 64);
+	VectorSet (ent->mins, -64, -64, 0);
+	VectorSet (ent->maxs, 64, 64, 64);
 	ent->health = 1500; //note - much testing needed, so this will likely be adjusted
 	ent->die = computer_die;
 	ent->think = computer_think;
@@ -1438,10 +1451,10 @@ void SP_misc_humancomputer (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_YES;
 
-	ent->s.modelindex = gi.modelindex ("models/tactical/hcomputer.iqm");
+	ent->s.modelindex = gi.modelindex ("models/tactical/human_computer.iqm");
 
-	VectorSet (ent->mins, -32, -32, 0);
-	VectorSet (ent->maxs, 32, 32, 64);
+	VectorSet (ent->mins, -64, -64, 0);
+	VectorSet (ent->maxs, 64, 64, 64);
 	ent->health = 1500; //note - much testing needed, so this will likely be adjusted
 	ent->die = computer_die;
 	ent->think = computer_think;

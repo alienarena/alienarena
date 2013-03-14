@@ -339,13 +339,26 @@ void InitGame (void)
 	globals.num_edicts = game.maxclients+1;
 
 	//clear out team scores and player counts
-	if(tca->integer) {
+	if(tca->integer) 
+	{
 		blue_team_score = red_team_score = 4;
 		blue_team_matches = red_team_matches = 0;
 	}
-	else {
+	else 
+	{
 		red_team_score = 0;
 		blue_team_score = 0;
+	}
+
+	if(g_tactical->integer)
+	{
+		tacticalScore.alienAmmoDepot = 
+			tacticalScore.alienComputer = 
+			tacticalScore.alienPowerSource = 
+			tacticalScore.humanAmmoDepot = 
+			tacticalScore.humanComputer = 
+			tacticalScore.humanPowerSource =
+			true;
 	}
 
 	//reset minderaser
