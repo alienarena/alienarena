@@ -163,6 +163,14 @@ void GL_ShadeModel (GLenum mode)
 	}
 }
 
+// FIXME:
+// This centralized texture bind batching system is a great idea if you use it
+// *everywhere*. Otherwise you just end up binding a texture elsewhere and
+// this system doesn't know you've done it, so when you count on this system
+// to bindanother texture, it doesn't know it has to, and it'll happily let
+// you use the wrong texture. Anywhere we use glActiveTexture and 
+// glBindTexture directly can potentially screw things up. 
+
 void GL_EnableMultitexture( qboolean enable )
 {
 	if ( !qglActiveTextureARB )
