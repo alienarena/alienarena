@@ -1962,7 +1962,7 @@ Mark all surfaces that will need to be drawn this frame
 */
 void R_MarkWorldSurfs (void)
 {
-	entity_t		ent;
+	static entity_t	ent;
 	static int		old_visframecount, old_dlightcount, last_bsp_time;
 	static vec3_t	old_origin, old_angle;
 	vec3_t			delta_origin, delta_angle;
