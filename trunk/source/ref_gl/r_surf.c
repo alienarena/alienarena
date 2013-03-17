@@ -2068,6 +2068,10 @@ static void LM_UploadBlock (void)
 	int i, height;
 	int texture = gl_lms.current_lightmap_texture;
 
+	GL_SelectTexture (GL_TEXTURE0);
+	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
+	// that texture unit 0 has been re-bound, as it most certainly has been.
+	gl_state.currenttextures[gl_state.currenttmu] = -1;
 	GL_Bind( gl_state.lightmap_textures + texture );
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -2287,6 +2291,10 @@ void BSP_UpdateSurfaceLightmap (msurface_t *surf)
 	R_SetCacheState (surf);
 	R_BuildLightMap (surf, gl_lms.lightmap_buffer, surf->lightmaxs[0], surf->lightmaxs[1], surf->lightmaxs[0]*LIGHTMAP_BYTES);
 	
+	GL_SelectTexture (GL_TEXTURE0);
+	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
+	// that texture unit 0 has been re-bound, as it most certainly has been.
+	gl_state.currenttextures[gl_state.currenttmu] = -1;
 	GL_Bind( gl_state.lightmap_textures + surf->lightmaptexturenum );
 	qglTexSubImage2D( GL_TEXTURE_2D, 
 					  0,
