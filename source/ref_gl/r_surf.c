@@ -1164,7 +1164,6 @@ drawn.
 void BSP_ClearWorldTextureChains (void)
 {
 	int i;
-	image_t     *image;
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
     {
@@ -1662,7 +1661,6 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
 	float		dot;
-	image_t		*image;
 	
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
@@ -2065,7 +2063,6 @@ static void LM_InitBlock (void)
 // upload.
 static void LM_UploadBlock (void)
 {
-	int i, height;
 	int texture = gl_lms.current_lightmap_texture;
 
 	GL_SelectTexture (GL_TEXTURE0);
