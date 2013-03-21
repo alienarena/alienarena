@@ -1898,11 +1898,11 @@ void	GL_InitImages (void)
 
 	Draw_GetPalette ();
 
-	R_InitBloomTextures();//BLOOMS
 	R_InitMirrorTextures();//MIRRORS
 	R_InitDepthTextures();//DEPTH(SHADOWMAPS)
 	R_FB_InitTextures();//FULLSCREEN EFFECTS
 	R_SI_InitTextures();//SIMPLE ITEMS
+	R_InitBloomTextures();//BLOOMS
 }
 
 /*
