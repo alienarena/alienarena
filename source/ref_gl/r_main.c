@@ -1685,6 +1685,8 @@ cpuinfo_exit:
 #endif
 
 	GL_SetDefaultState();
+	
+	R_CheckFBOExtensions ();
 
 	GL_InitImages ();
 	Mod_Init ();

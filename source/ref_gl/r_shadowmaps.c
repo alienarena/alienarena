@@ -60,41 +60,30 @@ void			(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1
 GLuint	fboId[3];
 GLuint	rboId;
 
-void getOpenGLFunctionPointers(void)
+void R_CheckFBOExtensions (void)
 {
-	// FBO
+	gl_state.fbo = true;
+	gl_state.hasFBOblit = false;
+
 	qglGenFramebuffersEXT		= (PFNGLGENFRAMEBUFFERSEXTPROC)		qwglGetProcAddress("glGenFramebuffersEXT");
 	qglBindFramebufferEXT		= (PFNGLBINDFRAMEBUFFEREXTPROC)		qwglGetProcAddress("glBindFramebufferEXT");
 	qglFramebufferTexture2DEXT	= (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)	qwglGetProcAddress("glFramebufferTexture2DEXT");
 	qglCheckFramebufferStatusEXT	= (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)	qwglGetProcAddress("glCheckFramebufferStatusEXT");
 	qglGenRenderbuffersEXT		= (PFNGLGENRENDERBUFFERSEXTPROC)qwglGetProcAddress("glGenRenderbuffersEXT");
-    qglBindRenderbufferEXT		= (PFNGLBINDRENDERBUFFEREXTPROC)qwglGetProcAddress("glBindRenderbufferEXT");
-    qglRenderbufferStorageEXT	= (PFNGLRENDERBUFFERSTORAGEEXTPROC)qwglGetProcAddress("glRenderbufferStorageEXT");
+	qglBindRenderbufferEXT		= (PFNGLBINDRENDERBUFFEREXTPROC)qwglGetProcAddress("glBindRenderbufferEXT");
+	qglRenderbufferStorageEXT	= (PFNGLRENDERBUFFERSTORAGEEXTPROC)qwglGetProcAddress("glRenderbufferStorageEXT");
 	qglFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)qwglGetProcAddress("glFramebufferRenderbufferEXT");
 	qglBlitFramebufferEXT = (PFNGLBLITFRAMEBUFFEREXTPROC)qwglGetProcAddress("glBlitFramebufferEXT");
-}
-
-//used for post process stencil volume blurring and shadowmapping
-void R_GenerateShadowFBO()
-{
-	int shadowMapWidth = vid.width * r_shadowmapscale->value;
-    int shadowMapHeight = vid.height * r_shadowmapscale->value;
-	GLenum FBOstatus;
-
-	gl_state.fbo = true;
-
-	getOpenGLFunctionPointers();
 
 	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT
 		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT)
 	{
-		Com_Printf("...GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+		Com_Printf("...Cannot find OpenGL Framebuffer extension, CANNOT use FBO\n");
 		gl_state.fbo = false;
 		return;
 	}
 
 	// Framebuffer object blit
-	gl_state.hasFBOblit = false;
 	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
 	{
 		Com_Printf("...using GL_EXT_framebuffer_blit\n");
@@ -102,8 +91,28 @@ void R_GenerateShadowFBO()
 	} else
 	{
 		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
-		gl_state.hasFBOblit = false;
 	}
+	
+	//must check for ability to blit(Many old ATI drivers do not support)
+	//TODO: redundant with previous check?
+	if(gl_state.hasFBOblit) {
+		if(!qglBlitFramebufferEXT) {
+			Com_Printf("glBlitFramebufferEXT not found...\n");
+			gl_state.hasFBOblit = false;
+		}
+	}
+}
+    
+
+//used for post process stencil volume blurring and shadowmapping
+void R_GenerateShadowFBO()
+{
+	int shadowMapWidth = vid.width * r_shadowmapscale->value;
+	int shadowMapHeight = vid.height * r_shadowmapscale->value;
+	GLenum FBOstatus;
+	
+	if (!gl_state.fbo || !gl_state.hasFBOblit)
+	return;
 
 	//FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
@@ -184,16 +193,6 @@ void R_GenerateShadowFBO()
 	}
 
 	//FBO for capturing stencil volumes
-
-	//must check for abilit to blit(Many old ATI drivers do not support)
-	if(gl_state.hasFBOblit) {
-		if(!qglBlitFramebufferEXT) {
-			Com_Printf("qglBlitFramebufferEXT not found...\n");
-			//no point in continuing on
-			gl_state.hasFBOblit = false;
-			return;
-		}
-	}
 
     qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
     qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
