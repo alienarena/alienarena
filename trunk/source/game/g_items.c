@@ -808,9 +808,9 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (!taken)
 		return;
 
-	if(g_tactical->integer) //items do not respawn in tactical mode - to do this is posing a problem when resetting after a game is over on the same map.
+	if(g_tactical->integer) //items do not respawn in tactical mode
 	{
-		G_FreeEdict (ent);
+		G_FreeEdict (ent); 
 		return;
 	}
 
