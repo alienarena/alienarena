@@ -1402,3 +1402,12 @@ models/tactical/acomputer
 		glow
 	}
 }
+models/tactical/hcomputer
+{
+	{
+		map models/tactical/hcomputer_normal.tga
+		normalmap
+		map2 models/tactical/hcomputer_fx.tga
+		glow
+	}
+}

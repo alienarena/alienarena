@@ -1406,17 +1406,27 @@ edict_t *SelectCTFSpawnPoint (edict_t *ent)
 	float	range, range1, range2;
 	char	*cname;
 
-
-	switch (ent->dmteam) {
-	case RED_TEAM:
-		cname = "info_player_red";
-		break;
-	case BLUE_TEAM:
-		cname = "info_player_blue";
-		break;
-	case NO_TEAM:
-	default:
-		return SelectRandomCTFSpawnPoint();
+	if(g_tactical->value)
+	{
+		if(ent->ctype == 1)
+			cname = "info_player_red";
+		else
+			cname = "info_player_blue";
+	}
+	else
+	{
+		switch (ent->dmteam) 
+		{
+			case RED_TEAM:
+				cname = "info_player_red";
+				break;
+			case BLUE_TEAM:
+				cname = "info_player_blue";
+				break;
+			case NO_TEAM:
+			default:
+				return SelectRandomCTFSpawnPoint();
+		}
 	}
 
 	spot = NULL;
@@ -1474,13 +1484,16 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 {
 	edict_t	*spot = NULL;
 
-	if (deathmatch->value) {
-		if (ctf->value || tca->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) {
+	if (deathmatch->value) 
+	{
+		if (g_tactical->value || ctf->value || tca->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) 
+		{
 			spot = SelectCTFSpawnPoint(ent);
 			if(!spot)
 				spot = SelectDeathmatchSpawnPoint ();
 		}
-		else {
+		else 
+		{
 			spot = SelectDeathmatchSpawnPoint ();
 			if(!spot)
 				spot = SelectCTFSpawnPoint(ent); //dm on team based maps
