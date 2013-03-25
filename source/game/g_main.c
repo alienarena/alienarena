@@ -934,7 +934,7 @@ void CheckDMRules (void)
 	
 	gi.cvar_set ("g_teamgame", va("%d", TEAM_GAME));
 
-	if ( !tca->integer && !ctf->integer && !cp->integer && !(dmflags->integer & DF_SKINTEAMS) )
+	if ( !g_tactical->integer && !tca->integer && !ctf->integer && !cp->integer && !(dmflags->integer & DF_SKINTEAMS) )
 	{
 		/*--- non-team game warmup ---*/
 		/*
