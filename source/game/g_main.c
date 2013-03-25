@@ -565,7 +565,8 @@ void EndDMLevel (void)
 	}
 
 	//call voting
-	if(g_callvote->value) {
+	if(g_callvote->value) 
+	{
 		playervote.called = false;
 		playervote.yay = 0;
 		playervote.nay = 0;
@@ -573,7 +574,8 @@ void EndDMLevel (void)
 	}
 
 	//map voting
-	if(g_mapvote->value) {
+	if(g_mapvote->value) 
+	{
 		level.changemap = level.mapname;
 
 		// initialise map list using the current map's name
@@ -1154,7 +1156,7 @@ void CheckDMRules (void)
 		}
 		if(/*!tacticalScore.humanAmmoDepot && */!tacticalScore.humanComputer/* && !tacticalScore.humanPowerSource*/)
 		{
-			safe_bprintf(PRINT_HIGH, "The Humans have defeated the Aliens!\n");
+			safe_bprintf(PRINT_HIGH, "The Aliens have defeated the Humans!\n");
 			bot_won = 0; //we don't care if it's a bot that wins
 			EndDMLevel();
 			return;
@@ -1173,7 +1175,7 @@ void ExitLevel (void)
 	edict_t		*ent;
 	char		command [256];
 
-	if(strcmp(level.mapname, level.changemap) || timelimit->value) 
+	if(strcmp(level.mapname, level.changemap) || timelimit->value || g_tactical->value) 
 	{
 		Com_sprintf( command, sizeof(command), "map \"%s\"\n", level.changemap );
 		gi.AddCommandString( command );
