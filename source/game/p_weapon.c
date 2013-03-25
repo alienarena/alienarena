@@ -135,8 +135,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	if( g_tactical->integer && other->client->pers.inventory[index])
 	{
-		if ( ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM) )
-			return false; //don't pick up dropped weapon if you already have it
+		return false; //don't pick up weapon if you already have it
 	}
 
 	if ( ( (dmflags->integer & DF_WEAPONS_STAY))

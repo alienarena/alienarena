@@ -440,6 +440,13 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				if(!(strcmp(targ->classname, "misc_redspidernode")) || !(strcmp(targ->classname, "misc_bluespidernode")))
 					safe_centerprintf(attacker, "Spider health at %i percent", 100*(targ->health-take)/600);
 			}
+			if(g_tactical->value)
+			{
+				if(!strcmp(targ->classname, "alien computer"))
+					safe_centerprintf(attacker, "Alien Computer health at %i percent", 100*(targ->health-take)/1500);
+				else if(!strcmp(targ->classname, "human computer"))
+					safe_centerprintf(attacker, "Human Computer health at %i percent", 100*(targ->health-take)/1500);
+			}
 		}
 
 		targ->health = targ->health - take;
