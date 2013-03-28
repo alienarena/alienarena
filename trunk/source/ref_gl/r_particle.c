@@ -60,7 +60,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale;
 	byte			color[4];
-	int			    oldtexnum = -1, oldblendsrc = -1, oldblenddst = -1;
+	int			    oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
 	float			*corner0 = corner[0];
 	vec3_t move, delta, v;
@@ -78,6 +78,11 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	qglDisable (GL_CULL_FACE);
 	
 	qsort (particles, num_particles, sizeof (particle_t *), compare_particle);
+	
+	GL_SelectTexture (GL_TEXTURE0);
+	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
+	// that texture unit 0 has been re-bound, as it most certainly has been.
+	gl_state.currenttextures[gl_state.currenttmu] = -1;
 	
 	for ( p1 = particles, i=0; i < num_particles ; i++,p1++)
 	{
@@ -120,17 +125,14 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 		}
 
 		color[3] = p->current_alpha*255;
+		
+		GL_Bind (texnum);
 
-		if (texnum != oldtexnum || oldblendsrc != blendsrc || 
-			oldblenddst != blenddst)
+		if (oldblendsrc != blendsrc || oldblenddst != blenddst)
 		{	
-			if (oldtexnum != texnum)
-				qglBindTexture (GL_TEXTURE_2D, texnum);
-			
 			if (oldblendsrc != blendsrc || oldblenddst != blenddst)
 				qglBlendFunc ( blendsrc, blenddst );
 			
-			oldtexnum = texnum;
 			oldblendsrc = blendsrc;
 			oldblenddst = blenddst;
 		}
