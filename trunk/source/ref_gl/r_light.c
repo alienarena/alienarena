@@ -521,6 +521,7 @@ store:
 			/*
 			** rescale all the color components if the intensity of the greatest
 			** channel exceeds 1.0
+			** NOTE: we used to scale alpha here also, but it caused problems.
 			*/
 			if (max > 255)
 			{
@@ -528,7 +529,6 @@ store:
 				r = r*t;
 				g = g*t;
 				b = b*t;
-				a = a*t;
 			}
 
             // GL_BGRA
