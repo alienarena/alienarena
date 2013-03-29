@@ -1133,6 +1133,8 @@ extern void SP_misc_redspidernode (edict_t *self);
 //Tactical
 extern void SP_misc_aliencomputer (edict_t *self);
 extern void SP_misc_humancomputer (edict_t *self);
+extern void SP_misc_alienpowersrc (edict_t *self);
+extern void SP_misc_humanpowersrc (edict_t *self);
 
 extern void SP_misc_mapmodel (edict_t *self);
 extern void SP_misc_watersplash (edict_t *ent);

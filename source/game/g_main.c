@@ -1147,14 +1147,14 @@ void CheckDMRules (void)
 
 	if(g_tactical->integer)
 	{
-		if(/*!tacticalScore.alienAmmoDepot && */!tacticalScore.alienComputer/* && !tacticalScore.alienPowerSource*/)
+		if(/*!tacticalScore.alienAmmoDepot && */!tacticalScore.alienComputer && !tacticalScore.alienPowerSource)
 		{
 			safe_bprintf(PRINT_HIGH, "The Humans have defeated the Aliens!\n");
 			bot_won = 0; //we don't care if it's a bot that wins
 			EndDMLevel();
 			return;
 		}
-		if(/*!tacticalScore.humanAmmoDepot && */!tacticalScore.humanComputer/* && !tacticalScore.humanPowerSource*/)
+		if(/*!tacticalScore.humanAmmoDepot && */!tacticalScore.humanComputer && !tacticalScore.humanPowerSource)
 		{
 			safe_bprintf(PRINT_HIGH, "The Aliens have defeated the Humans!\n");
 			bot_won = 0; //we don't care if it's a bot that wins

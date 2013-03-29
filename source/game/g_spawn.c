@@ -116,6 +116,8 @@ spawn_t	spawns[] = {
 	//Tactical
 	{"misc_aliencomputer", SP_misc_aliencomputer},
 	{"misc_humancomputer", SP_misc_humancomputer},
+	{"misc_alienpowersrc", SP_misc_alienpowersrc},
+	{"misc_humanpowersrc", SP_misc_humanpowersrc},
 
 	{"misc_mapmodel", SP_misc_mapmodel},
 	{"misc_watersplash", SP_misc_watersplash},
