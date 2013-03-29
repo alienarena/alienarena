@@ -1400,6 +1400,8 @@ models/tactical/acomputer
 		normalmap
 		map2 models/tactical/acomputer_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/tactical/hcomputer
@@ -1408,6 +1410,15 @@ models/tactical/hcomputer
 		map models/tactical/hcomputer_normal.tga
 		normalmap
 		map2 models/tactical/hcomputer_fx.tga
+		glow
+	}
+}
+models/tactical/apowersrc
+{
+	{
+		map models/tactical/apowersrc_normal.tga
+		normalmap
+		map2 models/tactical/apowersrc_fx.tga
 		glow
 	}
 }
