@@ -1383,6 +1383,8 @@ void SP_misc_bluespidernode (edict_t *ent)
 //When an ammo depot is destroyed, ammo stops being produced.
 //When all three are disabled, the other team wins.
 
+
+//computers
 void computer_think (edict_t *ent)
 {
 	ent->s.frame = (ent->s.frame + 1) % 24;
@@ -1398,7 +1400,7 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if(self->classname == "alien computer")
 	{
 		tacticalScore.alienComputer = false;
-		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - Cause erratic behavior of turrets/rays/ammo depot of this team.  Laser barriers shut off.
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - turrents and laser barriers shut off.
 	}
 	else
 	{
@@ -1429,7 +1431,7 @@ void SP_misc_aliencomputer (edict_t *ent)
 
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 64);
-	ent->health = 1500; //note - much testing needed, so this will likely be adjusted
+	ent->health = 1500; 
 	ent->die = computer_die;
 	ent->think = computer_think;
 	ent->nextthink = level.time + FRAMETIME;
@@ -1455,11 +1457,94 @@ void SP_misc_humancomputer (edict_t *ent)
 
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 64);
-	ent->health = 1500; //note - much testing needed, so this will likely be adjusted
+	ent->health = 1500; 
 	ent->die = computer_die;
 	ent->think = computer_think;
 	ent->nextthink = level.time + FRAMETIME;
 	ent->classname = "human computer";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
+//power sources
+void powersrc_think (edict_t *ent)
+{
+	ent->s.frame = (ent->s.frame + 1) % 24;
+	ent->nextthink = level.time + FRAMETIME;
+}
+
+void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	self->takedamage = DAMAGE_NO;
+	self->activator = attacker;
+
+	gi.WriteByte (svc_temp_entity);
+	if(self->classname == "alien powersrc")
+	{
+		tacticalScore.alienPowerSource = false;
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - turrents and laser barriers get erratic, ammo depot 1/2 speed.
+	}
+	else
+	{
+		tacticalScore.humanPowerSource = false;
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+	
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	G_FreeEdict (self);
+}
+
+void SP_misc_alienpowersrc (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/alien_powersrc.iqm");
+
+	VectorSet (ent->mins, -64, -64, 0);
+	VectorSet (ent->maxs, 64, 64, 72);
+	ent->health = 1500; 
+	ent->die = powersrc_die;
+	ent->think = powersrc_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "alien powersrc";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
+void SP_misc_humanpowersrc (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/human_powersrc.iqm");
+
+	VectorSet (ent->mins, -64, -64, 0);
+	VectorSet (ent->maxs, 64, 64, 72);
+	ent->health = 1500; 
+	ent->die = powersrc_die;
+	ent->think = powersrc_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "human powersrc";
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
