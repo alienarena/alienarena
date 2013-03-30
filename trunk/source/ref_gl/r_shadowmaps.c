@@ -222,6 +222,19 @@ void R_GenerateShadowFBO()
 	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
 		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
 
+	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+	qglViewport(0,0,vid.width,vid.height); 
+	
+	// Initialize frame values.
+	// This only makes a difference if the viewport is less than the screen
+	// size, like when the netgraph is on-- otherwise it's redundant with 
+	// later glClear calls.
+	qglClearColor (1, 1, 1, 1);
+	qglClear( GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+	
+	// back to previous screen coordinates
+	R_SetupViewport ();
+
 	// switch back to window-system-provided framebuffer
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
