@@ -909,26 +909,37 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 
 /*
 =============
+R_SetupViewport
+=============
+*/
+void R_SetupViewport (void)
+{
+	int		x, y, w, h;
+
+	// The viewport info in r_newrefdef is constructed with the upper left 
+	// corner as the origin, whereas glViewport treats the lower left corner
+	// as the origin. So we have to do some math to fix the y-coordinates.
+	
+	x = r_newrefdef.x;
+	w = r_newrefdef.width;
+	y = vid.height - r_newrefdef.y - r_newrefdef.height;
+	h = r_newrefdef.height;
+	
+	qglViewport (x, y, w, h);	// MPO : note this happens every frame interestingly enough
+}
+
+
+
+/*
+=============
 R_SetupGL
 =============
 */
 void R_SetupGL (void)
 {
 	float	screenaspect;
-	int		x, x2, y2, y, w, h;
-
-	//
-	// set up viewport
-	//
-	x = floor(r_newrefdef.x * vid.width / vid.width);
-	x2 = ceil((r_newrefdef.x + r_newrefdef.width) * vid.width / vid.width);
-	y = floor(vid.height - r_newrefdef.y * vid.height / vid.height);
-	y2 = ceil(vid.height - (r_newrefdef.y + r_newrefdef.height) * vid.height / vid.height);
-
-	w = x2 - x;
-	h = y - y2;
-
-	qglViewport (x, y2, w, h);	// MPO : note this happens every frame interestingly enough
+	
+	R_SetupViewport ();
 
 	//
 	// set up projection matrix
