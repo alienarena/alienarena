@@ -64,8 +64,6 @@ extern qboolean mouse_available;
 extern qboolean mouse_is_position;
 extern int mouse_diff_x;
 extern int mouse_diff_y;
-extern int mouse_odiff_x;
-extern int mouse_odiff_y;
 extern float rs_realtime;
 extern viddef_t vid;
 
