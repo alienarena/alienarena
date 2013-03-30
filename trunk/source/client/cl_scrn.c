@@ -418,11 +418,9 @@ static void SCR_CalcVrect (void)
 {
 
 	scr_vrect.width = viddef.width;
-	scr_vrect.width &= ~7;
-
 	scr_vrect.height = viddef.height;
-	scr_vrect.height &= ~1;
 
+	// calculate left and top margins-- for now always 0
 	scr_vrect.x = (viddef.width - scr_vrect.width)/2;
 	scr_vrect.y = (viddef.height - scr_vrect.height)/2;
 }
