@@ -288,7 +288,7 @@ void SM_SetupMatrices(float position_x,float position_y,float position_z,float l
 
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity();
-	MYgluPerspective(120.0f, vid.width/vid.height, 10.0f, 4096.0f);
+	MYgluPerspective(120.0f, r_newrefdef.width/r_newrefdef.height, 10.0f, 4096.0f);
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
@@ -618,8 +618,8 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		qglActiveTextureARB(GL_TEXTURE6);
 		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
-		glUniform1fARB( g_location_xOffset, 1.0/(viddef.width*r_shadowmapscale->value));
-		glUniform1fARB( g_location_yOffset, 1.0/(viddef.height*r_shadowmapscale->value));
+		glUniform1fARB( g_location_xOffset, 1.0/(r_newrefdef.width*r_shadowmapscale->value));
+		glUniform1fARB( g_location_yOffset, 1.0/(r_newrefdef.height*r_shadowmapscale->value));
 
 		glUniform1fARB( g_location_fadeShadow, fadeShadow );
 		
@@ -1090,7 +1090,8 @@ void R_DrawEntityCaster(entity_t *ent)
     qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
 
-	qglViewport( 0, 0, viddef.width, viddef.height );
+	// back to previous screen coordinates
+	R_SetupViewport ();
 
 	qglPopMatrix();
     qglMatrixMode(GL_PROJECTION);
@@ -1223,7 +1224,8 @@ void R_DrawRagdollCaster(int RagDollID)
     qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
 
-	qglViewport( 0, 0, viddef.width, viddef.height );
+	// back to previous screen coordinates
+	R_SetupViewport ();
 
 	qglPopMatrix();
     qglMatrixMode(GL_PROJECTION);
