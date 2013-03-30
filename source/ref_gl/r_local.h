@@ -262,6 +262,7 @@ extern void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 extern int	R_Init( void *hinstance, void *hWnd );
 extern void R_Shutdown( void );
 
+extern void R_SetupViewport (void);
 extern void R_RenderView (refdef_t *fd);
 extern void GL_ScreenShot_f (void);
 extern void R_DrawAliasModel (void);
