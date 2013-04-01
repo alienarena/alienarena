@@ -661,58 +661,76 @@ void TossClientWeapon (edict_t *self)
 	{
 		//always drop your weapon on death, even if it isn't the current held item.
 		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] == 1)
-			item = FindItem( "Flame Thrower" );
-		if(item)
 		{
-			self->client->v_angle[YAW] -= spread;
-			drop = Drop_Item (self, item);
-			self->client->v_angle[YAW] += spread;
-			drop->spawnflags = DROPPED_PLAYER_ITEM;
+			item = FindItem( "Flame Thrower" );
+			if(item)
+			{
+				spread = 10 * random();
+				self->client->v_angle[YAW] -= spread;
+				drop = Drop_Item (self, item);
+				self->client->v_angle[YAW] += spread;
+				drop->spawnflags = DROPPED_PLAYER_ITEM;
+			}
 		}
 		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] == 1)
+		{	
 			item = FindItem( "Rocket Launcher" );
-		if(item)
-		{
-			self->client->v_angle[YAW] -= spread;
-			drop = Drop_Item (self, item);
-			self->client->v_angle[YAW] += spread;
-			drop->spawnflags = DROPPED_PLAYER_ITEM;
+			if(item)
+			{
+				spread = 10 * random();
+				self->client->v_angle[YAW] -= spread;
+				drop = Drop_Item (self, item);
+				self->client->v_angle[YAW] += spread;
+				drop->spawnflags = DROPPED_PLAYER_ITEM;
+			}
 		}
 		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] == 1)
+		{	
 			item = FindItem( "Pulse Rifle" );
-		if(item)
-		{
-			self->client->v_angle[YAW] -= spread;
-			drop = Drop_Item (self, item);
-			self->client->v_angle[YAW] += spread;
-			drop->spawnflags = DROPPED_PLAYER_ITEM;
+			if(item)
+			{
+				spread = 10 * random();
+				self->client->v_angle[YAW] -= spread;
+				drop = Drop_Item (self, item);
+				self->client->v_angle[YAW] += spread;
+				drop->spawnflags = DROPPED_PLAYER_ITEM;
+			}
 		}
 		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] == 1)
+		{	
 			item = FindItem( "Disruptor" );
-		if(item)
-		{
-			self->client->v_angle[YAW] -= spread;
-			drop = Drop_Item (self, item);
-			self->client->v_angle[YAW] += spread;
-			drop->spawnflags = DROPPED_PLAYER_ITEM;
+			if(item)
+			{
+				spread = 10 * random();
+				self->client->v_angle[YAW] -= spread;
+				drop = Drop_Item (self, item);
+				self->client->v_angle[YAW] += spread;
+				drop->spawnflags = DROPPED_PLAYER_ITEM;
+			}
 		}
 		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] == 1)
-			item = FindItem( "Alien Disruptor" );
-		if(item)
 		{
-			self->client->v_angle[YAW] -= spread;
-			drop = Drop_Item (self, item);
-			self->client->v_angle[YAW] += spread;
-			drop->spawnflags = DROPPED_PLAYER_ITEM;
+			item = FindItem( "Alien Disruptor" );
+			if(item)
+			{
+				spread = 10 * random();
+				self->client->v_angle[YAW] -= spread;
+				drop = Drop_Item (self, item);
+				self->client->v_angle[YAW] += spread;
+				drop->spawnflags = DROPPED_PLAYER_ITEM;
+			}
 		}
 		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] == 1)
+		{	
 			item = FindItem( "Alien Smartgun" );
-		if(item)
-		{
-			self->client->v_angle[YAW] -= spread;
-			drop = Drop_Item (self, item);
-			self->client->v_angle[YAW] += spread;
-			drop->spawnflags = DROPPED_PLAYER_ITEM;
+			if(item)
+			{
+				spread = 10 * random();
+				self->client->v_angle[YAW] -= spread;
+				drop = Drop_Item (self, item);
+				self->client->v_angle[YAW] += spread;
+				drop->spawnflags = DROPPED_PLAYER_ITEM;
+			}
 		}
 	}
 	else
