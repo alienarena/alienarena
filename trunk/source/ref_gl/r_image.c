@@ -1486,17 +1486,16 @@ qboolean GL_Upload8 (byte *data, int width, int height, int picmip, qboolean fil
 
 /*
 ================
-GL_LoadPic
+GL_ReservePic
 
-This is also used as an entry point for the generated r_notexture
+Find a free image_t
 ================
 */
-image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits)
+image_t *GL_FindFreeImage (char *name, int width, int height, imagetype_t type)
 {
 	image_t		*image;
 	int			i;
-	int			picmip;
-
+	
 	// find a free image_t
 	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
 	{
@@ -1526,6 +1525,26 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 	image->width = width;
 	image->height = height;
 	image->type = type;
+	
+	image->texnum = TEXNUM_IMAGES + (image - gltextures);
+	
+	return image;
+}
+
+/*
+================
+GL_LoadPic
+
+This is also used as an entry point for the generated r_notexture
+================
+*/
+image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits)
+{
+	image_t		*image;
+	int			i;
+	int			picmip;
+
+	image = GL_FindFreeImage (name, width, height, type);
 
 	if (type == it_skin && bits == 8)
 		R_FloodFillSkin(pic, width, height);
@@ -1554,7 +1573,7 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 			for (j=0 ; j<image->width ; j++)
 			    for (l = 0; l < 4; l++, k++)
 				    scrap_texels[texnum][((y+i)*BLOCK_WIDTH + x + j)*4+l] = pic[k];
-		image->texnum = TEXNUM_SCRAPS + texnum;
+		image->texnum = TEXNUM_SCRAPS + texnum; // overwrite old texnum
 		image->scrap = true;
 		image->has_alpha = true;
 		image->sl = (double)(x+0.5)/(double)BLOCK_WIDTH;
@@ -1566,7 +1585,6 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 	{
 nonscrap:
 		image->scrap = false;
-		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
 		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, picmip, type <= it_wall);
