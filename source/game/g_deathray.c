@@ -92,6 +92,50 @@ void deathrayShot (edict_t *self)
 	int		damage = 50;
     trace_t tr;
 
+	//tactical
+	if(g_tactical->value)
+	{
+		if(self->spawnflags & 1)
+		{
+			//if power source is down, and backup gen is on, get erratic
+			if(!tacticalScore.humanPowerSource)
+			{
+				if(random() < 0.5) 
+				{
+					if(self->enemy->ctype == 1)
+					{
+						if(random() < 0.5)
+							return;
+					}
+					else
+						return;
+				}
+			}
+			//if no computer, deathrays are disabled
+			if(self->enemy->ctype == 1 || !tacticalScore.humanComputer)
+				return;
+		}
+		else
+		{
+			if(!tacticalScore.alienPowerSource)
+			{
+				if(random() < 0.5) 
+				{
+					if(self->enemy->ctype == 0)
+					{
+						if(random() < 0.5)
+							return;
+					}
+					else
+						return;
+				}
+			}
+
+			if(self->enemy->ctype == 0 || !tacticalScore.alienComputer)
+				return; 
+		}
+	}
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 	VectorSet(offset, 32, 0, 48);
 	G_ProjectSource (self->s.origin, offset, forward, right, start);
@@ -113,9 +157,13 @@ void deathrayShot (edict_t *self)
 	gi.WriteShort (self-g_edicts);
 	gi.WriteByte (MZ_RAILGUN);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
-
+	
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_VAPORBEAM);
+	//tactical
+	if(self->spawnflags & 1)
+		gi.WriteByte (TE_REDLASER);
+	else
+		gi.WriteByte (TE_VAPORBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (end);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
@@ -142,12 +190,12 @@ void deathrayShot (edict_t *self)
 mframe_t deathray_frames_attack_shoot [] =
 {
 	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL},
+	{ai_charge, 0, deathrayShot},
 	{ai_charge, 0, NULL},
 	{ai_charge, 0, NULL},
 	{ai_charge, 0, deathrayShot},
 	{ai_charge, 0, NULL},
-	{ai_charge, 0, NULL}
+	{ai_charge, 0, deathrayShot}
 };
 mmove_t deathray_move_attack_shoot = {FRAME_stand01, FRAME_stand06, deathray_frames_attack_shoot, deathray_run};
 
@@ -215,14 +263,16 @@ mmove_t deathray_move_death1 = {FRAME_stand01, FRAME_stand05, deathray_frames_de
 void deathray_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 
-	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
-
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	self->deadflag = DEAD_DEAD;
+
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	G_FreeEdict (self);
 }
 
 void SP_npc_deathray (edict_t *self)
@@ -244,6 +294,51 @@ void SP_npc_deathray (edict_t *self)
 	self->solid = SOLID_BBOX;
 	self->takedamage = DAMAGE_NO; //invincible
 	self->max_health = 5000;
+	self->health = self->max_health;
+	self->gib_health = 0;
+	self->mass = 5000;
+
+	self->pain = deathray_pain;
+	self->die = deathray_die;
+
+	self->monsterinfo.stand = deathray_stand;
+	self->monsterinfo.walk = deathray_run;
+	self->monsterinfo.run = deathray_run;
+	self->monsterinfo.dodge = NULL;
+	self->monsterinfo.attack = deathray_attack;
+	self->monsterinfo.melee = deathray_attack;
+	self->monsterinfo.sight = deathray_sight;
+	self->monsterinfo.search = deathray_search;
+	self->s.renderfx |= RF_MONSTER;
+
+	self->monsterinfo.currentmove = &deathray_move_stand;
+	self->monsterinfo.scale = MODEL_SCALE;
+
+	gi.linkentity (self);
+
+	walkmonster_start (self);
+}
+
+void SP_misc_deathray (edict_t *self)
+{
+
+	// pre-caches
+	sound_pain  = gi.soundindex ("misc/deathray/fizz.wav");
+	sound_die   = gi.soundindex ("misc/deathray/fizz.wav");
+	sound_idle  = gi.soundindex ("misc/deathray/weird2.wav");
+	sound_punch = gi.soundindex ("misc/deathray/shoot.wav");
+	sound_search = gi.soundindex ("misc/deathray/weird2.wav");
+	sound_sight = gi.soundindex ("misc/deathray/weird2.wav");
+
+	//to do - make different mesh for human weapon
+	self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.md2");
+
+	VectorSet (self->mins, -16, -16, 0);
+	VectorSet (self->maxs, 16, 16, 48);
+	self->movetype = MOVETYPE_STEP;
+	self->solid = SOLID_BBOX;
+	self->takedamage = DAMAGE_YES; 
+	self->max_health = 300;
 	self->health = self->max_health;
 	self->gib_health = 0;
 	self->mass = 5000;

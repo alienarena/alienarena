@@ -133,9 +133,27 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		return false; //why pick them up in these modes?
 	}
 
-	if( g_tactical->integer && other->client->pers.inventory[index])
+	if( g_tactical->integer)
 	{
-		return false; //don't pick up weapon if you already have it
+		//certain classes can only use certain weapons
+		if(other->ctype == 0)
+		{
+			if(!strcmp(ent->classname, "weapon_rocketlauncher") || !strcmp(ent->classname, "weapon_chaingun") || !strcmp(ent->classname, "weapon_bfg")
+				|| !strcmp(ent->classname, "weapon_supershotgun"))
+				return false;
+		}
+		else if (!strcmp(ent->classname, "weapon_shotgun") || !strcmp(ent->classname, "weapon_hyperblaster") || !strcmp(ent->classname, "weapon_railgun")
+				|| !strcmp(ent->classname, "weapon_minderaser"))
+				return false;
+
+		//do not pick up a weapon if you already have one
+		if(other->client->pers.weapon == FindItem("Alien Disruptor") || other->client->pers.weapon == FindItem("Alien Vaporizer") || other->client->pers.weapon == FindItem("Alien Smartgun")
+			|| other->client->pers.weapon == FindItem("Rocket Launcher") || other->client->pers.weapon == FindItem("Disruptor") || other->client->pers.weapon == FindItem("Minderaser")
+			|| other->client->pers.weapon == FindItem("Pulse Rifle") || other->client->pers.weapon == FindItem("Flame Thrower"))
+		{
+			safe_centerprintf(other, "Cannot pick up weapon, you already have a weapon");
+			return false;
+		}
 	}
 
 	if ( ( (dmflags->integer & DF_WEAPONS_STAY))
