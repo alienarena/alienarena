@@ -400,6 +400,7 @@ image_t *R_RegisterParticleNormal(const char *name);
 image_t *R_RegisterGfxPic(const char *name);
 
 extern void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
+extern image_t *GL_FindFreeImage (char *name, int width, int height, imagetype_t type);
 extern image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
 extern image_t *GL_GetImage( const char * name );
 extern image_t	*GL_FindImage (char *name, imagetype_t type);
