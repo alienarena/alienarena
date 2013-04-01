@@ -636,7 +636,7 @@ void TossClientWeapon (edict_t *self)
 	}
 
 	item = self->client->pers.weapon;
-	if (! self->client->pers.inventory[self->client->ammo_index] )
+	if (!self->client->pers.inventory[self->client->ammo_index] )
 		item = NULL;
 
 #ifdef ALTERIA
@@ -656,59 +656,121 @@ void TossClientWeapon (edict_t *self)
 	if (g_tactical->integer && item && (strcmp (item->pickup_name, "Alien Vaporizer") == 0))
 		item = NULL;
 #endif
-	if (!(dmflags->integer & DF_QUAD_DROP))
-		quad = false;
+
+	if(g_tactical->integer)
+	{
+		//always drop your weapon on death, even if it isn't the current held item.
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] == 1)
+			item = FindItem( "Flame Thrower" );
+		if(item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] == 1)
+			item = FindItem( "Rocket Launcher" );
+		if(item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] == 1)
+			item = FindItem( "Pulse Rifle" );
+		if(item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] == 1)
+			item = FindItem( "Disruptor" );
+		if(item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] == 1)
+			item = FindItem( "Alien Disruptor" );
+		if(item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] == 1)
+			item = FindItem( "Alien Smartgun" );
+		if(item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
+	}
 	else
-		quad = (self->client->quad_framenum > (level.framenum + 10));
-
-	sproing = (self->client->sproing_framenum > (level.framenum + 10));
-	haste = (self->client->haste_framenum > (level.framenum + 10));
-
-	if ((item && quad) || (item && haste) || (item && sproing))
-		spread = 22.5;
-	else
-		spread = 0.0;
-
-	if (item)
 	{
-		self->client->v_angle[YAW] -= spread;
-		drop = Drop_Item (self, item);
-		self->client->v_angle[YAW] += spread;
-		drop->spawnflags = DROPPED_PLAYER_ITEM;
-	}
+		if (!(dmflags->integer & DF_QUAD_DROP))
+			quad = false;
+		else
+			quad = (self->client->quad_framenum > (level.framenum + 10));
 
-	if (quad)
-	{
-		self->client->v_angle[YAW] += spread;
-		drop = Drop_Item (self, FindItemByClassname ("item_quad"));
-		self->client->v_angle[YAW] -= spread;
-		drop->spawnflags |= DROPPED_PLAYER_ITEM;
+		sproing = (self->client->sproing_framenum > (level.framenum + 10));
+		haste = (self->client->haste_framenum > (level.framenum + 10));
 
-		drop->touch = Touch_Item;
-		drop->nextthink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
-		drop->think = G_FreeEdict;
-	}
-	if (sproing && !self->client->resp.powered)
-	{
-		self->client->v_angle[YAW] += spread;
-		drop = Drop_Item (self, FindItemByClassname ("item_sproing"));
-		self->client->v_angle[YAW] -= spread;
-		drop->spawnflags |= DROPPED_PLAYER_ITEM;
+		if ((item && quad) || (item && haste) || (item && sproing))
+			spread = 22.5;
+		else
+			spread = 0.0;
 
-		drop->touch = Touch_Item;
-		drop->nextthink = level.time + (self->client->sproing_framenum - level.framenum) * FRAMETIME;
-		drop->think = G_FreeEdict;
-	}
-	if (haste && !self->client->resp.powered)
-	{
-		self->client->v_angle[YAW] += spread;
-		drop = Drop_Item (self, FindItemByClassname ("item_haste"));
-		self->client->v_angle[YAW] -= spread;
-		drop->spawnflags |= DROPPED_PLAYER_ITEM;
+		if (item)
+		{
+			self->client->v_angle[YAW] -= spread;
+			drop = Drop_Item (self, item);
+			self->client->v_angle[YAW] += spread;
+			drop->spawnflags = DROPPED_PLAYER_ITEM;
+		}
 
-		drop->touch = Touch_Item;
-		drop->nextthink = level.time + (self->client->haste_framenum - level.framenum) * FRAMETIME;
-		drop->think = G_FreeEdict;
+		if (quad)
+		{
+			self->client->v_angle[YAW] += spread;
+			drop = Drop_Item (self, FindItemByClassname ("item_quad"));
+			self->client->v_angle[YAW] -= spread;
+			drop->spawnflags |= DROPPED_PLAYER_ITEM;
+
+			drop->touch = Touch_Item;
+			drop->nextthink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
+			drop->think = G_FreeEdict;
+		}
+		if (sproing && !self->client->resp.powered)
+		{
+			self->client->v_angle[YAW] += spread;
+			drop = Drop_Item (self, FindItemByClassname ("item_sproing"));
+			self->client->v_angle[YAW] -= spread;
+			drop->spawnflags |= DROPPED_PLAYER_ITEM;
+
+			drop->touch = Touch_Item;
+			drop->nextthink = level.time + (self->client->sproing_framenum - level.framenum) * FRAMETIME;
+			drop->think = G_FreeEdict;
+		}
+		if (haste && !self->client->resp.powered)
+		{
+			self->client->v_angle[YAW] += spread;
+			drop = Drop_Item (self, FindItemByClassname ("item_haste"));
+			self->client->v_angle[YAW] -= spread;
+			drop->spawnflags |= DROPPED_PLAYER_ITEM;
+
+			drop->touch = Touch_Item;
+			drop->nextthink = level.time + (self->client->haste_framenum - level.framenum) * FRAMETIME;
+			drop->think = G_FreeEdict;
+		}	
 	}
 }
 

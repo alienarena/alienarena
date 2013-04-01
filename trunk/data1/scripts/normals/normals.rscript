@@ -1385,7 +1385,7 @@ models/tactical/abomb
 models/tactical/hbomb
 {
 	{
-		map models/tactical/hbomb_normal.tga
+		map models/tactical/hbomb_normal.jpg
 		normalmap
 		map2 models/tactical/hbomb_fx.tga
 		glow
@@ -1407,7 +1407,7 @@ models/tactical/acomputer
 models/tactical/hcomputer
 {
 	{
-		map models/tactical/hcomputer_normal.tga
+		map models/tactical/hcomputer_normal.jpg
 		normalmap
 		map2 models/tactical/hcomputer_fx.tga
 		glow
@@ -1416,9 +1416,18 @@ models/tactical/hcomputer
 models/tactical/apowersrc
 {
 	{
-		map models/tactical/apowersrc_normal.tga
+		map models/tactical/apowersrc_normal.jpg
 		normalmap
 		map2 models/tactical/apowersrc_fx.tga
+		glow
+	}
+}
+models/tactical/hpowersrc
+{
+	{
+		map models/tactical/hpowersrc_normal.jpg
+		normalmap
+		map2 models/tactical/hpowersrc_fx.tga
 		glow
 	}
 }
