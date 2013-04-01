@@ -665,7 +665,7 @@ void TossClientWeapon (edict_t *self)
 			item = FindItem( "Flame Thrower" );
 			if(item)
 			{
-				spread = 10 * random();
+				spread = 0;
 				self->client->v_angle[YAW] -= spread;
 				drop = Drop_Item (self, item);
 				self->client->v_angle[YAW] += spread;
@@ -677,7 +677,7 @@ void TossClientWeapon (edict_t *self)
 			item = FindItem( "Rocket Launcher" );
 			if(item)
 			{
-				spread = 10 * random();
+				spread = 35;
 				self->client->v_angle[YAW] -= spread;
 				drop = Drop_Item (self, item);
 				self->client->v_angle[YAW] += spread;
@@ -689,7 +689,7 @@ void TossClientWeapon (edict_t *self)
 			item = FindItem( "Pulse Rifle" );
 			if(item)
 			{
-				spread = 10 * random();
+				spread = 70;
 				self->client->v_angle[YAW] -= spread;
 				drop = Drop_Item (self, item);
 				self->client->v_angle[YAW] += spread;
@@ -701,7 +701,7 @@ void TossClientWeapon (edict_t *self)
 			item = FindItem( "Disruptor" );
 			if(item)
 			{
-				spread = 10 * random();
+				spread = 105;
 				self->client->v_angle[YAW] -= spread;
 				drop = Drop_Item (self, item);
 				self->client->v_angle[YAW] += spread;
@@ -713,7 +713,7 @@ void TossClientWeapon (edict_t *self)
 			item = FindItem( "Alien Disruptor" );
 			if(item)
 			{
-				spread = 10 * random();
+				spread = 140;
 				self->client->v_angle[YAW] -= spread;
 				drop = Drop_Item (self, item);
 				self->client->v_angle[YAW] += spread;
@@ -725,7 +725,7 @@ void TossClientWeapon (edict_t *self)
 			item = FindItem( "Alien Smartgun" );
 			if(item)
 			{
-				spread = 10 * random();
+				spread = 175;
 				self->client->v_angle[YAW] -= spread;
 				drop = Drop_Item (self, item);
 				self->client->v_angle[YAW] += spread;

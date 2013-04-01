@@ -135,6 +135,8 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	if( g_tactical->integer)
 	{
+		//to do - fix bug where you can pick up two weapons at once when they are on top of another
+
 		//certain classes can only use certain weapons
 		if(other->ctype == 0)
 		{
