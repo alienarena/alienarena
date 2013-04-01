@@ -100,12 +100,50 @@ static int	curView_height;
 
 /*
 =================
+R_Bloom_AllocFBOTexture 
+
+Create a 24-bit square texture with specified size and attach it to an FBO
+=================
+*/
+image_t *R_Bloom_AllocFBOTexture (char *name, int size_side, GLuint *FBO)
+{
+	byte	*data;
+	int		size;
+	image_t	*image;
+	
+	size = size_side*size_side*3;
+	data = malloc (size);
+	memset (data, 0, size);
+	
+	// create the texture
+	image = GL_FindFreeImage (name, size_side, size_side, it_pic);
+	GL_Bind (image->texnum);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, size_side, size_side, 0, GL_RGB, GL_UNSIGNED_BYTE, (byte*)data);
+	
+	// create up the FBO
+	qglGenFramebuffersEXT(1, FBO);
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,*FBO);
+
+	// bind the texture to it
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, image->texnum, 0);
+	
+	// clean up 
+	free (data);
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	
+	return image;
+}
+
+
+
+/*
+=================
 R_Bloom_InitEffectTexture
 =================
 */
 void R_Bloom_InitEffectTexture( void )
 {
-	byte	*data;
 	float	bloomsizecheck;
 
 	if( r_bloom_sample_size->integer < 32 )
@@ -130,17 +168,7 @@ void R_Bloom_InitEffectTexture( void )
 	if( BLOOM_SIZE != r_bloom_sample_size->integer )
 		Cvar_SetValue ("r_bloom_sample_size", BLOOM_SIZE);
 
-	data = malloc( BLOOM_SIZE * BLOOM_SIZE * 4 );
-	memset( data, 0, BLOOM_SIZE * BLOOM_SIZE * 4 );
-
-	r_bloomeffecttexture = GL_LoadPic( "***r_bloomeffecttexture***", (byte *)data, BLOOM_SIZE, BLOOM_SIZE, it_pic, 3 );
-
-	free ( data );
-	
-	qglGenFramebuffersEXT(1, &bloomeffectFBO);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,bloomeffectFBO);
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_bloomeffecttexture->texnum, 0);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	r_bloomeffecttexture = R_Bloom_AllocFBOTexture ("***r_bloomeffecttexture***", BLOOM_SIZE, &bloomeffectFBO);
 }
 
 /*
@@ -151,15 +179,14 @@ R_Bloom_InitTextures
 void checkFBOExtensions (void);
 void R_Bloom_InitTextures( void )
 {
-	byte	*data;
-	int		size;
-	
 	if (!gl_state.fbo || !gl_state.hasFBOblit)
 	{
 		Com_Printf ("FBO Failed, disabling bloom.\n");
 		Cvar_SetValue ("r_bloom", 0);
 		return;
 	}
+	
+	qglGetError ();
 
 	//find closer power of 2 to screen size
 	for (screen_texture_width = 1;screen_texture_width < viddef.width;screen_texture_width *= 2);
@@ -169,15 +196,7 @@ void R_Bloom_InitTextures( void )
 	R_Bloom_InitEffectTexture();
 
 	//init the "scratch" texture
-	size = BLOOM_SIZE * BLOOM_SIZE * 4;
-	data = malloc( size );
-	memset( data, 255, size );
-	r_bloomscratchtexture = GL_LoadPic( "***r_bloomscratchtexture***", (byte *)data, BLOOM_SIZE, BLOOM_SIZE, it_pic, 3 );
-	free ( data );
-	qglGenFramebuffersEXT(1, &bloomscratchFBO);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,bloomscratchFBO);
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_bloomscratchtexture->texnum, 0);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	r_bloomscratchtexture = R_Bloom_AllocFBOTexture ("***r_bloomscratchtexture***", BLOOM_SIZE, &bloomscratchFBO);
 
 	//if screensize is more than 2x the bloom effect texture, set up for stepped downsampling
 	r_bloomdownsamplingtexture = NULL;
@@ -185,14 +204,7 @@ void R_Bloom_InitTextures( void )
 	if( viddef.width > (BLOOM_SIZE * 2) && !r_bloom_fast_sample->integer )
 	{
 		r_screendownsamplingtexture_size = (int)(BLOOM_SIZE * 2);
-		data = malloc( r_screendownsamplingtexture_size * r_screendownsamplingtexture_size * 4 );
-		memset( data, 0, r_screendownsamplingtexture_size * r_screendownsamplingtexture_size * 4 );
-		r_bloomdownsamplingtexture = GL_LoadPic( "***r_bloomdownsamplingtexture***", (byte *)data, r_screendownsamplingtexture_size, r_screendownsamplingtexture_size, it_pic, 3 );
-		free ( data );
-		qglGenFramebuffersEXT(1, &bloomdownsamplingFBO);
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,bloomdownsamplingFBO);
-		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_bloomdownsamplingtexture->texnum, 0);
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+		r_bloomdownsamplingtexture = R_Bloom_AllocFBOTexture ("***r_bloomdownsamplingtexture***", r_screendownsamplingtexture_size, &bloomdownsamplingFBO);
 	}
 
 }
