@@ -1019,6 +1019,104 @@ void SP_misc_teleporter_dest (edict_t *ent)
 	gi.linkentity (ent);
 }
 
+void misc_mapmodel_think (edict_t *ent)
+{
+	if(ent->spawnflags & 2)
+		ent->s.frame = (ent->s.frame + 1) % 39;
+	else
+		ent->s.frame = (ent->s.frame + 1) % 24;
+	ent->nextthink = level.time + FRAMETIME;
+}
+void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
+{
+	gi.setmodel (ent, ent->model);
+
+	ent->solid = SOLID_NOT; //will need clipping brushes around it
+
+	//disable shadows(also disables per-pixel dynamic lighting unless minlight set
+	if(ent->spawnflags & 1)
+		ent->s.renderfx = RF_NOSHADOWS;
+
+	if(ent->spawnflags & 16)
+		ent->s.renderfx = RF_TRANSLUCENT;
+
+	if(ent->spawnflags & 32) { //animated mesh
+		if(ent->spawnflags & 128)
+			ent->s.frame = 0;
+		else
+			ent->s.frame = rand()%24;
+		ent->think = misc_mapmodel_think;
+		ent->nextthink = level.time + FRAMETIME;
+	}
+	else //static mesh
+		ent->s.frame = 0;
+
+	//allow dynamic per-pixel lighting
+	if(ent->spawnflags & 64)
+		ent->s.renderfx |= RF_MINLIGHT;
+
+	gi.linkentity (ent);
+}
+
+void watersplash_think (edict_t *ent)
+{
+	vec3_t up;
+
+	up[0] = 0;
+	up[1] = 0;
+	up[2] = 1;
+
+	//write effect
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_SPLASH);
+	gi.WriteByte (8);
+	gi.WritePosition (ent->s.origin);
+	gi.WriteDir (up);
+	gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	ent->nextthink = level.time + 1.0;
+}
+
+void SP_misc_watersplash (edict_t *ent)
+{
+	gi.setmodel(ent, NULL);
+	ent->solid = SOLID_NOT;
+	ent->movetype = MOVETYPE_NONE;
+	ent->takedamage = DAMAGE_NO;
+
+	ent->think = watersplash_think;
+	ent->nextthink = level.time + 0.5 + random();
+
+	gi.linkentity (ent);
+}
+
+void misc_electroflash_think (edict_t *ent)
+{
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (ent-g_edicts);
+	gi.WriteByte (MZ_RAILGUN);
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	ent->nextthink = level.time + 0.05 + random();
+}
+
+void SP_misc_electroflash (edict_t *ent) //random electrical pulses
+{
+	gi.setmodel (ent, NULL);
+
+	ent->solid = SOLID_NOT; 
+	ent->movetype = MOVETYPE_NONE;
+	ent->takedamage = DAMAGE_NO;
+	ent->s.sound = gi.soundindex("world/electricity.wav");
+	ent->think = misc_electroflash_think;
+	ent->nextthink = level.time + 0.05 + random();
+
+	gi.linkentity (ent);
+}
+
+//Team Core Assault
+
 void spidervolts (edict_t *self)
 {
 
@@ -1383,6 +1481,140 @@ void SP_misc_bluespidernode (edict_t *ent)
 //When an ammo depot is destroyed, ammo stops being produced.
 //When all three are disabled, the other team wins.
 
+//lasers
+void misc_laser_think (edict_t *self)
+{
+	edict_t *ent;
+	edict_t	*ignore;
+	vec3_t	start;
+	vec3_t	end;
+	trace_t	tr;
+	vec3_t	point;
+	vec3_t	last_movedir;
+	int		count;
+	
+	if(self->spawnflags & 1)
+	{
+		if(!tacticalScore.humanComputer || !tacticalScore.humanPowerSource)
+		{
+			self->nextthink = 0;
+			return;
+		}
+	}
+	else if(!tacticalScore.alienComputer || !tacticalScore.alienPowerSource)
+	{
+		self->nextthink = 0;
+		return;
+	}
+
+	count = 8;
+
+	if (!self->enemy)
+	{
+		if (self->target)
+		{
+			ent = G_Find (NULL, FOFS(targetname), self->target);
+			if (!ent)
+				gi.dprintf ("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
+			self->enemy = ent;
+		}
+		else
+		{
+			G_SetMovedir (self->s.angles, self->movedir);
+		}
+	}
+	else 
+	{
+		VectorCopy (self->movedir, last_movedir);
+		VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+		VectorSubtract (point, self->s.origin, self->movedir);
+		VectorNormalize (self->movedir);
+		if (!VectorCompare(self->movedir, last_movedir))
+			self->spawnflags |= 0x80000000;
+	}
+
+	ignore = self;
+	VectorCopy (self->s.origin, start);
+	VectorMA (start, 2048, self->movedir, end);
+	while(1)
+	{
+		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+		gi.WriteByte (svc_temp_entity);
+		if (self->spawnflags & 1)
+			gi.WriteByte (TE_REDLASER);
+		else
+			gi.WriteByte (TE_LASERBEAM);
+		gi.WritePosition (start);
+		gi.WritePosition (end);
+		gi.multicast (start, MULTICAST_PHS);
+
+		if (!tr.ent)
+			break;
+
+		//don't hurt anyone on the same team as the laser - spawnflag 1 = human
+		if(self->spawnflags & 1) 
+		{
+			if(tr.ent->ctype == 1)
+				break;
+		}
+		else if(!tr.ent->ctype)
+			break;
+	
+
+		// hurt it if we can
+		if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER))
+			T_Damage (tr.ent, self, self->activator, self->movedir, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
+
+		// if we hit something that's not a monster or player or is immune to lasers, we're done
+		if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
+		{
+			if (self->spawnflags & 0x80000000)
+			{
+				self->spawnflags &= ~0x80000000;
+				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte (TE_LASER_SPARKS);
+				gi.WriteByte (count);
+				gi.WritePosition (tr.endpos);
+				gi.WriteDir (tr.plane.normal);
+				gi.WriteByte (self->s.skinnum);
+				gi.multicast (tr.endpos, MULTICAST_PVS);
+			}
+			break;
+		}
+
+		ignore = tr.ent;
+		VectorCopy (tr.endpos, start);
+	}
+
+	VectorCopy (tr.endpos, self->s.old_origin);
+
+	self->nextthink = level.time + FRAMETIME;
+}
+
+void misc_laser_start (edict_t *self)
+{
+	
+	self->think = misc_laser_think;		
+}
+
+void SP_misc_laser (edict_t *ent)
+{
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_NO; //not sure if we want these to be destroyable, probably though?
+	
+	ent->dmg = 50; //cause severe damage, especially if multiples(most cases)
+
+	VectorSet (ent->mins, -16, -16, -16);
+	VectorSet (ent->maxs, 16, 16, 16);
+
+	// let everything else get spawned before we start firing
+	ent->think = misc_laser_think;
+	ent->nextthink = level.time + 1;
+
+	gi.linkentity (ent);
+}
+
 
 //computers
 void computer_think (edict_t *ent)
@@ -1550,98 +1782,3 @@ void SP_misc_humanpowersrc (edict_t *ent)
 	M_droptofloor (ent);
 }
 
-void misc_mapmodel_think (edict_t *ent)
-{
-	if(ent->spawnflags & 2)
-		ent->s.frame = (ent->s.frame + 1) % 39;
-	else
-		ent->s.frame = (ent->s.frame + 1) % 24;
-	ent->nextthink = level.time + FRAMETIME;
-}
-void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
-{
-	gi.setmodel (ent, ent->model);
-
-	ent->solid = SOLID_NOT; //will need clipping brushes around it
-
-	//disable shadows(also disables per-pixel dynamic lighting unless minlight set
-	if(ent->spawnflags & 1)
-		ent->s.renderfx = RF_NOSHADOWS;
-
-	if(ent->spawnflags & 16)
-		ent->s.renderfx = RF_TRANSLUCENT;
-
-	if(ent->spawnflags & 32) { //animated mesh
-		if(ent->spawnflags & 128)
-			ent->s.frame = 0;
-		else
-			ent->s.frame = rand()%24;
-		ent->think = misc_mapmodel_think;
-		ent->nextthink = level.time + FRAMETIME;
-	}
-	else //static mesh
-		ent->s.frame = 0;
-
-	//allow dynamic per-pixel lighting
-	if(ent->spawnflags & 64)
-		ent->s.renderfx |= RF_MINLIGHT;
-
-	gi.linkentity (ent);
-}
-
-void watersplash_think (edict_t *ent)
-{
-	vec3_t up;
-
-	up[0] = 0;
-	up[1] = 0;
-	up[2] = 1;
-
-	//write effect
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_SPLASH);
-	gi.WriteByte (8);
-	gi.WritePosition (ent->s.origin);
-	gi.WriteDir (up);
-	gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	ent->nextthink = level.time + 1.0;
-}
-
-void SP_misc_watersplash (edict_t *ent)
-{
-	gi.setmodel(ent, NULL);
-	ent->solid = SOLID_NOT;
-	ent->movetype = MOVETYPE_NONE;
-	ent->takedamage = DAMAGE_NO;
-
-	ent->think = watersplash_think;
-	ent->nextthink = level.time + 0.5 + random();
-
-	gi.linkentity (ent);
-}
-
-void misc_electroflash_think (edict_t *ent)
-{
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_RAILGUN);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	ent->nextthink = level.time + 0.05 + random();
-}
-
-void SP_misc_electroflash (edict_t *ent) //random electrical pulses
-{
-	gi.setmodel (ent, NULL);
-
-	ent->solid = SOLID_NOT; 
-	ent->movetype = MOVETYPE_NONE;
-	ent->takedamage = DAMAGE_NO;
-	ent->s.sound = gi.soundindex("world/electricity.wav");
-	ent->think = misc_electroflash_think;
-	ent->nextthink = level.time + 0.05 + random();
-
-	gi.linkentity (ent);
-}

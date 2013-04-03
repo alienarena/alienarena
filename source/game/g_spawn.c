@@ -119,6 +119,7 @@ spawn_t	spawns[] = {
 	{"misc_alienpowersrc", SP_misc_alienpowersrc},
 	{"misc_humanpowersrc", SP_misc_humanpowersrc},
 	{"misc_deathray", SP_misc_deathray}, //note - spawnflags determine team for this item(1 for human)
+	{"misc_laser", SP_misc_laser}, //spawnflag 1 for human
 
 	{"misc_mapmodel", SP_misc_mapmodel},
 	{"misc_watersplash", SP_misc_watersplash},
