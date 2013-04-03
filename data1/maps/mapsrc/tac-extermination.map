@@ -28826,3 +28826,153 @@
 "angle" "-0.000004"
 "spawnflags" "1"
 }
+// entity 373
+{
+"classname" "misc_laser"
+"origin" "88.000000 -336.000000 72.000000"
+"target" "a_laser1"
+}
+// entity 374
+{
+"classname" "info_notnull"
+"origin" "88.000000 -508.000000 72.000000"
+"targetname" "a_laser1"
+}
+// entity 375
+{
+"classname" "misc_laser"
+"origin" "-160.000000 -336.000000 72.000000"
+"target" "h_laser1"
+"spawnflags" "1"
+}
+// entity 376
+{
+"classname" "info_notnull"
+"origin" "-160.000000 -508.000000 72.000000"
+"targetname" "h_laser1"
+}
+// entity 377
+{
+"classname" "misc_laser"
+"origin" "88.000000 -336.000000 40.000000"
+"target" "a_laser2"
+}
+// entity 378
+{
+"classname" "info_notnull"
+"origin" "88.000000 -508.000000 40.000000"
+"targetname" "a_laser2"
+}
+// entity 379
+{
+"classname" "misc_laser"
+"origin" "-160.000000 -336.000000 40.000000"
+"target" "h_laser2"
+"spawnflags" "1"
+}
+// entity 380
+{
+"classname" "info_notnull"
+"origin" "-160.000000 -508.000000 40.000000"
+"targetname" "h_laser2"
+}
+// entity 381
+{
+"classname" "misc_laser"
+"origin" "224.000000 -96.000000 72.000000"
+"target" "a_laser3"
+}
+// entity 382
+{
+"classname" "misc_laser"
+"origin" "224.000000 -96.000000 40.000000"
+"target" "a_laser4"
+}
+// entity 383
+{
+"classname" "info_notnull"
+"origin" "116.000000 -96.000000 72.000000"
+"targetname" "a_laser3"
+}
+// entity 384
+{
+"classname" "info_notnull"
+"origin" "116.000000 -96.000000 40.000000"
+"targetname" "a_laser4"
+}
+// entity 385
+{
+"classname" "misc_laser"
+"origin" "-304.000000 -96.000000 72.000000"
+"target" "h_laser3"
+"spawnflags" "1"
+}
+// entity 386
+{
+"classname" "misc_laser"
+"origin" "-304.000000 -96.000000 40.000000"
+"target" "h_laser4"
+"spawnflags" "1"
+}
+// entity 387
+{
+"classname" "info_notnull"
+"origin" "-196.000000 -96.000000 72.000000"
+"targetname" "h_laser3"
+}
+// entity 388
+{
+"classname" "info_notnull"
+"origin" "-196.000000 -96.000000 40.000000"
+"targetname" "h_laser4"
+}
+// entity 389
+{
+"classname" "misc_laser"
+"origin" "-544.000000 488.000000 -192.000000"
+"target" "h_laser5"
+"spawnflags" "1"
+}
+// entity 390
+{
+"classname" "info_notnull"
+"origin" "-544.000000 316.000000 -192.000000"
+"targetname" "h_laser5"
+}
+// entity 391
+{
+"classname" "misc_laser"
+"origin" "-544.000000 488.000000 -224.000000"
+"target" "h_laser6"
+"spawnflags" "1"
+}
+// entity 392
+{
+"classname" "info_notnull"
+"origin" "-544.000000 316.000000 -224.000000"
+"targetname" "h_laser6"
+}
+// entity 393
+{
+"classname" "misc_laser"
+"origin" "464.000000 488.000000 -192.000000"
+"target" "a_laser5"
+}
+// entity 394
+{
+"classname" "info_notnull"
+"origin" "464.000000 316.000000 -192.000000"
+"targetname" "a_laser5"
+}
+// entity 395
+{
+"classname" "misc_laser"
+"origin" "464.000000 488.000000 -224.000000"
+"target" "a_laser6"
+}
+// entity 396
+{
+"classname" "info_notnull"
+"origin" "464.000000 316.000000 -224.000000"
+"targetname" "a_laser6"
+}

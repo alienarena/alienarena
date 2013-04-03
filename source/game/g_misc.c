@@ -1535,7 +1535,7 @@ void misc_laser_think (edict_t *self)
 
 	ignore = self;
 	VectorCopy (self->s.origin, start);
-	VectorMA (start, 2048, self->movedir, end);
+	VectorCopy (self->enemy->s.origin, end);
 	while(1)
 	{
 		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
