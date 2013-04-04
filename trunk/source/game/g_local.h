@@ -1135,6 +1135,8 @@ extern void SP_misc_aliencomputer (edict_t *self);
 extern void SP_misc_humancomputer (edict_t *self);
 extern void SP_misc_alienpowersrc (edict_t *self);
 extern void SP_misc_humanpowersrc (edict_t *self);
+extern void SP_misc_alienammodepot (edict_t *self);
+extern void SP_misc_humanammodepot (edict_t *self);
 extern void SP_misc_deathray (edict_t *self);
 extern void SP_misc_laser (edict_t *self);
 

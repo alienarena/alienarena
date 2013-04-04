@@ -149,8 +149,8 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				return false;
 
 		//do not pick up a weapon if you already have one
-		if(other->client->pers.weapon == FindItem("Alien Disruptor") || other->client->pers.weapon == FindItem("Alien Vaporizer") || other->client->pers.weapon == FindItem("Alien Smartgun")
-			|| other->client->pers.weapon == FindItem("Rocket Launcher") || other->client->pers.weapon == FindItem("Disruptor") || other->client->pers.weapon == FindItem("Minderaser")
+		if(other->client->pers.weapon == FindItem("Alien Disruptor") || other->client->pers.weapon == FindItem("Alien Smartgun")
+			|| other->client->pers.weapon == FindItem("Rocket Launcher") || other->client->pers.weapon == FindItem("Disruptor") 
 			|| other->client->pers.weapon == FindItem("Pulse Rifle") || other->client->pers.weapon == FindItem("Flame Thrower"))
 		{
 			safe_centerprintf(other, "Cannot pick up weapon, you already have a weapon");

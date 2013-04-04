@@ -560,7 +560,27 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 	}
 
 	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->integer))
-		SetRespawn (ent, 30);
+	{
+		if(g_tactical->integer)
+		{
+			if(!strcmp(ent->classname, "ammo_cells") || !strcmp(ent->classname, "ammo_shells"))
+			{
+				if(!tacticalScore.alienPowerSource)
+					SetRespawn (ent, 20); //on backup power, generate ammo much slower
+				else
+					SetRespawn (ent, 5);
+			}
+			else if(!strcmp(ent->classname, "ammo_rockets") || !strcmp(ent->classname, "ammo_bullets") || !strcmp(ent->classname, "ammo_grenades"))
+			{
+				if(!tacticalScore.humanPowerSource)
+					SetRespawn (ent, 20);
+				else
+					SetRespawn (ent, 5);
+			}
+		}
+		else
+			SetRespawn (ent, 30);
+	}
 
 	return true;
 }
@@ -808,8 +828,13 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (!taken)
 		return;
 
-	if(g_tactical->integer) //items do not respawn in tactical mode
+	if(g_tactical->integer) //items do not respawn in tactical mode(except ammo when ammo depots are running)
 	{
+		if((!strcmp(ent->classname, "ammo_cells") || !strcmp(ent->classname, "ammo_shells")) && tacticalScore.alienAmmoDepot)
+			return;
+		else if((!strcmp(ent->classname, "ammo_rockets") || !strcmp(ent->classname, "ammo_bullets") || !strcmp(ent->classname, "ammo_grenades")) && tacticalScore.humanAmmoDepot)
+			return;
+
 		G_FreeEdict (ent); 
 		return;
 	}

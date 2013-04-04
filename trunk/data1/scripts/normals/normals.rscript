@@ -1431,3 +1431,21 @@ models/tactical/hpowersrc
 		glow
 	}
 }
+models/tactical/alaser
+{
+	{
+		map models/tactical/laser_normal.jpg
+		normalmap
+		map2 models/tactical/alaser_fx.tga
+		glow
+	}
+}
+models/tactical/hlaser
+{
+	{
+		map models/tactical/laser_normal.jpg
+		normalmap
+		map2 models/tactical/hlaser_fx.tga
+		glow
+	}
+}
