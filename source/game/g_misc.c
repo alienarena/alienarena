@@ -1529,8 +1529,6 @@ void misc_laser_think (edict_t *self)
 		VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
 		VectorSubtract (point, self->s.origin, self->movedir);
 		VectorNormalize (self->movedir);
-		if (!VectorCompare(self->movedir, last_movedir))
-			self->spawnflags |= 0x80000000;
 	}
 
 	ignore = self;
@@ -1558,27 +1556,15 @@ void misc_laser_think (edict_t *self)
 				break;
 		}
 		else if(!tr.ent->ctype)
-			break;
-	
+			break;	
 
 		// hurt it if we can
-		if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER))
+		if (tr.ent->takedamage)
 			T_Damage (tr.ent, self, self->activator, self->movedir, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
 
-		// if we hit something that's not a monster or player or is immune to lasers, we're done
-		if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
+		// if we hit something that's not a player, we're done
+		if (!tr.ent->client)
 		{
-			if (self->spawnflags & 0x80000000)
-			{
-				self->spawnflags &= ~0x80000000;
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_LASER_SPARKS);
-				gi.WriteByte (count);
-				gi.WritePosition (tr.endpos);
-				gi.WriteDir (tr.plane.normal);
-				gi.WriteByte (self->s.skinnum);
-				gi.multicast (tr.endpos, MULTICAST_PVS);
-			}
 			break;
 		}
 
@@ -1599,11 +1585,22 @@ void misc_laser_start (edict_t *self)
 
 void SP_misc_laser (edict_t *ent)
 {
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
-	ent->takedamage = DAMAGE_NO; //not sure if we want these to be destroyable, probably though?
+	ent->takedamage = DAMAGE_NO; 
 	
 	ent->dmg = 50; //cause severe damage, especially if multiples(most cases)
+
+	if(ent->spawnflags & 1)
+		ent->s.modelindex = gi.modelindex ("models/tactical/human_laser.iqm");
+	else
+		ent->s.modelindex = gi.modelindex ("models/tactical/alien_laser.iqm");
 
 	VectorSet (ent->mins, -16, -16, -16);
 	VectorSet (ent->maxs, 16, 16, 16);
@@ -1777,6 +1774,88 @@ void SP_misc_humanpowersrc (edict_t *ent)
 	ent->think = powersrc_think;
 	ent->nextthink = level.time + FRAMETIME;
 	ent->classname = "human powersrc";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
+//ammo depots
+void ammodepot_think (edict_t *ent)
+{
+	ent->nextthink = level.time + FRAMETIME;
+}
+
+void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	self->takedamage = DAMAGE_NO;
+	self->activator = attacker;
+
+	gi.WriteByte (svc_temp_entity);
+	if(self->classname == "alien ammodepot")
+	{
+		tacticalScore.alienAmmoDepot = false;
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+	}
+	else
+	{
+		tacticalScore.humanAmmoDepot = false;
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+	
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	G_FreeEdict (self);
+}
+
+void SP_misc_alienammodepot (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/ammopad.md2");
+
+	VectorSet (ent->mins, -32, -32, 0);
+	VectorSet (ent->maxs, 32, 32, 16);
+	ent->health = 1500; 
+	ent->die = ammodepot_die;
+	ent->think = ammodepot_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "alien ammodepot";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
+void SP_misc_humanammodepot (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.md2");
+
+	VectorSet (ent->mins, -32, -32, 0);
+	VectorSet (ent->maxs, 32, 32, 16);
+	ent->health = 1500; 
+	ent->die = ammodepot_die;
+	ent->think = ammodepot_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "human ammodepot";
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
