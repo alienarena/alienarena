@@ -128,6 +128,11 @@ typedef struct
 	int		(*modelindex) (char *name);
 	int		(*soundindex) (char *name);
 	int		(*imageindex) (char *name);
+	
+	// for checking if assets are already loaded - return 0 if they are not
+	int		(*checkmodelindex) (char *name);
+	int		(*checksoundindex) (char *name);
+	int		(*checkimageindex) (char *name);
 
 	void	(*setmodel) (edict_t *ent, char *name);
 

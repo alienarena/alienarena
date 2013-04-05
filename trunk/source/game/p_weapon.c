@@ -352,22 +352,27 @@ void ChangeWeapon (edict_t *ent)
 #endif
 
 	sprintf(weaponpath, "%s", weaponmodel);
-	Q2_FindFile (weaponpath, &file); //does it really exist?
-	if(!file)
+	ent->s.modelindex2 = gi.checkmodelindex(weaponmodel);
+	
+	if (ent->s.modelindex2 == 0) // check if hasn't already been loaded
 	{
-		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
-		Q2_FindFile (weaponpath, &file);
-		if(!file) //server does not have this player model
-			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
-		else
-		{ //have the model, but it has no w_weaps
-			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
-			fclose(file);
+		Q2_FindFile (weaponpath, &file); //does it really exist?
+		if(!file)
+		{
+			sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+			Q2_FindFile (weaponpath, &file);
+			if(!file) //server does not have this player model
+				sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
+			else
+			{ //have the model, but it has no w_weaps
+				sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
+				fclose(file);
+			}
 		}
+		else
+			fclose(file);
+		ent->s.modelindex2 = gi.modelindex(weaponmodel);
 	}
-	else
-		fclose(file);
-	ent->s.modelindex2 = gi.modelindex(weaponmodel);
 
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
 	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2") )

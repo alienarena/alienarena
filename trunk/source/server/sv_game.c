@@ -297,6 +297,10 @@ void SV_InitGameProgs (void)
 	import.modelindex = SV_ModelIndex;
 	import.soundindex = SV_SoundIndex;
 	import.imageindex = SV_ImageIndex;
+	
+	import.checkmodelindex = SV_CheckModelIndex;
+	import.checksoundindex = SV_CheckSoundIndex;
+	import.checkimageindex = SV_CheckImageIndex;
 
 	import.configstring = PF_Configstring;
 	import.sound = PF_StartSound;
