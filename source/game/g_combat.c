@@ -450,6 +450,10 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 					safe_centerprintf(attacker, "Alien Power Source health at %i percent", 100*(targ->health-take)/1500);
 				else if(!strcmp(targ->classname, "human powersrc"))
 					safe_centerprintf(attacker, "Human Power Source health at %i percent", 100*(targ->health-take)/1500);
+				else if(!strcmp(targ->classname, "alien ammodepot"))
+					safe_centerprintf(attacker, "Alien Ammo Depot health at %i percent", 100*(targ->health-take)/1500);
+				else if(!strcmp(targ->classname, "human ammodepot"))
+					safe_centerprintf(attacker, "Human Ammo Depot health at %i percent", 100*(targ->health-take)/1500);
 			}
 		}
 

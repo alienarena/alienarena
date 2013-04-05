@@ -571,6 +571,44 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		}
 	}
 
+	if(g_tactical->value) {
+		target = findradius(NULL, self->s.origin, 300);
+		self->enemy = NULL;
+		while(target)
+		{
+			if(target->classname == NULL) {
+				self->enemy = NULL;
+				return false;
+			}
+			if(self->ctype == 1) {
+				if(strcmp(target->classname, "misc_aliencomputer") == 0)
+					self->enemy = target;
+				else if(strcmp(target->classname, "misc_alienpowersrc") == 0)
+					self->enemy = target;
+				else if(strcmp(target->classname, "misc_alienammodepot") == 0)
+					self->enemy = target;
+			}
+			else 
+			{
+				if(strcmp(target->classname, "misc_humancomputer") == 0)
+					self->enemy = target;
+				else if(strcmp(target->classname, "misc_humanpowersrc") == 0)
+					self->enemy = target;
+				else if(strcmp(target->classname, "misc_humanammodepot") == 0)
+					self->enemy = target;
+			}
+			target = findradius(target, self->s.origin, 300);
+			if(self->enemy) {
+				//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
+				self->movetarget = self->enemy;
+				self->goalentity= self->enemy; //face it, and fire
+				return true;
+			}
+			else
+				return false;
+		}
+	}
+
 	if(self->oldenemy != NULL) //(was shot from behind)
 	{
 		if(!OnSameTeam(self, self->oldenemy))

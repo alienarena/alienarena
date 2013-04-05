@@ -917,23 +917,26 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			Cmd_Score_f( self );
 		}
 
-		if(self->health < -40 && attacker->client) 
+		if(attacker)
 		{
-			attacker->client->resp.reward_pts++;
-			if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) 
-			{	//give them speed and invis powerups
-				it = FindItem("Invisibility");
-				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+			if(self->health < -40 && attacker->client) 
+			{
+				attacker->client->resp.reward_pts++;
+				if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) 
+				{	//give them speed and invis powerups
+					it = FindItem("Invisibility");
+					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
 
-				it = FindItem("Sproing");
-				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+					it = FindItem("Sproing");
+					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
 
-				it = FindItem("Haste");
-				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+					it = FindItem("Haste");
+					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
 
-				attacker->client->resp.powered = true;
+					attacker->client->resp.powered = true;
 
-				gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
+					gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 		}
 	}
@@ -1567,7 +1570,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 	if (deathmatch->value) 
 	{
 		if (g_tactical->value || ctf->value || tca->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) 
-		{
+		{			
 			spot = SelectCTFSpawnPoint(ent);
 			if(!spot)
 				spot = SelectDeathmatchSpawnPoint ();
@@ -1963,7 +1966,8 @@ void PutClientInServer (edict_t *ent)
 	// find a spawn point
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
-	SelectSpawnPoint (ent, spawn_origin, spawn_angles);
+	if(!g_tactical->integer)
+		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
 
 	index = ent-g_edicts-1;
 	client = ent->client;
@@ -2035,11 +2039,7 @@ void PutClientInServer (edict_t *ent)
 
 	// clear playerstate values
 	memset (&ent->client->ps, 0, sizeof(client->ps));
-
-	client->ps.pmove.origin[0] = spawn_origin[0]*8;
-	client->ps.pmove.origin[1] = spawn_origin[1]*8;
-	client->ps.pmove.origin[2] = spawn_origin[2]*8;
-
+	
 	//remove these if there are there
 	if(ent->client->oldplayer)
 		G_FreeEdict (ent->client->oldplayer);
@@ -2220,6 +2220,14 @@ void PutClientInServer (edict_t *ent)
 		}
 	}
 #endif
+
+	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
+	if(g_tactical->integer)
+		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
+
+	client->ps.pmove.origin[0] = spawn_origin[0]*8;
+	client->ps.pmove.origin[1] = spawn_origin[1]*8;
+	client->ps.pmove.origin[2] = spawn_origin[2]*8;
 
 	ent->s.frame = 0;
 	VectorCopy (spawn_origin, ent->s.origin);
