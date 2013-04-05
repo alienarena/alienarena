@@ -2001,6 +2001,36 @@ void calModelFilename( entity_state_t *ent, const char *basename,
 
 /*
  ==
+ S_RegisterSoundsForPlayer()
+
+ Register the model-specific sounds (pain, jumping, etc.) that should be
+ present for each player model.
+ 
+ This function is called from the model loading code. It relies on the fact
+ that the server precaches sounds before models, so the generic (fallback)
+ version of each model-specific sound is already in the precache list at this
+ point.
+ ==
+ */
+void S_RegisterSoundsForPlayer (char *playername)
+{
+	int		i;
+	char	soundpath[MAX_QPATH];
+	
+	for (i=1 ; i<MAX_SOUNDS ; i++)
+	{
+		if (!cl.configstrings[CS_SOUNDS+i][0])
+			break;
+		if (cl.configstrings[CS_SOUNDS+i][0] != '*')
+			continue;
+		cl.sound_precache[i] = S_RegisterSound (cl.configstrings[CS_SOUNDS+i]);
+		Com_sprintf (soundpath, MAX_QPATH, "#players/%s/%s", playername, &cl.configstrings[CS_SOUNDS+i][1]);
+		S_RegisterSound (soundpath);
+	}
+}
+
+/*
+ ==
 
  S_StartSound()
 

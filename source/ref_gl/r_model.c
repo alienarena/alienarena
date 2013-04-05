@@ -2032,6 +2032,9 @@ void R_RegisterBasePlayerModels( void )
 			Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/%s", BasePModels[i].name, BaseWModels[j]);
 			R_RegisterModel(mod_filename);
 		}
+		
+		//register standard sounds
+		S_RegisterSoundsForPlayer (BasePModels[i].name);
 
 		//register all skins
 		Com_sprintf( scratch, sizeof(scratch), "players/%s/*.jpg", BasePModels[i].name);
@@ -2092,6 +2095,9 @@ void R_RegisterCustomPlayerModels( void )
 			if(FS_FileExists(mod_filename))
 				R_RegisterModel(mod_filename);
 		}
+		
+		//register standard sounds
+		S_RegisterSoundsForPlayer (dirnames[i]);
 
 		//register all skins
 		strcpy( scratch, dirnames[i] );
