@@ -400,6 +400,7 @@ void	R_SetSky (char *name, float rotate, vec3_t axis);
 
 void	R_RegisterBasePlayerModels(void);
 void	R_RegisterCustomPlayerModels(void);
+void	S_RegisterSoundsForPlayer (char *playername);
 void	R_BeginRegistration (char *map);
 void	R_EndRegistration (void);
 
