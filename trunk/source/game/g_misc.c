@@ -1622,6 +1622,9 @@ void computer_think (edict_t *ent)
 
 void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+	edict_t *cl_ent;
+	int i;
+
 	self->takedamage = DAMAGE_NO;
 	self->activator = attacker;
 
@@ -1629,12 +1632,26 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if(self->classname == "alien computer")
 	{
 		tacticalScore.alienComputer = false;
-		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - turrents and laser barriers shut off.
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Alien Central Computer has been destroyed!");
+		}
 	}
 	else
 	{
 		tacticalScore.humanComputer = false;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Human Central Computer has been destroyed!");
+		}
 	}
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
@@ -1705,6 +1722,9 @@ void powersrc_think (edict_t *ent)
 
 void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+	edict_t *cl_ent;
+	int i;
+
 	self->takedamage = DAMAGE_NO;
 	self->activator = attacker;
 
@@ -1712,12 +1732,26 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if(self->classname == "alien powersrc")
 	{
 		tacticalScore.alienPowerSource = false;
-		gi.WriteByte (TE_BFG_BIGEXPLOSION); //tactical to do - turrents and laser barriers get erratic, ammo depot 1/2 speed.
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Alien Power Source has been destroyed!");
+		}
 	}
 	else
 	{
 		tacticalScore.humanPowerSource = false;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Human Power Source has been destroyed!");
+		}
 	}
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
@@ -1787,6 +1821,9 @@ void ammodepot_think (edict_t *ent)
 
 void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+	edict_t	*cl_ent;
+	int i;
+
 	self->takedamage = DAMAGE_NO;
 	self->activator = attacker;
 
@@ -1795,11 +1832,25 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	{
 		tacticalScore.alienAmmoDepot = false;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Alien Ammo Depot has been destroyed!");
+		}
 	}
 	else
 	{
 		tacticalScore.humanAmmoDepot = false;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Human Ammo Depot has been destroyed!");
+		}
 	}
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
