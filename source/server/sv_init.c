@@ -89,6 +89,30 @@ int SV_ImageIndex (char *name)
 
 
 /*
+=================
+PF_Check*Index
+
+For checking if assets are already loaded - return 0 if they are not
+=================
+*/
+
+int SV_CheckModelIndex (char *name)
+{
+	return SV_FindIndex (name, CS_MODELS, MAX_MODELS, false);
+}
+
+int SV_CheckSoundIndex (char *name)
+{
+	return SV_FindIndex (name, CS_SOUNDS, MAX_SOUNDS, false);
+}
+
+int SV_CheckImageIndex (char *name)
+{
+	return SV_FindIndex (name, CS_IMAGES, MAX_IMAGES, false);
+}
+
+
+/*
 ================
 SV_CreateBaseline
 
