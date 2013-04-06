@@ -1729,20 +1729,29 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 	pic = NULL;
 	palette = NULL;
 
-	// try to load .tga first
+	// Try to load the image with different file extensions, in the following
+	// order of decreasing preference: TGA, JPEG, PCX, and WAL.
+	
 	LoadTGA (va("%s.tga", shortname), &pic, &width, &height);
 	if (pic)
 	{
 		image = GL_LoadPic (name, pic, width, height, type, 32);
 		goto done;
 	}
+	
 	LoadJPG (va("%s.jpg", shortname), &pic, &width, &height);
 	if (pic)
 	{
 		image = GL_LoadPic (name, pic, width, height, type, 32);
 		goto done;
 	}
-	// then comes .pcx
+	
+	// TGA and JPEG are the only file types used for heightmaps and
+	// normalmaps, so if we haven't found it yet, it isn't there, and we can
+	// save ourselves a file lookup.
+	if (type == it_bump)
+		goto done;
+	
 	LoadPCX (va("%s.pcx", shortname), &pic, &palette, &width, &height);
 	if (pic)
 	{
@@ -1750,7 +1759,6 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 		goto done;
 	}
 
-	// then comes .wal
 	if (type == it_wall)
 		image = GL_LoadWal (va("%s.wal", shortname));
 
