@@ -2017,6 +2017,8 @@ void S_RegisterSoundsForPlayer (char *playername)
 	int		i;
 	char	soundpath[MAX_QPATH];
 	
+	return; // FIXME: figure out why Windows doesn't like this.
+	
 	for (i=1 ; i<MAX_SOUNDS ; i++)
 	{
 		if (!cl.configstrings[CS_SOUNDS+i][0])
