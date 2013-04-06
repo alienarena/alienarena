@@ -148,7 +148,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				|| !strcmp(ent->classname, "weapon_minderaser"))
 				return false;
 
-		//do not pick up a weapon if you already have one
+		//do not pick up a weapon if you already have one - the premise behind this is that it will give others opportunities to pick up weapons since they do not respawn
 		if(other->client->pers.weapon == FindItem("Alien Disruptor") || other->client->pers.weapon == FindItem("Alien Smartgun")
 			|| other->client->pers.weapon == FindItem("Rocket Launcher") || other->client->pers.weapon == FindItem("Disruptor") 
 			|| other->client->pers.weapon == FindItem("Pulse Rifle") || other->client->pers.weapon == FindItem("Flame Thrower"))
