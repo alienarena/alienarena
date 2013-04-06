@@ -416,7 +416,7 @@ void R_Bloom_FullsizeRBOUpdate (void)
 	for (i = 0; i < num_sections; i++)
 	{
 		y = cur_section*(vid.height/4);
-		qglBlitFramebufferEXT(0, y, vid.width, vid.height/4, 0, y, vid.width, vid.height/4,
+		qglBlitFramebufferEXT(0, y, vid.width, y+vid.height/4, 0, y, vid.width, y+vid.height/4,
 			GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		cur_section = (cur_section + 1) % 4;
 	}
