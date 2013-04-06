@@ -397,7 +397,8 @@ This updates the full size RBO from the screen. The whole thing is guaranteed
 to be updated 60 times a second, but it does it a 1/4 of the screen at a time
 if the framerate is high enough. It does it in horizontal slices instead of
 quadrants because that way the GPU doesn't have to skip over part of each row
-of pixels.
+of pixels. Tearing isn't an issue because it'll just be blurred to mush
+anyway.
 =================
 */
 void R_Bloom_FullsizeRBOUpdate (void)
