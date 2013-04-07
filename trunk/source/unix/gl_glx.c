@@ -459,6 +459,7 @@ void HandleEvents( void )
 	int mwy = vid.height / 2;
 	int multiclicktime = 750;
 	int mouse_button;
+	static int last_mouse_x = 0, last_mouse_y = 0;
 
 	float f_sys_msecs;
 	unsigned u_sys_msecs;
@@ -490,28 +491,8 @@ void HandleEvents( void )
 			break;
 
 		case MotionNotify:
-			if ( mouse_is_position )
-			{ // allow mouse movement on menus in windowed mode
-				mouse_diff_x = event.xmotion.x;
-				mouse_diff_y = event.xmotion.y;
-			}
-			else
-			{
-				if ( dgamouse )
-				{ // TODO: find documentation for DGA mouse, explain this
-					mouse_diff_x += (event.xmotion.x + (vidmode_active ? 0 : win_x)) * 2;
-					mouse_diff_y += (event.xmotion.y + (vidmode_active ? 0 : win_y)) * 2;
-				}
-				else
-				{ // add the delta from the current position to the center
-					//  to the pointer motion accumulator
-					mouse_diff_x += ((int)event.xmotion.x - mwx);
-					mouse_diff_y += ((int)event.xmotion.y - mwy);
-
-					// flag to recenter pointer
-					dowarp = (mouse_diff_x != 0 || mouse_diff_y != 0 );
-				}
-			}
+			last_mouse_x = event.xmotion.x;
+			last_mouse_y = event.xmotion.y;
 			break;
 
 		case ButtonPress:
@@ -653,6 +634,29 @@ void HandleEvents( void )
 			if ( event.xclient.data.l[0] == wmDeleteWindow )
 				Cbuf_ExecuteText( EXEC_NOW, "quit" );
 			break;
+		}
+	}
+	
+	if ( mouse_is_position )
+	{ // allow mouse movement on menus in windowed mode
+		mouse_diff_x = last_mouse_x;
+		mouse_diff_y = last_mouse_y;
+	}
+	else
+	{
+		if ( dgamouse )
+		{ // TODO: find documentation for DGA mouse, explain this
+			mouse_diff_x += (last_mouse_x + (vidmode_active ? 0 : win_x)) * 2;
+			mouse_diff_y += (last_mouse_y + (vidmode_active ? 0 : win_y)) * 2;
+		}
+		else
+		{ // add the delta from the current position to the center
+			//  to the pointer motion accumulator
+			mouse_diff_x += ((int)last_mouse_x - mwx);
+			mouse_diff_y += ((int)last_mouse_y - mwy);
+
+			// flag to recenter pointer
+			dowarp = (mouse_diff_x != 0 || mouse_diff_y != 0 );
 		}
 	}
 
