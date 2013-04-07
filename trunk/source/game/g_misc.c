@@ -1583,6 +1583,28 @@ void misc_laser_start (edict_t *self)
 	self->think = misc_laser_think;		
 }
 
+void laser_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	self->takedamage = DAMAGE_NO;
+	self->activator = attacker;
+
+	gi.WriteByte (svc_temp_entity);
+	if(self->spawnflags & 1)
+	{
+		gi.WriteByte (TE_ROCKET_EXPLOSION); 		
+	}
+	else
+	{
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);		
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+	
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	G_FreeEdict (self);
+}
+
 void SP_misc_laser (edict_t *ent)
 {
 	if (!g_tactical->integer)
@@ -1593,9 +1615,11 @@ void SP_misc_laser (edict_t *ent)
 
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
-	ent->takedamage = DAMAGE_NO; 
+	ent->takedamage = DAMAGE_YES; 
+	ent->health = 1000;  
+	ent->die = laser_die;
 	
-	ent->dmg = 50; //cause severe damage, especially if multiples(most cases)
+	ent->dmg = 500; //cause severe damage, especially if multiples(most cases)
 
 	if(ent->spawnflags & 1)
 		ent->s.modelindex = gi.modelindex ("models/tactical/human_laser.iqm");
