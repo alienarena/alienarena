@@ -1806,12 +1806,79 @@ static char rgodrays_fragment_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
+typedef struct {
+	const char	*name;
+	int			index;
+} vertex_attribute_t;
+
+// add new vertex attributes here
+#define NO_ATTRIBUTES			0
+const vertex_attribute_t standard_attributes[] = 
+{
+	#define	ATTRIBUTE_TANGENT	(1<<0)
+	{"tangent",	1},
+	#define	ATTRIBUTE_WEIGHTS	(1<<1)
+	{"weights",	6},
+	#define ATTRIBUTE_BONES		(1<<2)
+	{"bones",	7}
+};
+const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
+	
+void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
+{
+	char		str[4096];
+	const char	*shaderStrings[1];
+	int			nResult;
+	int			i;
+	
+	*program = glCreateProgramObjectARB();
+	
+	g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+	shaderStrings[0] = vertex;
+	glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+	glCompileShaderARB( g_vertexShader);
+	glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+	if( nResult )
+		glAttachObjectARB( *program, g_vertexShader );
+	else
+	{
+		Com_Printf("...%s Vertex Shader Compile Error\n", name);
+	}
+	
+	g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+	shaderStrings[0] = fragment;
+	
+	glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+	glCompileShaderARB( g_fragmentShader );
+	glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+	if( nResult )
+		glAttachObjectARB( *program, g_fragmentShader );
+	else
+	{
+		Com_Printf("...%s Fragment Shader Compile Error\n", name);
+	}
+	
+	for (i = 0; i < num_standard_attributes; i++)
+	{
+		if (attributes & (1<<i))
+			glBindAttribLocationARB(*program, standard_attributes[i].index, standard_attributes[i].name);
+	}
+
+	glLinkProgramARB( *program );
+	glGetObjectParameterivARB( *program, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+	if( !nResult )
+	{
+		glGetInfoLogARB( *program, sizeof(str), NULL, str );
+		Com_Printf("...%s Shader Linking Error\n", name);
+	}
+
+}
+
 void R_LoadGLSLPrograms(void)
 {
-	const char *shaderStrings[1];
-    int		nResult;
-    char	str[4096];
-
 	//load glsl (to do - move to own file)
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
 	{
@@ -1865,61 +1932,12 @@ void R_LoadGLSLPrograms(void)
 		gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 
 		//standard bsp surfaces
-
-		g_programObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)bsp_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_programObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...BSP Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-
 		if(gl_state.ati)
-			shaderStrings[0] = (char*)bsp_fragment_program_ATI;
+			R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program_ATI, NO_ATTRIBUTES, &g_programObj);
 		else
-			shaderStrings[0] = (char*)bsp_fragment_program;
+			R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program, NO_ATTRIBUTES, &g_programObj);
 
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_programObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...BSP Fragment Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_programObj );
-		glGetObjectParameterivARB( g_programObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_programObj, sizeof(str), NULL, str );
-			Com_Printf("...BSP Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_surfTexture = glGetUniformLocationARB( g_programObj, "surfTexture" );
 		g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
 		g_tangentSpaceTransform = glGetUniformLocationARB( g_programObj, "tangentSpaceTransform");
@@ -1947,117 +1965,21 @@ void R_LoadGLSLPrograms(void)
 		g_location_chromeTex = glGetUniformLocationARB( g_programObj, "chromeTex" );
 
 		//shadowed white bsp surfaces
-
-		g_shadowprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)shadow_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_shadowprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Shadow Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-
 		if(gl_state.ati)
-			shaderStrings[0] = (char*)shadow_fragment_program_ATI;
+			R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program_ATI, NO_ATTRIBUTES, &g_shadowprogramObj);
 		else
-			shaderStrings[0] = (char*)shadow_fragment_program;
+			R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);
 
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_shadowprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Shadow Fragment Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_shadowprogramObj );
-		glGetObjectParameterivARB( g_shadowprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_shadowprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Shadow Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
 		g_location_fadeShadow = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
 		g_location_xOffset = glGetUniformLocationARB( g_shadowprogramObj, "xPixelOffset" );
 		g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
 
 		//warp(water) bsp surfaces
+		R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);
 
-		g_waterprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)water_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_waterprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Water Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)water_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_waterprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Water Fragment Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_waterprogramObj );
-		glGetObjectParameterivARB( g_waterprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_waterprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Water Surface Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
 		g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
 		g_location_refTexture = glGetUniformLocationARB( g_waterprogramObj, "refTexture" );
@@ -2070,59 +1992,9 @@ void R_LoadGLSLPrograms(void)
 		g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
 
 		//meshes
+		R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_meshprogramObj);
 
-		g_meshprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)mesh_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_meshprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Mesh Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)mesh_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_meshprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Mesh Fragment Shader Compile Error\n");
-		}
-
-		glBindAttribLocationARB(g_meshprogramObj, 1, "tangent");
-		glBindAttribLocationARB(g_meshprogramObj, 6, "weights");
-		glBindAttribLocationARB(g_meshprogramObj, 7, "bones");
-		glLinkProgramARB( g_meshprogramObj );
-		glGetObjectParameterivARB( g_meshprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_meshprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Mesh Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
 		g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
 		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
@@ -2140,58 +2012,9 @@ void R_LoadGLSLPrograms(void)
 		g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
 
 		//Glass
+		R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_glassprogramObj);
 
-		g_glassprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)glass_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_glassprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Glass Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)glass_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_glassprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Glass Fragment Shader Compile Error\n");
-		}
-
-		glBindAttribLocationARB(g_glassprogramObj, 6, "weights");
-		glBindAttribLocationARB(g_glassprogramObj, 7, "bones");
-		glLinkProgramARB( g_glassprogramObj );
-		glGetObjectParameterivARB( g_glassprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_glassprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Glass Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_gOutframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
 		g_location_gFog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
 		g_location_gLightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
@@ -2199,330 +2022,48 @@ void R_LoadGLSLPrograms(void)
 		g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
 
 		//Blank mesh (for shadowmapping efficiently)
+		R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_blankmeshprogramObj);
 
-		g_blankmeshprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)blankmesh_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_blankmeshprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Blankmesh Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)blankmesh_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_blankmeshprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Blankmesh Fragment Shader Compile Error\n");
-		}
-
-		glBindAttribLocationARB(g_blankmeshprogramObj, 6, "weights");
-		glBindAttribLocationARB(g_blankmeshprogramObj, 7, "bones");
-		glLinkProgramARB( g_blankmeshprogramObj );
-		glGetObjectParameterivARB( g_blankmeshprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_blankmeshprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Blankmesh Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_bmOutframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
 		
 		//fullscreen distortion effects
+		R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, &g_fbprogramObj);
 
-		g_fbprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)fb_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_fbprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Framebuffer Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)fb_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_fbprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Framebuffer Fragment Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_fbprogramObj );
-		glGetObjectParameterivARB( g_fbprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_fbprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...FBO Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
 		g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
 		g_location_dParams = glGetUniformLocationARB( g_fbprogramObj, "dParams" );
 		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
 
 		//gaussian blur
+		R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, &g_blurprogramObj);
 
-		g_blurprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)blur_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_blurprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Blur Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)blur_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_blurprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Framebuffer Blur Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_blurprogramObj );
-		glGetObjectParameterivARB( g_blurprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_blurprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...FBO Blur Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
 		g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
 
 		//radial blur
+		R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, &g_rblurprogramObj);
 
-		g_rblurprogramObj = glCreateProgramObjectARB();
-
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)rblur_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_rblurprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Radial Blur Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)rblur_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_rblurprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Radial Fragment Blur Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_rblurprogramObj );
-		glGetObjectParameterivARB( g_rblurprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_rblurprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Radial Blur Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_rscale = glGetUniformLocationARB( g_rblurprogramObj, "rblurScale" );
 		g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
 		g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
 
 		//water droplets
-		g_dropletsprogramObj = glCreateProgramObjectARB();
+		R_LoadGLSLProgram ("Framebuffer Droplets", (char*)droplets_vertex_program, (char*)droplets_fragment_program, NO_ATTRIBUTES, &g_dropletsprogramObj);
 
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)droplets_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_dropletsprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...Water Droplets Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)droplets_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_dropletsprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...Water Droplets Fragment Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_dropletsprogramObj );
-		glGetObjectParameterivARB( g_dropletsprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_dropletsprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Liquid Droplet Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_drSource = glGetUniformLocationARB( g_dropletsprogramObj, "drSource" );
 		g_location_drTex = glGetUniformLocationARB( g_dropletsprogramObj, "drTex");
 		g_location_drParams = glGetUniformLocationARB( g_dropletsprogramObj, "drParams" );
 		g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
 
 		//god rays
-		g_godraysprogramObj = glCreateProgramObjectARB();
+		R_LoadGLSLProgram ("God Rays", (char*)rgodrays_vertex_program, (char*)rgodrays_fragment_program, NO_ATTRIBUTES, &g_godraysprogramObj);
 
-		//
-		// Vertex shader
-		//
-
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)rgodrays_vertex_program;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_godraysprogramObj, g_vertexShader );
-		else
-		{
-			Com_Printf("...God Rays Vertex Shader Compile Error\n");
-		}
-
-		//
-		// Fragment shader
-		//
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)rgodrays_fragment_program;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
-			glAttachObjectARB( g_godraysprogramObj, g_fragmentShader );
-		else
-		{
-			Com_Printf("...God Rays Fragment Shader Compile Error\n");
-		}
-
-		glLinkProgramARB( g_godraysprogramObj );
-		glGetObjectParameterivARB( g_godraysprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-		if( !nResult )
-		{
-			glGetInfoLogARB( g_godraysprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...God Ray Shader Linking Error\n");
-		}
-
-		//
 		// Locate some parameters by name so we can set them later...
-		//
-
 		g_location_lightPositionOnScreen = glGetUniformLocationARB( g_godraysprogramObj, "lightPositionOnScreen" );
 		g_location_sunTex = glGetUniformLocationARB( g_godraysprogramObj, "sunTexture");
 		g_location_godrayScreenAspect = glGetUniformLocationARB( g_godraysprogramObj, "aspectRatio");
