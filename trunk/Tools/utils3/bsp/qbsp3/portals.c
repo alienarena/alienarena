@@ -542,7 +542,7 @@ void MakeTreePortals_r (node_t *node)
 
 	for (i=0 ; i<3 ; i++)
 	{
-		if (node->mins[i] < -8000 || node->maxs[i] > 8000)
+		if (node->mins[i] < -mapsize*1.5 || node->maxs[i] > mapsize*1.5)
 		{
 			printf ("WARNING: node with unbounded volume\n");
 			printf("  Bounds: %g %g %g -> %g %g %g\n",
@@ -1025,7 +1025,7 @@ void FindPortalSide (portal_t *p)
 
 gotit:
 	if (!bestside)
-		qprintf ("WARNING: side not found for portal\n");
+		qprintf ("WARNING: side not found for portal %p %f %f %f %f\n", p, p->plane.normal[0], p->plane.normal[1], p->plane.normal[2], p->plane.dist);
 
 	p->sidefound = true;
 	p->side = bestside;

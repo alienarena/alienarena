@@ -617,7 +617,7 @@ qboolean WindingIsHuge (winding_t *w)
 	for (i=0 ; i<w->numpoints ; i++)
 	{
 		for (j=0 ; j<3 ; j++)
-			if (w->p[i][j] < -8000 || w->p[i][j] > 8000)
+			if (w->p[i][j] < -mapsize*1.5 || w->p[i][j] > mapsize*1.5)
 				return true;
 	}
 	return false;
@@ -715,7 +715,7 @@ side_t *SelectSplitSide (bspbrush_t *brushes, node_t *node)
 	qboolean	hintsplit, detailsplit;
 
 	bestside = NULL;
-	bestvalue = -99999;
+	bestvalue = -BOGUS_RANGE;
 	bestsplits = 0;
 
 	// the search order goes: visible-structural, visible-detail,
@@ -801,7 +801,7 @@ side_t *SelectSplitSide (bspbrush_t *brushes, node_t *node)
 
 				// never split a hint side except with another hint
 				if ((hintsplit && !(side->surf & SURF_HINT)) &&	(!detailsplit || (side->contents & CONTENTS_DETAIL)))
-					value = -9999999;
+					value = -BOGUS_RANGE;
 
 				// save off the side test so we don't need
 				// to recalculate it when we actually seperate
@@ -1008,7 +1008,7 @@ void SplitBrush (bspbrush_t *brush, int planenum,
 		BoundBrush (b[i]);
 		for (j=0 ; j<3 ; j++)
 		{
-			if (b[i]->mins[j] < -4096 || b[i]->maxs[j] > 4096)
+			if (b[i]->mins[j] < -mapsize || b[i]->maxs[j] > mapsize)
 			{
 				qprintf ("bogus brush after clip\n");
 				break;
@@ -1243,6 +1243,7 @@ tree_t *BrushBSP (bspbrush_t *brushlist, vec3_t mins, vec3_t maxs)
 			if (b->sides[i].texinfo == TEXINFO_NODE)
 				continue;
 			if (b->sides[i].visible)
+
 				c_faces++;
 			else
 				c_nonvisfaces++;

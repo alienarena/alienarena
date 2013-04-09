@@ -61,7 +61,8 @@ typedef struct hashvert_s
 } hashvert_t;
 
 
-#define	HASH_SIZE	64
+#define	log2_hashsize	6
+#define	HASH_SIZE		(1<<log2_hashsize)
 
 
 int	vertexchain[MAX_MAP_VERTS];		// the next vertex in a hash chain
@@ -76,8 +77,8 @@ unsigned HashVec (vec3_t vec)
 {
 	int			x, y;
 
-	x = (4096 + (int)(vec[0]+0.5)) >> 7;
-	y = (4096 + (int)(vec[1]+0.5)) >> 7;
+	x = (mapsize + (int)(vec[0]+0.5)) >> (log2_mapsize-(log2_hashsize-1));
+	y = (mapsize + (int)(vec[1]+0.5)) >> (log2_mapsize-(log2_hashsize-1));
 
 	if ( x < 0 || x >= HASH_SIZE || y < 0 || y >= HASH_SIZE )
 		Error ("HashVec: point outside valid range");
@@ -160,8 +161,8 @@ int	GetVertexnum (vec3_t v)
 	{
 		if ( fabs(v[i] - (int)(v[i]+0.5)) < INTEGRAL_EPSILON )
 			v[i] = (int)(v[i]+0.5);
-		if (v[i] < -4096 || v[i] > 4096)
-			Error ("GetVertexnum: outside +/- 4096");
+		if (v[i] < -mapsize || v[i] > mapsize)
+			Error ("GetVertexnum: outside +/- %d", mapsize);
 	}
 
 	// search for an existing vertex match
@@ -321,10 +322,10 @@ void FindEdgeVerts (vec3_t v1, vec3_t v2)
 }
 #endif
 
-	x1 = (4096 + (int)(v1[0]+0.5)) >> 7;
-	y1 = (4096 + (int)(v1[1]+0.5)) >> 7;
-	x2 = (4096 + (int)(v2[0]+0.5)) >> 7;
-	y2 = (4096 + (int)(v2[1]+0.5)) >> 7;
+	x1 = (mapsize + (int)(v1[0]+0.5)) >> (log2_mapsize-(log2_hashsize-1));
+	y1 = (mapsize + (int)(v1[1]+0.5)) >> (log2_mapsize-(log2_hashsize-1));
+	x2 = (mapsize + (int)(v2[0]+0.5)) >> (log2_mapsize-(log2_hashsize-1));
+	y2 = (mapsize + (int)(v2[1]+0.5)) >> (log2_mapsize-(log2_hashsize-1));
 
 	if (x1 > x2)
 	{
@@ -877,8 +878,8 @@ void SubdivideFace (node_t *node, face_t *f)
 	{
 		while (1)
 		{
-			mins = 999999;
-			maxs = -999999;
+			mins = BOGUS_RANGE;
+			maxs = -BOGUS_RANGE;
 			
 			VectorCopy (tex->vecs[axis], temp);
 			w = f->w;
