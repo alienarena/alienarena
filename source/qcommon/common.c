@@ -406,6 +406,20 @@ void MSG_WriteLong (sizebuf_t *sb, int c)
 #endif
 }
 
+void MSG_WriteSizeInt (sizebuf_t *sb, int bytes, int c)
+{
+	byte		*buf;
+	int			i;
+	
+	// manually construct two's complement encoding with appropriate bit depth
+	if (c < 0 && bytes != sizeof(c))
+		c += 1<<(8*bytes);
+	
+	buf = SZ_GetSpace (sb, bytes);
+	for (i = 0; i < bytes; i++)
+		buf[i] = (byte)((c>>(8*i))&0xff);
+}
+
 void MSG_WriteFloat (sizebuf_t *sb, float f)
 {
 	union
@@ -431,14 +445,14 @@ void MSG_WriteString (sizebuf_t *sb, char *s)
 
 void MSG_WriteCoord (sizebuf_t *sb, float f)
 {
-	MSG_WriteShort (sb, (int)(f*8));
+	MSG_WriteSizeInt (sb, coord_bytes, (int)(f*8));
 }
 
 void MSG_WritePos (sizebuf_t *sb, vec3_t pos)
 {
-	MSG_WriteShort (sb, (int)(pos[0]*8));
-	MSG_WriteShort (sb, (int)(pos[1]*8));
-	MSG_WriteShort (sb, (int)(pos[2]*8));
+	MSG_WriteSizeInt (sb, coord_bytes, (int)(pos[0]*8));
+	MSG_WriteSizeInt (sb, coord_bytes, (int)(pos[1]*8));
+	MSG_WriteSizeInt (sb, coord_bytes, (int)(pos[2]*8));
 }
 
 void MSG_WriteAngle (sizebuf_t *sb, float f)
@@ -889,6 +903,26 @@ int MSG_ReadLong (sizebuf_t *msg_read)
 #endif
 }
 
+int MSG_ReadSizeInt (sizebuf_t *msg_read, int bytes)
+{
+	int c, i;
+	
+	if (msg_read->readcount+bytes > msg_read->cursize)
+		c = -1;
+	else
+	{
+		c = 0;
+		for (i = 0; i < bytes; i++)
+			c += msg_read->data[msg_read->readcount++] << (8*i);
+		// check sign bit and sign-extend to 32 bits if needed
+		if (bytes != sizeof(c) && (c & 1<<(8*bytes-1)))
+			for (; i < sizeof(c); i++)
+				c += 0xff<<(8*i);
+	}
+	
+	return c;
+}
+
 float MSG_ReadFloat (sizebuf_t *msg_read)
 {
 	union
@@ -960,14 +994,14 @@ char *MSG_ReadStringLine (sizebuf_t *msg_read)
 
 float MSG_ReadCoord (sizebuf_t *msg_read)
 {
-	return MSG_ReadShort(msg_read) * (1.0/8);
+	return MSG_ReadSizeInt(msg_read, coord_bytes) * (1.0/8);
 }
 
 void MSG_ReadPos (sizebuf_t *msg_read, vec3_t pos)
 {
-	pos[0] = MSG_ReadShort(msg_read) * (1.0/8);
-	pos[1] = MSG_ReadShort(msg_read) * (1.0/8);
-	pos[2] = MSG_ReadShort(msg_read) * (1.0/8);
+	pos[0] = MSG_ReadSizeInt(msg_read, coord_bytes) * (1.0/8);
+	pos[1] = MSG_ReadSizeInt(msg_read, coord_bytes) * (1.0/8);
+	pos[2] = MSG_ReadSizeInt(msg_read, coord_bytes) * (1.0/8);
 }
 
 float MSG_ReadAngle (sizebuf_t *msg_read)
