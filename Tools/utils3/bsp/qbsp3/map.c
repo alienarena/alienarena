@@ -544,7 +544,7 @@ qboolean MakeBrushWindings (mapbrush_t *ob)
 
 	for (i=0 ; i<3 ; i++)
 	{
-		if (ob->mins[i] < -4096 || ob->maxs[i] > 4096)
+		if (ob->mins[i] < -mapsize || ob->maxs[i] > mapsize)
 		{
 			printf ("entity %i, brush %i: bounds out of range\n", ob->entitynum, ob->brushnum);
 			printf("  Brush: %s\n", brush_info);
@@ -553,7 +553,7 @@ qboolean MakeBrushWindings (mapbrush_t *ob)
 
 			return true;
 		}
-		if (ob->mins[i] > 4096 || ob->maxs[i] < -4096)
+		if (ob->mins[i] > mapsize || ob->maxs[i] < -mapsize)
 		{
 			printf ("entity %i, brush %i: no visible sides on brush\n", ob->entitynum, ob->brushnum);
 			printf("  Brush: %s\n", brush_info);
@@ -986,7 +986,7 @@ void LoadMapFile (char *filename)
 	ClearBounds (map_mins, map_maxs);
 	for (i=0 ; i<entities[0].numbrushes ; i++)
 	{
-		if (mapbrushes[i].mins[0] > 4096)
+		if (mapbrushes[i].mins[0] > mapsize)
 			continue;	// no valid points
 		AddPointToBounds (mapbrushes[i].mins, map_mins, map_maxs);
 		AddPointToBounds (mapbrushes[i].maxs, map_mins, map_maxs);

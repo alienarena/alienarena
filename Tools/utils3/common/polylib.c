@@ -18,7 +18,7 @@ int	c_peak_windings;
 int	c_winding_allocs;
 int	c_winding_points;
 
-#define	BOGUS_RANGE	8192
+#define	BOGUS_RANGE	((signed int)(((unsigned int)(-1))>>1))
 
 void pw(winding_t *w)
 {
@@ -151,8 +151,8 @@ void	WindingBounds (winding_t *w, vec3_t mins, vec3_t maxs)
 	vec_t	v;
 	int		i,j;
 
-	mins[0] = mins[1] = mins[2] = 99999;
-	maxs[0] = maxs[1] = maxs[2] = -99999;
+	mins[0] = mins[1] = mins[2] = BOGUS_RANGE;
+	maxs[0] = maxs[1] = maxs[2] = -BOGUS_RANGE;
 
 	for (i=0 ; i<w->numpoints ; i++)
 	{
@@ -233,8 +233,8 @@ winding_t *BaseWindingForPlane (vec3_t normal, vec_t dist)
 
 	CrossProduct (vup, normal, vright);
 
-	VectorScale (vup, 8192, vup);
-	VectorScale (vright, 8192, vright);
+	VectorScale (vup, BOGUS_RANGE, vup);
+	VectorScale (vright, BOGUS_RANGE, vright);
 
 // project a really big	axis aligned box onto the plane
 	w = AllocWinding (4);

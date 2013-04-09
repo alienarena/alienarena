@@ -9,7 +9,10 @@
 #define	MAX_BRUSH_SIDES	128
 #define	CLIP_EPSILON	0.1
 
-#define	BOGUS_RANGE	8192
+#define	BOGUS_RANGE	((signed int)(((unsigned int)(-1))>>1))
+
+int	log2_mapsize;
+#define mapsize (1<<log2_mapsize)
 
 #define	TEXINFO_NODE		-1		// side is allready on a node
 

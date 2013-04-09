@@ -32,12 +32,14 @@ float badnormal;
 
 char		outbase[32] = "";
 
-int			block_xl = -8, block_xh = 7, block_yl = -8, block_yh = 7;
+int			block_xl = -16, block_xh = 15, block_yl = -16, block_yh = 15;
 
 int			entity_num;
 
 
-node_t		*block_nodes[10][10];
+#define	MAX_BLOCKS		32
+#define	BLOCK_CENTER	(32/2)
+node_t		*block_nodes[MAX_BLOCKS][MAX_BLOCKS];
 
 /*
 ============
@@ -54,7 +56,7 @@ node_t	*BlockTree (int xl, int yl, int xh, int yh)
 
 	if (xl == xh && yl == yh)
 	{
-		node = block_nodes[xl+5][yl+5];
+		node = block_nodes[xl+BLOCK_CENTER][yl+BLOCK_CENTER];
 		if (!node)
 		{	// return an empty leaf
 			node = AllocNode ();
@@ -116,10 +118,10 @@ void ProcessBlock_Thread (int blocknum)
 
 	mins[0] = xblock*1024;
 	mins[1] = yblock*1024;
-	mins[2] = -4096;
+	mins[2] = -mapsize;
 	maxs[0] = (xblock+1)*1024;
 	maxs[1] = (yblock+1)*1024;
-	maxs[2] = 4096;
+	maxs[2] = mapsize;
 
 	// the makelist and chopbrushes could be cached between the passes...
 	brushes = MakeBspBrushList (brush_start, brush_end, mins, maxs);
@@ -128,7 +130,7 @@ void ProcessBlock_Thread (int blocknum)
 		node = AllocNode ();
 		node->planenum = PLANENUM_LEAF;
 		node->contents = CONTENTS_SOLID;
-		block_nodes[xblock+5][yblock+5] = node;
+		block_nodes[xblock+BLOCK_CENTER][yblock+BLOCK_CENTER] = node;
 		return;
 	}
 
@@ -137,7 +139,7 @@ void ProcessBlock_Thread (int blocknum)
 
 	tree = BrushBSP (brushes, mins, maxs);
 
-	block_nodes[xblock+5][yblock+5] = tree->headnode;
+	block_nodes[xblock+BLOCK_CENTER][yblock+BLOCK_CENTER] = tree->headnode;
 
 	free(tree);
 }
@@ -174,14 +176,14 @@ void ProcessWorldModel (void)
 	if ( (block_yl+1) * 1024 < map_mins[1])
 		block_yl = floor(map_mins[1]/1024.0);
 
-	if (block_xl <-4)
-		block_xl = -4;
-	if (block_yl <-4)
-		block_yl = -4;
-	if (block_xh > 3)
-		block_xh = 3;
-	if (block_yh > 3)
-		block_yh = 3;
+	if (block_xl < -BLOCK_CENTER)
+		block_xl = -BLOCK_CENTER;
+	if (block_yl < -BLOCK_CENTER)
+		block_yl = -BLOCK_CENTER;
+	if (block_xh > BLOCK_CENTER-1)
+		block_xh = BLOCK_CENTER-1;
+	if (block_yh > BLOCK_CENTER-1)
+		block_yh = BLOCK_CENTER-1;
 
 	for (optimize = false ; optimize <= true ; optimize++)
 	{
@@ -273,8 +275,8 @@ void ProcessSubModel (void)
 	start = e->firstbrush;
 	end = start + e->numbrushes;
 
-	mins[0] = mins[1] = mins[2] = -4096;
-	maxs[0] = maxs[1] = maxs[2] = 4096;
+	mins[0] = mins[1] = mins[2] = -mapsize;
+	maxs[0] = maxs[1] = maxs[2] = mapsize;
 	list = MakeBspBrushList (start, end, mins, maxs);
 	if (!nocsg)
 		list = ChopBrushes (list);
@@ -335,9 +337,11 @@ int main (int argc, char **argv)
 
     full_help = false;
 
+	log2_mapsize = 12; //default map size limit from -4096 to 4096
+	
     LoadConfigurationFile("qbsp3", 0);
     LoadConfiguration(argc-1, argv+1);
-
+    
     while((param = WalkConfiguration()) != NULL)
 	{
 		if (!strcmp(param,"-threads"))
@@ -499,6 +503,12 @@ int main (int argc, char **argv)
 		else if (!strcmp (param,"-tmpout"))
 		{
 			strcpy (outbase, "/tmp");
+		}
+		else if (!strcmp (param,"-big"))
+		{
+			// Set maximum map size to -16384 to 16384; things actually start
+			// breaking long before that, so this limit is purely theoretical.
+			log2_mapsize = 14; 
 		}
 		else if (param[0] == '+')
             LoadConfigurationFile(param+1, 1);
