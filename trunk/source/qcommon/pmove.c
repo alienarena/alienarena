@@ -1103,7 +1103,7 @@ void PM_SnapPosition (void)
 {
 	int		sign[3];
 	int		i, j, bits;
-	short	base[3];
+	int 	base[3];
 	// try all single bits first
 	static int jitterbits[8] = {0,4,1,2,3,5,6,7};
 
@@ -1189,7 +1189,7 @@ PM_InitialSnapPosition
 void PM_InitialSnapPosition(void)
 {
 	int        x, y, z;
-	short      base[3];
+	int        base[3];
 	static int offset[3] = { 0, -1, 1 };
 
 	VectorCopy (pm->s.origin, base);

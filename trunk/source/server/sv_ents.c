@@ -234,9 +234,9 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 
 	if (pflags & PS_M_ORIGIN)
 	{
-		MSG_WriteShort (msg, ps->pmove.origin[0]);
-		MSG_WriteShort (msg, ps->pmove.origin[1]);
-		MSG_WriteShort (msg, ps->pmove.origin[2]);
+		MSG_WriteSizeInt (msg, coord_bytes, ps->pmove.origin[0]);
+		MSG_WriteSizeInt (msg, coord_bytes, ps->pmove.origin[1]);
+		MSG_WriteSizeInt (msg, coord_bytes, ps->pmove.origin[2]);
 	}
 
 	if (pflags & PS_M_VELOCITY)

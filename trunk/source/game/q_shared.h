@@ -557,7 +557,7 @@ typedef struct
 {
 	pmtype_t	pm_type;
 
-	short		origin[3];		// 12.3
+	int 		origin[3];		// 12.3
 	short		velocity[3];	// 12.3
 	byte		pm_flags;		// ducked, jump_held, etc
 	byte		pm_time;		// each unit = 8 ms
@@ -849,6 +849,12 @@ typedef struct
 
 #define	ANGLE2SHORT(x)	((int)((x)*65536/360) & 65535)
 #define	SHORT2ANGLE(x)	((x)*(360.0/65536))
+
+// Number of bytes per axis of world coordinates in the net protocol.
+// 2 is the default, backward-compatible number.
+// TODO: make this a variable, have it set based on the map size, server kicks
+// clients that don't support big maps.
+#define	coord_bytes		2
 
 
 //

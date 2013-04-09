@@ -383,9 +383,9 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 
 	if (flags & PS_M_ORIGIN)
 	{
-		state->pmove.origin[0] = MSG_ReadShort (&net_message);
-		state->pmove.origin[1] = MSG_ReadShort (&net_message);
-		state->pmove.origin[2] = MSG_ReadShort (&net_message);
+		state->pmove.origin[0] = MSG_ReadSizeInt (&net_message, coord_bytes);
+		state->pmove.origin[1] = MSG_ReadSizeInt (&net_message, coord_bytes);
+		state->pmove.origin[2] = MSG_ReadSizeInt (&net_message, coord_bytes);
 	}
 
 	if (flags & PS_M_VELOCITY)
