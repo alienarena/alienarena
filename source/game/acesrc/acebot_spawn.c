@@ -941,7 +941,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	// find a spawn point
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
-	SelectSpawnPoint (bot, spawn_origin, spawn_angles);
+	if(!g_tactical->integer)
+		SelectSpawnPoint (bot, spawn_origin, spawn_angles);
 
 	index = bot - g_edicts - 1;
 	client = bot->client;
@@ -1014,10 +1015,6 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 
 	// clear playerstate values
 	memset (&bot->client->ps, 0, sizeof(client->ps));
-
-	client->ps.pmove.origin[0] = spawn_origin[0]*8;
-	client->ps.pmove.origin[1] = spawn_origin[1]*8;
-	client->ps.pmove.origin[2] = spawn_origin[2]*8;
 
 //ZOID
 	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
@@ -1173,6 +1170,14 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			}
 		}
 	}
+
+	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
+	if(g_tactical->integer)
+		SelectSpawnPoint (bot, spawn_origin, spawn_angles);
+	
+	client->ps.pmove.origin[0] = spawn_origin[0]*8;
+	client->ps.pmove.origin[1] = spawn_origin[1]*8;
+	client->ps.pmove.origin[2] = spawn_origin[2]*8;
 
 	bot->s.frame = 0;
 	VectorCopy (spawn_origin, bot->s.origin);
