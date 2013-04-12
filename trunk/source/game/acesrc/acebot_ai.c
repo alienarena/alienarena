@@ -604,8 +604,6 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				self->goalentity= self->enemy; //face it, and fire
 				return true;
 			}
-			else
-				return false;
 		}
 	}
 
