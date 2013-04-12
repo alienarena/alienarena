@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	STEPSIZE	18
 
 extern cvar_t *sv_joustmode;
+extern cvar_t *sv_tactical;
+extern cvar_t *sv_excessive;
 
 // all of the locals will be zeroed before each
 // pmove, just to make damn sure we don't have
@@ -543,6 +545,11 @@ void PM_WaterMove (void)
 	float	wishspeed;
 	vec3_t	wishdir;
 
+	if(sv_tactical->value)
+		pm_maxspeed = 200;
+	else if(sv_excessive->value)
+		pm_maxspeed = 450;
+
 //
 // user intentions
 //
@@ -586,6 +593,11 @@ void PM_AirMove (void)
 	vec3_t		wishdir;
 	float		wishspeed;
 	float		maxspeed;
+
+	if(sv_tactical->value)
+		pm_maxspeed = 200;
+	else if(sv_excessive->value)
+		pm_maxspeed = 450;
 
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.sidemove;
@@ -911,6 +923,11 @@ void PM_FlyMove (qboolean doclip)
 	float		wishspeed;
 	vec3_t		end;
 	trace_t	trace;
+
+	if(sv_tactical->value)
+		pm_maxspeed = 200;
+	else if(sv_excessive->value)
+		pm_maxspeed = 450;
 
 	pm->viewheight = 22;
 
