@@ -1408,8 +1408,8 @@ void SV_Init (void)
 	sv_airaccelerate = Cvar_Get("sv_airaccelerate", "0", CVAR_LATCH);
 
 	sv_joustmode = Cvar_Get("sv_joustmode", "0", CVAR_SERVERINFO);
-	sv_tactical = Cvar_Get("g_tactical", "0", CVAR_SERVERINFO);
-	sv_excessive = Cvar_Get("excessive", "0", CVAR_SERVERINFO);
+	sv_tactical = Cvar_Get("g_tactical", "0", CVAR_LATCH | CVAR_GAMEINFO);
+	sv_excessive = Cvar_Get("excessive", "0", CVAR_LATCH | CVAR_GAMEINFO);
 
 	public_server = Cvar_Get ("sv_public", "1", 0);
 
