@@ -23871,6 +23871,60 @@
 ( -2368 188 -256 ) ( -2384 176 -268 ) ( -2368 188 -192 ) arena9/metal4 64 0 0 -1 1
 ( -2368 188 -80 ) ( -2368 248 -256 ) ( -2368 188 -256 ) phillipk/pk01_panel_small01 16 0 0 0.25 0.25 0 1 100
 }
+// brush 2509
+{
+( 112 -64 152 ) ( 120 -48 160 ) ( 112 -48 152 ) arena3/floor2 16 120 0 1 1 134217728 0 0
+( 112 -64 168 ) ( 112 -48 168 ) ( 120 -48 168 ) arena3/floor2 16 120 0 1 1 134217728 0 0
+( 112 -64 176 ) ( 120 -64 176 ) ( 120 -64 168 ) arena3/floor2 16 112 0 1 1 134217728 0 0
+( 120 -64 168 ) ( 120 -48 168 ) ( 120 -48 160 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+( 120 -48 176 ) ( 112 -48 176 ) ( 112 -48 168 ) arena3/floor2 16 112 0 1 1 134217728 0 0
+( 112 -48 176 ) ( 112 -64 176 ) ( 112 -64 168 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+}
+// brush 2510
+{
+( 368 -48 168 ) ( 112 -48 168 ) ( 112 -64 168 ) arena3/floor2 16 16 0 1 1 134217728 0 0
+( 112 -64 176 ) ( 112 -48 176 ) ( 368 -48 176 ) arena3/floor2 16 16 0 1 1 134217728 0 0
+( 112 -64 176 ) ( 368 -64 176 ) ( 368 -64 168 ) arena3/floor2 16 112 0 1 1 134217728 0 0
+( 240 -64 176 ) ( 240 -48 176 ) ( 240 -48 168 ) arena3/floor2 64 112 0 1 1 134217728 0 0
+( 368 -48 176 ) ( 112 -48 176 ) ( 112 -48 168 ) arena3/floor2 16 112 0 1 1 134217728 0 0
+( 112 -48 176 ) ( 112 -64 176 ) ( 112 -64 168 ) arena3/floor2 64 112 0 1 1 134217728 0 0
+}
+// brush 2511
+{
+( 240 -48 152 ) ( 232 -48 160 ) ( 240 -64 152 ) arena3/floor2 16 120 0 1 1 134217728 0 0
+( 232 -48 168 ) ( 240 -48 168 ) ( 240 -64 168 ) arena3/floor2 16 120 0 1 1 134217728 0 0
+( 232 -64 168 ) ( 232 -64 176 ) ( 240 -64 176 ) arena3/floor2 16 112 0 1 1 134217728 0 0
+( 232 -48 160 ) ( 232 -48 168 ) ( 232 -64 168 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+( 240 -48 168 ) ( 240 -48 176 ) ( 232 -48 176 ) arena3/floor2 16 112 0 1 1 134217728 0 0
+( 240 -64 168 ) ( 240 -64 176 ) ( 240 -48 176 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+}
+// brush 2512
+{
+( -192 -48 152 ) ( -200 -48 160 ) ( -192 -64 152 ) arena3/floor2 64 120 0 -1 1 134217728 0 0
+( -200 -48 168 ) ( -192 -48 168 ) ( -192 -64 168 ) arena3/floor2 64 120 0 -1 1 134217728 0 0
+( -200 -64 168 ) ( -200 -64 176 ) ( -192 -64 176 ) arena3/floor2 64 112 0 -1 1 134217728 0 0
+( -200 -48 160 ) ( -200 -48 168 ) ( -200 -64 168 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+( -192 -48 168 ) ( -192 -48 176 ) ( -200 -48 176 ) arena3/floor2 64 112 0 -1 1 134217728 0 0
+( -192 -64 168 ) ( -192 -64 176 ) ( -192 -48 176 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+}
+// brush 2513
+{
+( -192 -64 168 ) ( -192 -48 168 ) ( -448 -48 168 ) arena3/floor2 64 16 0 -1 1 134217728 0 0
+( -448 -48 176 ) ( -192 -48 176 ) ( -192 -64 176 ) arena3/floor2 64 16 0 -1 1 134217728 0 0
+( -448 -64 168 ) ( -448 -64 176 ) ( -192 -64 176 ) arena3/floor2 64 112 0 -1 1 134217728 0 0
+( -320 -48 168 ) ( -320 -48 176 ) ( -320 -64 176 ) arena3/floor2 64 112 0 1 1 134217728 0 0
+( -192 -48 168 ) ( -192 -48 176 ) ( -448 -48 176 ) arena3/floor2 64 112 0 -1 1 134217728 0 0
+( -192 -64 168 ) ( -192 -64 176 ) ( -192 -48 176 ) arena3/floor2 64 112 0 1 1 134217728 0 0
+}
+// brush 2514
+{
+( -320 -64 152 ) ( -312 -48 160 ) ( -320 -48 152 ) arena3/floor2 64 120 0 -1 1 134217728 0 0
+( -320 -64 168 ) ( -320 -48 168 ) ( -312 -48 168 ) arena3/floor2 64 120 0 -1 1 134217728 0 0
+( -320 -64 176 ) ( -312 -64 176 ) ( -312 -64 168 ) arena3/floor2 64 112 0 -1 1 134217728 0 0
+( -312 -64 168 ) ( -312 -48 168 ) ( -312 -48 160 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+( -312 -48 176 ) ( -320 -48 176 ) ( -320 -48 168 ) arena3/floor2 64 112 0 -1 1 134217728 0 0
+( -320 -48 176 ) ( -320 -64 176 ) ( -320 -64 168 ) arena3/floor2 88 112 0 1 1 134217728 0 0
+}
 }
 // entity 1
 {
@@ -28738,20 +28792,20 @@
 // entity 338
 {
 "classname" "misc_laser"
-"origin" "88.000000 -336.000000 72.000000"
+"origin" "88.000000 -336.000000 104.000000"
 "target" "a_laser1"
 "angle" "-90.000000"
 }
 // entity 339
 {
 "classname" "info_notnull"
-"origin" "88.000000 -508.000000 72.000000"
+"origin" "88.000000 -508.000000 104.000000"
 "targetname" "a_laser1"
 }
 // entity 340
 {
 "classname" "misc_laser"
-"origin" "-160.000000 -336.000000 72.000000"
+"origin" "-160.000000 -336.000000 104.000000"
 "target" "h_laser1"
 "spawnflags" "1"
 "angle" "-90.000000"
@@ -28759,26 +28813,26 @@
 // entity 341
 {
 "classname" "info_notnull"
-"origin" "-160.000000 -508.000000 72.000000"
+"origin" "-160.000000 -508.000000 104.000000"
 "targetname" "h_laser1"
 }
 // entity 342
 {
 "classname" "misc_laser"
-"origin" "88.000000 -336.000000 40.000000"
+"origin" "88.000000 -336.000000 48.000000"
 "target" "a_laser2"
 "angle" "-90.000000"
 }
 // entity 343
 {
 "classname" "info_notnull"
-"origin" "88.000000 -508.000000 40.000000"
+"origin" "88.000000 -508.000000 48.000000"
 "targetname" "a_laser2"
 }
 // entity 344
 {
 "classname" "misc_laser"
-"origin" "-160.000000 -336.000000 40.000000"
+"origin" "-160.000000 -336.000000 48.000000"
 "target" "h_laser2"
 "spawnflags" "1"
 "angle" "-90.000000"
@@ -28786,76 +28840,36 @@
 // entity 345
 {
 "classname" "info_notnull"
-"origin" "-160.000000 -508.000000 40.000000"
+"origin" "-160.000000 -508.000000 48.000000"
 "targetname" "h_laser2"
 }
 // entity 346
 {
 "classname" "misc_laser"
-"origin" "224.000000 -96.000000 72.000000"
-"target" "a_laser3"
-"angle" "-180.000000"
+"origin" "224.000000 -96.000000 48.000000"
+"target" "a_laser4"
+"angle" "-179.999985"
 }
 // entity 347
 {
-"classname" "misc_laser"
-"origin" "224.000000 -96.000000 40.000000"
-"target" "a_laser4"
-"angle" "-180.000000"
+"classname" "info_notnull"
+"origin" "116.000000 -96.000000 48.000000"
+"targetname" "a_laser4"
 }
 // entity 348
 {
-"classname" "info_notnull"
-"origin" "116.000000 -96.000000 72.000000"
-"targetname" "a_laser3"
+"classname" "misc_laser"
+"origin" "-304.000000 -96.000000 48.000000"
+"target" "h_laser4"
+"spawnflags" "1"
 }
 // entity 349
 {
 "classname" "info_notnull"
-"origin" "116.000000 -96.000000 40.000000"
-"targetname" "a_laser4"
-}
-// entity 350
-{
-"classname" "misc_laser"
-"origin" "-304.000000 -96.000000 72.000000"
-"target" "h_laser3"
-"spawnflags" "1"
-}
-// entity 351
-{
-"classname" "misc_laser"
-"origin" "-304.000000 -96.000000 40.000000"
-"target" "h_laser4"
-"spawnflags" "1"
-}
-// entity 352
-{
-"classname" "info_notnull"
-"origin" "-196.000000 -96.000000 72.000000"
-"targetname" "h_laser3"
-}
-// entity 353
-{
-"classname" "info_notnull"
-"origin" "-196.000000 -96.000000 40.000000"
+"origin" "-196.000000 -96.000000 48.000000"
 "targetname" "h_laser4"
 }
-// entity 354
-{
-"classname" "misc_laser"
-"origin" "-544.000000 488.000000 -192.000000"
-"target" "h_laser5"
-"spawnflags" "1"
-"angle" "-90.000000"
-}
-// entity 355
-{
-"classname" "info_notnull"
-"origin" "-544.000000 316.000000 -192.000000"
-"targetname" "h_laser5"
-}
-// entity 356
+// entity 350
 {
 "classname" "misc_laser"
 "origin" "-544.000000 488.000000 -224.000000"
@@ -28863,121 +28877,81 @@
 "spawnflags" "1"
 "angle" "-90.000000"
 }
-// entity 357
+// entity 351
 {
 "classname" "info_notnull"
 "origin" "-544.000000 316.000000 -224.000000"
 "targetname" "h_laser6"
 }
-// entity 358
-{
-"classname" "misc_laser"
-"origin" "464.000000 488.000000 -192.000000"
-"target" "a_laser5"
-"angle" "-90.000000"
-}
-// entity 359
-{
-"classname" "info_notnull"
-"origin" "464.000000 316.000000 -192.000000"
-"targetname" "a_laser5"
-}
-// entity 360
+// entity 352
 {
 "classname" "misc_laser"
 "origin" "464.000000 488.000000 -224.000000"
 "target" "a_laser6"
 "angle" "-90.000000"
 }
-// entity 361
+// entity 353
 {
 "classname" "info_notnull"
 "origin" "464.000000 316.000000 -224.000000"
 "targetname" "a_laser6"
 }
-// entity 362
+// entity 354
 {
 "classname" "misc_mapmodel"
-"origin" "88.000008 -496.000000 72.000000"
+"origin" "88.000008 -496.000000 104.000000"
 "model" "models/tactical/alien_laser.md2"
 "angle" "90.000000"
 }
-// entity 363
+// entity 355
 {
 "classname" "misc_mapmodel"
-"origin" "88.000008 -496.000000 40.000000"
+"origin" "88.000008 -496.000000 48.000000"
 "model" "models/tactical/alien_laser.md2"
 "angle" "90.000000"
 }
-// entity 364
+// entity 356
 {
 "classname" "misc_mapmodel"
-"origin" "-160.000046 -496.000000 40.000000"
+"origin" "-160.000046 -496.000000 48.000000"
 "model" "models/tactical/human_laser.md2"
 "angle" "90.000000"
 }
-// entity 365
+// entity 357
 {
 "classname" "misc_mapmodel"
-"origin" "-160.000046 -496.000000 72.000000"
+"origin" "-160.000046 -496.000000 104.000000"
 "model" "models/tactical/human_laser.md2"
 "angle" "90.000000"
 }
-// entity 366
+// entity 358
 {
 "classname" "misc_mapmodel"
-"origin" "128.000000 -96.000000 72.000000"
+"origin" "128.000000 -96.000000 48.000000"
 "model" "models/tactical/alien_laser.md2"
 }
-// entity 367
+// entity 359
 {
 "classname" "misc_mapmodel"
-"origin" "128.000000 -96.000000 40.000000"
-"model" "models/tactical/alien_laser.md2"
-}
-// entity 368
-{
-"classname" "misc_mapmodel"
-"origin" "-208.000000 -96.000008 72.000000"
+"origin" "-208.000000 -96.000008 48.000000"
 "model" "models/tactical/human_laser.md2"
 "angle" "-179.999985"
 }
-// entity 369
-{
-"classname" "misc_mapmodel"
-"origin" "-208.000000 -96.000008 40.000000"
-"model" "models/tactical/human_laser.md2"
-"angle" "-179.999985"
-}
-// entity 370
-{
-"classname" "misc_mapmodel"
-"origin" "-544.000000 328.000061 -192.000000"
-"model" "models/tactical/human_laser.md2"
-"angle" "90.000000"
-}
-// entity 371
+// entity 360
 {
 "classname" "misc_mapmodel"
 "origin" "-544.000000 328.000061 -224.000000"
 "model" "models/tactical/human_laser.md2"
 "angle" "90.000000"
 }
-// entity 372
-{
-"classname" "misc_mapmodel"
-"origin" "464.000000 328.000061 -192.000000"
-"model" "models/tactical/alien_laser.md2"
-"angle" "90.000000"
-}
-// entity 373
+// entity 361
 {
 "classname" "misc_mapmodel"
 "origin" "464.000000 328.000061 -224.000000"
 "model" "models/tactical/alien_laser.md2"
 "angle" "90.000000"
 }
-// entity 374
+// entity 362
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
@@ -28985,17 +28959,17 @@
 "angle" "-90.000000"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 375
+// entity 363
 {
 "classname" "weapon_shotgun"
 "origin" "1216.000000 -128.000000 -224.000000"
 }
-// entity 376
+// entity 364
 {
 "classname" "weapon_hyperblaster"
 "origin" "1248.000000 -144.000000 48.000000"
 }
-// entity 377
+// entity 365
 {
 "classname" "misc_mapmodel"
 "model" "maps/meshes/weaponpad.md2"
@@ -29003,7 +28977,7 @@
 "origin" "1248.000000 -144.000000 24.000000"
 "spawnflags" "64"
 }
-// entity 378
+// entity 366
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
@@ -29011,7 +28985,7 @@
 "angle" "-90.000000"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 379
+// entity 367
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
@@ -29019,7 +28993,7 @@
 "angle" "-90.000000"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 380
+// entity 368
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
@@ -29027,42 +29001,42 @@
 "angle" "-90.000000"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 381
+// entity 369
 {
 "classname" "weapon_shotgun"
 "origin" "1224.000000 -32.000000 48.000000"
 }
-// entity 382
+// entity 370
 {
 "classname" "weapon_railgun"
 "origin" "1248.000000 -248.000000 48.000000"
 }
-// entity 383
+// entity 371
 {
 "classname" "weapon_hyperblaster"
 "origin" "1232.000000 -360.000000 48.000000"
 }
-// entity 384
+// entity 372
 {
 "classname" "ammo_cells"
 "origin" "2272.000000 248.000000 -336.000000"
 }
-// entity 385
+// entity 373
 {
 "classname" "ammo_cells"
 "origin" "2208.000000 248.000000 -336.000000"
 }
-// entity 386
+// entity 374
 {
 "classname" "ammo_shells"
 "origin" "2272.000000 200.000000 -336.000000"
 }
-// entity 387
+// entity 375
 {
 "classname" "ammo_shells"
 "origin" "2208.000000 200.000000 -336.000000"
 }
-// entity 388
+// entity 376
 {
 "classname" "misc_mapmodel"
 "model" "maps/meshes/weaponpad.md2"
@@ -29070,12 +29044,12 @@
 "origin" "-1312.000000 -144.000000 24.000000"
 "spawnflags" "64"
 }
-// entity 389
+// entity 377
 {
 "classname" "weapon_rocketlauncher"
 "origin" "-1312.000000 -248.000000 48.000000"
 }
-// entity 390
+// entity 378
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
@@ -29083,7 +29057,7 @@
 "angle" "-90.000000"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 391
+// entity 379
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
@@ -29091,12 +29065,12 @@
 "angle" "-90.000000"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 392
+// entity 380
 {
 "classname" "weapon_supershotgun"
 "origin" "-1280.000000 -32.000000 48.000000"
 }
-// entity 393
+// entity 381
 {
 "classname" "misc_mapmodel"
 "model" "maps/meshes/weaponpad.md2"
@@ -29104,87 +29078,87 @@
 "origin" "-1280.000000 -32.000000 24.000000"
 "spawnflags" "64"
 }
-// entity 394
+// entity 382
 {
 "classname" "weapon_chaingun"
 "origin" "-1312.000000 -144.000000 48.000000"
 }
-// entity 395
+// entity 383
 {
 "classname" "weapon_rocketlauncher"
 "origin" "-1288.000000 -360.000000 48.000000"
 }
-// entity 396
+// entity 384
 {
 "classname" "ammo_bullets"
 "origin" "-2352.000000 248.000000 -336.000000"
 }
-// entity 397
+// entity 385
 {
 "classname" "ammo_rockets"
 "origin" "-2288.000000 248.000000 -336.000000"
 }
-// entity 398
+// entity 386
 {
 "classname" "ammo_rockets"
 "origin" "-2288.000000 200.000000 -336.000000"
 }
-// entity 399
+// entity 387
 {
 "classname" "ammo_grenades"
 "origin" "-2352.000000 200.000000 -336.000000"
 }
-// entity 400
+// entity 388
 {
 "classname" "misc_mapmodel"
 "origin" "2304.000000 215.999985 -252.000000"
 "model" "maps/meshes/cables.md2"
 "angle" "-179.999985"
 }
-// entity 401
+// entity 389
 {
 "classname" "misc_mapmodel"
 "origin" "2312.000000 308.000000 -232.000000"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angle" "89.999992"
 }
-// entity 402
+// entity 390
 {
 "classname" "misc_mapmodel"
 "origin" "-2368.000000 220.000046 -252.000000"
 "model" "maps/meshes/cables.md2"
 "angle" "0.000009"
 }
-// entity 403
+// entity 391
 {
 "classname" "misc_mapmodel"
 "origin" "-2388.000000 228.000000 -224.000000"
 "model" "maps/meshes/tech/redribtube1.md2"
 }
-// entity 404
+// entity 392
 {
 "classname" "misc_alienammodepot"
 "origin" "2240.000000 224.000000 -352.000000"
 }
-// entity 405
+// entity 393
 {
 "classname" "misc_humanammodepot"
 "origin" "-2320.000000 224.000000 -352.000000"
 }
-// entity 406
+// entity 394
 {
 "classname" "misc_mapmodel"
 "origin" "-1488.000000 -908.000000 -36.000000"
 "model" "maps/meshes/tech/redribtube1.md2"
 }
-// entity 407
+// entity 395
 {
 "classname" "misc_mapmodel"
 "origin" "1416.000000 -884.000000 -96.000000"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angle" "89.999992"
 }
-// entity 408
+// entity 396
 {
 "classname" "misc_mapmodel"
 "origin" "-760.000000 288.000031 -128.000000"
@@ -29192,7 +29166,7 @@
 "spawnflags" "1"
 "angle" "45.416546"
 }
-// entity 409
+// entity 397
 {
 "classname" "misc_mapmodel"
 "origin" "-952.000000 200.000031 -128.000000"
@@ -29200,7 +29174,7 @@
 "spawnflags" "1"
 "angle" "45.416546"
 }
-// entity 410
+// entity 398
 {
 "classname" "misc_mapmodel"
 "origin" "583.999939 312.000031 -144.000000"
@@ -29208,11 +29182,127 @@
 "angles" "5.437681 -129.227295 -6.298354"
 "spawnflags" "1"
 }
-// entity 411
+// entity 399
 {
 "classname" "misc_mapmodel"
 "origin" "856.000061 239.999924 -143.999908"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angles" "4.518487 40.196712 -63.025646"
 "spawnflags" "1"
+}
+// entity 400
+{
+"classname" "misc_laser"
+"origin" "224.000000 -96.000000 104.000000"
+"target" "a_laser9"
+"angle" "-179.999985"
+}
+// entity 401
+{
+"classname" "info_notnull"
+"origin" "116.000000 -96.000000 104.000000"
+"targetname" "a_laser9"
+}
+// entity 402
+{
+"classname" "misc_mapmodel"
+"origin" "128.000000 -96.000000 104.000000"
+"model" "models/tactical/alien_laser.md2"
+}
+// entity 403
+{
+"classname" "misc_laser"
+"origin" "-304.000000 -96.000000 104.000000"
+"target" "h_laser8"
+"spawnflags" "1"
+}
+// entity 404
+{
+"classname" "info_notnull"
+"origin" "-196.000000 -96.000000 104.000000"
+"targetname" "h_laser8"
+}
+// entity 405
+{
+"classname" "misc_mapmodel"
+"origin" "-208.000000 -96.000008 104.000000"
+"model" "models/tactical/human_laser.md2"
+"angle" "-179.999985"
+}
+// entity 406
+{
+"classname" "misc_laser"
+"origin" "464.000000 488.000000 -168.000000"
+"target" "a_laser10"
+"angle" "-90.000000"
+}
+// entity 407
+{
+"classname" "info_notnull"
+"origin" "464.000000 316.000000 -168.000000"
+"targetname" "a_laser10"
+}
+// entity 408
+{
+"classname" "misc_mapmodel"
+"origin" "464.000000 328.000061 -168.000000"
+"model" "models/tactical/alien_laser.md2"
+"angle" "90.000000"
+}
+// entity 409
+{
+"classname" "misc_laser"
+"origin" "-544.000000 488.000000 -168.000000"
+"target" "h_laser9"
+"spawnflags" "1"
+"angle" "-90.000000"
+}
+// entity 410
+{
+"classname" "info_notnull"
+"origin" "-544.000000 316.000000 -168.000000"
+"targetname" "h_laser9"
+}
+// entity 411
+{
+"classname" "misc_mapmodel"
+"origin" "-544.000000 328.000061 -168.000000"
+"model" "models/tactical/human_laser.md2"
+"angle" "90.000000"
+}
+// entity 412
+{
+"classname" "func_group"
+"targetname" "playerclip4"
+// brush 0
+{
+( -2320 212 -304 ) ( -2314 218 -304 ) ( -2314 218 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( -2312 216 -304 ) ( -2312 224 -304 ) ( -2312 224 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( -2308 224 -304 ) ( -2314 230 -304 ) ( -2314 230 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( -2312 232 -304 ) ( -2320 232 -304 ) ( -2320 232 -352 ) blanks/blank6 40 100 0 1 1 64 16 0
+( -2320 236 -304 ) ( -2326 230 -304 ) ( -2326 230 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( -2328 232 -304 ) ( -2328 224 -304 ) ( -2328 224 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( -2332 224 -304 ) ( -2326 218 -304 ) ( -2326 218 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( -2328 216 -304 ) ( -2320 216 -304 ) ( -2320 216 -352 ) blanks/blank6 40 100 0 1 1 64 16 0
+( -2328 216 -352 ) ( -2312 216 -352 ) ( -2312 232 -352 ) blanks/blank6 40 100 0 1 1 64 16 0
+( -2312 232 -304 ) ( -2312 216 -304 ) ( -2328 216 -304 ) arena6/blacktrans 38.9599990845 22 0 100 100 64 16 0
+}
+}
+// entity 413
+{
+"classname" "func_group"
+"targetname" "playerclip5"
+// brush 0
+{
+( 2240 212 -304 ) ( 2246 218 -304 ) ( 2246 218 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( 2248 216 -304 ) ( 2248 224 -304 ) ( 2248 224 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( 2252 224 -304 ) ( 2246 230 -304 ) ( 2246 230 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( 2248 232 -304 ) ( 2240 232 -304 ) ( 2240 232 -352 ) blanks/blank6 88 100 0 1 1 64 16 0
+( 2240 236 -304 ) ( 2234 230 -304 ) ( 2234 230 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( 2232 232 -304 ) ( 2232 224 -304 ) ( 2232 224 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( 2228 224 -304 ) ( 2234 218 -304 ) ( 2234 218 -352 ) blanks/blank6 120 100 0 -1 1 64 16 0
+( 2232 216 -304 ) ( 2240 216 -304 ) ( 2240 216 -352 ) blanks/blank6 88 100 0 1 1 64 16 0
+( 2232 216 -352 ) ( 2248 216 -352 ) ( 2248 232 -352 ) blanks/blank6 88 100 0 1 1 64 16 0
+( 2248 232 -304 ) ( 2248 216 -304 ) ( 2232 216 -304 ) arena6/blacktrans 121.3600006104 22 0 100 100 64 16 0
+}
 }
