@@ -3794,14 +3794,20 @@ void JoinServerFunc( void *self )
 		return;
 	}
 
+	remoteserver_runspeed = 300; //default
 	for ( i = 0; i < 16; i++)
 	{
         if( !strcmp("aa tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
 		{
+			remoteserver_runspeed = 200; //for correct prediction
 			curridx = index;
 			M_Menu_Tactical_f();
 			return;
 		}
+		else if( !strcmp("excessive", Info_ValueForKey(mod_names, local_mods_data[i])) )
+			remoteserver_runspeed = 450;
+		else if( !strcmp("playerspeed", Info_ValueForKey(mod_names, local_mods_data[i])) )
+			remoteserver_runspeed = 450;
 	}
 
 	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index+svridx].local_server_netadr));
