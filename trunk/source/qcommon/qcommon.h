@@ -742,6 +742,7 @@ Common between server and client so prediction matches
 
 extern float pm_airaccelerate;
 qboolean remoteserver_jousting;
+int	remoteserver_runspeed;
 
 void Pmove (pmove_t *pmove);
 

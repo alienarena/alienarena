@@ -549,6 +549,8 @@ void PM_WaterMove (void)
 		pm_maxspeed = 200;
 	else if(sv_excessive->value)
 		pm_maxspeed = 450;
+	else
+		pm_maxspeed = remoteserver_runspeed;
 
 //
 // user intentions
@@ -598,6 +600,8 @@ void PM_AirMove (void)
 		pm_maxspeed = 200;
 	else if(sv_excessive->value)
 		pm_maxspeed = 450;
+	else 
+		pm_maxspeed = remoteserver_runspeed;
 
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.sidemove;
@@ -928,6 +932,8 @@ void PM_FlyMove (qboolean doclip)
 		pm_maxspeed = 200;
 	else if(sv_excessive->value)
 		pm_maxspeed = 450;
+	else 
+		pm_maxspeed = remoteserver_runspeed;
 
 	pm->viewheight = 22;
 
