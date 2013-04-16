@@ -2131,6 +2131,8 @@ void CL_InitLocal (void)
 	(void)R_RegisterPic("hud_strafer");
 	(void)R_RegisterPic("hud_hover");
 	(void)R_RegisterPic("blood_ring");
+
+	remoteserver_runspeed = 300; //default
 }
 
 
