@@ -206,7 +206,7 @@ command, of course.
 $ export CFLAGS=
     -O3              (more optimization than -O2)
     -pipe            (faster compile)
-    --march=native   (tuned for CPU on this machine)
+    -march=native   (tuned for CPU on this machine)
     -DNDEBUG         (remove assert statements)
 
     -Wp,-D_FORTIFY_SOURCE=2   (improved security)
@@ -218,7 +218,7 @@ the same options for the c++ compiler:
 $ export CXXLAGS=
     -O3
     -pipe
-    --march=native
+    -march=native
     -DNDEBUG
     -Wp,-D_FORTIFY_SOURCE=2
     -fstack-protector --param=ssp-buffer-size=4
