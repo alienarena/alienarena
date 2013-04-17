@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Number of gibs to throw on death with lots of damage (including Client Head, where applicable) */
 #define DEATH_GIBS_TO_THROW 5
 void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom);
+void ClientDisconnect (edict_t *ent);
 void SP_misc_teleporter_dest (edict_t *ent);
 
 /*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)
@@ -2122,6 +2123,7 @@ void PutClientInServer (edict_t *ent)
 #else
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
+	sprintf(ent->charModel, playermodel);
 	Q2_FindFile (modelpath, &file);
 	if(file) 
 	{ 
@@ -2446,6 +2448,25 @@ void ClientBeginDeathmatch (edict_t *ent)
 	if(!ent->client->pers.spectator) //fixes invisible player bugs caused by leftover svf_noclients
 		ent->svflags &= ~SVF_NOCLIENT;
 	PutClientInServer (ent);
+
+	//kick and blackhole a player in tactical that is not using an authorized character!
+	if(g_tactical->integer)
+	{
+		//we want to actually check their model to be one of the valid ones we use
+		if(strcmp("martianenforcer", ent->charModel) && strcmp("martianwarrior", ent->charModel) && strcmp("martianoverlord", ent->charModel)
+			&& strcmp("lauren", ent->charModel) && strcmp("enforcer", ent->charModel) && strcmp("commander", ent->charModel))
+		{
+			if ( ent->is_bot )
+			{
+				ACESP_KickBot( ent );
+			}
+			else
+			{
+				safe_bprintf(PRINT_HIGH, "%s was kicked for using invalid character class!\n", ent->client->pers.netname);
+				ClientDisconnect (ent);
+			}
+		}
+	}
 
 	//in ctf, initially start in chase mode, and allow them to choose a team
 	if( TEAM_GAME ) 

@@ -1657,6 +1657,17 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	{
 		tacticalScore.alienComputer = false;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+	}
+	else
+	{
+		tacticalScore.humanComputer = false;
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	if(self->classname == "alien computer")
+	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
@@ -1667,8 +1678,6 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	}
 	else
 	{
-		tacticalScore.humanComputer = false;
-		gi.WriteByte (TE_ROCKET_EXPLOSION);
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
@@ -1677,8 +1686,6 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 			safe_centerprintf(cl_ent, "Human Central Computer has been destroyed!");
 		}
 	}
-	gi.WritePosition (self->s.origin);
-	gi.multicast (self->s.origin, MULTICAST_PHS);
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 
@@ -1757,6 +1764,17 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	{
 		tacticalScore.alienPowerSource = false;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+	}
+	else
+	{
+		tacticalScore.humanPowerSource = false;
+		gi.WriteByte (TE_ROCKET_EXPLOSION);		
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	if(self->classname == "alien powersrc")
+	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
@@ -1767,8 +1785,6 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	}
 	else
 	{
-		tacticalScore.humanPowerSource = false;
-		gi.WriteByte (TE_ROCKET_EXPLOSION);
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
@@ -1777,8 +1793,6 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 			safe_centerprintf(cl_ent, "Human Power Source has been destroyed!");
 		}
 	}
-	gi.WritePosition (self->s.origin);
-	gi.multicast (self->s.origin, MULTICAST_PHS);
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 
@@ -1856,6 +1870,17 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	{
 		tacticalScore.alienAmmoDepot = false;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+	}
+	else
+	{
+		tacticalScore.humanAmmoDepot = false;
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	if(self->classname == "alien ammodepot")
+	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
@@ -1866,8 +1891,6 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	}
 	else
 	{
-		tacticalScore.humanAmmoDepot = false;
-		gi.WriteByte (TE_ROCKET_EXPLOSION);
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
@@ -1876,8 +1899,6 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 			safe_centerprintf(cl_ent, "Human Ammo Depot has been destroyed!");
 		}
 	}
-	gi.WritePosition (self->s.origin);
-	gi.multicast (self->s.origin, MULTICAST_PHS);
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 

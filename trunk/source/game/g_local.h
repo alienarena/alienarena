@@ -1691,6 +1691,7 @@ struct edict_s
 	qboolean has_vaporizor;
 	qboolean has_minderaser;
 	int armor_type;
+	char charModel[128];
 
 	//model specific gibs
 	int usegibs;

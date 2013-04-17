@@ -3808,7 +3808,7 @@ void JoinServerFunc( void *self )
 			remoteserver_runspeed = 450;
 		else if( !strcmp("playerspeed", Info_ValueForKey(mod_names, local_mods_data[i])) )
 			remoteserver_runspeed = 450;
-	}
+	} //TO DO:  We need to do the speed check on connect instead - meaning the server will need to be pinged and parsed there as well(but only if not done already through the menu).
 
 	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index+svridx].local_server_netadr));
 	Cbuf_AddText (buffer);

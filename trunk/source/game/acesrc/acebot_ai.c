@@ -233,6 +233,27 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		else
 			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
 	}
+	else if(g_tactical->value) //when a base's laser barriers shut off, go into a more direct attack route
+	{
+		if (self->ctype == 1 && (!tacticalScore.alienComputer || !tacticalScore.alienPowerSource))
+		{
+			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_BLUEBASE);
+			if(current_node == -1)
+				current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+			else
+				hasFlag = true; //we can use this from CTF - bots will ignore most anything and attack base components
+		}
+		else if (self->ctype == 0 && (!tacticalScore.humanComputer || !tacticalScore.humanPowerSource))
+		{
+			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_REDBASE);
+			if(current_node == -1)
+				current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+			else
+				hasFlag = true;
+		}
+		else
+			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+	}
 	else
 		current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
 
@@ -312,7 +333,7 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		//We can walk the node table and get the last linked node of this type further down the list than this node
 		for(i = 0;i < bot_numnodes; i++)
 		{
-			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)])
+			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)] || (g_tactical->value && self->ctype == 1))
 			{
 				if(nodes[i].type == NODE_BLUEBASE)
 				{
@@ -321,7 +342,7 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 				}
 			}
 
-			if (self->client->pers.inventory[ITEM_INDEX(flag2_item)])
+			if (self->client->pers.inventory[ITEM_INDEX(flag2_item)] || (g_tactical->value && self->ctype == 0))
 			{
 				if(nodes[i].type == NODE_REDBASE)
 				{
