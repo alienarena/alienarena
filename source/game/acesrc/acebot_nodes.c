@@ -220,6 +220,23 @@ void ACEND_SetGoal(edict_t *self, int goal_node)
 		else
 			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
 	}
+	else if(g_tactical->value) //when a base's laser barriers shut off, go into a more direct attack route
+	{
+		if (self->ctype == 1 && (!tacticalScore.alienComputer || !tacticalScore.alienPowerSource))
+		{
+			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_BLUEBASE);
+			if(node == -1)
+				node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
+		}
+		else if (self->ctype == 0 && (!tacticalScore.humanComputer || !tacticalScore.humanPowerSource))
+		{
+			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_REDBASE);
+			if(node == -1)
+				node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
+		}
+		else
+			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
+	}
 	else
 		node = ACEND_FindClosestReachableNode(self, NODE_DENSITY*3, NODE_ALL);
 
