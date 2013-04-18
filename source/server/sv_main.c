@@ -1421,6 +1421,8 @@ void SV_Init (void)
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
 	SZ_SetName (&net_message, "Net message buffer", true);
+
+	remoteserver_runspeed = 300; //default
 }
 
 /*
