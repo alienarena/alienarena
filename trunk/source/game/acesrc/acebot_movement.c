@@ -910,7 +910,8 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	vehicle = FindItemByClassname("item_bomber");
 
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) 
+	{
 		//if we are too low, don't shoot, and move up.  Should be fairly simple, right?
 		if(self->enemy->s.origin[2] >= self->s.origin[2] - 128) { //we want to be well above our target
 			ucmd->upmove += 400;

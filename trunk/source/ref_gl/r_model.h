@@ -112,7 +112,7 @@ typedef struct
 //base player models and weapons for prechache
 typedef struct PModelList_s {
 
-    const char *name;
+    char *name;
 
 } PModelList_t;
 
@@ -121,7 +121,7 @@ extern int PModelsCount;
 
 typedef struct WModelList_s {
 
-    const char *name;
+    char *name;
 
 } WModelList_t;
 

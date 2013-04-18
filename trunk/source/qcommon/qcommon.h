@@ -150,6 +150,7 @@ int	MSG_ReadChar (sizebuf_t *sb);
 int	MSG_ReadByte (sizebuf_t *sb);
 int	MSG_ReadShort (sizebuf_t *sb);
 int	MSG_ReadLong (sizebuf_t *sb);
+int MSG_ReadSizeInt (sizebuf_t *msg_read, int bytes);
 float	MSG_ReadFloat (sizebuf_t *sb);
 char	*MSG_ReadString (sizebuf_t *sb);
 char	*MSG_ReadStringLine (sizebuf_t *sb);

@@ -544,11 +544,11 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				self->enemy = NULL;
 				return false;
 			}
-			if(self->dmteam == RED_TEAM && (strcmp(target->classname, "item_blue_dbtarget") == 0))
+			if(self->dmteam == RED_TEAM && target->classname == "item_blue_dbtarget")
 				self->enemy = target;
-			else if(self->dmteam == BLUE_TEAM && (strcmp(target->classname, "item_red_dbtarget") == 0))
+			else if(self->dmteam == BLUE_TEAM && target->classname == "item_red_dbtarget")
 				self->enemy = target;
-			else if(self->dmteam == NO_TEAM && (strcmp(target->classname, "item_dbtarget") == 0))
+			else if(self->dmteam == NO_TEAM && target->classname == "item_dbtarget")
 				self->enemy = target;
 			target = findradius(target, self->s.origin, 200);
 		}
@@ -562,26 +562,31 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		else
 			return false;
 	}
+
 	//only look for these if your team's spider is vulnerable
 	if(tca->value && ((self->dmteam == RED_TEAM && red_team_score < 2) || (self->dmteam == BLUE_TEAM && blue_team_score < 2))) {
 		target = findradius(NULL, self->s.origin, 300);
 		self->enemy = NULL;
 		while(target)
 		{
-			if(target->classname == NULL) {
+			if(target->classname == NULL) 
+			{
 				self->enemy = NULL;
 				return false;
 			}
-			if(self->dmteam == RED_TEAM) {
-				if(strcmp(target->classname, "misc_bluespidernode") == 0)
+			if(self->dmteam == RED_TEAM) 
+			{
+				if(target->classname == "misc_bluespidernode")
 					self->enemy = target;
 			}
-			if(self->dmteam == BLUE_TEAM) {
-				if(strcmp(target->classname, "misc_redspidernode") == 0)
+			if(self->dmteam == BLUE_TEAM) 
+			{
+				if(target->classname == "misc_redspidernode")
 					self->enemy = target;
 			}
 			target = findradius(target, self->s.origin, 300);
-			if(self->enemy) {
+			if(self->enemy) 
+			{
 				//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
 				self->movetarget = self->enemy;
 				self->goalentity= self->enemy; //face it, and fire
@@ -592,35 +597,38 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		}
 	}
 
-	if(g_tactical->value) {
+	if(g_tactical->value) //to do - they are not attacking for some reason!
+	{
 		target = findradius(NULL, self->s.origin, 300);
 		self->enemy = NULL;
 		while(target)
 		{
-			if(target->classname == NULL) {
+			if(target->classname == NULL) 
+			{
 				self->enemy = NULL;
 				return false;
 			}
-			if(self->ctype == 1) {
-				if(strcmp(target->classname, "misc_aliencomputer") == 0)
-					self->enemy = target;
-				else if(strcmp(target->classname, "misc_alienpowersrc") == 0)
-					self->enemy = target;
-				else if(strcmp(target->classname, "misc_alienammodepot") == 0)
-					self->enemy = target;
-			}
-			else 
+			if(self->ctype == 1) 
 			{
-				if(strcmp(target->classname, "misc_humancomputer") == 0)
+				if(target->classname == "alien computer")
 					self->enemy = target;
-				else if(strcmp(target->classname, "misc_humanpowersrc") == 0)
+				else if(target->classname == "alien powersrc")
 					self->enemy = target;
-				else if(strcmp(target->classname, "misc_humanammodepot") == 0)
+				else if(target->classname == "alien ammodepot")
 					self->enemy = target;
 			}
+			else if(self->ctype == 0)
+			{
+				if(target->classname == "human computer")
+					self->enemy = target;
+				else if(target->classname == "human powersrc")
+					self->enemy = target;
+				else if(target->classname == "human ammodepot")
+					self->enemy = target;
+			}		
 			target = findradius(target, self->s.origin, 300);
-			if(self->enemy) {
-				//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
+			if(self->enemy) 
+			{
 				self->movetarget = self->enemy;
 				self->goalentity= self->enemy; //face it, and fire
 				return true;
