@@ -704,8 +704,9 @@ qboolean ACEAI_CheckShot(edict_t *self)
 
 	tr = gi.trace (self->s.origin, tv(-8,-8,-8), tv(8,8,8), self->enemy->s.origin, self, MASK_SOLID);
 
-	// Blocked, do not shoot
-	if ( tr.fraction < 1.0f )
+	// Blocked, do not shoot - JKD 4/25/2013 - changed the threshold from 1.0 to 0.6 - this seemed to work much better and solved problems where bots 
+	// would not fire at items even though they had an obviously clear shot.
+	if ( tr.fraction < 0.6f )
 		return false;
 
 	return true;

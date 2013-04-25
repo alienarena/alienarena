@@ -1070,8 +1070,8 @@ standardmove:
 
 attack:
 	// Set the attack
-	if(ACEAI_CheckShot(self)) {
-
+	if(ACEAI_CheckShot(self)) 
+	{
 		//bot is taking a shot, lose spawn protection
 		// and calculate distance to enemy
 		range = 0.0f;
