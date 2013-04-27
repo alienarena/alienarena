@@ -1839,8 +1839,8 @@ void SP_misc_humanpowersrc (edict_t *ent)
 
 	ent->s.modelindex = gi.modelindex ("models/tactical/human_powersrc.iqm");
 
-	VectorSet (ent->mins, -64, -64, 0);
-	VectorSet (ent->maxs, 64, 64, 72);
+	VectorSet (ent->mins, -32, -32, 0);
+	VectorSet (ent->maxs, 32, 32, 72);
 	ent->health = 1500; 
 	ent->die = powersrc_die;
 	ent->think = powersrc_think;
