@@ -2143,7 +2143,7 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 
 	if(ent->client->ps.gunframe == 7) {
 
-		fire_tacticalbomb (ent, start, forward, 250);
+		fire_tacticalbomb (ent, start, forward, 100);
 
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);

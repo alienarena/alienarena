@@ -280,14 +280,34 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 			return 0.6;
 
 		// Weapons
-		case ITEMLIST_ROCKETLAUNCHER:
-		case ITEMLIST_RAILGUN:
-		case ITEMLIST_CHAINGUN:
-		case ITEMLIST_SHOTGUN:
+		case ITEMLIST_ROCKETLAUNCHER:		
+		case ITEMLIST_CHAINGUN:		
 		case ITEMLIST_SUPERSHOTGUN:
 		case ITEMLIST_BFG10K:
+			if(g_tactical->integer && self->ctype == 0)
+				return 0.0;
+			else if(g_tactical->integer && self->ctype == 1)
+			{
+				if(!self->client->pers.inventory[item])
+					return 0.9;
+				else
+					return 0.0;
+			}
+		case ITEMLIST_SHOTGUN:
 		case ITEMLIST_HYPERBLASTER:
+		case ITEMLIST_RAILGUN:
 		case ITEMLIST_MINDERASER:
+			if(g_tactical->integer && self->ctype == 1)
+				return 0.0;
+			else if(g_tactical->integer && self->ctype == 0)
+			{
+				if(!self->client->pers.inventory[item])
+					return 0.9;
+				else
+					return 0.0;
+			}
+
+			//normal game mode
 			if(!self->client->pers.inventory[item])
 				return 0.9; //was .7
 			else
