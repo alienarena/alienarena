@@ -2273,7 +2273,7 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	bomb->radius_dmg = 1000;
 	bomb->dmg_radius = 512;	
 	bomb->takedamage = DAMAGE_YES;
-	bomb->health = 200; //make it somewhat hard to destroy
+	bomb->health = 500; //make it somewhat hard to destroy
 	bomb->die = bomb_die; 
 	bomb->armed = false;
 	bomb->nade_timer = 0;
