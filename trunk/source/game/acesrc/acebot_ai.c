@@ -597,9 +597,9 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		}
 	}
 
-	if(g_tactical->value) //to do - they are not attacking for some reason!
+	if(g_tactical->value) 
 	{
-		target = findradius(NULL, self->s.origin, 300);
+		target = findradius(NULL, self->s.origin, 200);
 		self->enemy = NULL;
 		while(target)
 		{
@@ -626,7 +626,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				else if(target->classname == "human ammodepot")
 					self->enemy = target;
 			}		
-			target = findradius(target, self->s.origin, 300);
+			target = findradius(target, self->s.origin, 200);
 			if(self->enemy) 
 			{
 				self->movetarget = self->enemy;
@@ -922,6 +922,31 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		}
 		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
 		return;
+	}
+
+	//drop bombs if they have one, and the target is something that we want to plant a bomb near
+	if(g_tactical->integer) 
+	{
+		if(self->has_bomb && self->ctype == 0 
+			&& (self->enemy->classname == "human computer" || self->enemy->classname == "human powersrc" 
+			|| self->enemy->classname == "human ammodepot"))
+		{		
+			if(range < 300.0f)
+			{
+				if(ACEIT_ChangeWeapon( self, FindItem( "Alien Bomb" )))
+					return;
+			}
+		}
+		else if(self->has_bomb && self->ctype == 1 
+			&& (self->enemy->classname == "alien computer" || self->enemy->classname == "alien powersrc" 
+			|| self->enemy->classname == "alien ammodepot"))
+		{
+			if(range < 300.0f)
+			{
+				if(ACEIT_ChangeWeapon( self, FindItem( "Human Bomb" )))
+					return;
+			}
+		}
 	}
 
 	// what is the bot's favorite weapon?

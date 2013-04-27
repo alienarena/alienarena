@@ -1084,7 +1084,7 @@ attack:
 			{ // point blank range, avoid potentially odd behaviour
 				use_fuzzy_aim = false;
 			}
-		}
+		}		
 
 		if(self->skill >= 2) 
 		{	//skill 2/3 bots can use alt-fires!
@@ -1150,7 +1150,7 @@ attack:
 				else
 					ucmd->buttons = BUTTON_ATTACK2;
 			}
-
+			
 			//vehicle alt-fires
 			if (self->client->pers.weapon == FindItem("bomber")
 				|| self->client->pers.weapon == FindItem("strafer")) 
