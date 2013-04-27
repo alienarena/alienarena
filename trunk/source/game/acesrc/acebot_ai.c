@@ -610,7 +610,9 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 			}
 			if(self->ctype == 1) 
 			{
-				if(target->classname == "alien computer")
+				if(target->classname == "hbomb")
+					return false;
+				else if(target->classname == "alien computer")
 					self->enemy = target;
 				else if(target->classname == "alien powersrc")
 					self->enemy = target;
@@ -619,7 +621,9 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 			}
 			else if(self->ctype == 0)
 			{
-				if(target->classname == "human computer")
+				if(target->classname == "abomb")
+					return false;
+				else if(target->classname == "human computer")
 					self->enemy = target;
 				else if(target->classname == "human powersrc")
 					self->enemy = target;
