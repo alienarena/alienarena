@@ -135,8 +135,6 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 	if( g_tactical->integer)
 	{
-		//to do - fix bug where you can pick up two weapons at once when they are on top of another
-
 		//certain classes can only use certain weapons
 		if(other->ctype == 0)
 		{
@@ -149,9 +147,9 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				return false;
 
 		//do not pick up a weapon if you already have one - the premise behind this is that it will give others opportunities to pick up weapons since they do not respawn
-		if(other->client->pers.weapon == FindItem("Alien Disruptor") || other->client->pers.weapon == FindItem("Alien Smartgun")
-			|| other->client->pers.weapon == FindItem("Rocket Launcher") || other->client->pers.weapon == FindItem("Disruptor") 
-			|| other->client->pers.weapon == FindItem("Pulse Rifle") || other->client->pers.weapon == FindItem("Flame Thrower"))
+		if(other->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))]
+			|| other->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))]
+			|| other->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] )
 		{
 			safe_centerprintf(other, "Cannot pick up weapon, you already have a weapon");
 			return false;
@@ -166,7 +164,6 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	}
 
 	other->client->pers.inventory[index]++;
-
 
 	if (!(ent->spawnflags & DROPPED_ITEM) )
 	{
