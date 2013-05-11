@@ -1796,7 +1796,7 @@ void Mod_SummarizePVS (void)
 	byte		*vis;
 	mleaf_t		*leaf, *leaf2; 
 	int			cluster;
-	int			i, j;
+	int			i;
 	
 	loadmodel->num_areas = 0;
 	for (i = 0; i < MAX_MAP_AREAS; i++)
@@ -1808,8 +1808,6 @@ void Mod_SummarizePVS (void)
 	for (i=0,leaf=loadmodel->leafs ; i<loadmodel->numleafs ; i++, leaf++)
 	{
 		cluster = leaf->cluster;
-		leaf->maxPVSleaf = 0;
-		leaf->minPVSleaf = loadmodel->numleafs;
 		if (cluster == -1)
 			continue;
 		
@@ -1822,7 +1820,13 @@ void Mod_SummarizePVS (void)
 		if (leaf->area > loadmodel->num_areas)
 			loadmodel->num_areas = leaf->area;
 		
-		for (j=0,leaf2=loadmodel->leafs ; j<loadmodel->numleafs ; j++, leaf2++)
+		// Two separate loops, one for minPVSleaf and one for maxPVSleaf,
+		// each coming from opposite directions, for greater efficiency.
+		
+		for (	leaf->minPVSleaf = 0, leaf2 = loadmodel->leafs;
+				leaf->minPVSleaf < loadmodel->numleafs;
+				leaf->minPVSleaf++, leaf2++
+			)
 		{
 			cluster = leaf2->cluster;
 			if ((leaf2->contents & CONTENTS_SOLID) || cluster == -1)
@@ -1831,12 +1835,22 @@ void Mod_SummarizePVS (void)
 				continue;
 			
 			if (vis[cluster>>3] & (1<<(cluster&7)))
-			{
-				if (j < leaf->minPVSleaf)
-					leaf->minPVSleaf = j;
-				if (j > leaf->maxPVSleaf)
-					leaf->maxPVSleaf = j;
-			}
+				break;
+		}
+		
+		for (	leaf->maxPVSleaf = loadmodel->numleafs-1, leaf2 = &loadmodel->leafs[leaf->maxPVSleaf];
+				leaf->maxPVSleaf >= leaf->minPVSleaf;
+				leaf->maxPVSleaf--, leaf2--
+			)
+		{
+			cluster = leaf2->cluster;
+			if ((leaf2->contents & CONTENTS_SOLID) || cluster == -1)
+				continue;
+			if (leaf2->nummarksurfaces == 0)
+				continue;
+			
+			if (vis[cluster>>3] & (1<<(cluster&7)))
+				break;
 		}
 	}
 	loadmodel->num_areas++;
