@@ -318,7 +318,8 @@ will keep the demoloop from immediately starting
 */
 qboolean Cbuf_AddLateCommands (void)
 {
-	int		i, j;
+	int		i;
+	char	*t, *u;
 	int		s;
 	char	*text, *build, c;
 	int		argc;
@@ -347,22 +348,28 @@ qboolean Cbuf_AddLateCommands (void)
 	build = Z_Malloc (s+1);
 	build[0] = 0;
 
-	for (i=0 ; i<s-1 ; i++)
+	// Logic changed May 11 2013: hyphens still terminate commands, but must
+	// be preceeded by a space or tab character. Reason: allows hyphens in
+	// map names when specified as command line arguments to the game binary,
+	// as in: alienarena +map dm-deathray
+	// -Max
+	for (t = text ; t < &text[s-1] ; t++)
 	{
-		if (text[i] == '+')
+		if (*t == '+')
 		{
-			i++;
+			t++;
 
-			for (j=i ; (text[j] != '+') && (text[j] != '-') && (text[j] != 0) ; j++)
-				;
+			u = t;
+			while (*u != '+' && *u != '\0' && !((*(u-1) == ' ' || *(u-1) == '\t') && *u == '-'))
+				u++;
 
-			c = text[j];
-			text[j] = 0;
+			c = *u;
+			*u = 0;
 
-			strcat (build, text+i);
+			strcat (build, t);
 			strcat (build, "\n");
-			text[j] = c;
-			i = j-1;
+			*u = c;
+			t = u-1;
 		}
 	}
 
