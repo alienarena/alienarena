@@ -208,6 +208,10 @@ typedef struct RagDoll_s {
 
 RagDoll_t RagDoll[MAX_RAGDOLLS]; 
 
+// A few values will be copied into this. It's a bit wasteful, but it allows
+// us to reuse code that expects them to be in an entity_t struct.
+entity_t RagDollEntity;
+
 //surface for ragdoll to collide
 RagDollWorld_t RagDollTriWorld;
 

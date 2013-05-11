@@ -768,7 +768,7 @@ extern void IQM_AnimateFrame(float curframe, int nextframe);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern int IQM_NextFrame(int frame);
 extern void IQM_AnimateRagdoll(int RagDollID, int shellEffect);
-extern void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
+extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_DrawShadow(vec3_t origin);
 
 //Ragdoll
