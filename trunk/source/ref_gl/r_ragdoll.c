@@ -1161,8 +1161,16 @@ void R_RenderAllRagdolls ( void )
 			IQM_AnimateRagdoll(RagDollID, shellEffect);
 
 			currentmodel = RagDoll[RagDollID].ragDollMesh;
+			
+			// HACK: This is a bit wasteful, but it allows us to reuse code
+			// that expects these values to be in an entity_t struct.
+			VectorCopy (RagDoll[RagDollID].curPos, RagDollEntity.origin);
+			VectorCopy (RagDoll[RagDollID].angles, RagDollEntity.angles);
+			RagDollEntity.script = RagDoll[RagDollID].script;
+			RagDollEntity.flags = shellEffect?RF_SHELL_RED:0;
+			currententity = &RagDollEntity;
 
-			IQM_DrawRagDollFrame(RagDollID, RagDoll[RagDollID].texnum, shellAlpha, shellEffect);
+			IQM_DrawFrame (RagDoll[RagDollID].texnum, true, shellAlpha);
 
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);
