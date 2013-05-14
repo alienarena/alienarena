@@ -191,7 +191,7 @@ Returns the clipflags if the velocity was modified (hit something solid)
 ============
 */
 #define	MAX_CLIP_PLANES	5
-int SV_FlyMove (edict_t *ent, float time, int mask)
+int SV_FlyMove (edict_t *ent, float timespan, int mask)
 {
 	edict_t		*hit;
 	int			bumpcount, numbumps;
@@ -213,7 +213,7 @@ int SV_FlyMove (edict_t *ent, float time, int mask)
 	VectorCopy (ent->velocity, primal_velocity);
 	numplanes = 0;
 
-	time_left = time;
+	time_left = timespan;
 
 	ent->groundentity = NULL;
 	for (bumpcount=0 ; bumpcount<numbumps ; bumpcount++)
@@ -330,9 +330,9 @@ SV_AddGravity
 
 ============
 */
-void SV_AddGravity (edict_t *ent)
+void SV_AddGravity (edict_t *ent, float timespan)
 {
-	ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+	ent->velocity[2] -= ent->gravity * sv_gravity->value * timespan;
 }
 
 /*
@@ -576,7 +576,7 @@ Bmodel objects don't interact with each other, but
 push all box objects
 ================
 */
-void SV_Physics_Pusher (edict_t *ent)
+void SV_Physics_Pusher (edict_t *ent, float timespan)
 {
 	vec3_t		move, amove;
 	edict_t		*part, *mv;
@@ -596,8 +596,8 @@ void SV_Physics_Pusher (edict_t *ent)
 			part->avelocity[0] || part->avelocity[1] || part->avelocity[2]
 			)
 		{	// object is moving
-			VectorScale (part->velocity, FRAMETIME, move);
-			VectorScale (part->avelocity, FRAMETIME, amove);
+			VectorScale (part->velocity, timespan, move);
+			VectorScale (part->avelocity, timespan, amove);
 
 			if (!SV_Push (part, move, amove))
 				break;	// move was blocked
@@ -612,7 +612,7 @@ void SV_Physics_Pusher (edict_t *ent)
 		for (mv = ent ; mv ; mv=mv->teamchain)
 		{
 			if (mv->nextthink > 0)
-				mv->nextthink += FRAMETIME;
+				mv->nextthink += timespan;
 		}
 
 		// if the pusher has a "blocked" function, call it
@@ -657,14 +657,14 @@ SV_Physics_Noclip
 A moving object that doesn't obey physics
 =============
 */
-void SV_Physics_Noclip (edict_t *ent)
+void SV_Physics_Noclip (edict_t *ent, float timespan)
 {
 // regular thinking
 	if (!SV_RunThink (ent))
 		return;
 
-	VectorMA (ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
-	VectorMA (ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
+	VectorMA (ent->s.angles, timespan, ent->avelocity, ent->s.angles);
+	VectorMA (ent->s.origin, timespan, ent->velocity, ent->s.origin);
 
 	gi.linkentity (ent);
 }
@@ -684,7 +684,7 @@ SV_Physics_Toss
 Toss, bounce, and fly movement.  When onground, do nothing.
 =============
 */
-void SV_Physics_Toss (edict_t *ent)
+void SV_Physics_Toss (edict_t *ent, float timespan)
 {
 	trace_t		trace;
 	vec3_t		move;
@@ -720,13 +720,13 @@ void SV_Physics_Toss (edict_t *ent)
 // add gravity
 	if (ent->movetype != MOVETYPE_FLY
 	&& ent->movetype != MOVETYPE_FLYMISSILE)
-		SV_AddGravity (ent);
+		SV_AddGravity (ent, timespan);
 
 // move angles
-	VectorMA (ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+	VectorMA (ent->s.angles, timespan, ent->avelocity, ent->s.angles);
 
 // move origin
-	VectorScale (ent->velocity, FRAMETIME, move);
+	VectorScale (ent->velocity, timespan, move);
 	trace = SV_PushEntity (ent, move);
 	if (!ent->inuse)
 		return;
@@ -800,13 +800,13 @@ FIXME: is this true?
 #define sv_friction			6
 #define sv_waterfriction	1
 
-void SV_AddRotationalFriction (edict_t *ent)
+void SV_AddRotationalFriction (edict_t *ent, float timespan)
 {
 	int		n;
 	float	adjustment;
 
-	VectorMA (ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
-	adjustment = FRAMETIME * sv_stopspeed * sv_friction;
+	VectorMA (ent->s.angles, timespan, ent->avelocity, ent->s.angles);
+	adjustment = timespan * sv_stopspeed * sv_friction;
 	for (n = 0; n < 3; n++)
 	{
 		if (ent->avelocity[n] > 0)
@@ -824,7 +824,7 @@ void SV_AddRotationalFriction (edict_t *ent)
 	}
 }
 
-void SV_Physics_Step (edict_t *ent)
+void SV_Physics_Step (edict_t *ent, float timespan)
 {
 	qboolean	wasonground;
 	qboolean	hitsound = false;
@@ -848,7 +848,7 @@ void SV_Physics_Step (edict_t *ent)
 		wasonground = false;
 
 	if (ent->avelocity[0] || ent->avelocity[1] || ent->avelocity[2])
-		SV_AddRotationalFriction (ent);
+		SV_AddRotationalFriction (ent, timespan);
 
 	// add gravity except:
 	//   flying monsters
@@ -860,7 +860,7 @@ void SV_Physics_Step (edict_t *ent)
 				if (ent->velocity[2] < sv_gravity->value*-0.1)
 					hitsound = true;
 				if (ent->waterlevel == 0)
-					SV_AddGravity (ent);
+					SV_AddGravity (ent, timespan);
 			}
 
 	// friction for flying monsters that have been given vertical velocity
@@ -869,7 +869,7 @@ void SV_Physics_Step (edict_t *ent)
 		speed = fabs(ent->velocity[2]);
 		control = speed < sv_stopspeed ? sv_stopspeed : speed;
 		friction = sv_friction/3;
-		newspeed = speed - (FRAMETIME * control * friction);
+		newspeed = speed - (timespan * control * friction);
 		if (newspeed < 0)
 			newspeed = 0;
 		newspeed /= speed;
@@ -881,7 +881,7 @@ void SV_Physics_Step (edict_t *ent)
 	{
 		speed = fabs(ent->velocity[2]);
 		control = speed < sv_stopspeed ? sv_stopspeed : speed;
-		newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->waterlevel);
+		newspeed = speed - (timespan * control * sv_waterfriction * ent->waterlevel);
 		if (newspeed < 0)
 			newspeed = 0;
 		newspeed /= speed;
@@ -902,7 +902,7 @@ void SV_Physics_Step (edict_t *ent)
 					friction = sv_friction;
 
 					control = speed < sv_stopspeed ? sv_stopspeed : speed;
-					newspeed = speed - FRAMETIME*control*friction;
+					newspeed = speed - timespan*control*friction;
 
 					if (newspeed < 0)
 						newspeed = 0;
@@ -917,7 +917,7 @@ void SV_Physics_Step (edict_t *ent)
 			mask = MASK_MONSTERSOLID;
 		else
 			mask = MASK_SOLID;
-		SV_FlyMove (ent, FRAMETIME, mask);
+		SV_FlyMove (ent, timespan, mask);
 
 		gi.linkentity (ent);
 		G_TouchTriggers (ent);
@@ -936,7 +936,7 @@ G_RunEntity
 
 ================
 */
-void G_RunEntity (edict_t *ent)
+void G_RunEntity (edict_t *ent, float timespan)
 {
 	if (ent->prethink)
 		ent->prethink (ent);
@@ -950,22 +950,22 @@ void G_RunEntity (edict_t *ent)
 // ACEBOT_END
 	case MOVETYPE_PUSH:
 	case MOVETYPE_STOP:
-		SV_Physics_Pusher (ent);
+		SV_Physics_Pusher (ent, timespan);
 		break;
 	case MOVETYPE_NONE:
 		SV_Physics_None (ent);
 		break;
 	case MOVETYPE_NOCLIP:
-		SV_Physics_Noclip (ent);
+		SV_Physics_Noclip (ent, timespan);
 		break;
 	case MOVETYPE_STEP:
-		SV_Physics_Step (ent);
+		SV_Physics_Step (ent, timespan);
 		break;
 	case MOVETYPE_TOSS:
 	case MOVETYPE_BOUNCE:
 	case MOVETYPE_FLY:
 	case MOVETYPE_FLYMISSILE:
-		SV_Physics_Toss (ent);
+		SV_Physics_Toss (ent, timespan);
 		break;
 	default:
 		gi.error ("SV_Physics: bad movetype %i", (int)ent->movetype);

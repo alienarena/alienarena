@@ -436,6 +436,9 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 		VectorMA (bolt->s.origin, -10, dir, bolt->s.origin);
 		bolt->touch (bolt, tr.ent, NULL, NULL);
 	}
+	
+	if ( g_antilag->integer && g_antilagprojectiles->integer)
+		G_AntilagProjectile (bolt);
 }
 void fire_blaster (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper)
 {
@@ -587,6 +590,9 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->classname = "rocket";
 
 	gi.linkentity (rocket);
+	
+	if ( g_antilag->integer && g_antilagprojectiles->integer)
+		G_AntilagProjectile (rocket);
 }
 
 /*
@@ -1613,7 +1619,6 @@ void fire_smartgrenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	floater->s.sound = gi.soundindex ("weapons/electroball.wav");
 	floater->classname = "grenade";
 	floater->nade_timer = 0;
-
 
 	gi.linkentity (floater);
 }
