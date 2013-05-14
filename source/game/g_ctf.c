@@ -324,7 +324,7 @@ void CTFGrappleDrawCable(edict_t *self)
 
 }
 
-void SV_AddGravity (edict_t *ent);
+void SV_AddGravity (edict_t *ent, float timespan);
 
 // pull the player toward the grapple
 void CTFGrapplePull(edict_t *self)
@@ -398,7 +398,7 @@ void CTFGrapplePull(edict_t *self)
 		VectorNormalize (hookdir);
 		VectorScale(hookdir, CTF_GRAPPLE_PULL_SPEED, hookdir);
 		VectorCopy(hookdir, self->owner->velocity);
-		SV_AddGravity(self->owner);
+		SV_AddGravity(self->owner, FRAMETIME);
 	}
 }
 

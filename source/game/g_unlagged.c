@@ -316,3 +316,45 @@ void G_UndoTimeShiftFor( edict_t *ent ) {
 
 	G_UnTimeShiftAllClients( ent );
 }
+
+
+/*
+==================
+G_AntilagProjectile
+
+Simulate any extra frames to get the projectile "caught up" on the current
+state of the game. 
+==================
+*/
+void G_AntilagProjectile( edict_t *ent )
+{
+	int ping, time;
+	edict_t *owner;
+	
+	// Save a copy of the player who fired the shot. The reason not to refer
+	// to ent->owner directly is because if the projectile hits something,
+	// its contents will be cleared during the call to G_RunEntity.
+	owner = ent->owner;
+	
+	// don't antilag mistakes or bots
+	if ( !ent || !ent->inuse || !owner || !owner->inuse || !owner->client || owner->is_bot ) 
+	{
+		return;
+	}
+	
+	for (ping = owner->client->ping; ping > FRAMETIME*1000; ping -= FRAMETIME*1000)
+	{
+		// do the full lag compensation, without the "built in" lag
+		time = owner->client->attackTime - ping; 
+		G_TimeShiftAllClients( time, owner );
+		G_RunEntity (ent, FRAMETIME);
+		G_UnTimeShiftAllClients( owner );
+		if ( !ent->inuse )
+			return;
+	}
+	
+	time = owner->client->attackTime - ping; 
+	G_TimeShiftAllClients( time, owner );
+	G_RunEntity (ent, (float)ping/1000.0f);
+	G_UnTimeShiftAllClients( owner );
+}

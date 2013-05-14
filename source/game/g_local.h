@@ -986,7 +986,7 @@ void G_UnTimeShiftAllClients( edict_t *skip );
 void G_DoTimeShiftFor( edict_t *ent );
 void G_UndoTimeShiftFor( edict_t *ent );
 void G_UnTimeShiftClient( edict_t *ent );
-void G_PredictPlayerMove( edict_t *ent, float frametime );
+void G_AntilagProjectile( edict_t *ent );
 //unlagged - g_unlagged.c
 
 //
@@ -1032,7 +1032,7 @@ void M_ChangeYaw (edict_t *ent);
 //
 // g_phys.c
 //
-void G_RunEntity (edict_t *ent);
+void G_RunEntity (edict_t *ent, float timespan);
 void SV_CheckVelocity (edict_t *ent);
 
 //
@@ -1763,6 +1763,7 @@ extern qboolean StringToFilter (char *s, ipfilter_t *f);
 //unlagged
 extern	cvar_t	*g_antilag;
 extern  cvar_t	*g_antilagdebug;
+extern	cvar_t	*g_antilagprojectiles;
 
 // ACEBOT_ADD
 #include "acesrc/acebot.h"

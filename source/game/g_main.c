@@ -209,6 +209,7 @@ cvar_t  *sv_custombots;
 //unlagged
 cvar_t	*g_antilag;
 cvar_t	*g_antilagdebug;
+cvar_t	*g_antilagprojectiles;
 
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
@@ -1601,10 +1602,10 @@ void G_RunFrame (void)
 
 			//unlagged
 			if ( g_antilag->integer)
-				G_UnTimeShiftAllClients( NULL );
+		 		G_UnTimeShiftAllClients( NULL );
 		}
 		else*/
-		G_RunEntity (ent);
+		G_RunEntity (ent, FRAMETIME);
 	}
 
 	// see if it is time to end a deathmatch
