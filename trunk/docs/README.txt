@@ -154,14 +154,14 @@ The source code of Alien Arena is Free Software. You can redistribute it and/or 
 
 The included TrueType fonts (FreeSans and FreeMono) are from the GNU FreeFont package (http://www.gnu.org/software/freefont/); they are free software distributed under the terms of the GNU General Public License version 3 (http://www.gnu.org/licenses/gpl.html).
 
-It is only permissible to distribute the game data (models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
+Permission is granted to freely distribute (without restriction) the game data(models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena. However, it is not permissible to distribute, sell, or use for profit individual portions or items of the game data without express consent from COR Entertainment.
 
 'rcon' and 'svstat' ruby scripts are Copyright (C) 2009 Tony Jackson and Licensed under the GNU Lesser General Public License
 
 The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
-Under no circumstances ALIEN ARENA as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
+ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
 Contact:  http://red.planetarena.org
 
