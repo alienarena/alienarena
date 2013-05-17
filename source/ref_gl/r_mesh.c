@@ -1024,6 +1024,197 @@ void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float
 		}
 }
 
+void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varray, vec3_t lightcolor)
+{
+	int i;
+	
+	//shell render
+	if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
+	{
+		vec3_t lightVec, lightVal;
+
+		if(using_varray)
+		{
+			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+			glEnableVertexAttribArrayARB (1);
+			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+		}
+
+		//send light level and color to shader, ramp up a bit
+		VectorCopy(lightcolor, lightVal);
+		 for(i = 0; i < 3; i++) 
+		 {
+			if(lightVal[i] < shadelight[i]/2)
+				lightVal[i] = shadelight[i]/2; //never go completely black
+			lightVal[i] *= 5;
+			lightVal[i] += dynFactor;
+			if(lightVal[i] > 1.0+dynFactor)
+				lightVal[i] = 1.0+dynFactor;
+		}
+		
+		//brighten things slightly
+		for (i = 0; i < 3; i++ )
+			lightVal[i] *= (ragdoll?1.25:2.5);
+				   
+		//simple directional(relative light position)
+		VectorSubtract(lightPosition, currententity->origin, lightVec);
+		VectorMA(lightPosition, 1.0, lightVec, lightPosition);
+		R_ModelViewTransform(lightPosition, lightVec);
+
+		GL_EnableMultitexture( true );
+		
+		if (ragdoll)
+			qglDepthMask(false);
+
+		glUseProgramObjectARB( g_meshprogramObj );
+
+		glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
+		
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+
+		GL_SelectTexture( GL_TEXTURE1);
+		GL_Bind (r_shelltexture2->texnum);
+		glUniform1iARB( g_location_baseTex, 1);
+
+		GL_SelectTexture( GL_TEXTURE0);
+		GL_Bind (r_shellnormal->texnum);
+		glUniform1iARB( g_location_normTex, 0);
+
+		glUniform1iARB( g_location_useFX, 0);
+
+		glUniform1iARB( g_location_useGlow, 0);
+
+		glUniform1iARB( g_location_useCube, 0);
+
+		glUniform1iARB( g_location_useShell, 1);
+
+		glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
+
+		glUniform1fARB( g_location_meshTime, rs_realtime);
+
+		glUniform1iARB( g_location_meshFog, map_fog);
+		
+		glUniform1iARB(g_location_useGPUanim, 0);
+	}
+	else
+	{
+		GL_Bind(shell_skinnum);
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
+	}
+}
+
+void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor)
+{
+	int i;
+	
+	//render with shaders - assume correct single pass glsl shader struct(let's put some checks in for this)
+	vec3_t lightVec, lightVal;
+
+	GLSTATE_ENABLE_ALPHATEST		
+
+	//send light level and color to shader, ramp up a bit
+	VectorCopy(lightcolor, lightVal);
+	for(i = 0; i < 3; i++)
+	{
+		if(lightVal[i] < shadelight[i]/2)
+			lightVal[i] = shadelight[i]/2; //never go completely black
+		lightVal[i] *= 5;
+		lightVal[i] += dynFactor;
+		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		{
+			if(lightVal[i] > 1.5)
+				lightVal[i] = 1.5;
+		}
+		else
+		{
+			if(lightVal[i] > 1.0+dynFactor)
+				lightVal[i] = 1.0+dynFactor;
+		}
+	}
+	
+	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
+	{
+		//fixed light source pointing down, slightly forward and to the left
+		lightPosition[0] = -25.0;
+		lightPosition[1] = 300.0;
+		lightPosition[2] = 400.0;
+		VectorMA(lightPosition, 5.0, lightVec, lightPosition);
+		R_ModelViewTransform(lightPosition, lightVec);
+
+		for (i = 0; i < 3; i++ )
+		{
+			lightVal[i] = 1.1;
+		}
+	}
+	else
+	{
+		//simple directional(relative light position)
+		VectorSubtract(lightPosition, currententity->origin, lightVec);
+		VectorMA(lightPosition, 5.0, lightVec, lightPosition);
+		R_ModelViewTransform(lightPosition, lightVec);
+
+		//brighten things slightly
+		for (i = 0; i < 3; i++ )
+		{
+			lightVal[i] *= 1.05;
+		}
+	}
+
+	GL_EnableMultitexture( true );
+
+	glUseProgramObjectARB( g_meshprogramObj );
+
+	glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
+	
+	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER);
+
+	GL_SelectTexture( GL_TEXTURE1);
+	GL_Bind (skinnum);
+	glUniform1iARB( g_location_baseTex, 1);
+
+	GL_SelectTexture( GL_TEXTURE0);
+	GL_Bind (rs->stage->texture->texnum);
+	glUniform1iARB( g_location_normTex, 0);
+
+	GL_SelectTexture( GL_TEXTURE2);
+	GL_Bind (rs->stage->texture2->texnum);
+	glUniform1iARB( g_location_fxTex, 2);
+
+	qglActiveTextureARB(GL_TEXTURE3);
+	GL_Bind (rs->stage->texture3->texnum);
+	glUniform1iARB( g_location_fx2Tex, 3);
+
+	GL_SelectTexture( GL_TEXTURE0);
+
+	if(rs->stage->fx)
+		glUniform1iARB( g_location_useFX, 1);
+	else
+		glUniform1iARB( g_location_useFX, 0);
+
+	if(rs->stage->glow)
+		glUniform1iARB( g_location_useGlow, 1);
+	else
+		glUniform1iARB( g_location_useGlow, 0);
+
+	glUniform1iARB( g_location_useShell, 0);	
+
+	if(rs->stage->cube)
+	{
+		glUniform1iARB( g_location_useCube, 1);
+		if(currententity->flags & RF_WEAPONMODEL)
+			glUniform1iARB( g_location_fromView, 1);
+		else
+			glUniform1iARB( g_location_fromView, 0);
+	}
+	else
+		glUniform1iARB( g_location_useCube, 0);
+
+	glUniform1fARB( g_location_meshTime, rs_realtime);
+
+	glUniform1iARB( g_location_meshFog, map_fog);
+}
 /*
 =============
 MD2_DrawFrame - standard md2 rendering
@@ -1145,6 +1336,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
+		R_Mesh_SetupShell (r_shelltexture->texnum, false, true, lightcolor);
+		
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 
 		VArray = &VArrayVerts[0];
@@ -1153,72 +1346,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			alpha = 0.0;
 		else if (alpha > 1.0)
 			alpha = 1.0;
-
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) 
-		{
-			vec3_t lightVec, lightVal;
-
-			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-
-			//send light level and color to shader, ramp up a bit
-			VectorCopy(lightcolor, lightVal);
-			for(i = 0; i < 3; i++) 
-			{
-				if(lightVal[i] < shadelight[i]/2)
-					lightVal[i] = shadelight[i]/2; //never go completely black
-				lightVal[i] *= 5;
-				lightVal[i] += dynFactor;
-				if(lightVal[i] > 1.0+dynFactor)
-					lightVal[i] = 1.0+dynFactor;
-			}
-
-			//simple directional(relative light position)
-			VectorSubtract(lightPosition, currententity->origin, lightVec);
-			VectorMA(lightPosition, 1.0, lightVec, lightPosition);
-			R_ModelViewTransform(lightPosition, lightVec);
-
-			//brighten things slightly
-			for (i = 0; i < 3; i++ )
-				lightVal[i] *= 2.5;
-
-			GL_EnableMultitexture( true );
-
-			glUseProgramObjectARB( g_meshprogramObj );
-
-			glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
-
-			qglActiveTextureARB( GL_TEXTURE1);
-			qglBindTexture (GL_TEXTURE_2D, r_shelltexture2->texnum);
-			glUniform1iARB( g_location_baseTex, 1);
-
-			qglActiveTextureARB( GL_TEXTURE0);
-			qglBindTexture (GL_TEXTURE_2D, r_shellnormal->texnum);
-			glUniform1iARB( g_location_normTex, 0);
-
-			glUniform1iARB( g_location_useFX, 0);
-
-			glUniform1iARB( g_location_useGlow, 0);
-
-			glUniform1iARB( g_location_useCube, 0);
-
-			glUniform1iARB( g_location_useShell, 1);
-
-			glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
-
-			glUniform1fARB( g_location_meshTime, rs_realtime);
-
-			glUniform1iARB( g_location_meshFog, map_fog);
-
-			glUniform1iARB(g_location_useGPUanim, 0);
-		}
-		else
-		{
-			R_InitVArrays (VERT_COLOURED_TEXTURED);
-			GL_Bind(r_shelltexture->texnum);
-		}
 
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
@@ -1341,12 +1468,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				GL_EnableMultitexture( true );
 				GL_SelectTexture( GL_TEXTURE0);
 				GL_TexEnv ( GL_COMBINE_EXT );
-				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
+				GL_Bind (r_mirrortexture->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
 				GL_SelectTexture( GL_TEXTURE1);
 				GL_TexEnv ( GL_COMBINE_EXT );
-				qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
+				GL_Bind (r_mirrorspec->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
@@ -1355,14 +1482,14 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			{
 				R_InitVArrays (VERT_COLOURED_TEXTURED);
 				GL_SelectTexture( GL_TEXTURE0);
-				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
+				GL_Bind (r_mirrortexture->texnum);
 			}
 		}
 		else
 		{
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 			GL_SelectTexture( GL_TEXTURE0);
-			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
+			GL_Bind (r_reflecttexture->texnum);
 		}
 			
 		if (mirror)
@@ -1466,15 +1593,14 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	}
 	else if(rs && rs->stage->normalmap && gl_normalmaps->integer && gl_glsl_shaders->integer && gl_state.glsl_shaders)
 	{
-		vec3_t lightVec, lightVal;
 		qboolean dovbo;
-			
+		
 		dovbo = gl_state.vbo && !lerped;
-
-		GLSTATE_ENABLE_ALPHATEST		
-
+		
 		if(rs->stage->depthhack)
 			qglDepthMask(false);
+		
+		R_Mesh_SetupGLSL (skinnum, rs, lightcolor);
 				
 		if(dovbo)
 		{
@@ -1489,108 +1615,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
 		}
-
-		//send light level and color to shader, ramp up a bit
-		VectorCopy(lightcolor, lightVal);
-		for(i = 0; i < 3; i++)
-		{
-			if(lightVal[i] < shadelight[i]/2)
-				lightVal[i] = shadelight[i]/2; //never go completely black
-			lightVal[i] *= 5;
-			lightVal[i] += dynFactor;
-			if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-			{
-				if(lightVal[i] > 1.5)
-					lightVal[i] = 1.5;
-			}
-			else
-			{
-				if(lightVal[i] > 1.0+dynFactor)
-					lightVal[i] = 1.0+dynFactor;
-			}
-		}
-
-		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
-		{
-			//fixed light source pointing down, slightly forward and to the left
-			lightPosition[0] = -25.0;
-			lightPosition[1] = 300.0;
-			lightPosition[2] = 400.0;
-			VectorMA(lightPosition, 5.0, lightVec, lightPosition);
-			R_ModelViewTransform(lightPosition, lightVec);
-
-			for (i = 0; i < 3; i++ )
-			{
-				lightVal[i] = 1.1;
-			}
-		}
-		else
-		{
-			//simple directional(relative light position)
-			VectorSubtract(lightPosition, currententity->origin, lightVec);
-			VectorMA(lightPosition, 5.0, lightVec, lightPosition);
-			R_ModelViewTransform(lightPosition, lightVec);
-
-			//brighten things slightly
-			for (i = 0; i < 3; i++ )
-			{
-				lightVal[i] *= 1.05;
-			}
-		}
-
-		GL_EnableMultitexture( true );
-
-		glUseProgramObjectARB( g_meshprogramObj );
-
-		glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
-
-		qglActiveTextureARB( GL_TEXTURE1);
-		qglBindTexture (GL_TEXTURE_2D, skinnum);
-		glUniform1iARB( g_location_baseTex, 1);
-
-		qglActiveTextureARB( GL_TEXTURE0);
-		qglBindTexture (GL_TEXTURE_2D, rs->stage->texture->texnum);
-		glUniform1iARB( g_location_normTex, 0);
-
-		qglActiveTextureARB( GL_TEXTURE2);
-		qglBindTexture (GL_TEXTURE_2D, rs->stage->texture2->texnum);
-		glUniform1iARB( g_location_fxTex, 2);
-
-		qglActiveTextureARB(GL_TEXTURE3);
-		qglBindTexture (GL_TEXTURE_2D, rs->stage->texture3->texnum);
-		glUniform1iARB( g_location_fx2Tex, 3);
-
-		qglActiveTextureARB( GL_TEXTURE0);
-
-		if(rs->stage->fx)
-			glUniform1iARB( g_location_useFX, 1);
-		else
-			glUniform1iARB( g_location_useFX, 0);
-
-		if(rs->stage->glow)
-			glUniform1iARB( g_location_useGlow, 1);
-		else
-			glUniform1iARB( g_location_useGlow, 0);
-
-		if(rs->stage->cube)
-		{
-			glUniform1iARB( g_location_useCube, 1);
-			if(currententity->flags & RF_WEAPONMODEL)
-				glUniform1iARB( g_location_fromView, 1);
-			else
-				glUniform1iARB( g_location_fromView, 0);
-		}
-		else
-			glUniform1iARB( g_location_useCube, 0);
-
-		glUniform1iARB( g_location_useShell, 0);
-
-		glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
-
-		glUniform1fARB( g_location_meshTime, rs_realtime);
-
-		glUniform1iARB( g_location_meshFog, map_fog);
-
+		
 		glUniform1iARB(g_location_useGPUanim, 0);
 
 		if (dovbo)
