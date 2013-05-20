@@ -839,7 +839,8 @@ void G_SetScoreStats (edict_t *ent)
 	int high_score = 0;
 	
 	// highest scorer
-	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->integer; i++, e2++) {
+	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->integer; i++, e2++) 
+	{
 		if (!e2->inuse)
 			continue;
 
@@ -854,9 +855,23 @@ void G_SetScoreStats (edict_t *ent)
 	ent->client->ps.stats[STAT_REDSCORE] = red_team_score;
 	ent->client->ps.stats[STAT_BLUESCORE] = blue_team_score;
 	
-	if (tca->integer) {
+	if (tca->integer) 
+	{
 		ent->client->ps.stats[STAT_RED_MATCHES] = red_team_matches;
 		ent->client->ps.stats[STAT_BLUE_MATCHES] = blue_team_matches;
+	}
+
+	if (g_tactical->integer) //just use the weapon slots since these aren't displayed in tactical anyway
+	{
+		ent->client->ps.stats[STAT_TACTICAL_SCORE] = gi.imageindex ("i_tactical");
+
+		ent->client->ps.stats[STAT_WEAPN1] = tacticalScore.humanComputerHealth; 
+		ent->client->ps.stats[STAT_WEAPN2] = tacticalScore.humanPowerSourceHealth; 
+		ent->client->ps.stats[STAT_WEAPN3] = tacticalScore.humanAmmoDepotHealth; 
+
+		ent->client->ps.stats[STAT_WEAPN4] = tacticalScore.alienComputerHealth; 
+		ent->client->ps.stats[STAT_WEAPN5] = tacticalScore.alienPowerSourceHealth; 
+		ent->client->ps.stats[STAT_WEAPN6] = tacticalScore.alienAmmoDepotHealth; 
 	}
 }
 
@@ -1013,43 +1028,47 @@ void G_SetStats (edict_t *ent)
 	G_SetScoreStats (ent);
 
 #ifndef ALTERIA
-	//weapon/ammo inventories
-	for(i = 0; i < 7; i++)
-		ent->client->ps.stats[STAT_WEAPN1+i] = 0;
-	i = 0;
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] &&
-		ent->client->pers.weapon != (FindItem("Alien Disruptor"))) {
-			ent->client->ps.stats[STAT_WEAPN1] = gi.imageindex ("disruptor");
-			i++;
-	}
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] &&
-		ent->client->pers.weapon != (FindItem("Alien Smartgun"))) {
-			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("smartgun");
-			i++;
-	}
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] &&
-		ent->client->pers.weapon != (FindItem("Pulse Rifle"))) {
-			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("chaingun");
-			i++;
-	}
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] &&
-		ent->client->pers.weapon != (FindItem("Flame Thrower"))) {
-			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("flamethrower");
-			i++;
-	}
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] &&
-		ent->client->pers.weapon != (FindItem("Rocket Launcher"))) {
-			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("rocketlauncher");
-			i++;
-	}
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] &&
-		ent->client->pers.weapon != (FindItem("Disruptor"))) {
-			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("beamgun");
-			i++;
-	}
-	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] &&
-		ent->client->pers.weapon != (FindItem("Alien Vaporizer"))) {
-			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("vaporizor");
+
+	if(!g_tactical->integer)
+	{
+		//weapon/ammo inventories
+		for(i = 0; i < 7; i++)
+			ent->client->ps.stats[STAT_WEAPN1+i] = 0;
+		i = 0;
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] &&
+			ent->client->pers.weapon != (FindItem("Alien Disruptor"))) {
+				ent->client->ps.stats[STAT_WEAPN1] = gi.imageindex ("disruptor");
+				i++;
+		}
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] &&
+			ent->client->pers.weapon != (FindItem("Alien Smartgun"))) {
+				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("smartgun");
+				i++;
+		}
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] &&
+			ent->client->pers.weapon != (FindItem("Pulse Rifle"))) {
+				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("chaingun");
+				i++;
+		}
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] &&
+			ent->client->pers.weapon != (FindItem("Flame Thrower"))) {
+				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("flamethrower");
+				i++;
+		}
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] &&
+			ent->client->pers.weapon != (FindItem("Rocket Launcher"))) {
+				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("rocketlauncher");
+				i++;
+		}
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] &&
+			ent->client->pers.weapon != (FindItem("Disruptor"))) {
+				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("beamgun");
+				i++;
+		}
+		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] &&
+			ent->client->pers.weapon != (FindItem("Alien Vaporizer"))) {
+				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("vaporizor");
+		}
 	}
 #endif
 

@@ -360,6 +360,14 @@ void InitGame (void)
 			tacticalScore.humanComputer = 
 			tacticalScore.humanPowerSource =
 			true;
+
+		tacticalScore.alienAmmoDepotHealth = 
+			tacticalScore.alienComputerHealth = 
+			tacticalScore.alienPowerSourceHealth = 
+			tacticalScore.humanAmmoDepotHealth = 
+			tacticalScore.humanComputerHealth = 
+			tacticalScore.humanPowerSourceHealth =
+			100;
 	}
 
 	//reset minderaser

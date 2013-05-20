@@ -837,6 +837,75 @@ char *tca_statusbar =
 "pic 31 "
 "endif "
 ;
+
+char *tactical_statusbar =
+// background
+"yb -256 "
+"xl	 0 "
+"pic 0 "
+"xr  -130 "
+"yt  2 "
+"pic 8 "
+
+// health
+"yb	-29 "
+"xl	11 "
+"hnum "
+
+// ammo
+"if 2 "
+"	xl	76 "
+"	anum "
+"endif "
+
+// armor
+"	xl	142 "
+"	rnum "
+
+//  Human Computer
+"xr	-67 "
+"yt 16 "
+"num 3 25 "
+
+//  Human Power
+"yt 48 "
+"num 3 26 "
+
+//  Human Ammo Depot
+"yt 80 "
+"num 3 27 "
+
+//  Alien Computer
+"yt 122 "
+"num 3 28 "
+
+//  Alien Power
+"yt 154 "
+"num 3 29 "
+
+//  Alien Ammo Depot
+"yt 186 "
+"num 3 30 "
+
+// timer
+"if 9 "
+"	xv	324 "
+"   yb  -24 "
+"	num	2	10 "
+"	xv	358 "
+"   yb  -32 "
+"	pic	9 "
+"endif "
+
+// weapon icon
+"if 11 "
+"	xr	-72 "
+"   yt  196 "
+"	pic	11 "
+"endif "
+
+
+;
 /*QUAKED worldspawn (0 0 0) ?
 
 Only used for the world.
@@ -896,6 +965,8 @@ void SP_worldspawn (edict_t *ent)
 	}
 	else if (tca->integer)
 		gi.configstring (CS_STATUSBAR, tca_statusbar);
+	else if (g_tactical->integer)
+		gi.configstring (CS_STATUSBAR, tactical_statusbar);
 	else
 		gi.configstring (CS_STATUSBAR, dm_statusbar);
 

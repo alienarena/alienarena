@@ -1476,8 +1476,8 @@ void SP_misc_bluespidernode (edict_t *ent)
 
 //Tactical base items
 //Rules:  When a computer is destroyed, that base's turrents/deathrays will behave eratically, even firing on it's own team on occasion.  Laser barriers shut off.  
-//When a powersource is destroyed, the backup generators for the computer and ammo generator turn on(generator models will animate, emit sound).  Ammo will generate from depot at half speed.  Laser barriers shut off,
-//turrets and deathrays are weak.
+//When a powersource is destroyed, the backup generators(if not already destroyed) for the computer and ammo generator turn on(generator models will animate, emit sound).  Ammo will generate from depot at half speed.  
+//Laser barriers shut off, turrets and deathrays are weak.
 //When an ammo depot is destroyed, ammo stops being produced.
 //When all three are disabled, the other team wins.
 
@@ -1640,6 +1640,11 @@ void SP_misc_laser (edict_t *ent)
 //computers
 void computer_think (edict_t *ent)
 {
+	if(ent->classname == "alien computer")
+		tacticalScore.alienComputerHealth = ent->health/15;
+	else
+		tacticalScore.humanComputerHealth = ent->health/15;
+
 	ent->s.frame = (ent->s.frame + 1) % 24;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -1656,11 +1661,13 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if(self->classname == "alien computer")
 	{
 		tacticalScore.alienComputer = false;
+		tacticalScore.alienComputerHealth = 0;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
 	}
 	else
 	{
 		tacticalScore.humanComputer = false;
+		tacticalScore.humanComputerHealth = 0;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
 	}
 	gi.WritePosition (self->s.origin);
@@ -1747,6 +1754,10 @@ void SP_misc_humancomputer (edict_t *ent)
 //power sources
 void powersrc_think (edict_t *ent)
 {
+	if(ent->classname == "alien powersrc")
+		tacticalScore.alienPowerSourceHealth = ent->health/15;
+	else
+		tacticalScore.humanPowerSourceHealth = ent->health/15;
 	ent->s.frame = (ent->s.frame + 1) % 24;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -1763,11 +1774,13 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if(self->classname == "alien powersrc")
 	{
 		tacticalScore.alienPowerSource = false;
+		tacticalScore.alienPowerSourceHealth = 0;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
 	}
 	else
 	{
 		tacticalScore.humanPowerSource = false;
+		tacticalScore.humanPowerSourceHealth = 0;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);		
 	}
 	gi.WritePosition (self->s.origin);
@@ -1854,6 +1867,10 @@ void SP_misc_humanpowersrc (edict_t *ent)
 //ammo depots
 void ammodepot_think (edict_t *ent)
 {
+	if(ent->classname == "alien ammodepot")
+		tacticalScore.alienAmmoDepotHealth = ent->health/15;
+	else
+		tacticalScore.humanAmmoDepotHealth = ent->health/15;
 	ent->nextthink = level.time + FRAMETIME;
 }
 
@@ -1869,11 +1886,13 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	if(self->classname == "alien ammodepot")
 	{
 		tacticalScore.alienAmmoDepot = false;
+		tacticalScore.alienAmmoDepotHealth = 0;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
 	}
 	else
 	{
 		tacticalScore.humanAmmoDepot = false;
+		tacticalScore.humanAmmoDepotHealth = 0;
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
 	}
 	gi.WritePosition (self->s.origin);
