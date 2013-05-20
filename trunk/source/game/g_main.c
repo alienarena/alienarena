@@ -1261,6 +1261,14 @@ void ExitLevel (void)
 			tacticalScore.humanComputer = 
 			tacticalScore.humanPowerSource =
 			true;
+
+		tacticalScore.alienAmmoDepotHealth = 
+			tacticalScore.alienComputerHealth = 
+			tacticalScore.alienPowerSourceHealth = 
+			tacticalScore.humanAmmoDepotHealth = 
+			tacticalScore.humanComputerHealth = 
+			tacticalScore.humanPowerSourceHealth =
+			100;
 	}
 
 	print1 = print2 = print3 = false;

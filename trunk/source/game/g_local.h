@@ -503,12 +503,18 @@ typedef struct
 typedef struct
 {
 	qboolean alienComputer;
+	int		 alienComputerHealth;
 	qboolean alienPowerSource;
+	int		 alienPowerSourceHealth;
 	qboolean alienAmmoDepot;
+	int		 alienAmmoDepotHealth;
 
 	qboolean humanComputer;
+	int		 humanComputerHealth;
 	qboolean humanPowerSource;
+	int		 humanPowerSourceHealth;
 	qboolean humanAmmoDepot;
+	int		 humanAmmoDepotHealth;
 
 } tactical_t;
 
