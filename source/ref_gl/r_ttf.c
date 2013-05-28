@@ -141,6 +141,12 @@ static void _TTF_WrappedPrint(
 		const float *	color
 	);
 
+/* Wrapped printing function */
+static int _TTF_PredictSize(
+		FNT_font_t	font ,
+		const char *	text
+	);
+
 
 /*****************************************************************************
  * LOCAL VARIABLES                                                           *
@@ -622,6 +628,7 @@ static qboolean _TTF_GetFont( FNT_font_t font )
 	font->RawPrint = _TTF_RawPrint;
 	font->BoundedPrint = _TTF_BoundedPrint;
 	font->WrappedPrint = _TTF_WrappedPrint;
+	font->PredictSize = _TTF_PredictSize;
 	font->Destroy = _TTF_Destroy;
 	return true;
 }
@@ -686,6 +693,9 @@ static void _TTF_RawPrintInternal(
 	const unsigned char *	ptr = ( const unsigned char *) text;
 	int			ptrInc = r2l ? -1 : 1;
 	int			previous = -1;
+	
+	if (r2l)
+		ptr += text_length-1;
 
 	while ( text_length ) {
 		unsigned int	i = ( *ptr & 0x7F ) - ' ';
@@ -1274,4 +1284,43 @@ static void _TTF_WrappedPrint(
 	_TTF_PrepareToDraw( fInternal->texture );
 	_TTF_WrappedPrintInternal( fInternal , text , cmode , align , indent , box , color );
 	_TTF_RestoreEnvironment( );
+}
+
+
+/*
+ * Size prediction function
+ */
+static int _TTF_PredictSize(
+		FNT_font_t	font ,
+		const char *	text
+	)
+{
+	_TTF_font_t				fInternal;
+	float					tx;
+	int						ret;
+	unsigned int			previous;
+	const unsigned char *	ptr;
+	
+	fInternal = (_TTF_font_t) font->internal;
+	ptr = ( const unsigned char *) text;
+	
+	previous = ( *ptr & 0x7F ) - ' ';
+	
+	tx = fInternal->widths[ previous ];
+	
+	while ( *(++ptr) ) {
+		unsigned int	i = ( *ptr & 0x7F ) - ' ';
+
+		if ( i < TTF_CHARACTERS ) {
+			tx += fInternal->kerning[ previous ][ i ] + fInternal->widths[ i ];
+			previous = i;
+		}
+	}
+	
+	// always round up the pixel count
+	ret = (int)tx;
+	if (ret < tx)
+		ret++;
+	
+	return ret;
 }

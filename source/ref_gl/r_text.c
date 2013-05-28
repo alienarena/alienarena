@@ -114,6 +114,15 @@ static void _FNT_NullFont_WrappedPrint(
 }
 
 
+static void _FNT_NullFont_PredictSize(
+		FNT_font_t	font ,
+		const char *	text
+	)
+{
+	/* EMPTY */
+}
+
+
 
 /**************************************************************************/
 /* AUTOMATIC FONT MANAGEMENT                                              */
@@ -265,6 +274,7 @@ qboolean FNT_Initialise( )
 		_FNT_NullFont->RawPrint = _FNT_NullFont_RawPrint;
 		_FNT_NullFont->BoundedPrint = _FNT_NullFont_BoundedPrint;
 		_FNT_NullFont->WrappedPrint = _FNT_NullFont_WrappedPrint;
+		_FNT_NullFont->PredictSize = _FNT_NullFont_PredictSize;
 	}
 
 	// Create hash tables for both faces and fonts
