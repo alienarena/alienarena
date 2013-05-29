@@ -74,6 +74,12 @@ static void _BMF_WrappedPrint(
 		const float *	color
 	);
 
+/* Size prediction function */
+static int _BMF_PredictSize(
+		FNT_font_t	font ,
+		const char *	text
+	);
+
 
 /*****************************************************************************
  * LOCAL TYPE DEFINITIONS                                                    *
@@ -98,6 +104,7 @@ struct _BMF_font_s
 	FNT_RawPrint_funct	RawPrint;
 	FNT_BoundedPrint_funct	BoundedPrint;
 	FNT_WrappedPrint_funct	WrappedPrint;
+	FNT_PredictSize_funct	PredictSize;
 
 	/* Destructor */
 	FNT_DestroyFont_funct	Destroy;
@@ -214,6 +221,7 @@ static qboolean _BMF_GetFont( FNT_font_t font )
 	font->RawPrint = _BMF_RawPrint;
 	font->BoundedPrint = _BMF_BoundedPrint;
 	font->WrappedPrint = _BMF_WrappedPrint;
+	font->PredictSize = _BMF_PredictSize;
 
 	return true;
 }
@@ -614,4 +622,15 @@ static void _BMF_WrappedPrint(
 
 	box->width = maxWidth;
 	box->height = cHeight;
+}
+
+/*
+ * Size prediction function
+ */
+static int _BMF_PredictSize(
+		FNT_font_t	font ,
+		const char *	text
+	)
+{
+	return font->size*strlen(text);
 }
