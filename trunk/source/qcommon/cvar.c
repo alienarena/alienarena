@@ -32,7 +32,7 @@ cvar_t	*cvar_vars;
 Cvar_InfoValidate
 ============
 */
-static qboolean Cvar_InfoValidate (char *s)
+static qboolean Cvar_InfoValidate (const char *s)
 {
 	if (strstr (s, "\\"))
 		return false;
@@ -48,7 +48,7 @@ static qboolean Cvar_InfoValidate (char *s)
 Cvar_FindVar
 ============
 */
-static cvar_t *Cvar_FindVar (char *var_name)
+static cvar_t *Cvar_FindVar (const char *var_name)
 {
 	cvar_t		*var;
 	unsigned int	i, hash_key;
@@ -66,7 +66,7 @@ static cvar_t *Cvar_FindVar (char *var_name)
 Cvar_VariableValue
 ============
 */
-float Cvar_VariableValue (char *var_name)
+float Cvar_VariableValue (const char *var_name)
 {
 	cvar_t	*var;
 
@@ -82,7 +82,7 @@ float Cvar_VariableValue (char *var_name)
 Cvar_VariableString
 ============
 */
-char *Cvar_VariableString (char *var_name)
+char *Cvar_VariableString (const char *var_name)
 {
 	cvar_t *var;
 
@@ -98,7 +98,7 @@ char *Cvar_VariableString (char *var_name)
 Cvar_CompleteVariable
 ============
 */
-char *Cvar_CompleteVariable (char *partial)
+char *Cvar_CompleteVariable (const char *partial)
 {
 	cvar_t		*cvar;
 	int		len, i;
@@ -130,7 +130,7 @@ Cvar_Allocate
 Creates a new variable's record
 ============
 */
-inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, unsigned int hash_key)
+inline static cvar_t *Cvar_Allocate(const char *var_name, const char *var_value, int flags, unsigned int hash_key)
 {
 	cvar_t *nvar;
 
@@ -157,7 +157,7 @@ Initializes a new cvar struct holding just a value, with no name in it.
 Used in some places where a weak-typed variable is needed.
 ============
 */ 
-void Anon_Cvar_Set(cvar_t *nvar, char *var_value)
+void Anon_Cvar_Set(cvar_t *nvar, const char *var_value)
 {
 	if (nvar->string)
 		Z_Free (nvar->string);
@@ -175,7 +175,7 @@ Cvar_AddBetween
 Adds a variable between two others.
 ============
 */
-inline static cvar_t *Cvar_AddBetween(char *var_name, char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
+inline static cvar_t *Cvar_AddBetween(const char *var_name, const char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
 {
 	cvar_t *nvar;
 
@@ -211,7 +211,7 @@ If the variable already exists, the value will not be set
 The flags will be or'ed in if the variable exists.
 ============
 */
-cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
+cvar_t *Cvar_Get (const char *var_name, const char *var_value, int flags)
 {
 	cvar_t		*var, **prev;
 	unsigned int	i, hash_key;
@@ -256,7 +256,7 @@ sets the pointer to the variable through a parameter.
 ============
 */
 inline static qboolean Cvar_FindOrCreate (
-		char *var_name, char *var_value, int flags, cvar_t **found)
+		const char *var_name, const char *var_value, int flags, cvar_t **found)
 {
 	cvar_t		*var, **prev;
 	unsigned int	i, hash_key;
@@ -285,7 +285,7 @@ inline static qboolean Cvar_FindOrCreate (
 Cvar_Set2
 ============
 */
-cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
+cvar_t *Cvar_Set2 (const char *var_name, const char *value, qboolean force)
 {
 	cvar_t	*var;
 
@@ -375,7 +375,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 Cvar_ForceSet
 ============
 */
-cvar_t *Cvar_ForceSet (char *var_name, char *value)
+cvar_t *Cvar_ForceSet (const char *var_name, const char *value)
 {
 	return Cvar_Set2 (var_name, value, true);
 }
@@ -385,7 +385,7 @@ cvar_t *Cvar_ForceSet (char *var_name, char *value)
 Cvar_Set
 ============
 */
-void Cvar_Set (char *var_name, char *value)
+void Cvar_Set (const char *var_name, const char *value)
 {
 	(void)Cvar_Set2 (var_name, value, false);
 }
@@ -395,7 +395,7 @@ void Cvar_Set (char *var_name, char *value)
 Cvar_FullSet
 ============
 */
-void Cvar_FullSet (char *var_name, char *value, int flags)
+void Cvar_FullSet (const char *var_name, const char *value, int flags)
 {
 	cvar_t	*var;
 
@@ -421,7 +421,7 @@ void Cvar_FullSet (char *var_name, char *value, int flags)
 Cvar_SetValue
 ============
 */
-void Cvar_SetValue (char *var_name, float value)
+void Cvar_SetValue (const char *var_name, float value)
 {
 	char	val[32];
 
@@ -740,7 +740,7 @@ char	*Cvar_Serverinfo (void)
     return info;
 }
 
-void	Cvar_Describe(cvar_t *var, char *description_string)
+void	Cvar_Describe(cvar_t *var, const char *description_string)
 {
 	if (var == NULL)
 		return;
@@ -752,7 +752,7 @@ void	Cvar_Describe(cvar_t *var, char *description_string)
 		var->description = CopyString (description_string);
 }
 
-void	Cvar_Describe_ByName(char *var_name, char *description_string)
+void	Cvar_Describe_ByName(const char *var_name, const char *description_string)
 {
 	cvar_t *var;
 	if (var_name == NULL)

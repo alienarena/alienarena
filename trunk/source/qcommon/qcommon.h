@@ -188,7 +188,7 @@ void COM_AddParm (char *parm);
 void COM_Init (void);
 void COM_InitArgv (int argc, char **argv);
 
-char *CopyString (char *in);
+char *CopyString (const char *in);
 
 //============================================================================
 
@@ -506,28 +506,28 @@ extern	cvar_t	*cvar_vars;
 // That allows variables to be unarchived without needing bitflags. NOTE: the
 // value and name strings are copied, so you don't need to keep track of any
 // strings you use with this function.
-cvar_t *Cvar_Get (char *var_name, char *value, int flags);
+cvar_t *Cvar_Get (const char *var_name, const char *value, int flags);
 
 // will create the variable if it doesn't exist
-void	Cvar_Set (char *var_name, char *value);
+void	Cvar_Set (const char *var_name, const char *value);
 
 // will set the variable even if NOSET or LATCH
-cvar_t *Cvar_ForceSet (char *var_name, char *value);
+cvar_t *Cvar_ForceSet (const char *var_name, const char *value);
 
-void	Cvar_FullSet (char *var_name, char *value, int flags);
+void	Cvar_FullSet (const char *var_name, const char *value, int flags);
 
 // expands value to a string and calls Cvar_Set
-void	Cvar_SetValue (char *var_name, float value);
+void	Cvar_SetValue (const char *var_name, float value);
 
 // returns 0 if not defined or non numeric
-float	Cvar_VariableValue (char *var_name);
+float	Cvar_VariableValue (const char *var_name);
 
 // returns an empty string if not defined
-char	*Cvar_VariableString (char *var_name);
+char	*Cvar_VariableString (const char *var_name);
 
 // attempts to match a partial variable name for command line completion
 // returns NULL if nothing fits
-char 	*Cvar_CompleteVariable (char *partial);
+char 	*Cvar_CompleteVariable (const char *partial);
 
 // any CVAR_LATCHED variables that have been set will now take effect
 void	Cvar_GetLatchedVars (void);
@@ -552,13 +552,13 @@ char	*Cvar_Serverinfo (void);
 
 // Initializes a new cvar struct holding just a value, with no name in it.
 // Used in some places where a weak-typed variable is needed.
-void	Anon_Cvar_Set(cvar_t *nvar, char *var_value);
+void	Anon_Cvar_Set(cvar_t *nvar, const char *var_value);
 
 // Copies the description string into the cvar. Useful for documenting cvars.
 // The description string is copied, so it need not be kept in memory for the
 // life of the cvar.
-void	Cvar_Describe(cvar_t *var, char *description_string);
-void	Cvar_Describe_ByName(char *var_name, char *description_string);
+void	Cvar_Describe(cvar_t *var, const char *description_string);
+void	Cvar_Describe_ByName(const char *var_name, const char *description_string);
 
 // this is set each time a CVAR_USERINFO variable is changed
 // so that the client knows to send it to the server
