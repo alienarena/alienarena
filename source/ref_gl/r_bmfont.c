@@ -77,7 +77,8 @@ static void _BMF_WrappedPrint(
 /* Size prediction function */
 static int _BMF_PredictSize(
 		FNT_font_t	font ,
-		const char *	text
+		const char *	text,
+		qboolean		color
 	);
 
 
@@ -629,8 +630,22 @@ static void _BMF_WrappedPrint(
  */
 static int _BMF_PredictSize(
 		FNT_font_t	font ,
-		const char *	text
+		const char *	text,
+		qboolean		color
 	)
 {
-	return font->size*strlen(text);
+	int ret = 0;
+	while (*text)
+	{
+		if (*text == '^' && color)
+		{
+			text += 2;
+		}
+		else
+		{
+			ret += font->size;
+			text++;
+		}
+	}
+	return ret;
 }

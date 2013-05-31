@@ -204,13 +204,15 @@ typedef void (* FNT_DestroyFont_funct)( FNT_font_t font );
  * Parameters:
  *	font		the font to use
  *	text		the text to use
+ *  color       enable ^color code filtering
  *
  * Returns:
  *  The width in pixels required to render the text in the font
  */
 typedef int (* FNT_PredictSize_funct)(
 		FNT_font_t	font ,
-		const char *	text
+		const char *	text,
+		qboolean        color
 	);
 
 
@@ -441,8 +443,8 @@ void FNT_ReleaseFont( FNT_font_t font );
  * Determine how much space is required to print the string. See comment on
  * FNT_PredictSize_funct for more information.
  */
-#define FNT_PredictSize(font,text) \
-	( font->PredictSize( font , text ) )
+#define FNT_PredictSize(font,text,color) \
+	( font->PredictSize( font , text , color ) )
 
 
 
