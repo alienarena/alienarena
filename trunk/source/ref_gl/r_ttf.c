@@ -144,7 +144,8 @@ static void _TTF_WrappedPrint(
 /* Wrapped printing function */
 static int _TTF_PredictSize(
 		FNT_font_t	font ,
-		const char *	text
+		const char *	text,
+		qboolean		color
 	);
 
 
@@ -1292,7 +1293,8 @@ static void _TTF_WrappedPrint(
  */
 static int _TTF_PredictSize(
 		FNT_font_t	font ,
-		const char *	text
+		const char *	text,
+		qboolean		color
 	)
 {
 	_TTF_font_t				fInternal;
@@ -1304,12 +1306,24 @@ static int _TTF_PredictSize(
 	fInternal = (_TTF_font_t) font->internal;
 	ptr = ( const unsigned char *) text;
 	
+	if (*ptr == '\0')
+		return 0;
+	
+	if (*ptr == '^' && color)
+		ptr += 2;
+	
 	previous = ( *ptr & 0x7F ) - ' ';
 	
 	tx = fInternal->widths[ previous ];
 	
 	while ( *(++ptr) ) {
 		unsigned int	i = ( *ptr & 0x7F ) - ' ';
+		
+		if (*ptr == '^' && color)
+		{
+			ptr++;
+			continue;
+		}
 
 		if ( i < TTF_CHARACTERS ) {
 			tx += fInternal->kerning[ previous ][ i ] + fInternal->widths[ i ];
