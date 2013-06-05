@@ -106,15 +106,20 @@ struct \
 	}\
 }
 
+// The reason this macro is so odd is because you need to be able to do 
+// CHASELINK(var) = value directly.
 #define CHASELINK(l) \
 (*\
 	(\
 		((l).status == linkstatus_link)?\
-		(\
+		(	/*	Macro evaluates to (*((l).ptr)) */ \
 			(l).ptr\
 		)\
 		:\
-		(\
+		(	/*	Macro evaluates to (*(&((l).val))) which simplifies to (l).val
+				The compiler should figure that out and come up with something
+				you can assign directly.
+			*/ \
 			&((l).val)\
 		)\
 	)\

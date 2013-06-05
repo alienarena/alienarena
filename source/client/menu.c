@@ -502,7 +502,6 @@ char *main_names[] =
 };
 #define MAIN_ITEMS (sizeof(main_names)/sizeof(main_names[0]))
 
-// Oh, I am sooo curious if this'll compile in MSVC
 void (*main_open_funcs[MAIN_ITEMS])(void) = 
 {
 	&M_Menu_PlayerConfig_f,
