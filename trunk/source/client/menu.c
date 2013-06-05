@@ -93,7 +93,7 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 
 void	(*m_drawfunc) (void);
-const char *(*m_keyfunc) (int key);
+const char *(*m_keyfunc) (menuframework_s *menu, int key);
 
 static size_t szr; // just for unused result warnings
 
@@ -252,15 +252,10 @@ static void name ## _MenuDraw (void) \
 	Menu_Draw( &struct ); \
 } \
 \
-static const char * name ## _MenuKey( int key ) \
-{ \
-	return Default_MenuKey( &struct, key ); \
-} \
-\
 void M_Menu_ ## name ## _f (void) \
 { \
 	name ## _MenuInit(); \
-	M_PushMenu ( name ## _MenuDraw, name ## _MenuKey, Menu_TrueWidth(struct), 0); \
+	M_PushMenu ( name ## _MenuDraw, Default_MenuKey, &struct); \
 }
 
 
@@ -273,8 +268,8 @@ void M_Menu_ ## name ## _f (void) \
 typedef struct
 {
 	void	(*draw) (void);
-	const char *(*key) (int k);
-	int		width, natural_width;
+	const char *(*key) (menuframework_s *screen, int k);
+	menuframework_s *screen;
 	int		start_x, end_x;
 	int		offset;
 } menulayer_t;
@@ -317,11 +312,10 @@ void refreshCursorButtons(void)
 	cursor.buttonclicks[MOUSEBUTTON1] = 0;
 }
 
-void M_PushMenu ( void (*draw) (void), const char *(*key) (int k), int total_width, int natural_width)
+void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
 	int		i;
-	int		width = total_width;
-
+	
 	if (Cvar_VariableValue ("maxclients") == 1
 		&& Com_ServerState ())
 		Cvar_Set ("paused", "1");
@@ -330,7 +324,8 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (int k), int total_wid
 	// to avoid stacking menus by hotkeys
 	for (i=0 ; i<m_menudepth ; i++)
 		if (m_layers[i].draw == draw &&
-			m_layers[i].key == key)
+			m_layers[i].key == key && 
+			m_layers[i].screen == screen)
 		{
 			m_menudepth = i;
 		}
@@ -341,12 +336,9 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (int k), int total_wid
 			Com_Error (ERR_FATAL, "M_PushMenu: MAX_MENU_DEPTH");
 		m_menudepth++;
 		m_layers[m_menudepth-1].offset = global_menu_xoffset;
+		m_layers[m_menudepth].screen = screen;
 		m_layers[m_menudepth].draw = draw;
 		m_layers[m_menudepth].key = key;
-		m_layers[m_menudepth].width = total_width;
-		if (natural_width == 0)
-			natural_width = total_width;
-		m_layers[m_menudepth].natural_width = natural_width;
 	}
 
 	m_drawfunc = draw;
@@ -361,16 +353,20 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (int k), int total_wid
 	
 	if (m_menudepth > 1)
 	{
+		int prev_natural, width;
+		width = Menu_TrueWidth(*screen);
 		m_layers[m_menudepth].start_x = m_layers[m_menudepth-1].end_x;
-		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + total_width;
-		if (width < viddef.width-m_layers[m_menudepth-1].natural_width)
-			width = viddef.width-m_layers[m_menudepth-1].natural_width;
+		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + width;
+		prev_natural = Menu_NaturalWidth(*m_layers[m_menudepth-1].screen);
+		if (width < viddef.width-prev_natural)
+			width = viddef.width-prev_natural;
 		global_menu_xoffset_target = width; //setup animation
 	}
 	else
 	{
+		int width = Menu_TrueWidth(*screen);
 		m_layers[m_menudepth].start_x = 0;
-		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + total_width;
+		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + width;
 	}
 }
 
@@ -413,7 +409,7 @@ void M_PopMenu (void)
 	{
 		global_menu_xoffset_target = m_layers[m_menudepth].offset-global_menu_xoffset-viddef.width;
 		if (m_menudepth == 1)
-			global_menu_xoffset_target +=  m_layers[m_menudepth].natural_width;
+			global_menu_xoffset_target += Menu_NaturalWidth(*m_layers[m_menudepth].screen);
 /*		global_menu_xoffset_target = -m_layers[m_menudepth+1].width;*/
 /*		if (m_menudepth == 1)*/
 /*			global_menu_xoffset_target = m_layers[m_menudepth].natural_width-viddef.width;*/
@@ -421,7 +417,7 @@ void M_PopMenu (void)
 }
 
 
-const char *Default_MenuKey( menuframework_s *m, int key )
+const char *Default_MenuKey (menuframework_s *m, int key)
 {
 	const char *sound = NULL;
 	menucommon_s *item;
@@ -671,7 +667,7 @@ void CheckMainMenuMouse (void)
 	}
 }
 
-const char *M_Main_Key (int key)
+const char *M_Main_Key (menuframework_s *dummy, int key)
 {
 	switch (key)
 	{
@@ -705,12 +701,15 @@ const char *M_Main_Key (int key)
 void M_Menu_Main_f (void)
 {
 	float widscale;
-
+	static menuframework_s dummy;
+	
 	widscale = (float)(viddef.width)/1024.0;
+	CHASELINK(dummy.rwidth) = viddef.width;
+	dummy.natural_width = 150*widscale;
 	
 	S_StartMenuMusic();
 	global_menu_xoffset_progress = global_menu_xoffset_target = 0;
-	M_PushMenu (M_Main_Draw, M_Main_Key, viddef.width, 150*widscale);
+	M_PushMenu (M_Main_Draw, M_Main_Key, &dummy);
 }
 
 /*
@@ -907,11 +906,9 @@ static void Keys_MenuDraw (void)
 	Menu_Draw( &s_keys_screen );
 }
 
-static const char *Keys_MenuKey( int key )
+static const char *Keys_MenuKey (menuframework_s *screen, int key)
 {
-	menuaction_s *item = ( menuaction_s * ) Menu_ItemAtCursor( &s_keys_menu );
-
-	//menu mouse was (bind_grab)
+	menuaction_s *item = ( menuaction_s * ) Menu_ItemAtCursor (&s_keys_menu);
 
 	if ( bind_grab && !(cursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{
@@ -928,10 +925,10 @@ static const char *Keys_MenuKey( int key )
 		if (key==K_MOUSE1)
 			cursor.buttonclicks[MOUSEBUTTON1] = -1;
 
-		Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
+		Menu_SetStatusBar (&s_keys_menu, "enter to change, backspace to clear");
 		bind_grab = false;
 		
-		Menu_AutoArrange (&s_keys_menu);
+		Menu_AutoArrange (screen);
 		
 		return menu_out_sound;
 	}
@@ -944,14 +941,14 @@ static const char *Keys_MenuKey( int key )
 		M_UnbindCommand( item->generic.localstrings[0] );
 		return menu_out_sound;
 	default:
-		return Default_MenuKey( &s_keys_screen, key );
+		return Default_MenuKey (screen, key);
 	}
 }
 
 void M_Menu_Keys_f (void)
 {
 	Keys_MenuInit();
-	M_PushMenu( Keys_MenuDraw, Keys_MenuKey, Menu_TrueWidth(s_keys_screen), 0);
+	M_PushMenu( Keys_MenuDraw, Keys_MenuKey, &s_keys_screen);
 }
 
 
@@ -1807,10 +1804,13 @@ VIDEO MENU
 
 // TODO: just bring the actual menu portions of vid_menu.c into this file.
 extern menuframework_s s_opengl_screen;
+extern void VID_MenuInit( void );
+extern void VID_MenuDraw( void );
+extern const char *VID_MenuKey (menuframework_s *screen, int key);
 void M_Menu_Video_f (void)
 {
 	VID_MenuInit();
-	M_PushMenu( VID_MenuDraw, VID_MenuKey, Menu_TrueWidth(s_opengl_screen), 0);
+	M_PushMenu( VID_MenuDraw, VID_MenuKey, &s_opengl_screen);
 }
 
 /*
@@ -2004,7 +2004,7 @@ void M_Credits_MenuDraw( void )
 		credits_start_time = cls.realtime;
 }
 
-const char *M_Credits_Key( int key )
+const char *M_Credits_Key (menuframework_s *dummy, int key)
 {
 	if (key == K_ESCAPE)
 	{
@@ -2019,11 +2019,15 @@ const char *M_Credits_Key( int key )
 
 void M_Menu_Credits_f( void )
 {
+	static menuframework_s dummy;
+	
+	CHASELINK(dummy.rwidth) = viddef.width;
+	
 	creditsBuffer = NULL;
 	credits = idcredits;
 	credits_start_time = cls.realtime;
 
-	M_PushMenu( M_Credits_MenuDraw, M_Credits_Key, viddef.width, 0);
+	M_PushMenu( M_Credits_MenuDraw, M_Credits_Key, &dummy);
 }
 
 /*
@@ -2313,16 +2317,10 @@ void IRC_MenuDraw( void )
 	Menu_Draw( &s_irc_screen );
 }
 
-const char *IRC_MenuKey( int key )
-{
-	return Default_MenuKey( &s_irc_menu, key );
-}
-
-
 void M_Menu_IRC_f (void)
 {
 	IRC_MenuInit();
-	M_PushMenu( IRC_MenuDraw, IRC_MenuKey, Menu_TrueWidth (s_irc_screen), 0);
+	M_PushMenu( IRC_MenuDraw, Default_MenuKey, &s_irc_screen);
 }
 
 
@@ -3204,13 +3202,9 @@ void JoinServer_MenuDraw(void)
 	Menu_Draw( &s_serverbrowser_screen );
 	
 	Menu_AutoArrange (&s_serverbrowser_screen);
-	
-	// FIXME HACK just put a link to a menu struct in each layer instead!
-	m_layers[2].width = m_layers[2].natural_width = Menu_TrueWidth(s_serverbrowser_screen);
-	m_layers[2].end_x = m_layers[2].start_x + m_layers[2].width;
 }
 
-const char *JoinServer_MenuKey( int key )
+const char *JoinServer_MenuKey (menuframework_s *screen, int key)
 {
 	if ( key == K_ENTER && serverindex != -1 )
 	{
@@ -3223,13 +3217,13 @@ const char *JoinServer_MenuKey( int key )
 		DeselectServer ();
 		return menu_out_sound;
 	}
-	return Default_MenuKey( &s_serverbrowser_screen, key );
+	return Default_MenuKey (screen, key );
 }
 
 void M_Menu_JoinServer_f (void)
 {
 	JoinServer_MenuInit();
-	M_PushMenu( JoinServer_MenuDraw, JoinServer_MenuKey, Menu_TrueWidth(s_serverbrowser_screen), 0);
+	M_PushMenu( JoinServer_MenuDraw, JoinServer_MenuKey, &s_serverbrowser_screen);
 }
 
 /*
@@ -4197,15 +4191,10 @@ void StartServer_MenuDraw(void)
 	Menu_Draw( &s_startserver_screen );
 }
 
-const char *StartServer_MenuKey( int key )
-{
-	return Default_MenuKey( &s_startserver_menu, key );
-}
-
 void M_Menu_StartServer_f (void)
 {
 	StartServer_MenuInit();
-	M_PushMenu( StartServer_MenuDraw, StartServer_MenuKey, Menu_TrueWidth (s_startserver_screen), 0);
+	M_PushMenu( StartServer_MenuDraw, Default_MenuKey, &s_startserver_screen);
 }
 
 /*
@@ -5163,13 +5152,13 @@ void PConfigAccept (void)
 		s_pmi[i].nskins = 0;
 	}
 }
-const char *PlayerConfig_MenuKey (int key)
+const char *PlayerConfig_MenuKey (menuframework_s *screen, int key)
 {
 
 	if ( key == K_ESCAPE )
 		PConfigAccept();
 
-	return Default_MenuKey( &s_player_config_screen, key );
+	return Default_MenuKey (screen, key);
 }
 
 
@@ -5181,7 +5170,7 @@ void M_Menu_PlayerConfig_f (void)
 		return;
 	}
 	Menu_SetStatusBar( &s_options_menu, NULL );
-	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey, Menu_TrueWidth(s_player_config_screen), 0);
+	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey, &s_player_config_screen);
 }
 
 /*
@@ -5618,7 +5607,7 @@ void M_ThinkRedirect (enum thinkredirect_action action, int key)
 	
 	if (action == think_key && key == K_ESCAPE)
 	{
-		if ((s = m_keyfunc (key)))
+		if ((s = m_keyfunc (m_layers[m_menudepth].screen, key)))
 			S_StartLocalSound (s);
 		return;
 	}
@@ -5632,7 +5621,7 @@ void M_ThinkRedirect (enum thinkredirect_action action, int key)
 	for (i = 1; i < depth_max; i++)
 	{
 		if (m_layers[i+1].end_x-base_offset > viddef.width)
-			base_offset = m_layers[i].end_x-m_layers[i].natural_width;
+			base_offset = m_layers[i].end_x-Menu_NaturalWidth(*m_layers[i].screen);
 	}
 	if (global_menu_xoffset_target > global_menu_xoffset_progress)
 	{
@@ -5651,7 +5640,7 @@ void M_ThinkRedirect (enum thinkredirect_action action, int key)
 	{
 		shove_offset = base_offset;
 		if (m_layers[m_menudepth+1].end_x-shove_offset > viddef.width)
-			shove_offset = m_layers[m_menudepth].end_x-m_layers[m_menudepth].natural_width;
+			shove_offset = m_layers[m_menudepth].end_x-Menu_NaturalWidth(*m_layers[m_menudepth].screen);
 		shove_offset += global_menu_xoffset_progress;
 		if (shove_offset > base_offset)
 			base_offset = shove_offset;
@@ -5690,7 +5679,7 @@ void M_ThinkRedirect (enum thinkredirect_action action, int key)
 			m_layers[i].draw();
 		else if (cursor.x >= global_menu_xoffset && cursor.x <= next_xoffset && i <= old_menudepth)
 		{
-			if (action == think_key && m_layers[i].key != NULL && (s = m_layers[i].key (key)))
+			if (action == think_key && m_layers[i].key != NULL && (s = m_layers[i].key (m_layers[i].screen, key)))
 				S_StartLocalSound( s );
 			else if (action == think_mouse)
 				_M_Think_MouseCursor ();

@@ -39,7 +39,3 @@ void	VID_CheckChanges (void);
 qboolean	VID_GetModeInfo( int *width, int *height, int mode );
 void		VID_MenuInit( void );
 void		VID_NewWindow( int width, int height );
-
-void	VID_MenuInit( void );
-void	VID_MenuDraw( void );
-const char *VID_MenuKey( int );
