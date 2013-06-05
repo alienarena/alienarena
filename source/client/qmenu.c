@@ -1077,8 +1077,8 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 	else
 	{
 		menu->borderalpha -= cls.frametime*2;
-		if (menu->borderalpha < 0.5)
-			menu->borderalpha = 0.5;
+		if (menu->borderalpha < 0.75)
+			menu->borderalpha = 0.75;
 	}
 	
 	width = CHASELINK(menu->lwidth) + CHASELINK(menu->rwidth);
