@@ -1474,6 +1474,33 @@ nobase_nodist_pics_DATA = \
 	data1/pics/m_startserver.tga \
 	data1/pics/m_tactical.tga \
 	data1/pics/m_video.tga \
+	data1/pics/menu/dnarrow.tga \
+	data1/pics/menu/field_cursor.tga \
+	data1/pics/menu/icon_border.tga \
+	data1/pics/menu/m_background.tga \
+	data1/pics/menu/m_bottomcorner.tga \
+	data1/pics/menu/m_bottom.tga \
+	data1/pics/menu/midarrow.tga \
+	data1/pics/menu/m_side.tga \
+	data1/pics/menu/m_topcorner.tga \
+	data1/pics/menu/m_top.tga \
+	data1/pics/menu/on.tga \
+	data1/pics/menu/radio_border.tga \
+	data1/pics/menu/scroll_border_end.tga \
+	data1/pics/menu/scroll_border.tga \
+	data1/pics/menu/scroll_cursor_end.tga \
+	data1/pics/menu/scroll_cursor.tga \
+	data1/pics/menu/slide_border_end.tga \
+	data1/pics/menu/slide_border.tga \
+	data1/pics/menu/slide_cursor_end.tga \
+	data1/pics/menu/slide_cursor.tga \
+	data1/pics/menu/sm_background.tga \
+	data1/pics/menu/sm_bottomcorner.tga \
+	data1/pics/menu/sm_bottom.tga \
+	data1/pics/menu/sm_side.tga \
+	data1/pics/menu/sm_topcorner.tga \
+	data1/pics/menu/sm_top.tga \
+	data1/pics/menu/uparrow.tga \
 	data1/pics/net.tga \
 	data1/pics/num_0.tga \
 	data1/pics/num_1.tga \
