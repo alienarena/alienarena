@@ -100,6 +100,12 @@ static size_t szr; // just for unused result warnings
 
 // common callbacks
 
+static void StrFieldCallback( void *_self )
+{
+	menufield_s *self = (menufield_s *)_self;
+	Cvar_Set( self->generic.localstrings[0], self->buffer);
+}
+
 static void IntFieldCallback( void *_self )
 {
 	menufield_s *self = (menufield_s *)_self;
@@ -4373,6 +4379,7 @@ ADDRESS BOOK MENU
 #define NUM_ADDRESSBOOK_ENTRIES 9
 
 static menuframework_s	s_addressbook_menu;
+static char				s_addressbook_cvarnames[NUM_ADDRESSBOOK_ENTRIES][20];
 static menufield_s		s_addressbook_fields[NUM_ADDRESSBOOK_ENTRIES];
 
 void AddressBook_MenuInit( void )
@@ -4384,20 +4391,18 @@ void AddressBook_MenuInit( void )
 	for ( i = 0; i < NUM_ADDRESSBOOK_ENTRIES; i++ )
 	{
 		cvar_t *adr;
-		char buffer[20];
 
-		Com_sprintf( buffer, sizeof( buffer ), "adr%d", i );
+		Com_sprintf( s_addressbook_cvarnames[i], sizeof( s_addressbook_cvarnames[i] ), "adr%d", i );
 
-		adr = Cvar_Get( buffer, "", CVAR_ARCHIVE );
+		adr = Cvar_Get( s_addressbook_cvarnames[i], "", CVAR_ARCHIVE );
 
 		s_addressbook_fields[i].generic.type			= MTYPE_FIELD;
-		s_addressbook_fields[i].cursor					= 0;
+		s_addressbook_fields[i].generic.callback		= StrFieldCallback;
+		s_addressbook_fields[i].generic.localstrings[0]	= &s_addressbook_cvarnames[i][0];
+		s_addressbook_fields[i].cursor					= strlen (adr->string);
 		s_addressbook_fields[i].generic.visible_length	= 15;
 
 		strcpy( s_addressbook_fields[i].buffer, adr->string );
-
-		//test(this is where we will read in a bunch of servers from our website
-		//strcpy( s_addressbook_fields[4].buffer, "27.0.0.1");
 
 		Menu_AddItem( &s_addressbook_menu, &s_addressbook_fields[i] );
 	}
@@ -4406,32 +4411,7 @@ void AddressBook_MenuInit( void )
 	Menu_Center (&s_addressbook_menu);
 }
 
-const char *AddressBook_MenuKey( int key )
-{
-	if ( key == K_ESCAPE )
-	{
-		int index;
-		char buffer[20];
-
-		for ( index = 0; index < NUM_ADDRESSBOOK_ENTRIES; index++ )
-		{
-			Com_sprintf( buffer, sizeof( buffer ), "adr%d", index );
-			Cvar_Set( buffer, s_addressbook_fields[index].buffer );
-		}
-	}
-	return Default_MenuKey( &s_addressbook_menu, key );
-}
-
-void AddressBook_MenuDraw(void)
-{
-	Menu_Draw( &s_addressbook_menu );
-}
-
-void M_Menu_AddressBook_f(void)
-{
-	AddressBook_MenuInit();
-	M_PushMenu( AddressBook_MenuDraw, AddressBook_MenuKey, Menu_TrueWidth (s_addressbook_menu), 0);
-}
+screen_boilerplate (AddressBook, s_addressbook_menu);
 
 /*
 =============================================================================
