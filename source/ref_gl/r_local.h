@@ -380,13 +380,11 @@ int r_teamColor;
 qboolean r_gotFlag;
 qboolean r_lostFlag;
 
-extern void	Draw_GetPicSize (int *w, int *h, char *name);
-extern void	Draw_Pic (int x, int y, char *name);
-extern void	Draw_ScaledPic (int x, int y, float scale, char *pic);
-extern void	Draw_StretchPic (int x, int y, int w, int h, char *name);
-extern void	Draw_ScaledChar(float x, float y, int num, float scale, int from_menu);
-extern void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu);
-extern void	Draw_Fill (int x, int y, int w, int h, int c);
+extern void	Draw_GetPicSize (int *w, int *h, const char *name);
+extern void	Draw_Pic (float x, float y, const char *name);
+extern void	Draw_ScaledPic (float x, float y, float scale, const char *pic);
+extern void	Draw_StretchPic (float x, float y, float w, float h, const char *name);
+extern void	Draw_Fill (float x, float y, float w, float h, int c);
 extern void	Draw_FadeScreen (void);
 
 extern void	R_BeginFrame( float camera_separation );

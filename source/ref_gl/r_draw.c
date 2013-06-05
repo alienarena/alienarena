@@ -108,105 +108,6 @@ void Draw_InitLocal (void)
 	RefreshFont();
 }
 
-static byte R_FloatToByte( float x )
-{
-	union {
-		float			f;
-		unsigned int	i;
-	} f2i;
-
-	// shift float to have 8bit fraction at base of number
-	f2i.f = x + 32768.0f;
-	f2i.i &= 0x7FFFFF;
-
-	// then read as integer and kill float bits...
-	return ( byte )min( f2i.i, 255 );
-}
-
-void Draw_ScaledChar (float x, float y, int num, float scale, int from_menu)
-
-{
-	int				row, col;
-	float			frow, fcol, size;
-
-	num &= 255;
-
-	if ( (num&127) == 32 )
-		return;		// space
-
-	if (y <= -8)
-		return;			// totally off screen
-
-	row = num>>4;
-	col = num&15;
-
-	frow = row*0.0625;
-	fcol = col*0.0625;
-	size = 0.0625;
-
-	if(from_menu)
-		GL_Bind(menu_chars->texnum);
-	else
-		GL_Bind(draw_chars->texnum);
-
-	qglColor4f( 1,1,1,1 );
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (fcol, frow);
-	qglVertex2f (x, y);
-	qglTexCoord2f (fcol + size, frow);
-	qglVertex2f (x+scale, y);
-	qglTexCoord2f (fcol + size, frow + size);
-	qglVertex2f (x+scale, y+scale);
-	qglTexCoord2f (fcol, frow + size);
-	qglVertex2f (x, y+scale);
-	qglEnd();
-
-}
-void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu)
-{
-	int				row, col;
-	float			frow, fcol, size;
-	byte			colors[4];
-
-	colors[0] = R_FloatToByte( color[0] );
-	colors[1] = R_FloatToByte( color[1] );
-	colors[2] = R_FloatToByte( color[2] );
-	colors[3] = R_FloatToByte( color[3] );
-
-	num &= 255;
-
-	if ( (num&127) == 32 )
-		return;		// space
-
-	if (y <= -8)
-		return;			// totally off screen
-
-	row = num>>4;
-	col = num&15;
-
-	frow = row*0.0625;
-	fcol = col*0.0625;
-	size = 0.0625;
-
-	if(from_menu)
-		GL_Bind(menu_chars->texnum);
-	else
-		GL_Bind(draw_chars->texnum);
-
-	qglColor4ubv( colors );
-	GL_TexEnv(GL_MODULATE);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (fcol, frow);
-	qglVertex2f (x, y);
-	qglTexCoord2f (fcol + size, frow);
-	qglVertex2f (x+scale, y);
-	qglTexCoord2f (fcol + size, frow + size);
-	qglVertex2f (x+scale, y+scale);
-	qglTexCoord2f (fcol, frow + size);
-	qglVertex2f (x, y+scale);
-	qglEnd ();
-	qglColor4f( 1,1,1,1 );
-}
 /*
 =============
 R_RegisterPic
@@ -315,7 +216,7 @@ Draw_GetPicSize
 =============
 */
 
-void Draw_GetPicSize (int *w, int *h, char *pic)
+void Draw_GetPicSize (int *w, int *h, const char *pic)
 {
 	image_t *gl;
 
@@ -333,9 +234,18 @@ void Draw_GetPicSize (int *w, int *h, char *pic)
 /*
 =============
 Draw_AlphaStretchPic
+- Note: If tiling is true, the texture wrapping flags are adjusted to prevent
+        gaps from appearing if the texture is tiled with itself or with other
+        textures. This adjustment is permanent, although it would be easy to
+        change the code to undo it after rendering.
 =============
 */
-void Draw_AlphaStretchImage (int x, int y, int w, int h, image_t *gl, float alphaval)
+enum draw_tiling_s
+{
+	draw_without_tiling,
+	draw_with_tiling
+};
+void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *gl, float alphaval, enum draw_tiling_s tiling)
 {
 	rscript_t *rs = NULL;
 	float	alpha,s,t;
@@ -403,6 +313,11 @@ void Draw_AlphaStretchImage (int x, int y, int w, int h, image_t *gl, float alph
 		VA_SetElem4(col_array[2], 1,1,1,1);
 		VA_SetElem4(col_array[3], 1,1,1,1);
 		GL_Bind (gl->texnum);
+		if (tiling == draw_with_tiling)
+		{
+			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+		}
 		VA_SetElem2(tex_array[0], sl, tl);
 		VA_SetElem2(tex_array[1], sh, tl);
 		VA_SetElem2(tex_array[2], sh, th);
@@ -512,12 +427,7 @@ void Draw_AlphaStretchImage (int x, int y, int w, int h, image_t *gl, float alph
 	}
 }
 
-/*
-=============
-Draw_AlphaStretchPic
-=============
-*/
-void Draw_AlphaStretchPic (int x, int y, int w, int h, char *pic, float alphaval)
+void Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char *pic, float alphaval)
 {
 	image_t *gl;
 
@@ -527,7 +437,25 @@ void Draw_AlphaStretchPic (int x, int y, int w, int h, char *pic, float alphaval
 		return;
 	}
 	
-	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval);
+	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval, draw_with_tiling);
+}
+
+/*
+=============
+Draw_AlphaStretchPic
+=============
+*/
+void Draw_AlphaStretchPic (float x, float y, float w, float h, const char *pic, float alphaval)
+{
+	image_t *gl;
+
+	gl = R_RegisterPic (pic);
+	if (!gl)
+	{
+		return;
+	}
+	
+	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval, draw_without_tiling);
 }
 
 /*
@@ -535,7 +463,7 @@ void Draw_AlphaStretchPic (int x, int y, int w, int h, char *pic, float alphaval
 Draw_StretchPic
 =============
 */
-void Draw_StretchPic (int x, int y, int w, int h, char *pic)
+void Draw_StretchPic (float x, float y, float w, float h, const char *pic)
 {
 	Draw_AlphaStretchPic (x, y, w, h, pic, DIV254BY255);
 }
@@ -545,7 +473,7 @@ void Draw_StretchPic (int x, int y, int w, int h, char *pic)
 Draw_ScaledPic
 =============
 */
-void Draw_ScaledPic (int x, int y, float scale, char *pic)
+void Draw_ScaledPic (float x, float y, float scale, const char *pic)
 {
 	image_t *gl;
 	float w, h;
@@ -559,7 +487,7 @@ void Draw_ScaledPic (int x, int y, float scale, char *pic)
 	w = (float)gl->width*scale;
 	h = (float)gl->height*scale;
 	
-	Draw_AlphaStretchImage (x, y, w, h, gl, DIV254BY255);
+	Draw_AlphaStretchImage (x, y, w, h, gl, DIV254BY255, draw_without_tiling);
 }
 
 /*
@@ -567,7 +495,7 @@ void Draw_ScaledPic (int x, int y, float scale, char *pic)
 Draw_Pic
 =============
 */
-void Draw_Pic (int x, int y, char *pic)
+void Draw_Pic (float x, float y, const char *pic)
 {
 	Draw_ScaledPic (x, y, 1.0, pic);
 }
@@ -577,7 +505,7 @@ void Draw_Pic (int x, int y, char *pic)
 Draw_AlphaStretchPlayerIcon
 =============
 */
-void Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float alphaval)
+void Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, const char *pic, float alphaval)
 {
 	image_t *gl;
 
@@ -587,8 +515,7 @@ void Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float a
 		return;
 	}
 
-	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval);
-	return; 
+	Draw_AlphaStretchImage (x, y, w, h, gl, alphaval, draw_without_tiling);
 }
 
 
@@ -599,7 +526,7 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (int x, int y, int w, int h, int c)
+void Draw_Fill (float x, float y, float w, float h, int c)
 {
 	union
 	{

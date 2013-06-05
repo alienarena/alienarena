@@ -51,8 +51,6 @@ static cvar_t *r_overbrightbits;
 
 static cvar_t *_windowed_mouse;
 
-extern float banneralpha;
-
 extern void M_ForceMenuOff( void );
 
 extern void RS_FreeUnmarked( void );
@@ -69,9 +67,10 @@ MENU INTERACTION
 ====================================================================
 */
 
+menuframework_s			s_opengl_screen;
+
 static menuframework_s	s_opengl_menu;
 static menuframework_s *s_current_menu;
-// static int				s_current_menu_index; // unused
 
 static menulist_s		s_mode_list;
 static menuslider_s		s_tq_slider;
@@ -81,12 +80,6 @@ static menulist_s  		s_fs_box;
 static menulist_s  		s_finish_box;
 static menulist_s		s_vsync_box;
 static menulist_s  		s_windowed_mouse;
-static menuaction_s		s_apply_action;
-static menuaction_s		s_lowest_action;
-static menuaction_s		s_low_action;
-static menuaction_s		s_medium_action;
-static menuaction_s		s_high_action;
-static menuaction_s		s_highest_action;
 static menulist_s		s_bloom_box;
 static menuslider_s		s_bloom_slider;
 static menuslider_s		s_overbright_slider;
@@ -97,13 +90,17 @@ static menulist_s		s_postprocess_box;
 static menulist_s		s_glsl_box;
 static menulist_s		s_vbo_box;
 
-#if 0
-// unused
-static void DriverCallback( void *unused )
-{
-	s_current_menu = &s_opengl_menu;
-}
-#endif
+static menutxt_s		s_separator_presets;
+
+static menuaction_s		s_lowest_action;
+static menuaction_s		s_low_action;
+static menuaction_s		s_medium_action;
+static menuaction_s		s_high_action;
+static menuaction_s		s_highest_action;
+
+static menutxt_s		s_separator_apply;
+
+static menuaction_s		s_apply_action;
 
 static void BrightnessCallback( void *s )
 {
@@ -219,7 +216,7 @@ static void ApplyChanges( void *unused )
 		//check for sane values
 		w = atoi(s_width_field.buffer);
 		if ( w > 2048 )
-	       	{
+		   	{
 			strcpy(s_width_field.buffer, "2048");
 			w = 2048;
 		}
@@ -235,7 +232,7 @@ static void ApplyChanges( void *unused )
 			strcpy(s_height_field.buffer, "1536");
 			h = 1536;
 		}
-	       	else if (h < 480)
+		   	else if (h < 480)
 		{
 			strcpy(s_height_field.buffer, "480");
 			h = 480;
@@ -311,11 +308,6 @@ void VID_MenuInit( void )
 		"on",
 		0
 	};
-	float scale;
-
-	scale = (float)viddef.height/600;
-
-	banneralpha = 0.1;
 
 	if ( !gl_picmip )
 		gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_ARCHIVE );
@@ -345,7 +337,16 @@ void VID_MenuInit( void )
 		gl_usevbo = Cvar_Get( "gl_usevbo", "1", CVAR_ARCHIVE);
 
 	if ( !_windowed_mouse)
+	{
 		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
+	
+		// FIXME: MASSIVE HACK to get around the fact that VID_MenuInit is called
+		// really freaking early in the game's initialization for some reason--
+		// before the OpenGL functions even get loaded! The only reason it's
+		// called so early is to initialize all those cvars, which is how
+		// we detect when not to proceed.
+		return;
+	}
 
 	if(gl_mode->value == -1)
 		s_mode_list.curvalue = 13;
@@ -357,38 +358,33 @@ void VID_MenuInit( void )
 
 	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
 
-	s_opengl_menu.x = viddef.width*0.50 + 40*scale;
+	s_opengl_screen.nitems = 0;
+	
+	s_opengl_menu.generic.type = MTYPE_SUBMENU;
+	s_opengl_menu.navagable = true;
 	s_opengl_menu.nitems = 0;
+	s_opengl_menu.bordertitle = "VIDEO SETTINGS";
+	s_opengl_menu.bordertexture = "menu/m_";
 
 	s_mode_list.generic.type = MTYPE_SPINCONTROL;
 	s_mode_list.generic.name = "video mode";
-	s_mode_list.generic.x = 24*scale;
-	s_mode_list.generic.y = FONTSCALE*10*scale;
 	s_mode_list.itemnames = resolutions;
 
 	s_width_field.generic.type = MTYPE_FIELD;
 	s_width_field.generic.name = "custom width";
 	s_width_field.generic.flags = QMF_NUMBERSONLY;
-	s_width_field.generic.x	= 32*scale;
-	s_width_field.generic.y	= FONTSCALE*30*scale;
 	s_width_field.generic.statusbar = "set custom width";
-	s_width_field.length = 4*scale;
-	s_width_field.visible_length = 4*scale;
+	s_width_field.generic.visible_length = 4;
 	strcpy(s_width_field.buffer, Cvar_VariableString("vid_width"));
 
 	s_height_field.generic.type = MTYPE_FIELD;
 	s_height_field.generic.name = "custom height";
 	s_height_field.generic.flags = QMF_NUMBERSONLY;
-	s_height_field.generic.x	= 32*scale;
-	s_height_field.generic.y	= FONTSCALE*50*scale;
 	s_height_field.generic.statusbar = "set custom height";
-	s_height_field.length = 4*scale;
-	s_height_field.visible_length = 4*scale;
+	s_height_field.generic.visible_length = 4;
 	strcpy(s_height_field.buffer, Cvar_VariableString("vid_height"));
 
 	s_brightness_slider.generic.type	= MTYPE_SLIDER;
-	s_brightness_slider.generic.x	= 24*scale;
-	s_brightness_slider.generic.y	= FONTSCALE*70*scale;
 	s_brightness_slider.generic.name	= "texture brightness";
 	s_brightness_slider.generic.callback = BrightnessCallback;
 	s_brightness_slider.minvalue = 1;
@@ -396,8 +392,6 @@ void VID_MenuInit( void )
 	s_brightness_slider.curvalue = vid_gamma->value * 10;
 
 	s_contrast_slider.generic.type	= MTYPE_SLIDER;
-	s_contrast_slider.generic.x	= 24*scale;
-	s_contrast_slider.generic.y	= FONTSCALE*80*scale;
 	s_contrast_slider.generic.name	= "texture contrast";
 	s_contrast_slider.generic.callback = ContrastCallback;
 	s_contrast_slider.minvalue = 1;
@@ -405,8 +399,6 @@ void VID_MenuInit( void )
 	s_contrast_slider.curvalue = vid_contrast->value * 10;
 
 	s_modulate_slider.generic.type = MTYPE_SLIDER;
-	s_modulate_slider.generic.x	= 24*scale;
-	s_modulate_slider.generic.y	= FONTSCALE*90*scale;
 	s_modulate_slider.generic.name = "lightmap brightness";
 	s_modulate_slider.minvalue = 1;
 	s_modulate_slider.maxvalue = 5;
@@ -414,31 +406,23 @@ void VID_MenuInit( void )
 	s_modulate_slider.curvalue = gl_modulate->value;
 
 	s_fs_box.generic.type = MTYPE_SPINCONTROL;
-	s_fs_box.generic.x	= 24*scale;
-	s_fs_box.generic.y	= FONTSCALE*100*scale;
 	s_fs_box.generic.name	= "fullscreen";
 	s_fs_box.itemnames = yesno_names;
 	s_fs_box.curvalue = vid_fullscreen->value;
 
 	s_bloom_box.generic.type = MTYPE_SPINCONTROL;
-	s_bloom_box.generic.x	= 24*scale;
-	s_bloom_box.generic.y	= FONTSCALE*110*scale;
 	s_bloom_box.generic.name	= "light bloom";
 	s_bloom_box.itemnames = onoff_names;
 	s_bloom_box.generic.callback = BloomSetCallback;
 	s_bloom_box.curvalue = r_bloom->value;
 
 	s_bloom_slider.generic.type	= MTYPE_SLIDER;
-	s_bloom_slider.generic.x		= 24*scale;
-	s_bloom_slider.generic.y		= FONTSCALE*120*scale;
 	s_bloom_slider.generic.name	= "bloom intensity";
 	s_bloom_slider.minvalue = 0;
 	s_bloom_slider.maxvalue = 20;
 	s_bloom_slider.generic.callback = BloomCallback;
 
 	s_overbright_slider.generic.type	= MTYPE_SLIDER;
-	s_overbright_slider.generic.x		= 24*scale;
-	s_overbright_slider.generic.y		= FONTSCALE*130*scale;
 	s_overbright_slider.generic.name	= "overbright bits";
 	s_overbright_slider.minvalue = 1;
 	s_overbright_slider.maxvalue = 3;
@@ -446,32 +430,24 @@ void VID_MenuInit( void )
 		(r_overbrightbits->value == 4.0f) ? 3.0f : r_overbrightbits->value;
 
 	s_tq_slider.generic.type	= MTYPE_SLIDER;
-	s_tq_slider.generic.x		= 24*scale;
-	s_tq_slider.generic.y		= FONTSCALE*140*scale;
 	s_tq_slider.generic.name	= "texture quality";
 	s_tq_slider.minvalue = 0;
 	s_tq_slider.maxvalue = 3;
 	s_tq_slider.curvalue = 3-gl_picmip->value;
 
 	s_postprocess_box.generic.type	= MTYPE_SPINCONTROL;
-	s_postprocess_box.generic.x		= 24*scale;
-	s_postprocess_box.generic.y		= FONTSCALE*160*scale;
 	s_postprocess_box.generic.name	= "post process effects";
 	s_postprocess_box.curvalue = gl_glsl_postprocess->value;
 	s_postprocess_box.itemnames = yesno_names;
 	s_postprocess_box.generic.callback = PostProcessCallback;
 
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
-	s_glsl_box.generic.x		= 24*scale;
-	s_glsl_box.generic.y		= FONTSCALE*170*scale;
 	s_glsl_box.generic.name	= "GLSL shaders";
 	s_glsl_box.curvalue = gl_glsl_shaders->value;
 	s_glsl_box.itemnames = yesno_names;
 	s_glsl_box.generic.callback = GlslCallback;
 
 	s_vbo_box.generic.type	= MTYPE_SPINCONTROL;
-	s_vbo_box.generic.x		= 24*scale;
-	s_vbo_box.generic.y		= FONTSCALE*180*scale;
 	s_vbo_box.generic.name	= "vertex buffer objects";
 	s_vbo_box.curvalue = gl_usevbo->value;
 	s_vbo_box.itemnames = yesno_names;
@@ -479,94 +455,83 @@ void VID_MenuInit( void )
 	s_vbo_box.generic.callback = VboCallback;
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
-	s_finish_box.generic.x	= 24*scale;
-	s_finish_box.generic.y	= FONTSCALE*190*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
-    s_vsync_box.generic.x  = 24*scale;
-    s_vsync_box.generic.y  = FONTSCALE*200*scale;
-    s_vsync_box.generic.name       = "vertical sync";
-    s_vsync_box.curvalue = gl_swapinterval->value;
-    s_vsync_box.itemnames = onoff_names;
+	s_vsync_box.generic.name	   = "vertical sync";
+	s_vsync_box.curvalue = gl_swapinterval->value;
+	s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
-	s_windowed_mouse.generic.x  = 24*scale;
-	s_windowed_mouse.generic.y  = FONTSCALE*210*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
 
 	s_lowest_action.generic.type = MTYPE_ACTION;
 	s_lowest_action.generic.name = "high compatibility";
-	s_lowest_action.generic.x    = 24*scale;
-	s_lowest_action.generic.y    = FONTSCALE*230*scale;
 	s_lowest_action.generic.callback = SetCompatibility;
 	s_lowest_action.generic.statusbar = "use when all other modes fail or run slowly";
 
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "high performance";
-	s_low_action.generic.x    = 24*scale;
-	s_low_action.generic.y    = FONTSCALE*240*scale;
 	s_low_action.generic.callback = SetMaxPerformance;
 	s_low_action.generic.statusbar = "fast rendering, many effects disabled";
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "performance";
-	s_medium_action.generic.x    = 24*scale;
-	s_medium_action.generic.y    = FONTSCALE*250*scale;
 	s_medium_action.generic.callback = SetPerformance;
 	s_medium_action.generic.statusbar = "GLSL per-pixel lighting and postprocess";
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "quality";
-	s_high_action.generic.x    = 24*scale;
-	s_high_action.generic.y    = FONTSCALE*260*scale;
 	s_high_action.generic.callback = SetQuality;
 	s_high_action.generic.statusbar = "GLSL per-pixel effects on all surfaces";
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "high quality";
-	s_highest_action.generic.x    = 24*scale;
-	s_highest_action.generic.y    = FONTSCALE*270*scale;
 	s_highest_action.generic.callback = SetMaxQuality;
 	s_highest_action.generic.statusbar = "GLSL, shadows, light shafts from sun";
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
-	s_apply_action.generic.x    = 24*scale;
-	s_apply_action.generic.y    = FONTSCALE*290*scale;
 	s_apply_action.generic.callback = ApplyChanges;
+	
+	s_separator_presets.generic.type = s_separator_apply.generic.type = MTYPE_TEXT;
 
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_width_field);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_height_field);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_brightness_slider);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_contrast_slider);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_modulate_slider);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_fs_box);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_slider);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_postprocess_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_glsl_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vbo_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_finish_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_windowed_mouse );
+	Menu_AddItem( &s_opengl_menu, &s_mode_list);
+	Menu_AddItem( &s_opengl_menu, &s_width_field);
+	Menu_AddItem( &s_opengl_menu, &s_height_field);
+	Menu_AddItem( &s_opengl_menu, &s_brightness_slider);
+	Menu_AddItem( &s_opengl_menu, &s_contrast_slider);
+	Menu_AddItem( &s_opengl_menu, &s_modulate_slider);
+	Menu_AddItem( &s_opengl_menu, &s_fs_box);
+	Menu_AddItem( &s_opengl_menu, &s_bloom_box );
+	Menu_AddItem( &s_opengl_menu, &s_bloom_slider);
+	Menu_AddItem( &s_opengl_menu, &s_overbright_slider );
+	Menu_AddItem( &s_opengl_menu, &s_tq_slider );
+	Menu_AddItem( &s_opengl_menu, &s_postprocess_box );
+	Menu_AddItem( &s_opengl_menu, &s_glsl_box );
+	Menu_AddItem( &s_opengl_menu, &s_vbo_box );
+	Menu_AddItem( &s_opengl_menu, &s_finish_box );
+	Menu_AddItem( &s_opengl_menu, &s_vsync_box );
+	Menu_AddItem( &s_opengl_menu, &s_windowed_mouse );
 
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_lowest_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_low_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_medium_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_high_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_highest_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_apply_action);
-
-	Menu_Center( &s_opengl_menu );
-	s_opengl_menu.x -= 8;
+	Menu_AddItem( &s_opengl_menu, &s_separator_presets);
+	
+	Menu_AddItem( &s_opengl_menu, &s_lowest_action);
+	Menu_AddItem( &s_opengl_menu, &s_low_action);
+	Menu_AddItem( &s_opengl_menu, &s_medium_action);
+	Menu_AddItem( &s_opengl_menu, &s_high_action);
+	Menu_AddItem( &s_opengl_menu, &s_highest_action);
+	
+	Menu_AddItem( &s_opengl_menu, &s_separator_apply);
+	
+	Menu_AddItem( &s_opengl_menu, &s_apply_action);
+	
+	Menu_AddItem (&s_opengl_screen, &s_opengl_menu);
+	Menu_AutoArrange (&s_opengl_screen);
 }
 
 /*
@@ -576,35 +541,12 @@ VID_MenuDraw
 */
 void VID_MenuDraw (void)
 {
-	int w, h;
-	float scale;
-
-	scale = (float)(viddef.height)/600;
-
-	banneralpha += 0.01;
-	if (banneralpha > 1)
-		banneralpha = 1;
-
 	s_current_menu = &s_opengl_menu;
-	/*
-	** draw the banner
-	*/
-	Draw_StretchPic(0, 0, viddef.width, viddef.height, "menu_back");
-	Draw_GetPicSize( &w, &h, "m_video" );
-	w*=scale;
-	h*=scale;
-	Draw_AlphaStretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 275*scale, w, h, "m_video", banneralpha );
-
-
-	/*
-	** move cursor to a reasonable starting position
-	*/
+	
+	Draw_Fill(global_menu_xoffset, 0, viddef.width, viddef.height, 0);
+	
 	Menu_AdjustCursor( s_current_menu, 1 );
-
-	/*
-	** draw the menu
-	*/
-	Menu_Draw( s_current_menu );
+	Menu_Draw( &s_opengl_screen );
 }
 
 /*
@@ -641,11 +583,13 @@ const char *VID_MenuKey( int key )
 	case K_UPARROW:
 		m->cursor--;
 		Menu_AdjustCursor( m, -1 );
+		return NULL;
 		break;
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
 		m->cursor++;
 		Menu_AdjustCursor( m, 1 );
+		return NULL;
 		break;
 	case K_KP_LEFTARROW:
 	case K_LEFTARROW:
@@ -657,8 +601,7 @@ const char *VID_MenuKey( int key )
 		break;
 	case K_KP_ENTER:
 	case K_ENTER:
-		if ( !Menu_SelectItem( m ) )
-			ApplyChanges( NULL );
+		Menu_SelectItem( m );
 		break;
 	}
 

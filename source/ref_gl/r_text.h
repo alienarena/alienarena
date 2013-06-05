@@ -257,6 +257,10 @@ struct FNT_font_s
 
 	/* The font's height in pixels */
 	unsigned int		size;
+	/* total line height in pixels, including spacing */
+	unsigned int		height;
+	/* theoretical maximum character width in pixels, given current size */
+	unsigned int		width; 
 
 	/* Printing functions */
 	FNT_RawPrint_funct	RawPrint;

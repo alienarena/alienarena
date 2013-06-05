@@ -169,6 +169,8 @@ static qboolean _BMF_GetFont( FNT_font_t font )
 	unsigned int	i;
 
 	assert( sizeof( struct _BMF_font_s ) <= sizeof( struct FNT_font_s ) );
+	
+	font->width = font->height = font->size;
 
 	// Initialise GL lists
 	//
