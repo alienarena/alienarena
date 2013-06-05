@@ -1365,7 +1365,8 @@ void Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 {
 	int i, j;
 	menuframework_s *cur_row = rows;
-	void *cur_cell_p = columns;
+	// char because the measurements in celltype_size are in bytes
+	char *cur_cell_p = columns; 
 	
 	menu->nitems = 0;
 	for (i = 0; i < nrows; i++)
