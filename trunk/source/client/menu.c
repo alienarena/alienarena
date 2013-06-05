@@ -241,12 +241,12 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 
 // Should be useful for most menus
 #define screen_boilerplate(name,struct) \
-void name ## _MenuDraw (void) \
+static void name ## _MenuDraw (void) \
 { \
 	Menu_Draw( &struct ); \
 } \
 \
-const char * name ## _MenuKey( int key ) \
+static const char * name ## _MenuKey( int key ) \
 { \
 	return Default_MenuKey( &struct, key ); \
 } \
@@ -794,7 +794,7 @@ static void M_FindKeysForCommand (const char *command, int *twokeys)
 	twokeys[0] = twokeys[1] = -1;
 	l = strlen(command);
 	count = 0;
-
+	
 	for (j=0 ; j<256 ; j++)
 	{
 		b = keybindings[j];
@@ -817,13 +817,18 @@ static void M_KeyBindingDisplayStr (const char *command, size_t bufsize, char *b
 	M_FindKeysForCommand (command, keys);
 	
 	if (keys[0] == -1)
+	{
 		Com_sprintf (buf, bufsize, "???");
-	else if (keys[1] == -1)
-		Com_sprintf (buf, bufsize, "%s", Key_KeynumToString (keys[0]));
+	}
 	else
-		Com_sprintf (buf, bufsize, "%s  or  %s", 
-									Key_KeynumToString (keys[0]),
-									Key_KeynumToString (keys[1]));
+	{
+		// Key_KeynumToString reuses the same buffer for output sometimes
+		int len;
+		Com_sprintf (buf, bufsize, "%s", Key_KeynumToString (keys[0]));
+		len = strlen(buf);
+		if (keys[1] != -1)
+			Com_sprintf (buf+len, bufsize-len, "  or  %s", Key_KeynumToString (keys[1]));
+	}
 }
 
 static menuvec2_t KeySizeFunc (void *_self, FNT_font_t font)
@@ -876,6 +881,7 @@ static void Keys_MenuInit( void )
 	for (i = 0; i < num_bindable_actions; i++)
 	{
 		s_keys_actions[i].generic.type				= MTYPE_ACTION;
+		s_keys_actions[i].generic.callback			= KeyBindingFunc;
 		s_keys_actions[i].generic.itemdraw			= DrawKeyBindingFunc;
 		s_keys_actions[i].generic.localstrings[0]	= bindnames[i][0];
 		s_keys_actions[i].generic.name				= bindnames[i][1];
@@ -926,11 +932,6 @@ static const char *Keys_MenuKey( int key )
 
 	switch ( key )
 	{
-	case K_KP_ENTER:
-	case K_ENTER:
-	case K_MOUSE1:
-		KeyBindingFunc( item );
-		return menu_in_sound;
 	case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings
 	case K_KP_DEL:
