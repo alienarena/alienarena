@@ -1813,7 +1813,7 @@ void S_Shutdown( void )
 
  ==
  */
-sfx_t *S_FindName( char *name, qboolean create )
+sfx_t *S_FindName( const char *name, qboolean create )
 {
 	sfxlink_t *sfxlink;
 	sfx_t *sfx = NULL;
@@ -2304,7 +2304,7 @@ void S_StartMapMusic( void )
 
  ==
  */
-void S_StartLocalSound( char *qfilename )
+void S_StartLocalSound( const char *qfilename )
 {
 	sfx_t *sfx;
 	src_t *src;

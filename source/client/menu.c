@@ -765,7 +765,7 @@ static menuframework_s	s_keys_screen;
 static menuframework_s	s_keys_menu;
 static menuaction_s		s_keys_actions[num_bindable_actions];
 
-static void M_UnbindCommand (char *command)
+static void M_UnbindCommand (const char *command)
 {
 	int		j;
 	int		l;
@@ -3891,7 +3891,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		// should make it into the mapnames list.
 		for (j = 0; map_prefixes[s_rules_box.curvalue][j]; j++)
 		{
-			char *curpfx = map_prefixes[s_rules_box.curvalue][j];
+			const char *curpfx = map_prefixes[s_rules_box.curvalue][j];
 			if (!strncmp (curpfx, shortname, strlen(curpfx)))
 			{
 				// matched an allowable prefix
@@ -3954,7 +3954,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 			// should make it into the mapnames list.
 			for (j = 0; map_prefixes[s_rules_box.curvalue][j]; j++)
 			{
-				char *curpfx = map_prefixes[s_rules_box.curvalue][j];
+				const char *curpfx = map_prefixes[s_rules_box.curvalue][j];
 				if (!strncmp (curpfx, curMap, strlen(curpfx)))
 				{
 					// matched an allowable prefix

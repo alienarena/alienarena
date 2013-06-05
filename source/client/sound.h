@@ -25,7 +25,7 @@ void S_Shutdown (void);
 
 // if origin is NULL, the sound will be dynamically sourced from the entity
 void S_StartSound (vec3_t origin, int entnum, int entchannel, struct sfx_s *sfx, float fvol,  float attenuation, float timeofs);
-void S_StartLocalSound (char *s);
+void S_StartLocalSound (const char *s);
 void S_StartMusic (char *s);
 void S_StartMenuMusic( void );
 void S_StartMapMusic( void );
@@ -41,7 +41,7 @@ void S_BeginRegistration (void);
 struct sfx_s *S_RegisterSound (char *sample);
 void S_EndRegistration (void);
 
-struct sfx_s *S_FindName (char *name, qboolean create);
+struct sfx_s *S_FindName (const char *name, qboolean create);
 
 void S_UpdateDopplerFactor( void );
 
