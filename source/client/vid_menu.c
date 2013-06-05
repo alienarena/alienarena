@@ -554,12 +554,12 @@ void VID_MenuDraw (void)
 VID_MenuKey
 ================
 */
-const char *VID_MenuKey( int key )
+const char *VID_MenuKey (menuframework_s *screen, int key)
 {
 	extern void M_PopMenu( void );
 
 	menucommon_s *item;
-	menuframework_s *m = s_current_menu;
+	menuframework_s *m = &s_opengl_menu;
 	static const char *sound = "misc/menu1.wav";
 
 	if ( m )
