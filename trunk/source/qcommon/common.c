@@ -43,8 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_NUM_ARGVS	50
 
 #ifndef DEDICATED_ONLY
-extern void S_StartLocalSound (char *sound);
-extern void S_StartMusic ( char * sound );
 extern void S_StartMenuMusic( void );
 #endif
 
@@ -1182,7 +1180,6 @@ void COM_ClearArgv (int arg)
 
 /*
 ================
-
 COM_InitArgv
 ================
 */
