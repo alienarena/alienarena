@@ -120,7 +120,7 @@ static menuvec2_t PicSizeFunc (void *_self, FNT_font_t font)
 static void PicDrawFunc (void *_self, FNT_font_t font)
 {
 	int x, y;
-	menuitem_s *self = (menucommon_s *)_self;
+	menuitem_s *self = (menuitem_s *)_self;
 	
 	x = Item_GetX (*self) + self->generic.localints[2];
 	y = Item_GetY (*self);
