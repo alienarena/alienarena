@@ -896,7 +896,7 @@ static menuvec2_t Menu_GetBorderSize (menuframework_s *s)
 	
 	if (s->bordertexture != NULL)
 	{
-		snprintf (topcorner_name, MAX_QPATH, "%stopcorner.tga", s->bordertexture);
+		Com_sprintf (topcorner_name, MAX_QPATH, "%stopcorner.tga", s->bordertexture);
 		Draw_GetPicSize (&ret.x, &ret.y, topcorner_name );
 		ret.x = (int)((float)ret.x/64.0*(float)font->size*4.0);
 		ret.y = (int)((float)ret.y/64.0*(float)font->size*4.0);
@@ -921,12 +921,12 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 
 	font = FNT_AutoGet( CL_menuFont );
 	
-	snprintf (topcorner_name, MAX_QPATH, "%stopcorner.tga", prefix);
-	snprintf (bottomcorner_name, MAX_QPATH, "%sbottomcorner.tga", prefix);
-	snprintf (top_name, MAX_QPATH, "%stop.tga", prefix);
-	snprintf (bottom_name, MAX_QPATH, "%sbottom.tga", prefix);
-	snprintf (side_name, MAX_QPATH, "%sside.tga", prefix);
-	snprintf (background_name, MAX_QPATH, "%sbackground.tga", prefix);
+	Com_sprintf (topcorner_name, MAX_QPATH, "%stopcorner.tga", prefix);
+	Com_sprintf (bottomcorner_name, MAX_QPATH, "%sbottomcorner.tga", prefix);
+	Com_sprintf (top_name, MAX_QPATH, "%stop.tga", prefix);
+	Com_sprintf (bottom_name, MAX_QPATH, "%sbottom.tga", prefix);
+	Com_sprintf (side_name, MAX_QPATH, "%sside.tga", prefix);
+	Com_sprintf (background_name, MAX_QPATH, "%sbackground.tga", prefix);
 	
 	// assume all tiles are the same size
 	Draw_GetPicSize (&_tile_w, &_tile_h, topcorner_name );

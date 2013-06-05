@@ -2307,7 +2307,6 @@ extern unsigned sys_frame_time;   // TODO: ditto
  * r_frametime :
  *  unclamped float seconds since last render. Used in particle rendering.
  *
-
  * cl.time :
  *  critical global timer used in various places.
  *  clamped to [cl.frame.servertime-100, cl.frame.servertime] in CL_ParseFrame()
