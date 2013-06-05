@@ -342,7 +342,7 @@ static qboolean _TTF_LoadFont( FNT_font_t font )
 	unsigned int		n_lines;
 	unsigned int		i;
 	unsigned int		texture_height;
-
+	
 	// Load TTF face information
 	error = FT_New_Memory_Face( _TTF_library , faceInt->data , faceInt->size , 0 , &face );
 	if ( error != 0 ) {
@@ -407,8 +407,10 @@ static qboolean _TTF_LoadFont( FNT_font_t font )
 		if ( temp > max_descent )
 			max_descent = temp;
 	}
-	fontInt->height = max_ascent + max_descent;
+	
+	font->height = fontInt->height = max_ascent + max_descent;
 
+	font->width = 0;
 	// Get kerning information
 	if ( FT_HAS_KERNING( face ) ) {
 		for ( i = 0 ; i < TTF_CHARACTERS ; i ++ ) {
@@ -417,12 +419,17 @@ static qboolean _TTF_LoadFont( FNT_font_t font )
 				FT_Vector kvec;
 				FT_Get_Kerning( face , glyphs[ i ] , glyphs[ j ] , FT_KERNING_DEFAULT , &kvec );
 				fontInt->kerning[ i ][ j ] = kvec.x >> 6;
+				if (fontInt->kerning[i][j] + fontInt->widths[i] > font->width)
+					font->width = fontInt->kerning[i][j] + fontInt->widths[i];
+				if (fontInt->kerning[i][j] + fontInt->widths[j] > font->width)
+					font->width = fontInt->kerning[i][j] + fontInt->widths[j];
 			}
 		}
 	} else {
+		font->width = font->size;
 		memset( fontInt->kerning , 0 , sizeof( fontInt->kerning ) );
 	}
-
+	
 	// Compute texture height
 	texture_height = ( max_ascent + max_descent) * n_lines;
 	for ( i = 16 ; i <= 4096 ; i <<= 1 ) {

@@ -615,6 +615,7 @@ LOGINSTATE currLoginState;
 //
 
 void getLatestGameVersion( void );
+qboolean serverIsOutdated (char *server_vstring);
 char* VersionUpdateNotice( void );
 
 
@@ -706,23 +707,29 @@ qboolean server_is_team; //used for player visibility light code
 #define MAX_PLAYERS 64
 typedef struct _SERVERDATA {
 
-	char szHostName[64];
-	char szMapName[64];
+	char szHostName[48];
+	char szMapName[24];
 	char szAdmin[64];
 	char szVersion[64];
 	char szWebsite[64];
 	char maxClients[32];
 	char fraglimit[32];
 	char timelimit[32];
-	char playerInfo[MAX_PLAYERS][80];
+#define SVDATA_PLAYERINFO_NAME 0
+#define SVDATA_PLAYERINFO_SCORE 1
+#define SVDATA_PLAYERINFO_PING 2
+#define SVDATA_PLAYERINFO 3
+#define SVDATA_PLAYERINFO_COLSIZE 80
+	char playerInfo[MAX_PLAYERS][SVDATA_PLAYERINFO][SVDATA_PLAYERINFO_COLSIZE];
 	int	 playerRankings[MAX_PLAYERS];
 	char skill[32];
 	int players;
+	char szPlayers[11];
 	int ping;
+	char szPing[6];
 	netadr_t local_server_netadr;
 	char serverInfo[256];
 	char modInfo[64];
-	char szRawName[64];
 	qboolean joust; //for client-side prediction
 
 } SERVERDATA;
@@ -747,13 +754,6 @@ void CL_DrawInventory (void);
 // cl_pred.c
 //
 void CL_PredictMovement (void);
-
-#if id386
-void x86_TimerStart( void );
-void x86_TimerStop( void );
-void x86_TimerInit( unsigned long smallest, unsigned longest );
-unsigned long *x86_TimerGetHistogram( void );
-#endif
 
 //
 // cl_view, cl_scrn
@@ -811,6 +811,7 @@ void CL_ShutdownHttpDownload(void);
 //
 
 extern FNT_auto_t	CL_gameFont;
+extern FNT_auto_t	CL_menuFont;
 extern FNT_auto_t	CL_centerFont;
 extern FNT_auto_t	CL_consoleFont;
 

@@ -220,6 +220,8 @@ FNT_auto_t			CL_centerFont;
 static struct FNT_auto_s	_CL_centerFont;
 FNT_auto_t			CL_consoleFont;
 static struct FNT_auto_s	_CL_consoleFont;
+FNT_auto_t			CL_menuFont;
+static struct FNT_auto_s	_CL_menuFont;
 
 
 //======================================================================
@@ -2305,6 +2307,7 @@ extern unsigned sys_frame_time;   // TODO: ditto
  * r_frametime :
  *  unclamped float seconds since last render. Used in particle rendering.
  *
+
  * cl.time :
  *  critical global timer used in various places.
  *  clamped to [cl.frame.servertime-100, cl.frame.servertime] in CL_ParseFrame()
@@ -2714,6 +2717,12 @@ void CL_Init (void)
 	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "freemono" , CVAR_ARCHIVE );
 	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_consoleFont );
+	
+	CL_menuFont = &_CL_menuFont;
+	FNT_AutoInit( CL_menuFont , "default" , 0 , 48 , 8 , 48 );
+	CL_menuFont->faceVar = Cvar_Get( "fnt_menu" , "freesans" , CVAR_ARCHIVE );
+	CL_menuFont->sizeVar = Cvar_Get( "fnt_menu_size" , "0" , CVAR_ARCHIVE );
+	FNT_AutoRegister( CL_menuFont );
 
 	// all archived variables will now be loaded
 

@@ -109,6 +109,34 @@ static qboolean parse_version( const char* vstring, struct dotted_triple *versio
 }
 
 /**
+ *  Compare dotted triple structs
+ * 
+ * @param version1		Dotted triple struct
+ * @param version2		Dotted triple struct
+ * @return				True if version2 newer than version1, false otherwise
+ *
+ */ 
+static qboolean compare_version (const struct dotted_triple *version1, const struct dotted_triple *version2)
+{
+	if ( version1->major < version2->major )
+	{
+		return true;
+	}
+	if ( version1->major == version2->major 
+		&& version1->minor < version2->minor )
+	{
+		return true;
+	}
+	if ( version1->major == version2->major 
+		&& version1->minor == version2->minor 
+		&& version1->point < version2->point )
+	{
+		return true;
+	}
+	return false;
+}
+
+/**
  *  generate a version update notice, or nul the string
  *  see VersionUpdateNotice() below
  * 
@@ -126,21 +154,7 @@ static void update_version( const char* vstring )
 		valid_version = parse_version( VERSION, &this_version );
 		if ( valid_version )
 		{ /* local should always be valid */
-			if ( this_version.major < latest_version.major )
-			{
-				update_message = true;
-			}
-			else if ( this_version.major == latest_version.major 
-				&& this_version.minor < latest_version.minor )
-			{
-				update_message = true;
-			}
-			else if ( this_version.major == latest_version.major 
-				&& this_version.minor == latest_version.minor 
-				&& this_version.point < latest_version.point )
-			{
-				update_message = true;
-			}
+			update_message = compare_version (&this_version, &latest_version);
 		}
 	}
 	if ( update_message )
@@ -232,4 +246,35 @@ char* VersionUpdateNotice( void )
 		return NULL;
 	else
 		return update_notice;		
+}
+
+/**
+ *
+ * @param server_vstring	the version string from a remote game server
+ * @returns True if the the server is out of date or if the string is malformed, false otherwise.
+ *
+ * NOTE: getLatestGameVersion has to have been called at least once before
+ * calling this!
+ */
+qboolean serverIsOutdated (char *server_vstring){
+	char *end;
+	struct dotted_triple server_version;
+	qboolean valid_version;
+	
+	// have to get rid of everything after the first space
+	memset( versionstr, 0, sizeof(versionstr) );
+	
+	strncpy (versionstr, server_vstring, sizeof(versionstr));
+	
+	end = strchr (versionstr, ' ');
+	if (end != NULL)
+		*end = '\0';
+	
+	valid_version = parse_version( versionstr, &server_version );
+	
+	// assume it's out of date if the version string is malformed
+	if (!valid_version)
+		return true;
+	
+	return compare_version (&server_version, &latest_version);
 }

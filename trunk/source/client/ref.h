@@ -348,12 +348,6 @@ extern	vec3_t	r_origin;
 //cursor - psychospaz
 #define MENU_CURSOR_BUTTON_MAX 2
 
-#define MENUITEM_ACTION		1
-#define MENUITEM_ROTATE		2
-#define MENUITEM_SLIDER		3
-#define MENUITEM_TEXT		4
-#define MENUITEM_VERTSLIDER 5
-
 typedef struct
 {
 	//only 2 buttons for menus
@@ -368,6 +362,12 @@ typedef struct
 	int			menuitemtype;
 	void		*menuitem;
 	void		*menu;
+	
+	//this is whatever menuitem it was on when a click-and-drag maneuver was
+	//begun.
+	void		*click_menuitem;
+	int			click_menuitemtype;
+	qboolean	suppress_drag; //started clicking with nothing selected
 
 	//coords
 	int		x;
@@ -377,15 +377,14 @@ typedef struct
 	int		oldy;
 } cursor_t;
 
-void	Draw_GetPicSize (int *w, int *h, char *name);
-void	Draw_Pic (int x, int y, char *name);
-void	Draw_ScaledPic (int x, int y, float scale, char *pic);
-void	Draw_StretchPic (int x, int y, int w, int h, char *name);
-void	Draw_AlphaStretchPic (int x, int y, int w, int h, char *name, float alphaval);
-void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float alphaval);
-void	Draw_ScaledChar (float x, float y, int num, float scale, int from_menu);
-void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu);
-void	Draw_Fill (int x, int y, int w, int h, int c);
+void	Draw_GetPicSize (int *w, int *h, const char *name);
+void	Draw_Pic (float x, float y, const char *name);
+void	Draw_ScaledPic (float x, float y, float scale, const char *pic);
+void	Draw_StretchPic (float x, float y, float w, float h, const char *name);
+void	Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char *name, float alphaval);
+void	Draw_AlphaStretchPic (float x, float y, float w, float h, const char *name, float alphaval);
+void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, const char *pic, float alphaval);
+void	Draw_Fill (float x, float y, float w, float h, int c);
 void	Draw_FadeScreen (void);
 
 void	R_BeginFrame( float camera_separation );
