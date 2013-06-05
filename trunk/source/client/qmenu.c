@@ -76,13 +76,29 @@ int Menu_PredictSize (const char *str)
 
 void Action_Draw (menuaction_s *a, FNT_font_t font)
 {
+	int text_x;
 	const float *color;
 	unsigned int align, cmode;
 	
+	text_x = Item_GetX (*a);
+	
 	if ( a->generic.flags & QMF_LEFT_JUSTIFY )
+	{
 		align = FNT_ALIGN_LEFT;
+	}
 	else
-		align = FNT_ALIGN_RIGHT;
+	{
+		if (a->generic.parent->horizontal)
+		{
+			align = FNT_ALIGN_RIGHT;
+			text_x += LCOLUMN_OFFSET;
+		}
+		else
+		{
+			align = FNT_ALIGN_LEFT;
+			text_x = a->generic.parent->x;
+		}
+	}
 	
 	color = dark_color;
 	
@@ -92,8 +108,7 @@ void Action_Draw (menuaction_s *a, FNT_font_t font)
 		cmode = FNT_CMODE_QUAKE_SRS;
 	
 	Menu_DrawString_Core (
-		Item_GetX (*a) + LCOLUMN_OFFSET,
-		Item_GetY (*a),
+		text_x, Item_GetY (*a),
 		a->generic.name, cmode, align, color
 	);
 	
@@ -119,7 +134,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	menu_box.y = y;
 	menu_box.height = 0;
 	menu_box.width = f->generic.visible_length*font->width;
-	FNT_BoundedPrint (font, f->buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, dark_color);
+	FNT_BoundedPrint (font, f->buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
 	
 	if ( Menu_ItemAtCursor( f->generic.parent ) == f )
 	{
@@ -829,49 +844,37 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		Draw_Fill (Item_GetX (*item), Item_GetY (*item), CHASELINK(sm->lwidth) + CHASELINK(sm->rwidth), Menu_TrueHeight (*sm), 4);
 		SubMenu_Draw (sm, font);
 	}
-	else if ( item && (item->generic.type == MTYPE_SPINCONTROL) )
+	else if ( item )
 	{
+		// FIXME copy and paste!
 		unsigned int align;
-		int x = Item_GetX (*item);
+		int text_x;
+		
+		text_x = Item_GetX (*item);
+		
 		if ( item->generic.flags & QMF_LEFT_JUSTIFY)
 		{
 			align = FNT_ALIGN_LEFT;
 		}
 		else
 		{
-			align = FNT_ALIGN_RIGHT;
-			x += LCOLUMN_OFFSET;
+			if (item->generic.parent->horizontal)
+			{
+				align = FNT_ALIGN_RIGHT;
+				text_x += LCOLUMN_OFFSET;
+			}
+			else
+			{
+				align = FNT_ALIGN_LEFT;
+				text_x = item->generic.parent->x;
+			}
 		}
-		Menu_DrawString_Core (
-			x, Item_GetY (*item), item->generic.name,
-			FNT_CMODE_TWO, align, light_color
-		);
-	}
-	else if ( item && item->generic.type == MTYPE_ACTION ) //change to a "highlite"
-	{
-		unsigned int align;
-		if ( item->generic.flags & QMF_LEFT_JUSTIFY)
-			align = FNT_ALIGN_LEFT;
-		else
-			align = FNT_ALIGN_RIGHT;
+	
 		if(item->generic.name)
 			Menu_DrawString_Core (
-				Item_GetX (*item) + LCOLUMN_OFFSET, Item_GetY (*item), item->generic.name,
+				text_x, Item_GetY (*item), item->generic.name,
 				FNT_CMODE_TWO, align, light_color
 			);
-	}
-	else if ( item ) //change to a "highlite"
-	{
-		if ( item->generic.flags & QMF_LEFT_JUSTIFY )
-		{
-			if(item->generic.name)
-				Menu_DrawStringDark(Item_GetX (*item) + LCOLUMN_OFFSET, Item_GetY (*item), item->generic.name);
-		}
-		else
-		{
-			if(item->generic.name)
-				Menu_DrawStringR2L(Item_GetX (*item) + LCOLUMN_OFFSET, Item_GetY (*item), item->generic.name);
-		}
 	}
 
 	if ( item )
@@ -1252,9 +1255,7 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 
 	charscale = font->size;
 	
-	Menu_DrawStringR2LDark( Item_GetX (*s) + LCOLUMN_OFFSET,
-					Item_GetY (*s),
-					s->generic.name );
+	Action_Draw ((menuaction_s *)s, font);
 	
 	x = Item_GetX (*s) + RCOLUMN_OFFSET;
 	
@@ -1321,8 +1322,16 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		}
 		else
 		{
-			align = FNT_ALIGN_RIGHT;
-			text_x += LCOLUMN_OFFSET;
+			if (s->generic.parent->horizontal)
+			{
+				align = FNT_ALIGN_RIGHT;
+				text_x += LCOLUMN_OFFSET;
+			}
+			else
+			{
+				align = FNT_ALIGN_LEFT;
+				text_x = s->generic.parent->x;
+			}
 		}
 			
 		Menu_DrawString_Core (
