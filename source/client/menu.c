@@ -4527,6 +4527,130 @@ PLAYER CONFIG MENU
 =============================================================================
 */
 
+typedef struct 
+{
+	menucommon_s generic;
+	const char *name;
+	const char *skin;
+	int w, h;
+	float mframe, yaw;
+} menumodel_s;
+
+static menuvec2_t PlayerModelSizeFunc (void *_self, FNT_font_t font)
+{
+	menuvec2_t ret;
+	menumodel_s *self = (menumodel_s*) _self;
+	
+	ret.x = (self->w+2)*font->size;
+	ret.y = (self->h+2)*font->size;
+	
+	return ret;
+}
+
+static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
+{
+	refdef_t refdef;
+	char scratch[MAX_OSPATH];
+	FILE *modelfile;
+	int i;
+	extern float CalcFov( float fov_x, float w, float h );
+	float scale;
+	entity_t entity[3];
+	menumodel_s *self = (menumodel_s*) _self;
+	
+	self->mframe += cls.frametime*150;
+	if ( self->mframe > 390 )
+		self->mframe = 10;
+	if ( self->mframe < 10)
+		self->mframe = 10;
+
+	self->yaw += cls.frametime*50;
+	if (self->yaw > 360)
+		self->yaw = 0;
+
+	scale = (float)(viddef.height)/600;
+	
+	memset( &refdef, 0, sizeof( refdef ) );
+	
+	refdef.width = self->w*font->size;
+	refdef.height = self->h*font->size;
+	refdef.x = Item_GetX(*self);
+	refdef.y = Item_GetY(*self);
+	refdef.x -= refdef.width;
+	
+	Menu_DrawBox (refdef.x, refdef.y, refdef.width, refdef.height, 1, NULL, "menu/sm_");
+	
+	refdef.width -= font->size;
+	refdef.height -= font->size;
+	
+	refdef.fov_x = 50;
+	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
+	refdef.time = cls.realtime*0.001;
+	
+	memset( &entity, 0, sizeof( entity ) );
+
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", self->name );
+	entity[0].model = R_RegisterModel( scratch );
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.jpg", self->name, self->skin );
+	entity[0].skin = R_RegisterSkin( scratch );
+	entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", self->name );
+	entity[1].model = R_RegisterModel( scratch );
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.tga", self->name );
+	entity[1].skin = R_RegisterSkin( scratch );
+	entity[1].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+	
+	refdef.num_entities = 2;
+
+	//if a helmet or other special device
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", self->name );
+	FS_FOpenFile( scratch, &modelfile );
+	if ( modelfile )
+	{
+		fclose(modelfile);
+		
+		entity[2].model = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", self->name );
+		entity[2].skin = R_RegisterSkin( scratch );
+		entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
+		entity[2].alpha = 0.4;
+		
+		refdef.num_entities = 3;
+	}
+
+	for (i = 0; i < refdef.num_entities; i++)
+	{
+		float len, len2; 
+		
+		entity[i].frame = (int)(self->mframe/10);
+		entity[i].oldframe = (int)(self->mframe/10) - 1;
+		entity[i].backlerp = 1.0;
+		entity[i].angles[1] = (int)self->yaw;
+		
+		VectorSet (entity[i].origin, 70, 0, 0);
+		
+		len = VectorLength (entity[i].origin);
+		entity[i].origin[1] -= (refdef.x+refdef.width/2-viddef.width/2)/(4*scale);
+		entity[i].origin[2] -= (refdef.y+refdef.height/2-viddef.height/2)/(4*scale);
+		len2 = VectorLength (entity[i].origin);
+		
+		vectoangles (entity[i].origin, refdef.viewangles);
+		
+		entity[i].origin[2] -= 5;
+		
+		VectorScale (entity[i].origin, len/len2, entity[i].origin);
+		VectorCopy (entity[i].origin, entity[i].oldorigin);
+	}
+		
+	refdef.areabits = 0;
+	refdef.entities = entity;
+	refdef.lightstyles = 0;
+	refdef.rdflags = RDF_NOWORLDMODEL;
+	
+	R_RenderFramePlayerSetup( &refdef );
+}
+
 static const char *download_option_names[][2] = 
 {
 	{"allow_download",			"download missing files"},
@@ -4537,7 +4661,9 @@ static const char *download_option_names[][2] =
 };
 #define num_download_options (sizeof(download_option_names)/sizeof(download_option_names[0]))
 static menulist_s s_download_boxes[num_download_options];
-	
+
+static menuframework_s	s_player_config_screen;
+
 static menuframework_s	s_player_config_menu;
 static menufield_s		s_player_name_field;
 static menufield_s		s_player_password_field;
@@ -4549,6 +4675,8 @@ static menuitem_s   	s_player_thumbnail;
 static menulist_s		s_player_handedness_box;
 static menulist_s		s_player_rate_box;
 static menufield_s		s_player_fov_field;
+
+static menumodel_s		s_player_skin_preview;
 
 #define MAX_DISPLAYNAME 16
 #define MAX_PLAYERMODELS 1024
@@ -4852,11 +4980,10 @@ qboolean PlayerConfig_MenuInit( void )
 		}
 	}
 
-	s_player_config_menu.x = viddef.width / 2 - 120;
-	s_player_config_menu.y = viddef.height / 2 - 158*scale;
-	s_player_config_menu.nitems = 0;
-	s_player_config_menu.bordertitle = "PLAYER SETUP";
-	s_player_config_menu.bordertexture = "menu/m_";
+	s_player_config_screen.nitems = 0;
+	s_player_config_screen.horizontal = true;
+	
+	setup_window (s_player_config_screen, s_player_config_menu, "PLAYER SETUP");
 
 	s_player_name_field.generic.type = MTYPE_FIELD;
 	s_player_name_field.generic.name = "name";
@@ -4959,9 +5086,15 @@ qboolean PlayerConfig_MenuInit( void )
 
 	Menu_AddItem( &s_player_config_menu, &s_player_rate_box );
 	
-	Menu_AutoArrange (&s_player_config_menu);
-	Menu_Center (&s_player_config_menu);
-	s_player_config_menu.x = s_player_config_menu.y = 64;
+	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
+	s_player_skin_preview.generic.namesizecallback = PlayerModelSizeFunc;
+	s_player_skin_preview.generic.namedraw = PlayerModelDrawFunc;
+	s_player_skin_preview.h = 36;
+	s_player_skin_preview.w = 28;
+	
+	Menu_AddItem (&s_player_config_screen, &s_player_skin_preview);
+	
+	Menu_AutoArrange (&s_player_config_screen);
 
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
@@ -4978,109 +5111,8 @@ qboolean PlayerConfig_MenuInit( void )
 	return true;
 }
 
-typedef struct 
-{
-	menucommon_s generic;
-	const char *name;
-	const char *skin;
-	float w, h;
-	float mframe, yaw;
-} menuplayermodel_s;
-
-void PlayerModelPreview (const char *name, const char *skin, float x, float y, float w, float h, float mframe, float yaw)
-{
-	refdef_t refdef;
-	char scratch[MAX_OSPATH];
-	FILE *modelfile;
-	int i;
-	extern float CalcFov( float fov_x, float w, float h );
-	float scale;
-	entity_t entity[3];
-
-	scale = (float)(viddef.height)/600;
-	
-	memset( &refdef, 0, sizeof( refdef ) );
-	
-	if (w == 0)
-		w = h / 1.25;
-	else if (h == 0)
-		h = w * 1.25;
-	
-	refdef.x = x;
-	refdef.y = y;
-	refdef.width = w;
-	refdef.height = h;
-	refdef.fov_x = 45;
-	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
-	refdef.time = cls.realtime*0.001;
-	
-	memset( &entity, 0, sizeof( entity ) );
-
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", name );
-	entity[0].model = R_RegisterModel( scratch );
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.jpg", name, skin );
-	entity[0].skin = R_RegisterSkin( scratch );
-	entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
-
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", name );
-	entity[1].model = R_RegisterModel( scratch );
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.tga", name );
-	entity[1].skin = R_RegisterSkin( scratch );
-	entity[1].flags = RF_FULLBRIGHT | RF_MENUMODEL;
-	
-	refdef.num_entities = 2;
-
-	//if a helmet or other special device
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", name );
-	FS_FOpenFile( scratch, &modelfile );
-	if ( modelfile )
-	{
-		fclose(modelfile);
-		
-		entity[2].model = R_RegisterModel( scratch );
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", name );
-		entity[2].skin = R_RegisterSkin( scratch );
-		entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
-		entity[2].alpha = 0.4;
-		
-		refdef.num_entities = 3;
-	}
-
-	for (i = 0; i < refdef.num_entities; i++)
-	{
-		float len, len2; 
-		
-		entity[i].frame = (int)(mframe/10);
-		entity[i].oldframe = (int)(mframe/10) - 1;
-		entity[i].backlerp = 1.0;
-		entity[i].angles[1] = (int)yaw;
-		
-		VectorSet (entity[i].origin, 80, 0, -2);
-		
-		len = VectorLength (entity[i].origin);
-		entity[i].origin[1] -= (refdef.x+refdef.width/2-viddef.width/2)/(4*scale);
-		entity[i].origin[2] -= (refdef.y+refdef.height/2-viddef.height/2)/(4*scale);
-		len2 = VectorLength (entity[i].origin);
-		
-		vectoangles (entity[i].origin, refdef.viewangles);
-		
-		VectorScale (entity[i].origin, len/len2, entity[i].origin);
-		VectorCopy (entity[i].origin, entity[i].oldorigin);
-	}
-		
-	refdef.areabits = 0;
-	refdef.entities = entity;
-	refdef.lightstyles = 0;
-	refdef.rdflags = RDF_NOWORLDMODEL;
-	
-	R_RenderFramePlayerSetup( &refdef );
-}
-
-
 void PlayerConfig_MenuDraw( void )
 {
-	static float mframe, yaw;
-	
 	if(!strcmp(s_player_name_field.buffer, "Player"))
 		pNameUnique = false;
 	else
@@ -5091,25 +5123,9 @@ void PlayerConfig_MenuDraw( void )
 
 	if ( s_pmi[s_player_model_box.curvalue].skindisplaynames )
 	{
-		mframe += cls.frametime*150;
-		if ( mframe > 390 )
-			mframe = 10;
-		if ( mframe < 10)
-			mframe = 10;
-
-		yaw += cls.frametime*50;
-		if (yaw > 360)
-			yaw = 0;
-		
-		Menu_Draw( &s_player_config_menu );
-		
-		PlayerModelPreview (
-				s_pmi[s_player_model_box.curvalue].directory,
-				s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue],
-				global_menu_xoffset+viddef.width/2, 0, 
-				0, viddef.height,
-				mframe, yaw
-		);
+		s_player_skin_preview.name = s_pmi[s_player_model_box.curvalue].directory;
+		s_player_skin_preview.skin = s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue];
+		Menu_Draw( &s_player_config_screen );
 	}
 }
 void PConfigAccept (void)
@@ -5173,7 +5189,7 @@ const char *PlayerConfig_MenuKey (int key)
 	if ( key == K_ESCAPE )
 		PConfigAccept();
 
-	return Default_MenuKey( &s_player_config_menu, key );
+	return Default_MenuKey( &s_player_config_screen, key );
 }
 
 
@@ -5185,7 +5201,7 @@ void M_Menu_PlayerConfig_f (void)
 		return;
 	}
 	Menu_SetStatusBar( &s_options_menu, NULL );
-	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey, viddef.width, 0);
+	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey, Menu_TrueWidth(s_player_config_screen), 0);
 }
 
 /*
@@ -5196,30 +5212,37 @@ ALIEN ARENA TACTICAL MENU
 =======================================================================
 */
 
-static menuframework_s	s_tactical_menu;
-static menuaction_s s_tactical_title_action;
+static menuframework_s	s_tactical_screen;
+static menuaction_s		s_tactical_title_action;
 
-static const char *tacticalskins[][2] = {
+#define num_tactical_teams		2
+#define num_tactical_classes	3
+static const char *tactical_skin_names[num_tactical_teams][num_tactical_classes][2] =
+{
 	//ALIEN CLASSES
-	{"enforcer",	"martianenforcer"},
-	{"warrior",		"martianwarrior"},
-	{"overlord",	"martianoverlord"},
+	{
+		{"enforcer",	"martianenforcer"},
+		{"warrior",		"martianwarrior"},
+		{"overlord",	"martianoverlord"}
+	},
 	//HUMAN CLASSES
-	{"lauren",		"lauren"},
-	{"enforcer",	"enforcer"},
-	{"commander",	"commander"}
-};
-#define num_tactical_skins (sizeof(tacticalskins)/sizeof(tacticalskins[0]))
-
-// TODO: use autoarrange instead!
-static const int tacticalcoords[num_tactical_skins][2] = {
-	//ALIEN CLASSES
-	{-30, 90},	{80, 90},	{200, 90},
-	//HUMAN CLASSES
-	{-40, 270},	{80, 270},	{210, 270}
+	{
+		{"lauren",		"lauren"},
+		{"enforcer",	"enforcer"},
+		{"commander",	"commander"}
+	}
 };
 
-static menuaction_s s_tactical_skin_actions[num_tactical_skins];
+static const char *tactical_team_names[num_tactical_teams] =
+{
+	"ALIENS",
+	"HUMANS"
+};
+
+static menuframework_s	s_tactical_menus[num_tactical_teams];
+static menuframework_s	s_tactical_columns[num_tactical_teams][num_tactical_classes];
+static menuaction_s 	s_tactical_skin_actions[num_tactical_teams][num_tactical_classes];
+static menumodel_s 		s_tactical_skin_previews[num_tactical_teams][num_tactical_classes];
 
 static void TacticalJoinFunc ( void *item )
 {
@@ -5244,39 +5267,42 @@ void Tactical_MenuInit( void )
 {
 	extern cvar_t *name;
 	float scale;
-	int i;
-	
-	int x, y;
+	int i, j;
 	
 	scale = (float)(viddef.height)/600;
-
-	// TODO: use autoarrange instead!
-	x = viddef.width / 2 - 120;
-	y = viddef.height / 2 - 158*scale;
-	s_tactical_menu.nitems = 0;
-	CHASELINK(s_tactical_menu.rwidth) = viddef.width;
-	CHASELINK(s_tactical_menu.height) = viddef.height;
-	s_tactical_menu.freeform = true;
 	
-	//TITLE
-	s_tactical_title_action.generic.type = MTYPE_TEXT;
-	s_tactical_title_action.generic.name = "^2choose ^1team/class";
-	s_tactical_title_action.generic.flags = QMF_LEFT_JUSTIFY;
-	CHASELINK(s_tactical_title_action.generic.x) = x-140*scale;
-	CHASELINK(s_tactical_title_action.generic.y) = y+FONTSCALE*-75*scale;
+	s_tactical_screen.nitems = 0;
 	
-	for (i = 0; i < num_tactical_skins; i++)
+	for (i = 0; i < num_tactical_teams; i++)
 	{
-		s_tactical_skin_actions[i].generic.type = MTYPE_ACTION;
-		s_tactical_skin_actions[i].generic.name = tacticalskins[i][0];
-		s_tactical_skin_actions[i].generic.localstrings[0] = tacticalskins[i][1];
-		CHASELINK(s_tactical_skin_actions[i].generic.x) = x+FONTSCALE*scale*tacticalcoords[i][0];
-		CHASELINK(s_tactical_skin_actions[i].generic.y) = y+FONTSCALE*scale*tacticalcoords[i][1];
-		s_tactical_skin_actions[i].generic.callback = TacticalJoinFunc;
-		Menu_AddItem (&s_tactical_menu, &s_tactical_skin_actions[i]);
+		setup_window (s_tactical_screen, s_tactical_menus[i], tactical_team_names[i]);
+		s_tactical_menus[i].horizontal = true;
+		
+		for (j = 0; j < num_tactical_classes; j++)
+		{
+			s_tactical_columns[i][j].generic.type = MTYPE_SUBMENU;
+			s_tactical_columns[i][j].nitems = 0;
+			s_tactical_columns[i][j].navagable = true;
+			Menu_AddItem (&s_tactical_menus[i], &s_tactical_columns[i][j]);
+
+			s_tactical_skin_previews[i][j].generic.type = MTYPE_NOT_INTERACTIVE;
+			s_tactical_skin_previews[i][j].generic.namesizecallback = PlayerModelSizeFunc;
+			s_tactical_skin_previews[i][j].generic.namedraw = PlayerModelDrawFunc;
+			s_tactical_skin_previews[i][j].name = tactical_skin_names[i][j][1];
+			s_tactical_skin_previews[i][j].skin = "default";
+			s_tactical_skin_previews[i][j].h = 14;
+			s_tactical_skin_previews[i][j].w = 13;
+			Menu_AddItem (&s_tactical_columns[i][j], &s_tactical_skin_previews[i][j]);
+			
+			s_tactical_skin_actions[i][j].generic.type = MTYPE_ACTION;
+			s_tactical_skin_actions[i][j].generic.name = tactical_skin_names[i][j][0];
+			s_tactical_skin_actions[i][j].generic.localstrings[0] = tactical_skin_names[i][j][1];
+			s_tactical_skin_actions[i][j].generic.callback = TacticalJoinFunc;
+			Menu_AddItem (&s_tactical_columns[i][j], &s_tactical_skin_actions[i][j]);
+		}
 	}
-	
-	Menu_AutoArrange (&s_tactical_menu);
+
+	Menu_AutoArrange (&s_tactical_screen);
 
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
@@ -5291,63 +5317,7 @@ void Tactical_MenuInit( void )
 	}
 }
 
-void Tactical_MenuDraw( void )
-{
-	int i;
-	static float mframe;
-	static float yaw;
-	float scale;
-	
-	scale = (float)(viddef.height)/600;
-
-	Draw_Fill (global_menu_xoffset, 0, viddef.width, viddef.height, 0);
-	M_Banner( "m_tactical", 1 );
-
-	mframe += cls.frametime*150;
-	if ( mframe > 390 )
-		mframe = 10;
-	if ( mframe < 10)
-		mframe = 10;
-
-	yaw += cls.frametime*50;
-	if (yaw > 360)
-		yaw = 0;
-	
-	Menu_Draw( &s_tactical_menu );
-	
-	for (i = 0; i < num_tactical_skins; i++)
-	{
-		// main model
-		int size;
-		int x, y;
-		const char *skinname = tacticalskins[i][1];
-		
-		size = 200*scale;
-		
-		x = CHASELINK(s_tactical_skin_actions[i].generic.x)-size/1.6+global_menu_xoffset;
-		y = CHASELINK(s_tactical_skin_actions[i].generic.y)-size;
-		
-		PlayerModelPreview (
-				skinname, "default",
-				x, y,
-				size, 0,
-				mframe, yaw
-		);
-	}
-
-}
-
-const char *Tactical_MenuKey (int key)
-{
-	return Default_MenuKey( &s_tactical_menu, key );
-}
-
-
-void M_Menu_Tactical_f (void)
-{
-	Tactical_MenuInit();
-	M_PushMenu( Tactical_MenuDraw, Tactical_MenuKey, viddef.width, 0);
-}
+screen_boilerplate (Tactical, s_tactical_screen);
 
 
 /*
