@@ -535,7 +535,7 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 	
 	horiz_height = 0;
 	
-	if (reset && !menu->freeform)
+	if (reset)
 	{
 		RESETLINK (menu->rwidth, 0);
 		RESETLINK (menu->lwidth, 0);
@@ -571,7 +571,7 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 				Menu_Arrange ((menuframework_s *)item, false, font);
 			}
 		}
-		else if (!menu->freeform)
+		else
 			MENU_INCREASELINK (item->y, y);
 		
 		if (item->namesizecallback)
@@ -582,18 +582,6 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 			CHASELINK(item->rsize) = item->itemsizecallback (item, font);
 		else
 			CHASELINK(item->rsize) = Menu_Item_RightSize (item, font);
-		
-		// TODO remove freeform
-		if (menu->freeform)
-		{
-			// add some margins to make things easier to click
-			CHASELINK(item->y) += 6;
-			CHASELINK(item->lsize).x += 6;
-			CHASELINK(item->lsize).y += 12;
-			CHASELINK(item->rsize).x += 6;
-			CHASELINK(item->rsize).y += 12;
-			continue;
-		}
 		
 		itemheight = max (CHASELINK(item->lsize).y, CHASELINK(item->rsize).y);
 		lwidth = CHASELINK(item->lsize).x;
@@ -622,9 +610,6 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 			MENU_INCREASELINK (menu->rwidth, rwidth);
 		}
 	}
-	
-	if (menu->freeform)
-		return;
 	
 	// add some extra space to make things easier to click
 	if (menu->horizontal && menu->navagable)
@@ -751,16 +736,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 				if (!item || item->generic.type == MTYPE_TEXT)
 					continue;
 
-				if (menu->freeform)
-				{
-					// TODO REMOVE
-					max[0] = min[0] = Item_GetX (*item); 
-					max[0] += CHASELINK(item->generic.rsize).x;
-					min[0] -= CHASELINK(item->generic.lsize).x;
-					max[1] = min[1] = Item_GetY (*item);
-					max[1] += max (CHASELINK(item->generic.lsize).y, CHASELINK(item->generic.rsize).y);
-				}
-				else if (menu->horizontal)
+				if (menu->horizontal)
 				{
 					max[0] = min[0] = Item_GetX (*item); 
 					max[0] += CHASELINK(item->generic.rsize).x;
