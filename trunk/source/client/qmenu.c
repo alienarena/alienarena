@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #include "qmenu.h"
 
+static void	 ItemText_Draw (menuaction_s *a, FNT_font_t font);
 static void	 Action_Draw (menuaction_s *a, FNT_font_t font);
 static void  Menu_DrawStatusBar( const char *string );
 static void  Menu_DrawToolTip( const char *string );
@@ -74,11 +75,14 @@ int Menu_PredictSize (const char *str)
 	return FNT_PredictSize (font, str, true);
 }
 
-void Action_Draw (menuaction_s *a, FNT_font_t font)
+void ItemText_Draw (menuitem_s *a, FNT_font_t font)
 {
 	int text_x;
 	const float *color;
 	unsigned int align, cmode;
+	
+	if (a->generic.name == NULL)
+		return;
 	
 	text_x = Item_GetX (*a);
 	
@@ -111,7 +115,11 @@ void Action_Draw (menuaction_s *a, FNT_font_t font)
 		text_x, Item_GetY (*a),
 		a->generic.name, cmode, align, color
 	);
-	
+}
+
+void Action_Draw (menuaction_s *a, FNT_font_t font)
+{
+	ItemText_Draw (a, font);
 	if ( a->generic.itemdraw )
 		a->generic.itemdraw( a, font );
 }
@@ -121,7 +129,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	char tempbuffer[128]="";
 	int x, y;
 	
-	Action_Draw ((menuaction_s *)f, font);
+	ItemText_Draw ((menuaction_s *)f, font);
 
 	y = Item_GetY (*f);
 	x = Item_GetX (*f) + RCOLUMN_OFFSET;
@@ -1231,7 +1239,7 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 
 	charscale = font->size;
 	
-	Action_Draw ((menuaction_s *)s, font);
+	ItemText_Draw ((menuaction_s *)s, font);
 	
 	x = Item_GetX (*s) + RCOLUMN_OFFSET;
 	

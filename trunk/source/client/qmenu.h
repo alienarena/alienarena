@@ -242,7 +242,6 @@ typedef struct _tag_menuframework
 	int xscroll, yscroll;
 	int	cursor;
 	qboolean horizontal;
-	qboolean freeform; // for old menus that are laid out manually. TODO: remove
 	
 	qboolean navagable;
 	
