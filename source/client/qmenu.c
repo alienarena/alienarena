@@ -48,6 +48,20 @@ void Menu_DrawStringR2LDark( int x, int y, const char *string );
 
 static menuvec2_t Menu_GetBorderSize (menuframework_s *s);
 
+// some potential color schemes.
+
+// dark color = same blue as icons, light color = white
+const float dark_color[4] = {0, 1, 135.0f/255.0f, 1};
+const float light_color[4] = {1, 1, 1, 1};
+
+// dark color = grey, light color = white
+/*const float dark_color[4] = {0.9, 0.9, 0.9, 1};*/
+/*const float light_color[4] = {1, 1, 1, 1};*/
+
+// old color scheme
+/*#define dark_color FNT_colors[2]*/
+/*#define light_color FNT_colors[7*/
+
 #define VID_WIDTH viddef.width
 #define VID_HEIGHT viddef.height
 
@@ -70,7 +84,7 @@ void Action_Draw (menuaction_s *a, FNT_font_t font)
 	else
 		align = FNT_ALIGN_RIGHT;
 	
-	color = FNT_colors[2];
+	color = dark_color;
 	
 	if ( a->generic.flags & QMF_STRIP_COLOR )
 		cmode = FNT_CMODE_TWO;
@@ -105,7 +119,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	menu_box.y = y;
 	menu_box.height = 0;
 	menu_box.width = f->generic.visible_length*font->width;
-	FNT_BoundedPrint (font, f->buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, FNT_colors[2]);
+	FNT_BoundedPrint (font, f->buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, dark_color);
 	
 	if ( Menu_ItemAtCursor( f->generic.parent ) == f )
 	{
@@ -830,7 +844,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		}
 		Menu_DrawString_Core (
 			x, Item_GetY (*item), item->generic.name,
-			FNT_CMODE_TWO, align, FNT_colors[7]
+			FNT_CMODE_TWO, align, light_color
 		);
 	}
 	else if ( item && item->generic.type == MTYPE_ACTION ) //change to a "highlite"
@@ -843,7 +857,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		if(item->generic.name)
 			Menu_DrawString_Core (
 				Item_GetX (*item) + LCOLUMN_OFFSET, Item_GetY (*item), item->generic.name,
-				FNT_CMODE_TWO, align, FNT_colors[7]
+				FNT_CMODE_TWO, align, light_color
 			);
 	}
 	else if ( item ) //change to a "highlite"
@@ -984,7 +998,7 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 	{
 		int textwidth = Menu_PredictSize (title);
 		Menu_DrawHorizBar ("menu/slide_border", x+w/2-textwidth/2-2, y-font->size-2, textwidth+4, font->size+4);
-		Menu_DrawString_Core (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, FNT_colors[7]);
+		Menu_DrawString_Core (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
 	}
 }
 
@@ -1085,7 +1099,7 @@ void Menu_DrawToolTip( const char *string )
 		Menu_DrawString_Core (
 			cursor.x, cursor.y - font->size - 4, 
 			string, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
-			FNT_colors[7]
+			light_color
 		);
 	}
 }
@@ -1134,29 +1148,29 @@ void Menu_DrawStatusBar( const char *string )
 	if ( string )
 	{
 		Draw_Fill( 0, VID_HEIGHT-font->size-10, VID_WIDTH, font->size+10, 4 );
-		Menu_DrawString_Core (VID_WIDTH/2, VID_HEIGHT-font->size-5, string, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, FNT_colors[7]);
+		Menu_DrawString_Core (VID_WIDTH/2, VID_HEIGHT-font->size-5, string, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
 	}
 }
 
 void Menu_DrawString( int x, int y, const char *string )
 {
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_LEFT, FNT_colors[7]);
+	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_LEFT, light_color);
 }
 void Menu_DrawStringDark( int x, int y, const char *string )
 {
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_LEFT, FNT_colors[2]);
+	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_LEFT, dark_color);
 }
 void Menu_DrawStringR2L( int x, int y, const char *string )
 {
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_RIGHT, FNT_colors[7]);
+	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_RIGHT, light_color);
 }
 void Menu_DrawStringR2LDark( int x, int y, const char *string )
 {
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_RIGHT, FNT_colors[2]);
+	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_RIGHT, dark_color);
 }
 void Menu_DrawColorString ( int x, int y, const char *str )
 {
-	Menu_DrawString_Core (x, y, str, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, FNT_colors[2]);
+	Menu_DrawString_Core (x, y, str, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, dark_color);
 }
 
 void *Menu_ItemAtCursor( menuframework_s *m )
@@ -1215,7 +1229,7 @@ void Text_Draw (menutxt_s *s, FNT_font_t font)
 	
 	Menu_DrawString_Core (
 		Item_GetX (*s), Item_GetY (*s),
-		s->generic.name, FNT_CMODE_QUAKE_SRS, align, FNT_colors[2]
+		s->generic.name, FNT_CMODE_QUAKE_SRS, align, dark_color
 	);
 }
 void Slider_DoSlide( menuslider_s *s, int dir )
@@ -1314,7 +1328,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		Menu_DrawString_Core (
 			text_x, Item_GetY (*s), 
 			s->generic.name, FNT_CMODE_QUAKE_SRS, align,
-			FNT_colors[2]
+			dark_color
 		);
 	}
 	if (s->generic.itemdraw != NULL)
@@ -1326,7 +1340,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		Menu_DrawString_Core (
 			RCOLUMN_OFFSET + x, Item_GetY (*s), 
 			s->itemnames[s->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
-			FNT_colors[7]
+			light_color
 		);
 	}
 	else
@@ -1336,13 +1350,13 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		Menu_DrawString_Core (
 			RCOLUMN_OFFSET + x, Item_GetY (*s), 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
-			FNT_colors[7]
+			light_color
 		);
 		strcpy( buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
 		Menu_DrawString_Core (
 			menu_box.x, menu_box.y+menu_box.height, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
-			FNT_colors[7]
+			light_color
 		);
 	}
 }
