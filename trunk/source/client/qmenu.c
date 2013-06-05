@@ -51,7 +51,7 @@ static menuvec2_t Menu_GetBorderSize (menuframework_s *s);
 // some potential color schemes.
 
 // dark color = same blue as icons, light color = white
-const float dark_color[4] = {0, 1, 135.0f/255.0f, 1};
+const float dark_color[4] = {0, 1, 200.0f/255.0f, 1};
 const float light_color[4] = {1, 1, 1, 1};
 
 // dark color = grey, light color = white
