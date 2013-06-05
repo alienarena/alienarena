@@ -3503,12 +3503,12 @@ void LoadBotInfo( void )
 		name = Info_ValueForKey (bots[i].userinfo, "name");
 		skin = Info_ValueForKey (bots[i].userinfo, "skin");
 		strncpy(bots[i].name, name, sizeof(bots[i].name)-1);
-		snprintf(bots[i].model, sizeof(bots[i].model), "bots/%s_i", skin);
+		Com_sprintf (bots[i].model, sizeof(bots[i].model), "bots/%s_i", skin);
 		
 		// defaults for .cfg data
 		bots[i].skill = 1; //medium
 		strcpy (bots[i].faveweap, "None");
-		snprintf (bots[i].skill_buf, sizeof(bots[i].skill_buf), "%d", bots[i].skill);
+		Com_sprintf (bots[i].skill_buf, sizeof(bots[i].skill_buf), "%d", bots[i].skill);
 		
 		// load info from config file if possible
 		
@@ -3524,7 +3524,7 @@ void LoadBotInfo( void )
 		if ( bots[i].skill < 0 )
 			bots[i].skill = 0;
 		
-		snprintf (bots[i].skill_buf, sizeof(bots[i].skill_buf), "%d", bots[i].skill);
+		Com_sprintf (bots[i].skill_buf, sizeof(bots[i].skill_buf), "%d", bots[i].skill);
 		
 		if ( s && ((s = strtok( NULL, delim )) != NULL) )
 			strncpy( bots[i].faveweap, s, sizeof(bots[i].faveweap)-1 );
