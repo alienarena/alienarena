@@ -1806,11 +1806,10 @@ VIDEO MENU
 extern menuframework_s s_opengl_screen;
 extern void VID_MenuInit( void );
 extern void VID_MenuDraw( void );
-extern const char *VID_MenuKey (menuframework_s *screen, int key);
 void M_Menu_Video_f (void)
 {
 	VID_MenuInit();
-	M_PushMenu( VID_MenuDraw, VID_MenuKey, &s_opengl_screen);
+	M_PushMenu( VID_MenuDraw, Default_MenuKey, &s_opengl_screen);
 }
 
 /*

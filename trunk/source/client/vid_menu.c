@@ -257,13 +257,6 @@ static void ApplyChanges( void *unused )
 	M_ForceMenuOff();
 }
 
-static void CancelChanges( void *unused )
-{
-	extern void M_PopMenu( void );
-
-	M_PopMenu();
-}
-
 /*
 ** VID_MenuInit
 */
@@ -538,63 +531,4 @@ void VID_MenuDraw (void)
 	
 	Menu_AdjustCursor( s_current_menu, 1 );
 	Menu_Draw( &s_opengl_screen );
-}
-
-/*
-================
-VID_MenuKey
-================
-*/
-const char *VID_MenuKey (menuframework_s *screen, int key)
-{
-	extern void M_PopMenu( void );
-
-	menucommon_s *item;
-	menuframework_s *m = &s_opengl_menu;
-	static const char *sound = "misc/menu1.wav";
-
-	if ( m )
-	{
-		if ( ( item = Menu_ItemAtCursor( m ) ) != 0 )
-		{
-			if ( item->type == MTYPE_FIELD )
-			{
-				if ( Field_Key( ( menufield_s * ) item, key ) )
-					return NULL;
-			}
-		}
-	}
-
-	switch ( key )
-	{
-	case K_ESCAPE:
-		CancelChanges( 0 );
-		return NULL;
-	case K_KP_UPARROW:
-	case K_UPARROW:
-		m->cursor--;
-		Menu_AdjustCursor( m, -1 );
-		return NULL;
-		break;
-	case K_KP_DOWNARROW:
-	case K_DOWNARROW:
-		m->cursor++;
-		Menu_AdjustCursor( m, 1 );
-		return NULL;
-		break;
-	case K_KP_LEFTARROW:
-	case K_LEFTARROW:
-		Menu_SlideItem( m, -1 );
-		break;
-	case K_KP_RIGHTARROW:
-	case K_RIGHTARROW:
-		Menu_SlideItem( m, 1 );
-		break;
-	case K_KP_ENTER:
-	case K_ENTER:
-		Menu_SelectItem( m );
-		break;
-	}
-
-	return sound;
 }
