@@ -362,7 +362,7 @@ int global_menu_xoffset_target;
 #define Menu_GetBaseY(m) ((m).y - (m).yscroll)
 #define Item_GetY(i) (CHASELINK((i).generic.y) + Menu_GetBaseY(*((i).generic.parent)))
 
-#define Menu_ContainsCursor(m) \
+#define Menu_ContainsMouse(m) \
 	(	cursor.y > (m).y && cursor.y < (m).y+Menu_TrueHeight(m) && \
 		cursor.x > (m).x && cursor.x < (m).x+CHASELINK((m).rwidth)+CHASELINK((m).lwidth) \
 	)
