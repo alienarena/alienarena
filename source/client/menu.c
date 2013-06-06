@@ -93,7 +93,6 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 
 void	(*m_drawfunc) (void);
-const char *(*m_keyfunc) (menuframework_s *menu, int key);
 
 static size_t szr; // just for unused result warnings
 
@@ -314,7 +313,8 @@ void refreshCursorButtons(void)
 
 void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
-	int		i;
+	int			i;
+	qboolean	found = false;
 	
 	if (Cvar_VariableValue ("maxclients") == 1
 		&& Com_ServerState ())
@@ -322,15 +322,17 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *scre
 
 	// if this menu is already present, drop back to that level
 	// to avoid stacking menus by hotkeys
-	for (i=0 ; i<m_menudepth ; i++)
+	for (i=1 ; i <= m_menudepth ; i++)
 		if (m_layers[i].draw == draw &&
 			m_layers[i].key == key && 
 			m_layers[i].screen == screen)
 		{
 			m_menudepth = i;
+			found = true;
+			break;
 		}
 
-	if (i == m_menudepth)
+	if (!found)
 	{
 		if (m_menudepth >= MAX_MENU_DEPTH)
 			Com_Error (ERR_FATAL, "M_PushMenu: MAX_MENU_DEPTH");
@@ -342,7 +344,6 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *scre
 	}
 
 	m_drawfunc = draw;
-	m_keyfunc = key;
 
 	m_entersound = true;
 
@@ -380,7 +381,6 @@ void M_ForceMenuOff (void)
 	refreshCursorLink();
 
 	m_drawfunc = NULL;
-	m_keyfunc = NULL;
 	cls.key_dest = key_game;
 	m_menudepth = 0;
 	Key_ClearStates ();
@@ -407,7 +407,6 @@ void M_PopMenu (void)
 		Menu_SelectMenu (m_layers[m_menudepth].screen);
 	
 	m_drawfunc = m_layers[m_menudepth].draw;
-	m_keyfunc = m_layers[m_menudepth].key;
 
 	refreshCursorLink();
 	refreshCursorButtons();
@@ -5746,7 +5745,6 @@ void M_ThinkRedirect (enum thinkredirect_action action)
 			continue;
 		
 		m_drawfunc = m_layers[i].draw;
-		m_keyfunc = m_layers[i].key;
 		
 		if (i <= old_menudepth)
 			m_menudepth = i;
@@ -5808,7 +5806,7 @@ void M_Keydown (int key)
 	
 	if (key == K_ESCAPE)
 	{
-		if ((s = m_keyfunc (m_layers[m_menudepth].screen, key)))
+		if ((s = m_layers[m_menudepth].key (m_layers[m_menudepth].screen, key)))
 			S_StartLocalSound (s);
 		return;
 	}
