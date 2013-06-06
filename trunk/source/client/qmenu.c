@@ -51,19 +51,9 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 
 static menuvec2_t Menu_GetBorderSize (menuframework_s *s);
 
-// some potential color schemes.
-
 // dark color = same blue as icons, light color = white
 const float dark_color[4] = {0, 1, 200.0f/255.0f, 1};
 const float light_color[4] = {1, 1, 1, 1};
-
-// dark color = grey, light color = white
-/*const float dark_color[4] = {0.9, 0.9, 0.9, 1};*/
-/*const float light_color[4] = {1, 1, 1, 1};*/
-
-// old color scheme
-/*#define dark_color FNT_colors[2]*/
-/*#define light_color FNT_colors[7*/
 
 #define VID_WIDTH viddef.width
 #define VID_HEIGHT viddef.height
