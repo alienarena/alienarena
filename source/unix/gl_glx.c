@@ -508,21 +508,23 @@ void HandleEvents( void )
 					mouse_button = 1;
 					break;
 				}
+				
+				if (mouse_button < MENU_CURSOR_BUTTON_MAX)
+				{
+					if ( (f_sys_msecs - cursor.buttontime[mouse_button])
+							< multiclicktime )
+						cursor.buttonclicks[mouse_button] += 1;
+					else
+						cursor.buttonclicks[mouse_button] = 1;
 
-				if ( (f_sys_msecs - cursor.buttontime[mouse_button])
-						< multiclicktime )
-					cursor.buttonclicks[mouse_button] += 1;
-				else
-					cursor.buttonclicks[mouse_button] = 1;
+					if ( cursor.buttonclicks[mouse_button] > 3 )
+						cursor.buttonclicks[mouse_button] = 3;
 
-				if ( cursor.buttonclicks[mouse_button] > 3 )
-					cursor.buttonclicks[mouse_button] = 3;
+					cursor.buttontime[mouse_button] = f_sys_msecs;
 
-				cursor.buttontime[mouse_button] = f_sys_msecs;
-
-				cursor.buttondown[mouse_button] = true;
-				cursor.buttonused[mouse_button] = false;
-				cursor.mouseaction = true;
+					cursor.buttondown[mouse_button] = true;
+					cursor.buttonused[mouse_button] = false;
+				}
 
 				switch ( event.xbutton.button )
 				{
@@ -577,9 +579,11 @@ void HandleEvents( void )
 					break;
 				}
 
-				cursor.buttondown[mouse_button] = false;
-				cursor.buttonused[mouse_button] = false;
-				cursor.mouseaction = true;
+				if (mouse_button < MENU_CURSOR_BUTTON_MAX)
+				{
+					cursor.buttondown[mouse_button] = false;
+					cursor.buttonused[mouse_button] = false;
+				}
 
 				switch ( event.xbutton.button )
 				{
