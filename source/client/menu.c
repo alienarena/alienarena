@@ -1558,6 +1558,37 @@ static void SpinOptionFunc (void *_self)
 	Cvar_SetValue( cvarname, self->curvalue );
 }
 
+static menuvec2_t FontSelectorSizeFunc (void *_self, FNT_font_t unused)
+{
+	menuvec2_t ret;
+	menulist_s *self;
+	FNT_font_t font;
+	
+	self = (menulist_s *)_self;
+	font = FNT_AutoGet (*(FNT_auto_t *)self->generic.localptrs[0]);
+	
+	ret.y = font->height;
+	ret.x = RCOLUMN_OFFSET + FNT_PredictSize (font, self->itemnames[self->curvalue], false);
+	
+	return ret;
+}
+
+static void FontSelectorDrawFunc (void *_self, FNT_font_t unused)
+{
+	extern const float light_color[4];
+	menulist_s *self;
+	FNT_font_t font;
+	
+	self = (menulist_s *)_self;
+	font = FNT_AutoGet (*(FNT_auto_t *)self->generic.localptrs[0]);
+	
+	menu_box.x = Item_GetX (*self)+RCOLUMN_OFFSET;
+	menu_box.y = Item_GetY (*self);
+	menu_box.height = menu_box.width = 0;
+	
+	FNT_BoundedPrint (font, self->itemnames[self->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
+}
+
 static void TextVarSpinOptionFunc (void *_self)
 {
 	menulist_s *self;
@@ -1569,6 +1600,13 @@ static void TextVarSpinOptionFunc (void *_self)
 	
 	cvarval = strchr(self->itemnames[self->curvalue], '\0')+1;
 	Cvar_Set( cvarname, cvarval);
+}
+
+static void FontSelectorFunc (void *_self)
+{
+	TextVarSpinOptionFunc (_self);
+	// New font might not fit anymore.
+	Menu_AutoArrange (&s_options_screen); 
 }
 
 static void UpdateDopplerEffectFunc( void *self )
@@ -1755,6 +1793,21 @@ void Options_MenuInit( void )
 					options[i].generic.callback = UpdateDopplerEffectFunc;
 				else
 					options[i].generic.callback = TextVarSpinOptionFunc;
+				// FIXME HACK
+				if (!strcmp (optionnames[i].cvarname, "fnt_game"))
+				{
+					options[i].generic.itemsizecallback = FontSelectorSizeFunc;
+					options[i].generic.itemdraw = FontSelectorDrawFunc;
+					options[i].generic.callback = FontSelectorFunc;
+					options[i].generic.localptrs[0] = &CL_gameFont;
+				}
+				else if (!strcmp (optionnames[i].cvarname, "fnt_console"))
+				{
+					options[i].generic.itemsizecallback = FontSelectorSizeFunc;
+					options[i].generic.itemdraw = FontSelectorDrawFunc;
+					options[i].generic.callback = FontSelectorFunc;
+					options[i].generic.localptrs[0] = &CL_consoleFont;
+				}
 				break;
 			case option_hudspincontrol:
 				optionnames[i].extradata = hud_names;
