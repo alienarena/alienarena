@@ -599,7 +599,7 @@ void M_Main_Draw (void)
 	for ( i = 0; i < MAIN_ITEMS; i++ )
 	{
 		strcpy( litname, main_names[i] );
-		if (i == m_main_cursor)
+		if (i == m_main_cursor && cursor.menulayer == 1)
 			strcat( litname, "_sel");
 		Draw_GetPicSize( &w, &h, litname );
 		xstart = xoffset + 100*widscale + (20*i*widscale);
@@ -653,6 +653,7 @@ void CheckMainMenuMouse (void)
 	{
 		cursor.menulayer = 1;
 		m_main_cursor = i;
+		cursor.menuitem = NULL;
 	}
 
 	MainMenuMouseHover = 1 + i;
@@ -3236,7 +3237,7 @@ const char *JoinServer_MenuKey (menuframework_s *screen, int key)
 		JoinServerFunc (&s_serverlist_rows[serverindex]);
 		return "";
 	}
-	if (serverindex != -1 && !Menu_ContainsCursor (s_joinserver_menu) && cursor.buttonclicks[MOUSEBUTTON1] == 1)
+	if (serverindex != -1 && !Menu_ContainsMouse (s_joinserver_menu) && cursor.buttonclicks[MOUSEBUTTON1] == 1)
 	{
 		DeselectServer ();
 		return menu_out_sound;

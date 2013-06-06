@@ -281,13 +281,9 @@ static inline qboolean Menu_ItemSelectable (menuitem_s *item)
 	return true;
 }
 
-// Attempt to select the first reasonable menu item in the specified menu tree
-// as the cursor item. Returns false if unsuccessful (if there are no 
-// selectable menu items within the menu or any of its submenus.) Does nothing
-// if the cursor item is already within the menu or one of its submenus.
-qboolean Menu_SelectMenu (menuframework_s *menu)
+// Returns true if the current cursor item is within the specified menu tree.
+qboolean Menu_ContainsCursorItem (menuframework_s *menu)
 {
-	int			i;
 	menuitem_s	*item;
 	
 	item = cursor.menuitem;
@@ -302,6 +298,21 @@ qboolean Menu_SelectMenu (menuframework_s *menu)
 			menu2 = menu2->generic.parent;
 		}
 	}
+	
+	return false;
+}
+
+// Attempt to select the first reasonable menu item in the specified menu tree
+// as the cursor item. Returns false if unsuccessful (if there are no 
+// selectable menu items within the menu or any of its submenus.) Does nothing
+// if the cursor item is already within the menu or one of its submenus.
+qboolean Menu_SelectMenu (menuframework_s *menu)
+{
+	int			i;
+	menuitem_s	*item;
+	
+	if (Menu_ContainsCursorItem (menu))
+		return true;
 	
 	cursor.menuitem = NULL;
 	
@@ -1080,7 +1091,7 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 	{
 		menu->borderalpha = 0.50;
 	}
-	else if (Menu_ContainsCursor (*menu))
+	else if (Menu_ContainsCursorItem (menu))
 	{
 		menu->borderalpha += cls.frametime*2;
 		if (menu->borderalpha > 1.0)
@@ -1089,8 +1100,8 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 	else
 	{
 		menu->borderalpha -= cls.frametime*2;
-		if (menu->borderalpha < 0.75)
-			menu->borderalpha = 0.75;
+		if (menu->borderalpha < 0.5)
+			menu->borderalpha = 0.5;
 	}
 	
 	width = CHASELINK(menu->lwidth) + CHASELINK(menu->rwidth);
