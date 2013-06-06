@@ -2700,25 +2700,25 @@ void CL_Init (void)
 
 	// Initialise fonts
 	CL_gameFont = &_CL_gameFont;
-	FNT_AutoInit( CL_gameFont , "default" , 0 , 65 , 8 , 48 );
+	FNT_AutoInit( CL_gameFont , "freesans" , 0 , 65 , 8 , 48 );
 	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "creativeblock" , CVAR_ARCHIVE );
 	CL_gameFont->sizeVar = Cvar_Get( "fnt_game_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_gameFont );
 
 	CL_centerFont = &_CL_centerFont;
-	FNT_AutoInit( CL_centerFont , "default" , 0 , 45 , 16 , 64 );
+	FNT_AutoInit( CL_centerFont , "freesans" , 0 , 45 , 16 , 64 );
 	CL_centerFont->faceVar = CL_gameFont->faceVar;
 	CL_centerFont->sizeVar = Cvar_Get( "fnt_center_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_centerFont );
 
 	CL_consoleFont = &_CL_consoleFont;
-	FNT_AutoInit( CL_consoleFont , "default" , 0 , 52 , 8 , 48 );
+	FNT_AutoInit( CL_consoleFont , "freesans" , 0 , 52 , 8 , 48 );
 	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "freemono" , CVAR_ARCHIVE );
 	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_consoleFont );
 	
 	CL_menuFont = &_CL_menuFont;
-	FNT_AutoInit( CL_menuFont , "default" , 0 , 48 , 8 , 48 );
+	FNT_AutoInit( CL_menuFont , "freesans" , 0 , 48 , 8 , 48 );
 	CL_menuFont->faceVar = Cvar_Get( "fnt_menu" , "freesans" , CVAR_ARCHIVE );
 	CL_menuFont->sizeVar = Cvar_Get( "fnt_menu_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_menuFont );
