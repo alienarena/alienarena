@@ -240,13 +240,11 @@ typedef struct _tag_menuframework
 	int maxwidth, maxheight; // 0 for no limit
 	int maxlines; // for generating maxheight automatically
 	int xscroll, yscroll;
-	int	cursor;
 	qboolean horizontal;
 	
 	qboolean navagable;
 	
 	qboolean enable_highlight;
-	qboolean force_highlight;
 	
 	float borderalpha;
 
@@ -312,15 +310,16 @@ void	_Menu_AddItem( menuframework_s *menu, menucommon_s *item );
 	_Menu_AddItem((menu), &((item)->generic))
 
 
-void	Menu_AdjustCursor( menuframework_s *menu, int dir );
+qboolean Menu_SelectMenu (menuframework_s *menu);
+void	Menu_AdvanceCursor (int dir);
 void	Menu_Center( menuframework_s *menu );
 void	Menu_AutoArrange( menuframework_s *menu );
 void	Menu_Draw( menuframework_s *menu );
-void	*Menu_ItemAtCursor( menuframework_s *m );
-void	Menu_SelectItem( menuframework_s *s );
-void	Menu_MouseSelectItem( menucommon_s *item ); //menu mouse
+void	Menu_AssignCursor (menuframework_s *menu, int layernum);
+void	Menu_DrawHighlight (void);
+void	Menu_SelectItem (void);
 void	Menu_SetStatusBar( menuframework_s *s, const char *string );
-void	Menu_SlideItem( menuframework_s *s, int dir );
+void	Menu_SlideItem (int dir);
 
 void	Menu_DrawString( int, int, const char * );
 void	Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, const char *prefix);

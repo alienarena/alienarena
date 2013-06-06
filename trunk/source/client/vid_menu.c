@@ -529,6 +529,5 @@ void VID_MenuDraw (void)
 	
 	Draw_Fill(global_menu_xoffset, 0, viddef.width, viddef.height, 0);
 	
-	Menu_AdjustCursor( s_current_menu, 1 );
 	Menu_Draw( &s_opengl_screen );
 }
