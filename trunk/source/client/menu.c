@@ -3203,25 +3203,6 @@ void JoinServer_MenuInit( void )
 	
 }
 
-void M_LevelShotBackground (const char *mapname)
-{
-	char path[MAX_QPATH];
-	qboolean found = false;
-	
-	if (mapname != NULL)
-	{
-		sprintf(path, "/levelshots/%s", mapname);
-		if (R_RegisterPic (path))
-			found = true;
-	}
-	
-	if (found)
-	{
-		Draw_Fill (global_menu_xoffset, 0, viddef.width, viddef.height, 15);
-		Draw_AlphaStretchPic (global_menu_xoffset, 0, viddef.width, viddef.height, path, 0.90);
-	}
-}
-
 
 void JoinServer_MenuDraw(void)
 {
@@ -3785,7 +3766,10 @@ static menulist_s	s_antilag_box;
 static menulist_s   s_public_box;
 static menulist_s	s_dedicated_box;
 static menulist_s   s_skill_box;
-static menulist_s   s_startserver_map_data[5];
+
+static menuframework_s	s_levelshot_submenu;
+static menuitem_s		s_levelshot_preview;
+static menulist_s   	s_startserver_map_data[5];
 
 void BotOptionsFunc( void *self )
 {
@@ -4248,11 +4232,23 @@ void StartServer_MenuInit( void )
 	s_skill_box.generic.name	= "skill level";
 	s_skill_box.itemnames = skill;
 	s_skill_box.curvalue = 1;
+	
+	s_levelshot_submenu.generic.type = MTYPE_SUBMENU;
+	s_levelshot_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_levelshot_submenu.nitems = 0;
+	
+	s_levelshot_preview.generic.type = MTYPE_NOT_INTERACTIVE;
+	s_levelshot_preview.generic.localstrings[0] = NULL;
+	VectorSet (s_levelshot_preview.generic.localints, 16, 12, 0);
+	s_levelshot_preview.generic.itemsizecallback = PicSizeFunc;
+	s_levelshot_preview.generic.itemdraw = PicDrawFunc;
+	Menu_AddItem (&s_levelshot_submenu, &s_levelshot_preview);
 
-	for ( i = 0; i < 5; i++) { //initialize it
+	for ( i = 0; i < 5; i++) { 
 		s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
 		s_startserver_map_data[i].generic.name	= "no data";
 		s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+		Menu_AddItem( &s_levelshot_submenu, &s_startserver_map_data[i] );
 	}
 
 	Menu_AddItem( &s_startserver_menu, &s_antilag_box );
@@ -4269,8 +4265,7 @@ void StartServer_MenuInit( void )
 	add_action (s_startserver_menu, "Bot Options", BotOptionsFunc);
 	add_action (s_startserver_menu, "begin", StartServerActionFunc);
 	
-	for ( i = 0; i < 5; i++ )
-		Menu_AddItem( &s_startserver_menu, &s_startserver_map_data[i] );
+	Menu_AddItem (&s_startserver_menu, &s_levelshot_submenu);
 	
 	Menu_AutoArrange (&s_startserver_screen);
 
@@ -4281,10 +4276,10 @@ void StartServer_MenuInit( void )
 
 void StartServer_MenuDraw(void)
 {
-	char startmap[128];
+	static char levelshot[MAX_QPATH];
 	
-	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
-	M_LevelShotBackground (startmap);
+	Com_sprintf( levelshot, sizeof(levelshot), "/levelshots/%s", strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+	s_levelshot_preview.generic.localstrings[0] = levelshot;
 
 	Menu_AutoArrange (&s_startserver_screen);
 	Menu_Draw( &s_startserver_screen );
