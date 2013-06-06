@@ -1317,7 +1317,7 @@ sliderlimit_t volume_limits =
 
 sliderlimit_t mousespeed_limits = 
 {
-	0.0f, 50.0f, 0.0f, 11.0f
+	0.0f, 110.0f, 0.0f, 11.0f
 };
 
 typedef struct {
