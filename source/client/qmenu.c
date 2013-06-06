@@ -143,9 +143,15 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	}
 }
 
-qboolean Field_Key( menufield_s *f, int key )
+qboolean Field_Key (int key)
 {
+	menufield_s *f;
 	extern int keydown[];
+	
+	f = cursor.menuitem;
+	
+	if (f == NULL || f->generic.type != MTYPE_FIELD || key > 127)
+		return false;
 
 	switch ( key )
 	{
@@ -192,9 +198,6 @@ qboolean Field_Key( menufield_s *f, int key )
 		key = '.';
 		break;
 	}
-
-	if ( key > 127 )
-		return false;
 
 	/*
 	** support pasting from the clipboard

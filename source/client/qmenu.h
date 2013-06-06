@@ -300,7 +300,7 @@ typedef menuitem_s menutxt_s;
 
 void refreshCursorLink (void);
 
-qboolean Field_Key( menufield_s *field, int key );
+qboolean Field_Key (int key);
 
 void	_Menu_AddItem( menuframework_s *menu, menucommon_s *item );
 
