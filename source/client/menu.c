@@ -1064,7 +1064,7 @@ static void AddFontNames( char * path , int * nfontnames , char ** list )
 		p = strstr(fontfiles[i], "fonts/"); p++;
 		p = strstr(p, "/"); p++;
 
-		if (!strstr(p, ".tga") && !strstr( p , ".ttf" ) )
+		if (/*!strstr(p, ".tga") && */!strstr( p , ".ttf" ) )
 			continue;
 
 		num = strlen(p)-4;
