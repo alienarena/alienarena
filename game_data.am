@@ -248,12 +248,11 @@ nobase_nodist_fonts_DATA = \
 	data1/fonts/bluehigd.ttf \
 	data1/fonts/chicomono.ttf \
 	data1/fonts/creativeblock.ttf \
-	data1/fonts/default.tga \
-	data1/fonts/digital.tga \
-	data1/fonts/fat.tga \
 	data1/fonts/freemono.ttf \
 	data1/fonts/freesans.ttf \
-	data1/fonts/menu.tga
+	data1/fonts/orbitron.ttf \
+	data1/fonts/crackdown.ttf \
+	data1/fonts/bendable.ttf 
 
 
 gfxdir = $(pkgdatadir)
