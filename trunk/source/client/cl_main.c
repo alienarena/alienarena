@@ -2701,7 +2701,7 @@ void CL_Init (void)
 	// Initialise fonts
 	CL_gameFont = &_CL_gameFont;
 	FNT_AutoInit( CL_gameFont , "freesans" , 0 , 65 , 8 , 48 );
-	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "creativeblock" , CVAR_ARCHIVE );
+	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "orbitron" , CVAR_ARCHIVE );
 	CL_gameFont->sizeVar = Cvar_Get( "fnt_game_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_gameFont );
 
