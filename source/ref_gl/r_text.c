@@ -114,9 +114,10 @@ static void _FNT_NullFont_WrappedPrint(
 }
 
 
-static void _FNT_NullFont_PredictSize(
+static int _FNT_NullFont_PredictSize(
 		FNT_font_t	font ,
-		const char *	text
+		const char *	text,
+		qboolean color
 	)
 {
 	/* EMPTY */

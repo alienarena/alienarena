@@ -167,6 +167,9 @@ static qboolean _BMF_GetFont( FNT_font_t font )
 	_BMF_font_t	_font = (_BMF_font_t) font;
 	GLuint		glListBase;
 	unsigned int	i;
+	
+	Com_Printf ("BMF: Bitmap fonts disabled pending permanent removal.\n");
+	return false;
 
 	assert( sizeof( struct _BMF_font_s ) <= sizeof( struct FNT_font_s ) );
 	
