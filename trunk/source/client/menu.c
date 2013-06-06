@@ -1089,7 +1089,6 @@ void SetFontNames (char **list)
 
 	nfontnames = 0;
 	AddFontNames( "fonts/*.ttf" , &nfontnames , list );
-	AddFontNames( "fonts/*.tga" , &nfontnames , list + nfontnames );
 
 	numfonts = nfontnames;
 }
@@ -1852,7 +1851,8 @@ static const char *idcredits[] =
 	"",
 	"+FONTS",
 	"John Diamond",
-	"the-interceptor from http://www.quakeworld.nu/",
+	"The League of Moveable Type",
+	"Brian Kent",
 	"",
 	"+LOGO",
 	"Adam -servercleaner- Szalai",
