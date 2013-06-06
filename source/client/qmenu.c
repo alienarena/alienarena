@@ -47,6 +47,8 @@ void Menu_DrawStringDark( int x, int y, const char *string );
 void Menu_DrawStringR2L( int x, int y, const char *string );
 void Menu_DrawStringR2LDark( int x, int y, const char *string );
 
+void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *prefix);
+
 static menuvec2_t Menu_GetBorderSize (menuframework_s *s);
 
 // some potential color schemes.
