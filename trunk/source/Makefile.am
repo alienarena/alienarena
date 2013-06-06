@@ -177,8 +177,6 @@ alienarena_SOURCES = \
 	ref_gl/glext.h \
 	ref_gl/qgl.h \
 	ref_gl/r_bloom.c \
-	ref_gl/r_bmfont.c \
-	ref_gl/r_bmfont.h \
 	ref_gl/r_draw.c \
 	ref_gl/r_image.c \
 	ref_gl/r_image.h \

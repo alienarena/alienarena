@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_text.h"
 #include "r_ttf.h"
-#include "r_bmfont.h"
 
 
 
@@ -397,9 +396,6 @@ FNT_face_t FNT_GetFace( const char * face_name )
 
 	// Try loading it as a TrueType font
 	if ( TTF_InitFace( face ) )
-		return face;
-	// Now try as a bitmap font
-	if ( BMF_InitFace( face ) )
 		return face;
 
 	// Could not load
