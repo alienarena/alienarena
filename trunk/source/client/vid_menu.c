@@ -105,14 +105,14 @@ static menuaction_s		s_apply_action;
 static void BrightnessCallback( void *s )
 {
 	menuslider_s *slider = ( menuslider_s * ) s;
-	float gamma = slider->curvalue/10.0;
+	float gamma = (float)slider->curvalue/10.0;
 	Cvar_SetValue( "vid_gamma", gamma );
 }
 
 static void ContrastCallback( void *s )
 {
 	menuslider_s *slider = ( menuslider_s * ) s;
-	float contrast = slider->curvalue/10.0;
+	float contrast = (float)slider->curvalue/10.0;
 	Cvar_SetValue( "vid_contrast", contrast );
 }
 
@@ -120,7 +120,7 @@ static void BloomCallback( void *s )
 {
 	menuslider_s *slider = ( menuslider_s * ) s;
 
-	Cvar_SetValue( "r_bloom_intensity", slider->curvalue/10);
+	Cvar_SetValue( "r_bloom_intensity", (float)slider->curvalue/10.0f);
 }
 
 static void BloomSetCallback( void *s)
@@ -202,8 +202,6 @@ static void ApplyChanges( void *unused )
 	gamma = s_brightness_slider.curvalue/10.0;
 	contrast = s_contrast_slider.curvalue/10.0;
 
-	Cvar_SetValue( "vid_gamma", gamma );
-	Cvar_SetValue( "vid_contrast", contrast );
 	Cvar_SetValue( "gl_picmip", 3 - s_tq_slider.curvalue );
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
@@ -244,15 +242,9 @@ static void ApplyChanges( void *unused )
 	else
 		Cvar_SetValue( "gl_mode", s_mode_list.curvalue );
 
-	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
-	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
 	Cvar_SetValue( "r_overbrightbits",
 			(s_overbright_slider.curvalue == 3.0f ? 4.0f : s_overbright_slider.curvalue) );
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
-	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
-	Cvar_SetValue( "gl_glsl_postprocess", s_postprocess_box.curvalue);
-	Cvar_SetValue( "gl_glsl_shaders", s_glsl_box.curvalue);
-	Cvar_SetValue( "gl_usevbo", s_vbo_box.curvalue);
 
 	RS_FreeUnmarked();
 	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
@@ -356,8 +348,6 @@ void VID_MenuInit( void )
 	if ( s_mode_list.curvalue < 0 )
 		s_mode_list.curvalue = 0;
 
-	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
-
 	s_opengl_screen.nitems = 0;
 	
 	s_opengl_menu.generic.type = MTYPE_SUBMENU;
@@ -421,6 +411,7 @@ void VID_MenuInit( void )
 	s_bloom_slider.minvalue = 0;
 	s_bloom_slider.maxvalue = 20;
 	s_bloom_slider.generic.callback = BloomCallback;
+	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
 
 	s_overbright_slider.generic.type	= MTYPE_SLIDER;
 	s_overbright_slider.generic.name	= "overbright bits";
