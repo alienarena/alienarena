@@ -1789,10 +1789,17 @@ void Options_MenuInit( void )
 				options[i].generic.type = MTYPE_SPINCONTROL;
 				options[i].itemnames = (const char **) optionnames[i].extradata;
 				if (options[i].itemnames == doppler_effect_items)
+				{
 					// FIXME HACK
+					options[i].generic.type = MTYPE_SLIDER;
+					options[i].minvalue = 0;
+					options[i].maxvalue = 3;
 					options[i].generic.callback = UpdateDopplerEffectFunc;
+				}
 				else
+				{
 					options[i].generic.callback = TextVarSpinOptionFunc;
+				}
 				// FIXME HACK
 				if (!strcmp (optionnames[i].cvarname, "fnt_game"))
 				{
