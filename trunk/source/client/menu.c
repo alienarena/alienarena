@@ -430,23 +430,24 @@ void M_PopMenu (void)
 const char *Default_MenuKey (menuframework_s *m, int key)
 {
 	const char *sound = NULL;
-	menucommon_s *item;
-
-	item = cursor.menuitem;
 	
-	if (!item )
+	// this should work no matter what
+	if (key == K_ESCAPE)
+	{
+		M_PopMenu();
+		return menu_out_sound;
+	}
+
+	// the rest of these won't work unless there's a selected menu item
+	if (cursor.menuitem == NULL)
 		return NULL;
 	
-	m = item->parent;
-	
-	if ( item->type == MTYPE_FIELD && Field_Key( ( menufield_s * ) item, key ) )
+	// offer the keypress to the field key parser, see if it wants it
+	if (Field_Key (key))
 		return NULL;
 	
 	switch ( key )
 	{
-	case K_ESCAPE:
-		M_PopMenu();
-		return menu_out_sound;
 	case K_MWHEELUP:
 	case K_KP_UPARROW:
 	case K_UPARROW:
