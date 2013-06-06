@@ -351,9 +351,14 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *scre
 
 	cls.key_dest = key_menu;
 	
+	cursor.menulayer = m_menudepth;
+	
 	if (m_menudepth > 1)
 	{
 		int prev_natural, width;
+		
+		Menu_SelectMenu (screen);
+		
 		width = Menu_TrueWidth(*screen);
 		m_layers[m_menudepth].start_x = m_layers[m_menudepth-1].end_x;
 		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + width;
@@ -393,7 +398,13 @@ void M_PopMenu (void)
 	S_StartLocalSound( menu_out_sound );
 	if (m_menudepth < 1)
 		Com_Error (ERR_FATAL, "M_PopMenu: depth < 1");
+			
 	m_menudepth--;
+	
+	cursor.menulayer = m_menudepth;
+	
+	if (m_menudepth > 1)
+		Menu_SelectMenu (m_layers[m_menudepth].screen);
 	
 	m_drawfunc = m_layers[m_menudepth].draw;
 	m_keyfunc = m_layers[m_menudepth].key;
@@ -422,23 +433,16 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 	const char *sound = NULL;
 	menucommon_s *item;
 
-	if ( !m )
+	item = cursor.menuitem;
+	
+	if (!item )
 		return NULL;
 	
-	if ( ( item = Menu_ItemAtCursor( m ) ) != 0 )
-	{
-		if ( item->type == MTYPE_FIELD && Field_Key( ( menufield_s * ) item, key ) )
-				return NULL;
-		if ( item->type == MTYPE_SUBMENU )
-		{
-			menuframework_s *sm = (menuframework_s *) item;
-			if (sm->navagable && Menu_ContainsCursor (*sm))
-			{
-				return Default_MenuKey (sm, key);
-			}
-		}
-	}
-
+	m = item->parent;
+	
+	if ( item->type == MTYPE_FIELD && Field_Key( ( menufield_s * ) item, key ) )
+		return NULL;
+	
 	switch ( key )
 	{
 	case K_ESCAPE:
@@ -447,34 +451,27 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 	case K_MWHEELUP:
 	case K_KP_UPARROW:
 	case K_UPARROW:
-		m->cursor--;
-		refreshCursorLink();
-		Menu_AdjustCursor( m, -1 );
+		Menu_AdvanceCursor (-1);
 		break;
 	case K_TAB:
-		m->cursor++;
-		refreshCursorLink();
-		Menu_AdjustCursor( m, 1 );
-		break;
 	case K_MWHEELDOWN:
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
-		m->cursor++;
-		Menu_AdjustCursor( m, 1 );
+		Menu_AdvanceCursor (1);
 		break;
 	case K_KP_LEFTARROW:
 	case K_LEFTARROW:
-		Menu_SlideItem( m, -1 );
+		Menu_SlideItem (-1);
 		sound = menu_move_sound;
 		break;
 	case K_KP_RIGHTARROW:
 	case K_RIGHTARROW:
-		Menu_SlideItem( m, 1 );
+		Menu_SlideItem (1);
 		sound = menu_move_sound;
 		break;
 	case K_KP_ENTER:
 	case K_ENTER:
-		Menu_SelectItem( m );
+		Menu_SelectItem ();
 		sound = menu_move_sound;
 		break;
 	}
@@ -653,7 +650,10 @@ void CheckMainMenuMouse (void)
 	}
 
 	if (cursor.mouseaction)
+	{
+		cursor.menulayer = 1;
 		m_main_cursor = i;
+	}
 
 	MainMenuMouseHover = 1 + i;
 
@@ -908,7 +908,7 @@ static void Keys_MenuDraw (void)
 
 static const char *Keys_MenuKey (menuframework_s *screen, int key)
 {
-	menuaction_s *item = ( menuaction_s * ) Menu_ItemAtCursor (&s_keys_menu);
+	menuaction_s *item = ( menuaction_s * ) cursor.menuitem;
 
 	if ( bind_grab && !(cursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{
@@ -2732,7 +2732,6 @@ qboolean serveroutdated;
 void DeselectServer (void)
 {
 	serverindex = -1;
-	s_serverlist_submenu.force_highlight = false;
 	s_serverinfo_submenu.nitems = 0;
 	s_playerlist_scrollingmenu.nitems = 0;
 	s_modlist_submenu.nitems = 0;
@@ -2858,7 +2857,6 @@ void SearchLocalGames( void )
 {
 	m_num_servers = 0;
 	DeselectServer ();
-	s_serverlist_submenu.cursor = 0;
 	s_serverlist_submenu.nitems = 0;
 	s_serverlist_submenu.yscroll = 0;
 
@@ -3009,7 +3007,7 @@ void ServerList_SubmenuInit (void)
 		s_serverlist_rows[i].generic.type	= MTYPE_SUBMENU;
 		s_serverlist_rows[i].generic.callback = JoinServerFunc;
 		// undecided on this:
-/*		s_serverlist_rows[i].generic.cursorcallback = SelectServer;*/
+		s_serverlist_rows[i].generic.cursorcallback = SelectServer;
 		
 		s_serverlist_rows[i].nitems = 0;
 		s_serverlist_rows[i].horizontal = true;
@@ -3218,22 +3216,8 @@ void JoinServer_MenuDraw(void)
 	else
 		statusbar_text = "press ENTER or DBL CLICK to connect";
 
-	// FIXME: we really shouldn't have to set it in both places.
 	s_serverbrowser_screen.statusbar = statusbar_text;
 
-	s_serverlist_submenu.force_highlight = false;
-	if (serverindex != -1 && !Menu_ContainsCursor (s_serverlist_submenu))
-	{
-		s_serverlist_submenu.force_highlight = true;
-		// The order of the items in the menu list on-screen doesn't
-		// necessarily correspond to s_serverlist_rows and mservers,
-		// due to sorting. So we have to look for the item manually to set
-		// the cursor index.
-		s_serverlist_submenu.cursor = 0;
-		while (s_serverlist_submenu.items[s_serverlist_submenu.cursor] != &s_serverlist_rows[serverindex])
-			s_serverlist_submenu.cursor++;
-	}
-	
 	s_serverlist_submenu.nitems = m_num_servers;
 	if (serverindex == -1)
 		s_serverbrowser_screen.nitems = 1;
@@ -5443,13 +5427,14 @@ Menu Mouse Cursor
 =================================
 */
 
-void refreshCursorMenu (void)
-{
-	cursor.menu = NULL;
-}
 void refreshCursorLink (void)
 {
 	cursor.menuitem = NULL;
+}
+
+void refreshCursorMenu (void)
+{
+	// STUB
 }
 
 int Slider_CursorPositionX ( menuslider_s *s )
@@ -5497,33 +5482,36 @@ void Slider_CheckSlide( menuslider_s *s )
 		s->generic.callback( s );
 }
 
-void Menu_DragSlideItem (menuframework_s *menu, void *menuitem)
+void Menu_DragSlideItem (void)
 {
-	menuslider_s *slider = ( menuslider_s * ) menuitem;
+	menuslider_s *slider = ( menuslider_s * ) cursor.menuitem;
 
 	slider->curvalue = newSliderValueForX(cursor.x, slider);
 	Slider_CheckSlide ( slider );
 }
 
-void Menu_ClickSlideItem (menuframework_s *menu, void *menuitem)
+void Menu_ClickSlideItem (void)
 {
 	int min, max;
-	menuslider_s *slider = ( menuslider_s * ) menuitem;
+	menuslider_s *slider = ( menuslider_s * ) cursor.menuitem;
 
 	min = Item_GetX (*slider) + Slider_CursorPositionX(slider) - 4;
 	max = Item_GetX (*slider) + Slider_CursorPositionX(slider) + 4;
 
 	if (cursor.x < min)
-		Menu_SlideItem( menu, -1 );
+		Menu_SlideItem (-1 );
 	if (cursor.x > max)
-		Menu_SlideItem( menu, 1 );
+		Menu_SlideItem (1);
 }
 
 
 void _M_Think_MouseCursor (void)
 {
 	char * sound = NULL;
-	menuframework_s *m = (menuframework_s *)cursor.menu;
+	menuframework_s *m; 
+	
+	if (m_menudepth == 0)
+		return;
 
 	if (m_drawfunc == M_Main_Draw) //have to hack for main menu :p
 	{
@@ -5545,6 +5533,11 @@ void _M_Think_MouseCursor (void)
 			return;
 		}
 	}
+	
+	if (cursor.menuitem == NULL)
+		return;
+	
+	m = ((menuitem_s *)cursor.menuitem)->generic.parent;
 	
 	if (!m)
 		return;
@@ -5578,14 +5571,14 @@ void _M_Think_MouseCursor (void)
 	{
 		if (cursor.menuitemtype == MTYPE_SLIDER)
 		{
-			Menu_DragSlideItem(m, cursor.menuitem);
+			Menu_DragSlideItem ();
 		}
 		else if (!cursor.buttonused[MOUSEBUTTON1])
 		{
 			if (cursor.menuitemtype == MTYPE_SPINCONTROL)
-				Menu_SlideItem( m, 1 );
+				Menu_SlideItem (1);
 			else
-				Menu_MouseSelectItem( cursor.menuitem );
+				Menu_SelectItem ();
 			
 			// rate-limit repeat clicking
 			cursor.buttonused[MOUSEBUTTON1] = true;
@@ -5596,9 +5589,9 @@ void _M_Think_MouseCursor (void)
 	else if (cursor.buttondown[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2] && !cursor.buttonused[MOUSEBUTTON2])
 	{
 		if (cursor.menuitemtype == MTYPE_SPINCONTROL)
-			Menu_SlideItem( m, -1 );
+			Menu_SlideItem (-1);
 		else if (cursor.menuitemtype == MTYPE_SLIDER)
-			Menu_ClickSlideItem(m, cursor.menuitem);
+			Menu_ClickSlideItem ();
 		else
 			return;
 
@@ -5684,30 +5677,18 @@ int M_Transition (int progress, int target)
 enum thinkredirect_action
 {
 	think_draw,
-	think_key,
 	think_mouse
 };
 
-void M_ThinkRedirect (enum thinkredirect_action action, int key)
+void M_ThinkRedirect (enum thinkredirect_action action)
 {
 	int base_offset, shove_offset;
 	int depth_max;
 	int i;
-	const char *s;
 	int old_menudepth = m_menudepth;
 		
 	if (cls.key_dest != key_menu)
 		return;
-	
-	if (action == think_key && key == K_ESCAPE)
-	{
-		if ((s = m_keyfunc (m_layers[m_menudepth].screen, key)))
-			S_StartLocalSound (s);
-		return;
-	}
-	
-	if (action == think_draw)
-		refreshCursorMenu();
 	
 	depth_max = m_menudepth;
 	base_offset = 0;
@@ -5773,10 +5754,12 @@ void M_ThinkRedirect (enum thinkredirect_action action, int key)
 			m_layers[i].draw();
 		else if (cursor.x >= global_menu_xoffset && cursor.x <= next_xoffset && i <= old_menudepth)
 		{
-			if (action == think_key && m_layers[i].key != NULL && (s = m_layers[i].key (m_layers[i].screen, key)))
-				S_StartLocalSound( s );
-			else if (action == think_mouse)
+			if (action == think_mouse)
+			{
+				Menu_AssignCursor (m_layers[i].screen, i);
 				_M_Think_MouseCursor ();
+/*				return;*/
+			}
 		}
 		
 		if (m_menudepth != i)
@@ -5785,6 +5768,8 @@ void M_ThinkRedirect (enum thinkredirect_action action, int key)
 	
 	if (action != think_draw)
 		return;
+	
+	Menu_DrawHighlight ();
 	
 	global_menu_xoffset_progress = M_Transition (global_menu_xoffset_progress, global_menu_xoffset_target);
 	if (global_menu_xoffset_progress == global_menu_xoffset_target)
@@ -5809,20 +5794,33 @@ void M_Draw (void)
 	// draw a black background unless it will cover the console
 	if (m_menudepth >= 1)
 		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
-	M_ThinkRedirect (think_draw, 0);
+	M_ThinkRedirect (think_draw);
 }
 
 // send key presses to the appropriate menu
 void M_Keydown (int key)
 {
+	const char *s;
+	
 	if (global_menu_xoffset_target != 0)
 		return;
 	
-	M_ThinkRedirect (think_key, key);
+	if (key == K_ESCAPE)
+	{
+		if ((s = m_keyfunc (m_layers[m_menudepth].screen, key)))
+			S_StartLocalSound (s);
+		return;
+	}
+	
+	if (cursor.menulayer < 1)
+		return;
+	
+	if (m_layers[cursor.menulayer].key != NULL && (s = m_layers[cursor.menulayer].key (m_layers[cursor.menulayer].screen, key)))
+		S_StartLocalSound( s );
 }
 
 // send mouse movement to the appropriate menu
 void M_Think_MouseCursor (void)
 {
-	M_ThinkRedirect (think_mouse, 0);
+	M_ThinkRedirect (think_mouse);
 } 

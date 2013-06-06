@@ -360,8 +360,8 @@ typedef struct
 
 	//this is the active item that cursor is on.
 	int			menuitemtype;
+	int			menulayer;
 	void		*menuitem;
-	void		*menu;
 	
 	//this is whatever menuitem it was on when a click-and-drag maneuver was
 	//begun.

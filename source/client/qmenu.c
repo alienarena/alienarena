@@ -37,7 +37,7 @@ static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw (menuslider_s *s, FNT_font_t font);
 static void	 SpinControl_Draw (menulist_s *s, FNT_font_t font);
 static void	 SpinControl_DoSlide( menulist_s *s, int dir );
-static qboolean	SubMenu_Draw (menuframework_s *s, FNT_font_t font);
+static void  SubMenu_Draw (menuframework_s *s, FNT_font_t font);
 static void  Menu_DrawString_Core (int x, int y, const char *string, unsigned int cmode, unsigned int align, const float *color);
 
 static void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float base_size);
@@ -136,7 +136,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	menu_box.width = f->generic.visible_length*font->width;
 	FNT_BoundedPrint (font, f->buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
 	
-	if ( Menu_ItemAtCursor( f->generic.parent ) == f )
+	if ( cursor.menuitem == f )
 	{
 		if ( ( ( int ) ( Sys_Milliseconds() / 300 ) ) & 1 )
 			Draw_StretchPic (menu_box.x + menu_box.width - font->size / 8, menu_box.y-1, font->size, font->size+4, "menu/field_cursor");
@@ -271,59 +271,105 @@ void _Menu_AddItem( menuframework_s *menu, menucommon_s *item )
 	}
 }
 
-/*
-** Menu_AdjustCursor
-**
-** This function takes the given menu, the direction, and attempts
-** to adjust the menu's cursor so that it's at the next available
-** slot.
-*/
-void Menu_AdjustCursor( menuframework_s *m, int dir )
+// Returns true or false depending on whether the given item is selectable.
+static inline qboolean Menu_ItemSelectable (menuitem_s *item)
 {
-	menucommon_s *citem;
-	
-	/*
-	** see if it's in a valid spot
-	*/
-	if ( m->cursor >= 0 && m->cursor < m->nitems )
-	{
-		if ( ( citem = Menu_ItemAtCursor( m ) ) != 0 )
-		{
-			if ( citem->type != MTYPE_NOT_INTERACTIVE )
-				return;
-		}
-	}
-	
-	/*
-	** it's not in a valid spot, so crawl in the direction indicated until we
-	** find a valid spot
-	*/
-	if ( dir == 1 )
-	{
-		while (1 )
-		{
-			citem = Menu_ItemAtCursor( m );
-			if ( citem )
-				break;
-			m->cursor += dir;
-			if ( m->cursor >= m->nitems )
-				m->cursor = 0;
-		}
-	}
-	else
-	{
-		while ( 1 )
-		{
-			citem = Menu_ItemAtCursor( m );
-			if ( citem )
-				break;
-			m->cursor += dir;
-			if ( m->cursor < 0 )
-				m->cursor = m->nitems - 1;
-		}
-	}
+	if (item->generic.type == MTYPE_NOT_INTERACTIVE)
+		return false;
+	if (item->generic.type == MTYPE_SUBMENU)
+		return ((menuframework_s *)item)->enable_highlight;
+	return true;
 }
 
+// Attempt to select the first reasonable menu item in the specified menu tree
+// as the cursor item. Returns false if unsuccessful (if there are no 
+// selectable menu items within the menu or any of its submenus.) Does nothing
+// if the cursor item is already within the menu or one of its submenus.
+qboolean Menu_SelectMenu (menuframework_s *menu)
+{
+	int			i;
+	menuitem_s	*item;
+	
+	item = cursor.menuitem;
+	
+	if (item != NULL)
+	{
+		menuframework_s *menu2 = item->generic.parent;
+		while (menu2 != NULL)
+		{
+			if (menu2 == menu)
+				return true;
+			menu2 = menu2->generic.parent;
+		}
+	}
+	
+	cursor.menuitem = NULL;
+	
+	for (i = 0; i < menu->nitems; i++)
+	{
+		item = menu->items[i];
+		if (Menu_ItemSelectable (item))
+		{
+			cursor.menuitem = item;
+			cursor.menuitemtype = item->generic.type;
+			return true;
+		}
+		if (item->generic.type == MTYPE_SUBMENU)
+		{
+			menuframework_s *sm = (menuframework_s *)item;
+			if (sm->navagable && Menu_SelectMenu (sm))
+				return true;
+		}
+	}
+	
+	return false;
+}
+
+// Find the index of the item within its parent menu.
+int Menu_ItemIndex (menuitem_s *item)
+{
+	int 			ret;
+	menuframework_s	*menu;
+	
+	menu = item->generic.parent;
+	
+	for (ret = 0; ret < menu->nitems; ret++)
+	{
+		if (menu->items[ret] == item)
+			return ret;
+	}
+	
+	Com_Error (ERR_FATAL, "CAN'T HAPPEN: Item is not in its own parent menu!");
+}
+
+// Selects either the next or the previous menu item.
+void Menu_AdvanceCursor (int dir)
+{
+	int				item_index;
+	menuframework_s	*menu;
+	menuitem_s		*item, *newitem;
+
+	item = cursor.menuitem;
+	
+	if (item == NULL)
+		return;
+	
+	menu = item->generic.parent;
+	
+	item_index = Menu_ItemIndex (item);
+	
+	do 
+	{
+		item_index += dir;
+		item_index += menu->nitems;
+		item_index %= menu->nitems;
+		newitem = menu->items[item_index];
+	} while (!Menu_ItemSelectable (newitem));
+	
+	cursor.menuitem = newitem;
+	cursor.menuitemtype = newitem->generic.type;
+}
+	
 void Menu_Center( menuframework_s *menu )
 {
 	menu->y = ( (int)VID_HEIGHT - Menu_TrueHeight(*menu) ) / 2;
@@ -647,7 +693,6 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 {
 	int i;
 	menuitem_s *item;
-	qboolean submenu_has_mouse = false;
 	
 	if (menu->bordertexture != NULL)
 		Menu_DrawBorder (menu, menu->bordertitle, menu->bordertexture);
@@ -705,94 +750,85 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 			Text_Draw ((menutxt_s *) menu->items[i], font);
 			break;
 		case MTYPE_SUBMENU:
-			if (SubMenu_Draw ((menuframework_s *) menu->items[i], font))
-			{
-				// Prevent anything from being highlighted in this menu if a
-				// submenu is being navigated. Also, prevent cursor.menu from
-				// being overwritten, allowing mouse clicks to be forwarded
-				// to the submenu.
-				submenu_has_mouse = true;
-				menu->cursor = i;
-			}
+			SubMenu_Draw ((menuframework_s *) menu->items[i], font);
 			break;
 		}
 	}
+}
+
+void Menu_AssignCursor (menuframework_s *menu, int layernum)
+{
+	int i;
+	menuitem_s *item, *lastitem;
 	
-	if (!menu->navagable)
+	if (!menu->navagable || !cursor.mouseaction)
 		return;
 
-	if (Menu_ContainsCursor (*menu) && !submenu_has_mouse)
+	lastitem = (menuitem_s *)cursor.menuitem;
+
+	for ( i = menu->nitems; i >= 0 ; i-- )
 	{
-		cursor.menu = menu;
+		int mincoord, maxcoord;
 
-		if (cursor.mouseaction)
+		item = ((menuitem_s * )menu->items[i]);
+
+		if (!item || item->generic.type == MTYPE_TEXT)
+			continue;
+
+		if (menu->horizontal)
 		{
-			menuitem_s *lastitem = cursor.menuitem;
-			refreshCursorLink();
-
-			for ( i = menu->nitems; i >= 0 ; i-- )
-			{
-				int min[2], max[2];
-
-				item = ((menuitem_s * )menu->items[i]);
-
-				if (!item || item->generic.type == MTYPE_TEXT)
-					continue;
-
-				if (menu->horizontal)
-				{
-					max[0] = min[0] = Item_GetX (*item); 
-					max[0] += CHASELINK(item->generic.rsize).x;
-					min[0] -= CHASELINK(item->generic.lsize).x;
-					min[1] = 0;
-					max[1] = VID_HEIGHT;
-				}
-				else
-				{
-					max[1] = min[1] = Item_GetY (*item);
-					max[1] += max (CHASELINK(item->generic.lsize).y, CHASELINK(item->generic.rsize).y);
-					min[0] = 0;
-					max[0] = VID_WIDTH;
-				}
-				
-				if (cursor.x>=min[0] &&
-					cursor.x<=max[0] &&
-					cursor.y>=min[1] &&
-					cursor.y<=max[1])
-				{
-					// Selected a new item-- reset double-click count
-					if (lastitem!=item)
-					{
-						int j;
-						
-						for (j=0;j<MENU_CURSOR_BUTTON_MAX;j++)
-						{
-							cursor.buttonclicks[j] = 0;
-							cursor.buttontime[j] = 0;
-						}
-					}
-
-					cursor.menuitem = item;
-					cursor.menuitemtype = item->generic.type;
-
-					menu->cursor = i;
-
-					break;
-				}
-			}
+			maxcoord = mincoord = Item_GetX (*item); 
+			maxcoord += CHASELINK(item->generic.rsize).x;
+			mincoord -= CHASELINK(item->generic.lsize).x;
+			if (cursor.x < mincoord || cursor.x > maxcoord)
+				continue;
+		}
+		else
+		{
+			maxcoord = mincoord = Item_GetY (*item);
+			maxcoord += max (CHASELINK(item->generic.lsize).y, CHASELINK(item->generic.rsize).y);
+			if (cursor.y < mincoord || cursor.y > maxcoord)
+				continue;
+		}
 		
+		if (item->generic.type == MTYPE_SUBMENU && ((menuframework_s *)item)->navagable)
+		{
+			Menu_AssignCursor ((menuframework_s *)item, layernum);
+			return;
+		}
+		
+		// Selected a new item-- reset double-click count
+		if (lastitem != item)
+		{
+			memset (cursor.buttonclicks, 0, sizeof(cursor.buttonclicks));
+			memset (cursor.buttontime, 0, sizeof(cursor.buttontime));
 		}
 
+		cursor.menuitem = item;
+		cursor.menuitemtype = item->generic.type;
 		cursor.mouseaction = false;
-	}
-	else if (!menu->force_highlight)
+		cursor.menulayer = layernum;
+		
 		return;
+	}
+}
 
-	item = Menu_ItemAtCursor( menu );
+void Menu_DrawHighlight (void)
+{
+	menuitem_s *item;
+	menuframework_s *menu;
+	FNT_font_t font = FNT_AutoGet (CL_menuFont);
+	
+	item = cursor.menuitem;
+	
+	if (item == NULL)
+		return;
+		
+	menu = item->generic.parent;
 	
 	// Scrolling - make sure the selected item is entirely on screen if
 	// possible. TODO: add smoothing?
-	if (item && menu->maxheight != 0)
+	if (menu->maxheight != 0)
 	{
 		int y = CHASELINK(item->generic.y);
 		menu->yscroll = clamp (menu->yscroll, y, y + Item_GetHeight(*item) - menu->maxheight);
@@ -800,14 +836,14 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 	
 	// no actions you can do with these types, so use them only for scrolling
 	// and then return
-	if (!item || item->generic.type == MTYPE_TEXT)
+	if (item->generic.type == MTYPE_NOT_INTERACTIVE)
 		return;
 
-	if (item && item->generic.cursorcallback)
+	if (item->generic.cursorcallback)
 		item->generic.cursorcallback (item, font);
 
 	// highlighting 
-	if ( item && item->generic.cursordraw )
+	if (item->generic.cursordraw )
 	{
 		item->generic.cursordraw( item, font );
 	}
@@ -815,7 +851,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 	{
 		menu->cursordraw( menu );
 	}
-	else if ( item && item->generic.type == MTYPE_SUBMENU && ((menuframework_s *)item)->enable_highlight)
+	else if (item->generic.type == MTYPE_SUBMENU && ((menuframework_s *)item)->enable_highlight)
 	{
 		menuframework_s *sm = (menuframework_s *)item;
 		// FIXME HACK: draw a solid background, then draw the submenu again
@@ -823,7 +859,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		Draw_Fill (Item_GetX (*item), Item_GetY (*item), CHASELINK(sm->lwidth) + CHASELINK(sm->rwidth), Menu_TrueHeight (*sm), 4);
 		SubMenu_Draw (sm, font);
 	}
-	else if ( item )
+	else
 	{
 		// FIXME copy and paste!
 		unsigned int align;
@@ -856,17 +892,11 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 			);
 	}
 
-	if ( item )
-	{
-		if ( item->generic.statusbar )
-			Menu_DrawStatusBar( item->generic.statusbar );
-	}
+	if ( item->generic.statusbar )
+		Menu_DrawStatusBar( item->generic.statusbar );
 
-	if ( item  && cursor.menuitem)
-	{
-		if ( item->generic.tooltip )
-			Menu_DrawToolTip( item->generic.tooltip );
-	}	
+	if ( item->generic.tooltip )
+		Menu_DrawToolTip( item->generic.tooltip );
 }
 
 // needed because global_menu_xoffset must be added to only the top level of
@@ -1155,37 +1185,22 @@ void Menu_DrawColorString ( int x, int y, const char *str )
 	Menu_DrawString_Core (x, y, str, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, dark_color);
 }
 
-void *Menu_ItemAtCursor( menuframework_s *m )
+void Menu_SelectItem (void)
 {
-	if ( m->cursor < 0 || m->cursor >= m->nitems )
-		return 0;
-
-	return m->items[m->cursor];
-}
-
-void Menu_SelectItem( menuframework_s *s )
-{
-	menucommon_s *item = ( menucommon_s * ) Menu_ItemAtCursor( s );
-	if (item->callback != NULL)
+	menucommon_s *item = cursor.menuitem;
+	if (item != NULL && item->callback != NULL)
 		item->callback( item );
 }
-void Menu_MouseSelectItem( menucommon_s *item )
-{
-	if (item->callback != NULL)
-		item->callback( item );
-}
+
 void Menu_SetStatusBar( menuframework_s *m, const char *string )
 {
 	m->statusbar = string;
 }
 
-void Menu_SlideItem( menuframework_s *s, int dir )
+void Menu_SlideItem (int dir)
 {
-	menucommon_s *item = ( menucommon_s * ) Menu_ItemAtCursor( s );
+	menucommon_s *item = cursor.menuitem;
 	
-	while (item->type == MTYPE_SUBMENU && ((menuframework_s*)item)->navagable)
-		item = (menucommon_s *) Menu_ItemAtCursor ((menuframework_s *)item);
-
 	if ( item )
 	{
 		switch ( item->type )
@@ -1352,7 +1367,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	}
 }
 
-qboolean SubMenu_Draw (menuframework_s *sm, FNT_font_t font)
+void SubMenu_Draw (menuframework_s *sm, FNT_font_t font)
 {
 	sm->x = Item_GetX (*sm);
 	if (sm->generic.flags & QMF_SNUG_LEFT)
@@ -1361,7 +1376,6 @@ qboolean SubMenu_Draw (menuframework_s *sm, FNT_font_t font)
 	if (sm->navagable)
 		Menu_DrawScrollbar (sm);
 	_Menu_Draw (sm, font);
-	return (sm->navagable && Menu_ContainsCursor (*sm));
 }
 
 // utility functions
