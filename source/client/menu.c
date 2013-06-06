@@ -3489,6 +3489,27 @@ ADD BOTS MENU
 
 =============================================================================
 */
+
+// For going from weapon pickup name to weapon icon. Used for displaying icon
+// previews of the bots' favorite weapons.
+static char *weapon_icon_names[][2] =
+{
+	{"Hover",			"hover"},
+	{"Bomber",			"bomber"},
+	{"Strafer",			"strafer"},
+	{"Grapple",			"grapple"},
+	{"Blaster",			"blaster"},
+	{"Violator",		"violator"},
+	{"Alien Smartgun",	"smartgun"},
+	{"Pulse Rifle",		"chaingun"},
+	{"Flame Thrower",	"flamethrower"},
+	{"Rocket Launcher",	"rocketlauncher"},
+	{"Alien Disruptor",	"disruptor"},
+	{"Disruptor",		"beamgun"},
+	{"Alien Vaporizer",	"vaporizor"} // note the different spellings
+};
+#define num_weapon_icons (sizeof(weapon_icon_names)/sizeof(weapon_icon_names[0]))
+
 static menuframework_s	s_addbots_screen;
 static menuframework_s	s_addbots_menu;
 static menuframework_s	s_addbots_header;
@@ -3656,7 +3677,7 @@ void AddbotFunc(void *self)
 }
 void AddBots_MenuInit( void )
 {
-	int i;
+	int i, j;
 
 	totalbots = 0;
 
@@ -3709,9 +3730,23 @@ void AddBots_MenuInit( void )
 		LINK(s_addbots_skill_label.generic.x, bots[i].m_skill.generic.x);
 		Menu_AddItem (&bots[i].row, &bots[i].m_skill);
 		
-		bots[i].m_faveweap.generic.type = MTYPE_TEXT;
+		bots[i].m_faveweap.generic.type = MTYPE_NOT_INTERACTIVE;
 		bots[i].m_faveweap.generic.flags = QMF_LEFT_JUSTIFY;
+		VectorSet (bots[i].m_faveweap.generic.localints, 4, 2, 0);
+		bots[i].m_faveweap.generic.itemsizecallback = NULL;
+		bots[i].m_faveweap.generic.itemdraw = NULL;
 		bots[i].m_faveweap.generic.name = bots[i].faveweap;
+		for (j = 0; j < num_weapon_icons; j++)
+		{
+			if (!strcmp (bots[i].faveweap, weapon_icon_names[j][0]))
+			{
+				bots[i].m_faveweap.generic.itemsizecallback = PicSizeFunc;
+				bots[i].m_faveweap.generic.itemdraw = PicDrawFunc;
+				bots[i].m_faveweap.generic.localstrings[0] = weapon_icon_names[j][1];
+				bots[i].m_faveweap.generic.name = NULL;
+				break;
+			}
+		}
 		LINK(s_addbots_faveweap_label.generic.x, bots[i].m_faveweap.generic.x);
 		Menu_AddItem (&bots[i].row, &bots[i].m_faveweap);
 
