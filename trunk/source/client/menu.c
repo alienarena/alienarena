@@ -3732,7 +3732,9 @@ void AddBots_MenuInit( void )
 		
 		bots[i].m_faveweap.generic.type = MTYPE_NOT_INTERACTIVE;
 		bots[i].m_faveweap.generic.flags = QMF_LEFT_JUSTIFY;
-		VectorSet (bots[i].m_faveweap.generic.localints, 4, 2, 0);
+		// Start by assuming that we won't find a thumbnail image for the 
+		// bot's favorite weapon, and set the widget up to simply show the
+		// weapon's name.
 		bots[i].m_faveweap.generic.itemsizecallback = NULL;
 		bots[i].m_faveweap.generic.itemdraw = NULL;
 		bots[i].m_faveweap.generic.name = bots[i].faveweap;
@@ -3740,10 +3742,13 @@ void AddBots_MenuInit( void )
 		{
 			if (!strcmp (bots[i].faveweap, weapon_icon_names[j][0]))
 			{
+				// We have found a matching thumbnail image, so disable the
+				// display of text and instead show the image.
+				bots[i].m_faveweap.generic.name = NULL;
+				VectorSet (bots[i].m_faveweap.generic.localints, 4, 2, 0);
 				bots[i].m_faveweap.generic.itemsizecallback = PicSizeFunc;
 				bots[i].m_faveweap.generic.itemdraw = PicDrawFunc;
 				bots[i].m_faveweap.generic.localstrings[0] = weapon_icon_names[j][1];
-				bots[i].m_faveweap.generic.name = NULL;
 				break;
 			}
 		}
