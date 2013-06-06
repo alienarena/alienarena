@@ -714,11 +714,14 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 			break;
 		case MTYPE_SUBMENU:
 			if (SubMenu_Draw ((menuframework_s *) menu->items[i], font))
+			{
 				// Prevent anything from being highlighted in this menu if a
 				// submenu is being navigated. Also, prevent cursor.menu from
 				// being overwritten, allowing mouse clicks to be forwarded
 				// to the submenu.
 				submenu_has_mouse = true;
+				menu->cursor = i;
+			}
 			break;
 		}
 	}
@@ -1187,6 +1190,9 @@ void Menu_SetStatusBar( menuframework_s *m, const char *string )
 void Menu_SlideItem( menuframework_s *s, int dir )
 {
 	menucommon_s *item = ( menucommon_s * ) Menu_ItemAtCursor( s );
+	
+	while (item->type == MTYPE_SUBMENU && ((menuframework_s*)item)->navagable)
+		item = (menucommon_s *) Menu_ItemAtCursor ((menuframework_s *)item);
 
 	if ( item )
 	{
