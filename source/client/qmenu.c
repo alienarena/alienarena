@@ -1024,9 +1024,12 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 	
 	if (title != NULL)
 	{
+		int i;
 		int textwidth = Menu_PredictSize (title);
 		Menu_DrawHorizBar ("menu/slide_border", x+w/2-textwidth/2-2, y-font->size-2, textwidth+4, font->size+4);
-		Menu_DrawString (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
+		// Redraw multiple times to get a bold effect
+		for (i = 0; i < 4; i++)
+			Menu_DrawString (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, highlight_color);
 	}
 }
 
