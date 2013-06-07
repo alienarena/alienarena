@@ -1316,7 +1316,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		);
 		strcpy( buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
 		Menu_DrawString_Core (
-			item_x, item_y, 
+			item_x, menu_box.y + menu_box.height, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);
