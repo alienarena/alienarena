@@ -38,14 +38,9 @@ static void	 Slider_Draw (menuslider_s *s, FNT_font_t font);
 static void	 SpinControl_Draw (menulist_s *s, FNT_font_t font);
 static void	 SpinControl_DoSlide( menulist_s *s, int dir );
 static void  SubMenu_Draw (menuframework_s *s, FNT_font_t font);
-static void  Menu_DrawString_Core (int x, int y, const char *string, unsigned int cmode, unsigned int align, const float *color);
 
 static void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float base_size);
 static void Menu_DrawVertBar (const char *pathbase, float x, float y, float h, float base_size);
-
-void Menu_DrawStringDark( int x, int y, const char *string );
-void Menu_DrawStringR2L( int x, int y, const char *string );
-void Menu_DrawStringR2LDark( int x, int y, const char *string );
 
 void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *prefix);
 
@@ -107,7 +102,7 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 	else
 		cmode = FNT_CMODE_QUAKE_SRS;
 	
-	Menu_DrawString_Core (
+	Menu_DrawString (
 		text_x, text_y,
 		a->generic.name, cmode, align, color
 	);
@@ -994,7 +989,7 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 	{
 		int textwidth = Menu_PredictSize (title);
 		Menu_DrawHorizBar ("menu/slide_border", x+w/2-textwidth/2-2, y-font->size-2, textwidth+4, font->size+4);
-		Menu_DrawString_Core (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
+		Menu_DrawString (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
 	}
 }
 
@@ -1092,7 +1087,7 @@ void Menu_DrawToolTip( const char *string )
 	if ( string )
 	{
 		Menu_DrawHorizBar ("menu/slide_border", cursor.x-2, cursor.y-font->size-4, Menu_PredictSize (string)+4, font->size+4);
-		Menu_DrawString_Core (
+		Menu_DrawString (
 			cursor.x, cursor.y - font->size - 4, 
 			string, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
@@ -1100,7 +1095,7 @@ void Menu_DrawToolTip( const char *string )
 	}
 }
 
-void Menu_DrawString_Core (int x, int y, const char *string, unsigned int cmode, unsigned int align, const float *color)
+void Menu_DrawString (int x, int y, const char *string, unsigned int cmode, unsigned int align, const float *color)
 {
 	FNT_font_t		font;
 	
@@ -1144,29 +1139,8 @@ void Menu_DrawStatusBar( const char *string )
 	if ( string )
 	{
 		Draw_Fill( 0, VID_HEIGHT-font->size-10, VID_WIDTH, font->size+10, 4 );
-		Menu_DrawString_Core (VID_WIDTH/2, VID_HEIGHT-font->size-5, string, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
+		Menu_DrawString (VID_WIDTH/2, VID_HEIGHT-font->size-5, string, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, light_color);
 	}
-}
-
-void Menu_DrawString( int x, int y, const char *string )
-{
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_LEFT, light_color);
-}
-void Menu_DrawStringDark( int x, int y, const char *string )
-{
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_LEFT, dark_color);
-}
-void Menu_DrawStringR2L( int x, int y, const char *string )
-{
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_RIGHT, light_color);
-}
-void Menu_DrawStringR2LDark( int x, int y, const char *string )
-{
-	Menu_DrawString_Core (x, y, string, FNT_CMODE_NONE, FNT_ALIGN_RIGHT, dark_color);
-}
-void Menu_DrawColorString ( int x, int y, const char *str )
-{
-	Menu_DrawString_Core (x, y, str, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, dark_color);
 }
 
 void Menu_SelectItem (void)
@@ -1211,7 +1185,7 @@ void Label_Draw (menutxt_s *s, FNT_font_t font)
 	else
 		align = FNT_ALIGN_RIGHT;
 	
-	Menu_DrawString_Core (
+	Menu_DrawString (
 		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (font),
 		s->generic.name, FNT_CMODE_QUAKE_SRS, align, dark_color
 	);
@@ -1299,7 +1273,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	}
 	else if ( !strchr( s->itemnames[s->curvalue], '\n' ) )
 	{
-		Menu_DrawString_Core (
+		Menu_DrawString (
 			item_x, item_y, 
 			s->itemnames[s->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
@@ -1309,13 +1283,13 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	{
 		strcpy( buffer, s->itemnames[s->curvalue] );
 		*strchr( buffer, '\n' ) = 0;
-		Menu_DrawString_Core (
+		Menu_DrawString (
 			item_x, item_y, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);
 		strcpy( buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
-		Menu_DrawString_Core (
+		Menu_DrawString (
 			item_x, menu_box.y + menu_box.height, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
