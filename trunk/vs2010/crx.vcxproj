@@ -192,7 +192,6 @@
     <ClCompile Include="$(SrcDir)qcommon\net_chan.c" />
     <ClCompile Include="$(SrcDir)qcommon\pmove.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_bloom.c" />
-    <ClCompile Include="$(SrcDir)ref_gl\r_bmfont.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_draw.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_image.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_iqm.c" />
@@ -256,7 +255,6 @@
     <ClInclude Include="$(SrcDir)ref_gl\anorms.h" />
     <ClInclude Include="$(SrcDir)ref_gl\anormtab.h" />
     <ClInclude Include="$(SrcDir)ref_gl\qgl.h" />
-    <ClInclude Include="$(SrcDir)ref_gl\r_bmfont.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_image.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_iqm.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_local.h" />
