@@ -2076,19 +2076,23 @@ void Options_MenuInit( void )
 					options[i].generic.callback = TextVarSpinOptionFunc;
 				}
 				// FIXME HACK
-				if (!strcmp (optionnames[i].cvarname, "fnt_game"))
+				if (options[i].itemnames == font_names)
 				{
 					options[i].generic.itemsizecallback = FontSelectorSizeFunc;
 					options[i].generic.itemdraw = FontSelectorDrawFunc;
 					options[i].generic.callback = FontSelectorFunc;
-					options[i].generic.localptrs[0] = &CL_gameFont;
-				}
-				else if (!strcmp (optionnames[i].cvarname, "fnt_console"))
-				{
-					options[i].generic.itemsizecallback = FontSelectorSizeFunc;
-					options[i].generic.itemdraw = FontSelectorDrawFunc;
-					options[i].generic.callback = FontSelectorFunc;
-					options[i].generic.localptrs[0] = &CL_consoleFont;
+					if (!strcmp (optionnames[i].cvarname, "fnt_game"))
+					{
+						options[i].generic.localptrs[0] = &CL_gameFont;
+					}
+					else if (!strcmp (optionnames[i].cvarname, "fnt_console"))
+					{
+						options[i].generic.localptrs[0] = &CL_consoleFont;
+					}
+					else if (!strcmp (optionnames[i].cvarname, "fnt_menu"))
+					{
+						options[i].generic.localptrs[0] = &CL_menuFont;
+					}
 				}
 				break;
 			case option_hudspincontrol:
