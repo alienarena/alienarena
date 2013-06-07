@@ -5792,7 +5792,7 @@ void M_Draw (void)
 {
 	if (cls.key_dest != key_menu)
 		return;
-	Draw_Fill (0, 0, viddef.width, viddef.height, 0);
+	Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0, 0, 0, 1));
 	Menuscreens_Animate ();
 	Menu_DrawHighlight ();
 	M_Draw_Cursor();

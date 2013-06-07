@@ -185,7 +185,7 @@ typedef struct
 	// for map changing, etc
 	void	(*AddCommandString) (char *text);
 
-	void	(*DebugGraph) (float value, int color);
+	void	(*DebugGraph) (float value, const float color[]);
 
 	int		(*Sys_Milliseconds) (void);
 

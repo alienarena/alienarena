@@ -526,36 +526,23 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (float x, float y, float w, float h, int c)
+void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 {
-	union
-	{
-		unsigned	c;
-		byte		v[4];
-	} color;
-
-	if ( (unsigned)c > 255)
-		Com_Error (ERR_FATAL, "Draw_Fill: bad color");
-
 	qglDisable (GL_TEXTURE_2D);
-
-	color.c = d_8to24table[c];
-	qglColor3f (color.v[0]/255.0,
-		color.v[1]/255.0,
-		color.v[2]/255.0);
-
+	GLSTATE_ENABLE_ALPHATEST;
+	qglColor4fv (rgba);
+	
 	qglBegin (GL_QUADS);
-
-	qglVertex2f (x,y);
-	qglVertex2f (x+w, y);
-	qglVertex2f (x+w, y+h);
-	qglVertex2f (x, y+h);
-
+		qglVertex2f (x,y);
+		qglVertex2f (x+w, y);
+		qglVertex2f (x+w, y+h);
+		qglVertex2f (x, y+h);
 	qglEnd ();
+	
+	GLSTATE_DISABLE_ALPHATEST;
 	qglColor3f (1,1,1);
 	qglEnable (GL_TEXTURE_2D);
 }
-
 //=============================================================================
 
 /*

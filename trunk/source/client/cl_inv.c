@@ -102,7 +102,7 @@ void CL_DrawInventory (void)
 	colWidth[ 2 ] = box.width = 100 * scale , box.height = 0;
 	FNT_BoundedPrint( font , "Item" , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
 
-	Draw_Fill( colPos[ 0 ] + scale , box.y + 11 * scale , 302 * scale , 2 * scale , 15 );
+	Draw_Fill( colPos[ 0 ] + scale , box.y + 11 * scale , 302 * scale , 2 * scale , RGBA8(235,235,235,255));
 
 	// Draw inventory contents
 	box.y += 16 * scale;
