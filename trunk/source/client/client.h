@@ -793,7 +793,6 @@ perftest_t *get_perftest(char *name);
 //mouse
 //
 void refreshCursorLink (void);
-void refreshCursorMenu (void);
 void M_Think_MouseCursor (void);
 
 //

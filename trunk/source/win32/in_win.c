@@ -219,7 +219,6 @@ void IN_DeactivateMouse (void)
 IN_StartupMouse
 ===========
 */
-void refreshCursorMenu(void);
 void refreshCursorLink (void);
 void IN_StartupMouse (void)
 {
@@ -229,8 +228,6 @@ void IN_StartupMouse (void)
 	if ( !cv->value )
 		return;
 
-	// Knightmare- added Psychospaz's menu mouse support
-	refreshCursorMenu();
 	refreshCursorLink();
 
 	cursor.mouseaction = false;
