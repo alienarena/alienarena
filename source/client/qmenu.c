@@ -32,7 +32,7 @@ static void	 ItemName_Draw (menuaction_s *a, FNT_font_t font, const float *color
 static void	 Action_Draw (menuaction_s *a, FNT_font_t font);
 static void  Menu_DrawStatusBar( const char *string );
 static void  Menu_DrawToolTip( const char *string );
-static void  Label_Draw (menutxt_s *s, FNT_font_t font);
+static void  Label_Draw (menutxt_s *s, FNT_font_t font, const float *color);
 static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw (menuslider_s *s, FNT_font_t font);
 static void	 SpinControl_Draw (menulist_s *s, FNT_font_t font);
@@ -700,6 +700,18 @@ void Menu_AutoArrange (menuframework_s *menu)
 	}
 }
 
+static inline qboolean Item_ScrollVisible (menuframework_s *menu, menuitem_s *item)
+{
+	// scrolling disabled on this item
+	if (menu->maxheight == 0)
+		return true;
+	if (CHASELINK(item->generic.y)-menu->yscroll < 0)
+		return false;
+	if (CHASELINK(item->generic.y)-menu->yscroll + Item_GetHeight(*item) > menu->maxheight)
+		return false;
+	return true;
+}
+
 void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 {
 	int i;
@@ -717,13 +729,9 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 	for ( i = 0; i < menu->nitems; i++ )
 	{
 		item = ((menuitem_s * )menu->items[i]);
-		if (menu->maxheight != 0)
-		{
-			if (CHASELINK(item->generic.y)-menu->yscroll < 0)
-				continue;
-			if (CHASELINK(item->generic.y)-menu->yscroll + Item_GetHeight(*item) > menu->maxheight)
-				continue;
-		}
+		
+		if (!Item_ScrollVisible (menu, item))
+			continue;
 		
 		// TODO: cleaner method
 		if (item->generic.type == MTYPE_NOT_INTERACTIVE)
@@ -734,7 +742,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 			if (item->generic.namedraw != NULL)
 				item->generic.namedraw (item, font);
 			else
-				Label_Draw ((menutxt_s *) menu->items[i], font);
+				Label_Draw ((menutxt_s *) menu->items[i], font, dark_color);
 		}
 		else if (item->generic.type != MTYPE_SUBMENU)
 		{
@@ -821,17 +829,59 @@ void Menu_AssignCursor (menuframework_s *menu, int layernum)
 	}
 }
 
-void Menu_DrawHighlight (void)
+void Menu_DrawHighlightItem (menuitem_s *item);
+
+// Draws only the item labels, and draws everything highlighted. For cases 
+// where the menu itself is being used as a sort of complex widget.
+void Menu_DrawHighlightMenu (menuframework_s *menu, FNT_font_t font)
 {
+	int i;
 	menuitem_s *item;
-	menuframework_s *menu;
+	
+	for ( i = 0; i < menu->nitems; i++ )
+	{
+		item = ((menuitem_s * )menu->items[i]);
+		
+		if (!Item_ScrollVisible (menu, item))
+			continue;
+		
+		Menu_DrawHighlightItem (item);
+	}
+}
+
+void Menu_DrawHighlightItem (menuitem_s *item)
+{
 	FNT_font_t font = FNT_AutoGet (CL_menuFont);
 	
-	item = cursor.menuitem;
+	if (item->generic.cursorcallback)
+		item->generic.cursorcallback (item, font);
+
+	// highlighting 
+	if (item->generic.cursordraw != NULL)
+	{
+		item->generic.cursordraw( item, font );
+		return;
+	}
+	
+	if (item->generic.namedraw != NULL)
+		return;
+	
+	if (item->generic.type == MTYPE_SUBMENU && ((menuframework_s *)item)->enable_highlight)
+		Menu_DrawHighlightMenu ((menuframework_s *)item, font);
+	else if (item->generic.type == MTYPE_TEXT)
+		Label_Draw (item, font, highlight_color);
+	else
+		ItemName_Draw (item, font, highlight_color);
+}
+
+void Menu_DrawHighlight (void)
+{
+	menuframework_s *menu;
+	menuitem_s *item = cursor.menuitem;
 	
 	if (item == NULL)
 		return;
-		
+	
 	menu = item->generic.parent;
 	
 	// Scrolling - make sure the selected item is entirely on screen if
@@ -842,36 +892,22 @@ void Menu_DrawHighlight (void)
 		menu->yscroll = clamp (menu->yscroll, y, y + Item_GetHeight(*item) - menu->maxheight);
 	}
 	
+	if (item->generic.cursordraw == NULL && menu->cursordraw != NULL)
+	{
+		menu->cursordraw( menu );
+		return;
+	}
+	
+	if (item->generic.type == MTYPE_SUBMENU)
+		Menu_DrawBorder ((menuframework_s *)item, NULL, "menu/sm_");
+	
 	// no actions you can do with these types, so use them only for scrolling
 	// and then return
 	if (item->generic.type == MTYPE_NOT_INTERACTIVE)
 		return;
-
-	if (item->generic.cursorcallback)
-		item->generic.cursorcallback (item, font);
-
-	// highlighting 
-	if (item->generic.cursordraw )
-	{
-		item->generic.cursordraw( item, font );
-	}
-	else if ( menu->cursordraw )
-	{
-		menu->cursordraw( menu );
-	}
-	else if (item->generic.type == MTYPE_SUBMENU && ((menuframework_s *)item)->enable_highlight)
-	{
-		menuframework_s *sm = (menuframework_s *)item;
-		// FIXME HACK: draw a solid background, then draw the submenu again
-		// on top of the background
-		Draw_Fill (Item_GetX (*item), Item_GetY (*item), CHASELINK(sm->lwidth) + CHASELINK(sm->rwidth), Menu_TrueHeight (*sm), 4);
-		SubMenu_Draw (sm, font);
-	}
-	else
-	{
-		ItemName_Draw (item, font, highlight_color);
-	}
-
+		
+	Menu_DrawHighlightItem (item);
+	
 	if ( item->generic.statusbar )
 		Menu_DrawStatusBar( item->generic.statusbar );
 
@@ -1174,7 +1210,7 @@ void Menu_SlideItem (int dir)
 	}
 }
 
-void Label_Draw (menutxt_s *s, FNT_font_t font)
+void Label_Draw (menutxt_s *s, FNT_font_t font, const float *color)
 {
 	unsigned int align;
 	
@@ -1188,7 +1224,7 @@ void Label_Draw (menutxt_s *s, FNT_font_t font)
 	
 	Menu_DrawString (
 		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (font),
-		s->generic.name, FNT_CMODE_QUAKE_SRS, align, dark_color
+		s->generic.name, FNT_CMODE_QUAKE_SRS, align, color
 	);
 }
 void Slider_DoSlide( menuslider_s *s, int dir )
