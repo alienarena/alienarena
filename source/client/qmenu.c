@@ -49,6 +49,7 @@ static menuvec2_t Menu_GetBorderSize (menuframework_s *s);
 // dark color = same blue as icons, light color = white
 const float dark_color[4] = {0, 1, 200.0f/255.0f, 1};
 const float light_color[4] = {1, 1, 1, 1};
+const float highlight_color[4] = {1, 1, 1, 0.95};
 
 #define VID_WIDTH viddef.width
 #define VID_HEIGHT viddef.height
@@ -97,7 +98,7 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 		}
 	}
 	
-	if ( a->generic.flags & QMF_STRIP_COLOR || color == light_color )
+	if ( a->generic.flags & QMF_STRIP_COLOR || color == highlight_color )
 		cmode = FNT_CMODE_TWO;
 	else
 		cmode = FNT_CMODE_QUAKE_SRS;
@@ -868,7 +869,7 @@ void Menu_DrawHighlight (void)
 	}
 	else
 	{
-		ItemName_Draw (item, font, light_color);
+		ItemName_Draw (item, font, highlight_color);
 	}
 
 	if ( item->generic.statusbar )
