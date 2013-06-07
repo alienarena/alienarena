@@ -156,7 +156,7 @@ static menuvec2_t IconSpinSizeFunc (void *_self, FNT_font_t font)
 	
 	ret.x = ret.y = font->size;
 	ret.x += RCOLUMN_OFFSET;
-	if ((self->generic.flags & QMF_LEFT_JUSTIFY)) 
+	if ((self->generic.flags & QMF_RIGHT_COLUMN)) 
 		ret.x += Menu_PredictSize (self->generic.name);
 	return ret;
 }
@@ -168,7 +168,7 @@ static void IconSpinDrawFunc (void *_self, FNT_font_t font)
 	
 	x = Item_GetX (*self)+RCOLUMN_OFFSET;
 	y = Item_GetY (*self);
-	if ((self->generic.flags & QMF_LEFT_JUSTIFY))
+	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
 	Draw_StretchPic (x, y, font->size, font->size, "menu/icon_border");
 	if (strlen(self->itemnames[self->curvalue]) > 0)
@@ -192,7 +192,7 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	
 	x = Item_GetX (*self)+RCOLUMN_OFFSET;
 	y = Item_GetY (*self);
-	if ((self->generic.flags & QMF_LEFT_JUSTIFY))
+	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
 	Draw_StretchPic (x, y, font->size, font->size, "menu/radio_border");
 	if (strlen(self->itemnames[self->curvalue]) > 0)
@@ -3254,7 +3254,7 @@ void ServerList_SubmenuInit (void)
 	for (j = 0; j < SERVER_LIST_COLUMNS; j++)
 	{
 		s_serverlist_header_columns[j].generic.type = MTYPE_SPINCONTROL;
-		s_serverlist_header_columns[j].generic.flags = QMF_LEFT_JUSTIFY|QMF_ALLOW_WRAP;
+		s_serverlist_header_columns[j].generic.flags = QMF_RIGHT_COLUMN|QMF_ALLOW_WRAP;
 		s_serverlist_header_columns[j].itemnames = updown_names;
 		s_serverlist_header_columns[j].generic.itemsizecallback = IconSpinSizeFunc;
 		s_serverlist_header_columns[j].generic.itemdraw = IconSpinDrawFunc;
@@ -3287,7 +3287,7 @@ void ServerList_SubmenuInit (void)
 		for (j = 0; j < SERVER_LIST_COLUMNS; j++)
 		{
 			s_serverlist_columns[i][j].generic.type = MTYPE_TEXT;
-			s_serverlist_columns[i][j].generic.flags = QMF_LEFT_JUSTIFY;
+			s_serverlist_columns[i][j].generic.flags = QMF_RIGHT_COLUMN;
 			LINK(s_serverlist_header_columns[j].generic.x, s_serverlist_columns[i][j].generic.x);
 			Menu_AddItem (&s_serverlist_rows[i], &s_serverlist_columns[i][j]);
 		}
@@ -3321,7 +3321,7 @@ void ServerInfo_SubmenuInit (void)
 	
 	s_joinserver_server_data_columns[0][0].generic.type		= MTYPE_TEXT;
 	s_joinserver_server_data_columns[0][1].generic.type		= MTYPE_TEXT;
-	s_joinserver_server_data_columns[0][1].generic.flags	= QMF_LEFT_JUSTIFY;
+	s_joinserver_server_data_columns[0][1].generic.flags	= QMF_RIGHT_COLUMN;
 	
 	Menu_MakeTable (&s_serverinfo_submenu, 6, 2, sizes, s_joinserver_server_data_rows, s_joinserver_server_data_rows, s_joinserver_server_data_columns, contents);
 	
@@ -3337,7 +3337,7 @@ void ModList_SubmenuInit (void)
 	for ( i = 0; i < MAX_SERVER_MODS; i++ )
 	{
 		s_joinserver_mods_data[i].generic.type	= MTYPE_ACTION;
-		s_joinserver_mods_data[i].generic.flags = QMF_LEFT_JUSTIFY;
+		s_joinserver_mods_data[i].generic.flags = QMF_RIGHT_COLUMN;
 		s_joinserver_mods_data[i].generic.name	= modnames[i];
 		s_joinserver_mods_data[i].generic.tooltip = modtxt[i];
 		
@@ -3371,7 +3371,7 @@ void PlayerList_SubmenuInit (void)
 	{
 		s_playerlist_header_columns[i].generic.type			= MTYPE_TEXT;
 		if (i > 0)
-			s_playerlist_header_columns[i].generic.flags	= QMF_LEFT_JUSTIFY;
+			s_playerlist_header_columns[i].generic.flags	= QMF_RIGHT_COLUMN;
 		Menu_AddItem (&s_playerlist_header, &s_playerlist_header_columns[i]);
 	}
 	
@@ -3932,7 +3932,7 @@ void AddBots_MenuInit( void )
 	Menu_AddItem (&s_addbots_header, &s_addbots_skill_label);
 	
 	s_addbots_faveweap_label.generic.type = MTYPE_TEXT;
-	s_addbots_faveweap_label.generic.flags = QMF_LEFT_JUSTIFY;
+	s_addbots_faveweap_label.generic.flags = QMF_RIGHT_COLUMN;
 	s_addbots_faveweap_label.generic.name = "^3favorite ^3weapon";
 	Menu_AddItem (&s_addbots_header, &s_addbots_faveweap_label);
 	
@@ -3962,7 +3962,7 @@ void AddBots_MenuInit( void )
 		Menu_AddItem (&bots[i].row, &bots[i].m_skill);
 		
 		bots[i].m_faveweap.generic.type = MTYPE_NOT_INTERACTIVE;
-		bots[i].m_faveweap.generic.flags = QMF_LEFT_JUSTIFY;
+		bots[i].m_faveweap.generic.flags = QMF_RIGHT_COLUMN;
 		// Start by assuming that we won't find a thumbnail image for the 
 		// bot's favorite weapon, and set the widget up to simply show the
 		// weapon's name.
@@ -4083,7 +4083,7 @@ void MapInfoFunc( void *self ) {
 				/* While there are tokens in "string" */
 				s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
 				s_startserver_map_data[i].generic.name	= token;
-				s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+				s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
 
 				i++;
 			}
@@ -4099,7 +4099,7 @@ void MapInfoFunc( void *self ) {
 		{
 			s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
 			s_startserver_map_data[i].generic.name	= "no data";
-			s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+			s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
 		}
 	}
 
@@ -4497,7 +4497,7 @@ void StartServer_MenuInit( void )
 	for ( i = 0; i < 5; i++) { 
 		s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
 		s_startserver_map_data[i].generic.name	= "no data";
-		s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+		s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
 		Menu_AddItem( &s_levelshot_submenu, &s_startserver_map_data[i] );
 	}
 
@@ -4796,18 +4796,18 @@ void PlayerRanking_MenuInit( void )
 
 	s_playerranking_title.generic.type	= MTYPE_ACTION;
 	s_playerranking_title.generic.name	= "Player Ranking and Stats";
-	s_playerranking_title.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_title.generic.flags	= QMF_RIGHT_COLUMN;
 	Menu_AddItem( &s_playerranking_menu, &s_playerranking_title );
 	
-	add_text(s_playerranking_menu, playername, QMF_LEFT_JUSTIFY);
-	add_text(s_playerranking_menu, rank, QMF_LEFT_JUSTIFY);
-	add_text(s_playerranking_menu, fragrate, QMF_LEFT_JUSTIFY);
-	add_text(s_playerranking_menu, totalfrags, QMF_LEFT_JUSTIFY);
-	add_text(s_playerranking_menu, totaltime, QMF_LEFT_JUSTIFY);
+	add_text(s_playerranking_menu, playername, QMF_RIGHT_COLUMN);
+	add_text(s_playerranking_menu, rank, QMF_RIGHT_COLUMN);
+	add_text(s_playerranking_menu, fragrate, QMF_RIGHT_COLUMN);
+	add_text(s_playerranking_menu, totalfrags, QMF_RIGHT_COLUMN);
+	add_text(s_playerranking_menu, totaltime, QMF_RIGHT_COLUMN);
 
 	s_playerranking_ttheader.generic.type	= MTYPE_ACTION;
 	s_playerranking_ttheader.generic.name	= "Top Ten Players";
-	s_playerranking_ttheader.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_ttheader.generic.flags	= QMF_RIGHT_COLUMN;
 	Menu_AddItem (&s_playerranking_menu, &s_playerranking_ttheader);
 
 	for(i = 0; i < 10; i++) {
@@ -4822,7 +4822,7 @@ void PlayerRanking_MenuInit( void )
 
 		s_playerranking_topten[i].generic.type	= MTYPE_TEXT;
 		s_playerranking_topten[i].generic.name	= topTenList[i];
-		s_playerranking_topten[i].generic.flags	= QMF_LEFT_JUSTIFY;
+		s_playerranking_topten[i].generic.flags	= QMF_RIGHT_COLUMN;
 
 		Menu_AddItem( &s_playerranking_menu, &s_playerranking_topten[i] );
 	}

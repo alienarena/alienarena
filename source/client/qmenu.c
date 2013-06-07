@@ -28,11 +28,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #include "qmenu.h"
 
-static void	 ItemText_Draw (menuaction_s *a, FNT_font_t font);
+static void	 ItemName_Draw (menuaction_s *a, FNT_font_t font, const float *color);
 static void	 Action_Draw (menuaction_s *a, FNT_font_t font);
 static void  Menu_DrawStatusBar( const char *string );
 static void  Menu_DrawToolTip( const char *string );
-static void  Text_Draw (menutxt_s *s, FNT_font_t font);
+static void  Label_Draw (menutxt_s *s, FNT_font_t font);
 static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw (menuslider_s *s, FNT_font_t font);
 static void	 SpinControl_Draw (menulist_s *s, FNT_font_t font);
@@ -67,18 +67,24 @@ int Menu_PredictSize (const char *str)
 	return FNT_PredictSize (font, str, true);
 }
 
-void ItemText_Draw (menuitem_s *a, FNT_font_t font)
+void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 {
-	int text_x;
-	const float *color;
+	int text_x, text_y;
 	unsigned int align, cmode;
+	
+	if (a->generic.namedraw != NULL)
+	{
+		a->generic.namedraw (a, font);
+		return;
+	}
 	
 	if (a->generic.name == NULL)
 		return;
 	
 	text_x = Item_GetX (*a);
+	text_y = Item_GetY (*a);
 	
-	if ( a->generic.flags & QMF_LEFT_JUSTIFY )
+	if ( a->generic.flags & QMF_RIGHT_COLUMN )
 	{
 		align = FNT_ALIGN_LEFT;
 	}
@@ -96,22 +102,19 @@ void ItemText_Draw (menuitem_s *a, FNT_font_t font)
 		}
 	}
 	
-	color = dark_color;
-	
-	if ( a->generic.flags & QMF_STRIP_COLOR )
+	if ( a->generic.flags & QMF_STRIP_COLOR || color == light_color )
 		cmode = FNT_CMODE_TWO;
 	else
 		cmode = FNT_CMODE_QUAKE_SRS;
 	
 	Menu_DrawString_Core (
-		text_x, Item_GetY (*a),
+		text_x, text_y,
 		a->generic.name, cmode, align, color
 	);
 }
 
 void Action_Draw (menuaction_s *a, FNT_font_t font)
 {
-	ItemText_Draw (a, font);
 	if ( a->generic.itemdraw )
 		a->generic.itemdraw( a, font );
 }
@@ -121,8 +124,6 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	char tempbuffer[128]="";
 	int x, y;
 	
-	ItemText_Draw ((menuaction_s *)f, font);
-
 	y = Item_GetY (*f);
 	x = Item_GetX (*f) + RCOLUMN_OFFSET;
 	
@@ -447,7 +448,7 @@ static inline menuvec2_t Menu_Item_LeftSize (menucommon_s *self, FNT_font_t font
 		return ret;
 	}
 	
-	if (self->name && !(self->flags & QMF_LEFT_JUSTIFY))
+	if (self->name && !(self->flags & QMF_RIGHT_COLUMN))
 	{
 		ret.x = Menu_PredictSize (self->name);
 		if (self->type != MTYPE_TEXT)
@@ -464,7 +465,7 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 	
 	ret.y = font->height;
 	
-	if (self->name && (self->flags & QMF_LEFT_JUSTIFY))
+	if (self->name && (self->flags & QMF_RIGHT_COLUMN))
 	{
 		ret.x = Menu_PredictSize (self->name);
 		if (self->type != MTYPE_TEXT)
@@ -728,22 +729,20 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 				continue;
 		}
 		
-		// TODO: handle these properly in in the following draw methods
+		// TODO: cleaner method
 		if (item->generic.type == MTYPE_NOT_INTERACTIVE)
 		{
-			qboolean skip_rest = false;
-			if (item->generic.namedraw != NULL)
-			{
-				item->generic.namedraw (item, font);
-				skip_rest = true;
-			}
 			if (item->generic.itemdraw != NULL)
-			{
 				item->generic.itemdraw (item, font);
-				skip_rest = true;
-			}
-			if (skip_rest)
-				continue;
+			
+			if (item->generic.namedraw != NULL)
+				item->generic.namedraw (item, font);
+			else
+				Label_Draw ((menutxt_s *) menu->items[i], font);
+		}
+		else if (item->generic.type != MTYPE_SUBMENU)
+		{
+			ItemName_Draw ((menuitem_s *) menu->items[i], font, dark_color);
 		}
 		
 		switch ( item->generic.type )
@@ -761,7 +760,6 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 			Action_Draw ((menuaction_s *) menu->items[i], font);
 			break;
 		case MTYPE_TEXT:
-			Text_Draw ((menutxt_s *) menu->items[i], font);
 			break;
 		case MTYPE_SUBMENU:
 			SubMenu_Draw ((menuframework_s *) menu->items[i], font);
@@ -875,35 +873,7 @@ void Menu_DrawHighlight (void)
 	}
 	else
 	{
-		// FIXME copy and paste!
-		unsigned int align;
-		int text_x;
-		
-		text_x = Item_GetX (*item);
-		
-		if ( item->generic.flags & QMF_LEFT_JUSTIFY)
-		{
-			align = FNT_ALIGN_LEFT;
-		}
-		else
-		{
-			if (item->generic.parent->horizontal)
-			{
-				align = FNT_ALIGN_RIGHT;
-				text_x += LCOLUMN_OFFSET;
-			}
-			else
-			{
-				align = FNT_ALIGN_LEFT;
-				text_x = item->generic.parent->x;
-			}
-		}
-	
-		if(item->generic.name)
-			Menu_DrawString_Core (
-				text_x, Item_GetY (*item), item->generic.name,
-				FNT_CMODE_TWO, align, light_color
-			);
+		ItemName_Draw (item, font, light_color);
 	}
 
 	if ( item->generic.statusbar )
@@ -1229,14 +1199,14 @@ void Menu_SlideItem (int dir)
 	}
 }
 
-void Text_Draw (menutxt_s *s, FNT_font_t font)
+void Label_Draw (menutxt_s *s, FNT_font_t font)
 {
 	unsigned int align;
 	
 	if ( s->generic.name == NULL)
 		return;
 	
-	if ( s->generic.flags & QMF_LEFT_JUSTIFY )
+	if ( s->generic.flags & QMF_RIGHT_COLUMN )
 		align = FNT_ALIGN_LEFT;
 	else
 		align = FNT_ALIGN_RIGHT;
@@ -1265,8 +1235,6 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 	float 		charscale;
 
 	charscale = font->size;
-	
-	ItemText_Draw ((menuaction_s *)s, font);
 	
 	x = Item_GetX (*s) + RCOLUMN_OFFSET;
 	
@@ -1314,43 +1282,17 @@ void SpinControl_DoSlide( menulist_s *s, int dir )
 void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 {
 	char buffer[100];
+	int item_x, item_y;
 	
-	int x = Item_GetX (*s);
+	item_x = Item_GetX (*s) + RCOLUMN_OFFSET;
+	item_y = Item_GetY (*s);
 
-	if (s->generic.namedraw != NULL)
+	if (s->generic.namedraw == NULL && s->generic.name != NULL && s->generic.flags & QMF_RIGHT_COLUMN)
 	{
-		s->generic.namedraw (s, font);
+		// Both the name and item go in the right column.
+		item_x += Menu_PredictSize (s->generic.name);
 	}
-	else if ( s->generic.name )
-	{
-		unsigned int align;
-		int text_x = x;
-		
-		if (s->generic.flags & QMF_LEFT_JUSTIFY)
-		{
-			align = FNT_ALIGN_LEFT;
-			x += Menu_PredictSize (s->generic.name);
-		}
-		else
-		{
-			if (s->generic.parent->horizontal)
-			{
-				align = FNT_ALIGN_RIGHT;
-				text_x += LCOLUMN_OFFSET;
-			}
-			else
-			{
-				align = FNT_ALIGN_LEFT;
-				text_x = s->generic.parent->x;
-			}
-		}
-			
-		Menu_DrawString_Core (
-			text_x, Item_GetY (*s), 
-			s->generic.name, FNT_CMODE_QUAKE_SRS, align,
-			dark_color
-		);
-	}
+	
 	if (s->generic.itemdraw != NULL)
 	{
 		s->generic.itemdraw (s, font);
@@ -1358,7 +1300,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	else if ( !strchr( s->itemnames[s->curvalue], '\n' ) )
 	{
 		Menu_DrawString_Core (
-			RCOLUMN_OFFSET + x, Item_GetY (*s), 
+			item_x, item_y, 
 			s->itemnames[s->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);
@@ -1368,13 +1310,13 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		strcpy( buffer, s->itemnames[s->curvalue] );
 		*strchr( buffer, '\n' ) = 0;
 		Menu_DrawString_Core (
-			RCOLUMN_OFFSET + x, Item_GetY (*s), 
+			item_x, item_y, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);
 		strcpy( buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
 		Menu_DrawString_Core (
-			menu_box.x, menu_box.y+menu_box.height, 
+			item_x, item_y, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);
