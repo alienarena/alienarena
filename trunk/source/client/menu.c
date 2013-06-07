@@ -406,15 +406,21 @@ static struct
 {
 	enum
 	{
-		mstate_steady,
-		mstate_insert,
-		mstate_remove
+		mstate_steady,	// no animation, incoming & outgoing empty
+		mstate_insert,	// menus being added, possibly some outgoing menus
+		mstate_remove	// outgoing menus
 	} state;
 	layergroup_t active;
 	layergroup_t outgoing;
 	layergroup_t incoming;
-	int animation;
+	int animation; // current animation pixel offset
 } mstate;
+
+static inline void mstate_reset (void)
+{
+	mstate.active.num_layers = mstate.incoming.num_layers = mstate.outgoing.num_layers = 0;
+	mstate.state = mstate_steady;
+}
 
 #define activelayer(idx) (mstate.active.layers[(idx)])
 
@@ -556,6 +562,8 @@ void Menuscreens_Animate (void)
 		if (shove_offset < mstate.active.offset || mstate.active.num_layers == 0)
 			mstate.active.offset = shove_offset;
 		
+		// If there are outgoing windows, the incoming ones "push" them back
+		// behind the active windows and the sidebar.
 		if (mstate.outgoing.num_layers > 0)
 		{
 			int outgoing_shove;
@@ -568,6 +576,7 @@ void Menuscreens_Animate (void)
 			
 			layergroup_draw (&mstate.outgoing);
 			
+			// Keep the sidebar matched with its previous position
 			// TODO: interpolate this as well
 			global_menu_xoffset = MenuScreens_Animate_Outgoing_Start () - viddef.width;
 		}
@@ -665,6 +674,8 @@ void M_ForceMenuOff (void)
 	cls.key_dest = key_game;
 	Key_ClearStates ();
 	Cvar_Set ("paused", "0");
+	
+	mstate_reset ();
 
 	//-JD kill the music when leaving the menu of course
 	S_StopAllSounds();
