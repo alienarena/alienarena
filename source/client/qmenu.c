@@ -82,7 +82,7 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 		return;
 	
 	text_x = Item_GetX (*a);
-	text_y = Item_GetY (*a);
+	text_y = Item_GetY (*a) + MenuText_UpperMargin (font);
 	
 	if ( a->generic.flags & QMF_RIGHT_COLUMN )
 	{
@@ -1212,7 +1212,7 @@ void Label_Draw (menutxt_s *s, FNT_font_t font)
 		align = FNT_ALIGN_RIGHT;
 	
 	Menu_DrawString_Core (
-		Item_GetX (*s), Item_GetY (*s),
+		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (font),
 		s->generic.name, FNT_CMODE_QUAKE_SRS, align, dark_color
 	);
 }
@@ -1285,7 +1285,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	int item_x, item_y;
 	
 	item_x = Item_GetX (*s) + RCOLUMN_OFFSET;
-	item_y = Item_GetY (*s);
+	item_y = Item_GetY (*s) + MenuText_UpperMargin (font);
 
 	if (s->generic.namedraw == NULL && s->generic.name != NULL && s->generic.flags & QMF_RIGHT_COLUMN)
 	{

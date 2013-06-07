@@ -360,6 +360,8 @@ int global_menu_xoffset;
 		cursor.x > (m).x && cursor.x < (m).x+CHASELINK((m).rwidth)+CHASELINK((m).lwidth) \
 	)
 
+#define MenuText_UpperMargin(font) (((font)->height-(font)->size)/2)
+
 struct FNT_window_s	menu_box;
 
 #endif
