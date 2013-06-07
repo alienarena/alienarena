@@ -319,7 +319,7 @@ void	Menu_SelectItem (void);
 void	Menu_SetStatusBar( menuframework_s *s, const char *string );
 void	Menu_SlideItem (int dir);
 
-void	Menu_DrawString( int, int, const char * );
+void	Menu_DrawString (int x, int y, const char *string, unsigned int cmode, unsigned int align, const float *color);
 void	Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, const char *prefix);
 int		Menu_PredictSize (const char *str);
 

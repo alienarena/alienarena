@@ -860,10 +860,14 @@ void M_Main_Draw (void)
 
 
 	/* check for more recent program version */
-	version_warning = VersionUpdateNotice();	
+	version_warning = VersionUpdateNotice();
 	if ( version_warning != NULL )
 	{
-		Menu_DrawString (global_menu_xoffset, 5*scale, version_warning);
+		extern const float light_color[4];
+		Menu_DrawString (
+			global_menu_xoffset, 5*scale,
+			version_warning, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, light_color
+		);
 	}
 	
 	//draw the main menu buttons
@@ -1118,12 +1122,17 @@ static menuvec2_t KeySizeFunc (void *_self, FNT_font_t font)
 
 static void DrawKeyBindingFunc( void *_self, FNT_font_t font )
 {
+	extern const float light_color[4];
 	char buf[1024];
 	menuaction_s *self = ( menuaction_s * ) _self;
 
 	M_KeyBindingDisplayStr (self->generic.localstrings[0], sizeof(buf), buf);
 	
-	Menu_DrawString (Item_GetX (*self) + RCOLUMN_OFFSET, Item_GetY (*self), buf);
+	Menu_DrawString (
+		Item_GetX (*self) + RCOLUMN_OFFSET,
+		Item_GetY (*self) + MenuText_UpperMargin (font),
+		buf, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, light_color
+	);
 }
 
 static void KeyBindingFunc( void *_self )
