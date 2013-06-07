@@ -45,8 +45,6 @@ void IN_Init(void)
 
 	mouse_available = true;
 
-	// Knightmare- added Psychospaz's menu mouse support
-	refreshCursorMenu();
 	refreshCursorLink();
 }
 

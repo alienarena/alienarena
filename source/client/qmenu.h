@@ -256,8 +256,6 @@ typedef struct _tag_menuframework
 	const char *bordertitle;
 	const char *bordertexture;
 	
-	int natural_width;
-
 	void (*cursordraw)( struct _tag_menuframework *m );
 } menuframework_s;
 
@@ -341,8 +339,6 @@ void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 #endif
 
 int global_menu_xoffset;
-int global_menu_xoffset_progress;
-int global_menu_xoffset_target;
 
 #define Item_GetHeight(i) \
 	(max(CHASELINK((i).generic.lsize).y, CHASELINK((i).generic.rsize).y))
@@ -355,9 +351,6 @@ int global_menu_xoffset_target;
 
 #define Menu_TrueWidth(m) \
 	(CHASELINK((m).lwidth) + CHASELINK((m).rwidth))
-
-#define Menu_NaturalWidth(m) \
-	((m).natural_width == 0 ? Menu_TrueWidth(m) : (m).natural_width)
 
 #define Menu_GetBaseY(m) ((m).y - (m).yscroll)
 #define Item_GetY(i) (CHASELINK((i).generic.y) + Menu_GetBaseY(*((i).generic.parent)))

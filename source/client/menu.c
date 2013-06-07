@@ -92,8 +92,6 @@ void M_Menu_Main_f (void);
 qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 
-void	(*m_drawfunc) (void);
-
 static size_t szr; // just for unused result warnings
 
 
@@ -257,41 +255,6 @@ void M_Menu_ ## name ## _f (void) \
 	M_PushMenu ( name ## _MenuDraw, Default_MenuKey, &struct); \
 }
 
-
-//=============================================================================
-/* Support Routines */
-
-#define	MAX_MENU_DEPTH	8
-
-
-typedef struct
-{
-	void	(*draw) (void);
-	const char *(*key) (menuframework_s *screen, int k);
-	menuframework_s *screen;
-	int		start_x, end_x;
-	int		offset;
-} menulayer_t;
-
-menulayer_t	m_layers[MAX_MENU_DEPTH];
-int		m_menudepth;
-
-static void M_Banner( char *name, float alpha )
-{
-	int w, h;
-	float scale;
-
-	scale = (float)(viddef.height)/600;
-
-	Draw_GetPicSize (&w, &h, name );
-
-	w*=scale;
-	h*=scale;
-
-	Draw_AlphaStretchPic( global_menu_xoffset + viddef.width / 2 - (w / 2), viddef.height / 2 - 260*scale, w, h, name, alpha );
-
-}
-
 static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
 {
 	int x, y;
@@ -302,7 +265,6 @@ static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
 	Draw_StretchPic (x, y, font->size*5, font->size*5, crosshair->string);
 }
 
-
 void refreshCursorButtons(void)
 {
 	cursor.buttonused[MOUSEBUTTON2] = true;
@@ -310,6 +272,350 @@ void refreshCursorButtons(void)
 	cursor.buttonused[MOUSEBUTTON1] = true;
 	cursor.buttonclicks[MOUSEBUTTON1] = 0;
 }
+
+//=============================================================================
+/*	Screen layout routines -- responsible for tiling all the levels of menus
+	on the screen and animating transitions between them. This uses a finite
+	state machine to track which windows are active, "incoming" (will become
+	active after the current animation is complete,) and "outgoing" (will no
+	longer be active after the current animation is complete. If there are
+	incoming or outgoing windows, user input is disabled until the transition
+	animation is complete.
+	
+	Each window is a menu tree (a menuframework_s struct with submenus.) The 
+	purpose of the animation code is to determine what x-axis offset each 
+	window should be drawn at (that is, what number of pixels should be added
+	to the x-axis of the window when it is drawn.) The x offset for each
+	window is recalculated each frame so that the windows tile neatly
+	alongside each other, slide across the screen, etc. (TODO: don't use a
+	global for the x-offset, that's just crass.)
+	
+	The main menu is a special case, in that it will shrink into a sidebar 
+	instead of appearing partially off screen.
+	
+	Architecturally, this is done with a simple finite-state machine.
+*/
+
+// M_Interp - responsible for animating the transitions as menus are added and
+// removed from the screen.  Actually, this function just performs an
+// interpolation between 0 and target, returning a number that should be used
+// next time for progress. you determine roughly how many pixels a menu is
+// going to slide, and in which direction.  Your target is that number of
+// pixels, positive or negative depending on the direction.  Call this
+// function repeatedly with your target, and it will return a series of pixel
+// offsets that can be used in your animation.
+int M_Interp (int progress, int target)
+{
+	int increment = 0; // always positive
+	
+	// Determine the movement amount this frame. Make it nice and fast,
+	// because while slow might look cool, it's also an inconvenience.
+	if (target != progress)
+	{
+		static float frametime_accum = 0;
+
+		// The animation speeds up as it gets further from the starting point
+		// and slows down (although half as much) as it approaches the ending
+		// point.
+		increment = min(	abs(target-progress)/2,
+							abs(progress) )*40;
+		
+		// Clamp the animation speed at a minimum so it won't freeze due to
+		// rounding errors or take too long at either end.
+		increment = max (increment, abs(target)/10);
+
+		// Scale the animation by frame time so its speed is independent of 
+		// framerate. At very high framerates, each individual frame might be
+		// too small a time to result in an integer amount of movement. So we
+		// just add frames together until we do get some movement.
+		frametime_accum += cls.frametime;
+		increment *= frametime_accum;
+
+		if (increment > 0)
+			frametime_accum = 0;
+		else
+			return progress; // no movement, better luck next time.
+	}
+	
+	if (target > 0)
+	{
+		// increasing
+		progress += increment;
+		progress = min (progress, target); // make sure we don't overshoot
+	}
+	else if (target < 0)
+	{
+		// decreasing
+		progress -= increment;
+		progress = max (progress, target); // make sure we don't overshoot
+	}
+	
+	return progress;
+}
+
+#define	MAX_MENU_DEPTH	8
+
+#define sidebar_width ((float)(150*viddef.width)/1024.0)
+
+// Window wrapper
+// (TODO: rename all mention of "layer" to "screen" or "window," haven't
+// decided which yet.)
+typedef struct
+{
+	void	(*draw) (void);
+	const char *(*key) (menuframework_s *screen, int k);
+	menuframework_s *screen;
+} menulayer_t;
+
+// An "inelastic" row of windows. They always tile side by side, and the total
+// width is always the sum of the contained windows. This struct is for
+// convenience; it's easier to animate such a group of windows as a single 
+// unit.
+typedef struct
+{
+	int			offset; // starting x-axis pixel offset for the leftmost window
+	int			num_layers;
+	menulayer_t	layers[MAX_MENU_DEPTH];
+} layergroup_t;
+
+#define layergroup_last(g) ((g).layers[(g).num_layers-1])
+
+static inline int layergroup_width (layergroup_t *g)
+{
+	int i, ret;
+	
+	ret = 0;
+	for (i = 0; i < g->num_layers; i++)
+		ret += Menu_TrueWidth (*g->layers[i].screen);
+	return ret;
+}
+
+static void layergroup_draw (layergroup_t *g)
+{
+	int i;
+	global_menu_xoffset = g->offset;
+	for (i = 0; i < g->num_layers; i++)
+	{
+		g->layers[i].draw ();
+		global_menu_xoffset += Menu_TrueWidth (*g->layers[i].screen);
+	}
+}
+
+// this holds the state machine state
+static struct
+{
+	enum
+	{
+		mstate_steady,
+		mstate_insert,
+		mstate_remove
+	} state;
+	layergroup_t active;
+	layergroup_t outgoing;
+	layergroup_t incoming;
+	int animation;
+} mstate;
+
+#define activelayer(idx) (mstate.active.layers[(idx)])
+
+static int activelayer_coordidx (int xcoord)
+{
+	int i;
+	xcoord -= mstate.active.offset;
+	if (xcoord < 0 || mstate.active.num_layers == 0)
+		return -1;
+	for (i = 0; i < mstate.active.num_layers-1; i++)
+	{
+		xcoord -= Menu_TrueWidth (*activelayer(i).screen);
+		if (xcoord < 0)
+			break;
+	}
+	return i;
+}
+
+// Figure out the starting offset for the leftmost window of the "active"
+// (neither incoming nor outgoing) window group. Usually just equal to the 
+// maximum width of the sidebar, unless there are so many large windows that
+// they can't all fit on screen at once, in which case it may be a negative
+// number.
+static inline int Menuscreens_Animate_Active (void)
+{
+	int shove_offset, ret;
+	ret = sidebar_width;
+	shove_offset = viddef.width - layergroup_width (&mstate.active);
+	if (shove_offset < ret)
+		ret = shove_offset;
+	return ret;
+}
+
+// Figure out the starting offset for the leftmost window of the active window
+// group, *if* the "incoming" windows were hypothetically added to the end of
+// the active window group. Will be used as the "target" for the incoming-
+// window animation. This is because when the animation is done, the incoming
+// windows will be added to the end of the active window group, and we want 
+// the transition to be smooth.
+static inline int MenuScreens_Animate_Incoming_Target (void)
+{
+	int shove_offset, ret;
+	ret = sidebar_width;
+	shove_offset = viddef.width - layergroup_width (&mstate.active) - layergroup_width (&mstate.incoming);
+	if (shove_offset < ret)
+		ret = shove_offset;
+	return ret;
+}
+
+// Figure out the starting offset for the leftmost window of the active window
+// group, *if* the "outgoing" windows were hypothetically added to the end of
+// the active window group. Will be used as the "start" for the outgoing-
+// window animation. This is because before the animation started, the
+// outgoing windows were at the end of the active window group, and we want 
+// the transition to be smooth.
+static inline int MenuScreens_Animate_Outgoing_Start (void)
+{
+	int shove_offset, ret;
+	ret = sidebar_width;
+	shove_offset = viddef.width - layergroup_width (&mstate.active) - layergroup_width (&mstate.outgoing);
+	if (shove_offset < ret)
+		ret = shove_offset;
+	return ret;
+}
+
+void Menuscreens_Animate (void);
+
+// state machine state transitions
+void Menuscreens_Animate_Insert_To_Steady (void)
+{
+	int i;
+	for (i = 0; i < mstate.incoming.num_layers; i++)
+		activelayer(mstate.active.num_layers++) = mstate.incoming.layers[i];
+	cursor.menulayer = mstate.active.num_layers-1;
+	Menu_SelectMenu(layergroup_last(mstate.active).screen);
+	mstate.incoming.num_layers = 0;
+	mstate.outgoing.num_layers = 0;
+	mstate.state = mstate_steady;
+	mstate.animation = 0;
+	Menuscreens_Animate ();
+}
+void Menuscreens_Animate_Remove_To_Steady (void)
+{
+	mstate.outgoing.num_layers = 0;
+	mstate.state = mstate_steady;
+	cursor.menulayer = mstate.active.num_layers-1;
+	if (cursor.menulayer >= 0)
+		Menu_SelectMenu(layergroup_last(mstate.active).screen);
+	else
+		cursor.menuitem = NULL;
+	mstate.animation = 0;
+	Menuscreens_Animate ();
+}
+
+void M_Main_Draw (void);
+void CheckMainMenuMouse (void);
+
+// This is where the magic happens. (TODO: maybe separate the actual rendering
+// out into a different function?)
+void Menuscreens_Animate (void)
+{
+	int shove_offset, anim_start, anim_end;
+	switch (mstate.state)
+	{
+	case mstate_steady:
+	{
+		if (mstate.active.num_layers == 0)
+		{
+			global_menu_xoffset = 0;
+		}
+		else
+		{
+			mstate.active.offset = Menuscreens_Animate_Active ();
+			global_menu_xoffset = mstate.active.offset-viddef.width;
+		}
+		
+		M_Main_Draw ();
+		layergroup_draw (&mstate.active);
+	}
+	break;
+	case mstate_insert:
+	{
+		if (mstate.active.num_layers == 0)
+			mstate.active.offset = 0;
+		else
+			mstate.active.offset = Menuscreens_Animate_Active ();
+		
+		anim_start = mstate.active.offset+viddef.width;
+		anim_end = MenuScreens_Animate_Incoming_Target ();
+		
+		mstate.animation = M_Interp (mstate.animation, anim_end-anim_start);
+		if (mstate.animation <= anim_end-anim_start)
+		{
+			Menuscreens_Animate_Insert_To_Steady ();
+			return;
+		}
+		shove_offset = anim_start+mstate.animation;
+		
+		if (shove_offset < mstate.active.offset || mstate.active.num_layers == 0)
+			mstate.active.offset = shove_offset;
+		
+		if (mstate.outgoing.num_layers > 0)
+		{
+			int outgoing_shove;
+			
+			mstate.outgoing.offset = MenuScreens_Animate_Outgoing_Start ();
+			
+			outgoing_shove = shove_offset - layergroup_width (&mstate.outgoing);
+			if (outgoing_shove < mstate.outgoing.offset)
+				mstate.outgoing.offset = outgoing_shove;
+			
+			layergroup_draw (&mstate.outgoing);
+			
+			// TODO: interpolate this as well
+			global_menu_xoffset = MenuScreens_Animate_Outgoing_Start () - viddef.width;
+		}
+		else
+		{
+			global_menu_xoffset = mstate.active.offset-viddef.width;
+		}
+		mstate.incoming.offset = shove_offset + layergroup_width (&mstate.active);
+		
+		M_Main_Draw ();
+		layergroup_draw (&mstate.active);
+		layergroup_draw (&mstate.incoming);
+	}
+	break;
+	case mstate_remove:
+	{
+		if (mstate.active.num_layers == 0)
+			mstate.active.offset = 0;
+		else
+			mstate.active.offset = Menuscreens_Animate_Active ();
+		
+		anim_start = MenuScreens_Animate_Outgoing_Start ();
+		anim_end = mstate.active.offset + viddef.width;
+		
+		mstate.animation = M_Interp (mstate.animation, anim_end-anim_start);
+		if (mstate.animation >= anim_end-anim_start)
+		{
+			Menuscreens_Animate_Remove_To_Steady ();
+			return;
+		}
+		shove_offset = anim_start+mstate.animation;
+		
+		if (shove_offset < mstate.active.offset || mstate.active.num_layers == 0)
+			mstate.active.offset = shove_offset;
+		
+		global_menu_xoffset = mstate.active.offset-viddef.width;
+		mstate.outgoing.offset = shove_offset + layergroup_width (&mstate.active);
+
+		M_Main_Draw ();
+		layergroup_draw (&mstate.active);
+		layergroup_draw (&mstate.outgoing);
+	}
+	break;
+	}
+}
+
+// These functions (Push, Force Off, and Pop) are used by the outside world to
+// control the state machine.
 
 void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
@@ -319,70 +625,44 @@ void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *scre
 	if (Cvar_VariableValue ("maxclients") == 1
 		&& Com_ServerState ())
 		Cvar_Set ("paused", "1");
-
-	// if this menu is already present, drop back to that level
-	// to avoid stacking menus by hotkeys
-	for (i=1 ; i <= m_menudepth ; i++)
-		if (m_layers[i].draw == draw &&
-			m_layers[i].key == key && 
-			m_layers[i].screen == screen)
+	
+	for (i = 0; i < mstate.active.num_layers; i++)
+	{
+		if (activelayer(i).screen == screen)
 		{
-			m_menudepth = i;
 			found = true;
 			break;
 		}
-
-	if (!found)
-	{
-		if (m_menudepth >= MAX_MENU_DEPTH)
-			Com_Error (ERR_FATAL, "M_PushMenu: MAX_MENU_DEPTH");
-		m_menudepth++;
-		m_layers[m_menudepth-1].offset = global_menu_xoffset;
-		m_layers[m_menudepth].screen = screen;
-		m_layers[m_menudepth].draw = draw;
-		m_layers[m_menudepth].key = key;
 	}
-
-	m_drawfunc = draw;
-
-	m_entersound = true;
-
-	refreshCursorLink();
-	refreshCursorButtons();
-
-	cls.key_dest = key_menu;
 	
-	cursor.menulayer = m_menudepth;
-	
-	if (m_menudepth > 1)
+	if (found)
 	{
-		int prev_natural, width;
-		
-		Menu_SelectMenu (screen);
-		
-		width = Menu_TrueWidth(*screen);
-		m_layers[m_menudepth].start_x = m_layers[m_menudepth-1].end_x;
-		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + width;
-		prev_natural = Menu_NaturalWidth(*m_layers[m_menudepth-1].screen);
-		if (width < viddef.width-prev_natural)
-			width = viddef.width-prev_natural;
-		global_menu_xoffset_target = width; //setup animation
+		cursor.menulayer = i;
+		mstate.state = mstate_remove;
 	}
 	else
 	{
-		int width = Menu_TrueWidth(*screen);
-		m_layers[m_menudepth].start_x = 0;
-		m_layers[m_menudepth].end_x = m_layers[m_menudepth].start_x + width;
+		mstate.incoming.num_layers = 1;
+		mstate.incoming.layers[0].draw = draw;
+		mstate.incoming.layers[0].key = key;
+		mstate.incoming.layers[0].screen = screen;
+		mstate.state = mstate_insert;
 	}
+	
+	for (i = cursor.menulayer+1; i < mstate.active.num_layers; i++)
+		mstate.outgoing.layers[mstate.outgoing.num_layers++] = activelayer(i);
+	mstate.active.num_layers = cursor.menulayer+1;
+	
+	cls.key_dest = key_menu;
+	
+	m_entersound = true;
 }
 
 void M_ForceMenuOff (void)
 {
 	refreshCursorLink();
 
-	m_drawfunc = NULL;
 	cls.key_dest = key_game;
-	m_menudepth = 0;
 	Key_ClearStates ();
 	Cvar_Set ("paused", "0");
 
@@ -390,40 +670,20 @@ void M_ForceMenuOff (void)
 	S_StopAllSounds();
 	background_music = Cvar_Get ("background_music", "1", CVAR_ARCHIVE);
 	S_StartMapMusic();
-	global_menu_xoffset_progress = global_menu_xoffset_target = 0;
 }
 
 void M_PopMenu (void)
 {
 	S_StartLocalSound( menu_out_sound );
-	if (m_menudepth < 1)
-		Com_Error (ERR_FATAL, "M_PopMenu: depth < 1");
-			
-	m_menudepth--;
-	
-	cursor.menulayer = m_menudepth;
-	
-	if (m_menudepth > 1)
-		Menu_SelectMenu (m_layers[m_menudepth].screen);
-	
-	m_drawfunc = m_layers[m_menudepth].draw;
-
-	refreshCursorLink();
-	refreshCursorButtons();
-
-	if (m_menudepth == 0)
+	if (mstate.active.num_layers == 0)
 	{
 		M_ForceMenuOff ();
+		return;
 	}
-	else
-	{
-		global_menu_xoffset_target = m_layers[m_menudepth].offset-global_menu_xoffset-viddef.width;
-		if (m_menudepth == 1)
-			global_menu_xoffset_target += Menu_NaturalWidth(*m_layers[m_menudepth].screen);
-/*		global_menu_xoffset_target = -m_layers[m_menudepth+1].width;*/
-/*		if (m_menudepth == 1)*/
-/*			global_menu_xoffset_target = m_layers[m_menudepth].natural_width-viddef.width;*/
-	}
+			
+	mstate.outgoing.layers[mstate.outgoing.num_layers++] = 
+		activelayer(--mstate.active.num_layers);
+	mstate.state = mstate_remove;
 }
 
 
@@ -599,7 +859,7 @@ void M_Main_Draw (void)
 	for ( i = 0; i < MAIN_ITEMS; i++ )
 	{
 		strcpy( litname, main_names[i] );
-		if (i == m_main_cursor && cursor.menulayer == 1)
+		if (i == m_main_cursor && cursor.menulayer == -1)
 			strcat( litname, "_sel");
 		Draw_GetPicSize( &w, &h, litname );
 		xstart = xoffset + 100*widscale + (20*i*widscale);
@@ -651,7 +911,7 @@ void CheckMainMenuMouse (void)
 
 	if (cursor.mouseaction)
 	{
-		cursor.menulayer = 1;
+		cursor.menulayer = -1;
 		m_main_cursor = i;
 		cursor.menuitem = NULL;
 	}
@@ -701,16 +961,10 @@ const char *M_Main_Key (menuframework_s *dummy, int key)
 
 void M_Menu_Main_f (void)
 {
-	float widscale;
-	static menuframework_s dummy;
-	
-	widscale = (float)(viddef.width)/1024.0;
-	CHASELINK(dummy.rwidth) = viddef.width;
-	dummy.natural_width = 150*widscale;
-	
 	S_StartMenuMusic();
-	global_menu_xoffset_progress = global_menu_xoffset_target = 0;
-	M_PushMenu (M_Main_Draw, M_Main_Key, &dummy);
+	cls.key_dest = key_menu;
+	cursor.menulayer = -1;
+/*	M_PushMenu (M_Main_Draw, M_Main_Key, &dummy);*/
 }
 
 /*
@@ -5351,6 +5605,9 @@ void Tactical_MenuInit( void )
 	}
 
 	Menu_AutoArrange (&s_tactical_screen);
+	
+	// force it to use up the whole screen
+	CHASELINK(s_tactical_screen.rwidth) = viddef.width - CHASELINK(s_tactical_screen.lwidth);
 
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
@@ -5433,11 +5690,6 @@ void refreshCursorLink (void)
 	cursor.menuitem = NULL;
 }
 
-void refreshCursorMenu (void)
-{
-	// STUB
-}
-
 int Slider_CursorPositionX ( menuslider_s *s )
 {
 	float		range;
@@ -5505,35 +5757,62 @@ void Menu_ClickSlideItem (void)
 		Menu_SlideItem (1);
 }
 
-
-void _M_Think_MouseCursor (void)
+void M_Draw_Cursor (void)
 {
-	char * sound = NULL;
-	menuframework_s *m; 
-	
-	if (m_menudepth == 0)
-		return;
+	Draw_Pic (cursor.x, cursor.y, "m_mouse_cursor");
+}
 
-	if (m_drawfunc == M_Main_Draw) //have to hack for main menu :p
+
+// draw all menus on screen
+void M_Draw (void)
+{
+	if (cls.key_dest != key_menu)
+		return;
+	Draw_Fill (0, 0, viddef.width, viddef.height, 0);
+	Menuscreens_Animate ();
+	Menu_DrawHighlight ();
+	M_Draw_Cursor();
+}
+
+// send key presses to the appropriate menu
+void M_Keydown (int key)
+{
+	const char *s;
+	
+	if (mstate.state != mstate_steady)
+		return;
+	
+	if (key == K_ESCAPE && mstate.active.num_layers > 0)
 	{
-		CheckMainMenuMouse();
+		if ((s = layergroup_last(mstate.active).key (layergroup_last(mstate.active).screen, key)))
+			S_StartLocalSound (s);
 		return;
 	}
-	if (m_drawfunc == M_Credits_MenuDraw) //have to hack for credits :p
+	
+	if (cursor.menulayer == -1)
+		M_Main_Key (NULL, key);
+	else if (activelayer(cursor.menulayer).key != NULL && (s = activelayer(cursor.menulayer).key (activelayer(cursor.menulayer).screen, key)))
+		S_StartLocalSound( s );
+}
+
+// send mouse movement to the appropriate menu
+void M_Think_MouseCursor (void)
+{
+	int coordidx;
+	menuframework_s *m; 
+	char * sound = NULL;
+	
+	if (mstate.state != mstate_steady)
+		return;
+	
+	coordidx = activelayer_coordidx (cursor.x);
+	if (coordidx < 0)
 	{
-		if (cursor.buttonclicks[MOUSEBUTTON2])
-		{
-			cursor.buttonused[MOUSEBUTTON2] = true;
-			cursor.buttonclicks[MOUSEBUTTON2] = 0;
-			cursor.buttonused[MOUSEBUTTON1] = true;
-			cursor.buttonclicks[MOUSEBUTTON1] = 0;
-			S_StartLocalSound( menu_out_sound );
-			if (creditsBuffer)
-				FS_FreeFile (creditsBuffer);
-			M_PopMenu();
-			return;
-		}
+		CheckMainMenuMouse ();
+		return;
 	}
+	
+	Menu_AssignCursor (activelayer(coordidx).screen, coordidx);
 	
 	if (cursor.menuitem == NULL)
 		return;
@@ -5603,224 +5882,4 @@ void _M_Think_MouseCursor (void)
 
 	if ( sound )
 		S_StartLocalSound( sound );
-}
-
-void M_Draw_Cursor (void)
-{
-	Draw_Pic (cursor.x, cursor.y, "m_mouse_cursor");
-}
-
-
-// M_Transition - responsible for animating the transitions as menus are added
-// and removed from the screen. Actually, this function just performs an 
-// interpolation between 0 and target, returning a number that should be used
-// next time for progress. you determine roughly how many pixels a menu is
-// going to slide, and in which direction. Your target is that number of
-// pixels, positive or negative depending on the direction. Call this function
-// repeatedly with your target, and it will return a series of pixel offsets 
-// that can be used in your animation.
-int M_Transition (int progress, int target)
-{
-	int increment = 0; // always positive
-	
-	// Determine the movement amount this frame. Make it nice and fast,
-	// because while slow might look cool, it's also an inconvenience.
-	if (target != progress)
-	{
-		static float frametime_accum = 0;
-		
-		// The animation speeds up as it gets further from the starting point
-		// and slows down (although half as much) as it approaches the ending
-		// point.
-		increment = min(	abs(target-progress)/2,
-							abs(progress) )*40;
-		
-		// Clamp the animation speed at a minimum so it won't freeze due to
-		// rounding errors or take too long at either end.
-		increment = max (increment, abs(target)/10);
-
-		// Scale the animation by frame time so its speed is independent of 
-		// framerate. At very high framerates, each individual frame might be
-		// too small a time to result in an integer amount of movement. So we
-		// just add frames together until we do get some movement.
-		frametime_accum += cls.frametime;
-		increment *= frametime_accum;
-
-		if (increment > 0)
-			frametime_accum = 0;
-		else
-			return progress; // no movement, better luck next time.
-	}
-	
-	if (target > 0)
-	{
-		// increasing
-		progress += increment;
-		progress = min (progress, target); // make sure we don't overshoot
-	}
-	else if (target < 0)
-	{
-		// decreasing
-		progress -= increment;
-		progress = max (progress, target); // make sure we don't overshoot
-	}
-	
-	return progress;
-}
-	
-
-
-// M_ThinkRedirect - juggles various tasks for all the menus on screen. 
-// FIXME: mushing three different functions into one with an argument to 
-// determine which task the function should actually perform is kind of an
-// anti-pattern.
-
-enum thinkredirect_action
-{
-	think_draw,
-	think_mouse
-};
-
-void M_ThinkRedirect (enum thinkredirect_action action)
-{
-	int base_offset, shove_offset;
-	int depth_max;
-	int i;
-	int old_menudepth = m_menudepth;
-		
-	if (cls.key_dest != key_menu)
-		return;
-	
-	depth_max = m_menudepth;
-	base_offset = 0;
-	shove_offset = 0;
-	for (i = 1; i < depth_max; i++)
-	{
-		if (m_layers[i+1].end_x-base_offset > viddef.width)
-			base_offset = m_layers[i].end_x-Menu_NaturalWidth(*m_layers[i].screen);
-	}
-	if (global_menu_xoffset_target > global_menu_xoffset_progress)
-	{
-		if (m_layers[m_menudepth-1].start_x < base_offset)
-			base_offset = m_layers[m_menudepth-1].start_x;
-		shove_offset = m_layers[m_menudepth].start_x-viddef.width+global_menu_xoffset_progress;
-		if (shove_offset > base_offset)
-		{
-			if (m_layers[m_menudepth].end_x-base_offset > viddef.width)
-				base_offset = shove_offset;
-			else
-				shove_offset = base_offset;
-		}
-	}
-	else if (global_menu_xoffset_target < global_menu_xoffset_progress)
-	{
-		shove_offset = base_offset;
-		if (m_layers[m_menudepth+1].end_x-shove_offset > viddef.width)
-			shove_offset = m_layers[m_menudepth].end_x-Menu_NaturalWidth(*m_layers[m_menudepth].screen);
-		shove_offset += global_menu_xoffset_progress;
-		if (shove_offset > base_offset)
-			base_offset = shove_offset;
-	}
-	else if (global_menu_xoffset_target == global_menu_xoffset_progress)
-	{
-		shove_offset = m_layers[i].end_x-viddef.width;
-		if (shove_offset > base_offset)
-			base_offset = shove_offset;
-		else
-			shove_offset = base_offset;
-	}
-	
-	if (global_menu_xoffset_target < global_menu_xoffset_progress)
-		depth_max++;
-	for (i = 1; i <= depth_max; i++)
-	{
-		int next_xoffset;
-		
-		if (i == depth_max)
-			base_offset = shove_offset;
-		
-		global_menu_xoffset = m_layers[i].start_x-base_offset;
-		next_xoffset = m_layers[i].end_x-base_offset;
-		
-		if (global_menu_xoffset < -viddef.width)
-			continue;
-		
-		m_drawfunc = m_layers[i].draw;
-		
-		if (i <= old_menudepth)
-			m_menudepth = i;
-		
-		if (action == think_draw && m_layers[i].draw != NULL)
-			m_layers[i].draw();
-		else if (cursor.x >= global_menu_xoffset && cursor.x <= next_xoffset && i <= old_menudepth)
-		{
-			if (action == think_mouse)
-			{
-				Menu_AssignCursor (m_layers[i].screen, i);
-				_M_Think_MouseCursor ();
-/*				return;*/
-			}
-		}
-		
-		if (m_menudepth != i)
-			old_menudepth = m_menudepth;
-	}
-	
-	if (action != think_draw)
-		return;
-	
-	Menu_DrawHighlight ();
-	
-	global_menu_xoffset_progress = M_Transition (global_menu_xoffset_progress, global_menu_xoffset_target);
-	if (global_menu_xoffset_progress == global_menu_xoffset_target)
-		global_menu_xoffset_progress = global_menu_xoffset_target = 0;
-
-	// delay playing the enter sound until after the
-	// menu has been drawn, to avoid delay while
-	// caching images
-	if (m_entersound)
-	{
-		S_StartLocalSound( menu_in_sound );
-		m_entersound = false;
-	}
-
-	M_Draw_Cursor();
-
-}
-
-// draw all menus on screen
-void M_Draw (void)
-{
-	// draw a black background unless it will cover the console
-	if (m_menudepth >= 1)
-		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
-	M_ThinkRedirect (think_draw);
-}
-
-// send key presses to the appropriate menu
-void M_Keydown (int key)
-{
-	const char *s;
-	
-	if (global_menu_xoffset_target != 0)
-		return;
-	
-	if (key == K_ESCAPE)
-	{
-		if ((s = m_layers[m_menudepth].key (m_layers[m_menudepth].screen, key)))
-			S_StartLocalSound (s);
-		return;
-	}
-	
-	if (cursor.menulayer < 1)
-		return;
-	
-	if (m_layers[cursor.menulayer].key != NULL && (s = m_layers[cursor.menulayer].key (m_layers[cursor.menulayer].screen, key)))
-		S_StartLocalSound( s );
-}
-
-// send mouse movement to the appropriate menu
-void M_Think_MouseCursor (void)
-{
-	M_ThinkRedirect (think_mouse);
 } 
