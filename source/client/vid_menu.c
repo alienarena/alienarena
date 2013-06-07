@@ -527,7 +527,5 @@ void VID_MenuDraw (void)
 {
 	s_current_menu = &s_opengl_menu;
 	
-	Draw_Fill(global_menu_xoffset, 0, viddef.width, viddef.height, 0);
-	
 	Menu_Draw( &s_opengl_screen );
 }
