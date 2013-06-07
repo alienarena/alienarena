@@ -133,10 +133,10 @@ void CL_AddNetgraph (void)
 		return;
 
 	for (i=0 ; i<cls.netchan.dropped ; i++)
-		SCR_DebugGraph (30, 0x40);
+		SCR_DebugGraph (30, RGBA8(167,59,49,255));
 
 	for (i=0 ; i<cl.surpressCount ; i++)
-		SCR_DebugGraph (30, 0xdf);
+		SCR_DebugGraph (30, RGBA8(255,191,15,255));
 
 	// see what the latency was on this packet
 	in = cls.netchan.incoming_acknowledged & (CMD_BACKUP-1);
@@ -144,14 +144,14 @@ void CL_AddNetgraph (void)
 	ping /= 30;
 	if (ping > 30)
 		ping = 30;
-	SCR_DebugGraph (ping, 0xd0);
+	SCR_DebugGraph (ping, RGBA(0,1,0,1));
 }
 
 
 typedef struct
 {
 	float	value;
-	int		color;
+	float	color[4];
 } graphsamp_t;
 
 #define	DEBUGGRAPH_VALUES	4096
@@ -163,14 +163,16 @@ static	graphsamp_t	values[DEBUGGRAPH_VALUES];
 SCR_DebugGraph
 ==============
 */
-void SCR_DebugGraph (float value, int color)
+void SCR_DebugGraph (float value, const float color[])
 {
+	int i;
 	int limit;
 	limit = scr_vrect.width;
 	if (limit > DEBUGGRAPH_VALUES)
 		limit = DEBUGGRAPH_VALUES;
 	values[current%limit].value = value;
-	values[current%limit].color = color;
+	for (i = 0; i < 4; i++)
+		values[current%limit].color[i] = color[i];
 	current++;
 }
 
@@ -181,9 +183,9 @@ SCR_DrawDebugGraph
 */
 void SCR_DrawDebugGraph (void)
 {
-	int		a, x, y, w, i, h;
-	float	v;
-	int		color;
+	int			a, x, y, w, i, h;
+	float		v;
+	const float	*color;
 
 	//
 	// draw the graph
@@ -196,7 +198,7 @@ void SCR_DrawDebugGraph (void)
 	x = scr_vrect.x;
 	y = scr_vrect.y+scr_vrect.height;
 	Draw_Fill (x, y-scr_graphheight->value,
-		w, scr_graphheight->value, 8);
+		w, scr_graphheight->value, RGBA8(123,123,123,255));
 
 	for (a=0 ; a<w ; a++)
 	{
@@ -208,7 +210,7 @@ void SCR_DrawDebugGraph (void)
 		if (v < 0)
 			v += scr_graphheight->value * (1+(int)(-v/scr_graphheight->value));
 		h = (int)v % scr_graphheight->integer;
-		Draw_Fill (x+w-1-a, y - h, 1,	h, color);
+		Draw_Fill (x+w-1-a, y - h, 1, h, color);
 	}
 }
 
@@ -651,10 +653,10 @@ void SCR_DrawLoadingBar (int percent, int scale)
 	{
 		Draw_Fill (
 			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1,
-			scale*30-2, scale*2-2, 3);
+			scale*30-2, scale*2-2, RGBA8(47,47,47,255));
 		Draw_Fill (
 			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1,
-			(scale*30-2)*percent/100, scale*2-2, 7);
+			(scale*30-2)*percent/100, scale*2-2, RGBA8(107,107,107,255));
 	}
 }
 
@@ -686,13 +688,13 @@ void SCR_DrawLoading (void)
 		if(map_pic_loaded)
 			Draw_StretchPic (0, 0, viddef.width, viddef.height, va("/levelshots/%s.pcx", mapfile));
 		else
-			Draw_Fill (0, 0, viddef.width, viddef.height, 0);
+			Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0,0,0,1));
 
 		isMap = true;
 
 	}
 	else
-		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
+		Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0,0,0,1));
 
 #if 0
 	// no m_background pic, but a pic here over-writes the levelshot
@@ -890,7 +892,7 @@ void SCR_DrawConsole (void)
 	if (cls.state != ca_active || !cl.refresh_prepped)
 	{	// connected, but can't render
 		CON_DrawConsole( scr_consize->value );
-		Draw_Fill (0, viddef.height/2, viddef.width, viddef.height/2, 0);
+		Draw_Fill (0, viddef.height/2, viddef.width, viddef.height/2, RGBA(0,0,0,1));
 		return;
 	}
 
@@ -2103,7 +2105,7 @@ void SCR_UpdateScreen (void)
 			SCR_CheckDrawIRCString();
 
 			if (scr_timegraph->value)
-				SCR_DebugGraph (cls.frametime*600, 0);
+				SCR_DebugGraph (cls.frametime*600, RGBA(0,0,0,1));
 
 			if (scr_debuggraph->value || scr_timegraph->value || scr_netgraph->value)
 				SCR_DrawDebugGraph ();

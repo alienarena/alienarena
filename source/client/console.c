@@ -632,11 +632,11 @@ static void _CON_DrawScroller(
 	int tHeight = display_height - font_size;
 	int bHeight , bStart;
 
-	Draw_Fill( hStart - 1 , vStart - 1 , font_size + 2 , tHeight + 2 , 15 );
+	Draw_Fill (hStart - 1 , vStart - 1 , font_size + 2 , tHeight + 2 , RGBA8(235,235,235,255));
 
 	if ( display_height >= text_height ) {
 		// Fill whole bar
-		Draw_Fill( hStart , vStart , font_size , tHeight , 208 );
+		Draw_Fill (hStart , vStart , font_size , tHeight , RGBA(0,1,0,1));
 		return;
 	}
 
@@ -651,8 +651,8 @@ static void _CON_DrawScroller(
 		* ( CON_console.displayOffset - text_height + display_height )
 		/ ( display_height - text_height );
 
-	Draw_Fill( hStart , vStart , font_size , tHeight , 201 );
-	Draw_Fill( hStart , bStart , font_size , bHeight , 208 );
+	Draw_Fill (hStart , vStart , font_size , tHeight , RGBA8(63,79,27,255));
+	Draw_Fill (hStart , bStart , font_size , bHeight , RGBA(0,1,0,1));
 }
 
 
@@ -717,7 +717,7 @@ static void _CON_DrawInputLine(
 
 	// Draw cursor
 	if ( ( (int)( cls.realtime >> 8 ) & 1) != 0 ) {
-		Draw_Fill( box.x + box.width + 1 , box.y + 1 , font->size - 2 , font->size - 2 , 208 );
+		Draw_Fill (box.x + box.width + 1 , box.y + 1 , font->size - 2 , font->size - 2 , RGBA(0,1,0,1));
 	}
 
 	// Draw whatever is after the cursor

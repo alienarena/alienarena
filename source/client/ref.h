@@ -377,6 +377,9 @@ typedef struct
 	int		oldy;
 } cursor_t;
 
+#define RGBA(a,b,c,d) ((const float[]){(float)(a), (float)(b), (float)(c), (float)(d)})
+#define RGBA8(a,b,c,d) RGBA((a)/255.0f, (b)/255.0f, (c)/255.0f, (d)/255.0f)
+
 void	Draw_GetPicSize (int *w, int *h, const char *name);
 void	Draw_Pic (float x, float y, const char *name);
 void	Draw_ScaledPic (float x, float y, float scale, const char *pic);
@@ -384,7 +387,7 @@ void	Draw_StretchPic (float x, float y, float w, float h, const char *name);
 void	Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char *name, float alphaval);
 void	Draw_AlphaStretchPic (float x, float y, float w, float h, const char *name, float alphaval);
 void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, const char *pic, float alphaval);
-void	Draw_Fill (float x, float y, float w, float h, int c);
+void	Draw_Fill (float x, float y, float w, float h, const float rgba[]);
 void	Draw_FadeScreen (void);
 
 void	R_BeginFrame( float camera_separation );
