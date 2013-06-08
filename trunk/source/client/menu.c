@@ -4873,7 +4873,7 @@ typedef struct
 	const char *name;
 	const char *skin;
 	int w, h;
-	float mframe, yaw;
+	float mframe, yaw, pitch;
 } menumodel_s;
 
 static menuvec2_t PlayerModelSizeFunc (void *_self, FNT_font_t font)
@@ -4917,6 +4917,8 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	refdef.x = Item_GetX(*self);
 	refdef.y = Item_GetY(*self);
 	refdef.x -= refdef.width;
+
+	self->pitch = 5*(refdef.height/2.0 - refdef.y)/(refdef.height/2.0);
 	
 	Menu_DrawBox (refdef.x, refdef.y, refdef.width, refdef.height, 1, NULL, "menu/sm_");
 	
@@ -4966,6 +4968,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		entity[i].frame = (int)(self->mframe/10);
 		entity[i].oldframe = (int)(self->mframe/10) - 1;
 		entity[i].backlerp = 1.0;
+		entity[i].angles[0] = (int)self->pitch;
 		entity[i].angles[1] = (int)self->yaw;
 		
 		VectorSet (entity[i].origin, 70, 0, 0);
