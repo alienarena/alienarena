@@ -314,6 +314,7 @@ void	Menu_Center( menuframework_s *menu );
 void	Menu_AutoArrange( menuframework_s *menu );
 void	Menu_Draw( menuframework_s *menu );
 void	Menu_AssignCursor (menuframework_s *menu, int layernum);
+void	Menu_DrawHighlightItem (menuitem_s *item);
 void	Menu_DrawHighlight (void);
 void	Menu_SelectItem (void);
 void	Menu_SetStatusBar( menuframework_s *s, const char *string );
