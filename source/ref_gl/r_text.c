@@ -230,6 +230,7 @@ FNT_font_t FNT_AutoGet(
 		face = NULL;
 	}
 	if ( face == NULL ) {
+		// fallback font
 		face = FNT_GetFace( auto_font->face );
 	}
 
@@ -388,7 +389,9 @@ FNT_face_t FNT_GetFace( const char * face_name )
 	// Try looking it up first
 	face = HT_GetItem( _FNT_LoadedFaces , baseName , &created );
 	if ( created ) {
-		face->used = 0;
+		// Changed from 0 to 1. An initial value of 0 was causing face to be
+		// used after being freed.
+		face->used = 1;
 	} else {
 		face->used ++;
 		return face;
