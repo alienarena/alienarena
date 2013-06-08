@@ -325,6 +325,8 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		R_DrawVarrays (GL_QUADS, 0, 4);
 		qglEnable (GL_ALPHA_TEST);
 		qglDisable (GL_BLEND);
+		GLSTATE_DISABLE_BLEND
+		GLSTATE_ENABLE_ALPHATEST
 		R_KillVArrays();
 	}
 	else
@@ -529,7 +531,8 @@ Fills a box of pixels with a single color
 void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 {
 	qglDisable (GL_TEXTURE_2D);
-	GLSTATE_ENABLE_ALPHATEST;
+	// FIXME HACK
+	GLSTATE_ENABLE_BLEND;
 	qglColor4fv (rgba);
 	
 	qglBegin (GL_QUADS);
@@ -539,7 +542,7 @@ void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 		qglVertex2f (x, y+h);
 	qglEnd ();
 	
-	GLSTATE_DISABLE_ALPHATEST;
+	GLSTATE_DISABLE_BLEND;
 	qglColor3f (1,1,1);
 	qglEnable (GL_TEXTURE_2D);
 }
