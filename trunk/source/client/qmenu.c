@@ -1121,15 +1121,18 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 
 void Menu_DrawToolTip( const char *string )
 {
+	int				x;
 	FNT_font_t		font;
 	
 	font = FNT_AutoGet( CL_menuFont );
+	
+	x = min (cursor.x, VID_WIDTH - Menu_PredictSize (string));
 
 	if ( string )
 	{
-		Menu_DrawHorizBar ("menu/slide_border", cursor.x-2, cursor.y-font->size-4, Menu_PredictSize (string)+4, font->size+4);
+		Menu_DrawHorizBar ("menu/slide_border", x-2, cursor.y-font->size-4, Menu_PredictSize (string)+4, font->size+4);
 		Menu_DrawString (
-			cursor.x, cursor.y - font->size - 4, 
+			x, cursor.y - font->size - 4, 
 			string, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);
