@@ -782,7 +782,7 @@ void Menu_AssignCursor (menuframework_s *menu, int layernum)
 
 	lastitem = (menuitem_s *)cursor.menuitem;
 
-	for ( i = menu->nitems; i >= 0 ; i-- )
+	for ( i = 0; i < menu->nitems; i++ )
 	{
 		int mincoord, maxcoord;
 
