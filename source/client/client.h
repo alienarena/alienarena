@@ -708,10 +708,10 @@ qboolean server_is_team; //used for player visibility light code
 typedef struct _SERVERDATA {
 
 	char szHostName[48];
-	char szMapName[24];
+	char szMapName[24], fullMapName[128];
 	char szAdmin[64];
-	char szVersion[64];
-	char szWebsite[64];
+	char szVersion[32];
+	char szWebsite[32];
 	char maxClients[32];
 	char fraglimit[32];
 	char timelimit[32];
