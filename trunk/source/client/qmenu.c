@@ -700,8 +700,9 @@ void Menu_AutoArrange (menuframework_s *menu)
 	}
 }
 
-static inline qboolean Item_ScrollVisible (menuframework_s *menu, menuitem_s *item)
+static inline qboolean Item_ScrollVisible (menuitem_s *item)
 {
+	menuframework_s *menu = item->generic.parent;
 	// scrolling disabled on this item
 	if (menu->maxheight == 0)
 		return true;
@@ -730,7 +731,7 @@ void _Menu_Draw (menuframework_s *menu, FNT_font_t font)
 	{
 		item = ((menuitem_s * )menu->items[i]);
 		
-		if (!Item_ScrollVisible (menu, item))
+		if (!Item_ScrollVisible (item))
 			continue;
 		
 		// TODO: cleaner method
@@ -842,9 +843,6 @@ void Menu_DrawHighlightMenu (menuframework_s *menu, FNT_font_t font)
 	{
 		item = ((menuitem_s * )menu->items[i]);
 		
-		if (!Item_ScrollVisible (menu, item))
-			continue;
-		
 		Menu_DrawHighlightItem (item);
 	}
 }
@@ -852,6 +850,9 @@ void Menu_DrawHighlightMenu (menuframework_s *menu, FNT_font_t font)
 void Menu_DrawHighlightItem (menuitem_s *item)
 {
 	FNT_font_t font = FNT_AutoGet (CL_menuFont);
+	
+	if (!Item_ScrollVisible (item))
+		return;
 	
 	if (item->generic.cursorcallback)
 		item->generic.cursorcallback (item, font);
@@ -1216,6 +1217,7 @@ void Menu_SlideItem (int dir)
 void Label_Draw (menutxt_s *s, FNT_font_t font, const float *color)
 {
 	unsigned int align;
+	unsigned int cmode;
 	
 	if ( s->generic.name == NULL)
 		return;
@@ -1225,9 +1227,13 @@ void Label_Draw (menutxt_s *s, FNT_font_t font, const float *color)
 	else
 		align = FNT_ALIGN_RIGHT;
 	
+	cmode = FNT_CMODE_QUAKE_SRS;
+	if (color == highlight_color)
+		cmode = FNT_CMODE_TWO;
+	
 	Menu_DrawString (
 		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (font),
-		s->generic.name, FNT_CMODE_QUAKE_SRS, align, color
+		s->generic.name, cmode, align, color
 	);
 }
 void Slider_DoSlide( menuslider_s *s, int dir )

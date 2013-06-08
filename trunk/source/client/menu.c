@@ -3295,9 +3295,6 @@ void ServerList_SubmenuInit (void)
 	{
 		s_serverlist_rows[i].generic.type	= MTYPE_SUBMENU;
 		s_serverlist_rows[i].generic.callback = JoinServerFunc;
-		// undecided on this:
-		s_serverlist_rows[i].generic.cursorcallback = SelectServer;
-		
 		s_serverlist_rows[i].nitems = 0;
 		s_serverlist_rows[i].horizontal = true;
 		s_serverlist_rows[i].enable_highlight = true;
@@ -3512,9 +3509,16 @@ void JoinServer_MenuDraw(void)
 		s_serverbrowser_screen.nitems = 1;
 	else
 		s_serverbrowser_screen.nitems = 2;
+
+	Menu_AutoArrange (&s_serverbrowser_screen);
+		
 	Menu_Draw( &s_serverbrowser_screen );
 	
-	Menu_AutoArrange (&s_serverbrowser_screen);
+	if (serverindex != -1)
+	{
+		Menu_DrawHighlightItem ((menuitem_s *)&s_serverlist_rows[serverindex]);
+		Menu_DrawHighlightItem ((menuitem_s *)&s_serverlist_rows[serverindex]);
+	}
 }
 
 const char *JoinServer_MenuKey (menuframework_s *screen, int key)
