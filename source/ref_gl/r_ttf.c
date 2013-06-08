@@ -409,6 +409,12 @@ static qboolean _TTF_LoadFont( FNT_font_t font )
 	}
 	
 	font->height = fontInt->height = max_ascent + max_descent;
+	
+	// FIXME HACK: some fonts (like freemono) disappear if used as the menu
+	// font if we don't do this, because the menu code ends up calculating 
+	// negative margins.
+	if (font->height < font->size)
+		font->height = font->size;
 
 	font->width = 0;
 	// Get kerning information
