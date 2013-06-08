@@ -111,8 +111,18 @@ static void IntFieldCallback( void *_self )
 
 static menuvec2_t PicSizeFunc (void *_self, FNT_font_t font)
 {
-	menuvec2_t ret;
-	menuitem_s *self = (menuitem_s *)_self;
+	int 		sizetest1, sizetest2;
+	menuvec2_t	ret;
+	menuitem_s	*self = (menuitem_s *)_self;
+	
+	ret.x = ret.y = 0;
+	
+	// determine if pic exists, if not return 0 size. 
+	// TODO: less hacky way to do this test
+	Draw_GetPicSize (&sizetest1, &sizetest2, self->generic.localstrings[0]);
+	if (sizetest1 == -1)
+		return ret;
+	
 	ret.x = self->generic.localints[0]*font->size;
 	ret.y = self->generic.localints[1]*font->size;
 	ret.x += self->generic.localints[2];
@@ -2691,12 +2701,6 @@ static const char *updown_names[] = {
 	0
 };
 
-int		m_num_servers = 0;
-
-static char local_player_info[MAX_PLAYERS][SVDATA_PLAYERINFO][SVDATA_PLAYERINFO_COLSIZE];
-static char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
-static char local_server_data[6][64];
-static char local_mods_data[16][53]; //53 is measured max tooltip width
 
 //Lists for all stock mutators and game modes, plus some of the more popular
 //custom ones. (NOTE: For non-boolean cvars, i.e. those which have values
@@ -2795,9 +2799,305 @@ char *GetLine (char **contents, int *len)
 	return ret;
 }
 
+
 SERVERDATA mservers[MAX_LOCAL_SERVERS];
 
 PLAYERSTATS thisPlayer;
+
+int		m_num_servers = 0;
+
+static char local_mods_data[16][53]; //53 is measured max tooltip width
+
+
+static struct
+{
+	menuframework_s	screen;
+	menuframework_s	menu;
+	
+	menutxt_s		name;
+	menuaction_s	connect;
+	
+	menuitem_s		levelshot;
+	char			levelshot_path[MAX_QPATH];
+
+	menuframework_s	serverinfo_submenu;
+	menuframework_s	serverinfo_table;
+	menuframework_s	serverinfo_rows[8];
+	menutxt_s		serverinfo_columns[8][2];
+
+	menuframework_s	modlist_submenu;
+	menuaction_s	modlist[MAX_SERVER_MODS];
+	char			modtxt[MAX_SERVER_MODS][48];
+	char			modnames[MAX_SERVER_MODS][24];
+
+	menuframework_s	playerlist_submenu;
+	menuframework_s	playerlist_scrollingmenu;
+	menuframework_s	playerlist_header;
+	menutxt_s		playerlist_header_columns[SVDATA_PLAYERINFO];
+	menuframework_s	playerlist_rows[MAX_PLAYERS];
+	menutxt_s		playerlist_columns[MAX_PLAYERS][SVDATA_PLAYERINFO];
+	char			ranktxt[MAX_PLAYERS][32];
+} s_servers[MAX_LOCAL_SERVERS];
+
+static int serverindex;
+qboolean serveroutdated;
+
+void JoinServerFunc (void *unused)
+{
+	int		i;
+	char	buffer[128];
+	
+	cl.tactical = false;
+
+	remoteserver_runspeed = 300; //default
+	for ( i = 0; i < 16; i++)
+	{
+		if( !strcmp("aa tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
+		{
+			remoteserver_runspeed = 200; //for correct prediction
+			M_Menu_Tactical_f();
+			return;
+		}
+		else if( !strcmp("excessive", Info_ValueForKey(mod_names, local_mods_data[i])) )
+			remoteserver_runspeed = 450;
+		else if( !strcmp("playerspeed", Info_ValueForKey(mod_names, local_mods_data[i])) )
+			remoteserver_runspeed = 450;
+	} //TO DO:  We need to do the speed check on connect instead - meaning the server will need to be pinged and parsed there as well(but only if not done already through the menu).
+
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[serverindex].local_server_netadr));
+	Cbuf_AddText (buffer);
+	M_ForceMenuOff ();
+}
+
+void ModList_SubmenuInit (void)
+{
+	int i;
+	char	modstring[64];
+	char	*token;
+	
+	s_servers[serverindex].modlist_submenu.generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].modlist_submenu.navagable = true;
+	s_servers[serverindex].modlist_submenu.nitems = 0;
+	
+	for ( i = 0; i < MAX_SERVER_MODS; i++ )
+	{
+		s_servers[serverindex].modlist[i].generic.type	= MTYPE_ACTION;
+		s_servers[serverindex].modlist[i].generic.flags = QMF_RIGHT_COLUMN;
+		s_servers[serverindex].modlist[i].generic.name	= s_servers[serverindex].modnames[i];
+		s_servers[serverindex].modlist[i].generic.tooltip = s_servers[serverindex].modtxt[i];
+		
+		Menu_AddItem( &s_servers[serverindex].modlist_submenu, &s_servers[serverindex].modlist[i] );
+	}
+	
+	s_servers[serverindex].modlist_submenu.maxlines = 5;
+	
+	//Copy modstring over since strtok will modify it
+	Q_strncpyz(modstring, mservers[serverindex].modInfo, sizeof(modstring));
+	
+	// populate all the data
+	token = strtok(modstring, "%%");
+	for (i=0; i<MAX_SERVER_MODS; i++) {
+		if (!token)
+			break;
+		Com_sprintf(local_mods_data[i], sizeof(local_mods_data[i]), token);
+		token = strtok(NULL, "%%");
+		
+		Com_sprintf (   s_servers[serverindex].modtxt[i], sizeof(s_servers[serverindex].modtxt[i]),
+						Info_ValueForKey(mods_desc, local_mods_data[i])
+					);
+		if (!strlen(s_servers[serverindex].modtxt[i]))
+			Com_sprintf (s_servers[serverindex].modtxt[i], sizeof(s_servers[serverindex].modtxt[i]), "(no description)");
+		
+		Com_sprintf (   s_servers[serverindex].modnames[i], sizeof(s_servers[serverindex].modnames[i]),
+						Info_ValueForKey(mod_names, local_mods_data[i])
+					);
+		if (!strlen(s_servers[serverindex].modnames[i]))
+			Com_sprintf (s_servers[serverindex].modnames[i], sizeof(s_servers[serverindex].modnames[i]), local_mods_data[i]);
+	}
+	s_servers[serverindex].modlist_submenu.nitems = i;
+	s_servers[serverindex].modlist_submenu.yscroll = 0;
+}
+
+void ServerInfo_SubmenuInit (void)
+{
+	size_t sizes[2] = {sizeof(menutxt_s), sizeof(menutxt_s)};
+	
+	char *contents[2*7+1] = {
+		"Map:",			mservers[serverindex].szMapName,
+		"Skill:",		mservers[serverindex].skill,
+		"Admin:",		mservers[serverindex].szAdmin,
+		"Website:",		mservers[serverindex].szWebsite,
+		"Fraglimit:",	mservers[serverindex].fraglimit,
+		"Timelimit:",	mservers[serverindex].timelimit,
+		"Version:",		mservers[serverindex].szVersion,
+		"Gameplay:"
+	};
+	
+	Com_sprintf (
+		s_servers[serverindex].levelshot_path,
+		sizeof(s_servers[serverindex].levelshot_path),
+		"/levelshots/%s", mservers[serverindex].fullMapName
+	);
+	
+	s_servers[serverindex].serverinfo_submenu.generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].serverinfo_submenu.bordertexture = "menu/sm_";
+	s_servers[serverindex].serverinfo_submenu.nitems = 0;
+	s_servers[serverindex].serverinfo_submenu.navagable = true;
+	
+	s_servers[serverindex].name.generic.type = MTYPE_TEXT;
+	s_servers[serverindex].name.generic.flags = QMF_RIGHT_COLUMN;
+	s_servers[serverindex].name.generic.name = mservers[serverindex].szHostName;
+	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].name);
+	
+	s_servers[serverindex].connect.generic.type = MTYPE_ACTION;
+	s_servers[serverindex].connect.generic.flags = QMF_RIGHT_COLUMN;
+	s_servers[serverindex].connect.generic.name = "Connect";
+	if (!serveroutdated && pNameUnique)
+		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
+	else
+		s_servers[serverindex].connect.generic.statusbar = NULL;
+	s_servers[serverindex].connect.generic.callback = JoinServerFunc;
+	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].connect);
+	
+	s_servers[serverindex].levelshot.generic.type = MTYPE_NOT_INTERACTIVE;
+	s_servers[serverindex].levelshot.generic.localstrings[0] = s_servers[serverindex].levelshot_path;
+	VectorSet (s_servers[serverindex].levelshot.generic.localints, 16, 12, 0);
+	s_servers[serverindex].levelshot.generic.itemsizecallback = PicSizeFunc;
+	s_servers[serverindex].levelshot.generic.itemdraw = PicDrawFunc;
+	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].levelshot);
+	
+	serveroutdated = serverIsOutdated (mservers[serverindex].szVersion);
+	
+	s_servers[serverindex].serverinfo_table.generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].serverinfo_table.nitems = 0;
+	
+	s_servers[serverindex].serverinfo_columns[0][0].generic.type		= MTYPE_TEXT;
+	s_servers[serverindex].serverinfo_columns[0][1].generic.type		= MTYPE_TEXT;
+	s_servers[serverindex].serverinfo_columns[0][1].generic.flags	= QMF_RIGHT_COLUMN;
+	
+	Menu_MakeTable (&s_servers[serverindex].serverinfo_table, 7, 2, sizes, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_columns, contents);
+	
+	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].serverinfo_table);
+	
+	s_servers[serverindex].serverinfo_rows[7].generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].serverinfo_rows[7].horizontal = true;
+	s_servers[serverindex].serverinfo_rows[7].navagable = true;
+	s_servers[serverindex].serverinfo_rows[7].nitems = 0;
+	
+	LINK (s_servers[serverindex].serverinfo_rows[0].lwidth, s_servers[serverindex].serverinfo_rows[7].lwidth);
+	LINK (s_servers[serverindex].serverinfo_rows[0].rwidth, s_servers[serverindex].serverinfo_rows[7].rwidth);
+	
+	s_servers[serverindex].serverinfo_columns[7][0].generic.type = MTYPE_TEXT;
+	s_servers[serverindex].serverinfo_columns[7][0].generic.name = contents[7*2+0];
+	LINK (s_servers[serverindex].serverinfo_columns[0][0].generic.x, s_servers[serverindex].serverinfo_columns[7][0].generic.x);
+	Menu_AddItem (&s_servers[serverindex].serverinfo_rows[7], &s_servers[serverindex].serverinfo_columns[7][0]);
+	
+	ModList_SubmenuInit ();
+	LINK (s_servers[serverindex].serverinfo_columns[0][1].generic.x, s_servers[serverindex].modlist_submenu.generic.x);
+	Menu_AddItem (&s_servers[serverindex].serverinfo_rows[7], &s_servers[serverindex].modlist_submenu);
+	
+	// don't add it to serverinfo_table because serverinfo_table isn't navagable
+	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].serverinfo_rows[7]);
+	
+	Menu_AddItem (&s_servers[serverindex].menu, &s_servers[serverindex].serverinfo_submenu);
+}
+
+void PlayerList_SubmenuInit (void)
+{
+	int i, j;
+	
+	char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
+	size_t sizes[3] = {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
+	
+	if (mservers[serverindex].players == 0)
+		return;
+	
+	s_servers[serverindex].playerlist_submenu.generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].playerlist_submenu.navagable = true;
+	s_servers[serverindex].playerlist_submenu.nitems = 0;
+	
+	Menu_AddItem (&s_servers[serverindex].menu, &s_servers[serverindex].playerlist_submenu);
+	
+	s_servers[serverindex].playerlist_scrollingmenu.generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].playerlist_scrollingmenu.navagable = true;
+	s_servers[serverindex].playerlist_scrollingmenu.bordertexture = "menu/sm_";
+	s_servers[serverindex].playerlist_scrollingmenu.nitems = 0;
+	
+	s_servers[serverindex].playerlist_header.generic.type = MTYPE_SUBMENU;
+	s_servers[serverindex].playerlist_header.horizontal = true;
+	s_servers[serverindex].playerlist_header.nitems = 0;
+	
+	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_NAME].generic.name	= "^7Name";
+	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_SCORE].generic.name	= "^7Score";
+	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_PING].generic.name	= "^7Ping";
+	for (i = 0; i < SVDATA_PLAYERINFO; i++)
+	{
+		s_servers[serverindex].playerlist_header_columns[i].generic.type			= MTYPE_TEXT;
+		if (i > 0)
+			s_servers[serverindex].playerlist_header_columns[i].generic.flags	= QMF_RIGHT_COLUMN;
+		Menu_AddItem (&s_servers[serverindex].playerlist_header, &s_servers[serverindex].playerlist_header_columns[i]);
+	}
+	
+	Menu_AddItem (&s_servers[serverindex].playerlist_submenu, &s_servers[serverindex].playerlist_header);
+	
+	for (i = 0; i < mservers[serverindex].players; i++)
+	{
+		int ranking = mservers[serverindex].playerRankings[i];
+		if (ranking == 1000)
+			Com_sprintf(s_servers[serverindex].ranktxt[i], sizeof(s_servers[serverindex].ranktxt[i]), "Player is unranked");
+		else
+			Com_sprintf(s_servers[serverindex].ranktxt[i], sizeof(s_servers[serverindex].ranktxt[i]), "Player is ranked %i", ranking);
+		s_servers[serverindex].playerlist_rows[i].generic.tooltip = s_servers[serverindex].ranktxt[i];
+		
+		for (j = 0; j < SVDATA_PLAYERINFO; j++)
+			local_player_info_ptrs[i*SVDATA_PLAYERINFO+j] = &mservers[serverindex].playerInfo[i][j][0];
+	}
+	
+	Menu_MakeTable	(	&s_servers[serverindex].playerlist_scrollingmenu,
+						mservers[serverindex].players, SVDATA_PLAYERINFO,
+						sizes, &s_servers[serverindex].playerlist_header,
+						s_servers[serverindex].playerlist_rows, s_servers[serverindex].playerlist_columns,
+						local_player_info_ptrs
+					);
+	
+	Menu_AddItem (&s_servers[serverindex].playerlist_submenu, &s_servers[serverindex].playerlist_scrollingmenu);
+	
+	s_servers[serverindex].playerlist_scrollingmenu.maxlines = 7;
+	
+	s_servers[serverindex].playerlist_scrollingmenu.nitems = mservers[serverindex].players;
+	s_servers[serverindex].playerlist_scrollingmenu.yscroll = 0;
+	
+	LINK (s_servers[serverindex].serverinfo_submenu.rwidth, s_servers[serverindex].playerlist_scrollingmenu.rwidth);
+	LINK (s_servers[serverindex].serverinfo_submenu.lwidth, s_servers[serverindex].playerlist_scrollingmenu.lwidth);
+}
+
+void SelectedServer_MenuInit (void)
+{
+	const char *statusbar_text;
+
+	s_servers[serverindex].screen.nitems = 0;
+	
+	setup_window (s_servers[serverindex].screen, s_servers[serverindex].menu, "SERVER");
+	
+	ServerInfo_SubmenuInit ();
+	PlayerList_SubmenuInit ();
+	
+	//warn user that they cannot join until changing default player name
+	if(!pNameUnique) 
+		statusbar_text = "You must change your player name from the default before connecting!";
+	else if (serveroutdated)
+		statusbar_text = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
+	else
+		statusbar_text = mservers[serverindex].szHostName;
+
+	s_servers[serverindex].screen.statusbar = statusbar_text;
+	
+	Menu_AutoArrange (&s_servers[serverindex].screen);
+}
+
+screen_boilerplate (SelectedServer, s_servers[serverindex].screen);
+
+
 
 //TODO: Move this out of the menu section!
 void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserver)
@@ -2860,7 +3160,10 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 		else if (!Q_strcasecmp (lasttoken, "version"))
 			Com_sprintf(destserver->szVersion, sizeof(destserver->szVersion), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "mapname"))
+		{
 			Com_sprintf(destserver->szMapName, sizeof(destserver->szMapName), "%s", token);
+			Com_sprintf(destserver->fullMapName, sizeof(destserver->fullMapName), "%s", token);
+		}
 		else if (!Q_strcasecmp (lasttoken, "hostname"))
 			Com_sprintf(destserver->szHostName, sizeof(destserver->szHostName), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "maxclients"))
@@ -2952,6 +3255,17 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 }
 
 static menulist_s		s_joinserver_filterempty_action;
+static menuframework_s	s_serverbrowser_screen;
+
+static menuframework_s	s_joinserver_menu;
+
+static menuframework_s	s_joinserver_header;
+
+static menuframework_s	s_serverlist_submenu;
+static menuframework_s	s_serverlist_header;
+static menulist_s		s_serverlist_header_columns[SERVER_LIST_COLUMNS];
+static menuframework_s	s_serverlist_rows[MAX_LOCAL_SERVERS];
+static menutxt_s		s_serverlist_columns[MAX_LOCAL_SERVERS][SERVER_LIST_COLUMNS];
 
 void M_AddToServerList (netadr_t adr, char *status_string)
 {
@@ -2983,153 +3297,40 @@ void M_UpdateConnectedServerInfo (netadr_t adr, char *status_string)
 	remoteserver_jousting = connectedserver.joust;
 }
 
-
-static menuframework_s	s_serverbrowser_screen;
-
-static menuframework_s	s_joinserver_menu;
-
-static menuframework_s	s_joinserver_header;
-
-static menuframework_s	s_serverlist_submenu;
-static menuframework_s	s_serverlist_header;
-static menulist_s		s_serverlist_header_columns[SERVER_LIST_COLUMNS];
-static menuframework_s	s_serverlist_rows[MAX_LOCAL_SERVERS];
-static menutxt_s		s_serverlist_columns[MAX_LOCAL_SERVERS][SERVER_LIST_COLUMNS];
-
-static menuframework_s	s_selectedserver_screen;
-
-static menuframework_s	s_playerlist_submenu;
-static menuframework_s	s_playerlist_scrollingmenu;
-static menuframework_s	s_playerlist_header;
-static menutxt_s		s_playerlist_header_columns[SVDATA_PLAYERINFO];
-static menuframework_s	s_joinserver_player_rows[MAX_PLAYERS];
-static menutxt_s		s_joinserver_player_columns[MAX_PLAYERS][SVDATA_PLAYERINFO];
-char 					ranktxt[MAX_PLAYERS][32];
-
-static menuframework_s	s_modlist_submenu;
-static menuaction_s		s_joinserver_mods_data[MAX_SERVER_MODS];
-char					modtxt[MAX_SERVER_MODS][48];
-char					modnames[MAX_SERVER_MODS][24];
-
-static menuframework_s	s_serverinfo_submenu;
-static menuframework_s	s_joinserver_server_data_rows[6];
-static menutxt_s		s_joinserver_server_data_columns[6][2];
-
-static int serverindex;
-qboolean serveroutdated;
-
 void DeselectServer (void)
 {
 	serverindex = -1;
-	s_serverinfo_submenu.nitems = 0;
-	s_playerlist_scrollingmenu.nitems = 0;
-	s_modlist_submenu.nitems = 0;
+	s_servers[serverindex].serverinfo_submenu.nitems = 0;
+	s_servers[serverindex].playerlist_scrollingmenu.nitems = 0;
+	s_servers[serverindex].modlist_submenu.nitems = 0;
 }
 
-void SelectServer ( void *self )
+void SelectServer (int index)
 {
-	int		i;
-	char	modstring[64];
-	char	*token;
-	int 	index = ( menuframework_s * ) self - s_serverlist_rows;
-	
-	//set strings for output
-	Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), mservers[index].skill);
-	Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), mservers[index].szAdmin);
-	Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), mservers[index].szWebsite);
-	Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), mservers[index].fraglimit);
-	Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index].timelimit);
-
-	if ((serveroutdated = serverIsOutdated (mservers[index].szVersion)))
-		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), "^1%s", mservers[index].szVersion);
-	else
-		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index].szVersion);
-	s_serverinfo_submenu.nitems = 6;
-	s_serverinfo_submenu.yscroll = 0;
-	Menu_AutoArrange (&s_serverinfo_submenu);
-
-	//Copy modstring over since strtok will modify it
-	Q_strncpyz(modstring, mservers[index].modInfo, sizeof(modstring));
-	token = strtok(modstring, "%%");
-	for (i=0; i<MAX_SERVER_MODS; i++) {
-		if (!token)
-			break;
-		Com_sprintf(local_mods_data[i], sizeof(local_mods_data[i]), token);
-		token = strtok(NULL, "%%");
-		
-		Com_sprintf (   modtxt[i], sizeof(modtxt[i]),
-						Info_ValueForKey(mods_desc, local_mods_data[i])
-					);
-		if (!strlen(modtxt[i]))
-			Com_sprintf (modtxt[i], sizeof(modtxt[i]), "(no description)");
-		
-		Com_sprintf (   modnames[i], sizeof(modnames[i]),
-						Info_ValueForKey(mod_names, local_mods_data[i])
-					);
-		if (!strlen(modnames[i]))
-			Com_sprintf (modnames[i], sizeof(modnames[i]), local_mods_data[i]);
-	}
-	s_modlist_submenu.nitems = i;
-	s_modlist_submenu.yscroll = 0;
-	Menu_AutoArrange (&s_modlist_submenu);
-
-	//players
-	for(i=0; i<mservers[index].players; i++) {
-		int ranking = mservers[index].playerRankings[i];
-		if (ranking == 1000)
-			Com_sprintf(ranktxt[i], sizeof(ranktxt[i]), "Player is unranked");
-		else
-			Com_sprintf(ranktxt[i], sizeof(ranktxt[i]), "Player is ranked %i", ranking);
-	}
-	memcpy (local_player_info, mservers[index].playerInfo, sizeof(mservers[index].playerInfo));
-	s_playerlist_scrollingmenu.nitems = mservers[index].players;
-	s_playerlist_scrollingmenu.yscroll = 0;
-	Menu_AutoArrange (&s_playerlist_submenu);
-	
 	// used if the player hits enter without his mouse over the server list	
 	serverindex = index;
+	
+	M_Menu_SelectedServer_f ();
 }
 
 //join on double click, return info on single click - to do - might consider putting player info in a tooltip on single click/right click
-void JoinServerFunc( void *self )
+void ClickServerFunc( void *self )
 {
-	char	buffer[128];
-	int		index;
-	int		i;
+	int		index = ( menuframework_s * ) self - s_serverlist_rows;
 
-	cl.tactical = false;
-
-	index = ( menuframework_s * ) self - s_serverlist_rows;
-
-	if(cursor.buttonclicks[MOUSEBUTTON1] != 2 || serverindex != index)
+	if(serverindex != index)
 	{
-		SelectServer (self);
-		return;
+		SelectServer (index);
+		if (cursor.buttonclicks[MOUSEBUTTON1] != 2)
+			return;
 	}
 
 	if(!pNameUnique) {
 		M_Menu_PlayerConfig_f();
 		return;
 	}
-
-	remoteserver_runspeed = 300; //default
-	for ( i = 0; i < 16; i++)
-	{
-		if( !strcmp("aa tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
-		{
-			remoteserver_runspeed = 200; //for correct prediction
-			M_Menu_Tactical_f();
-			return;
-		}
-		else if( !strcmp("excessive", Info_ValueForKey(mod_names, local_mods_data[i])) )
-			remoteserver_runspeed = 450;
-		else if( !strcmp("playerspeed", Info_ValueForKey(mod_names, local_mods_data[i])) )
-			remoteserver_runspeed = 450;
-	} //TO DO:  We need to do the speed check on connect instead - meaning the server will need to be pinged and parsed there as well(but only if not done already through the menu).
-
-	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index].local_server_netadr));
-	Cbuf_AddText (buffer);
-	M_ForceMenuOff ();
+	
+	JoinServerFunc (NULL);
 }
 
 void AddressBookFunc( void *self )
@@ -3289,12 +3490,10 @@ void ServerList_SubmenuInit (void)
 	
 	Menu_AddItem (&s_joinserver_menu, &s_serverlist_header);
 	
-	serverindex = -1;
-	
 	for ( i = 0; i < MAX_LOCAL_SERVERS; i++ )
 	{
 		s_serverlist_rows[i].generic.type	= MTYPE_SUBMENU;
-		s_serverlist_rows[i].generic.callback = JoinServerFunc;
+		s_serverlist_rows[i].generic.callback = ClickServerFunc;
 		s_serverlist_rows[i].nitems = 0;
 		s_serverlist_rows[i].horizontal = true;
 		s_serverlist_rows[i].enable_highlight = true;
@@ -3324,99 +3523,6 @@ void ServerList_SubmenuInit (void)
 	
 }
 
-void ServerInfo_SubmenuInit (void)
-{
-	static const char *contents[] = {
-		"Skill:",		local_server_data[0],
-		"Admin:",		local_server_data[1],
-		"Website:",		local_server_data[2],
-		"Fraglimit:",	local_server_data[3],
-		"Timelimit:",	local_server_data[4],
-		"Version:",		local_server_data[5]
-	};
-	
-	static size_t sizes[2] = {sizeof(menutxt_s), sizeof(menutxt_s)};
-
-	setup_window (s_selectedserver_screen, s_serverinfo_submenu, "SERVER");
-	
-	s_joinserver_server_data_columns[0][0].generic.type		= MTYPE_TEXT;
-	s_joinserver_server_data_columns[0][1].generic.type		= MTYPE_TEXT;
-	s_joinserver_server_data_columns[0][1].generic.flags	= QMF_RIGHT_COLUMN;
-	
-	Menu_MakeTable (&s_serverinfo_submenu, 6, 2, sizes, s_joinserver_server_data_rows, s_joinserver_server_data_rows, s_joinserver_server_data_columns, contents);
-	
-	s_serverinfo_submenu.nitems = 0;
-}
-
-void ModList_SubmenuInit (void)
-{
-	int i;
-	
-	setup_window (s_selectedserver_screen, s_modlist_submenu, "GAMEPLAY");
-	
-	for ( i = 0; i < MAX_SERVER_MODS; i++ )
-	{
-		s_joinserver_mods_data[i].generic.type	= MTYPE_ACTION;
-		s_joinserver_mods_data[i].generic.flags = QMF_RIGHT_COLUMN;
-		s_joinserver_mods_data[i].generic.name	= modnames[i];
-		s_joinserver_mods_data[i].generic.tooltip = modtxt[i];
-		
-		Menu_AddItem( &s_modlist_submenu, &s_joinserver_mods_data[i] );
-	}
-	
-	s_modlist_submenu.maxlines = 5;
-	s_modlist_submenu.nitems = 0;
-}
-
-void PlayerList_SubmenuInit (void)
-{
-	int i, j;
-	
-	static size_t sizes[3] = {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
-	
-	setup_window (s_selectedserver_screen, s_playerlist_submenu, "PLAYERS");
-	
-	s_playerlist_scrollingmenu.generic.type = MTYPE_SUBMENU;
-	s_playerlist_scrollingmenu.navagable = true;
-	s_playerlist_scrollingmenu.nitems = 0;
-	
-	s_playerlist_header.generic.type = MTYPE_SUBMENU;
-	s_playerlist_header.horizontal = true;
-	s_playerlist_header.nitems = 0;
-	
-	s_playerlist_header_columns[SVDATA_PLAYERINFO_NAME].generic.name	= "^7Name";
-	s_playerlist_header_columns[SVDATA_PLAYERINFO_SCORE].generic.name	= "^7Score";
-	s_playerlist_header_columns[SVDATA_PLAYERINFO_PING].generic.name	= "^7Ping";
-	for (i = 0; i < SVDATA_PLAYERINFO; i++)
-	{
-		s_playerlist_header_columns[i].generic.type			= MTYPE_TEXT;
-		if (i > 0)
-			s_playerlist_header_columns[i].generic.flags	= QMF_RIGHT_COLUMN;
-		Menu_AddItem (&s_playerlist_header, &s_playerlist_header_columns[i]);
-	}
-	
-	Menu_AddItem (&s_playerlist_submenu, &s_playerlist_header);
-	
-	for (i = 0; i < MAX_PLAYERS; i++)
-		for (j = 0; j < SVDATA_PLAYERINFO; j++)
-			local_player_info_ptrs[i*SVDATA_PLAYERINFO+j] = &local_player_info[i][j][0];
-	
-	Menu_MakeTable	(	&s_playerlist_scrollingmenu,
-						MAX_PLAYERS, SVDATA_PLAYERINFO,
-						sizes, &s_playerlist_header,
-						s_joinserver_player_rows, s_joinserver_player_columns,
-						local_player_info_ptrs
-					);
-	
-	for ( i = 0; i < MAX_PLAYERS; i++ )
-		s_joinserver_player_rows[i].generic.tooltip = ranktxt[i];
-	
-	Menu_AddItem (&s_playerlist_submenu, &s_playerlist_scrollingmenu);
-	
-	s_playerlist_scrollingmenu.maxlines = 7;
-	s_playerlist_scrollingmenu.nitems = 0;
-}
-
 void ServerListHeader_SubmenuInit (void)
 {
 	s_joinserver_header.generic.type = MTYPE_SUBMENU;
@@ -3436,7 +3542,6 @@ void ServerListHeader_SubmenuInit (void)
 	
 	Menu_AddItem (&s_joinserver_menu, &s_joinserver_header);
 }
-
 
 void JoinServer_MenuInit( void )
 {
@@ -3467,18 +3572,6 @@ void JoinServer_MenuInit( void )
 	ServerListHeader_SubmenuInit ();
 	ServerList_SubmenuInit ();
 	
-	s_selectedserver_screen.generic.type = MTYPE_SUBMENU;
-	s_selectedserver_screen.generic.flags = QMF_SNUG_LEFT;
-	s_selectedserver_screen.nitems = 0;
-	s_selectedserver_screen.navagable = true;
-	s_selectedserver_screen.horizontal = true;
-	
-	ServerInfo_SubmenuInit ();
-	ModList_SubmenuInit ();
-	PlayerList_SubmenuInit ();
-	
-	Menu_AddItem (&s_serverbrowser_screen, &s_selectedserver_screen);
-
 	if(!gotServers)
 		SearchLocalGames();
 	gotServers = true;
@@ -3490,35 +3583,11 @@ void JoinServer_MenuInit( void )
 
 void JoinServer_MenuDraw(void)
 {
-	const char *statusbar_text;
-	
-		//warn user that they cannot join until changing default player name
-	if(!pNameUnique) 
-		statusbar_text = "You must change your player name from the default before connecting!";
-	else if (serverindex == -1)
-		statusbar_text = NULL;
-	else if (serveroutdated)
-		statusbar_text = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
-	else
-		statusbar_text = "press ENTER or DBL CLICK to connect";
-
-	s_serverbrowser_screen.statusbar = statusbar_text;
-
 	s_serverlist_submenu.nitems = m_num_servers;
-	if (serverindex == -1)
-		s_serverbrowser_screen.nitems = 1;
-	else
-		s_serverbrowser_screen.nitems = 2;
 
 	Menu_AutoArrange (&s_serverbrowser_screen);
 		
 	Menu_Draw( &s_serverbrowser_screen );
-	
-	if (serverindex != -1)
-	{
-		Menu_DrawHighlightItem ((menuitem_s *)&s_serverlist_rows[serverindex]);
-		Menu_DrawHighlightItem ((menuitem_s *)&s_serverlist_rows[serverindex]);
-	}
 }
 
 const char *JoinServer_MenuKey (menuframework_s *screen, int key)
@@ -3526,13 +3595,8 @@ const char *JoinServer_MenuKey (menuframework_s *screen, int key)
 	if ( key == K_ENTER && serverindex != -1 )
 	{
 		cursor.buttonclicks[MOUSEBUTTON1] = 2;//so we can still join without a mouse
-		JoinServerFunc (&s_serverlist_rows[serverindex]);
+		ClickServerFunc (&s_serverlist_rows[serverindex]);
 		return "";
-	}
-	if (serverindex != -1 && !Menu_ContainsMouse (s_joinserver_menu) && cursor.buttonclicks[MOUSEBUTTON1] == 1)
-	{
-		DeselectServer ();
-		return menu_out_sound;
 	}
 	return Default_MenuKey (screen, key );
 }
