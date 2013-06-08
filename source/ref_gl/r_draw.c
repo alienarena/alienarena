@@ -551,7 +551,6 @@ void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 /*
 ================
 Draw_FadeScreen
-
 ================
 */
 void Draw_FadeScreen (void)
@@ -573,3 +572,22 @@ void Draw_FadeScreen (void)
 }
 
 
+//=============================================================================
+
+/*
+================
+RGBA - This really should be a macro, but MSVC doesn't support C99.
+================
+*/
+
+float *RGBA (float r, float g, float b, float a)
+{
+	static float ret[4];
+	
+	ret[0] = r;
+	ret[1] = g;
+	ret[2] = b;
+	ret[3] = a;
+	
+	return ret;
+}
