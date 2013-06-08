@@ -119,7 +119,9 @@ static menuvec2_t PicSizeFunc (void *_self, FNT_font_t font)
 	
 	// determine if pic exists, if not return 0 size. 
 	// TODO: less hacky way to do this test
-	Draw_GetPicSize (&sizetest1, &sizetest2, self->generic.localstrings[0]);
+	if (self->generic.localstrings[0] != NULL)
+		// benifit of doubt if the name isn't there
+		Draw_GetPicSize (&sizetest1, &sizetest2, self->generic.localstrings[0]);
 	if (sizetest1 == -1)
 		return ret;
 	
@@ -480,12 +482,12 @@ static inline int MenuScreens_Animate_Incoming_Target (void)
 	return ret;
 }
 
-// Figure out the starting offset for the leftmost window of the active window
-// group, *if* the "outgoing" windows were hypothetically added to the end of
-// the active window group. Will be used as the "start" for the outgoing-
-// window animation. This is because before the animation started, the
-// outgoing windows were at the end of the active window group, and we want 
-// the transition to be smooth.
+// Figure out the starting offset for the leftmost window of the outgoing
+// window group, *if* the outgoing windows were hypothetically added to the
+// end ofthe active window group. Will be used as the "start" for the
+// outgoing- window animation. This is because before the animation started,
+// the outgoing windows were at the end of the active window group, and we 
+// want the transition to be smooth.
 static inline int MenuScreens_Animate_Outgoing_Start (void)
 {
 	int shove_offset, ret;
@@ -493,6 +495,7 @@ static inline int MenuScreens_Animate_Outgoing_Start (void)
 	shove_offset = viddef.width - layergroup_width (&mstate.active) - layergroup_width (&mstate.outgoing);
 	if (shove_offset < ret)
 		ret = shove_offset;
+	ret += layergroup_width (&mstate.active);
 	return ret;
 }
 
@@ -583,7 +586,7 @@ void Menuscreens_Animate (void)
 			
 			outgoing_end = Menuscreens_Animate_Active () - layergroup_width (&mstate.outgoing);
 			
-			outgoing_shove = shove_offset - layergroup_width (&mstate.outgoing);
+			outgoing_shove = shove_offset + layergroup_width (&mstate.active) - layergroup_width (&mstate.outgoing);
 			if (outgoing_shove < mstate.outgoing.offset)
 				mstate.outgoing.offset = outgoing_shove;
 			
@@ -598,7 +601,8 @@ void Menuscreens_Animate (void)
 			
 			// Keep the sidebar matched with its previous position
 			// TODO: interpolate this as well
-			global_menu_xoffset = MenuScreens_Animate_Outgoing_Start () - viddef.width;
+			mstate.active.offset = MenuScreens_Animate_Outgoing_Start () - layergroup_width (&mstate.active);
+			global_menu_xoffset = mstate.active.offset-viddef.width;
 		}
 		else
 		{
