@@ -566,15 +566,25 @@ void Menuscreens_Animate (void)
 		// behind the active windows and the sidebar.
 		if (mstate.outgoing.num_layers > 0)
 		{
-			int outgoing_shove;
+			int outgoing_shove, outgoing_start, outgoing_end;
+			float outgoing_fade;
 			
-			mstate.outgoing.offset = MenuScreens_Animate_Outgoing_Start ();
+			mstate.outgoing.offset = outgoing_start = MenuScreens_Animate_Outgoing_Start ();
+			
+			outgoing_end = Menuscreens_Animate_Active () - layergroup_width (&mstate.outgoing);
 			
 			outgoing_shove = shove_offset - layergroup_width (&mstate.outgoing);
 			if (outgoing_shove < mstate.outgoing.offset)
 				mstate.outgoing.offset = outgoing_shove;
 			
 			layergroup_draw (&mstate.outgoing);
+			
+			// Fade out the outgoing windows
+			Draw_Fill (
+				mstate.outgoing.offset, 0,
+				layergroup_width (&mstate.outgoing), viddef.height,
+				RGBA (0, 0, 0, sqrt((double)(mstate.outgoing.offset-outgoing_start)/(double)(outgoing_end-outgoing_start)))
+			);
 			
 			// Keep the sidebar matched with its previous position
 			// TODO: interpolate this as well
