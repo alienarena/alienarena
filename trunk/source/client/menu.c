@@ -430,7 +430,7 @@ static int activelayer_coordidx (int xcoord)
 	xcoord -= mstate.active.offset;
 	if (xcoord < 0 || mstate.active.num_layers == 0)
 		return -1;
-	for (i = 0; i < mstate.active.num_layers-1; i++)
+	for (i = 0; i < mstate.active.num_layers; i++)
 	{
 		xcoord -= Menu_TrueWidth (*activelayer(i).screen);
 		if (xcoord < 0)
@@ -5845,6 +5845,9 @@ void M_Think_MouseCursor (void)
 		CheckMainMenuMouse ();
 		return;
 	}
+	
+	if (coordidx == mstate.active.num_layers)
+		return;
 	
 	Menu_AssignCursor (activelayer(coordidx).screen, coordidx);
 	
