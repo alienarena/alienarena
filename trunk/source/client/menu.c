@@ -360,6 +360,9 @@ int M_Interp (int progress, int target)
 	return progress;
 }
 
+// linear interpolation
+#define lerp(start,end,progress) ((start) + (double)((end)-(start))*(progress))
+
 #define	MAX_MENU_DEPTH	8
 
 #define sidebar_width ((float)(150*viddef.width)/1024.0)
@@ -575,7 +578,7 @@ void Menuscreens_Animate (void)
 		if (mstate.outgoing.num_layers > 0)
 		{
 			int outgoing_shove, outgoing_start, outgoing_end;
-			float outgoing_fade;
+			double outgoing_fade;
 			
 			mstate.outgoing.offset = outgoing_start = MenuScreens_Animate_Outgoing_Start ();
 			
@@ -587,22 +590,24 @@ void Menuscreens_Animate (void)
 			
 			layergroup_draw (&mstate.outgoing);
 			
+			outgoing_fade = (double)(mstate.outgoing.offset-outgoing_start)/(double)(outgoing_end-outgoing_start);
+			
 			// Fade out the outgoing windows
 			Draw_Fill (
 				mstate.outgoing.offset, 0,
 				layergroup_width (&mstate.outgoing), viddef.height,
-				RGBA (0, 0, 0, sqrt((double)(mstate.outgoing.offset-outgoing_start)/(double)(outgoing_end-outgoing_start)))
+				RGBA (0, 0, 0, sqrt(outgoing_fade))
 			);
 			
-			// Keep the sidebar matched with its previous position
-			// TODO: interpolate this as well
-			mstate.active.offset = MenuScreens_Animate_Outgoing_Start () - layergroup_width (&mstate.active);
-			global_menu_xoffset = mstate.active.offset-viddef.width;
+			// Interpolate the sidebar as well.
+			mstate.active.offset = lerp (
+				MenuScreens_Animate_Outgoing_Start () - layergroup_width (&mstate.active),
+				MenuScreens_Animate_Incoming_Target (),
+				outgoing_fade
+			);
 		}
-		else
-		{
-			global_menu_xoffset = mstate.active.offset-viddef.width;
-		}
+			
+		global_menu_xoffset = mstate.active.offset-viddef.width;
 		mstate.incoming.offset = shove_offset + layergroup_width (&mstate.active);
 		
 		M_Main_Draw ();
