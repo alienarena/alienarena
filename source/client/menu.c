@@ -2960,7 +2960,8 @@ void ServerInfo_SubmenuInit (void)
 	
 	s_servers[serverindex].levelshot.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_servers[serverindex].levelshot.generic.localstrings[0] = s_servers[serverindex].levelshot_path;
-	VectorSet (s_servers[serverindex].levelshot.generic.localints, 16, 12, 0);
+	// pretty close to 16:9
+	VectorSet (s_servers[serverindex].levelshot.generic.localints, 21, 12, 0); 
 	s_servers[serverindex].levelshot.generic.itemsizecallback = PicSizeFunc;
 	s_servers[serverindex].levelshot.generic.itemdraw = PicDrawFunc;
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].levelshot);
@@ -4583,7 +4584,7 @@ void StartServer_MenuInit( void )
 	
 	s_levelshot_preview.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_levelshot_preview.generic.localstrings[0] = NULL;
-	VectorSet (s_levelshot_preview.generic.localints, 16, 12, 0);
+	VectorSet (s_levelshot_preview.generic.localints, 21, 12, 0);
 	s_levelshot_preview.generic.itemsizecallback = PicSizeFunc;
 	s_levelshot_preview.generic.itemdraw = PicDrawFunc;
 	Menu_AddItem (&s_levelshot_submenu, &s_levelshot_preview);
