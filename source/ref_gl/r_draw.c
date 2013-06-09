@@ -532,7 +532,10 @@ void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 {
 	qglDisable (GL_TEXTURE_2D);
 	// FIXME HACK
+	qglDisable (GL_ALPHA_TEST);
+	qglEnable (GL_BLEND);
 	GLSTATE_ENABLE_BLEND;
+	GLSTATE_DISABLE_ALPHATEST;
 	qglColor4fv (rgba);
 	
 	qglBegin (GL_QUADS);
