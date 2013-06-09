@@ -71,7 +71,6 @@ host_triplet = @host@
 @BUILD_UNIX_TRUE@	unix/glw_unix.h \
 @BUILD_UNIX_TRUE@	unix/net_udp.c \
 @BUILD_UNIX_TRUE@	unix/qal_unix.c \
-@BUILD_UNIX_TRUE@	unix/qasm.h \
 @BUILD_UNIX_TRUE@	unix/qgl_unix.c \
 @BUILD_UNIX_TRUE@	unix/q_shunix.c \
 @BUILD_UNIX_TRUE@	unix/rw_unix.c \
@@ -284,9 +283,9 @@ am__alienarena_SOURCES_DIST = client/anorms.h client/cl_ents.c \
 	server/sv_init.c server/sv_main.c server/sv_send.c \
 	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
 	unix/gl_glx.c unix/glw_unix.h unix/net_udp.c unix/qal_unix.c \
-	unix/qasm.h unix/qgl_unix.c unix/q_shunix.c unix/rw_unix.c \
-	unix/rw_unix.h unix/sys_unix.c unix/vid_so.c win32/conproc.c \
-	win32/conproc.h win32/glw_imp.c win32/glw_win.h win32/in_win.c \
+	unix/qgl_unix.c unix/q_shunix.c unix/rw_unix.c unix/rw_unix.h \
+	unix/sys_unix.c unix/vid_so.c win32/conproc.c win32/conproc.h \
+	win32/glw_imp.c win32/glw_win.h win32/in_win.c \
 	win32/net_wins.c win32/qal_win.c win32/qgl_win.c \
 	win32/q_shwin.c win32/sys_win.c win32/vid_dll.c \
 	win32/winquake.h win32/resource.h

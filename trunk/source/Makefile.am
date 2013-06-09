@@ -230,7 +230,6 @@ alienarena_SOURCES += \
 	unix/glw_unix.h \
 	unix/net_udp.c \
 	unix/qal_unix.c \
-	unix/qasm.h \
 	unix/qgl_unix.c \
 	unix/q_shunix.c \
 	unix/rw_unix.c \
