@@ -2825,8 +2825,9 @@ static struct
 	char			modnames[MAX_SERVER_MODS][24];
 
 	menuframework_s	playerlist_submenu;
-	menuframework_s	playerlist_scrollingmenu;
+	menuaction_s	playerlist_label;
 	menuframework_s	playerlist_header;
+	menuframework_s	playerlist_scrollingmenu;
 	menutxt_s		playerlist_header_columns[SVDATA_PLAYERINFO];
 	menuframework_s	playerlist_rows[MAX_PLAYERS];
 	menutxt_s		playerlist_columns[MAX_PLAYERS][SVDATA_PLAYERINFO];
@@ -2991,7 +2992,8 @@ void ServerInfo_SubmenuInit (void)
 	Menu_AddItem (&s_servers[serverindex].serverinfo_rows[7], &s_servers[serverindex].modlist_submenu);
 	
 	// don't add it to serverinfo_table because serverinfo_table isn't navagable
-	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].serverinfo_rows[7]);
+	if (s_servers[serverindex].modlist_submenu.nitems != 0)
+		Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].serverinfo_rows[7]);
 	
 	Menu_AddItem (&s_servers[serverindex].menu, &s_servers[serverindex].serverinfo_submenu);
 }
@@ -3011,6 +3013,11 @@ void PlayerList_SubmenuInit (void)
 	s_servers[serverindex].playerlist_submenu.nitems = 0;
 	
 	Menu_AddItem (&s_servers[serverindex].menu, &s_servers[serverindex].playerlist_submenu);
+	
+	s_servers[serverindex].playerlist_label.generic.type = MTYPE_TEXT;
+	s_servers[serverindex].playerlist_label.generic.flags = QMF_RIGHT_COLUMN;
+	s_servers[serverindex].playerlist_label.generic.name = "Players:";
+	Menu_AddItem (&s_servers[serverindex].playerlist_submenu, &s_servers[serverindex].playerlist_label);
 	
 	s_servers[serverindex].playerlist_scrollingmenu.generic.type = MTYPE_SUBMENU;
 	s_servers[serverindex].playerlist_scrollingmenu.navagable = true;
