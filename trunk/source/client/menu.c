@@ -480,9 +480,9 @@ static inline int MenuScreens_Animate_Incoming_Target (void)
 	return ret;
 }
 
-// Figure out the starting offset for the leftmost window of the outgoing
+// Figure out the starting offset for the leftmost window of the "active" 
 // window group, *if* the outgoing windows were hypothetically added to the
-// end ofthe active window group. Will be used as the "start" for the
+// end of the active window group. Will be used as the "start" for the
 // outgoing- window animation. This is because before the animation started,
 // the outgoing windows were at the end of the active window group, and we 
 // want the transition to be smooth.
@@ -493,7 +493,6 @@ static inline int MenuScreens_Animate_Outgoing_Start (void)
 	shove_offset = viddef.width - layergroup_width (&mstate.active) - layergroup_width (&mstate.outgoing);
 	if (shove_offset < ret)
 		ret = shove_offset;
-	ret += layergroup_width (&mstate.active);
 	return ret;
 }
 
@@ -580,7 +579,7 @@ void Menuscreens_Animate (void)
 			int outgoing_shove, outgoing_start, outgoing_end;
 			double outgoing_fade;
 			
-			mstate.outgoing.offset = outgoing_start = MenuScreens_Animate_Outgoing_Start ();
+			mstate.outgoing.offset = outgoing_start = MenuScreens_Animate_Outgoing_Start () + layergroup_width (&mstate.active);
 			
 			outgoing_end = Menuscreens_Animate_Active () - layergroup_width (&mstate.outgoing);
 			
@@ -601,7 +600,7 @@ void Menuscreens_Animate (void)
 			
 			// Interpolate the sidebar as well.
 			mstate.active.offset = lerp (
-				MenuScreens_Animate_Outgoing_Start () - layergroup_width (&mstate.active),
+				MenuScreens_Animate_Outgoing_Start (),
 				MenuScreens_Animate_Incoming_Target (),
 				outgoing_fade
 			);
@@ -622,7 +621,7 @@ void Menuscreens_Animate (void)
 		else
 			mstate.active.offset = Menuscreens_Animate_Active ();
 		
-		anim_start = MenuScreens_Animate_Outgoing_Start () - layergroup_width (&mstate.active);
+		anim_start = MenuScreens_Animate_Outgoing_Start ();
 		anim_end = mstate.active.offset + viddef.width;
 		
 		mstate.animation = M_Interp (mstate.animation, anim_end-anim_start);
