@@ -524,6 +524,7 @@ void HandleEvents( void )
 
 					cursor.buttondown[mouse_button] = true;
 					cursor.buttonused[mouse_button] = false;
+					cursor.mouseaction = true;
 				}
 
 				switch ( event.xbutton.button )

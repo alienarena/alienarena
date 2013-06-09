@@ -608,7 +608,7 @@ static void IN_MoveMenuMouse( int x , int y )
 
 	cursor.x = x;
 	cursor.y = y;
-	cursor.mouseaction = cursor.x != cursor.oldx
+	cursor.mouseaction = cursor.mouseaction || cursor.x != cursor.oldx
 		|| cursor.y != cursor.oldy;
 
 	M_Think_MouseCursor();
