@@ -617,7 +617,7 @@ void Menuscreens_Animate (void)
 		else
 			mstate.active.offset = Menuscreens_Animate_Active ();
 		
-		anim_start = MenuScreens_Animate_Outgoing_Start ();
+		anim_start = MenuScreens_Animate_Outgoing_Start () - layergroup_width (&mstate.active);
 		anim_end = mstate.active.offset + viddef.width;
 		
 		mstate.animation = M_Interp (mstate.animation, anim_end-anim_start);
