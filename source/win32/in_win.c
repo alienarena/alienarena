@@ -289,6 +289,7 @@ void IN_MouseEvent (int mstate)
 
 				cursor.buttondown[i] = true;
 				cursor.buttonused[i] = false;
+				cursor.mouseaction = true;
 			}
 			else if ( !(mstate & (1<<i)) &&	(mouse_oldbuttonstate & (1<<i)) )
 			{	//mouse let go

@@ -789,7 +789,7 @@ void Menu_AssignCursor (menuframework_s *menu, int layernum)
 
 		item = ((menuitem_s * )menu->items[i]);
 
-		if (!item || item->generic.type == MTYPE_TEXT)
+		if (!item)
 			continue;
 
 		if (menu->horizontal)
@@ -810,9 +810,14 @@ void Menu_AssignCursor (menuframework_s *menu, int layernum)
 		
 		if (item->generic.type == MTYPE_SUBMENU && ((menuframework_s *)item)->navagable)
 		{
+			// navagable menus should have at least one selectable item in 
+			// them.
 			Menu_AssignCursor ((menuframework_s *)item, layernum);
 			return;
 		}
+		
+		if (!Menu_ItemSelectable (item))
+			continue;
 		
 		// Selected a new item-- reset double-click count
 		if (lastitem != item)

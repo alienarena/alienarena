@@ -5924,6 +5924,9 @@ void M_Think_MouseCursor (void)
 	if (coordidx == mstate.active.num_layers)
 		return;
 	
+	if (coordidx != cursor.menulayer && cursor.mouseaction)
+		Menu_SelectMenu(activelayer(coordidx).screen);
+	
 	Menu_AssignCursor (activelayer(coordidx).screen, coordidx);
 	
 	if (cursor.menuitem == NULL)
