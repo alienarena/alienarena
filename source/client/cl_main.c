@@ -1047,10 +1047,11 @@ int CL_GetPingStartTime(netadr_t adr)
 CL_PingServers_f
 =================
 */
+static void CL_ReadPackets ();
 void CL_PingServers_f (void)
 {
 
-	int			i;
+	int			i, j;
 	netadr_t	adr;
 	char		name[32];
 	char		*adrstring;
@@ -1059,7 +1060,7 @@ void CL_PingServers_f (void)
 
 	NET_Config (true);		// allow remote
 
-	GetServerList();        //get list from COR master server
+	GetServerList();		//get list from COR master server
 
 	// send a broadcast packet
 	Com_Printf ("pinging broadcast...\n");
@@ -1099,6 +1100,35 @@ void CL_PingServers_f (void)
 
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
 
+	}
+	
+	// Note that all we have done thus far is 
+	// - Request server lists from the two master servers
+	// - Sent a broadcast to the LAN looking for local servers
+	// When CL_ReadPackets gets the responses from the master server, it will
+	// automatically ping all the game servers. Ideally, if the net connection
+	// is pretty good, we can get that all done in the following loop. The 
+	// game's main loop will catch any stragglers.
+	
+	// Read packets at 5 ms intervals 60 times. That's 300 ms. Figure maybe 
+	// 100-150 ms round trip to the master server, then another 100-150 ms 
+	// round trip to the game servers. So we should be able to grab any 
+	// servers 150 ping or less and gauge their pings to within 5 ms or so.
+#define PING_LOOP_TOTAL_MS		300
+#define PING_LOOP_INTERVAL_MS	5
+#define PING_LOOP_ITERATIONS	(PING_LOOP_TOTAL_MS/PING_LOOP_INTERVAL_MS)
+	for (i = 0; i < PING_LOOP_ITERATIONS; i++)
+	{
+		#if defined UNIX_VARIANT
+			usleep (PING_LOOP_INTERVAL_MS*1000);
+		#elif defined WIN32_VARIANT
+			Sleep (PING_LOOP_INTERVAL_MS);
+		#else
+			#warning	client/cl_main.c: CL_PingServers_f (): \
+						Do not know what sleep function to use!
+			break;
+		#endif
+		CL_ReadPackets ();
 	}
 
 	// -JD restart the menu music that was stopped during this procedure
@@ -1238,7 +1268,7 @@ static void CL_ConnectionlessPacket (void)
 		{
 			char *playerinfo_start;
 			if (cls.state >= ca_connected && 
-			    !memcmp(&net_from, &cls.netchan.remote_address, sizeof(netadr_t)))
+				!memcmp(&net_from, &cls.netchan.remote_address, sizeof(netadr_t)))
 				M_UpdateConnectedServerInfo (net_from, s);
 			if (cls.key_dest == key_menu)
 			{
@@ -1246,6 +1276,9 @@ static void CL_ConnectionlessPacket (void)
 			}
 			else
 			{
+				// If someone called pingservers () directly from the console,
+				// chances are he wants to read the server list manually 
+				// anyway.
 				playerinfo_start = strchr (s, '\n');
 				*playerinfo_start++ = '\0';
 				Info_Print (s);

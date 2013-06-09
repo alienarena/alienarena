@@ -3354,20 +3354,18 @@ void SearchLocalGames( void )
 	DeselectServer ();
 	s_serverlist_submenu.nitems = 0;
 	s_serverlist_submenu.yscroll = 0;
-
-	// the text box won't show up unless we do a buffer swap
-	R_EndFrame();
+	
+	Draw_Fill (0, 0, viddef.width, viddef.height, RGBA (0, 0, 0, 0.85));
+	SCR_CenterPrint ("Fetching server list...");
+	SCR_DrawCenterString ();
+	R_EndFrame ();
 
 	// send out info packets
 	CL_PingServers_f();
-
-#if defined UNIX_VARIANT
-	sleep(1);
-#else
-	Sleep(1000); //time to recieve packets
-#endif
-
+	
 	CON_Clear();
+	
+	Com_Printf (" Got %d servers- stragglers may follow.\n", m_num_servers);
 }
 
 void SearchLocalGamesFunc( void *self )
