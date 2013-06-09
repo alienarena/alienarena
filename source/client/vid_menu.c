@@ -324,7 +324,7 @@ void VID_MenuInit( void )
 	if ( !_windowed_mouse)
 	{
 		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
-	
+		
 		// FIXME: MASSIVE HACK to get around the fact that VID_MenuInit is called
 		// really freaking early in the game's initialization for some reason--
 		// before the OpenGL functions even get loaded! The only reason it's
@@ -523,9 +523,9 @@ void VID_MenuInit( void )
 VID_MenuDraw
 ================
 */
-void VID_MenuDraw (void)
+void VID_MenuDraw (menuframework_s *screen)
 {
-	s_current_menu = &s_opengl_menu;
+	s_current_menu = screen;
 	
-	Menu_Draw( &s_opengl_screen );
+	Menu_Draw (screen);
 }

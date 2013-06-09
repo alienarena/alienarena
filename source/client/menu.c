@@ -256,15 +256,10 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 
 // Should be useful for most menus
 #define screen_boilerplate(name,struct) \
-static void name ## _MenuDraw (void) \
-{ \
-	Menu_Draw( &struct ); \
-} \
-\
 void M_Menu_ ## name ## _f (void) \
 { \
 	name ## _MenuInit(); \
-	M_PushMenu ( name ## _MenuDraw, Default_MenuKey, &struct); \
+	M_PushMenu ( Menu_Draw, Default_MenuKey, &struct); \
 }
 
 static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
@@ -374,7 +369,7 @@ int M_Interp (int progress, int target)
 // decided which yet.)
 typedef struct
 {
-	void	(*draw) (void);
+	void	(*draw) (menuframework_s *screen);
 	const char *(*key) (menuframework_s *screen, int k);
 	menuframework_s *screen;
 } menulayer_t;
@@ -408,7 +403,7 @@ static void layergroup_draw (layergroup_t *g)
 	global_menu_xoffset = g->offset;
 	for (i = 0; i < g->num_layers; i++)
 	{
-		g->layers[i].draw ();
+		g->layers[i].draw (g->layers[i].screen);
 		global_menu_xoffset += Menu_TrueWidth (*g->layers[i].screen);
 	}
 }
@@ -650,7 +645,7 @@ void Menuscreens_Animate (void)
 // These functions (Push, Force Off, and Pop) are used by the outside world to
 // control the state machine.
 
-void M_PushMenu ( void (*draw) (void), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
+void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
 	int			i;
 	qboolean	found = false;
@@ -1200,11 +1195,6 @@ static void Keys_MenuInit( void )
 	Menu_AutoArrange (&s_keys_screen);
 }
 
-static void Keys_MenuDraw (void)
-{
-	Menu_Draw( &s_keys_screen );
-}
-
 static const char *Keys_MenuKey (menuframework_s *screen, int key)
 {
 	menuaction_s *item = ( menuaction_s * ) cursor.menuitem;
@@ -1247,7 +1237,7 @@ static const char *Keys_MenuKey (menuframework_s *screen, int key)
 void M_Menu_Keys_f (void)
 {
 	Keys_MenuInit();
-	M_PushMenu( Keys_MenuDraw, Keys_MenuKey, &s_keys_screen);
+	M_PushMenu( Menu_Draw, Keys_MenuKey, &s_keys_screen);
 }
 
 
@@ -2167,7 +2157,7 @@ VIDEO MENU
 // TODO: just bring the actual menu portions of vid_menu.c into this file.
 extern menuframework_s s_opengl_screen;
 extern void VID_MenuInit( void );
-extern void VID_MenuDraw( void );
+extern void VID_MenuDraw (menuframework_s *screen);
 void M_Menu_Video_f (void)
 {
 	VID_MenuInit();
@@ -2330,7 +2320,7 @@ static const char *idcredits[] =
 	0
 };
 
-void M_Credits_MenuDraw( void )
+void M_Credits_MenuDraw (menuframework_s *dummy)
 {
 	int i, y, scale;
 	FNT_font_t		font;
@@ -2655,7 +2645,7 @@ void IRC_MenuInit( void )
 }
 
 
-void IRC_MenuDraw( void )
+void IRC_MenuDraw (menuframework_s *dummy)
 {
 	//warn user that they cannot join until changing default player name
 	if(!pNameUnique)
@@ -3585,7 +3575,7 @@ void JoinServer_MenuInit( void )
 }
 
 
-void JoinServer_MenuDraw(void)
+void JoinServer_MenuDraw (menuframework_s *dummy)
 {
 	s_serverlist_submenu.nitems = m_num_servers;
 
@@ -4619,7 +4609,7 @@ void StartServer_MenuInit( void )
 	MapInfoFunc(NULL);
 }
 
-void StartServer_MenuDraw(void)
+void StartServer_MenuDraw (menuframework_s *dummy)
 {
 	static char levelshot[MAX_QPATH];
 	
@@ -5522,7 +5512,7 @@ qboolean PlayerConfig_MenuInit( void )
 	return true;
 }
 
-void PlayerConfig_MenuDraw( void )
+void PlayerConfig_MenuDraw (menuframework_s *dummy)
 {
 	if(!strcmp(s_player_name_field.buffer, "Player"))
 		pNameUnique = false;
