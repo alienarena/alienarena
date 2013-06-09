@@ -3513,7 +3513,7 @@ void ServerList_SubmenuInit (void)
 	
 	Menu_AddItem (&s_joinserver_menu, &s_serverlist_submenu);
 	
-	s_serverlist_submenu.maxlines = 17;
+	s_serverlist_submenu.maxlines = 25;
 	
 }
 
