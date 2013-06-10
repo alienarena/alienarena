@@ -2528,7 +2528,7 @@ void CL_Frame( int msec )
 		}
 	}
 
-	if ( packet_trigger || send_packet_now )
+	if ( packet_trigger || send_packet_now || cls.download)
 	{
 		send_packet_now = false; // used during downloads
 
