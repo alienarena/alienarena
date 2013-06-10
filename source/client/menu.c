@@ -4993,7 +4993,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	refdef.width -= font->size;
 	refdef.height -= font->size;
 	
-	refdef.fov_x = 50;
+	refdef.fov_x = 45;
 	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
 	refdef.time = cls.realtime*0.001;
 	
@@ -5039,7 +5039,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		entity[i].angles[0] = (int)self->pitch;
 		entity[i].angles[1] = (int)self->yaw;
 		
-		VectorSet (entity[i].origin, 70, 0, 0);
+		VectorSet (entity[i].origin, 80, 0, 0);
 		
 		len = VectorLength (entity[i].origin);
 		entity[i].origin[1] -= (refdef.x+refdef.width/2-viddef.width/2)/(4*scale);
@@ -5048,7 +5048,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		
 		vectoangles (entity[i].origin, refdef.viewangles);
 		
-		entity[i].origin[2] -= 5;
+		entity[i].origin[2] -= 7;
 		
 		VectorScale (entity[i].origin, len/len2, entity[i].origin);
 		VectorCopy (entity[i].origin, entity[i].oldorigin);
@@ -5500,8 +5500,8 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_player_skin_preview.generic.namesizecallback = PlayerModelSizeFunc;
 	s_player_skin_preview.generic.namedraw = PlayerModelDrawFunc;
-	s_player_skin_preview.h = 36;
-	s_player_skin_preview.w = 28;
+	s_player_skin_preview.w = 21;
+	s_player_skin_preview.h = 27;
 	
 	Menu_AddItem (&s_player_config_screen, &s_player_skin_preview);
 	
