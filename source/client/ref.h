@@ -353,7 +353,7 @@ typedef struct
 	//only 2 buttons for menus
 	float		buttontime[MENU_CURSOR_BUTTON_MAX];
 	int			buttonclicks[MENU_CURSOR_BUTTON_MAX];
-	int			buttonused[MENU_CURSOR_BUTTON_MAX];
+	qboolean	buttonused[MENU_CURSOR_BUTTON_MAX];
 	qboolean	buttondown[MENU_CURSOR_BUTTON_MAX];
 
 	qboolean	mouseaction;
