@@ -180,7 +180,6 @@
     <ClCompile Include="$(SrcDir)client\snd_file.c" />
     <ClCompile Include="$(SrcDir)client\snd_openal.c" />
     <ClCompile Include="$(SrcDir)client\vid_menu.c" />
-    <ClCompile Include="$(SrcDir)client\x86.c" />
     <ClCompile Include="$(SrcDir)game\q_shared.c" />
     <ClCompile Include="$(SrcDir)qcommon\cmd.c" />
     <ClCompile Include="$(SrcDir)qcommon\cmodel.c" />
