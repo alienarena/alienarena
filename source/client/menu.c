@@ -390,6 +390,7 @@ typedef struct
 
 #define layergroup_last(g) ((g).layers[(g).num_layers-1])
 
+// add up all the widths of each window in the group
 static inline int layergroup_width (layergroup_t *g)
 {
 	int i, ret;
@@ -399,6 +400,52 @@ static inline int layergroup_width (layergroup_t *g)
 		ret += Menu_TrueWidth (*g->layers[i].screen);
 	return ret;
 }
+
+// Add up the widths of each window in the group that cannot fit on screen,
+// starting with the leftmost. If the final (deepest) window is itself too 
+// wide, it still won't be included.
+static inline int layergroup_excesswidth (layergroup_t *g)
+{
+	int i, ret, w;
+	
+	ret = w = layergroup_width (g);
+	for (i = 0; i < g->num_layers-1; i++)
+	{
+		if (ret < viddef.width)
+			break;
+		ret -= Menu_TrueWidth (*g->layers[i].screen);
+	}
+	return w-ret;
+}
+
+// Like layergroup_excesswidth, but as if the windows from the two groups were
+// hypothetically in the same group.
+static inline int layergroup_pair_excesswidth (layergroup_t *g1, layergroup_t *g2)
+{
+	int i, ret, w;
+	
+	
+	if (g2->num_layers == 0)
+		return layergroup_excesswidth (g1);
+	if (g1->num_layers == 0)
+		return layergroup_excesswidth (g2);
+	
+	ret = w = layergroup_width (g1) + layergroup_width (g2);
+	for (i = 0; i < g1->num_layers; i++)
+	{
+		if (ret < viddef.width)
+			break;
+		ret -= Menu_TrueWidth (*g1->layers[i].screen);
+	}
+	for (i = 0; i < g2->num_layers-1; i++)
+	{
+		if (ret < viddef.width)
+			break;
+		ret -= Menu_TrueWidth (*g2->layers[i].screen);
+	}
+	return w-ret;
+}
+	
 
 static void layergroup_draw (layergroup_t *g)
 {
@@ -456,7 +503,10 @@ static int activelayer_coordidx (int xcoord)
 // number.
 static inline int Menuscreens_Animate_Active (void)
 {
-	int shove_offset, ret;
+	int shove_offset, ret, excess;
+	excess = layergroup_excesswidth (&mstate.active);
+	if (excess != 0)
+		return -excess;
 	ret = sidebar_width;
 	shove_offset = viddef.width - layergroup_width (&mstate.active);
 	if (shove_offset < ret)
@@ -472,7 +522,10 @@ static inline int Menuscreens_Animate_Active (void)
 // the transition to be smooth.
 static inline int MenuScreens_Animate_Incoming_Target (void)
 {
-	int shove_offset, ret;
+	int shove_offset, ret, excess;
+	excess = layergroup_pair_excesswidth (&mstate.active, &mstate.incoming);
+	if (excess != 0)
+		return -excess;
 	ret = sidebar_width;
 	shove_offset = viddef.width - layergroup_width (&mstate.active) - layergroup_width (&mstate.incoming);
 	if (shove_offset < ret)
@@ -488,7 +541,10 @@ static inline int MenuScreens_Animate_Incoming_Target (void)
 // want the transition to be smooth.
 static inline int MenuScreens_Animate_Outgoing_Start (void)
 {
-	int shove_offset, ret;
+	int shove_offset, ret, excess;
+	excess = layergroup_pair_excesswidth (&mstate.active, &mstate.outgoing);
+	if (excess != 0)
+		return -excess;
 	ret = sidebar_width;
 	shove_offset = viddef.width - layergroup_width (&mstate.active) - layergroup_width (&mstate.outgoing);
 	if (shove_offset < ret)
