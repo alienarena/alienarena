@@ -5962,7 +5962,8 @@ void M_Draw (void)
 		return;
 	Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0, 0, 0, 1));
 	Menuscreens_Animate ();
-	Menu_DrawHighlight ();
+	if (mstate.state == mstate_steady)
+		Menu_DrawHighlight ();
 	M_Draw_Cursor();
 }
 
