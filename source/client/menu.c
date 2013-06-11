@@ -1008,6 +1008,7 @@ void CheckMainMenuMouse (void)
 		cursor.menulayer = -1;
 		m_main_cursor = i;
 		cursor.menuitem = NULL;
+		cursor.mouseaction = false;
 	}
 
 	MainMenuMouseHover = 1 + i;
