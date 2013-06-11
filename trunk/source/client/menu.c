@@ -4996,7 +4996,7 @@ typedef struct
 	menucommon_s generic;
 	const char *name;
 	const char *skin;
-	int w, h;
+	float w, h;
 	float mframe, yaw, pitch;
 } menumodel_s;
 
@@ -5381,6 +5381,35 @@ static void PlayerPicDrawFunc (void *_self, FNT_font_t font)
 	Draw_StretchPic (x, y, font->size*5, font->size*5, scratch);
 }
 
+static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
+{
+	menuvec2_t ret;
+	int maxwidth;
+	float ratio;
+	menumodel_s *self = (menumodel_s*) _self;
+	
+	ret.x = 28*font->size;
+	ret.y = 36*font->size;
+	
+	ratio = (float)ret.y/(float)ret.x;
+	
+	maxwidth = viddef.width - (CHASELINK(s_player_config_menu.generic.lsize).x + CHASELINK(s_player_config_menu.generic.rsize).x + 4*font->size);
+	
+	if (ret.x > maxwidth)
+	{
+		ret.x = maxwidth;
+		ret.y = (int)((float)ret.x*ratio);
+	}
+	
+	self->w = (float)ret.x/(float)font->size-2;
+	self->h = (float)ret.y/(float)font->size-2;
+	
+	ret.x += 2*font->size;
+	ret.y += 2*font->size;
+	
+	return ret;
+}
+
 qboolean PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
@@ -5554,10 +5583,8 @@ qboolean PlayerConfig_MenuInit( void )
 	Menu_AddItem( &s_player_config_menu, &s_player_rate_box );
 	
 	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
-	s_player_skin_preview.generic.namesizecallback = PlayerModelSizeFunc;
+	s_player_skin_preview.generic.namesizecallback = PlayerConfigModelSizeFunc;
 	s_player_skin_preview.generic.namedraw = PlayerModelDrawFunc;
-	s_player_skin_preview.w = 21;
-	s_player_skin_preview.h = 27;
 	
 	Menu_AddItem (&s_player_config_screen, &s_player_skin_preview);
 	
