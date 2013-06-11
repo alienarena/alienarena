@@ -272,12 +272,17 @@ static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
 	Draw_StretchPic (x, y, font->size*5, font->size*5, crosshair->string);
 }
 
-void refreshCursorButtons(void)
+static inline void refreshCursorButton (int button)
 {
-	cursor.buttonused[MOUSEBUTTON2] = true;
-	cursor.buttonclicks[MOUSEBUTTON2] = 0;
-	cursor.buttonused[MOUSEBUTTON1] = true;
-	cursor.buttonclicks[MOUSEBUTTON1] = 0;
+	cursor.buttonused[button] = true;
+	cursor.buttonclicks[button] = 0;
+}
+
+void refreshAllCursorButtons(void)
+{
+	int i;
+	for (i = 0; i < MENU_CURSOR_BUTTON_MAX; i++)
+		refreshCursorButton (i);
 }
 
 //=============================================================================
@@ -1270,7 +1275,7 @@ static const char *Keys_MenuKey (menuframework_s *screen, int key)
 		}
 
 		//dont let selecting with mouse buttons screw everything up
-		refreshCursorButtons();
+		refreshAllCursorButtons();
 		if (key==K_MOUSE1)
 			cursor.buttonclicks[MOUSEBUTTON1] = -1;
 
@@ -6008,6 +6013,16 @@ void M_Think_MouseCursor (void)
 		return;
 	}
 	
+	if (cursor.buttondown[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2] == 2 && !cursor.buttonused[MOUSEBUTTON2])
+	{
+		M_PopMenu ();
+		
+		// we've "used" the click sequence and will begin another
+		refreshCursorButton (MOUSEBUTTON2);
+		S_StartLocalSound (menu_out_sound);
+		return;
+	}
+	
 	if (coordidx == mstate.active.num_layers)
 		return;
 	
@@ -6056,13 +6071,13 @@ void M_Think_MouseCursor (void)
 			else
 				Menu_SelectItem ();
 			
-			// rate-limit repeat clicking
-			cursor.buttonused[MOUSEBUTTON1] = true;
+			// we've "used" the click sequence and will begin another
+			refreshCursorButton (MOUSEBUTTON1);
 			sound = menu_move_sound;
 		}
 	}
 	//MOUSE2
-	else if (cursor.buttondown[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2] && !cursor.buttonused[MOUSEBUTTON2])
+	else if (cursor.buttondown[MOUSEBUTTON2] && !cursor.buttonused[MOUSEBUTTON2])
 	{
 		if (cursor.menuitem->generic.type == MTYPE_SPINCONTROL)
 			Menu_SlideItem (-1);
@@ -6070,9 +6085,9 @@ void M_Think_MouseCursor (void)
 			Menu_ClickSlideItem ();
 		else
 			return;
-
-		// rate-limit repeat clicking
-		cursor.buttonused[MOUSEBUTTON2] = true;
+		
+		// we've "used" the click sequence and will begin another
+		refreshCursorButton (MOUSEBUTTON2);
 		sound = menu_move_sound;
 	}
 
