@@ -288,7 +288,7 @@ typedef struct
 typedef menumultival_s menuslider_s;
 typedef menumultival_s menulist_s;
 
-typedef struct 
+typedef struct _tag_menuitem
 {
 	menucommon_s generic;
 } menuitem_s;

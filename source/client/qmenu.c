@@ -322,7 +322,6 @@ qboolean Menu_SelectMenu (menuframework_s *menu)
 		if (Menu_ItemSelectable (item))
 		{
 			cursor.menuitem = item;
-			cursor.menuitemtype = item->generic.type;
 			return true;
 		}
 		if (item->generic.type == MTYPE_SUBMENU)
@@ -378,7 +377,6 @@ void Menu_AdvanceCursor (int dir)
 	} while (!Menu_ItemSelectable (newitem));
 	
 	cursor.menuitem = newitem;
-	cursor.menuitemtype = newitem->generic.type;
 }
 	
 void Menu_Center( menuframework_s *menu )
@@ -827,7 +825,6 @@ void Menu_AssignCursor (menuframework_s *menu, int layernum)
 		}
 
 		cursor.menuitem = item;
-		cursor.menuitemtype = item->generic.type;
 		cursor.mouseaction = false;
 		cursor.menulayer = layernum;
 		
