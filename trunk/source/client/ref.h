@@ -359,14 +359,13 @@ typedef struct
 	qboolean	mouseaction;
 
 	//this is the active item that cursor is on.
-	int			menuitemtype;
 	int			menulayer;
-	void		*menuitem;
-	
+	struct _tag_menuitem
+				*menuitem;
 	//this is whatever menuitem it was on when a click-and-drag maneuver was
 	//begun.
-	void		*click_menuitem;
-	int			click_menuitemtype;
+	struct _tag_menuitem
+				*click_menuitem;
 	qboolean	suppress_drag; //started clicking with nothing selected
 
 	//coords

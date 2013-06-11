@@ -322,8 +322,7 @@ int M_Interp (int progress, int target)
 		static float frametime_accum = 0;
 
 		// The animation speeds up as it gets further from the starting point
-		// and slows down (although half as much) as it approaches the ending
-		// point.
+		// and slows down twice as fast as it approaches the ending point.
 		increment = min(	abs(target-progress)/2,
 							abs(progress) )*40;
 		
@@ -6020,7 +6019,7 @@ void M_Think_MouseCursor (void)
 	if (cursor.menuitem == NULL)
 		return;
 	
-	m = ((menuitem_s *)cursor.menuitem)->generic.parent;
+	m = cursor.menuitem->generic.parent;
 	
 	if (!m)
 		return;
@@ -6028,15 +6027,9 @@ void M_Think_MouseCursor (void)
 	if (cursor.buttondown[MOUSEBUTTON1] && !cursor.suppress_drag)
 	{
 		if (cursor.click_menuitem != NULL)
-		{
 			cursor.menuitem = cursor.click_menuitem;
-			cursor.menuitemtype = cursor.click_menuitemtype;
-		}
 		else if (cursor.menuitem)
-		{
 			cursor.click_menuitem = cursor.menuitem;
-			cursor.click_menuitemtype = cursor.menuitemtype;
-		}
 	}
 	else
 		cursor.click_menuitem = NULL;
@@ -6052,13 +6045,13 @@ void M_Think_MouseCursor (void)
 	//MOUSE1
 	if (cursor.buttondown[MOUSEBUTTON1])
 	{
-		if (cursor.menuitemtype == MTYPE_SLIDER)
+		if (cursor.menuitem->generic.type == MTYPE_SLIDER)
 		{
 			Menu_DragSlideItem ();
 		}
 		else if (!cursor.buttonused[MOUSEBUTTON1])
 		{
-			if (cursor.menuitemtype == MTYPE_SPINCONTROL)
+			if (cursor.menuitem->generic.type == MTYPE_SPINCONTROL)
 				Menu_SlideItem (1);
 			else
 				Menu_SelectItem ();
@@ -6071,9 +6064,9 @@ void M_Think_MouseCursor (void)
 	//MOUSE2
 	else if (cursor.buttondown[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2] && !cursor.buttonused[MOUSEBUTTON2])
 	{
-		if (cursor.menuitemtype == MTYPE_SPINCONTROL)
+		if (cursor.menuitem->generic.type == MTYPE_SPINCONTROL)
 			Menu_SlideItem (-1);
-		else if (cursor.menuitemtype == MTYPE_SLIDER)
+		else if (cursor.menuitem->generic.type == MTYPE_SLIDER)
 			Menu_ClickSlideItem ();
 		else
 			return;
