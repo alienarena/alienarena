@@ -328,7 +328,7 @@ int M_Interp (int progress, int target)
 
 		// The animation speeds up as it gets further from the starting point
 		// and slows down twice as fast as it approaches the ending point.
-		increment = min(	abs(target-progress)/2,
+		increment = min(	abs((11*target)/10-progress)/2,
 							abs(progress) )*40;
 		
 		// Clamp the animation speed at a minimum so it won't freeze due to
