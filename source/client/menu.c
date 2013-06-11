@@ -5085,6 +5085,9 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		
 		refdef.num_entities = 3;
 	}
+	
+	// Faked perspective commented out. Still doesn't look right, but it would
+	// be cool to get it working.
 
 	for (i = 0; i < refdef.num_entities; i++)
 	{
@@ -5093,21 +5096,21 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		entity[i].frame = (int)(self->mframe/10);
 		entity[i].oldframe = (int)(self->mframe/10) - 1;
 		entity[i].backlerp = 1.0;
-		entity[i].angles[0] = (int)self->pitch;
+/*		entity[i].angles[0] = (int)self->pitch;*/
 		entity[i].angles[1] = (int)self->yaw;
 		
 		VectorSet (entity[i].origin, 80, 0, 0);
 		
-		len = VectorLength (entity[i].origin);
-		entity[i].origin[1] -= (refdef.x+refdef.width/2-viddef.width/2)/(4*scale);
-		entity[i].origin[2] -= (refdef.y+refdef.height/2-viddef.height/2)/(4*scale);
-		len2 = VectorLength (entity[i].origin);
-		
-		vectoangles (entity[i].origin, refdef.viewangles);
+/*		len = VectorLength (entity[i].origin);*/
+/*		entity[i].origin[1] -= (refdef.x+refdef.width/2-viddef.width/2)/(4*scale);*/
+/*		entity[i].origin[2] -= (refdef.y+refdef.height/2-viddef.height/2)/(4*scale);*/
+/*		len2 = VectorLength (entity[i].origin);*/
+/*		*/
+/*		vectoangles (entity[i].origin, refdef.viewangles);*/
 		
 		entity[i].origin[2] -= 7;
 		
-		VectorScale (entity[i].origin, len/len2, entity[i].origin);
+/*		VectorScale (entity[i].origin, len/len2, entity[i].origin);*/
 		VectorCopy (entity[i].origin, entity[i].oldorigin);
 	}
 		
