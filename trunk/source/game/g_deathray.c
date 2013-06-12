@@ -114,8 +114,22 @@ void deathrayShot (edict_t *self)
 						return;
 				}
 			}
-			//if no computer, deathrays are disabled
-			if(self->enemy->ctype == 1 || !tacticalScore.humanComputer)
+			else if(!tacticalScore.humanComputer) //we have power, but no computer, so behave erratically
+			{
+				if(random() < 0.5) 
+				{
+					if(self->enemy->ctype == 1)
+					{
+						if(random() < 0.5)
+							return;
+					}
+					else
+						return;
+				}
+			}
+
+			//do not fire on humans
+			if(self->enemy->ctype == 1)
 				return;
 		}
 		else
@@ -136,8 +150,22 @@ void deathrayShot (edict_t *self)
 						return;
 				}
 			}
+			else if(!tacticalScore.alienComputer)
+			{
+				if(random() < 0.5) 
+				{
+					if(self->enemy->ctype == 0)
+					{
+						if(random() < 0.5)
+							return;
+					}
+					else
+						return;
+				}
+			}
 
-			if(self->enemy->ctype == 0 || !tacticalScore.alienComputer)
+			//do not fire on aliens
+			if(self->enemy->ctype == 0)
 				return; 
 		}
 	}
