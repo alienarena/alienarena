@@ -527,5 +527,5 @@ void VID_MenuDraw (menuframework_s *screen)
 {
 	s_current_menu = screen;
 	
-	Menu_Draw (screen);
+	Screen_Draw (screen);
 }
