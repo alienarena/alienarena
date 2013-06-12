@@ -508,6 +508,7 @@ typedef struct
 	int		 alienPowerSourceHealth;
 	qboolean alienAmmoDepot;
 	int		 alienAmmoDepotHealth;
+	qboolean alienBackupGen;
 
 	qboolean humanComputer;
 	int		 humanComputerHealth;
@@ -515,6 +516,7 @@ typedef struct
 	int		 humanPowerSourceHealth;
 	qboolean humanAmmoDepot;
 	int		 humanAmmoDepotHealth;
+	qboolean humanBackupGen;
 
 } tactical_t;
 
@@ -1143,6 +1145,8 @@ extern void SP_misc_alienpowersrc (edict_t *self);
 extern void SP_misc_humanpowersrc (edict_t *self);
 extern void SP_misc_alienammodepot (edict_t *self);
 extern void SP_misc_humanammodepot (edict_t *self);
+extern void SP_misc_alienbackupgen (edict_t *self);
+extern void SP_misc_humanbackupgen (edict_t *self);
 extern void SP_misc_deathray (edict_t *self);
 extern void SP_misc_laser (edict_t *self);
 

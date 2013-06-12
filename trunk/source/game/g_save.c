@@ -356,9 +356,11 @@ void InitGame (void)
 		tacticalScore.alienAmmoDepot = 
 			tacticalScore.alienComputer = 
 			tacticalScore.alienPowerSource = 
+			tacticalScore.alienBackupGen = 
 			tacticalScore.humanAmmoDepot = 
 			tacticalScore.humanComputer = 
 			tacticalScore.humanPowerSource =
+			tacticalScore.humanBackupGen = 
 			true;
 
 		tacticalScore.alienAmmoDepotHealth = 
