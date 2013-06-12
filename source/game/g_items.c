@@ -570,7 +570,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 					if(tacticalScore.alienBackupGen)
 						SetRespawn (ent, 20); //on backup power, generate ammo much slower
 					else
-						SetRespawn (ent, 100000); //for the most part, dead
+						SetRespawn (ent, 40); //for the most part, dead
 				}
 				else
 					SetRespawn (ent, 5);
@@ -582,7 +582,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 					if(tacticalScore.humanBackupGen)
 						SetRespawn (ent, 20);
 					else
-						SetRespawn (ent, 100000);
+						SetRespawn (ent, 40);
 				}
 				else
 					SetRespawn (ent, 5);
