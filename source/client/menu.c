@@ -818,7 +818,10 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 	
 	// offer the keypress to the field key parser, see if it wants it
 	if (Field_Key (key))
+	{
+		Menu_ActivateItem ();
 		return NULL;
+	}
 	
 	switch ( key )
 	{
