@@ -1049,7 +1049,7 @@ void CheckMainMenuMouse (void)
 	}
 }
 
-const char *M_Main_Key (menuframework_s *dummy, int key)
+const char *M_Main_Key (int key)
 {
 	switch (key)
 	{
@@ -5998,9 +5998,9 @@ void M_Keydown (int key)
 	}
 	
 	if (cursor.menulayer == -1)
-		M_Main_Key (NULL, key);
+		M_Main_Key (key);
 	else if (activelayer(cursor.menulayer).key != NULL && (s = activelayer(cursor.menulayer).key (activelayer(cursor.menulayer).screen, key)))
-		S_StartLocalSound( s );
+		S_StartLocalSound (s);
 }
 
 // send mouse movement to the appropriate menu
