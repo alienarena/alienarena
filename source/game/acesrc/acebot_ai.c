@@ -579,7 +579,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				if(target->classname == "misc_bluespidernode")
 					self->enemy = target;
 			}
-			if(self->dmteam == BLUE_TEAM) 
+			else if(self->dmteam == BLUE_TEAM) 
 			{
 				if(target->classname == "misc_redspidernode")
 					self->enemy = target;
@@ -611,12 +611,14 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 			if(self->ctype == 1) 
 			{
 				if(target->classname == "hbomb")
-					return false;
+					return false; //prevents them from accidently destorying a planted bomb
 				else if(target->classname == "alien computer")
 					self->enemy = target;
 				else if(target->classname == "alien powersrc")
 					self->enemy = target;
 				else if(target->classname == "alien ammodepot")
+					self->enemy = target;
+				else if(target->classname == "alien backupgen")
 					self->enemy = target;
 			}
 			else if(self->ctype == 0)
@@ -628,6 +630,8 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				else if(target->classname == "human powersrc")
 					self->enemy = target;
 				else if(target->classname == "human ammodepot")
+					self->enemy = target;
+				else if(target->classname == "human backupgen")
 					self->enemy = target;
 			}		
 			target = findradius(target, self->s.origin, 200);
