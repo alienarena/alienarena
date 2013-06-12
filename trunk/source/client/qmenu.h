@@ -307,16 +307,20 @@ void	_Menu_AddItem( menuframework_s *menu, menucommon_s *item );
 #define Menu_AddItem(menu,item)\
 	_Menu_AddItem((menu), &((item)->generic))
 
+menuframework_s	*Menu_GetItemTree (menuitem_s *item);
 
-qboolean Menu_SelectMenu (menuframework_s *menu);
+int			Cursor_GetLayer (void);
+qboolean	Cursor_SelectMenu (menuframework_s *menu);
+void		Cursor_SelectItem (menuitem_s *item);
+
 void	Menu_AdvanceCursor (int dir);
 void	Menu_Center( menuframework_s *menu );
 void	Menu_AutoArrange( menuframework_s *menu );
-void	Menu_Draw( menuframework_s *menu );
-void	Menu_AssignCursor (menuframework_s *menu, int layernum);
+void	Screen_Draw( menuframework_s *menu );
+void	Menu_AssignCursor (menuframework_s *menu);
 void	Menu_DrawHighlightItem (menuitem_s *item);
 void	Menu_DrawHighlight (void);
-void	Menu_SelectItem (void);
+void	Menu_ActivateItem (void);
 void	Menu_SetStatusBar( menuframework_s *s, const char *string );
 void	Menu_SlideItem (int dir);
 

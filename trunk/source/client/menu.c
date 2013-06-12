@@ -250,7 +250,7 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	it.generic.type = MTYPE_ACTION; \
 	it.generic.name = (itname); \
 	it.generic.callback = (itcallback); \
-	Menu_AddItem(&(menu), &(it)); \
+	Menu_AddItem (&(menu), &(it)); \
 }
 
 
@@ -259,7 +259,7 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 void M_Menu_ ## name ## _f (void) \
 { \
 	name ## _MenuInit(); \
-	M_PushMenu ( Menu_Draw, Default_MenuKey, &struct); \
+	M_PushMenu (Screen_Draw, Default_MenuKey, &struct); \
 }
 
 static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
@@ -481,9 +481,29 @@ static inline void mstate_reset (void)
 {
 	mstate.active.num_layers = mstate.incoming.num_layers = mstate.outgoing.num_layers = 0;
 	mstate.state = mstate_steady;
+	refreshCursorLink ();
 }
 
 #define activelayer(idx) (mstate.active.layers[(idx)])
+
+int Cursor_GetLayer (void)
+{
+	int i;
+	menuframework_s *screen;
+	
+	if (cursor.menuitem == NULL)
+		Com_Error (ERR_FATAL, "Cursor_GetLayer: unset cursor.menuitem!");
+	
+	screen = Menu_GetItemTree (cursor.menuitem);
+	
+	for (i = 0; i < mstate.active.num_layers; i++)
+	{
+		if (activelayer(i).screen == screen)
+			return i;
+	}
+	
+	Com_Error (ERR_FATAL, "Cursor_GetLayer: cannot find cursor.menuitem!");
+}
 
 static int activelayer_coordidx (int xcoord)
 {
@@ -564,8 +584,7 @@ void Menuscreens_Animate_Insert_To_Steady (void)
 	int i;
 	for (i = 0; i < mstate.incoming.num_layers; i++)
 		activelayer(mstate.active.num_layers++) = mstate.incoming.layers[i];
-	cursor.menulayer = mstate.active.num_layers-1;
-	Menu_SelectMenu(layergroup_last(mstate.active).screen);
+	Cursor_SelectMenu (layergroup_last(mstate.active).screen);
 	mstate.incoming.num_layers = 0;
 	mstate.outgoing.num_layers = 0;
 	mstate.state = mstate_steady;
@@ -576,11 +595,10 @@ void Menuscreens_Animate_Remove_To_Steady (void)
 {
 	mstate.outgoing.num_layers = 0;
 	mstate.state = mstate_steady;
-	cursor.menulayer = mstate.active.num_layers-1;
-	if (cursor.menulayer >= 0)
-		Menu_SelectMenu(layergroup_last(mstate.active).screen);
+	if (mstate.active.num_layers == 0)
+		refreshCursorLink ();
 	else
-		cursor.menuitem = NULL;
+		Cursor_SelectMenu (layergroup_last(mstate.active).screen);
 	mstate.animation = 0;
 	Menuscreens_Animate ();
 }
@@ -718,6 +736,8 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (me
 		&& Com_ServerState ())
 		Cvar_Set ("paused", "1");
 	
+	screen->navagable = true;
+	
 	for (i = 0; i < mstate.active.num_layers; i++)
 	{
 		if (activelayer(i).screen == screen)
@@ -825,7 +845,7 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 		break;
 	case K_KP_ENTER:
 	case K_ENTER:
-		Menu_SelectItem ();
+		Menu_ActivateItem ();
 		sound = menu_move_sound;
 		break;
 	}
@@ -1009,9 +1029,8 @@ void CheckMainMenuMouse (void)
 
 	if (cursor.mouseaction)
 	{
-		cursor.menulayer = -1;
+		refreshCursorLink ();
 		m_main_cursor = i;
-		cursor.menuitem = NULL;
 		cursor.mouseaction = false;
 	}
 
@@ -1062,8 +1081,7 @@ void M_Menu_Main_f (void)
 {
 	S_StartMenuMusic();
 	cls.key_dest = key_menu;
-	cursor.menulayer = -1;
-/*	M_PushMenu (M_Main_Draw, M_Main_Key, &dummy);*/
+	mstate_reset ();
 }
 
 /*
@@ -1302,7 +1320,7 @@ static const char *Keys_MenuKey (menuframework_s *screen, int key)
 void M_Menu_Keys_f (void)
 {
 	Keys_MenuInit();
-	M_PushMenu( Menu_Draw, Keys_MenuKey, &s_keys_screen);
+	M_PushMenu (Screen_Draw, Keys_MenuKey, &s_keys_screen);
 }
 
 
@@ -2226,7 +2244,7 @@ extern void VID_MenuDraw (menuframework_s *screen);
 void M_Menu_Video_f (void)
 {
 	VID_MenuInit();
-	M_PushMenu( VID_MenuDraw, Default_MenuKey, &s_opengl_screen);
+	M_PushMenu (VID_MenuDraw, Default_MenuKey, &s_opengl_screen);
 }
 
 /*
@@ -2444,7 +2462,7 @@ void M_Menu_Credits_f( void )
 	credits = idcredits;
 	credits_start_time = cls.realtime;
 
-	M_PushMenu( M_Credits_MenuDraw, M_Credits_Key, &dummy);
+	M_PushMenu (M_Credits_MenuDraw, M_Credits_Key, &dummy);
 }
 
 /*
@@ -2731,13 +2749,13 @@ void IRC_MenuDraw (menuframework_s *dummy)
 		s_irc_join.generic.callback = JoinIRCFunc;
 	}
 
-	Menu_Draw( &s_irc_screen );
+	Screen_Draw (&s_irc_screen);
 }
 
 void M_Menu_IRC_f (void)
 {
 	IRC_MenuInit();
-	M_PushMenu( IRC_MenuDraw, Default_MenuKey, &s_irc_screen);
+	M_PushMenu (IRC_MenuDraw, Default_MenuKey, &s_irc_screen);
 }
 
 
@@ -3631,6 +3649,7 @@ void JoinServer_MenuInit( void )
 		pNameUnique = true;
 
 	s_serverbrowser_screen.nitems = 0;
+	serverindex = -1;
 
 	setup_window (s_serverbrowser_screen, s_joinserver_menu, "SERVER LIST");
 	
@@ -3652,7 +3671,7 @@ void JoinServer_MenuDraw (menuframework_s *dummy)
 
 	Menu_AutoArrange (&s_serverbrowser_screen);
 		
-	Menu_Draw( &s_serverbrowser_screen );
+	Screen_Draw (&s_serverbrowser_screen);
 }
 
 const char *JoinServer_MenuKey (menuframework_s *screen, int key)
@@ -3669,7 +3688,7 @@ const char *JoinServer_MenuKey (menuframework_s *screen, int key)
 void M_Menu_JoinServer_f (void)
 {
 	JoinServer_MenuInit();
-	M_PushMenu( JoinServer_MenuDraw, JoinServer_MenuKey, &s_serverbrowser_screen);
+	M_PushMenu (JoinServer_MenuDraw, JoinServer_MenuKey, &s_serverbrowser_screen);
 }
 
 /*
@@ -4688,13 +4707,13 @@ void StartServer_MenuDraw (menuframework_s *dummy)
 	s_levelshot_preview.generic.localstrings[0] = levelshot;
 
 	Menu_AutoArrange (&s_startserver_screen);
-	Menu_Draw( &s_startserver_screen );
+	Screen_Draw (&s_startserver_screen);
 }
 
 void M_Menu_StartServer_f (void)
 {
 	StartServer_MenuInit();
-	M_PushMenu( StartServer_MenuDraw, Default_MenuKey, &s_startserver_screen);
+	M_PushMenu (StartServer_MenuDraw, Default_MenuKey, &s_startserver_screen);
 }
 
 /*
@@ -5612,7 +5631,7 @@ void PlayerConfig_MenuDraw (menuframework_s *dummy)
 	{
 		s_player_skin_preview.name = s_pmi[s_player_model_box.curvalue].directory;
 		s_player_skin_preview.skin = s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue];
-		Menu_Draw( &s_player_config_screen );
+		Screen_Draw (&s_player_config_screen);
 	}
 }
 void PConfigAccept (void)
@@ -5688,7 +5707,7 @@ void M_Menu_PlayerConfig_f (void)
 		return;
 	}
 	Menu_SetStatusBar( &s_options_menu, NULL );
-	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey, &s_player_config_screen);
+	M_PushMenu (PlayerConfig_MenuDraw, PlayerConfig_MenuKey, &s_player_config_screen);
 }
 
 /*
@@ -5872,7 +5891,7 @@ Menu Mouse Cursor
 
 void refreshCursorLink (void)
 {
-	cursor.menuitem = NULL;
+	Cursor_SelectItem (NULL);
 }
 
 int Slider_CursorPositionX ( menuslider_s *s )
@@ -6012,9 +6031,9 @@ void M_Think_MouseCursor (void)
 		return;
 	
 	if (coordidx != cursor.menulayer && cursor.mouseaction)
-		Menu_SelectMenu(activelayer(coordidx).screen);
+		Cursor_SelectMenu(activelayer(coordidx).screen);
 	
-	Menu_AssignCursor (activelayer(coordidx).screen, coordidx);
+	Menu_AssignCursor (activelayer(coordidx).screen);
 	
 	if (cursor.menuitem == NULL)
 		return;
@@ -6027,8 +6046,8 @@ void M_Think_MouseCursor (void)
 	if (cursor.buttondown[MOUSEBUTTON1] && !cursor.suppress_drag)
 	{
 		if (cursor.click_menuitem != NULL)
-			cursor.menuitem = cursor.click_menuitem;
-		else if (cursor.menuitem)
+		    Cursor_SelectItem (cursor.click_menuitem);
+		else if (cursor.menuitem != NULL)
 			cursor.click_menuitem = cursor.menuitem;
 	}
 	else
@@ -6054,7 +6073,7 @@ void M_Think_MouseCursor (void)
 			if (cursor.menuitem->generic.type == MTYPE_SPINCONTROL)
 				Menu_SlideItem (1);
 			else
-				Menu_SelectItem ();
+				Menu_ActivateItem ();
 			
 			// we've "used" the click sequence and will begin another
 			refreshCursorButton (MOUSEBUTTON1);
