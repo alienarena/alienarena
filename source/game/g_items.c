@@ -566,14 +566,24 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 			if(!strcmp(ent->classname, "ammo_cells") || !strcmp(ent->classname, "ammo_shells"))
 			{
 				if(!tacticalScore.alienPowerSource)
-					SetRespawn (ent, 20); //on backup power, generate ammo much slower
+				{
+					if(tacticalScore.alienBackupGen)
+						SetRespawn (ent, 20); //on backup power, generate ammo much slower
+					else
+						SetRespawn (ent, 100000); //for the most part, dead
+				}
 				else
 					SetRespawn (ent, 5);
 			}
 			else if(!strcmp(ent->classname, "ammo_rockets") || !strcmp(ent->classname, "ammo_bullets") || !strcmp(ent->classname, "ammo_grenades"))
 			{
 				if(!tacticalScore.humanPowerSource)
-					SetRespawn (ent, 20);
+				{
+					if(tacticalScore.humanBackupGen)
+						SetRespawn (ent, 20);
+					else
+						SetRespawn (ent, 100000);
+				}
 				else
 					SetRespawn (ent, 5);
 			}

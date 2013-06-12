@@ -864,9 +864,11 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 		tacticalScore.alienAmmoDepot = 
 			tacticalScore.alienComputer = 
 			tacticalScore.alienPowerSource = 
+			tacticalScore.alienBackupGen = 
 			tacticalScore.humanAmmoDepot = 
 			tacticalScore.humanComputer = 
 			tacticalScore.humanPowerSource =
+			tacticalScore.humanBackupGen = 
 			true;
 	}
 
@@ -1257,9 +1259,11 @@ void ExitLevel (void)
 		tacticalScore.alienAmmoDepot = 
 			tacticalScore.alienComputer = 
 			tacticalScore.alienPowerSource = 
+			tacticalScore.alienBackupGen = 
 			tacticalScore.humanAmmoDepot = 
 			tacticalScore.humanComputer = 
 			tacticalScore.humanPowerSource =
+			tacticalScore.humanBackupGen = 
 			true;
 
 		tacticalScore.alienAmmoDepotHealth = 

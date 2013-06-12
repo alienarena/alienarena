@@ -1449,3 +1449,19 @@ models/tactical/hlaser
 		glow
 	}
 }
+models/tactical/hbackupgen
+{
+	{
+		map models/tactical/hbackupgen_normal.jpg
+		normalmap
+	}
+}
+models/tactical/abackupgen
+{
+	{
+		map models/tactical/abackupgen_normal.jpg
+		normalmap
+		map2 models/tactical/abackupgen_fx.tga
+		glow
+	}
+}

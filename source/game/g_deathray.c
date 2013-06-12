@@ -100,6 +100,9 @@ void deathrayShot (edict_t *self)
 			//if power source is down, and backup gen is on, get erratic
 			if(!tacticalScore.humanPowerSource)
 			{
+				if(!tacticalScore.humanBackupGen)
+					return;
+
 				if(random() < 0.5) 
 				{
 					if(self->enemy->ctype == 1)
@@ -119,6 +122,9 @@ void deathrayShot (edict_t *self)
 		{
 			if(!tacticalScore.alienPowerSource)
 			{
+				if(!tacticalScore.alienBackupGen)
+					return;
+
 				if(random() < 0.5) 
 				{
 					if(self->enemy->ctype == 0)

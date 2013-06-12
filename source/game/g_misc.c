@@ -1976,3 +1976,123 @@ void SP_misc_humanammodepot (edict_t *ent)
 	M_droptofloor (ent);
 }
 
+//Backup generators
+void backupgen_think (edict_t *ent)
+{
+	if(ent->classname == "alien backupgen")
+	{
+		if(!tacticalScore.alienPowerSource)
+		{
+			//animate and play sound
+			ent->s.frame = (ent->s.frame + 1) % 24;
+		}
+	}
+	else
+	{
+		if(!tacticalScore.humanPowerSource)
+		{
+			ent->s.frame = (ent->s.frame + 1) % 24;
+		}
+	}	
+	ent->nextthink = level.time + FRAMETIME;
+}
+
+void backupgen_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	edict_t *cl_ent;
+	int i;
+
+	self->takedamage = DAMAGE_NO;
+	self->activator = attacker;
+
+	gi.WriteByte (svc_temp_entity);
+	if(self->classname == "alien backupgen")
+	{
+		tacticalScore.alienBackupGen = false;
+		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
+	}
+	else
+	{
+		tacticalScore.humanBackupGen = false;
+		gi.WriteByte (TE_ROCKET_EXPLOSION);		
+	}
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	if(self->classname == "alien backupgen")
+	{
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Alien Backup Generator has been destroyed!");
+		}
+	}
+	else
+	{
+		for (i=0 ; i<g_maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "Human Backup Generator has been destroyed!");
+		}
+	}
+	
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	G_FreeEdict (self);
+}
+
+void SP_misc_alienbackupgen (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/alien_backupgen.iqm");
+
+	VectorSet (ent->mins, -24, -24, 0);
+	VectorSet (ent->maxs, 24, 24, 48);
+	ent->health = 300; 
+	ent->die = backupgen_die;
+	ent->think = backupgen_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "alien backupgen";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
+
+void SP_misc_humanbackupgen (edict_t *ent)
+{
+	if (!g_tactical->integer)
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_BBOX;
+	ent->takedamage = DAMAGE_YES;
+
+	ent->s.modelindex = gi.modelindex ("models/tactical/human_backupgen.iqm");
+
+	VectorSet (ent->mins, -24, -24, 0);
+	VectorSet (ent->maxs, 24, 24, 48);
+	ent->health = 300; 
+	ent->die = backupgen_die;
+	ent->think = backupgen_think;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->classname = "human backupgen";
+
+	gi.linkentity (ent);
+	M_droptofloor (ent);
+}
