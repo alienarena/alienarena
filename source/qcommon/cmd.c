@@ -827,23 +827,24 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	cmd_function_t	*cmd, **prev, *ncmd;
 	unsigned int	hash_key, i;
 
-// fail if the command is a variable name
+	// fail if the command is a variable name
 	if (Cvar_VariableString(cmd_name)[0])
 	{
 		Com_Printf ("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
 		return;
 	}
 
-// compute the hash key for this command
+	// compute the hash key for this command
 	COMPUTE_HASH_KEY( hash_key, cmd_name , i );
 
-// fail if the command already exists
+	// fail if the command already exists (harmless if it's already the same.)
 	prev = &cmd_functions;
 	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key ; cmd=cmd->next)
 	{
 		if (cmd->hash_key == hash_key && !Q_strcasecmp (cmd_name, cmd->name))
 		{
-			Com_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
+			if (cmd->function != function)
+				Com_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
 			return;
 		}
 		prev = &( cmd->next );
