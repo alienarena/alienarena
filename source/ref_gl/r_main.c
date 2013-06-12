@@ -1319,6 +1319,16 @@ void R_Register( void )
 	Cvar_Describe (r_firstrun, "Set this to 0 if you want the game to auto detect your graphics settings next time you run it.");
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
+	
+	// FIXME HACK copied over from the video menu code. These are initialized
+	// again elsewhere. TODO: work out any complications that may arise from
+	// deleting these duplicate initializations.
+	Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
+	Cvar_Get( "r_bloom_intensity", "0.5", CVAR_ARCHIVE);
+	Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE);
+	Cvar_Get( "vid_width", "640", CVAR_ARCHIVE);
+	Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
+	Cvar_Get( "gl_glsl_shaders", "1", CVAR_ARCHIVE);
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );
@@ -1521,8 +1531,6 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf( "ref_gl::R_Init() - could not initialise text drawing front-end\n" );
 		return -1;
 	}
-
-	VID_MenuInit();
 
 	/*
 	** get our various GL strings
