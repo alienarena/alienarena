@@ -1,6 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 2005-2011 COR Entertainment, LLC.
+Copyright (C) 2005-2013 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -729,7 +729,7 @@ void Menuscreens_Animate (void)
 
 void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
-	int			i;
+	int			i, insertion_point;
 	qboolean	found = false;
 	
 	if (Cvar_VariableValue ("maxclients") == 1
@@ -749,7 +749,7 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (me
 	
 	if (found)
 	{
-		cursor.menulayer = i;
+		insertion_point = i;
 		mstate.state = mstate_remove;
 	}
 	else
@@ -759,11 +759,11 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (me
 		mstate.incoming.layers[0].key = key;
 		mstate.incoming.layers[0].screen = screen;
 		mstate.state = mstate_insert;
+		insertion_point = cursor.menulayer;
 	}
 	
-	for (i = cursor.menulayer+1; i < mstate.active.num_layers; i++)
-		mstate.outgoing.layers[mstate.outgoing.num_layers++] = activelayer(i);
-	mstate.active.num_layers = cursor.menulayer+1;
+	while (mstate.active.num_layers > insertion_point+1)
+		mstate.outgoing.layers[mstate.outgoing.num_layers++] = activelayer(--mstate.active.num_layers);
 	
 	cls.key_dest = key_menu;
 	
