@@ -167,9 +167,9 @@ typedef enum {
 #define	K_SPACE			32
 
 //menu mouse
-#define RCOLUMN_OFFSET  12	// was 16
-#define LCOLUMN_OFFSET -12	// was -16
-#define SLIDER_RANGE 10
+#define RCOLUMN_OFFSET  12
+#define LCOLUMN_OFFSET -12
+#define LONGINPUT_SIZE	13 // times font width
 
 #define NUM_CURSOR_FRAMES 15
 #define FONTSCALE 1.5
