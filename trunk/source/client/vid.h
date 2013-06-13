@@ -37,5 +37,6 @@ void	VID_Shutdown (void);
 void	VID_CheckChanges (void);
 
 qboolean	VID_GetModeInfo( int *width, int *height, int mode );
+void		R_Register (void); //defined in ref_gl
 void		VID_MenuInit( void );
 void		VID_NewWindow( int width, int height );

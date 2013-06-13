@@ -912,7 +912,7 @@ void Menu_DrawHighlight (void)
 	{
 		int newscroll;
 		int y = CHASELINK(item->generic.y);
-		newscroll = clamp (menu->yscroll, y, y + Item_GetHeight(*item) - menu->maxheight);
+		newscroll = clamp (menu->yscroll, y + Item_GetHeight(*item) - menu->maxheight, y);
 		if (newscroll != menu->yscroll)
 		{
 			menu->yscroll = newscroll;
@@ -1212,11 +1212,32 @@ void Menu_DrawStatusBar( const char *string )
 	}
 }
 
-void Menu_ActivateItem (void)
+void Menu_ActivateItem (menuitem_s *item)
 {
-	menucommon_s *item = cursor.menuitem;
-	if (item != NULL && item->callback != NULL)
-		item->callback( item );
+	if (item == NULL || item->generic.callback == NULL)
+		return;
+	if ((item->generic.flags & QMF_ACTION_WAIT))
+	{
+		if (!item->generic.apply_pending)
+		{
+			item->generic.apply_pending = true;
+			Menu_GetItemTree (item)->num_apply_pending++;
+		}
+	}
+	else
+	{
+		item->generic.callback (item);
+	}
+}
+
+void Menu_ApplyItem (menuitem_s *item)
+{
+	if (item != NULL && item->generic.callback != NULL && (item->generic.flags & QMF_ACTION_WAIT) && item->generic.apply_pending)
+	{
+		Menu_GetItemTree (item)->num_apply_pending--;
+		item->generic.callback (item);
+		item->generic.apply_pending = false;
+	}
 }
 
 void Menu_SetStatusBar( menuframework_s *m, const char *string )
@@ -1264,6 +1285,7 @@ void Label_Draw (menutxt_s *s, FNT_font_t font, const float *color)
 		s->generic.name, cmode, align, color
 	);
 }
+
 void Slider_DoSlide( menuslider_s *s, int dir )
 {
 	s->curvalue += dir;
@@ -1273,8 +1295,7 @@ void Slider_DoSlide( menuslider_s *s, int dir )
 	else if ( s->curvalue < s->minvalue )
 		s->curvalue = s->minvalue;
 
-	if ( s->generic.callback )
-		s->generic.callback( s );
+	Menu_ActivateItem (s);
 }
 
 void Slider_Draw (menuslider_s *s, FNT_font_t font)
@@ -1323,8 +1344,7 @@ void SpinControl_DoSlide( menulist_s *s, int dir )
 			s->curvalue--;
 	}
 
-	if ( s->generic.callback )
-		s->generic.callback( s );
+	Menu_ActivateItem (s);
 }
 
 void SpinControl_Draw (menulist_s *s, FNT_font_t font)

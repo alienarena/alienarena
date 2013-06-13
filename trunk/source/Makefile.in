@@ -260,11 +260,11 @@ am__alienarena_SOURCES_DIST = client/anorms.h client/cl_ents.c \
 	client/console.h client/input.h client/keys.c client/keys.h \
 	client/menu.c client/qal.c client/qal.h client/qmenu.c \
 	client/qmenu.h client/ref.h client/screen.h client/snd_file.c \
-	client/snd_openal.c client/sound.h client/vid.h \
-	client/vid_menu.c game/game.h game/q_shared.c game/q_shared.h \
-	qcommon/cmd.c qcommon/cmodel.c qcommon/common.c qcommon/crc.c \
-	qcommon/crc.h qcommon/cvar.c qcommon/files.c qcommon/htable.c \
-	qcommon/htable.h qcommon/md5.c qcommon/md5.h qcommon/mdfour.c \
+	client/snd_openal.c client/sound.h client/vid.h game/game.h \
+	game/q_shared.c game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
+	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
+	qcommon/files.c qcommon/htable.c qcommon/htable.h \
+	qcommon/md5.c qcommon/md5.h qcommon/mdfour.c \
 	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
 	qcommon/qfiles.h ref_gl/anorms.h ref_gl/anormtab.h \
 	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_draw.c \
@@ -327,7 +327,6 @@ am_alienarena_OBJECTS = client/alienarena-cl_ents.$(OBJEXT) \
 	client/alienarena-qmenu.$(OBJEXT) \
 	client/alienarena-snd_file.$(OBJEXT) \
 	client/alienarena-snd_openal.$(OBJEXT) \
-	client/alienarena-vid_menu.$(OBJEXT) \
 	game/alienarena-q_shared.$(OBJEXT) \
 	qcommon/alienarena-cmd.$(OBJEXT) \
 	qcommon/alienarena-cmodel.$(OBJEXT) \
@@ -642,11 +641,11 @@ alienarena_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	client/input.h client/keys.c client/keys.h client/menu.c \
 	client/qal.c client/qal.h client/qmenu.c client/qmenu.h \
 	client/ref.h client/screen.h client/snd_file.c \
-	client/snd_openal.c client/sound.h client/vid.h \
-	client/vid_menu.c game/game.h game/q_shared.c game/q_shared.h \
-	qcommon/cmd.c qcommon/cmodel.c qcommon/common.c qcommon/crc.c \
-	qcommon/crc.h qcommon/cvar.c qcommon/files.c qcommon/htable.c \
-	qcommon/htable.h qcommon/md5.c qcommon/md5.h qcommon/mdfour.c \
+	client/snd_openal.c client/sound.h client/vid.h game/game.h \
+	game/q_shared.c game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
+	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
+	qcommon/files.c qcommon/htable.c qcommon/htable.h \
+	qcommon/md5.c qcommon/md5.h qcommon/mdfour.c \
 	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
 	qcommon/qfiles.h ref_gl/anorms.h ref_gl/anormtab.h \
 	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_draw.c \
@@ -1435,8 +1434,6 @@ client/alienarena-snd_file.$(OBJEXT): client/$(am__dirstamp) \
 	client/$(DEPDIR)/$(am__dirstamp)
 client/alienarena-snd_openal.$(OBJEXT): client/$(am__dirstamp) \
 	client/$(DEPDIR)/$(am__dirstamp)
-client/alienarena-vid_menu.$(OBJEXT): client/$(am__dirstamp) \
-	client/$(DEPDIR)/$(am__dirstamp)
 game/alienarena-q_shared.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 qcommon/$(am__dirstamp):
@@ -1675,7 +1672,6 @@ mostlyclean-compile:
 	-rm -f client/alienarena-qmenu.$(OBJEXT)
 	-rm -f client/alienarena-snd_file.$(OBJEXT)
 	-rm -f client/alienarena-snd_openal.$(OBJEXT)
-	-rm -f client/alienarena-vid_menu.$(OBJEXT)
 	-rm -f game/acesrc/acebot_ai.$(OBJEXT)
 	-rm -f game/acesrc/acebot_cmds.$(OBJEXT)
 	-rm -f game/acesrc/acebot_items.$(OBJEXT)
@@ -1926,7 +1922,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/alienarena-qmenu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/alienarena-snd_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/alienarena-snd_openal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/alienarena-vid_menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/alienarena-q_shared.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/alienarena_ded-q_shared.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/c_cam.Po@am__quote@
@@ -2570,22 +2565,6 @@ client/alienarena-snd_openal.obj: client/snd_openal.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='client/snd_openal.c' object='client/alienarena-snd_openal.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o client/alienarena-snd_openal.obj `if test -f 'client/snd_openal.c'; then $(CYGPATH_W) 'client/snd_openal.c'; else $(CYGPATH_W) '$(srcdir)/client/snd_openal.c'; fi`
-
-client/alienarena-vid_menu.o: client/vid_menu.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT client/alienarena-vid_menu.o -MD -MP -MF client/$(DEPDIR)/alienarena-vid_menu.Tpo -c -o client/alienarena-vid_menu.o `test -f 'client/vid_menu.c' || echo '$(srcdir)/'`client/vid_menu.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) client/$(DEPDIR)/alienarena-vid_menu.Tpo client/$(DEPDIR)/alienarena-vid_menu.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='client/vid_menu.c' object='client/alienarena-vid_menu.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o client/alienarena-vid_menu.o `test -f 'client/vid_menu.c' || echo '$(srcdir)/'`client/vid_menu.c
-
-client/alienarena-vid_menu.obj: client/vid_menu.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT client/alienarena-vid_menu.obj -MD -MP -MF client/$(DEPDIR)/alienarena-vid_menu.Tpo -c -o client/alienarena-vid_menu.obj `if test -f 'client/vid_menu.c'; then $(CYGPATH_W) 'client/vid_menu.c'; else $(CYGPATH_W) '$(srcdir)/client/vid_menu.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) client/$(DEPDIR)/alienarena-vid_menu.Tpo client/$(DEPDIR)/alienarena-vid_menu.Po
-@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='client/vid_menu.c' object='client/alienarena-vid_menu.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o client/alienarena-vid_menu.obj `if test -f 'client/vid_menu.c'; then $(CYGPATH_W) 'client/vid_menu.c'; else $(CYGPATH_W) '$(srcdir)/client/vid_menu.c'; fi`
 
 game/alienarena-q_shared.o: game/q_shared.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT game/alienarena-q_shared.o -MD -MP -MF game/$(DEPDIR)/alienarena-q_shared.Tpo -c -o game/alienarena-q_shared.o `test -f 'game/q_shared.c' || echo '$(srcdir)/'`game/q_shared.c
