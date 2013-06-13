@@ -871,7 +871,6 @@ char *main_names[] =
 	"m_main_game",
 	"m_main_join",
 	"m_main_host",
-	"m_main_irc",
 	"m_main_options",
 	"m_main_quit",
 	"m_main_credits",
@@ -884,7 +883,6 @@ void (*main_open_funcs[MAIN_ITEMS])(void) =
 	&M_Menu_Game_f,
 	&M_Menu_JoinServer_f,
 	&M_Menu_StartServer_f,
-	&M_Menu_IRC_f,
 	&M_Menu_Options_f,
 	&M_Menu_Quit_f,
 	&M_Menu_Credits_f
@@ -2806,6 +2804,222 @@ screen_boilerplate (Net, s_net_screen);
 
 
 /*
+=============================================================================
+
+OPTIONS MENUS - IRC OPTIONS MENU
+
+=============================================================================
+*/
+
+char			IRC_key[64];
+
+static menuframework_s	s_irc_screen;
+
+static menuframework_s	s_irc_menu;
+static menuaction_s		s_irc_join;
+static menulist_s		s_irc_joinatstartup;
+
+static menufield_s		s_irc_server;
+static menufield_s		s_irc_channel;
+static menufield_s		s_irc_port;
+static menulist_s		s_irc_ovnickname;
+static menufield_s		s_irc_nickname;
+static menufield_s		s_irc_kickrejoin;
+static menufield_s		s_irc_reconnectdelay;
+
+static void JoinIRCFunc( void *unused )
+{
+	if(pNameUnique)
+		CL_InitIRC();
+}
+
+static void QuitIRCFunc( void *unused )
+{
+	CL_IRCInitiateShutdown();
+}
+
+static void ApplyIRCSettings( void * self )
+{
+	qboolean running = CL_IRCIsRunning( );
+	if ( running ) {
+		CL_IRCInitiateShutdown( );
+		CL_IRCWaitShutdown( );
+	}
+
+	Cvar_Set(	"cl_IRC_server" ,		s_irc_server.buffer);
+	Cvar_Set(	"cl_IRC_channel" ,		s_irc_channel.buffer);
+	Cvar_SetValue(	"cl_IRC_port" , 		atoi( s_irc_port.buffer ) );
+	Cvar_SetValue(	"cl_IRC_override_nickname" ,	s_irc_ovnickname.curvalue );
+	Cvar_Set(	"cl_IRC_nickname" ,		s_irc_nickname.buffer );
+	Cvar_SetValue(	"cl_IRC_kick_rejoin" ,		atoi( s_irc_kickrejoin.buffer ) );
+	Cvar_SetValue(	"cl_IRC_reconnect_delay" ,	atoi( s_irc_reconnectdelay.buffer ) );
+
+	if ( running )
+		CL_InitIRC( );
+
+	M_PopMenu( );
+}
+
+static void IRC_Settings_SubMenuInit( )
+{
+	setup_tickbox (s_irc_joinatstartup);
+	s_irc_joinatstartup.generic.name	= "Join At Startup";
+	s_irc_joinatstartup.generic.localstrings[0] = "cl_IRC_connect_at_startup";
+	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->integer != 0;
+	s_irc_joinatstartup.generic.callback = SpinOptionFunc;
+	Menu_AddItem( &s_irc_menu, &s_irc_joinatstartup );
+
+	s_irc_server.generic.type		= MTYPE_FIELD;
+	s_irc_server.generic.name		= "Server ";
+	s_irc_server.generic.tooltip	= "Address or name of the IRC server";
+	s_irc_server.generic.visible_length		= 16;
+	s_irc_server.cursor			= strlen( cl_IRC_server->string );
+	strcpy( s_irc_server.buffer, Cvar_VariableString("cl_IRC_server") );
+	Menu_AddItem( &s_irc_menu, &s_irc_server );
+
+	s_irc_channel.generic.type		= MTYPE_FIELD;
+	s_irc_channel.generic.name		= "Channel ";
+	s_irc_channel.generic.tooltip	= "Name of the channel to join";
+	s_irc_channel.generic.visible_length		= 16;
+	s_irc_channel.cursor			= strlen( cl_IRC_channel->string );
+	strcpy( s_irc_channel.buffer, Cvar_VariableString("cl_IRC_channel") );
+	Menu_AddItem( &s_irc_menu, &s_irc_channel );
+
+	s_irc_port.generic.type			= MTYPE_FIELD;
+	s_irc_port.generic.name			= "TCP Port ";
+	s_irc_port.generic.tooltip		= "Port to connect to on the server";
+	s_irc_port.generic.visible_length		= 6;
+	s_irc_port.cursor			= strlen( cl_IRC_port->string );
+	strcpy( s_irc_port.buffer, Cvar_VariableString("cl_IRC_port") );
+	Menu_AddItem( &s_irc_menu, &s_irc_port );
+
+	s_irc_ovnickname.generic.name		= "Override nick";
+	s_irc_ovnickname.generic.tooltip	= "Enable this to override the default, player-based nick";
+	setup_tickbox (s_irc_ovnickname);
+	s_irc_ovnickname.curvalue		= cl_IRC_override_nickname->value ? 1 : 0;
+	Menu_AddItem( &s_irc_menu, &s_irc_ovnickname );
+
+	s_irc_nickname.generic.type		= MTYPE_FIELD;
+	s_irc_nickname.generic.name		= "Nick ";
+	s_irc_nickname.generic.tooltip	= "Nickname override to use";
+	s_irc_nickname.generic.visible_length		= 16;
+	s_irc_nickname.cursor			= strlen( cl_IRC_nickname->string );
+	strcpy( s_irc_nickname.buffer, Cvar_VariableString("cl_IRC_nickname") );
+	Menu_AddItem( &s_irc_menu, &s_irc_nickname );
+
+	s_irc_kickrejoin.generic.type		= MTYPE_FIELD;
+	s_irc_kickrejoin.generic.name		= "Autorejoin ";
+	s_irc_kickrejoin.generic.tooltip	= "Delay before automatic rejoin after kick (0 to disable)";
+	s_irc_kickrejoin.generic.visible_length		= 4;
+	s_irc_kickrejoin.cursor			= strlen( cl_IRC_kick_rejoin->string );
+	strcpy( s_irc_kickrejoin.buffer, Cvar_VariableString("cl_IRC_kick_rejoin") );
+	Menu_AddItem( &s_irc_menu, &s_irc_kickrejoin );
+
+	s_irc_reconnectdelay.generic.type	= MTYPE_FIELD;
+	s_irc_reconnectdelay.generic.name	= "Reconnect ";
+	s_irc_reconnectdelay.generic.tooltip= "Delay between reconnection attempts (minimum 5)";
+	s_irc_reconnectdelay.generic.visible_length	= 4;
+	s_irc_reconnectdelay.cursor		= strlen( cl_IRC_reconnect_delay->string );
+	strcpy( s_irc_reconnectdelay.buffer, Cvar_VariableString("cl_IRC_reconnect_delay") );
+	Menu_AddItem( &s_irc_menu, &s_irc_reconnectdelay );
+
+	add_action (s_irc_menu, "Apply settings", ApplyIRCSettings);
+
+}
+
+
+static void M_FindIRCKey ( void )
+{
+	int		count;
+	int		j;
+	int		l;
+	char	*b;
+	int twokeys[2];
+
+	twokeys[0] = twokeys[1] = -1;
+	l = strlen("messagemode3");
+	count = 0;
+
+	for (j=0 ; j<256 ; j++)
+	{
+		b = keybindings[j];
+		if (!b)
+			continue;
+		if (!strncmp (b, "messagemode3", l) )
+		{
+			twokeys[count] = j;
+			count++;
+			if (count == 2)
+				break;
+		}
+	}
+	//got our key
+	Com_sprintf(IRC_key, sizeof(IRC_key), "(IRC Chat Key is %s)", Key_KeynumToString(twokeys[0]));
+}
+
+void IRC_MenuInit( void )
+{
+	extern cvar_t *name;
+
+	if(!strcmp(name->string, "Player"))
+		pNameUnique = false;
+	else
+		pNameUnique = true;
+
+	if(!cl_IRC_connect_at_startup)
+		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
+
+	M_FindIRCKey();
+	
+	s_irc_screen.nitems = 0;
+
+	setup_window (s_irc_screen, s_irc_menu, "IRC CHAT OPTIONS");
+
+	s_irc_join.generic.type	= MTYPE_ACTION;
+	s_irc_join.generic.name	= "Join IRC Chat";
+	s_irc_join.generic.callback = JoinIRCFunc;
+	Menu_AddItem( &s_irc_menu, &s_irc_join );
+
+	IRC_Settings_SubMenuInit ();
+
+	add_text (s_irc_menu, IRC_key, 0);
+
+	Menu_AutoArrange (&s_irc_screen);
+}
+
+
+void IRC_MenuDraw (menuframework_s *dummy)
+{
+	//warn user that they cannot join until changing default player name
+	if(!pNameUnique)
+		s_irc_menu.statusbar = "You must create your player name before joining a server!";
+	else if(CL_IRCIsConnected())
+		s_irc_menu.statusbar = "Connected to IRC server.";
+	else if(CL_IRCIsRunning())
+		s_irc_menu.statusbar = "Connecting to IRC server...";
+	else
+		s_irc_menu.statusbar = "Not connected to IRC server.";
+
+	// Update join/quit menu entry
+	if ( CL_IRCIsRunning( ) ) {
+		s_irc_join.generic.name	= "Quit IRC Chat";
+		s_irc_join.generic.callback = QuitIRCFunc;
+	} else {
+		s_irc_join.generic.name	= "Join IRC Chat";
+		s_irc_join.generic.callback = JoinIRCFunc;
+	}
+
+	Screen_Draw (&s_irc_screen);
+}
+
+void M_Menu_IRC_f (void)
+{
+	IRC_MenuInit();
+	M_PushMenu (IRC_MenuDraw, Default_MenuKey, &s_irc_screen);
+}
+
+
+/*
 =======================================================================
 
 OPTIONS MENUS - TOP-LEVEL OPTIONS MENU
@@ -2823,6 +3037,7 @@ char *option_screen_names[] =
 	"Audio",
 	"Input",
 	"Network", 
+	"IRC Chat",
 };
 #define OPTION_SCREENS (sizeof(option_screen_names)/sizeof(option_screen_names[0]))
 
@@ -2834,7 +3049,8 @@ void (*option_open_funcs[OPTION_SCREENS])(void) =
 	&M_Menu_Video_f,
 	&M_Menu_Audio_f,
 	&M_Menu_Input_f,
-	&M_Menu_Net_f
+	&M_Menu_Net_f,
+	&M_Menu_IRC_f,
 };
 
 menuframework_s *option_screens[OPTION_SCREENS] = 
@@ -2844,6 +3060,7 @@ menuframework_s *option_screens[OPTION_SCREENS] =
 	&s_audio_screen,
 	&s_input_screen,
 	&s_net_screen,
+	&s_irc_screen,
 };
 
 static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
@@ -3201,221 +3418,6 @@ void Game_MenuInit( void )
 }
 
 screen_boilerplate (Game, s_game_screen)
-
-/*
-=============================================================================
-
-IRC MENUS
-
-=============================================================================
-*/
-
-char			IRC_key[64];
-
-static menuframework_s	s_irc_screen;
-
-static menuframework_s	s_irc_menu;
-static menuaction_s		s_irc_join;
-static menulist_s		s_irc_joinatstartup;
-
-static menufield_s		s_irc_server;
-static menufield_s		s_irc_channel;
-static menufield_s		s_irc_port;
-static menulist_s		s_irc_ovnickname;
-static menufield_s		s_irc_nickname;
-static menufield_s		s_irc_kickrejoin;
-static menufield_s		s_irc_reconnectdelay;
-
-static void JoinIRCFunc( void *unused )
-{
-	if(pNameUnique)
-		CL_InitIRC();
-}
-
-static void QuitIRCFunc( void *unused )
-{
-	CL_IRCInitiateShutdown();
-}
-
-static void ApplyIRCSettings( void * self )
-{
-	qboolean running = CL_IRCIsRunning( );
-	if ( running ) {
-		CL_IRCInitiateShutdown( );
-		CL_IRCWaitShutdown( );
-	}
-
-	Cvar_Set(	"cl_IRC_server" ,		s_irc_server.buffer);
-	Cvar_Set(	"cl_IRC_channel" ,		s_irc_channel.buffer);
-	Cvar_SetValue(	"cl_IRC_port" , 		atoi( s_irc_port.buffer ) );
-	Cvar_SetValue(	"cl_IRC_override_nickname" ,	s_irc_ovnickname.curvalue );
-	Cvar_Set(	"cl_IRC_nickname" ,		s_irc_nickname.buffer );
-	Cvar_SetValue(	"cl_IRC_kick_rejoin" ,		atoi( s_irc_kickrejoin.buffer ) );
-	Cvar_SetValue(	"cl_IRC_reconnect_delay" ,	atoi( s_irc_reconnectdelay.buffer ) );
-
-	if ( running )
-		CL_InitIRC( );
-
-	M_PopMenu( );
-}
-
-static void IRC_Settings_SubMenuInit( )
-{
-	setup_tickbox (s_irc_joinatstartup);
-	s_irc_joinatstartup.generic.name	= "Autojoin At Startup";
-	s_irc_joinatstartup.generic.localstrings[0] = "cl_IRC_connect_at_startup";
-	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->integer != 0;
-	s_irc_joinatstartup.generic.callback = SpinOptionFunc;
-	Menu_AddItem( &s_irc_menu, &s_irc_joinatstartup );
-
-	s_irc_server.generic.type		= MTYPE_FIELD;
-	s_irc_server.generic.name		= "Server ";
-	s_irc_server.generic.tooltip	= "Address or name of the IRC server";
-	s_irc_server.generic.visible_length		= 16;
-	s_irc_server.cursor			= strlen( cl_IRC_server->string );
-	strcpy( s_irc_server.buffer, Cvar_VariableString("cl_IRC_server") );
-	Menu_AddItem( &s_irc_menu, &s_irc_server );
-
-	s_irc_channel.generic.type		= MTYPE_FIELD;
-	s_irc_channel.generic.name		= "Channel ";
-	s_irc_channel.generic.tooltip	= "Name of the channel to join";
-	s_irc_channel.generic.visible_length		= 16;
-	s_irc_channel.cursor			= strlen( cl_IRC_channel->string );
-	strcpy( s_irc_channel.buffer, Cvar_VariableString("cl_IRC_channel") );
-	Menu_AddItem( &s_irc_menu, &s_irc_channel );
-
-	s_irc_port.generic.type			= MTYPE_FIELD;
-	s_irc_port.generic.name			= "TCP Port ";
-	s_irc_port.generic.tooltip		= "Port to connect to on the server";
-	s_irc_port.generic.visible_length		= 6;
-	s_irc_port.cursor			= strlen( cl_IRC_port->string );
-	strcpy( s_irc_port.buffer, Cvar_VariableString("cl_IRC_port") );
-	Menu_AddItem( &s_irc_menu, &s_irc_port );
-
-	s_irc_ovnickname.generic.name		= "Override nick";
-	s_irc_ovnickname.generic.tooltip	= "Enable this to override the default, player-based nick";
-	setup_tickbox (s_irc_ovnickname);
-	s_irc_ovnickname.curvalue		= cl_IRC_override_nickname->value ? 1 : 0;
-	Menu_AddItem( &s_irc_menu, &s_irc_ovnickname );
-
-	s_irc_nickname.generic.type		= MTYPE_FIELD;
-	s_irc_nickname.generic.name		= "Nick ";
-	s_irc_nickname.generic.tooltip	= "Nickname override to use";
-	s_irc_nickname.generic.visible_length		= 16;
-	s_irc_nickname.cursor			= strlen( cl_IRC_nickname->string );
-	strcpy( s_irc_nickname.buffer, Cvar_VariableString("cl_IRC_nickname") );
-	Menu_AddItem( &s_irc_menu, &s_irc_nickname );
-
-	s_irc_kickrejoin.generic.type		= MTYPE_FIELD;
-	s_irc_kickrejoin.generic.name		= "Autorejoin ";
-	s_irc_kickrejoin.generic.tooltip	= "Delay before automatic rejoin after kick (0 to disable)";
-	s_irc_kickrejoin.generic.visible_length		= 4;
-	s_irc_kickrejoin.cursor			= strlen( cl_IRC_kick_rejoin->string );
-	strcpy( s_irc_kickrejoin.buffer, Cvar_VariableString("cl_IRC_kick_rejoin") );
-	Menu_AddItem( &s_irc_menu, &s_irc_kickrejoin );
-
-	s_irc_reconnectdelay.generic.type	= MTYPE_FIELD;
-	s_irc_reconnectdelay.generic.name	= "Reconnect ";
-	s_irc_reconnectdelay.generic.tooltip= "Delay between reconnection attempts (minimum 5)";
-	s_irc_reconnectdelay.generic.visible_length	= 4;
-	s_irc_reconnectdelay.cursor		= strlen( cl_IRC_reconnect_delay->string );
-	strcpy( s_irc_reconnectdelay.buffer, Cvar_VariableString("cl_IRC_reconnect_delay") );
-	Menu_AddItem( &s_irc_menu, &s_irc_reconnectdelay );
-
-	add_action (s_irc_menu, "Apply settings", ApplyIRCSettings);
-
-}
-
-
-static void M_FindIRCKey ( void )
-{
-	int		count;
-	int		j;
-	int		l;
-	char	*b;
-	int twokeys[2];
-
-	twokeys[0] = twokeys[1] = -1;
-	l = strlen("messagemode3");
-	count = 0;
-
-	for (j=0 ; j<256 ; j++)
-	{
-		b = keybindings[j];
-		if (!b)
-			continue;
-		if (!strncmp (b, "messagemode3", l) )
-		{
-			twokeys[count] = j;
-			count++;
-			if (count == 2)
-				break;
-		}
-	}
-	//got our key
-	Com_sprintf(IRC_key, sizeof(IRC_key), "(IRC Chat Key is %s)", Key_KeynumToString(twokeys[0]));
-}
-
-void IRC_MenuInit( void )
-{
-	extern cvar_t *name;
-
-	if(!strcmp(name->string, "Player"))
-		pNameUnique = false;
-	else
-		pNameUnique = true;
-
-	if(!cl_IRC_connect_at_startup)
-		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
-
-	M_FindIRCKey();
-	
-	s_irc_screen.nitems = 0;
-
-	setup_window (s_irc_screen, s_irc_menu, "IRC CHAT OPTIONS");
-
-	s_irc_join.generic.type	= MTYPE_ACTION;
-	s_irc_join.generic.name	= "Join IRC Chat";
-	s_irc_join.generic.callback = JoinIRCFunc;
-	Menu_AddItem( &s_irc_menu, &s_irc_join );
-
-	IRC_Settings_SubMenuInit ();
-
-	add_text (s_irc_menu, IRC_key, 0);
-
-	Menu_AutoArrange (&s_irc_screen);
-}
-
-
-void IRC_MenuDraw (menuframework_s *dummy)
-{
-	//warn user that they cannot join until changing default player name
-	if(!pNameUnique)
-		s_irc_menu.statusbar = "You must create your player name before joining a server!";
-	else if(CL_IRCIsConnected())
-		s_irc_menu.statusbar = "Connected to IRC server.";
-	else if(CL_IRCIsRunning())
-		s_irc_menu.statusbar = "Connecting to IRC server...";
-	else
-		s_irc_menu.statusbar = "Not connected to IRC server.";
-
-	// Update join/quit menu entry
-	if ( CL_IRCIsRunning( ) ) {
-		s_irc_join.generic.name	= "Quit IRC Chat";
-		s_irc_join.generic.callback = QuitIRCFunc;
-	} else {
-		s_irc_join.generic.name	= "Join IRC Chat";
-		s_irc_join.generic.callback = JoinIRCFunc;
-	}
-
-	Screen_Draw (&s_irc_screen);
-}
-
-void M_Menu_IRC_f (void)
-{
-	IRC_MenuInit();
-	M_PushMenu (IRC_MenuDraw, Default_MenuKey, &s_irc_screen);
-}
 
 
 
