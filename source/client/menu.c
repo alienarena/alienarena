@@ -867,7 +867,6 @@ MAIN MENU
 
 char *main_names[] =
 {
-	"m_main_player",
 	"m_main_game",
 	"m_main_join",
 	"m_main_host",
@@ -879,7 +878,6 @@ char *main_names[] =
 
 void (*main_open_funcs[MAIN_ITEMS])(void) = 
 {
-	&M_Menu_PlayerConfig_f,
 	&M_Menu_Game_f,
 	&M_Menu_JoinServer_f,
 	&M_Menu_StartServer_f,
@@ -1699,7 +1697,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 /*
 =======================================================================
 
-OPTIONS MENUS - MISC. OPTIONS MENU
+OPTIONS MENUS - DISPLAY OPTIONS MENU
 
 =======================================================================
 */
@@ -2000,6 +1998,14 @@ static const char *color_names[] =
 	0
 };
 
+static const char *handedness_names[] =
+{
+	"right",
+	"left",
+	"center",
+	0
+};
+
 sliderlimit_t mousespeed_limits = 
 {
 	0, 110, 0.0f, 11.0f
@@ -2010,7 +2016,7 @@ fieldsize_t fov_limits =
 	3, 10, 130
 };
 
-option_name_t misc_option_names[] = 
+option_name_t disp_option_names[] = 
 {
 	{
 		option_spincontrol,
@@ -2125,6 +2131,13 @@ option_name_t misc_option_names[] =
 		setnames (onoff_names)
 	},
 	{
+		option_spincontrol,
+		"hand",
+		"weapon handedness",
+		"NOTE: This does effect aim!",
+		setnames (handedness_names)
+	},
+	{
 		option_numberfield,
 		"fov",
 		"FOV",
@@ -2133,7 +2146,7 @@ option_name_t misc_option_names[] =
 	}
 };
 
-#define num_options (sizeof(misc_option_names)/sizeof(misc_option_names[0]))
+#define num_options (sizeof(disp_option_names)/sizeof(disp_option_names[0]))
 
 menumultival_s options[num_options];
 
@@ -2143,7 +2156,7 @@ static void ControlsSetMenuItemValues( void )
 	
 	for (i = 0; i < num_options; i++)
 	{
-		Option_Setup (&options[i], &misc_option_names[i]);
+		Option_Setup (&options[i], &disp_option_names[i]);
 	}
 }
 
@@ -2190,7 +2203,7 @@ void Display_MenuInit( void )
 	
 	for (i = 0; i < num_options; i++)
 	{
-		Option_Setup (&options[i], &misc_option_names[i]);
+		Option_Setup (&options[i], &disp_option_names[i]);
 		Menu_AddItem( &s_options_main_submenu, &options[i]);
 	}
 
@@ -3027,7 +3040,8 @@ static menuframework_s	s_options_menu;
 
 char *option_screen_names[] =
 {
-	"Display", // whatever's first will be the default
+	"Player", // whatever's first will be the default
+	"Display",
 	"Video",
 	"Audio",
 	"Input",
@@ -3040,6 +3054,7 @@ char *option_screen_names[] =
 // smaller screens.
 void (*option_open_funcs[OPTION_SCREENS])(void) = 
 {
+	&M_Menu_PlayerConfig_f,
 	&M_Menu_Display_f,
 	&M_Menu_Video_f,
 	&M_Menu_Audio_f,
@@ -3048,8 +3063,10 @@ void (*option_open_funcs[OPTION_SCREENS])(void) =
 	&M_Menu_IRC_f,
 };
 
+static menuframework_s	s_player_config_screen;
 menuframework_s *option_screens[OPTION_SCREENS] = 
 {
+	&s_player_config_screen,
 	&s_display_screen,
 	&s_video_screen,
 	&s_audio_screen,
@@ -5727,7 +5744,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	refdef.width -= font->size;
 	refdef.height -= font->size;
 	
-	refdef.fov_x = 45;
+	refdef.fov_x = 35;
 	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
 	refdef.time = cls.realtime*0.001;
 	
@@ -5774,7 +5791,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		entity[i].backlerp = (float)((int)self->mframe%10)/10.0f;
 		entity[i].angles[1] = (int)self->yaw;
 		
-		VectorSet (entity[i].origin, 80, 0, -7);
+		VectorSet (entity[i].origin, 80, 0, -5);
 		VectorCopy (entity[i].origin, entity[i].oldorigin);
 	}
 		
@@ -5786,8 +5803,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	R_RenderFramePlayerSetup( &refdef );
 }
 
-static menuframework_s	s_player_config_screen;
-
 static menuframework_s	s_player_config_menu;
 static menufield_s		s_player_name_field;
 static menufield_s		s_player_password_field;
@@ -5796,8 +5811,8 @@ static menuframework_s	s_player_skin_controls_submenu;
 static menulist_s		s_player_model_box;
 static menulist_s		s_player_skin_box;
 static menuitem_s   	s_player_thumbnail;
-static menulist_s		s_player_handedness_box;
 
+static menuframework_s	s_player_skin_preview_submenu;
 static menumodel_s		s_player_skin_preview;
 
 #define MAX_DISPLAYNAME 16
@@ -6029,28 +6044,15 @@ static void PlayerPicDrawFunc (void *_self, FNT_font_t font)
 static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 {
 	menuvec2_t ret;
-	int maxwidth;
+	int maxwidth, maxheight;
 	float ratio;
 	menumodel_s *self = (menumodel_s*) _self;
 	
-	ret.x = 28*font->size;
-	ret.y = 36*font->size;
+	ret.x = 20*font->size;
+	ret.y = 29*font->size;
 	
-	ratio = (float)ret.y/(float)ret.x;
-	
-	maxwidth = viddef.width - (CHASELINK(s_player_config_menu.generic.lsize).x + CHASELINK(s_player_config_menu.generic.rsize).x + 4*font->size);
-	
-	if (ret.x > maxwidth)
-	{
-		ret.x = maxwidth;
-		ret.y = (int)((float)ret.x*ratio);
-	}
-	
-	self->w = (float)ret.x/(float)font->size-2;
-	self->h = (float)ret.y/(float)font->size-2;
-	
-	ret.x += 2*font->size;
-	ret.y += 2*font->size;
+	self->w = (float)ret.x/(float)font->size;
+	self->h = (float)ret.y/(float)font->size;
 	
 	return ret;
 }
@@ -6069,8 +6071,6 @@ void PlayerConfig_MenuInit( void )
 	int currentdirectoryindex = 0;
 	int currentskinindex = 0;
 	cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
-
-	static const char *handedness[] = { "right", "left", "center", 0 };
 
 	scale = (float)(viddef.height)/600;
 
@@ -6185,23 +6185,20 @@ void PlayerConfig_MenuInit( void )
 	s_player_thumbnail.generic.itemdraw = PlayerPicDrawFunc;
 	Menu_AddItem (&s_player_skin_submenu, &s_player_thumbnail);
 
-	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_handedness_box.generic.name = "handedness";
-	s_player_handedness_box.generic.localstrings[0] = "hand";
-	s_player_handedness_box.generic.callback = SpinOptionFunc;
-	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
-	s_player_handedness_box.itemnames = handedness;
-
+	s_player_skin_preview_submenu.generic.type = MTYPE_SUBMENU;
+	s_player_skin_preview_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_player_skin_preview_submenu.nitems = 0;
+	
 	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
 	Menu_AddItem( &s_player_config_menu, &s_player_password_field);
 	Menu_AddItem( &s_player_config_menu, &s_player_skin_submenu);
-	Menu_AddItem( &s_player_config_menu, &s_player_handedness_box );
 		
 	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_player_skin_preview.generic.namesizecallback = PlayerConfigModelSizeFunc;
 	s_player_skin_preview.generic.namedraw = PlayerModelDrawFunc;
 	
-	Menu_AddItem (&s_player_config_screen, &s_player_skin_preview);
+	Menu_AddItem (&s_player_config_menu, &s_player_skin_preview_submenu);
+	Menu_AddItem (&s_player_skin_preview_submenu, &s_player_skin_preview);
 	
 	Menu_AutoArrange (&s_player_config_screen);
 
@@ -6393,7 +6390,7 @@ void Tactical_MenuInit( void )
 			s_tactical_skin_previews[i][j].name = tactical_skin_names[i][j][1];
 			s_tactical_skin_previews[i][j].skin = "default";
 			s_tactical_skin_previews[i][j].h = 14;
-			s_tactical_skin_previews[i][j].w = 13;
+			s_tactical_skin_previews[i][j].w = 10;
 			Menu_AddItem (&s_tactical_columns[i][j], &s_tactical_skin_previews[i][j]);
 			
 			s_tactical_skin_actions[i][j].generic.type = MTYPE_ACTION;
