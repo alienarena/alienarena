@@ -82,8 +82,8 @@ void M_Menu_Main_f (void);
 	void M_Menu_StartServer_f (void);
 			void M_Menu_BotOptions_f (void);
 	void M_Menu_IRC_f (void);
-	void M_Menu_Video_f (void);
 	void M_Menu_Options_f (void);
+		void M_Menu_Video_f (void);
 		void M_Menu_Keys_f (void);
 	void M_Menu_Quit_f (void);
 
@@ -120,7 +120,7 @@ static menuvec2_t PicSizeFunc (void *_self, FNT_font_t font)
 	// determine if pic exists, if not return 0 size. 
 	// TODO: less hacky way to do this test
 	if (self->generic.localstrings[0] != NULL)
-		// benifit of doubt if the name isn't there
+		// benefit of doubt if the name isn't there
 		Draw_GetPicSize (&sizetest1, &sizetest2, self->generic.localstrings[0]);
 	if (sizetest1 == -1)
 		return ret;
@@ -762,8 +762,9 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (me
 		insertion_point = cursor.menulayer;
 	}
 	
-	while (mstate.active.num_layers > insertion_point+1)
-		mstate.outgoing.layers[mstate.outgoing.num_layers++] = activelayer(--mstate.active.num_layers);
+	for (i = insertion_point+1; i < mstate.active.num_layers; i++)
+		mstate.outgoing.layers[mstate.outgoing.num_layers++] = activelayer(i);
+	mstate.active.num_layers = insertion_point+1;
 	
 	cls.key_dest = key_menu;
 	
@@ -872,7 +873,6 @@ char *main_names[] =
 	"m_main_host",
 	"m_main_irc",
 	"m_main_options",
-	"m_main_video",	
 	"m_main_quit",
 	"m_main_credits",
 };
@@ -886,7 +886,6 @@ void (*main_open_funcs[MAIN_ITEMS])(void) =
 	&M_Menu_StartServer_f,
 	&M_Menu_IRC_f,
 	&M_Menu_Options_f,
-	&M_Menu_Video_f,
 	&M_Menu_Quit_f,
 	&M_Menu_Credits_f
 };
@@ -1090,7 +1089,7 @@ void M_Menu_Main_f (void)
 /*
 =======================================================================
 
-KEYS MENU
+OPTIONS MENUS - INPUT MENU
 
 =======================================================================
 */
@@ -1326,356 +1325,13 @@ void M_Menu_Keys_f (void)
 	M_PushMenu (Screen_Draw, Keys_MenuKey, &s_keys_screen);
 }
 
-
 /*
 =======================================================================
 
-OPTIONS MENU
+OPTIONS MENUS - GENERIC CODE FOR OPTIONS WIDGETS
 
 =======================================================================
 */
-extern cvar_t *r_minimap;
-extern cvar_t *r_minimap_style;
-
-static menuframework_s 	s_options_screen;
-
-static menuframework_s	s_options_menu;
-
-static menuframework_s	s_options_header_submenu;
-
-static menuframework_s	s_options_main_submenu;
-static menulist_s		s_options_invertmouse_box;
-
-static void CustomizeControlsFunc( void *unused )
-{
-	M_Menu_Keys_f();
-}
-
-static void MinimapFunc( void *item )
-{
-	menulist_s *self = (menulist_s *)item;
-	Cvar_SetValue("r_minimap", self->curvalue != 0);
-	if(r_minimap->integer) {
-		Cvar_SetValue("r_minimap_style", self->curvalue % 2);
-	}
-}
-
-static float ClampCvar( float min, float max, float value )
-{
-	if ( value < min ) return min;
-	if ( value > max ) return max;
-	return value;
-}
-
-#define MAX_FONTS 32
-char *font_names[MAX_FONTS];
-int	numfonts = 0;
-
-qboolean fontInList (char *check, int num, char **list)
-{
-	int i;
-	for (i=0;i<num;i++)
-		if (!Q_strcasecmp(check, list[i]))
-			return true;
-	return false;
-}
-
-// One string after another, both in the same memory block, but each with its
-// own null terminator. 
-char *str_combine (char *in1, char *in2)
-{
-	size_t outsize;
-	char *out;
-	
-	outsize = strlen(in1)+1+strlen(in2)+1;
-	out = malloc (outsize);
-	memset (out, 0, outsize);
-	strcpy (out, in1);
-	strcpy (strchr(out, '\0')+1, in2);
-	
-	return out;
-}
-
-void insertFile (char ** list, char *insert1, char *insert2, int ndefaults, int len )
-{
-	int i, j;
-	char *tmp;
-	
-	tmp = str_combine (insert1, insert2);
-
-	for (i=ndefaults;i<len; i++)
-	{
-		if (!list[i])
-			break;
-
-		if (strcmp( list[i], insert1 ))
-		{
-			for (j=len; j>i ;j--)
-				list[j] = list[j-1];
-
-			list[i] = tmp;
-
-			return;
-		}
-	}
-
-	list[len] = tmp;
-}
-
-static void AddFontNames( char * path , int * nfontnames , char ** list )
-{
-	char ** fontfiles;
-	int nfonts = 0;
-	int i;
-
-	fontfiles = FS_ListFilesInFS( path , &nfonts, 0,
-		SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
-
-	for (i=0;i<nfonts && *nfontnames<MAX_FONTS;i++)
-	{
-		int num;
-		char * p;
-
-		p = strstr(fontfiles[i], "fonts/"); p++;
-		p = strstr(p, "/"); p++;
-
-		if (!strstr( p , ".ttf" ) )
-			continue;
-
-		num = strlen(p)-4;
-		p[num] = 0;
-
-		if (!fontInList(p, i, list))
-		{
-			insertFile (list, p, p, 1, i);
-			(*nfontnames)++;
-		}
-	}
-
-	if (fontfiles)
-		FS_FreeFileList(fontfiles, nfonts);
-}
-
-void SetFontNames (char **list)
-{
-	int nfontnames;
-
-	memset( list, 0, sizeof( char * ) * MAX_FONTS );
-
-	nfontnames = 0;
-	AddFontNames( "fonts/*.ttf" , &nfontnames , list );
-
-	numfonts = nfontnames;
-}
-
-extern cvar_t *crosshair;
-#define MAX_CROSSHAIRS 256
-char *crosshair_names[MAX_CROSSHAIRS];
-int	numcrosshairs = 0;
-
-void SetCrosshairNames (char **list)
-{
-	char *curCrosshair, *curCrosshairFile;
-	char *p;
-	int ncrosshairs = 0, ncrosshairnames;
-	char **crosshairfiles;
-	int i;
-
-	ncrosshairnames = 4;
-
-	list[0] = str_combine("none", "none"); //the old crosshairs
-	list[1] = str_combine("ch1", "ch1");
-	list[2] = str_combine("ch2", "ch2");
-	list[3] = str_combine("ch3", "ch3");
-
-	crosshairfiles = FS_ListFilesInFS( "pics/crosshairs/*.tga",
-		&ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
-
-	for (i=0;i<ncrosshairs && ncrosshairnames<MAX_CROSSHAIRS;i++)
-	{
-		int num;
-
-		p = strstr(crosshairfiles[i], "/crosshairs/"); p++;
-		curCrosshairFile = p;
-		
-		p = strstr(p, "/"); p++;
-
-		if (	!strstr(p, ".tga")
-			&&	!strstr(p, ".pcx")
-			)
-			continue;
-
-		num = strlen(p)-4;
-		p[num] = 0;
-
-		curCrosshair = p;
-
-		if (!fontInList(curCrosshair, ncrosshairnames, list))
-		{
-			insertFile (list,curCrosshair,curCrosshairFile,4,ncrosshairnames);
-			ncrosshairnames++;
-		}
-	}
-
-	if (crosshairfiles)
-		FS_FreeFileList(crosshairfiles, ncrosshairs);
-
-	numcrosshairs = ncrosshairnames;
-}
-
-extern cvar_t *cl_hudimage1;
-extern cvar_t *cl_hudimage2;
-#define MAX_HUDS 256
-char *hud_names[MAX_HUDS];
-int	numhuds = 0;
-
-static void HudFunc( void *item )
-{
-	menulist_s *self;
-	char hud1[MAX_OSPATH];
-	char hud2[MAX_OSPATH];
-	
-	self = (menulist_s *)item;
-
-	if(self->curvalue == 0) { //none
-		sprintf(hud1, "none");
-		sprintf(hud2, "none");
-	}
-
-	if(self->curvalue == 1) {
-		sprintf(hud1, "pics/i_health.tga");
-		sprintf(hud2, "pics/i_score.tga");
-	}
-
-	if(self->curvalue > 1) {
-		sprintf(hud1, "pics/huds/%s1", hud_names[self->curvalue]);
-		sprintf(hud2, "pics/huds/%s2", hud_names[self->curvalue]);
-	}
-
-	//set the cvars, both of them
-	Cvar_Set( "cl_hudimage1", hud1 );
-	Cvar_Set( "cl_hudimage2", hud2 );
-}
-
-void SetHudNames (char **list)
-{
-	char *curHud, *curHudFile;
-	char *p;
-	int nhuds = 0, nhudnames;
-	char **hudfiles;
-	int i;
-
-	memset( list, 0, sizeof( char * ) * MAX_HUDS );
-
-	nhudnames = 2;
-
-	list[0] = str_combine("none", "none");
-	list[1] = str_combine("default", "pics/i_health.tga"); //the default hud
-
-	hudfiles = FS_ListFilesInFS( "pics/huds/*.tga", &nhuds, 0,
-		SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
-
-	for (i=0;i<nhuds && nhudnames<MAX_HUDS;i++)
-	{
-		int num, file_ext;
-
-		p = strstr(hudfiles[i], "/huds/"); p++;
-		p = strstr(p, "/"); p++;
-
-		if (	!strstr(p, ".tga")
-			&&	!strstr(p, ".pcx")
-			)
-			continue;
-
-		num = strlen(p)-5;
-		 // we'll just assume the side hud is there if the bottom one is--
-		 // we're interested in the bottom one specifically, as that's the
-		 // value of the cvar.
-		if (p[num] == '2')
-			continue;
-		file_ext = num+1;
-		p[file_ext] = 0;
-		
-		curHudFile = _strdup (hudfiles[i]);
-		
-		p[num] = 0;
-
-		curHud = p;
-
-		if (!fontInList(curHud, nhudnames, list))
-		{
-			insertFile (list,curHud,curHudFile,2,nhudnames);
-			nhudnames++;
-		}
-
-		free (curHudFile);
-	}
-
-	if (hudfiles)
-		FS_FreeFileList(hudfiles, nhuds);
-
-	numhuds = nhudnames;
-}
-
-static void InvertMouseFunc( void *unused )
-
-{
-	if(s_options_invertmouse_box.curvalue && m_pitch->value > 0)
-		Cvar_SetValue( "m_pitch", -m_pitch->value );
-	else if(m_pitch->value < 0)
-		Cvar_SetValue( "m_pitch", -m_pitch->value );
-}
-
-static void UpdateBGMusicFunc( void *_self )
-{
-	menulist_s *self = (menulist_s *)_self;
-	Cvar_SetValue( "background_music", self->curvalue );
-	if ( background_music->value > 0.99f && background_music_vol->value >= 0.1f )
-	{
-		S_StartMenuMusic();
-	}
-}
-
-// name lists: list of strings terminated by 0
-
-static const char *minimap_names[] =
-{
-	"off",
-	"static",
-	"rotating",
-	0
-};
-static const char *playerid_names[] =
-{
-	"off",
-	"centered",
-	"over player",
-	0
-};
-
-static const char *color_names[] =
-{
-	"^2green",
-	"^4blue",
-	"^1red",
-	"^3yellow",
-	"^6purple",
-	0
-};
-
-// name and value lists: for spin-controls where the cvar value isn't simply
-// the integer index of whatever text is displaying in the control. We use
-// NULL terminators to separate display names and variable values, so that way
-// we can use the existing menu code.
-
-static const char *doppler_effect_items[] =
-{
-	"off\0000",
-	"normal\0001",
-	"high\0003",
-	"very high\0005",
-	0
-};
 
 typedef struct
 {
@@ -1683,23 +1339,11 @@ typedef struct
 	int	min_value, max_value; // for numerical fields, otherwise ignore
 } fieldsize_t;
 
-// slider limits:
-
 typedef struct
 {
 	int slider_min, slider_max;
 	float cvar_min, cvar_max;
 } sliderlimit_t;
-
-sliderlimit_t volume_limits = 
-{
-	1, 50, 0.0f, 1.0f
-};
-
-sliderlimit_t mousespeed_limits = 
-{
-	0, 110, 0.0f, 11.0f
-};
 
 typedef struct {
 	enum {
@@ -1727,199 +1371,6 @@ typedef struct {
 	int flags;
 	
 } option_name_t;
-
-option_name_t misc_option_names[] = 
-{
-	{
-		option_spincontrol,
-		"cl_precachecustom",
-		"precache custom models",
-		"Enabling this can result in slow map loading times",
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_showplayernames",
-		"identify target",
-		NULL, 
-		setnames (playerid_names)
-	},
-	{
-		option_spincontrol,
-		"r_ragdolls",
-		"ragdolls",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_noblood",
-		"no blood",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_noskins",
-		"force martian models",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_playertaunts",
-		"player taunts",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_slider,
-		"s_volume",
-		"global volume", 
-		NULL,
-		setlimits (volume_limits)
-	},
-	{
-		option_slider,
-		"background_music_vol",
-		"music volume", 
-		NULL,
-		setlimits (volume_limits)
-	},
-	{
-		option_spincontrol,
-		"background_music",
-		"Background music",
-		NULL, 
-		setnames (onoff_names)
-	},
-	{
-		option_textcvarslider,
-		"s_doppler",
-		"doppler sound effect",
-		NULL,
-		setnames (doppler_effect_items)
-	},
-	{
-		option_spincontrol,
-		"m_accel", 
-		"mouse acceleration",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_slider,
-		"sensitivity",
-		"mouse speed",
-		NULL,
-		setlimits (mousespeed_limits)
-	},
-	{
-		option_slider,
-		"menu_sensitivity",
-		"menu mouse speed",
-		NULL,
-		setlimits (mousespeed_limits)
-	},
-	{
-		option_spincontrol,
-		"m_smoothing",
-		"mouse smoothing",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_run",
-		"always run",
-		NULL,
-		setnames (onoff_names)
-	},
-	// Invert mouse here!
-	{
-		option_textcvarspincontrol,
-		"fnt_console",
-		"console font",
-		"select the font used to display the console",
-		setnames (font_names)
-	},
-	{
-		option_textcvarspincontrol,
-		"fnt_game",
-		"game font",
-		"select the font used in the game",
-		setnames (font_names)
-	},
-	{
-		option_textcvarspincontrol,
-		"fnt_menu",
-		"menu font",
-		"select the font used in the menu",
-		setnames (font_names)
-	},
-	{
-		option_textcvarspincontrol,
-		"crosshair",
-		"crosshair",
-		"select your crosshair",
-		setnames (crosshair_names)
-	},
-	{
-		option_hudspincontrol,
-		"cl_hudimage1", //multiple cvars controlled-- see HudFunc
-		"HUD",
-		"select your HUD style",
-		setnames (hud_names)
-	},
-	{
-		option_spincontrol,
-		"cl_disbeamclr",
-		"disruptor color",
-		"select disruptor beam color",
-		setnames (color_names)
-	},
-	{
-		option_minimapspincontrol,
-		NULL, //multiple cvars controlled-- see MinimapFunc
-		"Minimap",
-		"select your minimap style",
-		setnames (minimap_names)
-	},
-	{
-		option_spincontrol,
-		"in_joystick",
-		"use joystick",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_drawfps",
-		"display framerate",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_drawtimer",
-		"display timer",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
-		"cl_simpleitems",
-		"simple items",
-		"Draw floating icons instead of 3D models for ingame items",
-		setnames (onoff_names)
-	},
-};
-
-#define num_options (sizeof(misc_option_names)/sizeof(misc_option_names[0]))
-
-menuitem_s crosshair_pic_thumbnail;
-
-menumultival_s options[num_options];
 
 static void SpinOptionFunc (void *_self)
 {
@@ -1976,11 +1427,12 @@ static void TextVarSpinOptionFunc (void *_self)
 	Cvar_Set( cvarname, cvarval);
 }
 
+static menuframework_s 	s_display_screen;
 static void FontSelectorFunc (void *_self)
 {
 	TextVarSpinOptionFunc (_self);
 	// New font might not fit anymore.
-	Menu_AutoArrange (&s_options_screen); 
+	Menu_AutoArrange (&s_display_screen); 
 }
 
 static void UpdateDopplerEffectFunc( void *self )
@@ -2034,6 +1486,43 @@ static void NumberFieldOptionFunc (void *_self)
 	
 	Cvar_SetValue (cvarname, clamped_num);
 }
+
+// HACKS for specific menus
+extern cvar_t *crosshair;
+#define MAX_CROSSHAIRS 256
+char *crosshair_names[MAX_CROSSHAIRS];
+int	numcrosshairs = 0;
+
+menuitem_s crosshair_pic_thumbnail; 
+
+static void HudFunc( void *item );
+static void MinimapFunc( void *item );
+static void UpdateBGMusicFunc( void *_self );
+
+static float ClampCvar( float min, float max, float value );
+
+extern cvar_t *r_minimap;
+extern cvar_t *r_minimap_style;
+
+#define MAX_FONTS 32
+char *font_names[MAX_FONTS];
+int	numfonts = 0;
+
+static menuframework_s	s_options_main_submenu;
+
+// name and value lists: for spin-controls where the cvar value isn't simply
+// the integer index of whatever text is displaying in the control. We use
+// NULL terminators to separate display names and variable values, so that way
+// we can use the existing menu code.
+
+static const char *doppler_effect_items[] =
+{
+	"off\0000",
+	"normal\0001",
+	"high\0003",
+	"very high\0005",
+	0
+};
 
 // initialize a menu item as an "option."
 void Option_Setup (menumultival_s *item, option_name_t *optionname)
@@ -2209,6 +1698,447 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 	}
 }
 
+/*
+=======================================================================
+
+OPTIONS MENUS - MISC. OPTIONS MENU
+
+=======================================================================
+*/
+
+static menuframework_s	s_display_menu;
+
+static void MinimapFunc( void *item )
+{
+	menulist_s *self = (menulist_s *)item;
+	Cvar_SetValue("r_minimap", self->curvalue != 0);
+	if(r_minimap->integer) {
+		Cvar_SetValue("r_minimap_style", self->curvalue % 2);
+	}
+}
+
+static float ClampCvar( float min, float max, float value )
+{
+	if ( value < min ) return min;
+	if ( value > max ) return max;
+	return value;
+}
+
+qboolean fontInList (char *check, int num, char **list)
+{
+	int i;
+	for (i=0;i<num;i++)
+		if (!Q_strcasecmp(check, list[i]))
+			return true;
+	return false;
+}
+
+// One string after another, both in the same memory block, but each with its
+// own null terminator. 
+char *str_combine (char *in1, char *in2)
+{
+	size_t outsize;
+	char *out;
+	
+	outsize = strlen(in1)+1+strlen(in2)+1;
+	out = malloc (outsize);
+	memset (out, 0, outsize);
+	strcpy (out, in1);
+	strcpy (strchr(out, '\0')+1, in2);
+	
+	return out;
+}
+
+void insertFile (char ** list, char *insert1, char *insert2, int ndefaults, int len )
+{
+	int i, j;
+	char *tmp;
+	
+	tmp = str_combine (insert1, insert2);
+
+	for (i=ndefaults;i<len; i++)
+	{
+		if (!list[i])
+			break;
+
+		if (strcmp( list[i], insert1 ))
+		{
+			for (j=len; j>i ;j--)
+				list[j] = list[j-1];
+
+			list[i] = tmp;
+
+			return;
+		}
+	}
+
+	list[len] = tmp;
+}
+
+static void AddFontNames( char * path , int * nfontnames , char ** list )
+{
+	char ** fontfiles;
+	int nfonts = 0;
+	int i;
+
+	fontfiles = FS_ListFilesInFS( path , &nfonts, 0,
+		SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<nfonts && *nfontnames<MAX_FONTS;i++)
+	{
+		int num;
+		char * p;
+
+		p = strstr(fontfiles[i], "fonts/"); p++;
+		p = strstr(p, "/"); p++;
+
+		if (!strstr( p , ".ttf" ) )
+			continue;
+
+		num = strlen(p)-4;
+		p[num] = 0;
+
+		if (!fontInList(p, i, list))
+		{
+			insertFile (list, p, p, 1, i);
+			(*nfontnames)++;
+		}
+	}
+
+	if (fontfiles)
+		FS_FreeFileList(fontfiles, nfonts);
+}
+
+void SetFontNames (char **list)
+{
+	int nfontnames;
+
+	memset( list, 0, sizeof( char * ) * MAX_FONTS );
+
+	nfontnames = 0;
+	AddFontNames( "fonts/*.ttf" , &nfontnames , list );
+
+	numfonts = nfontnames;
+}
+
+void SetCrosshairNames (char **list)
+{
+	char *curCrosshair, *curCrosshairFile;
+	char *p;
+	int ncrosshairs = 0, ncrosshairnames;
+	char **crosshairfiles;
+	int i;
+
+	ncrosshairnames = 4;
+
+	list[0] = str_combine("none", "none"); //the old crosshairs
+	list[1] = str_combine("ch1", "ch1");
+	list[2] = str_combine("ch2", "ch2");
+	list[3] = str_combine("ch3", "ch3");
+
+	crosshairfiles = FS_ListFilesInFS( "pics/crosshairs/*.tga",
+		&ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<ncrosshairs && ncrosshairnames<MAX_CROSSHAIRS;i++)
+	{
+		int num;
+
+		p = strstr(crosshairfiles[i], "/crosshairs/"); p++;
+		curCrosshairFile = p;
+		
+		p = strstr(p, "/"); p++;
+
+		if (	!strstr(p, ".tga")
+			&&	!strstr(p, ".pcx")
+			)
+			continue;
+
+		num = strlen(p)-4;
+		p[num] = 0;
+
+		curCrosshair = p;
+
+		if (!fontInList(curCrosshair, ncrosshairnames, list))
+		{
+			insertFile (list,curCrosshair,curCrosshairFile,4,ncrosshairnames);
+			ncrosshairnames++;
+		}
+	}
+
+	if (crosshairfiles)
+		FS_FreeFileList(crosshairfiles, ncrosshairs);
+
+	numcrosshairs = ncrosshairnames;
+}
+
+extern cvar_t *cl_hudimage1;
+extern cvar_t *cl_hudimage2;
+#define MAX_HUDS 256
+char *hud_names[MAX_HUDS];
+int	numhuds = 0;
+
+static void HudFunc( void *item )
+{
+	menulist_s *self;
+	char hud1[MAX_OSPATH];
+	char hud2[MAX_OSPATH];
+	
+	self = (menulist_s *)item;
+
+	if(self->curvalue == 0) { //none
+		sprintf(hud1, "none");
+		sprintf(hud2, "none");
+	}
+
+	if(self->curvalue == 1) {
+		sprintf(hud1, "pics/i_health.tga");
+		sprintf(hud2, "pics/i_score.tga");
+	}
+
+	if(self->curvalue > 1) {
+		sprintf(hud1, "pics/huds/%s1", hud_names[self->curvalue]);
+		sprintf(hud2, "pics/huds/%s2", hud_names[self->curvalue]);
+	}
+
+	//set the cvars, both of them
+	Cvar_Set( "cl_hudimage1", hud1 );
+	Cvar_Set( "cl_hudimage2", hud2 );
+}
+
+void SetHudNames (char **list)
+{
+	char *curHud, *curHudFile;
+	char *p;
+	int nhuds = 0, nhudnames;
+	char **hudfiles;
+	int i;
+
+	memset( list, 0, sizeof( char * ) * MAX_HUDS );
+
+	nhudnames = 2;
+
+	list[0] = str_combine("none", "none");
+	list[1] = str_combine("default", "pics/i_health.tga"); //the default hud
+
+	hudfiles = FS_ListFilesInFS( "pics/huds/*.tga", &nhuds, 0,
+		SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<nhuds && nhudnames<MAX_HUDS;i++)
+	{
+		int num, file_ext;
+
+		p = strstr(hudfiles[i], "/huds/"); p++;
+		p = strstr(p, "/"); p++;
+
+		if (	!strstr(p, ".tga")
+			&&	!strstr(p, ".pcx")
+			)
+			continue;
+
+		num = strlen(p)-5;
+		 // we'll just assume the side hud is there if the bottom one is--
+		 // we're interested in the bottom one specifically, as that's the
+		 // value of the cvar.
+		if (p[num] == '2')
+			continue;
+		file_ext = num+1;
+		p[file_ext] = 0;
+		
+		curHudFile = _strdup (hudfiles[i]);
+		
+		p[num] = 0;
+
+		curHud = p;
+
+		if (!fontInList(curHud, nhudnames, list))
+		{
+			insertFile (list,curHud,curHudFile,2,nhudnames);
+			nhudnames++;
+		}
+
+		free (curHudFile);
+	}
+
+	if (hudfiles)
+		FS_FreeFileList(hudfiles, nhuds);
+
+	numhuds = nhudnames;
+}
+
+static void UpdateBGMusicFunc( void *_self )
+{
+	menulist_s *self = (menulist_s *)_self;
+	Cvar_SetValue( "background_music", self->curvalue );
+	if ( background_music->value > 0.99f && background_music_vol->value >= 0.1f )
+	{
+		S_StartMenuMusic();
+	}
+}
+
+// name lists: list of strings terminated by 0
+
+static const char *minimap_names[] =
+{
+	"off",
+	"static",
+	"rotating",
+	0
+};
+static const char *playerid_names[] =
+{
+	"off",
+	"centered",
+	"over player",
+	0
+};
+
+static const char *color_names[] =
+{
+	"^2green",
+	"^4blue",
+	"^1red",
+	"^3yellow",
+	"^6purple",
+	0
+};
+
+sliderlimit_t mousespeed_limits = 
+{
+	0, 110, 0.0f, 11.0f
+};
+
+fieldsize_t fov_limits = 
+{
+	3, 10, 130
+};
+
+option_name_t misc_option_names[] = 
+{
+	{
+		option_spincontrol,
+		"cl_precachecustom",
+		"precache custom models",
+		"Enabling this can result in slow map loading times",
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_showplayernames",
+		"identify target",
+		NULL, 
+		setnames (playerid_names)
+	},
+	{
+		option_spincontrol,
+		"r_ragdolls",
+		"ragdolls",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_noblood",
+		"no blood",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_noskins",
+		"force martian models",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_textcvarspincontrol,
+		"fnt_console",
+		"console font",
+		"select the font used to display the console",
+		setnames (font_names)
+	},
+	{
+		option_textcvarspincontrol,
+		"fnt_game",
+		"game font",
+		"select the font used in the game",
+		setnames (font_names)
+	},
+	{
+		option_textcvarspincontrol,
+		"fnt_menu",
+		"menu font",
+		"select the font used in the menu",
+		setnames (font_names)
+	},
+	{
+		option_textcvarspincontrol,
+		"crosshair",
+		"crosshair",
+		"select your crosshair",
+		setnames (crosshair_names)
+	},
+	{
+		option_hudspincontrol,
+		"cl_hudimage1", //multiple cvars controlled-- see HudFunc
+		"HUD",
+		"select your HUD style",
+		setnames (hud_names)
+	},
+	{
+		option_spincontrol,
+		"cl_disbeamclr",
+		"disruptor color",
+		"select disruptor beam color",
+		setnames (color_names)
+	},
+	{
+		option_minimapspincontrol,
+		NULL, //multiple cvars controlled-- see MinimapFunc
+		"Minimap",
+		"select your minimap style",
+		setnames (minimap_names)
+	},
+	{
+		option_spincontrol,
+		"in_joystick",
+		"use joystick",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_drawfps",
+		"display framerate",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_drawtimer",
+		"display timer",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_simpleitems",
+		"simple items",
+		"Draw floating icons instead of 3D models for ingame items",
+		setnames (onoff_names)
+	},
+	{
+		option_numberfield,
+		"fov",
+		"FOV",
+		"Horizontal field of view in degrees",
+		setfieldsize (fov_limits)
+	}
+};
+
+#define num_options (sizeof(misc_option_names)/sizeof(misc_option_names[0]))
+
+menumultival_s options[num_options];
+
 static void ControlsSetMenuItemValues( void )
 {
 	int i;
@@ -2217,8 +2147,6 @@ static void ControlsSetMenuItemValues( void )
 	{
 		Option_Setup (&options[i], &misc_option_names[i]);
 	}
-	
-	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
 }
 
 static void ControlsResetDefaultsFunc( void *unused )
@@ -2233,25 +2161,16 @@ static void ControlsResetDefaultsFunc( void *unused )
 
 }
 
-void Options_MenuInit( void )
+void Display_MenuInit( void )
 {
 	int i;
 
-	s_options_screen.nitems = 0;
+	s_display_screen.nitems = 0;
+	s_display_screen.num_apply_pending = 0;
 
-	setup_window (s_options_screen, s_options_menu, "OPTIONS");
+	setup_window (s_display_screen, s_display_menu, "DISPLAY");
 	
-	s_options_header_submenu.generic.type = MTYPE_SUBMENU;
-	s_options_header_submenu.navagable = true;
-	s_options_header_submenu.nitems = 0;
-	s_options_header_submenu.horizontal = true;
-
-	add_action(s_options_header_submenu, "customize controls", CustomizeControlsFunc);
-	add_action(s_options_header_submenu, "reset defaults", ControlsResetDefaultsFunc);
-	
-	Menu_AddItem (&s_options_menu, &s_options_header_submenu);
-	
-	setup_window (s_options_menu, s_options_main_submenu, NULL);
+	setup_window (s_display_menu, s_options_main_submenu, NULL);
 	s_options_main_submenu.bordertexture = "menu/sm_";
 	s_options_main_submenu.generic.flags = QMF_SNUG_LEFT;
 	s_options_main_submenu.maxlines = 25;
@@ -2278,22 +2197,15 @@ void Options_MenuInit( void )
 		Menu_AddItem( &s_options_main_submenu, &options[i]);
 	}
 
-	s_options_invertmouse_box.generic.name	= "invert mouse";
-	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
-	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
-	setup_tickbox (s_options_invertmouse_box);
-
-	Menu_AddItem( &s_options_main_submenu, &s_options_invertmouse_box );
-	
-	Menu_AutoArrange (&s_options_screen);
+	Menu_AutoArrange (&s_display_screen);
 }
 
-screen_boilerplate (Options, s_options_screen)
+screen_boilerplate (Display, s_display_screen)
 
 /*
 =======================================================================
 
-VIDEO MENU
+OPTIONS MENUS - VIDEO OPTIONS MENU
 
 =======================================================================
 */
@@ -2620,6 +2532,377 @@ void M_Menu_Video_f (void)
 {
 	Video_MenuInit ();
 	M_PushMenu (Video_MenuDraw, Default_MenuKey, &s_video_screen);
+}
+
+
+/*
+=======================================================================
+
+OPTIONS MENUS - AUDIO OPTIONS MENU
+
+=======================================================================
+*/
+
+sliderlimit_t volume_limits = 
+{
+	1, 50, 0.0f, 1.0f
+};
+
+option_name_t audio_option_names[] = 
+{
+	{
+		option_spincontrol,
+		"cl_playertaunts",
+		"player taunts",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_slider,
+		"s_volume",
+		"global volume", 
+		NULL,
+		setlimits (volume_limits)
+	},
+	{
+		option_slider,
+		"background_music_vol",
+		"music volume", 
+		NULL,
+		setlimits (volume_limits)
+	},
+	{
+		option_spincontrol,
+		"background_music",
+		"Background music",
+		NULL, 
+		setnames (onoff_names)
+	},
+	{
+		option_textcvarslider,
+		"s_doppler",
+		"doppler sound effect",
+		NULL,
+		setnames (doppler_effect_items)
+	},
+};
+
+#define num_audio_options (sizeof(audio_option_names)/sizeof(audio_option_names[0]))
+
+static menuframework_s	s_audio_screen;
+static menuframework_s	s_audio_menu;
+static menuframework_s	s_audio_main_submenu;
+static menumultival_s	audio_options[num_audio_options];
+
+void Audio_MenuInit (void)
+{
+	int i;
+
+	s_audio_screen.nitems = 0;
+	s_audio_screen.num_apply_pending = 0;
+
+	setup_window (s_audio_screen, s_audio_menu, "AUDIO OPTIONS");
+	
+	setup_window (s_audio_menu, s_audio_main_submenu, NULL);
+	s_audio_main_submenu.bordertexture = "menu/sm_";
+	s_audio_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_audio_main_submenu.maxlines = 25;
+	
+	for (i = 0; i < num_audio_options; i++)
+	{
+		Option_Setup (&audio_options[i], &audio_option_names[i]);
+		Menu_AddItem( &s_audio_main_submenu, &audio_options[i]);
+	}
+	
+	Menu_AutoArrange (&s_audio_screen);
+}
+
+screen_boilerplate (Audio, s_audio_screen);
+
+
+/*
+=======================================================================
+
+OPTIONS MENUS - INPUT OPTIONS MENU
+
+=======================================================================
+*/
+
+option_name_t input_option_names[] = 
+{
+	{
+		option_slider,
+		"sensitivity",
+		"mouse speed",
+		NULL,
+		setlimits (mousespeed_limits)
+	},
+	{
+		option_slider,
+		"menu_sensitivity",
+		"menu mouse speed",
+		NULL,
+		setlimits (mousespeed_limits)
+	},
+	{
+		option_spincontrol,
+		"m_accel", 
+		"mouse acceleration",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"m_smoothing",
+		"mouse smoothing",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_run",
+		"always run",
+		NULL,
+		setnames (onoff_names)
+	},
+};
+
+#define num_input_options (sizeof(input_option_names)/sizeof(input_option_names[0]))
+
+static menuframework_s	s_input_screen;
+static menuframework_s	s_input_menu;
+static menuframework_s	s_input_main_submenu;
+static menumultival_s	input_options[num_input_options];
+
+static menulist_s		s_options_invertmouse_box;
+
+static void InvertMouseFunc( void *unused )
+{
+	if(s_options_invertmouse_box.curvalue && m_pitch->value > 0)
+		Cvar_SetValue( "m_pitch", -m_pitch->value );
+	else if(m_pitch->value < 0)
+		Cvar_SetValue( "m_pitch", -m_pitch->value );
+}
+
+void CustomizeControlsFunc (void *unused)
+{
+	M_Menu_Keys_f ();
+}
+
+void Input_MenuInit (void)
+{
+	int i;
+
+	s_input_screen.nitems = 0;
+	s_input_screen.num_apply_pending = 0;
+
+	setup_window (s_input_screen, s_input_menu, "INPUT OPTIONS");
+	
+	setup_window (s_input_menu, s_input_main_submenu, NULL);
+	s_input_main_submenu.bordertexture = "menu/sm_";
+	s_input_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_input_main_submenu.maxlines = 25;
+	
+	for (i = 0; i < num_input_options; i++)
+	{
+		Option_Setup (&input_options[i], &input_option_names[i]);
+		Menu_AddItem( &s_input_main_submenu, &input_options[i]);
+	}
+	
+	s_options_invertmouse_box.generic.name	= "invert mouse";
+	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
+	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
+	setup_tickbox (s_options_invertmouse_box);
+
+	Menu_AddItem( &s_options_main_submenu, &s_options_invertmouse_box );
+	
+	add_text (s_input_menu, NULL, 0); //spacer
+	
+	add_action (s_input_menu, "key bindings", CustomizeControlsFunc);
+	
+	Menu_AutoArrange (&s_input_screen);
+}
+
+screen_boilerplate (Input, s_input_screen);
+
+/*
+=======================================================================
+
+OPTIONS MENUS - NETWORK OPTIONS MENU
+
+=======================================================================
+*/
+
+option_name_t net_option_names[] = 
+{
+	{
+		option_spincontrol,
+		"allow_download",
+		"download missing files",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"allow_download_maps",
+		"maps",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"allow_download_players",
+		"player models/skins",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"allow_download_models",
+		"models",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"allow_download_sounds",
+		"sounds",
+		NULL,
+		setnames (onoff_names)
+	},
+};
+
+#define num_net_options (sizeof(net_option_names)/sizeof(net_option_names[0]))
+
+static menuframework_s	s_net_screen;
+static menuframework_s	s_net_menu;
+static menuframework_s	s_net_main_submenu;
+static menumultival_s	net_options[num_net_options];
+
+void Net_MenuInit (void)
+{
+	int i;
+
+	s_net_screen.nitems = 0;
+	s_net_screen.num_apply_pending = 0;
+
+	setup_window (s_net_screen, s_net_menu, "NETWORK OPTIONS");
+	
+	setup_window (s_net_menu, s_net_main_submenu, NULL);
+	s_net_main_submenu.bordertexture = "menu/sm_";
+	s_net_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_net_main_submenu.maxlines = 25;
+	
+	for (i = 0; i < num_net_options; i++)
+	{
+		Option_Setup (&net_options[i], &net_option_names[i]);
+		Menu_AddItem( &s_net_main_submenu, &net_options[i]);
+	}
+	
+	Menu_AutoArrange (&s_net_screen);
+}
+
+screen_boilerplate (Net, s_net_screen);
+
+
+/*
+=======================================================================
+
+OPTIONS MENUS - TOP-LEVEL OPTIONS MENU
+
+=======================================================================
+*/
+
+static menuframework_s	s_options_screen;
+static menuframework_s	s_options_menu;
+
+char *option_screen_names[] =
+{
+	"Display", // whatever's first will be the default
+	"Video",
+	"Audio",
+	"Input",
+	"Network", 
+};
+#define OPTION_SCREENS (sizeof(option_screen_names)/sizeof(option_screen_names[0]))
+
+// TODO: add player config menu here as soon as I figure out what to do about
+// smaller screens.
+void (*option_open_funcs[OPTION_SCREENS])(void) = 
+{
+	&M_Menu_Display_f,
+	&M_Menu_Video_f,
+	&M_Menu_Audio_f,
+	&M_Menu_Input_f,
+	&M_Menu_Net_f
+};
+
+menuframework_s *option_screens[OPTION_SCREENS] = 
+{
+	&s_display_screen,
+	&s_video_screen,
+	&s_audio_screen,
+	&s_input_screen,
+	&s_net_screen,
+};
+
+static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
+
+static menuframework_s	*s_selected_option_menu;
+
+LINKABLE(int) option_screen_height;
+
+static void OptionScreenFunc (void *_self)
+{
+	menuframework_s *newscreen;
+	menuframework_s *self = (menuframework_s *)_self;
+	
+	option_open_funcs[self->generic.localints[0]]();
+	
+	newscreen = option_screens[self->generic.localints[0]];
+	s_selected_option_menu = (menuframework_s *)newscreen->items[0];
+}
+
+void Options_MenuInit (void)
+{
+	int i;
+	s_options_screen.nitems = 0;
+	s_options_screen.num_apply_pending = 0;
+	
+	setup_window (s_options_screen, s_options_menu, "OPTIONS");
+	
+	for (i = 0; i < OPTION_SCREENS; i++)
+	{
+		s_option_screen_actions[i].generic.type = MTYPE_ACTION;
+		s_option_screen_actions[i].generic.name = option_screen_names[i];
+		s_option_screen_actions[i].generic.localints[0] = i;
+		s_option_screen_actions[i].generic.callback = OptionScreenFunc;
+		Menu_AddItem (&s_options_menu, &s_option_screen_actions[i]);
+	}
+	
+	add_text (s_options_menu, NULL, 0); //spacer
+	
+	add_action (s_options_menu, "reset defaults", ControlsResetDefaultsFunc);
+	
+	LINK (option_screen_height, s_options_menu.height);
+	Menu_AutoArrange (&s_options_screen);
+}
+
+void Options_MenuDraw (menuframework_s *dummy)
+{
+	// keep the main options menu the same height as the selected submenu
+	CHASELINK(option_screen_height) = Menu_TrueHeight (*s_selected_option_menu);
+	
+	Menu_AutoArrange (&s_options_screen);
+	Screen_Draw (&s_options_screen);
+}
+
+void M_Menu_Options_f (void)
+{
+	Options_MenuInit ();
+	M_PushMenu (Options_MenuDraw, Default_MenuKey, &s_options_screen);
+	// select the default options screen
+	OptionScreenFunc (&s_option_screen_actions[0]);
 }
 
 
@@ -5506,17 +5789,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	R_RenderFramePlayerSetup( &refdef );
 }
 
-static const char *download_option_names[][2] = 
-{
-	{"allow_download",			"download missing files"},
-	{"allow_download_maps",		"maps"},
-	{"allow_download_players",	"player models/skins"},
-	{"allow_download_models",	"models"},
-	{"allow_download_sound",	"sounds"}
-};
-#define num_download_options (sizeof(download_option_names)/sizeof(download_option_names[0]))
-static menulist_s s_download_boxes[num_download_options];
-
 static menuframework_s	s_player_config_screen;
 
 static menuframework_s	s_player_config_menu;
@@ -5528,8 +5800,6 @@ static menulist_s		s_player_model_box;
 static menulist_s		s_player_skin_box;
 static menuitem_s   	s_player_thumbnail;
 static menulist_s		s_player_handedness_box;
-static menulist_s		s_player_rate_box;
-static menufield_s		s_player_fov_field;
 
 static menumodel_s		s_player_skin_preview;
 
@@ -5547,16 +5817,6 @@ typedef struct
 static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
 static char *s_pmnames[MAX_PLAYERMODELS];
 static int s_numplayermodels;
-
-static int rate_tbl[] = { 2500, 3200, 5000, 10000, 25000, 0 };
-static const char *rate_names[] = { "28.8 Modem", "33.6 Modem", "Single ISDN",
-	"Dual ISDN/Cable", "T1/LAN", "User defined", 0 };
-
-static void RateCallback( void *unused )
-{
-	if (s_player_rate_box.curvalue != sizeof(rate_tbl) / sizeof(*rate_tbl) - 1)
-		Cvar_SetValue( "rate", rate_tbl[s_player_rate_box.curvalue] );
-}
 
 static void ModelCallback( void *unused )
 {
@@ -5798,7 +6058,7 @@ static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 	return ret;
 }
 
-qboolean PlayerConfig_MenuInit( void )
+void PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
 	// extern cvar_t *team; // unused
@@ -5818,7 +6078,7 @@ qboolean PlayerConfig_MenuInit( void )
 	PlayerConfig_ScanDirectories();
 
 	if (s_numplayermodels == 0)
-		return false;
+		return;
 
 	if ( hand->value < 0 || hand->value > 2 )
 		Cvar_SetValue( "hand", 0 );
@@ -5933,43 +6193,11 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
 	s_player_handedness_box.itemnames = handedness;
 
-	s_player_fov_field.generic.type = MTYPE_FIELD;
-	s_player_fov_field.generic.name = "fov";
-	s_player_fov_field.generic.localstrings[0] = "fov";
-	s_player_fov_field.length	= 6;
-	s_player_fov_field.generic.visible_length = 6;
-	s_player_fov_field.generic.callback = IntFieldCallback;
-	strcpy( s_player_fov_field.buffer, fov->string );
-	s_player_fov_field.cursor = strlen( fov->string );
-
 	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
 	Menu_AddItem( &s_player_config_menu, &s_player_password_field);
 	Menu_AddItem( &s_player_config_menu, &s_player_skin_submenu);
 	Menu_AddItem( &s_player_config_menu, &s_player_handedness_box );
-	Menu_AddItem( &s_player_config_menu, &s_player_fov_field );
 		
-	for (i = 0; i < num_download_options; i++)
-	{
-		s_download_boxes[i].generic.name = download_option_names[i][1];
-		s_download_boxes[i].generic.callback = SpinOptionFunc;
-		s_download_boxes[i].generic.localstrings[0] = download_option_names[i][0];
-		setup_tickbox (s_download_boxes[i]);
-		s_download_boxes[i].curvalue = (Cvar_VariableValue (download_option_names[i][0]) != 0);
-		Menu_AddItem (&s_player_config_menu, &s_download_boxes[i]);
-	}
-	
-	for (i = 0; i < sizeof(rate_tbl) / sizeof(*rate_tbl) - 1; i++)
-		if (Cvar_VariableValue("rate") == rate_tbl[i])
-			break;
-
-	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_rate_box.generic.name	= "connection";
-	s_player_rate_box.generic.callback = RateCallback;
-	s_player_rate_box.curvalue = i;
-	s_player_rate_box.itemnames = rate_names;
-
-	Menu_AddItem( &s_player_config_menu, &s_player_rate_box );
-	
 	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_player_skin_preview.generic.namesizecallback = PlayerConfigModelSizeFunc;
 	s_player_skin_preview.generic.namedraw = PlayerModelDrawFunc;
@@ -5989,8 +6217,6 @@ qboolean PlayerConfig_MenuInit( void )
 		RS_LoadScript("scripts/caustics.rscript");
 		RS_LoadSpecialScripts();
 	}
-
-	return true;
 }
 
 void PlayerConfig_MenuDraw (menuframework_s *dummy)
@@ -6077,12 +6303,7 @@ const char *PlayerConfig_MenuKey (menuframework_s *screen, int key)
 
 void M_Menu_PlayerConfig_f (void)
 {
-	if (!PlayerConfig_MenuInit())
-	{
-		Menu_SetStatusBar( &s_options_menu, "No valid player models found" );
-		return;
-	}
-	Menu_SetStatusBar( &s_options_menu, NULL );
+	PlayerConfig_MenuInit();
 	M_PushMenu (PlayerConfig_MenuDraw, PlayerConfig_MenuKey, &s_player_config_screen);
 }
 
