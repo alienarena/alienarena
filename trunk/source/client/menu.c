@@ -6124,7 +6124,6 @@ void PlayerConfig_MenuInit( void )
 	}
 
 	s_player_config_screen.nitems = 0;
-	s_player_config_screen.horizontal = true;
 	
 	setup_window (s_player_config_screen, s_player_config_menu, "PLAYER SETUP");
 
