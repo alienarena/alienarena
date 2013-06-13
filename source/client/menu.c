@@ -501,8 +501,11 @@ int Cursor_GetLayer (void)
 		if (activelayer(i).screen == screen)
 			return i;
 	}
-	
-	Com_Error (ERR_FATAL, "Cursor_GetLayer: cannot find cursor.menuitem!");
+
+	// We only get here if, after changing resolutions, the mouse is no longer
+	// on screen.
+	Com_Printf ("WARN: fake cursor.menulayer!\n");	
+	return -1;
 }
 
 static int activelayer_coordidx (int xcoord)
