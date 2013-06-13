@@ -2171,7 +2171,6 @@ void Display_MenuInit( void )
 	setup_window (s_display_menu, s_options_main_submenu, NULL);
 	s_options_main_submenu.bordertexture = "menu/sm_";
 	s_options_main_submenu.generic.flags = QMF_SNUG_LEFT;
-	s_options_main_submenu.maxlines = 25;
 	
 	crosshair_pic_thumbnail.generic.type = MTYPE_NOT_INTERACTIVE;
 	VectorSet (crosshair_pic_thumbnail.generic.localints, 5, 5, RCOLUMN_OFFSET);
@@ -2489,7 +2488,6 @@ void Video_MenuInit (void)
 	setup_window (s_video_menu, s_video_main_submenu, NULL);
 	s_video_main_submenu.bordertexture = "menu/sm_";
 	s_video_main_submenu.generic.flags = QMF_SNUG_LEFT;
-	s_video_main_submenu.maxlines = 25;
 	
 	for (i = 0; i < num_vid_options; i++)
 	{
@@ -2572,14 +2570,14 @@ option_name_t audio_option_names[] =
 	{
 		option_spincontrol,
 		"background_music",
-		"Background music",
+		"music",
 		NULL, 
 		setnames (onoff_names)
 	},
 	{
 		option_textcvarslider,
 		"s_doppler",
-		"doppler sound effect",
+		"doppler effect",
 		NULL,
 		setnames (doppler_effect_items)
 	},
@@ -2604,7 +2602,6 @@ void Audio_MenuInit (void)
 	setup_window (s_audio_menu, s_audio_main_submenu, NULL);
 	s_audio_main_submenu.bordertexture = "menu/sm_";
 	s_audio_main_submenu.generic.flags = QMF_SNUG_LEFT;
-	s_audio_main_submenu.maxlines = 25;
 	
 	for (i = 0; i < num_audio_options; i++)
 	{
@@ -2699,7 +2696,6 @@ void Input_MenuInit (void)
 	setup_window (s_input_menu, s_input_main_submenu, NULL);
 	s_input_main_submenu.bordertexture = "menu/sm_";
 	s_input_main_submenu.generic.flags = QMF_SNUG_LEFT;
-	s_input_main_submenu.maxlines = 25;
 	
 	for (i = 0; i < num_input_options; i++)
 	{
@@ -2789,7 +2785,6 @@ void Net_MenuInit (void)
 	setup_window (s_net_menu, s_net_main_submenu, NULL);
 	s_net_main_submenu.bordertexture = "menu/sm_";
 	s_net_main_submenu.generic.flags = QMF_SNUG_LEFT;
-	s_net_main_submenu.maxlines = 25;
 	
 	for (i = 0; i < num_net_options; i++)
 	{
@@ -2872,7 +2867,7 @@ static void IRC_Settings_SubMenuInit( )
 	s_irc_server.generic.type		= MTYPE_FIELD;
 	s_irc_server.generic.name		= "Server ";
 	s_irc_server.generic.tooltip	= "Address or name of the IRC server";
-	s_irc_server.generic.visible_length		= 16;
+	s_irc_server.generic.visible_length		= LONGINPUT_SIZE;
 	s_irc_server.cursor			= strlen( cl_IRC_server->string );
 	strcpy( s_irc_server.buffer, Cvar_VariableString("cl_IRC_server") );
 	Menu_AddItem( &s_irc_menu, &s_irc_server );
@@ -2880,7 +2875,7 @@ static void IRC_Settings_SubMenuInit( )
 	s_irc_channel.generic.type		= MTYPE_FIELD;
 	s_irc_channel.generic.name		= "Channel ";
 	s_irc_channel.generic.tooltip	= "Name of the channel to join";
-	s_irc_channel.generic.visible_length		= 16;
+	s_irc_channel.generic.visible_length		= LONGINPUT_SIZE;
 	s_irc_channel.cursor			= strlen( cl_IRC_channel->string );
 	strcpy( s_irc_channel.buffer, Cvar_VariableString("cl_IRC_channel") );
 	Menu_AddItem( &s_irc_menu, &s_irc_channel );
@@ -2888,7 +2883,7 @@ static void IRC_Settings_SubMenuInit( )
 	s_irc_port.generic.type			= MTYPE_FIELD;
 	s_irc_port.generic.name			= "TCP Port ";
 	s_irc_port.generic.tooltip		= "Port to connect to on the server";
-	s_irc_port.generic.visible_length		= 6;
+	s_irc_port.generic.visible_length		= 4;
 	s_irc_port.cursor			= strlen( cl_IRC_port->string );
 	strcpy( s_irc_port.buffer, Cvar_VariableString("cl_IRC_port") );
 	Menu_AddItem( &s_irc_menu, &s_irc_port );
@@ -2902,7 +2897,7 @@ static void IRC_Settings_SubMenuInit( )
 	s_irc_nickname.generic.type		= MTYPE_FIELD;
 	s_irc_nickname.generic.name		= "Nick ";
 	s_irc_nickname.generic.tooltip	= "Nickname override to use";
-	s_irc_nickname.generic.visible_length		= 16;
+	s_irc_nickname.generic.visible_length		= LONGINPUT_SIZE;
 	s_irc_nickname.cursor			= strlen( cl_IRC_nickname->string );
 	strcpy( s_irc_nickname.buffer, Cvar_VariableString("cl_IRC_nickname") );
 	Menu_AddItem( &s_irc_menu, &s_irc_nickname );
@@ -5296,7 +5291,7 @@ void StartServer_MenuInit( void )
 	s_hostname_field.generic.name = "hostname";
 	s_hostname_field.generic.flags = 0;
 	s_hostname_field.length = 12;
-	s_hostname_field.generic.visible_length = 12;
+	s_hostname_field.generic.visible_length = LONGINPUT_SIZE;
 	strcpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
 
 	s_public_box.generic.name = "public server";
@@ -5569,7 +5564,7 @@ void AddressBook_MenuInit( void )
 		s_addressbook_fields[i].generic.callback		= StrFieldCallback;
 		s_addressbook_fields[i].generic.localstrings[0]	= &s_addressbook_cvarnames[i][0];
 		s_addressbook_fields[i].cursor					= strlen (adr->string);
-		s_addressbook_fields[i].generic.visible_length	= 15;
+		s_addressbook_fields[i].generic.visible_length	= LONGINPUT_SIZE;
 
 		strcpy( s_addressbook_fields[i].buffer, adr->string );
 
@@ -6136,14 +6131,14 @@ void PlayerConfig_MenuInit( void )
 	s_player_name_field.generic.type = MTYPE_FIELD;
 	s_player_name_field.generic.name = "name";
 	s_player_name_field.length	= 20;
-	s_player_name_field.generic.visible_length = 20;
+	s_player_name_field.generic.visible_length = LONGINPUT_SIZE;
 	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
 	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
 
 	s_player_password_field.generic.type = MTYPE_FIELD;
 	s_player_password_field.generic.name = "password";
 	s_player_password_field.length	= 20;
-	s_player_password_field.generic.visible_length = 20;
+	s_player_password_field.generic.visible_length = LONGINPUT_SIZE;
 	s_player_password_field.generic.statusbar = "COR Entertainment is not responsible for lost or stolen passwords";
 	Q_strncpyz2( s_player_password_field.buffer, "********", sizeof(s_player_password_field.buffer) );
 	s_player_password_field.cursor = 0;
@@ -6509,7 +6504,7 @@ int Slider_CursorPositionX ( menuslider_s *s )
 	if ( range > 1)
 		range = 1;
 
-	return ( int )( font->width + RCOLUMN_OFFSET + (SLIDER_RANGE) * font->width * range );
+	return ( int )( font->width + RCOLUMN_OFFSET + (LONGINPUT_SIZE) * font->width * range );
 }
 
 int newSliderValueForX (int x, menuslider_s *s)
@@ -6523,7 +6518,7 @@ int newSliderValueForX (int x, menuslider_s *s)
 	
 	pos = x - (font->width + RCOLUMN_OFFSET + CHASELINK(s->generic.x)) - Menu_GetCtrX(*(s->generic.parent));
 
-	newValue = ((float)pos)/((SLIDER_RANGE-1)*font->width);
+	newValue = ((float)pos)/((LONGINPUT_SIZE-1)*font->width);
 	newValueInt = s->minvalue + newValue * (float)( s->maxvalue - s->minvalue );
 
 	return newValueInt;

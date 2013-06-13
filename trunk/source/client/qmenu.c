@@ -492,7 +492,7 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 	switch ( self->type )
 	{
 		case MTYPE_SLIDER:
-			ret.x = font->width * (SLIDER_RANGE+1) + RCOLUMN_OFFSET;
+			ret.x = font->width * LONGINPUT_SIZE + RCOLUMN_OFFSET;
 			break;
 		case MTYPE_FIELD:
 			ret.y += 2;
@@ -1312,7 +1312,7 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 	
 	s->range = (float) curscroll / ( float ) maxscroll;
 	
-	width = charscale * (float)SLIDER_RANGE;
+	width = charscale * (float)LONGINPUT_SIZE;
 	scroll_range = width-charscale/2.0;
 	cursor_size = charscale;
 	
