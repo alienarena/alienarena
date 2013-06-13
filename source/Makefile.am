@@ -152,7 +152,6 @@ alienarena_SOURCES = \
 	client/snd_openal.c \
 	client/sound.h \
 	client/vid.h \
-	client/vid_menu.c \
 	game/game.h \
 	game/q_shared.c \
 	game/q_shared.h \

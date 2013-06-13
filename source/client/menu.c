@@ -754,10 +754,10 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (me
 	}
 	else
 	{
-		mstate.incoming.num_layers = 1;
-		mstate.incoming.layers[0].draw = draw;
-		mstate.incoming.layers[0].key = key;
-		mstate.incoming.layers[0].screen = screen;
+		mstate.incoming.num_layers++;
+		layergroup_last(mstate.incoming).draw = draw;
+		layergroup_last(mstate.incoming).key = key;
+		layergroup_last(mstate.incoming).screen = screen;
 		mstate.state = mstate_insert;
 		insertion_point = cursor.menulayer;
 	}
@@ -819,7 +819,7 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 	// offer the keypress to the field key parser, see if it wants it
 	if (Field_Key (key))
 	{
-		Menu_ActivateItem ();
+		Menu_ActivateItem (cursor.menuitem);
 		return NULL;
 	}
 	
@@ -848,7 +848,7 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 		break;
 	case K_KP_ENTER:
 	case K_ENTER:
-		Menu_ActivateItem ();
+		Menu_ActivateItem (cursor.menuitem);
 		sound = menu_move_sound;
 		break;
 	}
@@ -1677,164 +1677,163 @@ static const char *doppler_effect_items[] =
 	0
 };
 
+typedef struct
+{
+	int maxchars;
+	int	min_value, max_value; // for numerical fields, otherwise ignore
+} fieldsize_t;
+
 // slider limits:
 
 typedef struct
 {
-	float slider_min, slider_max, cvar_min, cvar_max;
+	int slider_min, slider_max;
+	float cvar_min, cvar_max;
 } sliderlimit_t;
 
 sliderlimit_t volume_limits = 
 {
-	0.0f, 50.0f, 0.0, 1.0
+	1, 50, 0.0f, 1.0f
 };
 
 sliderlimit_t mousespeed_limits = 
 {
-	0.0f, 110.0f, 0.0f, 11.0f
+	0, 110, 0.0f, 11.0f
 };
 
 typedef struct {
 	enum {
 		option_slider,
+		option_textcvarslider,
 		option_spincontrol,
 		option_textcvarspincontrol,
 		option_hudspincontrol,
 		option_minimapspincontrol,
+		option_numberfield
 	} type;
 	const char *cvarname;
 	const char *displayname;
 	const char *tooltip;
-	const void *extradata;
+	
+	// extra data - set the appropriate one
+	const char 			**names;
+	const sliderlimit_t *limits;
+	const fieldsize_t	*fieldsize;
+	#define setnames(x)		(const char **)(x), NULL, NULL
+	#define setlimits(x)	NULL, &(x), NULL
+	#define setfieldsize(x)	NULL, NULL, &(x)
+	
+	// flags - optional, defaults to no flags
+	int flags;
+	
 } option_name_t;
 
-option_name_t optionnames[] = 
+option_name_t misc_option_names[] = 
 {
 	{
 		option_spincontrol,
 		"cl_precachecustom",
 		"precache custom models",
 		"Enabling this can result in slow map loading times",
-		onoff_names
-	},
-	{
-		option_spincontrol,
-		"cl_paindist",
-		"pain distortion fx",
-		"GLSL must be enabled for this to take effect",
-		onoff_names
-	},
-	{
-		option_spincontrol,
-		"cl_explosiondist",
-		"explosion distortion fx",
-		"GLSL must be enabled for this to take effect",
-		onoff_names
-	},
-	{
-		option_spincontrol,
-		"cl_raindist",
-		"rain droplet fx",
-		"GLSL must be enabled for this to take effect",
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_showplayernames",
 		"identify target",
 		NULL, 
-		playerid_names
+		setnames (playerid_names)
 	},
 	{
 		option_spincontrol,
 		"r_ragdolls",
 		"ragdolls",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_noblood",
 		"no blood",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_noskins",
 		"force martian models",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_playertaunts",
 		"player taunts",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_slider,
 		"s_volume",
 		"global volume", 
 		NULL,
-		&volume_limits
+		setlimits (volume_limits)
 	},
 	{
 		option_slider,
 		"background_music_vol",
 		"music volume", 
 		NULL,
-		&volume_limits
+		setlimits (volume_limits)
 	},
 	{
 		option_spincontrol,
 		"background_music",
 		"Background music",
 		NULL, 
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
-		option_textcvarspincontrol,
+		option_textcvarslider,
 		"s_doppler",
 		"doppler sound effect",
 		NULL,
-		doppler_effect_items
+		setnames (doppler_effect_items)
 	},
 	{
 		option_spincontrol,
 		"m_accel", 
 		"mouse acceleration",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_slider,
 		"sensitivity",
 		"mouse speed",
 		NULL,
-		&mousespeed_limits
+		setlimits (mousespeed_limits)
 	},
 	{
 		option_slider,
 		"menu_sensitivity",
 		"menu mouse speed",
 		NULL,
-		&mousespeed_limits
+		setlimits (mousespeed_limits)
 	},
 	{
 		option_spincontrol,
 		"m_smoothing",
 		"mouse smoothing",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_run",
 		"always run",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	// Invert mouse here!
 	{
@@ -1842,81 +1841,81 @@ option_name_t optionnames[] =
 		"fnt_console",
 		"console font",
 		"select the font used to display the console",
-		font_names
+		setnames (font_names)
 	},
 	{
 		option_textcvarspincontrol,
 		"fnt_game",
 		"game font",
 		"select the font used in the game",
-		font_names
+		setnames (font_names)
 	},
 	{
 		option_textcvarspincontrol,
 		"fnt_menu",
 		"menu font",
 		"select the font used in the menu",
-		font_names
+		setnames (font_names)
 	},
 	{
 		option_textcvarspincontrol,
 		"crosshair",
 		"crosshair",
 		"select your crosshair",
-		crosshair_names 
+		setnames (crosshair_names)
 	},
 	{
 		option_hudspincontrol,
 		"cl_hudimage1", //multiple cvars controlled-- see HudFunc
 		"HUD",
 		"select your HUD style",
-		hud_names //will be set later
+		setnames (hud_names)
 	},
 	{
 		option_spincontrol,
 		"cl_disbeamclr",
 		"disruptor color",
 		"select disruptor beam color",
-		color_names
+		setnames (color_names)
 	},
 	{
 		option_minimapspincontrol,
 		NULL, //multiple cvars controlled-- see MinimapFunc
 		"Minimap",
 		"select your minimap style",
-		minimap_names
+		setnames (minimap_names)
 	},
 	{
 		option_spincontrol,
 		"in_joystick",
 		"use joystick",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_drawfps",
 		"display framerate",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_drawtimer",
 		"display timer",
 		NULL,
-		onoff_names
+		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_simpleitems",
 		"simple items",
 		"Draw floating icons instead of 3D models for ingame items",
-		onoff_names
+		setnames (onoff_names)
 	},
 };
 
-#define num_options (sizeof(optionnames)/sizeof(optionnames[0]))
+#define num_options (sizeof(misc_option_names)/sizeof(misc_option_names[0]))
 
 menuitem_s crosshair_pic_thumbnail;
 
@@ -1989,7 +1988,6 @@ static void UpdateDopplerEffectFunc( void *self )
 	TextVarSpinOptionFunc (self);
 	R_EndFrame(); // buffer swap needed to show text box
 	S_UpdateDopplerFactor();
-
 }
 
 static void SliderOptionFunc (void *_self)
@@ -2007,21 +2005,150 @@ static void SliderOptionFunc (void *_self)
 	sliderval = self->curvalue;
 	
 	valscale = 	(limit->cvar_max-limit->cvar_min)/
-				(limit->slider_max-limit->slider_min);
+				(float)(limit->slider_max-limit->slider_min);
 	cvarval = limit->cvar_min + valscale*(sliderval-limit->slider_min);
 	
-	Cvar_SetValue( cvarname, cvarval );
+	Cvar_SetValue (cvarname, cvarval);
 }
 
-void Option_SetMenuItemValue (menumultival_s *item, option_name_t *optionname)
+static void NumberFieldOptionFunc (void *_self)
+{
+	menufield_s *self;
+	int num, clamped_num;
+	const fieldsize_t *fieldsize;
+	const char *cvarname;
+	
+	self = (menufield_s *)_self;
+	cvarname = self->generic.localstrings[0];
+	
+	fieldsize = (const fieldsize_t *)self->generic.localptrs[0];
+	
+	num = atoi (self->buffer);
+	clamped_num = clamp (num, fieldsize->min_value, fieldsize->max_value);
+	
+	if (num != clamped_num)
+	{
+		Com_sprintf (self->buffer, sizeof(self->buffer), "%d", clamped_num);
+		self->cursor = strlen (self->buffer);
+	}
+	
+	Cvar_SetValue (cvarname, clamped_num);
+}
+
+// initialize a menu item as an "option."
+void Option_Setup (menumultival_s *item, option_name_t *optionname)
 {
 	int val, maxval;
 	char *vartextval;
 	int i;
 	float cvarval, sliderval, valscale;
 	const sliderlimit_t *limit;
+	const fieldsize_t *fieldsize;
 	
-	// special types
+	// initialize item
+	
+	item->generic.name = optionname->displayname;
+	item->generic.tooltip = optionname->tooltip;
+	item->generic.localstrings[0] = optionname->cvarname;
+	item->generic.flags = optionname->flags;
+	item->generic.apply_pending = false;
+	
+	switch (optionname->type)
+	{
+		case option_spincontrol:
+			item->generic.type = MTYPE_SPINCONTROL;
+			item->itemnames = optionname->names;
+			if (!strcmp (optionname->cvarname, "background_music"))
+				// FIXME HACK
+				item->generic.callback = UpdateBGMusicFunc;
+			else
+				item->generic.callback = SpinOptionFunc;
+			if (item->itemnames == onoff_names)
+				setup_tickbox (*item);
+			if (item->itemnames == offon_names)
+			{
+				setup_tickbox (*item); // because setup_tickbox overwrites itemnames
+				item->itemnames = offon_names;
+			}
+			break;
+		
+		case option_textcvarslider:
+			item->generic.type = MTYPE_SLIDER;
+			// TODO: use the name part in a tooltip or something
+			item->itemnames = optionname->names; 
+			item->minvalue = 0;
+			for (item->maxvalue = 0; item->itemnames[item->maxvalue]; item->maxvalue++)
+				continue;
+			if (item->itemnames == doppler_effect_items)
+				// FIXME HACK
+				item->generic.callback = UpdateDopplerEffectFunc;
+			else
+				item->generic.callback = TextVarSpinOptionFunc;
+			break;
+		
+		case option_textcvarspincontrol:
+			if (optionname->names == crosshair_names)
+				// found the crosshair, put the preview just above it.
+				Menu_AddItem (&s_options_main_submenu, &crosshair_pic_thumbnail);
+			item->generic.type = MTYPE_SPINCONTROL;
+			item->itemnames = optionname->names;
+			item->generic.callback = TextVarSpinOptionFunc;
+			// FIXME HACK
+			if (item->itemnames == font_names)
+			{
+				item->generic.itemsizecallback = FontSelectorSizeFunc;
+				item->generic.itemdraw = FontSelectorDrawFunc;
+				item->generic.callback = FontSelectorFunc;
+				if (!strcmp (optionname->cvarname, "fnt_game"))
+				{
+					item->generic.localptrs[0] = &CL_gameFont;
+				}
+				else if (!strcmp (optionname->cvarname, "fnt_console"))
+				{
+					item->generic.localptrs[0] = &CL_consoleFont;
+				}
+				else if (!strcmp (optionname->cvarname, "fnt_menu"))
+				{
+					item->generic.localptrs[0] = &CL_menuFont;
+				}
+			}
+			break;
+		
+		case option_hudspincontrol:
+			item->generic.type = MTYPE_SPINCONTROL;
+			item->itemnames = optionname->names;
+			item->generic.callback = HudFunc;
+			break;
+		
+		case option_minimapspincontrol:
+			item->generic.type = MTYPE_SPINCONTROL;
+			item->itemnames = optionname->names;
+			item->generic.callback = MinimapFunc;
+			break;
+		
+		case option_slider:
+			limit = optionname->limits;
+			item->generic.type = MTYPE_SLIDER;
+			item->minvalue = limit->slider_min;
+			item->maxvalue = limit->slider_max;
+			item->generic.callback = SliderOptionFunc;
+			item->generic.localptrs[0] = limit;
+			break;
+		
+		case option_numberfield:
+			fieldsize = optionname->fieldsize;
+			item->generic.type = MTYPE_FIELD;
+			item->generic.flags |= QMF_NUMBERSONLY;
+			item->generic.visible_length = fieldsize->maxchars;
+			item->cursor = 0;
+			memset (item->buffer, 0, sizeof(item->buffer));
+			item->generic.callback = NumberFieldOptionFunc;
+			item->generic.localptrs[0] = fieldsize;
+			break;
+	}
+	
+	// initialize value
+	
 	switch (optionname->type)
 	{
 		case option_spincontrol:
@@ -2033,10 +2160,11 @@ void Option_SetMenuItemValue (menumultival_s *item, option_name_t *optionname)
 		
 			item->curvalue = val;
 			Cvar_SetValue (optionname->cvarname, val);
-			return;
+			break;
 		
 		case option_hudspincontrol:
 		case option_textcvarspincontrol:
+		case option_textcvarslider:
 			item->curvalue = 0;
 			vartextval = Cvar_VariableString (optionname->cvarname);
 			
@@ -2049,7 +2177,7 @@ void Option_SetMenuItemValue (menumultival_s *item, option_name_t *optionname)
 					break;
 				}
 			}
-			return;
+			break;
 		
 		case option_minimapspincontrol:
 			Cvar_SetValue("r_minimap_style", ClampCvar(0, 1, r_minimap_style->value));
@@ -2058,19 +2186,26 @@ void Option_SetMenuItemValue (menumultival_s *item, option_name_t *optionname)
 				item->curvalue = 2;
 			else
 				item->curvalue = r_minimap->value;
-			return;
+			break;
 		
 		case option_slider:
-			limit = (const sliderlimit_t *) optionname->extradata;
+			limit = optionname->limits;
 		
 			cvarval = ClampCvar (	limit->cvar_min, limit->cvar_max,
 									Cvar_VariableValue (optionname->cvarname));
 			Cvar_SetValue (optionname->cvarname, cvarval);
 		
-			valscale = 	(limit->slider_max-limit->slider_min)/
+			valscale = 	(float)(limit->slider_max-limit->slider_min)/
 						(limit->cvar_max-limit->cvar_min);
 			sliderval = limit->slider_min + valscale*(cvarval-limit->cvar_min);
 			item->curvalue = sliderval;
+			break;
+		
+		case option_numberfield:
+			fieldsize = optionname->fieldsize;
+			Com_sprintf (item->buffer, sizeof(item->buffer), "%d", (int)Cvar_VariableValue (optionname->cvarname));
+			item->cursor = strlen (item->buffer);
+			break;
 	}
 }
 
@@ -2080,7 +2215,7 @@ static void ControlsSetMenuItemValues( void )
 	
 	for (i = 0; i < num_options; i++)
 	{
-		Option_SetMenuItemValue (&options[i], &optionnames[i]);
+		Option_Setup (&options[i], &misc_option_names[i]);
 	}
 	
 	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
@@ -2101,7 +2236,6 @@ static void ControlsResetDefaultsFunc( void *unused )
 void Options_MenuInit( void )
 {
 	int i;
-	const sliderlimit_t *cur_slider_limit;
 
 	s_options_screen.nitems = 0;
 
@@ -2140,83 +2274,7 @@ void Options_MenuInit( void )
 	
 	for (i = 0; i < num_options; i++)
 	{
-		options[i].generic.name = optionnames[i].displayname;
-		options[i].generic.tooltip = optionnames[i].tooltip;
-		options[i].generic.localstrings[0] = optionnames[i].cvarname;
-		
-		switch (optionnames[i].type)
-		{
-			case option_spincontrol:
-				options[i].generic.type = MTYPE_SPINCONTROL;
-				options[i].itemnames = (const char **) optionnames[i].extradata;
-				if (!strcmp (optionnames[i].cvarname, "background_music"))
-					// FIXME HACK
-					options[i].generic.callback = UpdateBGMusicFunc;
-				else
-					options[i].generic.callback = SpinOptionFunc;
-				if (options[i].itemnames == onoff_names)
-					setup_tickbox (options[i]);
-				break;
-			case option_textcvarspincontrol:
-				if (optionnames[i].extradata == crosshair_names)
-					// found the crosshair, put the preview just above it.
-					Menu_AddItem (&s_options_main_submenu, &crosshair_pic_thumbnail);
-				options[i].generic.type = MTYPE_SPINCONTROL;
-				options[i].itemnames = (const char **) optionnames[i].extradata;
-				if (options[i].itemnames == doppler_effect_items)
-				{
-					// FIXME HACK
-					options[i].generic.type = MTYPE_SLIDER;
-					options[i].minvalue = 0;
-					options[i].maxvalue = 3;
-					options[i].generic.callback = UpdateDopplerEffectFunc;
-				}
-				else
-				{
-					options[i].generic.callback = TextVarSpinOptionFunc;
-				}
-				// FIXME HACK
-				if (options[i].itemnames == font_names)
-				{
-					options[i].generic.itemsizecallback = FontSelectorSizeFunc;
-					options[i].generic.itemdraw = FontSelectorDrawFunc;
-					options[i].generic.callback = FontSelectorFunc;
-					if (!strcmp (optionnames[i].cvarname, "fnt_game"))
-					{
-						options[i].generic.localptrs[0] = &CL_gameFont;
-					}
-					else if (!strcmp (optionnames[i].cvarname, "fnt_console"))
-					{
-						options[i].generic.localptrs[0] = &CL_consoleFont;
-					}
-					else if (!strcmp (optionnames[i].cvarname, "fnt_menu"))
-					{
-						options[i].generic.localptrs[0] = &CL_menuFont;
-					}
-				}
-				break;
-			case option_hudspincontrol:
-				optionnames[i].extradata = hud_names;
-				options[i].generic.type = MTYPE_SPINCONTROL;
-				options[i].itemnames = (const char **) optionnames[i].extradata;
-				options[i].generic.callback = HudFunc;
-				break;
-			case option_minimapspincontrol:
-				options[i].generic.type = MTYPE_SPINCONTROL;
-				options[i].itemnames = (const char **) optionnames[i].extradata;
-				options[i].generic.callback = MinimapFunc;
-				break;
-			case option_slider:
-				cur_slider_limit = (const sliderlimit_t *) optionnames[i].extradata;
-				options[i].generic.type = MTYPE_SLIDER;
-				options[i].minvalue = cur_slider_limit->slider_min;
-				options[i].maxvalue = cur_slider_limit->slider_max;
-				options[i].generic.callback = SliderOptionFunc;
-				options[i].generic.localptrs[0] = cur_slider_limit;
-				break;
-		}
-		
-		Option_SetMenuItemValue (&options[i], &optionnames[i]);
+		Option_Setup (&options[i], &misc_option_names[i]);
 		Menu_AddItem( &s_options_main_submenu, &options[i]);
 	}
 
@@ -2240,15 +2298,330 @@ VIDEO MENU
 =======================================================================
 */
 
-// TODO: just bring the actual menu portions of vid_menu.c into this file.
-extern menuframework_s s_opengl_screen;
-extern void VID_MenuInit( void );
-extern void VID_MenuDraw (menuframework_s *screen);
+sliderlimit_t brightnesscontrast_limits = 
+{
+	1, 20, 0.1f, 2.0f
+};
+
+// FIXME: is this really supposed to be separate?
+sliderlimit_t bloom_limits = 
+{
+	0, 20, 0.0f, 2.0f
+};
+
+sliderlimit_t modulate_limits = 
+{
+	1, 5, 1.0f, 5.0f
+};
+
+fieldsize_t resolution_width_limits = 
+{
+	4, 640, 2048
+};
+
+fieldsize_t resolution_height_limits = 
+{
+	4, 480, 1536
+};
+
+static const char *resolution_items[] =
+{
+	"[640 480  ]\0000",
+	"[800 600  ]\0001",
+	"[960 720  ]\0002",
+	"[1024 768 ]\0003",
+	"[1152 864 ]\0004",
+	"[1280 960 ]\0005",
+	"[1280 1024]\0006",
+	"[1360 768 ]\0007",
+	"[1366 768 ]\0008",
+	"[1600 1200]\0009",
+	"[1680 1050]\00010",
+	"[1920 1080]\00011",
+	"[2048 1536]\00012",
+	"[custom   ]\000-1",
+	0
+};
+
+static const char *overbright_items[] = 
+{
+	"low\0001",
+	"medium\0002",
+	"high\0003",
+	0
+};
+
+static const char *texquality_items[] = 
+{
+	"very low\0003",
+	"low\0002",
+	"medium\0001",
+	"high\0000",
+	0
+};
+
+option_name_t video_option_names[] = 
+{
+	{
+		option_textcvarspincontrol,
+		"gl_mode",
+		"video mode",
+		NULL,
+		setnames (resolution_items),
+		QMF_ACTION_WAIT
+	},
+	{
+		option_numberfield,
+		"vid_width",
+		"custom width",
+		"set custom horizontal screen resolution",
+		setfieldsize (resolution_width_limits),
+		QMF_ACTION_WAIT
+	},
+	{
+		option_numberfield,
+		"vid_height",
+		"custom height",
+		"set custom vertical screen resolution",
+		setfieldsize (resolution_height_limits),
+		QMF_ACTION_WAIT
+	},
+	{
+		option_slider,
+		"vid_gamma",
+		"texture brightness",
+		NULL,
+		setlimits (brightnesscontrast_limits)
+	},
+	{
+		option_slider,
+		"vid_contrast",
+		"texture contrast",
+		NULL,
+		setlimits (brightnesscontrast_limits)
+	},
+	{
+		option_slider,
+		"gl_modulate",
+		"lightmap brightness",
+		NULL,
+		setlimits (modulate_limits)
+	},
+	{
+		option_spincontrol,
+		"vid_fullscreen",
+		"fullscreen",
+		NULL,
+		setnames (onoff_names),
+		QMF_ACTION_WAIT
+	},
+	{
+		option_spincontrol,
+		"r_bloom",
+		"light bloom",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_slider,
+		"r_bloom_intensity",
+		"bloom intensity",
+		NULL,
+		setlimits (bloom_limits)
+	},
+	{
+		option_textcvarslider,
+		"r_overbrightbits",
+		"overbright bits",
+		NULL,
+		setnames (overbright_items)
+	},
+	{
+		option_textcvarslider,
+		"gl_picmip",
+		"texture quality",
+		NULL,
+		setnames (texquality_items)
+	},
+	{
+		option_spincontrol,
+		"gl_glsl_shaders",
+		"GLSL shaders",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"gl_glsl_postprocess",
+		"post process effects",
+		"GLSL must be enabled for this to take effect",
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_paindist",
+		"pain distortion fx",
+		"GLSL must be enabled for this to take effect",
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_explosiondist",
+		"explosion distortion fx",
+		"GLSL must be enabled for this to take effect",
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"cl_raindist",
+		"rain droplet fx",
+		"GLSL must be enabled for this to take effect",
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"gl_finish",
+		"triple buffering",
+		"improved framerates, but displayed frame is more out of date",
+		setnames (offon_names),
+		QMF_ACTION_WAIT
+	},
+	{
+		option_spincontrol,
+		"gl_swapinterval",
+		"vertical sync",
+		"should be on unless framerates dip below your monitor's refresh rate",
+		setnames (onoff_names),
+		QMF_ACTION_WAIT
+	}
+};
+
+#define num_vid_options (sizeof(video_option_names)/sizeof(video_option_names[0]))
+
+void Video_MenuInit (void);
+
+static menuframework_s	s_video_screen;
+static menuframework_s	s_video_menu;
+static menuframework_s	s_video_main_submenu;
+static menumultival_s	video_options[num_vid_options];
+
+const char *graphical_preset_names[][3] = 
+{
+	// display name, cfg name, tooltip
+	{
+		"high compatibility",	"compatibility",
+		"use when all other modes fail or run slowly"
+	},
+	{
+		"high performance",		"maxperformance",
+		"fast rendering, many effects disabled"
+	},
+	{
+		"performance",			"maxperformance",
+		"GLSL per-pixel lighting and postprocess"
+	},
+	{
+		"quality",				"quality",
+		"GLSL per-pixel effects on all surfaces"
+	},
+	{
+		"high quality",			"maxquality",
+		"GLSL, shadows, light shafts from sun"
+	}
+};
+
+#define num_graphical_presets (sizeof(graphical_preset_names)/sizeof(graphical_preset_names[0]))
+
+static menuaction_s		s_graphical_presets[num_graphical_presets];
+
+static void PresetCallback (void *_self)
+{
+	char cmd[MAX_STRING_CHARS];
+	menuaction_s *self = (menuaction_s *)_self;
+	
+	Com_sprintf (cmd, sizeof(cmd), "exec graphical_presets/%s.cfg", self->generic.localstrings[0]);
+	Cmd_ExecuteString (cmd);
+	Cbuf_Execute ();
+	Video_MenuInit ();
+}
+
+void VidApplyFunc (void *unused)
+{
+	int i;
+	#if defined UNIX_VARIANT
+	extern qboolean vid_restart;
+	#endif
+	extern cvar_t *vid_ref;
+	
+	for (i = 0; i < num_vid_options; i++)
+		Menu_ApplyItem (&video_options[i]);
+	
+	RS_FreeUnmarked();
+	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
+
+	vid_ref->modified = true;
+#if defined UNIX_VARIANT
+	vid_restart = true;
+#endif
+
+	M_ForceMenuOff();
+}
+
+void Video_MenuInit (void)
+{
+	int i;
+
+	s_video_screen.nitems = 0;
+	s_video_screen.num_apply_pending = 0;
+
+	setup_window (s_video_screen, s_video_menu, "VIDEO OPTIONS");
+	
+	setup_window (s_video_menu, s_video_main_submenu, NULL);
+	s_video_main_submenu.bordertexture = "menu/sm_";
+	s_video_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_video_main_submenu.maxlines = 25;
+	
+	for (i = 0; i < num_vid_options; i++)
+	{
+		Option_Setup (&video_options[i], &video_option_names[i]);
+		Menu_AddItem( &s_video_main_submenu, &video_options[i]);
+	}
+	
+	add_text (s_video_menu, NULL, 0); // spacer
+	
+	for (i = 0; i < num_graphical_presets; i++)
+	{
+		s_graphical_presets[i].generic.type = MTYPE_ACTION;
+		s_graphical_presets[i].generic.callback = PresetCallback;
+		s_graphical_presets[i].generic.name = graphical_preset_names[i][0];
+		s_graphical_presets[i].generic.localstrings[0] = graphical_preset_names[i][1];
+		s_graphical_presets[i].generic.tooltip = graphical_preset_names[i][2];
+		Menu_AddItem (&s_video_menu, &s_graphical_presets[i]);
+	}
+	
+	add_text (s_video_menu, NULL, 0); // spacer
+	
+	add_action (s_video_menu, "apply changes", VidApplyFunc);
+	
+	Menu_AutoArrange (&s_video_screen);
+}
+
+void Video_MenuDraw (menuframework_s *dummy)
+{
+	if (s_video_screen.num_apply_pending != 0)
+		s_video_screen.statusbar = "Some changes must be applied!";
+	else
+		s_video_screen.statusbar = NULL;
+	
+	Screen_Draw (&s_video_screen);
+}
+
 void M_Menu_Video_f (void)
 {
-	VID_MenuInit();
-	M_PushMenu (VID_MenuDraw, Default_MenuKey, &s_opengl_screen);
+	Video_MenuInit ();
+	M_PushMenu (Video_MenuDraw, Default_MenuKey, &s_video_screen);
 }
+
 
 /*
 =============================================================================
@@ -6076,7 +6449,7 @@ void M_Think_MouseCursor (void)
 			if (cursor.menuitem->generic.type == MTYPE_SPINCONTROL)
 				Menu_SlideItem (1);
 			else
-				Menu_ActivateItem ();
+				Menu_ActivateItem (cursor.menuitem);
 			
 			// we've "used" the click sequence and will begin another
 			refreshCursorButton (MOUSEBUTTON1);

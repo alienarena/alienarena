@@ -191,6 +191,7 @@ typedef enum {
 #define QMF_ALLOW_WRAP		0x00000004
 #define QMF_STRIP_COLOR		0x00000008
 #define QMF_SNUG_LEFT		0x00000010
+#define QMF_ACTION_WAIT		0x00000020
 
 typedef struct
 {
@@ -230,6 +231,9 @@ typedef struct
 	// right column. The size of whatever gets drawn in each column is tracked
 	// separately.
 	LINKABLE(menuvec2_t) lsize, rsize;
+	
+	// only used for non-submenus with QMF_ACTION_WAIT
+	qboolean apply_pending;
 } menucommon_s;
 
 typedef struct _tag_menuframework
@@ -258,24 +262,18 @@ typedef struct _tag_menuframework
 	const char *bordertexture;
 	
 	void (*cursordraw)( struct _tag_menuframework *m );
+	
+	// only used at the top level of the menu tree
+	int num_apply_pending;
 } menuframework_s;
-
-typedef struct
-{
-	menucommon_s generic;
-
-	char		buffer[80];
-	int			cursor;
-	int			length;
-} menufield_s;
 
 typedef struct 
 {
 	menucommon_s generic;
 	
 	// slider only
-	float minvalue;
-	float maxvalue;
+	int minvalue;
+	int maxvalue;
 	float range;
 	int	  size;
 	
@@ -284,10 +282,16 @@ typedef struct
 	
 	// list only
 	const char **itemnames;
+	
+	// fields
+	char		buffer[80]; 
+	int			cursor;
+	int			length;
 } menumultival_s;
 
 typedef menumultival_s menuslider_s;
 typedef menumultival_s menulist_s;
+typedef menumultival_s menufield_s;
 
 typedef struct _tag_menuitem
 {
@@ -321,7 +325,8 @@ void	Screen_Draw( menuframework_s *menu );
 void	Menu_AssignCursor (menuframework_s *menu);
 void	Menu_DrawHighlightItem (menuitem_s *item);
 void	Menu_DrawHighlight (void);
-void	Menu_ActivateItem (void);
+void	Menu_ActivateItem (menuitem_s *item);
+void	Menu_ApplyItem (menuitem_s *item);
 void	Menu_SetStatusBar( menuframework_s *s, const char *string );
 void	Menu_SlideItem (int dir);
 
@@ -341,7 +346,7 @@ void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 #endif
 
 #if !defined clamp
-#define clamp(x,low,high) (max(min(low,x),high))
+#define clamp(x,low,high) (min(max(low,x),high))
 #endif
 
 int global_menu_xoffset;
