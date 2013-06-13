@@ -6058,6 +6058,8 @@ static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 	return ret;
 }
 
+// TODO: put the player model inside the main player config menu. They're
+// already close to the same width.
 void PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
