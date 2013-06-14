@@ -1054,7 +1054,8 @@ const char *M_Main_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		M_PopMenu ();
+		m_entersound = true;
+		M_Menu_Quit_f ();
 		break;
 
 	case K_KP_DOWNARROW:
