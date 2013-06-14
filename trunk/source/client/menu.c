@@ -223,12 +223,26 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 
 #define setup_window(parent,window,title) \
 { \
+	(parent).nitems = 0; \
+	(parent).num_apply_pending = 0; \
+	\
 	(window).generic.type = MTYPE_SUBMENU; \
 	(window).navagable = true; \
 	(window).nitems = 0; \
 	(window).bordertitle = title; \
 	(window).bordertexture = "menu/m_"; \
+	\
 	Menu_AddItem (&(parent), &(window)); \
+}
+
+#define setup_panel(parent,panel) \
+{ \
+	(panel).generic.type = MTYPE_SUBMENU; \
+	(panel).generic.flags = QMF_SNUG_LEFT; \
+	(panel).navagable = true; \
+	(panel).nitems = 0; \
+	(panel).bordertexture = "menu/sm_"; \
+	Menu_AddItem (&(parent), &(panel)); \
 }
 
 // if you just want to add some text to a menu and never need to refer to it
@@ -1260,8 +1274,6 @@ static void Keys_MenuInit( void )
 {
 	int i = 0;
 
-	s_keys_screen.nitems = 0;
-
 	setup_window (s_keys_screen, s_keys_menu, "CUSTOMIZE CONTROLS");
 	
 	for (i = 0; i < num_bindable_actions; i++)
@@ -1502,7 +1514,7 @@ extern cvar_t *r_minimap_style;
 char *font_names[MAX_FONTS];
 int	numfonts = 0;
 
-static menuframework_s	s_options_main_submenu;
+static menuframework_s	s_display_main_submenu;
 
 // name and value lists: for spin-controls where the cvar value isn't simply
 // the integer index of whatever text is displaying in the control. We use
@@ -1572,7 +1584,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 		case option_textcvarspincontrol:
 			if (optionname->names == crosshair_names)
 				// found the crosshair, put the preview just above it.
-				Menu_AddItem (&s_options_main_submenu, &crosshair_pic_thumbnail);
+				Menu_AddItem (&s_display_main_submenu, &crosshair_pic_thumbnail);
 			item->generic.type = MTYPE_SPINCONTROL;
 			item->itemnames = optionname->names;
 			item->generic.callback = TextVarSpinOptionFunc;
@@ -2159,14 +2171,8 @@ void Display_MenuInit( void )
 {
 	int i;
 
-	s_display_screen.nitems = 0;
-	s_display_screen.num_apply_pending = 0;
-
 	setup_window (s_display_screen, s_display_menu, "DISPLAY");
-	
-	setup_window (s_display_menu, s_options_main_submenu, NULL);
-	s_options_main_submenu.bordertexture = "menu/sm_";
-	s_options_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	setup_panel (s_display_menu, s_display_main_submenu);
 	
 	crosshair_pic_thumbnail.generic.type = MTYPE_NOT_INTERACTIVE;
 	VectorSet (crosshair_pic_thumbnail.generic.localints, 5, 5, RCOLUMN_OFFSET);
@@ -2187,7 +2193,7 @@ void Display_MenuInit( void )
 	for (i = 0; i < num_options; i++)
 	{
 		Option_Setup (&options[i], &disp_option_names[i]);
-		Menu_AddItem( &s_options_main_submenu, &options[i]);
+		Menu_AddItem( &s_display_main_submenu, &options[i]);
 	}
 
 	Menu_AutoArrange (&s_display_screen);
@@ -2476,14 +2482,8 @@ void Video_MenuInit (void)
 {
 	int i;
 
-	s_video_screen.nitems = 0;
-	s_video_screen.num_apply_pending = 0;
-
 	setup_window (s_video_screen, s_video_menu, "VIDEO OPTIONS");
-	
-	setup_window (s_video_menu, s_video_main_submenu, NULL);
-	s_video_main_submenu.bordertexture = "menu/sm_";
-	s_video_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	setup_panel (s_video_menu, s_video_main_submenu);
 	
 	for (i = 0; i < num_vid_options; i++)
 	{
@@ -2576,14 +2576,8 @@ void Audio_MenuInit (void)
 {
 	int i;
 
-	s_audio_screen.nitems = 0;
-	s_audio_screen.num_apply_pending = 0;
-
 	setup_window (s_audio_screen, s_audio_menu, "AUDIO OPTIONS");
-	
-	setup_window (s_audio_menu, s_audio_main_submenu, NULL);
-	s_audio_main_submenu.bordertexture = "menu/sm_";
-	s_audio_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	setup_panel (s_audio_menu, s_audio_main_submenu);
 	
 	for (i = 0; i < num_audio_options; i++)
 	{
@@ -2670,14 +2664,8 @@ void Input_MenuInit (void)
 {
 	int i;
 
-	s_input_screen.nitems = 0;
-	s_input_screen.num_apply_pending = 0;
-
 	setup_window (s_input_screen, s_input_menu, "INPUT OPTIONS");
-	
-	setup_window (s_input_menu, s_input_main_submenu, NULL);
-	s_input_main_submenu.bordertexture = "menu/sm_";
-	s_input_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	setup_panel (s_input_menu, s_input_main_submenu);
 	
 	for (i = 0; i < num_input_options; i++)
 	{
@@ -2690,7 +2678,7 @@ void Input_MenuInit (void)
 	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
 	setup_tickbox (s_options_invertmouse_box);
 
-	Menu_AddItem( &s_options_main_submenu, &s_options_invertmouse_box );
+	Menu_AddItem( &s_display_main_submenu, &s_options_invertmouse_box );
 	
 	add_text (s_input_menu, NULL, 0); //spacer
 	
@@ -2759,14 +2747,8 @@ void Net_MenuInit (void)
 {
 	int i;
 
-	s_net_screen.nitems = 0;
-	s_net_screen.num_apply_pending = 0;
-
 	setup_window (s_net_screen, s_net_menu, "NETWORK OPTIONS");
-	
-	setup_window (s_net_menu, s_net_main_submenu, NULL);
-	s_net_main_submenu.bordertexture = "menu/sm_";
-	s_net_main_submenu.generic.flags = QMF_SNUG_LEFT;
+	setup_panel (s_net_menu, s_net_main_submenu);
 	
 	for (i = 0; i < num_net_options; i++)
 	{
@@ -2948,8 +2930,6 @@ void IRC_MenuInit( void )
 
 	M_FindIRCKey();
 	
-	s_irc_screen.nitems = 0;
-
 	setup_window (s_irc_screen, s_irc_menu, "IRC CHAT OPTIONS");
 
 	s_irc_join.generic.type	= MTYPE_ACTION;
@@ -3064,8 +3044,6 @@ static void OptionScreenFunc (void *_self)
 void Options_MenuInit (void)
 {
 	int i;
-	s_options_screen.nitems = 0;
-	s_options_screen.num_apply_pending = 0;
 	
 	setup_window (s_options_screen, s_options_menu, "OPTIONS");
 	
@@ -3374,8 +3352,6 @@ static menuaction_s		s_singleplayer_game_actions[num_singleplayer_skill_levels];
 void Game_MenuInit( void )
 {
 	int i;
-	
-	s_game_screen.nitems = 0;
 	
 	setup_window (s_game_screen, s_game_menu, "SINGLE PLAYER");
 	
@@ -3797,8 +3773,6 @@ void PlayerList_SubmenuInit (void)
 
 void SelectedServer_MenuInit (void)
 {
-	s_servers[serverindex].screen.nitems = 0;
-	
 	setup_window (s_servers[serverindex].screen, s_servers[serverindex].menu, "SERVER");
 	
 	ServerInfo_SubmenuInit ();
@@ -4275,7 +4249,6 @@ void JoinServer_MenuInit( void )
 	else
 		pNameUnique = true;
 
-	s_serverbrowser_screen.nitems = 0;
 	serverindex = -1;
 
 	setup_window (s_serverbrowser_screen, s_joinserver_menu, "SERVER LIST");
@@ -4419,8 +4392,6 @@ void Mutators_MenuInit( void )
 	int i;
 	
 	int dmflags = Cvar_VariableValue( "dmflags" );
-	
-	s_mutators_screen.nitems = 0;
 	
 	setup_window (s_mutators_screen, s_mutators_menu, "MUTATORS");
 	
@@ -4691,8 +4662,6 @@ void AddBots_MenuInit( void )
 
 	LoadBotInfo();
 
-	s_addbots_screen.nitems = 0;
-	
 	setup_window (s_addbots_screen, s_addbots_menu, "CHOOSE A BOT");
 	s_addbots_menu.maxlines = 16;
 	
@@ -5175,8 +5144,6 @@ void StartServer_MenuInit( void )
 		0
 	};
 	
-	s_startserver_screen.nitems = 0;
-
 	setup_window (s_startserver_screen, s_startserver_menu, "HOST SERVER");
 
 	s_startmap_list.generic.type = MTYPE_SPINCONTROL;
@@ -5370,8 +5337,6 @@ void BotOptions_MenuInit( void )
 
 	Read_Bot_Info();
 	
-	s_botoptions_screen.nitems = 0;
-
 	setup_window (s_botoptions_screen, s_botoptions_menu, "BOT OPTIONS");
 	
 	for (i = 0; i < 8; i++) {
@@ -5531,8 +5496,6 @@ void PlayerRanking_MenuInit( void )
 	PLAYERSTATS player;
 	PLAYERSTATS topTenPlayers[10];
 	int i;
-
-	s_playerranking_screen.nitems = 0;
 
 	setup_window (s_playerranking_screen, s_playerranking_menu, "PLAYER RANKINGS");
 
@@ -6034,8 +5997,6 @@ void PlayerConfig_MenuInit( void )
 		}
 	}
 
-	s_player_config_screen.nitems = 0;
-	
 	setup_window (s_player_config_screen, s_player_config_menu, "PLAYER SETUP");
 
 	s_player_name_field.generic.type = MTYPE_FIELD;
@@ -6280,11 +6241,14 @@ void Tactical_MenuInit( void )
 	
 	scale = (float)(viddef.height)/600;
 	
-	s_tactical_screen.nitems = 0;
-	
 	for (i = 0; i < num_tactical_teams; i++)
 	{
 		setup_window (s_tactical_screen, s_tactical_menus[i], tactical_team_names[i]);
+		
+		// kinda hacky but this is the only place we have two windows in one
+		// screen.
+		s_tactical_screen.nitems = i; 
+		
 		s_tactical_menus[i].horizontal = true;
 		
 		for (j = 0; j < num_tactical_classes; j++)
@@ -6354,8 +6318,6 @@ void quitActionYes (void *blah)
 
 void Quit_MenuInit (void)
 {
-	s_quit_screen.nitems = 0;
-	
 	setup_window (s_quit_screen, s_quit_menu, "EXIT ALIEN ARENA");
 
 	add_text (s_quit_menu, "Are you sure?", 0);
