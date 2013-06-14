@@ -740,7 +740,10 @@ void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		Menu_DrawBorder (menu, menu->bordertitle, menu->bordertexture);
 	
 	// may get covered up later by a higher-priority status bar
-	Menu_DrawStatusBar( menu->statusbar );
+	if (menu->num_apply_pending != 0)
+		Menu_DrawStatusBar ("Some changes must be applied!\n");
+	else
+		Menu_DrawStatusBar (menu->statusbar);
 	
 	/*
 	** draw contents
@@ -949,6 +952,7 @@ void Screen_Draw (menuframework_s *screen)
 {
 	FNT_font_t font = FNT_AutoGet (CL_menuFont);
 	screen->x = global_menu_xoffset;
+	Menu_AutoArrange (screen);
 	Menu_Draw (screen, font);
 }
 
