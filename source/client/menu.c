@@ -4326,7 +4326,7 @@ static const char *weaponModeNames[][2] =
 	{"rocket arena",	"rocket_arena"},
 	{"insta/rockets",	"insta_rockets"},
 	{"excessive",		"excessive"},
-	{"class based",		"clasbased"}
+	{"class based",		"classbased"}
 };
 #define num_weapon_modes (sizeof(weaponModeNames)/sizeof(weaponModeNames[0]))
 static menulist_s s_weaponmode_list[num_weapon_modes];
