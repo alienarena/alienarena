@@ -1426,14 +1426,6 @@ static void TextVarSpinOptionFunc (void *_self)
 	Cvar_Set( cvarname, cvarval);
 }
 
-static menuframework_s 	s_display_screen;
-static void FontSelectorFunc (void *_self)
-{
-	TextVarSpinOptionFunc (_self);
-	// New font might not fit anymore.
-	Menu_AutoArrange (&s_display_screen); 
-}
-
 static void UpdateDopplerEffectFunc( void *self )
 {
 	TextVarSpinOptionFunc (self);
@@ -1586,7 +1578,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			{
 				item->generic.itemsizecallback = FontSelectorSizeFunc;
 				item->generic.itemdraw = FontSelectorDrawFunc;
-				item->generic.callback = FontSelectorFunc;
+				item->generic.callback = TextVarSpinOptionFunc;
 				if (!strcmp (optionname->cvarname, "fnt_game"))
 				{
 					item->generic.localptrs[0] = &CL_gameFont;
@@ -1705,6 +1697,7 @@ OPTIONS MENUS - DISPLAY OPTIONS MENU
 =======================================================================
 */
 
+static menuframework_s 	s_display_screen;
 static menuframework_s	s_display_menu;
 
 static void MinimapFunc( void *item )
@@ -2530,21 +2523,7 @@ void Video_MenuInit (void)
 	Menu_AutoArrange (&s_video_screen);
 }
 
-void Video_MenuDraw (menuframework_s *dummy)
-{
-	if (s_video_screen.num_apply_pending != 0)
-		s_video_screen.statusbar = "Some changes must be applied!";
-	else
-		s_video_screen.statusbar = NULL;
-	
-	Screen_Draw (&s_video_screen);
-}
-
-void M_Menu_Video_f (void)
-{
-	Video_MenuInit ();
-	M_PushMenu (Video_MenuDraw, Default_MenuKey, &s_video_screen);
-}
+screen_boilerplate (Video, s_video_screen);
 
 
 /*
@@ -3125,7 +3104,6 @@ void Options_MenuDraw (menuframework_s *dummy)
 	// keep the main options menu the same height as the selected submenu
 	CHASELINK(option_screen_height) = Menu_TrueHeight (*s_selected_option_menu);
 	
-	Menu_AutoArrange (&s_options_screen);
 	Screen_Draw (&s_options_screen);
 }
 
@@ -3414,10 +3392,6 @@ void Game_MenuInit( void )
 	
 	setup_window (s_game_screen, s_game_menu, "SINGLE PLAYER");
 	
-	s_game_menu.statusbar = "Progress levels against bots";
-	
-	add_text(s_game_menu, "Instant Action!", 0);
-	
 	for (i = 0; i < num_singleplayer_skill_levels; i++)
 	{
 		s_singleplayer_game_actions[i].generic.type = MTYPE_ACTION;
@@ -3557,7 +3531,7 @@ SERVERDATA mservers[MAX_LOCAL_SERVERS];
 
 PLAYERSTATS thisPlayer;
 
-int		m_num_servers = 0;
+#define m_num_servers (s_serverlist_submenu.nitems)
 
 static char local_mods_data[16][53]; //53 is measured max tooltip width
 
@@ -3594,7 +3568,6 @@ static struct
 } s_servers[MAX_LOCAL_SERVERS];
 
 static int serverindex;
-qboolean serveroutdated;
 
 void JoinServerFunc (void *unused)
 {
@@ -3706,12 +3679,17 @@ void ServerInfo_SubmenuInit (void)
 	s_servers[serverindex].connect.generic.type = MTYPE_ACTION;
 	s_servers[serverindex].connect.generic.flags = QMF_RIGHT_COLUMN;
 	s_servers[serverindex].connect.generic.name = "Connect";
-	if (!serveroutdated && pNameUnique)
-		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
-	else
-		s_servers[serverindex].connect.generic.statusbar = NULL;
 	s_servers[serverindex].connect.generic.callback = JoinServerFunc;
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].connect);
+	
+	s_servers[serverindex].serverinfo_submenu.statusbar = NULL;
+	s_servers[serverindex].connect.generic.statusbar = NULL;
+	if (serverIsOutdated (mservers[serverindex].szVersion))
+		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
+	else if (!pNameUnique)
+		s_servers[serverindex].connect.generic.statusbar = "You must change your player name from the default before connecting!";
+	else
+		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
 	
 	s_servers[serverindex].levelshot.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_servers[serverindex].levelshot.generic.localstrings[0] = s_servers[serverindex].levelshot_path;
@@ -3720,8 +3698,6 @@ void ServerInfo_SubmenuInit (void)
 	s_servers[serverindex].levelshot.generic.itemsizecallback = PicSizeFunc;
 	s_servers[serverindex].levelshot.generic.itemdraw = PicDrawFunc;
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].levelshot);
-	
-	serveroutdated = serverIsOutdated (mservers[serverindex].szVersion);
 	
 	s_servers[serverindex].serverinfo_table.generic.type = MTYPE_SUBMENU;
 	s_servers[serverindex].serverinfo_table.nitems = 0;
@@ -3834,24 +3810,12 @@ void PlayerList_SubmenuInit (void)
 
 void SelectedServer_MenuInit (void)
 {
-	const char *statusbar_text;
-
 	s_servers[serverindex].screen.nitems = 0;
 	
 	setup_window (s_servers[serverindex].screen, s_servers[serverindex].menu, "SERVER");
 	
 	ServerInfo_SubmenuInit ();
 	PlayerList_SubmenuInit ();
-	
-	//warn user that they cannot join until changing default player name
-	if(!pNameUnique) 
-		statusbar_text = "You must change your player name from the default before connecting!";
-	else if (serveroutdated)
-		statusbar_text = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
-	else
-		statusbar_text = mservers[serverindex].szHostName;
-
-	s_servers[serverindex].screen.statusbar = statusbar_text;
 	
 	Menu_AutoArrange (&s_servers[serverindex].screen);
 }
@@ -4340,32 +4304,7 @@ void JoinServer_MenuInit( void )
 	
 }
 
-
-void JoinServer_MenuDraw (menuframework_s *dummy)
-{
-	s_serverlist_submenu.nitems = m_num_servers;
-
-	Menu_AutoArrange (&s_serverbrowser_screen);
-		
-	Screen_Draw (&s_serverbrowser_screen);
-}
-
-const char *JoinServer_MenuKey (menuframework_s *screen, int key)
-{
-	if ( key == K_ENTER && serverindex != -1 )
-	{
-		cursor.buttonclicks[MOUSEBUTTON1] = 2;//so we can still join without a mouse
-		ClickServerFunc (&s_serverlist_rows[serverindex]);
-		return "";
-	}
-	return Default_MenuKey (screen, key );
-}
-
-void M_Menu_JoinServer_f (void)
-{
-	JoinServer_MenuInit();
-	M_PushMenu (JoinServer_MenuDraw, JoinServer_MenuKey, &s_serverbrowser_screen);
-}
+screen_boilerplate (JoinServer, s_serverbrowser_screen);
 
 /*
 =============================================================================
@@ -4558,7 +4497,7 @@ void Mutators_MenuInit( void )
 	
 	Menu_AddItem (&s_mutators_menu, &s_dmflags_submenu);
 	
-	// set the original dmflags statusbar
+	// initialize the dmflags display buffer
 	DMFlagCallback( 0 );
 	Menu_AutoArrange (&s_mutators_screen);
 }
@@ -4904,7 +4843,8 @@ void MapInfoFunc( void *self ) {
 	char seps[]   = "//";
 	char *token;
 	char startmap[128];
-	char path[1024];
+	char path[MAX_QPATH];
+	static char levelshot[MAX_QPATH];
 
 	//get a map description if it is there
 
@@ -4953,6 +4893,9 @@ void MapInfoFunc( void *self ) {
 			s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
 		}
 	}
+	
+	Com_sprintf( levelshot, sizeof(levelshot), "/levelshots/%s", startmap );
+	s_levelshot_preview.generic.localstrings[0] = levelshot;
 
 }
 
@@ -4999,8 +4942,6 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	// char *path = NULL; // unused
 	static char **bspnames;
 	int		j, l;
-
-	s_maxclients_field.generic.statusbar = NULL;
 
 	//clear out list first
 	for ( i = 0; i < nummaps; i++ )
@@ -5278,7 +5219,7 @@ void StartServer_MenuInit( void )
 	s_timelimit_field.generic.type = MTYPE_FIELD;
 	s_timelimit_field.generic.name = "time limit";
 	s_timelimit_field.generic.flags = QMF_NUMBERSONLY;
-	s_timelimit_field.generic.statusbar = "0 = no limit";
+	s_timelimit_field.generic.tooltip = "0 = no limit";
 	s_timelimit_field.length = 3;
 	s_timelimit_field.generic.visible_length = 3;
 	strcpy( s_timelimit_field.buffer, Cvar_VariableString("timelimit") );
@@ -5286,7 +5227,7 @@ void StartServer_MenuInit( void )
 	s_fraglimit_field.generic.type = MTYPE_FIELD;
 	s_fraglimit_field.generic.name = "frag limit";
 	s_fraglimit_field.generic.flags = QMF_NUMBERSONLY;
-	s_fraglimit_field.generic.statusbar = "0 = no limit";
+	s_fraglimit_field.generic.tooltip = "0 = no limit";
 	s_fraglimit_field.length = 3;
 	s_fraglimit_field.generic.visible_length = 3;
 	strcpy( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit") );
@@ -5375,22 +5316,7 @@ void StartServer_MenuInit( void )
 	MapInfoFunc(NULL);
 }
 
-void StartServer_MenuDraw (menuframework_s *dummy)
-{
-	static char levelshot[MAX_QPATH];
-	
-	Com_sprintf( levelshot, sizeof(levelshot), "/levelshots/%s", strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
-	s_levelshot_preview.generic.localstrings[0] = levelshot;
-
-	Menu_AutoArrange (&s_startserver_screen);
-	Screen_Draw (&s_startserver_screen);
-}
-
-void M_Menu_StartServer_f (void)
-{
-	StartServer_MenuInit();
-	M_PushMenu (StartServer_MenuDraw, Default_MenuKey, &s_startserver_screen);
-}
+screen_boilerplate (StartServer, s_startserver_screen);
 
 /*
 =============================================================================
@@ -6456,8 +6382,6 @@ void Quit_MenuInit (void)
 	
 	Menu_AutoArrange (&s_quit_screen);
 	Menu_Center (&s_quit_screen);
-
-	Menu_SetStatusBar( &s_quit_menu, NULL );
 }
 
 screen_boilerplate (Quit, s_quit_screen);
@@ -6641,7 +6565,7 @@ void M_Think_MouseCursor (void)
 	if (cursor.buttondown[MOUSEBUTTON1] && !cursor.suppress_drag)
 	{
 		if (cursor.click_menuitem != NULL)
-		    Cursor_SelectItem (cursor.click_menuitem);
+			Cursor_SelectItem (cursor.click_menuitem);
 		else if (cursor.menuitem != NULL)
 			cursor.click_menuitem = cursor.menuitem;
 	}
