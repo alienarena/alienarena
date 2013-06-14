@@ -1565,7 +1565,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			// TODO: use the name part in a tooltip or something
 			item->itemnames = optionname->names; 
 			item->minvalue = 0;
-			for (item->maxvalue = 0; item->itemnames[item->maxvalue]; item->maxvalue++)
+			for (item->maxvalue = 0; item->itemnames[item->maxvalue+1]; item->maxvalue++)
 				continue;
 			if (item->itemnames == doppler_effect_items)
 				// FIXME HACK
