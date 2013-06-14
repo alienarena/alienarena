@@ -546,6 +546,18 @@ void SV_ClipMoveToEntities ( moveclip_t *clip )
 				continue;	// don't clip against own missiles
 			if (clip->passedict->owner == touch)
 				continue;	// don't clip against owner
+			// don't clip against teammates
+			{
+				int n, n2;
+				n = NUM_FOR_EDICT (clip->passedict);
+				n2 = NUM_FOR_EDICT (touch);
+				if (	n > 0 && n <= maxclients->integer && 
+						n2 > 0 && n2 <= maxclients->integer &&
+						clip->passedict->teamset && touch->teamset && 
+						clip->passedict->dmteam != NO_TEAM && 
+						clip->passedict->dmteam == touch->dmteam	)
+					continue;
+			}
 		}
 
 		if ( !(clip->contentmask & CONTENTS_DEADMONSTER)
