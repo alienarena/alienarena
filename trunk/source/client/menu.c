@@ -376,7 +376,7 @@ int M_Interp (int progress, int target)
 // decided which yet.)
 typedef struct
 {
-	void	(*draw) (menuframework_s *screen);
+	void	(*draw) (menuframework_s *screen, menuvec2_t offset);
 	const char *(*key) (menuframework_s *screen, int k);
 	menuframework_s *screen;
 } menulayer_t;
@@ -454,11 +454,13 @@ static inline int layergroup_pair_excesswidth (layergroup_t *g1, layergroup_t *g
 static void layergroup_draw (layergroup_t *g)
 {
 	int i;
-	global_menu_xoffset = g->offset;
+	menuvec2_t offs;
+	offs.y = 0;
+	offs.x = g->offset;
 	for (i = 0; i < g->num_layers; i++)
 	{
-		g->layers[i].draw (g->layers[i].screen);
-		global_menu_xoffset += Menu_TrueWidth (*g->layers[i].screen);
+		g->layers[i].draw (g->layers[i].screen, offs);
+		offs.x += Menu_TrueWidth (*g->layers[i].screen);
 	}
 }
 
@@ -606,7 +608,7 @@ void Menuscreens_Animate_Remove_To_Steady (void)
 	Menuscreens_Animate ();
 }
 
-void M_Main_Draw (void);
+void M_Main_Draw (menuvec2_t offset);
 void CheckMainMenuMouse (void);
 
 // This is where the magic happens. (TODO: maybe separate the actual rendering
@@ -614,21 +616,21 @@ void CheckMainMenuMouse (void);
 void Menuscreens_Animate (void)
 {
 	int shove_offset, anim_start, anim_end;
+	menuvec2_t main_offs;
+	
+	main_offs.x = main_offs.y = 0;
+	
 	switch (mstate.state)
 	{
 	case mstate_steady:
 	{
-		if (mstate.active.num_layers == 0)
-		{
-			global_menu_xoffset = 0;
-		}
-		else
+		if (mstate.active.num_layers != 0)
 		{
 			mstate.active.offset = Menuscreens_Animate_Active ();
-			global_menu_xoffset = mstate.active.offset-viddef.width;
+			main_offs.x = mstate.active.offset-viddef.width;
 		}
 		
-		M_Main_Draw ();
+		M_Main_Draw (main_offs);
 		layergroup_draw (&mstate.active);
 	}
 	break;
@@ -687,10 +689,10 @@ void Menuscreens_Animate (void)
 			);
 		}
 			
-		global_menu_xoffset = mstate.active.offset-viddef.width;
+		main_offs.x = mstate.active.offset-viddef.width;
 		mstate.incoming.offset = shove_offset + layergroup_width (&mstate.active);
 		
-		M_Main_Draw ();
+		M_Main_Draw (main_offs);
 		layergroup_draw (&mstate.active);
 		layergroup_draw (&mstate.incoming);
 	}
@@ -716,10 +718,10 @@ void Menuscreens_Animate (void)
 		if (shove_offset < mstate.active.offset || mstate.active.num_layers == 0)
 			mstate.active.offset = shove_offset;
 		
-		global_menu_xoffset = mstate.active.offset-viddef.width;
+		main_offs.x = mstate.active.offset-viddef.width;
 		mstate.outgoing.offset = shove_offset + layergroup_width (&mstate.active);
 
-		M_Main_Draw ();
+		M_Main_Draw (main_offs);
 		layergroup_draw (&mstate.active);
 		layergroup_draw (&mstate.outgoing);
 	}
@@ -730,7 +732,7 @@ void Menuscreens_Animate (void)
 // These functions (Push, Force Off, and Pop) are used by the outside world to
 // control the state machine.
 
-void M_PushMenu ( void (*draw) (menuframework_s *screen), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
+void M_PushMenu ( void (*draw) (menuframework_s *screen, menuvec2_t offset), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
 	int			i, insertion_point;
 	qboolean	found = false;
@@ -912,7 +914,7 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 	*xoffset = ( viddef.width - *widest + 350*scale) / 2;
 }
 
-void M_Main_Draw (void)
+void M_Main_Draw (menuvec2_t offset)
 {
 	int i;
 	int ystart, xstart, xend;
@@ -936,14 +938,14 @@ void M_Main_Draw (void)
 
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 
-	ystart = ( viddef.height / 2 - 20*scale );
-	xoffset = ( viddef.width - widest - 35*widscale) / 2 + global_menu_xoffset;
+	ystart = ( viddef.height / 2 - 20*scale ) + offset.y;
+	xoffset = ( viddef.width - widest - 35*widscale) / 2 + offset.x;
 	
 	// When animating a transition away from the main menu, the background 
 	// slides away at double speed, disappearing and leaving just the menu 
-	// items themselves. Hence some things use global_menu_xoffset*1.25.
+	// items themselves. Hence some things use offset.x*1.25.
 	
-	Draw_StretchPic(global_menu_xoffset*1.25, 0, viddef.width, viddef.height, "m_main");
+	Draw_StretchPic(offset.x*1.25, offset.y, viddef.width, viddef.height, "m_main");
 
 	//draw the montage pics
 	mainalpha += cls.frametime; //fade image in
@@ -959,8 +961,8 @@ void M_Main_Draw (void)
 	}
 	sprintf(backgroundpic, "m_main_mont%i", (montagepic==1)?5:montagepic-1);
 	sprintf(montagepicname, "m_main_mont%i", montagepic);
-	Draw_StretchPic (global_menu_xoffset*1.25, 0, viddef.width, viddef.height, backgroundpic);
-	Draw_AlphaStretchPic (global_menu_xoffset*1.25, 0, viddef.width, viddef.height, montagepicname, mainalpha);
+	Draw_StretchPic (offset.x*1.25, offset.y, viddef.width, viddef.height, backgroundpic);
+	Draw_AlphaStretchPic (offset.x*1.25, offset.y, viddef.width, viddef.height, montagepicname, mainalpha);
 
 
 	/* check for more recent program version */
@@ -969,7 +971,7 @@ void M_Main_Draw (void)
 	{
 		extern const float light_color[4];
 		Menu_DrawString (
-			global_menu_xoffset, 5*scale,
+			offset.x, offset.y + 5*scale,
 			version_warning, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, light_color
 		);
 	}
@@ -989,7 +991,7 @@ void M_Main_Draw (void)
 		if (xstart < 0)
 		{
 			if (xend < 150*widscale)
-				xend = min (viddef.width+global_menu_xoffset, 150*widscale);
+				xend = min (viddef.width+offset.x, 150*widscale);
 			xstart = 0;
 			if (xend < 50*widscale)
 				return;
@@ -2978,7 +2980,7 @@ void IRC_MenuInit( void )
 }
 
 
-void IRC_MenuDraw (menuframework_s *dummy)
+void IRC_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
 	//warn user that they cannot join until changing default player name
 	if(!pNameUnique)
@@ -2999,7 +3001,7 @@ void IRC_MenuDraw (menuframework_s *dummy)
 		s_irc_join.generic.callback = JoinIRCFunc;
 	}
 
-	Screen_Draw (&s_irc_screen);
+	Screen_Draw (&s_irc_screen, offset);
 }
 
 void M_Menu_IRC_f (void)
@@ -3099,12 +3101,12 @@ void Options_MenuInit (void)
 	Menu_AutoArrange (&s_options_screen);
 }
 
-void Options_MenuDraw (menuframework_s *dummy)
+void Options_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
 	// keep the main options menu the same height as the selected submenu
 	CHASELINK(option_screen_height) = Menu_TrueHeight (*s_selected_option_menu);
 	
-	Screen_Draw (&s_options_screen);
+	Screen_Draw (&s_options_screen, offset);
 }
 
 void M_Menu_Options_f (void)
@@ -3272,7 +3274,7 @@ static const char *idcredits[] =
 	0
 };
 
-void M_Credits_MenuDraw (menuframework_s *dummy)
+void M_Credits_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
 	int i, y, scale;
 	FNT_font_t		font;
@@ -3289,8 +3291,8 @@ void M_Credits_MenuDraw (menuframework_s *dummy)
 		if ( y <= -12*scale )
 			continue;
 		
-		box.y = y;
-		box.x = global_menu_xoffset;
+		box.y = offset.y + y;
+		box.x = offset.x;
 		box.height = 0;
 		box.width = viddef.width;
 
@@ -6143,7 +6145,7 @@ void PlayerConfig_MenuInit( void )
 	}
 }
 
-void PlayerConfig_MenuDraw (menuframework_s *dummy)
+void PlayerConfig_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
 	if(!strcmp(s_player_name_field.buffer, "Player"))
 		pNameUnique = false;
@@ -6157,7 +6159,7 @@ void PlayerConfig_MenuDraw (menuframework_s *dummy)
 	{
 		s_player_skin_preview.name = s_pmi[s_player_model_box.curvalue].directory;
 		s_player_skin_preview.skin = s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue];
-		Screen_Draw (&s_player_config_screen);
+		Screen_Draw (&s_player_config_screen, offset);
 	}
 }
 void PConfigAccept (void)

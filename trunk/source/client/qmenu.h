@@ -321,7 +321,7 @@ void		Cursor_SelectItem (menuitem_s *item);
 void	Menu_AdvanceCursor (int dir);
 void	Menu_Center( menuframework_s *menu );
 void	Menu_AutoArrange( menuframework_s *menu );
-void	Screen_Draw( menuframework_s *menu );
+void	Screen_Draw (menuframework_s *menu, menuvec2_t offset);
 void	Menu_AssignCursor (menuframework_s *menu);
 void	Menu_DrawHighlightItem (menuitem_s *item);
 void	Menu_DrawHighlight (void);
@@ -348,8 +348,6 @@ void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 #if !defined clamp
 #define clamp(x,low,high) (min(max(low,x),high))
 #endif
-
-int global_menu_xoffset;
 
 #define Item_GetHeight(i) \
 	(max(CHASELINK((i).generic.lsize).y, CHASELINK((i).generic.rsize).y))

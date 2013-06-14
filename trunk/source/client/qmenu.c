@@ -948,10 +948,12 @@ void Menu_DrawHighlight (void)
 
 // needed because global_menu_xoffset must be added to only the top level of
 // any menu tree.
-void Screen_Draw (menuframework_s *screen)
+void Screen_Draw (menuframework_s *screen, menuvec2_t offset)
 {
 	FNT_font_t font = FNT_AutoGet (CL_menuFont);
-	screen->x = global_menu_xoffset;
+	screen->x = offset.x;
+	//TODO: figure out what to do about centered windows
+/*	screen->y = offset.y;*/ 
 	Menu_AutoArrange (screen);
 	Menu_Draw (screen, font);
 }
