@@ -1787,9 +1787,6 @@ static void AddFontNames( char * path , int * nfontnames , char ** list )
 		p = strstr(fontfiles[i], "fonts/"); p++;
 		p = strstr(p, "/"); p++;
 
-		if (!strstr( p , ".ttf" ) )
-			continue;
-
 		num = strlen(p)-4;
 		p[num] = 0;
 
@@ -1842,11 +1839,6 @@ void SetCrosshairNames (char **list)
 		curCrosshairFile = p;
 		
 		p = strstr(p, "/"); p++;
-
-		if (	!strstr(p, ".tga")
-			&&	!strstr(p, ".pcx")
-			)
-			continue;
 
 		num = strlen(p)-4;
 		p[num] = 0;
@@ -1915,7 +1907,7 @@ void SetHudNames (char **list)
 	list[0] = str_combine("none", "none");
 	list[1] = str_combine("default", "pics/i_health.tga"); //the default hud
 
-	hudfiles = FS_ListFilesInFS( "pics/huds/*.tga", &nhuds, 0,
+	hudfiles = FS_ListFilesInFS( "pics/huds/*1.tga", &nhuds, 0,
 		SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
 	for (i=0;i<nhuds && nhudnames<MAX_HUDS;i++)
@@ -1925,20 +1917,12 @@ void SetHudNames (char **list)
 		p = strstr(hudfiles[i], "/huds/"); p++;
 		p = strstr(p, "/"); p++;
 
-		if (	!strstr(p, ".tga")
-			&&	!strstr(p, ".pcx")
-			)
-			continue;
-
 		num = strlen(p)-5;
-		 // we'll just assume the side hud is there if the bottom one is--
-		 // we're interested in the bottom one specifically, as that's the
-		 // value of the cvar.
-		if (p[num] == '2')
-			continue;
 		file_ext = num+1;
 		p[file_ext] = 0;
 		
+		// we only need this because the second part of a text cvar value list
+		// will be compared against cl_hudimage1 so it needs the 1 suffix.
 		curHudFile = _strdup (hudfiles[i]);
 		
 		p[num] = 0;
@@ -5043,13 +5027,8 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	{
 		int num;
 
-		s = strstr( mapfiles[i], "maps/");
-		s++;
-		s = strstr(s, "/");
-		s++;
-
-		if (!strstr(s, ".bsp"))
-			continue;
+		s = strstr( mapfiles[i], "maps/"); s++;
+		s = strstr(s, "/"); s++;
 
 		num = strlen(s)-4;
 		s[num] = 0;
