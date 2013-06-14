@@ -24,6 +24,11 @@ pics/m_main
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scroll static .1 static 0
 	}
+	{
+		map gfx/menubar3.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static .15 static 0
+	}
 }
 pics/m_main_game_sel
 {
