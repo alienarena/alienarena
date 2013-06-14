@@ -145,10 +145,6 @@ typedef struct teamcensus_s
 #define TEAM_GAME ( (dmflags->integer & (DF_SKINTEAMS)) \
 		|| ctf->integer || tca->integer || cp->integer )
 
-#define RED_TEAM				0
-#define BLUE_TEAM				1
-#define NO_TEAM					2
-
 //clientinfo origins
 #define INGAME					0
 #define SPAWN					1
@@ -1500,6 +1496,13 @@ struct edict_s
 	edict_t		*owner;
 	
 	int			redirect_number;	//for ghost mode
+	
+	// must be accessible to server code for collision detection
+	int			dmteam;
+	int			teamset;
+#define RED_TEAM				0
+#define BLUE_TEAM				1
+#define NO_TEAM					2
 
 
 	// DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
@@ -1622,9 +1625,6 @@ struct edict_s
 	edict_t		*flashlight;
 	
 	edict_t		*replaced_weapon;
-
-	int			dmteam;
-	int			teamset;
 
 // ACEBOT_ADD
 	qboolean is_bot;

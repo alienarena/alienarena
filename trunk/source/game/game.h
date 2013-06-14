@@ -92,10 +92,16 @@ struct edict_s
 	edict_t		*owner;
 	
 	int			redirect_number;	//for ghost mode
+	
+	// must be accessible to server code for collision detection
+	int			dmteam;
+	int			teamset;
+#define RED_TEAM				0
+#define BLUE_TEAM				1
+#define NO_TEAM					2
 
 	// the game dll can add anything it wants after
 	// this point in the structure
-	edict_t     *orb;
 };
 
 #endif		// GAME_INCLUDE
