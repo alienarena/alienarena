@@ -908,8 +908,8 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 		*totalheight += ( h*scale + 24*scale);
 	}
 
-	*ystart = ( viddef.height / 2 - 60*scale );
-	*xoffset = ( viddef.width - *widest + 250*scale) / 2;
+	*ystart = ( viddef.height / 2 - 20*scale );
+	*xoffset = ( viddef.width - *widest + 350*scale) / 2;
 }
 
 void M_Main_Draw (void)
@@ -936,8 +936,8 @@ void M_Main_Draw (void)
 
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 
-	ystart = ( viddef.height / 2 - 60*scale );
-	xoffset = ( viddef.width - widest - 25*widscale) / 2 + global_menu_xoffset;
+	ystart = ( viddef.height / 2 - 20*scale );
+	xoffset = ( viddef.width - widest - 35*widscale) / 2 + global_menu_xoffset;
 	
 	// When animating a transition away from the main menu, the background 
 	// slides away at double speed, disappearing and leaving just the menu 
