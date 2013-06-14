@@ -1983,8 +1983,9 @@ void backupgen_think (edict_t *ent)
 	{
 		if(!tacticalScore.alienPowerSource)
 		{
-			//animate and play sound
+			//animate
 			ent->s.frame = (ent->s.frame + 1) % 24;
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/reject.wav"), 1, ATTN_STATIC, 0);
 		}
 	}
 	else
@@ -1992,6 +1993,7 @@ void backupgen_think (edict_t *ent)
 		if(!tacticalScore.humanPowerSource)
 		{
 			ent->s.frame = (ent->s.frame + 1) % 24;
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/reject.wav"), 1, ATTN_STATIC, 0);
 		}
 	}	
 	ent->nextthink = level.time + FRAMETIME;
