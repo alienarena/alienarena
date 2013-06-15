@@ -2607,11 +2607,10 @@ option_name_t input_option_names[] =
 	},
 };
 
-static menulist_s		s_options_invertmouse_box;
-
-static void InvertMouseFunc( void *unused )
+static void InvertMouseFunc( void *_self )
 {
-	if(s_options_invertmouse_box.curvalue && m_pitch->value > 0)
+	menulist_s *self = (menulist_s *)_self;
+	if(self->curvalue && m_pitch->value > 0)
 		Cvar_SetValue( "m_pitch", -m_pitch->value );
 	else if(m_pitch->value < 0)
 		Cvar_SetValue( "m_pitch", -m_pitch->value );
@@ -2626,12 +2625,14 @@ static void M_Menu_Input_f (void)
 {
 	options_menu_setup (input, "INPUT OPTIONS");
 
-	s_options_invertmouse_box.generic.name	= "invert mouse";
-	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
-	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
-	setup_tickbox (s_options_invertmouse_box);
-
-	Menu_AddItem (&input.panel, &s_options_invertmouse_box);
+	{
+		static menulist_s s_options_invertmouse_box;
+		s_options_invertmouse_box.generic.name	= "invert mouse";
+		s_options_invertmouse_box.generic.callback = InvertMouseFunc;
+		s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
+		setup_tickbox (s_options_invertmouse_box);
+		Menu_AddItem (&input.panel, &s_options_invertmouse_box);
+	}
 	
 	add_text (input.window, NULL, 0); //spacer
 	
@@ -2943,22 +2944,8 @@ void (*option_open_funcs[OPTION_SCREENS])(void) =
 };
 
 static menuframework_s	s_player_config_screen;
-#if 0
-menuframework_s *option_screens[OPTION_SCREENS] = 
-{
-	&s_player_config_screen,
-	&s_display_screen,
-	&s_video_screen,
-	&s_audio_screen,
-	&s_input_screen,
-	&s_net_screen,
-	&s_irc_screen,
-};
-#endif
 
 static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
-
-static menuframework_s	*s_selected_option_menu;
 
 LINKABLE(int) option_screen_height;
 
@@ -2968,12 +2955,9 @@ static void OptionScreenFunc (void *_self)
 	menuframework_s *self = (menuframework_s *)_self;
 	
 	option_open_funcs[self->generic.localints[0]]();
-	
-/*	newscreen = option_screens[self->generic.localints[0]];*/
-/*	s_selected_option_menu = (menuframework_s *)newscreen->items[0];*/
 }
 
-void Options_MenuInit (void)
+void M_Menu_Options_f (void)
 {
 	int i;
 	
@@ -2992,26 +2976,11 @@ void Options_MenuInit (void)
 	
 	add_action (s_options_menu, "reset defaults", ControlsResetDefaultsFunc);
 	
-/*	LINK (option_screen_height, s_options_menu.height);*/
-	Menu_AutoArrange (&s_options_screen);
-}
-
-void Options_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
-{
-	// keep the main options menu the same height as the selected submenu
-/*	CHASELINK(option_screen_height) = Menu_TrueHeight (*s_selected_option_menu);*/
+	M_PushMenu_Defaults (s_options_screen);
 	
-	Screen_Draw (&s_options_screen, offset);
-}
-
-void M_Menu_Options_f (void)
-{
-	Options_MenuInit ();
-	M_PushMenu (Options_MenuDraw, Default_MenuKey, &s_options_screen);
 	// select the default options screen
 	OptionScreenFunc (&s_option_screen_actions[0]);
 }
-
 
 /*
 =============================================================================
@@ -3239,9 +3208,6 @@ GAME MENU
 =============================================================================
 */
 
-static menuframework_s	s_game_screen;
-static menuframework_s	s_game_menu;
-
 static void StartGame( void )
 {
 	extern cvar_t *name;
@@ -3272,17 +3238,20 @@ static void SinglePlayerGameFunc (void *data)
 	StartGame ();
 }
 
-static const char *singleplayer_skill_level_names[][2] = {
-	{"easy",	"You will win"},
-	{"medium",	"You might win"},
-	{"hard",	"Very challenging"},
-	{"ultra",	"Only the best will win"}
-};
-#define num_singleplayer_skill_levels  static_array_size(singleplayer_skill_level_names)
-static menuaction_s		s_singleplayer_game_actions[num_singleplayer_skill_levels];
-
 static void M_Menu_Game_f (void)
 {
+	static menuframework_s	s_game_screen;
+	static menuframework_s	s_game_menu;
+
+	static const char *singleplayer_skill_level_names[][2] = {
+		{"easy",	"You will win"},
+		{"medium",	"You might win"},
+		{"hard",	"Very challenging"},
+		{"ultra",	"Only the best will win"}
+	};
+	#define num_singleplayer_skill_levels  static_array_size(singleplayer_skill_level_names)
+	static menuaction_s		s_singleplayer_game_actions[num_singleplayer_skill_levels];
+	
 	int i;
 	
 	setup_window (s_game_screen, s_game_menu, "SINGLE PLAYER");
