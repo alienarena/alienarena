@@ -72,22 +72,22 @@ static char *menu_out_sound		= "misc/menu3.wav";
 static int pNameUnique;
 
 void M_Menu_Main_f (void);
-	void M_Menu_PlayerConfig_f (void);
-	void M_Menu_Game_f (void);
-		void M_Menu_Credits_f( void );
-	void M_Menu_JoinServer_f (void);
-			void M_Menu_AddressBook_f( void );
-			void M_Menu_PlayerRanking_f( void );
-			void M_Menu_Tactical_f( void );
-	void M_Menu_StartServer_f (void);
-			void M_Menu_BotOptions_f (void);
-	void M_Menu_IRC_f (void);
-	void M_Menu_Options_f (void);
-		void M_Menu_Video_f (void);
-		void M_Menu_Keys_f (void);
-	void M_Menu_Quit_f (void);
+	static void M_Menu_PlayerConfig_f (void);
+	static void M_Menu_Game_f (void);
+		static void M_Menu_Credits_f( void );
+	static void M_Menu_JoinServer_f (void);
+			static void M_Menu_AddressBook_f( void );
+			static void M_Menu_PlayerRanking_f( void );
+			static void M_Menu_Tactical_f( void );
+	static void M_Menu_StartServer_f (void);
+			static void M_Menu_BotOptions_f (void);
+	static void M_Menu_IRC_f (void);
+	static void M_Menu_Options_f (void);
+		static void M_Menu_Video_f (void);
+		static void M_Menu_Keys_f (void);
+	static void M_Menu_Quit_f (void);
 
-	void M_Menu_Credits( void );
+	static void M_Menu_Credits( void );
 
 qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
@@ -269,12 +269,8 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 
 
 // Should be useful for most menus
-#define screen_boilerplate(name,struct) \
-void M_Menu_ ## name ## _f (void) \
-{ \
-	name ## _MenuInit(); \
-	M_PushMenu (Screen_Draw, Default_MenuKey, &struct); \
-}
+#define M_PushMenu_Defaults(struct) \
+	M_PushMenu (Screen_Draw, Default_MenuKey, &(struct))
 
 static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
 {
@@ -756,6 +752,7 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen, menuvec2_t offset), con
 		Cvar_Set ("paused", "1");
 	
 	screen->navagable = true;
+	Menu_AutoArrange (screen);
 	
 	for (i = 0; i < mstate.active.num_layers; i++)
 	{
@@ -792,8 +789,6 @@ void M_PushMenu ( void (*draw) (menuframework_s *screen, menuvec2_t offset), con
 
 void M_ForceMenuOff (void)
 {
-	refreshCursorLink();
-
 	cls.key_dest = key_game;
 	Key_ClearStates ();
 	Cvar_Set ("paused", "0");
@@ -893,7 +888,7 @@ char *main_names[] =
 	"m_main_quit",
 	"m_main_credits",
 };
-#define MAIN_ITEMS (sizeof(main_names)/sizeof(main_names[0]))
+#define MAIN_ITEMS static_array_size(main_names)
 
 void (*main_open_funcs[MAIN_ITEMS])(void) = 
 {
@@ -1069,7 +1064,7 @@ const char *M_Main_Key (int key)
 	{
 	case K_ESCAPE:
 		m_entersound = true;
-		M_Menu_Quit_f ();
+		M_PopMenu ();
 		break;
 
 	case K_KP_DOWNARROW:
@@ -1151,7 +1146,7 @@ char *bindnames[][2] =
 {"vtaunt 0",			"voice taunt auto"}
 };
 
-#define num_bindable_actions (sizeof(bindnames)/sizeof(bindnames[0]))
+#define num_bindable_actions static_array_size(bindnames)
 
 int				keys_cursor;
 static int		bind_grab;
@@ -1514,8 +1509,6 @@ extern cvar_t *r_minimap_style;
 char *font_names[MAX_FONTS];
 int	numfonts = 0;
 
-static menuframework_s	s_display_main_submenu;
-
 // name and value lists: for spin-controls where the cvar value isn't simply
 // the integer index of whatever text is displaying in the control. We use
 // NULL terminators to separate display names and variable values, so that way
@@ -1530,6 +1523,12 @@ static const char *doppler_effect_items[] =
 	0
 };
 
+int	numhuds = 0;
+extern cvar_t *cl_hudimage1;
+extern cvar_t *cl_hudimage2;
+#define MAX_HUDS 256
+char *hud_names[MAX_HUDS];
+
 // initialize a menu item as an "option."
 void Option_Setup (menumultival_s *item, option_name_t *optionname)
 {
@@ -1539,6 +1538,17 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 	float cvarval, sliderval, valscale;
 	const sliderlimit_t *limit;
 	const fieldsize_t *fieldsize;
+	
+	// Do not re-allocate font/crosshair/HUD names each time the menu is
+	// displayed - BlackIce
+	if ( numfonts == 0 )
+		SetFontNames (font_names);
+	
+	if ( numhuds == 0 )
+		SetHudNames (hud_names);
+	
+	if ( numcrosshairs == 0 )
+		SetCrosshairNames (crosshair_names);
 	
 	// initialize item
 	
@@ -1582,9 +1592,6 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			break;
 		
 		case option_textcvarspincontrol:
-			if (optionname->names == crosshair_names)
-				// found the crosshair, put the preview just above it.
-				Menu_AddItem (&s_display_main_submenu, &crosshair_pic_thumbnail);
 			item->generic.type = MTYPE_SPINCONTROL;
 			item->itemnames = optionname->names;
 			item->generic.callback = TextVarSpinOptionFunc;
@@ -1704,6 +1711,37 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 	}
 }
 
+// all "options" menus have roughly the same layout, so we can automate some
+// of the grunt work
+
+#define options_menu_setup(menu,title) \
+	static struct \
+	{ \
+		menuframework_s	screen; \
+		menuframework_s	window; \
+		menuframework_s	panel; \
+		menumultival_s	widgets[static_array_size(menu ## _option_names)]; \
+	} menu; \
+	\
+	setup_window (menu.screen, menu.window, title); \
+	setup_panel (menu.window, menu.panel); \
+	\
+	{ \
+	\
+		int i; \
+		for (i = 0; i < static_array_size(menu ## _option_names); i++) \
+		{ \
+			/* OMG HACK */ \
+			if ((menu ## _option_names)[i].names == crosshair_names) \
+				/* found the crosshair, put the preview just above it. */ \
+				Menu_AddItem (&menu.panel, &crosshair_pic_thumbnail); \
+			Option_Setup (&menu.widgets[i], &(menu ## _option_names)[i]); \
+			Menu_AddItem( &menu.panel, &menu.widgets[i]); \
+		} \
+	}
+	
+
+
 /*
 =======================================================================
 
@@ -1711,9 +1749,6 @@ OPTIONS MENUS - DISPLAY OPTIONS MENU
 
 =======================================================================
 */
-
-static menuframework_s 	s_display_screen;
-static menuframework_s	s_display_menu;
 
 static void MinimapFunc( void *item )
 {
@@ -1869,12 +1904,6 @@ void SetCrosshairNames (char **list)
 
 	numcrosshairs = ncrosshairnames;
 }
-
-extern cvar_t *cl_hudimage1;
-extern cvar_t *cl_hudimage2;
-#define MAX_HUDS 256
-char *hud_names[MAX_HUDS];
-int	numhuds = 0;
 
 static void HudFunc( void *item )
 {
@@ -2141,7 +2170,7 @@ option_name_t disp_option_names[] =
 	}
 };
 
-#define num_options (sizeof(disp_option_names)/sizeof(disp_option_names[0]))
+#define num_options static_array_size(disp_option_names)
 
 menumultival_s options[num_options];
 
@@ -2167,39 +2196,17 @@ static void ControlsResetDefaultsFunc( void *unused )
 
 }
 
-void Display_MenuInit( void )
+static void M_Menu_Display_f (void)
 {
-	int i;
+	options_menu_setup (disp, "DISPLAY");
 
-	setup_window (s_display_screen, s_display_menu, "DISPLAY");
-	setup_panel (s_display_menu, s_display_main_submenu);
-	
 	crosshair_pic_thumbnail.generic.type = MTYPE_NOT_INTERACTIVE;
 	VectorSet (crosshair_pic_thumbnail.generic.localints, 5, 5, RCOLUMN_OFFSET);
 	crosshair_pic_thumbnail.generic.itemsizecallback = PicSizeFunc;
 	crosshair_pic_thumbnail.generic.itemdraw = CrosshairPicDrawFunc;
 	
-	// Do not re-allocate font/crosshair/HUD names each time the menu is
-	// displayed - BlackIce
-	if ( numfonts == 0 )
-		SetFontNames (font_names);
-	
-	if ( numhuds == 0 )
-		SetHudNames (hud_names);
-	
-	if ( numcrosshairs == 0 )
-		SetCrosshairNames (crosshair_names);
-	
-	for (i = 0; i < num_options; i++)
-	{
-		Option_Setup (&options[i], &disp_option_names[i]);
-		Menu_AddItem( &s_display_main_submenu, &options[i]);
-	}
-
-	Menu_AutoArrange (&s_display_screen);
+	M_PushMenu_Defaults (disp.screen);
 }
-
-screen_boilerplate (Display, s_display_screen)
 
 /*
 =======================================================================
@@ -2407,15 +2414,6 @@ option_name_t video_option_names[] =
 	}
 };
 
-#define num_vid_options (sizeof(video_option_names)/sizeof(video_option_names[0]))
-
-void Video_MenuInit (void);
-
-static menuframework_s	s_video_screen;
-static menuframework_s	s_video_menu;
-static menuframework_s	s_video_main_submenu;
-static menumultival_s	video_options[num_vid_options];
-
 const char *graphical_preset_names[][3] = 
 {
 	// display name, cfg name, tooltip
@@ -2441,9 +2439,11 @@ const char *graphical_preset_names[][3] =
 	}
 };
 
-#define num_graphical_presets (sizeof(graphical_preset_names)/sizeof(graphical_preset_names[0]))
+#define num_graphical_presets static_array_size(graphical_preset_names)
 
 static menuaction_s		s_graphical_presets[num_graphical_presets];
+
+static menuframework_s *Video_MenuInit (void);
 
 static void PresetCallback (void *_self)
 {
@@ -2456,7 +2456,7 @@ static void PresetCallback (void *_self)
 	Video_MenuInit ();
 }
 
-void VidApplyFunc (void *unused)
+void VidApplyFunc (void *self)
 {
 	int i;
 	#if defined UNIX_VARIANT
@@ -2464,8 +2464,7 @@ void VidApplyFunc (void *unused)
 	#endif
 	extern cvar_t *vid_ref;
 	
-	for (i = 0; i < num_vid_options; i++)
-		Menu_ApplyItem (&video_options[i]);
+	Menu_ApplyMenu (Menu_GetItemTree ((menuitem_s *)self));
 	
 	RS_FreeUnmarked();
 	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
@@ -2478,20 +2477,13 @@ void VidApplyFunc (void *unused)
 	M_ForceMenuOff();
 }
 
-void Video_MenuInit (void)
+static menuframework_s *Video_MenuInit (void)
 {
 	int i;
-
-	setup_window (s_video_screen, s_video_menu, "VIDEO OPTIONS");
-	setup_panel (s_video_menu, s_video_main_submenu);
 	
-	for (i = 0; i < num_vid_options; i++)
-	{
-		Option_Setup (&video_options[i], &video_option_names[i]);
-		Menu_AddItem( &s_video_main_submenu, &video_options[i]);
-	}
+	options_menu_setup (video, "VIDEO OPTIONS");
 	
-	add_text (s_video_menu, NULL, 0); // spacer
+	add_text (video.window, NULL, 0); // spacer
 	
 	for (i = 0; i < num_graphical_presets; i++)
 	{
@@ -2500,17 +2492,21 @@ void Video_MenuInit (void)
 		s_graphical_presets[i].generic.name = graphical_preset_names[i][0];
 		s_graphical_presets[i].generic.localstrings[0] = graphical_preset_names[i][1];
 		s_graphical_presets[i].generic.tooltip = graphical_preset_names[i][2];
-		Menu_AddItem (&s_video_menu, &s_graphical_presets[i]);
+		Menu_AddItem (&video.window, &s_graphical_presets[i]);
 	}
 	
-	add_text (s_video_menu, NULL, 0); // spacer
+	add_text (video.window, NULL, 0); // spacer
 	
-	add_action (s_video_menu, "apply changes", VidApplyFunc);
+	add_action (video.window, "apply changes", VidApplyFunc);
 	
-	Menu_AutoArrange (&s_video_screen);
+	return &video.screen;
 }
 
-screen_boilerplate (Video, s_video_screen);
+static void M_Menu_Video_f (void)
+{
+	menuframework_s *screen = Video_MenuInit ();
+	M_PushMenu_Defaults (*screen);
+}
 
 
 /*
@@ -2565,30 +2561,11 @@ option_name_t audio_option_names[] =
 	},
 };
 
-#define num_audio_options (sizeof(audio_option_names)/sizeof(audio_option_names[0]))
-
-static menuframework_s	s_audio_screen;
-static menuframework_s	s_audio_menu;
-static menuframework_s	s_audio_main_submenu;
-static menumultival_s	audio_options[num_audio_options];
-
-void Audio_MenuInit (void)
+static void M_Menu_Audio_f (void)
 {
-	int i;
-
-	setup_window (s_audio_screen, s_audio_menu, "AUDIO OPTIONS");
-	setup_panel (s_audio_menu, s_audio_main_submenu);
-	
-	for (i = 0; i < num_audio_options; i++)
-	{
-		Option_Setup (&audio_options[i], &audio_option_names[i]);
-		Menu_AddItem( &s_audio_main_submenu, &audio_options[i]);
-	}
-	
-	Menu_AutoArrange (&s_audio_screen);
+	options_menu_setup (audio, "AUDIO OPTIONS");
+	M_PushMenu_Defaults (audio.screen);
 }
-
-screen_boilerplate (Audio, s_audio_screen);
 
 
 /*
@@ -2638,13 +2615,6 @@ option_name_t input_option_names[] =
 	},
 };
 
-#define num_input_options (sizeof(input_option_names)/sizeof(input_option_names[0]))
-
-static menuframework_s	s_input_screen;
-static menuframework_s	s_input_menu;
-static menuframework_s	s_input_main_submenu;
-static menumultival_s	input_options[num_input_options];
-
 static menulist_s		s_options_invertmouse_box;
 
 static void InvertMouseFunc( void *unused )
@@ -2660,34 +2630,23 @@ void CustomizeControlsFunc (void *unused)
 	M_Menu_Keys_f ();
 }
 
-void Input_MenuInit (void)
+static void M_Menu_Input_f (void)
 {
-	int i;
+	options_menu_setup (input, "INPUT OPTIONS");
 
-	setup_window (s_input_screen, s_input_menu, "INPUT OPTIONS");
-	setup_panel (s_input_menu, s_input_main_submenu);
-	
-	for (i = 0; i < num_input_options; i++)
-	{
-		Option_Setup (&input_options[i], &input_option_names[i]);
-		Menu_AddItem( &s_input_main_submenu, &input_options[i]);
-	}
-	
 	s_options_invertmouse_box.generic.name	= "invert mouse";
 	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
 	s_options_invertmouse_box.curvalue		= m_pitch->value < 0;
 	setup_tickbox (s_options_invertmouse_box);
 
-	Menu_AddItem( &s_display_main_submenu, &s_options_invertmouse_box );
+	Menu_AddItem (&input.panel, &s_options_invertmouse_box);
 	
-	add_text (s_input_menu, NULL, 0); //spacer
+	add_text (input.window, NULL, 0); //spacer
 	
-	add_action (s_input_menu, "key bindings", CustomizeControlsFunc);
+	add_action (input.window, "key bindings", CustomizeControlsFunc);
 	
-	Menu_AutoArrange (&s_input_screen);
+	M_PushMenu_Defaults (input.screen);
 }
-
-screen_boilerplate (Input, s_input_screen);
 
 /*
 =======================================================================
@@ -2736,30 +2695,11 @@ option_name_t net_option_names[] =
 	},
 };
 
-#define num_net_options (sizeof(net_option_names)/sizeof(net_option_names[0]))
-
-static menuframework_s	s_net_screen;
-static menuframework_s	s_net_menu;
-static menuframework_s	s_net_main_submenu;
-static menumultival_s	net_options[num_net_options];
-
-void Net_MenuInit (void)
+static void M_Menu_Net_f (void)
 {
-	int i;
-
-	setup_window (s_net_screen, s_net_menu, "NETWORK OPTIONS");
-	setup_panel (s_net_menu, s_net_main_submenu);
-	
-	for (i = 0; i < num_net_options; i++)
-	{
-		Option_Setup (&net_options[i], &net_option_names[i]);
-		Menu_AddItem( &s_net_main_submenu, &net_options[i]);
-	}
-	
-	Menu_AutoArrange (&s_net_screen);
+	options_menu_setup (net, "NETWORK OPTIONS");
+	M_PushMenu_Defaults (net.screen);
 }
-
-screen_boilerplate (Net, s_net_screen);
 
 
 /*
@@ -2997,7 +2937,7 @@ char *option_screen_names[] =
 	"Network", 
 	"IRC Chat",
 };
-#define OPTION_SCREENS (sizeof(option_screen_names)/sizeof(option_screen_names[0]))
+#define OPTION_SCREENS static_array_size(option_screen_names)
 
 // TODO: add player config menu here as soon as I figure out what to do about
 // smaller screens.
@@ -3013,6 +2953,7 @@ void (*option_open_funcs[OPTION_SCREENS])(void) =
 };
 
 static menuframework_s	s_player_config_screen;
+#if 0
 menuframework_s *option_screens[OPTION_SCREENS] = 
 {
 	&s_player_config_screen,
@@ -3023,6 +2964,7 @@ menuframework_s *option_screens[OPTION_SCREENS] =
 	&s_net_screen,
 	&s_irc_screen,
 };
+#endif
 
 static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
 
@@ -3037,8 +2979,8 @@ static void OptionScreenFunc (void *_self)
 	
 	option_open_funcs[self->generic.localints[0]]();
 	
-	newscreen = option_screens[self->generic.localints[0]];
-	s_selected_option_menu = (menuframework_s *)newscreen->items[0];
+/*	newscreen = option_screens[self->generic.localints[0]];*/
+/*	s_selected_option_menu = (menuframework_s *)newscreen->items[0];*/
 }
 
 void Options_MenuInit (void)
@@ -3060,14 +3002,14 @@ void Options_MenuInit (void)
 	
 	add_action (s_options_menu, "reset defaults", ControlsResetDefaultsFunc);
 	
-	LINK (option_screen_height, s_options_menu.height);
+/*	LINK (option_screen_height, s_options_menu.height);*/
 	Menu_AutoArrange (&s_options_screen);
 }
 
 void Options_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
 	// keep the main options menu the same height as the selected submenu
-	CHASELINK(option_screen_height) = Menu_TrueHeight (*s_selected_option_menu);
+/*	CHASELINK(option_screen_height) = Menu_TrueHeight (*s_selected_option_menu);*/
 	
 	Screen_Draw (&s_options_screen, offset);
 }
@@ -3346,10 +3288,10 @@ static const char *singleplayer_skill_level_names[][2] = {
 	{"hard",	"Very challenging"},
 	{"ultra",	"Only the best will win"}
 };
-#define num_singleplayer_skill_levels (sizeof(singleplayer_skill_level_names)/sizeof(singleplayer_skill_level_names[0]))
+#define num_singleplayer_skill_levels  static_array_size(singleplayer_skill_level_names)
 static menuaction_s		s_singleplayer_game_actions[num_singleplayer_skill_levels];
 
-void Game_MenuInit( void )
+static void M_Menu_Game_f (void)
 {
 	int i;
 	
@@ -3367,9 +3309,9 @@ void Game_MenuInit( void )
 
 	Menu_AutoArrange (&s_game_screen);
 	Menu_Center (&s_game_screen);
+	
+	M_PushMenu_Defaults (s_game_screen);
 }
-
-screen_boilerplate (Game, s_game_screen)
 
 
 
@@ -3771,17 +3713,15 @@ void PlayerList_SubmenuInit (void)
 	LINK (s_servers[serverindex].serverinfo_submenu.lwidth, s_servers[serverindex].playerlist_scrollingmenu.lwidth);
 }
 
-void SelectedServer_MenuInit (void)
+static void M_Menu_SelectedServer_f (void)
 {
 	setup_window (s_servers[serverindex].screen, s_servers[serverindex].menu, "SERVER");
 	
 	ServerInfo_SubmenuInit ();
 	PlayerList_SubmenuInit ();
 	
-	Menu_AutoArrange (&s_servers[serverindex].screen);
+	M_PushMenu_Defaults (s_servers[serverindex].screen);
 }
-
-screen_boilerplate (SelectedServer, s_servers[serverindex].screen);
 
 
 
@@ -4227,7 +4167,7 @@ void ServerListHeader_SubmenuInit (void)
 	Menu_AddItem (&s_joinserver_menu, &s_joinserver_header);
 }
 
-void JoinServer_MenuInit( void )
+static void M_Menu_JoinServer_f (void)
 {
 	extern cvar_t *name;
 
@@ -4260,11 +4200,8 @@ void JoinServer_MenuInit( void )
 		SearchLocalGames();
 	gotServers = true;
 	
-	Menu_AutoArrange (&s_serverbrowser_screen);
-	
+	M_PushMenu_Defaults (s_serverbrowser_screen);
 }
-
-screen_boilerplate (JoinServer, s_serverbrowser_screen);
 
 /*
 =============================================================================
@@ -4286,7 +4223,7 @@ static const char *weaponModeNames[][2] =
 	{"excessive",		"excessive"},
 	{"class based",		"classbased"}
 };
-#define num_weapon_modes (sizeof(weaponModeNames)/sizeof(weaponModeNames[0]))
+#define num_weapon_modes static_array_size(weaponModeNames)
 static menulist_s s_weaponmode_list[num_weapon_modes];
 
 static const char *mutatorNames[][2] = 
@@ -4300,7 +4237,7 @@ static const char *mutatorNames[][2] =
 	{"jousting",		"sv_joustmode"},
 	{"grapple hook",	"grapple"}
 };
-#define num_mutators (sizeof(mutatorNames)/sizeof(mutatorNames[0]))
+#define num_mutators static_array_size(mutatorNames)
 static menulist_s s_mutator_list[num_mutators];
 static menufield_s s_camptime;
 
@@ -4360,7 +4297,7 @@ static const DMFlag_control_t dmflag_control_names[] = {
 	 "bot wins",			true,	DF_BOT_LEVELAD},
 	{"bots in game",		true,	DF_BOTS}
 };
-#define num_dmflag_controls (sizeof(dmflag_control_names)/sizeof(dmflag_control_names[0]))
+#define num_dmflag_controls static_array_size(dmflag_control_names)
 
 static menuframework_s	s_dmflags_submenu;
 static menulist_s		s_dmflag_controls[num_dmflag_controls];
@@ -4387,7 +4324,7 @@ void SetWeaponModeFunc(void *_self)
 	self->curvalue = value;
 }
 
-void Mutators_MenuInit( void )
+static void M_Menu_Mutators_f (void)
 {
 	int i;
 	
@@ -4457,10 +4394,10 @@ void Mutators_MenuInit( void )
 	
 	// initialize the dmflags display buffer
 	DMFlagCallback( 0 );
-	Menu_AutoArrange (&s_mutators_screen);
+	
+	M_PushMenu_Defaults (s_mutators_screen);
 }
 
-screen_boilerplate (Mutators, s_mutators_screen)
 /*
 =============================================================================
 
@@ -4487,7 +4424,7 @@ static char *weapon_icon_names[][2] =
 	{"Disruptor",		"beamgun"},
 	{"Alien Vaporizer",	"vaporizor"} // note the different spellings
 };
-#define num_weapon_icons (sizeof(weapon_icon_names)/sizeof(weapon_icon_names[0]))
+#define num_weapon_icons static_array_size(weapon_icon_names)
 
 static menuframework_s	s_addbots_screen;
 static menuframework_s	s_addbots_menu;
@@ -4654,7 +4591,8 @@ void AddbotFunc(void *self)
 	M_PopMenu();
 
 }
-void AddBots_MenuInit( void )
+
+static void M_Menu_AddBots_f (void)
 {
 	int i, j;
 
@@ -4737,7 +4675,7 @@ void AddBots_MenuInit( void )
 		Menu_AddItem( &s_addbots_menu, &bots[i].row );
 	}
 
-	Menu_AutoArrange (&s_addbots_screen);
+	M_PushMenu_Defaults (s_addbots_screen);
 
 }
 
@@ -4864,9 +4802,9 @@ static const char *game_mode_names[] =
 	"team core assault",
 	"cattle prod",
 	"duel",
-	0
+	NULL
 };
-#define num_game_modes (sizeof(game_mode_names)/(sizeof(game_mode_names[0]))-1)
+#define num_game_modes (static_array_size(game_mode_names)-1)
 
 //same order as game_mode_names
 static const char *map_prefixes[num_game_modes][3] =
@@ -5131,7 +5069,7 @@ void StartServerActionFunc( void *self )
 
 }
 
-void StartServer_MenuInit( void )
+static void M_Menu_StartServer_f (void)
 {
 	int i;
 
@@ -5258,14 +5196,12 @@ void StartServer_MenuInit( void )
 	
 	Menu_AddItem (&s_startserver_menu, &s_levelshot_submenu);
 	
-	Menu_AutoArrange (&s_startserver_screen);
-
 	// call this now to set proper inital state
-	RulesChangeFunc ( NULL );
-	MapInfoFunc(NULL);
+	RulesChangeFunc (NULL);
+	MapInfoFunc (NULL);
+	
+	M_PushMenu_Defaults (s_startserver_screen);
 }
-
-screen_boilerplate (StartServer, s_startserver_screen);
 
 /*
 =============================================================================
@@ -5328,7 +5264,7 @@ void Read_Bot_Info()
 
 void BotAction (void *self);
 
-void BotOptions_MenuInit( void )
+static void M_Menu_BotOptions_f (void)
 {
 	int i;
 
@@ -5347,12 +5283,8 @@ void BotOptions_MenuInit( void )
 		Menu_AddItem( &s_botoptions_menu, &s_bots_bot_action[i]);
 	}
 
-	Menu_AutoArrange (&s_botoptions_screen);
+	M_PushMenu_Defaults (s_botoptions_screen);
 }
-
-screen_boilerplate (BotOptions, s_botoptions_screen);
-
-screen_boilerplate (AddBots, s_addbots_screen);
 
 void BotAction( void *self )
 {
@@ -5439,7 +5371,7 @@ static menuframework_s	s_addressbook_menu;
 static char				s_addressbook_cvarnames[NUM_ADDRESSBOOK_ENTRIES][20];
 static menufield_s		s_addressbook_fields[NUM_ADDRESSBOOK_ENTRIES];
 
-void AddressBook_MenuInit( void )
+static void M_Menu_AddressBook_f (void)
 {
 	int i;
 
@@ -5466,9 +5398,9 @@ void AddressBook_MenuInit( void )
 	
 	Menu_AutoArrange (&s_addressbook_menu);
 	Menu_Center (&s_addressbook_menu);
+	
+	M_PushMenu_Defaults (s_addressbook_menu);
 }
-
-screen_boilerplate (AddressBook, s_addressbook_menu);
 
 /*
 =============================================================================
@@ -5490,7 +5422,7 @@ char totaltime[32];
 char totalfrags[32];
 char topTenList[10][64];
 
-void PlayerRanking_MenuInit( void )
+static void M_Menu_PlayerRanking_f (void)
 {
 	extern cvar_t *name;
 	PLAYERSTATS player;
@@ -5549,10 +5481,8 @@ void PlayerRanking_MenuInit( void )
 		Menu_AddItem( &s_playerranking_menu, &s_playerranking_topten[i] );
 	}
 	
-	Menu_AutoArrange (&s_playerranking_screen);
+	M_PushMenu_Defaults (s_playerranking_screen);
 }
-
-screen_boilerplate (PlayerRanking, s_playerranking_screen)
 
 /*
 =============================================================================
@@ -6233,7 +6163,7 @@ static void TacticalJoinFunc ( void *item )
 	M_ForceMenuOff ();
 }
 
-void Tactical_MenuInit( void )
+static void M_Menu_Tactical_f (void)
 {
 	extern cvar_t *name;
 	float scale;
@@ -6291,9 +6221,9 @@ void Tactical_MenuInit( void )
 		RS_LoadScript("scripts/caustics.rscript");
 		RS_LoadSpecialScripts();
 	}
+	
+	M_PushMenu_Defaults (s_tactical_screen);
 }
-
-screen_boilerplate (Tactical, s_tactical_screen);
 
 
 /*
@@ -6316,7 +6246,7 @@ void quitActionYes (void *blah)
 	CL_Quit_f();
 }
 
-void Quit_MenuInit (void)
+static void M_Menu_Quit_f (void)
 {
 	setup_window (s_quit_screen, s_quit_menu, "EXIT ALIEN ARENA");
 
@@ -6326,9 +6256,9 @@ void Quit_MenuInit (void)
 	
 	Menu_AutoArrange (&s_quit_screen);
 	Menu_Center (&s_quit_screen);
+	
+	M_PushMenu_Defaults (s_quit_screen);
 }
-
-screen_boilerplate (Quit, s_quit_screen);
 
 //=============================================================================
 /* Menu Subsystem */
@@ -6355,6 +6285,7 @@ Menu Mouse Cursor
 void refreshCursorLink (void)
 {
 	Cursor_SelectItem (NULL);
+	cursor.click_menuitem = NULL;
 }
 
 int Slider_CursorPositionX ( menuslider_s *s )

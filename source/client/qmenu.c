@@ -1246,6 +1246,22 @@ void Menu_ApplyItem (menuitem_s *item)
 	}
 }
 
+void Menu_ApplyMenu (menuframework_s *menu)
+{
+	int i;
+	menuitem_s *item, *lastitem;
+	
+	for ( i = 0; i < menu->nitems; i++ )
+	{
+		item = ((menuitem_s * )menu->items[i]);
+
+		if (item->generic.type == MTYPE_SUBMENU)
+			Menu_ApplyMenu ((menuframework_s *)item);
+		else
+			Menu_ApplyItem (item);
+	}
+}
+
 void Menu_SetStatusBar( menuframework_s *m, const char *string )
 {
 	m->statusbar = string;
