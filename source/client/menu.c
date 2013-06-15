@@ -309,8 +309,7 @@ void refreshAllCursorButtons(void)
 	window should be drawn at (that is, what number of pixels should be added
 	to the x-axis of the window when it is drawn.) The x offset for each
 	window is recalculated each frame so that the windows tile neatly
-	alongside each other, slide across the screen, etc. (TODO: don't use a
-	global for the x-offset, that's just crass.)
+	alongside each other, slide across the screen, etc. 
 	
 	The main menu is a special case, in that it will shrink into a sidebar 
 	instead of appearing partially off screen.
@@ -1600,19 +1599,12 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			{
 				item->generic.itemsizecallback = FontSelectorSizeFunc;
 				item->generic.itemdraw = FontSelectorDrawFunc;
-				item->generic.callback = TextVarSpinOptionFunc;
 				if (!strcmp (optionname->cvarname, "fnt_game"))
-				{
 					item->generic.localptrs[0] = &CL_gameFont;
-				}
 				else if (!strcmp (optionname->cvarname, "fnt_console"))
-				{
 					item->generic.localptrs[0] = &CL_consoleFont;
-				}
 				else if (!strcmp (optionname->cvarname, "fnt_menu"))
-				{
 					item->generic.localptrs[0] = &CL_menuFont;
-				}
 			}
 			break;
 		
@@ -2939,8 +2931,6 @@ char *option_screen_names[] =
 };
 #define OPTION_SCREENS static_array_size(option_screen_names)
 
-// TODO: add player config menu here as soon as I figure out what to do about
-// smaller screens.
 void (*option_open_funcs[OPTION_SCREENS])(void) = 
 {
 	&M_Menu_PlayerConfig_f,
@@ -5861,8 +5851,6 @@ static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 	return ret;
 }
 
-// TODO: put the player model inside the main player config menu. They're
-// already close to the same width.
 void PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
