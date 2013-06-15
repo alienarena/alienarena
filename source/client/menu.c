@@ -4596,7 +4596,6 @@ static void M_Menu_AddBots_f (void)
 		bots[i].row.generic.callback = AddbotFunc;
 	
 		bots[i].action.generic.type	= MTYPE_ACTION;
-		bots[i].action.generic.flags = QMF_BUTTON;
 		bots[i].action.generic.name	= bots[i].name;
 		bots[i].action.generic.localstrings[0] = bots[i].model;
 		VectorSet (bots[i].action.generic.localints, 2, 2, RCOLUMN_OFFSET);
