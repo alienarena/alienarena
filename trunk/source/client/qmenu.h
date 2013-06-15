@@ -327,6 +327,7 @@ void	Menu_DrawHighlightItem (menuitem_s *item);
 void	Menu_DrawHighlight (void);
 void	Menu_ActivateItem (menuitem_s *item);
 void	Menu_ApplyItem (menuitem_s *item);
+void	Menu_ApplyMenu (menuframework_s *menu);
 void	Menu_SetStatusBar( menuframework_s *s, const char *string );
 void	Menu_SlideItem (int dir);
 
