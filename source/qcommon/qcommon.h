@@ -856,6 +856,8 @@ void SCR_DebugGraph (float value, const float color[]);
 //used for render effect
 void CL_GlassShards(vec3_t org, vec3_t dir, int count);
 
+#define static_array_size(array) (sizeof(array)/sizeof((array)[0]))
+
 /*
 ==============================================================
 
