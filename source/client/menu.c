@@ -179,7 +179,7 @@ static void IconSpinDrawFunc (void *_self, FNT_font_t font)
 	menulist_s *self = (menulist_s *)_self;
 	
 	x = Item_GetX (*self)+RCOLUMN_OFFSET;
-	y = Item_GetY (*self)+MenuText_UpperMargin (self, font);
+	y = Item_GetY (*self)+MenuText_UpperMargin (self, font->size);
 	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
 	Draw_StretchPic (x, y, font->size, font->size, "menu/icon_border");
@@ -203,7 +203,7 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	menulist_s *self = (menulist_s *)_self;
 	
 	x = Item_GetX (*self)+RCOLUMN_OFFSET;
-	y = Item_GetY (*self)+MenuText_UpperMargin (self, font);
+	y = Item_GetY (*self)+MenuText_UpperMargin (self, font->size);
 	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
 	Draw_StretchPic (x, y, font->size, font->size, "menu/radio_border");
@@ -258,11 +258,11 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 
 // if you just want to add an action to a menu and never need to refer to it
 // again (don't use inside a loop!)
-#define add_action(menu,itname,itcallback) \
+#define add_action(menu,itname,itcallback,itflags) \
 {\
 	static menuaction_s it; \
 	it.generic.type = MTYPE_ACTION; \
-	it.generic.flags = QMF_BUTTON; \
+	it.generic.flags = (itflags)|QMF_BUTTON; \
 	it.generic.name = (itname); \
 	it.generic.callback = (itcallback); \
 	Menu_AddItem (&(menu), &(it)); \
@@ -1245,7 +1245,7 @@ static void DrawKeyBindingFunc( void *_self, FNT_font_t font )
 	
 	Menu_DrawString (
 		Item_GetX (*self) + RCOLUMN_OFFSET,
-		Item_GetY (*self) + MenuText_UpperMargin (self, font),
+		Item_GetY (*self) + MenuText_UpperMargin (self, font->size),
 		buf, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, light_color
 	);
 }
@@ -1417,7 +1417,7 @@ static void FontSelectorDrawFunc (void *_self, FNT_font_t unused)
 	font = FNT_AutoGet (*(FNT_auto_t *)self->generic.localptrs[0]);
 	
 	menu_box.x = Item_GetX (*self)+RCOLUMN_OFFSET;
-	menu_box.y = Item_GetY (*self) + MenuText_UpperMargin(self, font);
+	menu_box.y = Item_GetY (*self) + MenuText_UpperMargin (self, font->size);
 	menu_box.height = menu_box.width = 0;
 	
 	FNT_BoundedPrint (font, self->itemnames[self->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
@@ -2491,7 +2491,7 @@ static menuframework_s *Video_MenuInit (void)
 	
 	add_text (video.window, NULL, 0); // spacer
 	
-	add_action (video.window, "apply changes", VidApplyFunc);
+	add_action (video.window, "apply changes", VidApplyFunc, 0);
 	
 	return &video.screen;
 }
@@ -2638,7 +2638,7 @@ static void M_Menu_Input_f (void)
 	
 	add_text (input.window, NULL, 0); //spacer
 	
-	add_action (input.window, "key bindings", CustomizeControlsFunc);
+	add_action (input.window, "key bindings", CustomizeControlsFunc, 0);
 	
 	M_PushMenu_Defaults (input.screen);
 }
@@ -2817,7 +2817,7 @@ static void IRC_Settings_SubMenuInit( )
 	strcpy( s_irc_reconnectdelay.buffer, Cvar_VariableString("cl_IRC_reconnect_delay") );
 	Menu_AddItem( &s_irc_menu, &s_irc_reconnectdelay );
 
-	add_action (s_irc_menu, "Apply settings", ApplyIRCSettings);
+	add_action (s_irc_menu, "Apply settings", ApplyIRCSettings, 0);
 
 }
 
@@ -2978,7 +2978,7 @@ void M_Menu_Options_f (void)
 	
 	add_text (s_options_menu, NULL, 0); //spacer
 	
-	add_action (s_options_menu, "reset defaults", ControlsResetDefaultsFunc);
+	add_action (s_options_menu, "reset defaults", ControlsResetDefaultsFunc, 0);
 	
 	M_PushMenu_Defaults (s_options_screen);
 	
@@ -4118,9 +4118,9 @@ void ServerListHeader_SubmenuInit (void)
 	s_joinserver_header.horizontal = true;
 	s_joinserver_header.navagable = true;
 	
-	add_action (s_joinserver_header, "address book", AddressBookFunc);
-	add_action (s_joinserver_header, "refresh list", SearchLocalGamesFunc);
-	add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc);
+	add_action (s_joinserver_header, "address book", AddressBookFunc, 0);
+	add_action (s_joinserver_header, "refresh list", SearchLocalGamesFunc, 0);
+	add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
 
 	s_joinserver_filterempty_action.generic.name	= "show empty";
 	setup_tickbox (s_joinserver_filterempty_action);
@@ -4654,6 +4654,7 @@ START SERVER MENU
 
 static menuframework_s s_startserver_screen;
 static menuframework_s s_startserver_menu;
+static menuframework_s s_startserver_main_submenu;
 static int	  nummaps = 0;
 
 static menufield_s	s_timelimit_field;
@@ -5047,84 +5048,13 @@ static void M_Menu_StartServer_f (void)
 	};
 	
 	setup_window (s_startserver_screen, s_startserver_menu, "HOST SERVER");
+	setup_panel (s_startserver_menu, s_startserver_main_submenu);
 
 	s_startmap_list.generic.type = MTYPE_SPINCONTROL;
 	s_startmap_list.generic.name	= "initial map";
 	s_startmap_list.itemnames = (const char **) mapnames;
 	s_startmap_list.generic.callback = MapInfoFunc;
-	Menu_AddItem( &s_startserver_menu, &s_startmap_list );
-
-	s_rules_box.generic.type = MTYPE_SPINCONTROL;
-	s_rules_box.generic.name	= "rules";
-	s_rules_box.itemnames = game_mode_names;
-	s_rules_box.curvalue = 0;
-	s_rules_box.generic.callback = RulesChangeFunc;
-	Menu_AddItem( &s_startserver_menu, &s_rules_box );
-	
-	add_action (s_startserver_menu, "mutators", MutatorFunc);
-
-	s_antilag_box.generic.name	= "antilag";
-	setup_tickbox (s_antilag_box);
-	s_antilag_box.curvalue = 1;
-
-	s_timelimit_field.generic.type = MTYPE_FIELD;
-	s_timelimit_field.generic.name = "time limit";
-	s_timelimit_field.generic.flags = QMF_NUMBERSONLY;
-	s_timelimit_field.generic.tooltip = "0 = no limit";
-	s_timelimit_field.length = 3;
-	s_timelimit_field.generic.visible_length = 3;
-	strcpy( s_timelimit_field.buffer, Cvar_VariableString("timelimit") );
-
-	s_fraglimit_field.generic.type = MTYPE_FIELD;
-	s_fraglimit_field.generic.name = "frag limit";
-	s_fraglimit_field.generic.flags = QMF_NUMBERSONLY;
-	s_fraglimit_field.generic.tooltip = "0 = no limit";
-	s_fraglimit_field.length = 3;
-	s_fraglimit_field.generic.visible_length = 3;
-	strcpy( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit") );
-
-	/*
-	** maxclients determines the maximum number of players that can join
-	** the game.  If maxclients is only "1" then we should default the menu
-	** option to 8 players, otherwise use whatever its current value is.
-	** Clamping will be done when the server is actually started.
-	*/
-	s_maxclients_field.generic.type = MTYPE_FIELD;
-	s_maxclients_field.generic.name = "max players";
-	s_maxclients_field.generic.flags = QMF_NUMBERSONLY;
-	s_maxclients_field.length = 3;
-	s_maxclients_field.generic.visible_length = 3;
-	if ( Cvar_VariableValue( "maxclients" ) == 1 )
-		strcpy( s_maxclients_field.buffer, "8" );
-	else
-		strcpy( s_maxclients_field.buffer, Cvar_VariableString("maxclients") );
-
-	s_hostname_field.generic.type = MTYPE_FIELD;
-	s_hostname_field.generic.name = "hostname";
-	s_hostname_field.generic.flags = 0;
-	s_hostname_field.length = 12;
-	s_hostname_field.generic.visible_length = LONGINPUT_SIZE;
-	strcpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
-
-	s_public_box.generic.name = "public server";
-	setup_tickbox (s_public_box);
-	s_public_box.curvalue = 1;
-
-
-#if defined WIN32_VARIANT
-	s_dedicated_box.generic.name = "dedicated server";
-	setup_tickbox (s_dedicated_box);
-#else
-	// may or may not need this when disabling dedicated server menu
-	s_dedicated_box.generic.type = -1;
-	s_dedicated_box.generic.name = NULL;
-	s_dedicated_box.curvalue = 0;
-#endif
-
-	s_skill_box.generic.type = MTYPE_SPINCONTROL;
-	s_skill_box.generic.name	= "skill level";
-	s_skill_box.itemnames = skill;
-	s_skill_box.curvalue = 1;
+	Menu_AddItem( &s_startserver_main_submenu, &s_startmap_list );
 	
 	s_levelshot_submenu.generic.type = MTYPE_SUBMENU;
 	s_levelshot_submenu.generic.flags = QMF_SNUG_LEFT;
@@ -5143,22 +5073,92 @@ static void M_Menu_StartServer_f (void)
 		s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
 		Menu_AddItem( &s_levelshot_submenu, &s_startserver_map_data[i] );
 	}
+	
+	Menu_AddItem (&s_startserver_main_submenu, &s_levelshot_submenu);
+	
+	add_text (s_startserver_main_submenu, NULL, 0); //spacer
 
-	Menu_AddItem( &s_startserver_menu, &s_antilag_box );
-	Menu_AddItem( &s_startserver_menu, &s_timelimit_field );
-	Menu_AddItem( &s_startserver_menu, &s_fraglimit_field );
-	Menu_AddItem( &s_startserver_menu, &s_maxclients_field );
-	Menu_AddItem( &s_startserver_menu, &s_hostname_field );
-	Menu_AddItem( &s_startserver_menu, &s_public_box );
+	s_rules_box.generic.type = MTYPE_SPINCONTROL;
+	s_rules_box.generic.name	= "rules";
+	s_rules_box.itemnames = game_mode_names;
+	s_rules_box.curvalue = 0;
+	s_rules_box.generic.callback = RulesChangeFunc;
+	Menu_AddItem( &s_startserver_main_submenu, &s_rules_box );
+	
+	s_antilag_box.generic.name	= "antilag";
+	setup_tickbox (s_antilag_box);
+	s_antilag_box.curvalue = 1;
+	Menu_AddItem( &s_startserver_main_submenu, &s_antilag_box );
+
+	s_timelimit_field.generic.type = MTYPE_FIELD;
+	s_timelimit_field.generic.name = "time limit";
+	s_timelimit_field.generic.flags = QMF_NUMBERSONLY;
+	s_timelimit_field.generic.tooltip = "0 = no limit";
+	s_timelimit_field.length = 3;
+	s_timelimit_field.generic.visible_length = 3;
+	strcpy( s_timelimit_field.buffer, Cvar_VariableString("timelimit") );
+	Menu_AddItem( &s_startserver_main_submenu, &s_timelimit_field );
+
+	s_fraglimit_field.generic.type = MTYPE_FIELD;
+	s_fraglimit_field.generic.name = "frag limit";
+	s_fraglimit_field.generic.flags = QMF_NUMBERSONLY;
+	s_fraglimit_field.generic.tooltip = "0 = no limit";
+	s_fraglimit_field.length = 3;
+	s_fraglimit_field.generic.visible_length = 3;
+	strcpy( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit") );
+	Menu_AddItem( &s_startserver_main_submenu, &s_fraglimit_field );
+
+	/*
+	** maxclients determines the maximum number of players that can join
+	** the game.  If maxclients is only "1" then we should default the menu
+	** option to 8 players, otherwise use whatever its current value is.
+	** Clamping will be done when the server is actually started.
+	*/
+	s_maxclients_field.generic.type = MTYPE_FIELD;
+	s_maxclients_field.generic.name = "max players";
+	s_maxclients_field.generic.flags = QMF_NUMBERSONLY;
+	s_maxclients_field.length = 3;
+	s_maxclients_field.generic.visible_length = 3;
+	if ( Cvar_VariableValue( "maxclients" ) == 1 )
+		strcpy( s_maxclients_field.buffer, "8" );
+	else
+		strcpy( s_maxclients_field.buffer, Cvar_VariableString("maxclients") );
+	Menu_AddItem( &s_startserver_main_submenu, &s_maxclients_field );
+
+	s_hostname_field.generic.type = MTYPE_FIELD;
+	s_hostname_field.generic.name = "server name";
+	s_hostname_field.generic.flags = 0;
+	s_hostname_field.length = 12;
+	s_hostname_field.generic.visible_length = LONGINPUT_SIZE;
+	strcpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
+	Menu_AddItem( &s_startserver_main_submenu, &s_hostname_field );
+
+	s_public_box.generic.name = "public server";
+	setup_tickbox (s_public_box);
+	s_public_box.curvalue = 1;
+	Menu_AddItem( &s_startserver_main_submenu, &s_public_box );
+
 #if defined WIN32_VARIANT
-	Menu_AddItem( &s_startserver_menu, &s_dedicated_box );
+	s_dedicated_box.generic.name = "dedicated server";
+	setup_tickbox (s_dedicated_box);
+	Menu_AddItem( &s_startserver_main_submenu, &s_dedicated_box );
+#else
+	// may or may not need this when disabling dedicated server menu
+	s_dedicated_box.generic.type = -1;
+	s_dedicated_box.generic.name = NULL;
+	s_dedicated_box.curvalue = 0;
 #endif
-	Menu_AddItem( &s_startserver_menu, &s_skill_box );
+
+	s_skill_box.generic.type = MTYPE_SPINCONTROL;
+	s_skill_box.generic.name	= "skill level";
+	s_skill_box.itemnames = skill;
+	s_skill_box.curvalue = 1;
+	Menu_AddItem( &s_startserver_main_submenu, &s_skill_box );
 	
-	add_action (s_startserver_menu, "Bot Options", BotOptionsFunc);
-	add_action (s_startserver_menu, "begin", StartServerActionFunc);
+	add_action (s_startserver_menu, "mutators", MutatorFunc, QMF_RIGHT_COLUMN);
+	add_action (s_startserver_menu, "Bot Options", BotOptionsFunc, QMF_RIGHT_COLUMN);
+	add_action (s_startserver_menu, "begin", StartServerActionFunc, QMF_RIGHT_COLUMN);
 	
-	Menu_AddItem (&s_startserver_menu, &s_levelshot_submenu);
 	
 	// call this now to set proper inital state
 	RulesChangeFunc (NULL);
@@ -6215,8 +6215,8 @@ static void M_Menu_Quit_f (void)
 	setup_window (s_quit_screen, s_quit_menu, "EXIT ALIEN ARENA");
 
 	add_text (s_quit_menu, "Are you sure?", 0);
-	add_action (s_quit_menu, "yes", quitActionYes);
-	add_action (s_quit_menu, "no", quitActionNo);
+	add_action (s_quit_menu, "yes", quitActionYes, 0);
+	add_action (s_quit_menu, "no", quitActionNo, 0);
 	
 	Menu_AutoArrange (&s_quit_screen);
 	Menu_Center (&s_quit_screen);

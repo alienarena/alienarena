@@ -79,7 +79,7 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 		return;
 	
 	text_x = Item_GetX (*a);
-	text_y = Item_GetY (*a) + MenuText_UpperMargin (a, font);
+	text_y = Item_GetY (*a) + MenuText_UpperMargin (a, font->size);
 	
 	if ((a->generic.flags & QMF_BUTTON))
 	{
@@ -141,7 +141,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	char tempbuffer[128]="";
 	int x, y;
 	
-	y = Item_GetY (*f) + MenuText_UpperMargin (f, font);
+	y = Item_GetY (*f) + MenuText_UpperMargin (f, font->size);
 	x = Item_GetX (*f) + RCOLUMN_OFFSET;
 	
 	strncpy( tempbuffer, f->buffer, f->generic.visible_length);
@@ -532,7 +532,7 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 			ret.x += SpinControl_MaxWidth ((menulist_s *)self);
 			ret.y = SpinControl_MaxLines ((menulist_s *)self)*font->height;
 			if (ret.y > font->height)
-				ret.y += font->height;
+				ret.y += font->height-font->size;
 			break;
 		case MTYPE_SUBMENU:
 			ret.y = Menu_TrueHeight(*(menuframework_s *)self);
@@ -1331,7 +1331,7 @@ void Label_Draw (menutxt_s *s, FNT_font_t font, const float *color)
 		cmode = FNT_CMODE_TWO;
 	
 	Menu_DrawString (
-		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (s, font),
+		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (s, font->size),
 		s->generic.name, cmode, align, color
 	);
 }
@@ -1356,7 +1356,7 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 	charscale = font->size;
 	
 	x = Item_GetX (*s) + RCOLUMN_OFFSET;
-	y = Item_GetY (*s) + MenuText_UpperMargin (s, font);
+	y = Item_GetY (*s) + MenuText_UpperMargin (s, font->size);
 	
 	curscroll = s->curvalue - s->minvalue;
 	maxscroll = s->maxvalue - s->minvalue;
@@ -1404,7 +1404,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	int item_x, item_y;
 	
 	item_x = Item_GetX (*s) + RCOLUMN_OFFSET;
-	item_y = Item_GetY (*s) + MenuText_UpperMargin (s, font);
+	item_y = Item_GetY (*s) + MenuText_UpperMargin (s, SpinControl_MaxLines (s)*font->size);
 
 	if (s->generic.namedraw == NULL && s->generic.name != NULL && s->generic.flags & QMF_RIGHT_COLUMN)
 	{
