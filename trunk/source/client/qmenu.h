@@ -192,6 +192,7 @@ typedef enum {
 #define QMF_STRIP_COLOR		0x00000008
 #define QMF_SNUG_LEFT		0x00000010
 #define QMF_ACTION_WAIT		0x00000020
+#define QMF_BUTTON			0x00000040
 
 typedef struct
 {
@@ -370,7 +371,7 @@ void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 		cursor.x > (m).x && cursor.x < (m).x+CHASELINK((m).rwidth)+CHASELINK((m).lwidth) \
 	)
 
-#define MenuText_UpperMargin(font) (((font)->height-(font)->size)/2)
+#define MenuText_UpperMargin(item,font) ( (((item)->generic.parent->horizontal ? Menu_TrueHeight (*((item)->generic.parent)) : Item_GetHeight(*(item)))-(font)->size)/2)
 
 struct FNT_window_s	menu_box;
 

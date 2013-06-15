@@ -79,9 +79,29 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 		return;
 	
 	text_x = Item_GetX (*a);
-	text_y = Item_GetY (*a) + MenuText_UpperMargin (font);
+	text_y = Item_GetY (*a) + MenuText_UpperMargin (a, font);
 	
-	if ( a->generic.flags & QMF_RIGHT_COLUMN )
+	if ((a->generic.flags & QMF_BUTTON))
+	{
+		int border_x, width;
+		
+		width = CHASELINK(a->generic.lsize).x+CHASELINK(a->generic.rsize).x;
+		
+		if (!a->generic.parent->horizontal)
+		{
+			align = FNT_ALIGN_CENTER;
+			text_x = a->generic.parent->x + width/2;
+			border_x = a->generic.parent->x;
+		}
+		else
+		{
+			align = FNT_ALIGN_RIGHT;
+			border_x = text_x - width + RCOLUMN_OFFSET/2;
+		}
+		
+		Menu_DrawHorizBar ("menu/button_border", border_x, Item_GetY(*a)+2, width, font->height*2-4);
+	}
+	else if ( a->generic.flags & QMF_RIGHT_COLUMN )
 	{
 		align = FNT_ALIGN_LEFT;
 	}
@@ -121,7 +141,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	char tempbuffer[128]="";
 	int x, y;
 	
-	y = Item_GetY (*f);
+	y = Item_GetY (*f) + MenuText_UpperMargin (f, font);
 	x = Item_GetX (*f) + RCOLUMN_OFFSET;
 	
 	strncpy( tempbuffer, f->buffer, f->generic.visible_length);
@@ -467,8 +487,19 @@ static inline menuvec2_t Menu_Item_LeftSize (menucommon_s *self, FNT_font_t font
 		ret.x = Menu_PredictSize (self->name);
 		if (self->type != MTYPE_TEXT)
 			ret.x -= LCOLUMN_OFFSET;
-	} 
-	ret.y = font->height;
+	}
+	
+	if ((self->flags & QMF_BUTTON))
+	{
+		ret.y = 2*font->height;
+		if (ret.x < CHASELINK(self->parent->lwidth) && !self->parent->horizontal)
+			ret.x = CHASELINK(self->parent->lwidth);
+	}
+	else
+	{
+		ret.y = font->height;
+	}
+	
 	return ret;
 }
 
@@ -495,11 +526,13 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 			ret.x = font->width * LONGINPUT_SIZE + RCOLUMN_OFFSET;
 			break;
 		case MTYPE_FIELD:
-			ret.y += 2;
+			ret.y += 4;
 			break;
 		case MTYPE_SPINCONTROL:
 			ret.x += SpinControl_MaxWidth ((menulist_s *)self);
-			ret.y = SpinControl_MaxLines ((menulist_s *)self)*(font->height);
+			ret.y = SpinControl_MaxLines ((menulist_s *)self)*font->height;
+			if (ret.y > font->height)
+				ret.y += font->height;
 			break;
 		case MTYPE_SUBMENU:
 			ret.y = Menu_TrueHeight(*(menuframework_s *)self);
@@ -519,6 +552,9 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 		case MTYPE_TEXT:
 			break;
 	}
+	
+	if ((self->flags & QMF_BUTTON) && ret.x < CHASELINK(self->parent->rwidth) && !self->parent->horizontal)
+		ret.x = CHASELINK(self->parent->rwidth);
 	
 	return ret;
 }
@@ -604,10 +640,6 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 	
 	x = y = 0;
 	
-	// add some extra space to make things easier to click
-	if (menu->horizontal && menu->navagable)
-		y += 2*font->size - font->height;
-	
 	horiz_height = 0;
 	
 	if (reset)
@@ -658,7 +690,7 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 		else
 			CHASELINK(item->rsize) = Menu_Item_RightSize (item, font);
 		
-		itemheight = max (CHASELINK(item->lsize).y, CHASELINK(item->rsize).y);
+		itemheight = Item_GetHeight(*((menuitem_s *)item));
 		lwidth = CHASELINK(item->lsize).x;
 		rwidth = CHASELINK(item->rsize).x;
 		
@@ -685,10 +717,6 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 			MENU_INCREASELINK (menu->rwidth, rwidth);
 		}
 	}
-	
-	// add some extra space to make things easier to click
-	if (menu->horizontal && menu->navagable)
-		horiz_height += 2*y;
 	
 	if (menu->horizontal)
 	{
@@ -824,7 +852,7 @@ void Menu_AssignCursor (menuframework_s *menu)
 		else
 		{
 			maxcoord = mincoord = Item_GetY (*item);
-			maxcoord += max (CHASELINK(item->generic.lsize).y, CHASELINK(item->generic.rsize).y);
+			maxcoord += Item_GetHeight (*item);
 			if (cursor.y < mincoord || cursor.y > maxcoord)
 				continue;
 		}
@@ -1073,7 +1101,7 @@ void Menu_DrawVertBar (const char *pathbase, float x, float y, float h, float ba
 	Com_sprintf( scratch, sizeof( scratch ), "%s%s", pathbase, "_end");
 	
 	Draw_AlphaStretchTilingPic (x, y-base_size/2.0, base_size, base_size, scratch, 1);
-	Draw_AlphaStretchTilingPic (x, y+h+base_size/2.0, base_size, -base_size, scratch, 1);
+	Draw_AlphaStretchTilingPic (x+base_size, y+h+base_size/2.0, -base_size, -base_size, scratch, 1);
 	if (h > base_size)
 		Draw_AlphaStretchTilingPic (x, y+base_size/2.0, base_size, h-base_size, pathbase, 1);
 }
@@ -1085,7 +1113,7 @@ void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float b
 	Com_sprintf( scratch, sizeof( scratch ), "%s%s", pathbase, "_end");
 	
 	Draw_AlphaStretchTilingPic (x-base_size/2.0, y, base_size, base_size, scratch, 1);
-	Draw_AlphaStretchTilingPic (x+w+base_size/2.0, y, -base_size, base_size, scratch, 1);
+	Draw_AlphaStretchTilingPic (x+w+base_size/2.0, y+base_size, -base_size, -base_size, scratch, 1);
 	if (w > base_size)
 		Draw_AlphaStretchTilingPic (x+base_size/2.0, y, w-base_size, base_size, pathbase, 1);
 }
@@ -1303,7 +1331,7 @@ void Label_Draw (menutxt_s *s, FNT_font_t font, const float *color)
 		cmode = FNT_CMODE_TWO;
 	
 	Menu_DrawString (
-		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (font),
+		Item_GetX (*s), Item_GetY (*s) + MenuText_UpperMargin (s, font),
 		s->generic.name, cmode, align, color
 	);
 }
@@ -1322,12 +1350,13 @@ void Slider_DoSlide( menuslider_s *s, int dir )
 
 void Slider_Draw (menuslider_s *s, FNT_font_t font)
 {
-	float		maxscroll, curscroll, scroll_range, cursor_size, x, width;
+	float		maxscroll, curscroll, scroll_range, cursor_size, x, y, width;
 	float 		charscale;
 
 	charscale = font->size;
 	
 	x = Item_GetX (*s) + RCOLUMN_OFFSET;
+	y = Item_GetY (*s) + MenuText_UpperMargin (s, font);
 	
 	curscroll = s->curvalue - s->minvalue;
 	maxscroll = s->maxvalue - s->minvalue;
@@ -1338,8 +1367,8 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 	scroll_range = width-charscale/2.0;
 	cursor_size = charscale;
 	
-	Menu_DrawHorizBar ("menu/slide_border", x, Item_GetY (*s), width, charscale);
-	Menu_DrawHorizBar ("menu/slide_cursor", x+charscale/4.0+s->range*(scroll_range-cursor_size), Item_GetY (*s), cursor_size, charscale);
+	Menu_DrawHorizBar ("menu/slide_border", x, y, width, charscale);
+	Menu_DrawHorizBar ("menu/slide_cursor", x+charscale/4.0+s->range*(scroll_range-cursor_size), y, cursor_size, charscale);
 }
 
 void SpinControl_DoSlide( menulist_s *s, int dir )
@@ -1375,7 +1404,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 	int item_x, item_y;
 	
 	item_x = Item_GetX (*s) + RCOLUMN_OFFSET;
-	item_y = Item_GetY (*s) + MenuText_UpperMargin (font);
+	item_y = Item_GetY (*s) + MenuText_UpperMargin (s, font);
 
 	if (s->generic.namedraw == NULL && s->generic.name != NULL && s->generic.flags & QMF_RIGHT_COLUMN)
 	{
@@ -1406,7 +1435,7 @@ void SpinControl_Draw (menulist_s *s, FNT_font_t font)
 		);
 		strcpy( buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
 		Menu_DrawString (
-			item_x, menu_box.y + menu_box.height, 
+			item_x, menu_box.y + font->height, 
 			buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
 			light_color
 		);

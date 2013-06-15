@@ -179,7 +179,7 @@ static void IconSpinDrawFunc (void *_self, FNT_font_t font)
 	menulist_s *self = (menulist_s *)_self;
 	
 	x = Item_GetX (*self)+RCOLUMN_OFFSET;
-	y = Item_GetY (*self);
+	y = Item_GetY (*self)+MenuText_UpperMargin (self, font);
 	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
 	Draw_StretchPic (x, y, font->size, font->size, "menu/icon_border");
@@ -203,7 +203,7 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	menulist_s *self = (menulist_s *)_self;
 	
 	x = Item_GetX (*self)+RCOLUMN_OFFSET;
-	y = Item_GetY (*self);
+	y = Item_GetY (*self)+MenuText_UpperMargin (self, font);
 	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
 	Draw_StretchPic (x, y, font->size, font->size, "menu/radio_border");
@@ -262,6 +262,7 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 {\
 	static menuaction_s it; \
 	it.generic.type = MTYPE_ACTION; \
+	it.generic.flags = QMF_BUTTON; \
 	it.generic.name = (itname); \
 	it.generic.callback = (itcallback); \
 	Menu_AddItem (&(menu), &(it)); \
@@ -1244,7 +1245,7 @@ static void DrawKeyBindingFunc( void *_self, FNT_font_t font )
 	
 	Menu_DrawString (
 		Item_GetX (*self) + RCOLUMN_OFFSET,
-		Item_GetY (*self) + MenuText_UpperMargin (font),
+		Item_GetY (*self) + MenuText_UpperMargin (self, font),
 		buf, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, light_color
 	);
 }
@@ -1416,7 +1417,7 @@ static void FontSelectorDrawFunc (void *_self, FNT_font_t unused)
 	font = FNT_AutoGet (*(FNT_auto_t *)self->generic.localptrs[0]);
 	
 	menu_box.x = Item_GetX (*self)+RCOLUMN_OFFSET;
-	menu_box.y = Item_GetY (*self);
+	menu_box.y = Item_GetY (*self) + MenuText_UpperMargin(self, font);
 	menu_box.height = menu_box.width = 0;
 	
 	FNT_BoundedPrint (font, self->itemnames[self->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
@@ -2480,6 +2481,7 @@ static menuframework_s *Video_MenuInit (void)
 	for (i = 0; i < num_graphical_presets; i++)
 	{
 		s_graphical_presets[i].generic.type = MTYPE_ACTION;
+		s_graphical_presets[i].generic.flags = QMF_BUTTON|QMF_RIGHT_COLUMN;
 		s_graphical_presets[i].generic.callback = PresetCallback;
 		s_graphical_presets[i].generic.name = graphical_preset_names[i][0];
 		s_graphical_presets[i].generic.localstrings[0] = graphical_preset_names[i][1];
@@ -2866,6 +2868,7 @@ void IRC_MenuInit( void )
 	setup_window (s_irc_screen, s_irc_menu, "IRC CHAT OPTIONS");
 
 	s_irc_join.generic.type	= MTYPE_ACTION;
+	s_irc_join.generic.flags = QMF_BUTTON;
 	s_irc_join.generic.name	= "Join IRC Chat";
 	s_irc_join.generic.callback = JoinIRCFunc;
 	Menu_AddItem( &s_irc_menu, &s_irc_join );
@@ -2966,6 +2969,7 @@ void M_Menu_Options_f (void)
 	for (i = 0; i < OPTION_SCREENS; i++)
 	{
 		s_option_screen_actions[i].generic.type = MTYPE_ACTION;
+		s_option_screen_actions[i].generic.flags = QMF_BUTTON;
 		s_option_screen_actions[i].generic.name = option_screen_names[i];
 		s_option_screen_actions[i].generic.localints[0] = i;
 		s_option_screen_actions[i].generic.callback = OptionScreenFunc;
@@ -3259,6 +3263,7 @@ static void M_Menu_Game_f (void)
 	for (i = 0; i < num_singleplayer_skill_levels; i++)
 	{
 		s_singleplayer_game_actions[i].generic.type = MTYPE_ACTION;
+		s_singleplayer_game_actions[i].generic.flags = QMF_BUTTON;
 		s_singleplayer_game_actions[i].generic.name = singleplayer_skill_level_names[i][0];
 		s_singleplayer_game_actions[i].generic.tooltip = singleplayer_skill_level_names[i][1];
 		s_singleplayer_game_actions[i].generic.localints[0] = i;
@@ -3541,7 +3546,7 @@ void ServerInfo_SubmenuInit (void)
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].name);
 	
 	s_servers[serverindex].connect.generic.type = MTYPE_ACTION;
-	s_servers[serverindex].connect.generic.flags = QMF_RIGHT_COLUMN;
+	s_servers[serverindex].connect.generic.flags = QMF_BUTTON | QMF_RIGHT_COLUMN;
 	s_servers[serverindex].connect.generic.name = "Connect";
 	s_servers[serverindex].connect.generic.callback = JoinServerFunc;
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].connect);
@@ -4591,6 +4596,7 @@ static void M_Menu_AddBots_f (void)
 		bots[i].row.generic.callback = AddbotFunc;
 	
 		bots[i].action.generic.type	= MTYPE_ACTION;
+		bots[i].action.generic.flags = QMF_BUTTON;
 		bots[i].action.generic.name	= bots[i].name;
 		bots[i].action.generic.localstrings[0] = bots[i].model;
 		VectorSet (bots[i].action.generic.localints, 2, 2, RCOLUMN_OFFSET);
@@ -5237,6 +5243,7 @@ static void M_Menu_BotOptions_f (void)
 	for (i = 0; i < 8; i++) {
 		s_bots_bot_action[i].generic.type = MTYPE_ACTION;
 		s_bots_bot_action[i].generic.name = bot[i].name;
+		s_bots_bot_action[i].generic.flags = QMF_BUTTON;
 		s_bots_bot_action[i].generic.callback = BotAction;
 		s_bots_bot_action[i].curvalue = i;
 		Menu_AddItem( &s_botoptions_menu, &s_bots_bot_action[i]);
@@ -6155,6 +6162,7 @@ static void M_Menu_Tactical_f (void)
 			Menu_AddItem (&s_tactical_columns[i][j], &s_tactical_skin_previews[i][j]);
 			
 			s_tactical_skin_actions[i][j].generic.type = MTYPE_ACTION;
+			s_tactical_skin_actions[i][j].generic.flags = QMF_BUTTON;
 			s_tactical_skin_actions[i][j].generic.name = tactical_skin_names[i][j][0];
 			s_tactical_skin_actions[i][j].generic.localstrings[0] = tactical_skin_names[i][j][1];
 			s_tactical_skin_actions[i][j].generic.callback = TacticalJoinFunc;
