@@ -371,7 +371,7 @@ void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 		cursor.x > (m).x && cursor.x < (m).x+CHASELINK((m).rwidth)+CHASELINK((m).lwidth) \
 	)
 
-#define MenuText_UpperMargin(item,font) ( (((item)->generic.parent->horizontal ? Menu_TrueHeight (*((item)->generic.parent)) : Item_GetHeight(*(item)))-(font)->size)/2)
+#define MenuText_UpperMargin(item,height) ( (((item)->generic.parent->horizontal ? Menu_TrueHeight (*((item)->generic.parent)) : Item_GetHeight(*(item)))-height)/2)
 
 struct FNT_window_s	menu_box;
 
