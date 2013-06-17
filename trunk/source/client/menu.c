@@ -55,6 +55,8 @@ extern int CL_GetPingStartTime(netadr_t adr);
 extern void RS_LoadScript(char *script);
 extern void RS_LoadSpecialScripts(void);
 extern void RS_ScanPathForScripts(void);
+extern void RS_FreeUnmarked (void);
+extern void SCR_DrawCenterString (void);
 extern cvar_t *scriptsloaded;
 #if defined WIN32_VARIANT
 extern char map_music[MAX_PATH];
@@ -70,6 +72,10 @@ static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
 static int pNameUnique;
+
+void SetCrosshairNames (char **list);
+void SetHudNames (char **list);
+void SetFontNames (char **list);
 
 void M_Menu_Main_f (void);
 	static void M_Menu_PlayerConfig_f (void);
