@@ -167,7 +167,6 @@ extern cvar_t	*r_overbrightbits;
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_bspnormalmaps;
 extern cvar_t	*gl_shadowmaps;
-extern cvar_t	*gl_glsl_postprocess;
 extern cvar_t	*gl_fog;
 
 extern	cvar_t	*r_shaders;

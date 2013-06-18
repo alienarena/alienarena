@@ -56,7 +56,7 @@ void R_GLSLDistortion(void)
 	trace_t r_trace;
 	float hScissor, wScissor;
 
-	if(!gl_glsl_postprocess->value || !gl_glsl_shaders->value || vid.width > 2048 || !gl_state.glsl_shaders)
+	if(!gl_glsl_shaders->integer || vid.width > 2048 || !gl_state.glsl_shaders)
 		return;
 
 	if(r_fbFxType == EXPLOSION) 
@@ -216,7 +216,7 @@ void R_GLSLWaterDroplets(void)
 	vec3_t end;
 	static float r_drTime;
 
-	if(!(r_weather == 1) || !cl_raindist->value || !gl_glsl_postprocess->value || !gl_glsl_shaders->value || vid.width > 2048 || !gl_state.glsl_shaders)
+	if(!(r_weather == 1) || !cl_raindist->integer || !gl_glsl_shaders->integer || vid.width > 2048 || !gl_state.glsl_shaders)
 		return;
 
 	VectorCopy(r_newrefdef.vieworg, end);
@@ -553,7 +553,7 @@ void R_DrawVehicleHUD (void)
 	char shortname[MAX_QPATH];
 	
 	//draw image over screen
-	if(!cl_vehicle_huds->value)
+	if(!cl_vehicle_huds->integer)
 		return;
 
 	switch(vehicle_hud)
@@ -613,7 +613,7 @@ void R_DrawVehicleHUD (void)
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
 	
-	if(r_shaders->value && rs)
+	if(r_shaders->integer && rs)
 	{
 		RS_ReadyScript(rs);
 
@@ -744,7 +744,7 @@ void R_GLSLGodRays(void)
 	vec2_t fxScreenPos;
 	vec3_t origin = {0, 0, 0};
 
-	if(!gl_glsl_postprocess->integer || !r_godrays->integer || !r_drawsun->integer)
+	if(!r_godrays->integer || !r_drawsun->integer)
 		return;
 
 	 if (!draw_sun || sun_alpha <= 0)
@@ -796,7 +796,7 @@ void R_GLSLGodRays(void)
 	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
 
 	qglCullFace(GL_FRONT);
-	if (gl_cull->value)
+	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
 	R_DrawShadowMapWorld(false, origin); //could tweak this to only draw surfaces that are in the sun?
