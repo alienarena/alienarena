@@ -230,6 +230,17 @@ void Draw_GetPicSize (int *w, int *h, const char *pic)
 	*h = gl->height;
 }
 
+/*
+=============
+Draw_CropImage
+
+Renders the image with automatic cropping. At image load time, margins of
+completely transparent pixels are detected and noted. The GPU needs texture
+dimensions to be powers of two, but by bringing the vertexes in closer to the
+center and adjusting texture coordinates to match, 
+=============
+*/
+
 #define DIV254BY255 (0.9960784313725490196078431372549f)
 /*
 =============
@@ -253,7 +264,6 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 	char shortname[MAX_QPATH];
 	float xscale, yscale;
 	float cropped_x, cropped_y, cropped_w, cropped_h;
-	float sl, tl, sh, th;
 	
 	if (scrap_dirty)
 		Scrap_Upload ();
@@ -283,19 +293,14 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		cropped_x = x + xscale*(float)gl->crop_left;
 		cropped_y = y + yscale*(float)gl->crop_top;
 	
-		cropped_w = w - xscale*(float)(gl->crop_right + gl->crop_left);
-		cropped_h = h - yscale*(float)(gl->crop_bottom + gl->crop_top);
+		cropped_w = xscale*(float)gl->crop_width; 
+		cropped_h = yscale*(float)gl->crop_height;
 		
 		VA_SetElem2(vert_array[0], cropped_x,			cropped_y);
 		VA_SetElem2(vert_array[1], cropped_x+cropped_w, cropped_y);
 		VA_SetElem2(vert_array[2], cropped_x+cropped_w, cropped_y+cropped_h);
 		VA_SetElem2(vert_array[3], cropped_x,			cropped_y+cropped_h);
 	
-		sl = gl->sl + (float)gl->crop_left/(float)gl->upload_width;
-		tl = gl->tl + (float)gl->crop_top/(float)gl->upload_height;
-		sh = gl->sh - (float)gl->crop_right/(float)gl->upload_width;
-		th = gl->th - (float)gl->crop_bottom/(float)gl->upload_height;
-
 		qglColor4f(1,1,1, alphaval);
 
 		//set color of hud by team
@@ -318,10 +323,10 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 		}
-		VA_SetElem2(tex_array[0], sl, tl);
-		VA_SetElem2(tex_array[1], sh, tl);
-		VA_SetElem2(tex_array[2], sh, th);
-		VA_SetElem2(tex_array[3], sl, th);
+		VA_SetElem2(tex_array[0], gl->crop_sl, gl->crop_tl);
+		VA_SetElem2(tex_array[1], gl->crop_sh, gl->crop_tl);
+		VA_SetElem2(tex_array[2], gl->crop_sh, gl->crop_th);
+		VA_SetElem2(tex_array[3], gl->crop_sl, gl->crop_th);
 		R_DrawVarrays (GL_QUADS, 0, 4);
 		qglEnable (GL_ALPHA_TEST);
 		qglDisable (GL_BLEND);
