@@ -678,11 +678,12 @@ void R_InitSun()
 }
 
 
-void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
+void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
                       float g, float b, float alpha)
 {
     float minx, miny, maxx, maxy;
-    float new_x, new_y, corr;
+    float new_x, new_y;
+    float diameter = 2.0*radius;
 
     qglColor4f(r, g, b, alpha);
     GL_Bind(tex->texnum);
@@ -695,23 +696,46 @@ void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
         new_y = sun_y;
     }
 
-    corr = 1;
-
-    minx = new_x - size * corr;
-    miny = new_y - size;
-    maxx = new_x + size * corr;
-    maxy = new_y + size;
-
-    qglBegin(GL_QUADS);
-    qglTexCoord2f(0, 0);
-    qglVertex2f(minx, miny);
-    qglTexCoord2f(1, 0);
-    qglVertex2f(maxx, miny);
-    qglTexCoord2f(1, 1);
-    qglVertex2f(maxx, maxy);
-    qglTexCoord2f(0, 1);
-    qglVertex2f(minx, maxy);
-    qglEnd();
+	
+	minx = new_x - radius;
+	miny = new_y - radius;
+	maxx = new_x + radius;
+	maxy = new_y + radius;
+	
+	if (r_test->integer && false)
+	{
+		// TODO: add an alpha channel to gfx/sun.jpg (will require converting
+		// to TGA) because otherwise this code makes no difference.
+		
+		minx += diameter * (float)tex->crop_left / (float)tex->upload_width;
+		miny += diameter * (float)tex->crop_top / (float)tex->upload_height;
+		maxx = minx + diameter * (float)tex->crop_width / (float)tex->upload_width;
+		maxy = miny + diameter * (float)tex->crop_height / (float)tex->upload_height;
+		
+	    qglBegin(GL_QUADS);
+		qglTexCoord2f(tex->crop_sl, tex->crop_tl);
+		qglVertex2f(minx, miny);
+		qglTexCoord2f(tex->crop_sh, tex->crop_tl);
+		qglVertex2f(maxx, miny);
+		qglTexCoord2f(tex->crop_sh, tex->crop_th);
+		qglVertex2f(maxx, maxy);
+		qglTexCoord2f(tex->crop_sl, tex->crop_th);
+		qglVertex2f(minx, maxy);
+		qglEnd();
+	}
+	else
+	{
+		qglBegin(GL_QUADS);
+		qglTexCoord2f(0, 0);
+		qglVertex2f(minx, miny);
+		qglTexCoord2f(1, 0);
+		qglVertex2f(maxx, miny);
+		qglTexCoord2f(1, 1);
+		qglVertex2f(maxx, maxy);
+		qglTexCoord2f(0, 1);
+		qglVertex2f(minx, maxy);
+		qglEnd();
+	}
 }
 
 void R_RenderSun()
@@ -729,11 +753,12 @@ void R_RenderSun()
     if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
         return;
 
-    qglReadPixels(sun_x, r_newrefdef.height - sun_y, 1, 1,
-                  GL_DEPTH_COMPONENT, GL_FLOAT, &l);
 
     // periodically test visibility to ramp alpha
     if(rs_realtime - sun_time > 0.02) {
+
+		qglReadPixels (	sun_x, r_newrefdef.height - sun_y, 1, 1,
+						GL_DEPTH_COMPONENT, GL_FLOAT, &l);
 
         sun_alpha += (l == 1.0 ? 0.15 : -0.15);  // ramp
 
@@ -752,7 +777,6 @@ void R_RenderSun()
         hy = r_newrefdef.height / 2;
         vec[0] = 1 - fabs(sun_x - hx) / hx;
         vec[1] = 1 - fabs(sun_y - hy) / hy;
-        l = 3 * vec[0] * vec[1] + 0.25;
 
         // set 2d
         qglMatrixMode(GL_PROJECTION);
