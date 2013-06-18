@@ -18,8 +18,6 @@ int	c_peak_windings;
 int	c_winding_allocs;
 int	c_winding_points;
 
-#define	BOGUS_RANGE	((signed int)(((unsigned int)(-1))>>1))
-
 void pw(winding_t *w)
 {
 	int		i;
@@ -423,7 +421,7 @@ void ChopWindingInPlace (winding_t **inout, vec3_t normal, vec_t dist, vec_t eps
 	vec_t	dists[MAX_POINTS_ON_WINDING+4];
 	int		sides[MAX_POINTS_ON_WINDING+4];
 	int		counts[3];
-	static	vec_t	dot;		// VC 4.2 optimizer bug if not static
+	vec_t	dot;
 	int		i, j;
 	vec_t	*p1, *p2;
 	vec3_t	mid;

@@ -5,7 +5,8 @@
 
 #include <math.h>
 
-#define	BOGUS_RANGE	((signed int)(((unsigned int)(-1))>>1))
+// big enough without being so big we get major floating point errors.
+#define	BOGUS_RANGE	((1<<14)<<1)
 
 #ifdef DOUBLEVEC_T
 typedef double vec_t;
