@@ -50,7 +50,8 @@ typedef struct image_s
 	int			registration_sequence;		// 0 = free
 	int			texnum;				// gl texture binding
 	float			sl, tl, sh, th;			// 0,0 - 1,1 unless part of the scrap
-	int				crop_left, crop_top, crop_right, crop_bottom; //for cropped 2D drawing
+	int				crop_left, crop_top, crop_width, crop_height; //for cropped 2D drawing
+	float			crop_sl, crop_tl, crop_sh, crop_th;	// texcoords of cropped corners
 	qboolean		scrap;
 	qboolean		has_alpha;
 	qboolean		paletted;

@@ -1593,19 +1593,33 @@ nonscrap:
 		}
 
 		if (type == it_pic)
-		    qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
-		image->crop_left = crop_left;
-		image->crop_right = crop_right;
-		image->crop_top = crop_top;
-		image->crop_bottom = crop_bottom;
-		image->upload_width = upload_width;		// after power of 2 and scales
-		image->upload_height = upload_height;
+			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+		
 		image->paletted = uploaded_paletted;
+
+		// size in pixels after power of 2 and scales
+		image->upload_width = upload_width;
+		image->upload_height = upload_height;
+		
+		// vertex offset to apply when cropping
+		image->crop_left = crop_left;
+		image->crop_top = crop_top;
+		
+		// size in pixels after cropping
+		image->crop_width = upload_width-crop_left-crop_right;
+		image->crop_height = upload_height-crop_top-crop_bottom;
+		
+		// texcoords to use when not cropping
 		image->sl = 0;
 		image->sh = 1;
 		image->tl = 0;
 		image->th = 1;
+		
+		// texcoords to use when cropping
+		image->crop_sl = 0 + (float)crop_left/(float)upload_width;
+		image->crop_sh = 1 - (float)crop_right/(float)upload_width;
+		image->crop_tl = 0 + (float)crop_top/(float)upload_height;
+		image->crop_th = 1 - (float)crop_bottom/(float)upload_height;
 	}
 
 	COMPUTE_HASH_KEY( image->hash_key, name, i );
