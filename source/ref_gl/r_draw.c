@@ -230,17 +230,6 @@ void Draw_GetPicSize (int *w, int *h, const char *pic)
 	*h = gl->height;
 }
 
-/*
-=============
-Draw_CropImage
-
-Renders the image with automatic cropping. At image load time, margins of
-completely transparent pixels are detected and noted. The GPU needs texture
-dimensions to be powers of two, but by bringing the vertexes in closer to the
-center and adjusting texture coordinates to match, 
-=============
-*/
-
 #define DIV254BY255 (0.9960784313725490196078431372549f)
 /*
 =============
