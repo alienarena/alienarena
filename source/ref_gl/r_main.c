@@ -48,7 +48,6 @@ glstate_t		gl_state;
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_bspnormalmaps;
 cvar_t  *gl_shadowmaps;
-cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
 cvar_t	*gl_fog;
@@ -1282,7 +1281,6 @@ void R_Register( void )
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	gl_bspnormalmaps = Cvar_Get("gl_bspnormalmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
-	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	gl_fog = Cvar_Get ("gl_fog", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	Cvar_Describe (gl_fog, "Fog and weather effects.");
 

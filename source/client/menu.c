@@ -2369,13 +2369,6 @@ option_name_t video_option_names[] =
 	},
 	{
 		option_spincontrol,
-		"gl_glsl_postprocess",
-		"post process effects",
-		"GLSL must be enabled for this to take effect",
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
 		"cl_paindist",
 		"pain distortion fx",
 		"GLSL must be enabled for this to take effect",
