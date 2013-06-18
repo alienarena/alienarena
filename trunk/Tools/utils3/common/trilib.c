@@ -10,7 +10,6 @@
 // on disk representation of a face
 
 
-#define	BOGUS_RANGE	((signed int)(((unsigned int)(-1))>>1))
 #define	FLOAT_START	BOGUS_RANGE
 #define	FLOAT_END	-FLOAT_START
 #define MAGIC       123322
