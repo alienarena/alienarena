@@ -703,6 +703,10 @@ static void InitSig(void)
 */
 rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
 {
+	extern cvar_t	*vid_xpos;	// X coordinate of window position
+	extern cvar_t	*vid_ypos;	// Y coordinate of window position
+	int xpos, ypos;
+
 	int width, height;
 	int attrib[] = {
 		GLX_RGBA,
@@ -790,6 +794,9 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		have_stencil = true;
 
 	vidmode_active = false;
+	
+	xpos = ypos = 0;
+	
 #if defined HAVE_XXF86VM
 	if (vidmode_ext) {
 		int best_fit, best_dist, dist, x, y, num_vidmodes;
@@ -825,6 +832,15 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 				// Move the viewport to top left
 				XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
+				
+				if (width != actualWidth || height != actualHeight)
+				{
+					xpos = vid_xpos->integer;
+					ypos = vid_ypos->integer;
+					Com_Printf ("Resolution %dx%d is not supported natively by the display!\n", width, height);
+					Com_Printf ("Closest screen resolution is %dx%d. ", actualWidth, actualHeight); 
+					Com_Printf ("Use vid_xpos and vid_ypos to adjust the position of the game window (current offset is %d, %d)\n", xpos, ypos);
+				}
 			} else
 				fullscreen = 0;
 		}
@@ -878,12 +894,12 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 #if defined HAVE_XXF86VM
 	if (vidmode_active) {
-		XMoveWindow(dpy, win, 0, 0);
+		XMoveWindow(dpy, win, xpos, ypos);
 		XRaiseWindow(dpy, win);
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
 		XFlush(dpy);
 		// Move the viewport to top left
-		XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
+		XF86VidModeSetViewPort(dpy, scrnum, xpos, ypos);
 	}
 #endif // defined HAVE_XXF86VM
 
