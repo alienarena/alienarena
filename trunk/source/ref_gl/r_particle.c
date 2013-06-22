@@ -653,8 +653,6 @@ qboolean gluProject2(float objx, float objy, float objz, const float model[16], 
 }
 
 
-float sun_time = 0;
-float sun_alpha = 0;
 void R_InitSun()
 {
     draw_sun = false;
@@ -740,7 +738,11 @@ void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
 
 void R_RenderSun()
 {
-    float l, hx, hy;
+    static float l;
+    static float float sun_vistest_time = 0;
+	static float sun_ramp_time = 0;
+	static float sun_alpha = 0;
+    float hx, hy;
     float vec[2];
     float size;
 
@@ -753,22 +755,32 @@ void R_RenderSun()
     if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
         return;
 
+    // The sun is only visible if a single pixel at sun_x, sun_y is not
+    // covered by anything. Just like lens flares, we ramp the opacity up and
+    // down linearly to smooth out transitions. Since glReadPixels is
+    // expensive, we only test visibility every SUN_VIS_TEST_PERIOD seconds,
+    // but to keep the opacity animation smooth, we do that every frame.
+
+    #define SUN_VIS_TEST_PERIOD 0.1
+    #define SUN_ALPHA_RAMP_PER_SECOND 7.5
+    #define SUN_ALPHA_RAMP_PER_FRAME (SUN_ALPHA_RAMP_PER_SECOND*(rs_realtime-sun_ramp_time))
 
     // periodically test visibility to ramp alpha
-    if(rs_realtime - sun_time > 0.02) {
+    if(rs_realtime - sun_vistest_time > SUN_VIS_TEST_PERIOD)
+    {
+	    qglReadPixels (	sun_x, r_newrefdef.height - sun_y, 1, 1,
+					    GL_DEPTH_COMPONENT, GL_FLOAT, &l);
+		sun_vistest_time = rs_realtime;
+	}
+	
+	// ramp opacity up or down each frame
+    sun_alpha += (l == 1.0 ? 1.0 : -1.0)*SUN_ALPHA_RAMP_PER_FRAME;
+    sun_ramp_time = rs_realtime;
 
-		qglReadPixels (	sun_x, r_newrefdef.height - sun_y, 1, 1,
-						GL_DEPTH_COMPONENT, GL_FLOAT, &l);
-
-        sun_alpha += (l == 1.0 ? 0.15 : -0.15);  // ramp
-
-        if(sun_alpha > 1.0)  // clamp
-            sun_alpha = 1.0;
-        else if(sun_alpha < 0)
-            sun_alpha = 0.0;
-
-        sun_time = rs_realtime;
-    }
+    if(sun_alpha > 1.0)  // clamp
+        sun_alpha = 1.0;
+    else if(sun_alpha < 0)
+        sun_alpha = 0.0;
 
     if (sun_alpha > 0)
     {
