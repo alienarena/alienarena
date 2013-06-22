@@ -736,12 +736,12 @@ void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
 	}
 }
 
+float sun_alpha = 0;
 void R_RenderSun()
 {
     static float l;
-    static float float sun_vistest_time = 0;
+    static float	 sun_vistest_time = 0;
 	static float sun_ramp_time = 0;
-	static float sun_alpha = 0;
     float hx, hy;
     float vec[2];
     float size;
