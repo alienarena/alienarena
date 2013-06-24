@@ -1781,6 +1781,9 @@ done:
 		free(pic);
 	if (palette)
 		free(palette);
+	
+	if (image != NULL)
+		image->script = RS_FindScript (shortname);
 
 ret_image:
 	return image;

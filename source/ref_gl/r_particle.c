@@ -740,7 +740,7 @@ float sun_alpha = 0;
 void R_RenderSun()
 {
     static float l;
-    static float	 sun_vistest_time = 0;
+    static float sun_vistest_time = 0;
 	static float sun_ramp_time = 0;
     float hx, hy;
     float vec[2];
