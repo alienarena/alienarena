@@ -822,8 +822,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			strcpy( mod->skinname, skinname );
 
 			//load shader for skin
-			COM_StripExtension( skinname, shortname );
-			mod->script = RS_FindScript( shortname );
+			mod->script = mod->skins[0]->script;
 			if ( mod->script )
 				RS_ReadyScript( (rscript_t *)mod->script );
 		}

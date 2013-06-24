@@ -553,13 +553,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	for (i=0 ; i<pheader->num_glcmds ; i++)
 		poutcmd[i] = LittleLong (pincmd[i]);
 
-#if 0
-	// register all skins
-	memcpy ((char *)pheader + pheader->ofs_skins, (char *)pinmodel + pheader->ofs_skins,
-		pheader->num_skins*MAX_SKINNAME);
-	for (i=0 ; i<pheader->num_skins ; i++)
-		mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME, it_skin);
-#else
 	// skin names are not always valid or file may not exist
 	// do not register skins that cannot be found to eliminate extraneous
 	//  file system searching.
@@ -579,20 +572,10 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 				pheader->num_skins--; // the important part: adjust skin count
 			pstring += MAX_SKINNAME;
 		}
-	}
-#endif
-
-	// load script
-	if(pheader->num_skins)
-	{
-		char rs[MAX_OSPATH];
-
-		strcpy(rs,(char *)pinmodel + LittleLong(pinmodel->ofs_skins));
-
-		rs[strlen(rs)-4]=0;
-
-		mod->script = RS_FindScript(rs);
-
+		
+		// load script
+		if (mod->skins[0] != NULL)
+    		mod->script = mod->skins[0]->script;
 		if (mod->script)
 			RS_ReadyScript( mod->script );
 	}
