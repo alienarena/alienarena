@@ -611,7 +611,8 @@ void R_DrawVehicleHUD (void)
 	R_DrawVarrays(GL_QUADS, 0, 4);
 	
 	COM_StripExtension ( gl->name, shortname );
-	rs=RS_FindScript(shortname);
+	
+	rs = gl->script;
 	
 	if(r_shaders->integer && rs)
 	{

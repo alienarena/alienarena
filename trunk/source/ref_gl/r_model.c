@@ -561,15 +561,12 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			if (mod->type == mod_alias || mod->type == mod_iqm)
 			{
 				// Make sure models scripts are definately reloaded between maps
-				char rs[MAX_OSPATH];
 				image_t *img;
 				img=mod->skins[0];
 
 				if (img != NULL)
 				{
-					strcpy(rs,mod->skins[0]->name);
-					rs[strlen(rs)-4]=0;
-					mod->script = RS_FindScript(rs);
+					mod->script = mod->skins[0]->script;
 					if (mod->script)
 						RS_ReadyScript( mod->script );
 				}
@@ -882,8 +879,6 @@ void Mod_LoadTexinfo (lump_t *l)
 		Com_sprintf (name, sizeof(name), "textures/%s.wal", in->texture);
 		out->image = GL_FindImage (name, it_wall);
 
-		Com_sprintf (name, sizeof(name), "textures/%s", in->texture);
-		out->image->script = RS_FindScript(name);
 		if (out->image->script)
 			RS_ReadyScript(out->image->script);
 

@@ -585,8 +585,7 @@ void R_DrawEntitiesOnList (void)
 			//custom player skin (must be done here)
 			if (currententity->skin)
 			{
-                COM_StripExtension ( currententity->skin->name, shortname );
-                rs = RS_FindScript(shortname);
+                rs = currententity->skin->script;
                 if(rs)
                     RS_ReadyScript(rs);
             }
@@ -650,8 +649,7 @@ void R_DrawViewEntitiesOnList (void)
 			//custom player skin (must be done here)
 			if (currententity->skin)
 			{
-                COM_StripExtension ( currententity->skin->name, shortname );
-                rs = RS_FindScript(shortname);
+                rs = currententity->skin->script;
                 if(rs)
                     RS_ReadyScript(rs);
             }
@@ -699,8 +697,7 @@ void R_DrawViewEntitiesOnList (void)
 			//custom player skin (must be done here)
 			if (currententity->skin)
 			{
-                COM_StripExtension ( currententity->skin->name, shortname );
-                rs = RS_FindScript(shortname);
+                rs = currententity->skin->script;
                 if(rs)
                     RS_ReadyScript(rs);
             }

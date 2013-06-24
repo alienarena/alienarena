@@ -879,7 +879,6 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 			if (r_shaders->value) {
 				strcpy(pathname,sky_images[i]->name);
 				pathname[strlen(pathname)-4]=0;
-				sky_images[i]->script = RS_FindScript(pathname);
 				if(sky_images[i]->script)
 					RS_ReadyScript(sky_images[i]->script);
 			}
