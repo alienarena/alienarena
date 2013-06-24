@@ -231,15 +231,23 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->next = NULL;
 }
 
-rscript_t *RS_NewScript (char *name)
+// Create a new script with the given name. Reuse the "old" struct if possible
+// to avoid breaking old pointers.
+rscript_t *RS_NewScript (char *name, rscript_t *old)
 {
 	rscript_t	*rs;
 	unsigned int	i;
 
-	if (!rs_rootscript)
+	if (old != NULL)
+	{
+		RS_ResetScript (old);
+		rs = old;
+	}
+	else if (!rs_rootscript)
 	{
 		rs_rootscript = (rscript_t *)malloc(sizeof(rscript_t));
 		rs = rs_rootscript;
+		rs->next = NULL;
 	}
 	else
 	{
@@ -250,13 +258,13 @@ rscript_t *RS_NewScript (char *name)
 
 		rs->next = (rscript_t *)malloc(sizeof(rscript_t));
 		rs = rs->next;
+		rs->next = NULL;
 	}
 
 	COMPUTE_HASH_KEY(rs->hash_key, name, i);
 	strncpy (rs->name, name, sizeof(rs->name));
 
 	rs->stage = NULL;
-	rs->next = NULL;
 	rs->dontflush = false;	
 	rs->ready = false;	
 
@@ -313,10 +321,14 @@ void RS_FreeAllScripts (void)
 void RS_ReloadImageScriptLinks (void)
 {
 	image_t		*image;
-	int	i;
+	int			i;
+	char		shortname[MAX_QPATH];
 
 	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
-		image->script = RS_FindScript(image->bare_name);
+	{
+		COM_StripExtension (image->name, shortname);
+		image->script = RS_FindScript (shortname);
+	}
 
 }
 
@@ -347,8 +359,16 @@ void RS_FreeScript(rscript_t *rs)
 
 void RS_FreeUnmarked (void)
 {
+	image_t		*image;
+	int			i;
 	rscript_t	*rs = rs_rootscript, *tmp_rs;
 
+	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
+	{
+		if (image->script && !((rscript_t *)image->script)->dontflush)
+			image->script = NULL;
+	}
+	
 	while (rs != NULL)
 	{
 		tmp_rs = rs->next;
@@ -1031,10 +1051,7 @@ void RS_LoadScript(char *script)
 			{
 				rs = RS_FindScript(token);
 
-				if (rs)
-					RS_FreeScript(rs);
-
-				rs = RS_NewScript(token);
+				rs = RS_NewScript (token, rs);
 			}
 		}
 		else if (inscript && !ignored)

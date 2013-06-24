@@ -247,7 +247,7 @@ enum draw_tiling_s
 };
 void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *gl, float alphaval, enum draw_tiling_s tiling)
 {
-	rscript_t *rs = NULL;
+	rscript_t *rs;
 	float	alpha,s,t;
 	rs_stage_t *stage;
 	char shortname[MAX_QPATH];
@@ -258,7 +258,8 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		Scrap_Upload ();
 	
 	COM_StripExtension ( gl->name, shortname );
-	rs=RS_FindScript(shortname);
+	
+	rs = gl->script;
 
 	//if we draw the red team bar, we are on red team
 	if(!strcmp(shortname, "pics/i_team1"))
