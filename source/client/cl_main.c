@@ -2577,7 +2577,10 @@ void CL_Frame( int msec )
 		/* run cURL downloads */
 		CL_HttpDownloadThink();
 
-		/* system dependent keyboard and mouse input event polling */
+		/* 
+		 * system dependent keyboard and mouse input event polling
+		 * accumulate keyboard and mouse events
+		 */
 		Sys_SendKeyEvents();
 
 		/* joystick input. may or may not be working. */
@@ -2586,7 +2589,11 @@ void CL_Frame( int msec )
 		/* execute pending commands */
 		Cbuf_Execute();
 
-		/* send client commands to server */
+		/*
+		 * send client commands to server
+		 * these are construced from accumulated keyboard and mouse events,
+		 * which are then reset
+		 */
 		CL_SendCmd();
 
 		/* clear various cvars unless single player */
@@ -2636,11 +2643,18 @@ void CL_Frame( int msec )
 	{
 		++render_counter; // counting renders since last packet
 		
-		if (!packet_trigger && cl_test->integer)
+		if (!packet_trigger)
 		{
-			/* system dependent keyboard and mouse input event polling */
+			/* 
+			 * system dependent keyboard and mouse input event polling
+			 * accumulate keyboard and mouse events
+			 */
 			cls.frametime  = ((float)packet_timer) / 1000.0f;
 			Sys_SendKeyEvents();
+			/*
+			 * update view angles based on accumulated keyboard and mouse 
+			 * events, which are *not* reset
+			 */
 			IN_Move(NULL);
 		}
 
