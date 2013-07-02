@@ -1051,7 +1051,7 @@ static void CL_ReadPackets ();
 void CL_PingServers_f (void)
 {
 
-	int			i, j;
+	int			i;
 	netadr_t	adr;
 	char		name[32];
 	char		*adrstring;
@@ -2643,7 +2643,7 @@ void CL_Frame( int msec )
 	{
 		++render_counter; // counting renders since last packet
 		
-		if (!packet_trigger)
+		if (!packet_trigger && cl_test->integer) //return cl_test - this was causing major issues with menu mouse in windows build
 		{
 			/* 
 			 * system dependent keyboard and mouse input event polling
