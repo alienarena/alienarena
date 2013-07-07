@@ -117,23 +117,21 @@ static void IntFieldCallback( void *_self )
 
 static menuvec2_t PicSizeFunc (void *_self, FNT_font_t font)
 {
-	int 		sizetest1, sizetest2;
 	menuvec2_t	ret;
 	menuitem_s	*self = (menuitem_s *)_self;
 	
 	ret.x = ret.y = 0;
 	
-	// determine if pic exists, if not return 0 size. 
-	// TODO: less hacky way to do this test
-	if (self->generic.localstrings[0] != NULL)
-		// benefit of doubt if the name isn't there
-		Draw_GetPicSize (&sizetest1, &sizetest2, self->generic.localstrings[0]);
-	if (sizetest1 == -1)
-		return ret;
+	// Determine if pic exists, if not return 0 size. 
+	// However, we give the benefit of the doubt if the name isn't there, and
+	// assume it will be.
+	if (self->generic.localstrings[0] == NULL || Draw_PicExists (self->generic.localstrings[0]))
+	{
+		ret.x = self->generic.localints[0]*font->size;
+		ret.y = self->generic.localints[1]*font->size;
+		ret.x += self->generic.localints[2];
+	}
 	
-	ret.x = self->generic.localints[0]*font->size;
-	ret.y = self->generic.localints[1]*font->size;
-	ret.x += self->generic.localints[2];
 	return ret;
 }
 
