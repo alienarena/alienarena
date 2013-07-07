@@ -848,13 +848,15 @@ const char *Default_MenuKey (menuframework_s *m, int key)
 	case K_MWHEELUP:
 	case K_KP_UPARROW:
 	case K_UPARROW:
-		Menu_AdvanceCursor (-1);
+		Menu_AdvanceCursor (-1, false);
 		break;
 	case K_TAB:
+		Menu_AdvanceCursor (1, true);
+		break;
 	case K_MWHEELDOWN:
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
-		Menu_AdvanceCursor (1);
+		Menu_AdvanceCursor (1, false);
 		break;
 	case K_KP_LEFTARROW:
 	case K_LEFTARROW:
@@ -4040,6 +4042,7 @@ void ServerList_SubmenuInit (void)
 	int i, j;
 	
 	s_serverlist_submenu.generic.type = MTYPE_SUBMENU;
+	s_serverlist_submenu.generic.flags = QMF_SUBMENU_CAPTURE;
 	s_serverlist_submenu.navagable = true;
 	s_serverlist_submenu.nitems = 0;
 	s_serverlist_submenu.bordertexture = "menu/sm_";
@@ -4319,9 +4322,9 @@ static void M_Menu_Mutators_f (void)
 	add_text (s_mutators_menu, dmflags_display_buffer, 0);
 	
 	s_dmflags_submenu.generic.type = MTYPE_SUBMENU;
+	s_dmflags_submenu.generic.flags = QMF_SNUG_LEFT | QMF_SUBMENU_CAPTURE;
 	s_dmflags_submenu.navagable = true;
 	s_dmflags_submenu.bordertexture = "menu/sm_";
-	s_dmflags_submenu.generic.flags = QMF_SNUG_LEFT;
 	s_dmflags_submenu.nitems = 0;
 	s_dmflags_submenu.maxlines = 15;
 	for (i = 0; i < num_dmflag_controls; i++)
