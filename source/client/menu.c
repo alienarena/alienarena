@@ -148,6 +148,33 @@ static void PicDrawFunc (void *_self, FNT_font_t font)
 	Draw_StretchPic (x, y, font->size*self->generic.localints[0], font->size*self->generic.localints[1], self->generic.localstrings[0]);
 }
 
+// for spin controls where each item is a texture path
+static menuvec2_t PicSpinSizeFunc (void *_self, FNT_font_t font)
+{
+	menuvec2_t	ret;
+	menulist_s	*self = (menulist_s *)_self;
+	
+	ret.x = self->generic.localints[0]*font->size;
+	ret.y = self->generic.localints[1]*font->size;
+	ret.x += self->generic.localints[2];
+	
+	return ret;
+}
+
+static void PicSpinDrawFunc (void *_self, FNT_font_t font)
+{
+	int x, y;
+	char *string;
+	menulist_s *self = (menulist_s *)_self;
+	
+	x = Item_GetX (*self);
+	y = Item_GetY (*self);
+	x += self->generic.localints[2];
+	
+	if (strlen(self->itemnames[self->curvalue]) > 0)
+		Draw_StretchPic (x, y,font->size*self->generic.localints[0], font->size*self->generic.localints[1], self->itemnames[self->curvalue]);
+}
+
 
 // name lists: list of strings terminated by 0
 
@@ -277,16 +304,6 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 // Should be useful for most menus
 #define M_PushMenu_Defaults(struct) \
 	M_PushMenu (Screen_Draw, Default_MenuKey, &(struct))
-
-static void CrosshairPicDrawFunc (void *_self, FNT_font_t font)
-{
-	int x, y;
-	menuitem_s *self = (menuitem_s *)_self;
-	x = Item_GetX (*self) + RCOLUMN_OFFSET;
-	y = Item_GetY (*self);
-	
-	Draw_StretchPic (x, y, font->size*5, font->size*5, crosshair->string);
-}
 
 static inline void refreshCursorButton (int button)
 {
@@ -1367,6 +1384,7 @@ typedef struct {
 		option_textcvarslider,
 		option_spincontrol,
 		option_textcvarspincontrol,
+		option_textcvarpicspincontrol,
 		option_hudspincontrol,
 		option_minimapspincontrol,
 		option_numberfield
@@ -1501,8 +1519,6 @@ extern cvar_t *crosshair;
 char *crosshair_names[MAX_CROSSHAIRS];
 int	numcrosshairs = 0;
 
-menuitem_s crosshair_pic_thumbnail; 
-
 static void HudFunc( void *item );
 static void MinimapFunc( void *item );
 static void UpdateBGMusicFunc( void *_self );
@@ -1599,6 +1615,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			break;
 		
 		case option_textcvarspincontrol:
+		case option_textcvarpicspincontrol:
 			item->generic.type = MTYPE_SPINCONTROL;
 			item->itemnames = optionname->names;
 			item->generic.callback = TextVarSpinOptionFunc;
@@ -1613,6 +1630,12 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 					item->generic.localptrs[0] = &CL_consoleFont;
 				else if (!strcmp (optionname->cvarname, "fnt_menu"))
 					item->generic.localptrs[0] = &CL_menuFont;
+			}
+			else if (optionname->type == option_textcvarpicspincontrol)
+			{
+				item->generic.itemsizecallback = PicSpinSizeFunc;
+				item->generic.itemdraw = PicSpinDrawFunc;
+				VectorSet (item->generic.localints, 5, 5, RCOLUMN_OFFSET);
 			}
 			break;
 		
@@ -1666,6 +1689,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 		
 		case option_hudspincontrol:
 		case option_textcvarspincontrol:
+		case option_textcvarpicspincontrol:
 		case option_textcvarslider:
 			item->curvalue = 0;
 			vartextval = Cvar_VariableString (optionname->cvarname);
@@ -1731,10 +1755,6 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 		int i; \
 		for (i = 0; i < static_array_size(menu ## _option_names); i++) \
 		{ \
-			/* OMG HACK */ \
-			if ((menu ## _option_names)[i].names == crosshair_names) \
-				/* found the crosshair, put the preview just above it. */ \
-				Menu_AddItem (&menu.panel, &crosshair_pic_thumbnail); \
 			Option_Setup (&menu.widgets[i], &(menu ## _option_names)[i]); \
 			Menu_AddItem( &menu.panel, &menu.widgets[i]); \
 		} \
@@ -1890,11 +1910,10 @@ void SetCrosshairNames (char **list)
 		num = strlen(p)-4;
 		p[num] = 0;
 
-		curCrosshair = p;
-
-		if (!fontInList(curCrosshair, ncrosshairnames, list))
+		if (!fontInList(curCrosshairFile, ncrosshairnames, list))
 		{
-			insertFile (list,curCrosshair,curCrosshairFile,4,ncrosshairnames);
+			// HACK
+			insertFile (list,curCrosshairFile,curCrosshairFile,4,ncrosshairnames);
 			ncrosshairnames++;
 		}
 	}
@@ -2099,7 +2118,7 @@ option_name_t disp_option_names[] =
 		setnames (font_names)
 	},
 	{
-		option_textcvarspincontrol,
+		option_textcvarpicspincontrol,
 		"crosshair",
 		"crosshair",
 		"select your crosshair",
@@ -2200,11 +2219,6 @@ static void M_Menu_Display_f (void)
 {
 	options_menu_setup (disp, "DISPLAY");
 
-	crosshair_pic_thumbnail.generic.type = MTYPE_NOT_INTERACTIVE;
-	VectorSet (crosshair_pic_thumbnail.generic.localints, 5, 5, RCOLUMN_OFFSET);
-	crosshair_pic_thumbnail.generic.itemsizecallback = PicSizeFunc;
-	crosshair_pic_thumbnail.generic.itemdraw = CrosshairPicDrawFunc;
-	
 	M_PushMenu_Defaults (disp.screen);
 }
 
@@ -3837,7 +3851,6 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", min(9999,destserver->ping));
 }
 
-static menulist_s		s_joinserver_filterempty_action;
 static menuframework_s	s_serverbrowser_screen;
 
 static menuframework_s	s_joinserver_menu;
@@ -3862,14 +3875,6 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	M_ParseServerInfo (adr, status_string, &mservers[m_num_servers]);
 	
 	CON_Clear();
-	
-	if(s_joinserver_filterempty_action.curvalue)
-	{
-		// show empty off; filter empty servers
-		if(mservers[m_num_servers].players == 0)
-			// don't increment m_num_servers; this one will be overwritten
-			return; 
-	}
 	
 	m_num_servers++;
 }
@@ -4116,12 +4121,6 @@ void ServerListHeader_SubmenuInit (void)
 	add_action (s_joinserver_header, "refresh list", SearchLocalGamesFunc, 0);
 	add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
 
-	s_joinserver_filterempty_action.generic.name	= "show empty";
-	setup_tickbox (s_joinserver_filterempty_action);
-	s_joinserver_filterempty_action.itemnames = offon_names;
-
-	Menu_AddItem( &s_joinserver_header, &s_joinserver_filterempty_action );
-	
 	Menu_AddItem (&s_joinserver_menu, &s_joinserver_header);
 }
 
