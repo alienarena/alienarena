@@ -379,6 +379,7 @@ typedef struct
 float *RGBA (float r, float g, float b, float a);
 #define RGBA8(a,b,c,d) RGBA((a)/255.0f, (b)/255.0f, (c)/255.0f, (d)/255.0f)
 
+qboolean	Draw_PicExists (const char *name);
 void	Draw_GetPicSize (int *w, int *h, const char *name);
 void	Draw_Pic (float x, float y, const char *name);
 void	Draw_ScaledPic (float x, float y, float scale, const char *pic);

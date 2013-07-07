@@ -210,12 +210,22 @@ image_t	*R_RegisterPlayerIcon (const char *name)
 
 	return gl;
 }
+
+/*
+=============
+Draw_PicExists
+=============
+*/
+qboolean Draw_PicExists (const char *pic)
+{
+	return R_RegisterPic (pic) != NULL;
+}
+
 /*
 =============
 Draw_GetPicSize
 =============
 */
-
 void Draw_GetPicSize (int *w, int *h, const char *pic)
 {
 	image_t *gl;
