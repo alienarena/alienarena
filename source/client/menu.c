@@ -5939,7 +5939,7 @@ void PlayerConfig_MenuInit( void )
 	// Horizontal submenu with two items. The first is a password field. The 
 	// second is an apply button for the password.
 	s_player_password_submenu.generic.type = MTYPE_SUBMENU;
-	// Keep the password field vertically lined up:
+	// Keep the password field horizontally lined up:
 	s_player_password_submenu.generic.flags = QMF_SNUG_LEFT;
 	s_player_password_submenu.navagable = true;
 	s_player_password_submenu.horizontal = true;
@@ -5951,9 +5951,9 @@ void PlayerConfig_MenuInit( void )
 	s_player_password_field_submenu.navagable = true;
 	s_player_password_field_submenu.horizontal = true;
 	s_player_password_field_submenu.nitems = 0;
-	// keep the password field vertically lined up:
+	// keep the password field horizontally lined up:
 	LINK (s_player_config_menu.lwidth, s_player_password_field_submenu.lwidth);
-	// keep it horizontally centered on the apply button
+	// keep it vertically centered on the apply button
 	LINK (s_player_password_submenu.height, s_player_password_field_submenu.height);
 	
 	s_player_password_field.generic.type = MTYPE_FIELD;
@@ -5974,7 +5974,7 @@ void PlayerConfig_MenuInit( void )
 	// model/skin controls. The second is just a thumbnail of the current
 	// selection.
 	s_player_skin_submenu.generic.type = MTYPE_SUBMENU;
-	// Keep the model/skin controls vertically lined up:
+	// Keep the model/skin controls horizontally lined up:
 	s_player_skin_submenu.generic.flags = QMF_SNUG_LEFT;
 	s_player_skin_submenu.navagable = true;
 	s_player_skin_submenu.horizontal = true;
@@ -5985,7 +5985,7 @@ void PlayerConfig_MenuInit( void )
 	s_player_skin_controls_submenu.generic.type = MTYPE_SUBMENU;
 	s_player_skin_controls_submenu.navagable = true;
 	s_player_skin_controls_submenu.nitems = 0;
-	// keep the model/skin controls vertically lined up:
+	// keep the model/skin controls horizontally lined up:
 	LINK (s_player_config_menu.lwidth, s_player_skin_controls_submenu.lwidth);
 
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
