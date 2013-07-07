@@ -71,7 +71,8 @@ extern cvar_t *stats_password;
 static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
-static int pNameUnique;
+
+#define PLAYER_NAME_UNIQUE (strcmp (Cvar_VariableString ("name"), "Player") != 0)
 
 void SetCrosshairNames (char **list);
 void SetHudNames (char **list);
@@ -2720,7 +2721,7 @@ static menufield_s		s_irc_reconnectdelay;
 
 static void JoinIRCFunc( void *unused )
 {
-	if(pNameUnique)
+	if(PLAYER_NAME_UNIQUE)
 		CL_InitIRC();
 }
 
@@ -2850,13 +2851,6 @@ static void M_FindIRCKey ( void )
 
 void IRC_MenuInit( void )
 {
-	extern cvar_t *name;
-
-	if(!strcmp(name->string, "Player"))
-		pNameUnique = false;
-	else
-		pNameUnique = true;
-
 	if(!cl_IRC_connect_at_startup)
 		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
 
@@ -2881,7 +2875,7 @@ void IRC_MenuInit( void )
 void IRC_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
 	//warn user that they cannot join until changing default player name
-	if(!pNameUnique)
+	if(!PLAYER_NAME_UNIQUE)
 		s_irc_menu.statusbar = "You must create your player name before joining a server!";
 	else if(CL_IRCIsConnected())
 		s_irc_menu.statusbar = "Connected to IRC server.";
@@ -3552,7 +3546,7 @@ void ServerInfo_SubmenuInit (void)
 	s_servers[serverindex].connect.generic.statusbar = NULL;
 	if (serverIsOutdated (mservers[serverindex].szVersion))
 		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
-	else if (!pNameUnique)
+	else if (!PLAYER_NAME_UNIQUE)
 		s_servers[serverindex].connect.generic.statusbar = "You must change your player name from the default before connecting!";
 	else
 		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
@@ -3912,7 +3906,7 @@ void ClickServerFunc( void *self )
 			return;
 	}
 
-	if(!pNameUnique) {
+	if(!PLAYER_NAME_UNIQUE) {
 		M_Menu_PlayerConfig_f();
 		return;
 	}
@@ -4144,11 +4138,6 @@ static void M_Menu_JoinServer_f (void)
 	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
 	thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
 	thisPlayer = getPlayerRanking ( thisPlayer );
-
-	if(!strcmp(name->string, "Player"))
-		pNameUnique = false;
-	else
-		pNameUnique = true;
 
 	serverindex = -1;
 
@@ -5570,8 +5559,13 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 }
 
 static menuframework_s	s_player_config_menu;
+
 static menufield_s		s_player_name_field;
+
+static menuframework_s	s_player_password_submenu;
+static menuframework_s	s_player_password_field_submenu;
 static menufield_s		s_player_password_field;
+
 static menuframework_s	s_player_skin_submenu;
 static menuframework_s	s_player_skin_controls_submenu;
 static menulist_s		s_player_model_box;
@@ -5594,12 +5588,25 @@ typedef struct
 
 static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
 static char *s_pmnames[MAX_PLAYERMODELS];
-static int s_numplayermodels;
+static int s_numplayermodels = 0;
 
-static void ModelCallback( void *unused )
+static void ModelCallback (void *unused)
 {
 	s_player_skin_box.itemnames = (const char **) s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
+	
+	Menu_ActivateItem ((menuitem_s *)&s_player_skin_box);
+}
+
+static void SkinCallback (void *unused)
+{
+	char scratch[MAX_QPATH];
+	
+	Com_sprintf( scratch, sizeof( scratch ), "%s/%s",
+		s_pmi[s_player_model_box.curvalue].directory,
+		s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
+
+	Cvar_Set( "skin", scratch );
 }
 
 static qboolean IconOfSkinExists( char *skin, char **pcxfiles, int npcxfiles )
@@ -5637,7 +5644,9 @@ static void PlayerConfig_ScanDirectories( void )
 	char **dirnames;
 	int i;
 
-	s_numplayermodels = 0;
+	// check if we need to do anything
+	if (s_numplayermodels != 0)
+		return;
 
 	//get dirs from gamedir first.
 	dirnames = FS_ListFilesInFS( "players/*.*", &ndirs, SFF_SUBDIR, 0 );
@@ -5791,7 +5800,6 @@ static int pmicmpfnc( const void *_a, const void *_b )
 	return strcmp( a->directory, b->directory );
 }
 
-
 static void PlayerPicDrawFunc (void *_self, FNT_font_t font)
 {
 	int x, y;
@@ -5800,11 +5808,41 @@ static void PlayerPicDrawFunc (void *_self, FNT_font_t font)
 	x = Item_GetX (*self);
 	y = Item_GetY (*self);
 	
-	Com_sprintf( scratch, sizeof( scratch ), "/players/%s/%s_i.tga",
-			s_pmi[s_player_model_box.curvalue].directory,
-			s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
+	Com_sprintf( scratch, sizeof( scratch ), "/players/%s_i.tga",
+			Cvar_VariableString ("skin") );
 	
 	Draw_StretchPic (x, y, font->size*5, font->size*5, scratch);
+}
+
+static void PasswordCallback (void *_self)
+{
+	menufield_s *self = (menufield_s *)_self;
+	
+	//was the password changed?
+	if(strcmp("********", self->buffer))
+	{
+		//if this is a virgin password, don't change, just authenticate
+		if(!strcmp(stats_password->string, "password"))
+		{
+			Cvar_FullSet( "stats_password", self->buffer, CVAR_PROFILE);
+			stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
+			currLoginState.validated = false;
+			STATS_RequestVerification();
+		}
+		else
+		{
+			Cvar_FullSet( "stats_password", self->buffer, CVAR_PROFILE);
+			stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
+			STATS_RequestPwChange();
+		}
+	}
+}
+
+void PConfigApplyFunc (void *self)
+{
+	Menu_ApplyMenu (Menu_GetItemTree ((menuitem_s *)self));
 }
 
 static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
@@ -5891,18 +5929,46 @@ void PlayerConfig_MenuInit( void )
 
 	s_player_name_field.generic.type = MTYPE_FIELD;
 	s_player_name_field.generic.name = "name";
+	s_player_name_field.generic.localstrings[0] = "name";
+	s_player_name_field.generic.callback = StrFieldCallback;
 	s_player_name_field.length	= 20;
 	s_player_name_field.generic.visible_length = LONGINPUT_SIZE;
 	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
 	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
-
+	
+	// Horizontal submenu with two items. The first is a password field. The 
+	// second is an apply button for the password.
+	s_player_password_submenu.generic.type = MTYPE_SUBMENU;
+	// Keep the password field vertically lined up:
+	s_player_password_submenu.generic.flags = QMF_SNUG_LEFT;
+	s_player_password_submenu.navagable = true;
+	s_player_password_submenu.horizontal = true;
+	s_player_password_submenu.nitems = 0;
+	
+	// sub-submenu for the password field. Purely for formatting/layout 
+	// purposes.
+	s_player_password_field_submenu.generic.type = MTYPE_SUBMENU;
+	s_player_password_field_submenu.navagable = true;
+	s_player_password_field_submenu.horizontal = true;
+	s_player_password_field_submenu.nitems = 0;
+	// keep the password field vertically lined up:
+	LINK (s_player_config_menu.lwidth, s_player_password_field_submenu.lwidth);
+	// keep it horizontally centered on the apply button
+	LINK (s_player_password_submenu.height, s_player_password_field_submenu.height);
+	
 	s_player_password_field.generic.type = MTYPE_FIELD;
 	s_player_password_field.generic.name = "password";
+	s_player_password_field.generic.flags = QMF_ACTION_WAIT;
+	s_player_password_field.generic.callback = PasswordCallback;
 	s_player_password_field.length	= 20;
 	s_player_password_field.generic.visible_length = LONGINPUT_SIZE;
 	s_player_password_field.generic.statusbar = "COR Entertainment is not responsible for lost or stolen passwords";
 	Q_strncpyz2( s_player_password_field.buffer, "********", sizeof(s_player_password_field.buffer) );
 	s_player_password_field.cursor = 0;
+	Menu_AddItem( &s_player_password_submenu, &s_player_password_field_submenu);
+	Menu_AddItem( &s_player_password_field_submenu, &s_player_password_field);
+	
+	add_action (s_player_password_submenu, "apply", PConfigApplyFunc, 0);
 	
 	// Horizontal submenu with two items. The first is a submenu with the
 	// model/skin controls. The second is just a thumbnail of the current
@@ -5929,6 +5995,7 @@ void PlayerConfig_MenuInit( void )
 	s_player_model_box.itemnames = (const char **) s_pmnames;
 
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
+	s_player_skin_box.generic.callback = SkinCallback;
 	s_player_skin_box.generic.name = "skin";
 	s_player_skin_box.curvalue = currentskinindex;
 	s_player_skin_box.itemnames = (const char **) s_pmi[currentdirectoryindex].skindisplaynames;
@@ -5951,7 +6018,7 @@ void PlayerConfig_MenuInit( void )
 	s_player_skin_preview_submenu.nitems = 0;
 	
 	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
-	Menu_AddItem( &s_player_config_menu, &s_player_password_field);
+	Menu_AddItem( &s_player_config_menu, &s_player_password_submenu);
 	Menu_AddItem( &s_player_config_menu, &s_player_skin_submenu);
 		
 	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
@@ -5978,12 +6045,7 @@ void PlayerConfig_MenuInit( void )
 
 void PlayerConfig_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 {
-	if(!strcmp(s_player_name_field.buffer, "Player"))
-		pNameUnique = false;
-	else
-		pNameUnique = true;
-
-	if(!pNameUnique)
+	if(!PLAYER_NAME_UNIQUE)
 		s_player_config_menu.statusbar = "You must change your player name before joining a server!";
 
 	if ( s_pmi[s_player_model_box.curvalue].skindisplaynames )
@@ -5993,75 +6055,11 @@ void PlayerConfig_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 		Screen_Draw (&s_player_config_screen, offset);
 	}
 }
-void PConfigAccept (void)
-{
-	int i;
-	char scratch[1024];
-
-	ValidatePlayerName( s_player_name_field.buffer, sizeof(s_player_name_field.buffer) );
-	Cvar_Set( "name", s_player_name_field.buffer );
-
-	if(!strcmp(s_player_name_field.buffer, "Player"))
-		pNameUnique = false;
-	else
-		pNameUnique = true;
-
-	//was the password changed?
-	if(strcmp("********", s_player_password_field.buffer))
-	{
-		//if this is a virgin password, don't change, just authenticate
-		if(!strcmp(stats_password->string, "password"))
-		{
-			Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
-			stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
-			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
-			currLoginState.validated = false;
-			STATS_RequestVerification();
-		}
-		else
-		{
-			Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
-			stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
-			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
-			STATS_RequestPwChange();
-		}
-	}
-
-	Com_sprintf( scratch, sizeof( scratch ), "%s/%s",
-		s_pmi[s_player_model_box.curvalue].directory,
-		s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
-
-	Cvar_Set( "skin", scratch );
-
-	for ( i = 0; i < s_numplayermodels; i++ )
-	{
-		int j;
-
-		for ( j = 0; j < s_pmi[i].nskins; j++ )
-		{
-			if ( s_pmi[i].skindisplaynames[j] )
-				free( s_pmi[i].skindisplaynames[j] );
-			s_pmi[i].skindisplaynames[j] = 0;
-		}
-		free( s_pmi[i].skindisplaynames );
-		s_pmi[i].skindisplaynames = 0;
-		s_pmi[i].nskins = 0;
-	}
-}
-const char *PlayerConfig_MenuKey (menuframework_s *screen, int key)
-{
-
-	if ( key == K_ESCAPE )
-		PConfigAccept();
-
-	return Default_MenuKey (screen, key);
-}
-
 
 void M_Menu_PlayerConfig_f (void)
 {
 	PlayerConfig_MenuInit();
-	M_PushMenu (PlayerConfig_MenuDraw, PlayerConfig_MenuKey, &s_player_config_screen);
+	M_PushMenu (PlayerConfig_MenuDraw, Default_MenuKey, &s_player_config_screen);
 }
 
 /*
