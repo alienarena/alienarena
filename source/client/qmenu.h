@@ -193,6 +193,7 @@ typedef enum {
 #define QMF_SNUG_LEFT		0x00000010
 #define QMF_ACTION_WAIT		0x00000020
 #define QMF_BUTTON			0x00000040
+#define QMF_SUBMENU_CAPTURE	0x00000080
 
 typedef struct
 {
@@ -319,7 +320,7 @@ int			Cursor_GetLayer (void);
 qboolean	Cursor_SelectMenu (menuframework_s *menu);
 void		Cursor_SelectItem (menuitem_s *item);
 
-void	Menu_AdvanceCursor (int dir);
+void	Menu_AdvanceCursor (int dir, qboolean allow_capture);
 void	Menu_Center( menuframework_s *menu );
 void	Menu_AutoArrange( menuframework_s *menu );
 void	Screen_Draw (menuframework_s *menu, menuvec2_t offset);

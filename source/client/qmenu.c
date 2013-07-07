@@ -392,8 +392,37 @@ int Menu_ItemIndex (menuitem_s *item)
 	Com_Error (ERR_FATAL, "CAN'T HAPPEN: Item is not in its own parent menu!");
 }
 
+// returns true if the item is a submenu that the cursor can advance "into."
+static qboolean CanAdvanceInto (menuitem_s *item, qboolean allow_capture)
+{
+	if (item->generic.type != MTYPE_SUBMENU)
+		return false;
+	
+	// if the submenu will "capture" the cursor, only advance into it if the
+	// tab key has been pressed instead an arrow key.
+	if (!allow_capture && (item->generic.flags & QMF_SUBMENU_CAPTURE))
+		return false;
+	
+	// selectable submenus aren't treated like submenus
+	if (Menu_ItemSelectable (item))
+		return false;
+	
+	return true;
+}
+
+// returns true if the cursor can advance out of the submenu
+static qboolean CanAdvanceOutOf (menuframework_s *submenu, qboolean allow_capture)
+{
+	// if the submenu has "captured" the cursor, only advance out of it if the
+	// tab key has been pressed instead of an arrow key.
+	if (!allow_capture && (submenu->generic.flags & QMF_SUBMENU_CAPTURE))
+		return false;
+	
+	return true;
+}
+
 // Selects either the next or the previous menu item.
-void Menu_AdvanceCursor (int dir)
+void Menu_AdvanceCursor (int dir, qboolean allow_capture)
 {
 	int				item_index;
 	menuframework_s	*menu;
@@ -411,9 +440,30 @@ void Menu_AdvanceCursor (int dir)
 	do 
 	{
 		item_index += dir;
-		item_index += menu->nitems;
-		item_index %= menu->nitems;
+		while (item_index < 0 || item_index >= menu->nitems)
+		{
+			menuframework_s *parent = menu->generic.parent;
+			if (parent == NULL || !CanAdvanceOutOf (menu, allow_capture))
+			{
+				item_index += menu->nitems;
+				item_index %= menu->nitems;
+			}
+			else
+			{
+				item_index = Menu_ItemIndex ((menuitem_s *)menu) + dir;
+				menu = parent;
+			}
+		}
 		newitem = menu->items[item_index];
+		while (CanAdvanceInto (newitem, allow_capture))
+		{
+			menu = (menuframework_s *)newitem;
+			if (dir == 1)
+				item_index = 0;
+			else
+				item_index = menu->nitems-1;
+			newitem = menu->items[item_index];
+		}
 	} while (!Menu_ItemSelectable (newitem));
 	
 	Cursor_SelectItem (newitem);
