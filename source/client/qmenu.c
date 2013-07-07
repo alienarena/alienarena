@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static void	 ItemName_Draw (menuaction_s *a, FNT_font_t font, const float *color);
 static void	 Action_Draw (menuaction_s *a, FNT_font_t font);
 static void  Menu_DrawStatusBar( const char *string );
-static void  Menu_DrawToolTip( const char *string );
+static void  Menu_DrawToolTip (const menuitem_s *item);
 static void  Label_Draw (menutxt_s *s, FNT_font_t font, const float *color);
 static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw (menuslider_s *s, FNT_font_t font);
@@ -1021,7 +1021,7 @@ void Menu_DrawHighlight (void)
 		Menu_DrawStatusBar( item->generic.statusbar );
 
 	if ( item->generic.tooltip )
-		Menu_DrawToolTip( item->generic.tooltip );
+		Menu_DrawToolTip (item);
 }
 
 // needed because global_menu_xoffset must be added to only the top level of
@@ -1228,24 +1228,27 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 	Menu_DrawScrollbar (menu);
 }
 
-void Menu_DrawToolTip( const char *string )
+void Menu_DrawToolTip (const menuitem_s *item)
 {
-	int				x;
+
+	int				x, y;
+	int				width;
 	FNT_font_t		font;
 	
-	font = FNT_AutoGet( CL_menuFont );
+	font = FNT_AutoGet (CL_menuFont);
 	
-	x = min (cursor.x, VID_WIDTH - Menu_PredictSize (string));
+	width = Menu_PredictSize (item->generic.tooltip);
+	
+	x = clamp (cursor.x, Item_GetX (*item) - width, VID_WIDTH - width);
+	
+	y = clamp (cursor.y - font->size - 4, Item_GetY(*item) - font->size, Item_GetY(*item));
 
-	if ( string )
-	{
-		Menu_DrawHorizBar ("menu/slide_border", x-2, cursor.y-font->size-4, Menu_PredictSize (string)+4, font->size+4);
-		Menu_DrawString (
-			x, cursor.y - font->size - 4, 
-			string, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
-			light_color
-		);
-	}
+	Menu_DrawHorizBar ("menu/slide_border", x-2, y, width+4, font->size+4);
+	Menu_DrawString (
+		x, y,
+		item->generic.tooltip, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
+		light_color
+	);
 }
 
 void Menu_DrawString (int x, int y, const char *string, unsigned int cmode, unsigned int align, const float *color)
