@@ -879,6 +879,9 @@ void Mod_LoadTexinfo (lump_t *l)
 		Com_sprintf (name, sizeof(name), "textures/%s.wal", in->texture);
 		out->image = GL_FindImage (name, it_wall);
 
+		Com_sprintf (name, sizeof(name), "textures/%s", in->texture);
+		out->image->script = RS_FindScript(name);
+
 		if (out->image->script)
 			RS_ReadyScript(out->image->script);
 
