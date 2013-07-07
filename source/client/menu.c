@@ -1093,6 +1093,7 @@ const char *M_Main_Key (int key)
 
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
+	case K_TAB:
 		if (++m_main_cursor >= MAIN_ITEMS)
 			m_main_cursor = 0;
 		break;
