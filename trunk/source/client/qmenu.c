@@ -390,6 +390,8 @@ int Menu_ItemIndex (menuitem_s *item)
 	}
 	
 	Com_Error (ERR_FATAL, "CAN'T HAPPEN: Item is not in its own parent menu!");
+
+	return 0;
 }
 
 // returns true if the item is a submenu that the cursor can advance "into."
@@ -1330,7 +1332,7 @@ void Menu_ApplyItem (menuitem_s *item)
 void Menu_ApplyMenu (menuframework_s *menu)
 {
 	int i;
-	menuitem_s *item, *lastitem;
+	menuitem_s *item;
 	
 	for ( i = 0; i < menu->nitems; i++ )
 	{
