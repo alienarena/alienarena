@@ -164,7 +164,6 @@ static menuvec2_t PicSpinSizeFunc (void *_self, FNT_font_t font)
 static void PicSpinDrawFunc (void *_self, FNT_font_t font)
 {
 	int x, y;
-	char *string;
 	menulist_s *self = (menulist_s *)_self;
 	
 	x = Item_GetX (*self);
@@ -978,7 +977,11 @@ void M_Main_Draw (menuvec2_t offset)
 	// slides away at double speed, disappearing and leaving just the menu 
 	// items themselves. Hence some things use offset.x*1.25.
 	
+#ifdef TACTICAL
+	Draw_StretchPic(offset.x*1.25, offset.y, viddef.width, viddef.height, "m_main_tactical");
+#else
 	Draw_StretchPic(offset.x*1.25, offset.y, viddef.width, viddef.height, "m_main");
+#endif
 
 	//draw the montage pics
 	mainalpha += cls.frametime; //fade image in
@@ -1885,7 +1888,7 @@ void SetFontNames (char **list)
 
 void SetCrosshairNames (char **list)
 {
-	char *curCrosshair, *curCrosshairFile;
+	char *curCrosshairFile;
 	char *p;
 	int ncrosshairs = 0, ncrosshairnames;
 	char **crosshairfiles;
@@ -2468,7 +2471,6 @@ static void PresetCallback (void *_self)
 
 void VidApplyFunc (void *self)
 {
-	int i;
 	#if defined UNIX_VARIANT
 	extern qboolean vid_restart;
 	#endif
@@ -2964,7 +2966,6 @@ LINKABLE(int) option_screen_height;
 
 static void OptionScreenFunc (void *_self)
 {
-	menuframework_s *newscreen;
 	menuframework_s *self = (menuframework_s *)_self;
 	
 	option_open_funcs[self->generic.localints[0]]();
@@ -3697,19 +3698,22 @@ static void M_Menu_SelectedServer_f (void)
 	M_PushMenu_Defaults (s_servers[serverindex].screen);
 }
 
-
-
 //TODO: Move this out of the menu section!
-void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserver)
+qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserver)
 {
 	char *rLine;
 	char *token;
+#ifdef TACTICAL
+	char *token2;
+	char modstring[64];
+#endif
 	char skillLevel[24];
 	char lasttoken[256];
 	char seps[]   = "\\";
 	int players = 0;
 	int bots = 0;
 	int result;
+	
 	char playername[PLAYERNAME_SIZE];
 	int score, ping, rankTotal, starttime;
 	PLAYERSTATS	player;
@@ -3772,7 +3776,37 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 			Com_sprintf(destserver->modInfo, sizeof(destserver->modInfo), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "sv_joustmode"))
 			destserver->joust = atoi(token);
-
+#ifdef TACTICAL
+		//Copy modstring over since strtok will modify it
+		Q_strncpyz(modstring, destserver->modInfo, sizeof(modstring));
+	
+		// populate all the data
+		toke2n = strtok(modstring, "%%");
+		for (int i = 0; i < MAX_SERVER_MODS; i++) 
+		{
+			if (!token2)
+				break;
+			Com_sprintf(local_mods_data[i], sizeof(local_mods_data[i]), token2);
+			token2 = strtok(NULL, "%%");
+		
+			Com_sprintf (   s_servers[serverindex].modtxt[i], sizeof(s_servers[serverindex].modtxt[i]),
+							Info_ValueForKey(mods_desc, local_mods_data[i])
+						);
+			if (!strlen(s_servers[serverindex].modtxt[i]))
+				Com_sprintf (s_servers[serverindex].modtxt[i], sizeof(s_servers[serverindex].modtxt[i]), "(no description)");
+		
+			Com_sprintf (   s_servers[serverindex].modnames[i], sizeof(s_servers[serverindex].modnames[i]),
+							Info_ValueForKey(mod_names, local_mods_data[i])
+						);
+			if (!strlen(s_servers[serverindex].modnames[i]))
+				Com_sprintf (s_servers[serverindex].modnames[i], sizeof(s_servers[serverindex].modnames[i]), local_mods_data[i]);
+		}
+		for ( int i = 0; i < 16; i++)
+		{
+			if( !strcmp("aa tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
+				return false
+		}
+#endif
 		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
 		token = strtok( NULL, seps );
@@ -3852,6 +3886,8 @@ void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserve
 	
 	Com_sprintf (destserver->szPlayers, sizeof(destserver->szPlayers), "%i(%i)/%s", min(99,players), min(99,bots), destserver->maxClients);
 	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", min(9999,destserver->ping));
+
+	return true;
 }
 
 static menuframework_s	s_serverbrowser_screen;
@@ -3875,11 +3911,13 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	if (m_num_servers == MAX_LOCAL_SERVERS)
 		return;
 	
-	M_ParseServerInfo (adr, status_string, &mservers[m_num_servers]);
+	if(M_ParseServerInfo (adr, status_string, &mservers[m_num_servers]))
+	{
 	
-	CON_Clear();
+		CON_Clear();
 	
-	m_num_servers++;
+		m_num_servers++;
+	}
 }
 
 void M_UpdateConnectedServerInfo (netadr_t adr, char *status_string)
@@ -4753,6 +4791,7 @@ static const char *game_mode_names[] =
 {
 	"deathmatch",
 	"ctf",
+	"tactical",
 	"all out assault",
 	"deathball",
 	"team core assault",
@@ -4767,6 +4806,7 @@ static const char *map_prefixes[num_game_modes][3] =
 {
 	{"dm", "tourney", NULL},
 	{"ctf", NULL},
+	{"tac", NULL},
 	{"aoa", NULL},
 	{"db", NULL},
 	{"tca", NULL},
@@ -4996,6 +5036,7 @@ void StartServerActionFunc( void *self )
 	// able to remove it from the game.
 	Cvar_SetValue ("deathmatch", 1 );
 	Cvar_SetValue ("ctf", 0);
+	Cvar_SetValue ("g_tactical", 0);
 	Cvar_SetValue ("tca", 0);
 	Cvar_SetValue ("cp", 0);
 	Cvar_SetValue ("g_duel", 0);
@@ -5005,6 +5046,9 @@ void StartServerActionFunc( void *self )
 	{
 		case 1:
 			Cvar_SetValue ("ctf", 1 );
+			break;
+		case 2:
+			Cvar_SetValue ("g_tactical", 1);
 			break;
 		case 4:
 			Cvar_SetValue ("tca", 1);
@@ -5542,8 +5586,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	
 	for (i = 0; i < refdef.num_entities; i++)
 	{
-		float len, len2; 
-		
 		// seems a little odd to use frame-1 for oldframe and frame%1 for 
 		// backlerp, but it works out
 		entity[i].frame = (int)(self->mframe/10);
@@ -5853,8 +5895,6 @@ void PConfigApplyFunc (void *self)
 static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 {
 	menuvec2_t ret;
-	int maxwidth, maxheight;
-	float ratio;
 	menumodel_s *self = (menumodel_s*) _self;
 	
 	ret.x = 20*font->size;
