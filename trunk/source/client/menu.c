@@ -4783,14 +4783,18 @@ void MapInfoFunc( void *self ) {
 
 static const char *game_mode_names[] =
 {
+#ifndef TACTICAL
 	"deathmatch",
 	"ctf",
+#endif
 	"tactical",
+#ifndef TACTICAL
 	"all out assault",
 	"deathball",
 	"team core assault",
 	"cattle prod",
 	"duel",
+#endif
 	NULL
 };
 #define num_game_modes (static_array_size(game_mode_names)-1)
@@ -4798,6 +4802,7 @@ static const char *game_mode_names[] =
 //same order as game_mode_names
 static const char *map_prefixes[num_game_modes][3] =
 {
+#ifndef TACTICAL
 	{"dm", "tourney", NULL},
 	{"ctf", NULL},
 	{"tac", NULL},
@@ -4806,6 +4811,9 @@ static const char *map_prefixes[num_game_modes][3] =
 	{"tca", NULL},
 	{"cp", NULL},
 	{"dm", "tourney", NULL}
+#else
+	{"tac", NULL}
+#endif
 };
 
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
@@ -5184,7 +5192,9 @@ static void M_Menu_StartServer_f (void)
 	s_skill_box.curvalue = 1;
 	Menu_AddItem( &s_startserver_main_submenu, &s_skill_box );
 	
+#ifndef TACTICAL
 	add_action (s_startserver_menu, "mutators", MutatorFunc, QMF_RIGHT_COLUMN);
+#endif
 	add_action (s_startserver_menu, "Bot Options", BotOptionsFunc, QMF_RIGHT_COLUMN);
 	add_action (s_startserver_menu, "begin", StartServerActionFunc, QMF_RIGHT_COLUMN);
 	
