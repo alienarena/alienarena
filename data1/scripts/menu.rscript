@@ -30,6 +30,22 @@ pics/m_main
 		scroll static .15 static 0
 	}
 }
+pics/m_main_tactical
+{
+	{
+		map pics/m_main_tactical.tga
+	}	
+	{
+		map gfx/menubar3.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static .15 static 0
+	}
+	{
+		map gfx/menubar4.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static .2 static 0
+	}
+}
 pics/m_main_game_sel
 {
 	{
