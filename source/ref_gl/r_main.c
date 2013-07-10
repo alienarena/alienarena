@@ -492,7 +492,6 @@ void R_DrawEntitiesOnList (void)
 	int		i;
 	rscript_t	*rs = NULL;
 	vec3_t	dist;
-	char    shortname[MAX_QPATH];
 
 	if (!r_drawentities->integer)
 		return;
@@ -627,7 +626,6 @@ void R_DrawViewEntitiesOnList (void)
 {
 	int		i;
 	rscript_t	*rs = NULL;
-	char    shortname[MAX_QPATH];
 
 	if (!r_drawentities->integer)
 		return;

@@ -3706,6 +3706,7 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 #ifdef TACTICAL
 	char *token2;
 	char modstring[64];
+	qboolean isTactical;
 #endif
 	char skillLevel[24];
 	char lasttoken[256];
@@ -3713,6 +3714,7 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 	int players = 0;
 	int bots = 0;
 	int result;
+	int i;
 	
 	char playername[PLAYERNAME_SIZE];
 	int score, ping, rankTotal, starttime;
@@ -3776,43 +3778,35 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 			Com_sprintf(destserver->modInfo, sizeof(destserver->modInfo), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "sv_joustmode"))
 			destserver->joust = atoi(token);
-#ifdef TACTICAL
-		//Copy modstring over since strtok will modify it
-		Q_strncpyz(modstring, destserver->modInfo, sizeof(modstring));
-	
-		// populate all the data
-		toke2n = strtok(modstring, "%%");
-		for (int i = 0; i < MAX_SERVER_MODS; i++) 
-		{
-			if (!token2)
-				break;
-			Com_sprintf(local_mods_data[i], sizeof(local_mods_data[i]), token2);
-			token2 = strtok(NULL, "%%");
-		
-			Com_sprintf (   s_servers[serverindex].modtxt[i], sizeof(s_servers[serverindex].modtxt[i]),
-							Info_ValueForKey(mods_desc, local_mods_data[i])
-						);
-			if (!strlen(s_servers[serverindex].modtxt[i]))
-				Com_sprintf (s_servers[serverindex].modtxt[i], sizeof(s_servers[serverindex].modtxt[i]), "(no description)");
-		
-			Com_sprintf (   s_servers[serverindex].modnames[i], sizeof(s_servers[serverindex].modnames[i]),
-							Info_ValueForKey(mod_names, local_mods_data[i])
-						);
-			if (!strlen(s_servers[serverindex].modnames[i]))
-				Com_sprintf (s_servers[serverindex].modnames[i], sizeof(s_servers[serverindex].modnames[i]), local_mods_data[i]);
-		}
-		for ( int i = 0; i < 16; i++)
-		{
-			if( !strcmp("aa tactical", Info_ValueForKey(mod_names, local_mods_data[i])) )
-				return false
-		}
-#endif
+
 		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
 		token = strtok( NULL, seps );
-	}
+	}	
 	
 	free (rLine);
+
+#ifdef TACTICAL
+	isTactical = false;
+
+	//Copy modstring over since strtok will modify it
+	Q_strncpyz(modstring, destserver->modInfo, sizeof(modstring));
+	
+	// populate all the data
+	token2 = strtok(modstring, "%%");
+	for (i = 0; i < MAX_SERVER_MODS; i++) 
+	{
+		if (!token2)
+			break;
+
+		if(!strcmp("g_tactical", token2))
+			isTactical = true;
+
+		token2 = strtok(NULL, "%%");
+	}
+	if(!isTactical)
+		return false;
+#endif
 
 	//playerinfo
 	rankTotal = 0;
