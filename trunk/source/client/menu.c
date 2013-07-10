@@ -252,9 +252,9 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	(spinctrl).curvalue = 0; \
 }
 
-#define setup_window(parent,window,title) \
+#define setup_nth_window(parent,n,window,title) \
 { \
-	(parent).nitems = 0; \
+	(parent).nitems = n; \
 	(parent).num_apply_pending = 0; \
 	\
 	(window).generic.type = MTYPE_SUBMENU; \
@@ -265,6 +265,8 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	\
 	Menu_AddItem (&(parent), &(window)); \
 }
+
+#define setup_window(parent,window,title) setup_nth_window(parent,0,window,title)
 
 #define setup_panel(parent,panel) \
 { \
@@ -6180,11 +6182,9 @@ static void M_Menu_Tactical_f (void)
 	
 	for (i = 0; i < num_tactical_teams; i++)
 	{
-		setup_window (s_tactical_screen, s_tactical_menus[i], tactical_team_names[i]);
-		
 		// kinda hacky but this is the only place we have two windows in one
-		// screen.
-		s_tactical_screen.nitems = i; 
+		// screen
+		setup_nth_window (s_tactical_screen, i, s_tactical_menus[i], tactical_team_names[i]);
 		
 		s_tactical_menus[i].horizontal = true;
 		
