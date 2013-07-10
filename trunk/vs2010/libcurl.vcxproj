@@ -17,6 +17,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Tactical|Win32">
+      <Configuration>Tactical</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1A8101AE-D897-4E84-A7BB-9A140EB5BA61}</ProjectGuid>
@@ -36,6 +40,12 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tactical|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -62,6 +72,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tactical|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='alteria|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(SolutionDir)alienarena_w32.props" />
@@ -76,6 +90,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tactical|Win32'">
+    <CustomBuildBeforeTargets />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='alteria|Win32'">
     <CustomBuildBeforeTargets />
@@ -143,6 +160,43 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <PreprocessorDefinitions>WIN32;BUILDING_LIBCURL;CURL_STATICLIB;HAVE_ZLIB_H;HAVE_ZLIB;HAVE_LIBZ;CURL_DISABLE_LDAP;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LibcurlSrcDir)include\;$(LibcurlSrcDir)lib\;$(LocalIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Outputs>
+      </Outputs>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( 
+ $(LibcurlSrcDir)include\curl\curl.h
+ $(LibcurlSrcDir)include\curl\curlbuild.h
+ $(LibcurlSrcDir)include\curl\curlver.h 
+ $(LibcurlSrcDir)include\curl\curlrules.h 
+ $(LibcurlSrcDir)include\curl\easy.h
+ $(LibcurlSrcDir)include\curl\mprintf.h
+ $(LibcurlSrcDir)include\curl\multi.h
+ $(LibcurlSrcDir)include\curl\stdcheaders.h
+ $(LibcurlSrcDir)include\curl\types.h
+ ) DO copy %%h  $(LocalIncludeDir)curl\</Command>
+      <Message>Copy header files to common local include</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tactical|Win32'">
     <ClCompile>
       <Optimization>Full</Optimization>
       <PreprocessorDefinitions>WIN32;BUILDING_LIBCURL;CURL_STATICLIB;HAVE_ZLIB_H;HAVE_ZLIB;HAVE_LIBZ;CURL_DISABLE_LDAP;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
