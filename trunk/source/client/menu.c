@@ -3708,7 +3708,8 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 #ifdef TACTICAL
 	char *token2;
 	char modstring[64];
-	qboolean isTactical;
+	qboolean isTactical;	
+	int i;
 #endif
 	char skillLevel[24];
 	char lasttoken[256];
@@ -3716,7 +3717,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 	int players = 0;
 	int bots = 0;
 	int result;
-	int i;
 	
 	char playername[PLAYERNAME_SIZE];
 	int score, ping, rankTotal, starttime;
