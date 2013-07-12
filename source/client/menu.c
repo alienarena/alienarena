@@ -6439,7 +6439,11 @@ void M_Think_MouseCursor (void)
 	}
 	
 	if (coordidx == mstate.active.num_layers)
+	{
+		if (cursor.mouseaction)
+			cursor.menuitem = NULL;
 		return;
+	}
 	
 	if (coordidx != cursor.menulayer && cursor.mouseaction)
 		Cursor_SelectMenu(activelayer(coordidx).screen);
