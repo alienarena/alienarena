@@ -356,6 +356,12 @@ qboolean Cursor_SelectMenu (menuframework_s *menu)
 	
 	refreshCursorLink ();
 	
+	if (menu->default_cursor_selection != NULL)
+	{
+		Cursor_SelectItem (menu->default_cursor_selection);
+		return true;
+	}
+	
 	for (i = 0; i < menu->nitems; i++)
 	{
 		item = menu->items[i];

@@ -265,8 +265,9 @@ typedef struct _tag_menuframework
 	
 	void (*cursordraw)( struct _tag_menuframework *m );
 	
-	// only used at the top level of the menu tree
-	int num_apply_pending;
+	// only used at the top level of the menu tree:
+	int						num_apply_pending;
+	struct _tag_menuitem	*default_cursor_selection; // will auto-pick if not set
 } menuframework_s;
 
 typedef struct 

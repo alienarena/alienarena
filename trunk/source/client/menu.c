@@ -3558,21 +3558,6 @@ void ServerInfo_SubmenuInit (void)
 	s_servers[serverindex].name.generic.name = mservers[serverindex].szHostName;
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].name);
 	
-	s_servers[serverindex].connect.generic.type = MTYPE_ACTION;
-	s_servers[serverindex].connect.generic.flags = QMF_BUTTON | QMF_RIGHT_COLUMN;
-	s_servers[serverindex].connect.generic.name = "Connect";
-	s_servers[serverindex].connect.generic.callback = JoinServerFunc;
-	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].connect);
-	
-	s_servers[serverindex].serverinfo_submenu.statusbar = NULL;
-	s_servers[serverindex].connect.generic.statusbar = NULL;
-	if (serverIsOutdated (mservers[serverindex].szVersion))
-		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
-	else if (!PLAYER_NAME_UNIQUE)
-		s_servers[serverindex].connect.generic.statusbar = "You must change your player name from the default before connecting!";
-	else
-		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
-	
 	s_servers[serverindex].levelshot.generic.type = MTYPE_NOT_INTERACTIVE;
 	s_servers[serverindex].levelshot.generic.localstrings[0] = s_servers[serverindex].levelshot_path;
 	// pretty close to 16:9
@@ -3697,7 +3682,25 @@ static void M_Menu_SelectedServer_f (void)
 	ServerInfo_SubmenuInit ();
 	PlayerList_SubmenuInit ();
 	
+	// "connect" button at the bottom
+	s_servers[serverindex].connect.generic.type = MTYPE_ACTION;
+	s_servers[serverindex].connect.generic.flags = QMF_BUTTON | QMF_RIGHT_COLUMN;
+	s_servers[serverindex].connect.generic.name = "Connect";
+	s_servers[serverindex].connect.generic.callback = JoinServerFunc;
+	Menu_AddItem (&s_servers[serverindex].menu, &s_servers[serverindex].connect);
+	
+	s_servers[serverindex].serverinfo_submenu.statusbar = NULL;
+	s_servers[serverindex].connect.generic.statusbar = NULL;
+	if (serverIsOutdated (mservers[serverindex].szVersion))
+		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
+	else if (!PLAYER_NAME_UNIQUE)
+		s_servers[serverindex].connect.generic.statusbar = "You must change your player name from the default before connecting!";
+	else
+		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
+	
 	M_PushMenu_Defaults (s_servers[serverindex].screen);
+	
+	s_servers[serverindex].menu.default_cursor_selection = (menuitem_s *)&s_servers[serverindex].connect;
 }
 
 //TODO: Move this out of the menu section!
@@ -4154,7 +4157,8 @@ void ServerListHeader_SubmenuInit (void)
 	s_joinserver_header.horizontal = true;
 	s_joinserver_header.navagable = true;
 	
-	add_action (s_joinserver_header, "address book", AddressBookFunc, 0);
+	// doesn't actually do anything yet
+	// add_action (s_joinserver_header, "address book", AddressBookFunc, 0);
 	add_action (s_joinserver_header, "refresh list", SearchLocalGamesFunc, 0);
 	add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
 
