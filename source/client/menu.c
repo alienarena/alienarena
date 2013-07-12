@@ -4169,7 +4169,7 @@ static void M_Menu_JoinServer_f (void)
 {
 	extern cvar_t *name;
 
-	static int gotServers = false;
+	static qboolean gotServers = false;
 
 	if(!gotServers)
 	{
@@ -4184,13 +4184,16 @@ static void M_Menu_JoinServer_f (void)
 
 	serverindex = -1;
 
-	setup_window (s_serverbrowser_screen, s_joinserver_menu, "SERVER LIST");
+	if (!gotServers)
+	{
+		setup_window (s_serverbrowser_screen, s_joinserver_menu, "SERVER LIST");
 	
-	ServerListHeader_SubmenuInit ();
-	ServerList_SubmenuInit ();
-	
-	if(!gotServers)
+		ServerListHeader_SubmenuInit ();
+		ServerList_SubmenuInit ();
+		
 		SearchLocalGames();
+	}
+	
 	gotServers = true;
 	
 	M_PushMenu_Defaults (s_serverbrowser_screen);
