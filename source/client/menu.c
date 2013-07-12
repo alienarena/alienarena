@@ -4192,6 +4192,8 @@ static void M_Menu_JoinServer_f (void)
 		ServerList_SubmenuInit ();
 		
 		SearchLocalGames();
+		
+		s_joinserver_menu.default_cursor_selection = (menuitem_s *)&s_serverlist_submenu;
 	}
 	
 	gotServers = true;

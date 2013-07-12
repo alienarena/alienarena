@@ -358,8 +358,16 @@ qboolean Cursor_SelectMenu (menuframework_s *menu)
 	
 	if (menu->default_cursor_selection != NULL)
 	{
-		Cursor_SelectItem (menu->default_cursor_selection);
-		return true;
+		if (Menu_ItemSelectable (menu->default_cursor_selection))
+		{
+			Cursor_SelectItem (menu->default_cursor_selection);
+			return true;
+		}
+		if (menu->default_cursor_selection->generic.type == MTYPE_SUBMENU)
+		{
+			if (Cursor_SelectMenu ((menuframework_s *)menu->default_cursor_selection))
+				return true;
+		}
 	}
 	
 	for (i = 0; i < menu->nitems; i++)
