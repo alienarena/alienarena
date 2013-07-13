@@ -3346,6 +3346,7 @@ static char mod_names[] =
 	"\\testmap"         "\\map testing"
 	"\\dodgedelay=0"    "\\rapid dodging"
 	"\\g_tactical"      "\\aa tactical"
+	"\\g_dm_lights"     "\\player lights"
 	"\\";
 
 //Descriptions. If a cvar isn't recognized, "(no description)" is used.
@@ -3375,6 +3376,7 @@ static char mods_desc[] =
 	"\\testmap"         "\\server is testing an unfinished map"
 	"\\dodgedelay=0"    "\\no minimum time between dodges"
 	"\\g_tactical"      "\\humans vs martians, destroy enemy bases"
+	"\\g_dm_lights"     "\\high-visibility lights on players"
 	"\\";
 
 char *GetLine (char **contents, int *len)
