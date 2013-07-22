@@ -764,6 +764,15 @@ vehicles/strafer/console
 		glow
 	}
 }
+vehicles/deathball/skin
+{
+	{
+		map vehicles/deathball/skin_normal.tga
+		normalmap
+		map2 vehicles/deathball/skin_fx.tga
+		glow
+	}
+}
 maps/meshes/electrode
 {
 	{
