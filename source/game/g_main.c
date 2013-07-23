@@ -772,9 +772,14 @@ void EndDMLevel (void)
 	//stick something in here to filter out CTF, and just make it loop back
 	for (i = 0; i < nummaps; i++) {
 		if (Q_strcasecmp(mapnames[i], level.mapname) == 0) {
-			if(mapnames[i+1][0])
-				BeginIntermission (CreateTargetChangeLevel (mapnames[i+1]) );
-			else if(mapnames[0][0]) //no more maps, repeat list
+			if(mapnames[i+1])
+			{
+				if(mapnames[i+1][0])
+					BeginIntermission (CreateTargetChangeLevel (mapnames[i+1]) );
+				else if(mapnames[0][0]) //no more maps, repeat list
+					BeginIntermission (CreateTargetChangeLevel (mapnames[0]) );
+			}
+			else
 				BeginIntermission (CreateTargetChangeLevel (mapnames[0]) );
 		}
 	}
