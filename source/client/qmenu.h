@@ -153,6 +153,7 @@ struct \
 
 typedef enum {
 	MTYPE_SLIDER,
+	MTYPE_VERT_SCROLLBAR,
 	MTYPE_ACTION,
 	MTYPE_FIELD,
 	MTYPE_NOT_INTERACTIVE,
@@ -216,6 +217,8 @@ typedef struct
 
 	const char *tooltip;
 	
+	float highlight_alpha;
+	
 	// action callbacks
 	void		(*callback) (void *self); // clicked on/activated
 	void		(*cursorcallback) (void *self, FNT_font_t font); // moused over
@@ -242,12 +245,17 @@ typedef struct _tag_menuframework
 {
 	menucommon_s generic;
 	
+	qboolean initialized; 
+	
 	int x, y;
 	LINKABLE(int) lwidth, rwidth, height;
 	int maxwidth, maxheight; // 0 for no limit
 	int maxlines; // for generating maxheight automatically
 	int xscroll, yscroll;
 	qboolean horizontal;
+	
+	float scroll_top, scroll_range, scrollbar_size, maxscroll;
+	menucommon_s vertical_scrollbar;
 	
 	qboolean navagable;
 	
@@ -270,7 +278,7 @@ typedef struct _tag_menuframework
 	struct _tag_menuitem	*default_cursor_selection; // will auto-pick if not set
 } menuframework_s;
 
-typedef struct 
+typedef struct
 {
 	menucommon_s generic;
 	
