@@ -40,8 +40,8 @@ static void	 SpinControl_Draw (menulist_s *s, FNT_font_t font);
 static void	 SpinControl_DoSlide( menulist_s *s, int dir );
 static void  SubMenu_Draw (menuframework_s *s, FNT_font_t font);
 
-static void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float base_size);
-static void Menu_DrawVertBar (const char *pathbase, float x, float y, float h, float base_size);
+static void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float base_size, float alpha);
+static void Menu_DrawVertBar (const char *pathbase, float x, float y, float h, float base_size, float alpha);
 
 void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *prefix);
 
@@ -99,7 +99,7 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 			border_x = text_x - width + RCOLUMN_OFFSET/2;
 		}
 		
-		Menu_DrawHorizBar ("menu/button_border", border_x, Item_GetY(*a)+2, width, font->height*2-4);
+		Menu_DrawHorizBar ("menu/button_border", border_x, Item_GetY(*a)+2, width, font->height*2-4, a->generic.highlight_alpha*a->generic.highlight_alpha);
 	}
 	else if ( a->generic.flags & QMF_RIGHT_COLUMN )
 	{
@@ -146,7 +146,11 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	
 	strncpy( tempbuffer, f->buffer, f->generic.visible_length);
 	
-	Menu_DrawHorizBar ("menu/slide_border", (float)x, (float)y-2.0, (float)(f->generic.visible_length*font->size)+4.0, (float)(font->size)+4.0);
+	Menu_DrawHorizBar (
+		"menu/slide_border", (float)x, (float)y-2.0,
+		(float)(f->generic.visible_length*font->size)+4.0, (float)(font->size)+4.0,
+		f->generic.highlight_alpha*f->generic.highlight_alpha
+	);
 	
 	menu_box.x = x+4;
 	menu_box.y = y;
@@ -451,6 +455,16 @@ void Menu_AdvanceCursor (int dir, qboolean allow_capture)
 	
 	menu = item->generic.parent;
 	
+	if (item->generic.type == MTYPE_VERT_SCROLLBAR)
+	{
+		menu->yscroll += 2*dir;
+		if (menu->yscroll < 0)
+			menu->yscroll = 0;
+		if (menu->yscroll > menu->maxscroll)
+			menu->yscroll = menu->maxscroll;
+		return;
+	}
+	
 	item_index = Menu_ItemIndex (item);
 	
 	do 
@@ -704,6 +718,14 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 	int itemheight, horiz_height;
 	menucommon_s *item;
 	
+	// TODO: move this into its own function?
+	if (!menu->initialized)
+	{
+		menu->initialized = true;
+		menu->vertical_scrollbar.parent = menu;
+		menu->vertical_scrollbar.type = MTYPE_VERT_SCROLLBAR;
+	}
+	
 	x = y = 0;
 	
 	horiz_height = 0;
@@ -794,6 +816,13 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 	
 	if (!menu->horizontal && menu->maxlines != 0 && menu->maxlines < menu->nitems)
 		menu->maxheight = CHASELINK (((menucommon_s*)menu->items[menu->maxlines])->y);
+	
+	menu->maxscroll = CHASELINK(menu->height) - menu->maxheight;
+	menu->scroll_range = (float)menu->maxheight - font->size/2.0;
+	menu->scrollbar_size = menu->scroll_range - menu->maxscroll;
+	if (menu->scrollbar_size < font->size)
+		menu->scrollbar_size = font->size;
+	menu->scroll_top = (float)menu->y+font->size/4.0;
 }
 
 void Menu_AutoArrange (menuframework_s *menu)
@@ -825,6 +854,22 @@ static inline qboolean Item_ScrollVisible (menuitem_s *item)
 	return true;
 }
 
+void Item_UpdateHighlightAlpha (menuitem_s *item)
+{
+	if (cursor.menuitem == item)
+	{
+		item->generic.highlight_alpha += cls.frametime*2;
+		if (item->generic.highlight_alpha > 1.0)
+			item->generic.highlight_alpha = 1.0;
+	}
+	else
+	{
+		item->generic.highlight_alpha -= cls.frametime*2;
+		if (item->generic.highlight_alpha < 0.7)
+			item->generic.highlight_alpha = 0.7;
+	}
+}
+
 void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 {
 	int i;
@@ -839,6 +884,8 @@ void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 	else
 		Menu_DrawStatusBar (menu->statusbar);
 	
+	Item_UpdateHighlightAlpha ((menuitem_s *)&menu->vertical_scrollbar);
+	
 	/*
 	** draw contents
 	*/
@@ -848,6 +895,8 @@ void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		
 		if (!Item_ScrollVisible (item))
 			continue;
+		
+		Item_UpdateHighlightAlpha (item);
 		
 		// TODO: cleaner method
 		if (item->generic.type == MTYPE_NOT_INTERACTIVE)
@@ -891,14 +940,22 @@ void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 void Menu_AssignCursor (menuframework_s *menu)
 {
 	int i;
+	float right;
 	menuitem_s *item, *lastitem;
 	
 	if (!menu->navagable || !cursor.mouseaction)
 		return;
 
 	lastitem = (menuitem_s *)cursor.menuitem;
-
-	for ( i = 0; i < menu->nitems; i++ )
+	
+	right = menu->x + CHASELINK(menu->rwidth) + CHASELINK(menu->lwidth);
+	
+	if (menu->maxheight != 0 && CHASELINK(menu->height) > menu->maxheight && cursor.x > right)
+	{
+		// select the scrollbar
+		item = &menu->vertical_scrollbar;
+	}
+	else for ( i = 0; i < menu->nitems; i++ )
 	{
 		int mincoord, maxcoord;
 
@@ -934,18 +991,19 @@ void Menu_AssignCursor (menuframework_s *menu)
 		if (!Menu_ItemSelectable (item))
 			continue;
 		
-		// Selected a new item-- reset double-click count
-		if (lastitem != item)
-		{
-			memset (cursor.buttonclicks, 0, sizeof(cursor.buttonclicks));
-			memset (cursor.buttontime, 0, sizeof(cursor.buttontime));
-		}
-
-		Cursor_SelectItem (item);
-		cursor.mouseaction = false;
-		
-		return;
+		// We've found a valid candiate for selection
+		break;
 	}
+	
+	// Selected a new item-- reset double-click count
+	if (lastitem != item)
+	{
+		memset (cursor.buttonclicks, 0, sizeof(cursor.buttonclicks));
+		memset (cursor.buttontime, 0, sizeof(cursor.buttontime));
+	}
+
+	Cursor_SelectItem (item);
+	cursor.mouseaction = false;
 }
 
 void Menu_DrawHighlightItem (menuitem_s *item);
@@ -998,7 +1056,7 @@ void Menu_DrawHighlight (void)
 	menuframework_s *menu;
 	menuitem_s *item = cursor.menuitem;
 	
-	if (item == NULL)
+	if (item == NULL || item->generic.type == MTYPE_VERT_SCROLLBAR)
 		return;
 	
 	menu = item->generic.parent;
@@ -1119,9 +1177,12 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 		h = tile_h;
 	}
 	
-	x -= tile_w/2;
-	w += tile_w;
-	
+	// hacky stuff to make things look right
+	if (strcmp (prefix, "menu/sm_"))
+	{
+		x -= tile_w/2;
+		w += tile_w;
+	}
 	if (!strcmp (prefix, "menu/m_"))
 	{
 		y -= tile_h/8;
@@ -1152,7 +1213,7 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 	{
 		int i;
 		int textwidth = Menu_PredictSize (title);
-		Menu_DrawHorizBar ("menu/slide_border", x+w/2-textwidth/2-2, y-font->size-2, textwidth+4, font->size+4);
+		Menu_DrawHorizBar ("menu/slide_border", x+w/2-textwidth/2-2, y-font->size-2, textwidth+4, font->size+4, 1);
 		// Redraw multiple times to get a bold effect
 		for (i = 0; i < 4; i++)
 			Menu_DrawString (x+w/2, y-font->size, title, FNT_CMODE_QUAKE, FNT_ALIGN_CENTER, highlight_color);
@@ -1160,35 +1221,35 @@ void Menu_DrawBox (int x, int y, int w, int h, float alpha, const char *title, c
 }
 
 
-void Menu_DrawVertBar (const char *pathbase, float x, float y, float h, float base_size)
+void Menu_DrawVertBar (const char *pathbase, float x, float y, float h, float base_size, float alpha)
 {
 	char scratch[MAX_QPATH];
 	
 	Com_sprintf( scratch, sizeof( scratch ), "%s%s", pathbase, "_end");
 	
-	Draw_AlphaStretchTilingPic (x, y-base_size/2.0, base_size, base_size, scratch, 1);
-	Draw_AlphaStretchTilingPic (x+base_size, y+h+base_size/2.0, -base_size, -base_size, scratch, 1);
+	Draw_AlphaStretchTilingPic (x, y-base_size/2.0, base_size, base_size, scratch, alpha);
+	Draw_AlphaStretchTilingPic (x+base_size, y+h+base_size/2.0, -base_size, -base_size, scratch, alpha);
 	if (h > base_size)
-		Draw_AlphaStretchTilingPic (x, y+base_size/2.0, base_size, h-base_size, pathbase, 1);
+		Draw_AlphaStretchTilingPic (x, y+base_size/2.0, base_size, h-base_size, pathbase, alpha);
 }
 
-void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float base_size)
+void Menu_DrawHorizBar (const char *pathbase, float x, float y, float w, float base_size, float alpha)
 {
 	char scratch[MAX_QPATH];
 	
 	Com_sprintf( scratch, sizeof( scratch ), "%s%s", pathbase, "_end");
 	
-	Draw_AlphaStretchTilingPic (x-base_size/2.0, y, base_size, base_size, scratch, 1);
-	Draw_AlphaStretchTilingPic (x+w+base_size/2.0, y+base_size, -base_size, -base_size, scratch, 1);
+	Draw_AlphaStretchTilingPic (x-base_size/2.0, y, base_size, base_size, scratch, alpha);
+	Draw_AlphaStretchTilingPic (x+w+base_size/2.0, y+base_size, -base_size, -base_size, scratch, alpha);
 	if (w > base_size)
-		Draw_AlphaStretchTilingPic (x+base_size/2.0, y, w-base_size, base_size, pathbase, 1);
+		Draw_AlphaStretchTilingPic (x+base_size/2.0, y, w-base_size, base_size, pathbase, alpha);
 }
 
 void Menu_DrawScrollbar (menuframework_s *menu)
 {
-	float		maxscroll, scroll_range, scroll_top;
-	float		scrollbar_size, scrollbar_pos;
+	float		scrollbar_pos;
 	float		charscale, right;
+	float		alpha;
 	FNT_font_t	font;
 	
 	font = FNT_AutoGet( CL_menuFont );
@@ -1197,19 +1258,13 @@ void Menu_DrawScrollbar (menuframework_s *menu)
 	if (menu->maxheight == 0 || CHASELINK(menu->height) <= menu->maxheight)
 		return;
 	
-	right = menu->x + CHASELINK(menu->rwidth) + CHASELINK(menu->lwidth);
+	right = menu->x + CHASELINK(menu->rwidth) + CHASELINK(menu->lwidth) + charscale/2.0;
 	
-	maxscroll = CHASELINK(menu->height) - menu->maxheight;
-	scroll_range = (float)menu->maxheight-charscale/2.0;
-	scrollbar_size = scroll_range-maxscroll;
-	if (scrollbar_size < charscale)
-		scrollbar_size = charscale;
+	scrollbar_pos = menu->scroll_top + (float)menu->yscroll*(menu->scroll_range-menu->scrollbar_size)/menu->maxscroll;
+	alpha = menu->vertical_scrollbar.highlight_alpha;
 	
-	scrollbar_pos = (float)menu->yscroll*(scroll_range-scrollbar_size)/maxscroll;
-	scroll_top = (float)menu->y+charscale/4.0;
-	
-	Menu_DrawVertBar ("menu/scroll_border", right, menu->y, menu->maxheight, charscale);
-	Menu_DrawVertBar ("menu/scroll_cursor", right, scroll_top+scrollbar_pos, scrollbar_size, charscale);
+	Menu_DrawVertBar ("menu/scroll_border", right, menu->y, menu->maxheight, charscale, alpha*alpha);
+	Menu_DrawVertBar ("menu/scroll_cursor", right, scrollbar_pos, menu->scrollbar_size, charscale, alpha);
 }
 
 void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *prefix)
@@ -1259,7 +1314,7 @@ void Menu_DrawToolTip (const menuitem_s *item)
 	
 	y = clamp (cursor.y - font->size - 4, Item_GetY(*item) - font->size, Item_GetY(*item));
 
-	Menu_DrawHorizBar ("menu/slide_border", x-2, y, width+4, font->size+4);
+	Menu_DrawHorizBar ("menu/slide_border", x-2, y, width+4, font->size+4, 1);
 	Menu_DrawString (
 		x, y,
 		item->generic.tooltip, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT,
@@ -1436,8 +1491,15 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 	scroll_range = width-charscale/2.0;
 	cursor_size = charscale;
 	
-	Menu_DrawHorizBar ("menu/slide_border", x, y, width, charscale);
-	Menu_DrawHorizBar ("menu/slide_cursor", x+charscale/4.0+s->range*(scroll_range-cursor_size), y, cursor_size, charscale);
+	Menu_DrawHorizBar (
+		"menu/slide_border", x, y, width, charscale,
+		s->generic.highlight_alpha*s->generic.highlight_alpha
+	);
+	Menu_DrawHorizBar (
+		"menu/slide_cursor", x+charscale/4.0+s->range*(scroll_range-cursor_size), y,
+		cursor_size, charscale,
+		s->generic.highlight_alpha
+	);
 }
 
 void SpinControl_DoSlide( menulist_s *s, int dir )

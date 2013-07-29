@@ -213,9 +213,12 @@ static void IconSpinDrawFunc (void *_self, FNT_font_t font)
 	y = Item_GetY (*self)+MenuText_UpperMargin (self, font->size);
 	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
-	Draw_StretchPic (x, y, font->size, font->size, "menu/icon_border");
+	Draw_AlphaStretchPic (
+		x, y, font->size, font->size, "menu/icon_border", 
+		self->generic.highlight_alpha*self->generic.highlight_alpha
+	);
 	if (strlen(self->itemnames[self->curvalue]) > 0)
-		Draw_StretchPic (x, y, font->size, font->size, self->itemnames[self->curvalue]);
+		Draw_AlphaStretchPic (x, y, font->size, font->size, self->itemnames[self->curvalue], self->generic.highlight_alpha);
 }
 
 #define setup_tickbox(spinctrl) \
@@ -237,9 +240,12 @@ static void RadioSpinDrawFunc (void *_self, FNT_font_t font)
 	y = Item_GetY (*self)+MenuText_UpperMargin (self, font->size);
 	if ((self->generic.flags & QMF_RIGHT_COLUMN))
 		x += Menu_PredictSize (self->generic.name);
-	Draw_StretchPic (x, y, font->size, font->size, "menu/radio_border");
+	Draw_AlphaStretchPic (
+		x, y, font->size, font->size, "menu/radio_border", 
+		self->generic.highlight_alpha*self->generic.highlight_alpha
+	);
 	if (strlen(self->itemnames[self->curvalue]) > 0)
-		Draw_StretchPic (x, y, font->size, font->size, self->itemnames[self->curvalue]);
+		Draw_AlphaStretchPic (x, y, font->size, font->size, self->itemnames[self->curvalue], self->generic.highlight_alpha);
 }
 
 #define setup_radiobutton(spinctrl) \
@@ -6374,6 +6380,20 @@ void Menu_ClickSlideItem (void)
 		Menu_SlideItem (1);
 }
 
+void Menu_DragVertScrollItem (void)
+{
+	float			scrollbar_pos;
+	menuframework_s	*menu = cursor.menuitem->generic.parent;
+	
+	scrollbar_pos = (float)cursor.y - menu->scroll_top;
+	menu->yscroll = scrollbar_pos*menu->maxscroll/(menu->scroll_range-menu->scrollbar_size);
+	
+	if (menu->yscroll < 0)
+		menu->yscroll = 0;
+	if (menu->yscroll > menu->maxscroll)
+		menu->yscroll = menu->maxscroll;
+}
+
 void M_Draw_Cursor (void)
 {
 	Draw_Pic (cursor.x, cursor.y, "m_mouse_cursor");
@@ -6484,6 +6504,10 @@ void M_Think_MouseCursor (void)
 		if (cursor.menuitem->generic.type == MTYPE_SLIDER)
 		{
 			Menu_DragSlideItem ();
+		}
+		else if (cursor.menuitem->generic.type == MTYPE_VERT_SCROLLBAR)
+		{
+			Menu_DragVertScrollItem ();
 		}
 		else if (!cursor.buttonused[MOUSEBUTTON1])
 		{
