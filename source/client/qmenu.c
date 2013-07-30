@@ -937,23 +937,37 @@ void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 	}
 }
 
+static void Cursor_MouseSelectItem (menuitem_s *item)
+{
+	menuitem_s *lastitem = (menuitem_s *)cursor.menuitem;
+	
+	// Selected a new item-- reset double-click count
+	if (lastitem != item)
+	{
+		memset (cursor.buttonclicks, 0, sizeof(cursor.buttonclicks));
+		memset (cursor.buttontime, 0, sizeof(cursor.buttontime));
+	}
+
+	Cursor_SelectItem (item);
+	cursor.mouseaction = false;
+}
+
 void Menu_AssignCursor (menuframework_s *menu)
 {
 	int i;
 	float right;
-	menuitem_s *item, *lastitem;
+	menuitem_s *item;
 	
 	if (!menu->navagable || !cursor.mouseaction)
 		return;
 
-	lastitem = (menuitem_s *)cursor.menuitem;
-	
 	right = menu->x + CHASELINK(menu->rwidth) + CHASELINK(menu->lwidth);
 	
 	if (menu->maxheight != 0 && CHASELINK(menu->height) > menu->maxheight && cursor.x > right)
 	{
 		// select the scrollbar
 		item = &menu->vertical_scrollbar;
+		Cursor_MouseSelectItem (item);
 	}
 	else for ( i = 0; i < menu->nitems; i++ )
 	{
@@ -992,18 +1006,9 @@ void Menu_AssignCursor (menuframework_s *menu)
 			continue;
 		
 		// We've found a valid candiate for selection
-		break;
+		Cursor_MouseSelectItem (item);
+		return;
 	}
-	
-	// Selected a new item-- reset double-click count
-	if (lastitem != item)
-	{
-		memset (cursor.buttonclicks, 0, sizeof(cursor.buttonclicks));
-		memset (cursor.buttontime, 0, sizeof(cursor.buttontime));
-	}
-
-	Cursor_SelectItem (item);
-	cursor.mouseaction = false;
 }
 
 void Menu_DrawHighlightItem (menuitem_s *item);
