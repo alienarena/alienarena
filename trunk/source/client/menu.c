@@ -2545,7 +2545,7 @@ option_name_t audio_option_names[] =
 {
 	{
 		option_spincontrol,
-		"cl_playertaunts",
+		"cl_playtaunts",
 		"player taunts",
 		NULL,
 		setnames (onoff_names)
