@@ -1323,8 +1323,6 @@ static void Keys_MenuInit( void )
 	Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
 	
 	s_keys_menu.maxlines = 30;
-	
-	Menu_AutoArrange (&s_keys_screen);
 }
 
 static const char *Keys_MenuKey (menuframework_s *screen, int key)
@@ -2897,7 +2895,6 @@ void IRC_MenuInit( void )
 	IRC_Settings_SubMenuInit ();
 
 	add_text (s_irc_menu, IRC_key, 0);
-
 	Menu_AutoArrange (&s_irc_screen);
 }
 
@@ -6097,8 +6094,6 @@ void PlayerConfig_MenuInit( void )
 	Menu_AddItem (&s_player_config_menu, &s_player_skin_preview_submenu);
 	Menu_AddItem (&s_player_skin_preview_submenu, &s_player_skin_preview);
 	
-	Menu_AutoArrange (&s_player_config_screen);
-
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
 	scriptsloaded = Cvar_Get("scriptsloaded", "0", 0);
@@ -6190,6 +6185,16 @@ static void TacticalJoinFunc ( void *item )
 	M_ForceMenuOff ();
 }
 
+static void TacticalScreen_Draw (menuframework_s *screen, menuvec2_t offset)
+{
+	FNT_font_t font = FNT_AutoGet (CL_menuFont);
+	screen->x = offset.x;
+	Menu_AutoArrange (screen);
+	// force it to use up the whole screen
+	CHASELINK(s_tactical_screen.rwidth) = viddef.width - CHASELINK(s_tactical_screen.lwidth);
+	Menu_Draw (screen, font);
+}
+
 static void M_Menu_Tactical_f (void)
 {
 	extern cvar_t *name;
@@ -6231,11 +6236,6 @@ static void M_Menu_Tactical_f (void)
 		}
 	}
 
-	Menu_AutoArrange (&s_tactical_screen);
-	
-	// force it to use up the whole screen
-	CHASELINK(s_tactical_screen.rwidth) = viddef.width - CHASELINK(s_tactical_screen.lwidth);
-
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
 	scriptsloaded = Cvar_Get("scriptsloaded", "0", 0);
@@ -6248,7 +6248,7 @@ static void M_Menu_Tactical_f (void)
 		RS_LoadSpecialScripts();
 	}
 	
-	M_PushMenu_Defaults (s_tactical_screen);
+	M_PushMenu (TacticalScreen_Draw, Default_MenuKey, &s_tactical_screen);
 }
 
 
