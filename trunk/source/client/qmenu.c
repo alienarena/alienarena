@@ -99,7 +99,9 @@ void ItemName_Draw (menuitem_s *a, FNT_font_t font, const float *color)
 			border_x = text_x - width + RCOLUMN_OFFSET/2;
 		}
 		
-		Menu_DrawHorizBar ("menu/button_border", border_x, Item_GetY(*a)+2, width, font->height*2-4, a->generic.highlight_alpha*a->generic.highlight_alpha);
+		// HACK
+		if (color == dark_color) 
+			Menu_DrawHorizBar ("menu/button_border", border_x, Item_GetY(*a)+2, width, font->height*2-4, a->generic.highlight_alpha*a->generic.highlight_alpha);
 	}
 	else if ( a->generic.flags & QMF_RIGHT_COLUMN )
 	{
@@ -858,15 +860,15 @@ void Item_UpdateHighlightAlpha (menuitem_s *item)
 {
 	if (cursor.menuitem == item)
 	{
-		item->generic.highlight_alpha += cls.frametime*2;
+		item->generic.highlight_alpha += cls.frametime*0.5f;
 		if (item->generic.highlight_alpha > 1.0)
 			item->generic.highlight_alpha = 1.0;
 	}
 	else
 	{
-		item->generic.highlight_alpha -= cls.frametime*2;
-		if (item->generic.highlight_alpha < 0.7)
-			item->generic.highlight_alpha = 0.7;
+		item->generic.highlight_alpha -= cls.frametime*0.5f;
+		if (item->generic.highlight_alpha < 0.9)
+			item->generic.highlight_alpha = 0.9;
 	}
 }
 
@@ -1300,8 +1302,6 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 	
 	width = CHASELINK(menu->lwidth) + CHASELINK(menu->rwidth);
 	Menu_DrawBox (menu->x, menu->y, width, height, menu->borderalpha, title, prefix);
-	
-	Menu_DrawScrollbar (menu);
 }
 
 void Menu_DrawToolTip (const menuitem_s *item)
