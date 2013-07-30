@@ -2155,7 +2155,7 @@ option_name_t disp_option_names[] =
 	{
 		option_minimapspincontrol,
 		NULL, //multiple cvars controlled-- see MinimapFunc
-		"Minimap",
+		"minimap",
 		"select your minimap style",
 		setnames (minimap_names)
 	},
@@ -2439,23 +2439,23 @@ const char *graphical_preset_names[][3] =
 {
 	// display name, cfg name, tooltip
 	{
-		"high compatibility",	"compatibility",
+		"High Compatibility",	"compatibility",
 		"use when all other modes fail or run slowly"
 	},
 	{
-		"high performance",		"maxperformance",
+		"High Performance",		"maxperformance",
 		"fast rendering, many effects disabled"
 	},
 	{
-		"performance",			"maxperformance",
+		"Performance",			"maxperformance",
 		"GLSL per-pixel lighting and postprocess"
 	},
 	{
-		"quality",				"quality",
+		"Quality",				"quality",
 		"GLSL per-pixel effects on all surfaces"
 	},
 	{
-		"high quality",			"maxquality",
+		"High quality",			"maxquality",
 		"GLSL, shadows, light shafts from sun"
 	}
 };
@@ -2518,7 +2518,7 @@ static menuframework_s *Video_MenuInit (void)
 	
 	add_text (video.window, NULL, 0); // spacer
 	
-	add_action (video.window, "apply changes", VidApplyFunc, 0);
+	add_action (video.window, "Apply", VidApplyFunc, 0);
 	
 	return &video.screen;
 }
@@ -2665,7 +2665,7 @@ static void M_Menu_Input_f (void)
 	
 	add_text (input.window, NULL, 0); //spacer
 	
-	add_action (input.window, "key bindings", CustomizeControlsFunc, 0);
+	add_action (input.window, "Key Bindings", CustomizeControlsFunc, 0);
 	
 	M_PushMenu_Defaults (input.screen);
 }
@@ -2781,17 +2781,18 @@ static void ApplyIRCSettings( void * self )
 	M_PopMenu( );
 }
 
+// TODO: use the options menu macros like everywhere else.
 static void IRC_Settings_SubMenuInit( )
 {
 	setup_tickbox (s_irc_joinatstartup);
-	s_irc_joinatstartup.generic.name	= "Join At Startup";
+	s_irc_joinatstartup.generic.name	= "join at startup";
 	s_irc_joinatstartup.generic.localstrings[0] = "cl_IRC_connect_at_startup";
 	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->integer != 0;
 	s_irc_joinatstartup.generic.callback = SpinOptionFunc;
 	Menu_AddItem( &s_irc_menu, &s_irc_joinatstartup );
 
 	s_irc_server.generic.type		= MTYPE_FIELD;
-	s_irc_server.generic.name		= "Server ";
+	s_irc_server.generic.name		= "server";
 	s_irc_server.generic.tooltip	= "Address or name of the IRC server";
 	s_irc_server.generic.visible_length		= LONGINPUT_SIZE;
 	s_irc_server.cursor			= strlen( cl_IRC_server->string );
@@ -2799,7 +2800,7 @@ static void IRC_Settings_SubMenuInit( )
 	Menu_AddItem( &s_irc_menu, &s_irc_server );
 
 	s_irc_channel.generic.type		= MTYPE_FIELD;
-	s_irc_channel.generic.name		= "Channel ";
+	s_irc_channel.generic.name		= "channel";
 	s_irc_channel.generic.tooltip	= "Name of the channel to join";
 	s_irc_channel.generic.visible_length		= LONGINPUT_SIZE;
 	s_irc_channel.cursor			= strlen( cl_IRC_channel->string );
@@ -2807,21 +2808,21 @@ static void IRC_Settings_SubMenuInit( )
 	Menu_AddItem( &s_irc_menu, &s_irc_channel );
 
 	s_irc_port.generic.type			= MTYPE_FIELD;
-	s_irc_port.generic.name			= "TCP Port ";
+	s_irc_port.generic.name			= "port";
 	s_irc_port.generic.tooltip		= "Port to connect to on the server";
 	s_irc_port.generic.visible_length		= 4;
 	s_irc_port.cursor			= strlen( cl_IRC_port->string );
 	strcpy( s_irc_port.buffer, Cvar_VariableString("cl_IRC_port") );
 	Menu_AddItem( &s_irc_menu, &s_irc_port );
 
-	s_irc_ovnickname.generic.name		= "Override nick";
+	s_irc_ovnickname.generic.name		= "override nick";
 	s_irc_ovnickname.generic.tooltip	= "Enable this to override the default, player-based nick";
 	setup_tickbox (s_irc_ovnickname);
 	s_irc_ovnickname.curvalue		= cl_IRC_override_nickname->value ? 1 : 0;
 	Menu_AddItem( &s_irc_menu, &s_irc_ovnickname );
 
 	s_irc_nickname.generic.type		= MTYPE_FIELD;
-	s_irc_nickname.generic.name		= "Nick ";
+	s_irc_nickname.generic.name		= "nick";
 	s_irc_nickname.generic.tooltip	= "Nickname override to use";
 	s_irc_nickname.generic.visible_length		= LONGINPUT_SIZE;
 	s_irc_nickname.cursor			= strlen( cl_IRC_nickname->string );
@@ -2829,7 +2830,7 @@ static void IRC_Settings_SubMenuInit( )
 	Menu_AddItem( &s_irc_menu, &s_irc_nickname );
 
 	s_irc_kickrejoin.generic.type		= MTYPE_FIELD;
-	s_irc_kickrejoin.generic.name		= "Autorejoin ";
+	s_irc_kickrejoin.generic.name		= "autorejoin";
 	s_irc_kickrejoin.generic.tooltip	= "Delay before automatic rejoin after kick (0 to disable)";
 	s_irc_kickrejoin.generic.visible_length		= 4;
 	s_irc_kickrejoin.cursor			= strlen( cl_IRC_kick_rejoin->string );
@@ -2837,14 +2838,14 @@ static void IRC_Settings_SubMenuInit( )
 	Menu_AddItem( &s_irc_menu, &s_irc_kickrejoin );
 
 	s_irc_reconnectdelay.generic.type	= MTYPE_FIELD;
-	s_irc_reconnectdelay.generic.name	= "Reconnect ";
+	s_irc_reconnectdelay.generic.name	= "reconnect";
 	s_irc_reconnectdelay.generic.tooltip= "Delay between reconnection attempts (minimum 5)";
 	s_irc_reconnectdelay.generic.visible_length	= 4;
 	s_irc_reconnectdelay.cursor		= strlen( cl_IRC_reconnect_delay->string );
 	strcpy( s_irc_reconnectdelay.buffer, Cvar_VariableString("cl_IRC_reconnect_delay") );
 	Menu_AddItem( &s_irc_menu, &s_irc_reconnectdelay );
 
-	add_action (s_irc_menu, "Apply settings", ApplyIRCSettings, 0);
+	add_action (s_irc_menu, "Apply", ApplyIRCSettings, 0);
 
 }
 
@@ -2889,7 +2890,7 @@ void IRC_MenuInit( void )
 
 	s_irc_join.generic.type	= MTYPE_ACTION;
 	s_irc_join.generic.flags = QMF_BUTTON;
-	s_irc_join.generic.name	= "Join IRC Chat";
+	s_irc_join.generic.name	= "Connect Now";
 	s_irc_join.generic.callback = JoinIRCFunc;
 	Menu_AddItem( &s_irc_menu, &s_irc_join );
 
@@ -2915,10 +2916,10 @@ void IRC_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 
 	// Update join/quit menu entry
 	if ( CL_IRCIsRunning( ) ) {
-		s_irc_join.generic.name	= "Quit IRC Chat";
+		s_irc_join.generic.name	= "Disconnect Now";
 		s_irc_join.generic.callback = QuitIRCFunc;
 	} else {
-		s_irc_join.generic.name	= "Join IRC Chat";
+		s_irc_join.generic.name	= "Connect Now";
 		s_irc_join.generic.callback = JoinIRCFunc;
 	}
 
@@ -2997,7 +2998,7 @@ void M_Menu_Options_f (void)
 	
 	add_text (s_options_menu, NULL, 0); //spacer
 	
-	add_action (s_options_menu, "reset defaults", ControlsResetDefaultsFunc, 0);
+	add_action (s_options_menu, "Reset to Defaults", ControlsResetDefaultsFunc, 0);
 	
 	M_PushMenu_Defaults (s_options_screen);
 	
@@ -3267,10 +3268,10 @@ static void M_Menu_Game_f (void)
 	static menuframework_s	s_game_menu;
 
 	static const char *singleplayer_skill_level_names[][2] = {
-		{"easy",	"You will win"},
-		{"medium",	"You might win"},
-		{"hard",	"Very challenging"},
-		{"ultra",	"Only the best will win"}
+		{"Easy",	"You will win"},
+		{"Medium",	"You might win"},
+		{"Hard",	"Very challenging"},
+		{"Ultra",	"Only the best will win"}
 	};
 	#define num_singleplayer_skill_levels  static_array_size(singleplayer_skill_level_names)
 	static menuaction_s		s_singleplayer_game_actions[num_singleplayer_skill_levels];
@@ -4166,8 +4167,8 @@ void ServerListHeader_SubmenuInit (void)
 	s_joinserver_header.navagable = true;
 	
 	// doesn't actually do anything yet
-	// add_action (s_joinserver_header, "address book", AddressBookFunc, 0);
-	add_action (s_joinserver_header, "refresh list", SearchLocalGamesFunc, 0);
+	// add_action (s_joinserver_header, "Address Book", AddressBookFunc, 0);
+	add_action (s_joinserver_header, "Refresh", SearchLocalGamesFunc, 0);
 	add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
 
 	Menu_AddItem (&s_joinserver_menu, &s_joinserver_header);
@@ -5212,10 +5213,10 @@ static void M_Menu_StartServer_f (void)
 	Menu_AddItem( &s_startserver_main_submenu, &s_skill_box );
 	
 #ifndef TACTICAL
-	add_action (s_startserver_menu, "mutators", MutatorFunc, QMF_RIGHT_COLUMN);
+	add_action (s_startserver_menu, "Mutators", MutatorFunc, QMF_RIGHT_COLUMN);
 #endif
 	add_action (s_startserver_menu, "Bot Options", BotOptionsFunc, QMF_RIGHT_COLUMN);
-	add_action (s_startserver_menu, "begin", StartServerActionFunc, QMF_RIGHT_COLUMN);
+	add_action (s_startserver_menu, "Begin", StartServerActionFunc, QMF_RIGHT_COLUMN);
 	
 	
 	// call this now to set proper inital state
@@ -6036,7 +6037,7 @@ void PlayerConfig_MenuInit( void )
 	Menu_AddItem( &s_player_password_submenu, &s_player_password_field_submenu);
 	Menu_AddItem( &s_player_password_field_submenu, &s_player_password_field);
 	
-	add_action (s_player_password_submenu, "apply", PConfigApplyFunc, 0);
+	add_action (s_player_password_submenu, "Apply", PConfigApplyFunc, 0);
 	
 	// Horizontal submenu with two items. The first is a submenu with the
 	// model/skin controls. The second is just a thumbnail of the current
@@ -6147,15 +6148,15 @@ static const char *tactical_skin_names[num_tactical_teams][num_tactical_classes]
 {
 	//ALIEN CLASSES
 	{
-		{"enforcer",	"martianenforcer"},
-		{"warrior",		"martianwarrior"},
-		{"overlord",	"martianoverlord"}
+		{"Enforcer",	"martianenforcer"},
+		{"Warrior",		"martianwarrior"},
+		{"Overlord",	"martianoverlord"}
 	},
 	//HUMAN CLASSES
 	{
-		{"lauren",		"lauren"},
-		{"enforcer",	"enforcer"},
-		{"commander",	"commander"}
+		{"Lauren",		"lauren"},
+		{"Enforcer",	"enforcer"},
+		{"Commander",	"commander"}
 	}
 };
 
@@ -6276,8 +6277,8 @@ static void M_Menu_Quit_f (void)
 	setup_window (s_quit_screen, s_quit_menu, "EXIT ALIEN ARENA");
 
 	add_text (s_quit_menu, "Are you sure?", 0);
-	add_action (s_quit_menu, "yes", quitActionYes, 0);
-	add_action (s_quit_menu, "no", quitActionNo, 0);
+	add_action (s_quit_menu, "Yes", quitActionYes, 0);
+	add_action (s_quit_menu, "No", quitActionNo, 0);
 	
 	Menu_AutoArrange (&s_quit_screen);
 	Menu_Center (&s_quit_screen);
