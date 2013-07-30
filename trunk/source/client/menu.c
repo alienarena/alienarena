@@ -5055,7 +5055,11 @@ void StartServerActionFunc( void *self )
 	// able to remove it from the game.
 	Cvar_SetValue ("deathmatch", 1 );
 	Cvar_SetValue ("ctf", 0);
+#ifdef TACTICAL
+	Cvar_SetValue ("g_tactical", 1);
+#else
 	Cvar_SetValue ("g_tactical", 0);
+#endif
 	Cvar_SetValue ("tca", 0);
 	Cvar_SetValue ("cp", 0);
 	Cvar_SetValue ("g_duel", 0);
