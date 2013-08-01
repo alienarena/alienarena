@@ -481,7 +481,7 @@ static void _CON_ComputeLineHeight( FNT_font_t font , int line )
 		// "Print" the line outside of the screen
 		struct FNT_window_s box;
 		box.x = 0 , box.y = viddef.height;
-		box.width = viddef.width - font->size * 3 , box.height = 0;
+		box.width = viddef.width - font->size * 5 , box.height = 0;
 
 		if ( CON_console.lCount[ line ] == 1 ) {
 			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
@@ -578,9 +578,9 @@ static void _CON_DrawConsoleText(
 
 	do {
 		if ( total + CON_console.heights[ line ] >= start && CON_console.text[ line ][ 0 ] ) {
-			box.x = font->size;
+			box.x = font->size*2;
 			box.y = total - start;
-			box.width = viddef.width - font->size * 3;
+			box.width = viddef.width - font->size * 5;
 			box.height = 0;
 
 			if ( CON_console.lCount[ line ] == 1 ) {
@@ -627,32 +627,39 @@ static void _CON_DrawScroller(
 		int	text_height ,
 		int	display_height )
 { 
-	int hStart = viddef.width - 3 * font_size / 2;
+	// FIXME: lots of copy-pasted code here. Doesn't matter, we will 
+	// eventually redo the whole console using the menu code.
+	
+	int hStart = viddef.width - 3 * font_size;
 	int vStart = font_size / 2;
 	int tHeight = display_height - font_size;
 	int bHeight , bStart;
-
-	Draw_Fill (hStart - 1 , vStart - 1 , font_size + 2 , tHeight + 2 , RGBA8(235,235,235,255));
-
-	if ( display_height >= text_height ) {
+	
+	Draw_AlphaStretchTilingPic (hStart, vStart, font_size, font_size, "menu/scroll_border_end", 1);
+	Draw_AlphaStretchTilingPic (hStart, vStart+font_size, font_size, tHeight-vStart, "menu/scroll_border", 1);
+	Draw_AlphaStretchTilingPic (hStart+font_size, vStart+tHeight+font_size, -font_size, -font_size, "menu/scroll_border_end", 1);
+	
+	if ( display_height >= text_height )
+	{
 		// Fill whole bar
-		Draw_Fill (hStart , vStart , font_size , tHeight , RGBA(0,1,0,1));
-		return;
+		bStart = vStart;
+		bHeight = tHeight;
 	}
-
-	bHeight = tHeight * display_height / text_height;
-	if ( bHeight < font_size / 2 ) {
-		bHeight = font_size / 2;
+	else
+	{
+		bHeight = tHeight * display_height / text_height;
+		if ( bHeight < font_size ) 
+			bHeight = font_size;
+		// "Top" offset is height - dHeight, "bottom" offset is 0
+		// "Top" bar location is vStart, bottom location is vStart + tHeight - bHeight.
+		bStart = vStart + ( tHeight - bHeight )
+			* ( CON_console.displayOffset - text_height + display_height )
+			/ ( display_height - text_height );
 	}
-
-	// "Top" offset is height - dHeight, "bottom" offset is 0
-	// "Top" bar location is vStart, bottom location is vStart + tHeight - bHeight.
-	bStart = vStart + ( tHeight - bHeight )
-		* ( CON_console.displayOffset - text_height + display_height )
-		/ ( display_height - text_height );
-
-	Draw_Fill (hStart , vStart , font_size , tHeight , RGBA8(63,79,27,255));
-	Draw_Fill (hStart , bStart , font_size , bHeight , RGBA(0,1,0,1));
+	
+	Draw_AlphaStretchTilingPic (hStart, bStart, font_size, font_size, "menu/scroll_cursor_end", 1);
+	Draw_AlphaStretchTilingPic (hStart, bStart+font_size, font_size, bHeight-font_size, "menu/scroll_cursor", 1);
+	Draw_AlphaStretchTilingPic (hStart+font_size, bStart+bHeight+font_size, -font_size, -font_size, "menu/scroll_cursor_end", 1);
 }
 
 
@@ -704,7 +711,7 @@ static void _CON_DrawInputLine(
 	box.y = inputY;
 	box.height = 0;
 	text[ key_linepos ] = 0;
-	if ( wToCursor + font->size * 3 < viddef.width ) {
+	if ( wToCursor + font->size * 5 < viddef.width ) {
 		// There is enough space for the start of the line
 		align = FNT_ALIGN_LEFT;
 	} else {
@@ -724,7 +731,7 @@ static void _CON_DrawInputLine(
 	if ( wAfterCursor ) {
 		text[ key_linepos ] = old;
 		box.x += box.width + font->size;
-		box.width = viddef.width - ( box.width + font->size * 3 );
+		box.width = viddef.width - ( box.width + font->size * 5 );
 		box.height = 0;
 		FNT_BoundedPrint( font , text + key_linepos , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 	}
@@ -755,7 +762,7 @@ static int _CON_DrawConsoleBottom( int y )
 	// Draw version string
 	sz = sizeof( VERSION );
 	FNT_RawPrint( font , VERSION , sz , false ,
-		viddef.width - font->size * 3 * sz / 2 , y , FNT_colors[ 7 ] );
+		viddef.width - font->size * 5 * sz / 2 , y , FNT_colors[ 7 ] );
 
 	// Draw download status if needed
 	if ( ! ( cls.download && ( kb = (int)ftell( cls.download ) / 1024 ) ) ) {
@@ -797,7 +804,29 @@ void CON_DrawConsole( float relSize )
 
 	// Compute display height and draw background
 	dHeight = viddef.height * relSize;
-	Draw_StretchPic( 0 , dHeight - viddef.height , viddef.width , viddef.height , "conback" );
+	
+	// FIXME: lots of copy-pasted code here. Doesn't matter, we will 
+	// eventually redo the whole console using the menu code. 
+	{
+		int _tile_w, _tile_h;
+		float tile_w, tile_h;
+		
+		// assume all tiles are the same size
+		Draw_GetPicSize (&_tile_w, &_tile_h, "menu/m_topcorner" );
+	
+		tile_w = (float)_tile_w/64.0*(float)font->size*4.0;
+		tile_h = (float)_tile_h/64.0*(float)font->size*4.0;
+		
+		
+		Draw_AlphaStretchTilingPic( -tile_w/4, dHeight-tile_h/2, tile_w, tile_h, "menu/m_bottomcorner", 1 );
+		Draw_AlphaStretchTilingPic( viddef.width+tile_w/4, dHeight-tile_h/2, -tile_w, tile_h, "menu/m_bottomcorner", 1 );
+		
+		Draw_AlphaStretchTilingPic( tile_w*0.75, dHeight-tile_h/2, viddef.width-tile_w*1.5, tile_h, "menu/m_bottom", 1 );
+		
+		Draw_AlphaStretchTilingPic( -tile_w/4, 0, tile_w, dHeight-tile_h/2, "menu/m_side", 1 );
+		Draw_AlphaStretchTilingPic( viddef.width+tile_w/4, 0, -tile_w, dHeight-tile_h/2, "menu/m_side", 1 );
+		Draw_AlphaStretchTilingPic( tile_w*0.75, 0, viddef.width-tile_w, dHeight-tile_h/2, "menu/m_background", 1 );
+	}
 
 	// Draw version string and download status
 	dHeight = _CON_DrawConsoleBottom( dHeight ) - fontSize;
