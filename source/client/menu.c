@@ -2479,7 +2479,7 @@ const char *graphical_preset_names[][3] =
 		"GLSL per-pixel effects on all surfaces"
 	},
 	{
-		"High quality",			"maxquality",
+		"High Quality",			"maxquality",
 		"GLSL, shadows, light shafts from sun"
 	}
 };
@@ -2498,7 +2498,7 @@ static void PresetCallback (void *_self)
 	Com_sprintf (cmd, sizeof(cmd), "exec graphical_presets/%s.cfg", self->generic.localstrings[0]);
 	Cmd_ExecuteString (cmd);
 	Cbuf_Execute ();
-	Video_MenuInit ();
+	Video_MenuInit (); //TODO: alert user of the need to apply here
 }
 
 void VidApplyFunc (void *self)
