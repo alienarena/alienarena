@@ -1750,7 +1750,28 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 // all "options" menus have roughly the same layout, so we can automate some
 // of the grunt work
 
-#define options_menu_setup(menu,title) \
+typedef struct
+{
+	menuframework_s	screen;
+	menuframework_s	window;
+	menuframework_s	panel;
+	menumultival_s	widgets[];
+} options_menu_t;
+
+static options_menu_t	*last_options_menu;
+static option_name_t	*last_options_menu_namelist;
+static int				last_options_menu_nitems;
+
+// Use this anywhere to reinitialize whatever options menu is currently 
+// showing so it reflects current cvar values.
+void Options_Menu_Reinitialize (void)
+{
+	int i;
+	for (i = 0; i < last_options_menu_nitems; i++)
+		Option_Setup (&last_options_menu->widgets[i], &last_options_menu_namelist[i]);
+}
+
+#define options_menu(menu,title) \
 	static struct \
 	{ \
 		menuframework_s	screen; \
@@ -1770,7 +1791,10 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			Option_Setup (&menu.widgets[i], &(menu ## _option_names)[i]); \
 			Menu_AddItem( &menu.panel, &menu.widgets[i]); \
 		} \
-	}
+	} \
+	last_options_menu_nitems = static_array_size(menu ## _option_names); \
+	last_options_menu_namelist = &(menu ## _option_names)[0]; \
+	last_options_menu = (options_menu_t*)&menu;
 	
 
 
@@ -2205,22 +2229,24 @@ option_name_t disp_option_names[] =
 
 menumultival_s options[num_options];
 
-static void ControlsSetMenuItemValues( void )
-{
-	int i;
-	
-	for (i = 0; i < num_options; i++)
-	{
-		Option_Setup (&options[i], &disp_option_names[i]);
-	}
-}
-
-static void ControlsResetDefaultsFunc( void *unused )
+static void OptionsResetDefaultsFunc( void *unused )
 {
 	Cbuf_AddText ("exec default.cfg\n");
 	Cbuf_Execute();
 
-	ControlsSetMenuItemValues();
+	Options_Menu_Reinitialize ();
+
+	CL_Snd_Restart_f();
+	S_StartMenuMusic();
+
+}
+
+static void OptionsResetSavedFunc( void *unused )
+{
+	Cbuf_AddText ("exec config.cfg\n");
+	Cbuf_Execute();
+
+	Options_Menu_Reinitialize ();
 
 	CL_Snd_Restart_f();
 	S_StartMenuMusic();
@@ -2229,7 +2255,7 @@ static void ControlsResetDefaultsFunc( void *unused )
 
 static void M_Menu_Display_f (void)
 {
-	options_menu_setup (disp, "DISPLAY");
+	options_menu (disp, "DISPLAY");
 
 	M_PushMenu_Defaults (disp.screen);
 }
@@ -2499,7 +2525,7 @@ static menuframework_s *Video_MenuInit (void)
 {
 	int i;
 	
-	options_menu_setup (video, "VIDEO OPTIONS");
+	options_menu (video, "VIDEO OPTIONS");
 	
 	add_text (video.window, NULL, 0); // spacer
 	
@@ -2582,7 +2608,7 @@ option_name_t audio_option_names[] =
 
 static void M_Menu_Audio_f (void)
 {
-	options_menu_setup (audio, "AUDIO OPTIONS");
+	options_menu (audio, "AUDIO OPTIONS");
 	M_PushMenu_Defaults (audio.screen);
 }
 
@@ -2650,7 +2676,7 @@ void CustomizeControlsFunc (void *unused)
 
 static void M_Menu_Input_f (void)
 {
-	options_menu_setup (input, "INPUT OPTIONS");
+	options_menu (input, "INPUT OPTIONS");
 
 	{
 		static menulist_s s_options_invertmouse_box;
@@ -2717,7 +2743,7 @@ option_name_t net_option_names[] =
 
 static void M_Menu_Net_f (void)
 {
-	options_menu_setup (net, "NETWORK OPTIONS");
+	options_menu (net, "NETWORK OPTIONS");
 	M_PushMenu_Defaults (net.screen);
 }
 
@@ -2995,7 +3021,8 @@ void M_Menu_Options_f (void)
 	
 	add_text (s_options_menu, NULL, 0); //spacer
 	
-	add_action (s_options_menu, "Reset to Defaults", ControlsResetDefaultsFunc, 0);
+	add_action (s_options_menu, "Reset to Defaults", OptionsResetDefaultsFunc, 0);
+	add_action (s_options_menu, "Restore from Saved", OptionsResetSavedFunc, 0);
 	
 	M_PushMenu_Defaults (s_options_screen);
 	
