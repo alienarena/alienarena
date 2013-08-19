@@ -219,7 +219,8 @@ am__installdirs = "$(DESTDIR)$(docdir)" "$(DESTDIR)$(icondir)" \
 	"$(DESTDIR)$(modelsdir)" "$(DESTDIR)$(particlesdir)" \
 	"$(DESTDIR)$(picsdir)" "$(DESTDIR)$(playersdir)" \
 	"$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(sounddir)" \
-	"$(DESTDIR)$(texturesdir)" "$(DESTDIR)$(vehiclesdir)"
+	"$(DESTDIR)$(tacticaldir)" "$(DESTDIR)$(texturesdir)" \
+	"$(DESTDIR)$(vehiclesdir)"
 DATA = $(dist_doc_DATA) $(dist_icon_DATA) $(nobase_dist_arena_DATA) \
 	$(nobase_dist_botinfo_DATA) $(nobase_dist_data1_DATA) \
 	$(nobase_nodist_env_DATA) $(nobase_nodist_fonts_DATA) \
@@ -229,7 +230,8 @@ DATA = $(dist_doc_DATA) $(dist_icon_DATA) $(nobase_dist_arena_DATA) \
 	$(nobase_nodist_models_DATA) $(nobase_nodist_particles_DATA) \
 	$(nobase_nodist_pics_DATA) $(nobase_nodist_players_DATA) \
 	$(nobase_nodist_scripts_DATA) $(nobase_nodist_sound_DATA) \
-	$(nobase_nodist_textures_DATA) $(nobase_nodist_vehicles_DATA)
+	$(nobase_nodist_tactical_DATA) $(nobase_nodist_textures_DATA) \
+	$(nobase_nodist_vehicles_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -762,6 +764,7 @@ nobase_nodist_gfx_DATA = \
 	data1/gfx/menubar1.tga \
 	data1/gfx/menubar2.tga \
 	data1/gfx/menubar3.tga \
+	data1/gfx/menubar4.tga \
 	data1/gfx/metal3glow.tga \
 	data1/gfx/metalenvmap.jpg \
 	data1/gfx/minderaser_fx.tga \
@@ -1037,6 +1040,7 @@ nobase_nodist_maps_DATA = \
  	data1/maps/dm-zorn2k11.bsp \
 	data1/maps/dm-zion2k9.bsp \
 	data1/maps/tac-extermination.bsp \
+	data1/maps/tac-extermination.lightmap \
 	data1/maps/tca-corrosion.bsp \
 	data1/maps/tca-corrosion.lightmap \
 	data1/maps/tca-cryogenic.bsp \
@@ -1798,7 +1802,6 @@ nobase_nodist_pics_DATA = \
 	data1/pics/crosshairs/alien.tga \
 	data1/pics/crosshairs/chexcross.tga \
 	data1/pics/crosshairs/dot1.tga \
-	data1/pics/crosshairs/freezy.tga \
 	data1/pics/crosshairs/hardcorech.tga \
 	data1/pics/crosshairs/havoc2.tga \
 	data1/pics/crosshairs/havoc3.tga \
@@ -1943,6 +1946,7 @@ nobase_nodist_pics_DATA = \
 	data1/pics/m_main_quit_fx.tga \
 	data1/pics/m_main_quit_sel.tga \
 	data1/pics/m_main_quit.tga \
+	data1/pics/m_main_tactical.tga \
 	data1/pics/m_main.tga \
 	data1/pics/m_main_video_fx.tga \
 	data1/pics/m_main_video_sel.tga \
@@ -4335,6 +4339,7 @@ nobase_nodist_textures_DATA = \
 	data1/textures/rage/support_column_nm.tga \
 	data1/textures/rage/support_column.tga \
 	data1/textures/rage/support_trim.tga \
+	data1/textures/rage/trimlight_blue.tga \
 	data1/textures/rage/trimlight_purple.tga \
 	data1/textures/rage/trimlight_red.tga \
 	data1/textures/rage/wall_blue.tga \
@@ -4411,6 +4416,7 @@ nobase_nodist_vehicles_DATA = \
 	data1/vehicles/deathball/deathball.md2 \
 	data1/vehicles/deathball/deathball.tga \
 	data1/vehicles/deathball/deathmask.tga \
+	data1/vehicles/deathball/skin_fx.tga \
 	data1/vehicles/deathball/skin_normal.tga \
 	data1/vehicles/deathball/skin.tga \
 	data1/vehicles/deathball/v_wep.md2 \
@@ -4440,6 +4446,13 @@ nobase_nodist_graphical_presets_DATA = \
 	data1/graphical_presets/quality.cfg \
 	data1/graphical_presets/maxquality.cfg 
 
+tacticaldir = $(pkgdatadir)
+nobase_nodist_tactical_DATA = \
+	tactical/maps.lst \
+	tactical/motd.txt \
+	tactical/default.cfg \
+	tactical/server.cfg
+
 gamedata_files = \
  $(nobase_nodist_env_DATA) \
  $(nobase_nodist_fonts_DATA) \
@@ -4454,7 +4467,8 @@ gamedata_files = \
  $(nobase_nodist_sound_DATA) \
  $(nobase_nodist_textures_DATA) \
  $(nobase_nodist_vehicles_DATA) \
- $(nobase_nodist_graphical_presets_DATA)
+ $(nobase_nodist_graphical_presets_DATA) \
+ $(nobase_nodist_tactical_DATA)
 
 all: all-recursive
 
@@ -4911,6 +4925,30 @@ uninstall-nobase_nodist_soundDATA:
 	@list='$(nobase_nodist_sound_DATA)'; test -n "$(sounddir)" || list=; \
 	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
 	dir='$(DESTDIR)$(sounddir)'; $(am__uninstall_files_from_dir)
+install-nobase_nodist_tacticalDATA: $(nobase_nodist_tactical_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(nobase_nodist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(tacticaldir)" || exit 1; \
+	fi; \
+	$(am__nobase_list) | while read dir files; do \
+	  xfiles=; for file in $$files; do \
+	    if test -f "$$file"; then xfiles="$$xfiles $$file"; \
+	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
+	  test -z "$$xfiles" || { \
+	    test "x$$dir" = x. || { \
+	      echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)/$$dir'"; \
+	      $(MKDIR_P) "$(DESTDIR)$(tacticaldir)/$$dir"; }; \
+	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(tacticaldir)/$$dir'"; \
+	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(tacticaldir)/$$dir" || exit $$?; }; \
+	done
+
+uninstall-nobase_nodist_tacticalDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nobase_nodist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
+	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
+	dir='$(DESTDIR)$(tacticaldir)'; $(am__uninstall_files_from_dir)
 install-nobase_nodist_texturesDATA: $(nobase_nodist_textures_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(nobase_nodist_textures_DATA)'; test -n "$(texturesdir)" || list=; \
@@ -5261,7 +5299,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(docdir)" "$(DESTDIR)$(icondir)" "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(botinfodir)" "$(DESTDIR)$(data1dir)" "$(DESTDIR)$(envdir)" "$(DESTDIR)$(fontsdir)" "$(DESTDIR)$(gfxdir)" "$(DESTDIR)$(graphical_presetsdir)" "$(DESTDIR)$(levelshotsdir)" "$(DESTDIR)$(mapsdir)" "$(DESTDIR)$(modelsdir)" "$(DESTDIR)$(particlesdir)" "$(DESTDIR)$(picsdir)" "$(DESTDIR)$(playersdir)" "$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(sounddir)" "$(DESTDIR)$(texturesdir)" "$(DESTDIR)$(vehiclesdir)"; do \
+	for dir in "$(DESTDIR)$(docdir)" "$(DESTDIR)$(icondir)" "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(botinfodir)" "$(DESTDIR)$(data1dir)" "$(DESTDIR)$(envdir)" "$(DESTDIR)$(fontsdir)" "$(DESTDIR)$(gfxdir)" "$(DESTDIR)$(graphical_presetsdir)" "$(DESTDIR)$(levelshotsdir)" "$(DESTDIR)$(mapsdir)" "$(DESTDIR)$(modelsdir)" "$(DESTDIR)$(particlesdir)" "$(DESTDIR)$(picsdir)" "$(DESTDIR)$(playersdir)" "$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(sounddir)" "$(DESTDIR)$(tacticaldir)" "$(DESTDIR)$(texturesdir)" "$(DESTDIR)$(vehiclesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -5329,6 +5367,7 @@ install-data-am: install-data-local install-dist_docDATA \
 	install-nobase_nodist_playersDATA \
 	install-nobase_nodist_scriptsDATA \
 	install-nobase_nodist_soundDATA \
+	install-nobase_nodist_tacticalDATA \
 	install-nobase_nodist_texturesDATA \
 	install-nobase_nodist_vehiclesDATA
 
@@ -5392,6 +5431,7 @@ uninstall-am: uninstall-dist_docDATA uninstall-dist_iconDATA \
 	uninstall-nobase_nodist_playersDATA \
 	uninstall-nobase_nodist_scriptsDATA \
 	uninstall-nobase_nodist_soundDATA \
+	uninstall-nobase_nodist_tacticalDATA \
 	uninstall-nobase_nodist_texturesDATA \
 	uninstall-nobase_nodist_vehiclesDATA
 
@@ -5420,6 +5460,7 @@ uninstall-am: uninstall-dist_docDATA uninstall-dist_iconDATA \
 	install-nobase_nodist_playersDATA \
 	install-nobase_nodist_scriptsDATA \
 	install-nobase_nodist_soundDATA \
+	install-nobase_nodist_tacticalDATA \
 	install-nobase_nodist_texturesDATA \
 	install-nobase_nodist_vehiclesDATA install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
@@ -5442,6 +5483,7 @@ uninstall-am: uninstall-dist_docDATA uninstall-dist_iconDATA \
 	uninstall-nobase_nodist_playersDATA \
 	uninstall-nobase_nodist_scriptsDATA \
 	uninstall-nobase_nodist_soundDATA \
+	uninstall-nobase_nodist_tacticalDATA \
 	uninstall-nobase_nodist_texturesDATA \
 	uninstall-nobase_nodist_vehiclesDATA
 

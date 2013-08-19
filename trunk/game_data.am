@@ -351,6 +351,7 @@ nobase_nodist_gfx_DATA = \
 	data1/gfx/menubar1.tga \
 	data1/gfx/menubar2.tga \
 	data1/gfx/menubar3.tga \
+	data1/gfx/menubar4.tga \
 	data1/gfx/metal3glow.tga \
 	data1/gfx/metalenvmap.jpg \
 	data1/gfx/minderaser_fx.tga \
@@ -630,6 +631,7 @@ nobase_nodist_maps_DATA = \
  	data1/maps/dm-zorn2k11.bsp \
 	data1/maps/dm-zion2k9.bsp \
 	data1/maps/tac-extermination.bsp \
+	data1/maps/tac-extermination.lightmap \
 	data1/maps/tca-corrosion.bsp \
 	data1/maps/tca-corrosion.lightmap \
 	data1/maps/tca-cryogenic.bsp \
@@ -1397,7 +1399,6 @@ nobase_nodist_pics_DATA = \
 	data1/pics/crosshairs/alien.tga \
 	data1/pics/crosshairs/chexcross.tga \
 	data1/pics/crosshairs/dot1.tga \
-	data1/pics/crosshairs/freezy.tga \
 	data1/pics/crosshairs/hardcorech.tga \
 	data1/pics/crosshairs/havoc2.tga \
 	data1/pics/crosshairs/havoc3.tga \
@@ -1542,6 +1543,7 @@ nobase_nodist_pics_DATA = \
 	data1/pics/m_main_quit_fx.tga \
 	data1/pics/m_main_quit_sel.tga \
 	data1/pics/m_main_quit.tga \
+	data1/pics/m_main_tactical.tga \
 	data1/pics/m_main.tga \
 	data1/pics/m_main_video_fx.tga \
 	data1/pics/m_main_video_sel.tga \
@@ -3942,6 +3944,7 @@ nobase_nodist_textures_DATA = \
 	data1/textures/rage/support_column_nm.tga \
 	data1/textures/rage/support_column.tga \
 	data1/textures/rage/support_trim.tga \
+	data1/textures/rage/trimlight_blue.tga \
 	data1/textures/rage/trimlight_purple.tga \
 	data1/textures/rage/trimlight_red.tga \
 	data1/textures/rage/wall_blue.tga \
@@ -4020,6 +4023,7 @@ nobase_nodist_vehicles_DATA = \
 	data1/vehicles/deathball/deathball.md2 \
 	data1/vehicles/deathball/deathball.tga \
 	data1/vehicles/deathball/deathmask.tga \
+	data1/vehicles/deathball/skin_fx.tga \
 	data1/vehicles/deathball/skin_normal.tga \
 	data1/vehicles/deathball/skin.tga \
 	data1/vehicles/deathball/v_wep.md2 \
@@ -4052,6 +4056,14 @@ nobase_nodist_graphical_presets_DATA = \
 	data1/graphical_presets/maxquality.cfg 
 
 
+tacticaldir = $(pkgdatadir)
+
+nobase_nodist_tactical_DATA = \
+	tactical/maps.lst \
+	tactical/motd.txt \
+	tactical/default.cfg \
+	tactical/server.cfg
+
 gamedata_files = \
  $(nobase_nodist_env_DATA) \
  $(nobase_nodist_fonts_DATA) \
@@ -4066,5 +4078,6 @@ gamedata_files = \
  $(nobase_nodist_sound_DATA) \
  $(nobase_nodist_textures_DATA) \
  $(nobase_nodist_vehicles_DATA) \
- $(nobase_nodist_graphical_presets_DATA)
+ $(nobase_nodist_graphical_presets_DATA) \
+ $(nobase_nodist_tactical_DATA)
 
