@@ -1,6 +1,6 @@
 
                            Alien Arena
-                           Version 7.65
+                           Version 7.66
 
 
 1. Scope
@@ -15,9 +15,9 @@ in the distribution archive).  For generic information about
 installation, see the GNU INSTALL document.
 
 
-2. Version 7.65 - For Players
+2. Version 7.66 - For Players
 
-The performance of Alien Arena 7.65 is much better that previous
+The performance of Alien Arena 7.66 is much better that previous
 versions.  Recent desktop and notebook computers with 3D
 acceleration for OpenGL will perform well.  Use the Video
 Settings menu to override the automatically selected performance
@@ -41,7 +41,7 @@ For more detail see these sections
   * Running the Program
 
 
-3. Version 7.65 - For Packagers
+3. Version 7.66 - For Packagers
 
   * The incompatibility with ODE 0.12 has been corrected.
     The configure option to use the system libode is --with-system-libode.
@@ -188,7 +188,7 @@ example file name variations):
   *ZLib        (libz)
   *ODE         (libode, libode-dev)
 
-Using the terminal, change to the "alienarena-7.65" directory and
+Using the terminal, change to the "alienarena-7.66" directory and
 enter these commands:
 
 --- Simple Version ---
@@ -206,7 +206,7 @@ command, of course.
 $ export CFLAGS=
     -O3              (more optimization than -O2)
     -pipe            (faster compile)
-    -march=native   (tuned for CPU on this machine)
+    --march=native   (tuned for CPU on this machine)
     -DNDEBUG         (remove assert statements)
 
     -Wp,-D_FORTIFY_SOURCE=2   (improved security)
@@ -218,7 +218,7 @@ the same options for the c++ compiler:
 $ export CXXLAGS=
     -O3
     -pipe
-    -march=native
+    --march=native
     -DNDEBUG
     -Wp,-D_FORTIFY_SOURCE=2
     -fstack-protector --param=ssp-buffer-size=4
@@ -327,7 +327,7 @@ Alien Arena is based on Quake games.  Many of the cvars are the
 same as Quake 2.  More information can be found on the Forum and
 on the Web.
 
-Version 7.65 adds new console variables related to new features.
+Version 7.66 adds new console variables related to new features.
 The important ones are set using the menu.  Check the forum for
 more info.  Or ask the friendly people in the IRC channel.
 
@@ -475,4 +475,54 @@ svn co svn://svn.icculus.org/alienarena/trunk alienarena
 
 More information about Subversion may be found at:
 http://subversion.apache.org/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

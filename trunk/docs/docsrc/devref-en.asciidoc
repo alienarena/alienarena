@@ -548,7 +548,7 @@ always just copies the executables.
 Verify that your versions of 'autoconf', 'automake', and
 'autoconf-archive' are current.
 
-The 7.60 release uses 'autoconf 2.68' and 'automake 1.11'. If more than
+The 7.66 release uses 'autoconf 2.69' and 'automake 1.14'. If more than
 one dev is committing autotool related changes to SVN, it will be less
 confusing if all are using the same versions. 
 

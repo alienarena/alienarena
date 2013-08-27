@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena
-.\" 2010-11-30. Revised: 2012-12-19
+.\" 2010-11-30. Revised: 2013-08-27
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -10,7 +10,7 @@
 .nr topic 0 1
 
 .tl ''Alien Arena''
-.tl ''Version 7.65''
+.tl ''Version 7.66''
 
 
 \n+[topic]. Scope
@@ -23,9 +23,9 @@ For general information, licensing, and contributers, see the README.txt and lic
 For generic information about installation, see the GNU INSTALL document.
 
 
-\n+[topic]. Version 7.65 - For Players
+\n+[topic]. Version 7.66 - For Players
 
-The performance of Alien Arena 7.65 is much better that previous versions.
+The performance of Alien Arena 7.66 is much better that previous versions.
 Recent desktop and notebook computers with 3D acceleration for OpenGL will perform well.
 Use the Video Settings menu to override the automatically selected performance level.  
 
@@ -58,7 +58,7 @@ For more detail see these sections
 .fi
 
 
-\n+[topic]. Version 7.65 - For Packagers
+\n+[topic]. Version 7.66 - For Packagers
 
 .nf
 .in +2
@@ -239,7 +239,7 @@ Alien Arena uses these components (in parentheses: some example file name variat
 .in
 .fi
 
-Using the terminal, change to the "alienarena-7.65" directory and enter these commands:
+Using the terminal, change to the "alienarena-7.66" directory and enter these commands:
 
 --- Simple Version ---
 
@@ -421,7 +421,7 @@ Alien Arena is based on Quake games.
 Many of the cvars are the same as Quake 2.
 More information can be found on the Forum and on the Web.
 
-Version 7.65 adds new console variables related to new features.
+Version 7.66 adds new console variables related to new features.
 The important ones are set using the menu.   
 Check the forum for more info.
 Or ask the friendly people in the IRC channel.
