@@ -1914,7 +1914,7 @@ void ParseClassFile( char *config_file, edict_t *ent )
 						ent->client->pers.inventory[ITEM_INDEX(FindItem("Body Armor"))] += 50;
 						break;
 					case 3:
-						ent->client->pers.inventory[ITEM_INDEX(FindItem("Jacket Armor"))] += 30;
+						ent->client->pers.inventory[ITEM_INDEX(FindItem("Combat Armor"))] += 100;
 						break;
 				}
 
