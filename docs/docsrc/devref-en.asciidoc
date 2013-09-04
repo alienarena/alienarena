@@ -356,7 +356,9 @@ To download Alien Arena from the SVN Repository:
 For example:
 
 +cd ~+
+
 +mkdir alienarena+
+
 +svn checkout svn://icculus.org/alienarena/trunk alienarena+
 
 === Maintainer's Guide ===
@@ -519,10 +521,13 @@ distclean::
 
 Following changes, run:
 
-- +autoreconf --verbose --force --install+
-- +./configure --enable-maintainer-mode <other options>+
-- +make+
-- 	+sudo make install+
++autoreconf --verbose --force --install+
+
++./configure --enable-maintainer-mode <other options>+
+
++make+
+
++sudo make install+
 
 The '--force' and '--install' options to 'autoreconf' are not usually
 needed. Run 'autoreconf --help' for descriptions. The '--install' option
