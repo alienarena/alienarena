@@ -1,0 +1,58 @@
+textures/arena10/cobblestone
+{
+	{
+		map gfx/grass.tga
+		scale static 4 static 4
+		colormap 1 1 1
+		grass
+		grasstype 0
+	}
+}
+textures/arena10/rockdirt1
+{
+	{
+		map gfx/grass.tga
+		scale static 4 static 4
+		colormap 1 1 1
+		grass
+		grasstype 0
+	}
+}
+textures/arena6/icerock
+{
+	{
+		map gfx/leaves1.tga
+		scale static 12 static 12
+		colormap 1 1 1
+		grass
+		grasstype 1
+	}
+}
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/arena10/neonsign4
+{
+	{
+		map gfx/yellowline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+		
