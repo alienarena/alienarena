@@ -1516,11 +1516,10 @@ static void NumberFieldOptionFunc (void *_self)
 	num = atoi (self->buffer);
 	clamped_num = clamp (num, fieldsize->min_value, fieldsize->max_value);
 	
+	Com_sprintf (self->buffer, sizeof(self->buffer), "%d", num);
+	self->cursor = clamp (self->cursor, 0, strlen (self->buffer));
 	if (num != clamped_num)
-	{
-		Com_sprintf (self->buffer, sizeof(self->buffer), "%d", clamped_num);
-		self->cursor = strlen (self->buffer);
-	}
+		Com_sprintf (self->buffer, sizeof(self->buffer), "%d  ^1(%d)", num, clamped_num);
 	
 	Cvar_SetValue (cvarname, clamped_num);
 }
@@ -1676,7 +1675,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			fieldsize = optionname->fieldsize;
 			item->generic.type = MTYPE_FIELD;
 			item->generic.flags |= QMF_NUMBERSONLY;
-			item->generic.visible_length = fieldsize->maxchars;
+			item->generic.visible_length = 2*fieldsize->maxchars;
 			item->cursor = 0;
 			memset (item->buffer, 0, sizeof(item->buffer));
 			item->generic.callback = NumberFieldOptionFunc;
