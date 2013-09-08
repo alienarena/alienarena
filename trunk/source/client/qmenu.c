@@ -140,13 +140,15 @@ void Action_Draw (menuaction_s *a, FNT_font_t font)
 
 void Field_Draw (menufield_s *f, FNT_font_t font)
 {
-	char tempbuffer[128]="";
-	int x, y;
+	char tempbuffer[sizeof(f->buffer)]="";
+	int x, y, before_cursor_width;
 	
 	y = Item_GetY (*f) + MenuText_UpperMargin (f, font->size);
 	x = Item_GetX (*f) + RCOLUMN_OFFSET;
 	
-	strncpy( tempbuffer, f->buffer, f->generic.visible_length);
+	strncpy (tempbuffer, f->buffer, f->cursor);
+	
+	before_cursor_width = Menu_PredictSize (tempbuffer);
 	
 	Menu_DrawHorizBar (
 		"menu/slide_border", (float)x, (float)y-2.0,
@@ -163,7 +165,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	if ( cursor.menuitem == f )
 	{
 		if ( ( ( int ) ( Sys_Milliseconds() / 300 ) ) & 1 )
-			Draw_StretchPic (menu_box.x + menu_box.width - font->size / 8, menu_box.y-1, font->size, font->size+4, "menu/field_cursor");
+			Draw_StretchPic (menu_box.x + before_cursor_width - font->size / 4, menu_box.y-1, font->size, font->size+4, "menu/field_cursor");
 	}
 }
 
@@ -174,7 +176,7 @@ qboolean Field_Key (int key)
 	
 	f = cursor.menuitem;
 	
-	if (f == NULL || f->generic.type != MTYPE_FIELD || key > 127)
+	if (f == NULL || f->generic.type != MTYPE_FIELD)
 		return false;
 
 	switch ( key )
@@ -245,8 +247,16 @@ qboolean Field_Key (int key)
 
 	switch ( key )
 	{
-	case K_KP_LEFTARROW:
 	case K_LEFTARROW:
+		if (f->cursor > 0)
+			f->cursor--;
+		break;
+	
+	case K_RIGHTARROW:
+		if (f->buffer[f->cursor] != '\0')
+			f->cursor++;
+		break;
+		
 	case K_BACKSPACE:
 		if ( f->cursor > 0 )
 		{
@@ -266,8 +276,10 @@ qboolean Field_Key (int key)
 	case K_TAB:
 		return false;
 
-	case K_SPACE:
 	default:
+		if (key > 127)
+			return false;
+		
 		if ( !isdigit( key ) && ( f->generic.flags & QMF_NUMBERSONLY ) )
 			return false;
 
@@ -277,10 +289,10 @@ qboolean Field_Key (int key)
 			{
 				maxlength = sizeof(f->buffer)-2;
 			}
-			if ( f->cursor < maxlength )
+			if (strlen(f->buffer) < maxlength)
 			{
+				memmove (&f->buffer[f->cursor+1], &f->buffer[f->cursor], strlen( &f->buffer[f->cursor] ) + 1 );
 				f->buffer[f->cursor++] = key;
-				f->buffer[f->cursor] = 0;
 			}
 		}
 	}
@@ -310,6 +322,7 @@ static inline qboolean Menu_ItemSelectable (menuitem_s *item)
 
 void Cursor_SelectItem (menuitem_s *item)
 {
+	menuitem_s *lastitem = (menuitem_s *)cursor.menuitem;
 	cursor.menuitem = item;
 	if (item == NULL)
 	{
@@ -317,6 +330,12 @@ void Cursor_SelectItem (menuitem_s *item)
 		return;
 	}
 	cursor.menulayer = Cursor_GetLayer ();
+	if (item != lastitem && item->generic.type == MTYPE_FIELD)
+	{
+		menufield_s *f = (menufield_s *)item;
+		f->cursor = strlen (f->buffer);
+		Menu_ActivateItem (item);
+	}
 }
 
 // Returns the top level node of the menu tree that contains the item
