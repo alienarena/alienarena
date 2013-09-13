@@ -223,14 +223,13 @@ void InitGame (void)
 	//health/max health/max ammo
 	g_spawnhealth = gi.cvar("g_spawnhealth", "125", CVARDOC_INT);
 	g_maxhealth = gi.cvar("g_maxhealth", "100", CVARDOC_INT);
-	g_maxbullets = gi.cvar("g_maxbullets", "200", CVARDOC_INT);
-	g_maxshells = gi.cvar("g_maxshells", "100", CVARDOC_INT);
-	g_maxrockets = gi.cvar("g_maxrockets", "50", CVARDOC_INT);
-	g_maxgrenades = gi.cvar("g_maxgrenades", "50", CVARDOC_INT);
-	g_maxcells = gi.cvar("g_maxcells", "200", CVARDOC_INT);
-	g_maxslugs = gi.cvar("g_maxslugs", "50", CVARDOC_INT);
-	g_maxseekers = gi.cvar("g_maxseekers", "1", CVARDOC_INT);
-	g_maxbombs = gi.cvar("g_maxbombs", "1", CVARDOC_INT);
+	
+#define X(name,itname,base,max,excessivemult) \
+	g_max##name = gi.cvar ("g_max" #name, #max, CVARDOC_INT);
+
+	AMMO_TYPES
+
+	#undef X
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_INT);
