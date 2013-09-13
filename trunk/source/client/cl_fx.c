@@ -163,7 +163,6 @@ void CL_ClearDlights (void)
 /*
 ===============
 CL_AllocDlight
-
 ===============
 */
 cdlight_t *CL_AllocDlight (int key)
@@ -225,7 +224,6 @@ void CL_NewDlight (int key, float x, float y, float z, float radius, float time)
 /*
 ===============
 CL_RunDLights
-
 ===============
 */
 void CL_RunDLights (void)
@@ -430,7 +428,6 @@ void CL_ParseMuzzleFlash (void)
 /*
 ===============
 CL_AddDLights
-
 ===============
 */
 void CL_AddDLights (void)
@@ -633,51 +630,40 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 
 		p->accel[0] = p->accel[1] = 0;
 		p->accel[2] = -PARTICLE_GRAVITY;
+		
+		p->type = PARTICLE_STANDARD;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->alpha = 0.2;
+		p->scalevel = 0;
 
 		if (color == 425)		// gunshots: FIXME should be using type
 		{
-			p->type = PARTICLE_STANDARD;
 			p->image = r_pufftexture;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 			p->scale = 4 + (rand()&2);
-			p->scalevel = 0;
-			p->alpha = 0.2;
 			p->alphavel = -1.0 / (1.5 + frand()*0.3);
 			p->accel[2] = PARTICLE_GRAVITY;
 		}
 		else if (color == 450)
 		{
-			p->type = PARTICLE_STANDARD;
 			p->image = r_bloodtexture;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-			p->alpha = 0.2;
 			p->alphavel = -1.0 / (4.5 + frand()*0.3);
 			p->color = 0xe8;
 			p->scale = 6;
-			p->scalevel = 0;
 		}
 		else if (color == 550)
 		{
-			p->type = PARTICLE_STANDARD;
 			p->image = r_bloodtexture;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-			p->alpha = 0.2;
 			p->alphavel = -1.0 / (4.5 + frand()*0.3);
 			p->color = 0xd0 + (rand()&3);
 			p->scale = 6;
-			p->scalevel = 0;
 		}
 		else
 		{
 			p->type = PARTICLE_NONE;
 			p->image = r_particletexture;
-			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
 			p->scale = 1;
-			p->scalevel = 0;
 			p->alpha = 1.0;
 			p->color = color;
 			p->alphavel = -1.0 / (0.5 + frand()*0.3);
@@ -960,7 +946,6 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 /*
 ===============
 CL_LogoutEffect
-
 ===============
 */
 void CL_LogoutEffect (vec3_t org, int type)
@@ -1005,7 +990,6 @@ void CL_LogoutEffect (vec3_t org, int type)
 /*
 ===============
 CL_ItemRespawnParticles
-
 ===============
 */
 void CL_ItemRespawnParticles (vec3_t org)
@@ -1589,105 +1573,55 @@ void CL_BigTeleportParticles (vec3_t org)
 CL_HealthParticles
 ===============
 */
+
+void CL_HealthParticles (vec3_t org, int color, float alpha)
+{
+	particle_t	*p;
+	float		angle, dist;
+
+	if (!(p = new_particle()))
+			return;
+
+	p->type = PARTICLE_STANDARD;
+	p->image = r_cflashtexture;
+	p->scale = 10 + (rand()&7);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = color + (rand() & 1);
+
+	angle = M_PI*2*(rand()&1023)/1023.0;
+	dist = rand()&5;
+	p->org[0] = org[0] + cos(angle)*dist;
+	p->vel[0] = cos(angle)*(6+(rand()&6));
+	p->accel[0] = -cos(angle)*6;
+
+	p->org[1] = org[1] + sin(angle)*dist;
+	p->vel[1] = sin(angle)*(6+(rand()&6));
+	p->accel[1] = -sin(angle)*100;
+
+	p->org[2] = org[2] + 8 + (rand()%10);
+	p->vel[2] = -10 + (rand()&6);
+	p->accel[2] = PARTICLE_GRAVITY*10;
+	p->alpha = alpha;
+
+	p->alphavel = -2.6 / (0.5 + frand()*0.3);
+}
+
 void CL_SmallHealthParticles (vec3_t org)
 {
-	particle_t	*p;
-	float		angle, dist;
-
-	if (!(p = new_particle()))
-			return;
-
-	p->type = PARTICLE_STANDARD;
-	p->image = r_cflashtexture;
-	p->scale = 10 + (rand()&7);
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->color = 0xd4 + (rand() & 1);
-
-	angle = M_PI*2*(rand()&1023)/1023.0;
-	dist = rand()&5;
-	p->org[0] = org[0] + cos(angle)*dist;
-	p->vel[0] = cos(angle)*(6+(rand()&6));
-	p->accel[0] = -cos(angle)*6;
-
-	p->org[1] = org[1] + sin(angle)*dist;
-	p->vel[1] = sin(angle)*(6+(rand()&6));
-	p->accel[1] = -sin(angle)*100;
-
-	p->org[2] = org[2] + 8 + (rand()%10);
-	p->vel[2] = -10 + (rand()&6);
-	p->accel[2] = PARTICLE_GRAVITY*10;
-	p->alpha = 0.2;
-
-	p->alphavel = -2.6 / (0.5 + frand()*0.3);
-
+	CL_HealthParticles (org, 0xd4, 0.2);
 }
+
 void CL_MedHealthParticles (vec3_t org)
 {
-	particle_t	*p;
-	float		angle, dist;
-
-	if (!(p = new_particle()))
-			return;
-
-	p->type = PARTICLE_STANDARD;
-	p->image = r_cflashtexture;
-	p->scale = 10 + (rand()&7);
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->color = 0x74 + (rand() & 1);
-
-	angle = M_PI*2*(rand()&1023)/1023.0;
-	dist = rand()&5;
-	p->org[0] = org[0] + cos(angle)*dist;
-	p->vel[0] = cos(angle)*(6+(rand()&6));
-	p->accel[0] = -cos(angle)*6;
-
-	p->org[1] = org[1] + sin(angle)*dist;
-	p->vel[1] = sin(angle)*(6+(rand()&6));
-	p->accel[1] = -sin(angle)*100;
-
-	p->org[2] = org[2] + 8 + (rand()%10);
-	p->vel[2] = -10 + (rand()&6);
-	p->accel[2] = PARTICLE_GRAVITY*10;
-	p->alpha = 0.3;
-
-	p->alphavel = -2.6 / (0.5 + frand()*0.3);
-
+	CL_HealthParticles (org, 0x74, 0.3);
 }
+
 void CL_LargeHealthParticles (vec3_t org)
 {
-	particle_t	*p;
-	float		angle, dist;
-
-	if (!(p = new_particle()))
-			return;
-
-	p->type = PARTICLE_STANDARD;
-	p->image = r_cflashtexture;
-	p->scale = 10 + (rand()&7);
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->color = 0xff + (rand() & 1);
-
-	angle = M_PI*2*(rand()&1023)/1023.0;
-	dist = rand()&5;
-	p->org[0] = org[0] + cos(angle)*dist;
-	p->vel[0] = cos(angle)*(6+(rand()&6));
-	p->accel[0] = -cos(angle)*6;
-
-	p->org[1] = org[1] + sin(angle)*dist;
-	p->vel[1] = sin(angle)*(6+(rand()&6));
-	p->accel[1] = -sin(angle)*100;
-
-	p->org[2] = org[2] + 8 + (rand()%10);
-	p->vel[2] = -10 + (rand()&6);
-	p->accel[2] = PARTICLE_GRAVITY*10;
-	p->alpha = 0.3;
-
-	p->alphavel = -2.6 / (0.5 + frand()*0.3);
-
+	CL_HealthParticles (org, 0xff, 0.3);
 }
+
 /*
 ===============
 CL_BlasterParticles
@@ -1794,48 +1728,12 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 
 /*
 ===============
-Team Lights
-
+Player Lights
 ===============
 */
 
-void CL_BlueTeamLight(vec3_t pos)
+void CL_PlayerLight(vec3_t pos, int color)
 {
-
-	int			i,j;
-	particle_t	*p;
-
-	if(!server_is_team && !cl_dmlights->value)
-		return;
-
-	for(i=1; i<3; i++) {
-		if (!(p = new_particle()))
-			return;
-
-		VectorClear (p->accel);
-
-		p->alpha = .7;
-		p->type = PARTICLE_STANDARD;
-		p->image = r_flaretexture;
-		p->blendsrc = GL_ONE;
-		p->blenddst = GL_ONE;
-		if (server_is_team)
-			p->color = 0x74;
-		else
-			p->color = 0xd3;
-		p->scale = 10*i;
-		p->alphavel = INSTANT_PARTICLE;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = pos[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-	}
-}
-void CL_RedTeamLight(vec3_t pos)
-{
-
 	int			j,i;
 	particle_t	*p;
 
@@ -1850,7 +1748,7 @@ void CL_RedTeamLight(vec3_t pos)
 		p->image = r_flaretexture;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
-		p->color = 0xe8;
+		p->color = color;
 		p->scale = 10*i;
 		p->alphavel = INSTANT_PARTICLE;
 		for (j=0 ; j<3 ; j++)
@@ -1861,6 +1759,23 @@ void CL_RedTeamLight(vec3_t pos)
 		}
 	}
 }
+
+void CL_BlueTeamLight(vec3_t pos)
+{
+	if(!server_is_team && !cl_dmlights->value)
+		return;
+	
+	if (server_is_team)
+		CL_PlayerLight (pos, 0x74);
+	else
+		CL_PlayerLight (pos, 0xd3);
+}
+
+void CL_RedTeamLight(vec3_t pos)
+{
+	CL_PlayerLight (pos, 0xe8);
+}
+
 void CL_FlagEffects(vec3_t pos, qboolean team)
 {
 
@@ -1976,7 +1891,6 @@ void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 /*
 ===============
 CL_DiminishingTrail
-
 ===============
 */
 void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
@@ -2124,7 +2038,6 @@ void MakeNormalVectors (vec3_t forward, vec3_t right, vec3_t up)
 /*
 ===============
 CL_RocketTrail
-
 ===============
 */
 void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
@@ -2321,7 +2234,6 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 /*
 ===============
 Wall Impacts
-
 ===============
 */
 
@@ -2569,7 +2481,6 @@ void CL_VaporizerMarks(vec3_t org, vec3_t dir){
 /*
 ===============
 Particle Beams
-
 ===============
 */
 
@@ -3109,7 +3020,6 @@ void CL_RedBlasterBeam (vec3_t start, vec3_t end)
 /*
 ===============
 CL_BubbleTrail
-
 ===============
 */
 void CL_BubbleTrail (vec3_t start, vec3_t end)
@@ -3225,7 +3135,6 @@ void CL_BFGExplosionParticles (vec3_t org)
 /*
 ===============
 CL_TeleportParticles
-
 ===============
 */
 void CL_TeleportParticles (vec3_t orig_start)
