@@ -473,28 +473,24 @@ int RS_BlendID (char *blend)
 {
 	if (!blend[0])
 		return 0;
-	if (!Q_strcasecmp (blend, "GL_ZERO"))
-		return GL_ZERO;
-	if (!Q_strcasecmp (blend, "GL_ONE"))
-		return GL_ONE;
-	if (!Q_strcasecmp (blend, "GL_DST_COLOR"))
-		return GL_DST_COLOR;
-	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_DST_COLOR"))
-		return GL_ONE_MINUS_DST_COLOR;
-	if (!Q_strcasecmp (blend, "GL_SRC_ALPHA"))
-		return GL_SRC_ALPHA;
-	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_SRC_ALPHA"))
-		return GL_ONE_MINUS_SRC_ALPHA;
-	if (!Q_strcasecmp (blend, "GL_DST_ALPHA"))
-		return GL_DST_ALPHA;
-	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_DST_ALPHA"))
-		return GL_ONE_MINUS_DST_ALPHA;
-	if (!Q_strcasecmp (blend, "GL_SRC_ALPHA_SATURATE"))
-		return GL_SRC_ALPHA_SATURATE;
-	if (!Q_strcasecmp (blend, "GL_SRC_COLOR"))
-		return GL_SRC_COLOR;
-	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_SRC_COLOR"))
-		return GL_ONE_MINUS_SRC_COLOR;
+	
+#define check_blend(name) \
+	if (!Q_strcasecmp (blend, #name)) \
+		return name;
+	
+	check_blend (GL_ZERO)
+	check_blend (GL_ONE)
+	check_blend (GL_DST_COLOR)
+	check_blend (GL_ONE_MINUS_DST_COLOR)
+	check_blend (GL_SRC_ALPHA)
+	check_blend (GL_ONE_MINUS_SRC_ALPHA)
+	check_blend (GL_DST_ALPHA)
+	check_blend (GL_ONE_MINUS_DST_ALPHA)
+	check_blend (GL_SRC_ALPHA_SATURATE)
+	check_blend (GL_SRC_COLOR)
+	check_blend (GL_ONE_MINUS_SRC_COLOR)
+
+#undef check_blend
 
 	return 0;
 }
@@ -545,25 +541,58 @@ scriptname
 }
 */
 
-void rs_stage_map (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-
-	strncpy (stage->name, *token, sizeof(stage->name));
+#define RS_STAGE_STRING_ATTR(attrname) \
+void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+{ \
+	*token = strtok (NULL, TOK_DELIMINATORS); \
+	strncpy (stage->attrname, *token, sizeof(stage->attrname)); \
 }
 
-void rs_stage_map2 (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-
-	strncpy (stage->name2, *token, sizeof(stage->name2));
+#define RS_STAGE_BOOL_ATTR(attrname) \
+void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+{ \
+	stage->attrname = true; \
 }
 
-void rs_stage_map3 (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
+#define RS_STAGE_FLOAT_ATTR(attrname) \
+void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+{ \
+	*token = strtok (NULL, TOK_DELIMINATORS); \
+	stage->attrname = (float)atof(*token); \
+}
 
-	strncpy (stage->name3, *token, sizeof(stage->name3));
+#define RS_STAGE_INT_ATTR(attrname) \
+void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+{ \
+	*token = strtok (NULL, TOK_DELIMINATORS); \
+	stage->attrname = atoi(*token); \
+}
+
+RS_STAGE_STRING_ATTR (name)
+RS_STAGE_STRING_ATTR (name2)
+RS_STAGE_STRING_ATTR (name3)
+RS_STAGE_BOOL_ATTR (depthhack)
+RS_STAGE_BOOL_ATTR (envmap)
+RS_STAGE_BOOL_ATTR (alphamask)
+RS_STAGE_BOOL_ATTR (lensflare)
+RS_STAGE_INT_ATTR (flaretype)
+RS_STAGE_BOOL_ATTR (normalmap)
+RS_STAGE_BOOL_ATTR (grass)
+RS_STAGE_INT_ATTR (grasstype)
+RS_STAGE_BOOL_ATTR (beam)
+RS_STAGE_INT_ATTR (beamtype)
+RS_STAGE_BOOL_ATTR (fx)
+RS_STAGE_BOOL_ATTR (glow)
+RS_STAGE_BOOL_ATTR (cube)
+RS_STAGE_FLOAT_ATTR (xang)
+RS_STAGE_FLOAT_ATTR (yang)
+RS_STAGE_FLOAT_ATTR (rot_speed)
+RS_STAGE_INT_ATTR (rotating)
+
+
+void rs_stage_nolightmap (rs_stage_t *stage, char **token)
+{
+	stage->lightmap = false;
 }
 
 void rs_stage_colormap (rs_stage_t *stage, char **token)
@@ -698,32 +727,6 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 	}
 }
 
-void rs_stage_depthhack (rs_stage_t *stage, char **token)
-{
-	stage->depthhack = true;
-}
-
-void rs_stage_envmap (rs_stage_t *stage, char **token)
-{
-	stage->envmap = true;
-}
-
-void rs_stage_nolightmap (rs_stage_t *stage, char **token)
-{
-	stage->lightmap = false;
-}
-
-void rs_stage_alphamask (rs_stage_t *stage, char **token)
-{
-	stage->alphamask = true;
-}
-
-void rs_stage_rotate (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->rot_speed = (float)atof(*token);
-}
-
 void rs_stage_scale (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -753,64 +756,6 @@ void rs_stage_alphafunc (rs_stage_t *stage, char **token)
 		stage->alphafunc = ALPHAFUNC_BASIC;
 	else if (!Q_strcasecmp (*token, "-basic"))
 		stage->alphafunc = -ALPHAFUNC_BASIC;
-}
-void rs_stage_lensflare (rs_stage_t *stage, char **token)
-{
-	stage->lensflare = true;
-}
-void rs_stage_flaretype (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->flaretype = atoi(*token);
-}
-void rs_stage_normalmap (rs_stage_t *stage, char **token)
-{
-	stage->normalmap = true;
-}
-void rs_stage_grass (rs_stage_t *stage, char **token)
-{
-	stage->grass = true;
-}
-void rs_stage_grasstype (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->grasstype = atoi(*token);
-}
-void rs_stage_beam (rs_stage_t *stage, char **token)
-{
-	stage->beam = true;
-}
-void rs_stage_beamtype (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->beamtype = atoi(*token);
-}
-void rs_stage_xang (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->xang = atof(*token);
-}
-void rs_stage_yang (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->yang = atof(*token);
-}
-void rs_stage_rotating (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->rotating = atoi(*token);
-}
-void rs_stage_fx (rs_stage_t *stage, char **token)
-{
-	stage->fx = true;
-}
-void rs_stage_glow (rs_stage_t *stage, char **token)
-{
-	stage->glow = true;
-}
-void rs_stage_cube (rs_stage_t *stage, char **token)
-{
-	stage->cube = true;
 }
 
 typedef struct 
@@ -960,9 +905,9 @@ void rs_stage_consume0 (rs_stage_t *stage, char **token)
 static rs_stagekey_t rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
-	{	"map",			&rs_stage_map			},
-	{	"map2",			&rs_stage_map2			},
-	{	"map3",			&rs_stage_map3			},
+	{	"map",			&rs_stage_name			},
+	{	"map2",			&rs_stage_name2			},
+	{	"map3",			&rs_stage_name3			},
 	{	"scroll",		&rs_stage_scroll		},
 	{	"blendfunc",	&rs_stage_blendfunc		},
 	{	"alphashift",	&rs_stage_alphashift	},
@@ -972,12 +917,12 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"depthhack",	&rs_stage_depthhack		},
 	{	"nolightmap",	&rs_stage_nolightmap	},
 	{	"alphamask",	&rs_stage_alphamask		},
-	{	"rotate",		&rs_stage_rotate		},
+	{	"rotate",		&rs_stage_rot_speed		},
 	{	"scale",		&rs_stage_scale			},
 	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{	"flaretype",	&rs_stage_flaretype		},
-	{   "normalmap",	&rs_stage_normalmap		},
+	{	"normalmap",	&rs_stage_normalmap		},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
