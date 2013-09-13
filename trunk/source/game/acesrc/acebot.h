@@ -188,14 +188,7 @@ struct botvals_s
 	char faveweap[64];
 	float weapacc[10];
 	float awareness;
-	char		chatmsg1[128];
-	char		chatmsg2[128];
-	char		chatmsg3[128];
-	char		chatmsg4[128];
-	char		chatmsg5[128];
-	char		chatmsg6[128];
-	char		chatmsg7[128];
-	char		chatmsg8[128];
+	char		chatmsg[8][128];
 } botvals;
 
 extern edict_t *players[MAX_CLIENTS];		// pointers to all players in the game

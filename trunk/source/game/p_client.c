@@ -230,24 +230,21 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					total++;
 				}
 				place = total - pos;
-				if(place < 3) {
-					switch(place) {
-					case 0:
-						safe_centerprintf(attacker, "You fragged %s\n1st place with %i frags\n", cleanname, attacker->client->resp.score+1);
-						break;
-					case 1:
-						safe_centerprintf(attacker, "You fragged %s\n2nd place with %i frags\n", cleanname, attacker->client->resp.score+1);
-						break;
-					case 2:
-						safe_centerprintf(attacker, "You fragged %s\n3rd place with %i frags\n", cleanname, attacker->client->resp.score+1);
-						break;
-					default:
-						break;
-					}
-				}
-				else
+				switch(place)
+				{
+				case 0:
+					safe_centerprintf(attacker, "You fragged %s\n1st place with %i frags\n", cleanname, attacker->client->resp.score+1);
+					break;
+				case 1:
+					safe_centerprintf(attacker, "You fragged %s\n2nd place with %i frags\n", cleanname, attacker->client->resp.score+1);
+					break;
+				case 2:
+					safe_centerprintf(attacker, "You fragged %s\n3rd place with %i frags\n", cleanname, attacker->client->resp.score+1);
+					break;
+				default:
 					safe_centerprintf(attacker, "You fragged %s\n", cleanname);
-
+					break;
+				}
 			}
 
 			switch (mod)
@@ -321,36 +318,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 			if ( !(dmflags->integer & DF_BOTCHAT) && self->is_bot)
 			{
+				// FIXME: strange way to generate a random integer
 				msg = random() * 9;
-				switch(msg){
-				case 1:
-					chatmsg = self->chatmsg1;
-					break;
-				case 2:
-					chatmsg = self->chatmsg2;
-					break;
-				case 3:
-					chatmsg = self->chatmsg3;
-					break;
-				case 4:
-					chatmsg = self->chatmsg4;
-					break;
-				case 5:
-					chatmsg = self->chatmsg5;
-					break;
-				case 6:
-					chatmsg = self->chatmsg6;
-					break;
-				case 7:
-					chatmsg = self->chatmsg7;
-					break;
-				case 8:
-					chatmsg = self->chatmsg8;
-					break;
-				default:
+				if (msg > 0 && msg < 8)
+					chatmsg = self->chatmsg[msg-1];
+				else
 					chatmsg = "%s: Stop it %s, you punk!";
-					break;
-				}
+				
 				if(chatmsg) {
 					safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
 					safe_bprintf (PRINT_CHAT, "\n");

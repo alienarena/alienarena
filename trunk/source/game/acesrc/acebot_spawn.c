@@ -802,6 +802,7 @@ void ACECO_ReadConfig( char *config_file )
 	char *s;
 	const char *delim = "\r\n";
 	float tmpf;
+	int i;
 
 	//set bot defaults(in case no bot config file is present for that bot)
 	botvals.skill = 1; //medium
@@ -810,14 +811,14 @@ void ACECO_ReadConfig( char *config_file )
 		botvals.weapacc[k] = 0.75;
 	botvals.awareness = 0.7; // 0.7 is 145 degree FOV
 
-	strcpy( botvals.chatmsg1, "%s: You are a real jerk %s!"    );
-	strcpy( botvals.chatmsg2, "%s: Wait till next time %s."    );
-	strcpy( botvals.chatmsg3, "%s: Life was better alive, %s!" );
-	strcpy( botvals.chatmsg4, "%s: You will pay for this %s!"  );
-	strcpy( botvals.chatmsg5, "%s: You're using a bot %s!"     );
-	strcpy( botvals.chatmsg6, "%s: I will be hunting you %s!"  );
-	strcpy( botvals.chatmsg7, "%s: It hurts %s...it hurts..."  );
-	strcpy( botvals.chatmsg8, "%s: Just a lucky shot %s!"      );
+	strcpy( botvals.chatmsg[0], "%s: You are a real jerk %s!"    );
+	strcpy( botvals.chatmsg[1], "%s: Wait till next time %s."    );
+	strcpy( botvals.chatmsg[2], "%s: Life was better alive, %s!" );
+	strcpy( botvals.chatmsg[3], "%s: You will pay for this %s!"  );
+	strcpy( botvals.chatmsg[4], "%s: You're using a bot %s!"     );
+	strcpy( botvals.chatmsg[5], "%s: I will be hunting you %s!"  );
+	strcpy( botvals.chatmsg[6], "%s: It hurts %s...it hurts..."  );
+	strcpy( botvals.chatmsg[7], "%s: Just a lucky shot %s!"      );
 
 	if ( !gi.FullPath( full_path, sizeof(full_path), config_file ) )
 	{ // bot not configured, use defaults
@@ -890,23 +891,13 @@ void ACECO_ReadConfig( char *config_file )
 		botvals.awareness = tmpf;
 	}
 
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg1, s, sizeof(botvals.chatmsg1)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg2, s, sizeof(botvals.chatmsg2)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg3, s, sizeof(botvals.chatmsg3)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg4, s, sizeof(botvals.chatmsg4)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg5, s, sizeof(botvals.chatmsg5)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg6, s, sizeof(botvals.chatmsg6)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg7, s, sizeof(botvals.chatmsg7)-1 );
-	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		strncpy( botvals.chatmsg8, s, sizeof(botvals.chatmsg8)-1 );
-
+	i = 0;
+	while ((s = strtok( NULL, delim)) != NULL && i < sizeof(botvals.chatmsg)/sizeof(botvals.chatmsg[0]))
+	{
+		strncpy( botvals.chatmsg[i], s, sizeof(botvals.chatmsg[i])-1 );
+		i++;
+	}
+	
 	free( buffer );
 
 }
@@ -1227,14 +1218,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			bot->weapacc[k] = botvals.weapacc[k];
 		bot->accuracy = 0.75; //start with this(changes when bot selects a weapon
 		bot->awareness = botvals.awareness;
-		strcpy(bot->chatmsg1, botvals.chatmsg1);
-		strcpy(bot->chatmsg2, botvals.chatmsg2);
-		strcpy(bot->chatmsg3, botvals.chatmsg3);
-		strcpy(bot->chatmsg4, botvals.chatmsg4);
-		strcpy(bot->chatmsg5, botvals.chatmsg5);
-		strcpy(bot->chatmsg6, botvals.chatmsg6);
-		strcpy(bot->chatmsg7, botvals.chatmsg7);
-		strcpy(bot->chatmsg8, botvals.chatmsg8);
+		memcpy (bot->chatmsg, botvals.chatmsg, sizeof (bot->chatmsg));
 
 		/*
 		 * adjust skill according to cvar. Single Player menu selections
