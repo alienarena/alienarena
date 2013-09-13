@@ -460,52 +460,25 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 {
 	int			index;
 	int			max, base;
-	gitem_t     *failedswitch;
+	gitem_t		*failedswitch;
 
 	if (!ent->client)
 		return false;
 
-	if (item->tag == AMMO_BULLETS) 
-	{
-		max = ent->client->pers.max_bullets;
-		base = BASE_BULLETS;
-	}
-	else if (item->tag == AMMO_SHELLS) 
-	{
-		max = ent->client->pers.max_shells;
-		base = BASE_SHELLS;
-	}
-	else if (item->tag == AMMO_ROCKETS) 
-	{
-		max = ent->client->pers.max_rockets;
-		base = BASE_ROCKETS;
-	}
-	else if (item->tag == AMMO_GRENADES) 
-	{
-		max = ent->client->pers.max_grenades;
-		base = BASE_GRENADES;
-	}
-	else if (item->tag == AMMO_CELLS) 
-	{
-		max = ent->client->pers.max_cells;
-		base = BASE_CELLS;
-	}
-	else if (item->tag == AMMO_SLUGS) 
-	{
-		max = ent->client->pers.max_slugs;
-		base = BASE_SLUGS;
-	}
-	else if (item->tag == AMMO_SEEKERS) 
-	{
-		max = ent->client->pers.max_seekers;
-		base = BASE_SEEKERS;
-	}
-	else if (item->tag == AMMO_BOMBS) 
-	{
-		max = ent->client->pers.max_bombs;
-		base = BASE_BOMBS;
-	}
-	else
+#define X(name,itname,defbase,defmax,excessivemult) \
+	if (item->tag == AMMO_##name) \
+	{ \
+		max = g_max##name->integer; \
+		if (excessive->value) \
+			max *= excessivemult; \
+		base = defbase; \
+	} \
+	else // leave a trailing else for the return false
+
+	AMMO_TYPES
+
+	#undef X
+	
 		return false;
 
 	index = ITEM_INDEX(item);
@@ -524,11 +497,11 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 
 	if (ent->client->pers.inventory[index] > max)
 		ent->client->pers.inventory[index] = max;
-    
-    failedswitch = ent->client->pers.lastfailedswitch;
-    if (failedswitch && failedswitch->ammo && 
-        (FindItem(failedswitch->ammo) == item) && 
-        (level.framenum - ent->client->pers.failedswitch_framenum) < 5)
+	
+	failedswitch = ent->client->pers.lastfailedswitch;
+	if (failedswitch && failedswitch->ammo && 
+		(FindItem(failedswitch->ammo) == item) && 
+		(level.framenum - ent->client->pers.failedswitch_framenum) < 5)
 		ent->client->newweapon = failedswitch;
 
 	return true;

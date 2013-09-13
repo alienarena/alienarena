@@ -259,6 +259,25 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 	// Make sure item is at least close to being valid
 	if(item < 0 || item > 100)
 		return 0.0;
+	
+	// if the item is an ammo type, make sure we have room for it
+#define X(name,itname,base,max,excessivemult) \
+	if (item == ITEM_INDEX (FindItem (itname))) \
+	{ \
+		if (excessive->integer) \
+		{ \
+			if (self->client->pers.inventory[item] >= g_max##name->integer*excessivemult) \
+				return 0.0; \
+		} \
+		else if (self->client->pers.inventory[item] >= g_max##name->integer) \
+		{ \
+			return 0.0; \
+		} \
+	}
+	
+	AMMO_TYPES
+	
+#undef X
 
 	switch(item)
 	{
@@ -315,41 +334,17 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 
 		// Ammo
 		case ITEMLIST_SLUGS:
-			if(self->client->pers.inventory[ITEMLIST_SLUGS] < self->client->pers.max_slugs)
-				return 0.4;
-			else
-				return 0.0;
+			return 0.4;
 
 		case ITEMLIST_BULLETS:
-			if(self->client->pers.inventory[ITEMLIST_BULLETS] < self->client->pers.max_bullets)
-				return 0.3;
-			else
-				return 0.0;
-
 		case ITEMLIST_SHELLS:
-		   if(self->client->pers.inventory[ITEMLIST_SHELLS] < self->client->pers.max_shells)
-				return 0.3;
-			else
-				return 0.0;
-
 		case ITEMLIST_CELLS:
-			if(self->client->pers.inventory[ITEMLIST_CELLS] <	self->client->pers.max_cells)
-				return 0.3;
-			else
-				return 0.0;
+		case ITEMLIST_GRENADES:
+			return 0.3;
 
 		case ITEMLIST_ROCKETS:
-			if(self->client->pers.inventory[ITEMLIST_ROCKETS] < self->client->pers.max_rockets)
-				return 1.5;
-			else
-				return 0.0;
-
-		case ITEMLIST_GRENADES:
-			if(self->client->pers.inventory[ITEMLIST_GRENADES] < self->client->pers.max_grenades)
-				return 0.3;
-			else
-				return 0.0;
-
+			return 1.5;
+		
 		case ITEMLIST_BODYARMOR:
 			if(ACEIT_CanUseArmor (FindItem("Body Armor"), self))
 				return 0.6;

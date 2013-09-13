@@ -79,17 +79,9 @@ cvar_t	*g_losehealth_num;
 //weapons
 cvar_t	*wep_selfdmgmulti;
 
-//health/max health/max ammo
+//health/max health
 cvar_t	*g_spawnhealth;
 cvar_t	*g_maxhealth;
-cvar_t	*g_maxbullets;
-cvar_t	*g_maxshells;
-cvar_t	*g_maxrockets;
-cvar_t	*g_maxgrenades;
-cvar_t	*g_maxcells;
-cvar_t	*g_maxslugs;
-cvar_t	*g_maxseekers;
-cvar_t	*g_maxbombs;
 
 //quick weapon change
 cvar_t  *quickweap;

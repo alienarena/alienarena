@@ -1083,22 +1083,22 @@ void InitClientPersistant (gclient_t *client)
 	if(instagib->integer) 
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxCELLS->value;
 		item = FindItem("Alien Disruptor");
 	}
 	else if(rocket_arena->integer) 
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxROCKETS->value;
 		item = FindItem("Rocket Launcher");
 	}
 	else if (insta_rockets->integer )
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxROCKETS->value;
 		item = FindItem("Rocket Launcher");
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxCELLS->value;
 		item = FindItem("Alien Disruptor");
 	}
 	else 
@@ -1113,43 +1113,26 @@ void InitClientPersistant (gclient_t *client)
 	{
 		//Allow custom health, even in excessive.
 		client->pers.health 		= g_spawnhealth->value * 3;
-		client->pers.max_bullets 	= g_maxbullets->value * 2.5;
-		client->pers.max_shells		= g_maxshells->value * 5;
-		client->pers.max_rockets	= g_maxrockets->value * 10;
-		client->pers.max_grenades	= g_maxgrenades->value * 10;
-		client->pers.max_cells		= g_maxcells->value * 2.5;
-		client->pers.max_slugs		= g_maxslugs->value * 10;
-		client->pers.max_seekers	= g_maxseekers->value * 2;
-		client->pers.max_bombs		= g_maxbombs->value * 2;
+		
+	#define X(name,itname,base,max,excessivemult) \
+		client->pers.inventory[ITEM_INDEX(FindItem(itname))] = g_max##name->value * excessivemult;
+		
+		AMMO_TYPES
+	
+	#undef X
 
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("bullets"))] = g_maxbullets->value * 2.5;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value * 2.5;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("alien smart grenade"))] = g_maxshells->value * 5;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = g_maxslugs->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = g_maxgrenades->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = g_maxseekers->value * 2;
-		client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = g_maxbombs->value * 2;
 	} 
 	else 
 	{
 		client->pers.health 		= g_spawnhealth->value;
-		client->pers.max_bullets 	= g_maxbullets->value;
-		client->pers.max_shells		= g_maxshells->value;
-		client->pers.max_rockets	= g_maxrockets->value;
-		client->pers.max_grenades	= g_maxgrenades->value;
-		client->pers.max_cells		= g_maxcells->value;
-		client->pers.max_slugs		= g_maxslugs->value;
-		client->pers.max_seekers	= g_maxseekers->value;
-		client->pers.max_bombs		= g_maxbombs->value;
 	}
 
 	if(vampire->value)

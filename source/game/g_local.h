@@ -114,17 +114,25 @@ typedef enum
 	WEAPON_FIRING
 } weaponstate_t;
 
+#define AMMO_TYPES \
+	X (BULLETS,		"bullets",				50, 200, 2.5) \
+	X (SHELLS,		"alien smart grenade",	10, 100, 5) \
+	X (ROCKETS,		"rockets",				10, 50, 10) \
+	X (GRENADES,	"napalm",				50, 50, 10) \
+	X (CELLS,		"cells",				50, 200, 2.5) \
+	X (SLUGS,		"slugs",				10, 50, 10) \
+	X (SEEKERS,		"seekers",				1, 1, 2) \
+	X (BOMBS,		"bombs",				1, 1, 2)
+
+#define X(name,itname,base,max,excessivemult) \
+	AMMO_##name,
+
 typedef enum
 {
-	AMMO_BULLETS,
-	AMMO_SHELLS,
-	AMMO_ROCKETS,
-	AMMO_GRENADES,
-	AMMO_CELLS,
-	AMMO_SLUGS,
-	AMMO_SEEKERS,
-	AMMO_BOMBS
+	AMMO_TYPES
 } ammo_t;
+
+#undef X
 
 //teams
 typedef struct teamcensus_s
@@ -660,14 +668,13 @@ extern	cvar_t	*wep_selfdmgmulti;
 //health/max health/max ammo
 extern	cvar_t	*g_spawnhealth;
 extern	cvar_t	*g_maxhealth;
-extern	cvar_t	*g_maxbullets;
-extern	cvar_t	*g_maxshells;
-extern	cvar_t	*g_maxrockets;
-extern	cvar_t	*g_maxgrenades;
-extern	cvar_t	*g_maxcells;
-extern	cvar_t	*g_maxslugs;
-extern	cvar_t	*g_maxseekers;
-extern  cvar_t	*g_maxbombs;
+
+#define X(name,itname,base,max,excessivemult) \
+	cvar_t *g_max##name;
+
+AMMO_TYPES
+
+#undef X
 
 //quick weapon change
 extern  cvar_t  *quickweap;
@@ -1162,16 +1169,6 @@ extern void SP_misc_electroflash (edict_t *ent);
 #define	ANIM_DEATH		5
 #define	ANIM_REVERSE	6
 
-#define BASE_ROCKETS	10
-#define BASE_SHELLS		10
-#define BASE_CELLS		50
-#define BASE_SLUGS		10
-#define BASE_GRENADES	50
-#define BASE_BULLETS	50
-#define BASE_SEEKERS	1
-#define BASE_BOMBS		1
-
-
 // client data that stays across multiple level loads
 typedef struct
 {
@@ -1192,16 +1189,6 @@ typedef struct
 
 	int			selected_item;
 	int			inventory[MAX_ITEMS];
-
-	// ammo capacities
-	int			max_bullets;
-	int			max_shells;
-	int			max_rockets;
-	int			max_grenades;
-	int			max_cells;
-	int			max_slugs;
-	int			max_seekers;
-	int			max_bombs;
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
