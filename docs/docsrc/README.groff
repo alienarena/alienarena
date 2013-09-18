@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena
-.\" 2010-11-30. Revised: 2013-08-27
+.\" 2010-11-30. Revised: 2013-09-17
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -261,7 +261,7 @@ $ export CFLAGS=
 .in +4
 -O3              (more optimization than -O2)
 -pipe            (faster compile) 
---march=native   (tuned for CPU on this machine)
+-march=native   (tuned for CPU on this machine)
 -DNDEBUG         (remove assert statements)
 .sp
 -Wp,-D_FORTIFY_SOURCE=2   (improved security)  
@@ -275,7 +275,7 @@ $ export CXXLAGS=
 .in +4
 -O3
 -pipe
---march=native
+-march=native
 -DNDEBUG
 -Wp,-D_FORTIFY_SOURCE=2
 -fstack-protector --param=ssp-buffer-size=4
