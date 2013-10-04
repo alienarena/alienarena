@@ -3466,10 +3466,25 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		ucmd->forwardmove *= 1.3;
 
+		//clear lean		
+		client->lean = 0;
+
 		//tactical
 		if(g_tactical->integer)
 		{
 			client->dodge = false;
+			if (ucmd->buttons & BUTTON_LEANRIGHT)
+			{
+				AngleVectors (client->v_angle, NULL, right, NULL);
+				VectorScale (right, 32, ent->client->kick_origin);
+				client->kick_angles[ROLL] = client->lean = 45;
+			}		
+			if (ucmd->buttons & BUTTON_LEANLEFT)
+			{
+				AngleVectors (client->v_angle, NULL, right, NULL);
+				VectorScale (right, -32, ent->client->kick_origin);
+				client->kick_angles[ROLL] = client->lean = -45;
+			}
 		}
 		else
 		{
@@ -3647,7 +3662,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			VectorCopy (pm.viewangles, client->v_angle);
 			VectorCopy (pm.viewangles, client->ps.viewangles);
-		}
+		}		
 
 		if (client->ctf_grapple)
 			CTFGrapplePull(client->ctf_grapple);

@@ -44,6 +44,7 @@ static qboolean has_vbo;
 qboolean use_vbo;
 
 float modelpitch;
+float modelroll;
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
@@ -1013,6 +1014,132 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
 				}
 			}
+
+			//bend the model at the waist for player roll
+			if(currentmodel->version == 1)
+			{
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")||
+					!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine.001"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 1, 0, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+					Matrix3x4GenRotate(&rmat, modelroll, rot);
+
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
+
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
+				//now rotate the legs back
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.l")||
+					!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.r"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 1, 0, 0);
+					Matrix3x4GenRotate(&rmat, -modelroll, rot);
+
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
+
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
+			}
+			else
+			{
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "Spine")||
+				!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "Spine.001"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 1, 0, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+					Matrix3x4GenRotate(&rmat, modelroll, rot);
+
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
+
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
+				//now rotate the legs back
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "hip.l")||
+					!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "hip.r"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 1, 0, 0);
+					Matrix3x4GenRotate(&rmat, -modelroll, rot);
+
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
+
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
+			}
 		}
 	}
 
@@ -1826,6 +1953,8 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
 	modelpitch = degreeToRadian(currententity->angles[PITCH]); 
+	modelroll = degreeToRadian(currententity->angles[ROLL]); 
+	//modelroll = 0.52 * sinf(rs_realtime); //use this for testing only
 
 	R_GetLightVals(currententity->origin, false);	
 		
@@ -2116,6 +2245,8 @@ void IQM_DrawCaster ( void )
 
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
 	modelpitch = degreeToRadian(currententity->angles[PITCH]);
+	modelroll = degreeToRadian(currententity->angles[ROLL]);
+	//modelroll = 0.52 * sinf(rs_realtime); //use this for testing only
 
 	VectorCopy(currententity->angles, sv_angles);
     qglPushMatrix ();

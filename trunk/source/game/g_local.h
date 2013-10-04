@@ -1339,6 +1339,8 @@ struct gclient_s
 
 	int			machinegun_shots;	// for weapon raising
 
+	float		lean; //for leaning around corners
+
 	// animation vars
 	int			anim_end;
 	int			anim_priority;
