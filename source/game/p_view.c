@@ -1159,6 +1159,7 @@ void ClientEndServerFrame (edict_t *ent)
 	ent->s.angles[YAW] = ent->client->v_angle[YAW];
 	ent->s.angles[ROLL] = 0;
 	ent->s.angles[ROLL] = SV_CalcRoll (ent->s.angles, ent->velocity)*4;
+	ent->s.angles[ROLL] +=current_client->lean;
 
 	//
 	// calculate speed and cycle to be used for

@@ -737,7 +737,7 @@ fire_begin:
 /*
 ======================================================================
 
-VIOALATOR
+Hands
 
 ======================================================================
 */
@@ -824,8 +824,24 @@ void weapon_disruptor_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, -3, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -3;
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
@@ -899,8 +915,24 @@ void weapon_vaporizer_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, -3, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -3;
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -984,6 +1016,20 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 		AngleVectors (ent->client->v_angle, forward, right, NULL);
 
+		if(g_tactical->integer && ent->client->lean != 0.0)
+		{
+			if(ent->client->lean > 0.0)
+			{
+				right[0] = right[0] * ent->client->lean/15.0;
+				right[1] = right[1] * ent->client->lean/15.0;
+			}
+			else
+			{
+				right[0] = right[0] * ent->client->lean/25.0;
+				right[1] = right[1] * ent->client->lean/25.0;
+			}
+		}
+
 		VectorSet(offset, 8, 8, ent->viewheight-8);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
@@ -1025,6 +1071,20 @@ void weapon_flamethrower_fire (edict_t *ent)
 		damage *= 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
+
+	if(g_tactical->integer && ent->client->lean != 0.0)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1079,8 +1139,24 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, 2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, 2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -1;
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 4, 4, ent->viewheight-2);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1148,10 +1224,24 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qb
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	if(!hyper) 
+	if(!hyper && ent->client->lean == 0.0) 
 	{
 		VectorScale (forward, -3, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -3;
+	}
+	
+	if(g_tactical->integer && ent->client->lean != 0.0)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
 	}
 
 	if(hyper && (ent->client->buttons & BUTTON_ATTACK))
@@ -1636,7 +1726,7 @@ void Machinegun_Fire (edict_t *ent)
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);//was up
-	if(ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12)
+	if((ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12) && ent->client->lean == 0.0)
 	{
 		if(ent->altfire)
 			ent->client->kick_angles[0] = -3; /* Kick view up */
@@ -1644,6 +1734,20 @@ void Machinegun_Fire (edict_t *ent)
 		{
 			ent->client->kick_angles[2] = (random() - 0.5)*3; /* Twist the view around a bit */
 			ent->client->kick_angles[0] = -1; /* tiny kick for pulsing effect */
+		}
+	}
+
+	if(g_tactical->integer && ent->client->lean != 0.0)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
 		}
 	}
 
@@ -1770,8 +1874,24 @@ void weapon_smartgun_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -1;
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 8, 8, ent->viewheight-4);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1844,8 +1964,24 @@ void weapon_minderaser_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, 2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, 2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -1;
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 8, 8, ent->viewheight-4);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -2024,8 +2160,26 @@ void Violator_Fire (edict_t *ent)
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	VectorScale (forward, -6 * random(), ent->client->kick_origin);
-	ent->client->kick_angles[0] = -6 * random();
+
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, -6 * random(), ent->client->kick_origin);
+		ent->client->kick_angles[0] = -6 * random();
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
+
 	VectorScale(forward, 10, forward);
 	VectorScale(right, 10, right);
 	VectorScale (right, -10, left);
@@ -2132,8 +2286,24 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
+	if(ent->client->lean == 0.0)
+	{
+		VectorScale (forward, -3, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -3;
+	}
+	else if(g_tactical->integer)
+	{
+		if(ent->client->lean > 0.0)
+		{
+			right[0] = right[0] * ent->client->lean/15.0;
+			right[1] = right[1] * ent->client->lean/15.0;
+		}
+		else
+		{
+			right[0] = right[0] * ent->client->lean/25.0;
+			right[1] = right[1] * ent->client->lean/25.0;
+		}
+	}
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
