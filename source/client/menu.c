@@ -1155,6 +1155,8 @@ char *bindnames[][2] =
 {"+moveright", 		"step right"},
 {"+moveup",			"up / jump"},
 {"+movedown",		"down / crouch"},
+{"+leanright",		"lean right"},
+{"+leanleft",		"lean left"},
 
 {"inven",			"inventory"},
 {"invuse",			"use item"},
