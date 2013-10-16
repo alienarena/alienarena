@@ -508,19 +508,25 @@ typedef struct
 {
 	qboolean alienComputer;
 	int		 alienComputerHealth;
+	int		 aCTime;
 	qboolean alienPowerSource;
 	int		 alienPowerSourceHealth;
+	int aPTime;
 	qboolean alienAmmoDepot;
 	int		 alienAmmoDepotHealth;
-	qboolean alienBackupGen;
+	int		 aATime;
+	qboolean alienBackupGen;	
 
 	qboolean humanComputer;
 	int		 humanComputerHealth;
+	int		 hCTime;
 	qboolean humanPowerSource;
 	int		 humanPowerSourceHealth;
+	int hPTime;
 	qboolean humanAmmoDepot;
 	int		 humanAmmoDepotHealth;
-	qboolean humanBackupGen;
+	int hATime;
+	qboolean humanBackupGen;	
 
 } tactical_t;
 
