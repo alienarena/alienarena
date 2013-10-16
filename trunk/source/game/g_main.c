@@ -867,6 +867,22 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 			tacticalScore.humanPowerSource =
 			tacticalScore.humanBackupGen = 
 			true;
+
+		tacticalScore.alienAmmoDepotHealth = 
+			tacticalScore.alienComputerHealth = 
+			tacticalScore.alienPowerSourceHealth = 
+			tacticalScore.humanAmmoDepotHealth = 
+			tacticalScore.humanComputerHealth = 
+			tacticalScore.humanPowerSourceHealth =
+			100;
+
+		tacticalScore.hPTime = 
+			tacticalScore.hCTime = 
+			tacticalScore.hATime = 
+			tacticalScore.aPTime = 
+			tacticalScore.aCTime = 
+			tacticalScore.aATime = 
+			0;
 	}
 
 	mindEraserTime = level.time;
@@ -1161,6 +1177,106 @@ void CheckDMRules (void)
 			EndDMLevel();
 			return;
 		}
+
+		//Warning Klaxons 
+		//human
+		if(tacticalScore.humanPowerSource && tacticalScore.humanPowerSourceHealth < 25)
+		{
+			if(level.time - tacticalScore.hPTime > 10)
+			{
+				tacticalScore.hPTime = level.time;
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot || cl_ent->ctype == 0)
+						continue;
+					if(i == 0)
+						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/minderaser.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "Human power source condition is ^2CRITICAL!\n");
+				}
+			}
+		}
+		if(tacticalScore.humanComputer && tacticalScore.humanComputerHealth < 25)
+		{
+			if(level.time - tacticalScore.hCTime > 10)
+			{
+				tacticalScore.hCTime = level.time;
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot || cl_ent->ctype == 0)
+						continue;
+					if(i == 0)
+						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/minderaser.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "Human computer condition is ^2CRITICAL!\n");
+				}
+			}
+		}
+		if(tacticalScore.humanAmmoDepot && tacticalScore.humanAmmoDepotHealth < 25)
+		{
+			if(level.time - tacticalScore.hATime > 10)
+			{
+				tacticalScore.hATime = level.time;
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot || cl_ent->ctype == 0)
+						continue;
+					if(i == 0)
+						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/minderaser.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "Human ammo depot condition is ^2CRITICAL!\n");
+				}
+			}
+		}
+		//alien
+		if(tacticalScore.alienPowerSource && tacticalScore.alienPowerSourceHealth < 25)
+		{
+			if(level.time - tacticalScore.aPTime > 10)
+			{
+				tacticalScore.aPTime = level.time;
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot || cl_ent->ctype == 1)
+						continue;
+					if(i == 0)
+						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/minderaser.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "Alien power source condition is ^2CRITICAL!\n");
+				}
+			}
+		}
+		if(tacticalScore.alienComputer && tacticalScore.alienComputerHealth < 25)
+		{
+			if(level.time - tacticalScore.aCTime > 10)
+			{
+				tacticalScore.aCTime = level.time;
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot || cl_ent->ctype == 1)
+						continue;
+					if(i == 0)
+						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/minderaser.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "Alien computer condition is ^2CRITICAL!\n");
+				}
+			}
+		}
+		if(tacticalScore.alienAmmoDepot && tacticalScore.alienAmmoDepotHealth < 25)
+		{
+			if(level.time - tacticalScore.aATime > 10)
+			{
+				tacticalScore.aATime = level.time;
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot || cl_ent->ctype == 1)
+						continue;
+					if(i == 0)
+						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/minderaser.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "Alien ammo depot condition is ^2CRITICAL!\n");
+				}
+			}
+		}
 	}
 }
 
@@ -1270,6 +1386,14 @@ void ExitLevel (void)
 			tacticalScore.humanComputerHealth = 
 			tacticalScore.humanPowerSourceHealth =
 			100;
+
+		tacticalScore.hPTime = 
+			tacticalScore.hCTime = 
+			tacticalScore.hATime = 
+			tacticalScore.aPTime = 
+			tacticalScore.aCTime = 
+			tacticalScore.aATime = 
+			0;
 	}
 
 	print1 = print2 = print3 = false;
