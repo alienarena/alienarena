@@ -810,16 +810,19 @@ void weapon_disruptor_fire (edict_t *ent)
 	}
 
 	//alt fire
-	if (ent->client->buttons & BUTTON_ATTACK2) {
-		ent->client->ps.fov = 20;
-		buildup = damage_buildup; //int, for the pic flag
-		ent->client->ps.stats[STAT_ZOOMED] = buildup;
-		damage_buildup += 0.1; //the longer you hold the key, the stronger the blast
-		if(damage_buildup > 3.0)
-			damage_buildup = 3.0;
-		if(damage_buildup < 3.0) //play a sound
-			gi.sound(ent, CHAN_AUTO, gi.soundindex("world/laser1.wav"), 1, ATTN_NORM, 0);
-		return;
+	if(!g_tactical->integer)
+	{
+		if (ent->client->buttons & BUTTON_ATTACK2) {
+			ent->client->ps.fov = 20;
+			buildup = damage_buildup; //int, for the pic flag
+			ent->client->ps.stats[STAT_ZOOMED] = buildup;
+			damage_buildup += 0.1; //the longer you hold the key, the stronger the blast
+			if(damage_buildup > 3.0)
+				damage_buildup = 3.0;
+			if(damage_buildup < 3.0) //play a sound
+				gi.sound(ent, CHAN_AUTO, gi.soundindex("world/laser1.wav"), 1, ATTN_NORM, 0);
+			return;
+		}
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -849,10 +852,13 @@ void weapon_disruptor_fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	fire_disruptor (ent, start, muzzle, forward, damage*damage_buildup, kick);
 
-	//alt fire - reset some things
-	ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
-	ent->client->ps.stats[STAT_ZOOMED] = 0;
-	damage_buildup = 1.0;
+	if(!g_tactical->integer)
+	{
+		//alt fire - reset some things
+		ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
+		ent->client->ps.stats[STAT_ZOOMED] = 0;
+		damage_buildup = 1.0;
+	}
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
