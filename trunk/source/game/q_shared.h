@@ -574,6 +574,7 @@ typedef struct
 #define BUTTON_ATTACK2		4
 #define BUTTON_LEANLEFT		8
 #define BUTTON_LEANRIGHT	16
+#define BUTTON_ZOOM			32
 #define	BUTTON_ANY			128			// any key whatsoever
 
 // usercmd_t is sent to the server each client frame

@@ -1346,6 +1346,8 @@ struct gclient_s
 	int			machinegun_shots;	// for weapon raising
 
 	float		lean; //for leaning around corners
+	int			zoomed; // for zooming in and out
+	int			zoomtime; // time of last zoom
 
 	// animation vars
 	int			anim_end;

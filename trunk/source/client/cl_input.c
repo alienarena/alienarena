@@ -61,7 +61,7 @@ Key_Event (int key, qboolean down, unsigned time);
 kbutton_t	in_klook;
 kbutton_t	in_left, in_right, in_forward, in_back;
 kbutton_t	in_lookup, in_lookdown, in_moveleft, in_moveright;
-kbutton_t	in_strafe, in_speed, in_use, in_attack, in_attack2, in_leanright, in_leanleft;
+kbutton_t	in_strafe, in_speed, in_use, in_attack, in_attack2, in_leanright, in_leanleft, in_zoom;
 kbutton_t	in_up, in_down;
 
 int			in_impulse;
@@ -183,6 +183,10 @@ void IN_LeanRightDown(void) {KeyDown(&in_leanright);}
 void IN_LeanRightUp(void) {KeyUp(&in_leanright);}
 void IN_LeanLeftDown(void) {KeyDown(&in_leanleft);}
 void IN_LeanLeftUp(void) {KeyUp(&in_leanleft);}
+
+//zooming
+void IN_ZoomDown(void) {KeyDown(&in_zoom);}
+void IN_ZoomUp(void) {KeyUp(&in_zoom);}
 
 void IN_UseDown (void) {KeyDown(&in_use);}
 void IN_UseUp (void) {KeyUp(&in_use);}
@@ -372,6 +376,11 @@ void CL_FinishMove (usercmd_t *cmd)
 		cmd->buttons |= BUTTON_LEANLEFT;
 	in_leanleft.state &= ~2;
 
+	//zooming
+	if ( in_zoom.state & 3 )
+		cmd->buttons |= BUTTON_ZOOM;
+	in_zoom.state &= ~2;
+
 	if (in_use.state & 3)
 		cmd->buttons |= BUTTON_USE;
 	in_use.state &= ~2;
@@ -478,6 +487,9 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-leanright", IN_LeanRightUp);
 	Cmd_AddCommand ("+leanleft", IN_LeanLeftDown);
 	Cmd_AddCommand ("-leanleft", IN_LeanLeftUp);
+	//zooming
+	Cmd_AddCommand ("+zoom", IN_ZoomDown);
+	Cmd_AddCommand ("-zoom", IN_ZoomUp);
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", 0);
 }

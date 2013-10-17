@@ -2012,6 +2012,8 @@ void PutClientInServer (edict_t *ent)
 
 	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
+	client->zoomed = false;
+
 	// clear entity state values
 	ent->s.effects = 0;
 	ent->s.skinnum = ent - g_edicts - 1;
@@ -3485,6 +3487,26 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				VectorScale (right, -32, ent->client->kick_origin);
 				client->kick_angles[ROLL] = client->lean = -45;
 			}
+			
+			if (ucmd->buttons & BUTTON_ZOOM)
+			{
+				if(level.time - client->zoomtime > FRAMETIME*10) //1 second delay between 
+				{
+					client->zoomed = !client->zoomed;
+					client->zoomtime = level.time;
+				}
+				if(client->zoomed)
+				{
+					client->ps.fov = 20;
+					ent->client->ps.stats[STAT_ZOOMED] = 1;
+				}
+				else
+				{
+					client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov"));
+					ent->client->ps.stats[STAT_ZOOMED] = 0;
+					ent->client->kick_angles[0] = -3; //just a little kick to refresh the draw
+				}
+			}			
 		}
 		else
 		{

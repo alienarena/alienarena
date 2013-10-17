@@ -1157,6 +1157,7 @@ char *bindnames[][2] =
 {"+movedown",		"down / crouch"},
 {"+leanright",		"lean right"},
 {"+leanleft",		"lean left"},
+{"+zoom",			"zoom"},
 
 {"inven",			"inventory"},
 {"invuse",			"use item"},
