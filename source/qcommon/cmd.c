@@ -140,6 +140,7 @@ void Cbuf_InsertText (char *text)
 
 // add the entire text of the file
 	Cbuf_AddText (text);
+	Cbuf_AddText ("\n");
 
 // add the copied off data
 	if (templen)
