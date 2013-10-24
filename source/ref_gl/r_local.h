@@ -232,10 +232,12 @@ extern	int		r_origin_leafnum;
 //Image
 void R_InitImageSubsystem(void);
 void GL_Bind (int texnum);
-void GL_MBind( GLenum target, int texnum );
-void GL_TexEnv( GLenum value );
-void GL_EnableMultitexture( qboolean enable );
-void GL_SelectTexture( GLenum );
+void GL_MBind (int target, int texnum);
+void GL_TexEnv (GLenum value);
+void GL_EnableTexture (int target, qboolean enable);
+void GL_EnableMultitexture (qboolean enable);
+void GL_SelectTexture (int target);
+void GL_InvalidateTextureState (void);
 void RefreshFont (void);
 
 extern void vectoangles (vec3_t value1, vec3_t angles);
@@ -282,6 +284,7 @@ extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
+void R_SetLightingMode (void);
 extern void R_RotateForEntity (entity_t *e);
 extern void R_MarkWorldSurfs (void);
 extern void R_AddSkySurface (msurface_t *fa);
@@ -475,7 +478,6 @@ typedef struct
 	const char *version_string;
 	const char *extensions_string;
 	qboolean	allow_cds;
-	qboolean 	mtexcombine;
 } glconfig_t;
 
 typedef struct
@@ -489,8 +491,12 @@ typedef struct
 
     int         lightmap_textures;
 
-    int         currenttextures[3];
+#define MAX_TMUS 8
+    int         currenttextures[MAX_TMUS];
+    int			currenttexturemodes[MAX_TMUS];
+    qboolean	enabledtmus[MAX_TMUS];
     int         currenttmu;
+    qboolean	tmuswitch_done;
 
     float       camera_separation;
     qboolean    stereo_enabled;
@@ -571,7 +577,7 @@ void R_InitQuadVarrays(void);
 void R_AddSurfToVArray (msurface_t *surf);
 void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
-void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddLightMappedSurfToVArray (msurface_t *surf);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 

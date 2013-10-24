@@ -240,18 +240,15 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 		GL_EnableMultitexture( true );
 
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
+		GL_MBind (0, fa->texinfo->image->texnum);
 		glUniform1iARB( g_location_baseTexture, 0);
 
-		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
+		GL_MBind (1, fa->texinfo->normalMap->texnum);
 		glUniform1iARB( g_location_normTexture, 1);
 
         if (texnum)
         {
-			qglActiveTextureARB(GL_TEXTURE2);
-			qglBindTexture(GL_TEXTURE_2D, texnum);
+			GL_MBind (2, texnum);
 			glUniform1iARB( g_location_refTexture, 2);
 		}
 		else
@@ -302,10 +299,10 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
 				(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
 
-			GL_MBind(GL_TEXTURE1, r_distort->texnum);
+			GL_MBind (1, r_distort->texnum);
 		}
 
-		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
+		GL_MBind (0, fa->texinfo->image->texnum);
 
 		for (p=fa->polys ; p ; p=p->next)
 		{

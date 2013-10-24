@@ -1120,7 +1120,7 @@ void R_RenderView (refdef_t *fd)
 		if (	ms < r_newrefdef.last_mirrorupdate_time || 
 				(ms-r_newrefdef.last_mirrorupdate_time) >= 16)
 		{
-			GL_SelectTexture (GL_TEXTURE0);
+			GL_SelectTexture (0);
 			GL_Bind (r_mirrortexture->texnum);
 			qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 						0, 0, 0, r_mirrortexture->upload_height/2, 
@@ -1728,6 +1728,8 @@ cpuinfo_exit:
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
 		Com_Printf ("glGetError() = 0x%x\n", err);
+	
+	GL_InvalidateTextureState ();
 
 	return 0;
 }

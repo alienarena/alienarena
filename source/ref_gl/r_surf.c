@@ -191,7 +191,7 @@ void BSP_DrawTexturelessBrushModel (entity_t *e)
 		modelorg[2] = DotProduct (temp, up);
 	}
 
-    qglPushMatrix ();
+	qglPushMatrix ();
 	e->angles[0] = -e->angles[0];	// stupid quake bug
 	e->angles[2] = -e->angles[2];	// stupid quake bug
 	R_RotateForEntity (e);
@@ -237,11 +237,9 @@ Special surfaces - Somewhat less common, require more work to render
 // surface linked lists can be preserved between frames if r_optimize is on,
 // whereas the entity linked lists must be cleared each time an entity is
 // drawn.
-msurface_t	*r_alpha_surfaces;
-msurface_t	*r_ent_alpha_surfaces;
+surfchain_t	r_alpha_surfaces;
+surfchain_t	r_warp_surfaces;
 msurface_t	*r_rscript_surfaces; // no brush models can have rscript surfs
-msurface_t	*r_warp_surfaces;
-msurface_t	*r_ent_warp_surfaces;
 
 // This is a chain of surfaces that may need to have their lightmaps updated.
 // They are not rendered in the order of this chain and will be linked into
@@ -260,9 +258,9 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 	image_t		*image;
 	
 	if (forEnt)
-		surf = r_ent_warp_surfaces;
+		surf = r_warp_surfaces.entchain;
 	else
-		surf = r_warp_surfaces;
+		surf = r_warp_surfaces.worldchain;
 	
 	if (surf == NULL)
 		return;
@@ -271,7 +269,7 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 	GL_EnableMultitexture( false );
 	GL_TexEnv( GL_MODULATE );
 	qglColor4f( gl_state.inverse_intensity,
-		        gl_state.inverse_intensity,
+				gl_state.inverse_intensity,
 				gl_state.inverse_intensity,
 				1.0F );
 	while (surf)
@@ -284,7 +282,7 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 	}
 	
 	if (forEnt)
-		r_ent_warp_surfaces = NULL;
+		r_warp_surfaces.entchain = NULL;
 	
 	GL_EnableMultitexture( true );
 	GL_TexEnv( GL_REPLACE );
@@ -425,10 +423,10 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 
 void R_DrawAlphaSurfaces (void)
 {
-	R_DrawAlphaSurfaces_chain (r_alpha_surfaces);
-	R_DrawAlphaSurfaces_chain (r_ent_alpha_surfaces);
+	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.worldchain);
+	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.entchain);
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
-	r_ent_alpha_surfaces = NULL;
+	r_alpha_surfaces.entchain = NULL;
 }
 
 /*
@@ -487,8 +485,8 @@ etc.
 // State variables for detecting changes from one surface to the next. If any
 // of these change, the current batch of polygons to render is flushed. This
 // helps minimize GL state change calls and draw calls.
-int 		r_currTex = -9999; //only bind a texture if it is not the same as previous surface
-int 		r_currLMTex = -9999; //lightmap texture
+int 		r_currLMTex = -9999; // only bind a lightmap texture if it is not
+								 // the same as previous surface
 mtexinfo_t	*r_currTexInfo = NULL; //texinfo struct
 float		*r_currTangentSpaceTransform; //etc.
 
@@ -636,143 +634,108 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 
 /*
 ================
-BSP_NonGLSLTexinfoChanged
+R_SetLightingMode
 
-Update GL state as needed so we can draw a new batch of surfaces for the 
-provided texinfo (version for all fixed-function standard surfaces)
+Setup the fixed-function pipeline with texture combiners to enable rendering
+of lightmapped surfaces. For GLSL renders, this is unnecessary, as the shader
+handles this job.
 ================
 */
-static void BSP_NonGLSLTexinfoChanged (mtexinfo_t *texinfo)
+void R_SetLightingMode (void)
 {
-	int			texnum;
+	GL_SelectTexture (0);
+	GL_TexEnv ( GL_COMBINE_EXT );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+
+	GL_SelectTexture (1);
+	GL_TexEnv ( GL_COMBINE_EXT );
+	if ( gl_lightmap->integer ) 
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+	} 
+	else 
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
+	}
+
+	if ( r_overbrightbits->value )
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
+	}
+}
+
+/*
+================
+BSP_TexinfoChanged
+
+Update GL state as needed so we can draw a new batch of surfaces for the 
+provided texinfo 
+================
+*/
+static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dynamic)
+{
+	int		texnum;
+	float	scroll;
 	
 	BSP_FlushVBOAccum ();
 	
 	if (TexinfoIsAlphaBlended (texinfo))
 	{
 		if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
-		{
 			qglEnable( GL_ALPHA_TEST );
-		}
 	}
 	else
 	{
 		if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
-		{
 			qglDisable( GL_ALPHA_TEST );
-		}
 	}
 	
-	// do this here so only have to do it once instead of for each surface
-	texnum = BSP_TextureAnimation( texinfo )->texnum;
-	
-	if(texnum != r_currTex)
-	{
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, texnum );
-		r_currTex = texnum;
-	}
-	
-	r_currTexInfo = texinfo;
-}
-
-/*
-================
-BSP_RenderLightmappedPoly
-
-Main polygon rendering routine (all fixed-function standard surfaces)
-================
-*/
-static void BSP_RenderLightmappedPoly( msurface_t *surf)
-{
-	float	scroll;
-	unsigned lmtex = surf->lightmaptexturenum;
-
-	c_brush_polys++;
-	
-	if (lmtex != r_currLMTex)
-	{
-		BSP_FlushVBOAccum ();
-		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );
-	}
-
-	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
-	{
-		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
-	}
+	if (glsl)
+		// no texture animation for normalmapped surfaces, for some reason
+		texnum = texinfo->image->texnum;
 	else
+		// do this here so only have to do it once instead of for each surface
+		texnum = BSP_TextureAnimation( texinfo )->texnum;
+	
+	GL_SelectTexture (0);
+	GL_Bind (texnum);
+	
+	// scrolling is done using the texture matrix
+	if (	!r_currTexInfo || (texinfo->flags & SURF_FLOWING) ||
+			(r_currTexInfo->flags & SURF_FLOWING))
 	{
-		BSP_FlushVBOAccum ();
-		r_vboOn = false;
-		scroll = 0;
-		if (surf->texinfo->flags & SURF_FLOWING)
+		qglMatrixMode (GL_TEXTURE);
+		qglLoadIdentity ();
+		if (texinfo->flags & SURF_FLOWING)
 		{
 			scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
 			if (scroll == 0.0)
 				scroll = -64.0;
+			qglTranslatef (scroll, 0, 0);
 		}
-		R_InitVArrays (VERT_MULTI_TEXTURED);
-		R_AddLightMappedSurfToVArray (surf, scroll);
+		qglMatrixMode (GL_MODELVIEW);
 	}
 	
-}
-
-/*
-================
-BSP_GLSLTexinfoChanged
-
-Update GL state as needed so we can draw a new batch of surfaces for the 
-provided texinfo (version for all normalmapped and/or dynamically lit standard
-surfaces)
-================
-*/
-static void BSP_GLSLTexinfoChanged (mtexinfo_t *texinfo, qboolean dynamic)
-{
-	int			texnum;
-	
-	BSP_FlushVBOAccum ();
-	
-	if (TexinfoIsAlphaBlended (texinfo))
+	if (!glsl)
 	{
-		if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
-		{
-			qglEnable( GL_ALPHA_TEST );
-		}
-	}
-	else
-	{
-		if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
-		{
-			qglDisable( GL_ALPHA_TEST );
-		}
+		r_currTexInfo = texinfo;
+		return;
 	}
 	
-	// no texture animation for normalmapped surfaces, for some reason
-	texnum = texinfo->image->texnum;
-	
-	if(texnum != r_currTex)
-	{
-		r_currTex = texnum;
-		
-		if (!r_currTexInfo)
-		{
-			glUniform1iARB( g_location_surfTexture, 0);
-			glUniform1iARB( g_location_heightTexture, 1);
-			glUniform1iARB( g_location_normalTexture, 2);
-			glUniform1iARB( g_location_lmTexture, 3);
-		}
-			
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, texnum);
-		
-		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture(GL_TEXTURE_2D, texinfo->heightMap->texnum);
-	
-		qglActiveTextureARB(GL_TEXTURE2);
-		qglBindTexture(GL_TEXTURE_2D, texinfo->normalMap->texnum);
-		KillFlags |= KILL_TMU2_POINTER;
-	}
+	GL_MBind (2, texinfo->heightMap->texnum);
+	GL_MBind (3, texinfo->normalMap->texnum);
+	KillFlags |= KILL_TMU2_POINTER | KILL_TMU3_POINTER;
 	
 	if (dynamic)
 	{
@@ -813,12 +776,10 @@ static void BSP_GLSLTexinfoChanged (mtexinfo_t *texinfo, qboolean dynamic)
 		glUniform1iARB( g_location_shiny, 0 );
 		glUniform1fARB( g_location_rsTime, rs_realtime);
 		glUniform1iARB( g_location_liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
-		qglActiveTextureARB(GL_TEXTURE4);
-		qglBindTexture(GL_TEXTURE_2D, r_blooddroplets->texnum);
+		GL_MBind (4, r_blooddroplets->texnum);
 		KillFlags |= KILL_TMU4_POINTER;
 		glUniform1iARB( g_location_liquidNormTex, 5); 
-		qglActiveTextureARB(GL_TEXTURE5);
-		qglBindTexture(GL_TEXTURE_2D, r_blooddroplets_nm->texnum);
+		GL_MBind (5, r_blooddroplets_nm->texnum);
 		KillFlags |= KILL_TMU5_POINTER;
 	}
 	else if (texinfo->flags & SURF_WATER) 
@@ -828,8 +789,7 @@ static void BSP_GLSLTexinfoChanged (mtexinfo_t *texinfo, qboolean dynamic)
 		glUniform1iARB( g_location_shiny, 0 );
 		glUniform1fARB( g_location_rsTime, rs_realtime);
 		glUniform1iARB( g_location_liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
-		qglActiveTextureARB(GL_TEXTURE4);
-		qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
+		GL_MBind (4, r_droplets->texnum);
 		KillFlags |= KILL_TMU4_POINTER;
 	}
 	else if (texinfo->flags & SURF_SHINY)
@@ -838,8 +798,7 @@ static void BSP_GLSLTexinfoChanged (mtexinfo_t *texinfo, qboolean dynamic)
 		glUniform1iARB( g_location_shiny, 1 );
 
 		glUniform1iARB( g_location_chromeTex, 4); 
-		qglActiveTextureARB(GL_TEXTURE4);
-		qglBindTexture(GL_TEXTURE_2D, r_mirrorspec->texnum);
+		GL_MBind (4, r_mirrorspec->texnum);
 		KillFlags |= KILL_TMU4_POINTER;
 	}
 	else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY))
@@ -853,37 +812,31 @@ static void BSP_GLSLTexinfoChanged (mtexinfo_t *texinfo, qboolean dynamic)
 
 /*
 ================
-BSP_RenderGLSLLightmappedPoly
+BSP_RenderLightmappedPoly
 
-Main polygon rendering routine (all normalmapped and/or dynamically lit 
-standard surfaces)
+Main polygon rendering routine (all standard surfaces)
 ================
 */
-static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
+static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 {
-	static float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
 		
 	c_brush_polys++;
 	
-	scroll = 0;
-
 	if (lmtex != r_currLMTex)
 	{
 		BSP_FlushVBOAccum ();
-		qglActiveTextureARB(GL_TEXTURE3);
-		qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
-		KillFlags |= KILL_TMU3_POINTER;	
+		GL_MBind (1, gl_state.lightmap_textures + lmtex);
 	}
 	
-	if (r_currTangentSpaceTransform != surf->tangentSpaceTransform)
+	if (glsl && r_currTangentSpaceTransform != surf->tangentSpaceTransform)
 	{
 		BSP_FlushVBOAccum ();
 		glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
 	}
 	
-	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
+	if(gl_state.vbo && surf->has_vbo) 
 	{
 		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
@@ -891,24 +844,17 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf)
 	{
 		BSP_FlushVBOAccum ();
 		r_vboOn = false;
-		scroll = 0;
-		if (surf->texinfo->flags & SURF_FLOWING)
-		{
-			scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-			if (scroll == 0.0)
-				scroll = -64.0;
-		}
 		R_InitVArrays (VERT_MULTI_TEXTURED);
-		R_AddLightMappedSurfToVArray (surf, scroll);
+		R_AddLightMappedSurfToVArray (surf);
 	}
 }
 
 void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 {
-    int         i;
+	int		 i;
 
 	// reset VBO batching state
-	r_currTex = r_currLMTex = -99999;
+	r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	r_currTangentSpaceTransform = NULL;
 	
@@ -924,41 +870,37 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
-    {
-    	msurface_t	*s;
-    	if (forEnt)
-    	{
-    		s = currentmodel->unique_texinfo[i]->e_lightmap_surfaces;
-    		currentmodel->unique_texinfo[i]->e_lightmap_surfaces = NULL;
-    	}
-    	else
-    	{
-    		s = currentmodel->unique_texinfo[i]->w_lightmap_surfaces;
-    	}
-    	if (!s)
-    		continue;
-    	BSP_NonGLSLTexinfoChanged (s->texinfo->equiv);
+	{
+		msurface_t	*s;
+		if (forEnt)
+		{
+			s = currentmodel->unique_texinfo[i]->lightmap_surfaces.entchain;
+			currentmodel->unique_texinfo[i]->lightmap_surfaces.entchain = NULL;
+		}
+		else
+		{
+			s = currentmodel->unique_texinfo[i]->lightmap_surfaces.worldchain;
+		}
+		if (!s)
+			continue;
+		BSP_TexinfoChanged (s->texinfo->equiv, false, false);
 		for (; s; s = s->texturechain) {
-			BSP_RenderLightmappedPoly(s);
+			BSP_RenderLightmappedPoly(s, false);
 			r_currLMTex = s->lightmaptexturenum;
 		}
 	}
 	
 	BSP_FlushVBOAccum ();
 	
-	qglActiveTextureARB(GL_TEXTURE1);
-	qglBindTexture(GL_TEXTURE_2D, 0 );
-
 	qglDisable (GL_ALPHA_TEST);
-
 }
 
 void BSP_DrawGLSLSurfaces (qboolean forEnt)
 {
-    int         i;
+	int		 i;
 
 	// reset VBO batching state
-	r_currTex = r_currLMTex = -99999;
+	r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	r_currTangentSpaceTransform = NULL;
 	
@@ -973,14 +915,13 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	{
 		//static vegetation shadow
 		glUniform1iARB( g_location_bspShadowmapTexture2, 6);
-		qglActiveTextureARB(GL_TEXTURE6);
-		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
+		GL_MBind (6, r_depthtexture2->texnum);
 
 		glUniform1iARB( g_location_shadowmap, 1);
 		glUniform1iARB( g_Location_statshadow, 1 );
 
 		glUniform1fARB( g_location_xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-        glUniform1fARB( g_location_yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+		glUniform1fARB( g_location_yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
 	}
 	else
 	{
@@ -1001,22 +942,22 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
-    {
-    	msurface_t	*s;
-    	if (forEnt)
-    	{
-    		s = currentmodel->unique_texinfo[i]->e_glsl_surfaces;
-    		currentmodel->unique_texinfo[i]->e_glsl_surfaces = NULL;
-    	}
-    	else
-    	{
-    		s = currentmodel->unique_texinfo[i]->w_glsl_surfaces;
-    	}
-    	if (!s)
-    		continue;
-    	BSP_GLSLTexinfoChanged (s->texinfo->equiv, false);
+	{
+		msurface_t	*s;
+		if (forEnt)
+		{
+			s = currentmodel->unique_texinfo[i]->glsl_surfaces.entchain;
+			currentmodel->unique_texinfo[i]->glsl_surfaces.entchain = NULL;
+		}
+		else
+		{
+			s = currentmodel->unique_texinfo[i]->glsl_surfaces.worldchain;
+		}
+		if (!s)
+			continue;
+		BSP_TexinfoChanged (s->texinfo->equiv, true, false);
 		for (; s; s = s->texturechain) {
-			BSP_RenderGLSLLightmappedPoly(s);
+			BSP_RenderLightmappedPoly(s, true);
 			r_currLMTex = s->lightmaptexturenum;
 		}
 	}
@@ -1024,15 +965,11 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	BSP_FlushVBOAccum ();
 
 	qglDisable (GL_ALPHA_TEST);
-	
-	qglActiveTextureARB (GL_TEXTURE1);
-	qglDisable (GL_TEXTURE_2D);	
-
 }
 
 void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 {
-	int         i;
+	int		 i;
 	dlight_t	*dl = NULL;
 	int			lnum, sv_lnum = 0;
 	float		add, brightest = 0;
@@ -1073,7 +1010,7 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 		lightCutoffSquared *= lightCutoffSquared;		
 
 		// reset VBO batching state
-		r_currTex = r_currLMTex = -99999;		
+		r_currLMTex = -99999;		
 		r_currTexInfo = NULL;
 		r_currTangentSpaceTransform = NULL;
 		
@@ -1088,8 +1025,7 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 		{
 			//dynamic shadow
 			glUniform1iARB( g_location_bspShadowmapTexture, 7);
-			qglActiveTextureARB(GL_TEXTURE7);
-			qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+			GL_MBind (7, r_depthtexture->texnum);
 
 			glUniform1iARB( g_location_shadowmap, 1);
 
@@ -1112,22 +1048,22 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
-    {
-    	msurface_t	*s;
-    	if (forEnt)
-    	{
-    		s = currentmodel->unique_texinfo[i]->e_glsl_dynamic_surfaces;
-    		currentmodel->unique_texinfo[i]->e_glsl_dynamic_surfaces = NULL;
-    	}
-    	else
-    	{
-    		s = currentmodel->unique_texinfo[i]->w_glsl_dynamic_surfaces;
-    	}
-    	if (!s)
-    		continue;
-    	BSP_GLSLTexinfoChanged (s->texinfo->equiv, true);
+	{
+		msurface_t	*s;
+		if (forEnt)
+		{
+			s = currentmodel->unique_texinfo[i]->dynamic_surfaces.entchain;
+			currentmodel->unique_texinfo[i]->dynamic_surfaces.entchain = NULL;
+		}
+		else
+		{
+			s = currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain;
+		}
+		if (!s)
+			continue;
+		BSP_TexinfoChanged (s->texinfo->equiv, true, true);
 		for (; s; s = s->texturechain) {
-			BSP_RenderGLSLLightmappedPoly(s);
+			BSP_RenderLightmappedPoly(s, true);
 			r_currLMTex = s->lightmaptexturenum;
 		}
 	}
@@ -1135,9 +1071,6 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	BSP_FlushVBOAccum ();
 	
 	qglDisable (GL_ALPHA_TEST);
-
-	qglActiveTextureARB (GL_TEXTURE1);
-	qglDisable (GL_TEXTURE_2D);	
 }
 
 
@@ -1166,16 +1099,16 @@ void BSP_ClearWorldTextureChains (void)
 	int i;
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
-    {
-    	currentmodel->unique_texinfo[i]->w_lightmap_surfaces = NULL;
-    	currentmodel->unique_texinfo[i]->w_glsl_surfaces = NULL;
-    	currentmodel->unique_texinfo[i]->w_glsl_dynamic_surfaces = NULL;
-    }
-    
-    r_warp_surfaces = NULL;
-    r_alpha_surfaces = NULL;
-    r_rscript_surfaces = NULL;
-    r_flicker_surfaces = NULL;
+	{
+		currentmodel->unique_texinfo[i]->lightmap_surfaces.worldchain = NULL;
+		currentmodel->unique_texinfo[i]->glsl_surfaces.worldchain = NULL;
+		currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain = NULL;
+	}
+	
+	r_warp_surfaces.worldchain = NULL;
+	r_alpha_surfaces.worldchain = NULL;
+	r_rscript_surfaces = NULL;
+	r_flicker_surfaces = NULL;
 }
 
 /*
@@ -1196,7 +1129,7 @@ void BSP_UpdateSurfaceLightmap (msurface_t *surf);
 void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 {
 	int			map;
-	rscript_t	*rs_shader;
+	msurface_t	**chain;
 	qboolean	is_dynamic = false;
 	
 	// Special surfaces that need to be handled separately
@@ -1207,33 +1140,22 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 		return;
 	}
 	
+#define AddToChainPair(chainpair)  \
+	chain = (forEnt?\
+				&((chainpair).entchain):\
+				&((chainpair).worldchain));\
+	surf->texturechain = *chain; \
+	*chain = surf; 
+	
 	if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
 	{	// add to the translucent chain
-		if (forEnt)
-		{
-			surf->texturechain = r_ent_alpha_surfaces;
-			r_ent_alpha_surfaces = surf;
-		}
-		else
-		{
-			surf->texturechain = r_alpha_surfaces;
-			r_alpha_surfaces = surf;
-		}
+		AddToChainPair (r_alpha_surfaces);
 		return;
 	}
 	
 	if (surf->iflags & ISURF_DRAWTURB)
 	{	// add to the warped surfaces chain
-		if (forEnt)
-		{
-			surf->texturechain = r_ent_warp_surfaces;
-			r_ent_warp_surfaces = surf;
-		}
-		else
-		{
-			surf->texturechain = r_warp_surfaces;
-			r_warp_surfaces = surf;
-		}
+		AddToChainPair (r_warp_surfaces);
 		return;
 	}
 	
@@ -1241,87 +1163,55 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// The rest of the function handles most ordinary surfaces: normalmapped,
 	// non-normalmapped, and dynamically lit surfaces. As these three cases 
 	// are the most common, they are the most optimized-- grouped by texinfo,
-	// etc.
+	// etc. Note that with alpha, warp, and sky surfaces out of the way, all
+	// the remaining surfaces have lightmaps.
 
 	// XXX: we could require gl_bspnormalmaps here, but that would result in
 	// weird inconsistency with only meshes lighting up. Better to fall back
 	// on GLSL for dynamically lit surfaces, even with gl_bspnormalmaps 0.
 	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->integer && gl_dynamic->integer)
 	{
-		// dynamic this frame or dynamic previously
-		if ( ( surf->dlightframe == r_framecount ) )
-		{
-			if ( !SurfaceHasNoLightmap(surf) )
-				is_dynamic = true;
-		}
+		// Dynamic surfaces must have normalmaps, as the old fixed-function
+		// texture-based dynamic lighting system is depreciated.
+		is_dynamic = (surf->dlightframe == r_framecount && surf->texinfo->has_normalmap);
 	}
 	
 	// reviving the ancient lightstyle system
-	if ( !SurfaceHasNoLightmap(surf) )
+	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 	{
-		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
+		// Chain of surfaces that may need to have their lightmaps updated
+		// in future frames (for dealing with r_optimize)
+		if (surf->styles[map] != 0)
 		{
-			// Chain of surfaces that may need to have their lightmaps updated
-			// in future frames (for dealing with r_optimize)
-			if (surf->styles[map] != 0)
+			if (!forEnt)
 			{
-				if (!forEnt)
-				{
-					surf->flickerchain = r_flicker_surfaces;
-					r_flicker_surfaces = surf;
-					break;
-				}
-				if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map])
-				{
-					BSP_UpdateSurfaceLightmap (surf);
-					break;
-				}
+				surf->flickerchain = r_flicker_surfaces;
+				r_flicker_surfaces = surf;
+				break;
+			}
+			if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map])
+			{
+				BSP_UpdateSurfaceLightmap (surf);
+				break;
 			}
 		}
 	}
 
-	if(is_dynamic && surf->texinfo->has_normalmap
-		&& gl_state.glsl_shaders && gl_glsl_shaders->integer) //always glsl for dynamic if it has a normalmap
+	if(is_dynamic) 
 	{
-		if (forEnt)
-		{
-			surf->texturechain = surf->texinfo->equiv->e_glsl_dynamic_surfaces;
-			surf->texinfo->equiv->e_glsl_dynamic_surfaces = surf;
-		}
-		else
-		{
-			surf->texturechain = surf->texinfo->equiv->w_glsl_dynamic_surfaces;
-			surf->texinfo->equiv->w_glsl_dynamic_surfaces = surf;
-		}
+		//always glsl for dynamic if it has a normalmap
+		AddToChainPair (surf->texinfo->equiv->dynamic_surfaces);
 	}
 	else if(gl_bspnormalmaps->integer
 			&& surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
 	{
-		if (forEnt)
-		{
-			surf->texturechain = surf->texinfo->equiv->e_glsl_surfaces;
-			surf->texinfo->equiv->e_glsl_surfaces = surf;
-		}
-		else
-		{
-			surf->texturechain = surf->texinfo->equiv->w_glsl_surfaces;
-			surf->texinfo->equiv->w_glsl_surfaces = surf;
-		}
+		AddToChainPair (surf->texinfo->equiv->glsl_surfaces);
 	}
 	else 
 	{
-		if (forEnt)
-		{
-			surf->texturechain = surf->texinfo->equiv->e_lightmap_surfaces;
-			surf->texinfo->equiv->e_lightmap_surfaces = surf;
-		}
-		else
-		{
-			surf->texturechain = surf->texinfo->equiv->w_lightmap_surfaces;
-			surf->texinfo->equiv->w_lightmap_surfaces = surf;
-		}
+		AddToChainPair (surf->texinfo->equiv->lightmap_surfaces);
 	}
 	
 	// Add to the rscript chain if there is actually a shader
@@ -1330,13 +1220,13 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// submerged?
 	if(!forEnt && r_shaders->integer)
 	{ 
-		rs_shader = (rscript_t *)surf->texinfo->image->script;
-		if(rs_shader || (surf->iflags & ISURF_UNDERWATER))
+		if (surf->texinfo->image->script != NULL || (surf->iflags & ISURF_UNDERWATER))
 		{
 			surf->rscriptchain = r_rscript_surfaces;
 			r_rscript_surfaces = surf;
 		}
 	}
+#undef AddToChainPair
 }
 
 /*
@@ -1373,49 +1263,8 @@ void BSP_DrawTextureChains (qboolean forEnt)
 	// (TODO: only necessary for fixed-function pipeline?)
 
 	GL_EnableMultitexture( true );
-
-	GL_SelectTexture( GL_TEXTURE0);
-
-	if ( !gl_config.mtexcombine ) 
-	{
-		GL_TexEnv( GL_REPLACE );
-			GL_SelectTexture( GL_TEXTURE1);
-
-		if ( gl_lightmap->integer )
-			GL_TexEnv( GL_REPLACE );
-		else
-			GL_TexEnv( GL_MODULATE );
-	}
-	else 
-	{
-		GL_TexEnv ( GL_COMBINE_EXT );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-		GL_SelectTexture( GL_TEXTURE1 );
-		GL_TexEnv ( GL_COMBINE_EXT );
-
-		if ( gl_lightmap->integer ) 
-		{
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-		}
-		else 
-		{
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
-		}
-
-		if ( r_overbrightbits->value )
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
-	}
+	
+	R_SetLightingMode ();
 
 	// render all fixed-function surfaces
 	BSP_DrawNonGLSLSurfaces(forEnt);
@@ -1427,10 +1276,19 @@ void BSP_DrawTextureChains (qboolean forEnt)
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
 		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+		glUniform1iARB( g_location_surfTexture, 0);
+		glUniform1iARB( g_location_lmTexture, 1);
+		glUniform1iARB( g_location_heightTexture, 2);
+		glUniform1iARB( g_location_normalTexture, 3);
 		BSP_DrawGLSLSurfaces(forEnt); 
 		BSP_DrawGLSLDynamicSurfaces(forEnt);
 		glUseProgramObjectARB( 0 );
 	}
+	
+	GL_SelectTexture (0);
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+	qglMatrixMode (GL_MODELVIEW);
 	
 	// this has to come last because it messes with GL state
 	BSP_DrawWarpSurfaces (forEnt);
@@ -1557,7 +1415,7 @@ void R_DrawBrushModel ( void )
 		modelorg[2] = DotProduct (temp, up);
 	}
 
-    qglPushMatrix ();
+	qglPushMatrix ();
 	currententity->angles[0] = -currententity->angles[0];	// stupid quake bug
 	currententity->angles[2] = -currententity->angles[2];	// stupid quake bug
 	R_RotateForEntity (currententity);
@@ -1764,7 +1622,6 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		}
 
 		// the polygon is visible, so add it to the appropriate linked list
-		// list
 		BSP_AddToTextureChain( surf, false );
 	}
 
@@ -2065,10 +1922,7 @@ static void LM_UploadBlock (void)
 {
 	int texture = gl_lms.current_lightmap_texture;
 
-	GL_SelectTexture (GL_TEXTURE0);
-	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
-	// that texture unit 0 has been re-bound, as it most certainly has been.
-	gl_state.currenttextures[gl_state.currenttmu] = -1;
+	GL_SelectTexture (0);
 	GL_Bind( gl_state.lightmap_textures + texture );
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -2288,10 +2142,7 @@ void BSP_UpdateSurfaceLightmap (msurface_t *surf)
 	R_SetCacheState (surf);
 	R_BuildLightMap (surf, gl_lms.lightmap_buffer, surf->lightmaxs[0], surf->lightmaxs[1], surf->lightmaxs[0]*LIGHTMAP_BYTES);
 	
-	GL_SelectTexture (GL_TEXTURE0);
-	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
-	// that texture unit 0 has been re-bound, as it most certainly has been.
-	gl_state.currenttextures[gl_state.currenttmu] = -1;
+	GL_SelectTexture (0);
 	GL_Bind( gl_state.lightmap_textures + surf->lightmaptexturenum );
 	qglTexSubImage2D( GL_TEXTURE_2D, 
 					  0,
@@ -2317,7 +2168,7 @@ void BSP_BeginBuildingLightmaps (model_t *m)
 	r_framecount = 1;		// no dlightcache
 
 	GL_EnableMultitexture( true );
-	GL_SelectTexture( GL_TEXTURE1);
+	GL_SelectTexture (1);
 
 	/*
 	** setup the base lightstyles so the lightmaps won't have to be regenerated
@@ -2649,6 +2500,6 @@ void R_DrawRadar(void)
 	GL_TexEnv( GL_REPLACE );
 	GLSTATE_DISABLE_BLEND;
 	qglEnable(GL_DEPTH_TEST);
-    qglColor4f(1,1,1,1);
+	qglColor4f(1,1,1,1);
 
 }

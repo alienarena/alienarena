@@ -1056,12 +1056,10 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 		
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 
-		GL_SelectTexture( GL_TEXTURE1);
-		GL_Bind (r_shelltexture2->texnum);
+		GL_MBind (1, r_shelltexture2->texnum);
 		glUniform1iARB( g_location_baseTex, 1);
 
-		GL_SelectTexture( GL_TEXTURE0);
-		GL_Bind (r_shellnormal->texnum);
+		GL_MBind (0, r_shellnormal->texnum);
 		glUniform1iARB( g_location_normTex, 0);
 
 		glUniform1iARB( g_location_useFX, 0);
@@ -1153,23 +1151,17 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor)
 	
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER);
 
-	GL_SelectTexture( GL_TEXTURE1);
-	GL_Bind (skinnum);
+	GL_MBind (1, skinnum);
 	glUniform1iARB( g_location_baseTex, 1);
 
-	GL_SelectTexture( GL_TEXTURE0);
-	GL_Bind (rs->stage->texture->texnum);
+	GL_MBind (0, rs->stage->texture->texnum);
 	glUniform1iARB( g_location_normTex, 0);
 
-	GL_SelectTexture( GL_TEXTURE2);
-	GL_Bind (rs->stage->texture2->texnum);
+	GL_MBind (2, rs->stage->texture2->texnum);
 	glUniform1iARB( g_location_fxTex, 2);
 
-	qglActiveTextureARB(GL_TEXTURE3);
-	GL_Bind (rs->stage->texture3->texnum);
+	GL_MBind (3, rs->stage->texture3->texnum);
 	glUniform1iARB( g_location_fx2Tex, 3);
-
-	GL_SelectTexture( GL_TEXTURE0);
 
 	if(rs->stage->fx)
 		glUniform1iARB( g_location_useFX, 1);
@@ -1449,12 +1441,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				vertsize = VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 
 				GL_EnableMultitexture( true );
-				GL_SelectTexture( GL_TEXTURE0);
+				GL_SelectTexture (0);
 				GL_TexEnv ( GL_COMBINE_EXT );
 				GL_Bind (r_mirrortexture->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				GL_SelectTexture( GL_TEXTURE1);
+				GL_SelectTexture (1);
 				GL_TexEnv ( GL_COMBINE_EXT );
 				GL_Bind (r_mirrorspec->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
@@ -1464,15 +1456,13 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			else
 			{
 				R_InitVArrays (VERT_COLOURED_TEXTURED);
-				GL_SelectTexture( GL_TEXTURE0);
-				GL_Bind (r_mirrortexture->texnum);
+				GL_MBind (0, r_mirrortexture->texnum);
 			}
 		}
 		else
 		{
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
-			GL_SelectTexture( GL_TEXTURE0);
-			GL_Bind (r_reflecttexture->texnum);
+			GL_MBind (0, r_reflecttexture->texnum);
 		}
 			
 		if (mirror)
@@ -1699,6 +1689,7 @@ skipLoad:
 			GL_BindVBO(vbo_xyz);
 			qglVertexPointer(3, GL_FLOAT, 0, 0);
 			
+			qglClientActiveTextureARB (GL_TEXTURE0);
 			qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			GL_BindVBO(vbo_st);
 			qglTexCoordPointer(2, GL_FLOAT, 0, 0);
@@ -1791,6 +1782,7 @@ skipLoad:
 
 	qglDisableClientState( GL_NORMAL_ARRAY);
 	qglDisableClientState( GL_COLOR_ARRAY );
+	qglClientActiveTextureARB (GL_TEXTURE1);
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 	glDisableVertexAttribArrayARB (1);
 
@@ -1976,7 +1968,8 @@ void R_DrawAliasModel ( void )
 	}
 	if (!skin)
 		skin = r_notexture;	// fallback...
-	GL_Bind(skin->texnum);
+	
+	GL_MBind (0, skin->texnum);
 
 	// draw it
 
@@ -2053,7 +2046,7 @@ void R_DrawAliasModel ( void )
 		qglDisable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		qglColor4f(1,1,1,1);
-		qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		GL_TexEnv (GL_MODULATE);
 
 	}
 	if (currententity->flags & RF_DEPTHHACK)

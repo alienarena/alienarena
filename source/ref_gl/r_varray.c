@@ -496,7 +496,7 @@ after each poly is rendered.
 It's assumed that the programmer has set up the vertex arrays properly before calling this, otherwise weird things may happen!!!
 =================
 */
-void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
+void R_AddLightMappedSurfToVArray (msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -515,7 +515,7 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 		VArray[2] = v[2];
 
 		// world texture coords
-		VArray[3] = v[3] + scroll;
+		VArray[3] = v[3];
 		VArray[4] = v[4];
 
 		// lightmap texture coords

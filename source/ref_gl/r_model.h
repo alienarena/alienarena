@@ -197,6 +197,14 @@ VERTEX ARRAYS
 ==============================================================================
 */
 
+typedef struct 
+{
+	//for BSP rendering-- not always cleared each frame
+	struct	msurface_s	*worldchain;
+	//for entity rendering-- cleared for each brush model drawn
+	struct	msurface_s	*entchain;
+} surfchain_t;
+
 typedef struct mtexinfo_s
 {
 	float		vecs[2][4];
@@ -212,15 +220,10 @@ typedef struct mtexinfo_s
 	struct		rscript_s	*script;
 	int			value;
 	
-	//for BSP rendering-- not always cleared each frame
-	struct 		msurface_s	*w_glsl_surfaces, 
-							*w_glsl_dynamic_surfaces, 
-							*w_lightmap_surfaces;
-	
-	//for entity rendering-- cleared for each brush model drawn
-	struct 		msurface_s	*e_glsl_surfaces, 
-							*e_glsl_dynamic_surfaces, 
-							*e_lightmap_surfaces;
+	// Surface linked lists: all surfaces in these lists are grouped together
+	// by texinfo so the renderer can take advantage of the fact that they 
+	// share the same texture and the same surface flags.
+	surfchain_t	glsl_surfaces, dynamic_surfaces, lightmap_surfaces;
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10
@@ -375,6 +378,7 @@ typedef struct model_s
 // brush model
 //
 	int			firstmodelsurface, nummodelsurfaces;
+
 
 	int			numsubmodels;
 	mmodel_t	*submodels;

@@ -158,6 +158,8 @@ void R_InitCubemapTextures (void)
 	// done - restore the texture state
 	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
 	qglEnable (GL_TEXTURE_2D);
+	
+	GL_InvalidateTextureState ();
 }
 
 /*

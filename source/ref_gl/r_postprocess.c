@@ -108,7 +108,8 @@ void R_GLSLDistortion(void)
 	qglViewport(0,0,FB_texture_width,FB_texture_height);
 
 	//we need to grab the frame buffer
-	qglBindTexture(GL_TEXTURE_2D, r_framebuffer->texnum);
+	GL_SelectTexture (0);
+	GL_Bind (r_framebuffer->texnum);
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0, 0, 0, FB_texture_width, FB_texture_height);
 
@@ -144,15 +145,14 @@ void R_GLSLDistortion(void)
 		//create a distortion wave effect at point of explosion
 		glUseProgramObjectARB( g_fbprogramObj );
 
-		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture (GL_TEXTURE_2D,r_framebuffer->texnum);
+		GL_MBind (1, r_framebuffer->texnum);
 		glUniform1iARB( g_location_framebuffTex, 1);
 		KillFlags |= KILL_TMU1_POINTER;
 
-		qglActiveTextureARB(GL_TEXTURE0);
+		GL_SelectTexture (0);
 	
 		if(r_distortwave)
-			qglBindTexture(GL_TEXTURE_2D, r_distortwave->texnum);
+			GL_Bind (r_distortwave->texnum);
 		glUniform1iARB( g_location_distortTex, 0);
 		KillFlags |= KILL_TMU0_POINTER;
 
@@ -182,8 +182,7 @@ void R_GLSLDistortion(void)
 		//do a radial blur
 		glUseProgramObjectARB( g_rblurprogramObj );
 
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, r_framebuffer->texnum);
+		GL_MBind (0, r_framebuffer->texnum);
 		KillFlags |= KILL_TMU0_POINTER;
 
 		glUniform1iARB( g_location_rsource, 0);
@@ -249,7 +248,8 @@ void R_GLSLWaterDroplets(void)
 	qglViewport(0,0,FB_texture_width,FB_texture_height);
 
 	//we need to grab the frame buffer
-	qglBindTexture(GL_TEXTURE_2D, r_framebuffer->texnum);
+	GL_SelectTexture (0);
+	GL_Bind (r_framebuffer->texnum);
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0, 0, 0, FB_texture_width, FB_texture_height);
 
@@ -283,13 +283,11 @@ void R_GLSLWaterDroplets(void)
 	//draw water droplets
 	glUseProgramObjectARB( g_dropletsprogramObj ); //this program will have two or three of the normalmap scrolling over the buffer
 
-	qglActiveTextureARB(GL_TEXTURE1);
-	qglBindTexture (GL_TEXTURE_2D,r_framebuffer->texnum);
+	GL_MBind (1, r_framebuffer->texnum);
 	glUniform1iARB( g_location_drSource, 1);
 	KillFlags |= KILL_TMU1_POINTER;
 
-	qglActiveTextureARB(GL_TEXTURE0);
-	qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
+	GL_MBind (0, r_droplets->texnum);
 	glUniform1iARB( g_location_drTex, 0);
 	KillFlags |= KILL_TMU0_POINTER;
 
@@ -403,8 +401,7 @@ void R_ShadowBlend(float alpha)
 
 		glUseProgramObjectARB( g_blurprogramObj );
 
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
+		GL_MBind (0, r_colorbuffer->texnum);
 
 		glUniform1iARB( g_location_source, 0);
 
@@ -582,8 +579,7 @@ void R_DrawVehicleHUD (void)
 	qglEnable (GL_BLEND);
 	qglBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	qglActiveTextureARB(GL_TEXTURE0);
-	qglBindTexture(GL_TEXTURE_2D, gl->texnum);
+	GL_MBind (0, gl->texnum);
 		
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -700,8 +696,7 @@ void R_DrawBloodEffect (void)
 
 	qglEnable (GL_BLEND);
 
-	qglActiveTextureARB(GL_TEXTURE0);
-	qglBindTexture(GL_TEXTURE_2D, gl->texnum);
+	GL_MBind (0, gl->texnum);
 		
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -817,8 +812,7 @@ void R_GLSLGodRays(void)
 
 	glUseProgramObjectARB( g_godraysprogramObj );
 
-	qglActiveTextureARB(GL_TEXTURE0);
-	qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
+	GL_MBind (0, r_colorbuffer->texnum);
 
 	glUniform1iARB( g_location_sunTex, 0);
 

@@ -79,10 +79,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	
 	qsort (particles, num_particles, sizeof (particle_t *), compare_particle);
 	
-	GL_SelectTexture (GL_TEXTURE0);
-	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
-	// that texture unit 0 has been re-bound, as it most certainly has been.
-	gl_state.currenttextures[gl_state.currenttmu] = -1;
+	GL_SelectTexture (0);
 	
 	for ( p1 = particles, i=0; i < num_particles ; i++,p1++)
 	{
@@ -306,7 +303,6 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 
 	R_KillVArrays ();
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
@@ -1413,7 +1409,6 @@ void R_DrawBeamSurface ( void )
 
 	R_KillVArrays ();
 
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
@@ -1663,7 +1658,6 @@ void R_DrawSimpleItems ( void )
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglDisable(GL_BLEND);
 	GLSTATE_DISABLE_ALPHATEST
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	GL_TexEnv( GL_REPLACE );
 }
 
