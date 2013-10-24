@@ -1793,51 +1793,12 @@ skipLoad:
 
 }
 
-/*
-=================
-R_DrawAliasModel - render alias models(using MD2 format)
-
-=================
-*/
-void R_DrawAliasModel ( void )
+void R_Mesh_SetShadelight (void)
 {
-	int			i;
-	dmdl_t		*paliashdr;
-	vec3_t		bbox[8];
-	image_t		*skin;
-
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
-		return;
-
-	if(currententity->team) //don't draw flag models, handled by sprites
-		return;
-
-	if ( !( currententity->flags & RF_WEAPONMODEL ) )
-	{
-		if ( MD2_CullModel( bbox ) )
-			return;
-	}
-	else
-	{
-		if ( r_lefthand->integer == 2 )
-			return;
-	}
-
-	R_GetLightVals(currententity->origin, false);
-
-	//R_GenerateEntityShadow(); //not using this for now, it's generally a bit slower than the stencil volumes at the moment when dealing with static meshes
-
-	paliashdr = (dmdl_t *)currentmodel->extradata;
-
-	//
-	// get lighting information
-	//
-
+	int i;
+	
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
-		if(!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
-			return;
-
 		VectorClear (shadelight);
 		if (currententity->flags & RF_SHELL_HALF_DAM)
 		{
@@ -1862,7 +1823,6 @@ void R_DrawAliasModel ( void )
 			shadelight[2] = 1.0;
 			shadelight[0] = 0.6;
 		}
-
 	}
 	else if (currententity->flags & RF_FULLBRIGHT)
 	{
@@ -1909,12 +1869,49 @@ void R_DrawAliasModel ( void )
 				shadelight[i] = minlight;
 		}
 	}
+}
+
+/*
+=================
+R_DrawAliasModel - render alias models(using MD2 format)
+=================
+*/
+void R_DrawAliasModel ( void )
+{
+	int			i;
+	dmdl_t		*paliashdr;
+	vec3_t		bbox[8];
+	image_t		*skin;
+
+	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
+		return;
+
+	if(currententity->team) //don't draw flag models, handled by sprites
+		return;
+	
+	if(!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
+		return;
+
+	if ( !( currententity->flags & RF_WEAPONMODEL ) )
+	{
+		if ( MD2_CullModel( bbox ) )
+			return;
+	}
+	else
+	{
+		if ( r_lefthand->integer == 2 )
+			return;
+	}
+
+	R_GetLightVals(currententity->origin, false);
+
+	//R_GenerateEntityShadow(); //not using this for now, it's generally a bit slower than the stencil volumes at the moment when dealing with static meshes
+
+	paliashdr = (dmdl_t *)currentmodel->extradata;
+
+	R_Mesh_SetShadelight ();
 
 	shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
-
-	//
-	// locate the proper data
-	//
 
 	if ( !(currententity->flags & RF_VIEWERMODEL) && !(currententity->flags & RF_WEAPONMODEL) )
 	{
@@ -1927,7 +1924,7 @@ void R_DrawAliasModel ( void )
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
-	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->integer != 2)
+	if (currententity->flags & RF_WEAPONMODEL)
 	{
 		qglMatrixMode(GL_PROJECTION);
 		qglPushMatrix();
@@ -2023,7 +2020,7 @@ void R_DrawAliasModel ( void )
 
 	qglPopMatrix ();
 
-	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->integer != 2 ) )
+	if (currententity->flags & RF_WEAPONMODEL)
 	{
 		qglMatrixMode( GL_PROJECTION );
 		qglPopMatrix();
