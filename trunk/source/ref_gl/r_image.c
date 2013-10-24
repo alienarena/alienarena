@@ -59,7 +59,7 @@ int		gl_filter_max = GL_LINEAR;
 
 void R_InitImageSubsystem(void)
 {
-	int		max_aniso;
+	int			max_aniso;
 
 	if ( strstr( gl_config.extensions_string, "GL_ARB_multitexture" ) )
 	{
@@ -83,27 +83,13 @@ void R_InitImageSubsystem(void)
 		Com_Error (ERR_FATAL, "...GL_ARB_multitexture not found\n" );
 	}
 	
-	gl_config.mtexcombine = false;
 	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
 	{
 		Com_Printf( "...using GL_ARB_texture_env_combine\n" );
-		gl_config.mtexcombine = true;
 	}
 	else
 	{
-		Com_Printf( "...GL_ARB_texture_env_combine not found\n" );
-	}
-	if ( !gl_config.mtexcombine )
-	{
-		if ( strstr( gl_config.extensions_string, "GL_EXT_texture_env_combine" ) )
-		{
-			Com_Printf( "...using GL_EXT_texture_env_combine\n" );
-			gl_config.mtexcombine = true;
-		}
-		else
-		{
-			Com_Printf( "...GL_EXT_texture_env_combine not found\n" );
-		}
+		Com_Error (ERR_FATAL, "...GL_ARB_texture_env_combine not found\n" );
 	}
 
 	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
@@ -163,89 +149,94 @@ void GL_ShadeModel (GLenum mode)
 	}
 }
 
-// FIXME:
-// This centralized texture bind batching system is a great idea if you use it
-// *everywhere*. Otherwise you just end up binding a texture elsewhere and
-// this system doesn't know you've done it, so when you count on this system
-// to bindanother texture, it doesn't know it has to, and it'll happily let
-// you use the wrong texture. Anywhere we use glActiveTexture and 
-// glBindTexture directly can potentially screw things up. 
+#define GetTextureFromNum(num) (num+GL_TEXTURE0_ARB)
 
-void GL_EnableMultitexture( qboolean enable )
+void GL_EnableTexture (int target, qboolean enable)
 {
-	if ( !qglActiveTextureARB )
+	if (	gl_state.enabledtmus[target] == enable &&
+			gl_state.currenttexturemodes[target] == GL_REPLACE )
 		return;
-
-	if ( enable )
-	{
-		GL_SelectTexture( GL_TEXTURE1 );
-		qglEnable( GL_TEXTURE_2D );
-		GL_TexEnv( GL_REPLACE );
-
-		GL_SelectTexture( GL_TEXTURE2 );
-		qglEnable( GL_TEXTURE_2D );
-		GL_TexEnv( GL_REPLACE );
-
-		GL_SelectTexture( GL_TEXTURE3 );
-		qglEnable( GL_TEXTURE_2D );
-		GL_TexEnv( GL_REPLACE );
-	}
+	
+	gl_state.enabledtmus[target] = enable;
+	
+	GL_SelectTexture (target);
+	
+	if (enable)
+		qglEnable (GL_TEXTURE_2D);
 	else
-	{
-		GL_SelectTexture( GL_TEXTURE1 );
-		qglDisable( GL_TEXTURE_2D );
-		GL_TexEnv( GL_REPLACE );
-
-		GL_SelectTexture( GL_TEXTURE2 );
-		qglDisable( GL_TEXTURE_2D );
-		GL_TexEnv( GL_REPLACE );
-
-		GL_SelectTexture( GL_TEXTURE3 );
-		qglDisable( GL_TEXTURE_2D );
-		GL_TexEnv( GL_REPLACE );
-	}
-	GL_SelectTexture( GL_TEXTURE0 );
-	GL_TexEnv( GL_REPLACE );
+		qglDisable (GL_TEXTURE_2D);
+	
+	GL_TexEnv (GL_REPLACE);
 }
 
-void GL_SelectTexture( GLenum texture )
+// TODO: Delete this obsolete function, use GL_EnableTexture on individual
+// texture units instead.
+void GL_EnableMultitexture( qboolean enable )
 {
-	int tmu;
-
-	if ( !qglActiveTextureARB )
-		return;
-
-	if ( texture == GL_TEXTURE0 )
+	if (enable)
 	{
-		tmu = 0;
+		GL_EnableTexture (1, enable);
+		// The only reason why the old code worked is because GL_TexEnv was 
+		// actually broken for everything above GL_TEXTURE1, and
+		// GL_SelectTexture was broken for everything above GL_TEXTURE2. This
+		// function gets called in a lot of places where not all of the 
+		// texture units are actually used.
+/*		GL_EnableTexture (2, enable);*/
+/*		GL_EnableTexture (3, enable);*/
 	}
 	else
 	{
-		tmu = 1;
+		GL_EnableTexture (1, enable);
+		GL_EnableTexture (2, enable);
+		GL_EnableTexture (3, enable);
 	}
+	GL_SelectTexture (0);
+	GL_TexEnv (GL_REPLACE);
+}
 
-	if ( tmu == gl_state.currenttmu )
-	{
+static inline void GL_ForceSelectTexture (void)
+{
+	if (gl_state.tmuswitch_done)
 		return;
-	}
+	
+	gl_state.tmuswitch_done = true;
+	qglActiveTextureARB( GetTextureFromNum (gl_state.currenttmu) );
+}
 
-	gl_state.currenttmu = tmu;
+void GL_SelectTexture (int target)
+{
+	if (target == gl_state.currenttmu)
+		return;
 
-	if ( qglActiveTextureARB )
-	{
-		qglActiveTextureARB( texture );
-		qglClientActiveTextureARB( texture );
-	}
+	// this should be a crash bug, as it depends entirely on our code and not
+	// the GL environment.	
+	assert (target < MAX_TMUS);
+
+	gl_state.currenttmu = target;
+	gl_state.tmuswitch_done = false;
+	
+	// TODO: figure out if I can remove this part:
+	GL_ForceSelectTexture ();
 }
 
 void GL_TexEnv( GLenum mode )
 {
-	static int lastmodes[2] = { -1, -1 };
-
-	if ( mode != lastmodes[gl_state.currenttmu] )
+	static qboolean firstrun = true;
+	
+	// Fun fact: setting each byte to an 8-bit -1 works even if it's actually
+	// an array of regular-size integers, just like 0.
+	if (firstrun)
+	{
+		firstrun = false;
+		memset (gl_state.currenttexturemodes, -1, sizeof(gl_state.currenttexturemodes));
+	}
+	
+	GL_ForceSelectTexture();
+	
+	if ( mode != gl_state.currenttexturemodes[gl_state.currenttmu] )
 	{
 		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mode );
-		lastmodes[gl_state.currenttmu] = mode;
+		gl_state.currenttexturemodes[gl_state.currenttmu] = mode;
 	}
 }
 
@@ -253,28 +244,32 @@ void GL_Bind (int texnum)
 {
 	extern	image_t	*draw_chars;
 
-	if (gl_nobind->integer && draw_chars)		// performance evaluation option
-		texnum = draw_chars->texnum;
+/*	if (gl_nobind->integer && draw_chars)		// performance evaluation option*/
+/*		texnum = draw_chars->texnum;*/
 	if ( gl_state.currenttextures[gl_state.currenttmu] == texnum)
 		return;
 	gl_state.currenttextures[gl_state.currenttmu] = texnum;
+	GL_ForceSelectTexture();
 	qglBindTexture (GL_TEXTURE_2D, texnum);
 }
 
-void GL_MBind( GLenum target, int texnum )
+void GL_MBind (int target, int texnum)
 {
-	GL_SelectTexture( target );
-	if ( target == GL_TEXTURE0 )
-	{
-		if ( gl_state.currenttextures[0] == texnum )
-			return;
-	}
-	else
-	{
-		if ( gl_state.currenttextures[1] == texnum )
-			return;
-	}
-	GL_Bind( texnum );
+	if (gl_state.currenttextures[target] == texnum)
+		return;
+	GL_SelectTexture (target);
+	GL_Bind (texnum);
+}
+
+// If you need to use the OpenGL texture calls manually for some reason, use
+// this function right after so the wrapper functions know that the current
+// state changed when they weren't watching.
+void GL_InvalidateTextureState (void)
+{
+	gl_state.tmuswitch_done = false;
+	GL_ForceSelectTexture ();
+	memset (gl_state.currenttexturemodes, -1, sizeof(gl_state.currenttexturemodes));
+	memset (gl_state.currenttextures, -1, sizeof(gl_state.currenttextures));
 }
 
 typedef struct

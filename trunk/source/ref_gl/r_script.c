@@ -1307,7 +1307,6 @@ void SetVertexOverbrights (qboolean toggle)
 
 	if (toggle)//turn on
 	{
-		qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
@@ -1318,55 +1317,6 @@ void SetVertexOverbrights (qboolean toggle)
 	{
 		GL_TexEnv( GL_MODULATE );
 		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
-	}
-}
-
-void SetLightingMode (void)
-{
-	GL_SelectTexture( GL_TEXTURE0);
-
-	if ( !gl_config.mtexcombine ) 
-	{
-		GL_TexEnv( GL_REPLACE );
-		GL_SelectTexture( GL_TEXTURE1);
-
-		if ( gl_lightmap->value )
-			GL_TexEnv( GL_REPLACE );
-		else 
-			GL_TexEnv( GL_MODULATE );
-	}
-	else 
-	{
-		GL_TexEnv ( GL_COMBINE_EXT );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
-		GL_SelectTexture( GL_TEXTURE1 );
-		GL_TexEnv ( GL_COMBINE_EXT );
-		if ( gl_lightmap->value ) 
-		{
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-		} 
-		else 
-		{
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
-		}
-
-		if ( r_overbrightbits->value )
-		{
-			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
-		}
 	}
 }
 
@@ -1381,7 +1331,7 @@ void ToggleLightmap (qboolean toggle)
 	{
 		SetVertexOverbrights(false);
 		GL_EnableMultitexture( true );
-		SetLightingMode ();
+		R_SetLightingMode ();
 	}
 	else
 	{
@@ -1490,16 +1440,16 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			ToggleLightmap(true);
 			qglShadeModel (GL_FLAT);
 
-			GL_MBind (GL_TEXTURE1, gl_state.lightmap_textures + lmtex);
+			GL_MBind (1, gl_state.lightmap_textures + lmtex);
 
 			if (stage->colormap.enabled)
 			qglDisable (GL_TEXTURE_2D);
 			else if (stage->anim_count){
-				GL_MBind (GL_TEXTURE0, RS_Animate(stage));
+				GL_MBind (0, RS_Animate(stage));
 			}
 			else
 			{
-		 		GL_MBind (GL_TEXTURE0, stage->texture->texnum);
+		 		GL_MBind (0, stage->texture->texnum);
 			}			
 		}
 		else 

@@ -318,6 +318,8 @@ void SM_SetTextureMatrix( qboolean mapnum )
 		0.0, 0.5, 0.0, 0.0,
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0};
+	
+	GL_InvalidateTextureState (); // FIXME
 
 	// Grab modelview and transformation matrices
 	qglGetDoublev(GL_MODELVIEW_MATRIX, modelView);
@@ -325,15 +327,9 @@ void SM_SetTextureMatrix( qboolean mapnum )
 
 	qglMatrixMode(GL_TEXTURE);
 	if(mapnum)
-	{		
-		qglActiveTextureARB(GL_TEXTURE6); 
-		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
-	}
+	    GL_MBind (6, r_depthtexture2->texnum);
 	else
-	{
-		qglActiveTextureARB(GL_TEXTURE7);
-		qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
-	}
+	    GL_MBind (7, r_depthtexture->texnum);
 
 	qglLoadIdentity();
 	qglLoadMatrixd(bias);
@@ -344,8 +340,6 @@ void SM_SetTextureMatrix( qboolean mapnum )
 
 	// Go back to normal matrix mode
 	qglMatrixMode(GL_MODELVIEW);
-
-	qglActiveTextureARB(GL_TEXTURE0);
 
 }
 
@@ -815,6 +809,8 @@ void R_DrawDynamicCaster(void)
 
 	qglPolygonOffset( 0.0f, 0.0f );
     qglDisable( GL_POLYGON_OFFSET_FILL );
+    
+    GL_InvalidateTextureState (); // FIXME
 
 }
 
@@ -891,7 +887,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 			//render grass polygon
 			
-			GL_SelectTexture( GL_TEXTURE0);
+			GL_SelectTexture (0);
 			qglBindTexture (GL_TEXTURE_2D, grass->texnum);
 
 			GLSTATE_ENABLE_ALPHATEST
@@ -962,6 +958,8 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 	qglColor4f( 1,1,1,1 );
 	GLSTATE_DISABLE_ALPHATEST
+	
+	GL_InvalidateTextureState (); // FIXME
 }
 
 void R_DrawVegetationCaster(void)
@@ -1112,6 +1110,8 @@ void R_DrawEntityCaster(entity_t *ent)
     qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
+	
+	GL_InvalidateTextureState (); // FIXME
 }
 
 void R_GenerateEntityShadow( void )
@@ -1246,6 +1246,8 @@ void R_DrawRagdollCaster(int RagDollID)
     qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
+	
+	GL_InvalidateTextureState (); // FIXME
 }
 
 void R_GenerateRagdollShadow( int RagDollID )

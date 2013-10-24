@@ -441,10 +441,7 @@ void R_Bloom_DownsampleView( void )
 	qglDisable( GL_BLEND );
 	qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	
-	GL_SelectTexture (GL_TEXTURE0);
-	// FIXME: OH FFS this is so stupid: tell the GL_Bind batching mechanism 
-	// that texture unit 0 has been re-bound, as it most certainly has been.
-	gl_state.currenttextures[gl_state.currenttmu] = -1;
+	GL_SelectTexture (0);
 	
 	if (MultiSampleEnabled != 0)
 	{

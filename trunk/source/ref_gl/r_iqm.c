@@ -1555,19 +1555,17 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 
 		glUniform3fARB( g_location_gLightPos, lightVec[0], lightVec[1], lightVec[2]);
 	
-		GL_SelectTexture( GL_TEXTURE1);
 		if(mirror)
 		{			
-			GL_Bind (r_mirrortexture->texnum);
+			GL_MBind (1, r_mirrortexture->texnum);
 		}
 		else
 		{
-			GL_Bind (r_mirrorspec->texnum);			
+			GL_MBind (1, r_mirrorspec->texnum);			
 		}
 		glUniform1iARB( g_location_gmirTexture, 1);
 
-		GL_SelectTexture( GL_TEXTURE0);
-		GL_Bind (r_mirrorspec->texnum);
+		GL_MBind (0, r_mirrorspec->texnum);
 		glUniform1iARB( g_location_grefTexture, 0);		
 
 		glUniform1iARB( g_location_gFog, map_fog);
@@ -1591,12 +1589,12 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 			{
 				R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
 				GL_EnableMultitexture( true );
-				GL_SelectTexture( GL_TEXTURE0);
+				GL_SelectTexture (0);
 				GL_TexEnv ( GL_COMBINE_EXT );
 				GL_Bind (r_mirrortexture->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				GL_SelectTexture( GL_TEXTURE1);
+				GL_SelectTexture (1);
 				GL_TexEnv ( GL_COMBINE_EXT );
 				GL_Bind (r_mirrorspec->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
@@ -1606,15 +1604,13 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 			else
 			{
 				R_InitVArrays (VERT_COLOURED_TEXTURED);
-				GL_SelectTexture( GL_TEXTURE0);
-				GL_Bind (r_mirrortexture->texnum);
+				GL_MBind (0, r_mirrortexture->texnum);
 			}
 		}
 		else
 		{
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
-			GL_SelectTexture( GL_TEXTURE0);
-			GL_Bind (r_reflecttexture->texnum);
+			GL_MBind (0, r_reflecttexture->texnum);
 		}
 		
 		for (i=0; i<currentmodel->num_triangles; i++)
@@ -1724,8 +1720,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
 
-		GL_SelectTexture( GL_TEXTURE0);
-		GL_Bind (skinnum);
+		GL_MBind (0, skinnum);
 		
 		for (i=0; i<currentmodel->num_triangles; i++)
 		{
