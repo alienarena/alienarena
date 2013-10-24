@@ -303,6 +303,7 @@
     <ClInclude Include="$(SrcDir)win32\conproc.h" />
     <ClInclude Include="$(SrcDir)win32\winquake.h" />
     <ClInclude Include="$(SrcDir)client\qal.h" />
+    <ClInclude Include="..\source\ref_gl\glfuncs.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(SrcDir)win32\q2.rc" />
