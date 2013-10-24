@@ -26,10 +26,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 //ARB fragment program extensions
-PFNGLGENPROGRAMSARBPROC             qglGenProgramsARB            = NULL;
-PFNGLDELETEPROGRAMSARBPROC          qglDeleteProgramsARB         = NULL;
-PFNGLBINDPROGRAMARBPROC             qglBindProgramARB            = NULL;
-PFNGLPROGRAMSTRINGARBPROC           qglProgramStringARB          = NULL;
+PFNGLGENPROGRAMSARBPROC			 qglGenProgramsARB			= NULL;
+PFNGLDELETEPROGRAMSARBPROC		  qglDeleteProgramsARB		 = NULL;
+PFNGLBINDPROGRAMARBPROC			 qglBindProgramARB			= NULL;
+PFNGLPROGRAMSTRINGARBPROC		   qglProgramStringARB		  = NULL;
 PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB  = NULL;
 PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB = NULL;
 
@@ -54,7 +54,7 @@ PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
 PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 PFNGLUNIFORMMATRIX3X4FVARBPROC		glUniformMatrix3x4fvARB		= NULL;
-PFNGLVERTEXATTRIBPOINTERARBPROC     glVertexAttribPointerARB	= NULL;
+PFNGLVERTEXATTRIBPOINTERARBPROC	 glVertexAttribPointerARB	= NULL;
 PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB = NULL;
 PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
 PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
@@ -75,25 +75,25 @@ GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
 
 //standard bsp
-GLuint      g_location_surfTexture;
-GLuint      g_location_eyePos;
+GLuint	  g_location_surfTexture;
+GLuint	  g_location_eyePos;
 GLuint		g_tangentSpaceTransform;
-GLuint      g_location_heightTexture;
+GLuint	  g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_location_normalTexture;
 GLuint		g_location_bspShadowmapTexture;
 GLuint		g_location_bspShadowmapTexture2;
 GLuint		g_location_fog;
-GLuint	    g_location_parallax;
+GLuint		g_location_parallax;
 GLuint		g_location_dynamic;
 GLuint		g_location_shadowmap;
 GLuint		g_Location_statshadow;
 GLuint		g_location_xOffs;
 GLuint		g_location_yOffs;
-GLuint	    g_location_lightPosition;
+GLuint		g_location_lightPosition;
 GLuint		g_location_staticLightPosition;
 GLuint		g_location_lightColour;
-GLuint	    g_location_lightCutoffSquared;
+GLuint		g_location_lightCutoffSquared;
 GLuint		g_location_liquid;
 GLuint		g_location_shiny;
 GLuint		g_location_rsTime;
@@ -324,10 +324,10 @@ static char bsp_vertex_program[] = "#version 120\n" STRINGIFY (
 	uniform int SHINY;
 
 	const float Eta = 0.66;
-    const float FresnelPower = 5.0;
-    const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
+	const float FresnelPower = 5.0;
+	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
 
-    varying float FresRatio;
+	varying float FresRatio;
 	varying vec3 EyeDir;
 	varying vec3 LightDir;
 	varying vec3 StaticLightDir;
@@ -657,293 +657,293 @@ static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 static char bsp_fragment_program_ATI[] = "#version 120\n" STRINGIFY (
-    uniform sampler2D surfTexture;
-    uniform sampler2D HeightTexture;
-    uniform sampler2D NormalTexture;
-    uniform sampler2D lmTexture;
-    uniform sampler2D liquidTexture;
-    uniform sampler2D liquidNormTex;
-    uniform sampler2D chromeTex;
-    uniform sampler2D ShadowMap;
-    uniform sampler2D StatShadowMap;
-    uniform vec3 lightColour;
-    uniform float lightCutoffSquared;
-    uniform int FOG;
-    uniform int PARALLAX;
-    uniform int DYNAMIC;
-    uniform int STATSHADOW;
-    uniform int SHADOWMAP;
-    uniform int LIQUID;
-    uniform int SHINY;
-    uniform float rsTime;
-    uniform float xPixelOffset;
-    uniform float yPixelOffset;
+	uniform sampler2D surfTexture;
+	uniform sampler2D HeightTexture;
+	uniform sampler2D NormalTexture;
+	uniform sampler2D lmTexture;
+	uniform sampler2D liquidTexture;
+	uniform sampler2D liquidNormTex;
+	uniform sampler2D chromeTex;
+	uniform sampler2D ShadowMap;
+	uniform sampler2D StatShadowMap;
+	uniform vec3 lightColour;
+	uniform float lightCutoffSquared;
+	uniform int FOG;
+	uniform int PARALLAX;
+	uniform int DYNAMIC;
+	uniform int STATSHADOW;
+	uniform int SHADOWMAP;
+	uniform int LIQUID;
+	uniform int SHINY;
+	uniform float rsTime;
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
 
-    varying float FresRatio;
-    varying vec4 sPos;
-    varying vec3 EyeDir;
-    varying vec3 LightDir;
-    varying vec3 StaticLightDir;
-    varying float fog;
+	varying float FresRatio;
+	varying vec4 sPos;
+	varying vec3 EyeDir;
+	varying vec3 LightDir;
+	varying vec3 StaticLightDir;
+	varying float fog;
 
-    vec4 ShadowCoord;
+	vec4 ShadowCoord;
 
-    float lookup( vec2 offSet, sampler2D Map)
-    {
+	float lookup( vec2 offSet, sampler2D Map)
+	{
 
-        float shadow = 1.0;
+		float shadow = 1.0;
 
-        vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
-        // Used to lower moir pattern and self-shadowing
-        shadowCoordinateWdivide.z += 0.0005;
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		// Used to lower moir pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;
 
-        float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
+		float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
 
-        if (ShadowCoord.w > 0.0)
-            shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+		if (ShadowCoord.w > 0.0)
+			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
 
-        return shadow;
-    }
+		return shadow;
+	}
 	
-    float lookupShadow( sampler2D Map )
-    {
-        float shadow = 1.0;
+	float lookupShadow( sampler2D Map )
+	{
+		float shadow = 1.0;
 
-        if(SHADOWMAP > 0)
-        {
-            if (ShadowCoord.w > 1.0)
-            {
-                vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+		if(SHADOWMAP > 0)
+		{
+			if (ShadowCoord.w > 1.0)
+			{
+				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
 
-                shadow += lookup(vec2(-1.5, 1.5) + o, Map);
-                shadow += lookup(vec2( 0.5, 1.5) + o, Map);
-                shadow += lookup(vec2(-1.5, -0.5) + o, Map);
-                shadow += lookup(vec2( 0.5, -0.5) + o, Map);
-                shadow *= 0.25 ;
-            }
+				shadow += lookup(vec2(-1.5, 1.5) + o, Map);
+				shadow += lookup(vec2( 0.5, 1.5) + o, Map);
+				shadow += lookup(vec2(-1.5, -0.5) + o, Map);
+				shadow += lookup(vec2( 0.5, -0.5) + o, Map);
+				shadow *= 0.25 ;
+			}
 
-            if(shadow > 1.0)
-                shadow = 1.0;
-        }
+			if(shadow > 1.0)
+				shadow = 1.0;
+		}
 
-        return shadow;
-    }
+		return shadow;
+	}
 
-    void main( void )
-    {
-        vec4 diffuse;
-        vec4 lightmap;
-        vec4 alphamask;
-        vec4 bloodColor;
-        float distanceSquared;
-        vec3 relativeLightDirection;
-        float diffuseTerm;
-        vec3 halfAngleVector;
-        float specularTerm;
-        float swamp;
-        float attenuation;
-        vec4 litColour;
-        vec3 varyingLightColour;
-        float varyingLightCutoffSquared;
-        float dynshadowval;
-        float statshadowval;
-        vec2 displacement;
-        vec2 displacement2;
-        vec2 displacement3;
-        vec2 displacement4;
+	void main( void )
+	{
+		vec4 diffuse;
+		vec4 lightmap;
+		vec4 alphamask;
+		vec4 bloodColor;
+		float distanceSquared;
+		vec3 relativeLightDirection;
+		float diffuseTerm;
+		vec3 halfAngleVector;
+		float specularTerm;
+		float swamp;
+		float attenuation;
+		vec4 litColour;
+		vec3 varyingLightColour;
+		float varyingLightCutoffSquared;
+		float dynshadowval;
+		float statshadowval;
+		vec2 displacement;
+		vec2 displacement2;
+		vec2 displacement3;
+		vec2 displacement4;
 
-        varyingLightColour = lightColour;
-        varyingLightCutoffSquared = lightCutoffSquared;
+		varyingLightColour = lightColour;
+		varyingLightCutoffSquared = lightCutoffSquared;
 
-        vec3 relativeEyeDirection = normalize( EyeDir );
+		vec3 relativeEyeDirection = normalize( EyeDir );
 
-        vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
-        vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
+		vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
+		vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
 
-        lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
-        alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
+		lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
+		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
 
-        //shadows
-        if(DYNAMIC > 0)
-        {
-            ShadowCoord = gl_TextureMatrix[7] * sPos;
-            dynshadowval = lookupShadow(ShadowMap);
-        }
-        else
-            dynshadowval = 0.0;
+		//shadows
+		if(DYNAMIC > 0)
+		{
+			ShadowCoord = gl_TextureMatrix[7] * sPos;
+			dynshadowval = lookupShadow(ShadowMap);
+		}
+		else
+			dynshadowval = 0.0;
 
-        if(STATSHADOW > 0)
-        {
-            ShadowCoord = gl_TextureMatrix[6] * sPos;
-            statshadowval = lookupShadow(StatShadowMap);
-        }
-        else
-            statshadowval = 1.0;
+		if(STATSHADOW > 0)
+		{
+			ShadowCoord = gl_TextureMatrix[6] * sPos;
+			statshadowval = lookupShadow(StatShadowMap);
+		}
+		else
+			statshadowval = 1.0;
 
-        bloodColor = vec4(0.0, 0.0, 0.0, 0.0);
-        displacement4 = vec2(0.0, 0.0);
-        if(LIQUID > 0)
-        {
-            vec3 noiseVec;
-            vec3 noiseVec2;
-            vec3 noiseVec3;
+		bloodColor = vec4(0.0, 0.0, 0.0, 0.0);
+		displacement4 = vec2(0.0, 0.0);
+		if(LIQUID > 0)
+		{
+			vec3 noiseVec;
+			vec3 noiseVec2;
+			vec3 noiseVec3;
 
-            //for liquid fx scrolling
-            vec4 texco = gl_TexCoord[0];
-            texco.t = texco.t - rsTime*1.0/LIQUID;
+			//for liquid fx scrolling
+			vec4 texco = gl_TexCoord[0];
+			texco.t = texco.t - rsTime*1.0/LIQUID;
 
-            vec4 texco2 = gl_TexCoord[0];
-            texco2.t = texco2.t - rsTime*0.9/LIQUID;
-            //shift the horizontal here a bit
-            texco2.s = texco2.s/1.5;
+			vec4 texco2 = gl_TexCoord[0];
+			texco2.t = texco2.t - rsTime*0.9/LIQUID;
+			//shift the horizontal here a bit
+			texco2.s = texco2.s/1.5;
 
-            vec4 texco3 = gl_TexCoord[0];
-            texco3.t = texco3.t - rsTime*0.6/LIQUID;
+			vec4 texco3 = gl_TexCoord[0];
+			texco3.t = texco3.t - rsTime*0.6/LIQUID;
 
-            vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
-            Offset = Offset * 0.04 - 0.02;
-            vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;
+			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
+			Offset = Offset * 0.04 - 0.02;
+			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;
 
-            displacement = texco.st;
+			displacement = texco.st;
 
-            noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;
-            noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
+			noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;
+			noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
-            displacement2 = texco2.st;
+			displacement2 = texco2.st;
 
-            noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;
-            noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
+			noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;
+			noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
 
-            if(LIQUID > 2)
-            {
-                displacement3 = texco3.st;
+			if(LIQUID > 2)
+			{
+				displacement3 = texco3.st;
 
-                noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;
-                noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
-            }
-            else
-            {
-                //used for water effect only
-                displacement4.x = noiseVec.x + noiseVec2.x;
-                displacement4.y = noiseVec.y + noiseVec2.y;
-            }
+				noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;
+				noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
+			}
+			else
+			{
+				//used for water effect only
+				displacement4.x = noiseVec.x + noiseVec2.x;
+				displacement4.y = noiseVec.y + noiseVec2.y;
+			}
 
-            displacement.x = texco.s + noiseVec.x + TexCoords.x;
-            displacement.y = texco.t + noiseVec.y + TexCoords.y;
-            displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
-            displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
-            displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;
-            displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;
+			displacement.x = texco.s + noiseVec.x + TexCoords.x;
+			displacement.y = texco.t + noiseVec.y + TexCoords.y;
+			displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
+			displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
+			displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;
+			displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;
 
-            if(LIQUID > 2)
-            {
-                vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
-                vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
-                vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);
-                vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
-                bloodColor = max(diffuse1, diffuse2);
-                bloodColor = max(bloodColor, diffuse3);
-            }
-        }
+			if(LIQUID > 2)
+			{
+				vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
+				vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
+				vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);
+				vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
+				bloodColor = max(diffuse1, diffuse2);
+				bloodColor = max(bloodColor, diffuse3);
+			}
+		}
 
-       if(PARALLAX > 0)
-       {
-            //do the parallax mapping
-            vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
-            Offset = Offset * 0.04 - 0.02;
-            vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
+	   if(PARALLAX > 0)
+	   {
+			//do the parallax mapping
+			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
+			Offset = Offset * 0.04 - 0.02;
+			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
 
-            diffuse = texture2D( surfTexture, TexCoords );
+			diffuse = texture2D( surfTexture, TexCoords );
 
-            relativeLightDirection = normalize (StaticLightDir);
+			relativeLightDirection = normalize (StaticLightDir);
 
-            diffuseTerm = dot( normal, relativeLightDirection  );
+			diffuseTerm = dot( normal, relativeLightDirection  );
 
-            if( diffuseTerm > 0.0 )
-            {
-                halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
+			if( diffuseTerm > 0.0 )
+			{
+				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
 
-                specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-                specularTerm = pow( specularTerm, 32.0 );
+				specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
+				specularTerm = pow( specularTerm, 32.0 );
 
-                litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);
-            }
-            else
-            {
-                litColour = vec4( 0.0, 0.0, 0.0, 6.0 );
-            }
+				litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);
+			}
+			else
+			{
+				litColour = vec4( 0.0, 0.0, 0.0, 6.0 );
+			}
 
-            gl_FragColor = max(litColour, diffuse * 2.0);
-            gl_FragColor = (gl_FragColor * lightmap) + bloodColor;
-            gl_FragColor = (gl_FragColor * statshadowval);
-       }
-       else
-       {
-            diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);
-            gl_FragColor = (diffuse * lightmap * 2.0);
-            gl_FragColor = (gl_FragColor * statshadowval);
-       }
+			gl_FragColor = max(litColour, diffuse * 2.0);
+			gl_FragColor = (gl_FragColor * lightmap) + bloodColor;
+			gl_FragColor = (gl_FragColor * statshadowval);
+	   }
+	   else
+	   {
+			diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);
+			gl_FragColor = (diffuse * lightmap * 2.0);
+			gl_FragColor = (gl_FragColor * statshadowval);
+	   }
 
-       if(DYNAMIC > 0)
-       {
-            lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
+	   if(DYNAMIC > 0)
+	   {
+			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 
-            //now do the dynamic lighting
-            distanceSquared = dot( LightDir, LightDir );
-            relativeLightDirection = LightDir / sqrt( distanceSquared );
+			//now do the dynamic lighting
+			distanceSquared = dot( LightDir, LightDir );
+			relativeLightDirection = LightDir / sqrt( distanceSquared );
 
-            diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );
-            vec3 colour = vec3( 0.0, 0.0, 0.0 );
+			diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );
+			vec3 colour = vec3( 0.0, 0.0, 0.0 );
 
-            if( diffuseTerm > 0.0 )
-            {
-                halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
+			if( diffuseTerm > 0.0 )
+			{
+				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
 
-                float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-                specularTerm = pow( specularTerm, 32.0 );
+				float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
+				specularTerm = pow( specularTerm, 32.0 );
 
-                colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;
-            }
+				colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;
+			}
 
-            attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );
+			attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );
 
-            swamp = attenuation;
-            swamp *= swamp;
-            swamp *= swamp;
-            swamp *= swamp;
+			swamp = attenuation;
+			swamp *= swamp;
+			swamp *= swamp;
+			swamp *= swamp;
 
-            colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
+			colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
 
-            vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
-            if(PARALLAX > 0)
-            {
-                dynamicColour = max(dynamicColour, gl_FragColor);
-            }
-            else
-            {
-                dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
-            }
-            gl_FragColor = dynamicColour;
-       }
+			vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
+			if(PARALLAX > 0)
+			{
+				dynamicColour = max(dynamicColour, gl_FragColor);
+			}
+			else
+			{
+				dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
+			}
+			gl_FragColor = dynamicColour;
+	   }
 
-       gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
+	   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
 
-       if(SHINY > 0)
-       {
-           vec3 reflection = reflect(relativeEyeDirection, normal);
-           vec3 refraction = refract(relativeEyeDirection, normal, 0.66);
+	   if(SHINY > 0)
+	   {
+		   vec3 reflection = reflect(relativeEyeDirection, normal);
+		   vec3 refraction = refract(relativeEyeDirection, normal, 0.66);
 
-           vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
-           vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
+		   vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
+		   vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
 
-           vec4 cubemap = mix(Tl,Tr,FresRatio);
+		   vec4 cubemap = mix(Tl,Tr,FresRatio);
 
-           gl_FragColor = max(gl_FragColor, (cubemap * 0.05 * alphamask.a));
-       }
+		   gl_FragColor = max(gl_FragColor, (cubemap * 0.05 * alphamask.a));
+	   }
 
-       if(FOG > 0)
-            gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
-    }
+	   if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
+	}
 );
 
 
@@ -998,7 +998,7 @@ static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
 
 	void main( void )
 	{
-	    float statshadowval = 1/fadeShadow * lookupStatshadow();	  
+		float statshadowval = 1/fadeShadow * lookupStatshadow();	  
 
 		gl_FragColor = vec4(1.0);
 		gl_FragColor = (gl_FragColor * statshadowval);	   
@@ -1007,56 +1007,56 @@ static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
 
 static char shadow_fragment_program_ATI[] = "#version 120\n" STRINGIFY (
 
-    uniform sampler2D StatShadowMap;
-    uniform float fadeShadow;
-    uniform float xPixelOffset;
-    uniform float yPixelOffset;
+	uniform sampler2D StatShadowMap;
+	uniform float fadeShadow;
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
 
-    varying vec4 ShadowCoord;
+	varying vec4 ShadowCoord;
 
-    float lookup( vec2 offSet)
-    {
-        float shadow = 1.0;
+	float lookup( vec2 offSet)
+	{
+		float shadow = 1.0;
 
-        vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
-        // Used to lower moir pattern and self-shadowing
-        shadowCoordinateWdivide.z += 0.0005;
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		// Used to lower moir pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;
 
-        float distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
+		float distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
 
-        if (ShadowCoord.w > 0.0)
-            shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+		if (ShadowCoord.w > 0.0)
+			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
 
-        return shadow;
-    }
+		return shadow;
+	}
 
-    float lookupStatshadow( void )
-    {
-        float shadow = 1.0;
+	float lookupStatshadow( void )
+	{
+		float shadow = 1.0;
 
-        if (ShadowCoord.w > 1.0)
-        {
-            vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+		if (ShadowCoord.w > 1.0)
+		{
+			vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
 
-            shadow += lookup(vec2(-1.5, 1.5) + o);
-            shadow += lookup(vec2( 0.5, 1.5) + o);
-            shadow += lookup(vec2(-1.5, -0.5) + o);
-            shadow += lookup(vec2( 0.5, -0.5) + o);
-            shadow *= 0.25 ;
-        }
-        if(shadow > 1.0)
-            shadow = 1.0;
+			shadow += lookup(vec2(-1.5, 1.5) + o);
+			shadow += lookup(vec2( 0.5, 1.5) + o);
+			shadow += lookup(vec2(-1.5, -0.5) + o);
+			shadow += lookup(vec2( 0.5, -0.5) + o);
+			shadow *= 0.25 ;
+		}
+		if(shadow > 1.0)
+			shadow = 1.0;
 
-        return shadow;
-    }
+		return shadow;
+	}
 
-    void main( void )
-    {
-        float statshadowval = 1/fadeShadow * lookupStatshadow();
+	void main( void )
+	{
+		float statshadowval = 1/fadeShadow * lookupStatshadow();
 
-        gl_FragColor = vec4(1.0);
-        gl_FragColor = (gl_FragColor * statshadowval);
-    }
+		gl_FragColor = vec4(1.0);
+		gl_FragColor = (gl_FragColor * statshadowval);
+	}
 );
 
 
@@ -1297,12 +1297,12 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 				relEyeDir = normalize(EyeDir);
 					
 			vec3 reflection = reflect(relEyeDir, normal);
-            vec3 refraction = refract(relEyeDir, normal, 0.66);
+			vec3 refraction = refract(relEyeDir, normal, 0.66);
 
-            vec4 Tl = texture2D(fx2Tex, reflection.xy );
-            vec4 Tr = texture2D(fx2Tex, refraction.xy );
+			vec4 Tl = texture2D(fx2Tex, reflection.xy );
+			vec4 Tr = texture2D(fx2Tex, refraction.xy );
 
-            vec4 cubemap = mix(Tl,Tr,FresRatio);
+			vec4 cubemap = mix(Tl,Tr,FresRatio);
 			
 			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor);
 
@@ -1440,12 +1440,12 @@ static char water_vertex_program[] = "#version 120\n" STRINGIFY (
 		lightDir = tangentSpaceTransform * (LightPos - gl_Vertex.xyz);
 
 		vec4 neyeDir = gl_ModelViewMatrix * gl_Vertex;
-        vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
-        refeyeDir = normalize(refeyeDir);
+		vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+		refeyeDir = normalize(refeyeDir);
 
 		// The normal is always 0, 0, 1 because water is always up. Thus, 
 		// dot (refeyeDir,norm) is always refeyeDir.z
-        FresRatio = F + (1.0-F) * pow((1.0-refeyeDir.z),FresnelPower);
+		FresRatio = F + (1.0-F) * pow((1.0-refeyeDir.z),FresnelPower);
 
 		eyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
 
@@ -1506,7 +1506,7 @@ static char water_fragment_program[] = "#version 120\n" STRINGIFY (
 		vec3 refraction = refract(vVec,modbump,0.66);
 
 		vec4 Tl = texture2D(baseTexture, reflection.xy);
-	    vec4 Tr = texture2D(baseTexture, refraction.xy);
+		vec4 Tr = texture2D(baseTexture, refraction.xy);
 
 		vec4 cubemap = mix(Tl,Tr,FresRatio);
 
@@ -1524,9 +1524,9 @@ static char water_fragment_program[] = "#version 120\n" STRINGIFY (
 static char fb_vertex_program[] = "#version 120\n" STRINGIFY (
 	void main( void )
 	{
-	    gl_Position = ftransform();
+		gl_Position = ftransform();
 
-	    gl_TexCoord[0] = gl_MultiTexCoord0;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
 	}
 );
 
@@ -1640,35 +1640,35 @@ static char rblur_fragment_program[] = "#version 120\n" STRINGIFY (
 		float wScissor;
 		float hScissor;
 
-	    vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);
-	    float dist = sqrt(dir.x*dir.x + dir.y*dir.y); 
+		vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);
+		float dist = sqrt(dir.x*dir.x + dir.y*dir.y); 
 	  	dir = dir/dist;
-	    vec4 color = texture2D(rtextureSource,gl_TexCoord[0].xy); 
-	    vec4 sum = color;
+		vec4 color = texture2D(rtextureSource,gl_TexCoord[0].xy); 
+		vec4 sum = color;
 
 		float strength = radialBlurParams.z;
 		vec2 pDir = vec2(rblurScale.y * 0.5 - gl_TexCoord[0].s, rblurScale.z * 0.5 - gl_TexCoord[0].t);
-	    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);
+		float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);
 		clamp(pDist, 0.0, 1.0);
 
 		 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.02 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.01 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.01 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.02 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.03 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.05 * strength * pDist );
-	    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.06 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.02 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.01 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.01 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.02 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.03 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.05 * strength * pDist );
+		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.06 * strength * pDist );
 
-	    sum *= 1.0/11.0;
+		sum *= 1.0/11.0;
  
-	    float t = dist * rblurScale.x;
-	    t = clamp( t ,0.0,1.0);
+		float t = dist * rblurScale.x;
+		t = clamp( t ,0.0,1.0);
 
-	    vec4 final = mix( color, sum, t );
+		vec4 final = mix( color, sum, t );
 
 		//clamp edges to prevent artifacts
 		wScissor = rblurScale.y - 0.008;
@@ -1687,7 +1687,7 @@ static char droplets_vertex_program[] = "#version 120\n" STRINGIFY (
 
 	void main( void )
 	{
-	    gl_Position = ftransform();
+		gl_Position = ftransform();
 
 		 //for vertical scrolling
 		 vec4 texco = gl_MultiTexCoord0;
@@ -1698,7 +1698,7 @@ static char droplets_vertex_program[] = "#version 120\n" STRINGIFY (
 		 texco.t = texco.t + drTime*0.8;
 		 gl_TexCoord[2] = texco;
 
-	    gl_TexCoord[0] = gl_MultiTexCoord0;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
 	}
 );
 
@@ -1720,7 +1720,7 @@ static char droplets_fragment_program[] = "#version 120\n" STRINGIFY (
 		noiseVec = normalize(texture2D(drTex, displacement.xy)).xyz;
 		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
-	    displacement = gl_TexCoord[2].st;
+		displacement = gl_TexCoord[2].st;
 
 		noiseVec2 = normalize(texture2D(drTex, displacement.xy)).xyz;
 		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
@@ -1885,19 +1885,19 @@ void R_LoadGLSLPrograms(void)
 		gl_state.glsl_shaders = true;
 
 		glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
-		glDeleteObjectARB         = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
-		glUseProgramObjectARB     = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
+		glDeleteObjectARB		 = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
+		glUseProgramObjectARB	 = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
 		glCreateShaderObjectARB   = (PFNGLCREATESHADEROBJECTARBPROC)qwglGetProcAddress("glCreateShaderObjectARB");
-		glShaderSourceARB         = (PFNGLSHADERSOURCEARBPROC)qwglGetProcAddress("glShaderSourceARB");
-		glCompileShaderARB        = (PFNGLCOMPILESHADERARBPROC)qwglGetProcAddress("glCompileShaderARB");
+		glShaderSourceARB		 = (PFNGLSHADERSOURCEARBPROC)qwglGetProcAddress("glShaderSourceARB");
+		glCompileShaderARB		= (PFNGLCOMPILESHADERARBPROC)qwglGetProcAddress("glCompileShaderARB");
 		glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)qwglGetProcAddress("glGetObjectParameterivARB");
-		glAttachObjectARB         = (PFNGLATTACHOBJECTARBPROC)qwglGetProcAddress("glAttachObjectARB");
-		glGetInfoLogARB           = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
-		glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
+		glAttachObjectARB		 = (PFNGLATTACHOBJECTARBPROC)qwglGetProcAddress("glAttachObjectARB");
+		glGetInfoLogARB		   = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
+		glLinkProgramARB		  = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
 		glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
-		glUniform3fARB            = (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
-		glUniform2fARB            = (PFNGLUNIFORM2FARBPROC)qwglGetProcAddress("glUniform2fARB");
-		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
+		glUniform3fARB			= (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
+		glUniform2fARB			= (PFNGLUNIFORM2FARBPROC)qwglGetProcAddress("glUniform2fARB");
+		glUniform1iARB			= (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
 		glUniformMatrix3x4fvARB	  = (PFNGLUNIFORMMATRIX3X4FVARBPROC)qwglGetProcAddress("glUniformMatrix3x4fv");
@@ -1907,9 +1907,9 @@ void R_LoadGLSLPrograms(void)
 		glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)qwglGetProcAddress("glBindAttribLocationARB");
 
 		if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
-		    !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
-		    !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
-		    !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
+			!glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
+			!glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
+			!glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
 				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB ||
 				!glUniformMatrix3x4fvARB || !glVertexAttribPointerARB 
 				|| !glEnableVertexAttribArrayARB ||
