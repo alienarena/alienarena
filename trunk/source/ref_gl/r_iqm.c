@@ -1910,6 +1910,9 @@ int IQM_NextFrame(int frame)
 	}
 	return outframe;
 }
+
+void R_Mesh_SetShadelight (void);
+
 /*
 =================
 R_DrawINTERQUAKEMODEL
@@ -1955,79 +1958,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		
 	R_GenerateEntityShadow();
 
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
-	{
-
-		VectorClear (shadelight);
-		if (currententity->flags & RF_SHELL_HALF_DAM)
-		{
-				shadelight[0] = 0.56;
-				shadelight[1] = 0.59;
-				shadelight[2] = 0.45;
-		}
-		if ( currententity->flags & RF_SHELL_DOUBLE )
-		{
-			shadelight[0] = 0.9;
-			shadelight[1] = 0.7;
-		}
-		if ( currententity->flags & RF_SHELL_RED )
-			shadelight[0] = 1.0;
-		if ( currententity->flags & RF_SHELL_GREEN )
-		{
-			shadelight[1] = 1.0;
-			shadelight[2] = 0.6;
-		}
-		if ( currententity->flags & RF_SHELL_BLUE )
-		{
-			shadelight[2] = 1.0;
-			shadelight[0] = 0.6;
-		}
-	}
-	else if (currententity->flags & RF_FULLBRIGHT)
-	{
-		for (i=0 ; i<3 ; i++)
-			shadelight[i] = 1.0;
-	}
-	else
-	{
-		R_LightPoint (currententity->origin, shadelight, true);
-	}
-	if ( currententity->flags & RF_MINLIGHT )
-	{
-		float minlight;
-
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-			minlight = 0.1;
-		else
-			minlight = 0.2;
-		for (i=0 ; i<3 ; i++)
-			if (shadelight[i] > minlight)
-				break;
-		if (i == 3)
-		{
-			shadelight[0] = minlight;
-			shadelight[1] = minlight;
-			shadelight[2] = minlight;
-		}
-	}
-
-	if ( currententity->flags & RF_GLOW )
-	{	// bonus items will pulse with time
-		float	scale;
-		float	minlight;
-
-		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-			minlight = 0.1;
-		else
-			minlight = 0.2;
-		for (i=0 ; i<3 ; i++)
-		{
-			shadelight[i] += scale;
-			if (shadelight[i] < minlight)
-				shadelight[i] = minlight;
-		}
-	}	
+	R_Mesh_SetShadelight ();
 
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
