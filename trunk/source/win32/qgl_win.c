@@ -65,6 +65,11 @@ int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
 BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
+BOOL ( WINAPI * qwglSwapIntervalEXT)( int );
+
+BOOL ( WINAPI * qwglGetDeviceGammaRampEXT ) ( unsigned char *, unsigned char *, unsigned char * );
+BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *, const unsigned char *, const unsigned char * );
+
 
 #define T(x) x // type
 #define N(x) ( APIENTRY * qgl ## x ) // name
