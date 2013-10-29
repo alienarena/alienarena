@@ -792,13 +792,14 @@ void weapon_disruptor_fire (edict_t *ent)
 
 	int		damage;
 	int		kick;
-	int		buildup;
 
 	if ( instagib->integer || insta_rockets->integer )
 	{
 		damage = 200;
 		kick = 200;
-	} else {
+	} 
+	else 
+	{
 		damage = 60;
 		kick = 60;
 	}
@@ -807,22 +808,6 @@ void weapon_disruptor_fire (edict_t *ent)
 	{
 		damage *= 2;
 		kick *= 2;
-	}
-
-	//alt fire
-	if(!g_tactical->integer)
-	{
-		if (ent->client->buttons & BUTTON_ATTACK2) {
-			ent->client->ps.fov = 20;
-			buildup = damage_buildup; //int, for the pic flag
-			ent->client->ps.stats[STAT_ZOOMED] = buildup;
-			damage_buildup += 0.1; //the longer you hold the key, the stronger the blast
-			if(damage_buildup > 3.0)
-				damage_buildup = 3.0;
-			if(damage_buildup < 3.0) //play a sound
-				gi.sound(ent, CHAN_AUTO, gi.soundindex("world/laser1.wav"), 1, ATTN_NORM, 0);
-			return;
-		}
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -850,15 +835,20 @@ void weapon_disruptor_fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
 	VectorSet(offset, 32, 0, ent->viewheight);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_disruptor (ent, start, muzzle, forward, damage*damage_buildup, kick);
 
-	if(!g_tactical->integer)
+	if (ent->client->buttons & BUTTON_ATTACK2 && !instagib->integer) 
 	{
-		//alt fire - reset some things
-		ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
-		ent->client->ps.stats[STAT_ZOOMED] = 0;
-		damage_buildup = 1.0;
+		fire_hover_beam (ent, start, forward, damage/5.0, 0, true);
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
+
+		VectorAdd(start, forward, start);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_CHAINGUNSMOKE);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
 	}
+	else
+		fire_disruptor (ent, start, muzzle, forward, damage*damage_buildup, kick);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -872,8 +862,16 @@ void weapon_disruptor_fire (edict_t *ent)
 	if ( !( (dmflags->integer & DF_INFINITE_AMMO) || instagib->integer
 		|| insta_rockets->integer ) )
 	{
-		ent->client->pers.inventory[ent->client->ammo_index] =
+		if (ent->client->buttons & BUTTON_ATTACK2)
+		{
+			ent->client->pers.inventory[ent->client->ammo_index] =
+					ent->client->pers.inventory[ent->client->ammo_index]-10;
+		}
+		else
+		{
+			ent->client->pers.inventory[ent->client->ammo_index] =
 				ent->client->pers.inventory[ent->client->ammo_index]-5;
+		}
 	}
 }
 

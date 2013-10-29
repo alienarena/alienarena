@@ -1921,7 +1921,6 @@ R_DrawINTERQUAKEMODEL
 
 void R_DrawINTERQUAKEMODEL ( void )
 {
-	int			i;
 	image_t		*skin;
 	float		frame, time;
 

@@ -843,7 +843,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	else
 	{
 		if ((tr.ent != self) && (tr.ent->takedamage))
-			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_DISRUPTOR);
 			if (tr.ent->health > 0)
 			{
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
@@ -868,7 +868,8 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
 
-	if(detonate) {
+	if(detonate) 
+	{
 		//spawn a new ent at end of explosion - and detonate it
 		bomb = G_Spawn();
 		VectorCopy (tr.endpos, bomb->s.origin);
@@ -879,7 +880,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		bomb->think = G_FreeEdict;
 		bomb->classname = "bomb";
 		gi.linkentity (bomb);
-		T_RadiusDamage(bomb, self, 100, NULL, 200, MOD_VAPORALTFIRE, -1);
+		T_RadiusDamage(bomb, self, damage*5.0, NULL, 200, MOD_DISRUPTOR, -1);
 
 		gi.WriteByte (svc_temp_entity);
 		if (bomb->waterlevel)
@@ -893,11 +894,11 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	}
 
 	if (gi.pointcontents (start) & MASK_WATER)
-		{
-			water = true;
-			VectorCopy (start, water_start);
-			content_mask &= ~MASK_WATER;
-		}
+	{
+		water = true;
+		VectorCopy (start, water_start);
+		content_mask &= ~MASK_WATER;
+	}
 
 	tr = gi.trace (start, NULL, NULL, end, self, content_mask);
 
@@ -963,7 +964,6 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 
 	if ( g_antilag->integer)
 		G_UndoTimeShiftFor( self );
-
 }
 
 void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int kick)
@@ -1393,6 +1393,83 @@ void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
 	spud->classname = "seeker"; //to do - make sure bots know to run like hell away from these things
 
 	gi.linkentity (spud);
+}
+
+//save this - might use this for other things(ALTERIA)
+void fire_lightning_blast (edict_t *self)
+{
+	edict_t	*ent;
+	edict_t *target = NULL;
+	edict_t	*ignore;
+	vec3_t	point;
+	vec3_t  start;
+	vec3_t  dir;
+	vec3_t	end;
+	int		dmg;
+	trace_t	tr;
+
+	if (deathmatch->value) {
+		if(excessive->value)
+			dmg = 15;
+		else
+			dmg = 3;
+	}
+	else
+		dmg = 7;
+
+	ent = NULL;
+	while ((ent = findradius(ent, self->s.origin, 256)) != NULL)
+	{
+		if (ent == self)
+			continue;
+
+		if (!ent->takedamage)
+			continue;
+
+		if (!(ent->svflags & SVF_MONSTER) && (!ent->client) && (strcmp(ent->classname, "misc_explobox") != 0))
+			continue;
+
+		VectorMA (ent->absmin, 0.5, ent->size, point);
+
+		VectorSubtract (point, self->s.origin, dir);
+		VectorNormalize (dir);
+
+		ignore = self;
+		VectorCopy (self->s.origin, start);
+		VectorMA (start, 2048, dir, end);
+
+		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+
+		// hurt it if we can
+		if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
+			T_Damage (tr.ent, self, self, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_DISRUPTOR);
+			self->client->resp.weapon_shots[2]++;
+			self->client->resp.weapon_hits[2]++;
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
+
+		// if we hit something that's not a monster or player we're done
+		if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
+		{
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_LASER_SPARKS);
+			gi.WriteByte (4);
+			gi.WritePosition (tr.endpos);
+			gi.WriteDir (tr.plane.normal);
+			gi.WriteByte (self->s.skinnum);
+			gi.multicast (tr.endpos, MULTICAST_PVS);
+		}
+
+		VectorCopy (tr.endpos, start);
+
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_LIGHTNING);
+		gi.WritePosition (self->s.origin);
+		gi.WritePosition (tr.endpos);
+		gi.multicast (self->s.origin, MULTICAST_PHS);
+
+		target = ent;
+	}
 }
 
 /*
