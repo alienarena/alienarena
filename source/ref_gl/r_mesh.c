@@ -1878,7 +1878,6 @@ R_DrawAliasModel - render alias models(using MD2 format)
 */
 void R_DrawAliasModel ( void )
 {
-	int			i;
 	dmdl_t		*paliashdr;
 	vec3_t		bbox[8];
 	image_t		*skin;

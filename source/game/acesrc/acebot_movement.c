@@ -1102,10 +1102,13 @@ attack:
 
 			if (self->client->pers.weapon == FindItem("Alien Disruptor")) 
 			{
-				if(range > 1000) {
-					ucmd->buttons = BUTTON_ATTACK2;
-					use_fuzzy_aim = false;
-					//make it more accurate, since he's sniping
+				if(range > 200) 
+				{
+					c = random();
+					if( c < 0.5)
+						ucmd->buttons = BUTTON_ATTACK2;
+					else
+						ucmd->buttons = BUTTON_ATTACK;
 				}
 				else
 					ucmd->buttons = BUTTON_ATTACK;
