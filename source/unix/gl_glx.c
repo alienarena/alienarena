@@ -998,23 +998,6 @@ void GLimp_AppActivate( qboolean active )
 {
 }
 
-void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
-                             GLsizei width, GLenum format, GLenum type,
-                             const GLvoid *table )
-{
-	byte temptable[256][4];
-	byte *intbl;
-	int i;
-
-	for (intbl = (byte *)table, i = 0; i < 256; i++) {
-		temptable[i][2] = *intbl++;
-		temptable[i][1] = *intbl++;
-		temptable[i][0] = *intbl++;
-		temptable[i][3] = 255;
-	}
-	qgl3DfxSetPaletteEXT((GLuint *)temptable);
-}
-
 /*------------------------------------------------*/
 /* X11 Input Stuff				  */
 /*------------------------------------------------*/
