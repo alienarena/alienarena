@@ -123,6 +123,8 @@ void R_InitImageSubsystem(void)
 		r_alphamasked_anisotropic = Cvar_Get("r_alphamasked_anisotropic", "0", CVAR_ARCHIVE);
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
 	}
+
+	GL_InvalidateTextureState ();
 }
 
 GLenum bFunc1 = -1;
