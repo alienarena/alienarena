@@ -207,6 +207,8 @@ static inline void GL_ForceSelectTexture (void)
 
 void GL_SelectTexture (int target)
 {
+	gl_state.currenttmu_defined = true;
+	
 	if (target == gl_state.currenttmu)
 		return;
 
@@ -233,6 +235,11 @@ void GL_TexEnv( GLenum mode )
 		memset (gl_state.currenttexturemodes, -1, sizeof(gl_state.currenttexturemodes));
 	}
 	
+	// TODO: eliminate every current warning, then change to regular
+	// Com_Printf to prevent new ones from going unnoticed.
+	if (!gl_state.currenttmu_defined)
+		Com_DPrintf ("Warning: GL_TexEnv with undefined TMU!\n");
+	
 	GL_ForceSelectTexture();
 	
 	if ( mode != gl_state.currenttexturemodes[gl_state.currenttmu] )
@@ -245,9 +252,12 @@ void GL_TexEnv( GLenum mode )
 void GL_Bind (int texnum)
 {
 	extern	image_t	*draw_chars;
+	
+	// TODO: eliminate every current warning, then change to regular
+	// Com_Printf to prevent new ones from going unnoticed.
+	if (!gl_state.currenttmu_defined)
+		Com_DPrintf ("Warning: GL_Bind with undefined TMU!\n");
 
-/*	if (gl_nobind->integer && draw_chars)		// performance evaluation option*/
-/*		texnum = draw_chars->texnum;*/
 	if ( gl_state.currenttextures[gl_state.currenttmu] == texnum)
 		return;
 	gl_state.currenttextures[gl_state.currenttmu] = texnum;
@@ -257,10 +267,16 @@ void GL_Bind (int texnum)
 
 void GL_MBind (int target, int texnum)
 {
-	if (gl_state.currenttextures[target] == texnum)
-		return;
-	GL_SelectTexture (target);
-	GL_Bind (texnum);
+	if (gl_state.currenttextures[target] != texnum)
+	{
+		GL_SelectTexture (target);
+		GL_Bind (texnum);
+	}
+	
+	// Since this function may or may not have changed the current texture
+    // unit with GL_SelectTexture, the code that follows should not count on
+    // any particular texture unit being selected.
+	gl_state.currenttmu_defined = false;
 }
 
 // If you need to use the OpenGL texture calls manually for some reason, use
@@ -270,6 +286,7 @@ void GL_InvalidateTextureState (void)
 {
 	gl_state.tmuswitch_done = false;
 	GL_ForceSelectTexture ();
+	gl_state.currenttmu_defined = false;
 	memset (gl_state.currenttexturemodes, -1, sizeof(gl_state.currenttexturemodes));
 	memset (gl_state.currenttextures, -1, sizeof(gl_state.currenttextures));
 }
