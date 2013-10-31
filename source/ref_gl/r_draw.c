@@ -82,6 +82,8 @@ void RefreshFont (void)
 		if(!draw_chars)
 			draw_chars = GL_LoadPic ("***font***", (byte *)data, 16, 16, it_pic, 32);
 	}
+	
+	GL_SelectTexture (0);
 
 	GL_Bind( draw_chars->texnum );
 
@@ -278,6 +280,8 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		r_teamColor = 2;
 
 	R_InitQuadVarrays();
+	
+	GL_SelectTexture (0);
 	
 	if (!rs)
 	{

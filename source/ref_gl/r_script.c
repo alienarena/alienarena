@@ -1304,6 +1304,8 @@ void SetVertexOverbrights (qboolean toggle)
 {
 	if (!r_overbrightbits->value)
 		return;
+	
+	GL_SelectTexture (0);
 
 	if (toggle)//turn on
 	{
@@ -1461,11 +1463,11 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				qglDisable (GL_TEXTURE_2D);
 			else if (stage->anim_count)
 			{
-				GL_Bind (RS_Animate(stage));
+				GL_MBind (0, RS_Animate(stage));
 			}
 			else
 			{
-		 		GL_Bind (stage->texture->texnum);
+		 		GL_MBind (0, stage->texture->texnum);
 			}			
 		}
 				
