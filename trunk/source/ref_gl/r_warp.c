@@ -300,6 +300,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 				(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
 
 			GL_MBind (1, r_distort->texnum);
+			GL_SelectTexture (0);
 		}
 
 		GL_MBind (0, fa->texinfo->image->texnum);
