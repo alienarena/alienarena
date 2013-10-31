@@ -207,7 +207,6 @@ qboolean QGL_Init( const char *dllname )
 	qglPointParameterfEXT = 0;
 	qglPointParameterfvEXT = 0;
 	qglColorTableEXT = 0;
-	qglSelectTextureARB = 0;
 	qglMTexCoord2fARB = 0;
 	qglMTexCoord3fARB = 0;
 	qglMultiTexCoord3fvARB = 0;

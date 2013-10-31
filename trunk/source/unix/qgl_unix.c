@@ -130,7 +130,10 @@ qboolean QGL_Init( const char *dllname )
 	gl_config.allow_cds = true;
 
 #undef N
-#define N(x) qgl ## x = GPA ( "gl"#x );
+#define N(x) \
+	qgl ## x = GPA ( "gl"#x ); \
+	if (qgl ## x == NULL) \
+		Com_Printf ("Could not load gl"#x"!\n");
 #include "../ref_gl/glfuncs.h"
 
     qwglGetProcAddress = qglXGetProcAddress;
@@ -140,8 +143,6 @@ qboolean QGL_Init( const char *dllname )
 	qglPointParameterfEXT = 0;
 	qglPointParameterfvEXT = 0;
 	qglColorTableEXT = 0;
-	qgl3DfxSetPaletteEXT = 0;
-	qglSelectTextureARB = 0;
 	qglMTexCoord2fARB = 0;
 	qglActiveTextureARB = 0;
 	qglClientActiveTextureARB = 0;
