@@ -497,6 +497,7 @@ typedef struct
     qboolean	enabledtmus[MAX_TMUS];
     int         currenttmu;
     qboolean	tmuswitch_done;
+    qboolean    currenttmu_defined;
 
     float       camera_separation;
     qboolean    stereo_enabled;
