@@ -1251,6 +1251,8 @@ void R_DrawBeamSurface ( void )
 
 	VectorSet(mins, 32, 32, 64);
 	VectorSet(maxs, -32, -32, -64);
+	
+	GL_SelectTexture (0);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	qglDepthMask( GL_FALSE );

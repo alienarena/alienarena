@@ -276,7 +276,7 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 	{
 		c_brush_polys++;
 		image = BSP_TextureAnimation (surf->texinfo);
-		GL_Bind (image->texnum);
+		GL_MBind (0, image->texnum);
 		R_RenderWaterPolys(surf, 0, 1, 1);
 		surf = surf->texturechain;
 	}
@@ -359,7 +359,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	
 	for (s=chain ; s ; s=s->texturechain)
 	{
-		GL_Bind(s->texinfo->image->texnum);
+		GL_MBind (0, s->texinfo->image->texnum);
 		c_brush_polys++;
 
 		if (s->texinfo->flags & SURF_TRANS33)

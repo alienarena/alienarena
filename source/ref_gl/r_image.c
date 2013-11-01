@@ -1599,6 +1599,7 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 	{
 nonscrap:
 		image->scrap = false;
+		GL_SelectTexture (0);
 		GL_Bind(image->texnum);
 		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, picmip, type <= it_wall);
