@@ -1548,7 +1548,7 @@ void SCR_ExecuteLayoutString (char *s)
 				SCR_DrawField (x, y, color, numwidth, value, scale);
 			}
 
-			//draw the zoom scope pic if we are using the zoom alt-fire of disruptor
+			//draw the zoom scope pic if we are using the zoom
 			if (cl.frame.playerstate.stats[STAT_ZOOMED])
 			{
 				char zoompic[32];

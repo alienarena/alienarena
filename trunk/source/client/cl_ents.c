@@ -1173,6 +1173,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	vec3_t		offset_down;
 	vec3_t		offset_right;
 
+	if (cl.frame.playerstate.stats[STAT_ZOOMED])
+		return;
+
 	memset (&gun, 0, sizeof(gun));
 
 	gun.model = cl.model_draw[ps->gunindex];
