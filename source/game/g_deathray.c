@@ -365,7 +365,10 @@ void SP_misc_deathray (edict_t *self)
 	sound_sight = gi.soundindex ("misc/deathray/weird2.wav");
 
 	//to do - make different mesh for human weapon
-	self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.md2");
+	if(self->spawnflags & 1)
+		self->s.modelindex = gi.modelindex("models/tactical/human_turret.iqm");
+	else
+		self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.md2");
 
 	VectorSet (self->mins, -16, -16, 0);
 	VectorSet (self->maxs, 16, 16, 48);
