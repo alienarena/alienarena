@@ -836,7 +836,7 @@ void weapon_disruptor_fire (edict_t *ent)
 	VectorSet(offset, 32, 0, ent->viewheight);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if (ent->client->buttons & BUTTON_ATTACK2 && !instagib->integer) 
+	if (ent->client->buttons & BUTTON_ATTACK2 && !instagib->integer && !insta_rockets->integer) 
 	{
 		fire_hover_beam (ent, start, forward, damage/5.0, 0, true);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
