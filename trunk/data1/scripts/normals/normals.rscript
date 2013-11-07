@@ -1474,3 +1474,12 @@ models/tactical/abackupgen
 		glow
 	}
 }
+models/tactical/hturret
+{
+	{
+		map models/tactical/hturret_normal.jpg
+		normalmap
+		map2 models/tactical/hturret_fx.tga
+		glow
+	}
+}
