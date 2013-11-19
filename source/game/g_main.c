@@ -888,15 +888,17 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 	mindEraserTime = level.time;
 
 	//reset level items
-	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
-
+	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++)
+	{
+		int j;
+	
 		if (!ent->inuse)
 			continue;
 		if(ent->client) //not players
 			continue;
 
 		//only items, not triggers, trains, etc
-		for (i=0,item=itemlist ; i<game.num_items ; i++,item++)
+		for (j=0,item=itemlist ; j<game.num_items ; j++,item++)
 		{
 			if (!item->classname)
 				continue;
