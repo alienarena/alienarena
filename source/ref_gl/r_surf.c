@@ -1169,7 +1169,7 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// XXX: we could require gl_bspnormalmaps here, but that would result in
 	// weird inconsistency with only meshes lighting up. Better to fall back
 	// on GLSL for dynamically lit surfaces, even with gl_bspnormalmaps 0.
-	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->integer && gl_dynamic->integer)
+	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_dynamic->integer)
 	{
 		// Dynamic surfaces must have normalmaps, as the old fixed-function
 		// texture-based dynamic lighting system is depreciated.
@@ -1205,7 +1205,7 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	else if(gl_bspnormalmaps->integer
 			&& surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
-			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
+			&& gl_state.glsl_shaders) 
 	{
 		AddToChainPair (surf->texinfo->equiv->glsl_surfaces);
 	}
@@ -1270,7 +1270,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 	BSP_DrawNonGLSLSurfaces(forEnt);
 
 	// render all GLSL surfaces, including normalmapped and dynamically lit
-	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
+	if(gl_state.glsl_shaders && (gl_dynamic->integer || gl_bspnormalmaps->integer))
 	{
 		glUseProgramObjectARB( g_programObj );
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
@@ -1641,7 +1641,7 @@ void R_CalcWorldLights( void )
 	float	dist, weight;
 	int		numlights = 0;
 
-	if(gl_glsl_shaders->integer && gl_state.glsl_shaders)
+	if(gl_state.glsl_shaders && (gl_dynamic->integer || gl_bspnormalmaps->integer))
 	{
 		//get light position relative to player's position
 		VectorClear(lightAdd);
