@@ -626,122 +626,140 @@ extern void	R_LoadGLSLPrograms(void);
 extern unsigned int g_water_program_id;
 
 //glsl
-extern GLhandleARB	g_programObj;
-extern GLhandleARB  g_shadowprogramObj;
-extern GLhandleARB	g_waterprogramObj;
-extern GLhandleARB	g_meshprogramObj;
-extern GLhandleARB  g_glassprogramObj;
-extern GLhandleARB	g_blankmeshprogramObj;
-extern GLhandleARB	g_fbprogramObj;
-extern GLhandleARB	g_blurprogramObj;
-extern GLhandleARB	g_rblurprogramObj;
-extern GLhandleARB  g_dropletsprogramObj;
-extern GLhandleARB  g_godraysprogramObj;
+GLhandleARB g_programObj;
+GLhandleARB g_shadowprogramObj;
+GLhandleARB g_waterprogramObj;
+GLhandleARB g_meshprogramObj;
+GLhandleARB g_vertexonlymeshprogramObj;
+GLhandleARB g_glassprogramObj;
+GLhandleARB g_blankmeshprogramObj;
+GLhandleARB g_fbprogramObj;
+GLhandleARB g_blurprogramObj;
+GLhandleARB g_rblurprogramObj;
+GLhandleARB g_dropletsprogramObj;
+GLhandleARB g_godraysprogramObj;
 
-extern GLhandleARB	g_vertexShader;
-extern GLhandleARB	g_fragmentShader;
+GLhandleARB g_vertexShader;
+GLhandleARB g_fragmentShader;
 
 //standard bsp surfaces
-extern GLuint		g_location_surfTexture;
-extern GLuint		g_location_eyePos;
-extern GLuint		g_tangentSpaceTransform;
-extern GLuint		g_location_heightTexture;
-extern GLuint		g_location_lmTexture;
-extern GLuint		g_location_normalTexture;
-extern GLuint		g_location_bspShadowmapTexture;
-extern GLuint		g_location_bspShadowmapTexture2;
-extern GLuint		g_location_bspShadowmapNum;
-extern GLuint		g_location_fog;
-extern GLuint		g_location_parallax;
-extern GLuint		g_location_dynamic;
-extern GLuint		g_location_shadowmap;
-extern GLuint		g_Location_statshadow;
-extern GLuint		g_location_xOffs;
-extern GLuint		g_location_yOffs;
-extern GLuint		g_location_lightPosition;
-extern GLuint		g_location_staticLightPosition;
-extern GLuint		g_location_lightColour;
-extern GLuint		g_location_lightCutoffSquared;
-extern GLuint		g_location_liquid;
-extern GLuint		g_location_shiny;
-extern GLuint		g_location_rsTime;
-extern GLuint		g_location_liquidTexture;
-extern GLuint		g_location_liquidNormTex;
-extern GLuint		g_location_chromeTex;
+GLuint		g_location_surfTexture;
+GLuint		g_location_eyePos;
+GLuint		g_tangentSpaceTransform;
+GLuint		g_location_heightTexture;
+GLuint		g_location_lmTexture;
+GLuint		g_location_normalTexture;
+GLuint		g_location_bspShadowmapTexture;
+GLuint		g_location_bspShadowmapTexture2;
+GLuint		g_location_fog;
+GLuint		g_location_parallax;
+GLuint		g_location_dynamic;
+GLuint		g_location_shadowmap;
+GLuint		g_Location_statshadow;
+GLuint		g_location_xOffs;
+GLuint		g_location_yOffs;
+GLuint		g_location_lightPosition;
+GLuint		g_location_staticLightPosition;
+GLuint		g_location_lightColour;
+GLuint		g_location_lightCutoffSquared;
+GLuint		g_location_liquid;
+GLuint		g_location_shiny;
+GLuint		g_location_rsTime;
+GLuint		g_location_liquidTexture;
+GLuint		g_location_liquidNormTex;
+GLuint		g_location_chromeTex;
 
-//shadows on white bsp surface
-extern GLuint		g_location_entShadow;
-extern GLuint		g_location_fadeShadow;
-extern GLuint		g_location_xOffset;
-extern GLuint		g_location_yOffset;
+//shadow on white bsp polys
+GLuint		g_location_entShadow;
+GLuint		g_location_fadeShadow;
+GLuint		g_location_xOffset;
+GLuint		g_location_yOffset;
 
 //water
-extern GLuint		g_location_baseTexture;
-extern GLuint		g_location_normTexture;
-extern GLuint		g_location_refTexture;
-extern GLuint		g_location_waterEyePos;
-extern GLuint		g_location_tangentSpaceTransform;
-extern GLuint		g_location_time;
-extern GLuint		g_location_lightPos;
-extern GLuint		g_location_reflect;
-extern GLuint		g_location_trans;
-extern GLuint		g_location_fogamount;
+GLuint		g_location_baseTexture;
+GLuint		g_location_normTexture;
+GLuint		g_location_refTexture;
+GLuint		g_location_waterEyePos;
+GLuint		g_location_tangentSpaceTransform;
+GLuint		g_location_time;
+GLuint		g_location_lightPos;
+GLuint		g_location_reflect;
+GLuint		g_location_trans;
+GLuint		g_location_fogamount;
+
+#define MESH_UNIFORM(name) \
+	((fragmentshader)?g_location_##name:g_location_vo_##name)
 
 //mesh
-extern GLuint		g_location_meshlightPosition;
-extern GLuint		g_location_baseTex;
-extern GLuint		g_location_normTex;
-extern GLuint		g_location_fxTex;
-extern GLuint		g_location_fx2Tex;
-extern GLuint		g_location_color;
-extern GLuint		g_location_meshNormal;
-extern GLuint		g_location_meshTime;
-extern GLuint		g_location_meshFog;
-extern GLuint		g_location_useFX;
-extern GLuint		g_location_useGlow;
-extern GLuint		g_location_useShell;
-extern GLuint		g_location_useCube;
-extern GLuint		g_location_useGPUanim;
-extern GLuint		g_location_outframe;
-extern GLuint		g_location_fromView;
+GLuint		g_location_meshlightPosition;
+GLuint		g_location_baseTex;
+GLuint		g_location_normTex;
+GLuint		g_location_fxTex;
+GLuint		g_location_fx2Tex;
+GLuint		g_location_color;
+GLuint		g_location_meshTime;
+GLuint		g_location_meshFog;
+GLuint		g_location_useFX;
+GLuint		g_location_useGlow;
+GLuint		g_location_useShell;
+GLuint		g_location_useCube;
+GLuint		g_location_useGPUanim;
+GLuint		g_location_outframe;
+GLuint		g_location_fromView;
+
+//vertex-only mesh
+GLuint		g_location_vo_meshlightPosition;
+GLuint		g_location_vo_baseTex;
+GLuint		g_location_vo_normTex;
+GLuint		g_location_vo_fxTex;
+GLuint		g_location_vo_fx2Tex;
+GLuint		g_location_vo_color;
+GLuint		g_location_vo_meshTime;
+GLuint		g_location_vo_meshFog;
+GLuint		g_location_vo_useFX;
+GLuint		g_location_vo_useGlow;
+GLuint		g_location_vo_useShell;
+GLuint		g_location_vo_useCube;
+GLuint		g_location_vo_useGPUanim;
+GLuint		g_location_vo_outframe;
+GLuint		g_location_vo_fromView;
 
 //glass
-extern GLuint		g_location_gmirTexture;
-extern GLuint		g_location_grefTexture;
-extern GLuint		g_location_gLightPos;
-extern GLuint		g_location_gFog;
-extern GLuint		g_location_gOutframe;
+GLuint		g_location_gmirTexture;
+GLuint		g_location_grefTexture;
+GLuint		g_location_gLightPos;
+GLuint		g_location_gFog;
+GLuint		g_location_gOutframe;
 
 //blank mesh
-extern GLuint		g_location_bmOutframe;
+GLuint		g_location_bmOutframe;
 
 //fullscreen distortion effects
-extern GLuint		g_location_framebuffTex;
-extern GLuint		g_location_distortTex;
-extern GLuint		g_location_dParams;
-extern GLuint		g_location_fxPos;
+GLuint		g_location_framebuffTex;
+GLuint		g_location_distortTex;
+GLuint		g_location_dParams;
+GLuint		g_location_fxPos;
 
 //gaussian blur
-extern GLuint		g_location_scale;
-extern GLuint		g_location_source;
+GLuint		g_location_scale;
+GLuint		g_location_source;
 
 //radial blur	
-extern GLuint		g_location_rscale;
-extern GLuint		g_location_rsource;
-extern GLuint		g_location_rparams;
+GLuint		g_location_rscale;
+GLuint		g_location_rsource;
+GLuint		g_location_rparams;
 
 //water droplets
-extern GLuint		g_location_drSource;
-extern GLuint		g_location_drTex;
-extern GLuint		g_location_drTime;
-extern GLuint		g_location_drParams;
+GLuint		g_location_drSource;
+GLuint		g_location_drTex;
+GLuint		g_location_drTime;
+GLuint		g_location_drParams;
 
 //god rays
-extern GLuint		g_location_lightPositionOnScreen;
-extern GLuint		g_location_sunTex;
-extern GLuint		g_location_godrayScreenAspect;
-extern GLuint		g_location_sunRadius;
-
+GLuint		g_location_lightPositionOnScreen;
+GLuint		g_location_sunTex;
+GLuint		g_location_godrayScreenAspect;
+GLuint		g_location_sunRadius;
 //MD2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 

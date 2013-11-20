@@ -59,121 +59,6 @@ PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB = NULL;
 PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
 PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
 
-GLhandleARB g_programObj;
-GLhandleARB g_shadowprogramObj;
-GLhandleARB g_waterprogramObj;
-GLhandleARB g_meshprogramObj;
-GLhandleARB g_glassprogramObj;
-GLhandleARB g_blankmeshprogramObj;
-GLhandleARB g_fbprogramObj;
-GLhandleARB g_blurprogramObj;
-GLhandleARB g_rblurprogramObj;
-GLhandleARB g_dropletsprogramObj;
-GLhandleARB g_godraysprogramObj;
-
-GLhandleARB g_vertexShader;
-GLhandleARB g_fragmentShader;
-
-//standard bsp
-GLuint	  g_location_surfTexture;
-GLuint	  g_location_eyePos;
-GLuint		g_tangentSpaceTransform;
-GLuint	  g_location_heightTexture;
-GLuint		g_location_lmTexture;
-GLuint		g_location_normalTexture;
-GLuint		g_location_bspShadowmapTexture;
-GLuint		g_location_bspShadowmapTexture2;
-GLuint		g_location_fog;
-GLuint		g_location_parallax;
-GLuint		g_location_dynamic;
-GLuint		g_location_shadowmap;
-GLuint		g_Location_statshadow;
-GLuint		g_location_xOffs;
-GLuint		g_location_yOffs;
-GLuint		g_location_lightPosition;
-GLuint		g_location_staticLightPosition;
-GLuint		g_location_lightColour;
-GLuint		g_location_lightCutoffSquared;
-GLuint		g_location_liquid;
-GLuint		g_location_shiny;
-GLuint		g_location_rsTime;
-GLuint		g_location_liquidTexture;
-GLuint		g_location_liquidNormTex;
-GLuint		g_location_chromeTex;
-
-//shadow on white bsp polys
-GLuint		g_location_entShadow;
-GLuint		g_location_fadeShadow;
-GLuint		g_location_xOffset;
-GLuint		g_location_yOffset;
-
-//water
-GLuint		g_location_baseTexture;
-GLuint		g_location_normTexture;
-GLuint		g_location_refTexture;
-GLuint		g_location_waterEyePos;
-GLuint		g_location_tangentSpaceTransform;
-GLuint		g_location_time;
-GLuint		g_location_lightPos;
-GLuint		g_location_reflect;
-GLuint		g_location_trans;
-GLuint		g_location_fogamount;
-
-//mesh
-GLuint		g_location_meshlightPosition;
-GLuint		g_location_baseTex;
-GLuint		g_location_normTex;
-GLuint		g_location_fxTex;
-GLuint		g_location_fx2Tex;
-GLuint		g_location_color;
-GLuint		g_location_meshNormal;
-GLuint		g_location_meshTime;
-GLuint		g_location_meshFog;
-GLuint		g_location_useFX;
-GLuint		g_location_useGlow;
-GLuint		g_location_useShell;
-GLuint		g_location_useCube;
-GLuint		g_location_useGPUanim;
-GLuint		g_location_outframe;
-GLuint		g_location_fromView;
-
-//glass
-GLuint		g_location_gmirTexture;
-GLuint		g_location_grefTexture;
-GLuint		g_location_gLightPos;
-GLuint		g_location_gFog;
-GLuint		g_location_gOutframe;
-
-//blank mesh
-GLuint		g_location_bmOutframe;
-
-//fullscreen distortion effects
-GLuint		g_location_framebuffTex;
-GLuint		g_location_distortTex;
-GLuint		g_location_dParams;
-GLuint		g_location_fxPos;
-
-//gaussian blur
-GLuint		g_location_scale;
-GLuint		g_location_source;
-
-//radial blur	
-GLuint		g_location_rscale;
-GLuint		g_location_rsource;
-GLuint		g_location_rparams;
-
-//water droplets
-GLuint		g_location_drSource;
-GLuint		g_location_drTex;
-GLuint		g_location_drTime;
-GLuint		g_location_drParams;
-
-//god rays
-GLuint		g_location_lightPositionOnScreen;
-GLuint		g_location_sunTex;
-GLuint		g_location_godrayScreenAspect;
-GLuint		g_location_sunRadius;
-
 //doesn't work with ARB shaders, unfortunately, due to the #comments
 #define STRINGIFY(...) #__VA_ARGS__
 
@@ -1175,6 +1060,8 @@ static char mesh_vertex_program[] = STRINGIFY (
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
 	   }
+	   
+	   gl_FrontColor = gl_Color;
 	}
 );
 
@@ -1844,22 +1731,21 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	if( nResult )
 		glAttachObjectARB( *program, g_vertexShader );
 	else
-	{
 		Com_Printf("...%s Vertex Shader Compile Error\n", name);
-	}
 	
-	g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-	shaderStrings[1] = fragment;
-	
-	glShaderSourceARB( g_fragmentShader, 2, shaderStrings, NULL );
-	glCompileShaderARB( g_fragmentShader );
-	glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-	if( nResult )
-		glAttachObjectARB( *program, g_fragmentShader );
-	else
+	if (fragment != NULL)
 	{
-		Com_Printf("...%s Fragment Shader Compile Error\n", name);
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[1] = fragment;
+	
+		glShaderSourceARB( g_fragmentShader, 2, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( *program, g_fragmentShader );
+		else
+			Com_Printf("...%s Fragment Shader Compile Error\n", name);
 	}
 	
 	for (i = 0; i < num_standard_attributes; i++)
@@ -2012,7 +1898,27 @@ void R_LoadGLSLPrograms(void)
 		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
 		g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
-
+		
+		//vertex-only meshes
+		R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_vertexonlymeshprogramObj);
+		
+		// Locate some parameters by name so we can set them later...
+		g_location_vo_meshlightPosition = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lightPos" );
+		g_location_vo_baseTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "baseTex" );
+		g_location_vo_normTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "normalTex" );
+		g_location_vo_fxTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fxTex" );
+		g_location_vo_fx2Tex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fx2Tex" );
+		g_location_vo_color = glGetUniformLocationARB(	g_vertexonlymeshprogramObj, "baseColor" );
+		g_location_vo_meshTime = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "time" );
+		g_location_vo_meshFog = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "FOG" );
+		g_location_vo_useFX = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useFX" );
+		g_location_vo_useGlow = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useGlow" );
+		g_location_vo_useShell = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useShell" );
+		g_location_vo_useCube = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useCube" );
+		g_location_vo_useGPUanim = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "GPUANIM");
+		g_location_vo_outframe = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "bonemats");
+		g_location_vo_fromView = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fromView");
+		
 		//Glass
 		R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_glassprogramObj);
 

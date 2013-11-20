@@ -1349,7 +1349,7 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
 }
 
 void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varray, vec3_t lightcolor);
-void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor);
+void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader);
 
 inline void IQM_DrawVBO (qboolean tangents)
 {
@@ -1627,7 +1627,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 	}
 	else if(rs && rs->stage->normalmap && gl_normalmaps->integer && gl_glsl_shaders->integer && gl_state.glsl_shaders)
 	{	
-		R_Mesh_SetupGLSL (skinnum, rs, lightcolor);		
+		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, true);		
 
 		if(!has_vbo)
 		{
