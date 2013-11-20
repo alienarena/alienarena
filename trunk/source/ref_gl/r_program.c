@@ -311,7 +311,7 @@ void R_LoadARBPrograms(void)
 //GLSL Programs
 
 //BSP Surfaces
-static char bsp_vertex_program[] = "#version 120\n" STRINGIFY (
+static char bsp_vertex_program[] = STRINGIFY (
 	uniform mat3 tangentSpaceTransform;
 	uniform vec3 Eye;
 	uniform vec3 lightPosition;
@@ -376,7 +376,7 @@ static char bsp_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
+static char bsp_fragment_program[] = STRINGIFY (
 	uniform sampler2D surfTexture;
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
@@ -656,7 +656,7 @@ static char bsp_fragment_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char bsp_fragment_program_ATI[] = "#version 120\n" STRINGIFY (
+static char bsp_fragment_program_ATI[] = STRINGIFY (
 	uniform sampler2D surfTexture;
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
@@ -948,7 +948,7 @@ static char bsp_fragment_program_ATI[] = "#version 120\n" STRINGIFY (
 
 
 //SHADOWS
-static char shadow_vertex_program[] = "#version 120\n" STRINGIFY (		
+static char shadow_vertex_program[] = STRINGIFY (		
 	varying vec4 ShadowCoord;
 
 	void main( void )
@@ -961,7 +961,7 @@ static char shadow_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
+static char shadow_fragment_program[] = STRINGIFY (
 
 	uniform sampler2DShadow StatShadowMap;
 	uniform float fadeShadow;
@@ -1005,7 +1005,7 @@ static char shadow_fragment_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char shadow_fragment_program_ATI[] = "#version 120\n" STRINGIFY (
+static char shadow_fragment_program_ATI[] = STRINGIFY (
 
 	uniform sampler2D StatShadowMap;
 	uniform float fadeShadow;
@@ -1061,7 +1061,7 @@ static char shadow_fragment_program_ATI[] = "#version 120\n" STRINGIFY (
 
 
 //MESHES
-static char mesh_vertex_program[] = "#version 120\n" STRINGIFY (
+static char mesh_vertex_program[] = STRINGIFY (
 
 	uniform vec3 lightPos;
 	uniform float time;
@@ -1178,7 +1178,7 @@ static char mesh_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
+static char mesh_fragment_program[] = STRINGIFY (
 
 	uniform sampler2D baseTex;
 	uniform sampler2D normalTex;
@@ -1318,7 +1318,7 @@ static char mesh_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 //GLASS 
-static char glass_vertex_program[] = "#version 120\n" STRINGIFY (
+static char glass_vertex_program[] = STRINGIFY (
 
 	uniform mat3x4 bonemats[70];
 	uniform int FOG;
@@ -1356,7 +1356,7 @@ static char glass_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char glass_fragment_program[] = "#version 120\n" STRINGIFY (
+static char glass_fragment_program[] = STRINGIFY (
 
 	uniform vec3 LightPos;
 	uniform sampler2D refTexture;
@@ -1391,7 +1391,7 @@ static char glass_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 //NO TEXTURE 
-static char blankmesh_vertex_program[] = "#version 120\n" STRINGIFY (
+static char blankmesh_vertex_program[] = STRINGIFY (
 	uniform mat3x4 bonemats[70];
 
 	attribute vec4 weights;
@@ -1408,7 +1408,7 @@ static char blankmesh_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char blankmesh_fragment_program[] = "#version 120\n" STRINGIFY (
+static char blankmesh_fragment_program[] = STRINGIFY (
 	void main (void)
 	{		
 		gl_FragColor = vec4(1.0);
@@ -1416,7 +1416,7 @@ static char blankmesh_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 
-static char water_vertex_program[] = "#version 120\n" STRINGIFY (
+static char water_vertex_program[] = STRINGIFY (
 	uniform mat3 tangentSpaceTransform;
 	uniform vec3 Eye; 
 	uniform vec3 LightPos;
@@ -1476,7 +1476,7 @@ static char water_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char water_fragment_program[] = "#version 120\n" STRINGIFY (
+static char water_fragment_program[] = STRINGIFY (
 	varying vec3 lightDir;
 	varying vec3 eyeDir;
 	varying float FresRatio;
@@ -1521,7 +1521,7 @@ static char water_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 //FRAMEBUFFER DISTORTION EFFECTS
-static char fb_vertex_program[] = "#version 120\n" STRINGIFY (
+static char fb_vertex_program[] = STRINGIFY (
 	void main( void )
 	{
 		gl_Position = ftransform();
@@ -1530,7 +1530,7 @@ static char fb_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char fb_fragment_program[] = "#version 120\n" STRINGIFY (
+static char fb_fragment_program[] = STRINGIFY (
 	uniform sampler2D fbtexture;
 	uniform sampler2D distortiontexture;
 	uniform vec2 dParams;
@@ -1571,7 +1571,7 @@ static char fb_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 //GAUSSIAN BLUR EFFECTS
-static char blur_vertex_program[] = "#version 120\n" STRINGIFY (
+static char blur_vertex_program[] = STRINGIFY (
 	varying vec2	texcoord1, texcoord2, texcoord3,
 					texcoord4, texcoord5, texcoord6,
 					texcoord7, texcoord8, texcoord9;
@@ -1596,7 +1596,7 @@ static char blur_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char blur_fragment_program[] = "#version 120\n" STRINGIFY (
+static char blur_fragment_program[] = STRINGIFY (
 	varying vec2	texcoord1, texcoord2, texcoord3,
 					texcoord4, texcoord5, texcoord6,
 					texcoord7, texcoord8, texcoord9;
@@ -1622,7 +1622,7 @@ static char blur_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 //RADIAL BLUR EFFECTS // xy = radial center screen space position, z = radius attenuation, w = blur strength
-static char rblur_vertex_program[] = "#version 120\n" STRINGIFY (
+static char rblur_vertex_program[] = STRINGIFY (
 	void main()
 	{
 		gl_Position = ftransform();
@@ -1630,7 +1630,7 @@ static char rblur_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char rblur_fragment_program[] = "#version 120\n" STRINGIFY (
+static char rblur_fragment_program[] = STRINGIFY (
 	uniform sampler2D rtextureSource;
 	uniform vec3 radialBlurParams;
 	uniform vec3 rblurScale;
@@ -1682,7 +1682,7 @@ static char rblur_fragment_program[] = "#version 120\n" STRINGIFY (
 );
 
 //WATER DROPLETS
-static char droplets_vertex_program[] = "#version 120\n" STRINGIFY (
+static char droplets_vertex_program[] = STRINGIFY (
 	uniform float drTime;
 
 	void main( void )
@@ -1702,7 +1702,7 @@ static char droplets_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char droplets_fragment_program[] = "#version 120\n" STRINGIFY (
+static char droplets_fragment_program[] = STRINGIFY (
 	uniform sampler2D drSource;
 	uniform sampler2D drTex;
 	uniform vec2 drParams;
@@ -1743,7 +1743,7 @@ static char droplets_fragment_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char rgodrays_vertex_program[] = "#version 120\n" STRINGIFY (
+static char rgodrays_vertex_program[] = STRINGIFY (
 	void main()
 	{
 		gl_TexCoord[0] =  gl_MultiTexCoord0;
@@ -1751,7 +1751,7 @@ static char rgodrays_vertex_program[] = "#version 120\n" STRINGIFY (
 	}
 );
 
-static char rgodrays_fragment_program[] = "#version 120\n" STRINGIFY (
+static char rgodrays_fragment_program[] = STRINGIFY (
 	uniform vec2 lightPositionOnScreen;
 	uniform sampler2D sunTexture;
 	uniform float aspectRatio; //width/height
@@ -1827,15 +1827,17 @@ const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_at
 void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
 {
 	char		str[4096];
-	const char	*shaderStrings[1];
+	const char	*shaderStrings[2];
 	int			nResult;
 	int			i;
+	
+	shaderStrings[0] = "#version 120\n";
 	
 	*program = glCreateProgramObjectARB();
 	
 	g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-	shaderStrings[0] = vertex;
-	glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+	shaderStrings[1] = vertex;
+	glShaderSourceARB( g_vertexShader, 2, shaderStrings, NULL );
 	glCompileShaderARB( g_vertexShader);
 	glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
@@ -1847,9 +1849,9 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	}
 	
 	g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-	shaderStrings[0] = fragment;
+	shaderStrings[1] = fragment;
 	
-	glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+	glShaderSourceARB( g_fragmentShader, 2, shaderStrings, NULL );
 	glCompileShaderARB( g_fragmentShader );
 	glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
