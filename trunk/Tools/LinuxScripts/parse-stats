@@ -14,7 +14,7 @@ my @suicides = ("suicides", "cratered", "was squished", "sank like a rock", "mel
                 "killed herself", "killed himself");
 my $suicides_re = join '|', @suicides;
 
-my @gameover = ("Timelimit hit.", "Blue Team wins!", "Red Team wins!", "Fraglimit hit.", "Server disconnected");
+my @gameover = ("Timelimit hit.", "Blue Team wins!", "Red Team wins!", "Fraglimit hit.", "Server disconnected", "FIGHT!");
 my $gameover_re = join '|', @gameover;
 
 my @ignore = ('\.\.\.', "GL_", "pinging ", "Already have: ", "Out of item", '[^[:print:]]', '\d+\.\d+\.\d+\.\d+:\d+');
@@ -106,7 +106,13 @@ Never exits intentionally. When game exits, (STDIN EOF) it will print the last s
 
 =head1 EXAMPLES
 
-alienarena | ./parse-stats
+To run from game output requires the unbuffer utility on Linux (comes with expect)
+
+C<unbuffer alienarena | ./parse-stats>
+
+To run from a console log:
+
+C<./parse-stats console.log>
 
 =head1 BUGS
 
