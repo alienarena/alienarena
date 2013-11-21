@@ -437,7 +437,6 @@ typedef struct model_s
 
 	//iqm skeletal model info
 	unsigned int	version;
-	mvertex_t		*animatevertexes;
 	int				num_joints;
 	iqmjoint_t		*joints;
 	iqmjoint2_t		*joints2;
@@ -448,9 +447,7 @@ typedef struct model_s
 	int				num_triangles;
 	iqmtriangle_t	*tris;
 	mnormal_t		*normal;
-	mnormal_t		*animatenormal;
 	mtangent_t		*tangent;
-	mtangent_t		*animatetangent;
 	unsigned char	*blendindexes;
 	unsigned char	*blendweights;
 	char			skinname[MAX_QPATH];

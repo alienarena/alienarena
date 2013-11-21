@@ -49,7 +49,6 @@ cvar_t	*gl_normalmaps;
 cvar_t	*gl_bspnormalmaps;
 cvar_t  *gl_shadowmaps;
 cvar_t	*gl_arb_fragment_program;
-cvar_t	*gl_glsl_shaders;
 cvar_t	*gl_fog;
 
 entity_t	*currententity;
@@ -114,8 +113,6 @@ cvar_t	*r_overbrightbits;
 cvar_t	*gl_vlights;
 
 cvar_t	*gl_nosubimage;
-
-cvar_t	*gl_usevbo;
 
 cvar_t	*gl_particle_min_size;
 cvar_t	*gl_particle_max_size;
@@ -1233,7 +1230,7 @@ void R_Register( void )
 	gl_skymip = Cvar_Get ("gl_skymip", "0", 0);
 	gl_showtris = Cvar_Get ("gl_showtris", "0", 0);
 	gl_showpolys = Cvar_Get ("gl_showpolys", "0", CVARDOC_INT);
-	Cvar_Describe (gl_showpolys, "Useful tool for mappers. 1 means show world polygon outlines for visible surfaces. 2 means show outlines for all surfaces in the PVS, even if they are hidden. Only works with gl_usevbo 0.");
+	Cvar_Describe (gl_showpolys, "Useful tool for mappers. 1 means show world polygon outlines for visible surfaces. 2 means show outlines for all surfaces in the PVS, even if they are hidden. FIXME: currently broken.");
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	Cvar_Describe (gl_finish, "Waits for graphics driver to finish drawing each frame before drawing the next one. Hurts performance but may improve smoothness on very low-end machines.");
 	gl_clear = Cvar_Get ("gl_clear", "0", CVARDOC_BOOL);
@@ -1258,9 +1255,6 @@ void R_Register( void )
 	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
-
-	gl_usevbo = Cvar_Get("gl_usevbo", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
-	Cvar_Describe (gl_usevbo, "Use VBOs for mesh and world geometry. Leave this on unless you've got a very old graphics card.");
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
@@ -1320,7 +1314,6 @@ void R_Register( void )
 	Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE);
 	Cvar_Get( "vid_width", "640", CVAR_ARCHIVE);
 	Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
-	Cvar_Get( "gl_glsl_shaders", "1", CVAR_ARCHIVE);
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );
@@ -1329,6 +1322,7 @@ void R_Register( void )
 }
 
 /*
+
 ==================
 R_SetMode
 ==================
@@ -1598,8 +1592,6 @@ int R_Init( void *hinstance, void *hWnd )
 	 */
 	gl_state.fragment_program = false;
 	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE);
-	gl_state.glsl_shaders = false;
-	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE);
 	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	Cvar_SetValue("r_firstrun", 1);
 	R_SetMaxPerformance();
@@ -1761,11 +1753,9 @@ void R_Shutdown (void)
 	/*
 	** shutdown our QGL subsystem
 	*/
-	if(gl_state.glsl_shaders) {
-		glDeleteObjectARB( g_vertexShader );
-		glDeleteObjectARB( g_fragmentShader );
-		glDeleteObjectARB( g_programObj );
-	}
+	glDeleteObjectARB( g_vertexShader );
+	glDeleteObjectARB( g_fragmentShader );
+	glDeleteObjectARB( g_programObj );
 
 	QGL_Shutdown();
 

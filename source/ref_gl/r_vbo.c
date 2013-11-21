@@ -42,11 +42,6 @@ GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLs
 
 void R_LoadVBOSubsystem(void)
 {
-	gl_state.vbo = false;
-
-	if(!gl_usevbo->integer)
-		return;
-
 	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
 	{
 		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
@@ -58,13 +53,12 @@ void R_LoadVBOSubsystem(void)
 		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
 		{
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
-			gl_state.vbo = true;
 			VB_VCInit();
 		}
-	} else
+	}
+	else
 	{
-		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
-		gl_state.vbo = false;
+		Com_Error (ERR_FATAL, "...GL_ARB_vertex_buffer_object not found\n");
 	}
 }
 
@@ -82,12 +76,27 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	
 	// XXX: for future reference, the glDrawRangeElements code was last seen
 	// here at revision 3246.
-	if (gl_state.vbo)
+	for (trinum = 1, l = 0, m = 0, n = 0; trinum < p->numverts-1; trinum++)
 	{
-		for (trinum = 1, l = 0, m = 0, n = 0; trinum < p->numverts-1; trinum++)
+		v = p->verts[0];
+		
+		// copy in vertex data
+		map[n++] = v[0];
+		map[n++] = v[1];
+		map[n++] = v[2];
+
+		// world texture coords
+		map2[l++] = v[3];
+		map2[l++] = v[4];
+
+		// lightmap texture coords
+		map3[m++] = v[5];
+		map3[m++] = v[6];
+		
+		for (i = trinum; i < trinum+2; i++)
 		{
-			v = p->verts[0];
-			
+			v = p->verts[i];
+		
 			// copy in vertex data
 			map[n++] = v[0];
 			map[n++] = v[1];
@@ -100,43 +109,25 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 			// lightmap texture coords
 			map3[m++] = v[5];
 			map3[m++] = v[6];
-			
-			for (i = trinum; i < trinum+2; i++)
-			{
-				v = p->verts[i];
-			
-				// copy in vertex data
-				map[n++] = v[0];
-				map[n++] = v[1];
-				map[n++] = v[2];
-
-				// world texture coords
-				map2[l++] = v[3];
-				map2[l++] = v[4];
-
-				// lightmap texture coords
-				map3[m++] = v[5];
-				map3[m++] = v[6];
-			}
 		}
-		
-		xyz_size = n*sizeof(float);
-		st_size = l*sizeof(float);
-		lm_size = m*sizeof(float);
-
-		surf->has_vbo = true;
-		surf->vbo_first_vert = currVertexNum;
-		surf->vbo_num_verts = 3*(p->numverts-2);
-		currVertexNum += surf->vbo_num_verts;
-		
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_lm_pos, lm_size, &map3);  
-
-		vbo_xyz_pos += xyz_size;
-		vbo_st_pos += st_size;
-		vbo_lm_pos += lm_size;
 	}
+	
+	xyz_size = n*sizeof(float);
+	st_size = l*sizeof(float);
+	lm_size = m*sizeof(float);
+
+	surf->has_vbo = true;
+	surf->vbo_first_vert = currVertexNum;
+	surf->vbo_num_verts = 3*(p->numverts-2);
+	currVertexNum += surf->vbo_num_verts;
+	
+	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
+	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
+	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_lm_pos, lm_size, &map3);  
+
+	vbo_xyz_pos += xyz_size;
+	vbo_st_pos += st_size;
+	vbo_lm_pos += lm_size;
 }
 
 void VB_BuildWorldVBO(void)
@@ -323,9 +314,6 @@ void R_VCFreeFrame()
 {
 	vertCache_t	*cache, *next;
 
-	if (!gl_state.vbo)
-		return;
-
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
 	{
 		next = cache->next;
@@ -338,9 +326,6 @@ void R_VCFreeFrame()
 void VB_VCInit()
 {
 	int	i;
-
-	if (!gl_state.vbo)
-		return;
 
 	//clear out previous buffer
 	qglDeleteBuffersARB(1, &vboId);
@@ -372,9 +357,6 @@ void R_VCShutdown()
 {
 	int			i;
 	vertCache_t	*cache, *next;
-
-	if (!gl_state.vbo)
-		return;
 
 	//delete buffers
 	qglDeleteBuffersARB(1, &vboId);

@@ -2417,13 +2417,6 @@ option_name_t video_option_names[] =
 	},
 	{
 		option_spincontrol,
-		"gl_glsl_shaders",
-		"GLSL shaders",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
 		"cl_paindist",
 		"pain distortion fx",
 		"GLSL must be enabled for this to take effect",

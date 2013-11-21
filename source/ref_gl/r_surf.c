@@ -353,6 +353,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
 	
+	GL_SelectTexture (0);
 	qglDepthMask ( GL_FALSE );
 	qglEnable (GL_BLEND);
 	GL_TexEnv( GL_MODULATE );
@@ -402,12 +403,14 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 				}
 			}
 			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
+			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
 		}
 		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
 		{
 			RS_Surface(s);
+			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
 		}
@@ -415,6 +418,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			BSP_DrawAlphaPoly (s, s->texinfo->flags);
 	}
 
+	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 	qglColor4f (1,1,1,1);
 	qglDisable (GL_BLEND);
@@ -836,7 +840,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
 	}
 	
-	if(gl_state.vbo && surf->has_vbo) 
+	if(surf->has_vbo) 
 	{
 		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 	}
@@ -1169,7 +1173,7 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// XXX: we could require gl_bspnormalmaps here, but that would result in
 	// weird inconsistency with only meshes lighting up. Better to fall back
 	// on GLSL for dynamically lit surfaces, even with gl_bspnormalmaps 0.
-	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_dynamic->integer)
+	if(r_newrefdef.num_dlights && gl_dynamic->integer)
 	{
 		// Dynamic surfaces must have normalmaps, as the old fixed-function
 		// texture-based dynamic lighting system is depreciated.
@@ -1204,8 +1208,7 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	}
 	else if(gl_bspnormalmaps->integer
 			&& surf->texinfo->has_heightmap
-			&& surf->texinfo->has_normalmap
-			&& gl_state.glsl_shaders) 
+			&& surf->texinfo->has_normalmap) 
 	{
 		AddToChainPair (surf->texinfo->equiv->glsl_surfaces);
 	}
@@ -1270,7 +1273,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 	BSP_DrawNonGLSLSurfaces(forEnt);
 
 	// render all GLSL surfaces, including normalmapped and dynamically lit
-	if(gl_state.glsl_shaders && (gl_dynamic->integer || gl_bspnormalmaps->integer))
+	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
 	{
 		glUseProgramObjectARB( g_programObj );
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
@@ -1641,7 +1644,7 @@ void R_CalcWorldLights( void )
 	float	dist, weight;
 	int		numlights = 0;
 
-	if(gl_state.glsl_shaders && (gl_dynamic->integer || gl_bspnormalmaps->integer))
+	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
 	{
 		//get light position relative to player's position
 		VectorClear(lightAdd);

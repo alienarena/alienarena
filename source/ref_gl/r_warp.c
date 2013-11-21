@@ -228,8 +228,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	else
 		scroll = 0.0f;
 	  
-	if(gl_state.glsl_shaders && gl_glsl_shaders->value
-		&& fa->texinfo->has_normalmap)
+	if(fa->texinfo->has_normalmap)
 	{
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
@@ -287,6 +286,8 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		return;
 	}
 	else {
+		// TODO: either add a CVAR specifically to use the ARB shader here,
+		// or just get rid of this all entirely.
 
 		if (gl_state.fragment_program && fa->texinfo->has_normalmap)
 		{

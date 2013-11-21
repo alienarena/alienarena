@@ -706,6 +706,7 @@ void GL_SetDefaultState( void )
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 
 	if ( qglPointParameterfEXT )

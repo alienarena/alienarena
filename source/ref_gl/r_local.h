@@ -203,7 +203,6 @@ extern  cvar_t		*r_minimap_style;
 extern	cvar_t	*gl_mirror;
 
 extern	cvar_t	*gl_arb_fragment_program;
-extern	cvar_t	*gl_glsl_shaders;
 
 extern	cvar_t	*sys_affinity;
 extern	cvar_t	*sys_priority;
@@ -506,10 +505,8 @@ typedef struct
     qboolean    blend;
     qboolean    texgen;
     qboolean    fragment_program;
-    qboolean    glsl_shaders;
     qboolean    separateStencil;
     qboolean    stencil_wrap;
-    qboolean    vbo;
     qboolean    fbo;
     qboolean    hasFBOblit;
 

@@ -317,8 +317,7 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
 	if(count < 1)
 		return; //do not send arrays of zero size to GPU!
 
-	if(gl_state.vbo)
-		GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
+	GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
 
 	qglDrawArrays (mode, first, count);
 }

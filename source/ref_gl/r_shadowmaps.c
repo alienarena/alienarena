@@ -1116,7 +1116,7 @@ void R_DrawEntityCaster(entity_t *ent)
 
 void R_GenerateEntityShadow( void )
 {
-	if(gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+	if(gl_shadowmaps->integer && gl_normalmaps->integer)
 	{
 		vec3_t dist, tmp;
 		float rad;
@@ -1252,7 +1252,7 @@ void R_DrawRagdollCaster(int RagDollID)
 
 void R_GenerateRagdollShadow( int RagDollID )
 {
-	if(gl_shadowmaps->integer && gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+	if(gl_shadowmaps->integer && gl_normalmaps->integer)
 	{
 		vec3_t dist, tmp;
 		float rad;
