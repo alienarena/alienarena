@@ -1695,6 +1695,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			IQM_DrawFrame(skin->texnum, false, 0.33);
 
+	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
 

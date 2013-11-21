@@ -691,6 +691,7 @@ void GL_SetDefaultState( void )
 
 	qglColor4f (1,1,1,1);
 
+	GL_SelectTexture (0);
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	qglShadeModel (GL_FLAT);
 
@@ -706,7 +707,6 @@ void GL_SetDefaultState( void )
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 
 	if ( qglPointParameterfEXT )
