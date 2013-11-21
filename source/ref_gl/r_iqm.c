@@ -1641,15 +1641,15 @@ void R_DrawINTERQUAKEMODEL ( void )
 	}
 
 	// select skin
-	if (currententity->skin) {
+	if (currententity->skin) 
 		skin = currententity->skin;
-	}
 	else
-	{
 		skin = currentmodel->skins[0];
-	}
 	if (!skin)
 		skin = r_notexture;	// fallback...
+	
+	GL_SelectTexture (0);
+	
 	GL_Bind(skin->texnum);
 
 	//check for valid script
