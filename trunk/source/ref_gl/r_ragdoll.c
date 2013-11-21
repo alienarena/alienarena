@@ -1124,6 +1124,7 @@ void R_RenderAllRagdolls ( void )
 				continue;
 
 			//render the meshes
+			GL_SelectTexture (0);
 			qglShadeModel (GL_SMOOTH);
 			GL_TexEnv( GL_MODULATE );
 
@@ -1170,6 +1171,7 @@ void R_RenderAllRagdolls ( void )
 
 			IQM_DrawFrame (RagDoll[RagDollID].texnum, true, shellAlpha);
 
+			GL_SelectTexture (0);
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);
 			
