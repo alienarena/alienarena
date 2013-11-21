@@ -1472,7 +1472,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
-			if(!(gl_state.glsl_shaders && gl_glsl_shaders->value) || !strcmp(out->texinfo->normalMap->name, out->texinfo->image->name))
+			if(!strcmp(out->texinfo->normalMap->name, out->texinfo->image->name))
 				R_SubdivideSurface (out, firstedge, numedges);	// cut up polygon for warps
 		}
 
@@ -1483,7 +1483,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 			BSP_CreateSurfaceLightmap (out, smax, tmax, &light_s, &light_t);
 		}
 
-		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && strcmp(out->texinfo->normalMap->name, out->texinfo->image->name)))
+		if ( (! (out->texinfo->flags & SURF_WARP)) || (strcmp(out->texinfo->normalMap->name, out->texinfo->image->name)))
 			BSP_BuildPolygonFromSurface(out, xscale, yscale, light_s, light_t, firstedge, numedges);
 
 		rs = (rscript_t *)out->texinfo->image->script;
@@ -1519,10 +1519,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 		}
 		Mod_CalcSurfaceNormals(out);
 
-		if(gl_state.vbo) {
-			VB_BuildVBOBufferSize(out);
-			out->has_vbo = false;
-		}
+		VB_BuildVBOBufferSize(out);
+		out->has_vbo = false;
 	}
 	BSP_EndBuildingLightmaps ();
 }
@@ -2231,8 +2229,7 @@ void R_BeginRegistration (char *model)
 	RGD_BuildWorldTrimesh ();
 
 	//VBO
-	if(gl_state.vbo)
-		VB_BuildWorldVBO();
+	VB_BuildWorldVBO();
 }
 
 /*

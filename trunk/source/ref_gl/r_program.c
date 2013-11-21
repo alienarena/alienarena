@@ -1061,7 +1061,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
 	   }
 	   
-	   gl_FrontColor = gl_Color;
+	   gl_FrontColor = gl_BackColor = gl_Color;
 	}
 );
 
@@ -1770,8 +1770,6 @@ void R_LoadGLSLPrograms(void)
 	//load glsl (to do - move to own file)
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
 	{
-		gl_state.glsl_shaders = true;
-
 		glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
 		glDeleteObjectARB		 = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
 		glUseProgramObjectARB	 = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
@@ -1803,183 +1801,171 @@ void R_LoadGLSLPrograms(void)
 				|| !glEnableVertexAttribArrayARB ||
 				!glBindAttribLocationARB)
 		{
-			Com_Printf("...One or more GL_ARB_shader_objects functions were not found\n");
-			gl_state.glsl_shaders = false;
+			Com_Error (ERR_FATAL, "...One or more GL_ARB_shader_objects functions were not found\n");
 		}
 	}
 	else
 	{
-		Com_Printf("...One or more GL_ARB_shader_objects functions were not found\n");
-		gl_state.glsl_shaders = false;
+		Com_Error (ERR_FATAL, "...One or more GL_ARB_shader_objects functions were not found\n");
 	}
 
-	if(gl_state.glsl_shaders)
-	{
-		//we have them, set defaults accordingly
-		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE);
-		gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
+	gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 
-		//standard bsp surfaces
-		if(gl_state.ati)
-			R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program_ATI, NO_ATTRIBUTES, &g_programObj);
-		else
-			R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program, NO_ATTRIBUTES, &g_programObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_surfTexture = glGetUniformLocationARB( g_programObj, "surfTexture" );
-		g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
-		g_tangentSpaceTransform = glGetUniformLocationARB( g_programObj, "tangentSpaceTransform");
-		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
-		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
-		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
-		g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
-		g_location_bspShadowmapTexture2 = glGetUniformLocationARB( g_programObj, "StatShadowMap" );
-		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
-		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
-		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
-		g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
-		g_Location_statshadow = glGetUniformLocationARB( g_programObj, "STATSHADOW" );
-		g_location_xOffs = glGetUniformLocationARB( g_programObj, "xPixelOffset" );
-		g_location_yOffs = glGetUniformLocationARB( g_programObj, "yPixelOffset" );
-		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
-		g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
-		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
-		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
-		g_location_liquid = glGetUniformLocationARB( g_programObj, "LIQUID" );
-		g_location_shiny = glGetUniformLocationARB( g_programObj, "SHINY" );
-		g_location_rsTime = glGetUniformLocationARB( g_programObj, "rsTime" );
-		g_location_liquidTexture = glGetUniformLocationARB( g_programObj, "liquidTexture" );
-		g_location_liquidNormTex = glGetUniformLocationARB( g_programObj, "liquidNormTex" );
-		g_location_chromeTex = glGetUniformLocationARB( g_programObj, "chromeTex" );
-
-		//shadowed white bsp surfaces
-		if(gl_state.ati)
-			R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program_ATI, NO_ATTRIBUTES, &g_shadowprogramObj);
-		else
-			R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
-		g_location_fadeShadow = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
-		g_location_xOffset = glGetUniformLocationARB( g_shadowprogramObj, "xPixelOffset" );
-		g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
-
-		//warp(water) bsp surfaces
-		R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
-		g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
-		g_location_refTexture = glGetUniformLocationARB( g_waterprogramObj, "refTexture" );
-		g_location_waterEyePos = glGetUniformLocationARB( g_waterprogramObj, "Eye" );
-		g_location_tangentSpaceTransform = glGetUniformLocationARB( g_waterprogramObj, "tangentSpaceTransform");
-		g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
-		g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );
-		g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );
-		g_location_trans = glGetUniformLocationARB( g_waterprogramObj, "TRANSPARENT" );
-		g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
-
-		//meshes
-		R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_meshprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
-		g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
-		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
-		g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
-		g_location_fx2Tex = glGetUniformLocationARB( g_meshprogramObj, "fx2Tex" );
-		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
-		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
-		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
-		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
-		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow" );
-		g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell" );
-		g_location_useCube = glGetUniformLocationARB( g_meshprogramObj, "useCube" );
-		g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
-		g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
-		g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
-		
-		//vertex-only meshes
-		R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_vertexonlymeshprogramObj);
-		
-		// Locate some parameters by name so we can set them later...
-		g_location_vo_meshlightPosition = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lightPos" );
-		g_location_vo_baseTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "baseTex" );
-		g_location_vo_normTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "normalTex" );
-		g_location_vo_fxTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fxTex" );
-		g_location_vo_fx2Tex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fx2Tex" );
-		g_location_vo_color = glGetUniformLocationARB(	g_vertexonlymeshprogramObj, "baseColor" );
-		g_location_vo_meshTime = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "time" );
-		g_location_vo_meshFog = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "FOG" );
-		g_location_vo_useFX = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useFX" );
-		g_location_vo_useGlow = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useGlow" );
-		g_location_vo_useShell = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useShell" );
-		g_location_vo_useCube = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useCube" );
-		g_location_vo_useGPUanim = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "GPUANIM");
-		g_location_vo_outframe = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "bonemats");
-		g_location_vo_fromView = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fromView");
-		
-		//Glass
-		R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_glassprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_gOutframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
-		g_location_gFog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
-		g_location_gLightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
-		g_location_gmirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
-		g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
-
-		//Blank mesh (for shadowmapping efficiently)
-		R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_blankmeshprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_bmOutframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
-		
-		//fullscreen distortion effects
-		R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, &g_fbprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
-		g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
-		g_location_dParams = glGetUniformLocationARB( g_fbprogramObj, "dParams" );
-		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
-
-		//gaussian blur
-		R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, &g_blurprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
-		g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
-
-		//radial blur
-		R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, &g_rblurprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_rscale = glGetUniformLocationARB( g_rblurprogramObj, "rblurScale" );
-		g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
-		g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
-
-		//water droplets
-		R_LoadGLSLProgram ("Framebuffer Droplets", (char*)droplets_vertex_program, (char*)droplets_fragment_program, NO_ATTRIBUTES, &g_dropletsprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_drSource = glGetUniformLocationARB( g_dropletsprogramObj, "drSource" );
-		g_location_drTex = glGetUniformLocationARB( g_dropletsprogramObj, "drTex");
-		g_location_drParams = glGetUniformLocationARB( g_dropletsprogramObj, "drParams" );
-		g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
-
-		//god rays
-		R_LoadGLSLProgram ("God Rays", (char*)rgodrays_vertex_program, (char*)rgodrays_fragment_program, NO_ATTRIBUTES, &g_godraysprogramObj);
-
-		// Locate some parameters by name so we can set them later...
-		g_location_lightPositionOnScreen = glGetUniformLocationARB( g_godraysprogramObj, "lightPositionOnScreen" );
-		g_location_sunTex = glGetUniformLocationARB( g_godraysprogramObj, "sunTexture");
-		g_location_godrayScreenAspect = glGetUniformLocationARB( g_godraysprogramObj, "aspectRatio");
-		g_location_sunRadius = glGetUniformLocationARB( g_godraysprogramObj, "sunRadius");
-	}
+	//standard bsp surfaces
+	if(gl_state.ati)
+		R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program_ATI, NO_ATTRIBUTES, &g_programObj);
 	else
-	{
-		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE);
-		gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
-	}
+		R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program, NO_ATTRIBUTES, &g_programObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_surfTexture = glGetUniformLocationARB( g_programObj, "surfTexture" );
+	g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
+	g_tangentSpaceTransform = glGetUniformLocationARB( g_programObj, "tangentSpaceTransform");
+	g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
+	g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
+	g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
+	g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
+	g_location_bspShadowmapTexture2 = glGetUniformLocationARB( g_programObj, "StatShadowMap" );
+	g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
+	g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
+	g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
+	g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
+	g_Location_statshadow = glGetUniformLocationARB( g_programObj, "STATSHADOW" );
+	g_location_xOffs = glGetUniformLocationARB( g_programObj, "xPixelOffset" );
+	g_location_yOffs = glGetUniformLocationARB( g_programObj, "yPixelOffset" );
+	g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
+	g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
+	g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
+	g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
+	g_location_liquid = glGetUniformLocationARB( g_programObj, "LIQUID" );
+	g_location_shiny = glGetUniformLocationARB( g_programObj, "SHINY" );
+	g_location_rsTime = glGetUniformLocationARB( g_programObj, "rsTime" );
+	g_location_liquidTexture = glGetUniformLocationARB( g_programObj, "liquidTexture" );
+	g_location_liquidNormTex = glGetUniformLocationARB( g_programObj, "liquidNormTex" );
+	g_location_chromeTex = glGetUniformLocationARB( g_programObj, "chromeTex" );
+
+	//shadowed white bsp surfaces
+	if(gl_state.ati)
+		R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program_ATI, NO_ATTRIBUTES, &g_shadowprogramObj);
+	else
+		R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
+	g_location_fadeShadow = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
+	g_location_xOffset = glGetUniformLocationARB( g_shadowprogramObj, "xPixelOffset" );
+	g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
+
+	//warp(water) bsp surfaces
+	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
+	g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
+	g_location_refTexture = glGetUniformLocationARB( g_waterprogramObj, "refTexture" );
+	g_location_waterEyePos = glGetUniformLocationARB( g_waterprogramObj, "Eye" );
+	g_location_tangentSpaceTransform = glGetUniformLocationARB( g_waterprogramObj, "tangentSpaceTransform");
+	g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
+	g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );
+	g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );
+	g_location_trans = glGetUniformLocationARB( g_waterprogramObj, "TRANSPARENT" );
+	g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
+
+	//meshes
+	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_meshprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
+	g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
+	g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
+	g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
+	g_location_fx2Tex = glGetUniformLocationARB( g_meshprogramObj, "fx2Tex" );
+	g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
+	g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
+	g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
+	g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
+	g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow" );
+	g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell" );
+	g_location_useCube = glGetUniformLocationARB( g_meshprogramObj, "useCube" );
+	g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
+	g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
+	g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
+	
+	//vertex-only meshes
+	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_vertexonlymeshprogramObj);
+	
+	// Locate some parameters by name so we can set them later...
+	g_location_vo_meshlightPosition = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lightPos" );
+	g_location_vo_baseTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "baseTex" );
+	g_location_vo_normTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "normalTex" );
+	g_location_vo_fxTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fxTex" );
+	g_location_vo_fx2Tex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fx2Tex" );
+	g_location_vo_color = glGetUniformLocationARB(	g_vertexonlymeshprogramObj, "baseColor" );
+	g_location_vo_meshTime = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "time" );
+	g_location_vo_meshFog = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "FOG" );
+	g_location_vo_useFX = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useFX" );
+	g_location_vo_useGlow = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useGlow" );
+	g_location_vo_useShell = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useShell" );
+	g_location_vo_useCube = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useCube" );
+	g_location_vo_useGPUanim = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "GPUANIM");
+	g_location_vo_outframe = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "bonemats");
+	g_location_vo_fromView = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fromView");
+	
+	//Glass
+	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_glassprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_gOutframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
+	g_location_gFog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
+	g_location_gLightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
+	g_location_gmirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
+	g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
+
+	//Blank mesh (for shadowmapping efficiently)
+	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_blankmeshprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_bmOutframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
+	
+	//fullscreen distortion effects
+	R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, &g_fbprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
+	g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
+	g_location_dParams = glGetUniformLocationARB( g_fbprogramObj, "dParams" );
+	g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
+
+	//gaussian blur
+	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, &g_blurprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
+	g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
+
+	//radial blur
+	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, &g_rblurprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_rscale = glGetUniformLocationARB( g_rblurprogramObj, "rblurScale" );
+	g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
+	g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
+
+	//water droplets
+	R_LoadGLSLProgram ("Framebuffer Droplets", (char*)droplets_vertex_program, (char*)droplets_fragment_program, NO_ATTRIBUTES, &g_dropletsprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_drSource = glGetUniformLocationARB( g_dropletsprogramObj, "drSource" );
+	g_location_drTex = glGetUniformLocationARB( g_dropletsprogramObj, "drTex");
+	g_location_drParams = glGetUniformLocationARB( g_dropletsprogramObj, "drParams" );
+	g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
+
+	//god rays
+	R_LoadGLSLProgram ("God Rays", (char*)rgodrays_vertex_program, (char*)rgodrays_fragment_program, NO_ATTRIBUTES, &g_godraysprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_lightPositionOnScreen = glGetUniformLocationARB( g_godraysprogramObj, "lightPositionOnScreen" );
+	g_location_sunTex = glGetUniformLocationARB( g_godraysprogramObj, "sunTexture");
+	g_location_godrayScreenAspect = glGetUniformLocationARB( g_godraysprogramObj, "aspectRatio");
+	g_location_sunRadius = glGetUniformLocationARB( g_godraysprogramObj, "sunRadius");
 }

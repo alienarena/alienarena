@@ -41,7 +41,6 @@ static vertCache_t	*vbo_normals;
 static vertCache_t *vbo_tangents;
 static vertCache_t *vbo_indices;
 static qboolean has_vbo;
-qboolean use_vbo;
 
 float modelpitch;
 float modelroll;
@@ -248,11 +247,6 @@ void IQM_LoadVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, f
 	iqmmodel->normal = (mnormal_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mnormal_t));
 	iqmmodel->tangent = (mtangent_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mtangent_t));
 
-	//set this now for later use
-	iqmmodel->animatevertexes = (mvertex_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mvertex_t));
-	iqmmodel->animatenormal = (mnormal_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mnormal_t));
-	iqmmodel->animatetangent = (mtangent_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mtangent_t));
-
 	for(i=0; i<iqmmodel->numvertexes; i++){
 		VectorSet(iqmmodel->vertexes[i].position,
 					LittleFloat(vposition[0]),
@@ -360,6 +354,25 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	}
 
 	return true;
+}
+
+static void IQM_LoadVBO (model_t *mod)
+{
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->vertexes, VBO_STORE_XYZ, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), mod->st, VBO_STORE_ST, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->normal, VBO_STORE_NORMAL, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), mod->tangent, VBO_STORE_TANGENT, mod);
+	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), mod->tris, VBO_STORE_INDICES, mod);
+}
+
+static qboolean IQM_FindVBO (model_t *mod)
+{
+	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
+	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
+	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
+	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
+	vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
+	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices;
 }
 
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
@@ -846,98 +859,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	
 	// load the VBO data
 
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->vertexes, VBO_STORE_XYZ, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), mod->st, VBO_STORE_ST, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->normal, VBO_STORE_NORMAL, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), mod->tangent, VBO_STORE_TANGENT, mod);
-	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), mod->tris, VBO_STORE_INDICES, mod);
+	IQM_LoadVBO (mod);
 	
 	return true;
-}
-
-static qboolean IQM_FindVBO (model_t *mod)
-{
-	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
-	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
-	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
-	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
-	vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
-	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices;
-}
-
-// The actual vertex generation based on the matrixes
-// TODO: depreciate this code completely in favor of the GLSL vertex shader.
-static void IQM_AnimateVertexes (model_t *mod)
-{
-	int i, j;
-	
-	const mvertex_t *srcpos = (const mvertex_t *)mod->vertexes;
-	const mnormal_t *srcnorm = (const mnormal_t *)mod->normal;
-	const mtangent_t *srctan = (const mtangent_t *)mod->tangent;
-		
-	mvertex_t *dstpos = (mvertex_t *)mod->animatevertexes;
-	mnormal_t *dstnorm = (mnormal_t *)mod->animatenormal;
-	mtangent_t *dsttan = (mtangent_t *)mod->animatetangent;
-
-	const unsigned char *index = mod->blendindexes;
-
-	const unsigned char *weight = mod->blendweights;
-
-	for(i = 0; i < mod->numvertexes; i++)
-	{
-		matrix3x4_t mat;
-	
-		// Blend matrixes for this vertex according to its blend weights.
-		// the first index/weight is always present, and the weights are
-		// guaranteed to add up to 255. So if only the first weight is
-		// presented, you could optimize this case by skipping any weight
-		// multiplies and intermediate storage of a blended matrix.
-		// There are only at most 4 weights per vertex, and they are in
-		// sorted order from highest weight to lowest weight. Weights with
-		// 0 values, which are always at the end, are unused.
-
-		Matrix3x4_Scale(&mat, mod->outframe[index[0]], weight[0]/255.0f);
-
-		for(j = 1; j < 4 && weight[j]; j++)
-		{
-			Matrix3x4_ScaleAdd (&mat, &mod->outframe[index[j]], weight[j]/255.0f, &mat);
-		}
-
-		// Transform attributes by the blended matrix.
-		// Position uses the full 3x4 transformation matrix.
-		// Normals and tangents only use the 3x3 rotation part
-		// of the transformation matrix.
-
-		Matrix3x4_Transform(dstpos, mat, *srcpos);
-
-		// Note that if the matrix includes non-uniform scaling, normal vectors
-		// must be transformed by the inverse-transpose of the matrix to have the
-		// correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
-		// and since the absolute scale is not important for a vector that will later
-		// be renormalized, the adjoint-transpose matrix will work fine, which can be
-		// cheaply generated by 3 cross-products.
-		//
-		// If you don't need to use joint scaling in your models, you can simply use the
-		// upper 3x3 part of the position matrix instead of the adjoint-transpose shown
-		// here.
-
-		Matrix3x4_TransformNormal(dstnorm, mat, *srcnorm);
-
-		// Note that input tangent data has 4 coordinates,
-		// so only transform the first 3 as the tangent vector.
-
-		Matrix3x4_TransformTangent(dsttan, mat, *srctan);
-
-		srcpos++;
-		srcnorm++;
-		srctan++;
-		dstpos++;
-		dstnorm++;
-		dsttan++;
-
-		index += 4;
-		weight += 4;
-	}
 }
 
 void IQM_AnimateFrame(float curframe, int nextframe)
@@ -1236,22 +1160,17 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 		}
 	}
 
-	//we need to skip this vbo check if not using a shader - since the animation is done in the shader
-	has_vbo = false;
-	//a lot of conditions need to be enabled in order to use GPU animation
-	if (use_vbo && (gl_state.vbo && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) &&
-		(r_shaders->integer || ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))))
+	has_vbo = IQM_FindVBO (currentmodel);
+	
+	// TODO: remove this - the VBOs are getting unloaded for every new map
+	if (!has_vbo)
 	{
-		if (IQM_FindVBO (currentmodel))
-			has_vbo = true;
-		else
-			Com_Printf ("WARN: could not load VBO for model!\n");
-		
-		if (has_vbo)
-			return;
+		IQM_LoadVBO (currentmodel);
+		has_vbo = IQM_FindVBO (currentmodel);
 	}
 	
-	IQM_AnimateVertexes (currentmodel);
+	if (!has_vbo)
+		Com_Printf ("WARN: could not load VBO for model %s!\n", currentmodel->name);
 }
 
 void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
@@ -1311,44 +1230,20 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		}
 	}
 
-	//we need to skip this vbo check if not using a shader - since the animation is done in the shader (might want to check for normalmap stage)
-	has_vbo = false;
-	//a lot of conditions need to be enabled in order to use GPU animation
-
-	if (use_vbo && (gl_state.vbo && RagDoll[RagDollID].script && gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) &&
-		(r_shaders->integer || shellEffect))
-	{
-		if (IQM_FindVBO (RagDoll[RagDollID].ragDollMesh))
-			has_vbo = true;
-		else
-			Com_Printf ("WARN: could not load VBO for model!\n");
-		
-		if (has_vbo)
-			return;
-	}		
+	has_vbo = IQM_FindVBO (RagDoll[RagDollID].ragDollMesh);
 	
-	IQM_AnimateVertexes (RagDoll[RagDollID].ragDollMesh);
+	// TODO: remove this - the VBOs are getting unloaded for every new map
+	if (!has_vbo)
+	{
+		IQM_LoadVBO (RagDoll[RagDollID].ragDollMesh);
+		has_vbo = IQM_FindVBO (RagDoll[RagDollID].ragDollMesh);
+	}
+	
+	if (!has_vbo)
+		Com_Printf ("WARN: could not load VBO for model!\n");
 }
 
-void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t lightOut)
-{
-	float l;
-	float lscale;
-
-	VectorScale(baselight, gl_modulate->value, lightOut);
-
-	//probably will remove this - maybe we can get a faster algorithm and redo one day
-	//if(!gl_vlights->integer)
-		return;
-
-	lscale = 3.0;
-
-    l = lscale * VLight_GetLightValue (normal->dir, lightPosition, angles[PITCH], angles[YAW]);
-
-    VectorScale(baselight, l, lightOut);
-}
-
-void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varray, vec3_t lightcolor);
+void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varay, vec3_t lightcolor);
 void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader);
 
 inline void IQM_DrawVBO (qboolean tangents)
@@ -1399,9 +1294,12 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 	int		va = 0;
 	qboolean mirror = false;
 	qboolean glass = false;
-
+	qboolean fragmentshader;
+	
 	if (r_shaders->integer)
 		rs = currententity->script;
+	
+	fragmentshader = (rs != NULL) && gl_normalmaps->integer;
 	
 	VectorCopy(shadelight, lightcolor);
 	for (i=0;i<model_dlights_num;i++)
@@ -1433,75 +1331,25 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		R_Mesh_SetupShell (r_shelltexture2->texnum, ragdoll, !has_vbo, lightcolor);
+		R_Mesh_SetupShell (r_shelltexture2->texnum, ragdoll, false, lightcolor);
 
 		if (ragdoll)
 			shellscale = 1.6;
-		else if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer))
+		else
 			shellscale = 0.4;
-		else
-			shellscale = 1.6;
 
-		if(!has_vbo)
-		{
-			if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-			{
-				glUniform1iARB(g_location_useGPUanim, 0);
-			}
+		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);			
 
-			for (i=0; i<currentmodel->num_triangles; i++)
-			{
-				for (j=0; j<3; j++)
-				{
-					index_xyz = index_st = currentmodel->tris[i].vertex[j];
+		glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
-					VArray[0] = currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
-					VArray[1] = currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
-					VArray[2] = currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
+		IQM_DrawVBO (true);
 
-					VArray[3] = currentmodel->st[index_st].s;
-					VArray[4] = currentmodel->st[index_st].t;
-
-					VArray[5] = shadelight[0];
-					VArray[6] = shadelight[1];
-					VArray[7] = shadelight[2];
-					
-					// normally fixed at 0.33, decreases gradually for 
-					// ragdolls
-					VArray[8] = shellAlpha; 
-
-					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-					{
-						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
-						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
-						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
-					}
-					else
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
-					va++;
-				}
-			}
-
-			R_DrawVarrays(GL_TRIANGLES, 0, va);
-		}		
-		else
-		{			
-			glUniform1iARB(g_location_useGPUanim, 1);			
-
-			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-
-			IQM_DrawVBO (true);
-		}
-
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-		{
-			glUseProgramObjectARB( 0 );
-			GL_EnableMultitexture( false );
-			if (ragdoll)
-				qglDepthMask(true);
-		}
-	}	
-	else if((mirror || glass ) && has_vbo)
+		glUseProgramObjectARB( 0 );
+		GL_EnableMultitexture( false );
+		if (ragdoll)
+			qglDepthMask(true);
+	}
+	else if(mirror || glass)
 	{
 		//render glass with glsl shader
 		vec3_t lightVec;
@@ -1517,13 +1365,9 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		glUniform3fARB( g_location_gLightPos, lightVec[0], lightVec[1], lightVec[2]);
 	
 		if(mirror)
-		{			
 			GL_MBind (1, r_mirrortexture->texnum);
-		}
 		else
-		{
 			GL_MBind (1, r_mirrorspec->texnum);			
-		}
 		glUniform1iARB( g_location_gmirTexture, 1);
 
 		GL_MBind (0, r_mirrorspec->texnum);
@@ -1537,177 +1381,22 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		
 		glUseProgramObjectARB( 0 );
 	}
-	else if(mirror || glass)
-	{
-		//glass surfaces
-		//base render, no vbo, no shaders	
-
-		qglDepthMask(false);
-
-		if(mirror)
-		{
-			if( !(currententity->flags & RF_WEAPONMODEL))
-			{
-				R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-				GL_EnableMultitexture( true );
-				GL_SelectTexture (0);
-				GL_TexEnv ( GL_COMBINE_EXT );
-				GL_Bind (r_mirrortexture->texnum);
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				GL_SelectTexture (1);
-				GL_TexEnv ( GL_COMBINE_EXT );
-				GL_Bind (r_mirrorspec->texnum);
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-			}
-			else
-			{
-				R_InitVArrays (VERT_COLOURED_TEXTURED);
-				GL_MBind (0, r_mirrortexture->texnum);
-			}
-		}
-		else
-		{
-			R_InitVArrays (VERT_COLOURED_TEXTURED);
-			GL_MBind (0, r_reflecttexture->texnum);
-		}
-		
-		for (i=0; i<currentmodel->num_triangles; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_xyz = index_st = currentmodel->tris[i].vertex[j];
-
-				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
-				VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
-				VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
-
-				if(mirror)
-				{
-					VArray[5] = VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
-					VArray[6] = VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
-				}
-				else
-				{
-					VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
-					VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
-				}
-				
-				IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
-
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
-				{
-					VArray[7] = lightcolor[0];
-					VArray[8] = lightcolor[1];
-					VArray[9] = lightcolor[2];
-					VArray[10] = alpha;
-					VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED]; // increment pointer and counter
-				}
-				else
-				{
-					VArray[5] = lightcolor[0];
-					VArray[6] = lightcolor[1];
-					VArray[7] = lightcolor[2];
-					VArray[8] = alpha;
-					VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
-				}
-
-				va++;
-			}
-		}
-
-		R_DrawVarrays(GL_TRIANGLES, 0, va);
-
-		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
-			GL_EnableMultitexture( false );
-
-		qglDepthMask(true);
-	}
-	else if(rs && rs->stage->normalmap && gl_normalmaps->integer && gl_glsl_shaders->integer && gl_state.glsl_shaders)
-	{	
-		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, true);		
-
-		if(!has_vbo)
-		{
-			glUniform1iARB(g_location_useGPUanim, 0);
-
-			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
-
-			for (i=0; i<currentmodel->num_triangles; i++)
-			{
-				for (j=0; j<3; j++)
-				{
-					index_xyz = index_st = currentmodel->tris[i].vertex[j];
-
-					VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
-					VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
-					VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
-
-					VArray[3] = currentmodel->st[index_st].s;
-					VArray[4] = currentmodel->st[index_st].t;
-
-					VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);
-					Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
-
-					VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
-					va++;
-				}
-			}
-			
-			R_DrawVarrays(GL_TRIANGLES, 0, va);
-		}
-		else
-		{
-			glUniform1iARB(g_location_useGPUanim, 1);
-
-			glUniformMatrix3x4fvARB( g_location_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-
-			IQM_DrawVBO (true);
-		}
-
-		qglColor4f(1,1,1,1);
-
-		glUseProgramObjectARB( 0 );
-		GL_EnableMultitexture( false );
-	}
 	else
 	{	
-		//base render no shaders
-
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
-
-		GL_MBind (0, skinnum);
+		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, fragmentshader);
 		
-		for (i=0; i<currentmodel->num_triangles; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_xyz = index_st = currentmodel->tris[i].vertex[j];
-
-				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
-				VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
-				VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
-
-				VArray[3] = currentmodel->st[index_st].s;
-				VArray[4] = currentmodel->st[index_st].t;
-				
-				IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
-
-				VArray[5] = lightcolor[0] > 0.2 ? lightcolor[0] : 0.2;
-				VArray[6] = lightcolor[1] > 0.2 ? lightcolor[1] : 0.2;
-				VArray[7] = lightcolor[2] > 0.2 ? lightcolor[2] : 0.2;
-				VArray[8] = alpha;
-				VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
-				va++;
-			}
-		}
-
-		R_DrawVarrays(GL_TRIANGLES, 0, va);
+		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);
+		
+		glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+		
+		IQM_DrawVBO (true);
+		
+		qglColor4f(1,1,1,1);
+		
+		glUseProgramObjectARB( 0 );
+		
+		if (fragmentshader)
+			GL_EnableMultitexture( false );
 	}
 
 	GLSTATE_DISABLE_ALPHATEST
@@ -1720,8 +1409,6 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 
 	R_KillVArrays ();
 
-	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
-		qglEnable( GL_TEXTURE_2D );
 }
 
 static qboolean IQM_CullModel( void )
@@ -1966,7 +1653,6 @@ void R_DrawINTERQUAKEMODEL ( void )
 	GL_Bind(skin->texnum);
 
 	//check for valid script
-	use_vbo = true;
 	if(currententity->script && currententity->script->stage)
 	{
 		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || 
@@ -1974,11 +1660,8 @@ void R_DrawINTERQUAKEMODEL ( void )
 			(currententity->script->stage->cube && !strcmp("***r_notexture***", currententity->script->stage->texture3->name)))
 		{
 			currententity->script = NULL; //bad shader!
-			use_vbo = false; //cannot use vbo without a valid shader
 		}
 	}
-	else if(!(currententity->flags & RF_TRANSLUCENT))
-		use_vbo = false;
 
 	// draw it
 
@@ -2059,60 +1742,33 @@ void IQM_DrawCasterFrame ()
     int     index_xyz, index_st;
     int     va = 0;
 	
-	if(!has_vbo)
-	{
-		R_InitVArrays (VERT_NO_TEXTURE);
+	//just use a very basic shader for this instead of the normal mesh shader
+	glUseProgramObjectARB( g_blankmeshprogramObj );
 
-		for (i=0; i<currentmodel->num_triangles; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_xyz = index_st = currentmodel->tris[i].vertex[j];
+	//send outframe, blendweights, and blendindexes to shader
+	glUniformMatrix3x4fvARB( g_location_bmOutframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
-				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
-				VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
-				VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	GL_BindVBO(vbo_xyz);
+	qglVertexPointer(3, GL_FLOAT, 0, 0);
 
-				// increment pointer and counter
-				VArray += VertexSizes[VERT_NO_TEXTURE];
-				va++;
-			}
-		}
+	GL_BindVBO(NULL);
 
-		R_DrawVarrays(GL_TRIANGLES, 0, va);
-	}
-	else 
-	{			
-		//to do - just use a very basic shader for this instead of the normal mesh shader
-		glUseProgramObjectARB( g_blankmeshprogramObj );
+	GL_BindIBO(vbo_indices);								
 
-		//send outframe, blendweights, and blendindexes to shader
-		glUniformMatrix3x4fvARB( g_location_bmOutframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+	glEnableVertexAttribArrayARB(6);
+	glEnableVertexAttribArrayARB(7);
+	glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights); 
+	glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 		
 
-		qglEnableClientState( GL_VERTEX_ARRAY );
-		GL_BindVBO(vbo_xyz);
-		qglVertexPointer(3, GL_FLOAT, 0, 0);
+	qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
 
-		GL_BindVBO(NULL);
+	GL_BindIBO(NULL);
 
-		GL_BindIBO(vbo_indices);								
-
-		glEnableVertexAttribArrayARB(6);
-		glEnableVertexAttribArrayARB(7);
-		glVertexAttribPointerARB(6, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights); 
-		glVertexAttribPointerARB(7, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 		
-
-		qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
+	glUseProgramObjectARB( 0 );
 	
-		GL_BindIBO(NULL);
-
-		glUseProgramObjectARB( 0 );
-		
-		glDisableVertexAttribArrayARB(6);
-		glDisableVertexAttribArrayARB(7);
-	}
-	
-	R_KillVArrays ();
+	glDisableVertexAttribArrayARB(6);
+	glDisableVertexAttribArrayARB(7);
 }
 
 void IQM_DrawCaster ( void )
@@ -2154,7 +1810,6 @@ void IQM_DrawCaster ( void )
 
 	frame = currententity->frame + time;
 
-	use_vbo = true;
 	IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
 
 	IQM_DrawCasterFrame();
@@ -2169,7 +1824,6 @@ void IQM_DrawRagDollCaster ( int RagDollID )
 
     qglPushMatrix ();
 
-	use_vbo = true;
 	IQM_AnimateRagdoll(RagDollID, false);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;

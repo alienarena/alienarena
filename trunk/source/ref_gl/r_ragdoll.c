@@ -1142,7 +1142,6 @@ void R_RenderAllRagdolls ( void )
 			}
 
 			//check for valid script
-			use_vbo = true;
 			if(RagDoll[RagDollID].script && RagDoll[RagDollID].script->stage)
 			{
 				if(!strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture->name) || 
@@ -1150,18 +1149,17 @@ void R_RenderAllRagdolls ( void )
 					(RagDoll[RagDollID].script->stage->cube && !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture3->name)))
 				{
 					RagDoll[RagDollID].script = NULL; //bad shader!
-					use_vbo = false; //cannot use vbo without a valid shader
 				}
 			}
 
+			currentmodel = RagDoll[RagDollID].ragDollMesh;
+			
 			R_GetLightVals(RagDoll[RagDollID].curPos, true);
 
 			R_GenerateRagdollShadow(RagDollID);
 
 			IQM_AnimateRagdoll(RagDollID, shellEffect);
 
-			currentmodel = RagDoll[RagDollID].ragDollMesh;
-			
 			// HACK: This is a bit wasteful, but it allows us to reuse code
 			// that expects these values to be in an entity_t struct.
 			VectorCopy (RagDoll[RagDollID].curPos, RagDollEntity.origin);

@@ -1011,7 +1011,7 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 {
 	int i;
 	vec3_t lightVec, lightVal;
-	qboolean fragmentshader = gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer;
+	qboolean fragmentshader = gl_normalmaps->integer;
 	
 	//shell render
 	if(using_varray)
@@ -1043,7 +1043,8 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 	VectorMA(lightPosition, 1.0, lightVec, lightPosition);
 	R_ModelViewTransform(lightPosition, lightVec);
 
-	GL_EnableMultitexture( true );
+	if (fragmentshader)
+		GL_EnableMultitexture( true );
 	
 	if (ragdoll)
 		qglDepthMask(false);
@@ -1057,11 +1058,14 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 	
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 
-	GL_MBind (1, r_shelltexture2->texnum);
-	glUniform1iARB( MESH_UNIFORM(baseTex), 1);
+	GL_MBind (0, r_shelltexture2->texnum);
+	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
 
-	GL_MBind (0, r_shellnormal->texnum);
-	glUniform1iARB( MESH_UNIFORM(normTex), 0);
+	if (fragmentshader)
+	{
+		GL_MBind (1, r_shellnormal->texnum);
+		glUniform1iARB( MESH_UNIFORM(normTex), 1);
+	}
 
 	glUniform1iARB( MESH_UNIFORM(useFX), 0);
 
@@ -1335,7 +1339,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				index_xyz = tris[i].index_xyz[j];
 				index_st = tris[i].index_st[j];
 
-				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer))
+				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || gl_normalmaps->integer)
 					shellscale = .4;
 				else
 					shellscale = 1.6;
@@ -1349,26 +1353,15 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+					for (k=0; k<3; k++)
 					{
-						for (k=0; k<3; k++)
-						{
-							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-							( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-							r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
+						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
 
-							tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
-							( r_avertexnormals[oldtangents[index_xyz]][k] -
-							r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
-						}
-					}
-					else
-					{
-
-						VArray[5] = shadelight[0];
-						VArray[6] = shadelight[1];
-						VArray[7] = shadelight[2];
-						VArray[8] = alpha;
+						tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
+						( r_avertexnormals[oldtangents[index_xyz]][k] -
+						r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
 					}
 				}
 				else
@@ -1380,38 +1373,20 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
 					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+					for (k=0;k<3;k++)
 					{
-						for (k=0;k<3;k++)
-						{
-							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-							tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
-						}
-					}
-					else
-					{
-
-						VArray[5] = shadelight[0];
-						VArray[6] = shadelight[1];
-						VArray[7] = shadelight[2];
-						VArray[8] = alpha;
+						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+						tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
 					}
 				}
 				tangent[3] = 1.0;
 
-				if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-				{
-					VectorNormalize ( normal );
-					VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-					Vector4Copy(tangent, TangentsArray[va]);
-
-				}
+				VectorNormalize ( normal );
+				VectorCopy(normal, NormalsArray[va]); //shader needs normal array
+				Vector4Copy(tangent, TangentsArray[va]);
 
 				// increment pointer and counter
-				if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
-					VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-				else
-					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+				VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 				va++;
 			}
 		}
@@ -1421,13 +1396,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			R_DrawVarrays(GL_TRIANGLES, 0, va);
 		}
 
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
-			glUseProgramObjectARB( 0 );
-			GL_EnableMultitexture( false );
-		}
+		glUseProgramObjectARB( 0 );
+		GL_EnableMultitexture( false );
 	}
 	else if(mirror || glass)
-	{		
+	{
+		// TODO: use the glass shader here.
 		qboolean mirror_noweap;
 		int vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
 
@@ -1566,16 +1540,16 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		qglDepthMask(true);
 
 	}
-	else if(rs && rs->stage->normalmap && gl_normalmaps->integer && gl_glsl_shaders->integer && gl_state.glsl_shaders)
+	else
 	{
 		qboolean dovbo;
 		
-		dovbo = gl_state.vbo && !lerped;
+		dovbo = !lerped;
 		
-		if(rs->stage->depthhack)
+		if(rs && rs->stage->depthhack)
 			qglDepthMask(false);
 		
-		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, true);
+		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, rs && rs->stage->normalmap && gl_normalmaps->integer);
 				
 		if(dovbo)
 		{
@@ -1711,71 +1685,8 @@ skipLoad:
 		glUseProgramObjectARB( 0 );
 		GL_EnableMultitexture( false );
 
-		if(rs->stage->depthhack)
+		if(rs && rs->stage->depthhack)
 			qglDepthMask(true);
-	}
-	else //base render no shaders
-	{
-		va=0;
-		VArray = &VArrayVerts[0];
-
-		alpha = basealpha;
-		if (alpha < 0.0)
-			alpha = 0.0;
-		else if (alpha > 1.0)
-			alpha = 1.0;
-
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
-		GLSTATE_ENABLE_ALPHATEST
-
-		for (i=0; i<paliashdr->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_xyz = tris[i].index_xyz[j];
-				index_st = tris[i].index_st[j];
-
-				if(lerped) {
-					MD2_VlightModel (shadelight, &verts[index_xyz], lightcolor);
-
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
-
-					VArray[3] = st[index_st].s;
-					VArray[4] = st[index_st].t;
-
-					VArray[5] = lightcolor[0];
-					VArray[6] = lightcolor[1];
-					VArray[7] = lightcolor[2];
-					VArray[8] = alpha;
-				}
-				else {
-					MD2_VlightModel (shadelight, &verts[index_xyz], lightcolor);
-
-					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
-					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
-					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
-
-					VArray[3] = st[index_st].s;
-					VArray[4] = st[index_st].t;
-
-					VArray[5] = lightcolor[0] > 0.2 ? lightcolor[0] : 0.2;
-					VArray[6] = lightcolor[1] > 0.2 ? lightcolor[1] : 0.2;
-					VArray[7] = lightcolor[2] > 0.2 ? lightcolor[2] : 0.2;
-					VArray[8] = alpha;
-				}
-
-				// increment pointer and counter
-				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-				va++;
-			}
-
-		}
-		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
-		{
-			R_DrawVarrays(GL_TRIANGLES, 0, va);
-		}
 	}
 
 	GLSTATE_DISABLE_ALPHATEST
@@ -1789,9 +1700,6 @@ skipLoad:
 	glDisableVertexAttribArrayARB (1);
 
 	R_KillVArrays ();	
-
-	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
-		qglEnable( GL_TEXTURE_2D );
 
 }
 
@@ -1839,7 +1747,7 @@ void R_Mesh_SetShadelight (void)
 	{
 		float minlight;
 
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+		if(gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -1860,7 +1768,7 @@ void R_Mesh_SetShadelight (void)
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
+		if(gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -1967,7 +1875,8 @@ void R_DrawAliasModel ( void )
 	if (!skin)
 		skin = r_notexture;	// fallback...
 	
-	GL_MBind (0, skin->texnum);
+	GL_SelectTexture (0);
+	GL_Bind (skin->texnum);
 
 	// draw it
 
@@ -2016,6 +1925,7 @@ void R_DrawAliasModel ( void )
 	else
 		MD2_DrawFrame(paliashdr, currententity->backlerp, true, skin->texnum);
 
+	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
 
@@ -2128,7 +2038,7 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	VArray = &VArrayVerts[0];
 	R_InitVArrays (VERT_NO_TEXTURE);
 
-	if (gl_state.vbo && !lerped)
+	if (!lerped)
 	{
 		vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
 		if (vbo_xyz) 
@@ -2157,12 +2067,9 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 				VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-				if(gl_state.vbo) 
-				{
-					VertexArray[va][0] = VArray[0];
-					VertexArray[va][1] = VArray[1];
-					VertexArray[va][2] = VArray[2];
-				}
+				VertexArray[va][0] = VArray[0];
+				VertexArray[va][1] = VArray[1];
+				VertexArray[va][2] = VArray[2];
 			}
 
 			// increment pointer and counter
@@ -2171,13 +2078,11 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 		}
 	}
 
-	if(gl_state.vbo && !lerped)
-	{
+	if(!lerped)
 		vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
-	}
 
 skipLoad:
-	if(gl_state.vbo && !lerped) 
+	if(!lerped) 
 	{
 		qglEnableClientState( GL_VERTEX_ARRAY );
 		GL_BindVBO(vbo_xyz);

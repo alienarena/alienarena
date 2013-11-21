@@ -56,7 +56,7 @@ void R_GLSLDistortion(void)
 	trace_t r_trace;
 	float hScissor, wScissor;
 
-	if(!gl_glsl_shaders->integer || vid.width > 2048 || !gl_state.glsl_shaders)
+	if(vid.width > 2048)
 		return;
 
 	if(r_fbFxType == EXPLOSION) 
@@ -215,7 +215,7 @@ void R_GLSLWaterDroplets(void)
 	vec3_t end;
 	static float r_drTime;
 
-	if(!(r_weather == 1) || !cl_raindist->integer || !gl_glsl_shaders->integer || vid.width > 2048 || !gl_state.glsl_shaders)
+	if(!(r_weather == 1) || !cl_raindist->integer || vid.width > 2048)
 		return;
 
 	VectorCopy(r_newrefdef.vieworg, end);
@@ -865,12 +865,9 @@ void R_GLSLGodRays(void)
 
 void R_GLSLPostProcess(void)
 {
-	if(gl_glsl_shaders->integer && gl_state.glsl_shaders)
-	{
-		R_GLSLGodRays();
+	R_GLSLGodRays();
 
-		R_GLSLWaterDroplets();
-	
-		R_GLSLDistortion();
-	}
+	R_GLSLWaterDroplets();
+
+	R_GLSLDistortion();
 }
