@@ -429,6 +429,60 @@ static void MD2_VecsForTris(
 #endif
 
 
+static void MD2_LoadVBO (model_t *mod)
+{
+	int i, j, k;;
+	int va = 0; // will eventually reach mod->num_triangles*3
+	
+	dmdl_t			*paliashdr;
+	dtriangle_t		*tris;
+	dtrivertx_t		*verts;
+	daliasframe_t	*frame;
+	
+	paliashdr = (dmdl_t *)mod->extradata;
+	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
+	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+	verts = frame->verts;
+	
+	for (i=0; i<paliashdr->num_tris; i++)
+	{
+		for (j=0; j<3; j++)
+		{
+			int index_xyz, index_st;
+			
+			index_xyz = tris[i].index_xyz[j];
+			index_st = tris[i].index_st[j];
+			
+			for (k = 0; k < 3; k++)
+				VertexArray[va][k] = verts[index_xyz].v[k] * frame->scale[k] + frame->translate[k];
+			
+			VectorCopy (r_avertexnormals[verts[index_xyz].lightnormalindex], NormalsArray[va]);
+			
+			VectorCopy (r_avertexnormals[mod->tangents[index_xyz]], TangentsArray[va]);
+			TangentsArray[va][3] = 1.0;
+			
+			TexCoordArray[va][0] = mod->st[index_st].s;
+			TexCoordArray[va][1] = mod->st[index_st].t;
+			
+			va++;
+		}
+	}
+	
+	vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, mod);
+	vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
+	vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, mod);
+	vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, mod);
+}
+
+static qboolean MD2_FindVBO (model_t *mod)
+{
+	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
+	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
+	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
+	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
+	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents;
+}
+
 /*
 =================
 Mod_LoadMD2Model
@@ -706,6 +760,8 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 
 		VectorCopy( tmp, mod->bbox[i] );
 	}	
+	
+	MD2_LoadVBO (mod);
 }
 
 //==============================================================
@@ -1551,29 +1607,33 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		
 		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, rs && rs->stage->normalmap && gl_normalmaps->integer);
 				
-		if(!dovbo)
-		{
-			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
-		}
-
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
 		
 		glUniform1iARB(g_location_useGPUanim, 0);
 
 		if (dovbo)
 		{
-			vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
-			vbo_st = R_VCFindCache(VBO_STORE_ST, currentmodel);
-			vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currentmodel);
-			vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currentmodel);
-			if(vbo_xyz && vbo_st && vbo_normals && vbo_tangents)
+			qboolean has_vbo;
+			
+			has_vbo = MD2_FindVBO (currentmodel);
+			
+			// TODO: remove this - the VBOs are getting unloaded for every new map
+			if (!has_vbo)
 			{
-				goto skipLoad;
+				MD2_LoadVBO (currentmodel);
+				has_vbo = MD2_FindVBO (currentmodel);
 			}
-		}	
+			
+			goto skipLoad;
+		}
+		
+		// can't use VBO if we're doing lerping-- yet!
+		// TODO: lerping in the vertex shader
+		
+		R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+		glEnableVertexAttribArrayARB (1);
+		glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
 			
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
@@ -1589,39 +1649,25 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				os = os2 = st[index_st].s;
 				ot = ot2 = st[index_st].t;
 
-				if(lerped)
+				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+
+				for (k=0; k<3; k++)
 				{
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+					( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
+					r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
 
-					for (k=0; k<3; k++)
-					{
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
-
-						tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
-						( r_avertexnormals[oldtangents[index_xyz]][k] -
-						r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
-					}
-					// we can safely assume that the contents of
-					// r_avertexnormals need not be converted to unit 
-					// vectors, however lerped normals may require this.
-					VectorNormalize ( normal );
+					tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
+					( r_avertexnormals[oldtangents[index_xyz]][k] -
+					r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
 				}
-				else
-				{
-					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
-					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
-					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
-
-					for (k=0;k<3;k++)
-					{
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-						tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
-					}
-				}
+				
+				// we can safely assume that the contents of
+				// r_avertexnormals need not be converted to unit 
+				// vectors, however lerped normals may require this.
+				VectorNormalize ( normal );
 
 				tangent[3] = 1.0;
 				
@@ -1631,15 +1677,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				//send tangent to shader
 				VectorCopy(normal, NormalsArray[va]); //shader needs normal array
 				Vector4Copy(tangent, TangentsArray[va]);
-				if (dovbo)
-				{
-					VertexArray[va][0] = VArray[0];
-					VertexArray[va][1] = VArray[1];
-					VertexArray[va][2] = VArray[2];
-
-					TexCoordArray[va][0] = VArray[3];
-					TexCoordArray[va][1] = VArray[4];
-				}				
 
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
@@ -1647,13 +1684,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			}
 		}
 
-		if(dovbo)
-		{
-			vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
-			vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, currentmodel);
-			vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currentmodel);
-			vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currentmodel);
-		}
 skipLoad:
 		if(dovbo) 
 		{
