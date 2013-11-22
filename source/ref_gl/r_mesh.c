@@ -1074,8 +1074,8 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 	{
 		R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-		glEnableVertexAttribArrayARB (1);
-		glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+		glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+		glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 	}
 
 	//send light level and color to shader, ramp up a bit
@@ -1632,8 +1632,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		
 		R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-		glEnableVertexAttribArrayARB (1);
-		glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
+		glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+		glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
 			
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
@@ -1700,9 +1700,9 @@ skipLoad:
 			GL_BindVBO(vbo_normals);
 			qglNormalPointer(GL_FLOAT, 0, 0);
 
-			glEnableVertexAttribArrayARB (1);
+			glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 			GL_BindVBO(vbo_tangents);
-			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+			glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 		}
 		
 		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
@@ -1723,7 +1723,7 @@ skipLoad:
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglClientActiveTextureARB (GL_TEXTURE1);
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	glDisableVertexAttribArrayARB (1);
+	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 
 	R_KillVArrays ();	
 

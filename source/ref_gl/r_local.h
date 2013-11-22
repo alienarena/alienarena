@@ -639,6 +639,11 @@ GLhandleARB g_godraysprogramObj;
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
 
+//vertex attribute indexes
+#define ATTR_TANGENT_IDX	1
+#define ATTR_WEIGHTS_IDX	5
+#define ATTR_BONES_IDX 		6
+
 //standard bsp surfaces
 GLuint		g_location_surfTexture;
 GLuint		g_location_eyePos;
