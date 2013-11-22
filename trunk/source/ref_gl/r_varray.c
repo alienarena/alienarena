@@ -104,63 +104,6 @@ void R_InitVArrays (int varraytype)
 		return;
 	}
 
-	// 2 TMUs which share texcoords
-	if (varraytype == VERT_DUAL_TEXTURED)
-	{
-		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_DUAL_TEXTURED], &VArrayVerts[3]);
-
-		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_DUAL_TEXTURED], &VArrayVerts[3]);
-
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-
-		return;
-	}
-
-	// the bumpmapped setup gets to reuse the verts as it's texcoords for tmu 0
-	if (varraytype == VERT_BUMPMAPPED)
-	{
-		// uses array indices 0, 1, 2
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (3, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED], &VArrayVerts[0]);
-
-		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED], &VArrayVerts[3]);
-
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-
-		return;
-	}
-
-	if (varraytype == VERT_BUMPMAPPED_COLOURED)
-	{
-		// uses array indices 0, 1, 2
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (3, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[0]);
-
-		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[3]);
-
-		// uses array indices 5, 6, 7, 8
-		qglEnableClientState (GL_COLOR_ARRAY);
-		qglColorPointer (4, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[5]);
-
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_RGBA_POINTER);
-
-		return;
-	}
-
 	// a standard 2 tmu multitexture needs 2 texcoord pointers. to do - for bsp surface VBO, we will have some changes here
 	if (varraytype == VERT_MULTI_TEXTURED)
 	{
@@ -175,18 +118,6 @@ void R_InitVArrays (int varraytype)
 		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_MULTI_TEXTURED], &VArrayVerts[5]);
 
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-
-		return;
-	}
-
-	// no texture is used here but we do specify a colour (used in Q2 for laser beams, etc)
-	if (varraytype == VERT_COLOURED_UNTEXTURED)
-	{
-		// uses array indices 3, 4, 5, 6
-		qglEnableClientState (GL_COLOR_ARRAY);
-		qglColorPointer (4, GL_FLOAT, sizeof (float) * VertexSizes[VERT_COLOURED_UNTEXTURED], &VArrayVerts[3]);
-
-		KillFlags |= KILL_RGBA_POINTER;
 
 		return;
 	}
