@@ -1703,11 +1703,11 @@ typedef struct {
 const vertex_attribute_t standard_attributes[] = 
 {
 	#define	ATTRIBUTE_TANGENT	(1<<0)
-	{"tangent",	1},
+	{"tangent",	ATTR_TANGENT_IDX},
 	#define	ATTRIBUTE_WEIGHTS	(1<<1)
-	{"weights",	6},
+	{"weights",	ATTR_WEIGHTS_IDX},
 	#define ATTRIBUTE_BONES		(1<<2)
-	{"bones",	7}
+	{"bones",	ATTR_BONES_IDX}
 };
 const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
 	
