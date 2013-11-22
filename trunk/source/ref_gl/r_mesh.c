@@ -429,13 +429,14 @@ static void MD2_VecsForTris(
 
 static void MD2_LoadVBO (model_t *mod)
 {
-	int i, j, k;
+	int i, j, k;;
+	int va = 0; // will eventually reach mod->num_triangles*3
+	
 	dmdl_t			*paliashdr;
 	dtriangle_t		*tris;
 	dtrivertx_t		*verts;
 	daliasframe_t	*frame;
-	int va = 0; // will eventually reach mod->num_triangles*3
-
+	
 	paliashdr = (dmdl_t *)mod->extradata;
 	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
@@ -1011,7 +1012,9 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 	//shell render
 	if(using_varray)
 	{
-		R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+		R_InitVArrays (VERT_NO_TEXTURE);
+		KillFlags |= KILL_NORMAL_POINTER;
+		qglEnableClientState( GL_NORMAL_ARRAY );
 		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 		glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 		glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
@@ -1339,9 +1342,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
 					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
-					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
-					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
-
 					for (k=0; k<3; k++)
 					{
 						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
@@ -1359,9 +1359,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-					VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
-					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
-
 					for (k=0;k<3;k++)
 					{
 						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
@@ -1375,7 +1372,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				Vector4Copy(tangent, TangentsArray[va]);
 
 				// increment pointer and counter
-				VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+				VArray += VertexSizes[VERT_NO_TEXTURE];
 				va++;
 			}
 		}

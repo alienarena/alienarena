@@ -986,6 +986,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 		vec3 t;
 		vec3 b;
 		vec4 neyeDir;
+		vec4 mpos;
 
 		if(GPUANIM > 0)
 		{
@@ -993,7 +994,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 			m += bonemats[int(bones.y)] * weights.y;
 			m += bonemats[int(bones.z)] * weights.z;
 			m += bonemats[int(bones.w)] * weights.w;
-			vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
+			mpos = vec4(gl_Vertex * m, gl_Vertex.w);
 			vec3 tmpn = vec4 (gl_Normal, 0.0) * m;
 			
 			n = normalize(gl_NormalMatrix * tmpn);
@@ -1013,7 +1014,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 		}
 		else
 		{
-			vec4 mpos = gl_Vertex;
+			mpos = gl_Vertex;
 			
 			if (useShell > 0)
 				mpos += normalize (vec4 (gl_Normal, 0)) * useShell;
@@ -1032,7 +1033,6 @@ static char mesh_vertex_program[] = STRINGIFY (
 		}
 		
 		worldNormal = n;
-		gl_TexCoord[0] = gl_MultiTexCoord0;
 
 		vec3 v;
 		v.x = dot(lightPos, t);
@@ -1045,15 +1045,18 @@ static char mesh_vertex_program[] = STRINGIFY (
 		v.z = dot(EyeDir, n);
 		EyeDir = normalize(v);
 
-		//for scrolling fx
-		vec4 texco = gl_MultiTexCoord0;
-		texco.s = texco.s + time*1.0;
-		texco.t = texco.t + time*2.0;
-		gl_TexCoord[1] = texco;
-
 		if(useShell > 0)
 		{
-			gl_TexCoord[0] = texco;
+			gl_TexCoord[0] = vec4 ((mpos[1]+mpos[0])/40.0, mpos[2]/40.0 - time, 0.0, 1.0);
+		}
+		else
+		{
+			gl_TexCoord[0] = gl_MultiTexCoord0;
+			//for scrolling fx
+			vec4 texco = gl_MultiTexCoord0;
+			texco.s = texco.s + time*1.0;
+			texco.t = texco.t + time*2.0;
+			gl_TexCoord[1] = texco;
 		}
 
 		if(useCube > 0)
