@@ -1551,19 +1551,15 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		
 		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, rs && rs->stage->normalmap && gl_normalmaps->integer);
 				
-		if(dovbo)
-		{
-			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER);
-		}
-		else 
+		if(!dovbo)
 		{
 			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 			glEnableVertexAttribArrayARB (1);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
-
-			KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
 		}
+
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
 		
 		glUniform1iARB(g_location_useGPUanim, 0);
 

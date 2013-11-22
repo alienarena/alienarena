@@ -1252,6 +1252,8 @@ inline void IQM_DrawVBO (qboolean tangents)
 	GL_BindVBO(vbo_xyz);
 	qglVertexPointer(3, GL_FLOAT, 0, 0);
 
+	KillFlags |= KILL_TMU0_POINTER;
+	qglClientActiveTextureARB (GL_TEXTURE0);
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	GL_BindVBO(vbo_st);
 	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
