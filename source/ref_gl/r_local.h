@@ -546,14 +546,10 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
-#define VERT_BUMPMAPPED					1		// verts and st for 1 tmu, but with 2 texcoord pointers
 #define VERT_MULTI_TEXTURED				2		// verts and st for 2 tmus
-#define VERT_COLOURED_UNTEXTURED		3		// verts and colour
 #define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
 #define VERT_COLOURED_MULTI_TEXTURED	5		// verts, st for 2 tmus and colour
-#define VERT_DUAL_TEXTURED				6		// verts, st for 2 tmus both with same st
 #define VERT_NO_TEXTURE					7		// verts only, no textures
-#define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
 #define VERT_NORMAL_COLOURED_TEXTURED	9		// verts and st for 1tmu and color, with normals
 
 // looks like these should be bit flags (2010-08)
