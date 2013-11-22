@@ -1129,7 +1129,7 @@ void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varr
 
 	glUniform1iARB( MESH_UNIFORM(useCube), 0);
 
-	glUniform1iARB( MESH_UNIFORM(useShell), 1);
+	glUniform1fARB( MESH_UNIFORM(useShell), ragdoll?1.6:0.4);
 
 	glUniform3fARB( MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
 
@@ -1235,7 +1235,7 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean f
 	else
 		glUniform1iARB( MESH_UNIFORM(useGlow), 0);
 
-	glUniform1iARB( MESH_UNIFORM(useShell), 0);	
+	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);	
 
 	if(fragmentshader && rs->stage->cube)
 	{
@@ -1270,7 +1270,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	int		index_xyz, index_st;
 	rscript_t *rs = NULL;
 	int		va = 0;
-	float shellscale;
 	vec3_t lightcolor;
 	fstvert_t *st;
 	float os, ot, os2, ot2;
@@ -1395,16 +1394,11 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				index_xyz = tris[i].index_xyz[j];
 				index_st = tris[i].index_st[j];
 
-				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || gl_normalmaps->integer)
-					shellscale = .4;
-				else
-					shellscale = 1.6;
-
 				if(lerped)
 				{
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * shellscale;
+					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;

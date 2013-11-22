@@ -953,7 +953,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 	uniform int FOG;
 	uniform mat3x4 bonemats[70];
 	uniform int GPUANIM;
-	uniform int useShell;
+	uniform float useShell; // doubles as shell scale
 	uniform int useCube;
 
 	attribute vec4 tangent;
@@ -994,11 +994,15 @@ static char mesh_vertex_program[] = STRINGIFY (
 			m += bonemats[int(bones.z)] * weights.z;
 			m += bonemats[int(bones.w)] * weights.w;
 			vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
+			vec3 tmpn = vec4 (gl_Normal, 0.0) * m;
+			
+			n = normalize(gl_NormalMatrix * tmpn);
+			
+			if (useShell > 0)
+				mpos += normalize (vec4 (tmpn, 0)) * useShell;
+
 			gl_Position = gl_ModelViewProjectionMatrix * mpos;
-
 			subScatterVS(gl_Position);
-
-			n = normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m));
 
 			t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));
 
@@ -1008,10 +1012,14 @@ static char mesh_vertex_program[] = STRINGIFY (
 			neyeDir = gl_ModelViewMatrix * mpos;
 		}
 		else
-		{	
-			subScatterVS(gl_ModelViewProjectionMatrix * gl_Vertex);
-
-			gl_Position = ftransform();
+		{
+			vec4 mpos = gl_Vertex;
+			
+			if (useShell > 0)
+				mpos += normalize (vec4 (gl_Normal, 0)) * useShell;
+			
+			gl_Position = gl_ModelViewProjectionMatrix * mpos;
+			subScatterVS (gl_Position);
 
 			n = normalize(gl_NormalMatrix * gl_Normal);
 
@@ -1020,9 +1028,9 @@ static char mesh_vertex_program[] = STRINGIFY (
 			b = tangent.w * cross(n, t);
 
 			EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
-			neyeDir = gl_ModelViewMatrix * gl_Vertex;;
+			neyeDir = gl_ModelViewMatrix * gl_Vertex;
 		}
-
+		
 		worldNormal = n;
 		gl_TexCoord[0] = gl_MultiTexCoord0;
 
@@ -1044,7 +1052,9 @@ static char mesh_vertex_program[] = STRINGIFY (
 		gl_TexCoord[1] = texco;
 
 		if(useShell > 0)
+		{
 			gl_TexCoord[0] = texco;
+		}
 
 		if(useCube > 0)
 		{
@@ -1077,7 +1087,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform int useFX;
 	uniform int useCube;
 	uniform int useGlow;
-	uniform int useShell;
+	uniform float useShell;
 	uniform int fromView;
 	uniform vec3 lightPos;
 	const float SpecularFactor = 0.5;
