@@ -602,11 +602,8 @@ void R_CastShadow(void)
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		if (currententity->
-		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
-				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
-				 RF_WEAPONMODEL | RF_NOSHADOWS | RF_TRANSLUCENT))
-				 continue;
+		if (currententity->flags & (RF_SHELL_ANY | RF_WEAPONMODEL | RF_NOSHADOWS | RF_TRANSLUCENT))
+			continue;
 
 		currentmodel = currententity->model;
 

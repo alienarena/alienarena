@@ -1327,7 +1327,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 
 	//render the model
 
-	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
+	if( currententity->flags & RF_SHELL_ANY )
 	{
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1781,7 +1781,7 @@ void IQM_DrawCaster ( void )
 	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
+	if ( currententity->flags & RF_SHELL_ANY ) //no shells
 		return;
 
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
