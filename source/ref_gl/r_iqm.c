@@ -1327,27 +1327,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 
 	//render the model
 
-	if( currententity->flags & RF_SHELL_ANY )
-	{
-		qglEnable (GL_BLEND);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		R_Mesh_SetupShell (r_shelltexture2->texnum, ragdoll, false, lightcolor);
-		
-		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-
-		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);			
-
-		glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-
-		IQM_DrawVBO (true);
-
-		glUseProgramObjectARB( 0 );
-		GL_EnableMultitexture( false );
-		if (ragdoll)
-			qglDepthMask(true);
-	}
-	else if(mirror || glass)
+	if ((mirror || glass) && !(currententity->flags & RF_SHELL_ANY))
 	{
 		//render glass with glsl shader
 		vec3_t lightVec;
@@ -1380,8 +1360,20 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		glUseProgramObjectARB( 0 );
 	}
 	else
-	{	
-		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, fragmentshader);
+	{
+		if (currententity->flags & RF_SHELL_ANY)
+		{
+			qglEnable (GL_BLEND);
+			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			
+			R_Mesh_SetupShell (r_shelltexture2->texnum, ragdoll, false, lightcolor);
+			
+			qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+		}
+		else
+		{
+			R_Mesh_SetupGLSL (skinnum, rs, lightcolor, fragmentshader);
+		}
 		
 		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);
 		
@@ -1389,12 +1381,10 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		
 		IQM_DrawVBO (true);
 		
+		// cleanup
 		qglColor4f(1,1,1,1);
-		
 		glUseProgramObjectARB( 0 );
-		
-		if (fragmentshader)
-			GL_EnableMultitexture( false );
+		GL_EnableMultitexture( false );
 	}
 
 	GLSTATE_DISABLE_ALPHATEST
