@@ -1370,7 +1370,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		}
 	}
 
-	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
+	if( currententity->flags & RF_SHELL_ANY )
 	{
 		R_Mesh_SetupShell (r_shelltexture->texnum, false, true, lightcolor);
 		
@@ -1727,7 +1727,7 @@ void R_Mesh_SetShadelight (void)
 {
 	int i;
 	
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
+	if ( currententity->flags & RF_SHELL_ANY )
 	{
 		VectorClear (shadelight);
 		if (currententity->flags & RF_SHELL_HALF_DAM)
@@ -1904,7 +1904,7 @@ void R_DrawAliasModel ( void )
 
 	GL_TexEnv( GL_MODULATE );
 
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE ) )
+	if ( currententity->flags & RF_SHELL_ANY )
 		qglEnable (GL_BLEND);
 	else if ( currententity->flags & RF_TRANSLUCENT )
 	{
@@ -1959,7 +1959,7 @@ void R_DrawAliasModel ( void )
 		qglCullFace( GL_FRONT );
 	}
 
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE ) )
+	if ( currententity->flags & RF_SHELL_ANY )
 		qglDisable(GL_BLEND);
 	else if ( currententity->flags & RF_TRANSLUCENT )
 	{
@@ -2126,7 +2126,7 @@ void MD2_DrawCaster ( void )
 	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
+	if ( currententity->flags & RF_SHELL_ANY ) //no shells
 		return;
 
 	if ( MD2_CullModel( bbox ) )

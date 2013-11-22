@@ -668,6 +668,8 @@ typedef struct
 #define	RF_NODRAW			0x00100000 //use this instead of a 0 modelindex for compatibility.
 #define RF_MENUMODEL		0x01280000 //for player menu
 
+#define RF_SHELL_ANY		(RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_HALF_DAM | RF_SHELL_DOUBLE)
+
 
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1		// warp the screen as apropriate
