@@ -75,8 +75,6 @@ float	r_avertexnormal_dots[SHADEDOT_QUANT][256] =
 #include "anormtab.h"
 ;
 
-float	*shadedots = r_avertexnormal_dots[0];
-
 /*
 =============
 MD2 Loading Routines
@@ -766,64 +764,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 //==============================================================
 //Rendering functions
 
-/*
-=============
-MD2_VlightModel
-
-Vertex lighting for Alias models
-
-Contrast has been added by finding a threshold point, and scaling values on either side in
-opposite directions.  This gives the shading a more prounounced, defined look.
-
-=============
-*/
-#if 0
-void MD2_VlightModel (vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut)
-{
-	int i;
-	float l;
-
-	l = shadedots[verts->lightnormalindex];
-	VectorScale(baselight, l, lightOut);
-
-	for (i=0; i<3; i++)
-	{
-		//add contrast - lights lighter, darks darker
-		lightOut[i] += (lightOut[i] - 0.25);
-
-		//keep values sane
-		if (lightOut[i]<0) lightOut[i] = 0;
-		if (lightOut[i]>1) lightOut[i] = 1;
-	}
-}
-#else
-/* Profiling shows this is a "hotspot". Calculation rearranged.
- * Leave original above for reference.
- */
-void MD2_VlightModel( const vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut )
-{
-	float l;
-	float c;
-
-	l = shadedots[verts->lightnormalindex];
-
-	c = baselight[0] * l;
-	c += ( c - 0.25 );  // [0,1] => [-0.25,1.75], then clamp to [0,1]
-	c = c < 0.0f ? 0.0f : ( c > 1.0f ? 1.0f : c );
-	lightOut[0] = c;
-
-	c = baselight[1] * l;
-	c += ( c - 0.25 );
-	c = c < 0.0f ? 0.0f : ( c > 1.0f ? 1.0f : c );
-	lightOut[1] = c;
-
-	c = baselight[2] * l;
-	c += ( c - 0.25 );
-	c = c < 0.0f ? 0.0f : ( c > 1.0f ? 1.0f : c );
-	lightOut[2] = c;
-
-}
-#endif
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
@@ -1838,8 +1778,6 @@ void R_DrawAliasModel ( void )
 	paliashdr = (dmdl_t *)currentmodel->extradata;
 
 	R_Mesh_SetShadelight ();
-
-	shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
 	if ( !(currententity->flags & RF_VIEWERMODEL) && !(currententity->flags & RF_WEAPONMODEL) )
 	{
