@@ -866,7 +866,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 void IQM_AnimateFrame(float curframe, int nextframe)
 {
-	int i, j;
+	int i;
 
     int frame1 = (int)floor(curframe),
         frame2 = nextframe;
@@ -1286,13 +1286,12 @@ inline void IQM_DrawVBO (qboolean tangents)
 
 void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 {
-	int		i, j;
+	int		i;
 	vec3_t	vectors[3];
 	rscript_t *rs = NULL;
 	float	alpha, basealpha;
 	vec3_t	lightcolor;
-	int		index_xyz, index_st;
-	int		va = 0;
+
 	qboolean mirror = false;
 	qboolean glass = false;
 	qboolean fragmentshader;
@@ -1727,10 +1726,6 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 void IQM_DrawCasterFrame ()
 {
-	int     i, j;
-    int     index_xyz, index_st;
-    int     va = 0;
-	
 	//just use a very basic shader for this instead of the normal mesh shader
 	glUseProgramObjectARB( g_blankmeshprogramObj );
 
