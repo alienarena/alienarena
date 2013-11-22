@@ -431,14 +431,13 @@ static void MD2_VecsForTris(
 
 static void MD2_LoadVBO (model_t *mod)
 {
-	int i, j, k;;
-	int va = 0; // will eventually reach mod->num_triangles*3
-	
+	int i, j, k;
 	dmdl_t			*paliashdr;
 	dtriangle_t		*tris;
 	dtrivertx_t		*verts;
 	daliasframe_t	*frame;
-	
+	int va = 0; // will eventually reach mod->num_triangles*3
+
 	paliashdr = (dmdl_t *)mod->extradata;
 	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
