@@ -1289,7 +1289,6 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 	int		i, j;
 	vec3_t	vectors[3];
 	rscript_t *rs = NULL;
-	float	shellscale;
 	float	alpha, basealpha;
 	vec3_t	lightcolor;
 	int		index_xyz, index_st;
@@ -1334,11 +1333,8 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		R_Mesh_SetupShell (r_shelltexture2->texnum, ragdoll, false, lightcolor);
-
-		if (ragdoll)
-			shellscale = 1.6;
-		else
-			shellscale = 0.4;
+		
+		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 
 		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);			
 
