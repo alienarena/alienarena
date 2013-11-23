@@ -1365,7 +1365,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		}
 	}
 
-	if( currententity->flags & RF_SHELL_ANY )
+	if (currententity->flags & RF_SHELL_ANY)
 	{
 		R_Mesh_SetupShell (r_shelltexture->texnum, false, lightcolor);
 		
