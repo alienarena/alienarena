@@ -952,13 +952,24 @@ static char mesh_vertex_program[] = STRINGIFY (
 	uniform float time;
 	uniform int FOG;
 	uniform mat3x4 bonemats[70];
-	uniform int GPUANIM;
+	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform float useShell; // doubles as shell scale
 	uniform int useCube;
+	
+	// MD2 only
+	uniform float lerp; // 1.0 = all new vertex, 0.0 = all old vertex
 
+	// IQM and MD2
 	attribute vec4 tangent;
+	
+	// IQM only
 	attribute vec4 weights;
 	attribute vec4 bones;
+	
+	// MD2 only
+	attribute vec3 oldvertex;
+	attribute vec3 oldnormal;
+	attribute vec4 oldtangent;
 	
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
@@ -988,7 +999,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 		vec4 neyeDir;
 		vec4 mpos;
 
-		if(GPUANIM > 0)
+		if(GPUANIM == 1)
 		{
 			mat3x4 m = bonemats[int(bones.x)] * weights.x;
 			m += bonemats[int(bones.y)] * weights.y;
@@ -1014,19 +1025,33 @@ static char mesh_vertex_program[] = STRINGIFY (
 		}
 		else
 		{
-			mpos = gl_Vertex;
+			vec3 tmpn;
+			vec4 tmptan;
+			
+			if (GPUANIM == 2)
+			{
+				mpos = mix (vec4 (oldvertex, 1), gl_Vertex, lerp);
+				tmpn = normalize (mix (oldnormal, gl_Normal, lerp));
+				tmptan = mix (oldtangent, tangent, lerp);
+			}
+			else
+			{
+				mpos = gl_Vertex;
+				tmpn = gl_Normal;
+				tmptan = tangent;
+			}
 			
 			if (useShell > 0)
-				mpos += normalize (vec4 (gl_Normal, 0)) * useShell;
+				mpos += normalize (vec4 (tmpn, 0)) * useShell;
 			
 			gl_Position = gl_ModelViewProjectionMatrix * mpos;
 			subScatterVS (gl_Position);
 
-			n = normalize(gl_NormalMatrix * gl_Normal);
+			n = normalize(gl_NormalMatrix * tmpn);
 
-			t = normalize(gl_NormalMatrix * tangent.xyz);
+			t = normalize(gl_NormalMatrix * tmptan.xyz);
 
-			b = tangent.w * cross(n, t);
+			b = tmptan.w * cross(n, t);
 
 			EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
 			neyeDir = gl_ModelViewMatrix * gl_Vertex;
@@ -1085,7 +1110,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
 	uniform vec3 baseColor;
-	uniform int GPUANIM;
+	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int FOG;
 	uniform int useFX;
 	uniform int useCube;
@@ -1173,7 +1198,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec3 reflectDir = reflect(LightDir, normal);
 
 		float spec = max(dot(EyeDir, reflectDir), 0.0);
-		if(GPUANIM > 0)
+		if(GPUANIM == 1)
 			spec = pow(spec, 4.0);
 		else
 			spec = pow(spec, 6.0);
@@ -1716,11 +1741,17 @@ typedef struct {
 const vertex_attribute_t standard_attributes[] = 
 {
 	#define	ATTRIBUTE_TANGENT	(1<<0)
-	{"tangent",	ATTR_TANGENT_IDX},
+	{"tangent",		ATTR_TANGENT_IDX},
 	#define	ATTRIBUTE_WEIGHTS	(1<<1)
-	{"weights",	ATTR_WEIGHTS_IDX},
+	{"weights",		ATTR_WEIGHTS_IDX},
 	#define ATTRIBUTE_BONES		(1<<2)
-	{"bones",	ATTR_BONES_IDX}
+	{"bones",		ATTR_BONES_IDX},
+	#define ATTRIBUTE_OLDVTX	(1<<3)
+	{"oldvertex",	ATTR_OLDVTX_IDX},
+	#define ATTRIBUTE_OLDNORM	(1<<4)
+	{"oldnormal",	ATTR_OLDNORM_IDX},
+	#define ATTRIBUTE_OLDTAN	(1<<5)
+	{"oldtangent",	ATTR_OLDTAN_IDX}
 };
 const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
 	
@@ -1770,12 +1801,9 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	glLinkProgramARB( *program );
 	glGetObjectParameterivARB( *program, GL_OBJECT_LINK_STATUS_ARB, &nResult );
 
+	glGetInfoLogARB( *program, sizeof(str), NULL, str );
 	if( !nResult )
-	{
-		glGetInfoLogARB( *program, sizeof(str), NULL, str );
-		Com_Printf("...%s Shader Linking Error\n", name);
-	}
-
+		Com_Printf("...%s Shader Linking Error\n%s\n", name, str);
 }
 
 void R_LoadGLSLPrograms(void)
@@ -1885,7 +1913,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
 
 	//meshes
-	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_meshprogramObj);
+	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_meshprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
@@ -1903,9 +1931,10 @@ void R_LoadGLSLPrograms(void)
 	g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
 	g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
 	g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
+	g_location_lerp = glGetUniformLocationARB( g_meshprogramObj, "lerp");
 	
 	//vertex-only meshes
-	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_vertexonlymeshprogramObj);
+	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_vertexonlymeshprogramObj);
 	
 	// Locate some parameters by name so we can set them later...
 	g_location_vo_meshlightPosition = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lightPos" );
@@ -1923,6 +1952,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_vo_useGPUanim = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "GPUANIM");
 	g_location_vo_outframe = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "bonemats");
 	g_location_vo_fromView = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fromView");
+	g_location_vo_lerp = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lerp");
 	
 	//Glass
 	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_glassprogramObj);

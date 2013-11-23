@@ -636,9 +636,14 @@ GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
 
 //vertex attribute indexes
+//blame NVIDIA for this idiocy:
+// http://stackoverflow.com/questions/528028/glvertexattrib-which-attribute-indices-are-predefined
 #define ATTR_TANGENT_IDX	1
-#define ATTR_WEIGHTS_IDX	5
-#define ATTR_BONES_IDX 		6
+#define ATTR_WEIGHTS_IDX	4
+#define ATTR_BONES_IDX 		5
+#define ATTR_OLDVTX_IDX		4
+#define ATTR_OLDNORM_IDX	5
+#define ATTR_OLDTAN_IDX		6
 
 //standard bsp surfaces
 GLuint		g_location_surfTexture;
@@ -704,6 +709,7 @@ GLuint		g_location_useCube;
 GLuint		g_location_useGPUanim;
 GLuint		g_location_outframe;
 GLuint		g_location_fromView;
+GLuint		g_location_lerp;
 
 //vertex-only mesh
 GLuint		g_location_vo_meshlightPosition;
@@ -721,6 +727,7 @@ GLuint		g_location_vo_useCube;
 GLuint		g_location_vo_useGPUanim;
 GLuint		g_location_vo_outframe;
 GLuint		g_location_vo_fromView;
+GLuint		g_location_vo_lerp;
 
 //glass
 GLuint		g_location_gmirTexture;

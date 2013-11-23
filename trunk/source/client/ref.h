@@ -110,7 +110,7 @@ typedef struct
 
 #define RDF_BLOOM         4      //BLOOMS
 
-#define	MAX_VERTEX_CACHES	4096
+#define	MAX_VERTEX_CACHES	((3+MAX_FRAMES*3)*MAX_MODELS)
 #define MAX_VBO_XYZs		65536
 
 typedef enum {
@@ -120,12 +120,14 @@ typedef enum {
 
 typedef enum {
 	VBO_STORE_ANY,
-	VBO_STORE_XYZ,
 	VBO_STORE_INDICES,
-	VBO_STORE_ST,
-	VBO_STORE_NORMAL,
 	VBO_STORE_BINORMAL,
-	VBO_STORE_TANGENT
+	VBO_STORE_ST,
+	// MD2 models will use, for example, VBO_STORE_XYZ+3 for the 3rd frame's 
+	// vertex data. IQM models are skeletal and don't need to do this.
+	VBO_STORE_XYZ,
+	VBO_STORE_NORMAL = VBO_STORE_XYZ+MAX_FRAMES,
+	VBO_STORE_TANGENT = VBO_STORE_NORMAL+MAX_FRAMES
 } vertStoreMode_t;
 
 typedef struct vertCache_s
