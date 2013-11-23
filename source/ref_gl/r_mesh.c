@@ -429,55 +429,63 @@ static void MD2_VecsForTris(
 
 static void MD2_LoadVBO (model_t *mod)
 {
-	int i, j, k;;
-	int va = 0; // will eventually reach mod->num_triangles*3
+	int i, j, k, framenum;
 	
 	dmdl_t			*paliashdr;
 	dtriangle_t		*tris;
 	dtrivertx_t		*verts;
 	daliasframe_t	*frame;
+	byte			*tangents;
 	
 	paliashdr = (dmdl_t *)mod->extradata;
 	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
-	verts = frame->verts;
 	
-	for (i=0; i<paliashdr->num_tris; i++)
+	for (framenum = 0; framenum < mod->num_frames; framenum++)
 	{
-		for (j=0; j<3; j++)
-		{
-			int index_xyz, index_st;
-			
-			index_xyz = tris[i].index_xyz[j];
-			index_st = tris[i].index_st[j];
-			
-			for (k = 0; k < 3; k++)
-				VertexArray[va][k] = verts[index_xyz].v[k] * frame->scale[k] + frame->translate[k];
-			
-			VectorCopy (r_avertexnormals[verts[index_xyz].lightnormalindex], NormalsArray[va]);
-			
-			VectorCopy (r_avertexnormals[mod->tangents[index_xyz]], TangentsArray[va]);
-			TangentsArray[va][3] = 1.0;
-			
-			TexCoordArray[va][0] = mod->st[index_st].s;
-			TexCoordArray[va][1] = mod->st[index_st].t;
-			
-			va++;
-		}
-	}
+		int va = 0; // will eventually reach mod->num_triangles*3
+		
+		frame = (daliasframe_t *)
+			((byte *)paliashdr + paliashdr->ofs_frames + framenum * paliashdr->framesize);
+		verts = frame->verts;
+		tangents = mod->tangents + paliashdr->num_xyz * framenum;
 	
-	vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, mod);
-	vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
-	vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, mod);
-	vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, mod);
+		for (i=0; i<paliashdr->num_tris; i++)
+		{
+			for (j=0; j<3; j++)
+			{
+				int index_xyz, index_st;
+			
+				index_xyz = tris[i].index_xyz[j];
+				index_st = tris[i].index_st[j];
+			
+				for (k = 0; k < 3; k++)
+					VertexArray[va][k] = verts[index_xyz].v[k] * frame->scale[k] + frame->translate[k];
+			
+				VectorCopy (r_avertexnormals[verts[index_xyz].lightnormalindex], NormalsArray[va]);
+			
+				VectorCopy (r_avertexnormals[tangents[index_xyz]], TangentsArray[va]);
+				TangentsArray[va][3] = 1.0;
+			
+				TexCoordArray[va][0] = mod->st[index_st].s;
+				TexCoordArray[va][1] = mod->st[index_st].t;
+			
+				va++;
+			}
+		}
+	
+		vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ+framenum, mod);
+		vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
+		vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL+framenum, mod);
+		vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT+framenum, mod);
+	}
 }
 
-static qboolean MD2_FindVBO (model_t *mod)
+static qboolean MD2_FindVBO (model_t *mod, int framenum)
 {
-	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
+	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod);
 	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
-	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
-	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
+	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod);
+	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod);
 	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents;
 }
 
@@ -1003,23 +1011,12 @@ void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float
 		}
 }
 
-void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, qboolean using_varray, vec3_t lightcolor)
+void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, vec3_t lightcolor)
 {
 	int i;
 	vec3_t lightVec, lightVal;
 	qboolean fragmentshader = gl_normalmaps->integer;
 	
-	//shell render
-	if(using_varray)
-	{
-		R_InitVArrays (VERT_NO_TEXTURE);
-		KillFlags |= KILL_NORMAL_POINTER;
-		qglEnableClientState( GL_NORMAL_ARRAY );
-		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-		glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-		glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-	}
-
 	//send light level and color to shader, ramp up a bit
 	VectorCopy(lightcolor, lightVal);
 	 for(i = 0; i < 3; i++) 
@@ -1194,6 +1191,59 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean f
 
 	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 }
+
+static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qboolean fragmentshader)
+{
+	glUniform1iARB(MESH_UNIFORM(useGPUanim), lerped?2:0);
+
+	if (!MD2_FindVBO (currentmodel, currententity->frame))
+	{
+		// TODO: remove this - the VBOs are getting unloaded for every new map
+		MD2_LoadVBO (currentmodel);
+		MD2_FindVBO (currentmodel, currententity->frame);
+	}
+
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	GL_BindVBO(vbo_xyz);
+	qglVertexPointer(3, GL_FLOAT, 0, 0);
+	
+	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	GL_BindVBO(vbo_st);
+	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+	qglEnableClientState( GL_NORMAL_ARRAY );
+	GL_BindVBO(vbo_normals);
+	qglNormalPointer(GL_FLOAT, 0, 0);
+
+	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+	GL_BindVBO(vbo_tangents);
+	glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+	
+	if (lerped)
+	{
+		MD2_FindVBO (currentmodel, currententity->oldframe);
+		
+		glEnableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
+		GL_BindVBO (vbo_xyz);
+		glVertexAttribPointerARB (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
+		
+		glEnableVertexAttribArrayARB (ATTR_OLDNORM_IDX);
+		GL_BindVBO (vbo_normals);
+		glVertexAttribPointerARB (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
+		
+		glEnableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
+		GL_BindVBO(vbo_tangents);
+		glVertexAttribPointerARB(ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+		
+		glUniform1fARB(MESH_UNIFORM(lerp), frontlerp);
+	}	
+	
+	if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
+		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+}
+
+
 /*
 =============
 MD2_DrawFrame - standard md2 rendering
@@ -1216,9 +1266,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	fstvert_t *st;
 	float os, ot, os2, ot2;
 	unsigned offs, offs2;
+	qboolean fragmentshader;
 	byte *tangents, *oldtangents = NULL;
 	qboolean mirror = false;
 	qboolean glass = false;
+	
+	fragmentshader = gl_normalmaps->integer;
 
 	offs = paliashdr->num_xyz;
 
@@ -1314,73 +1367,16 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 	if( currententity->flags & RF_SHELL_ANY )
 	{
-		R_Mesh_SetupShell (r_shelltexture->texnum, false, true, lightcolor);
-		
-		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-
-		VArray = &VArrayVerts[0];
+		R_Mesh_SetupShell (r_shelltexture->texnum, false, lightcolor);
 		
 		if (alpha < 0.0)
 			alpha = 0.0;
 		else if (alpha > 1.0)
 			alpha = 1.0;
+		
+		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 
-		for (i=0; i<paliashdr->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				vec3_t normal;
-				vec4_t tangent;
-				int k;
-
-				index_xyz = tris[i].index_xyz[j];
-				index_st = tris[i].index_st[j];
-
-				if(lerped)
-				{
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
-
-					for (k=0; k<3; k++)
-					{
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
-
-						tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
-						( r_avertexnormals[oldtangents[index_xyz]][k] -
-						r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
-					}
-				}
-				else
-				{
-					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
-					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
-					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
-
-					for (k=0;k<3;k++)
-					{
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-						tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
-					}
-				}
-				tangent[3] = 1.0;
-
-				VectorNormalize ( normal );
-				VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-				Vector4Copy(tangent, TangentsArray[va]);
-
-				// increment pointer and counter
-				VArray += VertexSizes[VERT_NO_TEXTURE];
-				va++;
-			}
-		}
-
-		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-		{
-			R_DrawVarrays(GL_TRIANGLES, 0, va);
-		}
+		MD2_DrawVBO (lerped, frontlerp, paliashdr, false);
 
 		glUseProgramObjectARB( 0 );
 		GL_EnableMultitexture( false );
@@ -1528,10 +1524,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	}
 	else
 	{
-		qboolean dovbo;
-		
-		dovbo = !lerped;
-		
 		if(rs && rs->stage->depthhack)
 			qglDepthMask(false);
 		
@@ -1539,104 +1531,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
 		
-		glUniform1iARB(g_location_useGPUanim, 0);
-
-		if (dovbo)
-		{
-			qboolean has_vbo;
-			
-			has_vbo = MD2_FindVBO (currentmodel);
-			
-			// TODO: remove this - the VBOs are getting unloaded for every new map
-			if (!has_vbo)
-			{
-				MD2_LoadVBO (currentmodel);
-				has_vbo = MD2_FindVBO (currentmodel);
-			}
-			
-			goto skipLoad;
-		}
-		
-		// can't use VBO if we're doing lerping-- yet!
-		// TODO: lerping in the vertex shader
-		
-		R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-		glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-		glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
-			
-		for (i=0; i<paliashdr->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				vec3_t normal;
-				vec4_t tangent;
-				int k;
-
-				index_xyz = tris[i].index_xyz[j];
-				index_st = tris[i].index_st[j];
-
-				os = os2 = st[index_st].s;
-				ot = ot2 = st[index_st].t;
-
-				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
-
-				for (k=0; k<3; k++)
-				{
-					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-					( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-					r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
-
-					tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
-					( r_avertexnormals[oldtangents[index_xyz]][k] -
-					r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
-				}
-				
-				// we can safely assume that the contents of
-				// r_avertexnormals need not be converted to unit 
-				// vectors, however lerped normals may require this.
-				VectorNormalize ( normal );
-
-				tangent[3] = 1.0;
-				
-				VArray[3] = os;
-				VArray[4] = ot;
-
-				//send tangent to shader
-				VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-				Vector4Copy(tangent, TangentsArray[va]);
-
-				// increment pointer and counter
-				VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-				va++;
-			}
-		}
-
-skipLoad:
-		if(dovbo) 
-		{
-			qglEnableClientState( GL_VERTEX_ARRAY );
-			GL_BindVBO(vbo_xyz);
-			qglVertexPointer(3, GL_FLOAT, 0, 0);
-			
-			qglClientActiveTextureARB (GL_TEXTURE0);
-			qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			GL_BindVBO(vbo_st);
-			qglTexCoordPointer(2, GL_FLOAT, 0, 0);
-
-			qglEnableClientState( GL_NORMAL_ARRAY );
-			GL_BindVBO(vbo_normals);
-			qglNormalPointer(GL_FLOAT, 0, 0);
-
-			glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-			GL_BindVBO(vbo_tangents);
-			glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
-		}
-		
-		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+		MD2_DrawVBO (lerped, frontlerp, paliashdr, rs && rs->stage->normalmap && gl_normalmaps->integer);
 
 		glUseProgramObjectARB( 0 );
 		GL_EnableMultitexture( false );
@@ -1654,6 +1549,12 @@ skipLoad:
 	qglClientActiveTextureARB (GL_TEXTURE1);
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+	if (lerped)
+	{
+		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
+		glDisableVertexAttribArrayARB (ATTR_OLDNORM_IDX);
+		glDisableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
+	}
 
 	R_KillVArrays ();	
 
