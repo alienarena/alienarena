@@ -638,11 +638,11 @@ GLhandleARB g_fragmentShader;
 //blame NVIDIA for this idiocy:
 // http://stackoverflow.com/questions/528028/glvertexattrib-which-attribute-indices-are-predefined
 #define ATTR_TANGENT_IDX	1
-#define ATTR_WEIGHTS_IDX	4
-#define ATTR_BONES_IDX 		5
-#define ATTR_OLDVTX_IDX		4
-#define ATTR_OLDNORM_IDX	5
-#define ATTR_OLDTAN_IDX		6
+#define ATTR_WEIGHTS_IDX	11
+#define ATTR_BONES_IDX 		12
+#define ATTR_OLDVTX_IDX		13
+#define ATTR_OLDNORM_IDX	14
+#define ATTR_OLDTAN_IDX		15
 
 //standard bsp surfaces
 GLuint		g_location_surfTexture;
