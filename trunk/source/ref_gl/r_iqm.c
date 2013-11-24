@@ -1243,7 +1243,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		Com_Printf ("WARN: could not load VBO for model!\n");
 }
 
-void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, vec3_t lightcolor);
+void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor);
 void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader);
 
 inline void IQM_DrawVBO (qboolean tangents)
@@ -1374,7 +1374,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 			qglEnable (GL_BLEND);
 			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			
-			R_Mesh_SetupShell (r_shelltexture2->texnum, ragdoll, lightcolor);
+			R_Mesh_SetupShell (ragdoll, lightcolor);
 			
 			qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 		}

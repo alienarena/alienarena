@@ -1011,7 +1011,7 @@ void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float
 		}
 }
 
-void R_Mesh_SetupShell (int shell_skinnum, qboolean ragdoll, vec3_t lightcolor)
+void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor)
 {
 	int i;
 	vec3_t lightVec, lightVal;
@@ -1381,7 +1381,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 	if (currententity->flags & RF_SHELL_ANY)
 	{
-		R_Mesh_SetupShell (r_shelltexture->texnum, false, lightcolor);
+		R_Mesh_SetupShell (false, lightcolor);
 		
 		if (alpha < 0.0)
 			alpha = 0.0;
