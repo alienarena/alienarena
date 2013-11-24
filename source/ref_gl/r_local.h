@@ -550,7 +550,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
 #define VERT_COLOURED_MULTI_TEXTURED	5		// verts, st for 2 tmus and colour
 #define VERT_NO_TEXTURE					7		// verts only, no textures
-#define VERT_NORMAL_COLOURED_TEXTURED	9		// verts and st for 1tmu and color, with normals
 
 // looks like these should be bit flags (2010-08)
 // apparently not - this was not working as bit flags, works fine as ints
