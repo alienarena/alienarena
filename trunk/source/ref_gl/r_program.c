@@ -1021,13 +1021,30 @@ static char mesh_anim_library[] = STRINGIFY (
 );
 
 //MESHES
-static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
+static char mesh_vertex_program[] = STRINGIFY (
 
 	uniform vec3 lightPos;
 	uniform float time;
 	uniform int FOG;
+	uniform mat3x4 bonemats[70];
+	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform float useShell; // doubles as shell scale
 	uniform int useCube;
+	
+	// MD2 only
+	uniform float lerp; // 1.0 = all new vertex, 0.0 = all old vertex
+
+	// IQM and MD2
+	attribute vec4 tangent;
+	
+	// IQM only
+	attribute vec4 weights;
+	attribute vec4 bones;
+	
+	// MD2 only
+	attribute vec3 oldvertex;
+	attribute vec3 oldnormal;
+	attribute vec4 oldtangent;
 	
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
@@ -1055,21 +1072,65 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 		vec3 t;
 		vec3 b;
 		vec4 neyeDir;
-		
-		anim_compute (true, true);
-		
-		if (useShell > 0)
-			anim_vertex += normalize (vec4 (anim_normal, 0)) * useShell;
+		vec4 mpos;
+
+		if(GPUANIM == 1)
+		{
+			mat3x4 m = bonemats[int(bones.x)] * weights.x;
+			m += bonemats[int(bones.y)] * weights.y;
+			m += bonemats[int(bones.z)] * weights.z;
+			m += bonemats[int(bones.w)] * weights.w;
+			mpos = vec4(gl_Vertex * m, gl_Vertex.w);
+			vec3 tmpn = vec4 (gl_Normal, 0.0) * m;
 			
-		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
-		subScatterVS (gl_Position);
-		
-		n = normalize (gl_NormalMatrix * anim_normal);
-		t = normalize (gl_NormalMatrix * anim_tangent);
-		b = normalize (gl_NormalMatrix * anim_tangent_w) * cross (n, t);
-		
-		EyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
-		neyeDir = gl_ModelViewMatrix * anim_vertex;
+			n = normalize(gl_NormalMatrix * tmpn);
+			
+			if (useShell > 0)
+				mpos += normalize (vec4 (tmpn, 0)) * useShell;
+
+			gl_Position = gl_ModelViewProjectionMatrix * mpos;
+			subScatterVS(gl_Position);
+
+			t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));
+
+			b = normalize(gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t); 
+
+			EyeDir = vec3(gl_ModelViewMatrix * mpos);
+			neyeDir = gl_ModelViewMatrix * mpos;
+		}
+		else
+		{
+			vec3 tmpn;
+			vec4 tmptan;
+			
+			if (GPUANIM == 2)
+			{
+				mpos = mix (vec4 (oldvertex, 1), gl_Vertex, lerp);
+				tmpn = normalize (mix (oldnormal, gl_Normal, lerp));
+				tmptan = mix (oldtangent, tangent, lerp);
+			}
+			else
+			{
+				mpos = gl_Vertex;
+				tmpn = gl_Normal;
+				tmptan = tangent;
+			}
+			
+			if (useShell > 0)
+				mpos += normalize (vec4 (tmpn, 0)) * useShell;
+			
+			gl_Position = gl_ModelViewProjectionMatrix * mpos;
+			subScatterVS (gl_Position);
+
+			n = normalize(gl_NormalMatrix * tmpn);
+
+			t = normalize(gl_NormalMatrix * tmptan.xyz);
+
+			b = tmptan.w * cross(n, t);
+
+			EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
+			neyeDir = gl_ModelViewMatrix * gl_Vertex;
+		}
 		
 		worldNormal = n;
 
@@ -1086,7 +1147,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 
 		if(useShell > 0)
 		{
-			gl_TexCoord[0] = vec4 ((anim_vertex[1]+anim_vertex[0])/40.0, anim_vertex[2]/40.0 - time, 0.0, 1.0);
+			gl_TexCoord[0] = vec4 ((mpos[1]+mpos[0])/40.0, mpos[2]/40.0 - time, 0.0, 1.0);
 		}
 		else
 		{
