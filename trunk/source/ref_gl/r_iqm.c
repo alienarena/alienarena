@@ -1357,7 +1357,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		glUniform1iARB( g_location_g_mirTexture, 1);
 
 		GL_MBind (0, r_mirrorspec->texnum);
-		glUniform1iARB( g_location_g_refTexture, 0);		
+		glUniform1iARB( g_location_g_refTexture, 0);
 
 		glUniform1iARB( g_location_g_fog, map_fog);
 										
@@ -1392,7 +1392,6 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		// cleanup
 		qglColor4f(1,1,1,1);
 		glUseProgramObjectARB( 0 );
-		GL_EnableMultitexture( false );
 	}
 
 	GLSTATE_DISABLE_ALPHATEST
