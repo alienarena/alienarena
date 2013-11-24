@@ -1202,7 +1202,7 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 		MD2_LoadVBO (currentmodel);
 		MD2_FindVBO (currentmodel, currententity->frame);
 	}
-
+	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
 	qglVertexPointer(3, GL_FLOAT, 0, 0);
@@ -1211,7 +1211,7 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	GL_BindVBO(vbo_st);
 	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
-
+	
 	qglEnableClientState( GL_NORMAL_ARRAY );
 	GL_BindVBO(vbo_normals);
 	qglNormalPointer(GL_FLOAT, 0, 0);
@@ -1237,7 +1237,7 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 		glVertexAttribPointerARB(ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 		
 		glUniform1fARB(MESH_UNIFORM(lerp), frontlerp);
-	}	
+	}
 	
 	if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
 		qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
@@ -1376,7 +1376,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 
-		MD2_DrawVBO (lerped, frontlerp, paliashdr, false);
+		MD2_DrawVBO (lerped, frontlerp, paliashdr, fragmentshader);
 
 		glUseProgramObjectARB( 0 );
 		GL_EnableMultitexture( false );
@@ -1386,9 +1386,9 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		// TODO: use the glass shader here.
 		qboolean mirror_noweap;
 		int vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
-
+		
 		mirror_noweap = mirror && !(currententity->flags & RF_WEAPONMODEL);
-	   
+		
 		qglDepthMask(false);
 
 		if(mirror)
@@ -1516,7 +1516,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 		}
 
-		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
+		if(mirror_noweap)
 			GL_EnableMultitexture( false );
 
 		qglDepthMask(true);
@@ -1544,10 +1544,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
 
+	// TODO: what's all this stuff for? Shouldn't KillVArrays handle this?
 	qglDisableClientState( GL_NORMAL_ARRAY);
 	qglDisableClientState( GL_COLOR_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	qglClientActiveTextureARB (GL_TEXTURE1); 
+	qglEnableClientState( GL_TEXTURE_COORD_ARRAY ); // And what is *this* for?
+	
 	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 	if (lerped)
 	{
