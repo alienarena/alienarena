@@ -1278,10 +1278,17 @@ inline void IQM_DrawVBO (qboolean tangents)
 	glEnableVertexAttribArrayARB(ATTR_BONES_IDX);
 	glVertexAttribPointerARB(ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights);
 	glVertexAttribPointerARB(ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 				
-
-	qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
-
+	
+	qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
+	
 	GL_BindIBO(NULL);
+	
+	glDisableVertexAttribArrayARB(ATTR_TANGENT_IDX);
+	glDisableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
+	glDisableVertexAttribArrayARB(ATTR_BONES_IDX);
+
+	R_KillVArrays ();
+
 }
 
 void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
@@ -1391,12 +1398,6 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
-
-	glDisableVertexAttribArrayARB(ATTR_TANGENT_IDX);
-	glDisableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-	glDisableVertexAttribArrayARB(ATTR_BONES_IDX);
-
-	R_KillVArrays ();
 
 }
 

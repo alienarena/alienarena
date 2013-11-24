@@ -1207,11 +1207,13 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 	GL_BindVBO(vbo_xyz);
 	qglVertexPointer(3, GL_FLOAT, 0, 0);
 	
+	KillFlags |= KILL_TMU0_POINTER;
 	qglClientActiveTextureARB (GL_TEXTURE0);
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	GL_BindVBO(vbo_st);
 	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 	
+	KillFlags |= KILL_NORMAL_POINTER;
 	qglEnableClientState( GL_NORMAL_ARRAY );
 	GL_BindVBO(vbo_normals);
 	qglNormalPointer(GL_FLOAT, 0, 0);
@@ -1239,8 +1241,20 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 		glUniform1fARB(MESH_UNIFORM(lerp), frontlerp);
 	}
 	
+	GL_BindVBO (NULL);
+	
 	if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
 		qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
+	
+	R_KillVArrays ();
+	
+	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+	if (lerped)
+	{
+		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
+		glDisableVertexAttribArrayARB (ATTR_OLDNORM_IDX);
+		glDisableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
+	}
 }
 
 
@@ -1529,8 +1543,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		
 		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, rs && rs->stage->normalmap && gl_normalmaps->integer);
 				
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_TMU3_POINTER | KILL_NORMAL_POINTER); //needed to kill all of these texture units
-		
 		MD2_DrawVBO (lerped, frontlerp, paliashdr, rs && rs->stage->normalmap && gl_normalmaps->integer);
 
 		glUseProgramObjectARB( 0 );
@@ -1544,21 +1556,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
 
-	// TODO: what's all this stuff for? Shouldn't KillVArrays handle this?
-	qglDisableClientState( GL_NORMAL_ARRAY);
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE1); 
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY ); // And what is *this* for?
-	
-	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-	if (lerped)
-	{
-		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
-		glDisableVertexAttribArrayARB (ATTR_OLDNORM_IDX);
-		glDisableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
-	}
-
-	R_KillVArrays ();	
+	R_KillVArrays ();
 
 }
 
