@@ -1038,9 +1038,6 @@ void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor)
 	VectorMA(lightPosition, 1.0, lightVec, lightPosition);
 	R_ModelViewTransform(lightPosition, lightVec);
 
-	if (fragmentshader)
-		GL_EnableMultitexture( true );
-	
 	if (ragdoll)
 		qglDepthMask(false);
 
@@ -1137,9 +1134,6 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean f
 	}
 
 	if (fragmentshader)
-		GL_EnableMultitexture( true );
-
-	if (fragmentshader)
 		glUseProgramObjectARB( g_meshprogramObj );
 	else
 		glUseProgramObjectARB( g_vertexonlymeshprogramObj );
@@ -1192,10 +1186,8 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean f
 	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 }
 
-static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qboolean fragmentshader)
+static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr)
 {
-	glUniform1iARB(MESH_UNIFORM(useGPUanim), lerped?2:0);
-
 	if (!MD2_FindVBO (currentmodel, currententity->frame))
 	{
 		// TODO: remove this - the VBOs are getting unloaded for every new map
@@ -1237,8 +1229,6 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 		glEnableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
 		GL_BindVBO(vbo_tangents);
 		glVertexAttribPointerARB(ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
-		
-		glUniform1fARB(MESH_UNIFORM(lerp), frontlerp);
 	}
 	
 	GL_BindVBO (NULL);
@@ -1313,8 +1303,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 	st = currentmodel->st;
 
-	if (r_shaders->integer)
-			rs=(rscript_t *)currententity->script;
+	if (r_shaders->integer && !(currententity->flags & RF_SHELL_ANY))
+		rs=(rscript_t *)currententity->script;
 
 	VectorCopy(shadelight, lightcolor);
 	for (i=0;i<model_dlights_num;i++)
@@ -1378,24 +1368,13 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				return;
 		}
 	}
+	
+	if (alpha < 0.0)
+		alpha = 0.0;
+	else if (alpha > 1.0)
+		alpha = 1.0;
 
-	if (currententity->flags & RF_SHELL_ANY)
-	{
-		R_Mesh_SetupShell (false, lightcolor);
-		
-		if (alpha < 0.0)
-			alpha = 0.0;
-		else if (alpha > 1.0)
-			alpha = 1.0;
-		
-		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-
-		MD2_DrawVBO (lerped, frontlerp, paliashdr, fragmentshader);
-
-		glUseProgramObjectARB( 0 );
-		GL_EnableMultitexture( false );
-	}
-	else if(mirror || glass)
+	if ((mirror || glass) && !(currententity->flags & RF_SHELL_ANY))
 	{
 		// TODO: use the glass shader here.
 		qboolean mirror_noweap;
@@ -1541,12 +1520,25 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		if(rs && rs->stage->depthhack)
 			qglDepthMask(false);
 		
-		R_Mesh_SetupGLSL (skinnum, rs, lightcolor, rs && rs->stage->normalmap && gl_normalmaps->integer);
+		fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
+		
+		if (currententity->flags & RF_SHELL_ANY)
+		{
+			R_Mesh_SetupShell (false, lightcolor);
+		
+			qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+		}
+		else
+		{
+			R_Mesh_SetupGLSL (skinnum, rs, lightcolor, fragmentshader);
+		}
+		
+		glUniform1iARB (MESH_UNIFORM(useGPUanim), lerped?2:0);
+		glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
 				
-		MD2_DrawVBO (lerped, frontlerp, paliashdr, rs && rs->stage->normalmap && gl_normalmaps->integer);
+		MD2_DrawVBO (lerped, frontlerp, paliashdr);
 
 		glUseProgramObjectARB( 0 );
-		GL_EnableMultitexture( false );
 
 		if(rs && rs->stage->depthhack)
 			qglDepthMask(true);
@@ -1865,7 +1857,6 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
 	
 	glUseProgramObjectARB( 0 );
-	GL_EnableMultitexture( false );
 	
 	if (lerped)
 		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
