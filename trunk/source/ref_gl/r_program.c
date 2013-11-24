@@ -58,6 +58,7 @@ PFNGLVERTEXATTRIBPOINTERARBPROC	 glVertexAttribPointerARB	= NULL;
 PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB = NULL;
 PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
 PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
+void (*glGetShaderInfoLog) (GLuint shader, GLsizei maxLength, GLsizei *length, GLchar *infoLog) = NULL;
 
 //doesn't work with ARB shaders, unfortunately, due to the #comments
 #define STRINGIFY(...) #__VA_ARGS__
@@ -945,16 +946,11 @@ static char shadow_fragment_program_ATI[] = STRINGIFY (
 );
 
 
-//MESHES
-static char mesh_vertex_program[] = STRINGIFY (
-
-	uniform vec3 lightPos;
-	uniform float time;
-	uniform int FOG;
+#define USE_MESH_ANIM_LIBRARY "/*USE_MESH_ANIM_LIBRARY*/"
+static char mesh_anim_library[] = STRINGIFY (
+	
 	uniform mat3x4 bonemats[70];
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
-	uniform float useShell; // doubles as shell scale
-	uniform int useCube;
 	
 	// MD2 only
 	uniform float lerp; // 1.0 = all new vertex, 0.0 = all old vertex
@@ -970,6 +966,68 @@ static char mesh_vertex_program[] = STRINGIFY (
 	attribute vec3 oldvertex;
 	attribute vec3 oldnormal;
 	attribute vec4 oldtangent;
+	
+	// anim_compute () output
+	vec4 anim_vertex;
+	vec3 anim_normal;
+	vec3 anim_tangent;
+	vec3 anim_tangent_w;
+	
+	// if dotangent is true, compute anim_tangent and anim_tangent_w
+	// if donormal is true, compute anim_normal
+	// hopefully the if statements for these booleans will get optimized out
+	void anim_compute (bool dotangent, bool donormal)
+	{
+		if (GPUANIM == 1)
+		{
+			mat3x4 m = bonemats[int(bones.x)] * weights.x;
+			m += bonemats[int(bones.y)] * weights.y;
+			m += bonemats[int(bones.z)] * weights.z;
+			m += bonemats[int(bones.w)] * weights.w;
+			
+			anim_vertex = vec4 (gl_Vertex * m, gl_Vertex.w);
+			if (donormal)
+				anim_normal = vec4 (gl_Normal, 0.0) * m;
+			if (dotangent)
+			{
+				anim_tangent = vec4 (tangent.xyz, 0.0) * m;
+				anim_tangent_w = vec4 (tangent.w, 0.0, 0.0, 0.0) * m;
+			}
+		}
+		else if (GPUANIM == 2)
+		{
+			anim_vertex = mix (vec4 (oldvertex, 1), gl_Vertex, lerp);
+			if (donormal)
+				anim_normal = normalize (mix (oldnormal, gl_Normal, lerp));
+			if (dotangent)
+			{
+				vec4 tmptan = mix (oldtangent, tangent, lerp);
+				anim_tangent = tmptan.xyz;
+				anim_tangent_w = vec3 (tmptan.w);
+			}
+		}
+		else
+		{
+			anim_vertex = gl_Vertex;
+			if (donormal)
+				anim_normal = gl_Normal;
+			if (dotangent)
+			{
+				anim_tangent = tangent.xyz;
+				anim_tangent_w = vec3 (tangent.w);
+			}
+		}
+	}
+);
+
+//MESHES
+static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
+
+	uniform vec3 lightPos;
+	uniform float time;
+	uniform int FOG;
+	uniform float useShell; // doubles as shell scale
+	uniform int useCube;
 	
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
@@ -997,65 +1055,21 @@ static char mesh_vertex_program[] = STRINGIFY (
 		vec3 t;
 		vec3 b;
 		vec4 neyeDir;
-		vec4 mpos;
-
-		if(GPUANIM == 1)
-		{
-			mat3x4 m = bonemats[int(bones.x)] * weights.x;
-			m += bonemats[int(bones.y)] * weights.y;
-			m += bonemats[int(bones.z)] * weights.z;
-			m += bonemats[int(bones.w)] * weights.w;
-			mpos = vec4(gl_Vertex * m, gl_Vertex.w);
-			vec3 tmpn = vec4 (gl_Normal, 0.0) * m;
+		
+		anim_compute (true, true);
+		
+		if (useShell > 0)
+			anim_vertex += normalize (vec4 (anim_normal, 0)) * useShell;
 			
-			n = normalize(gl_NormalMatrix * tmpn);
-			
-			if (useShell > 0)
-				mpos += normalize (vec4 (tmpn, 0)) * useShell;
-
-			gl_Position = gl_ModelViewProjectionMatrix * mpos;
-			subScatterVS(gl_Position);
-
-			t = normalize(gl_NormalMatrix * (vec4(tangent.xyz, 0.0) * m));
-
-			b = normalize(gl_NormalMatrix * (vec4(tangent.w, 0.0, 0.0, 0.0) * m)) * cross(n, t); 
-
-			EyeDir = vec3(gl_ModelViewMatrix * mpos);
-			neyeDir = gl_ModelViewMatrix * mpos;
-		}
-		else
-		{
-			vec3 tmpn;
-			vec4 tmptan;
-			
-			if (GPUANIM == 2)
-			{
-				mpos = mix (vec4 (oldvertex, 1), gl_Vertex, lerp);
-				tmpn = normalize (mix (oldnormal, gl_Normal, lerp));
-				tmptan = mix (oldtangent, tangent, lerp);
-			}
-			else
-			{
-				mpos = gl_Vertex;
-				tmpn = gl_Normal;
-				tmptan = tangent;
-			}
-			
-			if (useShell > 0)
-				mpos += normalize (vec4 (tmpn, 0)) * useShell;
-			
-			gl_Position = gl_ModelViewProjectionMatrix * mpos;
-			subScatterVS (gl_Position);
-
-			n = normalize(gl_NormalMatrix * tmpn);
-
-			t = normalize(gl_NormalMatrix * tmptan.xyz);
-
-			b = tmptan.w * cross(n, t);
-
-			EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
-			neyeDir = gl_ModelViewMatrix * gl_Vertex;
-		}
+		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
+		subScatterVS (gl_Position);
+		
+		n = normalize (gl_NormalMatrix * anim_normal);
+		t = normalize (gl_NormalMatrix * anim_tangent);
+		b = normalize (gl_NormalMatrix * anim_tangent_w) * cross (n, t);
+		
+		EyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
+		neyeDir = gl_ModelViewMatrix * anim_vertex;
 		
 		worldNormal = n;
 
@@ -1072,7 +1086,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 
 		if(useShell > 0)
 		{
-			gl_TexCoord[0] = vec4 ((mpos[1]+mpos[0])/40.0, mpos[2]/40.0 - time, 0.0, 1.0);
+			gl_TexCoord[0] = vec4 ((anim_vertex[1]+anim_vertex[0])/40.0, anim_vertex[2]/40.0 - time, 0.0, 1.0);
 		}
 		else
 		{
@@ -1243,13 +1257,9 @@ static char mesh_fragment_program[] = STRINGIFY (
 );
 
 //GLASS 
-static char glass_vertex_program[] = STRINGIFY (
+static char glass_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 
-	uniform mat3x4 bonemats[70];
 	uniform int FOG;
-
-	attribute vec4 weights;
-	attribute vec4 bones;
 
 	varying vec3 r;
 	varying float fog;
@@ -1257,20 +1267,17 @@ static char glass_vertex_program[] = STRINGIFY (
 
 	void main(void)
 	{
-		mat3x4 m = bonemats[int(bones.x)] * weights.x;
-		m += bonemats[int(bones.y)] * weights.y;
-		m += bonemats[int(bones.z)] * weights.z;
-		m += bonemats[int(bones.w)] * weights.w;
-		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
-		gl_Position = gl_ModelViewProjectionMatrix * mpos;
+		anim_compute (false, true);
+		
+		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 
-		vec3 u = normalize( vec3(gl_ModelViewMatrix * mpos) ); 	
-		vec3 n = normalize(gl_NormalMatrix * (vec4(gl_Normal, 0.0) * m)); 
+		vec3 u = normalize( vec3(gl_ModelViewMatrix * anim_vertex) ); 	
+		vec3 n = normalize(gl_NormalMatrix * anim_normal); 
 
 		r = reflect( u, n );
 
 		normal = n;
-		vert = vec3( gl_ModelViewMatrix * mpos );
+		vert = vec3( gl_ModelViewMatrix * anim_vertex );
 
 		//fog
 	   if(FOG > 0) 
@@ -1316,20 +1323,11 @@ static char glass_fragment_program[] = STRINGIFY (
 );
 
 //NO TEXTURE 
-static char blankmesh_vertex_program[] = STRINGIFY (
-	uniform mat3x4 bonemats[70];
-
-	attribute vec4 weights;
-	attribute vec4 bones;
-
+static char blankmesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 	void main(void)
 	{
-		mat3x4 m = bonemats[int(bones.x)] * weights.x;
-		m += bonemats[int(bones.y)] * weights.y;
-		m += bonemats[int(bones.z)] * weights.z;
-		m += bonemats[int(bones.w)] * weights.w;
-		vec4 mpos = vec4(gl_Vertex * m, gl_Vertex.w);
-		gl_Position = gl_ModelViewProjectionMatrix * mpos;		
+		anim_compute (false, false);
+		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 	}
 );
 
@@ -1758,7 +1756,7 @@ const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_at
 void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
 {
 	char		str[4096];
-	const char	*shaderStrings[2];
+	const char	*shaderStrings[3];
 	int			nResult;
 	int			i;
 	
@@ -1767,15 +1765,30 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	*program = glCreateProgramObjectARB();
 	
 	g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-	shaderStrings[1] = vertex;
-	glShaderSourceARB( g_vertexShader, 2, shaderStrings, NULL );
+	
+	if (strstr (vertex, USE_MESH_ANIM_LIBRARY))
+		shaderStrings[1] = mesh_anim_library;
+	else
+		shaderStrings[1] = "";
+	
+	shaderStrings[2] = vertex;
+	glShaderSourceARB( g_vertexShader, 3, shaderStrings, NULL );
 	glCompileShaderARB( g_vertexShader);
 	glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
 	if( nResult )
+	{
 		glAttachObjectARB( *program, g_vertexShader );
+	}
 	else
+	{
 		Com_Printf("...%s Vertex Shader Compile Error\n", name);
+		if (glGetShaderInfoLog != NULL)
+		{
+			glGetShaderInfoLog (g_vertexShader, sizeof(str), NULL, str);
+			Com_Printf ("%s\n", str);
+		}
+	}
 	
 	if (fragment != NULL)
 	{
@@ -1787,9 +1800,18 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
 		if( nResult )
+		{
 			glAttachObjectARB( *program, g_fragmentShader );
+		}
 		else
+		{
 			Com_Printf("...%s Fragment Shader Compile Error\n", name);
+			if (glGetShaderInfoLog != NULL)
+			{
+				glGetShaderInfoLog (g_fragmentShader, sizeof(str), NULL, str);
+				Com_Printf ("%s\n", str);
+			}
+		}
 	}
 	
 	for (i = 0; i < num_standard_attributes; i++)
@@ -1832,6 +1854,7 @@ void R_LoadGLSLPrograms(void)
 		glEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)qwglGetProcAddress("glEnableVertexAttribArrayARB");
 		glDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)qwglGetProcAddress("glDisableVertexAttribArrayARB");
 		glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)qwglGetProcAddress("glBindAttribLocationARB");
+		glGetShaderInfoLog = qwglGetProcAddress("glGetShaderInfoLog");
 
 		if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
 			!glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
@@ -1955,20 +1978,24 @@ void R_LoadGLSLPrograms(void)
 	g_location_vo_lerp = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lerp");
 	
 	//Glass
-	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_glassprogramObj);
+	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM, &g_glassprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_gOutframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
-	g_location_gFog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
-	g_location_gLightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
-	g_location_gmirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
-	g_location_grefTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
+	g_location_g_outframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
+	g_location_g_fog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
+	g_location_g_lightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
+	g_location_g_mirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
+	g_location_g_refTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
+	g_location_g_useGPUanim = glGetUniformLocationARB( g_glassprogramObj, "GPUANIM");
+	g_location_g_lerp = glGetUniformLocationARB( g_glassprogramObj, "lerp");
 
 	//Blank mesh (for shadowmapping efficiently)
-	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES, &g_blankmeshprogramObj);
+	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX, &g_blankmeshprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_bmOutframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
+	g_location_bm_outframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
+	g_location_bm_useGPUanim = glGetUniformLocationARB( g_blankmeshprogramObj, "GPUANIM" );
+	g_location_bm_lerp = glGetUniformLocationARB( g_blankmeshprogramObj, "lerp" );
 	
 	//fullscreen distortion effects
 	R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, &g_fbprogramObj);

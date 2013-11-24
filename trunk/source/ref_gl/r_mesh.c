@@ -1240,7 +1240,7 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr, qb
 	}	
 	
 	if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+		qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
 }
 
 
@@ -1836,117 +1836,39 @@ void R_DrawAliasModel ( void )
 
 void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
-	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t	*v, *ov=NULL, *verts;
-	dtriangle_t		*tris;
-	float	frontlerp;
-	vec3_t	move, delta, vectors[3];
-	vec3_t	frontv, backv;
-	int		i, j;
-	int		index_xyz, index_st;
-	int		va = 0;
-	fstvert_t *st;
+	glUseProgramObjectARB( g_blankmeshprogramObj );
+	
+	glUniform1iARB(g_location_bm_useGPUanim, lerped?2:0);
 
-	if(lerped)
-		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-			+ currententity->frame * paliashdr->framesize);
-	else
-		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
-	verts = v = frame->verts;
-
-	if(lerped) {
-		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-			+ currententity->oldframe * paliashdr->framesize);
-		ov = oldframe->verts;
-	}
-
-	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
-
-	st = currentmodel->st;
-
-	if(lerped) {
-		frontlerp = 1.0 - backlerp;
-
-		// move should be the delta back to the previous frame * backlerp
-		VectorSubtract (currententity->oldorigin, currententity->origin, delta);
-	}
-
-	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
-
-	if(lerped) 
+	if (!MD2_FindVBO (currentmodel, currententity->frame))
 	{
-		move[0] = DotProduct (delta, vectors[0]);	// forward
-		move[1] = -DotProduct (delta, vectors[1]);	// left
-		move[2] = DotProduct (delta, vectors[2]);	// up
-
-		VectorAdd (move, oldframe->translate, move);
-
-		for (i=0 ; i<3 ; i++)
-		{
-			move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
-			frontv[i] = frontlerp*frame->scale[i];
-			backv[i] = backlerp*oldframe->scale[i];
-		}
-	}
-
-	va=0;
-	VArray = &VArrayVerts[0];
-	R_InitVArrays (VERT_NO_TEXTURE);
-
-	if (!lerped)
-	{
-		vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currentmodel);
-		if (vbo_xyz) 
-		{
-			goto skipLoad;
-		}
-	}
-
-	for (i = 0; i < paliashdr->num_tris; i++)
-	{
-		for (j = 0; j < 3; j++)
-		{
-			index_xyz = tris[i].index_xyz[j];
-			index_st = tris[i].index_st[j];
-
-			if(lerped) 
-			{
-				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
-
-			}
-			else 
-			{
-				VArray[0] = currentmodel->vertexes[index_xyz].position[0];
-				VArray[1] = currentmodel->vertexes[index_xyz].position[1];
-				VArray[2] = currentmodel->vertexes[index_xyz].position[2];
-
-				VertexArray[va][0] = VArray[0];
-				VertexArray[va][1] = VArray[1];
-				VertexArray[va][2] = VArray[2];
-			}
-
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_NO_TEXTURE];
-			va++;
-		}
-	}
-
-	if(!lerped)
-		vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currentmodel);
-
-skipLoad:
-	if(!lerped) 
-	{
-		qglEnableClientState( GL_VERTEX_ARRAY );
-		GL_BindVBO(vbo_xyz);
-		qglVertexPointer(3, GL_FLOAT, 0, 0);   
+		// TODO: remove this - the VBOs are getting unloaded for every new map
+		MD2_LoadVBO (currentmodel);
+		MD2_FindVBO (currentmodel, currententity->frame);
 	}
 	
-	R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
-
-	R_KillVArrays ();
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	GL_BindVBO(vbo_xyz);
+	qglVertexPointer(3, GL_FLOAT, 0, 0);
+	
+	if (lerped)
+	{
+		MD2_FindVBO (currentmodel, currententity->oldframe);
+		
+		glEnableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
+		GL_BindVBO (vbo_xyz);
+		glVertexAttribPointerARB (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
+		
+		glUniform1fARB(g_location_bm_lerp, 1.0-backlerp);
+	}
+	
+	qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
+	
+	glUseProgramObjectARB( 0 );
+	GL_EnableMultitexture( false );
+	
+	if (lerped)
+		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
 }
 
 //to do - alpha and alphamasks possible?

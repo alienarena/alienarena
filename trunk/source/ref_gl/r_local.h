@@ -730,14 +730,18 @@ GLuint		g_location_vo_fromView;
 GLuint		g_location_vo_lerp;
 
 //glass
-GLuint		g_location_gmirTexture;
-GLuint		g_location_grefTexture;
-GLuint		g_location_gLightPos;
-GLuint		g_location_gFog;
-GLuint		g_location_gOutframe;
+GLuint		g_location_g_mirTexture;
+GLuint		g_location_g_refTexture;
+GLuint		g_location_g_lightPos;
+GLuint		g_location_g_fog;
+GLuint		g_location_g_outframe;
+GLuint		g_location_g_useGPUanim;
+GLuint		g_location_g_lerp;
 
 //blank mesh
-GLuint		g_location_bmOutframe;
+GLuint		g_location_bm_outframe;
+GLuint		g_location_bm_useGPUanim;
+GLuint		g_location_bm_lerp;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;

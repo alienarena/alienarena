@@ -1338,21 +1338,23 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		R_ModelViewTransform(lightPosition, lightVec);		
 				
 		glUseProgramObjectARB( g_glassprogramObj );
+		
+		glUniform1iARB( g_location_g_useGPUanim, 1);
 
-		glUniform3fARB( g_location_gLightPos, lightVec[0], lightVec[1], lightVec[2]);
+		glUniform3fARB( g_location_g_lightPos, lightVec[0], lightVec[1], lightVec[2]);
 	
 		if(mirror)
 			GL_MBind (1, r_mirrortexture->texnum);
 		else
 			GL_MBind (1, r_mirrorspec->texnum);			
-		glUniform1iARB( g_location_gmirTexture, 1);
+		glUniform1iARB( g_location_g_mirTexture, 1);
 
 		GL_MBind (0, r_mirrorspec->texnum);
-		glUniform1iARB( g_location_grefTexture, 0);		
+		glUniform1iARB( g_location_g_refTexture, 0);		
 
-		glUniform1iARB( g_location_gFog, map_fog);
+		glUniform1iARB( g_location_g_fog, map_fog);
 										
-		glUniformMatrix3x4fvARB( g_location_gOutframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+		glUniformMatrix3x4fvARB( g_location_g_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
 		IQM_DrawVBO (false);
 		
@@ -1730,7 +1732,10 @@ void IQM_DrawCasterFrame ()
 	glUseProgramObjectARB( g_blankmeshprogramObj );
 
 	//send outframe, blendweights, and blendindexes to shader
-	glUniformMatrix3x4fvARB( g_location_bmOutframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+	glUniformMatrix3x4fvARB( g_location_bm_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+	
+	//tell it to use IQM skeletal animation
+	glUniform1iARB(g_location_bm_useGPUanim, 1);
 
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
