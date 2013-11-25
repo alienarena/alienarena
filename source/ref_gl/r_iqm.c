@@ -1243,8 +1243,9 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		Com_Printf ("WARN: could not load VBO for model!\n");
 }
 
-void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor);
+void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor, float alpha);
 void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader);
+void R_Mesh_SetupGlass (qboolean mirror, qboolean glass);
 
 inline void IQM_DrawVBO (qboolean tangents)
 {
@@ -1291,12 +1292,15 @@ inline void IQM_DrawVBO (qboolean tangents)
 
 }
 
+/*
+TODO: this is now practically the same function as MD2_DrawFrame. They could
+easily be consolidated.
+*/
 void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 {
 	int		i;
-	vec3_t	vectors[3];
+	float	alpha;
 	rscript_t *rs = NULL;
-	float	alpha, basealpha;
 	vec3_t	lightcolor;
 
 	qboolean mirror = false;
@@ -1315,56 +1319,31 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 
 	if (currententity->flags & RF_TRANSLUCENT)
 	{
-		alpha = currententity->alpha;
-		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		{
-			if(gl_mirror->integer)
-				mirror = true;
-			else
-				glass = true;
-		}
+		alpha = currententity->alpha; //TODO: use this again
+		if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+			glass = true;
+		else if(gl_mirror->integer)
+			mirror = true;
 		else
 			glass = true;
 	}
 	else
-		alpha = basealpha = 1.0;
-
-	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
+		alpha = 1.0;
 
 	//render the model
 
 	if ((mirror || glass) && !(currententity->flags & RF_SHELL_ANY))
 	{
-		//render glass with glsl shader
-		vec3_t lightVec;
-		
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
-
 		qglDepthMask(false);
 
-		R_ModelViewTransform(lightPosition, lightVec);		
-				
-		glUseProgramObjectARB( g_glassprogramObj );
+		R_Mesh_SetupGlass (mirror, glass);
 		
 		glUniform1iARB( g_location_g_useGPUanim, 1);
-
-		glUniform3fARB( g_location_g_lightPos, lightVec[0], lightVec[1], lightVec[2]);
-	
-		if(mirror)
-			GL_MBind (1, r_mirrortexture->texnum);
-		else
-			GL_MBind (1, r_mirrorspec->texnum);			
-		glUniform1iARB( g_location_g_mirTexture, 1);
-
-		GL_MBind (0, r_mirrorspec->texnum);
-		glUniform1iARB( g_location_g_refTexture, 0);
-
-		glUniform1iARB( g_location_g_fog, map_fog);
-										
 		glUniformMatrix3x4fvARB( g_location_g_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 
 		IQM_DrawVBO (false);
 		
+		qglDepthMask(true);
 		glUseProgramObjectARB( 0 );
 	}
 	else
@@ -1374,9 +1353,7 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 			qglEnable (GL_BLEND);
 			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			
-			R_Mesh_SetupShell (ragdoll, lightcolor);
-			
-			qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+			R_Mesh_SetupShell (ragdoll, lightcolor, alpha);
 		}
 		else
 		{
@@ -1384,7 +1361,6 @@ void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
 		}
 		
 		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);
-		
 		glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 		
 		IQM_DrawVBO (true);

@@ -1264,12 +1264,12 @@ static char glass_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 
 	varying vec3 r;
 	varying float fog;
-	varying vec3 normal, vert;
+	varying vec3 orig_normal, normal, vert;
 
 	void main(void)
 	{
 		anim_compute (false, true);
-		
+
 		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 
 		vec3 u = normalize( vec3(gl_ModelViewMatrix * anim_vertex) ); 	
@@ -1280,25 +1280,33 @@ static char glass_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 		normal = n;
 		vert = vec3( gl_ModelViewMatrix * anim_vertex );
 
+		orig_normal = anim_normal;
+
 		//fog
 	   if(FOG > 0) 
 	   {
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
 	   }
+	   
+	   // for mirroring
+	   gl_TexCoord[0] = gl_MultiTexCoord0;
 	}
 );
 
 static char glass_fragment_program[] = STRINGIFY (
 
 	uniform vec3 LightPos;
+	uniform vec3 left;
+	uniform vec3 up;
 	uniform sampler2D refTexture;
 	uniform sampler2D mirTexture;
 	uniform int FOG;
+	uniform int type; // 1 means mirror only, 2 means glass only, 3 means both
 
 	varying vec3 r;
 	varying float fog;
-	varying vec3 normal, vert;
+	varying vec3 orig_normal, normal, vert;
 
 	void main (void)
 	{
@@ -1309,14 +1317,27 @@ static char glass_fragment_program[] = STRINGIFY (
 		float ld = max( dot(normal, light_dir), 0.0 ); 	
 		float ls = 0.75 * pow( max( dot(ref, eye_dir), 0.0 ), 0.70 ); //0.75 specular, .7 shininess
 
-		float m = -1.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) ); 	
-		vec2 coord = -vec2(r.x/m + 0.5, r.y/m + 0.5); 	
+		float m = -1.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
+		
+		vec3 n_orig_normal = normalize (orig_normal);
+		vec2 coord_offset = vec2 (dot (n_orig_normal, left), dot (n_orig_normal, up));
+		vec2 glass_coord = -vec2 (r.x/m + 0.5, r.y/m + 0.5);
+		vec2 mirror_coord = vec2 (-gl_TexCoord[0].s, gl_TexCoord[0].t);
 
-		vec4 t0 = texture2D(refTexture, coord.st);
-		vec4 t1 = texture2D(mirTexture, coord.st);
-
-		//gl_FragColor = 0.3 * t0 + 0.3 * t1 * (ld + ls);
-		gl_FragColor = 0.3 * t0 + 0.3 * t1 * vec4(ld + ls);
+		vec4 mirror_color, glass_color;
+		if (type == 1)
+			mirror_color = texture2D(mirTexture, mirror_coord.st);
+		else if (type == 3)
+			mirror_color = texture2D(mirTexture, mirror_coord.st + coord_offset.st);
+		if (type != 1)
+			glass_color = texture2D(refTexture, glass_coord.st + coord_offset.st/2.0);
+		
+		if (type == 3)
+			gl_FragColor = 0.3 * glass_color + 0.3 * mirror_color * vec4 (ld + ls + 0.5);
+		else if (type == 2)
+			gl_FragColor = glass_color;
+		else if (type == 1)
+			gl_FragColor = mirror_color;
 
 		if(FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
@@ -1984,6 +2005,9 @@ void R_LoadGLSLPrograms(void)
 	// Locate some parameters by name so we can set them later...
 	g_location_g_outframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
 	g_location_g_fog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
+	g_location_g_type = glGetUniformLocationARB( g_glassprogramObj, "type" );
+	g_location_g_left = glGetUniformLocationARB( g_glassprogramObj, "left" );
+	g_location_g_up = glGetUniformLocationARB( g_glassprogramObj, "up" );
 	g_location_g_lightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
 	g_location_g_mirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
 	g_location_g_refTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );

@@ -41,8 +41,6 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "anorms.h"
 };
 
-static  vec4_t  s_lerped[MAX_VERTS];
-
 static vec3_t VertexArray[MAX_VERTICES];
 static vec2_t TexCoordArray[MAX_VERTICES];
 static vec3_t NormalsArray[MAX_VERTICES];
@@ -1000,18 +998,7 @@ static qboolean MD2_CullModel( vec3_t bbox[8] )
 	}
 }
 
-void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3] )
-{
-	int i;
-	for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4)
-		{
-			lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
-			lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
-			lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
-		}
-}
-
-void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor)
+void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor, float alpha)
 {
 	int i;
 	vec3_t lightVec, lightVal;
@@ -1073,7 +1060,9 @@ void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor)
 
 	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 	
-	glUniform1iARB( MESH_UNIFORM(useGPUanim), 0);
+	// set up the fixed-function pipeline too
+	if (!fragmentshader)
+		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 }
 
 void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
@@ -1186,7 +1175,42 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean f
 	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 }
 
-static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr)
+void R_Mesh_SetupGlass (qboolean mirror, qboolean glass)
+{
+	vec3_t lightVec, left, up;
+	int type;
+	
+	glUseProgramObjectARB( g_glassprogramObj );
+	
+	R_ModelViewTransform(lightPosition, lightVec);
+	glUniform3fARB( g_location_g_lightPos, lightVec[0], lightVec[1], lightVec[2]);
+
+	AngleVectors (currententity->angles, NULL, left, up);
+	glUniform3fARB( g_location_g_left, left[0], left[1], left[2]);
+	glUniform3fARB( g_location_g_up, up[0], up[1], up[2]);
+	
+	type = 0;
+	
+	if (glass || (mirror && !(currententity->flags & RF_WEAPONMODEL)))
+	{
+		glUniform1iARB( g_location_g_refTexture, 0);
+		GL_MBind (0, r_mirrorspec->texnum);
+		type |= 2;
+	}
+	
+	if (mirror)
+	{
+		glUniform1iARB( g_location_g_mirTexture, 1);
+		GL_MBind (1, r_mirrortexture->texnum);
+		type |= 1;
+	}
+	
+	glUniform1iARB( g_location_g_type, type);
+	
+	glUniform1iARB( g_location_g_fog, map_fog);
+}
+
+static void MD2_DrawVBO (qboolean lerped, dmdl_t *paliashdr)
 {
 	if (!MD2_FindVBO (currentmodel, currententity->frame))
 	{
@@ -1251,57 +1275,23 @@ static void MD2_DrawVBO (qboolean lerped, float frontlerp, dmdl_t *paliashdr)
 /*
 =============
 MD2_DrawFrame - standard md2 rendering
+TODO: this is now practically the same function as IQM_DrawFrame. They could
+easily be consolidated.
 =============
 */
 void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
 {
-	daliasframe_t	*frame, *oldframe=NULL;
-	dtrivertx_t	*v, *ov=NULL, *verts;
-	dtriangle_t		*tris;
+	int		i;
 	float	frontlerp;
-	float	alpha, basealpha;
-	vec3_t	move, delta, vectors[3];
-	vec3_t	frontv, backv;
-	int		i, j;
-	int		index_xyz, index_st;
+	float	alpha;
 	rscript_t *rs = NULL;
-	int		va = 0;
 	vec3_t lightcolor;
-	fstvert_t *st;
-	float os, ot, os2, ot2;
-	unsigned offs, offs2;
-	qboolean fragmentshader;
-	byte *tangents, *oldtangents = NULL;
+	
 	qboolean mirror = false;
 	qboolean glass = false;
+	qboolean fragmentshader;
 	
 	fragmentshader = gl_normalmaps->integer;
-
-	offs = paliashdr->num_xyz;
-
-	if(lerped)
-		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-			+ currententity->frame * paliashdr->framesize);
-	else
-		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
-
-	verts = v = frame->verts;
-	offs2 = offs*currententity->frame;
-	tangents = currentmodel->tangents + offs2;
-
-	if(lerped) 
-	{
-		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-			+ currententity->oldframe * paliashdr->framesize);
-		ov = oldframe->verts;
-
-		offs2 = offs*currententity->oldframe;
-		oldtangents = currentmodel->tangents + offs2;
-	}
-
-	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
-
-	st = currentmodel->st;
 
 	if (r_shaders->integer && !(currententity->flags & RF_SHELL_ANY))
 		rs=(rscript_t *)currententity->script;
@@ -1311,63 +1301,21 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize(lightcolor);
 
-	if (currententity->flags & RF_TRANSLUCENT) 
+	if (currententity->flags & RF_TRANSLUCENT)
 	{
-		basealpha = alpha = currententity->alpha;
-
-		if(rs_glass)
-			rs=(rscript_t *)rs_glass;
-		if(!rs)
-			GL_Bind(r_reflecttexture->texnum);
-		else if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) 
-		{
-			if(gl_mirror->integer)
-				mirror = true;
-			else
-				glass = true;
-		}
+		alpha = currententity->alpha; //TODO: use this again
+		if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+			glass = true;
+		else if(gl_mirror->integer)
+			mirror = true;
+		else
+			glass = true;
 	}
 	else
-		basealpha = alpha = 1.0;
+		alpha = 1.0;
 
 	if(lerped) 
-	{
 		frontlerp = 1.0 - backlerp;
-
-		// move should be the delta back to the previous frame * backlerp
-		VectorSubtract (currententity->oldorigin, currententity->origin, delta);
-	}
-
-	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
-
-	if(lerped) 
-	{
-		move[0] = DotProduct (delta, vectors[0]);	// forward
-		move[1] = -DotProduct (delta, vectors[1]);	// left
-		move[2] = DotProduct (delta, vectors[2]);	// up
-
-		VectorAdd (move, oldframe->translate, move);
-
-		for (i=0 ; i<3 ; i++)
-		{
-			move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
-			frontv[i] = frontlerp*frame->scale[i];
-			backv[i] = backlerp*oldframe->scale[i];
-		}
-
-		if(currententity->flags & RF_VIEWERMODEL) 
-		{ 
-			float   *lerp;
-			//lerp the vertices for self shadows, and leave
-			if(gl_shadowmaps->integer) {
-				lerp = s_lerped[0];
-				MD2_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
-				return;
-			}
-			else
-				return;
-		}
-	}
 	
 	if (alpha < 0.0)
 		alpha = 0.0;
@@ -1376,144 +1324,17 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 	if ((mirror || glass) && !(currententity->flags & RF_SHELL_ANY))
 	{
-		// TODO: use the glass shader here.
-		qboolean mirror_noweap;
-		int vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
-		
-		mirror_noweap = mirror && !(currententity->flags & RF_WEAPONMODEL);
-		
 		qglDepthMask(false);
-
-		if(mirror)
-		{
-			if( !(currententity->flags & RF_WEAPONMODEL))
-			{
-				R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-				vertsize = VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
-
-				GL_EnableMultitexture( true );
-				GL_SelectTexture (0);
-				GL_TexEnv ( GL_COMBINE_EXT );
-				GL_Bind (r_mirrortexture->texnum);
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				GL_SelectTexture (1);
-				GL_TexEnv ( GL_COMBINE_EXT );
-				GL_Bind (r_mirrorspec->texnum);
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-			}
-			else
-			{
-				R_InitVArrays (VERT_COLOURED_TEXTURED);
-				GL_MBind (0, r_mirrortexture->texnum);
-			}
-		}
-		else
-		{
-			R_InitVArrays (VERT_COLOURED_TEXTURED);
-			GL_MBind (0, r_reflecttexture->texnum);
-		}
-			
-		if (mirror)
-		{
-			rs->stage->scale.scaleX = -1.0;
-			rs->stage->scale.scaleY = 1.0;
-		}
-		else 
-		{
-			rs->stage->scale.scaleX = rs->stage->scale.scaleY = 0.5;
-		}
 		
-		for (i=0; i<paliashdr->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				vec3_t normal;
-				int k;
-
-				index_xyz = tris[i].index_xyz[j];
-				index_st = tris[i].index_st[j];
-
-				os = os2 = st[index_st].s;
-				ot = ot2 = st[index_st].t;
-
-				if(lerped)
-				{
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
-
-					for (k=0; k<3; k++)
-					{
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
-
-					}
-					// we can safely assume that the contents of
-					// r_avertexnormals need not be converted to unit
-					// vectors, however lerped normals may require this.
-					VectorNormalize ( normal );
-				}
-				else
-				{
-					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
-					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
-					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
-
-					for (k=0;k<3;k++)
-					{
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-					}
-
-				}
-				
-				if (!mirror || mirror_noweap)
-				{
-					os -= DotProduct (normal, vectors[1]);
-					ot += DotProduct (normal, vectors[2]);
-				}
-				
-				RS_SetTexcoords2D(rs->stage, &os, &ot);
-
-				VArray[3] = os;
-				VArray[4] = ot;
-
-				if(mirror_noweap)
-				{
-					os2 -= DotProduct (normal, vectors[1] );
-					ot2 += DotProduct (normal, vectors[2] );
-					RS_SetTexcoords2D(rs->stage, &os2, &ot2);
-
-					VArray[5] = os2;
-					VArray[6] = ot2;
-					VArray[7] = VArray[8] = VArray[9] = 1;
-					VArray[10] = alpha;
-				}
-				else
-				{
-					VArray[5] = VArray[6] = VArray[7] = 1;
-					VArray[8] = alpha;
-				}
-
-				// increment pointer and counter
-				VArray += vertsize;
-				va++;
-			}
-		}
-				   
-		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-		{
-			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
-		}
-
-		if(mirror_noweap)
-			GL_EnableMultitexture( false );
-
+		R_Mesh_SetupGlass (mirror, glass);
+		
+		glUniform1iARB (g_location_g_useGPUanim, lerped?2:0);
+		glUniform1fARB (g_location_g_lerp, frontlerp);
+		
+		MD2_DrawVBO (lerped, paliashdr);
+		
 		qglDepthMask(true);
-
+		glUseProgramObjectARB( 0 );
 	}
 	else
 	{
@@ -1524,9 +1345,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		
 		if (currententity->flags & RF_SHELL_ANY)
 		{
-			R_Mesh_SetupShell (false, lightcolor);
-		
-			qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+			R_Mesh_SetupShell (false, lightcolor, alpha);
 		}
 		else
 		{
@@ -1536,7 +1355,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		glUniform1iARB (MESH_UNIFORM(useGPUanim), lerped?2:0);
 		glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
 				
-		MD2_DrawVBO (lerped, frontlerp, paliashdr);
+		MD2_DrawVBO (lerped, paliashdr);
 
 		glUseProgramObjectARB( 0 );
 
@@ -1547,8 +1366,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
-
-	R_KillVArrays ();
 
 }
 

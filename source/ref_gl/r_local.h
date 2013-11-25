@@ -548,7 +548,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
 #define VERT_MULTI_TEXTURED				2		// verts and st for 2 tmus
 #define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
-#define VERT_COLOURED_MULTI_TEXTURED	5		// verts, st for 2 tmus and colour
 #define VERT_NO_TEXTURE					7		// verts only, no textures
 
 // looks like these should be bit flags (2010-08)
@@ -729,6 +728,9 @@ GLuint		g_location_vo_fromView;
 GLuint		g_location_vo_lerp;
 
 //glass
+GLuint		g_location_g_type; // 1 means mirror only, 2 means glass only, 3 means both
+GLuint		g_location_g_left;
+GLuint		g_location_g_up;
 GLuint		g_location_g_mirTexture;
 GLuint		g_location_g_refTexture;
 GLuint		g_location_g_lightPos;
