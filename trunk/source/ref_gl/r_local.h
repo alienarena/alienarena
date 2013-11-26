@@ -784,6 +784,7 @@ float  dynFactor;
 extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
+extern void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha);
 
 //iqm
 #define pi 3.14159265
@@ -797,6 +798,8 @@ extern int IQM_NextFrame(int frame);
 extern void IQM_AnimateRagdoll(int RagDollID, int shellEffect);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_DrawShadow(vec3_t origin);
+extern qboolean IQM_CullModel( void );
+extern void IQM_AnimateFrame (void);
 
 //Ragdoll
 int r_DrawingRagDoll;

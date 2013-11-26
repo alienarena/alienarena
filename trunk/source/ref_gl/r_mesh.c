@@ -1016,6 +1016,8 @@ static qboolean R_Mesh_CullModel (void)
 	else if (currentmodel->type == mod_iqm)
 		return IQM_CullModel ();
 	// New model types go here
+
+	return false;
 }
 
 static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboolean fragmentshader, float alpha)

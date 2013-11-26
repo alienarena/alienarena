@@ -120,6 +120,7 @@ static int _FNT_NullFont_PredictSize(
 	)
 {
 	/* EMPTY */
+	return 0;
 }
 
 
