@@ -1205,6 +1205,8 @@ void R_Mesh_SetupGlassRender (void)
 	int type;
 	qboolean mirror, glass;
 	
+	mirror = glass = false;
+	
 	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		glass = true;
 	else if(gl_mirror->integer)
