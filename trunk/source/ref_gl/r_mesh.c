@@ -425,7 +425,7 @@ static void MD2_VecsForTris(
 #endif
 
 
-static void MD2_LoadVBO (model_t *mod)
+void MD2_LoadVBO (model_t *mod)
 {
 	int i, j, k, framenum;
 	
@@ -478,7 +478,7 @@ static void MD2_LoadVBO (model_t *mod)
 	}
 }
 
-static qboolean MD2_FindVBO (model_t *mod, int framenum)
+qboolean MD2_FindVBO (model_t *mod, int framenum)
 {
 	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod);
 	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
@@ -930,22 +930,13 @@ void R_ModelViewTransform(const vec3_t in, vec3_t out){
 /*
 ** MD2_CullModel
 */
-static qboolean MD2_CullModel( vec3_t bbox[8] )
+qboolean MD2_CullModel( void )
 {
 	int i;
 	vec3_t	vectors[3];
 	vec3_t  angles;
-	trace_t r_trace;
 	vec3_t	dist;
-
-	if (r_worldmodel ) {
-		//occulusion culling - why draw entities we cannot see?
-
-		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			return true;
-	}
-
+	vec3_t bbox[8];
 
 	VectorSubtract(r_origin, currententity->origin, dist);
 
@@ -998,11 +989,39 @@ static qboolean MD2_CullModel( vec3_t bbox[8] )
 	}
 }
 
-void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor, float alpha)
+// should be able to handle all mesh types
+static qboolean R_Mesh_CullModel (void)
+{
+	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
+		return true;
+	
+	if (currententity->team) //don't draw flag models, handled by sprites
+		return true;
+	
+	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
+		return true;
+	
+	if (r_worldmodel) {
+		//occulusion culling - why draw entities we cannot see?
+		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(r_trace.fraction != 1.0)
+			return true;
+	}
+	
+	if ((currententity->flags & RF_WEAPONMODEL))
+		return r_lefthand->integer == 2; 
+	
+	if (currentmodel->type == mod_alias)
+		return MD2_CullModel ();
+	else if (currentmodel->type == mod_iqm)
+		return IQM_CullModel ();
+	// New model types go here
+}
+
+static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboolean fragmentshader, float alpha)
 {
 	int i;
 	vec3_t lightVec, lightVal;
-	qboolean fragmentshader = gl_normalmaps->integer;
 	
 	//send light level and color to shader, ramp up a bit
 	VectorCopy(lightcolor, lightVal);
@@ -1063,9 +1082,12 @@ void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor, float alpha)
 	// set up the fixed-function pipeline too
 	if (!fragmentshader)
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+	
+	GLSTATE_ENABLE_BLEND
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
+static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
 {
 	int i;
 	
@@ -1175,10 +1197,21 @@ void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean f
 	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 }
 
-void R_Mesh_SetupGlass (qboolean mirror, qboolean glass)
+void R_Mesh_SetupGlassRender (void)
 {
 	vec3_t lightVec, left, up;
 	int type;
+	qboolean mirror, glass;
+	
+	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+		glass = true;
+	else if(gl_mirror->integer)
+		mirror = true;
+	else
+		glass = true;
+	
+	if (mirror && !(currententity->flags & RF_WEAPONMODEL))
+		glass = true;
 	
 	glUseProgramObjectARB( g_glassprogramObj );
 	
@@ -1191,7 +1224,7 @@ void R_Mesh_SetupGlass (qboolean mirror, qboolean glass)
 	
 	type = 0;
 	
-	if (glass || (mirror && !(currententity->flags & RF_WEAPONMODEL)))
+	if (glass)
 	{
 		glUniform1iARB( g_location_g_refTexture, 0);
 		GL_MBind (0, r_mirrorspec->texnum);
@@ -1208,9 +1241,12 @@ void R_Mesh_SetupGlass (qboolean mirror, qboolean glass)
 	glUniform1iARB( g_location_g_type, type);
 	
 	glUniform1iARB( g_location_g_fog, map_fog);
+	
+	GLSTATE_ENABLE_BLEND
+	qglBlendFunc (GL_ONE, GL_ONE);
 }
 
-static void MD2_DrawVBO (qboolean lerped, dmdl_t *paliashdr)
+void MD2_DrawVBO (qboolean lerped)
 {
 	if (!MD2_FindVBO (currentmodel, currententity->frame))
 	{
@@ -1258,7 +1294,7 @@ static void MD2_DrawVBO (qboolean lerped, dmdl_t *paliashdr)
 	GL_BindVBO (NULL);
 	
 	if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-		qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
+		qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
 	
 	R_KillVArrays ();
 	
@@ -1271,101 +1307,103 @@ static void MD2_DrawVBO (qboolean lerped, dmdl_t *paliashdr)
 	}
 }
 
+void IQM_DrawVBO (void);
 
 /*
 =============
-MD2_DrawFrame - standard md2 rendering
-TODO: this is now practically the same function as IQM_DrawFrame. They could
-easily be consolidated.
+R_Mesh_DrawFrame: should be able to handle all types of meshes.
 =============
 */
-void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
+void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 {
-	int		i;
-	float	frontlerp;
-	float	alpha;
-	rscript_t *rs = NULL;
-	vec3_t lightcolor;
+	int			i;
+	vec3_t		lightcolor;
 	
-	qboolean mirror = false;
-	qboolean glass = false;
-	qboolean fragmentshader;
+	// only applicable to MD2
+	qboolean	lerped;
+	float		frontlerp;
 	
-	fragmentshader = gl_normalmaps->integer;
-
-	if (r_shaders->integer && !(currententity->flags & RF_SHELL_ANY))
-		rs=(rscript_t *)currententity->script;
-
+	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
+	
 	VectorCopy(shadelight, lightcolor);
 	for (i=0;i<model_dlights_num;i++)
 		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize(lightcolor);
 
-	if (currententity->flags & RF_TRANSLUCENT)
-	{
-		alpha = currententity->alpha; //TODO: use this again
-		if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-			glass = true;
-		else if(gl_mirror->integer)
-			mirror = true;
-		else
-			glass = true;
-	}
-	else
-		alpha = 1.0;
-
 	if(lerped) 
-		frontlerp = 1.0 - backlerp;
-	
-	if (alpha < 0.0)
-		alpha = 0.0;
-	else if (alpha > 1.0)
-		alpha = 1.0;
+		frontlerp = 1.0 - currententity->backlerp;
 
-	if ((mirror || glass) && !(currententity->flags & RF_SHELL_ANY))
+	if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
 	{
 		qglDepthMask(false);
 		
-		R_Mesh_SetupGlass (mirror, glass);
+		R_Mesh_SetupGlassRender ();
 		
-		glUniform1iARB (g_location_g_useGPUanim, lerped?2:0);
-		glUniform1fARB (g_location_g_lerp, frontlerp);
-		
-		MD2_DrawVBO (lerped, paliashdr);
-		
-		qglDepthMask(true);
-		glUseProgramObjectARB( 0 );
+		if (currentmodel->type == mod_alias)
+		{
+			glUniform1iARB (g_location_g_useGPUanim, lerped?2:0);
+			glUniform1fARB (g_location_g_lerp, frontlerp);
+		}
+		else if (currentmodel->type == mod_iqm)
+		{
+			glUniform1iARB (g_location_g_useGPUanim, 1);
+			glUniformMatrix3x4fvARB (g_location_g_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+		}
+		// New model types go here
 	}
 	else
 	{
+		qboolean fragmentshader;
+		rscript_t *rs = NULL;
+		
+		if (r_shaders->integer)
+			rs=(rscript_t *)currententity->script;
+		
 		if(rs && rs->stage->depthhack)
 			qglDepthMask(false);
 		
-		fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
-		
 		if (currententity->flags & RF_SHELL_ANY)
 		{
-			R_Mesh_SetupShell (false, lightcolor, alpha);
+			fragmentshader = gl_normalmaps->integer;
+			R_Mesh_SetupShellRender (ragdoll, lightcolor, fragmentshader, shellAlpha);
 		}
 		else
 		{
-			R_Mesh_SetupGLSL (skinnum, rs, lightcolor, fragmentshader);
+			fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
+			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader);
 		}
 		
-		glUniform1iARB (MESH_UNIFORM(useGPUanim), lerped?2:0);
-		glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
-				
-		MD2_DrawVBO (lerped, paliashdr);
-
-		glUseProgramObjectARB( 0 );
-
-		if(rs && rs->stage->depthhack)
-			qglDepthMask(true);
+		if (currentmodel->type == mod_alias)
+		{
+			glUniform1iARB (MESH_UNIFORM(useGPUanim), lerped?2:0);
+			glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
+		}
+		else if (currentmodel->type == mod_iqm)
+		{
+			glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);
+			glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+		}
+		// New model types go here
 	}
+	
+	if (currentmodel->type == mod_alias)
+		MD2_DrawVBO (lerped);
+	else if (currentmodel->type == mod_iqm)
+		IQM_DrawVBO ();
+	// New model types go here
+	
+	glUseProgramObjectARB( 0 );
+	qglDepthMask(true);
 
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
+	
+	// FIXME: make this unnecessary
+	// Without this, the player options menu goes all funny due to
+	// R_Mesh_SetupGlassRender changing the blendfunc. The proper solution is
+	// to just never rely on the blendfunc being any default value.
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 }
 
@@ -1447,53 +1485,60 @@ void R_Mesh_SetShadelight (void)
 	}
 }
 
+void MD2_SelectFrame (void)
+{
+	dmdl_t *paliashdr = (dmdl_t *)currentmodel->extradata;
+	
+	if ( (currententity->frame >= paliashdr->num_frames)
+		|| (currententity->frame < 0) )
+	{
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
+	if ( (currententity->oldframe >= paliashdr->num_frames)
+		|| (currententity->oldframe < 0))
+	{
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
+	if ( !r_lerpmodels->integer )
+		currententity->backlerp = 0;
+}
+
 /*
 =================
-R_DrawAliasModel - render alias models(using MD2 format)
+R_Mesh_Draw - animate and render a mesh. Should support all mesh types.
 =================
 */
-void R_DrawAliasModel ( void )
+void R_Mesh_Draw ( void )
 {
-	dmdl_t		*paliashdr;
-	vec3_t		bbox[8];
 	image_t		*skin;
 
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
-		return;
-
-	if(currententity->team) //don't draw flag models, handled by sprites
+	if ( R_Mesh_CullModel () )
 		return;
 	
-	if(!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
-		return;
-
-	if ( !( currententity->flags & RF_WEAPONMODEL ) )
-	{
-		if ( MD2_CullModel( bbox ) )
-			return;
-	}
-	else
-	{
-		if ( r_lefthand->integer == 2 )
-			return;
-	}
-
 	R_GetLightVals(currententity->origin, false);
 
-	//R_GenerateEntityShadow(); //not using this for now, it's generally a bit slower than the stencil volumes at the moment when dealing with static meshes
-
-	paliashdr = (dmdl_t *)currentmodel->extradata;
+	if (currentmodel->type == mod_iqm) //TODO: use this for MD2 as well
+		R_GenerateEntityShadow();
+	
+	// Don't render your own avatar unless it's for shadows
+	if ((currententity->flags & RF_VIEWERMODEL))
+		return;
+	
+	if (currentmodel->type == mod_alias)
+		MD2_SelectFrame ();
+	else if (currentmodel->type == mod_iqm)
+		IQM_AnimateFrame ();
+	// New model types go here
 
 	R_Mesh_SetShadelight ();
 
-	if ( !(currententity->flags & RF_VIEWERMODEL) && !(currententity->flags & RF_WEAPONMODEL) )
-	{
-		c_alias_polys += paliashdr->num_tris; /* for rspeed_epoly count */
-	}
+	if (!(currententity->flags & RF_WEAPONMODEL))
+		c_alias_polys += currentmodel->num_triangles; /* for rspeed_epoly count */
 
-	//
-	// draw all the triangles
-	//
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
@@ -1516,85 +1561,51 @@ void R_DrawAliasModel ( void )
 		qglMatrixMode(GL_MODELVIEW);
 	}
 
-	qglPushMatrix ();
-	currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
-	R_RotateForEntity (currententity);
-	currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+	if (currententity->flags & RF_WEAPONMODEL || currentmodel->type == mod_alias)
+	{
+		qglPushMatrix ();
+		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+		R_RotateForEntity (currententity);
+		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+	}
+	else if (currentmodel->type == mod_iqm)
+	{
+		qglPushMatrix ();
+		currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
+		R_RotateForEntity (currententity);
+	}
 
 	// select skin
-	if (currententity->skin) {
-		skin = currententity->skin;	// custom player skin
-	}
+	if (currententity->skin) 
+		skin = currententity->skin;
 	else
+		skin = currentmodel->skins[0];
+	if (!skin)
+		skin = r_notexture;	// fallback..
+	
+	//check for valid script
+	if(currententity->script && currententity->script->stage)
 	{
-		if (currententity->skinnum >= MAX_MD2SKINS)
-			skin = currentmodel->skins[0];
-		else
+		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || 
+			((currententity->script->stage->fx || currententity->script->stage->glow) && !strcmp("***r_notexture***", currententity->script->stage->texture2->name)) ||
+			(currententity->script->stage->cube && !strcmp("***r_notexture***", currententity->script->stage->texture3->name)))
 		{
-			skin = currentmodel->skins[currententity->skinnum];
-			if (!skin)
-				skin = currentmodel->skins[0];
+			currententity->script = NULL; //bad shader!
 		}
 	}
-	if (!skin)
-		skin = r_notexture;	// fallback...
 	
 	GL_SelectTexture (0);
-	GL_Bind (skin->texnum);
-
-	// draw it
-
 	qglShadeModel (GL_SMOOTH);
-
 	GL_TexEnv( GL_MODULATE );
 
-	if ( currententity->flags & RF_SHELL_ANY )
-		qglEnable (GL_BLEND);
-	else if ( currententity->flags & RF_TRANSLUCENT )
-	{
-		qglEnable (GL_BLEND);
-		qglBlendFunc (GL_ONE, GL_ONE);
-	}
-	if (currententity->flags & RF_CUSTOMSKIN)
-	{
-		qglTexGenf(GL_S, GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-		qglTexGenf(GL_T, GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-		qglEnable(GL_TEXTURE_GEN_S);
-		qglEnable(GL_TEXTURE_GEN_T);
-		qglBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-	}
-
-	if ( (currententity->frame >= paliashdr->num_frames)
-		|| (currententity->frame < 0) )
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( (currententity->oldframe >= paliashdr->num_frames)
-		|| (currententity->oldframe < 0))
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( !r_lerpmodels->integer )
-		currententity->backlerp = 0;
-
-	if(currententity->frame == 0 && currentmodel->num_frames == 1) {
-		if(!(currententity->flags & RF_VIEWERMODEL))
-			MD2_DrawFrame(paliashdr, 0, false, skin->texnum);
-	}
-	else
-		MD2_DrawFrame(paliashdr, currententity->backlerp, true, skin->texnum);
+	R_Mesh_DrawFrame(skin->texnum, false, 0.33);
 
 	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
 
 	qglPopMatrix ();
-
+	
 	if (currententity->flags & RF_WEAPONMODEL)
 	{
 		qglMatrixMode( GL_PROJECTION );
@@ -1603,24 +1614,6 @@ void R_DrawAliasModel ( void )
 		qglCullFace( GL_FRONT );
 	}
 
-	if ( currententity->flags & RF_SHELL_ANY )
-		qglDisable(GL_BLEND);
-	else if ( currententity->flags & RF_TRANSLUCENT )
-	{
-		qglDisable (GL_BLEND);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-
-	if( currententity->flags & RF_CUSTOMSKIN )
-	{
-		qglDisable(GL_TEXTURE_GEN_S);
-		qglDisable(GL_TEXTURE_GEN_T);
-		qglDisable (GL_BLEND);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		qglColor4f(1,1,1,1);
-		GL_TexEnv (GL_MODULATE);
-
-	}
 	if (currententity->flags & RF_DEPTHHACK)
 		qglDepthRange (gldepthmin, gldepthmax);
 	
@@ -1643,7 +1636,7 @@ void R_DrawAliasModel ( void )
 	}
 }
 
-void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
+void MD2_DrawCasterFrame (float backlerp, qboolean lerped)
 {
 	glUseProgramObjectARB( g_blankmeshprogramObj );
 	
@@ -1671,7 +1664,7 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 		glUniform1fARB(g_location_bm_lerp, 1.0-backlerp);
 	}
 	
-	qglDrawArrays (GL_TRIANGLES, 0, paliashdr->num_tris*3);
+	qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
 	
 	glUseProgramObjectARB( 0 );
 	
@@ -1682,22 +1675,14 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 //to do - alpha and alphamasks possible?
 void MD2_DrawCaster ( void )
 {
-	vec3_t		bbox[8];
-	dmdl_t		*paliashdr;
-
-	if(currententity->team) //don't draw flag models, handled by sprites
-		return;
-
 	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
 	if ( currententity->flags & RF_SHELL_ANY ) //no shells
 		return;
 
-	if ( MD2_CullModel( bbox ) )
+	if (!(currententity->flags & RF_VIEWERMODEL) && R_Mesh_CullModel ())
 		return;
-
-	paliashdr = (dmdl_t *)currentmodel->extradata;
 
 	// draw it
 
@@ -1705,28 +1690,13 @@ void MD2_DrawCaster ( void )
 	currententity->angles[PITCH] = -currententity->angles[PITCH];
 	R_RotateForEntity (currententity);
 	currententity->angles[PITCH] = -currententity->angles[PITCH];
-
-	if ( (currententity->frame >= paliashdr->num_frames)
-		|| (currententity->frame < 0) )
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( (currententity->oldframe >= paliashdr->num_frames)
-		|| (currententity->oldframe < 0))
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( !r_lerpmodels->integer )
-		currententity->backlerp = 0;
+	
+	MD2_SelectFrame ();
 
 	if(currententity->frame == 0 && currentmodel->num_frames == 1)
-		MD2_DrawCasterFrame(paliashdr, 0, false);
+		MD2_DrawCasterFrame(0, false);
 	else
-		MD2_DrawCasterFrame(paliashdr, currententity->backlerp, true);
+		MD2_DrawCasterFrame(currententity->backlerp, true);
 
 	qglPopMatrix();
 }
