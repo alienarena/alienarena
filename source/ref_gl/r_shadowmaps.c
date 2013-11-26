@@ -1009,6 +1009,7 @@ void R_DrawEntityCaster(entity_t *ent)
 {		
 	vec3_t	dist, mins, maxs;
 	trace_t	r_trace;
+	model_t *prev;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -1069,6 +1070,8 @@ void R_DrawEntityCaster(entity_t *ent)
 	//this would be only if we want to do self shadowing, or have player shadows cast on other mesh objects.  At this time, I think that the
 	//performance losses would not be worth doing this, but we can revisit.
 
+	prev = currentmodel;
+	
 	currentmodel = ent->model;
 
 	//get view distance
@@ -1110,6 +1113,8 @@ void R_DrawEntityCaster(entity_t *ent)
     qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
+	
+	currentmodel = prev;
 	
 	GL_InvalidateTextureState (); // FIXME
 }
@@ -1177,8 +1182,6 @@ void R_GenerateEntityShadow( void )
 			qglDisable ( GL_BLEND );
 		}
 
-		currentmodel = currententity->model;	
-		
 		r_shadowmapcount = 0;
 	}
 }
