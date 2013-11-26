@@ -613,9 +613,6 @@ cvar_t			*r_shadowcutoff;
 extern void R_LoadARBPrograms(void);
 extern void	R_LoadGLSLPrograms(void);
 
-//arb fragment
-extern unsigned int g_water_program_id;
-
 //glsl
 GLhandleARB g_programObj;
 GLhandleARB g_shadowprogramObj;
