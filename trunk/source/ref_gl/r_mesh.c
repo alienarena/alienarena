@@ -1001,15 +1001,15 @@ static qboolean R_Mesh_CullModel (void)
 	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
 		return true;
 	
+	if ((currententity->flags & RF_WEAPONMODEL))
+		return r_lefthand->integer == 2;
+	
 	if (r_worldmodel) {
 		//occulusion culling - why draw entities we cannot see?
 		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
 	}
-	
-	if ((currententity->flags & RF_WEAPONMODEL))
-		return r_lefthand->integer == 2; 
 	
 	if (currentmodel->type == mod_alias)
 		return MD2_CullModel ();
