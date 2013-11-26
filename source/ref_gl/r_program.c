@@ -33,7 +33,6 @@ PFNGLPROGRAMSTRINGARBPROC		   qglProgramStringARB		  = NULL;
 PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB  = NULL;
 PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB = NULL;
 
-unsigned int g_water_program_id;
 char *fragment_program_text;
 
 //GLSL
@@ -62,88 +61,6 @@ PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
 //doesn't work with ARB shaders, unfortunately, due to the #comments
 #define STRINGIFY(...) #__VA_ARGS__
-
-static char water_ARB_program[] =
-"!!ARBfp1.0\n"
-
-"# Scroll and scale the distortion texture coordinates.\n"
-"# Scroll coordinates are specified externally.\n"
-"PARAM scroll1 = program.local[0];\n"
-"PARAM scroll2 = program.local[1];\n"
-"PARAM texScale1 = { 0.008, 0.008, 1.0, 1.0 };\n"
-"PARAM texScale2 = { 0.007, 0.007, 1.0, 1.0 };\n"
-"TEMP texCoord1;\n"
-"TEMP texCoord2;\n"
-"MUL texCoord1, fragment.texcoord[1], texScale1;\n"
-"MUL texCoord2, fragment.texcoord[1], texScale2;\n"
-"ADD texCoord1, texCoord1, scroll1;\n"
-"ADD texCoord2, texCoord2, scroll2;\n"
-
-"# Load the distortion textures and add them together.\n"
-"TEMP distortColor;\n"
-"TEMP distortColor2;\n"
-"TXP distortColor, texCoord1, texture[0], 2D;\n"
-"TXP distortColor2, texCoord2, texture[0], 2D;\n"
-"ADD distortColor, distortColor, distortColor2;\n"
-
-"# Subtract 1.0 and scale by 2.0.\n"
-"# Textures will be distorted from -2.0 to 2.0 texels.\n"
-"PARAM scaleFactor = { 2.0, 2.0, 2.0, 2.0 };\n"
-"PARAM one = { 1.0, 1.0, 1.0, 1.0 };\n"
-"SUB distortColor, distortColor, one;\n"
-"MUL distortColor, distortColor, scaleFactor;\n"
-
-"# Apply distortion to reflection texture coordinates.\n"
-"TEMP distortCoord;\n"
-"TEMP endColor;\n"
-"ADD distortCoord, distortColor, fragment.texcoord[0];\n"
-"TXP endColor, distortCoord, texture, 2D;\n"
-
-"# Get a vector from the surface to the view origin\n"
-"PARAM vieworg = program.local[2];\n"
-"TEMP eyeVec;\n"
-"TEMP trans;\n"
-"SUB eyeVec, vieworg, fragment.texcoord[1];\n"
-
-"# Normalize the vector to the eye position\n"
-"TEMP temp;\n"
-"TEMP invLen;\n"
-"DP3 temp, eyeVec, eyeVec;\n"
-"RSQ invLen, temp.x;\n"
-"MUL eyeVec, eyeVec, invLen;\n"
-"ABS eyeVec.z, eyeVec.z; # so it works underwater, too\n"
-
-"# Load the ripple normal map\n"
-"TEMP normalColor;\n"
-"TEMP normalColor2;\n"
-"# Scale texture\n"
-"MUL texCoord1, fragment.texcoord[2], texScale2;\n"
-"MUL texCoord2, fragment.texcoord[2], texScale1;\n"
-"# Scroll texture\n"
-"ADD texCoord1, texCoord1, scroll1;\n"
-"ADD texCoord2, texCoord2, scroll2;\n"
-"# Get texel color\n"
-"TXP normalColor, texCoord1, texture[1], 2D;\n"
-"TXP normalColor2, texCoord2, texture[1], 2D;\n"
-"# Combine normal maps\n"
-"ADD normalColor, normalColor, normalColor2;\n"
-"SUB normalColor, normalColor, 1.0;\n"
-
-"# Normalize normal texture\n"
-"DP3 temp, normalColor, normalColor;\n"
-"RSQ invLen, temp.x;\n"
-"MUL normalColor, invLen, normalColor;\n"
-
-"# Fresenel approximation\n"
-"DP3 trans.w, normalColor, eyeVec;\n"
-"SUB endColor.w, 1.0, trans.w;\n"
-"MAX endColor.w, endColor.w, 0.4; # MAX sets the min?  How odd.\n"
-"MIN endColor.w, endColor.w, 0.9; # Leave a LITTLE bit of transparency always\n"
-
-"# Put the color in the output (TODO: put this in final OP)\n"
-"MOV result.color, endColor;\n"
-
-"END\n";
 
 void R_LoadARBPrograms(void)
 {
@@ -175,21 +92,7 @@ void R_LoadARBPrograms(void)
 	}
 
 	if (gl_state.fragment_program)
-	{
 		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE);
-
-		qglGenProgramsARB(1, &g_water_program_id);
-		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
-		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f);
-		qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, strlen(water_ARB_program), water_ARB_program);
-
-		// Make sure the program loaded correctly
-		{
-			int err = 0;
-			assert((err = qglGetError()) == GL_NO_ERROR);
-			err = err; // for debugging only -- todo, remove
-		}
-	}
 	else
 		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE);
 }
@@ -1333,9 +1236,9 @@ static char glass_fragment_program[] = STRINGIFY (
 			glass_color = texture2D(refTexture, glass_coord.st + coord_offset.st/2.0);
 		
 		if (type == 3)
-			gl_FragColor = 0.3 * glass_color + 0.3 * mirror_color * vec4 (ld + ls + 0.5);
+			gl_FragColor = 0.3 * glass_color + 0.3 * mirror_color * vec4 (ld + ls + 0.35);
 		else if (type == 2)
-			gl_FragColor = glass_color;
+			gl_FragColor = glass_color/2.0;
 		else if (type == 1)
 			gl_FragColor = mirror_color;
 

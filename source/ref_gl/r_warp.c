@@ -285,74 +285,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 		return;
 	}
-	else {
-		// TODO: either add a CVAR specifically to use the ARB shader here,
-		// or just get rid of this all entirely.
-
-		if (gl_state.fragment_program && fa->texinfo->has_normalmap)
-		{
-			qglEnable(GL_FRAGMENT_PROGRAM_ARB);
-			qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
-			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
-				rs_realtime * (0.2f), 1.0f, 1.0f, 1.0f);
-			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
-				rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
-			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
-				(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
-
-			GL_MBind (1, r_distort->texnum);
-			GL_SelectTexture (0);
-		}
-
-		GL_MBind (0, fa->texinfo->image->texnum);
-
-		for (p=fa->polys ; p ; p=p->next)
-		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
-			{
-				os = v[3];
-				ot = v[4];
-
-				s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
-
-				s += scroll;
-				s *= (1.0/64);
-
-				t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
-
-				t *= (1.0/64);
-
-				if (gl_state.fragment_program)
-				{
-					qglMTexCoord2fARB(GL_TEXTURE0, s, t);
-					qglMTexCoord2fARB(GL_TEXTURE1, 20*s, 20*t);
-				}
-				else
-					qglTexCoord2f (s, t);
-
-				if (!(fa->texinfo->flags & SURF_FLOWING))
-
-				{
-					nv[0] =v[0];
-					nv[1] =v[1];
-
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-
-							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-
-					qglVertex3fv (nv);
-				}
-				else
-					qglVertex3fv (v);
-			}
-			qglEnd ();
-		}
-
-		if (gl_state.fragment_program)
-			qglDisable(GL_FRAGMENT_PROGRAM_ARB);
-	}
-
+	
 	//env map if specified by shader
 	if(texnum)
 		GL_Bind(texnum);
