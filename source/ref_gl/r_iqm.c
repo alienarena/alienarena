@@ -42,9 +42,6 @@ static vertCache_t *vbo_tangents;
 static vertCache_t *vbo_indices;
 static qboolean has_vbo;
 
-float modelpitch;
-float modelroll;
-
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
@@ -356,7 +353,7 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	return true;
 }
 
-static void IQM_LoadVBO (model_t *mod)
+void IQM_LoadVBO (model_t *mod)
 {
 	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->vertexes, VBO_STORE_XYZ, mod);
 	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), mod->st, VBO_STORE_ST, mod);
@@ -365,7 +362,7 @@ static void IQM_LoadVBO (model_t *mod)
 	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), mod->tris, VBO_STORE_INDICES, mod);
 }
 
-static qboolean IQM_FindVBO (model_t *mod)
+qboolean IQM_FindVBO (model_t *mod)
 {
 	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
 	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
@@ -864,13 +861,108 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-void IQM_AnimateFrame(float curframe, int nextframe)
+float IQM_SelectFrame (void)
+{
+	float		time;
+	
+	//frame interpolation
+	time = (Sys_Milliseconds() - currententity->frametime) / 100;
+	if(time > 1.0)
+		time = 1.0;
+
+	if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
+		time = 0;
+
+	//Check for stopped death anims
+	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
+		time = 0;
+
+	return currententity->frame + time;
+}
+
+int IQM_NextFrame(int frame)
+{
+	int outframe;
+
+	//just for now
+	if(currententity->flags & RF_WEAPONMODEL)
+	{
+		outframe = frame + 1;
+		return outframe;
+	}
+
+	switch(frame)
+	{
+		//map models can be 24 or 40 frames
+		case 23:
+			if(currentmodel->num_poses > 24)
+				outframe = frame + 1;
+			else
+				outframe = 0;
+			break;
+		//player standing
+		case 39:
+			outframe = 0;
+			break;
+		//player running
+		case 45:
+			outframe = 40;
+			break;
+		//player shooting
+		case 53:
+			outframe = 46;
+			break;
+		//player jumping
+		case 71:
+			outframe = 0;
+			break;
+		//player crouched
+		case 153:
+			outframe = 135;
+			break;
+		//player crouched walking
+		case 159:
+			outframe = 154;
+			break;
+		case 168:
+			outframe = 160;
+			break;
+		//deaths
+		case 219:
+			outframe = 219;
+			break;
+		case 237:
+			outframe = 237;
+			break;
+		case 257:
+			outframe = 257;
+			break;
+		default:
+			outframe = frame + 1;
+			break;
+	}
+	return outframe;
+}
+
+void IQM_AnimateFrame (void)
 {
 	int i;
+	int frame1, frame2;
+	float frameoffset;
+	float curframe;
+	int nextframe;
+	float modelpitch;
+	float modelroll;
+	
+	modelpitch = degreeToRadian(currententity->angles[PITCH]); 
+	modelroll = degreeToRadian(currententity->angles[ROLL]);
+	
+	curframe = IQM_SelectFrame ();
+	nextframe = IQM_NextFrame (currententity->frame);
 
-    int frame1 = (int)floor(curframe),
-        frame2 = nextframe;
-    float frameoffset = curframe - frame1;
+    frame1 = (int)floor(curframe);
+    frame2 = nextframe;
+    frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
 
@@ -1243,11 +1335,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 		Com_Printf ("WARN: could not load VBO for model!\n");
 }
 
-void R_Mesh_SetupShell (qboolean ragdoll, vec3_t lightcolor, float alpha);
-void R_Mesh_SetupGLSL (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader);
-void R_Mesh_SetupGlass (qboolean mirror, qboolean glass);
-
-inline void IQM_DrawVBO (qboolean tangents)
+void IQM_DrawVBO (void)
 {
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
@@ -1264,12 +1352,9 @@ inline void IQM_DrawVBO (qboolean tangents)
 	GL_BindVBO(vbo_normals);
 	qglNormalPointer(GL_FLOAT, 0, 0);
 
-	if (tangents)
-	{
-		glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-		GL_BindVBO(vbo_tangents);
-		glVertexAttribPointerARB (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	}
+	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+	GL_BindVBO(vbo_tangents);
+	glVertexAttribPointerARB (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, 0, 0);
 		
 	GL_BindVBO(NULL);
 
@@ -1292,107 +1377,13 @@ inline void IQM_DrawVBO (qboolean tangents)
 
 }
 
-/*
-TODO: this is now practically the same function as MD2_DrawFrame. They could
-easily be consolidated.
-*/
-void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha)
-{
-	int		i;
-	float	alpha;
-	rscript_t *rs = NULL;
-	vec3_t	lightcolor;
-
-	qboolean mirror = false;
-	qboolean glass = false;
-	qboolean fragmentshader;
-	
-	if (r_shaders->integer)
-		rs = currententity->script;
-	
-	fragmentshader = (rs != NULL) && gl_normalmaps->integer;
-	
-	VectorCopy(shadelight, lightcolor);
-	for (i=0;i<model_dlights_num;i++)
-		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
-	VectorNormalize(lightcolor);
-
-	if (currententity->flags & RF_TRANSLUCENT)
-	{
-		alpha = currententity->alpha; //TODO: use this again
-		if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-			glass = true;
-		else if(gl_mirror->integer)
-			mirror = true;
-		else
-			glass = true;
-	}
-	else
-		alpha = 1.0;
-
-	//render the model
-
-	if ((mirror || glass) && !(currententity->flags & RF_SHELL_ANY))
-	{
-		qglDepthMask(false);
-
-		R_Mesh_SetupGlass (mirror, glass);
-		
-		glUniform1iARB( g_location_g_useGPUanim, 1);
-		glUniformMatrix3x4fvARB( g_location_g_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-
-		IQM_DrawVBO (false);
-		
-		qglDepthMask(true);
-		glUseProgramObjectARB( 0 );
-	}
-	else
-	{
-		if (currententity->flags & RF_SHELL_ANY)
-		{
-			qglEnable (GL_BLEND);
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			
-			R_Mesh_SetupShell (ragdoll, lightcolor, alpha);
-		}
-		else
-		{
-			R_Mesh_SetupGLSL (skinnum, rs, lightcolor, fragmentshader);
-		}
-		
-		glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);
-		glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-		
-		IQM_DrawVBO (true);
-		
-		// cleanup
-		qglColor4f(1,1,1,1);
-		glUseProgramObjectARB( 0 );
-	}
-
-	GLSTATE_DISABLE_ALPHATEST
-	GLSTATE_DISABLE_BLEND
-	GLSTATE_DISABLE_TEXGEN
-
-}
-
-static qboolean IQM_CullModel( void )
+qboolean IQM_CullModel( void )
 {
 	int i;
 	vec3_t	vectors[3];
 	vec3_t  angles;
-	trace_t r_trace;
 	vec3_t	dist;
 	vec3_t bbox[8];
-
-	if (r_worldmodel )
-	{
-		//occulusion culling - why draw entities we cannot see?
-
-		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			return true;
-	}
 
 	VectorSubtract(r_origin, currententity->origin, dist);
 
@@ -1439,9 +1430,24 @@ static qboolean IQM_CullModel( void )
 		{
 			return true;
 		}
-
-		return false;
 	}
+	
+	// TODO: could probably find a better place for this.
+	if(r_ragdolls->integer)
+	{
+		//Ragdolls take over at beginning of each death sequence
+		if(!(currententity->flags & RF_TRANSLUCENT))
+		{
+			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
+				if(currentmodel->hasRagDoll)
+					RGD_AddNewRagdoll(currententity->origin, currententity->name);
+		}
+		//Do not render deathframes if using ragdolls - do not render translucent helmets
+		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
+			return true;
+	}
+	
+	return false;
 }
 
 //Can these next two be replaced with some type of animation grouping from the model?
@@ -1460,70 +1466,6 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 		return false;
 }
 
-int IQM_NextFrame(int frame)
-{
-	int outframe;
-
-	//just for now
-	if(currententity->flags & RF_WEAPONMODEL)
-	{
-		outframe = frame + 1;
-		return outframe;
-	}
-
-	switch(frame)
-	{
-		//map models can be 24 or 40 frames
-		case 23:
-			if(currentmodel->num_poses > 24)
-				outframe = frame + 1;
-			else
-				outframe = 0;
-			break;
-		//player standing
-		case 39:
-			outframe = 0;
-			break;
-		//player running
-		case 45:
-			outframe = 40;
-			break;
-		//player shooting
-		case 53:
-			outframe = 46;
-			break;
-		//player jumping
-		case 71:
-			outframe = 0;
-			break;
-		//player crouched
-		case 153:
-			outframe = 135;
-			break;
-		//player crouched walking
-		case 159:
-			outframe = 154;
-			break;
-		case 168:
-			outframe = 160;
-			break;
-		//deaths
-		case 219:
-			outframe = 219;
-			break;
-		case 237:
-			outframe = 237;
-			break;
-		case 257:
-			outframe = 257;
-			break;
-		default:
-			outframe = frame + 1;
-			break;
-	}
-	return outframe;
-}
-
 void R_Mesh_SetShadelight (void);
 
 /*
@@ -1532,175 +1474,6 @@ R_DrawINTERQUAKEMODEL
 =================
 */
 
-void R_DrawINTERQUAKEMODEL ( void )
-{
-	image_t		*skin;
-	float		frame, time;
-
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
-		return;
-
-	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->integer == 2)
-		return;
-
-	//do culling
-	if ( IQM_CullModel() )
-		return;
-
-	if(r_ragdolls->integer)
-	{
-		//Ragdolls take over at beginning of each death sequence
-		if(!(currententity->flags & RF_TRANSLUCENT))
-		{
-			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
-				if(currentmodel->hasRagDoll)
-					RGD_AddNewRagdoll(currententity->origin, currententity->name);
-		}
-		//Do not render deathframes if using ragdolls - do not render translucent helmets
-		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
-			return;
-	}
-
-	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	modelpitch = degreeToRadian(currententity->angles[PITCH]); 
-	modelroll = degreeToRadian(currententity->angles[ROLL]); 
-	//modelroll = 0.52 * sinf(rs_realtime); //use this for testing only
-
-	R_GetLightVals(currententity->origin, false);	
-		
-	R_GenerateEntityShadow();
-
-	R_Mesh_SetShadelight ();
-
-	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
-		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
-
-	if (currententity->flags & RF_WEAPONMODEL)
-    {
-		qglMatrixMode(GL_PROJECTION);
-		qglPushMatrix();
-		qglLoadIdentity();
-
-		if (r_lefthand->integer == 1)
-		{
-			qglScalef(-1, 1, 1);
-			qglCullFace(GL_BACK);
-		}
-		if(r_newrefdef.fov_y < 75.0f)
-			MYgluPerspective(r_newrefdef.fov_y, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
-		else
-			MYgluPerspective(75.0f, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
-
-		qglMatrixMode(GL_MODELVIEW);
-
-		qglPushMatrix ();
-		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
-		R_RotateForEntity (currententity);
-		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
-    }
-	else
-	{
-		qglPushMatrix ();
-		currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
-		R_RotateForEntity (currententity);
-	}
-
-	// select skin
-	if (currententity->skin) 
-		skin = currententity->skin;
-	else
-		skin = currentmodel->skins[0];
-	if (!skin)
-		skin = r_notexture;	// fallback...
-	
-	GL_SelectTexture (0);
-	
-	GL_Bind(skin->texnum);
-
-	//check for valid script
-	if(currententity->script && currententity->script->stage)
-	{
-		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || 
-			((currententity->script->stage->fx || currententity->script->stage->glow) && !strcmp("***r_notexture***", currententity->script->stage->texture2->name)) ||
-			(currententity->script->stage->cube && !strcmp("***r_notexture***", currententity->script->stage->texture3->name)))
-		{
-			currententity->script = NULL; //bad shader!
-		}
-	}
-
-	// draw it
-
-	qglShadeModel (GL_SMOOTH);
-
-	GL_TexEnv( GL_MODULATE );
-
-	if ( currententity->flags & RF_TRANSLUCENT )
-	{
-		qglEnable (GL_BLEND);
-		qglBlendFunc (GL_ONE, GL_ONE);
-	}
-
-	//frame interpolation
-	time = (Sys_Milliseconds() - currententity->frametime) / 100;
-	if(time > 1.0)
-		time = 1.0;
-
-	if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
-		time = 0;
-
-	//Check for stopped death anims
-	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
-		time = 0;
-
-	frame = currententity->frame + time;
-
-	IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
-
-	if(!(currententity->flags & RF_VIEWERMODEL))
-		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
-			IQM_DrawFrame(skin->texnum, false, 0.33);
-
-	GL_SelectTexture (0);
-	GL_TexEnv( GL_REPLACE );
-	qglShadeModel (GL_FLAT);
-
-	qglPopMatrix ();
-
-	if ( ( currententity->flags & RF_WEAPONMODEL ) )
-	{
-		qglMatrixMode( GL_PROJECTION );
-		qglPopMatrix();
-		qglMatrixMode( GL_MODELVIEW );
-		qglCullFace( GL_FRONT );
-	}
-
-	if ( currententity->flags & RF_TRANSLUCENT )
-	{
-		qglDisable (GL_BLEND);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}	
-
-	if (currententity->flags & RF_DEPTHHACK)
-		qglDepthRange (gldepthmin, gldepthmax);
-	
-	qglColor4f (1,1,1,1);	
-
-	if(r_minimap->integer)
-    {
-	   if ( currententity->flags & RF_MONSTER)
-	   {
-			RadarEnts[numRadarEnts].color[0]= 1.0;
-			RadarEnts[numRadarEnts].color[1]= 0.0;
-			RadarEnts[numRadarEnts].color[2]= 2.0;
-			RadarEnts[numRadarEnts].color[3]= 1.0;
-		}
-	    else
-			return;
-
-		VectorCopy(currententity->origin,RadarEnts[numRadarEnts].org);
-		numRadarEnts++;
-	}
-}
 
 void IQM_DrawCasterFrame ()
 {
@@ -1738,7 +1511,6 @@ void IQM_DrawCasterFrame ()
 
 void IQM_DrawCaster ( void )
 {
-	float		frame, time;
 	vec3_t		sv_angles;
 
 	if(currententity->team) //don't draw flag models, handled by sprites
@@ -1749,33 +1521,15 @@ void IQM_DrawCaster ( void )
 
 	if ( currententity->flags & RF_SHELL_ANY ) //no shells
 		return;
-
-	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	modelpitch = degreeToRadian(currententity->angles[PITCH]);
-	modelroll = degreeToRadian(currententity->angles[ROLL]);
-	//modelroll = 0.52 * sinf(rs_realtime); //use this for testing only
+	
+	qglPushMatrix ();
+	
+	IQM_AnimateFrame();
 
 	VectorCopy(currententity->angles, sv_angles);
-    qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 	R_RotateForEntity (currententity);
 	VectorCopy(sv_angles, currententity->angles);
-
-	//frame interpolation
-	time = (Sys_Milliseconds() - currententity->frametime) / 100;
-	if(time > 1.0)
-		time = 1.0;
-
-	if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
-		time = 0;
-
-	//Check for stopped death anims
-	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
-		time = 0;
-
-	frame = currententity->frame + time;
-
-	IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
 
 	IQM_DrawCasterFrame();
 

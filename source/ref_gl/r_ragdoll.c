@@ -1169,7 +1169,7 @@ void R_RenderAllRagdolls ( void )
 			RagDollEntity.flags = shellEffect?RF_SHELL_RED:0;
 			currententity = &RagDollEntity;
 
-			IQM_DrawFrame (RagDoll[RagDollID].texnum, true, shellAlpha);
+			R_Mesh_DrawFrame (RagDoll[RagDollID].texnum, true, shellAlpha);
 
 			GL_SelectTexture (0);
 			GL_TexEnv( GL_REPLACE );
