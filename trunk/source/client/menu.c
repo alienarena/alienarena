@@ -4264,7 +4264,7 @@ static const char *mutatorNames[][2] =
 	{"grapple hook",	"grapple"}
 };
 #define num_mutators static_array_size(mutatorNames)
-static menulist_s s_mutator_list[num_mutators];
+static menulist_s s_mutator_list[ num_mutators  ];
 static menufield_s s_camptime;
 
 static char dmflags_display_buffer[128];
@@ -4381,7 +4381,7 @@ static void M_Menu_Mutators_f (void)
 	{
 		s_mutator_list[i].generic.name = mutatorNames[i][0];
 		s_mutator_list[i].generic.callback = SpinOptionFunc;
-		s_mutator_list[i].generic.localstrings[0] = weaponModeNames[i][1];
+		s_mutator_list[i].generic.localstrings[0] = mutatorNames[i][1];
 		s_mutator_list[i].curvalue = Cvar_VariableValue (mutatorNames[i][1]);
 		setup_tickbox (s_mutator_list[i]);
 		Menu_AddItem (&s_mutators_menu, &s_mutator_list[i]);
