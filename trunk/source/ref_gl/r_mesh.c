@@ -1645,35 +1645,11 @@ void MD2_DrawCasterFrame (float backlerp, qboolean lerped)
 	glUseProgramObjectARB( g_blankmeshprogramObj );
 	
 	glUniform1iARB(g_location_bm_useGPUanim, lerped?2:0);
+	glUniform1fARB(g_location_bm_lerp, 1.0-backlerp);
+	
+	MD2_DrawVBO (lerped);
 
-	if (!MD2_FindVBO (currentmodel, currententity->frame))
-	{
-		// TODO: remove this - the VBOs are getting unloaded for every new map
-		MD2_LoadVBO (currentmodel);
-		MD2_FindVBO (currentmodel, currententity->frame);
-	}
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	GL_BindVBO(vbo_xyz);
-	qglVertexPointer(3, GL_FLOAT, 0, 0);
-	
-	if (lerped)
-	{
-		MD2_FindVBO (currentmodel, currententity->oldframe);
-		
-		glEnableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
-		GL_BindVBO (vbo_xyz);
-		glVertexAttribPointerARB (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
-		
-		glUniform1fARB(g_location_bm_lerp, 1.0-backlerp);
-	}
-	
-	qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
-	
 	glUseProgramObjectARB( 0 );
-	
-	if (lerped)
-		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
 }
 
 //to do - alpha and alphamasks possible?
