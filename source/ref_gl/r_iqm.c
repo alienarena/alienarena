@@ -1455,24 +1455,8 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 		return false;
 }
 
-void R_Mesh_SetShadelight (void);
-
-/*
-=================
-R_DrawINTERQUAKEMODEL
-=================
-*/
-
-
 void IQM_DrawCasterFrame ()
 {
-	if (!IQM_FindVBO (currentmodel))
-	{
-		// TODO: remove this - the VBOs are getting unloaded for every new map
-		IQM_LoadVBO (currentmodel);
-		IQM_FindVBO (currentmodel);
-	}
-	
 	//just use a very basic shader for this instead of the normal mesh shader
 	glUseProgramObjectARB( g_blankmeshprogramObj );
 
@@ -1482,27 +1466,9 @@ void IQM_DrawCasterFrame ()
 	//tell it to use IQM skeletal animation
 	glUniform1iARB(g_location_bm_useGPUanim, 1);
 
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	GL_BindVBO(vbo_xyz);
-	qglVertexPointer(3, GL_FLOAT, 0, 0);
-
-	GL_BindVBO(NULL);
-
-	GL_BindIBO(vbo_indices);								
-
-	glEnableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-	glEnableVertexAttribArrayARB(ATTR_BONES_IDX);
-	glVertexAttribPointerARB(ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights); 
-	glVertexAttribPointerARB(ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 		
-
-	qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);	
-
-	GL_BindIBO(NULL);
+	IQM_DrawVBO ();
 
 	glUseProgramObjectARB( 0 );
-	
-	glDisableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-	glDisableVertexAttribArrayARB(ATTR_BONES_IDX);
 }
 
 void IQM_DrawCaster ( void )
