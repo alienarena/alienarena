@@ -40,7 +40,6 @@ static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
 static vertCache_t *vbo_tangents;
 static vertCache_t *vbo_indices;
-static qboolean has_vbo;
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
@@ -1251,18 +1250,6 @@ void IQM_AnimateFrame (void)
 			}
 		}
 	}
-
-	has_vbo = IQM_FindVBO (currentmodel);
-	
-	// TODO: remove this - the VBOs are getting unloaded for every new map
-	if (!has_vbo)
-	{
-		IQM_LoadVBO (currentmodel);
-		has_vbo = IQM_FindVBO (currentmodel);
-	}
-	
-	if (!has_vbo)
-		Com_Printf ("WARN: could not load VBO for model %s!\n", currentmodel->name);
 }
 
 void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
@@ -1321,22 +1308,17 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
         nextjoint:;
 		}
 	}
-
-	has_vbo = IQM_FindVBO (RagDoll[RagDollID].ragDollMesh);
-	
-	// TODO: remove this - the VBOs are getting unloaded for every new map
-	if (!has_vbo)
-	{
-		IQM_LoadVBO (RagDoll[RagDollID].ragDollMesh);
-		has_vbo = IQM_FindVBO (RagDoll[RagDollID].ragDollMesh);
-	}
-	
-	if (!has_vbo)
-		Com_Printf ("WARN: could not load VBO for model!\n");
 }
 
 void IQM_DrawVBO (void)
 {
+	if (!IQM_FindVBO (currentmodel))
+	{
+		// TODO: remove this - the VBOs are getting unloaded for every new map
+		IQM_LoadVBO (currentmodel);
+		IQM_FindVBO (currentmodel);
+	}
+	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
 	qglVertexPointer(3, GL_FLOAT, 0, 0);
@@ -1484,6 +1466,13 @@ R_DrawINTERQUAKEMODEL
 
 void IQM_DrawCasterFrame ()
 {
+	if (!IQM_FindVBO (currentmodel))
+	{
+		// TODO: remove this - the VBOs are getting unloaded for every new map
+		IQM_LoadVBO (currentmodel);
+		IQM_FindVBO (currentmodel);
+	}
+	
 	//just use a very basic shader for this instead of the normal mesh shader
 	glUseProgramObjectARB( g_blankmeshprogramObj );
 
