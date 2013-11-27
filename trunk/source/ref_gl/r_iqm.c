@@ -1436,11 +1436,18 @@ qboolean IQM_CullModel( void )
 	if(r_ragdolls->integer)
 	{
 		//Ragdolls take over at beginning of each death sequence
-		if(!(currententity->flags & RF_TRANSLUCENT))
+		if	(	!(currententity->flags & RF_TRANSLUCENT) &&
+				currentmodel->hasRagDoll && 
+				(currententity->frame == 199 || 
+				currententity->frame == 220 ||
+				currententity->frame == 238)
+			)
 		{
-			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
-				if(currentmodel->hasRagDoll)
-					RGD_AddNewRagdoll(currententity->origin, currententity->name);
+			// Make sure the positions of all the arms and legs and stuff have
+			// been initialized-- necessary for the current player's avatar,
+			// which has not yet been rendered.
+			IQM_AnimateFrame (); 
+			RGD_AddNewRagdoll(currententity->origin, currententity->name);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
 		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
