@@ -40,12 +40,12 @@ static CURL *curl;
 
 // generic encapsulation for common http response codes
 typedef struct response_s {
-        int code;
-        char *text;
+	int code;
+	char *text;
 } response_t;
 
 response_t responses[] = {
-        {400, "Bad request"}, {401, "Unauthorized"}, {403, "Forbidden"},
+	{400, "Bad request"}, {401, "Unauthorized"}, {403, "Forbidden"},
 	{404, "Not found"}, {500, "Internal server error"}, {0, NULL}
 };
 
@@ -57,11 +57,99 @@ char dnld_file[MAX_OSPATH];  // local path to save to
 long status, length;  // for current transfer
 qboolean success;
 
+typedef enum
+{
+	default_1,
+	default_2,
+	server_custom
+} downloadhost_t;
+
+downloadhost_t currentHost;
+
 /*
 CL_HttpDownloadRecv
 */
 size_t CL_HttpDownloadRecv(void *buffer, size_t size, size_t nmemb, void *p){
-       return fwrite(buffer, size, nmemb, cls.download);
+   return fwrite(buffer, size, nmemb, cls.download);
+}
+
+/*
+CL_HttpDownload
+
+Queue up an http download-- get a specified file from a specified HTTP server.
+We use cURL's multi interface, even tho we only ever perform one download at a
+time, because it is non-blocking.
+*/
+static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filename)
+{
+	const char *hostname;
+	char game[64];
+
+	if(!curlm)
+		return false;
+
+	if(!curl)
+		return false;
+
+	memset(dnld_file, 0, sizeof(dnld_file));  // resolve local file name
+	Com_sprintf(dnld_file, sizeof(dnld_file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
+
+	FS_CreatePath(dnld_file);  // create the directory
+
+	if(!(cls.download = fopen(dnld_file, "wb"))){
+		Com_Printf("Failed to open %s.\n", dnld_file);
+		return false;  // and open the file
+	}
+
+	cls.downloadhttp = true;
+
+	memset(game, 0, sizeof(game));  // resolve gamedir
+	strncpy(game, Cvar_VariableString("game"), sizeof(game) - 1);
+
+	if(!strlen(game))  // use default if not set
+		strcpy(game, "arena");
+
+	switch (host)
+	{
+		case default_1:
+			hostname = DEFAULT_DOWNLOAD_URL_1;
+			break;
+		case default_2:
+			hostname = DEFAULT_DOWNLOAD_URL_2;
+			break;
+		case server_custom:
+			if (!strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_1))
+				return false;
+			if (!strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_2))
+				return false;
+			hostname = cls.downloadurl;
+			break;
+	}
+	
+	currentHost = host;
+
+	memset(url, 0, sizeof(url));  // construct url
+	Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", hostname, game, filename);
+
+	// set handle to default state
+	curl_easy_reset(curl);
+
+	// set url from which to retrieve the file
+	if (curl_easy_setopt(curl, CURLOPT_URL, url) != CURLE_OK) return false;
+
+	// time out in 5s
+	if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return false;
+
+	// set error buffer so we may print meaningful messages
+	memset(curlerr, 0, sizeof(curlerr));
+	if (curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerr) != CURLE_OK) return false;
+
+	// set the callback for when data is received
+	if (curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CL_HttpDownloadRecv) != CURLE_OK) return false;
+
+	if (curl_multi_add_handle(curlm, curl) != CURLM_OK) return false;
+
+	return true;
 }
 
 /*
@@ -72,53 +160,7 @@ the current gamedir.  We use cURL's multi interface, even tho we only ever
 perform one download at a time, because it is non-blocking.
 */
 qboolean CL_HttpDownload(void){
-        char game[64];
-
-        if(!curlm)
-                return false;
-
-        if(!curl)
-                return false;
-
-        memset(dnld_file, 0, sizeof(dnld_file));  // resolve local file name
-        Com_sprintf(dnld_file, sizeof(dnld_file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
-
-        FS_CreatePath(dnld_file);  // create the directory
-
-        if(!(cls.download = fopen(dnld_file, "wb"))){
-                Com_Printf("Failed to open %s.\n", dnld_file);
-                return false;  // and open the file
-        }
-
-		cls.downloadhttp = true;
-
-        memset(game, 0, sizeof(game));  // resolve gamedir
-        strncpy(game, Cvar_VariableString("game"), sizeof(game) - 1);
-
-        if(!strlen(game))  // use default if not set
-                strcpy(game, "arena");
-
-        memset(url, 0, sizeof(url));  // construct url
-        Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", cls.downloadurl, game, cls.downloadname);
-	    // set handle to default state
-        curl_easy_reset(curl);
-
-        // set url from which to retrieve the file
-        if (curl_easy_setopt(curl, CURLOPT_URL, url) != CURLE_OK) return false;
-
-		// time out in 5s
-		if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return false;
-
-        // set error buffer so we may print meaningful messages
-        memset(curlerr, 0, sizeof(curlerr));
-        if (curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerr) != CURLE_OK) return false;
-
-        // set the callback for when data is received
-        if (curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CL_HttpDownloadRecv) != CURLE_OK) return false;
-
-        if (curl_multi_add_handle(curlm, curl) != CURLM_OK) return false;
-
-		return true;
+return CL_HttpDownloadFromHost (default_1, cls.downloadname);
 }
 
 
@@ -126,13 +168,13 @@ qboolean CL_HttpDownload(void){
 CL_HttpResponseCode
 */
 char *CL_HttpResponseCode(long code){
-        int i = 0;
-        while(responses[i].code){
-                if(responses[i].code == code)
-                        return responses[i].text;
-                i++;
-        }
-        return "Unknown";
+	int i = 0;
+	while(responses[i].code){
+		if(responses[i].code == code)
+			return responses[i].text;
+		i++;
+	}
+	return "Unknown";
 }
 
 
@@ -143,37 +185,49 @@ If a download is currently taking place, clean it up.  This is called
 both to finalize completed downloads as well as abort incomplete ones.
 */
 void CL_HttpDownloadCleanup(){
-        char *c;
+	char *c;
 
-        if(!cls.download || !cls.downloadhttp)
-                return;
+	if(!cls.download || !cls.downloadhttp)
+		return;
 
-        (void)curl_multi_remove_handle(curlm, curl);  // cleanup curl
+	(void)curl_multi_remove_handle(curlm, curl);  // cleanup curl
 
-        fclose(cls.download);  // always close the file
-        cls.download = NULL;
+	fclose(cls.download);  // always close the file
+	cls.download = NULL;
+	
+	cls.downloadpercent = 0;
+	cls.downloadhttp = false;
 
-		if(success){
-		        cls.downloadname[0] = 0;
-        }
-        else {  // retry via legacy udp download
+	status = length = 0;
 
-                c = strlen(curlerr) ? curlerr : CL_HttpResponseCode(status);
+	if(success)
+	{
+		cls.downloadname[0] = 0;
+		success = false;
+	}
+	else
+	{  // retry via legacy udp download
 
-                Com_DPrintf("Failed to download %s via HTTP: %s.\n"
-                                "Trying UDP..", cls.downloadname, c);
-
-                MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
-                MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
-
-                _unlink(dnld_file);  // delete partial or empty file
-        }
-
-        cls.downloadpercent = 0;
-        cls.downloadhttp = false;
-
-        status = length = 0;
-        success = false;
+		c = strlen(curlerr) ? curlerr : CL_HttpResponseCode(status);
+	
+		Com_DPrintf("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, c);
+		
+		_unlink(dnld_file);  // delete partial or empty file
+		
+		switch (currentHost)
+		{
+			case default_1:
+			case default_2:
+				Com_DPrintf ("Trying next HTTP.\n");
+				CL_HttpDownloadFromHost (currentHost+1, cls.downloadname);
+				break;
+			case server_custom:
+				Com_DPrintf ("Trying UDP.\n");
+				MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
+				MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
+				break;
+		}
+	}
 }
 
 
@@ -188,48 +242,52 @@ we leave cls.download.tempname in tact during our cleanup, when the
 download is parsed back in the client, it will fopen and begin.
 */
 void CL_HttpDownloadThink(void){
-        CURLMsg *msg;
-        int i;
-		int runt;
+	CURLMsg *msg;
+	int i;
+	int runt;
 
-        if(!cls.downloadurl[0] || !cls.download)
-                return;  // nothing to do
+	if(!cls.downloadurl[0] || !cls.download)
+		return;  // nothing to do
 
-        // process the download as long as data is avaialble
-        while(curl_multi_perform(curlm, &i) == CURLM_CALL_MULTI_PERFORM){}
+	// process the download as long as data is avaialble
+	while(curl_multi_perform(curlm, &i) == CURLM_CALL_MULTI_PERFORM){}
 
-        // fail fast on any curl error
-        if(strlen(curlerr)){
-                CL_HttpDownloadCleanup();
-                return;
-        }
+	// fail fast on any curl error
+	if(strlen(curlerr)){
+		CL_HttpDownloadCleanup();
+		return;
+	}
 
-        // check for http status code
-        if(!status){
-                if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status) != CURLE_OK || 
-                    (status > 0 && status != 200)){  // 404, 403, etc..
-                        CL_HttpDownloadCleanup();
-                        return;
-                }
-        }
+	// check for http status code
+	if(!status){
+		if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status) != CURLE_OK || 
+		(status > 0 && status != 200)){  // 404, 403, etc..
+			CL_HttpDownloadCleanup();
+			return;
+		}
+	}
 
-        // check for completion
-        while((msg = curl_multi_info_read(curlm, &i))){
-                if(msg->msg == CURLMSG_DONE){
-						//not so fast, curl gives false positives sometimes
-						runt = FS_LoadFile (cls.downloadname, NULL);
-						if(runt > 2048)  { //the curl bug produces a 2kb chunk of data
-							success = true;
-							CL_HttpDownloadCleanup();
-							CL_RequestNextDownload();
-						}
-						else {
-							success = false;
-							CL_HttpDownloadCleanup();
-						}
-                        return;
-                }
-        }
+	// check for completion
+	while((msg = curl_multi_info_read(curlm, &i)))
+	{
+		if(msg->msg == CURLMSG_DONE)
+		{
+			//not so fast, curl gives false positives sometimes
+			runt = FS_LoadFile (cls.downloadname, NULL);
+			if(runt > 2048) //the curl bug produces a 2kb chunk of data
+			{ 
+				success = true;
+				CL_HttpDownloadCleanup();
+				CL_RequestNextDownload();
+			}
+			else
+			{
+				success = false;
+				CL_HttpDownloadCleanup();
+			}
+			return;
+		}
+	}
 }
 
 
@@ -237,11 +295,11 @@ void CL_HttpDownloadThink(void){
 CL_InitHttpDownload
 */
 void CL_InitHttpDownload(void){
-        if(!(curlm = curl_multi_init()))
-                return;
+	if(!(curlm = curl_multi_init()))
+		return;
 
-        if(!(curl = curl_easy_init()))
-                return;
+	if(!(curl = curl_easy_init()))
+		return;
 }
 
 
@@ -249,11 +307,11 @@ void CL_InitHttpDownload(void){
 CL_ShutdownHttpDownload
 */
 void CL_ShutdownHttpDownload(void){
-        CL_HttpDownloadCleanup();
+	CL_HttpDownloadCleanup();
 
-        curl_easy_cleanup(curl);
-        curl = NULL;
+	curl_easy_cleanup(curl);
+	curl = NULL;
 
-        (void)curl_multi_cleanup(curlm);
-        curlm = NULL;
+	(void)curl_multi_cleanup(curlm);
+	curlm = NULL;
 }
