@@ -102,6 +102,7 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 	}
 
 	cls.downloadhttp = true;
+	currentHost = host;
 
 	memset(game, 0, sizeof(game));  // resolve gamedir
 	strncpy(game, Cvar_VariableString("game"), sizeof(game) - 1);
@@ -126,8 +127,6 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 			break;
 	}
 	
-	currentHost = host;
-
 	memset(url, 0, sizeof(url));  // construct url
 	Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", hostname, game, filename);
 
