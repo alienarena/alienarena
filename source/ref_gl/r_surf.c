@@ -840,17 +840,9 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
 	}
 	
-	if(surf->has_vbo) 
-	{
-		BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
-	}
-	else
-	{
-		BSP_FlushVBOAccum ();
-		r_vboOn = false;
-		R_InitVArrays (VERT_MULTI_TEXTURED);
-		R_AddLightMappedSurfToVArray (surf);
-	}
+	// If we've gotten this far, it's because the surface is not translucent,
+	// warped, sky, or nodraw, thus it *will* be in the VBO.
+	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 }
 
 void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
