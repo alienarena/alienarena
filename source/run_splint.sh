@@ -2,7 +2,7 @@
 
 # run_splint.sh: a simple script to run Splint on all the source code.
 
-PREPROC_FLAGS="-I. -I../config/ -I./game"
+PREPROC_FLAGS="-I. -I../config/ -I./game -I/usr/include/i386-linux-gnu"
 DEFINE_FLAGS="-DHAVE_CONFIG_H"
 WARNING_FLAGS="-weak -nestcomment -warnposix -fixedformalarray +relaxtypes -namechecks"
 DO_SPLINT="splint $PREPROC_FLAGS $DEFINE_FLAGS $WARNING_FLAGS"
