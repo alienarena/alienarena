@@ -3956,9 +3956,6 @@ void M_UpdateConnectedServerInfo (netadr_t adr, char *status_string)
 void DeselectServer (void)
 {
 	serverindex = -1;
-	s_servers[serverindex].serverinfo_submenu.nitems = 0;
-	s_servers[serverindex].playerlist_scrollingmenu.nitems = 0;
-	s_servers[serverindex].modlist_submenu.nitems = 0;
 }
 
 void SelectServer (int index)
