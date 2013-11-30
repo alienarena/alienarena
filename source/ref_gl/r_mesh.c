@@ -633,7 +633,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		
 		// load script
 		if (mod->skins[0] != NULL)
-    		mod->script = mod->skins[0]->script;
+			mod->script = mod->skins[0]->script;
 		if (mod->script)
 			RS_ReadyScript( mod->script );
 	}
@@ -926,11 +926,35 @@ void R_ModelViewTransform(const vec3_t in, vec3_t out){
 	out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14];
 }
 
+// TODO: does this actually do a different job from R_CullBox?
+qboolean R_Mesh_CullBBox (vec3_t bbox[8])
+{
+	int p, f, aggregatemask = ~0;
+
+	for ( p = 0; p < 8; p++ )
+	{
+		int mask = 0;
+
+		for ( f = 0; f < 4; f++ )
+		{
+			float dp = DotProduct( frustum[f].normal, bbox[p] );
+
+			if ( ( dp - frustum[f].dist ) < 0 )
+			{
+				mask |= ( 1 << f );
+			}
+		}
+
+		aggregatemask &= mask;
+	}
+
+	return aggregatemask != 0;
+}
 
 /*
 ** MD2_CullModel
 */
-qboolean MD2_CullModel( void )
+static qboolean MD2_CullModel( void )
 {
 	int i;
 	vec3_t	vectors[3];
@@ -959,34 +983,9 @@ qboolean MD2_CullModel( void )
 
 		VectorAdd( currententity->origin, bbox[i], bbox[i] );
 	}
-
-	{
-		int p, f, aggregatemask = ~0;
-
-		for ( p = 0; p < 8; p++ )
-		{
-			int mask = 0;
-
-			for ( f = 0; f < 4; f++ )
-			{
-				float dp = DotProduct( frustum[f].normal, bbox[p] );
-
-				if ( ( dp - frustum[f].dist ) < 0 )
-				{
-					mask |= ( 1 << f );
-				}
-			}
-
-			aggregatemask &= mask;
-		}
-
-		if ( aggregatemask && (VectorLength(dist) > 150)) //so shadows don't blatantly disappear when out of frustom
-		{
-			return true;
-		}
-
-		return false;
-	}
+	
+	// Keep nearby meshes so shadows don't blatantly disappear when out of frustom
+	return VectorLength(dist) > 150 && R_Mesh_CullBBox (bbox);
 }
 
 // should be able to handle all mesh types
