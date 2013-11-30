@@ -1176,6 +1176,8 @@ void IQM_DrawVBO (void)
 
 }
 
+qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
+
 qboolean IQM_CullModel( void )
 {
 	int i;
@@ -1206,30 +1208,9 @@ qboolean IQM_CullModel( void )
 		VectorAdd( currententity->origin, bbox[i], bbox[i] );
 	}
 
-	{
-		int p, f, aggregatemask = ~0;
-
-		for ( p = 0; p < 8; p++ )
-		{
-			int mask = 0;
-
-			for ( f = 0; f < 4; f++ )
-			{
-				float dp = DotProduct( frustum[f].normal, bbox[p] );
-
-				if ( ( dp - frustum[f].dist ) < 0 )
-				{
-					mask |= ( 1 << f );
-				}
-			}
-			aggregatemask &= mask;
-		}
-
-		if ( aggregatemask && (VectorLength(dist) > 150)) //so shadows don't blatantly disappear when out of frustom
-		{
-			return true;
-		}
-	}
+	// Keep nearby meshes so shadows don't blatantly disappear when out of frustom
+	if (VectorLength(dist) > 150 && R_Mesh_CullBBox (bbox))
+		return true;
 	
 	// TODO: could probably find a better place for this.
 	if(r_ragdolls->integer)
