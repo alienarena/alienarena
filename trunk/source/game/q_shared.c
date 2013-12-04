@@ -1151,7 +1151,6 @@ float FloatSwap (float f)
 	{
 		float	f;
 		byte	b[4];
-
 	} dat1, dat2;
 
 
