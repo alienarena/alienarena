@@ -54,7 +54,8 @@ extern void *GetGameAPI( void *import);
 static qboolean stdin_enabled, stdout_enabled, stderr_enabled;
 static void *game_library = NULL;
 
-cvar_t   *nostdout;
+cvar_t	*nostdout;
+cvar_t	*sys_ansicolor;
 unsigned sys_frame_time;
 
 /* forward reference */
@@ -192,7 +193,7 @@ static int set_nonblock_stdin( void )
 	if ( !stdin_enabled || !terminal_stdin_exists() )
 		return -1;
 
-	int fcntl_flags = fcntl( fileno(stdin), F_GETFL, 0 );
+	int fcntl_flags = fcntl( fileno(stdin), F_GETFL, 0    );
 	if ( fcntl_flags == -1 )
 	{
 		return -1; /* failure */
@@ -311,39 +312,42 @@ void Sys_ConsoleOutput( char *ostring )
 	if ( stdout_disabled() )
 		return;
 
-#if defined ANSI_COLOR
-	static int q3ToAnsi[ 8 ] =
+	if (sys_ansicolor != NULL && sys_ansicolor->integer)
 	{
-		30, // COLOR_BLACK
-		31, // COLOR_RED
-		32, // COLOR_GREEN
-		33, // COLOR_YELLOW
-		34, // COLOR_BLUE
-		36, // COLOR_CYAN
-		35, // COLOR_MAGENTA
-		0   // COLOR_WHITE
-	};
-
-	while ( *ostring )
-	{
-		if ( *ostring == '^' && ostring[1] )
+		static int q3ToAnsi[ 8 ] =
 		{
-			int colornum = ( ostring[1]-'0' ) & 7;
-			printf( "\033[%dm", q3ToAnsi[colornum] );
-			ostring += 2;
-			continue;
-		}
-		if (*ostring == '\n')
-			printf ("\033[0m\n");
-		else if (*ostring == ' ')
-			printf( "\033[0m " );
-		else
-			printf( "%c", *ostring );
-		ostring++;
-	}
-#endif
+			30, // COLOR_BLACK
+			31, // COLOR_RED
+			32, // COLOR_GREEN
+			33, // COLOR_YELLOW
+			34, // COLOR_BLUE
+			36, // COLOR_CYAN
+			35, // COLOR_MAGENTA
+			0   // COLOR_WHITE
+		};
 
-	fputs( ostring, stdout );
+		while ( *ostring )
+		{
+			if ( *ostring == '^' && ostring[1] )
+			{
+				int colornum = ( ostring[1]-'0' ) & 7;
+				printf( "\033[%dm", q3ToAnsi[colornum] );
+				ostring += 2;
+				continue;
+			}
+			if (*ostring == '\n')
+				printf ("\033[0m\n");
+			else if (*ostring == ' ')
+				printf( "\033[0m " );
+			else
+				printf( "%c", *ostring );
+			ostring++;
+		}
+	}
+	else
+	{
+		fputs( ostring, stdout );
+	}
 
 }
 
@@ -640,6 +644,7 @@ int main( int argc, char** argv )
 
 	/* TODO: add help string */
 	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
+	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
 
     oldtime = Sys_Milliseconds();
 	for (;;)
@@ -696,7 +701,8 @@ main( int argc, char** argv )
 
 	Qcommon_Init( argc, argv );
 
- 	nostdout = Cvar_Get( "nostdout", "0", 0 );
+ 	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
+ 	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
 
 	oldtime = Sys_Milliseconds();
 	for (;;)
