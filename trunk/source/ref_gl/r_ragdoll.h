@@ -107,6 +107,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define GLOBAL_Z_OFF 35
 
 //contraint section
+#define UJOINT_LOSTOP1_OFFS 0
+#define UJOINT_HISTOP1_OFFS 1
+#define UJOINT_LOSTOP2_OFFS 2
+#define UJOINT_HISTOP2_OFFS 3
+
+#define HINGEJOINT_LOSTOP_OFFS 0
+#define HINGEJOINT_HISTOP_OFFS 1
+
 #define HIP_LOSTOP1 36
 #define HIP_HISTOP1 37
 #define HIP_LOSTOP2 38
