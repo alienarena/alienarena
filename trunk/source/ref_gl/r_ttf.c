@@ -977,6 +977,11 @@ static void _TTF_DrawFromInfo(
 
 
 
+// Used by BoundedPrintInternal and WrappedPrintInternal: most of the time a
+// static buffer can be used rather than a dynamically allocated one.
+#define HUGE_STR_CUTOFF 4096
+static struct _FNT_render_info_s static_renderInfo[HUGE_STR_CUTOFF];
+
 /*
  * Internal function for bounded printing.
  * Assumes the GL environment is ready.
@@ -990,14 +995,25 @@ static void _TTF_BoundedPrintInternal(
 		const float *	color
 	)
 {
-	qboolean			mustQuit	= false;
-	const char *			ptr		= text;
+	qboolean				mustQuit	= false;
+	const char *			ptr			= text;
 	unsigned int			cHeight		= 0;
 	unsigned int			nHeight		= 0;
 	unsigned int			maxWidth	= 0;
-	_FNT_render_info_t	renderInfo;
-
-	renderInfo = Z_Malloc( strlen( text ) * sizeof( struct _FNT_render_info_s ) );
+	qboolean				huge;
+	_FNT_render_info_t		renderInfo;
+	
+	huge = strlen (text) >= HUGE_STR_CUTOFF;
+	
+	if (huge)
+	{
+		renderInfo = Z_Malloc (strlen (text) * sizeof(*renderInfo));
+	}
+	else
+	{
+		memset (static_renderInfo, 0, sizeof(static_renderInfo));
+		renderInfo = static_renderInfo;
+	}
 
 	while ( ! mustQuit && ( box->height == 0 || cHeight + font->height < box->height ) ) {
 		unsigned int	riLength , riIndex;
@@ -1072,7 +1088,9 @@ static void _TTF_BoundedPrintInternal(
 
 	box->width = maxWidth;
 	box->height = cHeight;
-	Z_Free( renderInfo );
+	
+	if (huge)
+		Z_Free (renderInfo);
 }
 
 
@@ -1185,14 +1203,25 @@ static void _TTF_WrappedPrintInternal(
 		const float *		color
 	)
 {
-	qboolean			mustQuit	= false;
+	qboolean				mustQuit	= false;
 	const char *			curText		= text;
 	unsigned int			curHeight	= 0;
 	unsigned int			nextHeight	= 0;
 	unsigned int			maxWidth	= 0;
-	_FNT_render_info_t	renderInfo;
-
-	renderInfo = Z_Malloc( strlen( text ) * sizeof( struct _FNT_render_info_s ) );
+	qboolean				huge;
+	_FNT_render_info_t		renderInfo;
+	
+	huge = strlen (text) >= HUGE_STR_CUTOFF;
+	
+	if (huge)
+	{
+		renderInfo = Z_Malloc (strlen (text) * sizeof(*renderInfo));
+	}
+	else
+	{
+		memset (static_renderInfo, 0, sizeof(static_renderInfo));
+		renderInfo = static_renderInfo;
+	}
 
 	assert( box->width > indent );
 	while ( !mustQuit && ( box->height == 0 || curHeight + font->height < box->height ) ) {
@@ -1216,7 +1245,8 @@ static void _TTF_WrappedPrintInternal(
 	// Update box
 	box->height = curHeight;
 	box->width = maxWidth;
-	Z_Free( renderInfo );
+	if (huge)
+	Z_Free (renderInfo);
 }
 
 
