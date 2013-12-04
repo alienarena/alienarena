@@ -44,6 +44,15 @@ static vertCache_t *vbo_indices;
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
+// This function will compute the quaternion's W based on its X, Y, and Z.)
+void Vec4_CompleteQuatW (vec4_t q)
+{
+	vec3_t q_xyz;
+	
+	VectorCopy (q, q_xyz);
+	q[3] = -sqrt (max (1.0 - pow (VectorLength (q_xyz), 2), 0.0));
+}
+
 //these matrix functions should be moved to matrixlib.c or similar
 
 void Matrix3x4_TransformNormal(mnormal_t *out, matrix3x4_t mat, const mnormal_t in)
@@ -372,6 +381,8 @@ qboolean IQM_FindVBO (model_t *mod)
 	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices;
 }
 
+// NOTE: this should be the only function that needs to care what version the
+// IQM file is.
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	iqmheader_t *header;
@@ -515,10 +526,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->num_triangles = header->num_triangles;
 
 	// load the joints
+	mod->joints = (iqmjoint2_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint2_t));
 	if( header->version == 1 )
 	{
 		joint = (iqmjoint_t *) (pbase + header->ofs_joints);
-		mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
 		for (i = 0;i < mod->num_joints;i++)
 		{
 			mod->joints[i].name = LittleLong(joint[i].name);
@@ -529,73 +540,46 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				mod->joints[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
 				mod->joints[i].scale[j] = LittleFloat(joint[i].scale[j]);
 			}
+			// If the quaternion w is not already included, calculate it.
+			Vec4_CompleteQuatW (mod->joints[i].rotation);
 		}
 	}
 	else
 	{
 		joint2 = (iqmjoint2_t *) (pbase + header->ofs_joints);
-		mod->joints2 = (iqmjoint2_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint2_t));
 		for (i = 0;i < mod->num_joints;i++)
 		{
-			mod->joints2[i].name = LittleLong(joint2[i].name);
-			mod->joints2[i].parent = LittleLong(joint2[i].parent);
+			mod->joints[i].name = LittleLong(joint2[i].name);
+			mod->joints[i].parent = LittleLong(joint2[i].parent);
 			for (j = 0;j < 3;j++)
 			{
-				mod->joints2[i].origin[j] = LittleFloat(joint2[i].origin[j]);
-				mod->joints2[i].rotation[j] = LittleFloat(joint2[i].rotation[j]);
-				mod->joints2[i].scale[j] = LittleFloat(joint2[i].scale[j]);
+				mod->joints[i].origin[j] = LittleFloat(joint2[i].origin[j]);
+				mod->joints[i].rotation[j] = LittleFloat(joint2[i].rotation[j]);
+				mod->joints[i].scale[j] = LittleFloat(joint2[i].scale[j]);
 			}
-			mod->joints2[i].rotation[3] = LittleFloat(joint2[i].rotation[3]);
+			mod->joints[i].rotation[3] = LittleFloat(joint2[i].rotation[3]);
 		}
 	}
 	//these don't need to be a part of mod - remember to free them
 	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
 
-	if( header->version == 1 )
+	for(i = 0; i < (int)header->num_joints; i++)
 	{
-		for(i = 0; i < (int)header->num_joints; i++)
+		iqmjoint2_t j = mod->joints[i];
+
+		Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], j.rotation, j.origin, j.scale);
+		Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
+
+		assert(j.parent < (int)header->num_joints);
+
+		if(j.parent >= 0)
 		{
-			vec3_t rot;
-			vec4_t q_rot;
-			iqmjoint_t j = mod->joints[i];
-
-			//first need to make a vec4 quat from our rotation vec
-			VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
-			Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
-
-			Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], q_rot, j.origin, j.scale);
-			Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
-
-			if(j.parent >= 0)
-			{
-				matrix3x4_t temp;
-				Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
-				mod->baseframe[i] = temp;
-				Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
-				inversebaseframe[i] = temp;
-			}
-		}
-	}
-	else
-	{
-		for(i = 0; i < (int)header->num_joints; i++)
-		{
-			iqmjoint2_t j = mod->joints2[i];
-
-			Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], j.rotation, j.origin, j.scale);
-			Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
-
-			assert(j.parent < (int)header->num_joints);
-
-			if(j.parent >= 0)
-			{
-				matrix3x4_t temp;
-				Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
-				mod->baseframe[i] = temp;
-				Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
-				inversebaseframe[i] = temp;
-			}
+			matrix3x4_t temp;
+			Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
+			mod->baseframe[i] = temp;
+			Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
+			inversebaseframe[i] = temp;
 		}
 	}
 
@@ -676,7 +660,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 				// If the quaternion w is not already included, calculate it.
 				if (header->version == 1)
-					rotate[3] = -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0));
+					Vec4_CompleteQuatW (rotate);
 
 				Matrix3x4_FromQuatAndVectors(&m, rotate, translate, scale);
 
@@ -1002,16 +986,8 @@ void IQM_AnimateFrame (void)
 
 			Matrix3x4_Add(&mat, mat, temp);
 			
-			if (currentmodel->version == 1)
-			{
-				currentjoint_name = &currentmodel->jointname[currentmodel->joints[i].name];
-				currentjoint_parent = currentmodel->joints[i].parent;
-			}
-			else
-			{
-				currentjoint_name = &currentmodel->jointname[currentmodel->joints2[i].name];
-				currentjoint_parent = currentmodel->joints2[i].parent;
-			}
+			currentjoint_name = &currentmodel->jointname[currentmodel->joints[i].name];
+			currentjoint_parent = currentmodel->joints[i].parent;
 
 			if(currentjoint_parent >= 0)
 				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentjoint_parent], mat);
@@ -1069,36 +1045,18 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 
             for(j = 0; j < RagDollBindsCount; j++)
             {
-				if(RagDoll[RagDollID].ragDollMesh->version == 1)
+				if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
 				{
-					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
-					{
-						int object = RagDollBinds[j].object;
-						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
-						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
-						Matrix3x4GenFromODE(&rmat, odeRot, odePos);
-						Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
-						goto nextjoint;
-					}
-				}
-				else
-				{
-					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
-					{
-						int object = RagDollBinds[j].object;
-						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
-						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
-						Matrix3x4GenFromODE(&rmat, odeRot, odePos);
-						Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
-						goto nextjoint;
-					}
+					int object = RagDollBinds[j].object;
+					const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
+					const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
+					Matrix3x4GenFromODE(&rmat, odeRot, odePos);
+					Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
+					goto nextjoint;
 				}
 			}
 
-			if(RagDoll[RagDollID].ragDollMesh->version == 1)
-				parent = RagDoll[RagDollID].ragDollMesh->joints[i].parent;
-			else
-				parent = RagDoll[RagDollID].ragDollMesh->joints2[i].parent;
+			parent = RagDoll[RagDollID].ragDollMesh->joints[i].parent;
             if(parent >= 0)
             {
                 Matrix3x4_Invert(&mat, RagDoll[RagDollID].initframe[parent]);

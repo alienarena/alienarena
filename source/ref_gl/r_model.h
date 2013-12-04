@@ -438,8 +438,7 @@ typedef struct model_s
 	//iqm skeletal model info
 	unsigned int	version;
 	int				num_joints;
-	iqmjoint_t		*joints;
-	iqmjoint2_t		*joints2;
+	iqmjoint2_t		*joints; // when loading v1 files, joints are reencoded to v2 format
 	matrix3x4_t		*frames;
 	matrix3x4_t		*outframe;
 	matrix3x4_t		*baseframe;

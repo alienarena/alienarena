@@ -439,29 +439,14 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 	{
 		for(j = 0; j < RagDollBindsCount; j++)
 		{
-			if(RagDoll[RagDollID].ragDollMesh->version == 1)
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
 			{
-				if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
-				{
-					int object = RagDollBinds[j].object;
-					if ( ! IS_NAN( RagDoll[RagDollID].initframe[i].a[0] ) ) {
-						Matrix3x4_Add(&bindmat[object], bindmat[object], RagDoll[RagDollID].initframe[i]);
-					}
-					bindweight[object]++;
-					break;
+				int object = RagDollBinds[j].object;
+				if ( ! IS_NAN( RagDoll[RagDollID].initframe[i].a[0] ) ) {
+					Matrix3x4_Add(&bindmat[object], bindmat[object], RagDoll[RagDollID].initframe[i]);
 				}
-			}
-			else
-			{
-				if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
-				{
-					int object = RagDollBinds[j].object;
-					if ( ! IS_NAN( RagDoll[RagDollID].initframe[i].a[0] ) ) {
-						Matrix3x4_Add(&bindmat[object], bindmat[object], RagDoll[RagDollID].initframe[i]);
-					}
-					bindweight[object]++;
-					break;
-				}
+				bindweight[object]++;
+				break;
 			}
 		}		
 	}
