@@ -2089,7 +2089,7 @@ static const char *handedness_names[] =
 
 sliderlimit_t mousespeed_limits = 
 {
-	0, 110, 0.0f, 11.0f
+	1, 111, 0.1f, 11.1f
 };
 
 fieldsize_t fov_limits = 
