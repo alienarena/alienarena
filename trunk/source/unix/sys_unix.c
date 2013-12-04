@@ -25,22 +25,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <signal.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <sys/time.h>
-#include <sys/types.h>
+#include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/ipc.h>
+#include <sys/mman.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
-#include <string.h>
-#include <ctype.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/mman.h>
-#include <errno.h>
 #if defined HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
@@ -48,27 +48,271 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qcommon/qcommon.h"
 #include "unix/rw_unix.h"
 
-cvar_t *nostdout;
+extern void HandleEvents(void);
+extern void *GetGameAPI( void *import);
 
-unsigned	sys_frame_time;
+static qboolean stdin_enabled, stdout_enabled, stderr_enabled;
+static void *game_library = NULL;
 
-uid_t saved_euid;
-qboolean stdin_active = true;
+cvar_t   *nostdout;
+unsigned sys_frame_time;
 
-// attachment to statically linked game library
-extern void *GetGameAPI ( void *import);
+/* forward reference */
+void Sys_Warn( char *warning, ... );
 
 
-// =======================================================================
-// General routines
-// =======================================================================
+/*----------------------------------------------------- Setuid Access ------*/
 
-// Added ANSI color-escape output based on/inspired by Warsow. -M
-void Sys_ConsoleOutput (char *string)
+/* see 'libc' info doc,
+ * section 29.6 "Setting the User ID"
+ * section 29.9 "Setuid Program Example"
+ *
+ * 2013-12 Note: Not really needed at this time, because the game is
+ * statically linked, not dll/so. Runtime dynamic linking is in the
+ * code, but not tested. That could (and should) change.
+ */
+static uid_t ruid; /* saved 'real' user ID */
+static uid_t euid; /* saved 'effective' user ID */
+
+/**
+ * Store initial state. If the program is setuid, then euid will be
+ * the id with the access rights the program will use sometimes.
+ * Initially, the effective id is set to the real id.
+ */
+static void init_setuid( void )
 {
-#if defined ANSI_COLOR
+	int status;
 
-	static int  q3ToAnsi[ 8 ] =
+	ruid = getuid();
+	euid = geteuid();
+#if defined _POSIX_SAVED_IDS
+	status = seteuid( ruid );
+	assert( status == 0 || errno != EINVAL );
+#else
+	status = setreuid( euid, ruid );
+#endif
+}
+
+/*
+ * switch the effective user id to the setuid user id
+ */
+static void do_setuid( void )
+{
+	int status;
+#if defined _POSIX_SAVED_IDS
+	status = seteuid( euid );
+	assert( status == 0 || errno != EINVAL );
+#else
+	status = setreuid( euid, ruid );
+#endif
+	if ( status == -1 && errno == EPERM )
+	{
+		Sys_Warn("Not permitted to change user id (seteuid).");
+	}
+}
+
+/*
+ * switch the effective user id back to the real user id
+ */
+static void undo_setuid( void )
+{
+	int status;
+#if defined _POSIX_SAVED_IDS
+	status = seteuid( ruid );
+	assert( status == 0 || errno != EINVAL );
+#else
+	status = setreuid( euid, ruid );
+#endif
+	assert( getuid() == geteuid() );
+}
+
+/*----------------------------------------------- Low-Level Console I/O ----*/
+
+/**
+ * if, for instance, the program is invoked through a Gnome Launcher
+ * without the 'run in terminal' option, output can end up in some
+ * operating system log.
+ *
+ * The dedicated server requires a terminal.
+ * The client/listen server does not.
+ *
+ * Terminal output may  be disabled and re-enabled by toggling the
+ * 'nostdout' cvar.
+ */
+
+/**
+ * determine if there is a terminal for stdin, stdout, stderr
+ */
+static inline qboolean terminal_stdin_exists(void)
+{
+#if defined HAVE_UNISTD_H
+	return isatty( fileno(stdin) );
+#else
+	return true;
+#endif
+}
+
+static inline qboolean terminal_stdout_exists(void)
+{
+#if defined HAVE_UNISTD_H
+	return isatty( fileno(stderr) );
+#else
+	return true;
+#endif
+}
+
+static inline qboolean terminal_stderr_exists(void)
+{
+#if defined HAVE_UNISTD_H
+	return isatty( fileno(stderr) );
+#else
+	return true;
+#endif
+}
+
+/**
+ * for preventing spurious output to system log when there is no terminal
+ */
+static inline qboolean stdout_disabled( void )
+{
+	return ( !stdout_enabled
+			 || (nostdout && nostdout->integer)
+			 || !terminal_stdout_exists() );
+}
+
+/**
+ * if a console exists, non-blocking input is used to get
+ * keyboard input. The 'select' function is used to determine
+ * if there is keyboard input to be read.
+ *
+ * @return -1 on failure, non-negative flags on success
+ */
+static int set_nonblock_stdin( void )
+{
+	if ( !stdin_enabled || !terminal_stdin_exists() )
+		return -1;
+
+	int fcntl_flags = fcntl( fileno(stdin), F_GETFL, 0 );
+	if ( fcntl_flags == -1 )
+	{
+		return -1; /* failure */
+	}
+	fcntl_flags |= O_NONBLOCK;
+
+	return fcntl( fileno(stdin), F_SETFL, fcntl_flags );
+}
+
+/**
+ * if a console exists, and stdin is nonblocking, this clears
+ * the nonblocking state
+ *
+ * @return -1 on failure, non-negative flags on success
+ */
+static int clear_nonblock_stdin( void )
+{
+	/* maybe this should be done no matter what */
+	/* if ( !stdin_active || !terminal_exists() ) */
+	/* 	return -1; */
+
+	int fcntl_flags = fcntl( fileno(stdin), F_GETFL, 0 );
+	if ( fcntl_flags == -1 )
+	{
+		return -1; /* failure */
+	}
+	fcntl_flags &= O_NONBLOCK;
+
+	fcntl_flags = fcntl( fileno(stdin), F_SETFL, fcntl_flags );
+
+	return fcntl_flags;
+}
+
+/**
+ * low-level, non-blocking console input.
+ * called from qcommon/common.c
+ *
+ * @return - pointer to nul-terminated string in a static buffer
+ */
+char *Sys_ConsoleInput( void )
+{
+	static char text[256];
+
+	int    len;
+	fd_set fdset;
+	struct timeval timeout;
+	int    result;
+
+	if ( !stdin_enabled )
+		return NULL;
+
+	FD_ZERO( &fdset );
+	FD_SET( fileno( stdin ), &fdset);
+	timeout.tv_sec  = 0;
+	timeout.tv_usec = 0;
+
+	result = select( FD_SETSIZE, &fdset, NULL, NULL, &timeout );
+
+	if ( result < 0 )
+	{
+		assert( errno == EINTR ); /* ok, signal interrupted */
+		return NULL;
+	}
+
+	if ( result == 0 )
+		return NULL; /* nothing to read */
+
+	if ( !FD_ISSET( fileno(stdin), &fdset ) )
+		return NULL;  
+
+	memset( (void*)text, 0, sizeof(text) );
+	len = read( fileno(stdin), text, sizeof(text) );
+	if ( len < 1 )
+	{
+		if ( len == 0 ) /* EOF. can this happen? */
+		{
+			assert( 0 ); /* -jjb- find out if it happens */
+			stdin_enabled = false;
+		}
+		else
+		{ /* -1, mostly ok, but could be a program error */
+			assert( len == EAGAIN || len == EINTR ); /* ok */
+		}
+
+		return NULL;
+	}
+	assert( len >= 1 );
+
+	if ( text[len-1] == '\n' )
+	{ /* nul terminate by replacing newline */
+		 text[len-1] = 0;
+		 /*TODO: check for problems with an empty string */
+		 /* if ( text[0] == 0 )  */
+		 /* { */
+		 /* } */
+	}
+	else
+	{
+		if ( len >= (int)sizeof(text) )
+		{ /* input is probably garbage */
+			return NULL;
+		}
+		text[len] = 0; /* nul terminate, no newline */
+	}
+
+	return text;
+}
+
+/**
+ * Output text to the console/terminal
+ *
+ * @parameter ostring - nul-terminated string to be output
+ */
+void Sys_ConsoleOutput( char *ostring )
+{
+	if ( stdout_disabled() )
+		return;
+
+#if defined ANSI_COLOR
+	static int q3ToAnsi[ 8 ] =
 	{
 		30, // COLOR_BLACK
 		31, // COLOR_RED
@@ -80,161 +324,130 @@ void Sys_ConsoleOutput (char *string)
 		0   // COLOR_WHITE
 	};
 
-	if ( nostdout && nostdout->integer )
+	while ( *ostring )
+	{
+		if ( *ostring == '^' && ostring[1] )
+		{
+			int colornum = ( ostring[1]-'0' ) & 7;
+			printf( "\033[%dm", q3ToAnsi[colornum] );
+			ostring += 2;
+			continue;
+		}
+		if (*ostring == '\n')
+			printf ("\033[0m\n");
+		else if (*ostring == ' ')
+			printf( "\033[0m " );
+		else
+			printf( "%c", *ostring );
+		ostring++;
+	}
+#endif
+
+	fputs( ostring, stdout );
+
+}
+
+/**
+ * printf for console/terminal output
+ */
+void Sys_Printf( char *fmt, ... )
+{
+	if ( stdout_disabled )
 		return;
 
-    while (*string) {
-        if (*string == '^' && string[1]) {
-            int colornum = (string[1]-'0')&7;
-            printf ("\033[%dm", q3ToAnsi[colornum]);
-            string += 2;
-            continue;
-        }
-        if (*string == '\n')
-            printf ("\033[0m\n");
-        else if (*string == ' ')
-            printf ("\033[0m ");
-        else
-            printf ("%c", *string);
-        string++;
-    }
+#ifndef NDEBUG
+	/* paranoid and sanity checks */
+	char *pc;
+	assert( strlen(fmt) < 80 );
+	for( pc=(char*)fmt ; (*pc) ; ++pc )
+		assert( isprint( *pc ) );
+#endif
 
-#else
+	va_list argptr;
+	char    text[256];
+	int     textsize;
 
-    if ( nostdout == NULL || !nostdout->integer )
+	va_start( argptr,fmt );
+	textsize = vsnprintf( text, sizeof(text), fmt, argptr);
+	va_end( argptr );
+
+	if ( textsize >= (int)sizeof(text) )
 	{
-		fputs( string, stdout );
+		return; /* too much */
 	}
 
-#endif
+	fputs( text, stdout );
 }
 
-#if 0
-// not currently used in Unix/Linux
-void Sys_Printf (const char *fmt, ...)
+/*------------------------------------------------- Startup and Shutdown ----*/
+
+/**
+ * Normal program exit
+ */
+void Sys_Quit(void)
 {
-	va_list		argptr;
-	char		text[1024];
-	unsigned char		*p;
+	
+	clear_nonblock_stdin();
 
-	va_start (argptr,fmt);
-	vsnprintf (text,1024,fmt,argptr);
-	va_end (argptr);
+	CL_Shutdown();
+	Qcommon_Shutdown();
 
-	if (nostdout && nostdout->value)
-        return;
-
-	for (p = (unsigned char *)text; *p; p++) {
-		*p &= 0x7f;
-		if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
-			printf("[%02x]", *p);
-		else
-			putc(*p, stdout);
-	}
-}
-#endif
-
-void Sys_Quit (void)
-{
-	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
-	CL_Shutdown ();
-	Qcommon_Shutdown ();
 	exit(0);
 }
 
+/**
+ * System-dependent initialization called WHEN?
+ */
 void Sys_Init(void)
 {
 }
 
-//void Sys_Error (const char *error, ...)
-void Sys_Error (char *error, ...)
+/**
+ * Somewhat controlled crash exit
+ *
+ * TODO: check for non-reentrant functions
+ */
+void Sys_Error( char *error, ... )
 {
-	va_list     argptr;
-	char        string[1024];
+	clear_nonblock_stdin();
 
-// change stdin to non blocking
-	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
+	CL_Shutdown();
+	Qcommon_Shutdown();
 
-	CL_Shutdown ();
-	Qcommon_Shutdown ();
+	if ( stderr_enabled && terminal_stderr_exists() )
+	{
+		va_list     argptr;
+		static char crash_string[1024];
 
-	va_start (argptr,error);
-	vsnprintf (string,1024,error,argptr);
-	va_end (argptr);
-	fprintf(stderr, "Error: %s\n", string);
+		va_start( argptr, error );
+		vsnprintf( crash_string, sizeof(crash_string), error, argptr );
+		va_end( argptr );
+		fprintf( stderr, "Error: %s\n", crash_string );
+	}
+	/* TODO: maybe, post to syslog */
 
 	exit (1);
-
 }
 
-void Sys_Warn (char *warning, ...)
+/**
+ * Non-crashing warning to stderr
+ */
+void Sys_Warn( char *warning, ... )
 {
-	va_list     argptr;
-	char        string[1024];
+	if ( stderr_enabled && terminal_stderr_exists() )
+	{
+		va_list     argptr;
+		static char warn_string[1024];
 
-	va_start (argptr,warning);
-	vsnprintf (string,1024,warning,argptr);
-	va_end (argptr);
-	fprintf(stderr, "Warning: %s", string);
-}
-
-/*
-============
-Sys_FileTime
-
-returns -1 if not present
-============
-*/
-int	Sys_FileTime (char *path)
-{
-	struct	stat	buf;
-
-	if (stat (path,&buf) == -1)
-		return -1;
-
-	return buf.st_mtime;
-}
-
-void floating_point_exception_handler(int whatever)
-{
-//	Sys_Warn("floating point exception\n");
-	signal(SIGFPE, floating_point_exception_handler);
-}
-
-char *Sys_ConsoleInput(void)
-{
-    static char text[256];
-    int     len;
-	fd_set	fdset;
-    struct timeval timeout;
-
-	if (!stdin_active)
-		return NULL;
-
-	FD_ZERO(&fdset);
-	FD_SET(0, &fdset); // stdin
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
-	if (select (1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
-		return NULL;
-
-	len = read (0, text, sizeof(text));
-	if (len == 0) { // eof!
-		stdin_active = false;
-		return NULL;
+		va_start( argptr,warning );
+		vsnprintf( warn_string, sizeof(warn_string), warning, argptr );
+		va_end( argptr );
+		fprintf( stderr, "Warning: %s", warn_string);
 	}
-
-	if (len < 1)
-		return NULL;
-	text[len-1] = 0;    // rip off the /n and terminate
-
-	return text;
+	/* TODO: maybe, post to syslog */
 }
 
-/*****************************************************************************/
-
-static void *game_library = NULL;
-
+/*---------------------------------------------------- Game Load & Unload ---*/
 /*
 =================
 Sys_UnloadGame
@@ -270,11 +483,10 @@ void *Sys_GetGameAPI (void *parms)
 	char	*str_p;
 	const char *gamename = "game.so";
 
-	setreuid(getuid(), getuid());
-	setegid(getgid());
-
 	if (game_library != NULL)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
+
+	do_setuid();
 
 	// now run through the search paths
 	path = NULL;
@@ -328,6 +540,8 @@ void *Sys_GetGameAPI (void *parms)
 		ptrGetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
 	}
 
+	undo_setuid();
+
 	/*
 	 * No game shared library found, use statically linked game
 	 */
@@ -345,59 +559,161 @@ void *Sys_GetGameAPI (void *parms)
 	return ptrGetGameAPI (parms);
 }
 
-/*****************************************************************************/
+/*--------------------------------------------------------- Other stuff ----*/
 
+/*
+============
+Sys_FileTime
+
+returns -1 if not present
+============
+*/
+int	Sys_FileTime (char *path)
+{
+	struct stat buf;
+
+	if (stat (path,&buf) == -1)
+		return -1;
+
+	return buf.st_mtime;
+}
+
+/**
+ * Not sure why this is here.
+ */
+void floating_point_exception_handler( int unused  )
+{
+//	Sys_Warn("floating point exception\n");
+	signal( SIGFPE, floating_point_exception_handler );
+}
+
+/**
+ * called WHEN?
+ */
 void Sys_AppActivate (void)
 {
 }
 
-void HandleEvents(void);
-
-void Sys_SendKeyEvents (void)
+/**
+ * The system-dependent keyboard/mouse input for X11
+ *
+ */
+void Sys_SendKeyEvents( void )
 {
-#ifndef DEDICATED_ONLY
-		HandleEvents();
+
+#if !defined DEDICATED_ONLY
+	HandleEvents();
 #endif
 
 	// grab frame time
 	sys_frame_time = Sys_Milliseconds();
 }
 
-/*****************************************************************************/
+/*----------------------------------------------------------------- main()---*/
 
-int main (int argc, char **argv)
+#if defined DEDICATED_ONLY
+
+/**
+ * main() for terminal-based dedicated servers
+ */
+int main( int argc, char** argv )
 {
-	int 	time, oldtime, newtime;
+	int dtime, oldtime, newtime;
 
-	// go back to real user for config loads
-	saved_euid = geteuid();
-	seteuid(getuid());
+	/* init setuid access, remember real and effective user IDs */
+	init_setuid();
 
-	Qcommon_Init(argc, argv);
-
-	fcntl(0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
-
-	nostdout = Cvar_Get("nostdout", "0", 0);
-	if (!nostdout->value) {
-		fcntl(0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
+	/* a terminal with non-blocking input is required */
+	stdin_enabled = true;
+	if ( set_nonblock_stdin() == -1 )
+	{
+		exit(1);
+	}
+	stdout_enabled = terminal_stdout_exists();
+	stderr_enabled = terminal_stderr_exists();
+	if ( !stdout_enabled || !stderr_enabled )
+	{
+		exit(1);
 	}
 
-    oldtime = Sys_Milliseconds ();
-    while (1)
-    {
-// find time spent rendering last frame
-		do {
-			newtime = Sys_Milliseconds ();
-			time = newtime - oldtime;
-		} while (time < 1);
-		// curtime setting moved from Sys_Milliseconds()
-		//   so it consistent for entire frame
-		curtime = newtime;
+	Qcommon_Init( argc, argv );
 
-        Qcommon_Frame (time);
+	/* TODO: add help string */
+	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
+
+    oldtime = Sys_Milliseconds();
+	for (;;)
+	{
+		do
+		{
+			newtime = Sys_Milliseconds();
+			dtime = newtime - oldtime;
+		} while ( dtime < 1 );
 		oldtime = newtime;
-    }
+		curtime = newtime; /* consistent curtime for the frame */
+		
+		Qcommon_Frame( dtime );
 
+	}
+
+	return 0; /* unreachable */
 }
+
+#else
+
+/**
+ * main() for X11-based client/listen-server. Commonly, will be run
+ * using a window manager's launcher, and may not be run using 
+ * a terminal. When that happens, output ends up in the system log,
+ * which looks ridiculous.
+ */
+int
+main( int argc, char** argv )
+{
+	int dtime, oldtime, newtime;
+
+	/* init setuid access, remember real and effective user IDs */
+	init_setuid();
+
+	stdin_enabled  = terminal_stdin_exists();
+	stdout_enabled = terminal_stdout_exists();
+	stderr_enabled = terminal_stderr_exists();
+
+	/* one strategy for handling no console terminal: redirection  */
+	if ( !stdout_enabled )
+	{
+		freopen( "/dev/null", "w", stdout );
+	}
+	if ( !stderr_enabled )
+	{
+		freopen( "/dev/null", "w", stderr );
+	}
+
+	if ( stdin_enabled )
+	{
+		set_nonblock_stdin();
+	}
+
+	Qcommon_Init( argc, argv );
+
+ 	nostdout = Cvar_Get( "nostdout", "0", 0 );
+
+	oldtime = Sys_Milliseconds();
+	for (;;)
+	{
+		do {
+			newtime = Sys_Milliseconds();
+			dtime   = newtime - oldtime;
+		} while ( dtime < 1 );
+		oldtime = newtime;
+		curtime = newtime; /* consistent curtime for the frame */
+
+		Qcommon_Frame( dtime );
+	}
+
+	return 0; /* unreachable */
+}
+#endif
+
 
 

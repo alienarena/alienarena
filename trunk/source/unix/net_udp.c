@@ -564,29 +564,39 @@ char *NET_ErrorString (void)
 	return strerror (code);
 }
 
-// sleeps msec or until net socket is ready
-void NET_Sleep(int msec)
+#if defined DEDICATED_ONLY
+/**
+ * Unix/Linux Dedicated Server
+ * wait for network input, console input or sleep timeout
+ *
+ * @parameter msec - sleep time limir
+ */
+void NET_Sleep( int  msec )
 {
-
 	struct timeval timeout;
 	fd_set	fdset;
-	extern cvar_t *dedicated;
-	extern qboolean stdin_active;
 	int result;
 
-	if (!ip_sockets[NS_SERVER] || (dedicated && !dedicated->value))
-		return; // we're not a server, just run full speed
-
 	FD_ZERO(&fdset);
-	if (stdin_active)
-		FD_SET(0, &fdset); // stdin is processed too
-	FD_SET(ip_sockets[NS_SERVER], &fdset); // network socket
+	FD_SET( fileno(stdin), &fdset );
+	FD_SET( ip_sockets[NS_SERVER], &fdset );
+
 	timeout.tv_sec = msec/1000;
 	timeout.tv_usec = (msec%1000)*1000;
-	result = select(ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout);
+	result = select( ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout );
 	if ( result == -1 )
 	{
-		Com_Printf("ERROR: Net_Sleep( msec:%i ): select() error: %s\n", msec, strerror( errno ) );
+		Com_Printf(
+			"ERROR: Net_Sleep( msec:%i ): select() error: %s\n", 
+			msec, strerror( errno ) );
 	}
 }
+#else
+/**
+ * Unix/Linux client, do nothing
+ */
+void NET_Sleep( int unused )
+{
+}
 
+#endif
