@@ -1959,3 +1959,45 @@ size_t ValidatePlayerName( char *player_name, size_t player_name_size )
 
 	return glyph_count;
 }
+
+
+/*
+=============
+AllocTempVector
+
+This is just a convenience function
+for making temporary vectors for function calls
+=============
+*/
+float	*atv (void)
+{
+	static	int		index;
+	static	vec3_t	vecs[8];
+	float	*v;
+
+	// use an array so that multiple tempvectors won't collide
+	// for a while
+	v = vecs[index];
+	index = (index + 1)&7;
+
+	VectorClear (v);
+
+	return v;
+}
+
+/*
+=============
+TempVector
+
+This is just a convenience function
+for making temporary vectors for function calls
+=============
+*/
+float	*tv (float x, float y, float z)
+{
+	float	*v = atv();
+
+	VectorSet (v, x, y, z);
+
+	return v;
+}
