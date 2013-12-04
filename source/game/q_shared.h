@@ -291,6 +291,8 @@ float	LittleFloat (float l);
 
 void	Swap_Init (void);
 char	*va(char *format, ...);
+float	*atv(void);
+float	*tv (float x, float y, float z);
 
 //=============================================
 
