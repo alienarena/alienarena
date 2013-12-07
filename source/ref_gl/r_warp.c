@@ -306,13 +306,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 				t *= (1.0/64);
 
-				if (gl_state.fragment_program)
-				{
-					qglMTexCoord2fARB(GL_TEXTURE0, s, t);
-					qglMTexCoord2fARB(GL_TEXTURE1, 20*s, 20*t);
-				}
-				else
-					qglTexCoord2f (s, t);
+				qglTexCoord2f (s, t);
 
 				if (!(fa->texinfo->flags & SURF_FLOWING))
 
@@ -331,9 +325,6 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 			}
 			qglEnd ();
 		}
-
-		if (gl_state.fragment_program)
-			qglDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
 
 	//env map if specified by shader

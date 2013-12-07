@@ -298,10 +298,8 @@ void BSP_DrawAlphaPoly (msurface_t *fa, int flags)
 	scroll = 0;
 	if (flags & SURF_FLOWING)
 	{
-
 		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
 		if (scroll == 0.0)
-
 			scroll = -64.0;
 	}
 

@@ -25,16 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-//ARB fragment program extensions
-PFNGLGENPROGRAMSARBPROC			 qglGenProgramsARB			= NULL;
-PFNGLDELETEPROGRAMSARBPROC		  qglDeleteProgramsARB		 = NULL;
-PFNGLBINDPROGRAMARBPROC			 qglBindProgramARB			= NULL;
-PFNGLPROGRAMSTRINGARBPROC		   qglProgramStringARB		  = NULL;
-PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB  = NULL;
-PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB = NULL;
-
-char *fragment_program_text;
-
 //GLSL
 PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB	= NULL;
 PFNGLDELETEOBJECTARBPROC			glDeleteObjectARB			= NULL;
@@ -59,43 +49,7 @@ PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
 PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
 PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
-//doesn't work with ARB shaders, unfortunately, due to the #comments
 #define STRINGIFY(...) #__VA_ARGS__
-
-void R_LoadARBPrograms(void)
-{
-	if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
-	{
-		gl_state.fragment_program = true;
-
-		qglGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)qwglGetProcAddress("glGenProgramsARB");
-		qglDeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)qwglGetProcAddress("glDeleteProgramsARB");
-		qglBindProgramARB = (PFNGLBINDPROGRAMARBPROC)qwglGetProcAddress("glBindProgramARB");
-		qglProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)qwglGetProcAddress("glProgramStringARB");
-		qglProgramEnvParameter4fARB =
-			(PFNGLPROGRAMENVPARAMETER4FARBPROC)qwglGetProcAddress("glProgramEnvParameter4fARB");
-		qglProgramLocalParameter4fARB =
-			(PFNGLPROGRAMLOCALPARAMETER4FARBPROC)qwglGetProcAddress("glProgramLocalParameter4fARB");
-
-		if (!(qglGenProgramsARB && qglDeleteProgramsARB && qglBindProgramARB &&
-			qglProgramStringARB && qglProgramEnvParameter4fARB && qglProgramLocalParameter4fARB))
-		{
-			gl_state.fragment_program = false;
-			Com_Printf("...GL_ARB_fragment_program not found\n");
-
-		}
-	}
-	else
-	{
-		gl_state.fragment_program = false;
-		Com_Printf("...GL_ARB_fragment_program not found\n");
-	}
-
-	if (gl_state.fragment_program)
-		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE);
-	else
-		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE);
-}
 
 //GLSL Programs
 
@@ -1756,7 +1710,7 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 void R_LoadGLSLPrograms(void)
 {
 	//load glsl (to do - move to own file)
-	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
+	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ))
 	{
 		glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
 		glDeleteObjectARB		 = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");

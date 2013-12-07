@@ -48,7 +48,6 @@ glstate_t		gl_state;
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_bspnormalmaps;
 cvar_t  *gl_shadowmaps;
-cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_fog;
 
 entity_t	*currententity;
@@ -1582,7 +1581,6 @@ int R_Init( void *hinstance, void *hWnd )
 	 * For now, just go with low settings.
 	 */
 	gl_state.fragment_program = false;
-	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE);
 	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	Cvar_SetValue("r_firstrun", 1);
 	R_SetMaxPerformance();
@@ -1594,8 +1592,6 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.ati = true;
 
 	//load shader programs
-	R_LoadARBPrograms();
-
 	R_LoadGLSLPrograms();
 
 	//if running for the very first time, automatically set video settings

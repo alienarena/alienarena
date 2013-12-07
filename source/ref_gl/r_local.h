@@ -202,8 +202,6 @@ extern  cvar_t		*r_minimap_style;
 
 extern	cvar_t	*gl_mirror;
 
-extern	cvar_t	*gl_arb_fragment_program;
-
 extern	cvar_t	*sys_affinity;
 extern	cvar_t	*sys_priority;
 
@@ -504,7 +502,6 @@ typedef struct
     qboolean    alpha_test;
     qboolean    blend;
     qboolean    texgen;
-    qboolean    fragment_program;
     qboolean    separateStencil;
     qboolean    stencil_wrap;
     qboolean    fbo;
@@ -609,7 +606,6 @@ float			fadeShadow;
 cvar_t			*r_shadowcutoff;
 
 //shader programs
-extern void R_LoadARBPrograms(void);
 extern void	R_LoadGLSLPrograms(void);
 
 //glsl

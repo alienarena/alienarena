@@ -344,15 +344,6 @@ extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_T
 #endif
 // Vic - end
 
-// === jitwater - arb fragmetn program extensions
-extern	PFNGLGENPROGRAMSARBPROC             qglGenProgramsARB;
-extern	PFNGLDELETEPROGRAMSARBPROC          qglDeleteProgramsARB;
-extern	PFNGLBINDPROGRAMARBPROC             qglBindProgramARB;
-extern	PFNGLPROGRAMSTRINGARBPROC           qglProgramStringARB;
-extern	PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB;
-extern	PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB;
-// jitwater ===
-
 //add glsl program extensions
 extern	PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB;	
 extern	PFNGLDELETEOBJECTARBPROC			glDeleteObjectARB;
