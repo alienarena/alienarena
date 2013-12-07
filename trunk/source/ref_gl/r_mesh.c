@@ -1567,13 +1567,12 @@ void R_Mesh_Draw ( void )
 	if (currententity->flags & RF_WEAPONMODEL || currentmodel->type == mod_alias)
 	{
 		qglPushMatrix ();
-		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
 		R_RotateForEntity (currententity);
-		currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
 	}
 	else if (currentmodel->type == mod_iqm)
 	{
 		qglPushMatrix ();
+		// pitch and roll are handled by IQM_AnimateFrame. 
 		currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 		R_RotateForEntity (currententity);
 	}
@@ -1666,9 +1665,7 @@ void MD2_DrawCaster ( void )
 	// draw it
 
 	qglPushMatrix ();
-	currententity->angles[PITCH] = -currententity->angles[PITCH];
 	R_RotateForEntity (currententity);
-	currententity->angles[PITCH] = -currententity->angles[PITCH];
 	
 	MD2_SelectFrame ();
 

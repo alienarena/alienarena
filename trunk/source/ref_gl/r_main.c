@@ -432,10 +432,9 @@ void R_RotateForEntity (entity_t *e)
 {
     qglTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
 
-    qglRotatef (e->angles[1],  0, 0, 1);
-    qglRotatef (-e->angles[0],  0, 1, 0);
-
-    qglRotatef (-e->angles[2],  1, 0, 0);
+    qglRotatef (e->angles[YAW],		0, 0, 1);
+    qglRotatef (e->angles[PITCH],	0, 1, 0);
+    qglRotatef (e->angles[ROLL],	1, 0, 0);
 }
 
 /*

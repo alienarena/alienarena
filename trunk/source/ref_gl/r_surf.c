@@ -192,11 +192,7 @@ void BSP_DrawTexturelessBrushModel (entity_t *e)
 	}
 
 	qglPushMatrix ();
-	e->angles[0] = -e->angles[0];	// stupid quake bug
-	e->angles[2] = -e->angles[2];	// stupid quake bug
 	R_RotateForEntity (e);
-	e->angles[0] = -e->angles[0];	// stupid quake bug
-	e->angles[2] = -e->angles[2];	// stupid quake bug
 
 	BSP_DrawTexturelessInlineBModel (e);
 
@@ -374,11 +370,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		if (s->entity)
 		{
 			qglLoadMatrixf (r_world_matrix); //moving trans brushes
-			s->entity->angles[0] = -s->entity->angles[0];	// stupid quake bug
-			s->entity->angles[2] = -s->entity->angles[2];	// stupid quake bug
-				R_RotateForEntity (s->entity);
-			s->entity->angles[0] = -s->entity->angles[0];	// stupid quake bug
-			s->entity->angles[2] = -s->entity->angles[2];	// stupid quake bug
+			R_RotateForEntity (s->entity);
 		}
 		
 		rs_shader = NULL;
@@ -1411,11 +1403,7 @@ void R_DrawBrushModel ( void )
 	}
 
 	qglPushMatrix ();
-	currententity->angles[0] = -currententity->angles[0];	// stupid quake bug
-	currententity->angles[2] = -currententity->angles[2];	// stupid quake bug
 	R_RotateForEntity (currententity);
-	currententity->angles[0] = -currententity->angles[0];	// stupid quake bug
-	currententity->angles[2] = -currententity->angles[2];	// stupid quake bug
 
 	BSP_DrawInlineBModel ();
 
