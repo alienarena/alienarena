@@ -35,12 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 =============================================================
 */
 
-#define NUMVERTEXNORMALS	162
-
-float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
-#include "anorms.h"
-};
-
 static vec3_t VertexArray[MAX_VERTICES];
 static vec2_t TexCoordArray[MAX_VERTICES];
 static vec3_t NormalsArray[MAX_VERTICES];
@@ -66,12 +60,6 @@ extern image_t *r_mirrortexture;
 extern cvar_t *cl_gun;
 
 cvar_t *gl_mirror;
-
-// precalculated dot products for quantized angles
-#define SHADEDOT_QUANT 16
-float	r_avertexnormal_dots[SHADEDOT_QUANT][256] =
-#include "anormtab.h"
-;
 
 /*
 =============
@@ -508,7 +496,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 //
-// find neighbours
+// find neighbours - TODO: we can remove this when shadow volumes are gone.
 //
 	mod->neighbors = Hunk_Alloc(pheader->num_tris * sizeof(neighbors_t));
 	MD2_BuildTriangleNeighbors(mod->neighbors, pouttri, pheader->num_tris);
