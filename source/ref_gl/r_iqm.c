@@ -747,7 +747,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		inelements += 3;
 	}
 
-	//load triangle neighbors
+	// load triangle neighbors
+	// TODO: we can remove this when shadow volumes are gone, and simply not
+	// load this data from the file.
 	if (header->ofs_neighbors)
 	{
 		inelements = (const int *) (pbase + header->ofs_neighbors);

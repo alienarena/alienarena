@@ -420,6 +420,8 @@ typedef struct model_s
 
 	//md2 only
 	fstvert_t	*st;
+	
+	//md2 and iqm. TODO: we can remove this when shadow volumes are gone.
 	neighbors_t *neighbors;	
 
 	//ragdoll info
