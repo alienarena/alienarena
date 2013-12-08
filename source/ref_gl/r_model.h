@@ -75,39 +75,6 @@ ALIAS MODELS
 ==============================================================================
 */
 
-typedef struct
-{
-	byte			v[3];			// scaled byte to fit in frame mins/maxs
-	byte			lightnormalindex;
-} mtrivertx_t;
-
-typedef struct
-{
-	float			scale[3];		// multiply byte verts by this
-	float			translate[3];	// then add this
-	mtrivertx_t		*verts;			// variable sized
-} maliasframe_t;
-
-typedef struct
-{
-	char			name[MAX_SKINNAME];
-} maliasskin_t;
-
-typedef struct
-{
-	int				num_skins;
-	maliasskin_t	*skins;
-
-	int				num_xyz;
-	int				num_tris;
-
-	int				num_glcmds;		// dwords in strip/fan command list
-	int				*glcmds;
-
-	int				num_frames;
-	maliasframe_t	*frames;
-} maliasmdl_t;
-
 //base player models and weapons for prechache
 typedef struct PModelList_s {
 
