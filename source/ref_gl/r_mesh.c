@@ -261,13 +261,13 @@ void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int fram
 	frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + framenum * pheader->framesize);
 	verts = frame->verts;
 
-    memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
+	memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
 	memset(tangents_, 0, pheader->num_xyz*sizeof(vec3_t));
 
 	//for all tris
 	for (j=0; j<pheader->num_tris; j++)
 	{
-	    vec3_t	vv0,vv1,vv2;
+		vec3_t	vv0,vv1,vv2;
 		vec3_t tangent;
 		
 		//make 3 vec3_t's of this triangle's vertices
@@ -301,7 +301,7 @@ void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int fram
 					&st[tris[j].index_st[1]].s,
 					&st[tris[j].index_st[2]].s,
 					tangent);
-        
+		
 		for (k=0; k<3; k++)
 		{
 			l = tris[j].index_xyz[k];
@@ -314,15 +314,15 @@ void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int fram
 		for (k=j+1; k<pheader->num_xyz; k++)
 			if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
 			{
-			    // Have to make normalized versions or else the dot-product
-			    // won't come out right.
-			    vec3_t jnormal, knormal;
-			    VectorCopy (normals_[j], jnormal);
-			    VectorNormalize (jnormal);
-			    VectorCopy (normals_[k], knormal);
-			    VectorNormalize (knormal);
-			    
-			    // 45 degrees is our threshold for merging vertex normals.
+				// Have to make normalized versions or else the dot-product
+				// won't come out right.
+				vec3_t jnormal, knormal;
+				VectorCopy (normals_[j], jnormal);
+				VectorNormalize (jnormal);
+				VectorCopy (normals_[k], knormal);
+				VectorNormalize (knormal);
+				
+				// 45 degrees is our threshold for merging vertex normals.
 				if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
 				{
 					VectorAdd(normals_[j], normals_[k], normals_[j]);
@@ -402,13 +402,29 @@ void MD2_LoadVBO (model_t *mod)
 	}
 }
 
-qboolean MD2_FindVBO (model_t *mod, int framenum)
+void MD2_FindVBO (model_t *mod, int framenum)
 {
 	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod);
 	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
 	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod);
 	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod);
-	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents;
+	if (vbo_xyz && vbo_st && vbo_normals && vbo_tangents)
+		return;
+	Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
+}
+
+void MD2_FreeVBO (model_t *mod)
+{
+	int framenum;
+	
+	for (framenum = 0; framenum < mod->num_frames; framenum++)
+	{
+		MD2_FindVBO (mod, framenum);
+		R_VCFree (vbo_xyz);
+		R_VCFree (vbo_st);
+		R_VCFree (vbo_normals);
+		R_VCFree (vbo_tangents);
+	}
 }
 
 /*
@@ -1107,12 +1123,7 @@ void R_Mesh_SetupGlassRender (void)
 
 void MD2_DrawVBO (qboolean lerped)
 {
-	if (!MD2_FindVBO (currentmodel, currententity->frame))
-	{
-		// TODO: remove this - the VBOs are getting unloaded for every new map
-		MD2_LoadVBO (currentmodel);
-		MD2_FindVBO (currentmodel, currententity->frame);
-	}
+	MD2_FindVBO (currentmodel, currententity->frame);
 	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);

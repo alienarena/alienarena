@@ -371,14 +371,26 @@ void IQM_LoadVBO (model_t *mod)
 	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), mod->tris, VBO_STORE_INDICES, mod);
 }
 
-qboolean IQM_FindVBO (model_t *mod)
+void IQM_FindVBO (model_t *mod)
 {
 	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
 	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
 	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
 	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
 	vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
-	return vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices;
+	if (vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices)
+		return;
+	Com_Error (ERR_DROP, "Cannot find VBO for %s\n", mod->name);
+}
+
+void IQM_FreeVBO (model_t *mod)
+{
+	IQM_FindVBO (mod);
+	R_VCFree (vbo_xyz);
+	R_VCFree (vbo_st);
+	R_VCFree (vbo_normals);
+	R_VCFree (vbo_tangents);
+	R_VCFree (vbo_indices);
 }
 
 // NOTE: this should be the only function that needs to care what version the
@@ -769,7 +781,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	IQM_LoadVertexArrays(mod, vposition, vnormal, vtangent);
 
 	// load texture coodinates
-    mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
+	mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
 	//mod->blendweights = (float *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(float));
 
 	for (i = 0;i < (int)header->num_vertexes;i++)
@@ -963,9 +975,9 @@ void IQM_AnimateFrame (void)
 	curframe = IQM_SelectFrame ();
 	nextframe = IQM_NextFrame (currententity->frame);
 
-    frame1 = (int)floor(curframe);
-    frame2 = nextframe;
-    frameoffset = curframe - frame1;
+	frame1 = (int)floor(curframe);
+	frame2 = nextframe;
+	frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
 
@@ -1075,12 +1087,7 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 
 void IQM_DrawVBO (void)
 {
-	if (!IQM_FindVBO (currentmodel))
-	{
-		// TODO: remove this - the VBOs are getting unloaded for every new map
-		IQM_LoadVBO (currentmodel);
-		IQM_FindVBO (currentmodel);
-	}
+	IQM_FindVBO (currentmodel);
 	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
