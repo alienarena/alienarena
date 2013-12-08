@@ -318,7 +318,7 @@ typedef struct {
 
 } mragdoll_t;
 
-typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias, mod_iqm } modtype_t;
+typedef enum {mod_bad, mod_brush, mod_alias, mod_iqm } modtype_t;
 
 typedef enum	{	simplecolor_white, simplecolor_green, simplecolor_blue, 
 					simplecolor_purple	} simplecolor_t;
