@@ -212,9 +212,6 @@ int Q_log2(int val);
 void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
 void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 
-void NormalToLatLong( const vec3_t normal, byte latlong[2] );
-void LatLongToNormal( byte latlong[2], vec3_t normal );
-
 void fast_sincosf( float angle, float *sina, float *cosa );
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 void vectoangles (vec3_t value1, vec3_t angles);

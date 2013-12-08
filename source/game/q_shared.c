@@ -850,41 +850,6 @@ void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
 	vecc[2] = veca[2] + scale*vecb[2];
 }
 
-void NormalToLatLong( const vec3_t normal, byte latlong[2] )
-{
-	// can't do atan2 (normal[1], normal[0])
-	if ( normal[0] == 0 && normal[1] == 0 ) {
-		if ( normal[2] > 0 ) {
-			latlong[0] = 0;		// acos ( 1 )
-			latlong[1] = 0;
-		} else {
-			latlong[0] = 128;	// acos ( -1 )
-			latlong[1] = 0;
-		}
-	} else {
-		int angle;
-
-		angle = (int)( acos (normal[2]) * 255.0 / (M_PI * 2) ) & 255;
-		latlong[0] = angle;
-		angle = (int)( atan2 (normal[1], normal[0]) * 255.0 / (M_PI * 2) ) & 255;
-		latlong[1] = angle;
-	}
-}
-
-void LatLongToNormal( byte latlong[2], vec3_t normal )
-{
-	float sin_a, sin_b, cos_a, cos_b;
-
-	sin_a = (float)latlong[0] * (1.0 / 255.0) * M_PI * 2;
-	cos_a = cos ( sin_a );
-	sin_a = sin ( sin_a );
-	sin_b = (float)latlong[1] * (1.0 / 255.0) * M_PI * 2;
-	cos_b = cos ( sin_b );
-	sin_b = sin ( sin_b );
-
-	VectorSet ( normal, cos_b * sin_a, sin_b * sin_a, cos_a );
-}
-
 vec_t _DotProduct (vec3_t v1, vec3_t v2)
 {
 	return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
