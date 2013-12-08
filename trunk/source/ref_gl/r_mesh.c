@@ -354,29 +354,27 @@ void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int fram
 }
 
 
-void MD2_LoadVBO (model_t *mod)
+void MD2_LoadVBO (model_t *mod, dmdl_t *pheader)
 {
 	int i, j, k, framenum;
 	
-	dmdl_t			*paliashdr;
 	dtriangle_t		*tris;
 	dtrivertx_t		*verts;
 	daliasframe_t	*frame;
 	
-	paliashdr = (dmdl_t *)mod->extradata;
-	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
+	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
 	
 	for (framenum = 0; framenum < mod->num_frames; framenum++)
 	{
 		int va = 0; // will eventually reach mod->num_triangles*3
 		
 		frame = (daliasframe_t *)
-			((byte *)paliashdr + paliashdr->ofs_frames + framenum * paliashdr->framesize);
+			((byte *)pheader + pheader->ofs_frames + framenum * pheader->framesize);
 		verts = frame->verts;
 		
-		MD2_PopulateNormalsTangentsArrays (paliashdr, mod->st, framenum);
+		MD2_PopulateNormalsTangentsArrays (pheader, mod->st, framenum);
 	
-		for (i=0; i<paliashdr->num_tris; i++)
+		for (i=0; i<pheader->num_tris; i++)
 		{
 			for (j=0; j<3; j++)
 			{
@@ -435,7 +433,7 @@ Mod_LoadMD2Model
 void Mod_LoadMD2Model (model_t *mod, void *buffer)
 {
 	int					i, j, k, l;
-	dmdl_t				*pinmodel, *pheader, *paliashdr;
+	dmdl_t				*pinmodel, *pheader;
 	dstvert_t			*pinst, *poutst;
 	dtriangle_t			*pintri, *pouttri, *tris;
 	daliasframe_t		*pinframe, *poutframe, *pframe;
@@ -597,11 +595,9 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 
 	mod->num_triangles = pheader->num_tris;
 
-	paliashdr = (dmdl_t *)mod->extradata;
-
 	//redo this using max/min from all frames
-	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
-									  paliashdr->ofs_frames);
+	pframe = ( daliasframe_t * ) ( ( byte * ) pheader +
+									  pheader->ofs_frames);
 
 	/*
 	** compute axially aligned mins and maxs
@@ -637,7 +633,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		VectorCopy( tmp, mod->bbox[i] );
 	}	
 	
-	MD2_LoadVBO (mod);
+	MD2_LoadVBO (mod, pheader);
 }
 
 //==============================================================
@@ -1357,16 +1353,14 @@ void R_Mesh_SetShadelight (void)
 
 void MD2_SelectFrame (void)
 {
-	dmdl_t *paliashdr = (dmdl_t *)currentmodel->extradata;
-	
-	if ( (currententity->frame >= paliashdr->num_frames)
+	if ( (currententity->frame >= currentmodel->num_frames)
 		|| (currententity->frame < 0) )
 	{
 		currententity->frame = 0;
 		currententity->oldframe = 0;
 	}
 
-	if ( (currententity->oldframe >= paliashdr->num_frames)
+	if ( (currententity->oldframe >= currentmodel->num_frames)
 		|| (currententity->oldframe < 0))
 	{
 		currententity->frame = 0;
