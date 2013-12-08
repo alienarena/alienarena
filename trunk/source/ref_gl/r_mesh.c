@@ -164,171 +164,6 @@ static void MD2_BuildTriangleNeighbors(neighbors_t * neighbors,
 	}
 }
 
-void MD2_LoadVertexArrays(model_t *md2model){
-
-	dmdl_t *md2;
-	daliasframe_t *md2frame;
-	dtrivertx_t	*md2v;
-	int i;
-
-	if(md2model->num_frames > 1)
-		return;
-
-	md2 = (dmdl_t *)md2model->extradata;
-
-	md2frame = (daliasframe_t *)((byte *)md2 + md2->ofs_frames);
-
-	if(md2->num_xyz > MAX_VERTS)
-		return;
-
-	md2model->vertexes = (mvertex_t*)Hunk_Alloc(md2->num_xyz * sizeof(mvertex_t));
-
-	for(i = 0, md2v = md2frame->verts; i < md2->num_xyz; i++, md2v++){  // reconstruct the verts
-		VectorSet(md2model->vertexes[i].position,
-					md2v->v[0] * md2frame->scale[0] + md2frame->translate[0],
-					md2v->v[1] * md2frame->scale[1] + md2frame->translate[1],
-					md2v->v[2] * md2frame->scale[2] + md2frame->translate[2]);
-	}
-
-}
-
-#if 0
-byte MD2_Normal2Index(const vec3_t vec)
-{
-	int i, best;
-	float d, bestd;
-
-	bestd = best = 0;
-	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
-	{
-		d = DotProduct (vec, r_avertexnormals[i]);
-		if (d > bestd)
-		{
-			bestd = d;
-			best = i;
-		}
-	}
-
-	return best;
-}
-#else
-// for MD2 load speedup. Adapted from common.c::MSG_WriteDir()
-byte MD2_Normal2Index(const vec3_t vec)
-{
-	int i, best;
-	float d, bestd;
-	float x,y,z;
-
-	x = vec[0];
-	y = vec[1];
-	z = vec[2];
-
-	best = 0;
-	// frequently occurring axial cases, use known best index
-	if ( x == 0.0f && y == 0.0f )
-	{
-		best = ( z >= 0.999f ) ? 5  : 84;
-	}
-	else if ( x == 0.0f && z == 0.0f )
-	{
-		best = ( y >= 0.999f ) ? 32 : 104;
-	}
-	else if ( y == 0.0f && z == 0.0f )
-	{
-		best = ( x >= 0.999f ) ? 52 : 143;
-	}
-	else
-	{ // general case
-		bestd = 0.0f;
-		for ( i = 0 ; i < NUMVERTEXNORMALS ; i++ )
-		{ // search for closest match
-			d =	  (x*r_avertexnormals[i][0])
-				+ (y*r_avertexnormals[i][1])
-				+ (z*r_avertexnormals[i][2]);
-			if ( d > 0.998f )
-			{ // no other entry could be a closer match
-				//  0.9679495 is max dot product between anorm.h entries
-				best = i;
-				break;
-			}
-			if ( d > bestd )
-			{
-				bestd = d;
-				best = i;
-			}
-		}
-	}
-
-	return best;
-}
-#endif
-
-void MD2_RecalcVertsLightNormalIdx (dmdl_t *pheader)
-{
-	int				i, j, k, l;
-	daliasframe_t	*frame;
-	dtrivertx_t		*verts, *v;
-	vec3_t			normal, triangle[3], v1, v2;
-	dtriangle_t		*tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-	vec3_t	normals_[MAX_VERTS];
-
-	//for all frames
-	for (i=0; i<pheader->num_frames; i++)
-	{
-		frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + i * pheader->framesize);
-		verts = frame->verts;
-
-		memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
-
-		//for all tris
-		for (j=0; j<pheader->num_tris; j++)
-		{
-			//make 3 vec3_t's of this triangle's vertices
-			for (k=0; k<3; k++)
-			{
-				l = tris[j].index_xyz[k];
-				v = &verts[l];
-				for (l=0; l<3; l++)
-					triangle[k][l] = v->v[l];
-			}
-
-			//calculate normal
-			VectorSubtract(triangle[0], triangle[1], v1);
-			VectorSubtract(triangle[2], triangle[1], v2);
-			CrossProduct(v2,v1, normal);
-			VectorScale(normal, -1.0/VectorLength(normal), normal);
-
-			for (k=0; k<3; k++)
-			{
-				l = tris[j].index_xyz[k];
-				VectorAdd(normals_[l], normal, normals_[l]);
-			}
-		}
-
-		for (j=0; j<pheader->num_xyz; j++)
-			for (k=j+1; k<pheader->num_xyz; k++)
-				if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
-				{
-					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
-					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
-					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
-					{
-						VectorAdd(normals_[j], normals_[k], normals_[j]);
-						VectorCopy(normals_[j], normals_[k]);
-					}
-				}
-
-		//normalize average
-		for (j=0; j<pheader->num_xyz; j++)
-		{
-			VectorNormalize(normals_[j]);
-			verts[j].lightnormalindex = MD2_Normal2Index(normals_[j]);
-		}
-
-	}
-
-}
-
 #if 0
 void MD2_VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
 {
@@ -425,6 +260,112 @@ static void MD2_VecsForTris(
 #endif
 
 
+void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int framenum)
+{
+	int				i, j, k, l, va;
+	daliasframe_t	*frame;
+	dtrivertx_t		*verts, *v;
+	vec3_t			normal, triangle[3], v1, v2;
+	dtriangle_t		*tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
+	vec3_t	normals_[MAX_VERTS];
+	vec3_t	tangents_[MAX_VERTS];
+
+	frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + framenum * pheader->framesize);
+	verts = frame->verts;
+
+    memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
+	memset(tangents_, 0, pheader->num_xyz*sizeof(vec3_t));
+
+	//for all tris
+	for (j=0; j<pheader->num_tris; j++)
+	{
+	    vec3_t	vv0,vv1,vv2;
+		vec3_t tangent;
+		
+		//make 3 vec3_t's of this triangle's vertices
+		for (k=0; k<3; k++)
+		{
+			l = tris[j].index_xyz[k];
+			v = &verts[l];
+			for (l=0; l<3; l++)
+				triangle[k][l] = v->v[l];
+		}
+
+		//calculate normal
+		VectorSubtract(triangle[0], triangle[1], v1);
+		VectorSubtract(triangle[2], triangle[1], v2);
+		CrossProduct(v2,v1, normal);
+		VectorScale(normal, -1.0/VectorLength(normal), normal);
+		
+		// calculate tangent
+		vv0[0] = (float)verts[tris[j].index_xyz[0]].v[0];
+		vv0[1] = (float)verts[tris[j].index_xyz[0]].v[1];
+		vv0[2] = (float)verts[tris[j].index_xyz[0]].v[2];
+		vv1[0] = (float)verts[tris[j].index_xyz[1]].v[0];
+		vv1[1] = (float)verts[tris[j].index_xyz[1]].v[1];
+		vv1[2] = (float)verts[tris[j].index_xyz[1]].v[2];
+		vv2[0] = (float)verts[tris[j].index_xyz[2]].v[0];
+		vv2[1] = (float)verts[tris[j].index_xyz[2]].v[1];
+		vv2[2] = (float)verts[tris[j].index_xyz[2]].v[2];
+
+		MD2_VecsForTris(vv0, vv1, vv2,
+					&st[tris[j].index_st[0]].s,
+					&st[tris[j].index_st[1]].s,
+					&st[tris[j].index_st[2]].s,
+					tangent);
+        
+		for (k=0; k<3; k++)
+		{
+			l = tris[j].index_xyz[k];
+			VectorAdd(normals_[l], normal, normals_[l]);
+			VectorAdd(tangents_[l], tangent, tangents_[l]);
+		}
+	}
+
+	for (j=0; j<pheader->num_xyz; j++)
+		for (k=j+1; k<pheader->num_xyz; k++)
+			if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
+			{
+			    // Have to make normalized versions or else the dot-product
+			    // won't come out right.
+			    vec3_t jnormal, knormal;
+			    VectorCopy (normals_[j], jnormal);
+			    VectorNormalize (jnormal);
+			    VectorCopy (normals_[k], knormal);
+			    VectorNormalize (knormal);
+			    
+			    // 45 degrees is our threshold for merging vertex normals.
+				if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
+				{
+					VectorAdd(normals_[j], normals_[k], normals_[j]);
+					VectorCopy(normals_[j], normals_[k]);
+					VectorAdd(tangents_[j], tangents_[k], tangents_[j]);
+					VectorCopy(tangents_[j], tangents_[k]);
+				}
+			}
+
+	//normalize average
+	for (j=0; j<pheader->num_xyz; j++)
+	{
+		VectorNormalize(normals_[j]);
+		VectorNormalize(tangents_[j]);
+	}
+	
+	// Now that the normals and tangents are calculated, prepare them to be
+	// loaded into the VBO.
+	va = 0;
+	for (i=0; i<pheader->num_tris; i++)
+	{
+		for (j=0; j<3; j++, va++)
+		{
+			VectorCopy (normals_[tris[i].index_xyz[j]], NormalsArray[va]);
+			VectorCopy (tangents_[tris[i].index_xyz[j]], TangentsArray[va]);
+			TangentsArray[va][3] = 1.0;
+		}
+	}
+}
+
+
 void MD2_LoadVBO (model_t *mod)
 {
 	int i, j, k, framenum;
@@ -433,7 +374,6 @@ void MD2_LoadVBO (model_t *mod)
 	dtriangle_t		*tris;
 	dtrivertx_t		*verts;
 	daliasframe_t	*frame;
-	byte			*tangents;
 	
 	paliashdr = (dmdl_t *)mod->extradata;
 	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
@@ -445,7 +385,8 @@ void MD2_LoadVBO (model_t *mod)
 		frame = (daliasframe_t *)
 			((byte *)paliashdr + paliashdr->ofs_frames + framenum * paliashdr->framesize);
 		verts = frame->verts;
-		tangents = mod->tangents + paliashdr->num_xyz * framenum;
+		
+		MD2_PopulateNormalsTangentsArrays (paliashdr, mod->st, framenum);
 	
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
@@ -458,11 +399,6 @@ void MD2_LoadVBO (model_t *mod)
 			
 				for (k = 0; k < 3; k++)
 					VertexArray[va][k] = verts[index_xyz].v[k] * frame->scale[k] + frame->translate[k];
-			
-				VectorCopy (r_avertexnormals[verts[index_xyz].lightnormalindex], NormalsArray[va]);
-			
-				VectorCopy (r_avertexnormals[tangents[index_xyz]], TangentsArray[va]);
-				TangentsArray[va][3] = 1.0;
 			
 				TexCoordArray[va][0] = mod->st[index_st].s;
 				TexCoordArray[va][1] = mod->st[index_st].t;
@@ -508,7 +444,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	daliasframe_t		*frame;
 	dtrivertx_t			*verts;
 	byte				*tangents;
-	vec3_t				tangents_[MAX_VERTS];
 	char *pstring;
 	int count;
 	image_t *image;
@@ -602,7 +537,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 
 	mod->type = mod_alias;
 	mod->num_frames = pheader->num_frames;
-
+	
 	//
 	// load the glcmds
 	//
@@ -652,76 +587,9 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		st[i].t = (t + 1.0) * ih;
 	}
 
-	MD2_LoadVertexArrays(mod);
-
-	MD2_RecalcVertsLightNormalIdx(pheader);
-
 	cx = pheader->num_xyz * pheader->num_frames * sizeof(byte);
 
-	// Calculate tangents
-	mod->tangents = tangents = (byte*)Hunk_Alloc (cx);
-
 	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-
-	//for all frames
-	for (i=0; i<pheader->num_frames; i++)
-	{
-		//set temp to zero
-		memset(tangents_, 0, pheader->num_xyz*sizeof(vec3_t));
-
-		frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + i * pheader->framesize);
-		verts = frame->verts;
-
-		//for all tris
-		for (j=0; j<pheader->num_tris; j++)
-		{
-			vec3_t	vv0,vv1,vv2;
-			vec3_t tangent;
-
-			vv0[0] = (float)verts[tris[j].index_xyz[0]].v[0];
-			vv0[1] = (float)verts[tris[j].index_xyz[0]].v[1];
-			vv0[2] = (float)verts[tris[j].index_xyz[0]].v[2];
-			vv1[0] = (float)verts[tris[j].index_xyz[1]].v[0];
-			vv1[1] = (float)verts[tris[j].index_xyz[1]].v[1];
-			vv1[2] = (float)verts[tris[j].index_xyz[1]].v[2];
-			vv2[0] = (float)verts[tris[j].index_xyz[2]].v[0];
-			vv2[1] = (float)verts[tris[j].index_xyz[2]].v[1];
-			vv2[2] = (float)verts[tris[j].index_xyz[2]].v[2];
-
-			MD2_VecsForTris(vv0, vv1, vv2,
-						&st[tris[j].index_st[0]].s,
-						&st[tris[j].index_st[1]].s,
-						&st[tris[j].index_st[2]].s,
-						tangent);
-
-			for (k=0; k<3; k++)
-			{
-				l = tris[j].index_xyz[k];
-				VectorAdd(tangents_[l], tangent, tangents_[l]);
-			}
-		}
-
-		for (j=0; j<pheader->num_xyz; j++)
-			for (k=j+1; k<pheader->num_xyz; k++)
-				if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
-				{
-					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
-					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
-					// if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
-					if( DotProduct(jnormal, knormal) >= 0.707106781187 ) // cos of 45 degrees.
-					{
-						VectorAdd(tangents_[j], tangents_[k], tangents_[j]);
-						VectorCopy(tangents_[j], tangents_[k]);
-					}
-				}
-
-		//normalize averages
-		for (j=0; j<pheader->num_xyz; j++)
-		{
-			VectorNormalize(tangents_[j]);
-			tangents[i * pheader->num_xyz + j] = MD2_Normal2Index(tangents_[j]);
-		}
-	}
 
 	mod->num_triangles = pheader->num_tris;
 
