@@ -345,7 +345,6 @@ typedef struct model_s
 //
 	int			firstmodelsurface, nummodelsurfaces;
 
-
 	int			numsubmodels;
 	mmodel_t	*submodels;
 
@@ -420,8 +419,6 @@ typedef struct model_s
 	//end iqm
 
 	//md2 only
-	byte		*tangents;
-
 	fstvert_t	*st;
 	neighbors_t *neighbors;	
 
