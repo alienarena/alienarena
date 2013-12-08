@@ -79,7 +79,6 @@ typedef struct
 {
 	byte			v[3];			// scaled byte to fit in frame mins/maxs
 	byte			lightnormalindex;
-	byte			latlong[2];
 } mtrivertx_t;
 
 typedef struct
