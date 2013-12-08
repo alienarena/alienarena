@@ -1215,41 +1215,31 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 	if (stage->rot_speed)
 		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * 0.0087266388888888888888888888888889);
 
-	if (stage->scroll.speedX)
+	switch(stage->scroll.typeX)
 	{
-		switch(stage->scroll.typeX)
-		{
-			case 0:	// static
-				txm=rs_realtime*stage->scroll.speedX;
-				break;
-			case 1:	// sine
-				txm=sin(rs_realtime*stage->scroll.speedX);
-				break;
-			case 2:	// cosine
-				txm=cos(rs_realtime*stage->scroll.speedX);
-				break;
-		}
+		case 0:	// static
+			txm=rs_realtime*stage->scroll.speedX;
+			break;
+		case 1:	// sine
+			txm=sin(rs_realtime*stage->scroll.speedX);
+			break;
+		case 2:	// cosine
+			txm=cos(rs_realtime*stage->scroll.speedX);
+			break;
 	}
-	else
-		txm=0;
 
-	if (stage->scroll.speedY)
+	switch(stage->scroll.typeY)
 	{
-		switch(stage->scroll.typeY)
-		{
-			case 0:	// static
-				tym=rs_realtime*stage->scroll.speedY;
-				break;
-			case 1:	// sine
-				tym=sin(rs_realtime*stage->scroll.speedY);
-				break;
-			case 2:	// cosine
-				tym=cos(rs_realtime*stage->scroll.speedY);
-				break;
-		}
+		case 0:	// static
+			tym=rs_realtime*stage->scroll.speedY;
+			break;
+		case 1:	// sine
+			tym=sin(rs_realtime*stage->scroll.speedY);
+			break;
+		case 2:	// cosine
+			tym=cos(rs_realtime*stage->scroll.speedY);
+			break;
 	}
-	else
-		tym=0;
 
 	*os += txm;
 	*ot += tym;
@@ -1440,33 +1430,17 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			qglShadeModel (GL_FLAT);
 
 			GL_MBind (1, gl_state.lightmap_textures + lmtex);
-
-			if (stage->colormap.enabled)
-			qglDisable (GL_TEXTURE_2D);
-			else if (stage->anim_count){
-				GL_MBind (0, RS_Animate(stage));
-			}
-			else
-			{
-		 		GL_MBind (0, stage->texture->texnum);
-			}			
 		}
 		else 
 		{
 			ToggleLightmap(false);
 			qglShadeModel (GL_SMOOTH);
-
-			if (stage->colormap.enabled)
-				qglDisable (GL_TEXTURE_2D);
-			else if (stage->anim_count)
-			{
-				GL_MBind (0, RS_Animate(stage));
-			}
-			else
-			{
-		 		GL_MBind (0, stage->texture->texnum);
-			}			
 		}
+
+		if (stage->anim_count)
+			GL_MBind (0, RS_Animate(stage));
+		else
+	 		GL_MBind (0, stage->texture->texnum);
 				
 		if (stage->blendfunc.blend)
 		{
@@ -1503,40 +1477,31 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			}
 		}
 
-		if (stage->scroll.speedX)
+		switch (stage->scroll.typeX)
 		{
-			switch (stage->scroll.typeX)
-			{
-			case 0:	// static
-				txm = rs_realtime*stage->scroll.speedX;
-				break;
-			case 1:	// sine
-				txm = sin (rs_realtime*stage->scroll.speedX);
-				break;
-			case 2:	// cosine
-				txm = cos (rs_realtime*stage->scroll.speedX);
-				break;
-			}
+		case 0:	// static
+			txm = rs_realtime*stage->scroll.speedX;
+			break;
+		case 1:	// sine
+			txm = sin (rs_realtime*stage->scroll.speedX);
+			break;
+		case 2:	// cosine
+			txm = cos (rs_realtime*stage->scroll.speedX);
+			break;
 		}
-		else
-			txm=0;
 
-		if (stage->scroll.speedY)
+		switch (stage->scroll.typeY)
 		{
-			switch (stage->scroll.typeY)
-			{
-			case 0:	// static
-				tym = rs_realtime*stage->scroll.speedY;
-				break;
-			case 1:	// sine
-				tym = sin (rs_realtime*stage->scroll.speedY);
-				break;
-			case 2:	// cosine
-				tym = cos (rs_realtime*stage->scroll.speedY);
-				break;
-			}
-		} else
-			tym=0;
+		case 0:	// static
+			tym = rs_realtime*stage->scroll.speedY;
+			break;
+		case 1:	// sine
+			tym = sin (rs_realtime*stage->scroll.speedY);
+			break;
+		case 2:	// cosine
+			tym = cos (rs_realtime*stage->scroll.speedY);
+			break;
+		}
 
 		qglColor4f (1, 1, 1, alpha);
 
@@ -1577,19 +1542,16 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 			RS_SetTexcoords (stage, &os, &ot, surf);
 			{
-				float red=255, green=255, blue=255;
+				float red=1.0, green=1.0, blue=1.0;
 
 				if (stage->colormap.enabled)
 				{
-					red *= stage->colormap.red/255.0f;
-					green *= stage->colormap.green/255.0f;
-					blue *= stage->colormap.blue/255.0f;
+					red = stage->colormap.red;
+					green = stage->colormap.green;
+					blue = stage->colormap.blue;
 				}
 
 				alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-				if (red>1)red=1; if (red<0) red = 0;
-				if (green>1)green=1; if (green<0) green = 0;
-				if (blue>1)blue=1; if (blue<0) blue = 0;
 
 				qglColor4f (red, green, blue, alpha);
 			}
