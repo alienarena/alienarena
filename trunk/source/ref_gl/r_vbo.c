@@ -40,6 +40,7 @@ GLvoid			(APIENTRY * qglGenBuffersARB)(GLsizei n, GLuint *buffers);
 GLvoid			(APIENTRY * qglBufferDataARB)(GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
 GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
 
+void VB_VCInit();
 void R_LoadVBOSubsystem(void)
 {
 	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
@@ -121,8 +122,8 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	surf->vbo_num_verts = 3*(p->numverts-2);
 	currVertexNum += surf->vbo_num_verts;
 	
-	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);                             
-	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);                
+	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);
+	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);
 	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_lm_pos, lm_size, &map3);  
 
 	vbo_xyz_pos += xyz_size;
@@ -245,7 +246,7 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 
 	if (!vcm.freeVertCache)
 		Com_Error(ERR_FATAL, "VBO cache overflow\n");
-
+	
 	cache = vcm.freeVertCache;
 	cache->mode = mode;
 	cache->size = size;
@@ -295,7 +296,7 @@ void R_VCFree(vertCache_t *cache)
 {
 	if (!cache)
 		return;
-
+	
 	// unlink
 	cache->prev->next = cache->next;
 	cache->next->prev = cache->prev;
@@ -323,20 +324,24 @@ void R_VCFreeFrame()
 }
 
 
+void VB_WorldVCInit()
+{
+    //clear out previous buffer
+	qglDeleteBuffersARB(1, &vboId);
+	totalVBObufferSize = 0;	
+}
+
 void VB_VCInit()
 {
 	int	i;
-
-	//clear out previous buffer
-	qglDeleteBuffersARB(1, &vboId);
+	
+	VB_WorldVCInit ();
 
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 	{
 		if(vcm.vertCacheList[i].id)
 			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
 	}
-
-	totalVBObufferSize = 0;	
 
 	memset(&vcm, 0, sizeof(vcm));
 

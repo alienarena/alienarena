@@ -1410,7 +1410,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 
 	BSP_BeginBuildingLightmaps (loadmodel);
 
-	VB_VCInit();
+	VB_WorldVCInit();
 
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
@@ -2306,11 +2306,18 @@ void R_EndRegistration (void)
 
 /*
 ================
-Mod_Free
+Mod_Free - should be able to handle every model type
 ================
 */
+void MD2_FreeVBO (model_t *mod);
+void IQM_FreeVBO (model_t *mod);
 void Mod_Free (model_t *mod)
 {
+	if (mod->type == mod_alias)
+		MD2_FreeVBO (mod);
+	else if (mod->type == mod_iqm)
+		IQM_FreeVBO (mod);
+	// New model types go here
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));
 }
