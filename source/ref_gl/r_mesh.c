@@ -456,6 +456,8 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		Com_Printf("%s has wrong version number (%i should be %i)",
 				 mod->name, version, ALIAS_VERSION);
 
+	// TODO: we can stop permanently keeping this (change it to normal
+	// Z_Malloc) as soon as shadow volumes are gone.
 	pheader = Hunk_Alloc (LittleLong(pinmodel->ofs_end));
 
 	// byte swap the header fields and sanity check
