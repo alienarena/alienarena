@@ -437,7 +437,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	dstvert_t			*pinst, *poutst;
 	dtriangle_t			*pintri, *pouttri, *tris;
 	daliasframe_t		*pinframe, *poutframe, *pframe;
-	int					*pincmd, *poutcmd;
 	int					version;
 	int					cx;
 	float				s, t;
@@ -540,14 +539,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	mod->type = mod_alias;
 	mod->num_frames = pheader->num_frames;
 	
-	//
-	// load the glcmds
-	//
-	pincmd = (int *) ((byte *)pinmodel + pheader->ofs_glcmds);
-	poutcmd = (int *) ((byte *)pheader + pheader->ofs_glcmds);
-	for (i=0 ; i<pheader->num_glcmds ; i++)
-		poutcmd[i] = LittleLong (pincmd[i]);
-
 	// skin names are not always valid or file may not exist
 	// do not register skins that cannot be found to eliminate extraneous
 	//  file system searching.
