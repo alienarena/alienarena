@@ -408,9 +408,6 @@ typedef struct model_s
 	matrix3x4_t		*outframe;
 	matrix3x4_t		*baseframe;
 	int				num_poses;
-	iqmtriangle_t	*tris;
-	mnormal_t		*normal;
-	mtangent_t		*tangent;
 	unsigned char	*blendindexes;
 	unsigned char	*blendweights;
 	char			skinname[MAX_QPATH];
