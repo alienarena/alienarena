@@ -202,38 +202,33 @@ double degreeToRadian(double degree)
 	return radian;
 }
 
-void IQM_LoadVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
+void IQM_ByteswapVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles)
 {
 	int i;
 
 	if(iqmmodel->numvertexes > 16384)
 		return;
+	
+	for(i = 0; i < iqmmodel->numvertexes*2; i++)
+	{
+		*vtexcoord = LittleFloat (*vtexcoord);
+		vtexcoord++;
+	}
 
-	iqmmodel->vertexes = (mvertex_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mvertex_t));
-	iqmmodel->normal = (mnormal_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mnormal_t));
-	iqmmodel->tangent = (mtangent_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mtangent_t));
-
-	for(i=0; i<iqmmodel->numvertexes; i++){
-		VectorSet(iqmmodel->vertexes[i].position,
-
-					LittleFloat(vposition[0]),
-					LittleFloat(vposition[1]),
-					LittleFloat(vposition[2]));
-
-		VectorSet(iqmmodel->normal[i].dir,
-					LittleFloat(vnormal[0]),
-					LittleFloat(vnormal[1]),
-					LittleFloat(vnormal[2]));
-
-		Vector4Set(iqmmodel->tangent[i].dir,
-					LittleFloat(vtangent[0]),
-					LittleFloat(vtangent[1]),
-					LittleFloat(vtangent[2]),
-					LittleFloat(vtangent[3]));
-
-		vposition	+=3;
-		vnormal		+=3;
-		vtangent	+=4;
+	for(i = 0; i < iqmmodel->numvertexes*3; i++)
+	{
+		*vposition = LittleFloat (*vposition);
+		*vnormal = LittleFloat (*vnormal);
+		*vtriangles = LittleLong (*vtriangles);
+		vposition++;
+		vnormal++;
+		vtriangles++;
+	}
+	
+	for (i = 0; i < iqmmodel->numvertexes*4; i++)
+	{
+		*vtangent = LittleFloat (*vtangent);
+		vtangent++;
 	}
 }
 
@@ -323,13 +318,13 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	return true;
 }
 
-void IQM_LoadVBO (model_t *mod)
+void IQM_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles)
 {
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->vertexes, VBO_STORE_XYZ, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), mod->st, VBO_STORE_ST, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), mod->normal, VBO_STORE_NORMAL, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), mod->tangent, VBO_STORE_TANGENT, mod);
-	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), mod->tris, VBO_STORE_INDICES, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
+	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
 }
 
 void IQM_FindVBO (model_t *mod)
@@ -361,6 +356,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	iqmheader_t *header;
 	int i, j, k;
 	const int *inelements;
+	int *vtriangles = NULL;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
 	//unsigned char *vblendweights = NULL;
 	unsigned char *pbase;
@@ -707,18 +703,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		VectorCopy( tmp, mod->bbox[i] );
 	}
 
-	// load triangle data
-	inelements = (const int *) (pbase + header->ofs_triangles);
-
-	mod->tris = (iqmtriangle_t*)Hunk_Alloc(header->num_triangles * sizeof(iqmtriangle_t));
-
-	for (i = 0;i < (int)header->num_triangles;i++)
-	{
-		mod->tris[i].vertex[0] = LittleLong(inelements[0]);
-		mod->tris[i].vertex[1] = LittleLong(inelements[1]);
-		mod->tris[i].vertex[2] = LittleLong(inelements[2]);
-		inelements += 3;
-	}
+	vtriangles = (const int *) (pbase + header->ofs_triangles);
 
 	// load triangle neighbors
 	// TODO: we can remove this when shadow volumes are gone, and simply not
@@ -738,20 +723,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 	}
 
-	// load vertex data
-	IQM_LoadVertexArrays(mod, vposition, vnormal, vtangent);
-
-	// load texture coodinates
-	mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
-	//mod->blendweights = (float *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(float));
-
-	for (i = 0;i < (int)header->num_vertexes;i++)
-	{
-		mod->st[i].s = LittleFloat(vtexcoord[0]);
-		mod->st[i].t = LittleFloat(vtexcoord[1]);
-
-		vtexcoord+=2;
-	}
+	IQM_ByteswapVertexArrays(mod, vposition, vnormal, vtangent, vtexcoord, vtriangles);
 
 	/*
 	 * get skin pathname from <model>.skin file and initialize skin
@@ -801,7 +773,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	
 	// load the VBO data
 
-	IQM_LoadVBO (mod);
+	IQM_LoadVBO (mod, vposition, vnormal, vtangent, vtexcoord, vtriangles);
 	
 	return true;
 }
