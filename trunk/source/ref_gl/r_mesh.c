@@ -354,7 +354,7 @@ void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int fram
 }
 
 
-void MD2_LoadVBO (model_t *mod, dmdl_t *pheader)
+void MD2_LoadVBO (model_t *mod, dmdl_t *pheader, fstvert_t *st)
 {
 	int i, j, k, framenum;
 	
@@ -372,7 +372,7 @@ void MD2_LoadVBO (model_t *mod, dmdl_t *pheader)
 			((byte *)pheader + pheader->ofs_frames + framenum * pheader->framesize);
 		verts = frame->verts;
 		
-		MD2_PopulateNormalsTangentsArrays (pheader, mod->st, framenum);
+		MD2_PopulateNormalsTangentsArrays (pheader, st, framenum);
 	
 		for (i=0; i<pheader->num_tris; i++)
 		{
@@ -386,8 +386,8 @@ void MD2_LoadVBO (model_t *mod, dmdl_t *pheader)
 				for (k = 0; k < 3; k++)
 					VertexArray[va][k] = verts[index_xyz].v[k] * frame->scale[k] + frame->translate[k];
 			
-				TexCoordArray[va][0] = mod->st[index_st].s;
-				TexCoordArray[va][1] = mod->st[index_st].t;
+				TexCoordArray[va][0] = st[index_st].s;
+				TexCoordArray[va][1] = st[index_st].t;
 			
 				va++;
 			}
@@ -576,7 +576,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 	cx = pheader->num_st * sizeof(fstvert_t);
-	mod->st = st = (fstvert_t*)Hunk_Alloc (cx);
+	st = (fstvert_t*)Z_Malloc (cx);
 
 	// Calculate texcoords for triangles
 	iw = 1.0 / pheader->skinwidth;
@@ -633,7 +633,9 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		VectorCopy( tmp, mod->bbox[i] );
 	}	
 	
-	MD2_LoadVBO (mod, pheader);
+	MD2_LoadVBO (mod, pheader, st);
+	
+	Z_Free (st);
 }
 
 //==============================================================

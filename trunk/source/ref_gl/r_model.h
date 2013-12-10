@@ -414,9 +414,6 @@ typedef struct model_s
 	char			*jointname;
 	//end iqm
 
-	//md2 only
-	fstvert_t	*st;
-	
 	//md2 and iqm.
 	int				num_triangles;
 	// TODO: we can remove this when shadow volumes are gone.
