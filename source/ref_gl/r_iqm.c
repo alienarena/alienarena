@@ -529,8 +529,11 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			mod->joints[i].rotation[3] = LittleFloat(joint2[i].rotation[3]);
 		}
 	}
-	//these don't need to be a part of mod - remember to free them
+	
+	// needed for bending the in other ways besides the built-in animation.
 	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
+	
+	// this doesn't need to be a part of mod - remember to free them
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
 
 	for(i = 0; i < (int)header->num_joints; i++)
