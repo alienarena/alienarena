@@ -530,10 +530,11 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 	}
 	
-	// needed for bending the in other ways besides the built-in animation.
+	// needed for bending the model in other ways besides the built-in
+	// animation.
 	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
 	
-	// this doesn't need to be a part of mod - remember to free them
+	// this doesn't need to be a part of mod - remember to free it
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
 
 	for(i = 0; i < (int)header->num_joints; i++)
@@ -652,30 +653,24 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	// load bounding box data
 	if (header->ofs_bounds)
 	{
-		float xyradius = 0, radius = 0;
+		float radius = 0;
 		bounds = (iqmbounds_t *) (pbase + header->ofs_bounds);
 		VectorClear(mod->mins);
 		VectorClear(mod->maxs);
 		for (i = 0; i < (int)header->num_frames;i++)
 		{
-			bounds[i].mins[0] = LittleFloat(bounds[i].mins[0]);
-			bounds[i].mins[1] = LittleFloat(bounds[i].mins[1]);
-			bounds[i].mins[2] = LittleFloat(bounds[i].mins[2]);
-			bounds[i].maxs[0] = LittleFloat(bounds[i].maxs[0]);
-			bounds[i].maxs[1] = LittleFloat(bounds[i].maxs[1]);
-			bounds[i].maxs[2] = LittleFloat(bounds[i].maxs[2]);
-			bounds[i].xyradius = LittleFloat(bounds[i].xyradius);
+			for (j = 0; j < 3; j++)
+			{
+				bounds[i].mins[j] = LittleFloat(bounds[i].mins[j]);
+				if (mod->mins[j] > bounds[i].mins[j])
+					mod->mins[j] = bounds[i].mins[j];
+				
+				bounds[i].maxs[j] = LittleFloat(bounds[i].maxs[j]);
+				if (mod->maxs[j] < bounds[i].maxs[j])
+					mod->maxs[j] = bounds[i].maxs[j];
+			}
+			
 			bounds[i].radius = LittleFloat(bounds[i].radius);
-
-			if (mod->mins[0] > bounds[i].mins[0]) mod->mins[0] = bounds[i].mins[0];
-			if (mod->mins[1] > bounds[i].mins[1]) mod->mins[1] = bounds[i].mins[1];
-			if (mod->mins[2] > bounds[i].mins[2]) mod->mins[2] = bounds[i].mins[2];
-			if (mod->maxs[0] < bounds[i].maxs[0]) mod->maxs[0] = bounds[i].maxs[0];
-			if (mod->maxs[1] < bounds[i].maxs[1]) mod->maxs[1] = bounds[i].maxs[1];
-			if (mod->maxs[2] < bounds[i].maxs[2]) mod->maxs[2] = bounds[i].maxs[2];
-
-			if (bounds[i].xyradius > xyradius)
-				xyradius = bounds[i].xyradius;
 			if (bounds[i].radius > radius)
 				radius = bounds[i].radius;
 		}
