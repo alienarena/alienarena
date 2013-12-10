@@ -63,7 +63,7 @@ extern void R_ShadowBlend(float alpha);
 vec3_t ShadowArray[MAX_SHADOW_VERTS];
 static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
-static vec4_t shadow_lerped[MAX_VERTS];
+static vec3_t shadow_lerped[MAX_VERTS];
 
 void R_InitShadowSubsystem(void)
 {	
@@ -98,7 +98,7 @@ void SHD_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, flo
 {
     int i;
 
-    for (i = 0; i < nverts; i++, v++, ov++, lerp += 4) {
+    for (i = 0; i < nverts; i++, v++, ov++, lerp += 3) {
         lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
         lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
         lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
@@ -115,18 +115,9 @@ void SHD_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightO
 
 	for (i = 0; i < paliashdr->num_tris; i++, tris++)
 	{
-		if(lerp)
-		{
-			v0 = (float*)shadow_lerped[tris->index_xyz[0]];
-			v1 = (float*)shadow_lerped[tris->index_xyz[1]];
-			v2 = (float*)shadow_lerped[tris->index_xyz[2]];
-		}
-		else
-		{
-			v0 = (float*)currentmodel->vertexes[tris->index_xyz[0]].position;
-			v1 = (float*)currentmodel->vertexes[tris->index_xyz[1]].position;
-			v2 = (float*)currentmodel->vertexes[tris->index_xyz[2]].position;
-		}
+		v0 = (float*)shadow_lerped[tris->index_xyz[0]];
+		v1 = (float*)shadow_lerped[tris->index_xyz[1]];
+		v2 = (float*)shadow_lerped[tris->index_xyz[2]];
 
 		//Calculate shadow volume triangle normals
 		VectorSubtract( v0, v1, dir0 );
@@ -174,16 +165,8 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		{
 			for (j = 0; j < 3; j++)
 			{
-				if(lerp)
-				{
-					v0[j] = shadow_lerped[tris->index_xyz[1]][j];
-					v1[j] = shadow_lerped[tris->index_xyz[0]][j];
-				}
-				else
-				{
-					v0[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
-					v1[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
-				}
+				v0[j] = shadow_lerped[tris->index_xyz[1]][j];
+				v1[j] = shadow_lerped[tris->index_xyz[0]][j];
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -209,16 +192,8 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		{
 			for (j = 0; j < 3; j++)
 			{
-				if(lerp)
-				{
-					v0[j] = shadow_lerped[tris->index_xyz[2]][j];
-					v1[j] = shadow_lerped[tris->index_xyz[1]][j];
-				}
-				else
-				{
-					v0[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
-					v1[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
-				}
+				v0[j] = shadow_lerped[tris->index_xyz[2]][j];
+				v1[j] = shadow_lerped[tris->index_xyz[1]][j];
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -243,16 +218,8 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		{
 			for (j = 0; j < 3; j++)
 			{
-				if(lerp)
-				{
-					v0[j] = shadow_lerped[tris->index_xyz[0]][j];
-					v1[j] = shadow_lerped[tris->index_xyz[2]][j];
-				}
-				else
-				{
-					v0[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
-					v1[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
-				}
+				v0[j] = shadow_lerped[tris->index_xyz[0]][j];
+				v1[j] = shadow_lerped[tris->index_xyz[2]][j];
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -285,18 +252,9 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 
 		for (j = 0; j < 3; j++)
 		{
-			if(lerp)
-			{
-				v0[j] = shadow_lerped[tris->index_xyz[0]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[1]][j];
-				v2[j] = shadow_lerped[tris->index_xyz[2]][j];
-			}
-			else
-			{
-				v0[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
-				v1[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
-				v2[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
-			}
+			v0[j] = shadow_lerped[tris->index_xyz[0]][j];
+			v1[j] = shadow_lerped[tris->index_xyz[1]][j];
+			v2[j] = shadow_lerped[tris->index_xyz[2]][j];
 		}
 		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
 		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
@@ -308,20 +266,11 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		shadow_vert +=3;
 
 		// rear cap (with flipped winding order)
-			for (j = 0; j < 3; j++)
+		for (j = 0; j < 3; j++)
 		{
-				if(lerp)
-			{
-				v0[j] = shadow_lerped[tris->index_xyz[0]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[1]][j];
-				v2[j] = shadow_lerped[tris->index_xyz[2]][j];
-			}
-				else
-			{
-				v0[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
-				v1[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
-				v2[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
-			}
+			v0[j] = shadow_lerped[tris->index_xyz[0]][j];
+			v1[j] = shadow_lerped[tris->index_xyz[1]][j];
+			v2[j] = shadow_lerped[tris->index_xyz[2]][j];
 
 			v0[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
 			v1[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
@@ -357,7 +306,7 @@ void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboole
 
 	if(VectorCompare(lightdir, vec3_origin))
 		return;
-
+	
 	if(gl_state.separateStencil)
 	{
 		qglDisable(GL_CULL_FACE);
@@ -505,8 +454,8 @@ void SHD_DrawShadowVolume()
 			frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
 		verts = v = frame->verts;
 
-		if(lerped) {
-
+		if(lerped)
+		{
 			if ( (currententity->oldframe >= paliashdr->num_frames)
 				|| (currententity->oldframe < 0)) {
 
@@ -546,6 +495,15 @@ void SHD_DrawShadowVolume()
 			lerp = shadow_lerped[0];
 
 			SHD_LerpVerts(paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
+		}
+		else
+		{
+			for (i = 0; i < paliashdr->num_xyz; i++)
+			{
+				int j;
+				for (j = 0; j < 3; j++)
+					shadow_lerped[i][j] = frame->translate[j] + frame->scale[j] * v[i].v[j];
+			}
 		}
 	}
 
