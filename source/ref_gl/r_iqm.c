@@ -55,20 +55,6 @@ void Vec4_CompleteQuatW (vec4_t q)
 
 //these matrix functions should be moved to matrixlib.c or similar
 
-void Matrix3x4_TransformNormal(mnormal_t *out, matrix3x4_t mat, const mnormal_t in)
-{
-	out->dir[0] = DotProduct(mat.a, in.dir);
-	out->dir[1] = DotProduct(mat.b, in.dir);
-	out->dir[2] = DotProduct(mat.c, in.dir);
-}
-
-void Matrix3x4_TransformTangent(mtangent_t *out, matrix3x4_t mat, const mtangent_t in)
-{
-	out->dir[0] = DotProduct(mat.a, in.dir);
-	out->dir[1] = DotProduct(mat.b, in.dir);
-	out->dir[2] = DotProduct(mat.c, in.dir);
-}
-
 void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in)
 {
 	vec3_t a, b, c, trans;
@@ -142,24 +128,6 @@ void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale)
 	Vector4Scale(in.c, scale, out->c);
 }
 
-void Matrix3x4_ScaleAdd (matrix3x4_t *out, matrix3x4_t *base, float scale, matrix3x4_t *add)
-{
-   out->a[0] = base->a[0] * scale + add->a[0];
-   out->a[1] = base->a[1] * scale + add->a[1];
-   out->a[2] = base->a[2] * scale + add->a[2];
-   out->a[3] = base->a[3] * scale + add->a[3];
-
-   out->b[0] = base->b[0] * scale + add->b[0];
-   out->b[1] = base->b[1] * scale + add->b[1];
-   out->b[2] = base->b[2] * scale + add->b[2];
-   out->b[3] = base->b[3] * scale + add->b[3];
-
-   out->c[0] = base->c[0] * scale + add->c[0];
-   out->c[1] = base->c[1] * scale + add->c[1];
-   out->c[2] = base->c[2] * scale + add->c[2];
-   out->c[3] = base->c[3] * scale + add->c[3];
-}
-
 void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 {
 	Vector4Add(mat1.a, mat2.a, out->a);
@@ -179,13 +147,6 @@ void Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
 	Vector4Copy(in.a, out->a);
 	Vector4Copy(in.b, out->b);
 	Vector4Copy(in.c, out->c);
-}
-
-void Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
-{
-	out->position[0] = DotProduct(mat.a, in.position) + mat.a[3];
-    out->position[1] = DotProduct(mat.b, in.position) + mat.b[3];
-    out->position[2] = DotProduct(mat.c, in.position) + mat.c[3];
 }
 
 void Matrix3x4GenRotate(matrix3x4_t *out, float angle, const vec3_t axis)
