@@ -195,13 +195,6 @@ void Matrix3x4GenFromODE(matrix3x4_t *out, const dReal *rot, const dReal *trans)
 	Vector4Set(out->c, rot[8], rot[9], rot[10], trans[2]);
 }
 
-double degreeToRadian(double degree)
-{
-	double radian = 0;
-	radian = degree * (pi/180);
-	return radian;
-}
-
 void IQM_ByteswapVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles)
 {
 	int i;
@@ -900,8 +893,8 @@ void IQM_AnimateFrame (void)
 	float modelpitch;
 	float modelroll;
 	
-	modelpitch = degreeToRadian(currententity->angles[PITCH]); 
-	modelroll = degreeToRadian(currententity->angles[ROLL]);
+	modelpitch = DEG2RAD(currententity->angles[PITCH]); 
+	modelroll = DEG2RAD(currententity->angles[ROLL]);
 	
 	curframe = IQM_SelectFrame ();
 	nextframe = IQM_NextFrame (currententity->frame);
