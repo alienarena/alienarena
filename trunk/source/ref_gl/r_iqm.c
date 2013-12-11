@@ -32,9 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
 
-static vec3_t NormalsArray[MAX_VERTICES];
-static vec4_t TangentsArray[MAX_VERTICES];
-
 static vertCache_t	*vbo_st;
 static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
