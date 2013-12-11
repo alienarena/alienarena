@@ -26,8 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_ragdoll.h"
 #include "r_lodcalc.h"
 
-#define RAGDOLLVBO 1
-
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
@@ -37,9 +35,6 @@ static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
 static vertCache_t *vbo_tangents;
 static vertCache_t *vbo_indices;
-
-extern  void Q_strncpyz( char *dest, const char *src, size_t size );
-extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
 // This function will compute the quaternion's W based on its X, Y, and Z.)
 void Vec4_CompleteQuatW (vec4_t q)
