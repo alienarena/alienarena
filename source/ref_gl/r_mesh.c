@@ -24,8 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "r_local.h"
-#include "r_ragdoll.h"
-#include "r_lodcalc.h"
 
 /*
 =============================================================
