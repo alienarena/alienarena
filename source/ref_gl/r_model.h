@@ -318,7 +318,31 @@ typedef struct {
 
 } mragdoll_t;
 
-typedef enum {mod_bad, mod_brush, mod_alias, mod_iqm } modtype_t;
+typedef enum {mod_bad, mod_brush, mod_alias, mod_iqm, num_modtypes} modtype_t;
+
+// This array is a look-up table for the traits of various mesh formats.
+static struct 
+{
+	// Morph target animation is what the MD2 format uses exclusively. Vertex
+	// positions, normals, and tangents are stored in VBOs for every frame
+	// and interpolated by the vertex shader. It's possible to combine this
+	// with skeletal animation, although we don't support any formats that do
+	// this yet.
+	qboolean morphtarget; 
+	
+	// If true, the blendweights and blendindexes vertex attributes are used.
+	qboolean skeletal;
+	
+	// True if the vertex data is indexed. If so, an IBO is used.
+	qboolean indexed;
+} modtypes[num_modtypes] = 
+{
+	{false, false, false},	// mod_bad- this is ignored
+	{false, false, false},	// mod_brush- BSP brush models- this is ignored
+	{true, false, false},	// mod_alias- MD2 models
+	{false, true, true},	// mod_iqm- IQM models
+	// New model types go here
+};
 
 typedef enum	{	simplecolor_white, simplecolor_green, simplecolor_blue, 
 					simplecolor_purple	} simplecolor_t;

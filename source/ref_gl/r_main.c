@@ -427,13 +427,18 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 	return false;
 }
 
+// should be able to handle every mesh type
 void R_RotateForEntity (entity_t *e)
 {
     qglTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
 
     qglRotatef (e->angles[YAW],		0, 0, 1);
-    qglRotatef (e->angles[PITCH],	0, 1, 0);
-    qglRotatef (e->angles[ROLL],	1, 0, 0);
+    // pitch and roll are handled by IQM_AnimateFrame. 
+    if (e->model == NULL || (e->flags & RF_WEAPONMODEL) || e->model->type != mod_iqm)
+    {
+		qglRotatef (e->angles[PITCH],	0, 1, 0);
+		qglRotatef (e->angles[ROLL],	1, 0, 0);
+	}
 }
 
 /*

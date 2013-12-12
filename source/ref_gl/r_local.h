@@ -591,8 +591,7 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
-extern void		MD2_DrawCaster (void);
-extern void		IQM_DrawCaster (void);
+extern void		R_Mesh_DrawCaster (void);
 extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);

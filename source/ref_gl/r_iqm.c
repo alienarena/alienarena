@@ -29,12 +29,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
 
-static vertCache_t	*vbo_st;
-static vertCache_t	*vbo_xyz;
-static vertCache_t	*vbo_normals;
-static vertCache_t *vbo_tangents;
-static vertCache_t *vbo_indices;
-
 // This function will compute the quaternion's W based on its X, Y, and Z.)
 void Vec4_CompleteQuatW (vec4_t q)
 {
@@ -304,33 +298,11 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 
 void IQM_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles)
 {
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
 	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
+	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
 	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
 	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
 	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
-}
-
-void IQM_FindVBO (model_t *mod)
-{
-	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, mod);
-	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
-	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, mod);
-	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, mod);
-	vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
-	if (vbo_xyz && vbo_st && vbo_normals && vbo_tangents && vbo_indices)
-		return;
-	Com_Error (ERR_DROP, "Cannot find VBO for %s\n", mod->name);
-}
-
-void IQM_FreeVBO (model_t *mod)
-{
-	IQM_FindVBO (mod);
-	R_VCFree (vbo_xyz);
-	R_VCFree (vbo_st);
-	R_VCFree (vbo_normals);
-	R_VCFree (vbo_tangents);
-	R_VCFree (vbo_indices);
 }
 
 // NOTE: this should be the only function that needs to care what version the
@@ -1000,50 +972,6 @@ void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
 	}
 }
 
-void IQM_DrawVBO (void)
-{
-	IQM_FindVBO (currentmodel);
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	GL_BindVBO(vbo_xyz);
-	qglVertexPointer(3, GL_FLOAT, 0, 0);
-
-	KillFlags |= KILL_TMU0_POINTER;
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	GL_BindVBO(vbo_st);
-	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
-
-	KillFlags |= KILL_NORMAL_POINTER;
-	qglEnableClientState( GL_NORMAL_ARRAY );
-	GL_BindVBO(vbo_normals);
-	qglNormalPointer(GL_FLOAT, 0, 0);
-
-	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-	GL_BindVBO(vbo_tangents);
-	glVertexAttribPointerARB (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, 0, 0);
-		
-	GL_BindVBO(NULL);
-
-	GL_BindIBO(vbo_indices);								
-
-	glEnableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-	glEnableVertexAttribArrayARB(ATTR_BONES_IDX);
-	glVertexAttribPointerARB(ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(unsigned char)*4, currentmodel->blendweights);
-	glVertexAttribPointerARB(ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(unsigned char)*4, currentmodel->blendindexes); 				
-	
-	qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
-	
-	GL_BindIBO(NULL);
-	
-	glDisableVertexAttribArrayARB(ATTR_TANGENT_IDX);
-	glDisableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-	glDisableVertexAttribArrayARB(ATTR_BONES_IDX);
-
-	R_KillVArrays ();
-
-}
-
 qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
 
 qboolean IQM_CullModel( void )
@@ -1121,49 +1049,7 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 		return false;
 }
 
-void IQM_DrawCasterFrame ()
-{
-	//just use a very basic shader for this instead of the normal mesh shader
-	glUseProgramObjectARB( g_blankmeshprogramObj );
-
-	//send outframe, blendweights, and blendindexes to shader
-	glUniformMatrix3x4fvARB( g_location_bm_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-	
-	//tell it to use IQM skeletal animation
-	glUniform1iARB(g_location_bm_useGPUanim, 1);
-
-	IQM_DrawVBO ();
-
-	glUseProgramObjectARB( 0 );
-}
-
-void IQM_DrawCaster ( void )
-{
-	vec3_t		sv_angles;
-
-	if(currententity->team) //don't draw flag models, handled by sprites
-		return;
-
-	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
-		return;
-
-	if ( currententity->flags & RF_SHELL_ANY ) //no shells
-		return;
-	
-	qglPushMatrix ();
-	
-	IQM_AnimateFrame();
-
-	VectorCopy(currententity->angles, sv_angles);
-	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
-	R_RotateForEntity (currententity);
-	VectorCopy(sv_angles, currententity->angles);
-
-	IQM_DrawCasterFrame();
-
-	qglPopMatrix();
-}
-
+void R_Mesh_DrawCasterFrame (float backlerp, qboolean lerped);
 void IQM_DrawRagDollCaster ( int RagDollID )
 {
 	if ( RGD_CullRagDolls( RagDollID ) )
@@ -1175,7 +1061,7 @@ void IQM_DrawRagDollCaster ( int RagDollID )
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
 
-	IQM_DrawCasterFrame();
+	R_Mesh_DrawCasterFrame (0, false);
 
 	qglPopMatrix();
 }
