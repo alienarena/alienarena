@@ -331,6 +331,8 @@ static struct
 	qboolean morphtarget; 
 	
 	// If true, the blendweights and blendindexes vertex attributes are used.
+	// NOTE: this is still basically IQM-specific, we're not trying to
+	// generalize across every possible skeletal format-- yet.
 	qboolean skeletal;
 	
 	// True if the vertex data is indexed. If so, an IBO is used.
