@@ -426,7 +426,7 @@ void SHD_DrawShadowVolume()
     int i;
 	qboolean lerped=false;
 
-	if(currentmodel->type == mod_alias)
+	if(currentmodel->type == mod_md2)
 	{
 		daliasframe_t *frame, *oldframe;
 		dtrivertx_t *v, *ov, *verts;
@@ -512,7 +512,7 @@ void SHD_DrawShadowVolume()
 	qglTranslatef(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 	qglRotatef(currententity->angles[1], 0, 0, 1);
 
-	if(currentmodel->type == mod_alias)
+	if(currentmodel->type == mod_md2)
 		SHD_DrawAliasShadowVolume(paliashdr, lerped);
 	
 	qglEnable(GL_TEXTURE_2D);
@@ -568,7 +568,7 @@ void R_CastShadow(void)
 		if (!currentmodel)
 			continue;
 
-		if (currentmodel->type != mod_alias)
+		if (currentmodel->type != mod_md2)
 			continue;
 		
 		if (cl_simpleitems->integer && currentmodel->simple_texnum != 0)

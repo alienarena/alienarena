@@ -556,7 +556,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 
 	}
 
-	mod->type = mod_alias;
+	mod->type = mod_md2;
 	mod->num_frames = pheader->num_frames;
 	
 	// skin names are not always valid or file may not exist
@@ -891,7 +891,7 @@ static qboolean R_Mesh_CullModel (void)
 			return true;
 	}
 	
-	if (currentmodel->type == mod_alias)
+	if (currentmodel->type == mod_md2)
 		return MD2_CullModel ();
 	else if (currentmodel->type == mod_iqm)
 		return IQM_CullModel ();
@@ -1428,7 +1428,7 @@ void R_Mesh_Draw ( void )
 	if ((currententity->flags & RF_VIEWERMODEL))
 		return;
 	
-	if (currentmodel->type == mod_alias)
+	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();
 	else if (currentmodel->type == mod_iqm)
 		IQM_AnimateFrame ();
@@ -1564,7 +1564,7 @@ void R_Mesh_DrawCaster ( void )
 	qglPushMatrix ();
 	R_RotateForEntity (currententity);
 	
-	if (currentmodel->type == mod_alias)
+	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();
 	else if (currentmodel->type == mod_iqm)
 		IQM_AnimateFrame ();
