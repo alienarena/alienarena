@@ -553,7 +553,7 @@ void R_DrawEntitiesOnList (void)
 		}
 		switch (currentmodel->type)
 		{
-		    case mod_alias:
+		    case mod_md2:
 		    case mod_iqm:
 		        R_Mesh_Draw ();
 				break;
@@ -603,7 +603,7 @@ void R_DrawEntitiesOnList (void)
 		}
 		switch (currentmodel->type)
 		{
-		    case mod_alias:
+		    case mod_md2:
 		    case mod_iqm:
 		        R_Mesh_Draw ();
 				break;
@@ -663,7 +663,7 @@ void R_DrawViewEntitiesOnList (void)
 		}
 		switch (currentmodel->type)
 		{
-		case mod_alias:
+		case mod_md2:
 		case mod_iqm:
 		    R_Mesh_Draw ();
 			break;
@@ -709,7 +709,7 @@ void R_DrawViewEntitiesOnList (void)
 		}
 		switch (currentmodel->type)
 		{
-		case mod_alias:
+		case mod_md2:
 		case mod_iqm:
 		    R_Mesh_Draw ();
 			break;

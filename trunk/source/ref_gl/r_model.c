@@ -558,7 +558,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 		if (!strcmp (shortname, nameShortname) )
 		{
-			if (mod->type == mod_alias || mod->type == mod_iqm)
+			if (mod->type == mod_md2 || mod->type == mod_iqm)
 			{
 				// Make sure models scripts are definately reloaded between maps
 				image_t *img;
@@ -2251,7 +2251,7 @@ struct model_s *R_RegisterModel (char *name)
 		mod->registration_sequence = registration_sequence;
 
 		// register any images used by the models
-		if (mod->type == mod_alias)
+		if (mod->type == mod_md2)
 		{
 			pheader = (dmdl_t *)mod->extradata;
 			for (i=0 ; i<pheader->num_skins ; i++)
