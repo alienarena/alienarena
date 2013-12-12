@@ -789,7 +789,7 @@ extern qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 extern void R_DrawINTERQUAKEMODEL(void);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern int IQM_NextFrame(int frame);
-extern void IQM_AnimateRagdoll(int RagDollID, int shellEffect);
+extern void IQM_AnimateRagdoll(int RagDollID);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_DrawShadow(vec3_t origin);
 extern qboolean IQM_CullModel( void );
