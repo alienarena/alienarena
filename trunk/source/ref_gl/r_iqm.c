@@ -143,7 +143,7 @@ void Matrix3x4GenRotate(matrix3x4_t *out, float angle, const vec3_t axis)
 	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, 0);
 }
 
-void Matrix3x4ForEntity(matrix3x4_t *out, entity_t *ent, float z)
+void Matrix3x4ForEntity(matrix3x4_t *out, entity_t *ent)
 {
     matrix3x4_t rotmat;
     vec3_t rotaxis;
@@ -657,7 +657,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		VectorCopy( tmp, mod->bbox[i] );
 	}
 
-	vtriangles = (const int *) (pbase + header->ofs_triangles);
+	vtriangles = (int *) (pbase + header->ofs_triangles);
 
 	// load triangle neighbors
 	// TODO: we can remove this when shadow volumes are gone, and simply not
@@ -932,7 +932,7 @@ void IQM_AnimateFrame (void)
 	}
 }
 
-void IQM_AnimateRagdoll(int RagDollID, int shellEffect)
+void IQM_AnimateRagdoll(int RagDollID)
 {
 	//we only deal with one frame
 
@@ -1057,7 +1057,7 @@ void IQM_DrawRagDollCaster ( int RagDollID )
 
     qglPushMatrix ();
 
-	IQM_AnimateRagdoll(RagDollID, false);
+	IQM_AnimateRagdoll(RagDollID);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
 

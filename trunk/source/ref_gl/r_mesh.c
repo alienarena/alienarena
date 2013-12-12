@@ -450,7 +450,7 @@ Mod_LoadMD2Model
 */
 void Mod_LoadMD2Model (model_t *mod, void *buffer)
 {
-	int					i, j, k, l;
+	int					i, j;
 	dmdl_t				*pinmodel, *pheader;
 	dstvert_t			*pinst, *poutst;
 	dtriangle_t			*pintri, *pouttri, *tris;
@@ -460,9 +460,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	float				s, t;
 	float				iw, ih;
 	fstvert_t			*st;
-	daliasframe_t		*frame;
-	dtrivertx_t			*verts;
-	byte				*tangents;
 	char *pstring;
 	int count;
 	image_t *image;

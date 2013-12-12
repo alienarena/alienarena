@@ -1144,7 +1144,7 @@ void R_RenderAllRagdolls ( void )
 
 			R_GenerateRagdollShadow(RagDollID);
 
-			IQM_AnimateRagdoll(RagDollID, shellEffect);
+			IQM_AnimateRagdoll(RagDollID);
 
 			// HACK: This is a bit wasteful, but it allows us to reuse code
 			// that expects these values to be in an entity_t struct.
