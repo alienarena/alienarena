@@ -196,28 +196,51 @@ V_TestEntities
 If cl_testentities is set, create 32 player models
 ================
 */
+extern struct model_s *Mod_ForName (char *name, qboolean crash);
 void V_TestEntities (void)
 {
 	int			i, j;
 	float		f, r;
 	entity_t	*ent;
+	struct model_s		*mod;
+	struct image_s		*skin;
 
-	r_numentities = 32;
 	memset (r_entities, 0, sizeof(r_entities));
+	
+	if (cl_testentities->integer)
+	{
+		mod = cl.baseclientinfo.model;
+		skin = cl.baseclientinfo.skin;
+		r_numentities = 32;
+	}
+	else
+	{
+		mod = Mod_ForName (cl_testentities->string, false);
+		skin = NULL;
+		r_numentities = 1;
+	}
 
 	for (i=0 ; i<r_numentities ; i++)
 	{
 		ent = &r_entities[i];
 
-		r = 64 * ( (i%4) - 1.5 );
-		f = 64 * (i/4) + 128;
+		if (cl_testentities->integer)
+		{
+			r = 64 * ( (i%4) - 1.5 );
+			f = 64 * (i/4) + 128;
+		}
+		else
+		{
+			r = 0;
+			f = 128;
+		}
 
 		for (j=0 ; j<3 ; j++)
 			ent->origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j]*f +
 			cl.v_right[j]*r;
 
-		ent->model = cl.baseclientinfo.model;
-		ent->skin = cl.baseclientinfo.skin;
+		ent->model = mod;
+		ent->skin = skin;
 	}
 }
 
@@ -843,7 +866,7 @@ void V_RenderView( float stereo_separation )
 
 		if (cl_testparticles->value)
 			V_TestParticles ();
-		if (cl_testentities->value)
+		if (strcmp (cl_testentities->string, "0"))
 			V_TestEntities ();
 		if (cl_testlights->value)
 			V_TestLights ();
