@@ -327,9 +327,9 @@ void SM_SetTextureMatrix( qboolean mapnum )
 
 	qglMatrixMode(GL_TEXTURE);
 	if(mapnum)
-	    GL_MBind (6, r_depthtexture2->texnum);
+		GL_MBind (6, r_depthtexture2->texnum);
 	else
-	    GL_MBind (7, r_depthtexture->texnum);
+		GL_MBind (7, r_depthtexture->texnum);
 
 	qglLoadIdentity();
 	qglLoadMatrixd(bias);
@@ -716,7 +716,7 @@ void R_DrawDynamicCaster(void)
 	SM_SetupMatrices(dynLight->origin[0],dynLight->origin[1],dynLight->origin[2]+64,dynLight->origin[0],dynLight->origin[1],dynLight->origin[2]-128);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
-    qglPolygonOffset( 0.5f, 0.5f );
+	qglPolygonOffset( 0.5f, 0.5f );
 
 	//render world - very basic geometry
 	R_DrawShadowMapWorld(false, origin);
@@ -732,10 +732,8 @@ void R_DrawDynamicCaster(void)
 		if(!currententity->model)
 			continue;
 
-		if (currententity->model->type != mod_alias && currententity->model->type != mod_iqm)
-		{
+		if (currententity->model->type <= mod_brush) 
 			continue;
-		}
 		
 		if (cl_simpleitems->integer && currententity->model->simple_texnum != 0)
 			continue; //TODO: simple items casting shadows?
@@ -773,18 +771,15 @@ void R_DrawDynamicCaster(void)
 				currentmodel = currententity->lod1;
 		}
 		if (currententity->lod2)
-		    currentmodel = currententity->lod2;
+			currentmodel = currententity->lod2;
 
-		if(currentmodel->type == mod_iqm)
-			IQM_DrawCaster ();
-		else
-			MD2_DrawCaster ();
+		R_Mesh_DrawCaster ();
 	}
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
 		if(RagDoll[RagDollID].destroyed)
-	        continue;
+			continue;
 		
 		//distance from light, if too far, don't render(to do - check against brightness for dist!)
 		VectorSubtract(dynLight->origin, RagDoll[RagDollID].curPos, dist);
@@ -808,9 +803,9 @@ void R_DrawDynamicCaster(void)
 	qglDepthMask (1);		// back to writing
 
 	qglPolygonOffset( 0.0f, 0.0f );
-    qglDisable( GL_POLYGON_OFFSET_FILL );
-    
-    GL_InvalidateTextureState (); // FIXME
+	qglDisable( GL_POLYGON_OFFSET_FILL );
+	
+	GL_InvalidateTextureState (); // FIXME
 
 }
 
@@ -853,9 +848,9 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 
 void R_DrawVegetationCasters ( qboolean forShadows )
 {
-    int		i, k;
+	int		i, k;
 	grass_t *grass;
-    float   scale;
+	float   scale;
 	vec3_t	dir, origin, angle, right, up, corner[4];
 	float	*corner0 = corner[0];
 	float	sway;
@@ -867,7 +862,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
-    for (i=0; i<r_numgrasses; i++, grass++) 
+	for (i=0; i<r_numgrasses; i++, grass++) 
 	{
 		if(!grass->type)
 			continue; //only deal with leaves, grass shadows look kind of bad
@@ -991,7 +986,7 @@ void R_DrawVegetationCaster(void)
 	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2]);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
-    qglPolygonOffset( 0.5f, 0.5f );
+	qglPolygonOffset( 0.5f, 0.5f );
 
 	//render vegetation
 	R_DrawVegetationCasters(true); 
@@ -1001,7 +996,7 @@ void R_DrawVegetationCaster(void)
 	qglDepthMask (1);		// back to writing
 
 	qglPolygonOffset( 0.0f, 0.0f );
-    qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
 }
 
@@ -1038,9 +1033,9 @@ void R_DrawEntityCaster(entity_t *ent)
 		return;
 
 	qglMatrixMode(GL_PROJECTION);
-    qglPushMatrix();
-    qglMatrixMode(GL_MODELVIEW);
-    qglPushMatrix();
+	qglPushMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	qglPushMatrix();
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
@@ -1064,7 +1059,7 @@ void R_DrawEntityCaster(entity_t *ent)
 	SM_SetupMatrices(statLightPosition[0],statLightPosition[1],statLightPosition[2]+64,ent->origin[0],ent->origin[1],ent->origin[2]-128);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
-    qglPolygonOffset( 0.5f, 0.5f );	
+	qglPolygonOffset( 0.5f, 0.5f );	
 
 	//we could loop the entities here, and render any nearby models, to make sure we get shadows on the this entity if a mesh is nearby. 
 	//this would be only if we want to do self shadowing, or have player shadows cast on other mesh objects.  At this time, I think that the
@@ -1089,28 +1084,25 @@ void R_DrawEntityCaster(entity_t *ent)
 			currentmodel = currententity->lod1;
 	}
 	if (currententity->lod2)
-	    currentmodel = currententity->lod2;
+		currentmodel = currententity->lod2;
 
-	if(currentmodel->type == mod_iqm)
-		IQM_DrawCaster ();
-	else
-		MD2_DrawCaster ();
+	R_Mesh_DrawCaster ();
 	
 	SM_SetTextureMatrix(1);
 		
 	qglDepthMask (1);		// back to writing
 
 	qglPolygonOffset( 0.0f, 0.0f );
-    qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
 
 	// back to previous screen coordinates
 	R_SetupViewport ();
 
 	qglPopMatrix();
-    qglMatrixMode(GL_PROJECTION);
-    qglPopMatrix();
-    qglMatrixMode(GL_MODELVIEW);	
+	qglMatrixMode(GL_PROJECTION);
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
 	
@@ -1202,9 +1194,9 @@ void R_DrawRagdollCaster(int RagDollID)
 		return;
 
 	qglMatrixMode(GL_PROJECTION);
-    qglPushMatrix();
-    qglMatrixMode(GL_MODELVIEW);
-    qglPushMatrix();
+	qglPushMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	qglPushMatrix();
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
@@ -1228,7 +1220,7 @@ void R_DrawRagdollCaster(int RagDollID)
 	SM_SetupMatrices(statLightPosition[0],statLightPosition[1],statLightPosition[2]+64,RagDoll[RagDollID].origin[0],RagDoll[RagDollID].origin[1],RagDoll[RagDollID].origin[2]-128);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
-    qglPolygonOffset( 0.5f, 0.5f );	
+	qglPolygonOffset( 0.5f, 0.5f );	
 	
 	IQM_DrawRagDollCaster ( RagDollID );
 	
@@ -1237,16 +1229,16 @@ void R_DrawRagdollCaster(int RagDollID)
 	qglDepthMask (1);		// back to writing
 
 	qglPolygonOffset( 0.0f, 0.0f );
-    qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
 
 	// back to previous screen coordinates
 	R_SetupViewport ();
 
 	qglPopMatrix();
-    qglMatrixMode(GL_PROJECTION);
-    qglPopMatrix();
-    qglMatrixMode(GL_MODELVIEW);	
+	qglMatrixMode(GL_PROJECTION);
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
 	

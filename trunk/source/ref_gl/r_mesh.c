@@ -41,7 +41,8 @@ static vec4_t TangentsArray[MAX_VERTICES];
 static vertCache_t	*vbo_st;
 static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
-static vertCache_t *vbo_tangents;
+static vertCache_t	*vbo_tangents;
+static vertCache_t	*vbo_indices;
 
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
@@ -390,37 +391,56 @@ void MD2_LoadVBO (model_t *mod, dmdl_t *pheader, fstvert_t *st)
 				va++;
 			}
 		}
-	
-		vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ+framenum, mod);
-		vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
-		vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL+framenum, mod);
-		vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT+framenum, mod);
+		
+		R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
+		R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ+framenum, mod);
+		R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL+framenum, mod);
+		R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT+framenum, mod);
 	}
 }
 
-void MD2_FindVBO (model_t *mod, int framenum)
+// should be able to handle all mesh types
+void R_Mesh_FindVBO (model_t *mod, int framenum)
 {
+	if (!modtypes[mod->type].morphtarget)
+		framenum = 0;
+
+	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);	
 	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod);
-	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);
 	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod);
 	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod);
-	if (vbo_xyz && vbo_st && vbo_normals && vbo_tangents)
-		return;
-	Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
+	
+	if (!vbo_xyz || !vbo_st || !vbo_normals || !vbo_tangents)
+		Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
+	
+	if (modtypes[mod->type].indexed)
+	{
+		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
+		if (!vbo_indices)
+			Com_Error (ERR_DROP, "Cannot find IBO for %s frame %d\n", mod->name, framenum);
+	}
 }
 
-void MD2_FreeVBO (model_t *mod)
+// should be able to handle all mesh types
+void R_Mesh_FreeVBO (model_t *mod)
 {
-	int framenum;
+	int framenum, maxframes = 1;
 	
-	for (framenum = 0; framenum < mod->num_frames; framenum++)
+	if (modtypes[mod->type].morphtarget)
+		maxframes = mod->num_frames;
+	
+	for (framenum = 0; framenum < maxframes; framenum++)
 	{
-		MD2_FindVBO (mod, framenum);
+		R_Mesh_FindVBO (mod, framenum);
 		R_VCFree (vbo_xyz);
 		R_VCFree (vbo_st);
 		R_VCFree (vbo_normals);
 		R_VCFree (vbo_tangents);
 	}
+	
+	// indices should be the same for every frame
+	if (modtypes[mod->type].indexed)
+		R_VCFree (vbo_indices);
 }
 
 /*
@@ -1110,9 +1130,13 @@ void R_Mesh_SetupGlassRender (void)
 	qglBlendFunc (GL_ONE, GL_ONE);
 }
 
-void MD2_DrawVBO (qboolean lerped)
+// Should be able to handle all mesh types. This is the component of the 
+// mesh rendering process that does not need to care which GLSL shader is
+// being used-- they all support the same vertex data and vertex attributes.
+void R_Mesh_DrawVBO (qboolean lerped)
 {
-	MD2_FindVBO (currentmodel, currententity->frame);
+	// setup
+	R_Mesh_FindVBO (currentmodel, currententity->frame);
 	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
@@ -1133,9 +1157,10 @@ void MD2_DrawVBO (qboolean lerped)
 	GL_BindVBO(vbo_tangents);
 	glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 	
-	if (lerped)
+	// Note: the lerp position is sent separately as a uniform to the GLSL shader.
+	if (modtypes[currentmodel->type].morphtarget && lerped)
 	{
-		MD2_FindVBO (currentmodel, currententity->oldframe);
+		R_Mesh_FindVBO (currentmodel, currententity->oldframe);
 		
 		glEnableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
 		GL_BindVBO (vbo_xyz);
@@ -1152,12 +1177,38 @@ void MD2_DrawVBO (qboolean lerped)
 	
 	GL_BindVBO (NULL);
 	
-	if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
-		qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
+	// Note: bone positions are sent separately as uniforms to the GLSL shader.
+	if (modtypes[currentmodel->type].skeletal)
+	{
+		glEnableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
+		glVertexAttribPointerARB(ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(byte)*4, currentmodel->blendweights);
+		glEnableVertexAttribArrayARB(ATTR_BONES_IDX);
+		glVertexAttribPointerARB(ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(byte)*4, currentmodel->blendindexes);
+	}
 	
+	// render
+	if (modtypes[currentmodel->type].indexed)
+	{
+		GL_BindIBO(vbo_indices);
+		qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
+		GL_BindIBO(NULL);
+	}
+	else
+	{
+		qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
+	}
+	
+	// cleanup
 	R_KillVArrays ();
 	
 	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
+	
+	if (modtypes[currentmodel->type].skeletal)
+	{
+		glDisableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
+		glDisableVertexAttribArrayARB(ATTR_BONES_IDX);
+	}
+	
 	if (lerped)
 	{
 		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
@@ -1165,8 +1216,6 @@ void MD2_DrawVBO (qboolean lerped)
 		glDisableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
 	}
 }
-
-void IQM_DrawVBO (void);
 
 /*
 =============
@@ -1182,6 +1231,8 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	qboolean	lerped;
 	float		frontlerp;
 	
+	int			animtype = 0; // GLSL useGPUanim uniform
+	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
 	
 	VectorCopy(shadelight, lightcolor);
@@ -1191,6 +1242,14 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 
 	if(lerped) 
 		frontlerp = 1.0 - currententity->backlerp;
+	
+	if (modtypes[currentmodel->type].morphtarget && lerped)
+		animtype |= 2;
+	
+	if (modtypes[currentmodel->type].skeletal)
+		animtype |= 1;
+	
+	// XXX: the vertex shader won't actually support a value of 3 yet.
 
 	if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
 	{
@@ -1198,17 +1257,11 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 		
 		R_Mesh_SetupGlassRender ();
 		
-		if (currentmodel->type == mod_alias)
-		{
-			glUniform1iARB (g_location_g_useGPUanim, lerped?2:0);
-			glUniform1fARB (g_location_g_lerp, frontlerp);
-		}
-		else if (currentmodel->type == mod_iqm)
-		{
-			glUniform1iARB (g_location_g_useGPUanim, 1);
+		glUniform1iARB (g_location_g_useGPUanim, animtype);
+		glUniform1fARB (g_location_g_lerp, frontlerp);
+		
+		if (modtypes[currentmodel->type].skeletal)
 			glUniformMatrix3x4fvARB (g_location_g_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-		}
-		// New model types go here
 	}
 	else
 	{
@@ -1232,24 +1285,14 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader);
 		}
 		
-		if (currentmodel->type == mod_alias)
-		{
-			glUniform1iARB (MESH_UNIFORM(useGPUanim), lerped?2:0);
-			glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
-		}
-		else if (currentmodel->type == mod_iqm)
-		{
-			glUniform1iARB(MESH_UNIFORM(useGPUanim), 1);
-			glUniformMatrix3x4fvARB( MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-		}
-		// New model types go here
+		glUniform1iARB (MESH_UNIFORM(useGPUanim), animtype);
+		glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
+		
+		if (modtypes[currentmodel->type].skeletal)
+			glUniformMatrix3x4fvARB (MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 	}
 	
-	if (currentmodel->type == mod_alias)
-		MD2_DrawVBO (lerped);
-	else if (currentmodel->type == mod_iqm)
-		IQM_DrawVBO ();
-	// New model types go here
+	R_Mesh_DrawVBO (lerped);
 	
 	glUseProgramObjectARB( 0 );
 	qglDepthMask(true);
@@ -1378,7 +1421,7 @@ void R_Mesh_Draw ( void )
 	
 	R_GetLightVals(currententity->origin, false);
 
-	if (currentmodel->type == mod_iqm) //TODO: use this for MD2 as well
+	if (currentmodel->type != mod_md2) //TODO: use this for MD2 as well
 		R_GenerateEntityShadow();
 	
 	// Don't render your own avatar unless it's for shadows
@@ -1418,18 +1461,8 @@ void R_Mesh_Draw ( void )
 		qglMatrixMode(GL_MODELVIEW);
 	}
 
-	if (currententity->flags & RF_WEAPONMODEL || currentmodel->type == mod_alias)
-	{
-		qglPushMatrix ();
-		R_RotateForEntity (currententity);
-	}
-	else if (currentmodel->type == mod_iqm)
-	{
-		qglPushMatrix ();
-		// pitch and roll are handled by IQM_AnimateFrame. 
-		currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
-		R_RotateForEntity (currententity);
-	}
+	qglPushMatrix ();
+	R_RotateForEntity (currententity);
 
 	// select skin
 	if (currententity->skin) 
@@ -1492,20 +1525,32 @@ void R_Mesh_Draw ( void )
 	}
 }
 
-void MD2_DrawCasterFrame (float backlerp, qboolean lerped)
+void R_Mesh_DrawCasterFrame (float backlerp, qboolean lerped)
 {
-	glUseProgramObjectARB( g_blankmeshprogramObj );
+	int animtype = 0; // GLSL useGPUanim uniform
 	
-	glUniform1iARB(g_location_bm_useGPUanim, lerped?2:0);
+	glUseProgramObjectARB (g_blankmeshprogramObj);
+	
+	if (modtypes[currentmodel->type].morphtarget && lerped)
+		animtype |= 2;
+	
+	if (modtypes[currentmodel->type].skeletal)
+	{
+		glUniformMatrix3x4fvARB( g_location_bm_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
+		animtype |= 1;
+	}
+	
+	glUniform1iARB(g_location_bm_useGPUanim, animtype);
 	glUniform1fARB(g_location_bm_lerp, 1.0-backlerp);
 	
-	MD2_DrawVBO (lerped);
+	R_Mesh_DrawVBO (lerped);
 
-	glUseProgramObjectARB( 0 );
+	glUseProgramObjectARB (0);
 }
 
-//to do - alpha and alphamasks possible?
-void MD2_DrawCaster ( void )
+// TODO - alpha and alphamasks possible?
+// Should support every mesh type
+void R_Mesh_DrawCaster ( void )
 {
 	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
@@ -1516,17 +1561,19 @@ void MD2_DrawCaster ( void )
 	if (!(currententity->flags & RF_VIEWERMODEL) && R_Mesh_CullModel ())
 		return;
 
-	// draw it
-
 	qglPushMatrix ();
 	R_RotateForEntity (currententity);
 	
-	MD2_SelectFrame ();
+	if (currentmodel->type == mod_alias)
+		MD2_SelectFrame ();
+	else if (currentmodel->type == mod_iqm)
+		IQM_AnimateFrame ();
+	// New model types go here
 
 	if(currententity->frame == 0 && currentmodel->num_frames == 1)
-		MD2_DrawCasterFrame(0, false);
+		R_Mesh_DrawCasterFrame(0, false);
 	else
-		MD2_DrawCasterFrame(currententity->backlerp, true);
+		R_Mesh_DrawCasterFrame(currententity->backlerp, true);
 
 	qglPopMatrix();
 }
