@@ -58,6 +58,11 @@ void SP_info_player_red(edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	if(g_tactical->integer)
+	{
+		self->s.modelindex = gi.modelindex("models/objects/dmspot/tris2.md2");
+		gi.linkentity (self);
+	}
 	//SP_misc_teleporter_dest (self);
 }
 void SP_info_player_blue(edict_t *self)
@@ -66,6 +71,11 @@ void SP_info_player_blue(edict_t *self)
 	{
 		G_FreeEdict (self);
 		return;
+	}
+	if(g_tactical->integer)
+	{
+		self->s.modelindex = gi.modelindex("models/objects/dmspot/tris1.md2");
+		gi.linkentity (self);
 	}
 	//SP_misc_teleporter_dest (self);
 }
