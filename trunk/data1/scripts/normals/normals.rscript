@@ -512,6 +512,24 @@ models/objects/dmspot/skin
 		normalmap
 	}
 }
+models/objects/dmspot/skin1
+{
+	{
+		map models/objects/dmspot/skin1_normal.jpg
+		normalmap
+		map2 models/objects/dmspot/skin1_fx.tga
+		glow
+	}
+}
+models/objects/dmspot/skin2
+{
+	{
+		map models/objects/dmspot/skin1_normal.jpg
+		normalmap
+		map2 models/objects/dmspot/skin2_fx.tga
+		glow
+	}
+}
 models/weapons/v_blast/skin
 {
 	{
@@ -1299,6 +1317,13 @@ maps/meshes/gothic/meat3
 		normalmap
 	}
 }
+maps/meshes/gothic/tree1
+{
+	{
+		map maps/meshes/gothic/tree1_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/urban/orangelantern
 {
 	{
@@ -1480,6 +1505,15 @@ models/tactical/hturret
 		map models/tactical/hturret_normal.jpg
 		normalmap
 		map2 models/tactical/hturret_fx.tga
+		glow
+	}
+}
+models/tactical/hweappad
+{
+	{
+		map models/tactical/hweappad_normal.jpg
+		normalmap
+		map2 models/tactical/hweappad_fx.tga
 		glow
 	}
 }
