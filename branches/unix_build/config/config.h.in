@@ -1,8 +1,5 @@
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Enable ANSI terminal color codes in stdout */
-#undef ANSI_COLOR
-
 /* Canonical OS identification */
 #undef BUILDSTRING
 
@@ -48,8 +45,8 @@
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
 
-/* Define to 1 if you have the `closesocket' function. */
-#undef HAVE_CLOSESOCKET
+/* Define to 1 if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
@@ -57,17 +54,11 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
-/* Define to 1 if you have the `filelength' function. */
-#undef HAVE_FILELENGTH
-
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H
 
 /* Define to 1 if you have the `floor' function. */
 #undef HAVE_FLOOR
-
-/* Define to 1 if you have the `fstat' function. */
-#undef HAVE_FSTAT
 
 /* Define to 1 if you have the `getcwd' function. */
 #undef HAVE_GETCWD
@@ -124,9 +115,6 @@
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
 
-/* Define to 1 if you have the `mremap' function. */
-#undef HAVE_MREMAP
-
 /* Define to 1 if you have the `munmap' function. */
 #undef HAVE_MUNMAP
 
@@ -139,6 +127,9 @@
 /* Define to 1 if libc includes obstacks. */
 #undef HAVE_OBSTACK
 
+/* Define to 1 if you have the <ode/ode.h> header file. */
+#undef HAVE_ODE_ODE_H
+
 /* Define to 1 if you have the <OpenAL/alc.h> header file. */
 #undef HAVE_OPENAL_ALC_H
 
@@ -150,9 +141,6 @@
 
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
-
-/* Define to 1 if you have the `pthread_create' function. */
-#undef HAVE_PTHREAD_CREATE
 
 /* Have PTHREAD_PRIO_INHERIT. */
 #undef HAVE_PTHREAD_PRIO_INHERIT
@@ -176,8 +164,8 @@
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
 
-/* Define to 1 if you have the `stat' function. */
-#undef HAVE_STAT
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
@@ -191,9 +179,6 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
 /* Define to 1 if you have the `strchr' function. */
 #undef HAVE_STRCHR
 
@@ -203,23 +188,11 @@
 /* Define to 1 if you have the `strerror' function. */
 #undef HAVE_STRERROR
 
-/* Define to 1 if you have the `stricmp' function. */
-#undef HAVE_STRICMP
-
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
-
-/* Define to 1 if you have the `strlcpy' function. */
-#undef HAVE_STRLCPY
-
-/* Define to 1 if you have the `strncasecmp' function. */
-#undef HAVE_STRNCASECMP
-
-/* Define to 1 if you have the `strnicmp' function. */
-#undef HAVE_STRNICMP
 
 /* Define to 1 if you have the `strrchr' function. */
 #undef HAVE_STRRCHR
@@ -227,14 +200,17 @@
 /* Define to 1 if you have the `strstr' function. */
 #undef HAVE_STRSTR
 
+/* Define to 1 if you have the `strtoul' function. */
+#undef HAVE_STRTOUL
+
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#undef HAVE_SYS_MMAN_H
+
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
-
-/* Define to 1 if you have the <sys/select.h> header file. */
-#undef HAVE_SYS_SELECT_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
@@ -262,15 +238,6 @@
 
 /* Define to 1 if you have the `unlink' function. */
 #undef HAVE_UNLINK
-
-/* Define to 1 if you have the <windows.h> header file. */
-#undef HAVE_WINDOWS_H
-
-/* Define to 1 if you have the <winsock2.h> header file. */
-#undef HAVE_WINSOCK2_H
-
-/* Define to 1 if you have the <winsock.h> header file. */
-#undef HAVE_WINSOCK_H
 
 /* Define to 1 if you have the <X11/extensions/Xxf86dga.h> header file. */
 #undef HAVE_X11_EXTENSIONS_XXF86DGA_H
@@ -314,10 +281,10 @@
 /* linux-specific conditional compile */
 #undef LINUX_SPECIAL_CASE
 
-/* OpenAL dll name */
+/* OpenAL shared lib name */
 #undef OPENAL_DRIVER
 
-/* OpenGL DLL name */
+/* OpenGL shared lib name */
 #undef OPENGL_DRIVER
 
 /* Name of package */
@@ -359,14 +326,11 @@
 /* unix-specific conditional compile */
 #undef UNIX_VARIANT
 
-/* User data and cfg subdirectory in $HOME */
+/* Define to default file name for user configuration and data */
 #undef USER_GAMEDATA
 
 /* Version number of package */
 #undef VERSION
-
-/* win32-specific conditional compile */
-#undef WIN32_VARIANT
 
 /* see select (2) man page for Mac OS X */
 #undef _DARWIN_UNLIMITED_SELECT
@@ -375,9 +339,6 @@
    <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
    #define below would cause a syntax error. */
 #undef _UINT64_T
-
-/* Define to DBL_EPSILON for ODE */
-#undef dEpsilon
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
@@ -411,3 +372,9 @@
 /* Define to the type of an unsigned integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
 #undef uint64_t
+
+
+#if defined UNIX_VARIANT
+# include "unix/custom.h"
+#endif
+

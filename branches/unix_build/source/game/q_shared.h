@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #if !defined Q_SHARED_H_
 #define Q_SHARED_H_
 
+#if !defined UNIX_VARIANT
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -42,6 +43,8 @@ typedef unsigned char 		byte;
 # define true 1
 #endif
 typedef int qboolean;
+
+#endif
 
 #ifndef NULL
 #define NULL ((void *)0)

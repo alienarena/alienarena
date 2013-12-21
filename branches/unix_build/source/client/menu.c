@@ -28,12 +28,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <winsock.h>
 #endif
 
-#if defined UNIX_VARIANT
-#include <sys/time.h>
-#if defined HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#endif
+/* #if defined UNIX_VARIANT */
+/* #include <sys/time.h> */
+/* #if defined HAVE_UNISTD_H */
+/* #include <unistd.h> */
+/* #endif */
+/* #endif */
 
 #if defined WIN32_VARIANT
 #include <io.h>

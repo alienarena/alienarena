@@ -2814,7 +2814,7 @@ void CL_Shutdown(void)
 
 	if (isdown)
 	{
-		printf ("recursive shutdown\n");
+		Com_Printf ("recursive shutdown\n");
 		return;
 	}
 	isdown = true;

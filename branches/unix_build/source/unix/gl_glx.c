@@ -1,61 +1,66 @@
 /*
-Copyright (C) 1997-2001 Id Software, Inc.
+  Copyright (C) 1997-2001 Id Software, Inc.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <stdio.h>
-#if defined HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+/* #include <termios.h> */
+/* #include <sys/ioctl.h> */
+/* #include <sys/stat.h> */
+/* #include <stdarg.h> */
+/* #include <stdio.h> */
+
+/* #if defined HAVE_UNISTD_H */
+/* #include <unistd.h> */
+/* #endif */
+
 #include <signal.h>
+
 #if defined HAVE_DLFCN_H
-#include <dlfcn.h>
+# include <dlfcn.h>
+#endif
+
+// TODO -jjb- check these for configure inclusion
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/keysym.h>
+#include <X11/cursorfont.h>
+
+#if defined HAVE_XXF86VM
+# include <X11/extensions/xf86vmode.h>
+#endif // defined HAVE_XXF86VM
+
+#if defined HAVE_XXF86DGA
+# if defined HAVE_X11_EXTENSIONS_XXF86DGA_H
+#  include <X11/extensions/Xxf86dga.h>
+# else // defined HAVE_X11_EXTENSIONS_XXF86DGA_H
+#  include <X11/extensions/xf86dga.h>
+# endif // defined HAVE_X11_EXTENSIONS_XXF86DGA_H
+#endif
+
+#if defined HAVE_GL_GLX
+# include <GL/glx.h>
 #endif
 
 #include "qcommon/qcommon.h"
 #include "ref_gl/r_local.h"
 #include "client/keys.h"
 #include "unix/glw_unix.h"
-
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
-#if defined HAVE_XXF86VM
-#include <X11/extensions/xf86vmode.h>
-#endif // defined HAVE_XXF86VM
-#if defined HAVE_XXF86DGA
-# if defined HAVE_X11_EXTENSIONS_XXF86DGA_H
-#include <X11/extensions/Xxf86dga.h>
-# else // defined HAVE_X11_EXTENSIONS_XXF86DGA_H
-#include <X11/extensions/xf86dga.h>
-# endif // defined HAVE_X11_EXTENSIONS_XXF86DGA_H
-#endif
-
-#include <GL/glx.h>
 
 /* extern globals */
 // using include files for these has some problems
@@ -67,15 +72,15 @@ extern int mouse_diff_y;
 extern float rs_realtime;
 extern viddef_t vid;
 
-void		GLimp_BeginFrame( float camera_separation );
-void		GLimp_EndFrame( void );
-qboolean	GLimp_Init( void *hinstance, void *hWnd );
-void		GLimp_Shutdown( void );
-rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
-void		GLimp_AppActivate( qboolean active );
-void		GLimp_EnableLogging( qboolean enable );
-void		GLimp_LogNewFrame( void );
-
+void     GLimp_BeginFrame( float camera_separation );
+void     GLimp_EndFrame( void );
+qboolean GLimp_Init( void *hinstance, void *hWnd );
+void     GLimp_Shutdown( void );
+rserr_t  GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode,
+						qboolean fullscreen );
+void     GLimp_AppActivate( qboolean active );
+void     GLimp_EnableLogging( qboolean enable );
+void     GLimp_LogNewFrame( void );
 
 //---------------------------------------------------------------------------
 
@@ -93,9 +98,9 @@ qboolean have_stencil = false; // Stencil shadows - MrG
 
 #define KEY_MASK (KeyPressMask | KeyReleaseMask)
 #define MOUSE_MASK (ButtonPressMask | ButtonReleaseMask | \
-		    PointerMotionMask | ButtonMotionMask )
+					PointerMotionMask | ButtonMotionMask )
 #define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | \
-	       	StructureNotifyMask | PropertyChangeMask )
+				StructureNotifyMask | PropertyChangeMask )
 
 /*****************************************************************************/
 /* MOUSE                                                                     */
@@ -108,6 +113,7 @@ static int win_x, win_y;
 #if defined HAVE_XXF86VM
 static XF86VidModeModeInfo **vidmodes;
 #endif // defined HAVE_XXF86VM
+
 static qboolean vidmode_active = false;
 
 qboolean mouse_active = false;
@@ -116,77 +122,189 @@ qboolean vidmode_ext = false;
 
 static Cursor CreateNullCursor(Display *display, Window root)
 {
-    Pixmap cursormask;
-    XGCValues xgc;
-    GC gc;
-    XColor dummycolour;
-    Cursor cursor;
+	Pixmap cursormask;
+	XGCValues xgc;
+	GC gc;
+	XColor dummycolour;
+	Cursor cursor;
 
-    cursormask = XCreatePixmap(display, root, 1, 1, 1/*depth*/);
-    xgc.function = GXclear;
-    gc =  XCreateGC(display, cursormask, GCFunction, &xgc);
-    XFillRectangle(display, cursormask, gc, 0, 0, 1, 1);
-    dummycolour.pixel = 0;
-    dummycolour.red = 0;
-    dummycolour.flags = 04;
-    cursor = XCreatePixmapCursor(display, cursormask, cursormask,
-          &dummycolour,&dummycolour, 0,0);
-    XFreePixmap(display,cursormask);
-    XFreeGC(display,gc);
-    return cursor;
+	cursormask = XCreatePixmap(display, root, 1, 1, 1/*depth*/);
+	xgc.function = GXclear;
+	gc =  XCreateGC(display, cursormask, GCFunction, &xgc);
+	XFillRectangle(display, cursormask, gc, 0, 0, 1, 1);
+	dummycolour.pixel = 0;
+	dummycolour.red = 0;
+	dummycolour.flags = 04;
+	cursor = XCreatePixmapCursor(display, cursormask, cursormask,
+								 &dummycolour,&dummycolour, 0,0);
+	XFreePixmap(display,cursormask);
+	XFreeGC(display,gc);
+
+	return cursor;
+
 }
 
 void install_grabs(void)
 {
 
-#if defined DEBUG_GDB_NOGRAB
-// for running on gdb debug. prevents "lockup".
-	Cvar_Set( "in_dgamouse", "0" );
-	dgamouse = false;
-	mouse_is_position = false;
-#else // defined DEBUG_GDB_NOGRAB
-# if !defined HAVE_XXF86DGA
-	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
-	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
-	Cvar_Set( "in_dgamouse", "0" );
-	dgamouse = false;
-# else // !defined HAVE_XXF86DGA
-	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
+	Com_DPrintf("Grabbing Mouse and Keyboard\n");
 
-	if (in_dgamouse->integer)
+#if defined DEBUG_GDB_NOGRAB
+/* gdb debug operation
+ */
+	Cvar_Set( "in_dgamouse", "0" );
+	dgamouse = false;
+	mouse_is_position = false; /* fake */
+
+	Sys_Warn( "DEBUG_GDB_NOGRAB defined. Developer use only.\n" );
+
+#else
+/* normal operation
+ */
+	int result;
+	int dest_x_arg = vid.width / 2;
+	int dest_y_arg = vid.height / 2;
+
+/*
+ * MOUSE GRAB
+ */
+	dgamouse = false;
+
+	mouse_is_position = true;
+	result = XGrabPointer(
+		dpy, /* X Server */
+		win, /* grab window */
+		True, /* owner events, reported "as usual" */
+		0,    /* event mask, not applicable */
+		GrabModeAsync, /* pointer mode */
+		GrabModeAsync, /* keyboard mode */
+		win, /* confine to this window */
+		None, /* cursor */
+		CurrentTime);
+
+	switch ( result )
 	{
+	case GrabSuccess:
+		mouse_is_position = false;
+		break;
+
+	case AlreadyGrabbed:
+		Sys_Warn("XGrabPointer: Already Grabbed\n");
+		break;
+
+	case GrabNotViewable:
+		Sys_Warn("XGrabPointer: Not Viewable\n");
+		break;
+
+	case GrabFrozen:
+		Sys_Warn("XGrabPointer: Frozen\n");
+		break;
+
+	case GrabInvalidTime:
+		Sys_Warn("XGrabPointer: Invalid Time\n");
+		break;
+
+	default:
+		Sys_Warn("XGrabPointer: ? %i\n", result );
+		break;
+	};
+
+# if defined HAVE_XXF86DGA
+
+	if ( in_dgamouse->integer )
+	{
+/* Have DGA and it is enabled by cvar
+ */
 		int MajorVersion, MinorVersion;
 
-		if (XF86DGAQueryVersion(dpy, &MajorVersion, &MinorVersion)) {
-			XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
-			XF86DGADirectVideo(dpy, DefaultScreen(dpy), XF86DGADirectMouse);
+		if ( XF86DGAQueryVersion(dpy, &MajorVersion, &MinorVersion) )
+		{
+			dest_x_arg = dest_y_arg = 0; /* center is 0,0  I suppose */
+
+			/* want dga mouse only, not display, apparently */
+			XF86DGADirectVideo(
+				dpy,
+				DefaultScreen(dpy),
+				XF86DGADirectMouse );
+
 			dgamouse = true;
-		} else {
-			// unable to query, probably not supported
-			Com_Printf ( "Failed to detect XF86DGA Mouse\n" );
-			Cvar_Set( "in_dgamouse", "0" );
-			dgamouse = false;
-			XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 		}
-	} else {
-		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
+		else
+		{
+			// unable to query, probably not supported
+			Sys_Warn( "XF86DGA Mouse enabled but not detected.\N" );
+		}
 	}
-# endif // !defined HAVE_XXF86DGA
+	/* else, have DGA, but not enabled by cvar */
 
-	XGrabKeyboard(dpy, win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
+# endif
 
-	mouse_is_position = false;
+	Cvar_Set( "in_dgamouse", (dgamouse ? "1" : "0") );
+
+	XWarpPointer(
+		dpy,  /* X Server */
+		None, /* source window */
+		win,  /* destination window */
+		0, 0, 0, 0, /* source window rectangle */
+		dest_x_arg,
+		dest_y_arg
+		);
+
 	mouse_diff_x = mouse_diff_y = 0;
-#endif // defined DEBUG_GDB_NOGRAB
+
+	/*
+	 * KEYBOARD GRAB
+	 */
+	result = XGrabKeyboard(
+		dpy,   /* X server */
+		win,   /* grab window */
+		False, /* events reported wrt grab window */
+		GrabModeAsync, /* pointer mode */
+		GrabModeAsync, /* keyboard mode */
+		CurrentTime
+		);
+
+	switch ( result )
+	{
+	case GrabSuccess:
+		mouse_is_position = false;
+		/* even if mouse grab failed, technically, mouse is not necessary */
+		break;
+
+	case AlreadyGrabbed:
+		Sys_Warn("XGrabKeyboard: Already Grabbed\n");
+		break;
+
+	case GrabNotViewable:
+		Sys_Warn("XGrabKeyboard: Not Viewable\n");
+		break;
+
+	case GrabFrozen:
+		Sys_Warn("XGrabKeyboard: Frozen\n");
+		break;
+
+	case GrabInvalidTime:
+		Sys_Warn("XGrabKeyboard: Invalid Time\n");
+		break;
+
+	default:
+		Sys_Warn("XGrabKeyboard: ? %i\n", result);
+		break;
+	};
+
+#endif
+
 }
 
 void uninstall_grabs(void)
 {
+
 	if (!dpy || !win)
 		return;
 
 #if defined HAVE_XXF86DGA
-	if (dgamouse) {
+	if ( dgamouse )
+	{
 		dgamouse = false;
 		XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);
 	}
@@ -195,32 +313,41 @@ void uninstall_grabs(void)
 	XUngrabPointer(dpy, CurrentTime);
 	XUngrabKeyboard(dpy, CurrentTime);
 
-	mouse_is_position = true;
+	mouse_is_position = true; /* translation: mouse and keyboard not grabbed */
 }
 
 static void IN_DeactivateMouse( void )
 {
-	if (!dpy || !win)
-		return;
 
-	if (!mouse_is_position) {
-		uninstall_grabs();
+	if (!dpy || !win)
+	{
+		return;
+	}
+
+	if ( !mouse_is_position )
+	{
+		uninstall_grabs(); /* Keyboard, also */
 	}
 }
 
 static void IN_ActivateMouse( void )
 {
-	if (!dpy || !win)
-		return;
 
-	if (mouse_is_position) {
-		install_grabs();
+	if (!dpy || !win)
+	{
+		return;
+	}
+
+	if ( mouse_is_position )
+	{
+		install_grabs(); /* Keyboard, also */
 	}
 }
 
 void IN_Activate(qboolean active)
 {
-	if (active || vidmode_active)
+
+	if ( active || vidmode_active)
 		IN_ActivateMouse();
 	else
 		IN_DeactivateMouse ();
@@ -465,29 +592,24 @@ void HandleEvents( void )
 	unsigned u_sys_msecs;
 
 	if ( !dpy )
+	{
+		Com_DPrintf("HandleEvents called but dpy=NULL");
 		return;
+	}
 
-	// do one read of time for consistency
-	// theory is that all pending events occurring before this point in time
-	// should be considered occurring at this single point in time.
-	u_sys_msecs = (unsigned)Sys_Milliseconds();
-	f_sys_msecs = (float)u_sys_msecs;
-
-	while ( XPending( dpy ) )
+	while ( XPending( dpy ) ) /* number of events in queue */
 	{
 		XNextEvent( dpy, &event );
-
-		// TODO: check for errors here, maybe
 
 		switch ( event.type )
 		{
 
 		case KeyPress:
-			Key_Event( XLateKey( &event.xkey ), true, u_sys_msecs );
+			Key_Event( XLateKey( &event.xkey ), true, event.xkey.time  );
 			break;
 
 		case KeyRelease:
-			Key_Event( XLateKey( &event.xkey ), false, u_sys_msecs );
+			Key_Event( XLateKey( &event.xkey ), false, event.xkey.time );
 			break;
 
 		case MotionNotify:
@@ -508,9 +630,10 @@ void HandleEvents( void )
 					mouse_button = 1;
 					break;
 				}
-				
+
 				if (mouse_button < MENU_CURSOR_BUTTON_MAX)
 				{
+					f_sys_msecs = (float)event.xbutton.time;
 					if ( (f_sys_msecs - cursor.buttontime[mouse_button])
 							< multiclicktime )
 						cursor.buttonclicks[mouse_button] += 1;
@@ -530,37 +653,37 @@ void HandleEvents( void )
 				switch ( event.xbutton.button )
 				{
 				case 1:
-					Key_Event( K_MOUSE1, true, u_sys_msecs );
+					Key_Event( K_MOUSE1, true, event.xbutton.time );
 					break;
 				case 2:
-					Key_Event( K_MOUSE3, true, u_sys_msecs );
+					Key_Event( K_MOUSE3, true, event.xbutton.time );
 					break;
 				case 3:
-					Key_Event( K_MOUSE2, true, u_sys_msecs );
+					Key_Event( K_MOUSE2, true, event.xbutton.time );
 					break;
 				case 4:
-					Key_Event( K_MWHEELUP, true, u_sys_msecs );
+					Key_Event( K_MWHEELUP, true, event.xbutton.time );
 					break;
 				case 5:
-					Key_Event( K_MWHEELDOWN, true, u_sys_msecs );
+					Key_Event( K_MWHEELDOWN, true, event.xbutton.time );
 					break;
 				case 6:
-					Key_Event( K_MOUSE4, true, u_sys_msecs );
+					Key_Event( K_MOUSE4, true, event.xbutton.time );
 					break;
 				case 7:
-					Key_Event( K_MOUSE5, true, u_sys_msecs );
+					Key_Event( K_MOUSE5, true, event.xbutton.time );
 					break;
 				case 8:
-					Key_Event( K_MOUSE6, true, u_sys_msecs );
+					Key_Event( K_MOUSE6, true, event.xbutton.time );
 					break;
 				case 9:
-					Key_Event( K_MOUSE7, true, u_sys_msecs );
+					Key_Event( K_MOUSE7, true, event.xbutton.time );
 					break;
 				case 10:
-					Key_Event( K_MOUSE8, true, u_sys_msecs );
+					Key_Event( K_MOUSE8, true, event.xbutton.time );
 					break;
 				case 11:
-					Key_Event( K_MOUSE9, true, u_sys_msecs );
+					Key_Event( K_MOUSE9, true, event.xbutton.time );
 					break;
 				}
 			}
@@ -589,37 +712,37 @@ void HandleEvents( void )
 				switch ( event.xbutton.button )
 				{
 				case 1:
-					Key_Event( K_MOUSE1, false, u_sys_msecs );
+					Key_Event( K_MOUSE1, false, event.xbutton.time );
 					break;
 				case 2:
-					Key_Event( K_MOUSE3, false, u_sys_msecs );
+					Key_Event( K_MOUSE3, false, event.xbutton.time );
 					break;
 				case 3:
-					Key_Event( K_MOUSE2, false, u_sys_msecs );
+					Key_Event( K_MOUSE2, false, event.xbutton.time );
 					break;
 				case 4:
-					Key_Event( K_MWHEELUP, false, u_sys_msecs );
+					Key_Event( K_MWHEELUP, false, event.xbutton.time );
 					break;
 				case 5:
-					Key_Event( K_MWHEELDOWN, false, u_sys_msecs );
+					Key_Event( K_MWHEELDOWN, false, event.xbutton.time );
 					break;
 				case 6:
-					Key_Event( K_MOUSE4, false, u_sys_msecs );
+					Key_Event( K_MOUSE4, false, event.xbutton.time );
 					break;
 				case 7:
-					Key_Event( K_MOUSE5, false, u_sys_msecs );
+					Key_Event( K_MOUSE5, false, event.xbutton.time );
 					break;
 				case 8:
-					Key_Event( K_MOUSE6, false, u_sys_msecs );
+					Key_Event( K_MOUSE6, false, event.xbutton.time );
 					break;
 				case 9:
-					Key_Event( K_MOUSE7, false, u_sys_msecs );
+					Key_Event( K_MOUSE7, false, event.xbutton.time );
 					break;
 				case 10:
-					Key_Event( K_MOUSE8, false, u_sys_msecs );
+					Key_Event( K_MOUSE8, false, event.xbutton.time );
 					break;
 				case 11:
-					Key_Event( K_MOUSE9, false, u_sys_msecs );
+					Key_Event( K_MOUSE9, false, event.xbutton.time );
 					break;
 				}
 			}
@@ -641,7 +764,7 @@ void HandleEvents( void )
 			break;
 		}
 	}
-	
+
 	if ( mouse_is_position )
 	{ // allow mouse movement on menus in windowed mode
 		mouse_diff_x = last_mouse_x;
@@ -650,7 +773,7 @@ void HandleEvents( void )
 	else
 	{
 		if ( dgamouse )
-		{ // TODO: find documentation for DGA mouse, explain this
+		{
 			mouse_diff_x += (last_mouse_x + (vidmode_active ? 0 : win_x)) * 2;
 			mouse_diff_y += (last_mouse_y + (vidmode_active ? 0 : win_y)) * 2;
 		}
@@ -680,9 +803,8 @@ qboolean GLimp_InitGL (void);
 
 static void signal_handler(int sig)
 {
-	printf("Received signal %d, exiting...\n", sig);
-	GLimp_Shutdown();
-	exit(0);
+	Sys_Error("received signal %d, exiting...\n", sig);
+	/* unreachable */
 }
 
 static void InitSig(void)
@@ -750,7 +872,8 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 	if ( !VID_GetModeInfo( &width, &height, mode ) )
 	{
-		Com_Printf ( " invalid mode\n" );
+		// Com_Printf ( " invalid mode\n" );
+		Sys_Warn( "\ncannot set mode %d, video mode is unchanged\n", mode);
 		return rserr_invalid_mode;
 	}
 
@@ -760,7 +883,8 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	GLimp_Shutdown ();
 
 	if (!(dpy = XOpenDisplay(NULL))) {
-		fprintf(stderr, "Error couldn't open the X display\n");
+		Sys_Warn("cannot open the X display, video mode is unchanged\n");
+		// fprintf(stderr, "Error couldn't open the X display\n");
 		return rserr_invalid_mode;
 	}
 
@@ -783,10 +907,10 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 	visinfo = qglXChooseVisual(dpy, scrnum, attrib);
 	if (!visinfo) {
-		fprintf(stderr, "Error couldn't get an RGB, Double-buffered, Depth visual, Stencil Buffered\n");
+		Sys_Warn("couldn't get an RGB, Double-buffered, Depth visual, Stencil Buffered\n");
 		visinfo = qglXChooseVisual(dpy, scrnum, attrib2);
 		if(!visinfo){
-			fprintf(stderr, "Error couldn't get an RGB, Double-buffered, Depth visual\n");
+			Sys_Warn("couldn't get an RGB, Double-buffered, Depth visual");
 			return rserr_invalid_mode;
 		}
 	}
@@ -794,9 +918,9 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		have_stencil = true;
 
 	vidmode_active = false;
-	
+
 	xpos = ypos = 0;
-	
+
 #if defined HAVE_XXF86VM
 	if (vidmode_ext) {
 		int best_fit, best_dist, dist, x, y, num_vidmodes;
@@ -832,7 +956,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 				// Move the viewport to top left
 				XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
-				
+
 				if (width != actualWidth || height != actualHeight)
 				{
 					xpos = vid_xpos->integer;
@@ -841,8 +965,11 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 					Com_Printf ("Closest screen resolution is %dx%d. ", actualWidth, actualHeight); 
 					Com_Printf ("Use vid_xpos and vid_ypos to adjust the position of the game window (current offset is %d, %d)\n", xpos, ypos);
 				}
-			} else
+			}
+			else
+			{
 				fullscreen = 0;
+			}
 		}
 	}
 #endif // defined HAVE_XXF86VM
@@ -861,6 +988,9 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	} else
 		mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
+	/*
+	 * WINDOW CREATION
+	 */
 	win = XCreateWindow(dpy, root, 0, 0, width, height,
 						0, visinfo->depth, InputOutput,
 						visinfo->visual, mask, &attr);
@@ -883,7 +1013,11 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	if (sizehints)
 		XFree(sizehints);
 
+#if defined TACTICAL
+	XStoreName(dpy, win, "Alien Arena Tactical Demo");
+#else
 	XStoreName(dpy, win, "Alien Arena");
+#endif
 
 	wmDeleteWindow = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	XSetWMProtocols(dpy, win, &wmDeleteWindow, 1);
@@ -893,18 +1027,20 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	XMapWindow(dpy, win);
 
 #if defined HAVE_XXF86VM
-	if (vidmode_active) {
+	if (vidmode_active)
+	{
 		XMoveWindow(dpy, win, xpos, ypos);
 		XRaiseWindow(dpy, win);
-		XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
 		XFlush(dpy);
-		// Move the viewport to top left
 		XF86VidModeSetViewPort(dpy, scrnum, xpos, ypos);
 	}
 #endif // defined HAVE_XXF86VM
 
 	XFlush(dpy);
 
+	/*
+	 * CONTEXT CREATION
+	 */
 	ctx = qglXCreateContext(dpy, visinfo, NULL, True);
 
 	qglXMakeCurrent(dpy, win, ctx);
@@ -918,6 +1054,12 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	XDefineCursor(dpy, win, CreateNullCursor(dpy, win));
 
 	qglXMakeCurrent(dpy, win, ctx);
+
+	/* seems like this is the place to center the pointer */
+	if ( dgamouse )
+		XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
+	else
+		XWarpPointer(dpy, None, win, 0, 0, 0, 0, width/2, height/2);
 
 	RS_ScanPathForScripts();		// load all found scripts
 
@@ -935,6 +1077,11 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 */
 void GLimp_Shutdown( void )
 {
+
+#if !defined NDEBUG
+	Com_DPrintf("GLimp_Shutdown: dpy=%p, win=%i\n", dpy, win );
+#endif
+
 	uninstall_grabs();
 	mouse_is_position = true;
 	dgamouse = false;
@@ -948,6 +1095,7 @@ void GLimp_Shutdown( void )
 		if (vidmode_active)
 			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
 #endif // defined HAVE_XXF86VM
+
 		XUngrabKeyboard(dpy, CurrentTime);
 		XCloseDisplay(dpy);
 	}
@@ -964,6 +1112,10 @@ void GLimp_Shutdown( void )
 */
 qboolean GLimp_Init( void *hinstance, void *wndproc )
 {
+#if !defined NDEBUG
+	Com_DPrintf("GLimp_Init\n");
+#endif
+
 	InitSig();
 
 	return true;
@@ -996,6 +1148,9 @@ void GLimp_EndFrame (void)
 */
 void GLimp_AppActivate( qboolean active )
 {
+#if !defined NDEBUG
+	Com_DPrintf("GLimp_AppActivate( %i )\n", active );
+#endif
 }
 
 /*------------------------------------------------*/
@@ -1028,7 +1183,7 @@ char *Sys_GetClipboardData(void)
 	//  1) we get a response
 	//  2) 250ms have gone by and we got nothing
 	do
-       	{
+	{
 		received = XCheckTypedEvent( dpy, SelectionNotify, &evt );
 	} while ( !( received || Sys_Milliseconds() - sent_at > 250 ) );
 

@@ -11,90 +11,82 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # 
-# See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# A copy of the  GNU General Public License is included;
+# see the file, COPYING.
 #
 
-SUBDIRS = source
+# 2013 December:
+# - See notes in source/Makefile.am, and configure.ac
+# - Recursive build for data1 and botinfo. Same effect as
+#    previous game_data.am methods, but avoids problem
+#    with command line overflow when running install.
+# - Moved the data1 default.cfg and maps.lst to arena
+#   subdir for consistency between arena and tactical.
+#    
+
+SUBDIRS = source data1 botinfo
 
 ACLOCAL_AMFLAGS = -I m4 
 
+#
 # Alien Arena documents to be installed in $docdir
-if INSTALL_DOCS
-dist_doc_DATA = \
-	docs/license.txt \
-	docs/README.txt \
-	README
-endif
+#
+#if INSTALL_DOCS
+
+#dist_doc_DATA = \
+#	unix_doc/README \
+#	unix_doc/COPYING \
+#	unix_doc/INSTALL \
+#	unix_doc/GPL2
+
+#endif
 
 # Alien Arena icon
-dist_icon_DATA = alienarena.png
+# TODO: change default icon directory to share/${PACKAGE}
+#  and put these in a unixicon subdir in svn, maybe
+#
+
+#dist_icons_DATA = \
+#	unix_icons/alienarena.png \
+#	unix_icons/aa-tactical-demo.png
 
 # FUSE game server browser and Server management scripts
-# COPYING and INSTALL are GNU/FSF-supplied documents.
-EXTRA_DIST = \
-	Tools/fuse.tar.gz \
-	Tools/LinuxScripts \
-	COPYING \
-	INSTALL
+#EXTRA_DIST = \
+#	Tools/fuse.tar.gz \
+#	Tools/LinuxScripts
+
+#
+# Default configuration for client and server
+#
+arenadir = $(pkgdatadir)
+nobase_dist_arena_DATA = \
+	arena/motd.txt \
+	arena/server.cfg \
+	arena/default.cfg \
+	arena/maps.lst
+
+tacticaldir = $(pkgdatadir)
+nobase_dist_tactical_DATA = \
+	tactical/maps.lst \
+	tactical/motd.txt \
+	tactical/default.cfg \
+	tactical/server.cfg
+
 
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
 # but, it is probably a better idea to export the repository to the
 #  staging area since export does not include the .svn parts
 #
-# copy noinst DATA to the distribution directory. while partitioning the
-# data files into subdirectory groups solves the problem with exceeding
-# command length limits for installation, it does not help with tarball
-# creation. 
-#
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
-	$(foreach GAMEDIR, $(sort $(dir $(gamedata_files))),$(shell mkdir -p $(distdir)/$(GAMEDIR) ))
-	$(foreach GAMEFILE, $(gamedata_files), $(shell cp -p $(srcdir)/$(GAMEFILE) $(distdir)/$(GAMEFILE)))
 
 #
-# Alternate Install
-# This non-standard target is used for traditional single directory, 
-# in-place install. Good for map makers, frequent SVN updates.
-# Also, maybe the preferable installation for Game Server Providers doing
-#   dedicated server only builds
+# Alternate Install deemed redundant and removed.
+# Almost the same thing:
+#  ./configure --prefix=/home/user/COR_games && make && make install
 #
-# Use: 
-#  ./configure --enable-alternate-install && make && make install-alternate
+# TODO: if possible, detect when --prefix == top build dir and
+#  avoid copying. Also, test to see what happens if this is done, install
+#  may handle it.
 #
-# Note: this does not support program name translation and other autoconf
-#   features.
-#
-install-alternate:
-if ALTERNATE_INSTALL
-if BUILD_CLIENT
-	cp $(top_builddir)/source/alienarena@EXEEXT@ $(srcdir)/alienarena@EXEEXT@
-endif	
-if BUILD_UNIX	
-	cp $(top_builddir)/source/alienarena-ded $(srcdir)/alienarena-ded
-endif
-else
-	@echo "make install-alternate requires configuring with --enable-alternate-install"
-endif		
-
-#
-# install/uninstall added rules for alternate-install to prevent "undefined" behaviour. 
-#
-install-data-local:
-if ALTERNATE_INSTALL
-	@echo "Alternate install: Use "make install-alternate"!!!
-	exit 1
-endif
-
-uninstall-local:
-if ALTERNATE_INSTALL
-	@echo "Alternate install. Manual uninstall required!!!"
-	exit 1
-endif
-
-
-include game_data.am

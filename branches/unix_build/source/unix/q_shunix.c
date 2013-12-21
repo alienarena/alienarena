@@ -26,19 +26,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define _GNU_SOURCE
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <stdio.h>
+#if defined HAVE_DIRENT_H
 #include <dirent.h>
-#include <unistd.h>
-#include <sys/mman.h>
+#endif 
 
-#if defined HAVE_TIME_H
-# include <time.h>
-#elif defined HAVE_SYS_TIME_H
-# include <sys/time.h>
+#if defined HAVE_SYS_MMAN_H
+#include <sys/mman.h>
 #endif
+
 
 #include "unix/glob.h"
 #include "qcommon/qcommon.h"
@@ -211,6 +206,7 @@ void Hunk_Free (void *base)
 
 
 /*
+
 ================
 Sys_Milliseconds
 ================

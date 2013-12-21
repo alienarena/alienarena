@@ -270,7 +270,7 @@ char *Sys_ConsoleInput( void )
 	{
 		if ( len == 0 ) /* EOF. can this happen? */
 		{
-			assert( 0 ); /* -jjb- find out if it happens */
+			// assert( 0 ); /* does not seem to */
 			stdin_enabled = false;
 		}
 		else
@@ -285,7 +285,7 @@ char *Sys_ConsoleInput( void )
 	if ( text[len-1] == '\n' )
 	{ /* nul terminate by replacing newline */
 		 text[len-1] = 0;
-		 /*TODO: check for problems with an empty string */
+/*TODO: -jjb-  check for problems with an empty string */
 		 /* if ( text[0] == 0 )  */
 		 /* { */
 		 /* } */
@@ -356,7 +356,7 @@ void Sys_ConsoleOutput( char *ostring )
  */
 void Sys_Printf( char *fmt, ... )
 {
-	if ( stdout_disabled )
+	if ( stdout_disabled() )
 		return;
 
 #ifndef NDEBUG
@@ -393,8 +393,10 @@ void Sys_Quit(void)
 	
 	clear_nonblock_stdin();
 
+#if !defined DEDICATED_ONLY
 	CL_Shutdown();
-	Qcommon_Shutdown();
+#endif
+	Qcommon_Shutdown(); /* might do nothing */
 
 	exit(0);
 }
@@ -411,15 +413,20 @@ void Sys_Init(void)
  *
  * TODO: check for non-reentrant functions
  */
+extern void GLimp_Shutdown( void );
+
 void Sys_Error( char *error, ... )
 {
-	clear_nonblock_stdin();
 
-	CL_Shutdown();
-	Qcommon_Shutdown();
+	/* attempt to release device resources */
+	clear_nonblock_stdin();
+#if !defined DEDICATED_ONLY
+	GLimp_Shutdown();
+#endif
 
 	if ( stderr_enabled && terminal_stderr_exists() )
 	{
+
 		va_list     argptr;
 		static char crash_string[1024];
 
@@ -427,6 +434,12 @@ void Sys_Error( char *error, ... )
 		vsnprintf( crash_string, sizeof(crash_string), error, argptr );
 		va_end( argptr );
 		fprintf( stderr, "Error: %s\n", crash_string );
+
+#if !defined DEDICATED_ONLY
+		CL_Shutdown();
+#endif
+		Qcommon_Shutdown();
+
 	}
 	/* TODO: maybe, post to syslog */
 
@@ -448,7 +461,7 @@ void Sys_Warn( char *warning, ... )
 		va_end( argptr );
 		fprintf( stderr, "Warning: %s", warn_string);
 	}
-	/* TODO: maybe, post to syslog */
+	/* TODO: maybe, post to syslog or a server log */
 }
 
 /*---------------------------------------------------- Game Load & Unload ---*/
@@ -567,19 +580,22 @@ void *Sys_GetGameAPI (void *parms)
 
 /*
 ============
-Sys_FileTime
+Sys_FileTime  
 
 returns -1 if not present
 ============
 */
 int	Sys_FileTime (char *path)
 {
+#if defined HAVE_STAT
 	struct stat buf;
-
 	if (stat (path,&buf) == -1)
 		return -1;
 
 	return buf.st_mtime;
+#else
+	return 0;
+#endif
 }
 
 /**
@@ -592,10 +608,13 @@ void floating_point_exception_handler( int unused  )
 }
 
 /**
- * called WHEN?
+ * called when client receives an rcon from local gui 
+ *  in CL_ConnectionlessPacket(). Not sure why.
  */
-void Sys_AppActivate (void)
+void Sys_AppActivate( void )
 {
+	Com_DPrintf("Sys_AppActivate() at Sys_Milliseconds() = %i",
+				Sys_Milliseconds() );
 }
 
 /**
@@ -615,13 +634,13 @@ void Sys_SendKeyEvents( void )
 
 /*----------------------------------------------------------------- main()---*/
 
-#if defined DEDICATED_ONLY
-
-/**
- * main() for terminal-based dedicated servers
- */
 int main( int argc, char** argv )
 {
+#if defined DEDICATED_ONLY
+
+/*
+ * main() for terminal-based dedicated servers
+ */
 	int dtime, oldtime, newtime;
 
 	/* init setuid access, remember real and effective user IDs */
@@ -642,7 +661,6 @@ int main( int argc, char** argv )
 
 	Qcommon_Init( argc, argv );
 
-	/* TODO: add help string */
 	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
 	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
 
@@ -661,20 +679,14 @@ int main( int argc, char** argv )
 
 	}
 
-	return 0; /* unreachable */
-}
-
 #else
 
-/**
+/*
  * main() for X11-based client/listen-server. Commonly, will be run
  * using a window manager's launcher, and may not be run using 
  * a terminal. When that happens, output ends up in the system log,
  * which looks ridiculous.
  */
-int
-main( int argc, char** argv )
-{
 	int dtime, oldtime, newtime;
 
 	/* init setuid access, remember real and effective user IDs */
@@ -686,18 +698,12 @@ main( int argc, char** argv )
 
 	/* one strategy for handling no console terminal: redirection  */
 	if ( !stdout_enabled )
-	{
-		freopen( "/dev/null", "w", stdout );
-	}
+		(void)freopen( "/dev/null", "w", stdout );
 	if ( !stderr_enabled )
-	{
-		freopen( "/dev/null", "w", stderr );
-	}
+		(void)freopen( "/dev/null", "w", stderr );
 
 	if ( stdin_enabled )
-	{
 		set_nonblock_stdin();
-	}
 
 	Qcommon_Init( argc, argv );
 
@@ -717,9 +723,10 @@ main( int argc, char** argv )
 		Qcommon_Frame( dtime );
 	}
 
+#endif
+
 	return 0; /* unreachable */
 }
-#endif
 
 
 

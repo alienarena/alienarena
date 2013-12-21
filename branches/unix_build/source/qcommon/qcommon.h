@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #if !defined USER_GAMEDATA
 // default for COR_GAME environment variable
-#define USER_GAMEDATA ".codered"
+#define USER_GAMEDATA ".cor_games"
 #endif
 /*----------------------------------------*/
 
@@ -886,6 +886,7 @@ char	*Sys_ConsoleInput (void);
 void	Sys_ConsoleOutput (char *string);
 void	Sys_SendKeyEvents (void);
 void	Sys_Error (char *error, ...);
+void    Sys_Warn( char *warning, ... );
 void	Sys_Quit (void);
 char	*Sys_GetClipboardData( void );
 void	Sys_CopyProtect (void);
