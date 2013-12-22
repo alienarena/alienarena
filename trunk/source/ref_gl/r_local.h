@@ -762,8 +762,9 @@ GLuint		g_location_lightPositionOnScreen;
 GLuint		g_location_sunTex;
 GLuint		g_location_godrayScreenAspect;
 GLuint		g_location_sunRadius;
-//MD2
+
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
+void Mod_LoadTerrainModel (model_t *mod, void *_buf);
 
 //Shared mesh items
 extern vec3_t	shadelight;

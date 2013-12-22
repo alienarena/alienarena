@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "qcommon.h"
 
+#include <float.h>
+
 typedef struct
 {
 	cplane_t	*plane;
@@ -87,6 +89,9 @@ unsigned short	map_leafbrushes[MAX_MAP_LEAFBRUSHES];
 
 int			numcmodels;
 cmodel_t	map_cmodels[MAX_MAP_MODELS];
+
+cmodel_t		terrain_cmodels[MAX_MODELS];
+cterrainmodel_t	terrain_models[MAX_MODELS];
 
 int			numbrushes;
 cbrush_t	map_brushes[MAX_MAP_BRUSHES];
@@ -208,6 +213,7 @@ void CMod_LoadSubmodels (lump_t *l)
 
 		for (j=0 ; j<3 ; j++)
 		{	// spread the mins / maxs by a pixel
+			out->type = cmodel_brush;
 			out->mins[j] = LittleFloat (in->mins[j]) - 1;
 			out->maxs[j] = LittleFloat (in->maxs[j]) + 1;
 			out->origin[j] = LittleFloat (in->origin[j]);
@@ -638,6 +644,7 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 
 	map_noareas = Cvar_Get ("map_noareas", "0", 0);
 
+	// Don't need to load the map twice on local servers.
 	if (  !strcmp (map_name, name) && (clientload || !Cvar_VariableValue ("flushmap")) )
 	{
 		*checksum = last_checksum;
@@ -715,6 +722,19 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	FloodAreaConnections ();
 
 	strcpy (map_name, name);
+	
+	// Reset terrain models from last time. 
+	// TODO: verify this works in ALL situations, including local and non-
+	// local servers, wierd sequences of connects/disconnects, etc.
+	for (i = 0; i < MAX_MODELS; i++)
+	{
+		if (terrain_models[i].active)
+		{
+			terrain_models[i].active = false;
+			Z_Free (terrain_models[i].verts);
+			Z_Free (terrain_models[i].tris);
+		}
+	}
 
 	return &map_cmodels[0];
 }
@@ -846,6 +866,70 @@ int		CM_LeafArea (int leafnum)
 	if (leafnum < 0 || leafnum >= numleafs)
 		Com_Error (ERR_DROP, "CM_LeafArea: bad number");
 	return map_leafs[leafnum].area;
+}
+
+//=======================================================================
+
+cmodel_t *CM_TerrainModel (int modelindex, char *name)
+{	
+	int i;
+	cmodel_t *ret;
+	char *buf;
+	terraindata_t data;
+	
+	if (terrain_models[modelindex].active)
+		return;
+	
+	ret = &terrain_cmodels[modelindex];
+	ret->type = cmodel_terrain;
+	ret->tmodel = &terrain_models[modelindex];
+	
+	FS_LoadFile (name, (void**)&buf);
+	
+	if (!buf)
+		Com_Error (ERR_DROP, "CM_TerrainModel_Bounds: Missing terrain model %s!", name);
+	
+	// This ends up being 1/4 as much detail as is used for rendering. You 
+	// need a surprisingly large amount to maintain accurate physics.
+	LoadTerrainFile (&data, name, 0.5, 8, buf);
+	
+	Z_Free (data.vert_texcoords);
+	Z_Free (data.texture_path);
+	
+	VectorCopy (data.mins, ret->mins);
+	VectorCopy (data.maxs, ret->maxs);
+	
+	ret->tmodel->active = true;
+	ret->tmodel->numtriangles = data.num_triangles;
+	ret->tmodel->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
+	ret->tmodel->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
+	
+	for (i = 0; i < 3*data.num_vertices; i++)
+		ret->tmodel->verts[i] = data.vert_positions[i];
+	
+	for (i = 0; i < data.num_triangles; i++)
+	{
+		vec3_t side1, side2;
+		int j;
+		
+		for (j = 0; j < 3; j++)
+			ret->tmodel->tris[i].verts[j] = &ret->tmodel->verts[3*data.tri_indices[3*i+j]];
+		
+		VectorSubtract (ret->tmodel->tris[i].verts[1], ret->tmodel->tris[i].verts[0], side1);
+		VectorSubtract (ret->tmodel->tris[i].verts[2], ret->tmodel->tris[i].verts[0], side2);
+		CrossProduct (side2, side1, ret->tmodel->tris[i].p.normal);
+		VectorNormalize (ret->tmodel->tris[i].p.normal);
+		ret->tmodel->tris[i].p.dist = DotProduct (ret->tmodel->tris[i].verts[0], ret->tmodel->tris[i].p.normal);
+		ret->tmodel->tris[i].p.signbits = signbits_for_plane (&ret->tmodel->tris[i].p);
+		ret->tmodel->tris[i].p.type = PLANE_ANYZ;
+	}
+	
+	Z_Free (data.vert_positions);
+	Z_Free (data.tri_indices);
+	
+	FS_FreeFile (buf);
+	
+	return ret;
 }
 
 //=======================================================================
@@ -1154,7 +1238,7 @@ qboolean	trace_ispoint;		// optimized case
  *           trace_t record. otherwise does not touch trace_t record
  *
  */
-void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
+void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 		trace_t *trace, cbrush_t *brush )
 {
 	int           i;
@@ -1567,6 +1651,132 @@ return;
 
 
 
+
+static qboolean LineIntersectsTriangle (vec3_t p1, vec3_t d, vec3_t v0, vec3_t v1, vec3_t v2, float *intersection_dist)
+{
+	vec3_t	e1, e2, P, Q, T;
+	float	det, inv_det, u, v, t;
+	
+	VectorSubtract (v1, v0, e1);
+	VectorSubtract (v2, v0, e2);
+	
+	CrossProduct (d, e2, P);
+	det = DotProduct (e1, P);
+	
+	if (fabs (det) < FLT_EPSILON)
+		return false;
+	
+	inv_det = 1.0/det;
+	
+	VectorSubtract (p1, v0, T);
+	u = inv_det * DotProduct (P, T);
+	
+	if (u < 0.0 || u > 1.0)
+		return false;
+	
+	CrossProduct (T, e1, Q);
+	v = inv_det * DotProduct (d, Q);
+	
+	if (v < 0.0 || u + v > 1.0)
+		return false;
+	
+	t = inv_det * DotProduct (e2, Q);
+	
+	*intersection_dist = t;
+	
+	return t > FLT_EPSILON;
+}
+
+void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const cterraintri_t *t, qboolean does_intercept))
+{
+	int i, j;
+	
+	for (i = 0; i < MAX_MODELS; i++)
+	{
+		cterrainmodel_t *mod = &terrain_models[i];
+		
+		if (!mod->active)
+			continue;
+		
+		for (j = 0; j < mod->numtriangles; j++)
+		{
+			float tmp;
+			qboolean does_intersect;
+			
+			does_intersect = LineIntersectsTriangle (start, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &tmp);
+			
+			do_draw (&mod->tris[j], does_intersect);
+		}
+	}
+}
+
+// FIXME: This is a half-witted and inefficient way to do it. 
+// FIXME: It's still quite possible to fall through a terrain mesh.
+// FIXME: Also, the physics feel like crap on terrain.
+void CM_TerrainTrace (vec3_t p1, vec3_t end)
+{
+	vec3_t		p2, mid;
+	float		idist;
+	float		frac;
+	int			i, j;
+	float		t1, t2, offset, offset2;
+	cplane_t	*plane;
+	
+	for (i = 0; i < 3; i++)
+		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
+	
+	for (i = 0; i < MAX_MODELS; i++)
+	{
+		cterrainmodel_t *mod = &terrain_models[i];
+		
+		if (!mod->active)
+			continue;
+		
+		for (j = 0; j < mod->numtriangles; j++)
+		{
+			vec3_t	intersection_point;
+			float	orig_dist;
+			float	intersection_dist;
+			vec3_t	dir;
+			
+			plane = &mod->tris[j].p;
+			
+			VectorSubtract (p2, p1, dir);
+			orig_dist = VectorNormalize (dir);
+			
+			if (DotProduct (dir, plane->normal) > 0)
+				continue;
+			
+			if (!LineIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
+				continue;
+			
+			if (trace_ispoint)
+				offset = 0;
+			else
+				offset = fabs(trace_extents[0]*plane->normal[0]) +
+					fabs(trace_extents[1]*plane->normal[1]) +
+					fabs(trace_extents[2]*plane->normal[2]);
+			
+			intersection_dist -= offset;
+			intersection_dist -= DIST_EPSILON;
+			
+			if (intersection_dist > orig_dist)
+				continue;
+			
+			VectorMA (p1, intersection_dist, dir, intersection_point);
+			
+			VectorCopy (intersection_point, p2);
+			
+			frac = intersection_dist / orig_dist; // - DIST_EPSILON;
+			trace_trace.fraction *= frac;
+			
+			VectorCopy (plane->normal, trace_trace.plane.normal);
+		}
+	}
+}
+
+
+
 //======================================================================
 
 /*
@@ -1622,7 +1832,9 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 		VectorCopy (start, local_start); // so the function can modify these in-place
 		VectorCopy (end, local_end);
 		CM_RecursiveHullCheck (headnode, 0, 1, local_start, local_end);
-
+		
+		CM_TerrainTrace (start, end);
+		
 		if (trace_trace.fraction == 1)
 		{
 			VectorCopy (end, trace_trace.endpos);

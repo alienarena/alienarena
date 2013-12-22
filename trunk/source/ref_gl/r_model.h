@@ -318,7 +318,7 @@ typedef struct {
 
 } mragdoll_t;
 
-typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, num_modtypes} modtype_t;
+typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, num_modtypes} modtype_t;
 
 // This array is a look-up table for the traits of various mesh formats.
 static struct 
@@ -343,6 +343,7 @@ static struct
 	{false, false, false},	// mod_brush- BSP brush models- this is ignored
 	{true, false, false},	// mod_md2- MD2 models
 	{false, true, true},	// mod_iqm- IQM models
+	{false, false, true},	// mod_terrain- heightmap meshes
 	// New model types go here
 };
 
