@@ -954,6 +954,12 @@ void COM_StripExtension (char *in, char *out)
 	*out = 0;
 }
 
+qboolean COM_HasExtension (char *path, char *extension)
+{
+	return	strlen (path) > strlen (extension) &&
+			!strcmp (path + strlen (path) - strlen (extension), extension);
+}
+
 
 /*
 ============

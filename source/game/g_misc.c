@@ -1029,9 +1029,12 @@ void misc_mapmodel_think (edict_t *ent)
 }
 void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 {
+	// For .md2s, we will need clipping brushes around it.
+	// Note that for terrain models, gi.setmodel will change this to 
+	// SOLID_BBOX.
+	ent->solid = SOLID_NOT; 
+	
 	gi.setmodel (ent, ent->model);
-
-	ent->solid = SOLID_NOT; //will need clipping brushes around it
 
 	//disable shadows(also disables per-pixel dynamic lighting unless minlight set
 	if(ent->spawnflags & 1)

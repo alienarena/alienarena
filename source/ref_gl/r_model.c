@@ -529,7 +529,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	unsigned *buf;
 	int		i;
 	char shortname[MAX_QPATH], nameShortname[MAX_QPATH];
-	qboolean is_iqm = false;
+	qboolean is_iqm = false, is_terrain = false;
 
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
@@ -597,15 +597,16 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// load the file
 	//
+	
 	//if .md2, check for IQM version first
 	COM_StripExtension(mod->name, shortname);
 	strcat(shortname, ".iqm");
 
-	modfilelen = FS_LoadFile (shortname, (void*)&buf);
+	modfilelen = FS_LoadFile (shortname, (void**)&buf);
 
 	if(!buf) //could not find iqm
 	{
-		modfilelen = FS_LoadFile (mod->name, (void*)&buf);
+		modfilelen = FS_LoadFile (mod->name, (void**)&buf);
 		if (!buf)
 		{
 			if (crash)
@@ -613,6 +614,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			memset (mod->name, 0, sizeof(mod->name));
 			return NULL;
 		}
+		if (strstr (mod->name, ".terrain"))
+			is_terrain = true;
 	}
 	else
 	{
@@ -633,8 +636,12 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 
 	// call the apropriate loader
-	//iqm - try interquake model first
-	if(is_iqm)
+	if (is_terrain)
+	{
+		Mod_LoadTerrainModel (mod, buf);
+		return mod;
+	}
+	if (is_iqm)
 	{
 		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
 			Com_Error (ERR_DROP,"Mod_NumForName: wrong fileid for %s", mod->name);
@@ -2243,6 +2250,7 @@ struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;
 	int		i;
+
 	dmdl_t		*pheader;
 
 	mod = Mod_ForName (name, false);

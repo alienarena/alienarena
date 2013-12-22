@@ -185,6 +185,12 @@ void PF_setmodel (edict_t *ent, char *name)
 		VectorCopy (mod->maxs, ent->maxs);
 		SV_LinkEdict (ent);
 	}
+	else if (COM_HasExtension (name, ".terrain"))
+	{
+		mod = CM_TerrainModel (i, name);
+		VectorCopy (mod->mins, ent->mins);
+		VectorCopy (mod->maxs, ent->maxs);
+	}
 
 }
 

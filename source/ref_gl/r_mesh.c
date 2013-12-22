@@ -881,7 +881,7 @@ static qboolean R_Mesh_CullModel (void)
 	if ((currententity->flags & RF_WEAPONMODEL))
 		return r_lefthand->integer == 2;
 	
-	if (r_worldmodel) {
+	if (r_worldmodel && currentmodel->type != mod_terrain) {
 		//occulusion culling - why draw entities we cannot see?
 		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)

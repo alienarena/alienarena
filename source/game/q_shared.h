@@ -249,6 +249,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 char *COM_SkipPath (char *pathname);
 void COM_StripExtension (char *in, char *out);
+qboolean COM_HasExtension (char *path, char *extension);
 void COM_FileBase (char *in, char *out);
 void COM_FilePath (char *in, char *out);
 void COM_DefaultExtension (char *path, char *extension);
@@ -494,11 +495,31 @@ typedef struct cplane_s
 #define CPLANE_PAD0				18
 #define CPLANE_PAD1				19
 
+typedef struct
+{
+	cplane_t	p;
+	vec_t		*verts[3];
+} cterraintri_t;
+
+typedef struct
+{
+	qboolean		active;
+	int				numtriangles;
+	vec_t			*verts;
+	cterraintri_t	*tris;
+} cterrainmodel_t;
+
 typedef struct cmodel_s
 {
-	vec3_t		mins, maxs;
-	vec3_t		origin;		// for sounds or lights
-	int			headnode;
+	enum
+	{
+		cmodel_brush,
+		cmodel_terrain
+	}				type;
+	vec3_t			mins, maxs;
+	vec3_t			origin;		// for sounds or lights
+	int				headnode;
+	cterrainmodel_t	*tmodel;
 } cmodel_t;
 
 typedef struct csurface_s

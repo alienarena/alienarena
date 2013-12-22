@@ -366,6 +366,7 @@ void SV_AreaEdicts_r (areanode_t *node)
 	// touch linked edicts
 	if (area_type == AREA_SOLID)
 		start = &node->solid_edicts;
+
 	else
 		start = &node->trigger_edicts;
 

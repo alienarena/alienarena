@@ -555,6 +555,7 @@ void R_DrawEntitiesOnList (void)
 		{
 		    case mod_md2:
 		    case mod_iqm:
+		    case mod_terrain:
 		        R_Mesh_Draw ();
 				break;
 			case mod_brush:
@@ -605,6 +606,7 @@ void R_DrawEntitiesOnList (void)
 		{
 		    case mod_md2:
 		    case mod_iqm:
+		    case mod_terrain:
 		        R_Mesh_Draw ();
 				break;
 			case mod_brush:
@@ -665,6 +667,7 @@ void R_DrawViewEntitiesOnList (void)
 		{
 		case mod_md2:
 		case mod_iqm:
+		case mod_terrain:
 		    R_Mesh_Draw ();
 			break;
 		default:
@@ -711,6 +714,7 @@ void R_DrawViewEntitiesOnList (void)
 		{
 		case mod_md2:
 		case mod_iqm:
+		case mod_terrain:
 		    R_Mesh_Draw ();
 			break;
 		default:
@@ -1013,8 +1017,35 @@ r_newrefdef must be set before the first call
 ================
 */
 
+static void R_DrawTerrainTri (const cterraintri_t *t, qboolean does_intersect)
+{
+	int i;
+	
+	qglDisable (GL_TEXTURE_2D);
+	qglDisable (GL_DEPTH_TEST);
+	if (does_intersect)
+	{
+		qglColor4f (1, 0, 0, 1);
+		qglLineWidth (5.0);
+	}
+	else
+	{
+		qglColor4f (0, 0, 0, 1);
+		qglLineWidth (1.0);
+	}
+	qglBegin (GL_LINE_LOOP);
+	for (i = 0; i < 3; i++)
+		qglVertex3fv (t->verts[i]);
+	qglEnd ();
+	qglEnable (GL_DEPTH_TEST);
+	qglEnable (GL_TEXTURE_2D);
+}
+
+extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const cterraintri_t *t, qboolean does_intersect));
+
 void R_RenderView (refdef_t *fd)
 {
+	vec3_t forward;
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
 
 	numRadarEnts = 0;
@@ -1126,6 +1157,10 @@ void R_RenderView (refdef_t *fd)
 	R_BloomBlend( &r_newrefdef );//BLOOMS
 
 	R_RenderSun();
+	
+	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
+	if (gl_showpolys->integer)
+		CM_TerrainDrawIntersecting (r_origin, forward, R_DrawTerrainTri);
 
 	R_GLSLPostProcess();
 

@@ -690,6 +690,10 @@ int			CM_NumClusters (void);
 int			CM_NumInlineModels (void);
 char		*CM_EntityString (void);
 
+// get mins/maxs for terrain model collision
+// TODO: more than just mins and maxs! We want a real collision hull!
+cmodel_t	*CM_TerrainModel (int index, char *name);
+
 // creates a clipping hull for an arbitrary box
 int			CM_HeadnodeForBox (vec3_t mins, vec3_t maxs);
 
@@ -914,6 +918,48 @@ void SV_Frame (int msec);
 // compression
 //
 void qdecompress (sizebuf_t *src, sizebuf_t *dst, int type);
+
+
+/*
+==============================================================
+
+IMAGE LOADING
+
+==============================================================
+*/
+
+void LoadTGA (char *name, byte **pic, int *width, int *height);
+
+/*
+==============================================================
+
+TERRAIN LOADING/SIMPLIFICATION
+
+==============================================================
+*/
+
+typedef struct
+{
+	char			*texture_path;
+	int				num_vertices;
+	float			*vert_positions;
+	float			*vert_texcoords;
+	int				num_triangles;
+	unsigned int	*tri_indices;
+	vec3_t			mins, maxs;
+} terraindata_t;
+
+// out will be populated with a simplified version of the mesh. Calling
+// function is responsible for calling Z_Free on vert_positions,
+// vert_texcoords, tri_indices, and texture_path.
+// name is just the path of the .terrain file, only used for error messages.
+// oversampling_factor indicates how much detail to sample the heightmap 
+// at before simplification. 2.0 means 4x as many samples as there are pixels,
+// 0.5 means 0.25x as many.
+// reduction_amt indicates how many times fewer triangles the simplified mesh
+// should have.
+// buf is a string containing the text of a .terrain file.
+void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_factor, int reduction_amt, char *buf);
 
 #endif /* Q_COMMON_H_ */
 
