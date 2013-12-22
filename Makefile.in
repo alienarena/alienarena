@@ -563,7 +563,7 @@ nobase_dist_botinfo_DATA = \
 	botinfo/nav/dm-europa2k8.nod \
 	botinfo/nav/dm-extermination.nod \
 	botinfo/nav/dm-furious2k8.nod \
- 	botinfo/nav/dm-goregrinder.nod \
+	botinfo/nav/dm-goregrinder.nod \
 	botinfo/nav/dm-horus.nod \
 	botinfo/nav/dm-impact.nod \
 	botinfo/nav/dm-invasion.nod \
@@ -670,7 +670,7 @@ nobase_nodist_fonts_DATA = \
 	data1/fonts/freesans.ttf \
 	data1/fonts/orbitron.ttf \
 	data1/fonts/crackdown.ttf \
-	data1/fonts/bendable.ttf 
+	data1/fonts/bendable.ttf
 
 gfxdir = $(pkgdatadir)
 nobase_nodist_gfx_DATA = \
@@ -1037,10 +1037,11 @@ nobase_nodist_maps_DATA = \
 	data1/maps/dm-violator2k11.lightmap \
 	data1/maps/dm-warmachine2k10.bsp \
 	data1/maps/dm-warmachine2k10.lightmap \
- 	data1/maps/dm-zorn2k11.bsp \
+	data1/maps/dm-zorn2k11.bsp \
 	data1/maps/dm-zion2k9.bsp \
 	data1/maps/tac-extermination.bsp \
 	data1/maps/tac-extermination.lightmap \
+	data1/maps/tac-impact.bsp \
 	data1/maps/tca-corrosion.bsp \
 	data1/maps/tca-corrosion.lightmap \
 	data1/maps/tca-cryogenic.bsp \
@@ -1116,9 +1117,9 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/gothic/blade.md2 \
 	data1/maps/meshes/gothic/blade_normal.jpg \
 	data1/maps/meshes/gothic/ceillamp.md2 \
- 	data1/maps/meshes/gothic/column1.jpg \
- 	data1/maps/meshes/gothic/column1.md2 \
- 	data1/maps/meshes/gothic/column1_normal.jpg \
+	data1/maps/meshes/gothic/column1.jpg \
+	data1/maps/meshes/gothic/column1.md2 \
+	data1/maps/meshes/gothic/column1_normal.jpg \
 	data1/maps/meshes/gothic/dragon.jpg \
 	data1/maps/meshes/gothic/dragon.md2 \
 	data1/maps/meshes/gothic/dragon_normal.jpg \
@@ -1147,9 +1148,9 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/gothic/meat3.jpg \
 	data1/maps/meshes/gothic/meat3.md2 \
 	data1/maps/meshes/gothic/meat3_normal.jpg \
- 	data1/maps/meshes/gothic/neptune.jpg \
- 	data1/maps/meshes/gothic/neptune.md2 \
- 	data1/maps/meshes/gothic/neptune_normal.jpg \
+	data1/maps/meshes/gothic/neptune.jpg \
+	data1/maps/meshes/gothic/neptune.md2 \
+	data1/maps/meshes/gothic/neptune_normal.jpg \
 	data1/maps/meshes/gothic/root.jpg \
 	data1/maps/meshes/gothic/root.md2 \
 	data1/maps/meshes/gothic/root_normal.jpg \
@@ -1158,9 +1159,12 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/gothic/skeleton3.md2 \
 	data1/maps/meshes/gothic/skeleton.jpg \
 	data1/maps/meshes/gothic/skeleton_normal.jpg \
- 	data1/maps/meshes/gothic/throne.jpg \
- 	data1/maps/meshes/gothic/throne.md2 \
- 	data1/maps/meshes/gothic/throne_normal.jpg \
+	data1/maps/meshes/gothic/throne.jpg \
+	data1/maps/meshes/gothic/throne.md2 \
+	data1/maps/meshes/gothic/throne_normal.jpg \
+	data1/maps/meshes/gothic/tree1.jpg \
+	data1/maps/meshes/gothic/tree1.md2 \
+	data1/maps/meshes/gothic/tree1_normal.jpg \
 	data1/maps/meshes/greenblob_fx.tga \
 	data1/maps/meshes/greenblob.jpg \
 	data1/maps/meshes/greenblob.md2 \
@@ -1456,6 +1460,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/scripts/dm-zion2k9.mus \
 	data1/maps/scripts/tac-extermination.fog \
 	data1/maps/scripts/tac-extermination.mus \
+	data1/maps/scripts/tac-impact.fog \
 	data1/maps/scripts/tca-corrosion.fog \
 	data1/maps/scripts/tca-corrosion.mus \
 	data1/maps/scripts/tca-cryogenic.fog \
@@ -1571,7 +1576,14 @@ nobase_nodist_models_DATA = \
 	data1/models/objects/debris3/tris.md2 \
 	data1/models/objects/dmspot/skin_normal.tga \
 	data1/models/objects/dmspot/skin.tga \
+	data1/models/objects/dmspot/skin1.tga \
+	data1/models/objects/dmspot/skin1_fx.tga \
+	data1/models/objects/dmspot/skin1_normal.tga \
+	data1/models/objects/dmspot/skin2.tga \
+	data1/models/objects/dmspot/skin2_fx.tga \
 	data1/models/objects/dmspot/tris.md2 \
+	data1/models/objects/dmspot/tris1.md2 \
+	data1/models/objects/dmspot/tris2.md2 \
 	data1/models/objects/electroball/skin_fx.tga \
 	data1/models/objects/electroball/skin.jpg \
 	data1/models/objects/electroball/skin_normal.jpg \
@@ -1601,17 +1613,17 @@ nobase_nodist_models_DATA = \
 	data1/models/objects/spud/skin.tga \
 	data1/models/objects/spud/spud.mdo \
 	data1/models/objects/spud/tris.md2 \
-	data1/models/tactical/abackupgen_fx.tga \
 	data1/models/tactical/abackupgen.jpg \
+	data1/models/tactical/abackupgen_fx.tga \
 	data1/models/tactical/abackupgen_normal.jpg \
-	data1/models/tactical/abomb_fx.tga \
 	data1/models/tactical/abomb.jpg \
+	data1/models/tactical/abomb_fx.tga \
 	data1/models/tactical/abomb_normal.tga \
+	data1/models/tactical/acomputer.tga \
 	data1/models/tactical/acomputer_fx.tga \
 	data1/models/tactical/acomputer_normal.tga \
-	data1/models/tactical/acomputer.tga \
-	data1/models/tactical/alaser_fx.tga \
 	data1/models/tactical/alaser.jpg \
+	data1/models/tactical/alaser_fx.tga \
 	data1/models/tactical/alien_backupgen.iqm \
 	data1/models/tactical/alien_backupgen.skin \
 	data1/models/tactical/alien_bomb.iqm \
@@ -1624,22 +1636,25 @@ nobase_nodist_models_DATA = \
 	data1/models/tactical/alien_powersrc.iqm \
 	data1/models/tactical/alien_powersrc.skin \
 	data1/models/tactical/ammopad.md2 \
-	data1/models/tactical/apowersrc_fx.tga \
 	data1/models/tactical/apowersrc.jpg \
+	data1/models/tactical/apowersrc_fx.tga \
 	data1/models/tactical/apowersrc_normal.jpg \
 	data1/models/tactical/hbackupgen.jpg \
 	data1/models/tactical/hbackupgen_normal.jpg \
-	data1/models/tactical/hbomb_fx.tga \
 	data1/models/tactical/hbomb.jpg \
+	data1/models/tactical/hbomb_fx.tga \
 	data1/models/tactical/hbomb_normal.jpg \
-	data1/models/tactical/hcomputer_fx.tga \
 	data1/models/tactical/hcomputer.jpg \
+	data1/models/tactical/hcomputer_fx.tga \
 	data1/models/tactical/hcomputer_normal.jpg \
-	data1/models/tactical/hlaser_fx.tga \
 	data1/models/tactical/hlaser.jpg \
-	data1/models/tactical/hpowersrc_fx.tga \
+	data1/models/tactical/hlaser_fx.tga \
 	data1/models/tactical/hpowersrc.jpg \
+	data1/models/tactical/hpowersrc_fx.tga \
 	data1/models/tactical/hpowersrc_normal.jpg \
+	data1/models/tactical/hturret.jpg \
+	data1/models/tactical/hturret_fx.tga \
+	data1/models/tactical/hturret_normal.jpg \
 	data1/models/tactical/human_backupgen.iqm \
 	data1/models/tactical/human_backupgen.skin \
 	data1/models/tactical/human_bomb.iqm \
@@ -1651,6 +1666,12 @@ nobase_nodist_models_DATA = \
 	data1/models/tactical/human_laser.skin \
 	data1/models/tactical/human_powersrc.iqm \
 	data1/models/tactical/human_powersrc.skin \
+	data1/models/tactical/human_turret.iqm \
+	data1/models/tactical/human_turret.skin \
+	data1/models/tactical/human_weaponpad.md2 \
+	data1/models/tactical/hweappad.tga \
+	data1/models/tactical/hweappad_fx.tga \
+	data1/models/tactical/hweappad_normal.tga \
 	data1/models/tactical/laser_normal.jpg \
 	data1/models/weapons/g_bfg/tris.md2 \
 	data1/models/weapons/g_chain/tris.md2 \
@@ -2786,6 +2807,7 @@ nobase_nodist_scripts_DATA = \
 	data1/scripts/maps/dm-zorn2k11.rscript \
 	data1/scripts/maps/dm-zion2k9.rscript \
 	data1/scripts/maps/tac-extermination.rscript \
+	data1/scripts/maps/tac-impact.rscript \
 	data1/scripts/maps/tca-corrosion.rscript \
 	data1/scripts/maps/tca-cryogenic.rscript \
 	data1/scripts/maps/tca-extermination.rscript \
@@ -4444,7 +4466,7 @@ nobase_nodist_graphical_presets_DATA = \
 	data1/graphical_presets/maxperformance.cfg \
 	data1/graphical_presets/performance.cfg \
 	data1/graphical_presets/quality.cfg \
-	data1/graphical_presets/maxquality.cfg 
+	data1/graphical_presets/maxquality.cfg
 
 tacticaldir = $(pkgdatadir)
 nobase_nodist_tactical_DATA = \
