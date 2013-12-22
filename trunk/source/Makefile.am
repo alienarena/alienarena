@@ -88,16 +88,16 @@ alienarena_LDADD = libgame.a \
 	$(XXF86DGA_LIBS) \
 	$(ZLIB_LIBS) \
 	-lstdc++
-	
+
 libode_a_CPPFLAGS = -I$(top_srcdir)/source/unix/odesrc/OPCODE \
 	-isystem $(top_srcdir)/source/unix \
 	-DdDOUBLE \
 	-DdTRIMESH_ENABLED \
 	-DdTRIMESH_OPCODE
-	
+
 # ODE has an additional custom "no debug" variable 	
 libode_a_CPPFLAGS += -DNDEBUG -DdNODEBUG
-	
+
 endif
 
 if BUILD_WIN32
@@ -174,6 +174,7 @@ alienarena_SOURCES = \
 	ref_gl/anorms.h \
 	ref_gl/anormtab.h \
 	ref_gl/glext.h \
+	ref_gl/glfuncs.h \
 	ref_gl/qgl.h \
 	ref_gl/r_bloom.c \
 	ref_gl/r_draw.c \
@@ -341,7 +342,7 @@ libgame_a_SOURCES =  \
 	game/q_shared.c \
 	game/q_shared.h \
 	qcommon/qfiles.h
-	
+
 #
 # Integrated Open Dynamic Engine (ODE) Library
 #
@@ -367,7 +368,7 @@ libode_a_SOURCES = \
 	unix/ode/odemath.h \
 	unix/ode/rotation.h \
 	unix/ode/timer.h
-	
+
 libode_a_SOURCES += \
 	unix/odesrc/array.cpp \
 	unix/odesrc/array.h \
@@ -445,7 +446,7 @@ libode_a_SOURCES += \
 	unix/odesrc/collision_trimesh_sphere.cpp \
 	unix/odesrc/collision_trimesh_trimesh.cpp \
 	unix/odesrc/collision_trimesh_trimesh_new.cpp
-	
+
 libode_a_SOURCES += \
 	unix/odesrc/joints/amotor.cpp \
 	unix/odesrc/joints/amotor.h \
@@ -479,7 +480,7 @@ libode_a_SOURCES += \
 	unix/odesrc/joints/slider.h \
 	unix/odesrc/joints/universal.cpp \
 	unix/odesrc/joints/universal.h
-	
+
 libode_a_SOURCES += \
 	unix/odesrc/OPCODE/OPC_AABBCollider.cpp \
 	unix/odesrc/OPCODE/OPC_AABBCollider.h \
@@ -533,8 +534,8 @@ libode_a_SOURCES += \
 	unix/odesrc/OPCODE/OPC_VolumeCollider.cpp \
 	unix/odesrc/OPCODE/OPC_VolumeCollider.h \
 	unix/odesrc/OPCODE/Stdafx.h
-	
-	
+
+
 libode_a_SOURCES += \
 	unix/odesrc/OPCODE/Ice/IceAABB.cpp \
 	unix/odesrc/OPCODE/Ice/IceAABB.h \
@@ -575,4 +576,4 @@ libode_a_SOURCES += \
 	unix/odesrc/OPCODE/Ice/IceTypes.h \
 	unix/odesrc/OPCODE/Ice/IceUtils.cpp \
 	unix/odesrc/OPCODE/Ice/IceUtils.h
-	
+
