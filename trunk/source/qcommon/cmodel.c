@@ -877,10 +877,11 @@ cmodel_t *CM_TerrainModel (int modelindex, char *name)
 	char *buf;
 	terraindata_t data;
 	
-	if (terrain_models[modelindex].active)
-		return NULL;
-	
 	ret = &terrain_cmodels[modelindex];
+	
+	if (terrain_models[modelindex].active)
+		return ret;
+	
 	ret->type = cmodel_terrain;
 	ret->tmodel = &terrain_models[modelindex];
 	
