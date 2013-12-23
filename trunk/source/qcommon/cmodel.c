@@ -1716,11 +1716,10 @@ void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (cons
 // FIXME: Also, the physics feel like crap on terrain.
 void CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
-	vec3_t		p2, mid;
-	float		idist;
+	vec3_t		p2;
 	float		frac;
 	int			i, j;
-	float		t1, t2, offset, offset2;
+	float		offset;
 	cplane_t	*plane;
 	
 	for (i = 0; i < 3; i++)
