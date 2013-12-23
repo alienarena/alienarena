@@ -269,8 +269,13 @@
     <ClCompile Include="$(SrcDir)win32\sys_win.c" />
     <ClCompile Include="$(SrcDir)win32\vid_dll.c" />
     <ClCompile Include="..\source\client\cl_updates.c" />
+    <ClCompile Include="..\source\qcommon\binheap.c" />
+    <ClCompile Include="..\source\qcommon\image.c" />
+    <ClCompile Include="..\source\qcommon\libgarland.c" />
     <ClCompile Include="..\source\qcommon\md5.c" />
     <ClCompile Include="..\source\qcommon\mdfour.c" />
+    <ClCompile Include="..\source\qcommon\terrain.c" />
+    <ClCompile Include="..\source\ref_gl\r_terrain.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(LocalIncludeDir)config.h" />
@@ -303,6 +308,8 @@
     <ClInclude Include="$(SrcDir)win32\conproc.h" />
     <ClInclude Include="$(SrcDir)win32\winquake.h" />
     <ClInclude Include="$(SrcDir)client\qal.h" />
+    <ClInclude Include="..\source\qcommon\binheap.h" />
+    <ClInclude Include="..\source\qcommon\libgarland.h" />
     <ClInclude Include="..\source\ref_gl\glfuncs.h" />
   </ItemGroup>
   <ItemGroup>
