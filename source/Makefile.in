@@ -325,10 +325,12 @@ am__alienarena_SOURCES_DIST = client/anorms.h client/cl_ents.c \
 	server/server.h server/sv_ccmds.c server/sv_ents.c \
 	server/sv_game.c server/sv_init.c server/sv_main.c \
 	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h unix/gl_glx.c unix/glw_unix.h \
-	unix/net_udp.c unix/qal_unix.c unix/qgl_unix.c unix/q_shunix.c \
-	unix/rw_unix.c unix/rw_unix.h unix/sys_unix.c unix/vid_so.c \
-	win32/conproc.c win32/conproc.h win32/glw_imp.c \
+	unix/glob.c unix/glob.h qcommon/binheap.c qcommon/binheap.h \
+	qcommon/image.c qcommon/libgarland.c qcommon/libgarland.h \
+	qcommon/terrain.c ref_gl/r_terrain.c unix/gl_glx.c \
+	unix/glw_unix.h unix/net_udp.c unix/qal_unix.c unix/qgl_unix.c \
+	unix/q_shunix.c unix/rw_unix.c unix/rw_unix.h unix/sys_unix.c \
+	unix/vid_so.c win32/conproc.c win32/conproc.h win32/glw_imp.c \
 	win32/glw_win.h win32/in_win.c win32/net_wins.c \
 	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
 	win32/sys_win.c win32/vid_dll.c win32/winquake.h \
@@ -415,7 +417,12 @@ am_alienarena_OBJECTS = client/alienarena-cl_ents.$(OBJEXT) \
 	server/alienarena-sv_send.$(OBJEXT) \
 	server/alienarena-sv_user.$(OBJEXT) \
 	server/alienarena-sv_world.$(OBJEXT) \
-	unix/alienarena-glob.$(OBJEXT) $(am__objects_1) \
+	unix/alienarena-glob.$(OBJEXT) \
+	qcommon/alienarena-binheap.$(OBJEXT) \
+	qcommon/alienarena-image.$(OBJEXT) \
+	qcommon/alienarena-libgarland.$(OBJEXT) \
+	qcommon/alienarena-terrain.$(OBJEXT) \
+	ref_gl/alienarena-r_terrain.$(OBJEXT) $(am__objects_1) \
 	$(am__objects_2)
 alienarena_OBJECTS = $(am_alienarena_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -460,7 +467,11 @@ am_alienarena_ded_OBJECTS = game/alienarena_ded-q_shared.$(OBJEXT) \
 	unix/alienarena_ded-glob.$(OBJEXT) \
 	unix/alienarena_ded-net_udp.$(OBJEXT) \
 	unix/alienarena_ded-q_shunix.$(OBJEXT) \
-	unix/alienarena_ded-sys_unix.$(OBJEXT)
+	unix/alienarena_ded-sys_unix.$(OBJEXT) \
+	qcommon/alienarena_ded-binheap.$(OBJEXT) \
+	qcommon/alienarena_ded-image.$(OBJEXT) \
+	qcommon/alienarena_ded-libgarland.$(OBJEXT) \
+	qcommon/alienarena_ded-terrain.$(OBJEXT)
 alienarena_ded_OBJECTS = $(am_alienarena_ded_OBJECTS)
 alienarena_ded_DEPENDENCIES = libgame.a
 AM_V_P = $(am__v_P_@AM_V@)
@@ -712,6 +723,8 @@ alienarena_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 @USE_SYSTEM_LIBODE_FALSE@	-DdTRIMESH_OPCODE -DNDEBUG -DdNODEBUG
 
 # common client sources
+
+# new sources for terrain
 alienarena_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	client/cl_http.c client/client.h client/cl_input.c \
 	client/cl_inv.c client/cl_irc.c client/cl_main.c \
@@ -743,44 +756,26 @@ alienarena_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	server/server.h server/sv_ccmds.c server/sv_ents.c \
 	server/sv_game.c server/sv_init.c server/sv_main.c \
 	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h $(am__append_5) $(am__append_6)
+	unix/glob.c unix/glob.h qcommon/binheap.c qcommon/binheap.h \
+	qcommon/image.c qcommon/libgarland.c qcommon/libgarland.h \
+	qcommon/terrain.c ref_gl/r_terrain.c $(am__append_5) \
+	$(am__append_6)
 
 # Dedicated Server sources (Unix only)
-alienarena_ded_SOURCES = \
-	client/anorms.h \
-	game/game.h \
-	game/q_shared.c \
-	game/q_shared.h \
-	null/cl_null.c \
-	qcommon/cmd.c \
-	qcommon/cmodel.c \
-	qcommon/common.c \
-	qcommon/crc.c \
-	qcommon/cvar.c \
-	qcommon/files.c \
-	qcommon/htable.c \
-	qcommon/htable.h \
-	qcommon/mdfour.c \
-	qcommon/net_chan.c \
-	qcommon/pmove.c \
-	qcommon/qcommon.h \
-	qcommon/qfiles.h \
-	server/server.h \
-	server/sv_ccmds.c \
-	server/sv_ents.c \
-	server/sv_game.c \
-	server/sv_init.c \
-	server/sv_main.c \
-	server/sv_send.c \
-	server/sv_user.c \
-	server/sv_world.c \
-	unix/glob.c \
-	unix/glob.h \
-	unix/net_udp.c \
-	unix/q_shunix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c
 
+# new sources for terrain
+alienarena_ded_SOURCES = client/anorms.h game/game.h game/q_shared.c \
+	game/q_shared.h null/cl_null.c qcommon/cmd.c qcommon/cmodel.c \
+	qcommon/common.c qcommon/crc.c qcommon/cvar.c qcommon/files.c \
+	qcommon/htable.c qcommon/htable.h qcommon/mdfour.c \
+	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
+	qcommon/qfiles.h server/server.h server/sv_ccmds.c \
+	server/sv_ents.c server/sv_game.c server/sv_init.c \
+	server/sv_main.c server/sv_send.c server/sv_user.c \
+	server/sv_world.c unix/glob.c unix/glob.h unix/net_udp.c \
+	unix/q_shunix.c unix/rw_unix.h unix/sys_unix.c \
+	qcommon/binheap.c qcommon/binheap.h qcommon/image.c \
+	qcommon/libgarland.c qcommon/libgarland.h qcommon/terrain.c
 
 # Game module sources
 libgame_a_SOURCES = \
@@ -1635,6 +1630,16 @@ unix/$(DEPDIR)/$(am__dirstamp):
 	@: > unix/$(DEPDIR)/$(am__dirstamp)
 unix/alienarena-glob.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena-binheap.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena-image.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena-libgarland.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena-terrain.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+ref_gl/alienarena-r_terrain.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
 unix/alienarena-gl_glx.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
 unix/alienarena-net_udp.$(OBJEXT): unix/$(am__dirstamp) \
@@ -1733,6 +1738,14 @@ unix/alienarena_ded-q_shunix.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
 unix/alienarena_ded-sys_unix.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena_ded-binheap.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena_ded-image.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena_ded-libgarland.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/alienarena_ded-terrain.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
 
 alienarena-ded$(EXEEXT): $(alienarena_ded_OBJECTS) $(alienarena_ded_DEPENDENCIES) $(EXTRA_alienarena_ded_DEPENDENCIES) 
 	@rm -f alienarena-ded$(EXEEXT)
@@ -1819,6 +1832,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_nodes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_spawn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@null/$(DEPDIR)/alienarena_ded-cl_null.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-binheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-cmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-cmodel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-common.Po@am__quote@
@@ -1826,10 +1840,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-cvar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-files.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-htable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-libgarland.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-mdfour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-net_chan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-pmove.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-terrain.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-binheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-cmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-cmodel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-common.Po@am__quote@
@@ -1837,9 +1855,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-cvar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-files.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-htable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-libgarland.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-mdfour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-net_chan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-pmove.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-terrain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_bloom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_image.Po@am__quote@
@@ -1858,6 +1879,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_shadowmaps.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_shadows.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_surf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_terrain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_text.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_ttf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_varray.Po@am__quote@
@@ -3000,6 +3022,76 @@ unix/alienarena-glob.obj: unix/glob.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/alienarena-glob.obj `if test -f 'unix/glob.c'; then $(CYGPATH_W) 'unix/glob.c'; else $(CYGPATH_W) '$(srcdir)/unix/glob.c'; fi`
 
+qcommon/alienarena-binheap.o: qcommon/binheap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-binheap.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena-binheap.Tpo -c -o qcommon/alienarena-binheap.o `test -f 'qcommon/binheap.c' || echo '$(srcdir)/'`qcommon/binheap.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-binheap.Tpo qcommon/$(DEPDIR)/alienarena-binheap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/binheap.c' object='qcommon/alienarena-binheap.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-binheap.o `test -f 'qcommon/binheap.c' || echo '$(srcdir)/'`qcommon/binheap.c
+
+qcommon/alienarena-binheap.obj: qcommon/binheap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-binheap.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena-binheap.Tpo -c -o qcommon/alienarena-binheap.obj `if test -f 'qcommon/binheap.c'; then $(CYGPATH_W) 'qcommon/binheap.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/binheap.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-binheap.Tpo qcommon/$(DEPDIR)/alienarena-binheap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/binheap.c' object='qcommon/alienarena-binheap.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-binheap.obj `if test -f 'qcommon/binheap.c'; then $(CYGPATH_W) 'qcommon/binheap.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/binheap.c'; fi`
+
+qcommon/alienarena-image.o: qcommon/image.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-image.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena-image.Tpo -c -o qcommon/alienarena-image.o `test -f 'qcommon/image.c' || echo '$(srcdir)/'`qcommon/image.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-image.Tpo qcommon/$(DEPDIR)/alienarena-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/image.c' object='qcommon/alienarena-image.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-image.o `test -f 'qcommon/image.c' || echo '$(srcdir)/'`qcommon/image.c
+
+qcommon/alienarena-image.obj: qcommon/image.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-image.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena-image.Tpo -c -o qcommon/alienarena-image.obj `if test -f 'qcommon/image.c'; then $(CYGPATH_W) 'qcommon/image.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/image.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-image.Tpo qcommon/$(DEPDIR)/alienarena-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/image.c' object='qcommon/alienarena-image.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-image.obj `if test -f 'qcommon/image.c'; then $(CYGPATH_W) 'qcommon/image.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/image.c'; fi`
+
+qcommon/alienarena-libgarland.o: qcommon/libgarland.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-libgarland.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena-libgarland.Tpo -c -o qcommon/alienarena-libgarland.o `test -f 'qcommon/libgarland.c' || echo '$(srcdir)/'`qcommon/libgarland.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-libgarland.Tpo qcommon/$(DEPDIR)/alienarena-libgarland.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/libgarland.c' object='qcommon/alienarena-libgarland.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-libgarland.o `test -f 'qcommon/libgarland.c' || echo '$(srcdir)/'`qcommon/libgarland.c
+
+qcommon/alienarena-libgarland.obj: qcommon/libgarland.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-libgarland.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena-libgarland.Tpo -c -o qcommon/alienarena-libgarland.obj `if test -f 'qcommon/libgarland.c'; then $(CYGPATH_W) 'qcommon/libgarland.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/libgarland.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-libgarland.Tpo qcommon/$(DEPDIR)/alienarena-libgarland.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/libgarland.c' object='qcommon/alienarena-libgarland.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-libgarland.obj `if test -f 'qcommon/libgarland.c'; then $(CYGPATH_W) 'qcommon/libgarland.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/libgarland.c'; fi`
+
+qcommon/alienarena-terrain.o: qcommon/terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-terrain.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena-terrain.Tpo -c -o qcommon/alienarena-terrain.o `test -f 'qcommon/terrain.c' || echo '$(srcdir)/'`qcommon/terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-terrain.Tpo qcommon/$(DEPDIR)/alienarena-terrain.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/terrain.c' object='qcommon/alienarena-terrain.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-terrain.o `test -f 'qcommon/terrain.c' || echo '$(srcdir)/'`qcommon/terrain.c
+
+qcommon/alienarena-terrain.obj: qcommon/terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena-terrain.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena-terrain.Tpo -c -o qcommon/alienarena-terrain.obj `if test -f 'qcommon/terrain.c'; then $(CYGPATH_W) 'qcommon/terrain.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/terrain.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena-terrain.Tpo qcommon/$(DEPDIR)/alienarena-terrain.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/terrain.c' object='qcommon/alienarena-terrain.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena-terrain.obj `if test -f 'qcommon/terrain.c'; then $(CYGPATH_W) 'qcommon/terrain.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/terrain.c'; fi`
+
+ref_gl/alienarena-r_terrain.o: ref_gl/r_terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/alienarena-r_terrain.o -MD -MP -MF ref_gl/$(DEPDIR)/alienarena-r_terrain.Tpo -c -o ref_gl/alienarena-r_terrain.o `test -f 'ref_gl/r_terrain.c' || echo '$(srcdir)/'`ref_gl/r_terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/alienarena-r_terrain.Tpo ref_gl/$(DEPDIR)/alienarena-r_terrain.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ref_gl/r_terrain.c' object='ref_gl/alienarena-r_terrain.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/alienarena-r_terrain.o `test -f 'ref_gl/r_terrain.c' || echo '$(srcdir)/'`ref_gl/r_terrain.c
+
+ref_gl/alienarena-r_terrain.obj: ref_gl/r_terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/alienarena-r_terrain.obj -MD -MP -MF ref_gl/$(DEPDIR)/alienarena-r_terrain.Tpo -c -o ref_gl/alienarena-r_terrain.obj `if test -f 'ref_gl/r_terrain.c'; then $(CYGPATH_W) 'ref_gl/r_terrain.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_terrain.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/alienarena-r_terrain.Tpo ref_gl/$(DEPDIR)/alienarena-r_terrain.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ref_gl/r_terrain.c' object='ref_gl/alienarena-r_terrain.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/alienarena-r_terrain.obj `if test -f 'ref_gl/r_terrain.c'; then $(CYGPATH_W) 'ref_gl/r_terrain.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_terrain.c'; fi`
+
 unix/alienarena-gl_glx.o: unix/gl_glx.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/alienarena-gl_glx.o -MD -MP -MF unix/$(DEPDIR)/alienarena-gl_glx.Tpo -c -o unix/alienarena-gl_glx.o `test -f 'unix/gl_glx.c' || echo '$(srcdir)/'`unix/gl_glx.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/alienarena-gl_glx.Tpo unix/$(DEPDIR)/alienarena-gl_glx.Po
@@ -3573,6 +3665,62 @@ unix/alienarena_ded-sys_unix.obj: unix/sys_unix.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/sys_unix.c' object='unix/alienarena_ded-sys_unix.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/alienarena_ded-sys_unix.obj `if test -f 'unix/sys_unix.c'; then $(CYGPATH_W) 'unix/sys_unix.c'; else $(CYGPATH_W) '$(srcdir)/unix/sys_unix.c'; fi`
+
+qcommon/alienarena_ded-binheap.o: qcommon/binheap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-binheap.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-binheap.Tpo -c -o qcommon/alienarena_ded-binheap.o `test -f 'qcommon/binheap.c' || echo '$(srcdir)/'`qcommon/binheap.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-binheap.Tpo qcommon/$(DEPDIR)/alienarena_ded-binheap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/binheap.c' object='qcommon/alienarena_ded-binheap.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-binheap.o `test -f 'qcommon/binheap.c' || echo '$(srcdir)/'`qcommon/binheap.c
+
+qcommon/alienarena_ded-binheap.obj: qcommon/binheap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-binheap.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-binheap.Tpo -c -o qcommon/alienarena_ded-binheap.obj `if test -f 'qcommon/binheap.c'; then $(CYGPATH_W) 'qcommon/binheap.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/binheap.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-binheap.Tpo qcommon/$(DEPDIR)/alienarena_ded-binheap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/binheap.c' object='qcommon/alienarena_ded-binheap.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-binheap.obj `if test -f 'qcommon/binheap.c'; then $(CYGPATH_W) 'qcommon/binheap.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/binheap.c'; fi`
+
+qcommon/alienarena_ded-image.o: qcommon/image.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-image.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-image.Tpo -c -o qcommon/alienarena_ded-image.o `test -f 'qcommon/image.c' || echo '$(srcdir)/'`qcommon/image.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-image.Tpo qcommon/$(DEPDIR)/alienarena_ded-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/image.c' object='qcommon/alienarena_ded-image.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-image.o `test -f 'qcommon/image.c' || echo '$(srcdir)/'`qcommon/image.c
+
+qcommon/alienarena_ded-image.obj: qcommon/image.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-image.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-image.Tpo -c -o qcommon/alienarena_ded-image.obj `if test -f 'qcommon/image.c'; then $(CYGPATH_W) 'qcommon/image.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/image.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-image.Tpo qcommon/$(DEPDIR)/alienarena_ded-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/image.c' object='qcommon/alienarena_ded-image.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-image.obj `if test -f 'qcommon/image.c'; then $(CYGPATH_W) 'qcommon/image.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/image.c'; fi`
+
+qcommon/alienarena_ded-libgarland.o: qcommon/libgarland.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-libgarland.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-libgarland.Tpo -c -o qcommon/alienarena_ded-libgarland.o `test -f 'qcommon/libgarland.c' || echo '$(srcdir)/'`qcommon/libgarland.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-libgarland.Tpo qcommon/$(DEPDIR)/alienarena_ded-libgarland.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/libgarland.c' object='qcommon/alienarena_ded-libgarland.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-libgarland.o `test -f 'qcommon/libgarland.c' || echo '$(srcdir)/'`qcommon/libgarland.c
+
+qcommon/alienarena_ded-libgarland.obj: qcommon/libgarland.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-libgarland.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-libgarland.Tpo -c -o qcommon/alienarena_ded-libgarland.obj `if test -f 'qcommon/libgarland.c'; then $(CYGPATH_W) 'qcommon/libgarland.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/libgarland.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-libgarland.Tpo qcommon/$(DEPDIR)/alienarena_ded-libgarland.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/libgarland.c' object='qcommon/alienarena_ded-libgarland.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-libgarland.obj `if test -f 'qcommon/libgarland.c'; then $(CYGPATH_W) 'qcommon/libgarland.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/libgarland.c'; fi`
+
+qcommon/alienarena_ded-terrain.o: qcommon/terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-terrain.o -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-terrain.Tpo -c -o qcommon/alienarena_ded-terrain.o `test -f 'qcommon/terrain.c' || echo '$(srcdir)/'`qcommon/terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-terrain.Tpo qcommon/$(DEPDIR)/alienarena_ded-terrain.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/terrain.c' object='qcommon/alienarena_ded-terrain.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-terrain.o `test -f 'qcommon/terrain.c' || echo '$(srcdir)/'`qcommon/terrain.c
+
+qcommon/alienarena_ded-terrain.obj: qcommon/terrain.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/alienarena_ded-terrain.obj -MD -MP -MF qcommon/$(DEPDIR)/alienarena_ded-terrain.Tpo -c -o qcommon/alienarena_ded-terrain.obj `if test -f 'qcommon/terrain.c'; then $(CYGPATH_W) 'qcommon/terrain.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/terrain.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/alienarena_ded-terrain.Tpo qcommon/$(DEPDIR)/alienarena_ded-terrain.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='qcommon/terrain.c' object='qcommon/alienarena_ded-terrain.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_ded_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/alienarena_ded-terrain.obj `if test -f 'qcommon/terrain.c'; then $(CYGPATH_W) 'qcommon/terrain.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/terrain.c'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\

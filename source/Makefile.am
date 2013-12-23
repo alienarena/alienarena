@@ -223,6 +223,16 @@ alienarena_SOURCES = \
 	unix/glob.c \
 	unix/glob.h
 
+# new sources for terrain
+alienarena_SOURCES += \
+	qcommon/binheap.c \
+	qcommon/binheap.h \
+	qcommon/image.c \
+	qcommon/libgarland.c \
+	qcommon/libgarland.h \
+	qcommon/terrain.c \
+	ref_gl/r_terrain.c
+
 # Unix Client sources
 if BUILD_UNIX
 alienarena_SOURCES += \
@@ -291,6 +301,16 @@ alienarena_ded_SOURCES = \
 	unix/q_shunix.c \
 	unix/rw_unix.h \
 	unix/sys_unix.c
+
+# new sources for terrain
+alienarena_ded_SOURCES += \
+	qcommon/binheap.c \
+	qcommon/binheap.h \
+	qcommon/image.c \
+	qcommon/libgarland.c \
+	qcommon/libgarland.h \
+	qcommon/terrain.c
+
 
 # Game module sources
 libgame_a_SOURCES =  \
