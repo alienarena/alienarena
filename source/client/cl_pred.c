@@ -105,11 +105,6 @@ void CL_ClipMoveToEntities ( vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 			headnode = cmodel->headnode;
 			angles = ent->angles;
 		}
-		else if (cl.model_clip[ent->modelindex] && cl.model_clip[ent->modelindex]->type == cmodel_terrain)
-		{
-			headnode = CM_HeadnodeForBox (cl.model_clip[ent->modelindex]->mins, cl.model_clip[ent->modelindex]->maxs);
-			angles = vec3_origin;	// boxes don't rotate
-		}
 		else
 		{	// encoded bbox
 			x = 8*(ent->solid & 31);
