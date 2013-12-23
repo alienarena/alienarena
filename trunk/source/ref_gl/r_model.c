@@ -571,7 +571,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 						RS_ReadyScript( mod->script );
 				}
 			}
-
+			
 			return mod;
 		}
 	}
@@ -639,9 +639,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	if (is_terrain)
 	{
 		Mod_LoadTerrainModel (mod, buf);
-		return mod;
 	}
-	if (is_iqm)
+	else if (is_iqm)
 	{
 		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
 			Com_Error (ERR_DROP,"Mod_NumForName: wrong fileid for %s", mod->name);
@@ -666,7 +665,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		}
 	}
 
-	loadmodel->extradatasize = Hunk_End ();
+	if (!is_terrain)
+		loadmodel->extradatasize = Hunk_End ();
 
 	FS_FreeFile (buf);
 
@@ -2314,16 +2314,21 @@ void R_EndRegistration (void)
 
 /*
 ================
-Mod_Free - should be able to handle every model type
+Mod_Free - should be able to handle every model type, including uninitialized
+models.
 ================
 */
 void R_Mesh_FreeVBO (model_t *mod);
 void Mod_Free (model_t *mod)
 {
+	// mod_bad (uninitialized models memsetted to 0) will have nothing done to
+	// them here
 	if (mod->type > mod_brush)
 		R_Mesh_FreeVBO (mod);
-	// New model types go here
-	Hunk_Free (mod->extradata);
+	
+	if (mod->extradatasize)
+		Hunk_Free (mod->extradata);
+	
 	memset (mod, 0, sizeof(*mod));
 }
 
@@ -2337,10 +2342,7 @@ void Mod_FreeAll (void)
 	int		i;
 
 	for (i=0 ; i<mod_numknown ; i++)
-	{
-		if (mod_known[i].extradatasize)
-			Mod_Free (&mod_known[i]);
-	}
+		Mod_Free (&mod_known[i]);
 }
 
 
