@@ -187,7 +187,8 @@ alienarena_SOURCES = \
 	unix/rw_unix.h \
 	unix/sys_unix.c \
 	unix/vid_so.c \
-	unix/files_unix.c
+	unix/files_unix.c \
+	unix/custom.h
 
 
 alienarena_ded_SOURCES = \
@@ -223,7 +224,8 @@ alienarena_ded_SOURCES = \
 	unix/q_shunix.c \
 	unix/rw_unix.h \
 	unix/sys_unix.c \
-	unix/files_unix.c
+	unix/files_unix.c \
+	unix/custom.h
 
 
 aa_tactical_demo_SOURCES = \
@@ -338,10 +340,12 @@ aa_tactical_demo_SOURCES = \
 	unix/rw_unix.h \
 	unix/sys_unix.c \
 	unix/vid_so.c \
-	unix/files_unix.c
+	unix/files_unix.c \
+	unix/custom.h
 
 
 libgame_a_SOURCES =  \
+	unix/custom.h \
 	client/anorms.h \
 	game/acesrc/acebot_ai.c \
 	game/acesrc/acebot_cmds.c \
