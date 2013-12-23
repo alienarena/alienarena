@@ -888,7 +888,7 @@ cmodel_t *CM_TerrainModel (int modelindex, char *name)
 	FS_LoadFile (name, (void**)&buf);
 	
 	if (!buf)
-		Com_Error (ERR_DROP, "CM_TerrainModel_Bounds: Missing terrain model %s!", name);
+		Com_Error (ERR_DROP, "CM_TerrainModel: Missing terrain model %s!", name);
 	
 	// This ends up being 1/4 as much detail as is used for rendering. You 
 	// need a surprisingly large amount to maintain accurate physics.
