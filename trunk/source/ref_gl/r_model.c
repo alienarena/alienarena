@@ -57,23 +57,7 @@ char map_music[MAX_OSPATH];
 char map_music_sec[MAX_OSPATH];
 #endif
 
-char		map_entitystring[MAX_MAP_ENTSTRING];
-int			numentitychars;
 byte	*mod_base;
-
-/*
-=================
-Mod_LoadEntityString
-=================
-*/
-void Mod_LoadEntityStrn (lump_t *l)
-{
-	numentitychars = l->filelen;
-	if (l->filelen > MAX_MAP_ENTSTRING)
-		Sys_Error ("Map has too large entity lump");
-
-	memcpy (map_entitystring, mod_base + l->fileofs, l->filelen);
-}
 
 extern char	*CM_EntityString (void);
 
@@ -156,13 +140,10 @@ static void R_ParseLightEntities (void)
 {
 
 	int			i;
-	char		*entString;
 	char		*buf, *tok;
 	char		block[2048], *bl;
 	vec3_t		origin;
 	float		intensity;
-
-	entString = map_entitystring;
 
 	buf = CM_EntityString();
 	while (1){
@@ -244,12 +225,9 @@ static void R_FindSunTarget (void)
 {
 
 	int			i;
-	char		*entString;
 	char		*buf, *tok;
 	char		block[2048], *bl;
 	
-	entString = map_entitystring;
-
 	buf = CM_EntityString();
 	while (1){
 		tok = Com_ParseExt(&buf, true);
@@ -312,7 +290,6 @@ static void R_FindSunEntity (void)
 {
 
 	int			i;
-	char		*entString;
 	char		*buf, *tok;
 	char		block[2048], *bl;
 
@@ -322,8 +299,6 @@ static void R_FindSunEntity (void)
 	r_sunLight = (sunLight_t*)malloc(sizeof(sunLight_t));
 
 	r_sunLight->has_Sun = false;
-
-	entString = map_entitystring;
 
 	buf = CM_EntityString();
 	while (1){
@@ -1913,7 +1888,6 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
 	// load into heap
-	Mod_LoadEntityStrn (&header->lumps[LUMP_ENTITIES]);
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
