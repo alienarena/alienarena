@@ -579,36 +579,36 @@
 }
 // entity 2
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/terraintest/plateau1.terrain"
-}
-// entity 3
-{
 "classname" "light"
 "origin" "0.000000 0.000000 1728.000000"
 "light" "700"
 }
-// entity 4
+// entity 3
 {
 "classname" "light"
 "origin" "-1024.000000 -1024.000000 1728.000000"
 "light" "700"
 }
-// entity 5
+// entity 4
 {
 "classname" "light"
 "origin" "-1024.000000 1024.000000 1728.000000"
 "light" "700"
 }
-// entity 6
+// entity 5
 {
 "classname" "light"
 "origin" "1024.000000 -1024.000000 1728.000000"
 "light" "700"
 }
-// entity 7
+// entity 6
 {
 "classname" "light"
 "origin" "1024.000000 1024.000000 1728.000000"
 "light" "700"
+}
+// entity 7
+{
+"classname" "misc_terrainmodel"
+"model" "maps/meshes/terraintest/plateau1.terrain"
 }
