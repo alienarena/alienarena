@@ -59,8 +59,6 @@ char map_music_sec[MAX_OSPATH];
 
 byte	*mod_base;
 
-extern char	*CM_EntityString (void);
-
 void R_RegisterLightGroups (void)
 {
 	int			i;
@@ -128,170 +126,116 @@ void R_RegisterLightGroups (void)
 	Com_Printf("Condensed ^2%i worldlights into ^2%i lightgroups\n", r_numWorldLights, r_lightgroups);
 }
 
-/*
-================
-R_ParseLightEntities
+static void R_ParseLightEntity (char *match, char *block)
+{
+	int		i;
+	char	*tok, *bl;
+	vec3_t	origin;
+	float	intensity;
+	
+	if (r_numWorldLights == MAX_LIGHTS)
+		return;
+	
+	VectorClear(origin);
+	intensity = 0;
 
-parses light entity string
-================
-*/
+	bl = block;
+	while (1){
+		tok = Com_ParseExt(&bl, true);
+		if (!tok[0])
+			break;		// End of data
+
+		if (!Q_strcasecmp("origin", tok)){
+			for (i = 0; i < 3; i++){
+				tok = Com_ParseExt(&bl, false);
+				origin[i] = atof(tok);
+			}
+		}
+		else if (!Q_strcasecmp("light", tok) || !Q_strcasecmp("_light", tok)){
+			tok = Com_ParseExt(&bl, false);
+			intensity = atof(tok);
+		}
+		else
+			Com_SkipRestOfLine(&bl);
+	}
+
+	if (!intensity)
+		intensity = 150;
+
+	// Add it to the list
+	VectorCopy(origin, r_worldLights[r_numWorldLights].origin);
+	r_worldLights[r_numWorldLights].intensity = intensity/2;
+	r_worldLights[r_numWorldLights].surf = NULL;
+	r_numWorldLights++;
+}
 
 static void R_ParseLightEntities (void)
 {
+	static const char *classnames[] = {"light"};
+	
+	CM_FilterParseEntities ("classname", 1, classnames, R_ParseLightEntity);
+}
 
-	int			i;
-	char		*buf, *tok;
-	char		block[2048], *bl;
-	vec3_t		origin;
-	float		intensity;
-
-	buf = CM_EntityString();
+static void R_ParseSunTarget (char *match, char *block)
+{
+	int		i;
+	char	*bl, *tok;
+	
+	bl = block;
 	while (1){
-		tok = Com_ParseExt(&buf, true);
+		tok = Com_ParseExt(&bl, true);
 		if (!tok[0])
-			break;			// End of data
+			break;		// End of data
 
-		if (Q_strcasecmp(tok, "{"))
-			continue;		// Should never happen!
-
-		// Parse the text inside brackets
-		block[0] = 0;
-		do {
-			tok = Com_ParseExt(&buf, false);
-			if (!Q_strcasecmp(tok, "}"))
-				break;		// Done
-
-			if (!tok[0])	// Newline
-				Q_strcat(block, "\n", sizeof(block));
-			else {			// Token
-				Q_strcat(block, " ", sizeof(block));
-				Q_strcat(block, tok, sizeof(block));
-			}
-		} while (buf);
-
-		// Now look for "classname"
-		tok = strstr(block, "classname");
-		if (!tok)
-			continue;		// Not found
-
-		// Skip over "classname" and whitespace
-		tok += strlen("classname");
-		while (*tok && *tok == ' ')
-			tok++;
-
-		// Next token must be "light"
-		if (Q_strnicmp(tok, "light", 5))
-			continue;		// Not "light"
-
-		// Finally parse the light entity
-		VectorClear(origin);
-		intensity = 0;
-
-		bl = block;
-		while (1){
-			tok = Com_ParseExt(&bl, true);
-			if (!tok[0])
-				break;		// End of data
-
-			if (!Q_strcasecmp("origin", tok)){
-				for (i = 0; i < 3; i++){
-					tok = Com_ParseExt(&bl, false);
-					origin[i] = atof(tok);
-				}
-			}
-			else if (!Q_strcasecmp("light", tok) || !Q_strcasecmp("_light", tok)){
+		if (!Q_strcasecmp("origin", tok)){
+			for (i = 0; i < 3; i++){
 				tok = Com_ParseExt(&bl, false);
-				intensity = atof(tok);
+				r_sunLight->target[i] = atof(tok);
 			}
-			else
-				Com_SkipRestOfLine(&bl);
+			//Com_Printf("Found sun target@ : %4.2f %4.2f %4.2f\n", r_sunLight->target[0], r_sunLight->target[1], r_sunLight->target[2]);
 		}
-
-		if (!intensity)
-			intensity = 150;
-
-		// Add it to the list
-		if (r_numWorldLights == MAX_LIGHTS)
-			break;
-
-		VectorCopy(origin, r_worldLights[r_numWorldLights].origin);
-		r_worldLights[r_numWorldLights].intensity = intensity/2;
-		r_worldLights[r_numWorldLights].surf = NULL;
-		r_numWorldLights++;
+		else
+			Com_SkipRestOfLine(&bl);
 	}
 }
 
 static void R_FindSunTarget (void)
 {
-
-	int			i;
-	char		*buf, *tok;
-	char		block[2048], *bl;
+	static const char *targetnames[] = {"moonspot", "sunspot"};
 	
-	buf = CM_EntityString();
+	CM_FilterParseEntities ("targetname", 2, targetnames, R_ParseSunTarget);
+}
+
+static void R_ParseSunEntity (char *match, char *block)
+{
+	int		i;
+	char	*bl, *tok;
+	
+	strcpy(r_sunLight->targetname, match);
+
+	bl = block;
 	while (1){
-		tok = Com_ParseExt(&buf, true);
+		tok = Com_ParseExt(&bl, true);
 		if (!tok[0])
-			break;			// End of data
+			break;		// End of data
 
-		if (Q_strcasecmp(tok, "{"))
-			continue;		// Should never happen!
-
-		// Parse the text inside brackets
-		block[0] = 0;
-		do {
-			tok = Com_ParseExt(&buf, false);
-			if (!Q_strcasecmp(tok, "}"))
-				break;		// Done
-
-			if (!tok[0])	// Newline
-				Q_strcat(block, "\n", sizeof(block));
-			else {			// Token
-				Q_strcat(block, " ", sizeof(block));
-				Q_strcat(block, tok, sizeof(block));
+		if (!Q_strcasecmp("origin", tok)){
+			for (i = 0; i < 3; i++){
+				tok = Com_ParseExt(&bl, false);
+				r_sunLight->origin[i] = atof(tok);
+				r_sunLight->target[i] = 0; //default to this
 			}
-		} while (buf);
-
-		// Now look for "targetname"
-		tok = strstr(block, "targetname");
-		if (!tok)
-			continue;		// Not found
-
-		// Skip over "target" and whitespace
-		tok += strlen("targetname");
-		while (*tok && *tok == ' ')
-			tok++;
-
-		// Next token must match the sun targetname
-		if (Q_strnicmp(tok, "moonspot", 8) && Q_strnicmp(tok, "sunspot", 7))
-			continue;
-	
-		// Finally parse the sun target entity
-		bl = block;
-		while (1){
-			tok = Com_ParseExt(&bl, true);
-			if (!tok[0])
-				break;		// End of data
-
-			if (!Q_strcasecmp("origin", tok)){
-				for (i = 0; i < 3; i++){
-					tok = Com_ParseExt(&bl, false);
-					r_sunLight->target[i] = atof(tok);
-				}
-				//Com_Printf("Found sun target@ : %4.2f %4.2f %4.2f\n", r_sunLight->target[0], r_sunLight->target[1], r_sunLight->target[2]);
-			}
-			else
-				Com_SkipRestOfLine(&bl);
+			r_sunLight->has_Sun = true;
+			//Com_Printf("Found sun @ : %4.2f %4.2f %4.2f\n", r_sunLight->origin[0], r_sunLight->origin[1], r_sunLight->origin[2]);
 		}
+		else
+			Com_SkipRestOfLine(&bl);
 	}
 }
 
 static void R_FindSunEntity (void)
 {
-
-	int			i;
-	char		*buf, *tok;
-	char		block[2048], *bl;
+	static const char *targets[] = {"moonspot", "sunspot"};
 
 	if(r_sunLight)
 		free(r_sunLight); //free at level load
@@ -299,67 +243,9 @@ static void R_FindSunEntity (void)
 	r_sunLight = (sunLight_t*)malloc(sizeof(sunLight_t));
 
 	r_sunLight->has_Sun = false;
-
-	buf = CM_EntityString();
-	while (1){
-		tok = Com_ParseExt(&buf, true);
-		if (!tok[0])
-			break;			// End of data
-
-		if (Q_strcasecmp(tok, "{"))
-			continue;		// Should never happen!
-
-		// Parse the text inside brackets
-		block[0] = 0;
-		do {
-			tok = Com_ParseExt(&buf, false);
-			if (!Q_strcasecmp(tok, "}"))
-				break;		// Done
-
-			if (!tok[0])	// Newline
-				Q_strcat(block, "\n", sizeof(block));
-			else {			// Token
-				Q_strcat(block, " ", sizeof(block));
-				Q_strcat(block, tok, sizeof(block));
-			}
-		} while (buf);
-
-		// Now look for "target"
-		tok = strstr(block, "target");
-		if (!tok)
-			continue;		// Not found
-
-		// Skip over "target" and whitespace
-		tok += strlen("target");
-		while (*tok && *tok == ' ')
-			tok++;
-
-		// Next token must be a valid sun name( to do - maybe read this from the map header if possible?)
-		if (Q_strnicmp(tok, "moonspot", 8) && Q_strnicmp(tok, "sunspot", 7))
-			continue;
-
-		strcpy(r_sunLight->targetname, tok);
 	
-		// Finally parse the sun entity
-		bl = block;
-		while (1){
-			tok = Com_ParseExt(&bl, true);
-			if (!tok[0])
-				break;		// End of data
+	CM_FilterParseEntities ("target", 2, targets, R_ParseSunEntity);
 
-			if (!Q_strcasecmp("origin", tok)){
-				for (i = 0; i < 3; i++){
-					tok = Com_ParseExt(&bl, false);
-					r_sunLight->origin[i] = atof(tok);
-					r_sunLight->target[i] = 0; //default to this
-				}
-				r_sunLight->has_Sun = true;
-				//Com_Printf("Found sun @ : %4.2f %4.2f %4.2f\n", r_sunLight->origin[0], r_sunLight->origin[1], r_sunLight->origin[2]);
-			}
-			else
-				Com_SkipRestOfLine(&bl);
-		}
-	}
 	if(r_sunLight->has_Sun)
 		R_FindSunTarget(); //find target
 }
