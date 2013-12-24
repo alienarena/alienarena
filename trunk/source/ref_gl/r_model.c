@@ -169,7 +169,9 @@ static void R_ParseLightEntity (char *match, char *block)
 	r_numWorldLights++;
 }
 
-static void R_ParseTerrainEntity (char *match, char *block)
+// NOTE: If you update this, you may also want to update
+// CM_ParseTerrainModelEntity in qcommon/cmodel.c.
+static void R_ParseTerrainModelEntity (char *match, char *block)
 {
 	entity_t	*ent;
 	int			i;
@@ -191,8 +193,21 @@ static void R_ParseTerrainEntity (char *match, char *block)
 
 		if (!Q_strcasecmp("model", tok))
 		{
-			tok = Com_ParseExt (&bl, false);
-			ent->model = R_RegisterModel (tok);
+			ent->model = R_RegisterModel (Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angles", tok))
+		{
+			for (i = 0; i < 3; i++)
+				ent->angles[i] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angle", tok))
+		{
+			ent->angles[YAW] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("origin", tok))
+		{
+			for (i = 0; i < 3; i++)
+				ent->origin[i] = atof(Com_ParseExt(&bl, false));
 		}
 		else
 			Com_SkipRestOfLine(&bl);
@@ -204,7 +219,7 @@ static void R_ParseTerrainEntities (void)
 	static const char *classnames[] = {"misc_terrainmodel"};
 	
 	num_terrain_entities = 0;
-	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainEntity);
+	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainModelEntity);
 }
 
 static void R_ParseSunTarget (char *match, char *block)

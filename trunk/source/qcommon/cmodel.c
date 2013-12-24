@@ -617,10 +617,11 @@ void CMod_LoadAlternateEntityData (char *entity_file_name)
 
 //=======================================================================
 
-void CM_LoadTerrainModel (char *name)
+void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 {
-	
-	int i;
+	float cosyaw, cospitch, cosroll, sinyaw, sinpitch, sinroll;
+	float rotation_matrix[3][3];
+	int i, j, k;
 	cterrainmodel_t *mod;
 	char *buf;
 	terraindata_t data;
@@ -634,6 +635,23 @@ void CM_LoadTerrainModel (char *name)
 	
 	if (!buf)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
+	
+	cosyaw = cos (DEG2RAD (angles[YAW]));
+	cospitch = cos (DEG2RAD (angles[PITCH]));
+	cosroll = cos (DEG2RAD (angles[ROLL]));
+	sinyaw = sin (DEG2RAD (angles[YAW]));
+	sinpitch = sin (DEG2RAD (angles[PITCH]));
+	sinroll = sin (DEG2RAD (angles[ROLL]));
+	
+	rotation_matrix[0][0] = cosyaw*cospitch;
+	rotation_matrix[0][1] = cosyaw*sinpitch*sinroll - sinyaw*cosroll;
+	rotation_matrix[0][2] = cosyaw*sinpitch*cosroll + sinyaw*sinroll;
+	rotation_matrix[1][0] = sinyaw*cospitch;
+	rotation_matrix[1][1] = sinyaw*sinpitch*sinroll + cosyaw*cosroll;
+	rotation_matrix[1][2] = sinyaw*sinpitch*cosroll - cosyaw*sinroll;
+	rotation_matrix[2][0] = -sinpitch;
+	rotation_matrix[2][1] = cospitch*sinroll;
+	rotation_matrix[2][2] = cospitch*cosroll;
 	
 	// This ends up being 1/4 as much detail as is used for rendering. You 
 	// need a surprisingly large amount to maintain accurate physics.
@@ -650,8 +668,15 @@ void CM_LoadTerrainModel (char *name)
 	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
 	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
 	
-	for (i = 0; i < 3*data.num_vertices; i++)
-		mod->verts[i] = data.vert_positions[i];
+	for (i = 0; i < data.num_vertices; i++)
+	{
+		for (j = 0; j < 3; j++)
+		{
+			mod->verts[3*i+j] = origin[j];
+			for (k = 0; k < 3; k++)
+				mod->verts[3*i+j] += data.vert_positions[3*i+k] * rotation_matrix[j][k];
+		}
+	}
 	
 	for (i = 0; i < data.num_triangles; i++)
 	{
@@ -676,10 +701,16 @@ void CM_LoadTerrainModel (char *name)
 	FS_FreeFile (buf);
 }
 
+// NOTE: If you update this, you may also want to update
+// R_ParseTerrainModelEntity in ref_gl/r_model.c.
 static void CM_ParseTerrainModelEntity (char *match, char *block)
 {
 	int		i;
-	char	*bl, *tok;
+	vec3_t	angles, origin;
+	char	*bl, *tok, *pathname = NULL;
+	
+	VectorClear (angles);
+	VectorClear (origin);
 	
 	bl = block;
 	while (1)
@@ -690,12 +721,29 @@ static void CM_ParseTerrainModelEntity (char *match, char *block)
 
 		if (!Q_strcasecmp("model", tok))
 		{
-			tok = Com_ParseExt (&bl, false);
-			CM_LoadTerrainModel (tok);
+			pathname = CopyString (Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angles", tok))
+		{
+			for (i = 0; i < 3; i++)
+				angles[i] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angle", tok))
+		{
+			angles[YAW] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("origin", tok))
+		{
+			for (i = 0; i < 3; i++)
+				origin[i] = atof(Com_ParseExt(&bl, false));
 		}
 		else
 			Com_SkipRestOfLine(&bl);
 	}
+	
+	CM_LoadTerrainModel (pathname, angles, origin);
+	
+	Z_Free (pathname);
 }
 
 /*
