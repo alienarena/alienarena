@@ -2,7 +2,11 @@
 #include "config.h"
 #endif
 
-#include "qcommon.h"
+#include <string.h>
+#include <math.h>
+#include <float.h>
+#include <assert.h>
+#include <stdlib.h>
 
 #include "binheap.h"
 #include "libgarland.h"
@@ -17,8 +21,6 @@
 // FIXME: there are still some bugs in here. We occasionally end up with 
 // "balcony-like" features and walls that "tuck in" under the polygons that
 // are supposed to be capping them.
-
-#include <float.h>
 
 static edge_t *find_edge (const vert_t *a, const vert_t *b)
 {
