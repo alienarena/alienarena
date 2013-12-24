@@ -356,7 +356,7 @@ void Sys_ConsoleOutput( char *ostring )
  */
 void Sys_Printf( char *fmt, ... )
 {
-	if ( stdout_disabled )
+	if ( stdout_disabled() )
 		return;
 
 #ifndef NDEBUG
@@ -687,11 +687,13 @@ main( int argc, char** argv )
 	/* one strategy for handling no console terminal: redirection  */
 	if ( !stdout_enabled )
 	{
-		freopen( "/dev/null", "w", stdout );
+		if ( NULL == freopen( "/dev/null", "w", stdout ) )
+			Com_DPrintf("main: stdout redirect to /dev/null failed\n");
 	}
 	if ( !stderr_enabled )
 	{
-		freopen( "/dev/null", "w", stderr );
+		if ( NULL == freopen( "/dev/null", "w", stderr ) )
+			Com_DPrintf("main: stderr redirect to /dev/null failed\n");
 	}
 
 	if ( stdin_enabled )

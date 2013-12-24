@@ -643,6 +643,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/tca-titan2k8.bsp \
 	data1/maps/tca-zion2k9.bsp \
 	data1/maps/terraintest.bsp \
+	data1/maps/terraintest2.bsp \
 	data1/maps/gpuanimtest.bsp \
 	data1/maps/iqmtest.bsp \
 	data1/maps/lightstyletest.bsp \
@@ -894,6 +895,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/tech/turbinefan.jpg \
 	data1/maps/meshes/tech/turbinefan.md2 \
 	data1/maps/meshes/tech/turbinefan_normal.jpg \
+	data1/maps/meshes/terraintest/axialcross.terrain \
 	data1/maps/meshes/terraintest/plateau1.terrain \
 	data1/maps/meshes/terraintest/blankwhite.terrain \
 	data1/maps/meshes/terraintest/hill1.terrain \
@@ -4006,6 +4008,7 @@ nobase_nodist_textures_DATA = \
 	data1/textures/ramp1.wal \
 	data1/textures/rigel/baselightblue.tga \
 	data1/textures/rigel/baselightred.tga \
+	data1/textures/terraintest/axialcross.tga \
 	data1/textures/terraintest/randclouds1.tga \
 	data1/textures/terraintest/plateau1.tga \
 	data1/textures/water/blood_nm.tga \
