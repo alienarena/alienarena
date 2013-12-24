@@ -226,6 +226,17 @@ static void vec_cross (const double a[AXES], const double b[AXES], double cross[
 	cross[2] = a[0]*b[1] - a[1]*b[0];
 }
 
+// Takes two vectors that are in a plane and makes them orthoganal, while 
+// keeping them both in the same plane. a_out will remain parallel to a, but
+// b_out will not be parallel to b unless b was already orthoganal to a.
+static void vec_orthoganalize (const double a[AXES], const double b[AXES], double a_out[AXES], double b_out[AXES])
+{
+	vec_normalize (a, a_out);
+	vec_scale (a_out, vec_dot (a_out, b), b_out);
+	vec_sub (b, b_out, b_out);
+	vec_normalize (b_out, b_out);
+}
+
 // Here, we define a plane using two orthganal unit vectors that are parallel 
 // to the plane and a single point that lies on the plane. This ends up being
 // more useful here than the usual normal-plus-distance system.
@@ -408,10 +419,7 @@ static void generate_quadrices_for_tri (tri_t *tri)
 		normal[i] = 0;
 	area = vec_normalize (normal, normal)/2;
 	
-	vec_normalize (edgevec1, tangent1);
-	vec_scale (tangent1, vec_dot (tangent1, edgevec2), tangent2);
-	vec_sub (edgevec2, tangent2, tangent2);
-	vec_normalize (tangent2, tangent2);
+	vec_orthoganalize (edgevec1, edgevec2, tangent1, tangent2);
 	
 	fundamental_quadric_for_plane (tangent1, tangent2, vtx_a->pos, &q);
 	add_edge_quadrices (vtx_a, vtx_b, vtx_c, normal, area, &q);
@@ -586,12 +594,10 @@ static void recalculate_vert_neighborhood (mesh_t *mesh, vert_t *vtx)
 
 // Modifies the mesh by contracting the vertex pair that introduces the least
 // error by being contracted.
-static void contract (mesh_t *mesh)
+static void contract (mesh_t *mesh, edge_t *edge)
 {
 	vert_t			*a, *b;
-	edge_t			*edge;
 	
-	edge = binheap_find_root (&mesh->edgeheap);
 	assert (!edge->cull);
 	
 	if (edge->contract_flipvtx)
@@ -675,6 +681,8 @@ void reconstruct_mesh (mesh_t *mesh)
 // count.
 void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
 {
+	edge_t *next_contraction;
+	
 	mesh->edgeheap.cmp = edge_compare;
 	mesh->edgeheap.setidx = edge_setidx;
 	mesh->edgeheap.getidx = edge_getidx;
@@ -687,8 +695,12 @@ void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
 	
 	mesh->simplified_num_tris = mesh->num_tris;
 	
-	while (mesh->simplified_num_tris > target_polycount)
-		contract (mesh);
+	next_contraction = binheap_find_root (&mesh->edgeheap);
+	while (fabs (next_contraction->contract_error) < DBL_EPSILON || mesh->simplified_num_tris > target_polycount)
+	{
+		contract (mesh, next_contraction);
+		next_contraction = binheap_find_root (&mesh->edgeheap);
+	}
 	
 	reconstruct_mesh (mesh);
 	
