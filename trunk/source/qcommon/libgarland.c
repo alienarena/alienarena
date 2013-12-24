@@ -471,8 +471,23 @@ static void generate_all_contractions (mesh_t *mesh)
 
 static void delete_triangle (mesh_t *mesh, tri_t *tri)
 {
+	int i;
+	trilist_t **list;
+	
 	if (tri == NULL || tri->cull)
 		return;
+	
+	for (i = 0; i < 3; i++)
+	{
+		for (list = &tri->verts[i]->tris; *list != NULL; list = &(*list)->next)
+		{
+			if ((*list)->tri == tri)
+			{
+				*list = (*list)->next;
+				break;
+			}
+		}
+	}
 	
 	tri->cull = 1;
 	mesh->simplified_num_tris--;
