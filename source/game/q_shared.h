@@ -504,6 +504,7 @@ typedef struct
 typedef struct
 {
 	qboolean		active;
+	vec3_t			mins, maxs;
 	int				numtriangles;
 	vec_t			*verts;
 	cterraintri_t	*tris;
@@ -511,15 +512,9 @@ typedef struct
 
 typedef struct cmodel_s
 {
-	enum
-	{
-		cmodel_brush,
-		cmodel_terrain
-	}				type;
 	vec3_t			mins, maxs;
 	vec3_t			origin;		// for sounds or lights
 	int				headnode;
-	cterrainmodel_t	*tmodel;
 } cmodel_t;
 
 typedef struct csurface_s

@@ -169,11 +169,41 @@ static void R_ParseLightEntity (char *match, char *block)
 	r_numWorldLights++;
 }
 
-static void R_ParseLightEntities (void)
+static void R_ParseTerrainEntity (char *match, char *block)
 {
-	static const char *classnames[] = {"light"};
+	entity_t	*ent;
+	int			i;
+	char		*bl, *tok;
 	
-	CM_FilterParseEntities ("classname", 1, classnames, R_ParseLightEntity);
+	if (num_terrain_entities == MAX_MAP_MODELS)
+		Com_Error (ERR_DROP, "R_ParseTerrainEntity: MAX_MAP_MODELS");
+	
+	ent = &terrain_entities[num_terrain_entities];
+	memset (ent, 0, sizeof(*ent));
+	ent->number = MAX_EDICTS+num_terrain_entities++;
+	
+	bl = block;
+	while (1)
+	{
+		tok = Com_ParseExt(&bl, true);
+		if (!tok[0])
+			break;		// End of data
+
+		if (!Q_strcasecmp("model", tok))
+		{
+			tok = Com_ParseExt (&bl, false);
+			ent->model = R_RegisterModel (tok);
+		}
+		else
+			Com_SkipRestOfLine(&bl);
+	}
+}
+
+static void R_ParseTerrainEntities (void)
+{
+	static const char *classnames[] = {"misc_terrainmodel"};
+	
+	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainEntity);
 }
 
 static void R_ParseSunTarget (char *match, char *block)
@@ -248,6 +278,13 @@ static void R_FindSunEntity (void)
 
 	if(r_sunLight->has_Sun)
 		R_FindSunTarget(); //find target
+}
+
+static void R_ParseLightEntities (void)
+{
+	static const char *classnames[] = {"light"};
+	
+	CM_FilterParseEntities ("classname", 1, classnames, R_ParseLightEntity);
 }
 
 /*
@@ -1817,6 +1854,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		starmod->numleafs = bm->visleafs;
 	}
 
+	R_ParseTerrainEntities();
 	R_ParseLightEntities();
 	R_FindSunEntity();
 	R_FinalizeGrass(loadmodel);

@@ -217,7 +217,9 @@ typedef struct {
 	float				oldlightintens;
 } cl_entity_pers_t;
 
-cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS];
+// Allocate room for entities sent by the server AND "fake" terrain entities
+// parsed directly out of the BSP on the client-side.
+cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS+MAX_MAP_MODELS];
 
 
 #define ENTITY_FLAGS  68

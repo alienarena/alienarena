@@ -555,7 +555,6 @@ void R_DrawEntitiesOnList (void)
 		{
 		    case mod_md2:
 		    case mod_iqm:
-		    case mod_terrain:
 		        R_Mesh_Draw ();
 				break;
 			case mod_brush:
@@ -606,7 +605,6 @@ void R_DrawEntitiesOnList (void)
 		{
 		    case mod_md2:
 		    case mod_iqm:
-		    case mod_terrain:
 		        R_Mesh_Draw ();
 				break;
 			case mod_brush:
@@ -667,7 +665,6 @@ void R_DrawViewEntitiesOnList (void)
 		{
 		case mod_md2:
 		case mod_iqm:
-		case mod_terrain:
 		    R_Mesh_Draw ();
 			break;
 		default:
@@ -714,7 +711,6 @@ void R_DrawViewEntitiesOnList (void)
 		{
 		case mod_md2:
 		case mod_iqm:
-		case mod_terrain:
 		    R_Mesh_Draw ();
 			break;
 		default:
@@ -723,6 +719,69 @@ void R_DrawViewEntitiesOnList (void)
 		}
 	}
 	qglDepthMask (1);		// back to writing
+}
+
+void R_DrawTerrain (void)
+{
+	int		i;
+	rscript_t	*rs = NULL;
+	vec3_t	dist;
+
+	if (!r_drawworld->integer)
+		return;
+
+	for (i=0 ; i<num_terrain_entities ; i++)
+	{
+		currententity = &terrain_entities[i];
+		
+		if (currententity->model && r_shaders->integer)
+		{
+			rs=(rscript_t *)currententity->model->script;
+
+			//custom player skin (must be done here)
+			if (currententity->skin)
+			{
+			    rs = currententity->skin->script;
+                if(rs)
+                    RS_ReadyScript(rs);
+            }
+
+			if (rs)
+				currententity->script = rs;
+			else
+				currententity->script = NULL;
+		}
+
+		currentmodel = currententity->model;
+		
+		//get distance
+		VectorSubtract(r_origin, currententity->origin, dist);		
+		
+		//set lod if available
+		if(VectorLength(dist) > LOD_DIST*2.0)
+		{
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > LOD_DIST)
+		{
+			if(currententity->lod1)
+				currentmodel = currententity->lod1;
+		}
+
+		if (!currentmodel)
+		{
+			R_DrawNullModel ();
+			continue;
+		}
+		
+		// TODO: maybe we don't actually want to assert this?
+		assert (currentmodel->type == mod_terrain);
+		
+		R_Mesh_Draw ();
+	}
+	
+	// TODO: will these models ever be transparent?
 }
 
 extern int r_drawing_fbeffect;
@@ -1114,6 +1173,8 @@ void R_RenderView (refdef_t *fd)
 	}
 
 	R_DrawWorldSurfs ();
+	
+	R_DrawTerrain ();
 
 	if(r_lensflare->integer)
 		R_RenderFlares ();
@@ -1181,10 +1242,10 @@ void	R_SetGL2D (void)
 	// set 2D virtual screen size
 	qglViewport (0,0, vid.width, vid.height);
 	qglMatrixMode(GL_PROJECTION);
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	qglOrtho  (0, vid.width, vid.height, 0, -99999, 99999);
 	qglMatrixMode(GL_MODELVIEW);
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
@@ -1477,7 +1538,7 @@ double CPUSpeed()
 
 	DWORD BufSize = _MAX_PATH;
 	DWORD dwMHz = _MAX_PATH;
-	HKEY hKey;    // open the key where the proc speed is hidden:
+	HKEY hKey;	// open the key where the proc speed is hidden:
 
 	long lError = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
