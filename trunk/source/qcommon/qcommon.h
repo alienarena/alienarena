@@ -690,6 +690,8 @@ int			CM_NumClusters (void);
 int			CM_NumInlineModels (void);
 char		*CM_EntityString (void);
 
+void		CM_FilterParseEntities (const char *fieldname, int numvals, const char *vals[], void (*process_ent_callback) (char *match, char *block));
+
 // get mins/maxs for terrain model collision
 // TODO: more than just mins and maxs! We want a real collision hull!
 cmodel_t	*CM_TerrainModel (int index, char *name);

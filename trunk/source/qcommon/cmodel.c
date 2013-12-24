@@ -870,6 +870,71 @@ int		CM_LeafArea (int leafnum)
 
 //=======================================================================
 
+// Looks for entities with the given field matched to one of the possible 
+// values.
+void CM_FilterParseEntities (const char *fieldname, int numvals, const char *vals[], void (*process_ent_callback) (char *match, char *block))
+{
+	int			i;
+	char		*buf, *tok;
+	char		block[2048];
+	
+	buf = CM_EntityString();
+	while (1)
+	{
+		qboolean matched = false;
+		
+		tok = Com_ParseExt(&buf, true);
+		if (!tok[0])
+			break;			// End of data
+
+		if (Q_strcasecmp(tok, "{"))
+			continue;		// Should never happen!
+
+		// Parse the text inside brackets
+		block[0] = 0;
+		do {
+			tok = Com_ParseExt(&buf, false);
+			if (!Q_strcasecmp(tok, "}"))
+				break;		// Done
+
+			if (!tok[0])	// Newline
+				Q_strcat(block, "\n", sizeof(block));
+			else {			// Token
+				Q_strcat(block, " ", sizeof(block));
+				Q_strcat(block, tok, sizeof(block));
+			}
+		} while (buf);
+		
+		// Find the key we're filtering by
+		tok = strstr (block, fieldname);
+		if (!tok)
+			continue;
+		
+		// Skip key name and whitespace
+		tok += strlen (fieldname);
+		while (*tok && *tok == ' ')
+			tok++;
+		
+		// Next token will be the value. We want it to be one of the values
+		// we're looking for.
+		for (i = 0; i < numvals; i++)
+		{
+			if (!Q_strnicmp(tok, vals[i], strlen (vals[i])))
+			{
+				matched = true;
+				break;
+			}
+		}
+		
+		if (!matched)
+			continue;
+		
+		process_ent_callback (tok, block);
+	}
+}
+
+//=======================================================================
+
 cmodel_t *CM_TerrainModel (int modelindex, char *name)
 {	
 	int i;
