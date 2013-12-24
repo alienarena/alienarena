@@ -90,8 +90,8 @@ unsigned short	map_leafbrushes[MAX_MAP_LEAFBRUSHES];
 int			numcmodels;
 cmodel_t	map_cmodels[MAX_MAP_MODELS];
 
-cmodel_t		terrain_cmodels[MAX_MODELS];
-cterrainmodel_t	terrain_models[MAX_MODELS];
+static int		numterrainmodels;
+cterrainmodel_t	terrain_models[MAX_MAP_MODELS];
 
 int			numbrushes;
 cbrush_t	map_brushes[MAX_MAP_BRUSHES];
@@ -213,7 +213,6 @@ void CMod_LoadSubmodels (lump_t *l)
 
 		for (j=0 ; j<3 ; j++)
 		{	// spread the mins / maxs by a pixel
-			out->type = cmodel_brush;
 			out->mins[j] = LittleFloat (in->mins[j]) - 1;
 			out->maxs[j] = LittleFloat (in->maxs[j]) + 1;
 			out->origin[j] = LittleFloat (in->origin[j]);
@@ -616,7 +615,88 @@ void CMod_LoadAlternateEntityData (char *entity_file_name)
 	FS_FreeFile (buf);
 }
 
+//=======================================================================
 
+void CM_LoadTerrainModel (char *name)
+{
+	
+	int i;
+	cterrainmodel_t *mod;
+	char *buf;
+	terraindata_t data;
+	
+	if (numterrainmodels == MAX_MAP_MODELS)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
+	
+	mod = &terrain_models[numterrainmodels++];
+	
+	FS_LoadFile (name, (void**)&buf);
+	
+	if (!buf)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
+	
+	// This ends up being 1/4 as much detail as is used for rendering. You 
+	// need a surprisingly large amount to maintain accurate physics.
+	LoadTerrainFile (&data, name, 0.5, 8, buf);
+	
+	Z_Free (data.vert_texcoords);
+	Z_Free (data.texture_path);
+	
+	VectorCopy (data.mins, mod->mins);
+	VectorCopy (data.maxs, mod->maxs);
+	
+	mod->active = true;
+	mod->numtriangles = data.num_triangles;
+	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
+	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
+	
+	for (i = 0; i < 3*data.num_vertices; i++)
+		mod->verts[i] = data.vert_positions[i];
+	
+	for (i = 0; i < data.num_triangles; i++)
+	{
+		vec3_t side1, side2;
+		int j;
+		
+		for (j = 0; j < 3; j++)
+			mod->tris[i].verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
+		
+		VectorSubtract (mod->tris[i].verts[1], mod->tris[i].verts[0], side1);
+		VectorSubtract (mod->tris[i].verts[2], mod->tris[i].verts[0], side2);
+		CrossProduct (side2, side1, mod->tris[i].p.normal);
+		VectorNormalize (mod->tris[i].p.normal);
+		mod->tris[i].p.dist = DotProduct (mod->tris[i].verts[0], mod->tris[i].p.normal);
+		mod->tris[i].p.signbits = signbits_for_plane (&mod->tris[i].p);
+		mod->tris[i].p.type = PLANE_ANYZ;
+	}
+	
+	Z_Free (data.vert_positions);
+	Z_Free (data.tri_indices);
+	
+	FS_FreeFile (buf);
+}
+
+static void CM_ParseTerrainModelEntity (char *match, char *block)
+{
+	int		i;
+	char	*bl, *tok;
+	
+	bl = block;
+	while (1)
+	{
+		tok = Com_ParseExt(&bl, true);
+		if (!tok[0])
+			break;		// End of data
+
+		if (!Q_strcasecmp("model", tok))
+		{
+			tok = Com_ParseExt (&bl, false);
+			CM_LoadTerrainModel (tok);
+		}
+		else
+			Com_SkipRestOfLine(&bl);
+	}
+}
 
 /*
 ==================
@@ -625,6 +705,7 @@ CM_LoadMap
 Loads in the map and all submodels
 ==================
 */
+
 cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 {
 	unsigned		*buf;
@@ -726,7 +807,7 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	// Reset terrain models from last time. 
 	// TODO: verify this works in ALL situations, including local and non-
 	// local servers, wierd sequences of connects/disconnects, etc.
-	for (i = 0; i < MAX_MODELS; i++)
+	for (i = 0; i < MAX_MAP_MODELS; i++)
 	{
 		if (terrain_models[i].active)
 		{
@@ -734,6 +815,15 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 			Z_Free (terrain_models[i].verts);
 			Z_Free (terrain_models[i].tris);
 		}
+	}
+	numterrainmodels = 0;
+	
+	// Parse new terrain models from the BSP entity data.
+	// TODO: entdefs?
+	{
+		static const char *classnames[] = {"misc_terrainmodel"};
+		
+		CM_FilterParseEntities ("classname", 1, classnames, CM_ParseTerrainModelEntity);
 	}
 
 	return &map_cmodels[0];
@@ -931,71 +1021,6 @@ void CM_FilterParseEntities (const char *fieldname, int numvals, const char *val
 		
 		process_ent_callback (tok, block);
 	}
-}
-
-//=======================================================================
-
-cmodel_t *CM_TerrainModel (int modelindex, char *name)
-{	
-	int i;
-	cmodel_t *ret;
-	char *buf;
-	terraindata_t data;
-	
-	ret = &terrain_cmodels[modelindex];
-	
-	if (terrain_models[modelindex].active)
-		return ret;
-	
-	ret->type = cmodel_terrain;
-	ret->tmodel = &terrain_models[modelindex];
-	
-	FS_LoadFile (name, (void**)&buf);
-	
-	if (!buf)
-		Com_Error (ERR_DROP, "CM_TerrainModel: Missing terrain model %s!", name);
-	
-	// This ends up being 1/4 as much detail as is used for rendering. You 
-	// need a surprisingly large amount to maintain accurate physics.
-	LoadTerrainFile (&data, name, 0.5, 8, buf);
-	
-	Z_Free (data.vert_texcoords);
-	Z_Free (data.texture_path);
-	
-	VectorCopy (data.mins, ret->mins);
-	VectorCopy (data.maxs, ret->maxs);
-	
-	ret->tmodel->active = true;
-	ret->tmodel->numtriangles = data.num_triangles;
-	ret->tmodel->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
-	ret->tmodel->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
-	
-	for (i = 0; i < 3*data.num_vertices; i++)
-		ret->tmodel->verts[i] = data.vert_positions[i];
-	
-	for (i = 0; i < data.num_triangles; i++)
-	{
-		vec3_t side1, side2;
-		int j;
-		
-		for (j = 0; j < 3; j++)
-			ret->tmodel->tris[i].verts[j] = &ret->tmodel->verts[3*data.tri_indices[3*i+j]];
-		
-		VectorSubtract (ret->tmodel->tris[i].verts[1], ret->tmodel->tris[i].verts[0], side1);
-		VectorSubtract (ret->tmodel->tris[i].verts[2], ret->tmodel->tris[i].verts[0], side2);
-		CrossProduct (side2, side1, ret->tmodel->tris[i].p.normal);
-		VectorNormalize (ret->tmodel->tris[i].p.normal);
-		ret->tmodel->tris[i].p.dist = DotProduct (ret->tmodel->tris[i].verts[0], ret->tmodel->tris[i].p.normal);
-		ret->tmodel->tris[i].p.signbits = signbits_for_plane (&ret->tmodel->tris[i].p);
-		ret->tmodel->tris[i].p.type = PLANE_ANYZ;
-	}
-	
-	Z_Free (data.vert_positions);
-	Z_Free (data.tri_indices);
-	
-	FS_FreeFile (buf);
-	
-	return ret;
 }
 
 //=======================================================================

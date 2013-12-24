@@ -256,6 +256,10 @@ extern	int		registration_sequence;
 
 extern void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 
+// "fake" terrain entities parsed directly out of the BSP on the client side.
+int			num_terrain_entities;
+entity_t	terrain_entities[MAX_MAP_MODELS];
+
 //Renderer main loop
 extern int	R_Init( void *hinstance, void *hWnd );
 extern void R_Shutdown( void );

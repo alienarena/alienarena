@@ -438,8 +438,6 @@ void CL_PrepRefresh ( void )
 			cl.model_draw[i] = R_RegisterModel (cl.configstrings[CS_MODELS+i]);
 			if (name[0] == '*')
 				cl.model_clip[i] = CM_InlineModel (cl.configstrings[CS_MODELS+i]);
-			else if (COM_HasExtension (cl.configstrings[CS_MODELS+i], ".terrain"))
-			    cl.model_clip[i] = CM_TerrainModel (i, cl.configstrings[CS_MODELS+i]);
 			else
 				cl.model_clip[i] = NULL;
 		}

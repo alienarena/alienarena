@@ -128,6 +128,10 @@ spawn_t	spawns[] = {
 	{"misc_mapmodel", SP_misc_mapmodel},
 	{"misc_watersplash", SP_misc_watersplash},
 	{"misc_electroflash", SP_misc_electroflash},
+	
+	//Game code ignores these
+	{"misc_terrainmodel", SP_info_null},
+	
 	{NULL, NULL}
 };
 

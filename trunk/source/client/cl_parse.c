@@ -687,8 +687,6 @@ void CL_ParseConfigString (void)
 			cl.model_draw[i-CS_MODELS] = R_RegisterModel (cl.configstrings[i]);
 			if (cl.configstrings[i][0] == '*')
 				cl.model_clip[i-CS_MODELS] = CM_InlineModel (cl.configstrings[i]);
-			else if (COM_HasExtension (cl.configstrings[i], ".terrain"))
-			    cl.model_clip[i-CS_MODELS] = CM_TerrainModel (i-CS_MODELS, cl.configstrings[i]);
 			else
 				cl.model_clip[i-CS_MODELS] = NULL;
 		}
