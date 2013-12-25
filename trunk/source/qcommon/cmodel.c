@@ -660,13 +660,14 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	Z_Free (data.vert_texcoords);
 	Z_Free (data.texture_path);
 	
-	VectorCopy (data.mins, mod->mins);
-	VectorCopy (data.maxs, mod->maxs);
-	
 	mod->active = true;
 	mod->numtriangles = data.num_triangles;
+	
 	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
 	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
+	
+	VectorClear (mod->mins);
+	VectorClear (mod->maxs);
 	
 	for (i = 0; i < data.num_vertices; i++)
 	{
@@ -675,6 +676,11 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 			mod->verts[3*i+j] = origin[j];
 			for (k = 0; k < 3; k++)
 				mod->verts[3*i+j] += data.vert_positions[3*i+k] * rotation_matrix[j][k];
+				
+			if (mod->verts[3*i+j] < mod->mins[j])
+				mod->mins[j] = mod->verts[3*i+j];
+			else if (mod->verts[3*i+j] > mod->maxs[j])
+				mod->maxs[j] = mod->verts[3*i+j];
 		}
 	}
 	
@@ -1855,32 +1861,51 @@ void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (cons
 void CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
 	vec3_t		p2;
-	float		frac;
 	int			i, j;
 	float		offset;
 	cplane_t	*plane;
+	vec3_t		dir;
+	float		orig_dist;
 	
 	for (i = 0; i < 3; i++)
 		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
 	
+	VectorSubtract (p2, p1, dir);
+	orig_dist = VectorNormalize (dir); // Update this every time p2 changes
+	
 	for (i = 0; i < MAX_MODELS; i++)
 	{
-		cterrainmodel_t *mod = &terrain_models[i];
+		qboolean		in_trace;
+		cterrainmodel_t	*mod = &terrain_models[i];
 		
 		if (!mod->active)
 			continue;
 		
+		in_trace = true;
+		
+		for (j = 0; j < 3; j++)
+		{
+			float n1, n2;
+		
+			n1 = p1[j] - trace_extents[j]*dir[j];
+			n2 = p2[j] + trace_extents[j]*dir[j];
+			
+			if (	(n1 > mod->maxs[j] && n2 > mod->maxs[j]) ||
+					(n1 < mod->mins[j] && n2 < mod->mins[j]))
+			{
+				in_trace = false;
+				break;
+			}
+		}
+		
+		if (!in_trace)
+			continue;
+		
 		for (j = 0; j < mod->numtriangles; j++)
 		{
-			vec3_t	intersection_point;
-			float	orig_dist;
 			float	intersection_dist;
-			vec3_t	dir;
 			
 			plane = &mod->tris[j].p;
-			
-			VectorSubtract (p2, p1, dir);
-			orig_dist = VectorNormalize (dir);
 			
 			if (DotProduct (dir, plane->normal) > 0)
 				continue;
@@ -1896,18 +1921,14 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 					fabs(trace_extents[2]*plane->normal[2]);
 			
 			intersection_dist -= offset;
-			intersection_dist -= DIST_EPSILON;
 			
 			if (intersection_dist > orig_dist)
 				continue;
 			
-			VectorMA (p1, intersection_dist, dir, intersection_point);
-			
-			VectorCopy (intersection_point, p2);
-			
-			frac = intersection_dist / orig_dist; // - DIST_EPSILON;
-			trace_trace.fraction *= frac;
-			
+			// At this point, we've found a new closest intersection point
+			trace_trace.fraction *= intersection_dist / orig_dist;
+			VectorMA (p1, intersection_dist, dir, p2);
+			orig_dist = intersection_dist;
 			VectorCopy (plane->normal, trace_trace.plane.normal);
 		}
 	}
