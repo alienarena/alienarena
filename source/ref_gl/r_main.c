@@ -1079,6 +1079,9 @@ r_newrefdef must be set before the first call
 static void R_DrawTerrainTri (const cterraintri_t *t, qboolean does_intersect)
 {
 	int i;
+	vec3_t up;
+	
+	VectorSet (up, 0, 0, 1);
 	
 	qglDisable (GL_TEXTURE_2D);
 	qglDisable (GL_DEPTH_TEST);
@@ -1086,6 +1089,11 @@ static void R_DrawTerrainTri (const cterraintri_t *t, qboolean does_intersect)
 	{
 		qglColor4f (1, 0, 0, 1);
 		qglLineWidth (5.0);
+	}
+	else if (DotProduct (t->p.normal, up) < 0)
+	{
+		qglColor4f (0, 0, 1, 1);
+		qglLineWidth (2.0);
 	}
 	else
 	{
