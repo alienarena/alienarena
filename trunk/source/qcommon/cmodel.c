@@ -1888,14 +1888,14 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 	}
 }
 
-static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1_extents, vec3_t p2_extents)
+static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3_t p2_extents)
 {
 	int	i;
 	
 	for (i = 0; i < 3; i++)
 	{
-		if (	(p1_extents[i] > box_maxs[i] && p2_extents[i] > box_maxs[i]) ||
-				(p1_extents[i] < box_mins[i] && p2_extents[i] < box_mins[i]))
+		if (	(p1[i] > box_maxs[i] && p2_extents[i] > box_maxs[i]) ||
+				(p1[i] < box_mins[i] && p2_extents[i] < box_mins[i]))
 			return false;
 	}
 	
@@ -1913,15 +1913,13 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 	cplane_t	*plane;
 	vec3_t		dir;
 	float		orig_dist;
-	vec3_t		p1_extents, p2_extents;
+	vec3_t		p2_extents;
 	
 	for (i = 0; i < 3; i++)
 		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
 	
 	VectorSubtract (p2, p1, dir);
 	orig_dist = VectorNormalize (dir); // Update this every time p2 changes
-	
-	for (k = 0; k < 3; k++) p1_extents[k] = p1[k] - trace_extents[k]*dir[k];
 	
 	// Update this every time p2 changes
 	for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
@@ -1933,7 +1931,7 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 		if (!mod->active)
 			continue;
 		
-		if (!bbox_in_trace (mod->mins, mod->maxs, p1_extents, p2_extents))
+		if (!bbox_in_trace (mod->mins, mod->maxs, p1, p2_extents))
 			continue;
 		
 		for (j = 0; j < mod->numtriangles; j++)
@@ -1947,7 +1945,7 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 			if (DotProduct (dir, plane->normal) > 0)
 				continue;
 			
-			if (!bbox_in_trace (mod->tris[j].mins, mod->tris[j].maxs, p1_extents, p2_extents))
+			if (!bbox_in_trace (mod->tris[j].mins, mod->tris[j].maxs, p1, p2_extents))
 				continue;
 			
 			if (!LineIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
