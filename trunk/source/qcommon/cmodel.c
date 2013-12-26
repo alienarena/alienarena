@@ -666,6 +666,9 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
 	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
 	
+	// Technically, because the mins can be positive or the maxs can be 
+	// negative, this isn't always correct, but it errs on the side of more
+	// inclusive, so it's all right.
 	VectorCopy (origin, mod->mins);
 	VectorCopy (origin, mod->maxs);
 	
