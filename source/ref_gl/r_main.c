@@ -189,6 +189,7 @@ cvar_t	*r_firstrun;
 
 //for testing
 cvar_t  *r_test;
+cvar_t	*r_tracetest;
 
 //ODE initialization error check
 int r_odeinit_success; // 0 if dODEInit2() fails, 1 otherwise.
@@ -1230,6 +1231,14 @@ void R_RenderView (refdef_t *fd)
 	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
 	if (gl_showpolys->integer)
 		CM_TerrainDrawIntersecting (r_origin, forward, R_DrawTerrainTri);
+	if (r_tracetest->integer > 0)
+	{
+		int		i;
+		vec3_t	targ;
+		VectorMA (r_origin, 8192, forward, targ);
+		for (i = 0; i < r_tracetest->integer; i++)
+			CM_BoxTrace (r_origin, targ, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+	}
 
 	R_GLSLPostProcess();
 
@@ -1404,6 +1413,7 @@ void R_Register( void )
 	Cvar_Describe (r_firstrun, "Set this to 0 if you want the game to auto detect your graphics settings next time you run it.");
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
+	r_tracetest = Cvar_Get("r_tracetest", "0", CVARDOC_INT); // BoxTrace performance test
 	
 	// FIXME HACK copied over from the video menu code. These are initialized
 	// again elsewhere. TODO: work out any complications that may arise from
