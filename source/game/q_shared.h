@@ -499,6 +499,7 @@ typedef struct
 {
 	cplane_t	p;
 	vec_t		*verts[3];
+	vec3_t		mins, maxs;
 } cterraintri_t;
 
 typedef struct

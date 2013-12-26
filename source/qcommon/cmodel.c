@@ -690,10 +690,24 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	for (i = 0; i < data.num_triangles; i++)
 	{
 		vec3_t side1, side2;
-		int j;
+		int j, k;
 		
 		for (j = 0; j < 3; j++)
 			mod->tris[i].verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
+		
+		VectorCopy (mod->tris[i].verts[0], mod->tris[i].mins);
+		VectorCopy (mod->tris[i].verts[0], mod->tris[i].maxs);
+		
+		for (j = 1; j < 3; j++)
+		{
+			for (k = 0; k < 3; k++)
+			{
+				if (mod->tris[i].verts[j][k] < mod->tris[i].mins[k])
+					mod->tris[i].mins[k] = mod->tris[i].verts[j][k];
+				else if (mod->tris[i].verts[j][k] > mod->tris[i].maxs[k])
+					mod->tris[i].maxs[k] = mod->tris[i].verts[j][k];
+			}
+		}
 		
 		VectorSubtract (mod->tris[i].verts[1], mod->tris[i].verts[0], side1);
 		VectorSubtract (mod->tris[i].verts[2], mod->tris[i].verts[0], side2);
@@ -1858,17 +1872,32 @@ void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (cons
 	}
 }
 
+static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1_extents, vec3_t p2_extents)
+{
+	int	i;
+	
+	for (i = 0; i < 3; i++)
+	{
+		if (	(p1_extents[i] > box_maxs[i] && p2_extents[i] > box_maxs[i]) ||
+				(p1_extents[i] < box_mins[i] && p2_extents[i] < box_mins[i]))
+			return false;
+	}
+	
+	return true;
+}
+
 // FIXME: This is a half-witted and inefficient way to do it. 
 // FIXME: It's still quite possible to fall through a terrain mesh.
 // FIXME: Also, the physics feel like crap on terrain.
 void CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
 	vec3_t		p2;
-	int			i, j;
+	int			i, j, k;
 	float		offset;
 	cplane_t	*plane;
 	vec3_t		dir;
 	float		orig_dist;
+	vec3_t		p1_extents, p2_extents;
 	
 	for (i = 0; i < 3; i++)
 		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
@@ -1876,32 +1905,19 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 	VectorSubtract (p2, p1, dir);
 	orig_dist = VectorNormalize (dir); // Update this every time p2 changes
 	
+	for (k = 0; k < 3; k++) p1_extents[k] = p1[k] - trace_extents[k]*dir[k];
+	
+	// Update this every time p2 changes
+	for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+	
 	for (i = 0; i < MAX_MODELS; i++)
 	{
-		qboolean		in_trace;
 		cterrainmodel_t	*mod = &terrain_models[i];
 		
 		if (!mod->active)
 			continue;
 		
-		in_trace = true;
-		
-		for (j = 0; j < 3; j++)
-		{
-			float n1, n2;
-		
-			n1 = p1[j] - trace_extents[j]*dir[j];
-			n2 = p2[j] + trace_extents[j]*dir[j];
-			
-			if (	(n1 > mod->maxs[j] && n2 > mod->maxs[j]) ||
-					(n1 < mod->mins[j] && n2 < mod->mins[j]))
-			{
-				in_trace = false;
-				break;
-			}
-		}
-		
-		if (!in_trace)
+		if (!bbox_in_trace (mod->mins, mod->maxs, p1_extents, p2_extents))
 			continue;
 		
 		for (j = 0; j < mod->numtriangles; j++)
@@ -1910,7 +1926,12 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 			
 			plane = &mod->tris[j].p;
 			
+			// order the tests from least expensive to most
+			
 			if (DotProduct (dir, plane->normal) > 0)
+				continue;
+			
+			if (!bbox_in_trace (mod->tris[j].mins, mod->tris[j].maxs, p1_extents, p2_extents))
 				continue;
 			
 			if (!LineIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
@@ -1933,6 +1954,7 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 			VectorMA (p1, intersection_dist, dir, p2);
 			orig_dist = intersection_dist;
 			VectorCopy (plane->normal, trace_trace.plane.normal);
+			for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
 		}
 	}
 }
