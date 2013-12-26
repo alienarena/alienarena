@@ -495,22 +495,6 @@ typedef struct cplane_s
 #define CPLANE_PAD0				18
 #define CPLANE_PAD1				19
 
-typedef struct
-{
-	cplane_t	p;
-	vec_t		*verts[3];
-	vec3_t		mins, maxs;
-} cterraintri_t;
-
-typedef struct
-{
-	qboolean		active;
-	vec3_t			mins, maxs;
-	int				numtriangles;
-	vec_t			*verts;
-	cterraintri_t	*tris;
-} cterrainmodel_t;
-
 typedef struct cmodel_s
 {
 	vec3_t			mins, maxs;

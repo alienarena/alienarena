@@ -90,9 +90,6 @@ unsigned short	map_leafbrushes[MAX_MAP_LEAFBRUSHES];
 int			numcmodels;
 cmodel_t	map_cmodels[MAX_MAP_MODELS];
 
-static int		numterrainmodels;
-cterrainmodel_t	terrain_models[MAX_MAP_MODELS];
-
 int			numbrushes;
 cbrush_t	map_brushes[MAX_MAP_BRUSHES];
 
@@ -116,6 +113,25 @@ mapsurface_t	nullsurface;
 int			floodvalid;
 
 qboolean	portalopen[MAX_MAP_AREAPORTALS];
+
+typedef struct
+{
+	cplane_t	p;
+	vec_t		*verts[3];
+	vec3_t		mins, maxs;
+} cterraintri_t;
+
+typedef struct
+{
+	qboolean		active;
+	vec3_t			mins, maxs;
+	int				numtriangles;
+	vec_t			*verts;
+	cterraintri_t	*tris;
+} cterrainmodel_t;
+
+static int		numterrainmodels;
+cterrainmodel_t	terrain_models[MAX_MAP_MODELS];
 
 
 cvar_t		*map_noareas;
@@ -1849,7 +1865,7 @@ static qboolean LineIntersectsTriangle (vec3_t p1, vec3_t d, vec3_t v0, vec3_t v
 	return t > FLT_EPSILON;
 }
 
-void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const cterraintri_t *t, qboolean does_intercept))
+extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect))
 {
 	int i, j;
 	
@@ -1867,7 +1883,7 @@ void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (cons
 			
 			does_intersect = LineIntersectsTriangle (start, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &tmp);
 			
-			do_draw (&mod->tris[j], does_intersect);
+			do_draw (mod->tris[j].verts, mod->tris[j].p.normal, does_intersect);
 		}
 	}
 }
