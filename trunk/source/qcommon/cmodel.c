@@ -1830,7 +1830,7 @@ return;
 
 
 
-static qboolean LineIntersectsTriangle (vec3_t p1, vec3_t d, vec3_t v0, vec3_t v1, vec3_t v2, float *intersection_dist)
+static qboolean RayIntersectsTriangle (vec3_t p1, vec3_t d, vec3_t v0, vec3_t v1, vec3_t v2, float *intersection_dist)
 {
 	vec3_t	e1, e2, P, Q, T;
 	float	det, inv_det, u, v, t;
@@ -1881,9 +1881,9 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 			float tmp;
 			qboolean does_intersect;
 			
-			does_intersect = LineIntersectsTriangle (start, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &tmp);
+			does_intersect = RayIntersectsTriangle (start, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &tmp);
 			
-			do_draw (mod->tris[j].verts, mod->tris[j].p.normal, does_intersect);
+			do_draw ((const vec_t **)mod->tris[j].verts, mod->tris[j].p.normal, does_intersect);
 		}
 	}
 }
@@ -1948,7 +1948,7 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 			if (!bbox_in_trace (mod->tris[j].mins, mod->tris[j].maxs, p1, p2_extents))
 				continue;
 			
-			if (!LineIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
+			if (!RayIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
 				continue;
 			
 			if (trace_ispoint)
@@ -1982,6 +1982,9 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 CM_BoxTrace
 ==================
 */
+// TODO: create a CM_FastTrace variant that returns a boolean true or false
+// if the trace was blocked by something without bothering to isolate
+// precisely where.
 trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask)
