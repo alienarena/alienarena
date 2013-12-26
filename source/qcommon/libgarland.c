@@ -176,8 +176,8 @@ static void generate_vertices_for_mesh (mesh_t *mesh)
 	mesh->everts = malloc (mesh->num_verts*sizeof(*mesh->everts));
 	memset (mesh->everts, 0, mesh->num_verts*sizeof(*mesh->everts));
 	
-	memset (mesh->mins, 0, sizeof(mesh->mins));
-	memset (mesh->maxs, 0, sizeof(mesh->maxs));
+	memset (mesh->mins, 0, AXES*sizeof(*mesh->mins));
+	memset (mesh->maxs, 0, AXES*sizeof(*mesh->maxs));
 	
 	for (i = 0; i < mesh->num_verts; i++)
 	{
@@ -793,7 +793,6 @@ void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
 	mesh->edgeheap.cmp = edge_compare;
 	mesh->edgeheap.setidx = edge_setidx;
 	mesh->edgeheap.getidx = edge_getidx;
-	mesh->edgeheap.nitems = 0;
 	
 	generate_vertices_for_mesh (mesh);
 	generate_edges_for_mesh (mesh);
