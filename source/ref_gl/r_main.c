@@ -1077,7 +1077,7 @@ r_newrefdef must be set before the first call
 ================
 */
 
-static void R_DrawTerrainTri (const cterraintri_t *t, qboolean does_intersect)
+static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect)
 {
 	int i;
 	vec3_t up;
@@ -1091,7 +1091,7 @@ static void R_DrawTerrainTri (const cterraintri_t *t, qboolean does_intersect)
 		qglColor4f (1, 0, 0, 1);
 		qglLineWidth (5.0);
 	}
-	else if (DotProduct (t->p.normal, up) < 0)
+	else if (DotProduct (normal, up) < 0)
 	{
 		qglColor4f (0, 0, 1, 1);
 		qglLineWidth (2.0);
@@ -1103,13 +1103,13 @@ static void R_DrawTerrainTri (const cterraintri_t *t, qboolean does_intersect)
 	}
 	qglBegin (GL_LINE_LOOP);
 	for (i = 0; i < 3; i++)
-		qglVertex3fv (t->verts[i]);
+		qglVertex3fv (verts[i]);
 	qglEnd ();
 	qglEnable (GL_DEPTH_TEST);
 	qglEnable (GL_TEXTURE_2D);
 }
 
-extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const cterraintri_t *t, qboolean does_intersect));
+extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect));
 
 void R_RenderView (refdef_t *fd)
 {
