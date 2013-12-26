@@ -666,8 +666,8 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
 	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
 	
-	VectorClear (mod->mins);
-	VectorClear (mod->maxs);
+	VectorCopy (origin, mod->mins);
+	VectorCopy (origin, mod->maxs);
 	
 	for (i = 0; i < data.num_vertices; i++)
 	{
