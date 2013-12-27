@@ -171,8 +171,6 @@ alienarena_SOURCES = \
 	qcommon/pmove.c \
 	qcommon/qcommon.h \
 	qcommon/qfiles.h \
-	ref_gl/anorms.h \
-	ref_gl/anormtab.h \
 	ref_gl/glext.h \
 	ref_gl/glfuncs.h \
 	ref_gl/qgl.h \
