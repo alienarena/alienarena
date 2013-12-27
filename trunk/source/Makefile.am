@@ -182,6 +182,7 @@ alienarena_SOURCES = \
 	ref_gl/r_image.h \
 	ref_gl/r_iqm.h \
 	ref_gl/r_iqm.c \
+	ref_gl/r_md2.c \
 	ref_gl/r_light.c \
 	ref_gl/r_local.h \
 	ref_gl/r_lodcalc.h \
