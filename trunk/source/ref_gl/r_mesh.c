@@ -152,7 +152,11 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	{
 		for (i=0; i<r_lightgroups; i++)
 		{
-			if(!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
+			if (currentmodel->type == mod_terrain)
+			{
+				r_trace.fraction = 1.0; //terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
+			}
+			if (!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
 			{
 				r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
 			}
@@ -741,8 +745,9 @@ void R_Mesh_SetShadelight (void)
 			shadelight[0] = 0.6;
 		}
 	}
-	else if (currententity->flags & RF_FULLBRIGHT)
+	else if ((currententity->flags & RF_FULLBRIGHT) || currentmodel->type == mod_terrain)
 	{
+		// Treat terrain as fullbright for now. TODO: move to precompiled lightmaps for terrain.
 		for (i=0 ; i<3 ; i++)
 			shadelight[i] = 1.0;
 	}
