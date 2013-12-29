@@ -641,6 +641,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	cterrainmodel_t *mod;
 	char *buf;
 	terraindata_t data;
+	vec3_t up;
 	
 	if (numterrainmodels == MAX_MAP_MODELS)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
@@ -677,7 +678,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	Z_Free (data.texture_path);
 	
 	mod->active = true;
-	mod->numtriangles = data.num_triangles;
+	mod->numtriangles = 0;
 	
 	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
 	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
@@ -703,36 +704,48 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		}
 	}
 	
+	VectorSet (up, rotation_matrix[0][2], rotation_matrix[1][2], rotation_matrix[2][2]);
+	
 	for (i = 0; i < data.num_triangles; i++)
 	{
+		cterraintri_t *tri;
 		vec3_t side1, side2;
 		int j, k;
 		
-		for (j = 0; j < 3; j++)
-			mod->tris[i].verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
+		tri = &mod->tris[mod->numtriangles];
 		
-		VectorCopy (mod->tris[i].verts[0], mod->tris[i].mins);
-		VectorCopy (mod->tris[i].verts[0], mod->tris[i].maxs);
+		for (j = 0; j < 3; j++)
+			tri->verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
+		
+		VectorCopy (tri->verts[0], tri->mins);
+		VectorCopy (tri->verts[0], tri->maxs);
 		
 		for (j = 1; j < 3; j++)
 		{
 			for (k = 0; k < 3; k++)
 			{
-				if (mod->tris[i].verts[j][k] < mod->tris[i].mins[k])
-					mod->tris[i].mins[k] = mod->tris[i].verts[j][k];
-				else if (mod->tris[i].verts[j][k] > mod->tris[i].maxs[k])
-					mod->tris[i].maxs[k] = mod->tris[i].verts[j][k];
+				if (tri->verts[j][k] < tri->mins[k])
+					tri->mins[k] = tri->verts[j][k];
+				else if (tri->verts[j][k] > tri->maxs[k])
+					tri->maxs[k] = tri->verts[j][k];
 			}
 		}
 		
-		VectorSubtract (mod->tris[i].verts[1], mod->tris[i].verts[0], side1);
-		VectorSubtract (mod->tris[i].verts[2], mod->tris[i].verts[0], side2);
-		CrossProduct (side2, side1, mod->tris[i].p.normal);
-		VectorNormalize (mod->tris[i].p.normal);
-		mod->tris[i].p.dist = DotProduct (mod->tris[i].verts[0], mod->tris[i].p.normal);
-		mod->tris[i].p.signbits = signbits_for_plane (&mod->tris[i].p);
-		mod->tris[i].p.type = PLANE_ANYZ;
+		VectorSubtract (tri->verts[1], tri->verts[0], side1);
+		VectorSubtract (tri->verts[2], tri->verts[0], side2);
+		CrossProduct (side2, side1, tri->p.normal);
+		VectorNormalize (tri->p.normal);
+		tri->p.dist = DotProduct (tri->verts[0], tri->p.normal);
+		tri->p.signbits = signbits_for_plane (&tri->p);
+		tri->p.type = PLANE_ANYZ;
+		
+		// overwrite and don't use downward facing faces.
+		if (DotProduct (tri->p.normal, up) > 0)
+			mod->numtriangles++;
 	}
+	
+	if (data.num_triangles != mod->numtriangles)
+		Com_Printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
 	
 	Z_Free (data.vert_positions);
 	Z_Free (data.tri_indices);
