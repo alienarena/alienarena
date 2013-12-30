@@ -1409,7 +1409,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
 	float		os, ot, alpha;
-	float		time, txm=0.0f, tym=0.0f;
+	float		time;
 	int			VertexCounter;
 
 	if (!rs)
@@ -1456,7 +1456,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->blendfunc.blend)
 		{
 			GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
-			qglBlendFunc (stage->blendfunc.source, stage->blendfunc.dest); // FIXME
 			GLSTATE_ENABLE_BLEND
 		}
 		else if (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66) && !stage->alphamask)
@@ -1559,8 +1558,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			VArray[2] = v[2];
 
 			// world texture coords
-			VArray[3] = os+txm;
-			VArray[4] = ot+tym;
+			VArray[3] = os;
+			VArray[4] = ot;
 
 			// lightmap texture coords
 			VArray[5] = v[5];
