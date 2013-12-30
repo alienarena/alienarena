@@ -1138,19 +1138,6 @@ void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 	*ot = vert[1];
 }
 
-inline void RS_RotateST (float *os, float *ot, float radians, msurface_t *fa)
-{
-	float cost = cos(radians), sint = sin(radians);
-	float is = *os, it = *ot, c_s, c_t;
-
-	c_s = fa->c_s;// - (int)fa->c_s;
-	c_t = fa->c_t;// - (int)fa->c_t;
-
-	*os = cost * (is - c_s) + sint * (c_t - it) + c_s;
-	*ot = cost * (it - c_t) + sint * (is - c_s) + c_t;
-
-}
-
 inline void RS_RotateST2 (float *os, float *ot, float radians)
 {
 	float cost = cos(radians), sint = sin(radians);
@@ -1163,13 +1150,6 @@ inline void RS_RotateST2 (float *os, float *ot, float radians)
 // scaling factor to convert from rotations per minute to radians per second
 #define ROTFACTOR (M_PI * 2.0 / 60.0)
 
-void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa)
-{
-	// rotate
-	if (stage->rot_speed)
-		RS_RotateST (os, ot, -stage->rot_speed * rs_realtime * ROTFACTOR, fa);
-
-}
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 {
 	float	txm = 0, tym = 0;
@@ -1509,6 +1489,13 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			}
 		}
 		
+		if (stage->rot_speed)
+		{
+			qglTranslatef (surf->c_s, surf->c_t, 0);
+			qglRotatef (RAD2DEG (-stage->rot_speed * rs_realtime * ROTFACTOR), 0, 0, 1);
+			qglTranslatef (-surf->c_s, -surf->c_t, 0);
+		}
+		
 		qglTranslatef (	RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX),
 						RS_ScrollFunc (stage->scroll.typeY, stage->scroll.speedY),
 						0 );
@@ -1551,7 +1538,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				ot = v[4];
 			}
 			
-			RS_SetTexcoords (stage, &os, &ot, surf);
 			{
 				float red=1.0, green=1.0, blue=1.0, alpha2;
 

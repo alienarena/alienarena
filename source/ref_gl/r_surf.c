@@ -2081,6 +2081,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	
 	VectorScale (total, 1.0f/(float)lnumverts, center);
 	
+	// These are used by the rscript "rotate" keyword.
 	fa->c_s = (DotProduct (center, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3])
 				/ fa->texinfo->image->width;
 	fa->c_t = (DotProduct (center, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3])
