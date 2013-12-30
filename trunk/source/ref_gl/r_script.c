@@ -1138,33 +1138,36 @@ void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 	*ot = vert[1];
 }
 
-inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
+inline void RS_RotateST (float *os, float *ot, float radians, msurface_t *fa)
 {
-	float cost = cos(degrees), sint = sin(degrees);
+	float cost = cos(radians), sint = sin(radians);
 	float is = *os, it = *ot, c_s, c_t;
 
-	c_s = fa->c_s - (int)fa->c_s;
-	c_t = fa->c_t - (int)fa->c_t;
+	c_s = fa->c_s;// - (int)fa->c_s;
+	c_t = fa->c_t;// - (int)fa->c_t;
 
 	*os = cost * (is - c_s) + sint * (c_t - it) + c_s;
 	*ot = cost * (it - c_t) + sint * (is - c_s) + c_t;
 
 }
 
-inline void RS_RotateST2 (float *os, float *ot, float degrees)
+inline void RS_RotateST2 (float *os, float *ot, float radians)
 {
-	float cost = cos(degrees), sint = sin(degrees);
+	float cost = cos(radians), sint = sin(radians);
 	float is = *os, it = *ot;
 
 	*os = cost * (is - 0.5) + sint * (0.5 - it) + 0.5;
 	*ot = cost * (it - 0.5) + sint * (is - 0.5) + 0.5;
 }
 
+// scaling factor to convert from rotations per minute to radians per second
+#define ROTFACTOR (M_PI * 2.0 / 60.0)
+
 void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa)
 {
 	// rotate
 	if (stage->rot_speed)
-		RS_RotateST (os, ot, -stage->rot_speed * rs_realtime * 0.0087266388888888888888888888888889, fa);
+		RS_RotateST (os, ot, -stage->rot_speed * rs_realtime * ROTFACTOR, fa);
 
 }
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
@@ -1207,7 +1210,7 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 
 	// rotate
 	if (stage->rot_speed)
-		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * 0.0087266388888888888888888888888889);
+		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * ROTFACTOR);
 
 	switch(stage->scroll.typeX)
 	{

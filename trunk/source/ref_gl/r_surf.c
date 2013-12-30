@@ -1984,6 +1984,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	float		*vec;
 	float		s, t;
 	glpoly_t	*poly;
+	vec3_t		total, center;
 
 	vec3_t surfmaxs = {-99999999, -99999999, -99999999};
 	vec3_t surfmins = {99999999, 99999999, 99999999};
@@ -2017,6 +2018,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t /= fa->texinfo->image->height;
 
+		VectorAdd (total, vec, total);
 		VectorCopy (vec, poly->verts[i]);
 		poly->verts[i][3] = s;
 		poly->verts[i][4] = t;
@@ -2076,6 +2078,13 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	// store out the completed bbox
 	VectorCopy (surfmins, fa->mins);
 	VectorCopy (surfmaxs, fa->maxs);
+	
+	VectorScale (total, 1.0f/(float)lnumverts, center);
+	
+	fa->c_s = (DotProduct (center, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3])
+				/ fa->texinfo->image->width;
+	fa->c_t = (DotProduct (center, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3])
+				/ fa->texinfo->image->height;
 }
 
 /*
