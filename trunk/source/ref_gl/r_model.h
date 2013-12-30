@@ -231,6 +231,7 @@ typedef struct msurface_s
 
 	glpoly_t	*polys;				// multiple if warped
 
+	// Texcoords at the center of the face, used for rscript "rotate" keyword.
 	float		c_s, c_t;
 
 // lighting info
