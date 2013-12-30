@@ -570,7 +570,7 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
 void R_InitQuadVarrays(void);
 void R_AddSurfToVArray (msurface_t *surf);
 void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
-void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddTexturedSurfToVArray (msurface_t *surf);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 

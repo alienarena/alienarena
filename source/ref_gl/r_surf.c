@@ -245,6 +245,27 @@ msurface_t	*r_flicker_surfaces;
 
 /*
 ================
+BSP_SetScrolling
+================
+*/
+static void BSP_SetScrolling (qboolean enable)
+{
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+	if (enable)
+	{
+		float scroll;
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+		qglTranslatef (scroll, 0, 0);
+	}
+	qglMatrixMode (GL_MODELVIEW);
+}
+
+
+/*
+================
 BSP_DrawWarpSurfaces
 ================
 */
@@ -291,22 +312,14 @@ BSP_DrawAlphaPoly
 ================
 */
 void BSP_DrawAlphaPoly (msurface_t *fa, int flags)
-
 {
-	float	scroll;
-
-	scroll = 0;
-	if (flags & SURF_FLOWING)
-	{
-		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-		if (scroll == 0.0)
-			scroll = -64.0;
-	}
-
+	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
+	
 	R_InitVArrays(VERT_SINGLE_TEXTURED);
-
-	R_AddTexturedSurfToVArray (fa, scroll);
+	R_AddTexturedSurfToVArray (fa);
 	R_KillVArrays();
+	
+	BSP_SetScrolling (0);
 }
 
 
@@ -680,7 +693,6 @@ provided texinfo
 static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dynamic)
 {
 	int		texnum;
-	float	scroll;
 	
 	BSP_FlushVBOAccum ();
 	
@@ -708,18 +720,7 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	// scrolling is done using the texture matrix
 	if (	!r_currTexInfo || (texinfo->flags & SURF_FLOWING) ||
 			(r_currTexInfo->flags & SURF_FLOWING))
-	{
-		qglMatrixMode (GL_TEXTURE);
-		qglLoadIdentity ();
-		if (texinfo->flags & SURF_FLOWING)
-		{
-			scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-			if (scroll == 0.0)
-				scroll = -64.0;
-			qglTranslatef (scroll, 0, 0);
-		}
-		qglMatrixMode (GL_MODELVIEW);
-	}
+		BSP_SetScrolling ((texinfo->flags & SURF_FLOWING) != 0);
 	
 	if (!glsl)
 	{
@@ -1271,9 +1272,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 	}
 	
 	GL_SelectTexture (0);
-	qglMatrixMode (GL_TEXTURE);
-	qglLoadIdentity ();
-	qglMatrixMode (GL_MODELVIEW);
+	BSP_SetScrolling (0);
 	
 	// this has to come last because it messes with GL state
 	BSP_DrawWarpSurfaces (forEnt);
