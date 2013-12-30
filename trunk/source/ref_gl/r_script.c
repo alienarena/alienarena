@@ -949,6 +949,39 @@ static int num_stagekeys = sizeof (rs_stagekeys) / sizeof(rs_stagekeys[0]) - 1;
 
 // =====================================================
 
+static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
+{
+	qboolean scroll_enabled, scale_enabled;
+	
+	scroll_enabled =	stage->scroll.typeX != 0 ||
+						stage->scroll.speedX != 0 ||
+						stage->scroll.typeY != 0 ||
+						stage->scroll.speedY != 0;
+	
+	if (scroll_enabled && stage->envmap)
+	{
+		Com_Printf ("WARN: Incompatible combination: envmapping and scrolling"
+					"in script %s!\nForcing envmap off.\n", rs->name);
+		stage->envmap = false;
+	}
+	
+	scale_enabled = stage->scale.typeX != 0 || stage->scale.typeY != 0;
+	
+	if (scale_enabled && stage->envmap)
+	{
+		Com_Printf ("WARN: Incompatible combination: envmapping and scaling"
+					"in script %s!\nForcing envmap off.\n", rs->name);
+		stage->envmap = false;
+	}
+	
+	if (stage->rot_speed != 0 && stage->envmap)
+	{
+		Com_Printf ("WARN: Incompatible combination: envmapping and rotating"
+					"in script %s!\nForcing envmap off.\n", rs->name);
+		stage->envmap = false;
+	}
+}
+
 void RS_LoadScript(char *script)
 {
 	qboolean		inscript = false, instage = false;
@@ -1005,6 +1038,7 @@ void RS_LoadScript(char *script)
 			{
 				if (instage)
 				{
+					sanity_check_stage (rs, stage);
 					instage = false;
 				}
 				else
@@ -1104,44 +1138,6 @@ void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 	*ot = vert[1];
 }
 
-void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
-{
-	// float	txm = 0, tym = 0; // unused
-
-	// scale
-	if (stage->scale.scaleX)
-	{
-		switch (stage->scale.typeX)
-		{
-		case 0:	// static
-			*os *= stage->scale.scaleX;
-			break;
-		case 1:	// sine
-			*os *= stage->scale.scaleX*sin(rs_realtime*0.05);
-			break;
-		case 2:	// cosine
-			*os *= stage->scale.scaleX*cos(rs_realtime*0.05);
-			break;
-		}
-	}
-
-	if (stage->scale.scaleY)
-	{
-		switch (stage->scale.typeY)
-		{
-		case 0:	// static
-			*ot *= stage->scale.scaleY;
-			break;
-		case 1:	// sine
-			*ot *= stage->scale.scaleY*sin(rs_realtime*0.05);
-			break;
-		case 2:	// cosine
-			*ot *= stage->scale.scaleY*cos(rs_realtime*0.05);
-			break;
-		}
-	}
-}
-
 inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 {
 	float cost = cos(degrees), sint = sin(degrees);
@@ -1166,8 +1162,6 @@ inline void RS_RotateST2 (float *os, float *ot, float degrees)
 
 void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa)
 {
-	RS_ScaleTexcoords(stage, os, ot);
-
 	// rotate
 	if (stage->rot_speed)
 		RS_RotateST (os, ot, -stage->rot_speed * rs_realtime * 0.0087266388888888888888888888888889, fa);
@@ -1392,6 +1386,35 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
+static float RS_ScrollFunc (char type, float speed)
+{
+	switch (type)
+	{
+	case 0: // static
+		return rs_realtime*speed;
+	case 1:	// sine
+		return sin (rs_realtime * speed);
+	case 2:	// cosine
+		return cos (rs_realtime * speed);
+	}
+}
+
+static float RS_ScaleFunc (char type, float scale)
+{
+	if (scale == 0)
+		return 1;
+	
+	switch (type)
+	{
+	case 0: // static
+		return scale;
+	case 1: // sine
+		return scale * sin (rs_realtime * 0.05);
+	case 2: // cosine
+		return scale * cos (rs_realtime * 0.05);
+	}
+}
+
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the
 //existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
@@ -1417,13 +1440,15 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
 	lightmaptoggle = true;
+	
+	qglMatrixMode (GL_TEXTURE);
 	do
 	{
 		if (stage->lensflare || stage->grass || stage->beam || stage->cube)
 			break; //handled elsewhere
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute
-
+		
 		if(stage->lightmap)
 		{
 			ToggleLightmap(true);
@@ -1437,6 +1462,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			qglShadeModel (GL_SMOOTH);
 		}
 
+		GL_SelectTexture (0);
+		qglPushMatrix ();
+		
 		if (stage->anim_count)
 			GL_MBind (0, RS_Animate(stage));
 		else
@@ -1444,7 +1472,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				
 		if (stage->blendfunc.blend)
 		{
-			GL_BlendFunction(stage->blendfunc.source, stage->blendfunc.dest);
+			GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
+			qglBlendFunc (stage->blendfunc.source, stage->blendfunc.dest); // FIXME
 			GLSTATE_ENABLE_BLEND
 		}
 		else if (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66) && !stage->alphamask)
@@ -1476,33 +1505,15 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					alpha = stage->alphashift.min;
 			}
 		}
-
-		switch (stage->scroll.typeX)
-		{
-		case 0:	// static
-			txm = rs_realtime*stage->scroll.speedX;
-			break;
-		case 1:	// sine
-			txm = sin (rs_realtime*stage->scroll.speedX);
-			break;
-		case 2:	// cosine
-			txm = cos (rs_realtime*stage->scroll.speedX);
-			break;
-		}
-
-		switch (stage->scroll.typeY)
-		{
-		case 0:	// static
-			tym = rs_realtime*stage->scroll.speedY;
-			break;
-		case 1:	// sine
-			tym = sin (rs_realtime*stage->scroll.speedY);
-			break;
-		case 2:	// cosine
-			tym = cos (rs_realtime*stage->scroll.speedY);
-			break;
-		}
-
+		
+		qglTranslatef (	RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX),
+						RS_ScrollFunc (stage->scroll.typeY, stage->scroll.speedY),
+						0 );
+		
+		qglScalef (	RS_ScaleFunc (stage->scale.typeX, stage->scale.scaleX),
+					RS_ScaleFunc (stage->scale.typeY, stage->scale.scaleY),
+					1 );
+		
 		qglColor4f (1, 1, 1, alpha);
 
 		if (stage->alphamask)
@@ -1528,21 +1539,18 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			{
 				RS_SetEnvmap (v, &os, &ot);
 				//move by normal & position
-				os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
-				ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
-
-				if (surf->texinfo->flags & SURF_FLOWING)
-					txm = tym = 0;
+				os-=DotProduct (surf->plane->normal, vectors[1]) + (r_origin[0]-r_origin[1]+r_origin[2])*0.0025;
+				ot+=DotProduct (surf->plane->normal, vectors[2]) + (-r_origin[0]+r_origin[1]-r_origin[2])*0.0025;
 			}
 			else 
 			{
 				os = v[3];
 				ot = v[4];
 			}
-
+			
 			RS_SetTexcoords (stage, &os, &ot, surf);
 			{
-				float red=1.0, green=1.0, blue=1.0;
+				float red=1.0, green=1.0, blue=1.0, alpha2;
 
 				if (stage->colormap.enabled)
 				{
@@ -1551,9 +1559,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					blue = stage->colormap.blue;
 				}
 
-				alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
+				alpha2 = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
 
-				qglColor4f (red, green, blue, alpha);
+				qglColor4f (red, green, blue, alpha2);
 			}
 
 			// copy in vertex data
@@ -1581,8 +1589,12 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
+		
+		qglPopMatrix ();
 
 	} while ( (stage = stage->next) );	
+	
+	qglMatrixMode (GL_MODELVIEW);
 	
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
