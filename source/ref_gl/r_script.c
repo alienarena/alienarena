@@ -961,7 +961,7 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 	if (scroll_enabled && stage->envmap)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and scrolling"
-					"in script %s!\nForcing envmap off.\n", rs->name);
+					" in script %s!\nForcing envmap off.\n", rs->name);
 		stage->envmap = false;
 	}
 	
@@ -969,15 +969,16 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 	
 	if (scale_enabled && stage->envmap)
 	{
-		Com_Printf ("WARN: Incompatible combination: envmapping and scaling"
-					"in script %s!\nForcing envmap off.\n", rs->name);
+		Com_Printf ("WARN: Incompatible combination: envmapping and"
+					" non-static scaling in script %s!\n"
+					"Forcing envmap off.\n", rs->name);
 		stage->envmap = false;
 	}
 	
 	if (stage->rot_speed != 0 && stage->envmap)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and rotating"
-					"in script %s!\nForcing envmap off.\n", rs->name);
+					" in script %s!\nForcing envmap off.\n", rs->name);
 		stage->envmap = false;
 	}
 }
