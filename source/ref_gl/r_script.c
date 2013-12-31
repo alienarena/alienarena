@@ -1150,76 +1150,47 @@ inline void RS_RotateST2 (float *os, float *ot, float radians)
 // scaling factor to convert from rotations per minute to radians per second
 #define ROTFACTOR (M_PI * 2.0 / 60.0)
 
+static float RS_ScrollFunc (char type, float speed)
+{
+	switch (type)
+	{
+	case 0: // static
+		return rs_realtime*speed;
+	case 1:	// sine
+		return sin (rs_realtime * speed);
+	case 2:	// cosine
+		return cos (rs_realtime * speed);
+	}
+}
+
+static float RS_ScaleFunc (char type, float scale)
+{
+	if (scale == 0)
+		return 1;
+	
+	switch (type)
+	{
+	case 0: // static
+		return scale;
+	case 1: // sine
+		return scale * sin (rs_realtime * 0.05);
+	case 2: // cosine
+		return scale * cos (rs_realtime * 0.05);
+	}
+}
+
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 {
-	float	txm = 0, tym = 0;
-
 	// scale
-	if (stage->scale.scaleX)
-	{
-		switch (stage->scale.typeX)
-		{
-		case 0:	// static
-			*os *= stage->scale.scaleX;
-			break;
-		case 1:	// sine
-			*os *= stage->scale.scaleX*sin(rs_realtime*0.05);
-			break;
-		case 2:	// cosine
-			*os *= stage->scale.scaleX*cos(rs_realtime*0.05);
-			break;
-		}
-	}
-
-	if (stage->scale.scaleY)
-	{
-		switch (stage->scale.typeY)
-		{
-		case 0:	// static
-			*ot *= stage->scale.scaleY;
-			break;
-		case 1:	// sine
-			*ot *= stage->scale.scaleY*sin(rs_realtime*0.05);
-			break;
-		case 2:	// cosine
-			*ot *= stage->scale.scaleY*cos(rs_realtime*0.05);
-			break;
-		}
-
-	}
+	*os *= RS_ScaleFunc (stage->scale.typeX, stage->scale.scaleX);
+	*ot *= RS_ScaleFunc (stage->scale.typeY, stage->scale.scaleY);
 
 	// rotate
 	if (stage->rot_speed)
 		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * ROTFACTOR);
-
-	switch(stage->scroll.typeX)
-	{
-		case 0:	// static
-			txm=rs_realtime*stage->scroll.speedX;
-			break;
-		case 1:	// sine
-			txm=sin(rs_realtime*stage->scroll.speedX);
-			break;
-		case 2:	// cosine
-			txm=cos(rs_realtime*stage->scroll.speedX);
-			break;
-	}
-
-	switch(stage->scroll.typeY)
-	{
-		case 0:	// static
-			tym=rs_realtime*stage->scroll.speedY;
-			break;
-		case 1:	// sine
-			tym=sin(rs_realtime*stage->scroll.speedY);
-			break;
-		case 2:	// cosine
-			tym=cos(rs_realtime*stage->scroll.speedY);
-			break;
-	}
-
-	*os += txm;
-	*ot += tym;
+	
+	*os += RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX);
+	*ot += RS_ScrollFunc (stage->scroll.typeY, stage->scroll.speedY);
 }
 
 float RS_AlphaFunc (int alphafunc, float alpha, vec3_t normal, vec3_t org)
@@ -1367,35 +1338,6 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	}
 	Anon_Cvar_Set (&(expr->lval), va ("%d", resv));
 	return &(expr->lval);
-}
-
-static float RS_ScrollFunc (char type, float speed)
-{
-	switch (type)
-	{
-	case 0: // static
-		return rs_realtime*speed;
-	case 1:	// sine
-		return sin (rs_realtime * speed);
-	case 2:	// cosine
-		return cos (rs_realtime * speed);
-	}
-}
-
-static float RS_ScaleFunc (char type, float scale)
-{
-	if (scale == 0)
-		return 1;
-	
-	switch (type)
-	{
-	case 0: // static
-		return scale;
-	case 1: // sine
-		return scale * sin (rs_realtime * 0.05);
-	case 2: // cosine
-		return scale * cos (rs_realtime * 0.05);
-	}
 }
 
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the
