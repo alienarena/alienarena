@@ -29,13 +29,16 @@
 /* #include <unistd.h> */
 /* #endif */
 
-#include <signal.h>
-
-#if defined HAVE_DLFCN_H
-# include <dlfcn.h>
+#if defined HAVE_SIGNAL_H
+# include <signal.h>
 #endif
 
-// TODO -jjb- check these for configure inclusion
+/* #if defined HAVE_DLFCN_H */
+/* # include <dlfcn.h> */
+/* #endif */
+
+// TODO -jjb- check these for configure inclusion.
+//  are all these includes actually needed?
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
@@ -589,7 +592,6 @@ void HandleEvents( void )
 	static int last_mouse_x = 0, last_mouse_y = 0;
 
 	float f_sys_msecs;
-	unsigned u_sys_msecs;
 
 	if ( !dpy )
 	{
@@ -861,6 +863,11 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	int i;
 #endif
 
+#if !defined NDEBUG
+	Com_DPrintf( "GLimp_SetMode(): (w:%u,h:%u) mode:%i %s \n",
+		pwidth, pheight, mode, (fullscreen ? "Fullscreen" : "Windowed") );
+#endif
+
 	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE);
 
 	Com_Printf ( "Initializing OpenGL display\n");
@@ -1039,7 +1046,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	XFlush(dpy);
 
 	/*
-	 * CONTEXT CREATION
+	 * OPENGL CONTEXT CREATION
 	 */
 	ctx = qglXCreateContext(dpy, visinfo, NULL, True);
 
@@ -1086,13 +1093,15 @@ void GLimp_Shutdown( void )
 	mouse_is_position = true;
 	dgamouse = false;
 
-	if (dpy) {
+	if (dpy)
+	{
 		if (ctx)
 			qglXDestroyContext(dpy, ctx);
 		if (win)
 			XDestroyWindow(dpy, win);
 #if defined HAVE_XXF86VM
-		if (vidmode_active)
+		/* why is this here? is it necessary?, why mode 0 */
+		if ( vidmode_active )
 			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
 #endif // defined HAVE_XXF86VM
 
@@ -1109,6 +1118,8 @@ void GLimp_Shutdown( void )
 **
 ** This routine is responsible for initializing the OS specific portions
 ** of OpenGL.
+**
+** TODO: But... seems that is done in SetMode
 */
 qboolean GLimp_Init( void *hinstance, void *wndproc )
 {

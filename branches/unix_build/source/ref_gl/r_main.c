@@ -189,6 +189,7 @@ cvar_t	*r_firstrun;
 
 //for testing
 cvar_t  *r_test;
+cvar_t	*r_tracetest;
 
 //ODE initialization error check
 int r_odeinit_success; // 0 if dODEInit2() fails, 1 otherwise.
@@ -721,6 +722,69 @@ void R_DrawViewEntitiesOnList (void)
 	qglDepthMask (1);		// back to writing
 }
 
+void R_DrawTerrain (void)
+{
+	int		i;
+	rscript_t	*rs = NULL;
+	vec3_t	dist;
+
+	if (!r_drawworld->integer)
+		return;
+
+	for (i=0 ; i<num_terrain_entities ; i++)
+	{
+		currententity = &terrain_entities[i];
+		
+		if (currententity->model && r_shaders->integer)
+		{
+			rs=(rscript_t *)currententity->model->script;
+
+			//custom player skin (must be done here)
+			if (currententity->skin)
+			{
+			    rs = currententity->skin->script;
+                if(rs)
+                    RS_ReadyScript(rs);
+            }
+
+			if (rs)
+				currententity->script = rs;
+			else
+				currententity->script = NULL;
+		}
+
+		currentmodel = currententity->model;
+		
+		//get distance
+		VectorSubtract(r_origin, currententity->origin, dist);		
+		
+		//set lod if available
+		if(VectorLength(dist) > LOD_DIST*2.0)
+		{
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > LOD_DIST)
+		{
+			if(currententity->lod1)
+				currentmodel = currententity->lod1;
+		}
+
+		if (!currentmodel)
+		{
+			R_DrawNullModel ();
+			continue;
+		}
+		
+		// TODO: maybe we don't actually want to assert this?
+		assert (currentmodel->type == mod_terrain);
+		
+		R_Mesh_Draw ();
+	}
+	
+	// TODO: will these models ever be transparent?
+}
+
 extern int r_drawing_fbeffect;
 extern int	r_fbFxType;
 extern float r_fbeffectTime;
@@ -1013,8 +1077,43 @@ r_newrefdef must be set before the first call
 ================
 */
 
+static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect)
+{
+	int i;
+	vec3_t up;
+	
+	VectorSet (up, 0, 0, 1);
+	
+	qglDisable (GL_TEXTURE_2D);
+	qglDisable (GL_DEPTH_TEST);
+	if (does_intersect)
+	{
+		qglColor4f (1, 0, 0, 1);
+		qglLineWidth (5.0);
+	}
+	else if (DotProduct (normal, up) < 0)
+	{
+		qglColor4f (0, 0, 1, 1);
+		qglLineWidth (2.0);
+	}
+	else
+	{
+		qglColor4f (0, 0, 0, 1);
+		qglLineWidth (1.0);
+	}
+	qglBegin (GL_LINE_LOOP);
+	for (i = 0; i < 3; i++)
+		qglVertex3fv (verts[i]);
+	qglEnd ();
+	qglEnable (GL_DEPTH_TEST);
+	qglEnable (GL_TEXTURE_2D);
+}
+
+extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect));
+
 void R_RenderView (refdef_t *fd)
 {
+	vec3_t forward;
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
 
 	numRadarEnts = 0;
@@ -1083,6 +1182,8 @@ void R_RenderView (refdef_t *fd)
 	}
 
 	R_DrawWorldSurfs ();
+	
+	R_DrawTerrain ();
 
 	if(r_lensflare->integer)
 		R_RenderFlares ();
@@ -1126,6 +1227,18 @@ void R_RenderView (refdef_t *fd)
 	R_BloomBlend( &r_newrefdef );//BLOOMS
 
 	R_RenderSun();
+	
+	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
+	if (gl_showpolys->integer)
+		CM_TerrainDrawIntersecting (r_origin, forward, R_DrawTerrainTri);
+	if (r_tracetest->integer > 0)
+	{
+		int		i;
+		vec3_t	targ;
+		VectorMA (r_origin, 8192, forward, targ);
+		for (i = 0; i < r_tracetest->integer; i++)
+			CM_BoxTrace (r_origin, targ, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+	}
 
 	R_GLSLPostProcess();
 
@@ -1146,10 +1259,10 @@ void	R_SetGL2D (void)
 	// set 2D virtual screen size
 	qglViewport (0,0, vid.width, vid.height);
 	qglMatrixMode(GL_PROJECTION);
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	qglOrtho  (0, vid.width, vid.height, 0, -99999, 99999);
 	qglMatrixMode(GL_MODELVIEW);
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
@@ -1300,6 +1413,7 @@ void R_Register( void )
 	Cvar_Describe (r_firstrun, "Set this to 0 if you want the game to auto detect your graphics settings next time you run it.");
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
+	r_tracetest = Cvar_Get("r_tracetest", "0", CVARDOC_INT); // BoxTrace performance test
 	
 	// FIXME HACK copied over from the video menu code. These are initialized
 	// again elsewhere. TODO: work out any complications that may arise from
@@ -1442,7 +1556,7 @@ double CPUSpeed()
 
 	DWORD BufSize = _MAX_PATH;
 	DWORD dwMHz = _MAX_PATH;
-	HKEY hKey;    // open the key where the proc speed is hidden:
+	HKEY hKey;	// open the key where the proc speed is hidden:
 
 	long lError = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",

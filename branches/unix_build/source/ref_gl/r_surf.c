@@ -245,6 +245,27 @@ msurface_t	*r_flicker_surfaces;
 
 /*
 ================
+BSP_SetScrolling
+================
+*/
+static void BSP_SetScrolling (qboolean enable)
+{
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+	if (enable)
+	{
+		float scroll;
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+		qglTranslatef (scroll, 0, 0);
+	}
+	qglMatrixMode (GL_MODELVIEW);
+}
+
+
+/*
+================
 BSP_DrawWarpSurfaces
 ================
 */
@@ -291,22 +312,14 @@ BSP_DrawAlphaPoly
 ================
 */
 void BSP_DrawAlphaPoly (msurface_t *fa, int flags)
-
 {
-	float	scroll;
-
-	scroll = 0;
-	if (flags & SURF_FLOWING)
-	{
-		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-		if (scroll == 0.0)
-			scroll = -64.0;
-	}
-
+	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
+	
 	R_InitVArrays(VERT_SINGLE_TEXTURED);
-
-	R_AddTexturedSurfToVArray (fa, scroll);
+	R_AddTexturedSurfToVArray (fa);
 	R_KillVArrays();
+	
+	BSP_SetScrolling (0);
 }
 
 
@@ -680,7 +693,6 @@ provided texinfo
 static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dynamic)
 {
 	int		texnum;
-	float	scroll;
 	
 	BSP_FlushVBOAccum ();
 	
@@ -708,18 +720,7 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	// scrolling is done using the texture matrix
 	if (	!r_currTexInfo || (texinfo->flags & SURF_FLOWING) ||
 			(r_currTexInfo->flags & SURF_FLOWING))
-	{
-		qglMatrixMode (GL_TEXTURE);
-		qglLoadIdentity ();
-		if (texinfo->flags & SURF_FLOWING)
-		{
-			scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-			if (scroll == 0.0)
-				scroll = -64.0;
-			qglTranslatef (scroll, 0, 0);
-		}
-		qglMatrixMode (GL_MODELVIEW);
-	}
+		BSP_SetScrolling ((texinfo->flags & SURF_FLOWING) != 0);
 	
 	if (!glsl)
 	{
@@ -1271,9 +1272,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 	}
 	
 	GL_SelectTexture (0);
-	qglMatrixMode (GL_TEXTURE);
-	qglLoadIdentity ();
-	qglMatrixMode (GL_MODELVIEW);
+	BSP_SetScrolling (0);
 	
 	// this has to come last because it messes with GL state
 	BSP_DrawWarpSurfaces (forEnt);
@@ -1985,6 +1984,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	float		*vec;
 	float		s, t;
 	glpoly_t	*poly;
+	vec3_t		total, center;
 
 	vec3_t surfmaxs = {-99999999, -99999999, -99999999};
 	vec3_t surfmins = {99999999, 99999999, 99999999};
@@ -2018,6 +2018,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t /= fa->texinfo->image->height;
 
+		VectorAdd (total, vec, total);
 		VectorCopy (vec, poly->verts[i]);
 		poly->verts[i][3] = s;
 		poly->verts[i][4] = t;
@@ -2077,6 +2078,14 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	// store out the completed bbox
 	VectorCopy (surfmins, fa->mins);
 	VectorCopy (surfmaxs, fa->maxs);
+	
+	VectorScale (total, 1.0f/(float)lnumverts, center);
+	
+	// These are used by the rscript "rotate" keyword.
+	fa->c_s = (DotProduct (center, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3])
+				/ fa->texinfo->image->width;
+	fa->c_t = (DotProduct (center, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3])
+				/ fa->texinfo->image->height;
 }
 
 /*

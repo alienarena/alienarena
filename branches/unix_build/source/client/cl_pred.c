@@ -115,7 +115,7 @@ void CL_ClipMoveToEntities ( vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 			bmaxs[0] = bmaxs[1] = x;
 			bmins[2] = -zd;
 			bmaxs[2] = zu;
-
+			
 			headnode = CM_HeadnodeForBox (bmins, bmaxs);
 			angles = vec3_origin;	// boxes don't rotate
 		}
@@ -126,7 +126,7 @@ void CL_ClipMoveToEntities ( vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 		trace = CM_TransformedBoxTrace (start, end,
 			mins, maxs, headnode,  MASK_PLAYERSOLID,
 			ent->origin, angles);
-
+		
 		if (trace.allsolid || trace.startsolid ||
 		trace.fraction < tr->fraction)
 		{

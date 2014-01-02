@@ -440,7 +440,7 @@ void CL_PrepRefresh ( void )
 				cl.model_clip[i] = CM_InlineModel (cl.configstrings[CS_MODELS+i]);
 			else
 				cl.model_clip[i] = NULL;
-			}
+		}
 		if (name[0] != '*')
 			Com_Printf ("                                     \r");
 

@@ -211,11 +211,11 @@ dnl make sure  [DOT]cor_games[SUFFIX] can only be in HOME somewhere
 dnl
 cor_games_homedir=".cor_games"
 AC_ARG_VAR([COR_GAMES_HOMEDIR],
-	[User configuration and data directory (default:.cor_games)])
+	[(User configuration and data directory (default:.cor_games)])
 
 AS_IF([test "x${COR_GAMES_HOMEDIR}" = "x"],[
-	COR_GAMES_HOMEDIR = ${cor_games_homedir}],[
-	cor_games_homedir = ${COR_GAMES_HOMEDIR}
+	COR_GAMES_HOMEDIR=${cor_games_homedir}],[
+	cor_games_homedir=${COR_GAMES_HOMEDIR}
 	])
 
 AC_DEFINE_UNQUOTED([USER_GAMEDATA],["${cor_games_homedir}"],
@@ -363,6 +363,8 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h inttypes.h limits.h malloc.h \
  sys/ioctl.h sys/param.h sys/socket.h time.h sys/time.h termios.h unistd.h])
 
 AC_CHECK_HEADERS([dlfcn.h dirent.h sys/mman.h stdarg.h])
+
+AC_CHECK_HEADERS([signal.h])
 
 dnl
 dnl start of client-only header requirements

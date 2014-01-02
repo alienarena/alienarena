@@ -252,6 +252,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 char *COM_SkipPath (char *pathname);
 void COM_StripExtension (char *in, char *out);
+qboolean COM_HasExtension (char *path, char *extension);
 void COM_FileBase (char *in, char *out);
 void COM_FilePath (char *in, char *out);
 void COM_DefaultExtension (char *path, char *extension);
@@ -499,9 +500,9 @@ typedef struct cplane_s
 
 typedef struct cmodel_s
 {
-	vec3_t		mins, maxs;
-	vec3_t		origin;		// for sounds or lights
-	int			headnode;
+	vec3_t			mins, maxs;
+	vec3_t			origin;		// for sounds or lights
+	int				headnode;
 } cmodel_t;
 
 typedef struct csurface_s

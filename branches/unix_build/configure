@@ -1458,7 +1458,7 @@ Some influential environment variables:
   PKG_CONFIG_LIBDIR
               path overriding pkg-config's built-in search path
   COR_GAMES_HOMEDIR
-              User configuration and data directory (default:.cor_games)
+              (User configuration and data directory (default:.cor_games)
   XMKMF       Path to xmkmf, Makefile generator for X Window System
   GL_LIBDIR   directory containing libGL.dylib
   ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
@@ -4857,10 +4857,10 @@ cor_games_homedir=".cor_games"
 
 if test "x${COR_GAMES_HOMEDIR}" = "x"; then :
 
-	COR_GAMES_HOMEDIR = ${cor_games_homedir}
+	COR_GAMES_HOMEDIR=${cor_games_homedir}
 else
 
-	cor_games_homedir = ${COR_GAMES_HOMEDIR}
+	cor_games_homedir=${COR_GAMES_HOMEDIR}
 
 fi
 
@@ -6586,6 +6586,19 @@ ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_include
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+for ac_header in signal.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "signal.h" "ac_cv_header_signal_h" "$ac_includes_default"
+if test "x$ac_cv_header_signal_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SIGNAL_H 1
 _ACEOF
 
 fi

@@ -972,8 +972,6 @@ void IQM_AnimateRagdoll(int RagDollID)
 	}
 }
 
-qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
-
 qboolean IQM_CullModel( void )
 {
 	int i;

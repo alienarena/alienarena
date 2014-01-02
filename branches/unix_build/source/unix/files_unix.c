@@ -455,11 +455,9 @@ FS_Read( void *buffer, int len, FILE *f )
 	int  block, remaining;
 	int  read;
 	byte *buf;
-	int  tries;
 
 	buf       = (byte*)buffer;
 	remaining = len;
-	tries     = 0;
 	while ( remaining )
 	{
 		block = remaining;
@@ -542,7 +540,9 @@ FS_LoadFile( char *path, void **buffer )
 	*buffer  = buf;
 	FS_Read( buf, len, h );
 	FS_FCloseFile( h );
+
 	return len;
+
 } /* FS_LoadFile */
 
 /**

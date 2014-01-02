@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "qcommon.h"
 
+#include <float.h>
+
 typedef struct
 {
 	cplane_t	*plane;
@@ -111,6 +113,25 @@ mapsurface_t	nullsurface;
 int			floodvalid;
 
 qboolean	portalopen[MAX_MAP_AREAPORTALS];
+
+typedef struct
+{
+	cplane_t	p;
+	vec_t		*verts[3];
+	vec3_t		mins, maxs;
+} cterraintri_t;
+
+typedef struct
+{
+	qboolean		active;
+	vec3_t			mins, maxs;
+	int				numtriangles;
+	vec_t			*verts;
+	cterraintri_t	*tris;
+} cterrainmodel_t;
+
+static int		numterrainmodels;
+cterrainmodel_t	terrain_models[MAX_MAP_MODELS];
 
 
 cvar_t		*map_noareas;
@@ -610,7 +631,172 @@ void CMod_LoadAlternateEntityData (char *entity_file_name)
 	FS_FreeFile (buf);
 }
 
+//=======================================================================
 
+void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
+{
+	float cosyaw, cospitch, cosroll, sinyaw, sinpitch, sinroll;
+	float rotation_matrix[3][3];
+	int i, j, k;
+	cterrainmodel_t *mod;
+	char *buf;
+	terraindata_t data;
+	vec3_t up;
+	
+	if (numterrainmodels == MAX_MAP_MODELS)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
+	
+	mod = &terrain_models[numterrainmodels++];
+	
+	FS_LoadFile (name, (void**)&buf);
+	
+	if (!buf)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
+	
+	cosyaw = cos (DEG2RAD (angles[YAW]));
+	cospitch = cos (DEG2RAD (angles[PITCH]));
+	cosroll = cos (DEG2RAD (angles[ROLL]));
+	sinyaw = sin (DEG2RAD (angles[YAW]));
+	sinpitch = sin (DEG2RAD (angles[PITCH]));
+	sinroll = sin (DEG2RAD (angles[ROLL]));
+	
+	rotation_matrix[0][0] = cosyaw*cospitch;
+	rotation_matrix[0][1] = cosyaw*sinpitch*sinroll - sinyaw*cosroll;
+	rotation_matrix[0][2] = cosyaw*sinpitch*cosroll + sinyaw*sinroll;
+	rotation_matrix[1][0] = sinyaw*cospitch;
+	rotation_matrix[1][1] = sinyaw*sinpitch*sinroll + cosyaw*cosroll;
+	rotation_matrix[1][2] = sinyaw*sinpitch*cosroll - cosyaw*sinroll;
+	rotation_matrix[2][0] = -sinpitch;
+	rotation_matrix[2][1] = cospitch*sinroll;
+	rotation_matrix[2][2] = cospitch*cosroll;
+	
+	// This ends up being 1/4 as much detail as is used for rendering. You 
+	// need a surprisingly large amount to maintain accurate physics.
+	LoadTerrainFile (&data, name, 0.5, 8, buf);
+	
+	Z_Free (data.vert_texcoords);
+	Z_Free (data.texture_path);
+	
+	mod->active = true;
+	mod->numtriangles = 0;
+	
+	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
+	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
+	
+	// Technically, because the mins can be positive or the maxs can be 
+	// negative, this isn't always correct, but it errs on the side of more
+	// inclusive, so it's all right.
+	VectorCopy (origin, mod->mins);
+	VectorCopy (origin, mod->maxs);
+	
+	for (i = 0; i < data.num_vertices; i++)
+	{
+		for (j = 0; j < 3; j++)
+		{
+			mod->verts[3*i+j] = origin[j];
+			for (k = 0; k < 3; k++)
+				mod->verts[3*i+j] += data.vert_positions[3*i+k] * rotation_matrix[j][k];
+				
+			if (mod->verts[3*i+j] < mod->mins[j])
+				mod->mins[j] = mod->verts[3*i+j];
+			else if (mod->verts[3*i+j] > mod->maxs[j])
+				mod->maxs[j] = mod->verts[3*i+j];
+		}
+	}
+	
+	VectorSet (up, rotation_matrix[0][2], rotation_matrix[1][2], rotation_matrix[2][2]);
+	
+	for (i = 0; i < data.num_triangles; i++)
+	{
+		cterraintri_t *tri;
+		vec3_t side1, side2;
+		int j, k;
+		
+		tri = &mod->tris[mod->numtriangles];
+		
+		for (j = 0; j < 3; j++)
+			tri->verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
+		
+		VectorCopy (tri->verts[0], tri->mins);
+		VectorCopy (tri->verts[0], tri->maxs);
+		
+		for (j = 1; j < 3; j++)
+		{
+			for (k = 0; k < 3; k++)
+			{
+				if (tri->verts[j][k] < tri->mins[k])
+					tri->mins[k] = tri->verts[j][k];
+				else if (tri->verts[j][k] > tri->maxs[k])
+					tri->maxs[k] = tri->verts[j][k];
+			}
+		}
+		
+		VectorSubtract (tri->verts[1], tri->verts[0], side1);
+		VectorSubtract (tri->verts[2], tri->verts[0], side2);
+		CrossProduct (side2, side1, tri->p.normal);
+		VectorNormalize (tri->p.normal);
+		tri->p.dist = DotProduct (tri->verts[0], tri->p.normal);
+		tri->p.signbits = signbits_for_plane (&tri->p);
+		tri->p.type = PLANE_ANYZ;
+		
+		// overwrite and don't use downward facing faces.
+		if (DotProduct (tri->p.normal, up) > 0)
+			mod->numtriangles++;
+	}
+	
+	if (data.num_triangles != mod->numtriangles)
+		Com_Printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
+	
+	Z_Free (data.vert_positions);
+	Z_Free (data.tri_indices);
+	
+	FS_FreeFile (buf);
+}
+
+// NOTE: If you update this, you may also want to update
+// R_ParseTerrainModelEntity in ref_gl/r_model.c.
+static void CM_ParseTerrainModelEntity (char *match, char *block)
+{
+	int		i;
+	vec3_t	angles, origin;
+	char	*bl, *tok, *pathname = NULL;
+	
+	VectorClear (angles);
+	VectorClear (origin);
+	
+	bl = block;
+	while (1)
+	{
+		tok = Com_ParseExt(&bl, true);
+		if (!tok[0])
+			break;		// End of data
+
+		if (!Q_strcasecmp("model", tok))
+		{
+			pathname = CopyString (Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angles", tok))
+		{
+			for (i = 0; i < 3; i++)
+				angles[i] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angle", tok))
+		{
+			angles[YAW] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("origin", tok))
+		{
+			for (i = 0; i < 3; i++)
+				origin[i] = atof(Com_ParseExt(&bl, false));
+		}
+		else
+			Com_SkipRestOfLine(&bl);
+	}
+	
+	CM_LoadTerrainModel (pathname, angles, origin);
+	
+	Z_Free (pathname);
+}
 
 /*
 ==================
@@ -619,6 +805,7 @@ CM_LoadMap
 Loads in the map and all submodels
 ==================
 */
+
 cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 {
 	unsigned		*buf;
@@ -638,6 +825,7 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 
 	map_noareas = Cvar_Get ("map_noareas", "0", 0);
 
+	// Don't need to load the map twice on local servers.
 	if (  !strcmp (map_name, name) && (clientload || !Cvar_VariableValue ("flushmap")) )
 	{
 		*checksum = last_checksum;
@@ -715,6 +903,28 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	FloodAreaConnections ();
 
 	strcpy (map_name, name);
+	
+	// Reset terrain models from last time. 
+	// TODO: verify this works in ALL situations, including local and non-
+	// local servers, wierd sequences of connects/disconnects, etc.
+	for (i = 0; i < MAX_MAP_MODELS; i++)
+	{
+		if (terrain_models[i].active)
+		{
+			terrain_models[i].active = false;
+			Z_Free (terrain_models[i].verts);
+			Z_Free (terrain_models[i].tris);
+		}
+	}
+	numterrainmodels = 0;
+	
+	// Parse new terrain models from the BSP entity data.
+	// TODO: entdefs?
+	{
+		static const char *classnames[] = {"misc_terrainmodel"};
+		
+		CM_FilterParseEntities ("classname", 1, classnames, CM_ParseTerrainModelEntity);
+	}
 
 	return &map_cmodels[0];
 }
@@ -846,6 +1056,71 @@ int		CM_LeafArea (int leafnum)
 	if (leafnum < 0 || leafnum >= numleafs)
 		Com_Error (ERR_DROP, "CM_LeafArea: bad number");
 	return map_leafs[leafnum].area;
+}
+
+//=======================================================================
+
+// Looks for entities with the given field matched to one of the possible 
+// values.
+void CM_FilterParseEntities (const char *fieldname, int numvals, const char *vals[], void (*process_ent_callback) (char *match, char *block))
+{
+	int			i;
+	char		*buf, *tok;
+	char		block[2048];
+	
+	buf = CM_EntityString();
+	while (1)
+	{
+		qboolean matched = false;
+		
+		tok = Com_ParseExt(&buf, true);
+		if (!tok[0])
+			break;			// End of data
+
+		if (Q_strcasecmp(tok, "{"))
+			continue;		// Should never happen!
+
+		// Parse the text inside brackets
+		block[0] = 0;
+		do {
+			tok = Com_ParseExt(&buf, false);
+			if (!Q_strcasecmp(tok, "}"))
+				break;		// Done
+
+			if (!tok[0])	// Newline
+				Q_strcat(block, "\n", sizeof(block));
+			else {			// Token
+				Q_strcat(block, " ", sizeof(block));
+				Q_strcat(block, tok, sizeof(block));
+			}
+		} while (buf);
+		
+		// Find the key we're filtering by
+		tok = strstr (block, fieldname);
+		if (!tok)
+			continue;
+		
+		// Skip key name and whitespace
+		tok += strlen (fieldname);
+		while (*tok && *tok == ' ')
+			tok++;
+		
+		// Next token will be the value. We want it to be one of the values
+		// we're looking for.
+		for (i = 0; i < numvals; i++)
+		{
+			if (!Q_strnicmp(tok, vals[i], strlen (vals[i])))
+			{
+				matched = true;
+				break;
+			}
+		}
+		
+		if (!matched)
+			continue;
+		
+		process_ent_callback (tok, block);
+	}
 }
 
 //=======================================================================
@@ -1154,7 +1429,7 @@ qboolean	trace_ispoint;		// optimized case
  *           trace_t record. otherwise does not touch trace_t record
  *
  */
-void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs,vec3_t p1, vec3_t p2,
+void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 		trace_t *trace, cbrush_t *brush )
 {
 	int           i;
@@ -1567,6 +1842,152 @@ return;
 
 
 
+
+static qboolean RayIntersectsTriangle (vec3_t p1, vec3_t d, vec3_t v0, vec3_t v1, vec3_t v2, float *intersection_dist)
+{
+	vec3_t	e1, e2, P, Q, T;
+	float	det, inv_det, u, v, t;
+	
+	VectorSubtract (v1, v0, e1);
+	VectorSubtract (v2, v0, e2);
+	
+	CrossProduct (d, e2, P);
+	det = DotProduct (e1, P);
+	
+	if (fabs (det) < FLT_EPSILON)
+		return false;
+	
+	inv_det = 1.0/det;
+	
+	VectorSubtract (p1, v0, T);
+	u = inv_det * DotProduct (P, T);
+	
+	if (u < 0.0 || u > 1.0)
+		return false;
+	
+	CrossProduct (T, e1, Q);
+	v = inv_det * DotProduct (d, Q);
+	
+	if (v < 0.0 || u + v > 1.0)
+		return false;
+	
+	t = inv_det * DotProduct (e2, Q);
+	
+	*intersection_dist = t;
+	
+	return t > FLT_EPSILON;
+}
+
+extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect))
+{
+	int i, j;
+	
+	for (i = 0; i < MAX_MODELS; i++)
+	{
+		cterrainmodel_t *mod = &terrain_models[i];
+		
+		if (!mod->active)
+			continue;
+		
+		for (j = 0; j < mod->numtriangles; j++)
+		{
+			float tmp;
+			qboolean does_intersect;
+			
+			does_intersect = RayIntersectsTriangle (start, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &tmp);
+			
+			do_draw ((const vec_t **)mod->tris[j].verts, mod->tris[j].p.normal, does_intersect);
+		}
+	}
+}
+
+static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3_t p2_extents)
+{
+	int	i;
+	
+	for (i = 0; i < 3; i++)
+	{
+		if (	(p1[i] > box_maxs[i] && p2_extents[i] > box_maxs[i]) ||
+				(p1[i] < box_mins[i] && p2_extents[i] < box_mins[i]))
+			return false;
+	}
+	
+	return true;
+}
+
+// FIXME: This is a half-witted and inefficient way to do it. 
+// FIXME: It's still quite possible to fall through a terrain mesh.
+// FIXME: Also, the physics feel like crap on terrain.
+void CM_TerrainTrace (vec3_t p1, vec3_t end)
+{
+	vec3_t		p2;
+	int			i, j, k;
+	float		offset;
+	cplane_t	*plane;
+	vec3_t		dir;
+	float		orig_dist;
+	vec3_t		p2_extents;
+	
+	for (i = 0; i < 3; i++)
+		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
+	
+	VectorSubtract (p2, p1, dir);
+	orig_dist = VectorNormalize (dir); // Update this every time p2 changes
+	
+	// Update this every time p2 changes
+	for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+	
+	for (i = 0; i < MAX_MODELS; i++)
+	{
+		cterrainmodel_t	*mod = &terrain_models[i];
+		
+		if (!mod->active)
+			continue;
+		
+		if (!bbox_in_trace (mod->mins, mod->maxs, p1, p2_extents))
+			continue;
+		
+		for (j = 0; j < mod->numtriangles; j++)
+		{
+			float	intersection_dist;
+			
+			plane = &mod->tris[j].p;
+			
+			// order the tests from least expensive to most
+			
+			if (DotProduct (dir, plane->normal) > 0)
+				continue;
+			
+			if (!bbox_in_trace (mod->tris[j].mins, mod->tris[j].maxs, p1, p2_extents))
+				continue;
+			
+			if (!RayIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
+				continue;
+			
+			if (trace_ispoint)
+				offset = 0;
+			else
+				offset = fabs(trace_extents[0]*plane->normal[0]) +
+					fabs(trace_extents[1]*plane->normal[1]) +
+					fabs(trace_extents[2]*plane->normal[2]);
+			
+			intersection_dist -= offset;
+			
+			if (intersection_dist > orig_dist)
+				continue;
+			
+			// At this point, we've found a new closest intersection point
+			trace_trace.fraction *= intersection_dist / orig_dist;
+			VectorMA (p1, intersection_dist, dir, p2);
+			orig_dist = intersection_dist;
+			VectorCopy (plane->normal, trace_trace.plane.normal);
+			for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+		}
+	}
+}
+
+
+
 //======================================================================
 
 /*
@@ -1574,6 +1995,9 @@ return;
 CM_BoxTrace
 ==================
 */
+// TODO: create a CM_FastTrace variant that returns a boolean true or false
+// if the trace was blocked by something without bothering to isolate
+// precisely where.
 trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask)
@@ -1622,7 +2046,9 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 		VectorCopy (start, local_start); // so the function can modify these in-place
 		VectorCopy (end, local_end);
 		CM_RecursiveHullCheck (headnode, 0, 1, local_start, local_end);
-
+		
+		CM_TerrainTrace (start, end);
+		
 		if (trace_trace.fraction == 1)
 		{
 			VectorCopy (end, trace_trace.endpos);

@@ -57,25 +57,7 @@ char map_music[MAX_OSPATH];
 char map_music_sec[MAX_OSPATH];
 #endif
 
-char		map_entitystring[MAX_MAP_ENTSTRING];
-int			numentitychars;
 byte	*mod_base;
-
-/*
-=================
-Mod_LoadEntityString
-=================
-*/
-void Mod_LoadEntityStrn (lump_t *l)
-{
-	numentitychars = l->filelen;
-	if (l->filelen > MAX_MAP_ENTSTRING)
-		Sys_Error ("Map has too large entity lump");
-
-	memcpy (map_entitystring, mod_base + l->fileofs, l->filelen);
-}
-
-extern char	*CM_EntityString (void);
 
 void R_RegisterLightGroups (void)
 {
@@ -144,177 +126,162 @@ void R_RegisterLightGroups (void)
 	Com_Printf("Condensed ^2%i worldlights into ^2%i lightgroups\n", r_numWorldLights, r_lightgroups);
 }
 
-/*
-================
-R_ParseLightEntities
-
-parses light entity string
-================
-*/
-
-static void R_ParseLightEntities (void)
+static void R_ParseLightEntity (char *match, char *block)
 {
+	int		i;
+	char	*tok, *bl;
+	vec3_t	origin;
+	float	intensity;
+	
+	if (r_numWorldLights == MAX_LIGHTS)
+		return;
+	
+	VectorClear(origin);
+	intensity = 0;
 
-	int			i;
-	char		*entString;
-	char		*buf, *tok;
-	char		block[2048], *bl;
-	vec3_t		origin;
-	float		intensity;
-
-	entString = map_entitystring;
-
-	buf = CM_EntityString();
+	bl = block;
 	while (1){
-		tok = Com_ParseExt(&buf, true);
+		tok = Com_ParseExt(&bl, true);
 		if (!tok[0])
-			break;			// End of data
+			break;		// End of data
 
-		if (Q_strcasecmp(tok, "{"))
-			continue;		// Should never happen!
-
-		// Parse the text inside brackets
-		block[0] = 0;
-		do {
-			tok = Com_ParseExt(&buf, false);
-			if (!Q_strcasecmp(tok, "}"))
-				break;		// Done
-
-			if (!tok[0])	// Newline
-				Q_strcat(block, "\n", sizeof(block));
-			else {			// Token
-				Q_strcat(block, " ", sizeof(block));
-				Q_strcat(block, tok, sizeof(block));
-			}
-		} while (buf);
-
-		// Now look for "classname"
-		tok = strstr(block, "classname");
-		if (!tok)
-			continue;		// Not found
-
-		// Skip over "classname" and whitespace
-		tok += strlen("classname");
-		while (*tok && *tok == ' ')
-			tok++;
-
-		// Next token must be "light"
-		if (Q_strnicmp(tok, "light", 5))
-			continue;		// Not "light"
-
-		// Finally parse the light entity
-		VectorClear(origin);
-		intensity = 0;
-
-		bl = block;
-		while (1){
-			tok = Com_ParseExt(&bl, true);
-			if (!tok[0])
-				break;		// End of data
-
-			if (!Q_strcasecmp("origin", tok)){
-				for (i = 0; i < 3; i++){
-					tok = Com_ParseExt(&bl, false);
-					origin[i] = atof(tok);
-				}
-			}
-			else if (!Q_strcasecmp("light", tok) || !Q_strcasecmp("_light", tok)){
+		if (!Q_strcasecmp("origin", tok)){
+			for (i = 0; i < 3; i++){
 				tok = Com_ParseExt(&bl, false);
-				intensity = atof(tok);
+				origin[i] = atof(tok);
 			}
-			else
-				Com_SkipRestOfLine(&bl);
 		}
+		else if (!Q_strcasecmp("light", tok) || !Q_strcasecmp("_light", tok)){
+			tok = Com_ParseExt(&bl, false);
+			intensity = atof(tok);
+		}
+		else
+			Com_SkipRestOfLine(&bl);
+	}
 
-		if (!intensity)
-			intensity = 150;
+	if (!intensity)
+		intensity = 150;
 
-		// Add it to the list
-		if (r_numWorldLights == MAX_LIGHTS)
-			break;
+	// Add it to the list
+	VectorCopy(origin, r_worldLights[r_numWorldLights].origin);
+	r_worldLights[r_numWorldLights].intensity = intensity/2;
+	r_worldLights[r_numWorldLights].surf = NULL;
+	r_numWorldLights++;
+}
 
-		VectorCopy(origin, r_worldLights[r_numWorldLights].origin);
-		r_worldLights[r_numWorldLights].intensity = intensity/2;
-		r_worldLights[r_numWorldLights].surf = NULL;
-		r_numWorldLights++;
+// NOTE: If you update this, you may also want to update
+// CM_ParseTerrainModelEntity in qcommon/cmodel.c.
+static void R_ParseTerrainModelEntity (char *match, char *block)
+{
+	entity_t	*ent;
+	int			i;
+	char		*bl, *tok;
+	
+	if (num_terrain_entities == MAX_MAP_MODELS)
+		Com_Error (ERR_DROP, "R_ParseTerrainEntity: MAX_MAP_MODELS");
+	
+	ent = &terrain_entities[num_terrain_entities];
+	memset (ent, 0, sizeof(*ent));
+	ent->number = MAX_EDICTS+num_terrain_entities++;
+	
+	bl = block;
+	while (1)
+	{
+		tok = Com_ParseExt(&bl, true);
+		if (!tok[0])
+			break;		// End of data
+
+		if (!Q_strcasecmp("model", tok))
+		{
+			ent->model = R_RegisterModel (Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angles", tok))
+		{
+			for (i = 0; i < 3; i++)
+				ent->angles[i] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("angle", tok))
+		{
+			ent->angles[YAW] = atof(Com_ParseExt(&bl, false));
+		}
+		else if (!Q_strcasecmp("origin", tok))
+		{
+			for (i = 0; i < 3; i++)
+				ent->origin[i] = atof(Com_ParseExt(&bl, false));
+		}
+		else
+			Com_SkipRestOfLine(&bl);
+	}
+}
+
+static void R_ParseTerrainEntities (void)
+{
+	static const char *classnames[] = {"misc_terrainmodel"};
+	
+	num_terrain_entities = 0;
+	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainModelEntity);
+}
+
+static void R_ParseSunTarget (char *match, char *block)
+{
+	int		i;
+	char	*bl, *tok;
+	
+	bl = block;
+	while (1){
+		tok = Com_ParseExt(&bl, true);
+		if (!tok[0])
+			break;		// End of data
+
+		if (!Q_strcasecmp("origin", tok)){
+			for (i = 0; i < 3; i++){
+				tok = Com_ParseExt(&bl, false);
+				r_sunLight->target[i] = atof(tok);
+			}
+			//Com_Printf("Found sun target@ : %4.2f %4.2f %4.2f\n", r_sunLight->target[0], r_sunLight->target[1], r_sunLight->target[2]);
+		}
+		else
+			Com_SkipRestOfLine(&bl);
 	}
 }
 
 static void R_FindSunTarget (void)
 {
-
-	int			i;
-	char		*entString;
-	char		*buf, *tok;
-	char		block[2048], *bl;
+	static const char *targetnames[] = {"moonspot", "sunspot"};
 	
-	entString = map_entitystring;
+	CM_FilterParseEntities ("targetname", 2, targetnames, R_ParseSunTarget);
+}
 
-	buf = CM_EntityString();
+static void R_ParseSunEntity (char *match, char *block)
+{
+	int		i;
+	char	*bl, *tok;
+	
+	strcpy(r_sunLight->targetname, match);
+
+	bl = block;
 	while (1){
-		tok = Com_ParseExt(&buf, true);
+		tok = Com_ParseExt(&bl, true);
 		if (!tok[0])
-			break;			// End of data
+			break;		// End of data
 
-		if (Q_strcasecmp(tok, "{"))
-			continue;		// Should never happen!
-
-		// Parse the text inside brackets
-		block[0] = 0;
-		do {
-			tok = Com_ParseExt(&buf, false);
-			if (!Q_strcasecmp(tok, "}"))
-				break;		// Done
-
-			if (!tok[0])	// Newline
-				Q_strcat(block, "\n", sizeof(block));
-			else {			// Token
-				Q_strcat(block, " ", sizeof(block));
-				Q_strcat(block, tok, sizeof(block));
+		if (!Q_strcasecmp("origin", tok)){
+			for (i = 0; i < 3; i++){
+				tok = Com_ParseExt(&bl, false);
+				r_sunLight->origin[i] = atof(tok);
+				r_sunLight->target[i] = 0; //default to this
 			}
-		} while (buf);
-
-		// Now look for "targetname"
-		tok = strstr(block, "targetname");
-		if (!tok)
-			continue;		// Not found
-
-		// Skip over "target" and whitespace
-		tok += strlen("targetname");
-		while (*tok && *tok == ' ')
-			tok++;
-
-		// Next token must match the sun targetname
-		if (Q_strnicmp(tok, "moonspot", 8) && Q_strnicmp(tok, "sunspot", 7))
-			continue;
-	
-		// Finally parse the sun target entity
-		bl = block;
-		while (1){
-			tok = Com_ParseExt(&bl, true);
-			if (!tok[0])
-				break;		// End of data
-
-			if (!Q_strcasecmp("origin", tok)){
-				for (i = 0; i < 3; i++){
-					tok = Com_ParseExt(&bl, false);
-					r_sunLight->target[i] = atof(tok);
-				}
-				//Com_Printf("Found sun target@ : %4.2f %4.2f %4.2f\n", r_sunLight->target[0], r_sunLight->target[1], r_sunLight->target[2]);
-			}
-			else
-				Com_SkipRestOfLine(&bl);
+			r_sunLight->has_Sun = true;
+			//Com_Printf("Found sun @ : %4.2f %4.2f %4.2f\n", r_sunLight->origin[0], r_sunLight->origin[1], r_sunLight->origin[2]);
 		}
+		else
+			Com_SkipRestOfLine(&bl);
 	}
 }
 
 static void R_FindSunEntity (void)
 {
-
-	int			i;
-	char		*entString;
-	char		*buf, *tok;
-	char		block[2048], *bl;
+	static const char *targets[] = {"moonspot", "sunspot"};
 
 	if(r_sunLight)
 		free(r_sunLight); //free at level load
@@ -322,71 +289,18 @@ static void R_FindSunEntity (void)
 	r_sunLight = (sunLight_t*)malloc(sizeof(sunLight_t));
 
 	r_sunLight->has_Sun = false;
-
-	entString = map_entitystring;
-
-	buf = CM_EntityString();
-	while (1){
-		tok = Com_ParseExt(&buf, true);
-		if (!tok[0])
-			break;			// End of data
-
-		if (Q_strcasecmp(tok, "{"))
-			continue;		// Should never happen!
-
-		// Parse the text inside brackets
-		block[0] = 0;
-		do {
-			tok = Com_ParseExt(&buf, false);
-			if (!Q_strcasecmp(tok, "}"))
-				break;		// Done
-
-			if (!tok[0])	// Newline
-				Q_strcat(block, "\n", sizeof(block));
-			else {			// Token
-				Q_strcat(block, " ", sizeof(block));
-				Q_strcat(block, tok, sizeof(block));
-			}
-		} while (buf);
-
-		// Now look for "target"
-		tok = strstr(block, "target");
-		if (!tok)
-			continue;		// Not found
-
-		// Skip over "target" and whitespace
-		tok += strlen("target");
-		while (*tok && *tok == ' ')
-			tok++;
-
-		// Next token must be a valid sun name( to do - maybe read this from the map header if possible?)
-		if (Q_strnicmp(tok, "moonspot", 8) && Q_strnicmp(tok, "sunspot", 7))
-			continue;
-
-		strcpy(r_sunLight->targetname, tok);
 	
-		// Finally parse the sun entity
-		bl = block;
-		while (1){
-			tok = Com_ParseExt(&bl, true);
-			if (!tok[0])
-				break;		// End of data
+	CM_FilterParseEntities ("target", 2, targets, R_ParseSunEntity);
 
-			if (!Q_strcasecmp("origin", tok)){
-				for (i = 0; i < 3; i++){
-					tok = Com_ParseExt(&bl, false);
-					r_sunLight->origin[i] = atof(tok);
-					r_sunLight->target[i] = 0; //default to this
-				}
-				r_sunLight->has_Sun = true;
-				//Com_Printf("Found sun @ : %4.2f %4.2f %4.2f\n", r_sunLight->origin[0], r_sunLight->origin[1], r_sunLight->origin[2]);
-			}
-			else
-				Com_SkipRestOfLine(&bl);
-		}
-	}
 	if(r_sunLight->has_Sun)
 		R_FindSunTarget(); //find target
+}
+
+static void R_ParseLightEntities (void)
+{
+	static const char *classnames[] = {"light"};
+	
+	CM_FilterParseEntities ("classname", 1, classnames, R_ParseLightEntity);
 }
 
 /*
@@ -529,7 +443,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	unsigned *buf;
 	int		i;
 	char shortname[MAX_QPATH], nameShortname[MAX_QPATH];
-	qboolean is_iqm = false;
+	qboolean is_iqm = false, is_terrain = false;
 
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
@@ -571,7 +485,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 						RS_ReadyScript( mod->script );
 				}
 			}
-
+			
 			return mod;
 		}
 	}
@@ -597,15 +511,16 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// load the file
 	//
+	
 	//if .md2, check for IQM version first
 	COM_StripExtension(mod->name, shortname);
 	strcat(shortname, ".iqm");
 
-	modfilelen = FS_LoadFile (shortname, (void*)&buf);
+	modfilelen = FS_LoadFile (shortname, (void**)&buf);
 
 	if(!buf) //could not find iqm
 	{
-		modfilelen = FS_LoadFile (mod->name, (void*)&buf);
+		modfilelen = FS_LoadFile (mod->name, (void**)&buf);
 		if (!buf)
 		{
 			if (crash)
@@ -613,6 +528,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			memset (mod->name, 0, sizeof(mod->name));
 			return NULL;
 		}
+		if (strstr (mod->name, ".terrain"))
+			is_terrain = true;
 	}
 	else
 	{
@@ -633,8 +550,11 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 
 	// call the apropriate loader
-	//iqm - try interquake model first
-	if(is_iqm)
+	if (is_terrain)
+	{
+		Mod_LoadTerrainModel (mod, buf);
+	}
+	else if (is_iqm)
 	{
 		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
 			Com_Error (ERR_DROP,"Mod_NumForName: wrong fileid for %s", mod->name);
@@ -659,7 +579,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		}
 	}
 
-	loadmodel->extradatasize = Hunk_End ();
+	if (!is_terrain)
+		loadmodel->extradatasize = Hunk_End ();
 
 	FS_FreeFile (buf);
 
@@ -1906,7 +1827,6 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
 	// load into heap
-	Mod_LoadEntityStrn (&header->lumps[LUMP_ENTITIES]);
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
@@ -1950,6 +1870,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		starmod->numleafs = bm->visleafs;
 	}
 
+	R_ParseTerrainEntities();
 	R_ParseLightEntities();
 	R_FindSunEntity();
 	R_FinalizeGrass(loadmodel);
@@ -2243,6 +2164,7 @@ struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;
 	int		i;
+
 	dmdl_t		*pheader;
 
 	mod = Mod_ForName (name, false);
@@ -2306,16 +2228,21 @@ void R_EndRegistration (void)
 
 /*
 ================
-Mod_Free - should be able to handle every model type
+Mod_Free - should be able to handle every model type, including uninitialized
+models.
 ================
 */
 void R_Mesh_FreeVBO (model_t *mod);
 void Mod_Free (model_t *mod)
 {
+	// mod_bad (uninitialized models memsetted to 0) will have nothing done to
+	// them here
 	if (mod->type > mod_brush)
 		R_Mesh_FreeVBO (mod);
-	// New model types go here
-	Hunk_Free (mod->extradata);
+	
+	if (mod->extradatasize)
+		Hunk_Free (mod->extradata);
+	
 	memset (mod, 0, sizeof(*mod));
 }
 
@@ -2329,10 +2256,7 @@ void Mod_FreeAll (void)
 	int		i;
 
 	for (i=0 ; i<mod_numknown ; i++)
-	{
-		if (mod_known[i].extradatasize)
-			Mod_Free (&mod_known[i]);
-	}
+		Mod_Free (&mod_known[i]);
 }
 
 

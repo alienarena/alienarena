@@ -256,6 +256,10 @@ extern	int		registration_sequence;
 
 extern void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 
+// "fake" terrain entities parsed directly out of the BSP on the client side.
+int			num_terrain_entities;
+entity_t	terrain_entities[MAX_MAP_MODELS];
+
 //Renderer main loop
 extern int	R_Init( void *hinstance, void *hWnd );
 extern void R_Shutdown( void );
@@ -566,7 +570,7 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
 void R_InitQuadVarrays(void);
 void R_AddSurfToVArray (msurface_t *surf);
 void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
-void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddTexturedSurfToVArray (msurface_t *surf);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
@@ -762,8 +766,6 @@ GLuint		g_location_lightPositionOnScreen;
 GLuint		g_location_sunTex;
 GLuint		g_location_godrayScreenAspect;
 GLuint		g_location_sunRadius;
-//MD2
-extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 
 //Shared mesh items
 extern vec3_t	shadelight;
@@ -780,6 +782,7 @@ extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha);
+qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
 
 //iqm
 #define pi 3.14159265
@@ -795,6 +798,13 @@ extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_DrawShadow(vec3_t origin);
 extern qboolean IQM_CullModel( void );
 extern void IQM_AnimateFrame (void);
+
+//md2
+extern qboolean MD2_CullModel( void );
+extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
+
+//terrain
+void Mod_LoadTerrainModel (model_t *mod, void *_buf);
 
 //Ragdoll
 int r_DrawingRagDoll;

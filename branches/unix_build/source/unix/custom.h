@@ -1,13 +1,20 @@
 /*
  * custom.h
  * Added at end of config.h using AH_BOTTOM macro
+ * 
+ * TODO: put includes in source files according to need and
+ *   eliminate this file. firgure out the STDC_HEADERS thing.
+ *   figure out the TIME_WITH_SYS_TIME thing.
+ *   fix qboolean.
  */
 
 /*
  * A recommended way to include commonly needed headers
  * Reference: AC_INCLUDE_DEFAULTS
  */
+#include <errno.h>
 #include <stdio.h>
+
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -68,7 +75,7 @@
 
 #include <assert.h>
 #include <math.h>
-#include <errno.h>
+#include <ctype.h>
 
 
 /*

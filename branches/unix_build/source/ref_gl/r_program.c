@@ -879,13 +879,12 @@ static char mesh_anim_library[] = STRINGIFY (
 
 //MESHES
 static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
-
-
 	uniform vec3 lightPos;
 	uniform float time;
 	uniform int FOG;
 	uniform float useShell; // doubles as shell scale
 	uniform int useCube;
+	uniform vec3 baseColor;
 	
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
@@ -965,18 +964,26 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 		}
 
 		//fog
-	   if(FOG > 0) 
-	   {
+		if(FOG > 0) 
+		{
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
-	   }
-	   
-	   gl_FrontColor = gl_BackColor = gl_Color;
+		}
+		
+		// vertexOnly is defined as const, so this branch should get optimized
+		// out.
+		if (vertexOnly == 1)
+		{
+			// We try to bias toward light instead of shadow, but then make
+			// the contrast between light and shadow more pronounced.
+			float lightness = max (dot (worldNormal, LightDir), 0.0) + 0.25;
+			lightness = lightness * lightness + 0.25;
+			gl_FrontColor = gl_BackColor = vec4 (baseColor * lightness, 1.0);
+		}
 	}
 );
 
 static char mesh_fragment_program[] = STRINGIFY (
-
 	uniform sampler2D baseTex;
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
@@ -1635,7 +1642,7 @@ const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_at
 void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
 {
 	char		str[4096];
-	const char	*shaderStrings[3];
+	const char	*shaderStrings[4];
 	int			nResult;
 	int			i;
 	
@@ -1650,8 +1657,13 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	else
 		shaderStrings[1] = "";
 	
-	shaderStrings[2] = vertex;
-	glShaderSourceARB( g_vertexShader, 3, shaderStrings, NULL );
+	if (fragment == NULL)
+		shaderStrings[2] = "const int vertexOnly = 1;";
+	else
+		shaderStrings[2] = "const int vertexOnly = 0;";
+	
+	shaderStrings[3] = vertex;
+	glShaderSourceARB( g_vertexShader, 4, shaderStrings, NULL );
 	glCompileShaderARB( g_vertexShader);
 	glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
