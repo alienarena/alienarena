@@ -1398,7 +1398,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				
 		if (stage->blendfunc.blend)
 		{
-			GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
+			// FIXME: hack!
+			if (stage->blendfunc.source != GL_ONE || stage->blendfunc.dest != GL_ONE_MINUS_SRC_ALPHA)
+				GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
 			GLSTATE_ENABLE_BLEND
 		}
 		else if (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66) && !stage->alphamask)
