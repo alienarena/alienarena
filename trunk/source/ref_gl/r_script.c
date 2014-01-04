@@ -1446,6 +1446,14 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					RS_ScaleFunc (stage->scale.typeY, stage->scale.scaleY),
 					1 );
 		
+		if (stage->envmap)
+		{
+			//move by normal & position
+			qglTranslatef (	-DotProduct (surf->plane->normal, vectors[1]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
+							DotProduct (surf->plane->normal, vectors[2]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
+							0 );
+		}
+		
 		qglColor4f (1, 1, 1, alpha);
 
 		if (stage->alphamask)
@@ -1470,9 +1478,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			if (stage->envmap)
 			{
 				RS_SetEnvmap (v, &os, &ot);
-				//move by normal & position
-				os-=DotProduct (surf->plane->normal, vectors[1]) + (r_origin[0]-r_origin[1]+r_origin[2])*0.0025;
-				ot+=DotProduct (surf->plane->normal, vectors[2]) + (-r_origin[0]+r_origin[1]-r_origin[2])*0.0025;
 			}
 			else 
 			{
