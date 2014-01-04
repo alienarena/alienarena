@@ -193,7 +193,7 @@ env/deadcityup
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -201,7 +201,7 @@ env/deadcityrt
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -209,7 +209,7 @@ env/deadcitylf
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -217,7 +217,7 @@ env/deadcityft
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -225,7 +225,7 @@ env/deadcitybk
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -233,7 +233,7 @@ env/deadcitydn
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }

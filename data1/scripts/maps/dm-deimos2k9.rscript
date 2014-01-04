@@ -101,7 +101,7 @@ env/space1up
 {
 	{
 		map gfx/cloudsspace.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -109,7 +109,7 @@ env/space1rt
 {
 	{
 		map gfx/cloudsspace.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -117,7 +117,7 @@ env/space1lf
 {
 	{
 		map gfx/cloudsspace.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -125,7 +125,7 @@ env/space1ft
 {
 	{
 		map gfx/cloudsspace.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -133,7 +133,7 @@ env/space1bk
 {
 	{
 		map gfx/cloudsspace.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -141,7 +141,7 @@ env/space1dn
 {
 	{
 		map gfx/cloudsspace.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
