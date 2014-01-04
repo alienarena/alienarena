@@ -279,7 +279,7 @@ void R_Bloom_DrawEffect( void )
 {
 	GL_Bind(r_bloomeffecttexture->texnum);
 	qglEnable(GL_BLEND);
-	qglBlendFunc(GL_ONE, GL_ONE);
+	GL_BlendFunction (GL_ONE, GL_ONE);
 	qglColor4f(r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
 	GL_TexEnv(GL_MODULATE);
 	qglBegin(GL_QUADS);
@@ -324,7 +324,7 @@ void R_Bloom_GeneratexDiamonds( void )
 	//darkening passes
 	if( r_bloom_darken->integer )
 	{
-		qglBlendFunc(GL_DST_COLOR, GL_ZERO);
+		GL_BlendFunction (GL_DST_COLOR, GL_ZERO);
 		GL_TexEnv(GL_MODULATE);
 		
 		for(i=0; i<r_bloom_darken->integer ;i++) {
@@ -335,8 +335,8 @@ void R_Bloom_GeneratexDiamonds( void )
 	}
 
 	//bluring passes
-	//qglBlendFunc(GL_ONE, GL_ONE);
-	qglBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	//GL_BlendFunction (GL_ONE, GL_ONE);
+	GL_BlendFunction (GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	
 	if( r_bloom_diamond_size->integer > 7 || r_bloom_diamond_size->integer <= 3)
 	{
@@ -483,7 +483,7 @@ void R_Bloom_DownsampleView( void )
 		R_Bloom_Quad( 0,  viddef.height-BLOOM_SIZE, BLOOM_SIZE, BLOOM_SIZE);
 		// small-size
 		qglEnable( GL_BLEND );
-		qglBlendFunc(GL_ONE, GL_ONE);
+		GL_BlendFunction (GL_ONE, GL_ONE);
 		qglColor4f( 0.5f, 0.5f, 0.5f, 1.0f );
 		GL_Bind(r_bloomscratchtexture->texnum);
 		R_Bloom_Quad( 0,  viddef.height-BLOOM_SIZE, BLOOM_SIZE, BLOOM_SIZE );
@@ -562,7 +562,7 @@ void R_BloomBlend ( refdef_t *fd )
 	qglColor3f (1,1,1);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
 }
 

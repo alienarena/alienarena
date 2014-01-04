@@ -390,7 +390,7 @@ void R_ShadowBlend(float alpha)
 		qglEnable( GL_BLEND );
 		qglEnable( GL_TEXTURE_2D );
 
-		qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 		qglDisable (GL_DEPTH_TEST);
 		qglDisable(GL_STENCIL_TEST);
 
@@ -462,7 +462,7 @@ void R_ShadowBlend(float alpha)
 	qglMatrixMode(GL_MODELVIEW);
 	qglPopMatrix();
 
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable ( GL_BLEND );
 	qglEnable (GL_TEXTURE_2D);
 	qglEnable (GL_DEPTH_TEST);
@@ -577,7 +577,7 @@ void R_DrawVehicleHUD (void)
 
 	GL_TexEnv(GL_MODULATE);
 	qglEnable (GL_BLEND);
-	qglBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	GL_MBind (0, gl->texnum);
 		
@@ -618,7 +618,7 @@ void R_DrawVehicleHUD (void)
 		while (stage)
 		{
 			//change to use shader def
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			alpha=1.0f;
 			if (stage->alphashift.min || stage->alphashift.speed)
@@ -676,7 +676,7 @@ void R_DrawVehicleHUD (void)
 		}	
 	}
 	qglColor4f(1,1,1,1);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable (GL_BLEND);
 	GL_TexEnv(GL_REPLACE);
 
@@ -828,7 +828,7 @@ void R_GLSLGodRays(void)
     
 	//render quad 
 	qglEnable (GL_BLEND);
-	qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	qglDisable(GL_CULL_FACE);
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
@@ -851,7 +851,7 @@ void R_GLSLGodRays(void)
 	R_DrawVarrays(GL_QUADS, 0, 4);
 
 	qglDisable (GL_BLEND);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	R_KillVArrays();	
 

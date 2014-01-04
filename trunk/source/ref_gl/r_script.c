@@ -1537,7 +1537,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	GL_EnableMultitexture( false );
 
 	// restore the original blend mode
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_ALPHATEST

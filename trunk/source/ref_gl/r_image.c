@@ -131,12 +131,12 @@ GLenum bFunc1 = -1;
 GLenum bFunc2 = -1;
 void GL_BlendFunction (GLenum sfactor, GLenum dfactor)
 {
-	if (sfactor!=bFunc1 || dfactor!=bFunc2)
+	if (sfactor != bFunc1 || dfactor != bFunc2)
 	{
 		bFunc1 = sfactor;
 		bFunc2 = dfactor;
 
-		qglBlendFunc(bFunc1, bFunc2);
+		qglBlendFunc (bFunc1, bFunc2);
 	}
 }
 

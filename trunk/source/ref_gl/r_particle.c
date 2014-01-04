@@ -128,7 +128,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 		if (oldblendsrc != blendsrc || oldblenddst != blenddst)
 		{	
 			if (oldblendsrc != blendsrc || oldblenddst != blenddst)
-				qglBlendFunc ( blendsrc, blenddst );
+				GL_BlendFunction ( blendsrc, blenddst );
 			
 			oldblendsrc = blendsrc;
 			oldblenddst = blenddst;
@@ -303,7 +303,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 
 	R_KillVArrays ();
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
 	qglDepthMask( GL_TRUE );	// back to normal Z buffering
@@ -538,7 +538,7 @@ void R_RenderFlares (void)
 	qglDisable (GL_TEXTURE_2D);
 	qglShadeModel (GL_SMOOTH);
 	qglEnable (GL_BLEND);
-	qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
 	R_InitQuadVarrays();
 
@@ -586,7 +586,7 @@ void R_RenderFlares (void)
 	qglColor3f (1,1,1);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
-    qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
 }
 
@@ -796,7 +796,7 @@ void R_RenderSun()
         qglPushMatrix();
         qglLoadIdentity();
         qglEnable(GL_BLEND);
-        qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
         GL_TexEnv(GL_MODULATE);
         qglDepthRange(0, 0.3);
 
@@ -819,7 +819,7 @@ void R_RenderSun()
         qglDepthRange(0, 1);
         qglColor4f(1, 1, 1, 1);
         qglDisable(GL_BLEND);
-        qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // set 3d
         qglPopMatrix();
         qglMatrixMode(GL_PROJECTION);
@@ -978,7 +978,7 @@ void R_DrawVegetationSurface ( void )
 
 	qglDepthMask( GL_FALSE );
 	qglEnable( GL_BLEND);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Bind (0);
 	GL_TexEnv( GL_MODULATE );
 
@@ -1257,7 +1257,7 @@ void R_DrawBeamSurface ( void )
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	qglDepthMask( GL_FALSE );
 	qglEnable( GL_BLEND);
-	qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	GL_TexEnv( GL_MODULATE );
 
     for (i=0; i<r_numbeams; i++, beam++) {
@@ -1411,7 +1411,7 @@ void R_DrawBeamSurface ( void )
 
 	R_KillVArrays ();
 
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
 	qglDepthMask( GL_TRUE );
@@ -1529,7 +1529,7 @@ void R_DrawSimpleItems ( void )
 	VectorSet(maxs,	0, 0, 0);	
 
 	qglEnable( GL_BLEND);
-	qglBlendFunc ( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunction ( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Bind (0);
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
@@ -1657,7 +1657,7 @@ void R_DrawSimpleItems ( void )
 		}
 	}
 
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglDisable(GL_BLEND);
 	GLSTATE_DISABLE_ALPHATEST
 	GL_TexEnv( GL_REPLACE );

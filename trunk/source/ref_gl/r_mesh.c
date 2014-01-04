@@ -372,7 +372,7 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 	
 	GLSTATE_ENABLE_BLEND
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
@@ -533,7 +533,7 @@ void R_Mesh_SetupGlassRender (void)
 	glUniform1iARB( g_location_g_fog, map_fog);
 	
 	GLSTATE_ENABLE_BLEND
-	qglBlendFunc (GL_ONE, GL_ONE);
+	GL_BlendFunction (GL_ONE, GL_ONE);
 }
 
 // Should be able to handle all mesh types. This is the component of the 
@@ -710,7 +710,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	// Without this, the player options menu goes all funny due to
 	// R_Mesh_SetupGlassRender changing the blendfunc. The proper solution is
 	// to just never rely on the blendfunc being any default value.
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 }
 
