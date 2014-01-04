@@ -2463,7 +2463,7 @@ void R_DrawRadar(void)
 
 	if(r_radarmap)
 		GL_Bind(r_radarmap->texnum);
-	qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	GLSTATE_ENABLE_BLEND;
 	qglColor3f(1,1,1);
 
@@ -2476,7 +2476,7 @@ void R_DrawRadar(void)
 	// draw the stuff
 	R_RecursiveRadarNode (r_worldmodel->nodes);
 
-	qglBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	GLSTATE_DISABLE_TEXGEN;
 
 	qglPopMatrix();

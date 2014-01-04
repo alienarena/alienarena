@@ -1166,11 +1166,11 @@ void R_GenerateEntityShadow( void )
 		if(r_shadowmapcount > 0)
 		{
 			qglEnable( GL_BLEND );
-			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, currententity->origin);
 
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			qglDisable ( GL_BLEND );
 		}
 
@@ -1294,11 +1294,11 @@ void R_GenerateRagdollShadow( int RagDollID )
 		if(r_shadowmapcount > 0)
 		{
 			qglEnable( GL_BLEND );
-			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, RagDoll[RagDollID].origin);
 
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			qglDisable ( GL_BLEND );
 		}
 

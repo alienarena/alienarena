@@ -813,7 +813,7 @@ void R_DrawSkyBox (void)
 		// restore the original blend mode
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_DISABLE_BLEND
-		qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		qglColor4f( 1,1,1,1 );
 		qglDepthMask( GL_TRUE );	// back to normal Z buffering
 		GL_TexEnv( GL_REPLACE );
