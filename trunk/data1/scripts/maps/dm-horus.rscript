@@ -70,7 +70,7 @@ env/egyptup
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 .5 .5
 	}
 }
@@ -78,7 +78,7 @@ env/egyptrt
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 .5 .5
 	}
 }
@@ -86,7 +86,7 @@ env/egyptlf
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 .5 .5
 	}
 }
@@ -94,7 +94,7 @@ env/egyptft
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 .5 .5
 	}
 }
@@ -102,7 +102,7 @@ env/egyptbk
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 .5 .5
 	}
 }
@@ -110,7 +110,7 @@ env/egyptdn
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 .5 .5
 	}
 }

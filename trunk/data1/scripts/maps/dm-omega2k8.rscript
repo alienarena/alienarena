@@ -117,7 +117,7 @@ env/greenup
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -125,7 +125,7 @@ env/greenrt
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -133,7 +133,7 @@ env/greenlf
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -141,7 +141,7 @@ env/greenft
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -149,7 +149,7 @@ env/greenbk
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }
@@ -157,7 +157,7 @@ env/greendn
 {
 	{
 		map gfx/clouds.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
 }

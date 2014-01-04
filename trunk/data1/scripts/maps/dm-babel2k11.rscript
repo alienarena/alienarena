@@ -18,7 +18,7 @@ env/hellup
 {
 	{
 		map gfx/cloudsthick.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -26,7 +26,7 @@ env/hellrt
 {
 	{
 		map gfx/cloudsthick.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -34,7 +34,7 @@ env/helllf
 {
 	{
 		map gfx/cloudsthick.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -42,7 +42,7 @@ env/hellft
 {
 	{
 		map gfx/cloudsthick.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -50,7 +50,7 @@ env/hellbk
 {
 	{
 		map gfx/cloudsthick.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
@@ -58,7 +58,7 @@ env/helldn
 {
 	{
 		map gfx/cloudsthick.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1 1
 	}
 }
