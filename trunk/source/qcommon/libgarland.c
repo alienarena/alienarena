@@ -35,6 +35,7 @@
 #define SCOORDS(s,x,y)	((y)>(x) ? _SCOORDS((s),(y),(x)) : _SCOORDS((s),(x),(y)))
 #define ACOORDS(x,y)	SCOORDS(AXES,x,y)
 #define MATSIZE			(1 + ACOORDS (AXES-1, AXES-1))
+#define M_PI		3.14159265358979323846
 
 // The quadric of a plane is effectively a function that computes the squared
 // distance of a given point from that plane. The values in this structure

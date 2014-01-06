@@ -1984,8 +1984,9 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	float		*vec;
 	float		s, t;
 	glpoly_t	*poly;
-	vec3_t		total, center;
+	vec3_t		center;
 
+	vec3_t total = {0, 0, 0};
 	vec3_t surfmaxs = {-99999999, -99999999, -99999999};
 	vec3_t surfmins = {99999999, 99999999, 99999999};
 

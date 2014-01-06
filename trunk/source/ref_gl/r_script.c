@@ -1162,6 +1162,8 @@ static float RS_ScrollFunc (char type, float speed)
 	case 2:	// cosine
 		return cos (rs_realtime * speed);
 	}
+
+	return 0;
 }
 
 static float RS_ScaleFunc (char type, float scale)
@@ -1178,6 +1180,8 @@ static float RS_ScaleFunc (char type, float scale)
 	case 2: // cosine
 		return scale * cos (rs_realtime * 0.05);
 	}
+
+	return 1;
 }
 
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
