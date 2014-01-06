@@ -646,16 +646,32 @@ R_SetLightingMode
 Setup the fixed-function pipeline with texture combiners to enable rendering
 of lightmapped surfaces. For GLSL renders, this is unnecessary, as the shader
 handles this job.
+
+If environment_color is true, enable the color and alpha to be adjusted using
+glColor in addition to the lightmap texture. This is a bit more expensive.
 ================
 */
-void R_SetLightingMode (void)
+void R_SetLightingMode (qboolean environment_color)
 {
 	GL_SelectTexture (0);
 	GL_TexEnv ( GL_COMBINE_EXT );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+	
+	if (environment_color)
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PRIMARY_COLOR_EXT );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PRIMARY_COLOR_EXT );
+	}
+	else
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+	}
 
 	GL_SelectTexture (1);
 	GL_TexEnv ( GL_COMBINE_EXT );
@@ -1250,7 +1266,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 
 	GL_EnableMultitexture( true );
 	
-	R_SetLightingMode ();
+	R_SetLightingMode (false);
 
 	// render all fixed-function surfaces
 	BSP_DrawNonGLSLSurfaces(forEnt);

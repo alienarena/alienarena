@@ -285,7 +285,7 @@ extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
-void R_SetLightingMode (void);
+void R_SetLightingMode (qboolean environment_color);
 extern void R_RotateForEntity (entity_t *e);
 extern void R_MarkWorldSurfs (void);
 extern void R_AddSkySurface (msurface_t *fa);

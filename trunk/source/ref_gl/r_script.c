@@ -1273,7 +1273,7 @@ void ToggleLightmap (qboolean toggle)
 	{
 		SetVertexOverbrights(false);
 		GL_EnableMultitexture( true );
-		R_SetLightingMode ();
+		R_SetLightingMode (true);
 	}
 	else
 	{
@@ -1382,6 +1382,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if(stage->lightmap)
 		{
 			ToggleLightmap(true);
+			GL_SelectTexture (0);
 			qglShadeModel (GL_FLAT);
 
 			GL_MBind (1, gl_state.lightmap_textures + lmtex);
@@ -1389,6 +1390,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		else 
 		{
 			ToggleLightmap(false);
+			GL_SelectTexture (0);
 			qglShadeModel (GL_SMOOTH);
 		}
 
