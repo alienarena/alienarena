@@ -39,7 +39,7 @@ textures/arena6/ice
 
 	{
 		map gfx/grchrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA	
 		alphashift 0 0.2 0.2
 		envmap
 	}
@@ -77,12 +77,12 @@ textures/martian/metalrings1
 {
 	{
 		map textures/martian/metalrings1.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.6 0.6
 	}
 	{
 		map gfx/greenline.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 0.5 static 0.5
 		scroll static 0 static -10
 		alphashift 5 0.0 0.3
@@ -93,7 +93,7 @@ textures/xempx/a6bt
 {
 	{
 		map textures/arena5/lighta.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static .5 static .5
 		scroll sin 1 sin 0
 		anim .05
@@ -110,7 +110,7 @@ textures/evil/e6launchengine
 {
 	{
 		map gfx/e6launchengine_glow.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 10 0.1 0.9
 		nolightmap
 	}

@@ -101,7 +101,7 @@ textures/blanks/blank6
 {
 	{
 		map gfx/greenline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 10 static 10
 		scroll static 0 static 10
 		alphashift 0 0.2 0.2
@@ -147,46 +147,26 @@ textures/evil/e6launchengine
 {
     {
         map gfx/e6launchengine_fx.tga
-        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         alphashift 2.5 0.0 1.0
         nolightmap
     }
     {
         map gfx/e6launchengine_mask.tga
-        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
     }
-}
-textures/evil/e8_launchpad1
-{
-	{
-		map gfx/e8_launchpad1_fx1.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 9 0 9
-		nolightmap
-	}
-	{
-		map gfx/e8_launchpad1_fx2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 0 static 3
-		nolightmap
-	}
-	{
-		map gfx/e8_launchpad1_mask2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-	}
 }
 textures/evil/e8_jumppad02
 {
     	{
         	map gfx/e8_jumppad02_fx.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         	alphashift 9 0 9
         	nolightmap
     	}
     	{
         	map gfx/e8_jumppad02_mask.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
     	}
 }
 env/deadcityup

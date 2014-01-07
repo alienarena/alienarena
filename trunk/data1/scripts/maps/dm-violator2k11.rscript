@@ -20,8 +20,6 @@ textures/arena9/trim2
 {
 	{
 		map gfx/bluelightning2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 5 0.3 0.9
 		scroll static 5 static 0
 		nolightmap
 	}
@@ -32,10 +30,9 @@ textures/arena9/trim2
 }
 textures/arena7/glass
 {
-
 	{
 		map gfx/grchrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA	
 		alphashift 0 0.1 0.1
 		envmap
 	}
@@ -169,52 +166,52 @@ textures/evil/e8_launchpad1
 {
 	{
 		map gfx/e8_launchpad1_fx1.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 9 0 9
 		nolightmap
 	}
 	{
 		map gfx/e8_launchpad1_fx2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 3
 		nolightmap
 	}
 	{
 		map gfx/e8_launchpad1_mask2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 	}
 }
 textures/evil/e8_jumppad02
 {
     	{
         	map gfx/e8_jumppad02_fx.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         	alphashift 9 0 9
         	nolightmap
     	}
     	{
         	map gfx/e8_jumppad02_mask.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
     	}
 }
 textures/arena9/greenglass
 {
 	{
 		map textures/arena9/greenglass.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA	
 		alphashift 0 0.5 0.5
 	}
 	{
 		map gfx/bubbles.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static -2 static -2
 		alphashift 0 0.3 0.3
 		scroll static 0 static -2
 	}
 	{
 		map gfx/bubbles.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.1 0.1
 		scale static -4 static -4
 		scroll static 0 static -1
