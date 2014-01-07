@@ -159,7 +159,7 @@ void VB_BuildWorldVBO(void)
         //TODO: use VBO for alpha surfaces? But for now they'd just clutter up
         //the VBO, so we exclude them.
         if	(	TexinfoIsTranslucent(currentmodel->unique_texinfo[i]) && 
-        		!TexinfoIsAlphaBlended(currentmodel->unique_texinfo[i]))
+        		!TexinfoIsAlphaMasked(currentmodel->unique_texinfo[i]))
             continue;
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{

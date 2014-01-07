@@ -144,10 +144,10 @@ typedef struct
 #define ISURF_UNDERWATER	0x4 
 
 #define TexinfoIsTranslucent(texinfo) ((texinfo)->flags & (SURF_TRANS33|SURF_TRANS66))
-#define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent((surf)->texinfo))
-#define TexinfoIsAlphaBlended(texinfo) ((texinfo)->flags & SURF_TRANS33 && (texinfo)->flags & SURF_TRANS66)
-#define SurfaceIsAlphaBlended(surf) (TexinfoIsAlphaBlended ((surf)->texinfo))
-#define SurfaceHasNoLightmap(surf) ((surf)->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) && !SurfaceIsAlphaBlended((surf)))
+#define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent ((surf)->texinfo))
+#define TexinfoIsAlphaMasked(texinfo) ((texinfo)->flags & SURF_TRANS33 && (texinfo)->flags & SURF_TRANS66)
+#define SurfaceIsAlphaMasked(surf) (TexinfoIsAlphaMasked ((surf)->texinfo))
+#define SurfaceHasNoLightmap(surf) ((surf)->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) && !SurfaceIsAlphaMasked (surf))
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct
