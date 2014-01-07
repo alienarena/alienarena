@@ -38,8 +38,6 @@ textures/arena9/trim2
 {
 	{
 		map gfx/bluelightning2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 5 0.3 0.9
 		scroll static 5 static 0
 		nolightmap
 	}
@@ -52,14 +50,9 @@ textures/evil/e6launchengine
 {
     {
         map gfx/e6launchengine_glow.tga
-        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         alphashift 2.5 0.0 1.0
         nolightmap
-    }
-    {
-        map textures/evil/e6launchengine.tga
-        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-        alphashift 2.5 0.0 1.0
     }
 }
 textures/rage/metallight_2
@@ -76,12 +69,12 @@ textures/arena9/greenglass
 {
 	{
 		map textures/arena9/greenglass.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA	
 		alphashift 0 0.5 0.5
 	}
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -92,7 +85,7 @@ textures/arena7/glass
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -103,13 +96,13 @@ textures/arena10/neonsign8
 {
 	{
 		map textures/arena10/neonsign8
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 2.5 0.2 0.4
 		nolightmap
 	}
 	{
 		map gfx/purpleline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 2 static 2
 		scroll static 0 static 2
 		alphashift 10 0.05 0.5
@@ -120,13 +113,13 @@ textures/arena10/neonsign7
 {
 	{
 		map textures/arena10/neonsign7
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 2.5 0.2 0.4
 		nolightmap
 	}
 	{
 		map gfx/greenline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 2 static 2
 		scroll static 0 static 2
 		alphashift 10 0.05 0.5
@@ -137,13 +130,13 @@ textures/arena10/neonsign10
 {
 	{
 		map textures/arena10/neonsign10
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 2.5 0.2 0.4
 		nolightmap
 	}
 	{
 		map gfx/purpleline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 2 static 2
 		scroll static 0 static 2
 		alphashift 10 0.05 0.5
@@ -154,21 +147,21 @@ textures/arena10/floortile10w
 {
 	{
 		map gfx/noise.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 10 static 10
 		alphashift 0 0.2 0.2
 	}
 	{
 		map gfx/noise.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static -10 static -10
 		alphashift 0 0.2 0.2
 	}
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -176,7 +169,7 @@ textures/arena10/floortile10w
 	}
 	{
 		map gfx/rainfxa.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 16 .2 .3
 		scale static 1 static 1
 		anim 0.03
@@ -195,21 +188,21 @@ textures/arena10/metalfloor21w
 {
 	{
 		map gfx/noise.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 10 static 10
 		alphashift 0 0.2 0.2
 	}
 	{
 		map gfx/noise.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static -10 static -10
 		alphashift 0 0.2 0.2
 	}
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.05 0.05
@@ -217,7 +210,7 @@ textures/arena10/metalfloor21w
 	}
 	{
 		map gfx/rainfxa.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 16 .2 .3
 		scale static 1 static 1
 		anim 0.03
@@ -246,7 +239,7 @@ textures/arena10/neonsign11
 	{
 		if ( $ rs_hasflag && ( $ rs_team == blue ) )
 			map gfx/greenline.tga
-			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 			scale static 2 static 2
 			scroll static 0 static -2
 			alphashift 10 0.05 0.5
@@ -256,7 +249,7 @@ textures/arena10/neonsign11
 	{
 		if ( ! ( $ rs_hasflag && ( $ rs_team == blue ) ) )
 			map gfx/purpleline.tga
-			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 			scale static 2 static 2
 			scroll static 0 static 2
 			alphashift 10 0.05 0.5
@@ -277,7 +270,7 @@ textures/arena10/neonsign11b
 	{
 		if ( $ rs_hasflag && ( $ rs_team == red ) )
 			map gfx/purpleline.tga
-			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 			scale static 2 static 2
 			scroll static 0 static -2
 			alphashift 10 0.05 0.5
@@ -287,7 +280,7 @@ textures/arena10/neonsign11b
 	{
 		if ( ! ( $ rs_hasflag && ( $ rs_team == red ) ) )
 			map gfx/greenline.tga
-			blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+			blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 			scale static 2 static 2
 			scroll static 0 static 2
 			alphashift 10 0.05 0.5
@@ -298,7 +291,7 @@ textures/arena10/neonsign6
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -309,7 +302,7 @@ textures/arena10/neonsign6r
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -320,7 +313,7 @@ textures/arena10/neonsign16
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -331,7 +324,7 @@ textures/arena10/neonsign16r
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -342,7 +335,7 @@ textures/arena10/neonsign20
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -353,7 +346,7 @@ textures/arena10/neonsign20r
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -364,7 +357,7 @@ textures/arena10/neonsign18
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -375,7 +368,7 @@ textures/arena10/neonsign18r
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -386,7 +379,7 @@ textures/arena10/neonsign19
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
@@ -397,7 +390,7 @@ textures/arena10/neonsign19r
 {
 	{		
 		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 0 0.1 0.1
