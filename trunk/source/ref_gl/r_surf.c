@@ -99,6 +99,157 @@ image_t *BSP_TextureAnimation (mtexinfo_t *tex)
 /*
 =========================================
 
+VBO batching
+
+This system allows contiguous sequences of polygons to be merged into batches,
+even if they are added out of order.
+
+=========================================
+*/
+
+// There is a linked list of these, but they are not dynamically allocated.
+// They are allocated from a static array. This prevents us wasting CPU with
+// lots of malloc/free calls. Keep this struct small for performance!
+typedef struct vbobatch_s {
+	int					first_vert, last_vert;
+	struct vbobatch_s 	*next;
+} vbobatch_t;
+
+#define MAX_VBO_BATCHES 100	// 100 ought to be enough. If we run out, we can 
+							// always just draw some prematurely. 
+
+// use a static array and counter to avoid lots of malloc nonsense
+int			num_vbo_batches; 
+vbobatch_t	vbobatch_buffer[MAX_VBO_BATCHES];
+// never used directly; linked list base only
+vbobatch_t	first_vbobatch[] = {{-1, -1, NULL}}; 
+// if false, flushVBOAccum will set up the VBO GL state
+qboolean	r_vboOn = false; 
+// for the rspeed_vbobatches HUD gauge
+int			c_vbo_batches;
+
+// clear all accumulated surfaces without rendering
+static inline void BSP_ClearVBOAccum (void)
+{
+	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
+	num_vbo_batches = 0;
+	first_vbobatch->next = NULL;
+}
+
+// render all accumulated surfaces, then clear them
+// XXX: assumes that global OpenGL state is correct for whatever surfaces are
+// in the accumulator, so don't change state until you've called this!
+static inline void BSP_FlushVBOAccum (void)
+{
+	vbobatch_t *batch = first_vbobatch->next;
+	
+	if (!batch)
+		return;
+	
+	if (!r_vboOn)
+	{
+		GL_SetupWorldVBO ();
+		r_vboOn = true;
+	}
+	
+	// XXX: for future reference, the glDrawRangeElements code was last seen
+	// here at revision 3246.
+	for (; batch; batch = batch->next)
+	{
+		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
+		c_vbo_batches++;
+	}
+	
+	BSP_ClearVBOAccum ();
+}
+
+// Add a new surface to the VBO batch accumulator. If its vertex data is next
+// to any other surfaces within the VBO, opportunistically merge the surfaces
+// together into a larger "batch," so they can be rendered with one draw call. 
+// Whenever two batches touch each other, they are merged. Hundreds of
+// surfaces can be rendered with a single call, which is easier on the OpenGL
+// pipeline.
+static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
+{
+	vbobatch_t *batch = first_vbobatch->next, *prev = first_vbobatch;
+	vbobatch_t *new;
+	
+	if (!batch)
+	{
+		batch = first_vbobatch->next = vbobatch_buffer;
+		batch->first_vert = first_vert;
+		batch->last_vert = last_vert;
+		num_vbo_batches++;
+		return;
+	}
+	
+	// This is optimal. Because of the way the surface linked lists are built
+	// by BSP_AddToTextureChain, they are usually in reverse order, so it's
+	// best to start toward the beginning of the list of VBO batches where
+	// you're more likely to merge something.
+	
+	while (batch->next && batch->next->first_vert < first_vert)
+	{
+		prev = batch;
+		batch = batch->next;
+	}
+	
+	if (batch->first_vert > last_vert)
+	{
+		new = &vbobatch_buffer[num_vbo_batches++];
+		new->next = batch;
+		prev->next = new;
+		new->first_vert = first_vert;
+		new->last_vert = last_vert;
+	}
+	else if (batch->last_vert == first_vert)
+	{
+		batch->last_vert = last_vert;
+		if (batch->next && batch->next->first_vert == last_vert)
+		{
+			// This is the special case where the new surface bridges the gap
+			// between two existing batches, allowing us to merge them into 
+			// the first one. This is the only case where we actually remove a
+			// batch instead of growing one or adding one.
+			batch->last_vert = batch->next->last_vert;
+			if (batch->next == &vbobatch_buffer[num_vbo_batches-1])
+				num_vbo_batches--;
+			batch->next = batch->next->next;
+		}
+		return; //no need to check for maximum batch count being hit
+	}
+	else if (batch->next && batch->next->first_vert == last_vert)
+	{
+		batch->next->first_vert = first_vert;
+		return; //no need to check for maximum batch count being hit
+	}
+	else if (batch->first_vert == last_vert)
+	{
+		batch->first_vert = first_vert;
+		return; //no need to check for maximum batch count being hit
+	}
+	else //if (batch->last_vert < first_vert)
+	{
+		new = &vbobatch_buffer[num_vbo_batches++];
+		new->next = batch->next;
+		batch->next = new;
+		new->first_vert = first_vert;
+		new->last_vert = last_vert;
+	}
+	
+	//running out of space
+	if (num_vbo_batches == MAX_VBO_BATCHES)
+	{
+/*		Com_Printf ("MUSTFLUSH\n");*/
+		BSP_FlushVBOAccum ();
+	}
+}
+
+
+
+/*
+=========================================
+
 Textureless Surface Rendering
 Used by the shadow system
 
@@ -133,7 +284,6 @@ void BSP_DrawTexturelessInlineBModel (entity_t *e)
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
 	{
-
 		// draw the polygon
 		BSP_DrawTexturelessPoly( psurf );
 		psurf->visframe = r_framecount;
@@ -311,15 +461,22 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 BSP_DrawAlphaPoly
 ================
 */
-void BSP_DrawAlphaPoly (msurface_t *fa, int flags)
+void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
 {
 	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
 	
-	R_InitVArrays(VERT_SINGLE_TEXTURED);
-	R_AddTexturedSurfToVArray (fa);
-	R_KillVArrays();
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	KillFlags |= KILL_TMU0_POINTER;
+	
+	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
+	
+	// TODO: actually use the batching system for alpha surfaces
+	BSP_FlushVBOAccum ();
 	
 	BSP_SetScrolling (0);
+	R_KillVArrays ();
 }
 
 
@@ -364,6 +521,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	qglDepthMask ( GL_FALSE );
 	qglEnable (GL_BLEND);
 	GL_TexEnv( GL_MODULATE );
+	r_vboOn = false;
 	
 	for (s=chain ; s ; s=s->texturechain)
 	{
@@ -409,6 +567,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
+			r_vboOn = false;
 		}
 		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
 		{
@@ -416,6 +575,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
+			r_vboOn = false;
 		}
 		else
 			BSP_DrawAlphaPoly (s, s->texinfo->flags);
@@ -496,148 +656,6 @@ int 		r_currLMTex = -9999; // only bind a lightmap texture if it is not
 								 // the same as previous surface
 mtexinfo_t	*r_currTexInfo = NULL; //texinfo struct
 float		*r_currTangentSpaceTransform; //etc.
-
-// VBO batching
-// This system allows contiguous sequences of polygons to be merged into 
-// batches, even if they are added out of order.
-
-// There is a linked list of these, but they are not dynamically allocated.
-// They are allocated from a static array. This prevents us wasting CPU with
-// lots of malloc/free calls. Keep this struct small for performance!
-typedef struct vbobatch_s {
-	int					first_vert, last_vert;
-	struct vbobatch_s 	*next;
-} vbobatch_t;
-
-#define MAX_VBO_BATCHES 100	// 100 ought to be enough. If we run out, we can 
-							// always just draw some prematurely. 
-
-// use a static array and counter to avoid lots of malloc nonsense
-int			num_vbo_batches; 
-vbobatch_t	vbobatch_buffer[MAX_VBO_BATCHES];
-// never used directly; linked list base only
-vbobatch_t	first_vbobatch[] = {{-1, -1, NULL}}; 
-// if false, flushVBOAccum will set up the VBO GL state
-qboolean	r_vboOn = false; 
-// for the rspeed_vbobatches HUD gauge
-int			c_vbo_batches;
-
-// clear all accumulated surfaces without rendering
-static inline void BSP_ClearVBOAccum (void)
-{
-	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
-	num_vbo_batches = 0;
-	first_vbobatch->next = NULL;
-}
-
-// render all accumulated surfaces, then clear them
-// XXX: assumes that global OpenGL state is correct for whatever surfaces are
-// in the accumulator, so don't change state until you've called this!
-static inline void BSP_FlushVBOAccum (void)
-{
-	vbobatch_t *batch = first_vbobatch->next;
-	
-	if (!batch)
-		return;
-	
-	if (!r_vboOn)
-	{
-		GL_SetupWorldVBO ();
-		r_vboOn = true;
-	}
-	
-	// XXX: for future reference, the glDrawRangeElements code was last seen
-	// here at revision 3246.
-	for (; batch; batch = batch->next)
-	{
-		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
-		c_vbo_batches++;
-	}
-	
-	BSP_ClearVBOAccum ();
-}
-
-// Add a new surface to the VBO batch accumulator. If its vertex data is next
-// to any other surfaces within the VBO, opportunistically merge the surfaces
-// together into a larger "batch," so they can be rendered with one draw call. 
-// Whenever two batches touch each other, they are merged. Hundreds of
-// surfaces can be rendered with a single call, which is easier on the OpenGL
-// pipeline.
-static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
-{
-	vbobatch_t *batch = first_vbobatch->next, *prev = first_vbobatch;
-	vbobatch_t *new;
-	
-	if (!batch)
-	{
-		batch = first_vbobatch->next = vbobatch_buffer;
-		batch->first_vert = first_vert;
-		batch->last_vert = last_vert;
-		num_vbo_batches++;
-		return;
-	}
-	
-	// This is optimal. Because of the way the surface linked lists are built
-	// by BSP_AddToTextureChain, they are usually in reverse order, so it's
-	// best to start toward the beginning of the list of VBO batches where
-	// you're more likely to merge something.
-	
-	while (batch->next && batch->next->first_vert < first_vert)
-	{
-		prev = batch;
-		batch = batch->next;
-	}
-	
-	if (batch->first_vert > last_vert)
-	{
-		new = &vbobatch_buffer[num_vbo_batches++];
-		new->next = batch;
-		prev->next = new;
-		new->first_vert = first_vert;
-		new->last_vert = last_vert;
-	}
-	else if (batch->last_vert == first_vert)
-	{
-		batch->last_vert = last_vert;
-		if (batch->next && batch->next->first_vert == last_vert)
-		{
-			// This is the special case where the new surface bridges the gap
-			// between two existing batches, allowing us to merge them into 
-			// the first one. This is the only case where we actually remove a
-			// batch instead of growing one or adding one.
-			batch->last_vert = batch->next->last_vert;
-			if (batch->next == &vbobatch_buffer[num_vbo_batches-1])
-				num_vbo_batches--;
-			batch->next = batch->next->next;
-		}
-		return; //no need to check for maximum batch count being hit
-	}
-	else if (batch->next && batch->next->first_vert == last_vert)
-	{
-		batch->next->first_vert = first_vert;
-		return; //no need to check for maximum batch count being hit
-	}
-	else if (batch->first_vert == last_vert)
-	{
-		batch->first_vert = first_vert;
-		return; //no need to check for maximum batch count being hit
-	}
-	else //if (batch->last_vert < first_vert)
-	{
-		new = &vbobatch_buffer[num_vbo_batches++];
-		new->next = batch->next;
-		batch->next = new;
-		new->first_vert = first_vert;
-		new->last_vert = last_vert;
-	}
-	
-	//running out of space
-	if (num_vbo_batches == MAX_VBO_BATCHES)
-	{
-/*		Com_Printf ("MUSTFLUSH\n");*/
-		BSP_FlushVBOAccum ();
-	}
-}
 
 /*
 ================

@@ -156,11 +156,6 @@ void VB_BuildWorldVBO(void)
     {
         if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
             continue;
-        //TODO: use VBO for alpha surfaces? But for now they'd just clutter up
-        //the VBO, so we exclude them.
-        if	(	TexinfoIsTranslucent(currentmodel->unique_texinfo[i]) && 
-        		!TexinfoIsAlphaMasked(currentmodel->unique_texinfo[i]))
-            continue;
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
 			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
