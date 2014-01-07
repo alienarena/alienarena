@@ -856,6 +856,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 	{
 		BSP_FlushVBOAccum ();
 		GL_MBind (1, gl_state.lightmap_textures + lmtex);
+		r_currLMTex = lmtex;
 	}
 	
 	if (glsl && r_currTangentSpaceTransform != surf->tangentSpaceTransform)
@@ -905,10 +906,8 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 		if (!s)
 			continue;
 		BSP_TexinfoChanged (s->texinfo->equiv, false, false);
-		for (; s; s = s->texturechain) {
+		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, false);
-			r_currLMTex = s->lightmaptexturenum;
-		}
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -977,10 +976,8 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 		if (!s)
 			continue;
 		BSP_TexinfoChanged (s->texinfo->equiv, true, false);
-		for (; s; s = s->texturechain) {
+		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, true);
-			r_currLMTex = s->lightmaptexturenum;
-		}
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -1083,10 +1080,8 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 		if (!s)
 			continue;
 		BSP_TexinfoChanged (s->texinfo->equiv, true, true);
-		for (; s; s = s->texturechain) {
+		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, true);
-			r_currLMTex = s->lightmaptexturenum;
-		}
 	}
 	
 	BSP_FlushVBOAccum ();
