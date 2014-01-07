@@ -1383,7 +1383,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 			out->samples = override_lightdata + lfacelookups[surfnum].offset-1;
 		else
 			out->samples = loadmodel->lightdata + i;
-
+		
 		// set the drawing flags
 		if (out->texinfo->flags & SURF_WARP)
 		{

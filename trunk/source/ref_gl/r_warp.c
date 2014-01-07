@@ -230,7 +230,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	  
 	if(fa->texinfo->has_normalmap)
 	{
-		if (SurfaceIsAlphaBlended(fa))
+		if (SurfaceIsAlphaMasked (fa))
 			qglEnable( GL_ALPHA_TEST );
 
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
@@ -280,7 +280,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 		GL_EnableMultitexture( false );
 
-		if (SurfaceIsAlphaBlended(fa))
+		if (SurfaceIsAlphaMasked (fa))
 			qglDisable( GL_ALPHA_TEST);
 
 		return;

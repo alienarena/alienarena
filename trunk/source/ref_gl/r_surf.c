@@ -712,14 +712,14 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	
 	BSP_FlushVBOAccum ();
 	
-	if (TexinfoIsAlphaBlended (texinfo))
+	if (TexinfoIsAlphaMasked (texinfo))
 	{
-		if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
+		if (!r_currTexInfo || !TexinfoIsAlphaMasked (r_currTexInfo))
 			qglEnable( GL_ALPHA_TEST );
 	}
 	else
 	{
-		if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
+		if (!r_currTexInfo || TexinfoIsAlphaMasked (r_currTexInfo))
 			qglDisable( GL_ALPHA_TEST );
 	}
 	
@@ -1150,7 +1150,7 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	surf->texturechain = *chain; \
 	*chain = surf; 
 	
-	if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
+	if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
 	{	// add to the translucent chain
 		AddToChainPair (r_alpha_surfaces);
 		return;

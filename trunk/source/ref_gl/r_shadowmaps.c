@@ -419,7 +419,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{	// no skies here
 			continue;
 		}
-		else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
+		else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
 		{	// no trans surfaces
 			continue;
 		}
@@ -565,7 +565,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 		{	// no skies here
 			continue;
 		}
-		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaBlended(surf))
+		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaMasked (surf))
 		{	// no trans surfaces
 			continue;
 		}
