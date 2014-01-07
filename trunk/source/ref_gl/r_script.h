@@ -4,10 +4,6 @@
 //CVARS
 extern cvar_t *rs_dynamic_time;
 
-#define ALPHAFUNC_BASIC		1
-#define ALPHAFUNC_GLOSS		2
-#define ALPHAFUNC_NORMAL	3
-
 // Animation loop
 typedef struct anim_stage_s 
 {
@@ -117,8 +113,6 @@ typedef struct rs_stage_s
 	qboolean				envmap;			// fake envmapping - spheremapping
 	qboolean				lightmap;		// lightmap this stage?
 	qboolean				alphamask;		// alpha masking?
-
-	int						alphafunc;		// software alpha effects
 
 	qboolean				has_alpha;		// for sorting
 	qboolean				normalmap;		// for normalmaps

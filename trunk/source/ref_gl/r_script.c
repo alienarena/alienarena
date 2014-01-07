@@ -180,8 +180,6 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->has_alpha = false;
 	stage->alphamask = false;
 
-	stage->alphafunc = 0;
-
 	stage->alphashift.max = 0;
 	stage->alphashift.min = 0;
 	stage->alphashift.speed = 0;
@@ -740,24 +738,6 @@ void rs_stage_scale (rs_stage_t *stage, char **token)
 	stage->scale.scaleY = atof(*token);
 }
 
-void rs_stage_alphafunc (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-
-	if (!Q_strcasecmp (*token, "normal"))
-		stage->alphafunc = ALPHAFUNC_NORMAL;
-	else if (!Q_strcasecmp (*token, "-normal"))
-		stage->alphafunc = -ALPHAFUNC_NORMAL;
-	else if (!Q_strcasecmp (*token, "gloss"))
-		stage->alphafunc = ALPHAFUNC_GLOSS;
-	else if (!Q_strcasecmp (*token, "-gloss"))
-		stage->alphafunc = -ALPHAFUNC_GLOSS;
-	else if (!Q_strcasecmp (*token, "basic"))
-		stage->alphafunc = ALPHAFUNC_BASIC;
-	else if (!Q_strcasecmp (*token, "-basic"))
-		stage->alphafunc = -ALPHAFUNC_BASIC;
-}
-
 typedef struct 
 {
 	char			*opname;
@@ -919,7 +899,6 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"alphamask",	&rs_stage_alphamask		},
 	{	"rotate",		&rs_stage_rot_speed		},
 	{	"scale",		&rs_stage_scale			},
-	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{	"flaretype",	&rs_stage_flaretype		},
 	{	"normalmap",	&rs_stage_normalmap		},
@@ -941,6 +920,9 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"origin",		&rs_stage_consume3		},
 	{	"angle",		&rs_stage_consume3		},
 	{	"dynamic",		&rs_stage_consume1		},
+	
+	// Stuff we may bring back if anyone ever wants to use it
+	{	"alphafunc",	&rs_stage_consume1		},
 
 	{	NULL,			NULL					}
 };
@@ -1198,33 +1180,6 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 	*ot += RS_ScrollFunc (stage->scroll.typeY, stage->scroll.speedY);
 }
 
-float RS_AlphaFunc (int alphafunc, float alpha, vec3_t normal, vec3_t org)
-{
-	vec3_t dir;
-
-	if (!abs(alphafunc))
-		goto endalpha;
-
-	if (alphafunc == ALPHAFUNC_GLOSS)
-	{
-		//glossmap stuff here...
-	}
-	else if (alphafunc == ALPHAFUNC_NORMAL)
-	{
-		VectorSubtract(org, r_newrefdef.vieworg, dir);
-		VectorNormalize(dir);
-		alpha *= fabs(cutDot(dir, normal));
-	}
-
-endalpha:
-
-	if (alpha<0) alpha = 0;
-	if (alpha>1) alpha = 1;
-	if (alphafunc<0) alpha = 1-alpha;
-
-	return alpha;
-}
-
 image_t *BSP_TextureAnimation (mtexinfo_t *tex);
 rscript_t	*surfaceScript(msurface_t *surf)
 {
@@ -1462,8 +1417,19 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 							0 );
 		}
 		
-		qglColor4f (1, 1, 1, alpha);
+		{
+			float red=1.0, green=1.0, blue=1.0;
 
+			if (stage->colormap.enabled)
+			{
+				red = stage->colormap.red;
+				green = stage->colormap.green;
+				blue = stage->colormap.blue;
+			}
+
+			qglColor4f (red, green, blue, alpha);
+		}
+		
 		if (stage->alphamask)
 		{
 			GLSTATE_ENABLE_ALPHATEST
@@ -1493,21 +1459,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				ot = v[4];
 			}
 			
-			{
-				float red=1.0, green=1.0, blue=1.0, alpha2;
-
-				if (stage->colormap.enabled)
-				{
-					red = stage->colormap.red;
-					green = stage->colormap.green;
-					blue = stage->colormap.blue;
-				}
-
-				alpha2 = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-
-				qglColor4f (red, green, blue, alpha2);
-			}
-
 			// copy in vertex data
 			VArray[0] = v[0];
 			VArray[1] = v[1];
