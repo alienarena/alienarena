@@ -2840,7 +2840,6 @@ nobase_nodist_scripts_DATA = \
 	data1/scripts/textures.rscript \
 	data1/scripts/common.shader \
 	data1/scripts/liquids.shader \
-	data1/scripts/shaderlist.txt \
 	data1/scripts/trans.shader
 
 sounddir = $(pkgdatadir)
