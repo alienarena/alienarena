@@ -419,6 +419,7 @@ void RS_ReadyScript (rscript_t *rs)
 		if(stage->normalmap)
 			mode = it_bump;
 
+
 		//set anim
 		anim = stage->anim_stage;
 		while (anim != NULL)
@@ -1107,20 +1108,6 @@ void RS_ScanPathForScripts (void)
 	}
 }
 
-void RS_SetEnvmap (vec3_t v, float *os, float *ot)
-{
-	vec3_t vert;
-
-	vert[0] = v[0]*r_world_matrix[0]+v[1]*r_world_matrix[4]+v[2]*r_world_matrix[8] +r_world_matrix[12];
-	vert[1] = v[0]*r_world_matrix[1]+v[1]*r_world_matrix[5]+v[2]*r_world_matrix[9] +r_world_matrix[13];
-	vert[2] = v[0]*r_world_matrix[2]+v[1]*r_world_matrix[6]+v[2]*r_world_matrix[10]+r_world_matrix[14];
-
-	VectorNormalize (vert);
-
-	*os = vert[0];
-	*ot = vert[1];
-}
-
 inline void RS_RotateST2 (float *os, float *ot, float radians)
 {
 	float cost = cos(radians), sint = sin(radians);
@@ -1300,35 +1287,39 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
-//This is the shader drawing routine for bsp surfaces - it will draw on top of the
-//existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 {
-	glpoly_t	*p = surf->polys;
 	unsigned	lmtex = surf->lightmaptexturenum;
-	float		*v;
-	int			i, nv;
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
-	float		os, ot, alpha;
-	float		time;
-	int			VertexCounter;
 
 	if (!rs)
 		return;
 
-	nv = surf->polys->numverts;
 	stage = rs->stage;
-	time = rs_realtime;
 
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
 	lightmaptoggle = true;
 	
+	qglEnableClientState( GL_VERTEX_ARRAY );
+	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	qglClientActiveTextureARB (GL_TEXTURE1);
+	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+	
+	BSP_InvalidateVBO ();
+	BSP_AddSurfToVBOAccum (surf);
+	
+	glUseProgramObjectARB (g_rscriptprogramObj);
+	
 	qglMatrixMode (GL_TEXTURE);
 	do
 	{
+		float red = 1.0, green = 1.0, blue = 1.0, alpha = 1.0;
+		
 		if (stage->lensflare || stage->grass || stage->beam || stage->cube)
 			break; //handled elsewhere
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
@@ -1374,9 +1365,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			GLSTATE_DISABLE_BLEND
 		}
 
-		// sane defaults
-		alpha = 1.0f;
-
 		if (stage->alphashift.min || stage->alphashift.speed)
 		{
 			if (!stage->alphashift.speed && stage->alphashift.min > 0)
@@ -1417,18 +1405,16 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 							0 );
 		}
 		
+		glUniform1iARB (g_location_rs_envmap, stage->envmap != 0);
+		
+		if (stage->colormap.enabled)
 		{
-			float red=1.0, green=1.0, blue=1.0;
-
-			if (stage->colormap.enabled)
-			{
-				red = stage->colormap.red;
-				green = stage->colormap.green;
-				blue = stage->colormap.blue;
-			}
-
-			qglColor4f (red, green, blue, alpha);
+			red = stage->colormap.red;
+			green = stage->colormap.green;
+			blue = stage->colormap.blue;
 		}
+		
+		qglColor4f (red, green, blue, alpha);
 		
 		if (stage->alphamask)
 		{
@@ -1437,59 +1423,21 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		else
 		{
 			GLSTATE_DISABLE_ALPHATEST
-		}		
-	
-		if(stage->lightmap)
-			R_InitVArrays (VERT_MULTI_TEXTURED);
-		else
-			R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
-
-		for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
-		{
-			if (stage->envmap)
-			{
-				RS_SetEnvmap (v, &os, &ot);
-			}
-			else 
-			{
-				os = v[3];
-				ot = v[4];
-			}
-			
-			// copy in vertex data
-			VArray[0] = v[0];
-			VArray[1] = v[1];
-			VArray[2] = v[2];
-
-			// world texture coords
-			VArray[3] = os;
-			VArray[4] = ot;
-
-			// lightmap texture coords
-			VArray[5] = v[5];
-			VArray[6] = v[6];
-
-			if(stage->lightmap)
-				VArray += VertexSizes[VERT_MULTI_TEXTURED];
-			else
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			VertexCounter++;		
 		}
-
-		R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
-					
-		qglColor4f(1,1,1,1);
-		if (stage->colormap.enabled)
-			qglEnable (GL_TEXTURE_2D);
 		
+		BSP_DrawVBOAccum ();
+					
 		qglPopMatrix ();
 
 	} while ( (stage = stage->next) );	
 	
+	BSP_ClearVBOAccum ();
+	
+	qglColor4f(1,1,1,1);
+	
 	qglMatrixMode (GL_MODELVIEW);
+	
+	glUseProgramObjectARB (0);
 	
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );

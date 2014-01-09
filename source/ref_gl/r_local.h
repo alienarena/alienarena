@@ -308,6 +308,11 @@ extern image_t *r_blooddroplets;
 extern image_t *r_blooddroplets_nm;
 extern void BSP_DrawTexturelessPoly (msurface_t *fa);
 extern void BSP_DrawTexturelessBrushModel (entity_t *e);
+void BSP_InvalidateVBO (void);
+void BSP_DrawVBOAccum (void);
+void BSP_ClearVBOAccum (void);
+void BSP_FlushVBOAccum (void);
+void BSP_AddSurfToVBOAccum (msurface_t *surf);
 
 //Postprocess
 void R_GLSLPostProcess(void);
@@ -548,7 +553,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
-#define VERT_MULTI_TEXTURED				2		// verts and st for 2 tmus
 #define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
 #define VERT_NO_TEXTURE					7		// verts only, no textures
 
@@ -615,6 +619,7 @@ extern void	R_LoadGLSLPrograms(void);
 //glsl
 GLhandleARB g_programObj;
 GLhandleARB g_shadowprogramObj;
+GLhandleARB g_rscriptprogramObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
 GLhandleARB g_vertexonlymeshprogramObj;
@@ -671,6 +676,9 @@ GLuint		g_location_entShadow;
 GLuint		g_location_fadeShadow;
 GLuint		g_location_xOffset;
 GLuint		g_location_yOffset;
+
+//rscripts
+GLuint		g_location_rs_envmap;
 
 //water
 GLuint		g_location_baseTexture;

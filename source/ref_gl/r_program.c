@@ -705,7 +705,6 @@ static char shadow_vertex_program[] = STRINGIFY (
 );
 
 static char shadow_fragment_program[] = STRINGIFY (
-
 	uniform sampler2DShadow StatShadowMap;
 	uniform float fadeShadow;
 	uniform float xPixelOffset;
@@ -802,10 +801,35 @@ static char shadow_fragment_program_ATI[] = STRINGIFY (
 	}
 );
 
+//RSCRIPTS
+static char rscript_vertex_program[] = STRINGIFY (
+	uniform int envmap;
+	
+	void main ()
+	{
+		gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		gl_FrontColor = gl_BackColor = gl_Color;
+		
+		vec4 maincoord;
+		
+		if (envmap == 1)
+		{
+			maincoord.st = normalize (gl_Position.xyz).xy;
+			maincoord.pq = vec2 (0.0, 1.0);
+		}
+		else
+		{
+			maincoord = gl_MultiTexCoord0;
+		}
+		
+		gl_TexCoord[0] = gl_TextureMatrix[0] * maincoord;
+		gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+	}
+);
+
 
 #define USE_MESH_ANIM_LIBRARY "/*USE_MESH_ANIM_LIBRARY*/"
 static char mesh_anim_library[] = STRINGIFY (
-	
 	uniform mat3x4 bonemats[70];
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	
@@ -1810,6 +1834,12 @@ void R_LoadGLSLPrograms(void)
 	g_location_fadeShadow = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
 	g_location_xOffset = glGetUniformLocationARB( g_shadowprogramObj, "xPixelOffset" );
 	g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
+	
+	//rscript surfaces
+	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, NULL, NO_ATTRIBUTES, &g_rscriptprogramObj);
+	
+	// Locate some parameters by name so we can set them later...
+	g_location_rs_envmap = glGetUniformLocationARB (g_rscriptprogramObj, "envmap");
 
 	//warp(water) bsp surfaces
 	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);

@@ -104,24 +104,6 @@ void R_InitVArrays (int varraytype)
 		return;
 	}
 
-	// a standard 2 tmu multitexture needs 2 texcoord pointers. to do - for bsp surface VBO, we will have some changes here
-	if (varraytype == VERT_MULTI_TEXTURED)
-	{
-		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_MULTI_TEXTURED], &VArrayVerts[3]);
-
-		// uses array indices 5, 6
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_MULTI_TEXTURED], &VArrayVerts[5]);
-
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-
-		return;
-	}
-
 	// single texture + colour (water, mdls, and so on)
 	if (varraytype == VERT_COLOURED_TEXTURED)
 	{
