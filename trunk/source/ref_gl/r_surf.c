@@ -123,23 +123,20 @@ int			num_vbo_batches;
 vbobatch_t	vbobatch_buffer[MAX_VBO_BATCHES];
 // never used directly; linked list base only
 vbobatch_t	first_vbobatch[] = {{-1, -1, NULL}}; 
-// if false, flushVBOAccum will set up the VBO GL state
+// if false, drawVBOAccum will set up the VBO GL state
 qboolean	r_vboOn = false; 
 // for the rspeed_vbobatches HUD gauge
 int			c_vbo_batches;
 
-// clear all accumulated surfaces without rendering
-static inline void BSP_ClearVBOAccum (void)
+// Call this if you've bound the vertex/texture pointers to something else and
+// they will need to be re-bound to the BSP VBO.
+void BSP_InvalidateVBO (void)
 {
-	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
-	num_vbo_batches = 0;
-	first_vbobatch->next = NULL;
+	r_vboOn = false;
 }
 
-// render all accumulated surfaces, then clear them
-// XXX: assumes that global OpenGL state is correct for whatever surfaces are
-// in the accumulator, so don't change state until you've called this!
-static inline void BSP_FlushVBOAccum (void)
+// render all accumulated surfaces
+void BSP_DrawVBOAccum (void)
 {
 	vbobatch_t *batch = first_vbobatch->next;
 	
@@ -159,7 +156,26 @@ static inline void BSP_FlushVBOAccum (void)
 		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
 		c_vbo_batches++;
 	}
+}
+
+
+// clear all accumulated surfaces without rendering
+void BSP_ClearVBOAccum (void)
+{
+	if (first_vbobatch->next == NULL)
+		return;
 	
+	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
+	num_vbo_batches = 0;
+	first_vbobatch->next = NULL;
+}
+
+// render all accumulated surfaces, then clear them
+// XXX: assumes that global OpenGL state is correct for whatever surfaces are
+// in the accumulator, so don't change state until you've called this!
+void BSP_FlushVBOAccum (void)
+{
+	BSP_DrawVBOAccum ();
 	BSP_ClearVBOAccum ();
 }
 
@@ -243,6 +259,11 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 /*		Com_Printf ("MUSTFLUSH\n");*/
 		BSP_FlushVBOAccum ();
 	}
+}
+
+void BSP_AddSurfToVBOAccum (msurface_t *surf)
+{
+	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 }
 
 
@@ -470,7 +491,7 @@ void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	KillFlags |= KILL_TMU0_POINTER;
 	
-	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
+	BSP_AddSurfToVBOAccum (surf);
 	
 	// TODO: actually use the batching system for alpha surfaces
 	BSP_FlushVBOAccum ();
@@ -521,7 +542,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	qglDepthMask ( GL_FALSE );
 	qglEnable (GL_BLEND);
 	GL_TexEnv( GL_MODULATE );
-	r_vboOn = false;
+	BSP_InvalidateVBO ();
 	
 	for (s=chain ; s ; s=s->texturechain)
 	{
@@ -567,7 +588,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
-			r_vboOn = false;
+			BSP_InvalidateVBO ();
 		}
 		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
 		{
@@ -575,7 +596,6 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
-			r_vboOn = false;
 		}
 		else
 			BSP_DrawAlphaPoly (s, s->texinfo->flags);
@@ -868,7 +888,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 	
 	// If we've gotten this far, it's because the surface is not translucent,
 	// warped, sky, or nodraw, thus it *will* be in the VBO.
-	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
+	BSP_AddSurfToVBOAccum (surf);
 }
 
 void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
@@ -881,8 +901,7 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	r_currTangentSpaceTransform = NULL;
 	
 	BSP_FlushVBOAccum ();
-
-	r_vboOn = false;
+	BSP_InvalidateVBO ();
 	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	qglClientActiveTextureARB (GL_TEXTURE0);
@@ -952,7 +971,7 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	glUniform1iARB( g_location_dynamic, 0);
 	glUniform1iARB( g_location_parallax, 1);  
 	
-	r_vboOn = false;
+	BSP_InvalidateVBO ();
 	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	qglClientActiveTextureARB (GL_TEXTURE0);
@@ -1056,7 +1075,7 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 
 	glUniform1iARB( g_location_dynamic, foundLight);
 	
-	r_vboOn = false;
+	BSP_InvalidateVBO ();
 	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	qglClientActiveTextureARB (GL_TEXTURE0);
