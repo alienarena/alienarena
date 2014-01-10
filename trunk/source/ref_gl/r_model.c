@@ -472,7 +472,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 		if (!strcmp (shortname, nameShortname) )
 		{
-			if (mod->type == mod_md2 || mod->type == mod_iqm)
+			if (mod->type == mod_md2 || mod->type == mod_iqm || mod->type == mod_terrain)
 			{
 				// Make sure models scripts are definately reloaded between maps
 				image_t *img;

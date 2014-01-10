@@ -39,6 +39,11 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	mod->skins[0] = tex;
 	mod->type = mod_terrain;
 	
+	if (mod->skins[0] != NULL)
+		mod->script = mod->skins[0]->script;
+	if (mod->script)
+		RS_ReadyScript( mod->script );
+	
 	for ( i = 0; i < 8; i++ )
 	{
 		vec3_t   tmp;
