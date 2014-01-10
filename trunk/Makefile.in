@@ -786,7 +786,6 @@ nobase_nodist_gfx_DATA = \
 	data1/gfx/rainfxh.tga \
 	data1/gfx/rain.tga \
 	data1/gfx/rayfx.tga \
-	data1/gfx/redcommanderfx.tga \
 	data1/gfx/redcircuit.tga \
 	data1/gfx/redlightning.tga \
 	data1/gfx/reflect.tga \
@@ -1310,7 +1309,11 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/terraintest/hill1.terrain \
 	data1/maps/meshes/test/helmet.iqm \
 	data1/maps/meshes/test/martian.iqm \
+	data1/maps/meshes/test/martian.jpg \
 	data1/maps/meshes/test/martian.skin \
+	data1/maps/meshes/test/martian_fx.tga \
+	data1/maps/meshes/test/martian_normal.tga \
+	data1/maps/meshes/test/martiannormbase.jpg \
 	data1/maps/meshes/test/md2helmet.md2 \
 	data1/maps/meshes/test/md2martian.md2 \
 	data1/maps/meshes/toxicbarrell.jpg \
@@ -2124,13 +2127,6 @@ nobase_nodist_players_DATA = \
 	data1/players/commander/tris.iqm \
 	data1/players/commander/tris.md2 \
 	data1/players/commander/tris.rgd \
-	data1/players/commander/tron2_i.jpg \
-	data1/players/commander/tron2.jpg \
-	data1/players/commander/tron3_i.jpg \
-	data1/players/commander/tron3.jpg \
-	data1/players/commander/tron_i.jpg \
-	data1/players/commander/tron.jpg \
-	data1/players/commander/tron_normal.tga \
 	data1/players/commander/w_bfg.iqm \
 	data1/players/commander/w_bfg.md2 \
 	data1/players/commander/w_bfg.skin \
@@ -2440,9 +2436,6 @@ nobase_nodist_players_DATA = \
 	data1/players/martianenforcer/drown1.wav \
 	data1/players/martianenforcer/fall1.wav \
 	data1/players/martianenforcer/fall2.wav \
-	data1/players/martianenforcer/gamara_i.jpg \
-	data1/players/martianenforcer/gamara.jpg \
-	data1/players/martianenforcer/gamara_normal.tga \
 	data1/players/martianenforcer/gasp1.wav \
 	data1/players/martianenforcer/gasp2.wav \
 	data1/players/martianenforcer/gurp1.wav \
@@ -2471,13 +2464,6 @@ nobase_nodist_players_DATA = \
 	data1/players/martianenforcer/tris.iqm \
 	data1/players/martianenforcer/tris.md2 \
 	data1/players/martianenforcer/tris.rgd \
-	data1/players/martianenforcer/tron2_i.jpg \
-	data1/players/martianenforcer/tron2.jpg \
-	data1/players/martianenforcer/tron3_i.jpg \
-	data1/players/martianenforcer/tron3.jpg \
-	data1/players/martianenforcer/tron_i.jpg \
-	data1/players/martianenforcer/tron.jpg \
-	data1/players/martianenforcer/tron_normal.tga \
 	data1/players/martianenforcer/usegibs \
 	data1/players/martianenforcer/w_alienblaster.iqm \
 	data1/players/martianenforcer/w_alienblaster.skin \
@@ -2642,13 +2628,6 @@ nobase_nodist_players_DATA = \
 	data1/players/martianwarrior/tris.iqm \
 	data1/players/martianwarrior/tris.md2 \
 	data1/players/martianwarrior/tris.rgd \
-	data1/players/martianwarrior/tron2_i.jpg \
-	data1/players/martianwarrior/tron2.jpg \
-	data1/players/martianwarrior/tron3_i.jpg \
-	data1/players/martianwarrior/tron3.jpg \
-	data1/players/martianwarrior/tron_i.jpg \
-	data1/players/martianwarrior/tron.jpg \
-	data1/players/martianwarrior/tron_normal.tga \
 	data1/players/martianwarrior/w_alienblaster.iqm \
 	data1/players/martianwarrior/w_alienblaster.skin \
 	data1/players/martianwarrior/w_bfg.iqm \
@@ -2722,13 +2701,6 @@ nobase_nodist_players_DATA = \
 	data1/players/slashbot/tris.iqm \
 	data1/players/slashbot/tris.md2 \
 	data1/players/slashbot/tris.rgd \
-	data1/players/slashbot/tron2_i.jpg \
-	data1/players/slashbot/tron2.jpg \
-	data1/players/slashbot/tron3_i.jpg \
-	data1/players/slashbot/tron3.jpg \
-	data1/players/slashbot/tron_i.jpg \
-	data1/players/slashbot/tron.jpg \
-	data1/players/slashbot/tron_normal.tga \
 	data1/players/slashbot/w_bfg.iqm \
 	data1/players/slashbot/w_bfg.md2 \
 	data1/players/slashbot/w_bfg.skin \
@@ -2833,6 +2805,7 @@ nobase_nodist_scripts_DATA = \
 	data1/scripts/maps/tca-extermination.rscript \
 	data1/scripts/maps/tca-purgatory.rscript \
 	data1/scripts/maps/tca-zion2k9.rscript \
+	data1/scripts/maps/terraintest.rscript \
 	data1/scripts/menu.rscript \
 	data1/scripts/models.rscript \
 	data1/scripts/normals/normals.rscript \
@@ -4405,6 +4378,7 @@ nobase_nodist_textures_DATA = \
 	data1/textures/terraintest/axialcross.tga \
 	data1/textures/terraintest/randclouds1.tga \
 	data1/textures/terraintest/plateau1.tga \
+	data1/textures/terraintest/plateau1_blendtex.tga \
 	data1/textures/water/blood_nm.tga \
 	data1/textures/water/blood.tga \
 	data1/textures/water/bluewater_nm.tga \
