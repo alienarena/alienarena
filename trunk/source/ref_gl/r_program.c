@@ -807,6 +807,9 @@ static char rscript_vertex_program[] = STRINGIFY (
 	uniform int envmap;
 	uniform int	numblendtextures;
 	uniform int FOG;
+	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
+	// means lightmap using its own set of texcoords.
+	uniform int lightmap; 
 	
 	varying vec2 generated_texcoord;
 	varying float fog;
@@ -829,7 +832,11 @@ static char rscript_vertex_program[] = STRINGIFY (
 		}
 		
 		gl_TexCoord[0] = gl_TextureMatrix[0] * maincoord;
-		gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+		
+		if (lightmap == 1)
+			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord0;
+		else if (lightmap == 2)
+			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 		
 		if (numblendtextures > 0)
 		{
@@ -854,8 +861,10 @@ static char rscript_fragment_program[] = STRINGIFY (
 	uniform sampler2D blendTexture1;
 	uniform sampler2D blendTexture2;
 	uniform int	numblendtextures;
-	uniform int lightmap;
 	uniform int FOG;
+	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
+	// means lightmap using its own set of texcoords.
+	uniform int lightmap;
 	
 	varying vec2 generated_texcoord;
 	varying float fog;
@@ -886,7 +895,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 		
 		gl_FragColor *= gl_Color;
 		
-		if (lightmap == 1)
+		if (lightmap != 0)
 		{
 			vec4 lightmapColor = texture2D (lightmapTexture, gl_TexCoord[1].st);
 			

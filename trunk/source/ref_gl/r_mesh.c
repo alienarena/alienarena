@@ -691,7 +691,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	
 	if (rs_slowpath)
 	{
-		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, R_Mesh_DrawVBO_Callback);
+		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, false, R_Mesh_DrawVBO_Callback);
 		return;
 	}
 	else if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
