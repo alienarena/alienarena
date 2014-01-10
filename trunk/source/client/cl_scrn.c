@@ -2076,7 +2076,6 @@ void SCR_UpdateScreen (void)
 
 		if (scr_draw_loading == 2)
 		{	//  loading plaque over black screen
-return;
 			SCR_DrawLoading ();
 
 			if (cls.disable_screen)
