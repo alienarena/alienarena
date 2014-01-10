@@ -623,6 +623,11 @@ void R_Mesh_DrawVBO (qboolean lerped)
 	}
 }
 
+void R_Mesh_DrawVBO_Callback (void)
+{
+	R_Mesh_DrawVBO (false);
+}
+
 /*
 =============
 R_Mesh_DrawFrame: should be able to handle all types of meshes.
@@ -637,7 +642,27 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	qboolean	lerped;
 	float		frontlerp;
 	
+	// if true, then render through the RScript code
+	qboolean	rs_slowpath = false;
+	
 	int			animtype = 0; // GLSL useGPUanim uniform
+	
+	rscript_t	*rs = NULL;
+	
+	if (r_shaders->integer)
+		rs=(rscript_t *)currententity->script;
+	
+	//check for valid script
+	if(rs && rs->stage)
+	{
+		if(	!strcmp("***r_notexture***", rs->stage->texture->name) || 
+			((rs->stage->fx || rs->stage->glow) && !strcmp("***r_notexture***", rs->stage->texture2->name)) ||
+			(rs->stage->cube && !strcmp("***r_notexture***", rs->stage->texture3->name)) ||
+			rs->stage->num_blend_textures != 0 || rs->stage->next != NULL )
+		{
+			rs_slowpath = true;
+		}
+	}
 	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
 	
@@ -654,9 +679,22 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	if (modtypes[currentmodel->type].skeletal)
 		animtype |= 1;
 	
-	// XXX: the vertex shader won't actually support a value of 3 yet.
-
-	if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
+	// XXX: the vertex shader won't actually support a value of 3 for animtype
+	// yet.
+	
+	if (animtype != 0 && rs_slowpath)
+	{
+		Com_Printf ("WARN: Cannot apply a multi-stage RScript to model %s\n", currentmodel->name);
+		rs = NULL;
+		rs_slowpath = false;
+	}
+	
+	if (rs_slowpath)
+	{
+		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, R_Mesh_DrawVBO_Callback);
+		return;
+	}
+	else if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
 	{
 		qglDepthMask(false);
 		
@@ -671,10 +709,6 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	else
 	{
 		qboolean fragmentshader;
-		rscript_t *rs = NULL;
-		
-		if (r_shaders->integer)
-			rs=(rscript_t *)currententity->script;
 		
 		if(rs && rs->stage->depthhack)
 			qglDepthMask(false);
@@ -867,6 +901,7 @@ void R_Mesh_Draw ( void )
 		qglMatrixMode(GL_MODELVIEW);
 	}
 
+
 	qglPushMatrix ();
 	R_RotateForEntity (currententity);
 
@@ -877,17 +912,6 @@ void R_Mesh_Draw ( void )
 		skin = currentmodel->skins[0];
 	if (!skin)
 		skin = r_notexture;	// fallback..
-	
-	//check for valid script
-	if(currententity->script && currententity->script->stage)
-	{
-		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || 
-			((currententity->script->stage->fx || currententity->script->stage->glow) && !strcmp("***r_notexture***", currententity->script->stage->texture2->name)) ||
-			(currententity->script->stage->cube && !strcmp("***r_notexture***", currententity->script->stage->texture3->name)))
-		{
-			currententity->script = NULL; //bad shader!
-		}
-	}
 	
 	GL_SelectTexture (0);
 	qglShadeModel (GL_SMOOTH);

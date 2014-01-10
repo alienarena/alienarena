@@ -213,6 +213,8 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->lensflare = false;
 	stage->flaretype = 0;
 	stage->normalmap = false;
+	stage->num_blend_textures = 0;
+	memset (stage->blend_textures, 0, sizeof (stage->blend_textures));
 	stage->grass = false;
 	stage->grasstype = 0;
 	stage->beam = false;
@@ -406,6 +408,7 @@ void RS_ReadyScript (rscript_t *rs)
 	anim_stage_t	*anim;
 	random_stage_t	*randStage;
 	char			mode;
+	int				i;
 
 	if (rs->ready)
 		return;
@@ -418,7 +421,6 @@ void RS_ReadyScript (rscript_t *rs)
 		//if normalmap, set mode
 		if(stage->normalmap)
 			mode = it_bump;
-
 
 		//set anim
 		anim = stage->anim_stage;
@@ -455,6 +457,12 @@ void RS_ReadyScript (rscript_t *rs)
 			stage->texture3 = GL_FindImage (stage->name3, mode);
 		if (!stage->texture3)
 			stage->texture3 = r_notexture;
+		for (i = 0; i < stage->num_blend_textures; i++)
+		{
+			stage->blend_textures[i] = GL_FindImage (stage->blend_names[i], mode);
+			if (!stage->blend_textures[i])
+				stage->blend_textures[i] = r_notexture;
+		}
 
 		//check alpha
 		if (stage->blendfunc.blend)
@@ -857,6 +865,34 @@ void rs_stage_if (rs_stage_t *stage, char **token)
 		Com_Printf ("ERROR in stage conditional!\n");
 }
 
+void rs_stage_blendmap (rs_stage_t *stage, char **token)
+{
+	int i;
+	
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->num_blend_textures = atoi(*token);
+	
+	if (stage->num_blend_textures > 4)
+	{
+		Com_Printf ("ERROR: Cannot have %d blendmap channels (max 4)\n", stage->num_blend_textures);
+		
+		// consume the rest of the command
+		while (stage->num_blend_textures)
+		{
+			*token = strtok (NULL, TOK_DELIMINATORS);
+			stage->num_blend_textures--;
+		}
+		
+		return;
+	}
+	
+	for (i = 0; i < stage->num_blend_textures; i++)
+	{
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
+	}
+}
+
 // For legacy origin and angle commands that aren't actually used in the code.
 // Some old rscripts still have the origin command in them, so we should parse
 // it anyway. Can't find any angle commands, but may as well handle those too.
@@ -903,6 +939,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"lensflare",	&rs_stage_lensflare		},
 	{	"flaretype",	&rs_stage_flaretype		},
 	{	"normalmap",	&rs_stage_normalmap		},
+	{	"blendmap",		&rs_stage_blendmap		},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
@@ -1204,26 +1241,6 @@ void SetVertexOverbrights (qboolean toggle)
 	}
 }
 
-qboolean lightmaptoggle;
-void ToggleLightmap (qboolean toggle)
-{
-	if (toggle==lightmaptoggle)
-		return;
-
-	lightmaptoggle = toggle;
-	if (toggle)
-	{
-		SetVertexOverbrights(false);
-		GL_EnableMultitexture( true );
-		R_SetLightingMode (true);
-	}
-	else
-	{
-		GL_EnableMultitexture( false );
-		SetVertexOverbrights(true);
-	}
-}
-
 static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 {
 	int resv;
@@ -1287,9 +1304,8 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
-void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
+void RS_Draw (rscript_t *rs, unsigned lmtex, vec2_t rotate_center, vec3_t normal, qboolean translucent, void (*draw_callback) (void))
 {
-	unsigned	lmtex = surf->lightmaptexturenum;
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
 
@@ -1301,8 +1317,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	lightmaptoggle = true;
-	
 	qglEnableClientState( GL_VERTEX_ARRAY );
 	qglClientActiveTextureARB (GL_TEXTURE0);
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1310,10 +1324,16 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
-	BSP_InvalidateVBO ();
-	BSP_AddSurfToVBOAccum (surf);
-	
 	glUseProgramObjectARB (g_rscriptprogramObj);
+	
+	glUniform1iARB( g_location_rs_mainTexture, 0);
+	glUniform1iARB( g_location_rs_lightmapTexture, 1);
+	glUniform1iARB( g_location_rs_blendTexture0, 2);
+	glUniform1iARB( g_location_rs_blendTexture1, 3);
+	glUniform1iARB( g_location_rs_blendTexture2, 4);
+	glUniform1iARB( g_location_rs_fog, map_fog);
+	
+	GL_MBind (1, gl_state.lightmap_textures + lmtex);
 	
 	qglMatrixMode (GL_TEXTURE);
 	do
@@ -1325,20 +1345,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute
 		
-		if(stage->lightmap)
-		{
-			ToggleLightmap(true);
-			GL_SelectTexture (0);
-			qglShadeModel (GL_FLAT);
-
-			GL_MBind (1, gl_state.lightmap_textures + lmtex);
-		}
-		else 
-		{
-			ToggleLightmap(false);
-			GL_SelectTexture (0);
-			qglShadeModel (GL_SMOOTH);
-		}
+		glUniform1iARB (g_location_rs_lightmap, stage->lightmap);
 
 		GL_SelectTexture (0);
 		qglPushMatrix ();
@@ -1355,7 +1362,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
 			GLSTATE_ENABLE_BLEND
 		}
-		else if (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66) && !stage->alphamask)
+		else if (translucent && !stage->alphamask)
 		{
 			GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_ENABLE_BLEND
@@ -1384,9 +1391,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		
 		if (stage->rot_speed)
 		{
-			qglTranslatef (surf->c_s, surf->c_t, 0);
+			qglTranslatef (rotate_center[0], rotate_center[1], 0);
 			qglRotatef (RAD2DEG (-stage->rot_speed * rs_realtime * ROTFACTOR), 0, 0, 1);
-			qglTranslatef (-surf->c_s, -surf->c_t, 0);
+			qglTranslatef (-rotate_center[0], -rotate_center[1], 0);
 		}
 		
 		qglTranslatef (	RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX),
@@ -1400,12 +1407,23 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->envmap)
 		{
 			//move by normal & position
-			qglTranslatef (	-DotProduct (surf->plane->normal, vectors[1]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
-							DotProduct (surf->plane->normal, vectors[2]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
+			qglTranslatef (	-DotProduct (normal, vectors[1]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
+							DotProduct (normal, vectors[2]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
 							0 );
 		}
 		
 		glUniform1iARB (g_location_rs_envmap, stage->envmap != 0);
+		glUniform1iARB (g_location_rs_numblendtextures, stage->num_blend_textures);
+		
+		if (stage->num_blend_textures > 0)
+		{
+			int i;
+			
+			for (i = 0; i < stage->num_blend_textures; i++)
+				GL_MBind (2+i, stage->blend_textures[i]->texnum);
+		}
+		
+		GL_SelectTexture (0);
 		
 		if (stage->colormap.enabled)
 		{
@@ -1425,13 +1443,11 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			GLSTATE_DISABLE_ALPHATEST
 		}
 		
-		BSP_DrawVBOAccum ();
+		draw_callback ();
 					
 		qglPopMatrix ();
 
 	} while ( (stage = stage->next) );	
-	
-	BSP_ClearVBOAccum ();
 	
 	qglColor4f(1,1,1,1);
 	
@@ -1444,8 +1460,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	
 	R_KillVArrays();		
 	
-	ToggleLightmap(true);
-
 	GL_EnableMultitexture( false );
 
 	// restore the original blend mode
@@ -1454,6 +1468,25 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_TEXGEN
+}
+
+void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
+{
+	unsigned	lmtex = surf->lightmaptexturenum;
+	vec2_t		rotate_center;
+	qboolean	translucent;
+	
+	BSP_InvalidateVBO ();
+	BSP_AddSurfToVBOAccum (surf);
+	
+	rotate_center[0] = surf->c_s;
+	rotate_center[1] = surf->c_t;
+	
+	translucent = (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66)) != 0;
+	
+	RS_Draw (rs, lmtex, rotate_center, surf->plane->normal, translucent, BSP_DrawVBOAccum);
+	
+	BSP_ClearVBOAccum ();
 }
 
 rscript_t *rs_caustics;
@@ -1476,12 +1509,12 @@ void RS_Surface (msurface_t *surf)
 	//Underwater Caustics
 	if(rs_caustics)
 		if (surf->iflags & ISURF_UNDERWATER )
-				RS_DrawSurfaceTexture(surf, rs_caustics);
+				RS_DrawSurface (surf, rs_caustics);
 
 	//all other textures shaders
 	rs_shader = (rscript_t *)surf->texinfo->image->script;
 	if(rs_shader)
-		RS_DrawSurfaceTexture(surf, rs_shader);
+		RS_DrawSurface (surf, rs_shader);
 }
 
 

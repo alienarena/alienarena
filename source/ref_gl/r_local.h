@@ -679,6 +679,14 @@ GLuint		g_location_yOffset;
 
 //rscripts
 GLuint		g_location_rs_envmap;
+GLuint		g_location_rs_numblendtextures;
+GLuint		g_location_rs_lightmap;
+GLuint		g_location_rs_fog;
+GLuint		g_location_rs_mainTexture;
+GLuint		g_location_rs_lightmapTexture;
+GLuint		g_location_rs_blendTexture0;
+GLuint		g_location_rs_blendTexture1;
+GLuint		g_location_rs_blendTexture2;
 
 //water
 GLuint		g_location_baseTexture;

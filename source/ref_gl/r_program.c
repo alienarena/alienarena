@@ -37,6 +37,7 @@ PFNGLATTACHOBJECTARBPROC			glAttachObjectARB			= NULL;
 PFNGLGETINFOLOGARBPROC				glGetInfoLogARB				= NULL;
 PFNGLLINKPROGRAMARBPROC				glLinkProgramARB			= NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB		= NULL;
+PFNGLUNIFORM4IARBPROC				glUniform4iARB				= NULL;
 PFNGLUNIFORM3FARBPROC				glUniform3fARB				= NULL;
 PFNGLUNIFORM2FARBPROC				glUniform2fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
@@ -804,6 +805,11 @@ static char shadow_fragment_program_ATI[] = STRINGIFY (
 //RSCRIPTS
 static char rscript_vertex_program[] = STRINGIFY (
 	uniform int envmap;
+	uniform int	numblendtextures;
+	uniform int FOG;
+	
+	varying vec2 generated_texcoord;
+	varying float fog;
 	
 	void main ()
 	{
@@ -824,6 +830,73 @@ static char rscript_vertex_program[] = STRINGIFY (
 		
 		gl_TexCoord[0] = gl_TextureMatrix[0] * maincoord;
 		gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+		
+		if (numblendtextures > 0)
+		{
+			// TODO: replace with tri-planar projection, and eventually 
+			// potentially this fancy thing:
+			// http://graphics.cs.williams.edu/papers/IndirectionI3D08/
+			generated_texcoord = vec2 ((gl_Vertex[0])/400.0, (gl_Vertex[1]+gl_Vertex[2])/400.0);
+		}
+		
+		//fog
+		if(FOG > 0){
+			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+			fog = clamp(fog, 0.0, 1.0);
+		}
+	}
+);
+
+static char rscript_fragment_program[] = STRINGIFY (
+	uniform sampler2D mainTexture;
+	uniform sampler2D lightmapTexture;
+	uniform sampler2D blendTexture0;
+	uniform sampler2D blendTexture1;
+	uniform sampler2D blendTexture2;
+	uniform int	numblendtextures;
+	uniform int lightmap;
+	uniform int FOG;
+	
+	varying vec2 generated_texcoord;
+	varying float fog;
+	
+	void main ()
+	{
+		vec4 mainColor = texture2D (mainTexture, gl_TexCoord[0].st);
+		
+		if (numblendtextures == 0)
+		{
+			gl_FragColor = mainColor;
+		}
+		else
+		{
+			// TODO: make all blend weights sum up to 1
+			// Sigh, GLSL doesn't allow you to index arrays of samplers with
+			// variables.
+			gl_FragColor = texture2D (blendTexture0, generated_texcoord) * mainColor.r;
+			if (numblendtextures > 1)
+			{
+				gl_FragColor += texture2D (blendTexture1, generated_texcoord) * mainColor.g;
+				if (numblendtextures > 2)
+				{
+					gl_FragColor += texture2D (blendTexture2, generated_texcoord) * mainColor.b;
+				}
+			}
+		}
+		
+		gl_FragColor *= gl_Color;
+		
+		if (lightmap == 1)
+		{
+			vec4 lightmapColor = texture2D (lightmapTexture, gl_TexCoord[1].st);
+			
+			// FIXME HACK: why are we sometimes getting all black here?
+			if (lightmapColor.r > 0.01 && lightmapColor.g > 0.01 && lightmapColor.b > 0.01)
+				gl_FragColor *= 2.0 * lightmapColor;
+		}
+		
+		if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
 );
 
@@ -840,6 +913,7 @@ static char mesh_anim_library[] = STRINGIFY (
 	attribute vec4 tangent;
 	
 	// IQM only
+
 	attribute vec4 weights;
 	attribute vec4 bones;
 	
@@ -1759,6 +1833,7 @@ void R_LoadGLSLPrograms(void)
 		glGetInfoLogARB		   = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
 		glLinkProgramARB		  = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
 		glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
+		glUniform4iARB			= (PFNGLUNIFORM4IARBPROC)qwglGetProcAddress("glUniform4iARB");
 		glUniform3fARB			= (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
 		glUniform2fARB			= (PFNGLUNIFORM2FARBPROC)qwglGetProcAddress("glUniform2fARB");
 		glUniform1iARB			= (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
@@ -1775,9 +1850,9 @@ void R_LoadGLSLPrograms(void)
 			!glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
 			!glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 			!glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
-				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB ||
-				!glUniformMatrix3x4fvARB || !glVertexAttribPointerARB 
-				|| !glEnableVertexAttribArrayARB ||
+				!glUniform4iARB || !glUniform1iARB || !glUniform1fARB ||
+				!glUniformMatrix3fvARB || !glUniformMatrix3x4fvARB ||
+				!glVertexAttribPointerARB || !glEnableVertexAttribArrayARB ||
 				!glBindAttribLocationARB)
 		{
 			Com_Error (ERR_FATAL, "...One or more GL_ARB_shader_objects functions were not found\n");
@@ -1836,10 +1911,18 @@ void R_LoadGLSLPrograms(void)
 	g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
 	
 	//rscript surfaces
-	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, NULL, NO_ATTRIBUTES, &g_rscriptprogramObj);
+	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, NO_ATTRIBUTES, &g_rscriptprogramObj);
 	
 	// Locate some parameters by name so we can set them later...
 	g_location_rs_envmap = glGetUniformLocationARB (g_rscriptprogramObj, "envmap");
+	g_location_rs_numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj, "numblendtextures");
+	g_location_rs_lightmap = glGetUniformLocationARB (g_rscriptprogramObj, "lightmap");
+	g_location_rs_fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
+	g_location_rs_mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
+	g_location_rs_lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
+	g_location_rs_blendTexture0 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture0");
+	g_location_rs_blendTexture1 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture1");
+	g_location_rs_blendTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture2");
 
 	//warp(water) bsp surfaces
 	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);

@@ -116,6 +116,10 @@ typedef struct rs_stage_s
 
 	qboolean				has_alpha;		// for sorting
 	qboolean				normalmap;		// for normalmaps
+	
+	int						num_blend_textures;
+	char					blend_names[4][MAX_OSPATH];
+	image_t					*blend_textures[4];
 
 	qboolean				lensflare;		// for adding lensflares
 	int						flaretype;		// type of flare
@@ -167,9 +171,9 @@ void RS_ReadyScript(rscript_t *rs);
 void RS_ScanPathForScripts(void);
 int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
-void RS_DrawSurface (msurface_t *surf, qboolean lightmap);
 void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa);
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
+void RS_Draw (rscript_t *rs, unsigned lmtex, vec2_t rotate_center, vec3_t normal, qboolean translucent, void (*draw_callback) (void));
 void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
 
