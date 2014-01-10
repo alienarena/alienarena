@@ -84,10 +84,18 @@ typedef struct rs_stage_s
 {
 	image_t					*texture;				// texture
 	char					name[MAX_OSPATH];		// texture name
+	
+	// These are for the mesh rendering single-stage "fast path."
 	image_t					*texture2;				// texture for combining(GLSL)
 	char					name2[MAX_OSPATH];		// texture name
 	image_t					*texture3;				// texture for combining(GLSL)
 	char					name3[MAX_OSPATH];		// texture name
+	
+	// If this is unspecified, use the lightmap texture from whatever surface
+	// is being drawn. If nolightmap is not used, this MUST be specified for
+	// non-BSP (mesh) surfaces.
+	char					lightmapname[MAX_OSPATH];
+	image_t					*lightmaptex;
 
 	rs_cond_val_t			*condv;			// conditional expression
 	
@@ -173,7 +181,9 @@ int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
 void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa);
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
-void RS_Draw (rscript_t *rs, unsigned lmtex, vec2_t rotate_center, vec3_t normal, qboolean translucent, void (*draw_callback) (void));
+void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
+				vec3_t normal, qboolean translucent,
+				qboolean separate_lm_texcoords, void (*draw_callback) (void));
 void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
 
