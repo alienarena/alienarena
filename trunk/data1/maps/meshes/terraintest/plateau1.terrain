@@ -1,4 +1,4 @@
 heightmap textures/terraintest/plateau1.tga;
-texture textures/arena8/crackedrock1.tga;
+texture terraintest1_texture;
 mins -4000, -4000, 1;
 maxs 4000, 4000, 1000;
