@@ -1,0 +1,9 @@
+textures/arena8/crackedrock1
+{
+	{
+		map textures/terraintest/plateau1_blendtex.tga
+		blendmap 3 textures/arena8/crackedrock1.tga textures/arena8/crackedrock4.tga textures/arena8/grass2.tga
+		nolightmap
+		texcoordgen
+	}
+}
