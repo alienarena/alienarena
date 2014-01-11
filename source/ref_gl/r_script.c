@@ -208,8 +208,6 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->texture2 = NULL;
 	stage->texture3 = NULL;
 	
-	stage->lightmaptex = NULL;
-
 	stage->depthhack = false;
 	stage->envmap = false;
 	stage->lensflare = false;
@@ -298,8 +296,6 @@ rs_stage_t *RS_NewStage (rscript_t *rs)
 	strncpy (stage->name2, "***r_notexture***", sizeof(stage->name2));
 	strncpy (stage->name3, "***r_notexture***", sizeof(stage->name3));
 	
-	strncpy (stage->lightmapname, "***r_notexture***", sizeof(stage->lightmapname));
-
 	stage->rand_stage = NULL;
 	stage->anim_stage = NULL;
 	stage->next = NULL;
@@ -463,10 +459,6 @@ void RS_ReadyScript (rscript_t *rs)
 			stage->texture3 = GL_FindImage (stage->name3, mode);
 		if (!stage->texture3)
 			stage->texture3 = r_notexture;
-		if (stage->lightmapname[0])
-			stage->lightmaptex = GL_FindImage (stage->lightmapname, mode);
-		if (!stage->lightmaptex)
-			stage->lightmaptex = r_notexture;
 		for (i = 0; i < stage->num_blend_textures; i++)
 		{
 			stage->blend_textures[i] = GL_FindImage (stage->blend_names[i], mode);
@@ -588,7 +580,6 @@ void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
 RS_STAGE_STRING_ATTR (name)
 RS_STAGE_STRING_ATTR (name2)
 RS_STAGE_STRING_ATTR (name3)
-RS_STAGE_STRING_ATTR (lightmapname);
 RS_STAGE_BOOL_ATTR (depthhack)
 RS_STAGE_BOOL_ATTR (envmap)
 RS_STAGE_BOOL_ATTR (alphamask)
@@ -936,7 +927,6 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"map",			&rs_stage_name			},
 	{	"map2",			&rs_stage_name2			},
 	{	"map3",			&rs_stage_name3			},
-	{	"lightmaptex",	&rs_stage_lightmapname	},
 	{	"scroll",		&rs_stage_scroll		},
 	{	"blendfunc",	&rs_stage_blendfunc		},
 	{	"alphashift",	&rs_stage_alphashift	},
@@ -1322,9 +1312,9 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
-void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
-				vec3_t normal, qboolean translucent,
-				qboolean separate_lm_texcoords, void (*draw_callback) (void))
+void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
+				qboolean translucent, qboolean separate_lm_texcoords,
+				void (*draw_callback) (void))
 {
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
@@ -1365,10 +1355,7 @@ void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
 		
 		if (stage->lightmap && !translucent)
 		{
-			if (stage->lightmaptex != r_notexture)
-				GL_MBind (1, stage->lightmaptex->texnum);
-			else
-				GL_MBind (1, gl_state.lightmap_textures + lmtex);
+			GL_MBind (1, lmtex);
 			
 			if (separate_lm_texcoords)
 				glUniform1iARB (g_location_rs_lightmap, 2);
@@ -1505,7 +1492,7 @@ void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
 
 void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 {
-	unsigned	lmtex = surf->lightmaptexturenum;
+	int			lmtex = gl_state.lightmap_textures + surf->lightmaptexturenum;
 	vec2_t		rotate_center;
 	qboolean	translucent;
 	

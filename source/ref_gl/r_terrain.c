@@ -33,6 +33,12 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	if (!tex)
 		Com_Error (ERR_DROP, "Mod_LoadTerrainModel: Missing surface texture in %s!", mod->name);
 	
+	if (data.lightmap_path != NULL)
+	{
+		mod->lightmap = GL_FindImage (data.lightmap_path, it_wall);
+		Z_Free (data.lightmap_path);
+	}
+	
 	VectorCopy (data.mins, mod->mins);
 	VectorCopy (data.maxs, mod->maxs);
 	

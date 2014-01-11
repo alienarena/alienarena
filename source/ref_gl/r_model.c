@@ -504,6 +504,9 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			Com_Error (ERR_DROP, "mod_numknown == MAX_MOD_KNOWN");
 		mod_numknown++;
 	}
+	
+	memset (mod, 0, sizeof (*mod));
+	
 	strcpy (mod->name, name);
 	
 	R_SetSimpleTexnum (mod, name);

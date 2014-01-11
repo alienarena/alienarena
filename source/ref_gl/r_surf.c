@@ -672,7 +672,9 @@ void R_DrawRSSurfaces (void)
 				for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->rscriptchain)
 					BSP_AddSurfToVBOAccum (s);
 				
-				RS_Draw (rs, currLMTex, vec3_origin, vec3_origin, false, true, BSP_DrawVBOAccum);
+				RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
+							vec3_origin, vec3_origin, false, true,
+							BSP_DrawVBOAccum );
 				
 				BSP_ClearVBOAccum ();
 			}

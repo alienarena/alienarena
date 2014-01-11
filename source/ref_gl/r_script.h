@@ -90,12 +90,6 @@ typedef struct rs_stage_s
 	char					name2[MAX_OSPATH];		// texture name
 	image_t					*texture3;				// texture for combining(GLSL)
 	char					name3[MAX_OSPATH];		// texture name
-	
-	// If this is unspecified, use the lightmap texture from whatever surface
-	// is being drawn. If nolightmap is not used, this MUST be specified for
-	// non-BSP (mesh) surfaces.
-	char					lightmapname[MAX_OSPATH];
-	image_t					*lightmaptex;
 
 	rs_cond_val_t			*condv;			// conditional expression
 	
@@ -175,7 +169,6 @@ typedef struct rscript_s
 
 } rscript_t;
 
-void RS_SetEnvmap (vec3_t v, float *os, float *ot);
 void RS_LoadScript(char *script);
 void RS_FreeAllScripts(void);
 void RS_ReloadImageScriptLinks (void);
@@ -186,15 +179,12 @@ void RS_ReadyScript(rscript_t *rs);
 void RS_ScanPathForScripts(void);
 int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
-void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa);
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
-void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
-				vec3_t normal, qboolean translucent,
-				qboolean separate_lm_texcoords, void (*draw_callback) (void));
+void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
+				qboolean translucent, qboolean separate_lm_texcoords,
+				void (*draw_callback) (void));
 void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
-
-#define RS_DrawPolyNoLightMap(surf)	RS_DrawSurface((surf),false)
 
 extern float rs_realtime;
 
