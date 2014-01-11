@@ -447,6 +447,9 @@ typedef struct model_s
 	int				num_triangles;
 	// TODO: we can remove this when shadow volumes are gone.
 	neighbors_t *neighbors;	
+	
+	//terrain only
+	image_t         *lightmap;
 
 	//ragdoll info
 	int hasRagDoll;

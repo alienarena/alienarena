@@ -676,6 +676,8 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	
 	Z_Free (data.vert_texcoords);
 	Z_Free (data.texture_path);
+	if (data.lightmap_path != NULL)
+		Z_Free (data.lightmap_path);
 	
 	mod->active = true;
 	mod->numtriangles = 0;

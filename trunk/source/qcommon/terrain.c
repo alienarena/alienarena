@@ -53,6 +53,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 	int		start_time;
 	
 	out->texture_path = NULL;
+	out->lightmap_path = NULL;
 	
 	buf = strtok (buf, ";");
 	while (buf)
@@ -72,6 +73,12 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 			out->texture_path = CopyString (COM_Parse (&buf));
 			if (!buf)
 				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting texture filename! (File %s is invalid)", name);
+		}
+		if (!Q_strcasecmp (token, "lightmap"))
+		{
+			out->lightmap_path = CopyString (COM_Parse (&buf));
+			if (!buf)
+				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting lightmap filename! (File %s is invalid)", name);
 		}
 		if (!Q_strcasecmp (token, "mins"))
 		{

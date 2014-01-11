@@ -940,6 +940,7 @@ TERRAIN LOADING/SIMPLIFICATION
 typedef struct
 {
 	char			*texture_path;
+	char			*lightmap_path;
 	int				num_vertices;
 	float			*vert_positions;
 	float			*vert_texcoords;
@@ -950,7 +951,7 @@ typedef struct
 
 // out will be populated with a simplified version of the mesh. Calling
 // function is responsible for calling Z_Free on vert_positions,
-// vert_texcoords, tri_indices, and texture_path.
+// vert_texcoords, tri_indices, texture_path, and lightmap_path.
 // name is just the path of the .terrain file, only used for error messages.
 // oversampling_factor indicates how much detail to sample the heightmap 
 // at before simplification. 2.0 means 4x as many samples as there are pixels,
