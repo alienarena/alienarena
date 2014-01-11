@@ -20,6 +20,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+# 2014-01-11
+# - integrated libode eliminated
+# - ANSI color option removed (now a cvar)
+
 # configure.ac for
 #  GNU/Linux, Unix
 #  Windows (32-bit) using MinGW - Experimental
@@ -55,7 +59,6 @@ AC_CANONICAL_HOST
 #
 # Checks for programs.
 #
-AC_PROG_CXX
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CPP
@@ -169,13 +172,7 @@ AM_COND_IF([BUILD_UNIX],
 		[ generic ]
 			[AC_DEFINE([GENERIC_UNIX],1,[non-specific unix conditional compile])])
 
-	AC_ARG_ENABLE([ansi-color],
-	[AS_HELP_STRING([--enable-ansi-color],[ANSI terminal color (default: no)])],
-	[ansi_color=${enableval}],[ansi_color=no])
-	AS_IF([ test "x$ansi_color" = "xyes" ],[
-		AC_DEFINE([ANSI_COLOR],1,[Enable ANSI terminal color codes in stdout])
-		])
-])
+	])
 
 AM_COND_IF([BUILD_WIN32],
 	[AC_DEFINE([WIN32_VARIANT],1,[win32-specific conditional compile])])
@@ -184,31 +181,15 @@ AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
 AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 
 #
-# ODE (Open Dynamic Engine) Library
-#
-# if no option or "--without-system-libode" is specified, use the recommended
-#  integrated ODE.
-# if "--with-system-libode" is specified, check. look under BUILD_CLIENT
-#  for details.
-#
-AC_ARG_WITH([system-libode],
-	[AS_HELP_STRING([--with(out)-system-libode],
-		[use system-supplied libode (default:without)])],
-	[system_ode=${withval}],
-	[system_ode=no])
-
-#
 # Option for disabling installation of documents to allow for custom
-# documentation installation. Normally only useful for distro packagers.
-# Do not put in status message, because  documents probably are being 
-# installed in a custom way.
+# documentation installation. 
 #
 AC_ARG_ENABLE([documents],
 	[AS_HELP_STRING([--disable-documents],
 			[Disable document installation (default: no)])],
-	[no_docs=${documents}],
-	[no_docs=no])
-AM_CONDITIONAL([INSTALL_DOCS],[ test "x${no_docs}" = "xno" ])
+	[install_docs=${enableval}],
+	[install_docs=yes])
+AM_CONDITIONAL([INSTALL_DOCS],[ test "x${install_docs}" != "xno" ])
 
 #
 # Option for specifying where icon is installed.
@@ -357,30 +338,11 @@ AM_COND_IF([BUILD_CLIENT],
 		])
 	])
 
-#
-# if option to use system libode, rather than integrated ODE, is selected
-#  use pkg-config to get cflags and libs. do not default to
-#  integrated ODE on failure, as that is probably not what is wanted.
-#
-# for recommended integrated ODE build, setup client dependencies,
-#  and configuration. Double precision math is "hardwired" here and
-#  is not considered to be a user-specifiable option.
-#
-	AS_IF([ test "x$system_ode" = "xyes" ],[
-		PKG_CHECK_MODULES([ODE],[ode],,[
-			AC_MSG_FAILURE(
-				[--with-system-libode specified, but the library or headers could not be found])
-			])
-		],[
-		AC_SUBST([ODE_CFLAGS],[-DdDOUBLE])
-		AC_DEFINE([dEpsilon],[DBL_EPSILON],[Define to DBL_EPSILON for ODE])
-	])
-
 	dnl
 	dnl Check common client dependencies:
-	dnl Curl, Ogg/Vorbis and vorbisfile
+	dnl Curl, Ogg/Vorbis and vorbisfile, freetype, ode
 	dnl
-	PKG_CHECK_MODULES([DEPS],[libcurl ogg vorbis vorbisfile freetype2])
+	PKG_CHECK_MODULES([DEPS],[libcurl ogg vorbis vorbisfile freetype2 ode])
 
 	dnl Hack in the extras for Win32
 	dnl TODO: this may not be the best way to do this
@@ -392,7 +354,6 @@ AM_COND_IF([BUILD_CLIENT],
 
 ])
 
-AM_CONDITIONAL([USE_SYSTEM_LIBODE],[ test "x$system_ode" = "xyes" ])
 
 dnl
 dnl end of client-only library requirements
@@ -512,26 +473,22 @@ dnl
 AM_COND_IF([BUILD_UNIX],
 	[AS_CASE([ ${unix_host} ],
 		[ darwin ],
-			[AS_IF([ test x"${gl_dlopen_path}" = xdefault ],
-				[AC_DEFINE([OPENGL_DRIVER],
+		  [AS_IF([ test "x${gl_dlopen_path}" = xdefault ],
+	  		   	[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
 					["libGL.dylib"],
-					[OpenAL dynamic lib name])
+					[OpenGL dynamic lib name])
 				],
 				[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
 					["${gl_dlopen_path}/libGL.dylib"],
 					[OpenGL dynamic lib path])
 			])
-
-			AC_DEFINE([OPENAL_DRIVER],
-				["/System/Library/Frameworks/OpenAL.framework/OpenAL"],
-				[OpenAl dynamic lib path])
-			],
-
-		[
-		AC_DEFINE([OPENGL_DRIVER],
+		AC_DEFINE_UNQUOTED([OPENAL_DRIVER],
+			["@PREFIX@/lib/libopenal.dylib"],
+			[OpenAl dynamic lib path])
+		],[
+		AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
 			["libGL.so.1"],[OpenGL shared lib name])
-
-		AC_DEFINE([OPENAL_DRIVER],
+		AC_DEFINE_UNQUOTED([OPENAL_DRIVER],
 			["libopenal.so.1"],[OpenAL shared lib name])
 	])
 ])
@@ -544,14 +501,12 @@ AM_COND_IF([BUILD_WIN32],
 ])
 
 #
-# required gcc/g++ options.
+# required gcc
 #  fast-math because strict adherence to IEEE standard is not needed.
 #  no-strict-aliasing because strict aliasing is not adhered to in places.
 #
 AX_APPEND_FLAG([-ffast-math],[CFLAGS])
-AX_APPEND_FLAG([-ffast-math],[CXXFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
-AX_APPEND_FLAG([-fno-strict-aliasing],[CXXFLAGS])
 
 # outputs
 AC_CONFIG_FILES([ Makefile source/Makefile ])
@@ -572,13 +527,11 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AM_COND_IF([BUILD_WIN32],,[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
-		AS_ECHO([" Server terminal color: . ${ansi_color}"])
 	])
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],[
 		AM_COND_IF([BUILD_CLIENT],[
-			AS_ECHO([" System ODE library ..... ${system_ode}"])
 			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
 			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
@@ -595,7 +548,6 @@ dnl
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
 		AM_COND_IF([BUILD_CLIENT],[
-			AS_ECHO([" System ODE library ..... ${system_ode}"])
 			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
 			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
@@ -620,8 +572,7 @@ dnl
 	AS_ECHO([" Run ./configure --help for configure options."])
 	AS_ECHO([" Compiler options:"])
 	AS_ECHO(["  CFLAGS:.... ${CFLAGS}"])
-	AS_ECHO(["  CXXFLAGS:.. ${CXXFLAGS}"])
 	AS_ECHO()		
-
+	AS_ECHO(["Warning: now requires ODE library (libode-dev, libode)"])
 	AS_ECHO(["--------------------------------------------"])
 ])

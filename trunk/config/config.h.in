@@ -1,8 +1,5 @@
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Enable ANSI terminal color codes in stdout */
-#undef ANSI_COLOR
-
 /* Canonical OS identification */
 #undef BUILDSTRING
 
@@ -375,9 +372,6 @@
    <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
    #define below would cause a syntax error. */
 #undef _UINT64_T
-
-/* Define to DBL_EPSILON for ODE */
-#undef dEpsilon
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
