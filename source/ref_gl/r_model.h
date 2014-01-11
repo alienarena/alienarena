@@ -190,6 +190,7 @@ typedef struct mtexinfo_s
 	// by texinfo so the renderer can take advantage of the fact that they 
 	// share the same texture and the same surface flags.
 	surfchain_t	glsl_surfaces, dynamic_surfaces, lightmap_surfaces;
+	struct msurface_s *rscript_surfaces; // no brush models can have rscript surfs
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10

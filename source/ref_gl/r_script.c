@@ -268,7 +268,9 @@ rscript_t *RS_NewScript (char *name, rscript_t *old)
 
 	rs->stage = NULL;
 	rs->dontflush = false;	
-	rs->ready = false;	
+	rs->ready = false;
+	
+	rs->flags = 0;
 
 	return rs;
 }
@@ -1005,12 +1007,18 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 		stage->envmap = false;
 	}
 	
-	if (stage->rot_speed != 0 && stage->envmap)
+	if (stage->rot_speed != 0.0 && stage->envmap)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and rotating"
 					" in script %s!\nForcing envmap off.\n", rs->name);
 		stage->envmap = false;
 	}
+	
+	if (stage->envmap)
+		rs->flags |= RS_CONTAINS_ENVMAP;
+	
+	if (stage->rot_speed != 0.0)
+		rs->flags |= RS_CONTAINS_ROTATE;
 }
 
 void RS_LoadScript(char *script)
@@ -1379,7 +1387,7 @@ void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
 			GL_MBind (0, RS_Animate(stage));
 		else
 	 		GL_MBind (0, stage->texture->texnum);
-				
+		
 		if (stage->blendfunc.blend)
 		{
 			// FIXME: hack!
