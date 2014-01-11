@@ -2,6 +2,11 @@
 // entity 0
 {
 "classname" "worldspawn"
+"sky" "green"
+"_sun" "moonspot"
+"_sun_ambient" "0"
+"_sun_color" "0.33 0.33 0.33"
+"_sun_light" "60"
 // brush 0
 {
 ( 384 576 2048 ) ( 384 -576 2048 ) ( -768 576 2048 ) arena8/crackedrock4 0 0 0 1 1 0 4 0
@@ -575,40 +580,24 @@
 // entity 1
 {
 "classname" "info_player_deathmatch"
-"origin" "0.000000 64.000000 1376.000000"
+"origin" "-128.000000 64.000000 1376.000000"
+"angle" "90.000000"
 }
 // entity 2
 {
 "classname" "light"
-"origin" "0.000000 0.000000 1728.000000"
-"light" "700"
+"origin" "0.000000 0.000000 1968.000000"
+"light" "0"
+"target" "moonspot"
 }
 // entity 3
 {
-"classname" "light"
-"origin" "-1024.000000 -1024.000000 1728.000000"
-"light" "700"
+"classname" "misc_terrainmodel"
+"model" "maps/meshes/terraintest/plateau1.terrain"
 }
 // entity 4
 {
-"classname" "light"
-"origin" "-1024.000000 1024.000000 1728.000000"
-"light" "700"
-}
-// entity 5
-{
-"classname" "light"
-"origin" "1024.000000 -1024.000000 1728.000000"
-"light" "700"
-}
-// entity 6
-{
-"classname" "light"
-"origin" "1024.000000 1024.000000 1728.000000"
-"light" "700"
-}
-// entity 7
-{
-"classname" "misc_terrainmodel"
-"model" "maps/meshes/terraintest/plateau1.terrain"
+"classname" "info_null"
+"origin" "0.000000 0.000000 1792.000000"
+"targetname" "moonspot"
 }
