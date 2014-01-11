@@ -811,13 +811,22 @@ static char rscript_vertex_program[] = STRINGIFY (
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap; 
 	
-	varying vec2 generated_texcoord;
 	varying float fog;
+	varying vec3 normal;
+	varying vec3 orig_coord;
 	
 	void main ()
 	{
 		gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 		gl_FrontColor = gl_BackColor = gl_Color;
+		
+		// XXX: tri-planar projection requires the vertex normal, so don't use
+		// the blendmap RScript command on BSP surfaces yet!
+		if (numblendtextures != 0)
+		{
+			normal = gl_Normal.xyz;
+			orig_coord = gl_Vertex.xyz;
+		}
 		
 		vec4 maincoord;
 		
@@ -837,14 +846,6 @@ static char rscript_vertex_program[] = STRINGIFY (
 			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord0;
 		else if (lightmap == 2)
 			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
-		
-		if (numblendtextures > 0)
-		{
-			// TODO: replace with tri-planar projection, and eventually 
-			// potentially this fancy thing:
-			// http://graphics.cs.williams.edu/papers/IndirectionI3D08/
-			generated_texcoord = vec2 ((gl_Vertex[0])/400.0, (gl_Vertex[1]+gl_Vertex[2])/400.0);
-		}
 		
 		//fog
 		if(FOG > 0){
@@ -866,8 +867,26 @@ static char rscript_fragment_program[] = STRINGIFY (
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
 	
-	varying vec2 generated_texcoord;
 	varying float fog;
+	varying vec3 normal;
+	varying vec3 orig_coord;
+	
+	// This is tri-planar projection, based on code from NVIDIA's GPU Gems
+	// website. Potentially could be replaced with bi-planar projection, for
+	// roughly 1/3 less sampling overhead but also less accuracy, or 
+	// alternately, for even less overhead and *greater* accuracy, this fancy
+	// thing: http://graphics.cs.williams.edu/papers/IndirectionI3D08/
+	
+	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights)
+	{
+		vec4 ret = vec4 (0.0, 0.0, 0.0, 1.0);
+		
+		ret.rgb += blend_weights[0] * texture2D (tex, orig_coord.yz / 400.0).rgb;
+		ret.rgb += blend_weights[1] * texture2D (tex, orig_coord.zx / 400.0).rgb;
+		ret.rgb += blend_weights[2] * texture2D (tex, orig_coord.xy / 400.0).rgb;
+		
+		return ret;
+	}
 	
 	void main ()
 	{
@@ -879,16 +898,20 @@ static char rscript_fragment_program[] = STRINGIFY (
 		}
 		else
 		{
-			// TODO: make all blend weights sum up to 1
+			vec3 blend_weights = abs (normalize (normal));
+			blend_weights = (blend_weights - vec3 (0.2)) * 7;
+			blend_weights = max (blend_weights, 0);
+			blend_weights /= (blend_weights.x + blend_weights.y + blend_weights.z);
+			
 			// Sigh, GLSL doesn't allow you to index arrays of samplers with
 			// variables.
-			gl_FragColor = texture2D (blendTexture0, generated_texcoord) * mainColor.r;
+			gl_FragColor = triplanar_sample (blendTexture0, blend_weights) * mainColor.r;
 			if (numblendtextures > 1)
 			{
-				gl_FragColor += texture2D (blendTexture1, generated_texcoord) * mainColor.g;
+				gl_FragColor += triplanar_sample (blendTexture1, blend_weights) * mainColor.g;
 				if (numblendtextures > 2)
 				{
-					gl_FragColor += texture2D (blendTexture2, generated_texcoord) * mainColor.b;
+					gl_FragColor += triplanar_sample (blendTexture2, blend_weights) * mainColor.b;
 				}
 			}
 		}
