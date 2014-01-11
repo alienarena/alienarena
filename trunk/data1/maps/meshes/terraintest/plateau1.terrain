@@ -1,4 +1,5 @@
 heightmap textures/terraintest/plateau1.tga;
 texture terraintest1_texture;
+lightmap textures/terraintest/plateau1_lightmaptex.tga;
 mins -4000, -4000, 1;
 maxs 4000, 4000, 1000;
