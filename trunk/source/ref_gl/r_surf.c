@@ -266,6 +266,11 @@ void BSP_AddSurfToVBOAccum (msurface_t *surf)
 	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 }
 
+qboolean BSP_RoomInVBOAccum (void)
+{
+	return num_vbo_batches + 1 < MAX_VBO_BATCHES;
+}
+
 
 
 /*
@@ -406,7 +411,6 @@ Special surfaces - Somewhat less common, require more work to render
 // drawn.
 surfchain_t	r_alpha_surfaces;
 surfchain_t	r_warp_surfaces;
-msurface_t	*r_rscript_surfaces; // no brush models can have rscript surfs
 
 // This is a chain of surfaces that may need to have their lightmaps updated.
 // They are not rendered in the order of this chain and will be linked into
@@ -625,25 +629,55 @@ Draw shader surfaces
 */
 void R_DrawRSSurfaces (void)
 {
-	msurface_t	*s = r_rscript_surfaces;
-
-	if(!s)
-		return;
-
-	if (!r_shaders->integer)
-	{
-		r_rscript_surfaces = NULL;
-		return;
-	}
-
+	int i;
+	
 	qglDepthMask(false);
 	qglShadeModel (GL_SMOOTH);
 
 	qglEnable(GL_POLYGON_OFFSET_FILL);
 	qglPolygonOffset(-3, -2);
 
-	for (; s; s = s->rscriptchain)
-		RS_Surface(s);
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
+	{
+		rscript_t	*rs;
+		msurface_t	*s = currentmodel->unique_texinfo[i]->rscript_surfaces;
+
+		if(!s)
+			continue;
+
+		if (!r_shaders->integer)
+		{
+			currentmodel->unique_texinfo[i]->rscript_surfaces = NULL;
+			continue;
+		}
+		
+		rs = currentmodel->unique_texinfo[i]->image->script;
+		
+		if (rs == NULL || (rs->flags & RS_PREVENT_BATCH) != 0)
+		{
+			// fall back on drawing the surfaces one at a time
+			for (; s; s = s->rscriptchain)
+				RS_Surface(s);
+		}
+		else
+		{
+			// batch them up a bit
+			int currLMTex; 
+			
+			while (s != NULL)
+			{
+				BSP_InvalidateVBO ();
+				currLMTex = s->lightmaptexturenum;
+				
+				for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->rscriptchain)
+					BSP_AddSurfToVBOAccum (s);
+				
+				RS_Draw (rs, currLMTex, vec3_origin, vec3_origin, false, true, BSP_DrawVBOAccum);
+				
+				BSP_ClearVBOAccum ();
+			}
+		}
+	}
 
 	qglDisable(GL_POLYGON_OFFSET_FILL);
 
@@ -1138,11 +1172,11 @@ void BSP_ClearWorldTextureChains (void)
 		currentmodel->unique_texinfo[i]->lightmap_surfaces.worldchain = NULL;
 		currentmodel->unique_texinfo[i]->glsl_surfaces.worldchain = NULL;
 		currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain = NULL;
+		currentmodel->unique_texinfo[i]->rscript_surfaces = NULL;
 	}
 	
 	r_warp_surfaces.worldchain = NULL;
 	r_alpha_surfaces.worldchain = NULL;
-	r_rscript_surfaces = NULL;
 	r_flicker_surfaces = NULL;
 }
 
@@ -1256,8 +1290,8 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	{ 
 		if (surf->texinfo->image->script != NULL || (surf->iflags & ISURF_UNDERWATER))
 		{
-			surf->rscriptchain = r_rscript_surfaces;
-			r_rscript_surfaces = surf;
+			surf->rscriptchain = surf->texinfo->equiv->rscript_surfaces;
+			surf->texinfo->equiv->rscript_surfaces = surf;
 		}
 	}
 #undef AddToChainPair

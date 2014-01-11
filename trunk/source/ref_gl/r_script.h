@@ -165,6 +165,13 @@ typedef struct rscript_s
 	qboolean				ready;		// readied by the engine?
 	rs_stage_t				*stage;		// first rendering stage
 	struct rscript_s		*next;		// next script in linked list
+	
+	// Bits are set if the script contains certain types of stages. Some kinds
+	// of stages require rscript surfaces to be drawn one at a time.
+	#define RS_CONTAINS_ROTATE 1
+	#define RS_CONTAINS_ENVMAP 2
+	#define RS_PREVENT_BATCH (RS_CONTAINS_ROTATE|RS_CONTAINS_ENVMAP)
+	int						flags;
 
 } rscript_t;
 
