@@ -1363,7 +1363,7 @@ void RS_Draw (	rscript_t *rs, unsigned lmtex, vec2_t rotate_center,
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute
 		
-		if (stage->lightmap)
+		if (stage->lightmap && !translucent)
 		{
 			if (stage->lightmaptex != r_notexture)
 				GL_MBind (1, stage->lightmaptex->texnum);
