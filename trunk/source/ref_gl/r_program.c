@@ -897,11 +897,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 		
 		if (lightmap != 0)
 		{
-			vec4 lightmapColor = texture2D (lightmapTexture, gl_TexCoord[1].st);
-			
-			// FIXME HACK: why are we sometimes getting all black here?
-			if (lightmapColor.r > 0.01 && lightmapColor.g > 0.01 && lightmapColor.b > 0.01)
-				gl_FragColor *= 2.0 * lightmapColor;
+			gl_FragColor *= 2.0 * texture2D (lightmapTexture, gl_TexCoord[1].st);
 		}
 		
 		if(FOG > 0)
