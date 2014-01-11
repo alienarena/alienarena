@@ -30,9 +30,7 @@ GLuint eboId = 0;
 int	totalVBObufferSize;
 int totalEBObufferSize;
 int currVertexNum, currElemNum;
-size_t	vbo_xyz_base, vbo_xyz_pos, 
-		vbo_st_base, vbo_st_pos, 
-		vbo_lm_base, vbo_lm_pos;
+size_t vbo_xyz_pos;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -67,55 +65,33 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
-	int		i;
-	int		l, m, n;
+	int		i, j;
+	int		n;
 	int		trinum;
 	float map[MAX_VBO_XYZs];
-	float map2[MAX_VBO_XYZs];
-	float map3[MAX_VBO_XYZs];
-	int		xyz_size, st_size, lm_size;
+	int		xyz_size;
 	
 	// XXX: for future reference, the glDrawRangeElements code was last seen
 	// here at revision 3246.
-	for (trinum = 1, l = 0, m = 0, n = 0; trinum < p->numverts-1; trinum++)
+	for (trinum = 1, n = 0; trinum < p->numverts-1; trinum++)
 	{
 		v = p->verts[0];
 		
 		// copy in vertex data
-		map[n++] = v[0];
-		map[n++] = v[1];
-		map[n++] = v[2];
-
-		// world texture coords
-		map2[l++] = v[3];
-		map2[l++] = v[4];
-
-		// lightmap texture coords
-		map3[m++] = v[5];
-		map3[m++] = v[6];
+		for (j = 0; j < 7; j++)
+			map[n++] = v[j];
 		
 		for (i = trinum; i < trinum+2; i++)
 		{
 			v = p->verts[i];
 		
 			// copy in vertex data
-			map[n++] = v[0];
-			map[n++] = v[1];
-			map[n++] = v[2];
-
-			// world texture coords
-			map2[l++] = v[3];
-			map2[l++] = v[4];
-
-			// lightmap texture coords
-			map3[m++] = v[5];
-			map3[m++] = v[6];
+			for (j = 0; j < 7; j++)
+				map[n++] = v[j];
 		}
 	}
 	
 	xyz_size = n*sizeof(float);
-	st_size = l*sizeof(float);
-	lm_size = m*sizeof(float);
 
 	surf->has_vbo = true;
 	surf->vbo_first_vert = currVertexNum;
@@ -123,24 +99,17 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	currVertexNum += surf->vbo_num_verts;
 	
 	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);
-	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_st_pos, st_size, &map2);
-	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_lm_pos, lm_size, &map3);  
 
 	vbo_xyz_pos += xyz_size;
-	vbo_st_pos += st_size;
-	vbo_lm_pos += lm_size;
 }
 
 void VB_BuildWorldVBO(void)
 {
 	msurface_t *surf, *surfs;
 	int i, firstsurf, lastsurf;
-	int num_vertexes = totalVBObufferSize/7;
 	
 	currVertexNum = currElemNum = 0;
-	vbo_xyz_base = vbo_xyz_pos = 0;
-	vbo_st_base = vbo_st_pos = num_vertexes*3*sizeof(float);
-	vbo_lm_base = vbo_lm_pos = num_vertexes*5*sizeof(float);	
+	vbo_xyz_pos = 0;
 
 	qglGenBuffersARB(1, &vboId);
 		
@@ -153,22 +122,22 @@ void VB_BuildWorldVBO(void)
 	lastsurf = r_worldmodel->numsurfaces;
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
-    {
-        if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
-            continue;
+	{
+		if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
+			continue;
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
-			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-				    (surf->iflags & ISURF_DRAWTURB) ||
-				    (surf->iflags & ISURF_PLANEBACK))
+			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
+					(surf->iflags & ISURF_DRAWTURB) ||
+					(surf->iflags & ISURF_PLANEBACK))
 				continue;
 			VB_BuildSurfaceVBO(surf);
 		}
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
-			if (    (currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-				    (surf->iflags & ISURF_DRAWTURB) ||
-				    !(surf->iflags & ISURF_PLANEBACK))
+			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
+					(surf->iflags & ISURF_DRAWTURB) ||
+					!(surf->iflags & ISURF_PLANEBACK))
 				continue;
 			VB_BuildSurfaceVBO(surf);
 		}
@@ -191,13 +160,13 @@ void GL_SetupWorldVBO (void)
 {
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 	
-	qglVertexPointer(3, GL_FLOAT, 0, (void *)vbo_xyz_base);
+	qglVertexPointer(3, GL_FLOAT, 7*sizeof(float), (void *)0);
 	
 	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglTexCoordPointer(2, GL_FLOAT, 0, (void *)vbo_st_base);
+	qglTexCoordPointer(2, GL_FLOAT, 7*sizeof(float), (void *)(3*sizeof(float)));
 	
 	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglTexCoordPointer(2, GL_FLOAT, 0, (void *)vbo_lm_base);
+	qglTexCoordPointer(2, GL_FLOAT, 7*sizeof(float), (void *)(5*sizeof(float)));
 	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
@@ -321,7 +290,7 @@ void R_VCFreeFrame()
 
 void VB_WorldVCInit()
 {
-    //clear out previous buffer
+	//clear out previous buffer
 	qglDeleteBuffersARB(1, &vboId);
 	totalVBObufferSize = 0;	
 }
