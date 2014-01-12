@@ -678,6 +678,10 @@ void R_DrawSkyBox (void)
 	
 	#define SKYDIST 8000
 	#define CLOUDDIST 7000
+	
+	// Scale the fog distances up so fog looks like it used to before 
+	// CLOUDDIST was increased. 
+	R_SetupFog (((float)CLOUDDIST)/2300.0);
 
 	for (i=0 ; i<6 ; i++)
 	{
@@ -822,6 +826,8 @@ void R_DrawSkyBox (void)
 		GL_TexEnv( GL_REPLACE );
 		qglPopMatrix ();
 	}
+	
+	R_SetupFog (1);
 }
 
 
