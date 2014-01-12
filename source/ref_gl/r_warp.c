@@ -603,8 +603,8 @@ void R_ClearSkyBox (void)
 
 	for (i=0 ; i<6 ; i++)
 	{
-		skymins[0][i] = skymins[1][i] = 9999;
-		skymaxs[0][i] = skymaxs[1][i] = -9999;
+		skymins[0][i] = skymins[1][i] = 99999;
+		skymaxs[0][i] = skymaxs[1][i] = -99999;
 	}
 }
 
@@ -675,6 +675,9 @@ void R_DrawSkyBox (void)
 	qglPushMatrix ();
 	qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 	qglRotatef (r_newrefdef.time * skyrotate, skyaxis[0], skyaxis[1], skyaxis[2]);
+	
+	#define SKYDIST 8000
+	#define CLOUDDIST 7000
 
 	for (i=0 ; i<6 ; i++)
 	{
@@ -694,19 +697,19 @@ void R_DrawSkyBox (void)
 
 		qglBegin (GL_QUADS);
 
-		MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, 3300);
+		MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, SKYDIST);
 		qglTexCoord2f (s, t);
 		qglVertex3fv (point);
 
-		MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, 3300);
+		MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, SKYDIST);
 		qglTexCoord2f (s, t);
 		qglVertex3fv (point);
 
-		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, 3300);
+		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, SKYDIST);
 		qglTexCoord2f (s, t);
 		qglVertex3fv (point);
 
-		MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, 3300);
+		MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, SKYDIST);
 		qglTexCoord2f (s, t);
 		qglVertex3fv (point);
 
@@ -784,22 +787,22 @@ void R_DrawSkyBox (void)
 
 					qglBegin (GL_QUADS);
 
-					MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, 2300);
+					MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, CLOUDDIST);
 					RS_SetTexcoords2D (stage, &s, &t);
 					qglTexCoord2f (s, t);
 					qglVertex3fv (point);
 
-					MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, 2300);
+					MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, CLOUDDIST);
 					RS_SetTexcoords2D (stage, &s, &t);
 					qglTexCoord2f (s, t);
 					qglVertex3fv (point);
 
-					MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, 2300);
+					MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, CLOUDDIST);
 					RS_SetTexcoords2D (stage, &s, &t);
 					qglTexCoord2f (s, t);
 					qglVertex3fv (point);
 
-					MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, 2300);
+					MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, CLOUDDIST);
 					RS_SetTexcoords2D (stage, &s, &t);
 					qglTexCoord2f (s, t);
 					qglVertex3fv (point);
