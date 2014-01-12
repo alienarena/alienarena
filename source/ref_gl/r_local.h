@@ -264,6 +264,7 @@ entity_t	terrain_entities[MAX_MAP_MODELS];
 extern int	R_Init( void *hinstance, void *hWnd );
 extern void R_Shutdown( void );
 
+void R_SetupFog (float distance_boost);
 extern void R_SetupViewport (void);
 extern void R_RenderView (refdef_t *fd);
 extern void GL_ScreenShot_f (void);

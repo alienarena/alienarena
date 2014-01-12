@@ -1111,10 +1111,24 @@ static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboole
 
 extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect));
 
+void R_SetupFog (float distance_boost)
+{
+	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
+	
+	if(map_fog)
+	{
+		qglFogi(GL_FOG_MODE, GL_LINEAR);
+		qglFogfv(GL_FOG_COLOR, colors);
+		qglFogf(GL_FOG_START, fog.start * distance_boost);
+		qglFogf(GL_FOG_END, fog.end * distance_boost);
+		qglFogf(GL_FOG_DENSITY, fog.density);
+		qglEnable(GL_FOG);
+	}
+}
+
 void R_RenderView (refdef_t *fd)
 {
 	vec3_t forward;
-	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
 
 	numRadarEnts = 0;
 
@@ -1171,15 +1185,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_SetupGL ();
 
-	if(map_fog)
-	{
-		qglFogi(GL_FOG_MODE, GL_LINEAR);
-		qglFogfv(GL_FOG_COLOR, colors);
-		qglFogf(GL_FOG_START, fog.start);
-		qglFogf(GL_FOG_END, fog.end);
-		qglFogf(GL_FOG_DENSITY, fog.density);
-		qglEnable(GL_FOG);
-	}
+	R_SetupFog (1);
 
 	R_DrawWorldSurfs ();
 	
