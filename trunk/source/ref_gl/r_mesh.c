@@ -684,7 +684,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	
 	if (animtype != 0 && rs_slowpath)
 	{
-		Com_Printf ("WARN: Cannot apply a multi-stage RScript to model %s\n", currentmodel->name);
+		Com_Printf ("WARN: Cannot apply a multi-stage RScript %s to model %s\n", rs->name, currentmodel->name);
 		rs = NULL;
 		rs_slowpath = false;
 	}
