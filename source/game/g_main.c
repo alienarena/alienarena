@@ -216,6 +216,7 @@ void G_RunFrame (void);
 int ACESP_FindBotNum(void);
 extern long filelength(int);
 extern void ED_CallSpawn (edict_t *ent);
+extern void G_Ban( char *ip );
 
 static size_t szr;
 
@@ -1400,64 +1401,6 @@ void ExitLevel (void)
 
 	print1 = print2 = print3 = false;
 
-}
-
-/*
-================
-G_Ban
-
-Ban player
-================
-*/
-/*
-=================
-SV_WriteIP_f
-=================
-*/
-void G_Ban (char *ip)
-{
-	FILE	*f;
-	char	name[MAX_OSPATH];
-	cvar_t	*game;
-	int		i;
-
-	//add to banlist file
-	game = gi.cvar("game", "", 0);
-
-	if (!*game->string)
-		sprintf (name, "%s/listip.cfg", GAMEVERSION);
-	else
-		sprintf (name, "%s/listip.cfg", game->string);
-
-	safe_cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
-
-	f = fopen (name, "ab");
-	if (!f)
-	{
-		safe_cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
-		return;
-	}
-
-	fprintf (f, "sv addip %s\n", ip);
-
-	fclose (f);
-
-	//add to current ban list
-	for (i=0 ; i<numipfilters ; i++)
-		if (ipfilters[i].compare == 0xffffffff)
-			break;		// free spot
-	if (i == numipfilters)
-	{
-		if (numipfilters == MAX_IPFILTERS)
-		{
-			safe_cprintf (NULL, PRINT_HIGH, "IP filter list is full\n");
-			return;
-		}
-		numipfilters++;
-	}
-
-	if (!StringToFilter (ip, &ipfilters[i]))
-		ipfilters[i].compare = 0xffffffff;
 }
 
 /*

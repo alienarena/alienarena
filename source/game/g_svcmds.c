@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#include <stdio.h>
+#include <errno.h>
+
 #include "g_local.h"
 
 
@@ -35,28 +38,46 @@ void	Svcmd_Test_f (void)
 
 PACKET FILTERING
 
-
 You can add or remove addresses from the filter list with:
 
-addip <ip>
-removeip <ip>
+sv addip <ip>
+sv removeip <ip>
 
-The ip address is specified in dot format, and any unspecified digits will match any value, so you can specify an entire class C network with "addip 192.246.40".
+The ip address is specified in dot format, and any unspecified digits
+will match any value, so you can specify an entire class C network
+with "addip 192.246.40".
 
-Removeip will only remove an address specified exactly the same way.  You cannot addip a subnet, then removeip a single host.
+Removeip will only remove an address specified exactly the same way.
+You cannot addip a subnet, then removeip a single host.
 
-listip
+sv listip
 Prints the current list of filters.
 
-writeip
-Dumps "addip <ip>" commands to listip.cfg so it can be execed at a later date.  The filter lists are not saved and restored by default, because I beleive it would cause too much confusion.
+sv writeip
+
+Dumps "addip <ip>" commands to listip.cfg so it can be execed at a
+later date.  The filter lists are not saved and restored by default,
+because I beleive it would cause too much confusion.
 
 filterban <0 or 1>
 
-If 1 (the default), then ip addresses matching the current list will be prohibited from entering the game.  This is the default setting.
+If 1 (the default), then ip addresses matching the current list will
+be prohibited from entering the game.  This is the default setting.
 
-If 0, then only addresses matching the list will be allowed.  This lets you easily set up a private game, or a game that only allows players from your local network.
+If 0, then only addresses matching the list will be allowed.  This
+lets you easily set up a private game, or a game that only allows
+players from your local network.
 
+------ 2014-01-13 NOTE -------
+
+Corrected file system support. It was still using the assumption
+that the executable's current working directory was the parent
+directory for the arena subdir.
+
+The sv commands are passed to the game module when they are not
+recogized by the server. It seem obvious that these were originally
+in the server code, and were moved to the game for some reason
+(maybe to give the capability to mods?).
 
 ==============================================================================
 */
@@ -142,6 +163,32 @@ qboolean SV_FilterPacket (char *from)
 	return !filterban->integer;
 }
 
+/**
+ * For kickban, add player ip to ipfilter banned list.
+ * Does not write to iplist.cfg. Do 'sv writeip', if
+ * that is wanted.
+ *
+ * @params ip - string containing dotted IP addr.
+ */
+void G_Ban( char *ip )
+{
+	ipfilter_t banfilter;
+
+	if ( filterban->integer && StringToFilter( ip, &banfilter ))
+	{
+		int i;
+		for ( i = 0 ; i < numipfilters ; ++i )
+			if ( ipfilters[i].compare == 0xffffffff )
+				break;		// free spot
+		if ( i == numipfilters && numipfilters < MAX_IPFILTERS )
+		{
+			if ( !StringToFilter( ip, &ipfilters[i] ))
+				ipfilters[i].compare = 0xffffffff;
+			else
+				++numipfilters;
+		}
+	}
+}
 
 /*
 =================
@@ -228,39 +275,40 @@ void SVCmd_ListIP_f (void)
 SV_WriteIP_f
 =================
 */
+/**
+ * Create or replace the listip.cfg with current filter list
+ *
+ * @param - void
+ * @return - void
+ */
 void SVCmd_WriteIP_f (void)
 {
-	FILE	*f;
-	char	name[MAX_OSPATH];
-	byte	b[4];
-	int		i;
-	cvar_t	*game;
+	char  listip_name[MAX_OSPATH];
+	FILE* listip_fd;
+	unsigned char b[4];
 
-	game = gi.cvar("game", "", 0);
-
-	if (!*game->string)
-		sprintf (name, "%s/listip.cfg", GAMEVERSION);
-	else
-		sprintf (name, "%s/listip.cfg", game->string);
-
-	safe_cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
-
-	f = fopen (name, "wb");
-	if (!f)
+	errno = 0;
+	gi.FullWritePath( listip_name, sizeof(listip_name), "listip.cfg" );
+	listip_fd = fopen( listip_name, "w" );
+	if ( listip_fd != NULL )
 	{
-		safe_cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
-		return;
+		int i;
+		int wrcount = 
+			fprintf( listip_fd, "set filterban %d\n", filterban->integer );
+		for ( i = 0 ; i < numipfilters && wrcount > 0 ; ++i )
+		{
+			*(unsigned *)b = ipfilters[i].compare;
+			wrcount = fprintf( listip_fd, "sv addip %i.%i.%i.%i\n",
+							   b[0], b[1], b[2], b[3] );
+		}
+		if ( fclose( listip_fd ) == 0 )
+		{
+			safe_cprintf(NULL, PRINT_HIGH, "writeip: %s written.\n", listip_name);
+			return;
+		}
 	}
+	safe_cprintf(NULL, PRINT_HIGH, "writeip: listip.cfg file error (%i)\n", errno);
 
-	fprintf(f, "set filterban %d\n", filterban->integer);
-
-	for (i=0 ; i<numipfilters ; i++)
-	{
-		*(unsigned *)b = ipfilters[i].compare;
-		fprintf (f, "sv addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
-	}
-
-	fclose (f);
 }
 
 /*
@@ -288,8 +336,8 @@ void	ServerCommand (void)
 		SVCmd_ListIP_f ();
 	else if (Q_strcasecmp (cmd, "writeip") == 0)
 		SVCmd_WriteIP_f ();
-// ACEBOT_ADD
 
+// ACEBOT_ADD
 	else if(Q_strcasecmp (cmd, "acedebug") == 0)
  		if (strcmp(gi.argv(2),"on")==0)
 		{
