@@ -806,11 +806,13 @@ static char shadow_fragment_program_ATI[] = STRINGIFY (
 static char rscript_vertex_program[] = STRINGIFY (
 	uniform int envmap;
 	uniform int	numblendtextures;
+	uniform vec2 targetdist;
 	uniform int FOG;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap; 
 	
+	varying float fade;
 	varying float fog;
 	varying vec3 normal;
 	varying vec3 orig_coord;
@@ -852,6 +854,10 @@ static char rscript_vertex_program[] = STRINGIFY (
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 1.0);
 		}
+		
+		fade = 1.0;
+		if (targetdist[0] > 0.0 || targetdist[1] > 0.0)
+			fade = (targetdist[1] - gl_Position.z) / (targetdist[1] - targetdist[0]);
 	}
 );
 
@@ -863,10 +869,12 @@ static char rscript_fragment_program[] = STRINGIFY (
 	uniform sampler2D blendTexture2;
 	uniform int	numblendtextures;
 	uniform int FOG;
+	uniform vec3 blendscales;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
 	
+	varying float fade;
 	varying float fog;
 	varying vec3 normal;
 	varying vec3 orig_coord;
@@ -877,19 +885,23 @@ static char rscript_fragment_program[] = STRINGIFY (
 	// alternately, for even less overhead and *greater* accuracy, this fancy
 	// thing: http://graphics.cs.williams.edu/papers/IndirectionI3D08/
 	
-	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights)
+	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights, float scale)
 	{
 		vec4 ret = vec4 (0.0, 0.0, 0.0, 1.0);
 		
-		ret.rgb += blend_weights[0] * texture2D (tex, orig_coord.yz / 400.0).rgb;
-		ret.rgb += blend_weights[1] * texture2D (tex, orig_coord.zx / 400.0).rgb;
-		ret.rgb += blend_weights[2] * texture2D (tex, orig_coord.xy / 400.0).rgb;
+		ret.rgb += blend_weights[0] * texture2D (tex, orig_coord.yz / scale).rgb;
+		ret.rgb += blend_weights[1] * texture2D (tex, orig_coord.zx / scale).rgb;
+		ret.rgb += blend_weights[2] * texture2D (tex, orig_coord.xy / scale).rgb;
 		
 		return ret;
 	}
 	
 	void main ()
 	{
+		
+		if (fade <= 0.0)
+			discard;
+		
 		vec4 mainColor = texture2D (mainTexture, gl_TexCoord[0].st);
 		
 		if (numblendtextures == 0)
@@ -905,16 +917,23 @@ static char rscript_fragment_program[] = STRINGIFY (
 			
 			// Sigh, GLSL doesn't allow you to index arrays of samplers with
 			// variables.
-			gl_FragColor = triplanar_sample (blendTexture0, blend_weights) * mainColor.r;
+			gl_FragColor = vec4 (0.0);
+			if (mainColor.r > 0.0)
+				gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales.r) * mainColor.r;
 			if (numblendtextures > 1)
 			{
-				gl_FragColor += triplanar_sample (blendTexture1, blend_weights) * mainColor.g;
+				if (mainColor.g > 0.0)
+					gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales.g) * mainColor.g;
 				if (numblendtextures > 2)
 				{
-					gl_FragColor += triplanar_sample (blendTexture2, blend_weights) * mainColor.b;
+					if (mainColor.b > 0.0)
+						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales.b) * mainColor.b;
 				}
 			}
 		}
+		
+		if (fade < 1.0)
+			gl_FragColor.a *= fade;
 		
 		gl_FragColor *= gl_Color;
 		
@@ -1948,6 +1967,8 @@ void R_LoadGLSLPrograms(void)
 	g_location_rs_fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
 	g_location_rs_mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
 	g_location_rs_lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
+	g_location_rs_blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
+	g_location_rs_targetdist = glGetUniformLocationARB (g_rscriptprogramObj, "targetdist");
 	g_location_rs_blendTexture0 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture0");
 	g_location_rs_blendTexture1 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture1");
 	g_location_rs_blendTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture2");
