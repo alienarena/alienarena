@@ -435,6 +435,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	if (!vposition || !vtexcoord || !mod->blendindexes || !mod->blendweights)
 	{
 		Com_Printf("%s is missing vertex array data\n", mod->name);
+		mod->extradatasize = Hunk_End ();
 		return false;
 	}
 
@@ -728,6 +729,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	// load the VBO data
 
 	IQM_LoadVBO (mod, vposition, vnormal, vtangent, vtexcoord, vtriangles);
+	
+	mod->extradatasize = Hunk_End ();
 	
 	return true;
 }
