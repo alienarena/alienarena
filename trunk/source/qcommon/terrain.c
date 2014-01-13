@@ -193,8 +193,10 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_
 	if (vegetation_only)
 	{
 		free (texdata);
-		Z_Free (out->lightmap_path);
+		if (out->lightmap_path != NULL)
+			Z_Free (out->lightmap_path);
 		Z_Free (out->texture_path);
+		out->lightmap_path = out->texture_path = NULL;
 		return;
 	}
 	
