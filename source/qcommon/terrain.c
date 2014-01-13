@@ -42,10 +42,11 @@ float bilinear_sample(byte *texture, int tex_w, int tex_h, float u, float v)
 #undef SAMPLE
 }
 
-void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_factor, int reduction_amt, char *buf)
+// TODO: separate function for vegetation, currently this is kind of hacky.
+void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_only, float oversampling_factor, int reduction_amt, char *buf)
 {
 	int i, j, va, w, h, vtx_w, vtx_h;
-	char	*hmtex_path = NULL;
+	char	*hmtex_path = NULL, *vegtex_path = NULL;
 	mesh_t	mesh;
 	vec3_t	scale;
 	char	*token;
@@ -54,6 +55,8 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 	
 	out->texture_path = NULL;
 	out->lightmap_path = NULL;
+	out->num_vegetation = 0;
+	out->vegetation = NULL;
 	
 	buf = strtok (buf, ";");
 	while (buf)
@@ -79,6 +82,12 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 			out->lightmap_path = CopyString (COM_Parse (&buf));
 			if (!buf)
 				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting lightmap filename! (File %s is invalid)", name);
+		}
+		if (!Q_strcasecmp (token, "vegetation"))
+		{
+			vegtex_path = CopyString (COM_Parse (&buf));
+			if (!buf)
+				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting vegetation map filename! (File %s is invalid)", name);
 		}
 		if (!Q_strcasecmp (token, "mins"))
 		{
@@ -122,6 +131,73 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 	
 	Z_Free (hmtex_path);
 	
+	// Compile a list of all vegetation sprites that should be added to the
+	// map.
+	if (vegtex_path != NULL)
+	{
+		int		veg_w, veg_h, vegnum;
+		byte	*vegtexdata;
+		
+		LoadTGA (vegtex_path, &vegtexdata, &veg_w, &veg_h);
+		
+		if (vegtexdata == NULL)
+			Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", vegtex_path);
+		
+		Z_Free (vegtex_path);
+		
+		// Green pixels in the vegetation map indicate vegetation. 
+		
+		// Count how many vegetation sprites we should allocate.
+		for (i = 0; i < veg_w*veg_h; i++)
+		{
+			if (vegtexdata[i*4+1] != 0)
+				out->num_vegetation++;
+		}
+		
+		out->vegetation = Z_Malloc (out->num_vegetation * sizeof(terrainveg_t));
+		
+		vegnum = 0;
+		
+		// Fill in the vegetation sprites
+		for (i = 0; i < veg_h; i++)
+		{
+			for (j = 0; j < veg_w; j++)
+			{
+				float x, y, z, s, t, xrand, yrand;
+				byte amt;
+				
+				amt = vegtexdata[((veg_h-i-1)*veg_w+j)*4+1];
+				if (amt == 0)
+					continue;
+				
+				xrand = 2.0*(frand()-0.5);
+				yrand = 2.0*(frand()-0.5);
+				
+				s = ((float)j+xrand)/(float)veg_w;
+				t = 1.0 - ((float)i+yrand)/(float)veg_h;
+				
+				x = scale[0]*((float)j/(float)veg_w) + out->mins[0] + scale[0]*xrand/(float)veg_w;
+				y = scale[1]*((float)i/(float)veg_h) + out->mins[1] + scale[1]*yrand/(float)veg_h;
+				z = scale[2] * bilinear_sample (texdata, h, w, s, t) / 255.0 + out->mins[2];
+				
+				VectorSet (out->vegetation[vegnum].origin, x, y, z);
+				out->vegetation[vegnum].size = (float)amt/16.0f;
+				
+				vegnum++;
+			}
+		}
+		
+		free (vegtexdata);
+	}
+	
+	if (vegetation_only)
+	{
+		free (texdata);
+		Z_Free (out->lightmap_path);
+		Z_Free (out->texture_path);
+		return;
+	}
+	
 	vtx_w = oversampling_factor*w+1;
 	vtx_h = oversampling_factor*h+1;
 	
@@ -164,14 +240,16 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 	{
 		for (j = 0; j < vtx_w; j++)
 		{
-			float x, y, s, t;
+			float x, y, z, s, t;
 			
-			x = scale[0]*((float)j/(float)vtx_w) + out->mins[0];
-			y = scale[1]*((float)i/(float)vtx_h) + out->mins[1];
 			s = (float)j/(float)vtx_w;
 			t = 1.0 - (float)i/(float)vtx_h;
 			
-			VectorSet (&out->vert_positions[(i*vtx_w+j)*3], x, y, scale[2] * bilinear_sample (texdata, h, w, s, t) / 255.0 + out->mins[2]);
+			x = scale[0]*((float)j/(float)vtx_w) + out->mins[0];
+			y = scale[1]*((float)i/(float)vtx_h) + out->mins[1];
+			z = scale[2] * bilinear_sample (texdata, h, w, s, t) / 255.0 + out->mins[2];
+			
+			VectorSet (&out->vert_positions[(i*vtx_w+j)*3], x, y, z);
 			out->vert_texcoords[(i*vtx_w+j)*2] = s;
 			out->vert_texcoords[(i*vtx_w+j)*2+1] = t;
 		}

@@ -212,6 +212,8 @@ static void R_ParseTerrainModelEntity (char *match, char *block)
 		else
 			Com_SkipRestOfLine(&bl);
 	}
+	
+	Mod_LoadTerrainVegetation (ent->model->name, ent->angles, ent->origin);
 }
 
 static void R_ParseTerrainEntities (void)
@@ -1875,7 +1877,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	R_ParseTerrainEntities();
 	R_ParseLightEntities();
 	R_FindSunEntity();
-	R_FinalizeGrass(loadmodel);
+	R_FinalizeGrass(mod);
 }
 
 //=============================================================================
