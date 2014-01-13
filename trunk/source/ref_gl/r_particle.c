@@ -830,35 +830,24 @@ void R_RenderSun()
 
 //Vegetation
 
-void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
+void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, float size, char name[MAX_OSPATH], int type)
 {
-    glpoly_t *poly;
-    grass_t  *grass;
+	grass_t  *grass;
 	image_t *gl;
-	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
+	vec3_t binormal, tangent, tmp;
 
 	if (r_numgrasses >= MAX_GRASSES)
-			return;
+		return;
 
 	if(size == 0.0)
 		size = 1.0f;
 
-	poly = surf->polys;
-
-	VectorCopy(poly->verts[0], origin);
-
-	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
+	AngleVectors(normal, NULL, tangent, binormal);
 	VectorNormalize(tangent);
 	VectorNormalize(binormal);
 
 	VectorMA(origin, -32*frand(), tangent, origin);
-
-	if (surf->iflags & ISURF_PLANEBACK)
-		VectorNegate(surf->plane->normal, tmp);
-	else
-		VectorCopy(surf->plane->normal, tmp);
-
-	VectorMA(origin, 2, tmp, origin);
+	VectorMA(origin, 2, normal, origin);
 
 	grass = &r_grasses[r_numgrasses++];
 	VectorCopy(origin, grass->origin);
@@ -879,6 +868,23 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 
 	if(grass->type == 1)
 		r_hasleaves = true;
+}
+
+void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
+{
+    glpoly_t *poly;
+    vec3_t normal, origin;
+
+	poly = surf->polys;
+	
+	if (surf->iflags & ISURF_PLANEBACK)
+		VectorNegate(surf->plane->normal, normal);
+	else
+		VectorCopy(surf->plane->normal, normal);
+
+	VectorCopy (poly->verts[0], origin);
+	
+	Mod_AddVegetation (origin, normal, texnum, color, size, name, type);
 }
 
 // Mark any vegetation sprites that can cast shadows in sunlight, and get 
@@ -909,17 +915,28 @@ void R_FinalizeGrass(model_t *mod)
 		R_StaticLightPoint (origin, grass->static_light);
 		r_worldmodel = old;
 	
-		if (grass->type == 0)
-		{
-			grass->sunVisible = false;
-			continue; //only deal with leaves, grass shadows look kind of bad
-		}
-		
 		//cull for pathline to sunlight
 		VectorCopy (grass->origin, orig2);
 		orig2[2] += (grass->texsize/32) * grass->size;
 		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, mod->firstnode, MASK_VISIBILILITY);
-			grass->sunVisible = r_trace.fraction == 1.0;
+		grass->sunVisible = r_trace.fraction == 1.0;
+		
+		// XXX: HACK until we can make StaticLightPoint work on terrain!
+		if (grass->sunVisible)
+		{
+			int j;
+			for (j = 0; j < 3; j++)
+			{
+				if (grass->static_light[j] < 0.15)
+					grass->static_light[j] = 0.15;
+			}
+		}
+		
+		if (grass->type == 0)
+		{
+			//only deal with leaves, grass shadows look kind of bad
+			grass->sunVisible = false;
+		}
 	}
 }
 
@@ -956,7 +973,7 @@ void R_DrawVegetationSurface ( void )
 	qboolean visible;
 	float	lightLevel[3];
 	trace_t r_trace;
-	float	sway;
+	float	swaysin, swaysin2, swaysin3;
 	int ng;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
@@ -981,13 +998,46 @@ void R_DrawVegetationSurface ( void )
 	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Bind (0);
 	GL_TexEnv( GL_MODULATE );
+	
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
+	
+	VArray = &VArrayVerts[0];
+	for (i = 0; i < 3; i++)
+	{
+		for (k = 0; k < 4; k++)
+		{
+			switch(k)
+			{
+				case 0:
+					VArray[3] = 1;
+					VArray[4] = 1;
+					break;
+				case 1:
+					VArray[3] = 0;
+					VArray[4] = 1;
+					break;
+				case 2:
+					VArray[3] = 0;
+					VArray[4] = 0;
+					break;
+				case 3:
+					VArray[3] = 1;
+					VArray[4] = 0;
+					break;
+			}
+
+			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+		}
+	}
+	
+	swaysin2 = 2.0*sin (rs_realtime*2.0);
+	swaysin3 = 3.0*sin (rs_realtime*3.0);
 
     for (i=0; i<r_numgrasses; i++, grass++)
 	{
 		int gCount = 3;
 		int va = 0;
 
-		R_InitVArrays (VERT_SINGLE_TEXTURED);
 		VArray = &VArrayVerts[0];
 
 		scale = 10.0*grass->size;
@@ -996,27 +1046,29 @@ void R_DrawVegetationSurface ( void )
 
 		if(grass->type) 
 		{
-			sway = 3;
+			swaysin = swaysin3;
 			gCount = 1;
 
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 		}
 		else
 		{
-			sway = 2;
+			swaysin = swaysin2;
 			qglDisable( GL_CULL_FACE );
 			
 			// adjust vertical position, scaled
 			origin[2] += (grass->texsize/32) * grass->size;
 
 			visible = CM_inPVS_leafs (r_origin_leafnum, grass->leafnum);
-			if (visible)
-			{
-				r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-				visible = r_trace.fraction == 1.0;
-			}
-		}		
-
+			// TODO: Replace CM_BoxTrace with CM_FastTrace as soon as I write
+			// that function.
+/*			if (visible)*/
+/*			{*/
+/*				r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);*/
+/*				visible = r_trace.fraction == 1.0;*/
+/*			}*/
+		}
+		
 		if(visible)
 		{
 			GL_Bind(grass->texnum);
@@ -1043,54 +1095,29 @@ void R_DrawVegetationSurface ( void )
 
 				//render grass polygon				
 
-				VectorSet (corner[0],
+				VectorSet (VArray,
 					origin[0] + (up[0] + right[0])*(-0.5),
 					origin[1] + (up[1] + right[1])*(-0.5),
 					origin[2] + (up[2] + right[2])*(-0.5));				
 
-				VectorSet ( corner[1],
-					corner0[0] + up[0] + sway*sin (rs_realtime*sway),
-					corner0[1] + up[1] + sway*sin (rs_realtime*sway),
-					corner0[2] + up[2]);
+				VectorSet (VArray + VertexSizes[VERT_SINGLE_TEXTURED],
+					VArray[0] + up[0] + swaysin,
+					VArray[1] + up[1] + swaysin,
+					VArray[2] + up[2]);
 
-				VectorSet ( corner[2],
-					corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-					corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
-					corner0[2] + (up[2]+right[2]));
+				VectorSet (VArray + 2*VertexSizes[VERT_SINGLE_TEXTURED],
+					VArray[0] + (up[0]+right[0] + swaysin),
+					VArray[1] + (up[1]+right[1] + swaysin),
+					VArray[2] + (up[2]+right[2]));
 
-				VectorSet ( corner[3],
-					corner0[0] + right[0],
-					corner0[1] + right[1],
-					corner0[2] + right[2]);				
+				VectorSet (VArray + 3*VertexSizes[VERT_SINGLE_TEXTURED],
+					VArray[0] + right[0],
+					VArray[1] + right[1],
+					VArray[2] + right[2]);				
 
-				for(k = 0; k < 4; k++) 
-				{
-					VArray[0] = corner[k][0];
-					VArray[1] = corner[k][1];
-					VArray[2] = corner[k][2];
-					switch(k) 
-					{
-						case 0:
-							VArray[3] = 1;
-							VArray[4] = 1;
-							break;
-						case 1:
-							VArray[3] = 0;
-							VArray[4] = 1;
-							break;
-						case 2:
-							VArray[3] = 0;
-							VArray[4] = 0;
-							break;
-						case 3:
-							VArray[3] = 1;
-							VArray[4] = 0;
-							break;
-					}
-
-					VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-					va++;								
-				}
+				VArray += 4*VertexSizes[VERT_SINGLE_TEXTURED];
+				va += 4;
+				
 				angle[1]+=60;	
 			}
 
@@ -1098,9 +1125,10 @@ void R_DrawVegetationSurface ( void )
 	
 			R_DrawVarrays(GL_QUADS, 0, va);
 		
-			R_KillVArrays ();
 		}
 	}
+	
+	R_KillVArrays ();
 
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);

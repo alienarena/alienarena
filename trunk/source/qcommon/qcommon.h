@@ -939,6 +939,13 @@ TERRAIN LOADING/SIMPLIFICATION
 
 typedef struct
 {
+	vec3_t	origin;
+	float	size;
+}
+terrainveg_t;
+
+typedef struct
+{
 	char			*texture_path;
 	char			*lightmap_path;
 	int				num_vertices;
@@ -947,11 +954,13 @@ typedef struct
 	int				num_triangles;
 	unsigned int	*tri_indices;
 	vec3_t			mins, maxs;
+	int				num_vegetation;
+	terrainveg_t	*vegetation;
 } terraindata_t;
 
 // out will be populated with a simplified version of the mesh. Calling
 // function is responsible for calling Z_Free on vert_positions,
-// vert_texcoords, tri_indices, texture_path, and lightmap_path.
+// vert_texcoords, tri_indices, texture_path, lightmap_path, and vegetation.
 // name is just the path of the .terrain file, only used for error messages.
 // oversampling_factor indicates how much detail to sample the heightmap 
 // at before simplification. 2.0 means 4x as many samples as there are pixels,
@@ -959,7 +968,7 @@ typedef struct
 // reduction_amt indicates how many times fewer triangles the simplified mesh
 // should have.
 // buf is a string containing the text of a .terrain file.
-void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_factor, int reduction_amt, char *buf);
+void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_only, float oversampling_factor, int reduction_amt, char *buf);
 
 #endif /* Q_COMMON_H_ */
 

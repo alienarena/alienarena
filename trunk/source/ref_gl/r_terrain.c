@@ -22,13 +22,16 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	vec3_t up;
 	int ndownward;
 	
-	LoadTerrainFile (&data, mod->name, 2.0, 32, (char *)_buf);
+	LoadTerrainFile (&data, mod->name, false, 2.0, 32, (char *)_buf);
 	
 	mod->numvertexes = data.num_vertices;
 	mod->num_triangles = data.num_triangles;
 	
 	tex = GL_FindImage (data.texture_path, it_wall);
 	Z_Free (data.texture_path);
+	
+	if (data.vegetation != NULL)
+		Z_Free (data.vegetation);
 	
 	if (!tex)
 		Com_Error (ERR_DROP, "Mod_LoadTerrainModel: Missing surface texture in %s!", mod->name);
@@ -111,4 +114,41 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	Z_Free (vnormal);
 	Z_Free (vtangent);
 	Z_Free (data.tri_indices);
+}
+
+void Mod_LoadTerrainVegetation (char *path, vec3_t angles, vec3_t origin)
+{
+	char *buf;
+	int len;
+	int i;
+	terraindata_t data;
+	vec3_t up = {0, 0, 1};
+	vec3_t color = {1, 1, 1};
+	
+	len = FS_LoadFile (path, (void**)&buf);
+	
+	if (!buf)
+	{
+		Com_Printf ("WARN: Could not find %s\n", path);
+		return;
+	}
+	
+	LoadTerrainFile (&data, path, true, 0, 0, buf);
+	
+	FS_FreeFile ((void *)buf);
+	
+	if (data.vegetation == NULL)
+		return;
+	
+	// TODO: transformed terrain model support!
+	for (i = 0; i < data.num_vegetation; i++)
+	{
+		vec3_t org;
+		
+		VectorAdd (origin, data.vegetation[i].origin, org);
+		
+		Mod_AddVegetation (org, up, GL_FindImage ("gfx/grass.tga", it_wall)->texnum, color, data.vegetation[i].size, "gfx/grass.tga", 0);
+	}
+	
+	Z_Free (data.vegetation);
 }

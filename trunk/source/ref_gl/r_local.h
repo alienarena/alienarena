@@ -364,6 +364,7 @@ extern int c_grasses;
 grass_t r_grasses[MAX_GRASSES];
 qboolean r_hasleaves;
 extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type);
+void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, float size, char name[MAX_OSPATH], int type);
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
 extern void R_FinalizeGrass(model_t *mod); 
@@ -824,6 +825,7 @@ extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);
+void Mod_LoadTerrainVegetation (char *path, vec3_t angles, vec3_t origin);
 
 //Ragdoll
 int r_DrawingRagDoll;
