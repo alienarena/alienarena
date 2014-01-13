@@ -213,8 +213,12 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->lensflare = false;
 	stage->flaretype = 0;
 	stage->normalmap = false;
+	
 	stage->num_blend_textures = 0;
 	memset (stage->blend_textures, 0, sizeof (stage->blend_textures));
+	
+	memset (stage->targetdist, 0, sizeof (stage->targetdist));
+	
 	stage->grass = false;
 	stage->grasstype = 0;
 	stage->beam = false;
@@ -599,6 +603,15 @@ RS_STAGE_FLOAT_ATTR (rot_speed)
 RS_STAGE_INT_ATTR (rotating)
 
 
+void rs_stage_targetdist (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->targetdist[0] = atof(*token);
+
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->targetdist[1] = atof(*token);
+}
+
 void rs_stage_nolightmap (rs_stage_t *stage, char **token)
 {
 	stage->lightmap = false;
@@ -882,6 +895,7 @@ void rs_stage_blendmap (rs_stage_t *stage, char **token)
 		while (stage->num_blend_textures)
 		{
 			*token = strtok (NULL, TOK_DELIMINATORS);
+			*token = strtok (NULL, TOK_DELIMINATORS);
 			stage->num_blend_textures--;
 		}
 		
@@ -890,6 +904,8 @@ void rs_stage_blendmap (rs_stage_t *stage, char **token)
 	
 	for (i = 0; i < stage->num_blend_textures; i++)
 	{
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		stage->blend_scales[i] = atof (*token);
 		*token = strtok (NULL, TOK_DELIMINATORS);
 		strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
 	}
@@ -942,6 +958,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"flaretype",	&rs_stage_flaretype		},
 	{	"normalmap",	&rs_stage_normalmap		},
 	{	"blendmap",		&rs_stage_blendmap		},
+	{	"targetdist",	&rs_stage_targetdist	},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
@@ -1435,12 +1452,15 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		glUniform1iARB (g_location_rs_envmap, stage->envmap != 0);
 		glUniform1iARB (g_location_rs_numblendtextures, stage->num_blend_textures);
 		
+		glUniform2fARB (g_location_rs_targetdist, stage->targetdist[0], stage->targetdist[1]);
+		
 		if (stage->num_blend_textures > 0)
 		{
 			int i;
 			
 			for (i = 0; i < stage->num_blend_textures; i++)
 				GL_MBind (2+i, stage->blend_textures[i]->texnum);
+			glUniform3fARB (g_location_rs_blendscales, stage->blend_scales[0], stage->blend_scales[1], stage->blend_scales[2]);
 		}
 		
 		GL_SelectTexture (0);

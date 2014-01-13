@@ -120,8 +120,11 @@ typedef struct rs_stage_s
 	qboolean				normalmap;		// for normalmaps
 	
 	int						num_blend_textures;
+	float					blend_scales[4];
 	char					blend_names[4][MAX_OSPATH];
 	image_t					*blend_textures[4];
+	
+	float					targetdist[2];
 
 	qboolean				lensflare;		// for adding lensflares
 	int						flaretype;		// type of flare
