@@ -567,12 +567,10 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		switch (LittleLong(*(unsigned *)buf))
 		{
 		case IDALIASHEADER:
-			loadmodel->extradata = Hunk_Begin (0x300000);
 			Mod_LoadMD2Model (mod, buf);
 			break;
 
 		case IDBSPHEADER:
-			loadmodel->extradata = Hunk_Begin (0x1500000);
 			Mod_LoadBrushModel (mod, buf);
 			break;
 
@@ -581,9 +579,6 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			break;
 		}
 	}
-
-	if (!is_terrain)
-		loadmodel->extradatasize = Hunk_End ();
 
 	FS_FreeFile (buf);
 
@@ -1788,6 +1783,8 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	dheader_t	*header;
 	mmodel_t 	*bm;
 	char		rs_name[MAX_OSPATH], tmp[MAX_QPATH];		// rscript - MrG
+	
+	mod->extradata = Hunk_Begin (0x1500000);
 
 	if(r_lensflare->value)
 		R_ClearFlares();
@@ -1872,6 +1869,8 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		starmod->numleafs = bm->visleafs;
 	}
+	
+	mod->extradatasize = Hunk_End ();
 
 	R_ParseTerrainEntities();
 	R_ParseLightEntities();
