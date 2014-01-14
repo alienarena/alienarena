@@ -894,7 +894,7 @@ void R_FinalizeGrass(model_t *mod)
 	vec3_t origin, orig2, mins, maxs;
 	trace_t	r_trace;
 	grass_t *grass;
-	int i;
+	int i, j;
 	model_t *old;
 	
 	grass = r_grasses;
@@ -922,13 +922,17 @@ void R_FinalizeGrass(model_t *mod)
 		grass->sunVisible = r_trace.fraction == 1.0;
 		
 		// XXX: HACK until we can make StaticLightPoint work on terrain!
+		for (j = 0; j < 3; j++)
+		{
+			if (grass->static_light[j] < 0.25)
+				grass->static_light[j] = 0.25;
+		}
 		if (grass->sunVisible)
 		{
-			int j;
 			for (j = 0; j < 3; j++)
 			{
-				if (grass->static_light[j] < 0.15)
-					grass->static_light[j] = 0.15;
+				if (grass->static_light[j] < 0.75)
+					grass->static_light[j] = 0.75;
 			}
 		}
 		
