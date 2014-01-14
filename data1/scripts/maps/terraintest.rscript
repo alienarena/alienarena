@@ -7,6 +7,6 @@ terraintest1_texture
 			400 textures/arena8/crackedrock1.tga
 			400 textures/arena8/crackedrock4.tga
 			200 textures/arena8/grass2.tga
-			400 textures/arena8/sand2.tga
+			400 textures/arena10/rockdirt1.tga
 	}
 }
