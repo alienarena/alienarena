@@ -120,9 +120,9 @@ typedef struct rs_stage_s
 	qboolean				normalmap;		// for normalmaps
 	
 	int						num_blend_textures;
-	float					blend_scales[4];
-	char					blend_names[4][MAX_OSPATH];
-	image_t					*blend_textures[4];
+	float					blend_scales[6];
+	char					blend_names[6][MAX_OSPATH];
+	image_t					*blend_textures[6];
 	
 	float					targetdist[2];
 

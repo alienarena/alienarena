@@ -887,9 +887,9 @@ void rs_stage_blendmap (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->num_blend_textures = atoi(*token);
 	
-	if (stage->num_blend_textures > 4)
+	if (stage->num_blend_textures > 6)
 	{
-		Com_Printf ("ERROR: Cannot have %d blendmap channels (max 4)\n", stage->num_blend_textures);
+		Com_Printf ("ERROR: Cannot have %d blendmap channels (max 6)\n", stage->num_blend_textures);
 		
 		// consume the rest of the command
 		while (stage->num_blend_textures)
@@ -1355,9 +1355,13 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	
 	glUniform1iARB( g_location_rs_mainTexture, 0);
 	glUniform1iARB( g_location_rs_lightmapTexture, 1);
-	glUniform1iARB( g_location_rs_blendTexture0, 2);
-	glUniform1iARB( g_location_rs_blendTexture1, 3);
-	glUniform1iARB( g_location_rs_blendTexture2, 4);
+	glUniform1iARB( g_location_rs_mainTexture2, 2);
+	glUniform1iARB( g_location_rs_blendTexture0, 3);
+	glUniform1iARB( g_location_rs_blendTexture1, 4);
+	glUniform1iARB( g_location_rs_blendTexture2, 5);
+	glUniform1iARB( g_location_rs_blendTexture3, 6);
+	glUniform1iARB( g_location_rs_blendTexture4, 7);
+	glUniform1iARB( g_location_rs_blendTexture5, 8);
 	glUniform1iARB( g_location_rs_fog, map_fog);
 	
 	qglMatrixMode (GL_TEXTURE);
@@ -1391,6 +1395,9 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 			GL_MBind (0, RS_Animate(stage));
 		else
 	 		GL_MBind (0, stage->texture->texnum);
+	 	
+	 	if (stage->num_blend_textures > 3)
+	 		GL_MBind (2, stage->texture2->texnum);
 		
 		if (stage->blendfunc.blend)
 		{
@@ -1459,8 +1466,9 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 			int i;
 			
 			for (i = 0; i < stage->num_blend_textures; i++)
-				GL_MBind (2+i, stage->blend_textures[i]->texnum);
+				GL_MBind (3+i, stage->blend_textures[i]->texnum);
 			glUniform3fARB (g_location_rs_blendscales, stage->blend_scales[0], stage->blend_scales[1], stage->blend_scales[2]);
+			glUniform3fARB (g_location_rs_blendscales2, stage->blend_scales[3], stage->blend_scales[4], stage->blend_scales[5]);
 		}
 		
 		GL_SelectTexture (0);

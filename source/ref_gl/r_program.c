@@ -863,13 +863,18 @@ static char rscript_vertex_program[] = STRINGIFY (
 
 static char rscript_fragment_program[] = STRINGIFY (
 	uniform sampler2D mainTexture;
+	uniform sampler2D mainTexture2;
 	uniform sampler2D lightmapTexture;
 	uniform sampler2D blendTexture0;
 	uniform sampler2D blendTexture1;
 	uniform sampler2D blendTexture2;
+	uniform sampler2D blendTexture3;
+	uniform sampler2D blendTexture4;
+	uniform sampler2D blendTexture5;
 	uniform int	numblendtextures;
 	uniform int FOG;
 	uniform vec3 blendscales;
+	uniform vec3 blendscales2;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
@@ -928,6 +933,22 @@ static char rscript_fragment_program[] = STRINGIFY (
 				{
 					if (mainColor.b > 0.0)
 						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales.b) * mainColor.b;
+					if (numblendtextures > 3)
+					{
+						vec4 mainColor2 = texture2D (mainTexture2, gl_TexCoord[0].st);
+						if (mainColor2.r > 0.0)
+							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales2.r) * mainColor2.r;
+						if (numblendtextures > 4)
+						{
+							if (mainColor2.g > 0.0)
+								gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales2.g) * mainColor2.g;
+							if (numblendtextures > 5)
+							{
+								if (mainColor2.b > 0.0)
+									gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales2.b) * mainColor2.b;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1460,6 +1481,7 @@ static char water_fragment_program[] = STRINGIFY (
 		vec3 refraction = refract(vVec,modbump,0.66);
 
 		vec4 Tl = texture2D(baseTexture, reflection.xy);
+
 		vec4 Tr = texture2D(baseTexture, refraction.xy);
 
 		vec4 cubemap = mix(Tl,Tr,FresRatio);
@@ -1966,12 +1988,17 @@ void R_LoadGLSLPrograms(void)
 	g_location_rs_lightmap = glGetUniformLocationARB (g_rscriptprogramObj, "lightmap");
 	g_location_rs_fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
 	g_location_rs_mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
+	g_location_rs_mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture2");
 	g_location_rs_lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
 	g_location_rs_blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
+	g_location_rs_blendscales2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales2");
 	g_location_rs_targetdist = glGetUniformLocationARB (g_rscriptprogramObj, "targetdist");
 	g_location_rs_blendTexture0 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture0");
 	g_location_rs_blendTexture1 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture1");
 	g_location_rs_blendTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture2");
+	g_location_rs_blendTexture3 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture3");
+	g_location_rs_blendTexture4 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture4");
+	g_location_rs_blendTexture5 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture5");
 
 	//warp(water) bsp surfaces
 	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);
