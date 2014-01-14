@@ -823,6 +823,15 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/ribtube3.md2 \
 	data1/maps/meshes/ribtube.jpg \
 	data1/maps/meshes/ribtube_normal.jpg \
+	data1/maps/meshes/rocks/rock1.jpg \
+	data1/maps/meshes/rocks/rock2.jpg \
+	data1/maps/meshes/rocks/rock1.md2 \
+	data1/maps/meshes/rocks/rock3.jpg \
+	data1/maps/meshes/rocks/rock2.md2 \
+	data1/maps/meshes/rocks/rock4.jpg \
+	data1/maps/meshes/rocks/rock3.md2 \
+	data1/maps/meshes/rocks/rock4.md2 \
+	data1/maps/meshes/rocks/rock5.md2 \
 	data1/maps/meshes/sconduit1.md2 \
 	data1/maps/meshes/sconduit2.md2 \
 	data1/maps/meshes/scopecover.md2 \
@@ -3974,11 +3983,12 @@ nobase_nodist_textures_DATA = \
 	data1/textures/rigel/baselightblue.tga \
 	data1/textures/rigel/baselightred.tga \
 	data1/textures/terraintest/axialcross.tga \
-	data1/textures/terraintest/randclouds1.tga \
 	data1/textures/terraintest/plateau1.tga \
 	data1/textures/terraintest/plateau1_blendtex.tga \
 	data1/textures/terraintest/plateau1_lightmaptex.tga \
+	data1/textures/terraintest/plateau1_rocks.tga \
 	data1/textures/terraintest/plateau1_vegetation.tga \
+	data1/textures/terraintest/randclouds1.tga \
 	data1/textures/water/blood_nm.tga \
 	data1/textures/water/blood.tga \
 	data1/textures/water/bluewater_nm.tga \
