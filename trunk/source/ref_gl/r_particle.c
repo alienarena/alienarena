@@ -908,7 +908,7 @@ void R_FinalizeGrass(model_t *mod)
 	{
 		// get static light once at load time
 		VectorCopy(grass->origin, origin);
-		if (grass->type == 0)
+		if (grass->type != 1)
 			origin[2] += (grass->texsize/32) * grass->size;
 		// XXX: HACK!
 		r_worldmodel = mod;
@@ -1048,14 +1048,23 @@ void R_DrawVegetationSurface ( void )
 
 		VectorCopy(grass->origin, origin);
 
-		if(grass->type) 
+		if(grass->type == 1) // foliage
 		{
 			swaysin = swaysin3;
 			gCount = 1;
 
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 		}
-		else
+		if(grass->type == 2) // shrubbery
+		{
+			swaysin = swaysin2;
+
+			visible = true; //leaves tend to use much larger images, culling results in undesired effects
+			
+			// adjust vertical position, scaled
+			origin[2] += (grass->texsize/32) * grass->size;
+		}
+		else // grass
 		{
 			swaysin = swaysin2;
 			qglDisable( GL_CULL_FACE );
@@ -1086,7 +1095,7 @@ void R_DrawVegetationSurface ( void )
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
 					
-			if(grass->type)
+			if(grass->type == 1)
 				VectorCopy(r_newrefdef.viewangles, angle);
 			else
 				VectorSet(angle, 0, 0, 0);	
