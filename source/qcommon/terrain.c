@@ -61,12 +61,12 @@ terraindec_t *LoadTerrainDecorationType
 	Z_Free (texpath);
 	
 	// Count how many decorations we should allocate.
-	for (i = 0; i < w*h; i++)
+	for (j = 0; j < 3; j++)
 	{
-		for (j = 0; j < 3; j++)
+		if (channeltypes[j] == -1)
+			continue;
+		for (i = 0; i < w*h; i++)
 		{
-			if (channeltypes[j] == -1)
-				continue;
 			if (texdata[i*4+j] != 0)
 				counter++;
 		}
@@ -97,7 +97,7 @@ terraindec_t *LoadTerrainDecorationType
 				float x, y, z, s, t, xrand, yrand;
 				byte size;
 			
-				size = texdata[((h-i-1)*w+j)*4+1];
+				size = texdata[((h-i-1)*w+j)*4+k];
 				if (size == 0)
 					continue;
 		
@@ -119,6 +119,8 @@ terraindec_t *LoadTerrainDecorationType
 			}
 		}
 	}
+	
+	assert (counter == *out_counter);
 	
 	free (texdata);
 	
@@ -208,7 +210,8 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	if (vegtex_path != NULL)
 	{
 		// Green pixels in the vegetation map indicate grass.
-		const int channeltypes[3] = {-1, 0, -1};
+		// Red pixels indicate shrubbery.
+		const int channeltypes[3] = {2, 0, -1};
 		out->vegetation = LoadTerrainDecorationType (vegtex_path, out->mins, scale, texdata, h, w, channeltypes, &out->num_vegetation);
 	}
 	

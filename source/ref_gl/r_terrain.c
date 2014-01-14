@@ -130,10 +130,22 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 	for (i = 0; i < data.num_vegetation; i++)
 	{
 		vec3_t org;
+		char *texture;
+		static char *vegetationtextures[] = 
+		{
+			"gfx/grass.tga",
+			"",
+			"gfx/leaves1.tga"
+		};
 		
 		VectorAdd (origin, data.vegetation[i].origin, org);
 		
-		Mod_AddVegetation (org, up, GL_FindImage ("gfx/grass.tga", it_wall)->texnum, color, data.vegetation[i].size, "gfx/grass.tga", 0);
+		texture = vegetationtextures[data.vegetation[i].type];
+		
+		Mod_AddVegetation (	org, up,
+							GL_FindImage (texture, it_wall)->texnum, color,
+							data.vegetation[i].size, texture,
+							data.vegetation[i].type );
 	}
 	
 	num_rock_entities = 0;
