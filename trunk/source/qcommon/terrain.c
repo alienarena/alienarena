@@ -7,7 +7,7 @@
 #include "binheap.h"
 #include "libgarland.h"
 
-float raw_sample (byte *texture, int tex_w, int tex_h, int s, int t)
+float raw_sample (const byte *texture, int tex_w, int tex_h, int s, int t)
 {
 	if (s >= tex_w)
 		s = tex_w-1;
@@ -24,7 +24,7 @@ float raw_sample (byte *texture, int tex_w, int tex_h, int s, int t)
 						);
 }
 
-float bilinear_sample(byte *texture, int tex_w, int tex_h, float u, float v)
+float bilinear_sample(const byte *texture, int tex_w, int tex_h, float u, float v)
 {
  	int x, y;
  	float u_ratio, v_ratio, u_opposite, v_opposite;
@@ -42,21 +42,101 @@ float bilinear_sample(byte *texture, int tex_w, int tex_h, float u, float v)
 #undef SAMPLE
 }
 
-// TODO: separate function for vegetation, currently this is kind of hacky.
-void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_only, float oversampling_factor, int reduction_amt, char *buf)
+terraindec_t *LoadTerrainDecorationType 
+	(	char *texpath, const vec3_t mins, const vec3_t scale, 
+		const byte *hmtexdata, float hm_w, float hm_h,
+		const int channeltypes[3], int *out_counter
+	)
+{
+	byte *texdata = NULL;
+	terraindec_t *ret = NULL;
+	int i, j, k, w, h;
+	int counter = 0;
+	
+	LoadTGA (texpath, &texdata, &w, &h);
+	
+	if (texdata == NULL)
+		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", texpath);
+	
+	Z_Free (texpath);
+	
+	// Count how many decorations we should allocate.
+	for (i = 0; i < w*h; i++)
+	{
+		for (j = 0; j < 3; j++)
+		{
+			if (channeltypes[j] == -1)
+				continue;
+			if (texdata[i*4+j] != 0)
+				counter++;
+		}
+	}
+	
+	*out_counter = counter;
+	
+	if (counter == 0)
+	{
+		free (texdata);
+		return NULL;
+	}
+	
+	ret = Z_Malloc (counter * sizeof(terraindec_t));
+	
+	counter = 0;
+	
+	// Fill in the decorations
+	for (k = 0; k < 3; k++)
+	{
+		if (channeltypes[k] == -1)
+			continue;
+		
+		for (i = 0; i < h; i++)
+		{
+			for (j = 0; j < w; j++)
+			{
+				float x, y, z, s, t, xrand, yrand;
+				byte size;
+			
+				size = texdata[((h-i-1)*w+j)*4+1];
+				if (size == 0)
+					continue;
+		
+				xrand = 2.0*(frand()-0.5);
+				yrand = 2.0*(frand()-0.5);
+		
+				s = ((float)j+xrand)/(float)w;
+				t = 1.0 - ((float)i+yrand)/(float)h;
+		
+				x = scale[0]*((float)j/(float)w) + mins[0] + scale[0]*xrand/(float)w;
+				y = scale[1]*((float)i/(float)h) + mins[1] + scale[1]*yrand/(float)h;
+				z = scale[2] * bilinear_sample (hmtexdata, hm_h, hm_w, s, t) / 255.0 + mins[2];
+		
+				VectorSet (ret[counter].origin, x, y, z);
+				ret[counter].size = (float)size/16.0f;
+				ret[counter].type = channeltypes[k];
+		
+				counter++;
+			}
+		}
+	}
+	
+	free (texdata);
+	
+	return ret;
+}
+
+// TODO: separate function for decorations, currently this is kind of hacky.
+void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations_only, float oversampling_factor, int reduction_amt, char *buf)
 {
 	int i, j, va, w, h, vtx_w, vtx_h;
-	char	*hmtex_path = NULL, *vegtex_path = NULL;
+	char	*hmtex_path = NULL, *vegtex_path = NULL, *rocktex_path = NULL;
 	mesh_t	mesh;
 	vec3_t	scale;
 	char	*token;
 	byte	*texdata;
 	int		start_time;
 	
-	out->texture_path = NULL;
-	out->lightmap_path = NULL;
-	out->num_vegetation = 0;
-	out->vegetation = NULL;
+	memset (out, 0, sizeof(*out));
 	
 	buf = strtok (buf, ";");
 	while (buf)
@@ -65,30 +145,22 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_
 		if (!buf && !(buf = strtok (NULL, ";")))
 			break;
 
-		if (!Q_strcasecmp (token, "heightmap"))
-		{
-			hmtex_path = CopyString (COM_Parse (&buf));
-			if (!buf)
-				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting heightmap filename! (File %s is invalid)", name);
-		}
-		if (!Q_strcasecmp (token, "texture"))
-		{
-			out->texture_path = CopyString (COM_Parse (&buf));
-			if (!buf)
-				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting texture filename! (File %s is invalid)", name);
-		}
-		if (!Q_strcasecmp (token, "lightmap"))
-		{
-			out->lightmap_path = CopyString (COM_Parse (&buf));
-			if (!buf)
-				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting lightmap filename! (File %s is invalid)", name);
-		}
-		if (!Q_strcasecmp (token, "vegetation"))
-		{
-			vegtex_path = CopyString (COM_Parse (&buf));
-			if (!buf)
-				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting vegetation map filename! (File %s is invalid)", name);
-		}
+#define FILENAME_ATTR(cmd_name,out) \
+		if (!Q_strcasecmp (token, cmd_name)) \
+		{ \
+			out = CopyString (COM_Parse (&buf)); \
+			if (!buf) \
+				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting " cmd_name " filename! (File %s is invalid)", name); \
+		} 
+		
+		FILENAME_ATTR ("heightmap", hmtex_path)
+		FILENAME_ATTR ("texture", out->texture_path)
+		FILENAME_ATTR ("lightmap", out->lightmap_path)
+		FILENAME_ATTR ("vegetation", vegtex_path)
+		FILENAME_ATTR ("rocks", rocktex_path);
+		
+#undef FILENAME_ATTR
+		
 		if (!Q_strcasecmp (token, "mins"))
 		{
 			for (i = 0; i < 3; i++)
@@ -135,68 +207,22 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_
 	// map.
 	if (vegtex_path != NULL)
 	{
-		int		veg_w, veg_h, vegnum;
-		byte	*vegtexdata;
-		
-		LoadTGA (vegtex_path, &vegtexdata, &veg_w, &veg_h);
-		
-		if (vegtexdata == NULL)
-			Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", vegtex_path);
-		
-		Z_Free (vegtex_path);
-		
-		// Green pixels in the vegetation map indicate vegetation. 
-		
-		// Count how many vegetation sprites we should allocate.
-		for (i = 0; i < veg_w*veg_h; i++)
-		{
-			if (vegtexdata[i*4+1] != 0)
-				out->num_vegetation++;
-		}
-		
-		out->vegetation = Z_Malloc (out->num_vegetation * sizeof(terrainveg_t));
-		
-		vegnum = 0;
-		
-		// Fill in the vegetation sprites
-		for (i = 0; i < veg_h; i++)
-		{
-			for (j = 0; j < veg_w; j++)
-			{
-				float x, y, z, s, t, xrand, yrand;
-				byte amt;
-				
-				amt = vegtexdata[((veg_h-i-1)*veg_w+j)*4+1];
-				if (amt == 0)
-					continue;
-				
-				xrand = 2.0*(frand()-0.5);
-				yrand = 2.0*(frand()-0.5);
-				
-				s = ((float)j+xrand)/(float)veg_w;
-				t = 1.0 - ((float)i+yrand)/(float)veg_h;
-				
-				x = scale[0]*((float)j/(float)veg_w) + out->mins[0] + scale[0]*xrand/(float)veg_w;
-				y = scale[1]*((float)i/(float)veg_h) + out->mins[1] + scale[1]*yrand/(float)veg_h;
-				z = scale[2] * bilinear_sample (texdata, h, w, s, t) / 255.0 + out->mins[2];
-				
-				VectorSet (out->vegetation[vegnum].origin, x, y, z);
-				out->vegetation[vegnum].size = (float)amt/16.0f;
-				
-				vegnum++;
-			}
-		}
-		
-		free (vegtexdata);
+		// Green pixels in the vegetation map indicate grass.
+		const int channeltypes[3] = {-1, 0, -1};
+		out->vegetation = LoadTerrainDecorationType (vegtex_path, out->mins, scale, texdata, h, w, channeltypes, &out->num_vegetation);
 	}
 	
-	if (vegetation_only)
+	// Compile a list of all rock entities that should be added to the map
+	if (rocktex_path != NULL)
+	{
+		// Red pixels in the rock map indicate smallish rocks.
+		const int channeltypes[3] = {0, -1, -1};
+		out->rocks = LoadTerrainDecorationType (rocktex_path, out->mins, scale, texdata, h, w, channeltypes, &out->num_rocks);
+	}
+	
+	if (decorations_only)
 	{
 		free (texdata);
-		if (out->lightmap_path != NULL)
-			Z_Free (out->lightmap_path);
-		Z_Free (out->texture_path);
-		out->lightmap_path = out->texture_path = NULL;
 		return;
 	}
 	
@@ -271,4 +297,24 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean vegetation_
 	
 	out->num_triangles = mesh.num_verts;
 	out->num_triangles = mesh.num_tris;
+}
+
+void CleanupTerrainData (terraindata_t *dat)
+{
+#define CLEANUPFIELD(field) \
+	if (dat->field != NULL) \
+	{ \
+		Z_Free (dat->field); \
+		dat->field = NULL; \
+	}
+	
+	CLEANUPFIELD (texture_path)
+	CLEANUPFIELD (lightmap_path)
+	CLEANUPFIELD (vert_positions)
+	CLEANUPFIELD (vert_texcoords)
+	CLEANUPFIELD (tri_indices)
+	CLEANUPFIELD (vegetation)
+	CLEANUPFIELD (rocks)
+	
+#undef CLEANUPFIELD
 }

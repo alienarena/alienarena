@@ -33,7 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	MAX_LIGHTSTYLES		256
 
 #define MAX_FLARES      512
-#define MAX_GRASSES		4096
+#define MAX_GRASSES		8192
+#define MAX_ROCKS		8192
 #define MAX_BEAMS		128
 
 typedef struct
@@ -218,8 +219,9 @@ typedef struct {
 } cl_entity_pers_t;
 
 // Allocate room for entities sent by the server AND "fake" terrain entities
-// parsed directly out of the BSP on the client-side.
-cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS+MAX_MAP_MODELS];
+// parsed directly out of the BSP on the client-side AND terrain rock/pebble
+// entities.
+cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS+MAX_MAP_MODELS+MAX_ROCKS];
 
 
 #define ENTITY_FLAGS  68

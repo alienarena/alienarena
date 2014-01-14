@@ -259,6 +259,8 @@ extern void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 // "fake" terrain entities parsed directly out of the BSP on the client side.
 int			num_terrain_entities;
 entity_t	terrain_entities[MAX_MAP_MODELS];
+int			num_rock_entities;
+entity_t	rock_entities[MAX_ROCKS];
 
 //Renderer main loop
 extern int	R_Init( void *hinstance, void *hWnd );
@@ -825,7 +827,8 @@ extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);
-void Mod_LoadTerrainVegetation (char *path, vec3_t angles, vec3_t origin);
+// vegetation, rocks/pebbles, etc.
+void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 
 //Ragdoll
 int r_DrawingRagDoll;

@@ -28,19 +28,12 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	mod->num_triangles = data.num_triangles;
 	
 	tex = GL_FindImage (data.texture_path, it_wall);
-	Z_Free (data.texture_path);
-	
-	if (data.vegetation != NULL)
-		Z_Free (data.vegetation);
 	
 	if (!tex)
 		Com_Error (ERR_DROP, "Mod_LoadTerrainModel: Missing surface texture in %s!", mod->name);
 	
 	if (data.lightmap_path != NULL)
-	{
 		mod->lightmap = GL_FindImage (data.lightmap_path, it_wall);
-		Z_Free (data.lightmap_path);
-	}
 	
 	VectorCopy (data.mins, mod->mins);
 	VectorCopy (data.maxs, mod->maxs);
@@ -109,14 +102,10 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	
 	Terrain_LoadVBO (mod, data.vert_positions, vnormal, vtangent, data.vert_texcoords, data.tri_indices);
 	
-	Z_Free (data.vert_positions);
-	Z_Free (data.vert_texcoords);
-	Z_Free (vnormal);
-	Z_Free (vtangent);
-	Z_Free (data.tri_indices);
+	CleanupTerrainData (&data);
 }
 
-void Mod_LoadTerrainVegetation (char *path, vec3_t angles, vec3_t origin)
+void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 {
 	char *buf;
 	int len;
@@ -137,9 +126,6 @@ void Mod_LoadTerrainVegetation (char *path, vec3_t angles, vec3_t origin)
 	
 	FS_FreeFile ((void *)buf);
 	
-	if (data.vegetation == NULL)
-		return;
-	
 	// TODO: transformed terrain model support!
 	for (i = 0; i < data.num_vegetation; i++)
 	{
@@ -150,5 +136,34 @@ void Mod_LoadTerrainVegetation (char *path, vec3_t angles, vec3_t origin)
 		Mod_AddVegetation (org, up, GL_FindImage ("gfx/grass.tga", it_wall)->texnum, color, data.vegetation[i].size, "gfx/grass.tga", 0);
 	}
 	
-	Z_Free (data.vegetation);
+	num_rock_entities = 0;
+	for (i = 0; i < data.num_rocks; i++)
+	{
+		entity_t *ent;
+		static char *rockmeshes[] =
+		{
+			"maps/meshes/rocks/rock1.md2",
+			"maps/meshes/rocks/rock2.md2",
+			"maps/meshes/rocks/rock3.md2",
+			"maps/meshes/rocks/rock4.md2",
+			"maps/meshes/rocks/rock5.md2"
+		};
+		
+		if (num_rock_entities == MAX_ROCKS)
+			break;
+	
+		ent = &rock_entities[num_rock_entities];
+		memset (ent, 0, sizeof(*ent));
+		ent->number = MAX_EDICTS+MAX_MAP_MODELS+num_rock_entities++;
+		
+		ent->flags |= RF_FULLBRIGHT;
+		
+		VectorAdd (origin, data.rocks[i].origin, ent->origin);
+		
+		ent->angles[YAW] = 360.0*frand();
+		
+		ent->model = R_RegisterModel (rockmeshes[rand()%5]);
+	}
+	
+	CleanupTerrainData (&data);
 }

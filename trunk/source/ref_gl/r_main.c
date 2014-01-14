@@ -783,6 +783,58 @@ void R_DrawTerrain (void)
 	}
 	
 	// TODO: will these models ever be transparent?
+	
+	for (i=0 ; i<num_rock_entities ; i++)
+	{
+		currententity = &rock_entities[i];
+		
+		if (currententity->model && r_shaders->integer)
+		{
+			rs=(rscript_t *)currententity->model->script;
+
+			//custom player skin (must be done here)
+			if (currententity->skin)
+			{
+			    rs = currententity->skin->script;
+                if(rs)
+                    RS_ReadyScript(rs);
+            }
+
+			if (rs)
+				currententity->script = rs;
+			else
+				currententity->script = NULL;
+		}
+
+		currentmodel = currententity->model;
+		
+		//get distance
+		VectorSubtract(r_origin, currententity->origin, dist);
+		
+		//cull very distant rocks
+		if (VectorLength (dist) > LOD_DIST*8.0)
+			continue;
+		
+		//set lod if available
+		if(VectorLength(dist) > LOD_DIST*2.0)
+		{
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > LOD_DIST)
+		{
+			if(currententity->lod1)
+				currentmodel = currententity->lod1;
+		}
+
+		if (!currentmodel)
+		{
+			R_DrawNullModel ();
+			continue;
+		}
+		
+		R_Mesh_Draw ();
+	}
 }
 
 extern int r_drawing_fbeffect;
