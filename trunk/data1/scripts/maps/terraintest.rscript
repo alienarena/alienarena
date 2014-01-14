@@ -2,6 +2,11 @@ terraintest1_texture
 {
 	{
 		map textures/terraintest/plateau1_blendtex.tga
-		blendmap 3 400 textures/arena8/crackedrock1.tga 400 textures/arena8/crackedrock4.tga 200 textures/arena8/grass2.tga
+		map2 textures/terraintest/plateau1_blendtex2.tga
+		blendmap 4
+			400 textures/arena8/crackedrock1.tga
+			400 textures/arena8/crackedrock4.tga
+			200 textures/arena8/grass2.tga
+			400 textures/arena8/sand2.tga
 	}
 }
