@@ -290,8 +290,10 @@ static qboolean R_Mesh_CullModel (void)
 	if ((currententity->flags & RF_WEAPONMODEL))
 		return r_lefthand->integer == 2;
 	
-	if (r_worldmodel && currentmodel->type != mod_terrain) {
+	// HACK: culling rocks is currently too slow.
+	if (r_worldmodel && currentmodel->type != mod_terrain && !strstr (currentmodel->name, "rock")) {
 		//occulusion culling - why draw entities we cannot see?
+		// TODO: this looks like another job for CM_FastTrace.
 		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
@@ -670,7 +672,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	for (i=0;i<model_dlights_num;i++)
 		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize(lightcolor);
-
+	
 	frontlerp = 1.0 - currententity->backlerp;
 	
 	if (modtypes[currentmodel->type].morphtarget && lerped)

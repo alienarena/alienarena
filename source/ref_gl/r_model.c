@@ -213,7 +213,7 @@ static void R_ParseTerrainModelEntity (char *match, char *block)
 			Com_SkipRestOfLine(&bl);
 	}
 	
-	Mod_LoadTerrainVegetation (ent->model->name, ent->angles, ent->origin);
+	Mod_LoadTerrainDecorations (ent->model->name, ent->angles, ent->origin);
 }
 
 static void R_ParseTerrainEntities (void)
