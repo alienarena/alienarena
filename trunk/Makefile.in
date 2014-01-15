@@ -4374,6 +4374,7 @@ nobase_nodist_textures_DATA = \
 	data1/textures/terraintest/axialcross.tga \
 	data1/textures/terraintest/plateau1.tga \
 	data1/textures/terraintest/plateau1_blendtex.tga \
+	data1/textures/terraintest/plateau1_blendtex2.tga \
 	data1/textures/terraintest/plateau1_lightmaptex.tga \
 	data1/textures/terraintest/plateau1_rocks.tga \
 	data1/textures/terraintest/plateau1_vegetation.tga \
