@@ -915,6 +915,15 @@ static char rscript_fragment_program[] = STRINGIFY (
 		}
 		else
 		{
+			vec4 mainColor2 = vec4 (0.0);
+			if (numblendtextures > 3)
+				mainColor2 = texture2D (mainTexture2, gl_TexCoord[0].st);
+			
+			float tmp =	mainColor.r + mainColor.g + mainColor.b +
+						mainColor2.r + mainColor2.g + mainColor2.b;
+			mainColor.rgb /= tmp;
+			mainColor2.rgb /= tmp;
+			
 			vec3 blend_weights = abs (normalize (normal));
 			blend_weights = (blend_weights - vec3 (0.2)) * 7;
 			blend_weights = max (blend_weights, 0);
@@ -935,7 +944,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales.b) * mainColor.b;
 					if (numblendtextures > 3)
 					{
-						vec4 mainColor2 = texture2D (mainTexture2, gl_TexCoord[0].st);
 						if (mainColor2.r > 0.0)
 							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales2.r) * mainColor2.r;
 						if (numblendtextures > 4)
