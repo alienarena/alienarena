@@ -18,6 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifndef CL_KEYS_H_
+#define CL_KEYS_H_
+
 //
 // these are the key numbers that should be passed to Key_Event
 //
@@ -151,3 +154,5 @@ void Key_SetBinding (int keynum, char *binding);
 void Key_ClearStates (void);
 int Key_GetKey (void);
 void Key_ClearTyping (void);
+
+#endif /* #ifndef CL_KEYS_H_ */

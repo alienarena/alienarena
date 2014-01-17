@@ -1,3 +1,6 @@
+#ifndef R_QGL_H_
+#define R_QGL_H_
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 
@@ -21,8 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ** QGL.H
 */
 
-#ifndef __QGL_H__
-#define __QGL_H__
 
 #if defined WIN32_VARIANT
 #  include <windows.h>
@@ -469,4 +470,4 @@ extern void     (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 
 extern void		(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-#endif /* __QGL_H__ */
+#endif /* #ifndef R_QGL_H_ */

@@ -216,9 +216,15 @@ void G_RunFrame (void);
 int ACESP_FindBotNum(void);
 extern long filelength(int);
 extern void ED_CallSpawn (edict_t *ent);
+extern void G_Ban( char *ip );
 
 static size_t szr;
 
+/* -jjb-
+ * portable file length. 
+ * duplicates engine function, consider adding to CRX/Server  
+ *
+ */
 static int g_filelength( FILE *f )
 {
 	int length = -1;
@@ -379,9 +385,9 @@ edict_t *CreateTargetChangeLevel(char *map)
 
 
 /**
- * \brief Log scores and stats
+ * @brief Log scores and stats
  *
- * \detail This is a somewhat crude formatted dump of game information to
+ * @detail This is a somewhat crude formatted dump of game information to
  *         the server console and log file. This version is mostly intended
  *         to collect some data about bot targeting accuracy.
  *
@@ -413,7 +419,7 @@ edict_t *CreateTargetChangeLevel(char *map)
  * 7 : bomb_touch         : Weapon_Bomber, Weapon_Vaporizer
  * 7 : fire_vaporizer     : Weapon_Vaporizer
  * 8 : fire_violator      : Weapon_Violator
-
+ *
  * --- from sample.cfg accuracy
  * weapon_hit[] :to: bot weapacc[]
  * 0: 1: blaster
@@ -1404,64 +1410,6 @@ void ExitLevel (void)
 
 /*
 ================
-G_Ban
-
-Ban player
-================
-*/
-/*
-=================
-SV_WriteIP_f
-=================
-*/
-void G_Ban (char *ip)
-{
-	FILE	*f;
-	char	name[MAX_OSPATH];
-	cvar_t	*game;
-	int		i;
-
-	//add to banlist file
-	game = gi.cvar("game", "", 0);
-
-	if (!*game->string)
-		sprintf (name, "%s/listip.cfg", GAMEVERSION);
-	else
-		sprintf (name, "%s/listip.cfg", game->string);
-
-	safe_cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
-
-	f = fopen (name, "ab");
-	if (!f)
-	{
-		safe_cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
-		return;
-	}
-
-	fprintf (f, "sv addip %s\n", ip);
-
-	fclose (f);
-
-	//add to current ban list
-	for (i=0 ; i<numipfilters ; i++)
-		if (ipfilters[i].compare == 0xffffffff)
-			break;		// free spot
-	if (i == numipfilters)
-	{
-		if (numipfilters == MAX_IPFILTERS)
-		{
-			safe_cprintf (NULL, PRINT_HIGH, "IP filter list is full\n");
-			return;
-		}
-		numipfilters++;
-	}
-
-	if (!StringToFilter (ip, &ipfilters[i]))
-		ipfilters[i].compare = 0xffffffff;
-}
-
-/*
-================
 G_NameMatch
 
  A name entered in the console may (unlikely) or may not have color codes.
@@ -1557,6 +1505,17 @@ static edict_t* find_kick_target( const char *name )
 	return kick_target;
 }
 
+/**
+ * @brief Determine call vote result and implement action
+ *
+ * @detail Supports call vote for these commands and cvar settings:
+ *  kick, kickban, fraglimit, timelimit, map
+ *
+ * -jjb- ipfilter and kickban needs rethink.
+ *    maybe kicks of players need to be forwarded to CRX/Server
+ *    
+ *
+ */
 void G_ParseVoteCommand (void)
 {
 	int i, j;

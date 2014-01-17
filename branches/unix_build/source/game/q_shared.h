@@ -1,3 +1,6 @@
+#ifndef Q_SHARED_H_
+#define Q_SHARED_H_
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 
@@ -20,35 +23,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // q_shared.h -- included first by ALL program modules
 
-#if !defined Q_SHARED_H_
-#define Q_SHARED_H_
 
-#if !defined UNIX_VARIANT
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <ctype.h>
+// these need to be #ifdef HAVE'd
+// -jjb- effect on WINDOWS?
+/* #if !defined UNIX_VARIANT */
+/* #include <assert.h> */
+/* #include <math.h> */
+/* #include <stdio.h> */
+/* #include <stdarg.h> */
+/* #include <stddef.h> */
+/* #include <string.h> */
+/* #include <stdlib.h> */
+/* #include <time.h> */
+/* #include <ctype.h> */
 
-typedef unsigned char 		byte;
+/* typedef unsigned char 		byte; */
 
-// TODO: check for implementation defined boolean
-// typedef enum {false, true}	qboolean;
-#ifndef true
-# define false 0
-# define true 1
-#endif
-typedef int qboolean;
+/* // TODO: check for implementation defined boolean */
+/* // typedef enum {false, true}	qboolean; */
+/* #ifndef true */
+/* # define false 0 */
+/* # define true 1 */
+/* #endif */
+/* typedef int qboolean; */
 
-#endif
+/* #endif */
 
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
+/* #ifndef NULL */
+/* #define NULL ((void *)0) */
+/* #endif */
+
 
 
 // angle indexes
@@ -245,6 +249,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 //=============================================
 
+// -jjb-
 /* FIXME: Beware - _vsnprintf does not end with \0 - vsnprintf (*nix) does */
 #if defined WIN32_VARIANT
 #define vsnprintf	_vsnprintf
@@ -1030,4 +1035,4 @@ enum compressiontypes_e  {
     last_compressiontype_known
 };
 
-#endif  /* Q_SHARED_H_ */
+#endif  /* #ifndef Q_SHARED_H_ */

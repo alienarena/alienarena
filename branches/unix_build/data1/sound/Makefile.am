@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-sounddir=${pkgdatadir}/data1/sound
+sounddir=${datadir}/alienarena/data1/sound
 
 nobase_dist_sound_DATA = \
 	doors/dr1_end.wav \

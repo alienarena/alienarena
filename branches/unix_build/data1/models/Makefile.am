@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-modelsdir=${pkgdatadir}/data1/models
+modelsdir=${datadir}/alienarena/data1/models
 
 nobase_dist_models_DATA = \
 	cow/helmet.md2 \

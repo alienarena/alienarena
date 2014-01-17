@@ -14,7 +14,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # A copy of the GNU General Public License is included;
-# see the file, COPYING.
+# see the file, COPYING. TODO: make this GPL2,
+#   COPYING for COR licenses,
+#   separate data pkg with COR data license
 #
 
 # configure.ac for
@@ -28,6 +30,8 @@
 #  Default is changed to disable for silent rules.
 #  Darwin-related macros are modified per MacPorts practice. To be verified.
 #
+# TODO: alternate install alternatives
+#
 
 AC_PREREQ([2.69])
 AC_INIT([alienarena],[7.66.1],[alienrace@comcast.net])
@@ -37,10 +41,8 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
-dnl aa-tactical-demo as a "nested" project
-
 dnl insure default prefix
-AX_EXPAND_PREFIX
+dnl AX_EXPAND_PREFIX
 
 dnl 1.14 = require automake 1.14 or greater
 dnl foreign = do not apply GNU doc requirements
@@ -55,6 +57,24 @@ dnl autotools generated files will not be updated otherwise.
 dnl without --enable-maintainer-mode, autotools programs are not needed
 dnl to build the program, which is better for non-developers.
 AM_MAINTAINER_MODE
+
+dnl
+dnl Option for specifying whether to include "nested" 
+dnl  data1 package for make install and make distcheck.
+dnl
+AC_MSG_CHECKING([whether to include game resources package])
+AC_ARG_WITH([data1pkg],
+	[AS_HELP_STRING([--with(out)-data1pkg],
+			[include game resources from data1 directory (default:with)])
+		],[
+		with_data1pkg=${withval}],[
+		with_data1pkg=yes
+])
+AS_IF([ test "x${with_data1pkg}" != xno ],[
+	AC_CONFIG_SUBDIRS([data1])],[
+	])
+AC_MSG_RESULT([${with_data1pkg}])
+AM_CONDITIONAL([WITH_DATA1PKG],[ test "x${with_data1pkg}" = xyes ])
 
 #
 # Checks for programs.
@@ -119,7 +139,7 @@ dnl   The dependency checks are below, under the BUILD_CLIENT conditional
 dnl
 AS_CASE([ ${unix_host} ],
 	[ darwin ],
-	  [AS_IF([ test x"${gl_dlopen_path}" = xdefault ],
+	  [AS_IF([ test "x${gl_dlopen_path}" = xdefault ],
 			[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
 				["libGL.dylib"],
 				[OpenGL dynamic lib name])
@@ -180,7 +200,7 @@ AC_ARG_ENABLE([documents],
 		[Disable document installation (default: no)])],
 	[no_docs=${documents}],
 	[no_docs=no])
-AM_CONDITIONAL([INSTALL_DOCS],[ test "x${no_docs}" = "xno" ])
+AM_CONDITIONAL([INSTALL_DOCS],[ test "x${no_docs}" = xno ])
 
 dnl
 dnl Option for specifying where icon is installed.
@@ -209,11 +229,13 @@ dnl Allow COR_GAMES_SUBDIR to be installed in a HOME subdir
 dnl Also COR_GAMES_DOT to allow removal of hidden directory dot prefix
 dnl make sure  [DOT]cor_games[SUFFIX] can only be in HOME somewhere
 dnl
+dnl TODO: for first cut to trunk, back to .codered, with relative path fix
+dnl
 cor_games_homedir=".cor_games"
 AC_ARG_VAR([COR_GAMES_HOMEDIR],
 	[(User configuration and data directory (default:.cor_games)])
 
-AS_IF([test "x${COR_GAMES_HOMEDIR}" = "x"],[
+AS_IF([ test "x${COR_GAMES_HOMEDIR}" = x ],[
 	COR_GAMES_HOMEDIR=${cor_games_homedir}],[
 	cor_games_homedir=${COR_GAMES_HOMEDIR}
 	])
@@ -240,11 +262,11 @@ AM_COND_IF([BUILD_CLIENT],[
 	dnl  (ref: dlopen(3) for Mac OS X.)
 	dnl  see above. as of 2013-12, consult with ryandesign@macports
 	gl_dlopen_path=default
-	AS_IF([ test x"${unix_host}" = xdarwin ],[
+	AS_IF([ test "x${unix_host}" = xdarwin ],[
 		AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
 		AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
 		AC_MSG_RESULT([${GL_LIBDIR}])
-		AS_IF([test x"${GL_LIBDIR}" = x],[
+		AS_IF([ test "x${GL_LIBDIR}" = x ],[
 			gl_dlopen_path=${x_libraries}],[
 			gl_dlopen_path=${GL_LIBDIR}])
 	])
@@ -252,7 +274,7 @@ AM_COND_IF([BUILD_CLIENT],[
 	AX_PTHREAD([],
 		[AC_MSG_ERROR(["Required pthreads support not found (or invalid CFLAGS)."])])
 	dnl This might be a workaround for DSO missing pthread library error:
-	AS_IF([ test "x$PTHREAD_LIBS" = "x" ],[PTHREAD_LIBS="-pthread"])
+	AS_IF([ test "x${PTHREAD_LIBS}" = x ],[PTHREAD_LIBS="-pthread"])
 
 	dnl
 	dnl zlib support
@@ -266,13 +288,13 @@ AM_COND_IF([BUILD_CLIENT],[
 		[],
 		[with_zlib=check])
 	have_zlib=no
-	AS_IF([ test "x$with_zlib" != "xno" ],[
+	AS_IF([ test "x${with_zlib}" != xno ],[
 		PKG_CHECK_MODULES([ZLIB],[zlib],[
 			have_zlib=yes
 			AC_DEFINE([HAVE_ZLIB],1,[Enable ZLib support])
 		],[
 			have_zlib=no
-			AS_IF([ test "x$with_zlib" = "xyes" ],[
+			AS_IF([ test "x${with_zlib}" = xyes ],[
 				AC_MSG_FAILURE([--with-zlib specified, but the library or headers could not be found])
 			])
 		])
@@ -301,13 +323,13 @@ AM_COND_IF([BUILD_CLIENT],[
 		[],
 		[with_xf86vm=check])
 	have_Xxf86vm=no
-	AS_IF([ test "x$with_xf86vm" != "xno" ],[
+	AS_IF([ test "x${with_xf86vm}" != xno ],[
 		PKG_CHECK_MODULES([XXF86VM],[xxf86vm],[
 			have_Xxf86vm=yes
 			AC_DEFINE([HAVE_XXF86VM],1,[Enable X86 VidMode support])
 		],[
 			have_Xxf86vm=no
-			AS_IF([ test "x$with_xf86vm" = "xyes" ],[
+			AS_IF([ test "x${with_xf86vm}" = xyes ],[
 				AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
 			])
 		])
@@ -327,7 +349,7 @@ AM_COND_IF([BUILD_CLIENT],[
 		[],
 		[with_xf86dga=no])
 	have_Xxf86dga=no
-	AS_IF([ test "x$with_xf86dga" != "xno" ],[
+	AS_IF([ test "x$with_xf86dga" != xno ],[
 		PKG_CHECK_MODULES([XXF86DGA],[xxf86dga],[
 			have_Xxf86dga=yes
 			AC_DEFINE([HAVE_XXF86DGA],1,[Enable X86 DGA support])
@@ -337,7 +359,7 @@ AM_COND_IF([BUILD_CLIENT],[
 		 ])
 		 ],[
 		 have_Xxf86dga=no
-		 AS_IF([ test "x$with_xf86dga" = "xyes" ],[
+		 AS_IF([ test "x${with_xf86dga}" = xyes ],[
 			AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
 			])
 		])
@@ -358,6 +380,11 @@ dnl
 #
 # Checks for header files
 #
+dnl TODO: organize for portability variations
+dnl priority? string.h and strings.h
+dnl ?w32 manual config.h
+dnl TODO: time function variants
+
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h inttypes.h limits.h malloc.h \
  memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h \
  sys/ioctl.h sys/param.h sys/socket.h time.h sys/time.h termios.h unistd.h])
@@ -415,6 +442,8 @@ AC_TYPE_UINT64_T
 AC_CHECK_TYPES([ptrdiff_t])
 AC_CHECK_TYPES([uintptr_t])
 
+dnl TODO: AC_CHECK_TYPES([]) for Linux only sig typedef
+
 #
 # Checks for library functions.
 #
@@ -429,6 +458,7 @@ AC_CHECK_FUNCS([clock_gettime floor getcwd gethostbyname gettimeofday \
   isascii memmove memset mkdir munmap pow putenv select socket sqrt \ 
   strchr strdup strerror strrchr strstr strtoul])
 
+dnl maybe remove w32 specials, just in manual w32 config.h
 AC_CHECK_FUNCS([ _begin_thread _getcwd _mkdir _putenv _strdup _stricmp \
   _strnicmp unlink _unlink ])
 
@@ -441,7 +471,7 @@ AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
 
 dnl
-dnl common definitions
+dnl common definitions. TODO: incorporate in sources and eliminate
 dnl
 AH_BOTTOM([
 #if defined UNIX_VARIANT
@@ -455,19 +485,6 @@ AH_BOTTOM([
 AC_CONFIG_FILES([ 
 				Makefile 
 				source/Makefile
-				data1/Makefile 
-				data1/env/Makefile
-				data1/gfx/Makefile
-				data1/levelshots/Makefile
-				data1/maps/Makefile
-				data1/models/Makefile
-				data1/particles/Makefile
-				data1/pics/Makefile
-				data1/players/Makefile
-				data1/scripts/Makefile
-				data1/sound/Makefile
-				data1/textures/Makefile
-				data1/vehicles/Makefile
 				botinfo/Makefile
 ])
 
@@ -481,13 +498,13 @@ AC_ARG_ENABLE([build-status],[AS_HELP_STRING([--disable-build-status],
 			[hide the status message at the end of the configuration script (defdault:no)])],
 			[hide_status=${enableval}],[hide_status=no])
 
-AS_IF([test "x$hide_status" = "xno"],[
+AS_IF([ test "x${hide_status}" = xno ],[
 	AS_ECHO()
 	AS_ECHO(["-------------------------------------------"])
 	AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
 	AS_ECHO([" OS: .................... ${host_os}"])
 	AS_ECHO([" CPU: ................... ${host_cpu}"])
-	AS_IF([test "x$build_client" = "xyes"],[
+	AS_IF([ test "x${build_client}" = xyes ],[
 			dedicated_only=no],[
 			dedicated_only=yes])
 	AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
@@ -513,7 +530,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
 			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
-			AS_IF([ test x"${unix_host}" = xdarwin ],[
+			AS_IF([ test "x${unix_host}" = xdarwin ],[
 				AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 			])
 		])

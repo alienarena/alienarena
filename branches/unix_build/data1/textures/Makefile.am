@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-texturesdir=${pkgdatadir}/data1/textures
+texturesdir=${datadir}/alienarena/data1/textures
 
 nobase_dist_textures_DATA = \
 	alien/support5.tga \

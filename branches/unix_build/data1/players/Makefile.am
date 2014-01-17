@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-playersdir=${pkgdatadir}/data1/players
+playersdir=${datadir}/alienarena/data1/players
 
 nobase_dist_players_DATA = \
 	commander/blue_i.jpg \

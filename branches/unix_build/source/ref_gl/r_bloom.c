@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+// -jjb-
 #include "r_local.h"
 
 /*
@@ -194,7 +195,7 @@ void R_Bloom_InitEffectTexture( void )
 	//make sure bloom size doesn't have stupid values
 	if( BLOOM_SIZE > screen_texture_width ||
 		BLOOM_SIZE > screen_texture_height )
-		BLOOM_SIZE = min( screen_texture_width, screen_texture_height );
+		BLOOM_SIZE = MIN( screen_texture_width, screen_texture_height );
 
 	if( BLOOM_SIZE != r_bloom_sample_size->integer )
 		Cvar_SetValue ("r_bloom_sample_size", BLOOM_SIZE);

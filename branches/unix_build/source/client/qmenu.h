@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#ifndef __QMENU_H__
-#define __QMENU_H__
+#ifndef CL_QMENU_H_
+#define CL_QMENU_H_
 
 // TODO: This stuff could be useful outside the menu as well.
 
@@ -110,20 +110,20 @@ struct \
 // The reason this macro is so odd is because you need to be able to do 
 // CHASELINK(var) = value directly.
 #define CHASELINK(l) \
-(*\
-	(\
-		((l).status == linkstatus_link)?\
+(* \
+	( \
+		((l).status == linkstatus_link) ? \
 		(	/*	Macro evaluates to (*((l).ptr)) */ \
-			(l).ptr\
-		)\
-		:\
+			(l).ptr \
+		) \
+		: \
 		(	/*	Macro evaluates to (*(&((l).val))) which simplifies to (l).val
 				The compiler should figure that out and come up with something
 				you can assign directly.
 			*/ \
-			&((l).val)\
-		)\
-	)\
+			&((l).val) \
+		) \
+	) \
 )
 
 #define RESETLINK(l,v) \
@@ -146,8 +146,6 @@ struct \
 		(l).val = v; \
 	}\
 }
-
-
 
 #define MAXMENUITEMS	64
 
@@ -350,26 +348,34 @@ int		Menu_PredictSize (const char *str);
 // utility layout functions
 void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *celltype_size, menuframework_s *header, menuframework_s *rows, void *columns, const char **contents);
 
-#if !defined min
-#define min(a,b) (((a)<(b)) ? (a) : (b))
-#endif
+// -jjb- 
+/* #if !defined min */
+/* #define min(a,b) (((a)<(b)) ? (a) : (b)) */
+/* #endif */
 
-#if !defined max
-#define max(a,b) (((a)>(b)) ? (a) : (b))
-#endif
+/* #if !defined max */
+/* #define max(a,b) (((a)>(b)) ? (a) : (b)) */
+/* #endif */
 
-#if !defined clamp
-#define clamp(x,low,high) (min(max(low,x),high))
-#endif
+/* #if !defined clamp */
+/* #define clamp(x,low,high) (min(max(low,x),high)) */
+/* #endif */
 
 #define Item_GetHeight(i) \
-	(max(CHASELINK((i).generic.lsize).y, CHASELINK((i).generic.rsize).y))
+	(MAX(CHASELINK((i).generic.lsize).y, CHASELINK((i).generic.rsize).y))
+/* #define Item_GetHeight(i) \ */
+/* 	(max(CHASELINK((i).generic.lsize).y, CHASELINK((i).generic.rsize).y)) */
 
 #define Menu_GetCtrX(m) ((m).x + CHASELINK((m).lwidth))
 #define Item_GetX(i) (CHASELINK((i).generic.x) + Menu_GetCtrX(*((i).generic.parent)))
 
 #define Menu_TrueHeight(m) \
-	((m).maxheight!=0?min((m).maxheight,CHASELINK((m).height)):CHASELINK((m).height))
+	((m).maxheight != 0 ? \
+	 MIN( (m).maxheight,  CHASELINK((m).height)) : \
+	 CHASELINK((m).height))
+
+/* #define Menu_TrueHeight(m) \ */
+/* 	((m).maxheight!=0?min((m).maxheight,CHASELINK((m).height)):CHASELINK((m).height)) */
 
 #define Menu_TrueWidth(m) \
 	(CHASELINK((m).lwidth) + CHASELINK((m).rwidth))
@@ -386,4 +392,4 @@ void	Menu_MakeTable (menuframework_s *menu, int nrows, int ncolumns, size_t *cel
 
 struct FNT_window_s	menu_box;
 
-#endif
+#endif /* #ifndef CL_QMENU_H_ */

@@ -1,3 +1,6 @@
+#ifndef G_LOCAL_H_
+#define G_LOCAL_H_
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 
@@ -19,7 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_local.h -- local definitions for game module
 
+
 #include "q_shared.h"
+// -jjb-
+/* #include "acesrc/acebot.h" */
 
 // define GAME_INCLUDE so that game.h does not define the
 // short, server-visible gclient_t and edict_t structures,
@@ -1758,7 +1764,4 @@ extern	cvar_t	*g_antilag;
 extern  cvar_t	*g_antilagdebug;
 extern	cvar_t	*g_antilagprojectiles;
 
-// ACEBOT_ADD
-#include "acesrc/acebot.h"
-// ACEBOT_END
-
+#endif /* #ifndef G_LOCAL_H_ */

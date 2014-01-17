@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 #include "m_player.h"
+// -jjb-
+#include "acesrc/acebot.h"
 
 /* Number of gibs to throw on death with lots of damage (including Client Head, where applicable) */
 #define DEATH_GIBS_TO_THROW 5

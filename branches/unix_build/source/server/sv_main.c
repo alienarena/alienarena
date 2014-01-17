@@ -90,6 +90,13 @@ static void SV_LogEvent( netadr_t address , const char * event , const char * na
 	if ( !( sv_iplogfile && sv_iplogfile->string[0] ) )
 		return;
 
+/*** -jjb-  FIX file system access
+	 put this in top cor_games subdirectory
+     Windows needs a cor_games subdirectory
+	 add timestamp, and maybe other info
+	    bans, rcon access
+
+ ***/
 
 	file = fopen( sv_iplogfile->string , "a" );
 	if ( !file ) {
@@ -99,6 +106,7 @@ static void SV_LogEvent( netadr_t address , const char * event , const char * na
 	fprintf( file , "%s\t%s\t%d\t%s\r\n" , NET_AdrToString(address) , event ,
 			( name != NULL ) , ( name != NULL ) ? name : "" );
 	fclose( file );
+/***************************/
 }
 
 

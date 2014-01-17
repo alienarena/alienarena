@@ -23,7 +23,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
+// -jjb-
 #include <ctype.h>
+
 #if defined WIN32_VARIANT
 #include <winsock.h>
 #endif
@@ -68,7 +70,7 @@ extern cvar_t *background_music_vol;
 extern cvar_t *fov;
 extern cvar_t *stats_password;
 
-static char *menu_in_sound		= "misc/menu1.wav";
+// static char *menu_in_sound		= "misc/menu1.wav"; UNUSED -jjb-
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
 
@@ -94,7 +96,7 @@ void M_Menu_Main_f (void);
 		static void M_Menu_Keys_f (void);
 	static void M_Menu_Quit_f (void);
 
-	static void M_Menu_Credits( void );
+// static void M_Menu_Credits( void ); UNUSED -jjb-
 
 qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
@@ -367,12 +369,21 @@ int M_Interp (int progress, int target)
 
 		// The animation speeds up as it gets further from the starting point
 		// and slows down twice as fast as it approaches the ending point.
+#if 1
+// -jjb- 
+		int incr_a = abs( ((11*target)/10) - progress ) / 2;
+		int incr_b = abs(progress) * 40 ;
+		int incr_c = abs(target) / 10;
+		increment = MIN( incr_a, incr_b );
+		increment = MAX( increment, incr_c );
+#else
 		increment = min(	abs((11*target)/10-progress)/2,
 							abs(progress) )*40;
 		
 		// Clamp the animation speed at a minimum so it won't freeze due to
 		// rounding errors or take too long at either end.
 		increment = max (increment, abs(target)/10);
+#endif
 
 		// Scale the animation by frame time so its speed is independent of 
 		// framerate. At very high framerates, each individual frame might be
@@ -391,13 +402,13 @@ int M_Interp (int progress, int target)
 	{
 		// increasing
 		progress += increment;
-		progress = min (progress, target); // make sure we don't overshoot
+		progress = MIN( progress, target ); // make sure we don't overshoot
 	}
 	else if (target < 0)
 	{
 		// decreasing
 		progress -= increment;
-		progress = max (progress, target); // make sure we don't overshoot
+		progress = MAX( progress, target ); // make sure we don't overshoot
 	}
 	
 	return progress;
@@ -1029,13 +1040,26 @@ void M_Main_Draw (menuvec2_t offset)
 		Draw_GetPicSize( &w, &h, litname );
 		xstart = xoffset + 100*widscale + (20*i*widscale);
 		if (xstart < 0)
+		{
+#if 1
+// -jjb-
+			int xstart_a  = -xstart;
+			int xstart_b = (8-i) * 20 * widscale;
+			xstart += MIN( xstart_a, xstart_b);
+#else
 			xstart += min(-xstart, (8-i)*20*widscale);
+#endif
+		}
 		xend = xstart+w*widscale;
 		hscale = 1;
 		if (xstart < 0)
 		{
 			if (xend < 150*widscale)
-				xend = min (viddef.width+offset.x, 150*widscale);
+			{
+				int xend_a = viddef.width + offset.x;
+				int xend_b = widscale * 150;
+				xend = MIN( xend_a, xend_b );
+			}
 			xstart = 0;
 			if (xend < 50*widscale)
 				return;
@@ -1507,7 +1531,7 @@ static void SliderOptionFunc (void *_self)
 static void NumberFieldOptionFunc (void *_self)
 {
 	menufield_s *self;
-	int num, clamped_num;
+	int num, clamped_num, clamp_high;
 	const fieldsize_t *fieldsize;
 	const char *cvarname;
 	
@@ -1517,10 +1541,12 @@ static void NumberFieldOptionFunc (void *_self)
 	fieldsize = (const fieldsize_t *)self->generic.localptrs[0];
 	
 	num = atoi (self->buffer);
-	clamped_num = clamp (num, fieldsize->min_value, fieldsize->max_value);
+	clamped_num = CLAMP( num, fieldsize->min_value, fieldsize->max_value );
 	
 	Com_sprintf (self->buffer, sizeof(self->buffer), "%d", num);
-	self->cursor = clamp (self->cursor, 0, strlen (self->buffer));
+	
+	clamp_high = strlen( self->buffer );
+	self->cursor = CLAMP( self->cursor, 0, clamp_high );
 	if (num != clamped_num)
 		Com_sprintf (self->buffer, sizeof(self->buffer), "%d  ^1(%d)", num, clamped_num);
 	
@@ -1634,7 +1660,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			item->itemnames = optionname->names;
 			item->generic.callback = TextVarSpinOptionFunc;
 			// FIXME HACK
-			if (item->itemnames == font_names)
+			if ( (void*)item->itemnames == (void*)font_names )
 			{
 				item->generic.itemsizecallback = FontSelectorSizeFunc;
 				item->generic.itemdraw = FontSelectorDrawFunc;
@@ -1671,7 +1697,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			item->minvalue = limit->slider_min;
 			item->maxvalue = limit->slider_max;
 			item->generic.callback = SliderOptionFunc;
-			item->generic.localptrs[0] = limit;
+			item->generic.localptrs[0] = (void*)limit; // -jjb-
 			break;
 		
 		case option_numberfield:
@@ -1682,7 +1708,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			item->cursor = 0;
 			memset (item->buffer, 0, sizeof(item->buffer));
 			item->generic.callback = NumberFieldOptionFunc;
-			item->generic.localptrs[0] = fieldsize;
+			item->generic.localptrs[0] = (fieldsize_t*)fieldsize;
 			break;
 	}
 	
@@ -2989,7 +3015,9 @@ static menuframework_s	s_player_config_screen;
 
 static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
 
+#if 0
 LINKABLE(int) option_screen_height;
+#endif
 
 static void OptionScreenFunc (void *_self)
 {
@@ -3601,7 +3629,12 @@ void ServerInfo_SubmenuInit (void)
 	s_servers[serverindex].serverinfo_columns[0][1].generic.type		= MTYPE_TEXT;
 	s_servers[serverindex].serverinfo_columns[0][1].generic.flags	= QMF_RIGHT_COLUMN;
 	
-	Menu_MakeTable (&s_servers[serverindex].serverinfo_table, 7, 2, sizes, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_columns, contents);
+	Menu_MakeTable( &s_servers[serverindex].serverinfo_table,
+					7, 2, sizes,
+					s_servers[serverindex].serverinfo_rows,
+					s_servers[serverindex].serverinfo_rows,
+					s_servers[serverindex].serverinfo_columns,
+					(void*)contents );
 	
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].serverinfo_table);
 	
@@ -3685,11 +3718,14 @@ void PlayerList_SubmenuInit (void)
 			local_player_info_ptrs[i*SVDATA_PLAYERINFO+j] = &mservers[serverindex].playerInfo[i][j][0];
 	}
 	
-	Menu_MakeTable	(	&s_servers[serverindex].playerlist_scrollingmenu,
-						mservers[serverindex].players, SVDATA_PLAYERINFO,
-						sizes, &s_servers[serverindex].playerlist_header,
-						s_servers[serverindex].playerlist_rows, s_servers[serverindex].playerlist_columns,
-						local_player_info_ptrs
+	Menu_MakeTable(	&s_servers[serverindex].playerlist_scrollingmenu,
+					mservers[serverindex].players,
+					SVDATA_PLAYERINFO,
+					sizes,
+					&s_servers[serverindex].playerlist_header,
+					s_servers[serverindex].playerlist_rows,
+					s_servers[serverindex].playerlist_columns,
+					(void*)local_player_info_ptrs
 					);
 	
 	Menu_AddItem (&s_servers[serverindex].playerlist_submenu, &s_servers[serverindex].playerlist_scrollingmenu);
@@ -3911,8 +3947,9 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 	if(strlen(destserver->maxClients) > 2)
 		strcpy(destserver->maxClients, "??");
 	
-	Com_sprintf (destserver->szPlayers, sizeof(destserver->szPlayers), "%i(%i)/%s", min(99,players), min(99,bots), destserver->maxClients);
-	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", min(9999,destserver->ping));
+	Com_sprintf (destserver->szPlayers, sizeof(destserver->szPlayers), "%i(%i)/%s",
+				 MIN(99,players), MIN(99,bots), destserver->maxClients);
+	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", MIN(9999,destserver->ping));
 
 	return true;
 }
@@ -4532,7 +4569,7 @@ void LoadBotInfo( void )
 		// load info from config file if possible
 		
 		Com_sprintf (cfgpath, sizeof(cfgpath), "%s/%s.cfg", BOT_GAMEDATA, name);
-		if( FS_LoadFile (cfgpath, &cfg) == -1 )
+		if( FS_LoadFile( cfgpath, (void**)&cfg ) == -1 )
 		{
 			Com_DPrintf("LoadBotInfo: failed file open: %s\n", fullpath );
 			continue;
@@ -5563,7 +5600,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	FILE *modelfile;
 	int i;
 	extern float CalcFov( float fov_x, float w, float h );
-	float scale;
+//	float scale; UNUSED -jjb-
 	entity_t entity[3];
 	menumodel_s *self = (menumodel_s*) _self;
 	
@@ -5577,7 +5614,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	if (self->yaw > 360)
 		self->yaw = 0;
 
-	scale = (float)(viddef.height)/600;
+// scale = (float)(viddef.height)/600; -jjb-
 	
 	memset( &refdef, 0, sizeof( refdef ) );
 	
@@ -5958,12 +5995,12 @@ void PlayerConfig_MenuInit( void )
 	char currentdirectory[1024];
 	char currentskin[1024];
 	int i = 0;
-	float scale;
+// float scale; UNUSED -jjb-
 	int currentdirectoryindex = 0;
 	int currentskinindex = 0;
 	cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 
-	scale = (float)(viddef.height)/600;
+// scale = (float)(viddef.height)/600; -jjb-
 
 	PlayerConfig_ScanDirectories();
 
@@ -6158,7 +6195,7 @@ ALIEN ARENA TACTICAL MENU
 */
 
 static menuframework_s	s_tactical_screen;
-static menuaction_s		s_tactical_title_action;
+// static menuaction_s		s_tactical_title_action; UNUSED -jjb-
 
 #define num_tactical_teams		2
 #define num_tactical_classes	3
@@ -6221,10 +6258,10 @@ static void TacticalScreen_Draw (menuframework_s *screen, menuvec2_t offset)
 static void M_Menu_Tactical_f (void)
 {
 	extern cvar_t *name;
-	float scale;
+//	float scale; UNUSED -jjb-
 	int i, j;
 	
-	scale = (float)(viddef.height)/600;
+//	scale = (float)(viddef.height)/600; -jjb-
 	
 	for (i = 0; i < num_tactical_teams; i++)
 	{

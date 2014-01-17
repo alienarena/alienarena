@@ -23,8 +23,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "g_local.h"
+// -jjb-
+#include "acesrc/acebot.h"
 
-
+// --- -jjb- Put the server commands back on the server
+//  having them in game module looks anachronistic, to support mods?
+//
+//  problem is G_Ban which needs a CRX/Server function.
+//  A "philosophical" issue. Also, ip filter can be an allow rather than
+//   deny. should it all be in game configuration or server configuration.
+//   i think server. the cfg could be in top level cor_games
+//
 void	Svcmd_Test_f (void)
 {
 	safe_cprintf (NULL, PRINT_HIGH, "Svcmd_Test_f()\n");
@@ -142,6 +151,33 @@ qboolean SV_FilterPacket (char *from)
 	return !filterban->integer;
 }
 
+/**
+ * @brief For kickban, add player ip to ipfilter banned list.
+ *
+ * @detail Does not write to iplist.cfg. Do 'sv writeip', if
+ * that is wanted.
+ *
+ * @params ip - string containing dotted IP addr.
+ */
+void G_Ban( char *ip )
+{
+	ipfilter_t banfilter;
+
+	if ( filterban->integer && StringToFilter( ip, &banfilter ))
+	{
+		int i;
+		for ( i = 0 ; i < numipfilters ; ++i )
+			if ( ipfilters[i].compare == 0xffffffff )
+				break;		// free spot
+		if ( i == numipfilters && numipfilters < MAX_IPFILTERS )
+		{
+			if ( !StringToFilter( ip, &ipfilters[i] ))
+				ipfilters[i].compare = 0xffffffff;
+			else
+				++numipfilters;
+		}
+	}
+}
 
 /*
 =================
@@ -223,44 +259,41 @@ void SVCmd_ListIP_f (void)
 	}
 }
 
-/*
-=================
-SV_WriteIP_f
-=================
-*/
+
+/**
+ * Create or replace the listip.cfg with current filter list
+ *
+ * @param - void
+ * @return - void
+ */
 void SVCmd_WriteIP_f (void)
 {
-	FILE	*f;
-	char	name[MAX_OSPATH];
-	byte	b[4];
-	int		i;
-	cvar_t	*game;
+	char  listip_name[MAX_OSPATH];
+	FILE* listip_fd;
+	unsigned char b[4];
 
-	game = gi.cvar("game", "", 0);
-
-	if (!*game->string)
-		sprintf (name, "%s/listip.cfg", GAMEVERSION);
-	else
-		sprintf (name, "%s/listip.cfg", game->string);
-
-	safe_cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
-
-	f = fopen (name, "wb");
-	if (!f)
+	errno = 0;
+	gi.FullWritePath( listip_name, sizeof(listip_name), "listip.cfg" );
+	listip_fd = fopen( listip_name, "w" );
+	if ( listip_fd != NULL )
 	{
-		safe_cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
-		return;
+		int i;
+		int wrcount = 
+			fprintf( listip_fd, "set filterban %d\n", filterban->integer );
+		for ( i = 0 ; i < numipfilters && wrcount > 0 ; ++i )
+		{
+			*(unsigned *)b = ipfilters[i].compare;
+			wrcount = fprintf( listip_fd, "sv addip %i.%i.%i.%i\n",
+							   b[0], b[1], b[2], b[3] );
+		}
+		if ( fclose( listip_fd ) == 0 )
+		{
+			safe_cprintf(NULL, PRINT_HIGH, "writeip: %s written.\n", listip_name);
+			return;
+		}
 	}
+	safe_cprintf(NULL, PRINT_HIGH, "writeip: listip.cfg file error (%i)\n", errno);
 
-	fprintf(f, "set filterban %d\n", filterban->integer);
-
-	for (i=0 ; i<numipfilters ; i++)
-	{
-		*(unsigned *)b = ipfilters[i].compare;
-		fprintf (f, "sv addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
-	}
-
-	fclose (f);
 }
 
 /*
@@ -277,9 +310,12 @@ void	ServerCommand (void)
 	char	*cmd;
 	char botname[PLAYERNAME_SIZE];
 
+// -jjb- put the ip filters back on the server maybe
+
 	cmd = gi.argv(1);
 	if (Q_strcasecmp (cmd, "test") == 0)
 		Svcmd_Test_f ();
+
 	else if (Q_strcasecmp (cmd, "addip") == 0)
 		SVCmd_AddIP_f ();
 	else if (Q_strcasecmp (cmd, "removeip") == 0)
@@ -288,6 +324,7 @@ void	ServerCommand (void)
 		SVCmd_ListIP_f ();
 	else if (Q_strcasecmp (cmd, "writeip") == 0)
 		SVCmd_WriteIP_f ();
+
 // ACEBOT_ADD
 
 	else if(Q_strcasecmp (cmd, "acedebug") == 0)
@@ -351,4 +388,3 @@ void	ServerCommand (void)
 	else
 		safe_cprintf (NULL, PRINT_HIGH, "Unknown server command \"%s\"\n", cmd);
 }
-

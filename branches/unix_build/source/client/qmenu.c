@@ -23,8 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+// -jjb- to be reviewed
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
+#ifdef HAVE_CTYPE_H
 #include <ctype.h>
+#endif
 
 #include "client.h"
 #include "qmenu.h"
@@ -162,7 +167,7 @@ void Field_Draw (menufield_s *f, FNT_font_t font)
 	menu_box.width = f->generic.visible_length*font->width;
 	FNT_BoundedPrint (font, f->buffer, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
 	
-	if ( cursor.menuitem == f )
+	if ( (void*)cursor.menuitem == (void*)f )
 	{
 		if ( ( ( int ) ( Sys_Milliseconds() / 300 ) ) & 1 )
 			Draw_StretchPic (menu_box.x + before_cursor_width - font->size / 4, menu_box.y-1, font->size, font->size+4, "menu/field_cursor");
@@ -174,7 +179,7 @@ qboolean Field_Key (int key)
 	menufield_s *f;
 	extern int keydown[];
 	
-	f = cursor.menuitem;
+	f = (menufield_s*)cursor.menuitem;
 	
 	if (f == NULL || f->generic.type != MTYPE_FIELD)
 		return false;
@@ -623,35 +628,36 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 	
 	switch ( self->type )
 	{
-		case MTYPE_SLIDER:
-			ret.x = font->width * LONGINPUT_SIZE + RCOLUMN_OFFSET;
-			break;
-		case MTYPE_FIELD:
-			ret.y += 4;
-			break;
-		case MTYPE_SPINCONTROL:
-			ret.x += SpinControl_MaxWidth ((menulist_s *)self);
-			ret.y = SpinControl_MaxLines ((menulist_s *)self)*font->height;
-			if (ret.y > font->height)
-				ret.y += font->height-font->size;
-			break;
-		case MTYPE_SUBMENU:
-			ret.y = Menu_TrueHeight(*(menuframework_s *)self);
-			ret.x = CHASELINK(((menuframework_s *)self)->lwidth) + 
-					CHASELINK(((menuframework_s *)self)->rwidth);
-			if (self->flags & QMF_SNUG_LEFT)
-				ret.x -= CHASELINK(self->parent->lwidth);
-			{
-				menuvec2_t border = Menu_GetBorderSize ((menuframework_s*)self);
-				if (ret.x < border.x + border.x/2)
-					ret.x = border.x + border.x/2;
-				ret.x += border.x;
-				ret.y += border.y;
-			}
-			break;
-		case MTYPE_ACTION:
-		case MTYPE_TEXT:
-			break;
+	case MTYPE_SLIDER:
+		ret.x = font->width * LONGINPUT_SIZE + RCOLUMN_OFFSET;
+		break;
+	case MTYPE_FIELD:
+		ret.y += 4;
+		break;
+	case MTYPE_SPINCONTROL:
+		ret.x += SpinControl_MaxWidth ((menulist_s *)self);
+		ret.y = SpinControl_MaxLines ((menulist_s *)self)*font->height;
+		if (ret.y > font->height)
+			ret.y += font->height-font->size;
+		break;
+	case MTYPE_SUBMENU:
+		ret.y = Menu_TrueHeight(*(menuframework_s *)self);
+		ret.x = CHASELINK(((menuframework_s *)self)->lwidth) + 
+			CHASELINK(((menuframework_s *)self)->rwidth);
+		if (self->flags & QMF_SNUG_LEFT)
+			ret.x -= CHASELINK(self->parent->lwidth);
+		{
+			menuvec2_t border = Menu_GetBorderSize ((menuframework_s*)self);
+			if (ret.x < border.x + border.x/2)
+				ret.x = border.x + border.x/2;
+			ret.x += border.x;
+			ret.y += border.y;
+		}
+		break;
+	case MTYPE_ACTION:
+	case MTYPE_TEXT:
+	case MTYPE_VERT_SCROLLBAR:
+		break;
 	}
 	
 	if ((self->flags & QMF_BUTTON) && ret.x < CHASELINK(self->parent->rwidth) && !self->parent->horizontal)
@@ -839,10 +845,14 @@ void Menu_Arrange (menuframework_s *menu, qboolean reset, FNT_font_t font)
 		menu->maxheight = CHASELINK (((menucommon_s*)menu->items[menu->maxlines])->y);
 	
 	menu->maxscroll = CHASELINK(menu->height) - menu->maxheight;
+
 	menu->scroll_range = (float)menu->maxheight - font->size/2.0;
+
 	menu->scrollbar_size = menu->scroll_range - menu->maxscroll;
+
 	if (menu->scrollbar_size < font->size)
 		menu->scrollbar_size = font->size;
+
 	menu->scroll_top = (float)menu->y+font->size/4.0;
 }
 
@@ -949,10 +959,13 @@ void Menu_Draw (menuframework_s *menu, FNT_font_t font)
 		case MTYPE_ACTION:
 			Action_Draw ((menuaction_s *) menu->items[i], font);
 			break;
-		case MTYPE_TEXT:
-			break;
 		case MTYPE_SUBMENU:
 			SubMenu_Draw ((menuframework_s *) menu->items[i], font);
+			break;
+
+		case MTYPE_TEXT:
+		case MTYPE_VERT_SCROLLBAR:
+		default:
 			break;
 		}
 	}
@@ -987,7 +1000,7 @@ void Menu_AssignCursor (menuframework_s *menu)
 	if (menu->maxheight != 0 && CHASELINK(menu->height) > menu->maxheight && cursor.x > right)
 	{
 		// select the scrollbar
-		item = &menu->vertical_scrollbar;
+		item = (menuitem_s*)(&menu->vertical_scrollbar);
 		Cursor_MouseSelectItem (item);
 	}
 	else for ( i = 0; i < menu->nitems; i++ )
@@ -1087,13 +1100,15 @@ void Menu_DrawHighlight (void)
 	
 	menu = item->generic.parent;
 	
+
 	// Scrolling - make sure the selected item is entirely on screen if
 	// possible. TODO: add smoothing?
 	if (menu->maxheight != 0)
 	{
 		int newscroll;
-		int y = CHASELINK(item->generic.y);
-		newscroll = clamp (menu->yscroll, y + Item_GetHeight(*item) - menu->maxheight, y);
+		int yscroll_high = CHASELINK(item->generic.y);
+		int yscroll_low  = yscroll_high + Item_GetHeight(*item) - menu->maxheight; 
+		newscroll = CLAMP( menu->yscroll, yscroll_low, yscroll_high );
 		if (newscroll != menu->yscroll)
 		{
 			menu->yscroll = newscroll;
@@ -1326,17 +1341,28 @@ void Menu_DrawBorder (menuframework_s *menu, const char *title, const char *pref
 void Menu_DrawToolTip (const menuitem_s *item)
 {
 
-	int				x, y;
-	int				width;
-	FNT_font_t		font;
+	int x, y;
+	int width;
+	int tmp_low, tmp_high, tmp_y;
+	FNT_font_t font;
 	
 	font = FNT_AutoGet (CL_menuFont);
 	
 	width = Menu_PredictSize (item->generic.tooltip);
 	
+#if 1
+// -jjb-
+	tmp_low  = Item_GetX (*item) - width;
+	tmp_high = VID_WIDTH - width;
+	x = CLAMP( cursor.x, tmp_low, tmp_high );
+	tmp_y    = cursor.y - font->size - 4;
+	tmp_low  = Item_GetY(*item) - font->size;
+	tmp_high = Item_GetY(*item);
+	y = CLAMP( tmp_y, tmp_low, tmp_high );
+#else	
 	x = clamp (cursor.x, Item_GetX (*item) - width, VID_WIDTH - width);
-	
 	y = clamp (cursor.y - font->size - 4, Item_GetY(*item) - font->size, Item_GetY(*item));
+#endif
 
 	Menu_DrawHorizBar ("menu/slide_border", x-2, y, width+4, font->size+4, 1);
 	Menu_DrawString (
@@ -1445,7 +1471,7 @@ void Menu_SetStatusBar( menuframework_s *m, const char *string )
 
 void Menu_SlideItem (int dir)
 {
-	menucommon_s *item = cursor.menuitem;
+	menucommon_s *item = (menucommon_s*)cursor.menuitem;
 	
 	if ( item )
 	{
@@ -1456,6 +1482,8 @@ void Menu_SlideItem (int dir)
 			break;
 		case MTYPE_SPINCONTROL:
 			SpinControl_DoSlide( ( menulist_s * ) item, dir );
+			break;
+		default:
 			break;
 		}
 	}
@@ -1493,7 +1521,7 @@ void Slider_DoSlide( menuslider_s *s, int dir )
 	else if ( s->curvalue < s->minvalue )
 		s->curvalue = s->minvalue;
 
-	Menu_ActivateItem (s);
+	Menu_ActivateItem( (menuitem_s*)s );
 }
 
 void Slider_Draw (menuslider_s *s, FNT_font_t font)
@@ -1550,7 +1578,7 @@ void SpinControl_DoSlide( menulist_s *s, int dir )
 			s->curvalue--;
 	}
 
-	Menu_ActivateItem (s);
+	Menu_ActivateItem( (menuitem_s*)s );
 }
 
 void SpinControl_Draw (menulist_s *s, FNT_font_t font)

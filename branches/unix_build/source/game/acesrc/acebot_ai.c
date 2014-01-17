@@ -90,7 +90,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "game/g_local.h"
 #include "game/m_player.h"
-
 #include "acebot.h"
 
 ///////////////////////////////////////////////////////////////////////

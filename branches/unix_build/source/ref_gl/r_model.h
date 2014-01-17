@@ -1,3 +1,6 @@
+#ifndef R_MODEL_H_
+#define R_MODEL_H_
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 Copyright (C) 2011 COR Entertainment, LLC.
@@ -27,7 +30,11 @@ m*_t structures are in-memory
 
 
 */
-#include "r_iqm.h"
+
+
+// -jjb-
+/* #include "r_iqm.h" */
+
 /*
 ==============================================================================
 
@@ -321,6 +328,10 @@ typedef struct {
 
 typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, num_modtypes} modtype_t;
 
+#if 0
+// -jjb- definition of modtypes in header, static
+//  used in r_mesh.c only ???
+
 // This array is a look-up table for the traits of various mesh formats.
 static struct 
 {
@@ -347,6 +358,7 @@ static struct
 	{false, false, true},	// mod_terrain- heightmap meshes
 	// New model types go here
 };
+#endif
 
 typedef enum	{	simplecolor_white, simplecolor_green, simplecolor_blue, 
 					simplecolor_purple	} simplecolor_t;
@@ -474,3 +486,5 @@ void	Hunk_Free (void *base);
 
 void	Mod_Free (model_t *mod);
 void    Mod_FreeAll (void);
+
+#endif /* #ifndef R_MODEL_H_ */

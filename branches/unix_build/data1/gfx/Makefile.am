@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-gfxdir=${pkgdatadir}/data1/gfx
+gfxdir=${datadir}/alienarena/data1/gfx
 
 nobase_dist_gfx_DATA = \
 	aaglow.tga \

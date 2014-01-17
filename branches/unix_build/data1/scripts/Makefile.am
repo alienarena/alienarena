@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-scriptsdir=${pkgdatadir}/data1/scripts
+scriptsdir=${datadir}/alienarena/data1/scripts
 
 nobase_dist_scripts_DATA = \
 	caustics.rscript \

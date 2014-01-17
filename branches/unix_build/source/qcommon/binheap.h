@@ -1,3 +1,6 @@
+#ifndef Q_BINHEAP_H_
+#define Q_BINHEAP_H_
+
 // For two values that sort identically, the compare function you supply 
 // should still return nonzero if you want to support duplicates. But you can
 // manipulate the values you return to group duplicates together.
@@ -21,3 +24,5 @@ void binheap_heapify (binheap_t *h);
 void binheap_remove (binheap_t *h, void *val);
 void binheap_insert (binheap_t *h, void *val);
 void *binheap_find_root (const binheap_t *h);
+
+#endif /* #ifndef Q_BINHEAP_H_ */

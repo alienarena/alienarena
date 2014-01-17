@@ -19,6 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // input.h -- external (non-keyboard) input devices
 
+#ifndef CL_INPUT_H_
+#define CL_INPUT_H_
+
 void IN_Init (void);
 
 void IN_Shutdown (void);
@@ -34,3 +37,5 @@ void IN_Move (usercmd_t *cmd);
 void IN_JoyMove (usercmd_t *cmd);
 
 void IN_Activate (qboolean active);
+
+#endif /* #ifndef CL_INPUT_H_ */

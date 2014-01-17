@@ -17,8 +17,8 @@
  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
  */
-#ifndef QAL_H_
-#define QAL_H_
+#ifndef CL_QAL_H_
+#define CL_QAL_H_
 
 /*
  * function pointers for library loaders
@@ -250,5 +250,4 @@ extern qboolean QAL_Init( void );
 extern void QAL_Shutdown( void );
 extern qboolean QAL_Loaded( void );
 
-#endif /* QAL_H_ */
-
+#endif /* #ifndef CL_QAL_H_ */

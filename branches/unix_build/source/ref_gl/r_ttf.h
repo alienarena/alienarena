@@ -1,3 +1,6 @@
+#ifndef R_TTF_H_
+#define R_TTF_H_
+
 /*
 Copyright (C) 2010 COR Entertainment, LLC.
 
@@ -16,10 +19,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef __R_TTF_H
-#define __R_TTF_H
 
-#include <qcommon/qcommon.h>
+#include "qcommon/qcommon.h"
 #include "r_text.h"
 
 
@@ -38,4 +39,4 @@ void TTF_Shutdown( void );
 qboolean TTF_InitFace( FNT_face_t face );
 
 
-#endif //__R_TTF_H
+#endif /* #ifndef R_TTF_H_ */

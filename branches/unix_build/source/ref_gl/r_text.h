@@ -1,3 +1,6 @@
+#ifndef R_TEXT_H_
+#define R_TEXT_H_
+
 /*
 Copyright (C) 2010 COR Entertainment, LLC.
 
@@ -16,8 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef __R_TEXT_H
-#define __R_TEXT_H
 
 /* Forward-declare the face structure and its pointer type */
 struct FNT_face_s;
@@ -577,4 +578,4 @@ qboolean _FNT_NextWrappedUnit(
 
 
 
-#endif // __R_TEXT_H
+#endif /* #ifndef R_TEXT_H_ */

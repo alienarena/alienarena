@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // This file must be identical in the quake and utils directories
 //
 
+#ifndef Q_QFILES_H_
+#define Q_QFILES_H_
 /*
 ========================================================================
 
@@ -527,3 +529,5 @@ typedef struct
 	float		xscale;     // xscale in game units per lightmap pixel
 	float		yscale;		// yscale in game units per lightmap pixel
 } ltmp_facelookup_t;
+
+#endif /* #ifndef Q_QFILES_H_ */

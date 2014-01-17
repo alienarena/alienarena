@@ -18,8 +18,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 // Hash table interface
-#ifndef __H_HASHTABLE
-#define __H_HASHTABLE
+#ifndef Q_HASHTABLE_H_
+#define Q_HASHTABLE_H_
 
 #include "game/q_shared.h"
 
@@ -183,4 +183,4 @@ void HT_Apply(
 
 
 
-#endif // __H_HASHTABLE
+#endif /* #ifndef Q_HASHTABLE_H_ */

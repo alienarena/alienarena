@@ -1,3 +1,6 @@
+#ifndef R_RAGDOLL_H_
+#define R_RAGDOLL_H_
+
 /*
 Copyright (C) 2010 COR Entertainment, LLC.
 
@@ -224,3 +227,5 @@ extern void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] );
 extern void RGD_DestroyWorldTrimesh();
 extern void RGD_BuildWorldTrimesh ();
 extern qboolean RGD_CullRagDolls( int RagDollID );
+
+#endif /* #ifndef R_RAGDOLL_H_ */

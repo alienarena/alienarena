@@ -1,3 +1,6 @@
+#ifndef R_LOCAL_H_
+#define R_LOCAL_H_
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 
@@ -18,29 +21,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#if defined WIN32_VARIANT
-#  include <windows.h>
+// -jjb-
+#if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
+#define WIN32_LEAN_AND_MEAN 1
+#include <windows.h>
 #endif
-
-#include <stdio.h>
+/* #if defined WIN32_VARIANT */
+/* #  include <windows.h> */
+/* #endif */
 
 #include <GL/gl.h>
-#include <math.h>
-#include "glext.h"
 
 #ifndef GL_COLOR_INDEX8_EXT
 #define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
 #endif
 
-#include "client/ref.h"
-#include "client/vid.h"
+#include "qcommon/qcommon.h"
 
 #include "qgl.h"
+#include "glext.h"
+
+// -jjb- dependency ordered
+#include "client/ref.h"
+#include "client/vid.h"
+#include "r_iqm.h"
+#include "r_image.h"
+#include "r_model.h"
+#include "r_script.h"
 #include "r_math.h"
 
-#if !defined min
-#define min(a,b) (((a)<(b)) ? (a) : (b))
-#endif
+/* #if !defined min */
+/* #define min(a,b) (((a)<(b)) ? (a) : (b)) */
+/* #endif */
 
 // up / down
 #define	PITCH	0
@@ -55,7 +67,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern	viddef_t	vid;
 
-#include "r_image.h"
+/* #include "r_image.h" */
 
 //===================================================================
 
@@ -69,7 +81,7 @@ typedef enum
 	rserr_unknown
 } rserr_t;
 
-#include "r_model.h"
+/* #include "r_model.h" */
 
 extern float	r_frametime;
 
@@ -833,12 +845,4 @@ extern void		GLimp_AppActivate( qboolean active );
 extern void		GLimp_EnableLogging( qboolean enable );
 extern void		GLimp_LogNewFrame( void );
 
-/*
-====================================================================
-
-IMPORTED FUNCTIONS
-
-====================================================================
-*/
-
-#include "r_script.h"
+#endif /* #ifndef R_LOCAL_H_ */

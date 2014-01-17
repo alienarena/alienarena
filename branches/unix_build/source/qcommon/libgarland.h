@@ -1,3 +1,7 @@
+
+#ifndef Q_LIBGARLAND_H_
+#define Q_LIBGARLAND_H_
+
 // we always use doubles internally, but the outside world works in floats.
 typedef float incoord_t;
 
@@ -28,3 +32,5 @@ typedef struct
 } mesh_t;
 
 void simplify_mesh (mesh_t *mesh, idx_t target_polycount);
+
+#endif /* #ifndef Q_LIBGARLAND_H_ */

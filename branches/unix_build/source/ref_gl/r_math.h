@@ -1,3 +1,6 @@
+#ifndef R_MATH_H_
+#define R_MATH_H_
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 
@@ -18,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // r_math.h
+
+
 typedef vec_t mat4x4_t[16];
 
 extern const mat4x4_t mat4x4_identity;
@@ -42,3 +47,5 @@ void Matrix4_Stretch2D( mat4x4_t m, vec_t s, vec_t t );
 
 #define nanmask (255<<23)
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
+
+#endif /* #ifndef R_MATH_H_ */

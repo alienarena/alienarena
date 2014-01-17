@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-particlesdir=${pkgdatadir}/data1/particles
+particlesdir=${datadir}/alienarena/data1/particles
 
 nobase_dist_particles_DATA = \
 	aflash.tga \

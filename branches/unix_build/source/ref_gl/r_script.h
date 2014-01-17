@@ -1,5 +1,5 @@
-#ifndef __GL_SCRIPT__
-#define __GL_SCRIPT__
+#ifndef R_SCRIPT_H_
+#define R_SCRIPT_H_
 
 //CVARS
 extern cvar_t *rs_dynamic_time;
@@ -183,4 +183,4 @@ void RS_LoadSpecialScripts(void);
 
 extern float rs_realtime;
 
-#endif // __GL_SCRIPT__
+#endif /* #ifndef R_SCRIPT_H_ */

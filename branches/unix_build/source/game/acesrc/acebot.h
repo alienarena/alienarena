@@ -1,3 +1,6 @@
+#ifndef G_ACEBOT_H_
+#define G_ACEBOT_H_
+
 ///////////////////////////////////////////////////////////////////////
 //
 //  ACE - Quake II Bot Base Code
@@ -57,8 +60,6 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef _ACEBOT_H
-#define _ACEBOT_H
 
 #if !defined BOT_GAMEDATA
 #define BOT_GAMEDATA "botinfo"
@@ -281,4 +282,5 @@ void	 safe_cprintf (edict_t *ent, int printlevel, char *fmt, ...);
 void     safe_centerprintf (edict_t *ent, char *fmt, ...);
 void     safe_bprintf (int printlevel, char *fmt, ...);
 void     debug_printf (char *fmt, ...);
-#endif
+
+#endif /* #ifndef G_ACEBOT_H_ */

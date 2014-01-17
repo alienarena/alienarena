@@ -19,13 +19,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // qcommon.h -- definitions common between client and server, but not game module
 
-#if !defined Q_COMMON_H_
+#ifndef Q_COMMON_H_
 #define Q_COMMON_H_
+
+#ifndef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+/* MIN(a,b) returns the minimum of A and B.  */
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef CLAMP
+#define CLAMP(x,low,high) (MIN(MAX((low),(x)),(high)))
+#endif
 
 #include "game/q_shared.h"
 
+// -jjb-
 #if !defined VERSION
-#define	VERSION		"7.66"
+#define	VERSION		"7.66.1"
 #endif
 
 /* ---- Default locations of game data ---*/

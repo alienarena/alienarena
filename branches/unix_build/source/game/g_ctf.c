@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "g_local.h"
+// -jjb-
+#include "acesrc/acebot.h"
 
 int imageindex_sbfctf1;
 int imageindex_sbfctf2;

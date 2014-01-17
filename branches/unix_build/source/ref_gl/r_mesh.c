@@ -48,6 +48,34 @@ extern cvar_t *cl_gun;
 
 cvar_t *gl_mirror;
 
+// -jjb- modtypes definition  moved from r_model.h
+// This array is a look-up table for the traits of various mesh formats.
+static struct 
+{
+	// Morph target animation is what the MD2 format uses exclusively. Vertex
+	// positions, normals, and tangents are stored in VBOs for every frame
+	// and interpolated by the vertex shader. It's possible to combine this
+	// with skeletal animation, although we don't support any formats that do
+	// this yet.
+	qboolean morphtarget; 
+	
+	// If true, the blendweights and blendindexes vertex attributes are used.
+	// NOTE: this is still basically IQM-specific, we're not trying to
+	// generalize across every possible skeletal format-- yet.
+	qboolean skeletal;
+	
+	// True if the vertex data is indexed. If so, an IBO is used.
+	qboolean indexed;
+} modtypes[num_modtypes] = 
+{
+	{false, false, false},	// mod_bad- this is ignored
+	{false, false, false},	// mod_brush- BSP brush models- this is ignored
+	{true, false, false},	// mod_md2- MD2 models
+	{false, true, true},	// mod_iqm- IQM models
+	{false, false, true},	// mod_terrain- heightmap meshes
+	// New model types go here
+};
+
 // should be able to handle all mesh types
 void R_Mesh_FindVBO (model_t *mod, int framenum)
 {

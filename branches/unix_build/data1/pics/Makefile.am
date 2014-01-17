@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-picsdir=${pkgdatadir}/data1/pics
+picsdir=${datadir}/alienarena/data1/pics
 
 nobase_dist_pics_DATA = \
 	a_bullets.tga \

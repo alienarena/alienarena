@@ -22,11 +22,17 @@
 #    with command line overflow when running install.
 # - Moved the data1 default.cfg and maps.lst to arena
 #   subdir for consistency between arena and tactical.
-#    
+# 
+# 2014 January:
+# - change data1 to a separate alienarena-data package
+#
+# !pkg prefix is not required!
+# datadir='' in configure can stop install and dist both???
+#
 
-SUBDIRS = source data1 botinfo
+SUBDIRS = source botinfo data1
 
-ACLOCAL_AMFLAGS = -I m4 
+ACLOCAL_AMFLAGS = -I m4
 
 #
 # Alien Arena documents to be installed in $docdir
@@ -58,14 +64,14 @@ ACLOCAL_AMFLAGS = -I m4
 #
 # Default configuration for client and server
 #
-arenadir = $(pkgdatadir)
+arenadir = $(datadir)/alienarena
 nobase_dist_arena_DATA = \
 	arena/motd.txt \
 	arena/server.cfg \
 	arena/default.cfg \
 	arena/maps.lst
 
-tacticaldir = $(pkgdatadir)
+tacticaldir = $(datadir)/alienarena
 nobase_dist_tactical_DATA = \
 	tactical/maps.lst \
 	tactical/motd.txt \
