@@ -509,6 +509,9 @@ typedef struct
     int         currenttmu;
     qboolean	tmuswitch_done;
     qboolean    currenttmu_defined;
+	
+	GLenum bFunc1;
+	GLenum bFunc2;
 
     float       camera_separation;
     qboolean    stereo_enabled;

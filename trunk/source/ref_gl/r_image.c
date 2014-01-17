@@ -127,27 +127,14 @@ void R_InitImageSubsystem(void)
 	GL_InvalidateTextureState ();
 }
 
-GLenum bFunc1 = -1;
-GLenum bFunc2 = -1;
 void GL_BlendFunction (GLenum sfactor, GLenum dfactor)
 {
-	if (sfactor != bFunc1 || dfactor != bFunc2)
+	if (sfactor != gl_state.bFunc1 || dfactor != gl_state.bFunc2)
 	{
-		bFunc1 = sfactor;
-		bFunc2 = dfactor;
+		gl_state.bFunc1 = sfactor;
+		gl_state.bFunc2 = dfactor;
 
-		qglBlendFunc (bFunc1, bFunc2);
-	}
-}
-
-GLenum shadeModelMode = -1;
-
-void GL_ShadeModel (GLenum mode)
-{
-	if (mode!=shadeModelMode)
-	{
-		shadeModelMode = mode;
-		qglShadeModel(mode);
+		qglBlendFunc (sfactor, dfactor);
 	}
 }
 

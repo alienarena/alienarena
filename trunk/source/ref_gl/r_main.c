@@ -1647,7 +1647,7 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		r_turbsin[j] *= 0.5;
 	}
-
+	
 	Draw_GetPalette ();
 
 	R_Register();
@@ -1666,6 +1666,9 @@ int R_Init( void *hinstance, void *hWnd )
 		QGL_Shutdown();
 		return -1;
 	}
+	
+	// reset GL_BlendFunc state variables.
+	gl_state.bFunc1 = gl_state.bFunc2 = -1;
 
 	// set our "safe" modes
 	gl_state.prev_mode = 3;
