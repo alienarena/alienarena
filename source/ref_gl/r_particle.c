@@ -374,19 +374,18 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 	*/
 	VectorSet(mins, 999999, 999999, 999999);
 	VectorSet(maxs, -999999, -999999, -999999);
+	
+	poly = surf->polys;
+	for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE)
+	{
+		if(v[0] > maxs[0])   maxs[0] = v[0];
+		if(v[1] > maxs[1])   maxs[1] = v[1];
+		if(v[2] > maxs[2])   maxs[2] = v[2];
 
-    for ( poly = surf->polys; poly; poly = poly->chain ) {
-         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) {
-
-               if(v[0] > maxs[0])   maxs[0] = v[0];
-               if(v[1] > maxs[1])   maxs[1] = v[1];
-               if(v[2] > maxs[2])   maxs[2] = v[2];
-
-               if(v[0] < mins[0])   mins[0] = v[0];
-               if(v[1] < mins[1])   mins[1] = v[1];
-               if(v[2] < mins[2])   mins[2] = v[2];
-            }
-      }
+		if(v[0] < mins[0])   mins[0] = v[0];
+		if(v[1] < mins[1])   mins[1] = v[1];
+		if(v[2] < mins[2])   mins[2] = v[2];
+	}
 
      poly_center[0] = (mins[0] + maxs[0]) /2;
      poly_center[1] = (mins[1] + maxs[1]) /2;
@@ -1185,19 +1184,18 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	*/
 	VectorSet(mins, 999999, 999999, 999999);
 	VectorSet(maxs, -999999, -999999, -999999);
+	
+	poly = surf->polys;
+	for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE)
+	{
+		if(v[0] > maxs[0])   maxs[0] = v[0];
+		if(v[1] > maxs[1])   maxs[1] = v[1];
+		if(v[2] > maxs[2])   maxs[2] = v[2];
 
-    for ( poly = surf->polys; poly; poly = poly->chain ) {
-         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) {
-
-               if(v[0] > maxs[0])   maxs[0] = v[0];
-               if(v[1] > maxs[1])   maxs[1] = v[1];
-               if(v[2] > maxs[2])   maxs[2] = v[2];
-
-               if(v[0] < mins[0])   mins[0] = v[0];
-               if(v[1] < mins[1])   mins[1] = v[1];
-               if(v[2] < mins[2])   mins[2] = v[2];
-            }
-      }
+		if(v[0] < mins[0])   mins[0] = v[0];
+		if(v[1] < mins[1])   mins[1] = v[1];
+		if(v[2] < mins[2])   mins[2] = v[2];
+	}
 
      poly_center[0] = (mins[0] + maxs[0]) /2;
      poly_center[1] = (mins[1] + maxs[1]) /2;

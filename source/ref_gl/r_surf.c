@@ -2363,38 +2363,37 @@ void R_RecursiveRadarNode (mnode_t *node)
 				sColor=0;
 			}
 
-			for ( p = surf->polys; p; p = p->chain ) {
-				v = p->verts[0];
-				qglBegin(GL_LINE_STRIP);
-				for (i=0 ; i< p->numverts; i++, v+= VERTEXSIZE) {
-					C[3]= (v[2]-r_origin[2])/512.0;
-					if (C[3]>0) {
+			p = surf->polys;
+			v = p->verts[0];
+			qglBegin(GL_LINE_STRIP);
+			for (i=0 ; i< p->numverts; i++, v+= VERTEXSIZE) {
+				C[3]= (v[2]-r_origin[2])/512.0;
+				if (C[3]>0) {
 
-						C[0]=0.5;
-						C[1]=0.5+sColor;
-						C[2]=0.5;
-						C[3]=1-C[3];
+					C[0]=0.5;
+					C[1]=0.5+sColor;
+					C[2]=0.5;
+					C[3]=1-C[3];
 
-					}
-					   else
-					{
-						C[0]=0.5;
-						C[1]=sColor;
-						C[2]=0;
-						C[3]+=1;
+				}
+				   else
+				{
+					C[0]=0.5;
+					C[1]=sColor;
+					C[2]=0;
+					C[3]+=1;
 
-					}
-
-					if(C[3]<0) {
-						C[3]=0;
-
-					}
-					qglColor4fv(C);
-					qglVertex3fv (v);
 				}
 
-				qglEnd();
+				if(C[3]<0) {
+					C[3]=0;
+
+				}
+				qglColor4fv(C);
+				qglVertex3fv (v);
 			}
+
+			qglEnd();
 		}
 		qglEnable(GL_TEXTURE_2D);
 

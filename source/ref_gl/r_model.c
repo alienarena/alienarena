@@ -971,121 +971,116 @@ void CalcSurfaceExtents (msurface_t *s, qboolean override, int *smax, int *tmax,
 
 void Mod_CalcSurfaceNormals(msurface_t *surf)
 {
-
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i;
 	float 	temp_tangentSpaceTransform[3][3];
+	vec3_t	v01, v02, temp1, temp2, temp3;
+	vec3_t	normal, binormal, tangent;
+	float	s = 0;
+	float	*vec;
 
-	for (; p; p = p->chain)
+	_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
+	vec = p->verts[0];
+	_VectorCopy(surf->plane->normal, normal);
+
+	// FIXME: on some maps, this code doesn't always initialize v02, 
+	// leading to Valgrind complaining about use of uninitialized memory.
+	// dm-infinity and dm-zorn2k11 are two such maps. Probably not a huge
+	// deal, doesn't seem to be causing any issues.
+	for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 	{
-		vec3_t	v01, v02, temp1, temp2, temp3;
-		vec3_t	normal, binormal, tangent;
-		float	s = 0;
-		float	*vec;
 
-		_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
-		vec = p->verts[0];
-		_VectorCopy(surf->plane->normal, normal);
+		float currentLength;
+		vec3_t currentNormal;
 
-		// FIXME: on some maps, this code doesn't always initialize v02, 
-		// leading to Valgrind complaining about use of uninitialized memory.
-		// dm-infinity and dm-zorn2k11 are two such maps. Probably not a huge
-		// deal, doesn't seem to be causing any issues.
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		{
+		//do calculations for normal, tangent and binormal
+		if( i > 1) {
+			_VectorSubtract( p->verts[ i ], p->verts[0], temp1 );
 
-			float currentLength;
-			vec3_t currentNormal;
+			CrossProduct( temp1, v01, currentNormal );
+			currentLength = VectorLength( currentNormal );
 
-			//do calculations for normal, tangent and binormal
-			if( i > 1) {
-				_VectorSubtract( p->verts[ i ], p->verts[0], temp1 );
+			if( currentLength > s )
+			{
+				s = currentLength;
+				_VectorCopy( currentNormal, normal );
 
-				CrossProduct( temp1, v01, currentNormal );
-				currentLength = VectorLength( currentNormal );
+				vec = p->verts[i];
+				_VectorCopy( temp1, v02 );
 
-				if( currentLength > s )
-				{
-					s = currentLength;
-					_VectorCopy( currentNormal, normal );
-
-					vec = p->verts[i];
-					_VectorCopy( temp1, v02 );
-
-				}
 			}
 		}
+	}
 
-		VectorNormalize( normal ); //we have the largest normal
+	VectorNormalize( normal ); //we have the largest normal
 
-		temp_tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
-		temp_tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
-		temp_tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
+	temp_tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
+	temp_tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
+	temp_tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
 
-		//now get the tangent
-		s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
-			* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
-		s -= ( vec[ 3 ] - p->verts[ 0 ][ 3 ] )
-			 * ( p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ] );
-		s = 1.0f / s;
+	//now get the tangent
+	s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
+		* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
+	s -= ( vec[ 3 ] - p->verts[ 0 ][ 3 ] )
+		 * ( p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ] );
+	s = 1.0f / s;
 
-		VectorScale( v01, vec[ 4 ] - p->verts[ 0 ][ 4 ], temp1 );
-		VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
-		_VectorSubtract( temp1, temp2, temp3 );
-		VectorScale( temp3, s, tangent );
-		VectorNormalize( tangent );
+	VectorScale( v01, vec[ 4 ] - p->verts[ 0 ][ 4 ], temp1 );
+	VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
+	_VectorSubtract( temp1, temp2, temp3 );
+	VectorScale( temp3, s, tangent );
+	VectorNormalize( tangent );
 
-		temp_tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
-		temp_tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
-		temp_tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
+	temp_tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
+	temp_tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
+	temp_tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
 
-		//now get the binormal
-		VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
-		VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
-		_VectorSubtract( temp1, temp2, temp3 );
-		VectorScale( temp3, s, binormal );
-		VectorNormalize( binormal );
+	//now get the binormal
+	VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
+	VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
+	_VectorSubtract( temp1, temp2, temp3 );
+	VectorScale( temp3, s, binormal );
+	VectorNormalize( binormal );
 
-		temp_tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
-		temp_tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
-		temp_tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
-		
-		//Try to find this tangentSpaceTransform in the existing array or else
-		//add it. This is not a RAM-saving measure, it's to allow comparison 
-		//of different tangentSpaceTransforms using the == operator, which is
-		//more efficient.
+	temp_tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
+	temp_tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
+	temp_tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
+	
+	//Try to find this tangentSpaceTransform in the existing array or else
+	//add it. This is not a RAM-saving measure, it's to allow comparison 
+	//of different tangentSpaceTransforms using the == operator, which is
+	//more efficient.
+	{
+		float *tst;
+		int i;
+		int j;
+		for (tst = loadmodel->tangentSpaceTransforms, i = 0; i < loadmodel->numTangentSpaceTransforms; i++, tst += 9)
 		{
-			float *tst;
-			int i;
-			int j;
-			for (tst = loadmodel->tangentSpaceTransforms, i = 0; i < loadmodel->numTangentSpaceTransforms; i++, tst += 9)
+			qboolean match = true;
+			for (j = 0; j < 9; j++)
 			{
-				qboolean match = true;
-				for (j = 0; j < 9; j++)
+				// If we reduce our precision to just 4 decimal places,
+				// we can cut the number of transforms by a factor of more
+				// than 5. Single-precision floating point is precise to
+				// just 6 places anyway, so we're not loosing too much.
+				// Subjectively, it still looks fine.
+				if (fabs (tst[j]-temp_tangentSpaceTransform[j/3][j%3]) > 0.0001)
 				{
-					// If we reduce our precision to just 4 decimal places,
-					// we can cut the number of transforms by a factor of more
-					// than 5. Single-precision floating point is precise to
-					// just 6 places anyway, so we're not loosing too much.
-					// Subjectively, it still looks fine.
-					if (fabs (tst[j]-temp_tangentSpaceTransform[j/3][j%3]) > 0.0001)
-					{
-						match = false;
-						break;
-					}
-				}
-				if (match)
+					match = false;
 					break;
+				}
 			}
-			surf->tangentSpaceTransform = tst;
-			if (i == loadmodel->numTangentSpaceTransforms)
-			{
-				for (i = 0; i < 3; i++)
-					for (j = 0; j < 3; j++)
-						*(tst++) = temp_tangentSpaceTransform[i][j];
-				loadmodel->numTangentSpaceTransforms++;
-			}
+			if (match)
+				break;
+		}
+		surf->tangentSpaceTransform = tst;
+		if (i == loadmodel->numTangentSpaceTransforms)
+		{
+			for (i = 0; i < 3; i++)
+				for (j = 0; j < 3; j++)
+					*(tst++) = temp_tangentSpaceTransform[i][j];
+			loadmodel->numTangentSpaceTransforms++;
 		}
 	}
 }

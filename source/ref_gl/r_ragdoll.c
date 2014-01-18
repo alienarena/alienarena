@@ -696,51 +696,49 @@ void RGD_BuildODEGeoms(msurface_t *surf)
 	float	*v;
 	int		i;
     int polyStart;
-	for ( p = surf->polys; p; p = p->chain )
+    p = surf->polys;
+    if(RagDollTriWorld.numODEVerts + p->numverts > RagDollTriWorld.maxODEVerts)
+    {
+        int growVerts = RagDollTriWorld.maxODEVerts;
+        dVector3 *newVerts;
+        while(RagDollTriWorld.numODEVerts + p->numverts > growVerts)
+            growVerts += GROW_ODE_VERTS;
+        newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
+        if(!newVerts) return;
+        RagDollTriWorld.maxODEVerts = growVerts;
+        RagDollTriWorld.ODEVerts = newVerts;
+    }
+
+    polyStart = RagDollTriWorld.numODEVerts;
+
+	for (v = p->verts[0]; v < p->verts[p->numverts]; v += VERTEXSIZE)
 	{
-        if(RagDollTriWorld.numODEVerts + p->numverts > RagDollTriWorld.maxODEVerts)
-        {
-            int growVerts = RagDollTriWorld.maxODEVerts;
-            dVector3 *newVerts;
-            while(RagDollTriWorld.numODEVerts + p->numverts > growVerts)
-                growVerts += GROW_ODE_VERTS;
-            newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
-            if(!newVerts) break;
-            RagDollTriWorld.maxODEVerts = growVerts;
-            RagDollTriWorld.ODEVerts = newVerts;
-        }
 
-        polyStart = RagDollTriWorld.numODEVerts;
-
-		for (v = p->verts[0]; v < p->verts[p->numverts]; v += VERTEXSIZE)
-		{
-
-			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = v[0];
-			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = v[1];
-			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = v[2];
-			RagDollTriWorld.numODEVerts++;
-		}
-
-        if(RagDollTriWorld.numODETris + p->numverts-2 > RagDollTriWorld.maxODETris)
-        {
-            int growTris = RagDollTriWorld.maxODETris;
-            dTriIndex *newTris;
-            while(RagDollTriWorld.numODETris + p->numverts-2 > growTris)
-                growTris += GROW_ODE_TRIS;
-            newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
-            if(!newTris) break;
-            RagDollTriWorld.maxODETris = growTris;
-            RagDollTriWorld.ODETris = newTris;
-        }
-
-        for (i = 2; i < p->numverts; i++)
-        {
-            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + i;
-            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + i - 1;
-            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
-            RagDollTriWorld.numODETris++;
-        }
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = v[0];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = v[1];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = v[2];
+		RagDollTriWorld.numODEVerts++;
 	}
+
+    if(RagDollTriWorld.numODETris + p->numverts-2 > RagDollTriWorld.maxODETris)
+    {
+        int growTris = RagDollTriWorld.maxODETris;
+        dTriIndex *newTris;
+        while(RagDollTriWorld.numODETris + p->numverts-2 > growTris)
+            growTris += GROW_ODE_TRIS;
+        newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
+        if(!newTris) return;
+        RagDollTriWorld.maxODETris = growTris;
+        RagDollTriWorld.ODETris = newTris;
+    }
+
+    for (i = 2; i < p->numverts; i++)
+    {
+        RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + i;
+        RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + i - 1;
+        RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
+        RagDollTriWorld.numODETris++;
+    }
 }
 
 /*
