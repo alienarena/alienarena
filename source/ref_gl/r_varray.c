@@ -190,36 +190,6 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
 	qglDrawArrays (mode, first, count);
 }
 
-void R_AddSurfToVArray (msurface_t *surf)
-{
-	glpoly_t *p = surf->polys;
-	float	*v;
-	int i;
-
-	for (; p; p = p->chain)
-	{
-		// reset pointer and counter
-		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
-
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		{
-			// copy in vertex data
-			VArray[0] = v[0];
-			VArray[1] = v[1];
-			VArray[2] = v[2];
-
-			// nothing else is needed
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_NO_TEXTURE];
-			VertexCounter++;
-		}
-
-		// draw the poly
-		R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
-	}
-}
-
 extern int SignbitsForPlane (cplane_t *out);
 void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin)
 {

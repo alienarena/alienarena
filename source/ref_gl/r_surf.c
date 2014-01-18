@@ -282,18 +282,6 @@ Used by the shadow system
 =========================================
 */
 
-/*
-================
-BSP_DrawTexturelessPoly
-================
-*/
-void BSP_DrawTexturelessPoly (msurface_t *fa)
-{
-	R_InitVArrays(VERT_NO_TEXTURE);
-	R_AddSurfToVArray (fa);
-	R_KillVArrays();
-}
-
 void BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin)
 {
 	R_AddShadowSurfToVArray (fa, origin);
@@ -304,20 +292,17 @@ void BSP_DrawTexturelessInlineBModel (entity_t *e)
 	int			i;
 	msurface_t	*psurf;
 
-	//
-	// draw texture
-	//
+	BSP_InvalidateVBO (); // FIXME: why doesn't it work without this?
+	
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
 	{
 		// draw the polygon
-		BSP_DrawTexturelessPoly( psurf );
+		BSP_AddSurfToVBOAccum (psurf);
 		psurf->visframe = r_framecount;
 	}
-
-	qglDisable (GL_BLEND);
-	qglColor4f (1,1,1,1);
-	GL_TexEnv( GL_REPLACE );
+	
+	BSP_FlushVBOAccum ();
 }
 
 void BSP_DrawTexturelessBrushModel (entity_t *e)
@@ -350,8 +335,6 @@ void BSP_DrawTexturelessBrushModel (entity_t *e)
 	if (R_CullBox (mins, maxs)) {
 		return;
 	}
-
-	qglColor3f (1,1,1);
 
 	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
 
