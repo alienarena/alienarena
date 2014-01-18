@@ -1388,6 +1388,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
+			// NOTE: We only subdivide water surfaces if we WON'T be using GLSL
 			if(!strcmp(out->texinfo->normalMap->name, out->texinfo->image->name))
 				R_SubdivideSurface (out, firstedge, numedges);	// cut up polygon for warps
 		}

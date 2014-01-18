@@ -577,8 +577,6 @@ void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
 void R_InitQuadVarrays(void);
-void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
-void R_KillNormalTMUs(void);
 
 //shadows
 extern  void R_InitShadowSubsystem(void);
