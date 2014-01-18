@@ -531,8 +531,6 @@ extern glconfig_t  gl_config;
 extern glstate_t   gl_state;
 
 // vertex arrays
-extern int KillFlags;
-
 #define MAX_ARRAY (MAX_PARTICLES*4)
 
 #define VA_SetElem2(v,a,b)		((v)[0]=(a),(v)[1]=(b))
@@ -541,9 +539,6 @@ extern int KillFlags;
 
 extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
-extern float	norm_array[MAX_ARRAY][3];
-extern float	tan_array[MAX_ARRAY][4];
-extern float	col_array[MAX_ARRAY][4];
 
 #define MAX_VARRAY_VERTS (MAX_VERTS + 2)
 #define MAX_VARRAY_VERTEX_SIZE 11
@@ -560,21 +555,18 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
 
-// looks like these should be bit flags (2010-08)
-// apparently not - this was not working as bit flags, works fine as ints
 #define KILL_TMU0_POINTER	1
-#define KILL_TMU1_POINTER	2
-#define KILL_TMU2_POINTER	3
-#define KILL_TMU3_POINTER	4
-#define KILL_TMU4_POINTER   5
-#define KILL_TMU5_POINTER	6
-#define KILL_NORMAL_POINTER 8
+#define KILL_NORMAL_POINTER (KILL_TMU0_POINTER<<MAX_TMUS)
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
 void R_InitQuadVarrays(void);
+
+void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer);
+void R_VertexPointer (GLint size, GLsizei stride, const GLvoid *pointer);
+void R_NormalPointer (GLsizei stride, const GLvoid *pointer);
 
 //shadows
 extern  void R_InitShadowSubsystem(void);

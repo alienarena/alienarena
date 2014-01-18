@@ -542,20 +542,14 @@ void R_Mesh_DrawVBO (qboolean lerped)
 	// setup
 	R_Mesh_FindVBO (currentmodel, currententity->frame);
 	
-	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
-	qglVertexPointer(3, GL_FLOAT, 0, 0);
+	R_VertexPointer (3, 0, 0);
 	
-	KillFlags |= KILL_TMU0_POINTER;
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	GL_BindVBO(vbo_st);
-	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+	R_TexCoordPointer (0, 0, 0);
 	
-	KillFlags |= KILL_NORMAL_POINTER;
-	qglEnableClientState( GL_NORMAL_ARRAY );
 	GL_BindVBO(vbo_normals);
-	qglNormalPointer(GL_FLOAT, 0, 0);
+	R_NormalPointer (0, 0);
 
 	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 	GL_BindVBO(vbo_tangents);
