@@ -1499,13 +1499,6 @@ qboolean R_SetMode (void)
 	rserr_t err;
 	qboolean fullscreen;
 
-	if ( vid_fullscreen->modified && !gl_config.allow_cds )
-	{
-		Com_Printf ("R_SetMode() - CDS not allowed with this driver\n" );
-		Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->integer );
-		vid_fullscreen->modified = false;
-	}
-
 	fullscreen = vid_fullscreen->integer;
 
 	vid_fullscreen->modified = false;
@@ -1699,9 +1692,6 @@ int R_Init( void *hinstance, void *hWnd )
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
 	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
-
-	gl_config.allow_cds = true;
-	Com_Printf ("...allowing CDS\n" );
 
 	/*
 	** grab extensions
@@ -1946,9 +1936,6 @@ void R_BeginFrame( float camera_separation )
 {
 
 	gl_state.camera_separation = camera_separation;
-
-	if (con_font->modified)
-		RefreshFont ();
 
 	/*
 	** change modes if necessary

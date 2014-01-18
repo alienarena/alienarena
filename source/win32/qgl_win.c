@@ -173,8 +173,6 @@ qboolean QGL_Init( const char *dllname )
 		return false;
 	}
 
-	gl_config.allow_cds = true;
-
 
 #undef N
 #define N(x) qgl ## x = GPA ( "gl"#x );

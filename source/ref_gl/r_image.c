@@ -238,8 +238,6 @@ void GL_TexEnv( GLenum mode )
 
 void GL_Bind (int texnum)
 {
-	extern	image_t	*draw_chars;
-	
 	// TODO: eliminate every current warning, then change to regular
 	// Com_Printf to prevent new ones from going unnoticed.
 	if (!gl_state.currenttmu_defined)
