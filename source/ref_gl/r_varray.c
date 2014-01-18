@@ -130,7 +130,8 @@ hand-holding is done.
 */
 void R_KillVArrays (void)
 {
-
+	BSP_InvalidateVBO ();
+	
 	if(KillFlags & KILL_NORMAL_POINTER)
 		qglDisableClientState (GL_NORMAL_ARRAY);
 

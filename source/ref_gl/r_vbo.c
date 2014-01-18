@@ -154,14 +154,19 @@ void VB_BuildVBOBufferSize(msurface_t *surf)
 void GL_SetupWorldVBO (void)
 {
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
-	
+
+	qglEnableClientState (GL_VERTEX_ARRAY);	
 	qglVertexPointer(3, GL_FLOAT, 7*sizeof(float), (void *)0);
 	
 	qglClientActiveTextureARB (GL_TEXTURE0);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 	qglTexCoordPointer(2, GL_FLOAT, 7*sizeof(float), (void *)(3*sizeof(float)));
 	
 	qglClientActiveTextureARB (GL_TEXTURE1);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 	qglTexCoordPointer(2, GL_FLOAT, 7*sizeof(float), (void *)(5*sizeof(float)));
+	
+	KillFlags |= KILL_TMU0_POINTER | KILL_TMU1_POINTER;
 	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }

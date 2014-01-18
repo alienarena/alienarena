@@ -706,7 +706,6 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		BSP_FlushVBOAccum ();
 		
 		R_KillVArrays();
-		BSP_InvalidateVBO ();
 
 		glUseProgramObjectARB( 0 );
 
@@ -744,7 +743,6 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		}
 		
 		R_KillVArrays();
-		BSP_InvalidateVBO ();
 	}
 }
 
