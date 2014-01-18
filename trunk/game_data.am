@@ -3990,6 +3990,14 @@ nobase_nodist_textures_DATA = \
 	data1/textures/terraintest/plateau1_rocks.tga \
 	data1/textures/terraintest/plateau1_vegetation.tga \
 	data1/textures/terraintest/randclouds1.tga \
+	data1/textures/texturelib/grass_0048.jpg \
+	data1/textures/texturelib/grass_0075.jpg \
+	data1/textures/texturelib/grass_0099.jpg \
+	data1/textures/texturelib/grass_0102.jpg \
+	data1/textures/texturelib/ground_0045.jpg \
+	data1/textures/texturelib/grunge_decal.tga \
+	data1/textures/texturelib/grunge_leaking.jpg \
+	data1/textures/texturelib/stones_0027.jpg \
 	data1/textures/water/blood_nm.tga \
 	data1/textures/water/blood.tga \
 	data1/textures/water/bluewater_nm.tga \
