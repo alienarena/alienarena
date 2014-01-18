@@ -28,10 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 #include "glext.h"
 
-#ifndef GL_COLOR_INDEX8_EXT
-#define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
-#endif
-
 #include "client/ref.h"
 #include "client/vid.h"
 
@@ -72,9 +68,6 @@ typedef enum
 #include "r_model.h"
 
 extern float	r_frametime;
-
-void GL_BeginRendering (int *x, int *y, int *width, int *height);
-void GL_EndRendering (void);
 
 void GL_SetDefaultState( void );
 void GL_UpdateSwapInterval( void );
@@ -235,7 +228,6 @@ void GL_EnableTexture (int target, qboolean enable);
 void GL_EnableMultitexture (qboolean enable);
 void GL_SelectTexture (int target);
 void GL_InvalidateTextureState (void);
-void RefreshFont (void);
 
 extern void vectoangles (vec3_t value1, vec3_t angles);
 
@@ -273,7 +265,6 @@ extern void GL_ScreenShot_f (void);
 extern void R_Mesh_Draw (void);
 extern void R_DrawBrushModel (void);
 extern void R_DrawWorldSurfs (void);
-extern void R_RenderDlights (void);
 extern void R_DrawAlphaSurfaces (void);
 extern void R_InitParticleTexture (void);
 extern void R_DrawParticles (void);
@@ -288,7 +279,6 @@ extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
-void R_SetLightingMode (qboolean environment_color);
 extern void R_RotateForEntity (entity_t *e);
 extern void R_MarkWorldSurfs (void);
 extern void R_AddSkySurface (msurface_t *fa);
@@ -304,7 +294,6 @@ extern void  VLight_Init (void);
 extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
 
 //BSP 
-extern GLuint normalisationCubeMap;
 extern image_t *r_droplets;
 extern image_t *r_droplets_nm;
 extern image_t *r_blooddroplets;
@@ -321,11 +310,8 @@ void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
 //VBO
-extern qboolean use_vbo;
 extern GLuint vboId;
 extern GLuint eboId;
-extern int totalVBOsize;
-extern int	vboPosition;
 extern void R_LoadVBOSubsystem(void);
 extern void R_VCShutdown(void);
 extern void VB_WorldVCInit(void);
@@ -408,7 +394,6 @@ image_t *R_RegisterParticlePic(const char *name);
 image_t *R_RegisterParticleNormal(const char *name);
 image_t *R_RegisterGfxPic(const char *name);
 
-extern void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 extern image_t *GL_FindFreeImage (char *name, int width, int height, imagetype_t type);
 extern image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
 extern image_t *GL_GetImage( const char * name );
@@ -428,46 +413,6 @@ extern void	GL_TextureSolidMode( char *string );
 /*
 ** GL config stuff
 */
-#define GL_RENDERER_VOODOO		0x00000001
-#define GL_RENDERER_VOODOO2   	0x00000002
-#define GL_RENDERER_VOODOO_RUSH	0x00000004
-#define GL_RENDERER_BANSHEE		0x00000008
-#define	GL_RENDERER_3DFX		0x0000000F
-
-#define GL_RENDERER_PCX1		0x00000010
-#define GL_RENDERER_PCX2		0x00000020
-#define GL_RENDERER_PMX			0x00000040
-#define	GL_RENDERER_POWERVR		0x00000070
-
-#define GL_RENDERER_PERMEDIA2	0x00000100
-#define GL_RENDERER_GLINT_MX	0x00000200
-#define GL_RENDERER_GLINT_TX	0x00000400
-#define GL_RENDERER_3DLABS_MISC	0x00000800
-#define	GL_RENDERER_3DLABS		0x00000F00
-
-#define GL_RENDERER_REALIZM		0x00001000
-#define GL_RENDERER_REALIZM2	0x00002000
-#define	GL_RENDERER_INTERGRAPH	0x00003000
-
-#define GL_RENDERER_3DPRO		0x00004000
-#define GL_RENDERER_REAL3D		0x00008000
-#define GL_RENDERER_RIVA128		0x00010000
-#define GL_RENDERER_DYPIC		0x00020000
-
-#define GL_RENDERER_V1000		0x00040000
-#define GL_RENDERER_V2100		0x00080000
-#define GL_RENDERER_V2200		0x00100000
-#define	GL_RENDERER_RENDITION	0x001C0000
-
-#define GL_RENDERER_O2          0x00100000
-#define GL_RENDERER_IMPACT      0x00200000
-#define GL_RENDERER_RE			0x00400000
-#define GL_RENDERER_IR			0x00800000
-#define	GL_RENDERER_SGI			0x00F00000
-
-#define GL_RENDERER_MCD			0x01000000
-#define GL_RENDERER_OTHER		0x80000000
-
 #define GLSTATE_DISABLE_ALPHATEST	if (gl_state.alpha_test) { qglDisable(GL_ALPHA_TEST); gl_state.alpha_test=false; }
 #define GLSTATE_ENABLE_ALPHATEST	if (!gl_state.alpha_test) { qglEnable(GL_ALPHA_TEST); gl_state.alpha_test=true; }
 
@@ -477,17 +422,12 @@ extern void	GL_TextureSolidMode( char *string );
 #define GLSTATE_DISABLE_TEXGEN		if (gl_state.texgen) { qglDisable(GL_TEXTURE_GEN_S); qglDisable(GL_TEXTURE_GEN_T); qglDisable(GL_TEXTURE_GEN_R); gl_state.texgen=false; }
 #define GLSTATE_ENABLE_TEXGEN		if (!gl_state.texgen) { qglEnable(GL_TEXTURE_GEN_S); qglEnable(GL_TEXTURE_GEN_T); qglEnable(GL_TEXTURE_GEN_R); gl_state.texgen=true; }
 
-#define GL_COMBINE                        0x8570
-#define GL_DOT3_RGB                       0x86AE
-
 typedef struct
 {
-	int         renderer;
 	const char *renderer_string;
 	const char *vendor_string;
 	const char *version_string;
 	const char *extensions_string;
-	qboolean	allow_cds;
 } glconfig_t;
 
 typedef struct
@@ -496,8 +436,6 @@ typedef struct
     qboolean    fullscreen;
 
     int         prev_mode;
-
-    unsigned char *d_16to8table;
 
     int         lightmap_textures;
 
