@@ -100,23 +100,6 @@ void R_InitVArrays (int varraytype)
 
 		return;
 	}
-
-	// single texture + colour (water, mdls, and so on)
-	if (varraytype == VERT_COLOURED_TEXTURED)
-	{
-		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_COLOURED_TEXTURED], &VArrayVerts[3]);
-
-		// uses array indices 5, 6, 7, 8
-		qglEnableClientState (GL_COLOR_ARRAY);
-		qglColorPointer (4, GL_FLOAT, sizeof (float) * VertexSizes[VERT_COLOURED_TEXTURED], &VArrayVerts[5]);
-
-		KillFlags |= (KILL_TMU0_POINTER | KILL_RGBA_POINTER);
-
-		return;
-	}
 }
 
 
@@ -134,9 +117,6 @@ void R_KillVArrays (void)
 	
 	if(KillFlags & KILL_NORMAL_POINTER)
 		qglDisableClientState (GL_NORMAL_ARRAY);
-
-	if (KillFlags & KILL_RGBA_POINTER)
-		qglDisableClientState (GL_COLOR_ARRAY);
 
 	if (KillFlags & KILL_TMU5_POINTER)
 	{

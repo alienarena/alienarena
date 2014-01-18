@@ -68,18 +68,18 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
 	if ( !num_particles )
 		return;
+	
+	GL_SelectTexture (0);
 
 	qglDepthMask( GL_FALSE );	 	// no z buffering
 	qglEnable( GL_BLEND);
 	GL_TexEnv( GL_MODULATE );
 
-	R_InitVArrays (VERT_COLOURED_TEXTURED);
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	
 	qglDisable (GL_CULL_FACE);
 	
 	qsort (particles, num_particles, sizeof (particle_t *), compare_particle);
-	
-	GL_SelectTexture (0);
 	
 	for ( p1 = particles, i=0; i < num_particles ; i++,p1++)
 	{
@@ -290,12 +290,11 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 				VArray[4] = tl;
 				break;
 			}
-			 
-			 for (j = 0; j < 4; j++)
-			 	VArray[5+j] = (float)color[j]/255.0f;
 
-			 VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 		}
+		
+		qglColor4f (color[0]/255.0f, color[1]/255.0f, color[2]/255.0f, color[3]/255.0f);
 
 		R_DrawVarrays(GL_QUADS, 0, 4);
 	}	
