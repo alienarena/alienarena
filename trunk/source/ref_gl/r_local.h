@@ -559,7 +559,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
-#define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
 
 // looks like these should be bit flags (2010-08)
 // apparently not - this was not working as bit flags, works fine as ints
@@ -569,7 +568,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define KILL_TMU3_POINTER	4
 #define KILL_TMU4_POINTER   5
 #define KILL_TMU5_POINTER	6
-#define KILL_RGBA_POINTER	7
 #define KILL_NORMAL_POINTER 8
 
 // vertex array subsystem
