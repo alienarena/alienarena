@@ -107,19 +107,7 @@ extern	cvar_t	*r_novis;
 extern	cvar_t	*r_nocull;
 extern	cvar_t	*r_lerpmodels;
 
-extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 extern  cvar_t  *r_wave; //water waves
-
-extern cvar_t	*gl_ext_swapinterval;
-extern cvar_t	*gl_ext_pointparameters;
-extern cvar_t	*gl_ext_compiled_vertex_array;
-
-extern cvar_t	*gl_particle_min_size;
-extern cvar_t	*gl_particle_max_size;
-extern cvar_t	*gl_particle_size;
-extern cvar_t	*gl_particle_att_a;
-extern cvar_t	*gl_particle_att_b;
-extern cvar_t	*gl_particle_att_c;
 
 extern	cvar_t	*gl_bitdepth;
 extern	cvar_t	*gl_mode;
@@ -134,7 +122,6 @@ extern	cvar_t	*gl_showpolys;
 extern	cvar_t	*gl_finish;
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_cull;
-extern	cvar_t	*gl_poly;
 extern	cvar_t	*gl_polyblend;
 extern	cvar_t	*gl_modulate;
 extern	cvar_t	*gl_drawbuffer;
@@ -145,7 +132,6 @@ extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
 extern	cvar_t	*gl_vlights;
-extern  cvar_t	*gl_usevbo;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
@@ -493,9 +479,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
 
-#define KILL_TMU0_POINTER	1
-#define KILL_NORMAL_POINTER (KILL_TMU0_POINTER<<MAX_TMUS)
-
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
@@ -720,7 +703,6 @@ GLuint		g_location_sunRadius;
 //Shared mesh items
 extern vec3_t	shadelight;
 extern vec3_t	shadevector;
-extern int		model_dlights_num;
 extern m_dlight_t model_dlights[128];
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
@@ -737,7 +719,6 @@ qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
 //iqm
 #define pi 3.14159265
 extern float modelpitch;
-extern double degreeToRadian(double degree);
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 extern void R_DrawINTERQUAKEMODEL(void);
