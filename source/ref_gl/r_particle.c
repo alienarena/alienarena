@@ -56,7 +56,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 {
 	particle_t **p1;
 	particle_t *p;
-	int				i, k, j;
+	int				k, j;
 	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale;
 	byte			color[4];
@@ -463,7 +463,6 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 void PART_RenderFlare (flare_t *light)
 {
 	vec3_t	v, tmp;
-	int j;
 	float	dist;
 	float	alpha;
 	unsigned	flaretex;
@@ -830,7 +829,7 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, 
 {
 	grass_t  *grass;
 	image_t *gl;
-	vec3_t binormal, tangent, tmp;
+	vec3_t binormal, tangent;
 
 	if (r_numgrasses >= MAX_GRASSES)
 		return;
@@ -855,7 +854,8 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, 
 		grass->texsize = 64; //sane default
 
 	grass->texnum = texnum;
-	VectorCopy(color, grass->color);
+	VectorScale(color, 0.5, grass->color);
+	//VectorCopy(color, grass->color);
 	grass->size = size;
 	strcpy(grass->name, name);
 	grass->type = type;
@@ -972,7 +972,6 @@ void R_DrawVegetationSurface ( void )
 	float	*corner0 = corner[0];
 	qboolean visible;
 	float	lightLevel[3];
-	trace_t r_trace;
 	float	swaysin, swaysin2, swaysin3;
 	int ng;
 

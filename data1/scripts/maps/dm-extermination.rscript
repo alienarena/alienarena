@@ -39,7 +39,7 @@ textures/arena6/icerock
 	{
 		map gfx/leaves1.tga
 		scale static 12 static 12
-		colormap 1 1 1
+		colormap 1 1 1 
 		grass
 		grasstype 1
 	}
