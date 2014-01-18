@@ -401,7 +401,7 @@ msurface_t	*r_flicker_surfaces;
 BSP_SetScrolling
 ================
 */
-static void BSP_SetScrolling (qboolean enable)
+void BSP_SetScrolling (qboolean enable)
 {
 	qglMatrixMode (GL_TEXTURE);
 	qglLoadIdentity ();

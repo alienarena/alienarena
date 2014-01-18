@@ -187,38 +187,6 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
 	qglDrawArrays (mode, first, count);
 }
 
-void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
-{
-	glpoly_t *p = surf->polys;
-	float	*v;
-	int		i;
-
-	// reset pointer and counter
-	VArray = &VArrayVerts[0];
-	VertexCounter = 0;
-
-	for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-	{
-		// copy in vertex data
-		VArray[0] = v[0];
-		VArray[1] = v[1];
-		VArray[2] = v[2];
-
-		// world texture coords
-		VArray[3] = v[3] + scroll;
-		VArray[4] = v[4];
-
-		// nothing else is needed
-		// increment pointer and counter
-		VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-		VertexCounter++;
-	}
-
-	// draw the polys
-	R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
-}
-
-
 /*
 ====================
 R_InitQuadVarrays

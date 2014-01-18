@@ -216,6 +216,7 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
+void BSP_SetScrolling (qboolean enable);
 void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 {
 	glpoly_t	*p;
@@ -236,11 +237,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		if (SurfaceIsAlphaMasked (fa))
 			qglEnable( GL_ALPHA_TEST );
 
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
-
 		glUseProgramObjectARB( g_waterprogramObj );
-
-		GL_EnableMultitexture( true );
 
 		GL_MBind (0, fa->texinfo->image->texnum);
 		glUniform1iARB( g_location_baseTexture, 0);
@@ -274,14 +271,26 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		glUniform3fARB( g_location_lightPos, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
-
-		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
+		
+		BSP_InvalidateVBO ();
+		
+		qglEnableClientState (GL_VERTEX_ARRAY);
+		qglClientActiveTextureARB (GL_TEXTURE0);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		KillFlags |= KILL_TMU0_POINTER;
+		
+		// NOTE: We only subdivide water surfaces if we WON'T be using GLSL, 
+		// so this is safe.
+		BSP_AddSurfToVBOAccum (fa);
+		
+		BSP_SetScrolling ((fa->texinfo->flags & SURF_FLOWING) != 0);
+		BSP_FlushVBOAccum ();
+		BSP_SetScrolling (0);
 
 		glUseProgramObjectARB( 0 );
 
 		R_KillVArrays ();
-
-		GL_EnableMultitexture( false );
+		BSP_InvalidateVBO ();
 
 		if (SurfaceIsAlphaMasked (fa))
 			qglDisable( GL_ALPHA_TEST);

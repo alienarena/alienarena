@@ -128,7 +128,6 @@ void VB_BuildWorldVBO(void)
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-					(surf->iflags & ISURF_DRAWTURB) ||
 					(surf->iflags & ISURF_PLANEBACK))
 				continue;
 			VB_BuildSurfaceVBO(surf);
@@ -136,7 +135,6 @@ void VB_BuildWorldVBO(void)
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
-					(surf->iflags & ISURF_DRAWTURB) ||
 					!(surf->iflags & ISURF_PLANEBACK))
 				continue;
 			VB_BuildSurfaceVBO(surf);
@@ -149,11 +147,8 @@ void VB_BuildWorldVBO(void)
 void VB_BuildVBOBufferSize(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
-
-	if (!( surf->iflags & ISURF_DRAWTURB ) )
-	{
-		totalVBObufferSize += 7*3*(p->numverts-2);
-	}
+	
+	totalVBObufferSize += 7*3*(p->numverts-2);
 }
 
 void GL_SetupWorldVBO (void)
