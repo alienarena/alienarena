@@ -472,49 +472,46 @@ static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
 	VectorAdd (currentmodel->maxs, origin, maxs);
 	VectorAdd (currentmodel->mins, origin, mins);
 
-	for (; p; p = p->chain)
+	VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+
+	/* lengths used for comparison only, so squared lengths may be used.*/
+	sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
+	if ( sq_len <  4096.0f )
+	sq_len = 4096.0f; /* 64^2 */
+	else if ( sq_len > 65536.0f )
+	sq_len = 65536.0f; /* 256^2 */
+
+	for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
 	{
-		VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+		// Generate plane out of the triangle between v, v+1, and the 
+		// light point. This plane will be one of the borders of the
+		// 3D volume within which an object may cast a shadow on the
+		// world polygon.
+		vec3_t plane_line_1, plane_line_2;
+		cplane_t plane;
 
-		/* lengths used for comparison only, so squared lengths may be used.*/
-		sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
-		if ( sq_len <  4096.0f )
-		sq_len = 4096.0f; /* 64^2 */
-		else if ( sq_len > 65536.0f )
-		sq_len = 65536.0f; /* 256^2 */
+		// generate two vectors representing two sides of the triangle
+		VectorSubtract (v, statLightPosition, plane_line_1);
+		v2 = p->verts[(i+1)%p->numverts];
+		VectorSubtract (v2, v, plane_line_2);
 
-		for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
-		{
-			// Generate plane out of the triangle between v, v+1, and the 
-			// light point. This plane will be one of the borders of the
-			// 3D volume within which an object may cast a shadow on the
-			// world polygon.
-			vec3_t plane_line_1, plane_line_2;
-			cplane_t plane;
+		// generate the actual plane
+		CrossProduct (plane_line_1, plane_line_2, plane.normal);
+		VectorNormalize (plane.normal);
+		plane.type = PLANE_ANYZ;
+		plane.dist = DotProduct (v, plane.normal);
+		plane.signbits = SignbitsForPlane (&plane);
 
-			// generate two vectors representing two sides of the triangle
-			VectorSubtract (v, statLightPosition, plane_line_1);
-			v2 = p->verts[(i+1)%p->numverts];
-			VectorSubtract (v2, v, plane_line_2);
+		// CullBox-type operation
+		if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
+			//completely clipped; we can skip this surface
+			return false;
 
-			// generate the actual plane
-			CrossProduct (plane_line_1, plane_line_2, plane.normal);
-			VectorNormalize (plane.normal);
-			plane.type = PLANE_ANYZ;
-			plane.dist = DotProduct (v, plane.normal);
-			plane.signbits = SignbitsForPlane (&plane);
+		VectorSubtract( origin, v, vDist );
+		vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
+		if ( vsq_len < sq_len )
+			return true;
 
-			// CullBox-type operation
-			if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
-				//completely clipped; we can skip this surface
-				return false;
-
-			VectorSubtract( origin, v, vDist );
-			vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
-			if ( vsq_len < sq_len )
-				return true;
-
-		}
 	}
 	return false;
 }
