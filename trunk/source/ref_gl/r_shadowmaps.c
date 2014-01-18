@@ -427,7 +427,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{
 			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
-				BSP_DrawTexturelessPoly (surf);
+				BSP_AddSurfToVBOAccum (surf);
 			}
 		}
 	}
@@ -647,11 +647,13 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 	}
 	else
 	{
-		R_InitVArrays(VERT_NO_TEXTURE);
+		qglEnableClientState (GL_VERTEX_ARRAY);
 		
 		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
 		
-		R_KillVArrays();
+		// Flush the VBO accumulator now because each brush model will mess
+		// with the modelview matrix when rendering its own surfaces.
+		BSP_FlushVBOAccum ();
 
 		//draw brush models(not for ent shadow, for now)
 		for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -671,6 +673,9 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 			else
 				continue;
 		}
+		
+		R_KillVArrays();
+		BSP_InvalidateVBO ();
 	}
 }
 
