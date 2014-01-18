@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997 - 2001 Id Software, Inc.
+Copyright (C) 2007 - 2014 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and / or
 modify it under the terms of the GNU General Public License
@@ -38,33 +39,42 @@ has to take place at least every time the primitive type changes (that's vertex 
 #include "r_local.h"
 #include "r_ragdoll.h"
 
-// this must be equal to MAX_VERTS as it's possible for a single MDL to be composed of only one triangle fan or strip.
-// the storage overhead is only in the order of 100K anyway, so it's no big deal.
-// add 2 more verts for surface warping
-
 float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 
-// pointer for dynamic vert allocation
 float *VArray = &VArrayVerts[0];
 
-// arrays for normalmapping in glsl
-static vec3_t NormalsArray[MAX_VERTICES];
-// static vec4_t TangentsArray[MAX_VERTICES]; // unused
-
-// number of verts allocated
-static int VertexCounter = 0;
-
 float	tex_array[MAX_ARRAY][2];
-float	st_array[MAX_ARRAY][2];
 float	vert_array[MAX_ARRAY][3];
-float	norm_array[MAX_ARRAY][3];
-float	tan_array[MAX_ARRAY][4];
-float	col_array[MAX_ARRAY][4];
 
 // sizes of our vertexes.  the vertex type can be used as an index into this array
 int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12, 5};
 
 int KillFlags;
+
+void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer)
+{
+	assert (tmu < MAX_TMUS);
+	
+	qglClientActiveTextureARB (GL_TEXTURE0 + tmu);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+	qglTexCoordPointer (2, GL_FLOAT, stride, pointer);
+	
+	KillFlags |= (KILL_TMU0_POINTER << tmu);
+}
+
+void R_VertexPointer (GLint size, GLsizei stride, const GLvoid *pointer)
+{
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	qglVertexPointer (size, GL_FLOAT, stride, pointer);
+}
+
+void R_NormalPointer (GLsizei stride, const GLvoid *pointer)
+{
+	qglEnableClientState (GL_NORMAL_ARRAY);
+	qglNormalPointer (GL_FLOAT, stride, pointer);
+	
+	KillFlags |= KILL_NORMAL_POINTER;
+}
 
 /*
 =================
@@ -78,26 +88,19 @@ void R_InitVArrays (int varraytype)
 	// it's assumed that the programmer has already called glDrawArrays for everything before calling this, so
 	// here we will just re-init our pointer and counter
 	VArray = &VArrayVerts[0];
-	VertexCounter = 0;
 
 	// init the kill flags so we'll know what to kill
 	KillFlags = 0;
 
 	// all vertex types bring up a vertex pointer
 	// uses array indices 0, 1, 2
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglVertexPointer (3, GL_FLOAT, sizeof (float) * VertexSizes[varraytype], &VArrayVerts[0]);
+	R_VertexPointer (3, sizeof (float) * VertexSizes[varraytype], &VArrayVerts[0]);
 
 	// the simplest possible textured render uses a texcoord pointer for TMU 0
 	if (varraytype == VERT_SINGLE_TEXTURED)
 	{
 		// uses array indices 3, 4
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_SINGLE_TEXTURED], &VArrayVerts[3]);
-
-		KillFlags |= KILL_TMU0_POINTER;
-
+		R_TexCoordPointer (0, sizeof (float) * VertexSizes[VERT_SINGLE_TEXTURED], &VArrayVerts[3]);
 		return;
 	}
 }
@@ -113,57 +116,32 @@ hand-holding is done.
 */
 void R_KillVArrays (void)
 {
+	int tmu;
+	
 	BSP_InvalidateVBO ();
 	
 	if(KillFlags & KILL_NORMAL_POINTER)
 		qglDisableClientState (GL_NORMAL_ARRAY);
-
-	if (KillFlags & KILL_TMU5_POINTER)
+	
+	for (tmu = 0; tmu < MAX_TMUS; tmu++)
 	{
-		qglClientActiveTextureARB (GL_TEXTURE5);
-		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
-	}
-
-	if (KillFlags & KILL_TMU4_POINTER)
-	{
-		qglClientActiveTextureARB (GL_TEXTURE4);
-		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
-	}
-
-	if (KillFlags & KILL_TMU3_POINTER)
-	{
-		qglClientActiveTextureARB (GL_TEXTURE3);
-		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
-	}
-
-	if (KillFlags & KILL_TMU2_POINTER)
-	{
-		qglClientActiveTextureARB (GL_TEXTURE2);
-		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
-	}
-
-	if (KillFlags & KILL_TMU1_POINTER)
-	{
-		qglClientActiveTextureARB (GL_TEXTURE1);
-		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
-	}
-
-	if (KillFlags & KILL_TMU0_POINTER)
-	{
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+		if ((KillFlags & (KILL_TMU0_POINTER << tmu)) != 0)
+		{
+			qglClientActiveTextureARB (GL_TEXTURE0 + tmu);
+			qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+		}
 	}
 
 	// always kill
 	qglDisableClientState (GL_VERTEX_ARRAY);
+	
+	KillFlags = 0;
 }
 
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
 {
 	if(count < 1)
 		return; //do not send arrays of zero size to GPU!
-
-	GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
 
 	qglDrawArrays (mode, first, count);
 }
@@ -177,12 +155,6 @@ Used for 2 dimensional quads
 */
 void R_InitQuadVarrays(void) {
 
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (3, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
-
-	KillFlags |= KILL_TMU0_POINTER;
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+	R_VertexPointer (3, sizeof(vert_array[0]), vert_array[0]);
 }

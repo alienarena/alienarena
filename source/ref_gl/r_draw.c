@@ -317,10 +317,6 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 				qglColor4f(.1, .4, .8, alphaval);
 		}
 
-		VA_SetElem4(col_array[0], 1,1,1,1);
-		VA_SetElem4(col_array[1], 1,1,1,1);
-		VA_SetElem4(col_array[2], 1,1,1,1);
-		VA_SetElem4(col_array[3], 1,1,1,1);
 		GL_Bind (gl->texnum);
 		if (tiling == draw_with_tiling)
 		{
@@ -395,10 +391,6 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 			}
 
 			qglColor4f(red,green,blue, alpha);
-			VA_SetElem4(col_array[0], red,green,blue, alpha);
-			VA_SetElem4(col_array[1], red,green,blue, alpha);
-			VA_SetElem4(col_array[2], red,green,blue, alpha);
-			VA_SetElem4(col_array[3], red,green,blue, alpha);
 
 			if (stage->colormap.enabled)
 				qglDisable (GL_TEXTURE_2D);

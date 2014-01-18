@@ -1496,9 +1496,6 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	
 	glUseProgramObjectARB (0);
 	
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	
 	R_KillVArrays();		
 	
 	GL_EnableMultitexture( false );

@@ -155,18 +155,9 @@ void GL_SetupWorldVBO (void)
 {
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 
-	qglEnableClientState (GL_VERTEX_ARRAY);	
-	qglVertexPointer(3, GL_FLOAT, 7*sizeof(float), (void *)0);
-	
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-	qglTexCoordPointer(2, GL_FLOAT, 7*sizeof(float), (void *)(3*sizeof(float)));
-	
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-	qglTexCoordPointer(2, GL_FLOAT, 7*sizeof(float), (void *)(5*sizeof(float)));
-	
-	KillFlags |= KILL_TMU0_POINTER | KILL_TMU1_POINTER;
+	R_VertexPointer (3, 7*sizeof(float), (void *)0);
+	R_TexCoordPointer (0, 7*sizeof(float), (void *)(3*sizeof(float)));
+	R_TexCoordPointer (1, 7*sizeof(float), (void *)(5*sizeof(float)));
 	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }

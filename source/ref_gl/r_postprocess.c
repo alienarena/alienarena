@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define EXPLOSION 1
 #define PAIN 2
 
-extern int KillFlags;
 extern float v_blend[4];
 extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 void R_DrawBloodEffect (void);
@@ -123,14 +122,8 @@ void R_GLSLDistortion(void)
 	hScissor = (float)viddef.height/(float)FB_texture_height;
 	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	KillFlags |= KILL_TMU0_POINTER;
-	
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
 
 	VA_SetElem2(vert_array[0],0, viddef.height);
 	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
@@ -262,14 +255,8 @@ void R_GLSLWaterDroplets(void)
 	hScissor = (float)viddef.height/(float)FB_texture_height;
 	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	KillFlags |= KILL_TMU0_POINTER;
-	
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
 
 	VA_SetElem2(vert_array[0],0, viddef.height);
 	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
@@ -406,12 +393,8 @@ void R_ShadowBlend(float alpha)
 
 		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
 
-		qglEnableClientState (GL_VERTEX_ARRAY);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+		R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+		R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
 		VA_SetElem2(vert_array[0],0, vid.height);
 		VA_SetElem2(vert_array[1],vid.width, vid.height);
@@ -431,12 +414,8 @@ void R_ShadowBlend(float alpha)
 
 		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
 
-		qglEnableClientState (GL_VERTEX_ARRAY);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+		R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+		R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
 		VA_SetElem2(vert_array[0],0, vid.height);
 		VA_SetElem2(vert_array[1],vid.width, vid.height);
@@ -580,12 +559,8 @@ void R_DrawVehicleHUD (void)
 
 	GL_MBind (0, gl->texnum);
 		
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
 	VA_SetElem2(vert_array[0],0, 0);
 	VA_SetElem2(vert_array[1],vid.width, 0);
@@ -635,12 +610,8 @@ void R_DrawVehicleHUD (void)
 				}
 			}			
 			
-			qglEnableClientState (GL_VERTEX_ARRAY);
-			qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-			qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-			qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+			R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+			R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
 			VA_SetElem2(vert_array[0],0, 0);
 			VA_SetElem2(vert_array[1],vid.width, 0);
@@ -648,10 +619,6 @@ void R_DrawVehicleHUD (void)
 			VA_SetElem2(vert_array[3],0, vid.height);
 
 			qglColor4f(1,1,1, alpha);
-			VA_SetElem4(col_array[0], 1,1,1, alpha);
-			VA_SetElem4(col_array[1], 1,1,1, alpha);
-			VA_SetElem4(col_array[2], 1,1,1, alpha);
-			VA_SetElem4(col_array[3], 1,1,1, alpha);
 
 			if (stage->anim_count)
 				GL_Bind(RS_Animate(stage));
@@ -697,12 +664,8 @@ void R_DrawBloodEffect (void)
 
 	GL_MBind (0, gl->texnum);
 		
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
 	VA_SetElem2(vert_array[0],0, 0);
 	VA_SetElem2(vert_array[1],vid.width, 0);
@@ -830,12 +793,8 @@ void R_GLSLGodRays(void)
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	qglDisable(GL_CULL_FACE);
 
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
 	VA_SetElem2(vert_array[0],0, vid.height);
 	VA_SetElem2(vert_array[1],vid.width, vid.height);

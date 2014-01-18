@@ -508,8 +508,8 @@ void PART_RenderFlare (flare_t *light)
 	GL_Bind(flaretex);
 	
 	VectorScale(light->color, alpha, tmp );
-	for (j=0; j<4; j++)
-		VA_SetElem4(col_array[j], tmp[0],tmp[1],tmp[2], 1);
+	
+	qglColor4f (tmp[0], tmp[1], tmp[2], 1);
 
 	VA_SetElem2(tex_array[0], 0, 1);
 	VA_SetElem2(tex_array[1], 0, 0);
@@ -542,7 +542,6 @@ void R_RenderFlares (void)
 
 	qglDisable(GL_DEPTH_TEST);
 	qglEnable (GL_TEXTURE_2D);
-	qglEnableClientState( GL_COLOR_ARRAY );
 	GL_TexEnv( GL_MODULATE );
 
     l = r_flares;
@@ -577,7 +576,6 @@ void R_RenderFlares (void)
 	GL_TexEnv( GL_REPLACE );
 	qglEnable(GL_DEPTH_TEST);
 	qglDisable (GL_TEXTURE_2D);
-	qglDisableClientState(GL_COLOR_ARRAY);
 
 	R_KillVArrays();
 	
