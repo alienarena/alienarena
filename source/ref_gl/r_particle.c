@@ -56,7 +56,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 {
 	particle_t **p1;
 	particle_t *p;
-	int				k, j;
+	int				i, k;
 	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale;
 	byte			color[4];
@@ -854,8 +854,7 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, 
 		grass->texsize = 64; //sane default
 
 	grass->texnum = texnum;
-	VectorScale(color, 0.5, grass->color);
-	//VectorCopy(color, grass->color);
+	VectorCopy(color, grass->color);
 	grass->size = size;
 	strcpy(grass->name, name);
 	grass->type = type;
@@ -918,18 +917,18 @@ void R_FinalizeGrass(model_t *mod)
 		grass->sunVisible = r_trace.fraction == 1.0;
 		
 		// XXX: HACK until we can make StaticLightPoint work on terrain!
-		for (j = 0; j < 3; j++)
+		/*for (j = 0; j < 3; j++)
 		{
 			if (grass->static_light[j] < 0.25)
 				grass->static_light[j] = 0.25;
-		}
+		}*/
 		if (grass->sunVisible)
 		{
-			for (j = 0; j < 3; j++)
+			/*for (j = 0; j < 3; j++)
 			{
 				if (grass->static_light[j] < 0.75)
 					grass->static_light[j] = 0.75;
-			}
+			}*/
 		}
 		
 		if (grass->type == 0)
