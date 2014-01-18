@@ -468,11 +468,6 @@ void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
 {
 	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
 	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= KILL_TMU0_POINTER;
-	
 	BSP_AddSurfToVBOAccum (surf);
 	
 	// TODO: actually use the batching system for alpha surfaces
@@ -798,7 +793,6 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	
 	GL_MBind (2, texinfo->heightMap->texnum);
 	GL_MBind (3, texinfo->normalMap->texnum);
-	KillFlags |= KILL_TMU2_POINTER | KILL_TMU3_POINTER;
 	
 	if (dynamic)
 	{
@@ -840,10 +834,8 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 		glUniform1fARB( g_location_rsTime, rs_realtime);
 		glUniform1iARB( g_location_liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
 		GL_MBind (4, r_blooddroplets->texnum);
-		KillFlags |= KILL_TMU4_POINTER;
 		glUniform1iARB( g_location_liquidNormTex, 5); 
 		GL_MBind (5, r_blooddroplets_nm->texnum);
-		KillFlags |= KILL_TMU5_POINTER;
 	}
 	else if (texinfo->flags & SURF_WATER) 
 	{
@@ -853,7 +845,6 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 		glUniform1fARB( g_location_rsTime, rs_realtime);
 		glUniform1iARB( g_location_liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
 		GL_MBind (4, r_droplets->texnum);
-		KillFlags |= KILL_TMU4_POINTER;
 	}
 	else if (texinfo->flags & SURF_SHINY)
 	{
@@ -862,7 +853,6 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 
 		glUniform1iARB( g_location_chromeTex, 4); 
 		GL_MBind (4, r_mirrorspec->texnum);
-		KillFlags |= KILL_TMU4_POINTER;
 	}
 	else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY))
 	{
@@ -916,13 +906,6 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	
 	BSP_FlushVBOAccum ();
 	BSP_InvalidateVBO ();
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -986,13 +969,6 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	glUniform1iARB( g_location_parallax, 1);  
 	
 	BSP_InvalidateVBO ();
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -1090,13 +1066,6 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	glUniform1iARB( g_location_dynamic, foundLight);
 	
 	BSP_InvalidateVBO ();
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{

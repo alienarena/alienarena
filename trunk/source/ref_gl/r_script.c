@@ -1344,13 +1344,6 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-	
 	glUseProgramObjectARB (g_rscriptprogramObj);
 	
 	glUniform1iARB( g_location_rs_mainTexture, 0);

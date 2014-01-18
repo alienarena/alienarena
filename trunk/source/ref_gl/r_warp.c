@@ -274,11 +274,6 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		
 		BSP_InvalidateVBO ();
 		
-		qglEnableClientState (GL_VERTEX_ARRAY);
-		qglClientActiveTextureARB (GL_TEXTURE0);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		KillFlags |= KILL_TMU0_POINTER;
-		
 		// NOTE: We only subdivide water surfaces if we WON'T be using GLSL, 
 		// so this is safe.
 		BSP_AddSurfToVBOAccum (fa);
@@ -290,7 +285,6 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		glUseProgramObjectARB( 0 );
 
 		R_KillVArrays ();
-		BSP_InvalidateVBO ();
 
 		if (SurfaceIsAlphaMasked (fa))
 			qglDisable( GL_ALPHA_TEST);
