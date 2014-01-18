@@ -2056,6 +2056,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	// draw texture
 	//
 	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * VERTEXSIZE*sizeof(float));
+	assert (fa->polys == NULL); // only warp surfaces will have multiple polys
 	poly->next = fa->polys;
 	poly->numverts = lnumverts;
 	fa->polys = poly;
