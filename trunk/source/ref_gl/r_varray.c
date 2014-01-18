@@ -88,9 +88,6 @@ void R_InitVArrays (int varraytype)
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglVertexPointer (3, GL_FLOAT, sizeof (float) * VertexSizes[varraytype], &VArrayVerts[0]);
 
-	// no texturing at all
-	if (varraytype == VERT_NO_TEXTURE) return;
-
 	// the simplest possible textured render uses a texcoord pointer for TMU 0
 	if (varraytype == VERT_SINGLE_TEXTURED)
 	{
@@ -189,95 +186,6 @@ void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
 
 	qglDrawArrays (mode, first, count);
 }
-
-extern int SignbitsForPlane (cplane_t *out);
-void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin)
-{
-	glpoly_t *p = surf->polys;
-    float    *v, *v2;
-    int i;
-    float  sq_len;
-    vec3_t vDist;
-    vec3_t tmp, mins, maxs;
- 
-    qboolean renderPoly;
-    
-    VectorAdd (currentmodel->maxs, origin, maxs);
-    VectorAdd (currentmodel->mins, origin, mins);
- 
-    for (; p; p = p->chain)
-    {
-		// reset pointer and counter
-        VArray = &VArrayVerts[0];
-        VertexCounter = 0;
- 
-        VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
-        
-        /* lengths used for comparison only, so squared lengths may be used.*/
-        sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
-        if ( sq_len <  4096.0f )
-            sq_len = 4096.0f; /* 64^2 */
-        else if ( sq_len > 65536.0f )
-            sq_len = 65536.0f; /* 256^2 */
-         
-        renderPoly = false;
-        for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
-        {
-         	// Generate plane out of the triangle between v, v+1, and the 
-		    // light point. This plane will be one of the borders of the
-		    // 3D volume within which an object may cast a shadow on the
-		    // world polygon.
-		    vec3_t plane_line_1, plane_line_2;
-		    cplane_t plane;
-		     	
-		    // generate two vectors representing two sides of the triangle
-		    VectorSubtract (v, statLightPosition, plane_line_1);
-		    v2 = p->verts[(i+1)%p->numverts];
-		    VectorSubtract (v2, v, plane_line_2);
-		     	
-		    // generate the actual plane
-		    CrossProduct (plane_line_1, plane_line_2, plane.normal);
-		    VectorNormalize (plane.normal);
-		    plane.type = PLANE_ANYZ;
-		    plane.dist = DotProduct (v, plane.normal);
-		    plane.signbits = SignbitsForPlane (&plane);
-		     	
-		    // CullBox-type operation
-	     	if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
-	     	{
-	     		//completely clipped; we can skip this surface
-	     		return;
-	     	}
-	     	         		
-             if ( !renderPoly )
-             { /* once set, no need for calculation */
-                 float vsq_len;
-                 
-                 VectorSubtract( origin, v, vDist );
-                 vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
-                 if ( vsq_len < sq_len )
-                 {
-                     renderPoly = true;
-                 }
-             }
- 
-            // copy in vertex data
-             VArray[0] = v[0];
-             VArray[1] = v[1];
-             VArray[2] = v[2];
- 
-            // nothing else is needed
-             // increment pointer and counter
-             VArray += VertexSizes[VERT_NO_TEXTURE];
-             VertexCounter++;
-        }
- 
-        // draw the poly
-         if(renderPoly)
-             R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
-     }
- }
-
 
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 {

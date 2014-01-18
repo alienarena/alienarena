@@ -282,11 +282,6 @@ Used by the shadow system
 =========================================
 */
 
-void BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin)
-{
-	R_AddShadowSurfToVArray (fa, origin);
-}
-
 void BSP_DrawTexturelessInlineBModel (entity_t *e)
 {
 	int			i;
