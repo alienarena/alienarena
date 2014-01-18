@@ -344,8 +344,6 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 
 	glUniform3fARB( MESH_UNIFORM(meshlightPosition), lightVec[0], lightVec[1], lightVec[2]);
 	
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-
 	GL_MBind (0, r_shelltexture2->texnum);
 	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
 
@@ -442,8 +440,6 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	glUniform3fARB( MESH_UNIFORM(meshlightPosition), lightVec[0], lightVec[1], lightVec[2]);
 	glUniform3fARB( MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
 	
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER);
-
 	GL_MBind (0, skinnum);
 	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
 
