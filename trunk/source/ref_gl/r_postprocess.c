@@ -124,10 +124,12 @@ void R_GLSLDistortion(void)
 	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
 	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
 	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
+	
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+	KillFlags |= KILL_TMU0_POINTER;
+	
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 	VA_SetElem2(vert_array[0],0, viddef.height);
@@ -147,14 +149,12 @@ void R_GLSLDistortion(void)
 
 		GL_MBind (1, r_framebuffer->texnum);
 		glUniform1iARB( g_location_framebuffTex, 1);
-		KillFlags |= KILL_TMU1_POINTER;
 
 		GL_SelectTexture (0);
 	
 		if(r_distortwave)
 			GL_Bind (r_distortwave->texnum);
 		glUniform1iARB( g_location_distortTex, 0);
-		KillFlags |= KILL_TMU0_POINTER;
 
 		glUniform2fARB( g_location_dParams, wScissor, hScissor);
 
@@ -183,7 +183,6 @@ void R_GLSLDistortion(void)
 		glUseProgramObjectARB( g_rblurprogramObj );
 
 		GL_MBind (0, r_framebuffer->texnum);
-		KillFlags |= KILL_TMU0_POINTER;
 
 		glUniform1iARB( g_location_rsource, 0);
 
@@ -264,10 +263,12 @@ void R_GLSLWaterDroplets(void)
 	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
 	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
 	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
+	
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+	KillFlags |= KILL_TMU0_POINTER;
+	
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 	VA_SetElem2(vert_array[0],0, viddef.height);
@@ -285,11 +286,9 @@ void R_GLSLWaterDroplets(void)
 
 	GL_MBind (1, r_framebuffer->texnum);
 	glUniform1iARB( g_location_drSource, 1);
-	KillFlags |= KILL_TMU1_POINTER;
 
 	GL_MBind (0, r_droplets->texnum);
 	glUniform1iARB( g_location_drTex, 0);
-	KillFlags |= KILL_TMU0_POINTER;
 
 	glUniform1fARB( g_location_drTime, rs_realtime);
 	
