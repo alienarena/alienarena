@@ -2378,13 +2378,6 @@ nobase_nodist_players_DATA = \
 	data1/players/martiancyborg/tris.iqm \
 	data1/players/martiancyborg/tris.md2 \
 	data1/players/martiancyborg/tris.rgd \
-	data1/players/martiancyborg/tron2_i.jpg \
-	data1/players/martiancyborg/tron2.jpg \
-	data1/players/martiancyborg/tron3_i.jpg \
-	data1/players/martiancyborg/tron3.jpg \
-	data1/players/martiancyborg/tron_i.jpg \
-	data1/players/martiancyborg/tron.jpg \
-	data1/players/martiancyborg/tron_normal.tga \
 	data1/players/martiancyborg/w_alienblaster.iqm \
 	data1/players/martiancyborg/w_alienblaster.skin \
 	data1/players/martiancyborg/w_bfg.iqm \
