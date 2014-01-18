@@ -50,6 +50,8 @@ float	vert_array[MAX_ARRAY][3];
 int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12, 5};
 
 int KillFlags;
+#define KILL_TMU0_POINTER	1
+#define KILL_NORMAL_POINTER (KILL_TMU0_POINTER<<MAX_TMUS)
 
 void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer)
 {

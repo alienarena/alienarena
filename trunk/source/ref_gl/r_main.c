@@ -113,15 +113,6 @@ cvar_t	*gl_vlights;
 
 cvar_t	*gl_nosubimage;
 
-cvar_t	*gl_particle_min_size;
-cvar_t	*gl_particle_max_size;
-cvar_t	*gl_particle_size;
-cvar_t	*gl_particle_att_a;
-cvar_t	*gl_particle_att_b;
-cvar_t	*gl_particle_att_c;
-
-cvar_t	*gl_ext_pointparameters;
-
 cvar_t	*gl_log;
 cvar_t	*gl_bitdepth;
 cvar_t	*gl_drawbuffer;
@@ -1377,13 +1368,6 @@ void R_Register( void )
 
 	gl_nosubimage = Cvar_Get( "gl_nosubimage", "0", 0 );
 
-	gl_particle_min_size = Cvar_Get( "gl_particle_min_size", ".2", CVAR_ARCHIVE );
-	gl_particle_max_size = Cvar_Get( "gl_particle_max_size", "40", CVAR_ARCHIVE );
-	gl_particle_size = Cvar_Get( "gl_particle_size", "40", CVAR_ARCHIVE );
-	gl_particle_att_a = Cvar_Get( "gl_particle_att_a", "0.01", CVAR_ARCHIVE );
-	gl_particle_att_b = Cvar_Get( "gl_particle_att_b", "0.0", CVAR_ARCHIVE );
-	gl_particle_att_c = Cvar_Get( "gl_particle_att_c", "0.01", CVAR_ARCHIVE );
-
 	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE|CVARDOC_INT );
 	Cvar_Describe (gl_modulate, "Brightness setting. Higher means brighter.");
 	gl_log = Cvar_Get( "gl_log", "0", 0 );
@@ -1411,8 +1395,6 @@ void R_Register( void )
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
-
-	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "0", CVAR_ARCHIVE );
 
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE|CVARDOC_BOOL );
@@ -1719,23 +1701,6 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...WGL_EXT_swap_control not found\n" );
 	}
 #endif
-
-	if (strstr(gl_config.extensions_string, "GL_EXT_point_parameters"))
-	{
-		if(gl_ext_pointparameters->integer)
-		{
-			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
-			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_EXT_point_parameters\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_EXT_point_parameters not found\n" );
-	}
 
 	R_InitImageSubsystem();
 
