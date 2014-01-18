@@ -468,6 +468,7 @@ static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
 	float		sq_len, vsq_len;
 	vec3_t		vDist;
 	vec3_t		tmp, mins, maxs;
+	qboolean	ret = false;
 
 	VectorAdd (currentmodel->maxs, origin, maxs);
 	VectorAdd (currentmodel->mins, origin, mins);
@@ -507,13 +508,21 @@ static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
 			//completely clipped; we can skip this surface
 			return false;
 
-		VectorSubtract( origin, v, vDist );
-		vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
-		if ( vsq_len < sq_len )
-			return true;
+		// If at least one of the verts is within a certain distance of the
+		// camera, the surface should be rendered. (No need to check this vert
+		// if we already found one.)
+		if (!ret)
+		{
+			VectorSubtract( origin, v, vDist );
+			vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
+			if ( vsq_len < sq_len )
+				// Don't just return true yet, the bounding-box culling might
+				// rule this surface out on a later vertex.
+				ret = true; 
+		}
 
 	}
-	return false;
+	return ret;
 }
 
 void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
