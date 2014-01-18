@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_warp.c -- sky and water polygons
 
+// NOTE: Sky rendering is only here due to a historical accident. TODO: find
+// a better file for it.
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -578,17 +581,14 @@ void R_AddSkySurface (msurface_t *fa)
 {
 	int			i;
 	vec3_t		verts[MAX_CLIP_VERTS];
-	glpoly_t	*p;
+	glpoly_t	*p = fa->polys;
 
 	// calculate vertex values for sky box
-	for (p=fa->polys ; p ; p=p->next)
+	for (i=0 ; i<p->numverts ; i++)
 	{
-		for (i=0 ; i<p->numverts ; i++)
-		{
-			VectorSubtract (p->verts[i], r_origin, verts[i]);
-		}
-		ClipSkyPolygon (p->numverts, verts[0], 0);
+		VectorSubtract (p->verts[i], r_origin, verts[i]);
 	}
+	ClipSkyPolygon (p->numverts, verts[0], 0);
 }
 
 
