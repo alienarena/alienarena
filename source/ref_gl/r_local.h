@@ -560,7 +560,6 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
 #define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
-#define VERT_NO_TEXTURE					7		// verts only, no textures
 
 // looks like these should be bit flags (2010-08)
 // apparently not - this was not working as bit flags, works fine as ints
@@ -578,7 +577,6 @@ void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
 void R_InitQuadVarrays(void);
-void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
@@ -611,7 +609,6 @@ extern void		R_DrawVegetationCaster(void);
 extern void		R_DrawEntityCaster(entity_t *ent);
 extern void		R_GenerateEntityShadow( void );
 extern void		R_GenerateRagdollShadow( int RagDollID );
-extern void		BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin);
 extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;

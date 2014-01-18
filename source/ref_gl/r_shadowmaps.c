@@ -460,6 +460,65 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 
 static float fadeshadow_cutoff;
 
+static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
+{
+	glpoly_t	*p = surf->polys;
+	float		*v, *v2;
+	int			i;
+	float		sq_len, vsq_len;
+	vec3_t		vDist;
+	vec3_t		tmp, mins, maxs;
+
+	VectorAdd (currentmodel->maxs, origin, maxs);
+	VectorAdd (currentmodel->mins, origin, mins);
+
+	for (; p; p = p->chain)
+	{
+		VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+
+		/* lengths used for comparison only, so squared lengths may be used.*/
+		sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
+		if ( sq_len <  4096.0f )
+		sq_len = 4096.0f; /* 64^2 */
+		else if ( sq_len > 65536.0f )
+		sq_len = 65536.0f; /* 256^2 */
+
+		for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
+		{
+			// Generate plane out of the triangle between v, v+1, and the 
+			// light point. This plane will be one of the borders of the
+			// 3D volume within which an object may cast a shadow on the
+			// world polygon.
+			vec3_t plane_line_1, plane_line_2;
+			cplane_t plane;
+
+			// generate two vectors representing two sides of the triangle
+			VectorSubtract (v, statLightPosition, plane_line_1);
+			v2 = p->verts[(i+1)%p->numverts];
+			VectorSubtract (v2, v, plane_line_2);
+
+			// generate the actual plane
+			CrossProduct (plane_line_1, plane_line_2, plane.normal);
+			VectorNormalize (plane.normal);
+			plane.type = PLANE_ANYZ;
+			plane.dist = DotProduct (v, plane.normal);
+			plane.signbits = SignbitsForPlane (&plane);
+
+			// CullBox-type operation
+			if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
+				//completely clipped; we can skip this surface
+				return false;
+
+			VectorSubtract( origin, v, vDist );
+			vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
+			if ( vsq_len < sq_len )
+				return true;
+
+		}
+	}
+	return false;
+}
+
 void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
 {
 	int			c;
@@ -573,7 +632,8 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 		{
 			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
-				BSP_DrawShadowPoly (surf, origin);
+				if (SM_SurfaceIsShadowed (surf, origin))
+					BSP_AddSurfToVBOAccum (surf);
 			}
 		}
 	}
@@ -630,14 +690,17 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 
 		glUniform1fARB( g_location_fadeShadow, fadeShadow );
 		
-		R_InitVArrays(VERT_NO_TEXTURE);
-		
 		VectorAdd (currentmodel->mins, origin, absmins);
 		VectorAdd (currentmodel->maxs, origin, absmaxs);
 
+		qglEnableClientState (GL_VERTEX_ARRAY);
+		
 		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs);
 		
+		BSP_FlushVBOAccum ();
+		
 		R_KillVArrays();
+		BSP_InvalidateVBO ();
 
 		glUseProgramObjectARB( 0 );
 
