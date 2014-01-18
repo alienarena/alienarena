@@ -23,23 +23,24 @@ SUBDIRS = source
 ACLOCAL_AMFLAGS = -I m4 
 
 # Alien Arena documents to be installed in $docdir
+# GPL2 and INSTALL are GNU/FSF-supplied documents.
+# 
 if INSTALL_DOCS
 dist_doc_DATA = \
-	docs/license.txt \
-	docs/README.txt \
-	README
+	README \
+	README2 \
+	COPYING \
+	INSTALL \
+	GPL2
 endif
 
 # Alien Arena icon
 dist_icon_DATA = alienarena.png
 
 # FUSE game server browser and Server management scripts
-# COPYING and INSTALL are GNU/FSF-supplied documents.
 EXTRA_DIST = \
 	Tools/fuse.tar.gz \
-	Tools/LinuxScripts \
-	COPYING \
-	INSTALL
+	Tools/LinuxScripts
 
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver

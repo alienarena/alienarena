@@ -1,478 +1,288 @@
+ALIEN ARENA
 
-                           Alien Arena
-                           Version 7.66
+1. Introduction
+2. System Requirements
+3. Getting Started
+* Installation
+* Basic Commands
+* Completing Levels
+* Connecting to a server
+4. The CodeRED ACE Bot
+5. The Rewards System
+6. How to uninstall
+7. Credits
+8. Copyright Information
 
 
-1. Scope
+1.	INTRODUCTION
 
-This document includes information about the GNU-Linux/Unix
-version of Alien Arena.  Custom options and other information
-specific to Alien Arena are included here.
+ALIEN ARENA is a standalone 3D first person online deathmatch shooter
+crafted from the original source code of Quake II and Quake III,
+released by id Software under the GPL license.  With features
+including 32 bit graphics, new particle engine and effects, light
+blooms, reflective water, hi resolution textures and skins, hi poly
+models, stain maps, ALIEN ARENA pushes the envelope of graphical
+beauty rivaling today's top games.
 
-For general information, licensing, and contributers, see the
-README.txt and license.txt documents (in the docs/ subdirectory
-in the distribution archive).  For generic information about
-installation, see the GNU INSTALL document.
+The game features 37 levels, which can be played online against other
+players, or against the built in CodeRED bots.
+
+Alien Arena offers CTF, AOA (All Out Assault) mode, in which players
+can climb into vehicles to do battle, Deathball, Team Core Assault,
+where teams disable enemy power nodes to eventually destroy the enemy
+power core, and Cattle Prod, where teams guide cows into goal areas.
+Simply go into the multiplayer menu to start a server, change the game
+rules , and choose a map to play on.  You can also select from five
+different mutators(instagib, rocket arena, excessive, low grav, regen,
+and vampire) to further customize your game experience.
+
+Alien Arena : Many are called, only one will reign supreme.
+
+Eternal war ravaged the vastness of infinite space. For as far back
+into the ages as the memories of the galaxies oldest races could
+reach, it had been this way. Planet at war with planet, conflicts
+ending with a burned cinder orbiting a dead sun and countless billions
+sent screaming into oblivion. War, endless and eternal, embracing all
+the peoples of the cosmos. Scientific triumphs heralded the creation
+of ever more deadly weapons until the very fabric of the universe
+itself was threatened.
+
+Then came the call.
+
+Some said it was sent by an elder race, legendary beings of terrifying
+power who had existed since the birth of the stars and who now made
+their home beyond the fringes of known creation, others whispered
+fearfully and looked to the skies for the coming of their
+gods. Perhaps it didn't matter who had sent the call, for all the
+people of the stars could at least agree that the call was there.
+
+The wars were to end - or they would be ended. In a demonstration of
+power whoever had sent the call snuffed out the homeworld of the XXXX,
+the greatest empire of all the stars, in a heartbeat. One moment it
+was there, the next it was dust carried on the solar winds. All races
+had no choice but to heed the call.
+
+For most the call was a distant tug, a whispered warning that the wars
+were over, but for the greatest hero of each people it was more, it
+was a fire raging through their blood, a call to a new war, to the
+battle to end all battles. That fire burns in your blood, compelling
+you, the greatest warrior of your people, to fight in a distant and
+unknown arena, your honor and the future of your race at stake.
+
+Across the stars you traveled in search of this arena where the
+mightiest of the mighty would do battle, where you would stand face to
+face with your enemies in a duel to the death. Strange new weapons
+awaited you, weapons which you would have to master if you were to
+survive and emerge victorious from the complex and deadly arenas in
+which you were summoned to fight.
+
+The call to battle beats through your heart and soul like the drums of
+war. Will you be the one to rise through the ranks and conquer all
+others, the one who stands proud as the undefeated champion of the
+Alien Arena?
 
 
-2. Version 7.66 - For Players
+2.	SYSTEM REQUIREMENTS
 
-The performance of Alien Arena 7.66 is much better that previous
-versions.  Recent desktop and notebook computers with 3D
-acceleration for OpenGL will perform well.  Use the Video
-Settings menu to override the automatically selected performance
+1.8 GHz CPU
+1.5 GiB RAM
+1.2 GiB hard disk space
+3D Accelerator with at least 128 MiB texture memory available
+
+3.	GETTING STARTED
+
+* INSTALLATION
+
+(Windows)
+
+Installation has been made very simple.  After downloading, simply
+click on the .exe file and the installation will begin.  Follow the
+instructions of the Innosetup program. If you are running Windows, you
+should have administrative privileges.  If not, you may get some
+errors when the program tries to write the uninstall information to
+the registry.  If so, simply click "ignore", and the installation will
+continue without problem.
+
+Once finished, you can click on the Alien Arena icon that has been
+placed on your desktop to start a game or the Alien Arena Chat icon to
+join the IRC chat channel.
+
+(Linux)
+
+See the README and INSTALL documentation files.
+
+* BASIC COMMANDS
+
+ALIEN ARENA works very much like Quake and Unreal Tournament, with a few notable exceptions.
+
+The player will have the following weapons:
+
+1.	Blaster (automatically equipped at spawn)
+2.	Alien Disruptor
+3.	Chaingun
+4.	Flame Thrower
+5.	Rocket Launcher
+6.	Alien Smart Gun
+7.	Disruptor
+8.	Alien Vaporizer
+9.	Violator (automatically equipped at spawn)
+
+Weapons also have alternate firing modes.  In you controls menu,
+select your secondary fire key and this will allow you to use these
+modes.  The default key for alternate fire is MOUSE2 (right click).
+
+There are new powerups such as haste and sproing, in addition to the
+venerable quad damage and invulnerability.
+
+It would be advisable for you to change video settings for however you
+wish to view the game, and what gives you reasonable performance. The
+game's default settings are at a mid range setting, so try tweaking
+them or adding/removing effects depending on your framerate.  If you
+wish to see your framerate, you can type "set cl_drawfps 1" at the
+console (brought down using the ` key).
+
+ALIEN ARENA also allows for colored names just as Quake 3, using the ^
+character followed by a number to set the color.
+
+Movement is based on Quake 2 physics, allowing strafejumping,
+doublejumping, and other Quake type movements.  In Alien Arena, you
+can also dodge, similarly to Unreal Tournament, by pressing a strafe
+key, releasing it fully, and pressing it again.  Dodges can be linked
+together into sequences, similar to strafejumping, called
+strafedodging.
+
+* COMPLETING LEVELS
+
+In Alien Arena you can play a single player tournament where your goal
+will to be to reach the fraglimit before a bot does.  If you fail, you
+will be forced to repeat the level until you do. These rules can be
+changed in the menu system.  You can also play people online, where
+your goal is to reach the fraglimit before your opponents, or by
+scoring the most frags before the time limit is up.
+
+In CTF mode, you'll be on a team, and trying to capture the enemy's
+flag and return it to your own flag's location.  The team reaching the
+capture limit first, wins.
+
+In Deathball, the goal is to score as many points as possible, either
+by killing your opponents, or by finding the ball and shooting it into
+the goal (worth 10 frags).  When a player is inside of the deathball,
+he is defensless.
+
+In Team Core Assault, your goal is to disable your enemy teams power
+nodes, then destroy the central spider node.  You can only do damage
+to the spider node when all other power nodes are disabled.
+
+In Cattle Prod, each team tries to guide the cows in the middle of the
+map to the goals in the enemy base.  Cows follow players after a
+connection is automatically established between the cow and the
+player, when the player is within sight and range of the cow.  This
+connection is broken when either the player or the cow is killed.
+
+* CONNECTING TO A SERVER
+
+You can either select "join server" from the "multiplayer" menu and
+select a server in the list, or you can use the CodeRED Galaxy server
+browser (windows only).  In the in-game browser, servers are listed in
+order of ping, with lowest ping at the top of the list.
+
+4.	THE CODERED ACE BOT
+
+Bots are a built in feature of ALIEN ARENA 2009.  Several bots are
+already configured for multiplayer games, and in Alien Arena, each
+level has a specific bot file for what bots are to be played in each
 level.
 
-Alien Arena installation alternatives:
+To add a bot, type "sv addbot name model/skin", and to remove a bot
+type "sv removebot name". You can also add bots in the menu, in the
+deathmatch/bots flags area.
 
-  * Your distribution's package manager.
+In your Deathmatch options, you can configure other options such as
+chatting, node saving, and aiming.
 
-  * PlayDeb or Desura distribution service.
-    PlayDeb is at http://www.playdeb.net/.
-    Desura is at http://www.desura.com/.
+These bots are fully configurable using the Botconfigurator program.
+You can change their skill levels, accuracy, weapon favoring,
+awareness, and chat strings.
 
-  * Build from source.
-    See the "Installation from Distribution Archive" section below.
+Skill level 0 bots are quite easy to beat.  Skill level 1 bots are a
+little tougher, and do more dodging and are more accurate.  Skill
+level 2 bots do more advanced dodging, rocket jumping, and are even
+more accurate.  Level 3 bots are extremely skilled, and will strafe,
+and strafe jump around the level.  They will also taunt you after
+killing you.  If in Alien Arena, you play the single player tournament
+against the bots, selecting "easy" will make all bots skill level 0.
+Selecting "normal" will leave them at whatever level they are
+configured. Selecting "hard" will make them all move up 1 skill level.
 
-For more detail see these sections
-  * Help and Support
-  * Configuration and Troubleshooting
-  * Network Information
-  * Running the Program
+5.	THE REWARDS SYSTEM
 
+In Alien Arena, you are given points for getting kills (one point for
+kill), two points for special kills (midair kills, gib kills), and
+five extra points for killing sprees.  These points add up, and when
+these points reach the point threshold (set by the server), they can
+be used to purchase temporary powerups: invisibility, haste, and
+sproing.  Invisibility makes you appear like glass, haste makes your
+jumps increase your speed dramatically (linking jumps together makes
+this difference even more drastic), and sproing greatly increases the
+player jump height.  These powerups last for 30 seconds.
 
-3. Version 7.66 - For Packagers
+6.	HOW TO UNINSTALL ALIEN ARENA
 
-  * The incompatibility with ODE 0.12 has been corrected.
-    The configure option to use the system libode is --with-system-libode.
-    If the system libode causes problems with ragdoll animation,
-    configure the program to use the integrated libode.
+To uninstall Alien Arena, simply go to your start programs menu,
+select your Alien Arena folder, and click on "Uninstall".  You can
+also go into your control panel, and uninstall Alien Arena in the
+programs and software section.
 
-  * There is now direct dependency on zlib.
-    The configure option --with-zlib should be used.
+For Linux users, see the README documentation file. 
 
-  * The configure.ac status report has more information.
+7.	CREDITS
 
-  * Some little used options have been removed from configure.ac
+There is a long list of credits - ALIEN ARENA is greatly indebted to
+the following for its creation and completion:
 
-  * The documentation installation override configure option should work now.
-    The configure option is --disable-documents.
+Design:  John Diamond with input from the community at large.
 
-  * --with-xf86vm is the default.
+Programming: John Diamond, Jim Bower, Dave Stewart, Emmanuel Benoit,
+Max Eliaser, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer,
+Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
 
-  * --without-xf86dga is the default.
+Models and skins:  John Diamond, Alex Perez, Shawn Keeth, Franc Cassar
 
-  * The Autotools build used autoconf 2.68, and automake 1.11.6.
+Maps:  John Diamond, Dennis "xEMPx" Zedlach, Charles Hudson, Torben Fahrnbach
 
+Textures and Artwork:  John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
 
-The default standard install follows this file system scheme:
+Sounds:  John Diamond, Sound Rangers, Jon Ward, Jim Bower
 
-  * ${bindir}/alienarena             (the client program)
-  * ${bindir}/alienarena-ded         (the dedicated server program)
+Music:  Paul Joyce, Arteria Games, Divinity, Whitelipper, and SoundRangers
 
-  * ${pkgdatadir}/arena/             (read only configuration files)
-  * ${pkgdatadir}/botinfo/           (read only bot control files)
-  * ${pkgdatadir}/data1/             (read only resource files)
+Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
 
-  * ${datadir}/icons/alienarena.png  (the official icon)
-    The configure option is --with-icondir=DIR
+Linux Port: Shane Bayer, John Diamond, Jim Bower
 
-  * ${docdir}/                       (documents, licenses)
+FreeBSD port: "Ale"
 
-The shared directory is defined at build time to be exactly
-$(pkgdatadir). The preprocessor symbol, DATADIR, is set to
-$(pkgdatadir), The program expects the arena, botinfo, and data1
-shared, read-only subdirectories to be there.
+Gentoo portage: Paul Bredbury
 
-The program defaults for the user's home directory are:
+Debian packaging: Andres Mejia
 
-  * ${HOME}/.codered/arena/   (read/write configuration and resource files)
-  * ${HOME}/.codered/botinfo/ (read/write bot control files)
-  * ${HOME}/.codered/data1/   (read/write resource files, rarely created)
+Alien Arena IRC Channel: Victor B "Bonfire" (visit us @ irc.planetarena.org #alienarena)
 
-At build time, the environment variable, ALIENARENA_HOMEDIR, can
-be used to override the default .codered user home subdirectory.
+There are other major contributions from the gaming community,
+including MrG, Jay Dolan, Psychospaz, Barnes, Jalisko, Heffo, Chayfo,
+Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this
+wonderful group of people, and the release of their accomplishments,
+many features would not have been possible.  A special thanks for Lee
+Salzman for creating the new model format(IQM) and his assistance in
+getting it working for us.  A very special thanks goes out to the
+community members who contributed to the crosshair and hud contest. A
+full list of those contributors can be found in the in-game credit
+list.
 
-At run time, the environment variable, COR_GAME, will override
-the user home subdirectory program setting.  This should normally
-be left as a user option.
+8.	COPYRIGHT INFORMATION
 
-The arena subdirectory in the user home directory receives most
-of automatic resource downloads. By convention, it is where 3rd
-party maps are placed. The files in the user home have priority
-over the same name files in the read-only, shared directories.
+See the file, COPYING.
 
 
-4. Help and Support
 
-The Alien Arena Home Page URL is:
-
-  http://red.planetarena.org/
-
-There are links there to the Alien Arena Forum and other helpful
-Internet resources.  The Alien Arena IRC (Internet Relay Chat)
-channel is now served by:
-
-  irc.planetarena.org
-
-The in-game IRC connects to #alienarena there.
-
-There are web sites with 3rd party maps, skins, etc.  See the
-Home Page for links.
-
-There is a Subversion (SVN) repository for Alien Arena.  See the
-topic "Getting Alien Arena from SVN" below.
-
-Alien Arena is on IndieDB.
-http://www.indiedb.com/games/alien-arena-2008
-
-Alien Arena is on Facebook and Twitter.  See the Homepage for
-links.
-
-
-5. Network Information
-
-These ports are used by the program:
-  * UDP 27900 for the master server. Used for getting server list.
-  * UDP 27901 for the client.
-  * UDP 27902 for account/stats system password validation.
-  * UDP 27910 is the default for a server, but is often configured otherwise.
-  * TCP 6667 is the default for in-game connection to the IRC channel.
-
-The cURL library is used to retrieve game resources, player
-ranking information, and current version information from these
-URLs:
-  * http://red.planetarena.org/sv_downloadurl
-  * http://stats.planetarena.org/playerrank.db
-  * http://red.planetarena.org/version/crx_version
-
-Online performance will vary depending on the network connection
-between the your computer (the client) and the server.  Servers
-with *lower* ping are better.
-
-Playing online may require firewall configuration.
-
-
-6. Installation from Distribution Archive
-
-This describes the standard installation. There is another
-installation method described below in section, "Alternate
-Install".
-
-If you are reading this, you may have already unpacked the
-distribution archive (aka, "tarball") into your HOME directory.
-Otherwise, the terminal command line for unpacking the archive
-is:
-  $ tar -xzf alienarena-<some version numbers>.tar.gz
-Or, using the graphical file browser, right click on the file
-name, and left click on "Extract Here."  Then follow the
-instructions below to build the program.
-
-To build Alien Arena requires the compiler and various libraries.
-If you have built other programs these will probably be
-installed. If they are not there will be errors and the configure
-procedure will fail.
-
-If it fails, check the error messages for required software
-packages that may be missing.  Check the forum for easy ways to
-install the required libraries for the operating system you are
-using.  Alien Arena uses these components (in parentheses: some
-example file name variations):
-  *X11         (libx11-dev, libX11, libxxf86dga-dev, libxxf86vm-dev, libXxf86vm)
-  *OpenGL      (libgl1-mesa-dev, libGL)
-  *OpenAL 1.1  (libopenal, libopenal-dev)
-  *Ogg-Vorbis, (libogg-dev, libvorbis-dev. libogg, libvorbis, libvorbisfile)
-  *cURL,       (libcurl, libcurl4-gnutls-dev)
-  *FreeType2   (libfreetype, libfreetype6-dev)
-  *JPEG        (libjpeg8-dev)
-  *ZLib        (libz)
-  *ODE         (libode, libode-dev)
-
-Using the terminal, change to the "alienarena-7.66" directory and
-enter these commands:
-
---- Simple Version ---
-
-  $ ./configure
-  $ make
-  $ sudo make install
-
---- Not-so-Simple Version ---
-
-In the following the command options are listed on separate lines
-with short explanations. They are entered on one line with the
-command, of course.
-
-$ export CFLAGS=
-    -O3              (more optimization than -O2)
-    -pipe            (faster compile)
-    -march=native   (tuned for CPU on this machine)
-    -DNDEBUG         (remove assert statements)
-
-    -Wp,-D_FORTIFY_SOURCE=2   (improved security)
-    -fstack-protector --param=ssp-buffer-size=4  (improved security)
-
-If not configuring with the --with-system-libode option then set
-the same options for the c++ compiler:
-
-$ export CXXLAGS=
-    -O3
-    -pipe
-    -march=native
-    -DNDEBUG
-    -Wp,-D_FORTIFY_SOURCE=2
-    -fstack-protector --param=ssp-buffer-size=4
-
-$./configure
-    --with-system-libode       (use the system libode)
-    --disable-silent-rules        (verbose output)
-    --disable-dependency-tracking      (speed up one-time build)
-    ALIENARENA_HOMEDIR=some_other_dir  (override default ~/.codered)
-
-$ make
-
-$ sudo make install
-
-The variable, ALIENARENA_HOMEDIR, is relative to the user home,
-NOT the full path.  For example:
-  $ ./configure ALIENARENA_HOMEDIR=my_alienarena
-
-Check the notes about using the system libode in the "Custom
-Configure Options" section, if ragdolls do not work right, or if
-enabling ragdolls crashes the program.
-
-By default, 'sudo make install' will install the game programs
-and data like this:
-
-  /usr/local/
-    bin/
-      alienarena
-      alienarena-ded  (dedicated server)
-    share/
-      alienarena/
-        arena/
-        botinfo/
-        data1/
-      doc/
-        alienarena/
-          <various documents>
-      icons/
-        alienarena.png
-
-Following installation, intermediate files generated by the build
-may be removed using:
-
-  $ make clean
-
-To uninstall the program and data that 'sudo make install'
-installed, run:
-
-  $ sudo make uninstall
-
-The uninstall procedure may not remove all files and directories.
-Some manual removal may be required.
-
-
-7. Running the Program
-
-To run:
-  $ alienarena
-
-In the menu, Single Player will run a simple pre-configured local
-game.  For more single player options, go to the Host Server
-menu.  Setting "public server" to "no" will keep your local game
-from being broadcast with the master server list.
-
-For multiplayer, online play, first enter your player name and a
-password in the Player Setup menu.  Then go to the Join Server
-menu to find a Server.  Bots will always show ping of 0.  They
-have some mean sounding, but amusing, taunts.  Do not let it
-bother you, just frag 'em.  They may attack with the "probe", if
-you let them get close, watch out!
-
-Command line options to alienarena are NOT standard.  They follow
-a format inherited from Alien Arena's Quake 2 roots.  Command
-line options are the same as console commands, normally using a
-'+' character prefix.  The details are beyond the scope of this
-document; but a simple example is:
-  $ alienarena +set maxclients 10
-
-When the program is run, a directory is created in the user HOME
-directory.  Various kinds of data (config files, downloaded data,
-custom bot setups) are written there.  The default directory name
-is ".codered/".  That can be changed using an environment
-variable, COR_GAME.
-
-For example:
-  $ export COR_GAME=/home/user/.my_codered
-
-
-8. Configuration and Troubleshooting
-
-When the game program exits, it stores settings in "config.cfg".
-The default location for this file is
-"/home/<user>/.codered/arena/", but it might be elsewhere
-depending on your distribution or configuration.
-
-For custom settings, create a file, "autoexec.cfg" in the same
-directory as "config.cfg".  Settings in "autoexec.cfg" will
-override settings in "config.cfg".  Details about settings are
-beyond the scope of this document.  Go to the websites, the forum
-and the IRC channel for more information.
-
-If there are problems, sometimes it helps to delete "config.cfg",
-and then re-enter menu settings.
-
-Alien Arena is based on Quake games.  Many of the cvars are the
-same as Quake 2.  More information can be found on the Forum and
-on the Web.
-
-Version 7.66 adds new console variables related to new features.
-The important ones are set using the menu.  Check the forum for
-more info.  Or ask the friendly people in the IRC channel.
-
-If the game does not run smoothly, graphics settings may need to
-be adjusted.  It is best to start with the video card's setup
-utility, then adjust the Alien Arena settings.  A different or
-updated video driver may be needed.
-
-There are settings in both the "Game Options" and "Video Options"
-sections that affect performance.  Enable the video frame rate
-display in the "Game Options" menu by setting "display fps" to
-yes.  The maximum frame rate is set with the console variable
-("cvar"), "cl_maxfps".  Get more information on the Forum,
-Websites, and IRC channel.
-
-For sound problems, check OpenAL documentation about
-configuration settings in the "alsoftrc" file.
-
-If you have a high resolution mouse, you may need to set the
-mouse sensitivity cvar.  The cvar name is "sensitivity" and it
-may be set to fractional values between 0.0 and 1.0.  Use the
-console to determine the value, then put it in autoexec.cfg.
-
-The mouse may behave badly (always pointing up, for instance).
-This can usually be fixed by setting the console variable (cvar),
-"in_dgamouse", to zero.  Put this line into the "autoexec.cfg"
-file:
-  set in_dgamouse "0"
-By default, the program is built without DGA, so this only
-applies if the following configure option was set.
-  --with-xf86dga
-
-If the display will not go into full screen mode, it is likely
-the Xxf86vm library (libxxf86vm-dev or libXxf86vm) is missing on
-your system.
-
-
-9. Custom Configure Options
-
-Run './configure --help' for a list of options.  Note that many
-of the options are built-in and some are not meaningful or useful
-for Alien Arena.  Options are entered on the command line in the
-usual way; the help output has the details.  Refer to the GNU
-INSTALL document for general details.
-
-To build the dedicated server only, use the following configure
-option:
-  --disable-client
-
-By default, configure produces a status message giving
-information on the configuration.  To hide that message, use:
-  --disable-build-status
-
-To rename the programs, use the standard configure option.  For
-example:
-  --program-transform-name='s/alienarena/alien-arena/'
-
-To install to a different location, use the standard configure
-option.  For example:
-  --prefix=/usr/local/games
-
-To specify an installation location for the icon, use the
-following option.
-  --with-icondir=DIR
-
-To use the system-supplied libode, rather than the integrated
-ODE, use this option:
-  --with-system-libode
-If 'pkg-config --cflags ode' returns -DdDOUBLE, it is probably
-safe to use the system library.  The integrated ODE is built
-using these compile options:
-  * -DdDOUBLE
-  * -DdTRIMESH_ENABLED
-  * -DdTRIMESH_OPCODE
-  * -DNDEBUG and -DdNODEBUG
-Using a libode built with -DdSINGLE makes ragdolls excessively
-"raggedy".  Other libode build variations will likely result in
-program failure.
-
-To disable installation of documents, use the following option.
-  --disable-documents
-
-The server terminal will output color if the following option is
-used.  This converts Quake-style color codes to ANSI color
-escapes.
-  --enable-ansi-color
-
-Other Alien Arena custom options are intended mostly for
-developer use.  If you use them, it is assumed that you know what
-you are doing.
-
-
-10. Tools
-
-Tools/fuse.tar.gz contains a game server browser.  See documents
-in that package for details.
-
-Tools/LinuxScripts contains tools for server management.  See the
-README there for details.
-
-
-11. Alternate Install
-
-This configures the installation to use the "traditional", single
-directory, in-place install.  It does not define DATADIR, and the
-executables need to be in the top game directory.  Normally, this
-install would be done somewhere in your HOME directory.  Root
-privileges would not be required to write the game data.  The
-configure option for renaming of the executables is not
-supported.
-
-If you are a map-builder, you should use this option.  Some
-mapping tools may not work with the "standard" install.
-
-If you regularly update to the latest development code from the
-Subversion Repository, you may prefer this option.
-
-The two install methods are not mutually exclusive.  With some
-care, it is possible to use both.
-
-The configure option is:
-  --enable-alternate-install
-
-Following the usual 'make', it requires
-
-  $ make install-alternate
-
-This just copies the executables to the top game directory.  The
-effect of using any other 'install' make target is "undefined".
-
-
-12. Getting Alien Arena from SVN
-
-The repository has the latest development version of Alien Arena.
-It contains tools and other resources that are not a part of the
-regular distribution.
-
-The SVN repository may be browsed at:
-
-http://svn.icculus.org/alienarena/trunk/
-
-Anonymous read-only checkout is available using this command:
-
-svn co svn://svn.icculus.org/alienarena/trunk alienarena
-
-More information about Subversion may be found at:
-http://subversion.apache.org/
 
