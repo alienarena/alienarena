@@ -1056,7 +1056,7 @@ void R_DrawVegetationSurface ( void )
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 			
 			// adjust vertical position, scaled
-			origin[2] += (grass->texsize/32) * grass->size;
+			origin[2] += (grass->texsize/32) * grass->size/(grass->texsize/128);
 		}
 		else // grass
 		{
@@ -1064,7 +1064,7 @@ void R_DrawVegetationSurface ( void )
 			qglDisable( GL_CULL_FACE );
 			
 			// adjust vertical position, scaled
-			origin[2] += (grass->texsize/32) * grass->size;
+			origin[2] += (grass->texsize/32) * grass->size/(grass->texsize/128);
 
 			visible = CM_inPVS_leafs (r_origin_leafnum, grass->leafnum);
 			// TODO: Replace CM_BoxTrace with CM_FastTrace as soon as I write
