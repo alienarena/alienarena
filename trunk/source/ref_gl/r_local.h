@@ -271,6 +271,7 @@ extern void R_AddSkySurface (msurface_t *fa);
 extern void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
 extern void R_ReadFogScript(char config_file[128]);
 extern void R_ReadMusicScript(char config_file[128]);
+extern int SignbitsForPlane (cplane_t *out);
 
 //Lights
 extern dlight_t *dynLight;

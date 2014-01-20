@@ -124,9 +124,9 @@ textures/rage/metallight_2
 textures/arena10/cobblestone
 {
 	{
-		map gfx/grass.tga
+		map gfx/weed3.tga
 		scale static 4 static 4
-		colormap 1 1 1
+		colormap .5 .4 .3
 		grass
 		grasstype 0
 	}	
