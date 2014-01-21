@@ -119,10 +119,6 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 			hostname = DEFAULT_DOWNLOAD_URL_2;
 			break;
 		case server_custom:
-			if (!strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_1))
-				return false;
-			if (!strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_2))
-				return false;
 			hostname = cls.downloadurl;
 			break;
 	}
@@ -213,13 +209,22 @@ void CL_HttpDownloadCleanup(){
 		
 		_unlink(dnld_file);  // delete partial or empty file
 		
+		// determine the next download source to try. (currentHost is the
+		// source that just failed.)
 		switch (currentHost)
 		{
 			case default_1:
-			case default_2:
-				Com_DPrintf ("Trying next HTTP.\n");
+				Com_DPrintf ("Trying next hardcoded HTTP.\n");
 				CL_HttpDownloadFromHost (currentHost+1, cls.downloadname);
 				break;
+			case default_2:
+				if (	strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_1) &&
+						strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_2))
+				{
+					Com_DPrintf ("Trying server custom HTTP.\n");
+					CL_HttpDownloadFromHost (currentHost+1, cls.downloadname);
+					break;
+				}
 			case server_custom:
 				Com_DPrintf ("Trying UDP.\n");
 				MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
