@@ -180,7 +180,6 @@ void RS_FreeUnmarked(void);
 rscript_t *RS_FindScript(char *name);
 void RS_ReadyScript(rscript_t *rs);
 void RS_ScanPathForScripts(void);
-int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
 typedef enum 
