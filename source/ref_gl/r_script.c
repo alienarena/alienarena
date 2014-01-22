@@ -1309,7 +1309,7 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 }
 
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
-				qboolean translucent, qboolean separate_lm_texcoords,
+				qboolean translucent, rs_lightmaptype_t lm,
 				void (*draw_callback) (void))
 {
 	vec3_t		vectors[3];
@@ -1346,19 +1346,10 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute
 		
-		if (stage->lightmap && !translucent)
-		{
+		if (stage->lightmap && lm != rs_lightmap_off)
 			GL_MBind (1, lmtex);
 			
-			if (separate_lm_texcoords)
-				glUniform1iARB (g_location_rs_lightmap, 2);
-			else
-				glUniform1iARB (g_location_rs_lightmap, 1);
-		}
-		else
-		{
-			glUniform1iARB (g_location_rs_lightmap, 0);
-		}
+		glUniform1iARB (g_location_rs_lightmap, stage->lightmap?lm:0);
 
 		GL_SelectTexture (0);
 		qglPushMatrix ();
@@ -1501,7 +1492,9 @@ void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 	
 	translucent = (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66)) != 0;
 	
-	RS_Draw (rs, lmtex, rotate_center, surf->plane->normal, translucent, true, BSP_DrawVBOAccum);
+	RS_Draw (	rs, lmtex, rotate_center, surf->plane->normal, translucent,
+				translucent?rs_lightmap_separate_texcoords:rs_lightmap_off,
+				BSP_DrawVBOAccum );
 	
 	BSP_ClearVBOAccum ();
 }

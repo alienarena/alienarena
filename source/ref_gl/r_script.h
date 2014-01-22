@@ -183,8 +183,14 @@ void RS_ScanPathForScripts(void);
 int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
+typedef enum 
+{
+	rs_lightmap_off,
+	rs_lightmap_on,
+	rs_lightmap_separate_texcoords
+} rs_lightmaptype_t;
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
-				qboolean translucent, qboolean separate_lm_texcoords,
+				qboolean translucent, rs_lightmaptype_t lm,
 				void (*draw_callback) (void));
 void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
