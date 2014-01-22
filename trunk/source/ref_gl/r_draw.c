@@ -207,11 +207,13 @@ enum draw_tiling_s
 	draw_without_tiling,
 	draw_with_tiling
 };
+static void Draw_DrawQuad_Callback (void)
+{
+	R_DrawVarrays(GL_QUADS, 0, 4);
+}
 void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *gl, float alphaval, enum draw_tiling_s tiling)
 {
 	rscript_t *rs;
-	float	alpha,s,t;
-	rs_stage_t *stage;
 	char shortname[MAX_QPATH];
 	float xscale, yscale;
 	float cropped_x, cropped_y, cropped_w, cropped_h;
@@ -290,86 +292,22 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		VA_SetElem2(vert_array[1], x+w, y);
 		VA_SetElem2(vert_array[2], x+w, y+h);
 		VA_SetElem2(vert_array[3], x,	y+h);
+		
+		// We don't use sl, sh, tl, and th here because that opens up a whole
+		// can of worms of the texcoords for each RScript stage being
+		// different. As a result, the current policy is just don't draw any
+		// textures of type it_particle using RScripts.
+		VA_SetElem2(tex_array[0], 0, 0);
+		VA_SetElem2(tex_array[1], 1, 0);
+		VA_SetElem2(tex_array[2], 1, 1);
+		VA_SetElem2(tex_array[3], 0, 1);
 	
 		RS_ReadyScript(rs);
 
-		stage=rs->stage;
-		while (stage)
-		{
-			float red = 1, green = 1, blue = 1;
-
-			if (stage->blendfunc.blend)
-			{
-				GLSTATE_ENABLE_BLEND
-				GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
-			}
-			else
-			{
-				GLSTATE_DISABLE_BLEND
-			}
-
-			alpha=1.0f;
-			if (stage->alphashift.min || stage->alphashift.speed)
-			{
-				if (!stage->alphashift.speed && stage->alphashift.min > 0)
-				{
-					alpha=stage->alphashift.min;
-				}
-				else if (stage->alphashift.speed)
-				{
-					alpha=sin(rs_realtime * stage->alphashift.speed);
-					alpha=(alpha+1)*0.5f;
-					if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
-					if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
-				}
-			}
-
-			if (stage->alphamask)
-			{
-				GLSTATE_ENABLE_ALPHATEST
-			}
-			else
-			{
-				GLSTATE_DISABLE_ALPHATEST
-			}
-
-			if (stage->colormap.enabled)
-			{
-				red = stage->colormap.red/255.0;
-				green = stage->colormap.green/255.0;
-				blue = stage->colormap.blue/255.0;
-			}
-
-			qglColor4f(red,green,blue, alpha);
-
-			if (stage->colormap.enabled)
-				qglDisable (GL_TEXTURE_2D);
-			else if (stage->anim_count)
-				GL_Bind(RS_Animate(stage));
-			else
-				GL_Bind (stage->texture->texnum);
-
-			s = 0; t = 1;
-			RS_SetTexcoords2D (stage, &s, &t);
-			VA_SetElem2(tex_array[3],s, t);
-			s = 0; t = 0;
-			RS_SetTexcoords2D (stage, &s, &t);
-			VA_SetElem2(tex_array[0],s, t);
-			s = 1; t = 0;
-			RS_SetTexcoords2D (stage, &s, &t);
-			VA_SetElem2(tex_array[1],s, t);
-			s = 1; t = 1;
-			RS_SetTexcoords2D (stage, &s, &t);
-			VA_SetElem2(tex_array[2],s, t);
-
-			R_DrawVarrays(GL_QUADS, 0, 4);
-
-			qglColor4f(1,1,1,1);
-			if (stage->colormap.enabled)
-				qglEnable (GL_TEXTURE_2D);
-
-			stage=stage->next;
-		}
+		// FIXME: HACK to work around the other compatibility HACK in RS_Draw
+		GL_BlendFunction (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		
+		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, Draw_DrawQuad_Callback);
 
 		qglColor4f(1,1,1,1);
 		GLSTATE_ENABLE_ALPHATEST
