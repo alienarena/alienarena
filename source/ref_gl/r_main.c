@@ -113,7 +113,6 @@ cvar_t	*gl_vlights;
 
 cvar_t	*gl_nosubimage;
 
-cvar_t	*gl_log;
 cvar_t	*gl_bitdepth;
 cvar_t	*gl_drawbuffer;
 cvar_t	*gl_driver;
@@ -782,7 +781,7 @@ void R_DrawTerrain (void)
 		if (currententity->model && r_shaders->integer)
 		{
 			rs=(rscript_t *)currententity->model->script;
-
+			
 			//custom player skin (must be done here)
 			if (currententity->skin)
 			{
@@ -1370,7 +1369,6 @@ void R_Register( void )
 
 	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE|CVARDOC_INT );
 	Cvar_Describe (gl_modulate, "Brightness setting. Higher means brighter.");
-	gl_log = Cvar_Get( "gl_log", "0", 0 );
 	gl_bitdepth = Cvar_Get( "gl_bitdepth", "0", 0 );
 	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
@@ -1911,17 +1909,6 @@ void R_BeginFrame( float camera_separation )
 
 		ref = Cvar_Get ("vid_ref", "gl", 0);
 		ref->modified = true;
-	}
-
-	if ( gl_log->modified )
-	{
-		GLimp_EnableLogging( gl_log->integer );
-		gl_log->modified = false;
-	}
-
-	if ( gl_log->integer )
-	{
-		GLimp_LogNewFrame();
 	}
 
 	GLimp_BeginFrame( camera_separation );

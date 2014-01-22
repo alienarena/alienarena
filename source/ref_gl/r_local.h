@@ -111,7 +111,6 @@ extern  cvar_t  *r_wave; //water waves
 
 extern	cvar_t	*gl_bitdepth;
 extern	cvar_t	*gl_mode;
-extern	cvar_t	*gl_log;
 extern	cvar_t	*gl_lightmap;
 extern	cvar_t	*gl_dynamic;
 extern	cvar_t	*gl_nobind;
@@ -223,7 +222,6 @@ void R_DynamicLightPoint (vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
 void R_PushDlights (void);
 void R_PushDlightsForBModel (entity_t *e);
-void SetVertexOverbrights (qboolean toggle);
 
 //====================================================================
 extern	model_t	*r_worldmodel;
@@ -276,7 +274,6 @@ extern int SignbitsForPlane (cplane_t *out);
 //Lights
 extern dlight_t *dynLight;
 extern vec3_t lightspot;
-extern void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 extern void  VLight_Init (void);
 extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
 
@@ -460,7 +457,6 @@ extern glstate_t   gl_state;
 
 #define VA_SetElem2(v,a,b)		((v)[0]=(a),(v)[1]=(b))
 #define VA_SetElem3(v,a,b,c)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c))
-#define VA_SetElem4(v,a,b,c,d)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c),(v)[3]=(d))
 
 extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
@@ -475,7 +471,6 @@ extern float	vert_array[MAX_ARRAY][3];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
@@ -742,7 +737,6 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 
 //Ragdoll
 int r_DrawingRagDoll;
-int r_SurfaceCount;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI))
 
@@ -764,8 +758,6 @@ extern qboolean	GLimp_Init( void *hinstance, void *hWnd );
 extern void		GLimp_Shutdown( void );
 extern rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
 extern void		GLimp_AppActivate( qboolean active );
-extern void		GLimp_EnableLogging( qboolean enable );
-extern void		GLimp_LogNewFrame( void );
 
 /*
 ====================================================================
