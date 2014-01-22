@@ -20,16 +20,17 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-# 2014-01-11
+# 2014-01-11, 2014-01-22
 # - integrated libode eliminated
 # - ANSI color option removed (now a cvar)
+# - temporary revert to 2.68 and 1.11.1
 
 # configure.ac for
 #  GNU/Linux, Unix
 #  Windows (32-bit) using MinGW - Experimental
 #  Mac OS X / Darwin using X11 - Experimental
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 AC_INIT([alienarena],[7.66],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
@@ -40,12 +41,12 @@ AC_CONFIG_HEADERS([config/config.h])
 dnl insure default prefix
 AX_EXPAND_PREFIX
 
-dnl 1.14 = require automake 1.14 or greater
+dnl 1.11.1 = require automake 1.11.1 or greater
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output (--disable-silent-rules for more output)
 dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz
-AM_INIT_AUTOMAKE([ 1.14 foreign subdir-objects silent-rules ])
+AM_INIT_AUTOMAKE([ 1.11.1 foreign subdir-objects silent-rules ])
 AM_SILENT_RULES([yes])
 
 dnl use --enable-maintainer-mode to get full set of make targets.
