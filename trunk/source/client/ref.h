@@ -398,7 +398,6 @@ void	Draw_FadeScreen (void);
 
 void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );
-void	R_SetPalette ( const unsigned char *palette);
 
 struct model_s	*R_RegisterModel (char *name);
 struct image_s	*R_RegisterSkin (char *name);

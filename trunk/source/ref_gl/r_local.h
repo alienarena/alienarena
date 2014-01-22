@@ -370,7 +370,6 @@ extern void	Draw_FadeScreen (void);
 
 extern void	R_BeginFrame( float camera_separation );
 extern void	R_SwapBuffers( int );
-extern void	R_SetPalette ( const unsigned char *palette);
 extern int	Draw_GetPalette (void);
 
 image_t *R_RegisterSkin (char *name);
