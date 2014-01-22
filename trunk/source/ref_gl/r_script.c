@@ -1170,15 +1170,6 @@ void RS_ScanPathForScripts (void)
 	}
 }
 
-inline void RS_RotateST2 (float *os, float *ot, float radians)
-{
-	float cost = cos(radians), sint = sin(radians);
-	float is = *os, it = *ot;
-
-	*os = cost * (is - 0.5) + sint * (0.5 - it) + 0.5;
-	*ot = cost * (it - 0.5) + sint * (is - 0.5) + 0.5;
-}
-
 // scaling factor to convert from rotations per minute to radians per second
 #define ROTFACTOR (M_PI * 2.0 / 60.0)
 
@@ -1213,20 +1204,6 @@ static float RS_ScaleFunc (char type, float scale)
 	}
 
 	return 1;
-}
-
-void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
-{
-	// scale
-	*os *= RS_ScaleFunc (stage->scale.typeX, stage->scale.scaleX);
-	*ot *= RS_ScaleFunc (stage->scale.typeY, stage->scale.scaleY);
-
-	// rotate
-	if (stage->rot_speed)
-		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * ROTFACTOR);
-	
-	*os += RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX);
-	*ot += RS_ScrollFunc (stage->scroll.typeY, stage->scroll.speedY);
 }
 
 image_t *BSP_TextureAnimation (mtexinfo_t *tex);

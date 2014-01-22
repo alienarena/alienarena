@@ -656,14 +656,16 @@ R_DrawSkyBox
 ==============
 */
 int	skytexorder[6] = {0,2,1,3,4,5};
+static void Sky_DrawQuad_Callback (void)
+{
+	R_DrawVarrays(GL_QUADS, 0, 4);
+}
 void R_DrawSkyBox (void)
 {
-	int		i;
+	int		i, j;
 	float	s ,t;
 	vec3_t	point;
-	float	alpha;
 	rscript_t *rs = NULL;
-	rs_stage_t *stage = NULL;
 
 	if (skyrotate)
 	{	// check for no sky at all
@@ -730,96 +732,38 @@ void R_DrawSkyBox (void)
 		qglPushMatrix (); //rotate the clouds
 		qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 		qglRotatef (rs_realtime * 20, 0, 1, 0);
-
+		
 		for (i=0 ; i<6 ; i++)
 		{
 			rs=(rscript_t *)sky_images[skytexorder[i]]->script;
-
-			if(rs) {
-
-				stage=rs->stage;
-				while (stage)
-				{
-					qglDepthMask( GL_FALSE );	 	// no z buffering
-					qglEnable( GL_BLEND);
-					GL_TexEnv( GL_MODULATE );
-					GLSTATE_DISABLE_ALPHATEST
-
-					GL_Bind (stage->texture->texnum);
-
-					if (stage->blendfunc.blend)
-					{
-						GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
-						GLSTATE_ENABLE_BLEND
-					}
-					else
-					{
-						GLSTATE_DISABLE_BLEND
-					}
-
-					if (stage->alphashift.min || stage->alphashift.speed)
-					{
-						alpha=0.0f;
-
-						if (!stage->alphashift.speed && stage->alphashift.min > 0)
-						{
-							alpha=stage->alphashift.min;
-						}
-						else if (stage->alphashift.speed)
-						{
-							alpha=sin(rs_realtime * stage->alphashift.speed);
-							alpha=(alpha+1)*0.5f;
-							if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
-							if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
-						}
-					}
-					else
-						alpha=1.0f;
-
-					qglColor4f(1,1,1,alpha);
-
-					if (stage->alphamask)
-					{
-						GLSTATE_ENABLE_ALPHATEST
-					}
-					else
-					{
-						GLSTATE_DISABLE_ALPHATEST
-					}
-
-					skymins[0][i] = -1;
-					skymins[1][i] = -1;
-					skymaxs[0][i] = 1;
-					skymaxs[1][i] = 1;
-
-					qglBegin (GL_QUADS);
-
-					MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, CLOUDDIST);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, CLOUDDIST);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, CLOUDDIST);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, CLOUDDIST);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					qglEnd();
-
-					stage=stage->next;
-				}
+			
+			if (rs == NULL)
+				continue;
+			
+			R_InitVArrays (VERT_SINGLE_TEXTURED);
+			VArray = &VArrayVerts[0];
+			
+			for (j = 0; j < 4; j++)
+			{
+				if (j < 2)
+					s = -1;
+				else
+					s = 1;
+	
+				if (j == 1 || j == 2)
+					t = 1;
+				else
+					t = -1;
+	
+				MakeSkyVec (s, t, i, &VArray[3], &VArray[4], VArray, CLOUDDIST);
+				
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
+
+			qglDepthMask( GL_FALSE );	 	// no z buffering
+			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, Sky_DrawQuad_Callback);
 		}
+		R_KillVArrays ();
 		// restore the original blend mode
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_DISABLE_BLEND
