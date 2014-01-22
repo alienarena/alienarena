@@ -1244,27 +1244,6 @@ rscript_t	*surfaceScript(msurface_t *surf)
 	}
 	return NULL;
 }
-void SetVertexOverbrights (qboolean toggle)
-{
-	if (!r_overbrightbits->value)
-		return;
-	
-	GL_SelectTexture (0);
-
-	if (toggle)//turn on
-	{
-		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
-
-		GL_TexEnv( GL_COMBINE_EXT );
-	}
-	else //turn off
-	{
-		GL_TexEnv( GL_MODULATE );
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
-	}
-}
 
 static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 {

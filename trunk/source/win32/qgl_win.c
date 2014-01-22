@@ -212,16 +212,6 @@ qboolean QGL_Init( const char *dllname )
 	return true;
 }
 
-void GLimp_EnableLogging( qboolean enable )
-{
-}
-
-
-void GLimp_LogNewFrame( void )
-{
-	fprintf( glw_state.log_fp, "*** R_BeginFrame ***\n" );
-}
-
 #pragma warning (default : 4113 4133 4047 )
 
 
