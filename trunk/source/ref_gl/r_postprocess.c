@@ -45,6 +45,26 @@ int frames;
 
 extern  cvar_t	*cl_raindist;
 
+static void Postprocess_RenderQuad (image_t *img, int offsetX, int offsetY)
+{
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+
+	VA_SetElem2 (vert_array[0], 0, viddef.height);
+	VA_SetElem2 (vert_array[1], viddef.width-offsetX, viddef.height);
+	VA_SetElem2 (vert_array[2], viddef.width-offsetX, offsetY);
+	VA_SetElem2 (vert_array[3], 0, offsetY);
+
+	VA_SetElem2 (tex_array[0], img->sl, img->tl);
+	VA_SetElem2 (tex_array[1], img->sh, img->tl);
+	VA_SetElem2 (tex_array[2], img->sh, img->th);
+	VA_SetElem2 (tex_array[3], img->sl, img->th);
+	
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	
+	R_KillVArrays ();
+}
+
 void R_GLSLDistortion(void)
 {
 	vec2_t fxScreenPos;
@@ -112,7 +132,7 @@ void R_GLSLDistortion(void)
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0, 0, 0, FB_texture_width, FB_texture_height);
 
-	qglViewport(0,0,viddef.width, viddef.height);
+	qglViewport (0,0,viddef.width, viddef.height);
 
 	//render quad on screen
 
@@ -122,19 +142,6 @@ void R_GLSLDistortion(void)
 	hScissor = (float)viddef.height/(float)FB_texture_height;
 	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-
-	VA_SetElem2(vert_array[0],0, viddef.height);
-	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
-	VA_SetElem2(vert_array[2],viddef.width-offsetX, offsetY);
-	VA_SetElem2(vert_array[3],0, offsetY);
-
-	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
-	VA_SetElem2(tex_array[1],r_framebuffer->sh, r_framebuffer->tl);
-	VA_SetElem2(tex_array[2],r_framebuffer->sh, r_framebuffer->th);
-	VA_SetElem2(tex_array[3],r_framebuffer->sl, r_framebuffer->th);
-
 	if(r_fbFxType == EXPLOSION)
 	{
 		//create a distortion wave effect at point of explosion
@@ -166,7 +173,7 @@ void R_GLSLDistortion(void)
 		fxScreenPos[1] -= (float)frames*.001;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
-		R_DrawVarrays(GL_QUADS, 0, 4);
+		Postprocess_RenderQuad (r_framebuffer, offsetX, offsetY);
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -183,12 +190,10 @@ void R_GLSLDistortion(void)
 
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 
-		R_DrawVarrays(GL_QUADS, 0, 4);
+		Postprocess_RenderQuad (r_framebuffer, offsetX, offsetY);
 
 		glUseProgramObjectARB( 0 );
 	}
-
-	R_KillVArrays();
 
 	if(rs_realtime > r_fbeffectTime+r_fbeffectLen) 
 	{
@@ -255,19 +260,6 @@ void R_GLSLWaterDroplets(void)
 	hScissor = (float)viddef.height/(float)FB_texture_height;
 	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-
-	VA_SetElem2(vert_array[0],0, viddef.height);
-	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
-	VA_SetElem2(vert_array[2],viddef.width-offsetX, offsetY);
-	VA_SetElem2(vert_array[3],0, offsetY);
-
-	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
-	VA_SetElem2(tex_array[1],r_framebuffer->sh, r_framebuffer->tl);
-	VA_SetElem2(tex_array[2],r_framebuffer->sh, r_framebuffer->th);
-	VA_SetElem2(tex_array[3],r_framebuffer->sl, r_framebuffer->th);
-		
 	//draw water droplets
 	glUseProgramObjectARB( g_dropletsprogramObj ); //this program will have two or three of the normalmap scrolling over the buffer
 
@@ -281,11 +273,9 @@ void R_GLSLWaterDroplets(void)
 	
 	glUniform2fARB( g_location_drParams, wScissor, hScissor);
 
-	R_DrawVarrays(GL_QUADS, 0, 4);
+	Postprocess_RenderQuad (r_framebuffer, offsetX, offsetY);
 
 	glUseProgramObjectARB( 0 );
-	
-	R_KillVArrays();
 
 	return;
 }
@@ -392,44 +382,14 @@ void R_ShadowBlend(float alpha)
 		glUniform1iARB( g_location_source, 0);
 
 		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
-
-		R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-		R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-		VA_SetElem2(vert_array[0],0, vid.height);
-		VA_SetElem2(vert_array[1],vid.width, vid.height);
-		VA_SetElem2(vert_array[2],vid.width, 0);
-		VA_SetElem2(vert_array[3],0, 0);
-
-		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
-		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
-		VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
-		VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
-
-		R_DrawVarrays(GL_QUADS, 0, 4);
+		
+		Postprocess_RenderQuad (r_colorbuffer, 0, 0);
 
 		//now blur horizontally
 
-		glUniform1iARB( g_location_source, 0);
-
 		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
-
-		R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-		R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-		VA_SetElem2(vert_array[0],0, vid.height);
-		VA_SetElem2(vert_array[1],vid.width, vid.height);
-		VA_SetElem2(vert_array[2],vid.width, 0);
-		VA_SetElem2(vert_array[3],0, 0);
-
-		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
-		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
-		VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
-		VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
-
-		R_DrawVarrays(GL_QUADS, 0, 4);
-
-		R_KillVArrays();
+		
+		Postprocess_RenderQuad (r_colorbuffer, 0, 0);
 
 		glUseProgramObjectARB(0);
 	}
@@ -559,24 +519,26 @@ void R_DrawVehicleHUD (void)
 
 	GL_MBind (0, gl->texnum);
 		
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-	VA_SetElem2(vert_array[0],0, 0);
-	VA_SetElem2(vert_array[1],vid.width, 0);
-	VA_SetElem2(vert_array[2],vid.width, vid.height);
-	VA_SetElem2(vert_array[3],0, vid.height);
-
-	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
-	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
-	VA_SetElem2(tex_array[2],gl->sh, gl->th);
-	VA_SetElem2(tex_array[3],gl->sl, gl->th);
-
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity ();
 	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity ();
+
+	// FIXME: can't use Postprocess_RenderQuad here because the vertex order
+	// is different for some reason.	
+	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
+	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
+
+	VA_SetElem2(vert_array[0],0, 0);
+	VA_SetElem2(vert_array[1],viddef.width, 0);
+	VA_SetElem2(vert_array[2],viddef.width, viddef.height);
+	VA_SetElem2(vert_array[3],0, viddef.height);
+
+	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
+	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
+	VA_SetElem2(tex_array[2],gl->sh, gl->th);
+	VA_SetElem2(tex_array[3],gl->sl, gl->th);
 	
 	R_DrawVarrays(GL_QUADS, 0, 4);
 	
@@ -610,25 +572,12 @@ void R_DrawVehicleHUD (void)
 				}
 			}			
 			
-			R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-			R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-			VA_SetElem2(vert_array[0],0, 0);
-			VA_SetElem2(vert_array[1],vid.width, 0);
-			VA_SetElem2(vert_array[2],vid.width, vid.height);
-			VA_SetElem2(vert_array[3],0, vid.height);
-
 			qglColor4f(1,1,1, alpha);
 
 			if (stage->anim_count)
 				GL_Bind(RS_Animate(stage));
 			else
 				GL_Bind (stage->texture->texnum);
-
-			VA_SetElem2(tex_array[0],gl->sl, gl->tl);
-			VA_SetElem2(tex_array[1],gl->sh, gl->tl);
-			VA_SetElem2(tex_array[2],gl->sh, gl->th);
-			VA_SetElem2(tex_array[3],gl->sl, gl->th);
 
 			qglMatrixMode( GL_PROJECTION );
 			qglLoadIdentity ();
@@ -656,38 +605,21 @@ void R_DrawBloodEffect (void)
 	gl = R_RegisterPic ("blood_ring");
 	
 	if (!gl)
-	{
 		return;
-	}
 
 	qglEnable (GL_BLEND);
 
 	GL_MBind (0, gl->texnum);
 		
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-	VA_SetElem2(vert_array[0],0, 0);
-	VA_SetElem2(vert_array[1],vid.width, 0);
-	VA_SetElem2(vert_array[2],vid.width, vid.height);
-	VA_SetElem2(vert_array[3],0, vid.height);
-
-	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
-	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
-	VA_SetElem2(tex_array[2],gl->sh, gl->th);
-	VA_SetElem2(tex_array[3],gl->sl, gl->th);
-
 	qglMatrixMode( GL_PROJECTION );
     qglLoadIdentity ();
 	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
 	
-	R_DrawVarrays(GL_QUADS, 0, 4);
+	Postprocess_RenderQuad (gl, 0, 0);
 
 	qglDisable (GL_BLEND);
-
-	R_KillVArrays();	
 }
 
 extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
@@ -792,26 +724,11 @@ void R_GLSLGodRays(void)
 	qglEnable (GL_BLEND);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	qglDisable(GL_CULL_FACE);
-
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-	VA_SetElem2(vert_array[0],0, vid.height);
-	VA_SetElem2(vert_array[1],vid.width, vid.height);
-	VA_SetElem2(vert_array[2],vid.width, 0);
-	VA_SetElem2(vert_array[3],0, 0);
-
-	VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
-	VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
-	VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
-	VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
 	
-	R_DrawVarrays(GL_QUADS, 0, 4);
+	Postprocess_RenderQuad (r_colorbuffer, 0, 0);
 
 	qglDisable (GL_BLEND);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	R_KillVArrays();	
 
 	glUseProgramObjectARB( 0 );
 	
