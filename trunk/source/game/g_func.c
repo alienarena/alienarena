@@ -624,6 +624,12 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 	}
 }
 
+void func_rotating_animate (edict_t *ent)
+{
+	ent->s.frame = (ent->s.frame + 1) % 39;
+	ent->nextthink = level.time + FRAMETIME;
+}
+
 void SP_func_rotating (edict_t *ent)
 {
 
@@ -666,6 +672,24 @@ void SP_func_rotating (edict_t *ent)
 
 	if(!(ent->spawnflags & 128))
 		ent->s.renderfx = (RF_NOSHADOWS | RF_MINLIGHT);
+
+	//ran out of flags, can use these unused fields for this
+	if(ent->target)
+	{
+		if(!strcmp(ent->target, "translucent"))
+		{
+			ent->s.renderfx = RF_TRANSLUCENT;
+		}
+	}
+
+	if(ent->targetname)
+	{
+		if(!strcmp(ent->targetname, "animate"))
+		{
+			ent->nextthink = level.time + FRAMETIME;
+			ent->think = func_rotating_animate;
+		}
+	}
 
 	gi.setmodel (ent, ent->model);
 	gi.linkentity (ent);
