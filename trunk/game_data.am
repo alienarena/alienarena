@@ -389,36 +389,22 @@ nobase_nodist_gfx_DATA = \
 	data1/gfx/sun.jpg \
 	data1/gfx/tekwallmask.tga \
 	data1/gfx/trim2mask.tga \
-	data1/gfx/tron2_commanderfx.tga \
-	data1/gfx/tron2_cyborgfx.tga \
 	data1/gfx/tron2_enforcerfx.tga \
 	data1/gfx/tron2_laurenfx.tga \
-	data1/gfx/tron2_martianfx.tga \
-	data1/gfx/tron2_overlordfx.tga \
-	data1/gfx/tron2_slashbotfx.tga \
-	data1/gfx/tron2_warriorfx.tga \
-	data1/gfx/tron3_commanderfx.tga \
-	data1/gfx/tron3_cyborgfx.tga \
 	data1/gfx/tron3_enforcerfx.tga \
 	data1/gfx/tron3_laurenfx.tga \
-	data1/gfx/tron3_martianfx.tga \
-	data1/gfx/tron3_overlordfx.tga \
-	data1/gfx/tron3_slashbotfx.tga \
-	data1/gfx/tron3_warriorfx.tga \
-	data1/gfx/tron_commanderfx.tga \
-	data1/gfx/tron_cyborgfx.tga \
 	data1/gfx/tron_enforcerfx.tga \
 	data1/gfx/tron_laurenfx.tga \
-	data1/gfx/tron_martianfx.tga \
-	data1/gfx/tron_overlordfx.tga \
-	data1/gfx/tron_slashbotfx.tga \
-	data1/gfx/tron_warriorfx.tga \
 	data1/gfx/vaporbase.tga \
 	data1/gfx/vapormask.tga \
 	data1/gfx/violator2fx.tga \
 	data1/gfx/violatorfx.tga \
 	data1/gfx/water/distort1.tga \
 	data1/gfx/water/normal1.tga \
+	data1/gfx/weed1.tga \
+	data1/gfx/weed2.tga \
+	data1/gfx/weed3.tga \
+	data1/gfx/weed4.tga \
 	data1/gfx/yellowline.tga
 
 
@@ -554,6 +540,7 @@ nobase_nodist_levelshots_DATA = \
 mapsdir = $(pkgdatadir)
 
 nobase_nodist_maps_DATA = \
+	data1/maps/aaplayerpose.bsp \
 	data1/maps/aoa-atlantis.bsp \
 	data1/maps/aoa-corrosion.bsp \
 	data1/maps/aoa-frost2k9.bsp \
@@ -985,6 +972,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/xempx/tripes1.jpg \
 	data1/maps/meshes/xempx/tripes1.md2 \
 	data1/maps/meshes/xempx/tripes1_normal.jpg \
+	data1/maps/scripts/aaplayerpose.fog \
 	data1/maps/scripts/aoa-atlantis.mus \
 	data1/maps/scripts/aoa-corrosion.fog \
 	data1/maps/scripts/aoa-corrosion.mus \
@@ -2340,6 +2328,7 @@ nobase_nodist_scripts_DATA = \
 	data1/scripts/caustics.rscript \
 	data1/scripts/consoles.rscript \
 	data1/scripts/interactive/textures.rscript \
+	data1/scripts/maps/aaplayerpose.rscript \
 	data1/scripts/maps/aoa-atlantis.rscript \
 	data1/scripts/maps/aoa-corrosion.rscript \
 	data1/scripts/maps/aoa-frost2k9.rscript \
