@@ -477,15 +477,17 @@ void R_FB_InitTextures( void )
 		r_blooddroplets_nm = GL_LoadPic ("***r_blooddroplets_nm***", (byte *)nullpic, 16, 16, it_pic, 32);
 }
 
+static void VehicleHud_DrawQuad_Callback (void)
+{
+	R_DrawVarrays(GL_QUADS, 0, 4);
+}
+
 extern int vehicle_hud;
 extern cvar_t *cl_vehicle_huds;
 void R_DrawVehicleHUD (void)
 {	
 	image_t *gl = NULL;
 	rscript_t *rs = NULL;
-	float	alpha;
-	rs_stage_t *stage;
-	char shortname[MAX_QPATH];
 	
 	//draw image over screen
 	if(!cl_vehicle_huds->integer)
@@ -509,9 +511,7 @@ void R_DrawVehicleHUD (void)
 
 	
 	if (!gl)
-	{
 		return;
-	}
 
 	GL_TexEnv(GL_MODULATE);
 	qglEnable (GL_BLEND);
@@ -542,54 +542,14 @@ void R_DrawVehicleHUD (void)
 	
 	R_DrawVarrays(GL_QUADS, 0, 4);
 	
-	COM_StripExtension ( gl->name, shortname );
-	
 	rs = gl->script;
 	
 	if(r_shaders->integer && rs)
 	{
 		RS_ReadyScript(rs);
-
-		stage=rs->stage;
-		while (stage)
-		{
-			//change to use shader def
-			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			alpha=1.0f;
-			if (stage->alphashift.min || stage->alphashift.speed)
-			{
-				if (!stage->alphashift.speed && stage->alphashift.min > 0)
-				{
-					alpha=stage->alphashift.min;
-				}
-				else if (stage->alphashift.speed)
-				{
-					alpha=sin(rs_realtime * stage->alphashift.speed);
-					alpha=(alpha+1)*0.5f;
-					if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
-					if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
-				}
-			}			
-			
-			qglColor4f(1,1,1, alpha);
-
-			if (stage->anim_count)
-				GL_Bind(RS_Animate(stage));
-			else
-				GL_Bind (stage->texture->texnum);
-
-			qglMatrixMode( GL_PROJECTION );
-			qglLoadIdentity ();
-			qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
-			qglMatrixMode( GL_MODELVIEW );
-			qglLoadIdentity ();
-
-			R_DrawVarrays(GL_QUADS, 0, 4);
-
-			stage=stage->next;
-		}	
+		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, false, VehicleHud_DrawQuad_Callback);
 	}
+	
 	qglColor4f(1,1,1,1);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable (GL_BLEND);
