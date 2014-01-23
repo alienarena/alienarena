@@ -744,8 +744,28 @@ void Mod_LoadEdges (lump_t *l)
 
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
+		int j;
+		
 		out->v[0] = (unsigned short)LittleShort(in->v[0]);
 		out->v[1] = (unsigned short)LittleShort(in->v[1]);
+		
+		out->usecount = 0;
+		out->first_face_plane = NULL;
+		out->iscorner = 0;
+		
+		for (j = 0; j < 3; j++)
+		{
+			if (loadmodel->vertexes[out->v[0]].position[j] < loadmodel->vertexes[out->v[1]].position[j])
+			{
+				out->mins[j] = loadmodel->vertexes[out->v[0]].position[j];
+				out->maxs[j] = loadmodel->vertexes[out->v[1]].position[j];
+			}
+			else
+			{
+				out->mins[j] = loadmodel->vertexes[out->v[1]].position[j];
+				out->maxs[j] = loadmodel->vertexes[out->v[0]].position[j];
+			}
+		}
 	}
 }
 

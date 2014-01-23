@@ -2045,6 +2045,24 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 			r_pedge = &currentmodel->edges[-lindex];
 			vec = currentmodel->vertexes[r_pedge->v[1]].position;
 		}
+		
+		if ((fa->texinfo->flags & SURF_SKY) == 0)
+		{
+			if (fa->texinfo->flags & (SURF_WARP|SURF_FLOWING|SURF_TRANS33|SURF_TRANS66))
+				r_pedge->sColor += 0.5;
+			
+			if (r_pedge->usecount == 0)
+			{
+				r_pedge->first_face_plane = fa->plane;
+			}
+			else if (fa->plane != r_pedge->first_face_plane)
+			{
+				r_pedge->iscorner = true;
+				r_pedge->alpha = 1.0 - fabs (DotProduct (fa->plane->normal, r_pedge->first_face_plane->normal));
+			}
+			
+			r_pedge->usecount++;
+		}
 
 		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
 		s /= fa->texinfo->image->width;
@@ -2233,146 +2251,73 @@ void BSP_EndBuildingLightmaps (void)
   MINI MAP
   
   Draws a little 2D map in the corner of the HUD.
-  TODO: do a bit more calculation at load time, right now this is a huge FPS
-  hit.
+  TODO: Draw this with VBO+GLSL.
 
 =============================================================================
 */
 
-void R_RecursiveRadarNode (mnode_t *node)
+static void Radar_ColorForPoint (const vec3_t v, float sColor, float C[4])
 {
-	int			c, side;
-	cplane_t	*plane;
-	msurface_t	*surf, **mark;
-	mleaf_t		*pleaf;
-	float		dot,distance;
-	glpoly_t	*p;
-	float		*v;
-	int			i;
+	C[3]= (v[2]-r_origin[2])/512.0;
+	if (C[3]>0)
+	{
+		C[0]=0.5;
+		C[1]=0.5+sColor;
+		C[2]=0.5;
+		C[3]=1-C[3];
+	}
+	else
+	{
+		C[0]=0.5;
+		C[1]=sColor;
+		C[2]=0;
+		C[3]+=1;
+	}
 
-	if (node->contents == CONTENTS_SOLID)	return;		// solid
+	if(C[3]<0)
+		C[3]=0;
+}
 
-	if(r_minimap_zoom->value>=0.1) {
+void R_DrawRadarEdges (void)
+{
+	int i, j;
+	float distance;
+	
+	if(r_minimap_zoom->value>=0.1) 
 		distance = 1024.0/r_minimap_zoom->value;
-	} else {
+	else
 		distance = 1024.0;
-	}
-
-
-	if ( r_origin[0]+distance < node->minmaxs[0] ||
-		 r_origin[0]-distance > node->minmaxs[3] ||
-		 r_origin[1]+distance < node->minmaxs[1] ||
-		 r_origin[1]-distance > node->minmaxs[4] ||
-		 r_origin[2]+256 < node->minmaxs[2] ||
-		 r_origin[2]-256 > node->minmaxs[5]) return;
-
-	// if a leaf node, draw stuff
-	if (node->contents != -1) {
-		pleaf = (mleaf_t *)node;
-		// check for door connected areas
-		if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
-			return; // not visible
-		mark = pleaf->firstmarksurface;
-		c = pleaf->nummarksurfaces;
-
-		if (c) {
-			do {
-				(*mark)->visframe = r_framecount;
-				mark++;
-			} while (--c);
-		}
-		return;
-	}
-
-// node is just a decision point, so go down the apropriate sides
-// find which side of the node we are on
-	plane = node->plane;
-
-	switch (plane->type) {
-	case PLANE_X:
-		dot = modelorg[0] - plane->dist;
-		break;
-	case PLANE_Y:
-		dot = modelorg[1] - plane->dist;
-		break;
-	case PLANE_Z:
-		dot = modelorg[2] - plane->dist;
-		break;
-	default:
-		dot = DotProduct (modelorg, plane->normal) - plane->dist;
-		break;
-	}
-
-	if (dot >= 0) {
-		side = 0;
-	} else {
-		side = 1;
-	}
-
-// recurse down the children, front side first
-	R_RecursiveRadarNode (node->children[side]);
-
-  if(plane->normal[2]) {
-		// draw stuff
-		if(plane->normal[2]>0) for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
+	
+	qglBegin (GL_LINES);
+	
+	for (i = 1; i < r_worldmodel->numedges; i++)
+	{
+		medge_t *edge = &r_worldmodel->edges[i];
+		
+		if (!edge->iscorner)
+			continue;
+		
+		if (	r_origin[0]+distance < edge->mins[0] ||
+				r_origin[0]-distance > edge->maxs[0] ||
+				r_origin[1]+distance < edge->mins[1] ||
+				r_origin[1]-distance > edge->maxs[1] ||
+				r_origin[2]+256 < edge->mins[2] ||
+				r_origin[2]-256 > edge->maxs[2]) continue;
+		
+		for (j = 0; j < 2; j++)
 		{
-			if (surf->texinfo->flags & SURF_SKY){
-				continue;
-			}
-
-
+			float C[4];
+			vec_t *v = r_worldmodel->vertexes[edge->v[j]].position;
+			
+			Radar_ColorForPoint (v, edge->sColor, C);
+			C[3] *= edge->alpha;
+			
+			qglColor4fv (C);
+			qglVertex2fv (v);
 		}
-	} else {
-			qglDisable(GL_TEXTURE_2D);
-		for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++) {
-			float sColor,C[4];
-			if (surf->texinfo->flags & SURF_SKY) continue;
-
-			if (surf->texinfo->flags & (SURF_WARP|SURF_FLOWING|SURF_TRANS33|SURF_TRANS66)) {
-				sColor=0.5;
-			} else {
-				sColor=0;
-			}
-
-			p = surf->polys;
-			v = p->verts[0];
-			qglBegin(GL_LINE_STRIP);
-			for (i=0 ; i< p->numverts; i++, v+= VERTEXSIZE) {
-				C[3]= (v[2]-r_origin[2])/512.0;
-				if (C[3]>0) {
-
-					C[0]=0.5;
-					C[1]=0.5+sColor;
-					C[2]=0.5;
-					C[3]=1-C[3];
-
-				}
-				   else
-				{
-					C[0]=0.5;
-					C[1]=sColor;
-					C[2]=0;
-					C[3]+=1;
-
-				}
-
-				if(C[3]<0) {
-					C[3]=0;
-
-				}
-				qglColor4fv(C);
-				qglVertex3fv (v);
-			}
-
-			qglEnd();
-		}
-		qglEnable(GL_TEXTURE_2D);
-
-  }
-	// recurse down the back side
-	R_RecursiveRadarNode (node->children[!side]);
-
-
+	}
+	
+	qglEnd ();
 }
 
 int			numRadarEnts=0;
@@ -2506,8 +2451,10 @@ void R_DrawRadar(void)
 	GLSTATE_ENABLE_TEXGEN;
 	qglTexGenfv(GL_S,GL_OBJECT_PLANE,fS);
 
-	// draw the stuff
-	R_RecursiveRadarNode (r_worldmodel->nodes);
+	// draw the actual minimap
+	qglDisable (GL_TEXTURE_2D);
+	R_DrawRadarEdges ();
+	qglEnable (GL_TEXTURE_2D);
 
 	GL_BlendFunction (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	GLSTATE_DISABLE_TEXGEN;
