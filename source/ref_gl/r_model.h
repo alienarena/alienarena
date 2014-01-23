@@ -149,10 +149,21 @@ typedef struct
 #define SurfaceIsAlphaMasked(surf) (TexinfoIsAlphaMasked ((surf)->texinfo))
 #define SurfaceHasNoLightmap(surf) ((surf)->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) && !SurfaceIsAlphaMasked (surf))
 
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct
 {
+	// Data included in the BSP file.
 	unsigned short	v[2];
+	
+	// Used at load time to identify "corner" edges (i.e. edges between two 
+	// non-coplanar surfaces.) Corner edges are the only edges we draw in the
+	// minimap. Unused after load time.
+	int				usecount;
+	cplane_t		*first_face_plane;
+	
+	// Calculated at load time, used to render the minimap. 
+	vec3_t			mins, maxs;
+	qboolean		iscorner;
+	float			alpha, sColor;
 } medge_t;
 
 /*
