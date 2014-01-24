@@ -1151,13 +1151,10 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	msurface_t	**chain;
 	qboolean	is_dynamic = false;
 	
-	// Special surfaces that need to be handled separately
-	
+	// Since we now draw the whole skybox all the time anyway, no need to do
+	// anything special with these surfaces.
 	if (surf->texinfo->flags & SURF_SKY)
-	{	// just adds to visible sky bounds
-		R_AddSkySurface (surf);
 		return;
-	}
 	
 #define AddToChainPair(chainpair)  \
 	chain = (forEnt?\
@@ -1894,7 +1891,6 @@ void R_MarkWorldSurfs (void)
 	
 	if (do_bsp)
 	{
-		R_ClearSkyBox ();
 		BSP_ClearWorldTextureChains ();
 		BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 		
