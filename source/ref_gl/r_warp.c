@@ -428,7 +428,7 @@ static void Sky_DrawQuad_Setup (int axis, float size)
 	
 	for (i = 0; i < 4; i++)
 	{
-		int *st = &skyquad_texcoords[i];
+		int *st = skyquad_texcoords[i];
 		
 		MakeSkyVec (st[0], st[1], axis, VArray, size);
 		VArray[3] = st[0];
@@ -452,12 +452,15 @@ void R_DrawSkyBox (void)
 	qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 	qglRotatef (r_newrefdef.time * skyrotate, skyaxis[0], skyaxis[1], skyaxis[2]);
 	
-	#define SKYDIST 8000
-	#define CLOUDDIST 7000
+	#define DRAWDIST 15000 // TODO: use this constant in more places
+	
+	// Make sure the furthest possible corner of the skybox is closer than the
+	// draw distance we supplied to glFrustum. 
+	#define SKYDIST (sqrt(3*DRAWDIST*DRAWDIST)-1.0)
 	
 	// Scale the fog distances up so fog looks like it used to before 
-	// CLOUDDIST was increased. 
-	R_SetupFog (((float)CLOUDDIST)/2300.0);
+	// SKYDIST was increased. 
+	R_SetupFog (((float)SKYDIST)/2300.0);
 
 	for (i=0 ; i<6 ; i++)
 	{
@@ -482,7 +485,7 @@ void R_DrawSkyBox (void)
 			if (rs == NULL)
 				continue;
 			
-			Sky_DrawQuad_Setup (i, CLOUDDIST);
+			Sky_DrawQuad_Setup (i, SKYDIST);
 
 			qglDepthMask( GL_FALSE );	 	// no z buffering
 			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, Sky_DrawQuad_Callback);
