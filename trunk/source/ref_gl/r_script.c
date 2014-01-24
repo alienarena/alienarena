@@ -1470,7 +1470,7 @@ void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 	translucent = (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66)) != 0;
 	
 	RS_Draw (	rs, lmtex, rotate_center, surf->plane->normal, translucent,
-				translucent?rs_lightmap_separate_texcoords:rs_lightmap_off,
+				translucent?rs_lightmap_off:rs_lightmap_separate_texcoords,
 				BSP_DrawVBOAccum );
 	
 	BSP_ClearVBOAccum ();
