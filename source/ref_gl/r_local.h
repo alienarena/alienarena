@@ -254,7 +254,6 @@ extern void R_InitParticleTexture (void);
 extern void R_DrawParticles (void);
 extern void R_DrawRadar(void);
 extern void R_DrawVehicleHUD (void);
-extern void R_ClearSkyBox (void);
 extern void R_DrawSkyBox (void);
 extern void Draw_InitLocal (void);
 
@@ -265,7 +264,6 @@ extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
 extern void R_RotateForEntity (entity_t *e);
 extern void R_MarkWorldSurfs (void);
-extern void R_AddSkySurface (msurface_t *fa);
 extern void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
 extern void R_ReadFogScript(char config_file[128]);
 extern void R_ReadMusicScript(char config_file[128]);
