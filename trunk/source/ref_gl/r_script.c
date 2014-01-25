@@ -649,29 +649,10 @@ void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 	stage->blendfunc.blend = true;
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->blendfunc.source = RS_BlendID (*token);
 
-	if (!Q_strcasecmp (*token, "add"))
-	{
-		stage->blendfunc.source = GL_ONE;
-		stage->blendfunc.dest = GL_ONE;
-	}
-	else if (!Q_strcasecmp (*token, "blend"))
-	{
-		stage->blendfunc.source = GL_SRC_ALPHA;
-		stage->blendfunc.dest = GL_ONE_MINUS_SRC_ALPHA;
-	}
-	else if (!Q_strcasecmp (*token, "filter"))
-	{
-		stage->blendfunc.source = GL_ZERO;
-		stage->blendfunc.dest = GL_SRC_COLOR;
-	}
-	else
-	{	
-		stage->blendfunc.source = RS_BlendID (*token);
-
-		*token = strtok (NULL, TOK_DELIMINATORS);
-		stage->blendfunc.dest = RS_BlendID (*token);
-	}
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->blendfunc.dest = RS_BlendID (*token);
 }
 
 void rs_stage_alphashift (rs_stage_t *stage, char **token)
