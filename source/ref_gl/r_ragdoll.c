@@ -401,27 +401,7 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
     memcpy(RagDoll[RagDollID].initframe, currententity->model->outframe, currententity->model->num_joints*sizeof(matrix3x4_t));
 
 	if(r_shaders->integer && currententity->script)
-	{
-		RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
-		memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
-
-		if(currententity->script->stage)
-		{
-			RagDoll[RagDollID].script->stage = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
-			memcpy(RagDoll[RagDollID].script->stage, currententity->script->stage, sizeof(rs_stage_t));
-
-			if(currententity->script->stage->next)
-			{
-				RagDoll[RagDollID].script->stage->next = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
-				memcpy(RagDoll[RagDollID].script->stage->next, currententity->script->stage->next, sizeof(rs_stage_t));
-				RagDoll[RagDollID].script->stage->next->next = NULL;
-			}
-			else
-				RagDoll[RagDollID].script->stage->next = NULL;
-		}
-		else
-			RagDoll[RagDollID].script->stage = NULL;
-	}
+		RagDoll[RagDollID].script = currententity->script;
 	else
 		RagDoll[RagDollID].script = NULL;
 
@@ -876,22 +856,7 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 		RagDoll[RagDollID].initframe = NULL;
 	}
 
-	if(RagDoll[RagDollID].script)
-	{
-		if(RagDoll[RagDollID].script->stage)
-		{
-			if(RagDoll[RagDollID].script->stage->next)
-			{
-				free(RagDoll[RagDollID].script->stage->next);
-				RagDoll[RagDollID].script->stage->next = NULL;
-			}
-			free(RagDoll[RagDollID].script->stage);
-			RagDoll[RagDollID].script->stage = NULL;
-		}
-
-		free(RagDoll[RagDollID].script);
-		RagDoll[RagDollID].script = NULL;
-	}
+	RagDoll[RagDollID].script = NULL;
 
 	if(!nuke)
 		return;
