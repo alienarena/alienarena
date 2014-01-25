@@ -1198,6 +1198,16 @@ void R_RenderAllRagdolls ( void )
 	if(r_DrawingRagDoll) //here we handle the physics
 	{
 		int frametime = Sys_Milliseconds() - lastODEUpdate;
+		
+		// "Only" simulate the ragdoll 240 times per second. This stops
+		// dWorldQuickStep from being given too small a time parameter, which
+		// it responds to by shutting down the game!
+		if (frametime < 1000/240)
+		{
+			r_DrawingRagDoll = false;
+			return;
+		}
+		
 		dSpaceCollide(RagDollSpace, 0, &near_callback);
 		dWorldQuickStep( RagDollWorld, ((dReal)frametime)/1000.0 );
 		// Remove all temporary collision joints now that the world has been stepped
