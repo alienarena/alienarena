@@ -918,14 +918,18 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0.0f;
 }
 
+extern
+void PART_AddBillboardToVArray (	const vec3_t origin, const vec3_t up,
+									const vec3_t right, float sway,
+									qboolean notsideways, float sl, float sh,
+									float tl, float th );
+
 void R_DrawVegetationCasters ( qboolean forShadows )
 {
-	int		i, k;
+	int		i;
 	grass_t *grass;
 	float   scale;
-	vec3_t	dir, origin, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
-	float	sway;
+	vec3_t	dir, origin, angle, right, up;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
@@ -961,58 +965,8 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 			qglColor4f( 0, 0, 0, 1 );
 
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
-
-			sway = 3;
-			
-			VectorSet ( corner[1],
-				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
-				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
-
 			VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) 
-			{
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) 
-				{
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
+			PART_AddBillboardToVArray (origin, up, right, 3*sin (rs_realtime*3), false, 0, 1, 0, 1);
 
 			R_DrawVarrays(GL_QUADS, 0, 4);
 
