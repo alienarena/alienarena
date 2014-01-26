@@ -177,7 +177,6 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->rand_count = 0;
 	stage->rand_stage = NULL;
 
-	stage->has_alpha = false;
 	stage->alphamask = false;
 
 	stage->alphashift.max = 0;
@@ -469,12 +468,6 @@ void RS_ReadyScript (rscript_t *rs)
 			if (!stage->blend_textures[i])
 				stage->blend_textures[i] = r_notexture;
 		}
-
-		//check alpha
-		if (stage->blendfunc.blend)
-			stage->has_alpha = true;
-		else
-			stage->has_alpha = false;
 
 		stage = stage->next;
 	}
@@ -918,7 +911,11 @@ void rs_stage_consume0 (rs_stage_t *stage, char **token)
 	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token);
 }
 
-static rs_stagekey_t rs_stagekeys[] =
+static struct 
+{
+	char *stage;
+	void (*func)(rs_stage_t *shader, char **token);
+} rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
 	{	"map",			&rs_stage_name			},
@@ -1300,7 +1297,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		float red = 1.0, green = 1.0, blue = 1.0, alpha = 1.0;
 		
 		if (stage->lensflare || stage->grass || stage->beam || stage->cube)
-			break; //handled elsewhere
+			continue; //handled elsewhere
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute
 		
