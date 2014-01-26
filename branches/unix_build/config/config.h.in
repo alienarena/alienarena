@@ -284,6 +284,9 @@
 /* linux-specific conditional compile */
 #undef LINUX_SPECIAL_CASE
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
+
 /* OpenAL shared lib name */
 #undef OPENAL_DRIVER
 
@@ -329,7 +332,7 @@
 /* unix-specific conditional compile */
 #undef UNIX_VARIANT
 
-/* Define to default file name for user configuration and data */
+/* Define to default path name for user configuration and downloaded data */
 #undef USER_GAMEDATA
 
 /* Version number of package */

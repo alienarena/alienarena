@@ -16,7 +16,13 @@
 
 # Process this file with automake to produce Makefile.in
 
-# Copyright (C) 2013 COR Entertainment, LLC.
+# Copyright (C) 2014 COR Entertainment, LLC.
+
+# --- ALIEN ARENA ORIGINAL  ---
+
+#
+# TODO: add licensing and other docs for the package
+#
 
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
@@ -80,13 +86,18 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = sound
+subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(nobase_dist_sound_DATA)
+	$(top_srcdir)/configure $(am__configure_deps) \
+	$(nobase_dist_arena_DATA) build-aux/install-sh \
+	build-aux/missing $(top_srcdir)/build-aux/install-sh \
+	$(top_srcdir)/build-aux/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
+am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
+ configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
@@ -136,10 +147,26 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(sounddir)"
-DATA = $(nobase_dist_sound_DATA)
+am__installdirs = "$(DESTDIR)$(arenadir)"
+DATA = $(nobase_dist_arena_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+distdir = $(PACKAGE)-$(VERSION)
+top_distdir = $(distdir)
+am__remove_distdir = \
+  if test -d "$(distdir)"; then \
+    find "$(distdir)" -type d ! -perm -200 -exec chmod u+w {} ';' \
+      && rm -rf "$(distdir)" \
+      || { sleep 5 && rm -rf "$(distdir)"; }; \
+  else :; fi
+am__post_remove_distdir = $(am__remove_distdir)
+DIST_ARCHIVES = $(distdir).tar.gz
+GZIP_ENV = --best
+DIST_TARGETS = dist-gzip
+distuninstallcheck_listfiles = find . -type f -print
+am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
+  | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
+distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -214,313 +241,60 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-sounddir = ${datadir}/alienarena/data1/sound
-nobase_dist_sound_DATA = \
-	doors/dr1_end.wav \
-	doors/dr1_mid.wav \
-	doors/dr1_strt.wav \
-	items/damage2.wav \
-	items/damage3.wav \
-	items/damage.wav \
-	items/hasteout.wav \
-	items/haste.wav \
-	items/l_health.wav \
-	items/m_health.wav \
-	items/n_health.wav \
-	items/powerup.wav \
-	items/protect2.wav \
-	items/protect3.wav \
-	items/protect4.wav \
-	items/protect.wav \
-	items/respawn1.wav \
-	items/s_health.wav \
-	items/sproingout.wav \
-	items/sproing.wav \
-	misc/1frags.wav \
-	misc/2frags.wav \
-	misc/3frags.wav \
-	misc/am_pkup.wav \
-	misc/ar1_pkup.wav \
-	misc/ar2_pkup.wav \
-	misc/ar3_pkup.wav \
-	misc/bigtele.wav \
-	misc/blue_increases.wav \
-	misc/blue_picked.wav \
-	misc/bluepndisabled.wav \
-	misc/bluepnenabled.wav \
-	misc/blue_returned.wav \
-	misc/blue_scores.wav \
-	misc/blue_takes.wav \
-	misc/bluevulnerable.wav \
-	misc/blue_wins_ctf.wav \
-	misc/blue_wins.wav \
-	misc/cow/groan.wav \
-	misc/cow/moo.wav \
-	misc/cow/step1.wav \
-	misc/db_pickup.wav \
-	misc/db_score.wav \
-	misc/deathray/fizz.wav \
-	misc/deathray/shoot.wav \
-	misc/deathray/weird2.wav \
-	misc/death.wav \
-	misc/fight.wav \
-	misc/game_tied_ctf.wav \
-	misc/game_tied.wav \
-	misc/godlike.wav \
-	misc/headshot.wav \
-	misc/hit2.wav \
-	misc/hit.wav \
-	misc/lasfly.wav \
-	misc/menu1.wav \
-	misc/menu2.wav \
-	misc/menu3.wav \
-	misc/minderaser.wav \
-	misc/one.wav \
-	misc/pc_up.wav \
-	misc/rampage.wav \
-	misc/red_increases.wav \
-	misc/red_picked.wav \
-	misc/redpndisabled.wav \
-	misc/redpnenabled.wav \
-	misc/red_returned.wav \
-	misc/red_scores.wav \
-	misc/red_takes.wav \
-	misc/redvulnerable.wav \
-	misc/red_wins_ctf.wav \
-	misc/red_wins.wav \
-	misc/reject.wav \
-	misc/scores_tied.wav \
-	misc/spawn1.wav \
-	misc/talk1.wav \
-	misc/talk.wav \
-	misc/tele1.wav \
-	misc/tele_up.wav \
-	misc/three.wav \
-	misc/trigger1.wav \
-	misc/two.wav \
-	misc/w_pkup.wav \
-	music/adrenaline.ogg \
-	music/cp-ribeye.ogg \
-	music/Divinity_lack_of_success.ogg \
-	music/Divinity_misunderstood.ogg \
-	music/Divinity_never_ending.ogg \
-	music/dm-annihilation.ogg \
-	music/dm-deathray.ogg \
-	music/dm-deimos.ogg \
-	music/dm-dismal.ogg \
-	music/dm-dynamo.ogg \
-	music/dm-eternal.ogg \
-	music/dm-extermination.ogg \
-	music/dm-frontier.ogg \
-	music/dm-horus.ogg \
-	music/dm-inferno.ogg \
-	music/dm-redred.ogg \
-	music/dm-saucer.ogg \
-	music/dm-turbo.ogg \
-	music/dm-warmachine.ogg \
-	music/joyce1.ogg \
-	music/joyce2.ogg \
-	music/joyce3.ogg \
-	music/menumusic.ogg \
-	player/burn1.wav \
-	player/burn2.wav \
-	player/death1.wav \
-	player/death4.wav \
-	player/drown1.wav \
-	player/fall1.wav \
-	player/fall2.wav \
-	player/fry.wav \
-	player/gasp1.wav \
-	player/gasp2.wav \
-	player/jump1.wav \
-	player/land1.wav \
-	player/lava1.wav \
-	player/lava2.wav \
-	player/lava_in.wav \
-	player/male/bump1.wav \
-	player/male/death1.wav \
-	player/male/death2.wav \
-	player/male/death3.wav \
-	player/male/death4.wav \
-	player/male/drown1.wav \
-	player/male/fall1.wav \
-	player/male/fall2.wav \
-	player/male/gurp1.wav \
-	player/male/gurp2.wav \
-	player/male/jump1.wav \
-	player/male/pain100_1.wav \
-	player/male/pain100_2.wav \
-	player/male/pain25_1.wav \
-	player/male/pain25_2.wav \
-	player/male/pain50_1.wav \
-	player/male/pain50_2.wav \
-	player/male/pain75_1.wav \
-	player/male/pain75_2.wav \
-	player/step1.wav \
-	player/step2.wav \
-	player/step3.wav \
-	player/step4.wav \
-	player/step_metal1.wav \
-	player/step_metal2.wav \
-	player/step_metal3.wav \
-	player/step_metal4.wav \
-	player/wade1.wav \
-	player/wade2.wav \
-	player/wade3.wav \
-	player/watr_in.wav \
-	player/watr_out.wav \
-	player/watr_un.wav \
-	smallmech/sight.wav \
-	taunts/commander/taunt1.wav \
-	taunts/commander/taunt2.wav \
-	taunts/commander/taunt3.wav \
-	taunts/commander/taunt4.wav \
-	taunts/commander/taunt5.wav \
-	taunts/enforcer/taunt1.wav \
-	taunts/enforcer/taunt2.wav \
-	taunts/enforcer/taunt3.wav \
-	taunts/enforcer/taunt4.wav \
-	taunts/enforcer/taunt5.wav \
-	taunts/lauren/taunt1.wav \
-	taunts/lauren/taunt2.wav \
-	taunts/lauren/taunt3.wav \
-	taunts/lauren/taunt4.wav \
-	taunts/lauren/taunt5.wav \
-	taunts/martiancyborg/taunt1.wav \
-	taunts/martiancyborg/taunt2.wav \
-	taunts/martiancyborg/taunt3.wav \
-	taunts/martiancyborg/taunt4.wav \
-	taunts/martiancyborg/taunt5.wav \
-	taunts/martianenforcer/taunt1.wav \
-	taunts/martianenforcer/taunt2.wav \
-	taunts/martianenforcer/taunt3.wav \
-	taunts/martianenforcer/taunt4.wav \
-	taunts/martianenforcer/taunt5.wav \
-	taunts/martianoverlord/taunt1.wav \
-	taunts/martianoverlord/taunt2.wav \
-	taunts/martianoverlord/taunt3.wav \
-	taunts/martianoverlord/taunt4.wav \
-	taunts/martianoverlord/taunt5.wav \
-	taunts/martianwarrior/taunt1.wav \
-	taunts/martianwarrior/taunt2.wav \
-	taunts/martianwarrior/taunt3.wav \
-	taunts/martianwarrior/taunt4.wav \
-	taunts/martianwarrior/taunt5.wav \
-	taunts/slashbot/taunt1.wav \
-	taunts/slashbot/taunt2.wav \
-	taunts/slashbot/taunt3.wav \
-	taunts/slashbot/taunt4.wav \
-	taunts/slashbot/taunt5.wav \
-	vehicles/bomberidle.wav \
-	vehicles/explodebomb.wav \
-	vehicles/flybomb.wav \
-	vehicles/got_in.wav \
-	vehicles/shootbomb.wav \
-	vehicles/shootlaser.wav \
-	vehicles/warning.wav \
-	weapons/adetonatordown.wav \
-	weapons/adetonatorup.wav \
-	weapons/biglaser.wav \
-	weapons/blastf1a.wav \
-	weapons/clank.wav \
-	weapons/clink01.wav \
-	weapons/clink02.wav \
-	weapons/electroball.wav \
-	weapons/energyfield.wav \
-	weapons/grenlb1b.wav \
-	weapons/grenlf1a.wav \
-	weapons/grenlr1b.wav \
-	weapons/grenlx1a.wav \
-	weapons/hypbrl1a.wav \
-	weapons/hyprbf1a.wav \
-	weapons/lightoff.wav \
-	weapons/lighton.wav \
-	weapons/machgf1b.wav \
-	weapons/machgf2b.wav \
-	weapons/machgf3b.wav \
-	weapons/machgf4b.wav \
-	weapons/machgf5b.wav \
-	weapons/minderaserfire.wav \
-	weapons/noammo.wav \
-	weapons/railgf1a.wav \
-	weapons/rockfly.wav \
-	weapons/rocklf1a.wav \
-	weapons/rocklr1b.wav \
-	weapons/rocklx1a.wav \
-	weapons/seeker_fast.wav \
-	weapons/seeker.wav \
-	weapons/seeker_zap.wav \
-	weapons/shotgf1b.wav \
-	weapons/smartgun_hum.wav \
-	weapons/spidermov.wav \
-	weapons/vaporizer_hum.wav \
-	weapons/viofire1.wav \
-	weapons/viofire2.wav \
-	weapons/whoosh.wav \
-	world/botwon.wav \
-	world/button1.wav \
-	world/button2.wav \
-	world/distantjet.wav \
-	world/electricity.wav \
-	world/explosion1.wav \
-	world/explosion2.wav \
-	world/forcefield.wav \
-	world/hyprbf1a.wav \
-	world/jumppad1.wav \
-	world/laser1.wav \
-	world/platstop.wav \
-	world/rcktfly.wav \
-	world/ric1.wav \
-	world/ric2.wav \
-	world/ric3.wav \
-	world/rocket.wav \
-	world/steam1.wav \
-	world/steam2.wav \
-	world/turbine1.wav \
-	world/vents.wav \
-	world/water1.wav \
-	world/weird.wav \
-	world/youwin.wav
+
+#
+# Default configuration for client and server
+#
+arenadir = $(datadir)/alienarena/arena
+nobase_dist_arena_DATA = \
+	motd.txt \
+	server.cfg \
+	default.cfg \
+	maps.lst
 
 all: all-am
 
 .SUFFIXES:
+am--refresh: Makefile
+	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      ( cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh ) \
-	        && { if test -f $@; then exit 0; else break; fi; }; \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign'; \
+	      $(am__cd) $(srcdir) && $(AUTOMAKE) --foreign \
+		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign sound/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign sound/Makefile
+	  $(AUTOMAKE) --foreign Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
-	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
+	    echo ' $(SHELL) ./config.status'; \
+	    $(SHELL) ./config.status;; \
 	  *) \
-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
-	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
+	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
+	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
-	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+	$(SHELL) ./config.status --recheck
 
 $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
-	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+	$(am__cd) $(srcdir) && $(AUTOCONF)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
-	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
-install-nobase_dist_soundDATA: $(nobase_dist_sound_DATA)
+install-nobase_dist_arenaDATA: $(nobase_dist_arena_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(nobase_dist_sound_DATA)'; test -n "$(sounddir)" || list=; \
+	@list='$(nobase_dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(sounddir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(sounddir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(arenadir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(arenadir)" || exit 1; \
 	fi; \
 	$(am__nobase_list) | while read dir files; do \
 	  xfiles=; for file in $$files; do \
@@ -528,17 +302,17 @@ install-nobase_dist_soundDATA: $(nobase_dist_sound_DATA)
 	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
 	  test -z "$$xfiles" || { \
 	    test "x$$dir" = x. || { \
-	      echo " $(MKDIR_P) '$(DESTDIR)$(sounddir)/$$dir'"; \
-	      $(MKDIR_P) "$(DESTDIR)$(sounddir)/$$dir"; }; \
-	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(sounddir)/$$dir'"; \
-	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(sounddir)/$$dir" || exit $$?; }; \
+	      echo " $(MKDIR_P) '$(DESTDIR)$(arenadir)/$$dir'"; \
+	      $(MKDIR_P) "$(DESTDIR)$(arenadir)/$$dir"; }; \
+	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(arenadir)/$$dir'"; \
+	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(arenadir)/$$dir" || exit $$?; }; \
 	done
 
-uninstall-nobase_dist_soundDATA:
+uninstall-nobase_dist_arenaDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(nobase_dist_sound_DATA)'; test -n "$(sounddir)" || list=; \
+	@list='$(nobase_dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
 	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
-	dir='$(DESTDIR)$(sounddir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(arenadir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -547,6 +321,8 @@ cscope cscopelist:
 
 
 distdir: $(DISTFILES)
+	$(am__remove_distdir)
+	test -d "$(distdir)" || mkdir "$(distdir)"
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	list='$(DISTFILES)'; \
@@ -576,11 +352,138 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
+	-test -n "$(am__skip_mode_fix)" \
+	|| find "$(distdir)" -type d ! -perm -755 \
+		-exec chmod u+rwx,go+rx {} \; -o \
+	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
+	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
+	  ! -type d ! -perm -444 -exec $(install_sh) -c -m a+r {} {} \; \
+	|| chmod -R a+r "$(distdir)"
+dist-gzip: distdir
+	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
+	$(am__post_remove_distdir)
+
+dist-bzip2: distdir
+	tardir=$(distdir) && $(am__tar) | BZIP2=$${BZIP2--9} bzip2 -c >$(distdir).tar.bz2
+	$(am__post_remove_distdir)
+
+dist-lzip: distdir
+	tardir=$(distdir) && $(am__tar) | lzip -c $${LZIP_OPT--9} >$(distdir).tar.lz
+	$(am__post_remove_distdir)
+
+dist-xz: distdir
+	tardir=$(distdir) && $(am__tar) | XZ_OPT=$${XZ_OPT--e} xz -c >$(distdir).tar.xz
+	$(am__post_remove_distdir)
+
+dist-tarZ: distdir
+	tardir=$(distdir) && $(am__tar) | compress -c >$(distdir).tar.Z
+	$(am__post_remove_distdir)
+
+dist-shar: distdir
+	shar $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).shar.gz
+	$(am__post_remove_distdir)
+
+dist-zip: distdir
+	-rm -f $(distdir).zip
+	zip -rq $(distdir).zip $(distdir)
+	$(am__post_remove_distdir)
+
+dist dist-all:
+	$(MAKE) $(AM_MAKEFLAGS) $(DIST_TARGETS) am__post_remove_distdir='@:'
+	$(am__post_remove_distdir)
+
+# This target untars the dist file and tries a VPATH configuration.  Then
+# it guarantees that the distribution is self-contained by making another
+# tarfile.
+distcheck: dist
+	case '$(DIST_ARCHIVES)' in \
+	*.tar.gz*) \
+	  GZIP=$(GZIP_ENV) gzip -dc $(distdir).tar.gz | $(am__untar) ;;\
+	*.tar.bz2*) \
+	  bzip2 -dc $(distdir).tar.bz2 | $(am__untar) ;;\
+	*.tar.lz*) \
+	  lzip -dc $(distdir).tar.lz | $(am__untar) ;;\
+	*.tar.xz*) \
+	  xz -dc $(distdir).tar.xz | $(am__untar) ;;\
+	*.tar.Z*) \
+	  uncompress -c $(distdir).tar.Z | $(am__untar) ;;\
+	*.shar.gz*) \
+	  GZIP=$(GZIP_ENV) gzip -dc $(distdir).shar.gz | unshar ;;\
+	*.zip*) \
+	  unzip $(distdir).zip ;;\
+	esac
+	chmod -R a-w $(distdir)
+	chmod u+w $(distdir)
+	mkdir $(distdir)/_build $(distdir)/_inst
+	chmod a-w $(distdir)
+	test -d $(distdir)/_build || exit 0; \
+	dc_install_base=`$(am__cd) $(distdir)/_inst && pwd | sed -e 's,^[^:\\/]:[\\/],/,'` \
+	  && dc_destdir="$${TMPDIR-/tmp}/am-dc-$$$$/" \
+	  && am__cwd=`pwd` \
+	  && $(am__cd) $(distdir)/_build \
+	  && ../configure --srcdir=.. --prefix="$$dc_install_base" \
+	    $(AM_DISTCHECK_CONFIGURE_FLAGS) \
+	    $(DISTCHECK_CONFIGURE_FLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) uninstall \
+	  && $(MAKE) $(AM_MAKEFLAGS) distuninstallcheck_dir="$$dc_install_base" \
+	        distuninstallcheck \
+	  && chmod -R a-w "$$dc_install_base" \
+	  && ({ \
+	       (cd ../.. && umask 077 && mkdir "$$dc_destdir") \
+	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" install \
+	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" uninstall \
+	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" \
+	            distuninstallcheck_dir="$$dc_destdir" distuninstallcheck; \
+	      } || { rm -rf "$$dc_destdir"; exit 1; }) \
+	  && rm -rf "$$dc_destdir" \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist \
+	  && rm -rf $(DIST_ARCHIVES) \
+	  && $(MAKE) $(AM_MAKEFLAGS) distcleancheck \
+	  && cd "$$am__cwd" \
+	  || exit 1
+	$(am__post_remove_distdir)
+	@(echo "$(distdir) archives ready for distribution: "; \
+	  list='$(DIST_ARCHIVES)'; for i in $$list; do echo $$i; done) | \
+	  sed -e 1h -e 1s/./=/g -e 1p -e 1x -e '$$p' -e '$$x'
+distuninstallcheck:
+	@test -n '$(distuninstallcheck_dir)' || { \
+	  echo 'ERROR: trying to run $@ with an empty' \
+	       '$$(distuninstallcheck_dir)' >&2; \
+	  exit 1; \
+	}; \
+	$(am__cd) '$(distuninstallcheck_dir)' || { \
+	  echo 'ERROR: cannot chdir into $(distuninstallcheck_dir)' >&2; \
+	  exit 1; \
+	}; \
+	test `$(am__distuninstallcheck_listfiles) | wc -l` -eq 0 \
+	   || { echo "ERROR: files left after uninstall:" ; \
+	        if test -n "$(DESTDIR)"; then \
+	          echo "  (check DESTDIR support)"; \
+	        fi ; \
+	        $(distuninstallcheck_listfiles) ; \
+	        exit 1; } >&2
+distcleancheck: distclean
+	@if test '$(srcdir)' = . ; then \
+	  echo "ERROR: distcleancheck can only run from a VPATH build" ; \
+	  exit 1 ; \
+	fi
+	@test `$(distcleancheck_listfiles) | wc -l` -eq 0 \
+	  || { echo "ERROR: files left in build directory after distclean:" ; \
+	       $(distcleancheck_listfiles) ; \
+	       exit 1; } >&2
 check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(sounddir)"; do \
+	for dir in "$(DESTDIR)$(arenadir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -618,6 +521,7 @@ clean: clean-am
 clean-am: clean-generic mostlyclean-am
 
 distclean: distclean-am
+	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f Makefile
 distclean-am: clean-am distclean-generic
 
@@ -633,7 +537,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nobase_dist_soundDATA
+install-data-am: install-nobase_dist_arenaDATA
 
 install-dvi: install-dvi-am
 
@@ -662,6 +566,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+	-rm -rf $(top_srcdir)/autom4te.cache
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -677,22 +583,32 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-nobase_dist_soundDATA
+uninstall-am: uninstall-nobase_dist_arenaDATA
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic cscopelist-am \
-	ctags-am distclean distclean-generic distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-nobase_dist_soundDATA \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-nobase_dist_soundDATA
+.PHONY: all all-am am--refresh check check-am clean clean-generic \
+	cscopelist-am ctags-am dist dist-all dist-bzip2 dist-gzip \
+	dist-hook dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
+	distcheck distclean distclean-generic distcleancheck distdir \
+	distuninstallcheck dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-nobase_dist_arenaDATA install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags-am uninstall uninstall-am \
+	uninstall-nobase_dist_arenaDATA
 
+
+#
+# someday game source goes here
+#
+
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

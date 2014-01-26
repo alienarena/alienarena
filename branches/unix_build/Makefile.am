@@ -17,7 +17,7 @@
 
 # 2013 December:
 # - See notes in source/Makefile.am, and configure.ac
-# - Recursive build for data1 and botinfo. Same effect as
+# - Recursive build for data1. Same effect as
 #    previous game_data.am methods, but avoids problem
 #    with command line overflow when running install.
 # - Moved the data1 default.cfg and maps.lst to arena
@@ -26,11 +26,12 @@
 # 2014 January:
 # - change data1 to a separate alienarena-data package
 #
+# +move botinfo under data1
+#
 # !pkg prefix is not required!
 # datadir='' in configure can stop install and dist both???
 #
-
-SUBDIRS = source botinfo data1
+SUBDIRS = source data1 arena tactical
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -60,23 +61,6 @@ ACLOCAL_AMFLAGS = -I m4
 #EXTRA_DIST = \
 #	Tools/fuse.tar.gz \
 #	Tools/LinuxScripts
-
-#
-# Default configuration for client and server
-#
-arenadir = $(datadir)/alienarena
-nobase_dist_arena_DATA = \
-	arena/motd.txt \
-	arena/server.cfg \
-	arena/default.cfg \
-	arena/maps.lst
-
-tacticaldir = $(datadir)/alienarena
-nobase_dist_tactical_DATA = \
-	tactical/maps.lst \
-	tactical/motd.txt \
-	tactical/default.cfg \
-	tactical/server.cfg
 
 
 # remove svn directories from distribution staging area after creating

@@ -33,7 +33,7 @@
 # TODO: alternate install alternatives
 #
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 AC_INIT([alienarena],[7.66.1],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
@@ -44,12 +44,12 @@ AC_CONFIG_HEADERS([config/config.h])
 dnl insure default prefix
 dnl AX_EXPAND_PREFIX
 
-dnl 1.14 = require automake 1.14 or greater
+dnl 1.14 = require automake 1.14 or greater <= changed to 1.11.1
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output (--disable-silent-rules for more output)
 dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz
-AM_INIT_AUTOMAKE([1.14 foreign subdir-objects silent-rules])
+AM_INIT_AUTOMAKE([1.11.1 foreign subdir-objects silent-rules])
 AM_SILENT_RULES([no])
 
 dnl use --enable-maintainer-mode to get full set of make targets.
@@ -59,9 +59,10 @@ dnl to build the program, which is better for non-developers.
 AM_MAINTAINER_MODE
 
 dnl
-dnl Option for specifying whether to include "nested" 
-dnl  data1 package for make install and make distcheck.
+dnl Options for specifying whether to include "nested" 
+dnl  data1, arena, and tactical packages for make install and make distcheck.
 dnl
+dnl ---- DATA1
 AC_MSG_CHECKING([whether to include game resources package])
 AC_ARG_WITH([data1pkg],
 	[AS_HELP_STRING([--with(out)-data1pkg],
@@ -75,6 +76,37 @@ AS_IF([ test "x${with_data1pkg}" != xno ],[
 	])
 AC_MSG_RESULT([${with_data1pkg}])
 AM_CONDITIONAL([WITH_DATA1PKG],[ test "x${with_data1pkg}" = xyes ])
+
+dnl ---- ARENA
+AC_MSG_CHECKING([whether to include arena game configuration package])
+AC_ARG_WITH([arenapkg],
+	[AS_HELP_STRING([--with(out)-arenapkg],
+			[include arena game configuration from arena directory (default:with)])
+		],[
+		with_arenapkg=${withval}],[
+		with_arenapkg=yes
+])
+AS_IF([ test "x${with_arenapkg}" != xno ],[
+	AC_CONFIG_SUBDIRS([arena])],[
+	])
+AC_MSG_RESULT([${with_arenapkg}])
+AM_CONDITIONAL([WITH_ARENAPKG],[ test "x${with_arenapkg}" = xyes ])
+
+dnl ---- TACTICAL
+AC_MSG_CHECKING([whether to include tactical demo game configuration package])
+AC_ARG_WITH([tacticalpkg],
+	[AS_HELP_STRING([--with(out)-tacticalpkg],
+			[include tactical demo game configuration from tactical directory (default:with)])
+		],[
+		with_tacticalpkg=${withval}],[
+		with_tacticalpkg=yes
+])
+AS_IF([ test "x${with_tacticalpkg}" != xno ],[
+	AC_CONFIG_SUBDIRS([tactical])],[
+	])
+AC_MSG_RESULT([${with_tacticalpkg}])
+AM_CONDITIONAL([WITH_TACTICALPKG],[ test "x${with_tacticalpkg}" = xyes ])
+
 
 #
 # Checks for programs.
@@ -110,6 +142,8 @@ AS_CASE([ ${host} ],
 
 dnl
 dnl host-dependent conditional compile and version string settings for config.h
+dnl 
+dnl TODO: consider adding FreeBSD
 dnl
 AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
 
@@ -217,31 +251,23 @@ AC_SUBST([icondir], [${with_icondir}])
 # "Precious" Environment Variables
 #
 
-dnl Compile-time variable to override the default, "~/.codered".
-dnl If ALIENARENA_HOMEDIR is present (in env, or as an arg to configure),
-dnl  the USER_GAMEDATA define is overridden by an entry in config.h.
-dnl (There is also an environment variable, COR_GAMES, that may
-dnl  be used to override the default at runtime.)
-dnl
-dnl TODO: remove complete rename. allow a suffix, COR_GAMES_SUFFIX
-dnl  for the runtime environment. 
-dnl Allow COR_GAMES_SUBDIR to be installed in a HOME subdir
-dnl Also COR_GAMES_DOT to allow removal of hidden directory dot prefix
-dnl make sure  [DOT]cor_games[SUFFIX] can only be in HOME somewhere
-dnl
-dnl TODO: for first cut to trunk, back to .codered, with relative path fix
-dnl
-cor_games_homedir=".cor_games"
+#
+# TO BE CONVERTED TO XDG CONVENTION
+# $HOME/.local/share/cor_games
+# ALWAYS cor_games, to be hard-wired in code
+# For testing modify the code
+#
+cor_games_homedir="cor_games"
 AC_ARG_VAR([COR_GAMES_HOMEDIR],
-	[(User configuration and data directory (default:.cor_games)])
+ 	[(User configuration and data directory (default:$XDG_???/cor_games)])
 
 AS_IF([ test "x${COR_GAMES_HOMEDIR}" = x ],[
-	COR_GAMES_HOMEDIR=${cor_games_homedir}],[
-	cor_games_homedir=${COR_GAMES_HOMEDIR}
-	])
+ 	COR_GAMES_HOMEDIR=${cor_games_homedir}],[
+ 	cor_games_homedir=${COR_GAMES_HOMEDIR}
+ 	])
 
 AC_DEFINE_UNQUOTED([USER_GAMEDATA],["${cor_games_homedir}"],
-	[Define to default file name for user configuration and data])
+ 	[Define to default path name for user configuration and downloaded data])
 
 #
 # Checks for libraries.
@@ -485,7 +511,6 @@ AH_BOTTOM([
 AC_CONFIG_FILES([ 
 				Makefile 
 				source/Makefile
-				botinfo/Makefile
 ])
 
 AC_OUTPUT

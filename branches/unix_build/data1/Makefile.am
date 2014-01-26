@@ -2,6 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
+# --- ALIEN ARENA COMMON DATA ---
 
 SUBDIRS = botinfo env gfx levelshots maps models particles pics players scripts sound textures vehicles
 
