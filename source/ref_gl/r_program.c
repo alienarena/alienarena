@@ -1129,21 +1129,6 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 			gl_TexCoord[1] = texco;
 		}
 
-		if(useCube > 0)
-		{
-			vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
-			refeyeDir = normalize(refeyeDir);
-
-			FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir, n)), FresnelPower);
-		}
-
-		//fog
-		if(FOG > 0) 
-		{
-			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
-			fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
-		}
-		
 		// vertexOnly is defined as const, so this branch should get optimized
 		// out.
 		if (vertexOnly == 1)
@@ -1153,6 +1138,22 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 			float lightness = max (dot (worldNormal, LightDir), 0.0) + 0.25;
 			lightness = lightness * lightness + 0.25;
 			gl_FrontColor = gl_BackColor = vec4 (baseColor * lightness, 1.0);
+		}
+		else
+		{
+			if(useCube == 1)
+			{
+				vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+				refeyeDir = normalize(refeyeDir);
+
+				FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir, n)), FresnelPower);
+			}
+		
+			if(FOG == 1) 
+			{
+				fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+				fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
+			}
 		}
 	}
 );

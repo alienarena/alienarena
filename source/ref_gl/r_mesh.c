@@ -453,34 +453,21 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 
 		GL_MBind (3, rs->stage->texture3->texnum);
 		glUniform1iARB( MESH_UNIFORM(fx2Tex), 3);
-	}
-
-	if(fragmentshader && rs->stage->fx)
-		glUniform1iARB( MESH_UNIFORM(useFX), 1);
-	else
-		glUniform1iARB( MESH_UNIFORM(useFX), 0);
-
-	if(fragmentshader && rs->stage->glow)
-		glUniform1iARB( MESH_UNIFORM(useGlow), 1);
-	else
-		glUniform1iARB( MESH_UNIFORM(useGlow), 0);
-
-	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);	
-
-	if(fragmentshader && rs->stage->cube)
-	{
-		glUniform1iARB( MESH_UNIFORM(useCube), 1);
+		
+		glUniform1iARB( MESH_UNIFORM(useFX), rs->stage->fx);
+		glUniform1iARB( MESH_UNIFORM(useGlow), rs->stage->glow);
+		glUniform1iARB( MESH_UNIFORM(useCube), rs->stage->cube);
+		
 		if(currententity->flags & RF_WEAPONMODEL)
 			glUniform1iARB( MESH_UNIFORM(fromView), 1);
 		else
 			glUniform1iARB( MESH_UNIFORM(fromView), 0);
+		
+		glUniform1fARB( MESH_UNIFORM(meshTime), rs_realtime);
+		glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 	}
-	else
-		glUniform1iARB( MESH_UNIFORM(useCube), 0);
 
-	glUniform1fARB( MESH_UNIFORM(meshTime), rs_realtime);
-
-	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
+	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);
 }
 
 void R_Mesh_SetupGlassRender (void)
