@@ -333,8 +333,8 @@ void R_RenderWaterPolys (msurface_t *fa)
 				{
 					nv[0] =v[0];
 					nv[1] =v[1];
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
-							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+					nv[2] =v[2] + 2.0*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+							+ 2.0*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 					qglVertex3fv (nv);
 				}
@@ -366,8 +366,8 @@ void R_RenderWaterPolys (msurface_t *fa)
 			{
 				nv[0] =v[0];
 				nv[1] =v[1];
-				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
-						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+				nv[2] =v[2] + 2.0*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+						+ 2.0*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 				qglVertex3fv (nv);
 			}

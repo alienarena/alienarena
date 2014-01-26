@@ -103,8 +103,6 @@ cvar_t	*r_nocull;
 cvar_t	*r_lerpmodels;
 cvar_t	*r_lefthand;
 
-cvar_t  *r_wave; // Water waves
-
 cvar_t	*r_shadowmapscale;
 
 cvar_t	*r_overbrightbits;
@@ -1362,8 +1360,6 @@ void R_Register( void )
 	r_novis = Cvar_Get ("r_novis", "0", 0);
 	r_nocull = Cvar_Get ("r_nocull", "0", 0);
 	r_lerpmodels = Cvar_Get ("r_lerpmodels", "1", 0);
-
-	r_wave = Cvar_Get ("r_wave", "2", CVAR_ARCHIVE); // Water waves
 
 	gl_nosubimage = Cvar_Get( "gl_nosubimage", "0", 0 );
 
