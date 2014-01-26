@@ -116,8 +116,7 @@ typedef struct rs_stage_s
 	qboolean				lightmap;		// lightmap this stage?
 	qboolean				alphamask;		// alpha masking?
 
-	qboolean				has_alpha;		// for sorting
-	qboolean				normalmap;		// for normalmaps
+	qboolean				normalmap;		// use mesh rendering GLSL "fast path?"
 	
 	int						num_blend_textures;
 	float					blend_scales[6];
@@ -145,11 +144,6 @@ typedef struct rs_stage_s
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;
 
-typedef struct rs_stagekey_s
-{
-	char *stage;
-	void (*func)(rs_stage_t *shader, char **token);
-} rs_stagekey_t;
 
 
 // Base script
