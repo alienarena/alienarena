@@ -311,6 +311,10 @@ void R_RenderWaterPolys (msurface_t *fa)
 	else
 	{
 		GL_MBind (0, fa->texinfo->image->texnum);
+		
+// = 1/2 wave amplitude on each axis
+// = 1/4 wave amplitude on both axes combined
+#define WAVESCALE 2.0 
 
 		for (p=fa->polys ; p ; p=p->next)
 		{
@@ -333,8 +337,9 @@ void R_RenderWaterPolys (msurface_t *fa)
 				{
 					nv[0] =v[0];
 					nv[1] =v[1];
-					nv[2] =v[2] + 2.0*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
-							+ 2.0*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+					nv[2] =v[2] - 2*WAVESCALE // top of brush = top of waves
+							+ WAVESCALE*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+							+ WAVESCALE*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 					qglVertex3fv (nv);
 				}
@@ -366,8 +371,9 @@ void R_RenderWaterPolys (msurface_t *fa)
 			{
 				nv[0] =v[0];
 				nv[1] =v[1];
-				nv[2] =v[2] + 2.0*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
-						+ 2.0*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+				nv[2] =v[2] - 2*WAVESCALE // top of brush = top of waves
+						+ WAVESCALE*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+						+ WAVESCALE*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 				qglVertex3fv (nv);
 			}
