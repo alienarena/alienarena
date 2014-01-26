@@ -30,8 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
-extern float	r_turbsin[];
-
 #define		TOK_DELIMINATORS "\r\n\t "
 
 float		rs_realtime = 0;

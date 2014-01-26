@@ -735,12 +735,6 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 //Ragdoll
 int r_DrawingRagDoll;
 
-#define TURBSCALE2 (256.0 / (2 * M_PI))
-
-// reduce runtime calcs
-#define TURBSCALE 40.743665431525205956834243423364
-
-extern float r_turbsin[];
 /*
 ====================================================================
 

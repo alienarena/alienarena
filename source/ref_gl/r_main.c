@@ -1614,12 +1614,6 @@ int R_Init( void *hinstance, void *hWnd )
 {
 	int		err;
 	int		j;
-	extern float r_turbsin[256];
-
-	for ( j = 0; j < 256; j++ )
-	{
-		r_turbsin[j] *= 0.5;
-	}
 	
 	Draw_GetPalette ();
 

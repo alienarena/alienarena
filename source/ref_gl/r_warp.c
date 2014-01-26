@@ -201,12 +201,6 @@ void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges)
 
 
 
-// speed up sin calculations - Ed
-float	r_turbsin[] =
-{
-	#include "warpsin.h"
-};
-
 /*
 =============
 EmitWaterPolys
@@ -243,8 +237,8 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		GL_MBind (1, fa->texinfo->normalMap->texnum);
 		glUniform1iARB( g_location_normTexture, 1);
 
-        if (texnum)
-        {
+		if (texnum)
+		{
 			GL_MBind (2, texnum);
 			glUniform1iARB( g_location_refTexture, 2);
 		}
@@ -301,26 +295,21 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 				os = v[3];
 				ot = v[4];
 
-				s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
-
+				s = os + 4.0*sin (ot*0.125+rdt);
 				s += scroll;
 				s *= (1.0/64);
 
-				t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
-
+				t = ot + 4.0*sin (os*0.125+rdt);
 				t *= (1.0/64);
 
 				qglTexCoord2f (s, t);
 
 				if (!(fa->texinfo->flags & SURF_FLOWING))
-
 				{
 					nv[0] =v[0];
 					nv[1] =v[1];
-
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-
-							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 					qglVertex3fv (nv);
 				}
@@ -472,7 +461,7 @@ void R_DrawSkyBox (void)
 	
 	qglPopMatrix ();
 
-    if(r_shaders->value) { //just cloud layers for now, we can expand this
+	if(r_shaders->value) { //just cloud layers for now, we can expand this
 
 		qglPushMatrix (); //rotate the clouds
 		qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
