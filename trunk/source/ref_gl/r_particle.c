@@ -52,17 +52,60 @@ static int compare_particle (const void *_a, const void *_b)
 		return a->blenddst-b->blenddst;
 	return 0;
 }
+
+void PART_AddBillboardToVArray (	const vec3_t origin, const vec3_t up,
+									const vec3_t right, float sway,
+									qboolean notsideways, float sl, float sh,
+									float tl, float th )
+{
+#define VERTEX(n) (VArray + n*VertexSizes[VERT_SINGLE_TEXTURED])
+// Sigh. It turns out that all particles, vegetation sprites, and beam sprites
+// are always rendered sideways, but *not* the simple items.
+#define TEXVERTEX(n) VERTEX(((n+4-notsideways)%4))
+	
+	VectorSet (VERTEX(0),
+		origin[0] + (up[0] + right[0])*(-0.5),
+		origin[1] + (up[1] + right[1])*(-0.5),
+		origin[2] + (up[2] + right[2])*(-0.5));
+	TEXVERTEX(0)[3] = sh;
+	TEXVERTEX(0)[4] = th;
+
+	VectorSet (VERTEX(1),
+		VERTEX(0)[0] + up[0] + sway,
+		VERTEX(0)[1] + up[1] + sway,
+		VERTEX(0)[2] + up[2]);
+	TEXVERTEX(1)[3] = sl;
+	TEXVERTEX(1)[4] = th;
+
+	VectorSet (VERTEX(2),
+		VERTEX(0)[0] + up[0] + right[0] + sway,
+		VERTEX(0)[1] + up[1] + right[1] + sway,
+		VERTEX(0)[2] + up[2] + right[2]);
+	TEXVERTEX(2)[3] = sl;
+	TEXVERTEX(2)[4] = tl;
+
+	VectorSet (VERTEX(3),
+		VERTEX(0)[0] + right[0],
+		VERTEX(0)[1] + right[1],
+		VERTEX(0)[2] + right[2]);
+	TEXVERTEX(3)[3] = sh;
+	TEXVERTEX(3)[4] = tl;
+	
+	VArray += 4*VertexSizes[VERT_SINGLE_TEXTURED];
+	
+#undef VERTEX
+}
+
 void PART_DrawParticles( int num_particles, particle_t **particles, const unsigned colortable[768])
 {
 	particle_t **p1;
 	particle_t *p;
 	int				i, k;
-	vec3_t			corner[4], up, right, pup, pright, dir;
+	vec3_t			up, right, pup, pright, dir;
 	float			scale;
 	byte			color[4];
 	int			    oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
-	float			*corner0 = corner[0];
 	vec3_t move, delta, v;
 	float			sh, th, sl, tl;
 
@@ -211,48 +254,6 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			VectorScale ( up, p->dist, pup );
 		}
 		
-        if (p->type == PARTICLE_CHAINED && p->chain_prev) {
-        	particle_t *pr;
-        	vec3_t pspan, prev_pspan;
-        	pr = p->chain_prev;
-        	VectorCopy (p->current_pspan, pspan);
-        	if (pr->type == PARTICLE_CHAINED && pr->chain_prev)
-        		VectorCopy (pr->current_pspan, prev_pspan);
-        	else
-        		VectorCopy (pspan, prev_pspan);
-        	VectorCopy (pspan, pright);
-			VectorSet ( corner[0],
-				p->current_origin[0] + pspan[0]*(0.5),
-				p->current_origin[1] + pspan[1]*(0.5),
-				p->current_origin[2] + pspan[2]*(0.5));
-			VectorSet ( corner[1],
-				pr->current_origin[0] + prev_pspan[0]*(0.5),
-				pr->current_origin[1] + prev_pspan[1]*(0.5),
-				pr->current_origin[2] + prev_pspan[2]*(0.5));
-			VectorSet (corner[2],
-				pr->current_origin[0] + prev_pspan[0]*(-0.5),
-				pr->current_origin[1] + prev_pspan[1]*(-0.5),
-				pr->current_origin[2] + prev_pspan[2]*(-0.5));
-			VectorSet (corner[3],
-				p->current_origin[0] + pspan[0]*(-0.5),
-				p->current_origin[1] + pspan[1]*(-0.5),
-				p->current_origin[2] + pspan[2]*(-0.5));
-        } else {
-			VectorSet (corner[0],
-				p->current_origin[0] + (pup[0] + pright[0])*(-0.5),
-				p->current_origin[1] + (pup[1] + pright[1])*(-0.5),
-				p->current_origin[2] + (pup[2] + pright[2])*(-0.5));
-
-			VectorSet ( corner[1],
-				corner0[0] + pup[0], corner0[1] + pup[1], corner0[2] + pup[2]);
-			VectorSet ( corner[2], corner0[0] + (pup[0]+pright[0]),
-				corner0[1] + (pup[1]+pright[1]), corner0[2] + (pup[2]+pright[2]));
-			VectorSet ( corner[3],
-				corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
-		}
-
-		VArray = &VArrayVerts[0];
-		
 		if (p->image != NULL)
 		{
 			sh = p->image->sh;
@@ -265,33 +266,60 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			sh = th = 1;
 			sl = tl = 0;
 		}
-
-		for(k = 0; k < 4; k++) 
-		{
-			VArray[0] = corner[k][0];
-			VArray[1] = corner[k][1];
-			VArray[2] = corner[k][2];
-
-			switch(k) {
-			case 0:
-				VArray[3] = sh;
-				VArray[4] = th;
-				break;
-			case 1:
-				VArray[3] = sl;
-				VArray[4] = th;
-				break;
-			case 2:
-				VArray[3] = sl;
-				VArray[4] = tl;
-				break;
-			case 3:
-				VArray[3] = sh;
-				VArray[4] = tl;
-				break;
-			}
-
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+		
+		VArray = &VArrayVerts[0];
+		
+        if (p->type == PARTICLE_CHAINED && p->chain_prev)
+        {
+        	particle_t *pr;
+        	vec3_t pspan, prev_pspan;
+        	
+        	pr = p->chain_prev;
+        	
+        	VectorCopy (p->current_pspan, pspan);
+        	if (pr->type == PARTICLE_CHAINED && pr->chain_prev)
+        		VectorCopy (pr->current_pspan, prev_pspan);
+        	else
+        		VectorCopy (pspan, prev_pspan);
+        	
+#define VERTEX(n) (VArray + n*VertexSizes[VERT_SINGLE_TEXTURED])
+			
+			VectorSet (VERTEX(0),
+				p->current_origin[0] + pspan[0]*(0.5),
+				p->current_origin[1] + pspan[1]*(0.5),
+				p->current_origin[2] + pspan[2]*(0.5));
+			VERTEX(0)[3] = sh;
+			VERTEX(0)[4] = th;
+			
+			VectorSet (VERTEX(1),
+				pr->current_origin[0] + prev_pspan[0]*(0.5),
+				pr->current_origin[1] + prev_pspan[1]*(0.5),
+				pr->current_origin[2] + prev_pspan[2]*(0.5));
+			VERTEX(1)[3] = sl;
+			VERTEX(1)[4] = th;
+			
+			VectorSet (VERTEX(2),
+				pr->current_origin[0] + prev_pspan[0]*(-0.5),
+				pr->current_origin[1] + prev_pspan[1]*(-0.5),
+				pr->current_origin[2] + prev_pspan[2]*(-0.5));
+			VERTEX(2)[3] = sl;
+			VERTEX(2)[4] = tl;
+			
+			VectorSet (VERTEX(3),
+				p->current_origin[0] + pspan[0]*(-0.5),
+				p->current_origin[1] + pspan[1]*(-0.5),
+				p->current_origin[2] + pspan[2]*(-0.5));
+			VERTEX(3)[3] = sh;
+			VERTEX(3)[4] = tl;
+			
+			VArray += 4*VertexSizes[VERT_SINGLE_TEXTURED];
+			
+#undef VERTEX
+			
+        }
+        else
+        {
+        	PART_AddBillboardToVArray (p->current_origin, pup, pright, 0, false, sl, sh, tl, th);
 		}
 		
 		qglColor4f (color[0]/255.0f, color[1]/255.0f, color[2]/255.0f, color[3]/255.0f);
@@ -339,7 +367,7 @@ void R_DrawParticles (void)
 
 void Mod_AddFlareSurface (msurface_t *surf, int type )
 {
-     int i, width, height, intens;
+     int i, width, height;
      glpoly_t *poly;
      flare_t  *light;
      byte     *buffer;
@@ -361,11 +389,7 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 			return;
 
     light = &r_flares[r_numflares++];
-    intens = surf->texinfo->value;
 
-
-     //if (intens < 100) //if not a lighted surf, don't do a flare, right?
-	//	 return;
     /*
 	===================
 	find poligon centre
@@ -733,8 +757,6 @@ void R_RenderSun()
     static float l;
     static float sun_vistest_time = 0;
 	static float sun_ramp_time = 0;
-    float hx, hy;
-    float vec[2];
     float size;
 
     if (!draw_sun)
@@ -775,12 +797,6 @@ void R_RenderSun()
 
     if (sun_alpha > 0)
     {
-
-        hx = r_newrefdef.width / 2;
-        hy = r_newrefdef.height / 2;
-        vec[0] = 1 - fabs(sun_x - hx) / hx;
-        vec[1] = 1 - fabs(sun_y - hy) / hy;
-
         // set 2d
         qglMatrixMode(GL_PROJECTION);
         qglPushMatrix();
@@ -889,7 +905,7 @@ void R_FinalizeGrass(model_t *mod)
 	vec3_t origin, orig2, mins, maxs;
 	trace_t	r_trace;
 	grass_t *grass;
-	int i, j;
+	int i;
 	model_t *old;
 	
 	grass = r_grasses;
@@ -964,11 +980,10 @@ int compare_grass (void const *_a, void const *_b)
 static int g_lastGSort = 0;
 void R_DrawVegetationSurface ( void )
 {
-    int		i, k;
+    int		i;
 	grass_t *grass;
     float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
+	vec3_t	origin, mins, maxs, angle, right, up;
 	qboolean visible;
 	float	lightLevel[3];
 	float	swaysin, swaysin2, swaysin3;
@@ -998,35 +1013,6 @@ void R_DrawVegetationSurface ( void )
 	GL_TexEnv( GL_MODULATE );
 	
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
-	
-	VArray = &VArrayVerts[0];
-	for (i = 0; i < 3; i++)
-	{
-		for (k = 0; k < 4; k++)
-		{
-			switch(k)
-			{
-				case 0:
-					VArray[3] = 1;
-					VArray[4] = 1;
-					break;
-				case 1:
-					VArray[3] = 0;
-					VArray[4] = 1;
-					break;
-				case 2:
-					VArray[3] = 0;
-					VArray[4] = 0;
-					break;
-				case 3:
-					VArray[3] = 1;
-					VArray[4] = 0;
-					break;
-			}
-
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-		}
-	}
 	
 	swaysin2 = 2.0*sin (rs_realtime*2.0);
 	swaysin3 = 3.0*sin (rs_realtime*3.0);
@@ -1099,33 +1085,11 @@ void R_DrawVegetationSurface ( void )
 				AngleVectors(angle, NULL, right, up);
 				VectorScale(right, scale, right);
 				VectorScale(up, scale, up);			
-
-				//render grass polygon				
-
-				VectorSet (VArray,
-					origin[0] + (up[0] + right[0])*(-0.5),
-					origin[1] + (up[1] + right[1])*(-0.5),
-					origin[2] + (up[2] + right[2])*(-0.5));				
-
-				VectorSet (VArray + VertexSizes[VERT_SINGLE_TEXTURED],
-					VArray[0] + up[0] + swaysin,
-					VArray[1] + up[1] + swaysin,
-					VArray[2] + up[2]);
-
-				VectorSet (VArray + 2*VertexSizes[VERT_SINGLE_TEXTURED],
-					VArray[0] + (up[0]+right[0] + swaysin),
-					VArray[1] + (up[1]+right[1] + swaysin),
-					VArray[2] + (up[2]+right[2]));
-
-				VectorSet (VArray + 3*VertexSizes[VERT_SINGLE_TEXTURED],
-					VArray[0] + right[0],
-					VArray[1] + right[1],
-					VArray[2] + right[2]);				
-
-				VArray += 4*VertexSizes[VERT_SINGLE_TEXTURED];
-				va += 4;
 				
-				angle[1]+=60;	
+				PART_AddBillboardToVArray (origin, up, right, swaysin, false, 0, 1, 0, 1);
+				
+				va += 4;
+				angle[1] += 60;	
 			}
 
 			c_grasses++;
@@ -1269,11 +1233,10 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 
 void R_DrawBeamSurface ( void )
 {
-    int		i, j, k;
+    int		i, j;
 	beam_t *beam;
     double   scale, maxang;
-	vec3_t	start, end, mins, maxs, angle, right, up, delta, corner[4];
-	float	*corner0 = corner[0];
+	vec3_t	start, end, mins, maxs, angle, right, up, delta;
 	qboolean visible;
 	trace_t r_trace;
 	vec3_t	absmins, absmaxs;
@@ -1359,37 +1322,31 @@ void R_DrawBeamSurface ( void )
 		VectorScale(right, scale, right);
 		VectorScale(up, scale, up);
 		
-		VectorCopy (beam->origin, absmins);
-		VectorCopy (beam->origin, absmaxs);
+		VectorCopy (end, absmins);
+		VectorCopy (end, absmaxs);
 		
-		VectorSet (corner[0],
-			end[0] + (up[0] + right[0])*(-0.5),
-			end[1] + (up[1] + right[1])*(-0.5),
-			end[2] + (up[2] + right[2])*(-0.5));
-
-		VectorSet ( corner[1],
-			corner0[0] + up[0],
-			corner0[1] + up[1],
-			corner0[2] + up[2]);
-
-		VectorSet ( corner[2],
-			corner0[0] + (up[0]+right[0]),
-			corner0[1] + (up[1]+right[1]),
-			corner0[2] + (up[2]+right[2]));
-
-		VectorSet ( corner[3],
-			corner0[0] + right[0],
-			corner0[1] + right[1],
-			corner0[2] + right[2]);
-		
-		for (j = 0; j < 4; j++)
+		for (j = 0; j < 3; j++)
 		{
-			for (k = 0; k < 3; k++)
+			if (right[j] < 0.0)
 			{
-				if (corner[j][k] < absmins[k])
-					absmins[k] = corner[j][k];
-				else if (corner[j][k] > absmaxs[k])
-					absmaxs[k] = corner[j][k];
+				absmins[j] += right[j]*0.5;
+				absmaxs[j] -= right[j]*0.5;
+			}
+			else
+			{
+				absmins[j] -= right[j]*0.5;
+				absmaxs[j] += right[j]*0.5;
+			}
+			
+			if (up[j] < 0.0)
+			{
+				absmins[j] += up[j]*0.5;
+				absmaxs[j] -= up[j]*0.5;
+			}
+			else
+			{
+				absmins[j] -= up[j]*0.5;
+				absmaxs[j] += up[j]*0.5;
 			}
 		}
 		
@@ -1406,36 +1363,9 @@ void R_DrawBeamSurface ( void )
 			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
 
 			GL_Bind(beam->texnum);
-
+			
 			VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) {
-
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) {
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
+			PART_AddBillboardToVArray (end, up, right, 0, false, 0, 1, 0, 1);
 
 			R_DrawVarrays(GL_QUADS, 0, 4);
 
@@ -1546,10 +1476,9 @@ void R_SI_InitTextures( void )
 extern cvar_t *cl_simpleitems;
 void R_DrawSimpleItems ( void )
 {
-    int		i, k;
+    int		i;
     float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
+	vec3_t	origin, mins, maxs, angle, right, up;
 	qboolean visible;
 	trace_t r_trace;
 	
@@ -1575,7 +1504,6 @@ void R_DrawSimpleItems ( void )
 
     for (i=0 ; i<r_newrefdef.num_entities ; i++)
 	{
-		int va = 0;
 		currententity = &r_newrefdef.entities[i];
 		if (!currententity->model || !currententity->model->simple_texnum)
 			continue;
@@ -1633,59 +1561,9 @@ void R_DrawSimpleItems ( void )
 			VectorScale(right, scale, right);
 			VectorScale(up, scale, up);			
 
-			//render polygon				
+			PART_AddBillboardToVArray (origin, up, right, 0, true, 0, 1, 0, 1);
 
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));				
-
-			VectorSet ( corner[1],
-				corner0[0] + up[0],
-				corner0[1] + up[1],
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0]),
-				corner0[1] + (up[1]+right[1]),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);				
-
-			for(k = 0; k < 4; k++) 
-			{
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-				switch(k) 
-				{
-					
-					case 0:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 2:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-				va++;								
-			}
-	
-			R_DrawVarrays(GL_QUADS, 0, va);
+			R_DrawVarrays(GL_QUADS, 0, 4);
 
 			R_KillVArrays ();
 		}
