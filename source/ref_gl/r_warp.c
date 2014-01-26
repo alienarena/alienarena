@@ -209,7 +209,7 @@ Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
 void BSP_SetScrolling (qboolean enable);
-void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
+void R_RenderWaterPolys (msurface_t *fa)
 {
 	glpoly_t	*p;
 	float		*v;
@@ -218,6 +218,31 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	float		scroll;
 	float		rdt = r_newrefdef.time;
 	vec3_t		nv;
+	rscript_t	*rs_shader;
+	int			texnum;
+	float		scaleX, scaleY;
+	
+	rs_shader = NULL;
+	if (r_shaders->integer)
+		rs_shader = fa->texinfo->image->script;
+	
+	scaleX = scaleY = 1.0f;
+	texnum = 0;
+	
+	if(rs_shader) 
+	{
+		rs_stage_t *stage = rs_shader->stage;
+		
+		if(stage) 
+		{	//for now, just map a reflection texture
+			texnum = stage->texture->texnum; //pass this to renderwaterpolys
+		}
+		if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
+		{
+			scaleX = stage->scale.scaleX;
+			scaleY = stage->scale.scaleY;
+		}
+	}
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
@@ -283,7 +308,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 		return;
 	}
-	else 
+	else
 	{
 		GL_MBind (0, fa->texinfo->image->texnum);
 
@@ -341,9 +366,8 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 			{
 				nv[0] =v[0];
 				nv[1] =v[1];
-
-				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 				qglVertex3fv (nv);
 			}
