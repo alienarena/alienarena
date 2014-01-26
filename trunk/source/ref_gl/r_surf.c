@@ -291,6 +291,7 @@ void BSP_DrawTexturelessInlineBModel (entity_t *e)
 	
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
+
 	{
 		// draw the polygon
 		BSP_AddSurfToVBOAccum (psurf);
@@ -447,7 +448,7 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 		c_brush_polys++;
 		image = BSP_TextureAnimation (surf->texinfo);
 		GL_MBind (0, image->texnum);
-		R_RenderWaterPolys(surf, 0, 1, 1);
+		R_RenderWaterPolys (surf);
 		surf = surf->texturechain;
 	}
 	
@@ -506,10 +507,6 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 {
 	msurface_t	*s;
 	float		intens;
-	rscript_t	*rs_shader;
-	rs_stage_t	*stage = NULL;
-	int			texnum = 0;
-	float		scaleX = 1.0f, scaleY = 1.0f;
 
 	// the textures are prescaled up for a better lighting range,
 	// so scale it back down
@@ -540,34 +537,15 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			R_RotateForEntity (s->entity);
 		}
 		
-		rs_shader = NULL;
-		if (r_shaders->integer)
-			rs_shader = (rscript_t *)s->texinfo->image->script;
-
 		if (s->iflags & ISURF_DRAWTURB) 
 		{
-			//water shaders
-			scaleX = scaleY = 1.0f;
-			if(rs_shader) 
-			{
-				stage = rs_shader->stage;
-				if(stage) 
-				{	//for now, just map a reflection texture
-					texnum = stage->texture->texnum; //pass this to renderwaterpolys
-				}
-				if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
-				{
-					scaleX = stage->scale.scaleX;
-					scaleY = stage->scale.scaleY;
-				}
-			}
-			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
+			R_RenderWaterPolys (s);
 			GL_SelectTexture (0);
 			qglEnable (GL_BLEND);
 			GL_TexEnv( GL_MODULATE );
 			BSP_InvalidateVBO ();
 		}
-		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
+		else if(r_shaders->integer && s->texinfo->image->script && !(s->texinfo->flags & SURF_FLOWING)) 
 		{
 			RS_Surface(s);
 			GL_SelectTexture (0);

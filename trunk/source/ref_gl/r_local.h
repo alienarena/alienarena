@@ -264,7 +264,7 @@ extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
 extern void R_RotateForEntity (entity_t *e);
 extern void R_MarkWorldSurfs (void);
-extern void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
+void R_RenderWaterPolys (msurface_t *fa);
 extern void R_ReadFogScript(char config_file[128]);
 extern void R_ReadMusicScript(char config_file[128]);
 extern int SignbitsForPlane (cplane_t *out);
