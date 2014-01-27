@@ -221,6 +221,7 @@ static void R_ParseTerrainEntities (void)
 	static const char *classnames[] = {"misc_terrainmodel"};
 	
 	num_terrain_entities = 0;
+	num_rock_entities = 0;
 	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainModelEntity);
 }
 

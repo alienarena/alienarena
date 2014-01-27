@@ -148,7 +148,6 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 							data.vegetation[i].type );
 	}
 	
-	num_rock_entities = 0;
 	for (i = 0; i < data.num_rocks; i++)
 	{
 		entity_t *ent;
