@@ -638,6 +638,7 @@ nobase_nodist_maps_DATA = \
 	data1/maps/shadowtest.lightmap \
 	data1/maps/shadtest.bsp \
 	data1/maps/shinytest.bsp \
+	data1/maps/warptest.bsp \
 	data1/maps/meshes/arch_fx.tga \
 	data1/maps/meshes/arch.md2 \
 	data1/maps/meshes/arch_normal.jpg \
@@ -2391,6 +2392,7 @@ nobase_nodist_scripts_DATA = \
 	data1/scripts/maps/tca-purgatory.rscript \
 	data1/scripts/maps/tca-zion2k9.rscript \
 	data1/scripts/maps/terraintest.rscript \
+	data1/scripts/maps/warptest.rscript \
 	data1/scripts/menu.rscript \
 	data1/scripts/models.rscript \
 	data1/scripts/normals/normals.rscript \
