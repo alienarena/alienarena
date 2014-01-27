@@ -670,11 +670,11 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	
 	if (rs_slowpath)
 	{
-	    int lmtex = 0;
-	    
-	    if (currentmodel->lightmap != NULL)
-	        lmtex = currentmodel->lightmap->texnum;
-	    
+		int lmtex = 0;
+		
+		if (currentmodel->lightmap != NULL)
+			lmtex = currentmodel->lightmap->texnum;
+		
 		RS_Draw (	rs, lmtex, vec3_origin, vec3_origin, false,
 					lmtex != 0 ? rs_lightmap_on : rs_lightmap_off,
 					R_Mesh_DrawVBO_Callback );
