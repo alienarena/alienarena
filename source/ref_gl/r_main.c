@@ -475,7 +475,7 @@ static void R_DrawEntity (void)
 {
 	rscript_t	*rs = NULL;
 	vec3_t		dist, span;
-	float		volume;
+	float		size;
 	
 	currentmodel = currententity->model;
 	
@@ -505,14 +505,11 @@ static void R_DrawEntity (void)
 	
 	//get volume
 	VectorSubtract (currentmodel->maxs, currentmodel->mins, span);
-	volume = VectorLength (span);
+	size = VectorLength (span);
 	
-	// Cull very distant meshes. The cutoff distance is scaled by mesh volume,
-    // which gets bigger much faster than mesh frontal area (which is what
-    // actually matters when the model is rendered.) This makes the
-    // calculation more conservative about what it will cull. In practice,
-    // only tiny things like small rocks and pebbles ever actually get culled.
-	if (VectorLength (dist) > LOD_DIST*volume)
+	// Cull very distant meshes. In practice, only tiny things like small
+	// rocks and pebbles ever actually get culled.
+	if (VectorLength (dist) > LOD_DIST*size)
 		return;
 	
 	//set lod if available
