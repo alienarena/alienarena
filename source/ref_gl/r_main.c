@@ -474,7 +474,8 @@ extern cvar_t *cl_simpleitems;
 static void R_DrawEntity (void)
 {
 	rscript_t	*rs = NULL;
-	vec3_t		dist;
+	vec3_t		dist, span;
+	float		volume;
 	
 	currentmodel = currententity->model;
 	
@@ -500,19 +501,25 @@ static void R_DrawEntity (void)
 	}
 
 	//get distance
-	VectorSubtract(r_origin, currententity->origin, dist);		
+	VectorSubtract(r_origin, currententity->origin, dist);
+	
+	//get volume
+	VectorSubtract (currentmodel->maxs, currentmodel->mins, span);
+	volume = VectorLength (span);
+	
+	// Cull very distant meshes. The cutoff distance is scaled by mesh volume,
+    // which gets bigger much faster than mesh frontal area (which is what
+    // actually matters when the model is rendered.) This makes the
+    // calculation more conservative about what it will cull. In practice,
+    // only tiny things like small rocks and pebbles ever actually get culled.
+	if (VectorLength (dist) > LOD_DIST*volume)
+		return;
 	
 	//set lod if available
-	if(VectorLength(dist) > LOD_DIST*2.0)
-	{
-		if(currententity->lod2)
-			currentmodel = currententity->lod2;
-	}
-	else if(VectorLength(dist) > LOD_DIST)
-	{
-		if(currententity->lod1)
-			currentmodel = currententity->lod1;
-	}
+	if(VectorLength(dist) > LOD_DIST*2.0 && currententity->lod2 != NULL)
+		currentmodel = currententity->lod2;
+	else if(VectorLength(dist) > LOD_DIST && currententity->lod1 != NULL)
+		currentmodel = currententity->lod1;
 
 	if (!currentmodel)
 	{
@@ -523,6 +530,7 @@ static void R_DrawEntity (void)
 	{
 	    case mod_md2:
 	    case mod_iqm:
+	    case mod_terrain:
 	        R_Mesh_Draw ();
 			break;
 		case mod_brush:
@@ -595,117 +603,11 @@ void R_DrawViewEntitiesOnList (void)
 
 void R_DrawTerrain (void)
 {
-	int		i;
-	rscript_t	*rs = NULL;
-	vec3_t	dist;
-
 	if (!r_drawworld->integer)
 		return;
-
-	for (i=0 ; i<num_terrain_entities ; i++)
-	{
-		currententity = &terrain_entities[i];
-		
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-			    rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		
-		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);		
-		
-		//set lod if available
-		if(VectorLength(dist) > LOD_DIST*2.0)
-		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > LOD_DIST)
-		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
-		}
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		
-		// TODO: maybe we don't actually want to assert this?
-		assert (currentmodel->type == mod_terrain);
-		
-		R_Mesh_Draw ();
-	}
 	
-	// TODO: will these models ever be transparent?
-	
-	for (i=0 ; i<num_rock_entities ; i++)
-	{
-		currententity = &rock_entities[i];
-		
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-			
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-			    rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		
-		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);
-		
-		//cull very distant rocks
-		if (VectorLength (dist) > LOD_DIST*8.0)
-			continue;
-		
-		//set lod if available
-		if(VectorLength(dist) > LOD_DIST*2.0)
-		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > LOD_DIST)
-		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
-		}
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		
-		R_Mesh_Draw ();
-	}
+	R_DrawEntityList (terrain_entities, num_terrain_entities);
+	R_DrawEntityList (rock_entities, num_rock_entities);
 }
 
 extern int r_drawing_fbeffect;
