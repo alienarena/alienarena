@@ -470,18 +470,107 @@ void R_DrawNullModel (void)
 
 #include "r_lodcalc.h"
 
+extern cvar_t *cl_simpleitems;
+static void R_DrawEntity (void)
+{
+	rscript_t	*rs = NULL;
+	vec3_t		dist;
+	
+	currentmodel = currententity->model;
+	
+	if (cl_simpleitems->integer && currentmodel && currentmodel->simple_texnum)
+		return;
+	
+	if (currentmodel && r_shaders->integer)
+	{
+		rs=(rscript_t *)currentmodel->script;
+
+		//custom player skin (must be done here)
+		if (currententity->skin)
+		{
+		    rs = currententity->skin->script;
+            if(rs)
+                RS_ReadyScript(rs);
+        }
+
+		if (rs)
+			currententity->script = rs;
+		else
+			currententity->script = NULL;
+	}
+
+	//get distance
+	VectorSubtract(r_origin, currententity->origin, dist);		
+	
+	//set lod if available
+	if(VectorLength(dist) > LOD_DIST*2.0)
+	{
+		if(currententity->lod2)
+			currentmodel = currententity->lod2;
+	}
+	else if(VectorLength(dist) > LOD_DIST)
+	{
+		if(currententity->lod1)
+			currentmodel = currententity->lod1;
+	}
+
+	if (!currentmodel)
+	{
+		R_DrawNullModel ();
+		return;
+	}
+	switch (currentmodel->type)
+	{
+	    case mod_md2:
+	    case mod_iqm:
+	        R_Mesh_Draw ();
+			break;
+		case mod_brush:
+			R_DrawBrushModel ();
+			break;
+		default:
+			Com_Error(ERR_DROP, "Bad modeltype");
+			break;
+	}
+}
+
+static void R_DrawEntityList (entity_t *list, int numentities)
+{
+	int		i;
+	
+	// draw non-transparent first
+	for (i = 0 ; i < numentities; i++)
+	{
+		currententity = &list[i];
+		if (currententity->flags & RF_TRANSLUCENT)
+			continue;	// transluscent
+		
+		R_DrawEntity ();
+	}
+
+	// draw transparent entities
+	// we could sort these if it ever becomes a problem...
+	qglDepthMask (0);		// no z writes
+	for (i = 0 ; i < numentities; i++)
+	{
+		currententity = &list[i];
+		if (!(currententity->flags & RF_TRANSLUCENT))
+			continue;	// solid
+		
+		fadeShadow = 1.0;
+		R_DrawEntity ();
+	}
+	qglDepthMask (1);		// back to writing
+}
+
+
 /*
 =============
 R_DrawEntitiesOnList
 =============
 */
-extern cvar_t *cl_simpleitems;
 void R_DrawEntitiesOnList (void)
 {
-	int		i;
-	rscript_t	*rs = NULL;
-	vec3_t	dist;
-
 	if (!r_drawentities->integer)
 		return;
 
@@ -489,225 +578,19 @@ void R_DrawEntitiesOnList (void)
 	{ // ODE init failed, force ragdolls off
 		r_ragdolls = Cvar_ForceSet("r_ragdolls", "0");
 	}
-
-	// draw non-transparent first
-	for (i=0 ; i<r_newrefdef.num_entities ; i++)
-	{
-		currententity = &r_newrefdef.entities[i];
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
-		
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-			    rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		
-		if (cl_simpleitems->integer && currentmodel && currentmodel->simple_texnum)
-			continue;
-
-		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);		
-		
-		//set lod if available
-		if(VectorLength(dist) > LOD_DIST*2.0)
-		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > LOD_DIST)
-		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
-		}
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		    case mod_md2:
-		    case mod_iqm:
-		        R_Mesh_Draw ();
-				break;
-			case mod_brush:
-				R_DrawBrushModel ();
-				break;
-			default:
-				Com_Error(ERR_DROP, "Bad modeltype");
-				break;
-		}
-	}
-
-	// draw transparent entities
-	// we could sort these if it ever becomes a problem...
-	qglDepthMask (0);		// no z writes
-	for (i=0 ; i<r_newrefdef.num_entities ; i++)
-	{
-		currententity = &r_newrefdef.entities[i];
-		if (!(currententity->flags & RF_TRANSLUCENT))
-			continue;	// solid
-
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-                rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		fadeShadow = 1.0;
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		    case mod_md2:
-		    case mod_iqm:
-		        R_Mesh_Draw ();
-				break;
-			case mod_brush:
-				R_DrawBrushModel ();
-				break;
-			default:
-				Com_Error (ERR_DROP, "Bad modeltype");
-				break;
-		}
-	}
-	qglDepthMask (1);		// back to writing
+	
+	R_DrawEntityList (r_newrefdef.entities, r_newrefdef.num_entities);
 }
 
 void R_DrawViewEntitiesOnList (void)
 {
-	int		i;
-	rscript_t	*rs = NULL;
-
 	if (!r_drawentities->integer)
 		return;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-
-	// draw non-transparent first
-	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
-	{
-		currententity = &r_newrefdef.viewentities[i];
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
-
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-                rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		case mod_md2:
-		case mod_iqm:
-		    R_Mesh_Draw ();
-			break;
-		default:
-			Com_Error(ERR_DROP, "Bad modeltype");
-			break;
-		}
-	}
-
-	// draw transparent entities
-	// we could sort these if it ever becomes a problem...
-	qglDepthMask (0);		// no z writes
-	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
-	{
-		currententity = &r_newrefdef.viewentities[i];
-		if (!(currententity->flags & RF_TRANSLUCENT))
-			continue;	// solid
-
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-                rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		case mod_md2:
-		case mod_iqm:
-		    R_Mesh_Draw ();
-			break;
-		default:
-			Com_Error (ERR_DROP, "Bad modeltype");
-			break;
-		}
-	}
-	qglDepthMask (1);		// back to writing
+	
+	R_DrawEntityList (r_newrefdef.viewentities, r_newrefdef.num_viewentities);
 }
 
 void R_DrawTerrain (void)
