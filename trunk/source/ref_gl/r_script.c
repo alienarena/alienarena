@@ -412,18 +412,14 @@ int RS_BlendID (char *blend)
 	
 	check_blend (GL_ZERO)
 	check_blend (GL_ONE)
-	check_blend (GL_DST_COLOR)
-	check_blend (GL_ONE_MINUS_DST_COLOR)
 	check_blend (GL_SRC_ALPHA)
 	check_blend (GL_ONE_MINUS_SRC_ALPHA)
-	check_blend (GL_DST_ALPHA)
-	check_blend (GL_ONE_MINUS_DST_ALPHA)
-	check_blend (GL_SRC_ALPHA_SATURATE)
 	check_blend (GL_SRC_COLOR)
 	check_blend (GL_ONE_MINUS_SRC_COLOR)
 
 #undef check_blend
 
+	Com_Printf ("WARN: Unrecognized blend factor %s in RScript!\n", blend);
 	return 0;
 }
 
