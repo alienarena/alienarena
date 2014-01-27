@@ -39,11 +39,6 @@ int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
 
-/* unused
-	float			time = rs_realtime * 1000 -
-		(stage->last_anim_time + stage->anim_delay);
-*/
-
 	while (stage->last_anim_time < rs_realtime)
 	{
 		anim = anim->next;
@@ -59,11 +54,6 @@ int RS_Animate (rs_stage_t *stage)
 void *RS_AnimateSkin (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
-
-/* unused
-	float			time = rs_realtime * 1000 -
-		(stage->last_anim_time + stage->anim_delay);
-*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -164,72 +154,10 @@ void RS_ClearStage (rs_stage_t *stage)
 		randStage = randStage->next;
 		free (tmp_rand);
 	}
-
-	stage->last_anim = 0;
-	stage->last_anim_time = 0;
-	stage->anim_count = 0;
-
-	stage->anim_delay = 0;
-	stage->anim_stage = NULL;
-
-	stage->rand_count = 0;
-	stage->rand_stage = NULL;
-
-	stage->alphamask = false;
-
-	stage->alphashift.max = 0;
-	stage->alphashift.min = 0;
-	stage->alphashift.speed = 0;
-
-	stage->blendfunc.blend = false;
-	stage->blendfunc.dest = stage->blendfunc.source = 0;
-
-	stage->colormap.enabled = false;
-	stage->colormap.red = 0;
-	stage->colormap.green = 0;
-	stage->colormap.blue = 0;
-
-	stage->scale.scaleX = 0;
-	stage->scale.scaleY = 0;
-	stage->scale.typeX = 0;
-	stage->scale.typeY = 0;
-
-	stage->scroll.speedX = 0;
-	stage->scroll.speedY = 0;
-	stage->scroll.typeX = 0;
-	stage->scroll.typeY = 0;
-
-	stage->rot_speed = 0;
-
-	stage->texture = NULL;
-	stage->texture2 = NULL;
-	stage->texture3 = NULL;
 	
-	stage->depthhack = false;
-	stage->envmap = false;
-	stage->lensflare = false;
-	stage->flaretype = 0;
-	stage->normalmap = false;
-	
-	stage->num_blend_textures = 0;
-	memset (stage->blend_textures, 0, sizeof (stage->blend_textures));
-	
-	memset (stage->targetdist, 0, sizeof (stage->targetdist));
-	
-	stage->grass = false;
-	stage->grasstype = 0;
-	stage->beam = false;
-	stage->beamtype = 0;
-	stage->xang = 0;
-	stage->yang = 0;
-	stage->rotating = false;
-	stage->fx = false;
-	stage->glow = false;
-	stage->cube = false;
+	memset (stage, 0, sizeof(*stage));
 
 	stage->lightmap = true;
-
-	stage->next = NULL;
 }
 
 // Create a new script with the given name. Reuse the "old" struct if possible
