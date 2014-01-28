@@ -54,17 +54,17 @@ void R_Mesh_FindVBO (model_t *mod, int framenum)
 	if (!modtypes[mod->type].morphtarget)
 		framenum = 0;
 
-	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);	
-	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod);
-	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod);
-	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod);
+	vbo_st = R_VCFindCache(VBO_STORE_ST, mod, vbo_st);	
+	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod, vbo_xyz);
+	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod, vbo_normals);
+	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod, vbo_tangents);
 	
 	if (!vbo_xyz || !vbo_st || !vbo_normals || !vbo_tangents)
 		Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
 	
 	if (modtypes[mod->type].indexed)
 	{
-		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
+		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod, vbo_indices);
 		if (!vbo_indices)
 			Com_Error (ERR_DROP, "Cannot find IBO for %s frame %d\n", mod->name, framenum);
 	}
