@@ -178,9 +178,12 @@ void GL_BindIBO(vertCache_t *cache)
 		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod)
+vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache)
 {
 	vertCache_t	*cache;
+
+    if (tryCache != NULL && tryCache->mod == mod && tryCache->store == store)
+        return tryCache;
 
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = cache->next)
 	{

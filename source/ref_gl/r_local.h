@@ -300,7 +300,7 @@ extern void VB_BuildWorldVBO(void);
 void GL_SetupWorldVBO (void);
 void GL_BindVBO(vertCache_t *cache);
 void GL_BindIBO(vertCache_t *cache);
-vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod);
+vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache);
 vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, model_t *mod);
 extern void R_VCFree(vertCache_t *cache);
 
