@@ -80,6 +80,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 	
 	for (framenum = 0; framenum < maxframes; framenum++)
 	{
+		vbo_xyz = vbo_st = vbo_normals = vbo_tangents = vbo_indices = NULL;
 		R_Mesh_FindVBO (mod, framenum);
 		R_VCFree (vbo_xyz);
 		R_VCFree (vbo_st);
