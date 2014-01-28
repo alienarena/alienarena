@@ -1391,7 +1391,6 @@ R_Init
 int R_Init( void *hinstance, void *hWnd )
 {
 	int		err;
-	int		j;
 	
 	Draw_GetPalette ();
 
