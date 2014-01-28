@@ -187,7 +187,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *try
 
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = cache->next)
 	{
-		if (cache->mod == mod && cache->store == store)
+		if (cache->mod == mod->vbo_key && cache->store == store)
 			return cache;
 	}
 

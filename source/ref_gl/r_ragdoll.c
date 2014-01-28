@@ -394,6 +394,8 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	strcpy(RagDoll[RagDollID].name, name);
 
+	// TODO: stop making copies of the model_t, just init the ragdoll info in
+	// the *main* model_t once at load time.
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
 	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t));
 
