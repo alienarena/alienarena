@@ -357,6 +357,32 @@ void R_DrawParticles (void)
         qglEnable(GL_FOG);
 }
 
+static void R_Surface_Bounds (const msurface_t *surf, vec3_t out_mins, vec3_t out_maxs, vec3_t out_center)
+{
+	const glpoly_t	*poly;
+	const float		*v;
+	int				i;
+	
+	VectorSet(out_mins, 999999, 999999, 999999);
+	VectorSet(out_maxs, -999999, -999999, -999999);
+
+	poly = surf->polys;
+	for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE)
+	{
+		if(v[0] > out_maxs[0])   out_maxs[0] = v[0];
+		if(v[1] > out_maxs[1])   out_maxs[1] = v[1];
+		if(v[2] > out_maxs[2])   out_maxs[2] = v[2];
+
+		if(v[0] < out_mins[0])   out_mins[0] = v[0];
+		if(v[1] < out_mins[1])   out_mins[1] = v[1];
+		if(v[2] < out_mins[2])   out_mins[2] = v[2];
+	}
+
+	out_center[0] = (out_mins[0] + out_maxs[0]) / 2.0;
+	out_center[1] = (out_mins[1] + out_maxs[1]) / 2.0;
+	out_center[2] = (out_mins[2] + out_maxs[2]) / 2.0;
+}
+
 //lens flares
 // TODO: flare rendering is actually shockingly slow, and the reason is the 
 // overhead of each glDrawArrays call. It MIGHT be worth using a variation on 
@@ -367,53 +393,29 @@ void R_DrawParticles (void)
 
 void Mod_AddFlareSurface (msurface_t *surf, int type )
 {
-     int i, width, height;
-     glpoly_t *poly;
-     flare_t  *light;
-     byte     *buffer;
-	 byte     *p;
-     float    *v, surf_bound;
-	 vec3_t origin = {0,0,0}, color = {1,1,1}, tmp, rgbSum;
-     vec3_t poly_center, mins, maxs, tmp1;
+	int i, width, height;
+	flare_t  *light;
+	byte     *buffer;
+	byte     *p;
+	float    surf_bound;
+	vec3_t origin = {0,0,0}, color = {1,1,1}, tmp, rgbSum;
+	vec3_t mins, maxs, tmp1;
 
 	if (surf->iflags & ISURF_DRAWTURB)
 		return;
 
-     if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING|SURF_WARP))
-          return;
+	if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING|SURF_WARP))
+		return;
 
-     if (!(surf->texinfo->flags & (SURF_LIGHT)))
-          return;
+	if (!(surf->texinfo->flags & (SURF_LIGHT)))
+		return;
 
-	 if (r_numflares >= MAX_FLARES)
-			return;
+	if (r_numflares >= MAX_FLARES)
+		return;
 
     light = &r_flares[r_numflares++];
 
-    /*
-	===================
-	find poligon centre
-	===================
-	*/
-	VectorSet(mins, 999999, 999999, 999999);
-	VectorSet(maxs, -999999, -999999, -999999);
-	
-	poly = surf->polys;
-	for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE)
-	{
-		if(v[0] > maxs[0])   maxs[0] = v[0];
-		if(v[1] > maxs[1])   maxs[1] = v[1];
-		if(v[2] > maxs[2])   maxs[2] = v[2];
-
-		if(v[0] < mins[0])   mins[0] = v[0];
-		if(v[1] < mins[1])   mins[1] = v[1];
-		if(v[2] < mins[2])   mins[2] = v[2];
-	}
-
-     poly_center[0] = (mins[0] + maxs[0]) /2;
-     poly_center[1] = (mins[1] + maxs[1]) /2;
-     poly_center[2] = (mins[2] + maxs[2]) /2;
-	 VectorCopy(poly_center, origin);
+	R_Surface_Bounds (surf, mins, maxs, origin);
 
      /*
 	=====================================
@@ -1120,12 +1122,9 @@ void R_ClearGrasses(void)
 void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
 	qboolean rotating)
 {
-    glpoly_t *poly;
     beam_t  *beam;
 	image_t *gl;
-	vec3_t poly_center, mins, maxs;
-	float *v;
-	int i;
+	vec3_t mins, maxs;
 	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
 
 	if (r_numbeams >= MAX_BEAMS)
@@ -1134,32 +1133,7 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 	if(size == 0.0)
 		size = 1.0f;
 
-	poly = surf->polys;
-
-	 /*
-	===================
-	find poligon centre
-	===================
-	*/
-	VectorSet(mins, 999999, 999999, 999999);
-	VectorSet(maxs, -999999, -999999, -999999);
-	
-	poly = surf->polys;
-	for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE)
-	{
-		if(v[0] > maxs[0])   maxs[0] = v[0];
-		if(v[1] > maxs[1])   maxs[1] = v[1];
-		if(v[2] > maxs[2])   maxs[2] = v[2];
-
-		if(v[0] < mins[0])   mins[0] = v[0];
-		if(v[1] < mins[1])   mins[1] = v[1];
-		if(v[2] < mins[2])   mins[2] = v[2];
-	}
-
-     poly_center[0] = (mins[0] + maxs[0]) /2;
-     poly_center[1] = (mins[1] + maxs[1]) /2;
-     poly_center[2] = (mins[2] + maxs[2]) /2;
-	 VectorCopy(poly_center, origin);
+	R_Surface_Bounds (surf, mins, maxs, origin);
 
 	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
 	VectorNormalize(tangent);
