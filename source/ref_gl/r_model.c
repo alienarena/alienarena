@@ -216,6 +216,21 @@ static void R_ParseTerrainModelEntity (char *match, char *block)
 	Mod_LoadTerrainDecorations (ent->model->name, ent->angles, ent->origin);
 }
 
+// For sorting the rock entities by mesh. TODO: maybe sort other entity types
+// as well?
+int compare_entity (void const *_a, void const *_b)
+{
+	entity_t *a = (entity_t *)_a;
+	entity_t *b = (entity_t *)_b;	
+
+	if (a->model > b->model)
+		return -1;
+	else if (a->model < b->model)
+		return 1;
+	
+	return 0;
+}
+
 static void R_ParseTerrainEntities (void)
 {
 	static const char *classnames[] = {"misc_terrainmodel"};
@@ -223,6 +238,7 @@ static void R_ParseTerrainEntities (void)
 	num_terrain_entities = 0;
 	num_rock_entities = 0;
 	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainModelEntity);
+	qsort (rock_entities, num_rock_entities, sizeof(rock_entities[0]), compare_entity);
 }
 
 static void R_ParseSunTarget (char *match, char *block)
