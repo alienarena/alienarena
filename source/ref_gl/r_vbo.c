@@ -180,16 +180,12 @@ void GL_BindIBO(vertCache_t *cache)
 
 vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod)
 {
-	vertCache_t	*cache, *next;
+	vertCache_t	*cache;
 
-	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
+	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = cache->next)
 	{
-		next = cache->next;
-
-		if (cache->store == store && !strcmp(cache->mod->name, mod->name))
-		{	// already cached!
+		if (cache->mod == mod && cache->store == store)
 			return cache;
-		}
 	}
 
 	return NULL;
