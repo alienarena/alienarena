@@ -865,23 +865,6 @@ void CL_Reconnect_f (void)
 }
 
 /*
-=================
-CL_ParseStatusMessage
-
-Handle a reply from a status request
-=================
-*/
-void CL_ParseFullStatusMessage (void)
-{
-	char	*s;
-
-	s = MSG_ReadString(&net_message);
-
-	Com_Printf ("TESTING!!!!%s\n", s);
-	M_AddToServerList (net_from, s);
-}
-
-/*
 ===================
 GetServerList
 
