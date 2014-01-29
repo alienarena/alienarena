@@ -135,8 +135,6 @@ dJointGroupID contactGroup;
 
 int lastODEUpdate;
 
-dQuaternion initialQuaternion;
-
 typedef struct RagDollBind_s {
 
     const char *name;

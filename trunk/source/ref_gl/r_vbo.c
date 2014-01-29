@@ -26,10 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 GLuint vboId = 0;
-GLuint eboId = 0;
 int	totalVBObufferSize;
-int totalEBObufferSize;
-int currVertexNum, currElemNum;
+int currVertexNum;
 size_t vbo_xyz_pos;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
@@ -108,7 +106,7 @@ void VB_BuildWorldVBO(void)
 	msurface_t *surf, *surfs;
 	int i, firstsurf, lastsurf;
 	
-	currVertexNum = currElemNum = 0;
+	currVertexNum = 0;
 	vbo_xyz_pos = 0;
 
 	qglGenBuffersARB(1, &vboId);

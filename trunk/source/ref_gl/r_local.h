@@ -291,7 +291,6 @@ void R_FB_InitTextures(void);
 
 //VBO
 extern GLuint vboId;
-extern GLuint eboId;
 extern void R_LoadVBOSubsystem(void);
 extern void R_VCShutdown(void);
 extern void VB_WorldVCInit(void);

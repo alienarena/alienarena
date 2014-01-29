@@ -25,9 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-particle_t gparticles[MAX_PARTICLES];
-int			num_gparticles;
-
 /*
 ===============
 PART_DrawParticles
