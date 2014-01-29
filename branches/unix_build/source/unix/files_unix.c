@@ -24,6 +24,16 @@ see the file, COPYING.
  * Replaces qcommon/files.c
  */
 
+/* -jjb-
+ * to be re-integrated with Windows
+ * 2014-01:
+ * -- botinfo/ special-case separate top-level eliminated. now a subdir
+ *     of data1 and game
+ * -- basename of user writeable path is not configurable.
+ *     now is always "cor_games"
+ * -- use XDG conventions if defined
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -45,8 +55,11 @@ cvar_t *fs_gamedirvar;
 #define GAME_SEARCH_SLOTS  4
 char   fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 
+#if 0
+// -jjb-
 #define BOT_SEARCH_SLOTS   3
 char   fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
+#endif
 
 /**
  * Initialize the pathnames for the shared data directory and
@@ -63,10 +76,14 @@ FS_init_paths( void )
 	char *homestr;
 	char base_gamedata[MAX_OSPATH];
 	char game_gamedata[MAX_OSPATH];
+#if 0
 	char bot_gamedata[MAX_OSPATH];
+#endif
 
 	char user_game_gamedata[MAX_OSPATH];
+#if 0
 	char user_bot_gamedata[MAX_OSPATH];
+#endif
 
 	memset( fs_bindir, 0, sizeof( fs_bindir ));
 	memset( fs_datadir, 0, sizeof( fs_datadir ));
@@ -78,6 +95,7 @@ FS_init_paths( void )
 		Sys_Error( "path initialization (getcwd error: %s)", strerror( errno ));
 	}
 
+#if 0
 	/* where user-writable files are installed */
 	homestr = getenv( "COR_GAMES" ); /* 2013-12-20 added 'S' for consistency */
 	if ( homestr != NULL )
@@ -99,13 +117,21 @@ FS_init_paths( void )
 		else
 		{
 			fs_homedir[0] = 0;
-			// 
+			//
 		}
 	}
+#endif
+
+	homestr = getenv( "HOME" );
+	if ( homestr != NULL )
+		Com_sprintf( fs_homedir, sizeof( fs_homedir ), "%s/%s", homestr, USER_GAMEDATA );
+	else
+		fs_homedir[0] = 0;
+
 
 	/* where data files are installed */
 	if ( !Q_strncasecmp( fs_bindir, DATADIR, sizeof( fs_bindir )))
-	{ 
+	{
 		/* 'in place', same as executable location */
 		Q_strncpyz2( fs_datadir, fs_bindir, sizeof( fs_datadir ));
 		/* probably need to 'configure' with 'bindir' and 'datadir'
@@ -125,7 +151,7 @@ FS_init_paths( void )
 	/* where official game resource files are installed */
 	memset( base_gamedata, 0, sizeof( base_gamedata ));
 	Com_sprintf( base_gamedata, sizeof( base_gamedata ), "%s/%s",
-	    fs_datadir, BASE_GAMEDATA );
+				 fs_datadir, BASE_GAMEDATA );
 
 	/* where user-writeable configs and downloaded data are stored,
 	 * dependent on the game name.
@@ -134,21 +160,21 @@ FS_init_paths( void )
 	 * (Note: there seems to have been a command line arg '-game'
 	 *  to set the game name early. Need to review how that was
 	 *  done. check Dark Places?)
-	 *  
+	 *
 	 */
 	memset( game_gamedata, 0, sizeof( game_gamedata ));
 	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH | CVAR_SERVERINFO );
 	if ( *fs_gamedirvar->string && fs_gamedirvar->string[0] )
 	{
 		if ( Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
-		    && Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
-		{ 
+			 && Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
+		{
 			/* game cvar does not match either, use the cvar */
 			/* this might work for 'tactical', if commandline
 			 * has +set game tactical
 			 */
 			Com_sprintf( game_gamedata, sizeof( game_gamedata ), "%s/%s",
-			    fs_datadir, fs_gamedirvar->string );
+						 fs_datadir, fs_gamedirvar->string );
 		}
 		else
 		{
@@ -156,25 +182,28 @@ FS_init_paths( void )
 			 * GAME_GAMEDATA ('arena'). Use GAME_GAMEDATA
 			 */
 			Com_sprintf( game_gamedata, sizeof( game_gamedata ), "%s/%s",
-			    fs_datadir, GAME_GAMEDATA );
+						 fs_datadir, GAME_GAMEDATA );
 		}
 	}
 	else
 	{
 		fs_gamedirvar = Cvar_ForceSet( "gamedir", GAME_GAMEDATA );
 		Com_sprintf( game_gamedata, sizeof( game_gamedata ), "%s/%s",
-		    fs_datadir, GAME_GAMEDATA );
+					 fs_datadir, GAME_GAMEDATA );
 	}
 
+#if 0
+// -jjb-
 	/* where bot information is installed */
 	memset( bot_gamedata, 0, sizeof( bot_gamedata ));
 	Com_sprintf( bot_gamedata, sizeof( bot_gamedata ), "%s", fs_datadir );
+#endif
 
 	/* create the pathnames for user-writeable configs and storage
-	 * subdirectories. 2013-12: eliminate user_base_gamedate from the 
+	 * subdirectories. 2013-12: eliminate user_base_gamedate from the
 	 * the list; it is mostly useless and an unnecessary performance
 	 * hit
-	 * So, in the user home directory, as of 2013-12 version, there 
+	 * So, in the user home directory, as of 2013-12 version, there
 	 *   are three subdirectories: arena, tactical, and botinfo.
 	 * In the shared directory, there are 4: data1, arena, tactical
 	 *   and botinfo.
@@ -185,10 +214,11 @@ FS_init_paths( void )
 		memset( user_game_gamedata, 0, sizeof( user_game_gamedata ));
 		Com_sprintf( user_game_gamedata, sizeof( user_game_gamedata ),
 					 "%s/%s", fs_homedir, fs_gamedirvar->string );
-
+#if 0
 		memset( user_bot_gamedata, 0, sizeof( user_bot_gamedata ));
 		Com_sprintf( user_bot_gamedata, sizeof( user_bot_gamedata ),
 					 "%s", fs_homedir );
+#endif
 	}
 	else
 	{
@@ -207,6 +237,8 @@ FS_init_paths( void )
 	/* the 'game' directory is the same as the first search slot */
 	Q_strncpyz2( fs_gamedir, fs_gamesearch[0], sizeof( fs_gamedir ));
 
+#if 0
+// -jjb-
 	/* set up the directory search sequence for bot resource files */
 	for ( i = 0; i < BOT_SEARCH_SLOTS; i++ )
 	{
@@ -214,6 +246,7 @@ FS_init_paths( void )
 	}
 	Q_strncpyz2( fs_botsearch[0], user_bot_gamedata, sizeof( fs_botsearch[0] ));
 	Q_strncpyz2( fs_botsearch[1], bot_gamedata, sizeof( fs_botsearch[0] ));
+#endif
 
 
 } /* FS_init_paths */
@@ -226,7 +259,7 @@ FS_init_paths( void )
 int
 FS_filelength( FILE *f )
 {
-	int             length = -1;
+	int length = -1;
 
 #if defined HAVE_FILELENGTH
 	length = filelength( fileno( f ));
@@ -321,21 +354,25 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 	*full_path = 0;
 	if ( strlen( relative_path ) >= MAX_QPATH )
 	{
-		Com_DPrintf( "FS_FullPath: relative path size error: %s\n", relative_path );
+		Com_DPrintf( "FS_FullPath: relative path size error: %s\n",
+					 relative_path );
 		return false;
 	}
+#if 0
+// -jjb-
 	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen( BOT_GAMEDATA )))
 	{
 		to_search = &fs_botsearch[0][0];
 	}
 	else
 	{
-		to_search = &fs_gamesearch[0][0];
-	}
+#endif
+
+	to_search = &fs_gamesearch[0][0];
 	while ( to_search[0] && !found )
 	{
 		Com_sprintf( search_path, sizeof( search_path ), "%s/%s",
-		    to_search, relative_path );
+					 to_search, relative_path );
 		found      = FS_CheckFile( search_path );
 		to_search += MAX_OSPATH;
 	}
@@ -351,11 +388,12 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 		}
 		else
 		{
-			Com_DPrintf( "FS_FullPath: full path size error: %s\n", search_path );
+			Com_DPrintf( "FS_FullPath: full path size error: %s\n",
+						 search_path );
 			found = false;
 		}
 	}
-	else if ( developer && developer->integer == 2 )
+	else if ( developer && developer->integer == 2 ) // -jjb- improve this
 	{
 		Com_DPrintf( "FS_FullPath: not found : %s\n", relative_path );
 	}
@@ -375,18 +413,21 @@ FS_FullWritePath( char *full_path, size_t pathsize, const char *relative_path )
 {
 	if ( strlen( relative_path ) >= MAX_QPATH )
 	{
-		Com_DPrintf( "FS_FullPath: relative path size error: %s\n", relative_path );
+		Com_DPrintf( "FS_FullPath: relative path size error: %s\n",
+					 relative_path );
 		*full_path = 0;
 		return;
 	}
+#if 0
+// -jjb-
 	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen( BOT_GAMEDATA )))
 	{
-		Com_sprintf( full_path, pathsize, "%s/%s", fs_botsearch[0], relative_path );
+		Com_sprintf( full_path, pathsize, "%s/%s", fs_botsearch[0],
+					 relative_path );
 	}
-	else
-	{
-		Com_sprintf( full_path, pathsize, "%s/%s", fs_gamedir, relative_path );
-	}
+#endif
+
+	Com_sprintf( full_path, pathsize, "%s/%s", fs_gamedir, relative_path );
 	FS_CreatePath( full_path );
 
 } /* FS_FullWritePath */
@@ -554,7 +595,8 @@ FS_LoadFile( char *path, void **buffer )
  * @return -
  */
 int
-FS_LoadFile_TryStatic( char *path, void **buffer, void *statbuffer, size_t statbuffer_len )
+FS_LoadFile_TryStatic( char *path, void **buffer, void *statbuffer,
+					   size_t statbuffer_len )
 {
 	FILE *h;
 	byte *buf = NULL;
@@ -670,7 +712,7 @@ FS_SetGamedir( char *dir )
 {
 
 	if ( strstr( dir, ".." ) || strstr( dir, "/" )
-	    || strstr( dir, "\\" ) || strstr( dir, ":" ))
+		 || strstr( dir, "\\" ) || strstr( dir, ":" ))
 	{
 		Com_Printf( "Gamedir should be a single filename, not a path\n" );
 		return;
@@ -693,54 +735,9 @@ FS_SetGamedir( char *dir )
 
 } /* FS_SetGamedir */
 
-/*------------------------------------------------------ Directory Listing ----*/
+/*----------------------------------------------------- Directory Listing ----*/
 
-/**
- *
- * @param findname -
- * @param numfiles -
- * @param musthave -
- * @param canthave -
- * @return -
- */
-char**
-FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned canthave )
-{
-	char *namestr;
-	int  nfiles = 0;
-	char **list = NULL;
-
-	namestr = Sys_FindFirst( findname, musthave, canthave );
-	while ( namestr )
-	{
-		if ( namestr[ strlen( namestr ) - 1 ] != '.' )
-			nfiles++;
-		namestr = Sys_FindNext( musthave, canthave );
-	}
-	Sys_FindClose();
-	if ( !nfiles )
-		return NULL;
-
-	*numfiles = nfiles;
-	nfiles++;
-	list = malloc( sizeof( char* ) * nfiles );
-	memset( list, 0, sizeof( char* ) * nfiles );
-	namestr = Sys_FindFirst( findname, musthave, canthave );
-	nfiles  = 0;
-	while ( namestr )
-	{
-		if ( namestr[ strlen( namestr ) - 1] != '.' )
-		{
-			list[nfiles] = strdup( namestr );
-			nfiles++;
-		}
-		namestr = Sys_FindNext( musthave, canthave );
-	}
-	Sys_FindClose();
-
-	return list;
-
-} /* FS_ListFiles */
+// -jjb- research dirent stuff
 
 /**
  *
@@ -765,13 +762,75 @@ FS_FreeFileList ( char **list, int n )
 /**
  *
  * @param findname -
+ * @param numfiles - output, number of files in the list
+ * @param musthave -
+ * @param canthave -
+ * @return -
+ */
+char**
+FS_ListFiles( char *findname, int *numfiles,
+			  unsigned musthave, unsigned canthave )
+{
+	char *namestr;
+	int  nfiles = 0;
+	char **list = NULL;
+
+	namestr = Sys_FindFirst( findname, musthave, canthave );
+	while ( namestr )
+	{
+		if ( namestr[ strlen( namestr ) - 1 ] != '.' )
+			nfiles++;
+		namestr = Sys_FindNext( musthave, canthave );
+	}
+	Sys_FindClose();
+	if ( !nfiles )
+		return NULL;
+
+	*numfiles = nfiles;
+	nfiles++;
+
+// -jjb- calloc need HAVE?
+	list = calloc( nfiles, sizeof(char*) );
+	if ( list == NULL )
+		return NULL;
+	/* memset( list, 0, sizeof( char* ) * nfiles );*/
+
+	namestr = Sys_FindFirst( findname, musthave, canthave );
+	nfiles  = 0;
+	while ( namestr )
+	{
+		if ( namestr[ strlen( namestr ) - 1] != '.' )
+		{
+			list[nfiles] = strdup( namestr ); // -jjb- need HAVE?
+			if ( list[nfiles] == NULL )
+			{
+				if ( nfiles )
+				{
+					FS_FreeFileList( list, nfiles );
+					return NULL;
+				}
+			}
+			nfiles++;
+		}
+		namestr = Sys_FindNext( musthave, canthave );
+	}
+	Sys_FindClose();
+
+	return list;
+
+} /* FS_ListFiles */
+
+/**
+ *
+ * @param findname -
  * @param numfiles -
  * @param musthave -
  * @param canthave -
  * @return -
  */
 char**
-FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave, unsigned canthave )
+FS_ListFilesInFS( char *findname, int *numfiles,
+				  unsigned musthave, unsigned canthave )
 {
 	int  i, j;
 	int  nfiles;
@@ -784,9 +843,11 @@ FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave, unsigned can
 
 	nfiles = 0;
 	list   = malloc( sizeof( char* ));
+	if ( list == NULL )
+		return NULL;
 	for ( s = 0; fs_gamesearch[s][0]; s++ )
 	{
-		Com_sprintf( path, sizeof( path ), "%s/%s", fs_gamesearch[s], findname );
+		Com_sprintf( path, sizeof(path), "%s/%s", fs_gamesearch[s], findname );
 		tmplist = FS_ListFiles( path, &tmpnfiles, musthave, canthave );
 		if ( tmplist != NULL )
 		{
@@ -795,7 +856,7 @@ FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave, unsigned can
 			if ( new_list == NULL )
 			{
 				FS_FreeFileList( tmplist, tmpnfiles );
-				Com_Printf( "WARN: SYSTEM MEMORY EXHAUSTION!\n" );
+				// -jjb- Com_Printf( "WARN: SYSTEM MEMORY EXHAUSTION!\n" );
 				break;
 			}
 			list = new_list;
@@ -816,11 +877,11 @@ FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave, unsigned can
 		for ( j = i + 1; j < nfiles; j++ )
 		{
 			if ( list[j] != NULL &&
-			    strcmp( list[i], list[j] ) == 0 )
+				 strcmp( list[i], list[j] ) == 0 ) // -jjb-
 			{
 				free( list[j] );
 				list[j] = NULL;
-				tmpnfiles++;
+				tmpnfiles++;  // -jjb- ???
 			}
 		}
 	}
@@ -843,7 +904,7 @@ FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave, unsigned can
 		new_list = realloc( list, nfiles * sizeof( char* ));
 		if ( new_list == NULL )
 		{
-			Com_Printf( "WARN: SYSTEM MEMORY EXHAUSTION!\n" );
+			// -jjb- Com_Printf( "WARN: SYSTEM MEMORY EXHAUSTION!\n" );
 			nfiles--;
 		}
 		else
@@ -857,7 +918,7 @@ FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave, unsigned can
 		free( list );
 		list = NULL;
 	}
-	nfiles--;
+	nfiles--; // -jjb- ???
 	*numfiles = nfiles;
 
 	return list;
@@ -916,7 +977,7 @@ FS_Dir_f( void )
 } /* FS_Dir_f */
 
 /**
- *
+ * Target of "path" console command
  *
  */
 void
@@ -929,12 +990,14 @@ FS_Path_f( void )
 	{
 		Com_Printf( "%s/\n", fs_gamesearch[i] );
 	}
-
+#if 0
+// -jjb-
 	Com_Printf( "Bot data search path:\n" );
 	for ( i = 0; fs_botsearch[i][0]; i++ )
 	{
 		Com_Printf( "%s/%s/\n", fs_botsearch[i], BOT_GAMEDATA );
 	}
+#endif
 
 } /* FS_Path_f */
 
@@ -968,7 +1031,7 @@ FS_NextPath ( char *prevpath )
 			nextpath = fs_gamesearch[i];
 		}
 	}
-	
+
 	return nextpath;
 
 } /* FS_NextPath */
@@ -987,9 +1050,12 @@ FS_InitFilesystem ( void )
 
 	FS_init_paths();
 
-	Com_Printf( "using %s for writing\n", fs_gamedir );
+#if !defined DEDICATED_ONLY
+	Com_Printf( "Configuration and Download Directory: %s\n", fs_gamedir );
+	// -jjb- maybe stuff a "path" command instead
+#endif
 	Com_sprintf( dummy_path, sizeof( dummy_path ), "%s/dummy", fs_gamedir );
-	FS_CreatePath( dummy_path );
+	FS_CreatePath( dummy_path ); // -jjb- ???
 
 #if defined HAVE_ZLIB && !defined DEDICATED_ONLY
 	Com_Printf( "using zlib version %s\n", zlibVersion());
