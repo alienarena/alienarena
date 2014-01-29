@@ -7,39 +7,13 @@
 #include "binheap.h"
 #include "libgarland.h"
 
-float raw_sample (const byte *texture, int tex_w, int tex_h, int s, int t)
+static float grayscale_sample (const byte *texture, int tex_w, int tex_h, float u, float v)
 {
-	if (s >= tex_w)
-		s = tex_w-1;
-	if (s < 0)
-		s = 0;
-	if (t >= tex_h)
-		t = tex_h-1;
-	if (t < 0)
-		t = 0;
-	
-	return 1.0/3.0 *	(	texture[(t*tex_w+s)*4] +
-							texture[(t*tex_w+s)*4+1] +
-							texture[(t*tex_w+s)*4+2]
-						);
-}
-
-float bilinear_sample(const byte *texture, int tex_w, int tex_h, float u, float v)
-{
- 	int x, y;
- 	float u_ratio, v_ratio, u_opposite, v_opposite;
-	u = u * tex_w - 0.5;
-	v = v * tex_h - 0.5;
-	x = floor(u);
-	y = floor(v);
-	u_ratio = u - x;
-	v_ratio = v - y;
-	u_opposite = 1 - u_ratio;
-	v_opposite = 1 - v_ratio;
-#define SAMPLE(x,y) raw_sample (texture, tex_w, tex_h, x, y)
-	return	(SAMPLE (x, y) * u_opposite + SAMPLE (x+1, y) * u_ratio) * v_opposite +
-			(SAMPLE (x, y+1) * u_opposite + SAMPLE (x+1, y+1) * u_ratio) * v_ratio;	
-#undef SAMPLE
+    vec3_t res;
+    
+    bilinear_sample (texture, tex_w, tex_h, u, v, res);
+    
+    return (res[0] + res[1] + res[2]) / 3.0;
 }
 
 terraindec_t *LoadTerrainDecorationType 
@@ -109,7 +83,7 @@ terraindec_t *LoadTerrainDecorationType
 		
 				x = scale[0]*((float)j/(float)w) + mins[0] + scale[0]*xrand/(float)w;
 				y = scale[1]*((float)i/(float)h) + mins[1] + scale[1]*yrand/(float)h;
-				z = scale[2] * bilinear_sample (hmtexdata, hm_h, hm_w, s, t) / 255.0 + mins[2];
+				z = scale[2] * grayscale_sample (hmtexdata, hm_h, hm_w, s, t) + mins[2];
 		
 				VectorSet (ret[counter].origin, x, y, z);
 				ret[counter].size = (float)size/16.0f;
@@ -278,7 +252,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 			
 			x = scale[0]*((float)j/(float)vtx_w) + out->mins[0];
 			y = scale[1]*((float)i/(float)vtx_h) + out->mins[1];
-			z = scale[2] * bilinear_sample (texdata, h, w, s, t) / 255.0 + out->mins[2];
+			z = scale[2] * grayscale_sample (texdata, h, w, s, t) + out->mins[2];
 			
 			VectorSet (&out->vert_positions[(i*vtx_w+j)*3], x, y, z);
 			out->vert_texcoords[(i*vtx_w+j)*2] = s;

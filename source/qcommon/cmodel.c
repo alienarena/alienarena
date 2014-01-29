@@ -128,6 +128,12 @@ typedef struct
 	int				numtriangles;
 	vec_t			*verts;
 	cterraintri_t	*tris;
+	
+	// for calculating light levels
+	int				lm_w, lm_h;
+	vec3_t			lm_s_axis, lm_t_axis;
+	float			lm_mins[2], lm_size[2];
+	byte			*lightmaptex;
 } cterrainmodel_t;
 
 static int		numterrainmodels;
@@ -633,25 +639,9 @@ void CMod_LoadAlternateEntityData (char *entity_file_name)
 
 //=======================================================================
 
-void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
+void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
 {
 	float cosyaw, cospitch, cosroll, sinyaw, sinpitch, sinroll;
-	float rotation_matrix[3][3];
-	int i, j, k;
-	cterrainmodel_t *mod;
-	char *buf;
-	terraindata_t data;
-	vec3_t up;
-	
-	if (numterrainmodels == MAX_MAP_MODELS)
-		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
-	
-	mod = &terrain_models[numterrainmodels++];
-	
-	FS_LoadFile (name, (void**)&buf);
-	
-	if (!buf)
-		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
 	
 	cosyaw = cos (DEG2RAD (angles[YAW]));
 	cospitch = cos (DEG2RAD (angles[PITCH]));
@@ -669,10 +659,37 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	rotation_matrix[2][0] = -sinpitch;
 	rotation_matrix[2][1] = cospitch*sinroll;
 	rotation_matrix[2][2] = cospitch*cosroll;
+}
+
+void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
+{
+	float rotation_matrix[3][3];
+	int i, j, k;
+	cterrainmodel_t *mod;
+	char *buf;
+	terraindata_t data;
+	vec3_t up, lm_mins, lm_maxs;
+	
+	if (numterrainmodels == MAX_MAP_MODELS)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
+	
+	mod = &terrain_models[numterrainmodels++];
+	
+	FS_LoadFile (name, (void**)&buf);
+	
+	if (!buf)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
+	
+	AnglesToMatrix3x3 (angles, rotation_matrix);
 	
 	// This ends up being 1/4 as much detail as is used for rendering. You 
 	// need a surprisingly large amount to maintain accurate physics.
 	LoadTerrainFile (&data, name, false, 0.5, 8, buf);
+	
+	if (data.lightmap_path != NULL)
+		LoadTGA (data.lightmap_path, &mod->lightmaptex, &mod->lm_w, &mod->lm_h);
+	else
+		mod->lightmaptex = NULL;
 	
 	mod->active = true;
 	mod->numtriangles = 0;
@@ -701,7 +718,24 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		}
 	}
 	
+	VectorSet (mod->lm_s_axis, rotation_matrix[0][0], rotation_matrix[1][0], rotation_matrix[2][0]);
+	VectorSet (mod->lm_t_axis, rotation_matrix[0][1], rotation_matrix[1][1], rotation_matrix[2][1]);
 	VectorSet (up, rotation_matrix[0][2], rotation_matrix[1][2], rotation_matrix[2][2]);
+	
+	for (j = 0; j < 3; j++)
+	{
+		lm_mins[j] = lm_maxs[j] = origin[j];
+		for (k = 0; k < 3; k++)
+		{
+			lm_mins[j] += data.mins[k] * rotation_matrix[j][k];
+			lm_maxs[j] += data.maxs[k] * rotation_matrix[j][k];
+		}
+	}
+	
+	mod->lm_mins[0] = DotProduct (lm_mins, mod->lm_s_axis);
+	mod->lm_mins[1] = DotProduct (lm_mins, mod->lm_t_axis);
+	mod->lm_size[0] = DotProduct (lm_maxs, mod->lm_s_axis) - mod->lm_mins[0];
+	mod->lm_size[1] = DotProduct (lm_maxs, mod->lm_t_axis) - mod->lm_mins[1];
 	
 	for (i = 0; i < data.num_triangles; i++)
 	{
@@ -910,6 +944,8 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 			terrain_models[i].active = false;
 			Z_Free (terrain_models[i].verts);
 			Z_Free (terrain_models[i].tris);
+			if (terrain_models[i].lightmaptex != NULL)
+				free (terrain_models[i].lightmaptex);
 		}
 	}
 	numterrainmodels = 0;
@@ -1914,7 +1950,10 @@ static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3
 // FIXME: This is a half-witted and inefficient way to do it. 
 // FIXME: It's still quite possible to fall through a terrain mesh.
 // FIXME: Also, the physics feel like crap on terrain.
-void CM_TerrainTrace (vec3_t p1, vec3_t end)
+// Returns -1 for no intersection, otherwise it returns the index within 
+// terrain_models where the intersection was found (used by
+// CM_TerrainLightPoint.)
+int CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
 	vec3_t		p2;
 	int			i, j, k;
@@ -1923,6 +1962,7 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 	vec3_t		dir;
 	float		orig_dist;
 	vec3_t		p2_extents;
+	int			ret = -1;
 	
 	for (i = 0; i < 3; i++)
 		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
@@ -1978,8 +2018,52 @@ void CM_TerrainTrace (vec3_t p1, vec3_t end)
 			orig_dist = intersection_dist;
 			VectorCopy (plane->normal, trace_trace.plane.normal);
 			for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+			ret = i;
 		}
 	}
+	
+	return ret;
+}
+
+void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
+{
+	int modnum;
+	float s, t;
+	cterrainmodel_t	*mod;
+	
+	memset (&trace_trace, 0, sizeof(trace_trace));
+	trace_trace.fraction = 1;
+	
+	VectorCopy (in_point, trace_start);
+	trace_start[2] += 2048;
+	VectorCopy (in_point, trace_end);
+	trace_end[2] -= 2048;
+	
+	trace_ispoint = true;
+	VectorClear (trace_extents);
+	
+	VectorClear (out_color);
+	
+	modnum = CM_TerrainTrace (trace_start, trace_end);
+	
+	VectorCopy (trace_start, out_point);
+	out_point[2] = trace_start[2] - 4096.0 * trace_trace.fraction;
+	
+	if (modnum == -1)
+		return;
+	
+	mod = &terrain_models[modnum];
+	
+	if (mod->lightmaptex == NULL)
+	{
+		out_point[2] = trace_end[2];
+		return;
+	}
+	
+	s = (DotProduct (out_point, mod->lm_s_axis) - mod->lm_mins[0]) / mod->lm_size[0];
+	t = 1.0 - (DotProduct (out_point, mod->lm_t_axis) - mod->lm_mins[1]) / mod->lm_size[1];
+	
+	bilinear_sample (mod->lightmaptex, mod->lm_w, mod->lm_h, s, t, out_color);
 }
 
 

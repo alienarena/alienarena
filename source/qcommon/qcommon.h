@@ -696,6 +696,7 @@ void		CM_FilterParseEntities (const char *fieldname, int numvals, const char *va
 // creates a clipping hull for an arbitrary box
 int			CM_HeadnodeForBox (vec3_t mins, vec3_t maxs);
 
+void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color);
 
 // returns an ORed contents mask
 int			CM_PointContents (vec3_t p, int headnode);
@@ -928,6 +929,7 @@ IMAGE LOADING
 */
 
 void LoadTGA (char *name, byte **pic, int *width, int *height);
+void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec3_t out);
 
 /*
 ==============================================================
