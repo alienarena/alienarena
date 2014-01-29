@@ -38,7 +38,6 @@ image_t		*r_mirrortexture;
 image_t		*r_depthtexture;
 image_t		*r_depthtexture2;
 int			numgltextures;
-int			base_textureid;		// gltextures[i] = base_textureid+i
 
 extern cvar_t	*cl_hudimage1; //custom huds
 extern cvar_t	*cl_hudimage2;

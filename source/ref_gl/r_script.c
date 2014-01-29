@@ -51,30 +51,6 @@ int RS_Animate (rs_stage_t *stage)
 
 	return anim->texture->texnum;
 }
-void *RS_AnimateSkin (rs_stage_t *stage)
-{
-	anim_stage_t	*anim = stage->last_anim;
-
-	while (stage->last_anim_time < rs_realtime)
-	{
-		anim = anim->next;
-		if (!anim)
-			anim = stage->anim_stage;
-		stage->last_anim_time += stage->anim_delay;
-	}
-
-	stage->last_anim = anim;
-
-	return anim->texture;
-}
-
-float cutDot (vec3_t vec1, vec3_t vec2)
-{
-	float dot = DotProduct(vec1, vec2);
-	if (dot>1) return 1;
-	if (dot<-1) return -1;
-	return dot;
-}
 
 void RS_ResetScript (rscript_t *rs)
 {
@@ -1104,22 +1080,6 @@ static float RS_ScaleFunc (char type, float scale)
 	}
 
 	return 1;
-}
-
-image_t *BSP_TextureAnimation (mtexinfo_t *tex);
-rscript_t	*surfaceScript(msurface_t *surf)
-{
-	image_t *image = BSP_TextureAnimation( surf->texinfo );
-
-	if (image && image->script)
-	{
-		rscript_t *rs = image->script;
-
-		RS_ReadyScript(rs);
-
-		return rs;
-	}
-	return NULL;
 }
 
 static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)

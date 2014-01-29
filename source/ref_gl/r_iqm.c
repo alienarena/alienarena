@@ -120,13 +120,6 @@ void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 	Vector4Add(mat1.c, mat2.c, out->c);
 }
 
-void Matrix3x4_Subtract(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
-{
-	Vector4Sub(mat1.a, mat2.a, out->a);
-	Vector4Sub(mat1.b, mat2.b, out->b);
-	Vector4Sub(mat1.c, mat2.c, out->c);
-}
-
 void Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
 {
 	Vector4Copy(in.a, out->a);
