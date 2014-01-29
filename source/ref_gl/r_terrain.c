@@ -167,8 +167,6 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 		memset (ent, 0, sizeof(*ent));
 		ent->number = MAX_EDICTS+MAX_MAP_MODELS+num_rock_entities++;
 		
-		ent->flags |= RF_FULLBRIGHT;
-		
 		VectorAdd (origin, data.rocks[i].origin, ent->origin);
 		
 		ent->angles[YAW] = 360.0*frand();

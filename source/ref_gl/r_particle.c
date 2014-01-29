@@ -931,26 +931,9 @@ void R_FinalizeGrass(model_t *mod)
 		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, mod->firstnode, MASK_VISIBILILITY);
 		grass->sunVisible = r_trace.fraction == 1.0;
 		
-		// XXX: HACK until we can make StaticLightPoint work on terrain!
-		/*for (j = 0; j < 3; j++)
-		{
-			if (grass->static_light[j] < 0.25)
-				grass->static_light[j] = 0.25;
-		}*/
-		if (grass->sunVisible)
-		{
-			/*for (j = 0; j < 3; j++)
-			{
-				if (grass->static_light[j] < 0.75)
-					grass->static_light[j] = 0.75;
-			}*/
-		}
-		
 		if (grass->type == 0)
-		{
 			//only deal with leaves, grass shadows look kind of bad
 			grass->sunVisible = false;
-		}
 	}
 }
 
