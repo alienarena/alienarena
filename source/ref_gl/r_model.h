@@ -262,7 +262,6 @@ typedef struct msurface_s
 	float		*tangentSpaceTransform;
 
 	//vbo
-	int has_vbo;
 	int vbo_first_vert;
 	int vbo_num_verts;
 	

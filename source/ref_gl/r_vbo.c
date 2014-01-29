@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 GLuint vboId = 0;
-int	totalVBObufferSize;
 int currVertexNum;
 size_t vbo_xyz_pos;
 
@@ -91,7 +90,6 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	
 	xyz_size = n*sizeof(float);
 
-	surf->has_vbo = true;
 	surf->vbo_first_vert = currVertexNum;
 	surf->vbo_num_verts = 3*(p->numverts-2);
 	currVertexNum += surf->vbo_num_verts;
@@ -105,19 +103,27 @@ void VB_BuildWorldVBO(void)
 {
 	msurface_t *surf, *surfs;
 	int i, firstsurf, lastsurf;
+	int	totalVBObufferSize = 0;
 	
 	currVertexNum = 0;
 	vbo_xyz_pos = 0;
-
-	qglGenBuffersARB(1, &vboId);
-		
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
-	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
 	// just to keep the lines of code short
 	surfs = r_worldmodel->surfaces;
 	firstsurf = 0;
 	lastsurf = r_worldmodel->numsurfaces;
+	
+	for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
+	{
+		if (surf->texinfo->flags & (SURF_SKY|SURF_NODRAW))
+			continue;
+		totalVBObufferSize += 7*3*(surf->polys->numverts-2);
+	}
+	
+	qglGenBuffersARB(1, &vboId);
+		
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -140,13 +146,6 @@ void VB_BuildWorldVBO(void)
 	}
 
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-}
-
-void VB_BuildVBOBufferSize(msurface_t *surf)
-{
-	glpoly_t *p = surf->polys;
-	
-	totalVBObufferSize += 7*3*(p->numverts-2);
 }
 
 void GL_SetupWorldVBO (void)
@@ -280,7 +279,6 @@ void VB_WorldVCInit()
 {
 	//clear out previous buffer
 	qglDeleteBuffersARB(1, &vboId);
-	totalVBObufferSize = 0;	
 }
 
 void VB_VCInit()
