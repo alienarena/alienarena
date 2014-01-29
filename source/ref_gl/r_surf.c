@@ -291,7 +291,6 @@ void BSP_DrawTexturelessInlineBModel (entity_t *e)
 	
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
-
 	{
 		// draw the polygon
 		BSP_AddSurfToVBOAccum (psurf);
@@ -2112,6 +2111,11 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 				/ fa->texinfo->image->width;
 	fa->c_t = (DotProduct (center, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3])
 				/ fa->texinfo->image->height;
+	
+	// These are used by the code that detects light levels for entities, so
+	// they can sample HD lightmaps.
+	fa->lightmap_xscale = xscale;
+	fa->lightmap_yscale = yscale;
 }
 
 /*

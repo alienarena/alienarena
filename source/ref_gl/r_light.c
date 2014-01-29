@@ -245,12 +245,12 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 		if (!surf->samples)
 			return 0;
 
-		ds >>= 4;
-		dt >>= 4;
-
+		ds = floor((float)ds/surf->lightmap_xscale);
+		dt = floor((float)dt/surf->lightmap_yscale);
+		
 		VectorClear (pointcolor);
 
-		lightmap += 3*(dt * ((surf->extents[0]>>4)+1) + ds);
+		lightmap += 3*(dt * ((int)floor((float)surf->extents[0]/surf->lightmap_xscale)+1) + ds);
 
 		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;	maps++)
 		{
