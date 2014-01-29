@@ -1474,9 +1474,6 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 			} while ( (stage = stage->next) );
 		}
 		Mod_CalcSurfaceNormals(out);
-
-		VB_BuildVBOBufferSize(out);
-		out->has_vbo = false;
 	}
 	BSP_EndBuildingLightmaps ();
 }

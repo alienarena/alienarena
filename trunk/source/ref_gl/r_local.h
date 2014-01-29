@@ -294,7 +294,6 @@ extern GLuint vboId;
 extern void R_LoadVBOSubsystem(void);
 extern void R_VCShutdown(void);
 extern void VB_WorldVCInit(void);
-extern void VB_BuildVBOBufferSize(msurface_t *surf);
 extern void VB_BuildWorldVBO(void);
 void GL_SetupWorldVBO (void);
 void GL_BindVBO(vertCache_t *cache);
