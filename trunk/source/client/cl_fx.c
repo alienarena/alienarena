@@ -262,22 +262,6 @@ void RotateForNormal(vec3_t normal, vec3_t result){
 	result[YAW] =  yaw;
 }
 
-void vectoanglerolled (vec3_t value1, float angleyaw, vec3_t angles)
-{
-	float	forward, yaw, pitch;
-
-	yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
-	forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-	pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
-
-	if (pitch < 0)
-		pitch += 360;
-
-	angles[PITCH] = -pitch;
-	angles[YAW] =  yaw;
-	angles[ROLL] = -angleyaw;
-}
-
 /*
 ==============
 CL_ParseMuzzleFlash

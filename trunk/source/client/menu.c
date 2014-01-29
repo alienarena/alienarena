@@ -1189,7 +1189,6 @@ char *bindnames[][2] =
 
 #define num_bindable_actions static_array_size(bindnames)
 
-int				keys_cursor;
 static int		bind_grab;
 
 static menuframework_s	s_keys_screen;
@@ -2988,8 +2987,6 @@ void (*option_open_funcs[OPTION_SCREENS])(void) =
 static menuframework_s	s_player_config_screen;
 
 static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
-
-LINKABLE(int) option_screen_height;
 
 static void OptionScreenFunc (void *_self)
 {

@@ -26,12 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 
 //=============
-//
-// development tools for weapons
-//
-int			gun_frame;
-struct model_s	*gun_model;
-//=============
 
 int r_numgrasses;
 grass_t r_grasses[MAX_GRASSES];
