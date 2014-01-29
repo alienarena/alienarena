@@ -82,17 +82,17 @@ void R_Mesh_FindVBO (model_t *mod, int framenum)
 	if (!modtypes[mod->type].morphtarget)
 		framenum = 0;
 
-	vbo_st = R_VCFindCache(VBO_STORE_ST, mod);	
-	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod);
-	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod);
-	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod);
+	vbo_st = R_VCFindCache(VBO_STORE_ST, mod, vbo_st);	
+	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod, vbo_xyz);
+	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod, vbo_normals);
+	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod, vbo_tangents);
 	
 	if (!vbo_xyz || !vbo_st || !vbo_normals || !vbo_tangents)
 		Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
 	
 	if (modtypes[mod->type].indexed)
 	{
-		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod);
+		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod, vbo_indices);
 		if (!vbo_indices)
 			Com_Error (ERR_DROP, "Cannot find IBO for %s frame %d\n", mod->name, framenum);
 	}
@@ -108,6 +108,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 	
 	for (framenum = 0; framenum < maxframes; framenum++)
 	{
+		vbo_xyz = vbo_st = vbo_normals = vbo_tangents = vbo_indices = NULL;
 		R_Mesh_FindVBO (mod, framenum);
 		R_VCFree (vbo_xyz);
 		R_VCFree (vbo_st);
@@ -318,8 +319,10 @@ static qboolean R_Mesh_CullModel (void)
 	if ((currententity->flags & RF_WEAPONMODEL))
 		return r_lefthand->integer == 2;
 	
-	if (r_worldmodel && currentmodel->type != mod_terrain) {
+	// HACK: culling rocks is currently too slow.
+	if (r_worldmodel && currentmodel->type != mod_terrain && !strstr (currentmodel->name, "rock")) {
 		//occulusion culling - why draw entities we cannot see?
+		// TODO: this looks like another job for CM_FastTrace.
 		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
@@ -370,8 +373,6 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 
 	glUniform3fARB( MESH_UNIFORM(meshlightPosition), lightVec[0], lightVec[1], lightVec[2]);
 	
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
-
 	GL_MBind (0, r_shelltexture2->texnum);
 	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
 
@@ -400,7 +401,7 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 	
 	GLSTATE_ENABLE_BLEND
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
@@ -468,8 +469,6 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	glUniform3fARB( MESH_UNIFORM(meshlightPosition), lightVec[0], lightVec[1], lightVec[2]);
 	glUniform3fARB( MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
 	
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER);
-
 	GL_MBind (0, skinnum);
 	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
 
@@ -483,34 +482,21 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 
 		GL_MBind (3, rs->stage->texture3->texnum);
 		glUniform1iARB( MESH_UNIFORM(fx2Tex), 3);
-	}
-
-	if(fragmentshader && rs->stage->fx)
-		glUniform1iARB( MESH_UNIFORM(useFX), 1);
-	else
-		glUniform1iARB( MESH_UNIFORM(useFX), 0);
-
-	if(fragmentshader && rs->stage->glow)
-		glUniform1iARB( MESH_UNIFORM(useGlow), 1);
-	else
-		glUniform1iARB( MESH_UNIFORM(useGlow), 0);
-
-	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);	
-
-	if(fragmentshader && rs->stage->cube)
-	{
-		glUniform1iARB( MESH_UNIFORM(useCube), 1);
+		
+		glUniform1iARB( MESH_UNIFORM(useFX), rs->stage->fx);
+		glUniform1iARB( MESH_UNIFORM(useGlow), rs->stage->glow);
+		glUniform1iARB( MESH_UNIFORM(useCube), rs->stage->cube);
+		
 		if(currententity->flags & RF_WEAPONMODEL)
 			glUniform1iARB( MESH_UNIFORM(fromView), 1);
 		else
 			glUniform1iARB( MESH_UNIFORM(fromView), 0);
+		
+		glUniform1fARB( MESH_UNIFORM(meshTime), rs_realtime);
+		glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
 	}
-	else
-		glUniform1iARB( MESH_UNIFORM(useCube), 0);
 
-	glUniform1fARB( MESH_UNIFORM(meshTime), rs_realtime);
-
-	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
+	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);
 }
 
 void R_Mesh_SetupGlassRender (void)
@@ -561,7 +547,7 @@ void R_Mesh_SetupGlassRender (void)
 	glUniform1iARB( g_location_g_fog, map_fog);
 	
 	GLSTATE_ENABLE_BLEND
-	qglBlendFunc (GL_ONE, GL_ONE);
+	GL_BlendFunction (GL_ONE, GL_ONE);
 }
 
 // Should be able to handle all mesh types. This is the component of the 
@@ -572,20 +558,14 @@ void R_Mesh_DrawVBO (qboolean lerped)
 	// setup
 	R_Mesh_FindVBO (currentmodel, currententity->frame);
 	
-	qglEnableClientState( GL_VERTEX_ARRAY );
 	GL_BindVBO(vbo_xyz);
-	qglVertexPointer(3, GL_FLOAT, 0, 0);
+	R_VertexPointer (3, 0, 0);
 	
-	KillFlags |= KILL_TMU0_POINTER;
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	GL_BindVBO(vbo_st);
-	qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+	R_TexCoordPointer (0, 0, 0);
 	
-	KillFlags |= KILL_NORMAL_POINTER;
-	qglEnableClientState( GL_NORMAL_ARRAY );
 	GL_BindVBO(vbo_normals);
-	qglNormalPointer(GL_FLOAT, 0, 0);
+	R_NormalPointer (0, 0);
 
 	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 	GL_BindVBO(vbo_tangents);
@@ -651,6 +631,11 @@ void R_Mesh_DrawVBO (qboolean lerped)
 	}
 }
 
+void R_Mesh_DrawVBO_Callback (void)
+{
+	R_Mesh_DrawVBO (false);
+}
+
 /*
 =============
 R_Mesh_DrawFrame: should be able to handle all types of meshes.
@@ -665,7 +650,27 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	qboolean	lerped;
 	float		frontlerp;
 	
+	// if true, then render through the RScript code
+	qboolean	rs_slowpath = false;
+	
 	int			animtype = 0; // GLSL useGPUanim uniform
+	
+	rscript_t	*rs = NULL;
+	
+	if (r_shaders->integer)
+		rs=(rscript_t *)currententity->script;
+	
+	//check for valid script
+	if(rs && rs->stage)
+	{
+		if(	!strcmp("***r_notexture***", rs->stage->texture->name) || 
+			((rs->stage->fx || rs->stage->glow) && !strcmp("***r_notexture***", rs->stage->texture2->name)) ||
+			(rs->stage->cube && !strcmp("***r_notexture***", rs->stage->texture3->name)) ||
+			rs->stage->num_blend_textures != 0 || rs->stage->next != NULL )
+		{
+			rs_slowpath = true;
+		}
+	}
 	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
 	
@@ -673,7 +678,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	for (i=0;i<model_dlights_num;i++)
 		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize(lightcolor);
-
+	
 	frontlerp = 1.0 - currententity->backlerp;
 	
 	if (modtypes[currentmodel->type].morphtarget && lerped)
@@ -682,9 +687,30 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	if (modtypes[currentmodel->type].skeletal)
 		animtype |= 1;
 	
-	// XXX: the vertex shader won't actually support a value of 3 yet.
-
-	if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
+	// XXX: the vertex shader won't actually support a value of 3 for animtype
+	// yet.
+	
+	if (animtype != 0 && rs_slowpath)
+	{
+		Com_Printf ("WARN: Cannot apply a multi-stage RScript %s to model %s\n", rs->name, currentmodel->name);
+		rs = NULL;
+		rs_slowpath = false;
+	}
+	
+	if (rs_slowpath)
+	{
+		int lmtex = 0;
+		
+		if (currentmodel->lightmap != NULL)
+			lmtex = currentmodel->lightmap->texnum;
+		
+		RS_Draw (	rs, lmtex, vec3_origin, vec3_origin, false,
+					lmtex != 0 ? rs_lightmap_on : rs_lightmap_off,
+					R_Mesh_DrawVBO_Callback );
+		
+		return;
+	}
+	else if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
 	{
 		qglDepthMask(false);
 		
@@ -699,10 +725,6 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	else
 	{
 		qboolean fragmentshader;
-		rscript_t *rs = NULL;
-		
-		if (r_shaders->integer)
-			rs=(rscript_t *)currententity->script;
 		
 		if(rs && rs->stage->depthhack)
 			qglDepthMask(false);
@@ -738,7 +760,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	// Without this, the player options menu goes all funny due to
 	// R_Mesh_SetupGlassRender changing the blendfunc. The proper solution is
 	// to just never rely on the blendfunc being any default value.
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 }
 
@@ -895,6 +917,7 @@ void R_Mesh_Draw ( void )
 		qglMatrixMode(GL_MODELVIEW);
 	}
 
+
 	qglPushMatrix ();
 	R_RotateForEntity (currententity);
 
@@ -905,17 +928,6 @@ void R_Mesh_Draw ( void )
 		skin = currentmodel->skins[0];
 	if (!skin)
 		skin = r_notexture;	// fallback..
-	
-	//check for valid script
-	if(currententity->script && currententity->script->stage)
-	{
-		if(!strcmp("***r_notexture***", currententity->script->stage->texture->name) || 
-			((currententity->script->stage->fx || currententity->script->stage->glow) && !strcmp("***r_notexture***", currententity->script->stage->texture2->name)) ||
-			(currententity->script->stage->cube && !strcmp("***r_notexture***", currententity->script->stage->texture3->name)))
-		{
-			currententity->script = NULL; //bad shader!
-		}
-	}
 	
 	GL_SelectTexture (0);
 	qglShadeModel (GL_SMOOTH);

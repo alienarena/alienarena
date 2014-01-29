@@ -117,7 +117,6 @@ nobase_dist_gfx_DATA = \
 	rainfxh.tga \
 	rain.tga \
 	rayfx.tga \
-	redcommanderfx.tga \
 	redcircuit.tga \
 	redlightning.tga \
 	reflect.tga \
@@ -134,34 +133,14 @@ nobase_dist_gfx_DATA = \
 	sun.jpg \
 	tekwallmask.tga \
 	trim2mask.tga \
-	tron2_commanderfx.tga \
-	tron2_cyborgfx.tga \
-	tron2_enforcerfx.tga \
-	tron2_laurenfx.tga \
-	tron2_martianfx.tga \
-	tron2_overlordfx.tga \
-	tron2_slashbotfx.tga \
-	tron2_warriorfx.tga \
-	tron3_commanderfx.tga \
-	tron3_cyborgfx.tga \
-	tron3_enforcerfx.tga \
-	tron3_laurenfx.tga \
-	tron3_martianfx.tga \
-	tron3_overlordfx.tga \
-	tron3_slashbotfx.tga \
-	tron3_warriorfx.tga \
-	tron_commanderfx.tga \
-	tron_cyborgfx.tga \
-	tron_enforcerfx.tga \
-	tron_laurenfx.tga \
-	tron_martianfx.tga \
-	tron_overlordfx.tga \
-	tron_slashbotfx.tga \
-	tron_warriorfx.tga \
 	vaporbase.tga \
 	vapormask.tga \
 	violator2fx.tga \
 	violatorfx.tga \
 	water/distort1.tga \
 	water/normal1.tga \
+	weed1.tga \
+	weed2.tga \
+	weed3.tga \
+	weed4.tga \
 	yellowline.tga

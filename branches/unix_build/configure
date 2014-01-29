@@ -651,8 +651,6 @@ COR_GAMES_HOMEDIR
 icondir
 INSTALL_DOCS_FALSE
 INSTALL_DOCS_TRUE
-ALTERNATE_INSTALL_FALSE
-ALTERNATE_INSTALL_TRUE
 BUILD_CLIENT_FALSE
 BUILD_CLIENT_TRUE
 host_os
@@ -771,7 +769,6 @@ with_arenapkg
 with_tacticalpkg
 enable_dependency_tracking
 enable_client
-enable_alternate_install
 enable_documents
 with_icondir
 with_x
@@ -1440,9 +1437,6 @@ Optional Features:
                           speeds up one-time build
   --disable-client        build dedicated server only, not the client
                           (default:no)
-  --enable-alternate-install
-                          traditional single directory, in-place installation
-                          (default:no)
   --disable-documents     Disable document installation (default: no)
   --disable-build-status  hide the status message at the end of the
                           configuration script (defdault:no)
@@ -1481,7 +1475,7 @@ Some influential environment variables:
               path overriding pkg-config's built-in search path
   COR_GAMES_HOMEDIR
               (User configuration and data directory
-              (default:$XDG_???/cor_games)
+              (default:$XDG_?/cor_games))
   XMKMF       Path to xmkmf, Makefile generator for X Window System
   GL_LIBDIR   directory containing libGL.dylib
   ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
@@ -4930,26 +4924,6 @@ else
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for traditional single directory, in place installation" >&5
-$as_echo_n "checking for traditional single directory, in place installation... " >&6; }
-# Check whether --enable-alternate_install was given.
-if test "${enable_alternate_install+set}" = set; then :
-  enableval=$enable_alternate_install; alternate_install=${enableval}
-else
-  alternate_install=no
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${alternate_install}" >&5
-$as_echo "${alternate_install}" >&6; }
- if  test "x${alternate_install}" = xyes ; then
-  ALTERNATE_INSTALL_TRUE=
-  ALTERNATE_INSTALL_FALSE='#'
-else
-  ALTERNATE_INSTALL_TRUE='#'
-  ALTERNATE_INSTALL_FALSE=
-fi
-
-
 # Check whether --enable-documents was given.
 if test "${enable_documents+set}" = set; then :
   enableval=$enable_documents; no_docs=${documents}
@@ -4973,7 +4947,7 @@ if test "${with_icondir+set}" = set; then :
 		with_icondir=${withval}
 else
 
-		with_icondir=${datadir}/icons
+		with_icondir=${datadir}/iconsdir
 
 fi
 
@@ -6009,6 +5983,7 @@ if test "$ac_res" != no; then :
 
 else
   as_fn_error $? "\"Required jpeg library not found.\"" "$LINENO" 5
+
 fi
 
 
@@ -7928,10 +7903,6 @@ if test -z "${BUILD_CLIENT_TRUE}" && test -z "${BUILD_CLIENT_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_CLIENT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${ALTERNATE_INSTALL_TRUE}" && test -z "${ALTERNATE_INSTALL_FALSE}"; then
-  as_fn_error $? "conditional \"ALTERNATE_INSTALL\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${INSTALL_DOCS_TRUE}" && test -z "${INSTALL_DOCS_FALSE}"; then
   as_fn_error $? "conditional \"INSTALL_DOCS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -9432,59 +9403,27 @@ fi
 	$as_echo " Dedicated Only: ........ ${dedicated_only}"
 	$as_echo " Alternate install: ..... ${alternate_install}"
 
-	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
+	if test -z "$BUILD_CLIENT_TRUE"; then :
 
-		if test -z "$BUILD_CLIENT_TRUE"; then :
+		$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
+		$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+		$as_echo " Zlib support: .......... ${have_zlib}"
+		if  test "x${unix_host}" = xdarwin ; then :
 
-			$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
-			$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
-			$as_echo " Zlib support: .......... ${have_zlib}"
-
-fi
-			$as_echo " Shared Data ............ ${srcdir}"
-			$as_echo "   note: with alternate install, data is located relative to CWD."
-			$as_echo " User Home R/W Data ..... ~/${cor_games_homedir}"
-else
-
-										game_data=${datadir}/${PACKAGE_NAME}
-		game_data_a=`eval "echo ${game_data}"`
-		game_data=`eval "echo ${game_data_a}"`
-		if test -z "$BUILD_CLIENT_TRUE"; then :
-
-			$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
-			$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
-			$as_echo " Zlib support: .......... ${have_zlib}"
-			if  test "x${unix_host}" = xdarwin ; then :
-
-				$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
+			$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
 
 fi
 
 fi
-		$as_echo " Prefix ................. ${prefix}"
-		$as_echo " Shared RO Data: ........ ${game_data}"
-		$as_echo " User Home R/W Data ..... ~/${cor_games_homedir}"
-		if test -z "$INSTALL_DOCS_TRUE"; then :
+	$as_echo " Prefix ................. ${prefix}"
+	$as_echo " Shared RO Data: ........ ${game_data}"
+	$as_echo " User Home R/W Data ..... ~/${cor_games_homedir}"
+	if test -z "$INSTALL_DOCS_TRUE"; then :
 
-			dd1=`eval "echo ${docdir}"` && dd2=`eval "echo $dd1"`
-			$as_echo " Documentation........... ${dd2}"
-else
+		dd1=`eval "echo ${docdir}"` && dd2=`eval "echo $dd1"`
+		$as_echo " Documentation........... ${dd2}"
+		$as_echo " Documentation........... custom"
 
-			$as_echo " Documentation........... custom"
-
-
-fi
-		id1=`eval "echo ${icondir}"` && id2=`eval "echo $id1"`
-		$as_echo " Icon ................... ${id2}"
-
-fi
-
-	$as_echo
-
-	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
-  $as_echo "Run \"make\" to build, then \"make install-alternate\" to install."
-else
-  $as_echo "Run \"make\" to build, then \"sudo make install\" to install."
 fi
 
 	$as_echo
@@ -9494,7 +9433,5 @@ fi
 	$as_echo " Compiler options:"
 	$as_echo "  CFLAGS:.... ${CFLAGS}"
 	$as_echo
-
-	$as_echo "--------------------------------------------"
 
 fi

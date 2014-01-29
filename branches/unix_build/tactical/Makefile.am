@@ -11,7 +11,7 @@
 #
 # Default configuration for client and server
 #
-tacticaldir = $(datadir)/alienarena/tactical
+tacticaldir = ${datadir}/alienarena/tactical
 nobase_dist_tactical_DATA = \
 	motd.txt \
 	server.cfg \

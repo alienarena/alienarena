@@ -705,23 +705,9 @@ void GL_SetDefaultState( void )
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GL_TexEnv( GL_REPLACE );
-
-	if ( qglPointParameterfEXT )
-	{
-		float attenuations[3];
-
-		attenuations[0] = gl_particle_att_a->value;
-		attenuations[1] = gl_particle_att_b->value;
-		attenuations[2] = gl_particle_att_c->value;
-
-		qglEnable( GL_POINT_SMOOTH );
-		qglPointParameterfEXT( GL_POINT_SIZE_MIN_EXT, gl_particle_min_size->value );
-		qglPointParameterfEXT( GL_POINT_SIZE_MAX_EXT, gl_particle_max_size->value );
-		qglPointParameterfvEXT( GL_DISTANCE_ATTENUATION_EXT, attenuations );
-	}
 
 	GL_UpdateSwapInterval();
 

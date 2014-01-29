@@ -99,407 +99,13 @@ image_t *BSP_TextureAnimation (mtexinfo_t *tex)
 /*
 =========================================
 
-Textureless Surface Rendering
-Used by the shadow system
+VBO batching
+
+This system allows contiguous sequences of polygons to be merged into batches,
+even if they are added out of order.
 
 =========================================
 */
-
-/*
-================
-BSP_DrawTexturelessPoly
-================
-*/
-void BSP_DrawTexturelessPoly (msurface_t *fa)
-{
-	R_InitVArrays(VERT_NO_TEXTURE);
-	R_AddSurfToVArray (fa);
-	R_KillVArrays();
-}
-
-void BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin)
-{
-	R_AddShadowSurfToVArray (fa, origin);
-}
-
-void BSP_DrawTexturelessInlineBModel (entity_t *e)
-{
-	int			i;
-	msurface_t	*psurf;
-
-	//
-	// draw texture
-	//
-	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
-	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
-	{
-
-		// draw the polygon
-		BSP_DrawTexturelessPoly( psurf );
-		psurf->visframe = r_framecount;
-	}
-
-	qglDisable (GL_BLEND);
-	qglColor4f (1,1,1,1);
-	GL_TexEnv( GL_REPLACE );
-}
-
-void BSP_DrawTexturelessBrushModel (entity_t *e)
-{
-	vec3_t		mins, maxs;
-	int			i;
-	qboolean	rotated;
-
-	if (currentmodel->nummodelsurfaces == 0)
-		return;
-
-	currententity = e;
-
-	if (e->angles[0] || e->angles[1] || e->angles[2])
-	{
-		rotated = true;
-		for (i=0 ; i<3 ; i++)
-		{
-			mins[i] = e->origin[i] - currentmodel->radius;
-			maxs[i] = e->origin[i] + currentmodel->radius;
-		}
-	}
-	else
-	{
-		rotated = false;
-		VectorAdd (e->origin, currentmodel->mins, mins);
-		VectorAdd (e->origin, currentmodel->maxs, maxs);
-	}
-
-	if (R_CullBox (mins, maxs)) {
-		return;
-	}
-
-	qglColor3f (1,1,1);
-
-	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
-
-	if (rotated)
-	{
-		vec3_t	temp;
-		vec3_t	forward, right, up;
-
-		VectorCopy (modelorg, temp);
-		AngleVectors (e->angles, forward, right, up);
-		modelorg[0] = DotProduct (temp, forward);
-		modelorg[1] = -DotProduct (temp, right);
-		modelorg[2] = DotProduct (temp, up);
-	}
-
-	qglPushMatrix ();
-	R_RotateForEntity (e);
-
-	BSP_DrawTexturelessInlineBModel (e);
-
-	qglPopMatrix ();
-}
-
-
-
-/*
-=========================================
-
-BSP Surface Rendering
-Common between brush and world models
-
-=========================================
-*/
-
-
-/*
-=========================================
-Special surfaces - Somewhat less common, require more work to render
- - Translucent ("alpha") surfaces
-   These are special because they have to be rendered all in one pass, despite
-   consisting of several different types of surfaces, so the code can't make 
-   too many assumptions about the surface.
- - Rscript surfaces (those with material shaders)
-   Rscript surfaces are first rendered through the "ordinary" path, then 
-   this one.
- - Wavy, rippling ("warp") surfaces
-   The code to actually render these is in r_warp.c.
-=========================================
-*/
-
-
-// The "special" surfaces use these for linked lists.
-// The reason to have linked lists for surfaces from brush model entities
-// separate from the linked lists for world surfaces is that the world
-// surface linked lists can be preserved between frames if r_optimize is on,
-// whereas the entity linked lists must be cleared each time an entity is
-// drawn.
-surfchain_t	r_alpha_surfaces;
-surfchain_t	r_warp_surfaces;
-msurface_t	*r_rscript_surfaces; // no brush models can have rscript surfs
-
-// This is a chain of surfaces that may need to have their lightmaps updated.
-// They are not rendered in the order of this chain and will be linked into
-// other chains for rendering.
-msurface_t	*r_flicker_surfaces;
-
-
-/*
-================
-BSP_SetScrolling
-================
-*/
-static void BSP_SetScrolling (qboolean enable)
-{
-	qglMatrixMode (GL_TEXTURE);
-	qglLoadIdentity ();
-	if (enable)
-	{
-		float scroll;
-		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
-		if (scroll == 0.0)
-			scroll = -64.0;
-		qglTranslatef (scroll, 0, 0);
-	}
-	qglMatrixMode (GL_MODELVIEW);
-}
-
-
-/*
-================
-BSP_DrawWarpSurfaces
-================
-*/
-void BSP_DrawWarpSurfaces (qboolean forEnt)
-{
-	msurface_t	*surf;
-	image_t		*image;
-	
-	if (forEnt)
-		surf = r_warp_surfaces.entchain;
-	else
-		surf = r_warp_surfaces.worldchain;
-	
-	if (surf == NULL)
-		return;
-	
-	// no lightmaps rendered on these surfaces
-	GL_EnableMultitexture( false );
-	GL_TexEnv( GL_MODULATE );
-	qglColor4f( gl_state.inverse_intensity,
-				gl_state.inverse_intensity,
-				gl_state.inverse_intensity,
-				1.0F );
-	while (surf)
-	{
-		c_brush_polys++;
-		image = BSP_TextureAnimation (surf->texinfo);
-		GL_MBind (0, image->texnum);
-		R_RenderWaterPolys(surf, 0, 1, 1);
-		surf = surf->texturechain;
-	}
-	
-	if (forEnt)
-		r_warp_surfaces.entchain = NULL;
-	
-	GL_EnableMultitexture( true );
-	GL_TexEnv( GL_REPLACE );
-	R_KillVArrays ();
-}
-
-/*
-================
-BSP_DrawAlphaPoly
-================
-*/
-void BSP_DrawAlphaPoly (msurface_t *fa, int flags)
-{
-	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
-	
-	R_InitVArrays(VERT_SINGLE_TEXTURED);
-	R_AddTexturedSurfToVArray (fa);
-	R_KillVArrays();
-	
-	BSP_SetScrolling (0);
-}
-
-
-/*
-================
-R_DrawAlphaSurfaces
-
-Draw water surfaces and windows.
-
-Annoyingly, because alpha surfaces have to be drawn from back to front, 
-everything transparent-- water, rscripted surfs, and non-rscripted surfs-- has
-to be drawn in a single pass. This is an inherently inefficient process.
-
-The BSP tree is walked front to back, so unwinding the chain of alpha surfaces
-will draw back to front, giving proper ordering FOR BSP SURFACES! 
-
-
-It's a bit wrong for entity surfaces (i.e. glass doors.) Because they are in
-separate linked lists, the entity surfaces must be either always behind or
-always in front of the world surfaces. I chose always in front because that
-seems to fix all rendering issues, regardless of whether the entity actually 
-is in front. Search me why. NOTE: this bug existed even when it was all one
-linked list, although at that time entity surfaces were always behind map
-surfaces (added to the beginning of the linked list after all the BSP 
-rendering code.)
-================
-*/
-void R_DrawAlphaSurfaces_chain (msurface_t *chain)
-{
-	msurface_t	*s;
-	float		intens;
-	rscript_t	*rs_shader;
-	rs_stage_t	*stage = NULL;
-	int			texnum = 0;
-	float		scaleX = 1.0f, scaleY = 1.0f;
-
-	// the textures are prescaled up for a better lighting range,
-	// so scale it back down
-	intens = gl_state.inverse_intensity;
-	
-	GL_SelectTexture (0);
-	qglDepthMask ( GL_FALSE );
-	qglEnable (GL_BLEND);
-	GL_TexEnv( GL_MODULATE );
-	
-	for (s=chain ; s ; s=s->texturechain)
-	{
-		GL_MBind (0, s->texinfo->image->texnum);
-		c_brush_polys++;
-
-		if (s->texinfo->flags & SURF_TRANS33)
-			qglColor4f (intens, intens, intens, 0.33);
-		else if (s->texinfo->flags & SURF_TRANS66)
-			qglColor4f (intens, intens, intens, 0.66);
-		else
-			qglColor4f (intens, intens, intens, 1);
-
-		//moving trans brushes
-		if (s->entity)
-		{
-			qglLoadMatrixf (r_world_matrix); //moving trans brushes
-			R_RotateForEntity (s->entity);
-		}
-		
-		rs_shader = NULL;
-		if (r_shaders->integer)
-			rs_shader = (rscript_t *)s->texinfo->image->script;
-
-		if (s->iflags & ISURF_DRAWTURB) 
-		{
-			//water shaders
-			scaleX = scaleY = 1.0f;
-			if(rs_shader) 
-			{
-				stage = rs_shader->stage;
-				if(stage) 
-				{	//for now, just map a reflection texture
-					texnum = stage->texture->texnum; //pass this to renderwaterpolys
-				}
-				if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
-				{
-					scaleX = stage->scale.scaleX;
-					scaleY = stage->scale.scaleY;
-				}
-			}
-			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
-			GL_SelectTexture (0);
-			qglEnable (GL_BLEND);
-			GL_TexEnv( GL_MODULATE );
-		}
-		else if(rs_shader && !(s->texinfo->flags & SURF_FLOWING)) 
-		{
-			RS_Surface(s);
-			GL_SelectTexture (0);
-			qglEnable (GL_BLEND);
-			GL_TexEnv( GL_MODULATE );
-		}
-		else
-			BSP_DrawAlphaPoly (s, s->texinfo->flags);
-	}
-
-	GL_SelectTexture (0);
-	GL_TexEnv( GL_REPLACE );
-	qglColor4f (1,1,1,1);
-	qglDisable (GL_BLEND);
-	qglDepthMask ( GL_TRUE );
-}
-
-void R_DrawAlphaSurfaces (void)
-{
-	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.worldchain);
-	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.entchain);
-	qglLoadMatrixf (r_world_matrix); //moving trans brushes
-	r_alpha_surfaces.entchain = NULL;
-}
-
-/*
-================
-R_DrawRSSurfaces
-
-Draw shader surfaces
-================
-*/
-void R_DrawRSSurfaces (void)
-{
-	msurface_t	*s = r_rscript_surfaces;
-
-	if(!s)
-		return;
-
-	if (!r_shaders->integer)
-	{
-		r_rscript_surfaces = NULL;
-		return;
-	}
-
-	qglDepthMask(false);
-	qglShadeModel (GL_SMOOTH);
-
-	qglEnable(GL_POLYGON_OFFSET_FILL);
-	qglPolygonOffset(-3, -2);
-
-	for (; s; s = s->rscriptchain)
-		RS_Surface(s);
-
-	qglDisable(GL_POLYGON_OFFSET_FILL);
-
-	GLSTATE_DISABLE_BLEND
-	GLSTATE_DISABLE_ALPHATEST
-
-	qglDepthMask(true);
-}
-
-
-
-/*
-=========================================
-Ordinary surfaces (fixed-function, normalmapped, and dynamically lit)
-These are the most commonly used types of surfaces, so the rendering code path
-for each is more optimized-- surfaces grouped by texinfo, VBOs, VBO batching,
-etc.
-=========================================
-*/
-
-// The "ordinary" surfaces do not use global variables for linked lists. The
-// linked lists are in the texinfo struct, so the textures can be grouped by
-// texinfo. Like the "special" surfaces, there are separate linked lists for
-// entity surfaces and world surfaces.
-
-// State variables for detecting changes from one surface to the next. If any
-// of these change, the current batch of polygons to render is flushed. This
-// helps minimize GL state change calls and draw calls.
-int 		r_currLMTex = -9999; // only bind a lightmap texture if it is not
-								 // the same as previous surface
-mtexinfo_t	*r_currTexInfo = NULL; //texinfo struct
-float		*r_currTangentSpaceTransform; //etc.
-
-// VBO batching
-// This system allows contiguous sequences of polygons to be merged into 
-// batches, even if they are added out of order.
 
 // There is a linked list of these, but they are not dynamically allocated.
 // They are allocated from a static array. This prevents us wasting CPU with
@@ -517,23 +123,20 @@ int			num_vbo_batches;
 vbobatch_t	vbobatch_buffer[MAX_VBO_BATCHES];
 // never used directly; linked list base only
 vbobatch_t	first_vbobatch[] = {{-1, -1, NULL}}; 
-// if false, flushVBOAccum will set up the VBO GL state
+// if false, drawVBOAccum will set up the VBO GL state
 qboolean	r_vboOn = false; 
 // for the rspeed_vbobatches HUD gauge
 int			c_vbo_batches;
 
-// clear all accumulated surfaces without rendering
-static inline void BSP_ClearVBOAccum (void)
+// Call this if you've bound the vertex/texture pointers to something else and
+// they will need to be re-bound to the BSP VBO.
+void BSP_InvalidateVBO (void)
 {
-	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
-	num_vbo_batches = 0;
-	first_vbobatch->next = NULL;
+	r_vboOn = false;
 }
 
-// render all accumulated surfaces, then clear them
-// XXX: assumes that global OpenGL state is correct for whatever surfaces are
-// in the accumulator, so don't change state until you've called this!
-static inline void BSP_FlushVBOAccum (void)
+// render all accumulated surfaces
+void BSP_DrawVBOAccum (void)
 {
 	vbobatch_t *batch = first_vbobatch->next;
 	
@@ -553,7 +156,26 @@ static inline void BSP_FlushVBOAccum (void)
 		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
 		c_vbo_batches++;
 	}
+}
+
+
+// clear all accumulated surfaces without rendering
+void BSP_ClearVBOAccum (void)
+{
+	if (first_vbobatch->next == NULL)
+		return;
 	
+	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
+	num_vbo_batches = 0;
+	first_vbobatch->next = NULL;
+}
+
+// render all accumulated surfaces, then clear them
+// XXX: assumes that global OpenGL state is correct for whatever surfaces are
+// in the accumulator, so don't change state until you've called this!
+void BSP_FlushVBOAccum (void)
+{
+	BSP_DrawVBOAccum ();
 	BSP_ClearVBOAccum ();
 }
 
@@ -639,6 +261,410 @@ static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
 	}
 }
 
+void BSP_AddSurfToVBOAccum (msurface_t *surf)
+{
+	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
+}
+
+qboolean BSP_RoomInVBOAccum (void)
+{
+	return num_vbo_batches + 1 < MAX_VBO_BATCHES;
+}
+
+
+
+/*
+=========================================
+
+Textureless Surface Rendering
+Used by the shadow system
+
+=========================================
+*/
+
+void BSP_DrawTexturelessInlineBModel (entity_t *e)
+{
+	int			i;
+	msurface_t	*psurf;
+
+	BSP_InvalidateVBO (); // FIXME: why doesn't it work without this?
+	
+	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
+	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
+
+	{
+		// draw the polygon
+		BSP_AddSurfToVBOAccum (psurf);
+		psurf->visframe = r_framecount;
+	}
+	
+	BSP_FlushVBOAccum ();
+}
+
+void BSP_DrawTexturelessBrushModel (entity_t *e)
+{
+	vec3_t		mins, maxs;
+	int			i;
+	qboolean	rotated;
+
+	if (currentmodel->nummodelsurfaces == 0)
+		return;
+
+	currententity = e;
+
+	if (e->angles[0] || e->angles[1] || e->angles[2])
+	{
+		rotated = true;
+		for (i=0 ; i<3 ; i++)
+		{
+			mins[i] = e->origin[i] - currentmodel->radius;
+			maxs[i] = e->origin[i] + currentmodel->radius;
+		}
+	}
+	else
+	{
+		rotated = false;
+		VectorAdd (e->origin, currentmodel->mins, mins);
+		VectorAdd (e->origin, currentmodel->maxs, maxs);
+	}
+
+	if (R_CullBox (mins, maxs)) {
+		return;
+	}
+
+	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
+
+	if (rotated)
+	{
+		vec3_t	temp;
+		vec3_t	forward, right, up;
+
+		VectorCopy (modelorg, temp);
+		AngleVectors (e->angles, forward, right, up);
+		modelorg[0] = DotProduct (temp, forward);
+		modelorg[1] = -DotProduct (temp, right);
+		modelorg[2] = DotProduct (temp, up);
+	}
+
+	qglPushMatrix ();
+	R_RotateForEntity (e);
+
+	BSP_DrawTexturelessInlineBModel (e);
+
+	qglPopMatrix ();
+}
+
+
+
+/*
+=========================================
+
+BSP Surface Rendering
+Common between brush and world models
+
+=========================================
+*/
+
+
+/*
+=========================================
+Special surfaces - Somewhat less common, require more work to render
+ - Translucent ("alpha") surfaces
+   These are special because they have to be rendered all in one pass, despite
+   consisting of several different types of surfaces, so the code can't make 
+   too many assumptions about the surface.
+ - Rscript surfaces (those with material shaders)
+   Rscript surfaces are first rendered through the "ordinary" path, then 
+   this one.
+ - Wavy, rippling ("warp") surfaces
+   The code to actually render these is in r_warp.c.
+=========================================
+*/
+
+
+// The "special" surfaces use these for linked lists.
+// The reason to have linked lists for surfaces from brush model entities
+// separate from the linked lists for world surfaces is that the world
+// surface linked lists can be preserved between frames if r_optimize is on,
+// whereas the entity linked lists must be cleared each time an entity is
+// drawn.
+surfchain_t	r_alpha_surfaces;
+surfchain_t	r_warp_surfaces;
+
+// This is a chain of surfaces that may need to have their lightmaps updated.
+// They are not rendered in the order of this chain and will be linked into
+// other chains for rendering.
+msurface_t	*r_flicker_surfaces;
+
+
+/*
+================
+BSP_SetScrolling
+================
+*/
+void BSP_SetScrolling (qboolean enable)
+{
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+	if (enable)
+	{
+		float scroll;
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+		qglTranslatef (scroll, 0, 0);
+	}
+	qglMatrixMode (GL_MODELVIEW);
+}
+
+
+/*
+================
+BSP_DrawWarpSurfaces
+================
+*/
+void BSP_DrawWarpSurfaces (qboolean forEnt)
+{
+	msurface_t	*surf;
+	image_t		*image;
+	
+	if (forEnt)
+		surf = r_warp_surfaces.entchain;
+	else
+		surf = r_warp_surfaces.worldchain;
+	
+	if (surf == NULL)
+		return;
+	
+	// no lightmaps rendered on these surfaces
+	GL_EnableMultitexture( false );
+	GL_TexEnv( GL_MODULATE );
+	qglColor4f( gl_state.inverse_intensity,
+				gl_state.inverse_intensity,
+				gl_state.inverse_intensity,
+				1.0F );
+	while (surf)
+	{
+		c_brush_polys++;
+		image = BSP_TextureAnimation (surf->texinfo);
+		GL_MBind (0, image->texnum);
+		R_RenderWaterPolys (surf);
+		surf = surf->texturechain;
+	}
+	
+	if (forEnt)
+		r_warp_surfaces.entchain = NULL;
+	
+	GL_EnableMultitexture( true );
+	GL_TexEnv( GL_REPLACE );
+	R_KillVArrays ();
+}
+
+/*
+================
+BSP_DrawAlphaPoly
+================
+*/
+void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
+{
+	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
+	
+	BSP_AddSurfToVBOAccum (surf);
+	
+	// TODO: actually use the batching system for alpha surfaces
+	BSP_FlushVBOAccum ();
+	
+	BSP_SetScrolling (0);
+	R_KillVArrays ();
+}
+
+
+/*
+================
+R_DrawAlphaSurfaces
+
+Draw water surfaces and windows.
+
+Annoyingly, because alpha surfaces have to be drawn from back to front, 
+everything transparent-- water, rscripted surfs, and non-rscripted surfs-- has
+to be drawn in a single pass. This is an inherently inefficient process.
+
+The BSP tree is walked front to back, so unwinding the chain of alpha surfaces
+will draw back to front, giving proper ordering FOR BSP SURFACES! 
+
+
+It's a bit wrong for entity surfaces (i.e. glass doors.) Because they are in
+separate linked lists, the entity surfaces must be either always behind or
+always in front of the world surfaces. I chose always in front because that
+seems to fix all rendering issues, regardless of whether the entity actually 
+is in front. Search me why. NOTE: this bug existed even when it was all one
+linked list, although at that time entity surfaces were always behind map
+surfaces (added to the beginning of the linked list after all the BSP 
+rendering code.)
+================
+*/
+void R_DrawAlphaSurfaces_chain (msurface_t *chain)
+{
+	msurface_t	*s;
+	float		intens;
+
+	// the textures are prescaled up for a better lighting range,
+	// so scale it back down
+	intens = gl_state.inverse_intensity;
+	
+	GL_SelectTexture (0);
+	qglDepthMask ( GL_FALSE );
+	qglEnable (GL_BLEND);
+	GL_TexEnv( GL_MODULATE );
+	BSP_InvalidateVBO ();
+	
+	for (s=chain ; s ; s=s->texturechain)
+	{
+		GL_MBind (0, s->texinfo->image->texnum);
+		c_brush_polys++;
+
+		if (s->texinfo->flags & SURF_TRANS33)
+			qglColor4f (intens, intens, intens, 0.33);
+		else if (s->texinfo->flags & SURF_TRANS66)
+			qglColor4f (intens, intens, intens, 0.66);
+		else
+			qglColor4f (intens, intens, intens, 1);
+
+		//moving trans brushes
+		if (s->entity)
+		{
+			qglLoadMatrixf (r_world_matrix); //moving trans brushes
+			R_RotateForEntity (s->entity);
+		}
+		
+		if (s->iflags & ISURF_DRAWTURB) 
+		{
+			R_RenderWaterPolys (s);
+			GL_SelectTexture (0);
+			qglEnable (GL_BLEND);
+			GL_TexEnv( GL_MODULATE );
+			BSP_InvalidateVBO ();
+		}
+		else if(r_shaders->integer && s->texinfo->image->script && !(s->texinfo->flags & SURF_FLOWING)) 
+		{
+			RS_Surface(s);
+			GL_SelectTexture (0);
+			qglEnable (GL_BLEND);
+			GL_TexEnv( GL_MODULATE );
+		}
+		else
+			BSP_DrawAlphaPoly (s, s->texinfo->flags);
+	}
+
+	GL_SelectTexture (0);
+	GL_TexEnv( GL_REPLACE );
+	qglColor4f (1,1,1,1);
+	qglDisable (GL_BLEND);
+	qglDepthMask ( GL_TRUE );
+}
+
+void R_DrawAlphaSurfaces (void)
+{
+	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.worldchain);
+	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.entchain);
+	qglLoadMatrixf (r_world_matrix); //moving trans brushes
+	r_alpha_surfaces.entchain = NULL;
+}
+
+/*
+================
+R_DrawRSSurfaces
+
+Draw shader surfaces
+================
+*/
+void R_DrawRSSurfaces (void)
+{
+	int i;
+	
+	qglDepthMask(false);
+	qglShadeModel (GL_SMOOTH);
+
+	qglEnable(GL_POLYGON_OFFSET_FILL);
+	qglPolygonOffset(-3, -2);
+
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
+	{
+		rscript_t	*rs;
+		msurface_t	*s = currentmodel->unique_texinfo[i]->rscript_surfaces;
+
+		if(!s)
+			continue;
+
+		if (!r_shaders->integer)
+		{
+			currentmodel->unique_texinfo[i]->rscript_surfaces = NULL;
+			continue;
+		}
+		
+		rs = currentmodel->unique_texinfo[i]->image->script;
+		
+		if (rs == NULL || (rs->flags & RS_PREVENT_BATCH) != 0)
+		{
+			// fall back on drawing the surfaces one at a time
+			for (; s; s = s->rscriptchain)
+				RS_Surface(s);
+		}
+		else
+		{
+			// batch them up a bit
+			int currLMTex; 
+			
+			while (s != NULL)
+			{
+				BSP_InvalidateVBO ();
+				currLMTex = s->lightmaptexturenum;
+				
+				for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->rscriptchain)
+					BSP_AddSurfToVBOAccum (s);
+				
+				RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
+							vec3_origin, vec3_origin, false,
+							rs_lightmap_separate_texcoords, 
+							BSP_DrawVBOAccum );
+				
+				BSP_ClearVBOAccum ();
+			}
+		}
+	}
+
+	qglDisable(GL_POLYGON_OFFSET_FILL);
+
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_ALPHATEST
+
+	qglDepthMask(true);
+}
+
+
+
+/*
+=========================================
+Ordinary surfaces (fixed-function, normalmapped, and dynamically lit)
+These are the most commonly used types of surfaces, so the rendering code path
+for each is more optimized-- surfaces grouped by texinfo, VBOs, VBO batching,
+etc.
+=========================================
+*/
+
+// The "ordinary" surfaces do not use global variables for linked lists. The
+// linked lists are in the texinfo struct, so the textures can be grouped by
+// texinfo. Like the "special" surfaces, there are separate linked lists for
+// entity surfaces and world surfaces.
+
+// State variables for detecting changes from one surface to the next. If any
+// of these change, the current batch of polygons to render is flushed. This
+// helps minimize GL state change calls and draw calls.
+int 		r_currLMTex = -9999; // only bind a lightmap texture if it is not
+								 // the same as previous surface
+mtexinfo_t	*r_currTexInfo = NULL; //texinfo struct
+float		*r_currTangentSpaceTransform; //etc.
+
 /*
 ================
 R_SetLightingMode
@@ -646,16 +672,32 @@ R_SetLightingMode
 Setup the fixed-function pipeline with texture combiners to enable rendering
 of lightmapped surfaces. For GLSL renders, this is unnecessary, as the shader
 handles this job.
+
+If environment_color is true, enable the color and alpha to be adjusted using
+glColor in addition to the lightmap texture. This is a bit more expensive.
 ================
 */
-void R_SetLightingMode (void)
+void R_SetLightingMode (qboolean environment_color)
 {
 	GL_SelectTexture (0);
 	GL_TexEnv ( GL_COMBINE_EXT );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+	
+	if (environment_color)
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PRIMARY_COLOR_EXT );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PRIMARY_COLOR_EXT );
+	}
+	else
+	{
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+	}
 
 	GL_SelectTexture (1);
 	GL_TexEnv ( GL_COMBINE_EXT );
@@ -696,14 +738,14 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	
 	BSP_FlushVBOAccum ();
 	
-	if (TexinfoIsAlphaBlended (texinfo))
+	if (TexinfoIsAlphaMasked (texinfo))
 	{
-		if (!r_currTexInfo || !TexinfoIsAlphaBlended(r_currTexInfo))
+		if (!r_currTexInfo || !TexinfoIsAlphaMasked (r_currTexInfo))
 			qglEnable( GL_ALPHA_TEST );
 	}
 	else
 	{
-		if (!r_currTexInfo || TexinfoIsAlphaBlended(r_currTexInfo))
+		if (!r_currTexInfo || TexinfoIsAlphaMasked (r_currTexInfo))
 			qglDisable( GL_ALPHA_TEST );
 	}
 	
@@ -730,7 +772,6 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	
 	GL_MBind (2, texinfo->heightMap->texnum);
 	GL_MBind (3, texinfo->normalMap->texnum);
-	KillFlags |= KILL_TMU2_POINTER | KILL_TMU3_POINTER;
 	
 	if (dynamic)
 	{
@@ -772,10 +813,8 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 		glUniform1fARB( g_location_rsTime, rs_realtime);
 		glUniform1iARB( g_location_liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
 		GL_MBind (4, r_blooddroplets->texnum);
-		KillFlags |= KILL_TMU4_POINTER;
 		glUniform1iARB( g_location_liquidNormTex, 5); 
 		GL_MBind (5, r_blooddroplets_nm->texnum);
-		KillFlags |= KILL_TMU5_POINTER;
 	}
 	else if (texinfo->flags & SURF_WATER) 
 	{
@@ -785,7 +824,6 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 		glUniform1fARB( g_location_rsTime, rs_realtime);
 		glUniform1iARB( g_location_liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
 		GL_MBind (4, r_droplets->texnum);
-		KillFlags |= KILL_TMU4_POINTER;
 	}
 	else if (texinfo->flags & SURF_SHINY)
 	{
@@ -794,7 +832,6 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 
 		glUniform1iARB( g_location_chromeTex, 4); 
 		GL_MBind (4, r_mirrorspec->texnum);
-		KillFlags |= KILL_TMU4_POINTER;
 	}
 	else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY))
 	{
@@ -822,6 +859,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 	{
 		BSP_FlushVBOAccum ();
 		GL_MBind (1, gl_state.lightmap_textures + lmtex);
+		r_currLMTex = lmtex;
 	}
 	
 	if (glsl && r_currTangentSpaceTransform != surf->tangentSpaceTransform)
@@ -833,7 +871,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 	
 	// If we've gotten this far, it's because the surface is not translucent,
 	// warped, sky, or nodraw, thus it *will* be in the VBO.
-	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
+	BSP_AddSurfToVBOAccum (surf);
 }
 
 void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
@@ -846,15 +884,7 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	r_currTangentSpaceTransform = NULL;
 	
 	BSP_FlushVBOAccum ();
-
-	r_vboOn = false;
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+	BSP_InvalidateVBO ();
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -871,10 +901,8 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 		if (!s)
 			continue;
 		BSP_TexinfoChanged (s->texinfo->equiv, false, false);
-		for (; s; s = s->texturechain) {
+		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, false);
-			r_currLMTex = s->lightmaptexturenum;
-		}
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -919,14 +947,7 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	glUniform1iARB( g_location_dynamic, 0);
 	glUniform1iARB( g_location_parallax, 1);  
 	
-	r_vboOn = false;
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+	BSP_InvalidateVBO ();
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -943,10 +964,8 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 		if (!s)
 			continue;
 		BSP_TexinfoChanged (s->texinfo->equiv, true, false);
-		for (; s; s = s->texturechain) {
+		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, true);
-			r_currLMTex = s->lightmaptexturenum;
-		}
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -1025,14 +1044,7 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 
 	glUniform1iARB( g_location_dynamic, foundLight);
 	
-	r_vboOn = false;
-	
-	qglEnableClientState( GL_VERTEX_ARRAY );
-	qglClientActiveTextureARB (GL_TEXTURE0);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	qglClientActiveTextureARB (GL_TEXTURE1);
-	qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+	BSP_InvalidateVBO ();
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -1049,10 +1061,8 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 		if (!s)
 			continue;
 		BSP_TexinfoChanged (s->texinfo->equiv, true, true);
-		for (; s; s = s->texturechain) {
+		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, true);
-			r_currLMTex = s->lightmaptexturenum;
-		}
 	}
 	
 	BSP_FlushVBOAccum ();
@@ -1090,11 +1100,11 @@ void BSP_ClearWorldTextureChains (void)
 		currentmodel->unique_texinfo[i]->lightmap_surfaces.worldchain = NULL;
 		currentmodel->unique_texinfo[i]->glsl_surfaces.worldchain = NULL;
 		currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain = NULL;
+		currentmodel->unique_texinfo[i]->rscript_surfaces = NULL;
 	}
 	
 	r_warp_surfaces.worldchain = NULL;
 	r_alpha_surfaces.worldchain = NULL;
-	r_rscript_surfaces = NULL;
 	r_flicker_surfaces = NULL;
 }
 
@@ -1119,13 +1129,10 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	msurface_t	**chain;
 	qboolean	is_dynamic = false;
 	
-	// Special surfaces that need to be handled separately
-	
+	// Since we now draw the whole skybox all the time anyway, no need to do
+	// anything special with these surfaces.
 	if (surf->texinfo->flags & SURF_SKY)
-	{	// just adds to visible sky bounds
-		R_AddSkySurface (surf);
 		return;
-	}
 	
 #define AddToChainPair(chainpair)  \
 	chain = (forEnt?\
@@ -1134,7 +1141,7 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	surf->texturechain = *chain; \
 	*chain = surf; 
 	
-	if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
+	if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
 	{	// add to the translucent chain
 		AddToChainPair (r_alpha_surfaces);
 		return;
@@ -1208,8 +1215,8 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	{ 
 		if (surf->texinfo->image->script != NULL || (surf->iflags & ISURF_UNDERWATER))
 		{
-			surf->rscriptchain = r_rscript_surfaces;
-			r_rscript_surfaces = surf;
+			surf->rscriptchain = surf->texinfo->equiv->rscript_surfaces;
+			surf->texinfo->equiv->rscript_surfaces = surf;
 		}
 	}
 #undef AddToChainPair
@@ -1250,7 +1257,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 
 	GL_EnableMultitexture( true );
 	
-	R_SetLightingMode ();
+	R_SetLightingMode (false);
 
 	// render all fixed-function surfaces
 	BSP_DrawNonGLSLSurfaces(forEnt);
@@ -1862,7 +1869,6 @@ void R_MarkWorldSurfs (void)
 	
 	if (do_bsp)
 	{
-		R_ClearSkyBox ();
 		BSP_ClearWorldTextureChains ();
 		BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 		
@@ -1984,8 +1990,9 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	float		*vec;
 	float		s, t;
 	glpoly_t	*poly;
-	vec3_t		total, center;
+	vec3_t		center;
 
+	vec3_t total = {0, 0, 0};
 	vec3_t surfmaxs = {-99999999, -99999999, -99999999};
 	vec3_t surfmins = {99999999, 99999999, 99999999};
 
@@ -1993,6 +2000,7 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 	// draw texture
 	//
 	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * VERTEXSIZE*sizeof(float));
+	assert (fa->polys == NULL); // only warp surfaces will have multiple polys
 	poly->next = fa->polys;
 	poly->numverts = lnumverts;
 	fa->polys = poly;
@@ -2010,6 +2018,24 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int
 		{
 			r_pedge = &currentmodel->edges[-lindex];
 			vec = currentmodel->vertexes[r_pedge->v[1]].position;
+		}
+		
+		if ((fa->texinfo->flags & SURF_SKY) == 0)
+		{
+			if (fa->texinfo->flags & (SURF_WARP|SURF_FLOWING|SURF_TRANS33|SURF_TRANS66))
+				r_pedge->sColor += 0.5;
+			
+			if (r_pedge->usecount == 0)
+			{
+				r_pedge->first_face_plane = fa->plane;
+			}
+			else if (fa->plane != r_pedge->first_face_plane)
+			{
+				r_pedge->iscorner = true;
+				r_pedge->alpha = 1.0 - fabs (DotProduct (fa->plane->normal, r_pedge->first_face_plane->normal));
+			}
+			
+			r_pedge->usecount++;
 		}
 
 		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
@@ -2199,147 +2225,73 @@ void BSP_EndBuildingLightmaps (void)
   MINI MAP
   
   Draws a little 2D map in the corner of the HUD.
-  TODO: do a bit more calculation at load time, right now this is a huge FPS
-  hit.
+  TODO: Draw this with VBO+GLSL.
 
 =============================================================================
 */
 
-void R_RecursiveRadarNode (mnode_t *node)
+static void Radar_ColorForPoint (const vec3_t v, float sColor, float C[4])
 {
-	int			c, side;
-	cplane_t	*plane;
-	msurface_t	*surf, **mark;
-	mleaf_t		*pleaf;
-	float		dot,distance;
-	glpoly_t	*p;
-	float		*v;
-	int			i;
+	C[3]= (v[2]-r_origin[2])/512.0;
+	if (C[3]>0)
+	{
+		C[0]=0.5;
+		C[1]=0.5+sColor;
+		C[2]=0.5;
+		C[3]=1-C[3];
+	}
+	else
+	{
+		C[0]=0.5;
+		C[1]=sColor;
+		C[2]=0;
+		C[3]+=1;
+	}
 
-	if (node->contents == CONTENTS_SOLID)	return;		// solid
+	if(C[3]<0)
+		C[3]=0;
+}
 
-	if(r_minimap_zoom->value>=0.1) {
+void R_DrawRadarEdges (void)
+{
+	int i, j;
+	float distance;
+	
+	if(r_minimap_zoom->value>=0.1) 
 		distance = 1024.0/r_minimap_zoom->value;
-	} else {
+	else
 		distance = 1024.0;
-	}
-
-
-	if ( r_origin[0]+distance < node->minmaxs[0] ||
-		 r_origin[0]-distance > node->minmaxs[3] ||
-		 r_origin[1]+distance < node->minmaxs[1] ||
-		 r_origin[1]-distance > node->minmaxs[4] ||
-		 r_origin[2]+256 < node->minmaxs[2] ||
-		 r_origin[2]-256 > node->minmaxs[5]) return;
-
-	// if a leaf node, draw stuff
-	if (node->contents != -1) {
-		pleaf = (mleaf_t *)node;
-		// check for door connected areas
-		if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
-			return; // not visible
-		mark = pleaf->firstmarksurface;
-		c = pleaf->nummarksurfaces;
-
-		if (c) {
-			do {
-				(*mark)->visframe = r_framecount;
-				mark++;
-			} while (--c);
-		}
-		return;
-	}
-
-// node is just a decision point, so go down the apropriate sides
-// find which side of the node we are on
-	plane = node->plane;
-
-	switch (plane->type) {
-	case PLANE_X:
-		dot = modelorg[0] - plane->dist;
-		break;
-	case PLANE_Y:
-		dot = modelorg[1] - plane->dist;
-		break;
-	case PLANE_Z:
-		dot = modelorg[2] - plane->dist;
-		break;
-	default:
-		dot = DotProduct (modelorg, plane->normal) - plane->dist;
-		break;
-	}
-
-	if (dot >= 0) {
-		side = 0;
-	} else {
-		side = 1;
-	}
-
-// recurse down the children, front side first
-	R_RecursiveRadarNode (node->children[side]);
-
-  if(plane->normal[2]) {
-		// draw stuff
-		if(plane->normal[2]>0) for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
+	
+	qglBegin (GL_LINES);
+	
+	for (i = 1; i < r_worldmodel->numedges; i++)
+	{
+		medge_t *edge = &r_worldmodel->edges[i];
+		
+		if (!edge->iscorner)
+			continue;
+		
+		if (	r_origin[0]+distance < edge->mins[0] ||
+				r_origin[0]-distance > edge->maxs[0] ||
+				r_origin[1]+distance < edge->mins[1] ||
+				r_origin[1]-distance > edge->maxs[1] ||
+				r_origin[2]+256 < edge->mins[2] ||
+				r_origin[2]-256 > edge->maxs[2]) continue;
+		
+		for (j = 0; j < 2; j++)
 		{
-			if (surf->texinfo->flags & SURF_SKY){
-				continue;
-			}
-
-
+			float C[4];
+			vec_t *v = r_worldmodel->vertexes[edge->v[j]].position;
+			
+			Radar_ColorForPoint (v, edge->sColor, C);
+			C[3] *= edge->alpha;
+			
+			qglColor4fv (C);
+			qglVertex2fv (v);
 		}
-	} else {
-			qglDisable(GL_TEXTURE_2D);
-		for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++) {
-			float sColor,C[4];
-			if (surf->texinfo->flags & SURF_SKY) continue;
-
-			if (surf->texinfo->flags & (SURF_WARP|SURF_FLOWING|SURF_TRANS33|SURF_TRANS66)) {
-				sColor=0.5;
-			} else {
-				sColor=0;
-			}
-
-			for ( p = surf->polys; p; p = p->chain ) {
-				v = p->verts[0];
-				qglBegin(GL_LINE_STRIP);
-				for (i=0 ; i< p->numverts; i++, v+= VERTEXSIZE) {
-					C[3]= (v[2]-r_origin[2])/512.0;
-					if (C[3]>0) {
-
-						C[0]=0.5;
-						C[1]=0.5+sColor;
-						C[2]=0.5;
-						C[3]=1-C[3];
-
-					}
-					   else
-					{
-						C[0]=0.5;
-						C[1]=sColor;
-						C[2]=0;
-						C[3]+=1;
-
-					}
-
-					if(C[3]<0) {
-						C[3]=0;
-
-					}
-					qglColor4fv(C);
-					qglVertex3fv (v);
-				}
-
-				qglEnd();
-			}
-		}
-		qglEnable(GL_TEXTURE_2D);
-
-  }
-	// recurse down the back side
-	R_RecursiveRadarNode (node->children[!side]);
-
-
+	}
+	
+	qglEnd ();
 }
 
 int			numRadarEnts=0;
@@ -2463,7 +2415,7 @@ void R_DrawRadar(void)
 
 	if(r_radarmap)
 		GL_Bind(r_radarmap->texnum);
-	qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	GLSTATE_ENABLE_BLEND;
 	qglColor3f(1,1,1);
 
@@ -2473,10 +2425,12 @@ void R_DrawRadar(void)
 	GLSTATE_ENABLE_TEXGEN;
 	qglTexGenfv(GL_S,GL_OBJECT_PLANE,fS);
 
-	// draw the stuff
-	R_RecursiveRadarNode (r_worldmodel->nodes);
+	// draw the actual minimap
+	qglDisable (GL_TEXTURE_2D);
+	R_DrawRadarEdges ();
+	qglEnable (GL_TEXTURE_2D);
 
-	qglBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	GLSTATE_DISABLE_TEXGEN;
 
 	qglPopMatrix();

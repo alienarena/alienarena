@@ -153,6 +153,7 @@ void MSG_WriteShort (sizebuf_t *sb, int c);
 void MSG_WriteLong (sizebuf_t *sb, int c);
 void MSG_WriteSizeInt (sizebuf_t *sb, int bytes, int c);
 void MSG_WriteFloat (sizebuf_t *sb, float f);
+void MSG_WriteSizeInt (sizebuf_t *sb, int bytes, int c);
 void MSG_WriteString (sizebuf_t *sb, char *s);
 void MSG_WriteCoord (sizebuf_t *sb, float f);
 void MSG_WritePos (sizebuf_t *sb, vec3_t pos);
@@ -952,20 +953,31 @@ TERRAIN LOADING/SIMPLIFICATION
 ==============================================================
 */
 
+// decorations are things like vegetation, rocks/pebbles, etc.
+typedef struct
+{
+	vec3_t	origin;
+	float	size;
+	int		type;
+} terraindec_t;
+
 typedef struct
 {
 	char			*texture_path;
+	char			*lightmap_path;
 	int				num_vertices;
 	float			*vert_positions;
 	float			*vert_texcoords;
 	int				num_triangles;
 	unsigned int	*tri_indices;
 	vec3_t			mins, maxs;
+	int				num_vegetation;
+	terraindec_t	*vegetation;
+	int				num_rocks;
+	terraindec_t	*rocks;
 } terraindata_t;
 
-// out will be populated with a simplified version of the mesh. Calling
-// function is responsible for calling Z_Free on vert_positions,
-// vert_texcoords, tri_indices, and texture_path.
+// out will be populated with a simplified version of the mesh. 
 // name is just the path of the .terrain file, only used for error messages.
 // oversampling_factor indicates how much detail to sample the heightmap 
 // at before simplification. 2.0 means 4x as many samples as there are pixels,
@@ -973,7 +985,10 @@ typedef struct
 // reduction_amt indicates how many times fewer triangles the simplified mesh
 // should have.
 // buf is a string containing the text of a .terrain file.
-void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_factor, int reduction_amt, char *buf);
+void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations_only, float oversampling_factor, int reduction_amt, char *buf);
+
+// Frees any allocated buffers in dat.
+void CleanupTerrainData (terraindata_t *dat);
 
 #endif /* Q_COMMON_H_ */
 

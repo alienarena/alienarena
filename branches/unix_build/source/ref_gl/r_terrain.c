@@ -22,22 +22,29 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	vec3_t up;
 	int ndownward;
 	
-	LoadTerrainFile (&data, mod->name, 2.0, 32, (char *)_buf);
+	LoadTerrainFile (&data, mod->name, false, 2.0, 32, (char *)_buf);
 	
 	mod->numvertexes = data.num_vertices;
 	mod->num_triangles = data.num_triangles;
 	
 	tex = GL_FindImage (data.texture_path, it_wall);
-	Z_Free (data.texture_path);
 	
 	if (!tex)
 		Com_Error (ERR_DROP, "Mod_LoadTerrainModel: Missing surface texture in %s!", mod->name);
+	
+	if (data.lightmap_path != NULL)
+		mod->lightmap = GL_FindImage (data.lightmap_path, it_wall);
 	
 	VectorCopy (data.mins, mod->mins);
 	VectorCopy (data.maxs, mod->maxs);
 	
 	mod->skins[0] = tex;
 	mod->type = mod_terrain;
+	
+	if (mod->skins[0] != NULL)
+		mod->script = mod->skins[0]->script;
+	if (mod->script)
+		RS_ReadyScript( mod->script );
 	
 	for ( i = 0; i < 8; i++ )
 	{
@@ -95,9 +102,79 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	
 	Terrain_LoadVBO (mod, data.vert_positions, vnormal, vtangent, data.vert_texcoords, data.tri_indices);
 	
-	Z_Free (data.vert_positions);
-	Z_Free (data.vert_texcoords);
-	Z_Free (vnormal);
-	Z_Free (vtangent);
-	Z_Free (data.tri_indices);
+	CleanupTerrainData (&data);
+}
+
+void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
+{
+	char *buf;
+	int len;
+	int i;
+	terraindata_t data;
+	vec3_t up = {0, 0, 1};
+	vec3_t color = {1, 1, 1};
+	
+	len = FS_LoadFile (path, (void**)&buf);
+	
+	if (!buf)
+	{
+		Com_Printf ("WARN: Could not find %s\n", path);
+		return;
+	}
+	
+	LoadTerrainFile (&data, path, true, 0, 0, buf);
+	
+	FS_FreeFile ((void *)buf);
+	
+	// TODO: transformed terrain model support!
+	for (i = 0; i < data.num_vegetation; i++)
+	{
+		vec3_t org;
+		char *texture;
+		static char *vegetationtextures[] = 
+		{
+			"gfx/grass.tga",
+			"",
+			"gfx/leaves1.tga"
+		};
+		
+		VectorAdd (origin, data.vegetation[i].origin, org);
+		
+		texture = vegetationtextures[data.vegetation[i].type];
+		
+		Mod_AddVegetation (	org, up,
+							GL_FindImage (texture, it_wall)->texnum, color,
+							data.vegetation[i].size, texture,
+							data.vegetation[i].type );
+	}
+	
+	for (i = 0; i < data.num_rocks; i++)
+	{
+		entity_t *ent;
+		static char *rockmeshes[] =
+		{
+			"maps/meshes/rocks/rock1.md2",
+			"maps/meshes/rocks/rock2.md2",
+			"maps/meshes/rocks/rock3.md2",
+			"maps/meshes/rocks/rock4.md2",
+			"maps/meshes/rocks/rock5.md2"
+		};
+		
+		if (num_rock_entities == MAX_ROCKS)
+			break;
+	
+		ent = &rock_entities[num_rock_entities];
+		memset (ent, 0, sizeof(*ent));
+		ent->number = MAX_EDICTS+MAX_MAP_MODELS+num_rock_entities++;
+		
+		ent->flags |= RF_FULLBRIGHT;
+		
+		VectorAdd (origin, data.rocks[i].origin, ent->origin);
+		
+		ent->angles[YAW] = 360.0*frand();
+		
+		ent->model = R_RegisterModel (rockmeshes[rand()%5]);
+	}
+	
+	CleanupTerrainData (&data);
 }

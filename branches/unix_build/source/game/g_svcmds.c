@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#include <stdio.h>
+#include <errno.h>
+
 #include "g_local.h"
 // -jjb-
 #include "acesrc/acebot.h"
@@ -44,28 +47,46 @@ void	Svcmd_Test_f (void)
 
 PACKET FILTERING
 
-
 You can add or remove addresses from the filter list with:
 
-addip <ip>
-removeip <ip>
+sv addip <ip>
+sv removeip <ip>
 
-The ip address is specified in dot format, and any unspecified digits will match any value, so you can specify an entire class C network with "addip 192.246.40".
+The ip address is specified in dot format, and any unspecified digits
+will match any value, so you can specify an entire class C network
+with "addip 192.246.40".
 
-Removeip will only remove an address specified exactly the same way.  You cannot addip a subnet, then removeip a single host.
+Removeip will only remove an address specified exactly the same way.
+You cannot addip a subnet, then removeip a single host.
 
-listip
+sv listip
 Prints the current list of filters.
 
-writeip
-Dumps "addip <ip>" commands to listip.cfg so it can be execed at a later date.  The filter lists are not saved and restored by default, because I beleive it would cause too much confusion.
+sv writeip
+
+Dumps "addip <ip>" commands to listip.cfg so it can be execed at a
+later date.  The filter lists are not saved and restored by default,
+because I beleive it would cause too much confusion.
 
 filterban <0 or 1>
 
-If 1 (the default), then ip addresses matching the current list will be prohibited from entering the game.  This is the default setting.
+If 1 (the default), then ip addresses matching the current list will
+be prohibited from entering the game.  This is the default setting.
 
-If 0, then only addresses matching the list will be allowed.  This lets you easily set up a private game, or a game that only allows players from your local network.
+If 0, then only addresses matching the list will be allowed.  This
+lets you easily set up a private game, or a game that only allows
+players from your local network.
 
+------ 2014-01-13 NOTE -------
+
+Corrected file system support. It was still using the assumption
+that the executable's current working directory was the parent
+directory for the arena subdir.
+
+The sv commands are passed to the game module when they are not
+recogized by the server. It seem obvious that these were originally
+in the server code, and were moved to the game for some reason
+(maybe to give the capability to mods?).
 
 ==============================================================================
 */
@@ -152,9 +173,8 @@ qboolean SV_FilterPacket (char *from)
 }
 
 /**
- * @brief For kickban, add player ip to ipfilter banned list.
- *
- * @detail Does not write to iplist.cfg. Do 'sv writeip', if
+ * For kickban, add player ip to ipfilter banned list.
+ * Does not write to iplist.cfg. Do 'sv writeip', if
  * that is wanted.
  *
  * @params ip - string containing dotted IP addr.
@@ -266,6 +286,12 @@ void SVCmd_ListIP_f (void)
  * @param - void
  * @return - void
  */
+/**
+ * Create or replace the listip.cfg with current filter list
+ *
+ * @param - void
+ * @return - void
+ */
 void SVCmd_WriteIP_f (void)
 {
 	char  listip_name[MAX_OSPATH];
@@ -326,7 +352,6 @@ void	ServerCommand (void)
 		SVCmd_WriteIP_f ();
 
 // ACEBOT_ADD
-
 	else if(Q_strcasecmp (cmd, "acedebug") == 0)
  		if (strcmp(gi.argv(2),"on")==0)
 		{

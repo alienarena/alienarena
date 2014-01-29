@@ -542,7 +542,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libgame.a
-DATADIR_CPPFLAGS = -DDATADIR='"$(pkgdatadir)"'
+DATADIR_CPPFLAGS = -DDATADIR='"$(datadir)/alienarena"'
 
 # Dedicated Server libraries and flags
 alienarena_ded_LDADD = libgame.a

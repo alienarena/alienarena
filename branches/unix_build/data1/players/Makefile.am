@@ -41,13 +41,6 @@ nobase_dist_players_DATA = \
 	commander/tris.iqm \
 	commander/tris.md2 \
 	commander/tris.rgd \
-	commander/tron2_i.jpg \
-	commander/tron2.jpg \
-	commander/tron3_i.jpg \
-	commander/tron3.jpg \
-	commander/tron_i.jpg \
-	commander/tron.jpg \
-	commander/tron_normal.tga \
 	commander/w_bfg.iqm \
 	commander/w_bfg.md2 \
 	commander/w_bfg.skin \
@@ -129,13 +122,6 @@ nobase_dist_players_DATA = \
 	enforcer/tris.iqm \
 	enforcer/tris.md2 \
 	enforcer/tris.rgd \
-	enforcer/tron2_i.jpg \
-	enforcer/tron2.jpg \
-	enforcer/tron3_i.jpg \
-	enforcer/tron3.jpg \
-	enforcer/tron_i.jpg \
-	enforcer/tron.jpg \
-	enforcer/tron_normal.tga \
 	enforcer/usegibs \
 	enforcer/w_bfg.iqm \
 	enforcer/w_bfg.md2 \
@@ -212,13 +198,6 @@ nobase_dist_players_DATA = \
 	lauren/tris.iqm \
 	lauren/tris.md2 \
 	lauren/tris.rgd \
-	lauren/tron2_i.jpg \
-	lauren/tron2.jpg \
-	lauren/tron3_i.jpg \
-	lauren/tron3.jpg \
-	lauren/tron_i.jpg \
-	lauren/tron.jpg \
-	lauren/tron_normal.tga \
 	lauren/usegibs \
 	lauren/w_bfg.iqm \
 	lauren/w_bfg.md2 \
@@ -295,13 +274,6 @@ nobase_dist_players_DATA = \
 	martiancyborg/tris.iqm \
 	martiancyborg/tris.md2 \
 	martiancyborg/tris.rgd \
-	martiancyborg/tron2_i.jpg \
-	martiancyborg/tron2.jpg \
-	martiancyborg/tron3_i.jpg \
-	martiancyborg/tron3.jpg \
-	martiancyborg/tron_i.jpg \
-	martiancyborg/tron.jpg \
-	martiancyborg/tron_normal.tga \
 	martiancyborg/w_alienblaster.iqm \
 	martiancyborg/w_alienblaster.skin \
 	martiancyborg/w_bfg.iqm \
@@ -357,9 +329,6 @@ nobase_dist_players_DATA = \
 	martianenforcer/drown1.wav \
 	martianenforcer/fall1.wav \
 	martianenforcer/fall2.wav \
-	martianenforcer/gamara_i.jpg \
-	martianenforcer/gamara.jpg \
-	martianenforcer/gamara_normal.tga \
 	martianenforcer/gasp1.wav \
 	martianenforcer/gasp2.wav \
 	martianenforcer/gurp1.wav \
@@ -388,13 +357,6 @@ nobase_dist_players_DATA = \
 	martianenforcer/tris.iqm \
 	martianenforcer/tris.md2 \
 	martianenforcer/tris.rgd \
-	martianenforcer/tron2_i.jpg \
-	martianenforcer/tron2.jpg \
-	martianenforcer/tron3_i.jpg \
-	martianenforcer/tron3.jpg \
-	martianenforcer/tron_i.jpg \
-	martianenforcer/tron.jpg \
-	martianenforcer/tron_normal.tga \
 	martianenforcer/usegibs \
 	martianenforcer/w_alienblaster.iqm \
 	martianenforcer/w_alienblaster.skin \
@@ -473,13 +435,6 @@ nobase_dist_players_DATA = \
 	martianoverlord/tris.iqm \
 	martianoverlord/tris.md2 \
 	martianoverlord/tris.rgd \
-	martianoverlord/tron2_i.jpg \
-	martianoverlord/tron2.jpg \
-	martianoverlord/tron3_i.jpg \
-	martianoverlord/tron3.jpg \
-	martianoverlord/tron_i.jpg \
-	martianoverlord/tron.jpg \
-	martianoverlord/tron_normal.tga \
 	martianoverlord/w_alienblaster.iqm \
 	martianoverlord/w_alienblaster.skin \
 	martianoverlord/w_bfg.iqm \
@@ -559,13 +514,6 @@ nobase_dist_players_DATA = \
 	martianwarrior/tris.iqm \
 	martianwarrior/tris.md2 \
 	martianwarrior/tris.rgd \
-	martianwarrior/tron2_i.jpg \
-	martianwarrior/tron2.jpg \
-	martianwarrior/tron3_i.jpg \
-	martianwarrior/tron3.jpg \
-	martianwarrior/tron_i.jpg \
-	martianwarrior/tron.jpg \
-	martianwarrior/tron_normal.tga \
 	martianwarrior/w_alienblaster.iqm \
 	martianwarrior/w_alienblaster.skin \
 	martianwarrior/w_bfg.iqm \
@@ -639,13 +587,6 @@ nobase_dist_players_DATA = \
 	slashbot/tris.iqm \
 	slashbot/tris.md2 \
 	slashbot/tris.rgd \
-	slashbot/tron2_i.jpg \
-	slashbot/tron2.jpg \
-	slashbot/tron3_i.jpg \
-	slashbot/tron3.jpg \
-	slashbot/tron_i.jpg \
-	slashbot/tron.jpg \
-	slashbot/tron_normal.tga \
 	slashbot/w_bfg.iqm \
 	slashbot/w_bfg.md2 \
 	slashbot/w_bfg.skin \

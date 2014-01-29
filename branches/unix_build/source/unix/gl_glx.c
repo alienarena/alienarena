@@ -82,11 +82,8 @@ void     GLimp_Shutdown( void );
 rserr_t  GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode,
 						qboolean fullscreen );
 void     GLimp_AppActivate( qboolean active );
-void     GLimp_EnableLogging( qboolean enable );
-void     GLimp_LogNewFrame( void );
 
 //---------------------------------------------------------------------------
-
 
 glwstate_t glw_state;
 

@@ -219,7 +219,7 @@ players/commander/red
 	{
 		map players/commander/default_normal.tga
 		normalmap
-		map2 gfx/redcommanderfx.tga
+		map2 gfx/defaultcommanderfx.tga
 		glow
 	}	
 }
@@ -1514,6 +1514,15 @@ models/tactical/hweappad
 		map models/tactical/hweappad_normal.jpg
 		normalmap
 		map2 models/tactical/hweappad_fx.tga
+		glow
+	}
+}
+maps/meshes/test/martian
+{
+	{
+		map maps/meshes/test/martian_normal.jpg
+		normalmap
+		map2 maps/meshes/test/martian_fx.tga
 		glow
 	}
 }

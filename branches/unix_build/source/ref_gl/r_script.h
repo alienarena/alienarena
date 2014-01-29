@@ -4,10 +4,6 @@
 //CVARS
 extern cvar_t *rs_dynamic_time;
 
-#define ALPHAFUNC_BASIC		1
-#define ALPHAFUNC_GLOSS		2
-#define ALPHAFUNC_NORMAL	3
-
 // Animation loop
 typedef struct anim_stage_s 
 {
@@ -88,6 +84,8 @@ typedef struct rs_stage_s
 {
 	image_t					*texture;				// texture
 	char					name[MAX_OSPATH];		// texture name
+	
+	// These are for the mesh rendering single-stage "fast path."
 	image_t					*texture2;				// texture for combining(GLSL)
 	char					name2[MAX_OSPATH];		// texture name
 	image_t					*texture3;				// texture for combining(GLSL)
@@ -118,10 +116,14 @@ typedef struct rs_stage_s
 	qboolean				lightmap;		// lightmap this stage?
 	qboolean				alphamask;		// alpha masking?
 
-	int						alphafunc;		// software alpha effects
-
-	qboolean				has_alpha;		// for sorting
-	qboolean				normalmap;		// for normalmaps
+	qboolean				normalmap;		// use mesh rendering GLSL "fast path?"
+	
+	int						num_blend_textures;
+	float					blend_scales[6];
+	char					blend_names[6][MAX_OSPATH];
+	image_t					*blend_textures[6];
+	
+	float					targetdist[2];
 
 	qboolean				lensflare;		// for adding lensflares
 	int						flaretype;		// type of flare
@@ -142,11 +144,6 @@ typedef struct rs_stage_s
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;
 
-typedef struct rs_stagekey_s
-{
-	char *stage;
-	void (*func)(rs_stage_t *shader, char **token);
-} rs_stagekey_t;
 
 
 // Base script
@@ -159,10 +156,16 @@ typedef struct rscript_s
 	qboolean				ready;		// readied by the engine?
 	rs_stage_t				*stage;		// first rendering stage
 	struct rscript_s		*next;		// next script in linked list
+	
+	// Bits are set if the script contains certain types of stages. Some kinds
+	// of stages require rscript surfaces to be drawn one at a time.
+	#define RS_CONTAINS_ROTATE 1
+	#define RS_CONTAINS_ENVMAP 2
+	#define RS_PREVENT_BATCH (RS_CONTAINS_ROTATE|RS_CONTAINS_ENVMAP)
+	int						flags;
 
 } rscript_t;
 
-void RS_SetEnvmap (vec3_t v, float *os, float *ot);
 void RS_LoadScript(char *script);
 void RS_FreeAllScripts(void);
 void RS_ReloadImageScriptLinks (void);
@@ -171,15 +174,18 @@ void RS_FreeUnmarked(void);
 rscript_t *RS_FindScript(char *name);
 void RS_ReadyScript(rscript_t *rs);
 void RS_ScanPathForScripts(void);
-int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
-void RS_DrawSurface (msurface_t *surf, qboolean lightmap);
-void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa);
-void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
+typedef enum 
+{
+	rs_lightmap_off,
+	rs_lightmap_on,
+	rs_lightmap_separate_texcoords
+} rs_lightmaptype_t;
+void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
+				qboolean translucent, rs_lightmaptype_t lm,
+				void (*draw_callback) (void));
 void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
-
-#define RS_DrawPolyNoLightMap(surf)	RS_DrawSurface((surf),false)
 
 extern float rs_realtime;
 

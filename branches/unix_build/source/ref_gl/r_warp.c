@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_warp.c -- sky and water polygons
 
+// NOTE: Sky rendering is only here due to a historical accident. TODO: find
+// a better file for it.
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -198,14 +201,6 @@ void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges)
 
 
 
-// speed up sin calculations - Ed
-float	r_turbsin[] =
-{
-	#include "warpsin.h"
-};
-
-#define TURBOSCALE (256.0f / ((float)M_PI / 4.0f))
-
 /*
 =============
 EmitWaterPolys
@@ -213,7 +208,8 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
-void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
+void BSP_SetScrolling (qboolean enable);
+void R_RenderWaterPolys (msurface_t *fa)
 {
 	glpoly_t	*p;
 	float		*v;
@@ -222,6 +218,31 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	float		scroll;
 	float		rdt = r_newrefdef.time;
 	vec3_t		nv;
+	rscript_t	*rs_shader;
+	int			texnum;
+	float		scaleX, scaleY;
+	
+	rs_shader = NULL;
+	if (r_shaders->integer)
+		rs_shader = fa->texinfo->image->script;
+	
+	scaleX = scaleY = 1.0f;
+	texnum = 0;
+	
+	if(rs_shader) 
+	{
+		rs_stage_t *stage = rs_shader->stage;
+		
+		if(stage) 
+		{	//for now, just map a reflection texture
+			texnum = stage->texture->texnum; //pass this to renderwaterpolys
+		}
+		if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
+		{
+			scaleX = stage->scale.scaleX;
+			scaleY = stage->scale.scaleY;
+		}
+	}
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
@@ -230,14 +251,10 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	  
 	if(fa->texinfo->has_normalmap)
 	{
-		if (SurfaceIsAlphaBlended(fa))
+		if (SurfaceIsAlphaMasked (fa))
 			qglEnable( GL_ALPHA_TEST );
 
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
-
 		glUseProgramObjectARB( g_waterprogramObj );
-
-		GL_EnableMultitexture( true );
 
 		GL_MBind (0, fa->texinfo->image->texnum);
 		glUniform1iARB( g_location_baseTexture, 0);
@@ -245,8 +262,8 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		GL_MBind (1, fa->texinfo->normalMap->texnum);
 		glUniform1iARB( g_location_normTexture, 1);
 
-        if (texnum)
-        {
+		if (texnum)
+		{
 			GL_MBind (2, texnum);
 			glUniform1iARB( g_location_refTexture, 2);
 		}
@@ -271,23 +288,33 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		glUniform3fARB( g_location_lightPos, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
-
-		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
+		
+		BSP_InvalidateVBO ();
+		
+		// NOTE: We only subdivide water surfaces if we WON'T be using GLSL, 
+		// so this is safe.
+		BSP_AddSurfToVBOAccum (fa);
+		
+		BSP_SetScrolling ((fa->texinfo->flags & SURF_FLOWING) != 0);
+		BSP_FlushVBOAccum ();
+		BSP_SetScrolling (0);
 
 		glUseProgramObjectARB( 0 );
 
 		R_KillVArrays ();
 
-		GL_EnableMultitexture( false );
-
-		if (SurfaceIsAlphaBlended(fa))
+		if (SurfaceIsAlphaMasked (fa))
 			qglDisable( GL_ALPHA_TEST);
 
 		return;
 	}
-	else 
+	else
 	{
 		GL_MBind (0, fa->texinfo->image->texnum);
+		
+// = 1/2 wave amplitude on each axis
+// = 1/4 wave amplitude on both axes combined
+#define WAVESCALE 2.0 
 
 		for (p=fa->polys ; p ; p=p->next)
 		{
@@ -297,26 +324,22 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 				os = v[3];
 				ot = v[4];
 
-				s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
-
+				s = os + 4.0*sin (ot*0.125+rdt);
 				s += scroll;
 				s *= (1.0/64);
 
-				t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
-
+				t = ot + 4.0*sin (os*0.125+rdt);
 				t *= (1.0/64);
 
 				qglTexCoord2f (s, t);
 
 				if (!(fa->texinfo->flags & SURF_FLOWING))
-
 				{
 					nv[0] =v[0];
 					nv[1] =v[1];
-
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-
-							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+					nv[2] =v[2] - 2*WAVESCALE // top of brush = top of waves
+							+ WAVESCALE*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+							+ WAVESCALE*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 					qglVertex3fv (nv);
 				}
@@ -348,9 +371,9 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 			{
 				nv[0] =v[0];
 				nv[1] =v[1];
-
-				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+				nv[2] =v[2] - 2*WAVESCALE // top of brush = top of waves
+						+ WAVESCALE*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
+						+ WAVESCALE*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
 
 				qglVertex3fv (nv);
 			}
@@ -361,261 +384,34 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	}
 }
 
-vec3_t	skyclip[6] = {
-	{1,1,0},
-	{1,-1,0},
-	{0,-1,1},
-	{0,1,1},
-	{1,0,1},
-	{-1,0,1}
-};
+// SKY RENDERING
+
+// The Quake 2 code we started with did a bunch of elaborite math to minimize
+// the amount of skybox that got drawn. However, modern graphics hardware
+// (i.e. 2001 and newer) has early Z rejection, making this unnecessary. We
+// now draw the whole skybox all the time, which in testing has been shown to
+// have no appreciable performance hit.
 
 // 1 = s, 2 = t, 3 = 2048
 int	st_to_vec[6][3] =
 {
-	{3,-1,2},
-	{-3,1,2},
+	{3,-1,-2},
+	{-3,1,-2},
 
-	{1,3,2},
-	{-1,-3,2},
+	{1,3,-2},
+	{-1,-3,-2},
 
-	{-2,-1,3},		// 0 degrees yaw, look straight up
-	{2,-1,-3}		// look straight down
-
-//	{-1,2,3},
-//	{1,2,-3}
+	{2,-1,3},		// 0 degrees yaw, look straight up
+	{-2,-1,-3}		// look straight down
 };
 
-// s = [0]/[2], t = [1]/[2]
-int	vec_to_st[6][3] =
-{
-	{-2,3,1},
-	{2,3,-1},
-
-	{1,3,2},
-	{-1,3,-2},
-
-	{-2,-1,3},
-	{-2,1,-3}
-
-//	{-1,2,3},
-//	{1,2,-3}
-};
-
-float	skymins[2][6], skymaxs[2][6];
-float	sky_min, sky_max;
-
-void DrawSkyPolygon (int nump, vec3_t vecs)
-{
-	int		i,j;
-	vec3_t	v, av;
-	float	s, t, dv;
-	int		axis;
-	float	*vp;
-
-	// decide which face it maps to
-	VectorCopy (vec3_origin, v);
-	for (i=0, vp=vecs ; i<nump ; i++, vp+=3)
-	{
-		VectorAdd (vp, v, v);
-	}
-	av[0] = fabs(v[0]);
-	av[1] = fabs(v[1]);
-	av[2] = fabs(v[2]);
-	if (av[0] > av[1] && av[0] > av[2])
-	{
-		if (v[0] < 0)
-			axis = 1;
-		else
-			axis = 0;
-	}
-	else if (av[1] > av[2] && av[1] > av[0])
-	{
-		if (v[1] < 0)
-			axis = 3;
-		else
-			axis = 2;
-	}
-	else
-	{
-		if (v[2] < 0)
-			axis = 5;
-		else
-			axis = 4;
-	}
-
-	// project new texture coords
-	for (i=0 ; i<nump ; i++, vecs+=3)
-	{
-		j = vec_to_st[axis][2];
-		if (j > 0)
-			dv = vecs[j - 1];
-		else
-			dv = -vecs[-j - 1];
-		if (dv < 0.001)
-			continue;	// don't divide by zero
-		j = vec_to_st[axis][0];
-		if (j < 0)
-			s = -vecs[-j -1] / dv;
-		else
-			s = vecs[j-1] / dv;
-		j = vec_to_st[axis][1];
-		if (j < 0)
-			t = -vecs[-j -1] / dv;
-		else
-			t = vecs[j-1] / dv;
-
-		if (s < skymins[0][axis])
-			skymins[0][axis] = s;
-		if (t < skymins[1][axis])
-			skymins[1][axis] = t;
-		if (s > skymaxs[0][axis])
-			skymaxs[0][axis] = s;
-		if (t > skymaxs[1][axis])
-			skymaxs[1][axis] = t;
-	}
-}
-
-#define	ON_EPSILON		0.1			// point on plane side epsilon
-#define	MAX_CLIP_VERTS	64
-void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
-{
-	float	*norm;
-	float	*v;
-	qboolean	front, back;
-	float	d, e;
-	float	dists[MAX_CLIP_VERTS];
-	int		sides[MAX_CLIP_VERTS];
-	vec3_t	newv[2][MAX_CLIP_VERTS];
-	int		newc[2];
-	int		i, j;
-
-	if (nump > MAX_CLIP_VERTS-2)
-		Com_Error (ERR_DROP, "ClipSkyPolygon: MAX_CLIP_VERTS");
-	if (stage == 6)
-	{	// fully clipped, so draw it
-		DrawSkyPolygon (nump, vecs);
-		return;
-	}
-
-	front = back = false;
-	norm = skyclip[stage];
-	for (i=0, v = vecs ; i<nump ; i++, v+=3)
-	{
-		d = DotProduct (v, norm);
-		if (d > ON_EPSILON)
-		{
-			front = true;
-			sides[i] = SIDE_FRONT;
-		}
-		else if (d < -ON_EPSILON)
-		{
-			back = true;
-			sides[i] = SIDE_BACK;
-		}
-		else
-			sides[i] = SIDE_ON;
-		dists[i] = d;
-	}
-
-	if (!front || !back)
-	{	// not clipped
-		ClipSkyPolygon (nump, vecs, stage+1);
-		return;
-	}
-
-	// clip it
-	sides[i] = sides[0];
-	dists[i] = dists[0];
-	VectorCopy (vecs, (vecs+(i*3)) );
-	newc[0] = newc[1] = 0;
-
-	for (i=0, v = vecs ; i<nump ; i++, v+=3)
-	{
-		switch (sides[i])
-		{
-		case SIDE_FRONT:
-			VectorCopy (v, newv[0][newc[0]]);
-			newc[0]++;
-			break;
-		case SIDE_BACK:
-			VectorCopy (v, newv[1][newc[1]]);
-			newc[1]++;
-			break;
-		case SIDE_ON:
-			VectorCopy (v, newv[0][newc[0]]);
-			newc[0]++;
-			VectorCopy (v, newv[1][newc[1]]);
-			newc[1]++;
-			break;
-		}
-
-		if (sides[i] == SIDE_ON || sides[i+1] == SIDE_ON || sides[i+1] == sides[i])
-			continue;
-
-		d = dists[i] / (dists[i] - dists[i+1]);
-		for (j=0 ; j<3 ; j++)
-		{
-			e = v[j] + d*(v[j+3] - v[j]);
-			newv[0][newc[0]][j] = e;
-			newv[1][newc[1]][j] = e;
-		}
-		newc[0]++;
-		newc[1]++;
-	}
-
-	// continue
-	ClipSkyPolygon (newc[0], newv[0][0], stage+1);
-	ClipSkyPolygon (newc[1], newv[1][0], stage+1);
-}
-
-/*
-=================
-R_AddSkySurface
-=================
-*/
-void R_AddSkySurface (msurface_t *fa)
-{
-	int			i;
-	vec3_t		verts[MAX_CLIP_VERTS];
-	glpoly_t	*p;
-
-	// calculate vertex values for sky box
-	for (p=fa->polys ; p ; p=p->next)
-	{
-		for (i=0 ; i<p->numverts ; i++)
-		{
-			VectorSubtract (p->verts[i], r_origin, verts[i]);
-		}
-		ClipSkyPolygon (p->numverts, verts[0], 0);
-	}
-}
-
-
-/*
-==============
-R_ClearSkyBox
-==============
-*/
-void R_ClearSkyBox (void)
-{
-	int		i;
-
-	for (i=0 ; i<6 ; i++)
-	{
-		skymins[0][i] = skymins[1][i] = 9999;
-		skymaxs[0][i] = skymaxs[1][i] = -9999;
-	}
-}
-
-
-void MakeSkyVec (float s, float t, int axis, float *tex_s, float *tex_t, float *vec, float size)
+void MakeSkyVec (float s, float t, int axis, float *vec, float size)
 {
 	vec3_t		v, b;
 	int			j, k;
 
-	b[0] = s * size;
-	b[1] = t * size;
+	b[0] = (2.0*s-1.0) * size;
+	b[1] = (2.0*t-1.0) * size;
 	b[2] = size;
 
 	for (j=0 ; j<3 ; j++)
@@ -627,23 +423,6 @@ void MakeSkyVec (float s, float t, int axis, float *tex_s, float *tex_t, float *
 			v[j] = b[k - 1];
 	}
 
-	// avoid bilerp seam
-	s = (s+1)*0.5;
-	t = (t+1)*0.5;
-
-	if (s < sky_min)
-		s = sky_min;
-	else if (s > sky_max)
-		s = sky_max;
-	if (t < sky_min)
-		t = sky_min;
-	else if (t > sky_max)
-		t = sky_max;
-
-	t = 1.0 - t;
-
-	*tex_s = s;
-	*tex_t = t;
 	VectorCopy(v, vec);
 }
 
@@ -653,172 +432,95 @@ R_DrawSkyBox
 ==============
 */
 int	skytexorder[6] = {0,2,1,3,4,5};
+
+static int skyquad_texcoords[4][2] = 
+{
+	{0, 1}, {0, 0}, {1, 0}, {1, 1}
+};
+
+static void Sky_DrawQuad_Setup (int axis, float size)
+{
+	int i;
+	
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
+	VArray = &VArrayVerts[0];
+	
+	for (i = 0; i < 4; i++)
+	{
+		int *st = skyquad_texcoords[i];
+		
+		MakeSkyVec (st[0], st[1], axis, VArray, size);
+		VArray[3] = st[0];
+		VArray[4] = st[1];
+		
+		VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+	}
+}
+
+static void Sky_DrawQuad_Callback (void)
+{
+	R_DrawVarrays(GL_QUADS, 0, 4);
+}
+
 void R_DrawSkyBox (void)
 {
 	int		i;
-	float	s ,t;
-	vec3_t	point;
-	float	alpha;
 	rscript_t *rs = NULL;
-	rs_stage_t *stage = NULL;
-
-	if (skyrotate)
-	{	// check for no sky at all
-		for (i=0 ; i<6 ; i++)
-			if (skymins[0][i] < skymaxs[0][i]
-			&& skymins[1][i] < skymaxs[1][i])
-				break;
-		if (i == 6)
-			return;		// nothing visible
-	}
 
 	qglPushMatrix ();
 	qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 	qglRotatef (r_newrefdef.time * skyrotate, skyaxis[0], skyaxis[1], skyaxis[2]);
+	
+	#define DRAWDIST 15000 // TODO: use this constant in more places
+	
+	// Make sure the furthest possible corner of the skybox is closer than the
+	// draw distance we supplied to glFrustum. 
+	#define SKYDIST (sqrt(3*DRAWDIST*DRAWDIST)-1.0)
+	
+	// Scale the fog distances up so fog looks like it used to before 
+	// SKYDIST was increased. 
+	R_SetupFog (((float)SKYDIST)/2300.0);
 
 	for (i=0 ; i<6 ; i++)
 	{
-		if (skyrotate)
-		{	// hack, forces full sky to draw when rotating
-			skymins[0][i] = -1;
-			skymins[1][i] = -1;
-			skymaxs[0][i] = 1;
-			skymaxs[1][i] = 1;
-		}
-
-		if (skymins[0][i] >= skymaxs[0][i]
-		|| skymins[1][i] >= skymaxs[1][i])
-			continue;
-
 		GL_Bind (sky_images[skytexorder[i]]->texnum);
 
-		qglBegin (GL_QUADS);
-
-		MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, 3300);
-		qglTexCoord2f (s, t);
-		qglVertex3fv (point);
-
-		MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, 3300);
-		qglTexCoord2f (s, t);
-		qglVertex3fv (point);
-
-		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, 3300);
-		qglTexCoord2f (s, t);
-		qglVertex3fv (point);
-
-		MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, 3300);
-		qglTexCoord2f (s, t);
-		qglVertex3fv (point);
-
-		qglEnd ();
-
+		Sky_DrawQuad_Setup (i, SKYDIST);
+		Sky_DrawQuad_Callback ();
 	}
+	
 	qglPopMatrix ();
 
-    if(r_shaders->value) { //just cloud layers for now, we can expand this
+	if(r_shaders->value) { //just cloud layers for now, we can expand this
 
 		qglPushMatrix (); //rotate the clouds
 		qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 		qglRotatef (rs_realtime * 20, 0, 1, 0);
-
+		
 		for (i=0 ; i<6 ; i++)
 		{
 			rs=(rscript_t *)sky_images[skytexorder[i]]->script;
+			
+			if (rs == NULL)
+				continue;
+			
+			Sky_DrawQuad_Setup (i, SKYDIST);
 
-			if(rs) {
-
-				stage=rs->stage;
-				while (stage)
-				{
-					qglDepthMask( GL_FALSE );	 	// no z buffering
-					qglEnable( GL_BLEND);
-					GL_TexEnv( GL_MODULATE );
-					GLSTATE_DISABLE_ALPHATEST
-
-					GL_Bind (stage->texture->texnum);
-
-					if (stage->blendfunc.blend)
-					{
-						GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
-						GLSTATE_ENABLE_BLEND
-					}
-					else
-					{
-						GLSTATE_DISABLE_BLEND
-					}
-
-					if (stage->alphashift.min || stage->alphashift.speed)
-					{
-						alpha=0.0f;
-
-						if (!stage->alphashift.speed && stage->alphashift.min > 0)
-						{
-							alpha=stage->alphashift.min;
-						}
-						else if (stage->alphashift.speed)
-						{
-							alpha=sin(rs_realtime * stage->alphashift.speed);
-							alpha=(alpha+1)*0.5f;
-							if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
-							if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
-						}
-					}
-					else
-						alpha=1.0f;
-
-					qglColor4f(1,1,1,alpha);
-
-					if (stage->alphamask)
-					{
-						GLSTATE_ENABLE_ALPHATEST
-					}
-					else
-					{
-						GLSTATE_DISABLE_ALPHATEST
-					}
-
-					skymins[0][i] = -1;
-					skymins[1][i] = -1;
-					skymaxs[0][i] = 1;
-					skymaxs[1][i] = 1;
-
-					qglBegin (GL_QUADS);
-
-					MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, 2300);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, 2300);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, 2300);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, 2300);
-					RS_SetTexcoords2D (stage, &s, &t);
-					qglTexCoord2f (s, t);
-					qglVertex3fv (point);
-
-					qglEnd();
-
-					stage=stage->next;
-				}
-			}
+			qglDepthMask( GL_FALSE );	 	// no z buffering
+			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, Sky_DrawQuad_Callback);
 		}
+		R_KillVArrays ();
 		// restore the original blend mode
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_DISABLE_BLEND
-		qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		qglColor4f( 1,1,1,1 );
 		qglDepthMask( GL_TRUE );	// back to normal Z buffering
 		GL_TexEnv( GL_REPLACE );
 		qglPopMatrix ();
 	}
+	
+	R_SetupFog (1);
 }
 
 
@@ -856,6 +558,13 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 					RS_ReadyScript(sky_images[i]->script);
 			}
 		}
+		
+		// get rid of nasty visible seams in the skybox (better method than 
+		// screwing around with the texcoords)
+		GL_SelectTexture (0);
+		GL_Bind (sky_images[i]->texnum);
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		//set only if not set by fog script
 		if(r_sunX == 0.0 && r_sunY == 0.0 && r_sunZ == 0.0)
@@ -884,15 +593,6 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		}
 
 		if (gl_skymip->integer)
-		{	// take less memory
 			gl_picmip->integer -= gl_skymip->integer;
-			sky_min = 1.0/256;
-			sky_max = 255.0/256;
-		}
-		else
-		{
-			sky_min = 1.0/512;
-			sky_max = 511.0/512;
-		}
 	}
 }

@@ -103,8 +103,6 @@ cvar_t	*r_nocull;
 cvar_t	*r_lerpmodels;
 cvar_t	*r_lefthand;
 
-cvar_t  *r_wave; // Water waves
-
 cvar_t	*r_shadowmapscale;
 
 cvar_t	*r_overbrightbits;
@@ -113,16 +111,6 @@ cvar_t	*gl_vlights;
 
 cvar_t	*gl_nosubimage;
 
-cvar_t	*gl_particle_min_size;
-cvar_t	*gl_particle_max_size;
-cvar_t	*gl_particle_size;
-cvar_t	*gl_particle_att_a;
-cvar_t	*gl_particle_att_b;
-cvar_t	*gl_particle_att_c;
-
-cvar_t	*gl_ext_pointparameters;
-
-cvar_t	*gl_log;
 cvar_t	*gl_bitdepth;
 cvar_t	*gl_drawbuffer;
 cvar_t	*gl_driver;
@@ -482,18 +470,112 @@ void R_DrawNullModel (void)
 
 #include "r_lodcalc.h"
 
+extern cvar_t *cl_simpleitems;
+static void R_DrawEntity (void)
+{
+	rscript_t	*rs = NULL;
+	vec3_t		dist, span;
+	float		size;
+	
+	currentmodel = currententity->model;
+	
+	if (cl_simpleitems->integer && currentmodel && currentmodel->simple_texnum)
+		return;
+	
+	if (currentmodel && r_shaders->integer)
+	{
+		rs=(rscript_t *)currentmodel->script;
+
+		//custom player skin (must be done here)
+		if (currententity->skin)
+		{
+		    rs = currententity->skin->script;
+            if(rs)
+                RS_ReadyScript(rs);
+        }
+
+		if (rs)
+			currententity->script = rs;
+		else
+			currententity->script = NULL;
+	}
+
+	//get distance
+	VectorSubtract(r_origin, currententity->origin, dist);
+	
+	//get volume
+	VectorSubtract (currentmodel->maxs, currentmodel->mins, span);
+	size = VectorLength (span);
+	
+	// Cull very distant meshes. In practice, only tiny things like small
+	// rocks and pebbles ever actually get culled.
+	if (VectorLength (dist) > LOD_DIST*size)
+		return;
+	
+	//set lod if available
+	if(VectorLength(dist) > LOD_DIST*2.0 && currententity->lod2 != NULL)
+		currentmodel = currententity->lod2;
+	else if(VectorLength(dist) > LOD_DIST && currententity->lod1 != NULL)
+		currentmodel = currententity->lod1;
+
+	if (!currentmodel)
+	{
+		R_DrawNullModel ();
+		return;
+	}
+	switch (currentmodel->type)
+	{
+	    case mod_md2:
+	    case mod_iqm:
+	    case mod_terrain:
+	        R_Mesh_Draw ();
+			break;
+		case mod_brush:
+			R_DrawBrushModel ();
+			break;
+		default:
+			Com_Error(ERR_DROP, "Bad modeltype");
+			break;
+	}
+}
+
+static void R_DrawEntityList (entity_t *list, int numentities)
+{
+	int		i;
+	
+	// draw non-transparent first
+	for (i = 0 ; i < numentities; i++)
+	{
+		currententity = &list[i];
+		if (currententity->flags & RF_TRANSLUCENT)
+			continue;	// transluscent
+		
+		R_DrawEntity ();
+	}
+
+	// draw transparent entities
+	// we could sort these if it ever becomes a problem...
+	qglDepthMask (0);		// no z writes
+	for (i = 0 ; i < numentities; i++)
+	{
+		currententity = &list[i];
+		if (!(currententity->flags & RF_TRANSLUCENT))
+			continue;	// solid
+		
+		fadeShadow = 1.0;
+		R_DrawEntity ();
+	}
+	qglDepthMask (1);		// back to writing
+}
+
+
 /*
 =============
 R_DrawEntitiesOnList
 =============
 */
-extern cvar_t *cl_simpleitems;
 void R_DrawEntitiesOnList (void)
 {
-	int		i;
-	rscript_t	*rs = NULL;
-	vec3_t	dist;
-
 	if (!r_drawentities->integer)
 		return;
 
@@ -501,288 +583,28 @@ void R_DrawEntitiesOnList (void)
 	{ // ODE init failed, force ragdolls off
 		r_ragdolls = Cvar_ForceSet("r_ragdolls", "0");
 	}
-
-	// draw non-transparent first
-	for (i=0 ; i<r_newrefdef.num_entities ; i++)
-	{
-		currententity = &r_newrefdef.entities[i];
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
-		
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-			    rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		
-		if (cl_simpleitems->integer && currentmodel && currentmodel->simple_texnum)
-			continue;
-
-		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);		
-		
-		//set lod if available
-		if(VectorLength(dist) > LOD_DIST*2.0)
-		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > LOD_DIST)
-		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
-		}
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		    case mod_md2:
-		    case mod_iqm:
-		        R_Mesh_Draw ();
-				break;
-			case mod_brush:
-				R_DrawBrushModel ();
-				break;
-			default:
-				Com_Error(ERR_DROP, "Bad modeltype");
-				break;
-		}
-	}
-
-	// draw transparent entities
-	// we could sort these if it ever becomes a problem...
-	qglDepthMask (0);		// no z writes
-	for (i=0 ; i<r_newrefdef.num_entities ; i++)
-	{
-		currententity = &r_newrefdef.entities[i];
-		if (!(currententity->flags & RF_TRANSLUCENT))
-			continue;	// solid
-
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-                rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		fadeShadow = 1.0;
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		    case mod_md2:
-		    case mod_iqm:
-		        R_Mesh_Draw ();
-				break;
-			case mod_brush:
-				R_DrawBrushModel ();
-				break;
-			default:
-				Com_Error (ERR_DROP, "Bad modeltype");
-				break;
-		}
-	}
-	qglDepthMask (1);		// back to writing
+	
+	R_DrawEntityList (r_newrefdef.entities, r_newrefdef.num_entities);
 }
 
 void R_DrawViewEntitiesOnList (void)
 {
-	int		i;
-	rscript_t	*rs = NULL;
-
 	if (!r_drawentities->integer)
 		return;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-
-	// draw non-transparent first
-	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
-	{
-		currententity = &r_newrefdef.viewentities[i];
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
-
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-                rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		case mod_md2:
-		case mod_iqm:
-		    R_Mesh_Draw ();
-			break;
-		default:
-			Com_Error(ERR_DROP, "Bad modeltype");
-			break;
-		}
-	}
-
-	// draw transparent entities
-	// we could sort these if it ever becomes a problem...
-	qglDepthMask (0);		// no z writes
-	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
-	{
-		currententity = &r_newrefdef.viewentities[i];
-		if (!(currententity->flags & RF_TRANSLUCENT))
-			continue;	// solid
-
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-                rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		switch (currentmodel->type)
-		{
-		case mod_md2:
-		case mod_iqm:
-		    R_Mesh_Draw ();
-			break;
-		default:
-			Com_Error (ERR_DROP, "Bad modeltype");
-			break;
-		}
-	}
-	qglDepthMask (1);		// back to writing
+	
+	R_DrawEntityList (r_newrefdef.viewentities, r_newrefdef.num_viewentities);
 }
 
 void R_DrawTerrain (void)
 {
-	int		i;
-	rscript_t	*rs = NULL;
-	vec3_t	dist;
-
 	if (!r_drawworld->integer)
 		return;
-
-	for (i=0 ; i<num_terrain_entities ; i++)
-	{
-		currententity = &terrain_entities[i];
-		
-		if (currententity->model && r_shaders->integer)
-		{
-			rs=(rscript_t *)currententity->model->script;
-
-			//custom player skin (must be done here)
-			if (currententity->skin)
-			{
-			    rs = currententity->skin->script;
-                if(rs)
-                    RS_ReadyScript(rs);
-            }
-
-			if (rs)
-				currententity->script = rs;
-			else
-				currententity->script = NULL;
-		}
-
-		currentmodel = currententity->model;
-		
-		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);		
-		
-		//set lod if available
-		if(VectorLength(dist) > LOD_DIST*2.0)
-		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > LOD_DIST)
-		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
-		}
-
-		if (!currentmodel)
-		{
-			R_DrawNullModel ();
-			continue;
-		}
-		
-		// TODO: maybe we don't actually want to assert this?
-		assert (currentmodel->type == mod_terrain);
-		
-		R_Mesh_Draw ();
-	}
 	
-	// TODO: will these models ever be transparent?
+	R_DrawEntityList (terrain_entities, num_terrain_entities);
+	R_DrawEntityList (rock_entities, num_rock_entities);
 }
 
 extern int r_drawing_fbeffect;
@@ -1111,10 +933,24 @@ static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboole
 
 extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect));
 
+void R_SetupFog (float distance_boost)
+{
+	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
+	
+	if(map_fog)
+	{
+		qglFogi(GL_FOG_MODE, GL_LINEAR);
+		qglFogfv(GL_FOG_COLOR, colors);
+		qglFogf(GL_FOG_START, fog.start * distance_boost);
+		qglFogf(GL_FOG_END, fog.end * distance_boost);
+		qglFogf(GL_FOG_DENSITY, fog.density);
+		qglEnable(GL_FOG);
+	}
+}
+
 void R_RenderView (refdef_t *fd)
 {
 	vec3_t forward;
-	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
 
 	numRadarEnts = 0;
 
@@ -1171,15 +1007,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_SetupGL ();
 
-	if(map_fog)
-	{
-		qglFogi(GL_FOG_MODE, GL_LINEAR);
-		qglFogfv(GL_FOG_COLOR, colors);
-		qglFogf(GL_FOG_START, fog.start);
-		qglFogf(GL_FOG_END, fog.end);
-		qglFogf(GL_FOG_DENSITY, fog.density);
-		qglEnable(GL_FOG);
-	}
+	R_SetupFog (1);
 
 	R_DrawWorldSurfs ();
 	
@@ -1315,20 +1143,10 @@ void R_Register( void )
 	r_nocull = Cvar_Get ("r_nocull", "0", 0);
 	r_lerpmodels = Cvar_Get ("r_lerpmodels", "1", 0);
 
-	r_wave = Cvar_Get ("r_wave", "2", CVAR_ARCHIVE); // Water waves
-
 	gl_nosubimage = Cvar_Get( "gl_nosubimage", "0", 0 );
-
-	gl_particle_min_size = Cvar_Get( "gl_particle_min_size", ".2", CVAR_ARCHIVE );
-	gl_particle_max_size = Cvar_Get( "gl_particle_max_size", "40", CVAR_ARCHIVE );
-	gl_particle_size = Cvar_Get( "gl_particle_size", "40", CVAR_ARCHIVE );
-	gl_particle_att_a = Cvar_Get( "gl_particle_att_a", "0.01", CVAR_ARCHIVE );
-	gl_particle_att_b = Cvar_Get( "gl_particle_att_b", "0.0", CVAR_ARCHIVE );
-	gl_particle_att_c = Cvar_Get( "gl_particle_att_c", "0.01", CVAR_ARCHIVE );
 
 	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE|CVARDOC_INT );
 	Cvar_Describe (gl_modulate, "Brightness setting. Higher means brighter.");
-	gl_log = Cvar_Get( "gl_log", "0", 0 );
 	gl_bitdepth = Cvar_Get( "gl_bitdepth", "0", 0 );
 	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
@@ -1353,8 +1171,6 @@ void R_Register( void )
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
-
-	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "0", CVAR_ARCHIVE );
 
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE|CVARDOC_BOOL );
@@ -1440,13 +1256,6 @@ qboolean R_SetMode (void)
 {
 	rserr_t err;
 	qboolean fullscreen;
-
-	if ( vid_fullscreen->modified && !gl_config.allow_cds )
-	{
-		Com_Printf ("R_SetMode() - CDS not allowed with this driver\n" );
-		Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->integer );
-		vid_fullscreen->modified = false;
-	}
 
 	fullscreen = vid_fullscreen->integer;
 
@@ -1582,14 +1391,7 @@ R_Init
 int R_Init( void *hinstance, void *hWnd )
 {
 	int		err;
-	int		j;
-	extern float r_turbsin[256];
-
-	for ( j = 0; j < 256; j++ )
-	{
-		r_turbsin[j] *= 0.5;
-	}
-
+	
 	Draw_GetPalette ();
 
 	R_Register();
@@ -1608,6 +1410,9 @@ int R_Init( void *hinstance, void *hWnd )
 		QGL_Shutdown();
 		return -1;
 	}
+	
+	// reset GL_BlendFunc state variables.
+	gl_state.bFunc1 = gl_state.bFunc2 = -1;
 
 	// set our "safe" modes
 	gl_state.prev_mode = 3;
@@ -1639,9 +1444,6 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
 
-	gl_config.allow_cds = true;
-	Com_Printf ("...allowing CDS\n" );
-
 	/*
 	** grab extensions
 	*/
@@ -1668,23 +1470,6 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...WGL_EXT_swap_control not found\n" );
 	}
 #endif
-
-	if (strstr(gl_config.extensions_string, "GL_EXT_point_parameters"))
-	{
-		if(gl_ext_pointparameters->integer)
-		{
-			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
-			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_EXT_point_parameters\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_EXT_point_parameters not found\n" );
-	}
 
 	R_InitImageSubsystem();
 
@@ -1886,9 +1671,6 @@ void R_BeginFrame( float camera_separation )
 
 	gl_state.camera_separation = camera_separation;
 
-	if (con_font->modified)
-		RefreshFont ();
-
 	/*
 	** change modes if necessary
 	*/
@@ -1898,17 +1680,6 @@ void R_BeginFrame( float camera_separation )
 
 		ref = Cvar_Get ("vid_ref", "gl", 0);
 		ref->modified = true;
-	}
-
-	if ( gl_log->modified )
-	{
-		GLimp_EnableLogging( gl_log->integer );
-		gl_log->modified = false;
-	}
-
-	if ( gl_log->integer )
-	{
-		GLimp_LogNewFrame();
 	}
 
 	GLimp_BeginFrame( camera_separation );
@@ -1984,50 +1755,6 @@ R_EndFrame
 void R_EndFrame (void)
 {
 	 GLimp_EndFrame ();
-}
-
-/*
-=============
-R_SetPalette
-=============
-*/
-unsigned r_rawpalette[256];
-
-void R_SetPalette ( const unsigned char *palette)
-{
-	int		i;
-
-	byte *rp = ( byte * ) r_rawpalette;
-
-	if ( palette )
-	{
-		for ( i = 0; i < 256; i++ )
-		{
-			rp[i*4+0] = palette[i*3+0];
-			rp[i*4+1] = palette[i*3+1];
-			rp[i*4+2] = palette[i*3+2];
-			rp[i*4+3] = 0xff;
-		}
-	}
-	else
-	{
-		for ( i = 0; i < 256; i++ )
-		{
-			rp[i*4+0] = d_8to24table[i] & 0xff;
-			rp[i*4+1] = ( d_8to24table[i] >> 8 ) & 0xff;
-			rp[i*4+2] = ( d_8to24table[i] >> 16 ) & 0xff;
-			rp[i*4+3] = 0xff;
-		}
-	}
-
-	if ( qglClear && qglClearColor)
-	{
-		// only run this if we haven't uninitialised
-		// OpenGL already
-		qglClearColor (0,0,0,0);
-		qglClear (GL_COLOR_BUFFER_BIT);
-		qglClearColor (1,0, 0.5 , 0.5);
-	}
 }
 
 /*

@@ -32,10 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <GL/gl.h>
 
-#ifndef GL_COLOR_INDEX8_EXT
-#define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
-#endif
-
 #include "qcommon/qcommon.h"
 
 #include "qgl.h"
@@ -85,9 +81,6 @@ typedef enum
 
 extern float	r_frametime;
 
-void GL_BeginRendering (int *x, int *y, int *width, int *height);
-void GL_EndRendering (void);
-
 void GL_SetDefaultState( void );
 void GL_UpdateSwapInterval( void );
 
@@ -126,23 +119,8 @@ extern	cvar_t	*r_novis;
 extern	cvar_t	*r_nocull;
 extern	cvar_t	*r_lerpmodels;
 
-extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
-extern  cvar_t  *r_wave; //water waves
-
-extern cvar_t	*gl_ext_swapinterval;
-extern cvar_t	*gl_ext_pointparameters;
-extern cvar_t	*gl_ext_compiled_vertex_array;
-
-extern cvar_t	*gl_particle_min_size;
-extern cvar_t	*gl_particle_max_size;
-extern cvar_t	*gl_particle_size;
-extern cvar_t	*gl_particle_att_a;
-extern cvar_t	*gl_particle_att_b;
-extern cvar_t	*gl_particle_att_c;
-
 extern	cvar_t	*gl_bitdepth;
 extern	cvar_t	*gl_mode;
-extern	cvar_t	*gl_log;
 extern	cvar_t	*gl_lightmap;
 extern	cvar_t	*gl_dynamic;
 extern	cvar_t	*gl_nobind;
@@ -153,7 +131,6 @@ extern	cvar_t	*gl_showpolys;
 extern	cvar_t	*gl_finish;
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_cull;
-extern	cvar_t	*gl_poly;
 extern	cvar_t	*gl_polyblend;
 extern	cvar_t	*gl_modulate;
 extern	cvar_t	*gl_drawbuffer;
@@ -164,7 +141,6 @@ extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
 extern	cvar_t	*gl_vlights;
-extern  cvar_t	*gl_usevbo;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
@@ -247,7 +223,6 @@ void GL_EnableTexture (int target, qboolean enable);
 void GL_EnableMultitexture (qboolean enable);
 void GL_SelectTexture (int target);
 void GL_InvalidateTextureState (void);
-void RefreshFont (void);
 
 extern void vectoangles (vec3_t value1, vec3_t angles);
 
@@ -257,7 +232,6 @@ void R_DynamicLightPoint (vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
 void R_PushDlights (void);
 void R_PushDlightsForBModel (entity_t *e);
-void SetVertexOverbrights (qboolean toggle);
 
 //====================================================================
 extern	model_t	*r_worldmodel;
@@ -271,24 +245,25 @@ extern void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 // "fake" terrain entities parsed directly out of the BSP on the client side.
 int			num_terrain_entities;
 entity_t	terrain_entities[MAX_MAP_MODELS];
+int			num_rock_entities;
+entity_t	rock_entities[MAX_ROCKS];
 
 //Renderer main loop
 extern int	R_Init( void *hinstance, void *hWnd );
 extern void R_Shutdown( void );
 
+void R_SetupFog (float distance_boost);
 extern void R_SetupViewport (void);
 extern void R_RenderView (refdef_t *fd);
 extern void GL_ScreenShot_f (void);
 extern void R_Mesh_Draw (void);
 extern void R_DrawBrushModel (void);
 extern void R_DrawWorldSurfs (void);
-extern void R_RenderDlights (void);
 extern void R_DrawAlphaSurfaces (void);
 extern void R_InitParticleTexture (void);
 extern void R_DrawParticles (void);
 extern void R_DrawRadar(void);
 extern void R_DrawVehicleHUD (void);
-extern void R_ClearSkyBox (void);
 extern void R_DrawSkyBox (void);
 extern void Draw_InitLocal (void);
 
@@ -297,40 +272,38 @@ extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
-void R_SetLightingMode (void);
 extern void R_RotateForEntity (entity_t *e);
 extern void R_MarkWorldSurfs (void);
-extern void R_AddSkySurface (msurface_t *fa);
-extern void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
+void R_RenderWaterPolys (msurface_t *fa);
 extern void R_ReadFogScript(char config_file[128]);
 extern void R_ReadMusicScript(char config_file[128]);
+extern int SignbitsForPlane (cplane_t *out);
 
 //Lights
 extern dlight_t *dynLight;
 extern vec3_t lightspot;
-extern void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 extern void  VLight_Init (void);
 extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
 
 //BSP 
-extern GLuint normalisationCubeMap;
 extern image_t *r_droplets;
 extern image_t *r_droplets_nm;
 extern image_t *r_blooddroplets;
 extern image_t *r_blooddroplets_nm;
-extern void BSP_DrawTexturelessPoly (msurface_t *fa);
 extern void BSP_DrawTexturelessBrushModel (entity_t *e);
+void BSP_InvalidateVBO (void);
+void BSP_DrawVBOAccum (void);
+void BSP_ClearVBOAccum (void);
+void BSP_FlushVBOAccum (void);
+void BSP_AddSurfToVBOAccum (msurface_t *surf);
 
 //Postprocess
 void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
 //VBO
-extern qboolean use_vbo;
 extern GLuint vboId;
 extern GLuint eboId;
-extern int totalVBOsize;
-extern int	vboPosition;
 extern void R_LoadVBOSubsystem(void);
 extern void R_VCShutdown(void);
 extern void VB_WorldVCInit(void);
@@ -339,7 +312,7 @@ extern void VB_BuildWorldVBO(void);
 void GL_SetupWorldVBO (void);
 void GL_BindVBO(vertCache_t *cache);
 void GL_BindIBO(vertCache_t *cache);
-vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod);
+vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache);
 vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, model_t *mod);
 extern void R_VCFree(vertCache_t *cache);
 
@@ -370,6 +343,7 @@ extern int c_grasses;
 grass_t r_grasses[MAX_GRASSES];
 qboolean r_hasleaves;
 extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type);
+void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, float size, char name[MAX_OSPATH], int type);
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
 extern void R_FinalizeGrass(model_t *mod); 
@@ -404,7 +378,6 @@ extern void	Draw_FadeScreen (void);
 
 extern void	R_BeginFrame( float camera_separation );
 extern void	R_SwapBuffers( int );
-extern void	R_SetPalette ( const unsigned char *palette);
 extern int	Draw_GetPalette (void);
 
 image_t *R_RegisterSkin (char *name);
@@ -412,7 +385,6 @@ image_t *R_RegisterParticlePic(const char *name);
 image_t *R_RegisterParticleNormal(const char *name);
 image_t *R_RegisterGfxPic(const char *name);
 
-extern void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 extern image_t *GL_FindFreeImage (char *name, int width, int height, imagetype_t type);
 extern image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
 extern image_t *GL_GetImage( const char * name );
@@ -432,46 +404,6 @@ extern void	GL_TextureSolidMode( char *string );
 /*
 ** GL config stuff
 */
-#define GL_RENDERER_VOODOO		0x00000001
-#define GL_RENDERER_VOODOO2   	0x00000002
-#define GL_RENDERER_VOODOO_RUSH	0x00000004
-#define GL_RENDERER_BANSHEE		0x00000008
-#define	GL_RENDERER_3DFX		0x0000000F
-
-#define GL_RENDERER_PCX1		0x00000010
-#define GL_RENDERER_PCX2		0x00000020
-#define GL_RENDERER_PMX			0x00000040
-#define	GL_RENDERER_POWERVR		0x00000070
-
-#define GL_RENDERER_PERMEDIA2	0x00000100
-#define GL_RENDERER_GLINT_MX	0x00000200
-#define GL_RENDERER_GLINT_TX	0x00000400
-#define GL_RENDERER_3DLABS_MISC	0x00000800
-#define	GL_RENDERER_3DLABS		0x00000F00
-
-#define GL_RENDERER_REALIZM		0x00001000
-#define GL_RENDERER_REALIZM2	0x00002000
-#define	GL_RENDERER_INTERGRAPH	0x00003000
-
-#define GL_RENDERER_3DPRO		0x00004000
-#define GL_RENDERER_REAL3D		0x00008000
-#define GL_RENDERER_RIVA128		0x00010000
-#define GL_RENDERER_DYPIC		0x00020000
-
-#define GL_RENDERER_V1000		0x00040000
-#define GL_RENDERER_V2100		0x00080000
-#define GL_RENDERER_V2200		0x00100000
-#define	GL_RENDERER_RENDITION	0x001C0000
-
-#define GL_RENDERER_O2          0x00100000
-#define GL_RENDERER_IMPACT      0x00200000
-#define GL_RENDERER_RE			0x00400000
-#define GL_RENDERER_IR			0x00800000
-#define	GL_RENDERER_SGI			0x00F00000
-
-#define GL_RENDERER_MCD			0x01000000
-#define GL_RENDERER_OTHER		0x80000000
-
 #define GLSTATE_DISABLE_ALPHATEST	if (gl_state.alpha_test) { qglDisable(GL_ALPHA_TEST); gl_state.alpha_test=false; }
 #define GLSTATE_ENABLE_ALPHATEST	if (!gl_state.alpha_test) { qglEnable(GL_ALPHA_TEST); gl_state.alpha_test=true; }
 
@@ -481,17 +413,12 @@ extern void	GL_TextureSolidMode( char *string );
 #define GLSTATE_DISABLE_TEXGEN		if (gl_state.texgen) { qglDisable(GL_TEXTURE_GEN_S); qglDisable(GL_TEXTURE_GEN_T); qglDisable(GL_TEXTURE_GEN_R); gl_state.texgen=false; }
 #define GLSTATE_ENABLE_TEXGEN		if (!gl_state.texgen) { qglEnable(GL_TEXTURE_GEN_S); qglEnable(GL_TEXTURE_GEN_T); qglEnable(GL_TEXTURE_GEN_R); gl_state.texgen=true; }
 
-#define GL_COMBINE                        0x8570
-#define GL_DOT3_RGB                       0x86AE
-
 typedef struct
 {
-	int         renderer;
 	const char *renderer_string;
 	const char *vendor_string;
 	const char *version_string;
 	const char *extensions_string;
-	qboolean	allow_cds;
 } glconfig_t;
 
 typedef struct
@@ -500,8 +427,6 @@ typedef struct
     qboolean    fullscreen;
 
     int         prev_mode;
-
-    unsigned char *d_16to8table;
 
     int         lightmap_textures;
 
@@ -512,6 +437,9 @@ typedef struct
     int         currenttmu;
     qboolean	tmuswitch_done;
     qboolean    currenttmu_defined;
+	
+	GLenum bFunc1;
+	GLenum bFunc2;
 
     float       camera_separation;
     qboolean    stereo_enabled;
@@ -532,19 +460,13 @@ extern glconfig_t  gl_config;
 extern glstate_t   gl_state;
 
 // vertex arrays
-extern int KillFlags;
-
 #define MAX_ARRAY (MAX_PARTICLES*4)
 
 #define VA_SetElem2(v,a,b)		((v)[0]=(a),(v)[1]=(b))
 #define VA_SetElem3(v,a,b,c)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c))
-#define VA_SetElem4(v,a,b,c,d)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c),(v)[3]=(d))
 
 extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
-extern float	norm_array[MAX_ARRAY][3];
-extern float	tan_array[MAX_ARRAY][4];
-extern float	col_array[MAX_ARRAY][4];
 
 #define MAX_VARRAY_VERTS (MAX_VERTS + 2)
 #define MAX_VARRAY_VERTEX_SIZE 11
@@ -556,35 +478,19 @@ extern float	col_array[MAX_ARRAY][4];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
-#define VERT_MULTI_TEXTURED				2		// verts and st for 2 tmus
-#define VERT_COLOURED_TEXTURED			4		// verts, st for 1 tmu and colour
-#define VERT_NO_TEXTURE					7		// verts only, no textures
-
-// looks like these should be bit flags (2010-08)
-// apparently not - this was not working as bit flags, works fine as ints
-#define KILL_TMU0_POINTER	1
-#define KILL_TMU1_POINTER	2
-#define KILL_TMU2_POINTER	3
-#define KILL_TMU3_POINTER	4
-#define KILL_TMU4_POINTER   5
-#define KILL_TMU5_POINTER	6
-#define KILL_RGBA_POINTER	7
-#define KILL_NORMAL_POINTER 8
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count);
 void R_InitQuadVarrays(void);
-void R_AddSurfToVArray (msurface_t *surf);
-void R_AddShadowSurfToVArray (msurface_t *surf, vec3_t origin);
-void R_AddTexturedSurfToVArray (msurface_t *surf);
-void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
-void R_KillNormalTMUs(void);
+
+void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer);
+void R_VertexPointer (GLint size, GLsizei stride, const GLvoid *pointer);
+void R_NormalPointer (GLsizei stride, const GLvoid *pointer);
 
 //shadows
 extern  void R_InitShadowSubsystem(void);
@@ -615,7 +521,6 @@ extern void		R_DrawVegetationCaster(void);
 extern void		R_DrawEntityCaster(entity_t *ent);
 extern void		R_GenerateEntityShadow( void );
 extern void		R_GenerateRagdollShadow( int RagDollID );
-extern void		BSP_DrawShadowPoly (msurface_t *fa, vec3_t origin);
 extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
@@ -627,6 +532,7 @@ extern void	R_LoadGLSLPrograms(void);
 //glsl
 GLhandleARB g_programObj;
 GLhandleARB g_shadowprogramObj;
+GLhandleARB g_rscriptprogramObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
 GLhandleARB g_vertexonlymeshprogramObj;
@@ -683,6 +589,24 @@ GLuint		g_location_entShadow;
 GLuint		g_location_fadeShadow;
 GLuint		g_location_xOffset;
 GLuint		g_location_yOffset;
+
+//rscripts
+GLuint		g_location_rs_envmap;
+GLuint		g_location_rs_numblendtextures;
+GLuint		g_location_rs_lightmap;
+GLuint		g_location_rs_fog;
+GLuint		g_location_rs_mainTexture;
+GLuint		g_location_rs_mainTexture2;
+GLuint		g_location_rs_lightmapTexture;
+GLuint		g_location_rs_blendscales;
+GLuint		g_location_rs_blendscales2;
+GLuint		g_location_rs_targetdist;
+GLuint		g_location_rs_blendTexture0;
+GLuint		g_location_rs_blendTexture1;
+GLuint		g_location_rs_blendTexture2;
+GLuint		g_location_rs_blendTexture3;
+GLuint		g_location_rs_blendTexture4;
+GLuint		g_location_rs_blendTexture5;
 
 //water
 GLuint		g_location_baseTexture;
@@ -782,7 +706,6 @@ GLuint		g_location_sunRadius;
 //Shared mesh items
 extern vec3_t	shadelight;
 extern vec3_t	shadevector;
-extern int		model_dlights_num;
 extern m_dlight_t model_dlights[128];
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
@@ -799,7 +722,6 @@ qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
 //iqm
 #define pi 3.14159265
 extern float modelpitch;
-extern double degreeToRadian(double degree);
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 extern void R_DrawINTERQUAKEMODEL(void);
@@ -817,17 +739,12 @@ extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);
+// vegetation, rocks/pebbles, etc.
+void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 
 //Ragdoll
 int r_DrawingRagDoll;
-int r_SurfaceCount;
 
-#define TURBSCALE2 (256.0 / (2 * M_PI))
-
-// reduce runtime calcs
-#define TURBSCALE 40.743665431525205956834243423364
-
-extern float r_turbsin[];
 /*
 ====================================================================
 
@@ -842,7 +759,5 @@ extern qboolean	GLimp_Init( void *hinstance, void *hWnd );
 extern void		GLimp_Shutdown( void );
 extern rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
 extern void		GLimp_AppActivate( qboolean active );
-extern void		GLimp_EnableLogging( qboolean enable );
-extern void		GLimp_LogNewFrame( void );
 
 #endif /* #ifndef R_LOCAL_H_ */

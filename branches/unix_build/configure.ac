@@ -19,6 +19,11 @@
 #   separate data pkg with COR data license
 #
 
+# 2014-01-11, 2014-01-22
+# - integrated libode eliminated
+# - ANSI color option removed (now a cvar)
+# - temporary revert to 2.68 and 1.11.1
+
 # configure.ac for
 #  GNU/Linux, Unix
 #  Mac OS X / Darwin using X11 - supported by MacPorts
@@ -210,21 +215,6 @@ AC_MSG_RESULT([${build_client}])
 AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
 
 dnl
-dnl Alternate Install. Install in the traditional single directory way.
-dnl Might be required for map making tools to work. Also, good when updating
-dnl from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
-dnl
-AC_MSG_CHECKING([for traditional single directory, in place installation])
-AC_ARG_ENABLE(
-	[alternate_install],
-	[AS_HELP_STRING([--enable-alternate-install],
-		[traditional single directory, in-place installation (default:no)])],
-	[alternate_install=${enableval}],
-	[alternate_install=no])
-AC_MSG_RESULT([${alternate_install}])
-AM_CONDITIONAL([ALTERNATE_INSTALL],[ test "x${alternate_install}" = xyes ])
-
-dnl
 dnl Option for disabling installation of documents to allow for custom
 dnl documentation installation. Normally only useful for distro packagers.
 dnl If invoked, show as "custom" in status message
@@ -243,8 +233,8 @@ AC_ARG_WITH(icondir,
 	[AS_HELP_STRING([--with-icondir=DIR],
 		[icon install directory (default:DATADIR/icons)])],[
 		with_icondir=${withval}],[
-		with_icondir=${datadir}/icons
-])
+		with_icondir=${datadir}/iconsdir
+	])
 AC_SUBST([icondir], [${with_icondir}])
 
 #
@@ -258,8 +248,9 @@ AC_SUBST([icondir], [${with_icondir}])
 # For testing modify the code
 #
 cor_games_homedir="cor_games"
-AC_ARG_VAR([COR_GAMES_HOMEDIR],
- 	[(User configuration and data directory (default:$XDG_???/cor_games)])
+AC_ARG_VAR([COR_GAMES_HOMEDIR],[
+		(User configuration and data directory (default:$XDG_?/cor_games))
+])
 
 AS_IF([ test "x${COR_GAMES_HOMEDIR}" = x ],[
  	COR_GAMES_HOMEDIR=${cor_games_homedir}],[
@@ -328,7 +319,8 @@ AM_COND_IF([BUILD_CLIENT],[
 
 	dnl IJG libjpeg required
 	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
-		[AC_MSG_ERROR(["Required jpeg library not found."])])
+		[AC_MSG_ERROR(["Required jpeg library not found."])
+		])
 
 	dnl
 	dnl XF86
@@ -493,6 +485,7 @@ dnl required gcc options.
 dnl  fast-math because strict adherence to IEEE standard is not needed.
 dnl  no-strict-aliasing because strict aliasing is not adhered to in places.
 dnl
+dnl TODO: eliminate these
 AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
 
@@ -535,48 +528,22 @@ AS_IF([ test "x${hide_status}" = xno ],[
 	AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
-	AM_COND_IF([ALTERNATE_INSTALL],[
-		AM_COND_IF([BUILD_CLIENT],[
-			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
-			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
+	AM_COND_IF([BUILD_CLIENT],[
+		AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+		AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+		AS_ECHO([" Zlib support: .......... ${have_zlib}"])
+		AS_IF([ test "x${unix_host}" = xdarwin ],[
+			AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 			])
-			AS_ECHO([" Shared Data ............ ${srcdir}"])
-			AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
-			AS_ECHO([" User Home R/W Data ..... ~/${cor_games_homedir}"])],[
-		dnl
-		dnl try to generate the full path for automake pkgdatadir
-		dnl  which determines DATADIR that locates data1, arena, and botinfo
-		dnl
-		game_data=${datadir}/${PACKAGE_NAME}
-		game_data_a=`eval "echo ${game_data}"`
-		game_data=`eval "echo ${game_data_a}"`
-		AM_COND_IF([BUILD_CLIENT],[
-			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
-			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
-			AS_IF([ test "x${unix_host}" = xdarwin ],[
-				AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
-			])
-		])
-		AS_ECHO([" Prefix ................. ${prefix}"])
-		AS_ECHO([" Shared RO Data: ........ ${game_data}"])
-		AS_ECHO([" User Home R/W Data ..... ~/${cor_games_homedir}"])
-		AM_COND_IF([INSTALL_DOCS],[
-			dd1=`eval "echo ${docdir}"` && dd2=`eval "echo $dd1"`
-			AS_ECHO([" Documentation........... ${dd2}"])],[
-			AS_ECHO([" Documentation........... custom"
-])
-			])
-		id1=`eval "echo ${icondir}"` && id2=`eval "echo $id1"`
-		AS_ECHO([" Icon ................... ${id2}"])
 	])
-
-	AS_ECHO()
-
-	AM_COND_IF([ALTERNATE_INSTALL],
-		[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
-		[AS_ECHO(["Run \"make\" to build, then \"sudo make install\" to install."])])
+	AS_ECHO([" Prefix ................. ${prefix}"])
+	AS_ECHO([" Shared RO Data: ........ ${game_data}"])
+	AS_ECHO([" User Home R/W Data ..... ~/${cor_games_homedir}"])
+	AM_COND_IF([INSTALL_DOCS],[
+		dd1=`eval "echo ${docdir}"` && dd2=`eval "echo $dd1"`
+		AS_ECHO([" Documentation........... ${dd2}"])
+		AS_ECHO([" Documentation........... custom"])
+	])
 
 	AS_ECHO()
 	AS_ECHO(["Advanced Build Information:"])
@@ -585,6 +552,4 @@ AS_IF([ test "x${hide_status}" = xno ],[
 	AS_ECHO([" Compiler options:"])
 	AS_ECHO(["  CFLAGS:.... ${CFLAGS}"])
 	AS_ECHO()
-
-	AS_ECHO(["--------------------------------------------"])
 ])

@@ -151,15 +151,26 @@ typedef struct
 #define ISURF_UNDERWATER	0x4 
 
 #define TexinfoIsTranslucent(texinfo) ((texinfo)->flags & (SURF_TRANS33|SURF_TRANS66))
-#define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent((surf)->texinfo))
-#define TexinfoIsAlphaBlended(texinfo) ((texinfo)->flags & SURF_TRANS33 && (texinfo)->flags & SURF_TRANS66)
-#define SurfaceIsAlphaBlended(surf) (TexinfoIsAlphaBlended ((surf)->texinfo))
-#define SurfaceHasNoLightmap(surf) ((surf)->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) && !SurfaceIsAlphaBlended((surf)))
+#define SurfaceIsTranslucent(surf) (TexinfoIsTranslucent ((surf)->texinfo))
+#define TexinfoIsAlphaMasked(texinfo) ((texinfo)->flags & SURF_TRANS33 && (texinfo)->flags & SURF_TRANS66)
+#define SurfaceIsAlphaMasked(surf) (TexinfoIsAlphaMasked ((surf)->texinfo))
+#define SurfaceHasNoLightmap(surf) ((surf)->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) && !SurfaceIsAlphaMasked (surf))
 
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct
 {
+	// Data included in the BSP file.
 	unsigned short	v[2];
+	
+	// Used at load time to identify "corner" edges (i.e. edges between two 
+	// non-coplanar surfaces.) Corner edges are the only edges we draw in the
+	// minimap. Unused after load time.
+	int				usecount;
+	cplane_t		*first_face_plane;
+	
+	// Calculated at load time, used to render the minimap. 
+	vec3_t			mins, maxs;
+	qboolean		iscorner;
+	float			alpha, sColor;
 } medge_t;
 
 /*
@@ -197,14 +208,14 @@ typedef struct mtexinfo_s
 	// by texinfo so the renderer can take advantage of the fact that they 
 	// share the same texture and the same surface flags.
 	surfchain_t	glsl_surfaces, dynamic_surfaces, lightmap_surfaces;
+	struct msurface_s *rscript_surfaces; // no brush models can have rscript surfs
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10
 
 typedef struct glpoly_s
 {
-	struct	glpoly_s	*next;
-	struct	glpoly_s	*chain;
+	struct	glpoly_s	*next;		// warp surfaces only!
 	int		numverts;
 	float	verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
 
@@ -458,6 +469,15 @@ typedef struct model_s
 	int				num_triangles;
 	// TODO: we can remove this when shadow volumes are gone.
 	neighbors_t *neighbors;	
+	
+	// Is just a copy of the pointer to this model_t struct. That way you can
+	// make a copy of this model_t and still be able to identify which mesh it
+	// is without string comparisons. TODO: get rid of this and stop making 
+	// copies!
+	size_t			vbo_key; 
+	
+	//terrain only
+	image_t         *lightmap;
 
 	//ragdoll info
 	int hasRagDoll;

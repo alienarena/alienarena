@@ -26,7 +26,7 @@
 
 noinst_LIBRARIES = libgame.a
 
-DATADIR_CPPFLAGS = -DDATADIR='"$(pkgdatadir)"'
+DATADIR_CPPFLAGS = -DDATADIR='"$(datadir)/alienarena"'
 
 # Dedicated Server libraries and flags
 alienarena_ded_LDADD = libgame.a

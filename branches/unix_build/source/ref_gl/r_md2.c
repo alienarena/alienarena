@@ -382,6 +382,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 
 	// TODO: we can stop permanently keeping this (change it to normal
 	// Z_Malloc) as soon as shadow volumes are gone.
+	mod->extradata = Hunk_Begin (0x300000);
 	pheader = Hunk_Alloc (LittleLong(pinmodel->ofs_end));
 
 	// byte swap the header fields and sanity check
@@ -553,6 +554,8 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	MD2_LoadVBO (mod, pheader, st);
 	
 	Z_Free (st);
+	
+	mod->extradatasize = Hunk_End ();
 }
 
 /*

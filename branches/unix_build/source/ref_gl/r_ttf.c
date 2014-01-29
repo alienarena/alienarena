@@ -676,7 +676,7 @@ static void _TTF_PrepareToDraw( image_t * texture )
 	// Set blending function
 	qglDisable( GL_ALPHA_TEST );
 	qglEnable( GL_BLEND );
-	qglBlendFunc ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunction ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
 }
 
 

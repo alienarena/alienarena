@@ -264,6 +264,15 @@ nobase_dist_maps_DATA = \
 	meshes/ribtube3.md2 \
 	meshes/ribtube.jpg \
 	meshes/ribtube_normal.jpg \
+	meshes/rocks/rock2.md2 \
+	meshes/rocks/rock4.jpg \
+	meshes/rocks/rock3.md2 \
+	meshes/rocks/rock4.md2 \
+	meshes/rocks/rock5.md2 \
+	meshes/rocks/rock1.jpg \
+	meshes/rocks/rock2.jpg \
+	meshes/rocks/rock1.md2 \
+	meshes/rocks/rock3.jpg \
 	meshes/sconduit1.md2 \
 	meshes/sconduit2.md2 \
 	meshes/scopecover.md2 \

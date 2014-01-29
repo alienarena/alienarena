@@ -394,6 +394,8 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	strcpy(RagDoll[RagDollID].name, name);
 
+	// TODO: stop making copies of the model_t, just init the ragdoll info in
+	// the *main* model_t once at load time.
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
 	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t));
 
@@ -401,27 +403,7 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
     memcpy(RagDoll[RagDollID].initframe, currententity->model->outframe, currententity->model->num_joints*sizeof(matrix3x4_t));
 
 	if(r_shaders->integer && currententity->script)
-	{
-		RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
-		memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
-
-		if(currententity->script->stage)
-		{
-			RagDoll[RagDollID].script->stage = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
-			memcpy(RagDoll[RagDollID].script->stage, currententity->script->stage, sizeof(rs_stage_t));
-
-			if(currententity->script->stage->next)
-			{
-				RagDoll[RagDollID].script->stage->next = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
-				memcpy(RagDoll[RagDollID].script->stage->next, currententity->script->stage->next, sizeof(rs_stage_t));
-				RagDoll[RagDollID].script->stage->next->next = NULL;
-			}
-			else
-				RagDoll[RagDollID].script->stage->next = NULL;
-		}
-		else
-			RagDoll[RagDollID].script->stage = NULL;
-	}
+		RagDoll[RagDollID].script = currententity->script;
 	else
 		RagDoll[RagDollID].script = NULL;
 
@@ -696,51 +678,49 @@ void RGD_BuildODEGeoms(msurface_t *surf)
 	float	*v;
 	int		i;
     int polyStart;
-	for ( p = surf->polys; p; p = p->chain )
+    p = surf->polys;
+    if(RagDollTriWorld.numODEVerts + p->numverts > RagDollTriWorld.maxODEVerts)
+    {
+        int growVerts = RagDollTriWorld.maxODEVerts;
+        dVector3 *newVerts;
+        while(RagDollTriWorld.numODEVerts + p->numverts > growVerts)
+            growVerts += GROW_ODE_VERTS;
+        newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
+        if(!newVerts) return;
+        RagDollTriWorld.maxODEVerts = growVerts;
+        RagDollTriWorld.ODEVerts = newVerts;
+    }
+
+    polyStart = RagDollTriWorld.numODEVerts;
+
+	for (v = p->verts[0]; v < p->verts[p->numverts]; v += VERTEXSIZE)
 	{
-        if(RagDollTriWorld.numODEVerts + p->numverts > RagDollTriWorld.maxODEVerts)
-        {
-            int growVerts = RagDollTriWorld.maxODEVerts;
-            dVector3 *newVerts;
-            while(RagDollTriWorld.numODEVerts + p->numverts > growVerts)
-                growVerts += GROW_ODE_VERTS;
-            newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
-            if(!newVerts) break;
-            RagDollTriWorld.maxODEVerts = growVerts;
-            RagDollTriWorld.ODEVerts = newVerts;
-        }
 
-        polyStart = RagDollTriWorld.numODEVerts;
-
-		for (v = p->verts[0]; v < p->verts[p->numverts]; v += VERTEXSIZE)
-		{
-
-			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = v[0];
-			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = v[1];
-			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = v[2];
-			RagDollTriWorld.numODEVerts++;
-		}
-
-        if(RagDollTriWorld.numODETris + p->numverts-2 > RagDollTriWorld.maxODETris)
-        {
-            int growTris = RagDollTriWorld.maxODETris;
-            dTriIndex *newTris;
-            while(RagDollTriWorld.numODETris + p->numverts-2 > growTris)
-                growTris += GROW_ODE_TRIS;
-            newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
-            if(!newTris) break;
-            RagDollTriWorld.maxODETris = growTris;
-            RagDollTriWorld.ODETris = newTris;
-        }
-
-        for (i = 2; i < p->numverts; i++)
-        {
-            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + i;
-            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + i - 1;
-            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
-            RagDollTriWorld.numODETris++;
-        }
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = v[0];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = v[1];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = v[2];
+		RagDollTriWorld.numODEVerts++;
 	}
+
+    if(RagDollTriWorld.numODETris + p->numverts-2 > RagDollTriWorld.maxODETris)
+    {
+        int growTris = RagDollTriWorld.maxODETris;
+        dTriIndex *newTris;
+        while(RagDollTriWorld.numODETris + p->numverts-2 > growTris)
+            growTris += GROW_ODE_TRIS;
+        newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
+        if(!newTris) return;
+        RagDollTriWorld.maxODETris = growTris;
+        RagDollTriWorld.ODETris = newTris;
+    }
+
+    for (i = 2; i < p->numverts; i++)
+    {
+        RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + i;
+        RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + i - 1;
+        RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
+        RagDollTriWorld.numODETris++;
+    }
 }
 
 /*
@@ -878,22 +858,7 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 		RagDoll[RagDollID].initframe = NULL;
 	}
 
-	if(RagDoll[RagDollID].script)
-	{
-		if(RagDoll[RagDollID].script->stage)
-		{
-			if(RagDoll[RagDollID].script->stage->next)
-			{
-				free(RagDoll[RagDollID].script->stage->next);
-				RagDoll[RagDollID].script->stage->next = NULL;
-			}
-			free(RagDoll[RagDollID].script->stage);
-			RagDoll[RagDollID].script->stage = NULL;
-		}
-
-		free(RagDoll[RagDollID].script);
-		RagDoll[RagDollID].script = NULL;
-	}
+	RagDoll[RagDollID].script = NULL;
 
 	if(!nuke)
 		return;
@@ -1127,17 +1092,6 @@ void R_RenderAllRagdolls ( void )
 				shellEffect = true;
 			}
 
-			//check for valid script
-			if(RagDoll[RagDollID].script && RagDoll[RagDollID].script->stage)
-			{
-				if(!strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture->name) || 
-					((RagDoll[RagDollID].script->stage->fx || RagDoll[RagDollID].script->stage->glow) && !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture2->name)) ||
-					(RagDoll[RagDollID].script->stage->cube && !strcmp("***r_notexture***", RagDoll[RagDollID].script->stage->texture3->name)))
-				{
-					RagDoll[RagDollID].script = NULL; //bad shader!
-				}
-			}
-
 			currentmodel = RagDoll[RagDollID].ragDollMesh;
 			
 			R_GetLightVals(RagDoll[RagDollID].curPos, true);
@@ -1246,6 +1200,16 @@ void R_RenderAllRagdolls ( void )
 	if(r_DrawingRagDoll) //here we handle the physics
 	{
 		int frametime = Sys_Milliseconds() - lastODEUpdate;
+		
+		// "Only" simulate the ragdoll 240 times per second. This stops
+		// dWorldQuickStep from being given too small a time parameter, which
+		// it responds to by shutting down the game!
+		if (frametime < 1000/240)
+		{
+			r_DrawingRagDoll = false;
+			return;
+		}
+		
 		dSpaceCollide(RagDollSpace, 0, &near_callback);
 		dWorldQuickStep( RagDollWorld, ((dReal)frametime)/1000.0 );
 		// Remove all temporary collision joints now that the world has been stepped

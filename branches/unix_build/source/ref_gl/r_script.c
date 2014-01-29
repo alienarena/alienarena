@@ -30,8 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
-extern float	r_turbsin[];
-
 #define		TOK_DELIMINATORS "\r\n\t "
 
 float		rs_realtime = 0;
@@ -40,11 +38,6 @@ rscript_t	*rs_rootscript = NULL;
 int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
-
-/* unused
-	float			time = rs_realtime * 1000 -
-		(stage->last_anim_time + stage->anim_delay);
-*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -61,11 +54,6 @@ int RS_Animate (rs_stage_t *stage)
 void *RS_AnimateSkin (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
-
-/* unused
-	float			time = rs_realtime * 1000 -
-		(stage->last_anim_time + stage->anim_delay);
-*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -166,69 +154,10 @@ void RS_ClearStage (rs_stage_t *stage)
 		randStage = randStage->next;
 		free (tmp_rand);
 	}
-
-	stage->last_anim = 0;
-	stage->last_anim_time = 0;
-	stage->anim_count = 0;
-
-	stage->anim_delay = 0;
-	stage->anim_stage = NULL;
-
-	stage->rand_count = 0;
-	stage->rand_stage = NULL;
-
-	stage->has_alpha = false;
-	stage->alphamask = false;
-
-	stage->alphafunc = 0;
-
-	stage->alphashift.max = 0;
-	stage->alphashift.min = 0;
-	stage->alphashift.speed = 0;
-
-	stage->blendfunc.blend = false;
-	stage->blendfunc.dest = stage->blendfunc.source = 0;
-
-	stage->colormap.enabled = false;
-	stage->colormap.red = 0;
-	stage->colormap.green = 0;
-	stage->colormap.blue = 0;
-
-	stage->scale.scaleX = 0;
-	stage->scale.scaleY = 0;
-	stage->scale.typeX = 0;
-	stage->scale.typeY = 0;
-
-	stage->scroll.speedX = 0;
-	stage->scroll.speedY = 0;
-	stage->scroll.typeX = 0;
-	stage->scroll.typeY = 0;
-
-	stage->rot_speed = 0;
-
-	stage->texture = NULL;
-	stage->texture2 = NULL;
-	stage->texture3 = NULL;
-
-	stage->depthhack = false;
-	stage->envmap = false;
-	stage->lensflare = false;
-	stage->flaretype = 0;
-	stage->normalmap = false;
-	stage->grass = false;
-	stage->grasstype = 0;
-	stage->beam = false;
-	stage->beamtype = 0;
-	stage->xang = 0;
-	stage->yang = 0;
-	stage->rotating = false;
-	stage->fx = false;
-	stage->glow = false;
-	stage->cube = false;
+	
+	memset (stage, 0, sizeof(*stage));
 
 	stage->lightmap = true;
-
-	stage->next = NULL;
 }
 
 // Create a new script with the given name. Reuse the "old" struct if possible
@@ -266,7 +195,9 @@ rscript_t *RS_NewScript (char *name, rscript_t *old)
 
 	rs->stage = NULL;
 	rs->dontflush = false;	
-	rs->ready = false;	
+	rs->ready = false;
+	
+	rs->flags = 0;
 
 	return rs;
 }
@@ -293,7 +224,7 @@ rs_stage_t *RS_NewStage (rscript_t *rs)
 	strncpy (stage->name, "***r_notexture***", sizeof(stage->name));
 	strncpy (stage->name2, "***r_notexture***", sizeof(stage->name2));
 	strncpy (stage->name3, "***r_notexture***", sizeof(stage->name3));
-
+	
 	stage->rand_stage = NULL;
 	stage->anim_stage = NULL;
 	stage->next = NULL;
@@ -408,6 +339,7 @@ void RS_ReadyScript (rscript_t *rs)
 	anim_stage_t	*anim;
 	random_stage_t	*randStage;
 	char			mode;
+	int				i;
 
 	if (rs->ready)
 		return;
@@ -456,12 +388,12 @@ void RS_ReadyScript (rscript_t *rs)
 			stage->texture3 = GL_FindImage (stage->name3, mode);
 		if (!stage->texture3)
 			stage->texture3 = r_notexture;
-
-		//check alpha
-		if (stage->blendfunc.blend)
-			stage->has_alpha = true;
-		else
-			stage->has_alpha = false;
+		for (i = 0; i < stage->num_blend_textures; i++)
+		{
+			stage->blend_textures[i] = GL_FindImage (stage->blend_names[i], mode);
+			if (!stage->blend_textures[i])
+				stage->blend_textures[i] = r_notexture;
+		}
 
 		stage = stage->next;
 	}
@@ -480,18 +412,14 @@ int RS_BlendID (char *blend)
 	
 	check_blend (GL_ZERO)
 	check_blend (GL_ONE)
-	check_blend (GL_DST_COLOR)
-	check_blend (GL_ONE_MINUS_DST_COLOR)
 	check_blend (GL_SRC_ALPHA)
 	check_blend (GL_ONE_MINUS_SRC_ALPHA)
-	check_blend (GL_DST_ALPHA)
-	check_blend (GL_ONE_MINUS_DST_ALPHA)
-	check_blend (GL_SRC_ALPHA_SATURATE)
 	check_blend (GL_SRC_COLOR)
 	check_blend (GL_ONE_MINUS_SRC_COLOR)
 
 #undef check_blend
 
+	Com_Printf ("WARN: Unrecognized blend factor %s in RScript!\n", blend);
 	return 0;
 }
 
@@ -590,6 +518,15 @@ RS_STAGE_FLOAT_ATTR (rot_speed)
 RS_STAGE_INT_ATTR (rotating)
 
 
+void rs_stage_targetdist (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->targetdist[0] = atof(*token);
+
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->targetdist[1] = atof(*token);
+}
+
 void rs_stage_nolightmap (rs_stage_t *stage, char **token)
 {
 	stage->lightmap = false;
@@ -627,29 +564,10 @@ void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 	stage->blendfunc.blend = true;
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->blendfunc.source = RS_BlendID (*token);
 
-	if (!Q_strcasecmp (*token, "add"))
-	{
-		stage->blendfunc.source = GL_ONE;
-		stage->blendfunc.dest = GL_ONE;
-	}
-	else if (!Q_strcasecmp (*token, "blend"))
-	{
-		stage->blendfunc.source = GL_SRC_ALPHA;
-		stage->blendfunc.dest = GL_ONE_MINUS_SRC_ALPHA;
-	}
-	else if (!Q_strcasecmp (*token, "filter"))
-	{
-		stage->blendfunc.source = GL_ZERO;
-		stage->blendfunc.dest = GL_SRC_COLOR;
-	}
-	else
-	{	
-		stage->blendfunc.source = RS_BlendID (*token);
-
-		*token = strtok (NULL, TOK_DELIMINATORS);
-		stage->blendfunc.dest = RS_BlendID (*token);
-	}
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->blendfunc.dest = RS_BlendID (*token);
 }
 
 void rs_stage_alphashift (rs_stage_t *stage, char **token)
@@ -738,24 +656,6 @@ void rs_stage_scale (rs_stage_t *stage, char **token)
 	stage->scale.typeY = RS_FuncName(*token);
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scale.scaleY = atof(*token);
-}
-
-void rs_stage_alphafunc (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-
-	if (!Q_strcasecmp (*token, "normal"))
-		stage->alphafunc = ALPHAFUNC_NORMAL;
-	else if (!Q_strcasecmp (*token, "-normal"))
-		stage->alphafunc = -ALPHAFUNC_NORMAL;
-	else if (!Q_strcasecmp (*token, "gloss"))
-		stage->alphafunc = ALPHAFUNC_GLOSS;
-	else if (!Q_strcasecmp (*token, "-gloss"))
-		stage->alphafunc = -ALPHAFUNC_GLOSS;
-	else if (!Q_strcasecmp (*token, "basic"))
-		stage->alphafunc = ALPHAFUNC_BASIC;
-	else if (!Q_strcasecmp (*token, "-basic"))
-		stage->alphafunc = -ALPHAFUNC_BASIC;
 }
 
 typedef struct 
@@ -876,6 +776,37 @@ void rs_stage_if (rs_stage_t *stage, char **token)
 		Com_Printf ("ERROR in stage conditional!\n");
 }
 
+void rs_stage_blendmap (rs_stage_t *stage, char **token)
+{
+	int i;
+	
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->num_blend_textures = atoi(*token);
+	
+	if (stage->num_blend_textures > 6)
+	{
+		Com_Printf ("ERROR: Cannot have %d blendmap channels (max 6)\n", stage->num_blend_textures);
+		
+		// consume the rest of the command
+		while (stage->num_blend_textures)
+		{
+			*token = strtok (NULL, TOK_DELIMINATORS);
+			*token = strtok (NULL, TOK_DELIMINATORS);
+			stage->num_blend_textures--;
+		}
+		
+		return;
+	}
+	
+	for (i = 0; i < stage->num_blend_textures; i++)
+	{
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		stage->blend_scales[i] = atof (*token);
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
+	}
+}
+
 // For legacy origin and angle commands that aren't actually used in the code.
 // Some old rscripts still have the origin command in them, so we should parse
 // it anyway. Can't find any angle commands, but may as well handle those too.
@@ -902,7 +833,11 @@ void rs_stage_consume0 (rs_stage_t *stage, char **token)
 	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token);
 }
 
-static rs_stagekey_t rs_stagekeys[] =
+static struct 
+{
+	char *stage;
+	void (*func)(rs_stage_t *shader, char **token);
+} rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
 	{	"map",			&rs_stage_name			},
@@ -919,10 +854,11 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"alphamask",	&rs_stage_alphamask		},
 	{	"rotate",		&rs_stage_rot_speed		},
 	{	"scale",		&rs_stage_scale			},
-	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{	"flaretype",	&rs_stage_flaretype		},
 	{	"normalmap",	&rs_stage_normalmap		},
+	{	"blendmap",		&rs_stage_blendmap		},
+	{	"targetdist",	&rs_stage_targetdist	},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
@@ -941,6 +877,9 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"origin",		&rs_stage_consume3		},
 	{	"angle",		&rs_stage_consume3		},
 	{	"dynamic",		&rs_stage_consume1		},
+	
+	// Stuff we may bring back if anyone ever wants to use it
+	{	"alphafunc",	&rs_stage_consume1		},
 
 	{	NULL,			NULL					}
 };
@@ -975,12 +914,18 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 		stage->envmap = false;
 	}
 	
-	if (stage->rot_speed != 0 && stage->envmap)
+	if (stage->rot_speed != 0.0 && stage->envmap)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and rotating"
 					" in script %s!\nForcing envmap off.\n", rs->name);
 		stage->envmap = false;
 	}
+	
+	if (stage->envmap)
+		rs->flags |= RS_CONTAINS_ENVMAP;
+	
+	if (stage->rot_speed != 0.0)
+		rs->flags |= RS_CONTAINS_ROTATE;
 }
 
 void RS_LoadScript(char *script)
@@ -1125,29 +1070,6 @@ void RS_ScanPathForScripts (void)
 	}
 }
 
-void RS_SetEnvmap (vec3_t v, float *os, float *ot)
-{
-	vec3_t vert;
-
-	vert[0] = v[0]*r_world_matrix[0]+v[1]*r_world_matrix[4]+v[2]*r_world_matrix[8] +r_world_matrix[12];
-	vert[1] = v[0]*r_world_matrix[1]+v[1]*r_world_matrix[5]+v[2]*r_world_matrix[9] +r_world_matrix[13];
-	vert[2] = v[0]*r_world_matrix[2]+v[1]*r_world_matrix[6]+v[2]*r_world_matrix[10]+r_world_matrix[14];
-
-	VectorNormalize (vert);
-
-	*os = vert[0];
-	*ot = vert[1];
-}
-
-inline void RS_RotateST2 (float *os, float *ot, float radians)
-{
-	float cost = cos(radians), sint = sin(radians);
-	float is = *os, it = *ot;
-
-	*os = cost * (is - 0.5) + sint * (0.5 - it) + 0.5;
-	*ot = cost * (it - 0.5) + sint * (is - 0.5) + 0.5;
-}
-
 // scaling factor to convert from rotations per minute to radians per second
 #define ROTFACTOR (M_PI * 2.0 / 60.0)
 
@@ -1162,6 +1084,8 @@ static float RS_ScrollFunc (char type, float speed)
 	case 2:	// cosine
 		return cos (rs_realtime * speed);
 	}
+
+	return 0;
 }
 
 static float RS_ScaleFunc (char type, float scale)
@@ -1178,47 +1102,8 @@ static float RS_ScaleFunc (char type, float scale)
 	case 2: // cosine
 		return scale * cos (rs_realtime * 0.05);
 	}
-}
 
-void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
-{
-	// scale
-	*os *= RS_ScaleFunc (stage->scale.typeX, stage->scale.scaleX);
-	*ot *= RS_ScaleFunc (stage->scale.typeY, stage->scale.scaleY);
-
-	// rotate
-	if (stage->rot_speed)
-		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * ROTFACTOR);
-	
-	*os += RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX);
-	*ot += RS_ScrollFunc (stage->scroll.typeY, stage->scroll.speedY);
-}
-
-float RS_AlphaFunc (int alphafunc, float alpha, vec3_t normal, vec3_t org)
-{
-	vec3_t dir;
-
-	if (!abs(alphafunc))
-		goto endalpha;
-
-	if (alphafunc == ALPHAFUNC_GLOSS)
-	{
-		//glossmap stuff here...
-	}
-	else if (alphafunc == ALPHAFUNC_NORMAL)
-	{
-		VectorSubtract(org, r_newrefdef.vieworg, dir);
-		VectorNormalize(dir);
-		alpha *= fabs(cutDot(dir, normal));
-	}
-
-endalpha:
-
-	if (alpha<0) alpha = 0;
-	if (alpha>1) alpha = 1;
-	if (alphafunc<0) alpha = 1-alpha;
-
-	return alpha;
+	return 1;
 }
 
 image_t *BSP_TextureAnimation (mtexinfo_t *tex);
@@ -1235,47 +1120,6 @@ rscript_t	*surfaceScript(msurface_t *surf)
 		return rs;
 	}
 	return NULL;
-}
-void SetVertexOverbrights (qboolean toggle)
-{
-	if (!r_overbrightbits->value)
-		return;
-	
-	GL_SelectTexture (0);
-
-	if (toggle)//turn on
-	{
-		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
-
-		GL_TexEnv( GL_COMBINE_EXT );
-	}
-	else //turn off
-	{
-		GL_TexEnv( GL_MODULATE );
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
-	}
-}
-
-qboolean lightmaptoggle;
-void ToggleLightmap (qboolean toggle)
-{
-	if (toggle==lightmaptoggle)
-		return;
-
-	lightmaptoggle = toggle;
-	if (toggle)
-	{
-		SetVertexOverbrights(false);
-		GL_EnableMultitexture( true );
-		R_SetLightingMode ();
-	}
-	else
-	{
-		GL_EnableMultitexture( false );
-		SetVertexOverbrights(true);
-	}
 }
 
 static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
@@ -1341,52 +1185,48 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
-//This is the shader drawing routine for bsp surfaces - it will draw on top of the
-//existing texture.
-void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
+void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
+				qboolean translucent, rs_lightmaptype_t lm,
+				void (*draw_callback) (void))
 {
-	glpoly_t	*p = surf->polys;
-	unsigned	lmtex = surf->lightmaptexturenum;
-	float		*v;
-	int			i, nv;
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
-	float		os, ot, alpha;
-	float		time;
-	int			VertexCounter;
 
 	if (!rs)
 		return;
 
-	nv = surf->polys->numverts;
 	stage = rs->stage;
-	time = rs_realtime;
 
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	lightmaptoggle = true;
+	glUseProgramObjectARB (g_rscriptprogramObj);
+	
+	glUniform1iARB( g_location_rs_mainTexture, 0);
+	glUniform1iARB( g_location_rs_lightmapTexture, 1);
+	glUniform1iARB( g_location_rs_mainTexture2, 2);
+	glUniform1iARB( g_location_rs_blendTexture0, 3);
+	glUniform1iARB( g_location_rs_blendTexture1, 4);
+	glUniform1iARB( g_location_rs_blendTexture2, 5);
+	glUniform1iARB( g_location_rs_blendTexture3, 6);
+	glUniform1iARB( g_location_rs_blendTexture4, 7);
+	glUniform1iARB( g_location_rs_blendTexture5, 8);
+	glUniform1iARB( g_location_rs_fog, map_fog);
 	
 	qglMatrixMode (GL_TEXTURE);
 	do
 	{
+		float red = 1.0, green = 1.0, blue = 1.0, alpha = 1.0;
+		
 		if (stage->lensflare || stage->grass || stage->beam || stage->cube)
-			break; //handled elsewhere
+			continue; //handled elsewhere
 		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			continue; //stage should not execute
 		
-		if(stage->lightmap)
-		{
-			ToggleLightmap(true);
-			qglShadeModel (GL_FLAT);
-
-			GL_MBind (1, gl_state.lightmap_textures + lmtex);
-		}
-		else 
-		{
-			ToggleLightmap(false);
-			qglShadeModel (GL_SMOOTH);
-		}
+		if (stage->lightmap && lm != rs_lightmap_off)
+			GL_MBind (1, lmtex);
+			
+		glUniform1iARB (g_location_rs_lightmap, stage->lightmap?lm:0);
 
 		GL_SelectTexture (0);
 		qglPushMatrix ();
@@ -1395,13 +1235,18 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			GL_MBind (0, RS_Animate(stage));
 		else
 	 		GL_MBind (0, stage->texture->texnum);
-				
+	 	
+	 	if (stage->num_blend_textures > 3)
+	 		GL_MBind (2, stage->texture2->texnum);
+		
 		if (stage->blendfunc.blend)
 		{
-			GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
+			// FIXME: hack!
+			if (stage->blendfunc.source != GL_ONE || stage->blendfunc.dest != GL_ONE_MINUS_SRC_ALPHA)
+				GL_BlendFunction (stage->blendfunc.source, stage->blendfunc.dest);
 			GLSTATE_ENABLE_BLEND
 		}
-		else if (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66) && !stage->alphamask)
+		else if (translucent && !stage->alphamask)
 		{
 			GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_ENABLE_BLEND
@@ -1410,9 +1255,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		{
 			GLSTATE_DISABLE_BLEND
 		}
-
-		// sane defaults
-		alpha = 1.0f;
 
 		if (stage->alphashift.min || stage->alphashift.speed)
 		{
@@ -1433,9 +1275,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		
 		if (stage->rot_speed)
 		{
-			qglTranslatef (surf->c_s, surf->c_t, 0);
+			qglTranslatef (rotate_center[0], rotate_center[1], 0);
 			qglRotatef (RAD2DEG (-stage->rot_speed * rs_realtime * ROTFACTOR), 0, 0, 1);
-			qglTranslatef (-surf->c_s, -surf->c_t, 0);
+			qglTranslatef (-rotate_center[0], -rotate_center[1], 0);
 		}
 		
 		qglTranslatef (	RS_ScrollFunc (stage->scroll.typeX, stage->scroll.speedX),
@@ -1446,8 +1288,40 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					RS_ScaleFunc (stage->scale.typeY, stage->scale.scaleY),
 					1 );
 		
-		qglColor4f (1, 1, 1, alpha);
-
+		if (stage->envmap)
+		{
+			//move by normal & position
+			qglTranslatef (	-DotProduct (normal, vectors[1]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
+							DotProduct (normal, vectors[2]) - (r_origin[0]-r_origin[1]+r_origin[2])*0.0025,
+							0 );
+		}
+		
+		glUniform1iARB (g_location_rs_envmap, stage->envmap != 0);
+		glUniform1iARB (g_location_rs_numblendtextures, stage->num_blend_textures);
+		
+		glUniform2fARB (g_location_rs_targetdist, stage->targetdist[0], stage->targetdist[1]);
+		
+		if (stage->num_blend_textures > 0)
+		{
+			int i;
+			
+			for (i = 0; i < stage->num_blend_textures; i++)
+				GL_MBind (3+i, stage->blend_textures[i]->texnum);
+			glUniform3fARB (g_location_rs_blendscales, stage->blend_scales[0], stage->blend_scales[1], stage->blend_scales[2]);
+			glUniform3fARB (g_location_rs_blendscales2, stage->blend_scales[3], stage->blend_scales[4], stage->blend_scales[5]);
+		}
+		
+		GL_SelectTexture (0);
+		
+		if (stage->colormap.enabled)
+		{
+			red = stage->colormap.red;
+			green = stage->colormap.green;
+			blue = stage->colormap.blue;
+		}
+		
+		qglColor4f (red, green, blue, alpha);
+		
 		if (stage->alphamask)
 		{
 			GLSTATE_ENABLE_ALPHATEST
@@ -1455,93 +1329,51 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		else
 		{
 			GLSTATE_DISABLE_ALPHATEST
-		}		
-	
-		if(stage->lightmap)
-			R_InitVArrays (VERT_MULTI_TEXTURED);
-		else
-			R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
-
-		for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
-		{
-			if (stage->envmap)
-			{
-				RS_SetEnvmap (v, &os, &ot);
-				//move by normal & position
-				os-=DotProduct (surf->plane->normal, vectors[1]) + (r_origin[0]-r_origin[1]+r_origin[2])*0.0025;
-				ot+=DotProduct (surf->plane->normal, vectors[2]) + (-r_origin[0]+r_origin[1]-r_origin[2])*0.0025;
-			}
-			else 
-			{
-				os = v[3];
-				ot = v[4];
-			}
-			
-			{
-				float red=1.0, green=1.0, blue=1.0, alpha2;
-
-				if (stage->colormap.enabled)
-				{
-					red = stage->colormap.red;
-					green = stage->colormap.green;
-					blue = stage->colormap.blue;
-				}
-
-				alpha2 = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-
-				qglColor4f (red, green, blue, alpha2);
-			}
-
-			// copy in vertex data
-			VArray[0] = v[0];
-			VArray[1] = v[1];
-			VArray[2] = v[2];
-
-			// world texture coords
-			VArray[3] = os;
-			VArray[4] = ot;
-
-			// lightmap texture coords
-			VArray[5] = v[5];
-			VArray[6] = v[6];
-
-			if(stage->lightmap)
-				VArray += VertexSizes[VERT_MULTI_TEXTURED];
-			else
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			VertexCounter++;		
 		}
-
-		R_DrawVarrays(GL_POLYGON, 0, VertexCounter);
-					
-		qglColor4f(1,1,1,1);
-		if (stage->colormap.enabled)
-			qglEnable (GL_TEXTURE_2D);
 		
+		draw_callback ();
+					
 		qglPopMatrix ();
 
 	} while ( (stage = stage->next) );	
 	
+	qglColor4f(1,1,1,1);
+	
 	qglMatrixMode (GL_MODELVIEW);
 	
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glUseProgramObjectARB (0);
 	
 	R_KillVArrays();		
 	
-	ToggleLightmap(true);
-
 	GL_EnableMultitexture( false );
 
 	// restore the original blend mode
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_TEXGEN
+}
+
+void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
+{
+	int			lmtex = gl_state.lightmap_textures + surf->lightmaptexturenum;
+	vec2_t		rotate_center;
+	qboolean	translucent;
+	
+	BSP_InvalidateVBO ();
+	BSP_AddSurfToVBOAccum (surf);
+	
+	rotate_center[0] = surf->c_s;
+	rotate_center[1] = surf->c_t;
+	
+	translucent = (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66)) != 0;
+	
+	RS_Draw (	rs, lmtex, rotate_center, surf->plane->normal, translucent,
+				translucent?rs_lightmap_off:rs_lightmap_separate_texcoords,
+				BSP_DrawVBOAccum );
+	
+	BSP_ClearVBOAccum ();
 }
 
 rscript_t *rs_caustics;
@@ -1564,12 +1396,12 @@ void RS_Surface (msurface_t *surf)
 	//Underwater Caustics
 	if(rs_caustics)
 		if (surf->iflags & ISURF_UNDERWATER )
-				RS_DrawSurfaceTexture(surf, rs_caustics);
+				RS_DrawSurface (surf, rs_caustics);
 
 	//all other textures shaders
 	rs_shader = (rscript_t *)surf->texinfo->image->script;
 	if(rs_shader)
-		RS_DrawSurfaceTexture(surf, rs_shader);
+		RS_DrawSurface (surf, rs_shader);
 }
 
 

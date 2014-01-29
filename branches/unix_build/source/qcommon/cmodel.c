@@ -672,10 +672,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	
 	// This ends up being 1/4 as much detail as is used for rendering. You 
 	// need a surprisingly large amount to maintain accurate physics.
-	LoadTerrainFile (&data, name, 0.5, 8, buf);
-	
-	Z_Free (data.vert_texcoords);
-	Z_Free (data.texture_path);
+	LoadTerrainFile (&data, name, false, 0.5, 8, buf);
 	
 	mod->active = true;
 	mod->numtriangles = 0;
@@ -747,8 +744,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	if (data.num_triangles != mod->numtriangles)
 		Com_Printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
 	
-	Z_Free (data.vert_positions);
-	Z_Free (data.tri_indices);
+	CleanupTerrainData (&data);
 	
 	FS_FreeFile (buf);
 }

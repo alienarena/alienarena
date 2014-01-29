@@ -822,24 +822,26 @@ uninstall-am:
 #
 # Alien Arena documents to be installed in $docdir
 #
-#if INSTALL_DOCS
-
-#dist_doc_DATA = \
-#	unix_doc/README \
-#	unix_doc/COPYING \
-#	unix_doc/INSTALL \
-#	unix_doc/GPL2
-
-#endif
+# if INSTALL_DOCS
+# docdir=${docdir}/alienarena
+# dist_doc_DATA = \
+# 	unix_doc/README \
+# 	unix_doc/README2 \
+# 	unix_doc/COPYING \
+# 	unix_doc/INSTALL \
+# 	unix_doc/GPL2
+# endif
 
 # Alien Arena icon
 # TODO: change default icon directory to share/${PACKAGE}
 #  and put these in a unixicon subdir in svn, maybe
 #
-
-#dist_icons_DATA = \
-#	unix_icons/alienarena.png \
-#	unix_icons/aa-tactical-demo.png
+# if INSTALL_ICONS
+# iconsdir=${iconsdir}/alienarena
+# dist_icons_DATA = \
+# 	unix_icons/alienarena.png \
+# 	unix_icons/aa-tactical-demo.png
+# endif
 
 # FUSE game server browser and Server management scripts
 #EXTRA_DIST = \

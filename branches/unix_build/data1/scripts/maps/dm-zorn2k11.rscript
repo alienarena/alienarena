@@ -44,7 +44,7 @@ textures/xempx/a6bt
 {
 	{
 		map textures/arena5/lighta.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static .5 static .5
 		scroll sin 2 sin 0
 		anim .05
@@ -61,7 +61,7 @@ textures/blanks/blank5
 {
 	{
 		map textures/arena5/lighta.tga
-		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static .5 static .3
 		scroll sin 0 sin 0
 		anim .05
@@ -78,8 +78,6 @@ textures/arena9/trim2
 {
 	{
 		map gfx/bluelightning2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 5 0.3 0.9
 		scroll static 5 static 0
 		nolightmap
 	}
@@ -151,58 +149,58 @@ textures/evil/e6launchengine
 {
     {
         map gfx/e6launchengine_fx.tga
-        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         alphashift 2.5 0.0 1.0
         nolightmap
     }
     {
         map gfx/e6launchengine_mask.tga
-        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
     }
 }
 textures/evil/e8_launchpad1
 {
 	{
 		map gfx/e8_launchpad1_fx1.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 9 0 9
 		nolightmap
 	}
 	{
 		map gfx/e8_launchpad1_fx2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 3
 		nolightmap
 	}
 	{
 		map gfx/e8_launchpad1_mask2.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 	}
 }
 textures/evil/e8_jumppad02
 {
     	{
         	map gfx/e8_jumppad02_fx.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         	alphashift 9 0 9
         	nolightmap
     	}
     	{
         	map gfx/e8_jumppad02_mask.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
     	}
 }
 textures/evil/stepside_mtl4light
 {
     {
         	map gfx/stepside_mtl4light_fx1.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         	alphashift 2.5 0.0 1.0
     }
     {
         	map textures/evil/stepside_mtl4light.tga
-        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
         	alphashift 2.5 0.0 1.0
     }
 }

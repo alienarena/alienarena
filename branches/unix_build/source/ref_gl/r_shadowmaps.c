@@ -419,7 +419,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{	// no skies here
 			continue;
 		}
-		else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaBlended(surf))
+		else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
 		{	// no trans surfaces
 			continue;
 		}
@@ -427,7 +427,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{
 			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
-				BSP_DrawTexturelessPoly (surf);
+				BSP_AddSurfToVBOAccum (surf);
 			}
 		}
 	}
@@ -459,6 +459,71 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 */
 
 static float fadeshadow_cutoff;
+
+static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
+{
+	glpoly_t	*p = surf->polys;
+	float		*v, *v2;
+	int			i;
+	float		sq_len, vsq_len;
+	vec3_t		vDist;
+	vec3_t		tmp, mins, maxs;
+	qboolean	ret = false;
+
+	VectorAdd (currentmodel->maxs, origin, maxs);
+	VectorAdd (currentmodel->mins, origin, mins);
+
+	VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+
+	/* lengths used for comparison only, so squared lengths may be used.*/
+	sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
+	if ( sq_len <  4096.0f )
+	sq_len = 4096.0f; /* 64^2 */
+	else if ( sq_len > 65536.0f )
+	sq_len = 65536.0f; /* 256^2 */
+
+	for ( v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE )
+	{
+		// Generate plane out of the triangle between v, v+1, and the 
+		// light point. This plane will be one of the borders of the
+		// 3D volume within which an object may cast a shadow on the
+		// world polygon.
+		vec3_t plane_line_1, plane_line_2;
+		cplane_t plane;
+
+		// generate two vectors representing two sides of the triangle
+		VectorSubtract (v, statLightPosition, plane_line_1);
+		v2 = p->verts[(i+1)%p->numverts];
+		VectorSubtract (v2, v, plane_line_2);
+
+		// generate the actual plane
+		CrossProduct (plane_line_1, plane_line_2, plane.normal);
+		VectorNormalize (plane.normal);
+		plane.type = PLANE_ANYZ;
+		plane.dist = DotProduct (v, plane.normal);
+		plane.signbits = SignbitsForPlane (&plane);
+
+		// CullBox-type operation
+		if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
+			//completely clipped; we can skip this surface
+			return false;
+
+		// If at least one of the verts is within a certain distance of the
+		// camera, the surface should be rendered. (No need to check this vert
+		// if we already found one.)
+		if (!ret)
+		{
+			VectorSubtract( origin, v, vDist );
+			vsq_len = vDist[0]*vDist[0] + vDist[1]*vDist[1] + vDist[2]*vDist[2];
+			if ( vsq_len < sq_len )
+				// Don't just return true yet, the bounding-box culling might
+				// rule this surface out on a later vertex.
+				ret = true; 
+		}
+
+	}
+	return ret;
+}
 
 void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
 {
@@ -565,7 +630,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 		{	// no skies here
 			continue;
 		}
-		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaBlended(surf))
+		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaMasked (surf))
 		{	// no trans surfaces
 			continue;
 		}
@@ -573,7 +638,8 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 		{
 			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
-				BSP_DrawShadowPoly (surf, origin);
+				if (SM_SurfaceIsShadowed (surf, origin))
+					BSP_AddSurfToVBOAccum (surf);
 			}
 		}
 	}
@@ -630,12 +696,14 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 
 		glUniform1fARB( g_location_fadeShadow, fadeShadow );
 		
-		R_InitVArrays(VERT_NO_TEXTURE);
-		
 		VectorAdd (currentmodel->mins, origin, absmins);
 		VectorAdd (currentmodel->maxs, origin, absmaxs);
 
+		qglEnableClientState (GL_VERTEX_ARRAY);
+		
 		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs);
+		
+		BSP_FlushVBOAccum ();
 		
 		R_KillVArrays();
 
@@ -647,11 +715,13 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 	}
 	else
 	{
-		R_InitVArrays(VERT_NO_TEXTURE);
+		qglEnableClientState (GL_VERTEX_ARRAY);
 		
 		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
 		
-		R_KillVArrays();
+		// Flush the VBO accumulator now because each brush model will mess
+		// with the modelview matrix when rendering its own surfaces.
+		BSP_FlushVBOAccum ();
 
 		//draw brush models(not for ent shadow, for now)
 		for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -671,6 +741,8 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 			else
 				continue;
 		}
+		
+		R_KillVArrays();
 	}
 }
 
@@ -846,14 +918,18 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0.0f;
 }
 
+extern
+void PART_AddBillboardToVArray (	const vec3_t origin, const vec3_t up,
+									const vec3_t right, float sway,
+									qboolean notsideways, float sl, float sh,
+									float tl, float th );
+
 void R_DrawVegetationCasters ( qboolean forShadows )
 {
-	int		i, k;
+	int		i;
 	grass_t *grass;
 	float   scale;
-	vec3_t	dir, origin, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
-	float	sway;
+	vec3_t	dir, origin, angle, right, up;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
@@ -889,58 +965,8 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 			qglColor4f( 0, 0, 0, 1 );
 
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
-
-			sway = 3;
-			
-			VectorSet ( corner[1],
-				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
-				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
-
 			VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) 
-			{
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) 
-				{
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
+			PART_AddBillboardToVArray (origin, up, right, 3*sin (rs_realtime*3), false, 0, 1, 0, 1);
 
 			R_DrawVarrays(GL_QUADS, 0, 4);
 
@@ -1166,11 +1192,11 @@ void R_GenerateEntityShadow( void )
 		if(r_shadowmapcount > 0)
 		{
 			qglEnable( GL_BLEND );
-			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, currententity->origin);
 
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			qglDisable ( GL_BLEND );
 		}
 
@@ -1294,11 +1320,11 @@ void R_GenerateRagdollShadow( int RagDollID )
 		if(r_shadowmapcount > 0)
 		{
 			qglEnable( GL_BLEND );
-			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, RagDoll[RagDollID].origin);
 
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			qglDisable ( GL_BLEND );
 		}
 
