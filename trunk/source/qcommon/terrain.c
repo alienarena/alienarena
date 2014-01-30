@@ -185,7 +185,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	{
 		// Green pixels in the vegetation map indicate grass.
 		// Red pixels indicate shrubbery.
-		const int channeltypes[3] = {2, 0, -1};
+		const int channeltypes[3] = {2, 0, 1};
 		out->vegetation = LoadTerrainDecorationType (vegtex_path, out->mins, scale, texdata, h, w, channeltypes, &out->num_vegetation);
 	}
 	
