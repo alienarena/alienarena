@@ -144,6 +144,9 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 		VectorAdd (origin, data.vegetation[i].origin, org);
 		size = data.vegetation[i].size;
 		
+		if (size < 3.0)
+			continue;
+		
 		switch (data.vegetation[i].type)
 		{
 		default:
