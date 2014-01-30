@@ -131,21 +131,40 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 	{
 		vec3_t org;
 		char *texture;
-		static char *vegetationtextures[] = 
+		static char *weedtextures[] = 
 		{
-			"gfx/grass.tga",
-			"",
-			"gfx/leaves1.tga"
+			"gfx/weed1.tga",
+			"gfx/weed2.tga",
+			"gfx/weed3.tga",
+			"gfx/weed4.tga"
 		};
+		int type;
+		float size;
 		
 		VectorAdd (origin, data.vegetation[i].origin, org);
+		size = data.vegetation[i].size;
 		
-		texture = vegetationtextures[data.vegetation[i].type];
+		switch (data.vegetation[i].type)
+		{
+		default:
+		case 0:
+			texture = "gfx/grass.tga";
+			type = 0;
+			break;
+		case 1:
+			texture = weedtextures[rand()%4];
+			size /= 2.0;
+			type = 0;
+			break;
+		case 2:
+			texture = "gfx/leaves1.tga";
+			type = 2;
+			break;
+		}
 		
 		Mod_AddVegetation (	org, up,
 							GL_FindImage (texture, it_wall)->texnum, color,
-							data.vegetation[i].size, texture,
-							data.vegetation[i].type );
+							data.vegetation[i].size, texture, type );
 	}
 	
 	for (i = 0; i < data.num_rocks; i++)
