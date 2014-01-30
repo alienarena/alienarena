@@ -25,6 +25,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
+
+#include "r_lodcalc.h"
+// Returns true if a particle is far enough away not to be worth rendering.
+static qboolean distancecull_particle (vec3_t origin, float side_length)
+{
+	vec3_t dist, span;
+	
+	VectorSubtract (origin, r_origin, dist);
+	VectorSet (span, side_length, side_length, side_length);
+	
+	return 1.5*VectorLength (dist) > LOD_DIST*VectorLength (span);
+}
+
 /*
 ===============
 PART_DrawParticles
@@ -1009,6 +1022,9 @@ void R_DrawVegetationSurface ( void )
 		scale = 10.0*grass->size;
 
 		VectorCopy(grass->origin, origin);
+		
+		if (distancecull_particle (origin, scale))
+			continue;
 
 		if(grass->type == 1) // foliage
 		{
