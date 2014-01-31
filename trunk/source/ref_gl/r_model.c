@@ -1458,7 +1458,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					Mod_AddVegetationSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->grasstype);
+					Mod_AddVegetationSurface(out, stage->texture, color, stage->scale.scaleX, stage->texture->bare_name, stage->grasstype);
 				}
 				if (stage->beam && stage->texture) {
 					if(stage->colormap.enabled) {

@@ -853,7 +853,7 @@ void R_RenderSun()
 
 //Vegetation
 
-void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, float size, char name[MAX_OSPATH], int type)
+void Mod_AddVegetation (vec3_t origin, vec3_t normal, image_t *tex, vec3_t color, float size, char name[MAX_OSPATH], int type)
 {
 	grass_t  *grass;
 	image_t *gl;
@@ -881,7 +881,7 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, 
 	else
 		grass->texsize = 64; //sane default
 
-	grass->texnum = texnum;
+	grass->tex = tex;
 	VectorCopy(color, grass->color);
 	grass->size = size;
 	strcpy(grass->name, name);
@@ -893,7 +893,7 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, int texnum, vec3_t color, 
 		r_hasleaves = true;
 }
 
-void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
+void Mod_AddVegetationSurface (msurface_t *surf, image_t *tex, vec3_t color, float size, char name[MAX_QPATH], int type)
 {
     glpoly_t *poly;
     vec3_t normal, origin;
@@ -907,7 +907,7 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 
 	VectorCopy (poly->verts[0], origin);
 	
-	Mod_AddVegetation (origin, normal, texnum, color, size, name, type);
+	Mod_AddVegetation (origin, normal, tex, color, size, name, type);
 }
 
 // Mark any vegetation sprites that can cast shadows in sunlight, and get 
@@ -1025,7 +1025,7 @@ void R_DrawVegetationSurface ( void )
 		
 		if (distancecull_particle (origin, scale))
 			continue;
-
+		
 		if(grass->type == 1) // foliage
 		{
 			swaysin = swaysin3;
@@ -1062,7 +1062,7 @@ void R_DrawVegetationSurface ( void )
 		
 		if(visible)
 		{
-			GL_Bind(grass->texnum);
+			GL_Bind(grass->tex->texnum);
 			
 			if(gl_dynamic->integer)
 				R_DynamicLightPoint (origin, lightLevel);
@@ -1076,15 +1076,28 @@ void R_DrawVegetationSurface ( void )
 			if(grass->type == 1)
 				VectorCopy(r_newrefdef.viewangles, angle);
 			else
-				VectorSet(angle, 0, 0, 0);	
+				VectorSet(angle, 0, 0, 0);
+			
+			AngleVectors (angle, NULL, NULL, up);
+			VectorScale(up, scale, up);
+			
+			// up and right appear to be reversed, but actually the
+			// vegetation textures are all sideways.
+			VectorMA (origin, -0.5 + (float)grass->tex->crop_width/(2.0*grass->tex->upload_width), up, origin);
+			VectorScale (up, (float)grass->tex->crop_width/(float)grass->tex->upload_width, up);
 			
 			for(ng = 0; ng < gCount; ng ++)
 			{
-				AngleVectors(angle, NULL, right, up);
+				AngleVectors(angle, NULL, right, NULL);
 				VectorScale(right, scale, right);
-				VectorScale(up, scale, up);			
 				
-				PART_AddBillboardToVArray (origin, up, right, swaysin, false, 0, 1, 0, 1);
+				// up and right appear to be reversed, but actually the
+				// vegetation textures are all sideways.
+				VectorScale (right, (float)grass->tex->crop_height/(float)grass->tex->upload_height, right);
+				
+				PART_AddBillboardToVArray (origin, up, right, swaysin, false, 
+					grass->tex->crop_sl, grass->tex->crop_sh,
+					grass->tex->crop_tl, grass->tex->crop_th );
 				
 				va += 4;
 				angle[1] += 60;	

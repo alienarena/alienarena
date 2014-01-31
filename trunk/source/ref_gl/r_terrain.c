@@ -166,7 +166,7 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 		}
 		
 		Mod_AddVegetation (	org, up,
-							GL_FindImage (texture, it_wall)->texnum, color,
+							GL_FindImage (texture, it_wall), color,
 							data.vegetation[i].size, texture, type );
 	}
 	
