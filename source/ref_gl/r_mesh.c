@@ -32,7 +32,7 @@ static vertCache_t	*vbo_normals;
 static vertCache_t	*vbo_tangents;
 static vertCache_t	*vbo_indices;
 
-extern	vec3_t	lightspot;
+vec3_t	worldlight;
 vec3_t	shadevector;
 float	shadelight[3];
 
@@ -146,11 +146,14 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	if (copy)
 	{
 		numlights =  cl_persistent_ents[currententity->number].oldnumlights;
-		VectorCopy ( cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
+		VectorCopy (cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
+		VectorCopy (cl_persistent_ents[currententity->number].oldworldlight, worldlight);
 		statLightIntensity = cl_persistent_ents[currententity->number].oldlightintens;
 	}
 	else
 	{
+		R_LightPoint (currententity->origin, worldlight, true);
+		VectorCopy (worldlight, cl_persistent_ents[currententity->number].oldworldlight);
 		for (i=0; i<r_lightgroups; i++)
 		{
 			if (currentmodel->type == mod_terrain)
@@ -775,7 +778,7 @@ void R_Mesh_SetShadelight (void)
 	}
 	else
 	{
-		R_LightPoint (currententity->origin, shadelight, true);
+		VectorCopy (worldlight, shadelight); // worldlight is set in R_GetLightVals
 	}
 	if ( currententity->flags & RF_MINLIGHT )
 	{
