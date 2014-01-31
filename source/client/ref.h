@@ -55,7 +55,7 @@ typedef struct
 	vec3_t color;
 	float size;
 	int texsize;
-	int texnum;
+	struct image_s *tex;
 	char name[MAX_QPATH];
 	int leafnum;
 	qboolean sunVisible; //can cast shadows in sunlight

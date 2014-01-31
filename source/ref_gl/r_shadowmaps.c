@@ -959,7 +959,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 			//render grass polygon
 			
 			GL_SelectTexture (0);
-			qglBindTexture (GL_TEXTURE_2D, grass->texnum);
+			qglBindTexture (GL_TEXTURE_2D, grass->tex->texnum);
 
 			GLSTATE_ENABLE_ALPHATEST
 
