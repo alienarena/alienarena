@@ -160,7 +160,8 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 			type = 0;
 			break;
 		case 2:
-			texture = "gfx/leaves1.tga";
+			texture = "gfx/bush1.tga";
+			size *= 1.5;
 			type = 2;
 			break;
 		}
