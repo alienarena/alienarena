@@ -136,7 +136,7 @@ void MD2_VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, fl
 }
 #else
 // Math rearrangement for MD2 load speedup
-static void MD2_VecsForTris(
+void MD2_VecsForTris(
 		const float *v0,
 		const float *v1,
 		const float *v2,

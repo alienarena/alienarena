@@ -13,6 +13,16 @@ void Terrain_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vta
 	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
 }
 
+extern void MD2_VecsForTris(
+		const float *v0,
+		const float *v1,
+		const float *v2,
+		const float *st0,
+		const float *st1,
+		const float *st2,
+		vec3_t Tangent
+		);
+
 void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 {
 	int i;
@@ -78,7 +88,7 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	for (i = 0; i < mod->num_triangles; i++)
 	{
 		int j;
-		vec3_t v1, v2, normal;
+		vec3_t v1, v2, normal, tangent;
 		unsigned int *triangle = &data.tri_indices[3*i];
 		
 		VectorSubtract (&data.vert_positions[3*triangle[0]], &data.vert_positions[3*triangle[1]], v1);
@@ -89,8 +99,19 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 		if (DotProduct (normal, up) < 0)
 			ndownward++;
 		
+		MD2_VecsForTris (	&data.vert_positions[3*triangle[0]], 
+							&data.vert_positions[3*triangle[1]], 
+							&data.vert_positions[3*triangle[2]],
+							&data.vert_texcoords[2*triangle[0]], 
+							&data.vert_texcoords[2*triangle[1]], 
+							&data.vert_texcoords[2*triangle[2]],
+							tangent );
+		
 		for (j = 0; j < 3; j++)
+		{
 			VectorAdd (&vnormal[3*triangle[j]], normal, &vnormal[3*triangle[j]]);
+			VectorAdd (&vtangent[4*triangle[j]], tangent, &vtangent[4*triangle[j]]);
+		}
 	}
 	
 	if (ndownward > 0)
@@ -98,7 +119,11 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	
 	// Normalize the average normals and tangents
 	for (i = 0; i < mod->numvertexes; i++)
+	{
 		VectorNormalize (&vnormal[3*i]);
+		VectorNormalize (&vtangent[4*i]);
+		vtangent[4*i+3] = 1.0;
+	}
 	
 	Terrain_LoadVBO (mod, data.vert_positions, vnormal, vtangent, data.vert_texcoords, data.tri_indices);
 	
