@@ -138,6 +138,11 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 			"gfx/weed3.tga",
 			"gfx/weed4.tga"
 		};
+		static char *bushtextures[] = 
+		{
+			"gfx/bush1.tga",
+			"gfx/bush2.tga"
+		};
 		int type;
 		float size;
 		
@@ -160,7 +165,7 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 			type = 0;
 			break;
 		case 2:
-			texture = "gfx/bush1.tga";
+			texture = bushtextures[rand()%2];
 			size *= 1.5;
 			type = 2;
 			break;
