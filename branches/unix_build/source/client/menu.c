@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
+#include "qcommon/qcommon.h"
 #include "client.h"
 #include "client/qmenu.h"
 
@@ -49,6 +50,63 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define _strdup strdup
 #endif
 #endif
+
+/* ---- GAME MODES ---- */
+
+enum Game_mode
+{
+	mode_dm   = 0, 
+	mode_ctf  = 1, // team
+	mode_tac  = 2, // special team
+	mode_aoa  = 3,
+	mode_db   = 4, // team
+	mode_tca  = 5, // team
+	mode_cp   = 6, // team
+	mode_duel = 7,
+};
+
+static const char *game_mode_names[] =
+{
+#ifndef TACTICAL
+	"deathmatch",
+	"ctf",
+	"tactical",
+	"all out assault",
+	"deathball",
+	"team core assault",
+	"cattle prod",
+	"duel"
+#else
+	"tactical"
+#endif
+};
+// #define num_game_modes (static_array_size(game_mode_names)-1)
+
+//same order as game_mode_names
+static const char *map_prefixes[][3] =
+{
+#ifndef TACTICAL
+	{"dm",  "tourney", NULL},
+	{"ctf", NULL,      NULL}, // 1
+	{"tac", NULL,      NULL}, // 2
+	{"aoa", NULL,      NULL}, // 3
+	{"db",  NULL,      NULL}, // 4
+	{"tca", NULL,      NULL}, // 5
+	{"cp",  NULL,      NULL}, // 6
+	{"dm",  "tourney", NULL}  // 7
+#else
+	{"tac", NULL,      NULL}  // 2
+#endif
+};
+
+inline qboolean is_team_game( float rule_value )
+{
+	int rv = (int)rule_value;
+	return ( rv == mode_ctf || rv == mode_db || rv == mode_tca || rv ==	mode_cp );
+}
+
+/*--------*/
+
 
 static int	m_main_cursor;
 
@@ -70,7 +128,6 @@ extern cvar_t *background_music_vol;
 extern cvar_t *fov;
 extern cvar_t *stats_password;
 
-// static char *menu_in_sound		= "misc/menu1.wav"; UNUSED -jjb-
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
 
@@ -95,8 +152,6 @@ void M_Menu_Main_f (void);
 		static void M_Menu_Video_f (void);
 		static void M_Menu_Keys_f (void);
 	static void M_Menu_Quit_f (void);
-
-// static void M_Menu_Credits( void ); UNUSED -jjb-
 
 qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
@@ -4466,6 +4521,7 @@ ADD BOTS MENU
 =============================================================================
 */
 
+
 // For going from weapon pickup name to weapon icon. Used for displaying icon
 // previews of the bots' favorite weapons.
 static char *weapon_icon_names[][2] =
@@ -4524,6 +4580,8 @@ struct botinfo {
 
 int slot;
 
+#define BOTINFO "botinfo"
+
 void LoadBotInfo( void )
 {
 	FILE *pIn;
@@ -4533,9 +4591,9 @@ void LoadBotInfo( void )
 
 	char fullpath[MAX_OSPATH];
 
-	if ( !FS_FullPath( fullpath, sizeof(fullpath), BOT_GAMEDATA"/allbots.tmp" ) )
+	if ( !FS_FullPath( fullpath, sizeof(fullpath), BOTINFO"/allbots.tmp" ) )
 	{
-		Com_DPrintf("LoadBotInfo: %s/allbots.tmp not found\n", BOT_GAMEDATA );
+		Com_DPrintf("LoadBotInfo: %s/allbots.tmp not found\n", BOTINFO );
 		return;
 	}
 	if( (pIn = fopen( fullpath, "rb" )) == NULL )
@@ -4568,7 +4626,7 @@ void LoadBotInfo( void )
 		
 		// load info from config file if possible
 		
-		Com_sprintf (cfgpath, sizeof(cfgpath), "%s/%s.cfg", BOT_GAMEDATA, name);
+		Com_sprintf (cfgpath, sizeof(cfgpath), "%s/%s.cfg", BOTINFO, name);
 		if( FS_LoadFile( cfgpath, (void**)&cfg ) == -1 )
 		{
 			Com_DPrintf("LoadBotInfo: failed file open: %s\n", fullpath );
@@ -4621,14 +4679,14 @@ void AddbotFunc(void *self)
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
 
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
+	if ( is_team_game( s_rules_box.curvalue ))
 	{ // team game
-		FS_FullWritePath( bot_filename, sizeof(bot_filename), BOT_GAMEDATA"/team.tmp" );
+		FS_FullWritePath( bot_filename, sizeof(bot_filename), BOTINFO"/team.tmp" );
 	}
 	else
 	{ // non-team, bots per map
 		char relative_path[MAX_QPATH];
-		Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", startmap );
+		Com_sprintf( relative_path, sizeof(relative_path), BOTINFO"/%s.tmp", startmap );
 		FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
 	}
 
@@ -4775,6 +4833,8 @@ void MutatorFunc( void *self )
 {
 	M_Menu_Mutators_f();
 }
+
+// -jjb- used?
 int Menu_FindFile (char *filename, FILE **file)
 {
 	*file = fopen (filename, "rb");
@@ -4783,7 +4843,6 @@ int Menu_FindFile (char *filename, FILE **file)
 		return -1;
 	}
 	return 1;
-
 }
 
 void MapInfoFunc( void *self ) {
@@ -4854,74 +4913,37 @@ void MapInfoFunc( void *self ) {
 
 }
 
-static const char *game_mode_names[] =
-{
-#ifndef TACTICAL
-	"deathmatch",
-	"ctf",
-#endif
-	"tactical",
-#ifndef TACTICAL
-	"all out assault",
-	"deathball",
-	"team core assault",
-	"cattle prod",
-	"duel",
-#endif
-	NULL
-};
-#define num_game_modes (static_array_size(game_mode_names)-1)
-
-//same order as game_mode_names
-static const char *map_prefixes[num_game_modes][3] =
-{
-#ifndef TACTICAL
-	{"dm", "tourney", NULL},
-	{"ctf", NULL},
-	{"tac", NULL},
-	{"aoa", NULL},
-	{"db", NULL},
-	{"tca", NULL},
-	{"cp", NULL},
-	{"dm", "tourney", NULL}
-#else
-	{"tac", NULL}
-#endif
-};
 
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 {
 	char *buffer;
 	char  mapsname[1024];
 	char *s;
-	int length;
-	int i, k;
+	int   length;
+	int   i, j, k, l;
 	FILE *fp;
 	char  shortname[MAX_TOKEN_CHARS];
 	char  longname[MAX_TOKEN_CHARS];
 	char  scratch[200];
 	char *curMap;
-	int nmaps = 0;
-	int totalmaps;
+	int   nmaps = 0;
+	int   totalmaps;
 	char **mapfiles;
-	// char *path = NULL; // unused
 	static char **bspnames;
-	int		j, l;
 
+// -jjb- encapsulate file i/o in FS_
 	//clear out list first
 	for ( i = 0; i < nummaps; i++ )
 		free( mapnames[i] );
-
 	nummaps = 0;
 
 	/*
 	** reload the list of map names, based on rules
+	**  arena/maps.lst -or- tactical/maps.lst
 	*/
-	// maps.lst normally in "data1/"
-	//  need  to add a function to FS_ if that is the only place it is allowed
 	if ( !FS_FullPath( mapsname, sizeof( mapsname ), "maps.lst" ) )
 	{
-			Com_Error( ERR_DROP, "couldn't find maps.lst\n" );
+		Com_Error( ERR_DROP, "couldn't find maps.lst\n" );
 		return; // for show, no maps.lst is fatal error
 	}
 	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
@@ -4930,9 +4952,10 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		return; // for "show". above is fatal error.
 	}
 
+	// -jjb- convert to FS_ function, FS_fread
 	length = FS_filelength( fp );
 	buffer = malloc( length + 1 );
-	szr = fread( buffer, length, 1, fp );
+	fread( buffer, length, 1, fp );
 	buffer[length] = 0;
 
 	i = 0;
@@ -4966,6 +4989,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);
 #if defined WIN32_VARIANT
+		// -jjb- FS_
 		for (j=0 ; j<l ; j++)
 			shortname[j] = tolower(shortname[j]);
 #endif
@@ -4982,7 +5006,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		for (j = 0; map_prefixes[s_rules_box.curvalue][j]; j++)
 		{
 			const char *curpfx = map_prefixes[s_rules_box.curvalue][j];
-			if (!strncmp (curpfx, shortname, strlen(curpfx)))
+			if ( !Q_strncasecmp( curpfx, shortname, strlen(curpfx)) )
 			{
 				// matched an allowable prefix
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
@@ -4995,6 +5019,8 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	// done with maps.lst
 	fclose( fp );
 	free( buffer );
+
+// -jjb- 
 
 	//now, check the folders and add the maps not in the list yet
 
@@ -5040,7 +5066,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 			for (j = 0; map_prefixes[s_rules_box.curvalue][j]; j++)
 			{
 				const char *curpfx = map_prefixes[s_rules_box.curvalue][j];
-				if (!strncmp (curpfx, curMap, strlen(curpfx)))
+				if (!!Q_strncasecmp (curpfx, curMap, strlen(curpfx)))
 				{
 					// matched an allowable prefix
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
@@ -5072,20 +5098,21 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 
 void StartServerActionFunc( void *self )
 {
-	char	startmap[128];
-	int		timelimit;
-	int		fraglimit;
-	int		maxclients;
+	char startmap[128];
+	int  timelimit;
+	int  fraglimit;
+	int  maxclients;
+	int  cvflags;
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 
-	maxclients  = atoi( s_maxclients_field.buffer );
-	timelimit	= atoi( s_timelimit_field.buffer );
-	fraglimit	= atoi( s_fraglimit_field.buffer );
+	maxclients = atoi( s_maxclients_field.buffer );
+	timelimit  = atoi( s_timelimit_field.buffer );
+	fraglimit  = atoi( s_fraglimit_field.buffer );
 
-	Cvar_SetValue( "maxclients", ClampCvar( 0, maxclients, maxclients ) );
-	Cvar_SetValue ("timelimit", ClampCvar( 0, timelimit, timelimit ) );
-	Cvar_SetValue ("fraglimit", ClampCvar( 0, fraglimit, fraglimit ) );
+	Cvar_SetValue ( "maxclients", ClampCvar( 0, maxclients, maxclients ));
+	Cvar_SetValue ("timelimit", ClampCvar( 0, timelimit, timelimit ));
+	Cvar_SetValue ("fraglimit", ClampCvar( 0, fraglimit, fraglimit ));
 	Cvar_Set("hostname", s_hostname_field.buffer );
 	Cvar_SetValue("sv_public", s_public_box.curvalue );
 
@@ -5107,39 +5134,48 @@ void StartServerActionFunc( void *self )
 
 	// The deathmatch cvar doesn't specifically indicate a pure frag-to-win
 	// game mode. It's actually the "enable multiplayer" cvar.
-	// TODO: Does Alien Arena even work with deathmatch set to 0? Might be
-	// able to remove it from the game.
-	Cvar_SetValue ("deathmatch", 1 );
-	Cvar_SetValue ("ctf", 0);
+	// It protects from running vestigial Quake non-multiplayer code.
+	Cvar_SetValue( "deathmatch", 1 );
+
+	cvflags =  CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL;
+	Cvar_FullSet( "ctf",    "0", cvflags );
+	Cvar_FullSet( "tac",    "0", cvflags );
+	Cvar_FullSet( "aoa",    "0", cvflags );
+	Cvar_FullSet( "tca",    "0", cvflags );
+	Cvar_FullSet( "db",     "0", cvflags );
+	Cvar_FullSet( "cp",     "0", cvflags );
+	Cvar_FullSet( "g_duel", "0", cvflags );
 #ifdef TACTICAL
-	Cvar_SetValue ("g_tactical", 1);
+	Cvar_SetValue( "gamerules", (float)mode_tac );
 #else
-	Cvar_SetValue ("g_tactical", 0);
+	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
 #endif
-	Cvar_SetValue ("tca", 0);
-	Cvar_SetValue ("cp", 0);
-	Cvar_SetValue ("g_duel", 0);
-	Cvar_SetValue ("gamerules", s_rules_box.curvalue );
-	
+
 	switch (s_rules_box.curvalue)
 	{
-		case 1:
-			Cvar_SetValue ("ctf", 1 );
-			break;
-		case 2:
-			Cvar_SetValue ("g_tactical", 1);
-			break;
-		case 4:
-			Cvar_SetValue ("tca", 1);
-			break;
-		case 5:
-			Cvar_SetValue ("cp", 1);
-			break;
-		case 6:
-			Cvar_SetValue ("g_duel", 1);
-			break;
-		default:
-			break;
+	case mode_ctf:
+		Cvar_ForceSet( "ctf", "1" );
+		break;
+	case mode_tac:
+		Cvar_ForceSet( "g_tactical", "1" );
+		break;
+	case mode_aoa:
+		Cvar_ForceSet( "aoa", "1" );
+		break;
+	case mode_tca:
+		Cvar_ForceSet( "tca", "1" );
+		break;
+	case mode_db:
+		Cvar_ForceSet( "db", "1" );
+		break;
+	case mode_cp:
+		Cvar_ForceSet( "cp", "1" );
+		break;
+	case mode_duel:
+		Cvar_ForceSet( "g_duel", "1" );
+		break;
+	default:
+		break;
 	}
 
 	Cbuf_AddText (va("startmap %s\n", startmap));
@@ -5151,7 +5187,6 @@ void StartServerActionFunc( void *self )
 static void M_Menu_StartServer_f (void)
 {
 	int i;
-
 	
 	static const char *skill[] =
 	{
@@ -5303,8 +5338,8 @@ void Read_Bot_Info()
 	char stem[MAX_QPATH];
 	char relative_path[MAX_QPATH];
 
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-	{ // team game
+	if ( is_team_game( s_rules_box.curvalue ) )
+	{
 		strcpy( stem, "team" );
 	}
 	else
@@ -5313,10 +5348,10 @@ void Read_Bot_Info()
 		for(i = 0; i < strlen(stem); i++)
 			stem[i] = tolower( stem[i] );
 	}
-	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	Com_sprintf( relative_path, sizeof(relative_path), BOTINFO"/%s.tmp", stem );
 	if ( !FS_FullPath( bot_filename, sizeof(bot_filename), relative_path ) )
 	{
-		Com_DPrintf("Read_Bot_Info: %s/%s not found\n", BOT_GAMEDATA, relative_path );
+		Com_DPrintf("Read_Bot_Info: %s/%s not found\n", BOTINFO, relative_path );
 		return;
 	}
 
@@ -5408,8 +5443,8 @@ void BotAction( void *self )
 	}
 
 	//write out bot file
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-	{ // team game
+	if ( is_team_game( s_rules_box.curvalue ))
+	{
 		strcpy( stem, "team" );
 	}
 	else
@@ -5418,7 +5453,7 @@ void BotAction( void *self )
 		for(i = 0; i < strlen(stem); i++)
 			stem[i] = tolower( stem[i] );
 	}
-	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	Com_sprintf( relative_path, sizeof(relative_path), BOTINFO"/%s.tmp", stem );
 	FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
@@ -5600,7 +5635,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	FILE *modelfile;
 	int i;
 	extern float CalcFov( float fov_x, float w, float h );
-//	float scale; UNUSED -jjb-
 	entity_t entity[3];
 	menumodel_s *self = (menumodel_s*) _self;
 	
@@ -5613,8 +5647,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	self->yaw += cls.frametime*50;
 	if (self->yaw > 360)
 		self->yaw = 0;
-
-// scale = (float)(viddef.height)/600; -jjb-
 	
 	memset( &refdef, 0, sizeof( refdef ) );
 	
@@ -5990,17 +6022,12 @@ static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 void PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
-	// extern cvar_t *team; // unused
-	// extern cvar_t *skin; // unused
 	char currentdirectory[1024];
 	char currentskin[1024];
 	int i = 0;
-// float scale; UNUSED -jjb-
 	int currentdirectoryindex = 0;
 	int currentskinindex = 0;
 	cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
-
-// scale = (float)(viddef.height)/600; -jjb-
 
 	PlayerConfig_ScanDirectories();
 
@@ -6195,7 +6222,6 @@ ALIEN ARENA TACTICAL MENU
 */
 
 static menuframework_s	s_tactical_screen;
-// static menuaction_s		s_tactical_title_action; UNUSED -jjb-
 
 #define num_tactical_teams		2
 #define num_tactical_classes	3
@@ -6258,10 +6284,7 @@ static void TacticalScreen_Draw (menuframework_s *screen, menuvec2_t offset)
 static void M_Menu_Tactical_f (void)
 {
 	extern cvar_t *name;
-//	float scale; UNUSED -jjb-
 	int i, j;
-	
-//	scale = (float)(viddef.height)/600; -jjb-
 	
 	for (i = 0; i < num_tactical_teams; i++)
 	{

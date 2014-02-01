@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 #
-# Copyright (C) 2010 COR Entertainment, LLC
+# Copyright (C) 2010,2014 COR Entertainment, LLC
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -12,29 +12,20 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # A copy of the  GNU General Public License is included;
-# see the file, COPYING.
+# see the file, GPL2.
 #
-
-# 2013 December:
-# - See notes in top-level Makefile.am, and configure.ac
-# - The integrated ODE library option is now unnecessary and is removed.
-# - And so, libode is now a required dependency for the client.
-# - 'Alternate Install' is removed. There is a better way to do the equivalent.
-# - The MinGW Windows variant complicates things and is removed, for now.
-# - unix/files_unix.c replaces qcommon/files.c for Unix/GNU Linux
-# - aa_tactical_demo client added here, for now.
 
 noinst_LIBRARIES = libgame.a
 
-DATADIR_CPPFLAGS = -DDATADIR='"$(datadir)/alienarena"'
+AM_CPPFLAGS = -DCOR_DATADIR='"$(pkgdatadir)"'
 
 # Dedicated Server libraries and flags
+alienarena_ded_CPPFLAGS =  -DDEDICATED_ONLY $(AM_CPPFLAGS)
 alienarena_ded_LDADD = libgame.a
-alienarena_ded_CPPFLAGS = $(DATADIR_CPPFLAGS) -DDEDICATED_ONLY
 
 # Client libraries and flags
 alienarena_CPPFLAGS = \
-	$(DATADIR_CPPFLAGS) \
+	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
 	$(X11_CLAGS) \
 	$(DEPS_CFLAGS) \
@@ -53,7 +44,7 @@ alienarena_LDADD = libgame.a \
 
 
 aa_tactical_demo_CPPFLAGS = -DTACTICAL \
-	$(DATADIR_CPPFLAGS) \
+	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
 	$(X11_CLAGS) \
 	$(DEPS_CFLAGS) \
@@ -76,6 +67,7 @@ bin_PROGRAMS = alienarena-ded
 if BUILD_CLIENT
 bin_PROGRAMS += alienarena  aa_tactical_demo
 endif
+
 
 # Alien Arena Client
 alienarena_SOURCES = \
@@ -202,10 +194,10 @@ alienarena_SOURCES = \
 
 
 # Tactical Demo Client
-aa_tactical_demo_SOURCES = ${alienarena_SOURCES}
+aa_tactical_demo_SOURCES = $(alienarena_SOURCES)
 
 
-# Dedicated Server 
+# Dedicated Server
 alienarena_ded_SOURCES = \
 	client/anorms.h \
 	game/game.h \

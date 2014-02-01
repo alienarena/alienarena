@@ -633,24 +633,25 @@ EGREP
 GREP
 DEPS_LIBS
 DEPS_CFLAGS
+ZLIB_LIBS
+ZLIB_CFLAGS
 XXF86DGA_LIBS
 XXF86DGA_CFLAGS
 XXF86VM_LIBS
 XXF86VM_CFLAGS
 X11_LIBS
 X11_CFLAGS
-ZLIB_LIBS
-ZLIB_CFLAGS
+GL_LIBDIR
+XMKMF
 PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
 ax_pthread_config
-GL_LIBDIR
-XMKMF
 COR_GAMES_HOMEDIR
-icondir
-INSTALL_DOCS_FALSE
-INSTALL_DOCS_TRUE
+ICONS_INSTALL_FALSE
+ICONS_INSTALL_TRUE
+DOC_INSTALL_FALSE
+DOC_INSTALL_TRUE
 BUILD_CLIENT_FALSE
 BUILD_CLIENT_TRUE
 host_os
@@ -684,10 +685,7 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
-WITH_TACTICALPKG_FALSE
-WITH_TACTICALPKG_TRUE
-WITH_ARENAPKG_FALSE
-WITH_ARENAPKG_TRUE
+SED
 WITH_DATA1PKG_FALSE
 WITH_DATA1PKG_TRUE
 subdirs
@@ -765,16 +763,14 @@ enable_option_checking
 enable_silent_rules
 enable_maintainer_mode
 with_data1pkg
-with_arenapkg
-with_tacticalpkg
 enable_dependency_tracking
 enable_client
-enable_documents
-with_icondir
+enable_doc_install
+enable_icons_install
 with_x
-with_zlib
 with_xf86vm
 with_xf86dga
+with_zlib
 enable_build_status
 '
       ac_precious_vars='build_alias
@@ -792,19 +788,17 @@ PKG_CONFIG_LIBDIR
 COR_GAMES_HOMEDIR
 XMKMF
 GL_LIBDIR
-ZLIB_CFLAGS
-ZLIB_LIBS
 X11_CFLAGS
 X11_LIBS
 XXF86VM_CFLAGS
 XXF86VM_LIBS
 XXF86DGA_CFLAGS
 XXF86DGA_LIBS
+ZLIB_CFLAGS
+ZLIB_LIBS
 DEPS_CFLAGS
 DEPS_LIBS'
-ac_subdirs_all='data1
-arena
-tactical'
+ac_subdirs_all='data1'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1437,7 +1431,8 @@ Optional Features:
                           speeds up one-time build
   --disable-client        build dedicated server only, not the client
                           (default:no)
-  --disable-documents     Disable document installation (default: no)
+  --enable-doc-install    Enable document installation (default: yes)
+  --enable-icons-install  Enable icons installation (default: yes)
   --disable-build-status  hide the status message at the end of the
                           configuration script (defdault:no)
 
@@ -1447,17 +1442,10 @@ Optional Packages:
   --with(out)-data1pkg    include game resources from data1 directory
                           (default:with)
 
-  --with(out)-arenapkg    include arena game configuration from arena
-                          directory (default:with)
-
-  --with(out)-tacticalpkg include tactical demo game configuration from
-                          tactical directory (default:with)
-
-  --with-icondir=DIR      icon install directory (default:DATADIR/icons)
   --with-x                use the X Window System
-  --with(out)-zlib        include Zlib compression support (default: check)
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: without)
+  --with(out)-zlib        include Zlib compression support (default: check)
 
 Some influential environment variables:
   CC          C compiler command
@@ -1478,8 +1466,6 @@ Some influential environment variables:
               (default:$XDG_?/cor_games))
   XMKMF       Path to xmkmf, Makefile generator for X Window System
   GL_LIBDIR   directory containing libGL.dylib
-  ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
-  ZLIB_LIBS   linker flags for ZLIB, overriding pkg-config
   X11_CFLAGS  C compiler flags for X11, overriding pkg-config
   X11_LIBS    linker flags for X11, overriding pkg-config
   XXF86VM_CFLAGS
@@ -1490,6 +1476,8 @@ Some influential environment variables:
               C compiler flags for XXF86DGA, overriding pkg-config
   XXF86DGA_LIBS
               linker flags for XXF86DGA, overriding pkg-config
+  ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
+  ZLIB_LIBS   linker flags for ZLIB, overriding pkg-config
   DEPS_CFLAGS C compiler flags for DEPS, overriding pkg-config
   DEPS_LIBS   linker flags for DEPS, overriding pkg-config
 
@@ -3131,65 +3119,6 @@ else
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to include arena game configuration package" >&5
-$as_echo_n "checking whether to include arena game configuration package... " >&6; }
-
-# Check whether --with-arenapkg was given.
-if test "${with_arenapkg+set}" = set; then :
-  withval=$with_arenapkg;
-		with_arenapkg=${withval}
-else
-
-		with_arenapkg=yes
-
-fi
-
-if  test "x${with_arenapkg}" != xno ; then :
-
-	subdirs="$subdirs arena"
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${with_arenapkg}" >&5
-$as_echo "${with_arenapkg}" >&6; }
- if  test "x${with_arenapkg}" = xyes ; then
-  WITH_ARENAPKG_TRUE=
-  WITH_ARENAPKG_FALSE='#'
-else
-  WITH_ARENAPKG_TRUE='#'
-  WITH_ARENAPKG_FALSE=
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to include tactical demo game configuration package" >&5
-$as_echo_n "checking whether to include tactical demo game configuration package... " >&6; }
-
-# Check whether --with-tacticalpkg was given.
-if test "${with_tacticalpkg+set}" = set; then :
-  withval=$with_tacticalpkg;
-		with_tacticalpkg=${withval}
-else
-
-		with_tacticalpkg=yes
-
-fi
-
-if  test "x${with_tacticalpkg}" != xno ; then :
-
-	subdirs="$subdirs tactical"
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${with_tacticalpkg}" >&5
-$as_echo "${with_tacticalpkg}" >&6; }
- if  test "x${with_tacticalpkg}" = xyes ; then
-  WITH_TACTICALPKG_TRUE=
-  WITH_TACTICALPKG_FALSE='#'
-else
-  WITH_TACTICALPKG_TRUE='#'
-  WITH_TACTICALPKG_FALSE=
-fi
-
-
-
 #
 # Checks for programs.
 #
@@ -3234,6 +3163,75 @@ fi
 
   test -n "$AWK" && break
 done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
+$as_echo_n "checking for a sed that does not truncate output... " >&6; }
+if ${ac_cv_path_SED+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+            ac_script=s/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/
+     for ac_i in 1 2 3 4 5 6 7; do
+       ac_script="$ac_script$as_nl$ac_script"
+     done
+     echo "$ac_script" 2>/dev/null | sed 99q >conftest.sed
+     { ac_script=; unset ac_script;}
+     if test -z "$SED"; then
+  ac_path_SED_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in sed gsed; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_SED="$as_dir/$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_SED" || continue
+# Check for GNU ac_path_SED and select it if it is found.
+  # Check for GNU $ac_path_SED
+case `"$ac_path_SED" --version 2>&1` in
+*GNU*)
+  ac_cv_path_SED="$ac_path_SED" ac_path_SED_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo '' >> "conftest.nl"
+    "$ac_path_SED" -f conftest.sed < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_SED_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_SED="$ac_path_SED"
+      ac_path_SED_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_SED_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_SED"; then
+    as_fn_error $? "no acceptable sed could be found in \$PATH" "$LINENO" 5
+  fi
+else
+  ac_cv_path_SED=$SED
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_SED" >&5
+$as_echo "$ac_cv_path_SED" >&6; }
+ SED="$ac_cv_path_SED"
+  rm -f conftest.sed
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -4738,7 +4736,6 @@ fi
 #
 # Check host environment
 #
-
 # Make sure we can run config.sub.
 $SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
   as_fn_error $? "cannot run $SHELL $ac_aux_dir/config.sub" "$LINENO" 5
@@ -4824,6 +4821,7 @@ case  ${host}  in #(
   *) :
      ;;
 esac
+
 
 
 $as_echo "#define UNIX_VARIANT 1" >>confdefs.h
@@ -4924,34 +4922,44 @@ else
 fi
 
 
-# Check whether --enable-documents was given.
-if test "${enable_documents+set}" = set; then :
-  enableval=$enable_documents; no_docs=${documents}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to install documents" >&5
+$as_echo_n "checking whether to install documents... " >&6; }
+# Check whether --enable-doc_install was given.
+if test "${enable_doc_install+set}" = set; then :
+  enableval=$enable_doc_install; doc_install=${enableval}
 else
-  no_docs=no
+  doc_install=yes
 fi
 
- if  test "x${no_docs}" = xno ; then
-  INSTALL_DOCS_TRUE=
-  INSTALL_DOCS_FALSE='#'
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${doc_install}" >&5
+$as_echo "${doc_install}" >&6; }
+ if  test "x${doc_install}" = xyes ; then
+  DOC_INSTALL_TRUE=
+  DOC_INSTALL_FALSE='#'
 else
-  INSTALL_DOCS_TRUE='#'
-  INSTALL_DOCS_FALSE=
+  DOC_INSTALL_TRUE='#'
+  DOC_INSTALL_FALSE=
 fi
 
 
-
-# Check whether --with-icondir was given.
-if test "${with_icondir+set}" = set; then :
-  withval=$with_icondir;
-		with_icondir=${withval}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to install icons" >&5
+$as_echo_n "checking whether to install icons... " >&6; }
+# Check whether --enable-icons_install was given.
+if test "${enable_icons_install+set}" = set; then :
+  enableval=$enable_icons_install; icons_install=${enableval}
 else
-
-		with_icondir=${datadir}/iconsdir
-
+  icons_install=yes
 fi
 
-icondir=${with_icondir}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${icons_install}" >&5
+$as_echo "${icons_install}" >&6; }
+ if  test "x${icons_install}" = xyes ; then
+  ICONS_INSTALL_TRUE=
+  ICONS_INSTALL_FALSE='#'
+else
+  ICONS_INSTALL_TRUE='#'
+  ICONS_INSTALL_FALSE=
+fi
 
 
 #
@@ -4962,17 +4970,17 @@ icondir=${with_icondir}
 # TO BE CONVERTED TO XDG CONVENTION
 # $HOME/.local/share/cor_games
 # ALWAYS cor_games, to be hard-wired in code
-# For testing modify the code
+# For testing modify the code, or configure.ac
 #
 cor_games_homedir="cor_games"
 
 
 if  test "x${COR_GAMES_HOMEDIR}" = x ; then :
 
- 	COR_GAMES_HOMEDIR=${cor_games_homedir}
+	COR_GAMES_HOMEDIR=${cor_games_homedir}
 else
 
- 	cor_games_homedir=${COR_GAMES_HOMEDIR}
+	cor_games_homedir=${COR_GAMES_HOMEDIR}
 
 fi
 
@@ -4985,6 +4993,7 @@ _ACEOF
 #
 # Checks for libraries.
 #
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing acos" >&5
 $as_echo_n "checking for library containing acos... " >&6; }
@@ -5042,6 +5051,7 @@ if test "$ac_res" != no; then :
 
 fi
 
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
 $as_echo_n "checking for library containing dlopen... " >&6; }
 if ${ac_cv_search_dlopen+:} false; then :
@@ -5097,6 +5107,7 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing clock_gettime" >&5
 $as_echo_n "checking for library containing clock_gettime... " >&6; }
@@ -5159,217 +5170,6 @@ fi
 if test -z "$BUILD_CLIENT_TRUE"; then :
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
-$as_echo_n "checking for X... " >&6; }
-
-
-# Check whether --with-x was given.
-if test "${with_x+set}" = set; then :
-  withval=$with_x;
-fi
-
-# $have_x is `yes', `no', `disabled', or empty when we do not yet know.
-if test "x$with_x" = xno; then
-  # The user explicitly disabled X.
-  have_x=disabled
-else
-  case $x_includes,$x_libraries in #(
-    *\'*) as_fn_error $? "cannot use X directory names containing '" "$LINENO" 5;; #(
-    *,NONE | NONE,*) if ${ac_cv_have_x+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  # One or both of the vars are not set, and there is no cached value.
-ac_x_includes=no ac_x_libraries=no
-rm -f -r conftest.dir
-if mkdir conftest.dir; then
-  cd conftest.dir
-  cat >Imakefile <<'_ACEOF'
-incroot:
-	@echo incroot='${INCROOT}'
-usrlibdir:
-	@echo usrlibdir='${USRLIBDIR}'
-libdir:
-	@echo libdir='${LIBDIR}'
-_ACEOF
-  if (export CC; ${XMKMF-xmkmf}) >/dev/null 2>/dev/null && test -f Makefile; then
-    # GNU make sometimes prints "make[1]: Entering ...", which would confuse us.
-    for ac_var in incroot usrlibdir libdir; do
-      eval "ac_im_$ac_var=\`\${MAKE-make} $ac_var 2>/dev/null | sed -n 's/^$ac_var=//p'\`"
-    done
-    # Open Windows xmkmf reportedly sets LIBDIR instead of USRLIBDIR.
-    for ac_extension in a so sl dylib la dll; do
-      if test ! -f "$ac_im_usrlibdir/libX11.$ac_extension" &&
-	 test -f "$ac_im_libdir/libX11.$ac_extension"; then
-	ac_im_usrlibdir=$ac_im_libdir; break
-      fi
-    done
-    # Screen out bogus values from the imake configuration.  They are
-    # bogus both because they are the default anyway, and because
-    # using them would break gcc on systems where it needs fixed includes.
-    case $ac_im_incroot in
-	/usr/include) ac_x_includes= ;;
-	*) test -f "$ac_im_incroot/X11/Xos.h" && ac_x_includes=$ac_im_incroot;;
-    esac
-    case $ac_im_usrlibdir in
-	/usr/lib | /usr/lib64 | /lib | /lib64) ;;
-	*) test -d "$ac_im_usrlibdir" && ac_x_libraries=$ac_im_usrlibdir ;;
-    esac
-  fi
-  cd ..
-  rm -f -r conftest.dir
-fi
-
-# Standard set of common directories for X headers.
-# Check X11 before X11Rn because it is often a symlink to the current release.
-ac_x_header_dirs='
-/usr/X11/include
-/usr/X11R7/include
-/usr/X11R6/include
-/usr/X11R5/include
-/usr/X11R4/include
-
-/usr/include/X11
-/usr/include/X11R7
-/usr/include/X11R6
-/usr/include/X11R5
-/usr/include/X11R4
-
-/usr/local/X11/include
-/usr/local/X11R7/include
-/usr/local/X11R6/include
-/usr/local/X11R5/include
-/usr/local/X11R4/include
-
-/usr/local/include/X11
-/usr/local/include/X11R7
-/usr/local/include/X11R6
-/usr/local/include/X11R5
-/usr/local/include/X11R4
-
-/usr/X386/include
-/usr/x386/include
-/usr/XFree86/include/X11
-
-/usr/include
-/usr/local/include
-/usr/unsupported/include
-/usr/athena/include
-/usr/local/x11r5/include
-/usr/lpp/Xamples/include
-
-/usr/openwin/include
-/usr/openwin/share/include'
-
-if test "$ac_x_includes" = no; then
-  # Guess where to find include files, by looking for Xlib.h.
-  # First, try using that file with no special directory specified.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <X11/Xlib.h>
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  # We can compile using X headers with no special include directory.
-ac_x_includes=
-else
-  for ac_dir in $ac_x_header_dirs; do
-  if test -r "$ac_dir/X11/Xlib.h"; then
-    ac_x_includes=$ac_dir
-    break
-  fi
-done
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-fi # $ac_x_includes = no
-
-if test "$ac_x_libraries" = no; then
-  # Check for the libraries.
-  # See if we find them without any special options.
-  # Don't add to $LIBS permanently.
-  ac_save_LIBS=$LIBS
-  LIBS="-lX11 $LIBS"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <X11/Xlib.h>
-int
-main ()
-{
-XrmInitialize ()
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  LIBS=$ac_save_LIBS
-# We can link X programs with no special library path.
-ac_x_libraries=
-else
-  LIBS=$ac_save_LIBS
-for ac_dir in `$as_echo "$ac_x_includes $ac_x_header_dirs" | sed s/include/lib/g`
-do
-  # Don't even attempt the hair of trying to link an X program!
-  for ac_extension in a so sl dylib la dll; do
-    if test -r "$ac_dir/libX11.$ac_extension"; then
-      ac_x_libraries=$ac_dir
-      break 2
-    fi
-  done
-done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-fi # $ac_x_libraries = no
-
-case $ac_x_includes,$ac_x_libraries in #(
-  no,* | *,no | *\'*)
-    # Didn't find X, or a directory has "'" in its name.
-    ac_cv_have_x="have_x=no";; #(
-  *)
-    # Record where we found X for the cache.
-    ac_cv_have_x="have_x=yes\
-	ac_x_includes='$ac_x_includes'\
-	ac_x_libraries='$ac_x_libraries'"
-esac
-fi
-;; #(
-    *) have_x=yes;;
-  esac
-  eval "$ac_cv_have_x"
-fi # $with_x != no
-
-if test "$have_x" != yes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_x" >&5
-$as_echo "$have_x" >&6; }
-  no_x=yes
-else
-  # If each of the values was on the command line, it overrides each guess.
-  test "x$x_includes" = xNONE && x_includes=$ac_x_includes
-  test "x$x_libraries" = xNONE && x_libraries=$ac_x_libraries
-  # Update the cache value to reflect the command line values.
-  ac_cv_have_x="have_x=yes\
-	ac_x_includes='$x_includes'\
-	ac_x_libraries='$x_libraries'"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: libraries $x_libraries, headers $x_includes" >&5
-$as_echo "libraries $x_libraries, headers $x_includes" >&6; }
-fi
-
-
-					gl_dlopen_path=default
-	if  test "x${unix_host}" = xdarwin ; then :
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GL_LIBDIR (location of libGL.dylib)" >&5
-$as_echo_n "checking for GL_LIBDIR (location of libGL.dylib)... " >&6; }
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${GL_LIBDIR}" >&5
-$as_echo "${GL_LIBDIR}" >&6; }
-		if  test "x${GL_LIBDIR}" = x ; then :
-
-			gl_dlopen_path=${x_libraries}
-else
-
-			gl_dlopen_path=${GL_LIBDIR}
-fi
-
-fi
 
 
 
@@ -5818,174 +5618,217 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 
 
-# Check whether --with-zlib was given.
-if test "${with_zlib+set}" = set; then :
-  withval=$with_zlib;
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
+$as_echo_n "checking for X... " >&6; }
+
+
+# Check whether --with-x was given.
+if test "${with_x+set}" = set; then :
+  withval=$with_x;
+fi
+
+# $have_x is `yes', `no', `disabled', or empty when we do not yet know.
+if test "x$with_x" = xno; then
+  # The user explicitly disabled X.
+  have_x=disabled
 else
-  with_zlib=check
-fi
-
-	have_zlib=no
-	if  test "x${with_zlib}" != xno ; then :
-
-
-pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ZLIB" >&5
-$as_echo_n "checking for ZLIB... " >&6; }
-
-if test -n "$ZLIB_CFLAGS"; then
-    pkg_cv_ZLIB_CFLAGS="$ZLIB_CFLAGS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"zlib\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "zlib") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_ZLIB_CFLAGS=`$PKG_CONFIG --cflags "zlib" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-if test -n "$ZLIB_LIBS"; then
-    pkg_cv_ZLIB_LIBS="$ZLIB_LIBS"
- elif test -n "$PKG_CONFIG"; then
-    if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"zlib\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "zlib") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_ZLIB_LIBS=`$PKG_CONFIG --libs "zlib" 2>/dev/null`
-		      test "x$?" != "x0" && pkg_failed=yes
-else
-  pkg_failed=yes
-fi
- else
-    pkg_failed=untried
-fi
-
-
-
-if test $pkg_failed = yes; then
-   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
-        _pkg_short_errors_supported=yes
-else
-        _pkg_short_errors_supported=no
-fi
-        if test $_pkg_short_errors_supported = yes; then
-	        ZLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "zlib" 2>&1`
-        else
-	        ZLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "zlib" 2>&1`
-        fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$ZLIB_PKG_ERRORS" >&5
-
-
-			have_zlib=no
-			if  test "x${with_zlib}" = xyes ; then :
-
-				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-zlib specified, but the library or headers could not be found
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
-
-elif test $pkg_failed = untried; then
-     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-			have_zlib=no
-			if  test "x${with_zlib}" = xyes ; then :
-
-				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-zlib specified, but the library or headers could not be found
-See \`config.log' for more details" "$LINENO" 5; }
-
-fi
-
-else
-	ZLIB_CFLAGS=$pkg_cv_ZLIB_CFLAGS
-	ZLIB_LIBS=$pkg_cv_ZLIB_LIBS
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-			have_zlib=yes
-
-$as_echo "#define HAVE_ZLIB 1" >>confdefs.h
-
-
-fi
-
-fi
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
-$as_echo_n "checking for library containing jpeg_read_header... " >&6; }
-if ${ac_cv_search_jpeg_read_header+:} false; then :
+  case $x_includes,$x_libraries in #(
+    *\'*) as_fn_error $? "cannot use X directory names containing '" "$LINENO" 5;; #(
+    *,NONE | NONE,*) if ${ac_cv_have_x+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  # One or both of the vars are not set, and there is no cached value.
+ac_x_includes=no ac_x_libraries=no
+rm -f -r conftest.dir
+if mkdir conftest.dir; then
+  cd conftest.dir
+  cat >Imakefile <<'_ACEOF'
+incroot:
+	@echo incroot='${INCROOT}'
+usrlibdir:
+	@echo usrlibdir='${USRLIBDIR}'
+libdir:
+	@echo libdir='${LIBDIR}'
+_ACEOF
+  if (export CC; ${XMKMF-xmkmf}) >/dev/null 2>/dev/null && test -f Makefile; then
+    # GNU make sometimes prints "make[1]: Entering ...", which would confuse us.
+    for ac_var in incroot usrlibdir libdir; do
+      eval "ac_im_$ac_var=\`\${MAKE-make} $ac_var 2>/dev/null | sed -n 's/^$ac_var=//p'\`"
+    done
+    # Open Windows xmkmf reportedly sets LIBDIR instead of USRLIBDIR.
+    for ac_extension in a so sl dylib la dll; do
+      if test ! -f "$ac_im_usrlibdir/libX11.$ac_extension" &&
+	 test -f "$ac_im_libdir/libX11.$ac_extension"; then
+	ac_im_usrlibdir=$ac_im_libdir; break
+      fi
+    done
+    # Screen out bogus values from the imake configuration.  They are
+    # bogus both because they are the default anyway, and because
+    # using them would break gcc on systems where it needs fixed includes.
+    case $ac_im_incroot in
+	/usr/include) ac_x_includes= ;;
+	*) test -f "$ac_im_incroot/X11/Xos.h" && ac_x_includes=$ac_im_incroot;;
+    esac
+    case $ac_im_usrlibdir in
+	/usr/lib | /usr/lib64 | /lib | /lib64) ;;
+	*) test -d "$ac_im_usrlibdir" && ac_x_libraries=$ac_im_usrlibdir ;;
+    esac
+  fi
+  cd ..
+  rm -f -r conftest.dir
+fi
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char jpeg_read_header ();
+# Standard set of common directories for X headers.
+# Check X11 before X11Rn because it is often a symlink to the current release.
+ac_x_header_dirs='
+/usr/X11/include
+/usr/X11R7/include
+/usr/X11R6/include
+/usr/X11R5/include
+/usr/X11R4/include
+
+/usr/include/X11
+/usr/include/X11R7
+/usr/include/X11R6
+/usr/include/X11R5
+/usr/include/X11R4
+
+/usr/local/X11/include
+/usr/local/X11R7/include
+/usr/local/X11R6/include
+/usr/local/X11R5/include
+/usr/local/X11R4/include
+
+/usr/local/include/X11
+/usr/local/include/X11R7
+/usr/local/include/X11R6
+/usr/local/include/X11R5
+/usr/local/include/X11R4
+
+/usr/X386/include
+/usr/x386/include
+/usr/XFree86/include/X11
+
+/usr/include
+/usr/local/include
+/usr/unsupported/include
+/usr/athena/include
+/usr/local/x11r5/include
+/usr/lpp/Xamples/include
+
+/usr/openwin/include
+/usr/openwin/share/include'
+
+if test "$ac_x_includes" = no; then
+  # Guess where to find include files, by looking for Xlib.h.
+  # First, try using that file with no special directory specified.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <X11/Xlib.h>
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+  # We can compile using X headers with no special include directory.
+ac_x_includes=
+else
+  for ac_dir in $ac_x_header_dirs; do
+  if test -r "$ac_dir/X11/Xlib.h"; then
+    ac_x_includes=$ac_dir
+    break
+  fi
+done
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+fi # $ac_x_includes = no
+
+if test "$ac_x_libraries" = no; then
+  # Check for the libraries.
+  # See if we find them without any special options.
+  # Don't add to $LIBS permanently.
+  ac_save_LIBS=$LIBS
+  LIBS="-lX11 $LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <X11/Xlib.h>
 int
 main ()
 {
-return jpeg_read_header ();
+XrmInitialize ()
   ;
   return 0;
 }
 _ACEOF
-for ac_lib in '' jpeg; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_jpeg_read_header=$ac_res
+if ac_fn_c_try_link "$LINENO"; then :
+  LIBS=$ac_save_LIBS
+# We can link X programs with no special library path.
+ac_x_libraries=
+else
+  LIBS=$ac_save_LIBS
+for ac_dir in `$as_echo "$ac_x_includes $ac_x_header_dirs" | sed s/include/lib/g`
+do
+  # Don't even attempt the hair of trying to link an X program!
+  for ac_extension in a so sl dylib la dll; do
+    if test -r "$ac_dir/libX11.$ac_extension"; then
+      ac_x_libraries=$ac_dir
+      break 2
+    fi
+  done
+done
 fi
 rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_jpeg_read_header+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_jpeg_read_header+:} false; then :
+    conftest$ac_exeext conftest.$ac_ext
+fi # $ac_x_libraries = no
 
+case $ac_x_includes,$ac_x_libraries in #(
+  no,* | *,no | *\'*)
+    # Didn't find X, or a directory has "'" in its name.
+    ac_cv_have_x="have_x=no";; #(
+  *)
+    # Record where we found X for the cache.
+    ac_cv_have_x="have_x=yes\
+	ac_x_includes='$ac_x_includes'\
+	ac_x_libraries='$ac_x_libraries'"
+esac
+fi
+;; #(
+    *) have_x=yes;;
+  esac
+  eval "$ac_cv_have_x"
+fi # $with_x != no
+
+if test "$have_x" != yes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_x" >&5
+$as_echo "$have_x" >&6; }
+  no_x=yes
 else
-  ac_cv_search_jpeg_read_header=no
+  # If each of the values was on the command line, it overrides each guess.
+  test "x$x_includes" = xNONE && x_includes=$ac_x_includes
+  test "x$x_libraries" = xNONE && x_libraries=$ac_x_libraries
+  # Update the cache value to reflect the command line values.
+  ac_cv_have_x="have_x=yes\
+	ac_x_includes='$x_includes'\
+	ac_x_libraries='$x_libraries'"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: libraries $x_libraries, headers $x_includes" >&5
+$as_echo "libraries $x_libraries, headers $x_includes" >&6; }
 fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_jpeg_read_header" >&5
-$as_echo "$ac_cv_search_jpeg_read_header" >&6; }
-ac_res=$ac_cv_search_jpeg_read_header
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+
+	gl_dlopen_path=default
+	if  test "x${unix_host}" = xdarwin ; then :
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GL_LIBDIR (location of libGL.dylib)" >&5
+$as_echo_n "checking for GL_LIBDIR (location of libGL.dylib)... " >&6; }
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${GL_LIBDIR}" >&5
+$as_echo "${GL_LIBDIR}" >&6; }
+		if  test "x${GL_LIBDIR}" = x ; then :
+
+			gl_dlopen_path=${x_libraries}
 else
-  as_fn_error $? "\"Required jpeg library not found.\"" "$LINENO" 5
 
+			gl_dlopen_path=${GL_LIBDIR}
 fi
 
+fi
 
 
 pkg_failed=no
@@ -6155,7 +5998,7 @@ fi
 
 				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-xf86vm specified, but the library or headers could not be found
+as_fn_error $? "--with-xf86vm specified, library or headers found
 See \`config.log' for more details" "$LINENO" 5; }
 
 fi
@@ -6169,7 +6012,7 @@ $as_echo "no" >&6; }
 
 				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-xf86vm specified, but the library or headers could not be found
+as_fn_error $? "--with-xf86vm specified, library or headers found
 See \`config.log' for more details" "$LINENO" 5; }
 
 fi
@@ -6259,31 +6102,31 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$XXF86DGA_PKG_ERRORS" >&5
 
+	as_fn_error $? "Package requirements (xxf86dga) were not met:
 
-		 have_Xxf86dga=no
-		 if  test "x${with_xf86dga}" = xyes ; then :
+$XXF86DGA_PKG_ERRORS
 
-			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-xf86dga specified, but the library or headers could not be found
-See \`config.log' for more details" "$LINENO" 5; }
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
 
-fi
-
+Alternatively, you may set the environment variables XXF86DGA_CFLAGS
+and XXF86DGA_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
-		 have_Xxf86dga=no
-		 if  test "x${with_xf86dga}" = xyes ; then :
-
-			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "--with-xf86dga specified, but the library or headers could not be found
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables XXF86DGA_CFLAGS
+and XXF86DGA_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
 See \`config.log' for more details" "$LINENO" 5; }
-
-fi
-
 else
 	XXF86DGA_CFLAGS=$pkg_cv_XXF86DGA_CFLAGS
 	XXF86DGA_LIBS=$pkg_cv_XXF86DGA_LIBS
@@ -6313,9 +6156,196 @@ done
 
 fi
 
+else
+
+		have_Xxf86dga=no
+		if  test "x${with_xf86dga}" = xyes ; then :
+
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-xf86dga specified, library or headers not found
+See \`config.log' for more details" "$LINENO" 5; }
+
 fi
 
-				{ $as_echo "$as_me:${as_lineno-$LINENO}: checking other library dependencies" >&5
+fi
+
+
+
+# Check whether --with-zlib was given.
+if test "${with_zlib+set}" = set; then :
+  withval=$with_zlib;
+else
+  with_zlib=check
+fi
+
+	have_zlib=no
+	if  test "x${with_zlib}" != xno ; then :
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ZLIB" >&5
+$as_echo_n "checking for ZLIB... " >&6; }
+
+if test -n "$ZLIB_CFLAGS"; then
+    pkg_cv_ZLIB_CFLAGS="$ZLIB_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"zlib\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "zlib") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZLIB_CFLAGS=`$PKG_CONFIG --cflags "zlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$ZLIB_LIBS"; then
+    pkg_cv_ZLIB_LIBS="$ZLIB_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"zlib\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "zlib") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZLIB_LIBS=`$PKG_CONFIG --libs "zlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        ZLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "zlib" 2>&1`
+        else
+	        ZLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "zlib" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ZLIB_PKG_ERRORS" >&5
+
+
+			have_zlib=no
+			if  test "x${with_zlib}" = xyes ; then :
+
+				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-zlib specified, library or headers not found
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+			have_zlib=no
+			if  test "x${with_zlib}" = xyes ; then :
+
+				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "--with-zlib specified, library or headers not found
+See \`config.log' for more details" "$LINENO" 5; }
+
+fi
+
+else
+	ZLIB_CFLAGS=$pkg_cv_ZLIB_CFLAGS
+	ZLIB_LIBS=$pkg_cv_ZLIB_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+			have_zlib=yes
+
+$as_echo "#define HAVE_ZLIB 1" >>confdefs.h
+
+
+fi
+
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
+$as_echo_n "checking for library containing jpeg_read_header... " >&6; }
+if ${ac_cv_search_jpeg_read_header+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char jpeg_read_header ();
+int
+main ()
+{
+return jpeg_read_header ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' jpeg; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_jpeg_read_header=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_jpeg_read_header+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_jpeg_read_header+:} false; then :
+
+else
+  ac_cv_search_jpeg_read_header=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_jpeg_read_header" >&5
+$as_echo "$ac_cv_search_jpeg_read_header" >&6; }
+ac_res=$ac_cv_search_jpeg_read_header
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  as_fn_error $? "\"Required jpeg library not found.\"" "$LINENO" 5
+
+fi
+
+
+
+
+
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking other library dependencies" >&5
 $as_echo_n "checking other library dependencies... " >&6; }
 
 pkg_failed=no
@@ -7067,6 +7097,8 @@ fi
 #
 # Checks for library functions.
 #
+# TODO: verify use, separate logically
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for error_at_line" >&5
 $as_echo_n "checking for error_at_line... " >&6; }
 if ${ac_cv_lib_error_at_line+:} false; then :
@@ -7697,50 +7729,8 @@ fi
 done
 
 
-if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -ffast-math "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -ffast-math"; } >&5
-  (: CFLAGS already contains -ffast-math) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -ffast-math\""; } >&5
-  (: CFLAGS="$CFLAGS -ffast-math") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CFLAGS="$CFLAGS -ffast-math"
-      ;;
-   esac
-else
-  CFLAGS="-ffast-math"
-fi
-
-if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -fno-strict-aliasing "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fno-strict-aliasing"; } >&5
-  (: CFLAGS already contains -fno-strict-aliasing) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -fno-strict-aliasing\""; } >&5
-  (: CFLAGS="$CFLAGS -fno-strict-aliasing") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CFLAGS="$CFLAGS -fno-strict-aliasing"
-      ;;
-   esac
-else
-  CFLAGS="-fno-strict-aliasing"
-fi
-
+# AX_APPEND_FLAG([-ffast-math],[CFLAGS])
+# AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
 
 
 
@@ -7883,14 +7873,6 @@ if test -z "${WITH_DATA1PKG_TRUE}" && test -z "${WITH_DATA1PKG_FALSE}"; then
   as_fn_error $? "conditional \"WITH_DATA1PKG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${WITH_ARENAPKG_TRUE}" && test -z "${WITH_ARENAPKG_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_ARENAPKG\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_TACTICALPKG_TRUE}" && test -z "${WITH_TACTICALPKG_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_TACTICALPKG\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
   as_fn_error $? "conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -7903,8 +7885,12 @@ if test -z "${BUILD_CLIENT_TRUE}" && test -z "${BUILD_CLIENT_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_CLIENT\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${INSTALL_DOCS_TRUE}" && test -z "${INSTALL_DOCS_FALSE}"; then
-  as_fn_error $? "conditional \"INSTALL_DOCS\" was never defined.
+if test -z "${DOC_INSTALL_TRUE}" && test -z "${DOC_INSTALL_FALSE}"; then
+  as_fn_error $? "conditional \"DOC_INSTALL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ICONS_INSTALL_TRUE}" && test -z "${ICONS_INSTALL_FALSE}"; then
+  as_fn_error $? "conditional \"ICONS_INSTALL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -9401,7 +9387,6 @@ else
 			dedicated_only=yes
 fi
 	$as_echo " Dedicated Only: ........ ${dedicated_only}"
-	$as_echo " Alternate install: ..... ${alternate_install}"
 
 	if test -z "$BUILD_CLIENT_TRUE"; then :
 
@@ -9415,17 +9400,15 @@ fi
 fi
 
 fi
-	$as_echo " Prefix ................. ${prefix}"
-	$as_echo " Shared RO Data: ........ ${game_data}"
-	$as_echo " User Home R/W Data ..... ~/${cor_games_homedir}"
-	if test -z "$INSTALL_DOCS_TRUE"; then :
-
-		dd1=`eval "echo ${docdir}"` && dd2=`eval "echo $dd1"`
-		$as_echo " Documentation........... ${dd2}"
-		$as_echo " Documentation........... custom"
-
-fi
-
+	$as_echo " prefix ................ ${prefix}"
+	$as_echo " datarootdir:........... ${datarootdir}"
+	$as_echo " datadir: .............. ${datadir}"
+	$as_echo " bindir: ............... ${bindir}"
+	$as_echo " doc-install ........... ${doc_install}"
+	$as_echo " docdir: ............... ${docdir}"
+	$as_echo " icons-install: ........ ${icons_install}"
+	$as_echo " cor_iconsdir: ......... ${cor_iconsdir}"
+	$as_echo " User Home R/W Data:.... ~/${cor_games_homedir}"
 	$as_echo
 	$as_echo "Advanced Build Information:"
 	$as_echo " See README for information and recommendations."

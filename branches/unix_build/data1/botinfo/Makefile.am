@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-botinfodir=${datadir}/alienarena/data1/botinfo
+botinfodir=$(pkgdatadir)/data1/botinfo
 
 nobase_dist_botinfo_DATA = \
 	^1Squirtney.cfg \

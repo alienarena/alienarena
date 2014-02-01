@@ -10,7 +10,7 @@ SUBDIRS = botinfo env gfx levelshots maps models particles pics players scripts 
 # TODO: add licensing and other docs for the data package
 #
 
-fontsdir=${datadir}/alienarena/data1
+fontsdir=$(pkgdatadir)/data1
 
 nobase_dist_fonts_DATA = \
  fonts/agentred.ttf \
@@ -23,7 +23,7 @@ nobase_dist_fonts_DATA = \
  fonts/crackdown.ttf \
  fonts/bendable.ttf
 
-graphical_presetsdir=${datadir}/alienarena/data1
+graphical_presetsdir=$(pkgdatadir)/data1
 
 nobase_dist_graphical_presets_DATA = \
  graphical_presets/compatibility.cfg \

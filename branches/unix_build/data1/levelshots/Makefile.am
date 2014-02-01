@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-levelshotsdir=${datadir}/alienarena/data1/levelshots
+levelshotsdir=$(pkgdatadir)/data1/levelshots
 
 nobase_dist_levelshots_DATA = \
 	aoa-atlantis.jpg \

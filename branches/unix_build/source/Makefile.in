@@ -16,7 +16,7 @@
 
 # Process this file with automake to produce Makefile.in
 #
-# Copyright (C) 2010 COR Entertainment, LLC
+# Copyright (C) 2010,2014 COR Entertainment, LLC
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -28,17 +28,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # A copy of the  GNU General Public License is included;
-# see the file, COPYING.
+# see the file, GPL2.
 #
-
-# 2013 December:
-# - See notes in top-level Makefile.am, and configure.ac
-# - The integrated ODE library option is now unnecessary and is removed.
-# - And so, libode is now a required dependency for the client.
-# - 'Alternate Install' is removed. There is a better way to do the equivalent.
-# - The MinGW Windows variant complicates things and is removed, for now.
-# - unix/files_unix.c replaces qcommon/files.c for Unix/GNU Linux
-# - aa_tactical_demo client added here, for now.
 
 
 VPATH = @srcdir@
@@ -111,9 +102,8 @@ subdir = source
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_flag.m4 \
-	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/pkg.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_pthread.m4 \
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -475,6 +465,7 @@ PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -517,7 +508,6 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
-icondir = @icondir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -542,15 +532,15 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libgame.a
-DATADIR_CPPFLAGS = -DDATADIR='"$(datadir)/alienarena"'
+AM_CPPFLAGS = -DCOR_DATADIR='"$(pkgdatadir)"'
 
 # Dedicated Server libraries and flags
+alienarena_ded_CPPFLAGS = -DDEDICATED_ONLY $(AM_CPPFLAGS)
 alienarena_ded_LDADD = libgame.a
-alienarena_ded_CPPFLAGS = $(DATADIR_CPPFLAGS) -DDEDICATED_ONLY
 
 # Client libraries and flags
 alienarena_CPPFLAGS = \
-	$(DATADIR_CPPFLAGS) \
+	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
 	$(X11_CLAGS) \
 	$(DEPS_CFLAGS) \
@@ -567,7 +557,7 @@ alienarena_LDADD = libgame.a \
 	$(ZLIB_LIBS)
 
 aa_tactical_demo_CPPFLAGS = -DTACTICAL \
-	$(DATADIR_CPPFLAGS) \
+	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
 	$(X11_CLAGS) \
 	$(DEPS_CFLAGS) \
@@ -708,9 +698,9 @@ alienarena_SOURCES = \
 
 
 # Tactical Demo Client
-aa_tactical_demo_SOURCES = ${alienarena_SOURCES}
+aa_tactical_demo_SOURCES = $(alienarena_SOURCES)
 
-# Dedicated Server 
+# Dedicated Server
 alienarena_ded_SOURCES = \
 	client/anorms.h \
 	game/game.h \

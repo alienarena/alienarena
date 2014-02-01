@@ -214,7 +214,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-texturesdir = ${datadir}/alienarena/data1/textures
+texturesdir = $(pkgdatadir)/data1/textures
 nobase_dist_textures_DATA = \
 	alien/support5.tga \
 	arena10/bluetile_hm.tga \

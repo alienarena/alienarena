@@ -43,23 +43,34 @@ see the file, COPYING.
 #endif
 
 #include "qcommon/qcommon.h"
-// #include "game/q_shared.h" in qcommon.h
 
-// #include "unix/glob.h"
+
+/* ---- Full path for shared game resources ----*/
+
+#if !defined COR_DATADIR
+ERROR
+#endif
+
+/* ---- Path basenames for game resources ---*/
+
+#define BASE_GAMEDATA "data1"
+#define USER_GAMEDATA "cor_games"
+
+#if !defined GAME_GAMEDATA
+#define GAME_GAMEDATA "arena"
+#endif
+
+/*----------------------------------------*/
+
 
 #define SFF_INPACK 0x20 /* For FS_ListFilesInFS(). */
 
 char   fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar;
 
+/* last slot is sentinel */
 #define GAME_SEARCH_SLOTS  4
-char   fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
-
-#if 0
-// -jjb-
-#define BOT_SEARCH_SLOTS   3
-char   fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
-#endif
+char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 
 /**
  * Initialize the pathnames for the shared data directory and
@@ -76,93 +87,48 @@ FS_init_paths( void )
 	char *homestr;
 	char base_gamedata[MAX_OSPATH];
 	char game_gamedata[MAX_OSPATH];
-#if 0
-	char bot_gamedata[MAX_OSPATH];
-#endif
-
 	char user_game_gamedata[MAX_OSPATH];
-#if 0
-	char user_bot_gamedata[MAX_OSPATH];
-#endif
 
 	memset( fs_bindir, 0, sizeof( fs_bindir ));
 	memset( fs_datadir, 0, sizeof( fs_datadir ));
 	memset( fs_homedir, 0, sizeof( fs_homedir ));
+	memset( base_gamedata, 0, sizeof( base_gamedata ));
+	memset( game_gamedata, 0, sizeof( game_gamedata ));
+	memset( user_game_gamedata, 0, sizeof( user_game_gamedata ));
+	for ( i = 0; i < GAME_SEARCH_SLOTS; i++ )
+		memset( fs_gamesearch[i], 0, sizeof( fs_gamesearch[0]) );
 
 	cwdstr = getcwd( fs_bindir, sizeof( fs_bindir ));
 	if ( cwdstr == NULL )
-	{
 		Sys_Error( "path initialization (getcwd error: %s)", strerror( errno ));
-	}
-
-#if 0
-	/* where user-writable files are installed */
-	homestr = getenv( "COR_GAMES" ); /* 2013-12-20 added 'S' for consistency */
-	if ( homestr != NULL )
-	{
-		if ( strlen( homestr ) >= sizeof( fs_homedir ) || !strlen( homestr ))
-		{
-			Sys_Error( "path initialization (getenv COR_GAMES is %s)", homestr );
-		}
-		Q_strncpyz2( fs_homedir, homestr, sizeof( fs_homedir ));
-	}
-	else
-	{
-		homestr = getenv( "HOME" );
-		if ( homestr != NULL )
-		{
-			Com_sprintf( fs_homedir, sizeof( fs_homedir ), "%s/%s",
-						 homestr, USER_GAMEDATA );
-		}
-		else
-		{
-			fs_homedir[0] = 0;
-			//
-		}
-	}
-#endif
 
 	homestr = getenv( "HOME" );
 	if ( homestr != NULL )
+	{
 		Com_sprintf( fs_homedir, sizeof( fs_homedir ), "%s/%s", homestr, USER_GAMEDATA );
-	else
-		fs_homedir[0] = 0;
-
-
-	/* where data files are installed */
-	if ( !Q_strncasecmp( fs_bindir, DATADIR, sizeof( fs_bindir )))
-	{
-		/* 'in place', same as executable location */
-		Q_strncpyz2( fs_datadir, fs_bindir, sizeof( fs_datadir ));
-		/* probably need to 'configure' with 'bindir' and 'datadir'
-		   the same for this to have any chance of working  */
-	}
-	else
-	{
-		/* 'standard' installation. example '/usr/share/alienarena' */
-		if ( strnlen( DATADIR, sizeof(fs_datadir) ) >= sizeof( fs_datadir ) )
-		{
-			Com_Printf( "DATADIR is: %s\n", DATADIR );
-			Sys_Error( "DATADIR path name is too large" );
-		}
-		Q_strncpyz2( fs_datadir, DATADIR, sizeof( fs_datadir ));
+		// -jjb- to do test that it is readable
 	}
 
-	/* where official game resource files are installed */
-	memset( base_gamedata, 0, sizeof( base_gamedata ));
+	/* absolute path where data files are installed */
+	if ( strnlen( COR_DATADIR, sizeof(fs_datadir) ) >= sizeof( fs_datadir ) )
+	{
+			Com_Printf( "COR_DATADIR is: %s\n", COR_DATADIR );
+			Sys_Error( "COR_DATADIR path name is too long" );
+	}
+	Q_strncpyz2( fs_datadir, COR_DATADIR, sizeof( fs_datadir ));
+
+	/* absolute path where official game resource files are installed */
 	Com_sprintf( base_gamedata, sizeof( base_gamedata ), "%s/%s",
 				 fs_datadir, BASE_GAMEDATA );
 
-	/* where user-writeable configs and downloaded data are stored,
+	/* absolute path where user-writeable configs and downloaded data are stored
 	 * dependent on the game name.
 	 * If the game name is not set in the first 'Early' commands
 	 *  then it will be 'arena'
 	 * (Note: there seems to have been a command line arg '-game'
 	 *  to set the game name early. Need to review how that was
-	 *  done. check Dark Places?)
-	 *
+	 *  done.)
 	 */
-	memset( game_gamedata, 0, sizeof( game_gamedata ));
 	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH | CVAR_SERVERINFO );
 	if ( *fs_gamedirvar->string && fs_gamedirvar->string[0] )
 	{
@@ -192,13 +158,6 @@ FS_init_paths( void )
 					 fs_datadir, GAME_GAMEDATA );
 	}
 
-#if 0
-// -jjb-
-	/* where bot information is installed */
-	memset( bot_gamedata, 0, sizeof( bot_gamedata ));
-	Com_sprintf( bot_gamedata, sizeof( bot_gamedata ), "%s", fs_datadir );
-#endif
-
 	/* create the pathnames for user-writeable configs and storage
 	 * subdirectories. 2013-12: eliminate user_base_gamedate from the
 	 * the list; it is mostly useless and an unnecessary performance
@@ -211,43 +170,25 @@ FS_init_paths( void )
 	 */
 	if ( fs_homedir[0] )
 	{
-		memset( user_game_gamedata, 0, sizeof( user_game_gamedata ));
 		Com_sprintf( user_game_gamedata, sizeof( user_game_gamedata ),
 					 "%s/%s", fs_homedir, fs_gamedirvar->string );
-#if 0
-		memset( user_bot_gamedata, 0, sizeof( user_bot_gamedata ));
-		Com_sprintf( user_bot_gamedata, sizeof( user_bot_gamedata ),
-					 "%s", fs_homedir );
-#endif
 	}
 	else
 	{
-		Sys_Error( "could not initialize HOME subdirectory" );
+		Sys_Warn( "could not initialize HOME subdirectory" );
 	}
 
 	/* setup the directory search sequence for game resource files */
-	for ( i = 0; i < GAME_SEARCH_SLOTS; i++ )
-	{
-		memset( fs_gamesearch[i], 0, sizeof( fs_gamesearch[0]) );
-	}
-	Q_strncpyz2( fs_gamesearch[0], user_game_gamedata, sizeof( fs_gamesearch[0] ));
-	Q_strncpyz2( fs_gamesearch[1], game_gamedata, sizeof( fs_gamesearch[0] ));
-	Q_strncpyz2( fs_gamesearch[2], base_gamedata, sizeof( fs_gamesearch[0] ));
+	i = 0;
+	if ( user_game_gamedata[0] )
+		Q_strncpyz2( fs_gamesearch[i++], user_game_gamedata, sizeof( fs_gamesearch[0] ));
+	Q_strncpyz2( fs_gamesearch[i++], game_gamedata, sizeof( fs_gamesearch[0] ));
+	Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof( fs_gamesearch[0] ));
 
 	/* the 'game' directory is the same as the first search slot */
 	Q_strncpyz2( fs_gamedir, fs_gamesearch[0], sizeof( fs_gamedir ));
 
-#if 0
-// -jjb-
-	/* set up the directory search sequence for bot resource files */
-	for ( i = 0; i < BOT_SEARCH_SLOTS; i++ )
-	{
-		memset( fs_botsearch[i], 0, MAX_OSPATH );
-	}
-	Q_strncpyz2( fs_botsearch[0], user_bot_gamedata, sizeof( fs_botsearch[0] ));
-	Q_strncpyz2( fs_botsearch[1], bot_gamedata, sizeof( fs_botsearch[0] ));
-#endif
-
+	// -jjb- TODO: test accessibility, user_game_gamedata should be writeable 
 
 } /* FS_init_paths */
 
@@ -358,22 +299,14 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 					 relative_path );
 		return false;
 	}
-#if 0
-// -jjb-
-	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen( BOT_GAMEDATA )))
-	{
-		to_search = &fs_botsearch[0][0];
-	}
-	else
-	{
-#endif
 
+	// -jjb- to clever, possibly non-portable, TODO: fix
 	to_search = &fs_gamesearch[0][0];
 	while ( to_search[0] && !found )
 	{
 		Com_sprintf( search_path, sizeof( search_path ), "%s/%s",
 					 to_search, relative_path );
-		found      = FS_CheckFile( search_path );
+		found = FS_CheckFile( search_path );
 		to_search += MAX_OSPATH;
 	}
 	if ( found )
@@ -382,9 +315,7 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 		{
 			Q_strncpyz2( full_path, search_path, pathsize );
 			if ( developer && developer->integer == 2 )
-			{
 				Com_DPrintf( "FS_FullPath: found : %s\n", full_path );
-			}
 		}
 		else
 		{
@@ -418,15 +349,6 @@ FS_FullWritePath( char *full_path, size_t pathsize, const char *relative_path )
 		*full_path = 0;
 		return;
 	}
-#if 0
-// -jjb-
-	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen( BOT_GAMEDATA )))
-	{
-		Com_sprintf( full_path, pathsize, "%s/%s", fs_botsearch[0],
-					 relative_path );
-	}
-#endif
-
 	Com_sprintf( full_path, pathsize, "%s/%s", fs_gamedir, relative_path );
 	FS_CreatePath( full_path );
 
@@ -469,19 +391,20 @@ FS_FOpenFile( char *filename, FILE **file )
 			if ( length < 0 )
 			{
 				FS_FCloseFile( *file );
-				*file = NULL;
+				*file = 0;
 			}
 		}
 	}
 	else
 	{
-		*file = NULL;
+		*file = 0;
 	}
 
 	return length;
 
 } /* FS_FOpenFile */
 
+// -jjb- why the limit??? something to do with ZMalloc? 
 #define MAX_READ  0x10000
 
 /**
@@ -505,6 +428,7 @@ FS_Read( void *buffer, int len, FILE *f )
 		if ( block > MAX_READ )
 			block = MAX_READ;
 		read = fread( buf, 1, block, f );
+		// -jjb- fix this oddity, maybe return -1 on errors
 		if ( read == 0 )
 		{
 			if ( feof( f ))
@@ -608,9 +532,7 @@ FS_LoadFile_TryStatic( char *path, void **buffer, void *statbuffer,
 	{
 		Q_strncpyz2( lc_path, FS_TolowerPath( path ), sizeof( lc_path ));
 		if ( strcmp( path, lc_path ))
-		{
 			len = FS_FOpenFile( lc_path, &h );
-		}
 	}
 	if ( !h )
 	{
@@ -722,14 +644,11 @@ FS_SetGamedir( char *dir )
 	Cbuf_AddText( "vid_restart\nsnd_restart\n" );
 #endif
 
+	// -jjb- check this, requesting data1 should do arena?
 	if ( !strcmp( dir, BASE_GAMEDATA ) || ( *dir == 0 ))
-	{
 		Cvar_FullSet( "gamedir", "", CVAR_SERVERINFO | CVAR_NOSET );
-	}
 	else
-	{
 		Cvar_FullSet( "gamedir", dir, CVAR_SERVERINFO | CVAR_NOSET );
-	}
 
 	FS_init_paths();
 
@@ -987,17 +906,7 @@ FS_Path_f( void )
 
 	Com_Printf( "Game data search path:\n" );
 	for ( i = 0; fs_gamesearch[i][0]; i++ )
-	{
 		Com_Printf( "%s/\n", fs_gamesearch[i] );
-	}
-#if 0
-// -jjb-
-	Com_Printf( "Bot data search path:\n" );
-	for ( i = 0; fs_botsearch[i][0]; i++ )
-	{
-		Com_Printf( "%s/%s/\n", fs_botsearch[i], BOT_GAMEDATA );
-	}
-#endif
 
 } /* FS_Path_f */
 

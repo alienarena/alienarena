@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-vehiclesdir=${datadir}/alienarena/data1/vehicles
+vehiclesdir=$(pkgdatadir)/data1/vehicles
 
 nobase_dist_vehicles_DATA = \
 	bomber/bomb.md2 \

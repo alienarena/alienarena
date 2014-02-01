@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-envdir=${datadir}/alienarena/data1/env
+envdir=$(pkgdatadir)/data1/env
 
 nobase_dist_env_DATA = \
 	alienbk.tga \

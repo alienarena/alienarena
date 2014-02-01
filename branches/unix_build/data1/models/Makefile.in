@@ -214,7 +214,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-modelsdir = ${datadir}/alienarena/data1/models
+modelsdir = $(pkgdatadir)/data1/models
 nobase_dist_models_DATA = \
 	cow/helmet.md2 \
 	cow/skin.tga \

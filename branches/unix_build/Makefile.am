@@ -1,65 +1,68 @@
 # Process this file with automake to produce Makefile.in
 #
-# Copyright (C) 2010 COR Entertainment, LLC.
+# Copyright (C) 2010,2014 COR Entertainment, LLC.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# 
+#
 # A copy of the  GNU General Public License is included;
-# see the file, COPYING.
+# see the file, GPL2.
 #
 
-# 2013 December:
-# - See notes in source/Makefile.am, and configure.ac
-# - Recursive build for data1. Same effect as
-#    previous game_data.am methods, but avoids problem
-#    with command line overflow when running install.
-# - Moved the data1 default.cfg and maps.lst to arena
-#   subdir for consistency between arena and tactical.
-# 
-# 2014 January:
-# - change data1 to a separate alienarena-data package
-#
-# +move botinfo under data1
-#
-# !pkg prefix is not required!
-# datadir='' in configure can stop install and dist both???
-#
-SUBDIRS = source data1 arena tactical
+SUBDIRS = source data1
 
 ACLOCAL_AMFLAGS = -I m4
 
 #
 # Alien Arena documents to be installed in $docdir
 #
-# if INSTALL_DOCS
-# docdir=${docdir}/alienarena
-# dist_doc_DATA = \
-# 	unix_doc/README \
-# 	unix_doc/README2 \
-# 	unix_doc/COPYING \
-# 	unix_doc/INSTALL \
-# 	unix_doc/GPL2
-# endif
+if DOC_INSTALL
+unixdocdir=$(docdir)
+dist_unixdoc_DATA = \
+	unix_dist/README \
+	unix_dist/COPYING \
+	unix_dist/INSTALL \
+	unix_dist/GPL2
+endif
 
-# Alien Arena icon
-# TODO: change default icon directory to share/${PACKAGE}
-#  and put these in a unixicon subdir in svn, maybe
 #
-# if INSTALL_ICONS
-# iconsdir=${iconsdir}/alienarena
-# dist_icons_DATA = \
-# 	unix_icons/alienarena.png \
-# 	unix_icons/aa-tactical-demo.png
-# endif
+# Alien Arena icons to be installed in icon directory
+#
+if ICONS_INSTALL
+unixiconsdir=$(datadir)/icons/alienarena
+dist_unixicons_DATA = \
+	unix_dist/alienarena.png \
+	unix_dist/aa-tactical-demo.png
+endif
+
+#
+# ARENA Default configuration for client and server
+#
+arenadir=$(pkgdatadir)/arena
+nobase_dist_arena_DATA = \
+	arena/motd.txt \
+	arena/server.cfg \
+	arena/default.cfg \
+	arena/maps.lst
+
+#
+# TACTICAL-DEMO Default configuration for client and server
+#
+tacticaldir=$(pkgdatadir)/tactical
+nobase_dist_tactical_DATA = \
+	tactical/motd.txt \
+	tactical/server.cfg \
+	tactical/default.cfg \
+	tactical/maps.lst
 
 # FUSE game server browser and Server management scripts
+# todo: verify/update scripts. deprecate fuse.
 #EXTRA_DIST = \
 #	Tools/fuse.tar.gz \
 #	Tools/LinuxScripts
@@ -71,13 +74,3 @@ ACLOCAL_AMFLAGS = -I m4
 #
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
-
-#
-# Alternate Install deemed redundant and removed.
-# Almost the same thing:
-#  ./configure --prefix=/home/user/COR_games && make && make install
-#
-# TODO: if possible, detect when --prefix == top build dir and
-#  avoid copying. Also, test to see what happens if this is done, install
-#  may handle it.
-#

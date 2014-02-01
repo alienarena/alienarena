@@ -2,7 +2,7 @@
 
 # Copyright (C) 2013 COR Entertainment, LLC.
 
-mapsdir=${datadir}/alienarena/data1/maps
+mapsdir=$(pkgdatadir)/data1/maps
 
 nobase_dist_maps_DATA = \
 	aoa-atlantis.bsp \

@@ -214,7 +214,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-gfxdir = ${datadir}/alienarena/data1/gfx
+gfxdir = $(pkgdatadir)/data1/gfx
 nobase_dist_gfx_DATA = \
 	aaglow.tga \
 	adrenalbase.tga \

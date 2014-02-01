@@ -22,15 +22,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef Q_COMMON_H_
 #define Q_COMMON_H_
 
+/* fallback min/max macros when portable versions not defined  */
 #ifndef MAX
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
-
-/* MIN(a,b) returns the minimum of A and B.  */
 #ifndef MIN
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
-
 #ifndef CLAMP
 #define CLAMP(x,low,high) (MIN(MAX((low),(x)),(high)))
 #endif
@@ -42,36 +40,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	VERSION		"7.66.1"
 #endif
 
-/* ---- Default locations of game data ---*/
-#if !defined BASE_GAMEDATA
-#define BASE_GAMEDATA "data1"
-#endif
-
-#if !defined GAME_GAMEDATA
-#define GAME_GAMEDATA "arena"
-#endif
-
-#if !defined BOT_GAMEDATA
-#define BOT_GAMEDATA "botinfo"
-#endif
-
-#if !defined USER_GAMEDATA
-// default for COR_GAME environment variable
-#define USER_GAMEDATA ".cor_games"
-#endif
-/*----------------------------------------*/
-
-
 #define MENU_STATIC_WIDTH	720.0f
 
 #define DEFAULTMODEL		"martianenforcer"
 #define DEFAULTSKIN			"default"
 
-
 #if defined WIN32_VARIANT
-
-#define BUFFER_DEBUG 0
-
 #if !defined BUILDSTRING
 #ifdef NDEBUG
 #define BUILDSTRING "Win32 RELEASE"
