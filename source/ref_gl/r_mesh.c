@@ -221,11 +221,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 			VectorCopy(meshOrigin, temp);
 			temp[2] += 24; //generates more consistent tracing
 
-			// TODO: Write CM_FastTrace!
-			if (strstr (currentmodel->name, "rock"))
-				r_trace.fraction = 1.0;
-			else
-				r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 
 			if(r_trace.fraction == 1.0)
 			{
