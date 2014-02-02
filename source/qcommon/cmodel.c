@@ -121,6 +121,18 @@ typedef struct
 	vec3_t		mins, maxs;
 } cterraintri_t;
 
+// Terrain models are divided up into axis-aligned 3D grids of cube-shaped 
+// volumes measuring TERRAIN_GRIDSIZE units on each side. Each grid cell has a
+// list of all the triangles that go through it (a triangle may be in multiple
+// grid cells.) This is used to speed up tracing/collision detection/occlusion
+// by minimizing how many triangles need to be checked on any given trace.
+typedef struct
+{
+	vec3_t			mins, maxs;
+	int				numtris;
+	cterraintri_t	**tris;
+} cterraingrid_t;
+
 typedef struct
 {
 	qboolean		active;
@@ -134,6 +146,20 @@ typedef struct
 	vec3_t			lm_s_axis, lm_t_axis;
 	float			lm_mins[2], lm_size[2];
 	byte			*lightmaptex;
+	
+	// For grouping triangles into grids
+#define TERRAIN_GRIDSIZE 250
+#define NUMGRID_AXIS(terrainmod,axis) \
+	((int)ceil((terrainmod->maxs[axis] - terrainmod->mins[axis]) / TERRAIN_GRIDSIZE + 0.1))
+#define NUMGRID_X(terrainmod) NUMGRID_AXIS(terrainmod,0)
+#define NUMGRID_Y(terrainmod) NUMGRID_AXIS(terrainmod,1)
+#define NUMGRID_Z(terrainmod) NUMGRID_AXIS(terrainmod,2)
+#define NUMGRID(terrainmod) (NUMGRID_X(terrainmod) * NUMGRID_Y(terrainmod) * NUMGRID_Z(terrainmod))
+#define GRIDNUM(terrainmod,coord) \
+	(((int)floor(coord[2]-terrainmod->mins[2]) / TERRAIN_GRIDSIZE) * NUMGRID_X(terrainmod)*NUMGRID_Y(terrainmod) \
+	(int)floor((coord[1]-terrainmod->mins[1]) / TERRAIN_GRIDSIZE) * NUMGRID_X(terrainmod) + \
+	(int)floor((coord[0]-terrainmod->mins[0]) / TERRAIN_GRIDSIZE))
+	cterraingrid_t	*grids;
 } cterrainmodel_t;
 
 static int		numterrainmodels;
@@ -639,6 +665,203 @@ void CMod_LoadAlternateEntityData (char *entity_file_name)
 
 //=======================================================================
 
+static float RayFromSegment (const vec3_t start, const vec3_t end, vec3_t out_dir)
+{
+	VectorSubtract (end, start, out_dir);
+	return VectorNormalize (out_dir);
+}
+
+/* 
+Fast Ray-Box Intersection
+by Andrew Woo
+from "Graphics Gems", Academic Press, 1990
+The copyright license of "Graphics Gems" permits use of this code.
+*/
+static qboolean RayIntersectsBBox (const vec3_t origin, const vec3_t dir, const vec3_t mins, const vec3_t maxs, float *out_intersection_dist)
+{
+	qboolean inside = true;
+	enum {
+		right,
+		left,
+		middle
+	} quadrant[3];
+	int i;
+	int whichPlane;
+	vec3_t maxT;
+	vec3_t candidatePlane;
+	vec3_t coord;
+
+	/* Find candidate planes; this loop can be avoided if
+   	rays cast all from the eye(assume perpsective view) */
+	for (i = 0; i < 3; i++)
+	{
+		if (origin[i] < mins[i])
+		{
+			quadrant[i] = left;
+			candidatePlane[i] = mins[i];
+			inside = false;
+		}
+		else if (origin[i] > maxs[i])
+		{
+			quadrant[i] = right;
+			candidatePlane[i] = maxs[i];
+			inside = false;
+		}
+		else
+		{
+			quadrant[i] = middle;
+		}
+	}
+
+	/* Ray origin inside bounding box */
+	if(inside)
+		return true;
+
+
+	/* Calculate T distances to candidate planes */
+	for (i = 0; i < 3; i++)
+	{
+		if (quadrant[i] != middle && dir[i] != 0.0)
+			maxT[i] = (candidatePlane[i]-origin[i]) / dir[i];
+		else
+			maxT[i] = -1.0;
+	}
+
+	/* Get largest of the maxT's for final choice of intersection */
+	whichPlane = 0;
+	for (i = 1; i < 3; i++)
+	{
+		if (maxT[whichPlane] < maxT[i])
+			whichPlane = i;
+	}
+
+	/* Check final candidate actually inside box */
+	if (maxT[whichPlane] < 0.0)
+		return false;
+	for (i = 0; i < 3; i++)
+	{
+		if (whichPlane != i)
+		{
+			coord[i] = origin[i] + maxT[whichPlane] * dir[i];
+			if (coord[i] < mins[i] || coord[i] > maxs[i])
+				return false;
+		}
+		else
+		{
+			coord[i] = candidatePlane[i];
+		}
+	}
+	
+	VectorSubtract (coord, origin, coord);
+	*out_intersection_dist = VectorLength (coord);
+	
+	return true;				/* ray hits box */
+}
+
+static qboolean RayIntersectsTriangle (const vec3_t p1, const vec3_t d, const vec3_t v0, const vec3_t v1, const vec3_t v2, float *out_intersection_dist)
+{
+	vec3_t	e1, e2, P, Q, T;
+	float	det, inv_det, u, v, t;
+	
+	VectorSubtract (v1, v0, e1);
+	VectorSubtract (v2, v0, e2);
+	
+	CrossProduct (d, e2, P);
+	det = DotProduct (e1, P);
+	
+	if (fabs (det) < FLT_EPSILON)
+		return false;
+	
+	inv_det = 1.0/det;
+	
+	VectorSubtract (p1, v0, T);
+	u = inv_det * DotProduct (P, T);
+	
+	if (u < 0.0 || u > 1.0)
+		return false;
+	
+	CrossProduct (T, e1, Q);
+	v = inv_det * DotProduct (d, Q);
+	
+	if (v < 0.0 || u + v > 1.0)
+		return false;
+	
+	t = inv_det * DotProduct (e2, Q);
+	
+	*out_intersection_dist = t;
+	
+	return t > FLT_EPSILON;
+}
+
+// NOTE: this function doesn't need to be fast, it only runs at load time.
+static qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs)
+{
+	int i, axis;
+	float l0, l1, l2;
+	vec3_t d0, d1, d2;
+	qboolean all_in;
+	float dist;
+	
+	all_in = true;
+	for (i = 0; i < 3; i++)
+	{
+		float trimin, trimax;
+		
+		trimin = trimax = v0[i];
+		
+		if (v1[i] < trimin)
+			trimin = v1[i];
+		else if (v1[i] > trimax)
+			trimax = v1[i];
+		
+		if (v2[i] < trimin)
+			trimin = v2[i];
+		else if (v2[i] > trimax)
+			trimax = v2[i];
+		
+		if (trimin > maxs[i])
+			return false; // all triangle points are outside the bbox
+		else if (trimax < mins[i])
+			return false; // all triangle points are outside the bbox
+		
+		if (trimax > maxs[i] || trimin < mins[i])
+			all_in = false; // at least one triangle point is outside the bbox
+	}
+	
+	if (all_in)
+		return true; // all triangle points are inside the bbox
+	
+	// check if one of the edges of the bounding box goes through the triangle
+	for (axis = 0; axis < 3; axis++)
+	{
+		for (i = 0; i < 4; i++)
+		{
+			vec3_t start;
+			vec3_t dir = {0, 0, 0};
+			
+			dir[axis] = -1;
+			
+			VectorCopy (maxs, start);
+			if ((i & 1) != 0)
+				start[(axis+1)%3] = mins[(axis+1)%3];
+			if ((i & 2) != 0)
+				start[(axis+2)%3] = mins[(axis+2)%3];
+		
+			if (RayIntersectsTriangle (start, dir, v0, v1, v2, &dist) && dist <= (maxs[axis] - mins[axis]))
+				return true;
+		}
+	}
+	
+	// check if one of the edges of the triangle goes through the bbox
+	l0 = RayFromSegment (v0, v1, d0);
+	l1 = RayFromSegment (v1, v2, d1);
+	l2 = RayFromSegment (v2, v0, d2);
+	
+	return	(RayIntersectsBBox (v0, d0, mins, maxs, &dist) && dist <= l0) ||
+			(RayIntersectsBBox (v1, d1, mins, maxs, &dist) && dist <= l1) ||
+			(RayIntersectsBBox (v2, d2, mins, maxs, &dist) && dist <= l2);
+}
+
 void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
 {
 	float cosyaw, cospitch, cosroll, sinyaw, sinpitch, sinroll;
@@ -664,10 +887,11 @@ void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
 void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 {
 	float rotation_matrix[3][3];
-	int i, j, k;
+	int i, j, k, l, m;
 	cterrainmodel_t *mod;
 	char *buf;
 	terraindata_t data;
+	cterraintri_t **tmp;
 	vec3_t up, lm_mins, lm_maxs;
 	
 	if (numterrainmodels == MAX_MAP_MODELS)
@@ -778,6 +1002,68 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	if (data.num_triangles != mod->numtriangles)
 		Com_Printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
 	
+	mod->grids = Z_Malloc (NUMGRID(mod) * sizeof(cterraingrid_t));
+	tmp = Z_Malloc (mod->numtriangles * sizeof(cterraintri_t *));
+	for (i = 0; i < NUMGRID_Y(mod); i++)
+	{
+		for (j = 0; j < NUMGRID_X(mod); j++)
+		{
+			for (l = 0; l < NUMGRID_Z(mod); l++)
+			{
+				vec3_t tmpmaxs, tmpmins;
+				
+				cterraingrid_t *grid = &mod->grids[l*NUMGRID_X(mod)*NUMGRID_Y(mod)+i*NUMGRID_X(mod)+j];
+				grid->numtris = 0;
+				
+				grid->mins[0] = mod->mins[0] + j*TERRAIN_GRIDSIZE;
+				grid->maxs[0] = mod->mins[0] + (j+1)*TERRAIN_GRIDSIZE;
+				grid->mins[1] = mod->mins[1] + i*TERRAIN_GRIDSIZE;
+				grid->maxs[1] = mod->mins[1] + (i+1)*TERRAIN_GRIDSIZE;
+				grid->mins[2] = mod->mins[2] + l*TERRAIN_GRIDSIZE;
+				grid->maxs[2] = mod->mins[2] + (l+1)*TERRAIN_GRIDSIZE;
+			
+				for (k = 0; k < mod->numtriangles; k++)
+				{
+					cterraintri_t *tri = &mod->tris[k];
+					if (TriangleIntersectsBBox (tri->verts[0], tri->verts[1], tri->verts[2], grid->mins, grid->maxs))
+						tmp[grid->numtris++] = tri;
+				}
+				
+				if (grid->numtris == 0)
+					continue;
+			
+				grid->tris = Z_Malloc (grid->numtris * sizeof(cterraintri_t *));
+				for (k = 0; k < grid->numtris; k++)
+					grid->tris[k] = tmp[k];
+				
+				// Try shrinking the grid's bounding box
+				
+				VectorCopy (grid->tris[0]->mins, tmpmins);
+				VectorCopy (grid->tris[0]->maxs, tmpmaxs);
+				
+				for (k = 1; k < grid->numtris; k++)
+				{
+					for (m = 0; m < 3; m++)
+					{
+						if (grid->tris[k]->maxs[m] > tmpmaxs[m])
+							tmpmaxs[m] = grid->tris[k]->maxs[m];
+						if (grid->tris[k]->mins[m] < tmpmins[m])
+							tmpmins[m] = grid->tris[k]->mins[m];
+					}
+				}
+				
+				for (m = 0; m < 3; m++)
+				{
+					if (tmpmaxs[m] < grid->maxs[m])
+						grid->maxs[m] = tmpmaxs[m];
+					if (tmpmins[m] > grid->mins[m])
+						grid->mins[m] = tmpmins[m];
+				}
+			}
+		}
+	}
+	Z_Free (tmp);
+	
 	CleanupTerrainData (&data);
 	
 	FS_FreeFile (buf);
@@ -839,7 +1125,7 @@ Loads in the map and all submodels
 cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 {
 	unsigned		*buf;
-	unsigned int	i;
+	unsigned int	i, j;
 	dheader_t		header;
 	int				length;
 	static unsigned	last_checksum;
@@ -944,6 +1230,12 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 			terrain_models[i].active = false;
 			Z_Free (terrain_models[i].verts);
 			Z_Free (terrain_models[i].tris);
+			for (j = 0; j < NUMGRID((&terrain_models[i])); j++)
+			{
+				if (terrain_models[i].grids[j].numtris != 0)
+					Z_Free (terrain_models[i].grids[j].tris);
+			}
+			Z_Free (terrain_models[i].grids);
 			if (terrain_models[i].lightmaptex != NULL)
 				free (terrain_models[i].lightmaptex);
 		}
@@ -1874,45 +2166,9 @@ return;
 
 
 
-
-static qboolean RayIntersectsTriangle (vec3_t p1, vec3_t d, vec3_t v0, vec3_t v1, vec3_t v2, float *intersection_dist)
-{
-	vec3_t	e1, e2, P, Q, T;
-	float	det, inv_det, u, v, t;
-	
-	VectorSubtract (v1, v0, e1);
-	VectorSubtract (v2, v0, e2);
-	
-	CrossProduct (d, e2, P);
-	det = DotProduct (e1, P);
-	
-	if (fabs (det) < FLT_EPSILON)
-		return false;
-	
-	inv_det = 1.0/det;
-	
-	VectorSubtract (p1, v0, T);
-	u = inv_det * DotProduct (P, T);
-	
-	if (u < 0.0 || u > 1.0)
-		return false;
-	
-	CrossProduct (T, e1, Q);
-	v = inv_det * DotProduct (d, Q);
-	
-	if (v < 0.0 || u + v > 1.0)
-		return false;
-	
-	t = inv_det * DotProduct (e2, Q);
-	
-	*intersection_dist = t;
-	
-	return t > FLT_EPSILON;
-}
-
 extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect))
 {
-	int i, j;
+	int i, j, x, y, z;
 	
 	for (i = 0; i < MAX_MODELS; i++)
 	{
@@ -1921,14 +2177,28 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 		if (!mod->active)
 			continue;
 		
-		for (j = 0; j < mod->numtriangles; j++)
+		for (x = 0; x < NUMGRID_X(mod); x++)
 		{
-			float tmp;
-			qboolean does_intersect;
+			for (y = 0; y < NUMGRID_Y(mod); y++)
+			{
+				for (z = 0; z < NUMGRID_Z(mod); z++)
+				{
+					float tmp;
+					cterraingrid_t *grid = &mod->grids[z*NUMGRID_X(mod)*NUMGRID_Y(mod)+y*NUMGRID_X(mod)+x];
+					
+					if (!RayIntersectsBBox (start, dir, grid->mins, grid->maxs, &tmp))
+						continue;
+					
+					for (j = 0; j < grid->numtris; j++)
+					{
+						qboolean does_intersect;
+					
+						does_intersect = RayIntersectsTriangle (start, dir, grid->tris[j]->verts[0], grid->tris[j]->verts[1], grid->tris[j]->verts[2], &tmp);
 			
-			does_intersect = RayIntersectsTriangle (start, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &tmp);
-			
-			do_draw ((const vec_t **)mod->tris[j].verts, mod->tris[j].p.normal, does_intersect);
+						do_draw ((const vec_t **)grid->tris[j]->verts, grid->tris[j]->p.normal, does_intersect);
+					}
+				}
+			}
 		}
 	}
 }
@@ -1947,7 +2217,6 @@ static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3
 	return true;
 }
 
-// FIXME: This is a half-witted and inefficient way to do it. 
 // FIXME: It's still quite possible to fall through a terrain mesh.
 // FIXME: Also, the physics feel like crap on terrain.
 // Returns -1 for no intersection, otherwise it returns the index within 
@@ -1956,7 +2225,7 @@ static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3
 int CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
 	vec3_t		p2;
-	int			i, j, k;
+	int			i, j, k, x, y, z;
 	float		offset;
 	cplane_t	*plane;
 	vec3_t		dir;
@@ -1975,6 +2244,7 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 	
 	for (i = 0; i < MAX_MODELS; i++)
 	{
+		int mingrid[3], maxgrid[3], griddir[3];
 		cterrainmodel_t	*mod = &terrain_models[i];
 		
 		if (!mod->active)
@@ -1983,45 +2253,112 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 		if (!bbox_in_trace (mod->mins, mod->maxs, p1, p2_extents))
 			continue;
 		
-		for (j = 0; j < mod->numtriangles; j++)
+		// We iterate through the grid layers, rows, and columns in order from
+		// closest to furthest. 
+		for (k = 0; k < 3; k++)
 		{
-			float	intersection_dist;
+			float mincoord, maxcoord, tmp;
 			
-			plane = &mod->tris[j].p;
+			mincoord = maxcoord = p1[k];
+			if (p2_extents[k] < mincoord)
+				mincoord = p2_extents[k];
+			else if (p2_extents[k] > maxcoord)
+				maxcoord = p2_extents[k];
 			
-			// order the tests from least expensive to most
+			mingrid[k] = (int)floor((mincoord-mod->mins[k]) / TERRAIN_GRIDSIZE);
+			if (mingrid[k] < 0)
+				mingrid[k] = 0;
 			
-			if (DotProduct (dir, plane->normal) > 0)
-				continue;
+			maxgrid[k] = (int)ceil((maxcoord-mod->mins[k]) / TERRAIN_GRIDSIZE + 0.1);
+			if (maxgrid[k] > NUMGRID_AXIS(mod,k))
+				maxgrid[k] = NUMGRID_AXIS(mod,k);
 			
-			if (!bbox_in_trace (mod->tris[j].mins, mod->tris[j].maxs, p1, p2_extents))
-				continue;
-			
-			if (!RayIntersectsTriangle (p1, dir, mod->tris[j].verts[0], mod->tris[j].verts[1], mod->tris[j].verts[2], &intersection_dist))
-				continue;
-			
-			if (trace_ispoint)
-				offset = 0;
+			if (dir[k] < 0.0)
+			{
+				griddir[k] = -1;
+				tmp = mingrid[k] - 1;
+				mingrid[k] = maxgrid[k] - 1;
+				maxgrid[k] = tmp;
+			}
 			else
-				offset = fabs(trace_extents[0]*plane->normal[0]) +
-					fabs(trace_extents[1]*plane->normal[1]) +
-					fabs(trace_extents[2]*plane->normal[2]);
+			{
+				griddir[k] = 1;
+			}
+		}
+		
+		for (z = mingrid[2]; z != maxgrid[2]; z += griddir[2])
+		{
+			for (y = mingrid[1]; y != maxgrid[1]; y += griddir[1])
+			{
+				for (x = mingrid[0]; x != maxgrid[0]; x += griddir[0])
+				{
+					float tmp;
+					cterraingrid_t *grid;
+					
+					grid = &mod->grids[z*NUMGRID_X(mod)*NUMGRID_Y(mod)+y*NUMGRID_X(mod)+x];
+					
+					if (grid->numtris == 0)
+						continue;
+					
+					if (!bbox_in_trace (grid->mins, grid->maxs, p1, p2_extents))
+						continue;
+					
+					if (!RayIntersectsBBox (p1, dir, grid->mins, grid->maxs, &tmp))
+						continue;
+		
+					for (j = 0; j < grid->numtris; j++)
+					{
+						float			intersection_dist;
+						cterraintri_t	*tri = grid->tris[j];
 			
-			intersection_dist -= offset;
+						plane = &tri->p;
 			
-			if (intersection_dist > orig_dist)
-				continue;
+						// order the tests from least expensive to most
 			
-			// At this point, we've found a new closest intersection point
-			trace_trace.fraction *= intersection_dist / orig_dist;
-			VectorMA (p1, intersection_dist, dir, p2);
-			orig_dist = intersection_dist;
-			VectorCopy (plane->normal, trace_trace.plane.normal);
-			for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
-			ret = i;
+						if (DotProduct (dir, plane->normal) > 0)
+							continue;
+			
+						if (!bbox_in_trace (tri->mins, tri->maxs, p1, p2_extents))
+							continue;
+			
+						if (!RayIntersectsTriangle (p1, dir, tri->verts[0], tri->verts[1], tri->verts[2], &intersection_dist))
+							continue;
+			
+						if (trace_ispoint)
+							offset = 0;
+						else
+							offset = fabs(trace_extents[0]*plane->normal[0]) +
+								fabs(trace_extents[1]*plane->normal[1]) +
+								fabs(trace_extents[2]*plane->normal[2]);
+			
+						intersection_dist -= offset;
+			
+						if (intersection_dist > orig_dist)
+							continue;
+			
+						// At this point, we've found a new closest intersection point
+						trace_trace.fraction *= intersection_dist / orig_dist;
+						VectorMA (p1, intersection_dist, dir, p2);
+						orig_dist = intersection_dist;
+						VectorCopy (plane->normal, trace_trace.plane.normal);
+						for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+						ret = i;
+					}
+					
+					// Any grid cells we check after this one are further away
+					// than this one, so they won't contain any triangles that
+					// are actually *closer* that we haven't checked already.
+					// Thus, if we've found any intersections in the previous
+					// grid cell, there won't be any closer intersections in
+					// the next one, so we can stop the tracing right here.
+					if (ret != -1)
+						goto done;
+				}
+			}
 		}
 	}
 	
+done:
 	return ret;
 }
 
