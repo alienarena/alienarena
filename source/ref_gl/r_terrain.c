@@ -136,7 +136,8 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 	int len;
 	int i;
 	terraindata_t data;
-	vec3_t up = {0, 0, 1};
+	trace_t plant;
+	vec3_t start, end;
 	vec3_t color = {1, 1, 1};
 	
 	len = FS_LoadFile (path, (void**)&buf);
@@ -196,7 +197,14 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 			break;
 		}
 		
-		Mod_AddVegetation (	org, up,
+		// Figure out where to "plant" the plant.
+		VectorCopy (org, start);
+		start[2] += 256;
+		VectorCopy (org, end);
+		end[2] -= 256;
+		plant = CM_BoxTrace (start, end, vec3_origin, vec3_origin, 0, MASK_ALL);
+		
+		Mod_AddVegetation (	org, plant.plane.normal,
 							GL_FindImage (texture, it_wall), color,
 							data.vegetation[i].size, texture, type );
 	}
@@ -219,12 +227,22 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 		ent = &rock_entities[num_rock_entities];
 		memset (ent, 0, sizeof(*ent));
 		ent->number = MAX_EDICTS+MAX_MAP_MODELS+num_rock_entities++;
+		ent->model = R_RegisterModel (rockmeshes[rand()%5]);
 		
 		VectorAdd (origin, data.rocks[i].origin, ent->origin);
 		
-		ent->angles[YAW] = 360.0*frand();
+		// Figure out where to "plant" the rock.
+		VectorCopy (ent->origin, start);
+		start[2] += 256;
+		VectorCopy (ent->origin, end);
+		end[2] -= 256;
+		plant = CM_BoxTrace (start, end, ent->model->mins, ent->model->maxs, 0, MASK_ALL);
 		
-		ent->model = R_RegisterModel (rockmeshes[rand()%5]);
+		vectoangles (plant.plane.normal, ent->angles);
+		// Entities are oriented such that their angles point forward, not up
+		ent->angles[PITCH] += 90.0; 
+		
+/*		ent->angles[YAW] = 360.0*frand();*/
 	}
 	
 	CleanupTerrainData (&data);
