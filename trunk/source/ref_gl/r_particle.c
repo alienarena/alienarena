@@ -591,7 +591,7 @@ void R_RenderFlares (void)
 
 			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
-
+			
 			l->alpha += (visible ? 0.03 : -0.15);  // ramp
 
 			if(l->alpha > 0.5)  // clamp
@@ -880,12 +880,14 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, image_t *tex, vec3_t color
 		grass->texsize = gl->height;
 	else
 		grass->texsize = 64; //sane default
-
+	
 	grass->tex = tex;
 	VectorCopy(color, grass->color);
 	grass->size = size;
 	strcpy(grass->name, name);
 	grass->type = type;
+	
+	VectorCopy (normal, grass->normal);
 	
 	grass->leafnum = CM_PointLeafnum (grass->origin);
 
@@ -1080,6 +1082,9 @@ void R_DrawVegetationSurface ( void )
 			
 			AngleVectors (angle, NULL, NULL, up);
 			VectorScale(up, scale, up);
+			
+			if (grass->type != 1)
+				vectoangles (grass->normal, angle);
 			
 			// up and right appear to be reversed, but actually the
 			// vegetation textures are all sideways.
