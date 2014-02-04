@@ -565,3 +565,58 @@
 "origin" "0.000000 0.000000 1792.000000"
 "targetname" "moonspot"
 }
+// entity 5
+{
+"classname" "misc_decal"
+"origin" "-856.000000 448.000000 608.000000"
+"model" "maps/meshes/terraintest/ivy1.decal"
+"angles" "-90.000000 0.000000 -0.000000"
+}
+// entity 6
+{
+"classname" "misc_decal"
+"origin" "-2310.461914 332.579468 1.000000"
+"model" "maps/meshes/terraintest/rocks1.decal"
+"angle" "-54.680672"
+}
+// entity 7
+{
+"classname" "misc_decal"
+"origin" "-696.000000 800.000000 608.000000"
+"model" "maps/meshes/terraintest/ivy1.decal"
+"angles" "-90.000000 0.000000 -0.000000"
+}
+// entity 8
+{
+"classname" "misc_decal"
+"origin" "-664.000000 800.000000 800.000000"
+"model" "maps/meshes/terraintest/ivy1.decal"
+"angles" "-90.000000 0.000000 -0.000000"
+}
+// entity 9
+{
+"classname" "misc_decal"
+"origin" "-984.000000 192.000000 800.000000"
+"model" "maps/meshes/terraintest/ivy1.decal"
+"angles" "-90.000000 0.000000 -0.000000"
+}
+// entity 10
+{
+"classname" "misc_decal"
+"origin" "-760.000000 448.000000 800.000000"
+"model" "maps/meshes/terraintest/ivy1.decal"
+"angles" "-90.000000 0.000000 -0.000000"
+}
+// entity 11
+{
+"classname" "misc_decal"
+"origin" "-2286 610 1"
+"model" "maps/meshes/terraintest/rocks1.decal"
+}
+// entity 12
+{
+"classname" "misc_decal"
+"origin" "-1016.000000 192.000000 608.000000"
+"model" "maps/meshes/terraintest/ivy1.decal"
+"angles" "-90.000000 0.000000 -0.000000"
+}
