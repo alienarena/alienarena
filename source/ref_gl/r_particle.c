@@ -1014,8 +1014,8 @@ void R_DrawVegetationSurface ( void )
 	
 	swaysin2 = 2.0*sin (rs_realtime*2.0);
 	swaysin3 = 3.0*sin (rs_realtime*3.0);
-
-    for (i=0; i<r_numgrasses; i++, grass++)
+	
+	for (i=0; i<r_numgrasses; i++, grass++)
 	{
 		int gCount = 3;
 		int va = 0;
@@ -1476,7 +1476,7 @@ void R_DrawSimpleItems ( void )
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-
+	
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
 
@@ -1490,15 +1490,15 @@ void R_DrawSimpleItems ( void )
 	qglDepthMask( GL_TRUE );
 	GLSTATE_ENABLE_ALPHATEST
 	
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
-    for (i=0 ; i<r_newrefdef.num_entities ; i++)
+	for (i=0 ; i<r_newrefdef.num_entities ; i++)
 	{
 		currententity = &r_newrefdef.entities[i];
 		if (!currententity->model || !currententity->model->simple_texnum)
 			continue;
 		currentmodel = currententity->model;
 		
-		R_InitVArrays (VERT_SINGLE_TEXTURED);
 		VArray = &VArrayVerts[0];
 
 		VectorCopy(currententity->origin, origin);
@@ -1553,10 +1553,10 @@ void R_DrawSimpleItems ( void )
 			PART_AddBillboardToVArray (origin, up, right, 0, true, 0, 1, 0, 1);
 
 			R_DrawVarrays(GL_QUADS, 0, 4);
-
-			R_KillVArrays ();
 		}
 	}
+	
+	R_KillVArrays ();
 
 	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglDisable(GL_BLEND);

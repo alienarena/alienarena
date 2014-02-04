@@ -443,7 +443,6 @@ static void Sky_DrawQuad_Setup (int axis, float size)
 	int i;
 	
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
-	VArray = &VArrayVerts[0];
 	
 	for (i = 0; i < 4; i++)
 	{
