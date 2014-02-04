@@ -34,6 +34,8 @@ GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
 GLvoid			(APIENTRY * qglGenBuffersARB)(GLsizei n, GLuint *buffers);
 GLvoid			(APIENTRY * qglBufferDataARB)(GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
 GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+void *			(APIENTRY * qglMapBufferARB)(GLenum target, GLenum access);
+GLboolean		(APIENTRY * qglUnmapBufferARB)(GLenum target);
 
 void VB_VCInit();
 void R_LoadVBOSubsystem(void)
@@ -45,8 +47,10 @@ void R_LoadVBOSubsystem(void)
 		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
 		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
 		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
+		qglMapBufferARB = (void *)qwglGetProcAddress("glMapBufferARB");
+		qglUnmapBufferARB = (void *)qwglGetProcAddress("glUnmapBufferARB");
 
-		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
+		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB && qglMapBufferARB && qglUnmapBufferARB)
 		{
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
 			VB_VCInit();

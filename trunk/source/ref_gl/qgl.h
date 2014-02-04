@@ -65,6 +65,8 @@ extern GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffer
 extern GLvoid			(APIENTRY * qglGenBuffersARB)(GLsizei n, GLuint *buffers);
 extern GLvoid			(APIENTRY * qglBufferDataARB)(GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
 extern GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+extern void *			(APIENTRY * qglMapBufferARB)(GLenum target, GLenum access);
+extern GLboolean		(APIENTRY * qglUnmapBufferARB)(GLenum target);
 
 #ifndef GL_ARB_vertex_buffer_object
 #define GL_BUFFER_SIZE_ARB                0x8764
