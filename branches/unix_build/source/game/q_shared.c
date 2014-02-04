@@ -1326,16 +1326,17 @@ int Q_strnicmp (const char *string1, const char *string2, int n)
 
 	return 0;// Strings are equal
 }
+
 void Q_strncpyz2 (char *dst, const char *src, int dstSize)
 {
 	if (!dst)
-		Sys_Error(ERR_FATAL, "Q_strncpyz: NULL dst");
+		Sys_Error( "\nQ_strncpyz: NULL dst\n");
 
 	if (!src)
-		Sys_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+		Sys_Error( "\nQ_strncpyz: NULL src\n");
 
 	if (dstSize < 1)
-		Sys_Error(ERR_FATAL, "Q_strncpyz: dstSize < 1");
+		Sys_Error( "\nQ_strncpyz: dstSize < 1\n");
 
 	strncpy(dst, src, dstSize-1);
 	dst[dstSize-1] = 0;
@@ -1348,7 +1349,7 @@ void Q_strcat (char *dst, const char *src, int dstSize)
 
 	len = strlen(dst);
 	if (len >= dstSize)
-		Sys_Error(ERR_FATAL, "Q_strcat: already overflowed");
+		Sys_Error( "\nQ_strcat: already overflowed\n");
 
 	Q_strncpyz2(dst + len, src, dstSize - len);
 }

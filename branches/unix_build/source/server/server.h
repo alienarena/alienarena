@@ -240,7 +240,7 @@ extern  int			sv_numbots;
 //
 // sv_main.c
 //
-void SV_FinalMessage (char *message, qboolean reconnect);
+void SV_FinalMessage (const char *message, qboolean reconnect);
 void SV_DropClient (client_t *drop);
 
 int SV_ModelIndex (char *name);
@@ -317,7 +317,7 @@ void SV_RecordDemoMessage (void);
 void SV_BuildClientFrame (client_t *client);
 
 
-void SV_Error (char *error, ...);
+void SV_Error( const char *error_msg );
 
 //
 // sv_game.c

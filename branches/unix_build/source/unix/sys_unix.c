@@ -59,7 +59,7 @@ cvar_t	*sys_ansicolor;
 unsigned sys_frame_time;
 
 /* forward reference */
-void Sys_Warn( char *warning, ... );
+void Sys_Warn( const char *warning );
 
 
 /*----------------------------------------------------- Setuid Access ------*/
@@ -307,7 +307,7 @@ char *Sys_ConsoleInput( void )
  *
  * @parameter ostring - nul-terminated string to be output
  */
-void Sys_ConsoleOutput( char *ostring )
+void Sys_ConsoleOutput( const  char *ostring )
 {
 	if ( stdout_disabled() )
 		return;
@@ -354,31 +354,21 @@ void Sys_ConsoleOutput( char *ostring )
 /**
  * printf for console/terminal output
  */
-void Sys_Printf( char *fmt, ... )
+void Sys_Printf( const char *fmt, ... )
 {
+	va_list argptr;
+	char    text[128];
+	int     textsize;
+
 	if ( stdout_disabled() )
 		return;
-
-#ifndef NDEBUG
-	/* paranoid and sanity checks */
-	char *pc;
-	assert( strlen(fmt) < 80 );
-	for( pc=(char*)fmt ; (*pc) ; ++pc )
-		assert( isprint( *pc ) );
-#endif
-
-	va_list argptr;
-	char    text[256];
-	int     textsize;
 
 	va_start( argptr,fmt );
 	textsize = vsnprintf( text, sizeof(text), fmt, argptr);
 	va_end( argptr );
 
 	if ( textsize >= (int)sizeof(text) )
-	{
-		return; /* too much */
-	}
+		return; /* ignore, may have been truncated */
 
 	fputs( text, stdout );
 }
@@ -411,37 +401,30 @@ void Sys_Init(void)
 /**
  * Somewhat controlled crash exit
  *
- * TODO: check for non-reentrant functions
  */
 extern void GLimp_Shutdown( void );
 
-void Sys_Error( char *error, ... )
+void Sys_Error( const char *error_msg )
 {
+	static int reentry;
+
+	if ( reentry++ )
+		return;
 
 	/* attempt to release device resources */
 	clear_nonblock_stdin();
+
+	if ( stderr_enabled )
+	{
+		(void)write( fileno(stderr), error_msg, strlen( error_msg ));
+	}
+	/* TODO: maybe output to system error log */
+
 #if !defined DEDICATED_ONLY
 	GLimp_Shutdown();
+	CL_Shutdown();
 #endif
-
-	if ( stderr_enabled && terminal_stderr_exists() )
-	{
-
-		va_list     argptr;
-		static char crash_string[1024];
-
-		va_start( argptr, error );
-		vsnprintf( crash_string, sizeof(crash_string), error, argptr );
-		va_end( argptr );
-		fprintf( stderr, "Error: %s\n", crash_string );
-
-#if !defined DEDICATED_ONLY
-		CL_Shutdown();
-#endif
-		Qcommon_Shutdown();
-
-	}
-	/* TODO: maybe, post to syslog */
+	Qcommon_Shutdown();
 
 	exit (1);
 }
@@ -449,18 +432,14 @@ void Sys_Error( char *error, ... )
 /**
  * Non-crashing warning to stderr
  */
-void Sys_Warn( char *warning, ... )
+void Sys_Warn( const char *warning_msg )
 {
-	if ( stderr_enabled && terminal_stderr_exists() )
-	{
-		va_list     argptr;
-		static char warn_string[1024];
 
-		va_start( argptr,warning );
-		vsnprintf( warn_string, sizeof(warn_string), warning, argptr );
-		va_end( argptr );
-		fprintf( stderr, "Warning: %s", warn_string);
+	if ( stderr_enabled  )
+	{
+		(void)write( fileno(stderr), warning_msg, strlen( warning_msg ));
 	}
+	Sys_ConsoleOutput( warning_msg );
 	/* TODO: maybe, post to syslog or a server log */
 }
 
@@ -492,7 +471,6 @@ Loads the game module
 void *Sys_GetGameAPI (void *parms)
 {
 	void	*(*ptrGetGameAPI) (void *) = NULL;
-
 	FILE	*fp;
 	char	name[MAX_OSPATH];
 	char	*path;
@@ -512,6 +490,8 @@ void *Sys_GetGameAPI (void *parms)
 		path = FS_NextPath (path);
 		if (!path)
 			break; // Search did not turn up a game shared library
+
+
 
 		pathlen = strlen( path );
 		// old game lib in data1 is a problem

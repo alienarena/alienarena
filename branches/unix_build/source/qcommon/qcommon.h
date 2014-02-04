@@ -875,10 +875,10 @@ void	*Sys_GetGameAPI (void *parms);
 // loads the game dll and calls the api init function
 
 char	*Sys_ConsoleInput (void);
-void	Sys_ConsoleOutput (char *string);
+void	Sys_ConsoleOutput (const char *string);
 void	Sys_SendKeyEvents (void);
-void	Sys_Error (char *error, ...);
-void    Sys_Warn( char *warning, ... );
+void	Sys_Error (const char *error_msg);
+void    Sys_Warn  (const char *warning_msg);
 void	Sys_Quit (void);
 char	*Sys_GetClipboardData( void );
 void	Sys_CopyProtect (void);
@@ -899,7 +899,7 @@ void CON_Print (const char *text);
 void SCR_BeginLoadingPlaque (void);
 
 void SV_Init (void);
-void SV_Shutdown (char *finalmsg, qboolean reconnect);
+void SV_Shutdown (const char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
 
 

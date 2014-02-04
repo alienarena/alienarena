@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // -jjb-
 #include <ctype.h>
+#include <math.h>
 
 #if defined WIN32_VARIANT
 #include <winsock.h>
@@ -418,27 +419,18 @@ int M_Interp (int progress, int target)
 	
 	// Determine the movement amount this frame. Make it nice and fast,
 	// because while slow might look cool, it's also an inconvenience.
+	
 	if (target != progress)
 	{
 		static float frametime_accum = 0;
 
 		// The animation speeds up as it gets further from the starting point
 		// and slows down twice as fast as it approaches the ending point.
-#if 1
-// -jjb- 
-		int incr_a = abs( ((11*target)/10) - progress ) / 2;
-		int incr_b = abs(progress) * 40 ;
-		int incr_c = abs(target) / 10;
-		increment = MIN( incr_a, incr_b );
-		increment = MAX( increment, incr_c );
-#else
-		increment = min(	abs((11*target)/10-progress)/2,
-							abs(progress) )*40;
+		increment = MIN( abs((11*target)/10-progress)/2, abs(progress)*40 );
 		
 		// Clamp the animation speed at a minimum so it won't freeze due to
 		// rounding errors or take too long at either end.
-		increment = max (increment, abs(target)/10);
-#endif
+		increment = MAX( increment, abs(target)/8 );
 
 		// Scale the animation by frame time so its speed is independent of 
 		// framerate. At very high framerates, each individual frame might be
@@ -4834,6 +4826,7 @@ void MutatorFunc( void *self )
 	M_Menu_Mutators_f();
 }
 
+#if 0
 // -jjb- used?
 int Menu_FindFile (char *filename, FILE **file)
 {
@@ -4844,6 +4837,7 @@ int Menu_FindFile (char *filename, FILE **file)
 	}
 	return 1;
 }
+#endif
 
 void MapInfoFunc( void *self ) {
 

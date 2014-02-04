@@ -352,7 +352,7 @@ void	Sys_FindClose (void);
 
 
 // this is only here so the functions in q_shared.c and q_shwin.c can link
-void Sys_Error (char *error, ...);
+void Sys_Error (const char *error_msg);
 void Com_Printf (char *msg, ...);
 
 /*

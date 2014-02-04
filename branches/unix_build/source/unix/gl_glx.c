@@ -156,7 +156,7 @@ void install_grabs(void)
 	dgamouse = false;
 	mouse_is_position = false; /* fake */
 
-	Sys_Warn( "DEBUG_GDB_NOGRAB defined. Developer use only.\n" );
+	Sys_Warn( "\nDEBUG_GDB_NOGRAB defined. Developer use only.\n" );
 
 #else
 /* normal operation
@@ -189,23 +189,23 @@ void install_grabs(void)
 		break;
 
 	case AlreadyGrabbed:
-		Sys_Warn("XGrabPointer: Already Grabbed\n");
+		Sys_Warn("\nXGrabPointer: Already Grabbed\n");
 		break;
 
 	case GrabNotViewable:
-		Sys_Warn("XGrabPointer: Not Viewable\n");
+		Sys_Warn("\nXGrabPointer: Not Viewable\n");
 		break;
 
 	case GrabFrozen:
-		Sys_Warn("XGrabPointer: Frozen\n");
+		Sys_Warn("\nXGrabPointer: Frozen\n");
 		break;
 
 	case GrabInvalidTime:
-		Sys_Warn("XGrabPointer: Invalid Time\n");
+		Sys_Warn("\nXGrabPointer: Invalid Time\n");
 		break;
 
 	default:
-		Sys_Warn("XGrabPointer: ? %i\n", result );
+		Sys_Warn("\nXGrabPointer: Unknown\n" );
 		break;
 	};
 
@@ -232,7 +232,7 @@ void install_grabs(void)
 		else
 		{
 			// unable to query, probably not supported
-			Sys_Warn( "XF86DGA Mouse enabled but not detected.\N" );
+			Sys_Warn( "\nXF86DGA Mouse enabled but not detected.\n" );
 		}
 	}
 	/* else, have DGA, but not enabled by cvar */
@@ -802,8 +802,15 @@ qboolean GLimp_InitGL (void);
 
 static void signal_handler(int sig)
 {
-	Sys_Error("received signal %d, exiting...\n", sig);
-	/* unreachable */
+	switch ( sig )
+	{
+	case SIGSEGV:
+		Sys_Error("\nSIGSEGV, exiting...\n");
+		break;
+	default:
+		Sys_Error("\nSIG?, exiting...\n"); // -jjb-
+		break;
+	}
 }
 
 static void InitSig(void)
@@ -877,7 +884,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	if ( !VID_GetModeInfo( &width, &height, mode ) )
 	{
 		// Com_Printf ( " invalid mode\n" );
-		Sys_Warn( "\ncannot set mode %d, video mode is unchanged\n", mode);
+		Sys_Warn( "\nVideo mode setting failed, video mode unchanged\n");
 		return rserr_invalid_mode;
 	}
 
@@ -887,8 +894,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	GLimp_Shutdown ();
 
 	if (!(dpy = XOpenDisplay(NULL))) {
-		Sys_Warn("cannot open the X display, video mode is unchanged\n");
-		// fprintf(stderr, "Error couldn't open the X display\n");
+		Sys_Warn("Cannot open the X display, video mode is unchanged\n");
 		return rserr_invalid_mode;
 	}
 

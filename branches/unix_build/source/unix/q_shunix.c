@@ -38,7 +38,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "unix/glob.h"
 #include "qcommon/qcommon.h"
 
-
 /*
  * State of currently open Hunk.
  * Valid between Hunk_Begin() and Hunk_End()
@@ -53,17 +52,20 @@ size_t total_hunk_used_size;
 
 void *Hunk_Begin (int maxsize)
 {
-
 	Com_DPrintf("Hunk_Begin:0x%X:\n", maxsize );
 	if ( hunk_base != NULL )
 		Com_DPrintf("Warning: Hunk_Begin: hunk_base != NULL\n");
-
-	// reserve virtual memory space
+   
 	rsvd_hunk_size = (size_t)maxsize + hunk_header_size;
+
+	/*
+	 * Anonymous Memory Mapping
+	 */
+	errno = 0;
 	hunk_base = mmap(0, rsvd_hunk_size, PROT_READ|PROT_WRITE,
 		MAP_PRIVATE|MAP_ANON, -1, 0);
-	if ( hunk_base == NULL || hunk_base == (byte *)-1)
-		Sys_Error("unable to virtual allocate %d bytes", maxsize);
+	if ( hunk_base == MAP_FAILED )
+		Sys_Error( strerror(errno) );
 
 	total_hunk_used_size = hunk_header_size;
 	user_hunk_size = 0;
@@ -76,7 +78,7 @@ void *Hunk_Begin (int maxsize)
 	return user_hunk_base;
 }
 
-void *Hunk_Alloc (int size)
+void *Hunk_Alloc( int size )
 {
 	byte *user_hunk_bfr;
 	size_t user_hunk_block_size;
@@ -114,7 +116,7 @@ int Hunk_End (void)
 	new_rsvd_hunk_size = total_hunk_used_size;
 	remap_base = mremap( hunk_base, rsvd_hunk_size, new_rsvd_hunk_size, 0 );
 	if ( remap_base != hunk_base ) {
-		Sys_Error("Hunk_End:  Could not remap virtual block (%d)", errno);
+		Sys_Error( strerror( errno ));
 	}
 	// "close" this hunk, setting reserved size for Hunk_Free
 	rsvd_hunk_size = new_rsvd_hunk_size;
@@ -183,7 +185,6 @@ int Hunk_End()
 }
 #endif
 
-
 void Hunk_Free (void *base)
 {
 	byte *hunk_base;
@@ -196,9 +197,10 @@ void Hunk_Free (void *base)
 		hunk_rsvd_size = *((size_t *)hunk_base);
 
 		Com_DPrintf("Hunk_Free:0x%X @ %p:\n", hunk_rsvd_size, hunk_base );
-
+		
+		errno = 0;
 		if ( munmap( hunk_base, hunk_rsvd_size ) )
-			Sys_Error("Hunk_Free: munmap failed (%d)", errno);
+			Sys_Error( strerror(errno) );
 	}
 }
 

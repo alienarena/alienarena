@@ -56,21 +56,41 @@ ERROR
 #define BASE_GAMEDATA "data1"
 #define USER_GAMEDATA "cor_games"
 
-#if !defined GAME_GAMEDATA
-#define GAME_GAMEDATA "arena"
+#if defined TACTICAL
+# define GAME_GAMEDATA "tactical"
+#else
+# define GAME_GAMEDATA "arena"
 #endif
 
 /*----------------------------------------*/
-
 
 #define SFF_INPACK 0x20 /* For FS_ListFilesInFS(). */
 
 char   fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar;
 
-/* last slot is sentinel */
-#define GAME_SEARCH_SLOTS  4
+#define GAME_SEARCH_SLOTS  8
 char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
+int  fs_slots_used;
+
+const char* xdg_data_home_default = "/.local/share";  /* prefixed with $HOME */
+const char* xdg_data_dir_default  = "/usr/local/share:/usr/share";
+
+
+/* helper function */
+static inline bool
+is_absolute_path( const char* path )
+{
+	return *path == '/';
+}
+
+/* helper function */
+static bool
+is_valid_path( const char* path )
+{
+	return true;
+}
+
 
 /**
  * Initialize the pathnames for the shared data directory and
@@ -85,8 +105,10 @@ FS_init_paths( void )
 	char fs_homedir[MAX_OSPATH];
 	char *cwdstr;
 	char *homestr;
+    char *xdg_data_home;
 	char base_gamedata[MAX_OSPATH];
 	char game_gamedata[MAX_OSPATH];
+	char user_base_gamedata[MAX_OSPATH];
 	char user_game_gamedata[MAX_OSPATH];
 
 	memset( fs_bindir, 0, sizeof( fs_bindir ));
@@ -94,26 +116,33 @@ FS_init_paths( void )
 	memset( fs_homedir, 0, sizeof( fs_homedir ));
 	memset( base_gamedata, 0, sizeof( base_gamedata ));
 	memset( game_gamedata, 0, sizeof( game_gamedata ));
+	memset( user_base_gamedata, 0, sizeof( user_base_gamedata ));
 	memset( user_game_gamedata, 0, sizeof( user_game_gamedata ));
 	for ( i = 0; i < GAME_SEARCH_SLOTS; i++ )
 		memset( fs_gamesearch[i], 0, sizeof( fs_gamesearch[0]) );
 
 	cwdstr = getcwd( fs_bindir, sizeof( fs_bindir ));
 	if ( cwdstr == NULL )
-		Sys_Error( "path initialization (getcwd error: %s)", strerror( errno ));
+		Sys_Error( strerror(errno) );
+	
+	xdg_data_home = getenv( "XDG_DATA_HOME" );
+	if ( xdg_data_home == NULL || !is_absolute_path( xdg_data_home ) )
+		xdg_data_home = xdg_data_home_default;
 
 	homestr = getenv( "HOME" );
 	if ( homestr != NULL )
-	{
-		Com_sprintf( fs_homedir, sizeof( fs_homedir ), "%s/%s", homestr, USER_GAMEDATA );
-		// -jjb- to do test that it is readable
-	}
+		/* absolute path to user-writeable data */
+		Com_sprintf( fs_homedir, sizeof( fs_homedir ), 
+					 "%s/%s/%s", homestr, xdg_data_home, USER_GAMEDATA );
+	else
+		Sys_Error( "\nCould not initialize HOME subdirectory\n" );
+	
 
-	/* absolute path where data files are installed */
+	/* absolute path where shared data files are installed */
 	if ( strnlen( COR_DATADIR, sizeof(fs_datadir) ) >= sizeof( fs_datadir ) )
 	{
-			Com_Printf( "COR_DATADIR is: %s\n", COR_DATADIR );
-			Sys_Error( "COR_DATADIR path name is too long" );
+		Com_Printf( "\nCOR_DATADIR is: %s\n", COR_DATADIR );
+		Sys_Error( "\nCOR_DATADIR path name is too long\n" );
 	}
 	Q_strncpyz2( fs_datadir, COR_DATADIR, sizeof( fs_datadir ));
 
@@ -121,69 +150,48 @@ FS_init_paths( void )
 	Com_sprintf( base_gamedata, sizeof( base_gamedata ), "%s/%s",
 				 fs_datadir, BASE_GAMEDATA );
 
-	/* absolute path where user-writeable configs and downloaded data are stored
-	 * dependent on the game name.
+	/* absolute paths where official game-dependent data are stored.
 	 * If the game name is not set in the first 'Early' commands
 	 *  then it will be 'arena'
 	 * (Note: there seems to have been a command line arg '-game'
-	 *  to set the game name early. Need to review how that was
-	 *  done.)
-	 */
-	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH | CVAR_SERVERINFO );
+	 *  to set the game name early. TODO: add that?  */
+	fs_gamedirvar = Cvar_Get( "gamedir", "", CVAR_LATCH | CVAR_SERVERINFO );
 	if ( *fs_gamedirvar->string && fs_gamedirvar->string[0] )
 	{
-		if ( Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
-			 && Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
-		{
-			/* game cvar does not match either, use the cvar */
-			/* this might work for 'tactical', if commandline
-			 * has +set game tactical
-			 */
-			Com_sprintf( game_gamedata, sizeof( game_gamedata ), "%s/%s",
-						 fs_datadir, fs_gamedirvar->string );
-		}
-		else
-		{
-			/* game cvar matches BASE_GAMEDATA ('data1') or
-			 * GAME_GAMEDATA ('arena'). Use GAME_GAMEDATA
-			 */
-			Com_sprintf( game_gamedata, sizeof( game_gamedata ), "%s/%s",
-						 fs_datadir, GAME_GAMEDATA );
-		}
-	}
-	else
-	{
-		fs_gamedirvar = Cvar_ForceSet( "gamedir", GAME_GAMEDATA );
-		Com_sprintf( game_gamedata, sizeof( game_gamedata ), "%s/%s",
-					 fs_datadir, GAME_GAMEDATA );
-	}
-
-	/* create the pathnames for user-writeable configs and storage
-	 * subdirectories. 2013-12: eliminate user_base_gamedate from the
-	 * the list; it is mostly useless and an unnecessary performance
-	 * hit
-	 * So, in the user home directory, as of 2013-12 version, there
-	 *   are three subdirectories: arena, tactical, and botinfo.
-	 * In the shared directory, there are 4: data1, arena, tactical
-	 *   and botinfo.
-	 *
-	 */
-	if ( fs_homedir[0] )
-	{
+		/* gamedir cvar specified */
+		Com_sprintf( game_gamedata, sizeof( game_gamedata ),
+					 "%s/%s", fs_datadir, fs_gamedirvar->string );
 		Com_sprintf( user_game_gamedata, sizeof( user_game_gamedata ),
 					 "%s/%s", fs_homedir, fs_gamedirvar->string );
 	}
 	else
 	{
-		Sys_Warn( "could not initialize HOME subdirectory" );
+		/* gamedir cvar not specified, use GAME_GAMEDATA (arena or tactical) */
+		fs_gamedirvar = Cvar_ForceSet( "gamedir", GAME_GAMEDATA );
+		Com_sprintf( game_gamedata, sizeof( game_gamedata ),
+					 "%s/%s", fs_datadir, GAME_GAMEDATA );
+		Com_sprintf( user_game_gamedata, sizeof(user_game_gamedata),
+					 "%s/%s", fs_homedir, GAME_GAMEDATA );
 	}
+	/* absolute path to BASE_GAMEDATA (data1) in user home */
+	Com_sprintf( user_base_gamedata, sizeof(user_base_gamedata),
+				 "%s/%s", fs_homedir, BASE_GAMEDATA );
 
-	/* setup the directory search sequence for game resource files */
+	/* 
+	 * Create absolute search paths
+	 * As of 2014-02 version:
+	 * In the user home directory there are 2: data1 and arena -xor- tactical
+	 * In the shared directory there are 2: data1 and arena -xor- tactical
+	 * Preference order:
+	 *   home game, shared game, home data1, shared data1
+	 */
+
 	i = 0;
-	if ( user_game_gamedata[0] )
-		Q_strncpyz2( fs_gamesearch[i++], user_game_gamedata, sizeof( fs_gamesearch[0] ));
-	Q_strncpyz2( fs_gamesearch[i++], game_gamedata, sizeof( fs_gamesearch[0] ));
-	Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof( fs_gamesearch[0] ));
+	Q_strncpyz2(fs_gamesearch[i++],user_game_gamedata,sizeof(fs_gamesearch[0]));
+	Q_strncpyz2( fs_gamesearch[i++], game_gamedata, sizeof(fs_gamesearch[0]) );
+	Q_strncpyz2(fs_gamesearch[i++],user_base_gamedata,sizeof(fs_gamesearch[0]));
+	Q_strncpyz2( fs_gamesearch[i++], base_gamedata, sizeof(fs_gamesearch[0]) );
+	fs_slots_used = i;
 
 	/* the 'game' directory is the same as the first search slot */
 	Q_strncpyz2( fs_gamedir, fs_gamesearch[0], sizeof( fs_gamedir ));
@@ -289,8 +297,8 @@ qboolean
 FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 {
 	char     search_path[MAX_OSPATH];
-	char     *to_search;
 	qboolean found = false;
+	int      i;
 
 	*full_path = 0;
 	if ( strlen( relative_path ) >= MAX_QPATH )
@@ -300,15 +308,13 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 		return false;
 	}
 
-	// -jjb- to clever, possibly non-portable, TODO: fix
-	to_search = &fs_gamesearch[0][0];
-	while ( to_search[0] && !found )
+	for ( i = 0 ; !found && i < fs_slots_used ; ++i )
 	{
-		Com_sprintf( search_path, sizeof( search_path ), "%s/%s",
-					 to_search, relative_path );
+		Com_sprintf( search_path, sizeof(search_path), "%s/%s",
+					 fs_gamesearch[i], relative_path );
 		found = FS_CheckFile( search_path );
-		to_search += MAX_OSPATH;
 	}
+
 	if ( found )
 	{
 		if ( strlen( search_path ) < pathsize )
@@ -319,8 +325,7 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 		}
 		else
 		{
-			Com_DPrintf( "FS_FullPath: full path size error: %s\n",
-						 search_path );
+			Com_DPrintf( "FS_FullPath: pathsize error: %s\n", search_path );
 			found = false;
 		}
 	}
@@ -636,7 +641,7 @@ FS_SetGamedir( char *dir )
 	if ( strstr( dir, ".." ) || strstr( dir, "/" )
 		 || strstr( dir, "\\" ) || strstr( dir, ":" ))
 	{
-		Com_Printf( "Gamedir should be a single filename, not a path\n" );
+		Sys_Warn( "\nGame directory should be one word, not a path\n" );
 		return;
 	}
 

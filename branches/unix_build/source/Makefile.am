@@ -43,7 +43,7 @@ alienarena_LDADD = libgame.a \
 	$(ZLIB_LIBS)
 
 
-aa_tactical_demo_CPPFLAGS = -DTACTICAL \
+aa_tactical_demo_CPPFLAGS = -DTACTICAL  \
 	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
 	$(X11_CLAGS) \

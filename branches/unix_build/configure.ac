@@ -195,24 +195,6 @@ AM_CONDITIONAL([ICONS_INSTALL],[ test "x${icons_install}" = xyes ])
 # "Precious" Environment Variables
 #
 
-#
-# TO BE CONVERTED TO XDG CONVENTION
-# $HOME/.local/share/cor_games
-# ALWAYS cor_games, to be hard-wired in code
-# For testing modify the code, or configure.ac
-#
-cor_games_homedir="cor_games"
-AC_ARG_VAR([COR_GAMES_HOMEDIR],[
-		(User configuration and data directory (default:$XDG_?/cor_games))
-])
-
-AS_IF([ test "x${COR_GAMES_HOMEDIR}" = x ],[
-	COR_GAMES_HOMEDIR=${cor_games_homedir}],[
-	cor_games_homedir=${COR_GAMES_HOMEDIR}
-	])
-
-AC_DEFINE_UNQUOTED([USER_GAMEDATA],["${cor_games_homedir}"],
-	[Define to default path name for user configuration and downloaded data])
 
 #
 # Checks for libraries.
@@ -372,7 +354,7 @@ dnl ---= ODE
 dnl
 dnl end of client-only library requirements
 dnl
-
+	
 #
 # Checks for header files
 #
@@ -381,12 +363,23 @@ dnl priority? string.h and strings.h
 dnl ?w32 manual config.h
 dnl TODO: time function variants
 dnl TODO: separate these logically
+dnl see 5.6.2 Particular Header Checks
 
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h inttypes.h limits.h malloc.h \
- memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h strings.h \
- sys/ioctl.h sys/param.h sys/socket.h time.h sys/time.h termios.h unistd.h])
+AC_HEADER_STDBOOL
+AC_HEADER_DIRENT
+AC_HEADER_ASSERT
 
-AC_CHECK_HEADERS([dlfcn.h dirent.h sys/mman.h stdarg.h])
+AC_CHECK_HEADERS([sys/time.h time.h],[],[],[])
+
+AC_CHECK_HEADERS([string.h strings.h],[break],[],[])
+
+AC_CHECK_HEADERS_ONCE([unistd.h])
+
+AC_CHECK_HEADERS_ONCE([arpa/inet.h fcntl.h float.h inttypes.h limits.h malloc.h \
+ memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h  \
+ sys/ioctl.h sys/param.h sys/socket.h termios.h])
+
+AC_CHECK_HEADERS([dlfcn.h sys/mman.h stdarg.h])
 
 AC_CHECK_HEADERS([signal.h])
 
@@ -435,7 +428,6 @@ dnl
 #
 # Checks for typedefs, structures, and compiler characteristics.
 #
-AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T

@@ -223,17 +223,21 @@ do the apropriate things.
 */
 void Com_Error (int code, char *fmt, ...)
 {
-	va_list		argptr;
-	static char		msg[MAXPRINTMSG];
-	static	qboolean	recursive = false;
+	va_list          argptr;
+	static char      msg[MAXPRINTMSG];
+	static qboolean	recursive = false;
 
 	if (recursive)
-		Sys_Error ("recursive error after: %s", msg);
+	{
+		Sys_Warn( "\nMultiple errors.\n" );
+		return;
+	}
 	recursive = true;
 
 	va_start (argptr,fmt);
 	vsnprintf(msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
+	Sys_Warn( msg );
 
 	if (code == ERR_DISCONNECT)
 	{
@@ -243,15 +247,14 @@ void Com_Error (int code, char *fmt, ...)
 	}
 	else if (code == ERR_DROP)
 	{
-		Com_Printf ("********************\nERROR: %s\n********************\n", msg);
-		SV_Shutdown (va("Server crashed: %s\n", msg), false);
+		SV_Shutdown ("\nServer stopped\n", false);
 		CL_Drop ();
 		recursive = false;
 		longjmp (abortframe, -1);
 	}
 	else
 	{
-		SV_Shutdown (va("Server fatal crashed: %s\n", msg), false);
+		SV_Shutdown ("\nServer fatal crashed\n", false);
 		CL_Shutdown ();
 	}
 
@@ -261,7 +264,6 @@ void Com_Error (int code, char *fmt, ...)
 		logfile = NULL;
 	}
 
-	Sys_Error ("%s", msg);
 }
 
 
