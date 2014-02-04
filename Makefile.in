@@ -693,6 +693,8 @@ nobase_nodist_gfx_DATA = \
 	data1/gfx/blueoverlordfx.tga \
 	data1/gfx/bluewarriorfx.tga \
 	data1/gfx/bubbles.tga \
+	data1/gfx/bush1.tga \
+	data1/gfx/bush2.tga \
 	data1/gfx/caustics.tga \
 	data1/gfx/chrome2.tga \
 	data1/gfx/chrome.tga \
@@ -1036,6 +1038,8 @@ nobase_nodist_maps_DATA = \
 	data1/maps/terraintest2.bsp \
 	data1/maps/gpuanimtest.bsp \
 	data1/maps/iqmtest.bsp \
+	data1/maps/lightcolortest.bsp \
+	data1/maps/lightcolortest.lightmap \
 	data1/maps/lightstyletest.bsp \
 	data1/maps/lighttest.bsp \
 	data1/maps/shadowtest.bsp \
@@ -1296,9 +1300,11 @@ nobase_nodist_maps_DATA = \
 	data1/maps/meshes/tech/turbinefan.md2 \
 	data1/maps/meshes/tech/turbinefan_normal.jpg \
 	data1/maps/meshes/terraintest/axialcross.terrain \
-	data1/maps/meshes/terraintest/plateau1.terrain \
 	data1/maps/meshes/terraintest/blankwhite.terrain \
 	data1/maps/meshes/terraintest/hill1.terrain \
+	data1/maps/meshes/terraintest/ivy1.decal \
+	data1/maps/meshes/terraintest/plateau1.terrain \
+	data1/maps/meshes/terraintest/rocks1.decal \
 	data1/maps/meshes/test/helmet.iqm \
 	data1/maps/meshes/test/martian.iqm \
 	data1/maps/meshes/test/martian.jpg \
@@ -4011,6 +4017,7 @@ nobase_nodist_textures_DATA = \
 	data1/textures/dalek/wall5.tga \
 	data1/textures/dalek/wall6.tga \
 	data1/textures/dalek/wall7.tga \
+	data1/textures/decals/rock1.tga \
 	data1/textures/evil/confllrtile2pad_nm.tga \
 	data1/textures/evil/confllrtile2pad.tga \
 	data1/textures/evil/drktek_symb_hm.tga \

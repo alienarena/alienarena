@@ -574,6 +574,4 @@ dnl
 	AS_ECHO([" Compiler options:"])
 	AS_ECHO(["  CFLAGS:.... ${CFLAGS}"])
 	AS_ECHO()		
-	AS_ECHO(["Warning: now requires ODE library (libode-dev, libode)"])
-	AS_ECHO(["--------------------------------------------"])
 ])

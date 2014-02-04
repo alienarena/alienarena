@@ -9451,7 +9451,5 @@ fi
 	$as_echo " Compiler options:"
 	$as_echo "  CFLAGS:.... ${CFLAGS}"
 	$as_echo
-	$as_echo "Warning: now requires ODE library (libode-dev, libode)"
-	$as_echo "--------------------------------------------"
 
 fi
