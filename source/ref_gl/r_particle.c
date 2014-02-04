@@ -591,6 +591,7 @@ void R_RenderFlares (void)
 
 			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
+
 			
 			l->alpha += (visible ? 0.03 : -0.15);  // ramp
 
@@ -1028,14 +1029,14 @@ void R_DrawVegetationSurface ( void )
 		if (distancecull_particle (origin, scale))
 			continue;
 		
-		if(grass->type == 1) // foliage
+		if (grass->type == 1) // foliage
 		{
 			swaysin = swaysin3;
 			gCount = 1;
 
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 		}
-		if(grass->type == 2) // shrubbery
+		else if (grass->type == 2) // shrubbery
 		{
 			swaysin = swaysin2;
 
