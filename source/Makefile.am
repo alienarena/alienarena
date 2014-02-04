@@ -131,6 +131,7 @@ alienarena_SOURCES = \
 	qcommon/libgarland.h \
 	qcommon/terrain.c \
 	ref_gl/r_terrain.c \
+	ref_gl/r_decals.c \
 	ref_gl/glext.h \
 	ref_gl/glfuncs.h \
 	ref_gl/qgl.h \

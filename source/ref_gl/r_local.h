@@ -186,6 +186,8 @@ extern	cvar_t	*gl_screenshot_jpeg_quality;
 
 extern  cvar_t  *r_test;
 
+cvar_t *gl_showdecals;
+
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
 extern	int		gl_alpha_format;
@@ -235,6 +237,8 @@ int			num_terrain_entities;
 entity_t	terrain_entities[MAX_MAP_MODELS];
 int			num_rock_entities;
 entity_t	rock_entities[MAX_ROCKS];
+int			num_decal_entities;
+entity_t	decal_entities[MAX_MAP_MODELS];
 
 //Renderer main loop
 extern int	R_Init( void *hinstance, void *hWnd );
@@ -727,6 +731,10 @@ extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);
 // vegetation, rocks/pebbles, etc.
 void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
+
+//terrain decals
+void Mod_LoadDecalModel (model_t *mod, void *_buf);
+void R_ParseDecalEntity (char *match, char *block);
 
 //Ragdoll
 int r_DrawingRagDoll;

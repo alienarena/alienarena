@@ -794,7 +794,7 @@ static qboolean RayIntersectsTriangle (const vec3_t p1, const vec3_t d, const ve
 }
 
 // NOTE: this function doesn't need to be fast, it only runs at load time.
-static qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs)
+qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs)
 {
 	int i, axis;
 	float l0, l1, l2;

@@ -156,7 +156,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		VectorCopy (worldlight, cl_persistent_ents[currententity->number].oldworldlight);
 		for (i=0; i<r_lightgroups; i++)
 		{
-			if (currentmodel->type == mod_terrain)
+			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
 			{
 				r_trace.fraction = 1.0; //terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
 			}
@@ -295,7 +295,7 @@ static qboolean R_Mesh_CullModel (void)
 		return r_lefthand->integer == 2;
 	
 	// HACK: culling rocks is currently too slow.
-	if (r_worldmodel && currentmodel->type != mod_terrain && !strstr (currentmodel->name, "rock")) {
+	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock")) {
 		//occulusion culling - why draw entities we cannot see?
 		// TODO: this looks like another job for CM_FastTrace.
 		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
@@ -386,7 +386,14 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	//render with shaders - assume correct single pass glsl shader struct(let's put some checks in for this)
 	vec3_t lightVec, lightVal;
 
-	GLSTATE_ENABLE_ALPHATEST		
+	if (modtypes[currentmodel->type].decal)
+	{
+		GLSTATE_ENABLE_BLEND
+	}
+	else
+	{
+		GLSTATE_ENABLE_ALPHATEST
+	}
 
 	//send light level and color to shader, ramp up a bit
 	VectorCopy(lightcolor, lightVal);
@@ -770,7 +777,7 @@ void R_Mesh_SetShadelight (void)
 			shadelight[0] = 0.6;
 		}
 	}
-	else if ((currententity->flags & RF_FULLBRIGHT) || currentmodel->type == mod_terrain)
+	else if ((currententity->flags & RF_FULLBRIGHT) || currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
 	{
 		// Treat terrain as fullbright for now. TODO: move to precompiled lightmaps for terrain.
 		for (i=0 ; i<3 ; i++)
@@ -907,8 +914,32 @@ void R_Mesh_Draw ( void )
 	GL_SelectTexture (0);
 	qglShadeModel (GL_SMOOTH);
 	GL_TexEnv( GL_MODULATE );
+	
+	if (modtypes[currentmodel->type].decal)
+	{
+		qglEnable (GL_POLYGON_OFFSET_FILL);
+		qglPolygonOffset (-3, -2);
+		qglDepthMask (false);
+		if (gl_showdecals->integer > 1)
+		{
+			qglDisable (GL_TEXTURE_2D);
+			qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+		}
+	}
 
 	R_Mesh_DrawFrame(skin->texnum, false, 0.33);
+	
+	if (modtypes[currentmodel->type].decal)
+	{
+		qglPolygonOffset (0.0, 0.0);
+		qglDisable (GL_POLYGON_OFFSET_FILL);
+		qglDepthMask (true);
+		if (gl_showdecals->integer > 1)
+		{
+			qglEnable (GL_TEXTURE_2D);
+			qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+		}
+	}
 
 	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );

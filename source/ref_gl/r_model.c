@@ -234,11 +234,14 @@ int compare_entity (void const *_a, void const *_b)
 static void R_ParseTerrainEntities (void)
 {
 	static const char *classnames[] = {"misc_terrainmodel"};
+	static const char *decal_classnames[] = {"misc_decal"};
 	
 	num_terrain_entities = 0;
 	num_rock_entities = 0;
+	num_decal_entities = 0;
 	CM_FilterParseEntities ("classname", 1, classnames, R_ParseTerrainModelEntity);
 	qsort (rock_entities, num_rock_entities, sizeof(rock_entities[0]), compare_entity);
+	CM_FilterParseEntities ("classname", 1, decal_classnames, R_ParseDecalEntity);
 }
 
 static void R_ParseSunTarget (char *match, char *block)
@@ -462,7 +465,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	unsigned *buf;
 	int		i;
 	char shortname[MAX_QPATH], nameShortname[MAX_QPATH];
-	qboolean is_iqm = false, is_terrain = false;
+	qboolean is_iqm = false, is_terrain = false, is_decal = false;
 
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
@@ -491,7 +494,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 		if (!strcmp (shortname, nameShortname) )
 		{
-			if (mod->type == mod_md2 || mod->type == mod_iqm || mod->type == mod_terrain)
+			if (mod->type == mod_md2 || mod->type == mod_iqm || mod->type == mod_terrain || mod->type == mod_decal)
 			{
 				// Make sure models scripts are definately reloaded between maps
 				image_t *img;
@@ -552,6 +555,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		}
 		if (strstr (mod->name, ".terrain"))
 			is_terrain = true;
+		else if (strstr (mod->name, ".decal"))
+			is_decal = true;
 	}
 	else
 	{
@@ -575,6 +580,10 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	if (is_terrain)
 	{
 		Mod_LoadTerrainModel (mod, buf);
+	}
+	else if (is_decal)
+	{
+		Mod_LoadDecalModel (mod, buf);
 	}
 	else if (is_iqm)
 	{

@@ -330,7 +330,7 @@ typedef struct {
 
 } mragdoll_t;
 
-typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, num_modtypes} modtype_t;
+typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, mod_decal, num_modtypes} modtype_t;
 
 // This array is a look-up table for the traits of various mesh formats.
 static struct 
@@ -349,13 +349,18 @@ static struct
 	
 	// True if the vertex data is indexed. If so, an IBO is used.
 	qboolean indexed;
+	
+	// True if a polygon offset should be used to prevent z-fighting, as well
+	// as if blending should be used.
+	qboolean decal;
 } modtypes[num_modtypes] = 
 {
-	{false, false, false},	// mod_bad- this is ignored
-	{false, false, false},	// mod_brush- BSP brush models- this is ignored
-	{true, false, false},	// mod_md2- MD2 models
-	{false, true, true},	// mod_iqm- IQM models
-	{false, false, true},	// mod_terrain- heightmap meshes
+	{false, false, false, false},	// mod_bad- this is ignored
+	{false, false, false, false},	// mod_brush- BSP brush models- this is ignored
+	{true, false, false, false},	// mod_md2- MD2 models
+	{false, true, true, false},		// mod_iqm- IQM models
+	{false, false, true, false},	// mod_terrain- heightmap meshes
+	{false, false, true, true},		// mod_decal- terrain decals
 	// New model types go here
 };
 

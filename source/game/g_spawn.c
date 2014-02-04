@@ -131,6 +131,7 @@ spawn_t	spawns[] = {
 	
 	//Game code ignores these
 	{"misc_terrainmodel", SP_info_null},
+	{"misc_decal", SP_info_null},
 	
 	{NULL, NULL}
 };
