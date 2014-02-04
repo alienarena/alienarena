@@ -528,6 +528,7 @@ static void R_DrawEntity (void)
 	    case mod_md2:
 	    case mod_iqm:
 	    case mod_terrain:
+	    case mod_decal:
 	        R_Mesh_Draw ();
 			break;
 		case mod_brush:
@@ -604,6 +605,7 @@ void R_DrawTerrain (void)
 		return;
 	
 	R_DrawEntityList (terrain_entities, num_terrain_entities);
+	R_DrawEntityList (decal_entities, num_decal_entities);
 	R_DrawEntityList (rock_entities, num_rock_entities);
 }
 
@@ -948,6 +950,46 @@ void R_SetupFog (float distance_boost)
 	}
 }
 
+static void R_DrawEntityBBox (entity_t *e)
+{
+	vec3_t	minmaxs[2];
+	int		side;
+	int		square[4][3] = 
+		{{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}};
+
+	qglDisable (GL_TEXTURE_2D);
+	qglColor4f (1, 0, 0, 1);
+	qglLineWidth (5.0);
+
+	qglPushMatrix ();
+
+	R_RotateForEntity (e);
+
+	VectorCopy (e->model->mins, minmaxs[0]);
+	VectorCopy (e->model->maxs, minmaxs[1]);
+
+	for (side = 0; side < 6; side++)
+	{
+		int vertnum;
+		qglBegin (GL_LINE_LOOP);
+		for (vertnum = 0; vertnum < 4; vertnum++)
+		{
+			int axisnum;
+			vec3_t vert;
+			for (axisnum = 0; axisnum < 3; axisnum++)
+			{
+				int axis = (axisnum + (side >> 1)) % 3;
+				vert[axisnum] = minmaxs[square[vertnum][axis] != (side & 1)][axisnum];
+			}
+			qglVertex3fv (vert);
+		}
+		qglEnd ();
+	}
+	
+	qglPopMatrix ();
+	qglEnable (GL_TEXTURE_2D);
+}
+
 void R_RenderView (refdef_t *fd)
 {
 	vec3_t forward;
@@ -1059,6 +1101,15 @@ void R_RenderView (refdef_t *fd)
 	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
 	if (gl_showpolys->integer)
 		CM_TerrainDrawIntersecting (r_origin, forward, R_DrawTerrainTri);
+	
+	
+	if (gl_showdecals->integer)
+	{	
+		int i;
+		
+		for (i = 0; i < num_decal_entities; i++)
+			R_DrawEntityBBox (&decal_entities[i]);
+	}
 	if (r_tracetest->integer > 0)
 	{
 		int		i;
@@ -1230,6 +1281,9 @@ void R_Register( void )
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
 	r_tracetest = Cvar_Get("r_tracetest", "0", CVARDOC_INT); // BoxTrace performance test
+	
+	gl_showdecals = Cvar_Get("gl_showdecals", "0", CVARDOC_INT); //for testing things
+	Cvar_Describe (gl_showdecals, "Set this to 1 to show terrain decal bounding boxes. Set this to 2 to show terrain decals in wireframe.");
 	
 	// FIXME HACK copied over from the video menu code. These are initialized
 	// again elsewhere. TODO: work out any complications that may arise from

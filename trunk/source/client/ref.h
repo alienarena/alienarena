@@ -222,8 +222,8 @@ typedef struct {
 
 // Allocate room for entities sent by the server AND "fake" terrain entities
 // parsed directly out of the BSP on the client-side AND terrain rock/pebble
-// entities.
-cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS+MAX_MAP_MODELS+MAX_ROCKS];
+// entities AND decal entities.
+cl_entity_pers_t	cl_persistent_ents[MAX_EDICTS+2*MAX_MAP_MODELS+MAX_ROCKS];
 
 
 #define ENTITY_FLAGS  68
