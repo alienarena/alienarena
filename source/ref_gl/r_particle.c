@@ -1055,11 +1055,11 @@ void R_DrawVegetationSurface ( void )
 			visible = CM_inPVS_leafs (r_origin_leafnum, grass->leafnum);
 			// TODO: Replace CM_BoxTrace with CM_FastTrace as soon as I write
 			// that function.
-/*			if (visible)*/
-/*			{*/
-/*				r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);*/
-/*				visible = r_trace.fraction == 1.0;*/
-/*			}*/
+			if (visible)
+			{
+				trace_t r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+				visible = r_trace.fraction == 1.0;
+			}
 		}
 		
 		if(visible)
