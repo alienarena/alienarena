@@ -207,10 +207,10 @@ am__alienarena_SOURCES_DIST = client/anorms.h client/cl_ents.c \
 	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
 	qcommon/qfiles.h qcommon/binheap.c qcommon/binheap.h \
 	qcommon/image.c qcommon/libgarland.c qcommon/libgarland.h \
-	qcommon/terrain.c ref_gl/r_terrain.c ref_gl/glext.h \
-	ref_gl/glfuncs.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_draw.c \
-	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
-	ref_gl/r_iqm.c ref_gl/r_md2.c ref_gl/r_light.c \
+	qcommon/terrain.c ref_gl/r_terrain.c ref_gl/r_decals.c \
+	ref_gl/glext.h ref_gl/glfuncs.h ref_gl/qgl.h ref_gl/r_bloom.c \
+	ref_gl/r_draw.c ref_gl/r_image.c ref_gl/r_image.h \
+	ref_gl/r_iqm.h ref_gl/r_iqm.c ref_gl/r_md2.c ref_gl/r_light.c \
 	ref_gl/r_local.h ref_gl/r_lodcalc.h ref_gl/r_main.c \
 	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
 	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
@@ -286,6 +286,7 @@ am_alienarena_OBJECTS = client/alienarena-cl_ents.$(OBJEXT) \
 	qcommon/alienarena-libgarland.$(OBJEXT) \
 	qcommon/alienarena-terrain.$(OBJEXT) \
 	ref_gl/alienarena-r_terrain.$(OBJEXT) \
+	ref_gl/alienarena-r_decals.$(OBJEXT) \
 	ref_gl/alienarena-r_bloom.$(OBJEXT) \
 	ref_gl/alienarena-r_draw.$(OBJEXT) \
 	ref_gl/alienarena-r_image.$(OBJEXT) \
@@ -577,10 +578,10 @@ alienarena_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
 	qcommon/qfiles.h qcommon/binheap.c qcommon/binheap.h \
 	qcommon/image.c qcommon/libgarland.c qcommon/libgarland.h \
-	qcommon/terrain.c ref_gl/r_terrain.c ref_gl/glext.h \
-	ref_gl/glfuncs.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_draw.c \
-	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
-	ref_gl/r_iqm.c ref_gl/r_md2.c ref_gl/r_light.c \
+	qcommon/terrain.c ref_gl/r_terrain.c ref_gl/r_decals.c \
+	ref_gl/glext.h ref_gl/glfuncs.h ref_gl/qgl.h ref_gl/r_bloom.c \
+	ref_gl/r_draw.c ref_gl/r_image.c ref_gl/r_image.h \
+	ref_gl/r_iqm.h ref_gl/r_iqm.c ref_gl/r_md2.c ref_gl/r_light.c \
 	ref_gl/r_local.h ref_gl/r_lodcalc.h ref_gl/r_main.c \
 	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
 	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
@@ -955,6 +956,8 @@ ref_gl/$(DEPDIR)/$(am__dirstamp):
 	@: > ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/alienarena-r_terrain.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/alienarena-r_decals.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/alienarena-r_bloom.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/alienarena-r_draw.$(OBJEXT): ref_gl/$(am__dirstamp) \
@@ -1253,6 +1256,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-pmove.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena_ded-terrain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_bloom.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_decals.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/alienarena-r_iqm.Po@am__quote@
@@ -1864,6 +1868,20 @@ ref_gl/alienarena-r_terrain.obj: ref_gl/r_terrain.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ref_gl/r_terrain.c' object='ref_gl/alienarena-r_terrain.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/alienarena-r_terrain.obj `if test -f 'ref_gl/r_terrain.c'; then $(CYGPATH_W) 'ref_gl/r_terrain.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_terrain.c'; fi`
+
+ref_gl/alienarena-r_decals.o: ref_gl/r_decals.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/alienarena-r_decals.o -MD -MP -MF ref_gl/$(DEPDIR)/alienarena-r_decals.Tpo -c -o ref_gl/alienarena-r_decals.o `test -f 'ref_gl/r_decals.c' || echo '$(srcdir)/'`ref_gl/r_decals.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/alienarena-r_decals.Tpo ref_gl/$(DEPDIR)/alienarena-r_decals.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ref_gl/r_decals.c' object='ref_gl/alienarena-r_decals.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/alienarena-r_decals.o `test -f 'ref_gl/r_decals.c' || echo '$(srcdir)/'`ref_gl/r_decals.c
+
+ref_gl/alienarena-r_decals.obj: ref_gl/r_decals.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/alienarena-r_decals.obj -MD -MP -MF ref_gl/$(DEPDIR)/alienarena-r_decals.Tpo -c -o ref_gl/alienarena-r_decals.obj `if test -f 'ref_gl/r_decals.c'; then $(CYGPATH_W) 'ref_gl/r_decals.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_decals.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/alienarena-r_decals.Tpo ref_gl/$(DEPDIR)/alienarena-r_decals.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ref_gl/r_decals.c' object='ref_gl/alienarena-r_decals.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/alienarena-r_decals.obj `if test -f 'ref_gl/r_decals.c'; then $(CYGPATH_W) 'ref_gl/r_decals.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_decals.c'; fi`
 
 ref_gl/alienarena-r_bloom.o: ref_gl/r_bloom.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(alienarena_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/alienarena-r_bloom.o -MD -MP -MF ref_gl/$(DEPDIR)/alienarena-r_bloom.Tpo -c -o ref_gl/alienarena-r_bloom.o `test -f 'ref_gl/r_bloom.c' || echo '$(srcdir)/'`ref_gl/r_bloom.c

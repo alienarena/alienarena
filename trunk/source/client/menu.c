@@ -48,6 +48,57 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
+/* ---- GAME MODES ---- */
+
+enum Game_mode
+{
+	mode_dm   = 0, 
+	mode_ctf  = 1, // team
+	mode_tac  = 2, // special team
+	mode_aoa  = 3,
+	mode_db   = 4, // team
+	mode_tca  = 5, // team
+	mode_cp   = 6, // team
+	mode_duel = 7,
+};
+
+static const char *game_mode_names[] =
+{
+#ifndef TACTICAL
+	"deathmatch",
+	"ctf",
+	"tactical",
+	"all out assault",
+	"deathball",
+	"team core assault",
+	"cattle prod",
+	"duel"
+#else
+	"tactical"
+#endif
+};
+// #define num_game_modes (static_array_size(game_mode_names)-1)
+
+//same order as game_mode_names
+static const char *map_prefixes[][3] =
+{
+#ifndef TACTICAL
+	{"dm",  "tourney", NULL}, 
+	{"ctf", NULL,      NULL}, // 1
+	{"tac", NULL,      NULL}, // 2
+	{"aoa", NULL,      NULL}, // 3
+	{"db",  NULL,      NULL}, // 4
+	{"tca", NULL,      NULL}, // 5
+	{"cp",  NULL,      NULL}, // 6
+	{"dm",  "tourney", NULL}  // 7
+#else
+	{"tac", NULL,      NULL}  // 2
+#endif
+};
+
+/*--------*/
+
+
 static int	m_main_cursor;
 
 extern int CL_GetPingStartTime(netadr_t adr);
@@ -101,6 +152,11 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 
 static size_t szr; // just for unused result warnings
 
+inline qboolean is_team_game( float rule_value )
+{
+	int rv = (int)rule_value;
+	return ( rv == mode_ctf || rv == mode_db || rv == mode_tca || rv ==	mode_cp );
+}
 
 // common callbacks
 
@@ -368,7 +424,7 @@ int M_Interp (int progress, int target)
 		// The animation speeds up as it gets further from the starting point
 		// and slows down twice as fast as it approaches the ending point.
 		increment = min(	abs((11*target)/10-progress)/2,
-							abs(progress) )*40;
+							abs(progress) ) * 40;
 		
 		// Clamp the animation speed at a minimum so it won't freeze due to
 		// rounding errors or take too long at either end.
@@ -386,7 +442,7 @@ int M_Interp (int progress, int target)
 		else
 			return progress; // no movement, better luck next time.
 	}
-	
+
 	if (target > 0)
 	{
 		// increasing
@@ -399,7 +455,7 @@ int M_Interp (int progress, int target)
 		progress -= increment;
 		progress = max (progress, target); // make sure we don't overshoot
 	}
-	
+
 	return progress;
 }
 
@@ -3512,7 +3568,6 @@ void ModList_SubmenuInit (void)
 	s_servers[serverindex].modlist_submenu.generic.type = MTYPE_SUBMENU;
 	s_servers[serverindex].modlist_submenu.navagable = true;
 	s_servers[serverindex].modlist_submenu.nitems = 0;
-	
 	for ( i = 0; i < MAX_SERVER_MODS; i++ )
 	{
 		s_servers[serverindex].modlist[i].generic.type	= MTYPE_ACTION;
@@ -4581,7 +4636,9 @@ void AddbotFunc(void *self)
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
 
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
+
+	if( is_team_game( s_rules_box.curvalue ))
+
 	{ // team game
 		FS_FullWritePath( bot_filename, sizeof(bot_filename), BOT_GAMEDATA"/team.tmp" );
 	}
@@ -4814,41 +4871,6 @@ void MapInfoFunc( void *self ) {
 
 }
 
-static const char *game_mode_names[] =
-{
-#ifndef TACTICAL
-	"deathmatch",
-	"ctf",
-#endif
-	"tactical",
-#ifndef TACTICAL
-	"all out assault",
-	"deathball",
-	"team core assault",
-	"cattle prod",
-	"duel",
-#endif
-	NULL
-};
-#define num_game_modes (static_array_size(game_mode_names)-1)
-
-//same order as game_mode_names
-static const char *map_prefixes[num_game_modes][3] =
-{
-#ifndef TACTICAL
-	{"dm", "tourney", NULL},
-	{"ctf", NULL},
-	{"tac", NULL},
-	{"aoa", NULL},
-	{"db", NULL},
-	{"tca", NULL},
-	{"cp", NULL},
-	{"dm", "tourney", NULL}
-#else
-	{"tac", NULL}
-#endif
-};
-
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 {
 	char *buffer;
@@ -4864,7 +4886,6 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	int nmaps = 0;
 	int totalmaps;
 	char **mapfiles;
-	// char *path = NULL; // unused
 	static char **bspnames;
 	int		j, l;
 
@@ -5036,6 +5057,7 @@ void StartServerActionFunc( void *self )
 	int		timelimit;
 	int		fraglimit;
 	int		maxclients;
+	int  cvflags;
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 
@@ -5067,39 +5089,48 @@ void StartServerActionFunc( void *self )
 
 	// The deathmatch cvar doesn't specifically indicate a pure frag-to-win
 	// game mode. It's actually the "enable multiplayer" cvar.
-	// TODO: Does Alien Arena even work with deathmatch set to 0? Might be
-	// able to remove it from the game.
-	Cvar_SetValue ("deathmatch", 1 );
-	Cvar_SetValue ("ctf", 0);
+	// It protects from running vestigial Quake non-multiplayer code.
+	Cvar_SetValue( "deathmatch", 1 );
+
+	cvflags =  CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL;
+	Cvar_FullSet( "ctf",    "0", cvflags );
+	Cvar_FullSet( "tac",    "0", cvflags );
+	Cvar_FullSet( "aoa",    "0", cvflags );
+	Cvar_FullSet( "tca",    "0", cvflags );
+	Cvar_FullSet( "db",     "0", cvflags );
+	Cvar_FullSet( "cp",     "0", cvflags );
+	Cvar_FullSet( "g_duel", "0", cvflags );
 #ifdef TACTICAL
-	Cvar_SetValue ("g_tactical", 1);
+	Cvar_SetValue( "gamerules", (float)mode_tac );
 #else
-	Cvar_SetValue ("g_tactical", 0);
+	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
 #endif
-	Cvar_SetValue ("tca", 0);
-	Cvar_SetValue ("cp", 0);
-	Cvar_SetValue ("g_duel", 0);
-	Cvar_SetValue ("gamerules", s_rules_box.curvalue );
-	
+
 	switch (s_rules_box.curvalue)
 	{
-		case 1:
-			Cvar_SetValue ("ctf", 1 );
-			break;
-		case 2:
-			Cvar_SetValue ("g_tactical", 1);
-			break;
-		case 4:
-			Cvar_SetValue ("tca", 1);
-			break;
-		case 5:
-			Cvar_SetValue ("cp", 1);
-			break;
-		case 6:
-			Cvar_SetValue ("g_duel", 1);
-			break;
-		default:
-			break;
+	case mode_ctf:
+		Cvar_ForceSet( "ctf", "1" );
+		break;
+	case mode_tac:
+		Cvar_ForceSet( "g_tactical", "1" );
+		break;
+	case mode_aoa:
+		Cvar_ForceSet( "aoa", "1" );
+		break;
+	case mode_tca:
+		Cvar_ForceSet( "tca", "1" );
+		break;
+	case mode_db:
+		Cvar_ForceSet( "db", "1" );
+		break;
+	case mode_cp:
+		Cvar_ForceSet( "cp", "1" );
+		break;
+	case mode_duel:
+		Cvar_ForceSet( "g_duel", "1" );
+		break;
+	default:
+		break;
 	}
 
 	Cbuf_AddText (va("startmap %s\n", startmap));
@@ -5263,8 +5294,8 @@ void Read_Bot_Info()
 	char stem[MAX_QPATH];
 	char relative_path[MAX_QPATH];
 
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-	{ // team game
+	if ( is_team_game( s_rules_box.curvalue ) )
+	{
 		strcpy( stem, "team" );
 	}
 	else
@@ -5368,8 +5399,8 @@ void BotAction( void *self )
 	}
 
 	//write out bot file
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-	{ // team game
+	if ( is_team_game( s_rules_box.curvalue ) )
+	{
 		strcpy( stem, "team" );
 	}
 	else
@@ -5609,7 +5640,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	
 	refdef.num_entities = 2;
 
-	//if a helmet or other special device
+	//if a helmet or other special devce
 	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", self->name );
 	FS_FOpenFile( scratch, &modelfile );
 	if ( modelfile )
