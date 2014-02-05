@@ -149,16 +149,12 @@ typedef struct
 	
 	// For grouping triangles into grids
 #define TERRAIN_GRIDSIZE 250
-#define NUMGRID_AXIS(terrainmod,axis) \
-	((int)ceil((terrainmod->maxs[axis] - terrainmod->mins[axis]) / TERRAIN_GRIDSIZE + 0.1))
-#define NUMGRID_X(terrainmod) NUMGRID_AXIS(terrainmod,0)
-#define NUMGRID_Y(terrainmod) NUMGRID_AXIS(terrainmod,1)
-#define NUMGRID_Z(terrainmod) NUMGRID_AXIS(terrainmod,2)
-#define NUMGRID(terrainmod) (NUMGRID_X(terrainmod) * NUMGRID_Y(terrainmod) * NUMGRID_Z(terrainmod))
+#define NUMGRID(terrainmod) (terrainmod->numgrid[0] * terrainmod->numgrid[1] * terrainmod->numgrid[2])
 #define GRIDNUM(terrainmod,coord) \
-	(((int)floor(coord[2]-terrainmod->mins[2]) / TERRAIN_GRIDSIZE) * NUMGRID_X(terrainmod)*NUMGRID_Y(terrainmod) \
-	(int)floor((coord[1]-terrainmod->mins[1]) / TERRAIN_GRIDSIZE) * NUMGRID_X(terrainmod) + \
+	(((int)floor(coord[2]-terrainmod->mins[2]) / TERRAIN_GRIDSIZE) * terrainmod->numgrid[0]*terrainmod->numgrid[1] \
+	(int)floor((coord[1]-terrainmod->mins[1]) / TERRAIN_GRIDSIZE) * terrainmod->numgrid[0] + \
 	(int)floor((coord[0]-terrainmod->mins[0]) / TERRAIN_GRIDSIZE))
+	int numgrid[3]; // how many grid planes there are on each axis.
 	cterraingrid_t	*grids;
 } cterrainmodel_t;
 
@@ -1002,17 +998,20 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	if (data.num_triangles != mod->numtriangles)
 		Com_Printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
 	
+	for (i = 0; i < 3; i++)
+		mod->numgrid[i] = ceil((mod->maxs[i] - mod->mins[i]) / TERRAIN_GRIDSIZE + 0.1);
+	
 	mod->grids = Z_Malloc (NUMGRID(mod) * sizeof(cterraingrid_t));
 	tmp = Z_Malloc (mod->numtriangles * sizeof(cterraintri_t *));
-	for (i = 0; i < NUMGRID_Y(mod); i++)
+	for (i = 0; i < mod->numgrid[1]; i++)
 	{
-		for (j = 0; j < NUMGRID_X(mod); j++)
+		for (j = 0; j < mod->numgrid[0]; j++)
 		{
-			for (l = 0; l < NUMGRID_Z(mod); l++)
+			for (l = 0; l < mod->numgrid[2]; l++)
 			{
 				vec3_t tmpmaxs, tmpmins;
 				
-				cterraingrid_t *grid = &mod->grids[l*NUMGRID_X(mod)*NUMGRID_Y(mod)+i*NUMGRID_X(mod)+j];
+				cterraingrid_t *grid = &mod->grids[l*mod->numgrid[0]*mod->numgrid[1]+i*mod->numgrid[0]+j];
 				grid->numtris = 0;
 				
 				grid->mins[0] = mod->mins[0] + j*TERRAIN_GRIDSIZE;
@@ -2177,14 +2176,14 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 		if (!mod->active)
 			continue;
 		
-		for (x = 0; x < NUMGRID_X(mod); x++)
+		for (x = 0; x < mod->numgrid[0]; x++)
 		{
-			for (y = 0; y < NUMGRID_Y(mod); y++)
+			for (y = 0; y < mod->numgrid[1]; y++)
 			{
-				for (z = 0; z < NUMGRID_Z(mod); z++)
+				for (z = 0; z < mod->numgrid[2]; z++)
 				{
 					float tmp;
-					cterraingrid_t *grid = &mod->grids[z*NUMGRID_X(mod)*NUMGRID_Y(mod)+y*NUMGRID_X(mod)+x];
+					cterraingrid_t *grid = &mod->grids[z*mod->numgrid[0]*mod->numgrid[1]+y*mod->numgrid[0]+x];
 					
 					if (!RayIntersectsBBox (start, dir, grid->mins, grid->maxs, &tmp))
 						continue;
@@ -2270,8 +2269,8 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 				mingrid[k] = 0;
 			
 			maxgrid[k] = (int)ceil((maxcoord-mod->mins[k]) / TERRAIN_GRIDSIZE + 0.1);
-			if (maxgrid[k] > NUMGRID_AXIS(mod,k))
-				maxgrid[k] = NUMGRID_AXIS(mod,k);
+			if (maxgrid[k] > mod->numgrid[k])
+				maxgrid[k] = mod->numgrid[k];
 			
 			if (dir[k] < 0.0)
 			{
@@ -2295,7 +2294,7 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 					float tmp;
 					cterraingrid_t *grid;
 					
-					grid = &mod->grids[z*NUMGRID_X(mod)*NUMGRID_Y(mod)+y*NUMGRID_X(mod)+x];
+					grid = &mod->grids[z*mod->numgrid[0]*mod->numgrid[1]+y*mod->numgrid[0]+x];
 					
 					if (grid->numtris == 0)
 						continue;
