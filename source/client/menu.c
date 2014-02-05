@@ -72,15 +72,16 @@ static const char *game_mode_names[] =
 	"deathball",
 	"team core assault",
 	"cattle prod",
-	"duel"
+	"duel",
 #else
-	"tactical"
+	"tactical",
 #endif
+	NULL
 };
-// #define num_game_modes (static_array_size(game_mode_names)-1)
+#define num_game_modes (static_array_size(game_mode_names)-1)
 
 //same order as game_mode_names
-static const char *map_prefixes[][3] =
+static const char *map_prefixes[num_game_modes][3] =
 {
 #ifndef TACTICAL
 	{"dm",  "tourney", NULL}, 
