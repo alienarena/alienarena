@@ -97,7 +97,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = alienarena-ded$(EXEEXT) $(am__EXEEXT_1)
-@BUILD_CLIENT_TRUE@am__append_1 = alienarena  aa_tactical_demo
+@BUILD_CLIENT_TRUE@am__append_1 = alienarena  aa-tactical-demo
 subdir = source
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/depcomp
@@ -144,7 +144,7 @@ am_libgame_a_OBJECTS = game/acesrc/acebot_ai.$(OBJEXT) \
 	game/q_shared.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 @BUILD_CLIENT_TRUE@am__EXEEXT_1 = alienarena$(EXEEXT) \
-@BUILD_CLIENT_TRUE@	aa_tactical_demo$(EXEEXT)
+@BUILD_CLIENT_TRUE@	aa-tactical-demo$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = client/aa_tactical_demo-cl_ents.$(OBJEXT) \
@@ -1158,8 +1158,8 @@ unix/aa_tactical_demo-sys_unix.$(OBJEXT): unix/$(am__dirstamp) \
 unix/aa_tactical_demo-vid_so.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
 
-aa_tactical_demo$(EXEEXT): $(aa_tactical_demo_OBJECTS) $(aa_tactical_demo_DEPENDENCIES) $(EXTRA_aa_tactical_demo_DEPENDENCIES) 
-	@rm -f aa_tactical_demo$(EXEEXT)
+aa-tactical-demo$(EXEEXT): $(aa_tactical_demo_OBJECTS) $(aa_tactical_demo_DEPENDENCIES) $(EXTRA_aa_tactical_demo_DEPENDENCIES) 
+	@rm -f aa-tactical-demo$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(aa_tactical_demo_OBJECTS) $(aa_tactical_demo_LDADD) $(LIBS)
 client/alienarena-cl_ents.$(OBJEXT): client/$(am__dirstamp) \
 	client/$(DEPDIR)/$(am__dirstamp)

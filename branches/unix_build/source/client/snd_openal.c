@@ -1463,7 +1463,6 @@ ALCdevice *calSelectDevice( void )
 	ALCdevice *pDevice2 = NULL;
 	ALCchar *pDeviceName;
 	ALCint alc_mono_sources;
-	ALenum result;
 	int len;
 	int pos;
 
@@ -1513,7 +1512,7 @@ ALCdevice *calSelectDevice( void )
 		pDevice = qalcOpenDevice(NULL);
 		if( pDevice != NULL )
 		{ // handle Windows XP "Generic Hardware" case
-			result = calErrorCheckALC( pDevice,  __LINE__ );
+			(void)calErrorCheckALC( pDevice,  __LINE__ );
 			pDeviceName = (ALCchar*)qalcGetString( pDevice, ALC_DEVICE_SPECIFIER );
 			if( !Q_strcasecmp( (char*)pDeviceName, "Generic Hardware") )
 			{

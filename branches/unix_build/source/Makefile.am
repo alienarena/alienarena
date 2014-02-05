@@ -65,7 +65,7 @@ aa_tactical_demo_LDADD = libgame.a \
 # On Unix, always build the server, and the client if BUILD_CLIENT is enabled
 bin_PROGRAMS = alienarena-ded
 if BUILD_CLIENT
-bin_PROGRAMS += alienarena  aa_tactical_demo
+bin_PROGRAMS += alienarena  aa-tactical-demo
 endif
 
 

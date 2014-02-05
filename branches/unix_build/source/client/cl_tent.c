@@ -110,7 +110,6 @@ void CL_ParseSteam (void)
 	vec3_t	pos, dir;
 	int		i;
 	int		r;
-	int		cnt;
 	cl_sustain_t	*s, *free_sustain;
 
 	free_sustain = NULL;
@@ -160,15 +159,22 @@ void CL_ParseSteam (void)
 	else
 	{
 		// read the stuff anyway
-		cnt = MSG_ReadByte (&net_message);
+		(void)MSG_ReadByte (&net_message);
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		r = MSG_ReadByte (&net_message);
+		(void)MSG_ReadByte (&net_message);
 	}
 }
 
+
 void CL_ParseFire (void)
 {
+#if 1
+	/* unlikely this is used, 
+	   so kill a source of compiler warning messages */
+	return;
+#else
+
 	vec3_t	pos, dir;
 	int		id, i;
 	int		r;
@@ -176,9 +182,11 @@ void CL_ParseFire (void)
 	int		magnitude;
 	cl_sustain_t	*s, *free_sustain;
 
+// *** This makes no sense *** 
+
 //	id = MSG_ReadShort (&net_message);		// an id of -1 is an instant effect
 	id = 25;
-	if (id != -1) // sustains
+	if (id != -1) // sustains    *** 25 != -1 for sure  ***
 	{
 //			Com_Printf ("Sustain effect id %d\n", id);
 		free_sustain = NULL;
@@ -209,25 +217,31 @@ void CL_ParseFire (void)
 		{
 //				Com_Printf ("No free sustains!\n");
 			// FIXME - read the stuff anyway
-			cnt = MSG_ReadByte (&net_message);
+			(void) MSG_ReadByte (&net_message);
 			MSG_ReadPos (&net_message, pos);
 			MSG_ReadDir (&net_message, dir);
-			r = MSG_ReadByte (&net_message);
-			magnitude = MSG_ReadShort (&net_message);
-			magnitude = MSG_ReadLong (&net_message); // really interval
+			(void)MSG_ReadByte (&net_message);
+			(void)MSG_ReadShort (&net_message);
+			(void)MSG_ReadLong (&net_message); // really interval
 		}
 	}
-
+#endif
 }
 
 void CL_ParseSmoke (void)
 {
-	vec3_t	pos, dir;
+#if 1
+	/* unlikely this is used, 
+	   so kill a source of compiler warnings */
+#else
+ 	vec3_t	pos, dir;
 	int		id, i;
 	int		r;
 	int		cnt;
 	int		magnitude;
 	cl_sustain_t	*s, *free_sustain;
+
+/*** This also makes no sense (see above) ***/
 
 //	id = MSG_ReadShort (&net_message);		// an id of -1 is an instant effect
 	id = 25;
@@ -269,7 +283,7 @@ void CL_ParseSmoke (void)
 			magnitude = MSG_ReadLong (&net_message); // really interval
 		}
 	}
-
+#endif
 }
 
 //ROGUE
@@ -479,10 +493,10 @@ void CL_ParseTEnt (void)
 	case TE_STEAM:
 		CL_ParseSteam();
 		break;
-	case TE_FIRE:
+	case TE_FIRE:  // not currently used? see g_target::use_target_fire
 		CL_ParseFire();
 		break;
-	case TE_SMOKE:
+	case TE_SMOKE: // not currently used (see TE_CHAINGUNSMOKE)
 		CL_ParseSmoke();
 		break;
 

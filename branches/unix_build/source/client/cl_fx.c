@@ -725,7 +725,6 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	float		inc, scale, nudge;
 	particle_t	*p;
 	particle_t	*pr;
-	particle_t	*center;
 
 	for( i=0; i<3; i++) {
 		nudge = frand();
@@ -756,7 +755,6 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	p->alpha = .5;
 
 	p->alphavel = -1.0 / (3 + frand()*0.3);
-	center = p;
 
 	//shoot off sparks
 
@@ -812,7 +810,7 @@ CL_SplashEffect
 void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
-	float		scale, nudge;
+	float		nudge;
 	particle_t	*p;
 	vec3_t		angle;
 
@@ -854,7 +852,6 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 		}
 
 		VectorNormalize(dir);
-		scale = frand();
 
 		//shoot off small plume of water
 		i = 0;
@@ -2146,14 +2143,11 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 {
 	vec3_t		move;
 	vec3_t		vec;
-	float		len;
 	int			j;
 	particle_t	*p;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-
 	VectorScale (vec, 5, vec);
 
 	if (!(p = new_particle()))
@@ -2491,7 +2485,7 @@ Particle Beams
 void CL_DisruptorBeam (vec3_t start, vec3_t end)
 {
 	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
+	vec3_t		vec, last;
 	float		len, color;
 	vec3_t		right, up;
 	particle_t	*p;
@@ -2502,10 +2496,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
 	MakeNormalVectors (vec, right, up);
-	VectorCopy (vec, vec2);
 	VectorScale (vec, RAILTRAILSPACE, vec);
 	VectorCopy (start, move);
 
@@ -2550,7 +2541,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 {
 
 	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
+	vec3_t		vec, last, vec2;
 	float		len;
 	vec3_t		right, up;
 	particle_t	*p, *pr;
@@ -2558,8 +2549,6 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
 	VectorScale (vec, RAILTRAILSPACE, vec);
@@ -2665,21 +2654,16 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 {
 
 	vec3_t		move;
-	vec3_t		vec, point, vec2;
-	float		len;
+	vec3_t		vec, vec2;
 	vec3_t		right, up;
 	particle_t	*p, *pr;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
 	VectorScale (vec, LASERTRAILSPACE, vec);
 	VectorCopy (start, move);
-
 
 	//puff of blue gas
 	VectorScale (vec2, -LASERTRAILSPACE/2, vec2);
@@ -2755,7 +2739,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 void CL_VaporizerBeam (vec3_t start, vec3_t end)
 {
 	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
+	vec3_t		vec, last, vec2;
 	float		len;
 	vec3_t		right, up;
 	particle_t	*p;
@@ -2763,8 +2747,6 @@ void CL_VaporizerBeam (vec3_t start, vec3_t end)
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
 	VectorScale (vec, VAPORIZORTRAILSPACE, vec);
@@ -2942,7 +2924,7 @@ void CL_RedBlasterBeam (vec3_t start, vec3_t end)
 {
 
 	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
+	vec3_t		vec, last, vec2;
 	float		len;
 	vec3_t		right, up;
 	particle_t	*p;
@@ -2951,8 +2933,6 @@ void CL_RedBlasterBeam (vec3_t start, vec3_t end)
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
 	VectorScale (vec, LASERTRAILSPACE, vec);
@@ -3139,7 +3119,6 @@ CL_TeleportParticles
 */
 void CL_TeleportParticles (vec3_t orig_start)
 {
-	vec3_t		move;
 	vec3_t		vec;
 	vec3_t		start;
 	vec3_t		end;
@@ -3205,7 +3184,6 @@ void CL_TeleportParticles (vec3_t orig_start)
 		p->accel[j] = 0;
 	}
 
-	VectorCopy (start, move);
 	VectorCopy (start, end);
 	end[2] += 32;
 	start[2] -= 48;
@@ -3484,7 +3462,7 @@ void CL_PoweredEffects (vec3_t origin)
 	int			i;
 	particle_t	*p;
 	float		angle;
-	float		sr, sp, sy, cr, cp, cy;
+	float		sp, sy, cp, cy;
 	vec3_t		forward;
 	float		dist = 64;
 	float		ltime;
@@ -3505,8 +3483,6 @@ void CL_PoweredEffects (vec3_t origin)
 		sp = sin(angle);
 		cp = cos(angle);
 		angle = ltime * avelocities[i][2];
-		sr = sin(angle);
-		cr = cos(angle);
 
 		forward[0] = cp*cy;
 		forward[1] = cp*sy;

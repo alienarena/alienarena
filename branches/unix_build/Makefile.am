@@ -45,7 +45,7 @@ endif
 # ARENA Default configuration for client and server
 #
 arenadir=$(pkgdatadir)/arena
-nobase_dist_arena_DATA = \
+dist_arena_DATA = \
 	arena/motd.txt \
 	arena/server.cfg \
 	arena/default.cfg \
@@ -55,7 +55,7 @@ nobase_dist_arena_DATA = \
 # TACTICAL-DEMO Default configuration for client and server
 #
 tacticaldir=$(pkgdatadir)/tactical
-nobase_dist_tactical_DATA = \
+dist_tactical_DATA = \
 	tactical/motd.txt \
 	tactical/server.cfg \
 	tactical/default.cfg \

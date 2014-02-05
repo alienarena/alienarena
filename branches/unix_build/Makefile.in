@@ -98,9 +98,9 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(top_srcdir)/config/config.h.in $(am__dist_unixdoc_DATA_DIST) \
-	$(am__dist_unixicons_DATA_DIST) $(nobase_dist_arena_DATA) \
-	$(nobase_dist_tactical_DATA) config/compile \
+	$(top_srcdir)/config/config.h.in $(dist_arena_DATA) \
+	$(dist_tactical_DATA) $(am__dist_unixdoc_DATA_DIST) \
+	$(am__dist_unixicons_DATA_DIST) config/compile \
 	config/config.guess config/config.sub config/depcomp \
 	config/install-sh config/missing $(top_srcdir)/config/compile \
 	$(top_srcdir)/config/config.guess \
@@ -144,8 +144,6 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__dist_unixdoc_DATA_DIST = unix_dist/README unix_dist/COPYING \
-	unix_dist/INSTALL unix_dist/GPL2
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -173,13 +171,14 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(unixdocdir)" \
-	"$(DESTDIR)$(unixiconsdir)" "$(DESTDIR)$(arenadir)" \
-	"$(DESTDIR)$(tacticaldir)"
+am__installdirs = "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" \
+	"$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"
+am__dist_unixdoc_DATA_DIST = unix_dist/README unix_dist/COPYING \
+	unix_dist/INSTALL unix_dist/GPL2
 am__dist_unixicons_DATA_DIST = unix_dist/alienarena.png \
 	unix_dist/aa-tactical-demo.png
-DATA = $(dist_unixdoc_DATA) $(dist_unixicons_DATA) \
-	$(nobase_dist_arena_DATA) $(nobase_dist_tactical_DATA)
+DATA = $(dist_arena_DATA) $(dist_tactical_DATA) $(dist_unixdoc_DATA) \
+	$(dist_unixicons_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -398,7 +397,7 @@ ACLOCAL_AMFLAGS = -I m4
 # ARENA Default configuration for client and server
 #
 arenadir = $(pkgdatadir)/arena
-nobase_dist_arena_DATA = \
+dist_arena_DATA = \
 	arena/motd.txt \
 	arena/server.cfg \
 	arena/default.cfg \
@@ -409,7 +408,7 @@ nobase_dist_arena_DATA = \
 # TACTICAL-DEMO Default configuration for client and server
 #
 tacticaldir = $(pkgdatadir)/tactical
-nobase_dist_tactical_DATA = \
+dist_tactical_DATA = \
 	tactical/motd.txt \
 	tactical/server.cfg \
 	tactical/default.cfg \
@@ -467,6 +466,48 @@ $(top_srcdir)/config/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config/config.h config/stamp-h1
+install-dist_arenaDATA: $(dist_arena_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(arenadir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(arenadir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(arenadir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(arenadir)" || exit $$?; \
+	done
+
+uninstall-dist_arenaDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(arenadir)'; $(am__uninstall_files_from_dir)
+install-dist_tacticalDATA: $(dist_tactical_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(tacticaldir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(tacticaldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(tacticaldir)" || exit $$?; \
+	done
+
+uninstall-dist_tacticalDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(tacticaldir)'; $(am__uninstall_files_from_dir)
 install-dist_unixdocDATA: $(dist_unixdoc_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_unixdoc_DATA)'; test -n "$(unixdocdir)" || list=; \
@@ -509,54 +550,6 @@ uninstall-dist_unixiconsDATA:
 	@list='$(dist_unixicons_DATA)'; test -n "$(unixiconsdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(unixiconsdir)'; $(am__uninstall_files_from_dir)
-install-nobase_dist_arenaDATA: $(nobase_dist_arena_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(nobase_dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(arenadir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(arenadir)" || exit 1; \
-	fi; \
-	$(am__nobase_list) | while read dir files; do \
-	  xfiles=; for file in $$files; do \
-	    if test -f "$$file"; then xfiles="$$xfiles $$file"; \
-	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
-	  test -z "$$xfiles" || { \
-	    test "x$$dir" = x. || { \
-	      echo " $(MKDIR_P) '$(DESTDIR)$(arenadir)/$$dir'"; \
-	      $(MKDIR_P) "$(DESTDIR)$(arenadir)/$$dir"; }; \
-	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(arenadir)/$$dir'"; \
-	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(arenadir)/$$dir" || exit $$?; }; \
-	done
-
-uninstall-nobase_dist_arenaDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nobase_dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
-	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
-	dir='$(DESTDIR)$(arenadir)'; $(am__uninstall_files_from_dir)
-install-nobase_dist_tacticalDATA: $(nobase_dist_tactical_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(nobase_dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(tacticaldir)" || exit 1; \
-	fi; \
-	$(am__nobase_list) | while read dir files; do \
-	  xfiles=; for file in $$files; do \
-	    if test -f "$$file"; then xfiles="$$xfiles $$file"; \
-	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
-	  test -z "$$xfiles" || { \
-	    test "x$$dir" = x. || { \
-	      echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)/$$dir'"; \
-	      $(MKDIR_P) "$(DESTDIR)$(tacticaldir)/$$dir"; }; \
-	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(tacticaldir)/$$dir'"; \
-	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(tacticaldir)/$$dir" || exit $$?; }; \
-	done
-
-uninstall-nobase_dist_tacticalDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nobase_dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
-	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
-	dir='$(DESTDIR)$(tacticaldir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -853,7 +846,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)" "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)"; do \
+	for dir in "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" "$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -907,8 +900,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_unixdocDATA install-dist_unixiconsDATA \
-	install-nobase_dist_arenaDATA install-nobase_dist_tacticalDATA
+install-data-am: install-dist_arenaDATA install-dist_tacticalDATA \
+	install-dist_unixdocDATA install-dist_unixiconsDATA
 
 install-dvi: install-dvi-recursive
 
@@ -954,9 +947,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_unixdocDATA uninstall-dist_unixiconsDATA \
-	uninstall-nobase_dist_arenaDATA \
-	uninstall-nobase_dist_tacticalDATA
+uninstall-am: uninstall-dist_arenaDATA uninstall-dist_tacticalDATA \
+	uninstall-dist_unixdocDATA uninstall-dist_unixiconsDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -967,18 +959,18 @@ uninstall-am: uninstall-dist_unixdocDATA uninstall-dist_unixiconsDATA \
 	dist-zip distcheck distclean distclean-generic distclean-hdr \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dist_unixdocDATA \
+	install-data install-data-am install-dist_arenaDATA \
+	install-dist_tacticalDATA install-dist_unixdocDATA \
 	install-dist_unixiconsDATA install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
-	install-nobase_dist_arenaDATA install-nobase_dist_tacticalDATA \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-dist_unixdocDATA \
-	uninstall-dist_unixiconsDATA uninstall-nobase_dist_arenaDATA \
-	uninstall-nobase_dist_tacticalDATA
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-dist_arenaDATA \
+	uninstall-dist_tacticalDATA uninstall-dist_unixdocDATA \
+	uninstall-dist_unixiconsDATA
 
 
 # FUSE game server browser and Server management scripts

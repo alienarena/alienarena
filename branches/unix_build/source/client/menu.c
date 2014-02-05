@@ -426,7 +426,7 @@ int M_Interp (int progress, int target)
 
 		// The animation speeds up as it gets further from the starting point
 		// and slows down twice as fast as it approaches the ending point.
-		increment = MIN( abs((11*target)/10-progress)/2, abs(progress)*40 );
+		increment = MIN( abs((11*target)/10-progress)/2, abs(progress)) * 35;
 		
 		// Clamp the animation speed at a minimum so it won't freeze due to
 		// rounding errors or take too long at either end.
@@ -3061,10 +3061,6 @@ void (*option_open_funcs[OPTION_SCREENS])(void) =
 static menuframework_s	s_player_config_screen;
 
 static menuaction_s		s_option_screen_actions[OPTION_SCREENS];
-
-#if 0
-LINKABLE(int) option_screen_height;
-#endif
 
 static void OptionScreenFunc (void *_self)
 {

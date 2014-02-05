@@ -73,8 +73,14 @@ cvar_t *fs_gamedirvar;
 char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 int  fs_slots_used;
 
-const char* xdg_data_home_default = "/.local/share";  /* prefixed with $HOME */
-const char* xdg_data_dir_default  = "/usr/local/share:/usr/share";
+const char* xdg_data_home_default = ".local/share";
+
+#if 0
+/* technically, should use this for shared data
+ * but right now using -DCOR_DATADIR instead
+ */
+const char* xdg_data_dir_default = 	"/usr/local/share:/usr/share";
+#endif
 
 
 /* helper function */

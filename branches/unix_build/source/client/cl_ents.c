@@ -1348,7 +1348,6 @@ void CL_CalcViewValues (void)
 {
 	int			i;
 	float		lerp, backlerp;
-	centity_t	*ent;
 	frame_t		*oldframe;
 	player_state_t	*ps, *ops;
 
@@ -1366,7 +1365,6 @@ void CL_CalcViewValues (void)
 		|| abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256*8)
 		ops = ps;		// don't interpolate
 
-	ent = &cl_entities[cl.playernum+1];
 	lerp = cl.lerpfrac;
 
 	// calculate the origin
@@ -1579,7 +1577,7 @@ void CL_AddClEntities()
 	entity_t ent;
 	clentity_t *le, *next;
 	clentity_t *active, *tail;
-	vec3_t org, dir;
+	vec3_t org;
 	float alpha, bak;
 	int contents;
 	qboolean onground;
@@ -1650,7 +1648,6 @@ void CL_AddClEntities()
 			// Water friction affected cl model
 			if (contents & MASK_WATER) {
 				if (contents & CONTENTS_LAVA) {	// kill entity in lava
-					VectorSet(dir, 0, 0, 1);
 					le->alpha = 0;
 					continue;
 				} else {
