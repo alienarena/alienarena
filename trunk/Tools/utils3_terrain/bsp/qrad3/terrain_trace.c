@@ -5,7 +5,7 @@
 
 #define MAX_MAP_MODELS 1024
 
-typedef struct
+typedef struct cterraintri_s
 {
 	dplane_t	p;
 	vec_t		*verts[3], *normals[3];
@@ -17,7 +17,7 @@ typedef struct
 // list of all the triangles that go through it (a triangle may be in multiple
 // grid cells.) This is used to speed up tracing/collision detection/occlusion
 // by minimizing how many triangles need to be checked on any given trace.
-typedef struct
+typedef struct 
 {
 	vec3_t			mins, maxs;
 	int				numtris;
@@ -30,7 +30,7 @@ typedef struct
 	vec3_t			mins, maxs;
 	int				numtriangles;
 	vec_t			*verts;
-	vec_t           *normals;
+	vec_t			*normals;
 	cterraintri_t	*tris;
 	
 	// for generating lightamps light levels
@@ -405,11 +405,11 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 			mod->numtriangles++;
 		
 		for (j = 0; j < 3; j++)
-		    VectorAdd (tri->normals[j], tri->p.normal, tri->normals[j]);
+			VectorAdd (tri->normals[j], tri->p.normal, tri->normals[j]);
 	}
 	
 	for (i = 0; i < data.num_vertices; i++)
-	    VectorNormalize (&mod->normals[3*i], &mod->normals[3*i]);
+		VectorNormalize (&mod->normals[3*i], &mod->normals[3*i]);
 	
 	if (data.num_triangles != mod->numtriangles)
 		printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
@@ -520,9 +520,6 @@ void LoadAllTerrain (void)
 	}
 }
 
-static vec3_t trace_extents; // unused
-#define trace_ispoint true
-
 static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3_t p2_extents)
 {
 	int	i;
@@ -543,11 +540,10 @@ static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3
 // Returns -1 for no intersection, otherwise it returns the index within 
 // terrain_models where the intersection was found (used by
 // CM_TerrainLightPoint.)
-int CM_TerrainTrace (vec3_t p1, vec3_t end, vec3_t out_normal, float *out_fraction)
+int CM_TerrainTrace (vec3_t p1, vec3_t end, vec3_t out_normal, float *out_fraction, cterraintri_t **out_occluder)
 {
 	vec3_t		p2;
 	int			i, j, k, x, y, z;
-	float		offset;
 	dplane_t	*plane;
 	vec3_t		dir;
 	float		orig_dist;
@@ -561,7 +557,7 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end, vec3_t out_normal, float *out_fracti
 	orig_dist = VectorNormalize (dir, dir); // Update this every time p2 changes
 	
 	// Update this every time p2 changes
-	for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+	for (k = 0; k < 3; k++) p2_extents[k] = p2[k];
 	
 	for (i = 0; i < numterrainmodels; i++)
 	{
@@ -645,15 +641,6 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end, vec3_t out_normal, float *out_fracti
 						if (!RayIntersectsTriangle (p1, dir, tri->verts[0], tri->verts[1], tri->verts[2], &intersection_dist, &u, &v))
 							continue;
 			
-						if (trace_ispoint)
-							offset = 0;
-						else
-							offset = fabs(trace_extents[0]*plane->normal[0]) +
-								fabs(trace_extents[1]*plane->normal[1]) +
-								fabs(trace_extents[2]*plane->normal[2]);
-			
-						intersection_dist -= offset;
-			
 						if (intersection_dist > orig_dist)
 							continue;
 			
@@ -668,8 +655,9 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end, vec3_t out_normal, float *out_fracti
 							out_normal[k] = (1.0 - u - v) * tri->normals[0][k] + u * tri->normals[1][k] + v * tri->normals[2][k];
 						VectorNormalize (out_normal, out_normal);
 						
-						for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+						for (k = 0; k < 3; k++) p2_extents[k] = p2[k];
 						ret = i;
+						*out_occluder = tri;
 					}
 					
 					// Any grid cells we check after this one are further away
@@ -693,9 +681,10 @@ qboolean Terrain_Trace (vec3_t start, vec3_t end, vec3_t out_end, vec3_t out_nor
 {
 	vec3_t dir;
 	float orig_dist;
+	cterraintri_t *tmp;
 	float fraction = 1.0;
 	
-	CM_TerrainTrace (start, end, out_normal, &fraction);
+	CM_TerrainTrace (start, end, out_normal, &fraction, &tmp);
 	
 	if (fraction == 1.0)
 		return true;
@@ -707,13 +696,39 @@ qboolean Terrain_Trace (vec3_t start, vec3_t end, vec3_t out_end, vec3_t out_nor
 	return false;
 }
 
+qboolean Fast_Terrain_Trace (vec3_t start, vec3_t end, occlusioncache_t *cache)
+{
+	float u, v, intersection_dist, orig_dist;
+	vec3_t dir, normal;
+	float fraction = 1.0;
+	
+	VectorSubtract (end, start, dir);
+	orig_dist = VectorNormalize (dir, dir);
+	
+	if (cache->last != NULL)
+	{
+		if (	RayIntersectsTriangle (	start, dir,
+										cache->last->verts[0],
+										cache->last->verts[1],
+										cache->last->verts[2],
+										&intersection_dist, &u, &v) && 
+				intersection_dist < orig_dist )
+			return false;
+	}
+	
+	CM_TerrainTrace (start, end, normal, &fraction, &cache->last);
+	
+	return fraction == 1.0;
+}
+
 extern
 void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									vec3_t normal, vec3_t color, 
 									float lightscale2, 
 									qboolean *sun_main_once, 
 									qboolean *sun_ambient_once,
-									float *lightweight
+									float *lightweight,
+									occlusioncache_t *cache
 								);
 
 static void TerrainPointLight (vec3_t pos, vec3_t out_color)
@@ -726,6 +741,7 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color)
 	vec3_t			normal;
 	vec3_t			start, end;
 	vec3_t			surface_pos;
+	occlusioncache_t cache;
 	
 	VectorCopy (pos, start);
 	start[2] += 2048;
@@ -741,12 +757,14 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color)
 	
 	VectorClear (out_color);
 	
+	memset (&cache, 0, sizeof(cache));
+	
 	// get the PVS for the pos to limit the number of checks
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight);
+			LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, &cache);
 			VectorAdd (out_color, color, out_color);
 		}
 	}
