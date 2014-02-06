@@ -363,8 +363,8 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	mod->lm_size[1] = DotProduct (lm_maxs, mod->lm_t_axis) - mod->lm_mins[1];
 	
 	// Output lightmap is the same size as heightmap
-	mod->lm_w = data.heightmap_w*2;
-	mod->lm_h = data.heightmap_h*2;
+	mod->lm_w = data.heightmap_w*4;
+	mod->lm_h = data.heightmap_h*4;
 	
 	for (i = 0; i < data.num_triangles; i++)
 	{
