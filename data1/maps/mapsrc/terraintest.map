@@ -550,7 +550,7 @@
 // entity 2
 {
 "classname" "light"
-"origin" "-2560.000000 2048.000000 1968.000000"
+"origin" "-3688.000000 3736.000000 1968.000000"
 "light" "0"
 "target" "moonspot"
 }
@@ -562,7 +562,7 @@
 // entity 4
 {
 "classname" "info_null"
-"origin" "-1344.000000 1152.000000 1792.000000"
+"origin" "-1496.000000 2032.000000 984.000000"
 "targetname" "moonspot"
 }
 // entity 5
