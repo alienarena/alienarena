@@ -45,7 +45,7 @@ extern cvar_t	*cl_hudimage2;
 unsigned	d_8to24table[256];
 
 qboolean GL_Upload8 (byte *data, int width, int height, int picmip, qboolean filter);
-qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean filter, qboolean force_standard_mipmap);
+qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean filter, qboolean modulate, qboolean force_standard_mipmap);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -527,7 +527,7 @@ int	scrap_uploads;
 void Scrap_Upload (void)
 {
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload32 (scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, 0, false, true);
+	GL_Upload32 (scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, 0, false, false, true);
 	scrap_dirty = false;
 }
 
@@ -969,7 +969,7 @@ Applies brightness and contrast to the specified image while optionally computin
 the image's average color.  Also handles image inversion and monochrome.  This is
 all munged into one function to reduce loops on level load.
 */
-void R_FilterTexture(byte *in, int width, int height)
+void R_FilterTexture(byte *in, int width, int height, qboolean modulate)
 {
 	int count;
 	float fcb;
@@ -1005,12 +1005,22 @@ void R_FilterTexture(byte *in, int width, int height)
 	// apply to image
 	count = width * height;
 	while ( count-- ) {
-		*in = lut[*in];
-		++in;
-		*in = lut[*in];
-		++in;
-		*in = lut[*in];
-		++in;
+		int i;
+		for (i = 0; i < 3; i++)
+		{
+			if (modulate)
+			{
+				int c = (int)(gl_modulate->value*(*in));
+				if (c > 255)
+					c = 255;
+				*in = c;
+			}
+			else
+			{
+				*in = lut[*in];
+			}
+			++in;
+		}
 		++in;
 	}
 
@@ -1087,7 +1097,7 @@ int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
 
 
-qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean filter, qboolean force_standard_mipmap)
+qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean filter, qboolean modulate, qboolean force_standard_mipmap)
 {
 	int		samples;
 	byte 	*scaled;
@@ -1097,7 +1107,7 @@ qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean fi
 	int comp;
 
 	if(filter)
-		R_FilterTexture(data, width, height);
+		R_FilterTexture(data, width, height, modulate);
 
 	uploaded_paletted = false;    // scan the texture for any non-255 alpha
 	c = width*height;
@@ -1273,7 +1283,7 @@ qboolean GL_Upload8 (byte *data, int width, int height, int picmip, qboolean fil
             ((byte *)&trans[i])[2] = ((byte *)&d_8to24table[p])[2];
         }
     }
-    return GL_Upload32 ((byte*)trans, width, height, picmip, filter, false);
+    return GL_Upload32 ((byte*)trans, width, height, picmip, filter, false, false);
 }
 
 /*
@@ -1382,7 +1392,7 @@ nonscrap:
 		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, picmip, type <= it_wall);
 		} else {
-			image->has_alpha = GL_Upload32 (pic, width, height, picmip, type <= it_wall, type >= it_bump);
+			image->has_alpha = GL_Upload32 (pic, width, height, picmip, type <= it_wall, type == it_lightmap, type >= it_bump);
 		}
 
 		if (type == it_pic)

@@ -32,6 +32,7 @@ typedef enum
 {
 	it_skin,
 	it_sprite,
+	it_lightmap,
 	it_wall,
 	it_pic,
 	it_sky,

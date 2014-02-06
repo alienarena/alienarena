@@ -287,6 +287,7 @@ void R_StaticLightPoint (vec3_t p, vec3_t color)
 	}
 	
 	CM_TerrainLightPoint (p, end, color);
+	VectorScale (color, gl_modulate->value, color);
 	
 	r = RecursiveLightPoint (r_worldmodel->nodes, p, end);
 
