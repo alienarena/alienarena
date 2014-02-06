@@ -810,6 +810,7 @@ void CreateDirectLights (void)
 	char	*name;
 	char	*target;
 	float	angle;
+
 	vec3_t	dest;
 	char	*_color;
 	float	intensity;
@@ -1179,7 +1180,8 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									float lightscale2, 
 									qboolean *sun_main_once, 
 									qboolean *sun_ambient_once,
-									float *lightweight
+									float *lightweight,
+									occlusioncache_t *cache
 								)
 {
 	vec3_t			delta, target, occluded, color_nodist;
@@ -1242,7 +1244,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 							(	RayPlaneIntersect (	l->plane->normal,
 													l->plane->dist, pos,
 													sun_pos, target ) &&
-								!TestLine_color (0, pos, target, occluded)));
+								!TestLine_color (0, pos, target, occluded, cache)));
 		if (add_direct)
 		{
 			*sun_main_once = *sun_ambient_once = true;
@@ -1253,7 +1255,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 			if (!add_ambient)
 				return;
 			lcn = lowestCommonNode(nodenum, l->nodenum);
-			if (!noblock && TestLine_color (lcn, pos, l->origin, occluded))
+			if (!noblock && TestLine_color (lcn, pos, l->origin, occluded, cache))
 				return;		// occluded
 			scale = 0.0;
 		}
@@ -1272,7 +1274,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 	else
 	{
 		lcn = lowestCommonNode(nodenum, l->nodenum);
-		if (!noblock && TestLine_color (lcn, pos, l->origin, occluded))
+		if (!noblock && TestLine_color (lcn, pos, l->origin, occluded, cache))
 			return;		// occluded
 		
 		switch ( l->type )
@@ -1334,6 +1336,7 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 	vec3_t			color;
 	int				nodenum;
 	float			lightweight;
+	occlusioncache_t cache;
 
 	// get the PVS for the pos to limit the number of checks
 	if (!PvsForOrigin (pos, pvs))
@@ -1341,6 +1344,8 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 		return;
 	}
 	nodenum = PointInNodenum(pos);
+	
+	memset (&cache, 0, sizeof(cache));
 
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
@@ -1349,7 +1354,7 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint (l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once, &lightweight);
+			LightContributionToPoint (l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once, &lightweight, &cache);
 			
 			// no contribution
 			if ( VectorCompare ( color, vec3_origin ) )

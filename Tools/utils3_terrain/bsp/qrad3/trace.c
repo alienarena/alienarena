@@ -546,14 +546,11 @@ int TestLine (vec3_t start, vec3_t stop)
 }
 
 // Checking terrain in this one *is* appropriate
-int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded)
+int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded, occlusioncache_t *cache)
 {
-	vec3_t tmp;
-	float tmp2;
-	
 	occluded[0] = occluded[1] = occluded[2] = 1.0;
 	
-	if (!Terrain_Trace (start, stop, tmp, &tmp2))
+	if (!Fast_Terrain_Trace (start, stop, cache))
 		return true;
 	
 	if (doing_texcheck)

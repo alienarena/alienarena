@@ -143,9 +143,14 @@ void DetectUniformColor (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
+typedef struct
+{
+	struct cterraintri_s *last;
+} occlusioncache_t;
+
 int	PointInNodenum (vec3_t point);
 int TestLine (vec3_t start, vec3_t stop);
-int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded);
+int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded, occlusioncache_t *cache);
 int TestLine_r (int node, vec3_t start, vec3_t stop);
 
 void CreateDirectLights (void);
@@ -223,6 +228,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 void CleanupTerrainData (terraindata_t *dat);
 
 qboolean Terrain_Trace (vec3_t start, vec3_t end, vec3_t out_end, vec3_t out_normal);
+qboolean Fast_Terrain_Trace (vec3_t start, vec3_t end, occlusioncache_t *cache);
 void LoadAllTerrain (void);
 void GenerateAllTerrainLightmaps (void);
 
