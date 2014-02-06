@@ -4,9 +4,9 @@
 "classname" "worldspawn"
 "sky" "green"
 "_sun" "moonspot"
-"_sun_ambient" "7"
+"_sun_ambient" "20"
 "_sun_color" "1 0.7 0.3"
-"_sun_light" "50"
+"_sun_light" "35"
 // brush 0
 {
 ( 384 576 2048 ) ( 384 -576 2048 ) ( -768 576 2048 ) arena8/crackedrock4 0 0 0 1 1 0 4 0
@@ -564,6 +564,8 @@
 "classname" "info_null"
 "origin" "-1496.000000 2032.000000 984.000000"
 "targetname" "moonspot"
+"_sun_light" "35"
+"_sun_ambient" "20"
 }
 // entity 5
 {
