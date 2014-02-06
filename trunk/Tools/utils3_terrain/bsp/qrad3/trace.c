@@ -554,7 +554,7 @@ int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded)
 	occluded[0] = occluded[1] = occluded[2] = 1.0;
 	
 	if (!Terrain_Trace (start, stop, tmp, &tmp2))
-		return false;
+		return true;
 	
 	if (doing_texcheck)
 		return TestLine_r_texcheck (node, 0, start, stop, start, stop, occluded);
