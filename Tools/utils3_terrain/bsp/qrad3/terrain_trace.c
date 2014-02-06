@@ -734,6 +734,11 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color)
 	
 	Terrain_Trace (start, end, surface_pos, normal);
 	
+	// This eliminates some pixel checkerboard/aliasing patterns. We want to
+	// avoid having the traces "skim" across the surface of the terrain and 
+	// intersect or miss it incorrectly due to FP inaccuracy.
+	VectorAdd (surface_pos, normal, surface_pos);
+	
 	VectorClear (out_color);
 	
 	// get the PVS for the pos to limit the number of checks
