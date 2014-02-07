@@ -755,10 +755,62 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									occlusioncache_t *cache
 								);
 
-static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *cache, directlight_t **suncache)
+// On maps with sunlight, a grid of light sources is created along each sky
+// surface. However, when computing the amount of illumination from sunlight,
+// only one light source per sample ends up actually mattering. If a sample
+// point can "see" a sky surface, it gets the ambient sunlight amount added to
+// it. If it can "see" a sky surface in the direction of the sun entity, it
+// gets the ambient *and* direct sunlight amounts added to it. To avoid having
+// to do occlusion checks on each and every sun/sky light source for each and
+// every sample point, we cache the most recent sun light source that had an
+// effect and check that first. If that fails, we check other lights in the
+// cluster of the most recent light. Only if that fails to we check the lights
+// in the other clusters.
+typedef struct
+{
+	directlight_t	*light;
+	int				clusternum;
+} suncache_t;
+
+static void TerrainPointLight_TryCluster (	int clusternum,
+											vec3_t surface_pos, vec3_t normal,
+											vec3_t out_color,
+											occlusioncache_t *cache,
+											suncache_t *suncache,
+											qboolean *sun_main_once,
+											qboolean *sun_ambient_once )
+{
+	directlight_t	*l;
+	float			lightweight = 0.0;
+	vec3_t			color;
+	
+	for (l=directlights[clusternum]; l != NULL; l=l->next)
+	{
+		qboolean sun_main_already = *sun_main_once;
+		
+		// Make sure not to double-count any lights.
+		if (l == suncache->light)
+			continue;
+		
+		LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, sun_main_once, sun_ambient_once, &lightweight, cache);
+		
+		// If this light is a sky/sun light and it illuminated this
+		// sample, cache it. We may "evict" a light that only does ambient
+		// illumination in favor of one that does direct illumination too,
+		// since those are better to cache.
+		if ((!sun_main_already && *sun_main_once) || (*sun_ambient_once && suncache->light == NULL))
+		{
+			suncache->light = l;
+			suncache->clusternum = clusternum;
+		}
+		
+		VectorAdd (out_color, color, out_color);
+	}
+}
+
+static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *cache, suncache_t *suncache)
 {
 	int				i;
-	directlight_t	*l;
 	qboolean		sun_main_once = false, sun_ambient_once = false;
 	float			lightweight = 0.0;
 	vec3_t			color;
@@ -780,38 +832,21 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *c
 	
 	VectorClear (out_color);
 	
-	// Suncache is the most recent sky/sun light that illuminated a sample. 
-	// We'll try it first, because if it illuminates this sample too, no more
-	// sky lights need to be tested for this sample.
-	if (*suncache != NULL)
+	if (suncache->light != NULL)
 	{
-		LightContributionToPoint (*suncache, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
+		LightContributionToPoint (suncache->light, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
 		VectorAdd (out_color, color, out_color);
 		if (!sun_ambient_once)
-			*suncache = NULL; // The light did nothing
+			suncache->light = NULL; // The light did nothing
 	}
+	
+	TerrainPointLight_TryCluster (suncache->clusternum, surface_pos, normal, out_color, cache, suncache, &sun_main_once, &sun_ambient_once);
 	
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
-		for (l=directlights[i]; l != NULL; l=l->next)
-		{
-			qboolean sun_main_already = sun_main_once;
-			
-			// Make sure not to double-count any lights.
-			if (l == *suncache)
-				continue;
-			
-			LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
-			
-			// If this light is a sky/sun light and it illuminated this
-			// sample, cache it. We may "evict" a light that only does ambient
-			// illumination in favor of one that does direct illumination too,
-			// since those are better to cache.
-			if ((!sun_main_already && sun_main_once) || (sun_ambient_once && *suncache == NULL))
-				*suncache = l;
-			
-			VectorAdd (out_color, color, out_color);
-		}
+		if (i == suncache->clusternum)
+			continue;
+		TerrainPointLight_TryCluster (i, surface_pos, normal, out_color, cache, suncache, &sun_main_once, &sun_ambient_once);
 	}
 }
 
@@ -822,10 +857,11 @@ static void GenerateTerrainModelLightmapRow (int t)
 	int s, i;
 	vec3_t oloop_pos;
 	occlusioncache_t cache;
-	directlight_t *suncache = NULL;
+	suncache_t suncache;
 	cterrainmodel_t *mod = generate_mod;
 	
 	memset (&cache, 0, sizeof(cache));
+	memset (&suncache, 0, sizeof(suncache));
 	
 	VectorMA (mod->mins, mod->lm_size[1]*(float)t/(float)mod->lm_h, mod->lm_t_axis, oloop_pos);
 	for (s = 0; s < mod->lm_w; s++)
