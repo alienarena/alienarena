@@ -181,6 +181,9 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 			vec3_t dir;
 			float *new_vert = out->verts[out->nverts];
 			
+			if (out->nverts+1 >= DECAL_VERTS)
+				Com_Error (ERR_FATAL, "ClipTriangleAgainstBorder: DECAL_VERTS");
+			
 			VectorSubtract (out->verts[outsideidx[i]], out->verts[insideidx[0]], dir);
 			old_len = VectorNormalize (dir);
 			
@@ -202,11 +205,17 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 	
 	new_trinum = out->npolys++;
 	
+	if (out->npolys >= DECAL_POLYS)
+		Com_Error (ERR_FATAL, "ClipTriangleAgainstBorder: DECAL_POLYS");
+	
 	for (i = 0; i < 2; i++)
 	{
 		float old_len, new_len;
 		vec3_t dir;
 		float *new_vert = out->verts[out->nverts];
+		
+		if (out->nverts+1 >= DECAL_VERTS)
+			Com_Error (ERR_FATAL, "ClipTriangleAgainstBorder: DECAL_VERTS");
 		
 		newidx[i] = out->nverts++;
 		
@@ -397,8 +406,8 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		vec3_t v1, v2, normal, tangent;
 		unsigned int *triangle = data.polys[i];
 		
-		VectorSubtract (&data.verts[triangle[0]], &data.verts[triangle[1]], v1);
-		VectorSubtract (&data.verts[triangle[2]], &data.verts[triangle[1]], v2);
+		VectorSubtract (data.verts[triangle[0]], data.verts[triangle[1]], v1);
+		VectorSubtract (data.verts[triangle[2]], data.verts[triangle[1]], v2);
 		CrossProduct (v2, v1, normal);
 		VectorScale (normal, -1.0/VectorLength(normal), normal);
 		
@@ -425,7 +434,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		vtangent[4*i+3] = 1.0;
 	}
 	
-	Decal_LoadVBO (mod, data.verts, vnormal, vtangent, vtexcoord, data.polys);
+	Decal_LoadVBO (mod, &data.verts[0][0], vnormal, vtangent, vtexcoord, &data.polys[0][0]);
 	
 	Z_Free (vnormal);
 	Z_Free (vtangent);
