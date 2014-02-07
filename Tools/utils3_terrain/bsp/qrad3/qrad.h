@@ -174,6 +174,7 @@ extern float sun_ambient;
 extern vec3_t sun_color;
 
 int	refine_amt, refine_setting;
+int terrain_refine;
 
 int	PointInLeafnum (vec3_t point);
 void MakeTnodes (dmodel_t *bm);
