@@ -205,7 +205,7 @@ void V_TestEntities (void)
 	{
 		mod = cl.baseclientinfo.model;
 		skin = cl.baseclientinfo.skin;
-		r_numentities = 32;
+		r_numentities = cl_testentities->integer == 1 ? 32 : cl_testentities->integer;
 	}
 	else
 	{
