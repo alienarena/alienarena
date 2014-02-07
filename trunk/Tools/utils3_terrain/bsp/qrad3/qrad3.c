@@ -966,6 +966,7 @@ int main (int argc, char **argv)
     full_help = false;
     numthreads = 4;
     refine_amt = 1;
+    terrain_refine = 4;
 
     LoadConfigurationFile("qrad3", 0);
     LoadConfiguration(argc-1, argv+1);
@@ -1110,6 +1111,19 @@ int main (int argc, char **argv)
 					Error ("Valid refine settings are 1, 2, 4, and 8");
 			}
 		}
+		else if (!strcmp(param,"-terrainrefine"))
+		{
+			param2 = WalkConfiguration();
+			terrain_refine = atoi (param2);
+			switch (terrain_refine)
+			{
+				case 1: case 2: case 4: case 8: case 16:
+				case 32: //heaven forbid
+					break;
+				default:
+					Error ("Valid terrain refine settings are 1, 2, 4, and 8");
+			}
+		}
 		else if (!strcmp (param,"-tmpin"))
 			strcpy (inbase, "/tmp");
 		else if (!strcmp (param,"-tmpout"))
@@ -1124,17 +1138,18 @@ int main (int argc, char **argv)
 		printf ("Recommend refine setting of 8 or 16 for -blur!\n");
 
     printf("-------------------------\n");
-	printf("ambient   : %f\n", ambient );
-	printf("scale     : %f\n", lightscale );
-	printf("maxlight  : %f\n", maxlight );
-	printf("entity    : %f\n", entity_scale );
-	printf("direct    : %f\n", direct_scale );
-	printf("grayscale : %f\n", grayscale );
-	printf("desaturate: %f\n", desaturate );
-	printf("bounce    : %d\n", numbounce );
-	printf("radmin    : %f\n", patch_cutoff );
-	printf("subdiv    : %f\n", subdiv );
-	printf("refine    : %d\n", refine_amt );
+	printf("ambient      : %f\n", ambient );
+	printf("scale        : %f\n", lightscale );
+	printf("maxlight     : %f\n", maxlight );
+	printf("entity       : %f\n", entity_scale );
+	printf("direct       : %f\n", direct_scale );
+	printf("grayscale    : %f\n", grayscale );
+	printf("desaturate   : %f\n", desaturate );
+	printf("bounce       : %d\n", numbounce );
+	printf("radmin       : %f\n", patch_cutoff );
+	printf("subdiv       : %f\n", subdiv );
+	printf("refine       : %d\n", refine_amt );
+	printf("terrainrefine: %d\n", terrain_refine );
 	if ( extrasamples )
 		printf("with extra samples\n");
 	if ( doing_blur )
