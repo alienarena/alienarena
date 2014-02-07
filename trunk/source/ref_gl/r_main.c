@@ -503,7 +503,7 @@ static void R_DrawEntity (void)
 	//get distance
 	VectorSubtract(r_origin, currententity->origin, dist);
 	
-	//get volume
+	//get diagonal size
 	VectorSubtract (currentmodel->maxs, currentmodel->mins, span);
 	size = VectorLength (span);
 	
