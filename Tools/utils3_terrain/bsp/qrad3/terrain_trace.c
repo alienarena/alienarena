@@ -755,7 +755,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									occlusioncache_t *cache
 								);
 
-static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *cache)
+static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *cache, directlight_t **suncache)
 {
 	int				i;
 	directlight_t	*l;
@@ -780,12 +780,36 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *c
 	
 	VectorClear (out_color);
 	
-	// get the PVS for the pos to limit the number of checks
+	// Suncache is the most recent sky/sun light that illuminated a sample. 
+	// We'll try it first, because if it illuminates this sample too, no more
+	// sky lights need to be tested for this sample.
+	if (*suncache != NULL)
+	{
+		LightContributionToPoint (*suncache, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
+		VectorAdd (out_color, color, out_color);
+		if (!sun_ambient_once)
+			*suncache = NULL; // The light did nothing
+	}
+	
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
-		for (l=directlights[i] ; l ; l=l->next)
+		for (l=directlights[i]; l != NULL; l=l->next)
 		{
+			qboolean sun_main_already = sun_main_once;
+			
+			// Make sure not to double-count any lights.
+			if (l == *suncache)
+				continue;
+			
 			LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
+			
+			// If this light is a sky/sun light and it illuminated this
+			// sample, cache it. We may "evict" a light that only does ambient
+			// illumination in favor of one that does direct illumination too,
+			// since those are better to cache.
+			if ((!sun_main_already && sun_main_once) || (sun_ambient_once && *suncache == NULL))
+				*suncache = l;
+			
 			VectorAdd (out_color, color, out_color);
 		}
 	}
@@ -798,6 +822,7 @@ static void GenerateTerrainModelLightmapRow (int t)
 	int s, i;
 	vec3_t oloop_pos;
 	occlusioncache_t cache;
+	directlight_t *suncache = NULL;
 	cterrainmodel_t *mod = generate_mod;
 	
 	memset (&cache, 0, sizeof(cache));
@@ -810,7 +835,7 @@ static void GenerateTerrainModelLightmapRow (int t)
 		
 		VectorMA (oloop_pos, mod->lm_size[0]*(float)s/(float)mod->lm_w, mod->lm_s_axis, iloop_pos);
 		
-		TerrainPointLight (iloop_pos, color, &cache);
+		TerrainPointLight (iloop_pos, color, &cache, &suncache);
 		
 		max = 0;
 		for (i = 0; i < 3; i++)
