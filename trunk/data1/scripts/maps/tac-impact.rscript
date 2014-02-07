@@ -13,7 +13,7 @@ textures/arena10/cobblestone1
 	{
 		map gfx/weed3.tga
 		scale static 4 static 4
-		colormap .5 .4 .3
+		colormap .7 .6 .5
 		grass
 		grasstype 0
 	}
@@ -23,7 +23,7 @@ textures/arena10/rockdirt1
 	{
 		map gfx/weed3.tga
 		scale static 4 static 4
-		colormap .5 .4 .3
+		colormap .7 .6 .5
 		grass
 		grasstype 0
 	}
