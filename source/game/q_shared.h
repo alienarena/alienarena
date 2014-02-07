@@ -206,7 +206,7 @@ void CrossProduct (const vec3_t v1, const vec3_t v2, vec3_t cross);
 vec_t VectorNormalize (vec3_t v);		// returns vector length
 vec_t VectorNormalize2 (vec3_t v, vec3_t out);
 void VectorInverse (vec3_t v);
-void VectorScale (vec3_t in, vec_t scale, vec3_t out);
+void VectorScale (const vec3_t in, vec_t scale, vec3_t out);
 int Q_log2(int val);
 
 void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
@@ -247,8 +247,8 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 #define vsnprintf	_vsnprintf
 #endif
 
-char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
+char *COM_SkipPath (const char *pathname);
+void COM_StripExtension (const char *in, char *out);
 qboolean COM_HasExtension (char *path, char *extension);
 void COM_FileBase (char *in, char *out);
 void COM_FilePath (char *in, char *out);

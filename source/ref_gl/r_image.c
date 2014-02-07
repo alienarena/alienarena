@@ -1293,7 +1293,7 @@ GL_ReservePic
 Find a free image_t
 ================
 */
-image_t *GL_FindFreeImage (char *name, int width, int height, imagetype_t type)
+image_t *GL_FindFreeImage (const char *name, int width, int height, imagetype_t type)
 {
 	image_t		*image;
 	int			i;
@@ -1340,7 +1340,7 @@ GL_LoadPic
 This is also used as an entry point for the generated r_notexture
 ================
 */
-image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits)
+image_t *GL_LoadPic (const char *name, byte *pic, int width, int height, imagetype_t type, int bits)
 {
 	image_t		*image;
 	int			i;
@@ -1512,7 +1512,7 @@ GL_FindImage
 Finds or loads the given image
 ===============
 */
-image_t	*GL_FindImage (char *name, imagetype_t type)
+image_t	*GL_FindImage (const char *name, imagetype_t type)
 {
 	image_t		*image = NULL;
 	int		len;
@@ -1528,9 +1528,9 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 
 	//if HUD, then we want to load the one according to what it is set to.
 	if(!strcmp(name, "pics/i_health.pcx"))
-			strcpy(name, cl_hudimage1->string);
+		return GL_FindImage (cl_hudimage1->string, type);
 	if(!strcmp(name, "pics/i_score.pcx"))
-			strcpy(name, cl_hudimage2->string);
+		return GL_FindImage (cl_hudimage2->string, type);
 
 	// look for it
 	image = GL_GetImage( name );
