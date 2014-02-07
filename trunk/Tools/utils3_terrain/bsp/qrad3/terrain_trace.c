@@ -696,27 +696,51 @@ qboolean Terrain_Trace (vec3_t start, vec3_t end, vec3_t out_end, vec3_t out_nor
 	return false;
 }
 
-qboolean Fast_Terrain_Trace (vec3_t start, vec3_t end, occlusioncache_t *cache)
+qboolean Fast_Terrain_Trace_Try_Cache (vec3_t start, vec3_t end, occlusioncache_t *cache)
 {
 	float u, v, intersection_dist, orig_dist;
-	vec3_t dir, normal;
-	float fraction = 1.0;
+	vec3_t dir;
 	
 	VectorSubtract (end, start, dir);
 	orig_dist = VectorNormalize (dir, dir);
 	
-	if (cache->last != NULL)
+	if (cache->mru != NULL)
 	{
 		if (	RayIntersectsTriangle (	start, dir,
-										cache->last->verts[0],
-										cache->last->verts[1],
-										cache->last->verts[2],
+										cache->mru->verts[0],
+										cache->mru->verts[1],
+										cache->mru->verts[2],
 										&intersection_dist, &u, &v) && 
 				intersection_dist < orig_dist )
 			return false;
 	}
 	
-	CM_TerrainTrace (start, end, normal, &fraction, &cache->last);
+	if (cache->lru != NULL)
+	{
+		if (	RayIntersectsTriangle (	start, dir,
+										cache->lru->verts[0],
+										cache->lru->verts[1],
+										cache->lru->verts[2],
+										&intersection_dist, &u, &v) && 
+				intersection_dist < orig_dist )
+		{
+			cterraintri_t *tmp = cache->mru;
+			cache->mru = cache->lru;
+			cache->lru = tmp;
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+qboolean Fast_Terrain_Trace_Cache_Miss (vec3_t start, vec3_t end, occlusioncache_t *cache)
+{
+	vec3_t normal;
+	float fraction = 1.0;
+	
+	cache->lru = cache->mru;
+	CM_TerrainTrace (start, end, normal, &fraction, &cache->mru);
 	
 	return fraction == 1.0;
 }
@@ -731,7 +755,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 									occlusioncache_t *cache
 								);
 
-static void TerrainPointLight (vec3_t pos, vec3_t out_color)
+static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *cache)
 {
 	int				i;
 	directlight_t	*l;
@@ -741,7 +765,6 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color)
 	vec3_t			normal;
 	vec3_t			start, end;
 	vec3_t			surface_pos;
-	occlusioncache_t cache;
 	
 	VectorCopy (pos, start);
 	start[2] += 2048;
@@ -757,14 +780,12 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color)
 	
 	VectorClear (out_color);
 	
-	memset (&cache, 0, sizeof(cache));
-	
 	// get the PVS for the pos to limit the number of checks
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, &cache);
+			LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
 			VectorAdd (out_color, color, out_color);
 		}
 	}
@@ -776,7 +797,10 @@ static void GenerateTerrainModelLightmapRow (int t)
 {
 	int s, i;
 	vec3_t oloop_pos;
+	occlusioncache_t cache;
 	cterrainmodel_t *mod = generate_mod;
+	
+	memset (&cache, 0, sizeof(cache));
 	
 	VectorMA (mod->mins, mod->lm_size[1]*(float)t/(float)mod->lm_h, mod->lm_t_axis, oloop_pos);
 	for (s = 0; s < mod->lm_w; s++)
@@ -786,7 +810,7 @@ static void GenerateTerrainModelLightmapRow (int t)
 		
 		VectorMA (oloop_pos, mod->lm_size[0]*(float)s/(float)mod->lm_w, mod->lm_s_axis, iloop_pos);
 		
-		TerrainPointLight (iloop_pos, color);
+		TerrainPointLight (iloop_pos, color, &cache);
 		
 		max = 0;
 		for (i = 0; i < 3; i++)

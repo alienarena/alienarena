@@ -552,6 +552,9 @@ int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded, occlus
 	
 	occluded[0] = occluded[1] = occluded[2] = 1.0;
 	
+	if (!Fast_Terrain_Trace_Try_Cache (start, stop, cache))
+		return true;
+	
 	if (doing_texcheck)
 		bsp_occluded = TestLine_r_texcheck (node, 0, start, stop, start, stop, occluded);
 	else
@@ -560,7 +563,7 @@ int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded, occlus
 	if (bsp_occluded)
 		return true;
 	
-	return !Fast_Terrain_Trace (start, stop, cache);
+	return !Fast_Terrain_Trace_Cache_Miss (start, stop, cache);
 }
 
 /*
