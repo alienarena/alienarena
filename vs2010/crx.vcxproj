@@ -275,6 +275,7 @@
     <ClCompile Include="..\source\qcommon\md5.c" />
     <ClCompile Include="..\source\qcommon\mdfour.c" />
     <ClCompile Include="..\source\qcommon\terrain.c" />
+    <ClCompile Include="..\source\ref_gl\r_decals.c" />
     <ClCompile Include="..\source\ref_gl\r_md2.c" />
     <ClCompile Include="..\source\ref_gl\r_terrain.c" />
   </ItemGroup>

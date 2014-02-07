@@ -947,8 +947,8 @@ void R_FinalizeGrass(model_t *mod)
 		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, mod->firstnode, MASK_VISIBILILITY);
 		grass->sunVisible = r_trace.fraction == 1.0;
 		
+		//only deal with leaves, grass shadows look kind of bad
 		if (grass->type == 0)
-			//only deal with leaves, grass shadows look kind of bad
 			grass->sunVisible = false;
 	}
 }
