@@ -145,7 +145,7 @@ qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
 typedef struct
 {
-	struct cterraintri_s *last;
+	struct cterraintri_s *mru, *lru;
 } occlusioncache_t;
 
 int	PointInNodenum (vec3_t point);
@@ -228,7 +228,8 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 void CleanupTerrainData (terraindata_t *dat);
 
 qboolean Terrain_Trace (vec3_t start, vec3_t end, vec3_t out_end, vec3_t out_normal);
-qboolean Fast_Terrain_Trace (vec3_t start, vec3_t end, occlusioncache_t *cache);
+qboolean Fast_Terrain_Trace_Try_Cache (vec3_t start, vec3_t end, occlusioncache_t *cache);
+qboolean Fast_Terrain_Trace_Cache_Miss (vec3_t start, vec3_t end, occlusioncache_t *cache);
 void LoadAllTerrain (void);
 void GenerateAllTerrainLightmaps (void);
 
