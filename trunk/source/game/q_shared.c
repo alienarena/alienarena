@@ -903,7 +903,7 @@ void VectorInverse (vec3_t v)
 	v[2] = -v[2];
 }
 
-void VectorScale (vec3_t in, vec_t scale, vec3_t out)
+void VectorScale (const vec3_t in, vec_t scale, vec3_t out)
 {
 	out[0] = in[0]*scale;
 	out[1] = in[1]*scale;
@@ -928,15 +928,17 @@ int Q_log2(int val)
 COM_SkipPath
 ============
 */
-char *COM_SkipPath (char *pathname)
+char *COM_SkipPath (const char *pathname)
 {
 	char	*last;
 
-	last = pathname;
+	// This is kind of an end-run around the type-system, but appropriate in
+	// this case.
+	last = (char *)pathname;
 	while (*pathname)
 	{
 		if (*pathname=='/')
-			last = pathname+1;
+			last = (char *)pathname+1;
 		pathname++;
 	}
 	return last;
@@ -947,7 +949,7 @@ char *COM_SkipPath (char *pathname)
 COM_StripExtension
 ============
 */
-void COM_StripExtension (char *in, char *out)
+void COM_StripExtension (const char *in, char *out)
 {
 	while (*in && *in != '.')
 		*out++ = *in++;

@@ -375,10 +375,10 @@ image_t *R_RegisterParticlePic(const char *name);
 image_t *R_RegisterParticleNormal(const char *name);
 image_t *R_RegisterGfxPic(const char *name);
 
-extern image_t *GL_FindFreeImage (char *name, int width, int height, imagetype_t type);
-extern image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
-extern image_t *GL_GetImage( const char * name );
-extern image_t	*GL_FindImage (char *name, imagetype_t type);
+extern image_t *GL_FindFreeImage (const char *name, int width, int height, imagetype_t type);
+extern image_t *GL_LoadPic (const char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+extern image_t *GL_GetImage (const char * name );
+extern image_t	*GL_FindImage (const char *name, imagetype_t type);
 extern void	GL_FreeImage( image_t * image );
 extern void	GL_TextureMode( char *string );
 extern void	GL_ImageList_f (void);
