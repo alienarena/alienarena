@@ -41,7 +41,7 @@ typedef struct
 } decalprogress_t;
 
 // FIXME: supports neither oriented terrain nor oriented decals!
-void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t origin, vec3_t angles, model_t *terrainmodel, decalprogress_t *out)
+void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t origin, const vec3_t angles, model_t *terrainmodel, decalprogress_t *out)
 {
 	// For rotating terrain geometry into the decal's orientation
 	vec3_t rotation_angles;
