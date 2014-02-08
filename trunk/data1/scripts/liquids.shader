@@ -7,13 +7,13 @@ textures/water/bluewater
 textures/water/clearwater
 {
 	qer_editorimage textures/water/clearwater.tga
-	qer_trans 0.5
+	qer_trans 1
 }
 
 textures/water/flowingwater
 {
 	qer_editorimage textures/water/flowingwater.tga
-	qer_trans 0.5
+	qer_trans 1
 }
 
 textures/arena3/water
