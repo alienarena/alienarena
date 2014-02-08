@@ -43,6 +43,7 @@ typedef struct
 // FIXME: supports neither oriented terrain nor oriented decals!
 void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t origin, const vec3_t angles, model_t *terrainmodel, decalprogress_t *out)
 {
+	int i, j, k, l;
 	// For rotating terrain geometry into the decal's orientation
 	vec3_t rotation_angles;
 	float rotation_matrix[3][3];
@@ -60,8 +61,41 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 	// the new decal model yet.
 	unsigned int *index_table;
 	
-	VectorScale (angles, -1.0, rotation_angles);
-	AnglesToMatrix3x3 (rotation_angles, rotation_matrix);
+	// Create the rotation matrices - we must apply the rotations in the 
+	// opposite order or else we won't properly be preemptively undoing the 
+	// rotation transformation applied later in the renderer.
+	for (i = 0; i < 3; i++)
+	{
+		for (j = 0; j < 3; j++)
+			rotation_matrix[i][j] = i == j;
+	}
+	for (i = 2; i >= 0; i--)
+	{
+		float prev_rotation_matrix[3][3];
+		float temp_matrix[3][3];
+		
+		for (j = 0; j < 3; j++)
+		{
+			for (k = 0; k < 3; k++)
+			{
+				prev_rotation_matrix[j][k] = rotation_matrix[j][k];
+				rotation_matrix[j][k] = 0.0;
+			}
+		}
+		
+		VectorClear (rotation_angles);
+		rotation_angles[i] = -angles[i];
+		AnglesToMatrix3x3 (rotation_angles, temp_matrix);
+		
+		for (j = 0; j < 3; j++)
+		{
+			for (k = 0; k < 3; k++)
+			{
+				for (l = 0; l < 3; l++)
+					rotation_matrix[j][k] += prev_rotation_matrix[l][k] * temp_matrix[j][l];
+			}
+		}
+	}
 	
 	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ, terrainmodel, NULL);
 	GL_BindVBO (vbo_xyz);
@@ -79,7 +113,7 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 	// inside the oriented bounding box of the decal.
 	for (trinum = 0; trinum < terrainmodel->num_triangles; trinum++)
 	{
-		int i, j, k, orig_idx;
+		int orig_idx;
 		vec3_t verts[3];
 		
 		for (i = 0; i < 3; i++)
@@ -265,8 +299,12 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 
 static void ReUnifyVertexes (decalprogress_t *out)
 {
-	int trinum, newnverts = 0;
+	int trinum, vertnum, maxidx = 0, newidx = 0;
+	unsigned int *index_table;
+	vec3_t *new_verts;
 	
+	// Detect duplicate vertices and substitute the index of the first
+	// occurance of each duplicate vertex
 	for (trinum = 0; trinum < out->npolys; trinum++)
 	{
 		int i;
@@ -291,12 +329,40 @@ static void ReUnifyVertexes (decalprogress_t *out)
 			
 			out->polys[trinum][i] = idx;
 			
-			if (newnverts <= idx)
-				newnverts = idx+1;
+			if (maxidx <= idx)
+				maxidx = idx+1;
 		}
 	}
 	
-	out->nverts = newnverts;
+	out->nverts = maxidx;
+	
+	// Prune redundant vertices- generate new indices
+	index_table = Z_Malloc (maxidx*sizeof(unsigned int));
+	for (trinum = 0; trinum < out->npolys; trinum++)
+	{
+		int i;
+		for (i = 0; i < 3; i++)
+		{
+			if (index_table[out->polys[trinum][i]] == 0)
+				index_table[out->polys[trinum][i]] = ++newidx;
+			out->polys[trinum][i] = index_table[out->polys[trinum][i]] - 1;
+		}
+	}
+	
+	// Prune redundant vertices- rearrange the actual vertex data to match the
+	// new indices
+	new_verts = Z_Malloc (newidx*sizeof(vec3_t));
+	for (vertnum = 0; vertnum < maxidx; vertnum++)
+	{
+		if (index_table[vertnum] != 0)
+			VectorCopy (out->verts[vertnum], new_verts[index_table[vertnum]-1]);
+	}
+	memcpy (out->verts, new_verts, newidx*sizeof(vec3_t));
+	
+	out->nverts = newidx;
+	
+	Z_Free (index_table);
+	Z_Free (new_verts);
 }
 
 void Mod_LoadDecalModel (model_t *mod, void *_buf)
