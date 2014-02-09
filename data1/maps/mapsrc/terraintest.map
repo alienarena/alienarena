@@ -572,7 +572,7 @@
 "classname" "misc_decal"
 "origin" "-856.000000 448.000000 608.000000"
 "model" "maps/meshes/terraintest/ivy1.decal"
-"angles" "-90.000000 0.000000 -0.000000"
+"angles" "-90.000000 -45.000000 0.000000"
 }
 // entity 6
 {
@@ -580,6 +580,7 @@
 "origin" "-2310.461914 332.579468 1.000000"
 "model" "maps/meshes/terraintest/rocks1.decal"
 "angle" "-54.680672"
+"angles" "0 -54.680672 0"
 }
 // entity 7
 {
@@ -591,7 +592,7 @@
 // entity 8
 {
 "classname" "misc_decal"
-"origin" "-664.000000 800.000000 800.000000"
+"origin" "-592.000000 744.000000 800.000000"
 "model" "maps/meshes/terraintest/ivy1.decal"
 "angles" "-90.000000 0.000000 -0.000000"
 }
@@ -600,14 +601,14 @@
 "classname" "misc_decal"
 "origin" "-984.000000 192.000000 800.000000"
 "model" "maps/meshes/terraintest/ivy1.decal"
-"angles" "-90.000000 0.000000 -0.000000"
+"angles" "-67 -45 0"
 }
 // entity 10
 {
 "classname" "misc_decal"
 "origin" "-760.000000 448.000000 800.000000"
 "model" "maps/meshes/terraintest/ivy1.decal"
-"angles" "-90.000000 0.000000 -0.000000"
+"angles" "-67 -15 0"
 }
 // entity 11
 {
@@ -618,7 +619,7 @@
 // entity 12
 {
 "classname" "misc_decal"
-"origin" "-1016.000000 192.000000 608.000000"
+"origin" "-1032.000000 208.000000 608.000000"
 "model" "maps/meshes/terraintest/ivy1.decal"
-"angles" "-90.000000 0.000000 -0.000000"
+"angles" "-45.000008 -45.000008 0.000000"
 }
