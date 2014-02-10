@@ -74,9 +74,25 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 
 //=============================================================================
 
-void CL_DownloadFileName(char *dest, int destlen, char *fn)
+void CL_DownloadFileName (char *dest, int destlen, char *fn)
 {
-	Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
+	memset(dest, 0, destlen);
+	Com_sprintf (dest, destlen-1, "%s/%s", FS_Gamedir(), fn);
+}
+
+// Current download has been completed, rename temp file to main file
+void CL_DownloadComplete (void)
+{
+	int		r;
+	char	oldn[MAX_OSPATH];
+	char	newn[MAX_OSPATH];
+		
+	// rename the temp file to it's final name
+	CL_DownloadFileName(oldn, sizeof(oldn), cls.downloadtempname);
+	CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
+	r = rename (oldn, newn);
+	if (r)
+		Com_Printf ("failed to rename.\n");
 }
 
 /*
@@ -263,7 +279,6 @@ void CL_ParseDownload (void)
 {
 	int		size, percent;
 	char	name[MAX_OSPATH];
-	int		r;
 
 	// read the data
 	size = MSG_ReadShort (&net_message);
@@ -317,25 +332,14 @@ void CL_ParseDownload (void)
 	}
 	else
 	{
-		char	oldn[MAX_OSPATH];
-		char	newn[MAX_OSPATH];
-
-//		Com_Printf ("100%%\n");
-
 		fclose (cls.download);
-
-		// rename the temp file to it's final name
-		CL_DownloadFileName(oldn, sizeof(oldn), cls.downloadtempname);
-		CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
-		r = rename (oldn, newn);
-		if (r)
-			Com_Printf ("failed to rename.\n");
 
 		cls.download = NULL;
 		cls.downloadpercent = 0;
+		
+		CL_DownloadComplete ();
 
 		// get another file if needed
-
 		CL_RequestNextDownload ();
 	}
 }
