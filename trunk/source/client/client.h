@@ -572,6 +572,8 @@ void CL_ParseServerMessage (void);
 void CL_LoadClientinfo (clientinfo_t *ci, char *s);
 void SHOWNET(char *s);
 void CL_ParseClientinfo (int player);
+void CL_DownloadFileName (char *dest, int destlen, char *fn);
+void CL_DownloadComplete (void);
 void CL_Download_f (void);
 
 //

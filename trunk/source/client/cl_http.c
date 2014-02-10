@@ -91,8 +91,8 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 	if(!curl)
 		return false;
 
-	memset(dnld_file, 0, sizeof(dnld_file));  // resolve local file name
-	Com_sprintf(dnld_file, sizeof(dnld_file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
+	// cls.downloadtempname created by CL_CheckOrDownloadFile in cl_parse.c
+	CL_DownloadFileName (dnld_file, sizeof(dnld_file), cls.downloadtempname);
 
 	FS_CreatePath(dnld_file);  // create the directory
 
@@ -154,8 +154,9 @@ Queue up an http download.  The url is resolved from cls.downloadurl and
 the current gamedir.  We use cURL's multi interface, even tho we only ever
 perform one download at a time, because it is non-blocking.
 */
-qboolean CL_HttpDownload(void){
-return CL_HttpDownloadFromHost (default_1, cls.downloadname);
+qboolean CL_HttpDownload(void)
+{
+	return CL_HttpDownloadFromHost (default_1, cls.downloadname);
 }
 
 
@@ -199,6 +200,7 @@ void CL_HttpDownloadCleanup(){
 	{
 		cls.downloadname[0] = 0;
 		success = false;
+		CL_DownloadComplete ();
 	}
 	else
 	{  // retry via legacy udp download
@@ -298,7 +300,9 @@ void CL_HttpDownloadThink(void){
 /*
 CL_InitHttpDownload
 */
-void CL_InitHttpDownload(void){
+void CL_InitHttpDownload(void)
+{
+	
 	if(!(curlm = curl_multi_init()))
 		return;
 

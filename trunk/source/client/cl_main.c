@@ -1789,6 +1789,7 @@ redoSkins:
 		if (allow_download_maps->integer)
 		{
 			//get mus files
+
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
 
 			//remove "maps/" from string
