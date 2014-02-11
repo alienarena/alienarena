@@ -474,7 +474,7 @@ void R_DrawSkyBox (void)
 	
 	// Make sure the furthest possible corner of the skybox is closer than the
 	// draw distance we supplied to glFrustum. 
-	#define SKYDIST (sqrt(3*DRAWDIST*DRAWDIST)-1.0)
+	#define SKYDIST (gl_skyboxscale->value*(sqrt(3*DRAWDIST*DRAWDIST)-1.0))
 	
 	// Scale the fog distances up so fog looks like it used to before 
 	// SKYDIST was increased. 
