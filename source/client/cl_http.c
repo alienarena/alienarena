@@ -198,9 +198,9 @@ void CL_HttpDownloadCleanup(){
 
 	if(success)
 	{
+		CL_DownloadComplete ();
 		cls.downloadname[0] = 0;
 		success = false;
-		CL_DownloadComplete ();
 	}
 	else
 	{  // retry via legacy udp download
@@ -279,7 +279,7 @@ void CL_HttpDownloadThink(void){
 		if(msg->msg == CURLMSG_DONE)
 		{
 			//not so fast, curl gives false positives sometimes
-			runt = FS_LoadFile (cls.downloadname, NULL);
+			runt = FS_LoadFile (cls.downloadtempname, NULL);
 			if(runt > 2048) //the curl bug produces a 2kb chunk of data
 			{ 
 				success = true;
