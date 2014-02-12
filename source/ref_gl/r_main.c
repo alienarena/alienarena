@@ -499,6 +499,12 @@ static void R_DrawEntity (void)
 		else
 			currententity->script = NULL;
 	}
+	
+	if (!currentmodel)
+	{
+		R_DrawNullModel ();
+		return;
+	}
 
 	//get distance
 	VectorSubtract(r_origin, currententity->origin, dist);
@@ -518,11 +524,6 @@ static void R_DrawEntity (void)
 	else if(VectorLength(dist) > LOD_DIST && currententity->lod1 != NULL)
 		currentmodel = currententity->lod1;
 
-	if (!currentmodel)
-	{
-		R_DrawNullModel ();
-		return;
-	}
 	switch (currentmodel->type)
 	{
 	    case mod_md2:
