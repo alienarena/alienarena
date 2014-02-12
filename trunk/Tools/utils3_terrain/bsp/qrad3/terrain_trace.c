@@ -103,8 +103,11 @@ qboolean RayIntersectsBBox (const vec3_t origin, const vec3_t dir, const vec3_t 
 
 	/* Ray origin inside bounding box */
 	if(inside)
+	{
+		*out_intersection_dist = 0;
 		return true;
-
+	}
+	
 
 	/* Calculate T distances to candidate planes */
 	for (i = 0; i < 3; i++)
