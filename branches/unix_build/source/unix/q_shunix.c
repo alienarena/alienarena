@@ -21,19 +21,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
 
-#if defined HAVE_MREMAP
+#if HAVE_MREMAP
 #define _GNU_SOURCE
 #endif
 
-#if defined HAVE_DIRENT_H
-#include <dirent.h>
+#if HAVE_DIRENT_H
+# include <dirent.h>
 #endif 
-
-#if defined HAVE_SYS_MMAN_H
-#include <sys/mman.h>
+#if HAVE_SYS_MMAN_H
+# include <sys/mman.h>
 #endif
-
+#if HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#if HAVE_TIME_H
+# include <time.h>
+#endif
 
 #include "unix/glob.h"
 #include "qcommon/qcommon.h"

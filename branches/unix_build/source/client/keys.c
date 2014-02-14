@@ -290,7 +290,7 @@ void Key_Console (int key)
 			// restore the end of the line
 			memcpy (key_lines[edit_line] + key_linepos, buffer, l);
 
-			free( cbd );
+			Com_xfree( cbd );
 		}
 
 		return;

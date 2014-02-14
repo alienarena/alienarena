@@ -1,3 +1,6 @@
+#ifndef CL_CLIENT_H
+#define CL_CLIENT_H
+
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
 
@@ -18,17 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // client.h -- primary header for client
-#ifndef CL_CLIENT_H_
-#define CL_CLIENT_H_
-
-//define	PARANOID			// speed sapping error checking
-
-// -jjb- need #ifdef HAVE'd
-/* #include <math.h> */
-/* #include <string.h> */
-/* #include <stdarg.h> */
-/* #include <stdio.h> */
-/* #include <stdlib.h> */
 
 #include "ref.h"
 #include "ref_gl/r_text.h"
@@ -822,4 +814,4 @@ extern void R_AddSimpleItem(int type, vec3_t origin);
 extern qboolean r_gotFlag;
 extern qboolean r_lostFlag;
 
-#endif /* #ifndef CL_CLIENT_H_ */
+#endif /*  CL_CLIENT_H */

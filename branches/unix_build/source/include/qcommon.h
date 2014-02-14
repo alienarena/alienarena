@@ -751,39 +751,34 @@ FILESYSTEM
 
 ==============================================================
 */
+#if defined UNIX_VARIANT
 
-int FS_filelength( FILE *f );
-void	FS_InitFilesystem (void);
-void	FS_SetGamedir (char *dir);
-char	*FS_Gamedir (void);
-char	*FS_NextPath (char *prevpath);
-void	FS_ExecAutoexec (void);
+#include "unix/files_unix.h"
 
-// 2 Filesystem functions added 2010-08
-qboolean FS_FullPath( char *full_path, size_t pathsize,const char *relative_path );
-void    FS_FullWritePath( char *full_path, size_t pathsize,const char *relative_path );
-
-int		FS_FOpenFile (char *filename, FILE **file);
-void	FS_FCloseFile (FILE *f);
-// note: this can't be called from another DLL, due to MS libc issues
-
-int		FS_LoadFile (char *path, void **buffer);
-int		FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t statbuffer_len);
-
-void	FS_Read (void *buffer, int len, FILE *f);
-// properly handles partial reads
-
-void	FS_FreeFile (void *buffer);
-
-void	FS_CreatePath (char *path);
-
-qboolean FS_FileExists(char *path);
+#else
+int   FS_FileLength( FILE *f );
+void  FS_InitFilesystem (void);
+void  FS_SetGamedir (char *dir);
+char  *FS_Gamedir (void);
+char  *FS_NextPath (char *prevpath);
+void  FS_ExecAutoexec (void);
+bool  FS_FullPath( char *full_path, size_t pathsize,const char *relative_path );
+void  FS_FullWritePath( char *full_path, size_t pathsize,const char *relative_path );
+int   FS_FOpenFile (char *filename, FILE **file);
+void  FS_FCloseFile (FILE *f);
+int   FS_LoadFile (char *path, void **buffer);
+int   FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t statbuffer_len);
+void  FS_Read (void *buffer, int len, FILE *f);
+void  FS_FreeFile (void *buffer);
+void  FS_CreatePath (char *path);
+bool  FS_FileExists(char *path);
 
 #define SFF_INPACK	0x20	/* For FS_ListFilesInFS(). */
 
-char	**FS_ListFiles(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
-char	**FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
-void	FS_FreeFileList (char **list, int n);
+char  **FS_ListFiles(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
+char  **FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
+void  FS_FreeFileList (char **list, int n);
+#endif
 
 /*
 ==============================================================

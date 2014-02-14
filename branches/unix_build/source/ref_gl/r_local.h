@@ -1,5 +1,5 @@
-#ifndef R_LOCAL_H_
-#define R_LOCAL_H_
+#ifndef R_LOCAL_H
+#define R_LOCAL_H
 
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
@@ -20,6 +20,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#include "com_std.h"
 
 // -jjb-
 #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
@@ -760,4 +762,4 @@ extern void		GLimp_Shutdown( void );
 extern rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
 extern void		GLimp_AppActivate( qboolean active );
 
-#endif /* #ifndef R_LOCAL_H_ */
+#endif /* R_LOCAL_H */

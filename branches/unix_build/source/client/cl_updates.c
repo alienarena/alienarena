@@ -20,11 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
 
-#if defined HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <string.h>
 #include "curl/curl.h"
 
 #include "client.h"

@@ -1,5 +1,5 @@
-#ifndef R_IMAGE_H_
-#define R_IMAGE_H_
+#ifndef R_IMAGE_H
+#define R_IMAGE_H
 
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
@@ -129,4 +129,4 @@ extern image_t		*sun2_object;
 extern	image_t		*r_radarmap;
 extern	image_t		*r_around;
 
-#endif /* #ifndef R_IMAGE_H_ */
+#endif /* R_IMAGE_H */

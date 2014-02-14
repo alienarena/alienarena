@@ -265,7 +265,7 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	}
 	else
 	{
-		length = FS_filelength( fp );
+		length = FS_FileLength( fp );
 
 		buffer = malloc( length + 1 );
 		if ( buffer != NULL )

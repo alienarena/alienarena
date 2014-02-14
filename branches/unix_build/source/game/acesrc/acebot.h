@@ -1,5 +1,5 @@
-#ifndef G_ACEBOT_H_
-#define G_ACEBOT_H_
+#ifndef G_ACEBOT_H
+#define G_ACEBOT_H
 
 ///////////////////////////////////////////////////////////////////////
 //
@@ -60,6 +60,7 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+#include "com_std.h"
 
 #if !defined BOT_GAMEDATA
 #define BOT_GAMEDATA "botinfo"
@@ -283,4 +284,4 @@ void     safe_centerprintf (edict_t *ent, char *fmt, ...);
 void     safe_bprintf (int printlevel, char *fmt, ...);
 void     debug_printf (char *fmt, ...);
 
-#endif /* #ifndef G_ACEBOT_H_ */
+#endif /* G_ACEBOT_H */

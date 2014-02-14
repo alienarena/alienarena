@@ -334,7 +334,6 @@ void CL_Record_f (void)
 	// write out messages to hold the startup information
 	//
 	SZ_Init (&buf, (byte *)buf_data, sizeof(buf_data));
-	SZ_SetName ( &buf, "CL_Record_f", false );
 
 	// send the serverdata
 	MSG_WriteByte (&buf, svc_serverdata);
@@ -678,7 +677,6 @@ void CL_Rcon_f (void)
 
 	SZ_Init( &buffer, (byte *) message, 1024 );
 	buffer.allowoverflow = true;
-	SZ_SetName( &buffer, "RCon buffer", false );
 
 	SZ_Print (&buffer, "\xff\xff\xff\xffrcon ");
 	if ( rcon_client_password->string && rcon_client_password->string[0] )
@@ -2677,11 +2675,7 @@ void CL_Frame( int msec )
 		}
 		else
 		{ // regular screen update
-			if ( host_speeds->integer )
-				time_before_ref = Sys_Milliseconds(); // TODO: obsolete test?
 			SCR_UpdateScreen();
-			if ( host_speeds->integer )
-				time_after_ref = Sys_Milliseconds();
 		}
 
 		// check for flag and update music src if possesed or lost
@@ -2702,32 +2696,6 @@ void CL_Frame( int msec )
 
 		// retrigger render timing
 		render_timer = 0;
-
-#if 0
-		/* TODO: Check if this still works and/or is useful.
-		 */
-		if ( log_stats->value )
-		{
-			if ( cls.state == ca_active )
-			{
-				if ( !lasttimecalled )
-				{
-					lasttimecalled = Sys_Milliseconds();
-					if ( log_stats_file )
-						fprintf( log_stats_file, "0\n" );
-				}
-				else
-				{
-					int now = Sys_Milliseconds();
-
-					if ( log_stats_file )
-						fprintf( log_stats_file, "%d\n", now - lasttimecalled );
-					lasttimecalled = now;
-				}
-			}
-		}
-#endif
-
 	}
 
 }

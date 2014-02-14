@@ -22,29 +22,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
 
 // -jjb-
 #include <ctype.h>
-#include <math.h>
 
 #if defined WIN32_VARIANT
 #include <winsock.h>
-#endif
-
-/* #if defined UNIX_VARIANT */
-/* #include <sys/time.h> */
-/* #if defined HAVE_UNISTD_H */
-/* #include <unistd.h> */
-/* #endif */
-/* #endif */
-
-#if defined WIN32_VARIANT
 #include <io.h>
 #endif
 
 #include "qcommon/qcommon.h"
 #include "client.h"
-#include "client/qmenu.h"
+#include "qmenu.h"
 
 #if !defined HAVE__STRDUP
 #if defined HAVE_STRDUP
@@ -63,7 +53,7 @@ enum Game_mode
 	mode_db   = 4, // team
 	mode_tca  = 5, // team
 	mode_cp   = 6, // team
-	mode_duel = 7,
+	mode_duel = 7
 };
 
 static const char *game_mode_names[] =
@@ -76,15 +66,17 @@ static const char *game_mode_names[] =
 	"deathball",
 	"team core assault",
 	"cattle prod",
-	"duel"
+	"duel",
 #else
-	"tactical"
+	"tactical",
 #endif
+	NULL
 };
-// #define num_game_modes (static_array_size(game_mode_names)-1)
+
+#define num_game_modes (static_array_size(game_mode_names)-1)
 
 //same order as game_mode_names
-static const char *map_prefixes[][3] =
+static const char *map_prefixes[num_game_modes][3] =
 {
 #ifndef TACTICAL
 	{"dm",  "tourney", NULL},
@@ -1914,8 +1906,7 @@ char *str_combine (char *in1, char *in2)
 	char *out;
 	
 	outsize = strlen(in1)+1+strlen(in2)+1;
-	out = malloc (outsize);
-	memset (out, 0, outsize);
+	out     = Com_xmalloc0( outsize );
 	strcpy (out, in1);
 	strcpy (strchr(out, '\0')+1, in2);
 	
@@ -3494,7 +3485,7 @@ char *GetLine (char **contents, int *len)
 			*contents += (num + 1);
 			*len -= (num + 1);
 			line[num] = '\0';
-			ret = (char *)malloc (sizeof(line));
+			ret = (char *)Com_xmalloc( sizeof(line) );
 			strcpy (ret, line);
 			return ret;
 		} 
@@ -3502,7 +3493,7 @@ char *GetLine (char **contents, int *len)
 		num++;
 	}
 
-	ret = (char *)malloc (sizeof(line));
+	ret = (char *)Com_xmalloc (sizeof(line));
 	strcpy (ret, line);
 	return ret;
 }
@@ -4903,117 +4894,124 @@ void MapInfoFunc( void *self ) {
 
 }
 
+/* helper for RulesChangeFunc */
+static qboolean menu_rcf_is_valid_name( const char* filename, size_t length )
+{
+	const char *p = filename;
+	size_t count = length;
+	while ( count-- )
+	{
+		if ( isupper( *p || !(*p) ) )
+		{
+			Com_Printf("File name error: %s\n", filename );
+			return false;
+		}
+	}
+	return true;
+}
 
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 {
 	char *buffer;
-	char  mapsname[1024];
 	char *s;
-	int   length;
-	int   i, j, k, l;
+	int length;
+	int i, k;
 	FILE *fp;
 	char  shortname[MAX_TOKEN_CHARS];
 	char  longname[MAX_TOKEN_CHARS];
 	char  scratch[200];
 	char *curMap;
-	int   nmaps = 0;
-	int   totalmaps;
+	int nmaps = 0;
+	int totalmaps;
 	char **mapfiles;
 	static char **bspnames;
+	int		j, l;
 
-// -jjb- encapsulate file i/o in FS_
-	//clear out list first
+	// clear out list first
 	for ( i = 0; i < nummaps; i++ )
-		free( mapnames[i] );
+		Com_xfree( mapnames[i] );
 	nummaps = 0;
+	memset( mapnames, 0, sizeof(char*) * ( MAX_MAPS + 2 ) );
 
-	/*
-	** reload the list of map names, based on rules
-	**  arena/maps.lst -or- tactical/maps.lst
-	*/
-	if ( !FS_FullPath( mapsname, sizeof( mapsname ), "maps.lst" ) )
+/*--------------------------------------------------------------------
+  Reload the list of map names, based on rules.
+
+  Each game mode has one or more map name prefixes. For example, if the
+  game mode is capture the flag, only maps that start with ctf should
+  make it into the mapnames list.
+
+  Map file names should always be all lower case.
+  maps.lst record format:
+      <bsp file basename><whitespace>"<map title>"<eol>
+
+  2014-02 pending update: maps.lst is normally in shared data game
+  sub-directory ( 'arena' or 'tactical' )
+----------------------------------------------------------------------*/
+
+//---- -jjb- FILE_OPERATION  maps.lst
+	/* read whole file */
+	length = FS_FOpenFile( "maps.lst", &fp );
+	if ( !fp )
 	{
-		Com_Error( ERR_DROP, "couldn't find maps.lst\n" );
-		return; // for show, no maps.lst is fatal error
+		Com_Error( ERR_DROP, "\nMissing maps list file (maps.lst)\n" );
+		return; // unreachable
 	}
-	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
-	{
-		Com_Error( ERR_DROP, "couldn't open maps.lst\n" );
-		return; // for "show". above is fatal error.
-	}
+	buffer = Com_xcalloc( length+1, 1 );
+	FS_Read( buffer, length, fp );
 
-	// -jjb- convert to FS_ function, FS_fread
-	length = FS_filelength( fp );
-	buffer = malloc( length + 1 );
-	fread( buffer, length, 1, fp );
-	buffer[length] = 0;
-
+	/* count file records */
 	i = 0;
 	while ( i < length )
 	{
-		if ( buffer[i] == '\r' )
-			nummaps++;
+		if ( buffer[i] == '\n' || 
+			 ( buffer[i] == '\r' && buffer[i+1] != '\n' ))
+			++nummaps;
 		i++;
 	}
 	totalmaps = nummaps;
-
 	if ( nummaps == 0 )
 	{
-		fclose( fp );
-		free( buffer );
-		Com_Error( ERR_DROP, "no maps in maps.lst\n" );
-		return; // for showing above is fatal.
+		FS_FCloseFile( fp );
+		Com_xfree( buffer );
+		Com_Error( ERR_DROP, "\nMaps list file, maps.lst, is empty\n" );
+		return; // unreachable
 	}
 
-	memset( mapnames, 0, sizeof( char * ) * ( MAX_MAPS + 2 ) );
-
-	bspnames = malloc( sizeof( char * ) * ( MAX_MAPS + 2 ) );  //was + 1, but caused memory errors
-	memset( bspnames, 0, sizeof( char * ) * ( MAX_MAPS + 2 ) );
-
+	/* add unique, game mode matching bsp files from maps.lst */
+	bspnames = Com_xcalloc( MAX_MAPS+2, sizeof(char*) );
 	s = buffer;
-
 	k = 0;
 	for ( i = 0; i < nummaps; i++ )
 	{
-
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);
-#if defined WIN32_VARIANT
-		// -jjb- FS_
-		for (j=0 ; j<l ; j++)
-			shortname[j] = tolower(shortname[j]);
-#endif
-		//keep a list of the shortnames for later comparison to bsp files
-		bspnames[i] = malloc( strlen( shortname ) + 1 );
+		if ( !menu_rcf_is_valid_name( shortname, l ))
+		{
+			Com_Error( ERR_DROP, "\nInvalid file name in maps list file (maps.lst)\n" );
+			return; // unreachable
+		}
+		bspnames[i] = Com_xcalloc( strlen( shortname ) + 1, sizeof(char) );
 		strcpy(bspnames[i], shortname);
-
 		strcpy( longname, COM_Parse( &s ) );
-		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", longname, shortname );
+		Com_sprintf( scratch, sizeof(scratch), "%s\n%s", longname, shortname );
 		
-		// Each game mode has one or more map name prefixes. For example, if
-		// the game mode is capture the flag, only maps that start with ctf
-		// should make it into the mapnames list.
 		for (j = 0; map_prefixes[s_rules_box.curvalue][j]; j++)
 		{
 			const char *curpfx = map_prefixes[s_rules_box.curvalue][j];
-			if ( !Q_strncasecmp( curpfx, shortname, strlen(curpfx)) )
+			if (!strncmp (curpfx, shortname, strlen(curpfx)))
 			{
-				// matched an allowable prefix
-				mapnames[k] = malloc( strlen( scratch ) + 1 );
+				mapnames[k] = Com_xmalloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
 				break;
 			}
 		}
 	}
-	// done with maps.lst
-	fclose( fp );
-	free( buffer );
+	FS_FCloseFile( fp );
+	Com_xfree( buffer );
+/*----*/
 
-// -jjb- 
-
-	//now, check the folders and add the maps not in the list yet
-
+	/* add unique, game mode matching files not in map.lst */
 	mapfiles = FS_ListFilesInFS( "maps/*.bsp", &nmaps, 0,
 		SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
@@ -5023,22 +5021,14 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 
 		s = strstr( mapfiles[i], "maps/"); s++;
 		s = strstr(s, "/"); s++;
-
 		num = strlen(s)-4;
 		s[num] = 0;
-
 		curMap = s;
-
 		l = strlen(curMap);
-
-#if defined WIN32_VARIANT
-		for (j=0 ; j<l ; j++)
-			curMap[j] = tolower(curMap[j]);
-#endif
-
+		if ( !menu_rcf_is_valid_name( curMap, l ))
+			continue; // quietly ignore
 		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", "Custom Map", curMap );
 
-		//check game type, and if not already in maps.lst, add it
 		l = 0;
 		for ( j = 0 ; j < nummaps ; j++ )
 		{
@@ -5047,19 +5037,14 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 				break; //already there, don't bother adding
 		}
 		if ( l )
-		{ //didn't find it in our list
-		
-			// FIXME: copy and paste sux0rs
-			// Each game mode has one or more map name prefixes. For example, if
-			// the game mode is capture the flag, only maps that start with ctf
-			// should make it into the mapnames list.
+		{
 			for (j = 0; map_prefixes[s_rules_box.curvalue][j]; j++)
 			{
 				const char *curpfx = map_prefixes[s_rules_box.curvalue][j];
-				if (!!Q_strncasecmp (curpfx, curMap, strlen(curpfx)))
+				if ( !strncmp (curpfx, curMap, strlen(curpfx)) )
 				{
 					// matched an allowable prefix
-					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					mapnames[k] = Com_xmalloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
 					totalmaps++;
@@ -5072,12 +5057,6 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	if (mapfiles)
 		FS_FreeFileList(mapfiles, nmaps);
 
-	for(i = k; i<=nummaps; i++) 
-	{
-		free(mapnames[i]);
-		mapnames[i] = 0;
-	}
-
 	s_startmap_list.generic.name	= "initial map";
 	s_startmap_list.itemnames = (const char **)mapnames;
 	s_startmap_list.curvalue = 0;
@@ -5085,6 +5064,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	//set map info
 	MapInfoFunc(NULL);
 }
+
 
 void StartServerActionFunc( void *self )
 {
@@ -5874,8 +5854,7 @@ static void PlayerConfig_ScanDirectories( void )
 		if ( !nskins )
 			continue;
 
-		skinnames = malloc( sizeof( char * ) * ( nskins + 1 ) );
-		memset( skinnames, 0, sizeof( char * ) * ( nskins + 1 ) );
+		Com_xcalloc( nskins+1, sizeof(char *) );
 
 		// copy the valid skins
 		for ( s = 0, k = 0; k < npcxfiles; k++ )
@@ -5898,8 +5877,11 @@ static void PlayerConfig_ScanDirectories( void )
 
 					if ( strrchr( scratch, '.' ) )
 						*strrchr( scratch, '.' ) = 0;
-
+#ifdef HAVE__STRDUP
 					skinnames[s] = _strdup( scratch );
+#else
+					skinnames[s] = strdup( scratch );
+#endif
 					s++;
 				}
 			}

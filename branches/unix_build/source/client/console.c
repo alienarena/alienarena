@@ -69,7 +69,7 @@ void CON_ToggleConsole( void )
 /*
  * Clear the chat area
  */
-static void _CON_ToggleChat( void )
+static void CON_ToggleChat( void )
 {
 	Key_ClearTyping( );
 
@@ -89,7 +89,7 @@ static void _CON_ToggleChat( void )
 /*
  * Toggle the general chat input
  */
-static void _CON_GeneralChatInput( void )
+static void CON_GeneralChatInput( void )
 {
 	chat_team = false;
 	chat_irc = false;
@@ -102,7 +102,7 @@ static void _CON_GeneralChatInput( void )
 /*
  * Toggle the team chat input
  */
-static void _CON_TeamChatInput( void )
+static void CON_TeamChatInput( void )
 {
 	chat_team = true;
 	chat_irc = false;
@@ -115,7 +115,7 @@ static void _CON_TeamChatInput( void )
 /*
  * Toggle the IRC input
  */
-static void _CON_IRCInput( void )
+static void CON_IRCInput( void )
 {
 	chat_team = false;
 	chat_irc = true;
@@ -137,7 +137,7 @@ static void _CON_IRCInput( void )
  * Returns:
  *	the identifier of the current line in the buffer
  */
-static int _CON_FindLineStart( int line )
+static int CON_FindLineStart( int line )
 {
 	line = ( line + CON_MAX_LINES ) % CON_MAX_LINES;
 	while ( CON_console.lCount[ line ] == 0 ) {
@@ -156,7 +156,7 @@ static int _CON_FindLineStart( int line )
  * Returns:
  *	the identifier of the next line in the buffer
  */
-static int _CON_FindNextLine( int line )
+static int CON_FindNextLine( int line )
 {
 	line = ( line + CON_MAX_LINES ) % CON_MAX_LINES;
 	if ( CON_console.lCount[ line ] == 0 ) {
@@ -179,16 +179,16 @@ static int _CON_FindNextLine( int line )
  * Returns:
  *	the identifier of the previous line in the buffer
  */
-static int _CON_FindPreviousLine( int line )
+static int CON_FindPreviousLine( int line )
 {
-	return _CON_FindLineStart( _CON_FindLineStart( line ) - 1 );
+	return CON_FindLineStart( CON_FindLineStart( line ) - 1 );
 }
 
 
 /*
  * End the current line and start a new one
  */
-static void _CON_NewLine( )
+static void CON_NewLine( )
 {
 	CON_console.times[ CON_console.curTime ] = cls.realtime;
 	CON_console.curTime = ( CON_console.curTime + 1 ) % CON_MAX_NOTIFY;
@@ -207,9 +207,9 @@ static void _CON_NewLine( )
 /*
  * Go back to the start of the current line
  */
-static void _CON_RestartLine( )
+static void CON_RestartLine( )
 {
-	CON_console.curLine = _CON_FindLineStart( CON_console.curLine );
+	CON_console.curLine = CON_FindLineStart( CON_console.curLine );
 	CON_console.offset = 0;
 }
 
@@ -220,9 +220,9 @@ static void _CON_RestartLine( )
  * Parameters:
  *	new_char	the character to append
  */
-static void _CON_AppendChar( char new_char )
+static void CON_AppendChar( char new_char )
 {
-	int lStart = _CON_FindLineStart( CON_console.curLine );
+	int lStart = CON_FindLineStart( CON_console.curLine );
 
 	CON_console.text[ CON_console.curLine ][ CON_console.offset ] = new_char;
 	CON_console.offset = ( CON_console.offset + 1 ) % CON_LINE_LENGTH;
@@ -252,7 +252,7 @@ static void _CON_AppendChar( char new_char )
  *	The buffer should have a sufficient size, which can be computed
  *		using lCount[ line ] * CON_LINE_LENGTH.
  */
-static void _CON_CopyLine( char * buffer , int line )
+static void CON_CopyLine( char * buffer , int line )
 {
 	int len = CON_console.lCount[ line ];
 	int i;
@@ -319,7 +319,7 @@ void CON_DrawNotify( )
 	}
 
 	// Find the first logical line to display
-	line = _CON_FindLineStart( CON_console.curLine );
+	line = CON_FindLineStart( CON_console.curLine );
 	bLines = CON_console.lines - CON_console.lCount[ line ];
 	timeIndex = ( CON_console.curTime - 1 + CON_MAX_NOTIFY ) % CON_MAX_NOTIFY;
 	for ( count = 0 ; count < CON_MAX_NOTIFY && bLines > 0 ; count ++ ) {
@@ -329,7 +329,7 @@ void CON_DrawNotify( )
 		}
 		timeIndex = ( timeIndex - 1 + CON_MAX_NOTIFY ) % CON_MAX_NOTIFY;
 
-		line = _CON_FindPreviousLine( line );
+		line = CON_FindPreviousLine( line );
 		bLines -= CON_console.lCount[ line ];
 	}
 
@@ -346,13 +346,13 @@ void CON_DrawNotify( )
 			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 		} else {
 			char * buffer = Z_Malloc( CON_LINE_LENGTH * CON_console.lCount[ line ] );
-			_CON_CopyLine( buffer , line );
+			CON_CopyLine( buffer , line );
 			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 			Z_Free( buffer );
 		}
 		box.y += box.height;
 
-		line = _CON_FindNextLine( line );
+		line = CON_FindNextLine( line );
 		timeIndex = ( timeIndex + 1 ) % CON_MAX_NOTIFY;
 		count --;
 	}
@@ -365,7 +365,7 @@ void CON_DrawNotify( )
 /**************************************************************************/
 
 /* Save the console contents out to a file. */
-static void _CON_Dump( void )
+static void CON_Dump( void )
 {
 	char	name[MAX_OSPATH];
 	int	line , lastLine;
@@ -385,7 +385,7 @@ static void _CON_Dump( void )
 		return;
 	}
 
-	lastLine = _CON_FindLineStart( CON_console.curLine );
+	lastLine = CON_FindLineStart( CON_console.curLine );
 	line = ( CON_console.curLine + 1 + CON_MAX_LINES - CON_console.lines ) % CON_MAX_LINES;
 	while ( line != lastLine ) {
 		if ( CON_console.text[ line ][ 0 ] != 0 ) {
@@ -393,12 +393,12 @@ static void _CON_Dump( void )
 				fprintf( f , "%s\n" , CON_console.text[ line ] );
 			} else {
 				char * buffer = Z_Malloc( CON_LINE_LENGTH * CON_console.lCount[ line ] );
-				_CON_CopyLine( buffer , line );
+				CON_CopyLine( buffer , line );
 				fprintf( f , "%s\n" , buffer );
 				Z_Free( buffer );
 			}
 		}
-		line = _CON_FindNextLine( line );
+		line = CON_FindNextLine( line );
 	}
 
 	fclose( f );
@@ -427,12 +427,12 @@ void CON_Initialise( )
 
 	// Register commands
 	Cmd_AddCommand( "toggleconsole", CON_ToggleConsole );
-	Cmd_AddCommand( "togglechat", _CON_ToggleChat );
-	Cmd_AddCommand( "messagemode", _CON_GeneralChatInput );
-	Cmd_AddCommand( "messagemode2", _CON_TeamChatInput );
-	Cmd_AddCommand( "messagemode3", _CON_IRCInput );
+	Cmd_AddCommand( "togglechat", CON_ToggleChat );
+	Cmd_AddCommand( "messagemode", CON_GeneralChatInput );
+	Cmd_AddCommand( "messagemode2", CON_TeamChatInput );
+	Cmd_AddCommand( "messagemode3", CON_IRCInput );
 	Cmd_AddCommand( "clear" , CON_Clear );
-	Cmd_AddCommand( "condump" , _CON_Dump );
+	Cmd_AddCommand( "condump" , CON_Dump );
 }
 
 
@@ -447,11 +447,11 @@ void CON_Print( const char * text )
 
 	while ( ( curChar = *text ) != 0 ) {
 		if ( curChar == '\r' ) {
-			_CON_RestartLine( );
+			CON_RestartLine( );
 		} else if ( curChar == '\n' ) {
-			_CON_NewLine( );
+			CON_NewLine( );
 		} else {
-			_CON_AppendChar( curChar );
+			CON_AppendChar( curChar );
 		}
 		text ++;
 	}
@@ -472,7 +472,7 @@ void CON_Print( const char * text )
  *	line	the start of the logical line for which the computation will
  *		be performed
  */
-static void _CON_ComputeLineHeight( FNT_font_t font , int line )
+static void CON_ComputeLineHeight( FNT_font_t font , int line )
 {
 	if ( CON_console.text[ line ][ 0 ] == 0 ) {
 		// Empty lines are a special case, as we don't need to draw them
@@ -488,7 +488,7 @@ static void _CON_ComputeLineHeight( FNT_font_t font , int line )
 				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
 		} else {
 			char * buffer = Z_Malloc( CON_console.lCount[ line ] * CON_LINE_LENGTH );
-			_CON_CopyLine( buffer , line );
+			CON_CopyLine( buffer , line );
 			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
 				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
 			Z_Free( buffer );
@@ -512,23 +512,23 @@ static void _CON_ComputeLineHeight( FNT_font_t font , int line )
  * Returns:
  *	the total height of the console
  */
-static unsigned int _CON_ComputeHeight( FNT_font_t font )
+static unsigned int CON_ComputeHeight( FNT_font_t font )
 {
 	int			line , lastLine;
 	unsigned int		total = 0;
 
-	lastLine = _CON_FindLineStart( CON_console.curLine );
+	lastLine = CON_FindLineStart( CON_console.curLine );
 	line = ( CON_console.curLine + 1 + CON_MAX_LINES - CON_console.lines ) % CON_MAX_LINES;
 	while ( 1 ) {
 		if ( ! CON_console.heights[ line ] ) {
-			_CON_ComputeLineHeight( font , line );
+			CON_ComputeLineHeight( font , line );
 		}
 
 		total += CON_console.heights[ line ];
 		if ( line == lastLine ) {
 			break;
 		}
-		line = _CON_FindNextLine( line );
+		line = CON_FindNextLine( line );
 	}
 
 	return total;
@@ -544,7 +544,7 @@ static unsigned int _CON_ComputeHeight( FNT_font_t font )
  * Returns:
  *	true if the resolution or fonts have changed, false otherwise
  */
-static qboolean _CON_CheckResize( FNT_font_t font )
+static qboolean CON_CheckResize( FNT_font_t font )
 {
 	return ( viddef.width != CON_console.pWidth || font->size != CON_console.pSize
 		|| strcmp( font->face->name , CON_console.pFace ) );
@@ -560,7 +560,7 @@ static qboolean _CON_CheckResize( FNT_font_t font )
  *		contents at which drawing is to begin
  *	dHeight	the height of the display area
  */
-static void _CON_DrawConsoleText(
+static void CON_DrawConsoleText(
 		FNT_font_t		font ,
 		int			start ,
 		int			dHeight
@@ -573,7 +573,7 @@ static void _CON_DrawConsoleText(
 	qglEnable( GL_SCISSOR_TEST );
 
 	total = 0;
-	lastLine = _CON_FindLineStart( CON_console.curLine );
+	lastLine = CON_FindLineStart( CON_console.curLine );
 	line = ( CON_console.curLine + 1 + CON_MAX_LINES - CON_console.lines ) % CON_MAX_LINES;
 
 	do {
@@ -588,7 +588,7 @@ static void _CON_DrawConsoleText(
 					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
 			} else {
 				char * buffer = Z_Malloc( CON_console.lCount[ line ] * CON_LINE_LENGTH );
-				_CON_CopyLine( buffer , line );
+				CON_CopyLine( buffer , line );
 				FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
 					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
 				Z_Free( buffer );
@@ -599,7 +599,7 @@ static void _CON_DrawConsoleText(
 		if ( line == lastLine ) {
 			break;
 		}
-		line = _CON_FindNextLine( line );
+		line = CON_FindNextLine( line );
 	} while ( total - start < dHeight );
 
 	qglDisable( GL_SCISSOR_TEST );
@@ -622,7 +622,7 @@ static void _CON_DrawConsoleText(
  *	text_height	Total height of the console's text contents.
  *	display_height	Height of the viewing area.
  */
-static void _CON_DrawScroller(
+static void CON_DrawScroller(
 		int	font_size ,
 		int	text_height ,
 		int	display_height )
@@ -670,7 +670,7 @@ static void _CON_DrawScroller(
  *	font	the current console font
  *	inputY	the height at which the input line is located
  */
-static void _CON_DrawInputLine(
+static void CON_DrawInputLine(
 		FNT_font_t		font ,
 		int			inputY )
 {
@@ -750,7 +750,7 @@ static void _CON_DrawInputLine(
  *	vertical offset above the line at the bottom of the console
  *
  */
-static int _CON_DrawConsoleBottom( int y )
+static int CON_DrawConsoleBottom( int y )
 {
 	FNT_font_t	font;
 	char		buffer[ MAX_STRING_CHARS ];
@@ -794,7 +794,7 @@ void CON_DrawConsole( float relSize )
 
 	// Check for changes and act accordingly
 	font = FNT_AutoGet( CL_consoleFont );
-	if ( _CON_CheckResize( font ) ) {
+	if ( CON_CheckResize( font ) ) {
 		CON_console.pWidth = viddef.width;
 		CON_console.pSize = font->size;
 		strcpy( CON_console.pFace , font->face->name );
@@ -808,7 +808,7 @@ void CON_DrawConsole( float relSize )
 	// FIXME: lots of copy-pasted code here. Doesn't matter, we will 
 	// eventually redo the whole console using the menu code. 
 	{
-		int _tile_w, _tile_h;
+		int   _tile_w, _tile_h;
 		float tile_w, tile_h;
 		
 		// assume all tiles are the same size
@@ -829,10 +829,10 @@ void CON_DrawConsole( float relSize )
 	}
 
 	// Draw version string and download status
-	dHeight = _CON_DrawConsoleBottom( dHeight ) - fontSize;
+	dHeight = CON_DrawConsoleBottom( dHeight ) - fontSize;
 
 	// Compute heights
-	height = _CON_ComputeHeight( font );
+	height = CON_ComputeHeight( font );
 	if ( height < dHeight ) {
 		CON_console.displayOffset = 0;
 	} else if ( CON_console.displayOffset > height - dHeight ) {
@@ -841,7 +841,7 @@ void CON_DrawConsole( float relSize )
 	start = height - dHeight - CON_console.displayOffset;
 
 	// Draw console contents & input line
-	_CON_DrawConsoleText( font , start , dHeight );
-	_CON_DrawScroller( font->size , height , dHeight );
-	_CON_DrawInputLine( font , dHeight );
+	CON_DrawConsoleText( font , start , dHeight );
+	CON_DrawScroller( font->size , height , dHeight );
+	CON_DrawInputLine( font , dHeight );
 }

@@ -646,11 +646,16 @@ void SV_ExecuteClientMessage (client_t *cl)
 			MSG_ReadDeltaUsercmd (&net_message, &oldest, &oldcmd);
 			MSG_ReadDeltaUsercmd (&net_message, &oldcmd, &newcmd);
 
+
+#if 0
+			// -jjb-
 			// checks the lastframe and deltauser parts of command
 			calculatedChecksum = COM_BlockSequenceCRCByte(
 					net_message.data + checksumIndex + 1,      // base
 					net_message.readcount - checksumIndex - 1, // length
 					cl->netchan.incoming_sequence );           // sequence
+
+
 			if ( calculatedChecksum != checksum )
 			{
 				Com_Printf(
@@ -659,6 +664,7 @@ void SV_ExecuteClientMessage (client_t *cl)
 					cl->netchan.incoming_sequence, timestamp() );
 				break;
 			}
+#endif
 
 			if (cl->state == cs_spawned)
 			{

@@ -631,8 +631,14 @@ ALLOCA
 LIBOBJS
 EGREP
 GREP
-DEPS_LIBS
-DEPS_CFLAGS
+ODE_LIBS
+ODE_CFLAGS
+FREETYPE_LIBS
+FREETYPE_CFLAGS
+OGG_VORBIS_LIBS
+OGG_VORBIS_CFLAGS
+LIBCURL_LIBS
+LIBCURL_CFLAGS
 ZLIB_LIBS
 ZLIB_CFLAGS
 XXF86DGA_LIBS
@@ -642,7 +648,6 @@ XXF86VM_CFLAGS
 X11_LIBS
 X11_CFLAGS
 GL_LIBDIR
-XMKMF
 PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
@@ -766,7 +771,6 @@ enable_dependency_tracking
 enable_client
 enable_doc_install
 enable_icons_install
-with_x
 with_xf86vm
 with_xf86dga
 with_zlib
@@ -785,7 +789,6 @@ CPP
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
-XMKMF
 GL_LIBDIR
 X11_CFLAGS
 X11_LIBS
@@ -795,8 +798,14 @@ XXF86DGA_CFLAGS
 XXF86DGA_LIBS
 ZLIB_CFLAGS
 ZLIB_LIBS
-DEPS_CFLAGS
-DEPS_LIBS'
+LIBCURL_CFLAGS
+LIBCURL_LIBS
+OGG_VORBIS_CFLAGS
+OGG_VORBIS_LIBS
+FREETYPE_CFLAGS
+FREETYPE_LIBS
+ODE_CFLAGS
+ODE_LIBS'
 ac_subdirs_all='data1'
 
 # Initialize some variables set by options.
@@ -1399,10 +1408,6 @@ Program names:
   --program-suffix=SUFFIX            append SUFFIX to installed program names
   --program-transform-name=PROGRAM   run sed PROGRAM on installed program names
 
-X features:
-  --x-includes=DIR    X include files are in DIR
-  --x-libraries=DIR   X library files are in DIR
-
 System types:
   --build=BUILD     configure for building on BUILD [guessed]
   --host=HOST       cross-compile to build programs to run on HOST [BUILD]
@@ -1442,7 +1447,6 @@ Optional Packages:
   --with(out)-data1pkg    include game resources from data1 directory
                           (default:with)
 
-  --with-x                use the X Window System
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: without)
   --with(out)-zlib        include Zlib compression support (default: check)
@@ -1461,7 +1465,6 @@ Some influential environment variables:
               directories to add to pkg-config's search path
   PKG_CONFIG_LIBDIR
               path overriding pkg-config's built-in search path
-  XMKMF       Path to xmkmf, Makefile generator for X Window System
   GL_LIBDIR   directory containing libGL.dylib
   X11_CFLAGS  C compiler flags for X11, overriding pkg-config
   X11_LIBS    linker flags for X11, overriding pkg-config
@@ -1475,8 +1478,20 @@ Some influential environment variables:
               linker flags for XXF86DGA, overriding pkg-config
   ZLIB_CFLAGS C compiler flags for ZLIB, overriding pkg-config
   ZLIB_LIBS   linker flags for ZLIB, overriding pkg-config
-  DEPS_CFLAGS C compiler flags for DEPS, overriding pkg-config
-  DEPS_LIBS   linker flags for DEPS, overriding pkg-config
+  LIBCURL_CFLAGS
+              C compiler flags for LIBCURL, overriding pkg-config
+  LIBCURL_LIBS
+              linker flags for LIBCURL, overriding pkg-config
+  OGG_VORBIS_CFLAGS
+              C compiler flags for OGG_VORBIS, overriding pkg-config
+  OGG_VORBIS_LIBS
+              linker flags for OGG_VORBIS, overriding pkg-config
+  FREETYPE_CFLAGS
+              C compiler flags for FREETYPE, overriding pkg-config
+  FREETYPE_LIBS
+              linker flags for FREETYPE, overriding pkg-config
+  ODE_CFLAGS  C compiler flags for ODE, overriding pkg-config
+  ODE_LIBS    linker flags for ODE, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -2377,23 +2392,9 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
-as_fn_append ac_header_list " unistd.h"
-as_fn_append ac_header_list " arpa/inet.h"
-as_fn_append ac_header_list " fcntl.h"
-as_fn_append ac_header_list " float.h"
-as_fn_append ac_header_list " inttypes.h"
-as_fn_append ac_header_list " limits.h"
-as_fn_append ac_header_list " malloc.h"
-as_fn_append ac_header_list " memory.h"
-as_fn_append ac_header_list " netdb.h"
-as_fn_append ac_header_list " netinet/in.h"
-as_fn_append ac_header_list " stddef.h"
-as_fn_append ac_header_list " stdint.h"
 as_fn_append ac_header_list " stdlib.h"
-as_fn_append ac_header_list " sys/ioctl.h"
+as_fn_append ac_header_list " unistd.h"
 as_fn_append ac_header_list " sys/param.h"
-as_fn_append ac_header_list " sys/socket.h"
-as_fn_append ac_header_list " termios.h"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -5154,9 +5155,7 @@ if test "$ac_res" != no; then :
 fi
 
 
-
 if test -z "$BUILD_CLIENT_TRUE"; then :
-
 
 
 
@@ -5601,219 +5600,25 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-		if  test "x${PTHREAD_LIBS}" = x ; then :
+if  test "x${PTHREAD_LIBS}" = x ; then :
   PTHREAD_LIBS="-pthread"
 fi
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
-$as_echo_n "checking for X... " >&6; }
+gl_dlopen_path=default
+if  test "x${unix_host}" = xdarwin ; then :
 
-
-# Check whether --with-x was given.
-if test "${with_x+set}" = set; then :
-  withval=$with_x;
-fi
-
-# $have_x is `yes', `no', `disabled', or empty when we do not yet know.
-if test "x$with_x" = xno; then
-  # The user explicitly disabled X.
-  have_x=disabled
-else
-  case $x_includes,$x_libraries in #(
-    *\'*) as_fn_error $? "cannot use X directory names containing '" "$LINENO" 5;; #(
-    *,NONE | NONE,*) if ${ac_cv_have_x+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  # One or both of the vars are not set, and there is no cached value.
-ac_x_includes=no ac_x_libraries=no
-rm -f -r conftest.dir
-if mkdir conftest.dir; then
-  cd conftest.dir
-  cat >Imakefile <<'_ACEOF'
-incroot:
-	@echo incroot='${INCROOT}'
-usrlibdir:
-	@echo usrlibdir='${USRLIBDIR}'
-libdir:
-	@echo libdir='${LIBDIR}'
-_ACEOF
-  if (export CC; ${XMKMF-xmkmf}) >/dev/null 2>/dev/null && test -f Makefile; then
-    # GNU make sometimes prints "make[1]: Entering ...", which would confuse us.
-    for ac_var in incroot usrlibdir libdir; do
-      eval "ac_im_$ac_var=\`\${MAKE-make} $ac_var 2>/dev/null | sed -n 's/^$ac_var=//p'\`"
-    done
-    # Open Windows xmkmf reportedly sets LIBDIR instead of USRLIBDIR.
-    for ac_extension in a so sl dylib la dll; do
-      if test ! -f "$ac_im_usrlibdir/libX11.$ac_extension" &&
-	 test -f "$ac_im_libdir/libX11.$ac_extension"; then
-	ac_im_usrlibdir=$ac_im_libdir; break
-      fi
-    done
-    # Screen out bogus values from the imake configuration.  They are
-    # bogus both because they are the default anyway, and because
-    # using them would break gcc on systems where it needs fixed includes.
-    case $ac_im_incroot in
-	/usr/include) ac_x_includes= ;;
-	*) test -f "$ac_im_incroot/X11/Xos.h" && ac_x_includes=$ac_im_incroot;;
-    esac
-    case $ac_im_usrlibdir in
-	/usr/lib | /usr/lib64 | /lib | /lib64) ;;
-	*) test -d "$ac_im_usrlibdir" && ac_x_libraries=$ac_im_usrlibdir ;;
-    esac
-  fi
-  cd ..
-  rm -f -r conftest.dir
-fi
-
-# Standard set of common directories for X headers.
-# Check X11 before X11Rn because it is often a symlink to the current release.
-ac_x_header_dirs='
-/usr/X11/include
-/usr/X11R7/include
-/usr/X11R6/include
-/usr/X11R5/include
-/usr/X11R4/include
-
-/usr/include/X11
-/usr/include/X11R7
-/usr/include/X11R6
-/usr/include/X11R5
-/usr/include/X11R4
-
-/usr/local/X11/include
-/usr/local/X11R7/include
-/usr/local/X11R6/include
-/usr/local/X11R5/include
-/usr/local/X11R4/include
-
-/usr/local/include/X11
-/usr/local/include/X11R7
-/usr/local/include/X11R6
-/usr/local/include/X11R5
-/usr/local/include/X11R4
-
-/usr/X386/include
-/usr/x386/include
-/usr/XFree86/include/X11
-
-/usr/include
-/usr/local/include
-/usr/unsupported/include
-/usr/athena/include
-/usr/local/x11r5/include
-/usr/lpp/Xamples/include
-
-/usr/openwin/include
-/usr/openwin/share/include'
-
-if test "$ac_x_includes" = no; then
-  # Guess where to find include files, by looking for Xlib.h.
-  # First, try using that file with no special directory specified.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <X11/Xlib.h>
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  # We can compile using X headers with no special include directory.
-ac_x_includes=
-else
-  for ac_dir in $ac_x_header_dirs; do
-  if test -r "$ac_dir/X11/Xlib.h"; then
-    ac_x_includes=$ac_dir
-    break
-  fi
-done
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-fi # $ac_x_includes = no
-
-if test "$ac_x_libraries" = no; then
-  # Check for the libraries.
-  # See if we find them without any special options.
-  # Don't add to $LIBS permanently.
-  ac_save_LIBS=$LIBS
-  LIBS="-lX11 $LIBS"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <X11/Xlib.h>
-int
-main ()
-{
-XrmInitialize ()
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  LIBS=$ac_save_LIBS
-# We can link X programs with no special library path.
-ac_x_libraries=
-else
-  LIBS=$ac_save_LIBS
-for ac_dir in `$as_echo "$ac_x_includes $ac_x_header_dirs" | sed s/include/lib/g`
-do
-  # Don't even attempt the hair of trying to link an X program!
-  for ac_extension in a so sl dylib la dll; do
-    if test -r "$ac_dir/libX11.$ac_extension"; then
-      ac_x_libraries=$ac_dir
-      break 2
-    fi
-  done
-done
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-fi # $ac_x_libraries = no
-
-case $ac_x_includes,$ac_x_libraries in #(
-  no,* | *,no | *\'*)
-    # Didn't find X, or a directory has "'" in its name.
-    ac_cv_have_x="have_x=no";; #(
-  *)
-    # Record where we found X for the cache.
-    ac_cv_have_x="have_x=yes\
-	ac_x_includes='$ac_x_includes'\
-	ac_x_libraries='$ac_x_libraries'"
-esac
-fi
-;; #(
-    *) have_x=yes;;
-  esac
-  eval "$ac_cv_have_x"
-fi # $with_x != no
-
-if test "$have_x" != yes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_x" >&5
-$as_echo "$have_x" >&6; }
-  no_x=yes
-else
-  # If each of the values was on the command line, it overrides each guess.
-  test "x$x_includes" = xNONE && x_includes=$ac_x_includes
-  test "x$x_libraries" = xNONE && x_libraries=$ac_x_libraries
-  # Update the cache value to reflect the command line values.
-  ac_cv_have_x="have_x=yes\
-	ac_x_includes='$x_includes'\
-	ac_x_libraries='$x_libraries'"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: libraries $x_libraries, headers $x_includes" >&5
-$as_echo "libraries $x_libraries, headers $x_includes" >&6; }
-fi
-
-
-	gl_dlopen_path=default
-	if  test "x${unix_host}" = xdarwin ; then :
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GL_LIBDIR (location of libGL.dylib)" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GL_LIBDIR (location of libGL.dylib)" >&5
 $as_echo_n "checking for GL_LIBDIR (location of libGL.dylib)... " >&6; }
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${GL_LIBDIR}" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${GL_LIBDIR}" >&5
 $as_echo "${GL_LIBDIR}" >&6; }
-		if  test "x${GL_LIBDIR}" = x ; then :
+	if  test "x${GL_LIBDIR}" = x ; then :
 
-			gl_dlopen_path=${x_libraries}
+		gl_dlopen_path=${x_libraries}
 else
 
-			gl_dlopen_path=${GL_LIBDIR}
+		gl_dlopen_path=${GL_LIBDIR}
 fi
 
 fi
@@ -5909,6 +5714,8 @@ else
 $as_echo "yes" >&6; }
 
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $X11_CFLAGS, $X11_LIBS" >&5
+$as_echo "$X11_CFLAGS, $X11_LIBS" >&6; }
 
 
 # Check whether --with-xf86vm was given.
@@ -5918,8 +5725,8 @@ else
   with_xf86vm=check
 fi
 
-	have_Xxf86vm=no
-	if  test "x${with_xf86vm}" != xno ; then :
+have_Xxf86vm=no
+if  test "x${with_xf86vm}" != xno ; then :
 
 
 pkg_failed=no
@@ -5981,10 +5788,10 @@ fi
 	echo "$XXF86VM_PKG_ERRORS" >&5
 
 
-			have_Xxf86vm=no
-			if  test "x${with_xf86vm}" = xyes ; then :
+		have_Xxf86vm=no
+		if  test "x${with_xf86vm}" = xyes ; then :
 
-				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "--with-xf86vm specified, library or headers found
 See \`config.log' for more details" "$LINENO" 5; }
@@ -5995,10 +5802,10 @@ elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-			have_Xxf86vm=no
-			if  test "x${with_xf86vm}" = xyes ; then :
+		have_Xxf86vm=no
+		if  test "x${with_xf86vm}" = xyes ; then :
 
-				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "--with-xf86vm specified, library or headers found
 See \`config.log' for more details" "$LINENO" 5; }
@@ -6011,7 +5818,7 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
-			have_Xxf86vm=yes
+		have_Xxf86vm=yes
 
 $as_echo "#define HAVE_XXF86VM 1" >>confdefs.h
 
@@ -6159,7 +5966,6 @@ fi
 fi
 
 
-
 # Check whether --with-zlib was given.
 if test "${with_zlib+set}" = set; then :
   withval=$with_zlib;
@@ -6167,8 +5973,8 @@ else
   with_zlib=check
 fi
 
-	have_zlib=no
-	if  test "x${with_zlib}" != xno ; then :
+have_zlib=no
+if  test "x${with_zlib}" != xno ; then :
 
 
 pkg_failed=no
@@ -6230,10 +6036,10 @@ fi
 	echo "$ZLIB_PKG_ERRORS" >&5
 
 
-			have_zlib=no
-			if  test "x${with_zlib}" = xyes ; then :
+		have_zlib=no
+		if  test "x${with_zlib}" = xyes ; then :
 
-				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "--with-zlib specified, library or headers not found
 See \`config.log' for more details" "$LINENO" 5; }
@@ -6244,10 +6050,10 @@ elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-			have_zlib=no
-			if  test "x${with_zlib}" = xyes ; then :
+		have_zlib=no
+		if  test "x${with_zlib}" = xyes ; then :
 
-				{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "--with-zlib specified, library or headers not found
 See \`config.log' for more details" "$LINENO" 5; }
@@ -6260,7 +6066,7 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
-			have_zlib=yes
+		have_zlib=yes
 
 $as_echo "#define HAVE_ZLIB 1" >>confdefs.h
 
@@ -6269,7 +6075,7 @@ fi
 
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
 $as_echo_n "checking for library containing jpeg_read_header... " >&6; }
 if ${ac_cv_search_jpeg_read_header+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -6324,32 +6130,26 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
-  as_fn_error $? "\"Required jpeg library not found.\"" "$LINENO" 5
+  as_fn_error $? "\"Required jpeg library not found\"" "$LINENO" 5
 
 fi
 
 
 
-
-
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking other library dependencies" >&5
-$as_echo_n "checking other library dependencies... " >&6; }
-
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DEPS" >&5
-$as_echo_n "checking for DEPS... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBCURL" >&5
+$as_echo_n "checking for LIBCURL... " >&6; }
 
-if test -n "$DEPS_CFLAGS"; then
-    pkg_cv_DEPS_CFLAGS="$DEPS_CFLAGS"
+if test -n "$LIBCURL_CFLAGS"; then
+    pkg_cv_LIBCURL_CFLAGS="$LIBCURL_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcurl ogg vorbis vorbisfile freetype2 ode\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "libcurl ogg vorbis vorbisfile freetype2 ode") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcurl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcurl") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DEPS_CFLAGS=`$PKG_CONFIG --cflags "libcurl ogg vorbis vorbisfile freetype2 ode" 2>/dev/null`
+  pkg_cv_LIBCURL_CFLAGS=`$PKG_CONFIG --cflags "libcurl" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -6357,16 +6157,16 @@ fi
  else
     pkg_failed=untried
 fi
-if test -n "$DEPS_LIBS"; then
-    pkg_cv_DEPS_LIBS="$DEPS_LIBS"
+if test -n "$LIBCURL_LIBS"; then
+    pkg_cv_LIBCURL_LIBS="$LIBCURL_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcurl ogg vorbis vorbisfile freetype2 ode\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "libcurl ogg vorbis vorbisfile freetype2 ode") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcurl\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcurl") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DEPS_LIBS=`$PKG_CONFIG --libs "libcurl ogg vorbis vorbisfile freetype2 ode" 2>/dev/null`
+  pkg_cv_LIBCURL_LIBS=`$PKG_CONFIG --libs "libcurl" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -6387,22 +6187,100 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        DEPS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libcurl ogg vorbis vorbisfile freetype2 ode" 2>&1`
+	        LIBCURL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libcurl" 2>&1`
         else
-	        DEPS_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libcurl ogg vorbis vorbisfile freetype2 ode" 2>&1`
+	        LIBCURL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libcurl" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
-	echo "$DEPS_PKG_ERRORS" >&5
+	echo "$LIBCURL_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (libcurl ogg vorbis vorbisfile freetype2 ode) were not met:
 
-$DEPS_PKG_ERRORS
+	as_fn_error $? "\"Required cURL library not found\"" "$LINENO" 5
+
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+	as_fn_error $? "\"Required cURL library not found\"" "$LINENO" 5
+
+else
+	LIBCURL_CFLAGS=$pkg_cv_LIBCURL_CFLAGS
+	LIBCURL_LIBS=$pkg_cv_LIBCURL_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${LIBCURL_CFLAGS}" >&5
+$as_echo "${LIBCURL_CFLAGS}" >&6; }
+fi
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OGG_VORBIS" >&5
+$as_echo_n "checking for OGG_VORBIS... " >&6; }
+
+if test -n "$OGG_VORBIS_CFLAGS"; then
+    pkg_cv_OGG_VORBIS_CFLAGS="$OGG_VORBIS_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \" ogg vorbis vorbisfile \""; } >&5
+  ($PKG_CONFIG --exists --print-errors " ogg vorbis vorbisfile ") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OGG_VORBIS_CFLAGS=`$PKG_CONFIG --cflags " ogg vorbis vorbisfile " 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$OGG_VORBIS_LIBS"; then
+    pkg_cv_OGG_VORBIS_LIBS="$OGG_VORBIS_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \" ogg vorbis vorbisfile \""; } >&5
+  ($PKG_CONFIG --exists --print-errors " ogg vorbis vorbisfile ") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_OGG_VORBIS_LIBS=`$PKG_CONFIG --libs " ogg vorbis vorbisfile " 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        OGG_VORBIS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs " ogg vorbis vorbisfile " 2>&1`
+        else
+	        OGG_VORBIS_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs " ogg vorbis vorbisfile " 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$OGG_VORBIS_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements ( ogg vorbis vorbisfile ) were not met:
+
+$OGG_VORBIS_PKG_ERRORS
 
 Consider adjusting the PKG_CONFIG_PATH environment variable if you
 installed software in a non-standard prefix.
 
-Alternatively, you may set the environment variables DEPS_CFLAGS
-and DEPS_LIBS to avoid the need to call pkg-config.
+Alternatively, you may set the environment variables OGG_VORBIS_CFLAGS
+and OGG_VORBIS_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details." "$LINENO" 5
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -6413,21 +6291,194 @@ as_fn_error $? "The pkg-config script could not be found or is too old.  Make su
 is in your PATH or set the PKG_CONFIG environment variable to the full
 path to pkg-config.
 
-Alternatively, you may set the environment variables DEPS_CFLAGS
-and DEPS_LIBS to avoid the need to call pkg-config.
+Alternatively, you may set the environment variables OGG_VORBIS_CFLAGS
+and OGG_VORBIS_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details.
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.
 See \`config.log' for more details" "$LINENO" 5; }
 else
-	DEPS_CFLAGS=$pkg_cv_DEPS_CFLAGS
-	DEPS_LIBS=$pkg_cv_DEPS_LIBS
+	OGG_VORBIS_CFLAGS=$pkg_cv_OGG_VORBIS_CFLAGS
+	OGG_VORBIS_LIBS=$pkg_cv_OGG_VORBIS_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
 fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $DEPS_CFLAGS , $DEPS_LIBS" >&5
-$as_echo "$DEPS_CFLAGS , $DEPS_LIBS" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${OGG_VORBIS_CFLAGS}, ${OGG_VORBIS_LIBS}" >&5
+$as_echo "${OGG_VORBIS_CFLAGS}, ${OGG_VORBIS_LIBS}" >&6; }
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for FREETYPE" >&5
+$as_echo_n "checking for FREETYPE... " >&6; }
+
+if test -n "$FREETYPE_CFLAGS"; then
+    pkg_cv_FREETYPE_CFLAGS="$FREETYPE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"freetype2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "freetype2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_FREETYPE_CFLAGS=`$PKG_CONFIG --cflags "freetype2" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$FREETYPE_LIBS"; then
+    pkg_cv_FREETYPE_LIBS="$FREETYPE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"freetype2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "freetype2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_FREETYPE_LIBS=`$PKG_CONFIG --libs "freetype2" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        FREETYPE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "freetype2" 2>&1`
+        else
+	        FREETYPE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "freetype2" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$FREETYPE_PKG_ERRORS" >&5
+
+
+	as_fn_error $? "\"Required FreeType library not found\"" "$LINENO" 5
+
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+	as_fn_error $? "\"Required FreeType library not found\"" "$LINENO" 5
+
+else
+	FREETYPE_CFLAGS=$pkg_cv_FREETYPE_CFLAGS
+	FREETYPE_LIBS=$pkg_cv_FREETYPE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $FREETYPE_CFLAGS, $FREETYPE_LIBS" >&5
+$as_echo "$FREETYPE_CFLAGS, $FREETYPE_LIBS" >&6; }
+fi
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ODE" >&5
+$as_echo_n "checking for ODE... " >&6; }
+
+if test -n "$ODE_CFLAGS"; then
+    pkg_cv_ODE_CFLAGS="$ODE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ODE_CFLAGS=`$PKG_CONFIG --cflags "ode" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$ODE_LIBS"; then
+    pkg_cv_ODE_LIBS="$ODE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ODE_LIBS=`$PKG_CONFIG --libs "ode" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        ODE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "ode" 2>&1`
+        else
+	        ODE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "ode" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ODE_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (ode) were not met:
+
+$ODE_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables ODE_CFLAGS
+and ODE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables ODE_CFLAGS
+and ODE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	ODE_CFLAGS=$pkg_cv_ODE_CFLAGS
+	ODE_LIBS=$pkg_cv_ODE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${ODE_CFLAGS}, ${ODE_LIBS}" >&5
+$as_echo "${ODE_CFLAGS}, ${ODE_LIBS}" >&6; }
+
 
 
 fi
@@ -6435,6 +6486,7 @@ fi
 #
 # Checks for header files
 #
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
 $as_echo_n "checking for grep that handles long lines and -e... " >&6; }
@@ -6969,6 +7021,31 @@ fi
 $as_echo "$ac_enable_assert" >&6; }
 
 
+for ac_header in unistd.h stdarg.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in dlfcn.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "dlfcn.h" "ac_cv_header_dlfcn_h" "$ac_includes_default"
+if test "x$ac_cv_header_dlfcn_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLFCN_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in sys/time.h time.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -6982,7 +7059,6 @@ fi
 
 done
 
-
 for ac_header in string.h strings.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -6991,80 +7067,10 @@ if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- break
-fi
-
-done
-
-
-
-
-
-  for ac_header in $ac_header_list
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
-"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
 
 fi
 
 done
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-for ac_header in dlfcn.h sys/mman.h stdarg.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
 
 for ac_header in signal.h
 do :
@@ -7078,12 +7084,81 @@ fi
 
 done
 
+for ac_header in setjmp.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "setjmp.h" "ac_cv_header_setjmp_h" "$ac_includes_default"
+if test "x$ac_cv_header_setjmp_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SETJMP_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in math.h float.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in  \
+	sys/socket.h \
+	netinet/in.h  \
+	netdb.h \
+	sys/param.h \
+	sys/ioctl.h \
+	sys/uio.h \
+
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+for ac_header in  \
+	arpa/inet.h \
+	fcntl.h \
+	inttypes.h \
+	limits.h \
+	malloc.h \
+	memory.h \
+	termios.h \
+	sys/mman.h
+
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
 
 if test -z "$BUILD_CLIENT_TRUE"; then :
 
 
-	jpeglib_h_found=no
-	for ac_header in jpeglib.h jpeg/jpeglib.h
+jpeglib_h_found=no
+for ac_header in jpeglib.h jpeg/jpeglib.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7096,12 +7171,12 @@ fi
 
 done
 
-	if  test "x${jpeglib_h_found}" = xno ; then :
+if  test "x${jpeglib_h_found}" = xno ; then :
   as_fn_error $? "\"Required JPEG header file not found.\"" "$LINENO" 5
 fi
 
-	openal_h_found=no
-	for ac_header in AL/al.h al.h OpenAL/al.h
+openal_h_found=no
+for ac_header in AL/al.h al.h OpenAL/al.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7114,12 +7189,12 @@ fi
 
 done
 
-	if  test "x${openal_h_found}" = xno ; then :
+if  test "x${openal_h_found}" = xno ; then :
   as_fn_error $? "\"Required OpenAL header file not found.\"" "$LINENO" 5
 fi
 
-	openalc_h_found=no
-	for ac_header in AL/alc.h alc.h OpenAL/alc.h
+openalc_h_found=no
+for ac_header in AL/alc.h alc.h OpenAL/alc.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7132,11 +7207,11 @@ fi
 
 done
 
-	if  test "x${openalc_h_found}" = xno ; then :
+if  test "x${openalc_h_found}" = xno ; then :
   as_fn_error $? "\"Required OpenAL header file not found.\"" "$LINENO" 5
 fi
 
-	for ac_header in GL/gl.h
+for ac_header in GL/gl.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
 if test "x$ac_cv_header_GL_gl_h" = xyes; then :
@@ -7150,7 +7225,7 @@ fi
 
 done
 
-	for ac_header in GL/glx.h
+for ac_header in GL/glx.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "GL/glx.h" "ac_cv_header_GL_glx_h" "$ac_includes_default"
 if test "x$ac_cv_header_GL_glx_h" = xyes; then :
@@ -7165,7 +7240,7 @@ fi
 done
 
 
-	for ac_header in ode/ode.h
+for ac_header in ode/ode.h
 do :
   ac_fn_c_check_header_compile "$LINENO" "ode/ode.h" "ac_cv_header_ode_ode_h" "
 #define dDOUBLE
@@ -7182,6 +7257,7 @@ else
 fi
 
 done
+
 
 
 fi
@@ -7624,6 +7700,29 @@ fi
 
 
 
+
+
+  for ac_header in $ac_header_list
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+
+
+
+
+
+
 for ac_func in getpagesize
 do :
   ac_fn_c_check_func "$LINENO" "getpagesize" "ac_cv_func_getpagesize"
@@ -7913,9 +8012,32 @@ esac
 fi
 
 
+for ac_func in vsnprintf
+do :
+  ac_fn_c_check_func "$LINENO" "vsnprintf" "ac_cv_func_vsnprintf"
+if test "x$ac_cv_func_vsnprintf" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_VSNPRINTF 1
+_ACEOF
+
+fi
+done
+
+for ac_func in strerror
+do :
+  ac_fn_c_check_func "$LINENO" "strerror" "ac_cv_func_strerror"
+if test "x$ac_cv_func_strerror" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRERROR 1
+_ACEOF
+
+fi
+done
+
+
 for ac_func in clock_gettime floor getcwd gethostbyname gettimeofday \
   isascii memmove memset mkdir munmap pow putenv select socket sqrt \
-  strchr strdup strerror strrchr strstr strtoul
+  strchr strdup strrchr strstr strtoul
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -7942,9 +8064,52 @@ fi
 done
 
 
+for ac_func in closesocket
+do :
+  ac_fn_c_check_func "$LINENO" "closesocket" "ac_cv_func_closesocket"
+if test "x$ac_cv_func_closesocket" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CLOSESOCKET 1
+_ACEOF
+
+fi
+done
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking POSIX termios" >&5
+$as_echo_n "checking POSIX termios... " >&6; }
+if ${ac_cv_sys_posix_termios+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#include <unistd.h>
+#include <termios.h>
+
+int
+main ()
+{
+/* SunOS 4.0.3 has termios.h but not the library calls.  */
+   tcgetattr(0, 0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_sys_posix_termios=yes
+else
+  ac_cv_sys_posix_termios=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_posix_termios" >&5
+$as_echo "$ac_cv_sys_posix_termios" >&6; }
+
+
 # AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 # AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
-
 
 
 #

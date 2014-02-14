@@ -31,24 +31,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
 
-#include <stdio.h>
-#if defined HAVE_MALLOC_H
-#include <malloc.h>
-#elif defined HAVE_MALLOC_MALLOC_H
-#include <malloc/malloc.h>
-#endif
-#include <string.h>
-
-#if defined HAVE_AL_H
-#include <al.h>
-#include <alc.h>
-#elif defined HAVE_AL_AL_H
-#include <AL/al.h>
-#include <AL/alc.h>
-#elif defined HAVE_OPENAL_AL_H
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
+#ifdef HAVE_AL_H
+# include <al.h>
+# include <alc.h>
+#else
+# ifdef HAVE_AL_AL_H
+#  include <AL/al.h>
+#  include <AL/alc.h>
+# else
+#  ifdef HAVE_OPENAL_AL_H
+#   include <OpenAL/al.h>
+#   include <OpenAL/alc.h>
+#  endif
+# endif
 #endif
 
 #include "client.h"
@@ -64,13 +61,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // These 2 are defined in cl_main.c
 //cvar_t *background_music; //     enable/disable music
 //cvar_t *background_music_vol; // music volume setting
-cvar_t *s_initsound; //   in cfg or on command line, to disable sound
-cvar_t *s_volume; //      global volume setting
+cvar_t *s_initsound;  // in cfg or on command line, to disable sound
+cvar_t *s_volume;     // global volume setting
 /*--- OpenAL additions ---*/
-cvar_t *s_doppler; //     0=doppler off, non-zero Doppler Factor
-cvar_t *s_maxsources; //  upper limit on generated Sources
-cvar_t *s_minsources; //  lower limit on generated Sources
-cvar_t *s_device; //      name of device to use
+cvar_t *s_doppler;    // 0=doppler off, non-zero Doppler Factor
+cvar_t *s_maxsources; // upper limit on generated Sources
+cvar_t *s_minsources; // lower limit on generated Sources
+cvar_t *s_device;     // name of device to use
 /*--- debug ---*/
 cvar_t *snd_developer; // for debug printf's
 
@@ -86,22 +83,22 @@ int s_registration_sequence; // id for current "batch"
  */
 typedef struct sfx_s
 {
-	void *backlink; //           link to the sfx_link node
-	qboolean silent; //          for when sound effect file is missing
-	qboolean bg_music; //        this is background music
+	void *backlink;            // link to the sfx_link node
+	qboolean silent;           // for when sound effect file is missing
+	qboolean bg_music;         // this is background music
 	int registration_sequence; // used for culling stale sfx's from pre-cache
-	int byte_width; //           1=8-bit, 2=16-bit
-	int channels; //             1=mono, 2=stereo,
-	int samplerate; //           samples-per-sec, aka Hz
-	size_t byte_count; //        size of the sound data
-	void *filebfr; //            intermediate buffer for file reading
-	void *pcmbfr; //             where PCM data is in filebfr
-	qboolean buffered; //        data has been read into OpenAL buffer
-	int oalFormat; //            file format code from OpenAL
-	ALuint oalBuffer; //         index into collection of OpenAL buffers
-	qboolean aliased; //         the file loaded is an alias for the truename
-	char name[MAX_QPATH]; //     relative file path
-	char truename[MAX_QPATH]; // in case 'name' is an 'alias'
+	int byte_width;            // 1=8-bit, 2=16-bit
+	int channels;              // 1=mono, 2=stereo,
+	int samplerate;            // samples-per-sec, aka Hz
+	size_t byte_count;         // size of the sound data
+	void *filebfr;             // intermediate buffer for file reading
+	void *pcmbfr;              // where PCM data is in filebfr
+	qboolean buffered;         // data has been read into OpenAL buffer
+	int oalFormat;             // file format code from OpenAL
+	ALuint oalBuffer;          // index into collection of OpenAL buffers
+	qboolean aliased;          // the file loaded is an alias for the truename
+	char name[MAX_QPATH];      // relative file path
+	char truename[MAX_QPATH];  // in case 'name' is an 'alias'
 } sfx_t;
 
 typedef struct sfxlink_s // node for the sfx_t lists
@@ -133,20 +130,20 @@ typedef enum velocity_state_e
 
 typedef struct src_s
 {
-	void *backlink; //        link to the src_link node
-	int start_timer; //       for delayed start
-	int stop_timer; //        for delayed forced stop
-	int entnum; //            the entity identifier, index into cl_entities[]
-	int entchannel; //        the "channel", AUTO, WEAP, etc.
+	void *backlink;        // link to the src_link node
+	int start_timer;       // for delayed start
+	int stop_timer;        // for delayed forced stop
+	int entnum;            // the entity identifier, index into cl_entities[]
+	int entchannel;        // the "channel", AUTO, WEAP, etc.
 	qboolean fixed_origin; // non-moving point implied by non-NULL origin arg
-	int attn_class; //        attenuation classification ATTN_NORM, etc.
-	qboolean looping; //      for AL_LOOPING Sources
+	int attn_class;        // attenuation classification ATTN_NORM, etc.
+	qboolean looping;      // for AL_LOOPING Sources
 	loop_mark_t loop_mark; // for finding "automatic" looping sounds
-	int entity_index; //      for CL_GetEntitySoundOrigin()
-	int sound_field; //       entity_state_t .sound
+	int entity_index;      // for CL_GetEntitySoundOrigin()
+	int sound_field;       // entity_state_t .sound
 	velocity_state_t velocity_state; //velocity tracking for doppler
-	sfx_t *sfx; //            the associated sound effect
-	ALuint oalSource; //      the OpenAL Source name/id
+	sfx_t *sfx;            // the associated sound effect
+	ALuint oalSource;      // the OpenAL Source name/id
 } src_t;
 
 typedef struct srclink_s // node for the src_t lists
@@ -160,9 +157,9 @@ srclink_t *src_datahead;
 srclink_t *src_freehead;
 srclink_t src_link[MAX_SRC];
 src_t src_data[MAX_SRC];
-int actual_src_count; //      number of sources generated
-int source_counter; //        current number of sources in use
-int max_sources_used; //      for tracking max number of sources used
+int actual_src_count;      // number of sources generated
+int source_counter;        // current number of sources in use
+int max_sources_used;      // for tracking max number of sources used
 int source_failed_counter; // for counting source alloc failures
 int max_sources_failed;
 
@@ -244,31 +241,31 @@ const struct source_default_s
 	// int stop_timer_delay;
 } source_default =
 {
-		(ALfloat)1.0f, //    AL_PITCH
-        (ALfloat)1.0f, //    AL_GAIN
-        (ALfloat)0.7f, //    AL_GAIN for auto loop sounds
-        // ATTN_NORM:
-        (ALfloat)3200.0f, // AL_MAX_DISTANCE (ATTN_NORM)
-        (ALfloat)1.5f, //    AL_ROLLOFF_FACTOR (ATTN_NORM)
-        (ALfloat)320.0f, //  AL_REFERENCE_DISTANCE (ATTN_NORM)
-        // ATTN_IDLE:
-        (ALfloat)2800.0f, // AL_MAX_DISTANCE (ATTN_IDLE)
-        (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_IDLE)
-        (ALfloat)280.0f, //  AL_REFERENCE_DISTANCE (ATTN_IDLE)
-        // ATTN_STATIC:
-        (ALfloat)1600.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
-        (ALfloat)2.2f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
-        (ALfloat)160.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
-        // "Auto Looping"
-        (ALfloat)1600.0f, // AL_MAX_DISTANCE (Looping)
-        (ALfloat)1.8f, //    AL_ROLLOFF_FACTOR (Looping)
-        (ALfloat)160.0f, //  AL_REFERENCE_DISTANCE (Looping)
-        //
-        (ALfloat)0.0f, //    AL_MIN_GAIN
-        (ALfloat)1.0f, //    AL_MAX_GAIN
-        (ALfloat)0.0f, //    AL_CONE_OUTER_GAIN
-        (ALfloat)360.0f, //  AL_CONE_INNER_ANGLE
-        (ALfloat)360.0f //   AL_CONE_OUTER_ANGLE
+	(ALfloat)1.0f,    // AL_PITCH
+	(ALfloat)1.0f,    // AL_GAIN
+	(ALfloat)0.7f,    // AL_GAIN for auto loop sounds
+	// ATTN_NORM:
+	(ALfloat)3200.0f, // AL_MAX_DISTANCE (ATTN_NORM)
+	(ALfloat)1.5f,    // AL_ROLLOFF_FACTOR (ATTN_NORM)
+	(ALfloat)320.0f,  // AL_REFERENCE_DISTANCE (ATTN_NORM)
+	// ATTN_IDLE:
+	(ALfloat)2800.0f, // AL_MAX_DISTANCE (ATTN_IDLE)
+	(ALfloat)2.0f,    // AL_ROLLOFF_FACTOR (ATTN_IDLE)
+	(ALfloat)280.0f,  // AL_REFERENCE_DISTANCE (ATTN_IDLE)
+	// ATTN_STATIC:
+	(ALfloat)1600.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
+	(ALfloat)2.2f,    // AL_ROLLOFF_FACTOR (ATTN_STATIC)
+	(ALfloat)160.0f,  // AL_REFERENCE_DISTANCE (ATTN_STATIC)
+	// "Auto Looping"
+	(ALfloat)1600.0f, // AL_MAX_DISTANCE (Looping)
+	(ALfloat)1.8f,    // AL_ROLLOFF_FACTOR (Looping)
+	(ALfloat)160.0f,  // AL_REFERENCE_DISTANCE (Looping)
+	//
+	(ALfloat)0.0f,    // AL_MIN_GAIN
+	(ALfloat)1.0f,    // AL_MAX_GAIN
+	(ALfloat)0.0f,    // AL_CONE_OUTER_GAIN
+	(ALfloat)360.0f,  // AL_CONE_INNER_ANGLE
+	(ALfloat)360.0f   // AL_CONE_OUTER_ANGLE
  };
 
 /*

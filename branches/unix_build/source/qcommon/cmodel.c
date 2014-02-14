@@ -25,8 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "qcommon.h"
 
-#include <float.h>
-
 typedef struct
 {
 	cplane_t	*plane;

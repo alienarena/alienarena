@@ -26,8 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "com_std.h"
 
-#include <qcommon/htable.h>
+#include "qcommon/htable.h"
 #include "r_local.h"
 
 #include "r_text.h"

@@ -696,11 +696,6 @@ void SCR_DrawLoading (void)
 	else
 		Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0,0,0,1));
 
-#if 0
-	// no m_background pic, but a pic here over-writes the levelshot
-	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_background");
-#endif
-
 	//loading message stuff...
 	if (isMap)
 	{

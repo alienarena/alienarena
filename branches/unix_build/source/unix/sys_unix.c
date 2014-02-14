@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+// -jjb- <sys/select.h> posix 2001  see man select
+
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -46,7 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "qcommon/qcommon.h"
-#include "unix/rw_unix.h"
+#include "rw_unix.h"
 
 extern void HandleEvents(void);
 extern void *GetGameAPI( void *import);
@@ -303,7 +305,7 @@ char *Sys_ConsoleInput( void )
 }
 
 /**
- * Output text to the console/terminal
+ * Output text to the terminal
  *
  * @parameter ostring - nul-terminated string to be output
  */
@@ -336,9 +338,9 @@ void Sys_ConsoleOutput( const  char *ostring )
 				continue;
 			}
 			if (*ostring == '\n')
-				printf ("\033[0m\n");
+				fputs( "\033[0m\n", stdout );
 			else if (*ostring == ' ')
-				printf( "\033[0m " );
+				fputs( "\033[0m ", stdout  );
 			else
 				printf( "%c", *ostring );
 			ostring++;
@@ -352,19 +354,19 @@ void Sys_ConsoleOutput( const  char *ostring )
 }
 
 /**
- * printf for console/terminal output
+ * printf for terminal output
  */
 void Sys_Printf( const char *fmt, ... )
 {
 	va_list argptr;
-	char    text[128];
+	char    text[128]; // -jjb- malloc, see Com_Printf
 	int     textsize;
 
 	if ( stdout_disabled() )
 		return;
 
 	va_start( argptr,fmt );
-	textsize = vsnprintf( text, sizeof(text), fmt, argptr);
+	textsize = vsnprintf( text, sizeof(text), fmt, argptr );
 	va_end( argptr );
 
 	if ( textsize >= (int)sizeof(text) )
@@ -378,7 +380,7 @@ void Sys_Printf( const char *fmt, ... )
 /**
  * Normal program exit
  */
-void Sys_Quit(void)
+void Sys_Quit( void )
 {
 	
 	clear_nonblock_stdin();
@@ -386,9 +388,10 @@ void Sys_Quit(void)
 #if !defined DEDICATED_ONLY
 	CL_Shutdown();
 #endif
+
 	Qcommon_Shutdown(); /* might do nothing */
 
-	exit(0);
+	exit( EXIT_SUCCESS ); // -jjb- use atexit?
 }
 
 /**
@@ -434,7 +437,6 @@ void Sys_Error( const char *error_msg )
  */
 void Sys_Warn( const char *warning_msg )
 {
-
 	if ( stderr_enabled  )
 	{
 		(void)write( fileno(stderr), warning_msg, strlen( warning_msg ));
@@ -569,12 +571,12 @@ int	Sys_FileTime (char *path)
 {
 #if defined HAVE_STAT
 	struct stat buf;
-	if (stat (path,&buf) == -1)
+	if ( stat( path,&buf ) == -1)
 		return -1;
 
 	return buf.st_mtime;
 #else
-	return 0;
+	return -1;
 #endif
 }
 
@@ -612,65 +614,11 @@ void Sys_SendKeyEvents( void )
 	sys_frame_time = Sys_Milliseconds();
 }
 
+
 /*----------------------------------------------------------------- main()---*/
 
-int main( int argc, char** argv )
+static void stdio_init( void )
 {
-#if defined DEDICATED_ONLY
-
-/*
- * main() for terminal-based dedicated servers
- */
-	int dtime, oldtime, newtime;
-
-	/* init setuid access, remember real and effective user IDs */
-	init_setuid();
-
-	/* a terminal with non-blocking input is required */
-	stdin_enabled = true;
-	if ( set_nonblock_stdin() == -1 )
-	{
-		exit(1);
-	}
-	stdout_enabled = terminal_stdout_exists();
-	stderr_enabled = terminal_stderr_exists();
-	if ( !stdout_enabled || !stderr_enabled )
-	{
-		exit(1);
-	}
-
-	Qcommon_Init( argc, argv );
-
-	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
-	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
-
-    oldtime = Sys_Milliseconds();
-	for (;;)
-	{
-		do
-		{
-			newtime = Sys_Milliseconds();
-			dtime = newtime - oldtime;
-		} while ( dtime < 1 );
-		oldtime = newtime;
-		curtime = newtime; /* consistent curtime for the frame */
-		
-		Qcommon_Frame( dtime );
-
-	}
-
-#else
-
-/*
- * main() for X11-based client/listen-server. Commonly, will be run
- * using a window manager's launcher, and may not be run using 
- * a terminal. When that happens, output ends up in the system log,
- * which looks ridiculous.
- */
-	int dtime, oldtime, newtime;
-
-	/* init setuid access, remember real and effective user IDs */
-	init_setuid();
 
 	stdin_enabled  = terminal_stdin_exists();
 	stdout_enabled = terminal_stdout_exists();
@@ -682,8 +630,10 @@ int main( int argc, char** argv )
 		if ( NULL == freopen( "/dev/null", "w", stdout ) )
 			Com_DPrintf("main: stdout redirect to /dev/null failed\n");
 	}
+
 	if ( !stderr_enabled )
 	{
+		// -jjb- redirect stderr to a log ???
 		if ( NULL == freopen( "/dev/null", "w", stderr ) )
 			Com_DPrintf("main: stderr redirect to /dev/null failed\n");
 	}
@@ -691,25 +641,96 @@ int main( int argc, char** argv )
 	if ( stdin_enabled )
 		set_nonblock_stdin();
 
-	Qcommon_Init( argc, argv );
+}
 
- 	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
- 	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
+static void stdio_init_ded( void )
+{
 
-	oldtime = Sys_Milliseconds();
+	/* a terminal with non-blocking input is required */
+	stdin_enabled = true;
+	if ( set_nonblock_stdin() == -1 )
+	{
+		exit( EXIT_FAILURE );
+	}
+	stdout_enabled = terminal_stdout_exists();
+	stderr_enabled = terminal_stderr_exists();
+	if ( !stdout_enabled || !stderr_enabled )
+	{
+		exit( EXIT_FAILURE );
+	}
+
+}
+
+static void
+mainloop_sleep( void )
+{
+	fd_set fdset;
+	struct timeval timeout;
+	int result;
+
+	FD_ZERO( &fdset ); // sets and timeouts not persistent
+	timeout.tv_sec  = 0;
+	timeout.tv_usec = 1250;
+	result  = select( FD_SETSIZE, &fdset, NULL, NULL, &timeout );
+	if ( result == -1 )
+		perror( "select" ); // -jjb-
+
+}
+
+static void
+main_loop( void )
+{
+	int oldtime; /* times in milliseconds */
+	int newtime;
+	int dtime;   /* delta time */
+
+	oldtime = newtime = Sys_Milliseconds();
+	dtime = newtime - oldtime;
 	for (;;)
 	{
-		do {
+		while ( dtime < 1 )
+		{
+			mainloop_sleep();
 			newtime = Sys_Milliseconds();
 			dtime   = newtime - oldtime;
-		} while ( dtime < 1 );
+		}
 		oldtime = newtime;
 		curtime = newtime; /* consistent curtime for the frame */
 
 		Qcommon_Frame( dtime );
-	}
 
+		newtime = Sys_Milliseconds();
+		dtime = newtime - oldtime;
+	}
+}
+
+/* 
+ * conventional single char option ideas
+ *  -v  version 
+ *  -h  help
+ *  -g  game name
+ *  -t  test
+ *  
+ */
+int main( int argc, char** argv )
+{
+	int dtime, oldtime, newtime;
+
+	/* init setuid access, remember real and effective user IDs */
+	init_setuid();
+
+#if defined DEDICATED_ONLY
+	stdio_init_ded();
+#else
+	stdio_init();
 #endif
+
+	Qcommon_Init( argc, argv );
+
+	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
+	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
+
+	main_loop();
 
 	return 0; /* unreachable */
 }

@@ -98,17 +98,12 @@ AS_CASE([ ${host} ],
 dnl
 dnl host-dependent conditional compile and version string settings for config.h
 dnl
-dnl TODO: consider adding FreeBSD
-dnl
 AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
 
 AS_CASE([${unix_host}],
 	[ darwin ],
 		[
 		AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])
-		dnl
-		dnl possible error from select() in unix/net_udp.c::Net_Sleep()
-		dnl
 		AC_DEFINE([_DARWIN_UNLIMITED_SELECT],1,
 				[see select (2) man page for Mac OS X])
 		],
@@ -168,7 +163,7 @@ AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
 
 dnl
 dnl Option for documentation installation
-dnl Note: distros have custom document install methods
+dnl Note: distros may have custom document install methods
 dnl
 AC_MSG_CHECKING([whether to install documents])
 AC_ARG_ENABLE([doc_install],
@@ -214,38 +209,34 @@ dnl start of client-only library requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],[
 
-dnl ---- pthread
+dnl ---- pthread (client)
+AX_PTHREAD([],
+	[AC_MSG_ERROR(
+			["Required pthreads support not found (or invalid CFLAGS)."])])
+dnl This might be a workaround for DSO missing pthread library error:
+AS_IF([ test "x${PTHREAD_LIBS}" = x ],[PTHREAD_LIBS="-pthread"])
 
-	AX_PTHREAD([],
-		[AC_MSG_ERROR(
-				["Required pthreads support not found (or invalid CFLAGS)."])])
-	dnl This might be a workaround for DSO missing pthread library error:
-	AS_IF([ test "x${PTHREAD_LIBS}" = x ],[PTHREAD_LIBS="-pthread"])
-
-dnl ----  X11 Libraries
-
-	AC_PATH_X
+dnl ----  X11 Libraries (client)
+dnl #AC_PATH_XTRA
 
 dnl ?this probably does not need to be darwin specific?
 dnl Darwin search for OpenGL library
 dnl  (ref: dlopen(3) for Mac OS X.)
 dnl  see above. as of 2013-12, consult with ryandesign@macports
-	gl_dlopen_path=default
-	AS_IF([ test "x${unix_host}" = xdarwin ],[
-		AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
-		AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
-		AC_MSG_RESULT([${GL_LIBDIR}])
-		AS_IF([ test "x${GL_LIBDIR}" = x ],[
-			gl_dlopen_path=${x_libraries}],[
-			gl_dlopen_path=${GL_LIBDIR}])
-	])
+gl_dlopen_path=default
+AS_IF([ test "x${unix_host}" = xdarwin ],[
+	AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
+	AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
+	AC_MSG_RESULT([${GL_LIBDIR}])
+	AS_IF([ test "x${GL_LIBDIR}" = x ],[
+		gl_dlopen_path=${x_libraries}],[
+		gl_dlopen_path=${GL_LIBDIR}])
+])
 
-dnl
-dnl XF86
-dnl
-	PKG_CHECK_MODULES([X11],[x11])
+PKG_CHECK_MODULES([X11],[x11])
+AC_MSG_RESULT([$X11_CFLAGS, $X11_LIBS])
 
-dnl
+dnl ---- xf86vm (client)
 dnl XF86 VidMode extension
 dnl  Note: supports full-screen display. if it is not installed, the
 dnl   build will succeed but full-screen will not work.
@@ -254,26 +245,26 @@ dnl If no option is specified, then check for the library and act accordingly.
 dnl If "--without-xf86vm" is specified, do not check, and disable the library.
 dnl If "--with-xf86vm" is specified, check and bail out if it cannot be found.
 dnl
-	AC_ARG_WITH([xf86vm],
-		[AS_HELP_STRING([--with(out)-xf86vm],
-				[include XF86 VidMode support (default: check)])],
-		[],
-		[with_xf86vm=check])
-	have_Xxf86vm=no
-	AS_IF([ test "x${with_xf86vm}" != xno ],[
-		PKG_CHECK_MODULES([XXF86VM],[xxf86vm],[
-			have_Xxf86vm=yes
-			AC_DEFINE([HAVE_XXF86VM],1,[Enable X86 VidMode support])
-		],[
-			have_Xxf86vm=no
-			AS_IF([ test "x${with_xf86vm}" = xyes ],[
-				AC_MSG_FAILURE(
-					[--with-xf86vm specified, library or headers found])
-			])
+AC_ARG_WITH([xf86vm],
+	[AS_HELP_STRING([--with(out)-xf86vm],
+			[include XF86 VidMode support (default: check)])],
+	[],
+	[with_xf86vm=check])
+have_Xxf86vm=no
+AS_IF([ test "x${with_xf86vm}" != xno ],[
+	PKG_CHECK_MODULES([XXF86VM],[xxf86vm],[
+		have_Xxf86vm=yes
+		AC_DEFINE([HAVE_XXF86VM],1,[Enable X86 VidMode support])
+	],[
+		have_Xxf86vm=no
+		AS_IF([ test "x${with_xf86vm}" = xyes ],[
+			AC_MSG_FAILURE(
+				[--with-xf86vm specified, library or headers found])
 		])
 	])
+])
 
-dnl
+dnl ---- xf86dga (client)
 dnl XF86 DGA extension
 dnl  Note: this is changed to default to "without",
 dnl    so "--with-xf86dga" must be specified to use this library
@@ -305,50 +296,55 @@ dnl
 		])
 	])
 
-
-dnl ---- zlib
-dnl
+dnl ---- zlib (client)
 dnl If no option is specified, then check for the library and act accordingly.
 dnl If "--without-zlib" is specified, do not check, and disable the library.
-dnl If "--with-zlib" is specified, check and bail out if it cannot be found.
+dnl If "--with-zlib" is specified, check and fail if it cannot be found.
 dnl
-	AC_ARG_WITH([zlib],
-		[AS_HELP_STRING([--with(out)-zlib],
-				[include Zlib compression support (default: check)])],
-		[],
-		[with_zlib=check])
-	have_zlib=no
-	AS_IF([ test "x${with_zlib}" != xno ],[
-		PKG_CHECK_MODULES([ZLIB],[zlib],[
-			have_zlib=yes
-			AC_DEFINE([HAVE_ZLIB],1,[Enable ZLib support])
-		],[
-			have_zlib=no
-			AS_IF([ test "x${with_zlib}" = xyes ],[
-				AC_MSG_FAILURE(
-					[--with-zlib specified, library or headers not found])
-			])
+AC_ARG_WITH([zlib],
+	[AS_HELP_STRING([--with(out)-zlib],
+			[include Zlib compression support (default: check)])],
+	[],
+	[with_zlib=check])
+have_zlib=no
+AS_IF([ test "x${with_zlib}" != xno ],[
+	PKG_CHECK_MODULES([ZLIB],[zlib],[
+		have_zlib=yes
+		AC_DEFINE([HAVE_ZLIB],1,[Enable ZLib support])
+	],[
+		have_zlib=no
+		AS_IF([ test "x${with_zlib}" = xyes ],[
+			AC_MSG_FAILURE(
+				[--with-zlib specified, library or headers not found])
 		])
 	])
+])
 
-dnl ---- jpeg
-dnl
-dnl IJG libjpeg required
-	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
-		[AC_MSG_ERROR(["Required jpeg library not found."])
-		])
+dnl ---- libjpeg (client)
+AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
+	[AC_MSG_ERROR(["Required jpeg library not found"])
+	])
 
-dnl ---- libcurl
+dnl ---- libcurl (client)
+PKG_CHECK_MODULES([LIBCURL],[libcurl],[
+	AC_MSG_RESULT(${LIBCURL_CFLAGS}, ${LIBCURL_LIBS})],[
+	AC_MSG_ERROR("Required cURL library not found")
+])
+	
+dnl ---- ogg, vorbis, vorbisfile (client)
+PKG_CHECK_MODULES([OGG_VORBIS],[ ogg vorbis vorbisfile ])
+AC_MSG_RESULT([${OGG_VORBIS_CFLAGS}, ${OGG_VORBIS_LIBS}])
 
-dnl ---- ogg, vorbis, vorbisfile
+dnl ---- freetype2 (client)
+PKG_CHECK_MODULES([FREETYPE],[freetype2],[
+	AC_MSG_RESULT([$FREETYPE_CFLAGS, $FREETYPE_LIBS])],[
+	AC_MSG_ERROR(["Required FreeType library not found"])
+])
 
-dnl ---- freetype2
+dnl ---- ODE (client)
+PKG_CHECK_MODULES([ODE],[ode])
+AC_MSG_RESULT([${ODE_CFLAGS}, ${ODE_LIBS}])
 
-dnl ---= ODE 
-
-	AC_MSG_CHECKING([other library dependencies])
-	PKG_CHECK_MODULES([DEPS],[libcurl ogg vorbis vorbisfile freetype2 ode])
-	AC_MSG_RESULT([$DEPS_CFLAGS , $DEPS_LIBS])
 
 ])
 dnl
@@ -369,57 +365,70 @@ AC_HEADER_STDBOOL
 AC_HEADER_DIRENT
 AC_HEADER_ASSERT
 
+AC_CHECK_HEADERS([unistd.h stdarg.h],[],[],[])
+AC_CHECK_HEADERS([dlfcn.h],[],[],[])
 AC_CHECK_HEADERS([sys/time.h time.h],[],[],[])
+AC_CHECK_HEADERS([string.h strings.h],[],[],[])
+AC_CHECK_HEADERS([signal.h],[],[],[])
+AC_CHECK_HEADERS([setjmp.h],[],[],[])
+AC_CHECK_HEADERS([math.h float.h],[],[],[])
+AC_CHECK_HEADERS([ \
+	sys/socket.h \
+	netinet/in.h  \
+	netdb.h \
+	sys/param.h \
+	sys/ioctl.h \
+	sys/uio.h \
+])
 
-AC_CHECK_HEADERS([string.h strings.h],[break],[],[])
+AC_CHECK_HEADERS([ \
+	arpa/inet.h \
+	fcntl.h \
+	inttypes.h \
+	limits.h \
+	malloc.h \
+	memory.h \
+	termios.h \
+	sys/mman.h
+])
 
-AC_CHECK_HEADERS_ONCE([unistd.h])
-
-AC_CHECK_HEADERS_ONCE([arpa/inet.h fcntl.h float.h inttypes.h limits.h malloc.h \
- memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h  \
- sys/ioctl.h sys/param.h sys/socket.h termios.h])
-
-AC_CHECK_HEADERS([dlfcn.h sys/mman.h stdarg.h])
-
-AC_CHECK_HEADERS([signal.h])
 
 dnl
 dnl ------------------------ start of client-only header requirements
 dnl
-dnl TODO: add more
-dnl
 AM_COND_IF([BUILD_CLIENT],[
 
-dnl ---- jpeg
-	jpeglib_h_found=no
-	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
-	AS_IF([ test "x${jpeglib_h_found}" = xno ],
-		[AC_MSG_ERROR("Required JPEG header file not found.")])
+dnl ---- jpeg (client)
+jpeglib_h_found=no
+AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
+AS_IF([ test "x${jpeglib_h_found}" = xno ],
+	[AC_MSG_ERROR("Required JPEG header file not found.")])
 
-dnl ---- OpenAL
-	openal_h_found=no
-	AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
-	AS_IF([ test "x${openal_h_found}" = xno ],
-		[AC_MSG_ERROR("Required OpenAL header file not found.")])
+dnl ---- OpenAL (client)
+openal_h_found=no
+AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
+AS_IF([ test "x${openal_h_found}" = xno ],
+	[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
-	openalc_h_found=no
-	AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
-	AS_IF([ test "x${openalc_h_found}" = xno ],
-		[AC_MSG_ERROR("Required OpenAL header file not found.")])
+openalc_h_found=no
+AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
+AS_IF([ test "x${openalc_h_found}" = xno ],
+	[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
-dnl ---- OpenGL
-	AC_CHECK_HEADERS([GL/gl.h],,
-		[AC_MSG_ERROR("Required OpenGL header files not found.")])
-	AC_CHECK_HEADERS([GL/glx.h],,
-		[AC_MSG_ERROR("Required OpenGL header files not found.")])
+dnl ---- OpenGL (client)
+AC_CHECK_HEADERS([GL/gl.h],,
+	[AC_MSG_ERROR("Required OpenGL header files not found.")])
+AC_CHECK_HEADERS([GL/glx.h],,
+	[AC_MSG_ERROR("Required OpenGL header files not found.")])
 
-dnl ---- ODE
-	AC_CHECK_HEADERS([ode/ode.h],,
-		[AC_MSG_ERROR("Required ODE header file not found.")]
-		[],
-		[
+dnl ---- ODE (client)
+AC_CHECK_HEADERS([ode/ode.h],,
+	[AC_MSG_ERROR("Required ODE header file not found.")]
+	[],
+	[
 #define dDOUBLE
-		])
+	])
+
 ])
 dnl
 dnl ------------------------ end of client-only header requirements
@@ -451,13 +460,23 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_FUNC_OBSTACK
 
+dnl add variants
+AC_CHECK_FUNCS([vsnprintf])
+AC_CHECK_FUNCS([strerror])
+
 AC_CHECK_FUNCS([clock_gettime floor getcwd gethostbyname gettimeofday \
   isascii memmove memset mkdir munmap pow putenv select socket sqrt \
-  strchr strdup strerror strrchr strstr strtoul])
+  strchr strdup strrchr strstr strtoul])
 
 dnl maybe remove w32 specials, just in manual w32 config.h
 AC_CHECK_FUNCS([ _begin_thread _getcwd _mkdir _putenv _strdup _stricmp \
   _strnicmp unlink _unlink ])
+
+dnl winsock
+AC_CHECK_FUNCS([closesocket])
+
+dnl termios headers and functions needed?
+AC_SYS_POSIX_TERMIOS
 
 dnl
 dnl required gcc options.
@@ -468,14 +487,6 @@ dnl TODO: eliminate these
 # AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 # AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
 
-dnl
-dnl common definitions. TODO: incorporate in sources and eliminate
-dnl
-AH_BOTTOM([
-#if defined UNIX_VARIANT
-# include "unix/custom.h"
-#endif
-])
 
 #
 # Outputs

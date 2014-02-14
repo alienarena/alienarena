@@ -17,56 +17,76 @@
 
 noinst_LIBRARIES = libgame.a
 
-AM_CPPFLAGS = -DCOR_DATADIR='"$(pkgdatadir)"'
+# set location of `data1', etc.
+# 
+AM_CPPFLAGS = -DCOR_DATADIR='"$(pkgdatadir)"' -I$(top_srcdir)/source/include
+
+#
+# On Unix, always build the server, and the client if BUILD_CLIENT is enabled
+#
+bin_PROGRAMS = alienarena-ded
+if BUILD_CLIENT
+bin_PROGRAMS += alienarena  aa-tactical-demo
+endif
+
 
 # Dedicated Server libraries and flags
-alienarena_ded_CPPFLAGS =  -DDEDICATED_ONLY $(AM_CPPFLAGS)
+alienarena_ded_CFLAGS =  -DDEDICATED_ONLY $(AM_CPPFLAGS)
 alienarena_ded_LDADD = libgame.a
 
+
 # Client libraries and flags
-alienarena_CPPFLAGS = \
+alienarena_CFLAGS = \
 	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
-	$(X11_CLAGS) \
-	$(DEPS_CFLAGS) \
+	$(X_CFLAGS) \
 	$(XXF86VM_CFLAGS) \
 	$(XXF86DGA_CFLAGS) \
+	$(LIBCURL_CFLAGS) \
+	$(OGG_VORBIS_CFLAGS) \
+	$(FREETYPE_CFLAGS) \
+	$(ODE_CFLAGS) \
 	$(ZLIB_CFLAGS)
 
 
 alienarena_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
-	$(X11_LIBS) \
-	$(DEPS_LIBS) \
+	$(X_LIBS) \
 	$(XXF86VM_LIBS) \
 	$(XXF86DGA_LIBS) \
+	$(LIBCURL_LIBS) \
+	$(OGG_VORBIS_LIBS) \
+	$(FREETYPE_LIBS) \
+	$(ODE_LIBS) \
 	$(ZLIB_LIBS)
 
 
-aa_tactical_demo_CPPFLAGS = -DTACTICAL  \
+aa_tactical_demo_CFLAGS = -DTACTICAL  \
 	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
-	$(X11_CLAGS) \
-	$(DEPS_CFLAGS) \
+	$(X11_CFLAGS) \
 	$(XXF86VM_CFLAGS) \
 	$(XXF86DGA_CFLAGS) \
+	$(LIBCURL_CFLAGS) \
+	$(OGG_VORBIS_CFLAGS) \
+	$(FREETYPE_CFLAGS) \
+	$(ODE_CFLAGS) \
 	$(ZLIB_CFLAGS)
 
 
 aa_tactical_demo_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
-	$(DEPS_LIBS) \
 	$(XXF86VM_LIBS) \
 	$(XXF86DGA_LIBS) \
+	$(LIBCURL_LIBS) \
+	$(OGG_VORBIS_LIBS) \
+	$(FREETYPE_LIBS) \
+	$(ODE_LIBS) \
 	$(ZLIB_LIBS)
 
 
-# On Unix, always build the server, and the client if BUILD_CLIENT is enabled
-bin_PROGRAMS = alienarena-ded
-if BUILD_CLIENT
-bin_PROGRAMS += alienarena  aa-tactical-demo
-endif
+libgame_CFLAGS = -fPIC -I$(topsrcdir)/source
 
 
 # Alien Arena Client
@@ -189,8 +209,8 @@ alienarena_SOURCES = \
 	unix/rw_unix.c \
 	unix/rw_unix.h \
 	unix/sys_unix.c \
-	unix/vid_so.c
-
+	unix/vid_so.c \
+	include/com_std.h
 
 
 # Tactical Demo Client
@@ -238,7 +258,8 @@ alienarena_ded_SOURCES = \
 	unix/net_udp.c \
 	unix/q_shunix.c \
 	unix/rw_unix.h \
-	unix/sys_unix.c
+	unix/sys_unix.c \
+	include/com_std.h
 
 
 # Game Module
@@ -291,4 +312,5 @@ libgame_a_SOURCES =  \
 	game/q_shared.c \
 	game/q_shared.h \
 	qcommon/qfiles.h \
-	unix/custom.h
+	include/com_std.h
+

@@ -61,7 +61,7 @@ Q_strncpyz
 */
 void Q_strncpyz( char *dest, const char *src, size_t size )
 {
-#if defined HAVE_STRLCPY
+#ifdef HAVE_STRLCPY
 	strlcpy( dest, src, size );
 #else
 	if( size )
@@ -161,7 +161,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	{ // it exists
 		int len;
 
-		len = FS_filelength( fp );
+		len = FS_FileLength( fp );
 		cls.download = fp;
 
 		// give the server an offset to start the download

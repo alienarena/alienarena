@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
+
 
 #include "r_local.h"
 #include "r_script.h"
@@ -218,7 +220,7 @@ void R_ReadFogScript( char *config_file )
 		return;
 	}
 
-	length = FS_filelength( fp );
+	length = FS_FileLength( fp );
 
 	buffer = malloc( length + 1 );
 	if ( buffer != NULL )
@@ -293,9 +295,9 @@ void R_ReadMusicScript( char *config_file )
 		return;
 	}
 
-	length = FS_filelength( fp );
+	length = FS_FileLength( fp );
 
-	buffer = malloc( length + 1 );
+	buffer = Com_xmalloc( length + 1 );
 	if ( buffer != NULL )
 	{
 		result = fread( buffer, length, 1, fp );

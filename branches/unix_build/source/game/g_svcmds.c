@@ -22,9 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include <stdio.h>
-#include <errno.h>
-
 #include "g_local.h"
 // -jjb-
 #include "acesrc/acebot.h"

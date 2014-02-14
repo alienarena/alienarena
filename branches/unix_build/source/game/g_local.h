@@ -1,5 +1,5 @@
-#ifndef G_LOCAL_H_
-#define G_LOCAL_H_
+#ifndef G_LOCAL_H
+#define G_LOCAL_H
 
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_local.h -- local definitions for game module
 
+#include "com_std.h"
 
 #include "q_shared.h"
 // -jjb-
@@ -30,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // define GAME_INCLUDE so that game.h does not define the
 // short, server-visible gclient_t and edict_t structures,
 // because we define the full size ones in this file
+// -jjb- TODO fix this for game dll/so
 #define	GAME_INCLUDE
 #include "game.h"
 
@@ -1764,4 +1766,16 @@ extern	cvar_t	*g_antilag;
 extern  cvar_t	*g_antilagdebug;
 extern	cvar_t	*g_antilagprojectiles;
 
-#endif /* #ifndef G_LOCAL_H_ */
+/* 2014-02 
+ * Some new utilites in g_main.c
+ */
+char *G_xsprintf(const char *fmt, ...);
+void G_ErrnoMsg(int errnum, const char *msg);
+void *G_xmalloc(size_t size);
+void *G_xmalloc0(size_t size);
+void *G_xcalloc(size_t count, size_t elemsize);
+void *G_xrealloc(void *p, size_t newsize);
+void G_xfree(void *p);
+
+
+#endif /* G_LOCAL_H */

@@ -1,5 +1,5 @@
-#ifndef Q_SHARED_H_
-#define Q_SHARED_H_
+#ifndef Q_SHARED_H
+#define Q_SHARED_H
 
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
@@ -22,38 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 // q_shared.h -- included first by ALL program modules
-
-
-// these need to be #ifdef HAVE'd
-// -jjb- effect on WINDOWS?
-/* #if !defined UNIX_VARIANT */
-/* #include <assert.h> */
-/* #include <math.h> */
-/* #include <stdio.h> */
-/* #include <stdarg.h> */
-/* #include <stddef.h> */
-/* #include <string.h> */
-/* #include <stdlib.h> */
-/* #include <time.h> */
-/* #include <ctype.h> */
-
-/* typedef unsigned char 		byte; */
-
-/* // TODO: check for implementation defined boolean */
-/* // typedef enum {false, true}	qboolean; */
-/* #ifndef true */
-/* # define false 0 */
-/* # define true 1 */
-/* #endif */
-/* typedef int qboolean; */
-
-/* #endif */
-
-/* #ifndef NULL */
-/* #define NULL ((void *)0) */
-/* #endif */
-
-
 
 // angle indexes
 #define	PITCH				0		// up / down
@@ -271,8 +239,6 @@ void Com_SkipRestOfLine (char **data_p);
 
 int com_parseLine;
 
-void Com_sprintf (char *dest, int size, char *fmt, ...);
-
 void Com_PageInMemory (byte *buffer, int size);
 
 //=============================================
@@ -296,7 +262,7 @@ float	BigFloat (float l);
 float	LittleFloat (float l);
 
 void	Swap_Init (void);
-char	*va(char *format, ...);
+char	*va(char *format, ...);  // -jjb- 
 float	*atv(void);
 float	*tv (float x, float y, float z);
 
@@ -1035,4 +1001,4 @@ enum compressiontypes_e  {
     last_compressiontype_known
 };
 
-#endif  /* #ifndef Q_SHARED_H_ */
+#endif  /* Q_SHARED_H */

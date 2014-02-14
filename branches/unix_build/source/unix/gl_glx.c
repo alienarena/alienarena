@@ -19,23 +19,13 @@
 #include "config.h"
 #endif
 
-/* #include <termios.h> */
-/* #include <sys/ioctl.h> */
-/* #include <sys/stat.h> */
-/* #include <stdarg.h> */
-/* #include <stdio.h> */
-
-/* #if defined HAVE_UNISTD_H */
-/* #include <unistd.h> */
-/* #endif */
-
-#if defined HAVE_SIGNAL_H
+#ifdef  HAVE_SIGNAL_H
 # include <signal.h>
 #endif
 
-/* #if defined HAVE_DLFCN_H */
-/* # include <dlfcn.h> */
-/* #endif */
+#ifdef HAVE_DLFCN_H
+# include <dlfcn.h>
+#endif
 
 // TODO -jjb- check these for configure inclusion.
 //  are all these includes actually needed?
@@ -288,7 +278,7 @@ void install_grabs(void)
 		break;
 
 	default:
-		Sys_Warn("XGrabKeyboard: ? %i\n", result);
+		Sys_Warn("XGrabKeyboard: Unknown\n" );
 		break;
 	};
 
@@ -872,7 +862,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		pwidth, pheight, mode, (fullscreen ? "Fullscreen" : "Windowed") );
 #endif
 
-	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE);
+	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE); // -jjb- what?
 
 	Com_Printf ( "Initializing OpenGL display\n");
 

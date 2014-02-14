@@ -20,40 +20,64 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_irc.c  -- irc client
 
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "client.h"
-#include "qcommon/htable.h"
 
-#if defined WIN32_VARIANT
+#include "client.h"
+#include <qcommon/htable.h>
+
+// -jjb- TODO remove variant, use config.h
+#ifdef WIN32_VARIANT
+
 # include <winsock.h>
 # include <process.h>
-  typedef SOCKET irc_socket_t;
+
+typedef SOCKET irc_socket_t;
+
 #else
-# if defined HAVE_UNISTD_H
-#  include <unistd.h>
-# endif
+
+#ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
+#endif
+#ifdef HAVE_NETDB_H
 # include <netdb.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
 # include <sys/uio.h>
-# include <errno.h>
+#endif
+#ifdef HAVE_PTHREAD_H
 # include <pthread.h>
-  typedef int irc_socket_t;
+#endif
+
+#endif
+
+#ifdef WIN32_VARIANT
+typedef SOCKET irc_socket_t;
+#else
+typedef int irc_socket_t;
+#endif
+
 # if !defined HAVE_CLOSESOCKET
 #  define closesocket close
 # endif
+
 # if !defined INVALID_SOCKET
 #  define INVALID_SOCKET -1
 # endif
-#endif
 
 
 /* IRC control cvars */
@@ -405,7 +429,7 @@ static void IRC_SetTimeout( irc_handler_func_t function , int time )
 	assert( time > 0 );
 
 	// Create entry
-	qe = (struct irc_delayed_t *) malloc( sizeof( struct irc_delayed_t ) );
+	qe = (struct irc_delayed_t *)Com_xmalloc( sizeof( struct irc_delayed_t ) );
 	qe->handler = function;
 	qe->time_left = time * IRC_TIMEOUTS_PER_SEC;
 
@@ -440,7 +464,7 @@ static qboolean IRC_DequeueDelayed( )
 
 	found = IRC_DEQueue;
 	IRC_DEQueue = found->next;
-	free( found );
+	Com_xfree( found );
 	return true;
 }
 

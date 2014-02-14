@@ -1,5 +1,5 @@
-#ifndef G_GAME_H_
-#define G_GAME_H_
+#ifndef G_GAME_H
+#define G_GAME_H
 
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
@@ -256,4 +256,4 @@ typedef struct
 
 game_export_t *GetGameApi (game_import_t *import);
 
-#endif /* #ifndef G_GAME_H_ */
+#endif /* G_GAME_H */

@@ -22,14 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
-#if defined HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#if defined HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
+// -jjb- fix this, other way around or at use of
 #if !defined HAVE__STRDUP
 #define _strdup strdup
 #endif
@@ -214,16 +207,136 @@ void RunEntity (edict_t *ent);
 void InitGame (void);
 void G_RunFrame (void);
 int ACESP_FindBotNum(void);
-extern long filelength(int);
+// extern long filelength(int); // -jjb- WTF?
 extern void ED_CallSpawn (edict_t *ent);
 extern void G_Ban( char *ip );
 
 static size_t szr;
 
-/* -jjb-
- * portable file length. 
- * duplicates engine function, consider adding to CRX/Server  
+char*
+G_xsprintf( const char* fmt, ... )
+{
+	char    *p, np;
+	int     size = 128;
+	va_list ap;
+	int     len;
+	int     errnum;
+
+	p = G_xmalloc0( size );
+	
+	va_start( ap, fmt );
+	len = vsnprintf( p, size, fmt, ap );
+	va_end( ap );
+	if ( len < 0 )
+	{
+		errnum = errno;
+		G_xfree( p );
+		G_ErrnoMsg( errnum, "G_xsprintf" );
+		return NULL;
+	}
+	if ( len >= size )
+	{
+		size = len + 1;
+		p = G_xrealloc( p, size );
+
+		va_start( ap, fmt );
+		len = vsnprintf( np, size, fmt, ap );
+		va_end( ap );
+	}
+
+	return p;
+}
+
+/*----------------------------------------------------------- Error Reporting */
+
+/**
+ * @brief Error message output for standard errno errors
  *
+ */
+void
+G_ErrnoMsg( int errnum, const char *msg )
+{
+	char *errmsg;
+
+	errno = errnum;
+	perror( msg ); /* to stderr */
+	
+	/* g_xsprintf allocates a sufficient buffer */
+	errmsg = G_xsprintf( "%s: %s", msg, strerror(errnum) );
+	gi.dprintf( "\n%s\n", errmsg );
+	G_xfree( errmsg );
+}
+
+/*------------------------------------------------- Checked Memory Allocation */
+
+void*
+G_xmalloc( size_t size )
+{
+	void *p;
+
+	p = malloc( size );
+	if ( !p )
+	{
+		G_ErrnoMsg( errno, "G_xmalloc" );
+		abort();
+	}
+
+	return p;
+}
+
+void*
+G_xmalloc0( size_t size )
+{
+	void *p;
+
+	p = calloc( size, sizeof(char) );
+	if ( !p )
+	{
+		G_ErrnoMsg( errno, "G_xmalloc0" );
+		abort();
+	}
+
+	return p;
+}
+
+void*
+G_xcalloc( size_t count, size_t elemsize )
+{
+	void *p;
+	p = calloc( count, elemsize );
+	if ( !p )
+	{
+		G_ErrnoMsg( errno, "G_xcalloc" );
+		abort();
+	}
+
+	return p;
+}
+
+void*
+G_xrealloc( void *p, size_t newsize )
+{
+	void *newp;
+
+	newp = realloc( p, newsize );
+	if ( !newp )
+	{
+		G_ErrnoMsg( errno, "G_xrealloc" );
+		abort();
+	}
+
+	return newp;
+}
+
+void
+G_xfree( void *p )
+{
+	free( p );
+}
+
+
+/* -jjb- TODO: compare to FS_filelength, report errors
+ * portable file length. 
  */
 static int g_filelength( FILE *f )
 {
@@ -240,9 +353,9 @@ static int g_filelength( FILE *f )
 
 	result = fstat( fileno(f), &statbfr );
 	if ( result != -1 )
-	{
 		length = (int)statbfr.st_size;
-	}
+	else
+		G_ErrnoMsg( errno, "g_filelength" );
 
 #else
 
@@ -702,6 +815,8 @@ void EndDMLevel (void)
 
     //check the maps.lst file and read in those, which will overide anything in the level
 	//write this code here
+
+// -jjb- MAPS LIST OPERATION in g_main.c
 
 	/*
 	** load the list of map names

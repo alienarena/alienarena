@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (c) 2014 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,22 +23,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
 
-#include "qcommon.h"
-
+#if HAVE_SETJMP_H
 #include <setjmp.h>
+#endif
 
-//zlib currently not needed server-side (FOR NOW!)
-//Also, due to the ld flags for zlib not being used server side, it won't
-//compile without this workaround.
 #ifdef DEDICATED_ONLY
 #undef HAVE_ZLIB
 #endif 
 
-#ifdef HAVE_ZLIB
+#if HAVE_ZLIB
 #include <zlib.h>
 #endif
 
+#if HAVE_SETJMP_H
+#include <setjmp.h>
+#endif
+
+#include "qcommon.h"
+
+/* compressed normal vector set for net packets */
+vec3_t	bytedirs[NUMVERTEXNORMALS] =
+{
+#include "client/anorms.h"
+};
+
+#define COM_MSGSIZE 384
 #define	MAXPRINTMSG	8192
 
 #define MAX_NUM_ARGVS	50
@@ -45,8 +57,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DEDICATED_ONLY
 extern void S_StartMenuMusic( void );
 #endif
-
 extern void CL_Disconnect(void);
+
 
 int		com_argc;
 char	*com_argv[MAX_NUM_ARGVS+1];
@@ -55,36 +67,18 @@ int		realtime;
 
 jmp_buf abortframe;		// an ERR_DROP occured, exit the entire frame
 
-
-FILE	*log_stats_file;
-
-cvar_t	*host_speeds;
-cvar_t	*log_stats;
 cvar_t	*developer;
 cvar_t	*timescale;
 cvar_t	*fixedtime;
-cvar_t	*logfile_active;	// 1 = buffer log, 2 = flush after each print
-cvar_t	*logfile_name;
 cvar_t	*showtrace;
 cvar_t	*dedicated;
 
-FILE	*logfile;
-
 int			server_state;
 
-// host_speeds times
-int		time_before_game;
-int		time_after_game;
-int		time_before_ref;
-int		time_after_ref;
+// -jjb- forward reference
+char *Com_xsprintf( const char *fmt, ... );
 
-/*
-============================================================================
-
-CLIENT / SERVER interactions
-
-============================================================================
-*/
+/*--------------------------------------------------------- RCON Redirection */
 
 static int	rd_target;
 static char	*rd_buffer;
@@ -98,7 +92,7 @@ void Com_BeginRedirect (int target, char *buffer, int buffersize, void (*flush))
 	rd_target = target;
 	rd_buffer = buffer;
 	rd_buffersize = buffersize;
-	rd_flush = flush;
+	rd_flush = flush;  // -jjb-
 
 	*rd_buffer = 0;
 }
@@ -113,105 +107,249 @@ void Com_EndRedirect (void)
 	rd_flush = NULL;
 }
 
-/*
-=============
-Com_Printf
-
-Both client and server can use this, and it will output
-to the apropriate place.
-=============
-*/
-void Com_Printf (char *fmt, ...)
+void Com_PrintRedirect( const char* msg )
 {
-	va_list		argptr;
-	char		msg[MAXPRINTMSG];
-
-	va_start (argptr,fmt);
-	vsnprintf(msg, sizeof(msg), fmt, argptr);
-	va_end (argptr);
-
-	if (rd_target)
+	if ((strlen (msg) + strlen(rd_buffer)) > (rd_buffersize - 1))
 	{
-		if ((strlen (msg) + strlen(rd_buffer)) > (rd_buffersize - 1))
+		rd_flush( rd_target, rd_buffer );
+		*rd_buffer = 0;
+	}
+	strcat( rd_buffer, msg );
+}
+
+
+/*----------------------------------------------------------- Error Reporting */
+
+/**
+ * @brief Error message output for standard errno errors
+ *
+ */
+void
+Com_ErrnoMsg( int errnum, const char *msg )
+{
+	char *errmsg;
+
+	errno = errnum;
+	perror( msg ); /* to stderr */
+	
+	/* Com_xsprintf allocates a sufficient buffer */
+	errmsg = Com_xsprintf( "\n%s: %s\n", msg, strerror(errnum) );
+
+	if ( rd_target )
+	{
+		Com_PrintRedirect( errmsg );
+	}
+	else
+	{
+		CON_Print( errmsg );
+		Sys_ConsoleOutput( errmsg );
+	}
+
+	FS_WriteConsoleLog( errmsg );
+
+	Com_xfree( errmsg );
+}
+
+/*------------------------------------------------- Checked Memory Allocation */
+
+void*
+Com_xmalloc( size_t size )
+{
+	void *p;
+
+	p = malloc( size );
+	if ( !p )
+	{
+		Com_ErrnoMsg( errno, "Com_xmalloc" );
+		abort();
+	}
+
+	return p;
+}
+
+void*
+Com_xmalloc0( size_t size )
+{
+	void *p;
+
+	p = calloc( size, sizeof(char) );
+	if ( !p )
+	{
+		Com_ErrnoMsg( errno, "Com_xmalloc0" );
+		abort();
+	}
+
+	return p;
+}
+
+void*
+Com_xcalloc( size_t count, size_t elemsize )
+{
+	void *p;
+	p = calloc( count, elemsize );
+	if ( !p )
+	{
+		Com_ErrnoMsg( errno, "Com_xcalloc" );
+		abort();
+	}
+
+	return p;
+}
+
+void*
+Com_xrealloc( void *p, size_t newsize )
+{
+	void *newp;
+
+	newp = realloc( p, newsize );
+	if ( !newp )
+	{
+		Com_ErrnoMsg( errno, "Com_xrealloc" );
+		abort();
+	}
+
+	return newp;
+}
+
+void
+Com_xfree( void *p )
+{
+	free( p );
+}
+
+
+/**
+ * @brief String printf implemented using vsnprintf
+ */
+void Com_sprintf (char *dest, int size, char *fmt, ...)
+{
+	int     len;
+	va_list argptr;
+	char    *buf;
+
+	va_start( argptr, fmt );
+	len = vsnprintf( dest, size, fmt, argptr );
+	va_end( argptr );
+	if ( len >= size )
+	{
+		/* caller did not supply a big enough destination buffer.
+		 * the output was truncated without a terminating null
+		 */
+		dest[size-1] = '\0';
+		Com_ErrnoMsg( errno, "Com_sprintf" );
+	}
+}
+
+/*
+ * @brief Alternate string printf which returns an allocated buffer
+ *        of at least the size of the generated string.
+ */
+char*
+Com_xsprintf( const char* fmt, ... )
+{
+	char    *p, *np;
+	int     size = 128;
+	va_list ap;
+	int     len;
+	int     errnum;
+
+	p = Com_xmalloc0( size );
+	
+	va_start( ap, fmt );
+	len = vsnprintf( p, size, fmt, ap );
+	va_end( ap );
+	if ( len < 0 )
+	{
+		errnum = errno;
+		Com_xfree( p );
+		Com_ErrnoMsg( errnum, "Com_xsprintf" );
+		return NULL;
+	}
+	if ( len >= size )
+	{
+		size = len + 1;
+		p = Com_xrealloc( p, size );
+
+		va_start( ap, fmt );
+		len = vsnprintf( np, size, fmt, ap );
+		va_end( ap );
+	}
+
+	return p;
+}
+
+/**
+ * @brief Printf-style output message output
+ *
+ *
+ */
+void Com_Printf( char *fmt, ... )
+{
+	va_list	argptr;
+	char*   msg;
+	int     msglen;
+	int     msgsize;
+
+	msg = Com_xmalloc( COM_MSGSIZE  );
+
+	va_start( argptr, fmt );
+	msglen = vsnprintf( msg, COM_MSGSIZE, fmt, argptr ); // -jjb- c99
+	va_end( argptr );
+
+	if ( msglen >= COM_MSGSIZE )
+	{
+		if ( msglen >= MAXPRINTMSG )
 		{
-			rd_flush(rd_target, rd_buffer);
-			*rd_buffer = 0;
+			Com_ErrnoMsg( errno, "Com_Printf" );
+			Com_xfree( msg );
+			return;
 		}
-		strcat (rd_buffer, msg);
+
+		msgsize = msglen + 2;
+		msg = Com_xrealloc( msg, msgsize );
+
+		va_start( argptr, fmt );
+		msglen = vsnprintf( msg, MAXPRINTMSG, fmt, argptr );
+		va_end( argptr );
+	}
+	if ( msglen >= MAXPRINTMSG )
+	{
+		Com_ErrnoMsg( 0, "Com_Printf: message too long\n" );
+		Com_xfree( msg );
 		return;
 	}
 
-	CON_Print( msg );
-
-	// also echo to debugging console
-	Sys_ConsoleOutput (msg);
-
-#if defined WIN32_VARIANT
-	// Also echo to dedicated console
-	Sys_Print(msg);
-#endif
-
-	// if logfile_active or logfile_name have been modified, close the current log file
-	if ( ( (logfile_active && logfile_active->modified)
-			|| (logfile_name && logfile_name->modified) ) && logfile )
+	if ( rd_target )
 	{
-		fclose (logfile);
-		logfile = NULL;
-		if (logfile_active) {
-			logfile_active->modified = false;
-		}
-		if (logfile_name) {
-			logfile_name->modified = false;
-		}
+		Com_PrintRedirect( msg );
+	}
+	else
+	{
+		CON_Print( msg );
+		Sys_ConsoleOutput( msg );
 	}
 
-	// logfile
-	if (logfile_active && logfile_active->value)
-	{
-		char		name[MAX_OSPATH];
-		const char 	*f_name;
+	FS_WriteConsoleLog( msg );
 
-		if (!logfile)
-		{
-			f_name = logfile_name ? logfile_name->string : "qconsole.log";
-			Com_sprintf (name, sizeof(name), "%s/%s", FS_Gamedir (), f_name);
+	Com_xfree( msg );
 
-			if (logfile_active->value > 2)
-				logfile = fopen (name, "a");
-			else
-				logfile = fopen (name, "w");
-		}
-		if (logfile) {
-			fprintf (logfile, "%s", msg);
-			if (logfile_active->value > 1)
-				fflush (logfile);		// force it to save every time
-		}
-	}
 }
 
-
-/*
-================
-Com_DPrintf
-
-A Com_Printf that only shows up if the "developer" cvar is set
-================
-*/
-void Com_DPrintf (char *fmt, ...)
+void Com_DPrintf( char *fmt, ... )
 {
-	va_list		argptr;
-	char		msg[MAXPRINTMSG];
+// -jjb- redundancy
+	if ( developer && developer->integer )
+	{
+		va_list argptr;
+		char    msg[MAXPRINTMSG];
 
-	if (!developer || !developer->value)
-		return;			// don't confuse non-developers with techie stuff...
+		va_start (argptr,fmt);
+		vsnprintf(msg, sizeof(msg), fmt, argptr);
+		va_end (argptr);
 
-	va_start (argptr,fmt);
-	vsnprintf(msg, sizeof(msg), fmt, argptr);
-	va_end (argptr);
-
-	Com_Printf ("%s", msg);
+		Com_Printf ("%s", msg);
+	}
 }
-
 
 /*
 =============
@@ -221,15 +359,17 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error (int code, char *fmt, ...)
+void Com_Error( int code, char *fmt, ... )
 {
 	va_list          argptr;
 	static char      msg[MAXPRINTMSG];
 	static qboolean	recursive = false;
+	bool do_reconnect   = false;
+	bool do_abort_frame = true;;
 
 	if (recursive)
 	{
-		Sys_Warn( "\nMultiple errors.\n" );
+		Sys_Warn( "\nMultiple errors. Com_Error re-entered\n" );
 		return;
 	}
 	recursive = true;
@@ -237,32 +377,34 @@ void Com_Error (int code, char *fmt, ...)
 	va_start (argptr,fmt);
 	vsnprintf(msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
+
 	Sys_Warn( msg );
 
-	if (code == ERR_DISCONNECT)
+	switch ( code )
 	{
+
+	case ERR_DISCONNECT:
+		CL_Drop();
+		break;
+
+	case ERR_DROP:
+		SV_Shutdown( "\nServer stopped\n", do_reconnect );
 		CL_Drop ();
-		recursive = false;
-		longjmp (abortframe, -1);
-	}
-	else if (code == ERR_DROP)
-	{
-		SV_Shutdown ("\nServer stopped\n", false);
-		CL_Drop ();
-		recursive = false;
-		longjmp (abortframe, -1);
-	}
-	else
-	{
-		SV_Shutdown ("\nServer fatal crashed\n", false);
+		break;
+
+	default:
+		SV_Shutdown ("\nServer fatal crashed\n", do_reconnect );
 		CL_Shutdown ();
+		do_abort_frame = false; // -jjb- ???
+		break;
+
 	}
 
-	if (logfile)
-	{
-		fclose (logfile);
-		logfile = NULL;
-	}
+//	FS_CloseLogFiles(); -jjb-
+
+	recursive = false;
+	if ( do_abort_frame )
+		longjmp( abortframe, -1 ); // -jjb-
 
 }
 
@@ -277,14 +419,13 @@ do the apropriate things.
 */
 void Com_Quit (void)
 {
-	SV_Shutdown ("Server quit\n", false);
+	bool do_reconnect = false;
+
+	SV_Shutdown ("Server quit\n", do_reconnect );
 	CL_Shutdown ();
 
-	if (logfile)
-	{
-		fclose (logfile);
-		logfile = NULL;
-	}
+// -jjb-
+//	FS_CloseLogFiles();
 
 	Sys_Quit ();
 }
@@ -319,11 +460,6 @@ void Com_SetServerState (int state)
 Handles byte ordering and avoids alignment errors
 ==============================================================================
 */
-
-vec3_t	bytedirs[NUMVERTEXNORMALS] =
-{
-#include "../client/anorms.h"
-};
 
 //
 // writing functions
@@ -362,48 +498,20 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 
 void MSG_WriteShort (sizebuf_t *sb, int c)
 {
-#if 0
-	/* Original Version */
-	byte	*buf;
-
-#ifdef PARANOID
-	if ( c > 65535 )
-	{ // unsigned short actually
-		//Com_Printf("MSG_WriteShort: range error: %i \n", c);
-		Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
-	}
-#endif
-
-	buf = SZ_GetSpace (sb, 2);
-	buf[0] = c&0xff;
-	buf[1] = c>>8;
-#else
-	/* Experimental Version */
 	short *buf;
 
 	buf  = (short*)SZ_GetSpace( sb , 2 );
 	*buf = LittleShort( c );
-#endif
+
 }
 
 void MSG_WriteLong (sizebuf_t *sb, int c)
 {
-#if 0
-	/* Original Version */
-	byte	*buf;
-
-	buf = SZ_GetSpace (sb, 4);
-	buf[0] = c&0xff;
-	buf[1] = (c>>8)&0xff;
-	buf[2] = (c>>16)&0xff;
-	buf[3] = c>>24;
-#else
-	/* Experimental Version */
 	int *buf;
 
 	buf  = (int*)SZ_GetSpace( sb, 4 );
 	*buf = LittleLong( c );
-#endif
+
 }
 
 void MSG_WriteSizeInt (sizebuf_t *sb, int bytes, int c)
@@ -427,7 +535,6 @@ void MSG_WriteFloat (sizebuf_t *sb, float f)
 		float	f;
 		int	l;
 	} dat;
-
 
 	dat.f = f;
 	dat.l = LittleLong (dat.l);
@@ -540,6 +647,8 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 		MSG_WriteByte( sb, 0 );
 		return;
 	}
+
+// -jjb- to separate function ?
 	// sometimes dir is not normalized
 	if ( d < 0.999f || d > 1.001f )
 	{
@@ -839,21 +948,6 @@ int MSG_ReadByte (sizebuf_t *msg_read)
 
 int MSG_ReadShort (sizebuf_t *msg_read)
 {
-#if 0
-	/* Origninal Version */
-	int	c;
-
-	if (msg_read->readcount+2 > msg_read->cursize)
-		c = -1;
-	else
-		c = (short)(msg_read->data[msg_read->readcount]
-		+ (msg_read->data[msg_read->readcount+1]<<8));
-
-	msg_read->readcount += 2;
-
-	return c;
-#else
-	/* Experimental Version */
 	int c     = -1;
 	int rc    = msg_read->readcount;
 	short *pi = (short*)(&msg_read->data[ rc ]);
@@ -866,28 +960,10 @@ int MSG_ReadShort (sizebuf_t *msg_read)
 	}
 
 	return c;
-#endif
 }
 
 int MSG_ReadLong (sizebuf_t *msg_read)
 {
-#if 0
-	/* Original Version */
-	int	c;
-
-	if (msg_read->readcount+4 > msg_read->cursize)
-		c = -1;
-	else
-		c = msg_read->data[msg_read->readcount]
-		+ (msg_read->data[msg_read->readcount+1]<<8)
-		+ (msg_read->data[msg_read->readcount+2]<<16)
-		+ (msg_read->data[msg_read->readcount+3]<<24);
-
-	msg_read->readcount += 4;
-
-	return c;
-#else
-	/* Experimental Version */
 	int c   = -1;
 	int rc  = msg_read->readcount;
 	int *pi = (int*)(&msg_read->data[rc]);
@@ -900,7 +976,6 @@ int MSG_ReadLong (sizebuf_t *msg_read)
 	}
 
 	return c;
-#endif
 }
 
 int MSG_ReadSizeInt (sizebuf_t *msg_read, int bytes)
@@ -1071,15 +1146,6 @@ void SZ_Init (sizebuf_t *buf, byte *data, int length)
 	buf->maxsize = length;
 }
 
-#ifdef	BUFFER_DEBUG
-void SZ_SetName(sizebuf_t * buf, const char * name, qboolean print_it)
-{
-	strncpy(buf->name, name, sizeof(buf->name) - 1);
-	if ( print_it )
-		Com_DPrintf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
-}
-#endif	//BUFFER_DEBUG
-
 void SZ_Clear (sizebuf_t *buf)
 {
 	buf->cursize = 0;
@@ -1098,11 +1164,8 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 		if (length > buf->maxsize)
 			Com_Error (ERR_FATAL, "SZ_GetSpace: %i is > full buffer size", length);
 
-#ifdef	BUFFER_DEBUG
-		Com_Printf ("SZ_GetSpace (%s at 0x%.12x): overflow\n", buf->name, buf);
-#else	//BUFFER_DEBUG
-		Com_Printf ("SZ_GetSpace: overflow\n");
-#endif	//BUFFER_DEBUG
+		Com_Printf ("SZ_GetSpace: overflow\n"); // -jjb-
+
 		SZ_Clear (buf);
 		buf->overflowed = true;
 	}
@@ -1214,8 +1277,6 @@ void COM_AddParm (char *parm)
 		Com_Error (ERR_FATAL, "COM_AddParm: MAX_NUM)ARGS");
 	com_argv[com_argc++] = parm;
 }
-
-
 
 
 /// just for debugging
@@ -1340,7 +1401,7 @@ void Z_Free (void *ptr)
 
 	z_count--;
 	z_bytes -= z->size;
-	free (z);
+	Com_xfree (z); // -jjb-
 }
 
 
@@ -1381,10 +1442,15 @@ void *Z_TagMalloc (int size, int tag)
 	zhead_t	*z;
 
 	size = size + sizeof(zhead_t);
+#if 0
 	z = malloc(size);
 	if (!z)
 		Com_Error (ERR_FATAL, "Z_Malloc: failed on allocation of %i bytes",size);
 	memset (z, 0, size);
+#else 
+// -jjb-
+	z = Com_xmalloc0( size );
+#endif
 	z_count++;
 	z_bytes += size;
 	z->magic = Z_MAGIC;
@@ -1407,65 +1473,6 @@ Z_Malloc
 void *Z_Malloc (int size)
 {
 	return Z_TagMalloc (size, 0);
-}
-
-
-//============================================================================
-
-
-/*
-====================
-COM_BlockSequenceCheckByte
-
-For proxy protecting
-
-// THIS IS MASSIVELY BROKEN!  CHALLENGE MAY BE NEGATIVE
-// DON'T USE THIS FUNCTION!!!!!
-
-====================
-*/
-byte	COM_BlockSequenceCheckByte (byte *base, int length, int sequence, int challenge)
-{
-	Sys_Error("COM_BlockSequenceCheckByte called\n");
-
-#if 0
-	int		checksum;
-	byte	buf[68];
-	byte	*p;
-	float temp;
-	byte c;
-
-	temp = bytedirs[(sequence/3) % NUMVERTEXNORMALS][sequence % 3];
-	temp = LittleFloat(temp);
-	p = ((byte *)&temp);
-
-	if (length > 60)
-		length = 60;
-	memcpy (buf, base, length);
-
-	buf[length] = (sequence & 0xff) ^ p[0];
-	buf[length+1] = p[1];
-	buf[length+2] = ((sequence>>8) & 0xff) ^ p[2];
-	buf[length+3] = p[3];
-
-	temp = bytedirs[((sequence+challenge)/3) % NUMVERTEXNORMALS][(sequence+challenge) % 3];
-	temp = LittleFloat(temp);
-	p = ((byte *)&temp);
-
-	buf[length+4] = (sequence & 0xff) ^ p[3];
-	buf[length+5] = (challenge & 0xff) ^ p[2];
-	buf[length+6] = ((sequence>>8) & 0xff) ^ p[1];
-	buf[length+7] = ((challenge >> 7) & 0xff) ^ p[0];
-
-	length += 8;
-
-	checksum = LittleLong(Com_BlockChecksum (buf, length));
-
-	checksum &= 0xff;
-
-	return checksum;
-#endif
-	return 0;
 }
 
 static byte chktbl[1024] = {
@@ -1577,32 +1584,72 @@ byte	COM_BlockSequenceCRCByte (byte *base, int length, int sequence)
 	return crc;
 }
 
-//========================================================
-
-float	frand(void)
-{
-	return (rand()&32767)* (1.0/32767);
-}
-
-float	crand(void)
-{
-	return (rand()&32767)* (2.0/32767) - 1;
-}
-
 void Key_Init (void);
 void SCR_EndLoadingPlaque (void);
 
 /*
-=============
-Com_Error_f
-
-Just throw a fatal error to
-test error shutdown procedures
-=============
-*/
+ * target of 'error' console command
+ *   for testing error handling 
+ */
 void Com_Error_f (void)
 {
-	Com_Error (ERR_FATAL, "%s", Cmd_Argv(1));
+	Com_Error( ERR_FATAL, "%s", Cmd_Argv(1) );
+}
+
+/*--------------------------------------------------------------- Random Math */
+
+static float rndtbl1[ 1024 ];
+static float *fr1;
+static float const *fr1_end = rndtbl1 + sizeof(rndtbl1)/sizeof(float);
+static float rndtbl2[ 1024 ];
+static float *fr2;
+static float const *fr2_end = rndtbl2 + sizeof(rndtbl2)/sizeof(float);
+
+void
+Com_random_table_init( void )
+{
+	float *pr;
+	int    count;
+	float  rmax;
+
+	rmax = (float)( RAND_MAX );
+	pr   = rndtbl1;
+	count = sizeof(rndtbl1)/sizeof(float);
+	srand( Sys_Milliseconds() ); /* somewhat indeterminate seed */
+	while ( count-- )
+		*pr++ = ((float)rand() / rmax);
+
+	rmax = (float)( RAND_MAX >> 1 );
+	pr   = rndtbl2;
+	count = sizeof(rndtbl2)/sizeof(float);
+	srand( Sys_Milliseconds() );
+	while ( count-- )
+		*pr++ = ((float)rand() / rmax) - 1.0f;
+
+	fr1 = rndtbl1;
+	fr2 = rndtbl2;
+}
+
+/**
+ * [0.0f, 1.0f]
+ */
+float
+frand( void )
+{
+	if ( ++fr1 == fr1_end )
+		fr1 = rndtbl1;
+	return *fr1;
+}
+
+/**
+ * [-1.0f, 1.0f]
+ */
+float
+crand( void )
+{
+	if ( ++fr2 == fr2_end )
+		fr2 = rndtbl2;
+	return *fr2;
 }
 
 
@@ -1617,6 +1664,8 @@ void Qcommon_Init (int argc, char **argv)
 
 	if (setjmp (abortframe) )
 		Sys_Error ("Error during initialization");
+
+	Com_random_table_init();
 
 	z_chain.next = z_chain.prev = &z_chain;
 
@@ -1654,15 +1703,9 @@ void Qcommon_Init (int argc, char **argv)
     Cmd_AddCommand ("z_stats", Z_Stats_f);
     Cmd_AddCommand ("error", Com_Error_f);
 
-	host_speeds = Cvar_Get ("host_speeds", "0", 0);
-	log_stats = Cvar_Get ("log_stats", "0", 0);
 	developer = Cvar_Get ("developer", "0", 0);
 	timescale = Cvar_Get ("timescale", "1", 0);
 	fixedtime = Cvar_Get ("fixedtime", "0", 0);
-	// 2010-08 logfile default to "1" to prevent unbounded growth (also no flush on write)
-	// rationale: expert user can figure out when "2" or "3" are appropriate
-	logfile_active = Cvar_Get ("logfile", "1", CVAR_ARCHIVE);
-	logfile_name = Cvar_Get ("logname", "qconsole.log", CVAR_ARCHIVE);
 	showtrace = Cvar_Get ("showtrace", "0", 0);
 #ifdef DEDICATED_ONLY
 	dedicated = Cvar_Get ("dedicated", "1", CVAR_NOSET);
@@ -1673,7 +1716,7 @@ void Qcommon_Init (int argc, char **argv)
 	s = va("%s %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
 
-	if (dedicated->value)
+	if ( dedicated->integer )
 		Cmd_AddCommand ("quit", Com_Quit);
 
 	Sys_Init ();
@@ -1722,73 +1765,57 @@ Qcommon_Frame
 */
 void Qcommon_Frame (int msec)
 {
+	float fmsec;
 
-	int		time_before=0, time_between=0, time_after=0;
-#if defined UNIX_VARIANT
-	char	*s;
-#endif
+	/*
+	 * for events that require aborting the current frame
+	 */
+	if ( setjmp( abortframe ) )
+	{		
+		return;
+	}
 
-	if (setjmp (abortframe) )
-		return;			// an ERR_DROP was thrown
+// -jjb- new perf log?
 
-	if ( log_stats->modified )
+	/* for testing */
+	fmsec = (float)msec;
+	if ( fixedtime->value >= 1.0f )
 	{
-		log_stats->modified = false;
-		if ( log_stats->value )
+		fmsec = fixedtime->value;
+	}
+	else if ( timescale->value > 0.0f )
+	{
+		fmsec *= timescale->value;
+	}
+	msec = (int)ceilf( fmsec );
+	if ( msec < 1 )
+		msec = 1;
+
+
+#if defined UNIX_VARIANT
+
+	/* all console input */
+	for (;;)
+	{
+		char *cmd;
+
+		cmd = Sys_ConsoleInput();
+		if ( cmd )
 		{
-			if ( log_stats_file )
-			{
-				fclose( log_stats_file );
-				log_stats_file = 0;
-			}
-			log_stats_file = fopen( "stats.log", "w" );
-			if ( log_stats_file )
-				fprintf( log_stats_file, "entities,dlights,parts,frame time\n" );
+			Cbuf_AddText( cmd );
+			Cbuf_AddText( "\n" );
 		}
 		else
 		{
-			if ( log_stats_file )
-			{
-				fclose( log_stats_file );
-				log_stats_file = 0;
-			}
+			break;
 		}
-	}
+	};
 
-	if (fixedtime->value)
-		msec = fixedtime->value;
-	else if (timescale->value)
-	{
-		msec *= timescale->value;
-		if (msec < 1)
-			msec = 1;
-	}
-
-	if (showtrace->value)
-	{
-		extern	int c_traces, c_brush_traces;
-		extern	int	c_pointcontents;
-
-		if ( c_traces > 0 || c_brush_traces > 0 || c_pointcontents > 0 )
-		{
-			Com_Printf ("%4i traces %4i brush %4i points\n", c_traces, c_brush_traces, c_pointcontents);
-			c_traces = 0;
-			c_brush_traces = 0;
-			c_pointcontents = 0;
-		}
-	}
-
-#if defined UNIX_VARIANT
-	do
-	{
-		s = Sys_ConsoleInput ();
-		if (s)
-			Cbuf_AddText (va("%s\n",s));
-	} while (s);
 #else
 
 	// Get input from dedicated server console
-	if (dedicated->integer){
+	if ( dedicated->integer)
+	{
 		char	*cmd;
 
 		cmd = Sys_GetCommand();
@@ -1801,45 +1828,24 @@ void Qcommon_Frame (int msec)
 
 	Cbuf_Execute ();
 
-	if (host_speeds->value)
-		time_before = Sys_Milliseconds ();
-
-	SV_Frame (msec);
+	SV_Frame( msec );
 
 #if defined WIN32_VARIANT
-	// not good for Linux when run from menu or icon without a terminal
+	/*
+	 * switch to dedicated server mode
+	 * see Host Server menu
+	 */
 	if(dedicated->modified) {
 		dedicated->modified = false;
-		if ( dedicated->value ) {
+		if ( dedicated->integer ) {
 			//shutdown the client
 			CL_Shutdown();
 		}
 	}
 #endif
 
-	if (host_speeds->value)
-		time_between = Sys_Milliseconds ();
+	CL_Frame( msec );
 
-	CL_Frame (msec);
-
-	if (host_speeds->value)
-		time_after = Sys_Milliseconds ();
-
-
-	if (host_speeds->value)
-	{
-		int			all, sv, gm, cl, rf;
-
-		all = time_after - time_before;
-		sv = time_between - time_before;
-		cl = time_after - time_between;
-		gm = time_after_game - time_before_game;
-		rf = time_after_ref - time_before_ref;
-		sv -= gm;
-		cl -= rf;
-		Com_Printf ("all:%3i sv:%3i gm:%3i cl:%3i rf:%3i\n",
-			all, sv, gm, cl, rf);
-	}
 }
 
 /*
@@ -1851,13 +1857,7 @@ void Qcommon_Shutdown (void)
 {
 }
 
-
-
-
-
-
-
-
+/*-------------------------------------------------------- ZLib Decompression */
 
 #ifdef HAVE_ZLIB
 //This compression code was originally from the Lua branch. More of it will
@@ -1951,7 +1951,7 @@ void qdecompress (sizebuf_t *src, sizebuf_t *dst, int type){
 			break;
 #endif
 	} 
-        
+
 	if ( newsize == 0)
 		dst->cursize = 0;
 	else

@@ -12,8 +12,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 A copy of the  GNU General Public License is included;
-see the file, COPYING.
-
+see the file, GPL2.
 */
 
 /**
@@ -24,31 +23,22 @@ see the file, COPYING.
  * Replaces qcommon/files.c
  */
 
-/* -jjb-
- * to be re-integrated with Windows
- * 2014-01:
- * -- botinfo/ special-case separate top-level eliminated. now a subdir
- *     of data1 and game
- * -- basename of user writeable path is not configurable.
- *     now is always "cor_games"
- * -- use XDG conventions if defined
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "com_std.h"
 
 #if defined HAVE_ZLIB
 # include <zlib.h>
 #endif
 
-#include "qcommon/qcommon.h"
-
+#include "qcommon.h"
 
 /* ---- Full path for shared game resources ----*/
 
+// -jjb-
 #if !defined COR_DATADIR
-ERROR
+# define COR_DATADIR "UNKNOWN"
 #endif
 
 /* ---- Path basenames for game resources ---*/
@@ -62,11 +52,37 @@ ERROR
 # define GAME_GAMEDATA "arena"
 #endif
 
-/*----------------------------------------*/
+/* ---- Console Log ---- */
+
+#if !defined COR_CONSOLE_LOG
+# define COR_CONSOLE_LOG "cor_console.log"
+#endif
+
+/* -jjb- TODO
+ * console log logfile_active cvar options:
+ * 0 = disabled
+ * 1 = buffered
+ * 2 = unbuffered (was flush after write)
+ * 3 = unbuffered, persistent
+ * 4 = buffered, persistent <added 2014-02
+ */
+cvar_t *logfile_active;
+cvar_t *logfile_name;
+FILE   *logfile;
+
+/* ---- Server Log ---- */
+
+#if !defined COR_SERVER_LOG
+# define COR_SERVER_LOG "cor_server.log"
+#endif
+cvar_t	*sv_iplogfile; // Log file by IP address
+
+
+/* ---- Game Directories ---- */
 
 #define SFF_INPACK 0x20 /* For FS_ListFilesInFS(). */
 
-char   fs_gamedir[MAX_OSPATH];
+char    fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar;
 
 #define GAME_SEARCH_SLOTS  8
@@ -82,27 +98,185 @@ const char* xdg_data_home_default = ".local/share";
 const char* xdg_data_dir_default = 	"/usr/local/share:/usr/share";
 #endif
 
+/* ---- Forward Reference ----  */
 
-/* helper function */
-static inline bool
-is_absolute_path( const char* path )
+void fs_file_error(int errnum, char *filename);
+bool fs_is_valid_path(const char *path);
+bool fs_is_absolute_path(const char *path);
+bool fs_file_exists(const char *fullpath);
+char *fs_make_path(const char *abs_part, const char *rel_part);
+bool fs_full_path(const char *relative_path,char *fullpath,size_t fullpathsize);
+void fs_close(FILE *fp);
+FILE *fs_fopen_rb(const char *fullpath);
+void fs_start_console_log(void);
+void fs_start_server_log(void);
+
+
+/*--------------------------------------------------------- Error reporting */
+
+#if defined HAVE_STRERROR_R && !defined _GNU_SOURCE
+/* thread safe */
+void 
+fs_file_error( int errnum, char *filename )
+{
+	char buf[256];
+
+	errno = errnum;
+	perror( filename ); /* to stderr */
+	if ( strerror_r( errnum, buf, sizeof(buf) ) == 0 )
+		Com_Printf( "\n%s : %s\n", filename, buf );
+}
+
+#else
+/* not thread safe */
+ void
+fs_file_error( int errnum, char *filename )
+{
+	perror( filename );
+	Com_Printf( "\n%s : %s\n", filename, strerror(errnum) );
+
+}
+#endif
+
+/*---------------------------------------------------- Local Helper Functions */
+
+bool
+fs_is_valid_path( const char* path )
+{
+	// -jjb- TODO: 
+	return true;
+}
+
+bool
+fs_is_absolute_path( const char* path )
 {
 	return *path == '/';
 }
 
-/* helper function */
-static bool
-is_valid_path( const char* path )
+bool
+fs_file_exists( const char* fullpath )
 {
+	FILE *fp;
+	
+	fp = fopen( fullpath, "r" );
+	if ( fp == NULL )
+	{
+		if ( errno != ENOENT )
+			fs_file_error( errno, fullpath );
+		return false;
+	}
+	fclose( fp );
+
 	return true;
+
+} 
+
+
+char*
+fs_make_path( const char *abs_part, const char *rel_part )
+{
+	size_t len_abs = strlen( abs_part );
+	size_t len_rel = strlen( rel_part );
+	size_t len_sep = 0;
+	char   tail_abs = *(abs_part + len_abs - 1);
+	char   head_rel = *rel_part;
+	char   *p;
+	char   *path;  
+	size_t bufsize;
+
+	if ( !fs_is_absolute_path( abs_part ))
+		return NULL;
+
+	if (( tail_abs != '/') && ( head_rel != '/' ))
+		len_sep = 1;
+	else if (( tail_abs == '/') && ( head_rel == '/' ))
+		++rel_part;
+	
+	 p = path = Com_xmalloc0( bufsize );
+
+	 p = (char*)memcpy( p, abs_part, len_abs ) + len_abs;
+	 if ( len_sep )
+		 p = (char*)memcpy( p, "/", 1 ) + 1;
+	 (void)memcpy( p, rel_part, len_rel );
+
+	 return path;
 }
 
+bool
+fs_full_path( const char *relative_path, char *fullpath, size_t fullpathsize  )
+{
+	int  i;
+	bool found  = false;
+
+	for ( i = 0 ; !found && i < fs_slots_used ; ++i )
+	{
+		fullpath = fs_make_path( fs_gamesearch[i], relative_path );
+		found = fs_file_exists( fullpath );
+	}
+
+	return found;
+}
+	
+
+#if 0
+	char     search_path[MAX_OSPATH];
+	qboolean found = false;
+	int      i;
+
+	*full_path = 0;
+	if ( strlen( relative_path ) >= MAX_QPATH )
+	{
+		Com_DPrintf( "FS_FullPath: relative path size error: %s\n",
+					 relative_path );
+		return false;
+	}
+
+	for ( i = 0 ; !found && i < fs_slots_used ; ++i )
+	{
+		Com_sprintf( search_path, sizeof(search_path), "%s/%s",
+					 fs_gamesearch[i], relative_path );
+		found = FS_CheckFile( search_path );
+	}
+
+	if ( found )
+	{
+		if ( strlen( search_path ) < pathsize )
+		{
+			Q_strncpyz2( full_path, search_path, pathsize );
+			if ( developer && developer->integer == 2 )
+				Com_DPrintf( "FS_FullPath: found : %s\n", full_path );
+		}
+		else
+		{
+			Com_DPrintf( "FS_FullPath: pathsize error: %s\n", search_path );
+			found = false;
+		}
+	}
+	else if ( developer && developer->integer == 2 ) // -jjb- improve this
+	{
+		Com_DPrintf( "FS_FullPath: not found : %s\n", relative_path );
+	}
+
+	return found;
+
+
+}
+#endif
+
+void
+fs_close( FILE* fp )
+{
+	fclose( fp );
+}
+
+
+/*---------------------------------------------------------- Basic Operations */
 
 /**
  * Initialize the pathnames for the shared data directory and
  *  the user home data directory.
  */
-static void
+void
 FS_init_paths( void )
 {
 	int  i;
@@ -111,7 +285,7 @@ FS_init_paths( void )
 	char fs_homedir[MAX_OSPATH];
 	char *cwdstr;
 	char *homestr;
-    char *xdg_data_home;
+    const char *xdg_data_home;
 	char base_gamedata[MAX_OSPATH];
 	char game_gamedata[MAX_OSPATH];
 	char user_base_gamedata[MAX_OSPATH];
@@ -129,10 +303,11 @@ FS_init_paths( void )
 
 	cwdstr = getcwd( fs_bindir, sizeof( fs_bindir ));
 	if ( cwdstr == NULL )
-		Sys_Error( strerror(errno) );
+		Sys_Error( strerror(errno) ); // -jjb- strerror_r
+	// -jjb- TODO separate string call from crash call
 	
 	xdg_data_home = getenv( "XDG_DATA_HOME" );
-	if ( xdg_data_home == NULL || !is_absolute_path( xdg_data_home ) )
+	if ( xdg_data_home == NULL || !fs_is_absolute_path( xdg_data_home ) )
 		xdg_data_home = xdg_data_home_default;
 
 	homestr = getenv( "HOME" );
@@ -207,38 +382,84 @@ FS_init_paths( void )
 } /* FS_init_paths */
 
 /**
+ * @brief Given FILE*, return number of bytes in a file
  *
- * @param f -
- * @return -
+ * Call when the  size of an opened file is needed.
+ *
+ * @param fp - FILE*
+ * @returns size of the file, -1 on error
  */
-int
-FS_filelength( FILE *f )
+ssize_t
+FS_FileLength( FILE *fp )
 {
-	int length = -1;
+ 
+	size_t length;
 
 #if defined HAVE_FILELENGTH
-	length = filelength( fileno( f ));
+
+	length = filelength( fileno(fp) ); // -jjb- ?windows?
+
 #elif defined HAVE_FSTAT
+
 	struct stat statbfr;
 	int         result;
-	result = fstat( fileno( f ), &statbfr );
+
+	result = fstat( fileno(fp), &statbfr );
 	if ( result != -1 )
-	{
 		length = (int)statbfr.st_size;
-	}
+	
 #else
-	long int    pos;
-	pos = ftell( f );
-	fseek( f, 0L, SEEK_END );
-	length = ftell( f );
-	fseek( f, pos, SEEK_SET );
-#endif /* if defined HAVE_FILELENGTH */
+/* not thread safe */
+	long int pos;
 
-	return length;
+	pos = ftell(fp);
+	fseek( fp, 0L, SEEK_END );
+	length = ftell(fp);
+	fseek( fp, pos, SEEK_SET );
 
-} /* FS_filelength */
+#endif
+
+	return (ssize_t)length;
+
+}
 
 /**
+ * @brief Given relative path, return number of bytes in a file
+ *
+ * Call when only the size of a file is needed and
+ * the file is expected to exist.
+ *
+ * @param relative_path 
+ * @returns size of the file, -1 on error
+ */
+ssize_t
+FS_FileLength2( const char* relative_path )
+{
+	const char* fullpath;
+	int     i;
+	FILE*   fp          = NULL;
+	bool    found       = false;
+	ssize_t file_length = -1;
+
+	for ( i = 0 ; !found && i < fs_slots_used ; ++i )
+	{
+		fullpath = fs_make_path( fs_gamesearch[i], relative_path );
+		fp = fs_fopen_rb( fullpath );
+		if ( fp )
+			found = true;
+	}
+	Com_xfree( fullpath );
+	if ( found )
+	{
+		file_length = FS_FileLength( fp );
+		fs_close( fp );
+	}
+	
+	return file_length;
+}
+
+/**
+ * @brief Create a directory hierarchy (like  mkdir -p)
  *
  * @param path -
  */
@@ -262,9 +483,9 @@ FS_CreatePath ( char *path )
 /**
  *
  * @param search_path -
- * @return -
+ * @return - true if exists, false otherwise
  */
-static qboolean
+bool
 FS_CheckFile( const char *search_path )
 {
 #if defined HAVE_STAT
@@ -293,18 +514,19 @@ FS_CheckFile( const char *search_path )
 
 
 /**
+ * @brief Find the full, absolute path to a game resource
  *
  * @param full_path -
  * @param pathsize -
  * @param relative_path -
  * @return -
  */
-qboolean
+bool
 FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 {
-	char     search_path[MAX_OSPATH];
-	qboolean found = false;
-	int      i;
+	char search_path[MAX_OSPATH];
+	bool found = false;
+	int  i;
 
 	*full_path = 0;
 	if ( strlen( relative_path ) >= MAX_QPATH )
@@ -345,6 +567,7 @@ FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 } /* FS_FullPath */
 
 /**
+ * @brief Find full, absolute path to a user-writeable game resource
  *
  * @param full_path -
  * @param pathsize -
@@ -375,19 +598,36 @@ FS_FCloseFile( FILE *f )
 	fclose( f );
 } /* FS_FCloseFile */
 
+
+FILE*
+fs_fopen_rb( const char* fullpath )
+{
+	FILE *fp;
+	
+	fp = fopen( fullpath, "rb" );
+	if ( !fp )
+		fs_file_error( errno, fullpath );
+	
+	return fp;
+}
+
+
+// -jjb- another version that takes a list of extensions in preferred order
 /**
  *
- * @param filename -
- * @param file -
+ * @param filename - the relative path
+ * @param file - receiver for FILE*
  * @return -
  */
 int
 FS_FOpenFile( char *filename, FILE **file )
 {
-	char     netpath[MAX_OSPATH];
-	qboolean found;
-	int      length = -1;
+	char netpath[MAX_OSPATH];
+	bool found;
+	int  length = -1;
 
+	// -jjb- need version that finds the file and leaves it open
+	//       return FILE*, length of file maybe, 
 	found = FS_FullPath( netpath, sizeof( netpath ), filename );
 	if ( found )
 	{
@@ -398,7 +638,7 @@ FS_FOpenFile( char *filename, FILE **file )
 		}
 		else
 		{
-			length = FS_filelength( *file );
+			length = FS_FileLength( *file );
 			if ( length < 0 )
 			{
 				FS_FCloseFile( *file );
@@ -415,7 +655,7 @@ FS_FOpenFile( char *filename, FILE **file )
 
 } /* FS_FOpenFile */
 
-// -jjb- why the limit??? something to do with ZMalloc? 
+
 #define MAX_READ  0x10000
 
 /**
@@ -591,7 +831,7 @@ FS_FreeFile( void *buffer )
  * @param path -
  * @return -
  */
-qboolean
+bool
 FS_FileExists( char *path )
 {
 	char fullpath[MAX_OSPATH];
@@ -719,11 +959,7 @@ FS_ListFiles( char *findname, int *numfiles,
 	*numfiles = nfiles;
 	nfiles++;
 
-// -jjb- calloc need HAVE?
-	list = calloc( nfiles, sizeof(char*) );
-	if ( list == NULL )
-		return NULL;
-	/* memset( list, 0, sizeof( char* ) * nfiles );*/
+	list = Com_xcalloc( nfiles, sizeof(char*) );
 
 	namestr = Sys_FindFirst( findname, musthave, canthave );
 	nfiles  = 0;
@@ -772,13 +1008,15 @@ FS_ListFilesInFS( char *findname, int *numfiles,
 	int  s;
 
 	nfiles = 0;
-	list   = malloc( sizeof( char* ));
-	if ( list == NULL )
-		return NULL;
+	list   = Com_xmalloc( sizeof( char* ) );
+
 	for ( s = 0; fs_gamesearch[s][0]; s++ )
 	{
+
 		Com_sprintf( path, sizeof(path), "%s/%s", fs_gamesearch[s], findname );
+
 		tmplist = FS_ListFiles( path, &tmpnfiles, musthave, canthave );
+
 		if ( tmplist != NULL )
 		{
 			nfiles  += tmpnfiles;
@@ -958,15 +1196,128 @@ FS_NextPath ( char *prevpath )
 
 /**
  *
+ * msg - c-string message, with newline normally
+ */
+void
+FS_WriteConsoleLog( char *msg )
+{
+	if ( logfile_active == NULL || logfile_active->integer == 0 )
+		return;
+
+	if ( fputs( msg, logfile ) == EOF )
+	{
+		perror( "FS_WriteConsoleLog" );
+		fclose( logfile );
+	}
+	
+}
+
+/**
+ *
+ */
+void
+fs_start_console_log( void )
+{
+	// -jjb- stub
+
+#if 0
+	// if logfile_active or logfile_name have been modified, close the current log file
+	if ( ( (logfile_active && logfile_active->modified)
+			|| (logfile_name && logfile_name->modified) ) && logfile )
+	{
+		fclose (logfile);
+		logfile = NULL;
+		if (logfile_active) {
+			logfile_active->modified = false;
+		}
+		if (logfile_name) {
+			logfile_name->modified = false;
+		}
+	}
+
+	// logfile
+	if (logfile_active && logfile_active->value)
+	{
+		char		name[MAX_OSPATH];
+		const char 	*f_name;
+
+		if (!logfile)
+		{
+			f_name = logfile_name ? logfile_name->string : "qconsole.log";
+			Com_sprintf (name, sizeof(name), "%s/%s", FS_Gamedir (), f_name);
+
+
+			if (logfile_active->value > 2)
+				logfile = fopen (name, "a");
+			else
+				logfile = fopen (name, "w");
+		}
+		if (logfile) {
+			fprintf (logfile, "%s", msg);
+			if (logfile_active->value > 1)
+				fflush (logfile);		// force it to save every time
+		}
+	}
+#endif
+
+}
+
+/*
+=====================
+SV_LogEvent
+
+Logs an event to the IP log.
+=====================
+*/
+/**
+ *
+ *
+ */
+// -jjb- moved from server, change function name FS_LogServerEvent
+void
+SV_LogEvent( netadr_t address , const char * event , const char * name )
+{
+	FILE * file;
+
+	if ( !( sv_iplogfile && sv_iplogfile->string[0] ) )
+		return;
+
+	file = fopen( sv_iplogfile->string , "a" );
+	if ( !file ) {
+		Com_DPrintf( "Failed to write to IP log file '%s'\n" , sv_iplogfile->string );
+		return;
+	}
+	fprintf( file , "%s\t%s\t%d\t%s\r\n" , NET_AdrToString(address) , event ,
+			( name != NULL ) , ( name != NULL ) ? name : "" );
+	fclose( file );
+}
+
+void
+fs_start_server_log( void )
+{
+	// -jjb- stub
+}
+
+/**
+ *
  */
 void
 FS_InitFilesystem ( void )
 {
-
 	char dummy_path[MAX_OSPATH];
+	static int first_time;
 
-	Cmd_AddCommand( "path", FS_Path_f );
-	Cmd_AddCommand( "dir", FS_Dir_f );
+	if ( first_time )
+	{
+		Cmd_AddCommand( "path", FS_Path_f );
+		Cmd_AddCommand( "dir", FS_Dir_f );
+
+		logfile_active = Cvar_Get("logfile", "1", CVAR_ARCHIVE);
+		logfile_name   = Cvar_Get("logname", COR_CONSOLE_LOG, CVAR_ARCHIVE);
+		sv_iplogfile   = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
+
+		++first_time;
+	}
 
 	FS_init_paths();
 
@@ -974,8 +1325,10 @@ FS_InitFilesystem ( void )
 	Com_Printf( "Configuration and Download Directory: %s\n", fs_gamedir );
 	// -jjb- maybe stuff a "path" command instead
 #endif
-	Com_sprintf( dummy_path, sizeof( dummy_path ), "%s/dummy", fs_gamedir );
-	FS_CreatePath( dummy_path ); // -jjb- ???
+
+
+	fs_start_console_log();
+	fs_start_server_log();
 
 #if defined HAVE_ZLIB && !defined DEDICATED_ONLY
 	Com_Printf( "using zlib version %s\n", zlibVersion());

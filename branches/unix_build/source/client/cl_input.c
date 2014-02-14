@@ -541,7 +541,6 @@ void CL_SendCmd (void)
 	}
 
 	SZ_Init (&buf, data, sizeof(data));
-	SZ_SetName ( &buf, "CL_SendCmd", false );
 
 	// begin a client move command
 	MSG_WriteByte (&buf, clc_move);

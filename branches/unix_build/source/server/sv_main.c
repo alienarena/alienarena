@@ -65,8 +65,6 @@ cvar_t	*sv_iplimit;
 
 cvar_t	*sv_downloadurl;
 
-cvar_t	*sv_iplogfile;		// Log file by IP address
-
 int		sv_numbots;
 
 void Master_Shutdown (void);
@@ -75,39 +73,6 @@ short   ShortSwap (short l);
 
 //============================================================================
 
-
-/*
-=====================
-SV_LogEvent
-
-Logs an event to the IP log.
-=====================
-*/
-static void SV_LogEvent( netadr_t address , const char * event , const char * name )
-{
-	FILE * file;
-
-	if ( !( sv_iplogfile && sv_iplogfile->string[0] ) )
-		return;
-
-/*** -jjb-  FIX file system access
-	 put this in top cor_games subdirectory
-     Windows needs a cor_games subdirectory
-	 add timestamp, and maybe other info
-	    bans, rcon access
-
- ***/
-
-	file = fopen( sv_iplogfile->string , "a" );
-	if ( !file ) {
-		Com_DPrintf( "Failed to write to IP log file '%s'\n" , sv_iplogfile->string );
-		return;
-	}
-	fprintf( file , "%s\t%s\t%d\t%s\r\n" , NET_AdrToString(address) , event ,
-			( name != NULL ) , ( name != NULL ) ? name : "" );
-	fclose( file );
-/***************************/
-}
 
 
 
@@ -719,7 +684,6 @@ gotnewcl:
 	newcl->state = cs_connected;
 
 	SZ_Init (&newcl->datagram, newcl->datagram_buf, sizeof(newcl->datagram_buf) );
-	SZ_SetName (&newcl->datagram, va("Datagram buffer %s", NET_AdrToString(adr)), true);
 
 	newcl->datagram.allowoverflow = true;
 	newcl->lastmessage = svs.realtime;	// don't timeout
@@ -1072,8 +1036,6 @@ SV_RunGameFrame
 */
 void SV_RunGameFrame (void)
 {
-	if (host_speeds->integer)
-		time_before_game = Sys_Milliseconds ();
 
 	// we always need to bump framenum, even if we
 	// don't run the world, otherwise the delta
@@ -1095,10 +1057,6 @@ void SV_RunGameFrame (void)
 			svs.realtime = sv.time;
 		}
 	}
-
-	if (host_speeds->integer)
-		time_after_game = Sys_Milliseconds ();
-
 }
 
 /*
@@ -1114,7 +1072,6 @@ void SV_Frame (int msec)
 	static int old_systime = 0;
 	if (!old_systime)
 		old_systime = Sys_Milliseconds ();
-	time_before_game = time_after_game = 0;
 
 	// if server is not active, do nothing
 	if (!svs.initialized)
@@ -1409,7 +1366,6 @@ void SV_Init (void)
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
 
-	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 
 	sv_noreload = Cvar_Get ("sv_noreload", "0", 0);
 
@@ -1428,7 +1384,6 @@ void SV_Init (void)
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
-	SZ_SetName (&net_message, "Net message buffer", true);
 
 	remoteserver_runspeed = 300; //default
 }
