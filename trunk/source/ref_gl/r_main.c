@@ -1164,6 +1164,9 @@ void R_RenderFrame (refdef_t *fd)
 	R_SetGL2D ();
 }
 
+// FIXME HACK: this should really just setup the frustum and viewport, then 
+// do a single call to R_Mesh_Draw. RDF_NOWORLDMODEL needs to go away, it's
+// just as annoying as having ifdefs everywhere.
 void R_RenderFramePlayerSetup( refdef_t *rfdf )
 {
 
@@ -1177,6 +1180,9 @@ void R_RenderFramePlayerSetup( refdef_t *rfdf )
 	R_DrawEntitiesOnList();
 
 	R_SetGL2D();
+	
+	// stop the set rdflags from messing up the map loading process.
+	memset (&r_newrefdef, 0, sizeof(r_newrefdef));
 
 }
 
