@@ -99,13 +99,24 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 	
 	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ, terrainmodel, NULL);
 	GL_BindVBO (vbo_xyz);
+	qglGetError ();
 	vposition = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
 	GL_BindVBO (NULL);
+	if (vposition == NULL)
+	{
+		Com_Printf ("Mod_AddToDecalModel: qglMapBufferARB on vertex positions: %u\n", qglGetError ());
+		return;
+	}
 	
 	vbo_indices = R_VCFindCache (VBO_STORE_INDICES, terrainmodel, NULL);
 	GL_BindIBO (vbo_indices);
 	vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
 	GL_BindIBO (NULL);
+	if (vtriangles == NULL)
+	{
+		Com_Printf ("Mod_AddToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
+		return;
+	}
 	
 	index_table = Z_Malloc (terrainmodel->numvertexes*sizeof(unsigned int));
 	
