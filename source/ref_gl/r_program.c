@@ -806,13 +806,11 @@ static char shadow_fragment_program_ATI[] = STRINGIFY (
 static char rscript_vertex_program[] = STRINGIFY (
 	uniform int envmap;
 	uniform int	numblendtextures;
-	uniform vec2 targetdist;
 	uniform int FOG;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap; 
 	
-	varying float fade;
 	varying float fog;
 	varying vec3 normal;
 	varying vec3 orig_coord;
@@ -854,10 +852,6 @@ static char rscript_vertex_program[] = STRINGIFY (
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 1.0);
 		}
-		
-		fade = 1.0;
-		if (targetdist[0] > 0.0 || targetdist[1] > 0.0)
-			fade = (targetdist[1] - gl_Position.z) / (targetdist[1] - targetdist[0]);
 	}
 );
 
@@ -879,7 +873,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
 	
-	varying float fade;
 	varying float fog;
 	varying vec3 normal;
 	varying vec3 orig_coord;
@@ -903,9 +896,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 	
 	void main ()
 	{
-		
-		if (fade <= 0.0)
-			discard;
 		
 		vec4 mainColor = texture2D (mainTexture, gl_TexCoord[0].st);
 		
@@ -960,9 +950,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 				}
 			}
 		}
-		
-		if (fade < 1.0)
-			gl_FragColor.a *= fade;
 		
 		gl_FragColor *= gl_Color;
 		
@@ -2001,7 +1988,6 @@ void R_LoadGLSLPrograms(void)
 	g_location_rs_lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
 	g_location_rs_blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
 	g_location_rs_blendscales2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales2");
-	g_location_rs_targetdist = glGetUniformLocationARB (g_rscriptprogramObj, "targetdist");
 	g_location_rs_blendTexture0 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture0");
 	g_location_rs_blendTexture1 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture1");
 	g_location_rs_blendTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture2");
