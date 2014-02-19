@@ -494,15 +494,6 @@ RS_STAGE_FLOAT_ATTR (rot_speed)
 RS_STAGE_INT_ATTR (rotating)
 
 
-void rs_stage_targetdist (rs_stage_t *stage, char **token)
-{
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->targetdist[0] = atof(*token);
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->targetdist[1] = atof(*token);
-}
-
 void rs_stage_nolightmap (rs_stage_t *stage, char **token)
 {
 	stage->lightmap = false;
@@ -834,7 +825,6 @@ static struct
 	{	"flaretype",	&rs_stage_flaretype		},
 	{	"normalmap",	&rs_stage_normalmap		},
 	{	"blendmap",		&rs_stage_blendmap		},
-	{	"targetdist",	&rs_stage_targetdist	},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
@@ -1258,8 +1248,6 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		
 		glUniform1iARB (g_location_rs_envmap, stage->envmap != 0);
 		glUniform1iARB (g_location_rs_numblendtextures, stage->num_blend_textures);
-		
-		glUniform2fARB (g_location_rs_targetdist, stage->targetdist[0], stage->targetdist[1]);
 		
 		if (stage->num_blend_textures > 0)
 		{

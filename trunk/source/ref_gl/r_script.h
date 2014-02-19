@@ -123,8 +123,6 @@ typedef struct rs_stage_s
 	char					blend_names[6][MAX_OSPATH];
 	image_t					*blend_textures[6];
 	
-	float					targetdist[2];
-
 	qboolean				lensflare;		// for adding lensflares
 	int						flaretype;		// type of flare
 

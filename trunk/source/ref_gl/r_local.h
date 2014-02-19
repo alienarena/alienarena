@@ -591,7 +591,6 @@ GLuint		g_location_rs_mainTexture2;
 GLuint		g_location_rs_lightmapTexture;
 GLuint		g_location_rs_blendscales;
 GLuint		g_location_rs_blendscales2;
-GLuint		g_location_rs_targetdist;
 GLuint		g_location_rs_blendTexture0;
 GLuint		g_location_rs_blendTexture1;
 GLuint		g_location_rs_blendTexture2;
