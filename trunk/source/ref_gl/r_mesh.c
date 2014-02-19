@@ -859,7 +859,7 @@ void R_Mesh_Draw ( void )
 	
 	R_GetLightVals(currententity->origin, false);
 
-	if (currentmodel->type != mod_md2) //TODO: use this for MD2 as well
+	if (modtypes[currentmodel->type].castshadowmap)
 		R_GenerateEntityShadow();
 	
 	// Don't render your own avatar unless it's for shadows
