@@ -335,6 +335,9 @@ typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, mod_decal, num_
 // This array is a look-up table for the traits of various mesh formats.
 static struct 
 {
+	// If true, this model type can cast shadowmaps.
+	qboolean castshadowmap;
+	
 	// Morph target animation is what the MD2 format uses exclusively. Vertex
 	// positions, normals, and tangents are stored in VBOs for every frame
 	// and interpolated by the vertex shader. It's possible to combine this
@@ -355,12 +358,12 @@ static struct
 	qboolean decal;
 } modtypes[num_modtypes] = 
 {
-	{false, false, false, false},	// mod_bad- this is ignored
-	{false, false, false, false},	// mod_brush- BSP brush models- this is ignored
-	{true, false, false, false},	// mod_md2- MD2 models
-	{false, true, true, false},		// mod_iqm- IQM models
-	{false, false, true, false},	// mod_terrain- heightmap meshes
-	{false, false, true, true},		// mod_decal- terrain decals
+	{true, false, false, false, false},	// mod_bad- this is ignored
+	{true, false, false, false, false},	// mod_brush- BSP brush models- this is ignored
+	{false, true, false, false, false},	// mod_md2- TODO: these should use shadowmaps as well
+	{true, false, true, true, false},	// mod_iqm
+	{false, false, false, true, false},	// mod_terrain
+	{false, false, false, true, true},	// mod_decal
 	// New model types go here
 };
 
