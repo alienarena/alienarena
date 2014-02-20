@@ -111,7 +111,7 @@ players/enforcer/blue
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
-		map2 gfx/defaultenforcerfx.tga
+		map2 gfx/blueenforcerfx.tga
 		glow
 	}	
 }
