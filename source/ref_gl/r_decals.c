@@ -440,13 +440,6 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	tex = GL_FindImage (tex_path, it_wall);
 	mod->skins[0] = tex;
 	
-	// HACK: Clip the geometry instead!
-/*	GL_SelectTexture (0);*/
-/*	GL_Bind (tex->texnum);*/
-/*	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);*/
-/*	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);*/
-/*	qglTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, RGBA (0, 0, 0, 0));*/
-	
 	memset (&data, 0, sizeof(data));
 	
 	for (i = 0; i < num_terrain_entities; i++)
