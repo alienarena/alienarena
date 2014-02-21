@@ -799,11 +799,8 @@ nobase_nodist_gfx_DATA = \
 	data1/gfx/sun.jpg \
 	data1/gfx/tekwallmask.tga \
 	data1/gfx/trim2mask.tga \
-	data1/gfx/tron2_enforcerfx.tga \
 	data1/gfx/tron2_laurenfx.tga \
-	data1/gfx/tron3_enforcerfx.tga \
 	data1/gfx/tron3_laurenfx.tga \
-	data1/gfx/tron_enforcerfx.tga \
 	data1/gfx/tron_laurenfx.tga \
 	data1/gfx/vaporbase.tga \
 	data1/gfx/vapormask.tga \
@@ -1824,7 +1821,6 @@ nobase_nodist_pics_DATA = \
 	data1/pics/bots/enforcer/blue_i.jpg \
 	data1/pics/bots/enforcer/default_i.jpg \
 	data1/pics/bots/enforcer/red_i.jpg \
-	data1/pics/bots/enforcer/stryker_i.jpg \
 	data1/pics/bots/martiancyborg/blue_i.jpg \
 	data1/pics/bots/martiancyborg/default_i.jpg \
 	data1/pics/bots/martiancyborg/red_i.jpg \
@@ -2202,18 +2198,9 @@ nobase_nodist_players_DATA = \
 	data1/players/enforcer/pain75_2.wav \
 	data1/players/enforcer/red_i.jpg \
 	data1/players/enforcer/red.jpg \
-	data1/players/enforcer/stryker_i.jpg \
-	data1/players/enforcer/stryker.jpg \
 	data1/players/enforcer/tris.iqm \
 	data1/players/enforcer/tris.md2 \
 	data1/players/enforcer/tris.rgd \
-	data1/players/enforcer/tron2_i.jpg \
-	data1/players/enforcer/tron2.jpg \
-	data1/players/enforcer/tron3_i.jpg \
-	data1/players/enforcer/tron3.jpg \
-	data1/players/enforcer/tron_i.jpg \
-	data1/players/enforcer/tron.jpg \
-	data1/players/enforcer/tron_normal.tga \
 	data1/players/enforcer/usegibs \
 	data1/players/enforcer/w_bfg.iqm \
 	data1/players/enforcer/w_bfg.md2 \
