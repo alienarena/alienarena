@@ -216,6 +216,9 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 	if (ninside == 3)
 		return;
 	
+	assert (ninside != 0);
+	assert (noutside != 3);
+	
 	// No need to add a new vertex and retesselate the resulting quad, just
 	// clip the two vertices that are outside.
 	if (noutside == 2)
@@ -306,6 +309,81 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 		out->polys[new_trinum][0] = out->polys[new_trinum][1];
 		out->polys[new_trinum][1] = tmpidx;
 	}
+}
+
+static qboolean TriangleOutsideBounds (int trinum, const vec3_t mins, const vec3_t maxs, const decalprogress_t *mesh)
+{
+	int axisnum;
+	qboolean maxborder;
+	
+	for (maxborder = false; maxborder <= true; maxborder++)
+	{
+		for (axisnum = 0; axisnum < 3; axisnum++)
+		{
+			int i;
+			int noutside = 0;
+	
+			for (i = 0; i < 3; i++)
+			{
+				qboolean isoutside;
+				float coord;
+				unsigned int vertidx = mesh->polys[trinum][i];
+		
+				coord = mesh->verts[vertidx][axisnum];
+		
+				if (maxborder)
+					isoutside = coord > maxs[axisnum];
+				else
+					isoutside = coord < mins[axisnum];
+		
+				if (isoutside)
+					noutside++;
+			}
+			
+			if (noutside == 3)
+				return true;
+		}
+	}
+	
+	return false;
+}
+
+// Sometimes, in the process of clipping a triangle against one border of the
+// bounding box, one of the resulting split triangles is now completely
+// outside another border. For example:
+//            /\ 
+//  .========/  \ 
+//  |       /|___\ 
+//  |        |
+//  '========'
+// After clipping against the top border, we get a trapezoid-shaped region
+// which is tesselated into two triangles. Depending on the tesselation, one
+// of those triangles may actually be entirely outside the bounding box.
+//
+// So for the sake of consistency, we re-cull every terrain triangle we 
+// modify before re-clipping it against the next border.
+static void ReCullTriangles (const vec3_t mins, const vec3_t maxs, decalprogress_t *out)
+{
+	int outTriangle;
+	int inTriangle;
+	
+	for (inTriangle = outTriangle = 0; inTriangle < out->npolys; inTriangle++)
+	{
+		if (TriangleOutsideBounds (inTriangle, mins, maxs, out))
+			continue;
+		
+		if (outTriangle != inTriangle)
+		{
+			int i;
+			
+			for (i = 0; i < 3; i++)
+				out->polys[outTriangle][i] = out->polys[inTriangle][i];
+		}
+		
+		outTriangle++;
+	}
+	
+	out->npolys = outTriangle;
 }
 
 static void ReUnifyVertexes (decalprogress_t *out)
@@ -452,8 +530,10 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 			int lim = data.npolys;
 			for (i = 0; i < lim; i++)
 				ClipTriangleAgainstBorder (i, mod->mins, mod->maxs, j, maxborder, &data);
+			ReCullTriangles (mod->mins, mod->maxs, &data);
 		}
 	}
+	
 	ReUnifyVertexes (&data);
 	
 	vnormal = Z_Malloc (data.nverts*sizeof(vec3_t));
