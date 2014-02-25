@@ -177,9 +177,9 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 {
 	int new_trinum;
 	int i;
-	unsigned int outsideidx[2], insideidx[3];
-	unsigned newidx[2];
-	int outside[2];
+	unsigned int outsideidx[3], insideidx[3];
+	unsigned newidx[3];
+	int outside[3];
 	int noutside = 0, ninside = 0;
 	
 	// For making sure any new triangles are facing the right way.
@@ -250,6 +250,7 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 	}
 	
 	// If we reach this point, noutside == 1
+	assert (noutside == 1);
 	
 	new_trinum = out->npolys++;
 	
