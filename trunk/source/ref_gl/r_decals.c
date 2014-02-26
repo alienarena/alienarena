@@ -37,7 +37,7 @@ typedef struct
 	int npolys;
 	int nverts;
 	unsigned int polys[DECAL_POLYS][3];
-	vec3_t verts[DECAL_POLYS];
+	vec3_t verts[DECAL_VERTS];
 } decalprogress_t;
 
 // FIXME: supports neither oriented terrain nor oriented decals!
