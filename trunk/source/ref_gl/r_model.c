@@ -1914,11 +1914,6 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	}
 	
 	mod->extradatasize = Hunk_End ();
-
-	R_ParseTerrainEntities();
-	R_ParseLightEntities();
-	R_FindSunEntity();
-	R_FinalizeGrass(mod);
 }
 
 //=============================================================================
@@ -2184,6 +2179,11 @@ void R_BeginRegistration (char *model)
 		Mod_Free (&mod_known[0]);	//do it every time to fix shader bugs in AA
 
 	r_worldmodel = Mod_ForName(fullname, true);
+	
+	R_ParseTerrainEntities();
+	R_ParseLightEntities();
+	R_FindSunEntity();
+	R_FinalizeGrass();
 
 	r_viewcluster = -1;
 

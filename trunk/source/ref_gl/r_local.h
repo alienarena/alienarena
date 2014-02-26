@@ -337,7 +337,7 @@ extern void Mod_AddVegetationSurface (msurface_t *surf, image_t *tex, vec3_t col
 void Mod_AddVegetation (vec3_t origin, vec3_t normal, image_t *tex, vec3_t color, float size, char name[MAX_OSPATH], int type);
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
-extern void R_FinalizeGrass(model_t *mod); 
+extern void R_FinalizeGrass(void); 
 
 //Simple Items
 extern void R_SI_InitTextures( void );

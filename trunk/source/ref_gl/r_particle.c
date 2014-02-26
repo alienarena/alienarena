@@ -591,7 +591,6 @@ void R_RenderFlares (void)
 
 			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
-
 			
 			l->alpha += (visible ? 0.03 : -0.15);  // ramp
 
@@ -915,20 +914,17 @@ void Mod_AddVegetationSurface (msurface_t *surf, image_t *tex, vec3_t color, flo
 
 // Mark any vegetation sprites that can cast shadows in sunlight, and get 
 // static light levels.
-void R_FinalizeGrass(model_t *mod)
+void R_FinalizeGrass(void)
 {
 	vec3_t origin, orig2, mins, maxs;
 	trace_t	r_trace;
 	grass_t *grass;
 	int i;
-	model_t *old;
 	
 	grass = r_grasses;
 	
 	VectorSet (mins, 0, 0, 0);
 	VectorSet (maxs, 0, 0, 0);
-	
-	old = r_worldmodel;
 	
 	for (i=0; i<r_numgrasses; i++, grass++) 
 	{
@@ -937,14 +933,12 @@ void R_FinalizeGrass(model_t *mod)
 		if (grass->type != 1)
 			origin[2] += (grass->texsize/32) * grass->size;
 		// XXX: HACK!
-		r_worldmodel = mod;
 		R_StaticLightPoint (origin, grass->static_light);
-		r_worldmodel = old;
 	
 		//cull for pathline to sunlight
 		VectorCopy (grass->origin, orig2);
 		orig2[2] += (grass->texsize/32) * grass->size;
-		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, mod->firstnode, MASK_VISIBILILITY);
+		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		grass->sunVisible = r_trace.fraction == 1.0;
 		
 		if (grass->type == 0)
