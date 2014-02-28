@@ -32,38 +32,14 @@ extern void MD2_VecsForTris(
 extern qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs);
 extern void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3]);
 
-typedef struct
-{
-	int npolys;
-	int nverts;
-	unsigned int polys[DECAL_POLYS][3];
-	vec3_t verts[DECAL_VERTS];
-} decalprogress_t;
-
-// FIXME: supports neither oriented terrain nor oriented decals!
-void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t origin, const vec3_t angles, model_t *terrainmodel, decalprogress_t *out)
+// Creates a rotation matrix that will *undo* the specified rotation. We must
+// apply the rotations in the opposite order or else we won't properly be
+// preemptively undoing the rotation transformation applied later in the
+// renderer.
+void AnglesToMatrix3x3_Backwards (const vec3_t angles, float rotation_matrix[3][3])
 {
 	int i, j, k, l;
-	// For rotating terrain geometry into the decal's orientation
-	vec3_t rotation_angles;
-	float rotation_matrix[3][3];
 	
-	int trinum;
-	
-	vertCache_t	*vbo_xyz;
-	vertCache_t	*vbo_indices;
-	
-	float *vposition;
-	unsigned int *vtriangles;
-	// If a vertex was at index n in the original terrain model, then in the
-	// new decal model, it will be at index_table[n]-1. A value of 0 for 
-	// index_table[n] indicates space for the vertex hasn't been allocated in
-	// the new decal model yet.
-	unsigned int *index_table;
-	
-	// Create the rotation matrices - we must apply the rotations in the 
-	// opposite order or else we won't properly be preemptively undoing the 
-	// rotation transformation applied later in the renderer.
 	for (i = 0; i < 3; i++)
 	{
 		for (j = 0; j < 3; j++)
@@ -71,6 +47,7 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 	}
 	for (i = 2; i >= 0; i--)
 	{
+		vec3_t rotation_angles;
 		float prev_rotation_matrix[3][3];
 		float temp_matrix[3][3];
 		
@@ -96,60 +73,103 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 			}
 		}
 	}
+}
+
+// This structure is used to accumulate 3D geometry that will make up a 
+// finished decal mesh. Geometry is taken from the world (including terrain
+// meshes and BSP surfaces,) clipped aginst the oriented bounding box of the
+// decal, and retesselated as needed.
+typedef struct
+{
+	int npolys;
+	int nverts;
+	unsigned int polys[DECAL_POLYS][3];
+	vec3_t verts[DECAL_VERTS];
+} decalprogress_t;
+
+// This structure contains 3D geometry that might potentially get added to a
+// decal. All the triangles in here will be checked against a decal's OBB as
+// described above.
+typedef struct
+{
+	int npolys;
+	int nverts;
+	unsigned int *vtriangles;
+	float *vposition;
+	// For moving terrain/mesh geometry to its actual position in the world
+	vec3_t origin;
+	// For rotating terrain/mesh geometry into its actual orientation
+	float rotation_matrix[3][3];
+} decalinput_t;
+
+// This structure describes the orientation and position of the decal being
+// created.
+typedef struct
+{
+	// For transforming world-oriented geometry to the decal's position
+	vec3_t origin;
+	// For rotating world-oriented geometry into the decal's orientation
+	float decal_space_matrix[3][3]; 
+	// For clipping decal-oriented geometry against the decal's bounding box
+	vec3_t mins, maxs;
+} decalorientation_t;
+
+// This function should be able to handle any indexed triangle geometry.
+static void Mod_AddToDecalModel (const decalorientation_t *pos, const decalinput_t *in, decalprogress_t *out)
+{
+	int i, j, k;
 	
-	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ, terrainmodel, NULL);
-	GL_BindVBO (vbo_xyz);
-	qglGetError ();
-	vposition = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
-	GL_BindVBO (NULL);
-	if (vposition == NULL)
-	{
-		Com_Printf ("Mod_AddToDecalModel: qglMapBufferARB on vertex positions: %u\n", qglGetError ());
-		return;
-	}
+	int trinum;
 	
-	vbo_indices = R_VCFindCache (VBO_STORE_INDICES, terrainmodel, NULL);
-	GL_BindIBO (vbo_indices);
-	vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-	GL_BindIBO (NULL);
-	if (vtriangles == NULL)
-	{
-		Com_Printf ("Mod_AddToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
-		return;
-	}
+	// If a vertex was at index n in the original model, then in the new decal
+    // model, it will be at index_table[n]-1. A value of 0 for index_table[n]
+    // indicates space for the vertex hasn't been allocated in the new decal
+    // model yet.
+	unsigned int *index_table;
 	
-	index_table = Z_Malloc (terrainmodel->numvertexes*sizeof(unsigned int));
+	index_table = Z_Malloc (in->nverts*sizeof(unsigned int));
 	
-	// Look for all the triangles from the terrain model that happen to occur
+	// Look for all the triangles from the original model that happen to occur
 	// inside the oriented bounding box of the decal.
-	for (trinum = 0; trinum < terrainmodel->num_triangles; trinum++)
+	for (trinum = 0; trinum < in->npolys; trinum++)
 	{
 		int orig_idx;
 		vec3_t verts[3];
 		
 		for (i = 0; i < 3; i++)
 		{
-			vec3_t tmp;
-			VectorSubtract (&vposition[3*vtriangles[3*trinum+i]], origin, tmp);
+			vec3_t tmp, tmp2;
+			
+			// First, transform the mesh geometry into world space
+			VectorAdd (&in->vposition[3*in->vtriangles[3*trinum+i]], in->origin, tmp);
+			VectorClear (tmp2);
+			for (j = 0; j < 3; j++)
+			{
+				for (k = 0; k < 3; k++)
+					tmp2[j] += tmp[k] * in->rotation_matrix[j][k];
+			}
+			
+			// Then, transform it into decal space
+			VectorSubtract (tmp2, pos->origin, tmp);
 			VectorClear (verts[i]);
 			for (j = 0; j < 3; j++)
 			{
 				for (k = 0; k < 3; k++)
-					verts[i][j] += tmp[k] * rotation_matrix[j][k];
+					verts[i][j] += tmp[k] * pos->decal_space_matrix[j][k];
 			}
 		}
 		
-		if (!TriangleIntersectsBBox (verts[0], verts[1], verts[2], mins, maxs))
+		if (!TriangleIntersectsBBox (verts[0], verts[1], verts[2], pos->mins, pos->maxs))
 			continue;
 		
 		for (i = 0; i < 3; i++)
 		{
-			orig_idx = vtriangles[3*trinum+i];
+			orig_idx = in->vtriangles[3*trinum+i];
 			if (index_table[orig_idx] == 0)
 			{
 				index_table[orig_idx] = ++out->nverts;
 				if (out->nverts >= DECAL_VERTS)
-					Com_Error (ERR_FATAL, "Mod_AddToDecalModel: DECAL_VERTS");
+					Com_Error (ERR_FATAL, "Mod_AddTerrainToDecalModel: DECAL_VERTS");
 				VectorCopy (verts[i], out->verts[index_table[orig_idx]-1]);
 			}
 			
@@ -157,10 +177,51 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 		}
 		out->npolys++;
 		if (out->npolys >= DECAL_POLYS)
-			Com_Error (ERR_FATAL, "Mod_AddToDecalModel: DECAL_POLYS");
+			Com_Error (ERR_FATAL, "Mod_AddTerrainToDecalModel: DECAL_POLYS");
 	}
 	
 	Z_Free (index_table);
+	
+}
+
+// Add geometry from a terrain model to the decal
+static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t *terrainentity, decalprogress_t *out)
+{
+	model_t *terrainmodel;
+	
+	vertCache_t	*vbo_xyz;
+	vertCache_t	*vbo_indices;
+	
+	decalinput_t in;
+	
+	terrainmodel = terrainentity->model;
+	
+	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ, terrainmodel, NULL);
+	GL_BindVBO (vbo_xyz);
+	in.vposition = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
+	GL_BindVBO (NULL);
+	if (in.vposition == NULL)
+	{
+		Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex positions: %u\n", qglGetError ());
+		return;
+	}
+	
+	vbo_indices = R_VCFindCache (VBO_STORE_INDICES, terrainmodel, NULL);
+	GL_BindIBO (vbo_indices);
+	in.vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+	GL_BindIBO (NULL);
+	if (in.vtriangles == NULL)
+	{
+		Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
+		return;
+	}
+	
+	VectorCopy (terrainentity->origin, in.origin);
+	AnglesToMatrix3x3 (terrainentity->angles, in.rotation_matrix);
+	in.npolys = terrainmodel->num_triangles;
+	in.nverts = terrainmodel->numvertexes;
+	
+	Mod_AddToDecalModel (pos, &in, out);
 	
 	GL_BindVBO (vbo_xyz);
 	qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
@@ -171,9 +232,58 @@ void Mod_AddToDecalModel (const vec3_t mins, const vec3_t maxs, const vec3_t ori
 	GL_BindIBO (NULL);
 }
 
-static entity_t *load_decalentity;
+// Add geometry from the BSP to the decal
+static void Mod_AddBSPToDecalModel (const decalorientation_t *pos, decalprogress_t *out)
+{
+	int surfnum, vertnum, trinum;
+	int i, n;
+	float *v;
+	decalinput_t in;
+	
+	VectorClear (in.origin);
+	AnglesToMatrix3x3 (vec3_origin, in.rotation_matrix);
+	
+	// FIXME HACK: we generate a separate indexed mesh for each BSP surface.
+	// TODO: generate indexed BSP VBOs in r_vbo.c, and then just use the same
+	// code as we use for other mesh types.
+	for (surfnum = 0; surfnum < r_worldmodel->numsurfaces; surfnum++)
+	{
+		msurface_t *surf = &r_worldmodel->surfaces[surfnum];
+		
+		if ((surf->texinfo->flags & (SURF_SKY|SURF_WARP|SURF_FLOWING|SURF_NODRAW)))
+			continue;
+		
+		in.nverts = surf->polys->numverts;
+		in.vposition = Z_Malloc (in.nverts * 3 * sizeof(float));
+		
+		for (vertnum = 0, v = surf->polys->verts[0]; vertnum < in.nverts; vertnum++, v += VERTEXSIZE)
+			VectorCopy (v, &in.vposition[3*vertnum]);
+		
+		in.npolys = in.nverts - 2;
+		in.vtriangles = Z_Malloc (in.npolys * 3 * sizeof(unsigned int));
+		
+		for (trinum = 1, n = 0; trinum < in.nverts-1; trinum++)
+		{
+			in.vtriangles[n++] = 0;
+		
+			for (i = trinum; i < trinum+2; i++)
+				in.vtriangles[n++] = i;
+		}
+		
+		Mod_AddToDecalModel (pos, &in, out);
+		
+		Z_Free (in.vposition);
+		Z_Free (in.vtriangles);
+	}
+}
 
-static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3_t maxs, int axisnum, qboolean maxborder, decalprogress_t *out)
+// If a triangle is entirely inside the bounding box, this function does 
+// nothing. Otherwise, it clips against one of the bounding planes of the box
+// and then (if needed) retesselates the area being kept. If maxborder is 
+// false and axisnum is 0, then the plane being clipped against is the plane
+// defined by x = mins[0]. If maxborder is true and axisnum is 1, then the
+// plane is y = maxs[1].
+static void ClipTriangleAgainstBorder (int trinum, const decalorientation_t *pos, int axisnum, qboolean maxborder, decalprogress_t *out)
 {
 	int new_trinum;
 	int i;
@@ -195,9 +305,9 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 		coord = out->verts[vertidx][axisnum];
 		
 		if (maxborder)
-			isoutside = coord > maxs[axisnum];
+			isoutside = coord > pos->maxs[axisnum];
 		else
-			isoutside = coord < mins[axisnum];
+			isoutside = coord < pos->mins[axisnum];
 		
 		if (isoutside)
 		{
@@ -236,9 +346,9 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 			old_len = VectorNormalize (dir);
 			
 			if (maxborder)
-				new_len = out->verts[insideidx[0]][axisnum] - maxs[axisnum];
+				new_len = out->verts[insideidx[0]][axisnum] - pos->maxs[axisnum];
 			else
-				new_len = out->verts[insideidx[0]][axisnum] - mins[axisnum];
+				new_len = out->verts[insideidx[0]][axisnum] - pos->mins[axisnum];
 			new_len *= old_len;
 			new_len /= out->verts[insideidx[0]][axisnum] - out->verts[outsideidx[i]][axisnum];
 			
@@ -272,9 +382,9 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 		old_len = VectorNormalize (dir);
 		
 		if (maxborder)
-			new_len = out->verts[insideidx[i]][axisnum] - maxs[axisnum];
+			new_len = out->verts[insideidx[i]][axisnum] - pos->maxs[axisnum];
 		else
-			new_len = out->verts[insideidx[i]][axisnum] - mins[axisnum];
+			new_len = out->verts[insideidx[i]][axisnum] - pos->mins[axisnum];
 		new_len *= old_len;
 		new_len /= out->verts[insideidx[i]][axisnum] - out->verts[outsideidx[0]][axisnum];
 		
@@ -312,7 +422,7 @@ static void ClipTriangleAgainstBorder (int trinum, const vec3_t mins, const vec3
 	}
 }
 
-static qboolean TriangleOutsideBounds (int trinum, const vec3_t mins, const vec3_t maxs, const decalprogress_t *mesh)
+static qboolean TriangleOutsideBounds (int trinum, const decalorientation_t *pos, const decalprogress_t *mesh)
 {
 	int axisnum;
 	qboolean maxborder;
@@ -333,9 +443,9 @@ static qboolean TriangleOutsideBounds (int trinum, const vec3_t mins, const vec3
 				coord = mesh->verts[vertidx][axisnum];
 		
 				if (maxborder)
-					isoutside = coord > maxs[axisnum];
+					isoutside = coord > pos->maxs[axisnum];
 				else
-					isoutside = coord < mins[axisnum];
+					isoutside = coord < pos->mins[axisnum];
 		
 				if (isoutside)
 					noutside++;
@@ -363,14 +473,14 @@ static qboolean TriangleOutsideBounds (int trinum, const vec3_t mins, const vec3
 //
 // So for the sake of consistency, we re-cull every terrain triangle we 
 // modify before re-clipping it against the next border.
-static void ReCullTriangles (const vec3_t mins, const vec3_t maxs, decalprogress_t *out)
+static void ReCullTriangles (const decalorientation_t *pos, decalprogress_t *out)
 {
 	int outTriangle;
 	int inTriangle;
 	
 	for (inTriangle = outTriangle = 0; inTriangle < out->npolys; inTriangle++)
 	{
-		if (TriangleOutsideBounds (inTriangle, mins, maxs, out))
+		if (TriangleOutsideBounds (inTriangle, pos, out))
 			continue;
 		
 		if (outTriangle != inTriangle)
@@ -455,6 +565,8 @@ static void ReUnifyVertexes (decalprogress_t *out)
 	Z_Free (new_verts);
 }
 
+static entity_t *load_decalentity;
+
 void Mod_LoadDecalModel (model_t *mod, void *_buf)
 {
 	decalprogress_t data;
@@ -465,6 +577,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	char	*token;
 	qboolean maxborder;
 	char *buf = (char *)_buf;
+	decalorientation_t pos;
 	
 	buf = strtok (buf, ";");
 	while (buf)
@@ -521,8 +634,17 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	
 	memset (&data, 0, sizeof(data));
 	
+	VectorCopy (mod->mins, pos.mins);
+	VectorCopy (mod->maxs, pos.maxs);
+	VectorCopy (load_decalentity->origin, pos.origin);
+	// Create a rotation matrix to apply to world/terrain geometry to
+	// transform it into decal space.
+	AnglesToMatrix3x3_Backwards (load_decalentity->angles, pos.decal_space_matrix);
+	
 	for (i = 0; i < num_terrain_entities; i++)
-		Mod_AddToDecalModel (mod->mins, mod->maxs, load_decalentity->origin, load_decalentity->angles, terrain_entities[i].model, &data);
+		Mod_AddTerrainToDecalModel (&pos, &terrain_entities[i], &data);
+	
+	Mod_AddBSPToDecalModel (&pos, &data);
 	
 	for (maxborder = false; maxborder <= true; maxborder++)
 	{
@@ -530,8 +652,8 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		{
 			int lim = data.npolys;
 			for (i = 0; i < lim; i++)
-				ClipTriangleAgainstBorder (i, mod->mins, mod->maxs, j, maxborder, &data);
-			ReCullTriangles (mod->mins, mod->maxs, &data);
+				ClipTriangleAgainstBorder (i, &pos, j, maxborder, &data);
+			ReCullTriangles (&pos, &data);
 		}
 	}
 	
