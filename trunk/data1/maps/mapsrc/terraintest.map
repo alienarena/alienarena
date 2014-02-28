@@ -623,3 +623,10 @@
 "model" "maps/meshes/terraintest/ivy1.decal"
 "angles" "-45.000008 -45.000008 0.000000"
 }
+// entity 13
+{
+"classname" "misc_decal"
+"origin" "128.000000 656.000000 1008.000000"
+"model" "maps/meshes/terraintest/blood_splatter3.decal"
+"angles" "-20 -89.999992 0.000000"
+}
