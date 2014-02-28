@@ -1046,6 +1046,8 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 	uniform float useShell; // doubles as shell scale
 	uniform int useCube;
 	uniform vec3 baseColor;
+	// For now, only applies to vertexOnly. If 0, don't do the per-vertex shading.
+	uniform int doShading; 
 	
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
@@ -1122,8 +1124,16 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 		{
 			// We try to bias toward light instead of shadow, but then make
 			// the contrast between light and shadow more pronounced.
-			float lightness = max (dot (worldNormal, LightDir), 0.0) + 0.25;
-			lightness = lightness * lightness + 0.25;
+			float lightness;
+			if (doShading == 1)
+			{
+				lightness = max (dot (worldNormal, LightDir), 0.0) + 0.25;
+				lightness = lightness * lightness + 0.25;
+			}
+			else
+			{
+				lightness = 1.0;
+			}
 			gl_FrontColor = gl_BackColor = vec4 (baseColor * lightness, 1.0);
 		}
 		else
@@ -2030,6 +2040,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
 	g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
 	g_location_lerp = glGetUniformLocationARB( g_meshprogramObj, "lerp");
+	g_location_doShading = glGetUniformLocationARB( g_meshprogramObj, "doShading");
 	
 	//vertex-only meshes
 	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_vertexonlymeshprogramObj);
@@ -2051,6 +2062,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_vo_outframe = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "bonemats");
 	g_location_vo_fromView = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fromView");
 	g_location_vo_lerp = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lerp");
+	g_location_vo_doShading = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "doShading");
 	
 	//Glass
 	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM, &g_glassprogramObj);
