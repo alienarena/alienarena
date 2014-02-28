@@ -356,14 +356,19 @@ static struct
 	// True if a polygon offset should be used to prevent z-fighting, as well
 	// as if blending should be used.
 	qboolean decal;
+	
+	// True if any sort of static per-pixel or per-vertex lighting should be
+	// done on this mesh type. (The eventual goal is to do dynamic lighting on
+	// all mesh types.)
+	qboolean doShading;
 } modtypes[num_modtypes] = 
 {
-	{true, false, false, false, false},	// mod_bad- this is ignored
-	{true, false, false, false, false},	// mod_brush- BSP brush models- this is ignored
-	{false, true, false, false, false},	// mod_md2- TODO: these should use shadowmaps as well
-	{true, false, true, true, false},	// mod_iqm
-	{false, false, false, true, false},	// mod_terrain
-	{false, false, false, true, true},	// mod_decal
+	{true,	false,	false,	false,	false,	true},	// mod_bad- this is ignored
+	{true,	false,	false,	false,	false,	true},	// mod_brush- BSP brush models- this is ignored
+	{false,	true,	false,	false,	false,	true},	// mod_md2- TODO: these should use shadowmaps as well
+	{true,	false,	true,	true,	false,	true},	// mod_iqm
+	{false,	false,	false,	true,	false,	false},	// mod_terrain
+	{false,	false,	false,	true,	true,	false},	// mod_decal
 	// New model types go here
 };
 

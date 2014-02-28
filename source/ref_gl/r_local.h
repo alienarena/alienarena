@@ -630,6 +630,7 @@ GLuint		g_location_useGPUanim;
 GLuint		g_location_outframe;
 GLuint		g_location_fromView;
 GLuint		g_location_lerp;
+GLuint		g_location_doShading;
 
 //vertex-only mesh
 GLuint		g_location_vo_meshlightPosition;
@@ -648,6 +649,7 @@ GLuint		g_location_vo_useGPUanim;
 GLuint		g_location_vo_outframe;
 GLuint		g_location_vo_fromView;
 GLuint		g_location_vo_lerp;
+GLuint		g_location_vo_doShading;
 
 //glass
 GLuint		g_location_g_type; // 1 means mirror only, 2 means glass only, 3 means both

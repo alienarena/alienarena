@@ -357,19 +357,16 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 		glUniform1iARB( MESH_UNIFORM(normTex), 1);
 	}
 
-	glUniform1iARB( MESH_UNIFORM(useFX), 0);
+	glUniform1iARB (MESH_UNIFORM(useFX), 0);
+	glUniform1iARB (MESH_UNIFORM(useGlow), 0);
+	glUniform1iARB (MESH_UNIFORM(useCube), 0);
 
-	glUniform1iARB( MESH_UNIFORM(useGlow), 0);
-
-	glUniform1iARB( MESH_UNIFORM(useCube), 0);
-
-	glUniform1fARB( MESH_UNIFORM(useShell), ragdoll?1.6:0.4);
-
-	glUniform3fARB( MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
-
-	glUniform1fARB( MESH_UNIFORM(meshTime), rs_realtime);
-
-	glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
+	glUniform1fARB (MESH_UNIFORM(useShell), ragdoll?1.6:0.4);
+	glUniform3fARB (MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
+	glUniform1fARB (MESH_UNIFORM(meshTime), rs_realtime);
+	
+	glUniform1iARB (MESH_UNIFORM(doShading), modtypes[currentmodel->type].doShading);
+	glUniform1iARB (MESH_UNIFORM(meshFog), map_fog);
 	
 	// set up the fixed-function pipeline too
 	if (!fragmentshader)
@@ -479,6 +476,8 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	}
 
 	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);
+	
+	glUniform1iARB (MESH_UNIFORM(doShading), modtypes[currentmodel->type].doShading);
 }
 
 void R_Mesh_SetupGlassRender (void)
