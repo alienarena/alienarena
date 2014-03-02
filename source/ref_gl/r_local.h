@@ -222,6 +222,7 @@ void R_StaticLightPoint (vec3_t p, vec3_t color);
 void R_DynamicLightPoint (vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
 void R_PushDlights (void);
+void R_TransformDlights (void);
 void R_PushDlightsForBModel (entity_t *e);
 
 //====================================================================
@@ -586,6 +587,9 @@ GLuint		g_location_rs_envmap;
 GLuint		g_location_rs_numblendtextures;
 GLuint		g_location_rs_lightmap;
 GLuint		g_location_rs_fog;
+GLuint		g_location_rs_dynamic;
+GLuint		g_location_rs_lightPosition;
+GLuint		g_location_rs_lightAmount;
 GLuint		g_location_rs_mainTexture;
 GLuint		g_location_rs_mainTexture2;
 GLuint		g_location_rs_lightmapTexture;

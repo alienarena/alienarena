@@ -1051,6 +1051,8 @@ void R_RenderView (refdef_t *fd)
 	R_SetupGL ();
 
 	R_SetupFog (1);
+	
+	R_TransformDlights ();
 
 	R_DrawWorldSurfs ();
 	
@@ -1177,6 +1179,7 @@ void R_RenderFramePlayerSetup( refdef_t *rfdf )
 	R_SetupFrame();
 	R_SetFrustum();
 	R_SetupGL();
+	R_TransformDlights ();
 	R_DrawEntitiesOnList();
 
 	R_SetGL2D();

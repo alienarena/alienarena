@@ -506,7 +506,7 @@ void R_DrawSkyBox (void)
 			Sky_DrawQuad_Setup (i, SKYDIST);
 
 			qglDepthMask( GL_FALSE );	 	// no z buffering
-			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, Sky_DrawQuad_Callback);
+			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, Sky_DrawQuad_Callback);
 		}
 		R_KillVArrays ();
 		// restore the original blend mode

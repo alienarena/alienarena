@@ -1137,10 +1137,11 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 				qboolean translucent, rs_lightmaptype_t lm,
-				void (*draw_callback) (void))
+				qboolean enable_dlights, void (*draw_callback) (void))
 {
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
+	qboolean	dynamic = false;
 
 	if (!rs)
 		return;
@@ -1152,16 +1153,46 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 
 	glUseProgramObjectARB (g_rscriptprogramObj);
 	
-	glUniform1iARB( g_location_rs_mainTexture, 0);
-	glUniform1iARB( g_location_rs_lightmapTexture, 1);
-	glUniform1iARB( g_location_rs_mainTexture2, 2);
-	glUniform1iARB( g_location_rs_blendTexture0, 3);
-	glUniform1iARB( g_location_rs_blendTexture1, 4);
-	glUniform1iARB( g_location_rs_blendTexture2, 5);
-	glUniform1iARB( g_location_rs_blendTexture3, 6);
-	glUniform1iARB( g_location_rs_blendTexture4, 7);
-	glUniform1iARB( g_location_rs_blendTexture5, 8);
-	glUniform1iARB( g_location_rs_fog, map_fog);
+	glUniform1iARB (g_location_rs_mainTexture, 0);
+	glUniform1iARB (g_location_rs_lightmapTexture, 1);
+	glUniform1iARB (g_location_rs_mainTexture2, 2);
+	glUniform1iARB (g_location_rs_blendTexture0, 3);
+	glUniform1iARB (g_location_rs_blendTexture1, 4);
+	glUniform1iARB (g_location_rs_blendTexture2, 5);
+	glUniform1iARB (g_location_rs_blendTexture3, 6);
+	glUniform1iARB (g_location_rs_blendTexture4, 7);
+	glUniform1iARB (g_location_rs_blendTexture5, 8);
+	glUniform1iARB (g_location_rs_fog, map_fog);
+	
+	if (gl_dynamic->integer && enable_dlights)
+	{
+		int		lnum, best_lnum;
+		float	add, brightest = 0;
+		
+		for (lnum = 0; lnum < r_newrefdef.num_dlights; lnum++)
+		{
+			vec3_t lightVec;
+			
+			VectorSubtract (r_origin, r_newrefdef.dlights[lnum].origin, lightVec);
+			add = r_newrefdef.dlights[lnum].intensity - VectorLength(lightVec)/10;
+			if (add > brightest) //only bother with lights close by
+			{
+				brightest = add;
+				best_lnum = lnum; //remember the position of most influencial light
+				dynamic = true;
+			}
+		}
+		
+		if (dynamic)
+		{
+			dlight_t *dl = &r_newrefdef.dlights[best_lnum];
+			
+			glUniform3fARB (g_location_rs_lightPosition, dl->eyeSpaceOrigin[0], dl->eyeSpaceOrigin[1], dl->eyeSpaceOrigin[2]);
+			glUniform3fARB (g_location_rs_lightAmount, dl->lightAmountSquared[0], dl->lightAmountSquared[1], dl->lightAmountSquared[2]);
+		}
+	}
+	
+	glUniform1iARB (g_location_rs_dynamic, dynamic);
 	
 	qglMatrixMode (GL_TEXTURE);
 	do
@@ -1319,7 +1350,7 @@ void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 	
 	RS_Draw (	rs, lmtex, rotate_center, surf->plane->normal, translucent,
 				translucent?rs_lightmap_off:rs_lightmap_separate_texcoords,
-				BSP_DrawVBOAccum );
+				true, BSP_DrawVBOAccum );
 	
 	BSP_ClearVBOAccum ();
 }

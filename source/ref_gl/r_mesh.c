@@ -687,7 +687,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 		
 		RS_Draw (	rs, lmtex, vec3_origin, vec3_origin, false,
 					lmtex != 0 ? rs_lightmap_on : rs_lightmap_off,
-					R_Mesh_DrawVBO_Callback );
+					true, R_Mesh_DrawVBO_Callback );
 		
 		return;
 	}

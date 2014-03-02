@@ -534,7 +534,7 @@ void R_DrawVehicleHUD (void)
 	if(r_shaders->integer && rs)
 	{
 		RS_ReadyScript(rs);
-		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, VehicleHud_DrawQuad_Callback);
+		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, VehicleHud_DrawQuad_Callback);
 	}
 	
 	qglColor4f(1,1,1,1);
