@@ -159,6 +159,31 @@ void R_PushDlightsForBModel (entity_t *e)
 	}
 }
 
+// MUST be called with the modelview matrix set up for eye space.
+void R_TransformDlights (void)
+{
+	int			i;
+	dlight_t	*l;
+	
+	l = r_newrefdef.dlights;
+	for (i = 0; i < r_newrefdef.num_dlights; i++, l++)
+	{
+		float intensitySquared;
+		
+		R_ModelViewTransform (l->origin, l->eyeSpaceOrigin);
+		
+		intensitySquared = l->intensity - DLIGHT_CUTOFF;
+
+		if (intensitySquared <= 0.0f)
+			intensitySquared = 0.0f;
+
+		intensitySquared *= 2.0f;
+		intensitySquared *= intensitySquared;
+		
+		VectorScale (l->color, intensitySquared, l->lightAmountSquared);
+	}
+}
+
 /*
 =============================================================================
 
@@ -524,7 +549,7 @@ store:
 				b = b*t;
 			}
 
-            // GL_BGRA
+			// GL_BGRA
 			dest[0] = b;
 			dest[1] = g;
 			dest[2] = r;

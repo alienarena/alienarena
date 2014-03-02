@@ -181,7 +181,7 @@ typedef enum
 } rs_lightmaptype_t;
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 				qboolean translucent, rs_lightmaptype_t lm,
-				void (*draw_callback) (void));
+				qboolean enable_dlights, void (*draw_callback) (void));
 void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
 

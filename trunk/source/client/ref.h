@@ -233,6 +233,9 @@ typedef struct
 	vec3_t	origin;
 	vec3_t	color;
 	float	intensity;
+	// The following fields are updated each frame by the renderer:
+	vec3_t	eyeSpaceOrigin;
+	vec3_t	lightAmountSquared;
 } dlight_t;
 
 typedef struct

@@ -286,7 +286,7 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		// FIXME: HACK to work around the other compatibility HACK in RS_Draw
 		GL_BlendFunction (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		
-		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, Draw_DrawQuad_Callback);
+		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, Draw_DrawQuad_Callback);
 
 		qglColor4f(1,1,1,1);
 		GLSTATE_ENABLE_ALPHATEST

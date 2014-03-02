@@ -807,13 +807,24 @@ static char rscript_vertex_program[] = STRINGIFY (
 	uniform int envmap;
 	uniform int	numblendtextures;
 	uniform int FOG;
+	uniform int DYNAMIC;
+	uniform vec3 lightPosition;
+	uniform vec3 lightAmount;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap; 
 	
 	varying float fog;
 	varying vec3 normal;
+	varying vec3 orig_normal;
 	varying vec3 orig_coord;
+	varying vec3 LightDir;
+	
+	// This is just the maximum axis from lightAmount. It's used as a
+	// mathematical shortcut to avoid some unnecessary calculations.
+	varying float lightCutoffSquared; //TODO: make this uniform
+	
+	attribute vec4 tangent;
 	
 	void main ()
 	{
@@ -824,7 +835,8 @@ static char rscript_vertex_program[] = STRINGIFY (
 		// the blendmap RScript command on BSP surfaces yet!
 		if (numblendtextures != 0)
 		{
-			normal = gl_Normal.xyz;
+			orig_normal = gl_Normal.xyz;
+			normal = gl_NormalMatrix * gl_Normal;
 			orig_coord = gl_Vertex.xyz;
 		}
 		
@@ -848,9 +860,16 @@ static char rscript_vertex_program[] = STRINGIFY (
 			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 		
 		//fog
-		if(FOG > 0){
+		if(FOG > 0)
+		{
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 1.0);
+		}
+		
+		if (DYNAMIC > 0)
+		{
+			LightDir = vec3 (gl_ModelViewMatrix * gl_Vertex) - lightPosition;
+			lightCutoffSquared = max (max (lightAmount[0], lightAmount[1]), lightAmount[2]);
 		}
 	}
 );
@@ -867,6 +886,8 @@ static char rscript_fragment_program[] = STRINGIFY (
 	uniform sampler2D blendTexture5;
 	uniform int	numblendtextures;
 	uniform int FOG;
+	uniform int DYNAMIC;
+	uniform vec3 lightAmount;
 	uniform vec3 blendscales;
 	uniform vec3 blendscales2;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
@@ -875,7 +896,13 @@ static char rscript_fragment_program[] = STRINGIFY (
 	
 	varying float fog;
 	varying vec3 normal;
+	varying vec3 orig_normal;
 	varying vec3 orig_coord;
+	varying vec3 LightDir;
+	
+	// This is just the maximum axis from lightAmount. It's used as a
+	// mathematical shortcut to avoid some unnecessary calculations.
+	varying float lightCutoffSquared; //TODO: make this uniform
 	
 	// This is tri-planar projection, based on code from NVIDIA's GPU Gems
 	// website. Potentially could be replaced with bi-planar projection, for
@@ -914,7 +941,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 			mainColor.rgb /= tmp;
 			mainColor2.rgb /= tmp;
 			
-			vec3 blend_weights = abs (normalize (normal));
+			vec3 blend_weights = abs (normalize (orig_normal));
 			blend_weights = (blend_weights - vec3 (0.2)) * 7;
 			blend_weights = max (blend_weights, 0);
 			blend_weights /= (blend_weights.x + blend_weights.y + blend_weights.z);
@@ -952,13 +979,34 @@ static char rscript_fragment_program[] = STRINGIFY (
 		}
 		
 		gl_FragColor *= gl_Color;
+		vec3 textureColor = gl_FragColor.rgb;
 		
 		if (lightmap != 0)
-		{
 			gl_FragColor *= 2.0 * texture2D (lightmapTexture, gl_TexCoord[1].st);
+		
+		if (DYNAMIC > 0)
+		{
+			float dist2 = dot (LightDir, LightDir);
+			if (dist2 < lightCutoffSquared)
+			{
+				// If we get this far, the fragment is within range of the 
+				// dynamic light
+				vec3 attenuation = clamp (vec3 (1.0) - (vec3 (dist2) / lightAmount), vec3 (0.0), vec3 (1.0));
+				if (attenuation != vec3 (0.0))
+				{
+					// If we get this far, the fragment is facing the dynamic
+					// light.
+					float diffuseTerm = max (0.0, -dot (LightDir / dist2, normalize (normal)));
+					vec3 swamp = attenuation * attenuation;
+					swamp *= swamp;
+					swamp *= swamp;
+					vec3 dynamicColor = ((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor * 3.0 * attenuation;
+					gl_FragColor.rgb = max (gl_FragColor.rgb, dynamicColor);
+				}
+			}
 		}
 		
-		if(FOG > 0)
+		if (FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
 );
@@ -1986,13 +2034,16 @@ void R_LoadGLSLPrograms(void)
 	g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
 	
 	//rscript surfaces
-	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, NO_ATTRIBUTES, &g_rscriptprogramObj);
+	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, &g_rscriptprogramObj);
 	
 	// Locate some parameters by name so we can set them later...
 	g_location_rs_envmap = glGetUniformLocationARB (g_rscriptprogramObj, "envmap");
 	g_location_rs_numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj, "numblendtextures");
 	g_location_rs_lightmap = glGetUniformLocationARB (g_rscriptprogramObj, "lightmap");
 	g_location_rs_fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
+	g_location_rs_dynamic = glGetUniformLocationARB (g_rscriptprogramObj, "DYNAMIC");
+	g_location_rs_lightPosition = glGetUniformLocationARB (g_rscriptprogramObj, "lightPosition");
+	g_location_rs_lightAmount = glGetUniformLocationARB (g_rscriptprogramObj, "lightAmount");
 	g_location_rs_mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
 	g_location_rs_mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture2");
 	g_location_rs_lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");

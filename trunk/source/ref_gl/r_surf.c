@@ -625,7 +625,7 @@ void R_DrawRSSurfaces (void)
 				RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
 							vec3_origin, vec3_origin, false,
 							rs_lightmap_separate_texcoords, 
-							BSP_DrawVBOAccum );
+							true, BSP_DrawVBOAccum );
 				
 				BSP_ClearVBOAccum ();
 			}
