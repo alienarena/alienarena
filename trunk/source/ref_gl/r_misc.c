@@ -683,11 +683,13 @@ void GL_SetDefaultState( void )
 	qglEnable(GL_TEXTURE_2D);
 
 	qglEnable(GL_ALPHA_TEST);
+	gl_state.alpha_test = true;
 	qglAlphaFunc(GL_GREATER, 0.666);
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
+	gl_state.blend = false;
 
 	qglColor4f (1,1,1,1);
 

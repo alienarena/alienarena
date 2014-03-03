@@ -216,8 +216,6 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 	
 	if (!rs)
 	{
-		qglDisable (GL_ALPHA_TEST);
-		qglEnable (GL_BLEND);
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_ENABLE_BLEND
 		GL_TexEnv( GL_MODULATE );
@@ -259,8 +257,6 @@ void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *
 		VA_SetElem2(tex_array[2], gl->crop_sh, gl->crop_th);
 		VA_SetElem2(tex_array[3], gl->crop_sl, gl->crop_th);
 		R_DrawVarrays (GL_QUADS, 0, 4);
-		qglEnable (GL_ALPHA_TEST);
-		qglDisable (GL_BLEND);
 		GLSTATE_DISABLE_BLEND
 		GLSTATE_ENABLE_ALPHATEST
 		R_KillVArrays();
@@ -399,9 +395,6 @@ Fills a box of pixels with a single color
 void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 {
 	qglDisable (GL_TEXTURE_2D);
-	// FIXME HACK
-	qglDisable (GL_ALPHA_TEST);
-	qglEnable (GL_BLEND);
 	GLSTATE_ENABLE_BLEND;
 	GLSTATE_DISABLE_ALPHATEST;
 	qglColor4fv (rgba);
@@ -426,7 +419,7 @@ Draw_FadeScreen
 */
 void Draw_FadeScreen (void)
 {
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
 	qglBegin (GL_QUADS);
@@ -439,7 +432,7 @@ void Draw_FadeScreen (void)
 	qglEnd ();
 	qglColor4f (1,1,1,1);
 	qglEnable (GL_TEXTURE_2D);
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 }
 
 

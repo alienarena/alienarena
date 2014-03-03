@@ -1191,13 +1191,13 @@ void R_GenerateEntityShadow( void )
 		//re-render affected polys with shadowmap for this entity
 		if(r_shadowmapcount > 0)
 		{
-			qglEnable( GL_BLEND );
+			GLSTATE_ENABLE_BLEND
 			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, currententity->origin);
 
 			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			qglDisable ( GL_BLEND );
+			GLSTATE_DISABLE_BLEND
 		}
 
 		r_shadowmapcount = 0;
@@ -1319,13 +1319,13 @@ void R_GenerateRagdollShadow( int RagDollID )
 		//re-render affected polys with shadowmap for this entity(note - blend "if darker").
 		if(r_shadowmapcount > 0)
 		{
-			qglEnable( GL_BLEND );
+			GLSTATE_ENABLE_BLEND
 			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, RagDoll[RagDollID].origin);
 
 			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			qglDisable ( GL_BLEND );
+			GLSTATE_DISABLE_BLEND
 		}
 
 		currentmodel = RagDoll[RagDollID].ragDollMesh;	

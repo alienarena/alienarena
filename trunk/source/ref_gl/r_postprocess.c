@@ -80,7 +80,7 @@ static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
     
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 
 	qglViewport(0,0,FB_texture_width,FB_texture_height);
@@ -93,7 +93,7 @@ static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
 	
 	Postprocess_RenderQuad (r_framebuffer, offsetX, offsetY);
 	
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 	qglEnable (GL_DEPTH_TEST);
 }
 
@@ -308,7 +308,7 @@ void R_ShadowBlend(float alpha)
 
 		qglDisable(GL_STENCIL_TEST);
 		GLSTATE_DISABLE_ALPHATEST
-		qglEnable( GL_BLEND );
+		GLSTATE_ENABLE_BLEND
 		qglDisable (GL_DEPTH_TEST);
 		qglDisable (GL_TEXTURE_2D);
 
@@ -324,7 +324,7 @@ void R_ShadowBlend(float alpha)
 	qglColor4f (0,0,0, alpha);
 
 	GLSTATE_DISABLE_ALPHATEST
-	qglEnable( GL_BLEND );
+	GLSTATE_ENABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_TEXTURE_2D);
 
@@ -347,7 +347,7 @@ void R_ShadowBlend(float alpha)
 		qglLoadIdentity ();
 		qglOrtho(0, vid.width, vid.height, 0, -10, 100);
 
-		qglEnable( GL_BLEND );
+		GLSTATE_ENABLE_BLEND
 		qglEnable( GL_TEXTURE_2D );
 
 		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
@@ -385,7 +385,7 @@ void R_ShadowBlend(float alpha)
 	qglPopMatrix();
 
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable ( GL_BLEND );
+	GLSTATE_DISABLE_BLEND
 	qglEnable (GL_TEXTURE_2D);
 	qglEnable (GL_DEPTH_TEST);
 	qglDisable(GL_STENCIL_TEST);
@@ -497,7 +497,7 @@ void R_DrawVehicleHUD (void)
 		return;
 
 	GL_TexEnv(GL_MODULATE);
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	GL_MBind (0, gl->texnum);
@@ -535,7 +535,7 @@ void R_DrawVehicleHUD (void)
 	
 	qglColor4f(1,1,1,1);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	GL_TexEnv(GL_REPLACE);
 
 	R_KillVArrays();
@@ -550,7 +550,7 @@ void R_DrawBloodEffect (void)
 	if (!gl)
 		return;
 
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 
 	GL_MBind (0, gl->texnum);
 		
@@ -562,7 +562,7 @@ void R_DrawBloodEffect (void)
 	
 	Postprocess_RenderQuad (gl, 0, 0);
 
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 }
 
 extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
@@ -664,12 +664,12 @@ void R_GLSLGodRays(void)
     glUniform1fARB( g_location_sunRadius, sun_size*r_godray_intensity->value);
     
 	//render quad 
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
 	Postprocess_RenderQuad (r_colorbuffer, 0, 0);
 
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glUseProgramObjectARB( 0 );

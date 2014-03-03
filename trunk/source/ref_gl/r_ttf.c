@@ -673,10 +673,12 @@ static void _TTF_PrepareToDraw( image_t * texture )
 	qglScaled( 1.0 / texture->width , 1.0 / texture->height , 1 );
 	qglMatrixMode( GL_MODELVIEW );
 
-	// Set blending function
-	qglDisable( GL_ALPHA_TEST );
-	qglEnable( GL_BLEND );
-	GL_BlendFunction ( GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA );
+	// Set blending function. NOTE: we do NOT use GLSTATE_ENABLE/DISABLE
+	// macros or GL_BlendFunction because we're using glPushAttrib/glPopAttrib
+	// to handle that state instead.
+	qglDisable (GL_ALPHA_TEST);
+	qglEnable (GL_BLEND);
+	qglBlendFunc (GL_SRC_ALPHA , GL_ONE_MINUS_SRC_ALPHA);
 }
 
 

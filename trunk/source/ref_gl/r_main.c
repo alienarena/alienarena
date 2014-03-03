@@ -634,8 +634,8 @@ void R_PolyBlend (void)
 		}
 	}
 
-	qglDisable (GL_ALPHA_TEST);
-	qglEnable (GL_BLEND);
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_ENABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_TEXTURE_2D);
 
@@ -654,9 +654,9 @@ void R_PolyBlend (void)
 	qglVertex2f (-5, 10);
 	qglEnd ();
 
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	qglEnable (GL_TEXTURE_2D);
-	qglEnable (GL_ALPHA_TEST);
+	GLSTATE_ENABLE_ALPHATEST
 
 	qglColor4f(1,1,1,1);
 }
@@ -851,9 +851,8 @@ void R_SetupGL (void)
 	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
-	qglDisable(GL_BLEND);
-
-	qglDisable(GL_ALPHA_TEST);
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_ALPHATEST
 	qglEnable(GL_DEPTH_TEST);
 }
 
@@ -1147,8 +1146,8 @@ void	R_SetGL2D (void)
 	qglLoadIdentity ();
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
-	qglDisable (GL_BLEND);
-	qglEnable (GL_ALPHA_TEST);
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_ENABLE_ALPHATEST
 	qglColor4f (1,1,1,1);
 }
 
