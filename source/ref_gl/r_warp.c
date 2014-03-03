@@ -252,7 +252,7 @@ void R_RenderWaterPolys (msurface_t *fa)
 	if(fa->texinfo->has_normalmap)
 	{
 		if (SurfaceIsAlphaMasked (fa))
-			qglEnable( GL_ALPHA_TEST );
+			GLSTATE_ENABLE_ALPHATEST
 
 		glUseProgramObjectARB( g_waterprogramObj );
 
@@ -304,7 +304,7 @@ void R_RenderWaterPolys (msurface_t *fa)
 		R_KillVArrays ();
 
 		if (SurfaceIsAlphaMasked (fa))
-			qglDisable( GL_ALPHA_TEST);
+			GLSTATE_DISABLE_ALPHATEST
 
 		return;
 	}

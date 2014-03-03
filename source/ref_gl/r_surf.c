@@ -513,7 +513,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	
 	GL_SelectTexture (0);
 	qglDepthMask ( GL_FALSE );
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 	GL_TexEnv( GL_MODULATE );
 	BSP_InvalidateVBO ();
 	
@@ -540,7 +540,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		{
 			R_RenderWaterPolys (s);
 			GL_SelectTexture (0);
-			qglEnable (GL_BLEND);
+			GLSTATE_ENABLE_BLEND
 			GL_TexEnv( GL_MODULATE );
 			BSP_InvalidateVBO ();
 		}
@@ -548,7 +548,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		{
 			RS_Surface(s);
 			GL_SelectTexture (0);
-			qglEnable (GL_BLEND);
+			GLSTATE_ENABLE_BLEND
 			GL_TexEnv( GL_MODULATE );
 		}
 		else
@@ -558,7 +558,7 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	GL_SelectTexture (0);
 	GL_TexEnv( GL_REPLACE );
 	qglColor4f (1,1,1,1);
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	qglDepthMask ( GL_TRUE );
 }
 
@@ -740,12 +740,12 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	if (TexinfoIsAlphaMasked (texinfo))
 	{
 		if (!r_currTexInfo || !TexinfoIsAlphaMasked (r_currTexInfo))
-			qglEnable( GL_ALPHA_TEST );
+			GLSTATE_ENABLE_ALPHATEST
 	}
 	else
 	{
 		if (!r_currTexInfo || TexinfoIsAlphaMasked (r_currTexInfo))
-			qglDisable( GL_ALPHA_TEST );
+			GLSTATE_DISABLE_ALPHATEST
 	}
 	
 	if (glsl)
@@ -906,7 +906,7 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	
 	BSP_FlushVBOAccum ();
 	
-	qglDisable (GL_ALPHA_TEST);
+	GLSTATE_DISABLE_ALPHATEST
 }
 
 void BSP_DrawGLSLSurfaces (qboolean forEnt)
@@ -969,7 +969,7 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	
 	BSP_FlushVBOAccum ();
 
-	qglDisable (GL_ALPHA_TEST);
+	GLSTATE_DISABLE_ALPHATEST
 }
 
 void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
@@ -1066,7 +1066,7 @@ void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	
 	BSP_FlushVBOAccum ();
 	
-	qglDisable (GL_ALPHA_TEST);
+	GLSTATE_DISABLE_ALPHATEST
 }
 
 
@@ -1315,7 +1315,7 @@ void BSP_DrawInlineBModel ( void )
 
 	if ( currententity->flags & RF_TRANSLUCENT )
 	{
-		qglEnable (GL_BLEND);
+		GLSTATE_ENABLE_BLEND
 		qglColor4f (1,1,1,0.25);
 		GL_TexEnv( GL_MODULATE );
 	}
@@ -1346,7 +1346,7 @@ void BSP_DrawInlineBModel ( void )
 	
 	BSP_DrawTextureChains (true);
 	
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	qglColor4f (1,1,1,1);
 	GL_TexEnv( GL_REPLACE );
 	

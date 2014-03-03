@@ -278,10 +278,11 @@ R_Bloom_DrawEffect
 void R_Bloom_DrawEffect( void )
 {
 	GL_Bind(r_bloomeffecttexture->texnum);
-	qglEnable(GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_ONE, GL_ONE);
 	qglColor4f(r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
 	GL_TexEnv(GL_MODULATE);
+	
 	qglBegin(GL_QUADS);
 	qglTexCoord2f(	0,							1.0	);
 	qglVertex2f(	curView_x,					curView_y	);
@@ -293,7 +294,7 @@ void R_Bloom_DrawEffect( void )
 	qglVertex2f(	curView_x + curView_width,	curView_y	);
 	qglEnd();
 
-	qglDisable(GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 }
 
 
@@ -319,7 +320,7 @@ void R_Bloom_GeneratexDiamonds( void )
 
 	//start modifying the small scene corner
 	qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	qglEnable(GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 
 	//darkening passes
 	if( r_bloom_darken->integer )
@@ -438,7 +439,7 @@ The function name uses meaning 1.
 */
 void R_Bloom_DownsampleView( void )
 {
-	qglDisable( GL_BLEND );
+	GLSTATE_DISABLE_BLEND
 	qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	
 	GL_SelectTexture (0);
@@ -482,13 +483,13 @@ void R_Bloom_DownsampleView( void )
 		qglColor4f( 0.5f, 0.5f, 0.5f, 1.0f );
 		R_Bloom_Quad( 0,  viddef.height-BLOOM_SIZE, BLOOM_SIZE, BLOOM_SIZE);
 		// small-size
-		qglEnable( GL_BLEND );
+		GLSTATE_ENABLE_BLEND
 		GL_BlendFunction (GL_ONE, GL_ONE);
 		qglColor4f( 0.5f, 0.5f, 0.5f, 1.0f );
 		GL_Bind(r_bloomscratchtexture->texnum);
 		R_Bloom_Quad( 0,  viddef.height-BLOOM_SIZE, BLOOM_SIZE, BLOOM_SIZE );
 		qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		qglDisable( GL_BLEND );
+		GLSTATE_DISABLE_BLEND
 		
 	} else {	//downsample simple
 
@@ -541,7 +542,7 @@ void R_BloomBlend ( refdef_t *fd )
 	qglLoadIdentity ();
 	qglDisable(GL_CULL_FACE);
 
-	qglDisable( GL_BLEND );
+	GLSTATE_DISABLE_BLEND
 	qglEnable( GL_TEXTURE_2D );
 
 	qglColor4f( 1, 1, 1, 1 );
@@ -560,7 +561,7 @@ void R_BloomBlend ( refdef_t *fd )
 	R_Bloom_DrawEffect();
 
 	qglColor3f (1,1,1);
-	qglDisable (GL_BLEND);
+	GLSTATE_DISABLE_BLEND
 	qglEnable (GL_TEXTURE_2D);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
