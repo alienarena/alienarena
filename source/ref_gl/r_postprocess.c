@@ -185,6 +185,7 @@ void R_GLSLDistortion(void)
 		Distort_RenderQuad (1, offsetX, offsetY);
 		
 		glUseProgramObjectARB (0);
+		GL_MBind (1, 0);
 	}
 	else
 	{
