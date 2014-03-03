@@ -549,6 +549,17 @@ GLhandleARB g_fragmentShader;
 #define ATTR_OLDNORM_IDX	14
 #define ATTR_OLDTAN_IDX		15
 
+// Uniform locations for GLSL shaders that support dynamic lighting
+// FIXME: currently only used by RScript surfaces.
+typedef struct
+{
+	GLuint	enableDynamic;
+	GLuint	lightAmountSquared;
+	GLuint	lightPosition;
+} dlight_uniform_location_t;
+
+void R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights); // See r_light.c
+
 //standard bsp surfaces
 GLuint		g_location_surfTexture;
 GLuint		g_location_eyePos;
@@ -583,24 +594,18 @@ GLuint		g_location_xOffset;
 GLuint		g_location_yOffset;
 
 //rscripts
-GLuint		g_location_rs_envmap;
-GLuint		g_location_rs_numblendtextures;
-GLuint		g_location_rs_lightmap;
-GLuint		g_location_rs_fog;
-GLuint		g_location_rs_dynamic;
-GLuint		g_location_rs_lightPosition;
-GLuint		g_location_rs_lightAmount;
-GLuint		g_location_rs_mainTexture;
-GLuint		g_location_rs_mainTexture2;
-GLuint		g_location_rs_lightmapTexture;
-GLuint		g_location_rs_blendscales;
-GLuint		g_location_rs_blendscales2;
-GLuint		g_location_rs_blendTexture0;
-GLuint		g_location_rs_blendTexture1;
-GLuint		g_location_rs_blendTexture2;
-GLuint		g_location_rs_blendTexture3;
-GLuint		g_location_rs_blendTexture4;
-GLuint		g_location_rs_blendTexture5;
+struct
+{
+	dlight_uniform_location_t	dlight_uniforms;
+	GLuint						envmap;
+	GLuint						numblendtextures;
+	GLuint						lightmap;
+	GLuint						fog;
+	GLuint						mainTexture, mainTexture2;
+	GLuint						lightmapTexture;
+	GLuint						blendscales, blendscales2;
+	GLuint						blendTexture[6];
+} rscript_uniforms;
 
 //water
 GLuint		g_location_baseTexture;
@@ -614,69 +619,58 @@ GLuint		g_location_reflect;
 GLuint		g_location_trans;
 GLuint		g_location_fogamount;
 
-#define MESH_UNIFORM(name) \
-	((fragmentshader)?g_location_##name:g_location_vo_##name)
+// All the GLSL shaders that render animated meshes have these uniforms.
+typedef struct
+{
+	// 0 for no animation, 1 for IQM skeletal, 2 for MD2 lerp
+	GLuint	useGPUanim; 
+	GLuint	outframe;
+	GLuint	lerp;
+} mesh_anim_uniform_location_t;
 
-//mesh
-GLuint		g_location_meshlightPosition;
-GLuint		g_location_baseTex;
-GLuint		g_location_normTex;
-GLuint		g_location_fxTex;
-GLuint		g_location_fx2Tex;
-GLuint		g_location_color;
-GLuint		g_location_meshTime;
-GLuint		g_location_meshFog;
-GLuint		g_location_useFX;
-GLuint		g_location_useGlow;
-GLuint		g_location_useShell;
-GLuint		g_location_useCube;
-GLuint		g_location_useGPUanim;
-GLuint		g_location_outframe;
-GLuint		g_location_fromView;
-GLuint		g_location_lerp;
-GLuint		g_location_doShading;
+// Uniform locations for standard full mesh rendering.
+// Most of these will be -1 for the version of the GLSL program that doesn't
+// have the fragment shader.
+typedef struct
+{
+	mesh_anim_uniform_location_t	anim_uniforms;
+	GLuint							lightPosition;
+	GLuint							baseTex, normTex, fxTex, fx2Tex;
+	GLuint							color;
+	GLuint							time;
+	GLuint							fog;
+	GLuint							useFX;
+	GLuint							useGlow;
+	GLuint							useShell;
+	GLuint							useCube;
+	GLuint							fromView;
+	GLuint							doShading;
+} mesh_uniform_location_t;
 
-//vertex-only mesh
-GLuint		g_location_vo_meshlightPosition;
-GLuint		g_location_vo_baseTex;
-GLuint		g_location_vo_normTex;
-GLuint		g_location_vo_fxTex;
-GLuint		g_location_vo_fx2Tex;
-GLuint		g_location_vo_color;
-GLuint		g_location_vo_meshTime;
-GLuint		g_location_vo_meshFog;
-GLuint		g_location_vo_useFX;
-GLuint		g_location_vo_useGlow;
-GLuint		g_location_vo_useShell;
-GLuint		g_location_vo_useCube;
-GLuint		g_location_vo_useGPUanim;
-GLuint		g_location_vo_outframe;
-GLuint		g_location_vo_fromView;
-GLuint		g_location_vo_lerp;
-GLuint		g_location_vo_doShading;
+mesh_uniform_location_t	mesh_uniforms, mesh_vertexonly_uniforms;
 
-//glass
-GLuint		g_location_g_type; // 1 means mirror only, 2 means glass only, 3 means both
-GLuint		g_location_g_left;
-GLuint		g_location_g_up;
-GLuint		g_location_g_mirTexture;
-GLuint		g_location_g_refTexture;
-GLuint		g_location_g_lightPos;
-GLuint		g_location_g_fog;
-GLuint		g_location_g_outframe;
-GLuint		g_location_g_useGPUanim;
-GLuint		g_location_g_lerp;
+// Uniform locations for glass rendering.
+struct
+{
+	mesh_anim_uniform_location_t	anim_uniforms;
+	// 1 means mirror only, 2 means glass only, 3 means both
+	GLuint							type;
+	GLuint							left, up;
+	GLuint							mirTexture, refTexture;
+	GLuint							lightPos;
+	GLuint							fog;
+} glass_uniforms;
 
-//blank mesh
-GLuint		g_location_bm_outframe;
-GLuint		g_location_bm_useGPUanim;
-GLuint		g_location_bm_lerp;
+// Uniform locations for blank meshes.
+mesh_anim_uniform_location_t blankmesh_uniforms;
 
 //fullscreen distortion effects
-GLuint		g_location_framebuffTex;
-GLuint		g_location_distortTex;
-GLuint		g_location_dParams;
-GLuint		g_location_fxPos;
+struct
+{
+	GLuint	framebuffTex, distortTex;
+	GLuint	dParams;
+	GLuint	fxPos;
+} distort_uniforms;
 
 //gaussian blur
 GLuint		g_location_scale;

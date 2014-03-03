@@ -184,6 +184,42 @@ void R_TransformDlights (void)
 	}
 }
 
+// TODO: use this for more than just RScript rendering.
+void R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights)
+{
+	qboolean dynamic = false;
+	
+	if (gl_dynamic->integer && enable_dlights)
+	{
+		int		lnum, best_lnum;
+		float	add, brightest = 0;
+		
+		for (lnum = 0; lnum < r_newrefdef.num_dlights; lnum++)
+		{
+			vec3_t lightVec;
+			
+			VectorSubtract (r_origin, r_newrefdef.dlights[lnum].origin, lightVec);
+			add = r_newrefdef.dlights[lnum].intensity - VectorLength(lightVec)/10;
+			if (add > brightest) //only bother with lights close by
+			{
+				brightest = add;
+				best_lnum = lnum; //remember the position of most influencial light
+				dynamic = true;
+			}
+		}
+		
+		if (dynamic)
+		{
+			dlight_t *dl = &r_newrefdef.dlights[best_lnum];
+			
+			glUniform3fARB (uniforms->lightPosition, dl->eyeSpaceOrigin[0], dl->eyeSpaceOrigin[1], dl->eyeSpaceOrigin[2]);
+			glUniform3fARB (uniforms->lightAmountSquared, dl->lightAmountSquared[0], dl->lightAmountSquared[1], dl->lightAmountSquared[2]);
+		}
+	}
+	
+	glUniform1iARB (uniforms->enableDynamic, dynamic);
+}
+
 /*
 =============================================================================
 
