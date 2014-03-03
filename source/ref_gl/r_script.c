@@ -1141,7 +1141,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 {
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
-	qboolean	dynamic = false;
+	int			i;
 
 	if (!rs)
 		return;
@@ -1153,46 +1153,14 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 
 	glUseProgramObjectARB (g_rscriptprogramObj);
 	
-	glUniform1iARB (g_location_rs_mainTexture, 0);
-	glUniform1iARB (g_location_rs_lightmapTexture, 1);
-	glUniform1iARB (g_location_rs_mainTexture2, 2);
-	glUniform1iARB (g_location_rs_blendTexture0, 3);
-	glUniform1iARB (g_location_rs_blendTexture1, 4);
-	glUniform1iARB (g_location_rs_blendTexture2, 5);
-	glUniform1iARB (g_location_rs_blendTexture3, 6);
-	glUniform1iARB (g_location_rs_blendTexture4, 7);
-	glUniform1iARB (g_location_rs_blendTexture5, 8);
-	glUniform1iARB (g_location_rs_fog, map_fog);
+	glUniform1iARB (rscript_uniforms.mainTexture, 0);
+	glUniform1iARB (rscript_uniforms.lightmapTexture, 1);
+	glUniform1iARB (rscript_uniforms.mainTexture2, 2);
+	for (i = 0; i < 6; i++)
+		glUniform1iARB (rscript_uniforms.blendTexture[i], 3+i);
+	glUniform1iARB (rscript_uniforms.fog, map_fog);
 	
-	if (gl_dynamic->integer && enable_dlights)
-	{
-		int		lnum, best_lnum;
-		float	add, brightest = 0;
-		
-		for (lnum = 0; lnum < r_newrefdef.num_dlights; lnum++)
-		{
-			vec3_t lightVec;
-			
-			VectorSubtract (r_origin, r_newrefdef.dlights[lnum].origin, lightVec);
-			add = r_newrefdef.dlights[lnum].intensity - VectorLength(lightVec)/10;
-			if (add > brightest) //only bother with lights close by
-			{
-				brightest = add;
-				best_lnum = lnum; //remember the position of most influencial light
-				dynamic = true;
-			}
-		}
-		
-		if (dynamic)
-		{
-			dlight_t *dl = &r_newrefdef.dlights[best_lnum];
-			
-			glUniform3fARB (g_location_rs_lightPosition, dl->eyeSpaceOrigin[0], dl->eyeSpaceOrigin[1], dl->eyeSpaceOrigin[2]);
-			glUniform3fARB (g_location_rs_lightAmount, dl->lightAmountSquared[0], dl->lightAmountSquared[1], dl->lightAmountSquared[2]);
-		}
-	}
-	
-	glUniform1iARB (g_location_rs_dynamic, dynamic);
+	R_SetDlightUniforms (&rscript_uniforms.dlight_uniforms, enable_dlights);
 	
 	qglMatrixMode (GL_TEXTURE);
 	do
@@ -1207,7 +1175,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		if (stage->lightmap && lm != rs_lightmap_off)
 			GL_MBind (1, lmtex);
 			
-		glUniform1iARB (g_location_rs_lightmap, stage->lightmap?lm:0);
+		glUniform1iARB (rscript_uniforms.lightmap, stage->lightmap?lm:0);
 
 		GL_SelectTexture (0);
 		qglPushMatrix ();
@@ -1277,17 +1245,16 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 							0 );
 		}
 		
-		glUniform1iARB (g_location_rs_envmap, stage->envmap != 0);
-		glUniform1iARB (g_location_rs_numblendtextures, stage->num_blend_textures);
+		glUniform1iARB (rscript_uniforms.envmap, stage->envmap != 0);
+		glUniform1iARB (rscript_uniforms.numblendtextures, stage->num_blend_textures);
 		
 		if (stage->num_blend_textures > 0)
 		{
-			int i;
-			
 			for (i = 0; i < stage->num_blend_textures; i++)
 				GL_MBind (3+i, stage->blend_textures[i]->texnum);
-			glUniform3fARB (g_location_rs_blendscales, stage->blend_scales[0], stage->blend_scales[1], stage->blend_scales[2]);
-			glUniform3fARB (g_location_rs_blendscales2, stage->blend_scales[3], stage->blend_scales[4], stage->blend_scales[5]);
+			
+			glUniform3fARB (rscript_uniforms.blendscales, stage->blend_scales[0], stage->blend_scales[1], stage->blend_scales[2]);
+			glUniform3fARB (rscript_uniforms.blendscales2, stage->blend_scales[3], stage->blend_scales[4], stage->blend_scales[5]);
 		}
 		
 		GL_SelectTexture (0);

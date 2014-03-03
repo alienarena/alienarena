@@ -1940,8 +1940,43 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 		Com_Printf("...%s Shader Linking Error\n%s\n", name, str);
 }
 
+static void get_dlight_uniform_locations (GLhandleARB programObj, dlight_uniform_location_t *out)
+{
+	out->enableDynamic = glGetUniformLocationARB (programObj, "DYNAMIC");
+	out->lightAmountSquared = glGetUniformLocationARB (programObj, "lightAmount");
+	out->lightPosition = glGetUniformLocationARB (programObj, "lightPosition");
+}
+
+static void get_mesh_anim_uniform_locations (GLhandleARB programObj, mesh_anim_uniform_location_t *out)
+{
+	out->useGPUanim = glGetUniformLocationARB (programObj, "GPUANIM");
+	out->outframe = glGetUniformLocationARB (programObj, "bonemats");
+	out->lerp = glGetUniformLocationARB (programObj, "lerp");
+}
+
+static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_location_t *out)
+{
+	get_mesh_anim_uniform_locations (programObj, &out->anim_uniforms);
+	out->lightPosition = glGetUniformLocationARB (programObj, "lightPos");
+	out->baseTex = glGetUniformLocationARB (programObj, "baseTex");
+	out->normTex = glGetUniformLocationARB (programObj, "normalTex");
+	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");
+	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
+	out->color = glGetUniformLocationARB (programObj, "baseColor");
+	out->time = glGetUniformLocationARB (programObj, "time");
+	out->fog = glGetUniformLocationARB (programObj, "FOG");
+	out->useFX = glGetUniformLocationARB (programObj, "useFX");
+	out->useGlow = glGetUniformLocationARB (programObj, "useGlow");
+	out->useShell = glGetUniformLocationARB (programObj, "useShell");
+	out->useCube = glGetUniformLocationARB (programObj, "useCube");
+	out->fromView = glGetUniformLocationARB (programObj, "fromView");
+	out->doShading = glGetUniformLocationARB (programObj, "doShading");
+}
+
 void R_LoadGLSLPrograms(void)
 {
+	int i;
+	
 	//load glsl (to do - move to own file)
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ))
 	{
@@ -2037,24 +2072,25 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, &g_rscriptprogramObj);
 	
 	// Locate some parameters by name so we can set them later...
-	g_location_rs_envmap = glGetUniformLocationARB (g_rscriptprogramObj, "envmap");
-	g_location_rs_numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj, "numblendtextures");
-	g_location_rs_lightmap = glGetUniformLocationARB (g_rscriptprogramObj, "lightmap");
-	g_location_rs_fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
-	g_location_rs_dynamic = glGetUniformLocationARB (g_rscriptprogramObj, "DYNAMIC");
-	g_location_rs_lightPosition = glGetUniformLocationARB (g_rscriptprogramObj, "lightPosition");
-	g_location_rs_lightAmount = glGetUniformLocationARB (g_rscriptprogramObj, "lightAmount");
-	g_location_rs_mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
-	g_location_rs_mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture2");
-	g_location_rs_lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
-	g_location_rs_blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
-	g_location_rs_blendscales2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales2");
-	g_location_rs_blendTexture0 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture0");
-	g_location_rs_blendTexture1 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture1");
-	g_location_rs_blendTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture2");
-	g_location_rs_blendTexture3 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture3");
-	g_location_rs_blendTexture4 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture4");
-	g_location_rs_blendTexture5 = glGetUniformLocationARB (g_rscriptprogramObj, "blendTexture5");
+	get_dlight_uniform_locations (g_rscriptprogramObj, &rscript_uniforms.dlight_uniforms);
+	rscript_uniforms.envmap = glGetUniformLocationARB (g_rscriptprogramObj, "envmap");
+	rscript_uniforms.numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj, "numblendtextures");
+	rscript_uniforms.lightmap = glGetUniformLocationARB (g_rscriptprogramObj, "lightmap");
+	rscript_uniforms.fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
+	rscript_uniforms.mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
+	rscript_uniforms.mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture2");
+	rscript_uniforms.lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
+	rscript_uniforms.blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
+	rscript_uniforms.blendscales2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales2");
+	
+	for (i = 0; i < 6; i++)
+	{
+		char uniformname[] = "blendTexture.";
+		
+		assert (i < 10); // We only have space for one digit.
+		uniformname[12] = '0'+i;
+		rscript_uniforms.blendTexture[i] = glGetUniformLocationARB (g_rscriptprogramObj, uniformname);
+	}
 
 	//warp(water) bsp surfaces
 	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, NO_ATTRIBUTES, &g_waterprogramObj);
@@ -2073,79 +2109,41 @@ void R_LoadGLSLPrograms(void)
 
 	//meshes
 	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_meshprogramObj);
-
-	// Locate some parameters by name so we can set them later...
-	g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
-	g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
-	g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
-	g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
-	g_location_fx2Tex = glGetUniformLocationARB( g_meshprogramObj, "fx2Tex" );
-	g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
-	g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
-	g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
-	g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
-	g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow" );
-	g_location_useShell = glGetUniformLocationARB( g_meshprogramObj, "useShell" );
-	g_location_useCube = glGetUniformLocationARB( g_meshprogramObj, "useCube" );
-	g_location_useGPUanim = glGetUniformLocationARB( g_meshprogramObj, "GPUANIM");
-	g_location_outframe = glGetUniformLocationARB( g_meshprogramObj, "bonemats");
-	g_location_fromView = glGetUniformLocationARB( g_meshprogramObj, "fromView");
-	g_location_lerp = glGetUniformLocationARB( g_meshprogramObj, "lerp");
-	g_location_doShading = glGetUniformLocationARB( g_meshprogramObj, "doShading");
 	
+	get_mesh_uniform_locations (g_meshprogramObj, &mesh_uniforms);
+
 	//vertex-only meshes
 	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_vertexonlymeshprogramObj);
 	
-	// Locate some parameters by name so we can set them later...
-	g_location_vo_meshlightPosition = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lightPos" );
-	g_location_vo_baseTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "baseTex" );
-	g_location_vo_normTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "normalTex" );
-	g_location_vo_fxTex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fxTex" );
-	g_location_vo_fx2Tex = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fx2Tex" );
-	g_location_vo_color = glGetUniformLocationARB(	g_vertexonlymeshprogramObj, "baseColor" );
-	g_location_vo_meshTime = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "time" );
-	g_location_vo_meshFog = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "FOG" );
-	g_location_vo_useFX = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useFX" );
-	g_location_vo_useGlow = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useGlow" );
-	g_location_vo_useShell = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useShell" );
-	g_location_vo_useCube = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "useCube" );
-	g_location_vo_useGPUanim = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "GPUANIM");
-	g_location_vo_outframe = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "bonemats");
-	g_location_vo_fromView = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "fromView");
-	g_location_vo_lerp = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "lerp");
-	g_location_vo_doShading = glGetUniformLocationARB( g_vertexonlymeshprogramObj, "doShading");
+	get_mesh_uniform_locations (g_vertexonlymeshprogramObj, &mesh_vertexonly_uniforms);
 	
 	//Glass
 	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM, &g_glassprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_g_outframe = glGetUniformLocationARB( g_glassprogramObj, "bonemats" );
-	g_location_g_fog = glGetUniformLocationARB( g_glassprogramObj, "FOG" );
-	g_location_g_type = glGetUniformLocationARB( g_glassprogramObj, "type" );
-	g_location_g_left = glGetUniformLocationARB( g_glassprogramObj, "left" );
-	g_location_g_up = glGetUniformLocationARB( g_glassprogramObj, "up" );
-	g_location_g_lightPos = glGetUniformLocationARB( g_glassprogramObj, "LightPos" );
-	g_location_g_mirTexture = glGetUniformLocationARB( g_glassprogramObj, "mirTexture" );
-	g_location_g_refTexture = glGetUniformLocationARB( g_glassprogramObj, "refTexture" );
-	g_location_g_useGPUanim = glGetUniformLocationARB( g_glassprogramObj, "GPUANIM");
-	g_location_g_lerp = glGetUniformLocationARB( g_glassprogramObj, "lerp");
+	get_mesh_anim_uniform_locations (g_glassprogramObj, &glass_uniforms.anim_uniforms);
+	glass_uniforms.fog = glGetUniformLocationARB (g_glassprogramObj, "FOG");
+	glass_uniforms.type = glGetUniformLocationARB (g_glassprogramObj, "type");
+	glass_uniforms.left = glGetUniformLocationARB (g_glassprogramObj, "left");
+	glass_uniforms.up = glGetUniformLocationARB (g_glassprogramObj, "up");
+	glass_uniforms.lightPos = glGetUniformLocationARB (g_glassprogramObj, "LightPos");
+	glass_uniforms.mirTexture = glGetUniformLocationARB (g_glassprogramObj, "mirTexture");
+	glass_uniforms.refTexture = glGetUniformLocationARB (g_glassprogramObj, "refTexture");
 
 	//Blank mesh (for shadowmapping efficiently)
 	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX, &g_blankmeshprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_bm_outframe = glGetUniformLocationARB( g_blankmeshprogramObj, "bonemats" );
-	g_location_bm_useGPUanim = glGetUniformLocationARB( g_blankmeshprogramObj, "GPUANIM" );
-	g_location_bm_lerp = glGetUniformLocationARB( g_blankmeshprogramObj, "lerp" );
+	get_mesh_anim_uniform_locations (g_blankmeshprogramObj, &blankmesh_uniforms);
 	
 	//fullscreen distortion effects
 	R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, &g_fbprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
-	g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
-	g_location_dParams = glGetUniformLocationARB( g_fbprogramObj, "dParams" );
-	g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
+	distort_uniforms.framebuffTex = glGetUniformLocationARB (g_fbprogramObj, "fbtexture");
+	distort_uniforms.distortTex = glGetUniformLocationARB (g_fbprogramObj, "distorttexture");
+	distort_uniforms.dParams = glGetUniformLocationARB (g_fbprogramObj, "dParams");
+	distort_uniforms.fxPos = glGetUniformLocationARB (g_fbprogramObj, "fxPos");
 
 	//gaussian blur
 	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, &g_blurprogramObj);

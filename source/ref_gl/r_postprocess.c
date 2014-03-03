@@ -160,13 +160,13 @@ void R_GLSLDistortion(void)
 		// FIXME: why does this fail catastrophically if I put distortwave on
 		// TMU 1 and r_framebuffer on TMU 0? 
 		GL_MBind (1, r_framebuffer->texnum);
-		glUniform1iARB( g_location_framebuffTex, 1);
+		glUniform1iARB (distort_uniforms.framebuffTex, 1);
 
 		if(r_distortwave)
 			GL_MBind (0, r_distortwave->texnum);
-		glUniform1iARB( g_location_distortTex, 0);
+		glUniform1iARB (distort_uniforms.distortTex, 0);
 
-		glUniform2fARB( g_location_dParams, wScissor, hScissor);
+		glUniform2fARB (distort_uniforms.dParams, wScissor, hScissor);
 
 		fxScreenPos[0] = fxScreenPos[1] = 0;
 
@@ -181,12 +181,12 @@ void R_GLSLDistortion(void)
 
 		fxScreenPos[0] -= (float)frames*.001;
 		fxScreenPos[1] -= (float)frames*.001;
-		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
+		glUniform2fARB (distort_uniforms.fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
 		// Note that r_framebuffer is on TMU 1 this time
 		Distort_RenderQuad (1, offsetX, offsetY);
 		
-		glUseProgramObjectARB( 0 );
+		glUseProgramObjectARB (0);
 	}
 	else
 	{

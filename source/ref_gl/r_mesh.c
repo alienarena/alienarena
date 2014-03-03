@@ -312,20 +312,50 @@ static qboolean R_Mesh_CullModel (void)
 	return false;
 }
 
+static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
+{
+	int			animtype;
+	
+	// only applicable to MD2
+	qboolean	lerped;
+	float		frontlerp;
+	
+	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
+	frontlerp = 1.0 - currententity->backlerp;
+	
+	animtype = 0;
+	
+	if (modtypes[currentmodel->type].morphtarget && lerped)
+		animtype |= 2;
+	
+	if (modtypes[currentmodel->type].skeletal)
+	{
+		glUniformMatrix3x4fvARB (uniforms->outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe);
+		animtype |= 1;
+	}
+	
+	// XXX: the vertex shader won't actually support a value of 3 for animtype
+	// yet.
+	
+	glUniform1iARB (uniforms->useGPUanim, animtype);
+	glUniform1fARB (uniforms->lerp, frontlerp);
+}
+
 static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboolean fragmentshader, float alpha)
 {
 	int i;
 	vec3_t lightVec, lightVal;
+	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
 	
 	//send light level and color to shader, ramp up a bit
-	VectorCopy(lightcolor, lightVal);
-	 for(i = 0; i < 3; i++) 
-	 {
-		if(lightVal[i] < shadelight[i]/2)
+	VectorCopy (lightcolor, lightVal);
+	for (i = 0; i < 3; i++) 
+	{
+		if (lightVal[i] < shadelight[i]/2)
 			lightVal[i] = shadelight[i]/2; //never go completely black
 		lightVal[i] *= 5;
 		lightVal[i] += dynFactor;
-		if(lightVal[i] > 1.0+dynFactor)
+		if (lightVal[i] > 1.0+dynFactor)
 			lightVal[i] = 1.0+dynFactor;
 	}
 	
@@ -334,43 +364,45 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 		lightVal[i] *= (ragdoll?1.25:2.5);
 			   
 	//simple directional(relative light position)
-	VectorSubtract(lightPosition, currententity->origin, lightVec);
-	VectorMA(lightPosition, 1.0, lightVec, lightPosition);
-	R_ModelViewTransform(lightPosition, lightVec);
+	VectorSubtract (lightPosition, currententity->origin, lightVec);
+	VectorMA (lightPosition, 1.0, lightVec, lightPosition);
+	R_ModelViewTransform (lightPosition, lightVec);
 
 	if (ragdoll)
 		qglDepthMask(false);
 
 	if (fragmentshader)
-		glUseProgramObjectARB( g_meshprogramObj );
+		glUseProgramObjectARB (g_meshprogramObj);
 	else
-		glUseProgramObjectARB( g_vertexonlymeshprogramObj );
+		glUseProgramObjectARB (g_vertexonlymeshprogramObj);
 
-	glUniform3fARB( MESH_UNIFORM(meshlightPosition), lightVec[0], lightVec[1], lightVec[2]);
+	glUniform3fARB (uniforms->lightPosition, lightVec[0], lightVec[1], lightVec[2]);
 	
 	GL_MBind (0, r_shelltexture2->texnum);
-	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
+	glUniform1iARB (uniforms->baseTex, 0);
 
 	if (fragmentshader)
 	{
 		GL_MBind (1, r_shellnormal->texnum);
-		glUniform1iARB( MESH_UNIFORM(normTex), 1);
+		glUniform1iARB (uniforms->normTex, 1);
 	}
 
-	glUniform1iARB (MESH_UNIFORM(useFX), 0);
-	glUniform1iARB (MESH_UNIFORM(useGlow), 0);
-	glUniform1iARB (MESH_UNIFORM(useCube), 0);
+	glUniform1iARB (uniforms->useFX, 0);
+	glUniform1iARB (uniforms->useGlow, 0);
+	glUniform1iARB (uniforms->useCube, 0);
 
-	glUniform1fARB (MESH_UNIFORM(useShell), ragdoll?1.6:0.4);
-	glUniform3fARB (MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
-	glUniform1fARB (MESH_UNIFORM(meshTime), rs_realtime);
+	glUniform1fARB (uniforms->useShell, ragdoll?1.6:0.4);
+	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
+	glUniform1fARB (uniforms->time, rs_realtime);
 	
-	glUniform1iARB (MESH_UNIFORM(doShading), modtypes[currentmodel->type].doShading);
-	glUniform1iARB (MESH_UNIFORM(meshFog), map_fog);
+	glUniform1iARB (uniforms->doShading, modtypes[currentmodel->type].doShading);
+	glUniform1iARB (uniforms->fog, map_fog);
+	
+	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
 	
 	// set up the fixed-function pipeline too
 	if (!fragmentshader)
-		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+		qglColor4f (shadelight[0], shadelight[1], shadelight[2], alpha);
 	
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -379,9 +411,8 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
 {
 	int i;
-	
-	//render with shaders - assume correct single pass glsl shader struct(let's put some checks in for this)
 	vec3_t lightVec, lightVal;
+	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
 
 	if (modtypes[currentmodel->type].decal)
 	{
@@ -393,33 +424,33 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	}
 
 	//send light level and color to shader, ramp up a bit
-	VectorCopy(lightcolor, lightVal);
-	for(i = 0; i < 3; i++)
+	VectorCopy (lightcolor, lightVal);
+	for (i = 0; i < 3; i++)
 	{
-		if(lightVal[i] < shadelight[i]/2)
+		if (lightVal[i] < shadelight[i]/2)
 			lightVal[i] = shadelight[i]/2; //never go completely black
 		lightVal[i] *= 5;
 		lightVal[i] += dynFactor;
-		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		{
-			if(lightVal[i] > 1.5)
+			if (lightVal[i] > 1.5)
 				lightVal[i] = 1.5;
 		}
 		else
 		{
-			if(lightVal[i] > 1.0+dynFactor)
+			if (lightVal[i] > 1.0+dynFactor)
 				lightVal[i] = 1.0+dynFactor;
 		}
 	}
 	
-	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
 	{
 		//fixed light source pointing down, slightly forward and to the left
 		lightPosition[0] = -25.0;
 		lightPosition[1] = 300.0;
 		lightPosition[2] = 400.0;
-		VectorMA(lightPosition, 5.0, lightVec, lightPosition);
-		R_ModelViewTransform(lightPosition, lightVec);
+		VectorMA (lightPosition, 5.0, lightVec, lightPosition);
+		R_ModelViewTransform (lightPosition, lightVec);
 
 		for (i = 0; i < 3; i++ )
 		{
@@ -429,9 +460,9 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	else
 	{
 		//simple directional(relative light position)
-		VectorSubtract(lightPosition, currententity->origin, lightVec);
-		VectorMA(lightPosition, 5.0, lightVec, lightPosition);
-		R_ModelViewTransform(lightPosition, lightVec);
+		VectorSubtract (lightPosition, currententity->origin, lightVec);
+		VectorMA (lightPosition, 5.0, lightVec, lightPosition);
+		R_ModelViewTransform (lightPosition, lightVec);
 
 		//brighten things slightly
 		for (i = 0; i < 3; i++ )
@@ -441,43 +472,45 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	}
 
 	if (fragmentshader)
-		glUseProgramObjectARB( g_meshprogramObj );
+		glUseProgramObjectARB (g_meshprogramObj);
 	else
-		glUseProgramObjectARB( g_vertexonlymeshprogramObj );
+		glUseProgramObjectARB (g_vertexonlymeshprogramObj);
 
-	glUniform3fARB( MESH_UNIFORM(meshlightPosition), lightVec[0], lightVec[1], lightVec[2]);
-	glUniform3fARB( MESH_UNIFORM(color), lightVal[0], lightVal[1], lightVal[2]);
+	glUniform3fARB (uniforms->lightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
 	
 	GL_MBind (0, skinnum);
-	glUniform1iARB( MESH_UNIFORM(baseTex), 0);
+	glUniform1iARB (uniforms->baseTex, 0);
 
 	if (fragmentshader)
 	{
 		GL_MBind (1, rs->stage->texture->texnum);
-		glUniform1iARB( MESH_UNIFORM(normTex), 1);
+		glUniform1iARB (uniforms->normTex, 1);
 
 		GL_MBind (2, rs->stage->texture2->texnum);
-		glUniform1iARB( MESH_UNIFORM(fxTex), 2);
+		glUniform1iARB (uniforms->fxTex, 2);
 
 		GL_MBind (3, rs->stage->texture3->texnum);
-		glUniform1iARB( MESH_UNIFORM(fx2Tex), 3);
+		glUniform1iARB (uniforms->fx2Tex, 3);
 		
-		glUniform1iARB( MESH_UNIFORM(useFX), rs->stage->fx);
-		glUniform1iARB( MESH_UNIFORM(useGlow), rs->stage->glow);
-		glUniform1iARB( MESH_UNIFORM(useCube), rs->stage->cube);
+		glUniform1iARB (uniforms->useFX, rs->stage->fx);
+		glUniform1iARB (uniforms->useGlow, rs->stage->glow);
+		glUniform1iARB (uniforms->useCube, rs->stage->cube);
 		
 		if(currententity->flags & RF_WEAPONMODEL)
-			glUniform1iARB( MESH_UNIFORM(fromView), 1);
+			glUniform1iARB (uniforms->fromView, 1);
 		else
-			glUniform1iARB( MESH_UNIFORM(fromView), 0);
+			glUniform1iARB (uniforms->fromView, 0);
 		
-		glUniform1fARB( MESH_UNIFORM(meshTime), rs_realtime);
-		glUniform1iARB( MESH_UNIFORM(meshFog), map_fog);
+		glUniform1fARB (uniforms->time, rs_realtime);
+		glUniform1iARB (uniforms->fog, map_fog);
 	}
 
-	glUniform1fARB( MESH_UNIFORM(useShell), 0.0);
+	glUniform1fARB (uniforms->useShell, 0.0);
 	
-	glUniform1iARB (MESH_UNIFORM(doShading), modtypes[currentmodel->type].doShading);
+	glUniform1iARB (uniforms->doShading, modtypes[currentmodel->type].doShading);
+	
+	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
 }
 
 void R_Mesh_SetupGlassRender (void)
@@ -490,7 +523,7 @@ void R_Mesh_SetupGlassRender (void)
 	
 	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		glass = true;
-	else if(gl_mirror->integer)
+	else if (gl_mirror->integer)
 		mirror = true;
 	else
 		glass = true;
@@ -498,37 +531,39 @@ void R_Mesh_SetupGlassRender (void)
 	if (mirror && !(currententity->flags & RF_WEAPONMODEL))
 		glass = true;
 	
-	glUseProgramObjectARB( g_glassprogramObj );
+	glUseProgramObjectARB (g_glassprogramObj);
 	
-	R_ModelViewTransform(lightPosition, lightVec);
-	glUniform3fARB( g_location_g_lightPos, lightVec[0], lightVec[1], lightVec[2]);
+	R_ModelViewTransform (lightPosition, lightVec);
+	glUniform3fARB (glass_uniforms.lightPos, lightVec[0], lightVec[1], lightVec[2]);
 
 	AngleVectors (currententity->angles, NULL, left, up);
-	glUniform3fARB( g_location_g_left, left[0], left[1], left[2]);
-	glUniform3fARB( g_location_g_up, up[0], up[1], up[2]);
+	glUniform3fARB (glass_uniforms.left, left[0], left[1], left[2]);
+	glUniform3fARB (glass_uniforms.up, up[0], up[1], up[2]);
 	
 	type = 0;
 	
 	if (glass)
 	{
-		glUniform1iARB( g_location_g_refTexture, 0);
+		glUniform1iARB (glass_uniforms.refTexture, 0);
 		GL_MBind (0, r_mirrorspec->texnum);
 		type |= 2;
 	}
 	
 	if (mirror)
 	{
-		glUniform1iARB( g_location_g_mirTexture, 1);
+		glUniform1iARB (glass_uniforms.mirTexture, 1);
 		GL_MBind (1, r_mirrortexture->texnum);
 		type |= 1;
 	}
 	
-	glUniform1iARB( g_location_g_type, type);
+	glUniform1iARB (glass_uniforms.type, type);
 	
-	glUniform1iARB( g_location_g_fog, map_fog);
+	glUniform1iARB (glass_uniforms.fog, map_fog);
 	
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_ONE, GL_ONE);
+	
+	R_Mesh_SetupAnimUniforms (&glass_uniforms.anim_uniforms);
 }
 
 // Should be able to handle all mesh types. This is the component of the 
@@ -629,12 +664,9 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	
 	// only applicable to MD2
 	qboolean	lerped;
-	float		frontlerp;
 	
 	// if true, then render through the RScript code
 	qboolean	rs_slowpath = false;
-	
-	int			animtype = 0; // GLSL useGPUanim uniform
 	
 	rscript_t	*rs = NULL;
 	
@@ -655,24 +687,14 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
 	
-	VectorCopy(shadelight, lightcolor);
-	for (i=0;i<model_dlights_num;i++)
-		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
-	VectorNormalize(lightcolor);
+	VectorCopy (shadelight, lightcolor);
+	for (i = 0; i < model_dlights_num; i++)
+		VectorAdd (lightcolor, model_dlights[i].color, lightcolor);
+	VectorNormalize (lightcolor);
 	
-	frontlerp = 1.0 - currententity->backlerp;
-	
-	if (modtypes[currentmodel->type].morphtarget && lerped)
-		animtype |= 2;
-	
-	if (modtypes[currentmodel->type].skeletal)
-		animtype |= 1;
-	
-	// XXX: the vertex shader won't actually support a value of 3 for animtype
-	// yet.
-	
-	if (animtype != 0 && rs_slowpath)
+	if (((modtypes[currentmodel->type].morphtarget && lerped) || modtypes[currentmodel->type].skeletal) != 0 && rs_slowpath)
 	{
+		// FIXME: rectify this.
 		Com_Printf ("WARN: Cannot apply a multi-stage RScript %s to model %s\n", rs->name, currentmodel->name);
 		rs = NULL;
 		rs_slowpath = false;
@@ -696,12 +718,6 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 		qglDepthMask(false);
 		
 		R_Mesh_SetupGlassRender ();
-		
-		glUniform1iARB (g_location_g_useGPUanim, animtype);
-		glUniform1fARB (g_location_g_lerp, frontlerp);
-		
-		if (modtypes[currentmodel->type].skeletal)
-			glUniformMatrix3x4fvARB (g_location_g_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 	}
 	else
 	{
@@ -720,12 +736,6 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 			fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
 			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader);
 		}
-		
-		glUniform1iARB (MESH_UNIFORM(useGPUanim), animtype);
-		glUniform1fARB (MESH_UNIFORM(lerp), frontlerp);
-		
-		if (modtypes[currentmodel->type].skeletal)
-			glUniformMatrix3x4fvARB (MESH_UNIFORM(outframe), currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
 	}
 	
 	R_Mesh_DrawVBO (lerped);
@@ -976,23 +986,10 @@ void R_Mesh_Draw ( void )
 	}
 }
 
-void R_Mesh_DrawCasterFrame (float backlerp, qboolean lerped)
+void R_Mesh_DrawCasterFrame (qboolean lerped)
 {
-	int animtype = 0; // GLSL useGPUanim uniform
-	
 	glUseProgramObjectARB (g_blankmeshprogramObj);
-	
-	if (modtypes[currentmodel->type].morphtarget && lerped)
-		animtype |= 2;
-	
-	if (modtypes[currentmodel->type].skeletal)
-	{
-		glUniformMatrix3x4fvARB( g_location_bm_outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe );
-		animtype |= 1;
-	}
-	
-	glUniform1iARB(g_location_bm_useGPUanim, animtype);
-	glUniform1fARB(g_location_bm_lerp, 1.0-backlerp);
+	R_Mesh_SetupAnimUniforms (&blankmesh_uniforms);
 	
 	R_Mesh_DrawVBO (lerped);
 
@@ -1022,9 +1019,9 @@ void R_Mesh_DrawCaster ( void )
 	// New model types go here
 
 	if(currententity->frame == 0 && currentmodel->num_frames == 1)
-		R_Mesh_DrawCasterFrame(0, false);
+		R_Mesh_DrawCasterFrame (false);
 	else
-		R_Mesh_DrawCasterFrame(currententity->backlerp, true);
+		R_Mesh_DrawCasterFrame (true);
 
 	qglPopMatrix();
 }
