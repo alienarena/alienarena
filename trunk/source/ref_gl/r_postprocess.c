@@ -50,15 +50,15 @@ static void Postprocess_RenderQuad (image_t *img, int offsetX, int offsetY)
 	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
 
-	VA_SetElem2 (vert_array[0], 0, viddef.height);
-	VA_SetElem2 (vert_array[1], viddef.width-offsetX, viddef.height);
-	VA_SetElem2 (vert_array[2], viddef.width-offsetX, offsetY);
-	VA_SetElem2 (vert_array[3], 0, offsetY);
+	VA_SetElem2 (vert_array[3], 0, viddef.height);
+	VA_SetElem2 (vert_array[2], viddef.width-offsetX, viddef.height);
+	VA_SetElem2 (vert_array[1], viddef.width-offsetX, offsetY);
+	VA_SetElem2 (vert_array[0], 0, offsetY);
 
-	VA_SetElem2 (tex_array[0], img->sl, img->tl);
-	VA_SetElem2 (tex_array[1], img->sh, img->tl);
-	VA_SetElem2 (tex_array[2], img->sh, img->th);
-	VA_SetElem2 (tex_array[3], img->sl, img->th);
+	VA_SetElem2 (tex_array[3], img->sl, img->tl);
+	VA_SetElem2 (tex_array[2], img->sh, img->tl);
+	VA_SetElem2 (tex_array[1], img->sh, img->th);
+	VA_SetElem2 (tex_array[0], img->sl, img->th);
 	
 	R_DrawVarrays (GL_QUADS, 0, 4);
 	
@@ -80,7 +80,6 @@ static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
     
-	qglDisable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
 	qglDisable (GL_DEPTH_TEST);
 
@@ -94,7 +93,6 @@ static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
 	
 	Postprocess_RenderQuad (r_framebuffer, offsetX, offsetY);
 	
-	qglEnable (GL_CULL_FACE);
 	qglEnable (GL_BLEND);
 	qglEnable (GL_DEPTH_TEST);
 }
@@ -348,7 +346,6 @@ void R_ShadowBlend(float alpha)
 		qglMatrixMode( GL_PROJECTION );
 		qglLoadIdentity ();
 		qglOrtho(0, vid.width, vid.height, 0, -10, 100);
-		qglDisable(GL_CULL_FACE);
 
 		qglEnable( GL_BLEND );
 		qglEnable( GL_TEXTURE_2D );
@@ -392,7 +389,6 @@ void R_ShadowBlend(float alpha)
 	qglEnable (GL_TEXTURE_2D);
 	qglEnable (GL_DEPTH_TEST);
 	qglDisable(GL_STENCIL_TEST);
-	qglEnable(GL_CULL_FACE);
 
 	qglColor4f(1,1,1,1);
 }
@@ -670,7 +666,6 @@ void R_GLSLGodRays(void)
 	//render quad 
 	qglEnable (GL_BLEND);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
-	qglDisable(GL_CULL_FACE);
 	
 	Postprocess_RenderQuad (r_colorbuffer, 0, 0);
 
