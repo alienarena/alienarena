@@ -1,0 +1,68 @@
+ALIEN ARENA and it's original content are a copyright of
+COR Entertainment, LLC.
+
+The source code of Alien Arena is Free Software. You can redistribute
+it and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version. The file, GPL2,
+contains a verbatim copy of the license, as permitted under the terms
+of the license.
+
+Permission is granted to freely distribute (without restriction) the
+game data(models, maps, textures, sound, etc) as a whole, and with the
+intention of being used with Alien Arena. However, it is not
+permissible to distribute, sell, or use for profit individual portions
+or items of the game data without express consent from COR
+Entertainment.
+
+------------------------------------------------------------------------
+Parts of the source code are Copyright ID Software. Released
+under GPL Version 2.
+
+(TODO: add other copyrights noted in source files.)
+
+The included TrueType fonts (FreeSans and FreeMono) are from the GNU
+FreeFont package (http://www.gnu.org/software/freefont/); they are
+free software distributed under the terms of the GNU General Public
+License version 3 (http://www.gnu.org/licenses/gpl.html).
+
+'rcon' and 'svstat' ruby scripts are Copyright (C) 2009 Tony Jackson
+and Licensed under the GNU Lesser General Public License
+
+The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com>
+and is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+-------------------------------------------------------------------------
+
+Textures in the subdirectory data1/textures/texturelib from
+texturelib.com. Used as permitted by their license:
+http://texturelib.com/license/
+
+ALIEN ARENA may be included in free compilation CD's and similar
+packages without consent, provided it adheres to the above
+restrictions.
+
+You, the end user, by installing this software agree to these terms.
+
+Contact:  http://red.planetarena.org
+
+Privacy Policy:  http://icculus.org/alienarena/rpa/privacy.html
+
+-------------------------------------------------------------------------
+
+Original ACE Bot License, later converted to GPL 
+(TODO: Find reference to phone call. Fedora?)
+
+The ACE Bot is a product of Steve Yeager, and is available from the
+ACE Bot homepage, at http://www.axionfx.com/ace (note: no longer
+active.)
+
+This program is a modification of the ACE Bot, and is therefore in NO
+WAY supported by Steve Yeager.
+
+This program MUST NOT be sold in ANY form. If you have paid for this
+product, you should contact Steve Yeager immediately, via the ACE Bot
+homepage.
+
+------------------------------------------------------------------------
+
