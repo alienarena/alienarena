@@ -11,97 +11,70 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+A copy of the GNU General Public License is included;
+see the file, GPLv2.
 
 */
-
 /*
 -------------------------------------------------------------------------------
-Alien Arena File System  (August 2010)
- *** with autotools build and filesystem update modifications ***
+Alien Arena File System  (February 2014)
 
------- Windows XP, Vista, Windows 7 (MSVC or MinGW builds) ------
+------ Microsoft Windows ------
 
   c:\alienarena\
-    data1\
-      --- game data from release package
-    arena\
-      --- 3rd party, legacy, and downloaded game data
-      --- screenshots, demos
-      config.cfg
-      autoexec.cfg
-      qconsole.log
-    botinfo\
-    Tools\doc\
-    crx.exe
+	data1\
+	  --- game data from release package
+	  --- including  botinfo\
+	arena\ and tactical\
+	  default.cfg
+	  maps.lst
+	  server.cfg
+	  motd.txt
+	  config.cfg
+	  autoexec.cfg
+	  qconsole.log
+	  --- 3rd party, legacy, and downloaded game data
+	  --- screenshots, demos
+	Tools\doc\
+	alienarena.exe
+	aa-tactical-demo.exe
 
 ------ Linux, Unix, Darwin ------
-
- --- Standard Install ---
+  February 2014:
 
   $prefix/          /usr/local/
-    $bindir/          /usr/local/bin/
-      crx
-      crx-ded
-    $datadir/         /usr/local/share/
-      $pkgdatadir       /usr/local/share/alienarena/
-        data1/
-          --- shared game data from release package
-        arena/
-          --- shared 3rd party and legacy game data
-        botinfo/
-          --- shared bot information
+	$bindir/          /usr/local/bin/
+	  alienarena
+	  alienarena-ded
+	  aa-tactical-demo
+	$datadir/         /usr/local/share/
+	  $pkgdatadir==$COR_DATADIR  /usr/local/share/alienarena/
+		data1/
+		  --- shared game data from release package
+		  --- including botinfo/
+		arena/ and tactical/
+		  default.cfg
+		  maps.lst
+		  server.cfg
+		  motd.txt
 
-  $COR_GAME         ~/.codered
-    arena/
-      --- downloaded 3rd party, legacy game data
-      --- screenshots, demos
-      config.cfg
-      autoexec.cfg
-      qconsole.log
-    botinfo/
-      --- user custom bot information
-
- --- Alternate (Traditional) Install ---
-
-  /home/user/games/alienarena/  (for example)
-    crx
-    crx-ded
-    data1/
-    arena/
-    botinfo/
-
-  $COR_GAME         $(HOME)/.codered
-    --- Same as Standard Install
+  $XDG_DATA_HOME/cor-games   $HOME/.local/share/cor-games
+	arena/ and tactical/
+	  --- downloaded 3rd party, legacy game data
+	  --- screenshots, demos, botinfo
+	  config.cfg
+	  autoexec.cfg
+	  qconsole.log
 
 --- Alien Arena ACEBOT File System ---
-
- - botinfo can be in one place or two places depending on the installation
+ -- February 2014: release package botinfo moved to data1. Custom botinfo
+	placed in arena or tactical directories.
 
  -- botinfo files and file types --
   - allbots.tmp   : data for bots included in the Add Bot menu.
   - team.tmp      : data for default set of bots spawned for a team game.
   - <botname>.cfg : config data for bots by name.
   - <mapname>.tmp : data for the set of bots spawned in a map.
-
---- Other Notes ---
-
-.pak file support removed because:
-  1. Alien Arena does not use it.
-  2. simplifies filesystem modifications
-
-link command removed because:
-  1. it is probably obsolete (hack for DOS to simulate Unix link?)
-  2. simplifies filesystem modifications
-  3. might be a security issue?
-
-basedir cvar removed because:
-  1. it is probably an unnecessary complication.
-
 
 --- Original Quake File System Comments ---
 All of Quake's data access is through a hierchal file system, but the contents
@@ -126,6 +99,9 @@ they shouldn't.
 #include "config.h"
 #endif
 
+#include <stdio.h>
+#include <errno.h>
+
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
 #elif defined HAVE_DIRECT_H
@@ -141,8 +117,6 @@ they shouldn't.
 # include <zlib.h>
 #endif
 
-#include <errno.h>
-
 #include "qcommon.h"
 #include "game/q_shared.h"
 #include "unix/glob.h"
@@ -151,28 +125,36 @@ they shouldn't.
 #define _getcwd getcwd
 #endif
 
-char fs_gamedir[MAX_OSPATH];
-cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
+/* Unix/Linux: COR_DATADIR must be defined at compile-time
+ *  normally same as $pkg_datadir
+ */
+#if defined UNIX_VARIANT && !defined COR_DATADIR
+# define COR_DATADIR "*ERROR*"
+#endif
+
+/* fs_gamedir is the game name and game subdirectory name
+ * fs_gamedirvar is the cvar holding the subdirectory name
+ *   for the currently running game.
+ */
+char fs_gamedir[64];
+cvar_t *fs_gamedirvar;
+
+/* This is the default for the user data subdirectory.
+ * Prefix with $HOME to get the full absolute path.
+ */
+const char* xdg_data_home_default = ".local/share";
 
 /* --- Search Paths ---
- *
  * Pathname strings do not include a trailing '/'
  * The last slot is guard, containing an empty string
- * The bot pathname strings do not include the "botinfo" part.
- *
  */
-#define GAME_SEARCH_SLOTS 7
+#define GAME_SEARCH_SLOTS 6
 char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 
-#define BOT_SEARCH_SLOTS 3
-char fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
 
 /**
- * @brief Initialize paths: data1, arena, botinfo, etc.
+ * @brief Initialize search paths.
  *
- * @note This gets executed after command line "+set" commands are executed
- *       the first time. But, before any other commands from command line
- *       or .cfg files are executed.
  */
 static void FS_init_paths( void )
 {
@@ -180,191 +162,186 @@ static void FS_init_paths( void )
 	char fs_bindir[MAX_OSPATH];
 	char fs_datadir[MAX_OSPATH];
 	char fs_homedir[MAX_OSPATH];
-	char *cwdstr;
-	char *homestr;
-
 	char base_gamedata[MAX_OSPATH];
 	char game_gamedata[MAX_OSPATH];
-	char bot_gamedata[MAX_OSPATH];
+#ifdef UNIX_VARIANT
+	char user_base_gamedata[MAX_OSPATH];
+	char user_game_gamedata[MAX_OSPATH];
+	char xdg_data_home[MAX_OSPATH];
+	char *xdg_env;
+	FILE *testfile;
+	char testfile_path[MAX_OSPATH];
+#endif
+	char *cwdstr  = NULL;
+	char *homestr = NULL;
 
-#if defined UNIX_VARIANT
-	char user_base_gamedata[MAX_OSPATH]; // possibly never used in Alien Arena
-	char user_game_gamedata[MAX_OSPATH]; // configuration, logs, downloaded data
-	char user_bot_gamedata[MAX_OSPATH]; //  user custom bot data
+	memset( fs_bindir, 0, sizeof(fs_bindir));
+	memset( fs_datadir, 0, sizeof(fs_datadir));
+	memset( fs_homedir, 0, sizeof(fs_homedir));
+	memset( base_gamedata, 0, sizeof(base_gamedata));
+	memset( game_gamedata, 0, sizeof(game_gamedata));
+#ifdef UNIX_VARIANT
+	memset( user_base_gamedata, 0, sizeof(base_gamedata));
+	memset( user_game_gamedata, 0, sizeof(game_gamedata));
+	memset( xdg_data_home, 0, sizeof(xdg_data_home));
 #endif
 
-	memset(fs_bindir, 0, sizeof(fs_bindir));
-	memset(fs_datadir, 0, sizeof(fs_datadir));
-	memset(fs_homedir, 0, sizeof(fs_homedir));
-
+	/*
+	 * For Windows, CWD is both the 'datadir' and the user data directory.
+	 *
+	 * For Unix/Linux, CWD serves as an "in-place" 'datadir' overriding COR_DATADIR
+	 *  (which is equivalent to what was the "alternate install"). To activate this
+	 *  option, after 'make', the executables are copied from source/ to the
+	 *  topdir manually, and run in the topdir (using ./alienarena, for example.)
+	 *  This is compatible with the normal install, as long as the user remembers
+	 *  that the normally installed executable is the PATH and the in-place
+	 *  executable is probably not. There is still a separate user data
+	 *  directory (unlike Windows).
+	 * Note: in-place install is a tool for developers and testers. 
+	 *  It is also needed for running the aaradiant map editor.
+	 */
 	cwdstr = _getcwd( fs_bindir, sizeof(fs_bindir) );
 	if ( cwdstr == NULL )
-	{
 		Sys_Error( "path initialization (getcwd error: %i)", strerror(errno) );
-	}
-
-#if defined UNIX_VARIANT
-	homestr = getenv( "COR_GAME" );
-	if ( homestr != NULL )
-	{
-		if ( strlen( homestr) >= sizeof(fs_homedir) || !strlen( homestr ) )
-		{
-			Sys_Error( "path initialization (getenv COR_GAME is %s)", homestr );
-		}
-		Q_strncpyz2( fs_homedir, homestr, sizeof( fs_homedir) );
-	}
-	else
-	{
-		homestr = getenv( "HOME" );
-		if ( homestr != NULL )
-		{
-			Com_sprintf( fs_homedir, sizeof( fs_homedir), "%s/%s",
-					homestr, USER_GAMEDATA );
-		}
-		else
-		{
-			fs_homedir[0] = 0;
-		}
-	}
-#else
-	homestr = NULL;
-	fs_homedir[0] = 0;
-#endif
-
-#if !defined DATADIR
-	// "Traditional" install, expect game data in current directory
 	Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
-#else
-	if ( !Q_strncasecmp( fs_bindir, DATADIR, sizeof(fs_bindir)) )
-	{ // DATADIR defined, but it is current directory for executable
-		// note: this may not need to be a special case
-		Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
-	}
-	else
-	{ // "Standard" install. game data is not in same directory as executables
-		if ( strlen( DATADIR ) >= sizeof( fs_datadir ) )
-		{
-			Sys_Error("DATADIR size error");
-		}
-		Q_strncpyz2( fs_datadir, DATADIR, sizeof(fs_datadir) );
-	}
-#endif
 
-	// set path for "data1"
-	memset( base_gamedata, 0, sizeof(base_gamedata) );
-	Com_sprintf( base_gamedata, sizeof(base_gamedata), "%s/%s",
-			fs_datadir, BASE_GAMEDATA );
-
-	// set path for "arena" or mod
-	memset( game_gamedata, 0, sizeof(game_gamedata) );
-	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH|CVAR_SERVERINFO);
-	if ( *fs_gamedirvar->string  && fs_gamedirvar->string[0] )
-	{ // not empty
-		if (  Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
-				&& Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
-		{ // not "data1" nor "arena".  expect a mod data directory.
-			Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
-					fs_datadir, fs_gamedirvar->string );
-		}
-		else
-		{ // was "data1" or "arena", use "arena"
-			Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
-					fs_datadir, GAME_GAMEDATA );
-		}
-	}
-	else
-	{ // was empty, set to "arena"
-		fs_gamedirvar = Cvar_ForceSet("gamedir", GAME_GAMEDATA );
-		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
-				fs_datadir, GAME_GAMEDATA );
-	}
-
-	// set path for "botinfo"
-	// note: the "botinfo" part of the path, will be in the relative path
-	//  so do not include it here
-	memset( bot_gamedata, 0, sizeof(bot_gamedata) );
-	Com_sprintf( bot_gamedata, sizeof(bot_gamedata), "%s", fs_datadir );
-
-#if defined UNIX_VARIANT
-	if ( fs_homedir[0] )
-	{ // have a user HOME as expected
-		/*
-		 * use the ".codered" or $COR_GAME directory,
-		 *  even if this is a Traditional install.
+#ifdef UNIX_VARIANT
+	/* use the traditional file to check existence of data1 in the cwd */
+	Com_sprintf( testfile_path, sizeof( testfile_path ), "%s/%s",
+				 fs_bindir, "data1/pics/colormap.pcx"  );
+	testfile = fopen( testfile_path, "r" );
+	if ( testfile == NULL )
+	{
+		/* Normal installation */
+		/* absolute path where shared data files are installed */
+		if ( strnlen( COR_DATADIR, sizeof(fs_datadir) ) >= sizeof( fs_datadir ) )
+			{
+				Com_Printf( "\nCOR_DATADIR is: %s\n", COR_DATADIR );
+				Sys_Error( "\nCOR_DATADIR path name is too long\n" );
+			}
+		/* fs_datadir holds the absolute path for shared data
+		 * normally this is $(pkgdatadir), set in source/Makefile.am
 		 */
-		// set "data1" path for user writeable data
-		// Alien Arena maybe never uses this
-		memset( user_base_gamedata, 0, sizeof(user_base_gamedata) );
-		Com_sprintf( user_base_gamedata, sizeof(user_base_gamedata),
-			"%s/%s", fs_homedir, BASE_GAMEDATA );
-
-		// set "arena" path for user writeable data
-		memset( user_game_gamedata, 0, sizeof(user_game_gamedata) );
-		Com_sprintf( user_game_gamedata, sizeof(user_game_gamedata),
-			"%s/%s", fs_homedir, GAME_GAMEDATA );
-
-		// set "botinfo" path for user writeable data
-		memset( user_bot_gamedata, 0, sizeof(user_bot_gamedata) );
-		Com_sprintf( user_bot_gamedata, sizeof(user_bot_gamedata),
-				"%s", fs_homedir );
+		Q_strncpyz2( fs_datadir, COR_DATADIR, sizeof( fs_datadir ));
 	}
 	else
 	{
-		// unexpected missing $HOME directory
-		Sys_Error("set environment variable HOME (or COR_GAME) to a writeable directory.");
+		/* we are running "in-place", fs_datadir is already the absolute path
+		 * to the game data.
+		 */
+		fclose( testfile );
 	}
 #endif
 
-	//
-	// set up search priority sequence
-	//
-	// 2 or 4 places for game data
+	/* absolute path where official game resource files are installed
+	 * normally, BASE_GAMEDATA is "data1"
+	 */
+	Com_sprintf( base_gamedata, sizeof( base_gamedata ), "%s/%s",
+				 fs_datadir, BASE_GAMEDATA );
+
+
+	/* Pending sorting out multiple game and plugin game module issues,
+	 * game and gamedir cvars are fixed at startup.
+	 *
+	 * 'alienarena' is always "arena", "aa-tactical-demo" is always "tactical"
+	 *  based on preprocessor -DTACTICAL (-DARENA is ok, but not required)
+	 *
+	 * 'alienarena-ded' uses +set game arena|tactical" on command line.
+	 *  defaults to arena if not set.
+	 * 
+	 */
+#if defined DEDICATED_ONLY
+	Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+				 fs_datadir, Cvar_VariableString( "gamedir" ));
+#else
+	Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+				 fs_datadir, GAME_GAMEDATA );
+#endif
+
+	Com_Printf("Game sub-directory: %s\n", game_gamedata );
+
+#ifdef UNIX_VARIANT
+	/* absolute path to user-writeable data */
+	/* per spec, $XDG_DATA_HOME must be an absolute path */
+	/* To override, and put this some place else for testing
+	 * do this, for instance:
+	 * > cd
+	 * > mkdir -p --mode=0700 devtest/cor-games/arena
+	 * (and copy  your test configs there)
+	 * > XDG_DATA_HOME=/home/user/devtest alienarena
+	 */
+	xdg_env = getenv( "XDG_DATA_HOME" );
+	if ( xdg_env == NULL || xdg_env[0] != '/' || xdg_env[0] == '\0')
+	{
+		/* XDG_DATA_HOME not set, or violates spec, use default  */
+		homestr = getenv( "HOME" );
+		if ( homestr != NULL && homestr[0] != '\0' )
+		{
+			Com_sprintf( xdg_data_home, sizeof(xdg_data_home), "%s/%s",
+						 homestr, xdg_data_home_default );
+		}
+	}
+	else
+	{
+		Com_sprintf( xdg_data_home, sizeof(xdg_data_home), "%s", xdg_env );
+	}
+	if ( xdg_data_home[0] == '/' )
+	{
+		int result;
+
+		Com_sprintf( fs_homedir, sizeof( fs_homedir ), "%s/%s",
+					 xdg_data_home, USER_GAMEDATA );
+		Com_sprintf( user_game_gamedata, sizeof(user_game_gamedata), "%s/%s",
+					 fs_homedir, fs_gamedirvar->string  );
+		Com_sprintf( user_base_gamedata, sizeof(user_base_gamedata), "%s/%s",
+					 fs_homedir,  BASE_GAMEDATA );
+
+		/* if does not exist, create the directory */
+		Sys_Mkdir( fs_homedir );
+
+		/* attempt write into the directory */
+		Com_sprintf( testfile_path, sizeof(testfile_path), "%s/%s",
+					 fs_homedir, ".version" );
+		testfile = fopen( testfile_path, "w" );
+		if ( testfile == NULL  )
+			Sys_Error( "Home data directory error: %s", strerror( errno ));
+		result = fprintf( testfile, "%s\n", VERSION );
+		if ( result < 0 )
+		{
+			fclose( testfile );
+			Sys_Error( "Home data directory error: %s", strerror( errno ));
+		}
+		fclose( testfile );
+		Com_Printf("User data and configuration in: %s\n", fs_homedir ); 
+	}
+	else
+	{
+		Sys_Error( "Home data directory configuration error: %s",
+				   xdg_data_home );
+	}
+#endif
+
+	/*
+	 * Create absolute search paths
+	 * As of 2014-02 version:
+	 * In the user home directory there are 2: data1 and arena -xor- tactical
+	 * In the shared directory there are 2: data1 and arena -xor- tactical
+	 * Preference order:
+	 *   home game, shared game, home data1, shared data1
+	 */
 	for ( i = 0 ; i < GAME_SEARCH_SLOTS ; i++ )
 	{
 		memset( fs_gamesearch[i], 0, MAX_OSPATH );
 	}
 	i = 0;
-#if defined UNIX_VARIANT
-	if ( user_game_gamedata[0] )
-	{ // default: ~/.codered/arena or $COR_GAME/arena
-		Q_strncpyz2( fs_gamesearch[i], user_game_gamedata, sizeof(fs_gamesearch[0]));
-		i++;
-	}
+#ifdef UNIX_VARIANT
+	Q_strncpyz2(fs_gamesearch[i++],user_game_gamedata,sizeof(fs_gamesearch[0]));
 #endif
-	if ( game_gamedata[0] )
-	{ // default: DATADIR/arena or $CWD/arena
-		Q_strncpyz2( fs_gamesearch[i], game_gamedata, sizeof(fs_gamesearch[0]));
-		i++;
-	}
-#if defined UNIX_VARIANT
-	if ( user_base_gamedata[0] )
-	{ // default: ~/.codered/data1  or $COR_GAME/data1 (may not be needed)
-		Q_strncpyz2( fs_gamesearch[i], user_base_gamedata, sizeof(fs_gamesearch[0]));
-		i++;
-	}
+	Q_strncpyz2( fs_gamesearch[i++], game_gamedata, sizeof(fs_gamesearch[0]) );
+#ifdef UNIX_VARIANT
+	Q_strncpyz2(fs_gamesearch[i++],user_base_gamedata,sizeof(fs_gamesearch[0]));
 #endif
-	if ( base_gamedata[0] )
-	{ // default: DATADIR/data1 or $CWD/data1
-		Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof(fs_gamesearch[0]));
-	}
-
-	// one or two places for bot information
-	for ( i = 0 ; i < BOT_SEARCH_SLOTS ; i++ )
-	{
-		memset( fs_botsearch[i], 0, MAX_OSPATH );
-	}
-	i = 0;
-#if defined UNIX_VARIANT
-	if ( user_bot_gamedata[0] )
-	{
-		Q_strncpyz2( fs_botsearch[i], user_bot_gamedata, sizeof(fs_botsearch[0]));
-		i++;
-	}
-#endif
-	if ( bot_gamedata[0] )
-	{
-		Q_strncpyz2( fs_botsearch[i], bot_gamedata, sizeof(fs_botsearch[0]));
-	}
+	Q_strncpyz2( fs_gamesearch[i++], base_gamedata, sizeof(fs_gamesearch[0]) );
 
 	// set up fs_gamedir, location for writing various files
 	//  this is the first directory in the search path
@@ -431,6 +408,7 @@ void FS_CreatePath (char *path)
 			*ofs = '/';
 		}
 	}
+
 }
 
 
@@ -477,9 +455,6 @@ Given a relative path to a file
   if found, return true, with the constructed full path
   otherwise return false, with full_path set to zero-length string
 
-Corrected 2012-11, was:
-  otherwise, return false, with a constructed writeable full path
-  (which clearly it might not, and could not do).
 ===
  */
 qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
@@ -495,15 +470,7 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 		Com_DPrintf("FS_FullPath: relative path size error: %s\n", relative_path );
 		return false;
 	}
-
-	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
-	{ // search in botinfo places
-		to_search = &fs_botsearch[0][0];
-	}
-	else
-	{ // search in the usual game data places
-		to_search = &fs_gamesearch[0][0];
-	}
+	to_search = &fs_gamesearch[0][0];
 
 	while ( to_search[0] && !found )
 	{
@@ -543,9 +510,9 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
  FS_FullWritePath()
 
   Given a relative path for a file to be written
-    Using the game writeable directory
-    Create any sub-directories required
-    Return the generated full path for file
+	Using the game writeable directory
+	Create any sub-directories required
+	Return the generated full path for file
 
 ===
 */
@@ -558,15 +525,7 @@ void FS_FullWritePath( char *full_path, size_t pathsize, const char* relative_pa
 		return;
 	}
 
-	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
-	{ // a "botinfo/" prefixed relative path
-		Com_sprintf( full_path, pathsize, "%s/%s", fs_botsearch[0], relative_path);
-	}
-	else
-	{ // writeable path for game data, same as fs_gamesearch[0]
-		Com_sprintf( full_path, pathsize, "%s/%s", fs_gamedir, relative_path);
-	}
-
+	Com_sprintf( full_path, pathsize, "%s/%s", fs_gamedir, relative_path);
 	FS_CreatePath( full_path );
 
 }
@@ -677,13 +636,13 @@ FS_TolowerPath
 Makes the path to the given file lowercase on case-sensitive systems.
 Kludge for case-sensitive and case-insensitive systems inteoperability.
 Background: Some people may extract game paths/files as uppercase onto their
-            HDD (while their system is case-insensitive, so game will work, but
-            will case trouble for case-sensitive systems if they are acting
-            as servers [propagating their maps etc. in uppercase]). Indeed the
-            best approach here would be to make fopen()ing always case-
-            insensitive, but due to resulting complexity and fact that
-            Linux people will always install the game files with correct
-            name casing, this is just fine.
+			HDD (while their system is case-insensitive, so game will work, but
+			will case trouble for case-sensitive systems if they are acting
+			as servers [propagating their maps etc. in uppercase]). Indeed the
+			best approach here would be to make fopen()ing always case-
+			insensitive, but due to resulting complexity and fact that
+			Linux people will always install the game files with correct
+			name casing, this is just fine.
 -JR / 20050802 / 1
 ==================
 */
@@ -756,15 +715,15 @@ int FS_LoadFile (char *path, void **buffer)
 ============
 FS_LoadFile_TryStatic
 
-Given relative path, and assuming statbuffer is already allocated with at 
+Given relative path, and assuming statbuffer is already allocated with at
 least statbuffer_len bytes,
  if buffer or statbuffer arg is NULL, just return the file length. Otherwise,
    If the file length is less than statbuffer_len, load file contents into it
    and return it in the buffer output pointer. Otherwise,
-     Z_malloc a buffer, read the file into it, return pointer to the new
-     buffer.
+	 Z_malloc a buffer, read the file into it, return pointer to the new
+	 buffer.
 
-This is a variation on FS_LoadFile which attempts to reduce needless dynamic 
+This is a variation on FS_LoadFile which attempts to reduce needless dynamic
 memory allocations, by using a static buffer when possible.
 
 The calling function is responsible for comparing the value of *buffer with
@@ -802,7 +761,7 @@ int FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t s
 		FS_FCloseFile (h);
 		return len;
 	}
-	
+
 	if (statbuffer_len > len)
 	{
 		memset (statbuffer, 0, statbuffer_len);
@@ -856,11 +815,9 @@ FS_Gamedir
 Called to find where to write a file (demos, savegames, etc)
 ============
 */
-char *FS_Gamedir (void)
+const char *FS_Gamedir (void)
 {
-
 	return fs_gamedir;
-
 }
 
 /*
@@ -899,32 +856,39 @@ Sets the gamedir and path to a different directory.
 void FS_SetGamedir (char *dir)
 {
 
+	Com_DPrintf("FS_SetGamedir stub (%s).\n", dir );
+
+#if 0
+/* 2014-02
+ * Stubbed out pending sorting out multiple game and game plugin
+ * module issues.
+ */
 	if (strstr(dir, "..") || strstr(dir, "/")
 		|| strstr(dir, "\\") || strstr(dir, ":") )
 	{
 		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
-	//
-	// flush all data, so it will be forced to reload
-	//
-	if ( dedicated && !dedicated->value )
-	{ // set up for client restart
+
+	if ( dedicated==NULL || !dedicated->integer )
+	{
+		/* for client, re-initialize */
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 	}
 
-	// note: FullSet triggers sending info to client
-	if ( !strcmp( dir, BASE_GAMEDATA ) || ( *dir == 0 ) )
-	{ // either "data1" or "", set to empty string.
-		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
-	}
+	/* Cvar_FullSet triggers sending new game to client */
+	if ( *dir = 0 || Q_strncasecmp( "data1", dir, 5 ) )
+		/* "" or "data1", set to our default, which is  */
+		Cvar_FullSet( "game", GAME_GAMEDATA, 
+					  CVAR_LATCH|CVAR_SERVERINFO|CVAR_USERINFO );
 	else
-	{
-		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
-	}
+		/* otherwise, set to requested game sub-directory */
+		Cvar_FullSet( "game", dir, 
+					  CVAR_LATCH|CVAR_SERVERINFO|CVAR_USERINFO );
 
 	// re-initialize search paths
 	FS_init_paths();
+#endif
 
 }
 
@@ -1046,7 +1010,7 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 			continue;
 		for (j = i + 1; j < nfiles; j++)
 			if (list[j] != NULL &&
-			    strcmp(list[i], list[j]) == 0) {
+				strcmp(list[i], list[j]) == 0) {
 				free(list[j]);
 				list[j] = NULL;
 				tmpnfiles++;
@@ -1165,11 +1129,6 @@ void FS_Path_f (void)
 	{
 		Com_Printf( "%s/\n", fs_gamesearch[i] );
 	}
-	Com_Printf ("Bot data search path:\n");
-	for ( i = 0; fs_botsearch[i][0] ; i++ )
-	{
-		Com_Printf( "%s/%s/\n", fs_botsearch[i], BOT_GAMEDATA );
-	}
 
 }
 
@@ -1219,25 +1178,32 @@ FS_InitFilesystem
 */
 void FS_InitFilesystem (void)
 {
-#if defined UNIX_VARIANT
-	char dummy_path[MAX_OSPATH];
-#endif
+	cvar_t* var;
 
 	Cmd_AddCommand ("path", FS_Path_f);
 	Cmd_AddCommand ("dir", FS_Dir_f );
 
-	FS_init_paths();
-
-#if defined UNIX_VARIANT
-	Com_Printf("using %s for writing\n", fs_gamedir );
-	/*
-	 * Create the writeable directory if it does not exist.
-	 * Otherwise, a dedicated server may fail to create a logfile.
-	 * "dummy" is there just so FS_CreatePath works, no file is created.
+#if defined DEDICATED_ONLY
+	/* game from command line */
+	var = Cvar_Get( "game","", CVAR_NOSET|CVAR_SERVERINFO );
+	if ( var == NULL || var->string[0] == '\0' )
+	{
+		Cvar_FullSet( "game", "arena", CVAR_ROM|CVAR_SERVERINFO );
+		var = Cvar_Get( "game", "", 0 );
+	}
+	Cvar_FullSet( "gamedir", var->string, CVAR_ROM|CVAR_SERVERINFO );
+#else
+	/* game from client/listen server preprocessor def
+	 * alienarena (-DARENA or none) executable runs "arena" server
+	 * aa-tactical-demo (-DTACTICAL) executable runs "tactical" server
 	 */
-	Com_sprintf( dummy_path, sizeof(dummy_path), "%s/dummy", fs_gamedir );
-	FS_CreatePath( dummy_path );
+	Cvar_FullSet( "game", GAME_GAMEDATA, CVAR_ROM|CVAR_SERVERINFO );
+	var = Cvar_Get( "game", "", 0 );
+	Cvar_FullSet( "gamedir", var->string, CVAR_ROM|CVAR_SERVERINFO );
 #endif
+
+	fs_gamedirvar = Cvar_Get( "gamedir", "", 0 );
+	FS_init_paths();
 
 #if defined HAVE_ZLIB && !defined DEDICATED_ONLY
 	Com_Printf("using zlib version %s\n", zlibVersion() );

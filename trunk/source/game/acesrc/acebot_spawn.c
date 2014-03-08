@@ -118,15 +118,15 @@ static void loadbots_openfile( void )
 	// custom<n>.cfg has priority over team.cfg
 	if ( sv_custombots && sv_custombots->integer )
 	{
-		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer );
+		sprintf( stem, "botinfo/custom%i.tmp", sv_custombots->integer );
 	}
 	else if ( TEAM_GAME )
 	{
-		strcpy(stem, BOT_GAMEDATA"/team.tmp");
+		strcpy(stem, "botinfo/team.tmp");
 	}
 	else
 	{
-		sprintf(stem, BOT_GAMEDATA"/%s.tmp", level.mapname);
+		sprintf(stem, "botinfo/%s.tmp", level.mapname);
 	}
 
 	if ( !gi.FullPath( bot_filename, sizeof(bot_filename), stem ) )
@@ -310,7 +310,7 @@ void ACESP_SaveBots( void )
 
     count = client_botupdate(); // count bots and update clients
 
-	gi.FullWritePath( full_path, sizeof(full_path), BOT_GAMEDATA"/bots.tmp" );
+	gi.FullWritePath( full_path, sizeof(full_path), "botinfo/bots.tmp" );
 	if ( ( pOut = fopen( full_path, "wb" )) == NULL )
 	{
 		gi.dprintf("ACESP_SaveBots: fopen for write failed: %s\n", full_path );
@@ -1208,7 +1208,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		 * ReadConfig sets defaults if there is no such file.
 		 */
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
-		sprintf( bot_configfilename, BOT_GAMEDATA"/%s.cfg", info );
+		sprintf( bot_configfilename, "botinfo/%s.cfg", info );
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items

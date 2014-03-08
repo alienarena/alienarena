@@ -15,21 +15,10 @@
 @SET_MAKE@
 
 # Process this file with automake to produce Makefile.in
-#
-# Copyright (C) 2010,2014 COR Entertainment, LLC.
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# A copy of the  GNU General Public License is included;
-# see the file, GPLv2.
-#
+
+# Copyright (C) 2013 COR Entertainment, LLC.
+
+# --- ALIEN ARENA COMMON DATA ---
 
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
@@ -93,31 +82,20 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = @build@
-host_triplet = @host@
-@WITH_DATA1PKG_TRUE@am__append_1 = data1
-@WITH_DATA1PKG_TRUE@am__append_2 = data1
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(top_srcdir)/config/config.h.in $(dist_arena_DATA) \
-	$(dist_tactical_DATA) $(am__dist_unixdoc_DATA_DIST) \
-	$(am__dist_unixicons_DATA_DIST) config/compile \
-	config/config.guess config/config.sub config/depcomp \
-	config/install-sh config/missing $(top_srcdir)/config/compile \
-	$(top_srcdir)/config/config.guess \
-	$(top_srcdir)/config/config.sub \
-	$(top_srcdir)/config/install-sh $(top_srcdir)/config/missing
+	$(nobase_dist_fonts_DATA) \
+	$(nobase_dist_graphical_presets_DATA) build-aux/install-sh \
+	build-aux/missing $(top_srcdir)/build-aux/install-sh \
+	$(top_srcdir)/build-aux/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_flag.m4 \
-	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/pkg.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
@@ -174,14 +152,9 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" \
-	"$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"
-am__dist_unixdoc_DATA_DIST = unix_dist/README unix_dist/COPYING \
-	unix_dist/INSTALL unix_dist/GPLv2
-am__dist_unixicons_DATA_DIST = unix_dist/alienarena.png \
-	unix_dist/aa-tactical-demo.png
-DATA = $(dist_arena_DATA) $(dist_tactical_DATA) $(dist_unixdoc_DATA) \
-	$(dist_unixicons_DATA)
+am__installdirs = "$(DESTDIR)$(fontsdir)" \
+	"$(DESTDIR)$(graphical_presetsdir)"
+DATA = $(nobase_dist_fonts_DATA) $(nobase_dist_graphical_presets_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -210,6 +183,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -253,50 +227,28 @@ am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
-ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-CC = @CC@
-CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@
-CPP = @CPP@
-CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
-EGREP = @EGREP@
-EXEEXT = @EXEEXT@
-FREETYPE2_CFLAGS = @FREETYPE2_CFLAGS@
-FREETYPE2_LIBS = @FREETYPE2_LIBS@
-GL_LIBDIR = @GL_LIBDIR@
-GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = @LDFLAGS@
-LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
-LIBCURL_LIBS = @LIBCURL_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
-LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
-OBJEXT = @OBJEXT@
-ODE_CFLAGS = @ODE_CFLAGS@
-ODE_LIBS = @ODE_LIBS@
-OGG_CFLAGS = @OGG_CFLAGS@
-OGG_LIBS = @OGG_LIBS@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -305,58 +257,27 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
-PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
-PTHREAD_CC = @PTHREAD_CC@
-PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
-PTHREAD_LIBS = @PTHREAD_LIBS@
-RANLIB = @RANLIB@
-SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
-VORBIS_CFLAGS = @VORBIS_CFLAGS@
-VORBIS_LIBS = @VORBIS_LIBS@
-X11_CFLAGS = @X11_CFLAGS@
-X11_LIBS = @X11_LIBS@
-XXF86DGA_CFLAGS = @XXF86DGA_CFLAGS@
-XXF86DGA_LIBS = @XXF86DGA_LIBS@
-XXF86VM_CFLAGS = @XXF86VM_CFLAGS@
-XXF86VM_LIBS = @XXF86VM_LIBS@
-ZLIB_CFLAGS = @ZLIB_CFLAGS@
-ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_CC = @ac_ct_CC@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
-ax_pthread_config = @ax_pthread_config@
 bindir = @bindir@
-build = @build@
 build_alias = @build_alias@
-build_cpu = @build_cpu@
-build_os = @build_os@
-build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-host = @host@
 host_alias = @host_alias@
-host_cpu = @host_cpu@
-host_os = @host_os@
-host_vendor = @host_vendor@
 htmldir = @htmldir@
-iconsdir = @iconsdir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -374,56 +295,35 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-DIST_SUBDIRS = source $(am__append_1)
-SUBDIRS = source $(am__append_2)
-ACLOCAL_AMFLAGS = -I m4
+SUBDIRS = botinfo env gfx levelshots maps models particles pics players scripts sound textures vehicles
 
 #
-# Alien Arena documents to be installed in $docdir
+# TODO: add licensing and other docs for the data package
 #
-@DOC_INSTALL_TRUE@unixdocdir = $(docdir)
-@DOC_INSTALL_TRUE@dist_unixdoc_DATA = \
-@DOC_INSTALL_TRUE@	unix_dist/README \
-@DOC_INSTALL_TRUE@	unix_dist/COPYING \
-@DOC_INSTALL_TRUE@	unix_dist/INSTALL \
-@DOC_INSTALL_TRUE@	unix_dist/GPLv2
+fontsdir = $(pkgdatadir)/data1
+nobase_dist_fonts_DATA = \
+ fonts/agentred.ttf \
+ fonts/bluehigd.ttf \
+ fonts/chicomono.ttf \
+ fonts/creativeblock.ttf \
+ fonts/freemono.ttf \
+ fonts/freesans.ttf \
+ fonts/orbitron.ttf \
+ fonts/crackdown.ttf \
+ fonts/bendable.ttf
 
-
-#
-# Alien Arena icons to be installed in icon directory
-#
-@ICONS_INSTALL_TRUE@unixiconsdir = $(datadir)/icons/alienarena
-@ICONS_INSTALL_TRUE@dist_unixicons_DATA = \
-@ICONS_INSTALL_TRUE@	unix_dist/alienarena.png \
-@ICONS_INSTALL_TRUE@	unix_dist/aa-tactical-demo.png
-
-
-#
-# ARENA Default configuration for client and server
-#
-arenadir = $(pkgdatadir)/arena
-dist_arena_DATA = \
-	arena/motd.txt \
-	arena/server.cfg \
-	arena/default.cfg \
-	arena/maps.lst
-
-
-#
-# TACTICAL-DEMO Default configuration for client and server
-#
-tacticaldir = $(pkgdatadir)/tactical
-dist_tactical_DATA = \
-	tactical/motd.txt \
-	tactical/server.cfg \
-	tactical/default.cfg \
-	tactical/maps.lst
+graphical_presetsdir = $(pkgdatadir)/data1
+nobase_dist_graphical_presets_DATA = \
+ graphical_presets/compatibility.cfg \
+ graphical_presets/maxperformance.cfg \
+ graphical_presets/performance.cfg \
+ graphical_presets/quality.cfg \
+ graphical_presets/maxquality.cfg
 
 all: all-recursive
 
@@ -462,105 +362,54 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
-
-config/config.h: config/stamp-h1
-	@if test ! -f $@; then rm -f config/stamp-h1; else :; fi
-	@if test ! -f $@; then $(MAKE) $(AM_MAKEFLAGS) config/stamp-h1; else :; fi
-
-config/stamp-h1: $(top_srcdir)/config/config.h.in $(top_builddir)/config.status
-	@rm -f config/stamp-h1
-	cd $(top_builddir) && $(SHELL) ./config.status config/config.h
-$(top_srcdir)/config/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
-	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
-	rm -f config/stamp-h1
-	touch $@
-
-distclean-hdr:
-	-rm -f config/config.h config/stamp-h1
-install-dist_arenaDATA: $(dist_arena_DATA)
+install-nobase_dist_fontsDATA: $(nobase_dist_fonts_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
+	@list='$(nobase_dist_fonts_DATA)'; test -n "$(fontsdir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(arenadir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(arenadir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(fontsdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(fontsdir)" || exit 1; \
 	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(arenadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(arenadir)" || exit $$?; \
+	$(am__nobase_list) | while read dir files; do \
+	  xfiles=; for file in $$files; do \
+	    if test -f "$$file"; then xfiles="$$xfiles $$file"; \
+	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
+	  test -z "$$xfiles" || { \
+	    test "x$$dir" = x. || { \
+	      echo " $(MKDIR_P) '$(DESTDIR)$(fontsdir)/$$dir'"; \
+	      $(MKDIR_P) "$(DESTDIR)$(fontsdir)/$$dir"; }; \
+	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(fontsdir)/$$dir'"; \
+	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(fontsdir)/$$dir" || exit $$?; }; \
 	done
 
-uninstall-dist_arenaDATA:
+uninstall-nobase_dist_fontsDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(arenadir)'; $(am__uninstall_files_from_dir)
-install-dist_tacticalDATA: $(dist_tactical_DATA)
+	@list='$(nobase_dist_fonts_DATA)'; test -n "$(fontsdir)" || list=; \
+	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
+	dir='$(DESTDIR)$(fontsdir)'; $(am__uninstall_files_from_dir)
+install-nobase_dist_graphical_presetsDATA: $(nobase_dist_graphical_presets_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
+	@list='$(nobase_dist_graphical_presets_DATA)'; test -n "$(graphical_presetsdir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(tacticaldir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(graphical_presetsdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(graphical_presetsdir)" || exit 1; \
 	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(tacticaldir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(tacticaldir)" || exit $$?; \
+	$(am__nobase_list) | while read dir files; do \
+	  xfiles=; for file in $$files; do \
+	    if test -f "$$file"; then xfiles="$$xfiles $$file"; \
+	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
+	  test -z "$$xfiles" || { \
+	    test "x$$dir" = x. || { \
+	      echo " $(MKDIR_P) '$(DESTDIR)$(graphical_presetsdir)/$$dir'"; \
+	      $(MKDIR_P) "$(DESTDIR)$(graphical_presetsdir)/$$dir"; }; \
+	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(graphical_presetsdir)/$$dir'"; \
+	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(graphical_presetsdir)/$$dir" || exit $$?; }; \
 	done
 
-uninstall-dist_tacticalDATA:
+uninstall-nobase_dist_graphical_presetsDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(tacticaldir)'; $(am__uninstall_files_from_dir)
-install-dist_unixdocDATA: $(dist_unixdoc_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(dist_unixdoc_DATA)'; test -n "$(unixdocdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(unixdocdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(unixdocdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(unixdocdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(unixdocdir)" || exit $$?; \
-	done
-
-uninstall-dist_unixdocDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_unixdoc_DATA)'; test -n "$(unixdocdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(unixdocdir)'; $(am__uninstall_files_from_dir)
-install-dist_unixiconsDATA: $(dist_unixicons_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(dist_unixicons_DATA)'; test -n "$(unixiconsdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(unixiconsdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(unixiconsdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(unixiconsdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(unixiconsdir)" || exit $$?; \
-	done
-
-uninstall-dist_unixiconsDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_unixicons_DATA)'; test -n "$(unixiconsdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(unixiconsdir)'; $(am__uninstall_files_from_dir)
+	@list='$(nobase_dist_graphical_presets_DATA)'; test -n "$(graphical_presetsdir)" || list=; \
+	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
+	dir='$(DESTDIR)$(graphical_presetsdir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -857,7 +706,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" "$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"; do \
+	for dir in "$(DESTDIR)$(fontsdir)" "$(DESTDIR)$(graphical_presetsdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -897,7 +746,7 @@ clean-am: clean-generic mostlyclean-am
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-hdr distclean-tags
+distclean-am: clean-am distclean-generic distclean-tags
 
 dvi: dvi-recursive
 
@@ -911,8 +760,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_arenaDATA install-dist_tacticalDATA \
-	install-dist_unixdocDATA install-dist_unixiconsDATA
+install-data-am: install-nobase_dist_fontsDATA \
+	install-nobase_dist_graphical_presetsDATA
 
 install-dvi: install-dvi-recursive
 
@@ -958,8 +807,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_arenaDATA uninstall-dist_tacticalDATA \
-	uninstall-dist_unixdocDATA uninstall-dist_unixiconsDATA
+uninstall-am: uninstall-nobase_dist_fontsDATA \
+	uninstall-nobase_dist_graphical_presetsDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -967,34 +816,21 @@ uninstall-am: uninstall-dist_arenaDATA uninstall-dist_tacticalDATA \
 	am--refresh check check-am clean clean-cscope clean-generic \
 	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
 	dist-gzip dist-hook dist-lzip dist-shar dist-tarZ dist-xz \
-	dist-zip distcheck distclean distclean-generic distclean-hdr \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dist_arenaDATA \
-	install-dist_tacticalDATA install-dist_unixdocDATA \
-	install-dist_unixiconsDATA install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
+	dist-zip distcheck distclean distclean-generic distclean-tags \
+	distcleancheck distdir distuninstallcheck dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-nobase_dist_fontsDATA \
+	install-nobase_dist_graphical_presetsDATA install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs installdirs-am \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-dist_arenaDATA \
-	uninstall-dist_tacticalDATA uninstall-dist_unixdocDATA \
-	uninstall-dist_unixiconsDATA
+	uninstall-am uninstall-nobase_dist_fontsDATA \
+	uninstall-nobase_dist_graphical_presetsDATA
 
 
-# FUSE game server browser and Server management scripts
-# todo: verify/update scripts. deprecate fuse.
-#EXTRA_DIST = \
-#	Tools/fuse.tar.gz \
-#	Tools/LinuxScripts
-
-# remove svn directories from distribution staging area after creating
-#  distribution in staging area and before running archiver
-# but, it is probably a better idea to export the repository to the
-#  staging area since export does not include the .svn parts
-#
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 

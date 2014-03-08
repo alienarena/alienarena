@@ -69,7 +69,7 @@ void Sys_Warn( char *warning, ... );
  * section 29.9 "Setuid Program Example"
  *
  * 2013-12 Note: Not really needed at this time, because the game is
- * statically linked, not dll/so. Runtime dynamic linking is in the
+ * statically linked, not dll/so. Runtime dynamic linking was in the
  * code, but not tested. That could (and should) change.
  */
 static uid_t ruid; /* saved 'real' user ID */
@@ -268,9 +268,8 @@ char *Sys_ConsoleInput( void )
 	len = read( fileno(stdin), text, sizeof(text) );
 	if ( len < 1 )
 	{
-		if ( len == 0 ) /* EOF. can this happen? */
+		if ( len == 0 ) /* EOF. not likely to happen. */
 		{
-			assert( 0 ); /* -jjb- find out if it happens */
 			stdin_enabled = false;
 		}
 		else
@@ -400,7 +399,9 @@ void Sys_Quit(void)
 }
 
 /**
- * System-dependent initialization called WHEN?
+ * System-dependent initialization.
+ *
+ * Called from Qcommon_Init().
  */
 void Sys_Init(void)
 {
@@ -408,8 +409,6 @@ void Sys_Init(void)
 
 /**
  * Somewhat controlled crash exit
- *
- * TODO: check for non-reentrant functions
  */
 void Sys_Error( char *error, ... )
 {
@@ -426,7 +425,7 @@ void Sys_Error( char *error, ... )
 		va_start( argptr, error );
 		vsnprintf( crash_string, sizeof(crash_string), error, argptr );
 		va_end( argptr );
-		fprintf( stderr, "Error: %s\n", crash_string );
+		fprintf( stderr, "\nError: %s\n", crash_string );
 	}
 	/* TODO: maybe, post to syslog */
 
@@ -452,6 +451,12 @@ void Sys_Warn( char *warning, ... )
 }
 
 /*---------------------------------------------------- Game Load & Unload ---*/
+
+/* 2014-02 
+ * Note: To be updated for game module plugins.
+ * Removed old, untested, pretend code.
+ */
+
 /*
 =================
 Sys_UnloadGame
@@ -459,108 +464,21 @@ Sys_UnloadGame
 */
 void Sys_UnloadGame (void)
 {
-	if ( game_library != NULL )
-		dlclose (game_library);
 	game_library = NULL;
 }
 
 /*
 =================
 Sys_GetGameAPI
-
-Loads the game module
-
-2010-08 : Implements a statically linked game module. Loading a game module lib
-  is supported if it exists.
-  To prevent problems with attempting to load an older, incompatible version,
-    a lib will not be loaded from arena/ nor data1/
 =================
 */
-void *Sys_GetGameAPI (void *parms)
+void *Sys_GetGameAPI( void *parms )
 {
-	void	*(*ptrGetGameAPI) (void *) = NULL;
+	void *(*ptrGetGameAPI)(void*) = NULL;
 
-	FILE	*fp;
-	char	name[MAX_OSPATH];
-	char	*path;
-	size_t  pathlen;
-	char	*str_p;
-	const char *gamename = "game.so";
+	ptrGetGameAPI = &GetGameAPI;
 
-	if (game_library != NULL)
-		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
-
-	do_setuid();
-
-	// now run through the search paths
-	path = NULL;
-	while (1)
-	{
-		path = FS_NextPath (path);
-		if (!path)
-			break; // Search did not turn up a game shared library
-
-		pathlen = strlen( path );
-		// old game lib in data1 is a problem
-		if ( !Q_strncasecmp( "data1", &path[ pathlen-5 ], 5 ) )
-			continue;
-		// may want to have a game lib in arena, but disable for now
-		if ( !Q_strncasecmp( "arena", &path[ pathlen-5 ], 5 ) )
-			continue;
-
-		snprintf (name, MAX_OSPATH, "%s/%s", path, gamename);
-
-		/* skip it if it just doesn't exist */
-		fp = fopen(name, "rb");
-		if (fp == NULL)
-			continue;
-		fclose(fp);
-
-		game_library = dlopen (name, RTLD_NOW);
-		if (game_library != NULL )
-		{
-			Com_Printf("------- Loading %s -------\n", gamename);
-			break;
-		}
-		else
-		{
-			Com_DPrintf ("LoadLibrary (%s):", name);
-
-			path = dlerror();
-			str_p = strchr(path, ':'); // skip the path (already shown)
-			if (str_p == NULL)
-				str_p = path;
-			else
-				str_p++;
-
-			Com_DPrintf ("%s\n", str_p);
-
-			break; // file opened but did not dlopen
-		}
-	}
-
-	if ( game_library != NULL )
-	{ // game module from dlopen'd shared library
-		ptrGetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
-	}
-
-	undo_setuid();
-
-	/*
-	 * No game shared library found, use statically linked game
-	 */
-	if ( ptrGetGameAPI == NULL )
-	{
-		ptrGetGameAPI = &GetGameAPI;
-	}
-
-	if ( ptrGetGameAPI == NULL )
-	{ // program error
-		Sys_UnloadGame ();
-		return NULL;
-	}
-
-	return ptrGetGameAPI (parms);
+	return ptrGetGameAPI( parms );
 }
 
 /*--------------------------------------------------------- Other stuff ----*/
@@ -592,7 +510,12 @@ void floating_point_exception_handler( int unused  )
 }
 
 /**
- * called WHEN?
+ *
+ * Called from CL_ConnectionlessPacket()
+ *
+ * MS Windows does:
+ * 	ShowWindow ( cl_hwnd, SW_RESTORE);
+ *	SetForegroundWindow ( cl_hwnd );
  */
 void Sys_AppActivate (void)
 {
@@ -669,8 +592,7 @@ int main( int argc, char** argv )
 /**
  * main() for X11-based client/listen-server. Commonly, will be run
  * using a window manager's launcher, and may not be run using 
- * a terminal. When that happens, output ends up in the system log,
- * which looks ridiculous.
+ * a terminal.
  */
 int
 main( int argc, char** argv )
@@ -678,7 +600,7 @@ main( int argc, char** argv )
 	int dtime, oldtime, newtime;
 
 	/* init setuid access, remember real and effective user IDs */
-	init_setuid();
+	// init_setuid(); TBD.
 
 	stdin_enabled  = terminal_stdin_exists();
 	stdout_enabled = terminal_stdout_exists();
@@ -697,9 +619,7 @@ main( int argc, char** argv )
 	}
 
 	if ( stdin_enabled )
-	{
 		set_nonblock_stdin();
-	}
 
 	Qcommon_Init( argc, argv );
 

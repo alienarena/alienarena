@@ -360,9 +360,9 @@ CL_ParseServerData
 */
 void CL_ParseServerData (void)
 {
-	 extern cvar_t	*fs_gamedirvar;
-	char	*str;
-	int		i;
+	extern cvar_t *fs_gamedirvar;
+	char *str;
+	int  i;
 
 	Com_DPrintf ("Serverdata packet received.\n");
 //
@@ -395,8 +395,13 @@ void CL_ParseServerData (void)
 	strncpy (cl.gamedir, str, sizeof(cl.gamedir)-1);
 
 	// set gamedir
-	if ((*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str))) || (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)))
-		Cvar_Set("game", str);
+	/* Pending sorting out multiple game and game plugin module issues,
+	 * changing the game and gamedir cvars is not supported.
+	 * NOTE: seems like servers do not always send a gamedir (default to "arena"?)
+	 */
+	Com_DPrintf("[game: server: %s, client: %s]\n", cl.gamedir, fs_gamedirvar->string );
+	if ( cl.gamedir[0] = '\0' )
+		strcpy( cl.gamedir, "arena" );
 
 	// parse player entity number
 	cl.playernum = MSG_ReadShort (&net_message);

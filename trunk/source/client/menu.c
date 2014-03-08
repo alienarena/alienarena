@@ -52,29 +52,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 enum Game_mode
 {
+#ifndef TACTICAL
 	mode_dm   = 0, 
 	mode_ctf  = 1, // team
-	mode_tac  = 2, // special team
-	mode_aoa  = 3,
-	mode_db   = 4, // team
-	mode_tca  = 5, // team
-	mode_cp   = 6, // team
-	mode_duel = 7,
+	mode_aoa  = 2,
+	mode_db   = 3, // team
+	mode_tca  = 4, // team
+	mode_cp   = 5, // team
+	mode_duel = 6
+#else
+	mode_tac  = 0 // special team
+#endif
 };
 
 static const char *game_mode_names[] =
 {
 #ifndef TACTICAL
-	"deathmatch",
-	"ctf",
-	"tactical",
-	"all out assault",
-	"deathball",
-	"team core assault",
-	"cattle prod",
-	"duel",
+	"deathmatch",        // 0 
+	"ctf",               // 1
+	"all out assault",   // 2
+	"deathball",         // 3
+	"team core assault", // 4
+	"cattle prod",       // 5
+	"duel",              // 6
 #else
-	"tactical",
+	"tactical",          // 0
 #endif
 	NULL
 };
@@ -84,16 +86,15 @@ static const char *game_mode_names[] =
 static const char *map_prefixes[num_game_modes][3] =
 {
 #ifndef TACTICAL
-	{"dm",  "tourney", NULL}, 
+	{"dm",  "tourney", NULL}, // 0
 	{"ctf", NULL,      NULL}, // 1
-	{"tac", NULL,      NULL}, // 2
-	{"aoa", NULL,      NULL}, // 3
-	{"db",  NULL,      NULL}, // 4
-	{"tca", NULL,      NULL}, // 5
-	{"cp",  NULL,      NULL}, // 6
-	{"dm",  "tourney", NULL}  // 7
+	{"aoa", NULL,      NULL}, // 2
+	{"db",  NULL,      NULL}, // 3
+	{"tca", NULL,      NULL}, // 4
+	{"cp",  NULL,      NULL}, // 5
+	{"dm",  "tourney", NULL}  // 6
 #else
-	{"tac", NULL,      NULL}  // 2
+	{"tac", NULL,      NULL}  // 0
 #endif
 };
 
@@ -156,7 +157,14 @@ static size_t szr; // just for unused result warnings
 inline qboolean is_team_game( float rule_value )
 {
 	int rv = (int)rule_value;
-	return ( rv == mode_ctf || rv == mode_db || rv == mode_tca || rv ==	mode_cp );
+	Com_DPrintf("[is_team_game: rule_value:  %i]\n", rule_value );
+
+#ifndef TACTICAL
+	return ( rv == mode_ctf || rv == mode_db || rv == mode_tca 
+			 || rv ==	mode_cp );
+#else
+	return false; /* tactical is a different kind of team */
+#endif
 }
 
 // common callbacks
@@ -4549,9 +4557,9 @@ void LoadBotInfo( void )
 
 	char fullpath[MAX_OSPATH];
 
-	if ( !FS_FullPath( fullpath, sizeof(fullpath), BOT_GAMEDATA"/allbots.tmp" ) )
+	if ( !FS_FullPath( fullpath, sizeof(fullpath), "botinfo/allbots.tmp" ) )
 	{
-		Com_DPrintf("LoadBotInfo: %s/allbots.tmp not found\n", BOT_GAMEDATA );
+		Com_DPrintf("LoadBotInfo: %s/allbots.tmp not found\n", "botinfo" );
 		return;
 	}
 	if( (pIn = fopen( fullpath, "rb" )) == NULL )
@@ -4584,7 +4592,7 @@ void LoadBotInfo( void )
 		
 		// load info from config file if possible
 		
-		Com_sprintf (cfgpath, sizeof(cfgpath), "%s/%s.cfg", BOT_GAMEDATA, name);
+		Com_sprintf (cfgpath, sizeof(cfgpath), "%s/%s.cfg", "botinfo", name);
 		if( FS_LoadFile (cfgpath, &cfg) == -1 )
 		{
 			Com_DPrintf("LoadBotInfo: failed file open: %s\n", fullpath );
@@ -4641,12 +4649,12 @@ void AddbotFunc(void *self)
 	if( is_team_game( s_rules_box.curvalue ))
 
 	{ // team game
-		FS_FullWritePath( bot_filename, sizeof(bot_filename), BOT_GAMEDATA"/team.tmp" );
+		FS_FullWritePath( bot_filename, sizeof(bot_filename), "botinfo/team.tmp" );
 	}
 	else
 	{ // non-team, bots per map
 		char relative_path[MAX_QPATH];
-		Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", startmap );
+		Com_sprintf( relative_path, sizeof(relative_path), "botinfo/%s.tmp", startmap );
 		FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
 	}
 
@@ -5094,26 +5102,26 @@ void StartServerActionFunc( void *self )
 	Cvar_SetValue( "deathmatch", 1 );
 
 	cvflags =  CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL;
+#ifndef TACTICAL
 	Cvar_FullSet( "ctf",    "0", cvflags );
-	Cvar_FullSet( "tac",    "0", cvflags );
 	Cvar_FullSet( "aoa",    "0", cvflags );
 	Cvar_FullSet( "tca",    "0", cvflags );
 	Cvar_FullSet( "db",     "0", cvflags );
 	Cvar_FullSet( "cp",     "0", cvflags );
 	Cvar_FullSet( "g_duel", "0", cvflags );
-#ifdef TACTICAL
-	Cvar_SetValue( "gamerules", (float)mode_tac );
-#else
 	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
+#else
+	Cvar_FullSet( "tac",    "0", cvflags );
+	Cvar_SetValue( "gamerules", (float)mode_tac );
+	Cvar_ForceSet( "g_tactical", "1" );
 #endif
 
+#ifndef TACTICAL
+	Cvar_ForceSet( "g_tactical", "0" );
 	switch (s_rules_box.curvalue)
 	{
 	case mode_ctf:
 		Cvar_ForceSet( "ctf", "1" );
-		break;
-	case mode_tac:
-		Cvar_ForceSet( "g_tactical", "1" );
 		break;
 	case mode_aoa:
 		Cvar_ForceSet( "aoa", "1" );
@@ -5133,6 +5141,7 @@ void StartServerActionFunc( void *self )
 	default:
 		break;
 	}
+#endif
 
 	Cbuf_AddText (va("startmap %s\n", startmap));
 	
@@ -5305,10 +5314,10 @@ void Read_Bot_Info()
 		for(i = 0; i < strlen(stem); i++)
 			stem[i] = tolower( stem[i] );
 	}
-	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	Com_sprintf( relative_path, sizeof(relative_path), "botinfo/%s.tmp", stem );
 	if ( !FS_FullPath( bot_filename, sizeof(bot_filename), relative_path ) )
 	{
-		Com_DPrintf("Read_Bot_Info: %s/%s not found\n", BOT_GAMEDATA, relative_path );
+		Com_DPrintf("Read_Bot_Info: %s/%s not found\n", "botinfo", relative_path );
 		return;
 	}
 
@@ -5410,7 +5419,7 @@ void BotAction( void *self )
 		for(i = 0; i < strlen(stem); i++)
 			stem[i] = tolower( stem[i] );
 	}
-	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	Com_sprintf( relative_path, sizeof(relative_path), "botinfo/%s.tmp", stem );
 	FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)

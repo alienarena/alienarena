@@ -291,7 +291,15 @@ cvar_t *Cvar_Set2 (const char *var_name, const char *value, qboolean force)
 
 	// Find the variable; if it does not exist, create it and return at once
 	if (!Cvar_FindOrCreate (var_name, value, 0, &var))
+	{
 		return var;
+	}
+
+	if ( var->flags & CVAR_ROM )
+	{
+		Com_Printf( "%s is read-only.\n", var_name );
+		return var;
+	}
 
 	if (var->flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
 	{
@@ -302,9 +310,9 @@ cvar_t *Cvar_Set2 (const char *var_name, const char *value, qboolean force)
 		}
 	}
 
-	if (!force)
+	if (!force) /* Cvar_Set */
 	{
-		if (var->flags & CVAR_NOSET)
+		if (var->flags & CVAR_NOSET )
 		{
 			Com_Printf ("%s is write protected.\n", var_name);
 			return var;
@@ -332,19 +340,14 @@ cvar_t *Cvar_Set2 (const char *var_name, const char *value, qboolean force)
 			}
 			else
 			{
-				var->string = CopyString(value);
-				var->value = atof (var->string);
-				var->integer = atoi (var->string);
-				if (!Q_strcasecmp(var->name, "game"))
-				{
-					FS_SetGamedir (var->string);
-					FS_ExecAutoexec ();
-				}
+				var->string  = CopyString( value );
+				var->value   = atof( var->string );
+				var->integer = atoi( var->string );
 			}
 			return var;
 		}
 	}
-	else
+	else /* Cvar_ForceSet */
 	{
 		if (var->latched_string)
 		{
@@ -377,6 +380,7 @@ Cvar_ForceSet
 */
 cvar_t *Cvar_ForceSet (const char *var_name, const char *value)
 {
+	/* true means "force" */
 	return Cvar_Set2 (var_name, value, true);
 }
 
@@ -387,6 +391,7 @@ Cvar_Set
 */
 void Cvar_Set (const char *var_name, const char *value)
 {
+	/* false means "do not force" */
 	(void)Cvar_Set2 (var_name, value, false);
 }
 
@@ -443,7 +448,6 @@ Any variables with latched values will now be updated
 void Cvar_GetLatchedVars (void)
 {
 	cvar_t	*var;
-
 	for (var = cvar_vars ; var ; var = var->next)
 	{
 		if (!var->latched_string)
@@ -458,11 +462,6 @@ void Cvar_GetLatchedVars (void)
 		var->latched_string = NULL;
 		var->value = atof(var->string);
 		var->integer = atoi(var->string);
-		if (!Q_strcasecmp(var->name, "game"))
-		{
-			FS_SetGamedir (var->string);
-			FS_ExecAutoexec ();
-		}
 	}
 }
 

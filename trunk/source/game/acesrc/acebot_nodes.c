@@ -611,7 +611,7 @@ void ACEND_SaveNodes()
 
 	safe_bprintf(PRINT_MEDIUM,"Saving node table...");
 
-	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
+	strcpy( relative_path, "botinfo/nav/" );
 	strcat( relative_path, level.mapname );
 	strcat( relative_path, ".nod" );
 
@@ -652,7 +652,7 @@ void ACEND_LoadNodes(void)
 	int version;
 	size_t sz;
 
-	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
+	strcpy( relative_path, "botinfo/nav/" );
 	strcat( relative_path, level.mapname );
 	strcat( relative_path, ".nod" );
 
