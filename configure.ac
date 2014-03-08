@@ -2,7 +2,7 @@
 #
 # Alien Arena auto configuration source
 #
-# Copyright (C) 2010 COR Entertainment, LLC.
+# Copyright (C) 2010,2014 COR Entertainment, LLC.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -13,54 +13,61 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# See the GNU General Public License for more details.
+# A copy of the GNU General Public License is included;
+# see the file, GPLv2
 #
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-
-# 2014-01-11, 2014-01-22
-# - integrated libode eliminated
-# - ANSI color option removed (now a cvar)
-# - temporary revert to 2.68 and 1.11.1
-
-# configure.ac for
-#  GNU/Linux, Unix
-#  Windows (32-bit) using MinGW - Experimental
-#  Mac OS X / Darwin using X11 - Experimental
+# TODO: COPYING for COR licenses,
+#  separate data pkg with COR data license
 
 AC_PREREQ([2.68])
-AC_INIT([alienarena],[7.66],[alienrace@comcast.net])
+AC_INIT([alienarena],[7.66.1],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
-dnl insure default prefix
-AX_EXPAND_PREFIX
+dnl insure default prefix. TODO: when/where would this help
+dnl AX_EXPAND_PREFIX
 
-dnl 1.11.1 = require automake 1.11.1 or greater
+dnl 1.11.1 TODO: verify that 1.13.x or 1.14.x is not required
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
-dnl silent-rules = less output (--disable-silent-rules for more output)
-dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz
-AM_INIT_AUTOMAKE([ 1.11.1 foreign subdir-objects silent-rules ])
-AM_SILENT_RULES([yes])
+dnl silent-rules = less output, default off
+dnl one might add dist-zip, dist-bzip2 for other distributions besides tar.gz
+AM_INIT_AUTOMAKE([1.11.1 foreign subdir-objects silent-rules])
+AM_SILENT_RULES([no])
 
 dnl use --enable-maintainer-mode to get full set of make targets.
 dnl autotools generated files will not be updated otherwise.
-dnl without --enable-maintainer-mode, autotools programs are not needed
-dnl to build the program, which is better for non-developers.   
+dnl without --enable-maintainer-mode, autotools programs are
+dnl not needed to build the program, which is better for
+dnl non-developers who build from repository sources.
 AM_MAINTAINER_MODE
 
-AC_CANONICAL_HOST
+dnl
+dnl Options for specifying whether to include "nested"  data1 package
+dnl  for make install and make distcheck.
+dnl
+AC_MSG_CHECKING([whether to include game resources package])
+AC_ARG_WITH([data1pkg],
+	[AS_HELP_STRING([--with(out)-data1pkg],
+			[include game resources from data1 directory (default:with)])
+		],[
+		with_data1pkg=${withval}],[
+		with_data1pkg=yes
+])
+AS_IF([ test "x${with_data1pkg}" != xno ],[
+	AC_CONFIG_SUBDIRS([data1])],[
+	])
+AC_MSG_RESULT([${with_data1pkg}])
+AM_CONDITIONAL([WITH_DATA1PKG],[ test "x${with_data1pkg}" = xyes ])
 
 #
 # Checks for programs.
 #
 AC_PROG_AWK
+AC_PROG_SED
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
@@ -71,418 +78,62 @@ AC_PROG_MKDIR_P
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 
+#
+# Check host environment
+#
+AC_CANONICAL_HOST
 
-#
-# check host environment
-#
-cond_build_win32=no
-cond_build_unix=no
 unix_host=generic
 AS_CASE([ ${host} ],
-	[ *-*-mingw* ],[ cond_build_win32=yes ],
 	[ *-*-darwin*],
 		[
-		cond_build_unix=yes
 		unix_host=darwin
 		],
 	[ *-*-linux* ],
 		[
-		cond_build_unix=yes
 		unix_host=linux
+		])
+
+
+dnl
+dnl host-dependent conditional compile and version string settings for config.h
+dnl
+AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
+
+AS_CASE([${unix_host}],
+	[ darwin ],
+		[
+		AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])
+		AC_DEFINE([_DARWIN_UNLIMITED_SELECT],1,
+				[see select (2) man page for Mac OS X])
 		],
-	[ cond_build_unix=yes ])
-
-AM_CONDITIONAL([BUILD_WIN32],[ test "x${cond_build_win32}" = xyes ])
-AM_CONDITIONAL([BUILD_UNIX],[ test "x${cond_build_unix}" = xyes ])
-
-#
-# Environment variable for specifying libGL.dylib path for Darwin when it
-# is not in the dlopen() search path. see dlopen (3) for Mac OS X.
-# Either export or in command line: GL_LIBDIR=/usr/Xll/lib, for example.
-# If this GL_LIBDIR is not given, use the shell variable x_libraries from
-# the AC_PATH_X macro (which may be empty)
-#
-gl_dlopen_path=default
-AS_IF([ test x"${unix_host}" = xdarwin ],
-	[
-	AC_PATH_X
-	AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
-	AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
-	AC_MSG_RESULT([${GL_LIBDIR}])
-	AS_IF([ test x"${GL_LIBDIR}" = x ],
-		[gl_dlopen_path=${x_libraries}],
-		[gl_dlopen_path=${GL_LIBDIR}])
+	[ linux ],
+		[AC_DEFINE([LINUX_SPECIAL_CASE],1,
+				[linux-specific conditional compile])],
+	[ generic ]
+		[AC_DEFINE([GENERIC_UNIX],1,[non-specific unix conditional compile])
 ])
 
-#
-# Unix/Linux/Darwin dedicated server only build option
-#
-AC_MSG_CHECKING([whether to build the client])
-AM_COND_IF([BUILD_UNIX],
-	[
-	AC_ARG_ENABLE(
-		[client],
-		[AS_HELP_STRING([--disable-client],
-			[build dedicated server only, not the client (default:no)])],
-		[build_client=${enableval}],
-		[build_client=yes])
-	],
-	[build_client=yes])
-AC_MSG_RESULT([${build_client}])
-AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
-
-#
-# Alternate Install. Install in the traditional single directory way.
-# Might be required for map making tools to work. Also, good when updating
-# from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
-# for now, win32/mingw is always alternate install
-#
-AM_COND_IF([BUILD_WIN32],
-	[alternate_install=yes],
-	[
-	AC_MSG_CHECKING([for traditional single directory, in place installation])
-	AC_ARG_ENABLE(
-		[alternate_install],
-		[AS_HELP_STRING([--enable-alternate-install],
-			[traditional single directory, in-place installation (default:no)])],
-		[alternate_install=${enableval}],
-		[alternate_install=no])
-	AC_MSG_RESULT([${alternate_install}])
-])
-
-AM_CONDITIONAL([ALTERNATE_INSTALL],[ test "x${alternate_install}" = xyes ])
-
-dnl
-dnl symbols for config.h
-dnl
-AM_COND_IF([BUILD_UNIX],
-	[
-	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
-
-	AS_CASE([ ${unix_host} ],
-		[ darwin ],
-			[
-			AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])
-			dnl
-			dnl possible error from select() in unix/net_udp.c::Net_Sleep()
-			dnl
-			AC_DEFINE([_DARWIN_UNLIMITED_SELECT],1,[see select (2) man page for Mac OS X])
-			],
-		[ linux ],
-			[AC_DEFINE([LINUX_SPECIAL_CASE],1,[linux-specific conditional compile])],
-		[ generic ]
-			[AC_DEFINE([GENERIC_UNIX],1,[non-specific unix conditional compile])])
-
-	])
-
-AM_COND_IF([BUILD_WIN32],
-	[AC_DEFINE([WIN32_VARIANT],1,[win32-specific conditional compile])])
-
-AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
-AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
-
-#
-# Option for disabling installation of documents to allow for custom
-# documentation installation. 
-#
-AC_ARG_ENABLE([documents],
-	[AS_HELP_STRING([--disable-documents],
-			[Disable document installation (default: no)])],
-	[install_docs=${enableval}],
-	[install_docs=yes])
-AM_CONDITIONAL([INSTALL_DOCS],[ test "x${install_docs}" != "xno" ])
-
-#
-# Option for specifying where icon is installed.
-#
-AC_ARG_WITH(icondir,
-	[AS_HELP_STRING([--with-icondir=DIR],
-		[icon install directory (default:DATADIR/icons)])],
-	[ with_icondir=${withval} ], [ with_icondir=${datadir}/icons ])
-AC_SUBST([icondir], [${with_icondir}])
-
-#
-# User writable data and configuration subdirectory in $HOME
-#  normally this is a hidden subdirectory
-#  default is .codered. but distros modify this
-#  can be overridden by environment variable, COR_GAME
-#
-# (These also are #defined in qcommon.h, but changing them is not a good idea
-# BASE_GAMEDATA  "data1", GAME_GAMEDATA  "arena", BOT_GAMEDATA   "botinfo")
-#
-# AC_ARG_VAR creates ALIENARENA_HOMEDIR entry for ./configure --help
-# AC_DEFINE_UNQUOTED adds the setting to config.h,
-#  overriding the define in qcommon.h
-#   and
-#  using the default, if not specified in the commandline
-#  (Note: could also be specified in enviroment. That is not recommended
-#   but is the reason for the package specific variable name.)
-#
-alienarena_homedir=".codered"
-AC_ARG_VAR([ALIENARENA_HOMEDIR],[User data and cfg subdirectory in $HOME])
-AS_IF([ test "x${ALIENARENA_HOMEDIR}" = "x" ],
-	[ALIENARENA_HOMEDIR=${alienarena_homedir}],
-	[alienarena_homedir=${ALIENARENA_HOMEDIR}])
-AC_DEFINE_UNQUOTED([USER_GAMEDATA],["${alienarena_homedir}"],
-	[User data and cfg subdirectory in $HOME])
-
-#
-# Checks for libraries.
-#
-AC_SEARCH_LIBS([acos],[m])
-AC_SEARCH_LIBS([dlopen],[dl])
-AC_SEARCH_LIBS([clock_gettime],[rt])
-
-dnl
-dnl start of client-only library requirements
-dnl
-AM_COND_IF([BUILD_CLIENT],
-	[
-
-	AX_PTHREAD([],[AC_MSG_ERROR(["Required pthreads support not found."])])
-#
-# This might be a workaround for DSO missing pthread library error
-#
-	AS_IF([ test "x$PTHREAD_LIBS" = "x" ],[PTHREAD_LIBS="-pthread"])
-
-	dnl
-	dnl zlib support
-	dnl
-	dnl If no option is specified, then check for the library and act accordingly.
-	dnl If "--without-zlib" is specified, do not check, and disable the library.
-	dnl If "--with-zlib" is specified, check and bail out if it cannot be found.
-	dnl
-	AC_ARG_WITH([zlib],
-		[AS_HELP_STRING([--with(out)-zlib],[include Zlib compression support (default: check)])],
-		[],
-		[with_zlib=check])
-	have_zlib=no
-	AS_IF([ test "x$with_zlib" != "xno" ],[
-		PKG_CHECK_MODULES([ZLIB],[zlib],[
-			have_zlib=yes
-			AC_DEFINE([HAVE_ZLIB],1,[Enable ZLib support])
-		],[
-			have_zlib=no
-			AS_IF([ test "x$with_zlib" = "xyes" ],[
-				AC_MSG_FAILURE([--with-zlib specified, but the library or headers could not be found])
-			])
-		])
-	])
-
-
-	dnl IJG libjpeg required  
-	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
-		[AC_MSG_ERROR(["Required jpeg library not found."])])
-
-
-	AM_COND_IF([BUILD_UNIX],
-	[
-		dnl
-		dnl XF86
-		dnl
-		PKG_CHECK_MODULES([X11],[x11])
-
-		dnl
-		dnl XF86 VidMode extension
-		dnl  Note: supports full-screen display. if it is not installed, the
-		dnl   build will succeed but full-screen will not work. 
-		dnl
-		dnl If no option is specified, then check for the library and act accordingly.
-		dnl If "--without-xf86vm" is specified, do not check, and disable the library.
-		dnl If "--with-xf86vm" is specified, check and bail out if it cannot be found.
-		dnl
-		AC_ARG_WITH([xf86vm],
-			[AS_HELP_STRING([--with(out)-xf86vm],[include XF86 VidMode support (default: check)])],
-			[],
-			[with_xf86vm=check])
-		have_Xxf86vm=no
-		AS_IF([ test "x$with_xf86vm" != "xno" ],[
-			PKG_CHECK_MODULES([XXF86VM],[xxf86vm],[
-				have_Xxf86vm=yes
-				AC_DEFINE([HAVE_XXF86VM],1,[Enable X86 VidMode support])
-			],[
-				have_Xxf86vm=no
-				AS_IF([ test "x$with_xf86vm" = "xyes" ],[
-					AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
-				])
-			])
-		])
-
-		dnl
-		dnl XF86 DGA extension
-		dnl  Note: this is changed to default to "without", 
-		dnl    so "--with-xf86dga" must be specified to use this library
-		dnl
-		dnl If no option is specified, disable the library.
-		dnl If "--without-xf86dga" is specified, do not check, and disable the library.
-		dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
-		dnl
-		AC_ARG_WITH([xf86dga],
-			[AS_HELP_STRING([--with(out)-xf86dga],[include XF86 DGA support (default: without)])],
-			[],
-			[with_xf86dga=no])
-		have_Xxf86dga=no
-		AS_IF([ test "x$with_xf86dga" != "xno" ],[
-			PKG_CHECK_MODULES([XXF86DGA],[xxf86dga],[
-				have_Xxf86dga=yes
-				AC_DEFINE([HAVE_XXF86DGA],1,[Enable X86 DGA support])
-				AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h],[],[],[
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-])
-			],[
-				have_Xxf86dga=no
-				AS_IF([ test "x$with_xf86dga" = "xyes" ],[
-					AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
-				])
-			])
-		])
-	])
-
-	dnl
-	dnl Check common client dependencies:
-	dnl Curl, Ogg/Vorbis and vorbisfile, freetype, ode
-	dnl
-	PKG_CHECK_MODULES([DEPS],[libcurl ogg vorbis vorbisfile freetype2 ode])
-
-	dnl Hack in the extras for Win32
-	dnl TODO: this may not be the best way to do this
-	win32_syslibs=""
-	AM_COND_IF([BUILD_WIN32],
-		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
-	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
-
-
-])
-
-
-dnl
-dnl end of client-only library requirements
-dnl
-
-#
-# Checks for header files
-#
-
-AC_CHECK_HEADERS(
-	[inttypes.h stdint.h stddef.h stdlib.h unistd.h],
-	[],[],[])
-
-AC_CHECK_HEADERS(
-	[float.h limits.h],
-	[],[],[])
-
-AC_CHECK_HEADERS(
-	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h]
-	[],[],[])
-
-AC_CHECK_HEADERS(
-	[dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h]
-	[],[],[])
-
-AC_CHECK_HEADERS(
-	[time.h sys/time.h]
-	[],[],[])
-
-AC_CHECK_HEADERS([windows.h winsock.h winsock2.h])
-
-dnl
-dnl start of client-only header requirements
-dnl
-AM_COND_IF([BUILD_CLIENT],[
-
-	jpeglib_h_found=no
-	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
-	AS_IF([ test "x${jpeglib_h_found}" = xno ],
-		[AC_MSG_ERROR("Required JPEG header file not found.")])
-
-	openal_h_found=no
-	AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
-	AS_IF([ test "x${openal_h_found}" = xno ],
-		[AC_MSG_ERROR("Required OpenAL header file not found.")])
-
-	openalc_h_found=no
-	AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
-	AS_IF([ test "x${openalc_h_found}" = xno ],
-		[AC_MSG_ERROR("Required OpenAL header file not found.")])
-
-	AC_CHECK_HEADERS([GL/gl.h],,
-		[AC_MSG_ERROR("Required OpenGL header files not found.")])
-	AM_COND_IF([BUILD_UNIX],
-		[AC_CHECK_HEADERS([GL/glx.h],,
-			[AC_MSG_ERROR("Required OpenGL header files not found.")
-		])
-	])
-])
-dnl
-dnl end of client-only header requirements
-dnl
-
-#
-# Checks for typedefs, structures, and compiler characteristics.
-#
-AC_HEADER_STDBOOL
-AC_C_INLINE
-AC_TYPE_SIZE_T
-AC_TYPE_UID_T
-AC_TYPE_INT32_T
-AC_TYPE_INT64_T
-AC_TYPE_UINT64_T
-AC_CHECK_TYPES([ptrdiff_t])
-AC_CHECK_TYPES([uintptr_t])
-
-
-#
-# Checks for library functions.
-#
-AC_FUNC_ERROR_AT_LINE
-AC_FUNC_ALLOCA
-AC_FUNC_MALLOC
-AC_FUNC_MMAP
-AC_FUNC_REALLOC
-AC_FUNC_OBSTACK
-
-dnl network functions
-AC_CHECK_FUNCS([closesocket socket gethostbyname select])
-
-dnl thread functions
-AC_CHECK_FUNCS([pthread_create _begin_thread])
-
-dnl string functions
-AC_CHECK_FUNCS([strchr strerror strrchr strstr strlcpy isascii])
-AC_CHECK_FUNCS([strcasecmp strncasecmp ])
-AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp strnicmp _strnicmp])
-
-dnl file system functions
-AC_CHECK_FUNCS([filelength stat fstat getcwd _getcwd unlink _unlink mkdir _mkdir])
-
-dnl math functions
-AC_CHECK_FUNCS([pow sqrt floor])
-
-dnl mem mgmt functions
-AC_CHECK_FUNCS([memmove memset munmap mremap])
-
-dnl time functions
-AC_CHECK_FUNCS([gettimeofday clock_gettime])
-
-dnl other functions
-AC_CHECK_FUNCS([ putenv _putenv])
+AC_DEFINE_UNQUOTED([CPUSTRING], "${host_cpu}", [Canonical CPU identification])
+AC_DEFINE_UNQUOTED([BUILDSTRING], "${host_os}", [Canonical OS identification])
 
 dnl
 dnl Set names of dlopened libraries for config.h
+dnl The Darwin configuration attempts to conform to MacPorts.
+dnl   As of 2013-12 consult with ryandesign@macports
+dnl   The dependency checks are below, under the BUILD_CLIENT conditional
 dnl
-AM_COND_IF([BUILD_UNIX],
-	[AS_CASE([ ${unix_host} ],
-		[ darwin ],
-		  [AS_IF([ test "x${gl_dlopen_path}" = xdefault ],
-	  		   	[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
-					["libGL.dylib"],
-					[OpenGL dynamic lib name])
-				],
-				[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
-					["${gl_dlopen_path}/libGL.dylib"],
-					[OpenGL dynamic lib path])
-			])
+AS_CASE([ ${unix_host} ],
+	[ darwin ],
+	  [AS_IF([ test "x${gl_dlopen_path}" = xdefault ],
+			[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
+				["libGL.dylib"],
+				[OpenGL dynamic lib name])
+			],
+			[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
+				["${gl_dlopen_path}/libGL.dylib"],
+				[OpenGL dynamic lib path])
+		])
 		AC_DEFINE_UNQUOTED([OPENAL_DRIVER],
 			["@PREFIX@/lib/libopenal.dylib"],
 			[OpenAl dynamic lib path])
@@ -492,86 +143,432 @@ AM_COND_IF([BUILD_UNIX],
 		AC_DEFINE_UNQUOTED([OPENAL_DRIVER],
 			["libopenal.so.1"],[OpenAL shared lib name])
 	])
+
+#
+# Check for MAKE options
+#
+
+dnl
+dnl Dedicated server only build option.
+dnl So dedicated server may be built without video/audio dependencies.
+dnl
+AC_MSG_CHECKING([whether to build the client])
+AC_ARG_ENABLE([client],
+	[AS_HELP_STRING([--disable-client],
+		[build dedicated server only, not the client (default:no)])],
+	[build_client=${enableval}],
+	[build_client=yes])
+AC_MSG_RESULT([${build_client}])
+AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
+
+dnl
+dnl Option for documentation installation
+dnl Note: distros may have custom document install methods
+dnl
+AC_MSG_CHECKING([whether to install documents])
+AC_ARG_ENABLE([doc_install],
+	[AS_HELP_STRING([--enable-doc-install],
+		[Enable document installation (default: yes)])],
+	[doc_install=${enableval}],
+	[doc_install=yes])
+AC_MSG_RESULT([${doc_install}])
+AM_CONDITIONAL([DOC_INSTALL],[ test "x${doc_install}" = xyes ])
+
+dnl
+dnl Option for icon installation
+dnl
+AC_MSG_CHECKING([whether to install icons])
+AC_ARG_ENABLE([icons_install],
+	[AS_HELP_STRING([--enable-icons-install],
+		[Enable icons installation (default: yes)])],
+	[icons_install=${enableval}],
+	[icons_install=yes])
+AC_MSG_RESULT([${icons_install}])
+AM_CONDITIONAL([ICONS_INSTALL],[ test "x${icons_install}" = xyes ])
+
+AC_ARG_WITH(iconsdir,
+	[AS_HELP_STRING([--with-iconsdir=DIR],
+		[icons installation directory (default:DATADIR/icons)])],
+	[with_iconsdir=${withval}],
+	[with_iconsdir=${datadir}/icons])
+AC_SUBST([iconsdir], [${with_icondir}])
+
+#
+# "Precious" Environment Variables
+#
+
+
+#
+# Checks for libraries.
+#
+
+dnl ---- math
+AC_SEARCH_LIBS([acos],[m])
+
+dnl ---- dynamic 
+AC_SEARCH_LIBS([dlopen],[dl])
+
+dnl ---- real time
+AC_SEARCH_LIBS([clock_gettime],[rt])
+
+dnl
+dnl start of client-only library requirements
+dnl
+AM_COND_IF([BUILD_CLIENT],[
+
+dnl ---- pthread (client)
+AX_PTHREAD([],
+	[AC_MSG_ERROR(
+			["Required pthreads support not found (or invalid CFLAGS)."])])
+dnl This might be a workaround for DSO missing pthread library error:
+AS_IF([ test "x${PTHREAD_LIBS}" = x ],[PTHREAD_LIBS="-pthread"])
+
+dnl ----  X11 Libraries (client)
+dnl #AC_PATH_XTRA
+
+dnl ?this probably does not need to be darwin specific?
+dnl Darwin search for OpenGL library
+dnl  (ref: dlopen(3) for Mac OS X.)
+dnl  see above. as of 2013-12, consult with ryandesign@macports
+gl_dlopen_path=default
+AS_IF([ test "x${unix_host}" = xdarwin ],[
+	AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
+	AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
+	AC_MSG_RESULT([${GL_LIBDIR}])
+	AS_IF([ test "x${GL_LIBDIR}" = x ],[
+		gl_dlopen_path=${x_libraries}],[
+		gl_dlopen_path=${GL_LIBDIR}])
 ])
 
-AM_COND_IF([BUILD_WIN32],
+dnl ----  X11 (client)
+PKG_CHECK_MODULES([X11],[x11],,[
+	AC_MSG_ERROR(["Required Xll library not found"])
+])
+
+dnl ---- xf86vm (client)
+dnl XF86 VidMode extension
+dnl  Note: supports full-screen display. if it is not installed, the
+dnl   build will succeed but full-screen will not work.
+dnl
+dnl If no option is specified, then check for the library and act accordingly.
+dnl If "--without-xf86vm" is specified, do not check, and disable the library.
+dnl If "--with-xf86vm" is specified, check and bail out if it cannot be found.
+dnl
+AC_ARG_WITH([xf86vm],
+	[AS_HELP_STRING([--with(out)-xf86vm],
+			[include XF86 VidMode support (default: check)])],
+	[],
+	[with_xf86vm=check])
+have_Xxf86vm=no
+AS_IF([ test "x${with_xf86vm}" != xno ],[
+	PKG_CHECK_MODULES([XXF86VM],[xxf86vm],[
+		have_Xxf86vm=yes
+		AC_DEFINE([HAVE_XXF86VM],1,[Enable X86 VidMode support])
+	],[
+		have_Xxf86vm=no
+		AS_IF([ test "x${with_xf86vm}" = xyes ],[
+			AC_MSG_FAILURE(
+				[--with-xf86vm specified, library or headers found])
+		])
+	])
+])
+
+dnl ---- xf86dga (client)
+dnl XF86 DGA extension
+dnl  Note: this is changed to default to "without",
+dnl    so "--with-xf86dga" must be specified to use this library
+dnl
+dnl If no option is specified, disable the library.
+dnl If "--without-xf86dga" is specified, do not check, and disable the library.
+dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
+dnl
+	AC_ARG_WITH([xf86dga],
+		[AS_HELP_STRING([--with(out)-xf86dga],
+			[include XF86 DGA support (default: without)])],
+		[],
+		[with_xf86dga=no])
+	have_Xxf86dga=no
+	AS_IF([ test "x$with_xf86dga" != xno ],[
+		PKG_CHECK_MODULES([XXF86DGA],[xxf86dga],[
+			have_Xxf86dga=yes
+			AC_DEFINE([HAVE_XXF86DGA],1,[Enable X86 DGA support])
+			AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h],[],[],[
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+				])
+			])
+		],[
+		have_Xxf86dga=no
+		AS_IF([ test "x${with_xf86dga}" = xyes ],[
+			AC_MSG_FAILURE(
+				[--with-xf86dga specified, library or headers not found])
+		])
+	])
+
+dnl ---- zlib (client)
+dnl If no option is specified, then check for the library and act accordingly.
+dnl If "--without-zlib" is specified, do not check, and disable the library.
+dnl If "--with-zlib" is specified, check and fail if it cannot be found.
+dnl
+AC_ARG_WITH([zlib],
+	[AS_HELP_STRING([--with(out)-zlib],
+			[include Zlib compression support (default: check)])],
+	[],
+	[with_zlib=check])
+have_zlib=no
+AS_IF([ test "x${with_zlib}" != xno ],[
+	PKG_CHECK_MODULES([ZLIB],[zlib],[
+		have_zlib=yes
+		AC_DEFINE([HAVE_ZLIB],1,[Enable ZLib support])
+	],[
+		have_zlib=no
+		AS_IF([ test "x${with_zlib}" = xyes ],[
+			AC_MSG_FAILURE(
+				[--with-zlib specified, library or headers not found])
+		])
+	])
+])
+
+dnl ---- libjpeg (client)
+AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,[
+	AC_MSG_ERROR(["Required jpeg library not found"])
+])
+
+dnl ---- libcurl (client)
+PKG_CHECK_MODULES([LIBCURL],[libcurl],,[
+	AC_MSG_ERROR(["Required cURL library not found"])
+])
+
+dnl ---- ogg, vorbis, vorbisfile (client)
+PKG_CHECK_MODULES([OGG],[ogg],,[
+	AC_MSG_ERROR(["Required Ogg libraries not found"])
+])
+
+PKG_CHECK_MODULES([VORBIS],[vorbis vorbisfile],,[
+	AC_MSG_ERROR(["Required Vorbis libraries not found"])
+])
+
+dnl ---- freetype2 (client)
+PKG_CHECK_MODULES([FREETYPE2],[freetype2],,[
+	AC_MSG_ERROR(["Required FreeType2 library not found"])
+])
+
+dnl ---- ODE (client)
+PKG_CHECK_MODULES( [ODE],[ode],,[
+	AC_MSG_ERROR(["Required ODE (Open Dynamics Engine) library not found"])
+])
+
+
+])
+dnl
+dnl end of client-only library requirements
+dnl
+	
+#
+# Checks for header files
+#
+dnl TODO: organize for portability variations
+dnl priority? string.h and strings.h
+dnl ?w32 manual config.h
+dnl TODO: time function variants
+dnl TODO: separate these logically
+dnl see 5.6.2 Particular Header Checks
+
+AC_HEADER_STDBOOL
+AC_HEADER_DIRENT
+AC_HEADER_ASSERT
+
+AC_CHECK_HEADERS([unistd.h stdarg.h],[],[],[])
+AC_CHECK_HEADERS([dlfcn.h],[],[],[])
+AC_CHECK_HEADERS([sys/time.h time.h],[],[],[])
+AC_CHECK_HEADERS([string.h strings.h ctype.h],[],[],[])
+AC_CHECK_HEADERS([signal.h],[],[],[])
+AC_CHECK_HEADERS([setjmp.h],[],[],[])
+AC_CHECK_HEADERS([math.h float.h],[],[],[])
+AC_CHECK_HEADERS([ \
+	sys/socket.h \
+	netinet/in.h  \
+	netdb.h \
+	sys/param.h \
+	sys/ioctl.h \
+	sys/uio.h \
+])
+
+AC_CHECK_HEADERS([ \
+	arpa/inet.h \
+	fcntl.h \
+	inttypes.h \
+	limits.h \
+	malloc.h \
+	memory.h \
+	termios.h \
+	sys/mman.h
+])
+
+
+dnl
+dnl ------------------------ start of client-only header requirements
+dnl
+AM_COND_IF([BUILD_CLIENT],[
+
+dnl ---- jpeg (client)
+jpeglib_h_found=no
+AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
+AS_IF([ test "x${jpeglib_h_found}" = xno ],
+	[AC_MSG_ERROR("Required JPEG header file not found.")])
+
+dnl ---- OpenAL (client)
+openal_h_found=no
+AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
+AS_IF([ test "x${openal_h_found}" = xno ],
+	[AC_MSG_ERROR("Required OpenAL header file not found.")])
+
+openalc_h_found=no
+AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
+AS_IF([ test "x${openalc_h_found}" = xno ],
+	[AC_MSG_ERROR("Required OpenAL header file not found.")])
+
+dnl ---- OpenGL (client)
+AC_CHECK_HEADERS([GL/gl.h],,
+	[AC_MSG_ERROR("Required OpenGL header files not found.")])
+AC_CHECK_HEADERS([GL/glx.h],,
+	[AC_MSG_ERROR("Required OpenGL header files not found.")])
+
+dnl ---- ODE (client)
+AC_CHECK_HEADERS([ode/ode.h],,
+	[AC_MSG_ERROR("Required ODE header file not found.")]
+	[],
 	[
-	AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])
+#define dDOUBLE
+	])
 
-	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
 ])
+dnl
+dnl ------------------------ end of client-only header requirements
+dnl
 
 #
-# required gcc
-#  fast-math because strict adherence to IEEE standard is not needed.
-#  no-strict-aliasing because strict aliasing is not adhered to in places.
+# Checks for typedefs, structures, and compiler characteristics.
 #
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_TYPE_UID_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_UINT64_T
+AC_CHECK_TYPES([ptrdiff_t])
+AC_CHECK_TYPES([uintptr_t])
+
+dnl TODO: AC_CHECK_TYPES([]) for Linux only sig typedef
+
+#
+# Checks for library functions.
+#
+# TODO: verify use, separate logically
+
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_ALLOCA
+AC_FUNC_MALLOC
+AC_FUNC_MMAP
+AC_FUNC_REALLOC
+AC_FUNC_OBSTACK
+
+dnl add variants
+AC_CHECK_FUNCS([vsnprintf])
+AC_CHECK_FUNCS([strerror])
+AC_CHECK_FUNCS([strdup])
+AC_CHECK_FUNCS([nanosleep usleep])
+
+AC_CHECK_FUNCS([clock_gettime floor getcwd gethostbyname gettimeofday \
+  isascii memmove memset mkdir munmap pow putenv select socket sqrt \
+  strchr strdup strrchr strstr strtoul])
+
+dnl maybe remove w32 specials, just in manual w32 config.h
+AC_CHECK_FUNCS([ _begin_thread _getcwd _mkdir _putenv _strdup _stricmp \
+  _strnicmp unlink _unlink ])
+
+dnl winsock
+AC_CHECK_FUNCS([closesocket])
+
+dnl termios headers and functions needed?
+AC_SYS_POSIX_TERMIOS
+
+dnl
+dnl required gcc options.
+dnl  fast-math because strict adherence to IEEE standard is not needed.
+dnl  no-strict-aliasing because strict aliasing is not adhered to in places.
+dnl
 AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
 
-# outputs
-AC_CONFIG_FILES([ Makefile source/Makefile ])
+#
+# Outputs
+#
+AC_CONFIG_FILES([
+		Makefile
+		source/Makefile
+])
 
 AC_OUTPUT
 
+#
+# Status message
+#
 dnl Option to disable this message.
 AC_ARG_ENABLE([build-status],[AS_HELP_STRING([--disable-build-status],
-			[hide the status message at the end of the configuration script (default:no)])],
+			[hide the status message at the end of the configuration script (defdault:no)])],
 			[hide_status=${enableval}],[hide_status=no])
 
-AS_IF([test "x$hide_status" = "xno"],[
+AS_IF([ test "x${hide_status}" = xno ],[
 	AS_ECHO()
 	AS_ECHO(["-------------------------------------------"])
 	AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
 	AS_ECHO([" OS: .................... ${host_os}"])
 	AS_ECHO([" CPU: ................... ${host_cpu}"])
-	AM_COND_IF([BUILD_WIN32],,[
-		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
-		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
-	])
-	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
+	AS_IF([ test "x${build_client}" = xyes ],[
+			dedicated_only=no],[
+			dedicated_only=yes])
+	AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
 
-	AM_COND_IF([ALTERNATE_INSTALL],[
-		AM_COND_IF([BUILD_CLIENT],[
-			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
-			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
+	AM_COND_IF([BUILD_CLIENT],[
+		AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+		AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+		AS_ECHO([" Zlib support: .......... ${have_zlib}"])
+		AS_IF([ test "x${unix_host}" = xdarwin ],[
+			AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 			])
-		AS_ECHO([" Shared Data ............ ${srcdir}"])
-		AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
-		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
-		],[
-dnl
-dnl try to generate the full path for automake pkgdatadir
-dnl  which determines DATADIR that locates data1, arena, and botinfo
-dnl
-		game_data=${datadir}/${PACKAGE_NAME}
-		game_data_a=`eval "echo ${game_data}"`
-		game_data=`eval "echo ${game_data_a}"`
-		AM_COND_IF([BUILD_CLIENT],[
-			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
-			AS_ECHO([" Zlib support: .......... ${have_zlib}"])
-			AS_IF([ test x"${unix_host}" = xdarwin ],[
-				AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
-			])
-		])
-		AS_ECHO([" Prefix ................. ${prefix}"])
-		AS_ECHO([" Shared RO Data: ........ ${game_data}"])
-		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
 	])
-
-	AS_ECHO()		
-
-	AM_COND_IF([ALTERNATE_INSTALL],
-		[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
-		[AS_ECHO(["Run \"make\" to build, then \"sudo make install\" to install."])])
-		
-	AS_ECHO()		
+	AS_ECHO([" prefix ................ ${prefix}"])
+	AS_ECHO([" doc-install ........... ${doc_install}"])
+	AS_ECHO([" icons-install: ........ ${icons_install}"])
+	AS_ECHO([" with data1: ........... ${with_data1pkg}"])
+	AS_ECHO()
 	AS_ECHO(["Advanced Build Information:"])
 	AS_ECHO([" See README for information and recommendations."])
 	AS_ECHO([" Run ./configure --help for configure options."])
 	AS_ECHO([" Compiler options:"])
 	AS_ECHO(["  CFLAGS:.... ${CFLAGS}"])
-	AS_ECHO()		
+	AS_ECHO()
+	AS_ECHO(["X11:"])
+	AS_ECHO(["  cflags: ${X11_CFLAGS} ${XXF86VM_CFLAGS} ${XXF86DGA_CFLAGS}"])
+	AS_ECHO(["  libs:   ${X11_LIBS} ${XXF86VM_LIBS} ${XXF86DGA_LIBS}"])
+	AS_ECHO(["FREETYPE2:"])
+	AS_ECHO(["  cflags: ${FREETYPE2_CFLAGS}"])
+	AS_ECHO(["  libs: ${FREETYPE2_LIBS}"])
+	AS_ECHO(["LIBCURL:"])
+	AS_ECHO(["  cflags: ${LIBCURL_CFLAGS}"])
+	AS_ECHO(["  libs: ${LIBCURL_LIBS}"])
+	AS_ECHO(["ODE:"])
+	AS_ECHO(["  cflags: ${ODE_CFLAGS}"])
+	AS_ECHO(["  libs: ${ODE_LIBS}"])
+	AS_ECHO(["OGG:"])
+	AS_ECHO(["  cflags: ${OGG}"])
+	AS_ECHO(["  libs: ${OGG_LIBS}"])
+	AS_ECHO(["VORBIS:"])
+	AS_ECHO(["  cflags: ${VORBIS_CFLAGS}"])
+	AS_ECHO(["  libs: ${VORBIS_LIBS}"])
+	AS_ECHO(["ZLIB:"])
+	AS_ECHO(["  cflags: ${ZLIB_CFLAGS}"])
+	AS_ECHO(["  libs: ${ZLIB_LIBS}"])
+	AS_ECHO()
 ])

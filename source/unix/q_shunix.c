@@ -288,7 +288,7 @@ void Sys_Mkdir (char *path)
 	{
 		if ( errno != EEXIST )
 		{
-			Com_DPrintf("Creating directory %s failed\n", path );
+			Com_Printf("Creating directory %s failed\n", path );
 		}
 	}
 }

@@ -730,12 +730,16 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	XVisualInfo *visinfo;
 	XSetWindowAttributes attr;
 	XSizeHints *sizehints;
+	XClassHint *class_hint;
 	unsigned long mask;
 #if defined HAVE_XXF86VM
 	int MajorVersion, MinorVersion;
 	int actualWidth, actualHeight;
 	int i;
 #endif
+
+	/* release keyboard and mouse until after initialization */
+	uninstall_grabs();
 
 	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE);
 
@@ -881,7 +885,36 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	if (sizehints)
 		XFree(sizehints);
 
+	/* For Gnome 3
+	 * Ref: .desktop files, and Gnome 3 doc
+	 */
+#ifdef TACTICAL
+
+	XStoreName(dpy, win, "Alien Arena Tactical Demo");
+
+	class_hint = XAllocClassHint();
+	if ( class_hint != NULL )
+	{
+		class_hint->res_name = "Alien Arena Tactical Demo";
+		class_hint->res_class = "aa-tactical-demo"; /* .desktop */
+		XSetClassHint( dpy, win, class_hint );
+
+		XFree( class_hint );
+	}	
+#else
+
 	XStoreName(dpy, win, "Alien Arena");
+
+	class_hint = XAllocClassHint();
+	if ( class_hint != NULL )
+	{
+		class_hint->res_name = "Alien Arena";
+		class_hint->res_class = "alienarena"; /* .desktop */
+		XSetClassHint( dpy, win, class_hint );
+
+		XFree( class_hint );
+	}
+#endif
 
 	wmDeleteWindow = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	XSetWMProtocols(dpy, win, &wmDeleteWindow, 1);
@@ -918,6 +951,10 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	qglXMakeCurrent(dpy, win, ctx);
 
 	RS_ScanPathForScripts();		// load all found scripts
+
+
+	/* re-acquire keyboard and mouse */
+	install_grabs();
 
 	return rserr_ok;
 }
@@ -962,6 +999,8 @@ void GLimp_Shutdown( void )
 */
 qboolean GLimp_Init( void *hinstance, void *wndproc )
 {
+
+
 	InitSig();
 
 	return true;

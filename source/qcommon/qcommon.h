@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // qcommon.h -- definitions common between client and server, but not game module
 
-#if !defined Q_COMMON_H_
-#define Q_COMMON_H_
+#if !defined Q_COMMON_H
+#define Q_COMMON_H
 
 #include "game/q_shared.h"
 
@@ -28,31 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	VERSION		"7.66"
 #endif
 
-/* ---- Default locations of game data ---*/
-#if !defined BASE_GAMEDATA
-#define BASE_GAMEDATA "data1"
-#endif
-
-#if !defined GAME_GAMEDATA
-#define GAME_GAMEDATA "arena"
-#endif
-
-#if !defined BOT_GAMEDATA
-#define BOT_GAMEDATA "botinfo"
-#endif
-
-#if !defined USER_GAMEDATA
-// default for COR_GAME environment variable
-#define USER_GAMEDATA ".codered"
-#endif
-/*----------------------------------------*/
-
-
 #define MENU_STATIC_WIDTH	720.0f
 
 #define DEFAULTMODEL		"martianenforcer"
 #define DEFAULTSKIN			"default"
-
 
 #if defined WIN32_VARIANT
 
@@ -86,6 +65,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // client.
 #define DEFAULT_DOWNLOAD_URL_1 "http://red.planetarena.org/sv_downloadurl"
 #define DEFAULT_DOWNLOAD_URL_2 "http://martianbackup.com/sv_downloadurl"
+
+/* ---- Relative path names for game data ---*/
+/*
+ * BASE_GAMEDATA : the principal resource subdirectory.
+ * GAME_GAMEDATA : the game and game subdirectory.
+ * USER_GAMEDATA : the user home subdirectory.
+ */
+#define BASE_GAMEDATA "data1"
+
+#if defined TACTICAL
+# define GAME_GAMEDATA "tactical"
+#else
+# define GAME_GAMEDATA "arena"
+#endif
+
+#ifdef UNIX_VARIANT
+# define USER_GAMEDATA "cor-games"
+#endif
 
 //============================================================================
 
@@ -762,39 +759,172 @@ FILESYSTEM
 
 ==============================================================
 */
-
+/**
+ * @brief
+ *
+ * @param f 
+ * @return 
+ */
 int FS_filelength( FILE *f );
-void	FS_InitFilesystem (void);
-void	FS_SetGamedir (char *dir);
-char	*FS_Gamedir (void);
-char	*FS_NextPath (char *prevpath);
-void	FS_ExecAutoexec (void);
 
-// 2 Filesystem functions added 2010-08
-qboolean FS_FullPath( char *full_path, size_t pathsize,const char *relative_path );
-void    FS_FullWritePath( char *full_path, size_t pathsize,const char *relative_path );
+/**
+ * @brief
+ *
+ */
+void FS_InitFilesystem( void );
 
-int		FS_FOpenFile (char *filename, FILE **file);
-void	FS_FCloseFile (FILE *f);
-// note: this can't be called from another DLL, due to MS libc issues
+/**
+ * @brief Sets game and game sub-directory.
+ *
+ * @param dir The relative sub-directory name string. 
+ */
+void FS_SetGamedir( char *dir );
 
-int		FS_LoadFile (char *path, void **buffer);
-int		FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t statbuffer_len);
+/**
+ * @brief
+ *
+ * @param prevpath 
+ * @return 
+ */
+char *FS_NextPath( char *prevpath );
 
-void	FS_Read (void *buffer, int len, FILE *f);
-// properly handles partial reads
+/**
+ * @brief
+ *
+ *
+ */
+void FS_ExecAutoexec( void );
 
-void	FS_FreeFile (void *buffer);
+/**
+ * @brief
+ *
+ * @param full_path 
+ * @param pathsize 
+ * @param relative_path 
+ * @return 
+ */
+qboolean FS_FullPath( char *full_path, size_t pathsize,
+					  const char *relative_path );
 
-void	FS_CreatePath (char *path);
+/**
+ * @brief
+ *
+ * @param full_path 
+ * @param pathsize 
+ * @param relative_path 
+ */
+void FS_FullWritePath( char *full_path, size_t pathsize,
+					   const char *relative_path );
 
-qboolean FS_FileExists(char *path);
+/**
+ * @brief
+ *
+ * @param filename 
+ * @param file 
+ * @return 
+ */
+int  FS_FOpenFile( char *filename, FILE **file );
 
-#define SFF_INPACK	0x20	/* For FS_ListFilesInFS(). */
+/**
+ * @brief
+ *
+ * @param f 
+ */
+void FS_FCloseFile( FILE *f );
 
-char	**FS_ListFiles(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
-char	**FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
-void	FS_FreeFileList (char **list, int n);
+/**
+ * @brief
+ *
+ * @param path 
+ * @param buffer 
+ * @return 
+ */
+int FS_LoadFile( char *path, void **buffer );
+
+/**
+ * @brief
+ *
+ * @param path 
+ * @param buffer 
+ * @param statbuffer 
+ * @param statbuffer_len 
+ * @return 
+ */
+int FS_LoadFile_TryStatic( char *path, void **buffer, void *statbuffer,
+							size_t statbuffer_len );
+
+/**
+ * @brief
+ *
+ * @param buffer 
+ * @param len 
+ * @param f 
+ */
+void FS_Read( void *buffer, int len, FILE *f );
+
+/**
+ * @brief
+ *
+ * @param buffer 
+ */
+void FS_FreeFile( void *buffer );
+
+/**
+ * @brief
+ *
+ * @param path 
+ */
+void FS_CreatePath( char *path );
+
+/**
+ * @brief
+ *
+ * @param path 
+ * @return 
+ */
+qboolean FS_FileExists( char *path );
+
+/**
+ * @brief Get the absolute path to the game directory
+ *        where configuration and non-official game
+ *        resources reside.
+ *
+ * @return The absolute pathname string.
+ */
+const char *FS_Gamedir( void );
+
+#define SFF_INPACK  0x20 /* For FS_ListFilesInFS(). */
+/**
+ * @brief
+ *
+ * @param findname 
+ * @param numfiles 
+ * @param musthave 
+ * @param canthave 
+ * @return 
+ */
+char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave,
+					 unsigned canthave );
+
+/**
+ * @brief
+ *
+ * @param findname 
+ * @param numfiles 
+ * @param musthave 
+ * @param canthave 
+ * @return 
+ */
+char **FS_ListFilesInFS( char *findname, int *numfiles, unsigned musthave,
+						 unsigned canthave );
+
+/**
+ * @brief
+ *
+ * @param list 
+ * @param n 
+ */
+void FS_FreeFileList( char **list, int n );
 
 /*
 ==============================================================
@@ -976,6 +1106,6 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 // Frees any allocated buffers in dat.
 void CleanupTerrainData (terraindata_t *dat);
 
-#endif /* Q_COMMON_H_ */
+#endif /* Q_COMMON_H */
 
 

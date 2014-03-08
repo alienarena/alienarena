@@ -1683,7 +1683,7 @@ void Qcommon_Init (int argc, char **argv)
 
 	dedicated->modified = false;
 
-	if(!dedicated->value)
+	if ( !dedicated->integer )
 		CL_Init ();
 
 	// add + commands from command line
