@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Alien Arena
+Exec=alienarena
+Icon=/usr/local/share/icons/alienarena/alienarena.png
+Terminal=true
+StartupNotify=true
+
+
