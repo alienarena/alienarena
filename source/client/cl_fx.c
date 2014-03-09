@@ -1241,13 +1241,13 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 		AngleVectors (angles, vforward, vright, vup);
 
 		if (r_lefthand->value == 1.0F)
-			rightoffset = -2.4;
+			rightoffset = -1.2;
 		else
-			rightoffset = 2.4;
+			rightoffset = 1.2;
 
 		VectorMA(mflashorg, 24, vforward, mflashorg);
 		VectorMA(mflashorg, rightoffset, vright, mflashorg);
-		VectorMA(mflashorg, -2.5, vup, mflashorg);
+		VectorMA(mflashorg, -1.0, vup, mflashorg);
 	}
 
 	if (!(p = new_particle()))

@@ -248,6 +248,17 @@ models/weapons/v_shotg2/skin
 		cube
 	}
 }
+models/weapons/v_shotg2/chaingun
+{
+	{
+		map models/weapons/v_shotg2/chaingun_normal.tga
+		normalmap
+		map2 models/weapons/v_shotg2/chaingun_fx.tga
+		glow 
+		map3 gfx/chrome.tga
+		cube
+	}
+}
 maps/meshes/generator
 {
 	{
