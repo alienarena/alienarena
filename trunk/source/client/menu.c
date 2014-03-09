@@ -5778,7 +5778,7 @@ static void PlayerConfig_ScanDirectories( void )
 		return;
 
 	//get dirs from gamedir first.
-	dirnames = FS_ListFilesInFS( "players/*.*", &ndirs, SFF_SUBDIR, 0 );
+	dirnames = FS_ListFilesInFS( "players/*.*", &ndirs, 0, 0 );
 
 	if ( !dirnames )
 		return;
