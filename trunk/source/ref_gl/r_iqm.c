@@ -755,20 +755,7 @@ int IQM_NextFrame(int frame)
 	//just for now
 	if(currententity->flags & RF_WEAPONMODEL)
 	{
-		Com_Printf("frame: %i\n", frame);
-		//check for specific weapons, or read this in from the skin files
-		switch(frame)
-		{
-			case 13:
-				outframe = 5;
-				break;
-			case 39:
-				outframe = 39;
-				break;
-			default:
-				outframe = frame + 1;
-				break;
-		}
+		outframe = frame + 1;
 	}
 	else
 	{
@@ -1048,11 +1035,7 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 	//this code I believe can be replaced with anim groups that IQM supports
 	if(currententity->flags & RF_WEAPONMODEL)
 	{
-		//since weapons have different animations, we will have to see what one we are actually using.  This could be read in via the skin file
-		if(frame >= 5 && frame <=14 && oldframe >= 5 && oldframe <=14)
-			return true; //weapon firing
-		else
-			return false;
+		return false;
 	}
 	else
 	{
