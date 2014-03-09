@@ -263,6 +263,8 @@ nobase_dist_models_DATA = \
 	weapons/v_shotg2/tris.skin \
 	weapons/v_violator/skin.jpg \
 	weapons/v_violator/skin_normal.jpg \
+	weapons/v_violator/tris.iqm \
 	weapons/v_violator/tris.md2 \
+	weapons/v_violator/tris.skin \
 	weapons/v_violator/violator.jpg \
 	weapons/v_violator/violator_normal.tga
