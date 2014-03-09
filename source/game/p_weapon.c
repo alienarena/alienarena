@@ -1674,7 +1674,7 @@ void Machinegun_Fire (edict_t *ent)
 	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
 
-		ent->client->ps.gunframe = 13;
+		ent->client->ps.gunframe = 14;
 		ent->client->weapon_sound = 0;
 		return;
 	}
@@ -1686,7 +1686,7 @@ void Machinegun_Fire (edict_t *ent)
 	else if (ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe > 6)
 	{
 		if(ent->client->ps.gunframe == 7 || ent->client->ps.gunframe == 12) {
-			ent->client->ps.gunframe = 13;
+			ent->client->ps.gunframe = 14;
 			return;
 		}
 		ent->altfire = true;
@@ -1804,7 +1804,7 @@ void Machinegun_Fire (edict_t *ent)
 			// this. (If it wasn't, allowing this would make it be possible to
 			// cheat the maximum fire rate.)
 			if (!ent->is_bot && ent->client->newweapon)
-				ent->client->ps.gunframe = 13;
+				ent->client->ps.gunframe = 14;
 			
 			return; //Don't waste ammo
 		}
@@ -1844,7 +1844,7 @@ void Machinegun_Fire (edict_t *ent)
 		// it wasn't, allowing this would make it be possible to cheat the
 		// maximum fire rate.)
 		if (!ent->is_bot && ent->client->newweapon)
-			ent->client->ps.gunframe = 13;
+			ent->client->ps.gunframe = 14;
 	}
 
 }
@@ -1854,7 +1854,7 @@ void Weapon_Chain (edict_t *ent)
 	static int	pause_frames[]	= {43, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13};
 
-	Weapon_Generic (ent, 3, 14, 43, 46, pause_frames, fire_frames, Machinegun_Fire);
+	Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, fire_frames, Machinegun_Fire);
 
 }
 
