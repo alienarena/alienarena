@@ -734,6 +734,7 @@ float IQM_SelectFrame (void)
 	
 	//frame interpolation
 	time = (Sys_Milliseconds() - currententity->frametime) / 100;
+	
 	if(time > 1.0)
 		time = 1.0;
 
@@ -742,8 +743,8 @@ float IQM_SelectFrame (void)
 
 	//Check for stopped death anims
 	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
-		time = 0;
-
+		time = 0;	
+	
 	return currententity->frame + time;
 }
 
@@ -754,59 +755,75 @@ int IQM_NextFrame(int frame)
 	//just for now
 	if(currententity->flags & RF_WEAPONMODEL)
 	{
-		outframe = frame + 1;
-		return outframe;
-	}
-
-	switch(frame)
-	{
-		//map models can be 24 or 40 frames
-		case 23:
-			if(currentmodel->num_poses > 24)
-				outframe = frame + 1;
-			else
+		//check for specific weapons, or read this in from the skin files
+		switch(frame)
+		{
+			case 4:
 				outframe = 0;
-			break;
-		//player standing
-		case 39:
-			outframe = 0;
-			break;
-		//player running
-		case 45:
-			outframe = 40;
-			break;
-		//player shooting
-		case 53:
-			outframe = 46;
-			break;
-		//player jumping
-		case 71:
-			outframe = 0;
-			break;
-		//player crouched
-		case 153:
-			outframe = 135;
-			break;
-		//player crouched walking
-		case 159:
-			outframe = 154;
-			break;
-		case 168:
-			outframe = 160;
-			break;
-		//deaths
-		case 219:
-			outframe = 219;
-			break;
-		case 237:
-			outframe = 237;
-			break;
-		case 257:
-			outframe = 257;
-			break;
-		default:
-			outframe = frame + 1;
-			break;
+				break;
+			case 14:
+				outframe = 5;
+				break;
+			case 39:
+				outframe = 39;
+				break;
+			default:
+				outframe = frame + 1;
+				break;
+		}
+	}
+	else
+	{
+		switch(frame)
+		{
+			//map models can be 24 or 40 frames
+			case 23:
+				if(currentmodel->num_poses > 24)
+					outframe = frame + 1;
+				else
+					outframe = 0;
+				break;
+			//player standing
+			case 39:
+				outframe = 0;
+				break;
+			//player running
+			case 45:
+				outframe = 40;
+				break;
+			//player shooting
+			case 53:
+				outframe = 46;
+				break;
+			//player jumping
+			case 71:
+				outframe = 0;
+				break;
+			//player crouched
+			case 153:
+				outframe = 135;
+				break;
+			//player crouched walking
+			case 159:
+				outframe = 154;
+				break;
+			case 168:
+				outframe = 160;
+				break;
+			//deaths
+			case 219:
+				outframe = 219;
+				break;
+			case 237:
+				outframe = 237;
+				break;
+			case 257:
+				outframe = 257;
+				break;
+			default:
+				outframe = frame + 1;
+				break;
+		}
 	}
 	return outframe;
 }
@@ -1030,17 +1047,29 @@ qboolean IQM_CullModel( void )
 //Can these next two be replaced with some type of animation grouping from the model?
 qboolean IQM_InAnimGroup(int frame, int oldframe)
 {
-	//check if we are in a player anim group that is commonly looping
-	if(frame >= 0 && frame <= 39 && oldframe >=0 && oldframe <= 39)
-		return true; //standing, or 40 frame static mesh
-	else if(frame >= 40 && frame <=45 && oldframe >= 40 && oldframe <=45)
-		return true; //running
-	else if(frame >= 66 && frame <= 71 && oldframe >= 66 && oldframe <= 71)
-		return true; //jumping
-	else if(frame >= 0 && frame <= 23 && oldframe >= 0 && oldframe <= 23)
-		return true; //static meshes are 24 frames
+	//this code I believe can be replaced with anim groups that IQM supports
+	if(currententity->flags & RF_WEAPONMODEL)
+	{
+		//since weapons have different animations, we will have to see what one we are actually using.  This could be read in via the skin file
+		if(frame >= 6 && frame <=15 && oldframe >= 6 && oldframe <=15)
+			return true; //weapon firing
+		else
+			return false;
+	}
 	else
-		return false;
+	{
+		//check if we are in a player anim group that is commonly looping
+		if(frame >= 0 && frame <= 39 && oldframe >=0 && oldframe <= 39)
+			return true; //standing, or 40 frame static mesh
+		else if(frame >= 40 && frame <=45 && oldframe >= 40 && oldframe <=45)
+			return true; //running
+		else if(frame >= 66 && frame <= 71 && oldframe >= 66 && oldframe <= 71)
+			return true; //jumping
+		else if(frame >= 0 && frame <= 23 && oldframe >= 0 && oldframe <= 23)
+			return true; //static meshes are 24 frames
+		else
+			return false;
+	}	
 }
 
 void R_Mesh_DrawCasterFrame (float backlerp, qboolean lerped);

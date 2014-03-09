@@ -1165,6 +1165,8 @@ CL_AddViewWeapon
 ==============
 */
 
+static int gunPrevFrame = 0;
+static int gunFrameTime = 0;
 void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {
 	entity_t	gun;		// view model
@@ -1234,6 +1236,17 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	else
 		gun.oldframe = ops->gunframe;
 
+	//animation timestamps are set here
+	if(gunPrevFrame != ps->gunframe) 
+	{
+		gunPrevFrame = ps->gunframe;
+		gun.frametime = gunFrameTime = Sys_Milliseconds();
+	}
+	else 
+	{
+		gun.frametime = gunFrameTime;
+	}
+
 	VectorSubtract(gun.origin, offset_down, gun.origin);
 	VectorSubtract(gun.origin, offset_right, gun.origin);
 	
@@ -1242,7 +1255,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
 	//add an attached muzzleflash for chaingun
-	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name)) || !(strcmp("models/weapons/v_shotg2/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
