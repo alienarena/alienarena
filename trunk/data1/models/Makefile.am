@@ -216,8 +216,10 @@ nobase_dist_models_DATA = \
 	weapons/g_rail/tris.md2 \
 	weapons/g_rocket/cover.md2 \
 	weapons/g_rocket/tris.md2 \
-	weapons/g_shotg2/tris.md2 \
 	weapons/g_shotg/tris.md2 \
+	weapons/g_shotg2/tris.iqm \
+	weapons/g_shotg2/tris.md2 \
+	weapons/g_shotg2/tris.skin \
 	weapons/v_alienblast/cover.md2 \
 	weapons/v_alienblast/skin_fx.tga \
 	weapons/v_alienblast/skin_normal.jpg \
@@ -248,15 +250,19 @@ nobase_dist_models_DATA = \
 	weapons/v_rocket/skin.jpg \
 	weapons/v_rocket/skin_normal.tga \
 	weapons/v_rocket/tris.md2 \
-	weapons/v_shotg2/skin.jpg \
-	weapons/v_shotg2/skin_normal.tga \
-	weapons/v_shotg2/tris.md2 \
 	weapons/v_shotg/skin.jpg \
 	weapons/v_shotg/skin_normal.tga \
 	weapons/v_shotg/tris.md2 \
+	weapons/v_shotg2/chaingun.jpg \
+	weapons/v_shotg2/chaingun_fx.tga \
+	weapons/v_shotg2/chaingun_normal.tga \
+	weapons/v_shotg2/skin.jpg \
+	weapons/v_shotg2/skin_normal.tga \
+	weapons/v_shotg2/tris.iqm \
+	weapons/v_shotg2/tris.md2 \
+	weapons/v_shotg2/tris.skin \
 	weapons/v_violator/skin.jpg \
 	weapons/v_violator/skin_normal.jpg \
 	weapons/v_violator/tris.md2 \
 	weapons/v_violator/violator.jpg \
 	weapons/v_violator/violator_normal.tga
-
