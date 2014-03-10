@@ -429,7 +429,9 @@ nobase_dist_models_DATA = \
 	weapons/g_rail/tris.skin \
 	weapons/g_rocket/cover.md2 \
 	weapons/g_rocket/tris.md2 \
+	weapons/g_shotg/tris.iqm \
 	weapons/g_shotg/tris.md2 \
+	weapons/g_shotg/tris.skin \
 	weapons/g_shotg2/tris.iqm \
 	weapons/g_shotg2/tris.md2 \
 	weapons/g_shotg2/tris.skin \
@@ -467,7 +469,9 @@ nobase_dist_models_DATA = \
 	weapons/v_rocket/tris.md2 \
 	weapons/v_shotg/skin.jpg \
 	weapons/v_shotg/skin_normal.tga \
+	weapons/v_shotg/tris.iqm \
 	weapons/v_shotg/tris.md2 \
+	weapons/v_shotg/tris.skin \
 	weapons/v_shotg2/chaingun.jpg \
 	weapons/v_shotg2/chaingun_fx.tga \
 	weapons/v_shotg2/chaingun_normal.tga \
