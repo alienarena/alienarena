@@ -1255,7 +1255,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
 	//add an attached muzzleflash for chaingun
-	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name)) || !(strcmp("models/weapons/v_shotg2/tris.iqm", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_shotg2/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
@@ -1333,9 +1333,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_blast/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_blast/tris.iqm", gun.model->name))) 
 	{
-		gun.model = R_RegisterModel("models/weapons/v_blast/cover.md2");
+		gun.model = R_RegisterModel("models/weapons/v_blast/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
