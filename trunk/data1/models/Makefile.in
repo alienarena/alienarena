@@ -424,7 +424,9 @@ nobase_dist_models_DATA = \
 	weapons/g_launch/tris.md2 \
 	weapons/g_machn/tris.md2 \
 	weapons/g_minderaser/tris.md2 \
+	weapons/g_rail/tris.iqm \
 	weapons/g_rail/tris.md2 \
+	weapons/g_rail/tris.skin \
 	weapons/g_rocket/cover.md2 \
 	weapons/g_rocket/tris.md2 \
 	weapons/g_shotg/tris.md2 \
@@ -454,6 +456,8 @@ nobase_dist_models_DATA = \
 	weapons/v_minderaser/minderaser.jpg \
 	weapons/v_minderaser/minderaser_normal.tga \
 	weapons/v_minderaser/tris.md2 \
+	weapons/v_rail/tris.iqm \
+	weapons/v_rail/tris.skin \
 	weapons/v_rail/beamgun.jpg \
 	weapons/v_rail/beamgun_normal.tga \
 	weapons/v_rail/tris.md2 \
