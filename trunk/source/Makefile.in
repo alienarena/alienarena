@@ -326,7 +326,8 @@ alienarena_DEPENDENCIES = libgame.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 alienarena_LINK = $(CCLD) $(alienarena_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_alienarena_ded_OBJECTS = game/alienarena_ded-q_shared.$(OBJEXT) \
@@ -564,7 +565,7 @@ alienarena_ded_LDADD = libgame.a
 alienarena_CFLAGS = \
 	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
-	$(X_CFLAGS) \
+	$(X11_CFLAGS) \
 	$(XXF86VM_CFLAGS) \
 	$(XXF86DGA_CFLAGS) \
 	$(LIBCURL_CFLAGS) \
@@ -576,7 +577,7 @@ alienarena_CFLAGS = \
 
 alienarena_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
-	$(X_LIBS) \
+	$(X11_LIBS) \
 	$(XXF86VM_LIBS) \
 	$(XXF86DGA_LIBS) \
 	$(LIBCURL_LIBS) \

@@ -39,7 +39,7 @@ alienarena_ded_LDADD = libgame.a
 alienarena_CFLAGS = \
 	$(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
-	$(X_CFLAGS) \
+	$(X11_CFLAGS) \
 	$(XXF86VM_CFLAGS) \
 	$(XXF86DGA_CFLAGS) \
 	$(LIBCURL_CFLAGS) \
@@ -52,7 +52,7 @@ alienarena_CFLAGS = \
 
 alienarena_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
-	$(X_LIBS) \
+	$(X11_LIBS) \
 	$(XXF86VM_LIBS) \
 	$(XXF86DGA_LIBS) \
 	$(LIBCURL_LIBS) \
