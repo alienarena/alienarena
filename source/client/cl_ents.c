@@ -889,12 +889,12 @@ void CL_AddPacketEntities (frame_t *frame)
 					V_AddEntity (&ent);
 				}
 			}	
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.iqm")) 
 			{
 				//add clear cover
 				if (!cl_simpleitems->integer)
 				{
-					ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
+					ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.iqm");
 					ent.flags |= RF_TRANSLUCENT;
 					ent.alpha = 0.30;
 					V_AddEntity (&ent);
@@ -1260,7 +1260,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
 	}	
-	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame > 5 && gun.frame < 7) {
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
@@ -1326,9 +1326,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
 	{
-		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.md2");
+		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
