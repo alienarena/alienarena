@@ -232,10 +232,13 @@ nobase_dist_models_DATA = \
 	weapons/v_bfg/skin.jpg \
 	weapons/v_bfg/skin_normal.tga \
 	weapons/v_bfg/tris.md2 \
+	weapons/v_blast/cover.iqm \
 	weapons/v_blast/cover.md2 \
 	weapons/v_blast/skin.jpg \
 	weapons/v_blast/skin_normal.tga \
+	weapons/v_blast/tris.iqm \
 	weapons/v_blast/tris.md2 \
+	weapons/v_blast/tris.skin \
 	weapons/v_chain/skin.jpg \
 	weapons/v_chain/skin_normal.tga \
 	weapons/v_chain/tris.md2 \
