@@ -418,8 +418,11 @@ nobase_dist_models_DATA = \
 	tactical/laser_normal.jpg \
 	weapons/g_bfg/tris.md2 \
 	weapons/g_chain/tris.md2 \
+	weapons/g_hyperb/cover.iqm \
 	weapons/g_hyperb/cover.md2 \
+	weapons/g_hyperb/tris.iqm \
 	weapons/g_hyperb/tris.md2 \
+	weapons/g_hyperb/tris.skin \
 	weapons/g_launch/skin.tga \
 	weapons/g_launch/tris.md2 \
 	weapons/g_machn/tris.md2 \
@@ -454,9 +457,12 @@ nobase_dist_models_DATA = \
 	weapons/v_chain/skin_normal.tga \
 	weapons/v_chain/tris.md2 \
 	weapons/v_hyperb/cover.md2 \
+	weapons/v_hyperb/cover.iqm \
 	weapons/v_hyperb/disruptor.jpg \
 	weapons/v_hyperb/disruptor_normal.tga \
+	weapons/v_hyperb/tris.iqm \
 	weapons/v_hyperb/tris.md2 \
+	weapons/v_hyperb/tris.skin \
 	weapons/v_machn/tris.md2 \
 	weapons/v_minderaser/minderaser.jpg \
 	weapons/v_minderaser/minderaser_normal.tga \
