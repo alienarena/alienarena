@@ -2184,6 +2184,7 @@ void R_BeginRegistration (char *model)
 	R_ParseLightEntities();
 	R_FindSunEntity();
 	R_FinalizeGrass();
+	memset (cl_persistent_ents, 0, sizeof(cl_persistent_ents));
 
 	r_viewcluster = -1;
 
