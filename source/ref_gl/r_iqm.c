@@ -1053,8 +1053,8 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 	}	
 }
 
-void R_Mesh_DrawCasterFrame (float backlerp, qboolean lerped);
-void IQM_DrawRagDollCaster ( int RagDollID )
+void R_Mesh_DrawCasterFrame (qboolean lerped);
+void IQM_DrawRagDollCaster (int RagDollID)
 {
 	if ( RGD_CullRagDolls( RagDollID ) )
 		return;
@@ -1065,7 +1065,7 @@ void IQM_DrawRagDollCaster ( int RagDollID )
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
 
-	R_Mesh_DrawCasterFrame (0, false);
+	R_Mesh_DrawCasterFrame (false);
 
 	qglPopMatrix();
 }
