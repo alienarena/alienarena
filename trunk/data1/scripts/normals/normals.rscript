@@ -544,9 +544,20 @@ models/objects/dmspot/skin2
 models/weapons/v_blast/skin
 {
 	{
-		map models/weapons/v_blast/skin_normal.jpg
+		map models/weapons/v_blast/skin_normal.tga
 		normalmap
 		map2 gfx/blasterfx.tga
+		glow
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
+models/weapons/v_blast/blaster
+{
+	{
+		map models/weapons/v_blast/blaster_normal.tga
+		normalmap
+		map2 gfx/newblasterfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -692,9 +703,9 @@ players/martiancyborg/weapon
 players/lauren/weapon
 {
 	{
-		map models/weapons/v_blast/skin_normal.tga
+		map models/weapons/v_blast/blaster_normal.tga
 		normalmap
-		map2 gfx/blasterfx.tga
+		map2 gfx/newblasterfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -703,9 +714,9 @@ players/lauren/weapon
 players/enforcer/weapon
 {
 	{
-		map models/weapons/v_blast/skin_normal.tga
+		map models/weapons/v_blast/blaster_normal.tga
 		normalmap
-		map2 gfx/blasterfx.tga
+		map2 gfx/newblasterfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -714,9 +725,9 @@ players/enforcer/weapon
 players/slashbot/weapon
 {
 	{
-		map models/weapons/v_blast/skin_normal.tga
+		map models/weapons/v_blast/blaster_normal.tga
 		normalmap
-		map2 gfx/blasterfx.tga
+		map2 gfx/newblasterfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -725,9 +736,9 @@ players/slashbot/weapon
 players/commander/weapon
 {
 	{
-		map models/weapons/v_blast/skin_normal.tga
+		map models/weapons/v_blast/blaster_normal.tga
 		normalmap
-		map2 gfx/blasterfx.tga
+		map2 gfx/newblasterfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
