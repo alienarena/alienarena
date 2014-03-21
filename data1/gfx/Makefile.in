@@ -312,6 +312,7 @@ nobase_dist_gfx_DATA = \
 	metalenvmap.jpg \
 	minderaser_fx.tga \
 	mirrorspec.tga \
+	newblasterfx.tga \
 	noise.tga \
 	plate5fx.tga \
 	purpleline.tga \

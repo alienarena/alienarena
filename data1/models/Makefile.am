@@ -227,14 +227,19 @@ nobase_dist_models_DATA = \
 	weapons/g_shotg2/tris.iqm \
 	weapons/g_shotg2/tris.md2 \
 	weapons/g_shotg2/tris.skin \
+	weapons/v_alienblast/cover.iqm \
 	weapons/v_alienblast/cover.md2 \
+	weapons/v_alienblast/skin.jpg \
 	weapons/v_alienblast/skin_fx.tga \
 	weapons/v_alienblast/skin_normal.jpg \
-	weapons/v_alienblast/skin.jpg \
+	weapons/v_alienblast/tris.iqm \
 	weapons/v_alienblast/tris.md2 \
+	weapons/v_alienblast/tris.skin \
 	weapons/v_bfg/skin.jpg \
 	weapons/v_bfg/skin_normal.tga \
 	weapons/v_bfg/tris.md2 \
+	weapons/v_blast/blaster.jpg \
+	weapons/v_blast/blaster_normal.tga \
 	weapons/v_blast/cover.iqm \
 	weapons/v_blast/cover.md2 \
 	weapons/v_blast/skin.jpg \
