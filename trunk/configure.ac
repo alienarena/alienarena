@@ -30,12 +30,11 @@ AC_CONFIG_HEADERS([config/config.h])
 dnl insure default prefix. TODO: when/where would this help
 dnl AX_EXPAND_PREFIX
 
-dnl 1.11.1 TODO: verify that 1.13.x or 1.14.x is not required
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output, default off
 dnl one might add dist-zip, dist-bzip2 for other distributions besides tar.gz
-AM_INIT_AUTOMAKE([1.11.1 foreign subdir-objects silent-rules])
+AM_INIT_AUTOMAKE([1.11.3 foreign subdir-objects silent-rules])
 AM_SILENT_RULES([no])
 
 dnl use --enable-maintainer-mode to get full set of make targets.
