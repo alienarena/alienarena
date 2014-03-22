@@ -1093,22 +1093,22 @@ void InitClientPersistant (gclient_t *client)
 	if(instagib->integer) 
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxCELLS->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
 		item = FindItem("Alien Disruptor");
 	}
 	else if(rocket_arena->integer) 
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxROCKETS->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
 		item = FindItem("Rocket Launcher");
 	}
 	else if (insta_rockets->integer )
 	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxROCKETS->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
 		item = FindItem("Rocket Launcher");
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxCELLS->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
 		item = FindItem("Alien Disruptor");
 	}
 	else 
@@ -1124,8 +1124,8 @@ void InitClientPersistant (gclient_t *client)
 		//Allow custom health, even in excessive.
 		client->pers.health 		= g_spawnhealth->value * 3;
 		
-	#define X(name,itname,base,max,excessivemult) \
-		client->pers.inventory[ITEM_INDEX(FindItem(itname))] = g_max##name->value * excessivemult;
+#define X(name,cvarname,itname,base,max,excessivemult)					\
+		client->pers.inventory[ITEM_INDEX(FindItem(itname))] = g_max##cvarname->value * excessivemult;
 		
 		AMMO_TYPES
 	

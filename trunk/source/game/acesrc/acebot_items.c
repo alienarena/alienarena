@@ -261,15 +261,15 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 		return 0.0;
 	
 	// if the item is an ammo type, make sure we have room for it
-#define X(name,itname,base,max,excessivemult) \
+#define X(name,cvarname,itname,base,max,excessivemult)	\
 	if (item == ITEM_INDEX (FindItem (itname))) \
 	{ \
 		if (excessive->integer) \
 		{ \
-			if (self->client->pers.inventory[item] >= g_max##name->integer*excessivemult) \
+			if (self->client->pers.inventory[item] >= g_max##cvarname->integer*excessivemult) \
 				return 0.0; \
 		} \
-		else if (self->client->pers.inventory[item] >= g_max##name->integer) \
+		else if (self->client->pers.inventory[item] >= g_max##cvarname->integer) \
 		{ \
 			return 0.0; \
 		} \

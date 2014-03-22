@@ -224,8 +224,8 @@ void InitGame (void)
 	g_spawnhealth = gi.cvar("g_spawnhealth", "125", CVARDOC_INT);
 	g_maxhealth = gi.cvar("g_maxhealth", "100", CVARDOC_INT);
 	
-#define X(name,itname,base,max,excessivemult) \
-	g_max##name = gi.cvar ("g_max" #name, #max, CVARDOC_INT);
+#define X(name,cvarname,itname,base,max,excessivemult)			\
+	g_max##cvarname = gi.cvar ("g_max" #cvarname, #max, CVARDOC_INT);
 
 	AMMO_TYPES
 

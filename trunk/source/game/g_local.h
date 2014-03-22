@@ -115,16 +115,16 @@ typedef enum
 } weaponstate_t;
 
 #define AMMO_TYPES \
-	X (BULLETS,		"bullets",				50, 200, 2.5) \
-	X (SHELLS,		"alien smart grenade",	10, 100, 5) \
-	X (ROCKETS,		"rockets",				10, 50, 10) \
-	X (GRENADES,	"napalm",				50, 50, 10) \
-	X (CELLS,		"cells",				50, 200, 2.5) \
-	X (SLUGS,		"slugs",				10, 50, 10) \
-	X (SEEKERS,		"seekers",				1, 1, 2) \
-	X (BOMBS,		"bombs",				1, 1, 2)
+	X (BULLETS,  bullets,  "bullets",             50, 200,  2.5) \
+	X (SHELLS,   shells,   "alien smart grenade", 10, 100,  5)   \
+	X (ROCKETS,  rockets,  "rockets",             10,  50, 10)   \
+	X (GRENADES, grenades, "napalm",              50,  50, 10)   \
+	X (CELLS,    cells,    "cells",               50, 200,  2.5) \
+	X (SLUGS,    slugs,    "slugs",               10,  50, 10)   \
+	X (SEEKERS,  seekers,  "seekers",              1,   1,  2)   \
+	X (BOMBS,    bombs,    "bombs",                1,   1,  2)
 
-#define X(name,itname,base,max,excessivemult) \
+#define X(name,cvarname,itname,base,max,excessivemult)	\
 	AMMO_##name,
 
 typedef enum
@@ -675,8 +675,8 @@ extern	cvar_t	*wep_selfdmgmulti;
 extern	cvar_t	*g_spawnhealth;
 extern	cvar_t	*g_maxhealth;
 
-#define X(name,itname,base,max,excessivemult) \
-	cvar_t *g_max##name;
+#define X(name,cvarname,itname,base,max,excessivemult)	\
+	cvar_t *g_max##cvarname;
 
 AMMO_TYPES
 
