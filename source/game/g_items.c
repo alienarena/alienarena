@@ -465,10 +465,10 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 	if (!ent->client)
 		return false;
 
-#define X(name,itname,defbase,defmax,excessivemult) \
+#define X(name,cvarname,itname,defbase,defmax,excessivemult)	\
 	if (item->tag == AMMO_##name) \
 	{ \
-		max = g_max##name->integer; \
+		max = g_max##cvarname->integer; \
 		if (excessive->value) \
 			max *= excessivemult; \
 		base = defbase; \
