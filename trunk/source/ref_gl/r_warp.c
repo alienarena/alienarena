@@ -490,7 +490,7 @@ void R_DrawSkyBox (void)
 	
 	qglPopMatrix ();
 
-	if(r_shaders->value) { //just cloud layers for now, we can expand this
+	if(r_shaders->integer) { //just cloud layers for now, we can expand this
 
 		qglPushMatrix (); //rotate the clouds
 		qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
@@ -549,13 +549,11 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		sky_images[i] = GL_FindImage (pathname, it_sky);
 		if (!sky_images[i])
 			sky_images[i] = r_notexture;
-		else { //valid sky, load shader
-			if (r_shaders->value) {
-				strcpy(pathname,sky_images[i]->name);
-				pathname[strlen(pathname)-4]=0;
-				if(sky_images[i]->script)
-					RS_ReadyScript(sky_images[i]->script);
-			}
+		else if (r_shaders->integer) { //valid sky, load shader
+			strcpy(pathname,sky_images[i]->name);
+			pathname[strlen(pathname)-4]=0;
+			if(sky_images[i]->script)
+				RS_ReadyScript(sky_images[i]->script);
 		}
 		
 		// get rid of nasty visible seams in the skybox (better method than 

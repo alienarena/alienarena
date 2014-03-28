@@ -361,7 +361,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	if (node->visframe != r_visframecount)
 		return;
 
-	if (!r_nocull->value)
+	if (!r_nocull->integer)
 	{
 		int i, clipped;
 		cplane_t *clipplane;
@@ -541,7 +541,7 @@ void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t
 	if (node->visframe != r_visframecount)
 		return;
 
-	if (!r_nocull->value)
+	if (!r_nocull->integer)
 	{
 		int i, clipped;
 		cplane_t *clipplane;
@@ -675,7 +675,7 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 {
 	int i;
 
-	if (!r_drawworld->value)
+	if (!r_drawworld->integer)
 		return;
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )

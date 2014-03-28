@@ -699,8 +699,8 @@ void R_SetLightingMode (qboolean environment_color)
 	}
 
 	GL_SelectTexture (1);
-	GL_TexEnv ( GL_COMBINE_EXT );
-	if ( gl_lightmap->integer ) 
+	GL_TexEnv (GL_COMBINE_EXT);
+	if (gl_lightmap->integer) 
 	{
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
@@ -717,10 +717,8 @@ void R_SetLightingMode (qboolean environment_color)
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
 	}
 
-	if ( r_overbrightbits->value )
-	{
+	if (r_overbrightbits->value != 0.0)
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
-	}
 }
 
 /*

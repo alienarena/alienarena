@@ -684,7 +684,7 @@ void R_InitSun()
 {
     draw_sun = false;
 
-    if (!r_drawsun->value || r_nosun)
+    if (!r_drawsun->integer || r_nosun)
         return;
 
     if (spacebox)

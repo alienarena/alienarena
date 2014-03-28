@@ -467,7 +467,7 @@ void SHD_DrawShadowVolume()
 				+ currententity->oldframe * paliashdr->framesize);
 			ov = oldframe->verts;
 
-			if ( !r_lerpmodels->value )
+			if (!r_lerpmodels->integer)
 				currententity->backlerp = 0;
 
 			frontlerp = 1.0 - currententity->backlerp;
@@ -531,7 +531,7 @@ void R_CastShadow(void)
     trace_t r_trace;
 
 	//note - we use a combination of stencil volumes(for world light shadows) and shadowmaps(for dynamic shadows)
-	if (!gl_shadowmaps->value)
+	if (!gl_shadowmaps->integer)
 		return;
 
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)

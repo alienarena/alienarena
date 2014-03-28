@@ -400,7 +400,7 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 	int		i;
 	cplane_t *p;
 
-	if (r_nocull->value)
+	if (r_nocull->integer)
 		return false;
 
 	for (i=0,p=frustum ; i<4; i++,p++)
