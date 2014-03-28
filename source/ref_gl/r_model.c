@@ -1457,10 +1457,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 
 			rs_stage_t	*stage = rs->stage;
 			do {
-				if (stage->lensflare) {
-					if(r_lensflare->value)
-						Mod_AddFlareSurface(out, stage->flaretype);
-				}
+				if (r_lensflare->integer && stage->lensflare)
+					Mod_AddFlareSurface(out, stage->flaretype);
 				if (stage->grass && stage->texture) {
 					if(stage->colormap.enabled) {
 						color[0] = stage->colormap.red;
@@ -1829,7 +1827,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	
 	mod->extradata = Hunk_Begin (0x1500000);
 
-	if(r_lensflare->value)
+	if (r_lensflare->integer)
 		R_ClearFlares();
 	R_ClearGrasses();
 	R_ClearBeams();
@@ -2173,7 +2171,7 @@ void R_BeginRegistration (char *model)
 	// this guarantees that mod_known[0] is the world map
 	flushmap = Cvar_Get ("flushmap", "0", 0);
 
-	if ( strcmp(mod_known[0].name, fullname) || flushmap->value)
+	if (strcmp(mod_known[0].name, fullname) || flushmap->integer)
 		Mod_Free (&mod_known[0]);
 	else
 		Mod_Free (&mod_known[0]);	//do it every time to fix shader bugs in AA
