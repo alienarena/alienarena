@@ -1353,9 +1353,15 @@ static int _TTF_PredictSize(
 	
 	if (*ptr == '\0')
 		return 0;
-	
+
 	if (*ptr == '^' && color)
+	{
+		if ( *(ptr + 1) == '\0' )
+			return 1; /* "^" only */
+		if ( *(ptr + 2) == '\0' )
+			return 0; /* a color escape only */
 		ptr += 2;
+	}
 	
 	previous = ( *ptr & 0x7F ) - ' ';
 	
