@@ -419,7 +419,7 @@ void NET_OpenIP (void)
 	port = Cvar_Get ("port", va("%i", PORT_SERVER), CVAR_NOSET);
 	ip = Cvar_Get ("ip", "localhost", CVAR_NOSET);
 
-	server_port = (ptrdiff_t)port;
+	server_port = port->integer;
 
 	if (!ip_sockets[NS_SERVER])
 		ip_sockets[NS_SERVER] = NET_Socket (ip->string, port->value);
