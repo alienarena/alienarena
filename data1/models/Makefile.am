@@ -219,8 +219,11 @@ nobase_dist_models_DATA = \
 	weapons/g_rail/tris.iqm \
 	weapons/g_rail/tris.md2 \
 	weapons/g_rail/tris.skin \
+	weapons/g_rocket/cover.iqm \
 	weapons/g_rocket/cover.md2 \
+	weapons/g_rocket/tris.iqm \
 	weapons/g_rocket/tris.md2 \
+	weapons/g_rocket/tris.skin \
 	weapons/g_shotg/tris.iqm \
 	weapons/g_shotg/tris.md2 \
 	weapons/g_shotg/tris.skin \
@@ -266,10 +269,15 @@ nobase_dist_models_DATA = \
 	weapons/v_rail/beamgun.jpg \
 	weapons/v_rail/beamgun_normal.tga \
 	weapons/v_rail/tris.md2 \
+	weapons/v_rocket/cover.iqm \
 	weapons/v_rocket/cover.md2 \
+	weapons/v_rocket/rocketlauncher.jpg \
+	weapons/v_rocket/rocketlauncher_normal.tga \
 	weapons/v_rocket/skin.jpg \
 	weapons/v_rocket/skin_normal.tga \
+	weapons/v_rocket/tris.iqm \
 	weapons/v_rocket/tris.md2 \
+	weapons/v_rocket/tris.skin \
 	weapons/v_shotg/skin.jpg \
 	weapons/v_shotg/skin_normal.tga \
 	weapons/v_shotg/tris.iqm \
