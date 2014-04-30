@@ -883,13 +883,13 @@ void CL_AddPacketEntities (frame_t *frame)
 				//add clear cover
 				if (!cl_simpleitems->integer)
 				{
-					ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
+					ent.model = R_RegisterModel("models/weapons/g_rocket/cover.iqm");
 					ent.flags |= RF_TRANSLUCENT;
 					ent.alpha = 0.30;
 					V_AddEntity (&ent);
 				}
 			}	
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.iqm")) 
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
 			{
 				//add clear cover
 				if (!cl_simpleitems->integer)
@@ -1319,9 +1319,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 	//add glass pieces
 	
-	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_rocket/tris.iqm", gun.model->name))) 
 	{
-		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.md2");
+		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
