@@ -651,6 +651,13 @@ models/weapons/v_rocket/skin
 	{
 		map models/weapons/v_rocket/skin_normal.tga
 		normalmap
+	}
+}
+models/weapons/v_rocket/rocketlauncher
+{
+	{
+		map models/weapons/v_rocket/rocketlauncher_normal.tga
+		normalmap
 		map2 gfx/rlauncherfx.tga
 		glow
 	}
