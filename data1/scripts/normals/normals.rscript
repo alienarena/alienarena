@@ -660,6 +660,8 @@ models/weapons/v_rocket/rocketlauncher
 		normalmap
 		map2 gfx/rlauncherfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/misc/spiderpod/spider
