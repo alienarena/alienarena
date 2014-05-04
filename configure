@@ -4753,6 +4753,10 @@ $as_echo "no" >&6; }
 	fi
 fi
 
+if  test "x${PKG_CONFIG}" = x ; then :
+  as_fn_error $? "required pkg-config utility not found." "$LINENO" 5
+fi
+
 #
 # Check host environment
 #
