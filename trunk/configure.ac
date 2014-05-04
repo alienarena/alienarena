@@ -77,6 +77,11 @@ AC_PROG_MKDIR_P
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 
+dnl to avoid misleading error messages later
+AS_IF([ test "x${PKG_CONFIG}" = x ],
+	[AC_MSG_ERROR([required pkg-config utility not found.])],
+	[])
+
 #
 # Check host environment
 #

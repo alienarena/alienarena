@@ -1824,8 +1824,9 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	dheader_t	*header;
 	mmodel_t 	*bm;
 	char		rs_name[MAX_OSPATH], tmp[MAX_QPATH];		// rscript - MrG
-	
-	mod->extradata = Hunk_Begin (0x1500000);
+
+	/* 2014-05-03 strat : increased from 0x1500000 because dm-zorn2k11.bsp overflows */
+	mod->extradata = Hunk_Begin (0x1800000);
 
 	if (r_lensflare->integer)
 		R_ClearFlares();
