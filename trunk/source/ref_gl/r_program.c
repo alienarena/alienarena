@@ -1134,7 +1134,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 		
 		n = normalize (gl_NormalMatrix * anim_normal);
 		t = normalize (gl_NormalMatrix * anim_tangent);
-		b = normalize (gl_NormalMatrix * anim_tangent_w) * cross (n, t);
+		b = cross (n, t);
 		
 		EyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
 		neyeDir = gl_ModelViewMatrix * anim_vertex;
@@ -1250,6 +1250,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 
 		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
 		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5 ) );
+		normal = normalize(normal);
 
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
