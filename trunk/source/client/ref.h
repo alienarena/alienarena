@@ -215,7 +215,7 @@ typedef struct {
 	qboolean			setlightstuff;
 	float				oldnumlights;
 	vec3_t				oldlightadd;
-	vec3_t				oldworldlight;
+	vec3_t				oldstaticlight;
 	vec3_t				oldorigin;
 	float				oldlightintens;
 } cl_entity_pers_t;

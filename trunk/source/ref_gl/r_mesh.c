@@ -100,6 +100,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	int i, j, lnum;
 	dlight_t	*dl;
 	float dist;
+	vec3_t staticlight, dynamiclight;
 	vec3_t	temp, tempOrg, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
@@ -147,13 +148,13 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	{
 		numlights =  cl_persistent_ents[currententity->number].oldnumlights;
 		VectorCopy (cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
-		VectorCopy (cl_persistent_ents[currententity->number].oldworldlight, worldlight);
+		VectorCopy (cl_persistent_ents[currententity->number].oldstaticlight, staticlight);
 		statLightIntensity = cl_persistent_ents[currententity->number].oldlightintens;
 	}
 	else
 	{
-		R_LightPoint (currententity->origin, worldlight, true);
-		VectorCopy (worldlight, cl_persistent_ents[currententity->number].oldworldlight);
+		R_StaticLightPoint (currententity->origin, staticlight);
+		VectorCopy (staticlight, cl_persistent_ents[currententity->number].oldstaticlight);
 		for (i=0; i<r_lightgroups; i++)
 		{
 			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
@@ -211,6 +212,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	dynFactor = 0;
 	if(gl_dynamic->integer != 0)
 	{
+		R_DynamicLightPoint (currententity->origin, dynamiclight);
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
 		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
@@ -238,6 +240,12 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 			}
 		}
 	}
+	else
+	{
+		VectorClear (dynamiclight);
+	}
+	
+	VectorAdd (staticlight, dynamiclight, worldlight);
 
 	if(numlights > 0.0) {
 		for(i = 0; i < 3; i++)
