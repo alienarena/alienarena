@@ -293,7 +293,7 @@ static qboolean R_Mesh_CullModel (void)
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return true;
 	
-	if (currententity->team) //don't draw flag models, handled by sprites
+	if (currententity->nodraw) //don't draw this model, it's been overriden by the engine for one reason or another
 		return true;
 	
 	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
@@ -512,6 +512,9 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		
 		glUniform1fARB (uniforms->time, rs_realtime);
 		glUniform1iARB (uniforms->fog, map_fog);
+
+		glUniform1iARB (uniforms->team, currententity->team);
+
 	}
 
 	glUniform1fARB (uniforms->useShell, 0.0);

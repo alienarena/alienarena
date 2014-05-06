@@ -712,6 +712,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.lod1 = NULL;
 		ent.lod2 = NULL;
 		ent.team = 0;
+		ent.nodraw = 0;
 
 		// set skin
 		if (s1->modelindex == 255)
@@ -734,6 +735,16 @@ void CL_AddPacketEntities (frame_t *frame)
 
 			strcpy(ent.name, ci->name);
 
+			//set team of this player model
+			if (effects & EF_TEAM1)
+				ent.team = 1;
+			else if (effects & EF_TEAM2)
+			{
+				if(server_is_team)
+					ent.team = 2;
+				else
+					ent.team = 3;
+			}
 		}
 		else
 		{
@@ -833,12 +844,14 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			CL_FlagEffects(ent.origin, 0);
 			ent.team = 1;
+			ent.nodraw = 1;
 		}
 		else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag2.md2")) 
 		{
 			CL_FlagEffects(ent.origin, 1);
 			ent.team = 2;
-		}
+			ent.nodraw = 1;
+		}		
 		
 		if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 		{
@@ -862,6 +875,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.lod1 = NULL;		// only player models get lods
 		ent.lod2 = NULL;
 		ent.team = 0;
+		ent.nodraw = 0;
 
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
@@ -1023,7 +1037,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			{
 				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 			}
-			else if (effects & EF_TEAM1)
+			//we can leave these effects as an additional option for those who really have eye issues
+			else if ((effects & EF_TEAM1) && cl_dmlights->integer)
 			{
 				vec3_t right;
 				vec3_t start;
@@ -1038,7 +1053,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				VectorMA (start, 32, up, start);
 				CL_RedTeamLight(start);
 			}
-			else if (effects & EF_TEAM2)
+			else if ((effects & EF_TEAM2) && cl_dmlights->integer)
 			{
 
 				vec3_t right;

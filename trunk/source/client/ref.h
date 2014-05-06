@@ -201,6 +201,8 @@ typedef struct entity_s
 
 	float	bob;
 	
+	int		nodraw;
+
 	int		number; //edict number;
 
 	struct rscript_s *script;
