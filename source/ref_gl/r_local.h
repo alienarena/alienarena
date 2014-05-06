@@ -645,6 +645,7 @@ typedef struct
 	GLuint							useCube;
 	GLuint							fromView;
 	GLuint							doShading;
+	GLuint							team;
 } mesh_uniform_location_t;
 
 mesh_uniform_location_t	mesh_uniforms, mesh_vertexonly_uniforms;

@@ -1091,6 +1091,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 	uniform vec3 lightPos;
 	uniform float time;
 	uniform int FOG;
+	uniform int TEAM;
 	uniform float useShell; // doubles as shell scale
 	uniform int useCube;
 	uniform vec3 baseColor;
@@ -1194,11 +1195,19 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 				FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir, n)), FresnelPower);
 			}
 		
-			if(FOG == 1) 
+			if(TEAM > 0)
+			{
+				fog = (gl_Position.z - 50.0)/1000.0;
+				if(TEAM == 3)
+					fog = clamp(fog, 0.0, 0.5);
+				else
+					fog = clamp(fog, 0.0, 0.75);
+			}
+			else if(FOG == 1) 
 			{
 				fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 				fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
-			}
+			}			
 		}
 	}
 );
@@ -1211,6 +1220,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform vec3 baseColor;
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int FOG;
+	uniform int TEAM;
 	uniform int useFX;
 	uniform int useCube;
 	uniform int useGlow;
@@ -1337,8 +1347,14 @@ static char mesh_fragment_program[] = STRINGIFY (
 		if(useGlow > 0)
 			gl_FragColor = mix(gl_FragColor, glow, glow.a);
 
-		if(FOG > 0)
-			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
+		if(TEAM == 1)
+			gl_FragColor = mix(gl_FragColor, vec4(0.3, 0.0, 0.0, 1.0), fog);
+		else if(TEAM == 2)
+			gl_FragColor = mix(gl_FragColor, vec4(0.0, 0.1, 0.4, 1.0), fog);
+		else if(TEAM == 3)
+			gl_FragColor = mix(gl_FragColor, vec4(0.0, 0.4, 0.3, 1.0), fog);
+		else if(FOG > 0)
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);		
 	}
 );
 
@@ -1972,6 +1988,7 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->useCube = glGetUniformLocationARB (programObj, "useCube");
 	out->fromView = glGetUniformLocationARB (programObj, "fromView");
 	out->doShading = glGetUniformLocationARB (programObj, "doShading");
+	out->team = glGetUniformLocationARB (programObj, "TEAM");
 }
 
 void R_LoadGLSLPrograms(void)

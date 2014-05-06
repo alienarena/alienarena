@@ -1746,13 +1746,7 @@ void CL_PlayerLight(vec3_t pos, int color)
 
 void CL_BlueTeamLight(vec3_t pos)
 {
-	if(!server_is_team && !cl_dmlights->value)
-		return;
-	
-	if (server_is_team)
-		CL_PlayerLight (pos, 0x74);
-	else
-		CL_PlayerLight (pos, 0xd3);
+	CL_PlayerLight (pos, 0x74);
 }
 
 void CL_RedTeamLight(vec3_t pos)

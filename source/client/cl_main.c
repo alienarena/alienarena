@@ -1955,7 +1955,7 @@ void CL_InitLocal (void)
 	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_disbeamclr, "beam color for the disruptor weapon. 0 = green, 1 = blue, 2 = red, 3 = yellow, 4 = purple.");
 	cl_brass = Cvar_Get ("cl_brass", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
-	cl_dmlights = Cvar_Get("cl_dmlights", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_dmlights = Cvar_Get("cl_dm_lights", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_centerprint = Cvar_Get ("cl_centerprint", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_precachecustom = Cvar_Get ("cl_precachecustom", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
