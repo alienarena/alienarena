@@ -712,6 +712,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.lod1 = NULL;
 		ent.lod2 = NULL;
 		ent.team = 0;
+		ent.flag = 0;
 		ent.nodraw = 0;
 
 		// set skin
@@ -843,13 +844,13 @@ void CL_AddPacketEntities (frame_t *frame)
 		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag1.md2")) 
 		{
 			CL_FlagEffects(ent.origin, 0);
-			ent.team = 1;
+			ent.flag = 1;
 			ent.nodraw = 1;
 		}
 		else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag2.md2")) 
 		{
 			CL_FlagEffects(ent.origin, 1);
-			ent.team = 2;
+			ent.flag = 2;
 			ent.nodraw = 1;
 		}		
 		

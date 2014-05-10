@@ -198,6 +198,7 @@ typedef struct entity_s
 	int		flags;
 
 	int		team;
+	int		flag;
 
 	float	bob;
 	
