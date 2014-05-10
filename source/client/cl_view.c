@@ -794,7 +794,7 @@ void SCR_DrawBases (void)
 		const char *		str;
 
 		ent = &r_entities[i];
-		if(!ent->team)
+		if(!ent->flag)
 			continue;
 		if (!InFront(ent->origin))
 			continue;
@@ -804,9 +804,9 @@ void SCR_DrawBases (void)
 		box.y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
 		box.width = box.height = 0;
 
-		if(ent->team == 2)
+		if(ent->flag == 2)
 			str = "^4Blue Flag";
-		else if(ent->team == 1)
+		else if(ent->flag == 1)
 			str = "^1Red Flag";
 		else
 			str = "Flag";
