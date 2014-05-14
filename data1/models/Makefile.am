@@ -252,7 +252,9 @@ nobase_dist_models_DATA = \
 	weapons/v_blast/tris.skin \
 	weapons/v_chain/skin.jpg \
 	weapons/v_chain/skin_normal.tga \
+	weapons/v_chain/tris.iqm \
 	weapons/v_chain/tris.md2 \
+	weapons/v_chain/tris.skin \
 	weapons/v_hyperb/cover.md2 \
 	weapons/v_hyperb/cover.iqm \
 	weapons/v_hyperb/disruptor.jpg \

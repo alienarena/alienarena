@@ -71,6 +71,7 @@ nobase_dist_gfx_DATA = \
 	electrics3d.tga \
 	electrics3.tga \
 	electrics.tga \
+	flamethrower_fx.tga \
 	flares/flare0.tga \
 	flares/flare1.tga \
 	flares/flare2.tga \
