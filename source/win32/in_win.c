@@ -110,7 +110,6 @@ void IN_JoyMove (usercmd_t *cmd);
 */
 
 // mouse variables
-cvar_t	*m_filter;
 cvar_t	*m_accel;
 
 qboolean	mlooking;
@@ -324,7 +323,6 @@ IN_Init
 void IN_Init (void)
 {
 	// mouse variables
-	m_filter				= Cvar_Get ("m_filter",					"0",		0);
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
 
 	// joystick variables

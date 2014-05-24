@@ -602,8 +602,6 @@ qboolean mouse_is_position = false;
 qboolean mlooking = false;
 int mouse_diff_x = 0;
 int mouse_diff_y = 0;
-int mouse_odiff_x = 0;
-int mouse_odiff_y = 0;
 cursor_t cursor;
 
 
@@ -669,16 +667,8 @@ void IN_Move (usercmd_t *cmd)
 	// Apply interpolation with previous value if necessary
 	fmx = (float) mouse_diff_x;
 	fmy = (float) mouse_diff_y;
-	if ( m_filter->integer ) {
-		fmx = ( fmx + mouse_odiff_x ) * 0.5f;
-		fmy = ( fmy + mouse_odiff_y ) * 0.5f;
-	}
 	if (cmd)
-	{
-		mouse_odiff_x = mouse_diff_x;
-		mouse_odiff_y = mouse_diff_y;
 		mouse_diff_x = mouse_diff_y = 0;
-	}
 
 	// No mouse in console
 	if ( cls.key_dest == key_console ) {
