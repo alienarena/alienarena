@@ -39,7 +39,6 @@ int	anykeydown;
 int		edit_line=0;
 int		history_line=0;
 
-int		key_waiting;
 char	*keybindings[256];
 qboolean	consolekeys[256];	// if true, can't be rebound while in console
 qboolean	menubound[256];	// if true, can't be rebound while in menu
@@ -884,14 +883,6 @@ void Key_Event (int key, qboolean down, unsigned time)
 	char	*kb;
 	char	cmd[1024];
 
-	// hack for modal presses
-	if (key_waiting == -1)
-	{
-		if (down)
-			key_waiting = key;
-		return;
-	}
-
 	// update auto-repeat status
 	if (down)
 	{
@@ -1066,20 +1057,4 @@ void Key_ClearStates (void)
 		keydown[i] = 0;
 		key_repeats[i] = 0;
 	}
-}
-
-
-/*
-===================
-Key_GetKey
-===================
-*/
-int Key_GetKey (void)
-{
-	key_waiting = -1;
-
-	while (key_waiting == -1)
-		Sys_SendKeyEvents ();
-
-	return key_waiting;
 }
