@@ -306,7 +306,6 @@ extern  cvar_t	*m_accel;
 extern	cvar_t	*sensitivity;
 extern  cvar_t  *menu_sensitivity;
 
-extern	cvar_t	*m_smoothing;
 extern	cvar_t	*m_pitch;
 extern	cvar_t	*m_yaw;
 extern	cvar_t	*m_forward;

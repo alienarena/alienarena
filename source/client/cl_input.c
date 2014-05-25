@@ -675,14 +675,8 @@ void IN_Move (usercmd_t *cmd)
 		return;
 	}
 
-	// Compute adjustments
+	// Compute sensitivity adjustments
 	adjust = 1.0;
-	if ( m_smoothing->value ) {
-		// reduce sensitivity when frames per sec is below maximum
-		// setting by multiplying by:
-		//	current measured fps / cvar set maximum fps
-		adjust /= cls.frametime * cl_maxfps->value;
-	}
 
 	// Update menu cursor location
 	if ( cls.key_dest == key_menu ) {

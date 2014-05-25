@@ -2705,13 +2705,6 @@ option_name_t input_option_names[] =
 	},
 	{
 		option_spincontrol,
-		"m_smoothing",
-		"mouse smoothing",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
 		"cl_run",
 		"always run",
 		NULL,
