@@ -589,6 +589,7 @@ void R_DrawRSSurfaces (void)
 	qglPolygonOffset(-3, -2);
 	
 	BSP_InvalidateVBO ();
+	RS_Begin_Group ();
 
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -634,6 +635,7 @@ void R_DrawRSSurfaces (void)
 		}
 	}
 	
+	RS_End_Group ();
 	R_KillVArrays ();
 
 	qglDisable(GL_POLYGON_OFFSET_FILL);
