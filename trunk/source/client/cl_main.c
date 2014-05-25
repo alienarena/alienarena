@@ -103,7 +103,6 @@ cvar_t	*lookstrafe;
 cvar_t	*sensitivity;
 cvar_t	*menu_sensitivity;
 
-cvar_t	*m_smoothing;
 cvar_t	*m_pitch;
 cvar_t	*m_yaw;
 cvar_t	*m_forward;
@@ -1984,7 +1983,6 @@ void CL_InitLocal (void)
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE | CVARDOC_FLOAT);
 	menu_sensitivity = Cvar_Get("menu_sensitivity", "3", CVAR_ARCHIVE | CVARDOC_FLOAT);
 
-	m_smoothing = Cvar_Get("m_smoothing", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE | CVARDOC_FLOAT);
 	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE | CVARDOC_FLOAT);
 	m_forward = Cvar_Get ("m_forward", "1", 0);
