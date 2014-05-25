@@ -1138,6 +1138,58 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
+static void RS_SetupGLState (void)
+{
+	int i;
+	
+	glUseProgramObjectARB (g_rscriptprogramObj);
+	
+	glUniform1iARB (rscript_uniforms.mainTexture, 0);
+	glUniform1iARB (rscript_uniforms.lightmapTexture, 1);
+	glUniform1iARB (rscript_uniforms.mainTexture2, 2);
+	for (i = 0; i < 6; i++)
+		glUniform1iARB (rscript_uniforms.blendTexture[i], 3+i);
+	glUniform1iARB (rscript_uniforms.fog, map_fog);
+	
+	qglMatrixMode (GL_TEXTURE);
+}
+
+static void RS_CleanupGLState (void)
+{
+	qglMatrixMode (GL_MODELVIEW);
+	
+	qglColor4f(1,1,1,1);
+	
+	glUseProgramObjectARB (0);
+	
+	// restore the original blend mode
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_DISABLE_TEXGEN
+}
+
+static qboolean rs_in_group = false;
+static qboolean rs_dlights_enabled;
+
+// If you're about to draw a huge number of RScript surfaces in a row with
+// *no other types of surfaces* being drawn, you can surround them with 
+// RS_Begin_Group and RS_End_Group for some extra performance.
+
+void RS_Begin_Group (void)
+{
+	rs_in_group = true;
+	rs_dlights_enabled = -1;
+	RS_SetupGLState ();
+}
+
+void RS_End_Group (void)
+{
+	rs_in_group = false;
+	RS_CleanupGLState ();
+}
+
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 				qboolean translucent, rs_lightmaptype_t lm,
 				qboolean enable_dlights, void (*draw_callback) (void))
@@ -1154,18 +1206,15 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	glUseProgramObjectARB (g_rscriptprogramObj);
+	if (!rs_in_group)
+		RS_SetupGLState ();
 	
-	glUniform1iARB (rscript_uniforms.mainTexture, 0);
-	glUniform1iARB (rscript_uniforms.lightmapTexture, 1);
-	glUniform1iARB (rscript_uniforms.mainTexture2, 2);
-	for (i = 0; i < 6; i++)
-		glUniform1iARB (rscript_uniforms.blendTexture[i], 3+i);
-	glUniform1iARB (rscript_uniforms.fog, map_fog);
+	if (!rs_in_group || rs_dlights_enabled != enable_dlights)
+	{
+		rs_dlights_enabled = enable_dlights;
+		R_SetDlightUniforms (&rscript_uniforms.dlight_uniforms, enable_dlights);
+	}
 	
-	R_SetDlightUniforms (&rscript_uniforms.dlight_uniforms, enable_dlights);
-	
-	qglMatrixMode (GL_TEXTURE);
 	do
 	{
 		float red = 1.0, green = 1.0, blue = 1.0, alpha = 1.0;
@@ -1286,20 +1335,8 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 
 	} while ( (stage = stage->next) );	
 	
-	qglColor4f(1,1,1,1);
-	
-	qglMatrixMode (GL_MODELVIEW);
-	
-	glUseProgramObjectARB (0);
-	
-	GL_EnableMultitexture( false );
-
-	// restore the original blend mode
-	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	GLSTATE_DISABLE_BLEND
-	GLSTATE_DISABLE_ALPHATEST
-	GLSTATE_DISABLE_TEXGEN
+	if (!rs_in_group)
+		RS_CleanupGLState ();
 }
 
 void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
