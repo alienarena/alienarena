@@ -892,6 +892,9 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 	
 	if (stage->rot_speed != 0.0)
 		rs->flags |= RS_CONTAINS_ROTATE;
+	
+	if (!(stage->lensflare || stage->grass || stage->beam || stage->cube))
+		rs->flags |= RS_CONTAINS_DRAWN;
 }
 
 void RS_LoadScript(char *script)
@@ -1346,7 +1349,7 @@ void RS_Surface (msurface_t *surf)
 
 	//all other textures shaders
 	rs_shader = (rscript_t *)surf->texinfo->image->script;
-	if(rs_shader)
+	if(rs_shader && (rs_shader->flags & RS_CONTAINS_DRAWN))
 		RS_DrawSurface (surf, rs_shader);
 }
 

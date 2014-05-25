@@ -160,6 +160,12 @@ typedef struct rscript_s
 	#define RS_CONTAINS_ROTATE 1
 	#define RS_CONTAINS_ENVMAP 2
 	#define RS_PREVENT_BATCH (RS_CONTAINS_ROTATE|RS_CONTAINS_ENVMAP)
+	// Some kinds of stages are only processed at load-time and then ignored
+	// (such as lens flare, grass, beam, etc.) If a script contains nothing 
+	// but these stage types, we can save some time by not drawing it at all.
+	// TODO: filter these stages out at load time, then filter out empty 
+	// scripts.
+	#define RS_CONTAINS_DRAWN 3
 	int						flags;
 
 } rscript_t;
