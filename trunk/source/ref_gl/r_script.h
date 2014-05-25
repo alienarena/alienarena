@@ -165,7 +165,7 @@ typedef struct rscript_s
 	// but these stage types, we can save some time by not drawing it at all.
 	// TODO: filter these stages out at load time, then filter out empty 
 	// scripts.
-	#define RS_CONTAINS_DRAWN 3
+	#define RS_CONTAINS_DRAWN 4
 	int						flags;
 
 } rscript_t;
