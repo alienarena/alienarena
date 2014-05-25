@@ -546,10 +546,11 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		}
 		else if(r_shaders->integer && s->texinfo->image->script && !(s->texinfo->flags & SURF_FLOWING)) 
 		{
-			RS_Surface(s);
+			RS_Surface (s);
+			R_KillVArrays ();
 			GL_SelectTexture (0);
 			GLSTATE_ENABLE_BLEND
-			GL_TexEnv( GL_MODULATE );
+			GL_TexEnv (GL_MODULATE);
 		}
 		else
 			BSP_DrawAlphaPoly (s, s->texinfo->flags);
@@ -586,6 +587,8 @@ void R_DrawRSSurfaces (void)
 
 	qglEnable(GL_POLYGON_OFFSET_FILL);
 	qglPolygonOffset(-3, -2);
+	
+	BSP_InvalidateVBO ();
 
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -616,7 +619,6 @@ void R_DrawRSSurfaces (void)
 			
 			while (s != NULL)
 			{
-				BSP_InvalidateVBO ();
 				currLMTex = s->lightmaptexturenum;
 				
 				for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->rscriptchain)
@@ -631,6 +633,8 @@ void R_DrawRSSurfaces (void)
 			}
 		}
 	}
+	
+	R_KillVArrays ();
 
 	qglDisable(GL_POLYGON_OFFSET_FILL);
 

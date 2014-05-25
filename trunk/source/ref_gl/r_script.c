@@ -1292,8 +1292,6 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	
 	glUseProgramObjectARB (0);
 	
-	R_KillVArrays();		
-	
 	GL_EnableMultitexture( false );
 
 	// restore the original blend mode
@@ -1310,7 +1308,6 @@ void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 	vec2_t		rotate_center;
 	qboolean	translucent;
 	
-	BSP_InvalidateVBO ();
 	BSP_AddSurfToVBOAccum (surf);
 	
 	rotate_center[0] = surf->c_s;
