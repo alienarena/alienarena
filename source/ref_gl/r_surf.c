@@ -1208,9 +1208,10 @@ void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// TODO: investigate the possibility of doing this for brush models as 
 	// well-- might cause problems with caustics and brush models only half
 	// submerged?
-	if(!forEnt && r_shaders->integer)
-	{ 
-		if (surf->texinfo->image->script != NULL || (surf->iflags & ISURF_UNDERWATER))
+	if (!forEnt && r_shaders->integer)
+	{
+		rscript_t *rs = surf->texinfo->image->script;
+		if ((rs != NULL && (rs->flags & RS_CONTAINS_DRAWN)) || (surf->iflags & ISURF_UNDERWATER))
 		{
 			surf->rscriptchain = surf->texinfo->equiv->rscript_surfaces;
 			surf->texinfo->equiv->rscript_surfaces = surf;
