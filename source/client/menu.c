@@ -2530,7 +2530,7 @@ const char *graphical_preset_names[][3] =
 		"fast rendering, many effects disabled"
 	},
 	{
-		"Performance",			"maxperformance",
+		"Performance",			"performance",
 		"GLSL per-pixel lighting and postprocess"
 	},
 	{
