@@ -565,8 +565,10 @@ void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 
 void R_DrawAlphaSurfaces (void)
 {
-	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.worldchain);
-	R_DrawAlphaSurfaces_chain (r_alpha_surfaces.entchain);
+	if (r_drawworld->integer)
+		R_DrawAlphaSurfaces_chain (r_alpha_surfaces.worldchain);
+	if (r_drawentities->integer)
+		R_DrawAlphaSurfaces_chain (r_alpha_surfaces.entchain);
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 	r_alpha_surfaces.entchain = NULL;
 }
