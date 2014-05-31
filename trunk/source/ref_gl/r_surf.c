@@ -77,7 +77,7 @@ with the rscript system, although it is implemented more efficiently. Maybe
 merge the two systems somehow?
 ===============
 */
-image_t *BSP_TextureAnimation (mtexinfo_t *tex)
+static image_t *BSP_TextureAnimation (mtexinfo_t *tex)
 {
 	int		c;
 
@@ -266,7 +266,7 @@ void BSP_AddSurfToVBOAccum (msurface_t *surf)
 	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
 }
 
-qboolean BSP_RoomInVBOAccum (void)
+static qboolean BSP_RoomInVBOAccum (void)
 {
 	return num_vbo_batches + 1 < MAX_VBO_BATCHES;
 }
@@ -282,7 +282,7 @@ Used by the shadow system
 =========================================
 */
 
-void BSP_DrawTexturelessInlineBModel (entity_t *e)
+static void BSP_DrawTexturelessInlineBModel (entity_t *e)
 {
 	int			i;
 	msurface_t	*psurf;
@@ -422,7 +422,7 @@ void BSP_SetScrolling (qboolean enable)
 BSP_DrawWarpSurfaces
 ================
 */
-void BSP_DrawWarpSurfaces (qboolean forEnt)
+static void BSP_DrawWarpSurfaces (qboolean forEnt)
 {
 	msurface_t	*surf;
 	image_t		*image;
@@ -464,7 +464,7 @@ void BSP_DrawWarpSurfaces (qboolean forEnt)
 BSP_DrawAlphaPoly
 ================
 */
-void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
+static void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
 {
 	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
 	
@@ -502,7 +502,7 @@ surfaces (added to the beginning of the linked list after all the BSP
 rendering code.)
 ================
 */
-void R_DrawAlphaSurfaces_chain (msurface_t *chain)
+static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 {
 	msurface_t	*s;
 	float		intens;
@@ -580,7 +580,7 @@ R_DrawRSSurfaces
 Draw shader surfaces
 ================
 */
-void R_DrawRSSurfaces (void)
+static void R_DrawRSSurfaces (void)
 {
 	int i;
 	
@@ -679,32 +679,17 @@ R_SetLightingMode
 Setup the fixed-function pipeline with texture combiners to enable rendering
 of lightmapped surfaces. For GLSL renders, this is unnecessary, as the shader
 handles this job.
-
-If environment_color is true, enable the color and alpha to be adjusted using
-glColor in addition to the lightmap texture. This is a bit more expensive.
 ================
 */
-void R_SetLightingMode (qboolean environment_color)
+static void R_SetLightingMode (void)
 {
 	GL_SelectTexture (0);
 	GL_TexEnv ( GL_COMBINE_EXT );
 	
-	if (environment_color)
-	{
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PRIMARY_COLOR_EXT );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PRIMARY_COLOR_EXT );
-	}
-	else
-	{
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-	}
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+	qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
 
 	GL_SelectTexture (1);
 	GL_TexEnv (GL_COMBINE_EXT);
@@ -879,7 +864,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 	BSP_AddSurfToVBOAccum (surf);
 }
 
-void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
+static void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 {
 	int		 i;
 
@@ -915,7 +900,7 @@ void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	GLSTATE_DISABLE_ALPHATEST
 }
 
-void BSP_DrawGLSLSurfaces (qboolean forEnt)
+static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 {
 	int		 i;
 
@@ -978,7 +963,7 @@ void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	GLSTATE_DISABLE_ALPHATEST
 }
 
-void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
+static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 {
 	int		 i;
 	dlight_t	*dl = NULL;
@@ -1096,7 +1081,7 @@ needed for entity surfaces because they are reset automatically when they are
 drawn.
 ================
 */
-void BSP_ClearWorldTextureChains (void)
+static void BSP_ClearWorldTextureChains (void)
 {
 	int i;
 	
@@ -1127,8 +1112,8 @@ brushmodel entity or in the world's static geometry, followed by a single call
 to BSP_DrawTextureChains to render them all in one fell swoop.
 ================
 */
-void BSP_UpdateSurfaceLightmap (msurface_t *surf);
-void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
+static void BSP_UpdateSurfaceLightmap (msurface_t *surf);
+static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 {
 	int			map;
 	msurface_t	**chain;
@@ -1236,7 +1221,7 @@ Draw ALL surfaces for either the current entity or the world model. If drawing
 entity surfaces, reset the linked lists afterward.
 ================
 */
-void BSP_DrawTextureChains (qboolean forEnt)
+static void BSP_DrawTextureChains (qboolean forEnt)
 {
 	msurface_t	*flickersurf;
 	int			map;
@@ -1263,7 +1248,7 @@ void BSP_DrawTextureChains (qboolean forEnt)
 
 	GL_EnableMultitexture( true );
 	
-	R_SetLightingMode (false);
+	R_SetLightingMode ();
 
 	// render all fixed-function surfaces
 	BSP_DrawNonGLSLSurfaces(forEnt);
@@ -1311,7 +1296,7 @@ Picks which of the current entity's surfaces face toward the camera, and calls
 BSP_AddToTextureChain on those.
 =================
 */
-void BSP_DrawInlineBModel ( void )
+static void BSP_DrawInlineBModel ( void )
 {
 	int			i;
 	cplane_t	*pplane;
@@ -1439,7 +1424,7 @@ Returns true if the box is completely outside the frustum
 Variant: uses clipflags
 =================
 */
-qboolean R_CullBox_ClipFlags (vec3_t mins, vec3_t maxs, int clipflags)
+static qboolean R_CullBox_ClipFlags (vec3_t mins, vec3_t maxs, int clipflags)
 {
 	int		i;
 	cplane_t *p;
@@ -1505,7 +1490,7 @@ shown not to intersect a node at all, then it won't intersect either of its
 children. 
 ================
 */
-void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
+static void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
 	int			c, side;
 	cplane_t	*plane;
@@ -1627,7 +1612,7 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 R_CalcWorldLights - this is the fallback for non deluxmapped bsp's
 =============
 */
-void R_CalcWorldLights( void )
+static void R_CalcWorldLights( void )
 {	
 	int		i, j;
 	vec3_t	lightAdd, temp;
@@ -2164,7 +2149,7 @@ void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax, int *light
 	R_BuildLightMap (surf, base, smax, tmax, LIGHTMAP_SIZE*LIGHTMAP_BYTES);
 }
 
-void BSP_UpdateSurfaceLightmap (msurface_t *surf)
+static void BSP_UpdateSurfaceLightmap (msurface_t *surf)
 {
 	R_SetCacheState (surf);
 	R_BuildLightMap (surf, gl_lms.lightmap_buffer, surf->lightmaxs[0], surf->lightmaxs[1], surf->lightmaxs[0]*LIGHTMAP_BYTES);
@@ -2263,7 +2248,7 @@ static void Radar_ColorForPoint (const vec3_t v, float sColor, float C[4])
 		C[3]=0;
 }
 
-void R_DrawRadarEdges (void)
+static void R_DrawRadarEdges (void)
 {
 	int i, j;
 	float distance;
