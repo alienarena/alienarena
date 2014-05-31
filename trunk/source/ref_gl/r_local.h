@@ -727,6 +727,7 @@ extern void IQM_AnimateFrame (void);
 //md2
 extern qboolean MD2_CullModel( void );
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
+void MD2_SelectFrame (void);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);

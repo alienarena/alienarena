@@ -558,6 +558,26 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	mod->extradatasize = Hunk_End ();
 }
 
+void MD2_SelectFrame (void)
+{
+	if ( (currententity->frame >= currentmodel->num_frames)
+		|| (currententity->frame < 0) )
+	{
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
+	if ( (currententity->oldframe >= currentmodel->num_frames)
+		|| (currententity->oldframe < 0))
+	{
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
+	if ( !r_lerpmodels->integer )
+		currententity->backlerp = 0;
+}
+
 /*
 ** MD2_CullModel
 */
