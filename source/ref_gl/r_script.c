@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 float		rs_realtime = 0;
 rscript_t	*rs_rootscript = NULL;
 
-int RS_Animate (rs_stage_t *stage)
+static int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
 
@@ -52,7 +52,7 @@ int RS_Animate (rs_stage_t *stage)
 	return anim->texture->texnum;
 }
 
-void RS_ResetScript (rscript_t *rs)
+static void RS_ResetScript (rscript_t *rs)
 {
 	rs_stage_t		*stage = rs->stage, *tmp_stage;
 	anim_stage_t	*anim, *tmp_anim;
@@ -96,7 +96,7 @@ void RS_ResetScript (rscript_t *rs)
 	rs->ready = false;
 }
 
-void rs_free_if_subexpr (rs_cond_val_t *expr)
+static void rs_free_if_subexpr (rs_cond_val_t *expr)
 {
 	if (expr->lval.string)
 		Z_Free (expr->lval.string);
@@ -107,7 +107,7 @@ void rs_free_if_subexpr (rs_cond_val_t *expr)
 	Z_Free (expr);
 }
 
-void RS_ClearStage (rs_stage_t *stage)
+static void RS_ClearStage (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->anim_stage, *tmp_anim;
 	random_stage_t	*randStage = stage->rand_stage, *tmp_rand;
@@ -138,7 +138,7 @@ void RS_ClearStage (rs_stage_t *stage)
 
 // Create a new script with the given name. Reuse the "old" struct if possible
 // to avoid breaking old pointers.
-rscript_t *RS_NewScript (char *name, rscript_t *old)
+static rscript_t *RS_NewScript (char *name, rscript_t *old)
 {
 	rscript_t	*rs;
 	unsigned int	i;
@@ -178,7 +178,7 @@ rscript_t *RS_NewScript (char *name, rscript_t *old)
 	return rs;
 }
 
-rs_stage_t *RS_NewStage (rscript_t *rs)
+static rs_stage_t *RS_NewStage (rscript_t *rs)
 {
 	rs_stage_t	*stage;
 
@@ -377,7 +377,7 @@ void RS_ReadyScript (rscript_t *rs)
 	rs->ready = true;
 }
 
-int RS_BlendID (char *blend)
+static int RS_BlendID (char *blend)
 {
 	if (!blend[0])
 		return 0;
@@ -399,7 +399,7 @@ int RS_BlendID (char *blend)
 	return 0;
 }
 
-int RS_FuncName (char *text)
+static int RS_FuncName (char *text)
 {
 	if (!Q_strcasecmp (text, "static"))			// static
 		return 0;
@@ -446,27 +446,28 @@ scriptname
 */
 
 #define RS_STAGE_STRING_ATTR(attrname) \
-void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+static void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
 { \
 	*token = strtok (NULL, TOK_DELIMINATORS); \
 	strncpy (stage->attrname, *token, sizeof(stage->attrname)); \
 }
 
 #define RS_STAGE_BOOL_ATTR(attrname) \
-void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+static void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
 { \
+	(void)token; /* shut up compiler warnings */ \
 	stage->attrname = true; \
 }
 
 #define RS_STAGE_FLOAT_ATTR(attrname) \
-void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+static void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
 { \
 	*token = strtok (NULL, TOK_DELIMINATORS); \
 	stage->attrname = (float)atof(*token); \
 }
 
 #define RS_STAGE_INT_ATTR(attrname) \
-void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
+static void rs_stage_ ## attrname (rs_stage_t *stage, char **token) \
 { \
 	*token = strtok (NULL, TOK_DELIMINATORS); \
 	stage->attrname = atoi(*token); \
@@ -494,12 +495,12 @@ RS_STAGE_FLOAT_ATTR (rot_speed)
 RS_STAGE_INT_ATTR (rotating)
 
 
-void rs_stage_nolightmap (rs_stage_t *stage, char **token)
+static void rs_stage_nolightmap (rs_stage_t *stage, char **token)
 {
 	stage->lightmap = false;
 }
 
-void rs_stage_colormap (rs_stage_t *stage, char **token)
+static void rs_stage_colormap (rs_stage_t *stage, char **token)
 {
 	stage->colormap.enabled = true;
 
@@ -513,7 +514,7 @@ void rs_stage_colormap (rs_stage_t *stage, char **token)
 	stage->colormap.blue = atof(*token);
 }
 
-void rs_stage_scroll (rs_stage_t *stage, char **token)
+static void rs_stage_scroll (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scroll.typeX = RS_FuncName(*token);
@@ -526,7 +527,7 @@ void rs_stage_scroll (rs_stage_t *stage, char **token)
 	stage->scroll.speedY = atof(*token);
 }
 
-void rs_stage_blendfunc (rs_stage_t *stage, char **token)
+static void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 {
 	stage->blendfunc.blend = true;
 
@@ -537,7 +538,7 @@ void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 	stage->blendfunc.dest = RS_BlendID (*token);
 }
 
-void rs_stage_alphashift (rs_stage_t *stage, char **token)
+static void rs_stage_alphashift (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->alphashift.speed = (float)atof(*token);
@@ -549,7 +550,7 @@ void rs_stage_alphashift (rs_stage_t *stage, char **token)
 	stage->alphashift.max = (float)atof(*token);
 }
 
-void rs_stage_random (rs_stage_t *stage, char **token)
+static void rs_stage_random (rs_stage_t *stage, char **token)
 {
 	random_stage_t	*rand = (random_stage_t *)malloc(sizeof(random_stage_t));
 
@@ -579,7 +580,7 @@ void rs_stage_random (rs_stage_t *stage, char **token)
 	}
 }
 
-void rs_stage_anim (rs_stage_t *stage, char **token)
+static void rs_stage_anim (rs_stage_t *stage, char **token)
 {
 	anim_stage_t	*anim = (anim_stage_t *)malloc(sizeof(anim_stage_t));
 
@@ -612,7 +613,7 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 	}
 }
 
-void rs_stage_scale (rs_stage_t *stage, char **token)
+static void rs_stage_scale (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scale.typeX = RS_FuncName(*token);
@@ -643,7 +644,7 @@ static rs_cond_op_key_t rs_cond_op_keys[] =
 	
 	{	NULL,	0				}
 };
-rs_cond_val_t *rs_stage_if_subexpr (char **token)
+static rs_cond_val_t *rs_stage_if_subexpr (char **token)
 {
 	int i;
 	rs_cond_val_t *res = Z_Malloc (sizeof(rs_cond_val_t));
@@ -736,14 +737,14 @@ rs_cond_val_t *rs_stage_if_subexpr (char **token)
 		return res;
 	}
 }
-void rs_stage_if (rs_stage_t *stage, char **token)
+static void rs_stage_if (rs_stage_t *stage, char **token)
 {
 	stage->condv = rs_stage_if_subexpr (token);
 	if (!stage->condv)
 		Com_Printf ("ERROR in stage conditional!\n");
 }
 
-void rs_stage_blendmap (rs_stage_t *stage, char **token)
+static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 {
 	int i;
 	
@@ -777,7 +778,7 @@ void rs_stage_blendmap (rs_stage_t *stage, char **token)
 // For legacy origin and angle commands that aren't actually used in the code.
 // Some old rscripts still have the origin command in them, so we should parse
 // it anyway. Can't find any angle commands, but may as well handle those too.
-void rs_stage_consume3 (rs_stage_t *stage, char **token)
+static void rs_stage_consume3 (rs_stage_t *stage, char **token)
 {
 	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token); 
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -787,7 +788,7 @@ void rs_stage_consume3 (rs_stage_t *stage, char **token)
 
 // Used for the old "model" command, even though I can't find any rscripts 
 // that have that command.
-void rs_stage_consume1 (rs_stage_t *stage, char **token)
+static void rs_stage_consume1 (rs_stage_t *stage, char **token)
 {
 	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token); 
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -795,7 +796,7 @@ void rs_stage_consume1 (rs_stage_t *stage, char **token)
 
 // Used for the old "dynamic" command, even though I can't find any rscripts
 // that have that command.
-void rs_stage_consume0 (rs_stage_t *stage, char **token)
+static void rs_stage_consume0 (rs_stage_t *stage, char **token)
 {
 	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token);
 }
@@ -842,7 +843,7 @@ static struct
 	{	"frames",		&rs_stage_consume3		},
 	{	"origin",		&rs_stage_consume3		},
 	{	"angle",		&rs_stage_consume3		},
-	{	"dynamic",		&rs_stage_consume1		},
+	{	"dynamic",		&rs_stage_consume0		},
 	
 	// Stuff we may bring back if anyone ever wants to use it
 	{	"alphafunc",	&rs_stage_consume1		},
@@ -1339,7 +1340,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		RS_CleanupGLState ();
 }
 
-void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
+static void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 {
 	int			lmtex = gl_state.lightmap_textures + surf->lightmaptexturenum;
 	vec2_t		rotate_center;
