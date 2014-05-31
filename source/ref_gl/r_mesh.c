@@ -49,7 +49,7 @@ extern cvar_t *cl_gun;
 cvar_t *gl_mirror;
 
 // should be able to handle all mesh types
-void R_Mesh_FindVBO (model_t *mod, int framenum)
+static void R_Mesh_FindVBO (model_t *mod, int framenum)
 {
 	if (!modtypes[mod->type].morphtarget)
 		framenum = 0;
@@ -524,7 +524,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
 }
 
-void R_Mesh_SetupGlassRender (void)
+static void R_Mesh_SetupGlassRender (void)
 {
 	vec3_t lightVec, left, up;
 	int type;
@@ -580,7 +580,7 @@ void R_Mesh_SetupGlassRender (void)
 // Should be able to handle all mesh types. This is the component of the 
 // mesh rendering process that does not need to care which GLSL shader is
 // being used-- they all support the same vertex data and vertex attributes.
-void R_Mesh_DrawVBO (qboolean lerped)
+static void R_Mesh_DrawVBO (qboolean lerped)
 {
 	// setup
 	R_Mesh_FindVBO (currentmodel, currententity->frame);
@@ -658,7 +658,7 @@ void R_Mesh_DrawVBO (qboolean lerped)
 	}
 }
 
-void R_Mesh_DrawVBO_Callback (void)
+static void R_Mesh_DrawVBO_Callback (void)
 {
 	R_Mesh_DrawVBO (false);
 }
@@ -766,7 +766,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 
 }
 
-void R_Mesh_SetShadelight (void)
+static void R_Mesh_SetShadelight (void)
 {
 	int i;
 	
@@ -843,26 +843,6 @@ void R_Mesh_SetShadelight (void)
 				shadelight[i] = minlight;
 		}
 	}
-}
-
-void MD2_SelectFrame (void)
-{
-	if ( (currententity->frame >= currentmodel->num_frames)
-		|| (currententity->frame < 0) )
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( (currententity->oldframe >= currentmodel->num_frames)
-		|| (currententity->oldframe < 0))
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( !r_lerpmodels->integer )
-		currententity->backlerp = 0;
 }
 
 /*
