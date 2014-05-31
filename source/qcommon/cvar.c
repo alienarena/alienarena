@@ -289,6 +289,9 @@ cvar_t *Cvar_Set2 (const char *var_name, const char *value, qboolean force)
 {
 	cvar_t	*var;
 
+    /*  debug/test cvar tracing */
+	/* Com_Printf("[Cvar_Set2: %s := %s]\n", var_name, value ); */
+
 	// Find the variable; if it does not exist, create it and return at once
 	if (!Cvar_FindOrCreate (var_name, value, 0, &var))
 	{
