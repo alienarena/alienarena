@@ -549,7 +549,7 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		sky_images[i] = GL_FindImage (pathname, it_sky);
 		if (!sky_images[i])
 			sky_images[i] = r_notexture;
-		else if (r_shaders->integer) { //valid sky, load shader
+		else { //valid sky, load shader
 			strcpy(pathname,sky_images[i]->name);
 			pathname[strlen(pathname)-4]=0;
 			if(sky_images[i]->script)

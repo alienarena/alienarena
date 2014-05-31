@@ -2562,9 +2562,9 @@ static void PresetCallback (void *_self)
 
 void VidApplyFunc (void *self)
 {
-	#if defined UNIX_VARIANT
+#if defined UNIX_VARIANT
 	extern qboolean vid_restart;
-	#endif
+#endif
 	extern cvar_t *vid_ref;
 	
 	Menu_ApplyMenu (Menu_GetItemTree ((menuitem_s *)self));

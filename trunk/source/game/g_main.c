@@ -950,11 +950,27 @@ void CheckDMRules (void)
 	edict_t    *cl_ent;
 	float      countdown_time;
 	static int warmup_state = 0;
+	static int teamgame_cvar_state = -1;
 	
-	gi.cvar_set ("g_teamgame", va("%d", TEAM_GAME));
+	/* note: g_teamgame cvar  code replaces setting the cvar repetitively */
 
-	if ( !g_tactical->integer && !tca->integer && !ctf->integer && !cp->integer && !(dmflags->integer & DF_SKINTEAMS) )
+	if ( TEAM_GAME )
 	{
+		if ( teamgame_cvar_state == -1 || teamgame_cvar_state == 0 )
+		{
+			gi.cvar_set ("g_teamgame", "1");
+			teamgame_cvar_state = 1;
+		}
+		/* programming challenge: implement warmup for team games */
+	}
+	else
+	{
+		if ( teamgame_cvar_state == -1 || teamgame_cvar_state == 1 )
+		{
+			gi.cvar_set ("g_teamgame", "0");
+			teamgame_cvar_state = 0;
+		}
+
 		/*--- non-team game warmup ---*/
 		/*
 		 * note: broadcast sounds require first client to have sound info
@@ -964,6 +980,7 @@ void CheckDMRules (void)
 		{ /* start warmup countdown */
 			countdown_time = warmuptime->value - level.time;
 			warmup_state = (int)(ceil( countdown_time ));
+
 		}
 
 		if ( warmup_state > 0 )
