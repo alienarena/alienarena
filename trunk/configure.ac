@@ -485,7 +485,9 @@ AC_CHECK_FUNCS([nanosleep usleep])
 
 AC_CHECK_FUNCS([clock_gettime floor getcwd gethostbyname gettimeofday \
   isascii memmove memset mkdir munmap pow putenv select socket sqrt \
-  strchr strdup strrchr strstr strtoul])
+  strchr strrchr strstr strtoul])
+
+AC_CHECK_FUNCS([stat fstat filelength strlcat strlcpy])
 
 dnl maybe remove w32 specials, just in manual w32 config.h
 AC_CHECK_FUNCS([ _begin_thread _getcwd _mkdir _putenv _strdup _stricmp \
