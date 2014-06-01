@@ -22,7 +22,6 @@ nobase_dist_pics_DATA = \
 	a_rockets.tga \
 	a_shells.tga \
 	a_slugs.tga \
-	backtile.pcx \
 	bar_background.tga \
 	bar_loading.tga \
 	beamgun.tga \
@@ -46,7 +45,6 @@ nobase_dist_pics_DATA = \
 	ch3.tga \
 	chaingun.tga \
 	colormap.pcx \
-	conback.tga \
 	conchars.tga \
 	crosshairs/alien2a.tga \
 	crosshairs/alien2b.tga \
