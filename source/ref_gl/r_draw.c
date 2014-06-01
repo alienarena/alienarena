@@ -44,102 +44,42 @@ void Draw_InitLocal (void)
 R_RegisterPic
 =============
 */
-image_t	*R_RegisterPic (const char *name)
+static image_t *R_RegisterPicOfType (	const char *name, const char *dirname,
+										imagetype_t type )
 {
-	image_t *gl;
 	char	fullname[MAX_QPATH];
 
 	if (name[0] != '/' && name[0] != '\\')
-	{
-		Com_sprintf (fullname, sizeof(fullname), "pics/%s.pcx", name);
-		gl = GL_FindImage (fullname, it_pic);
-	}
+		Com_sprintf (fullname, sizeof(fullname), "%s/%s.pcx", dirname, name);
 	else
-	{ // note: levelshot graphic is loaded here
-		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_pic );
-		// gl = GL_FindImage (name+1, it_pic);
-		// sometimes gets "evelshot" instead of "levelshot", compiler bug???
-	}
+		strcpy (fullname, &name[1]);
+	
+	return GL_FindImage (fullname, type);
+}
 
-	return gl;
+image_t	*R_RegisterPic (const char *name)
+{
+	return R_RegisterPicOfType (name, "pics", it_pic);
 }
 
 image_t	*R_RegisterParticlePic (const char *name)
 {
-	image_t *gl;
-	char	fullname[MAX_QPATH];
-
-	if (name[0] != '/' && name[0] != '\\')
-	{
-		Com_sprintf (fullname, sizeof(fullname), "particles/%s.tga", name);
-		gl = GL_FindImage (fullname, it_particle);
-	}
-	else
-	{ // 2010-10 match above workaround (paranoid)
-		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_particle );
-	}
-
-	return gl;
+	return R_RegisterPicOfType (name, "particles", it_particle);
 }
 
 image_t	*R_RegisterParticleNormal (const char *name)
 {
-	image_t *gl;
-	char	fullname[MAX_QPATH];
-
-	if (name[0] != '/' && name[0] != '\\')
-	{
-		Com_sprintf (fullname, sizeof(fullname), "particles/%s.tga", name);
-		gl = GL_FindImage (fullname, it_pic);
-	}
-	else
-	{ // 2010-10 match above workaround (paranoid)
-		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_pic );
-	}
-
-	return gl;
+	return R_RegisterPicOfType (name, "particles", it_pic);
 }
 
 image_t	*R_RegisterGfxPic (const char *name)
 {
-	image_t *gl;
-	char	fullname[MAX_QPATH];
-
-	if (name[0] != '/' && name[0] != '\\')
-	{
-		Com_sprintf (fullname, sizeof(fullname), "gfx/%s.tga", name);
-		gl = GL_FindImage (fullname, it_pic);
-	}
-	else
-	{ // 2010-10 match above workaround (paranoid)
-		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_pic );
-	}
-
-
-	return gl;
+	return R_RegisterPicOfType (name, "gfx", it_pic);
 }
 
-image_t	*R_RegisterPlayerIcon (const char *name)
+static image_t	*R_RegisterPlayerIcon (const char *name)
 {
-	image_t *gl;
-	char	fullname[MAX_QPATH];
-
-	if (name[0] != '/' && name[0] != '\\')
-	{
-		Com_sprintf (fullname, sizeof(fullname), "players/%s.tga", name);
-		gl = GL_FindImage (fullname, it_pic);
-	}
-	else
-	{ // 2010-10 match above workaround (paranoid)
-		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_pic );
-	}
-
-	return gl;
+	return R_RegisterPicOfType (name, "players", it_pic);
 }
 
 /*
@@ -190,7 +130,7 @@ static void Draw_DrawQuad_Callback (void)
 {
 	R_DrawVarrays(GL_QUADS, 0, 4);
 }
-void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *gl, float alphaval, enum draw_tiling_s tiling)
+static void Draw_AlphaStretchImage (float x, float y, float w, float h, const image_t *gl, float alphaval, enum draw_tiling_s tiling)
 {
 	rscript_t *rs;
 	char shortname[MAX_QPATH];
@@ -410,32 +350,6 @@ void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 	qglColor3f (1,1,1);
 	qglEnable (GL_TEXTURE_2D);
 }
-//=============================================================================
-
-/*
-================
-Draw_FadeScreen
-================
-*/
-void Draw_FadeScreen (void)
-{
-	GLSTATE_ENABLE_BLEND
-	qglDisable (GL_TEXTURE_2D);
-	qglColor4f (0, 0, 0, 0.8);
-	qglBegin (GL_QUADS);
-
-	qglVertex2f (0,0);
-	qglVertex2f (vid.width, 0);
-	qglVertex2f (vid.width, vid.height);
-	qglVertex2f (0, vid.height);
-
-	qglEnd ();
-	qglColor4f (1,1,1,1);
-	qglEnable (GL_TEXTURE_2D);
-	GLSTATE_DISABLE_BLEND
-}
-
-
 //=============================================================================
 
 /*
