@@ -2391,7 +2391,7 @@ void R_DrawRadar(void)
 
 		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, 1);
 	}
-	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
+	qglTranslatef (-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], 0);
 
 	qglBegin(GL_QUADS);
 	for(i=0;i<numRadarEnts;i++){
