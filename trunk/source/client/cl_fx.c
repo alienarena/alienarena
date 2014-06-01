@@ -501,28 +501,11 @@ static inline particle_t *new_particle (void)
 
 	p = free_particles;
 	free_particles = p->next;
+	
+	memset (p, 0, sizeof(*p));
+	
 	p->next = active_particles;
-	p->type = 0;
-	p->image = NULL;
-	p->blenddst = 0;
-	p->blendsrc = 0;
-	p->scalevel = 0;
 	p->time = cl.time;
-	for(j=0; j<3; j++)
-		p->angle[j]=0;
-
-	for (j=0;j<P_LIGHTS_MAX;j++)
-	{
-		cplight_t *plight = &p->lights[j];
-		plight->isactive = false;
-		plight->light = 0;
-		plight->lightvel = 0;
-		plight->lightcol[0] = 0;
-		plight->lightcol[1] = 0;
-		plight->lightcol[2] = 0;
-	}
-	p->fromsustainedeffect = false;
-	p->chain_prev = NULL;
 
 	return (active_particles = p);
 }
