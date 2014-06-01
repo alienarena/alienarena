@@ -402,7 +402,6 @@ void	Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char 
 void	Draw_AlphaStretchPic (float x, float y, float w, float h, const char *name, float alphaval);
 void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, const char *pic, float alphaval);
 void	Draw_Fill (float x, float y, float w, float h, const float rgba[]);
-void	Draw_FadeScreen (void);
 
 void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );
