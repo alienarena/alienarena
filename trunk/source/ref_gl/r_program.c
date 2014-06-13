@@ -1135,7 +1135,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 		
 		n = normalize (gl_NormalMatrix * anim_normal);
 		t = normalize (gl_NormalMatrix * anim_tangent);
-		b = cross (n, t);
+		b = cross (n, t) * tangent.w;
 		
 		EyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
 		neyeDir = gl_ModelViewMatrix * anim_vertex;
