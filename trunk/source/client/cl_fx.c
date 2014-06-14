@@ -615,14 +615,14 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		{
 			p->image = r_bloodtexture;
 			p->alphavel = -1.0 / (4.5 + frand()*0.3);
-			p->color = 0xe8;
+			p->color = 0xe8; //(155 31 0) (0.607843 0.121569 0)
 			p->scale = 6;
 		}
 		else if (color == 550)
 		{
 			p->image = r_bloodtexture;
 			p->alphavel = -1.0 / (4.5 + frand()*0.3);
-			p->color = 0xd0 + (rand()&3);
+			p->color = 0xd0 + (rand()&3); // (0-83 255-187 0-39) (0-0.32549 1-0.7333 0-0.1529)
 			p->scale = 6;
 		}
 		else
@@ -713,7 +713,7 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	p->scale = 1;
 	p->scalevel = 0;
 
-	p->color = 0xe0 + (rand()&2);
+	p->color = 0xe0 + (rand()&2); // (255-239 171-127 7-0) (1.0-0.937255 0.670588-0.498039 0.027451-0.0)
 	for (j=0 ; j<3 ; j++)
 	{
 		p->org[j] = org[j];
@@ -740,7 +740,7 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 			if (!(p = new_particle()))
 				return;
 
-			p->color = 0xe0 + (rand()&2);
+			p->color = 0xe0 + (rand()&2); // (255-239 171-127 7-0) (1.0-0.937255 0.670588-0.498039 0.027451-0.0)
 			p->type = PARTICLE_CHAINED;
 			p->image = r_raintexture;
 			p->blendsrc = GL_SRC_ALPHA;
@@ -792,7 +792,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 	p->blenddst = GL_SRC_COLOR;
 	p->scale = 1;
 	p->scalevel = 8;
-	p->color = 0 + (rand() & 1);
+	p->color = 0 + (rand() & 1); //(0-15 0-15 0-15) (0-0.0588...)
 
 	VectorScale(dir, -1, angle);
 	RotateForNormal(angle, p->angle);
@@ -932,11 +932,11 @@ void CL_LogoutEffect (vec3_t org, int type)
 		p->blenddst = GL_ONE;
 
 		if (type == MZ_LOGIN)
-			p->color = 0xd0 + (rand()&7);	// green
+			p->color = 0xd0 + (rand()&7);	// green (0-95 255-123 0-51)
 		else if (type == MZ_LOGOUT)
-			p->color = 0x40 + (rand()&7);	// red
+			p->color = 0x40 + (rand()&7);	// red (167-87 59-19 43-0)
 		else
-			p->color = 0xe0 + (rand()&7);	// yellow
+			p->color = 0xe0 + (rand()&7);	// yellow (255-171 171-43 0)
 
 		p->org[0] = org[0] - 16 + frand()*32;
 		p->org[1] = org[1] - 16 + frand()*32;
@@ -969,7 +969,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->color = 0x74 + (rand()&7);
+		p->color = 0x74 + (rand()&7); //(23-0 83-31 111-43)
 		p->scale = 12 + (rand()&7) ;
 		p->scalevel = 0;
 		p->type = PARTICLE_STANDARD;
@@ -1036,7 +1036,7 @@ void CL_ExplosionParticles (vec3_t org)
 			p->alpha = 0.2;
 			p->scale = 6;
 			p->scalevel = 52;
-			p->color = 0xd9 + (rand()&7);
+			p->color = 0xd9 + (rand()&7); //(255 255-171 167-7)
 			p->alphavel = -1.0 / (1 + i + k/5);
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
@@ -1086,7 +1086,7 @@ void CL_ExplosionParticles (vec3_t org)
 	p->image = r_explosion5texture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->color = 0xd9 + (rand()&7);
+	p->color = 0xd9 + (rand()&7); //(255 255-171 167-7)
 	p->scale = 12 + (rand()&4) ;
 	p->scalevel = 100;
 	for(j = 0; j < 3; j++) {
@@ -1116,7 +1116,7 @@ void CL_ExplosionParticles (vec3_t org)
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 1 + (rand()&4);
 		p->scalevel = 12.0;
-		p->color = 1 + (rand()&10);
+		p->color = 1 + (rand()&10); // (15 15 15), (47 47 47), (139 139 139), (171 171 171)
 		p->accel[2] = 10;
 
 		p->image = r_smoketexture;
@@ -1153,7 +1153,7 @@ void CL_MuzzleParticles (vec3_t org)
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 1 + (rand()&4);
 		p->scalevel = 12.0;
-		p->color = 15;
+		p->color = 15; // (255 255 255)
 		p->accel[2] = 20;
 	}
 
@@ -1186,7 +1186,7 @@ void CL_BlueMuzzleParticles (vec3_t org)
 		p->accel[0] = p->accel[1] = 0;
 		p->accel[2] = 0;
 		p->alpha = 0.4;
-		p->color = 0x74;
+		p->color = 0x74; //(23 84 111)
 
 		p->alphavel = -2.8 / (0.5 + frand()*0.3);
 	}
@@ -1249,7 +1249,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	p->accel[0] = p->accel[1] = 0;
 	p->accel[2] = 0;
 	p->alpha = 0.8;
-	p->color = 0xd9;
+	p->color = 0xd9; //(255 255 167)
 	p->alphavel = -100;
 
 }
@@ -1330,7 +1330,7 @@ void CL_SmartMuzzle (vec3_t org)
 		p->type = PARTICLE_STANDARD;
 		p->image = r_leaderfieldtexture;
 		p->scale = 24 + (rand()&2);
-		p->color = 0xff;
+		p->color = 0xff; // (159 91 83)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 
@@ -1366,7 +1366,7 @@ void CL_Voltage (vec3_t org)
 		p->type = PARTICLE_STANDARD;
 		p->image = r_voltagetexture;
 		p->scale = 14 + (rand()&14);
-		p->color = 0xff;
+		p->color = 0xff; // (159 91 83)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 
@@ -1413,7 +1413,7 @@ void CL_Deathfield (vec3_t org, int type)
 	p->alpha = 1.5;
 	p->scale = 10 + (rand()&2);
 	p->scalevel = 12;
-	p->color = 0x72;
+	p->color = 0x72; // (71 119 139)
 	p->accel[0] = p->accel[1] = 0;
 	p->accel[2] = PARTICLE_GRAVITY;
 	p->alphavel = -1.28 / (2.0 + frand()*0.3);
@@ -1439,7 +1439,7 @@ void CL_SayIcon(vec3_t org)
 	p->image = r_sayicontexture;
 	p->scale = 5;
 	p->scalevel = 0;
-	p->color = 15;
+	p->color = 15; //(235 235 235)
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 	for(j=0; j<3; j++)
@@ -1475,7 +1475,7 @@ void CL_DustParticles (vec3_t org)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 4 + (rand()&2);
-		p->color = 15;
+		p->color = 15; //(235 235 235)
 		p->scalevel = 1.5;
 		for (j=0 ; j<3 ; j++)
 		{
@@ -1515,9 +1515,9 @@ void CL_BigTeleportParticles (vec3_t org)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 		if(i>1)
-			p->color = 0xd4;
+			p->color = 0xd4; // (95 167 47)
 		else
-			p->color = 0x74;
+			p->color = 0x74; // (23 83 111)
 		p->scalevel = 30;
 		for (j=0 ; j<3 ; j++)
 		{
@@ -1610,7 +1610,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 		p->image = r_cflashtexture;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
-		p->color = 0x74;
+		p->color = 0x74; //(23 83 111)
 		p->scale = (.75 * (i+1)) + (rand()&2);
 		p->scalevel = 12;
 		d = rand()&7;
@@ -1664,7 +1664,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	p->angle[2] = cl.refdef.viewangles[2];
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->color = 0x72;
+	p->color = 0x72; //(71 119 139)
 
 	for (j=0 ; j<3 ; j++)
 	{
@@ -1683,7 +1683,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	p->scale = 15+5*frand();
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
-	p->color = 0x79;
+	p->color = 0x79; //(7 47 63)
 
 	for (j=0 ; j<3 ; j++)
 	{
@@ -1758,9 +1758,9 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	if(team)
-		p->color = 0x74;
+		p->color = 0x74; //(23 83 111)
 	else
-		p->color = 0xe8;
+		p->color = 0xe8; //(155 31 0)
 	p->scale = 15;
 	p->alphavel = INSTANT_PARTICLE;
 	for (i=0 ; i<3 ; i++)
@@ -1782,9 +1782,9 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	if(team)
-		p->color = 0x74;
+		p->color = 0x74; //(23 83 111)
 	else
-		p->color = 0xe8;
+		p->color = 0xe8; //(155 31 0)
 
 	angle = M_PI*2*(rand()&1023)/1023.0;
 	dist = rand()&5;
@@ -1924,7 +1924,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 				p->image = r_bloodtexture;
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-				p->color = 0xe8;
+				p->color = 0xe8; //(155 31 0)
 				p->scale = 6;
 				p->scalevel = 1.5;
 				for (j=0 ; j<3 ; j++)
@@ -1943,7 +1943,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 				p->image = r_bloodtexture;
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-				p->color = 0xd0+ (rand()&3);
+				p->color = 0xd0+ (rand()&3); //(0-83 255-187 0-39)
 				p->scale = 6;
 				p->scalevel = 1.5;
 				for (j=0; j< 3; j++)
@@ -1971,7 +1971,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 				p->scale = 1 + (rand()&4);
 				p->scalevel = 15.0;
-				p->color = 15;
+				p->color = 15; //(235 235 235)
 				p->accel[2] = 20;
 			}
 		}
@@ -2038,7 +2038,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 				return;
 
 			VectorClear (p->accel);
-			p->color = 0xd0 + (rand()&2);
+			p->color = 0xd0 + (rand()&2); // (0 255 0), (63 211 27)
 			p->scale = 2 + (rand()&7);
 			p->scalevel = 5;
 			p->alpha = .3;
