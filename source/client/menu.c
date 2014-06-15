@@ -1209,20 +1209,24 @@ OPTIONS MENUS - INPUT MENU
 */
 char *bindnames[][2] =
 {
-{"+attack", 		"attack"},
-{"+attack2",		"alt attack"},
+{"+attack", 		"primary attack"},
+{"+attack2",		"secondary attack"},
 {"weapnext", 		"next weapon"},
 {"weapprev", 		"previous weapon"},
+
 {"+forward", 		"walk forward"},
-{"+back", 			"backpedal"},
-{"+speed", 			"run"},
+{"+back", 			"walk back"},
 {"+moveleft", 		"step left"},
 {"+moveright", 		"step right"},
 {"+moveup",			"up / jump"},
 {"+movedown",		"down / crouch"},
-{"+leanright",		"lean right(tactical)"},
-{"+leanleft",		"lean left(tactical)"},
-{"+zoom",			"zoom(tactical)"},
+{"+speed", 			"running speed select"},
+{"+left",			"turn left (keyboard)"},
+{"+right",			"turn right (keyboard)"},
+
+{"+leanright",		"lean right (tactical)"},
+{"+leanleft",		"lean left (tactical)"},
+{"+zoom",			"zoom (tactical)"},
 
 {"inven",			"inventory"},
 {"invuse",			"use item"},
@@ -1230,20 +1234,23 @@ char *bindnames[][2] =
 {"invprev",			"prev item"},
 {"invnext",			"next item"},
 
-{"use Alien Disruptor",	"alien disruptor" },
-{"use Pulse Rifle",		"chaingun" },
-{"use Flame Thrower",	"flame thrower" },
-{"use Rocket Launcher",	"rocket launcher" },
-{"use Alien Smartgun",	"alien smartgun" },
-{"use Disruptor",		"alien beamgun" },
-{"use Alien Vaporizer", "alien vaporizer" },
-{"use Violator", "the violator" },
-{"score",				"show scores" },
-{"use grapple",			"grapple hook"},
-{"use sproing",			"sproing"},
-{"use haste",			"haste"},
-{"use invisibility",	"invisibility"},
+{"use Blaster",			"switch to Blaster"},
+{"use Alien Disruptor",	"switch to Alien Disruptor"},
+{"use Pulse Rifle",		"switch to chaingun"},
+{"use Flame Thrower",	"switch to Flame Thrower"},
+{"use Rocket Launcher",	"switch to Rocket Launcher"},
+{"use Alien Smartgun",	"switch to Alien Smartgun"},
+{"use Disruptor",		"switch to Alien Beamgun"},
+{"use Alien Vaporizer", "switch to Alien Vaporizer"},
+{"use Violator",		"switch to Violator"},
+{"use Minderaser",		"switch to Mind Eraser"},
+{"use grapple",			"switch to Grapple Hook"},
 
+{"use sproing",			"buy Sproing"},
+{"use haste",			"buy Haste"},
+{"use invisibility",	"buy Invisibility"},
+
+{"score",				"show scores"},
 {"vtaunt 1",			"voice taunt #1"},
 {"vtaunt 2",			"voice taunt #2"},
 {"vtaunt 3",			"voice taunt #3"},
@@ -1283,11 +1290,9 @@ static void M_FindKeysForCommand (const char *command, int *twokeys)
 {
 	int		count;
 	int		j;
-	int		l;
 	char	*b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = strlen(command);
 	count = 0;
 	
 	for (j=0 ; j<256 ; j++)
@@ -1295,7 +1300,7 @@ static void M_FindKeysForCommand (const char *command, int *twokeys)
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l) )
+		if (!Q_strcasecmp (b, command) )
 		{
 			twokeys[count] = j;
 			count++;
@@ -2416,6 +2421,14 @@ option_name_t video_option_names[] =
 		QMF_ACTION_WAIT
 	},
 	{
+		option_spincontrol,
+		"vid_fullscreen",
+		"fullscreen",
+		NULL,
+		setnames (onoff_names),
+		QMF_ACTION_WAIT
+	},
+	{
 		option_slider,
 		"vid_gamma",
 		"texture brightness",
@@ -2435,14 +2448,6 @@ option_name_t video_option_names[] =
 		"lightmap brightness",
 		NULL,
 		setlimits (modulate_limits)
-	},
-	{
-		option_spincontrol,
-		"vid_fullscreen",
-		"fullscreen",
-		NULL,
-		setnames (onoff_names),
-		QMF_ACTION_WAIT
 	},
 	{
 		option_spincontrol,
@@ -2476,21 +2481,21 @@ option_name_t video_option_names[] =
 		option_spincontrol,
 		"cl_paindist",
 		"pain distortion fx",
-		"GLSL must be enabled for this to take effect",
+		"Warp the screen when you take damage",
 		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_explosiondist",
 		"explosion distortion fx",
-		"GLSL must be enabled for this to take effect",
+		"Explosions warp the screen",
 		setnames (onoff_names)
 	},
 	{
 		option_spincontrol,
 		"cl_raindist",
 		"rain droplet fx",
-		"GLSL must be enabled for this to take effect",
+		"Rain dripping down your visor",
 		setnames (onoff_names)
 	},
 	{
@@ -2524,15 +2529,15 @@ const char *graphical_preset_names[][3] =
 	},
 	{
 		"Performance",			"performance",
-		"GLSL per-pixel lighting and postprocess"
+		"dynamic lighting and postprocess"
 	},
 	{
 		"Quality",				"quality",
-		"GLSL per-pixel effects on all surfaces"
+		"per-pixel effects on all surfaces"
 	},
 	{
 		"High Quality",			"maxquality",
-		"GLSL, shadows, light shafts from sun"
+		"shadows, light shafts from sun"
 	}
 };
 
@@ -2673,6 +2678,13 @@ OPTIONS MENUS - INPUT OPTIONS MENU
 =======================================================================
 */
 
+static const char *slowfast_names[] =
+{
+	"slow",
+	"fast",
+	0
+};
+
 option_name_t input_option_names[] = 
 {
 	{
@@ -2706,9 +2718,9 @@ option_name_t input_option_names[] =
 	{
 		option_spincontrol,
 		"cl_run",
-		"always run",
-		NULL,
-		setnames (onoff_names)
+		"primary running speed",
+		"You will run at this speed unless you hold down the \"running speed select\" button",
+		setnames (slowfast_names)
 	},
 };
 
