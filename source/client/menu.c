@@ -1236,7 +1236,7 @@ char *bindnames[][2] =
 
 {"use Blaster",			"switch to Blaster"},
 {"use Alien Disruptor",	"switch to Alien Disruptor"},
-{"use Pulse Rifle",		"switch to chaingun"},
+{"use Pulse Rifle",		"switch to Chaingun"},
 {"use Flame Thrower",	"switch to Flame Thrower"},
 {"use Rocket Launcher",	"switch to Rocket Launcher"},
 {"use Alien Smartgun",	"switch to Alien Smartgun"},
