@@ -2249,13 +2249,6 @@ option_name_t disp_option_names[] =
 	},
 	{
 		option_spincontrol,
-		"in_joystick",
-		"use joystick",
-		NULL,
-		setnames (onoff_names)
-	},
-	{
-		option_spincontrol,
 		"cl_drawfps",
 		"display framerate",
 		NULL,
@@ -2700,6 +2693,13 @@ option_name_t input_option_names[] =
 		option_spincontrol,
 		"m_accel", 
 		"mouse acceleration",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
+		"in_joystick",
+		"use joystick",
 		NULL,
 		setnames (onoff_names)
 	},
