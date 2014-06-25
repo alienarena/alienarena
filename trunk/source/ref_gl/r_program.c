@@ -1308,10 +1308,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec3 reflectDir = reflect(LightDir, normal);
 
 		float spec = max(dot(EyeDir, reflectDir), 0.0);
-		if(GPUANIM == 1)
-			spec = pow(spec, 4.0);
-		else
-			spec = pow(spec, 6.0);
+		spec = pow(spec, 6.0);
 		spec *= (SpecularFactor*specmask.a);
 		litColor = min(litColor + spec, vec3(1.0));
 
