@@ -429,6 +429,13 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 		if(target->classname == NULL)
 			return;
 
+		/* do not evaluate self as a potential target */
+		if ( target == self )
+		{
+			target = findradius( target, self->s.origin, 200 );
+			continue;
+		}
+
 		// Missle avoidance code
 		// Set our movetarget to be the rocket or grenade fired at us.
 		if(strcmp(target->classname,"rocket") == 0 || strcmp(target->classname,"grenade") == 0
