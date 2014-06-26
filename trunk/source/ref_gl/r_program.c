@@ -1227,7 +1227,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform float useShell;
 	uniform int fromView;
 	uniform vec3 lightPos;
-	const float SpecularFactor = 0.5;
+	const float SpecularFactor = 0.55;
 	//next group could be made uniforms if we want to control this 
 	const float MaterialThickness = 2.0; //this val seems good for now
 	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
@@ -1258,9 +1258,8 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec4 glow;
 		vec4 scatterCol = vec4(0.0);
 
-		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
+		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb * 1.1;
 		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5 ) );
-		normal = normalize(normal);
 
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
