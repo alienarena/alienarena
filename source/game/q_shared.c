@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
-vec3_t vec3_origin = {0,0,0};
+vec3_t vec3_origin = {0.0f,0.0f,0.0f};
 
 //============================================================================
 
@@ -69,10 +69,10 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	memset( zrot, 0, sizeof( zrot ) );
 	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-	zrot[0][0] = cos( DEG2RAD( degrees ) );
-	zrot[0][1] = sin( DEG2RAD( degrees ) );
-	zrot[1][0] = -sin( DEG2RAD( degrees ) );
-	zrot[1][1] = cos( DEG2RAD( degrees ) );
+	zrot[0][0] = cosf( DEG2RAD( degrees ) );
+	zrot[0][1] = sinf( DEG2RAD( degrees ) );
+	zrot[1][0] = -sinf( DEG2RAD( degrees ) );
+	zrot[1][1] = cosf( DEG2RAD( degrees ) );
 
 	R_ConcatRotations( m, zrot, tmpmat );
 	R_ConcatRotations( tmpmat, im, rot );
@@ -83,114 +83,23 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	}
 }
 
-/*
-** Fast sincos function using polynomial approximation
-**
-** Profiling indicates that AngleVectors() is heavily used, which justifies
-**   (i hope) doing some "heroic" optimization.
-** Testing indicates that maximum variation from original calculation is
-**   is around 0.000006
-**
-** sin(a) ~=  a - (0.16666 * a**3) + (0.0083143 a**5) - (0.00018542 * a**7)
-**
-** Reference:
-**   Essential Mathematics for Games and Interactive Applications, Second Edition.
-**   by James M. Van Verth and Lars M. Bishop, Morgan-Kaufman Publishing.
-**   which bases this technique on:
-**   Robin Green's GDC 2003 session, "Faster Math Functions"
-**
-** Arguments:
-**   angle : in radians
-*/
-
-#define kPI         3.1415926535897932384626433832795f
-#define kHalfPI     1.5707963267948966192313216916398f
-#define kTwoPI      2.0f*kPI
-static const float kTwoOverPI = 1.0f / kHalfPI;
-static const float kRationalHalfPI = 201.0f / 128.0f;
-static const float kRemainderHalfPI = 4.8382679e-4f;
-static const float kpoly3 = -0.16666f;
-static const float kpoly5 = 0.0083143f;
-static const float kpoly7 = -0.00018542f;
-
-float fast_sincosf_calc( float angle )
-{
-	float result;
-	float anglesq;
-
-	anglesq = angle * angle;
-	result = angle * ( 1.0f + anglesq * (kpoly3 + anglesq * (kpoly5
-		+ ( anglesq * kpoly7 ))));
-	return result;
-}
-
-void fast_sincosf( float angle, float *sina, float *cosa )
-{
-	qboolean negate;
-	float angle_radians;
-	float angle_float_part;
-	float angle_float_part_minus_halfpi;
-	int angle_int_part;
-
-	// make negative angle non-negative for purposes of calculation
-	negate = false;
-	angle_radians = angle;
-	if( angle_radians < 0.0f )
-	{
-		negate = true;
-		angle_radians = -angle_radians;
-	}
-
-	// this is tricky. to prevent "catastophic cancelation" when subtracting
-	//  near equal floating point numbers, the calculation is broken down
-	//  into 2 parts.
-	angle_float_part =  kTwoOverPI * angle_radians;
-	angle_int_part = (int)angle_float_part;
-	angle_float_part = (angle_radians - (kRationalHalfPI * angle_int_part))
-		- (kRemainderHalfPI * angle_int_part);
-	angle_float_part_minus_halfpi = (angle_float_part - kRationalHalfPI)
-		- kRemainderHalfPI;
-
-	switch( angle_int_part & 0x03 ) // mod 4 to get quadrant
-	{
-	case 0: // 0..PI/2
-		*sina = fast_sincosf_calc( angle_float_part );
-		*cosa = fast_sincosf_calc( -angle_float_part_minus_halfpi );
-		break;
-	case 1: // PI/2..PI
-		*sina = fast_sincosf_calc( -angle_float_part_minus_halfpi );
-		*cosa = fast_sincosf_calc( -angle_float_part );
-		break;
-	case 2: // PI..3/2 PI
-		*sina = fast_sincosf_calc( -angle_float_part );
-		*cosa = fast_sincosf_calc( angle_float_part_minus_halfpi );
-		break;
-	case 3: // 3/2 PI..2 PI
-		*sina = fast_sincosf_calc( angle_float_part_minus_halfpi );
-		*cosa = fast_sincosf_calc( angle_float_part );
-		break;
-	}
-
-	if( negate )
-	{
-		*sina = -(*sina);
-	}
-
-}
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * (kTwoPI / 360.0f);
-	fast_sincosf( angle, &sy, &cy );
-	angle = angles[PITCH] * (kTwoPI / 360.0f );
-	fast_sincosf( angle, &sp, &cp );
+	angle = angles[YAW] * ((float)M_PI/180.0f);
+	sy = sinf( angle );
+	cy = cosf( angle );
+	angle = angles[PITCH] * ((float)M_PI/180.0f);
+	sp = sinf( angle );
+	cp = cosf( angle );
 	if( right || up )
 	{ // if forward only, this is not used
-		angle = angles[ROLL] * (kTwoPI / 360.0f);
-		fast_sincosf( angle, &sr, &cr );
+		angle = angles[ROLL] * ((float)M_PI/180.0f);
+		sr = sinf( angle );
+		cr = cosf( angle );
 	}
 
 	if (forward)
@@ -201,9 +110,9 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	}
 	if (right)
 	{
-		right[0] = (-1*sr*sp*cy+-1*cr*-sy);
-		right[1] = (-1*sr*sp*sy+-1*cr*cy);
-		right[2] = -1*sr*cp;
+		right[0] = (-1.0f * sr * sp * cy + -1.0f * cr * -sy);
+		right[1] = (-1.0f * sr * sp * sy + -1.0f *cr * cy);
+		right[2] = -1.0f * sr * cp;
 	}
 	if (up)
 	{
@@ -231,7 +140,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	{
 	// PMM - fixed to correct for pitch of 0
 		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180.0f / M_PI);
+			yaw = (atan2f(value1[1], value1[0]) * 180.0f / (float)M_PI);
 		else if (value1[1] > 0)
 			yaw = 90.0f;
 		else
@@ -240,8 +149,8 @@ void vectoangles (vec3_t value1, vec3_t angles)
 		if (yaw < 0.0f)
 			yaw += 360.0f;
 
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180.0f / M_PI);
+		forward = sqrtf(value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (atan2f(value1[2], forward) * 180.0f / (float)M_PI);
 		if (pitch < 0.0f)
 			pitch += 360.0f;
 	}
@@ -285,10 +194,10 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	*/
 	for ( pos = 0, i = 0; i < 3; i++ )
 	{
-		if ( fabs( src[i] ) < minelem )
+		if ( fabsf( src[i] ) < minelem )
 		{
 			pos = i;
-			minelem = fabs( src[i] );
+			minelem = fabsf( src[i] );
 		}
 	}
 	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;
@@ -369,38 +278,6 @@ void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4])
 }
 
 
-//============================================================================
-
-
-// these are probably obsolete (2010-06-13)
-/*
-float Q_fabs (float f)
-{
-#if 0
-	if (f >= 0)
-		return f;
-	return -f;
-#else
-	int tmp = * ( int * ) &f;
-	tmp &= 0x7FFFFFFF;
-	return * ( float * ) &tmp;
-#endif
-}
-
-#if defined _M_IX86 && !defined C_ONLY
-#pragma warning (disable:4035)
-__declspec( naked ) long Q_ftol( float f )
-{
-	static int tmp;
-	__asm fld dword ptr [esp+4]
-	__asm fistp tmp
-	__asm mov eax, tmp
-	__asm ret
-}
-#pragma warning (default:4035)
-#endif
-*/
-
 /*
 ===============
 LerpAngle
@@ -409,29 +286,27 @@ LerpAngle
 */
 float LerpAngle (float a2, float a1, float frac)
 {
-	if (a1 - a2 > 180)
-		a1 -= 360;
-	if (a1 - a2 < -180)
-		a1 += 360;
+	if (a1 - a2 > 180.0f)
+		a1 -= 360.0f;
+	if (a1 - a2 < -180.0f)
+		a1 += 360.0f;
 	return a2 + frac * (a1 - a2);
 }
 
-
-float	anglemod(float a)
+/** @brief  Angle "modulo 360"
+ *
+ * @param   a  Angle in degrees
+ * @return  Angle in range [0,360)
+ */
+float anglemod( float a )
 {
-#if 0
-	if (a >= 0)
-		a -= 360*(int)(a/360);
-	else
-		a += 360*( 1 + (int)(-a/360) );
-#endif
-	a = (360.0f/65536.0f) * ((int)(a*(65536.0f/360.0f)) & 65535);
+	if ( a < 0.0f )
+		a += ceilf( -a/360.0f ) * 360.0f;
+	else if ( a >= 360.0f )
+		a -= floorf( a/360.0f ) * 360.0f;
+
 	return a;
 }
-
-	int		i;
-	vec3_t	corners[2];
-
 
 // this is the slow, general version
 int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
@@ -457,9 +332,9 @@ int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 	dist1 = DotProduct (p->normal, corners[0]) - p->dist;
 	dist2 = DotProduct (p->normal, corners[1]) - p->dist;
 	sides = 0;
-	if (dist1 >= 0)
+	if (dist1 >= 0.0f)
 		sides = 1;
-	if (dist2 < 0)
+	if (dist2 < 0.0f)
 		sides |= 2;
 
 	return sides;
@@ -538,241 +413,6 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 	return sides;
 }
 
-/*  probably obsolete (2010-08)
-#pragma warning( disable: 4035 )
-
-__declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
-{
-	static int bops_initialized;
-	static int Ljmptab[8];
-
-	__asm {
-
-		push ebx
-
-		cmp bops_initialized, 1
-		je  initialized
-		mov bops_initialized, 1
-
-		mov Ljmptab[0*4], offset Lcase0
-		mov Ljmptab[1*4], offset Lcase1
-		mov Ljmptab[2*4], offset Lcase2
-		mov Ljmptab[3*4], offset Lcase3
-		mov Ljmptab[4*4], offset Lcase4
-		mov Ljmptab[5*4], offset Lcase5
-		mov Ljmptab[6*4], offset Lcase6
-		mov Ljmptab[7*4], offset Lcase7
-
-initialized:
-
-		mov edx,ds:dword ptr[4+12+esp]
-		mov ecx,ds:dword ptr[4+4+esp]
-		xor eax,eax
-		mov ebx,ds:dword ptr[4+8+esp]
-		mov al,ds:byte ptr[17+edx]
-		cmp al,8
-		jge Lerror
-		fld ds:dword ptr[0+edx]
-		fld st(0)
-		jmp dword ptr[Ljmptab+eax*4]
-Lcase0:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase1:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase2:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase3:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase4:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase5:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ebx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase6:
-		fmul ds:dword ptr[ebx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ecx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-		jmp LSetSides
-Lcase7:
-		fmul ds:dword ptr[ecx]
-		fld ds:dword ptr[0+4+edx]
-		fxch st(2)
-		fmul ds:dword ptr[ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[4+ecx]
-		fld ds:dword ptr[0+8+edx]
-		fxch st(2)
-		fmul ds:dword ptr[4+ebx]
-		fxch st(2)
-		fld st(0)
-		fmul ds:dword ptr[8+ecx]
-		fxch st(5)
-		faddp st(3),st(0)
-		fmul ds:dword ptr[8+ebx]
-		fxch st(1)
-		faddp st(3),st(0)
-		fxch st(3)
-		faddp st(2),st(0)
-LSetSides:
-		faddp st(2),st(0)
-		fcomp ds:dword ptr[12+edx]
-		xor ecx,ecx
-		fnstsw ax
-		fcomp ds:dword ptr[12+edx]
-		and ah,1
-		xor ah,1
-		add cl,ah
-		fnstsw ax
-		and ah,1
-		add ah,ah
-		add cl,ah
-		pop ebx
-		mov eax,ecx
-		ret
-Lerror:
-		int 3
-	}
-}
-#pragma warning( default: 4035 )
-#endif
-*/
 
 void ClearBounds (vec3_t mins, vec3_t maxs)
 {
@@ -810,11 +450,11 @@ vec_t VectorNormalize (vec3_t v)
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
+	length = sqrtf(length);
 
 	if (length)
 	{
-		ilength = 1/length;
+		ilength = 1.0f/length;
 		v[0] *= ilength;
 		v[1] *= ilength;
 		v[2] *= ilength;
@@ -829,11 +469,11 @@ vec_t VectorNormalize2 (vec3_t v, vec3_t out)
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);
+	length = sqrtf(length);
 
 	if (length)
 	{
-		ilength = 1/length;
+		ilength = 1.0f/length;
 		out[0] = v[0]*ilength;
 		out[1] = v[1]*ilength;
 		out[2] = v[2]*ilength;
@@ -891,7 +531,7 @@ vec_t VectorLength(vec3_t v)
 	length = 0;
 	for (i=0 ; i< 3 ; i++)
 		length += v[i]*v[i];
-	length = sqrt (length);
+	length = sqrtf(length);
 
 	return length;
 }
