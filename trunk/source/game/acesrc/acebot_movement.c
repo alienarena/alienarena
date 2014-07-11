@@ -865,7 +865,8 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	radius =  (random_r * ( ktgt_acc / accuracy)) + ktgt_ofs;
 	//angle calc
 	angle = random() * 2.0f * M_PI;
-	fast_sincosf( angle, &sa, &ca );
+	sa = sinf( angle );
+	ca = cosf( angle );
 	//apply delta to target
 	*pdx += dx = ca * radius;
 	*pdy += dy = sa * radius;
