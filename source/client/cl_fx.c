@@ -234,29 +234,31 @@ void CL_RunDLights (void)
 	dl = cl_dlights;
 	for (i=0 ; i<MAX_DLIGHTS ; i++, dl++)
 	{
-		if (!dl->radius)
+		if ( dl->radius == 0.0f )
 			continue;
 
 		if (dl->die < cl.time)
 		{
-			dl->radius = 0;
+			dl->radius = 0.0f;
 			return;
 		}
 		dl->radius -= cls.frametime*dl->decay;
-		if (dl->radius < 0)
-			dl->radius = 0;
+		if (dl->radius < 0.0f)
+			dl->radius = 0.0f;
 	}
 }
 
 void RotateForNormal(vec3_t normal, vec3_t result){
 	float forward, pitch, yaw;
 
-	forward = sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
-	pitch = (int)(atan2(normal[2], forward) * 180 / M_PI);
-	yaw = (int)(atan2(normal[1], normal[0]) * 180 / M_PI);
+	forward = sqrtf(normal[0] * normal[0] + normal[1] * normal[1]);
+//	pitch = (int)(atan2f(normal[2], forward) * 180 / M_PI);
+//	yaw = (int)(atan2f(normal[1], normal[0]) * 180 / M_PI);
+	pitch = atan2f( normal[2], forward  ) * 180.0f / (float)M_PI;
+	yaw   = atan2f( normal[1], normal[0]) * 180.0f / (float)M_PI;
 
-	if(pitch < 0)
-		pitch += 360;
+	if(pitch < 0.0f)
+		pitch += 360.0f;
 
 	result[PITCH] = -pitch;
 	result[YAW] =  yaw;
@@ -494,7 +496,7 @@ void CL_ClearParticles (void)
 static inline particle_t *new_particle (void)
 {
 	particle_t	*p;
-	int j;
+	//int j;
 
 	if (!free_particles)
 		return NULL;
@@ -731,11 +733,11 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 
 	for( k=0; k<2; k++) {
 
-		scale = frand()*3.0;
+		scale = frand()*3.0f;
 		pr = NULL;
 
 		i = 0;
-		for (inc=1.0 ; inc<2.0 ; inc+=0.25, i++)
+		for (inc=1.0f ; inc<2.0f ; inc+=0.25f, i++)
 		{
 			if (!(p = new_particle()))
 				return;
@@ -745,18 +747,18 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 			p->image = r_raintexture;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 1.25*scale/inc;
+			p->scale = 1.25f * scale/inc;
 			p->scalevel = 0;
 
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*(-1.25*scale)*dir[j];
-				p->vel[j] = 60*dir[j];
+				p->org[j] = org[j] + i * (-1.25f*scale) * dir[j]; 
+				p->vel[j] = 60.0f * dir[j];
 			}
 
 			p->accel[0] = 0;
 			p->accel[1] = 0;
-			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
+			p->accel[2] = -((float)PARTICLE_GRAVITY) / (0.5f*inc);
 			p->alpha = .5;
 
 			p->alphavel = -1.0f / (2.5f + frand()*0.3f);
@@ -847,7 +849,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 
 			p->accel[0] = 0;
 			p->accel[1] = 0;
-			p->accel[2] = -(PARTICLE_GRAVITY)/0.5;
+			p->accel[2] = -((float)PARTICLE_GRAVITY) / 0.5f;
 			p->alpha = .5;
 
 			p->alphavel = -1.0f / (1.5f + frand()*0.3f);
@@ -881,7 +883,7 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 		scale = frand();
 
 		i = 0;
-		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
+		for (inc=1.0f ; inc<2.0f ; inc+=0.1f, i++)
 		{
 			if (!(p = new_particle()))
 				return;
@@ -891,18 +893,18 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 			p->image = r_particletexture;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 1.5*scale/inc;
+			p->scale = 1.5f*scale/inc;
 			p->scalevel = 0;
 
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*(-1.5*scale)*dir[j];
-				p->vel[j] = 60*dir[j];
+				p->org[j] = org[j] + i*(-1.5f*scale)*dir[j];
+				p->vel[j] = 60.0f*dir[j];
 			}
 
 			p->accel[0] = 0;
 			p->accel[1] = 0;
-			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
+			p->accel[2] = -((float)PARTICLE_GRAVITY) / (0.5f*inc);
 			p->alpha = .5;
 
 			p->alphavel = -1.0f / (1.5f + frand()*0.3f);
@@ -984,7 +986,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 			p->vel[j] = crand()*8;
 
 		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = -PARTICLE_GRAVITY*0.2;
+		p->accel[2] = -((float)PARTICLE_GRAVITY) * 0.2f;
 		p->alpha = .3;
 
 		p->alphavel = -1.0f / (1.0f + frand()*0.3f);
@@ -1424,7 +1426,7 @@ void CL_Deathfield (vec3_t org, int type)
 	p->accel[0] = p->accel[1] = 0;
 	p->accel[2] = 0;
 	p->alpha = 1.5;
-	p->scale = 10 + (rand()&2);
+	p->scale = 10.0f + (rand()&2);
 	p->scalevel = 12;
 	p->color = 0x72; // (71 119 139)
 	p->accel[0] = p->accel[1] = 0;
@@ -1569,19 +1571,21 @@ void CL_HealthParticles (vec3_t org, int color, float alpha)
 	p->blenddst = GL_ONE;
 	p->color = color + (rand() & 1);
 
-	angle = M_PI*2*(rand()&1023)/1023.0;
+	// angle = M_PI*2*(rand()&1023)/1023.0;
+	angle = (float)M_PI * 2.0f * frand();
+
 	dist = rand()&5;
-	p->org[0] = org[0] + cos(angle)*dist;
-	p->vel[0] = cos(angle)*(6+(rand()&6));
-	p->accel[0] = -cos(angle)*6;
+	p->org[0] = org[0] + cosf(angle)*dist;
+	p->vel[0] = cosf(angle)*(6+(rand()&6));
+	p->accel[0] = -cosf(angle)*6;
 
-	p->org[1] = org[1] + sin(angle)*dist;
-	p->vel[1] = sin(angle)*(6+(rand()&6));
-	p->accel[1] = -sin(angle)*100;
+	p->org[1] = org[1] + sinf(angle) * dist;
+	p->vel[1] = sinf(angle) * (6+(rand()&6));
+	p->accel[1] = -sinf(angle) * 100.0f;
 
-	p->org[2] = org[2] + 8 + (rand()%10);
-	p->vel[2] = -10 + (rand()&6);
-	p->accel[2] = PARTICLE_GRAVITY*10;
+	p->org[2] = org[2] + 8.0f + (rand()%10);
+	p->vel[2] = -10.0f + (rand()&6);
+	p->accel[2] = (float)PARTICLE_GRAVITY * 10.0f;
 	p->alpha = alpha;
 
 	p->alphavel = -2.6f / (0.5f + frand()*0.3f);
@@ -1626,7 +1630,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 		p->color = 0x74; //(23 83 111)
-		p->scale = (.75 * (i+1)) + (rand()&2);
+		p->scale = (0.75f * (ifl + 1.0f)) + (rand()&2);
 		p->scalevel = 12;
 		d = rand()&7;
 		for (j=0 ; j<3 ; j++)
@@ -1675,7 +1679,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	p->image = r_shottexture;
 	p->scale = 8;
 	p->angle[1] = cl.refdef.viewangles[0];
-	p->angle[0] = sin(len);
+	p->angle[0] = sinf(len);
 	p->angle[2] = cl.refdef.viewangles[2];
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
@@ -1695,7 +1699,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_STANDARD;
 	p->image = r_cflashtexture;
-	p->scale = 15+5*frand();
+	p->scale = 15.0f + 5.0f * frand();
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	p->color = 0x79; //(7 47 63)
@@ -1781,10 +1785,10 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	for (i=0 ; i<3 ; i++)
 	{
 		p->org[i] = pos[i];
-		p->vel[i] = 0;
-		p->accel[i] = 0;
+		p->vel[i] = 0.0f;
+		p->accel[i] = 0.0f;
 	}
-	p->org[2] += 64;
+	p->org[2] += 64.0f;
 
 
 
@@ -1793,7 +1797,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 
 	p->type = PARTICLE_STANDARD;
 	p->image = r_cflashtexture;
-	p->scale = 20 + (rand()&7);
+	p->scale = 20.0f + (rand()&7);
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	if(team)
@@ -1801,20 +1805,22 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	else
 		p->color = 0xe8; //(155 31 0)
 
-	angle = M_PI*2*(rand()&1023)/1023.0;
+	//angle = M_PI*2*(rand()&1023)/1023.0;
+	angle = (float)M_PI * 2.0f * frand();
+
 	dist = rand()&5;
-	p->org[0] = pos[0] + cos(angle)*dist;
-	p->vel[0] = cos(angle)*(6+(rand()&6));
-	p->accel[0] = -cos(angle)*6;
+	p->org[0] = pos[0] + cosf(angle)*dist;
+	p->vel[0] = cosf(angle) * (6+(rand()&6));
+	p->accel[0] = -cosf(angle) * 6.0f;
 
-	p->org[1] = pos[1] + sin(angle)*dist;
-	p->vel[1] = sin(angle)*(6+(rand()&6));
-	p->accel[1] = -sin(angle)*100;
+	p->org[1] = pos[1] + sinf(angle)*dist;
+	p->vel[1] = sinf(angle) * (6+(rand()&6));
+	p->accel[1] = -sinf(angle) * 100.0f;
 
-	p->org[2] = pos[2] + 56 + (rand()%10);
-	p->vel[2] = -10 + (rand()&6);
-	p->accel[2] = PARTICLE_GRAVITY*10;
-	p->alpha = 0.2;
+	p->org[2] = pos[2] + 56.0f + (rand()%10);
+	p->vel[2] = -10.0f + (rand()&6);
+	p->accel[2] = (float)PARTICLE_GRAVITY * 10.0f;
+	p->alpha = 0.2f;
 
 	p->alphavel = -50.0f / (0.5f + frand()*0.3f);
 }
@@ -1831,8 +1837,8 @@ void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 	vec3_t		v;
 	int			j;
 	trace_t	trace;
-	static vec3_t mins = { -1, -1, -1 };
-    static vec3_t maxs = { 1, 1, 1 };
+	static vec3_t mins = { -1.0f, -1.0f, -1.0f };
+    static vec3_t maxs = { 1.0f, 1.0f, 1.0f };
 
 	//trace to see if impact occurs with nearby brush
 	trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
@@ -1948,7 +1954,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 					p->vel[j] = crand()*velscale;
 					p->accel[j] = 0;
 				}
-				p->vel[2] -= PARTICLE_GRAVITY;
+				p->vel[2] -= (float)PARTICLE_GRAVITY;
 			}
 			else if (flags & EF_GREENGIB)
 			{
@@ -1967,7 +1973,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 					p->vel[j] = crand()*velscale;
 					p->accel[j] = 0;
 				}
-				p->vel[2] -= PARTICLE_GRAVITY;
+				p->vel[2] -= (float)PARTICLE_GRAVITY;
 			}
 			else
 			{
@@ -3213,13 +3219,13 @@ void CL_TeleportParticles (vec3_t orig_start)
 			p->org[j] = start[j];
 			p->vel[j] = 0;
 		}
-		p->vel[2] = PARTICLE_GRAVITY*2;
+		p->vel[2] = (float)PARTICLE_GRAVITY * 2.0f;
 		if (i < 1)
 		addParticleLight (p,
 					p->scale, 10,
 				0, 1, 1);
 
-		start[2] += 16;
+		start[2] += 16.0f;
 	}
 }
 
@@ -3457,7 +3463,7 @@ void Cl_WeatherEffects()
 Powered up effects
 */
 
-#define	BEAMLENGTH			16
+#define	BEAMLENGTH			16.0f
 void CL_PoweredEffects (vec3_t origin)
 {
 	int			i;
@@ -3474,18 +3480,18 @@ void CL_PoweredEffects (vec3_t origin)
 			avelocities[0][i] = (rand()&255) * 0.01;
 	}
 
-	ltime = (float)cl.time / 1000.0;
+	ltime = (float)cl.time / 1000.0f;
 	for (i=0 ; i<32 ; i+=2)
 	{
 		angle = ltime * avelocities[i][0];
-		sy = sin(angle);
-		cy = cos(angle);
+		sy = sinf(angle);
+		cy = cosf(angle);
 		angle = ltime * avelocities[i][1];
-		sp = sin(angle);
-		cp = cos(angle);
+		sp = sinf(angle);
+		cp = cosf(angle);
 		angle = ltime * avelocities[i][2];
-		sr = sin(angle);
-		cr = cos(angle);
+		sr = sinf(angle);
+		cr = cosf(angle);
 
 		forward[0] = cp*cy;
 		forward[1] = cp*sy;
@@ -3494,7 +3500,7 @@ void CL_PoweredEffects (vec3_t origin)
 		if (!(p = new_particle()))
 			return;
 
-		dist = sin(ltime + i)*32;
+		dist = sinf(ltime + i) * 32.0f;
 		p->org[0] = origin[0] + bytedirs[i][0]*dist + forward[0]*BEAMLENGTH;
 		p->org[1] = origin[1] + bytedirs[i][1]*dist + forward[1]*BEAMLENGTH;
 		p->org[2] = origin[2] + bytedirs[i][2]*dist + forward[2]*BEAMLENGTH;
@@ -3537,19 +3543,19 @@ void vectoangles2 (vec3_t value1, vec3_t angles)
 	{
 	// PMM - fixed to correct for pitch of 0
 		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
-			yaw = 90;
+			yaw = (atan2f(value1[1], value1[0]) * 180.0f / (float)M_PI);
+		else if (value1[1] > 0.0f)
+			yaw = 90.0f;
 		else
-			yaw = 270;
+			yaw = 270.0f;
 
-		if (yaw < 0)
-			yaw += 360;
+		if (yaw < 0.0f)
+			yaw += 360.0f;
 
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
+		forward = sqrtf( value1[0]*value1[0] + value1[1]*value1[1] );
+		pitch = (atan2f(value1[2], forward) * 180.0f / (float)M_PI);
+		if (pitch < 0.0f)
+			pitch += 360.0f;
 	}
 
 	angles[PITCH] = -pitch;
@@ -3642,7 +3648,7 @@ void CL_ParticleSteamEffect (cl_sustain_t *self)
 		VectorMA (p->vel, d, u, p->vel);
 
 		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = -PARTICLE_GRAVITY/2;
+		p->accel[2] = -((float)PARTICLE_GRAVITY) / 2.0f;
 		p->alpha = 0.1;
 
 		p->alphavel = -1.0f / (6.5f + frand()*0.3f);
@@ -3731,7 +3737,7 @@ void CL_ParticleSmokeEffect2 (cl_sustain_t *self)
 		VectorMA (p->vel, d, u, p->vel);
 
 		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = -PARTICLE_GRAVITY/3;
+		p->accel[2] = -((float)PARTICLE_GRAVITY) / 3.0f;
 		p->alpha = 0.03;
 
 		p->alphavel = -0.015f / (7.8f + frand()*0.3f);
@@ -3831,10 +3837,10 @@ void CL_AddParticles (void)
 			vec3_t distance;
 			
 			// Use a slightly larger radius so it rotates slower.
-			circumference = 2.0*M_PI*(3.5*p->current_scale);
+			circumference = 2.0f * (float)M_PI * (3.5f * p->current_scale);
 			
 			VectorSubtract (p->current_origin, p->org, distance);
-			VectorScale (distance, 360.0/circumference, p->angle);
+			VectorScale (distance, 360.0f/circumference, p->angle);
 		}
 
 		p->next = NULL;
