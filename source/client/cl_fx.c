@@ -993,7 +993,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 
 		if (i < 4)
 			addParticleLight (p,
-						p->scale*30, 10,
+						p->scale*30.0f, 10,
 					0, 1, 1);
 
 	}
@@ -1087,7 +1087,7 @@ void CL_ExplosionParticles (vec3_t org)
 			}
 			if (p && i < 4)
 				addParticleLight (p,
-						p->scale*50*i, 0,
+						p->scale*50.0f*ifl, 0,
 					.4, .4, 0.1);
 		}
 	}
@@ -1645,7 +1645,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 
 		if (i > 4)
 			addParticleLight (p,
-					p->scale*25, 50,
+					p->scale*25.0f, 50,
 				0, .8, 1);
 	}
 }
@@ -2911,7 +2911,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 		}
 		if (len < 4)
 			addParticleLight (p,
-						p->scale*75, 0,
+						p->scale*75.0f, 0,
 					.25, 0, .3);
 		VectorAdd (p->org, vec, move);
 		if (pr) 

@@ -898,8 +898,8 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 	{
 	// PMM - fixed to correct for pitch of 0
 		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180.0f / M_PI);
-		else if (value1[1] > 0)
+			yaw = (atan2f(value1[1], value1[0]) * 180.0f / (float)M_PI);
+		else if (value1[1] > 0.0f)
 			yaw = 90.0f;
 		else
 			yaw = 270.0f;
@@ -907,8 +907,8 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 		if (yaw < 0.0f)
 			yaw += 360.0f;
 
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180.0f / M_PI);
+		forward = sqrtf(value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (atan2f(value1[2], forward) * 180.0f / (float)M_PI);
 		if (pitch < 0.0f)
 			pitch += 360.0f;
 	}
@@ -945,7 +945,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 		if(grass->sunVisible) 
 		{
-			scale = 10.0*grass->size;
+			scale = 10.0f * grass->size;
 
 			VectorSubtract(r_sunLight->origin, r_sunLight->target, dir);
 			R_Vectoangles(dir, angle);
@@ -966,7 +966,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 			qglColor4f( 0, 0, 0, 1 );
 
 			VArray = &VArrayVerts[0];
-			PART_AddBillboardToVArray (origin, up, right, 3*sin (rs_realtime*3), false, 0, 1, 0, 1);
+			PART_AddBillboardToVArray (origin, up, right, 3.0f*sinf(rs_realtime*3.0f), false, 0, 1, 0, 1);
 
 			R_DrawVarrays(GL_QUADS, 0, 4);
 
