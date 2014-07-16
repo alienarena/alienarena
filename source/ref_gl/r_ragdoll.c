@@ -191,6 +191,13 @@ void RGD_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int obj
     waxis[2] = DotProduct(bindmat[object1].c, axis) + DotProduct(bindmat[object2].c, axis);
 	VectorNormalize(waxis);
 
+	if ( waxis[0] == 0.0f && waxis[1] == 0.0f && waxis[2] == 0.0f )
+	{
+		if ( r_ragdoll_debug->integer )
+			Com_Printf( "RGD_addHingeJoint: waxis is zero vector\n" );
+		return;
+	}
+
 	VectorAdd(anchor, RagDoll[RagDollID].origin, anchor);
 
 	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateHinge(RagDollWorld, 0);
@@ -243,10 +250,24 @@ void RGD_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int
     waxis1[2] = DotProduct(bindmat[object1].c, axis1) + DotProduct(bindmat[object2].c, axis1);
 	VectorNormalize(waxis1);
 
+	if ( waxis1[0] == 0.0f && waxis1[1] == 0.0f && waxis1[2] == 0.0f )
+	{
+		if ( r_ragdoll_debug->integer )
+			Com_Printf( "RGD_addUniversalJoint: waxis1 is zero vector\n" ); 
+		return;
+	}
+
 	waxis2[0] = DotProduct(bindmat[object1].a, axis2) + DotProduct(bindmat[object2].a, axis2);
     waxis2[1] = DotProduct(bindmat[object1].b, axis2) + DotProduct(bindmat[object2].b, axis2);
     waxis2[2] = DotProduct(bindmat[object1].c, axis2) + DotProduct(bindmat[object2].c, axis2);
 	VectorNormalize(waxis2);
+
+	if ( waxis2[0] == 0.0f && waxis2[1] == 0.0f && waxis2[2] == 0.0f )
+	{
+		if ( r_ragdoll_debug->integer )
+			Com_Printf( "RGD_addUniversalJoint: waxis2 is zero vector\n" );
+		return;
+	}
 
 	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateUniversal(RagDollWorld, 0);
 
