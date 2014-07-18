@@ -220,11 +220,18 @@ void GL_TexEnv( GLenum mode )
 		firstrun = false;
 		memset (gl_state.currenttexturemodes, -1, sizeof(gl_state.currenttexturemodes));
 	}
-	
+
 	// TODO: eliminate every current warning, then change to regular
 	// Com_Printf to prevent new ones from going unnoticed.
 	if (!gl_state.currenttmu_defined)
-		Com_DPrintf ("Warning: GL_TexEnv with undefined TMU!\n");
+	{
+		static int once = 1;
+		if ( once )
+		{ // show only once. these warnings flood debug output.
+			Com_DPrintf ("Warning: GL_TexEnv with undefined TMU!\n");
+			once = 0;
+		}
+	}
 	
 	GL_ForceSelectTexture();
 	
@@ -240,7 +247,14 @@ void GL_Bind (int texnum)
 	// TODO: eliminate every current warning, then change to regular
 	// Com_Printf to prevent new ones from going unnoticed.
 	if (!gl_state.currenttmu_defined)
-		Com_DPrintf ("Warning: GL_Bind with undefined TMU!\n");
+	{
+		static int once = 1;
+		if ( once )
+		{ // show only once. these warnings flood debug output.
+			Com_DPrintf ("Warning: GL_Bind with undefined TMU!\n");
+			once = 0;
+		}
+	}
 
 	if ( gl_state.currenttextures[gl_state.currenttmu] == texnum)
 		return;
