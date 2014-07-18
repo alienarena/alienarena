@@ -117,7 +117,7 @@ void R_RegisterLightGroups (void)
 			}
 			VectorCopy(LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].group_origin);
 			r_lightgroups++;
-			if(r_lightgroups > MAX_LIGHTS)
+			if(r_lightgroups >= MAX_LIGHTS)
 				doneShadowGroups = true;
 
 			lnum = 0;
@@ -133,7 +133,7 @@ static void R_ParseLightEntity (char *match, char *block)
 	vec3_t	origin;
 	float	intensity;
 	
-	if (r_numWorldLights == MAX_LIGHTS)
+	if (r_numWorldLights >= MAX_LIGHTS)
 		return;
 	
 	VectorClear(origin);
@@ -164,7 +164,7 @@ static void R_ParseLightEntity (char *match, char *block)
 
 	// Add it to the list
 	VectorCopy(origin, r_worldLights[r_numWorldLights].origin);
-	r_worldLights[r_numWorldLights].intensity = intensity/2;
+	r_worldLights[r_numWorldLights].intensity = intensity/2.0f;
 	r_worldLights[r_numWorldLights].surf = NULL;
 	r_numWorldLights++;
 }
