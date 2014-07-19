@@ -187,6 +187,11 @@ typedef struct entity_s
 	int		number; //edict number;
 
 	struct rscript_s *script;
+	
+	// Used by the ragdoll code
+	qboolean	ragdoll;
+	float		shellAlpha;
+	struct		RagDoll_s *RagDollData;
 
 } entity_t;
 
