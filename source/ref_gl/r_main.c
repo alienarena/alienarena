@@ -477,6 +477,9 @@ static void R_DrawEntity (void)
 	vec3_t		dist, span;
 	float		size;
 	
+	if (currententity->nodraw) //don't draw this model, it's been overriden by the engine for one reason or another
+		return;
+	
 	currentmodel = currententity->model;
 	
 	if (cl_simpleitems->integer && currentmodel && currentmodel->simple_texnum)
@@ -587,6 +590,18 @@ void R_DrawEntitiesOnList (void)
 	}
 	
 	R_DrawEntityList (r_newrefdef.entities, r_newrefdef.num_entities);
+}
+
+void R_DrawRagdollsOnList (void)
+{
+	if (!r_ragdolls->integer)
+		return;
+	
+	if (!r_drawentities->integer)
+		return;
+	
+	// Just using MAX_RAGDOLLS is fine, the inactive ones have nodraw set
+	R_DrawEntityList (RagDollEntity, MAX_RAGDOLLS);
 }
 
 void R_DrawViewEntitiesOnList (void)
@@ -1068,7 +1083,9 @@ void R_RenderView (refdef_t *fd)
 
 	R_CastShadow();
 
-	R_RenderAllRagdolls(); //move back ahead of r_castshadow when we figure out shadow jitter bug
+	//move back ahead of r_castshadow when we figure out shadow jitter bug
+	R_SimulateAllRagdolls(); 
+	R_DrawRagdollsOnList (); 
 	
 	R_DrawViewEntitiesOnList ();
 

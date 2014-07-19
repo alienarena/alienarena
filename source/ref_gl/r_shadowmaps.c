@@ -749,16 +749,67 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 #include "r_lodcalc.h"
 
 extern cvar_t *cl_simpleitems;
+
+static void R_DrawDynamicCasterEntity (void)
+{
+	vec3_t	dist;
+	trace_t	r_trace;
+	
+	if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
+		return;
+
+	if(!currententity->model)
+		return;
+
+	if (currententity->model->type <= mod_brush) 
+		return;
+	
+	if (cl_simpleitems->integer && currententity->model->simple_texnum != 0)
+		return; //TODO: simple items casting shadows?
+
+	if(r_ragdolls->value && currententity->model->type == mod_iqm && currententity->model->hasRagDoll && !currententity->ragdoll)
+	{
+		if(currententity->frame > 198)
+			return;
+	}
+
+	//distance from light, if too far, don't render(to do - check against brightness for dist!)
+	VectorSubtract(dynLight->origin, currententity->origin, dist);
+	if(VectorLength(dist) > 256.0f)
+		return;
+
+	//trace visibility from light - we don't render objects the light doesn't hit!
+	r_trace = CM_BoxTrace(dynLight->origin, currententity->origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+	if(r_trace.fraction != 1.0)
+		return;
+
+	currentmodel = currententity->model;
+
+	//get distance
+	VectorSubtract(r_origin, currententity->origin, dist);
+	
+	//set lod if available
+	if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
+	{
+		if(currententity->lod2)
+			currentmodel = currententity->lod2;
+	}
+	else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
+	{
+		if(currententity->lod1)
+			currentmodel = currententity->lod1;
+	}
+	if (currententity->lod2)
+		currentmodel = currententity->lod2;
+
+	R_Mesh_DrawCaster ();
+}
+
 void R_DrawDynamicCaster(void)
 {
 	int		i;
-	vec3_t	dist, mins, maxs;
-	trace_t	r_trace;
 	int		RagDollID;
 	vec3_t origin = {0, 0, 0};
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
 
 	r_shadowmapcount = 0;
 		
@@ -798,72 +849,20 @@ void R_DrawDynamicCaster(void)
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
-			continue;
-
-		if(!currententity->model)
-			continue;
-
-		if (currententity->model->type <= mod_brush) 
-			continue;
-		
-		if (cl_simpleitems->integer && currententity->model->simple_texnum != 0)
-			continue; //TODO: simple items casting shadows?
-
-		if(r_ragdolls->value && currententity->model->type == mod_iqm && currententity->model->hasRagDoll)
-		{
-			if(currententity->frame > 198)
-				continue;
-		}
-
-		//distance from light, if too far, don't render(to do - check against brightness for dist!)
-		VectorSubtract(dynLight->origin, currententity->origin, dist);
-		if(VectorLength(dist) > 256.0f)
-			continue;
-
-		//trace visibility from light - we don't render objects the light doesn't hit!
-		r_trace = CM_BoxTrace(dynLight->origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			continue;
-
-		currentmodel = currententity->model;
-
-		//get distance
-		VectorSubtract(r_origin, currententity->origin, dist);
-		
-		//set lod if available
-		if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
-		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
-		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
-		}
-		if (currententity->lod2)
-			currentmodel = currententity->lod2;
-
-		R_Mesh_DrawCaster ();
+		R_DrawDynamicCasterEntity ();
 	}
 
-	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	if (r_ragdolls->integer)
 	{
-		if(RagDoll[RagDollID].destroyed)
-			continue;
+		for (RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+		{
+			if (RagDoll[RagDollID].destroyed)
+				continue;
 		
-		//distance from light, if too far, don't render(to do - check against brightness for dist!)
-		VectorSubtract(dynLight->origin, RagDoll[RagDollID].curPos, dist);
-		if(VectorLength(dist) > 256.0f)
-			continue;
-
-		//trace visibility from light - we don't render objects the light doesn't hit!
-		r_trace = CM_BoxTrace(dynLight->origin, RagDoll[RagDollID].curPos, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			continue;
-
-		IQM_DrawRagDollCaster (RagDollID);
+			currententity = &RagDollEntity[RagDollID];
+		
+			R_DrawDynamicCasterEntity ();
+		}
 	}
 
 	SM_SetTextureMatrix(0);
@@ -1047,7 +1046,7 @@ void R_DrawEntityCaster(entity_t *ent)
 	if (cl_simpleitems->integer && ent->model->simple_texnum != 0)
 		return;
 
-	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll)
+	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll)
 	{
 		if(ent->frame > 198)
 			return;
@@ -1093,24 +1092,28 @@ void R_DrawEntityCaster(entity_t *ent)
 
 	prev = currentmodel;
 	
-	currentmodel = ent->model;
-
-	//get view distance
-	VectorSubtract(r_origin, ent->origin, dist);
-		
-	//set lod if available
-	if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
+	// We only do LODs for non-ragdoll meshes-- for now.
+	if (!ent->ragdoll)
 	{
-		if(currententity->lod2)
+		currentmodel = ent->model;
+
+		//get view distance
+		VectorSubtract(r_origin, ent->origin, dist);
+		
+		//set lod if available
+		if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
+		{
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
+		{
+			if(currententity->lod1)
+				currentmodel = currententity->lod1;
+		}
+		if (currententity->lod2)
 			currentmodel = currententity->lod2;
 	}
-	else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
-	{
-		if(currententity->lod1)
-			currentmodel = currententity->lod1;
-	}
-	if (currententity->lod2)
-		currentmodel = currententity->lod2;
 
 	R_Mesh_DrawCaster ();
 	
@@ -1200,136 +1203,6 @@ void R_GenerateEntityShadow( void )
 			GLSTATE_DISABLE_BLEND
 		}
 
-		r_shadowmapcount = 0;
-	}
-}
-
-void R_DrawRagdollCaster(int RagDollID)
-{		
-	vec3_t mins, maxs;
-	trace_t	r_trace;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
-
-	r_shadowmapcount = 0;
-		
-	//trace visibility from light - we don't render objects the light doesn't hit!
-	r_trace = CM_BoxTrace(statLightPosition, RagDoll[RagDollID].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-	if(r_trace.fraction != 1.0)
-		return;
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
-
-	//Clear previous frame values
-	qglClear( GL_DEPTH_BUFFER_BIT);
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglDisable(GL_CULL_FACE);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
-
-	//get light origin 
-	//set camera
-	SM_SetupMatrices(statLightPosition[0],statLightPosition[1],statLightPosition[2]+64,RagDoll[RagDollID].origin[0],RagDoll[RagDollID].origin[1],RagDoll[RagDollID].origin[2]-128);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );	
-	
-	IQM_DrawRagDollCaster ( RagDollID );
-	
-	SM_SetTextureMatrix(1);
-		
-	qglDepthMask (1);		// back to writing
-
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
-	qglEnable(GL_CULL_FACE);
-
-	// back to previous screen coordinates
-	R_SetupViewport ();
-
-	qglPopMatrix();
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);	
-
-	r_shadowmapcount = 1;
-	
-	GL_InvalidateTextureState (); // FIXME
-}
-
-void R_GenerateRagdollShadow( int RagDollID )
-{
-	if(gl_shadowmaps->integer && gl_normalmaps->integer)
-	{
-		vec3_t dist, tmp;
-		float rad;
-
-		VectorSubtract(RagDoll[RagDollID].ragDollMesh->maxs, RagDoll[RagDollID].ragDollMesh->mins, tmp);
-		VectorScale (tmp, 1.666, tmp);
-		rad = VectorLength (tmp);		
-
-		if( R_CullSphere( RagDoll[RagDollID].origin, rad, 15 ) )
-			return;
-
-		//get view distance
-		VectorSubtract(r_origin, RagDoll[RagDollID].origin, dist);
-
-		//fade out shadows both by distance from view, and by distance from light
-		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST); 
-
-		if (r_shadowcutoff->value < 0.1)
-			fadeShadow = 1.0;
-		else if (VectorLength (dist) > fadeshadow_cutoff)
-		{
-			fadeShadow = VectorLength(dist) - fadeshadow_cutoff;
-			if (fadeShadow > 512)
-				return;
-			else
-				fadeShadow = 1.0 - fadeShadow/512.0; //fade out smoothly over 512 units.
-		}
-		else
-			fadeShadow = 1.0;		
-		
-		qglEnable(GL_DEPTH_TEST);
-		qglClearColor(0,0,0,1.0f);
-
-		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
-
-		R_DrawRagdollCaster(RagDollID);
-
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-		//re-render affected polys with shadowmap for this entity(note - blend "if darker").
-		if(r_shadowmapcount > 0)
-		{
-			GLSTATE_ENABLE_BLEND
-			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
-
-			R_DrawShadowMapWorld(true, RagDoll[RagDollID].origin);
-
-			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			GLSTATE_DISABLE_BLEND
-		}
-
-		currentmodel = RagDoll[RagDollID].ragDollMesh;	
-		
 		r_shadowmapcount = 0;
 	}
 }

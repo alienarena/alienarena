@@ -290,10 +290,7 @@ qboolean R_Mesh_CullBBox (vec3_t bbox[8])
 // should be able to handle all mesh types
 static qboolean R_Mesh_CullModel (void)
 {
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
-		return true;
-	
-	if (currententity->nodraw) //don't draw this model, it's been overriden by the engine for one reason or another
+	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL) && !(currententity->flags & RF_MENUMODEL))
 		return true;
 	
 	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
@@ -338,7 +335,11 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 	
 	if (modtypes[currentmodel->type].skeletal)
 	{
-		glUniformMatrix3x4fvARB (uniforms->outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) currentmodel->outframe);
+		// For converting ODE object positions back to IQM joint positions.
+		static matrix3x4_t outframe[SKELETAL_MAX_BONEMATS];
+		assert (currentmodel->type == mod_iqm);
+		IQM_AnimateFrame (outframe);
+		glUniformMatrix3x4fvARB (uniforms->outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) outframe);
 		animtype |= 1;
 	}
 	
@@ -349,11 +350,19 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 	glUniform1fARB (uniforms->lerp, frontlerp);
 }
 
-static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboolean fragmentshader, float alpha)
+static void R_Mesh_SetupShellRender (vec3_t lightcolor, qboolean fragmentshader)
 {
 	int i;
+	float alpha;
 	vec3_t lightVec, lightVal;
 	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
+	
+	// FIXME HACK
+	// TODO: other meshes might want dynamic shell alpha too!
+	if (currententity->ragdoll)
+		alpha = currententity->shellAlpha;
+	else
+		alpha = 0.33f;
 	
 	//send light level and color to shader, ramp up a bit
 	VectorCopy (lightcolor, lightVal);
@@ -369,14 +378,14 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 	
 	//brighten things slightly
 	for (i = 0; i < 3; i++ )
-		lightVal[i] *= (ragdoll?1.25:2.5);
+		lightVal[i] *= (currententity->ragdoll?1.25:2.5);
 			   
 	//simple directional(relative light position)
 	VectorSubtract (lightPosition, currententity->origin, lightVec);
 	VectorMA (lightPosition, 1.0, lightVec, lightPosition);
 	R_ModelViewTransform (lightPosition, lightVec);
 
-	if (ragdoll)
+	if (currententity->ragdoll)
 		qglDepthMask(false);
 
 	if (fragmentshader)
@@ -399,7 +408,8 @@ static void R_Mesh_SetupShellRender (qboolean ragdoll, vec3_t lightcolor, qboole
 	glUniform1iARB (uniforms->useGlow, 0);
 	glUniform1iARB (uniforms->useCube, 0);
 
-	glUniform1fARB (uniforms->useShell, ragdoll?1.6:0.4);
+	glUniform1fARB (uniforms->useShell, currententity->ragdoll?1.6:0.4);
+	// FIXME: the GLSL shader doesn't support shell alpha!
 	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
 	glUniform1fARB (uniforms->time, rs_realtime);
 	
@@ -668,7 +678,7 @@ static void R_Mesh_DrawVBO_Callback (void)
 R_Mesh_DrawFrame: should be able to handle all types of meshes.
 =============
 */
-void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
+static void R_Mesh_DrawFrame (int skinnum)
 {
 	int			i;
 	vec3_t		lightcolor;
@@ -740,7 +750,7 @@ void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha)
 		if (currententity->flags & RF_SHELL_ANY)
 		{
 			fragmentshader = gl_normalmaps->integer;
-			R_Mesh_SetupShellRender (ragdoll, lightcolor, fragmentshader, shellAlpha);
+			R_Mesh_SetupShellRender (lightcolor, fragmentshader);
 		}
 		else
 		{
@@ -854,10 +864,10 @@ void R_Mesh_Draw ( void )
 {
 	image_t		*skin;
 
-	if ( R_Mesh_CullModel () )
+	if (R_Mesh_CullModel ())
 		return;
 	
-	R_GetLightVals(currententity->origin, false);
+	R_GetLightVals (currententity->origin, false);
 
 	if (modtypes[currentmodel->type].castshadowmap)
 		R_GenerateEntityShadow();
@@ -868,8 +878,6 @@ void R_Mesh_Draw ( void )
 	
 	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();
-	else if (currentmodel->type == mod_iqm)
-		IQM_AnimateFrame ();
 	// New model types go here
 
 	R_Mesh_SetShadelight ();
@@ -901,7 +909,8 @@ void R_Mesh_Draw ( void )
 
 
 	qglPushMatrix ();
-	R_RotateForEntity (currententity);
+	if (!currententity->ragdoll) // HACK
+		R_RotateForEntity (currententity);
 
 	// select skin
 	if (currententity->skin) 
@@ -927,7 +936,7 @@ void R_Mesh_Draw ( void )
 		}
 	}
 
-	R_Mesh_DrawFrame(skin->texnum, false, 0.33);
+	R_Mesh_DrawFrame (skin->texnum);
 	
 	if (modtypes[currentmodel->type].decal)
 	{
@@ -960,9 +969,9 @@ void R_Mesh_Draw ( void )
 	
 	qglColor4f (1,1,1,1);
 
-	if(r_minimap->integer)
+	if (r_minimap->integer && !currententity->ragdoll)
 	{
-	   if ( currententity->flags & RF_MONSTER)
+	   if (currententity->flags & RF_MONSTER)
 	   {
 			RadarEnts[numRadarEnts].color[0]= 1.0;
 			RadarEnts[numRadarEnts].color[1]= 0.0;
@@ -972,7 +981,7 @@ void R_Mesh_Draw ( void )
 		else
 			return;
 
-		VectorCopy(currententity->origin,RadarEnts[numRadarEnts].org);
+		VectorCopy (currententity->origin,RadarEnts[numRadarEnts].org);
 		numRadarEnts++;
 	}
 }
@@ -1001,12 +1010,11 @@ void R_Mesh_DrawCaster ( void )
 		return;
 
 	qglPushMatrix ();
-	R_RotateForEntity (currententity);
+	if (!currententity->ragdoll) // HACK
+		R_RotateForEntity (currententity);
 	
 	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();
-	else if (currentmodel->type == mod_iqm)
-		IQM_AnimateFrame ();
 	// New model types go here
 
 	if(currententity->frame == 0 && currentmodel->num_frames == 1)

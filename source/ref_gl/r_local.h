@@ -706,7 +706,6 @@ float  dynFactor;
 extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
-extern void R_Mesh_DrawFrame (int skinnum, qboolean ragdoll, float shellAlpha);
 qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
 
 //iqm
@@ -716,12 +715,10 @@ extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 extern void R_DrawINTERQUAKEMODEL(void);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
-extern int IQM_NextFrame(int frame);
-extern void IQM_AnimateRagdoll(int RagDollID);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_DrawShadow(vec3_t origin);
 extern qboolean IQM_CullModel( void );
-extern void IQM_AnimateFrame (void);
+extern void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
 //md2
 extern qboolean MD2_CullModel( void );
@@ -736,9 +733,6 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 //terrain decals
 void Mod_LoadDecalModel (model_t *mod, void *_buf);
 void R_ParseDecalEntity (char *match, char *block);
-
-//Ragdoll
-int r_DrawingRagDoll;
 
 /*
 ====================================================================

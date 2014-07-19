@@ -1014,7 +1014,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 
 #define USE_MESH_ANIM_LIBRARY "/*USE_MESH_ANIM_LIBRARY*/"
 static char mesh_anim_library[] = STRINGIFY (
-	uniform mat3x4 bonemats[70];
+	uniform mat3x4 bonemats[70]; // Keep this equal to SKELETAL_MAX_BONEMATS
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	
 	// MD2 only

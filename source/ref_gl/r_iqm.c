@@ -63,17 +63,17 @@ void Matrix3x4_FromQuatAndVectors(matrix3x4_t *out, vec4_t rot, const float tran
 {
 	vec3_t a, b, c;
 
-    //Convert the quat
-    {
-        float x = rot[0], y = rot[1], z = rot[2], w = rot[3],
-              tx = 2*x, ty = 2*y, tz = 2*z,
-              txx = tx*x, tyy = ty*y, tzz = tz*z,
-              txy = tx*y, txz = tx*z, tyz = ty*z,
-              twx = w*tx, twy = w*ty, twz = w*tz;
-        VectorSet(a, 1 - (tyy + tzz), txy - twz, txz + twy);
-        VectorSet(b, txy + twz, 1 - (txx + tzz), tyz - twx);
-        VectorSet(c, txz - twy, tyz + twx, 1 - (txx + tyy));
-    }
+	//Convert the quat
+	{
+		float	x = rot[0], y = rot[1], z = rot[2], w = rot[3],
+				tx = 2*x, ty = 2*y, tz = 2*z,
+				txx = tx*x, tyy = ty*y, tzz = tz*z,
+				txy = tx*y, txz = tx*z, tyz = ty*z,
+				twx = w*tx, twy = w*ty, twz = w*tz;
+		VectorSet(a, 1 - (tyy + tzz), txy - twz, txz + twy);
+		VectorSet(b, txy + twz, 1 - (txx + tzz), tyz - twx);
+		VectorSet(c, txz - twy, tyz + twx, 1 - (txx + tyy));
+	}
 
 	Vector4Set(out->a, a[0]*scale[0], a[1]*scale[1], a[2]*scale[2], trans[0]);
 	Vector4Set(out->b, b[0]*scale[0], b[1]*scale[1], b[2]*scale[2], trans[1]);
@@ -84,26 +84,26 @@ void Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 {
 	vec4_t a, b, c, d;
 
-    Vector4Scale(mat2.a, mat1.a[0], a);
-    Vector4Scale(mat2.b, mat1.a[1], b);
-    Vector4Scale(mat2.c, mat1.a[2], c);
-    Vector4Add(a, b, d);
-    Vector4Add(d, c, d);
-    Vector4Set(out->a, d[0], d[1], d[2], d[3] + mat1.a[3]);
+	Vector4Scale(mat2.a, mat1.a[0], a);
+	Vector4Scale(mat2.b, mat1.a[1], b);
+	Vector4Scale(mat2.c, mat1.a[2], c);
+	Vector4Add(a, b, d);
+	Vector4Add(d, c, d);
+	Vector4Set(out->a, d[0], d[1], d[2], d[3] + mat1.a[3]);
 
-    Vector4Scale(mat2.a, mat1.b[0], a);
-    Vector4Scale(mat2.b, mat1.b[1], b);
-    Vector4Scale(mat2.c, mat1.b[2], c);
-    Vector4Add(a, b, d);
-    Vector4Add(d, c, d);
-    Vector4Set(out->b, d[0], d[1], d[2], d[3] + mat1.b[3]);
+	Vector4Scale(mat2.a, mat1.b[0], a);
+	Vector4Scale(mat2.b, mat1.b[1], b);
+	Vector4Scale(mat2.c, mat1.b[2], c);
+	Vector4Add(a, b, d);
+	Vector4Add(d, c, d);
+	Vector4Set(out->b, d[0], d[1], d[2], d[3] + mat1.b[3]);
 
-    Vector4Scale(mat2.a, mat1.c[0], a);
-    Vector4Scale(mat2.b, mat1.c[1], b);
-    Vector4Scale(mat2.c, mat1.c[2], c);
-    Vector4Add(a, b, d);
-    Vector4Add(d, c, d);
-    Vector4Set(out->c, d[0], d[1], d[2], d[3] + mat1.c[3]);
+	Vector4Scale(mat2.a, mat1.c[0], a);
+	Vector4Scale(mat2.b, mat1.c[1], b);
+	Vector4Scale(mat2.c, mat1.c[2], c);
+	Vector4Add(a, b, d);
+	Vector4Add(d, c, d);
+	Vector4Set(out->c, d[0], d[1], d[2], d[3] + mat1.c[3]);
 }
 
 void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale)
@@ -138,32 +138,32 @@ void Matrix3x4GenRotate(matrix3x4_t *out, float angle, const vec3_t axis)
 
 void Matrix3x4ForEntity(matrix3x4_t *out, entity_t *ent)
 {
-    matrix3x4_t rotmat;
-    vec3_t rotaxis;
-    Vector4Set(out->a, 1, 0, 0, 0);
-    Vector4Set(out->b, 0, 1, 0, 0);
-    Vector4Set(out->c, 0, 0, 1, 0);
-    if(ent->angles[2])
-    {
-        VectorSet(rotaxis, -1, 0, 0);
-        Matrix3x4GenRotate(&rotmat, ent->angles[2]*pi/180, rotaxis);
-        Matrix3x4_Multiply(out, rotmat, *out);
-    }
-    if(ent->angles[0])
-    {
-        VectorSet(rotaxis, 0, -1, 0);
-        Matrix3x4GenRotate(&rotmat, ent->angles[0]*pi/180, rotaxis);
-        Matrix3x4_Multiply(out, rotmat, *out);
-    }
-    if(ent->angles[1])
-    {
-        VectorSet(rotaxis, 0, 0, 1);
-        Matrix3x4GenRotate(&rotmat, ent->angles[1]*pi/180, rotaxis);
-        Matrix3x4_Multiply(out, rotmat, *out);
-    }
-    out->a[3] += ent->origin[0];
-    out->b[3] += ent->origin[1];
-    out->c[3] += ent->origin[2];
+	matrix3x4_t rotmat;
+	vec3_t rotaxis;
+	Vector4Set(out->a, 1, 0, 0, 0);
+	Vector4Set(out->b, 0, 1, 0, 0);
+	Vector4Set(out->c, 0, 0, 1, 0);
+	if(ent->angles[2])
+	{
+		VectorSet(rotaxis, -1, 0, 0);
+		Matrix3x4GenRotate(&rotmat, ent->angles[2]*pi/180, rotaxis);
+		Matrix3x4_Multiply(out, rotmat, *out);
+	}
+	if(ent->angles[0])
+	{
+		VectorSet(rotaxis, 0, -1, 0);
+		Matrix3x4GenRotate(&rotmat, ent->angles[0]*pi/180, rotaxis);
+		Matrix3x4_Multiply(out, rotmat, *out);
+	}
+	if(ent->angles[1])
+	{
+		VectorSet(rotaxis, 0, 0, 1);
+		Matrix3x4GenRotate(&rotmat, ent->angles[1]*pi/180, rotaxis);
+		Matrix3x4_Multiply(out, rotmat, *out);
+	}
+	out->a[3] += ent->origin[0];
+	out->b[3] += ent->origin[1];
+	out->c[3] += ent->origin[2];
 }
 
 void Matrix3x4GenFromODE(matrix3x4_t *out, const dReal *rot, const dReal *trans)
@@ -513,6 +513,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		{
 			translate_size = 3;
 			rotate_size = 3;
+
 			scale_size = 3;
 		}
 		else
@@ -597,7 +598,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			}
 		}
 	}
-
+	
 	mod->outframe = (matrix3x4_t *)Hunk_Alloc(mod->num_joints * sizeof(matrix3x4_t));
 
 	// load bounding box data
@@ -813,13 +814,9 @@ int IQM_NextFrame(int frame)
 	return outframe;
 }
 
-static inline void IQM_Bend (matrix3x4_t *temp, matrix3x4_t rmat, int jointnum)
+static inline void IQM_Bend (matrix3x4_t *temp, matrix3x4_t rmat, matrix3x4_t *basejoint, matrix3x4_t *outjoint)
 {
 	vec3_t		basePosition, oldPosition, newPosition;
-	matrix3x4_t	*basejoint, *outjoint;
-	
-	basejoint = &currentmodel->baseframe[jointnum];
-	outjoint = &currentmodel->outframe[jointnum];
 	
 	// concatenate the rotation with the bone
 	Matrix3x4_Multiply(temp, rmat, *outjoint);
@@ -844,130 +841,139 @@ static inline void IQM_Bend (matrix3x4_t *temp, matrix3x4_t rmat, int jointnum)
 	Matrix3x4_Copy(outjoint, *temp);
 }
 
-void IQM_AnimateFrame (void)
+static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
 {
-	int i;
 	int frame1, frame2;
 	float frameoffset;
 	float curframe;
 	int nextframe;
+	const matrix3x4_t *mat1, *mat2;
+	int i;
 	float modelpitch;
 	float modelroll;
-	
-	modelpitch = DEG2RAD(currententity->angles[PITCH]); 
-	modelroll = DEG2RAD(currententity->angles[ROLL]);
 	
 	curframe = IQM_SelectFrame ();
 	nextframe = IQM_NextFrame (currententity->frame);
 
-	frame1 = (int)floor(curframe);
+	frame1 = (int)floor (curframe);
 	frame2 = nextframe;
 	frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
 
+	mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints];
+	mat2 = &currentmodel->frames[frame2 * currentmodel->num_joints];
+	
+	modelpitch = DEG2RAD (currententity->angles[PITCH]); 
+	modelroll = DEG2RAD (currententity->angles[ROLL]);
+	
+	// Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
+	// Concatenate the result with the inverse of the base pose.
+	// You would normally do animation blending and inter-frame blending here in a 3D engine.
+
+	for (i = 0; i < currentmodel->num_joints; i++)
 	{
-		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
-			*mat2 = &currentmodel->frames[frame2 * currentmodel->num_joints];
+		const char *currentjoint_name;
+		signed int currentjoint_parent;
+		matrix3x4_t mat, rmat, temp;
+		vec3_t rot;
+		Matrix3x4_Scale (&mat, mat1[i], 1-frameoffset);
+		Matrix3x4_Scale (&temp, mat2[i], frameoffset);
 
-		// Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
-		// Concatenate the result with the inverse of the base pose.
-		// You would normally do animation blending and inter-frame blending here in a 3D engine.
+		Matrix3x4_Add (&mat, mat, temp);
+		
+		currentjoint_name = &currentmodel->jointname[currentmodel->joints[i].name];
+		currentjoint_parent = currentmodel->joints[i].parent;
 
-		for(i = 0; i < currentmodel->num_joints; i++)
+		if (currentjoint_parent >= 0)
+			Matrix3x4_Multiply (&outframe[i], outframe[currentjoint_parent], mat);
+		else
+			Matrix3x4_Copy (&outframe[i], mat);
+
+		//bend the model at the waist for player pitch
+		if (!strcmp(currentjoint_name, "Spine") || !strcmp(currentjoint_name, "Spine.001"))
 		{
-			const char *currentjoint_name;
-			signed int currentjoint_parent;
-			matrix3x4_t mat, rmat, temp;
-			vec3_t rot;
-			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
-			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
-
-			Matrix3x4_Add(&mat, mat, temp);
+			VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+			Matrix3x4GenRotate(&rmat, modelpitch, rot);
 			
-			currentjoint_name = &currentmodel->jointname[currentmodel->joints[i].name];
-			currentjoint_parent = currentmodel->joints[i].parent;
+			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+		}
+		//now rotate the legs back
+		if (!strcmp(currentjoint_name, "hip.l") || !strcmp(currentjoint_name, "hip.r"))
+		{
+			VectorSet(rot, 0, 1, 0);
+			Matrix3x4GenRotate(&rmat, -modelpitch, rot);
+			
+			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+		}
 
-			if(currentjoint_parent >= 0)
-				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentjoint_parent], mat);
-			else
-				Matrix3x4_Copy(&currentmodel->outframe[i], mat);
-
-			//bend the model at the waist for player pitch
-			if(!strcmp(currentjoint_name, "Spine") || !strcmp(currentjoint_name, "Spine.001"))
-			{
-				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
-				Matrix3x4GenRotate(&rmat, modelpitch, rot);
-				
-				IQM_Bend (&temp, rmat, i);
-			}
-			//now rotate the legs back
-			if(!strcmp(currentjoint_name, "hip.l") || !strcmp(currentjoint_name, "hip.r"))
-			{
-				VectorSet(rot, 0, 1, 0);
-				Matrix3x4GenRotate(&rmat, -modelpitch, rot);
-				
-				IQM_Bend (&temp, rmat, i);
-			}
-
-			//bend the model at the waist for player roll
-			if(!strcmp(currentjoint_name, "Spine") || !strcmp(currentjoint_name, "Spine.001"))
-			{
-				VectorSet(rot, 1, 0, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
-				Matrix3x4GenRotate(&rmat, modelroll, rot);
-				
-				IQM_Bend (&temp, rmat, i);
-			}
-			//now rotate the legs back
-			if(!strcmp(currentjoint_name, "hip.l") || !strcmp(currentjoint_name, "hip.r"))
-			{
-				VectorSet(rot, 1, 0, 0);
-				Matrix3x4GenRotate(&rmat, -modelroll, rot);
-				
-				IQM_Bend (&temp, rmat, i);
-			}
+		//bend the model at the waist for player roll
+		if (!strcmp(currentjoint_name, "Spine") || !strcmp(currentjoint_name, "Spine.001"))
+		{
+			VectorSet(rot, 1, 0, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+			Matrix3x4GenRotate(&rmat, modelroll, rot);
+			
+			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+		}
+		//now rotate the legs back
+		if (!strcmp(currentjoint_name, "hip.l") || !strcmp(currentjoint_name, "hip.r"))
+		{
+			VectorSet(rot, 1, 0, 0);
+			Matrix3x4GenRotate(&rmat, -modelroll, rot);
+			
+			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
 		}
 	}
 }
 
-void IQM_AnimateRagdoll(int RagDollID)
+static void IQM_AnimateFrame_ragdoll (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS], const matrix3x4_t *initframe)
 {
 	//we only deal with one frame
 
 	//animate using the rotations from our corresponding ODE objects.
 	int i, j;
 	{
-		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->num_joints; i++)
+		for (i = 0; i < currentmodel->num_joints; i++)
 		{
-			matrix3x4_t mat, rmat;
-            int parent;
+			int parent;
 
-            for(j = 0; j < RagDollBindsCount; j++)
-            {
-				if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
+			for (j = 0; j < RagDollBindsCount; j++)
+			{
+				if (!strcmp (&currentmodel->jointname[currentmodel->joints[i].name], RagDollBinds[j].name))
 				{
-					int object = RagDollBinds[j].object;
-					const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
-					const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
-					Matrix3x4GenFromODE(&rmat, odeRot, odePos);
-					Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
+					matrix3x4_t rmat;
+					RagDollObject_t *object = &currententity->RagDollData->RagDollObject[RagDollBinds[j].object];
+					const dReal *odeRot = dBodyGetRotation (object->body);
+					const dReal *odePos = dBodyGetPosition (object->body);
+					Matrix3x4GenFromODE (&rmat, odeRot, odePos);
+					Matrix3x4_Multiply (&outframe[i], rmat, object->initmat);
 					goto nextjoint;
 				}
 			}
 
-			parent = RagDoll[RagDollID].ragDollMesh->joints[i].parent;
-            if(parent >= 0)
-            {
-                Matrix3x4_Invert(&mat, RagDoll[RagDollID].initframe[parent]);
-                Matrix3x4_Multiply(&mat, mat, RagDoll[RagDollID].initframe[i]);
-                Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], RagDoll[RagDollID].ragDollMesh->outframe[parent], mat);
-            }
-            else
-                memset(&RagDoll[RagDollID].ragDollMesh->outframe[i], 0, sizeof(matrix3x4_t));
+			parent = currentmodel->joints[i].parent;
+			if (parent >= 0)
+			{
+				matrix3x4_t mat;
+				// FIXME: inefficient
+				Matrix3x4_Invert(&mat, initframe[parent]);
+                Matrix3x4_Multiply(&mat, mat, initframe[i]);
+				Matrix3x4_Multiply (&outframe[i], outframe[parent], mat);
+			}
+			else
+				memset (&outframe[i], 0, sizeof(matrix3x4_t));
 
-        nextjoint:;
+		nextjoint:;
 		}
 	}
+}
+
+void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
+{
+	if (currententity->ragdoll)
+		IQM_AnimateFrame_ragdoll (outframe, currententity->RagDollData->initframe);
+	else
+		IQM_AnimateFrame_standard (outframe);
 }
 
 qboolean IQM_CullModel( void )
@@ -1005,7 +1011,7 @@ qboolean IQM_CullModel( void )
 		return true;
 	
 	// TODO: could probably find a better place for this.
-	if(r_ragdolls->integer)
+	if(r_ragdolls->integer && !currententity->ragdoll)
 	{
 		//Ragdolls take over at beginning of each death sequence
 		if	(	!(currententity->flags & RF_TRANSLUCENT) &&
@@ -1015,11 +1021,7 @@ qboolean IQM_CullModel( void )
 				currententity->frame == 238)
 			)
 		{
-			// Make sure the positions of all the arms and legs and stuff have
-			// been initialized-- necessary for the current player's avatar,
-			// which has not yet been rendered.
-			IQM_AnimateFrame (); 
-			RGD_AddNewRagdoll(currententity->origin, currententity->name);
+			RGD_AddNewRagdoll (currententity->origin, currententity->name);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
 		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
@@ -1051,21 +1053,4 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 		else
 			return false;
 	}	
-}
-
-void R_Mesh_DrawCasterFrame (qboolean lerped);
-void IQM_DrawRagDollCaster (int RagDollID)
-{
-	if ( RGD_CullRagDolls( RagDollID ) )
-		return;
-
-    qglPushMatrix ();
-
-	IQM_AnimateRagdoll(RagDollID);
-
-	currentmodel = RagDoll[RagDollID].ragDollMesh;
-
-	R_Mesh_DrawCasterFrame (false);
-
-	qglPopMatrix();
 }

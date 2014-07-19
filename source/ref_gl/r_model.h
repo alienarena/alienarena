@@ -330,6 +330,9 @@ typedef struct {
 
 } mragdoll_t;
 
+// NOTE: Keep this up-to-date with the GLSL shaders.
+#define SKELETAL_MAX_BONEMATS 70
+
 typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, mod_decal, num_modtypes} modtype_t;
 
 // This array is a look-up table for the traits of various mesh formats.

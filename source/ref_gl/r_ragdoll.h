@@ -188,12 +188,10 @@ typedef struct RagDoll_s {
 
 	RagDollForce_t RagDollForces[MAX_FORCES];
 	
-	//mesh information
-	model_t *ragDollMesh;
-    matrix3x4_t *initframe;
-	int		texnum;
-	int		flags;
-	struct	rscript_s *script;
+	// For grabbing the animated position of the mesh just before it goes limp
+	matrix3x4_t initframe[SKELETAL_MAX_BONEMATS];
+	
+	// entity information
 	float	angles[3];
 	vec3_t	origin;
 	vec3_t	curPos;
@@ -204,21 +202,20 @@ typedef struct RagDoll_s {
 
 } RagDoll_t;
 
-RagDoll_t RagDoll[MAX_RAGDOLLS]; 
+RagDoll_t RagDoll[MAX_RAGDOLLS];
 
 // A few values will be copied into this. It's a bit wasteful, but it allows
 // us to reuse code that expects them to be in an entity_t struct.
-entity_t RagDollEntity;
+entity_t RagDollEntity[MAX_RAGDOLLS];
 
 //surface for ragdoll to collide
 RagDollWorld_t RagDollTriWorld;
 
 //Funcs
-extern void R_RenderAllRagdolls ( void );
+extern void R_SimulateAllRagdolls ( void );
 extern void R_ClearAllRagdolls( void );
 extern void RGD_CreateWorldObject( void );
 extern void RGD_DestroyWorldObject( void );
 extern void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] );
 extern void RGD_DestroyWorldTrimesh();
 extern void RGD_BuildWorldTrimesh ();
-extern qboolean RGD_CullRagDolls( int RagDollID );
