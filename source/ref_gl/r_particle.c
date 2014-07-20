@@ -1000,6 +1000,8 @@ void R_DrawVegetationSurface ( void )
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
 
+	GL_SelectTexture (0);
+	
 	qglDepthMask( GL_FALSE );
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -1476,6 +1478,8 @@ void R_DrawSimpleItems ( void )
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
 
+	GL_SelectTexture (0);
+	
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction ( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Bind (0);
