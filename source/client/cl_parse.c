@@ -440,7 +440,6 @@ void CL_ParseBaseline (void)
 /*
 ================
 CL_LoadClientinfo
-
 ================
 */
 void CL_LoadClientinfo (clientinfo_t *ci, char *s)
@@ -556,15 +555,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		model_filename[i] = tolower(model_filename[i]);
 	while (model_filename[i++]);
 
-	FS_FOpenFile (model_filename, &file);
-	if(file)
-	{
-		//exists
-		fclose(file);
-		ci->lod1 = R_RegisterModel(model_filename);
-	}
-	else
-		ci->lod1 = NULL;
+	ci->lod1 = R_RegisterModel(model_filename);
 
 	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod2.md2", model_name);
 	i = 0;
@@ -572,15 +563,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		model_filename[i] = tolower(model_filename[i]);
 	while (model_filename[i++]);
 
-	FS_FOpenFile (model_filename, &file);
-	if(file)
-	{
-		//exists
-		fclose(file);
-		ci->lod2 = R_RegisterModel(model_filename);
-	}
-	else
-		ci->lod2 = NULL;
+	ci->lod2 = R_RegisterModel(model_filename);
 
 	// must have loaded all data types to be valid
 	if (!ci->skin || !ci->icon || !ci->model || !ci->weaponmodel[0])
