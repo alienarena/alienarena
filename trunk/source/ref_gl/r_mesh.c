@@ -379,7 +379,6 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 	
 	if (modtypes[currentmodel->type].skeletal)
 	{
-		// For converting ODE object positions back to IQM joint positions.
 		static matrix3x4_t outframe[SKELETAL_MAX_BONEMATS];
 		assert (currentmodel->type == mod_iqm);
 		IQM_AnimateFrame (outframe);
