@@ -976,61 +976,6 @@ void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
 		IQM_AnimateFrame_standard (outframe);
 }
 
-qboolean IQM_CullModel( void )
-{
-	int i;
-	vec3_t	vectors[3];
-	vec3_t  angles;
-	vec3_t	dist;
-	vec3_t bbox[8];
-
-	VectorSubtract(r_origin, currententity->origin, dist);
-
-	/*
-	** rotate the bounding box
-	*/
-	VectorCopy( currententity->angles, angles );
-	angles[YAW] = -angles[YAW];
-	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
-
-	for ( i = 0; i < 8; i++ )
-	{
-		vec3_t tmp;
-
-		VectorCopy( currentmodel->bbox[i], tmp );
-
-		bbox[i][0] = DotProduct( vectors[0], tmp );
-		bbox[i][1] = -DotProduct( vectors[1], tmp );
-		bbox[i][2] = DotProduct( vectors[2], tmp );
-
-		VectorAdd( currententity->origin, bbox[i], bbox[i] );
-	}
-
-	// Keep nearby meshes so shadows don't blatantly disappear when out of frustom
-	if (VectorLength(dist) > 150 && R_Mesh_CullBBox (bbox))
-		return true;
-	
-	// TODO: could probably find a better place for this.
-	if(r_ragdolls->integer && !currententity->ragdoll)
-	{
-		//Ragdolls take over at beginning of each death sequence
-		if	(	!(currententity->flags & RF_TRANSLUCENT) &&
-				currentmodel->hasRagDoll && 
-				(currententity->frame == 199 || 
-				currententity->frame == 220 ||
-				currententity->frame == 238)
-			)
-		{
-			RGD_AddNewRagdoll (currententity->origin, currententity->name);
-		}
-		//Do not render deathframes if using ragdolls - do not render translucent helmets
-		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
-			return true;
-	}
-	
-	return false;
-}
-
 //Can these next two be replaced with some type of animation grouping from the model?
 qboolean IQM_InAnimGroup(int frame, int oldframe)
 {
