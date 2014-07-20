@@ -706,7 +706,6 @@ float  dynFactor;
 extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
-qboolean R_Mesh_CullBBox (vec3_t bbox[8]);
 
 //iqm
 #define pi 3.14159265
@@ -717,11 +716,9 @@ extern void R_DrawINTERQUAKEMODEL(void);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_DrawShadow(vec3_t origin);
-extern qboolean IQM_CullModel( void );
 extern void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
 //md2
-extern qboolean MD2_CullModel( void );
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 void MD2_SelectFrame (void);
 
