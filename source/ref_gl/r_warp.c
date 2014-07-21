@@ -352,7 +352,7 @@ void R_RenderWaterPolys (msurface_t *fa)
 
 	//env map if specified by shader
 	if(texnum)
-		GL_Bind(texnum);
+		GL_MBind (0, texnum);
 	else
 		return;
 
@@ -479,6 +479,8 @@ void R_DrawSkyBox (void)
 	// Scale the fog distances up so fog looks like it used to before 
 	// SKYDIST was increased. 
 	R_SetupFog (((float)SKYDIST)/2300.0);
+
+	GL_SelectTexture (0);
 
 	for (i=0 ; i<6 ; i++)
 	{
