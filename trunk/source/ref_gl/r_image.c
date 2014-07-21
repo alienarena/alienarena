@@ -157,31 +157,6 @@ void GL_EnableTexture (int target, qboolean enable)
 	GL_TexEnv (GL_REPLACE);
 }
 
-// TODO: Delete this obsolete function, use GL_EnableTexture on individual
-// texture units instead.
-void GL_EnableMultitexture( qboolean enable )
-{
-	if (enable)
-	{
-		GL_EnableTexture (1, enable);
-		// The only reason why the old code worked is because GL_TexEnv was 
-		// actually broken for everything above GL_TEXTURE1, and
-		// GL_SelectTexture was broken for everything above GL_TEXTURE2. This
-		// function gets called in a lot of places where not all of the 
-		// texture units are actually used.
-/*		GL_EnableTexture (2, enable);*/
-/*		GL_EnableTexture (3, enable);*/
-	}
-	else
-	{
-		GL_EnableTexture (1, enable);
-		GL_EnableTexture (2, enable);
-		GL_EnableTexture (3, enable);
-	}
-	GL_SelectTexture (0);
-	GL_TexEnv (GL_REPLACE);
-}
-
 static inline void GL_ForceSelectTexture (void)
 {
 	if (gl_state.tmuswitch_done)

@@ -211,7 +211,6 @@ void GL_Bind (int texnum);
 void GL_MBind (int target, int texnum);
 void GL_TexEnv (GLenum value);
 void GL_EnableTexture (int target, qboolean enable);
-void GL_EnableMultitexture (qboolean enable);
 void GL_SelectTexture (int target);
 void GL_InvalidateTextureState (void);
 
