@@ -217,6 +217,8 @@ void R_Bloom_InitTextures( void )
 		return;
 	}
 	
+	GL_SelectTexture (0);
+	
 	qglGetError ();
 	
 	qglGetIntegerv(GL_SAMPLE_BUFFERS, &MultiSampleEnabled);
@@ -531,6 +533,8 @@ void R_BloomBlend ( refdef_t *fd )
 	if( screen_texture_width < BLOOM_SIZE ||
 		screen_texture_height < BLOOM_SIZE )
 		return;
+	
+	GL_SelectTexture (0);
 
 	//set up full screen workspace
 	qglViewport( 0, 0, viddef.width, viddef.height );
