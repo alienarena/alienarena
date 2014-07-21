@@ -26,9 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-extern	qboolean	scrap_dirty;
 extern cvar_t *con_font;
-void Scrap_Upload (void);
 
 /*
 ===============
@@ -136,9 +134,6 @@ static void Draw_AlphaStretchImage (float x, float y, float w, float h, const im
 	char shortname[MAX_QPATH];
 	float xscale, yscale;
 	float cropped_x, cropped_y, cropped_w, cropped_h;
-	
-	if (scrap_dirty)
-		Scrap_Upload ();
 	
 	COM_StripExtension ( gl->name, shortname );
 	

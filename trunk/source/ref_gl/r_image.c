@@ -337,6 +337,8 @@ void GL_TextureMode( char *string )
 	gl_filter_min = modes[i].minimize;
 	gl_filter_max = modes[i].maximize;
 
+	GL_SelectTexture (0);
+	
 	// change all the existing mipmap texture objects
 	for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
 	{
@@ -467,7 +469,6 @@ void	GL_ImageList_f (void)
 
 int			scrap_allocated[MAX_SCRAPS][BLOCK_WIDTH];
 byte		scrap_texels[MAX_SCRAPS][BLOCK_WIDTH*BLOCK_HEIGHT*4];
-qboolean	scrap_dirty;
 
 // returns a texture number and the position inside it
 int Scrap_AllocBlock (int w, int h, int *x, int *y)
@@ -511,13 +512,12 @@ int Scrap_AllocBlock (int w, int h, int *x, int *y)
 /*	Sys_Error ("Scrap_AllocBlock: full");*/
 }
 
-int	scrap_uploads;
-
-void Scrap_Upload (void)
+static void Scrap_Upload (int texnum)
 {
-	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload32 (scrap_texels[scrap_uploads++], BLOCK_WIDTH, BLOCK_HEIGHT, 0, false, false, true);
-	scrap_dirty = false;
+	GL_SelectTexture (0);
+
+	GL_Bind (texnum + TEXNUM_SCRAPS);
+	GL_Upload32 (scrap_texels[texnum], BLOCK_WIDTH, BLOCK_HEIGHT, 0, false, false, true);
 }
 
 //just a guessed size-- this isn't necessarily raw RGBA data, it's the
@@ -1356,7 +1356,6 @@ image_t *GL_LoadPic (const char *name, byte *pic, int width, int height, imagety
 		texnum = Scrap_AllocBlock (image->width, image->height, &x, &y);
 		if (texnum == -1)
 			goto nonscrap;
-		scrap_dirty = true;
 		
 		// copy the texels into the scrap block
 		k = 0;
@@ -1371,13 +1370,17 @@ image_t *GL_LoadPic (const char *name, byte *pic, int width, int height, imagety
 		image->sh = (double)(x+image->width-0.5)/(double)BLOCK_WIDTH;
 		image->tl = (double)(y+0.5)/(double)BLOCK_HEIGHT;
 		image->th = (double)(y+image->height-0.5)/(double)BLOCK_HEIGHT;
+		
+		// Send updated scrap to OpenGL. Wasteful to do it over and over like
+		// this, but we don't care.
+		Scrap_Upload (texnum);
 	}
 	else
 	{
 nonscrap:
 		image->scrap = false;
 		GL_SelectTexture (0);
-		GL_Bind(image->texnum);
+		GL_Bind (image->texnum);
 		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, picmip, type <= it_wall);
 		} else {
@@ -1761,7 +1764,5 @@ void	GL_ShutdownImages (void)
 	
 	memset (scrap_allocated, 0, sizeof(scrap_allocated));
 	memset (scrap_texels, 0, sizeof(scrap_texels));
-	scrap_dirty = false;
-	scrap_uploads = 0;
 }
 
