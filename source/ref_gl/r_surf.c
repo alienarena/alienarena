@@ -436,8 +436,9 @@ static void BSP_DrawWarpSurfaces (qboolean forEnt)
 		return;
 	
 	// no lightmaps rendered on these surfaces
-	GL_EnableMultitexture( false );
-	GL_TexEnv( GL_MODULATE );
+	GL_EnableTexture (1, false);
+	GL_SelectTexture (0);
+	GL_TexEnv (GL_MODULATE);
 	qglColor4f( gl_state.inverse_intensity,
 				gl_state.inverse_intensity,
 				gl_state.inverse_intensity,
@@ -454,8 +455,9 @@ static void BSP_DrawWarpSurfaces (qboolean forEnt)
 	if (forEnt)
 		r_warp_surfaces.entchain = NULL;
 	
-	GL_EnableMultitexture( true );
-	GL_TexEnv( GL_REPLACE );
+	GL_EnableTexture (1, true);
+	GL_SelectTexture (0);
+	GL_TexEnv (GL_REPLACE);
 	R_KillVArrays ();
 }
 
@@ -1245,9 +1247,7 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 
 	// Setup GL state for lightmap render 
 	// (TODO: only necessary for fixed-function pipeline?)
-
-	GL_EnableMultitexture( true );
-	
+	GL_EnableTexture (1, true);
 	R_SetLightingMode ();
 
 	// render all fixed-function surfaces
@@ -1275,7 +1275,8 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 	// this has to come last because it messes with GL state
 	BSP_DrawWarpSurfaces (forEnt);
 	
-	GL_EnableMultitexture( false );
+	GL_EnableTexture (1, false);
+	GL_SelectTexture (0); // FIXME: make unnecessary
 }
 
 
@@ -2175,12 +2176,9 @@ void BSP_BeginBuildingLightmaps (model_t *m)
 	static lightstyle_t	lightstyles[MAX_LIGHTSTYLES];
 	int				i;
 
-	memset( gl_lms.allocated, 0, sizeof(gl_lms.allocated) );
+	LM_InitBlock ();
 
 	r_framecount = 1;		// no dlightcache
-
-	GL_EnableMultitexture( true );
-	GL_SelectTexture (1);
 
 	/*
 	** setup the base lightstyles so the lightmaps won't have to be regenerated
@@ -2209,8 +2207,7 @@ BSP_EndBuildingLightmaps
 */
 void BSP_EndBuildingLightmaps (void)
 {
-	LM_UploadBlock( );
-	GL_EnableMultitexture( false );
+	LM_UploadBlock ();
 }
 
 
