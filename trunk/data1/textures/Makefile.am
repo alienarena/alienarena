@@ -950,6 +950,12 @@ nobase_dist_textures_DATA = \
 	dalek/wall5.tga \
 	dalek/wall6.tga \
 	dalek/wall7.tga \
+	dm-wasteland/canyon1.tga \
+	dm-wasteland/canyon1_blendtex.tga \
+	dm-wasteland/canyon1_blendtex2.tga \
+	dm-wasteland/canyon1_lightmaptex.tga \
+	dm-wasteland/canyon1_rocks.tga \
+	dm-wasteland/canyon1_vegetation.tga \
 	evil/confllrtile2pad_nm.tga \
 	evil/confllrtile2pad.tga \
 	evil/drktek_symb_hm.tga \

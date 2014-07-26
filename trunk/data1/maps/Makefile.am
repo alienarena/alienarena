@@ -78,6 +78,7 @@ nobase_dist_maps_DATA = \
 	dm-violator2k11.lightmap \
 	dm-warmachine2k10.bsp \
 	dm-warmachine2k10.lightmap \
+	dm-wasteland.bsp \
 	dm-zorn2k11.bsp \
 	dm-zion2k9.bsp \
 	tac-extermination.bsp \
@@ -133,6 +134,10 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
+	meshes/dm-wasteland/blood_splatter3.decal \
+	meshes/dm-wasteland/canyon1.terrain \
+	meshes/dm-wasteland/ivy1.decal \
+	meshes/dm-wasteland/rocks1.decal \
 	meshes/dome.md2 \
 	meshes/dualpipes.jpg \
 	meshes/dualpipes.md2 \
@@ -505,6 +510,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-violator2k11.fog \
 	scripts/dm-warmachine2k10.fog \
 	scripts/dm-warmachine2k10.mus \
+	scripts/dm-wasteland.fog \
+	scripts/dm-wasteland.mus \
 	scripts/dm-zorn2k11.fog \
 	scripts/dm-zorn2k11.mus \
 	scripts/dm-zion2k9.mus \
