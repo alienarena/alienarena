@@ -146,6 +146,7 @@ cvar_t	*r_shaders;
 cvar_t	*r_bloom;
 cvar_t	*r_lensflare;
 cvar_t	*r_lensflare_intens;
+cvar_t	*r_vegetation;
 cvar_t	*r_drawsun;
 cvar_t	*r_lightbeam;
 cvar_t	*r_godrays;
@@ -1070,14 +1071,16 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawWorldSurfs ();
 	
+	if (!r_test->integer)
 	R_DrawTerrain ();
 
 	if(r_lensflare->integer)
 		R_RenderFlares ();
 
 	R_DrawEntitiesOnList ();
-			
-	R_DrawVegetationSurface ();
+	
+	if (r_vegetation->integer)
+		R_DrawVegetationSurface ();
 
 	R_DrawSimpleItems ();
 
@@ -1280,6 +1283,7 @@ void R_Register( void )
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE|CVARDOC_INT);
+	r_vegetation = Cvar_Get ("r_vegetation", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
 	r_lightbeam = Cvar_Get ("r_lightbeam", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	r_godrays = Cvar_Get ("r_godrays", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
