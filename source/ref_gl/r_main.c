@@ -1071,7 +1071,6 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawWorldSurfs ();
 	
-	if (!r_test->integer)
 	R_DrawTerrain ();
 
 	if(r_lensflare->integer)
