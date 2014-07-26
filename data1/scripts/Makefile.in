@@ -271,6 +271,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-vesuvius2k11.rscript \
 	maps/dm-violator2k11.rscript \
 	maps/dm-warmachine2k10.rscript \
+	maps/dm-wasteland.rscript \
 	maps/dm-zorn2k11.rscript \
 	maps/dm-zion2k9.rscript \
 	maps/tac-extermination.rscript \
