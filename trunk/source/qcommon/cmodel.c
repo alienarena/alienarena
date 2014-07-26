@@ -2381,7 +2381,7 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 	trace_ispoint = true;
 	VectorClear (trace_extents);
 	
-	VectorClear (out_color);
+	out_color[0] = out_color[1] = out_color[2] = 1.0f;
 	
 	modnum = CM_TerrainTrace (trace_start, trace_end);
 	
