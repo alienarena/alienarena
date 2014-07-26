@@ -340,20 +340,17 @@ void R_StaticLightPoint (vec3_t p, vec3_t color)
 {
 	float		r;
 	vec3_t		end;
+	
+	color[0] = color[1] = color[2] = 1.0f;
 
-	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || !r_worldmodel->lightdata)
+	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 	{
-		color[0] = color[1] = color[2] = 1.0;
-		return;
+		CM_TerrainLightPoint (p, end, color);
+		VectorScale (color, gl_modulate->value, color);
+	
+		if (r_worldmodel->lightdata && RecursiveLightPoint (r_worldmodel->nodes, p, end) != -1)
+			VectorCopy (pointcolor, color);
 	}
-	
-	CM_TerrainLightPoint (p, end, color);
-	VectorScale (color, gl_modulate->value, color);
-	
-	r = RecursiveLightPoint (r_worldmodel->nodes, p, end);
-
-	if (r != -1)
-		VectorCopy (pointcolor, color);
 }
 
 void R_DynamicLightPoint (vec3_t p, vec3_t color)
