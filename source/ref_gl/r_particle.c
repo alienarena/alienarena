@@ -1007,6 +1007,7 @@ void R_DrawVegetationSurface ( void )
 	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Bind (0);
 	GL_TexEnv( GL_MODULATE );
+	qglDisable( GL_CULL_FACE );
 	
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	
@@ -1046,7 +1047,6 @@ void R_DrawVegetationSurface ( void )
 		else // grass
 		{
 			swaysin = swaysin2;
-			qglDisable( GL_CULL_FACE );
 			
 			// adjust vertical position, scaled
 			origin[2] += (grass->texsize/32.0) * grass->size/(grass->texsize/128.0);
