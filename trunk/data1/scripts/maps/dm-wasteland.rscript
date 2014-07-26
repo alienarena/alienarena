@@ -1,0 +1,69 @@
+canyon1_texture
+
+{
+	
+	{
+
+		map textures/dm-wasteland/canyon1_blendtex.tga
+		
+		map2 textures/dm-wasteland/canyon1_blendtex2.tga
+		
+		blendmap 4
+			
+			200 textures/arena5/ground1.tga
+			
+			400 textures/texturelib/stones_0027.jpg			
+			200 textures/texturelib/ground_0045.jpg			
+			400 textures/arena10/heap4.tga
+
+	}
+
+}
+env/hellup
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/hellrt
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/helllf
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/hellft
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/hellbk
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/helldn
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
