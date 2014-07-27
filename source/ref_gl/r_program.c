@@ -912,13 +912,12 @@ static char rscript_fragment_program[] = STRINGIFY (
 	
 	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights, float scale)
 	{
-		vec4 ret = vec4 (0.0, 0.0, 0.0, 1.0);
-		
-		ret.rgb += blend_weights[0] * texture2D (tex, orig_coord.yz / scale).rgb;
-		ret.rgb += blend_weights[1] * texture2D (tex, orig_coord.zx / scale).rgb;
-		ret.rgb += blend_weights[2] * texture2D (tex, orig_coord.xy / scale).rgb;
-		
-		return ret;
+		return vec4 (
+			blend_weights[0] * texture2D (tex, orig_coord.yz * scale).rgb +
+			blend_weights[1] * texture2D (tex, orig_coord.zx * scale).rgb +
+			blend_weights[2] * texture2D (tex, orig_coord.xy * scale).rgb,
+			1.0
+		);
 	}
 	
 	void main ()

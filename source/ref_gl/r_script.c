@@ -1306,8 +1306,8 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 			for (i = 0; i < stage->num_blend_textures; i++)
 				GL_MBind (3+i, stage->blend_textures[i]->texnum);
 			
-			glUniform3fARB (rscript_uniforms.blendscales, stage->blend_scales[0], stage->blend_scales[1], stage->blend_scales[2]);
-			glUniform3fARB (rscript_uniforms.blendscales2, stage->blend_scales[3], stage->blend_scales[4], stage->blend_scales[5]);
+			glUniform3fARB (rscript_uniforms.blendscales, 1.0f/stage->blend_scales[0], 1.0f/stage->blend_scales[1], 1.0f/stage->blend_scales[2]);
+			glUniform3fARB (rscript_uniforms.blendscales2, 1.0f/stage->blend_scales[3], 1.0f/stage->blend_scales[4], 1.0f/stage->blend_scales[5]);
 		}
 		
 		GL_SelectTexture (0);
