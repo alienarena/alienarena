@@ -586,9 +586,12 @@ void R_CastShadow(void)
 
 		if (r_worldmodel ) {
 			//occulusion culling - why draw shadows of entities we cannot see?
-			r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-			if(r_trace.fraction != 1.0)
-				continue;
+			if(strstr (currentmodel->name, "cactus1") && strstr (currentmodel->name, "cactus2"))
+			{
+				r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+				if(r_trace.fraction != 1.0)
+					continue;
+			}
 		}
 
 		//get distance, set lod if available

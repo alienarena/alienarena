@@ -300,7 +300,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	mod = &terrain_models[numterrainmodels++];
 	
 	// FIXME HACK!!!
-	sprintf (newname, "data1/%s", name);
+	sprintf (newname, "c:/alienarena_w32/data1/%s", name);
 	LoadFile (newname, (void**)&buf);
 	
 	if (!buf)

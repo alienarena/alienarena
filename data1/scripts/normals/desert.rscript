@@ -1,0 +1,109 @@
+maps/meshes/desert/lantern
+{
+	{
+		map maps/meshes/desert/lantern_normal.jpg
+		normalmap
+		map2 maps/meshes/desert/lantern_fx.tga
+		glow
+	}
+}
+maps/meshes/desert/barrel
+{
+	{
+		map maps/meshes/desert/barrel_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/candle
+{
+	{
+		map maps/meshes/desert/candle_normal.jpg
+		normalmap
+		map2 maps/meshes/desert/candle_fx.tga
+		glow
+	}
+}
+maps/meshes/desert/lamp
+{
+	{
+		map maps/meshes/desert/lamp_normal.jpg
+		normalmap
+		map2 maps/meshes/desert/lamp_fx.tga
+		glow
+	}
+}
+maps/meshes/desert/embers
+{
+	{
+		map maps/meshes/desert/embers_normal.jpg
+		normalmap
+		map2 maps/meshes/desert/embers_fx.tga
+		glow
+	}
+}
+maps/meshes/desert/chair
+{
+	{
+		map maps/meshes/desert/chair_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/book1
+{
+	{
+		map maps/meshes/desert/book1_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/book2
+{
+	{
+		map maps/meshes/desert/book2_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/books
+{
+	{
+		map maps/meshes/desert/books_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/bookshelf
+{
+	{
+		map maps/meshes/desert/bookshelf_normal.jpg
+		normalmap
+	}
+}
+models/weapons/v_warriorhands/skin
+{
+	{
+		map models/weapons/v_warriorhands/skin_normal.tga
+		normalmap
+	}
+}
+models/weapons/v_wizardhands/skin
+{
+	{
+		map models/weapons/v_wizardhands/skin_normal.tga
+		normalmap
+		map2 models/weapons/v_wizardhands/skin_fx.tga
+		glow
+	}
+}
+maps/meshes/desert/cactus1
+{
+	{
+		map maps/meshes/desert/cactus1_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/cactus2
+{
+	{
+		map maps/meshes/desert/cactus2_normal.jpg
+		normalmap
+	}
+}
+
