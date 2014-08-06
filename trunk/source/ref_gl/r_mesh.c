@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "r_local.h"
+#include "r_ragdoll.h"
 
 static vertCache_t	*vbo_st;
 static vertCache_t	*vbo_xyz;
@@ -306,7 +307,7 @@ static qboolean R_Mesh_CullModel (void)
 		return r_lefthand->integer == 2;
 	
 	// HACK: culling rocks is currently too slow.
-	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock")) {
+	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock") && !strstr (currentmodel->name, "cactus1") && !strstr (currentmodel->name, "cactus2")) {
 		//occulusion culling - why draw entities we cannot see?
 		// TODO: this looks like another job for CM_FastTrace.
 		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);

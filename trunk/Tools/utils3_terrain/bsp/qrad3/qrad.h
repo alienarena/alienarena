@@ -194,6 +194,8 @@ void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float 
 void *Z_Malloc (size_t sz);
 char *CopyString (const char *in);
 
+#define M_PI       3.14159265358979323846
+
 typedef vec_t vec2_t[2];
 #define VectorSet(v, x, y, z)		((v)[0]=(x), (v)[1]=(y), (v)[2]=(z))
 #define	PITCH				0		// up / down

@@ -89,9 +89,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\bsp\qrad3\binheap.c" />
+    <ClCompile Include="..\..\bsp\qrad3\image.c" />
+    <ClCompile Include="..\..\bsp\qrad3\libgarland.c" />
     <ClCompile Include="..\..\bsp\qrad3\lightmap.c" />
     <ClCompile Include="..\..\bsp\qrad3\patches.c" />
     <ClCompile Include="..\..\bsp\qrad3\qrad3.c" />
+    <ClCompile Include="..\..\bsp\qrad3\terrain.c" />
+    <ClCompile Include="..\..\bsp\qrad3\terrain_trace.c" />
     <ClCompile Include="..\..\bsp\qrad3\trace.c" />
     <ClCompile Include="..\..\common\bspfile.c" />
     <ClCompile Include="..\..\common\cmdlib.c" />
