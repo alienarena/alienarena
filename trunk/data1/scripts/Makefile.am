@@ -72,5 +72,6 @@ nobase_dist_scripts_DATA = \
 	menu.rscript \
 	models.rscript \
 	normals/normals.rscript \
+	normals/desert.rscript \
 	textures.rscript
 
