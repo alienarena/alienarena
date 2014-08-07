@@ -134,6 +134,43 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
+	meshes/desert/barrel.jpg \
+	meshes/desert/barrel.md2 \
+	meshes/desert/barrel_normal.jpg \
+	meshes/desert/book1.jpg \
+	meshes/desert/book1.md2 \
+	meshes/desert/book1_normal.jpg \
+	meshes/desert/book2.jpg \
+	meshes/desert/book2.md2 \
+	meshes/desert/book2_normal.jpg \
+	meshes/desert/book3.md2 \
+	meshes/desert/books.jpg \
+	meshes/desert/books_normal.jpg \
+	meshes/desert/bookshelf.jpg \
+	meshes/desert/bookshelf.md2 \
+	meshes/desert/bookshelf_normal.jpg \
+	meshes/desert/cactus1.jpg \
+	meshes/desert/cactus1.md2 \
+	meshes/desert/cactus1_normal.jpg \
+	meshes/desert/cactus2.jpg \
+	meshes/desert/cactus2.md2 \
+	meshes/desert/cactus2_normal.jpg \
+	meshes/desert/candle.jpg \
+	meshes/desert/candle.md2 \
+	meshes/desert/candle_fx.tga \
+	meshes/desert/candle_normal.jpg \
+	meshes/desert/chair.jpg \
+	meshes/desert/chair.md2 \
+	meshes/desert/chair_normal.jpg \
+	meshes/desert/lamp.jpg \
+	meshes/desert/lamp.md2 \
+	meshes/desert/lamp_fx.tga \
+	meshes/desert/lamp_normal.jpg \
+	meshes/desert/lantern.jpg \
+	meshes/desert/lantern.md2 \
+	meshes/desert/lantern_fx.tga \
+	meshes/desert/lantern_normal.jpg \
+	meshes/desert/metalbare_d.jpg \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
