@@ -114,7 +114,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	vec3_t			up, right, pup, pright, dir;
 	float			scale;
 	byte			color[4];
-	int			    oldblendsrc = -1, oldblenddst = -1;
+	int				oldblendsrc = -1, oldblenddst = -1;
 	int				texnum=0, blenddst, blendsrc;
 	vec3_t move, delta, v;
 	float			sh, th, sl, tl;
@@ -136,7 +136,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	
 	for ( p1 = particles, i=0; i < num_particles ; i++,p1++)
 	{
-	    p = *p1;
+		p = *p1;
 
 		if( p->type == PARTICLE_CHAINED && p->chain_prev)
 		{
@@ -279,19 +279,19 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 		
 		VArray = &VArrayVerts[0];
 		
-        if (p->type == PARTICLE_CHAINED && p->chain_prev)
-        {
-        	particle_t *pr;
-        	vec3_t pspan, prev_pspan;
-        	
-        	pr = p->chain_prev;
-        	
-        	VectorCopy (p->current_pspan, pspan);
-        	if (pr->type == PARTICLE_CHAINED && pr->chain_prev)
-        		VectorCopy (pr->current_pspan, prev_pspan);
-        	else
-        		VectorCopy (pspan, prev_pspan);
-        	
+		if (p->type == PARTICLE_CHAINED && p->chain_prev)
+		{
+			particle_t *pr;
+			vec3_t pspan, prev_pspan;
+	
+			pr = p->chain_prev;
+	
+			VectorCopy (p->current_pspan, pspan);
+			if (pr->type == PARTICLE_CHAINED && pr->chain_prev)
+				VectorCopy (pr->current_pspan, prev_pspan);
+			else
+				VectorCopy (pspan, prev_pspan);
+	
 #define VERTEX(n) (VArray + n*VertexSizes[VERT_SINGLE_TEXTURED])
 			
 			VectorSet (VERTEX(0),
@@ -326,10 +326,10 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			
 #undef VERTEX
 			
-        }
-        else
-        {
-        	PART_AddBillboardToVArray (p->current_origin, pup, pright, 0, false, sl, sh, tl, th);
+		}
+		else
+		{
+			PART_AddBillboardToVArray (p->current_origin, pup, pright, 0, false, sl, sh, tl, th);
 		}
 		
 		qglColor4f (color[0]/255.0f, color[1]/255.0f, color[2]/255.0f, color[3]/255.0f);
@@ -355,16 +355,16 @@ R_DrawParticles
 */
 void R_DrawParticles (void)
 {
-    if ( !r_newrefdef.num_particles )
-        return;
+	if ( !r_newrefdef.num_particles )
+		return;
 
-    if(map_fog)
-        qglDisable(GL_FOG);
+	if(map_fog)
+		qglDisable(GL_FOG);
 
-    PART_DrawParticles( r_newrefdef.num_particles, r_newrefdef.particles, d_8to24table);
+	PART_DrawParticles( r_newrefdef.num_particles, r_newrefdef.particles, d_8to24table);
 
-    if(map_fog)
-        qglEnable(GL_FOG);
+	if(map_fog)
+		qglEnable(GL_FOG);
 }
 
 static void R_Surface_Bounds (const msurface_t *surf, vec3_t out_mins, vec3_t out_maxs, vec3_t out_center)
@@ -404,10 +404,10 @@ static void R_Surface_Bounds (const msurface_t *surf, vec3_t out_mins, vec3_t ou
 void Mod_AddFlareSurface (msurface_t *surf, int type )
 {
 	int i, width, height;
-	flare_t  *light;
-	byte     *buffer;
-	byte     *p;
-	float    surf_bound;
+	flare_t	*light;
+	byte	*buffer;
+	byte	*p;
+	float	surf_bound;
 	vec3_t origin = {0,0,0}, color = {1,1,1}, tmp, rgbSum;
 	vec3_t mins, maxs, tmp1;
 
@@ -423,25 +423,25 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 	if (r_numflares >= MAX_FLARES)
 		return;
 
-    light = &r_flares[r_numflares++];
+	light = &r_flares[r_numflares++];
 
 	R_Surface_Bounds (surf, mins, maxs, origin);
 
-     /*
+	 /*
 	=====================================
 	calc light surf bounds and flare size
 	=====================================
 	*/
 
 
-	 VectorSubtract(maxs, mins, tmp1);
-     surf_bound = VectorLength(tmp1);
-	 if (surf_bound <=25) light->size = 10;
-	 else if (surf_bound <=50)  light->size = 15;
-     else if (surf_bound <=100) light->size = 20;
-	 else if (surf_bound <=150) light->size = 25;
-	 else if (surf_bound <=200) light->size = 30;
-	 else if (surf_bound <=250) light->size = 35;
+	VectorSubtract(maxs, mins, tmp1);
+	surf_bound = VectorLength(tmp1);
+	if (surf_bound <=25) light->size = 10;
+	else if (surf_bound <=50)  light->size = 15;
+	else if (surf_bound <=100) light->size = 20;
+	else if (surf_bound <=150) light->size = 25;
+	else if (surf_bound <=200) light->size = 30;
+	else if (surf_bound <=250) light->size = 35;
 
 
 	/*
@@ -450,30 +450,30 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 	===================
 	*/
 
-     GL_Bind( surf->texinfo->image->texnum );
-     width = surf->texinfo->image->upload_width;
-	 height = surf->texinfo->image->upload_height;
+	GL_Bind( surf->texinfo->image->texnum );
+	width = surf->texinfo->image->upload_width;
+	height = surf->texinfo->image->upload_height;
 
-     buffer = malloc(width * height * 3);
-     qglGetTexImage (GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-     VectorClear(rgbSum);
+	buffer = malloc(width * height * 3);
+	qglGetTexImage (GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	VectorClear(rgbSum);
 
-     for (i=0, p=buffer; i<width*height; i++, p += 3)
-      {
-        rgbSum[0] += (float)p[0]  * (1.0 / 255);
-        rgbSum[1] += (float)p[1]  * (1.0 / 255);
-        rgbSum[2] += (float)p[2]  * (1.0 / 255);
-      }
+	for (i=0, p=buffer; i<width*height; i++, p += 3)
+	{
+		rgbSum[0] += (float)p[0]  * (1.0 / 255);
+		rgbSum[1] += (float)p[1]  * (1.0 / 255);
+		rgbSum[2] += (float)p[2]  * (1.0 / 255);
+	}
 
-      VectorScale(rgbSum, r_lensflare_intens->value / (width *height), color);
+	VectorScale(rgbSum, r_lensflare_intens->value / (width *height), color);
 
-      for (i=0; i<3; i++) {
-          if (color[i] < 0.5)
-               color[i] = color[i] * 0.5;
-          else
-               color[i] = color[i] * 0.5 + 0.5;
-          }
-      VectorCopy(color, light->color);
+	for (i=0; i<3; i++) {
+		if (color[i] < 0.5)
+			color[i] = color[i] * 0.5;
+		else
+			color[i] = color[i] * 0.5 + 0.5;
+	}
+	VectorCopy(color, light->color);
 
 	/*
 	==================================
@@ -481,19 +481,19 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 	==================================
 	*/
 
-     if (surf->iflags & ISURF_PLANEBACK)
-		VectorNegate(surf->plane->normal, tmp);
-     else
-		VectorCopy(surf->plane->normal, tmp);
+	if (surf->iflags & ISURF_PLANEBACK)
+	VectorNegate(surf->plane->normal, tmp);
+	else
+	VectorCopy(surf->plane->normal, tmp);
 
-     VectorMA(origin, 2, tmp, origin);
-     VectorCopy(origin, light->origin);
+	VectorMA(origin, 2, tmp, origin);
+	VectorCopy(origin, light->origin);
 
-     light->style = type;
-     
-     light->leafnum = CM_PointLeafnum (light->origin);
+	light->style = type;
 
-     free (buffer);
+	light->leafnum = CM_PointLeafnum (light->origin);
+
+	free (buffer);
 }
 
 void PART_RenderFlare (flare_t *light)
@@ -558,7 +558,7 @@ void PART_RenderFlare (flare_t *light)
 void R_RenderFlares (void)
 {
 	flare_t	*l;
-    int i;
+	int i;
 	qboolean visible;
 	vec3_t mins, maxs;
 	trace_t r_trace;
@@ -579,15 +579,15 @@ void R_RenderFlares (void)
 	qglEnable (GL_TEXTURE_2D);
 	GL_TexEnv( GL_MODULATE );
 
-    l = r_flares;
-    for (i=0; i<r_numflares ; i++, l++)
+	l = r_flares;
+	for (i=0; i<r_numflares ; i++, l++)
 	{
 
 		// periodically test visibility to ramp alpha
 		if(rs_realtime - l->time > 0.02){
 
 			if (!CM_inPVS_leafs (r_origin_leafnum, l->leafnum))
-	        	continue;
+				continue;
 
 			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
@@ -617,7 +617,7 @@ void R_RenderFlares (void)
 	qglColor3f (1,1,1);
 	GLSTATE_DISABLE_BLEND
 	qglEnable (GL_TEXTURE_2D);
-    GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
 }
 
@@ -682,44 +682,43 @@ qboolean gluProject2(float objx, float objy, float objz, const float model[16], 
 
 void R_InitSun()
 {
-    draw_sun = false;
+	draw_sun = false;
 
-    if (!r_drawsun->integer || r_nosun)
-        return;
+	if (!r_drawsun->integer || r_nosun)
+		return;
 
-    if (spacebox)
-        sun_size = 0.1f;
-    else
-        sun_size = 0.2f;
+	if (spacebox)
+		sun_size = 0.1f;
+	else
+		sun_size = 0.2f;
 
-    if (R_CullOrigin(sun_origin))
-        return;
+	if (R_CullOrigin(sun_origin))
+		return;
 
-    draw_sun = true;
+	draw_sun = true;
 
-    gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y); // /,
-                                                                                                                                    // &sun_z);
-    sun_y = r_newrefdef.height - sun_y;
+	gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y);
+	sun_y = r_newrefdef.height - sun_y;
 }
 
 
 void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
-                      float g, float b, float alpha)
+					  float g, float b, float alpha)
 {
-    float minx, miny, maxx, maxy;
-    float new_x, new_y;
-    float diameter = 2.0*radius;
+	float minx, miny, maxx, maxy;
+	float new_x, new_y;
+	float diameter = 2.0*radius;
 
-    qglColor4f(r, g, b, alpha);
-    GL_Bind(tex->texnum);
+	qglColor4f(r, g, b, alpha);
+	GL_Bind(tex->texnum);
 
-    if (offset) {
-        new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
-        new_y = offset * (r_newrefdef.height / 2 - sun_y) + sun_y;
-    } else {
-        new_x = sun_x;
-        new_y = sun_y;
-    }
+	if (offset) {
+		new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
+		new_y = offset * (r_newrefdef.height / 2 - sun_y) + sun_y;
+	} else {
+		new_x = sun_x;
+		new_y = sun_y;
+	}
 
 	
 	minx = new_x - radius;
@@ -737,7 +736,7 @@ void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
 		maxx = minx + diameter * (float)tex->crop_width / (float)tex->upload_width;
 		maxy = miny + diameter * (float)tex->crop_height / (float)tex->upload_height;
 		
-	    qglBegin(GL_QUADS);
+		qglBegin(GL_QUADS);
 		qglTexCoord2f(tex->crop_sl, tex->crop_tl);
 		qglVertex2f(minx, miny);
 		qglTexCoord2f(tex->crop_sh, tex->crop_tl);
@@ -766,89 +765,88 @@ void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
 float sun_alpha = 0;
 void R_RenderSun()
 {
-    static float l;
-    static float sun_vistest_time = 0;
+	static float l;
+	static float sun_vistest_time = 0;
 	static float sun_ramp_time = 0;
-    float size;
+	float size;
 
-    if (!draw_sun)
-        return;
+	if (!draw_sun)
+		return;
 
 	if (r_nosun)
 		return;
 
-    if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-        return;
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
 
-    // The sun is only visible if a single pixel at sun_x, sun_y is not
-    // covered by anything. Just like lens flares, we ramp the opacity up and
-    // down linearly to smooth out transitions. Since glReadPixels is
-    // expensive, we only test visibility every SUN_VIS_TEST_PERIOD seconds,
-    // but to keep the opacity animation smooth, we do that every frame.
+	// The sun is only visible if a single pixel at sun_x, sun_y is not
+	// covered by anything. Just like lens flares, we ramp the opacity up and
+	// down linearly to smooth out transitions. Since glReadPixels is
+	// expensive, we only test visibility every SUN_VIS_TEST_PERIOD seconds,
+	// but to keep the opacity animation smooth, we do that every frame.
 
-    #define SUN_VIS_TEST_PERIOD 0.1
-    #define SUN_ALPHA_RAMP_PER_SECOND 7.5
-    #define SUN_ALPHA_RAMP_PER_FRAME (SUN_ALPHA_RAMP_PER_SECOND*(rs_realtime-sun_ramp_time))
+	#define SUN_VIS_TEST_PERIOD 0.1
+	#define SUN_ALPHA_RAMP_PER_SECOND 7.5
+	#define SUN_ALPHA_RAMP_PER_FRAME (SUN_ALPHA_RAMP_PER_SECOND*(rs_realtime-sun_ramp_time))
 
-    // periodically test visibility to ramp alpha
-    if(rs_realtime - sun_vistest_time > SUN_VIS_TEST_PERIOD)
-    {
-	    qglReadPixels (	sun_x, r_newrefdef.height - sun_y, 1, 1,
-					    GL_DEPTH_COMPONENT, GL_FLOAT, &l);
+	// periodically test visibility to ramp alpha
+	if(rs_realtime - sun_vistest_time > SUN_VIS_TEST_PERIOD)
+	{
+		qglReadPixels (	sun_x, r_newrefdef.height - sun_y, 1, 1,
+						GL_DEPTH_COMPONENT, GL_FLOAT, &l);
 		sun_vistest_time = rs_realtime;
 	}
-	
+
 	// ramp opacity up or down each frame
-    sun_alpha += (l == 1.0 ? 1.0 : -1.0)*SUN_ALPHA_RAMP_PER_FRAME;
-    sun_ramp_time = rs_realtime;
+	sun_alpha += (l == 1.0 ? 1.0 : -1.0)*SUN_ALPHA_RAMP_PER_FRAME;
+	sun_ramp_time = rs_realtime;
 
-    if(sun_alpha > 1.0)  // clamp
-        sun_alpha = 1.0;
-    else if(sun_alpha < 0)
-        sun_alpha = 0.0;
+	if(sun_alpha > 1.0)  // clamp
+		sun_alpha = 1.0;
+	else if(sun_alpha < 0)
+		sun_alpha = 0.0;
 
-    if (sun_alpha > 0)
-    {
-        // set 2d
-        qglMatrixMode(GL_PROJECTION);
-        qglPushMatrix();
-        qglLoadIdentity();
-        qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
-                 99999);
-        qglMatrixMode(GL_MODELVIEW);
-        qglPushMatrix();
-        qglLoadIdentity();
-        GLSTATE_ENABLE_BLEND
-        GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
-        GL_TexEnv(GL_MODULATE);
-        qglDepthRange(0, 0.3);
+	if (sun_alpha > 0)
+	{
+		// set 2d
+		qglMatrixMode(GL_PROJECTION);
+		qglPushMatrix();
+		qglLoadIdentity();
+		qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
+				99999);
+		qglMatrixMode(GL_MODELVIEW);
+		qglPushMatrix();
+		qglLoadIdentity();
+		GLSTATE_ENABLE_BLEND
+		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
+		GL_TexEnv(GL_MODULATE);
+		qglDepthRange(0, 0.3);
 
-        size = r_newrefdef.width * sun_size;
-        PART_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
-        if (r_drawsun->value == 2) {
+		size = r_newrefdef.width * sun_size;
+		PART_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
+		if (r_drawsun->value == 2) {
+			PART_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
+			PART_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);
+			PART_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0.1, 0.1, 0.1, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0.1, 0, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0.1, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0.1, 0.1, 0.1, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0.1, 0, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
+		}
 
-            PART_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
-            PART_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
-            PART_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);
-            PART_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0.1, 0.1, 0.1, sun_alpha);
-            PART_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0.1, 0, 0, sun_alpha);
-            PART_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0.1, 0, sun_alpha);
-            PART_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0.1, 0.1, 0, sun_alpha);
-            PART_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0.1, 0.1, 0.1, sun_alpha);
-            PART_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0.1, 0, 0, sun_alpha);
-            PART_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
-        }
-
-        qglDepthRange(0, 1);
-        qglColor4f(1, 1, 1, 1);
-        GLSTATE_DISABLE_BLEND
-        GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        // set 3d
-        qglPopMatrix();
-        qglMatrixMode(GL_PROJECTION);
-        qglPopMatrix();
-        qglMatrixMode(GL_MODELVIEW);
-    }
+		qglDepthRange(0, 1);
+		qglColor4f(1, 1, 1, 1);
+		GLSTATE_DISABLE_BLEND
+		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		// set 3d
+		qglPopMatrix();
+		qglMatrixMode(GL_PROJECTION);
+		qglPopMatrix();
+		qglMatrixMode(GL_MODELVIEW);
+	}
 }
 
 //Vegetation
@@ -897,8 +895,8 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, image_t *tex, vec3_t color
 
 void Mod_AddVegetationSurface (msurface_t *surf, image_t *tex, vec3_t color, float size, char name[MAX_QPATH], int type)
 {
-    glpoly_t *poly;
-    vec3_t normal, origin;
+	glpoly_t *poly;
+	vec3_t normal, origin;
 
 	poly = surf->polys;
 	
@@ -967,16 +965,16 @@ int compare_grass (void const *_a, void const *_b)
 		return -1;
 	else if (distA < distB)
 		return 1;
-    
+
 	return 0;
 }
 
 static int g_lastGSort = 0;
 void R_DrawVegetationSurface ( void )
 {
-    int		i;
+	int		i;
 	grass_t *grass;
-    float   scale;
+	float   scale;
 	vec3_t	origin, mins, maxs, angle, right, up;
 	qboolean visible;
 	float	lightLevel[3];
@@ -1135,7 +1133,7 @@ void R_ClearGrasses(void)
 void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
 	qboolean rotating)
 {
-    beam_t  *beam;
+	beam_t  *beam;
 	image_t *gl;
 	vec3_t mins, maxs;
 	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
@@ -1220,9 +1218,9 @@ void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size,
 
 void R_DrawBeamSurface ( void )
 {
-    int		i, j;
+	int		i, j;
 	beam_t *beam;
-    double   scale, maxang;
+	double   scale, maxang;
 	vec3_t	start, end, mins, maxs, angle, right, up, delta;
 	qboolean visible;
 	trace_t r_trace;
@@ -1244,7 +1242,7 @@ void R_DrawBeamSurface ( void )
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	GL_TexEnv( GL_MODULATE );
 
-    for (i=0; i<r_numbeams; i++, beam++) {
+	for (i=0; i<r_numbeams; i++, beam++) {
 		float movdir;
 		
 		if (	beam->leafnum && beam->leafnum2 && 
@@ -1423,48 +1421,48 @@ void R_SI_InitTextures( void )
 	}
 
 #define R_SI_InitTexture(itemnum,imgname) \
-    /* load the texture */ \
-    s_item ## itemnum = GL_FindImage ("pics/" #imgname ".tga,", it_pic);\
-    /* load a blank texture if it isn't found */ \
-    if (!s_item ## itemnum) \
-        s_item ## itemnum = GL_LoadPic ("***s_item" #itemnum "***", (byte *)nullpic, 16, 16, it_pic, 32); \
-    /* Disable more than one mipmap level. FIXME: improve mushy mipmap 
-     * detection so this isn't necessary.
-     */ \
-    GL_Bind(s_item ## itemnum ->texnum); \
-    qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
+	/* load the texture */ \
+	s_item ## itemnum = GL_FindImage ("pics/" #imgname ".tga,", it_pic);\
+	/* load a blank texture if it isn't found */ \
+	if (!s_item ## itemnum) \
+		s_item ## itemnum = GL_LoadPic ("***s_item" #itemnum "***", (byte *)nullpic, 16, 16, it_pic, 32); \
+	/* Disable more than one mipmap level. FIXME: improve mushy mipmap 
+	 * detection so this isn't necessary.
+	 */ \
+	GL_Bind(s_item ## itemnum ->texnum); \
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
 
-    R_SI_InitTexture (0,  w_sshotgun);
-    R_SI_InitTexture (1,  w_railgun);
-    R_SI_InitTexture (2,  w_chaingun);
-    R_SI_InitTexture (3,  w_rlauncher);
-    R_SI_InitTexture (4,  w_shotgun);
-    R_SI_InitTexture (5,  p_haste);
-    R_SI_InitTexture (6,  p_invulnerability);
-    R_SI_InitTexture (7,  p_quad);
-    R_SI_InitTexture (8,  p_sproing);
-    R_SI_InitTexture (9,  p_adrenaline);
-    R_SI_InitTexture (10, p_shard);
-    R_SI_InitTexture (11, p_jacket);
-    R_SI_InitTexture (12, p_combat);
-    R_SI_InitTexture (13, p_body);
-    R_SI_InitTexture (14, p_health);
-    R_SI_InitTexture (17, i_beamgun);
-    R_SI_InitTexture (18, i_vaporizer);
-    R_SI_InitTexture (19, i_disruptor);
-    R_SI_InitTexture (20, i_flamegun);
-    R_SI_InitTexture (21, i_smartgun);
-    R_SI_InitTexture (22, i_chaingun);
-    R_SI_InitTexture (23, i_rocketlauncher);
-    R_SI_InitTexture (24, i_minderaser);
+	R_SI_InitTexture (0,  w_sshotgun);
+	R_SI_InitTexture (1,  w_railgun);
+	R_SI_InitTexture (2,  w_chaingun);
+	R_SI_InitTexture (3,  w_rlauncher);
+	R_SI_InitTexture (4,  w_shotgun);
+	R_SI_InitTexture (5,  p_haste);
+	R_SI_InitTexture (6,  p_invulnerability);
+	R_SI_InitTexture (7,  p_quad);
+	R_SI_InitTexture (8,  p_sproing);
+	R_SI_InitTexture (9,  p_adrenaline);
+	R_SI_InitTexture (10, p_shard);
+	R_SI_InitTexture (11, p_jacket);
+	R_SI_InitTexture (12, p_combat);
+	R_SI_InitTexture (13, p_body);
+	R_SI_InitTexture (14, p_health);
+	R_SI_InitTexture (17, i_beamgun);
+	R_SI_InitTexture (18, i_vaporizer);
+	R_SI_InitTexture (19, i_disruptor);
+	R_SI_InitTexture (20, i_flamegun);
+	R_SI_InitTexture (21, i_smartgun);
+	R_SI_InitTexture (22, i_chaingun);
+	R_SI_InitTexture (23, i_rocketlauncher);
+	R_SI_InitTexture (24, i_minderaser);
 }
 
 //rendering
 extern cvar_t *cl_simpleitems;
 void R_DrawSimpleItems ( void )
 {
-    int		i;
-    float   scale;
+	int		i;
+	float   scale;
 	vec3_t	origin, mins, maxs, angle, right, up;
 	qboolean visible;
 	trace_t r_trace;
@@ -1566,8 +1564,8 @@ void R_DrawSimpleItems ( void )
 
 void R_SetSimpleTexnum (model_t *loadmodel, const char *pathname)
 {
-    loadmodel->simple_texnum = 0;
-    loadmodel->simple_color = simplecolor_white;
+	loadmodel->simple_texnum = 0;
+	loadmodel->simple_color = simplecolor_white;
 	if (!Q_strcasecmp (pathname, "models/items/ammo/bullets/medium/tris.md2"))
 	{
 		loadmodel->simple_texnum = s_item0->texnum;
