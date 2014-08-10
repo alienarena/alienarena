@@ -306,17 +306,6 @@ static qboolean R_Mesh_CullModel (void)
 	if ((currententity->flags & RF_WEAPONMODEL))
 		return r_lefthand->integer == 2;
 	
-	// HACK: culling rocks is currently too slow.
-	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock") && !strstr (currentmodel->name, "cactus1") && !strstr (currentmodel->name, "cactus2")) {
-		//occulusion culling - why draw entities we cannot see?
-		// TODO: this looks like another job for CM_FastTrace.
-		trace_t r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			return true;
-	}
-	
-	VectorSubtract(r_origin, currententity->origin, dist);
-
 	/*
 	** rotate the bounding box
 	*/
@@ -336,6 +325,28 @@ static qboolean R_Mesh_CullModel (void)
 
 		VectorAdd( currententity->origin, bbox[i], bbox[i] );
 	}
+	
+	// Occlusion culling-- check if *any*  part of the mesh is visible. 
+	// Possible to have meshes culled that shouldn't be, but quite rare.
+	// HACK: culling rocks is currently too slow, so we don't.
+	// TODO: this looks like another job for CM_FastTrace. TODO: parallelize?
+	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock"))
+	{
+		trace_t r_trace;
+		qboolean unblocked = false;
+		
+        r_trace = CM_BoxTrace(r_origin, currententity->origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+        unblocked = r_trace.fraction == 1.0;
+        for (i = 0; i < 8 && !unblocked; i++)
+        {
+            r_trace = CM_BoxTrace(r_origin, bbox[i], vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+            unblocked = r_trace.fraction == 1.0;
+        }
+        if (!unblocked)
+			return true;
+	}
+	
+	VectorSubtract(r_origin, currententity->origin, dist);
 
 	// Keep nearby meshes so shadows don't blatantly disappear when out of frustom
 	if (VectorLength(dist) > 150 && R_Mesh_CullBBox (bbox))
