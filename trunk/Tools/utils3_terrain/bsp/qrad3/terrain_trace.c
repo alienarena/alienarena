@@ -285,7 +285,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	float rotation_matrix[3][3];
 	int i, j, k, l, m;
 	cterrainmodel_t *mod;
-	char newname[4096];
+	char newname[4096], extension[32];
 	char *buf;
 	terraindata_t data;
 	cterraintri_t **tmp;
@@ -297,10 +297,8 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		assert (false);
 	}
 	
-	mod = &terrain_models[numterrainmodels++];
-	
 	// FIXME HACK!!!
-	sprintf (newname, "c:/alienarena_w32/data1/%s", name);
+	sprintf (newname, "%s%s", moddir, name);
 	LoadFile (newname, (void**)&buf);
 	
 	if (!buf)
@@ -309,9 +307,18 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		assert (false);
 	}
 	
+	ExtractFileExtension (name, extension);
+	if (Q_strcasecmp (extension, "terrain"))
+	{
+		printf ("CM_LoadTerrainModel: Can only handle .terrain meshes so far!\n");
+		return;
+	}
+	
 	AnglesToMatrix3x3 (angles, rotation_matrix);
 	
 	LoadTerrainFile (&data, name, 0.5, 8, buf);
+	
+	mod = &terrain_models[numterrainmodels++];
 	
 	if (data.lightmap_path != NULL)
 		mod->lightmap_path = CopyString (data.lightmap_path);
