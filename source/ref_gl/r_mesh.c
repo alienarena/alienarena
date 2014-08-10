@@ -109,14 +109,14 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	float bob;
 	qboolean copy;
 
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
+	VectorSet (mins, 0, 0, 0);
+	VectorSet (maxs, 0, 0, 0);
 
 	//light shining down if there are no lights at all
-	VectorCopy(meshOrigin, lightPosition);
+	VectorCopy (meshOrigin, lightPosition);
 	lightPosition[2] += 128;
 
-	if((currententity->flags & RF_BOBBING) && !RagDoll)
+	if ((currententity->flags & RF_BOBBING) && !RagDoll)
 		bob = currententity->bob;
 	else
 		bob = 0;
@@ -156,37 +156,27 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	{
 		R_StaticLightPoint (currententity->origin, staticlight);
 		VectorCopy (staticlight, cl_persistent_ents[currententity->number].oldstaticlight);
-		for (i=0; i<r_lightgroups; i++)
+		for (i = 0; i < r_lightgroups; i++)
 		{
 			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
-			{
 				r_trace.fraction = 1.0; //terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
-			}
-			if (!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
-			{
+			else if (!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
 				r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
-			}
+			else if (CM_inPVS (tempOrg, LightGroups[i].group_origin))
+				r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 			else
-			{
-				if (CM_inPVS (tempOrg, LightGroups[i].group_origin))
-					r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-				else
-					r_trace.fraction = 0.0;
-			}
-				
+				r_trace.fraction = 0.0;
 
-			if(r_trace.fraction == 1.0)
+			if (r_trace.fraction == 1.0)
 			{
 				VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
 				dist = VectorLength(temp);
-				if(dist == 0)
+				if (dist == 0)
 					dist = 1;
 				dist = dist*dist;
 				weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-				for(j = 0; j < 3; j++)
-				{
+				for (j = 0; j < 3; j++)
 					lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-				}
 				statLightIntensity += LightGroups[i].avg_intensity;
 				numlights+=weight;
 				nonweighted_numlights++;
@@ -203,15 +193,14 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		cl_persistent_ents[currententity->number].oldlightintens = statLightIntensity;
 	}
 
-	if(numlights > 0.0) {
-		for(i = 0; i < 3; i++)
-		{
+	if (numlights > 0.0)
+	{
+		for (i = 0; i < 3; i++)
 			statLightPosition[i] = lightAdd[i]/numlights;
-		}
 	}
 	
 	dynFactor = 0;
-	if(gl_dynamic->integer != 0)
+	if (gl_dynamic->integer != 0)
 	{
 		R_DynamicLightPoint (currententity->origin, dynamiclight);
 		dl = r_newrefdef.dlights;
@@ -226,18 +215,15 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 
-			if(r_trace.fraction == 1.0)
+			if (r_trace.fraction == 1.0 && dist < dl->intensity)
 			{
-				if(dist < dl->intensity)
-				{
-					//make dynamic lights more influential than world
-					for(j = 0; j < 3; j++)
-						lightAdd[j] += dl->origin[j]*10*dl->intensity;
-					numlights+=10*dl->intensity;
+				//make dynamic lights more influential than world
+				for (j = 0; j < 3; j++)
+					lightAdd[j] += dl->origin[j]*10*dl->intensity;
+				numlights+=10*dl->intensity;
 
-					VectorSubtract (dl->origin, meshOrigin, temp);
-					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
-				}
+				VectorSubtract (dl->origin, meshOrigin, temp);
+				dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 			}
 		}
 	}
@@ -248,8 +234,9 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	
 	VectorAdd (staticlight, dynamiclight, worldlight);
 
-	if(numlights > 0.0) {
-		for(i = 0; i < 3; i++)
+	if (numlights > 0.0)
+	{
+		for (i = 0; i < 3; i++)
 			lightPosition[i] = lightAdd[i]/numlights;
 	}
 }
@@ -268,18 +255,14 @@ static qboolean R_Mesh_CullBBox (vec3_t bbox[8])
 {
 	int p, f, aggregatemask = ~0;
 
-	for ( p = 0; p < 8; p++ )
+	for (p = 0; p < 8; p++)
 	{
 		int mask = 0;
 
-		for ( f = 0; f < 4; f++ )
+		for (f = 0; f < 4; f++)
 		{
-			float dp = DotProduct( frustum[f].normal, bbox[p] );
-
-			if ( ( dp - frustum[f].dist ) < 0 )
-			{
-				mask |= ( 1 << f );
-			}
+			if (DotProduct (frustum[f].normal, bbox[p]) < frustum[f].dist)
+				mask |= 1 << f;
 		}
 
 		aggregatemask &= mask;
@@ -309,24 +292,24 @@ static qboolean R_Mesh_CullModel (void)
 	/*
 	** rotate the bounding box
 	*/
-	VectorCopy( currententity->angles, angles );
+	VectorCopy (currententity->angles, angles);
 	angles[YAW] = -angles[YAW];
-	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
+	AngleVectors (angles, vectors[0], vectors[1], vectors[2]);
 
-	for ( i = 0; i < 8; i++ )
+	for (i = 0; i < 8; i++)
 	{
 		vec3_t tmp;
 
-		VectorCopy( currentmodel->bbox[i], tmp );
+		VectorCopy (currentmodel->bbox[i], tmp);
 
-		bbox[i][0] = DotProduct( vectors[0], tmp );
-		bbox[i][1] = -DotProduct( vectors[1], tmp );
-		bbox[i][2] = DotProduct( vectors[2], tmp );
+		bbox[i][0] = DotProduct (vectors[0], tmp);
+		bbox[i][1] = -DotProduct (vectors[1], tmp);
+		bbox[i][2] = DotProduct (vectors[2], tmp);
 
-		VectorAdd( currententity->origin, bbox[i], bbox[i] );
+		VectorAdd (currententity->origin, bbox[i], bbox[i]);
 	}
 	
-	// Occlusion culling-- check if *any*  part of the mesh is visible. 
+	// Occlusion culling-- check if *any* part of the mesh is visible. 
 	// Possible to have meshes culled that shouldn't be, but quite rare.
 	// HACK: culling rocks is currently too slow, so we don't.
 	// TODO: this looks like another job for CM_FastTrace. TODO: parallelize?
@@ -366,7 +349,7 @@ static qboolean R_Mesh_CullModel (void)
 			RGD_AddNewRagdoll (currententity->origin, currententity->name);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
-		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
+		if ((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
 			return true;
 	}
 
@@ -432,9 +415,9 @@ static void R_Mesh_SetupShellRender (vec3_t lightcolor, qboolean fragmentshader)
 	}
 	
 	//brighten things slightly
-	for (i = 0; i < 3; i++ )
+	for (i = 0; i < 3; i++)
 		lightVal[i] *= (currententity->ragdoll?1.25:2.5);
-			   
+	
 	//simple directional(relative light position)
 	VectorSubtract (lightPosition, currententity->origin, lightVec);
 	VectorMA (lightPosition, 1.0, lightVec, lightPosition);
@@ -504,7 +487,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 			lightVal[i] = shadelight[i]/2; //never go completely black
 		lightVal[i] *= 5;
 		lightVal[i] += dynFactor;
-		if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		{
 			if (lightVal[i] > 1.5)
 				lightVal[i] = 1.5;
@@ -516,7 +499,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		}
 	}
 	
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
+	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL)) //menu model
 	{
 		//fixed light source pointing down, slightly forward and to the left
 		lightPosition[0] = -25.0;
@@ -525,10 +508,8 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		VectorMA (lightPosition, 5.0, lightVec, lightPosition);
 		R_ModelViewTransform (lightPosition, lightVec);
 
-		for (i = 0; i < 3; i++ )
-		{
+		for (i = 0; i < 3; i++)
 			lightVal[i] = 1.1;
-		}
 	}
 	else
 	{
@@ -538,10 +519,8 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		R_ModelViewTransform (lightPosition, lightVec);
 
 		//brighten things slightly
-		for (i = 0; i < 3; i++ )
-		{
+		for (i = 0; i < 3; i++)
 			lightVal[i] *= 1.05;
-		}
 	}
 
 	if (fragmentshader)
@@ -570,7 +549,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		glUniform1iARB (uniforms->useGlow, rs->stage->glow);
 		glUniform1iARB (uniforms->useCube, rs->stage->cube);
 		
-		if(currententity->flags & RF_WEAPONMODEL)
+		if ((currententity->flags & RF_WEAPONMODEL))
 			glUniform1iARB (uniforms->fromView, 1);
 		else
 			glUniform1iARB (uniforms->fromView, 0);
@@ -750,9 +729,9 @@ static void R_Mesh_DrawFrame (int skinnum)
 		rs=(rscript_t *)currententity->script;
 	
 	//check for valid script
-	if(rs && rs->stage)
+	if (rs && rs->stage)
 	{
-		if(	!strcmp("***r_notexture***", rs->stage->texture->name) || 
+		if (!strcmp("***r_notexture***", rs->stage->texture->name) || 
 			((rs->stage->fx || rs->stage->glow) && !strcmp("***r_notexture***", rs->stage->texture2->name)) ||
 			(rs->stage->cube && !strcmp("***r_notexture***", rs->stage->texture3->name)) ||
 			rs->stage->num_blend_textures != 0 || rs->stage->next != NULL )
@@ -799,7 +778,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 	{
 		qboolean fragmentshader;
 		
-		if(rs && rs->stage->depthhack)
+		if (rs && rs->stage->depthhack)
 			qglDepthMask(false);
 		
 		if (currententity->flags & RF_SHELL_ANY)
@@ -816,8 +795,8 @@ static void R_Mesh_DrawFrame (int skinnum)
 	
 	R_Mesh_DrawVBO (lerped);
 	
-	glUseProgramObjectARB( 0 );
-	qglDepthMask(true);
+	glUseProgramObjectARB (0);
+	qglDepthMask (true);
 
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
@@ -835,28 +814,24 @@ static void R_Mesh_SetShadelight (void)
 {
 	int i;
 	
-	if ( currententity->flags & RF_SHELL_ANY )
+	if ((currententity->flags & RF_SHELL_ANY))
 	{
 		VectorClear (shadelight);
-		if (currententity->flags & RF_SHELL_HALF_DAM)
-		{
-				shadelight[0] = 0.56;
-				shadelight[1] = 0.59;
-				shadelight[2] = 0.45;
-		}
-		if ( currententity->flags & RF_SHELL_DOUBLE )
+		if ((currententity->flags & RF_SHELL_HALF_DAM))
+			VectorSet (shadelight, 0.56, 0.59, 0.45);
+		if ((currententity->flags & RF_SHELL_DOUBLE))
 		{
 			shadelight[0] = 0.9;
 			shadelight[1] = 0.7;
 		}
-		if ( currententity->flags & RF_SHELL_RED )
+		if ((currententity->flags & RF_SHELL_RED))
 			shadelight[0] = 1.0;
-		if ( currententity->flags & RF_SHELL_GREEN )
+		if ((currententity->flags & RF_SHELL_GREEN))
 		{
 			shadelight[1] = 1.0;
 			shadelight[2] = 0.6;
 		}
-		if ( currententity->flags & RF_SHELL_BLUE )
+		if ((currententity->flags & RF_SHELL_BLUE))
 		{
 			shadelight[2] = 1.0;
 			shadelight[0] = 0.6;
@@ -865,18 +840,17 @@ static void R_Mesh_SetShadelight (void)
 	else if ((currententity->flags & RF_FULLBRIGHT) || currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
 	{
 		// Treat terrain as fullbright for now. TODO: move to precompiled lightmaps for terrain.
-		for (i=0 ; i<3 ; i++)
-			shadelight[i] = 1.0;
+		VectorSet (shadelight, 1.0, 1.0, 1.0);
 	}
 	else
 	{
 		VectorCopy (worldlight, shadelight); // worldlight is set in R_GetLightVals
 	}
-	if ( currententity->flags & RF_MINLIGHT )
+	if ((currententity->flags & RF_MINLIGHT))
 	{
 		float minlight;
 
-		if(gl_normalmaps->integer)
+		if (gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -891,13 +865,13 @@ static void R_Mesh_SetShadelight (void)
 		}
 	}
 
-	if ( currententity->flags & RF_GLOW )
+	if ((currententity->flags & RF_GLOW))
 	{	// bonus items will pulse with time
 		float	scale;
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_normalmaps->integer)
+		if (gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -915,7 +889,7 @@ static void R_Mesh_SetShadelight (void)
 R_Mesh_Draw - animate and render a mesh. Should support all mesh types.
 =================
 */
-void R_Mesh_Draw ( void )
+void R_Mesh_Draw (void)
 {
 	image_t		*skin;
 
@@ -940,10 +914,10 @@ void R_Mesh_Draw ( void )
 	if (!(currententity->flags & RF_WEAPONMODEL))
 		c_alias_polys += currentmodel->num_triangles; /* for rspeed_epoly count */
 
-	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
+	if ((currententity->flags & RF_DEPTHHACK)) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
-	if (currententity->flags & RF_WEAPONMODEL)
+	if ((currententity->flags & RF_WEAPONMODEL))
 	{
 		qglMatrixMode(GL_PROJECTION);
 		qglPushMatrix();
@@ -954,7 +928,7 @@ void R_Mesh_Draw ( void )
 			qglScalef(-1, 1, 1);
 			qglCullFace(GL_BACK);
 		}
-		if(r_newrefdef.fov_y < 75.0f)
+		if (r_newrefdef.fov_y < 75.0f)
 			MYgluPerspective(r_newrefdef.fov_y, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
 		else
 			MYgluPerspective(75.0f, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
@@ -977,7 +951,7 @@ void R_Mesh_Draw ( void )
 	
 	GL_SelectTexture (0);
 	qglShadeModel (GL_SMOOTH);
-	GL_TexEnv( GL_MODULATE );
+	GL_TexEnv (GL_MODULATE);
 	
 	if (modtypes[currentmodel->type].decal)
 	{
@@ -1006,38 +980,32 @@ void R_Mesh_Draw ( void )
 	}
 
 	GL_SelectTexture (0);
-	GL_TexEnv( GL_REPLACE );
+	GL_TexEnv (GL_REPLACE);
 	qglShadeModel (GL_FLAT);
 
 	qglPopMatrix ();
 	
-	if (currententity->flags & RF_WEAPONMODEL)
+	if ((currententity->flags & RF_WEAPONMODEL))
 	{
-		qglMatrixMode( GL_PROJECTION );
-		qglPopMatrix();
-		qglMatrixMode( GL_MODELVIEW );
-		qglCullFace( GL_FRONT );
+		qglMatrixMode (GL_PROJECTION);
+		qglPopMatrix ();
+		qglMatrixMode (GL_MODELVIEW);
+		qglCullFace (GL_FRONT);
 	}
 
-	if (currententity->flags & RF_DEPTHHACK)
+	if ((currententity->flags & RF_DEPTHHACK)) // restore depth range
 		qglDepthRange (gldepthmin, gldepthmax);
 	
 	qglColor4f (1,1,1,1);
 
 	if (r_minimap->integer && !currententity->ragdoll)
 	{
-	   if (currententity->flags & RF_MONSTER)
-	   {
-			RadarEnts[numRadarEnts].color[0]= 1.0;
-			RadarEnts[numRadarEnts].color[1]= 0.0;
-			RadarEnts[numRadarEnts].color[2]= 2.0;
-			RadarEnts[numRadarEnts].color[3]= 1.0;
+		if ((currententity->flags & RF_MONSTER))
+		{
+			Vector4Set (RadarEnts[numRadarEnts].color, 1.0, 0.0, 2.0, 1.0);
+			VectorCopy (currententity->origin, RadarEnts[numRadarEnts].org);
+			numRadarEnts++;
 		}
-		else
-			return;
-
-		VectorCopy (currententity->origin,RadarEnts[numRadarEnts].org);
-		numRadarEnts++;
 	}
 }
 
@@ -1053,12 +1021,10 @@ void R_Mesh_DrawCasterFrame (qboolean lerped)
 
 // TODO - alpha and alphamasks possible?
 // Should support every mesh type
-void R_Mesh_DrawCaster ( void )
+void R_Mesh_DrawCaster (void)
 {
-	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
-		return;
-
-	if ( currententity->flags & RF_SHELL_ANY ) //no shells
+	// don't draw weapon model shadow casters or shells
+	if ((currententity->flags & (RF_WEAPONMODEL|RF_SHELL_ANY)))
 		return;
 
 	if (!(currententity->flags & RF_VIEWERMODEL) && R_Mesh_CullModel ())
@@ -1072,7 +1038,7 @@ void R_Mesh_DrawCaster ( void )
 		MD2_SelectFrame ();
 	// New model types go here
 
-	if(currententity->frame == 0 && currentmodel->num_frames == 1)
+	if (currententity->frame == 0 && currentmodel->num_frames == 1)
 		R_Mesh_DrawCasterFrame (false);
 	else
 		R_Mesh_DrawCasterFrame (true);
