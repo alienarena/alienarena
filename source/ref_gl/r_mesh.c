@@ -335,11 +335,11 @@ static qboolean R_Mesh_CullModel (void)
 		trace_t r_trace;
 		qboolean unblocked = false;
 		
-		r_trace = CM_BoxTrace(r_origin, currententity->origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace (currententity->origin, r_origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 		unblocked = r_trace.fraction == 1.0;
 		for (i = 0; i < 8 && !unblocked; i++)
 		{
-			r_trace = CM_BoxTrace(r_origin, bbox[i], vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace (bbox[i], r_origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 			unblocked = r_trace.fraction == 1.0;
 		}
 		if (!unblocked)
