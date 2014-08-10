@@ -56,7 +56,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_f
 #define FILENAME_ATTR(cmd_name,out) \
 		if (!Q_strcasecmp (token, cmd_name)) \
 		{ \
-			sprintf (newname, "c:/alienarena_w32/data1/%s", COM_Parse (&buf)); \
+			sprintf (newname, "%s%s", moddir, COM_Parse (&buf)); \
 			out = CopyString (newname); \
 			if (!buf) \
 			{ \
