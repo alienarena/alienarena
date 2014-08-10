@@ -263,7 +263,7 @@ void R_ModelViewTransform(const vec3_t in, vec3_t out){
 	out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14];
 }
 
-// TODO: does this actually do a different job from R_CullBox?
+// Unlike R_CullBox, this takes an *oriented* (rotated) bounding box.
 static qboolean R_Mesh_CullBBox (vec3_t bbox[8])
 {
 	int p, f, aggregatemask = ~0;
