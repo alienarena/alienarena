@@ -608,25 +608,22 @@ qboolean COM_HasExtension (char *path, char *extension)
 COM_FileExtension
 ============
 */
-#if 0
-// not used
 char *COM_FileExtension (char *in)
 {
-
-	static char exten[8];
+    char *src;
+	static char exten[32];
 	int		i;
 
-	while (*in && *in != '.')
-		in++;
-	if (!*in)
+    src = in + strlen (in) - 1;
+    while (src != in && *(src - 1) != '.')
+		src--;
+	if (src == in)
 		return "";
-	in++;
-	for (i=0 ; i<7 && *in ; i++,in++)
-		exten[i] = *in;
+	for (i=0 ; i<31 && *src ; i++,src++)
+		exten[i] = *src;
 	exten[i] = 0;
 	return exten;
 }
-#endif
 
 /*
 ============

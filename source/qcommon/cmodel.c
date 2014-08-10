@@ -646,7 +646,7 @@ CMod_LoadAlternateEntityData
 */
 void CMod_LoadAlternateEntityData (char *entity_file_name)
 {
-    char *buf;
+	char *buf;
 
 	numentitychars = FS_LoadFile (entity_file_name, (void **)&buf);
 
@@ -895,6 +895,10 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	
 	if (numterrainmodels == MAX_MAP_MODELS)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
+	
+	// Can only handle .terrain meshes so far
+	if (Q_strcasecmp (COM_FileExtension (name), "terrain"))
+		return;
 	
 	mod = &terrain_models[numterrainmodels++];
 	

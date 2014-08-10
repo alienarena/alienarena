@@ -140,6 +140,9 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 	vec3_t start, end;
 	vec3_t color = {1, 1, 1};
 	
+	if (Q_strcasecmp (COM_FileExtension (path), "terrain"))
+		return; // not a .terrain mesh
+	
 	len = FS_LoadFile (path, (void**)&buf);
 	
 	if (!buf)
