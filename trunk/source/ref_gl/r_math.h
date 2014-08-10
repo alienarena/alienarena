@@ -40,5 +40,14 @@ void Matrix4_Scale2D( mat4x4_t m, vec_t x, vec_t y );
 void Matrix4_Translate2D( mat4x4_t m, vec_t x, vec_t y );
 void Matrix4_Stretch2D( mat4x4_t m, vec_t s, vec_t t );
 
+void Matrix3x4_Invert (matrix3x4_t *out, matrix3x4_t in);
+void Matrix3x4_FromQuatAndVectors (matrix3x4_t *out, vec4_t rot, const float trans[3], const float scale[3]);
+void Matrix3x4_Multiply (matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
+void Matrix3x4_Scale (matrix3x4_t *out, matrix3x4_t in, float scale);
+void Matrix3x4_Add (matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
+void Matrix3x4_Copy (matrix3x4_t *out, matrix3x4_t in);
+void Matrix3x4GenRotate (matrix3x4_t *out, float angle, const vec3_t axis);
+
+
 #define nanmask (255<<23)
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
