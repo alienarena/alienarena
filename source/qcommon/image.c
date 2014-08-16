@@ -7,7 +7,7 @@
 // Contains the routines for loading images into buffers
 // TODO: maybe move the rest of the image formats here?
 
-static void raw_sample (const byte *texture, int tex_w, int tex_h, int s, int t, vec3_t out)
+static void raw_sample (const byte *texture, int tex_w, int tex_h, int s, int t, vec4_t out)
 {
 	int i;
 	
@@ -20,17 +20,17 @@ static void raw_sample (const byte *texture, int tex_w, int tex_h, int s, int t,
 	if (t < 0)
 		t = 0;
 	
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 4; i++)
 		out[i] = (float)texture[(t*tex_w+s)*4+i]/255.0f;
 }
 
 // Used for sampling textures on the CPU.
-void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec3_t out)
+void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec4_t out)
 {
 	int i;
  	int x, y;
  	float u_ratio, v_ratio, u_opposite, v_opposite;
- 	vec3_t sample1, sample2, sample3, sample4;
+ 	vec4_t sample1, sample2, sample3, sample4;
  	
 	u = u * tex_w - 0.5;
 	v = v * tex_h - 0.5;
@@ -48,7 +48,7 @@ void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float 
 	SAMPLE (x+1, y+1, sample4);
 #undef SAMPLE
 	
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 4; i++)
 		out[i] =	(sample1[i] * u_opposite + sample2[i] * u_ratio) * v_opposite +
 					(sample3[i] * u_opposite + sample4[i] * u_ratio) * v_ratio;
 }

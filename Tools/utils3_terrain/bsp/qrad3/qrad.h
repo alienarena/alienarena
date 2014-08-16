@@ -187,7 +187,7 @@ byte	*dlightdata_ptr;
 byte	dlightdata_raw[MAX_OVERRIDE_LIGHTING];
 
 
-void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec3_t out);
+void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec4_t out);
 
 
 #define Z_Free free

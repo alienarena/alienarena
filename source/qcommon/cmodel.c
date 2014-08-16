@@ -2372,6 +2372,7 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 {
 	int modnum;
 	float s, t;
+	vec4_t out_color_withalpha;
 	cterrainmodel_t	*mod;
 	
 	memset (&trace_trace, 0, sizeof(trace_trace));
@@ -2406,7 +2407,8 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 	s = (DotProduct (out_point, mod->lm_s_axis) - mod->lm_mins[0]) / mod->lm_size[0];
 	t = 1.0 - (DotProduct (out_point, mod->lm_t_axis) - mod->lm_mins[1]) / mod->lm_size[1];
 	
-	bilinear_sample (mod->lightmaptex, mod->lm_w, mod->lm_h, s, t, out_color);
+	bilinear_sample (mod->lightmaptex, mod->lm_w, mod->lm_h, s, t, out_color_withalpha);
+	VectorCopy (out_color_withalpha, out_color);
 }
 
 
