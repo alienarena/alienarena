@@ -7,11 +7,14 @@
 #include "binheap.h"
 #include "libgarland.h"
 
-static float grayscale_sample (const byte *texture, int tex_w, int tex_h, float u, float v)
+static float grayscale_sample (const byte *texture, int tex_w, int tex_h, float u, float v, float *out_alpha)
 {
-    vec3_t res;
+    vec4_t res;
     
     bilinear_sample (texture, tex_w, tex_h, u, v, res);
+    
+    if (out_alpha != NULL)
+    	*out_alpha = res[3];
     
     return (res[0] + res[1] + res[2]) / 3.0;
 }
@@ -83,7 +86,7 @@ terraindec_t *LoadTerrainDecorationType
 		
 				x = scale[0]*((float)j/(float)w) + mins[0] + scale[0]*xrand/(float)w;
 				y = scale[1]*((float)i/(float)h) + mins[1] + scale[1]*yrand/(float)h;
-				z = scale[2] * grayscale_sample (hmtexdata, hm_h, hm_w, s, t) + mins[2];
+				z = scale[2] * grayscale_sample (hmtexdata, hm_h, hm_w, s, t, NULL) + mins[2];
 		
 				VectorSet (ret[counter].origin, x, y, z);
 				ret[counter].size = (float)size/16.0f;
@@ -106,6 +109,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 {
 	int i, j, va, w, h, vtx_w, vtx_h;
 	char	*hmtex_path = NULL, *vegtex_path = NULL, *rocktex_path = NULL;
+	byte	*alphamask; // Bitmask of "holes" in terrain from alpha channel
 	mesh_t	mesh;
 	vec3_t	scale;
 	char	*token;
@@ -206,6 +210,8 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	vtx_w = oversampling_factor*w+1;
 	vtx_h = oversampling_factor*h+1;
 	
+	alphamask = Z_Malloc (vtx_w * vtx_h / 8 + 1);
+	
 	out->num_vertices = vtx_w*vtx_h;
 	out->num_triangles = 2*(vtx_w-1)*(vtx_h-1);
 	
@@ -213,46 +219,23 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	out->vert_positions = Z_Malloc (out->num_vertices*sizeof(vec3_t));
 	out->tri_indices = Z_Malloc (out->num_triangles*3*sizeof(unsigned int));
 	
-	va = 0;
-	for (i = 0; i < vtx_h-1; i++)
-	{
-		for (j = 0; j < vtx_w-1; j++)
-		{
-			if ((i+j)%2 == 1)
-			{
-				out->tri_indices[va++] = (i+1)*vtx_w+j;
-				out->tri_indices[va++] = i*vtx_w+j+1;
-				out->tri_indices[va++] = i*vtx_w+j;
-				out->tri_indices[va++] = i*vtx_w+j+1;
-				out->tri_indices[va++] = (i+1)*vtx_w+j;
-				out->tri_indices[va++] = (i+1)*vtx_w+j+1;
-			}
-			else
-			{
-				out->tri_indices[va++] = (i+1)*vtx_w+j+1;
-				out->tri_indices[va++] = i*vtx_w+j+1;
-				out->tri_indices[va++] = i*vtx_w+j;
-				out->tri_indices[va++] = i*vtx_w+j;
-				out->tri_indices[va++] = (i+1)*vtx_w+j;
-				out->tri_indices[va++] = (i+1)*vtx_w+j+1;
-			}
-		}
-	}
-	
-	assert (va == out->num_triangles*3);
-	
 	for (i = 0; i < vtx_h; i++)
 	{
 		for (j = 0; j < vtx_w; j++)
 		{
-			float x, y, z, s, t;
+			float x, y, z, s, t, alpha;
 			
 			s = (float)j/(float)vtx_w;
 			t = 1.0 - (float)i/(float)vtx_h;
 			
 			x = scale[0]*((float)j/(float)vtx_w) + out->mins[0];
 			y = scale[1]*((float)i/(float)vtx_h) + out->mins[1];
-			z = scale[2] * grayscale_sample (texdata, h, w, s, t) + out->mins[2];
+			z = scale[2] * grayscale_sample (texdata, h, w, s, t, &alpha) + out->mins[2];
+			
+			// If the alpha of the heightmap texture is less than 1.0, the 
+			// terrain has a "hole" in it and any tris that would have
+			// included this vertex should be skipped.
+			alphamask[(i*vtx_w+j)/8] |= (alpha == 1.0) << ((i*vtx_w+j)%8);
 			
 			VectorSet (&out->vert_positions[(i*vtx_w+j)*3], x, y, z);
 			out->vert_texcoords[(i*vtx_w+j)*2] = s;
@@ -260,10 +243,42 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 		}
 	}
 	
+	va = 0;
+	for (i = 0; i < vtx_h-1; i++)
+	{
+		for (j = 0; j < vtx_w-1; j++)
+		{
+// Yeah, this was actually the least embarrassing way to do it
+#define IDX_NOT_HOLE(idx) ((alphamask[(idx) / 8] & (1 << ((idx) % 8))) != 0)
+#define ADDTRIANGLE(idx1,idx2,idx3) \
+			if (IDX_NOT_HOLE (idx1) && IDX_NOT_HOLE (idx2) && IDX_NOT_HOLE (idx3)) \
+			{ \
+				out->tri_indices[va++] = idx1; \
+				out->tri_indices[va++] = idx2; \
+				out->tri_indices[va++] = idx3; \
+			}
+			
+			if ((i+j)%2 == 1)
+			{
+				ADDTRIANGLE ((i+1)*vtx_w+j, i*vtx_w+j+1, i*vtx_w+j);
+				ADDTRIANGLE (i*vtx_w+j+1, (i+1)*vtx_w+j, (i+1)*vtx_w+j+1);
+			}
+			else
+			{
+				ADDTRIANGLE ((i+1)*vtx_w+j+1, i*vtx_w+j+1, i*vtx_w+j);
+				ADDTRIANGLE (i*vtx_w+j, (i+1)*vtx_w+j, (i+1)*vtx_w+j+1);
+			}
+		}
+	}
+	
+	assert (va % 3 == 0 && va / 3 <= out->num_triangles);
+	
 	free (texdata);
 	
+	Z_Free (alphamask);
+	
 	mesh.num_verts = out->num_vertices;
-	mesh.num_tris = out->num_triangles;
+	mesh.num_tris = va / 3;
 	mesh.vcoords = out->vert_positions;
 	mesh.vtexcoords = out->vert_texcoords;
 	mesh.tris = out->tri_indices;
