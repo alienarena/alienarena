@@ -1943,9 +1943,11 @@ void CL_InitLocal (void)
 	cl_gun = Cvar_Get ("cl_gun", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_footsteps = Cvar_Get ("cl_footsteps", "1", CVARDOC_BOOL);
 	cl_noskins = Cvar_Get ("cl_noskins", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_noskins, "for all players to be shown with the same skin.");
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", CVARDOC_BOOL);
 	cl_predict = Cvar_Get ("cl_predict", "1", CVARDOC_BOOL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "60", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (cl_maxfps, "limit the frames drawn per second using a busy-wait loop.");
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_showPlayerNames, "0 means no nametags, 1 means show one nametag in the center of the screen, 2 means show a nametag over each player.");
 	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
@@ -1957,6 +1959,7 @@ void CL_InitLocal (void)
 	cl_dmlights = Cvar_Get("cl_dm_lights", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_centerprint = Cvar_Get ("cl_centerprint", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_centerprint, "enable text in the center of the screen.");
 	cl_precachecustom = Cvar_Get ("cl_precachecustom", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	Cvar_Describe (cl_precachecustom, "precache 3rd-party and custom player skins at the first map load.");
 	cl_simpleitems = Cvar_Get ("cl_simpleitems", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
@@ -1965,8 +1968,11 @@ void CL_InitLocal (void)
 	Cvar_Describe (cl_flicker, "enable flickering world lighting.");
 
 	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
+	Cvar_Describe (cl_paindist, "distort the screen when you take damage.");
 	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);
+	Cvar_Describe (cl_paindist, "distort the screen for explosions.");
 	cl_raindist = Cvar_Get ("cl_raindist", "1", CVAR_ARCHIVE);
+	Cvar_Describe (cl_paindist, "rain running down your visor.");
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);
