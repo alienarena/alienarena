@@ -734,7 +734,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 		if (!strcmp("***r_notexture***", rs->stage->texture->name) || 
 			((rs->stage->fx || rs->stage->glow) && !strcmp("***r_notexture***", rs->stage->texture2->name)) ||
 			(rs->stage->cube && !strcmp("***r_notexture***", rs->stage->texture3->name)) ||
-			rs->stage->num_blend_textures != 0 || rs->stage->next != NULL )
+			rs->stage->num_blend_textures != 0 || rs->stage->next != NULL || currentmodel->lightmap != NULL )
 		{
 			rs_slowpath = true;
 		}
