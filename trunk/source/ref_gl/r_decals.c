@@ -6,7 +6,7 @@
 #include <float.h>
 
 // Maximums
-#define DECAL_POLYS 256
+#define DECAL_POLYS MAX_TRIANGLES // This really is a bit high
 #define DECAL_VERTS (2*(3*DECAL_POLYS)) // double to make room for temp new verts
 
 void Decal_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, unsigned int *vtriangles)
@@ -122,9 +122,9 @@ static void Mod_AddToDecalModel (const decalorientation_t *pos, const decalinput
 	int trinum;
 	
 	// If a vertex was at index n in the original model, then in the new decal
-    // model, it will be at index_table[n]-1. A value of 0 for index_table[n]
-    // indicates space for the vertex hasn't been allocated in the new decal
-    // model yet.
+	// model, it will be at index_table[n]-1. A value of 0 for index_table[n]
+	// indicates space for the vertex hasn't been allocated in the new decal
+	// model yet.
 	unsigned int *index_table;
 	
 	index_table = Z_Malloc (in->nverts*sizeof(unsigned int));
@@ -141,13 +141,14 @@ static void Mod_AddToDecalModel (const decalorientation_t *pos, const decalinput
 			vec3_t tmp, tmp2;
 			
 			// First, transform the mesh geometry into world space
-			VectorAdd (&in->vposition[3*in->vtriangles[3*trinum+i]], in->origin, tmp);
+			VectorCopy (&in->vposition[3*in->vtriangles[3*trinum+i]], tmp);
 			VectorClear (tmp2);
 			for (j = 0; j < 3; j++)
 			{
 				for (k = 0; k < 3; k++)
 					tmp2[j] += tmp[k] * in->rotation_matrix[j][k];
 			}
+			VectorAdd (tmp2, in->origin, tmp2);
 			
 			// Then, transform it into decal space
 			VectorSubtract (tmp2, pos->origin, tmp);
@@ -190,11 +191,15 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	model_t *terrainmodel;
 	
 	vertCache_t	*vbo_xyz;
-	vertCache_t	*vbo_indices;
 	
 	decalinput_t in;
 	
 	terrainmodel = terrainentity->model;
+	
+	VectorCopy (terrainentity->origin, in.origin);
+	AnglesToMatrix3x3 (terrainentity->angles, in.rotation_matrix);
+	in.npolys = terrainmodel->num_triangles;
+	in.nverts = terrainmodel->numvertexes;
 	
 	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ, terrainmodel, NULL);
 	GL_BindVBO (vbo_xyz);
@@ -206,30 +211,42 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 		return;
 	}
 	
-	vbo_indices = R_VCFindCache (VBO_STORE_INDICES, terrainmodel, NULL);
-	GL_BindIBO (vbo_indices);
-	in.vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-	GL_BindIBO (NULL);
-	if (in.vtriangles == NULL)
+	if (modtypes[terrainmodel->type].indexed)
 	{
-		Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
-		return;
+		vertCache_t	*vbo_indices = R_VCFindCache (VBO_STORE_INDICES, terrainmodel, NULL);
+		GL_BindIBO (vbo_indices);
+		in.vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
+		GL_BindIBO (NULL);
+		if (in.vtriangles == NULL)
+		{
+			Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
+			return;
+		}
+		
+		Mod_AddToDecalModel (pos, &in, out);
+		
+		GL_BindIBO (vbo_indices);
+		qglUnmapBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB);
+		GL_BindIBO (NULL);
 	}
-	
-	VectorCopy (terrainentity->origin, in.origin);
-	AnglesToMatrix3x3 (terrainentity->angles, in.rotation_matrix);
-	in.npolys = terrainmodel->num_triangles;
-	in.nverts = terrainmodel->numvertexes;
-	
-	Mod_AddToDecalModel (pos, &in, out);
+	else
+	{
+		int i;
+		
+		// Fake indexing for MD2s.
+		in.npolys = in.nverts / 3;
+		in.vtriangles = Z_Malloc (in.nverts * sizeof(unsigned int));
+		for (i = 0; i < in.nverts; i++)
+			in.vtriangles[i] = i;
+		
+		Mod_AddToDecalModel (pos, &in, out);
+		
+		Z_Free (in.vtriangles);
+	}
 	
 	GL_BindVBO (vbo_xyz);
 	qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
 	GL_BindVBO (NULL);
-	
-	GL_BindIBO (vbo_indices);
-	qglUnmapBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB);
-	GL_BindIBO (NULL);
 }
 
 // Add geometry from the BSP to the decal
