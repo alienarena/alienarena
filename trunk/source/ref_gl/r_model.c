@@ -610,8 +610,6 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 	FS_FreeFile (buf);
 	
-	mod->vbo_key = (size_t)mod;
-
 	return mod;
 }
 

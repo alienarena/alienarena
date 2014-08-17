@@ -472,12 +472,6 @@ typedef struct model_s
 	// TODO: we can remove this when shadow volumes are gone.
 	neighbors_t *neighbors;	
 	
-	// Is just a copy of the pointer to this model_t struct. That way you can
-	// make a copy of this model_t and still be able to identify which mesh it
-	// is without string comparisons. TODO: get rid of this and stop making 
-	// copies!
-	size_t			vbo_key; 
-	
 	//terrain only
 	image_t         *lightmap;
 
