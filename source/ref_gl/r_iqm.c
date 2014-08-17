@@ -191,13 +191,15 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	return true;
 }
 
-void IQM_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles)
+void IQM_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles, unsigned char *vblendweights, unsigned char *vblendindices)
 {
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
-	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
+	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
+	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
+	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
+	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
+	R_VCLoadData (VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
+	R_VCLoadData (VBO_STATIC, mod->numvertexes*4*sizeof(unsigned char), vblendweights, VBO_STORE_BLENDWEIGHTS, mod);
+	R_VCLoadData (VBO_STATIC, mod->numvertexes*4*sizeof(unsigned char), vblendindices, VBO_STORE_BLENDINDICES, mod);
 }
 
 // NOTE: this should be the only function that needs to care what version the
@@ -209,7 +211,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	const int *inelements;
 	int *vtriangles = NULL;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
-	//unsigned char *vblendweights = NULL;
+	unsigned char *vblendweights = NULL, *vblendindices = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint = NULL;
 	iqmjoint2_t *joint2 = NULL;
@@ -311,23 +313,15 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			break;
 		case IQM_BLENDINDEXES:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-			{
-				mod->blendindexes = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				memcpy(mod->blendindexes, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
-			}
+				vblendindices = (unsigned char *)(pbase + va[i].offset);
 			break;
 		case IQM_BLENDWEIGHTS:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-			{
-				/*vblendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				memcpy(vblendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));*/
-				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				memcpy(mod->blendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
-			}
+				vblendweights = (unsigned char *)(pbase + va[i].offset);
 			break;
 		}
 	}
-	if (!vposition || !vtexcoord || !mod->blendindexes || !mod->blendweights)
+	if (!vposition || !vtexcoord || !vblendindices || !vblendweights)
 	{
 		Com_Printf("%s is missing vertex array data\n", mod->name);
 		mod->extradatasize = Hunk_End ();
@@ -624,7 +618,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	
 	// load the VBO data
 
-	IQM_LoadVBO (mod, vposition, vnormal, vtangent, vtexcoord, vtriangles);
+	IQM_LoadVBO (mod, vposition, vnormal, vtangent, vtexcoord, vtriangles, vblendweights, vblendindices);
 	
 	mod->extradatasize = Hunk_End ();
 	
@@ -859,7 +853,7 @@ static void IQM_AnimateFrame_ragdoll (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS
 				matrix3x4_t mat;
 				// FIXME: inefficient
 				Matrix3x4_Invert(&mat, initframe[parent]);
-                Matrix3x4_Multiply(&mat, mat, initframe[i]);
+				Matrix3x4_Multiply(&mat, mat, initframe[i]);
 				Matrix3x4_Multiply (&outframe[i], outframe[parent], mat);
 			}
 			else

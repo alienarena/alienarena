@@ -32,6 +32,8 @@ static vertCache_t	*vbo_xyz;
 static vertCache_t	*vbo_normals;
 static vertCache_t	*vbo_tangents;
 static vertCache_t	*vbo_indices;
+static vertCache_t	*vbo_blendweights;
+static vertCache_t	*vbo_blendindices;
 
 vec3_t	worldlight;
 vec3_t	shadevector;
@@ -55,19 +57,27 @@ static void R_Mesh_FindVBO (model_t *mod, int framenum)
 	if (!modtypes[mod->type].morphtarget)
 		framenum = 0;
 
-	vbo_st = R_VCFindCache(VBO_STORE_ST, mod, vbo_st);	
-	vbo_xyz = R_VCFindCache(VBO_STORE_XYZ+framenum, mod, vbo_xyz);
-	vbo_normals = R_VCFindCache(VBO_STORE_NORMAL+framenum, mod, vbo_normals);
-	vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT+framenum, mod, vbo_tangents);
+	vbo_st = R_VCFindCache (VBO_STORE_ST, mod, vbo_st);	
+	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ+framenum, mod, vbo_xyz);
+	vbo_normals = R_VCFindCache (VBO_STORE_NORMAL+framenum, mod, vbo_normals);
+	vbo_tangents = R_VCFindCache (VBO_STORE_TANGENT+framenum, mod, vbo_tangents);
 	
 	if (!vbo_xyz || !vbo_st || !vbo_normals || !vbo_tangents)
 		Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
 	
 	if (modtypes[mod->type].indexed)
 	{
-		vbo_indices = R_VCFindCache(VBO_STORE_INDICES, mod, vbo_indices);
+		vbo_indices = R_VCFindCache (VBO_STORE_INDICES, mod, vbo_indices);
 		if (!vbo_indices)
-			Com_Error (ERR_DROP, "Cannot find IBO for %s frame %d\n", mod->name, framenum);
+			Com_Error (ERR_DROP, "Cannot find IBO for %s\n", mod->name);
+	}
+	
+	if (modtypes[mod->type].skeletal)
+	{
+		vbo_blendweights = R_VCFindCache (VBO_STORE_BLENDWEIGHTS, mod, vbo_blendweights);
+		vbo_blendindices = R_VCFindCache (VBO_STORE_BLENDINDICES, mod, vbo_blendindices);
+		if (!vbo_blendweights || !vbo_blendindices)
+			Com_Error (ERR_DROP, "Cannot find blend VBO for %s\n", mod->name);
 	}
 }
 
@@ -89,9 +99,16 @@ void R_Mesh_FreeVBO (model_t *mod)
 		R_VCFree (vbo_tangents);
 	}
 	
-	// indices should be the same for every frame
+	// Certain things are not stored separately for every frame
+	
 	if (modtypes[mod->type].indexed)
 		R_VCFree (vbo_indices);
+	
+	if (modtypes[mod->type].skeletal)
+	{
+		R_VCFree (vbo_blendweights);
+		R_VCFree (vbo_blendindices);
+	}
 }
 
 //This routine bascially finds the average light position, by factoring in all lights and
@@ -629,18 +646,18 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	// setup
 	R_Mesh_FindVBO (currentmodel, currententity->frame);
 	
-	GL_BindVBO(vbo_xyz);
+	GL_BindVBO (vbo_xyz);
 	R_VertexPointer (3, 0, 0);
 	
-	GL_BindVBO(vbo_st);
+	GL_BindVBO (vbo_st);
 	R_TexCoordPointer (0, 0, 0);
 	
-	GL_BindVBO(vbo_normals);
+	GL_BindVBO (vbo_normals);
 	R_NormalPointer (0, 0);
 
 	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-	GL_BindVBO(vbo_tangents);
-	glVertexAttribPointerARB(ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+	GL_BindVBO (vbo_tangents);
+	glVertexAttribPointerARB (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 	
 	// Note: the lerp position is sent separately as a uniform to the GLSL shader.
 	if (modtypes[currentmodel->type].morphtarget && lerped)
@@ -656,27 +673,30 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 		glVertexAttribPointerARB (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
 		
 		glEnableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
-		GL_BindVBO(vbo_tangents);
-		glVertexAttribPointerARB(ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+		GL_BindVBO (vbo_tangents);
+		glVertexAttribPointerARB (ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 	}
-	
-	GL_BindVBO (NULL);
 	
 	// Note: bone positions are sent separately as uniforms to the GLSL shader.
 	if (modtypes[currentmodel->type].skeletal)
 	{
-		glEnableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-		glVertexAttribPointerARB(ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(byte)*4, currentmodel->blendweights);
-		glEnableVertexAttribArrayARB(ATTR_BONES_IDX);
-		glVertexAttribPointerARB(ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(byte)*4, currentmodel->blendindexes);
+		glEnableVertexAttribArrayARB (ATTR_WEIGHTS_IDX);
+		GL_BindVBO (vbo_blendweights);
+		glVertexAttribPointerARB (ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(byte)*4, 0);
+		
+		glEnableVertexAttribArrayARB (ATTR_BONES_IDX);
+		GL_BindVBO (vbo_blendindices);
+		glVertexAttribPointerARB (ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(byte)*4, 0);
 	}
+	
+	GL_BindVBO (NULL);
 	
 	// render
 	if (modtypes[currentmodel->type].indexed)
 	{
-		GL_BindIBO(vbo_indices);
-		qglDrawElements(GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
-		GL_BindIBO(NULL);
+		GL_BindIBO (vbo_indices);
+		qglDrawElements (GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
+		GL_BindIBO (NULL);
 	}
 	else
 	{
@@ -690,8 +710,8 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	
 	if (modtypes[currentmodel->type].skeletal)
 	{
-		glDisableVertexAttribArrayARB(ATTR_WEIGHTS_IDX);
-		glDisableVertexAttribArrayARB(ATTR_BONES_IDX);
+		glDisableVertexAttribArrayARB (ATTR_WEIGHTS_IDX);
+		glDisableVertexAttribArrayARB (ATTR_BONES_IDX);
 	}
 	
 	if (lerped)
