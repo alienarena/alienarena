@@ -339,6 +339,7 @@ void MD2_LoadVBO (model_t *mod, dmdl_t *pheader, fstvert_t *st)
 /*
 =================
 Mod_LoadMD2Model
+TODO: the MD2 format actually supports partial indexing, we should use it!
 =================
 */
 void Mod_LoadMD2Model (model_t *mod, void *buffer)
@@ -496,6 +497,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
 
 	mod->num_triangles = pheader->num_tris;
+	mod->numvertexes = 3*mod->num_triangles; // TODO: use MD2's indexing!
 
 	//redo this using max/min from all frames
 	pframe = ( daliasframe_t * ) ( ( byte * ) pheader +
