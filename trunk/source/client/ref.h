@@ -105,6 +105,9 @@ typedef enum {
 	VBO_STORE_INDICES,
 	VBO_STORE_BINORMAL,
 	VBO_STORE_ST,
+	// For skeletal models
+	VBO_STORE_BLENDWEIGHTS,
+	VBO_STORE_BLENDINDICES,
 	// MD2 models will use, for example, VBO_STORE_XYZ+3 for the 3rd frame's 
 	// vertex data. IQM models are skeletal and don't need to do this.
 	VBO_STORE_XYZ,
