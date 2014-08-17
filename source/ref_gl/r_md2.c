@@ -201,7 +201,7 @@ void MD2_VecsForTris(
 }
 #endif
 
-static void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, int framenum)
+static void MD2_PopulateFrameArrays (dmdl_t *pheader, fstvert_t *st, int framenum)
 {
 	int				i, j, k, l, va;
 	daliasframe_t	*frame;
@@ -294,62 +294,46 @@ static void MD2_PopulateNormalsTangentsArrays (dmdl_t *pheader, fstvert_t *st, i
 	
 	// Now that the normals and tangents are calculated, prepare them to be
 	// loaded into the VBO.
-	va = 0;
-	for (i=0; i<pheader->num_tris; i++)
+	for (va = 0; va < pheader->num_tris*3; va++)
 	{
-		for (j=0; j<3; j++, va++)
-		{
-			VectorCopy (normals_[tris[i].index_xyz[j]], NormalsArray[va]);
-			VectorCopy (tangents_[tris[i].index_xyz[j]], TangentsArray[va]);
-			TangentsArray[va][3] = 1.0;
-		}
+	    int index_xyz = tris[va/3].index_xyz[va%3];
+	    
+	    VectorCopy (normals_[index_xyz], NormalsArray[va]);
+	    
+		VectorCopy (tangents_[index_xyz], TangentsArray[va]);
+		TangentsArray[va][3] = 1.0;
+		
+		for (i = 0; i < 3; i++)
+			VertexArray[va][i] = verts[index_xyz].v[i] * frame->scale[i] + frame->translate[i];
 	}
 }
 
 void MD2_LoadVBO (model_t *mod, dmdl_t *pheader, fstvert_t *st)
 {
-	int i, j, k, framenum;
+	int framenum, va;
 	
 	dtriangle_t		*tris;
-	dtrivertx_t		*verts;
-	daliasframe_t	*frame;
 	
 	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
 	
 	for (framenum = 0; framenum < mod->num_frames; framenum++)
 	{
-		int va = 0; // will eventually reach mod->num_triangles*3
-		
-		frame = (daliasframe_t *)
-			((byte *)pheader + pheader->ofs_frames + framenum * pheader->framesize);
-		verts = frame->verts;
-		
-		MD2_PopulateNormalsTangentsArrays (pheader, st, framenum);
-	
-		for (i=0; i<pheader->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				int index_xyz, index_st;
-			
-				index_xyz = tris[i].index_xyz[j];
-				index_st = tris[i].index_st[j];
-			
-				for (k = 0; k < 3; k++)
-					VertexArray[va][k] = verts[index_xyz].v[k] * frame->scale[k] + frame->translate[k];
-			
-				TexCoordArray[va][0] = st[index_st].s;
-				TexCoordArray[va][1] = st[index_st].t;
-			
-				va++;
-			}
-		}
-		
-		R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
-		R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ+framenum, mod);
-		R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL+framenum, mod);
-		R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT+framenum, mod);
+		MD2_PopulateFrameArrays (pheader, st, framenum);
+	    
+		R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ+framenum, mod);
+		R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL+framenum, mod);
+		R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT+framenum, mod);
 	}
+	
+	for (va = 0; va < pheader->num_tris*3; va++)
+	{
+		int index_st = tris[va/3].index_st[va%3];
+	
+		TexCoordArray[va][0] = st[index_st].s;
+		TexCoordArray[va][1] = st[index_st].t;
+	}
+	
+	R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
 }
 
 /*

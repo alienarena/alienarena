@@ -89,17 +89,20 @@ void R_Mesh_FreeVBO (model_t *mod)
 	if (modtypes[mod->type].morphtarget)
 		maxframes = mod->num_frames;
 	
+	vbo_st = vbo_indices = vbo_blendweights = vbo_blendindices = NULL;
+	
 	for (framenum = 0; framenum < maxframes; framenum++)
 	{
-		vbo_xyz = vbo_st = vbo_normals = vbo_tangents = vbo_indices = NULL;
+		vbo_xyz = vbo_normals = vbo_tangents = NULL;
 		R_Mesh_FindVBO (mod, framenum);
 		R_VCFree (vbo_xyz);
-		R_VCFree (vbo_st);
 		R_VCFree (vbo_normals);
 		R_VCFree (vbo_tangents);
 	}
 	
 	// Certain things are not stored separately for every frame
+	
+	R_VCFree (vbo_st);
 	
 	if (modtypes[mod->type].indexed)
 		R_VCFree (vbo_indices);
