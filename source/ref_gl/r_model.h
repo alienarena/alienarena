@@ -386,8 +386,6 @@ typedef struct model_s
 
 	modtype_t	type;
 
-	int			flags;
-
 //
 // volume occupied by the model graphics
 //
@@ -456,11 +454,9 @@ typedef struct model_s
 	int			num_frames;
 
 	//iqm skeletal model info
-	unsigned int	version;
 	int				num_joints;
 	iqmjoint2_t		*joints; // when loading v1 files, joints are reencoded to v2 format
 	matrix3x4_t		*frames;
-	matrix3x4_t		*outframe;
 	matrix3x4_t		*baseframe;
 	int				num_poses;
 	char			skinname[MAX_QPATH];
