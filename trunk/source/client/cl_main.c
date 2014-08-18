@@ -1151,6 +1151,8 @@ static void CL_ConnectionlessPacket (void)
 {
 	char	*s;
 	char	*c;
+	char	*net_from_str;
+	qboolean suppress_command_print = false;
 
 	MSG_BeginReading (&net_message);
 	MSG_ReadLong (&net_message);	// skip the -1
@@ -1160,8 +1162,28 @@ static void CL_ConnectionlessPacket (void)
 	Cmd_TokenizeString (s, false);
 
 	c = Cmd_Argv(0);
+	
+	net_from_str = NET_AdrToString (net_from);
 
-	Com_Printf ("%s: %s\n", NET_AdrToString (net_from), c);
+	if (!strcmp (c, "print"))
+	{
+		netadr_t to;
+		char	*to_str;
+		
+		if (cls.state >= ca_connected)
+			to = cls.netchan.remote_address;
+		else if (rcon_address != NULL)
+			NET_StringToAdr (rcon_address->string, &to);
+		
+		// Convert back to string to populate the default port, expand short
+		// IPs like 127.1 to 127.0.0.1, etc.
+		to_str = NET_AdrToString (to);
+		
+		suppress_command_print = !strcmp (to_str, net_from_str);
+	}
+	
+	if (!suppress_command_print)
+		Com_Printf ("%s: %s\n", net_from_str, c);
 
 	if(!strncmp(c, "servers", 7))
 	{
