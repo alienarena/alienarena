@@ -68,6 +68,8 @@ cvar_t	*logfile_name;
 cvar_t	*showtrace;
 cvar_t	*dedicated;
 
+cvar_t	*log_dest_udp;
+
 FILE	*logfile;
 
 int			server_state;
@@ -125,6 +127,8 @@ void Com_Printf (char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
+	static netadr_t log_dest_udp_addr;
+	static qboolean *log_dest_udp_valid = false;
 
 	va_start (argptr,fmt);
 	vsnprintf(msg, sizeof(msg), fmt, argptr);
@@ -150,6 +154,14 @@ void Com_Printf (char *fmt, ...)
 	// Also echo to dedicated console
 	Sys_Print(msg);
 #endif
+	
+	if (log_dest_udp != NULL && log_dest_udp->modified)
+	{
+		log_dest_udp_valid = NET_StringToAdr (log_dest_udp->string, &log_dest_udp_addr);
+		log_dest_udp->modified = false;
+	}
+	if (log_dest_udp_valid)
+		Netchan_OutOfBandPrint (NS_SERVER, log_dest_udp_addr, "print\n%s", msg);
 
 	// if logfile_active or logfile_name have been modified, close the current log file
 	if ( ( (logfile_active && logfile_active->modified)
@@ -1670,6 +1682,9 @@ void Qcommon_Init (int argc, char **argv)
 
 	s = va("%s %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
+	
+	log_dest_udp = Cvar_Get ("log_dest_udp", "", CVARDOC_STR);
+	log_dest_udp->modified = true;
 
 	if (dedicated->value)
 		Cmd_AddCommand ("quit", Com_Quit);
