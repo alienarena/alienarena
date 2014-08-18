@@ -752,6 +752,8 @@ void SVC_RemoteCommand (void)
 		Com_Printf ("Bad rcon from %s:\n%s\n", NET_AdrToString (net_from), net_message.data+4);
 	else
 		Com_Printf ("Rcon from %s:\n%s\n", NET_AdrToString (net_from), net_message.data+4);
+	
+	Cvar_Set ("this_rcon_address", NET_AdrToString (net_from)); 
 
 	Com_BeginRedirect (RD_PACKET, sv_outputbuf, SV_OUTPUTBUF_LENGTH, SV_FlushRedirect);
 
