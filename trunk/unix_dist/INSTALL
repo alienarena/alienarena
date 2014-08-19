@@ -1,266 +1,147 @@
 
-2014 March: Portions are obsolete.
+                             Alien Arena
+                            Version 7.66.1
 
+1. Scope and Introduction
 
-                           Alien Arena
-                           Version 7.66
+This document includes information about the GNU-Linux/Unix version of
+Alien Arena and Alien Arena Tactical Demo. The information here
+applies to the development version in the Subversion Repository
+starting with Revision 4215 (March 9, 2014). This document does not
+currently include details about the Tactical Demo and running a
+dedicated server.
 
+Custom options and other information specific to this version are
+included here. For general information, licensing, and contributers,
+see the README, COPYING and GPLv2 documents. For generic information
+about installation using GNU Autotools: the original GNU INSTALL
+document is included at the end of this document.
 
-1. Scope
+There are links to the Alien Arena Forum and other helpful
+Internet resources on the Alien Arena Homepage:
 
-This document includes information about the GNU-Linux/Unix
-version of Alien Arena.  Custom options and other information
-specific to Alien Arena are included here.
+  red.planetarena.org
 
-For general information, licensing, and contributers, see the
-README.txt and license.txt documents (in the docs/ subdirectory
-in the distribution archive).  For generic information about
-installation, see the GNU-INSTALL document.
-
-
-2. Version 7.66 - For Players
-
-The performance of Alien Arena 7.66 is much better that previous
-versions.  Recent desktop and notebook computers with 3D
-acceleration for OpenGL will perform well.  Use the Video
-Settings menu to override the automatically selected performance
-level.
-
-Alien Arena installation alternatives:
-
-  * Your distribution's package manager.
-
-  * PlayDeb or Desura distribution service.
-    PlayDeb is at http://www.playdeb.net/.
-    Desura is at http://www.desura.com/.
-
-  * Build from source.
-    See the "Installation from Distribution Archive" section below.
-
-For more detail see these sections
-  * Help and Support
-  * Configuration and Troubleshooting
-  * Network Information
-  * Running the Program
-
-
-3. Version 7.66 - For Packagers
-
-  * The incompatibility with ODE 0.12 has been corrected.
-    The configure option to use the system libode is --with-system-libode.
-    If the system libode causes problems with ragdoll animation,
-    configure the program to use the integrated libode.
-
-  * There is now direct dependency on zlib.
-    The configure option --with-zlib should be used.
-
-  * The configure.ac status report has more information.
-
-  * Some little used options have been removed from configure.ac
-
-  * The documentation installation override configure option should work now.
-    The configure option is --disable-documents.
-
-  * --with-xf86vm is the default.
-
-  * --without-xf86dga is the default.
-
-  * The Autotools build used autoconf 2.68, and automake 1.11.6.
-
-
-The default standard install follows this file system scheme:
-
-  * ${bindir}/alienarena             (the client program)
-  * ${bindir}/alienarena-ded         (the dedicated server program)
-
-  * ${pkgdatadir}/arena/             (read only configuration files)
-  * ${pkgdatadir}/botinfo/           (read only bot control files)
-  * ${pkgdatadir}/data1/             (read only resource files)
-
-  * ${datadir}/icons/alienarena.png  (the official icon)
-    The configure option is --with-icondir=DIR
-
-  * ${docdir}/                       (documents, licenses)
-
-The shared directory is defined at build time to be exactly
-$(pkgdatadir). The preprocessor symbol, DATADIR, is set to
-$(pkgdatadir), The program expects the arena, botinfo, and data1
-shared, read-only subdirectories to be there.
-
-The program defaults for the user's home directory are:
-
-  * ${HOME}/.codered/arena/   (read/write configuration and resource files)
-  * ${HOME}/.codered/botinfo/ (read/write bot control files)
-  * ${HOME}/.codered/data1/   (read/write resource files, rarely created)
-
-At build time, the environment variable, ALIENARENA_HOMEDIR, can
-be used to override the default .codered user home subdirectory.
-
-At run time, the environment variable, COR_GAME, will override
-the user home subdirectory program setting.  This should normally
-be left as a user option.
-
-The arena subdirectory in the user home directory receives most
-of automatic resource downloads. By convention, it is where 3rd
-party maps are placed. The files in the user home have priority
-over the same name files in the read-only, shared directories.
-
-
-4. Help and Support
-
-The Alien Arena Home Page URL is:
-
-  http://red.planetarena.org/
-
-There are links there to the Alien Arena Forum and other helpful
-Internet resources.  The Alien Arena IRC (Internet Relay Chat)
-channel is now served by:
+The Alien Arena IRC (Internet Relay Chat) channel is now served by:
 
   irc.planetarena.org
 
-The in-game IRC connects to #alienarena there.
-
-There are web sites with 3rd party maps, skins, etc.  See the
-Home Page for links.
-
-There is a Subversion (SVN) repository for Alien Arena.  See the
-topic "Getting Alien Arena from SVN" below.
-
-Alien Arena is on IndieDB.
-http://www.indiedb.com/games/alien-arena-2008
-
-Alien Arena is on Facebook and Twitter.  See the Homepage for
-links.
+The in-game IRC connects to the #alienarena channel there.
 
 
-5. Network Information
+2. Requirements
 
-These ports are used by the program:
-  * UDP 27900 for the master server. Used for getting server list.
-  * UDP 27901 for the client.
-  * UDP 27902 for account/stats system password validation.
-  * UDP 27910 is the default for a server, but is often configured otherwise.
-  * TCP 6667 is the default for in-game connection to the IRC channel.
+2.1 System Requirements
 
-The cURL library is used to retrieve game resources, player
-ranking information, and current version information from these
-URLs:
-  * http://red.planetarena.org/sv_downloadurl
-  * http://stats.planetarena.org/playerrank.db
-  * http://red.planetarena.org/version/crx_version
+A video adapter with 3D acceleration using the latest proprietary
+OpenGL driver is recommended. If you have not previously run a 3D FPS
+(First Person Shooter) at playable frame rates, or if you do not know
+what this means, you may want to verify your system has adequate 3D
+performance before proceeding.
 
-Online performance will vary depending on the network connection
-between the your computer (the client) and the server.  Servers
-with *lower* ping are better.
+2.2 Installing Subversion
 
-Playing online may require firewall configuration.
+The Subversion program is required to download from the Subversion
+Repository. Use your Linux distribution's package manager to install
+Subversion. Subversion is commonly referred to as SVN (for instance:
+"I installed from SVN" or "I updated to the latest SVN").
+
+2.3 Subversion Initial Download and Updating
+
+Anonymous read-only download (checkout) is available using this
+command line:
+
+  $ svn co svn://svn.icculus.org/alienarena/trunk alienarena
+
+This is run in a terminal, normally in your HOME directory.
+
+To update to the latest version after the initial download, change to
+your alienarena subdirectory and use this command line:
+
+  $ svn update
+
+It is a good idea to browse the repository before doing the initial
+download or updates. The initial download is large. Updates are much
+smaller. You can browse the repository using this URL:
+
+  http://svn.icculus.org/alienarena/trunk/
+
+2.4 Installing Tools and Libraries
+
+For Linux, there is no pre-built executable. The executable is built
+after the initial download and rebuilt after updates using an
+automated system called GNU Autotools. This system is also used for
+installation of executables and data.
+
+But, before that can be done, certain tools and libraries must be
+installed. Use your distribution's package manager to install
+these. Depending on your distribution, some of these may already be
+installed. Some distributions have special development versions that
+are not installed by default but are needed to build programs. These
+will have a suffix of "-dev" or "-devel". Some example library names
+are given below in parentheses. These libraries may depend on other
+libraries; the package manager will automatically install those
+dependencies.
+
+  * gcc or g++  (the GNU 'c/c++' compiler tools)
+  * pkg-config  (a library configuration information tool)
+
+  * X11         (libx11-dev, libX11, libxxf86dga-dev, libxxf86vm-dev, libXxf86vm)
+  * OpenGL      (libgl1-mesa-dev, libGL)
+  * OpenAL 1.1  (libopenal-dev, libopenal)
+  * Ogg-Vorbis, (libogg-dev, libvorbis-dev. libogg, libvorbis, libvorbisfile)
+  * cURL,       (libcurl, libcurl4-gnutls-dev)
+  * FreeType2   (libfreetype, libfreetype6-dev)
+  * JPEG        (libjpeg8-dev, libjpeg8)
+  * ZLib        (libz, libz-dev)
+  * ODE         (libode, libode-dev)
+
+For Debian-based distributions (such as Ubuntu and Mint), this command
+should get all of what you need. Enter it all on one command line.
+
+  $ sudo apt-get install libx11-dev libxxf86dga-dev libxxf86vm-dev \
+    libgl1-mesa-dev libopenal-dev libogg-dev libvorbis-dev \ 
+    libcurl4-gnutls-dev libfreetype6-dev libjpeg8-dev libode-dev g++
 
 
-6. Installation from Distribution Archive
+3. Building and Installing
 
-This describes the standard installation. There is another
-installation method described below in section, "Alternate
-Install".
+Using the terminal, change to the destination directory for the svn
+checkout command (normally, ~/alienarena). If required libraries are
+missing, the 'configure' command will exit with error messages.
 
-If you are reading this, you may have already unpacked the
-distribution archive (aka, "tarball") into your HOME directory.
-Otherwise, the terminal command line for unpacking the archive
-is:
-  $ tar -xzf alienarena-<some version numbers>.tar.gz
-Or, using the graphical file browser, right click on the file
-name, and left click on "Extract Here."  Then follow the
-instructions below to build the program.
-
-To build Alien Arena requires the compiler and various libraries.
-If you have built other programs these will probably be
-installed. If they are not there will be errors and the configure
-procedure will fail.
-
-If it fails, check the error messages for required software
-packages that may be missing.  Check the forum for easy ways to
-install the required libraries for the operating system you are
-using.  Alien Arena uses these components (in parentheses: some
-example file name variations):
-  *X11         (libx11-dev, libX11, libxxf86dga-dev, libxxf86vm-dev, libXxf86vm)
-  *OpenGL      (libgl1-mesa-dev, libGL)
-  *OpenAL 1.1  (libopenal, libopenal-dev)
-  *Ogg-Vorbis, (libogg-dev, libvorbis-dev. libogg, libvorbis, libvorbisfile)
-  *cURL,       (libcurl, libcurl4-gnutls-dev)
-  *FreeType2   (libfreetype, libfreetype6-dev)
-  *JPEG        (libjpeg8-dev)
-  *ZLib        (libz)
-  *ODE         (libode, libode-dev)
-
-Using the terminal, change to the "alienarena-7.66" directory and
-enter these commands:
-
---- Simple Version ---
+The following commands will build and install the program and data
+with the default configuration:
 
   $ ./configure
   $ make
   $ sudo make install
 
---- Not-so-Simple Version ---
+However, for better build and run-time performance, you should use
+these commands instead:
 
-In the following the command options are listed on separate lines
-with short explanations. They are entered on one line with the
-command, of course.
-
-$ export CFLAGS=
-    -O3              (more optimization than -O2)
-    -pipe            (faster compile)
-    -march=native   (tuned for CPU on this machine)
-    -DNDEBUG         (remove assert statements)
-
-    -Wp,-D_FORTIFY_SOURCE=2   (improved security)
-    -fstack-protector --param=ssp-buffer-size=4  (improved security)
-
-If not configuring with the --with-system-libode option then set
-the same options for the c++ compiler:
-
-$ export CXXLAGS=
-    -O3
-    -pipe
-    -march=native
-    -DNDEBUG
-    -Wp,-D_FORTIFY_SOURCE=2
-    -fstack-protector --param=ssp-buffer-size=4
-
-$./configure
-    --with-system-libode       (use the system libode)
-    --disable-silent-rules        (verbose output)
-    --disable-dependency-tracking      (speed up one-time build)
-    ALIENARENA_HOMEDIR=some_other_dir  (override default ~/.codered)
-
-$ make
-
-$ sudo make install
-
-The variable, ALIENARENA_HOMEDIR, is relative to the user home,
-NOT the full path.  For example:
-  $ ./configure ALIENARENA_HOMEDIR=my_alienarena
-
-Check the notes about using the system libode in the "Custom
-Configure Options" section, if ragdolls do not work right, or if
-enabling ragdolls crashes the program.
+  $ export CFLAGS='-march=native -O3 -g -pipe -DNDEBUG'
+  $ ./configure
+  $ make -jN  (where N is your CPU's number of cores + 1)
+  $ sudo make install
 
 By default, 'sudo make install' will install the game programs
-and data like this:
+and data using this directory hierarchy:
 
   /usr/local/
     bin/
       alienarena
       alienarena-ded  (dedicated server)
+      aa-tactical-demo
     share/
       alienarena/
         arena/
-        botinfo/
         data1/
+        tactical/
       doc/
         alienarena/
-          <various documents>
       icons/
-        alienarena.png
+        alienarena/
 
 Following installation, intermediate files generated by the build
 may be removed using:
@@ -275,214 +156,189 @@ installed, run:
 The uninstall procedure may not remove all files and directories.
 Some manual removal may be required.
 
+If you know what you are doing, the installation may be
+customized. For more information, run:
 
-7. Running the Program
+  $ ./configure --help
+
+
+4. Updating
+
+4.1 The Safe Way to Update
+
+Sometimes during development there are changes that remove data
+files. In order to prevent that from causing problems, the following
+is the safest way to update (using the recommended configuration).
+
+  $ cd ~/alienarena
+  $ sudo make uninstall
+  $ make clean
+  $ svn update
+  $ export CFLAGS='-march=native -O3 -g -pipe -DNDEBUG'
+  $ ./configure
+  $ make
+  $ sudo make install
+
+4.2 A Faster Way to Update
+
+Often the only changes in the SVN Repository are to program source
+files (which have '.c' or '.h' extensions). If you update frequently,
+it is faster to use the following commands. If you do not know what
+all this means, you should use the safer way shown above.
+
+  $ cd ~/alienarena
+  $ svn update
+  $ make
+
+If the update output showed that only program source files were
+changed:
+
+  $ sudo make install-exec
+
+If the update output showed that resource files were added:
+
+  $ sudo make install
+
+It is a good idea to browse the repository before doing an update to
+see what has changed since your last update. You can browse the
+repository using this URL:
+
+  http://svn.icculus.org/alienarena/trunk/
+
+
+5. Running
+
+5.1 Setup
+
+Use the Menu for setting video configuration and other options.
+
+For the first run, do the following:
+
+ $ cd
+ $ alienarena
+
+Go to the GAME OPTIONS menu, enter a Player name and password, then
+Apply. A name and password is required for online play. Set the other
+options to your preferences; details are beyond the scope of this
+document.
+
+Then, quit the game using the QUIT GAME menu selection. This is done
+to make sure the configuration is created and saved.
+
+Configuration, screen shots, and other data is stored in:
+
+  ~/.local/share/cor-games/arena
+
+Note that this is different from earlier versions of Alien Arena.
+
+The file, 'config.cfg', stores the current settings when the game
+exits normally. Do not edit this file. For custom settings, create a
+file named 'autoexec.cfg'. Visit the Forums for more information on
+custom configuration.
+
+There are a number of 3rd-party and legacy maps that are not installed
+as part of the standard installation. These may be downloaded and
+stored in the 'cor-games/arena' subdirectory. When playing online,
+maps that you do not have are automatically downloaded and stored
+there.
+
+SVN installation and update DO NOT alter files in the 'cor-games'
+subdirectory.
+
+Files in the 'cor-games' subdirectory have precedence over the
+standard files in '/usr/local/share/alienarena'. Normally, this in not
+a problem, but sometimes SVN updates or downloads result in obsolete
+files in 'cor-games' overriding newer files.
+
+5.2 Normal Operation
 
 To run:
+  $ cd	
   $ alienarena
 
-In the menu, Single Player will run a simple pre-configured local
-game.  For more single player options, go to the Host Server
-menu.  Setting "public server" to "no" will keep your local game
-from being broadcast with the master server list.
+In the menu, SINGLE PLAYER will run a simple pre-configured local
+games. For more single player options, go to the HOST SERVER menu.
+Setting "public server" to "no" will keep your local game from being
+broadcast with the master server list.
 
-For multiplayer, online play, first enter your player name and a
-password in the Player Setup menu.  Then go to the Join Server
-menu to find a Server.  Bots will always show ping of 0.  They
-have some mean sounding, but amusing, taunts.  Do not let it
-bother you, just frag 'em.  They may attack with the "probe", if
-you let them get close, watch out!
+For multiplayer, online play, go to the JOIN SERVER menu to find a
+Server. Bots will always show ping of 0. They have some mean sounding,
+but amusing, taunts. Do not let it bother you, just frag 'em. They may
+attack with the "probe", if you let them get close, watch out!
 
-Command line options to alienarena are NOT standard.  They follow
-a format inherited from Alien Arena's Quake 2 roots.  Command
-line options are the same as console commands, normally using a
-'+' character prefix.  The details are beyond the scope of this
-document; but a simple example is:
-  $ alienarena +set maxclients 10
+Command line options to 'alienarena' are NOT standard. They follow a
+format inherited from Alien Arena's Quake 2 roots. Command line
+options are the same as console commands, normally using a '+'
+character prefix. The details are beyond the scope of this document.
 
-When the program is run, a directory is created in the user HOME
-directory.  Various kinds of data (config files, downloaded data,
-custom bot setups) are written there.  The default directory name
-is ".codered/".  That can be changed using an environment
-variable, COR_GAME.
+5.3 Special "In-place" Operation
 
-For example:
-  $ export COR_GAME=/home/user/.my_codered
+For various reasons (map making, for example), one may want to run the
+program using data installed in one's HOME directory, rather than in
+/usr/local/. Formerly, this required a special build. That is no
+longer the case. Running the program from the directory containing
+the data1/ sub-directory will cause the program to use that directory
+for data instead of /usr/local/share/alienarena.
 
+For example, assuming the program has been checked out from SVN and
+built in ~/alienarena.
 
-8. Configuration and Troubleshooting
+To run normally:
 
-When the game program exits, it stores settings in "config.cfg".
-The default location for this file is
-"/home/<user>/.codered/arena/", but it might be elsewhere
-depending on your distribution or configuration.
+  $ cd
+  $ alienarena
 
-For custom settings, create a file, "autoexec.cfg" in the same
-directory as "config.cfg".  Settings in "autoexec.cfg" will
-override settings in "config.cfg".  Details about settings are
-beyond the scope of this document.  Go to the websites, the forum
-and the IRC channel for more information.
+To run using the data files in ~/alienarena:
 
-If there are problems, sometimes it helps to delete "config.cfg",
-and then re-enter menu settings.
+  $ cd ~/alienarena
+  $ alienarena
 
-Alien Arena is based on Quake games.  Many of the cvars are the
-same as Quake 2.  More information can be found on the Forum and
-on the Web.
-
-Version 7.66 adds new console variables related to new features.
-The important ones are set using the menu.  Check the forum for
-more info.  Or ask the friendly people in the IRC channel.
-
-If the game does not run smoothly, graphics settings may need to
-be adjusted.  It is best to start with the video card's setup
-utility, then adjust the Alien Arena settings.  A different or
-updated video driver may be needed.
-
-There are settings in both the "Game Options" and "Video Options"
-sections that affect performance.  Enable the video frame rate
-display in the "Game Options" menu by setting "display fps" to
-yes.  The maximum frame rate is set with the console variable
-("cvar"), "cl_maxfps".  Get more information on the Forum,
-Websites, and IRC channel.
-
-For sound problems, check OpenAL documentation about
-configuration settings in the "alsoftrc" file.
-
-If you have a high resolution mouse, you may need to set the
-mouse sensitivity cvar.  The cvar name is "sensitivity" and it
-may be set to fractional values between 0.0 and 1.0.  Use the
-console to determine the value, then put it in autoexec.cfg.
-
-The mouse may behave badly (always pointing up, for instance).
-This can usually be fixed by setting the console variable (cvar),
-"in_dgamouse", to zero.  Put this line into the "autoexec.cfg"
-file:
-  set in_dgamouse "0"
-By default, the program is built without DGA, so this only
-applies if the following configure option was set.
-  --with-xf86dga
-
-If the display will not go into full screen mode, it is likely
-the Xxf86vm library (libxxf86vm-dev or libXxf86vm) is missing on
-your system.
+Standard disclaimer: You should do this only if you know what you are
+doing.
 
 
-9. Custom Configure Options
+6. Network Information
 
-Run './configure --help' for a list of options.  Note that many
-of the options are built-in and some are not meaningful or useful
-for Alien Arena.  Options are entered on the command line in the
-usual way; the help output has the details.  Refer to the GNU
-INSTALL document for general details.
+These ports are used by the program:
+  * UDP 27900 for the master server. Used for getting server list.
+  * UDP 27901 for the client.
+  * UDP 27902 for account/stats system password validation.
+  * UDP 27910 is the default for a server, but is often configured otherwise.
+  * TCP 6667  is the default for in-game connection to the IRC channel.
 
-To build the dedicated server only, use the following configure
-option:
-  --disable-client
+The cURL library is used to retrieve game resources, player
+ranking information, and current version information from these
+URLs:
+  * http://red.planetarena.org/sv_downloadurl
+  * http://stats.planetarena.org/playerrank.db
+  * http://red.planetarena.org/version/crx_version
 
-By default, configure produces a status message giving
-information on the configuration.  To hide that message, use:
-  --disable-build-status
+Online performance will vary depending on the network connection
+between the your computer (the client) and the server. Servers
+with *lower* ping are better.
 
-To rename the programs, use the standard configure option.  For
-example:
-  --program-transform-name='s/alienarena/alien-arena/'
-
-To install to a different location, use the standard configure
-option.  For example:
-  --prefix=/usr/local/games
-
-To specify an installation location for the icon, use the
-following option.
-  --with-icondir=DIR
-
-To use the system-supplied libode, rather than the integrated
-ODE, use this option:
-  --with-system-libode
-If 'pkg-config --cflags ode' returns -DdDOUBLE, it is probably
-safe to use the system library.  The integrated ODE is built
-using these compile options:
-  * -DdDOUBLE
-  * -DdTRIMESH_ENABLED
-  * -DdTRIMESH_OPCODE
-  * -DNDEBUG and -DdNODEBUG
-Using a libode built with -DdSINGLE makes ragdolls excessively
-"raggedy".  Other libode build variations will likely result in
-program failure.
-
-To disable installation of documents, use the following option.
-  --disable-documents
-
-The server terminal will output color if the following option is
-used.  This converts Quake-style color codes to ANSI color
-escapes.
-  --enable-ansi-color
-
-Other Alien Arena custom options are intended mostly for
-developer use.  If you use them, it is assumed that you know what
-you are doing.
+Playing online may require firewall configuration.
 
 
-10. Tools
+7. Troubleshooting
 
-Tools/fuse.tar.gz contains a game server browser.  See documents
-in that package for details.
+If you encounter problems, first check in the Forums for the latest
+information:
 
-Tools/LinuxScripts contains tools for server management.  See the
-README there for details.
+  red.planetarena.org/forum
 
-
-11. Alternate Install
-
-This configures the installation to use the "traditional", single
-directory, in-place install.  It does not define DATADIR, and the
-executables need to be in the top game directory.  Normally, this
-install would be done somewhere in your HOME directory.  Root
-privileges would not be required to write the game data.  The
-configure option for renaming of the executables is not
-supported.
-
-If you are a map-builder, you should use this option.  Some
-mapping tools may not work with the "standard" install.
-
-If you regularly update to the latest development code from the
-Subversion Repository, you may prefer this option.
-
-The two install methods are not mutually exclusive.  With some
-care, it is possible to use both.
-
-The configure option is:
-  --enable-alternate-install
-
-Following the usual 'make', it requires
-
-  $ make install-alternate
-
-This just copies the executables to the top game directory.  The
-effect of using any other 'install' make target is "undefined".
+Bug reports are posted in the Support/Bug Reports section. If you are
+reporting a new bug, please include information about your system and
+the SVN Revision you are running.
 
 
-12. Getting Alien Arena from SVN
-
-The repository has the latest development version of Alien Arena.
-It contains tools and other resources that are not a part of the
-regular distribution.
-
-The SVN repository may be browsed at:
-
-http://svn.icculus.org/alienarena/trunk/
-
-Anonymous read-only checkout is available using this command:
-
-svn co svn://svn.icculus.org/alienarena/trunk alienarena
-
-More information about Subversion may be found at:
-http://subversion.apache.org/
-
+************************************************************************
+                              ADDENDUM
 ------------------------------------------------------------------------
-
 NOTE: This following is a copy of the GNU Document, INSTALL, with
 more technical details related to GNU Autotools than the above.
+------------------------------------------------------------------------
+************************************************************************
 
 Installation Instructions
 *************************
