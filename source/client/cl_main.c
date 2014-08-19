@@ -1992,9 +1992,9 @@ void CL_InitLocal (void)
 	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
 	Cvar_Describe (cl_paindist, "distort the screen when you take damage.");
 	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);
-	Cvar_Describe (cl_paindist, "distort the screen for explosions.");
+	Cvar_Describe (cl_explosiondist, "distort the screen for explosions.");
 	cl_raindist = Cvar_Get ("cl_raindist", "1", CVAR_ARCHIVE);
-	Cvar_Describe (cl_paindist, "rain running down your visor.");
+	Cvar_Describe (cl_raindist, "rain running down your visor.");
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);
