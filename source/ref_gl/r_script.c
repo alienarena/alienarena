@@ -768,9 +768,23 @@ static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 	
 	for (i = 0; i < stage->num_blend_textures; i++)
 	{
+		int j;
+		
 		*token = strtok (NULL, TOK_DELIMINATORS);
-		stage->blend_scales[i] = atof (*token);
+		stage->blend_scales[2*i] = 1.0f / atof (*token);
+		
 		*token = strtok (NULL, TOK_DELIMINATORS);
+		for (j = 0; (*token)[j] != '\0' && isdigit ((*token)[j]); j++);
+		if ((*token)[j] == '\0')
+		{
+			stage->blend_scales[2*i+1] = 1.0f / atof (*token);
+			*token = strtok (NULL, TOK_DELIMINATORS);
+		}
+		else
+		{
+			stage->blend_scales[2*i+1] = stage->blend_scales[2*i];
+		}
+		
 		strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
 	}
 }
@@ -1306,8 +1320,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 			for (i = 0; i < stage->num_blend_textures; i++)
 				GL_MBind (3+i, stage->blend_textures[i]->texnum);
 			
-			glUniform3fARB (rscript_uniforms.blendscales, 1.0f/stage->blend_scales[0], 1.0f/stage->blend_scales[1], 1.0f/stage->blend_scales[2]);
-			glUniform3fARB (rscript_uniforms.blendscales2, 1.0f/stage->blend_scales[3], 1.0f/stage->blend_scales[4], 1.0f/stage->blend_scales[5]);
+			glUniformMatrix3x4fvARB (rscript_uniforms.blendscales, 1, GL_FALSE, (const GLfloat *) stage->blend_scales);
 		}
 		
 		GL_SelectTexture (0);

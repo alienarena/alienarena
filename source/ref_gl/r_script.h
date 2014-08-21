@@ -119,7 +119,7 @@ typedef struct rs_stage_s
 	qboolean				normalmap;		// use mesh rendering GLSL "fast path?"
 	
 	int						num_blend_textures;
-	float					blend_scales[6];
+	float					blend_scales[12];
 	char					blend_names[6][MAX_OSPATH];
 	image_t					*blend_textures[6];
 	
