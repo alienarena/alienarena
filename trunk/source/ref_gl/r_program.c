@@ -888,8 +888,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 	uniform int FOG;
 	uniform int DYNAMIC;
 	uniform vec3 lightAmount;
-	uniform vec3 blendscales;
-	uniform vec3 blendscales2;
+	uniform mat3x4 blendscales;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
@@ -910,7 +909,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 	// alternately, for even less overhead and *greater* accuracy, this fancy
 	// thing: http://graphics.cs.williams.edu/papers/IndirectionI3D08/
 	
-	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights, float scale)
+	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights, vec2 scale)
 	{
 		return vec4 (
 			blend_weights[0] * texture2D (tex, orig_coord.yz * scale).rgb +
@@ -949,27 +948,27 @@ static char rscript_fragment_program[] = STRINGIFY (
 			// variables.
 			gl_FragColor = vec4 (0.0);
 			if (mainColor.r > 0.0)
-				gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales.r) * mainColor.r;
+				gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales[0].xy) * mainColor.r;
 			if (numblendtextures > 1)
 			{
 				if (mainColor.g > 0.0)
-					gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales.g) * mainColor.g;
+					gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales[0].zw) * mainColor.g;
 				if (numblendtextures > 2)
 				{
 					if (mainColor.b > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales.b) * mainColor.b;
+						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales[1].xy) * mainColor.b;
 					if (numblendtextures > 3)
 					{
 						if (mainColor2.r > 0.0)
-							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales2.r) * mainColor2.r;
+							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales[1].zw) * mainColor2.r;
 						if (numblendtextures > 4)
 						{
 							if (mainColor2.g > 0.0)
-								gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales2.g) * mainColor2.g;
+								gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales[2].xy) * mainColor2.g;
 							if (numblendtextures > 5)
 							{
 								if (mainColor2.b > 0.0)
-									gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales2.b) * mainColor2.b;
+									gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales[2].zw) * mainColor2.b;
 							}
 						}
 					}
@@ -2094,7 +2093,6 @@ void R_LoadGLSLPrograms(void)
 	rscript_uniforms.mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture2");
 	rscript_uniforms.lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
 	rscript_uniforms.blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
-	rscript_uniforms.blendscales2 = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales2");
 	
 	for (i = 0; i < 6; i++)
 	{

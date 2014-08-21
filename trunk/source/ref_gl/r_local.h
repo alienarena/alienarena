@@ -601,7 +601,7 @@ struct
 	GLuint						fog;
 	GLuint						mainTexture, mainTexture2;
 	GLuint						lightmapTexture;
-	GLuint						blendscales, blendscales2;
+	GLuint						blendscales;
 	GLuint						blendTexture[6];
 } rscript_uniforms;
 
