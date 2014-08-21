@@ -751,42 +751,41 @@ static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->num_blend_textures = atoi(*token);
 	
-	if (stage->num_blend_textures > 6)
-	{
-		Com_Printf ("ERROR: Cannot have %d blendmap channels (max 6)\n", stage->num_blend_textures);
-		
-		// consume the rest of the command
-		while (stage->num_blend_textures)
-		{
-			*token = strtok (NULL, TOK_DELIMINATORS);
-			*token = strtok (NULL, TOK_DELIMINATORS);
-			stage->num_blend_textures--;
-		}
-		
-		return;
-	}
-	
 	for (i = 0; i < stage->num_blend_textures; i++)
 	{
+		float scale[2];
 		int j;
 		
 		*token = strtok (NULL, TOK_DELIMINATORS);
-		stage->blend_scales[2*i] = 1.0f / atof (*token);
+		scale[0] = 1.0f / atof (*token);
 		
 		*token = strtok (NULL, TOK_DELIMINATORS);
 		for (j = 0; (*token)[j] != '\0' && isdigit ((*token)[j]); j++);
 		if ((*token)[j] == '\0')
 		{
-			stage->blend_scales[2*i+1] = 1.0f / atof (*token);
+			scale[1] = 1.0f / atof (*token);
 			*token = strtok (NULL, TOK_DELIMINATORS);
 		}
 		else
 		{
-			stage->blend_scales[2*i+1] = stage->blend_scales[2*i];
+			scale[1] = scale[0];
 		}
 		
-		strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
+		if (i < 6) // Current maximum
+		{
+			for (j = 0; j < 2; j++)
+				stage->blend_scales[2*i+j] = scale[j];
+		
+			strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
+		}
+		else
+		{
+			Com_Printf ("WARN: skip blendmap channel %d (max 6)\n", i+1);
+		}
 	}
+	
+	if (stage->num_blend_textures > 6)
+		stage->num_blend_textures = 6;
 }
 
 // For legacy origin and angle commands that aren't actually used in the code.
