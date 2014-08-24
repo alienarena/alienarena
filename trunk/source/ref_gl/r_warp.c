@@ -166,6 +166,8 @@ R_SubdivideSurface
 Breaks a polygon up along axial 64 unit
 boundaries so that turbulent and sky warps
 can be done reasonably.
+
+TODO: use GPU tesselation!
 ================
 */
 void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges)
@@ -211,13 +213,6 @@ Does a water warp on the pre-fragmented glpoly_t chain
 void BSP_SetScrolling (qboolean enable);
 void R_RenderWaterPolys (msurface_t *fa)
 {
-	glpoly_t	*p;
-	float		*v;
-	int			i;
-	float		s, t, os, ot;
-	float		scroll;
-	float		rdt = r_newrefdef.time;
-	vec3_t		nv;
 	rscript_t	*rs_shader;
 	int			texnum;
 	float		scaleX, scaleY;
@@ -229,26 +224,20 @@ void R_RenderWaterPolys (msurface_t *fa)
 	scaleX = scaleY = 1.0f;
 	texnum = 0;
 	
-	if(rs_shader) 
+	if(rs_shader && rs_shader->stage) 
 	{
+		//for now, just map a reflection texture
 		rs_stage_t *stage = rs_shader->stage;
 		
-		if(stage) 
-		{	//for now, just map a reflection texture
-			texnum = stage->texture->texnum; //pass this to renderwaterpolys
-		}
-		if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
+		texnum = stage->texture->texnum; //pass this to renderwaterpolys
+		
+		if(stage->scale.scaleX != 0.0f && stage->scale.scaleY != 0.0f) 
 		{
 			scaleX = stage->scale.scaleX;
 			scaleY = stage->scale.scaleY;
 		}
 	}
 
-	if (fa->texinfo->flags & SURF_FLOWING)
-		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
-	else
-		scroll = 0.0f;
-	  
 	if(fa->texinfo->has_normalmap)
 	{
 		if (SurfaceIsAlphaMasked (fa))
@@ -291,8 +280,6 @@ void R_RenderWaterPolys (msurface_t *fa)
 		
 		BSP_InvalidateVBO ();
 		
-		// NOTE: We only subdivide water surfaces if we WON'T be using GLSL, 
-		// so this is safe.
 		BSP_AddSurfToVBOAccum (fa);
 		
 		BSP_SetScrolling ((fa->texinfo->flags & SURF_FLOWING) != 0);
@@ -305,82 +292,57 @@ void R_RenderWaterPolys (msurface_t *fa)
 
 		if (SurfaceIsAlphaMasked (fa))
 			GLSTATE_DISABLE_ALPHATEST
-
-		return;
 	}
 	else
 	{
+		// Be sure to check the warptest map when you change this code
+		float scroll = 0.0f;
+		
+		if (fa->texinfo->flags & SURF_FLOWING)
+			scroll = -((r_newrefdef.time / 2.0f) - (int)(r_newrefdef.time / 2.0f));
+		
 		GL_MBind (0, fa->texinfo->image->texnum);
 		
-// = 1/2 wave amplitude on each axis
-// = 1/4 wave amplitude on both axes combined
-#define WAVESCALE 2.0 
-
-		for (p=fa->polys ; p ; p=p->next)
+		GL_SelectTexture (0);
+		qglMatrixMode (GL_TEXTURE);
+		qglLoadIdentity ();
+		qglTranslatef (scroll, 0, 0);
+		qglScalef (1.0f/64.0f, 1.0f/64.f, 1);
+		
+		glUseProgramObjectARB (g_warpprogramObj);
+		glUniform1fARB (warp_uniforms.time, r_newrefdef.time);
+		glUniform1iARB (warp_uniforms.warpvert, !(fa->texinfo->flags & SURF_FLOWING));
+		
+		BSP_InvalidateVBO ();
+	
+		// Already subdivided
+		BSP_AddSurfToVBOAccum (fa);
+		
+		if (!texnum || (SurfaceIsTranslucent(fa) && !SurfaceIsAlphaMasked (fa)))
 		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
-			{
-				os = v[3];
-				ot = v[4];
-
-				s = os + 4.0*sin (ot*0.125+rdt);
-				s += scroll;
-				s *= (1.0/64);
-
-				t = ot + 4.0*sin (os*0.125+rdt);
-				t *= (1.0/64);
-
-				qglTexCoord2f (s, t);
-
-				if (!(fa->texinfo->flags & SURF_FLOWING))
-				{
-					nv[0] =v[0];
-					nv[1] =v[1];
-					nv[2] =v[2] - 2*WAVESCALE // top of brush = top of waves
-							+ WAVESCALE*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
-							+ WAVESCALE*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-
-					qglVertex3fv (nv);
-				}
-				else
-					qglVertex3fv (v);
-			}
-			qglEnd ();
+			glUniform1iARB (warp_uniforms.envmap, 0);
+			BSP_DrawVBOAccum ();
 		}
-	}
-
-	//env map if specified by shader
-	if(texnum)
-		GL_MBind (0, texnum);
-	else
-		return;
-
-	for (p=fa->polys ; p ; p=p->next)
-	{
-		qglBegin (GL_TRIANGLE_FAN);
-		for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
+		
+		if (texnum)
 		{
-			os = v[3] - r_newrefdef.vieworg[0] + 128*scaleX;
-			ot = v[4] + r_newrefdef.vieworg[1] + 128*scaleY;
-
-			if(texnum)
-				qglTexCoord2f(1.0/512*scaleX*os, 1.0/512*scaleY*ot);
-
-			if (!(fa->texinfo->flags & SURF_FLOWING))
-			{
-				nv[0] =v[0];
-				nv[1] =v[1];
-				nv[2] =v[2] - 2*WAVESCALE // top of brush = top of waves
-						+ WAVESCALE*sin(v[0]*0.025+rdt)*sin(v[2]*0.05+rdt)
-						+ WAVESCALE*sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-
-				qglVertex3fv (nv);
-			}
-			else
-				qglVertex3fv (v);
+			GL_MBind (0, texnum);
+			glUniform1iARB (warp_uniforms.envmap, 1);
+			qglLoadIdentity ();
+			qglScalef (scaleX/512.0f, scaleY/512.0f, 1);
+			qglTranslatef (128.0f*scaleX - r_newrefdef.vieworg[0], r_newrefdef.vieworg[1] + 128.0f*scaleY, 0);
+			BSP_DrawVBOAccum ();
 		}
-		qglEnd ();
+		
+		BSP_ClearVBOAccum ();
+		
+		glUseProgramObjectARB (0);
+
+		R_KillVArrays ();
+		
+		GL_SelectTexture (0);
+		qglLoadIdentity ();
+		qglMatrixMode (GL_MODELVIEW);
 	}
 }
 
