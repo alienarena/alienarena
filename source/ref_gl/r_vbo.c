@@ -64,38 +64,45 @@ void R_LoadVBOSubsystem(void)
 
 void VB_BuildSurfaceVBO(msurface_t *surf)
 {
-	glpoly_t *p = surf->polys;
+	glpoly_t *p;
 	float	*v;
 	int		i, j;
 	int		n;
 	int		trinum;
-	float map[MAX_VBO_XYZs];
+	float	map[MAX_VBO_XYZs];
 	int		xyz_size;
+	
+	surf->vbo_num_verts = 0;
+	n = 0;
 	
 	// XXX: for future reference, the glDrawRangeElements code was last seen
 	// here at revision 3246.
-	for (trinum = 1, n = 0; trinum < p->numverts-1; trinum++)
+	for (p = surf->polys; p != NULL; p = p->next)
 	{
-		v = p->verts[0];
-		
-		// copy in vertex data
-		for (j = 0; j < 7; j++)
-			map[n++] = v[j];
-		
-		for (i = trinum; i < trinum+2; i++)
+		for (trinum = 1; trinum < p->numverts-1; trinum++)
 		{
-			v = p->verts[i];
+			v = p->verts[0];
 		
 			// copy in vertex data
 			for (j = 0; j < 7; j++)
 				map[n++] = v[j];
+		
+			for (i = trinum; i < trinum+2; i++)
+			{
+				v = p->verts[i];
+		
+				// copy in vertex data
+				for (j = 0; j < 7; j++)
+					map[n++] = v[j];
+			}
 		}
+		
+		surf->vbo_num_verts += 3*(p->numverts-2);
 	}
 	
 	xyz_size = n*sizeof(float);
 
 	surf->vbo_first_vert = currVertexNum;
-	surf->vbo_num_verts = 3*(p->numverts-2);
 	currVertexNum += surf->vbo_num_verts;
 	
 	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);
@@ -119,9 +126,11 @@ void VB_BuildWorldVBO(void)
 	
 	for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 	{
+		glpoly_t *p;
 		if (surf->texinfo->flags & (SURF_SKY|SURF_NODRAW))
 			continue;
-		totalVBObufferSize += 7*3*(surf->polys->numverts-2);
+		for (p = surf->polys; p != NULL; p = p->next)
+			totalVBObufferSize += 7*3*(p->numverts-2);
 	}
 	
 	qglGenBuffersARB(1, &vboId);

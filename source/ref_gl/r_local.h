@@ -522,6 +522,7 @@ extern void	R_LoadGLSLPrograms(void);
 //glsl
 GLhandleARB g_programObj;
 GLhandleARB g_shadowprogramObj;
+GLhandleARB g_warpprogramObj;
 GLhandleARB g_rscriptprogramObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
@@ -590,6 +591,14 @@ GLuint		g_location_entShadow;
 GLuint		g_location_fadeShadow;
 GLuint		g_location_xOffset;
 GLuint		g_location_yOffset;
+
+// Old-style per-vertex water effects
+struct
+{
+	GLuint	time;
+	GLuint	warpvert;
+	GLuint	envmap;
+} warp_uniforms;
 
 //rscripts
 struct
