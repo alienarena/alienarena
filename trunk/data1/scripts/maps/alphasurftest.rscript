@@ -1,0 +1,15 @@
+textures/arena9/greenglass
+{
+	{
+		map textures/arena9/greenglass.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+	}
+	{
+		map gfx/bubbles.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static -4 static -4
+		alphashift 0 0.9 0.9
+		scroll static 0 static -2
+	}
+}
