@@ -448,9 +448,12 @@ static void BSP_DrawWarpSurfaces (qboolean forEnt)
 		c_brush_polys++;
 		image = BSP_TextureAnimation (surf->texinfo);
 		GL_MBind (0, image->texnum);
+		BSP_SetScrolling ((surf->texinfo->flags & SURF_FLOWING) != 0);
 		R_RenderWaterPolys (surf);
 		surf = surf->texturechain;
 	}
+	
+	BSP_SetScrolling (0);
 	
 	if (forEnt)
 		r_warp_surfaces.entchain = NULL;
@@ -466,19 +469,11 @@ static void BSP_DrawWarpSurfaces (qboolean forEnt)
 BSP_DrawAlphaPoly
 ================
 */
-static void BSP_DrawAlphaPoly (msurface_t *surf, int flags)
+static void BSP_DrawAlphaPoly (msurface_t *surf)
 {
-	BSP_SetScrolling ((flags & SURF_FLOWING) != 0);
-	
 	BSP_AddSurfToVBOAccum (surf);
-	
-	// TODO: actually use the batching system for alpha surfaces
-	BSP_FlushVBOAccum ();
-	
-	BSP_SetScrolling (0);
-	R_KillVArrays ();
+	BSP_FlushVBOAccum (); // Must flush to guarantee draw order :(
 }
-
 
 /*
 ================
@@ -493,21 +488,19 @@ to be drawn in a single pass. This is an inherently inefficient process.
 The BSP tree is walked front to back, so unwinding the chain of alpha surfaces
 will draw back to front, giving proper ordering FOR BSP SURFACES! 
 
-
 It's a bit wrong for entity surfaces (i.e. glass doors.) Because they are in
 separate linked lists, the entity surfaces must be either always behind or
-always in front of the world surfaces. I chose always in front because that
-seems to fix all rendering issues, regardless of whether the entity actually 
-is in front. Search me why. NOTE: this bug existed even when it was all one
-linked list, although at that time entity surfaces were always behind map
-surfaces (added to the beginning of the linked list after all the BSP 
-rendering code.)
+always in front of the world surfaces. I chose always in front.
+
+Be sure to double-check alphasurftest THOROUGHLY when changing this code!
 ================
 */
 static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 {
 	msurface_t	*s;
 	float		intens;
+	int			last_surf_type = -1;
+	mtexinfo_t	*last_texinfo = NULL;
 
 	// the textures are prescaled up for a better lighting range,
 	// so scale it back down
@@ -521,15 +514,11 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	
 	for (s=chain ; s ; s=s->texturechain)
 	{
+		int			current_surf_type;
+		mtexinfo_t	*current_texinfo = s->texinfo;
+		
 		GL_MBind (0, s->texinfo->image->texnum);
 		c_brush_polys++;
-
-		if (s->texinfo->flags & SURF_TRANS33)
-			qglColor4f (intens, intens, intens, 0.33);
-		else if (s->texinfo->flags & SURF_TRANS66)
-			qglColor4f (intens, intens, intens, 0.66);
-		else
-			qglColor4f (intens, intens, intens, 1);
 
 		//moving trans brushes
 		if (s->entity)
@@ -538,31 +527,45 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			R_RotateForEntity (s->entity);
 		}
 		
-		if (s->iflags & ISURF_DRAWTURB) 
+		if (s->iflags & ISURF_DRAWTURB)
+			current_surf_type = 0;
+		else if (r_shaders->integer && s->texinfo->image->script && !(s->texinfo->flags & SURF_FLOWING)) 
+			current_surf_type = 1;
+		else
+			current_surf_type = 2;
+		
+		if (current_surf_type != last_surf_type || current_texinfo != last_texinfo)
 		{
-			R_RenderWaterPolys (s);
-			GL_SelectTexture (0);
-			GLSTATE_ENABLE_BLEND
-			GL_TexEnv( GL_MODULATE );
-			BSP_InvalidateVBO ();
-		}
-		else if(r_shaders->integer && s->texinfo->image->script && !(s->texinfo->flags & SURF_FLOWING)) 
-		{
-			RS_Surface (s);
-			R_KillVArrays ();
 			GL_SelectTexture (0);
 			GLSTATE_ENABLE_BLEND
 			GL_TexEnv (GL_MODULATE);
+			BSP_SetScrolling ((s->texinfo->flags & SURF_FLOWING) != 0);
+			
+			if (s->texinfo->flags & SURF_TRANS33)
+				qglColor4f (intens, intens, intens, 0.33);
+			else if (s->texinfo->flags & SURF_TRANS66)
+				qglColor4f (intens, intens, intens, 0.66);
+			else
+				qglColor4f (intens, intens, intens, 1);
+			
+			last_surf_type = current_surf_type;
+			last_texinfo = current_texinfo;
 		}
+		
+		if (current_surf_type == 0)
+			R_RenderWaterPolys (s);
+		else if (current_surf_type == 1)
+			RS_Surface (s);
 		else
-			BSP_DrawAlphaPoly (s, s->texinfo->flags);
+			BSP_DrawAlphaPoly (s);
 	}
 
+	BSP_SetScrolling (0);
 	GL_SelectTexture (0);
-	GL_TexEnv( GL_REPLACE );
+	GL_TexEnv (GL_REPLACE);
 	qglColor4f (1,1,1,1);
 	GLSTATE_DISABLE_BLEND
-	qglDepthMask ( GL_TRUE );
+	qglDepthMask (GL_TRUE);
 }
 
 void R_DrawAlphaSurfaces (void)

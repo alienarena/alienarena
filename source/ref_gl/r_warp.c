@@ -278,17 +278,10 @@ void R_RenderWaterPolys (msurface_t *fa)
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
 		
-		BSP_InvalidateVBO ();
-		
 		BSP_AddSurfToVBOAccum (fa);
-		
-		BSP_SetScrolling ((fa->texinfo->flags & SURF_FLOWING) != 0);
 		BSP_FlushVBOAccum ();
-		BSP_SetScrolling (0);
 
 		glUseProgramObjectARB( 0 );
-
-		R_KillVArrays ();
 
 		if (SurfaceIsAlphaMasked (fa))
 			GLSTATE_DISABLE_ALPHATEST
@@ -305,6 +298,7 @@ void R_RenderWaterPolys (msurface_t *fa)
 		
 		GL_SelectTexture (0);
 		qglMatrixMode (GL_TEXTURE);
+		qglPushMatrix ();
 		qglLoadIdentity ();
 		qglTranslatef (scroll, 0, 0);
 		qglScalef (1.0f/64.0f, 1.0f/64.f, 1);
@@ -313,8 +307,6 @@ void R_RenderWaterPolys (msurface_t *fa)
 		glUniform1fARB (warp_uniforms.time, r_newrefdef.time);
 		glUniform1iARB (warp_uniforms.warpvert, !(fa->texinfo->flags & SURF_FLOWING));
 		
-		BSP_InvalidateVBO ();
-	
 		// Already subdivided
 		BSP_AddSurfToVBOAccum (fa);
 		
@@ -338,10 +330,8 @@ void R_RenderWaterPolys (msurface_t *fa)
 		
 		glUseProgramObjectARB (0);
 
-		R_KillVArrays ();
-		
 		GL_SelectTexture (0);
-		qglLoadIdentity ();
+		qglPopMatrix ();
 		qglMatrixMode (GL_MODELVIEW);
 	}
 }
