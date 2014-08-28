@@ -48,19 +48,19 @@ void Matrix3x4ForEntity (matrix3x4_t *out, entity_t *ent)
 	if(ent->angles[2])
 	{
 		VectorSet(rotaxis, -1, 0, 0);
-		Matrix3x4GenRotate(&rotmat, ent->angles[2]*pi/180, rotaxis);
+		Matrix3x4GenRotate(&rotmat, DEG2RAD (ent->angles[2]), rotaxis);
 		Matrix3x4_Multiply(out, rotmat, *out);
 	}
 	if(ent->angles[0])
 	{
 		VectorSet(rotaxis, 0, -1, 0);
-		Matrix3x4GenRotate(&rotmat, ent->angles[0]*pi/180, rotaxis);
+		Matrix3x4GenRotate(&rotmat, DEG2RAD (ent->angles[0]), rotaxis);
 		Matrix3x4_Multiply(out, rotmat, *out);
 	}
 	if(ent->angles[1])
 	{
 		VectorSet(rotaxis, 0, 0, 1);
-		Matrix3x4GenRotate(&rotmat, ent->angles[1]*pi/180, rotaxis);
+		Matrix3x4GenRotate(&rotmat, DEG2RAD (ent->angles[1]), rotaxis);
 		Matrix3x4_Multiply(out, rotmat, *out);
 	}
 	out->a[3] += ent->origin[0];
@@ -105,7 +105,7 @@ void IQM_ByteswapVertexArrays(model_t *iqmmodel, float *vposition, float *vnorma
 	}
 }
 
-qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
+static qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 {
 	FILE *fp;
 	int length;

@@ -702,28 +702,17 @@ GLuint		g_location_godrayScreenAspect;
 GLuint		g_location_sunRadius;
 
 //Shared mesh items
-extern vec3_t	shadelight;
-extern vec3_t	shadevector;
-extern m_dlight_t model_dlights[128];
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
-vec3_t lightPosition;
 vec3_t statLightPosition;
-float statLightIntensity;
-float  dynFactor;
 extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
 //iqm
-#define pi 3.14159265
-extern float modelpitch;
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
-extern qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
-extern void R_DrawINTERQUAKEMODEL(void);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
-extern void IQM_DrawShadow(vec3_t origin);
 extern void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
 //md2

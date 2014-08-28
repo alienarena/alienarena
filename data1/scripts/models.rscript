@@ -1,9 +1,0 @@
-glass
-{
-	{
-		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		envmap
-	}
-}

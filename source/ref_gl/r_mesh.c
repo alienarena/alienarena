@@ -35,16 +35,11 @@ static vertCache_t	*vbo_indices;
 static vertCache_t	*vbo_blendweights;
 static vertCache_t	*vbo_blendindices;
 
-vec3_t	worldlight;
-vec3_t	shadevector;
-float	shadelight[3];
-
-#define MAX_MODEL_DLIGHTS 128
-m_dlight_t model_dlights[MAX_MODEL_DLIGHTS];
-int model_dlights_num;
+// FIXME: globals
+static vec3_t worldlight, shadelight, lightPosition;
+static float dynFactor; 
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
-extern rscript_t *rs_glass;
 extern image_t *r_mirrortexture;
 
 extern cvar_t *cl_gun;
@@ -146,7 +141,6 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 
 	numlights = nonweighted_numlights = 0;
 	VectorClear(lightAdd);
-	statLightIntensity = 0.0;
 	
 	if (!RagDoll)
 	{
@@ -170,7 +164,6 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		numlights =  cl_persistent_ents[currententity->number].oldnumlights;
 		VectorCopy (cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
 		VectorCopy (cl_persistent_ents[currententity->number].oldstaticlight, staticlight);
-		statLightIntensity = cl_persistent_ents[currententity->number].oldlightintens;
 	}
 	else
 	{
@@ -197,20 +190,15 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 				weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
 				for (j = 0; j < 3; j++)
 					lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-				statLightIntensity += LightGroups[i].avg_intensity;
 				numlights+=weight;
 				nonweighted_numlights++;
 			}
 		}
 		
-		if (numlights > 0.0)
-			statLightIntensity /= (float)nonweighted_numlights;
-		
 		cl_persistent_ents[currententity->number].oldnumlights = numlights;
 		VectorCopy (lightAdd, cl_persistent_ents[currententity->number].oldlightadd);
 		cl_persistent_ents[currententity->number].setlightstuff = true;
 		VectorCopy (currententity->origin, cl_persistent_ents[currententity->number].oldorigin);
-		cl_persistent_ents[currententity->number].oldlightintens = statLightIntensity;
 	}
 
 	if (numlights > 0.0)
@@ -766,8 +754,6 @@ static void R_Mesh_DrawFrame (int skinnum)
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
 	
 	VectorCopy (shadelight, lightcolor);
-	for (i = 0; i < model_dlights_num; i++)
-		VectorAdd (lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize (lightcolor);
 	
 	if (((modtypes[currentmodel->type].morphtarget && lerped) || modtypes[currentmodel->type].skeletal) != 0 && rs_slowpath)
