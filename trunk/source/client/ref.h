@@ -208,7 +208,6 @@ typedef struct {
 	vec3_t				oldlightadd;
 	vec3_t				oldstaticlight;
 	vec3_t				oldorigin;
-	float				oldlightintens;
 } cl_entity_pers_t;
 
 // Allocate room for entities sent by the server AND "fake" terrain entities

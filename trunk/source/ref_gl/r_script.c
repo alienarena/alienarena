@@ -1373,16 +1373,12 @@ static void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 }
 
 rscript_t *rs_caustics;
-rscript_t *rs_glass;
 
-void RS_LoadSpecialScripts (void) //the special cases of glass and water caustics
+void RS_LoadSpecialScripts (void) //the special case of water caustics
 {
 	rs_caustics = RS_FindScript("caustics");
 	if(rs_caustics)
 		RS_ReadyScript(rs_caustics);
-	rs_glass = RS_FindScript("glass");
-	if(rs_glass)
-		RS_ReadyScript(rs_glass);
 }
 
 void RS_Surface (msurface_t *surf)
