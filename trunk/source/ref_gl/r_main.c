@@ -1668,13 +1668,25 @@ cpuinfo_exit:
 	
 	R_CheckFBOExtensions ();
 
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
+
 	GL_InitImages ();
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
+
 	Mod_Init ();
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
+
 	R_InitParticleTexture ();
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
+
 	Draw_InitLocal ();
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
 
 	R_GenerateShadowFBO();
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
+
 	VLight_Init();
+	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
 
 	//Initialize ODE
 	// ODE assert failures sometimes occur, this may or may not help.
