@@ -49,9 +49,11 @@ float	vert_array[MAX_ARRAY][3];
 // sizes of our vertexes.  the vertex type can be used as an index into this array
 int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12, 5};
 
-int KillFlags;
+static long int KillFlags = 0;
 #define KILL_TMU0_POINTER	1
 #define KILL_NORMAL_POINTER (KILL_TMU0_POINTER<<MAX_TMUS)
+
+static long int KillAttribFlags = 0;
 
 void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer)
 {
@@ -61,7 +63,7 @@ void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 	qglTexCoordPointer (2, GL_FLOAT, stride, pointer);
 	
-	KillFlags |= (KILL_TMU0_POINTER << tmu);
+	KillFlags |= KILL_TMU0_POINTER << tmu;
 }
 
 void R_VertexPointer (GLint size, GLsizei stride, const GLvoid *pointer)
@@ -78,6 +80,18 @@ void R_NormalPointer (GLsizei stride, const GLvoid *pointer)
 	KillFlags |= KILL_NORMAL_POINTER;
 }
 
+void R_AttribPointer (	GLuint index, GLint size, GLenum type,
+						GLboolean normalized, GLsizei stride,
+						const GLvoid *pointer )
+{
+	assert (index < MAX_ATTR_IDX);
+	
+	glEnableVertexAttribArrayARB (index);
+	glVertexAttribPointerARB (index, size, type, normalized, stride, pointer);
+	
+	KillAttribFlags |= 1 << index;
+}
+
 /*
 =================
 R_InitVArrays
@@ -92,7 +106,7 @@ void R_InitVArrays (int varraytype)
 	VArray = &VArrayVerts[0];
 
 	// init the kill flags so we'll know what to kill
-	KillFlags = 0;
+	KillAttribFlags = KillFlags = 0;
 
 	// all vertex types bring up a vertex pointer
 	// uses array indices 0, 1, 2
@@ -118,7 +132,7 @@ hand-holding is done.
 */
 void R_KillVArrays (void)
 {
-	int tmu;
+	int tmu, attr_idx;
 	
 	BSP_InvalidateVBO ();
 	
@@ -133,11 +147,17 @@ void R_KillVArrays (void)
 			qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
 		}
 	}
+	
+	for (attr_idx = 0; attr_idx < MAX_ATTR_IDX; attr_idx++)
+	{
+		if ((KillAttribFlags & (1 << attr_idx)) != 0)
+			glDisableVertexAttribArrayARB (attr_idx);
+	}
 
 	// always kill
 	qglDisableClientState (GL_VERTEX_ARRAY);
 	
-	KillFlags = 0;
+	KillAttribFlags = KillFlags = 0;
 }
 
 void R_DrawVarrays(GLenum mode, GLint first, GLsizei count)
