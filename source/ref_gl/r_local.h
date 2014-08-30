@@ -481,6 +481,9 @@ void R_InitQuadVarrays(void);
 void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer);
 void R_VertexPointer (GLint size, GLsizei stride, const GLvoid *pointer);
 void R_NormalPointer (GLsizei stride, const GLvoid *pointer);
+void R_AttribPointer (	GLuint index, GLint size, GLenum type,
+						GLboolean normalized, GLsizei stride,
+						const GLvoid *pointer );
 
 //shadows
 extern  void R_InitShadowSubsystem(void);
@@ -553,6 +556,8 @@ GLhandleARB g_fragmentShader;
 
 // Minimap rendering
 #define ATTR_MINIMAP_DATA_IDX	1
+
+#define MAX_ATTR_IDX		16
 
 // Uniform locations for GLSL shaders that support dynamic lighting
 // FIXME: currently only used by RScript surfaces.

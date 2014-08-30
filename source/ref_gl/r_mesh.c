@@ -646,38 +646,32 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	GL_BindVBO (vbo_normals);
 	R_NormalPointer (0, 0);
 
-	glEnableVertexAttribArrayARB (ATTR_TANGENT_IDX);
 	GL_BindVBO (vbo_tangents);
-	glVertexAttribPointerARB (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+	R_AttribPointer (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 	
 	// Note: the lerp position is sent separately as a uniform to the GLSL shader.
 	if (modtypes[currentmodel->type].morphtarget && lerped)
 	{
 		R_Mesh_FindVBO (currentmodel, currententity->oldframe);
 		
-		glEnableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
 		GL_BindVBO (vbo_xyz);
-		glVertexAttribPointerARB (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
+		R_AttribPointer (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
 		
-		glEnableVertexAttribArrayARB (ATTR_OLDNORM_IDX);
 		GL_BindVBO (vbo_normals);
-		glVertexAttribPointerARB (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
+		R_AttribPointer (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
 		
-		glEnableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
 		GL_BindVBO (vbo_tangents);
-		glVertexAttribPointerARB (ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+		R_AttribPointer (ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 	}
 	
 	// Note: bone positions are sent separately as uniforms to the GLSL shader.
 	if (modtypes[currentmodel->type].skeletal)
 	{
-		glEnableVertexAttribArrayARB (ATTR_WEIGHTS_IDX);
 		GL_BindVBO (vbo_blendweights);
-		glVertexAttribPointerARB (ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(byte)*4, 0);
+		R_AttribPointer (ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(byte)*4, 0);
 		
-		glEnableVertexAttribArrayARB (ATTR_BONES_IDX);
 		GL_BindVBO (vbo_blendindices);
-		glVertexAttribPointerARB (ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(byte)*4, 0);
+		R_AttribPointer (ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(byte)*4, 0);
 	}
 	
 	GL_BindVBO (NULL);
@@ -694,23 +688,7 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 		qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
 	}
 	
-	// cleanup
 	R_KillVArrays ();
-	
-	glDisableVertexAttribArrayARB (ATTR_TANGENT_IDX);
-	
-	if (modtypes[currentmodel->type].skeletal)
-	{
-		glDisableVertexAttribArrayARB (ATTR_WEIGHTS_IDX);
-		glDisableVertexAttribArrayARB (ATTR_BONES_IDX);
-	}
-	
-	if (lerped)
-	{
-		glDisableVertexAttribArrayARB (ATTR_OLDVTX_IDX);
-		glDisableVertexAttribArrayARB (ATTR_OLDNORM_IDX);
-		glDisableVertexAttribArrayARB (ATTR_OLDTAN_IDX);
-	}
 }
 
 static void R_Mesh_DrawVBO_Callback (void)

@@ -1201,6 +1201,7 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	else 
 	{
 		AddToChainPair (surf->texinfo->equiv->lightmap_surfaces);
+
 	}
 	
 	// Add to the rscript chain if there is actually a shader
@@ -2237,11 +2238,8 @@ static void R_DrawRadarEdges (void)
 		distance = 1024.0;
 	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, minimap_vboId);
-	
 	R_VertexPointer (3, 5*sizeof(float), (void *)0);
-	glEnableVertexAttribArrayARB (ATTR_MINIMAP_DATA_IDX);
-	glVertexAttribPointerARB (ATTR_MINIMAP_DATA_IDX, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)(3*sizeof(float)));
-	
+	R_AttribPointer (ATTR_MINIMAP_DATA_IDX, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)(3*sizeof(float)));
 	GL_BindVBO (NULL);
 	
 	glUseProgramObjectARB (g_minimapprogramObj);
@@ -2264,7 +2262,6 @@ static void R_DrawRadarEdges (void)
 	}
 	
 	R_KillVArrays ();
-	glDisableVertexAttribArrayARB (ATTR_MINIMAP_DATA_IDX);
 	
 	glUseProgramObjectARB (0);
 }
