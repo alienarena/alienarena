@@ -560,6 +560,7 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			BSP_DrawAlphaPoly (s);
 	}
 
+	R_KillVArrays ();
 	BSP_SetScrolling (0);
 	GL_SelectTexture (0);
 	GL_TexEnv (GL_REPLACE);
