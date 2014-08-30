@@ -295,7 +295,7 @@ void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
 //VBO
-extern GLuint vboId;
+extern GLuint minimap_vboId;
 extern void R_LoadVBOSubsystem(void);
 extern void R_VCShutdown(void);
 extern void VB_WorldVCInit(void);
@@ -523,6 +523,7 @@ extern void	R_LoadGLSLPrograms(void);
 GLhandleARB g_programObj;
 GLhandleARB g_shadowprogramObj;
 GLhandleARB g_warpprogramObj;
+GLhandleARB g_minimapprogramObj;
 GLhandleARB g_rscriptprogramObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
@@ -538,15 +539,20 @@ GLhandleARB g_godraysprogramObj;
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
 
-//vertex attribute indexes
-//blame NVIDIA for this idiocy:
+// vertex attribute indexes
+// blame NVIDIA for this idiocy:
 // http://stackoverflow.com/questions/528028/glvertexattrib-which-attribute-indices-are-predefined
+
+// Mesh rendering
 #define ATTR_TANGENT_IDX	1
 #define ATTR_WEIGHTS_IDX	11
 #define ATTR_BONES_IDX 		12
 #define ATTR_OLDVTX_IDX		13
 #define ATTR_OLDNORM_IDX	14
 #define ATTR_OLDTAN_IDX		15
+
+// Minimap rendering
+#define ATTR_MINIMAP_DATA_IDX	1
 
 // Uniform locations for GLSL shaders that support dynamic lighting
 // FIXME: currently only used by RScript surfaces.

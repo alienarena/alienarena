@@ -25,7 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-GLuint vboId = 0;
+static GLuint bsp_vboId = 0;
+GLuint minimap_vboId = 0;
 int currVertexNum;
 size_t vbo_xyz_pos;
 
@@ -105,12 +106,12 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	surf->vbo_first_vert = currVertexNum;
 	currVertexNum += surf->vbo_num_verts;
 	
-	qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);
+	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);
 
 	vbo_xyz_pos += xyz_size;
 }
 
-void VB_BuildWorldVBO(void)
+void VB_BuildWorldSurfaceVBO (void)
 {
 	msurface_t *surf, *surfs;
 	int i, firstsurf, lastsurf;
@@ -133,9 +134,9 @@ void VB_BuildWorldVBO(void)
 			totalVBObufferSize += 7*3*(p->numverts-2);
 	}
 	
-	qglGenBuffersARB(1, &vboId);
+	qglGenBuffersARB(1, &bsp_vboId);
 		
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bsp_vboId);
 	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
@@ -157,13 +158,61 @@ void VB_BuildWorldVBO(void)
 			VB_BuildSurfaceVBO(surf);
 		}
 	}
-
+	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+}
+
+void VB_BuildMinimapVBO (void)
+{
+	int i, j;
+	int totalVBObufferSize = 0;
+	int currVertexNum = 0;
+	float *vbo_idx = 0;
+	
+	for (i = 1; i < r_worldmodel->numedges; i++)
+	{
+		if (r_worldmodel->edges[i].iscorner)
+			totalVBObufferSize += (3+2)*2;
+	}
+	
+	qglGenBuffersARB(1, &minimap_vboId);
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, minimap_vboId);
+	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+	
+	for (i = 1; i < r_worldmodel->numedges; i++)
+	{
+		medge_t *edge = &r_worldmodel->edges[i];
+		
+		if (!edge->iscorner)
+			continue;
+		
+		edge->vbo_start = currVertexNum;
+		currVertexNum += 2;
+		
+		for (j = 0; j < 2; j++)
+		{
+			vec_t *v = r_worldmodel->vertexes[edge->v[j]].position;
+			
+			qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, (GLintptrARB)vbo_idx, 3 * sizeof(float), v);
+			vbo_idx += 3;
+			qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, (GLintptrARB)(vbo_idx++), sizeof(float), &edge->sColor);
+			qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, (GLintptrARB)(vbo_idx++), sizeof(float), &edge->alpha);
+		}
+	}
+	
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+}
+
+void VB_BuildWorldVBO (void)
+{
+	VB_BuildWorldSurfaceVBO ();
+	VB_BuildMinimapVBO ();
+	fflush (stdout);
 }
 
 void GL_SetupWorldVBO (void)
 {
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bsp_vboId);
 
 	R_VertexPointer (3, 7*sizeof(float), (void *)0);
 	R_TexCoordPointer (0, 7*sizeof(float), (void *)(3*sizeof(float)));
@@ -291,7 +340,8 @@ void R_VCFreeFrame()
 void VB_WorldVCInit()
 {
 	//clear out previous buffer
-	qglDeleteBuffersARB(1, &vboId);
+	qglDeleteBuffersARB(1, &bsp_vboId);
+	qglDeleteBuffersARB(1, &minimap_vboId);
 }
 
 void VB_VCInit()
@@ -327,7 +377,7 @@ void R_VCShutdown()
 	vertCache_t	*cache, *next;
 
 	//delete buffers
-	qglDeleteBuffersARB(1, &vboId);
+	qglDeleteBuffersARB(1, &bsp_vboId);
 	
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 	{
