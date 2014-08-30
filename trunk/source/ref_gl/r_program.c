@@ -802,6 +802,35 @@ static char shadow_fragment_program_ATI[] = STRINGIFY (
 	}
 );
 
+
+// Minimap
+static char minimap_vertex_program[] = STRINGIFY (
+	attribute vec2 colordata;
+	
+	void main (void)
+	{
+		vec4 pos = gl_ModelViewProjectionMatrix * gl_Vertex;
+		
+		gl_Position.xywz = vec4 (pos.xyw, 0.0);
+		
+		gl_FrontColor.a = pos.z / -2.0;
+		
+		if (gl_FrontColor.a > 0.0)
+		{
+			gl_FrontColor.rgb = vec3 (0.5, 0.5 + colordata[0], 0.5);
+			gl_FrontColor.a = 1.0 - gl_FrontColor.a;
+		}
+		else
+		{
+			gl_FrontColor.rgb = vec3 (0.5, colordata[0], 0);
+			gl_FrontColor.a += 1.0;
+		}
+		
+		gl_FrontColor.a *= colordata[1];
+	}
+);
+
+
 //RSCRIPTS
 static char rscript_vertex_program[] = STRINGIFY (
 	uniform int envmap;
@@ -1917,7 +1946,9 @@ const vertex_attribute_t standard_attributes[] =
 	#define ATTRIBUTE_OLDNORM	(1<<4)
 	{"oldnormal",	ATTR_OLDNORM_IDX},
 	#define ATTRIBUTE_OLDTAN	(1<<5)
-	{"oldtangent",	ATTR_OLDTAN_IDX}
+	{"oldtangent",	ATTR_OLDTAN_IDX},
+	#define ATTRIBUTE_MINIMAP	(1<<6)
+	{"colordata",	ATTR_MINIMAP_DATA_IDX}
 };
 const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
 	
@@ -2136,6 +2167,9 @@ void R_LoadGLSLPrograms(void)
 	warp_uniforms.time = glGetUniformLocationARB (g_warpprogramObj, "time");
 	warp_uniforms.warpvert = glGetUniformLocationARB (g_warpprogramObj, "warpvert");
 	warp_uniforms.envmap = glGetUniformLocationARB (g_warpprogramObj, "envmap");
+	
+	// Minimaps
+	R_LoadGLSLProgram ("Minimap", (char*)minimap_vertex_program, NULL, ATTRIBUTE_MINIMAP, &g_minimapprogramObj);
 	
 	//rscript surfaces
 	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, &g_rscriptprogramObj);

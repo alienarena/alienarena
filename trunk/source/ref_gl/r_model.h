@@ -164,6 +164,7 @@ typedef struct
 	vec3_t			mins, maxs;
 	qboolean		iscorner;
 	float			alpha, sColor;
+	int				vbo_start;
 } medge_t;
 
 /*

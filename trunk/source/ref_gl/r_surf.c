@@ -2222,32 +2222,9 @@ void BSP_EndBuildingLightmaps (void)
   MINI MAP
   
   Draws a little 2D map in the corner of the HUD.
-  TODO: Draw this with VBO+GLSL.
 
 =============================================================================
 */
-
-static void Radar_ColorForPoint (const vec3_t v, float sColor, float C[4])
-{
-	C[3]= (v[2]-r_origin[2])/512.0;
-	if (C[3]>0)
-	{
-		C[0]=0.5;
-		C[1]=0.5+sColor;
-		C[2]=0.5;
-		C[3]=1-C[3];
-	}
-	else
-	{
-		C[0]=0.5;
-		C[1]=sColor;
-		C[2]=0;
-		C[3]+=1;
-	}
-
-	if(C[3]<0)
-		C[3]=0;
-}
 
 static void R_DrawRadarEdges (void)
 {
@@ -2259,15 +2236,23 @@ static void R_DrawRadarEdges (void)
 	else
 		distance = 1024.0;
 	
-	qglBegin (GL_LINES);
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, minimap_vboId);
+	
+	R_VertexPointer (3, 5*sizeof(float), (void *)0);
+	glEnableVertexAttribArrayARB (ATTR_MINIMAP_DATA_IDX);
+	glVertexAttribPointerARB (ATTR_MINIMAP_DATA_IDX, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)(3*sizeof(float)));
+	
+	GL_BindVBO (NULL);
+	
+	glUseProgramObjectARB (g_minimapprogramObj);
 	
 	for (i = 1; i < r_worldmodel->numedges; i++)
 	{
 		medge_t *edge = &r_worldmodel->edges[i];
-		
+	
 		if (!edge->iscorner)
 			continue;
-		
+	
 		if (	r_origin[0]+distance < edge->mins[0] ||
 				r_origin[0]-distance > edge->maxs[0] ||
 				r_origin[1]+distance < edge->mins[1] ||
@@ -2275,20 +2260,13 @@ static void R_DrawRadarEdges (void)
 				r_origin[2]+256 < edge->mins[2] ||
 				r_origin[2]-256 > edge->maxs[2]) continue;
 		
-		for (j = 0; j < 2; j++)
-		{
-			float C[4];
-			vec_t *v = r_worldmodel->vertexes[edge->v[j]].position;
-			
-			Radar_ColorForPoint (v, edge->sColor, C);
-			C[3] *= edge->alpha;
-			
-			qglColor4fv (C);
-			qglVertex2fv (v);
-		}
+		qglDrawArrays (GL_LINES, edge->vbo_start, 2);
 	}
 	
-	qglEnd ();
+	R_KillVArrays ();
+	glDisableVertexAttribArrayARB (ATTR_MINIMAP_DATA_IDX);
+	
+	glUseProgramObjectARB (0);
 }
 
 int			numRadarEnts=0;
@@ -2392,7 +2370,7 @@ void R_DrawRadar(void)
 
 		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, 1);
 	}
-	qglTranslatef (-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], 0);
+	qglTranslatef (-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
 
 	qglBegin(GL_QUADS);
 	for(i=0;i<numRadarEnts;i++){
