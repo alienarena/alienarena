@@ -108,7 +108,7 @@ R_Bloom_AllocFBOTexture
 Create a 24-bit square texture with specified size and attach it to an FBO
 =================
 */
-image_t *R_Bloom_AllocFBOTexture (char *name, int size_side, GLuint *FBO)
+static image_t *R_Bloom_AllocFBOTexture (char *name, int size_side, GLuint *FBO)
 {
 	byte	*data;
 	int		size;
@@ -147,7 +147,7 @@ R_Bloom_AllocRBO
 Create a 24-bit square RBO with specified size and attach it to an FBO
 =================
 */
-void R_Bloom_AllocRBO (int width, int height, GLuint *RBO, GLuint *FBO)
+static void R_Bloom_AllocRBO (int width, int height, GLuint *RBO, GLuint *FBO)
 {
 	// create the RBO
 	qglGenRenderbuffersEXT(1, RBO);
@@ -173,7 +173,7 @@ void R_Bloom_AllocRBO (int width, int height, GLuint *RBO, GLuint *FBO)
 R_Bloom_InitEffectTexture
 =================
 */
-void R_Bloom_InitEffectTexture( void )
+static void R_Bloom_InitEffectTexture (void)
 {
 	float	bloomsizecheck;
 
@@ -208,7 +208,7 @@ R_Bloom_InitTextures
 =================
 */
 void checkFBOExtensions (void);
-void R_Bloom_InitTextures( void )
+static void R_Bloom_InitTextures (void)
 {
 	if (!gl_state.fbo || !gl_state.hasFBOblit)
 	{
@@ -277,7 +277,7 @@ void R_InitBloomTextures( void )
 R_Bloom_DrawEffect
 =================
 */
-void R_Bloom_DrawEffect( void )
+static void R_Bloom_DrawEffect (void)
 {
 	GL_Bind(r_bloomeffecttexture->texnum);
 	GLSTATE_ENABLE_BLEND
@@ -305,7 +305,7 @@ void R_Bloom_DrawEffect( void )
 R_Bloom_GeneratexDiamonds
 =================
 */
-void R_Bloom_GeneratexDiamonds( void )
+static void R_Bloom_GeneratexDiamonds (void)
 {
 	int			i, j;
 	static float intensity;
@@ -404,7 +404,7 @@ of pixels. Tearing isn't an issue because it'll just be blurred to mush
 anyway.
 =================
 */
-void R_Bloom_FullsizeRBOUpdate (void)
+static void R_Bloom_FullsizeRBOUpdate (void)
 {
 	static int	cur_section = 0;
 	static int	last_time = 0;
@@ -439,7 +439,7 @@ a bit confusing, because "downsampling" means two things here:
 The function name uses meaning 1.
 =================
 */
-void R_Bloom_DownsampleView( void )
+static void R_Bloom_DownsampleView (void)
 {
 	GLSTATE_DISABLE_BLEND
 	qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -517,7 +517,7 @@ void R_Bloom_DownsampleView( void )
 R_BloomBlend
 =================
 */
-void R_BloomBlend ( refdef_t *fd )
+void R_BloomBlend (refdef_t *fd)
 {
 
 	if( !(fd->rdflags & RDF_BLOOM) || !r_bloom->integer )

@@ -38,7 +38,7 @@ GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLs
 void *			(APIENTRY * qglMapBufferARB)(GLenum target, GLenum access);
 GLboolean		(APIENTRY * qglUnmapBufferARB)(GLenum target);
 
-void VB_VCInit();
+static void VB_VCInit();
 void R_LoadVBOSubsystem(void)
 {
 	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
@@ -63,7 +63,7 @@ void R_LoadVBOSubsystem(void)
 	}
 }
 
-void VB_BuildSurfaceVBO(msurface_t *surf)
+static void VB_AddWorldSurfaceToVBO (msurface_t *surf)
 {
 	glpoly_t *p;
 	float	*v;
@@ -111,7 +111,7 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	vbo_xyz_pos += xyz_size;
 }
 
-void VB_BuildWorldSurfaceVBO (void)
+static void VB_BuildWorldSurfaceVBO (void)
 {
 	msurface_t *surf, *surfs;
 	int i, firstsurf, lastsurf;
@@ -148,21 +148,21 @@ void VB_BuildWorldSurfaceVBO (void)
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
 					(surf->iflags & ISURF_PLANEBACK))
 				continue;
-			VB_BuildSurfaceVBO(surf);
+			VB_AddWorldSurfaceToVBO (surf);
 		}
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
 					!(surf->iflags & ISURF_PLANEBACK))
 				continue;
-			VB_BuildSurfaceVBO(surf);
+			VB_AddWorldSurfaceToVBO (surf);
 		}
 	}
 	
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
-void VB_BuildMinimapVBO (void)
+static void VB_BuildMinimapVBO (void)
 {
 	int i, j;
 	int totalVBObufferSize = 0;
@@ -344,7 +344,7 @@ void VB_WorldVCInit()
 	qglDeleteBuffersARB(1, &minimap_vboId);
 }
 
-void VB_VCInit()
+static void VB_VCInit()
 {
 	int	i;
 	

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2010 COR Entertainment, LLC.
+Copyright (C) 2010-2014 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -57,8 +57,8 @@ void            (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 // GL_EXT_framebuffer_blit
 void			(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-GLuint	fboId[3];
-GLuint	rboId;
+GLuint			fboId[3];
+static GLuint	rboId;
 
 void R_CheckFBOExtensions (void)
 {
@@ -296,7 +296,7 @@ static void lookAt( float position_x , float position_y , float position_z , flo
 	qglTranslated( -position_x , -position_y , -position_z );
 }
 
-void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
+static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
 {
 
 	qglMatrixMode(GL_PROJECTION);
@@ -307,7 +307,7 @@ void SM_SetupMatrices(float position_x,float position_y,float position_z,float l
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
 
-void SM_SetTextureMatrix( qboolean mapnum )
+static void SM_SetTextureMatrix( qboolean mapnum )
 {
 	static double modelView[16];
 	static double projection[16];
@@ -349,7 +349,7 @@ SM_RecursiveWorldNode - this variant of the classic routine renders both sides f
 ================
 */
 
-void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
+static void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
 	int			c;
 	msurface_t	*surf, **mark;
@@ -437,7 +437,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 }
 
 
-inline float point_dist_from_plane (cplane_t *plane, vec3_t point)
+static inline float point_dist_from_plane (cplane_t *plane, vec3_t point)
 {
 	switch (plane->type)
 	{
@@ -525,7 +525,7 @@ static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
 	return ret;
 }
 
-void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
+static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
 {
 	int			c;
 	float		dist, dist_model, dist_light;
@@ -880,7 +880,7 @@ void R_DrawDynamicCaster(void)
 
 }
 
-void R_Vectoangles (vec3_t value1, vec3_t angles)
+static void R_Vectoangles (vec3_t value1, vec3_t angles)
 {
 	float	forward;
 	float	yaw, pitch;

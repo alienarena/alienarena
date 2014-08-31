@@ -494,7 +494,6 @@ extern  image_t		*r_depthtexture;
 extern	image_t		*r_depthtexture2;
 extern  image_t		*r_colorbuffer;
 extern GLuint   fboId[3];
-extern GLuint	rboId;
 extern vec3_t	r_worldLightVec;
 typedef struct	LightGroup 
 {
