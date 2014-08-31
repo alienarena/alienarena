@@ -581,7 +581,7 @@ static void R_DrawEntityList (entity_t *list, int numentities)
 R_DrawEntitiesOnList
 =============
 */
-void R_DrawEntitiesOnList (void)
+static void R_DrawEntitiesOnList (void)
 {
 	if (!r_drawentities->integer)
 		return;
@@ -594,7 +594,7 @@ void R_DrawEntitiesOnList (void)
 	R_DrawEntityList (r_newrefdef.entities, r_newrefdef.num_entities);
 }
 
-void R_DrawRagdollsOnList (void)
+static void R_DrawRagdollsOnList (void)
 {
 	if (!r_ragdolls->integer)
 		return;
@@ -606,7 +606,7 @@ void R_DrawRagdollsOnList (void)
 	R_DrawEntityList (RagDollEntity, MAX_RAGDOLLS);
 }
 
-void R_DrawViewEntitiesOnList (void)
+static void R_DrawViewEntitiesOnList (void)
 {
 	if (!r_drawentities->integer)
 		return;
@@ -617,7 +617,7 @@ void R_DrawViewEntitiesOnList (void)
 	R_DrawEntityList (r_newrefdef.viewentities, r_newrefdef.num_viewentities);
 }
 
-void R_DrawTerrain (void)
+static void R_DrawTerrain (void)
 {
 	if (!r_drawworld->integer)
 		return;
@@ -631,12 +631,8 @@ extern int r_drawing_fbeffect;
 extern int	r_fbFxType;
 extern float r_fbeffectTime;
 extern cvar_t *cl_paindist;
-/*
-============
-R_PolyBlend
-============
-*/
-void R_PolyBlend (void)
+
+static void R_Flash (void)
 {
 	if (!gl_polyblend->integer)
 		return;
@@ -696,7 +692,7 @@ int SignbitsForPlane (cplane_t *out)
 }
 
 
-void R_SetFrustum (void)
+static void R_SetFrustum (void)
 {
 	int		i;
 
@@ -724,7 +720,7 @@ void R_SetFrustum (void)
 R_SetupFrame
 ===============
 */
-void R_SetupFrame (void)
+static void R_SetupFrame (void)
 {
 	int i;
 	mleaf_t *leaf;
@@ -826,7 +822,7 @@ void R_SetupViewport (void)
 R_SetupGL
 =============
 */
-void R_SetupGL (void)
+static void R_SetupGL (void)
 {
 	float	screenaspect;
 	
@@ -903,11 +899,6 @@ void R_Clear (void)
         qglClearStencil(0);
         qglClear(GL_STENCIL_BUFFER_BIT);
     }
-}
-
-void R_Flash( void )
-{
-	R_PolyBlend ();
 }
 
 /*
@@ -1155,7 +1146,7 @@ void R_RenderView (refdef_t *fd)
 	*fd = r_newrefdef;
 }
 
-void	R_SetGL2D (void)
+static void	R_SetGL2D (void)
 {
 	// set 2D virtual screen size
 	qglViewport (0,0, vid.width, vid.height);
@@ -1338,7 +1329,7 @@ void R_Register( void )
 R_SetMode
 ==================
 */
-qboolean R_SetMode (void)
+static qboolean R_SetMode (void)
 {
 	rserr_t err;
 	qboolean fullscreen;
@@ -1704,7 +1695,7 @@ void R_Shutdown (void)
 R_BeginFrame
 @@@@@@@@@@@@@@@@@@@@@
 */
-void R_BeginFrame( float camera_separation )
+void R_BeginFrame (float camera_separation)
 {
 
 	gl_state.camera_separation = camera_separation;
@@ -1780,7 +1771,7 @@ void R_BeginFrame( float camera_separation )
 R_AppActivate
 =============
 */
-void R_AppActivate( qboolean active )
+void R_AppActivate (qboolean active)
 {
 	GLimp_AppActivate (active);
 }
@@ -1800,7 +1791,7 @@ void R_EndFrame (void)
 R_FarClip
 ===============
 */
-float R_FarClip( void )
+static float R_FarClip (void)
 {
 	float farclip, farclip_dist;
 	int i;
@@ -1839,7 +1830,7 @@ float R_FarClip( void )
 R_SetupProjectionMatrix
 =============
 */
-void R_SetupProjectionMatrix( refdef_t *rd, mat4x4_t m )
+static void R_SetupProjectionMatrix (refdef_t *rd, mat4x4_t m)
 {
 	double xMin, xMax, yMin, yMax, zNear, zFar;
 
@@ -1879,7 +1870,7 @@ void R_SetupProjectionMatrix( refdef_t *rd, mat4x4_t m )
 R_SetupModelviewMatrix
 =============
 */
-void R_SetupModelviewMatrix( refdef_t *rd, mat4x4_t m )
+static void R_SetupModelviewMatrix (refdef_t *rd, mat4x4_t m)
 {
 	Vector4Set( &m[0], 0, 0, -1, 0 );
 	Vector4Set( &m[4], -1, 0, 0, 0 );
@@ -1892,7 +1883,7 @@ void R_SetupModelviewMatrix( refdef_t *rd, mat4x4_t m )
 	Matrix4_Translate( m, -rd->vieworg[0], -rd->vieworg[1], -rd->vieworg[2] );
 }
 
-void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out )
+void R_TransformVectorToScreen (refdef_t *rd, vec3_t in, vec2_t out)
 {
    mat4x4_t p, m;
    vec4_t temp, temp2;
