@@ -1379,76 +1379,16 @@ qboolean R_SetMode (void)
 	return true;
 }
 
-/*
-===============
-R_SetCompatibility
-===============
-*/
-
-void R_SetCompatibility(void)
+static void R_SetGraphicalPreset (const char *cfgname, const char *desc)
 {
-	Cmd_ExecuteString ("exec graphical_presets/compatibility.cfg");
+	Cmd_ExecuteString (va ("exec graphical_presets/%s.cfg", cfgname));
 	Cbuf_Execute ();
-	Com_Printf("...autodetected MAX COMPATIBILITY game setting\n");
-}
-
-/*
-===============
-R_SetMaxPerformance
-===============
-*/
-
-void R_SetMaxPerformance( void )
-{
-	Cmd_ExecuteString ("exec graphical_presets/maxperformance.cfg");
-	Cbuf_Execute ();
-	Com_Printf("...autodetected MAX PERFORMANCE game setting\n");
-}
-
-/*
-===============
-R_SetPerformance
-===============
-*/
-
-void R_SetPerformance( void )
-{
-	Cmd_ExecuteString ("exec graphical_presets/performance.cfg");
-	Cbuf_Execute ();
-	Com_Printf("...autodetected PERFORMANCE game setting\n");
-}
-
-/*
-===============
-R_SetQuality
-===============
-*/
-
-void R_SetQuality( void )
-{
-	Cmd_ExecuteString ("exec graphical_presets/quality.cfg");
-	Cbuf_Execute ();
-	Com_Printf("...autodetected QUALITY game setting\n");
-}
-
-/*
-===============
-R_SetMaxQuality
-===============
-*/
-
-void R_SetMaxQuality( void )
-{
-	Cmd_ExecuteString ("exec graphical_presets/maxquality.cfg");
-	Cbuf_Execute ();
-	Com_Printf("...autodetected MAX QUALITY game setting\n");
+	Com_Printf("...autodetected %s game setting\n", desc);
 }
 
 #if defined WIN32_VARIANT
 double CPUSpeed()
 {
-
-
 	DWORD BufSize = _MAX_PATH;
 	DWORD dwMHz = _MAX_PATH;
 	HKEY hKey;	// open the key where the proc speed is hidden:
@@ -1465,7 +1405,6 @@ double CPUSpeed()
 	// query the key:
 	RegQueryValueEx(hKey, "~MHz", NULL, NULL, (LPBYTE) &dwMHz, &BufSize);
 	return (double)dwMHz;
-
 }
 #endif
 
@@ -1573,7 +1512,7 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_state.fragment_program = false;
 	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	Cvar_SetValue("r_firstrun", 1);
-	R_SetMaxPerformance();
+	R_SetGraphicalPreset ("maxperformance", "MAX PERFORMANCE");
 	Com_Printf("...Development Workaround. Low game settings forced.\n");
 #else
 
@@ -1585,6 +1524,7 @@ int R_Init( void *hinstance, void *hWnd )
 	R_LoadGLSLPrograms();
 
 	//if running for the very first time, automatically set video settings
+	// TODO: Maybe change/update some of this logic a bit?
 	if(!r_firstrun->integer)
 	{
 		qboolean ati_nvidia = false;
@@ -1642,22 +1582,22 @@ cpuinfo_exit:
 		if(OGLVer < 2.1)
 		{
 			//weak GPU, set to maximum compatibility
-			R_SetCompatibility();
+			R_SetGraphicalPreset ("compatibility", "MAX COMPATIBILITY");
 		}
 		else if(OGLVer >= 3)
 		{
 			//GPU is modern, check CPU
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
-				R_SetMaxQuality();
+				R_SetGraphicalPreset ("maxquality", "MAX QUALITY");
 			else
-				R_SetQuality();
+				R_SetGraphicalPreset ("quality", "QUALITY");
 		}
 		else 
 		{
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
-				R_SetQuality();
+				R_SetGraphicalPreset ("quality", "QUALITY");
 			else
-				R_SetPerformance();
+				R_SetGraphicalPreset ("performance", "PERFORMANCE");
 		}
 
 		//never run again
