@@ -1493,20 +1493,6 @@ int R_Init( void *hinstance, void *hWnd )
 
 	R_LoadVBOSubsystem();
 
-#if defined DARWIN_SPECIAL_CASE
-	/*
-	 * development workaround for Mac OS X / Darwin using X11
-	 *  problems seen with 2.1 NVIDIA-1.6.18 when calling
-	 *  glCreateProgramObjectARB()
-	 * For now, just go with low settings.
-	 */
-	gl_state.fragment_program = false;
-	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
-	Cvar_SetValue("r_firstrun", 1);
-	R_SetGraphicalPreset ("maxperformance", "MAX PERFORMANCE");
-	Com_Printf("...Development Workaround. Low game settings forced.\n");
-#else
-
 	//always do this check for ATI drivers - they are somewhat bugged in regards to shadowmapping and use of shadow2dproj command
 	if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc."))
 		gl_state.ati = true;
@@ -1594,7 +1580,6 @@ cpuinfo_exit:
 		//never run again
 		Cvar_SetValue("r_firstrun", 1);
 	}
-#endif
 
 	GL_SetDefaultState();
 	
