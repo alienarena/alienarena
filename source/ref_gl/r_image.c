@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2014 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -1655,6 +1656,7 @@ int Draw_GetPalette (void)
 		v = (255<<24) + (r<<0) + (g<<8) + (b<<16);
 		d_8to24table[i] = LittleLong(v);
 	}
+
 
 	d_8to24table[255] &= LittleLong(0xffffff);	// 255 is transparent
 
