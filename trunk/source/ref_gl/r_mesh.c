@@ -703,7 +703,6 @@ R_Mesh_DrawFrame: should be able to handle all types of meshes.
 */
 static void R_Mesh_DrawFrame (int skinnum)
 {
-	int			i;
 	vec3_t		lightcolor;
 	
 	// only applicable to MD2
@@ -737,7 +736,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 	if (((modtypes[currentmodel->type].morphtarget && lerped) || modtypes[currentmodel->type].skeletal) != 0 && rs_slowpath)
 	{
 		// FIXME: rectify this.
-		Com_Printf ("WARN: Cannot apply a multi-stage RScript %s to model %s\n", rs->name, currentmodel->name);
+		Com_Printf ("WARN: Cannot apply a multi-stage RScript %s to model %s\n", rs->outname, currentmodel->name);
 		rs = NULL;
 		rs_slowpath = false;
 	}

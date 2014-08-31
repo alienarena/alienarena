@@ -147,13 +147,14 @@ typedef struct rs_stage_s
 // Base script
 typedef struct rscript_s 
 {
-	char				name[MAX_OSPATH];	// name of script
-	unsigned int			hash_key;		// hash key for the script's name
+	char				name[MAX_OSPATH];	// texture the script applies to
+	unsigned int		hash_key;			// hash key for the script's name
+	char				outname[2*MAX_OSPATH+1]; // for output
 	
-	qboolean				dontflush;	// dont flush from memory on map change
-	qboolean				ready;		// readied by the engine?
-	rs_stage_t				*stage;		// first rendering stage
-	struct rscript_s		*next;		// next script in linked list
+	qboolean			dontflush;	// dont flush from memory on map change
+	qboolean			ready;		// readied by the engine?
+	rs_stage_t			*stage;		// first rendering stage
+	struct rscript_s	*next;		// next script in linked list
 	
 	// Bits are set if the script contains certain types of stages. Some kinds
 	// of stages require rscript surfaces to be drawn one at a time.
@@ -166,7 +167,7 @@ typedef struct rscript_s
 	// TODO: filter these stages out at load time, then filter out empty 
 	// scripts.
 	#define RS_CONTAINS_DRAWN 4
-	int						flags;
+	int					flags;
 
 } rscript_t;
 
