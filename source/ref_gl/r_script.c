@@ -880,7 +880,7 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 	if (scroll_enabled && stage->envmap)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and scrolling"
-					" in script %s!\nForcing envmap off.\n", rs->name);
+					" in script %s!\nForcing envmap off.\n", rs->outname);
 		stage->envmap = false;
 	}
 	
@@ -890,14 +890,14 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and"
 					" non-static scaling in script %s!\n"
-					"Forcing envmap off.\n", rs->name);
+					"Forcing envmap off.\n", rs->outname);
 		stage->envmap = false;
 	}
 	
 	if (stage->rot_speed != 0.0 && stage->envmap)
 	{
 		Com_Printf ("WARN: Incompatible combination: envmapping and rotating"
-					" in script %s!\nForcing envmap off.\n", rs->name);
+					" in script %s!\nForcing envmap off.\n", rs->outname);
 		stage->envmap = false;
 	}
 	
@@ -911,11 +911,12 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 		rs->flags |= RS_CONTAINS_DRAWN;
 }
 
-void RS_LoadScript(char *script)
+void RS_LoadScript (char *script)
 {
 	qboolean		inscript = false, instage = false;
 	char			ignored = 0;
 	char			*token, *fbuf, *buf;
+	char			script_full_path[MAX_OSPATH];
 	rscript_t		*rs = NULL;
 	rs_stage_t		*stage = NULL;
 	// unsigned char	tcmod = 0; // unused
@@ -934,6 +935,8 @@ void RS_LoadScript(char *script)
 	buf[len] = 0;
 
 	FS_FreeFile (fbuf);
+	
+	FS_FullPath (script_full_path, sizeof(script_full_path), script);
 
 	token = strtok (buf, TOK_DELIMINATORS);
 
@@ -956,9 +959,10 @@ void RS_LoadScript(char *script)
 			}
 			else
 			{
-				rs = RS_FindScript(token);
-
+				rs = RS_FindScript (token);
 				rs = RS_NewScript (token, rs);
+				
+				snprintf (rs->outname, sizeof(rs->outname), "%s:%s", script_full_path, rs->name);
 			}
 		}
 		else if (inscript && !ignored)
