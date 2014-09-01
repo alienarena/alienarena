@@ -202,17 +202,22 @@ static void generate_vertices_for_mesh (mesh_t *mesh)
 	
 	vec_sub (mesh->maxs, mesh->mins, mesh->scale);
 	
-	// Normalize each axis to the range of 0 to 1. This helps avoid FP errors
-	// which result in nasty visual artefacts.
+	double biggest_scale = mesh->scale[0];
+	for (i = 1; i < 3; i++)
+	{
+		if (mesh->scale[i] > biggest_scale)
+			biggest_scale = mesh->scale[i];
+	}
+	
+	// Transform the mesh into the unit cube. This helps avoid FP issues which
+	// result in nasty visual artefacts. We keep the mesh proportional for
+	// accurate error estimation.
 	for (i = 0; i < mesh->num_verts; i++)
 	{
 		int j;
 		
-		for (j = 0; j < AXES; j++)
-		{
-			mesh->everts[i].pos[j] -= (mesh->mins[j] + mesh->scale[j]/2.0);
-			mesh->everts[i].pos[j] /= mesh->scale[j];
-		}
+		for (j = 0; j < 3; j++)
+			mesh->everts[i].pos[j] = (mesh->everts[i].pos[j] - mesh->mins[j]) / biggest_scale;
 	}
 }
 
@@ -803,10 +808,10 @@ void reconstruct_mesh (mesh_t *mesh)
 		mesh->everts[i].idx = mesh->num_verts++;
 		
 		for (j = 0; j < 3; j++)
-			mesh->vcoords[3*mesh->everts[i].idx+j] = mesh->everts[i].pos[j] * mesh->scale[j] + mesh->mins[j] + mesh->scale[j]/2;
+			mesh->vcoords[3*mesh->everts[i].idx+j] = mesh->vcoords[3*i+j];
 		
 		for (j = 0; j < 2; j++)
-			mesh->vtexcoords[2*mesh->everts[i].idx+j] = mesh->everts[i].pos[3+j] * mesh->scale[3+j] + mesh->mins[3+j] + mesh->scale[3+j]/2;
+			mesh->vtexcoords[2*mesh->everts[i].idx+j] = mesh->vtexcoords[2*i+j];
 	}
 	
 	old_num_tris = mesh->num_tris;
