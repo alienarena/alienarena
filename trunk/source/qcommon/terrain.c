@@ -287,7 +287,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	simplify_mesh (&mesh, out->num_triangles/reduction_amt);
 	Com_Printf ("Simplified mesh in %f seconds.\n", (float)(Sys_Milliseconds () - start_time)/1000.0f);
 	
-	out->num_triangles = mesh.num_verts;
+	out->num_vertices = mesh.num_verts;
 	out->num_triangles = mesh.num_tris;
 }
 
