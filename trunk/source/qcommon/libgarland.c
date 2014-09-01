@@ -89,6 +89,7 @@ typedef struct trilist_s
 {
 	struct tri_s		*tri;
 	struct trilist_s	*next;
+	char				idx; // Which vertex is this within the triangle?
 } trilist_t;
 
 typedef struct vert_s
@@ -245,6 +246,7 @@ static void generate_edges_for_mesh (mesh_t *mesh)
 			link = &mesh->trilinks[3*i+j];
 			link->tri = &mesh->etris[i];
 			link->next = mesh->etris[i].verts[j]->tris;
+			link->idx = j;
 			mesh->etris[i].verts[j]->tris = link;
 		}
 	}
@@ -308,7 +310,9 @@ static double vec_angle (const double a[AXES], const double b[AXES])
 	return acos (vec_dot (a, b) / (vec_length (a) * vec_length (b)));
 }
 
-static void vec_cross (const double a[AXES], const double b[AXES], double cross[AXES])
+// Note that the cross product only uses the first three axes. In all places
+// it's used, this ends up being approprate-- the math works out anyway.
+static void vec3_cross (const double a[3], const double b[3], double cross[3])
 {
 	cross[0] = a[1]*b[2] - a[2]*b[1];
 	cross[1] = a[2]*b[0] - a[0]*b[2];
@@ -415,6 +419,54 @@ static double get_quadric_error (const quadric_t *q, const double v[AXES])
 	return vec_dot (matproduct, v) + 2 * vec_dot (q->b, v) + q->c;
 }
 
+static void vec3_sub (const double a[3], const double b[3], double diff[3])
+{
+	diff[0] = a[0] - b[0];
+	diff[1] = a[1] - b[1];
+	diff[2] = a[2] - b[2];
+}
+
+static double vec3_dot (const double a[3], const double b[3])
+{
+	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+// See Garland's thesis, section 3.7
+// This helps, but FIXME: why isn't this catching everything?
+static double get_cross_error (const vert_t *a, const vert_t *b)
+{
+	const trilist_t *link;
+	double penalty = 0.0;
+	
+	for (link = a->tris; link != NULL; link = link->next)
+	{
+		const vert_t *e2_a, *e2_b;
+		double	guard_tangent1[3], guard_tangent2[3];
+		double temp[3], guard_normal[3];
+		double guard_dist, b_dist;
+		
+		e2_a = link->tri->verts[(link->idx + 1) % 3];
+		e2_b = link->tri->verts[(link->idx + 2) % 3];
+		
+		if (e2_a == b || e2_b == b)
+			continue;
+		
+		vec3_sub (a->pos, e2_a->pos, temp);
+		vec3_sub (e2_b->pos, e2_a->pos, guard_tangent1);
+		
+		vec3_cross (guard_tangent1, temp, guard_tangent2);
+		vec3_cross (guard_tangent1, guard_tangent2, guard_normal);
+		
+		guard_dist = vec3_dot (guard_normal, e2_a->pos);
+		b_dist = vec3_dot (guard_normal, b->pos);
+		
+		if (b_dist > guard_dist)
+			penalty += 1000.0;
+	}
+	
+	return penalty;
+}
+
 static void generate_contraction (edge_t *edge)
 {
 	quadric_t		q;
@@ -422,8 +474,11 @@ static void generate_contraction (edge_t *edge)
 	
 	add_quadrices (&edge->vtx_a->quadric, &edge->vtx_b->quadric, &q);
 	
+	a_error = b_error =	get_cross_error (edge->vtx_a, edge->vtx_b) +
+						get_cross_error (edge->vtx_b, edge->vtx_a);
+	
 	// what would happen if we contracted a and b into a?
-	a_error = get_quadric_error (&q, edge->vtx_a->pos);
+	a_error += get_quadric_error (&q, edge->vtx_a->pos);
 	
 	// If a and b are on the same plane, it doesn't matter which we pick.
 	if (fabs (a_error) < DBL_EPSILON)
@@ -435,7 +490,7 @@ static void generate_contraction (edge_t *edge)
 	}
 	
 	// what would happen if we contracted a and b into b?
-	b_error = get_quadric_error (&q, edge->vtx_b->pos);
+	b_error += get_quadric_error (&q, edge->vtx_b->pos);
 	
 	if (b_error < a_error)
 	{
@@ -499,11 +554,7 @@ static void generate_quadrices_for_tri (tri_t *tri)
 	vec_sub (vtx_c->pos, vtx_a->pos, edgevec1);
 	vec_sub (vtx_b->pos, vtx_a->pos, edgevec2);
 	
-	// Note that the cross product only uses the first three axes. In both
-	// places it's used (weighting by area and generating a perpendicular 
-	// plane for border weighting,) this ends up being approprate-- the math
-	// works out anyway.
-	vec_cross (edgevec1, edgevec2, normal);
+	vec3_cross (edgevec1, edgevec2, normal);
 	for (i = 3; i < AXES; i++)
 		normal[i] = 0;
 	area = vec_normalize (normal, normal)/2;
