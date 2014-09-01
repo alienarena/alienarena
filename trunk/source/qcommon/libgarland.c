@@ -437,6 +437,7 @@ static double get_cross_error (const vert_t *a, const vert_t *b)
 {
 	const trilist_t *link;
 	double penalty = 0.0;
+	return 0;
 	
 	for (link = a->tris; link != NULL; link = link->next)
 	{
