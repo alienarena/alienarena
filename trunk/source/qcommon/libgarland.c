@@ -174,6 +174,7 @@ static void vec_sub (const double a[AXES], const double b[AXES], double diff[AXE
 static void generate_vertices_for_mesh (mesh_t *mesh)
 {
 	idx_t i;
+	double biggest_scale;
 	
 	mesh->everts = malloc (mesh->num_verts*sizeof(*mesh->everts));
 	memset (mesh->everts, 0, mesh->num_verts*sizeof(*mesh->everts));
@@ -202,7 +203,7 @@ static void generate_vertices_for_mesh (mesh_t *mesh)
 	
 	vec_sub (mesh->maxs, mesh->mins, mesh->scale);
 	
-	double biggest_scale = mesh->scale[0];
+	biggest_scale = mesh->scale[0];
 	for (i = 1; i < 3; i++)
 	{
 		if (mesh->scale[i] > biggest_scale)
