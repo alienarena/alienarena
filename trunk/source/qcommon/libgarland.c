@@ -210,15 +210,15 @@ static void generate_vertices_for_mesh (mesh_t *mesh)
 			biggest_scale = mesh->scale[i];
 	}
 	
-	// Transform the mesh into the unit cube. This helps avoid FP issues which
-	// result in nasty visual artefacts. We keep the mesh proportional for
-	// accurate error estimation.
+	// Transform the mesh into the range -1 to 1. This helps avoid FP issues
+	// which result in nasty visual artefacts. We keep the mesh proportional
+	// for accurate error estimation.
 	for (i = 0; i < mesh->num_verts; i++)
 	{
 		int j;
 		
 		for (j = 0; j < 3; j++)
-			mesh->everts[i].pos[j] = (mesh->everts[i].pos[j] - mesh->mins[j]) / biggest_scale;
+			mesh->everts[i].pos[j] = (mesh->everts[i].pos[j] - mesh->mins[j]) * 2.0 / biggest_scale - 1.0;
 	}
 }
 
