@@ -74,6 +74,7 @@ typedef struct edge_s
 	double		contract_pos[AXES];	// calculated optimum position for contraction
 	double		contract_error;		// cost of deleting this edge
 	char		contract_flipvtx;	// if this is 1, contract into vertex b
+	char		moved;
 	
 	// for the binheap code
 	unsigned int	sorted_pos;
@@ -443,7 +444,6 @@ static double get_cross_error (const vert_t *a, const vert_t *b)
 {
 	const trilist_t *link;
 	double penalty = 0.0;
-	return 0;
 	
 	for (link = a->tris; link != NULL; link = link->next)
 	{
@@ -707,6 +707,7 @@ static void replace_vertex (mesh_t *mesh, vert_t *a, vert_t *b)
 				link->edge->vtx_a = a;
 				link->edge->vtx_b = c;
 			}
+			link->edge->moved = 1;
 			link->next = a->edges;
 			a->edges = link;
 		}
@@ -744,13 +745,41 @@ static void replace_vertex (mesh_t *mesh, vert_t *a, vert_t *b)
 static void recalculate_vert_neighborhood (mesh_t *mesh, vert_t *vtx)
 {
 	edgelist_t *edges;
+	trilist_t *tris;
 	
 	for (edges = vtx->edges; edges != NULL; edges = edges->next)
 	{
-		assert (!edges->edge->cull);
-		binheap_remove (&mesh->edgeheap, edges->edge);
-		generate_contraction (edges->edge);
-		binheap_insert (&mesh->edgeheap, edges->edge);
+		vert_t *vtx2;
+		edgelist_t *edges2;
+		edge_t *edge = edges->edge;
+		
+		assert (!edge->cull);
+		
+		binheap_remove (&mesh->edgeheap, edge);
+		generate_contraction (edge);
+		binheap_insert (&mesh->edgeheap, edge);
+		
+		if (!edge->moved)
+			continue;
+		
+		edge->moved = 0;
+		
+		if (edge->vtx_a == vtx)
+			vtx2 = edge->vtx_b;
+		else
+			vtx2 = edge->vtx_a;
+		
+		for (edges2 = vtx2->edges; edges2 != NULL; edges2 = edges2->next)
+		{
+			edge_t *edge2 = edges2->edge;
+			
+			if (edge2 == edge)
+				continue;
+			
+			binheap_remove (&mesh->edgeheap, edge2);
+			generate_contraction (edge2);
+			binheap_insert (&mesh->edgeheap, edge2);
+		}
 	}
 }
 
