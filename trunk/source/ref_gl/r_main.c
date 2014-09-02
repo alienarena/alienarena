@@ -912,9 +912,6 @@ r_newrefdef must be set before the first call
 static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect)
 {
 	int i;
-	vec3_t up;
-	
-	VectorSet (up, 0, 0, 1);
 	
 	qglDisable (GL_TEXTURE_2D);
 	qglDisable (GL_DEPTH_TEST);
@@ -923,14 +920,14 @@ static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboole
 		qglColor4f (1, 0, 0, 1);
 		qglLineWidth (5.0);
 	}
-	else if (DotProduct (normal, up) < 0)
+	else if (normal[2] < 0.0f)
 	{
 		qglColor4f (0, 0, 1, 1);
 		qglLineWidth (2.0);
 	}
 	else
 	{
-		qglColor4f (0, 0, 0, 1);
+		qglColor4f (0, 1, 0, 1);
 		qglLineWidth (1.0);
 	}
 	qglBegin (GL_LINE_LOOP);
