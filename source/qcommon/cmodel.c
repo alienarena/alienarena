@@ -998,7 +998,7 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		tri->p.type = PLANE_ANYZ;
 		
 		// overwrite and don't use downward facing faces.
-		if (DotProduct (tri->p.normal, up) > 0)
+		if (DotProduct (tri->p.normal, up) >= 0.0f)
 			mod->numtriangles++;
 	}
 	
