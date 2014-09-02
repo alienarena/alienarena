@@ -29,7 +29,6 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	float *vnormal, *vtangent;
 	image_t	*tex = NULL;
 	terraindata_t data;
-	vec3_t up;
 	int ndownward;
 	
 	LoadTerrainFile (&data, mod->name, false, 2.0, 32, (char *)_buf);
@@ -81,7 +80,6 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	vnormal = Z_Malloc (mod->numvertexes*sizeof(vec3_t));
 	vtangent = Z_Malloc (mod->numvertexes*sizeof(vec4_t));
 	
-	VectorSet (up, 0, 0, 1);
 	ndownward = 0;
 	
 	// Calculate normals and tangents
@@ -91,12 +89,13 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 		vec3_t v1, v2, normal, tangent;
 		unsigned int *triangle = &data.tri_indices[3*i];
 		
+		// leave normal scaled proportional to triangle area
 		VectorSubtract (&data.vert_positions[3*triangle[0]], &data.vert_positions[3*triangle[1]], v1);
 		VectorSubtract (&data.vert_positions[3*triangle[2]], &data.vert_positions[3*triangle[1]], v2);
 		CrossProduct (v2, v1, normal);
-		VectorScale (normal, -1.0/VectorLength(normal), normal);
+		VectorScale (normal, -1.0f, normal);
 		
-		if (DotProduct (normal, up) < 0)
+		if (normal[2] < 0.0f)
 			ndownward++;
 		
 		MD2_VecsForTris (	&data.vert_positions[3*triangle[0]], 
