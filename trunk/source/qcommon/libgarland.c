@@ -66,9 +66,6 @@ typedef struct edge_s
 {
 	struct vert_s	*vtx_a, *vtx_b;
 	
-	// triangles that use this edge
-	struct tri_s	*tri_1, *tri_2;
-
 	char		border;				// 1 if the edge is only used once
 	char		cull;				// 1 if we're not keeping it
 	double		contract_pos[AXES];	// calculated optimum position for contraction
@@ -108,6 +105,9 @@ typedef struct tri_s
 {
 	char	cull; // 1 if we're not keeping it
 	vert_t	*verts[3];
+	// Guard planes for triangle inversion mitigation
+	double	opposite_plane_normal[3][3];
+	double	opposite_plane_dist[3];
 } tri_t;
 
 
@@ -448,9 +448,7 @@ static double get_cross_error (const vert_t *a, const vert_t *b)
 	for (link = a->tris; link != NULL; link = link->next)
 	{
 		const vert_t *e2_a, *e2_b;
-		double	guard_tangent1[3], guard_tangent2[3];
-		double temp[3], guard_normal[3];
-		double guard_dist, b_dist;
+		double b_dist;
 		
 		e2_a = link->tri->verts[(link->idx + 1) % 3];
 		e2_b = link->tri->verts[(link->idx + 2) % 3];
@@ -458,16 +456,9 @@ static double get_cross_error (const vert_t *a, const vert_t *b)
 		if (e2_a == b || e2_b == b)
 			continue;
 		
-		vec3_sub (a->pos, e2_a->pos, temp);
-		vec3_sub (e2_b->pos, e2_a->pos, guard_tangent1);
+		b_dist = vec3_dot (link->tri->opposite_plane_normal[link->idx], b->pos);
 		
-		vec3_cross (guard_tangent1, temp, guard_tangent2);
-		vec3_cross (guard_tangent1, guard_tangent2, guard_normal);
-		
-		guard_dist = vec3_dot (guard_normal, e2_a->pos);
-		b_dist = vec3_dot (guard_normal, b->pos);
-		
-		if (b_dist > guard_dist)
+		if (b_dist > link->tri->opposite_plane_dist[link->idx])
 			penalty += 1000.0;
 	}
 	
@@ -543,6 +534,38 @@ static void add_edge_quadrices (vert_t *vtx_a, vert_t *vtx_b, vert_t *vtx_c, dou
 		add_quadrices (&vtx_a->quadric, &q2, &vtx_a->quadric);
 		add_quadrices (&vtx_b->quadric, &q2, &vtx_b->quadric);
 	}
+}
+
+// See Garland's thesis, section 3.7
+static void generate_guard_planes_for_tri (tri_t *tri)
+{
+	int i;
+	
+	for (i = 0; i < 3; i++)
+	{
+		const vert_t *a, *b, *c;
+		double	guard_tangent1[3], guard_tangent2[3], temp[3];
+		
+		a = tri->verts[i];
+		b = tri->verts[(i + 1) % 3];
+		c = tri->verts[(i + 2) % 3];
+		
+		vec3_sub (a->pos, b->pos, temp);
+		vec3_sub (c->pos, b->pos, guard_tangent1);
+		
+		vec3_cross (guard_tangent1, temp, guard_tangent2);
+		vec3_cross (guard_tangent1, guard_tangent2, tri->opposite_plane_normal[i]);
+		
+		tri->opposite_plane_dist[i] = vec3_dot (tri->opposite_plane_normal[i], b->pos);
+	}
+}
+
+static void generate_guard_planes_for_mesh (mesh_t *mesh)
+{
+	idx_t i;
+	
+	for (i = 0; i < mesh->num_tris; i++)
+		generate_guard_planes_for_tri (&mesh->etris[i]);
 }
 
 static void generate_quadrices_for_tri (tri_t *tri)
@@ -734,6 +757,7 @@ static void replace_vertex (mesh_t *mesh, vert_t *a, vert_t *b)
 		
 		if (!link->tri->cull)
 		{
+			generate_guard_planes_for_tri (link->tri);
 			link->next = a->tris;
 			a->tris = link;
 		}
@@ -745,7 +769,6 @@ static void replace_vertex (mesh_t *mesh, vert_t *a, vert_t *b)
 static void recalculate_vert_neighborhood (mesh_t *mesh, vert_t *vtx)
 {
 	edgelist_t *edges;
-	trilist_t *tris;
 	
 	for (edges = vtx->edges; edges != NULL; edges = edges->next)
 	{
@@ -885,6 +908,7 @@ void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
 	generate_vertices_for_mesh (mesh);
 	generate_edges_for_mesh (mesh);
 	generate_quadrices_for_mesh (mesh);
+	generate_guard_planes_for_mesh (mesh);
 	generate_all_contractions (mesh);
 	
 	mesh->simplified_num_tris = mesh->num_tris;
