@@ -2271,6 +2271,7 @@ cheatvar_t cheatvars[] =
 	{"fixedtime",     "0", NULL},
 	{"gl_lightmap",   "0", NULL},
 	{"gl_showpolys",  "0", NULL},
+	{"gl_showtris",   "0", NULL},
 	{NULL, NULL, NULL}
 };
 

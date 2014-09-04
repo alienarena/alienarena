@@ -796,6 +796,16 @@ static void R_Mesh_DrawFrame (int skinnum)
 
 }
 
+static void R_Mesh_DrawBlankMeshFrame (void)
+{
+	glUseProgramObjectARB (g_blankmeshprogramObj);
+	R_Mesh_SetupAnimUniforms (&blankmesh_uniforms);
+	
+	R_Mesh_DrawVBO (currententity->frame != 0 || currentmodel->num_frames != 1);
+
+	glUseProgramObjectARB (0);
+}
+
 static void R_Mesh_SetShadelight (void)
 {
 	int i;
@@ -944,27 +954,29 @@ void R_Mesh_Draw (void)
 		qglEnable (GL_POLYGON_OFFSET_FILL);
 		qglPolygonOffset (-3, -2);
 		qglDepthMask (false);
-		if (gl_showdecals->integer > 1)
-		{
-			qglDisable (GL_TEXTURE_2D);
-			qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-		}
 	}
 
 	R_Mesh_DrawFrame (skin->texnum);
 	
 	if (modtypes[currentmodel->type].decal)
 	{
-		qglPolygonOffset (0.0, 0.0);
 		qglDisable (GL_POLYGON_OFFSET_FILL);
 		qglDepthMask (true);
-		if (gl_showdecals->integer > 1)
-		{
-			qglEnable (GL_TEXTURE_2D);
-			qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-		}
 	}
-
+	
+	if ((modtypes[currentmodel->type].decal && gl_showdecals->integer > 1) || gl_showtris->integer)
+	{
+		qglLineWidth (3.0);
+		qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+		qglDepthMask (false);
+		if (gl_showtris->integer > 1) qglDisable (GL_DEPTH_TEST);
+		R_Mesh_DrawBlankMeshFrame ();
+		if (gl_showtris->integer > 1) qglEnable (GL_DEPTH_TEST);
+		qglDepthMask (true);
+		qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+		qglLineWidth (1.0);
+	}
+	
 	GL_SelectTexture (0);
 	GL_TexEnv (GL_REPLACE);
 	qglShadeModel (GL_FLAT);
@@ -995,16 +1007,6 @@ void R_Mesh_Draw (void)
 	}
 }
 
-void R_Mesh_DrawCasterFrame (qboolean lerped)
-{
-	glUseProgramObjectARB (g_blankmeshprogramObj);
-	R_Mesh_SetupAnimUniforms (&blankmesh_uniforms);
-	
-	R_Mesh_DrawVBO (lerped);
-
-	glUseProgramObjectARB (0);
-}
-
 // TODO - alpha and alphamasks possible?
 // Should support every mesh type
 void R_Mesh_DrawCaster (void)
@@ -1024,10 +1026,7 @@ void R_Mesh_DrawCaster (void)
 		MD2_SelectFrame ();
 	// New model types go here
 
-	if (currententity->frame == 0 && currentmodel->num_frames == 1)
-		R_Mesh_DrawCasterFrame (false);
-	else
-		R_Mesh_DrawCasterFrame (true);
+	R_Mesh_DrawBlankMeshFrame ();
 
 	qglPopMatrix();
 }
