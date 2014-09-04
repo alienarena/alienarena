@@ -28,6 +28,18 @@ textures/arena9/blueglass
 	qer_trans 0.5
 }
 
+textures/arena9/purpleglass
+{
+	qer_editorimage textures/arena9/purpleglass.tga
+	qer_trans 0.5
+}
+
+textures/arena9/redglass
+{
+	qer_editorimage textures/arena9/redglass.tga
+	qer_trans 0.5
+}
+
 textures/arena9/hexglass
 {
 	qer_editorimage textures/arena9/hexglass.tga
