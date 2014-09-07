@@ -190,9 +190,7 @@ alienarena_SOURCES = \
 	ref_gl/r_ttf.h \
 	ref_gl/r_varray.c \
 	ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c \
 	ref_gl/r_warp.c \
-	ref_gl/warpsin.h \
 	server/server.h \
 	server/sv_ccmds.c \
 	server/sv_ents.c \
