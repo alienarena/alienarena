@@ -1599,9 +1599,6 @@ cpuinfo_exit:
 	R_GenerateShadowFBO();
 	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
 
-	VLight_Init();
-	Com_DPrintf("%s : %d\n", __FILE__, __LINE__ );
-
 	//Initialize ODE
 	// ODE assert failures sometimes occur, this may or may not help.
 	r_odeinit_success = dInitODE2(0);
