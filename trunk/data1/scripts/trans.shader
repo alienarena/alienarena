@@ -189,6 +189,24 @@ textures/arena10/cobwebs2
 	qer_trans 0.5
 }
 
+textures/desert/web1
+{
+	qer_editorimage textures/desert/web1.tga
+	qer_trans 0.5
+}
+
+textures/desert/web2
+{
+	qer_editorimage textures/desert/web2.tga
+	qer_trans 0.5
+}
+
+textures/desert/web3
+{
+	qer_editorimage textures/desert/web3.tga
+	qer_trans 0.5
+}
+
 textures/arena10/ivy1
 {
 	qer_editorimage textures/arena10/ivy1.tga
