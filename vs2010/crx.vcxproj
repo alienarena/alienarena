@@ -248,7 +248,6 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_ttf.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_varray.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vbo.c" />
-    <ClCompile Include="$(SrcDir)ref_gl\r_vlights.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_warp.c" />
     <ClCompile Include="$(SrcDir)server\sv_ccmds.c" />
     <ClCompile Include="$(SrcDir)server\sv_ents.c" />

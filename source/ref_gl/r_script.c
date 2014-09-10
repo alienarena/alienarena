@@ -961,8 +961,11 @@ void RS_LoadScript (char *script)
 			{
 				rs = RS_FindScript (token);
 				rs = RS_NewScript (token, rs);
-				
+#if defined WIN32_VARIANT
+				sprintf_s (rs->outname, sizeof(rs->outname), "%s:%s", script_full_path, rs->name);
+#else
 				snprintf (rs->outname, sizeof(rs->outname), "%s:%s", script_full_path, rs->name);
+#endif
 			}
 		}
 		else if (inscript && !ignored)
