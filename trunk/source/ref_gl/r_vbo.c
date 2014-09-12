@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static GLuint bsp_vboId = 0;
 GLuint minimap_vboId = 0;
-int currVertexNum;
-size_t vbo_xyz_pos;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -38,7 +36,7 @@ GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLs
 void *			(APIENTRY * qglMapBufferARB)(GLenum target, GLenum access);
 GLboolean		(APIENTRY * qglUnmapBufferARB)(GLenum target);
 
-static void VB_VCInit();
+static void VB_VCInit (void);
 void R_LoadVBOSubsystem(void)
 {
 	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
@@ -63,7 +61,7 @@ void R_LoadVBOSubsystem(void)
 	}
 }
 
-static void VB_AddWorldSurfaceToVBO (msurface_t *surf)
+static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 {
 	glpoly_t *p;
 	float	*v;
@@ -71,7 +69,6 @@ static void VB_AddWorldSurfaceToVBO (msurface_t *surf)
 	int		n;
 	int		trinum;
 	float	map[MAX_VBO_XYZs];
-	int		xyz_size;
 	
 	surf->vbo_num_verts = 0;
 	n = 0;
@@ -101,14 +98,10 @@ static void VB_AddWorldSurfaceToVBO (msurface_t *surf)
 		surf->vbo_num_verts += 3*(p->numverts-2);
 	}
 	
-	xyz_size = n*sizeof(float);
-
-	surf->vbo_first_vert = currVertexNum;
-	currVertexNum += surf->vbo_num_verts;
+	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currVertexNum * 7 * sizeof(float), n * sizeof(float), &map);
 	
-	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, vbo_xyz_pos, xyz_size, &map);
-
-	vbo_xyz_pos += xyz_size;
+	surf->vbo_first_vert = currVertexNum;
+	return currVertexNum + surf->vbo_num_verts;
 }
 
 static void VB_BuildWorldSurfaceVBO (void)
@@ -116,9 +109,7 @@ static void VB_BuildWorldSurfaceVBO (void)
 	msurface_t *surf, *surfs;
 	int i, firstsurf, lastsurf;
 	int	totalVBObufferSize = 0;
-	
-	currVertexNum = 0;
-	vbo_xyz_pos = 0;
+	int currVertexNum = 0;
 	
 	// just to keep the lines of code short
 	surfs = r_worldmodel->surfaces;
@@ -148,14 +139,14 @@ static void VB_BuildWorldSurfaceVBO (void)
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
 					(surf->iflags & ISURF_PLANEBACK))
 				continue;
-			VB_AddWorldSurfaceToVBO (surf);
+			currVertexNum = VB_AddWorldSurfaceToVBO (surf, currVertexNum);
 		}
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
 		{
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
 					!(surf->iflags & ISURF_PLANEBACK))
 				continue;
-			VB_AddWorldSurfaceToVBO (surf);
+			currVertexNum = VB_AddWorldSurfaceToVBO (surf, currVertexNum);
 		}
 	}
 	
@@ -241,8 +232,8 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *try
 {
 	vertCache_t	*cache;
 
-    if (tryCache != NULL && tryCache->mod == mod && tryCache->store == store)
-        return tryCache;
+	if (tryCache != NULL && tryCache->mod == mod && tryCache->store == store)
+		return tryCache;
 
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = cache->next)
 	{
@@ -344,7 +335,7 @@ void VB_WorldVCInit()
 	qglDeleteBuffersARB(1, &minimap_vboId);
 }
 
-static void VB_VCInit()
+static void VB_VCInit (void)
 {
 	int	i;
 	
