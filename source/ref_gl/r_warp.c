@@ -344,89 +344,29 @@ void R_RenderWaterPolys (msurface_t *fa)
 // now draw the whole skybox all the time, which in testing has been shown to
 // have no appreciable performance hit.
 
-// 1 = s, 2 = t, 3 = 2048
-int	st_to_vec[6][3] =
-{
-	{3,-1,-2},
-	{-3,1,-2},
-
-	{1,3,-2},
-	{-1,-3,-2},
-
-	{2,-1,3},		// 0 degrees yaw, look straight up
-	{-2,-1,-3}		// look straight down
-};
-
-void MakeSkyVec (float s, float t, int axis, float *vec, float size)
-{
-	vec3_t		v, b;
-	int			j, k;
-
-	b[0] = (2.0*s-1.0) * size;
-	b[1] = (2.0*t-1.0) * size;
-	b[2] = size;
-
-	for (j=0 ; j<3 ; j++)
-	{
-		k = st_to_vec[axis][j];
-		if (k < 0)
-			v[j] = -b[-k - 1];
-		else
-			v[j] = b[k - 1];
-	}
-
-	VectorCopy(v, vec);
-}
-
 /*
 ==============
 R_DrawSkyBox
 ==============
 */
-int	skytexorder[6] = {0,2,1,3,4,5};
+static int	skytexorder[6] = {0,2,1,3,4,5};
 
-static int skyquad_texcoords[4][2] = 
-{
-	{0, 1}, {0, 0}, {1, 0}, {1, 1}
-};
-
-static void Sky_DrawQuad_Setup (int axis, float size)
-{
-	int i;
-	
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-	
-	for (i = 0; i < 4; i++)
-	{
-		int *st = skyquad_texcoords[i];
-		
-		MakeSkyVec (st[0], st[1], axis, VArray, size);
-		VArray[3] = st[0];
-		VArray[4] = st[1];
-		
-		VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-	}
-}
-
+static int skyboxside;
 static void Sky_DrawQuad_Callback (void)
 {
-	R_DrawVarrays(GL_QUADS, 0, 4);
+	R_DrawVarrays (GL_QUADS, 4 * skyboxside, 4);
 }
 
 void R_DrawSkyBox (void)
 {
 	int		i;
 	rscript_t *rs = NULL;
+	
+	GL_SetupSkyboxVBO ();
 
 	qglPushMatrix ();
 	qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 	qglRotatef (r_newrefdef.time * skyrotate, skyaxis[0], skyaxis[1], skyaxis[2]);
-	
-	#define DRAWDIST 15000 // TODO: use this constant in more places
-	
-	// Make sure the furthest possible corner of the skybox is closer than the
-	// draw distance we supplied to glFrustum. 
-	#define SKYDIST (sqrt(DRAWDIST*DRAWDIST/3.0)-1.0)
 	
 	// Scale the fog distances up so fog looks like it used to before 
 	// SKYDIST was increased. 
@@ -438,7 +378,7 @@ void R_DrawSkyBox (void)
 	{
 		GL_Bind (sky_images[skytexorder[i]]->texnum);
 
-		Sky_DrawQuad_Setup (i, SKYDIST);
+		skyboxside = i;
 		Sky_DrawQuad_Callback ();
 	}
 	
@@ -450,6 +390,8 @@ void R_DrawSkyBox (void)
 		qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
 		qglRotatef (rs_realtime * 20, 0, 1, 0);
 		
+		qglDepthMask( GL_FALSE );	 	// no z buffering
+		
 		for (i=0 ; i<6 ; i++)
 		{
 			rs=(rscript_t *)sky_images[skytexorder[i]]->script;
@@ -457,12 +399,10 @@ void R_DrawSkyBox (void)
 			if (rs == NULL)
 				continue;
 			
-			Sky_DrawQuad_Setup (i, SKYDIST);
-
-			qglDepthMask( GL_FALSE );	 	// no z buffering
+			skyboxside = i;
 			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, Sky_DrawQuad_Callback);
 		}
-		R_KillVArrays ();
+		
 		// restore the original blend mode
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_DISABLE_BLEND
@@ -472,6 +412,8 @@ void R_DrawSkyBox (void)
 		GL_TexEnv( GL_REPLACE );
 		qglPopMatrix ();
 	}
+	
+	R_KillVArrays ();
 	
 	R_SetupFog (1);
 }
