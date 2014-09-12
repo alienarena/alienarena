@@ -114,7 +114,6 @@ extern	cvar_t	*gl_dynamic;
 extern	cvar_t	*gl_nobind;
 extern	cvar_t	*gl_picmip;
 extern	cvar_t	*gl_skymip;
-cvar_t			*gl_skyboxscale;
 extern	cvar_t	*gl_showtris;
 extern	cvar_t	*gl_showpolys;
 extern	cvar_t	*gl_finish;
