@@ -98,6 +98,12 @@ extern	refdef_t	r_newrefdef;
 extern	int		r_viewcluster, r_viewcluster2, r_oldviewcluster, r_oldviewcluster2;
 mleaf_t			*r_viewleaf, *r_viewleaf2;
 
+#define DRAWDIST 15000 // TODO: use this constant in more places
+
+// Make sure the furthest possible corner of the skybox is closer than the
+// draw distance we supplied to glFrustum. 
+#define SKYDIST (sqrt(DRAWDIST*DRAWDIST/3.0)-1.0)
+
 extern	cvar_t	*r_norefresh;
 extern	cvar_t	*r_lefthand;
 extern	cvar_t	*r_drawentities;
@@ -295,11 +301,12 @@ void R_FB_InitTextures(void);
 
 //VBO
 extern GLuint minimap_vboId;
-extern void R_LoadVBOSubsystem(void);
-extern void R_VCShutdown(void);
-extern void VB_WorldVCInit(void);
-extern void VB_BuildWorldVBO(void);
+void R_LoadVBOSubsystem (void);
+void R_VCShutdown (void);
+void VB_WorldVCInit (void);
+void VB_BuildWorldVBO (void);
 void GL_SetupWorldVBO (void);
+void GL_SetupSkyboxVBO (void);
 void GL_BindVBO(vertCache_t *cache);
 void GL_BindIBO(vertCache_t *cache);
 vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache);

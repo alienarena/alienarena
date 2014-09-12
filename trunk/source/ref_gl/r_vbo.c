@@ -328,6 +328,58 @@ void R_VCFreeFrame()
 }
 
 
+
+// "Special" VBOs: snippets of static geometry that stay unchanged between
+// maps.
+
+
+static vertCache_t *skybox_vbo;
+
+static void VB_BuildSkyboxVBO (void)
+{
+	// s, t, 1 (the 1 is for convenience)
+	static float skyquad_texcoords[4][3] = 
+	{
+		{0, 1, 1}, {0, 0, 1}, {1, 0, 1}, {1, 1, 1}
+	};
+	
+	// 1 = s, 2 = t, 3 = SKYDIST
+	static int	side_to_vec[6][3] =
+	{
+		{3,-1,-2}, {-3,1,-2},
+		{1,3,-2}, {-1,-3,-2},
+		{2,-1,3}, {-2,-1,-3}
+	};
+	
+	int i, side, axis, vertnum, coordidx;
+	float vertbuf[6 * 4][5], coordcoef;
+	
+	for (i = 0; i < 4 * 6; i++)
+	{
+		side = i / 4; 
+		vertnum = i % 4;
+		for (axis = 0; axis < 3; axis++)
+		{
+			coordidx = abs (side_to_vec[side][axis]) - 1;
+			coordcoef = side_to_vec[side][axis] < 0 ? -SKYDIST : SKYDIST;
+			vertbuf[i][axis] = coordcoef * (2.0f * skyquad_texcoords[vertnum][coordidx] - 1.0);
+		}
+		for (; axis < 5; axis++)
+			vertbuf[i][axis] = skyquad_texcoords[vertnum][axis - 3];
+	}
+	
+	skybox_vbo = R_VCLoadData (VBO_STATIC, sizeof(vertbuf), vertbuf, VBO_STORE_XYZ, NULL);
+}
+
+void GL_SetupSkyboxVBO (void)
+{
+	GL_BindVBO (skybox_vbo);
+	R_VertexPointer (3, 5*sizeof(float), (void *)0);
+	R_TexCoordPointer (0, 5*sizeof(float), (void *)(3*sizeof(float)));
+	GL_BindVBO (NULL);
+}
+
+
 void VB_WorldVCInit()
 {
 	//clear out previous buffer
@@ -360,9 +412,12 @@ static void VB_VCInit (void)
 
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 		qglGenBuffersARB(1, &vcm.vertCacheList[i].id);
+	
+	// "Special" VBOs
+	VB_BuildSkyboxVBO ();
 }
 
-void R_VCShutdown()
+void R_VCShutdown (void)
 {
 	int			i;
 	vertCache_t	*cache, *next;
