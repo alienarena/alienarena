@@ -158,12 +158,12 @@ void Com_Printf (char *fmt, ...)
 	if (log_dest_udp != NULL && log_dest_udp->modified)
 	{
 		log_dest_udp_valid = NET_StringToAdr (log_dest_udp->string, &log_dest_udp_addr);
+		if (*log_dest_udp->string == '\0')
+			log_dest_udp_valid = false; // workaround for Windows behavior
 		log_dest_udp->modified = false;
 	}
-#if 0
 	if (log_dest_udp_valid)
 		Netchan_OutOfBandPrint (NS_SERVER, log_dest_udp_addr, "print\n%s", msg);
-#endif
 
 	// if logfile_active or logfile_name have been modified, close the current log file
 	if ( ( (logfile_active && logfile_active->modified)
