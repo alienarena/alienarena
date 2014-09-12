@@ -128,7 +128,7 @@ void Com_Printf (char *fmt, ...)
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
 	static netadr_t log_dest_udp_addr;
-	static qboolean *log_dest_udp_valid = false;
+	static qboolean log_dest_udp_valid = false;
 
 	va_start (argptr,fmt);
 	vsnprintf(msg, sizeof(msg), fmt, argptr);
