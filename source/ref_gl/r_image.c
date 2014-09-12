@@ -1067,7 +1067,6 @@ int GL_GenerateAlphaMipmaps (byte *data, int width, int height)
 }
 
 
-static int	powers_of_two[] = {16,32,64,128,256,512,1024,2048,4096};
 int		upload_width, upload_height;
 int		crop_left, crop_right, crop_top, crop_bottom;
 qboolean	uploaded_paletted;
@@ -1103,32 +1102,9 @@ qboolean GL_Upload32 (byte *data, int width, int height, int picmip, qboolean fi
 		int max_size;
 		int i;
 		qglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_size);
-		scaled_width = scaled_height = 0;
-
-		for (i=0; i<8; i++)
-		{
-			if (width >= powers_of_two[i] && width < powers_of_two[i+1]) {
-				if (width > ((powers_of_two[i] + powers_of_two[i+1])/2))
-					scaled_width = powers_of_two[i+1];
-				else
-					scaled_width = powers_of_two[i];
-			} else if (width == powers_of_two[i+1]) {
-				scaled_width = powers_of_two[i+1];
-			}
-
-			if (scaled_width && scaled_height)
-				break;
-			if (height >= powers_of_two[i] && height < powers_of_two[i+1]) {
-				if (height > ((powers_of_two[i] + powers_of_two[i+1])/2))
-					scaled_height = powers_of_two[i+1];
-				else
-					scaled_height = powers_of_two[i];
-			} else if (height == powers_of_two[i+1]) {
-				scaled_height = powers_of_two[i+1];
-			}
-			if (scaled_width && scaled_height)
-				break;
-		}
+		scaled_width = width;
+		scaled_height = height;
+		
 		// let people sample down the world textures for speed
 		for (i = 0; i < picmip; i++)
 		{
