@@ -45,15 +45,15 @@ int frames;
 
 extern  cvar_t	*cl_raindist;
 
-static void Postprocess_RenderQuad (image_t *img, int offsetX, int offsetY)
+static void Postprocess_RenderQuad (image_t *img)
 {
 	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
 
 	VA_SetElem2 (vert_array[3], 0, viddef.height);
-	VA_SetElem2 (vert_array[2], viddef.width-offsetX, viddef.height);
-	VA_SetElem2 (vert_array[1], viddef.width-offsetX, offsetY);
-	VA_SetElem2 (vert_array[0], 0, offsetY);
+	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
+	VA_SetElem2 (vert_array[1], viddef.width, 0);
+	VA_SetElem2 (vert_array[0], 0, 0);
 
 	VA_SetElem2 (tex_array[3], img->sl, img->tl);
 	VA_SetElem2 (tex_array[2], img->sh, img->tl);
@@ -68,7 +68,7 @@ static void Postprocess_RenderQuad (image_t *img, int offsetX, int offsetY)
 // Be sure to set up your GLSL program and uniforms before calling this! Make
 // sure r_framebuffer is already bound to a TMU, and tell this function which
 // TMU it is.
-static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
+static void Distort_RenderQuad (int framebuffer_tmu)
 {
 	//set up full screen workspace
 	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
@@ -83,15 +83,11 @@ static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
 	GLSTATE_DISABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 
-	qglViewport(0,0,FB_texture_width,FB_texture_height);
-	
 	//we need to grab the frame buffer
-	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0, 0, 0, FB_texture_width, FB_texture_height);
+	qglCopyTexSubImage2D (GL_TEXTURE_2D, 0,
+				0, 0, 0, 0, viddef.width, viddef.height);
 	
-	qglViewport(0,0,viddef.width, viddef.height);
-	
-	Postprocess_RenderQuad (r_framebuffer, offsetX, offsetY);
+	Postprocess_RenderQuad (r_framebuffer);
 	
 	GLSTATE_ENABLE_BLEND
 	qglEnable (GL_DEPTH_TEST);
@@ -100,16 +96,11 @@ static void Distort_RenderQuad (int framebuffer_tmu, int offsetX, int offsetY)
 void R_GLSLDistortion(void)
 {
 	vec2_t fxScreenPos;
-	int offsetX, offsetY;
 	vec3_t	vec;
 	float	dot, r_fbeffectLen;
 	vec3_t	forward, mins, maxs;
 	trace_t r_trace;
-	float hScissor, wScissor;
-
-	if(vid.width > 2048)
-		return;
-
+	
 	if(r_fbFxType == EXPLOSION) 
 	{
 		//is it in our view?
@@ -143,13 +134,6 @@ void R_GLSLDistortion(void)
 	else
 		r_fbeffectLen = 0.2;
 
-	//render quad on screen
-	offsetY = viddef.height - FB_texture_height;
-	offsetX = viddef.width - FB_texture_width;
-
-	hScissor = (float)viddef.height/(float)FB_texture_height;
-	wScissor = (float)viddef.width/(float)FB_texture_width;
-		
 	if(r_fbFxType == EXPLOSION)
 	{
 		//create a distortion wave effect at point of explosion
@@ -164,8 +148,6 @@ void R_GLSLDistortion(void)
 			GL_MBind (0, r_distortwave->texnum);
 		glUniform1iARB (distort_uniforms.distortTex, 0);
 
-		glUniform2fARB (distort_uniforms.dParams, wScissor, hScissor);
-
 		fxScreenPos[0] = fxScreenPos[1] = 0;
 
 		//get position of focal point of warp
@@ -174,15 +156,15 @@ void R_GLSLDistortion(void)
 		fxScreenPos[0] /= viddef.width; 
 		fxScreenPos[1] /= viddef.height;
 
-		fxScreenPos[0] -= (0.5 + (abs((float)offsetX)/1024.0)*0.25); 
-		fxScreenPos[1] -= (0.5 + (abs((float)offsetY)/1024.0)*0.15); 
+		fxScreenPos[0] -= 0.5;
+		fxScreenPos[1] -= 0.5;
 
 		fxScreenPos[0] -= (float)frames*.001;
 		fxScreenPos[1] -= (float)frames*.001;
 		glUniform2fARB (distort_uniforms.fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
 		// Note that r_framebuffer is on TMU 1 this time
-		Distort_RenderQuad (1, offsetX, offsetY);
+		Distort_RenderQuad (1);
 		
 		glUseProgramObjectARB (0);
 		GL_MBind (1, 0);
@@ -196,11 +178,9 @@ void R_GLSLDistortion(void)
 
 		glUniform1iARB( g_location_rsource, 0);
 
-		glUniform3fARB( g_location_rscale, 1.0, wScissor, hScissor);
-
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 
-		Distort_RenderQuad (0, offsetX, offsetY);
+		Distort_RenderQuad (0);
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -216,13 +196,11 @@ void R_GLSLDistortion(void)
 
 void R_GLSLWaterDroplets(void)
 {
-	int offsetX, offsetY;
-	float hScissor, wScissor;
 	trace_t tr;
 	vec3_t end;
 	static float r_drTime;
 
-	if(!(r_weather == 1) || !cl_raindist->integer || vid.width > 2048)
+	if(!(r_weather == 1) || !cl_raindist->integer)
 		return;
 
 	VectorCopy(r_newrefdef.vieworg, end);
@@ -239,13 +217,6 @@ void R_GLSLWaterDroplets(void)
 	if(rs_realtime - r_drTime > 0.5)
 		return; //been out of the rain long enough for effect to dry up
 	
-	//render quad on screen
-	offsetY = viddef.height - FB_texture_height;
-	offsetX = viddef.width - FB_texture_width;
-
-	hScissor = (float)viddef.height/(float)FB_texture_height;
-	wScissor = (float)viddef.width/(float)FB_texture_width;
-		
 	//draw water droplets - set up GLSL program and uniforms
 	glUseProgramObjectARB( g_dropletsprogramObj ); //this program will have two or three of the normalmap scrolling over the buffer
 
@@ -257,9 +228,7 @@ void R_GLSLWaterDroplets(void)
 
 	glUniform1fARB( g_location_drTime, rs_realtime);
 	
-	glUniform2fARB( g_location_drParams, wScissor, hScissor);
-	
-	Distort_RenderQuad (0, offsetX, offsetY);
+	Distort_RenderQuad (0);
 
 	glUseProgramObjectARB( 0 );
 
@@ -368,13 +337,13 @@ void R_ShadowBlend(float alpha)
 
 		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
 		
-		Postprocess_RenderQuad (r_colorbuffer, 0, 0);
+		Postprocess_RenderQuad (r_colorbuffer);
 
 		//now blur horizontally
 
 		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
 		
-		Postprocess_RenderQuad (r_colorbuffer, 0, 0);
+		Postprocess_RenderQuad (r_colorbuffer);
 
 		glUseProgramObjectARB(0);
 	}
@@ -420,29 +389,17 @@ void R_FB_InitTextures( void )
 		}
 	}
 
-	//find closer power of 2 to screen size
-	for (FB_texture_width = 1;FB_texture_width < viddef.width;FB_texture_width *= 2);
-	for (FB_texture_height = 1;FB_texture_height < viddef.height;FB_texture_height *= 2);
+    //init the various FBO textures
+	size = viddef.width * viddef.height * 4;
+	data = malloc (size);
 
-	//limit to 2048x2048 - anything larger is generally going to cause problems, and AA doesn't support res higher
-	if(FB_texture_width > 2048)
-		FB_texture_width = 2048;
-	if(FB_texture_height > 2048)
-		FB_texture_height = 2048;
-
-	//init the framebuffer texture
-	size = FB_texture_width * FB_texture_height * 4;
-	data = malloc( size );
-	memset( data, 255, size );
-	r_framebuffer = GL_LoadPic( "***r_framebuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
-	free ( data );
-
-	//init the various FBO textures
-	size = FB_texture_width * FB_texture_height * 4;
-	data = malloc( size );
-	memset( data, 255, size );
-	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
-	free ( data );
+	memset (data, 255, size);
+	r_framebuffer = GL_LoadPic ("***r_framebuffer***", (byte *)data, viddef.width, viddef.height, it_pic, 3);
+	
+	memset (data, 255, size);
+	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", (byte *)data, viddef.width, viddef.height, it_pic, 3);
+	
+	free (data);
 
 	//init the distortion textures
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg", it_pic);
@@ -561,7 +518,7 @@ void R_DrawBloodEffect (void)
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
 	
-	Postprocess_RenderQuad (gl, 0, 0);
+	Postprocess_RenderQuad (gl);
 
 	GLSTATE_DISABLE_BLEND
 }
@@ -668,7 +625,7 @@ void R_GLSLGodRays(void)
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
-	Postprocess_RenderQuad (r_colorbuffer, 0, 0);
+	Postprocess_RenderQuad (r_colorbuffer);
 
 	GLSTATE_DISABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

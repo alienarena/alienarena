@@ -1653,40 +1653,30 @@ static char fb_vertex_program[] = STRINGIFY (
 static char fb_fragment_program[] = STRINGIFY (
 	uniform sampler2D fbtexture;
 	uniform sampler2D distortiontexture;
-	uniform vec2 dParams;
 	uniform vec2 fxPos;
 
 	void main(void)
 	{
 		vec3 noiseVec;
 		vec2 displacement;
-		float wScissor;
-		float hScissor;
-
-	   displacement = gl_TexCoord[0].st;
-
-		displacement.x -= fxPos.x;
-		displacement.y -= fxPos.y;
+		
+		displacement = gl_TexCoord[0].st - fxPos;
 
 		noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;
 		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
 		//clamp edges to prevent artifacts
-
-		wScissor = dParams.x - 0.008;
-		hScissor = dParams.y - 0.008;
-
-		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)
+		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < 0.992)
 			displacement.x = gl_TexCoord[0].s + noiseVec.x;
 		else
 			displacement.x = gl_TexCoord[0].s;
 
-		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) 
+		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < 0.992) 
 			displacement.y = gl_TexCoord[0].t + noiseVec.y;
 		else
 			displacement.y = gl_TexCoord[0].t;
 
-		gl_FragColor = texture2D(fbtexture, displacement.xy);
+		gl_FragColor = texture2D (fbtexture, displacement.xy);
 	}
 );
 
@@ -1753,7 +1743,6 @@ static char rblur_vertex_program[] = STRINGIFY (
 static char rblur_fragment_program[] = STRINGIFY (
 	uniform sampler2D rtextureSource;
 	uniform vec3 radialBlurParams;
-	uniform vec3 rblurScale;
 
 	void main(void)
 	{
@@ -1767,7 +1756,7 @@ static char rblur_fragment_program[] = STRINGIFY (
 		vec4 sum = color;
 
 		float strength = radialBlurParams.z;
-		vec2 pDir = vec2(rblurScale.y * 0.5 - gl_TexCoord[0].s, rblurScale.z * 0.5 - gl_TexCoord[0].t);
+		vec2 pDir = vec2 (0.5) - gl_TexCoord[0].st;
 		float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);
 		clamp(pDist, 0.0, 1.0);
 
@@ -1785,16 +1774,12 @@ static char rblur_fragment_program[] = STRINGIFY (
 
 		sum *= 1.0/11.0;
  
-		float t = dist * rblurScale.x;
-		t = clamp( t ,0.0,1.0);
+		float t = clamp (dist, 0.0, 1.0);
 
-		vec4 final = mix( color, sum, t );
+		vec4 final = mix (color, sum, t);
 
 		//clamp edges to prevent artifacts
-		wScissor = rblurScale.y - 0.008;
-		hScissor = rblurScale.z - 0.008;
-
-		if(gl_TexCoord[0].s > 0.008 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.008 && gl_TexCoord[0].t < hScissor)
+		if(gl_TexCoord[0].s > 0.008 && gl_TexCoord[0].s < 0.992 && gl_TexCoord[0].t > 0.008 && gl_TexCoord[0].t < 0.992)
 			gl_FragColor = final;
 		else
 			gl_FragColor = color;
@@ -1825,17 +1810,14 @@ static char droplets_vertex_program[] = STRINGIFY (
 static char droplets_fragment_program[] = STRINGIFY (
 	uniform sampler2D drSource;
 	uniform sampler2D drTex;
-	uniform vec2 drParams;
 
 	void main(void)
 	{
 		vec3 noiseVec;
 		vec3 noiseVec2;
 		vec2 displacement;
-		float wScissor;
-		float hScissor;
 
-	   displacement = gl_TexCoord[1].st;
+		displacement = gl_TexCoord[1].st;
 
 		noiseVec = normalize(texture2D(drTex, displacement.xy)).xyz;
 		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
@@ -1846,20 +1828,17 @@ static char droplets_fragment_program[] = STRINGIFY (
 		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
 
 		//clamp edges to prevent artifacts
-		wScissor = drParams.x - 0.008;
-		hScissor = drParams.y - 0.028;
-
-		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)
+		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < 0.992)
 			displacement.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x;
 		else
 			displacement.x = gl_TexCoord[0].s;
 
-		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) 
+		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < 0.972) 
 			displacement.y = gl_TexCoord[0].t + noiseVec.y + noiseVec2.y;
 		else
 			displacement.y = gl_TexCoord[0].t;
 
-		gl_FragColor = texture2D(drSource, displacement.xy);
+		gl_FragColor = texture2D (drSource, displacement.xy);
 	}
 );
 
@@ -2244,7 +2223,6 @@ void R_LoadGLSLPrograms(void)
 	// Locate some parameters by name so we can set them later...
 	distort_uniforms.framebuffTex = glGetUniformLocationARB (g_fbprogramObj, "fbtexture");
 	distort_uniforms.distortTex = glGetUniformLocationARB (g_fbprogramObj, "distorttexture");
-	distort_uniforms.dParams = glGetUniformLocationARB (g_fbprogramObj, "dParams");
 	distort_uniforms.fxPos = glGetUniformLocationARB (g_fbprogramObj, "fxPos");
 
 	//gaussian blur
@@ -2258,7 +2236,6 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, &g_rblurprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_rscale = glGetUniformLocationARB( g_rblurprogramObj, "rblurScale" );
 	g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
 	g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
 
@@ -2268,7 +2245,6 @@ void R_LoadGLSLPrograms(void)
 	// Locate some parameters by name so we can set them later...
 	g_location_drSource = glGetUniformLocationARB( g_dropletsprogramObj, "drSource" );
 	g_location_drTex = glGetUniformLocationARB( g_dropletsprogramObj, "drTex");
-	g_location_drParams = glGetUniformLocationARB( g_dropletsprogramObj, "drParams" );
 	g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
 
 	//god rays
