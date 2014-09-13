@@ -692,7 +692,6 @@ mesh_anim_uniform_location_t blankmesh_uniforms;
 struct
 {
 	GLuint	framebuffTex, distortTex;
-	GLuint	dParams;
 	GLuint	fxPos;
 } distort_uniforms;
 
@@ -701,7 +700,6 @@ GLuint		g_location_scale;
 GLuint		g_location_source;
 
 //radial blur	
-GLuint		g_location_rscale;
 GLuint		g_location_rsource;
 GLuint		g_location_rparams;
 
@@ -709,7 +707,6 @@ GLuint		g_location_rparams;
 GLuint		g_location_drSource;
 GLuint		g_location_drTex;
 GLuint		g_location_drTime;
-GLuint		g_location_drParams;
 
 //god rays
 GLuint		g_location_lightPositionOnScreen;
