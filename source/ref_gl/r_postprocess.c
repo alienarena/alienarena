@@ -50,15 +50,15 @@ static void Postprocess_RenderQuad (image_t *img)
 	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
 
-	VA_SetElem2 (vert_array[3], 0, viddef.height);
-	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
-	VA_SetElem2 (vert_array[1], viddef.width, 0);
 	VA_SetElem2 (vert_array[0], 0, 0);
+	VA_SetElem2 (vert_array[1], viddef.width, 0);
+	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
+	VA_SetElem2 (vert_array[3], 0, viddef.height);
 
-	VA_SetElem2 (tex_array[3], img->sl, img->tl);
-	VA_SetElem2 (tex_array[2], img->sh, img->tl);
-	VA_SetElem2 (tex_array[1], img->sh, img->th);
-	VA_SetElem2 (tex_array[0], img->sl, img->th);
+	VA_SetElem2 (tex_array[3], 0, 0);
+	VA_SetElem2 (tex_array[2], 1, 0);
+	VA_SetElem2 (tex_array[1], 1, 1);
+	VA_SetElem2 (tex_array[0], 0, 1);
 	
 	R_DrawVarrays (GL_QUADS, 0, 4);
 	
@@ -73,7 +73,6 @@ static void Distort_RenderQuad (int framebuffer_tmu)
 	//set up full screen workspace
 	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
 	GL_Bind (r_framebuffer->texnum);
-	qglViewport (0, 0, viddef.width, viddef.height);
 	qglMatrixMode (GL_PROJECTION );
     qglLoadIdentity ();
 	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
@@ -136,6 +135,8 @@ void R_GLSLDistortion(void)
 
 	if(r_fbFxType == EXPLOSION)
 	{
+		int i;
+		
 		//create a distortion wave effect at point of explosion
 		glUseProgramObjectARB( g_fbprogramObj );
 
@@ -155,12 +156,10 @@ void R_GLSLDistortion(void)
 
 		fxScreenPos[0] /= viddef.width; 
 		fxScreenPos[1] /= viddef.height;
-
-		fxScreenPos[0] -= 0.5;
-		fxScreenPos[1] -= 0.5;
-
-		fxScreenPos[0] -= (float)frames*.001;
-		fxScreenPos[1] -= (float)frames*.001;
+		
+		for (i = 0; i < 2; i++)
+			fxScreenPos[i] -= 0.5f + (float)frames * 0.001f;
+		
 		glUniform2fARB (distort_uniforms.fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
 		// Note that r_framebuffer is on TMU 1 this time
@@ -372,50 +371,37 @@ R_FB_InitTextures
 void R_FB_InitTextures( void )
 {
 	byte	*data;
-	int		size, x, y;
-	byte	nullpic[16][16][4];
-
-	//
-	// blank texture
-	//
-	for (x = 0 ; x < 16 ; x++)
-	{
-		for (y = 0 ; y < 16 ; y++)
-		{
-			nullpic[y][x][0] = 255;
-			nullpic[y][x][1] = 255;
-			nullpic[y][x][2] = 255;
-			nullpic[y][x][3] = 255;
-		}
-	}
+	int		size;
 
     //init the various FBO textures
 	size = viddef.width * viddef.height * 4;
+	if (size < 16 * 16 * 4) // nullpic min size
+		size = 16 * 16 * 4;
 	data = malloc (size);
 
 	memset (data, 255, size);
-	r_framebuffer = GL_LoadPic ("***r_framebuffer***", (byte *)data, viddef.width, viddef.height, it_pic, 3);
+	r_framebuffer = GL_LoadPic ("***r_framebuffer***", data, viddef.width, viddef.height, it_pic, 3);
 	
 	memset (data, 255, size);
-	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", (byte *)data, viddef.width, viddef.height, it_pic, 3);
+	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, viddef.width, viddef.height, it_pic, 3);
 	
 	free (data);
 
 	//init the distortion textures
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg", it_pic);
 	if (!r_distortwave) 
-		r_distortwave = GL_LoadPic ("***r_distortwave***", (byte *)nullpic, 16, 16, it_pic, 32);
+		r_distortwave = GL_LoadPic ("***r_distortwave***", data, 16, 16, it_pic, 32);
 	r_droplets = GL_FindImage("gfx/droplets.jpg", it_pic);
 	if (!r_droplets) 
-		r_droplets = GL_LoadPic ("***r_droplets***", (byte *)nullpic, 16, 16, it_pic, 32);
+		r_droplets = GL_LoadPic ("***r_droplets***", data, 16, 16, it_pic, 32);
 
 	//init gore/blood textures
 	r_blooddroplets = GL_FindImage("gfx/blooddrops.jpg", it_pic);
 	if (!r_blooddroplets) 
-		r_blooddroplets = GL_LoadPic ("***r_blooddroplets***", (byte *)nullpic, 16, 16, it_pic, 32);
+		r_blooddroplets = GL_LoadPic ("***r_blooddroplets***", data, 16, 16, it_pic, 32);
 	r_blooddroplets_nm = GL_FindImage("gfx/blooddrops_nm.jpg", it_pic);
 	if (!r_blooddroplets_nm) 
-		r_blooddroplets_nm = GL_LoadPic ("***r_blooddroplets_nm***", (byte *)nullpic, 16, 16, it_pic, 32);
+		r_blooddroplets_nm = GL_LoadPic ("***r_blooddroplets_nm***", data, 16, 16, it_pic, 32);
 }
 
 static void VehicleHud_DrawQuad_Callback (void)
@@ -471,15 +457,15 @@ void R_DrawVehicleHUD (void)
 	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
 	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 
-	VA_SetElem2(vert_array[0],0, 0);
-	VA_SetElem2(vert_array[1],viddef.width, 0);
-	VA_SetElem2(vert_array[2],viddef.width, viddef.height);
-	VA_SetElem2(vert_array[3],0, viddef.height);
+	VA_SetElem2 (vert_array[0], 0, 0);
+	VA_SetElem2 (vert_array[1], viddef.width, 0);
+	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
+	VA_SetElem2 (vert_array[3], 0, viddef.height);
 
-	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
-	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
-	VA_SetElem2(tex_array[2],gl->sh, gl->th);
-	VA_SetElem2(tex_array[3],gl->sl, gl->th);
+	VA_SetElem2 (tex_array[0], 0, 0);
+	VA_SetElem2 (tex_array[1], 1, 0);
+	VA_SetElem2 (tex_array[2], 1, 1);
+	VA_SetElem2 (tex_array[3], 0, 1);
 	
 	R_DrawVarrays(GL_QUADS, 0, 4);
 	
