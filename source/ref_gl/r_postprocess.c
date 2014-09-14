@@ -347,12 +347,12 @@ void R_ShadowBlend(float alpha)
 		GL_MBind (0, r_colorbuffer->texnum);
 		glUniform1iARB( g_location_source, 0);
 
-		// render quad on screen into FBO
-		// and blur it vertically
+		// Render two blurred versions of the original hard shadows onto the
+		// framebuffer. (The second blur does NOT start with the first blur as
+		// input!) This is not a proper Gaussian blur, but is designed to
+		// create penumbra-like effects.
 		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
 		R_DrawVarrays (GL_QUADS, 0, 4);
-
-		// now blur horizontally
 		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
 		R_DrawVarrays (GL_QUADS, 0, 4);
 
