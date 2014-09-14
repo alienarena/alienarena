@@ -33,31 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ==============================================================================
 */
 
-static float Diamond8x[8][8] = {
-		{0.0f, 0.0f, 0.0f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.2f, 0.3f, 0.3f, 0.2f, 0.0f, 0.0f},
-		{0.0f, 0.2f, 0.4f, 0.6f, 0.6f, 0.4f, 0.2f, 0.0f},
-		{0.1f, 0.3f, 0.6f, 0.9f, 0.9f, 0.6f, 0.3f, 0.1f},
-		{0.1f, 0.3f, 0.6f, 0.9f, 0.9f, 0.6f, 0.3f, 0.1f},
-		{0.0f, 0.2f, 0.4f, 0.6f, 0.6f, 0.4f, 0.2f, 0.0f},
-		{0.0f, 0.0f, 0.2f, 0.3f, 0.3f, 0.2f, 0.0f, 0.0f},
-		{0.0f, 0.0f, 0.0f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f} };
-
-static float Diamond6x[6][6] = {
-		{0.0f, 0.0f, 0.1f, 0.1f, 0.0f, 0.0f},
-		{0.0f, 0.3f, 0.5f, 0.5f, 0.3f, 0.0f},
-		{0.1f, 0.5f, 0.9f, 0.9f, 0.5f, 0.1f},
-		{0.1f, 0.5f, 0.9f, 0.9f, 0.5f, 0.1f},
-		{0.0f, 0.3f, 0.5f, 0.5f, 0.3f, 0.0f},
-		{0.0f, 0.0f, 0.1f, 0.1f, 0.0f, 0.0f} };
-
-static float Diamond4x[4][4] = {
-		{0.3f, 0.4f, 0.4f, 0.3f},
-		{0.4f, 0.9f, 0.9f, 0.4f},
-		{0.4f, 0.9f, 0.9f, 0.4f},
-		{0.3f, 0.4f, 0.4f, 0.3f} };
-
-
 static int		BLOOM_SIZE;
 
 cvar_t		*r_bloom_alpha;
@@ -68,9 +43,10 @@ cvar_t		*r_bloom_sample_size;
 cvar_t		*r_bloom_fast_sample;
 
 image_t	*r_bloomscratchtexture;
+image_t	*r_bloomscratchtexture2;
 image_t	*r_bloomeffecttexture;
 image_t	*r_midsizetexture;
-static GLuint bloomscratchFBO, midsizeFBO, bloomeffectFBO;
+static GLuint bloomscratchFBO, bloomscratch2FBO, midsizeFBO, bloomeffectFBO;
 static GLuint bloom_fullsize_downsampling_rbo_FBO;
 static GLuint bloom_fullsize_downsampling_RBO;
 
@@ -96,9 +72,6 @@ static int	curView_height;
 	qglTexCoord2f(	1.0,		1.0);		\
 	qglVertex2f(	x+width,	y);			\
 	qglEnd();
-
-#define R_Bloom_SamplePass( xpos, ypos ) R_Bloom_Quad ( xpos, ypos, BLOOM_SIZE, BLOOM_SIZE)
-
 
 
 /*
@@ -193,6 +166,7 @@ static void R_Bloom_InitTextures (void)
 
 	//init the "scratch" texture
 	r_bloomscratchtexture = R_Postprocess_AllocFBOTexture ("***r_bloomscratchtexture***", BLOOM_SIZE, BLOOM_SIZE, &bloomscratchFBO);
+	r_bloomscratchtexture2 = R_Postprocess_AllocFBOTexture ("***r_bloomscratchtexture2***", BLOOM_SIZE, BLOOM_SIZE, &bloomscratch2FBO);
 	
 	//init the screen-size RBO
 	R_Bloom_AllocRBO (viddef.width, viddef.height, &bloom_fullsize_downsampling_RBO, &bloom_fullsize_downsampling_rbo_FBO);
@@ -263,84 +237,67 @@ static void R_Bloom_DrawEffect (void)
 
 /*
 =================
-R_Bloom_GeneratexDiamonds
+R_Bloom_DoGuassian
 =================
 */
-static void R_Bloom_GeneratexDiamonds (void)
+static void R_Bloom_DoGuassian (void)
 {
-	int			i, j;
+	int			i;
 	static float intensity;
-
-	//set up sample size workspace
-	qglViewport( 0, 0, BLOOM_SIZE, BLOOM_SIZE );
-	qglMatrixMode( GL_PROJECTION );
-	qglLoadIdentity ();
-	qglOrtho(0, BLOOM_SIZE, BLOOM_SIZE, 0, -10, 100);
-	qglMatrixMode( GL_MODELVIEW );
 	
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, bloomscratchFBO);
-	GL_Bind(r_bloomeffecttexture->texnum);
-
-	//start modifying the small scene corner
+	//set up sample size workspace
+	qglViewport (0, 0, BLOOM_SIZE, BLOOM_SIZE);
+	qglMatrixMode (GL_PROJECTION);
+	qglLoadIdentity ();
+	qglOrtho (0, 1, 1, 0, -10, 100);
+	qglMatrixMode (GL_MODELVIEW);
+	
+	GL_MBind (0, r_bloomeffecttexture->texnum);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, bloomscratchFBO);
+	
+	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
+	
 	qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	GLSTATE_ENABLE_BLEND
-
+	
 	//darkening passes
 	if( r_bloom_darken->integer )
 	{
 		GL_BlendFunction (GL_DST_COLOR, GL_ZERO);
 		GL_TexEnv(GL_MODULATE);
-		
-		for(i=0; i<r_bloom_darken->integer ;i++) {
-			R_Bloom_SamplePass( 0, 0 );
-		}
-		
+		for(i=0; i<r_bloom_darken->integer ;i++)
+			R_DrawVarrays (GL_QUADS, 0, 4);
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, BLOOM_SIZE, BLOOM_SIZE);
 	}
-
-	//bluring passes
-	//GL_BlendFunction (GL_ONE, GL_ONE);
+	
+	
+	glUseProgramObjectARB (g_blurprogramObj);
+	glUniform1iARB (g_location_source, 0);
+	GLSTATE_DISABLE_BLEND
+	
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, bloomscratch2FBO);
+	glUniform2fARB (g_location_scale, 0, r_bloom_diamond_size->value/BLOOM_SIZE/8.0f);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	GL_MBind (0, r_bloomscratchtexture2->texnum);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, bloomscratchFBO);
+	glUniform2fARB (g_location_scale, r_bloom_diamond_size->value/BLOOM_SIZE/8.0f, 0);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	
+	
+	glUseProgramObjectARB (g_colorscaleprogramObj);
+	glUniform1iARB (colorscale_uniforms.source, 0);
+	intensity = 4.0 * r_bloom_intensity->value;
+	glUniform3fARB (colorscale_uniforms.scale, intensity, intensity, intensity);
+	
 	GL_BlendFunction (GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	GLSTATE_ENABLE_BLEND
 	
-	if( r_bloom_diamond_size->integer > 7 || r_bloom_diamond_size->integer <= 3)
-	{
-		if( r_bloom_diamond_size->integer != 8 ) Cvar_SetValue( "r_bloom_diamond_size", 8 );
-
-		for(i=0; i<r_bloom_diamond_size->integer; i++) {
-			for(j=0; j<r_bloom_diamond_size->integer; j++) {
-				intensity = r_bloom_intensity->value * 0.3 * Diamond8x[i][j];
-				if( intensity < 0.01f ) continue;
-				qglColor4f( intensity, intensity, intensity, 1.0);
-				R_Bloom_SamplePass( i-4, j-4 );
-			}
-		}
-	} else if( r_bloom_diamond_size->integer > 5 ) {
-
-		if( r_bloom_diamond_size->integer != 6 ) Cvar_SetValue( "r_bloom_diamond_size", 6 );
-
-		for(i=0; i<r_bloom_diamond_size->integer; i++) {
-			for(j=0; j<r_bloom_diamond_size->integer; j++) {
-				intensity = r_bloom_intensity->value * 0.5 * Diamond6x[i][j];
-				if( intensity < 0.01f ) continue;
-				qglColor4f( intensity, intensity, intensity, 1.0);
-				R_Bloom_SamplePass( i-3, j-3 );
-			}
-		}
-	} else if( r_bloom_diamond_size->integer > 3 ) {
-
-		if( r_bloom_diamond_size->integer != 4 ) Cvar_SetValue( "r_bloom_diamond_size", 4 );
-
-		for(i=0; i<r_bloom_diamond_size->integer; i++) {
-			for(j=0; j<r_bloom_diamond_size->integer; j++) {
-				intensity = r_bloom_intensity->value * 0.8f * Diamond4x[i][j];
-				if( intensity < 0.01f ) continue;
-				qglColor4f( intensity, intensity, intensity, 1.0);
-				R_Bloom_SamplePass( i-2, j-2 );
-			}
-		}
-	}
+	GL_MBind (0, r_bloomscratchtexture->texnum);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, bloomeffectFBO);
+	R_DrawVarrays (GL_QUADS, 0, 4);
 	
-	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, BLOOM_SIZE, BLOOM_SIZE);
+	glUseProgramObjectARB (0);
+	R_KillVArrays ();
 	
 	//restore full screen workspace
 	qglViewport( 0, 0, viddef.width, viddef.height );
@@ -349,6 +306,8 @@ static void R_Bloom_GeneratexDiamonds (void)
 	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity ();
+	
+	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, BLOOM_SIZE, BLOOM_SIZE);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
@@ -463,7 +422,7 @@ static void R_Bloom_DownsampleView (void)
 	}
 	
 	// Blit the finished downsampled texture onto a second FBO. We end up with
-	// with two copies, which GenerateDiamonds will take advantage of.
+	// with two copies, which DoGuassian will take advantage of.
 	qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, bloomscratchFBO);
 	qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, bloomeffectFBO);
 	qglBlitFramebufferEXT(0, 0, BLOOM_SIZE, BLOOM_SIZE, 0, 0, BLOOM_SIZE, BLOOM_SIZE,
@@ -521,7 +480,7 @@ void R_BloomBlend (refdef_t *fd)
 
 	//create the bloom image
 	R_Bloom_DownsampleView();
-	R_Bloom_GeneratexDiamonds();
+	R_Bloom_DoGuassian();
 
 	R_Bloom_DrawEffect();
 

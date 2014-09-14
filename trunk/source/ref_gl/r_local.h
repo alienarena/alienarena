@@ -546,6 +546,7 @@ GLhandleARB g_glassprogramObj;
 GLhandleARB g_blankmeshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
+GLhandleARB g_colorscaleprogramObj;
 GLhandleARB g_rblurprogramObj;
 GLhandleARB g_dropletsprogramObj;
 GLhandleARB g_godraysprogramObj;
@@ -704,6 +705,12 @@ struct
 //gaussian blur
 GLuint		g_location_scale;
 GLuint		g_location_source;
+
+//color scale shader
+struct 
+{
+    GLuint  scale, source;
+} colorscale_uniforms;
 
 //radial blur	
 GLuint		g_location_rsource;
