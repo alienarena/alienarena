@@ -1680,6 +1680,17 @@ static char fb_fragment_program[] = STRINGIFY (
 	}
 );
 
+//COLOR SCALING SHADER - because glColor can't go outside the range 0..1
+static char colorscale_fragment_program[] = STRINGIFY (
+	uniform vec3		scale;
+	uniform sampler2D	textureSource;
+	
+	void main (void)
+	{
+		gl_FragColor = texture2D (textureSource, gl_TexCoord[0].st) * vec4 (scale, 1.0);
+	}
+);
+
 //GAUSSIAN BLUR EFFECTS
 static char blur_vertex_program[] = STRINGIFY (
 	varying vec2	texcoord1, texcoord2, texcoord3,
@@ -1942,34 +1953,37 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	
 	*program = glCreateProgramObjectARB();
 	
-	g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+	if (vertex != NULL)
+	{
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
 	
-	if (strstr (vertex, USE_MESH_ANIM_LIBRARY))
-		shaderStrings[1] = mesh_anim_library;
-	else
-		shaderStrings[1] = "";
+		if (strstr (vertex, USE_MESH_ANIM_LIBRARY))
+			shaderStrings[1] = mesh_anim_library;
+		else
+			shaderStrings[1] = "";
 	
-	if (fragment == NULL)
-		shaderStrings[2] = "const int vertexOnly = 1;";
-	else
-		shaderStrings[2] = "const int vertexOnly = 0;";
+		if (fragment == NULL)
+			shaderStrings[2] = "const int vertexOnly = 1;";
+		else
+			shaderStrings[2] = "const int vertexOnly = 0;";
 	
-	shaderStrings[3] = vertex;
-	glShaderSourceARB( g_vertexShader, 4, shaderStrings, NULL );
-	glCompileShaderARB( g_vertexShader);
-	glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		shaderStrings[3] = vertex;
+		glShaderSourceARB( g_vertexShader, 4, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
-	if( nResult )
-	{
-		glAttachObjectARB( *program, g_vertexShader );
-	}
-	else
-	{
-		Com_Printf("...%s Vertex Shader Compile Error\n", name);
-		if (glGetShaderInfoLog != NULL)
+		if( nResult )
 		{
-			glGetShaderInfoLog (g_vertexShader, sizeof(str), NULL, str);
-			Com_Printf ("%s\n", str);
+			glAttachObjectARB( *program, g_vertexShader );
+		}
+		else
+		{
+			Com_Printf("...%s Vertex Shader Compile Error\n", name);
+			if (glGetShaderInfoLog != NULL)
+			{
+				glGetShaderInfoLog (g_vertexShader, sizeof(str), NULL, str);
+				Com_Printf ("%s\n", str);
+			}
 		}
 	}
 	
@@ -2231,6 +2245,11 @@ void R_LoadGLSLPrograms(void)
 	// Locate some parameters by name so we can set them later...
 	g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
 	g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
+	
+	// Color scaling
+	R_LoadGLSLProgram ("Color Scaling", NULL, (char*)colorscale_fragment_program, NO_ATTRIBUTES, &g_colorscaleprogramObj);
+	colorscale_uniforms.scale = glGetUniformLocationARB (g_colorscaleprogramObj, "scale");
+	colorscale_uniforms.source = glGetUniformLocationARB (g_colorscaleprogramObj, "textureSource");
 
 	//radial blur
 	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, &g_rblurprogramObj);
