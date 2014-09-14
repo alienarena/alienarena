@@ -296,6 +296,7 @@ void BSP_FlushVBOAccum (void);
 void BSP_AddSurfToVBOAccum (msurface_t *surf);
 
 //Postprocess
+image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuint *FBO);
 void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 

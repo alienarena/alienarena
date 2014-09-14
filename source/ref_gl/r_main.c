@@ -1103,15 +1103,16 @@ void R_RenderView (refdef_t *fd)
 		}
 	}
 
-
-	R_BloomBlend( &r_newrefdef );//BLOOMS
-
-	R_RenderSun();
+    // Postprocessing
+	R_BloomBlend (&r_newrefdef);
+	R_RenderSun ();
+	R_GLSLPostProcess ();
+	R_DrawVehicleHUD ();
+	R_Flash ();
 	
 	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
 	if (gl_showpolys->integer)
 		CM_TerrainDrawIntersecting (r_origin, forward, R_DrawTerrainTri);
-	
 	
 	if (gl_showdecals->integer)
 	{	
@@ -1128,12 +1129,6 @@ void R_RenderView (refdef_t *fd)
 		for (i = 0; i < r_tracetest->integer; i++)
 			CM_BoxTrace (r_origin, targ, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 	}
-
-	R_GLSLPostProcess();
-
-	R_DrawVehicleHUD();
-
-	R_Flash();
 
 	if(map_fog)
 		qglDisable(GL_FOG);

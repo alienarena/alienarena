@@ -103,67 +103,28 @@ static int	curView_height;
 
 /*
 =================
-R_Bloom_AllocFBOTexture 
-
-Create a 24-bit square texture with specified size and attach it to an FBO
-=================
-*/
-static image_t *R_Bloom_AllocFBOTexture (char *name, int size_side, GLuint *FBO)
-{
-	byte	*data;
-	int		size;
-	image_t	*image;
-	
-	size = size_side*size_side*3;
-	data = malloc (size);
-	memset (data, 0, size);
-	
-	// create the texture
-	image = GL_FindFreeImage (name, size_side, size_side, it_pic);
-	GL_Bind (image->texnum);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, size_side, size_side, 0, GL_RGB, GL_UNSIGNED_BYTE, (byte*)data);
-	
-	// create up the FBO
-	qglGenFramebuffersEXT(1, FBO);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,*FBO);
-
-	// bind the texture to it
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, image->texnum, 0);
-	
-	// clean up 
-	free (data);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-	
-	return image;
-}
-
-
-
-/*
-=================
 R_Bloom_AllocRBO
 
-Create a 24-bit square RBO with specified size and attach it to an FBO
+Create a 24-bit RBO with specified size and attach it to an FBO
 =================
 */
 static void R_Bloom_AllocRBO (int width, int height, GLuint *RBO, GLuint *FBO)
 {
 	// create the RBO
-	qglGenRenderbuffersEXT(1, RBO);
-    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, *RBO);
-    qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGB, width, height);
-    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+	qglGenRenderbuffersEXT (1, RBO);
+    qglBindRenderbufferEXT (GL_RENDERBUFFER_EXT, *RBO);
+    qglRenderbufferStorageEXT (GL_RENDERBUFFER_EXT, GL_RGB, width, height);
+    qglBindRenderbufferEXT (GL_RENDERBUFFER_EXT, 0);
     
     // create up the FBO
-	qglGenFramebuffersEXT(1, FBO);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, *FBO);
+	qglGenFramebuffersEXT (1, FBO);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, *FBO);
 	
 	// bind the RBO to it
-	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, *RBO);
+	qglFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, *RBO);
 	
 	//clean up
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 }
 
 
@@ -199,7 +160,7 @@ static void R_Bloom_InitEffectTexture (void)
 	if( BLOOM_SIZE != r_bloom_sample_size->integer )
 		Cvar_SetValue ("r_bloom_sample_size", BLOOM_SIZE);
 
-	r_bloomeffecttexture = R_Bloom_AllocFBOTexture ("***r_bloomeffecttexture***", BLOOM_SIZE, &bloomeffectFBO);
+	r_bloomeffecttexture = R_Postprocess_AllocFBOTexture ("***r_bloomeffecttexture***", BLOOM_SIZE, BLOOM_SIZE, &bloomeffectFBO);
 }
 
 /*
@@ -231,7 +192,7 @@ static void R_Bloom_InitTextures (void)
 	R_Bloom_InitEffectTexture();
 
 	//init the "scratch" texture
-	r_bloomscratchtexture = R_Bloom_AllocFBOTexture ("***r_bloomscratchtexture***", BLOOM_SIZE, &bloomscratchFBO);
+	r_bloomscratchtexture = R_Postprocess_AllocFBOTexture ("***r_bloomscratchtexture***", BLOOM_SIZE, BLOOM_SIZE, &bloomscratchFBO);
 	
 	//init the screen-size RBO
 	R_Bloom_AllocRBO (viddef.width, viddef.height, &bloom_fullsize_downsampling_RBO, &bloom_fullsize_downsampling_rbo_FBO);
@@ -243,7 +204,7 @@ static void R_Bloom_InitTextures (void)
 	{
 		r_midsizetexture_size = (int)(BLOOM_SIZE * 2);
 		// mid-size texture
-		r_midsizetexture = R_Bloom_AllocFBOTexture ("***r_midsizetexture***", r_midsizetexture_size, &midsizeFBO);
+		r_midsizetexture = R_Postprocess_AllocFBOTexture ("***r_midsizetexture***", r_midsizetexture_size, r_midsizetexture_size, &midsizeFBO);
 	}
 
 }
