@@ -84,28 +84,6 @@ image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuin
 	return image;
 }
 
-// FIXME: textures captured from the framebuffer need to be rendered upside
-// down for some reason
-static void Postprocess_RenderQuad (qboolean flip)
-{
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-
-	VA_SetElem2 (vert_array[0], 0, 0);
-	VA_SetElem2 (vert_array[1], viddef.width, 0);
-	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
-	VA_SetElem2 (vert_array[3], 0, viddef.height);
-
-	VA_SetElem2 (tex_array[0], 0, 0 ^ flip);
-	VA_SetElem2 (tex_array[1], 1, 0 ^ flip);
-	VA_SetElem2 (tex_array[2], 1, 1 ^ flip);
-	VA_SetElem2 (tex_array[3], 0, 1 ^ flip);
-	
-	R_DrawVarrays (GL_QUADS, 0, 4);
-	
-	R_KillVArrays ();
-}
-
 // Be sure to set up your GLSL program and uniforms before calling this! Make
 // sure r_framebuffer is already bound to a TMU, and tell this function which
 // TMU it is.
@@ -114,7 +92,7 @@ static void Distort_RenderQuad (int framebuffer_tmu)
 	//set up full screen workspace
 	qglMatrixMode (GL_PROJECTION );
     qglLoadIdentity ();
-	qglOrtho (0, viddef.width, viddef.height, 0, -10, 100);
+	qglOrtho (0, 1, 1, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
     
@@ -126,11 +104,15 @@ static void Distort_RenderQuad (int framebuffer_tmu)
 
 	// we need to grab the frame buffer
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, distort_FBO);
-	qglBlitFramebufferEXT (0, 0, viddef.width, viddef.height, 0, 0, viddef.width, viddef.height,
+	qglBlitFramebufferEXT(0, 0, viddef.width, viddef.height, 0, 0, viddef.width, viddef.height,
 		GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, 0);
 	
-	Postprocess_RenderQuad (true);
+	// FIXME: textures captured from the framebuffer need to be rendered
+	// upside down for some reason
+	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	R_KillVArrays ();
 	
 	GLSTATE_ENABLE_BLEND
 	qglEnable (GL_DEPTH_TEST);
@@ -301,6 +283,8 @@ void R_ShadowBlend(float alpha)
 	qglMatrixMode(GL_MODELVIEW);
 	qglPushMatrix();
 	qglLoadIdentity();
+	
+	GL_SetupWholeScreen2DVBO (wholescreen_blank);
 
 	if(gl_state.fbo && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) 
 	{
@@ -310,7 +294,7 @@ void R_ShadowBlend(float alpha)
 		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
 		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fboId[2]);
 
-		qglBlitFramebufferEXT(0, 0, vid.width, vid.height, 0, 0, viddef.width, viddef.height,
+		qglBlitFramebufferEXT(0, 0, viddef.width, viddef.height, 0, 0, viddef.width, viddef.height,
 			GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 
 		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
@@ -327,11 +311,7 @@ void R_ShadowBlend(float alpha)
 
 		qglColor4f (1,1,1, 1);
 
-		qglBegin(GL_TRIANGLES);
-		qglVertex2f(-5, -5);
-		qglVertex2f(10, -5);
-		qglVertex2f(-5, 10);
-		qglEnd();
+		R_DrawVarrays (GL_QUADS, 0, 4);
 	}
 
 	qglColor4f (0,0,0, alpha);
@@ -345,20 +325,11 @@ void R_ShadowBlend(float alpha)
 	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
 	qglStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
-	qglBegin(GL_TRIANGLES);
-	qglVertex2f(-5, -5);
-	qglVertex2f(10, -5);
-	qglVertex2f(-5, 10);
-	qglEnd();
+	R_DrawVarrays (GL_QUADS, 0, 4);
 
 	if(gl_state.fbo && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) 
 	{
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-		//revert settings
-		qglMatrixMode( GL_PROJECTION );
-		qglLoadIdentity ();
-		qglOrtho(0, vid.width, vid.height, 0, -10, 100);
 
 		GLSTATE_ENABLE_BLEND
 		qglEnable( GL_TEXTURE_2D );
@@ -368,25 +339,22 @@ void R_ShadowBlend(float alpha)
 		qglDisable(GL_STENCIL_TEST);
 
 		qglColor4f (1,1,1,1);
-
-		//render quad on screen	into FBO
-		//and blur it vertically
-
+		
+		// FIXME: textures captured from the framebuffer need to be rendered
+		// upside down for some reason
+		GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
 		glUseProgramObjectARB( g_blurprogramObj );
-
 		GL_MBind (0, r_colorbuffer->texnum);
-
 		glUniform1iARB( g_location_source, 0);
 
+		// render quad on screen into FBO
+		// and blur it vertically
 		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
-		
-		Postprocess_RenderQuad (true);
+		R_DrawVarrays (GL_QUADS, 0, 4);
 
-		//now blur horizontally
-
+		// now blur horizontally
 		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
-		
-		Postprocess_RenderQuad (true);
+		R_DrawVarrays (GL_QUADS, 0, 4);
 
 		glUseProgramObjectARB (0);
 	}
@@ -404,6 +372,8 @@ void R_ShadowBlend(float alpha)
 	qglDisable(GL_STENCIL_TEST);
 
 	qglColor4f(1,1,1,1);
+	
+	R_KillVArrays ();
 }
 
 /*
@@ -491,11 +461,12 @@ void R_DrawVehicleHUD (void)
 		
 	qglMatrixMode( GL_PROJECTION );
 	qglLoadIdentity ();
-	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+	qglOrtho(0, 1, 1, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity ();
 	
-	Postprocess_RenderQuad (false);
+	GL_SetupWholeScreen2DVBO (wholescreen_textured);
+	R_DrawVarrays (GL_QUADS, 0, 4);
 
 	rs = gl->script;
 	
@@ -504,6 +475,8 @@ void R_DrawVehicleHUD (void)
 		RS_ReadyScript(rs);
 		RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, VehicleHud_DrawQuad_Callback);
 	}
+	
+	R_KillVArrays ();
 	
 	qglColor4f(1,1,1,1);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -528,11 +501,13 @@ void R_DrawBloodEffect (void)
 		
 	qglMatrixMode( GL_PROJECTION );
     qglLoadIdentity ();
-	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+	qglOrtho(0, 1, 1, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
 	
-	Postprocess_RenderQuad (false);
+	GL_SetupWholeScreen2DVBO (wholescreen_textured);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	R_KillVArrays ();
 
 	GLSTATE_DISABLE_BLEND
 }
@@ -610,7 +585,7 @@ void R_GLSLGodRays(void)
 	qglMatrixMode(GL_PROJECTION);
     qglPushMatrix();
     qglLoadIdentity();
-    qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999, 99999);
+    qglOrtho(0, 1, 1, 0, -99999, 99999);
     qglMatrixMode(GL_MODELVIEW);
     qglPushMatrix();
     qglLoadIdentity();	
@@ -639,7 +614,9 @@ void R_GLSLGodRays(void)
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
-	Postprocess_RenderQuad (true);
+	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	R_KillVArrays ();
 
 	GLSTATE_DISABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

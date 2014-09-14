@@ -380,6 +380,43 @@ void GL_SetupSkyboxVBO (void)
 }
 
 
+// For fullscreen postprocessing passes, etc. To be rendered in a glOrtho
+// coordinate space from 0 to 1 on each axis.
+static vertCache_t *wholescreen2D_vbo;
+
+static void VB_BuildWholeScreen2DVBO (void)
+{
+	static float vertbuf[4][2][2] = 
+	{
+	//	vertex coords/texcoords		vertically flipped texcoords
+		{{0, 0},					{0, 1}},
+		{{1, 0},					{1, 1}},
+		{{1, 1},					{1, 0}},
+		{{0, 1},					{0, 0}}
+	};
+	
+	wholescreen2D_vbo = R_VCLoadData (VBO_STATIC, sizeof(vertbuf), vertbuf, VBO_STORE_XYZ, NULL);
+}
+
+void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype)
+{
+	GL_BindVBO (wholescreen2D_vbo);
+	R_VertexPointer (2, 4*sizeof(float), (void *)0);
+	switch (drawtype)
+	{
+	case wholescreen_blank:
+		break;
+	case wholescreen_textured:
+		R_TexCoordPointer (0, 4*sizeof(float), (void *)0);
+		break;
+	case wholescreen_fliptextured:
+		R_TexCoordPointer (0, 4*sizeof(float), (void *)(2*sizeof(float)));
+		break;
+	}
+	GL_BindVBO (NULL);
+}
+
+
 void VB_WorldVCInit()
 {
 	//clear out previous buffer
@@ -415,6 +452,7 @@ static void VB_VCInit (void)
 	
 	// "Special" VBOs
 	VB_BuildSkyboxVBO ();
+	VB_BuildWholeScreen2DVBO ();
 }
 
 void R_VCShutdown (void)
