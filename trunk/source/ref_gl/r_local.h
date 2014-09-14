@@ -308,6 +308,11 @@ void VB_WorldVCInit (void);
 void VB_BuildWorldVBO (void);
 void GL_SetupWorldVBO (void);
 void GL_SetupSkyboxVBO (void);
+typedef enum
+{
+    wholescreen_blank, wholescreen_textured, wholescreen_fliptextured
+} wholescreen_drawtype_t;
+void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype);
 void GL_BindVBO(vertCache_t *cache);
 void GL_BindIBO(vertCache_t *cache);
 vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache);
