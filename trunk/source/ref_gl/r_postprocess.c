@@ -45,7 +45,48 @@ int frames;
 
 extern  cvar_t	*cl_raindist;
 
-static void Postprocess_RenderQuad (image_t *img)
+static GLuint distort_FBO;
+
+/*
+=================
+R_Postprocess_AllocFBOTexture 
+
+Create a 24-bit texture with specified size and attach it to an FBO
+=================
+*/
+image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuint *FBO)
+{
+	byte	*data;
+	int		size;
+	image_t	*image;
+	
+	size = width * height * 3;
+	data = malloc (size);
+	memset (data, 0, size);
+	
+	// create the texture
+	image = GL_FindFreeImage (name, width, height, it_pic);
+	GL_Bind (image->texnum);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	
+	// create up the FBO
+	qglGenFramebuffersEXT (1, FBO);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, *FBO);
+
+	// bind the texture to it
+	qglFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, image->texnum, 0);
+	
+	// clean up 
+	free (data);
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+	
+	return image;
+}
+
+// FIXME: textures captured from the framebuffer need to be rendered upside
+// down for some reason
+static void Postprocess_RenderQuad (qboolean flip)
 {
 	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
 	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
@@ -55,10 +96,10 @@ static void Postprocess_RenderQuad (image_t *img)
 	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
 	VA_SetElem2 (vert_array[3], 0, viddef.height);
 
-	VA_SetElem2 (tex_array[3], 0, 0);
-	VA_SetElem2 (tex_array[2], 1, 0);
-	VA_SetElem2 (tex_array[1], 1, 1);
-	VA_SetElem2 (tex_array[0], 0, 1);
+	VA_SetElem2 (tex_array[0], 0, 0 ^ flip);
+	VA_SetElem2 (tex_array[1], 1, 0 ^ flip);
+	VA_SetElem2 (tex_array[2], 1, 1 ^ flip);
+	VA_SetElem2 (tex_array[3], 0, 1 ^ flip);
 	
 	R_DrawVarrays (GL_QUADS, 0, 4);
 	
@@ -71,22 +112,25 @@ static void Postprocess_RenderQuad (image_t *img)
 static void Distort_RenderQuad (int framebuffer_tmu)
 {
 	//set up full screen workspace
-	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
-	GL_Bind (r_framebuffer->texnum);
 	qglMatrixMode (GL_PROJECTION );
     qglLoadIdentity ();
-	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+	qglOrtho (0, viddef.width, viddef.height, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
     
 	GLSTATE_DISABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
-
-	//we need to grab the frame buffer
-	qglCopyTexSubImage2D (GL_TEXTURE_2D, 0,
-				0, 0, 0, 0, viddef.width, viddef.height);
 	
-	Postprocess_RenderQuad (r_framebuffer);
+	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
+	GL_Bind (r_framebuffer->texnum);
+
+	// we need to grab the frame buffer
+	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, distort_FBO);
+	qglBlitFramebufferEXT (0, 0, viddef.width, viddef.height, 0, 0, viddef.width, viddef.height,
+		GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, 0);
+	
+	Postprocess_RenderQuad (true);
 	
 	GLSTATE_ENABLE_BLEND
 	qglEnable (GL_DEPTH_TEST);
@@ -336,15 +380,15 @@ void R_ShadowBlend(float alpha)
 
 		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
 		
-		Postprocess_RenderQuad (r_colorbuffer);
+		Postprocess_RenderQuad (true);
 
 		//now blur horizontally
 
 		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
 		
-		Postprocess_RenderQuad (r_colorbuffer);
+		Postprocess_RenderQuad (true);
 
-		glUseProgramObjectARB(0);
+		glUseProgramObjectARB (0);
 	}
 
 	//revert settings
@@ -379,14 +423,11 @@ void R_FB_InitTextures( void )
 		size = 16 * 16 * 4;
 	data = malloc (size);
 
-	memset (data, 255, size);
-	r_framebuffer = GL_LoadPic ("***r_framebuffer***", data, viddef.width, viddef.height, it_pic, 3);
+	r_framebuffer = R_Postprocess_AllocFBOTexture ("***r_framebuffer***", viddef.width, viddef.height, &distort_FBO);
 	
 	memset (data, 255, size);
 	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, viddef.width, viddef.height, it_pic, 3);
 	
-	free (data);
-
 	//init the distortion textures
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg", it_pic);
 	if (!r_distortwave) 
@@ -402,6 +443,8 @@ void R_FB_InitTextures( void )
 	r_blooddroplets_nm = GL_FindImage("gfx/blooddrops_nm.jpg", it_pic);
 	if (!r_blooddroplets_nm) 
 		r_blooddroplets_nm = GL_LoadPic ("***r_blooddroplets_nm***", data, 16, 16, it_pic, 32);
+	
+	free (data);
 }
 
 static void VehicleHud_DrawQuad_Callback (void)
@@ -451,24 +494,9 @@ void R_DrawVehicleHUD (void)
 	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
 	qglLoadIdentity ();
-
-	// FIXME: can't use Postprocess_RenderQuad here because the vertex order
-	// is different for some reason.	
-	R_TexCoordPointer (0, sizeof(tex_array[0]), tex_array[0]);
-	R_VertexPointer (2, sizeof(vert_array[0]), vert_array[0]);
-
-	VA_SetElem2 (vert_array[0], 0, 0);
-	VA_SetElem2 (vert_array[1], viddef.width, 0);
-	VA_SetElem2 (vert_array[2], viddef.width, viddef.height);
-	VA_SetElem2 (vert_array[3], 0, viddef.height);
-
-	VA_SetElem2 (tex_array[0], 0, 0);
-	VA_SetElem2 (tex_array[1], 1, 0);
-	VA_SetElem2 (tex_array[2], 1, 1);
-	VA_SetElem2 (tex_array[3], 0, 1);
 	
-	R_DrawVarrays(GL_QUADS, 0, 4);
-	
+	Postprocess_RenderQuad (false);
+
 	rs = gl->script;
 	
 	if(r_shaders->integer && rs)
@@ -504,7 +532,7 @@ void R_DrawBloodEffect (void)
 	qglMatrixMode( GL_MODELVIEW );
     qglLoadIdentity ();
 	
-	Postprocess_RenderQuad (gl);
+	Postprocess_RenderQuad (false);
 
 	GLSTATE_DISABLE_BLEND
 }
@@ -611,7 +639,7 @@ void R_GLSLGodRays(void)
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
-	Postprocess_RenderQuad (r_colorbuffer);
+	Postprocess_RenderQuad (true);
 
 	GLSTATE_DISABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
