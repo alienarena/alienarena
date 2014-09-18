@@ -288,8 +288,8 @@ static qboolean R_Mesh_CullModel (void)
 	vec3_t	dist;
 	vec3_t	bbox[8];
 	
-	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL) && !(currententity->flags & RF_MENUMODEL))
-		return true;
+	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+		return !(currententity->flags & RF_MENUMODEL);
 	
 	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
 		return true;
