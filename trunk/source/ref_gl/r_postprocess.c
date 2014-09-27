@@ -41,7 +41,6 @@ vec3_t r_explosionOrigin;
 int r_drawing_fbeffect;
 int	r_fbFxType;
 float r_fbeffectTime;
-int frames;
 
 extern  cvar_t	*cl_raindist;
 
@@ -69,6 +68,8 @@ image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuin
 	GL_Bind (image->texnum);
 	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	
 	// create up the FBO
 	qglGenFramebuffersEXT (1, FBO);
@@ -87,7 +88,7 @@ image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuin
 // Be sure to set up your GLSL program and uniforms before calling this! Make
 // sure r_framebuffer is already bound to a TMU, and tell this function which
 // TMU it is.
-static void Distort_RenderQuad (int framebuffer_tmu)
+static void Distort_RenderQuad (int framebuffer_tmu, int x, int y, int w, int h)
 {
 	//set up full screen workspace
 	qglMatrixMode (GL_PROJECTION );
@@ -99,12 +100,14 @@ static void Distort_RenderQuad (int framebuffer_tmu)
 	GLSTATE_DISABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 	
+	qglViewport (x, y, w, h);
+	
 	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
 	GL_Bind (r_framebuffer->texnum);
 
 	// we need to grab the frame buffer
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, distort_FBO);
-	qglBlitFramebufferEXT(0, 0, viddef.width, viddef.height, 0, 0, viddef.width, viddef.height,
+	qglBlitFramebufferEXT (x, y, x + w, y + h, 0, 0, viddef.width, viddef.height, // HACK!
 		GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, 0);
 	
@@ -113,6 +116,7 @@ static void Distort_RenderQuad (int framebuffer_tmu)
 	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
 	R_DrawVarrays (GL_QUADS, 0, 4);
 	R_KillVArrays ();
+	R_SetupViewport ();
 	
 	GLSTATE_ENABLE_BLEND
 	qglEnable (GL_DEPTH_TEST);
@@ -120,7 +124,6 @@ static void Distort_RenderQuad (int framebuffer_tmu)
 
 void R_GLSLDistortion(void)
 {
-	vec2_t fxScreenPos;
 	vec3_t	vec;
 	float	dot, r_fbeffectLen;
 	vec3_t	forward, mins, maxs;
@@ -149,19 +152,13 @@ void R_GLSLDistortion(void)
 	if(!r_drawing_fbeffect)
 		return;
 
-	frames++;
-
-	if(r_fbFxType == PAIN)		
-	{
-		r_fbeffectLen = 0.1;
-		R_DrawBloodEffect();
-	}
-	else
-		r_fbeffectLen = 0.2;
-
 	if(r_fbFxType == EXPLOSION)
 	{
-		int i;
+		vec3_t ul_3d, lr_3d;
+		vec2_t ul_2d, lr_2d;
+		float scale, intensity;
+		
+		r_fbeffectLen = 0.2f;
 		
 		//create a distortion wave effect at point of explosion
 		glUseProgramObjectARB( g_fbprogramObj );
@@ -175,27 +172,29 @@ void R_GLSLDistortion(void)
 			GL_MBind (0, r_distortwave->texnum);
 		glUniform1iARB (distort_uniforms.distortTex, 0);
 
-		fxScreenPos[0] = fxScreenPos[1] = 0;
+		// get positions of bounds of warp area
+		scale = 8.0f + (rs_realtime - r_fbeffectTime) * 78.0f / r_fbeffectLen;
+		VectorMA (r_explosionOrigin, -scale, vright, ul_3d);
+		VectorMA (ul_3d, scale, vup, ul_3d);
+		R_TransformVectorToScreen(&r_newrefdef, ul_3d, ul_2d);
+		VectorMA (r_explosionOrigin, scale, vright, lr_3d);
+		VectorMA (lr_3d, -scale, vup, lr_3d);
+		R_TransformVectorToScreen(&r_newrefdef, lr_3d, lr_2d);
 
-		//get position of focal point of warp
-		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
-
-		fxScreenPos[0] /= viddef.width; 
-		fxScreenPos[1] /= viddef.height;
-		
-		for (i = 0; i < 2; i++)
-			fxScreenPos[i] -= 0.5f + (float)frames * 0.001f;
-		
-		glUniform2fARB (distort_uniforms.fxPos, fxScreenPos[0], fxScreenPos[1]);
+		intensity = sinf (M_PI * (rs_realtime - r_fbeffectTime) / r_fbeffectLen);
+		glUniform1fARB (distort_uniforms.intensity, intensity);
 		
 		// Note that r_framebuffer is on TMU 1 this time
-		Distort_RenderQuad (1);
+		Distort_RenderQuad (1, ul_2d[0], lr_2d[1], lr_2d[0] - ul_2d[0], ul_2d[1] - lr_2d[1]);
 		
 		glUseProgramObjectARB (0);
 		GL_MBind (1, 0);
 	}
 	else
 	{
+		r_fbeffectLen = 0.1f;
+		R_DrawBloodEffect();
+		
 		//do a radial blur
 		glUseProgramObjectARB( g_rblurprogramObj );
 
@@ -205,16 +204,13 @@ void R_GLSLDistortion(void)
 
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 
-		Distort_RenderQuad (0);
+		Distort_RenderQuad (0, 0, 0, viddef.width, viddef.height);
 
 		glUseProgramObjectARB( 0 );
 	}
 
 	if(rs_realtime > r_fbeffectTime+r_fbeffectLen) 
-	{
-		frames = 0;
 		r_drawing_fbeffect = false; //done effect
-	}
 
 	return;
 }
@@ -253,7 +249,7 @@ void R_GLSLWaterDroplets(void)
 
 	glUniform1fARB( g_location_drTime, rs_realtime);
 	
-	Distort_RenderQuad (0);
+	Distort_RenderQuad (0, 0, 0, viddef.width, viddef.height);
 
 	glUseProgramObjectARB( 0 );
 

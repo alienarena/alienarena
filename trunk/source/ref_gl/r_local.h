@@ -699,7 +699,7 @@ mesh_anim_uniform_location_t blankmesh_uniforms;
 struct
 {
 	GLuint	framebuffTex, distortTex;
-	GLuint	fxPos;
+	GLuint	intensity;
 } distort_uniforms;
 
 //gaussian blur

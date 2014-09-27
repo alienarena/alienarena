@@ -1653,30 +1653,17 @@ static char fb_vertex_program[] = STRINGIFY (
 static char fb_fragment_program[] = STRINGIFY (
 	uniform sampler2D fbtexture;
 	uniform sampler2D distortiontexture;
-	uniform vec2 fxPos;
+	uniform float intensity;
 
 	void main(void)
 	{
-		vec3 noiseVec;
+		vec2 noiseVec;
 		vec2 displacement;
 		
-		displacement = gl_TexCoord[0].st - fxPos;
-
-		noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;
-		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
-
-		//clamp edges to prevent artifacts
-		if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < 0.992)
-			displacement.x = gl_TexCoord[0].s + noiseVec.x;
-		else
-			displacement.x = gl_TexCoord[0].s;
-
-		if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < 0.992) 
-			displacement.y = gl_TexCoord[0].t + noiseVec.y;
-		else
-			displacement.y = gl_TexCoord[0].t;
-
-		gl_FragColor = texture2D (fbtexture, displacement.xy);
+		noiseVec = normalize(texture2D(distortiontexture, gl_TexCoord[0].st)).xy;
+		displacement = gl_TexCoord[0].st + (noiseVec * 2.0 - vec2 (0.6389, 0.6339)) * intensity;
+		
+		gl_FragColor = texture2D (fbtexture, displacement);
 	}
 );
 
@@ -2237,7 +2224,7 @@ void R_LoadGLSLPrograms(void)
 	// Locate some parameters by name so we can set them later...
 	distort_uniforms.framebuffTex = glGetUniformLocationARB (g_fbprogramObj, "fbtexture");
 	distort_uniforms.distortTex = glGetUniformLocationARB (g_fbprogramObj, "distorttexture");
-	distort_uniforms.fxPos = glGetUniformLocationARB (g_fbprogramObj, "fxPos");
+	distort_uniforms.intensity = glGetUniformLocationARB (g_fbprogramObj, "intensity");
 
 	//gaussian blur
 	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, &g_blurprogramObj);
