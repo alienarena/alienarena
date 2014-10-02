@@ -90,34 +90,50 @@ image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuin
 // TMU it is.
 static void Distort_RenderQuad (int framebuffer_tmu, int x, int y, int w, int h)
 {
+	int xl = x, yt = y, xr = x + w, yb = y + h;
+	
 	//set up full screen workspace
 	qglMatrixMode (GL_PROJECTION );
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	qglOrtho (0, 1, 1, 0, -10, 100);
-	qglMatrixMode( GL_MODELVIEW );
-    qglLoadIdentity ();
-    
+	qglMatrixMode (GL_MODELVIEW);
+	qglLoadIdentity ();
+	
 	GLSTATE_DISABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 	
-	qglViewport (x, y, w, h);
-	
 	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
 	GL_Bind (r_framebuffer->texnum);
-
-	// we need to grab the frame buffer
+	
+	// Ie need to grab the frame buffer. If we're not working with the whole
+	// framebuffer, copy a margin to avoid artifacts
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, distort_FBO);
-	qglBlitFramebufferEXT (x, y, x + w, y + h, 0, 0, viddef.width, viddef.height, // HACK!
-		GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	if (xl > 0) xl--;
+	if (xr < viddef.width) xr++;
+	if (yt > 0) yt--;
+	if (yb < viddef.height) yb++;
+	qglBlitFramebufferEXT (xl, yt, xr, yb, xl, yt, xr, yb, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, 0);
+	
+	qglViewport (x, y, w, h);
+	
+	// Set the texture matrix so the GLSL shader knows only to sample part
+	// of the FB texture
+	GL_SelectTexture (0);
+	qglMatrixMode (GL_TEXTURE);
+	qglPushMatrix ();
+	qglTranslatef ((float)x/(float)viddef.width, (float)y/(float)viddef.height, 0);
+	qglScalef ((float)w/(float)viddef.width, (float)h/(float)viddef.height, 1);
 	
 	// FIXME: textures captured from the framebuffer need to be rendered
 	// upside down for some reason
 	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
 	R_DrawVarrays (GL_QUADS, 0, 4);
+	
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
 	R_KillVArrays ();
 	R_SetupViewport ();
-	
 	GLSTATE_ENABLE_BLEND
 	qglEnable (GL_DEPTH_TEST);
 }
@@ -180,7 +196,7 @@ void R_GLSLDistortion(void)
 		VectorMA (r_explosionOrigin, scale, vright, lr_3d);
 		VectorMA (lr_3d, -scale, vup, lr_3d);
 		R_TransformVectorToScreen(&r_newrefdef, lr_3d, lr_2d);
-
+		
 		intensity = sinf (M_PI * (rs_realtime - r_fbeffectTime) / r_fbeffectLen);
 		glUniform1fARB (distort_uniforms.intensity, intensity);
 		
@@ -383,7 +399,7 @@ void R_FB_InitTextures( void )
 	byte	*data;
 	int		size;
 
-    //init the various FBO textures
+	//init the various FBO textures
 	size = viddef.width * viddef.height * 4;
 	if (size < 16 * 16 * 4) // nullpic min size
 		size = 16 * 16 * 4;
