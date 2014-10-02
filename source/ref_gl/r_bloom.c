@@ -214,7 +214,8 @@ R_Bloom_DrawEffect
 */
 static void R_Bloom_DrawEffect (void)
 {
-	GL_Bind(r_bloomeffecttexture->texnum);
+	GL_SelectTexture (0);
+	GL_Bind (r_bloomeffecttexture->texnum);
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_ONE, GL_ONE);
 	qglColor4f(r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
@@ -264,10 +265,11 @@ static void R_Bloom_DoGuassian (void)
 	if( r_bloom_darken->integer )
 	{
 		GL_BlendFunction (GL_DST_COLOR, GL_ZERO);
-		GL_TexEnv(GL_MODULATE);
+		GL_SelectTexture (0);
+		GL_TexEnv (GL_MODULATE);
 		for(i=0; i<r_bloom_darken->integer ;i++)
 			R_DrawVarrays (GL_QUADS, 0, 4);
-		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, BLOOM_SIZE, BLOOM_SIZE);
+		qglCopyTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 0, 0, BLOOM_SIZE, BLOOM_SIZE);
 	}
 	
 	
