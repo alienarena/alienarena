@@ -500,11 +500,11 @@ CMod_LoadBrushSides
 */
 void CMod_LoadBrushSides (lump_t *l)
 {
-	int			i, j;
-	cbrushside_t	*out;
-	dbrushside_t 	*in;
-	int			count;
-	int			num;
+	int					i, j;
+	cbrushside_t		*out;
+	dbrushside_t 		*in;
+	int					count;
+	unsigned short		num;
 
 	in = (void *)(cmod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -521,6 +521,8 @@ void CMod_LoadBrushSides (lump_t *l)
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
 		num = LittleShort (in->planenum);
+		if (num >= numplanes)
+			Com_Error (ERR_DROP, "Bad brushside plane");
 		out->plane = &map_planes[num];
 		j = LittleShort (in->texinfo);
 		if (j >= numtexinfo)
