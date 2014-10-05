@@ -453,12 +453,6 @@ static void loadbots_team_botkick( edict_t *ent )
 	// count the ingame players and bots
 	TeamCensus( &teamcensus );
 
-	if ( ent->client->pers.spectator && teamcensus.bots > 0 )
-	{ // "spectator" is player who has not yet joined a team
-		// nothing to do, unless bots have not been loaded.
-		return;
-	}
-
 	ingame_players = teamcensus.real;
 	ingame_bots = teamcensus.bots;
 
