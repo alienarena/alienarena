@@ -27,6 +27,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 cvar_t	*cvar_vars;
 
+/**
+ * \brief Make sure skin cvar contains exactly one '/'.
+ *
+ * If user sets skin to a value without the slash, the info string,
+ * config.cfg, team membership and probably other things get really
+ * messed up.
+ *
+ * \param skin The skin string value to check.
+ *
+ * \return If ok return original, otherwise return a default skin.
+ */
+static const char *Cvar_SkinValidate( const char *skin )
+{
+	const char* pc = skin;
+	int count = 0;
+	while ( *pc )
+	{
+		if ( *pc == '/' )
+			++count;
+		++pc;
+	}
+	if ( count == 1 )
+	{
+		return skin;
+	}
+	else
+	{
+		Com_Printf("Invalid skin name. Using default.\n");
+		return "martianenforcer/default";
+	}
+}
+
 /*
 ============
 Cvar_InfoValidate
@@ -175,13 +207,24 @@ Cvar_AddBetween
 Adds a variable between two others.
 ============
 */
-inline static cvar_t *Cvar_AddBetween(const char *var_name, const char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
+static cvar_t *Cvar_AddBetween(
+	const char *var_name, 
+	const char *var_value,
+	int flags,
+	unsigned int hash_key,
+	cvar_t **prev, 
+	cvar_t *next )
 {
 	cvar_t *nvar;
 
 	// variable needs to be created, check parameters
 	if (!var_value)
 		return NULL;
+
+	if ( !Q_strcasecmp( var_name, "skin" ) )
+	{
+		var_value = Cvar_SkinValidate( var_value );
+	}
 
 	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
 	{
@@ -215,6 +258,11 @@ cvar_t *Cvar_Get (const char *var_name, const char *var_value, int flags)
 {
 	cvar_t		*var, **prev;
 	unsigned int	i, hash_key;
+
+	if ( !Q_strcasecmp( var_name, "skin" ) )
+	{
+		var_value = Cvar_SkinValidate( var_value );
+	}
 
 	// validate variable name
 	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
@@ -302,6 +350,11 @@ cvar_t *Cvar_Set2 (const char *var_name, const char *value, qboolean force)
 	{
 		Com_Printf( "%s is read-only.\n", var_name );
 		return var;
+	}
+
+	if ( !Q_strcasecmp( var_name, "skin" ) )
+	{
+		value = Cvar_SkinValidate( value );
 	}
 
 	if (var->flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
