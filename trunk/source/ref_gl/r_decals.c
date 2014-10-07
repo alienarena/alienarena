@@ -184,7 +184,6 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	vbo_xyz = terrainmodel->vboIDs[(terrainmodel->typeFlags & MESH_INDEXED) ? 2 : 1];
 	GL_BindVBO (vbo_xyz);
 	in.framevbo = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
-	GL_BindVBO (0);
 	if (in.framevbo == NULL)
 	{
 		Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex positions: %u\n", qglGetError ());
@@ -194,20 +193,18 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	if ((terrainmodel->typeFlags & MESH_INDEXED))
 	{
 		GLuint vbo_indices = terrainmodel->vboIDs[1];
-		GL_BindIBO (vbo_indices);
-		in.vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-		GL_BindIBO (0);
+		GL_BindVBO (vbo_indices);
+		in.vtriangles = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
 		if (in.vtriangles == NULL)
 		{
+		    GL_BindVBO (0); // Do we need this?
 			Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
 			return;
 		}
 		
 		Mod_AddToDecalModel (pos, &in, out);
 		
-		GL_BindIBO (vbo_indices);
-		qglUnmapBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB);
-		GL_BindIBO (0);
+		qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
 	}
 	else
 	{

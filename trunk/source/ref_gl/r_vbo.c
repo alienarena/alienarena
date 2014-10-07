@@ -331,11 +331,10 @@ static void VB_BuildNullModelVBO (void)
 	qglGenBuffersARB (1, &nullmodel_vbo);
 	GL_BindVBO (nullmodel_vbo);
 	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, sizeof(vertbuf), vertbuf, GL_STATIC_DRAW_ARB);
-	GL_BindVBO (0);
 	qglGenBuffersARB (1, &nullmodel_ibo);
-	GL_BindIBO (nullmodel_ibo);
-	qglBufferDataARB (GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW_ARB);
-	GL_BindIBO (0);
+	GL_BindVBO (nullmodel_ibo);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, sizeof(indices), indices, GL_STATIC_DRAW_ARB);
+	GL_BindVBO (0);
 }
 
 void GL_DrawNullModel (void)

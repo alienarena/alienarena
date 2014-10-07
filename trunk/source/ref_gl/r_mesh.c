@@ -278,10 +278,9 @@ void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
 	
 	if ((mod->typeFlags & MESH_INDEXED))
 	{
-		GL_BindIBO (mod->vboIDs[1]);
+		GL_BindVBO (mod->vboIDs[1]);
 		vtriangles = va_arg (ap, const unsigned int *);
-		qglBufferDataARB (GL_ELEMENT_ARRAY_BUFFER, mod->num_triangles * 3 * sizeof(unsigned int), vtriangles, GL_STATIC_DRAW_ARB);
-		GL_BindIBO (0);
+		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->num_triangles * 3 * sizeof(unsigned int), vtriangles, GL_STATIC_DRAW_ARB);
 	}
 	
 	if (!(mod->typeFlags & MESH_MORPHTARGET))
