@@ -2229,7 +2229,7 @@ void BSP_EndBuildingLightmaps (void)
 
 static void R_DrawRadarEdges (void)
 {
-	int i, j;
+	int i;
 	float distance;
 	
 	if(r_minimap_zoom->value>=0.1) 
