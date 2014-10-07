@@ -224,13 +224,13 @@ static GLuint skybox_vbo;
 static void VB_BuildSkyboxVBO (void)
 {
 	// s, t, 1 (the 1 is for convenience)
-	static float skyquad_texcoords[4][3] = 
+	static const float skyquad_texcoords[4][3] = 
 	{
 		{0, 1, 1}, {0, 0, 1}, {1, 0, 1}, {1, 1, 1}
 	};
 	
 	// 1 = s, 2 = t, 3 = SKYDIST
-	static int	side_to_vec[6][3] =
+	static const int	side_to_vec[6][3] =
 	{
 		{3,-1,-2}, {-3,1,-2},
 		{1,3,-2}, {-1,-3,-2},
@@ -275,7 +275,7 @@ static GLuint wholescreen2D_vbo;
 
 static void VB_BuildWholeScreen2DVBO (void)
 {
-	static float vertbuf[4][2][2] = 
+	static const float vertbuf[4][2][2] = 
 	{
 	//	vertex coords/texcoords		vertically flipped texcoords
 		{{0, 0},					{0, 1}},
@@ -309,6 +309,46 @@ void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype)
 }
 
 
+// The "diamond" shape used as a default model and also as a marker for 
+// debugging/visualization.
+static GLuint nullmodel_vbo, nullmodel_ibo;
+
+static void VB_BuildNullModelVBO (void)
+{
+	static const float vertbuf[6][3] = 
+	{
+		{0, 0, -1},
+		{1, 0, 0}, {0, 1, 0}, {-1, 0, 0}, {0, -1, 0},
+		{0, 0, 1}
+	};
+	
+	static const unsigned int indices[3*8] =
+	{
+		0, 1, 2,	0, 2, 3,	0, 3, 4,	0, 4, 1,
+		5, 1, 4,	5, 4, 3,	5, 3, 2,	5, 2, 1
+	};
+	
+	qglGenBuffersARB (1, &nullmodel_vbo);
+	GL_BindVBO (nullmodel_vbo);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, sizeof(vertbuf), vertbuf, GL_STATIC_DRAW_ARB);
+	GL_BindVBO (0);
+	qglGenBuffersARB (1, &nullmodel_ibo);
+	GL_BindIBO (nullmodel_ibo);
+	qglBufferDataARB (GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW_ARB);
+	GL_BindIBO (0);
+}
+
+void GL_DrawNullModel (void)
+{
+	GL_BindVBO (nullmodel_vbo);
+	R_VertexPointer (3, 0, (void *)0);
+	GL_BindVBO (0);
+	GL_BindIBO (nullmodel_ibo);
+	qglDrawElements (GL_TRIANGLES, 3*8, GL_UNSIGNED_INT, 0);
+	GL_BindIBO (0);
+}
+
+
 void VB_WorldVCInit (void)
 {
 	//clear out previous buffer
@@ -323,6 +363,7 @@ static void VB_VCInit (void)
 	// "Special" VBOs
 	VB_BuildSkyboxVBO ();
 	VB_BuildWholeScreen2DVBO ();
+	VB_BuildNullModelVBO ();
 }
 
 void R_VCShutdown (void)
@@ -331,4 +372,6 @@ void R_VCShutdown (void)
 	VB_WorldVCInit ();
 	qglDeleteBuffersARB (1, &skybox_vbo);
 	qglDeleteBuffersARB (1, &wholescreen2D_vbo);
+	qglDeleteBuffersARB (1, &nullmodel_vbo);
+	qglDeleteBuffersARB (1, &nullmodel_ibo);
 }
