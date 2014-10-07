@@ -18,6 +18,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include <float.h>
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -438,8 +440,8 @@ void AddPointToBounds (vec3_t v, vec3_t mins, vec3_t maxs)
 
 int VectorCompare (vec3_t v1, vec3_t v2)
 {
-	if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2])
-			return 0;
+	if (fabs (v1[0] - v2[0]) > FLT_EPSILON || fabs (v1[1] - v2[1]) > FLT_EPSILON || fabs (v1[2] - v2[2]) > FLT_EPSILON)
+		return 0;
 
 	return 1;
 }

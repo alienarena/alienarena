@@ -313,11 +313,8 @@ typedef enum
     wholescreen_blank, wholescreen_textured, wholescreen_fliptextured
 } wholescreen_drawtype_t;
 void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype);
-void GL_BindVBO(vertCache_t *cache);
-void GL_BindIBO(vertCache_t *cache);
-vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache);
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, model_t *mod);
-extern void R_VCFree(vertCache_t *cache);
+#define GL_BindVBO(ptr) qglBindBufferARB (GL_ARRAY_BUFFER_ARB, ptr)
+#define GL_BindIBO(ptr) qglBindBufferARB (GL_ELEMENT_ARRAY_BUFFER, ptr)
 
 //Light Bloom
 extern void R_BloomBlend( refdef_t *fd );

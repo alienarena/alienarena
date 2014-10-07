@@ -75,36 +75,6 @@ void Matrix3x4GenFromODE(matrix3x4_t *out, const dReal *rot, const dReal *trans)
 	Vector4Set(out->c, rot[8], rot[9], rot[10], trans[2]);
 }
 
-void IQM_ByteswapVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles)
-{
-	int i;
-
-	if(iqmmodel->numvertexes > 16384)
-		return;
-	
-	for(i = 0; i < iqmmodel->numvertexes*2; i++)
-	{
-		*vtexcoord = LittleFloat (*vtexcoord);
-		vtexcoord++;
-	}
-
-	for(i = 0; i < iqmmodel->numvertexes*3; i++)
-	{
-		*vposition = LittleFloat (*vposition);
-		*vnormal = LittleFloat (*vnormal);
-		*vtriangles = LittleLong (*vtriangles);
-		vposition++;
-		vnormal++;
-		vtriangles++;
-	}
-	
-	for (i = 0; i < iqmmodel->numvertexes*4; i++)
-	{
-		*vtangent = LittleFloat (*vtangent);
-		vtangent++;
-	}
-}
-
 static qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 {
 	FILE *fp;
@@ -191,17 +161,6 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	return true;
 }
 
-void IQM_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, int *vtriangles, unsigned char *vblendweights, unsigned char *vblendindices)
-{
-	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
-	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
-	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
-	R_VCLoadData (VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
-	R_VCLoadData (VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
-	R_VCLoadData (VBO_STATIC, mod->numvertexes*4*sizeof(unsigned char), vblendweights, VBO_STORE_BLENDWEIGHTS, mod);
-	R_VCLoadData (VBO_STATIC, mod->numvertexes*4*sizeof(unsigned char), vblendindices, VBO_STORE_BLENDINDICES, mod);
-}
-
 // NOTE: this should be the only function that needs to care what version the
 // IQM file is.
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
@@ -209,9 +168,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	iqmheader_t *header;
 	int i, j, k;
 	const int *inelements;
-	int *vtriangles = NULL;
-	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
-	unsigned char *vblendweights = NULL, *vblendindices = NULL;
+	unsigned int *vtriangles = NULL;
+	skeletal_basevbo_t *basevbo = NULL;
+	mesh_framevbo_t *framevbo = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint = NULL;
 	iqmjoint2_t *joint2 = NULL;
@@ -226,6 +185,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	char *pskinpath_buffer;
 	int skinpath_buffer_length;
 	char *parse_string;
+	int remaining_varray_types;
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
@@ -242,6 +202,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	}
 
 	mod->type = mod_iqm;
+	mod->typeFlags = MESH_CASTSHADOWMAP | MESH_SKELETAL | MESH_INDEXED | MESH_DOSHADING;
 
 	// byteswap header
 	header->version = LittleLong(header->version);
@@ -282,8 +243,31 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		Com_Printf("%s has no animations\n", mod->name);
 		return false;
 	}
+	
+	mod->num_frames = header->num_anims;
+	mod->num_joints = header->num_joints;
+	mod->num_poses = header->num_frames;
+	mod->numvertexes = header->num_vertexes;
+	mod->num_triangles = header->num_triangles;
 
 	mod->extradata = Hunk_Begin (0x150000);
+	
+	basevbo = malloc (mod->numvertexes * sizeof(*basevbo));
+	framevbo = malloc (mod->numvertexes * sizeof(*framevbo));
+	
+	remaining_varray_types = 6;
+#define map_vertdata(dest,field,fieldtype,fieldconvert) \
+do { \
+	int j; \
+	const fieldtype *buf = (fieldtype *)(pbase + va[i].offset); \
+	for (j = 0; j < mod->numvertexes; j++) \
+	{ \
+		unsigned k; \
+		for (k = 0; k < va[i].size; k++) \
+			dest[j].field[k] = fieldconvert (*buf++); \
+	} \
+	remaining_varray_types--; \
+} while (0) // do-while to allow semicolon after
 
 	va = (iqmvertexarray_t *)(pbase + header->ofs_vertexarrays);
 	for (i = 0;i < (int)header->num_vertexarrays;i++)
@@ -297,34 +281,36 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		{
 		case IQM_POSITION:
 			if (va[i].format == IQM_FLOAT && va[i].size == 3)
-				vposition = (float *)(pbase + va[i].offset);
+				map_vertdata (framevbo, vertex, float, LittleFloat);
 			break;
 		case IQM_TEXCOORD:
 			if (va[i].format == IQM_FLOAT && va[i].size == 2)
-				vtexcoord = (float *)(pbase + va[i].offset);
+				map_vertdata (basevbo, common.st, float, LittleFloat);
 			break;
 		case IQM_NORMAL:
 			if (va[i].format == IQM_FLOAT && va[i].size == 3)
-				vnormal = (float *)(pbase + va[i].offset);
+				map_vertdata (framevbo, normal, float, LittleFloat);
 			break;
 		case IQM_TANGENT:
 			if (va[i].format == IQM_FLOAT && va[i].size == 4)
-				vtangent = (float *)(pbase + va[i].offset);
+				map_vertdata (framevbo, tangent, float, LittleFloat);
 			break;
 		case IQM_BLENDINDEXES:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-				vblendindices = (unsigned char *)(pbase + va[i].offset);
+				map_vertdata (basevbo, blendindices, byte,);
 			break;
 		case IQM_BLENDWEIGHTS:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-				vblendweights = (unsigned char *)(pbase + va[i].offset);
+				map_vertdata (basevbo, blendweights, byte,);
 			break;
 		}
 	}
-	if (!vposition || !vtexcoord || !vblendindices || !vblendweights)
+	if (remaining_varray_types != 0)
 	{
 		Com_Printf("%s is missing vertex array data\n", mod->name);
 		mod->extradatasize = Hunk_End ();
+		free (framevbo);
+		free (basevbo);
 		return false;
 	}
 
@@ -332,12 +318,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	mod->jointname = (char *)Hunk_Alloc(header->num_text * sizeof(char *));
 	memcpy(mod->jointname, text, header->num_text * sizeof(char *));
-
-	mod->num_frames = header->num_anims;
-	mod->num_joints = header->num_joints;
-	mod->num_poses = header->num_frames;
-	mod->numvertexes = header->num_vertexes;
-	mod->num_triangles = header->num_triangles;
 
 	// load the joints
 	mod->joints = (iqmjoint2_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint2_t));
@@ -545,7 +525,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		VectorCopy( tmp, mod->bbox[i] );
 	}
 
-	vtriangles = (int *) (pbase + header->ofs_triangles);
+	vtriangles = (unsigned int *) (pbase + header->ofs_triangles);
+	for(i = 0; i < mod->numvertexes*3; i++)
+		vtriangles[i] = LittleLong (vtriangles[i]);
 
 	// load triangle neighbors
 	// TODO: we can remove this when shadow volumes are gone, and simply not
@@ -564,8 +546,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			inelements += 3;
 		}
 	}
-
-	IQM_ByteswapVertexArrays(mod, vposition, vnormal, vtangent, vtexcoord, vtriangles);
 
 	/*
 	 * get skin pathname from <model>.skin file and initialize skin
@@ -614,10 +594,11 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		free(inversebaseframe);
 	
 	// load the VBO data
-
-	IQM_LoadVBO (mod, vposition, vnormal, vtangent, vtexcoord, vtriangles, vblendweights, vblendindices);
+	R_Mesh_LoadVBO (mod, 0, basevbo, vtriangles, framevbo);
 	
 	mod->extradatasize = Hunk_End ();
+	free (framevbo);
+	free (basevbo);
 	
 	return true;
 }

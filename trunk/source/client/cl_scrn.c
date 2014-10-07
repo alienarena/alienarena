@@ -76,7 +76,6 @@ int		crosshair_width, crosshair_height;
 void SCR_TimeRefresh_f (void);
 void SCR_Loading_f (void);
 
-extern void R_VCFreeFrame(void);
 extern cvar_t *rs_hasflag;
 extern cvar_t *rs_team;
 
@@ -2088,8 +2087,6 @@ void SCR_UpdateScreen (void)
 			// do 3D refresh drawing, and then update the screen
 			SCR_CalcVrect ();
 
-			need_free_vbo = true;
-
 			V_RenderView ( separation[i] );
 
 			SCR_DrawStats ();
@@ -2111,9 +2108,6 @@ void SCR_UpdateScreen (void)
 			SCR_DrawPause ();
 
 			SCR_DrawConsole ();
-
-			if (need_free_vbo)		
-				R_VCFreeFrame();
 
 			M_Draw ();
 

@@ -38,7 +38,6 @@ extern cvar_t *name;
 extern char map_music[260];
 extern cvar_t *background_music;
 extern qboolean IsVisible(vec3_t org1,vec3_t org2);
-extern void R_VCFreeFrame(void);
 
 cvar_t		*crosshair;
 cvar_t		*cl_testparticles;
@@ -47,8 +46,6 @@ cvar_t		*cl_testlights;
 cvar_t		*cl_testblend;
 
 cvar_t		*cl_stats;
-
-qboolean need_free_vbo;
 
 int			r_numdlights;
 dlight_t	r_dlights[MAX_DLIGHTS];
@@ -937,9 +934,6 @@ void V_RenderView( float stereo_separation )
 	}
 
 	cl.refdef.rdflags |= RDF_BLOOM;   //BLOOMS
-
-	R_VCFreeFrame();
-	need_free_vbo = false;
 
 	R_RenderFrame (&cl.refdef);
 	if (cl_stats->value)
