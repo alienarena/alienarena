@@ -313,6 +313,7 @@ typedef enum
     wholescreen_blank, wholescreen_textured, wholescreen_fliptextured
 } wholescreen_drawtype_t;
 void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype);
+void GL_DrawNullModel (void);
 #define GL_BindVBO(ptr) qglBindBufferARB (GL_ARRAY_BUFFER_ARB, ptr)
 #define GL_BindIBO(ptr) qglBindBufferARB (GL_ELEMENT_ARRAY_BUFFER, ptr)
 

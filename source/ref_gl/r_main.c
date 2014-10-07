@@ -440,7 +440,6 @@ R_DrawNullModel
 void R_DrawNullModel (void)
 {
 	vec3_t	shadelight;
-	int		i;
 
 	if ( currententity->flags & RF_FULLBRIGHT )
 		shadelight[0] = shadelight[1] = shadelight[2] = 1.0F;
@@ -449,21 +448,12 @@ void R_DrawNullModel (void)
 
     qglPushMatrix ();
 	R_RotateForEntity (currententity);
+	qglScalef (16, 16, 16);
 
 	qglDisable (GL_TEXTURE_2D);
 	qglColor3fv (shadelight);
-
-	qglBegin (GL_TRIANGLE_FAN);
-	qglVertex3f (0, 0, -16);
-	for (i=0 ; i<=4 ; i++)
-		qglVertex3f (16*cos(i*M_PI/2), 16*sin(i*M_PI/2), 0);
-	qglEnd ();
-
-	qglBegin (GL_TRIANGLE_FAN);
-	qglVertex3f (0, 0, 16);
-	for (i=4 ; i>=0 ; i--)
-		qglVertex3f (16*cos(i*M_PI/2), 16*sin(i*M_PI/2), 0);
-	qglEnd ();
+	
+	GL_DrawNullModel ();
 
 	qglColor3f (1,1,1);
 	qglPopMatrix ();

@@ -647,16 +647,16 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 void R_DrawMark (vec3_t origin, int type)
 {
 
-	int		i;
 	float scale;
 
 	if(type)
-		scale = 0.25;
+		scale = 0.25f;
 	else
-		scale = 1.0;
+		scale = 1.0f;
 
 	qglPushMatrix ();
 	qglTranslatef (origin[0],  origin[1],  origin[2]);
+	qglScalef (scale * 16.0f, scale * 16.0f, scale * 16.0f);
 
 	qglDisable (GL_TEXTURE_2D);
 	if(type == 1)
@@ -668,17 +668,7 @@ void R_DrawMark (vec3_t origin, int type)
 	else
 		qglColor3f(1,1,1);
 
-	qglBegin (GL_TRIANGLE_FAN);
-	qglVertex3f (0, 0, -scale*16);
-	for (i=0 ; i<=4 ; i++)
-		qglVertex3f (scale*16*cos(i*M_PI/2), scale*16*sin(i*M_PI/2), 0);
-	qglEnd ();
-
-	qglBegin (GL_TRIANGLE_FAN);
-	qglVertex3f (0, 0, scale*16);
-	for (i=4 ; i>=0 ; i--)
-		qglVertex3f (scale*16*cos(i*M_PI/2), scale*16*sin(i*M_PI/2), 0);
-	qglEnd ();
+	GL_DrawNullModel ();
 
 	qglColor3f (1,1,1);
 	qglPopMatrix ();
