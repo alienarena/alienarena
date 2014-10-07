@@ -9,26 +9,6 @@
 #define DECAL_POLYS MAX_TRIANGLES // This really is a bit high
 #define DECAL_VERTS (2*(3*DECAL_POLYS)) // double to make room for temp new verts
 
-void Decal_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, unsigned int *vtriangles)
-{
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
-	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
-}
-
-extern void MD2_VecsForTris(
-		const float *v0,
-		const float *v1,
-		const float *v2,
-		const float *st0,
-		const float *st1,
-		const float *st2,
-		vec3_t Tangent
-		);
-
-
 extern qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs);
 extern void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3]);
 
@@ -95,7 +75,7 @@ typedef struct
 	int npolys;
 	int nverts;
 	unsigned int *vtriangles;
-	float *vposition;
+	mesh_framevbo_t *framevbo;
 	// For moving terrain/mesh geometry to its actual position in the world
 	vec3_t origin;
 	// For rotating terrain/mesh geometry into its actual orientation
@@ -141,7 +121,7 @@ static void Mod_AddToDecalModel (const decalorientation_t *pos, const decalinput
 			vec3_t tmp, tmp2;
 			
 			// First, transform the mesh geometry into world space
-			VectorCopy (&in->vposition[3*in->vtriangles[3*trinum+i]], tmp);
+			VectorCopy (in->framevbo[in->vtriangles[3*trinum+i]].vertex, tmp);
 			VectorClear (tmp2);
 			for (j = 0; j < 3; j++)
 			{
@@ -190,7 +170,7 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 {
 	model_t *terrainmodel;
 	
-	vertCache_t	*vbo_xyz;
+	GLuint vbo_xyz;
 	
 	decalinput_t in;
 	
@@ -201,22 +181,22 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	in.npolys = terrainmodel->num_triangles;
 	in.nverts = terrainmodel->numvertexes;
 	
-	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ, terrainmodel, NULL);
+	vbo_xyz = terrainmodel->vboIDs[(terrainmodel->typeFlags & MESH_INDEXED) ? 2 : 1];
 	GL_BindVBO (vbo_xyz);
-	in.vposition = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
-	GL_BindVBO (NULL);
-	if (in.vposition == NULL)
+	in.framevbo = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
+	GL_BindVBO (0);
+	if (in.framevbo == NULL)
 	{
 		Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex positions: %u\n", qglGetError ());
 		return;
 	}
 	
-	if (modtypes[terrainmodel->type].indexed)
+	if ((terrainmodel->typeFlags & MESH_INDEXED))
 	{
-		vertCache_t	*vbo_indices = R_VCFindCache (VBO_STORE_INDICES, terrainmodel, NULL);
+		GLuint vbo_indices = terrainmodel->vboIDs[1];
 		GL_BindIBO (vbo_indices);
 		in.vtriangles = qglMapBufferARB (GL_ELEMENT_ARRAY_BUFFER, GL_READ_ONLY_ARB);
-		GL_BindIBO (NULL);
+		GL_BindIBO (0);
 		if (in.vtriangles == NULL)
 		{
 			Com_Printf ("Mod_AddTerrainToDecalModel: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
@@ -227,7 +207,7 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 		
 		GL_BindIBO (vbo_indices);
 		qglUnmapBufferARB (GL_ELEMENT_ARRAY_BUFFER_ARB);
-		GL_BindIBO (NULL);
+		GL_BindIBO (0);
 	}
 	else
 	{
@@ -246,7 +226,7 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	
 	GL_BindVBO (vbo_xyz);
 	qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
-	GL_BindVBO (NULL);
+	GL_BindVBO (0);
 }
 
 // Add geometry from the BSP to the decal
@@ -271,10 +251,10 @@ static void Mod_AddBSPToDecalModel (const decalorientation_t *pos, decalprogress
 			continue;
 		
 		in.nverts = surf->polys->numverts;
-		in.vposition = Z_Malloc (in.nverts * 3 * sizeof(float));
+		in.framevbo = Z_Malloc (in.nverts * sizeof(*in.framevbo));
 		
 		for (vertnum = 0, v = surf->polys->verts[0]; vertnum < in.nverts; vertnum++, v += VERTEXSIZE)
-			VectorCopy (v, &in.vposition[3*vertnum]);
+			VectorCopy (v, in.framevbo[vertnum].vertex);
 		
 		in.npolys = in.nverts - 2;
 		in.vtriangles = Z_Malloc (in.npolys * 3 * sizeof(unsigned int));
@@ -289,7 +269,7 @@ static void Mod_AddBSPToDecalModel (const decalorientation_t *pos, decalprogress
 		
 		Mod_AddToDecalModel (pos, &in, out);
 		
-		Z_Free (in.vposition);
+		Z_Free (in.framevbo);
 		Z_Free (in.vtriangles);
 	}
 }
@@ -589,7 +569,8 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	decalprogress_t data;
 	int i, j;
 	const char *tex_path = NULL;
-	float *vnormal, *vtangent, *vtexcoord;
+	nonskeletal_basevbo_t *basevbo = NULL;
+	mesh_framevbo_t *framevbo = NULL;
 	image_t	*tex = NULL;
 	char	*token;
 	qboolean maxborder;
@@ -643,6 +624,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	}
 	
 	mod->type = mod_decal;
+	mod->typeFlags = MESH_INDEXED | MESH_DECAL;
 	
 	if (!tex_path)
 		Com_Error (ERR_DROP, "Mod_LoadDecalFile: Missing texture in %s!", mod->name);
@@ -676,59 +658,25 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	
 	ReUnifyVertexes (&data);
 	
-	vnormal = Z_Malloc (data.nverts*sizeof(vec3_t));
-	vtangent = Z_Malloc (data.nverts*sizeof(vec4_t));
-	vtexcoord = Z_Malloc (data.nverts*sizeof(vec2_t));
-	
 	mod->numvertexes = data.nverts;
 	mod->num_triangles = data.npolys;
+	
+	basevbo = Z_Malloc (mod->numvertexes * sizeof(*basevbo));
+	framevbo = Z_Malloc (mod->numvertexes * sizeof(*framevbo));
 	
 	for (i = 0; i < data.nverts; i++)
 	{
 		for (j = 0; j < 2; j++)
-			vtexcoord[2*i+!j] = 1.0-(data.verts[i][j] - mod->mins[j]) / (mod->maxs[j] - mod->mins[j]);
+			basevbo[i].st[!j] = 1.0-(data.verts[i][j] - mod->mins[j]) / (mod->maxs[j] - mod->mins[j]);
+		VectorCopy (data.verts[i], framevbo[i].vertex);
 	}
 	
-	// Calculate normals and tangents
-	for (i = 0; i < data.npolys; i++)
-	{
-		int j;
-		vec3_t v1, v2, normal, tangent;
-		unsigned int *triangle = data.polys[i];
-		
-		VectorSubtract (data.verts[triangle[0]], data.verts[triangle[1]], v1);
-		VectorSubtract (data.verts[triangle[2]], data.verts[triangle[1]], v2);
-		CrossProduct (v2, v1, normal);
-		VectorScale (normal, -1.0/VectorLength(normal), normal);
-		
-		MD2_VecsForTris (	data.verts[triangle[0]], 
-							data.verts[triangle[1]], 
-							data.verts[triangle[2]],
-							&vtexcoord[triangle[0]], 
-							&vtexcoord[triangle[1]], 
-							&vtexcoord[triangle[2]],
-							tangent );
-		
-		for (j = 0; j < 3; j++)
-		{
-			VectorAdd (&vnormal[3*triangle[j]], normal, &vnormal[3*triangle[j]]);
-			VectorAdd (&vtangent[4*triangle[j]], tangent, &vtangent[4*triangle[j]]);
-		}
-	}
+	mod->extradata = Hunk_Begin (3 * sizeof(*mod->vboIDs));
+	R_Mesh_LoadVBO (mod, MESHLOAD_CALC_NORMAL|MESHLOAD_CALC_TANGENT, basevbo, &data.polys[0][0], framevbo);
+	mod->extradatasize = Hunk_End ();
 	
-	// Normalize the average normals and tangents
-	for (i = 0; i < mod->numvertexes; i++)
-	{
-		VectorNormalize (&vnormal[3*i]);
-		VectorNormalize (&vtangent[4*i]);
-		vtangent[4*i+3] = 1.0;
-	}
-	
-	Decal_LoadVBO (mod, &data.verts[0][0], vnormal, vtangent, vtexcoord, &data.polys[0][0]);
-	
-	Z_Free (vnormal);
-	Z_Free (vtangent);
-	Z_Free (vtexcoord);
+	Z_Free (framevbo);
+	Z_Free (basevbo);
 }
 
 void R_ParseDecalEntity (char *match, char *block)

@@ -4,29 +4,11 @@
 
 #include "r_local.h"
 
-void Terrain_LoadVBO (model_t *mod, float *vposition, float *vnormal, float *vtangent, float *vtexcoord, unsigned int *vtriangles)
-{
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec2_t), vtexcoord, VBO_STORE_ST, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vposition, VBO_STORE_XYZ, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec3_t), vnormal, VBO_STORE_NORMAL, mod);
-	R_VCLoadData(VBO_STATIC, mod->numvertexes*sizeof(vec4_t), vtangent, VBO_STORE_TANGENT, mod);
-	R_VCLoadData(VBO_STATIC, mod->num_triangles*3*sizeof(unsigned int), vtriangles, VBO_STORE_INDICES, mod);
-}
-
-extern void MD2_VecsForTris(
-		const float *v0,
-		const float *v1,
-		const float *v2,
-		const float *st0,
-		const float *st1,
-		const float *st2,
-		vec3_t Tangent
-		);
-
 void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 {
 	int i;
-	float *vnormal, *vtangent;
+	nonskeletal_basevbo_t *basevbo = NULL;
+	mesh_framevbo_t *framevbo = NULL;
 	image_t	*tex = NULL;
 	terraindata_t data;
 	int ndownward;
@@ -49,6 +31,7 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	
 	mod->skins[0] = tex;
 	mod->type = mod_terrain;
+	mod->typeFlags = MESH_INDEXED;
 	
 	if (mod->skins[0] != NULL)
 		mod->script = mod->skins[0]->script;
@@ -77,56 +60,41 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 		VectorCopy( tmp, mod->bbox[i] );
 	}
 	
-	vnormal = Z_Malloc (mod->numvertexes*sizeof(vec3_t));
-	vtangent = Z_Malloc (mod->numvertexes*sizeof(vec4_t));
+	basevbo = Z_Malloc (mod->numvertexes * sizeof(*basevbo));
+	framevbo = Z_Malloc (mod->numvertexes * sizeof(*framevbo));
+	
+	for (i = 0; i < mod->numvertexes; i++)
+	{
+	    Vector2Copy (&data.vert_texcoords[2*i], basevbo[i].st);
+	    VectorCopy (&data.vert_positions[3*i], framevbo[i].vertex);
+	}
 	
 	ndownward = 0;
 	
-	// Calculate normals and tangents
 	for (i = 0; i < mod->num_triangles; i++)
 	{
-		int j;
-		vec3_t v1, v2, normal, tangent;
+		vec3_t v1, v2, normal;
 		unsigned int *triangle = &data.tri_indices[3*i];
 		
 		// leave normal scaled proportional to triangle area
 		VectorSubtract (&data.vert_positions[3*triangle[0]], &data.vert_positions[3*triangle[1]], v1);
 		VectorSubtract (&data.vert_positions[3*triangle[2]], &data.vert_positions[3*triangle[1]], v2);
 		CrossProduct (v2, v1, normal);
-		VectorScale (normal, -1.0f, normal);
 		
-		if (normal[2] < 0.0f)
+		if (normal[2] > 0.0f)
 			ndownward++;
-		
-		MD2_VecsForTris (	&data.vert_positions[3*triangle[0]], 
-							&data.vert_positions[3*triangle[1]], 
-							&data.vert_positions[3*triangle[2]],
-							&data.vert_texcoords[2*triangle[0]], 
-							&data.vert_texcoords[2*triangle[1]], 
-							&data.vert_texcoords[2*triangle[2]],
-							tangent );
-		
-		for (j = 0; j < 3; j++)
-		{
-			VectorAdd (&vnormal[3*triangle[j]], normal, &vnormal[3*triangle[j]]);
-			VectorAdd (&vtangent[4*triangle[j]], tangent, &vtangent[4*triangle[j]]);
-		}
 	}
 	
 	if (ndownward > 0)
 		Com_Printf ("WARN: %d downward facing polygons in %s!\n", ndownward, mod->name);
 	
-	// Normalize the average normals and tangents
-	for (i = 0; i < mod->numvertexes; i++)
-	{
-		VectorNormalize (&vnormal[3*i]);
-		VectorNormalize (&vtangent[4*i]);
-		vtangent[4*i+3] = 1.0;
-	}
-	
-	Terrain_LoadVBO (mod, data.vert_positions, vnormal, vtangent, data.vert_texcoords, data.tri_indices);
+	mod->extradata = Hunk_Begin (3 * sizeof(*mod->vboIDs));
+	R_Mesh_LoadVBO (mod, MESHLOAD_CALC_NORMAL|MESHLOAD_CALC_TANGENT, basevbo, data.tri_indices, framevbo);
+	mod->extradatasize = Hunk_End ();
 	
 	CleanupTerrainData (&data);
+	Z_Free (framevbo);
+	Z_Free (basevbo);
 }
 
 void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)

@@ -1850,6 +1850,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	r_numWorldLights = 0;
 
 	loadmodel->type = mod_brush;
+	loadmodel->typeFlags = MESH_CASTSHADOWMAP | MESH_DOSHADING; // XXX: does nothing yet for mod_brush
 	if (loadmodel != mod_known)
 		Com_Error (ERR_DROP, "Loaded a brush model after the world");
 

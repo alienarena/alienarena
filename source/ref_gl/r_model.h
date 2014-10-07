@@ -336,45 +336,51 @@ typedef struct {
 
 typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, mod_decal, num_modtypes} modtype_t;
 
-// This array is a look-up table for the traits of various mesh formats.
-static struct 
+// These flags (for mod->typeFlags) encode the traits of various mesh formats.
+
+// If set, this model type can cast shadowmaps (otherwise it may use stencils.)
+#define	MESH_CASTSHADOWMAP	1
+
+// Morph target animation is what the MD2 format uses exclusively. Vertex
+// positions, normals, and tangents are stored in VBOs for every frame and
+// interpolated by the vertex shader. It's possible to combine this with
+// skeletal animation, although we don't support any formats that do this yet.
+#define MESH_MORPHTARGET	2
+
+// If set, the blendweights and blendindexes vertex attributes are used. NOTE:
+// this is still basically IQM-specific, we're not trying to generalize across
+// every possible skeletal format-- yet.
+#define MESH_SKELETAL		4
+
+// Set if the vertex data is indexed. If so, an IBO is used.
+#define MESH_INDEXED		8
+
+// Set if a polygon offset should be used to prevent z-fighting, as well as if
+// blending should be used.
+#define MESH_DECAL			16
+
+// Set if any sort of static per-pixel or per-vertex lighting should be done
+// on this mesh type. (The eventual goal is to do dynamic lighting on all mesh
+// types.)
+#define MESH_DOSHADING		32
+
+// XXX: These structs should always be packed tight!
+typedef struct
 {
-	// If true, this model type can cast shadowmaps.
-	qboolean castshadowmap;
-	
-	// Morph target animation is what the MD2 format uses exclusively. Vertex
-	// positions, normals, and tangents are stored in VBOs for every frame
-	// and interpolated by the vertex shader. It's possible to combine this
-	// with skeletal animation, although we don't support any formats that do
-	// this yet.
-	qboolean morphtarget; 
-	
-	// If true, the blendweights and blendindexes vertex attributes are used.
-	// NOTE: this is still basically IQM-specific, we're not trying to
-	// generalize across every possible skeletal format-- yet.
-	qboolean skeletal;
-	
-	// True if the vertex data is indexed. If so, an IBO is used.
-	qboolean indexed;
-	
-	// True if a polygon offset should be used to prevent z-fighting, as well
-	// as if blending should be used.
-	qboolean decal;
-	
-	// True if any sort of static per-pixel or per-vertex lighting should be
-	// done on this mesh type. (The eventual goal is to do dynamic lighting on
-	// all mesh types.)
-	qboolean doShading;
-} modtypes[num_modtypes] = 
+	vec2_t					st;
+} nonskeletal_basevbo_t;
+typedef struct
 {
-	{true,	false,	false,	false,	false,	true},	// mod_bad- this is ignored
-	{true,	false,	false,	false,	false,	true},	// mod_brush- BSP brush models- this is ignored
-	{false,	true,	false,	false,	false,	true},	// mod_md2- TODO: these should use shadowmaps as well
-	{true,	false,	true,	true,	false,	true},	// mod_iqm
-	{false,	false,	false,	true,	false,	false},	// mod_terrain
-	{false,	false,	false,	true,	true,	false},	// mod_decal
-	// New model types go here
-};
+	nonskeletal_basevbo_t	common;  // sizeof(float) == 4 so should be ok
+	unsigned char			blendweights[4];
+	unsigned char			blendindices[4];
+} skeletal_basevbo_t;
+typedef struct
+{
+	vec3_t					vertex;
+	vec3_t					normal;
+	vec4_t					tangent;
+} mesh_framevbo_t;
 
 typedef enum	{	simplecolor_white, simplecolor_green, simplecolor_blue, 
 					simplecolor_purple	} simplecolor_t;
@@ -386,6 +392,7 @@ typedef struct model_s
 	int			registration_sequence;
 
 	modtype_t	type;
+	int			typeFlags;
 
 //
 // volume occupied by the model graphics
@@ -453,6 +460,7 @@ typedef struct model_s
 	void		*extradata;
 
 	int			num_frames;
+	GLuint		*vboIDs;
 
 	//iqm skeletal model info
 	int				num_joints;
@@ -481,6 +489,14 @@ typedef struct model_s
 	simplecolor_t		simple_color;
 
 } model_t;
+
+// cast basevbo to skeletal if you have to
+typedef mesh_framevbo_t *(*Mesh_GetFrameVBO_Callback) (void *data, int framenum);
+// Some mesh file formats lack tangent/normal info; in that case, it must be
+// calculated at load time.
+#define MESHLOAD_CALC_NORMAL 1
+#define MESHLOAD_CALC_TANGENT 2
+void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...);
 
 //============================================================================
 

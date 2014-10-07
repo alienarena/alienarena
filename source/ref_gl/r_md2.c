@@ -26,11 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-static vec3_t VertexArray[MAX_VERTICES];
-static vec2_t TexCoordArray[MAX_VERTICES];
-static vec3_t NormalsArray[MAX_VERTICES];
-static vec4_t TangentsArray[MAX_VERTICES];
-
 /*
 ========================
 MD2_FindTriangleWithEdge
@@ -106,234 +101,48 @@ static void MD2_BuildTriangleNeighbors(neighbors_t * neighbors,
 	}
 }
 
-#if 0
-void MD2_VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
+static mesh_framevbo_t *MD2_GetFrameVBO (void *data, int framenum)
 {
-	vec3_t	vec1, vec2;
-	vec3_t	planes[3];
-	float	tmp;
-	int		i;
-
-	for (i=0; i<3; i++)
-	{
-		vec1[0] = v1[i]-v0[i];
-		vec1[1] = st1[0]-st0[0];
-		vec1[2] = st1[1]-st0[1];
-		vec2[0] = v2[i]-v0[i];
-		vec2[1] = st2[0]-st0[0];
-		vec2[2] = st2[1]-st0[1];
-		VectorNormalize(vec1);
-		VectorNormalize(vec2);
-		CrossProduct(vec1,vec2,planes[i]);
-	}
-
-	for (i=0; i<3; i++)
-	{
-		tmp = 1.0 / planes[i][0];
-		Tangent[i] = -planes[i][1]*tmp;
-	}
-	VectorNormalize(Tangent);
-}
-#else
-// Math rearrangement for MD2 load speedup
-void MD2_VecsForTris(
-		const float *v0,
-		const float *v1,
-		const float *v2,
-		const float *st0,
-		const float *st1,
-		const float *st2,
-		vec3_t Tangent
-		)
-{
-	vec3_t vec1, vec2;
-	vec3_t planes[3];
-	float tmp;
-	float vec1_y, vec1_z, vec1_nrml;
-	float vec2_y, vec2_z, vec2_nrml;
-	int i;
-
-	vec1_y = st1[0]-st0[0];
-	vec1_z = st1[1]-st0[1];
-	vec1_nrml = (vec1_y*vec1_y) + (vec1_z*vec1_z); // partial for normalize
-
-	vec2_y = st2[0]-st0[0];
-	vec2_z = st2[1]-st0[1];
-	vec2_nrml = (vec2_y*vec2_y) + (vec2_z*vec2_z); // partial for normalize
-
-	for (i=0; i<3; i++)
-	{
-		vec1[0] = v1[i]-v0[i];
-		// VectorNormalize(vec1);
-		tmp = (vec1[0] * vec1[0]) + vec1_nrml;
-		tmp = sqrt(tmp);
-		if ( tmp > 0.0 )
-		{
-			tmp = 1.0 / tmp;
-			vec1[0] *= tmp;
-			vec1[1] = vec1_y * tmp;
-			vec1[2] = vec1_z * tmp;
-		}
-
-		vec2[0] = v2[i]-v0[i];
-		// --- VectorNormalize(vec2);
-		tmp = (vec2[0] * vec2[0]) + vec2_nrml;
-		tmp = sqrt(tmp);
-		if ( tmp > 0.0 )
-		{
-			tmp = 1.0 / tmp;
-			vec2[0] *= tmp;
-			vec2[1] = vec2_y * tmp;
-			vec2[2] = vec2_z * tmp;
-		}
-
-		// --- CrossProduct(vec1,vec2,planes[i]);
-		planes[i][0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
-		planes[i][1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
-		planes[i][2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
-		// ---
-
-		tmp = 1.0 / planes[i][0];
-		Tangent[i] = -planes[i][1]*tmp;
-	}
-
-	VectorNormalize(Tangent);
-}
-#endif
-
-static void MD2_PopulateFrameArrays (dmdl_t *pheader, fstvert_t *st, int framenum)
-{
-	int				i, j, k, l, va;
+	dmdl_t			*pheader = (dmdl_t *)data;
+	int				va, i;
 	daliasframe_t	*frame;
-	dtrivertx_t		*verts, *v;
-	vec3_t			normal, triangle[3], v1, v2;
+	dtrivertx_t		*verts;
 	dtriangle_t		*tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-	vec3_t	normals_[MAX_VERTS];
-	vec3_t	tangents_[MAX_VERTS];
+	static mesh_framevbo_t framevbo[MAX_TRIANGLES * 3];
+	
+	memset (framevbo, 0, sizeof(framevbo));
 
 	frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + framenum * pheader->framesize);
 	verts = frame->verts;
 
-	memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
-	memset(tangents_, 0, pheader->num_xyz*sizeof(vec3_t));
-
-	//for all tris
-	for (j=0; j<pheader->num_tris; j++)
-	{
-		vec3_t	vv0,vv1,vv2;
-		vec3_t tangent;
-		
-		//make 3 vec3_t's of this triangle's vertices
-		for (k=0; k<3; k++)
-		{
-			l = tris[j].index_xyz[k];
-			v = &verts[l];
-			for (l=0; l<3; l++)
-				triangle[k][l] = v->v[l];
-		}
-
-		//calculate normal
-		VectorSubtract(triangle[0], triangle[1], v1);
-		VectorSubtract(triangle[2], triangle[1], v2);
-		CrossProduct(v2,v1, normal);
-		VectorScale(normal, -1.0/VectorLength(normal), normal);
-		
-		// calculate tangent
-		vv0[0] = (float)verts[tris[j].index_xyz[0]].v[0];
-		vv0[1] = (float)verts[tris[j].index_xyz[0]].v[1];
-		vv0[2] = (float)verts[tris[j].index_xyz[0]].v[2];
-		vv1[0] = (float)verts[tris[j].index_xyz[1]].v[0];
-		vv1[1] = (float)verts[tris[j].index_xyz[1]].v[1];
-		vv1[2] = (float)verts[tris[j].index_xyz[1]].v[2];
-		vv2[0] = (float)verts[tris[j].index_xyz[2]].v[0];
-		vv2[1] = (float)verts[tris[j].index_xyz[2]].v[1];
-		vv2[2] = (float)verts[tris[j].index_xyz[2]].v[2];
-
-		MD2_VecsForTris(vv0, vv1, vv2,
-					&st[tris[j].index_st[0]].s,
-					&st[tris[j].index_st[1]].s,
-					&st[tris[j].index_st[2]].s,
-					tangent);
-		
-		for (k=0; k<3; k++)
-		{
-			l = tris[j].index_xyz[k];
-			VectorAdd(normals_[l], normal, normals_[l]);
-			VectorAdd(tangents_[l], tangent, tangents_[l]);
-		}
-	}
-
-	for (j=0; j<pheader->num_xyz; j++)
-		for (k=j+1; k<pheader->num_xyz; k++)
-			if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
-			{
-				// Have to make normalized versions or else the dot-product
-				// won't come out right.
-				vec3_t jnormal, knormal;
-				VectorCopy (normals_[j], jnormal);
-				VectorNormalize (jnormal);
-				VectorCopy (normals_[k], knormal);
-				VectorNormalize (knormal);
-				
-				// 45 degrees is our threshold for merging vertex normals.
-				if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
-				{
-					VectorAdd(normals_[j], normals_[k], normals_[j]);
-					VectorCopy(normals_[j], normals_[k]);
-					VectorAdd(tangents_[j], tangents_[k], tangents_[j]);
-					VectorCopy(tangents_[j], tangents_[k]);
-				}
-			}
-
-	//normalize average
-	for (j=0; j<pheader->num_xyz; j++)
-	{
-		VectorNormalize(normals_[j]);
-		VectorNormalize(tangents_[j]);
-	}
-	
-	// Now that the normals and tangents are calculated, prepare them to be
-	// loaded into the VBO.
 	for (va = 0; va < pheader->num_tris*3; va++)
 	{
-	    int index_xyz = tris[va/3].index_xyz[va%3];
-	    
-	    VectorCopy (normals_[index_xyz], NormalsArray[va]);
-	    
-		VectorCopy (tangents_[index_xyz], TangentsArray[va]);
-		TangentsArray[va][3] = 1.0;
+		int index_xyz = tris[va/3].index_xyz[va%3];
 		
 		for (i = 0; i < 3; i++)
-			VertexArray[va][i] = verts[index_xyz].v[i] * frame->scale[i] + frame->translate[i];
+			framevbo[va].vertex[i] = verts[index_xyz].v[i] * frame->scale[i] + frame->translate[i];
 	}
+	
+	return framevbo;
 }
 
-void MD2_LoadVBO (model_t *mod, dmdl_t *pheader, fstvert_t *st)
+static void MD2_LoadVBO (model_t *mod, dmdl_t *pheader, fstvert_t *st)
 {
-	int framenum, va;
-	
-	dtriangle_t		*tris;
+	int va;
+	static nonskeletal_basevbo_t basevbo[MAX_TRIANGLES * 3];
+	dtriangle_t *tris;
 	
 	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-	
-	for (framenum = 0; framenum < mod->num_frames; framenum++)
-	{
-		MD2_PopulateFrameArrays (pheader, st, framenum);
-	    
-		R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ+framenum, mod);
-		R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL+framenum, mod);
-		R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT+framenum, mod);
-	}
 	
 	for (va = 0; va < pheader->num_tris*3; va++)
 	{
 		int index_st = tris[va/3].index_st[va%3];
 	
-		TexCoordArray[va][0] = st[index_st].s;
-		TexCoordArray[va][1] = st[index_st].t;
+		basevbo[va].st[0] = st[index_st].s;
+		basevbo[va].st[1] = st[index_st].t;
 	}
 	
-	R_VCLoadData (VBO_STATIC, pheader->num_tris*3*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, mod);
+	R_Mesh_LoadVBO (mod, MESHLOAD_CALC_NORMAL|MESHLOAD_CALC_TANGENT, basevbo, MD2_GetFrameVBO, (void *)pheader);
 }
 
 /*
@@ -347,7 +156,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	int					i, j;
 	dmdl_t				*pinmodel, *pheader;
 	dstvert_t			*pinst, *poutst;
-	dtriangle_t			*pintri, *pouttri, *tris;
+	dtriangle_t			*pintri, *pouttri;
 	daliasframe_t		*pinframe, *poutframe, *pframe;
 	int					version;
 	int					cx;
@@ -449,6 +258,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 	mod->type = mod_md2;
+	mod->typeFlags = MESH_MORPHTARGET | MESH_DOSHADING; // TODO: these should use shadowmaps as well
 	mod->num_frames = pheader->num_frames;
 	
 	// skin names are not always valid or file may not exist
@@ -493,8 +303,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 	cx = pheader->num_xyz * pheader->num_frames * sizeof(byte);
-
-	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
 
 	mod->num_triangles = pheader->num_tris;
 	mod->numvertexes = 3*mod->num_triangles; // TODO: use MD2's indexing!

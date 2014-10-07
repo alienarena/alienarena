@@ -61,6 +61,7 @@ void R_LoadVBOSubsystem(void)
 	}
 }
 
+#define MAX_VBO_XYZs		65536
 static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 {
 	glpoly_t *p;
@@ -212,128 +213,13 @@ void GL_SetupWorldVBO (void)
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
-void GL_BindVBO(vertCache_t *cache)
-{
-	if (cache) 
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, cache->id);
-	else
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-}
-
-void GL_BindIBO(vertCache_t *cache)
-{
-	if (cache) 
-		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, cache->id);
-	else
-		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-vertCache_t *R_VCFindCache(vertStoreMode_t store, model_t *mod, vertCache_t *tryCache)
-{
-	vertCache_t	*cache;
-
-	if (tryCache != NULL && tryCache->mod == mod && tryCache->store == store)
-		return tryCache;
-
-	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = cache->next)
-	{
-		if (cache->mod == mod && cache->store == store)
-			return cache;
-	}
-
-	return NULL;
-}
-
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, model_t *mod)
-{
-	vertCache_t *cache;
-
-	if (!vcm.freeVertCache)
-		Com_Error(ERR_FATAL, "VBO cache overflow\n");
-	
-	cache = vcm.freeVertCache;
-	cache->mode = mode;
-	cache->size = size;
-	cache->pointer = buffer;
-	cache->store = store;
-	cache->mod = mod;
-	
-	// link
-	vcm.freeVertCache = vcm.freeVertCache->next;
-
-	cache->next = vcm.activeVertCache.next;
-	cache->prev = &vcm.activeVertCache;
-
-	vcm.activeVertCache.next->prev = cache;
-	vcm.activeVertCache.next = cache;
-
-	if(store == VBO_STORE_INDICES)
-		GL_BindIBO(cache);
-	else
-		GL_BindVBO(cache);
-
-	switch (cache->mode)
-	{
-		case VBO_STATIC:
-			if(store == VBO_STORE_INDICES)
-				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
-			else
-				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
-			break;
-		case VBO_DYNAMIC:
-			if(store == VBO_STORE_INDICES)
-				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
-			else
-				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
-			break;
-	}
-
-	if(store == VBO_STORE_INDICES)
-		GL_BindIBO(NULL);
-	else
-		GL_BindVBO(NULL);	
-
-	return cache;
-}
-
-void R_VCFree(vertCache_t *cache)
-{
-	if (!cache)
-		return;
-	
-	// unlink
-	cache->prev->next = cache->next;
-	cache->next->prev = cache->prev;
-
-	cache->next = vcm.freeVertCache;
-	vcm.freeVertCache = cache;
-}
-
-/*
-===============
-R_VCFreeFrame
-Deletes all non-STATIC buffers from the previous frame.
-===============
-*/
-void R_VCFreeFrame()
-{
-	vertCache_t	*cache, *next;
-
-	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
-	{
-		next = cache->next;
-		if (cache->mode != VBO_STATIC)
-			R_VCFree(cache);
-	}
-}
-
 
 
 // "Special" VBOs: snippets of static geometry that stay unchanged between
 // maps.
 
 
-static vertCache_t *skybox_vbo;
+static GLuint skybox_vbo;
 
 static void VB_BuildSkyboxVBO (void)
 {
@@ -368,7 +254,10 @@ static void VB_BuildSkyboxVBO (void)
 			vertbuf[i][axis] = skyquad_texcoords[vertnum][axis - 3];
 	}
 	
-	skybox_vbo = R_VCLoadData (VBO_STATIC, sizeof(vertbuf), vertbuf, VBO_STORE_XYZ, NULL);
+	qglGenBuffersARB (1, &skybox_vbo);
+	GL_BindVBO (skybox_vbo);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, sizeof(vertbuf), vertbuf, GL_STATIC_DRAW_ARB);
+	GL_BindVBO (0);
 }
 
 void GL_SetupSkyboxVBO (void)
@@ -376,13 +265,13 @@ void GL_SetupSkyboxVBO (void)
 	GL_BindVBO (skybox_vbo);
 	R_VertexPointer (3, 5*sizeof(float), (void *)0);
 	R_TexCoordPointer (0, 5*sizeof(float), (void *)(3*sizeof(float)));
-	GL_BindVBO (NULL);
+	GL_BindVBO (0);
 }
 
 
 // For fullscreen postprocessing passes, etc. To be rendered in a glOrtho
 // coordinate space from 0 to 1 on each axis.
-static vertCache_t *wholescreen2D_vbo;
+static GLuint wholescreen2D_vbo;
 
 static void VB_BuildWholeScreen2DVBO (void)
 {
@@ -395,7 +284,10 @@ static void VB_BuildWholeScreen2DVBO (void)
 		{{0, 1},					{0, 0}}
 	};
 	
-	wholescreen2D_vbo = R_VCLoadData (VBO_STATIC, sizeof(vertbuf), vertbuf, VBO_STORE_XYZ, NULL);
+	qglGenBuffersARB (1, &wholescreen2D_vbo);
+	GL_BindVBO (wholescreen2D_vbo);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, sizeof(vertbuf), vertbuf, GL_STATIC_DRAW_ARB);
+	GL_BindVBO (0);
 }
 
 void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype)
@@ -413,42 +305,20 @@ void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype)
 		R_TexCoordPointer (0, 4*sizeof(float), (void *)(2*sizeof(float)));
 		break;
 	}
-	GL_BindVBO (NULL);
+	GL_BindVBO (0);
 }
 
 
-void VB_WorldVCInit()
+void VB_WorldVCInit (void)
 {
 	//clear out previous buffer
-	qglDeleteBuffersARB(1, &bsp_vboId);
-	qglDeleteBuffersARB(1, &minimap_vboId);
+	qglDeleteBuffersARB (1, &bsp_vboId);
+	qglDeleteBuffersARB (1, &minimap_vboId);
 }
 
 static void VB_VCInit (void)
 {
-	int	i;
-	
 	VB_WorldVCInit ();
-
-	for (i=0; i<MAX_VERTEX_CACHES; i++)
-	{
-		if(vcm.vertCacheList[i].id)
-			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
-	}
-
-	memset(&vcm, 0, sizeof(vcm));
-
-	// setup the linked lists
-	vcm.activeVertCache.next = &vcm.activeVertCache;
-	vcm.activeVertCache.prev = &vcm.activeVertCache;
-
-	vcm.freeVertCache = vcm.vertCacheList;
-
-	for (i=0; i<MAX_VERTEX_CACHES-1; i++)
-		vcm.vertCacheList[i].next = &vcm.vertCacheList[i+1];
-
-	for (i=0; i<MAX_VERTEX_CACHES; i++)
-		qglGenBuffersARB(1, &vcm.vertCacheList[i].id);
 	
 	// "Special" VBOs
 	VB_BuildSkyboxVBO ();
@@ -457,21 +327,8 @@ static void VB_VCInit (void)
 
 void R_VCShutdown (void)
 {
-	int			i;
-	vertCache_t	*cache, *next;
-
-	//delete buffers
-	qglDeleteBuffersARB(1, &bsp_vboId);
-	
-	for (i=0; i<MAX_VERTEX_CACHES; i++)
-	{
-		if(vcm.vertCacheList[i].id)
-			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
-	}
-
-	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
-	{
-		next = cache->next;
-		R_VCFree(cache);
-	}
+	// delete buffers
+	VB_WorldVCInit ();
+	qglDeleteBuffersARB (1, &skybox_vbo);
+	qglDeleteBuffersARB (1, &wholescreen2D_vbo);
 }

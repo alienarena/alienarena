@@ -20,20 +20,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // r_mesh.c: triangle model rendering functions, shared by all mesh types
 
+#include <stdarg.h>
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "r_local.h"
 #include "r_ragdoll.h"
-
-static vertCache_t	*vbo_st;
-static vertCache_t	*vbo_xyz;
-static vertCache_t	*vbo_normals;
-static vertCache_t	*vbo_tangents;
-static vertCache_t	*vbo_indices;
-static vertCache_t	*vbo_blendweights;
-static vertCache_t	*vbo_blendindices;
 
 // FIXME: globals
 static vec3_t worldlight, shadelight, lightPosition;
@@ -46,67 +40,285 @@ extern cvar_t *cl_gun;
 
 cvar_t *gl_mirror;
 
-// should be able to handle all mesh types
-static void R_Mesh_FindVBO (model_t *mod, int framenum)
+#if 0
+static void R_Mesh_VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
 {
-	if (!modtypes[mod->type].morphtarget)
-		framenum = 0;
+	vec3_t	vec1, vec2;
+	vec3_t	planes[3];
+	float	tmp;
+	int		i;
 
-	vbo_st = R_VCFindCache (VBO_STORE_ST, mod, vbo_st);	
-	vbo_xyz = R_VCFindCache (VBO_STORE_XYZ+framenum, mod, vbo_xyz);
-	vbo_normals = R_VCFindCache (VBO_STORE_NORMAL+framenum, mod, vbo_normals);
-	vbo_tangents = R_VCFindCache (VBO_STORE_TANGENT+framenum, mod, vbo_tangents);
-	
-	if (!vbo_xyz || !vbo_st || !vbo_normals || !vbo_tangents)
-		Com_Error (ERR_DROP, "Cannot find VBO for %s frame %d\n", mod->name, framenum);
-	
-	if (modtypes[mod->type].indexed)
+	for (i=0; i<3; i++)
 	{
-		vbo_indices = R_VCFindCache (VBO_STORE_INDICES, mod, vbo_indices);
-		if (!vbo_indices)
-			Com_Error (ERR_DROP, "Cannot find IBO for %s\n", mod->name);
+		vec1[0] = v1[i]-v0[i];
+		vec1[1] = st1[0]-st0[0];
+		vec1[2] = st1[1]-st0[1];
+		vec2[0] = v2[i]-v0[i];
+		vec2[1] = st2[0]-st0[0];
+		vec2[2] = st2[1]-st0[1];
+		VectorNormalize(vec1);
+		VectorNormalize(vec2);
+		CrossProduct(vec1,vec2,planes[i]);
+	}
+
+	for (i=0; i<3; i++)
+	{
+		tmp = 1.0 / planes[i][0];
+		Tangent[i] = -planes[i][1]*tmp;
+	}
+	VectorNormalize(Tangent);
+}
+#else
+// Math rearrangement for MD2 load speedup
+static void R_Mesh_VecsForTris(
+		const float *v0,
+		const float *v1,
+		const float *v2,
+		const float *st0,
+		const float *st1,
+		const float *st2,
+		vec3_t Tangent
+		)
+{
+	vec3_t vec1, vec2;
+	vec3_t planes[3];
+	float tmp;
+	float vec1_y, vec1_z, vec1_nrml;
+	float vec2_y, vec2_z, vec2_nrml;
+	int i;
+
+	vec1_y = st1[0]-st0[0];
+	vec1_z = st1[1]-st0[1];
+	vec1_nrml = (vec1_y*vec1_y) + (vec1_z*vec1_z); // partial for normalize
+
+	vec2_y = st2[0]-st0[0];
+	vec2_z = st2[1]-st0[1];
+	vec2_nrml = (vec2_y*vec2_y) + (vec2_z*vec2_z); // partial for normalize
+
+	for (i=0; i<3; i++)
+	{
+		vec1[0] = v1[i]-v0[i];
+		// VectorNormalize(vec1);
+		tmp = (vec1[0] * vec1[0]) + vec1_nrml;
+		tmp = sqrt(tmp);
+		if ( tmp > 0.0 )
+		{
+			tmp = 1.0 / tmp;
+			vec1[0] *= tmp;
+			vec1[1] = vec1_y * tmp;
+			vec1[2] = vec1_z * tmp;
+		}
+
+		vec2[0] = v2[i]-v0[i];
+		// --- VectorNormalize(vec2);
+		tmp = (vec2[0] * vec2[0]) + vec2_nrml;
+		tmp = sqrt(tmp);
+		if ( tmp > 0.0 )
+		{
+			tmp = 1.0 / tmp;
+			vec2[0] *= tmp;
+			vec2[1] = vec2_y * tmp;
+			vec2[2] = vec2_z * tmp;
+		}
+
+		// --- CrossProduct(vec1,vec2,planes[i]);
+		planes[i][0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
+		planes[i][1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
+		planes[i][2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
+		// ---
+
+		tmp = 1.0 / planes[i][0];
+		Tangent[i] = -planes[i][1]*tmp;
+	}
+
+	VectorNormalize(Tangent);
+}
+#endif
+
+static void R_Mesh_CompleteNormalsTangents
+	(model_t *mod, int calcflags, const nonskeletal_basevbo_t *basevbo, mesh_framevbo_t *framevbo, const unsigned int *vtriangles)
+{
+	int i, j;
+	unsigned int nonindexed_triangle[3];
+	const skeletal_basevbo_t *basevbo_sk = (const skeletal_basevbo_t *)basevbo;
+	qboolean *merged, *do_merge;
+	merged = Z_Malloc (mod->numvertexes * sizeof(qboolean));
+	do_merge = Z_Malloc (mod->numvertexes * sizeof(qboolean));
+	
+	for (i = 0; i < mod->num_triangles; i++)
+	{
+		vec3_t v1, v2, normal, tangent;
+		const unsigned int *triangle;
+		
+		if ((mod->typeFlags & MESH_INDEXED))
+		{
+			triangle = &vtriangles[3*i];
+		}
+		else
+		{
+			triangle = nonindexed_triangle;
+			for (j = 0; j < 3; j++)
+				nonindexed_triangle[j] = 3*i+j;
+		}
+		
+		if ((calcflags & MESHLOAD_CALC_NORMAL))
+		{
+			VectorSubtract (framevbo[triangle[0]].vertex, framevbo[triangle[1]].vertex, v1);
+			VectorSubtract (framevbo[triangle[2]].vertex, framevbo[triangle[1]].vertex, v2);
+			CrossProduct (v2, v1, normal);
+			VectorScale (normal, -1.0f, normal);
+			
+			for (j = 0; j < 3; j++)
+				VectorAdd (framevbo[triangle[j]].normal, normal, framevbo[triangle[j]].normal);
+		}
+		
+		if ((calcflags & MESHLOAD_CALC_TANGENT))
+		{
+			const nonskeletal_basevbo_t *basevbo_vert[3];
+			
+			for (j = 0; j < 3; j++)
+			{
+				if ((mod->typeFlags & MESH_SKELETAL))
+					basevbo_vert[j] = &basevbo_sk[triangle[j]].common;
+				else
+					basevbo_vert[j] = &basevbo[triangle[j]];
+			}
+			
+			R_Mesh_VecsForTris (	framevbo[triangle[0]].vertex,
+									framevbo[triangle[1]].vertex,
+									framevbo[triangle[2]].vertex,
+									basevbo_vert[0]->st,
+									basevbo_vert[1]->st,
+									basevbo_vert[2]->st,
+									tangent );
+		
+			for (j = 0; j < 3; j++)
+				VectorAdd (framevbo[triangle[j]].tangent, tangent, framevbo[triangle[j]].tangent);
+		}
 	}
 	
-	if (modtypes[mod->type].skeletal)
+	// In the case of texture seams in the mesh, we merge tangents/normals for
+	// verts with the same positions. This is also necessary for non-indexed
+	// meshes.
+	for (i = 0; i < mod->numvertexes; i++)
 	{
-		vbo_blendweights = R_VCFindCache (VBO_STORE_BLENDWEIGHTS, mod, vbo_blendweights);
-		vbo_blendindices = R_VCFindCache (VBO_STORE_BLENDINDICES, mod, vbo_blendindices);
-		if (!vbo_blendweights || !vbo_blendindices)
-			Com_Error (ERR_DROP, "Cannot find blend VBO for %s\n", mod->name);
+		if (merged[i]) continue;
+		
+		// Total normals/tangents up
+		for (j = i + 1; j < mod->numvertexes; j++)
+		{
+			if (VectorCompare (framevbo[i].vertex, framevbo[j].vertex))
+			{
+				do_merge[j] = true;
+				
+				if ((calcflags & MESHLOAD_CALC_NORMAL))
+					VectorAdd (framevbo[i].normal, framevbo[j].normal, framevbo[i].normal);
+				if ((calcflags & MESHLOAD_CALC_TANGENT))
+					VectorAdd (framevbo[i].tangent, framevbo[j].tangent, framevbo[i].tangent);
+			}
+		}
+		
+		// Normalize the average normals and tangents
+		if ((calcflags & MESHLOAD_CALC_NORMAL))
+		{
+			VectorNormalize (framevbo[i].normal);
+		}
+		if ((calcflags & MESHLOAD_CALC_TANGENT))
+		{
+			VectorNormalize (framevbo[i].tangent);
+			framevbo[i].tangent[3] = 1.0;
+		}
+		
+		// Copy the averages where they need to go
+		for (j = i + 1; j < mod->numvertexes; j++)
+		{
+			if (do_merge[j])
+			{
+				merged[j] = true;
+				do_merge[j] = false;
+				
+				if ((calcflags & MESHLOAD_CALC_NORMAL))
+					VectorCopy (framevbo[i].normal, framevbo[j].normal);
+				if ((calcflags & MESHLOAD_CALC_TANGENT))
+					Vector4Copy (framevbo[i].tangent, framevbo[j].tangent);
+			}
+		}
 	}
+	
+	Z_Free (merged);
+	Z_Free (do_merge);
 }
 
-// should be able to handle all mesh types
+void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
+{
+	const int maxframes = ((mod->typeFlags & MESH_MORPHTARGET) ? mod->num_frames : 1);
+	const int frames_idx = ((mod->typeFlags & MESH_INDEXED) ? 2 : 1);
+	mesh_framevbo_t *framevbo;
+	const unsigned int *vtriangles = NULL;
+	const nonskeletal_basevbo_t *basevbo;
+	va_list ap;
+	
+	mod->vboIDs = Hunk_Alloc ((maxframes + frames_idx) * sizeof(*mod->vboIDs));
+	qglGenBuffersARB (maxframes + frames_idx, mod->vboIDs);
+	
+	va_start (ap, calcflags);
+	
+	GL_BindVBO (mod->vboIDs[0]);
+	if ((mod->typeFlags & MESH_SKELETAL))
+	{
+		const skeletal_basevbo_t *basevbo_sk = va_arg (ap, const skeletal_basevbo_t *);
+		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*basevbo_sk), basevbo_sk, GL_STATIC_DRAW_ARB);
+		basevbo = &basevbo_sk->common;
+	}
+	else
+	{
+		basevbo = va_arg (ap, const nonskeletal_basevbo_t *);
+		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*basevbo), basevbo, GL_STATIC_DRAW_ARB);
+	}
+	
+	if ((mod->typeFlags & MESH_INDEXED))
+	{
+		GL_BindIBO (mod->vboIDs[1]);
+		vtriangles = va_arg (ap, const unsigned int *);
+		qglBufferDataARB (GL_ELEMENT_ARRAY_BUFFER, mod->num_triangles * 3 * sizeof(unsigned int), vtriangles, GL_STATIC_DRAW_ARB);
+		GL_BindIBO (0);
+	}
+	
+	if (!(mod->typeFlags & MESH_MORPHTARGET))
+	{
+		framevbo = va_arg (ap, mesh_framevbo_t *);
+		if (calcflags != 0)
+			R_Mesh_CompleteNormalsTangents (mod, calcflags, basevbo, framevbo, vtriangles);
+		GL_BindVBO (mod->vboIDs[frames_idx]);
+		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*framevbo), framevbo, GL_STATIC_DRAW_ARB);
+	}
+	else
+	{
+		int framenum;
+		Mesh_GetFrameVBO_Callback callback = va_arg (ap, Mesh_GetFrameVBO_Callback);
+		void *data = va_arg (ap, void *);
+		
+		for (framenum = 0; framenum < mod->num_frames; framenum++)
+		{
+			mesh_framevbo_t *framevbo = callback (data, framenum);
+			if (calcflags != 0)
+				R_Mesh_CompleteNormalsTangents (mod, calcflags, basevbo, framevbo, vtriangles);
+			GL_BindVBO (mod->vboIDs[framenum + frames_idx]);
+			qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*framevbo), framevbo, GL_STATIC_DRAW_ARB);
+		}
+	}
+	
+	GL_BindVBO (0);
+	
+	va_end (ap);
+}
+
 void R_Mesh_FreeVBO (model_t *mod)
 {
-	int framenum, maxframes = 1;
+	const int maxframes = ((mod->typeFlags & MESH_MORPHTARGET) ? mod->num_frames : 1);
+	const int frames_idx = ((mod->typeFlags & MESH_INDEXED) ? 2 : 1);
 	
-	if (modtypes[mod->type].morphtarget)
-		maxframes = mod->num_frames;
-	
-	vbo_st = vbo_indices = vbo_blendweights = vbo_blendindices = NULL;
-	
-	for (framenum = 0; framenum < maxframes; framenum++)
-	{
-		vbo_xyz = vbo_normals = vbo_tangents = NULL;
-		R_Mesh_FindVBO (mod, framenum);
-		R_VCFree (vbo_xyz);
-		R_VCFree (vbo_normals);
-		R_VCFree (vbo_tangents);
-	}
-	
-	// Certain things are not stored separately for every frame
-	
-	R_VCFree (vbo_st);
-	
-	if (modtypes[mod->type].indexed)
-		R_VCFree (vbo_indices);
-	
-	if (modtypes[mod->type].skeletal)
-	{
-		R_VCFree (vbo_blendweights);
-		R_VCFree (vbo_blendindices);
-	}
+	qglDeleteBuffersARB (maxframes + frames_idx, mod->vboIDs);
 }
 
 //This routine bascially finds the average light position, by factoring in all lights and
@@ -344,7 +556,7 @@ static qboolean R_Mesh_CullModel (void)
 		return true;
 	
 	// TODO: could probably find a better place for this.
-	if (r_ragdolls->integer && modtypes[currentmodel->type].skeletal && !currententity->ragdoll)
+	if (r_ragdolls->integer && (currentmodel->typeFlags & MESH_SKELETAL) && !currententity->ragdoll)
 	{
 		//Ragdolls take over at beginning of each death sequence
 		if	(	!(currententity->flags & RF_TRANSLUCENT) &&
@@ -377,10 +589,10 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 	
 	animtype = 0;
 	
-	if (modtypes[currentmodel->type].morphtarget && lerped)
+	if ((currentmodel->typeFlags & MESH_MORPHTARGET) && lerped)
 		animtype |= 2;
 	
-	if (modtypes[currentmodel->type].skeletal)
+	if ((currentmodel->typeFlags & MESH_SKELETAL))
 	{
 		static matrix3x4_t outframe[SKELETAL_MAX_BONEMATS];
 		assert (currentmodel->type == mod_iqm);
@@ -459,7 +671,7 @@ static void R_Mesh_SetupShellRender (vec3_t lightcolor, qboolean fragmentshader)
 	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
 	glUniform1fARB (uniforms->time, rs_realtime);
 	
-	glUniform1iARB (uniforms->doShading, modtypes[currentmodel->type].doShading);
+	glUniform1iARB (uniforms->doShading, (currentmodel->typeFlags & MESH_DOSHADING) != 0);
 	glUniform1iARB (uniforms->fog, map_fog);
 	
 	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
@@ -478,7 +690,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	vec3_t lightVec, lightVal;
 	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
 
-	if (modtypes[currentmodel->type].decal)
+	if ((currentmodel->typeFlags & MESH_DECAL))
 	{
 		GLSTATE_ENABLE_BLEND
 	}
@@ -571,7 +783,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 
 	glUniform1fARB (uniforms->useShell, 0.0);
 	
-	glUniform1iARB (uniforms->doShading, modtypes[currentmodel->type].doShading);
+	glUniform1iARB (uniforms->doShading, (currentmodel->typeFlags & MESH_DOSHADING) != 0);
 	
 	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
 }
@@ -634,54 +846,46 @@ static void R_Mesh_SetupGlassRender (void)
 // being used-- they all support the same vertex data and vertex attributes.
 static void R_Mesh_DrawVBO (qboolean lerped)
 {
-	// setup
-	R_Mesh_FindVBO (currentmodel, currententity->frame);
+	const int typeFlags = currentmodel->typeFlags;
+	const int frames_idx =  ((typeFlags & MESH_INDEXED) ? 2 : 1);
+	const int framenum = ((typeFlags & MESH_MORPHTARGET) ? currententity->frame : 0);
+	const size_t framestride = sizeof(mesh_framevbo_t);
+	const size_t basestride = (typeFlags & MESH_SKELETAL) ? sizeof(skeletal_basevbo_t) : sizeof(nonskeletal_basevbo_t);
 	
-	GL_BindVBO (vbo_xyz);
-	R_VertexPointer (3, 0, 0);
-	
-	GL_BindVBO (vbo_st);
-	R_TexCoordPointer (0, 0, 0);
-	
-	GL_BindVBO (vbo_normals);
-	R_NormalPointer (0, 0);
-
-	GL_BindVBO (vbo_tangents);
-	R_AttribPointer (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
-	
-	// Note: the lerp position is sent separately as a uniform to the GLSL shader.
-	if (modtypes[currentmodel->type].morphtarget && lerped)
+	// base (non-frame-specific) data
+	GL_BindVBO (currentmodel->vboIDs[0]);
+	R_TexCoordPointer (0, basestride, (void *)FOFS (nonskeletal_basevbo_t, st));
+	if ((typeFlags & MESH_SKELETAL))
 	{
-		R_Mesh_FindVBO (currentmodel, currententity->oldframe);
-		
-		GL_BindVBO (vbo_xyz);
-		R_AttribPointer (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
-		
-		GL_BindVBO (vbo_normals);
-		R_AttribPointer (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, sizeof(vec3_t), 0);
-		
-		GL_BindVBO (vbo_tangents);
-		R_AttribPointer (ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+		// Note: bone positions are sent separately as uniforms to the GLSL shader.
+		R_AttribPointer (ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, basestride, (void *)FOFS (skeletal_basevbo_t, blendweights));
+		R_AttribPointer (ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, basestride, (void *)FOFS (skeletal_basevbo_t, blendindices));
 	}
 	
-	// Note: bone positions are sent separately as uniforms to the GLSL shader.
-	if (modtypes[currentmodel->type].skeletal)
+	// primary frame data
+	GL_BindVBO (currentmodel->vboIDs[framenum + frames_idx]);
+	R_VertexPointer (3, framestride, (void *)FOFS (mesh_framevbo_t, vertex));
+	R_NormalPointer (framestride, (void *)FOFS (mesh_framevbo_t, normal));
+	R_AttribPointer (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, tangent));
+	
+	// secondary frame data
+	if ((typeFlags & MESH_MORPHTARGET) && lerped)
 	{
-		GL_BindVBO (vbo_blendweights);
-		R_AttribPointer (ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(byte)*4, 0);
-		
-		GL_BindVBO (vbo_blendindices);
-		R_AttribPointer (ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(byte)*4, 0);
+		// Note: the lerp position is sent separately as a uniform to the GLSL shader.
+		GL_BindVBO (currentmodel->vboIDs[currententity->oldframe + frames_idx]);
+		R_AttribPointer (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, vertex));
+		R_AttribPointer (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, normal));
+		R_AttribPointer (ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, tangent));
 	}
 	
-	GL_BindVBO (NULL);
+	GL_BindVBO (0);
 	
 	// render
-	if (modtypes[currentmodel->type].indexed)
+	if ((typeFlags & MESH_INDEXED))
 	{
-		GL_BindIBO (vbo_indices);
+		GL_BindIBO (currentmodel->vboIDs[1]);
 		qglDrawElements (GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
-		GL_BindIBO (NULL);
+		GL_BindIBO (0);
 	}
 	else
 	{
@@ -733,7 +937,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 	VectorCopy (shadelight, lightcolor);
 	VectorNormalize (lightcolor);
 	
-	if (((modtypes[currentmodel->type].morphtarget && lerped) || modtypes[currentmodel->type].skeletal) != 0 && rs_slowpath)
+	if ((((currentmodel->typeFlags & MESH_MORPHTARGET) && lerped) || (currentmodel->typeFlags & MESH_SKELETAL) != 0) && rs_slowpath)
 	{
 		// FIXME: rectify this.
 		Com_Printf ("WARN: Cannot apply a multi-stage RScript %s to model %s\n", rs->outname, currentmodel->name);
@@ -894,7 +1098,7 @@ void R_Mesh_Draw (void)
 	
 	R_GetLightVals (currententity->origin, false);
 
-	if (modtypes[currentmodel->type].castshadowmap)
+	if ((currentmodel->typeFlags & MESH_CASTSHADOWMAP))
 		R_GenerateEntityShadow();
 	
 	// Don't render your own avatar unless it's for shadows
@@ -949,7 +1153,7 @@ void R_Mesh_Draw (void)
 	qglShadeModel (GL_SMOOTH);
 	GL_TexEnv (GL_MODULATE);
 	
-	if (modtypes[currentmodel->type].decal)
+	if ((currentmodel->typeFlags & MESH_DECAL))
 	{
 		qglEnable (GL_POLYGON_OFFSET_FILL);
 		qglPolygonOffset (-3, -2);
@@ -958,13 +1162,13 @@ void R_Mesh_Draw (void)
 
 	R_Mesh_DrawFrame (skin->texnum);
 	
-	if (modtypes[currentmodel->type].decal)
+	if ((currentmodel->typeFlags & MESH_DECAL))
 	{
 		qglDisable (GL_POLYGON_OFFSET_FILL);
 		qglDepthMask (true);
 	}
 	
-	if ((modtypes[currentmodel->type].decal && gl_showdecals->integer > 1) || gl_showtris->integer)
+	if (((currentmodel->typeFlags & MESH_DECAL) && gl_showdecals->integer > 1) || gl_showtris->integer)
 	{
 		qglLineWidth (3.0);
 		qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);

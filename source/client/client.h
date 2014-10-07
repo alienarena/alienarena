@@ -625,7 +625,6 @@ char* VersionUpdateNotice( void );
 
 #define CL_LOADMSG_LENGTH 96
 
-extern qboolean need_free_vbo;
 qboolean loadingMessage;
 char loadingMessages[5][2][CL_LOADMSG_LENGTH];
 float loadingPercent;
