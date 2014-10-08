@@ -2272,101 +2272,74 @@ RadarEnt_t	RadarEnts[MAX_RADAR_ENTS];
 void R_DrawRadar(void)
 {
 	int		i;
-	float	fS[4]={0,0,-1.0/512.0,0};
 
-	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) return;
-	if(!r_minimap->integer) return;
-	
+	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL)) return;
+	if (!r_minimap->integer) return;
 	if (!r_newrefdef.areabits) return;
 
 	qglViewport	(	r_newrefdef.x+r_newrefdef.width-r_minimap_size->value,
 					vid.height-r_newrefdef.y-r_newrefdef.height, 
 					r_minimap_size->value, r_minimap_size->value);
 
-	qglDisable(GL_DEPTH_TEST);
-  	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
+	qglDisable (GL_DEPTH_TEST);
+  	qglMatrixMode (GL_PROJECTION);
+	qglPushMatrix ();
 	qglLoadIdentity ();
-
-
-	if (r_minimap_style->integer) {
-		qglOrtho(-1024,1024,-1024,1024,-256,256);
-	} else {
-		qglOrtho(-1024,1024,-512,1536,-256,256);
-	}
+	qglOrtho(0, 1, 1, 0, -99999, 99999);
 
 	qglMatrixMode(GL_MODELVIEW);
 	qglPushMatrix();
 	qglLoadIdentity ();
+	
+	qglStencilMask(255);
+	qglClear(GL_STENCIL_BUFFER_BIT);
+	qglEnable(GL_STENCIL_TEST);
+	qglStencilFunc(GL_ALWAYS,4,4);
+	qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
 
 
-		{
-		qglStencilMask(255);
-		qglClear(GL_STENCIL_BUFFER_BIT);
-		qglEnable(GL_STENCIL_TEST);
-		qglStencilFunc(GL_ALWAYS,4,4);
-		qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+	GLSTATE_ENABLE_ALPHATEST;
+	qglAlphaFunc(GL_LESS,0.1);
+	qglColorMask(0,0,0,0);
 
-
-		GLSTATE_ENABLE_ALPHATEST;
-		qglAlphaFunc(GL_LESS,0.1);
-		qglColorMask(0,0,0,0);
-
-		qglColor4f(1,1,1,1);
-		if(r_around)
-			GL_Bind(r_around->texnum);
-		qglBegin(GL_TRIANGLE_FAN);
-		if (r_minimap_style->integer){
-			qglTexCoord2f(0,1); qglVertex3f(1024,-1024,1);
-			qglTexCoord2f(1,1); qglVertex3f(-1024,-1024,1);
-			qglTexCoord2f(1,0); qglVertex3f(-1024,1024,1);
-			qglTexCoord2f(0,0); qglVertex3f(1024,1024,1);
-		} else {
-			qglTexCoord2f(0,1); qglVertex3f(1024,-512,1);
-			qglTexCoord2f(1,1); qglVertex3f(-1024,-512,1);
-			qglTexCoord2f(1,0); qglVertex3f(-1024,1536,1);
-			qglTexCoord2f(0,0); qglVertex3f(1024,1536,1);
-		}
-		qglEnd();
-
-		qglColorMask(1,1,1,1);
-		GLSTATE_DISABLE_ALPHATEST;
-		qglAlphaFunc(GL_GREATER, 0.5);
-		qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
-		qglStencilFunc(GL_NOTEQUAL,4,4);
-
+	qglColor4f(1,1,1,1);
+	if(r_around)
+	{
+		GL_Bind (r_around->texnum);
+		GL_SetupWholeScreen2DVBO (wholescreen_textured);
+		R_DrawVarrays (GL_QUADS, 0, 4);
+		R_KillVArrays ();
 	}
 
-	if(r_minimap_zoom->value>=0.1) {
-		qglScalef(r_minimap_zoom->value,r_minimap_zoom->value,r_minimap_zoom->value);
-	}
+	qglColorMask(1,1,1,1);
+	GLSTATE_DISABLE_ALPHATEST;
+	qglAlphaFunc(GL_GREATER, 0.5);
+	qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+	qglStencilFunc(GL_NOTEQUAL,4,4);
+	
+	if (r_minimap_zoom->value >= 0.1)
+		qglScalef (r_minimap_zoom->value, r_minimap_zoom->value, r_minimap_zoom->value);
+	
+	qglMatrixMode (GL_PROJECTION);
+	qglLoadIdentity ();
+	if (r_minimap_style->integer)
+		qglOrtho (-1024, 1024, -1024, 1024, -256, 256);
+	else
+		qglOrtho (-1024, 1024, -512, 1536, -256, 256);
+	
+	qglMatrixMode(GL_MODELVIEW);
+	if (r_minimap_style->integer)
+		qglRotatef (90-r_newrefdef.viewangles[1], 0, 0, -1);
+	
+	qglDisable (GL_TEXTURE_2D);
+	qglBegin (GL_TRIANGLES);
+	qglColor4f (1,1,0,0.5);
+	qglVertex3f (0,32,0);
+	qglVertex3f (24,-32,0);
+	qglVertex3f (-24,-32,0);
+	qglEnd ();
 
-	if (r_minimap_style->integer) {
-		qglPushMatrix();
-		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, -1);
-
-		qglDisable(GL_TEXTURE_2D);
-		qglBegin(GL_TRIANGLES);
-		qglColor4f(1,1,1,0.5);
-		qglVertex3f(0,32,0);
-		qglColor4f(1,1,0,0.5);
-		qglVertex3f(24,-32,0);
-		qglVertex3f(-24,-32,0);
-		qglEnd();
-
-		qglPopMatrix();
-	} else {
-		qglDisable(GL_TEXTURE_2D);
-		qglBegin(GL_TRIANGLES);
-		qglColor4f(1,1,1,0.5);
-		qglVertex3f(0,32,0);
-		qglColor4f(1,1,0,0.5);
-		qglVertex3f(24,-32,0);
-		qglVertex3f(-24,-32,0);
-		qglEnd();
-
-		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, 1);
-	}
+	qglRotatef (90-r_newrefdef.viewangles[1], 0, 0, 1);
 	qglTranslatef (-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
 
 	qglBegin(GL_QUADS);
@@ -2383,19 +2356,9 @@ void R_DrawRadar(void)
 	}
 	qglEnd();
 
-	qglEnable(GL_TEXTURE_2D);
-
-	if(r_radarmap)
-		GL_Bind(r_radarmap->texnum);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	GLSTATE_ENABLE_BLEND;
 	qglColor3f(1,1,1);
-
-	fS[3]=0.5+ r_newrefdef.vieworg[2]/512.0;
-	qglTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-
-	GLSTATE_ENABLE_TEXGEN;
-	qglTexGenfv(GL_S,GL_OBJECT_PLANE,fS);
 
 	// draw the actual minimap
 	qglDisable (GL_TEXTURE_2D);
@@ -2403,7 +2366,6 @@ void R_DrawRadar(void)
 	qglEnable (GL_TEXTURE_2D);
 
 	GL_BlendFunction (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	GLSTATE_DISABLE_TEXGEN;
 
 	qglPopMatrix();
 

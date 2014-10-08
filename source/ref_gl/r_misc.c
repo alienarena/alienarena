@@ -75,7 +75,6 @@ image_t		*r_leaftexture;
 image_t		*r_trashtexture;
 image_t		*r_splashtexture;
 image_t		*r_splash2texture;
-image_t		*r_radarmap;
 image_t		*r_around;
 image_t		*r_flare;
 image_t		*r_flare1;
@@ -369,10 +368,6 @@ void R_InitParticleTexture (void)
     }
 
 	//to do - move more or all of this to their appropriate places
-	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
-	if (!r_radarmap) {
-		r_radarmap = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 	if (!r_around) {
 		r_around = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
