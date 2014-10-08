@@ -124,5 +124,4 @@ extern image_t		*sun_object;
 extern image_t		*sun1_object;
 extern image_t		*sun2_object;
 
-extern	image_t		*r_radarmap;
 extern	image_t		*r_around;

@@ -108,7 +108,6 @@ nobase_dist_gfx_DATA = \
 	purpleline.tga \
 	quadbase.tga \
 	radar/around.tga \
-	radar/radarmap.tga \
 	rain_a.tga \
 	rainfxa.tga \
 	rainfxb.tga \
