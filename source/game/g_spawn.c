@@ -421,6 +421,17 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	SaveClientData ();
 
 	gi.FreeTags (TAG_LEVEL);
+	
+	if(tca->integer) 
+	{
+		blue_team_score = red_team_score = 4;
+		red_team_matches = blue_team_matches = 0;
+	}
+	else 
+	{
+		red_team_score = 0;
+		blue_team_score = 0;
+	}
 
 	memset (&level, 0, sizeof(level));
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
