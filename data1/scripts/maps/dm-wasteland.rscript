@@ -1,23 +1,14 @@
 canyon1_texture
-
-{
-	
+{	
 	{
-
-		map textures/dm-wasteland/canyon1_blendtex.tga
-		
-		map2 textures/dm-wasteland/canyon1_blendtex2.tga
-		
-		blendmap 4
-			
-			200 textures/arena5/ground1.tga
-			
-			400 textures/texturelib/stones_0027.jpg			
-			200 textures/texturelib/ground_0045.jpg			
+		map textures/dm-wasteland/canyon1_blendtex.tga		
+		map2 textures/dm-wasteland/canyon1_blendtex2.tga	
+		blendmap 4			
+			200 textures/arena5/ground1.tga			
+			400 textures/dm-wasteland/clifftop.tga		
+			200 textures/texturelib/ground_0045.jpg		
 			400 textures/arena10/heap4.tga
-
 	}
-
 }
 env/hellup
 {
