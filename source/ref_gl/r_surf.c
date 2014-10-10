@@ -403,6 +403,7 @@ BSP_SetScrolling
 */
 void BSP_SetScrolling (qboolean enable)
 {
+	GL_SelectTexture (0);
 	qglMatrixMode (GL_TEXTURE);
 	qglLoadIdentity ();
 	if (enable)
@@ -613,6 +614,8 @@ static void R_DrawRSSurfaces (void)
 			continue;
 		}
 		
+		BSP_SetScrolling ((currentmodel->unique_texinfo[i]->flags & SURF_FLOWING) != 0);
+		
 		rs = currentmodel->unique_texinfo[i]->image->script;
 		
 		if (rs == NULL || (rs->flags & RS_PREVENT_BATCH) != 0)
@@ -642,6 +645,8 @@ static void R_DrawRSSurfaces (void)
 			}
 		}
 	}
+	
+	BSP_SetScrolling (0);
 	
 	RS_End_Group ();
 	R_KillVArrays ();
