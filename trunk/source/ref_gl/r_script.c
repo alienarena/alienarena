@@ -1191,7 +1191,7 @@ static void RS_CleanupGLState (void)
 	GLSTATE_DISABLE_TEXGEN
 }
 
-static qboolean rs_in_group = false;
+qboolean rs_in_group = false;
 static qboolean rs_dlights_enabled;
 
 // If you're about to draw a huge number of RScript surfaces in a row with

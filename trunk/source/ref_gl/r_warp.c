@@ -210,7 +210,6 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
-void BSP_SetScrolling (qboolean enable);
 void R_RenderWaterPolys (msurface_t *fa)
 {
 	rscript_t	*rs_shader;
