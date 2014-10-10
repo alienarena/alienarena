@@ -401,10 +401,12 @@ msurface_t	*r_flicker_surfaces;
 BSP_SetScrolling
 ================
 */
-void BSP_SetScrolling (qboolean enable)
+static void BSP_SetScrolling (qboolean enable)
 {
+	extern qboolean rs_in_group; // Sigh
 	GL_SelectTexture (0);
-	qglMatrixMode (GL_TEXTURE);
+	if (!rs_in_group)
+		qglMatrixMode (GL_TEXTURE);
 	qglLoadIdentity ();
 	if (enable)
 	{
@@ -414,7 +416,8 @@ void BSP_SetScrolling (qboolean enable)
 			scroll = -64.0;
 		qglTranslatef (scroll, 0, 0);
 	}
-	qglMatrixMode (GL_MODELVIEW);
+	if (!rs_in_group)
+		qglMatrixMode (GL_MODELVIEW);
 }
 
 
