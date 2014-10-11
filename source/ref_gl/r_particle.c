@@ -814,6 +814,7 @@ void R_RenderSun()
 		qglLoadIdentity();
 		GLSTATE_ENABLE_BLEND
 		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
+		GL_SelectTexture (0);
 		GL_TexEnv(GL_MODULATE);
 		qglDepthRange(0, 0.3);
 
