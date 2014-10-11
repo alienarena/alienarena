@@ -2232,6 +2232,7 @@ static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3
 // CM_TerrainLightPoint.)
 int CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
+	static csurface_t placeholder_surface; // no flags, no value
 	vec3_t		p2;
 	int			i, j, k, x, y, z;
 	float		offset;
@@ -2349,6 +2350,8 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 						VectorMA (p1, intersection_dist, dir, p2);
 						orig_dist = intersection_dist;
 						VectorCopy (plane->normal, trace_trace.plane.normal);
+						trace_trace.contents = CONTENTS_SOLID;
+						trace_trace.surface = &placeholder_surface;
 						for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
 						ret = i;
 					}
