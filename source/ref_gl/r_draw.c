@@ -330,7 +330,7 @@ Fills a box of pixels with a single color
 */
 void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 {
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	GLSTATE_ENABLE_BLEND;
 	GLSTATE_DISABLE_ALPHATEST;
 	qglColor4fv (rgba);
@@ -344,7 +344,7 @@ void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 	
 	GLSTATE_DISABLE_BLEND;
 	qglColor3f (1,1,1);
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 }
 //=============================================================================
 

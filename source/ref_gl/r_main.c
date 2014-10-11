@@ -450,14 +450,14 @@ void R_DrawNullModel (void)
 	R_RotateForEntity (currententity);
 	qglScalef (16, 16, 16);
 
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	qglColor3fv (shadelight);
 	
 	GL_DrawNullModel ();
 
 	qglColor3f (1,1,1);
 	qglPopMatrix ();
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 }
 
 #include "r_lodcalc.h"
@@ -640,7 +640,7 @@ static void R_Flash (void)
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_ENABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
@@ -658,7 +658,7 @@ static void R_Flash (void)
 	qglEnd ();
 
 	GLSTATE_DISABLE_BLEND
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 	GLSTATE_ENABLE_ALPHATEST
 
 	qglColor4f(1,1,1,1);
@@ -903,7 +903,7 @@ static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboole
 {
 	int i;
 	
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	qglDisable (GL_DEPTH_TEST);
 	if (does_intersect)
 	{
@@ -925,7 +925,7 @@ static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboole
 		qglVertex3fv (verts[i]);
 	qglEnd ();
 	qglEnable (GL_DEPTH_TEST);
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 }
 
 extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect));
@@ -952,7 +952,7 @@ static void R_DrawEntityBBox (entity_t *e)
 	int		square[4][3] = 
 		{{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}};
 
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	qglColor4f (1, 0, 0, 1);
 	qglLineWidth (5.0);
 
@@ -982,7 +982,7 @@ static void R_DrawEntityBBox (entity_t *e)
 	}
 	
 	qglPopMatrix ();
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 }
 
 void R_RenderView (refdef_t *fd)

@@ -2339,7 +2339,7 @@ void R_DrawRadar(void)
 	if (r_minimap_style->integer)
 		qglRotatef (90-r_newrefdef.viewangles[1], 0, 0, -1);
 	
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	qglBegin (GL_TRIANGLES);
 	qglColor4f (1,1,0,0.5);
 	qglVertex3f (0,32,0);
@@ -2369,9 +2369,9 @@ void R_DrawRadar(void)
 	qglColor3f(1,1,1);
 
 	// draw the actual minimap
-	qglDisable (GL_TEXTURE_2D);
 	R_DrawRadarEdges ();
-	qglEnable (GL_TEXTURE_2D);
+	
+	GL_EnableTexture (0, true);
 
 	GL_BlendFunction (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
