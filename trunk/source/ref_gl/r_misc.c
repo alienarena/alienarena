@@ -599,7 +599,7 @@ void GL_SetDefaultState( void )
 {
 	qglClearColor (1,0, 0.5 , 0.5);
 	qglCullFace(GL_FRONT);
-	qglEnable(GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 
 	qglEnable(GL_ALPHA_TEST);
 	gl_state.alpha_test = true;

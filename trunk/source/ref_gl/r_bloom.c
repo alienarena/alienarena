@@ -469,7 +469,7 @@ void R_BloomBlend (refdef_t *fd)
 	qglDisable(GL_CULL_FACE);
 
 	GLSTATE_DISABLE_BLEND
-	qglEnable( GL_TEXTURE_2D );
+	GL_EnableTexture (0, true);
 
 	qglColor4f( 1, 1, 1, 1 );
 
@@ -488,7 +488,7 @@ void R_BloomBlend (refdef_t *fd)
 
 	qglColor3f (1,1,1);
 	GLSTATE_DISABLE_BLEND
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
 }

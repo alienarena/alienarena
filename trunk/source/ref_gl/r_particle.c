@@ -568,7 +568,6 @@ void R_RenderFlares (void)
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )return;
 	qglDepthMask (0);
-	qglDisable (GL_TEXTURE_2D);
 	qglShadeModel (GL_SMOOTH);
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
@@ -576,8 +575,8 @@ void R_RenderFlares (void)
 	R_InitQuadVarrays();
 
 	qglDisable(GL_DEPTH_TEST);
-	qglEnable (GL_TEXTURE_2D);
-	GL_TexEnv( GL_MODULATE );
+	GL_SelectTexture (0);
+	GL_TexEnv (GL_MODULATE);
 
 	l = r_flares;
 	for (i=0; i<r_numflares ; i++, l++)
@@ -608,15 +607,11 @@ void R_RenderFlares (void)
 		}
 	}
 	
-	GL_TexEnv( GL_REPLACE );
-	qglEnable(GL_DEPTH_TEST);
-	qglDisable (GL_TEXTURE_2D);
-
-	R_KillVArrays();
-	
+	R_KillVArrays ();
+	GL_TexEnv (GL_REPLACE);
+	qglEnable (GL_DEPTH_TEST);
 	qglColor3f (1,1,1);
 	GLSTATE_DISABLE_BLEND
-	qglEnable (GL_TEXTURE_2D);
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
 }

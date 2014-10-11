@@ -312,7 +312,7 @@ void R_ShadowBlend(float alpha)
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_ENABLE_BLEND
 		qglDisable (GL_DEPTH_TEST);
-		qglDisable (GL_TEXTURE_2D);
+		GL_EnableTexture (0, false);
 
 		qglColor4f (1,1,1, 1);
 
@@ -324,7 +324,7 @@ void R_ShadowBlend(float alpha)
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_ENABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 
 	qglEnable(GL_STENCIL_TEST);
 	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
@@ -337,7 +337,7 @@ void R_ShadowBlend(float alpha)
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
 		GLSTATE_ENABLE_BLEND
-		qglEnable( GL_TEXTURE_2D );
+		GL_EnableTexture (0, true);
 
 		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 		qglDisable (GL_DEPTH_TEST);
@@ -372,7 +372,7 @@ void R_ShadowBlend(float alpha)
 
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLSTATE_DISABLE_BLEND
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 	qglEnable (GL_DEPTH_TEST);
 	qglDisable(GL_STENCIL_TEST);
 

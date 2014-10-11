@@ -508,14 +508,14 @@ void SHD_DrawShadowVolume()
 	}
 
 	qglPushMatrix();
-	qglDisable(GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	qglTranslatef(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 	qglRotatef(currententity->angles[1], 0, 0, 1);
 
 	if(currentmodel->type == mod_md2)
 		SHD_DrawAliasShadowVolume(paliashdr, lerped);
 	
-	qglEnable(GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 	qglPopMatrix();
 }
 

@@ -658,7 +658,7 @@ void R_DrawMark (vec3_t origin, int type)
 	qglTranslatef (origin[0],  origin[1],  origin[2]);
 	qglScalef (scale * 16.0f, scale * 16.0f, scale * 16.0f);
 
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
 	if(type == 1)
 		qglColor3f (1,0,0);
 	else if(type == 2)
@@ -672,7 +672,7 @@ void R_DrawMark (vec3_t origin, int type)
 
 	qglColor3f (1,1,1);
 	qglPopMatrix ();
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 }
 
 //For creating the surfaces for the ragdoll to collide with
