@@ -142,20 +142,22 @@ void GL_BlendFunction (GLenum sfactor, GLenum dfactor)
 
 void GL_EnableTexture (int target, qboolean enable)
 {
-	if (	gl_state.enabledtmus[target] == enable &&
-			gl_state.currenttexturemodes[target] == GL_REPLACE )
-		return;
+	if (gl_state.enabledtmus[target] != enable)
+	{
+	    gl_state.enabledtmus[target] = enable;
 	
-	gl_state.enabledtmus[target] = enable;
+	    GL_SelectTexture (target);
 	
-	GL_SelectTexture (target);
+	    if (enable)
+		    qglEnable (GL_TEXTURE_2D);
+	    else
+		    qglDisable (GL_TEXTURE_2D);
+	}
 	
-	if (enable)
-		qglEnable (GL_TEXTURE_2D);
-	else
-		qglDisable (GL_TEXTURE_2D);
-	
-	GL_TexEnv (GL_REPLACE);
+	// Since this function may or may not have changed the current texture
+    // unit with GL_SelectTexture, the code that follows should not count on
+    // any particular texture unit being selected.
+	gl_state.currenttmu_defined = false;
 }
 
 static inline void GL_ForceSelectTexture (void)
