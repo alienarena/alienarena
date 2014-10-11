@@ -2383,7 +2383,6 @@ void R_DrawRadar(void)
 	qglPopMatrix();
 	qglMatrixMode(GL_MODELVIEW);
 	qglDisable(GL_STENCIL_TEST);
-	GL_TexEnv( GL_REPLACE );
 	GLSTATE_DISABLE_BLEND;
 	qglEnable(GL_DEPTH_TEST);
 	qglColor4f(1,1,1,1);
