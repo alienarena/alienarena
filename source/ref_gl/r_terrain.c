@@ -88,9 +88,7 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	if (ndownward > 0)
 		Com_Printf ("WARN: %d downward facing polygons in %s!\n", ndownward, mod->name);
 	
-	mod->extradata = Hunk_Begin (3 * sizeof(*mod->vboIDs));
 	R_Mesh_LoadVBO (mod, MESHLOAD_CALC_NORMAL|MESHLOAD_CALC_TANGENT, basevbo, data.tri_indices, framevbo);
-	mod->extradatasize = Hunk_End ();
 	
 	CleanupTerrainData (&data);
 	Z_Free (framevbo);
