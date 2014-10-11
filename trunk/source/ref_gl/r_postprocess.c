@@ -88,7 +88,7 @@ image_t *R_Postprocess_AllocFBOTexture (char *name, int width, int height, GLuin
 // Be sure to set up your GLSL program and uniforms before calling this! Make
 // sure r_framebuffer is already bound to a TMU, and tell this function which
 // TMU it is.
-static void Distort_RenderQuad (int framebuffer_tmu, int x, int y, int w, int h)
+static void Distort_RenderQuad (int x, int y, int w, int h)
 {
 	int xl = x, yt = y, xr = x + w, yb = y + h;
 	
@@ -102,8 +102,7 @@ static void Distort_RenderQuad (int framebuffer_tmu, int x, int y, int w, int h)
 	GLSTATE_DISABLE_BLEND
 	qglDisable (GL_DEPTH_TEST);
 	
-	GL_SelectTexture (framebuffer_tmu); // r_framefuffer should already be bound to TMU 0
-	GL_Bind (r_framebuffer->texnum);
+	GL_MBind (0, r_framebuffer->texnum);
 	
 	// Ie need to grab the frame buffer. If we're not working with the whole
 	// framebuffer, copy a margin to avoid artifacts
@@ -179,14 +178,11 @@ void R_GLSLDistortion(void)
 		//create a distortion wave effect at point of explosion
 		glUseProgramObjectARB( g_fbprogramObj );
 
-		// FIXME: why does this fail catastrophically if I put distortwave on
-		// TMU 1 and r_framebuffer on TMU 0? 
-		GL_MBind (1, r_framebuffer->texnum);
-		glUniform1iARB (distort_uniforms.framebuffTex, 1);
+		glUniform1iARB (distort_uniforms.framebuffTex, 0);
 
 		if(r_distortwave)
-			GL_MBind (0, r_distortwave->texnum);
-		glUniform1iARB (distort_uniforms.distortTex, 0);
+			GL_MBind (1, r_distortwave->texnum);
+		glUniform1iARB (distort_uniforms.distortTex, 1);
 
 		// get positions of bounds of warp area
 		scale = 8.0f + (rs_realtime - r_fbeffectTime) * 78.0f / r_fbeffectLen;
@@ -201,7 +197,7 @@ void R_GLSLDistortion(void)
 		glUniform1fARB (distort_uniforms.intensity, intensity);
 		
 		// Note that r_framebuffer is on TMU 1 this time
-		Distort_RenderQuad (1, ul_2d[0], lr_2d[1], lr_2d[0] - ul_2d[0], ul_2d[1] - lr_2d[1]);
+		Distort_RenderQuad (ul_2d[0], lr_2d[1], lr_2d[0] - ul_2d[0], ul_2d[1] - lr_2d[1]);
 		
 		glUseProgramObjectARB (0);
 		GL_MBind (1, 0);
@@ -214,13 +210,11 @@ void R_GLSLDistortion(void)
 		//do a radial blur
 		glUseProgramObjectARB( g_rblurprogramObj );
 
-		GL_MBind (0, r_framebuffer->texnum);
-
 		glUniform1iARB( g_location_rsource, 0);
 
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 
-		Distort_RenderQuad (0, 0, 0, viddef.width, viddef.height);
+		Distort_RenderQuad (0, 0, viddef.width, viddef.height);
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -257,7 +251,6 @@ void R_GLSLWaterDroplets(void)
 	//draw water droplets - set up GLSL program and uniforms
 	glUseProgramObjectARB( g_dropletsprogramObj ); //this program will have two or three of the normalmap scrolling over the buffer
 
-	GL_MBind (0, r_framebuffer->texnum);
 	glUniform1iARB( g_location_drSource, 0);
 
 	GL_MBind (1, r_droplets->texnum);
@@ -265,7 +258,7 @@ void R_GLSLWaterDroplets(void)
 
 	glUniform1fARB( g_location_drTime, rs_realtime);
 	
-	Distort_RenderQuad (0, 0, 0, viddef.width, viddef.height);
+	Distort_RenderQuad (0, 0, viddef.width, viddef.height);
 
 	glUseProgramObjectARB( 0 );
 

@@ -2225,7 +2225,7 @@ void R_LoadGLSLPrograms(void)
 
 	// Locate some parameters by name so we can set them later...
 	distort_uniforms.framebuffTex = glGetUniformLocationARB (g_fbprogramObj, "fbtexture");
-	distort_uniforms.distortTex = glGetUniformLocationARB (g_fbprogramObj, "distorttexture");
+	distort_uniforms.distortTex = glGetUniformLocationARB (g_fbprogramObj, "distortiontexture");
 	distort_uniforms.intensity = glGetUniformLocationARB (g_fbprogramObj, "intensity");
 
 	//gaussian blur
