@@ -637,8 +637,7 @@ void R_GLSLGodRays(void)
 void R_GLSLPostProcess(void)
 {
 	R_GLSLGodRays();
-
 	R_GLSLWaterDroplets();
-
 	R_GLSLDistortion();
+	GL_SelectTexture (0); // FIXME: make unnecessary
 }
