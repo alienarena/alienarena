@@ -668,9 +668,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		VectorCopy (data.verts[i], framevbo[i].vertex);
 	}
 	
-	mod->extradata = Hunk_Begin (3 * sizeof(*mod->vboIDs));
 	R_Mesh_LoadVBO (mod, MESHLOAD_CALC_NORMAL|MESHLOAD_CALC_TANGENT, basevbo, &data.polys[0][0], framevbo);
-	mod->extradatasize = Hunk_End ();
 	
 	Z_Free (framevbo);
 	Z_Free (basevbo);

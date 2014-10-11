@@ -258,7 +258,7 @@ void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
 	const nonskeletal_basevbo_t *basevbo;
 	va_list ap;
 	
-	mod->vboIDs = Hunk_Alloc ((maxframes + frames_idx) * sizeof(*mod->vboIDs));
+	mod->vboIDs = malloc ((maxframes + frames_idx) * sizeof(*mod->vboIDs));
 	qglGenBuffersARB (maxframes + frames_idx, mod->vboIDs);
 	
 	va_start (ap, calcflags);
@@ -318,6 +318,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 	const int frames_idx = ((mod->typeFlags & MESH_INDEXED) ? 2 : 1);
 	
 	qglDeleteBuffersARB (maxframes + frames_idx, mod->vboIDs);
+	free (mod->vboIDs);
 }
 
 //This routine bascially finds the average light position, by factoring in all lights and
