@@ -441,8 +441,7 @@ static void BSP_DrawWarpSurfaces (qboolean forEnt)
 	
 	// no lightmaps rendered on these surfaces
 	GL_EnableTexture (1, false);
-	GL_SelectTexture (0);
-	GL_TexEnv (GL_MODULATE);
+	GL_MTexEnv (0, GL_MODULATE);
 	qglColor4f( gl_state.inverse_intensity,
 				gl_state.inverse_intensity,
 				gl_state.inverse_intensity,
@@ -463,8 +462,7 @@ static void BSP_DrawWarpSurfaces (qboolean forEnt)
 		r_warp_surfaces.entchain = NULL;
 	
 	GL_EnableTexture (1, true);
-	GL_SelectTexture (0);
-	GL_TexEnv (GL_REPLACE);
+	GL_MTexEnv (0, GL_REPLACE);
 	R_KillVArrays ();
 }
 
@@ -510,10 +508,9 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
 	
-	GL_SelectTexture (0);
 	qglDepthMask ( GL_FALSE );
 	GLSTATE_ENABLE_BLEND
-	GL_TexEnv( GL_MODULATE );
+	GL_MTexEnv (0, GL_MODULATE);
 	BSP_InvalidateVBO ();
 	
 	for (s=chain ; s ; s=s->texturechain)
@@ -540,9 +537,8 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		
 		if (current_surf_type != last_surf_type || current_texinfo != last_texinfo)
 		{
-			GL_SelectTexture (0);
 			GLSTATE_ENABLE_BLEND
-			GL_TexEnv (GL_MODULATE);
+			GL_MTexEnv (0, GL_MODULATE);
 			BSP_SetScrolling ((s->texinfo->flags & SURF_FLOWING) != 0);
 			
 			if (s->texinfo->flags & SURF_TRANS33)
@@ -566,8 +562,7 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 
 	R_KillVArrays ();
 	BSP_SetScrolling (0);
-	GL_SelectTexture (0);
-	GL_TexEnv (GL_REPLACE);
+	GL_MTexEnv (0, GL_MODULATE);
 	qglColor4f (1,1,1,1);
 	GLSTATE_DISABLE_BLEND
 	qglDepthMask (GL_TRUE);
@@ -760,8 +755,7 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 		// do this here so only have to do it once instead of for each surface
 		texnum = BSP_TextureAnimation( texinfo )->texnum;
 	
-	GL_SelectTexture (0);
-	GL_Bind (texnum);
+	GL_MBind (0, texnum);
 	
 	// scrolling is done using the texture matrix
 	if (	!r_currTexInfo || (texinfo->flags & SURF_FLOWING) ||
@@ -1282,7 +1276,6 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 		glUseProgramObjectARB( 0 );
 	}
 	
-	GL_SelectTexture (0);
 	BSP_SetScrolling (0);
 	
 	// this has to come last because it messes with GL state
@@ -1323,7 +1316,7 @@ static void BSP_DrawInlineBModel ( void )
 	{
 		GLSTATE_ENABLE_BLEND
 		qglColor4f (1,1,1,0.25);
-		GL_TexEnv( GL_MODULATE );
+		GL_MTexEnv (0, GL_MODULATE);
 	}
 
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
@@ -1354,7 +1347,7 @@ static void BSP_DrawInlineBModel ( void )
 	
 	GLSTATE_DISABLE_BLEND
 	qglColor4f (1,1,1,1);
-	GL_TexEnv( GL_REPLACE );
+	GL_MTexEnv (0, GL_REPLACE);
 	
 	R_KillVArrays ();
 }

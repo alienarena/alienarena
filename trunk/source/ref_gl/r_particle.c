@@ -124,9 +124,9 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	
 	GL_SelectTexture (0);
 
-	qglDepthMask( GL_FALSE );	 	// no z buffering
+	qglDepthMask (GL_FALSE);	 	// no z buffering
 	GLSTATE_ENABLE_BLEND
-	GL_TexEnv( GL_MODULATE );
+	GL_TexEnv (GL_MODULATE);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	
@@ -344,7 +344,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 	qglColor4f( 1,1,1,1 );
 	GLSTATE_DISABLE_BLEND
 	qglDepthMask( GL_TRUE );	// back to normal Z buffering
-	GL_TexEnv( GL_REPLACE );
+	GL_TexEnv (GL_REPLACE);
 	qglEnable (GL_CULL_FACE);
 }
 
@@ -574,7 +574,7 @@ void R_RenderFlares (void)
 	
 	R_InitQuadVarrays();
 
-	qglDisable(GL_DEPTH_TEST);
+	qglDisable (GL_DEPTH_TEST);
 	GL_SelectTexture (0);
 	GL_TexEnv (GL_MODULATE);
 
@@ -608,7 +608,7 @@ void R_RenderFlares (void)
 	}
 	
 	R_KillVArrays ();
-	GL_TexEnv (GL_REPLACE);
+	GL_MTexEnv (0, GL_REPLACE);
 	qglEnable (GL_DEPTH_TEST);
 	qglColor3f (1,1,1);
 	GLSTATE_DISABLE_BLEND
@@ -704,8 +704,8 @@ void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
 	float new_x, new_y;
 	float diameter = 2.0*radius;
 
-	qglColor4f(r, g, b, alpha);
-	GL_Bind(tex->texnum);
+	qglColor4f (r, g, b, alpha);
+	GL_MBind (0, tex->texnum);
 
 	if (offset) {
 		new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
@@ -814,9 +814,8 @@ void R_RenderSun()
 		qglLoadIdentity();
 		GLSTATE_ENABLE_BLEND
 		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
-		GL_SelectTexture (0);
-		GL_TexEnv(GL_MODULATE);
-		qglDepthRange(0, 0.3);
+		GL_MTexEnv (0, GL_MODULATE);
+		qglDepthRange (0, 0.3);
 
 		size = r_newrefdef.width * sun_size;
 		PART_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
@@ -999,9 +998,8 @@ void R_DrawVegetationSurface ( void )
 	qglDepthMask( GL_FALSE );
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	GL_Bind (0);
-	GL_TexEnv( GL_MODULATE );
-	qglDisable( GL_CULL_FACE );
+	GL_TexEnv (GL_MODULATE);
+	qglDisable (GL_CULL_FACE);
 	
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	
@@ -1110,11 +1108,11 @@ void R_DrawVegetationSurface ( void )
 	
 	R_KillVArrays ();
 
-	qglColor4f( 1,1,1,1 );
+	qglColor4f (1,1,1,1);
 	GLSTATE_DISABLE_BLEND
-	qglDepthMask( GL_TRUE );
-	GL_TexEnv( GL_REPLACE );
-	qglEnable( GL_CULL_FACE );
+	qglDepthMask (GL_TRUE);
+	GL_TexEnv (GL_REPLACE);
+	qglEnable (GL_CULL_FACE);
 }
 
 void R_ClearGrasses(void)
@@ -1233,10 +1231,10 @@ void R_DrawBeamSurface ( void )
 	GL_SelectTexture (0);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
-	qglDepthMask( GL_FALSE );
+	qglDepthMask (GL_FALSE);
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
-	GL_TexEnv( GL_MODULATE );
+	GL_TexEnv (GL_MODULATE);
 
 	for (i=0; i<r_numbeams; i++, beam++) {
 		float movdir;
@@ -1356,11 +1354,11 @@ void R_DrawBeamSurface ( void )
 
 	R_KillVArrays ();
 
-	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	qglColor4f( 1,1,1,1 );
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglColor4f (1,1,1,1 );
 	GLSTATE_DISABLE_BLEND
-	qglDepthMask( GL_TRUE );
-	GL_TexEnv( GL_REPLACE );
+	qglDepthMask (GL_TRUE);
+	GL_TexEnv (GL_REPLACE);
 }
 
 void R_ClearBeams(void)
@@ -1479,7 +1477,7 @@ void R_DrawSimpleItems ( void )
 	GL_Bind (0);
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
-	GL_TexEnv( GL_MODULATE );
+	GL_TexEnv (GL_MODULATE);
 
 	qglDepthMask( GL_TRUE );
 	GLSTATE_ENABLE_ALPHATEST
@@ -1555,7 +1553,7 @@ void R_DrawSimpleItems ( void )
 	GL_BlendFunction ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_ALPHATEST
-	GL_TexEnv( GL_REPLACE );
+	GL_TexEnv (GL_REPLACE);
 }
 
 void R_SetSimpleTexnum (model_t *loadmodel, const char *pathname)
