@@ -144,19 +144,19 @@ void GL_EnableTexture (int target, qboolean enable)
 {
 	if (gl_state.enabledtmus[target] != enable)
 	{
-	    gl_state.enabledtmus[target] = enable;
+		gl_state.enabledtmus[target] = enable;
 	
-	    GL_SelectTexture (target);
+		GL_SelectTexture (target);
 	
-	    if (enable)
-		    qglEnable (GL_TEXTURE_2D);
-	    else
-		    qglDisable (GL_TEXTURE_2D);
+		if (enable)
+			qglEnable (GL_TEXTURE_2D);
+		else
+			qglDisable (GL_TEXTURE_2D);
 	}
 	
 	// Since this function may or may not have changed the current texture
-    // unit with GL_SelectTexture, the code that follows should not count on
-    // any particular texture unit being selected.
+	// unit with GL_SelectTexture, the code that follows should not count on
+	// any particular texture unit being selected.
 	gl_state.currenttmu_defined = false;
 }
 
@@ -187,7 +187,7 @@ void GL_SelectTexture (int target)
 	GL_ForceSelectTexture ();
 }
 
-void GL_TexEnv( GLenum mode )
+void GL_TexEnv (GLenum mode)
 {
 	static qboolean firstrun = true;
 	
@@ -206,11 +206,25 @@ void GL_TexEnv( GLenum mode )
 	
 	GL_ForceSelectTexture();
 	
-	if ( mode != gl_state.currenttexturemodes[gl_state.currenttmu] )
+	if (mode != gl_state.currenttexturemodes[gl_state.currenttmu])
 	{
 		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, mode );
 		gl_state.currenttexturemodes[gl_state.currenttmu] = mode;
 	}
+}
+
+void GL_MTexEnv (int target, GLenum mode)
+{
+	if (gl_state.currenttexturemodes[target] != mode)
+	{
+		GL_SelectTexture (target);
+		GL_TexEnv (mode);
+	}
+	
+	// Since this function may or may not have changed the current texture
+	// unit with GL_SelectTexture, the code that follows should not count on
+	// any particular texture unit being selected.
+	gl_state.currenttmu_defined = false;
 }
 
 void GL_Bind (int texnum)
@@ -220,7 +234,7 @@ void GL_Bind (int texnum)
 	if (!gl_state.currenttmu_defined)
 		Com_DPrintf ("Warning: GL_Bind with undefined TMU!\n");
 
-	if ( gl_state.currenttextures[gl_state.currenttmu] == texnum)
+	if (gl_state.currenttextures[gl_state.currenttmu] == texnum)
 		return;
 	gl_state.currenttextures[gl_state.currenttmu] = texnum;
 	GL_ForceSelectTexture();
@@ -236,8 +250,8 @@ void GL_MBind (int target, int texnum)
 	}
 	
 	// Since this function may or may not have changed the current texture
-    // unit with GL_SelectTexture, the code that follows should not count on
-    // any particular texture unit being selected.
+	// unit with GL_SelectTexture, the code that follows should not count on
+	// any particular texture unit being selected.
 	gl_state.currenttmu_defined = false;
 }
 

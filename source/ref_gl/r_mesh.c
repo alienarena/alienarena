@@ -1149,9 +1149,8 @@ void R_Mesh_Draw (void)
 	if (!skin)
 		skin = r_notexture;	// fallback..
 	
-	GL_SelectTexture (0);
 	qglShadeModel (GL_SMOOTH);
-	GL_TexEnv (GL_MODULATE);
+	GL_MTexEnv (0, GL_MODULATE);
 	
 	if ((currentmodel->typeFlags & MESH_DECAL))
 	{
@@ -1181,8 +1180,7 @@ void R_Mesh_Draw (void)
 		qglLineWidth (1.0);
 	}
 	
-	GL_SelectTexture (0);
-	GL_TexEnv (GL_REPLACE);
+	GL_MTexEnv (0, GL_REPLACE);
 	qglShadeModel (GL_FLAT);
 
 	qglPopMatrix ();
