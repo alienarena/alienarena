@@ -2027,6 +2027,7 @@ void SCR_UpdateScreen (void)
 {
 	int numframes;
 	int i;
+	static int last_loading_percent = -1;
 	float separation[2] = { 0, 0 };
 
 	// if the screen is disabled (loading plaque is up, or vid mode changing)
@@ -2066,6 +2067,17 @@ void SCR_UpdateScreen (void)
 		separation[0] = 0;
 		separation[1] = 0;
 		numframes = 1;
+	}
+	
+	if (scr_draw_loading)
+	{
+		if (loadingPercent == last_loading_percent)
+			return;
+		last_loading_percent = loadingPercent;
+	}
+	else
+	{
+		last_loading_percent = -1;
 	}
 
 	for ( i = 0; i < numframes; i++ )
