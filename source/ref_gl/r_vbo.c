@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static GLuint bsp_vboId = 0;
 GLuint minimap_vboId = 0;
+GLuint vegetation_vboId = 0;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -35,6 +36,13 @@ GLvoid			(APIENTRY * qglBufferDataARB)(GLenum target, GLsizeiptrARB size, const 
 GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
 void *			(APIENTRY * qglMapBufferARB)(GLenum target, GLenum access);
 GLboolean		(APIENTRY * qglUnmapBufferARB)(GLenum target);
+
+#define AppendToVBO(idx,sz,ptr) \
+{ \
+	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, (GLintptrARB)idx, sz, ptr); \
+	idx += sz; \
+}
+	
 
 static void VB_VCInit (void);
 void R_LoadVBOSubsystem(void)
@@ -126,10 +134,9 @@ static void VB_BuildWorldSurfaceVBO (void)
 			totalVBObufferSize += 7*3*(p->numverts-2);
 	}
 	
-	qglGenBuffersARB(1, &bsp_vboId);
-		
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bsp_vboId);
-	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+	qglGenBuffersARB (1, &bsp_vboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_vboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -151,7 +158,7 @@ static void VB_BuildWorldSurfaceVBO (void)
 		}
 	}
 	
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
 
 static void VB_BuildMinimapVBO (void)
@@ -167,9 +174,9 @@ static void VB_BuildMinimapVBO (void)
 			totalVBObufferSize += (3+2)*2;
 	}
 	
-	qglGenBuffersARB(1, &minimap_vboId);
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, minimap_vboId);
-	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+	qglGenBuffersARB (1, &minimap_vboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, minimap_vboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
 	for (i = 1; i < r_worldmodel->numedges; i++)
 	{
@@ -195,22 +202,127 @@ static void VB_BuildMinimapVBO (void)
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
-void VB_BuildWorldVBO (void)
-{
-	VB_BuildWorldSurfaceVBO ();
-	VB_BuildMinimapVBO ();
-	fflush (stdout);
-}
-
 void GL_SetupWorldVBO (void)
 {
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bsp_vboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_vboId);
 
 	R_VertexPointer (3, 7*sizeof(float), (void *)0);
 	R_TexCoordPointer (0, 7*sizeof(float), (void *)(3*sizeof(float)));
 	R_TexCoordPointer (1, 7*sizeof(float), (void *)(5*sizeof(float)));
 	
-	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
+}
+
+static void VB_BuildVegetationVBO (void)
+{
+	int i, ng;
+	int totalVBObufferSize = 0;
+	int currVertexNum = 0;
+	int vbo_idx = 0;
+	grass_t *grass;
+	
+	for (grass = r_grasses, i = 0; i < r_numgrasses; i++, grass++)
+		totalVBObufferSize += (grass->type == 1 ? 1 : 3) * 4 * (3 + 2 + 1 + 1 + 1);
+	
+	qglGenBuffersARB (1, &vegetation_vboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, vegetation_vboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+	
+	for (grass = r_grasses, i = 0; i < r_numgrasses; i++, grass++)
+	{
+		vec3_t origin;
+		vec3_t angle;
+		vec3_t up;
+		int gcount = grass->type == 1 ? 1 : 3;
+		float upscale, rightscale, scale = 10.0f * grass->size;
+		
+		// up and right appear to be reversed, but actually the
+		// vegetation textures are all sideways.
+		upscale = scale * (float)grass->tex->crop_width/(float)grass->tex->upload_width;
+		rightscale = scale * (float)grass->tex->crop_height/(float)grass->tex->upload_height;
+		
+		VectorCopy (grass->origin, origin);
+		VectorClear (angle);
+		VectorSet (up, 0, 0, upscale);
+		
+		grass->vbo_first_vert = currVertexNum;
+		grass->vbo_num_verts = gcount * 4;
+		currVertexNum += grass->vbo_num_verts;
+		
+		for (ng = 0; ng < gcount; ng++)
+		{
+			int side, v;
+			float swayCoef, addright = 0.0f, addup = 0.0f;
+			trace_t r_trace;
+			vec3_t right, vertex[2];
+			vec2_t st;
+			AngleVectors (angle, NULL, right, NULL);
+			VectorScale (right, rightscale, right);
+			
+			if (grass->type == 1)
+			{
+				VectorCopy (origin, vertex[0]);
+				VectorCopy (origin, vertex[1]);
+			}
+			
+			for (side = 1; side >= 0; side--)
+			{
+				st[1] = side ? grass->tex->sh : grass->tex->sl;
+				
+				if (grass->type != 1)
+				{
+					VectorMA (origin, side ? 0.5f : -0.5f, right, vertex[0]);
+					VectorAdd (vertex[0], up, vertex[1]);
+					VectorSubtract (vertex[0], up, vertex[0]);
+					r_trace = CM_BoxTrace (vertex[1], vertex[0], vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_SOLID);
+					VectorMA (vertex[1], -2.0*r_trace.fraction, up, vertex[0]);
+					VectorAdd (vertex[0], up, vertex[1]);
+				}
+				
+				for (v = 1; v >= 0; v--)
+				{
+					st[0] = side != v ? grass->tex->tl : grass->tex->th;
+					
+					AppendToVBO (vbo_idx, 3 * sizeof(float), vertex[side != v]);
+					AppendToVBO (vbo_idx, 2 * sizeof(float), st);
+					swayCoef = (grass->type == 1 ? 3 : 2) * v;
+					AppendToVBO (vbo_idx, sizeof(float), &swayCoef);
+					if (grass->type == 1)
+					{
+						addup = ((side != v) - 0.5f) * rightscale;
+						addright = (0.5f - side) * rightscale;
+					}
+					AppendToVBO (vbo_idx, sizeof(float), &addup);
+					AppendToVBO (vbo_idx, sizeof(float), &addright);
+				}
+			}
+			
+			angle[1] += 60.0f;
+		}
+	}
+	
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
+}
+
+void VB_BuildWorldVBO (void)
+{
+	VB_BuildWorldSurfaceVBO ();
+	VB_BuildMinimapVBO ();
+	VB_BuildVegetationVBO ();
+	fflush (stdout);
+}
+
+void GL_SetupVegetationVBO (void)
+{
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, vegetation_vboId);
+
+	R_VertexPointer (3, 8*sizeof(float), (void *)0);
+	R_TexCoordPointer (0, 8*sizeof(float), (void *)(3*sizeof(float)));
+	R_AttribPointer (ATTR_SWAYCOEF_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(5*sizeof(float)));
+	R_AttribPointer (ATTR_ADDUP_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(6*sizeof(float)));
+	R_AttribPointer (ATTR_ADDRIGHT_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(7*sizeof(float)));
+	
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
 
 

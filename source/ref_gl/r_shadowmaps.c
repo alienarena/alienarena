@@ -917,69 +917,49 @@ static void R_Vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0.0f;
 }
 
-extern
-void PART_AddBillboardToVArray (	const vec3_t origin, const vec3_t up,
-									const vec3_t right, float sway,
-									qboolean notsideways, float sl, float sh,
-									float tl, float th );
-
 void R_DrawVegetationCasters ( qboolean forShadows )
 {
 	int		i;
 	grass_t *grass;
-	float   scale;
-	vec3_t	dir, origin, angle, right, up;
+	vec3_t	dir, angle, right, up;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
-	grass = r_grasses;
+	GL_SetupVegetationVBO ();
+	glUseProgramObjectARB (g_vegetationprogramObj);
+	VectorSubtract (r_sunLight->origin, r_sunLight->target, dir);
+	R_Vectoangles (dir, angle);
+	AngleVectors (angle, NULL, right, up);
+	glUniform1fARB (vegetation_uniforms.rsTime, rs_realtime);
+	glUniform3fARB (vegetation_uniforms.up, up[0], up[1], up[2]);
+	glUniform3fARB (vegetation_uniforms.right, right[0], right[1], right[2]);
+	
+	qglColor4f (0, 0, 0, 1);
+	GL_SelectTexture (0);
+	GLSTATE_ENABLE_ALPHATEST
 
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-	for (i=0; i<r_numgrasses; i++, grass++) 
+	for (grass = r_grasses, i = 0; i < r_numgrasses; i++, grass++) 
 	{
-		if(!grass->type)
+		if (grass->type != 1)
 			continue; //only deal with leaves, grass shadows look kind of bad
 
-		if(grass->sunVisible) 
+		if (grass->sunVisible) 
 		{
-			scale = 10.0f * grass->size;
-
-			VectorSubtract(r_sunLight->origin, r_sunLight->target, dir);
-			R_Vectoangles(dir, angle);
-		
-			AngleVectors(angle, NULL, right, up);
-			VectorScale(right, scale, right);
-			VectorScale(up, scale, up);
-
-			VectorCopy(grass->origin, origin);
-
-			//render grass polygon
-			
-			GL_SelectTexture (0);
-			qglBindTexture (GL_TEXTURE_2D, grass->tex->texnum);
-
-			GLSTATE_ENABLE_ALPHATEST
-
-			qglColor4f( 0, 0, 0, 1 );
-
-			VArray = &VArrayVerts[0];
-			PART_AddBillboardToVArray (origin, up, right, 3.0f*sinf(rs_realtime*3.0f), false, 0, 1, 0, 1);
-
-			R_DrawVarrays(GL_QUADS, 0, 4);
-
-			if(forShadows)
+			if (forShadows)
 				r_shadowmapcount = 2;
+			
+			GL_Bind (grass->tex->texnum);
+			
+			R_DrawVarrays (GL_QUADS, grass->vbo_first_vert, grass->vbo_num_verts);
 		}
 	}
 
+	glUseProgramObjectARB (0);
 	R_KillVArrays ();
 
 	qglColor4f( 1,1,1,1 );
 	GLSTATE_DISABLE_ALPHATEST
-	
-	GL_InvalidateTextureState (); // FIXME
 }
 
 void R_DrawVegetationCaster(void)

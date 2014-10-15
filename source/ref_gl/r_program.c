@@ -1905,6 +1905,26 @@ static char rgodrays_fragment_program[] = STRINGIFY (
 	}
 );
 
+// This may eventually become the basis of all particle rendering
+static char vegetation_vertex_program[] = STRINGIFY (
+	uniform float rsTime;
+	uniform vec3 up, right;
+	attribute float swayCoef, addup, addright;
+	
+	void main ()
+	{
+		// use cosine so that negative swayCoef is different from positive
+		float sway = swayCoef * cos (swayCoef * rsTime);
+		vec4 swayvec = vec4 (sway, sway, 0, 0);
+		vec4 vertex =	gl_Vertex + swayvec +
+						addup * vec4 (up, 0) + addright * vec4 (right, 0);
+		gl_Position = gl_ModelViewProjectionMatrix * vertex;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
+		gl_FrontColor = gl_BackColor = gl_Color;
+	}
+);
+
+
 typedef struct {
 	const char	*name;
 	int			index;
@@ -1927,7 +1947,13 @@ const vertex_attribute_t standard_attributes[] =
 	#define ATTRIBUTE_OLDTAN	(1<<5)
 	{"oldtangent",	ATTR_OLDTAN_IDX},
 	#define ATTRIBUTE_MINIMAP	(1<<6)
-	{"colordata",	ATTR_MINIMAP_DATA_IDX}
+	{"colordata",	ATTR_MINIMAP_DATA_IDX},
+	#define ATTRIBUTE_SWAYCOEF	(1<<7)
+	{"swaycoef",	ATTR_SWAYCOEF_DATA_IDX},
+	#define ATTRIBUTE_ADDUP		(1<<8)
+	{"addup",		ATTR_ADDUP_DATA_IDX},
+	#define ATTRIBUTE_ADDRIGHT	(1<<9)
+	{"addright",	ATTR_ADDRIGHT_DATA_IDX}
 };
 const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
 	
@@ -2263,4 +2289,12 @@ void R_LoadGLSLPrograms(void)
 	g_location_sunTex = glGetUniformLocationARB( g_godraysprogramObj, "sunTexture");
 	g_location_godrayScreenAspect = glGetUniformLocationARB( g_godraysprogramObj, "aspectRatio");
 	g_location_sunRadius = glGetUniformLocationARB( g_godraysprogramObj, "sunRadius");
+	
+	//vegetation
+	R_LoadGLSLProgram ("Vegetation", (char*)vegetation_vertex_program, NULL, ATTRIBUTE_SWAYCOEF|ATTRIBUTE_ADDUP|ATTRIBUTE_ADDRIGHT, &g_vegetationprogramObj);
+	
+	vegetation_uniforms.rsTime = glGetUniformLocationARB (g_vegetationprogramObj, "rsTime");
+	vegetation_uniforms.up = glGetUniformLocationARB (g_vegetationprogramObj, "up");
+	vegetation_uniforms.right = glGetUniformLocationARB (g_vegetationprogramObj, "right");
+
 }
