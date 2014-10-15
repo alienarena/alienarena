@@ -48,9 +48,9 @@ typedef struct
 typedef struct
 {
 	int type;
+	unsigned int vbo_first_vert, vbo_num_verts;
 	vec3_t origin;
 	vec3_t color;
-	vec3_t normal;
 	float size;
 	int texsize;
 	struct image_s *tex;

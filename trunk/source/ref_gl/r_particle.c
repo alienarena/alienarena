@@ -880,8 +880,6 @@ void Mod_AddVegetation (vec3_t origin, vec3_t normal, image_t *tex, vec3_t color
 	strcpy(grass->name, name);
 	grass->type = type;
 	
-	VectorCopy (normal, grass->normal);
-	
 	grass->leafnum = CM_PointLeafnum (grass->origin);
 
 	if(grass->type == 1)
@@ -939,7 +937,7 @@ void R_FinalizeGrass(void)
 			//only deal with leaves, grass shadows look kind of bad
 			grass->sunVisible = false;
 		}
-	}	
+	}
 }
 
 //rendering
@@ -970,11 +968,9 @@ void R_DrawVegetationSurface ( void )
 	int		i;
 	grass_t *grass;
 	float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up;
+	vec3_t	origin, mins, maxs, right, up;
 	qboolean visible;
 	float	lightLevel[3];
-	float	swaysin, swaysin2, swaysin3;
-	int ng;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
@@ -988,8 +984,6 @@ void R_DrawVegetationSurface ( void )
 		g_lastGSort = Sys_Milliseconds();
 	}
 	
-	grass = r_grasses;
-
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
 
@@ -1001,18 +995,15 @@ void R_DrawVegetationSurface ( void )
 	GL_TexEnv (GL_MODULATE);
 	qglDisable (GL_CULL_FACE);
 	
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
+	GL_SetupVegetationVBO ();
+	glUseProgramObjectARB (g_vegetationprogramObj);
+	AngleVectors(r_newrefdef.viewangles, NULL, right, up);
+	glUniform1fARB (vegetation_uniforms.rsTime, rs_realtime);
+	glUniform3fARB (vegetation_uniforms.up, up[0], up[1], up[2]);
+	glUniform3fARB (vegetation_uniforms.right, right[0], right[1], right[2]);
 	
-	swaysin2 = 2.0*sin (rs_realtime*2.0);
-	swaysin3 = 3.0*sin (rs_realtime*3.0);
-	
-	for (i=0; i<r_numgrasses; i++, grass++)
+	for (grass = r_grasses, i = 0; i < r_numgrasses; i++, grass++)
 	{
-		int gCount = 3;
-		int va = 0;
-
-		VArray = &VArrayVerts[0];
-
 		scale = 10.0*grass->size;
 
 		VectorCopy(grass->origin, origin);
@@ -1022,15 +1013,10 @@ void R_DrawVegetationSurface ( void )
 		
 		if (grass->type == 1) // foliage
 		{
-			swaysin = swaysin3;
-			gCount = 1;
-
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 		}
 		else if (grass->type == 2) // shrubbery
 		{
-			swaysin = swaysin2;
-
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 			
 			// adjust vertical position, scaled
@@ -1038,8 +1024,6 @@ void R_DrawVegetationSurface ( void )
 		}
 		else // grass
 		{
-			swaysin = swaysin2;
-			
 			// adjust vertical position, scaled
 			origin[2] += (grass->texsize/32.0) * grass->size/(grass->texsize/128.0);
 
@@ -1055,6 +1039,8 @@ void R_DrawVegetationSurface ( void )
 		
 		if(visible)
 		{
+			c_grasses++;
+			
 			GL_Bind(grass->tex->texnum);
 			
 			if(gl_dynamic->integer)
@@ -1065,46 +1051,12 @@ void R_DrawVegetationSurface ( void )
 			
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
-					
-			if(grass->type == 1)
-				VectorCopy(r_newrefdef.viewangles, angle);
-			else
-				VectorSet(angle, 0, 0, 0);
 			
-			AngleVectors (angle, NULL, NULL, up);
-			VectorScale(up, scale, up);
-			
-			if (grass->type != 1)
-				vectoangles (grass->normal, angle);
-			
-			// up and right appear to be reversed, but actually the
-			// vegetation textures are all sideways.
-			VectorMA (origin, -0.5 + (float)grass->tex->crop_width/(2.0*grass->tex->upload_width), up, origin);
-			VectorScale (up, (float)grass->tex->crop_width/(float)grass->tex->upload_width, up);
-			
-			for(ng = 0; ng < gCount; ng ++)
-			{
-				AngleVectors(angle, NULL, right, NULL);
-				VectorScale(right, scale, right);
-				
-				// up and right appear to be reversed, but actually the
-				// vegetation textures are all sideways.
-				VectorScale (right, (float)grass->tex->crop_height/(float)grass->tex->upload_height, right);
-				
-				PART_AddBillboardToVArray (origin, up, right, swaysin, false, 
-					grass->tex->crop_sl, grass->tex->crop_sh,
-					grass->tex->crop_tl, grass->tex->crop_th );
-				
-				va += 4;
-				angle[1] += 60;	
-			}
-
-			c_grasses++;
-	
-			R_DrawVarrays(GL_QUADS, 0, va);
-		
+			R_DrawVarrays (GL_QUADS, grass->vbo_first_vert, grass->vbo_num_verts);
 		}
 	}
+	
+	glUseProgramObjectARB (0);
 	
 	R_KillVArrays ();
 
