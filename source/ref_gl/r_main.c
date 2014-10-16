@@ -651,11 +651,9 @@ static void R_Flash (void)
 
 	qglColor4fv (v_blend);
 
-	qglBegin (GL_TRIANGLES);
-	qglVertex2f (-5, -5);
-	qglVertex2f (10, -5);
-	qglVertex2f (-5, 10);
-	qglEnd ();
+	GL_SetupWholeScreen2DVBO (wholescreen_blank);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	R_KillVArrays ();
 
 	GLSTATE_DISABLE_BLEND
 	GL_EnableTexture (0, true);
