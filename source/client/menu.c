@@ -4598,7 +4598,7 @@ void LoadBotInfo( void )
 		// load info from config file if possible
 		
 		Com_sprintf (cfgpath, sizeof(cfgpath), "%s/%s.cfg", "botinfo", name);
-		if( FS_LoadFile (cfgpath, &cfg) == -1 )
+		if( FS_LoadFile (cfgpath, (void**)&cfg) == -1 )
 		{
 			Com_DPrintf("LoadBotInfo: failed file open: %s\n", fullpath );
 			continue;
@@ -4614,7 +4614,7 @@ void LoadBotInfo( void )
 		if ( s && ((s = strtok( NULL, delim )) != NULL) )
 			strncpy( bots[i].faveweap, s, sizeof(bots[i].faveweap)-1 );
 		
-		Z_Free (cfg);
+		FS_FreeFile(cfg);
 	}
 	totalbots = count;
 	fclose(pIn);
