@@ -915,11 +915,10 @@ void RS_LoadScript (char *script)
 {
 	qboolean		inscript = false, instage = false;
 	char			ignored = 0;
-	char			*token, *fbuf, *buf;
+	char			*token, *fbuf;
 	char			script_full_path[MAX_OSPATH];
 	rscript_t		*rs = NULL;
 	rs_stage_t		*stage = NULL;
-	// unsigned char	tcmod = 0; // unused
 	unsigned int	len, i;
 
 	len = FS_LoadFile (script, (void **)&fbuf);
@@ -929,17 +928,10 @@ void RS_LoadScript (char *script)
 	//	Con_Printf (PRINT_ALL, "Could not load script %s\n", script);
 		return;
 	}
-
-	buf = (char *)malloc(len+1);
-	memcpy (buf, fbuf, len);
-	buf[len] = 0;
-
-	FS_FreeFile (fbuf);
 	
 	FS_FullPath (script_full_path, sizeof(script_full_path), script);
 
-	token = strtok (buf, TOK_DELIMINATORS);
-
+	token = strtok (fbuf, TOK_DELIMINATORS);
 	while (token != NULL)
 	{
 		if (!Q_strcasecmp (token, "/*") || !Q_strcasecmp (token, "["))
@@ -1007,7 +999,7 @@ void RS_LoadScript (char *script)
 		token = strtok (NULL, TOK_DELIMINATORS);
 	}
 
-	free(buf);
+	FS_FreeFile(fbuf);
 }
 
 void RS_ScanPathForScripts (void)

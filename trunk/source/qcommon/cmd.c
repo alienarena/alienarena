@@ -439,14 +439,7 @@ void Cmd_Exec_f (void)
 	}
 	Com_Printf ("execing %s\n",Cmd_Argv(1));
 
-	// the file doesn't have a trailing 0, so we need to copy it off
-	f2 = Z_Malloc(len+1);
-	memcpy (f2, f, len);
-	f2[len] = 0;
-
-	Cbuf_InsertText (f2);
-
-	Z_Free (f2);
+	Cbuf_InsertText(f); /* FS_LoadFile nul-terminates the buffer */
 	FS_FreeFile (f);
 }
 

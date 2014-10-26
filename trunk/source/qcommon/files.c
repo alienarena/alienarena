@@ -666,6 +666,8 @@ Given relative path
  if buffer arg is NULL, just return the file length
  otherwise,
    Z_malloc a buffer, read the file into it, return pointer to the new buffer
+   The new buffer is nul-terminated; its size == returned length + 1.
+   For text files, this means the buffer is nul-terminated c-string.
 ============
 */
 int FS_LoadFile (char *path, void **buffer)
