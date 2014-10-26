@@ -1031,6 +1031,7 @@ nobase_dist_textures_DATA = \
 	dm-wasteland/canyon1_lightmaptex.tga \
 	dm-wasteland/canyon1_rocks.tga \
 	dm-wasteland/canyon1_vegetation.tga \
+	dm-wasteland/clifftop.tga \
 	evil/confllrtile2pad_nm.tga \
 	evil/confllrtile2pad.tga \
 	evil/drktek_symb_hm.tga \
