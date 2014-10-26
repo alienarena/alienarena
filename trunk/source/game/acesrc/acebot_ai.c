@@ -1053,8 +1053,6 @@ void ACEAI_ChooseWeapon(edict_t *self)
 
 	// now go through normal weapon favoring routine
 	//  always favor the Vaporizor, unless close, then use the violator
-	if(g_tactical->integer) 
-
 	if ( !g_tactical->integer && range < 200.0f && self->skill > 0 )
 	{
 		selected = ACEIT_ChangeWeapon( self, FindItem( "Violator" ));
