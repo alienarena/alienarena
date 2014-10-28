@@ -10,6 +10,12 @@ canyon1_texture
 			400 textures/arena10/heap4.tga
 	}
 }
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
 env/hellup
 {
 	{
