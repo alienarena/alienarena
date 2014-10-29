@@ -386,6 +386,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/turbinefan.jpg \
 	meshes/tech/turbinefan.md2 \
 	meshes/tech/turbinefan_normal.jpg \
+	meshes/tech/turbinefan_vert.md2 \
 	meshes/toxicbarrell.jpg \
 	meshes/toxicbarrell.md2 \
 	meshes/toxicbarrell_normal.jpg \
