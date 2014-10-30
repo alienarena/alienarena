@@ -390,6 +390,18 @@ void SV_AreaEdicts_r (areanode_t *node)
 			return;
 		}
 
+		/* 2014-10. Workaround to detect error. Cause of error is unknown
+		 * See SV_HullForEntity */
+		if ( check->solid == SOLID_BSP )
+		{
+			cmodel_t *model = sv.models[check->s.modelindex];
+			if ( !model )
+			{
+				Com_Printf("ERROR in SV_AreaEdicts_r. Bad entity (%p)\n", check);
+				continue;
+			}
+		}
+
 		area_list[area_count] = check;
 		area_count++;
 	}
@@ -499,7 +511,11 @@ int SV_HullForEntity (edict_t *ent)
 		model = sv.models[ ent->s.modelindex ];
 
 		if (!model)
+		{
+			/* 2014-10. See SV_AreaEdicts_r, for workaround for this
+			 * error occuring on a map with terrain. */
 			Com_Error (ERR_FATAL, "MOVETYPE_PUSH with a non bsp model");
+		}
 
 		return model->headnode;
 	}
