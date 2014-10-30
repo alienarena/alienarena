@@ -136,6 +136,21 @@ spawn_t	spawns[] = {
 	{NULL, NULL}
 };
 
+static void ED_PostSpawn_SanityCheck (edict_t *ent)
+{
+	if (ent->solid == SOLID_BSP && (ent->model == NULL || ent->model[0] != '*'))
+	{
+		gi.dprintf ("Changing %s from SOLID_BSP to SOLID_NOT "
+					"(entity has no brushes!)\n", ent->classname);
+		ent->solid = SOLID_NOT;
+	}
+	
+	// HACK: since solidness may have changed, if the entity is
+	// already linked, it must be relinked.
+	if (ent->linkcount != 0)
+		SV_LinkEdict (ent);
+}
+
 /*
 ===============
 ED_CallSpawn
@@ -187,6 +202,8 @@ void ED_CallSpawn (edict_t *ent)
 		if (!strcmp(s->name, ent->classname))
 		{	// found it
 			s->spawn (ent);
+			if (ent != g_edicts && ent->inuse)
+				ED_PostSpawn_SanityCheck (ent);
 			return;
 		}
 	}
