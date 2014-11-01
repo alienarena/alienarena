@@ -643,11 +643,8 @@ qboolean InFront (vec3_t target)
 		return true;
 	return false;
 }
-//==============
-//SCR_DrawPlayerNamesCenter
-// shows player names at center of screen
-//==============
-void SCR_DrawPlayerNamesCenter( void )
+
+static void SCR_DrawPlayerNames (void)
 {
 	static vec3_t		mins = { -8, -8, -8 };
 	static vec3_t		maxs = { 8, 8, 8 };
@@ -657,124 +654,70 @@ void SCR_DrawPlayerNamesCenter( void )
 	centity_t *		cent;
 	float			dist, mindist;
 	trace_t			trace;
+	vec2_t			screen_pos;
 	vec3_t			vecdist;
-	vec3_t			temp;
-	vec3_t			axis[3];
 	int			closest;
-
-	if( !cl_showPlayerNames->integer )
-		return;
+	
+	font = FNT_AutoGet (CL_gameFont);
 
 	mindist = 1000;
 	closest = 0;
 
-	for( i = 0; i < MAX_CLIENTS; i++ )
+	for (i = 0; i < MAX_CLIENTS; i++)
 	{
 		cent = cl_entities + i + 1;
 
-		if( !cent->current.modelindex )
+		if (!cent->current.modelindex)
+			continue;
+		
+		if (strlen (cl.clientinfo[i].name) <= 1)
 			continue;
 
-		if(!strcmp(cl.clientinfo[i].name, name->string))
+		if (!strcmp (cl.clientinfo[i].name, name->string))
+			continue;
+		
+		VectorSubtract (cent->current.origin, cl.refdef.vieworg, vecdist);
+		dist = VectorLength (vecdist);
+		
+		if (dist >= mindist)
+			continue;
+		
+		if (!InFront (cent->current.origin))
 			continue;
 
+		// FIXME: CL_Trace is hot-spot here!
 		trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
 		if (trace.fraction != 1.0)
 			continue;
 
-		VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
-		dist = VectorLength(vecdist);
-
-		if (dist >= 1000)
-			continue;
-
-		if(dist < mindist && (strlen(cl.clientinfo[i].name) > 1) && InFront(cent->current.origin) ) {
-			mindist = dist;
+		if (cl_showPlayerNames->integer == 2)
+		{
+		    // Draw a label over each visible player
+			R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos);
+			box.x = (int)screen_pos[0];
+			box.y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
+			box.width = box.height = 0;
+			FNT_BoundedPrint (font, cl.clientinfo[i].name, FNT_CMODE_QUAKE_SRS,
+				FNT_ALIGN_LEFT, &box, FNT_colors[2]);
+		}
+		else
+		{
+		    mindist = dist;
 			closest = i;
 		}
-
-		VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
-		VectorNormalize (temp);
-
-		AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
-
-		if (DotProduct (temp, axis[0]) < 0)
-			continue;
 	}
 
-	if (!closest) {
+	if (closest == 0)
 		return;
-	}
 
-	font = FNT_AutoGet( CL_gameFont );
+	// Draw a label of the closest visible player in the center of the screen
 	box.x = (int)( ( cl.refdef.width - 200 ) / 2 );
 	box.y = (int)( cl.refdef.height / 1.8 );
 	box.width = 400;
 	box.height = 0;
-	FNT_BoundedPrint( font , cl.clientinfo[closest].name , FNT_CMODE_QUAKE_SRS ,
-		FNT_ALIGN_CENTER , &box , FNT_colors[ 2 ] );
+	FNT_BoundedPrint (font, cl.clientinfo[closest].name, FNT_CMODE_QUAKE_SRS,
+		FNT_ALIGN_CENTER, &box, FNT_colors[2]);
 
-}
-
-//==============
-//SCR_DrawPlayerNames
-// shows player names at their feets.
-//==============
-extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
-void SCR_DrawPlayerNames( void )
-{
-	// static vec4_t   whiteTransparent = { 1.0f, 1.0f, 1.0f, 0.5f };
-	FNT_font_t	font;
-	int		i;
-	centity_t *	cent;
-	float		dist;
-	trace_t		trace;
-	vec2_t		screen_pos;
-	vec3_t		vecdist;
-	vec3_t		temp;
-	vec3_t		axis[3];
-	static vec3_t mins = { -4, -4, -4 };
-	static vec3_t maxs = { 4, 4, 4 };
-
-	font = FNT_AutoGet( CL_gameFont );
-	for( i = 0; i < MAX_CLIENTS; i++ )
-	{
-		struct FNT_window_s	box;
-
-		cent = cl_entities + i + 1;
-
-		if( !cent->current.modelindex )
-			continue;
-
-		if(!strcmp(cl.clientinfo[i].name, name->string))
-			continue;
-
-		trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
-		if (trace.fraction != 1.0)
-			continue;
-
-		VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
-		dist = VectorLength(vecdist);
-
-		if (dist >= 1000 || !InFront(cent->current.origin))
-			continue;
-
-		VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
-		VectorNormalize (temp);
-
-		AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
-
-		if (DotProduct (temp, axis[0]) < 0)
-			continue;
-
-		R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos);
-		box.x = (int)screen_pos[0];
-		box.y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
-		box.width = box.height = 0;
-		FNT_BoundedPrint( font , cl.clientinfo[i].name , FNT_CMODE_QUAKE_SRS ,
-			FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
-
-	}
 }
 
 void SCR_DrawBases (void)
@@ -944,13 +887,10 @@ void V_RenderView( float stereo_separation )
 
 	SCR_DrawCrosshair (&cl.refdef);
 
-	if(cl_showPlayerNames->integer) {
-		if(cl_showPlayerNames->integer == 2)
-			SCR_DrawPlayerNames();
-		else
-			SCR_DrawPlayerNamesCenter();
-
-		SCR_DrawBases();
+	if (cl_showPlayerNames->integer)
+	{
+		SCR_DrawPlayerNames ();
+		SCR_DrawBases ();
 	}
 
 }
