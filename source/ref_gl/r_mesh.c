@@ -383,28 +383,25 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		VectorCopy (staticlight, cl_persistent_ents[currententity->number].oldstaticlight);
 		for (i = 0; i < r_lightgroups; i++)
 		{
-			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
-				r_trace.fraction = 1.0; //terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
-			else if (!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
-				r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
-			else if (CM_inPVS (tempOrg, LightGroups[i].group_origin))
-				r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-			else
-				r_trace.fraction = 0.0;
+			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal) {}
+				//terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
+			else if (!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2])) {}
+				//don't do traces for lights above weapon models, not smooth enough
+			else if (!CM_inPVS (tempOrg, LightGroups[i].group_origin))
+				continue;
+			else if (!CM_FastTrace (tempOrg, LightGroups[i].group_origin, r_worldmodel->firstnode, MASK_OPAQUE))
+				continue;
 
-			if (r_trace.fraction == 1.0)
-			{
-				VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
-				dist = VectorLength(temp);
-				if (dist == 0)
-					dist = 1;
-				dist = dist*dist;
-				weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-				for (j = 0; j < 3; j++)
-					lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-				numlights+=weight;
-				nonweighted_numlights++;
-			}
+			VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
+			dist = VectorLength(temp);
+			if (dist == 0)
+				dist = 1;
+			dist = dist*dist;
+			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+			for (j = 0; j < 3; j++)
+				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+			numlights+=weight;
+			nonweighted_numlights++;
 		}
 		
 		cl_persistent_ents[currententity->number].oldnumlights = numlights;
@@ -532,19 +529,13 @@ static qboolean R_Mesh_CullModel (void)
 	// Occlusion culling-- check if *any* part of the mesh is visible. 
 	// Possible to have meshes culled that shouldn't be, but quite rare.
 	// HACK: culling rocks is currently too slow, so we don't.
-	// TODO: this looks like another job for CM_FastTrace. TODO: parallelize?
+	// TODO: parallelize?
 	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock"))
 	{
-		trace_t r_trace;
-		qboolean unblocked = false;
-		
-		r_trace = CM_BoxTrace (currententity->origin, r_origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
-		unblocked = r_trace.fraction == 1.0;
+		qboolean unblocked = CM_FastTrace (currententity->origin, r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 		for (i = 0; i < 8 && !unblocked; i++)
-		{
-			r_trace = CM_BoxTrace (bbox[i], r_origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
-			unblocked = r_trace.fraction == 1.0;
-		}
+			unblocked = CM_FastTrace (bbox[i], r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+		
 		if (!unblocked)
 			return true;
 	}

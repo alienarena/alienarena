@@ -135,7 +135,6 @@ typedef struct
 
 typedef struct
 {
-	qboolean		active;
 	vec3_t			mins, maxs;
 	int				numtriangles;
 	vec_t			*verts;
@@ -920,7 +919,6 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	else
 		mod->lightmaptex = NULL;
 	
-	mod->active = true;
 	mod->numtriangles = 0;
 	
 	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
@@ -1231,22 +1229,18 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	// Reset terrain models from last time. 
 	// TODO: verify this works in ALL situations, including local and non-
 	// local servers, wierd sequences of connects/disconnects, etc.
-	for (i = 0; i < MAX_MAP_MODELS; i++)
+	for (i = 0; i < numterrainmodels; i++)
 	{
-		if (terrain_models[i].active)
+		Z_Free (terrain_models[i].verts);
+		Z_Free (terrain_models[i].tris);
+		for (j = 0; j < NUMGRID((&terrain_models[i])); j++)
 		{
-			terrain_models[i].active = false;
-			Z_Free (terrain_models[i].verts);
-			Z_Free (terrain_models[i].tris);
-			for (j = 0; j < NUMGRID((&terrain_models[i])); j++)
-			{
-				if (terrain_models[i].grids[j].numtris != 0)
-					Z_Free (terrain_models[i].grids[j].tris);
-			}
-			Z_Free (terrain_models[i].grids);
-			if (terrain_models[i].lightmaptex != NULL)
-				free (terrain_models[i].lightmaptex);
+			if (terrain_models[i].grids[j].numtris != 0)
+				Z_Free (terrain_models[i].grids[j].tris);
 		}
+		Z_Free (terrain_models[i].grids);
+		if (terrain_models[i].lightmaptex != NULL)
+			free (terrain_models[i].lightmaptex);
 	}
 	numterrainmodels = 0;
 	
@@ -1743,13 +1737,17 @@ BOX TRACING
 // 1/32 epsilon to keep floating point happy
 #define	DIST_EPSILON	(0.03125)
 
-vec3_t	trace_start, trace_end;
-vec3_t	trace_mins, trace_maxs;
-vec3_t	trace_extents;
+static vec3_t		trace_start, trace_end;
+static vec3_t		trace_mins, trace_maxs;
+static vec3_t		trace_extents;
 
-trace_t	trace_trace;
-int		trace_contents;
-qboolean	trace_ispoint;		// optimized case
+static trace_t		trace_trace;
+static int			trace_contents;
+// optimized case: no extents
+static qboolean		trace_ispoint;
+// optimized case: stop at any intersection point at all
+// otherwise, look for the *closest* intersection point
+static qboolean		trace_fast;
 
 /**
  * @brief  intersect test for axis-aligned box and a brush in a leaf.
@@ -2004,6 +2002,8 @@ void CM_TraceToLeaf (int leafnum)
 		CM_ClipBoxToBrush (trace_mins, trace_maxs, trace_start, trace_end, &trace_trace, b);
 		if (!trace_trace.fraction)
 			return;
+		if (trace_fast && trace_trace.fraction != 1.0f)
+			return;
 	}
 
 }
@@ -2062,6 +2062,9 @@ void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec3_t p2)
 	vec3_t		p1_copy;
 
 re_test:
+	
+	if (trace_fast && trace_trace.fraction != 1.0f)
+		return;		// already hit anything at all
 
 	if (trace_trace.fraction <= p1f)
 		return;		// already hit something nearer
@@ -2178,12 +2181,9 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 {
 	int i, j, x, y, z;
 	
-	for (i = 0; i < MAX_MODELS; i++)
+	for (i = 0; i < numterrainmodels; i++)
 	{
 		cterrainmodel_t *mod = &terrain_models[i];
-		
-		if (!mod->active)
-			continue;
 		
 		for (x = 0; x < mod->numgrid[0]; x++)
 		{
@@ -2251,13 +2251,10 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 	// Update this every time p2 changes
 	for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
 	
-	for (i = 0; i < MAX_MODELS; i++)
+	for (i = 0; i < numterrainmodels; i++)
 	{
 		int mingrid[3], maxgrid[3], griddir[3];
 		cterrainmodel_t	*mod = &terrain_models[i];
-		
-		if (!mod->active)
-			continue;
 		
 		if (!bbox_in_trace (mod->mins, mod->maxs, p1, p2_extents))
 			continue;
@@ -2354,6 +2351,9 @@ int CM_TerrainTrace (vec3_t p1, vec3_t end)
 						trace_trace.surface = &placeholder_surface;
 						for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
 						ret = i;
+						
+						if (trace_fast)
+							goto done;
 					}
 					
 					// Any grid cells we check after this one are further away
@@ -2425,9 +2425,6 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 CM_BoxTrace
 ==================
 */
-// TODO: create a CM_FastTrace variant that returns a boolean true or false
-// if the trace was blocked by something without bothering to isolate
-// precisely where.
 trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask)
@@ -2446,6 +2443,8 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 
 	if (!numnodes)	// map not loaded
 		return trace_trace;
+	
+	trace_fast = false;
 
 	trace_contents = brushmask;
 	VectorCopy (start, trace_start);
@@ -2517,6 +2516,65 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 	return trace_trace;
 }
 
+// Returns true if there is nothing blocking the path from start to end.
+// Provides no way to know what the obstacle was if there was one. Faster than
+// standard BoxTrace. If start == end, will always return true.
+qboolean CM_FastTrace (vec3_t start, vec3_t end, int headnode, int brushmask)
+{
+	int		i;
+	vec3_t	local_start, local_end;
+
+	checkcount++;		// for multi-check avoidance
+
+	c_traces++;			// for statistics, may be zeroed
+
+	if (!numnodes)	// map not loaded
+		return true;
+	
+	// fill in a default trace
+	memset (&trace_trace, 0, sizeof(trace_trace));
+	trace_trace.fraction = 1;
+	trace_trace.surface = &(nullsurface.c);
+	
+	trace_fast = true;
+
+	trace_contents = brushmask;
+	VectorCopy (start, trace_start);
+	VectorCopy (end, trace_end);
+	VectorClear (trace_mins);
+	VectorClear (trace_maxs);
+	trace_ispoint = true;
+	VectorClear (trace_extents);
+	
+	if ( !(start == end) &&
+			(start[0] != end[0] || start[1] != end[1] || start[2] != end[2]) )
+	{
+		qboolean ret;
+		//
+		// general sweeping through world
+		//
+		VectorCopy (start, local_start); // so the function can modify these in-place
+		VectorCopy (end, local_end);
+		CM_RecursiveHullCheck (headnode, 0, 1, local_start, local_end);
+		
+		CM_TerrainTrace (start, end);
+		
+		ret = trace_trace.fraction == 1.0f;
+		
+		if (fasttrace_verify->integer)
+		{
+			CM_BoxTrace (start, end, vec3_origin, vec3_origin, headnode, brushmask);
+			assert (ret == (trace_trace.fraction == 1.0f));
+		}
+		
+		return ret;
+	}
+	else
+	{ 
+		return true;
+	}
+}
+
 
 /*
 ==================
@@ -2572,6 +2630,7 @@ trace_t		CM_TransformedBoxTrace (vec3_t start, vec3_t end,
 	}
 
 	// sweep the box through the model
+	// FIXME: we have to suppress terrain tracing here!!!
 	trace = CM_BoxTrace (start_l, end_l, mins, maxs, headnode, brushmask);
 
 	if (rotated && trace.fraction != 1.0)

@@ -179,7 +179,7 @@ cvar_t	*r_firstrun;
 
 //for testing
 cvar_t  *r_test;
-cvar_t	*r_tracetest;
+static cvar_t *r_tracetest, *r_fasttracetest;
 
 //ODE initialization error check
 int r_odeinit_success; // 0 if dODEInit2() fails, 1 otherwise.
@@ -1117,6 +1117,14 @@ void R_RenderView (refdef_t *fd)
 		for (i = 0; i < r_tracetest->integer; i++)
 			CM_BoxTrace (r_origin, targ, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 	}
+	if (r_fasttracetest->integer > 0)
+	{
+		int		i;
+		vec3_t	targ;
+		VectorMA (r_origin, 8192, forward, targ);
+		for (i = 0; i < r_fasttracetest->integer; i++)
+			CM_FastTrace (r_origin, targ, r_worldmodel->firstnode, MASK_OPAQUE);
+	}
 
 	if(map_fog)
 		qglDisable(GL_FOG);
@@ -1282,6 +1290,7 @@ void R_Register( void )
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
 	r_tracetest = Cvar_Get("r_tracetest", "0", CVARDOC_INT); // BoxTrace performance test
+	r_fasttracetest = Cvar_Get("r_fasttracetest", "0", CVARDOC_INT); // FastTrace performance test
 	
 	gl_showdecals = Cvar_Get("gl_showdecals", "0", CVARDOC_INT); //for testing things
 	Cvar_Describe (gl_showdecals, "Set this to 1 to show terrain decal bounding boxes. Set this to 2 to show terrain decals in wireframe.");
@@ -1602,6 +1611,7 @@ cpuinfo_exit:
 		Com_Printf ("glGetError() = 0x%x\n", err);
 	
 	GL_InvalidateTextureState ();
+
 
 	return 0;
 }
