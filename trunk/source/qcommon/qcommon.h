@@ -704,6 +704,7 @@ int			CM_TransformedPointContents (vec3_t p, int headnode, vec3_t origin, vec3_t
 trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask);
+qboolean CM_FastTrace (vec3_t start, vec3_t end, int headnode, int brushmask);
 trace_t		CM_TransformedBoxTrace (vec3_t start, vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask,
@@ -970,6 +971,8 @@ extern	cvar_t	*dedicated;
 extern	cvar_t	*host_speeds;
 
 extern	cvar_t	*log_stats;
+
+cvar_t *fasttrace_verify; // Test for CM_FastTrace
 
 extern	FILE *log_stats_file;
 
