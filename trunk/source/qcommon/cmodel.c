@@ -232,7 +232,7 @@ qboolean checkLumps (lump_t *l, size_t header_size, int *lump_order, void *_file
 CMod_LoadSubmodels
 =================
 */
-void CMod_LoadSubmodels (lump_t *l)
+static void CMod_LoadSubmodels (lump_t *l)
 {
 	dmodel_t	*in;
 	cmodel_t	*out;
@@ -270,7 +270,7 @@ void CMod_LoadSubmodels (lump_t *l)
 CMod_LoadSurfaces
 =================
 */
-void CMod_LoadSurfaces (lump_t *l)
+static void CMod_LoadSurfaces (lump_t *l)
 {
 	texinfo_t	*in;
 	mapsurface_t	*out;
@@ -301,10 +301,9 @@ void CMod_LoadSurfaces (lump_t *l)
 /*
 =================
 CMod_LoadNodes
-
 =================
 */
-void CMod_LoadNodes (lump_t *l)
+static void CMod_LoadNodes (lump_t *l)
 {
 	dnode_t		*in;
 	int			child;
@@ -340,10 +339,9 @@ void CMod_LoadNodes (lump_t *l)
 /*
 =================
 CMod_LoadBrushes
-
 =================
 */
-void CMod_LoadBrushes (lump_t *l)
+static void CMod_LoadBrushes (lump_t *l)
 {
 	dbrush_t	*in;
 	cbrush_t	*out;
@@ -375,7 +373,7 @@ void CMod_LoadBrushes (lump_t *l)
 CMod_LoadLeafs
 =================
 */
-void CMod_LoadLeafs (lump_t *l)
+static void CMod_LoadLeafs (lump_t *l)
 {
 	int			i;
 	cleaf_t		*out;
@@ -430,7 +428,7 @@ void CMod_LoadLeafs (lump_t *l)
 CMod_LoadPlanes
 =================
 */
-void CMod_LoadPlanes (lump_t *l)
+static void CMod_LoadPlanes (lump_t *l)
 {
 	int			i;
 	cplane_t	*out;
@@ -467,7 +465,7 @@ void CMod_LoadPlanes (lump_t *l)
 CMod_LoadLeafBrushes
 =================
 */
-void CMod_LoadLeafBrushes (lump_t *l)
+static void CMod_LoadLeafBrushes (lump_t *l)
 {
 	int			i;
 	unsigned short	*out;
@@ -497,7 +495,7 @@ void CMod_LoadLeafBrushes (lump_t *l)
 CMod_LoadBrushSides
 =================
 */
-void CMod_LoadBrushSides (lump_t *l)
+static void CMod_LoadBrushSides (lump_t *l)
 {
 	int					i, j;
 	cbrushside_t		*out;
@@ -535,7 +533,7 @@ void CMod_LoadBrushSides (lump_t *l)
 CMod_LoadAreas
 =================
 */
-void CMod_LoadAreas (lump_t *l)
+static void CMod_LoadAreas (lump_t *l)
 {
 	int			i;
 	carea_t		*out;
@@ -567,7 +565,7 @@ void CMod_LoadAreas (lump_t *l)
 CMod_LoadAreaPortals
 =================
 */
-void CMod_LoadAreaPortals (lump_t *l)
+static void CMod_LoadAreaPortals (lump_t *l)
 {
 	int			i;
 	dareaportal_t		*out;
@@ -597,7 +595,7 @@ void CMod_LoadAreaPortals (lump_t *l)
 CMod_LoadVisibility
 =================
 */
-void CMod_LoadVisibility (lump_t *l)
+static void CMod_LoadVisibility (lump_t *l)
 {
 	int		i;
 
@@ -629,7 +627,7 @@ void CMod_LoadVisibility (lump_t *l)
 CMod_LoadEntityString
 =================
 */
-void CMod_LoadEntityString (lump_t *l)
+static void CMod_LoadEntityString (lump_t *l)
 {
 	numentitychars = l->filelen;
 	if (l->filelen > MAX_MAP_ENTSTRING)
@@ -645,7 +643,7 @@ void CMod_LoadEntityString (lump_t *l)
 CMod_LoadAlternateEntityData
 =================
 */
-void CMod_LoadAlternateEntityData (char *entity_file_name)
+static void CMod_LoadAlternateEntityData (char *entity_file_name)
 {
 	char *buf;
 
@@ -1561,7 +1559,7 @@ CM_PointLeafnum_r
 
 ==================
 */
-int CM_PointLeafnum_r (vec3_t p, int num)
+static int CM_PointLeafnum_r (vec3_t p, int num)
 {
 	float		d;
 	cnode_t		*node;
@@ -1608,7 +1606,7 @@ int		*leaf_list;
 float	*leaf_mins, *leaf_maxs;
 int		leaf_topnode;
 
-void CM_BoxLeafnums_r (int nodenum)
+static void CM_BoxLeafnums_r (int nodenum)
 {
 	cplane_t	*plane;
 	cnode_t		*node;
@@ -1646,7 +1644,7 @@ void CM_BoxLeafnums_r (int nodenum)
 	}
 }
 
-int	CM_BoxLeafnums_headnode (vec3_t mins, vec3_t maxs, int *list, int listsize, int headnode, int *topnode)
+static int	CM_BoxLeafnums_headnode (vec3_t mins, vec3_t maxs, int *list, int listsize, int headnode, int *topnode)
 {
 	leaf_list = list;
 	leaf_count = 0;
@@ -1759,7 +1757,7 @@ static qboolean		trace_fast;
  *           trace_t record. otherwise does not touch trace_t record
  *
  */
-void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
+static void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 		trace_t *trace, cbrush_t *brush )
 {
 	int           i;
@@ -1923,7 +1921,7 @@ void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 CM_TestBoxInBrush
 ================
 */
-void CM_TestBoxInBrush (vec3_t mins, vec3_t maxs, vec3_t p1,
+static void CM_TestBoxInBrush (vec3_t mins, vec3_t maxs, vec3_t p1,
 					  trace_t *trace, cbrush_t *brush)
 {
 	int			i, j;
@@ -1978,7 +1976,7 @@ void CM_TestBoxInBrush (vec3_t mins, vec3_t maxs, vec3_t p1,
 CM_TraceToLeaf
 ================
 */
-void CM_TraceToLeaf (int leafnum)
+static void CM_TraceToLeaf (int leafnum)
 {
 	int			k;
 	int			brushnum;
@@ -2014,7 +2012,7 @@ void CM_TraceToLeaf (int leafnum)
 CM_TestInLeaf
 ================
 */
-void CM_TestInLeaf (int leafnum)
+static void CM_TestInLeaf (int leafnum)
 {
 	int			k;
 	int			brushnum;
@@ -2049,7 +2047,7 @@ CM_RecursiveHullCheck
 
 ==================
 */
-void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec3_t p2)
+static void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec3_t p2)
 {
 	cnode_t		*node;
 	cplane_t	*plane;
@@ -2230,7 +2228,7 @@ static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3
 // Returns -1 for no intersection, otherwise it returns the index within 
 // terrain_models where the intersection was found (used by
 // CM_TerrainLightPoint.)
-int CM_TerrainTrace (vec3_t p1, vec3_t end)
+static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
 	static csurface_t placeholder_surface; // no flags, no value
 	vec3_t		p2;
@@ -2521,7 +2519,6 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 // standard BoxTrace. If start == end, will always return true.
 qboolean CM_FastTrace (vec3_t start, vec3_t end, int headnode, int brushmask)
 {
-	int		i;
 	vec3_t	local_start, local_end;
 
 	checkcount++;		// for multi-check avoidance
