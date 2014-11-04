@@ -331,13 +331,9 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	vec3_t staticlight, dynamiclight;
 	vec3_t	temp, tempOrg, lightAdd;
 	trace_t r_trace;
-	vec3_t mins, maxs;
 	float numlights, nonweighted_numlights, weight;
 	float bob;
 	qboolean copy;
-
-	VectorSet (mins, 0, 0, 0);
-	VectorSet (maxs, 0, 0, 0);
 
 	//light shining down if there are no lights at all
 	VectorCopy (meshOrigin, lightPosition);
@@ -424,15 +420,15 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		//limit to five lights(maybe less)?
 		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
 		{
-			VectorSubtract(meshOrigin, dl->origin, temp);
-			dist = VectorLength(temp);
+			VectorSubtract (meshOrigin, dl->origin, temp);
+			dist = VectorLength (temp);
+			if (dist >= dl->intensity)
+				continue;
 
 			VectorCopy(meshOrigin, temp);
 			temp[2] += 24; //generates more consistent tracing
 
-			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-
-			if (r_trace.fraction == 1.0 && dist < dl->intensity)
+			if (CM_FastTrace (temp, dl->origin, r_worldmodel->firstnode, MASK_OPAQUE))
 			{
 				//make dynamic lights more influential than world
 				for (j = 0; j < 3; j++)
