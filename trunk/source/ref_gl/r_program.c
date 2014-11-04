@@ -120,7 +120,69 @@ static char bsp_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char bsp_fragment_program[] = STRINGIFY (
+// You must shadow_fudge in your shader
+#define USE_SHADOWMAP_LIBRARY "/*USE_SHADOWMAP_LIBRARY*/"
+
+static char shadowmap_header[] = STRINGIFY (
+	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord);
+);
+
+static char shadowmap_library[] = 
+"\n#ifndef AMD_GPU\n"
+STRINGIFY (
+	float lookup (vec2 offSet, sampler2DShadow Map, vec4 ShadowCoord)
+	{	
+		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+	}
+	
+	const float internal_shadow_fudge = shadow_fudge;
+)
+"\n#else\n"
+STRINGIFY (
+	float lookup (vec2 offSet, sampler2D Map, vec4 ShadowCoord)
+	{
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		// Used to lower moir pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;
+
+		float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
+
+		if (ShadowCoord.w > 0.0)
+			return distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+		return 1.0;
+	}
+	
+	const float internal_shadow_fudge = 0.0;
+)
+"\n#endif\n"
+STRINGIFY (
+	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord)
+	{
+		float shadow = 1.0;
+
+		if(SHADOWMAP > 0) 
+		{			
+			if (ShadowCoord.w > 1.0)
+			{
+				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+				
+				shadow += lookup (vec2(-1.5, 1.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2( 0.5, 1.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2(-1.5, -0.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
+				shadow *= 0.25 ;
+			}
+	
+			shadow += internal_shadow_fudge; 
+			if(shadow > 1.0)
+				shadow = 1.0;
+		}
+		
+		return shadow;
+	}
+);
+
+static char bsp_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 	uniform sampler2D surfTexture;
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
@@ -128,8 +190,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 	uniform sampler2D liquidTexture;
 	uniform sampler2D liquidNormTex;
 	uniform sampler2D chromeTex;
-	uniform sampler2DShadow ShadowMap;
-	uniform sampler2DShadow StatShadowMap;
+	uniform shadowsampler_t ShadowMap;
+	uniform shadowsampler_t StatShadowMap;
 	uniform vec3 lightColour;
 	uniform float lightCutoffSquared;
 	uniform int FOG;
@@ -149,39 +211,8 @@ static char bsp_fragment_program[] = STRINGIFY (
 	varying vec3 LightDir;
 	varying vec3 StaticLightDir;
 	varying float fog;
-
-	vec4 ShadowCoord;
 	
-	float lookup( vec2 offSet, sampler2DShadow Map)
-	{	
-		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
-	}
-
-
-	float lookupShadow( sampler2DShadow Map )
-	{
-		float shadow = 1.0;
-
-		if(SHADOWMAP > 0) 
-		{			
-			if (ShadowCoord.w > 1.0)
-			{
-				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-				
-				shadow += lookup(vec2(-1.5, 1.5) + o, Map);
-				shadow += lookup(vec2( 0.5, 1.5) + o, Map);
-				shadow += lookup(vec2(-1.5, -0.5) + o, Map);
-				shadow += lookup(vec2( 0.5, -0.5) + o, Map);
-				shadow *= 0.25 ;
-			}
-	
-			shadow += 0.2;
-			if(shadow > 1.0)
-				shadow = 1.0;
-		}
-		
-		return shadow;
-	}		
+	const float shadow_fudge = 0.2; // Used by shadowmap library
 
 	void main( void )
 	{
@@ -219,18 +250,12 @@ static char bsp_fragment_program[] = STRINGIFY (
 
 	   	//shadows
 		if(DYNAMIC > 0)
-		{
-			ShadowCoord = gl_TextureMatrix[7] * sPos;
-			dynshadowval = lookupShadow(ShadowMap);
-		}
+			dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
 		else
 			dynshadowval = 0.0;
 
 		if(STATSHADOW > 0)
-		{
-			ShadowCoord = gl_TextureMatrix[6] * sPos;
-			statshadowval = lookupShadow(StatShadowMap);
-		}
+			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		else
 			statshadowval = 1.0;
 
@@ -400,296 +425,6 @@ static char bsp_fragment_program[] = STRINGIFY (
 	}
 );
 
-static char bsp_fragment_program_ATI[] = STRINGIFY (
-	uniform sampler2D surfTexture;
-	uniform sampler2D HeightTexture;
-	uniform sampler2D NormalTexture;
-	uniform sampler2D lmTexture;
-	uniform sampler2D liquidTexture;
-	uniform sampler2D liquidNormTex;
-	uniform sampler2D chromeTex;
-	uniform sampler2D ShadowMap;
-	uniform sampler2D StatShadowMap;
-	uniform vec3 lightColour;
-	uniform float lightCutoffSquared;
-	uniform int FOG;
-	uniform int PARALLAX;
-	uniform int DYNAMIC;
-	uniform int STATSHADOW;
-	uniform int SHADOWMAP;
-	uniform int LIQUID;
-	uniform int SHINY;
-	uniform float rsTime;
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
-
-	varying float FresRatio;
-	varying vec4 sPos;
-	varying vec3 EyeDir;
-	varying vec3 LightDir;
-	varying vec3 StaticLightDir;
-	varying float fog;
-
-	vec4 ShadowCoord;
-
-	float lookup( vec2 offSet, sampler2D Map)
-	{
-
-		float shadow = 1.0;
-
-		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
-		// Used to lower moir pattern and self-shadowing
-		shadowCoordinateWdivide.z += 0.0005;
-
-		float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
-
-		if (ShadowCoord.w > 0.0)
-			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
-
-		return shadow;
-	}
-	
-	float lookupShadow( sampler2D Map )
-	{
-		float shadow = 1.0;
-
-		if(SHADOWMAP > 0)
-		{
-			if (ShadowCoord.w > 1.0)
-			{
-				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-
-				shadow += lookup(vec2(-1.5, 1.5) + o, Map);
-				shadow += lookup(vec2( 0.5, 1.5) + o, Map);
-				shadow += lookup(vec2(-1.5, -0.5) + o, Map);
-				shadow += lookup(vec2( 0.5, -0.5) + o, Map);
-				shadow *= 0.25 ;
-			}
-
-			if(shadow > 1.0)
-				shadow = 1.0;
-		}
-
-		return shadow;
-	}
-
-	void main( void )
-	{
-		vec4 diffuse;
-		vec4 lightmap;
-		vec4 alphamask;
-		vec4 bloodColor;
-		float distanceSquared;
-		vec3 relativeLightDirection;
-		float diffuseTerm;
-		vec3 halfAngleVector;
-		float specularTerm;
-		float swamp;
-		float attenuation;
-		vec4 litColour;
-		vec3 varyingLightColour;
-		float varyingLightCutoffSquared;
-		float dynshadowval;
-		float statshadowval;
-		vec2 displacement;
-		vec2 displacement2;
-		vec2 displacement3;
-		vec2 displacement4;
-
-		varyingLightColour = lightColour;
-		varyingLightCutoffSquared = lightCutoffSquared;
-
-		vec3 relativeEyeDirection = normalize( EyeDir );
-
-		vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
-		vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
-
-		lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
-		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
-
-		//shadows
-		if(DYNAMIC > 0)
-		{
-			ShadowCoord = gl_TextureMatrix[7] * sPos;
-			dynshadowval = lookupShadow(ShadowMap);
-		}
-		else
-			dynshadowval = 0.0;
-
-		if(STATSHADOW > 0)
-		{
-			ShadowCoord = gl_TextureMatrix[6] * sPos;
-			statshadowval = lookupShadow(StatShadowMap);
-		}
-		else
-			statshadowval = 1.0;
-
-		bloodColor = vec4(0.0, 0.0, 0.0, 0.0);
-		displacement4 = vec2(0.0, 0.0);
-		if(LIQUID > 0)
-		{
-			vec3 noiseVec;
-			vec3 noiseVec2;
-			vec3 noiseVec3;
-
-			//for liquid fx scrolling
-			vec4 texco = gl_TexCoord[0];
-			texco.t = texco.t - rsTime*1.0/LIQUID;
-
-			vec4 texco2 = gl_TexCoord[0];
-			texco2.t = texco2.t - rsTime*0.9/LIQUID;
-			//shift the horizontal here a bit
-			texco2.s = texco2.s/1.5;
-
-			vec4 texco3 = gl_TexCoord[0];
-			texco3.t = texco3.t - rsTime*0.6/LIQUID;
-
-			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
-			Offset = Offset * 0.04 - 0.02;
-			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;
-
-			displacement = texco.st;
-
-			noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;
-			noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
-
-			displacement2 = texco2.st;
-
-			noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;
-			noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
-
-			if(LIQUID > 2)
-			{
-				displacement3 = texco3.st;
-
-				noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;
-				noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
-			}
-			else
-			{
-				//used for water effect only
-				displacement4.x = noiseVec.x + noiseVec2.x;
-				displacement4.y = noiseVec.y + noiseVec2.y;
-			}
-
-			displacement.x = texco.s + noiseVec.x + TexCoords.x;
-			displacement.y = texco.t + noiseVec.y + TexCoords.y;
-			displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
-			displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
-			displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;
-			displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;
-
-			if(LIQUID > 2)
-			{
-				vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
-				vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
-				vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);
-				vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
-				bloodColor = max(diffuse1, diffuse2);
-				bloodColor = max(bloodColor, diffuse3);
-			}
-		}
-
-	   if(PARALLAX > 0)
-	   {
-			//do the parallax mapping
-			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
-			Offset = Offset * 0.04 - 0.02;
-			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
-
-			diffuse = texture2D( surfTexture, TexCoords );
-
-			relativeLightDirection = normalize (StaticLightDir);
-
-			diffuseTerm = dot( normal, relativeLightDirection  );
-
-			if( diffuseTerm > 0.0 )
-			{
-				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
-
-				specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-				specularTerm = pow( specularTerm, 32.0 );
-
-				litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);
-			}
-			else
-			{
-				litColour = vec4( 0.0, 0.0, 0.0, 6.0 );
-			}
-
-			gl_FragColor = max(litColour, diffuse * 2.0);
-			gl_FragColor = (gl_FragColor * lightmap) + bloodColor;
-			gl_FragColor = (gl_FragColor * statshadowval);
-	   }
-	   else
-	   {
-			diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);
-			gl_FragColor = (diffuse * lightmap * 2.0);
-			gl_FragColor = (gl_FragColor * statshadowval);
-	   }
-
-	   if(DYNAMIC > 0)
-	   {
-			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
-
-			//now do the dynamic lighting
-			distanceSquared = dot( LightDir, LightDir );
-			relativeLightDirection = LightDir / sqrt( distanceSquared );
-
-			diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );
-			vec3 colour = vec3( 0.0, 0.0, 0.0 );
-
-			if( diffuseTerm > 0.0 )
-			{
-				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
-
-				float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-				specularTerm = pow( specularTerm, 32.0 );
-
-				colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;
-			}
-
-			attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );
-
-			swamp = attenuation;
-			swamp *= swamp;
-			swamp *= swamp;
-			swamp *= swamp;
-
-			colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
-
-			vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
-			if(PARALLAX > 0)
-			{
-				dynamicColour = max(dynamicColour, gl_FragColor);
-			}
-			else
-			{
-				dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
-			}
-			gl_FragColor = dynamicColour;
-	   }
-
-	   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
-
-	   if(SHINY > 0)
-	   {
-		   vec3 reflection = reflect(relativeEyeDirection, normal);
-		   vec3 refraction = refract(relativeEyeDirection, normal, 0.66);
-
-		   vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
-		   vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
-
-		   vec4 cubemap = mix(Tl,Tr,FresRatio);
-
-		   gl_FragColor = max(gl_FragColor, (cubemap * 0.05 * alphamask.a));
-	   }
-
-	   if(FOG > 0)
-			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
-	}
-);
-
 
 //SHADOWS
 static char shadow_vertex_program[] = STRINGIFY (		
@@ -705,103 +440,22 @@ static char shadow_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char shadow_fragment_program[] = STRINGIFY (
-	uniform sampler2DShadow StatShadowMap;
+static char shadow_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
+	uniform shadowsampler_t StatShadowMap;
 	uniform float fadeShadow;
 	uniform float xPixelOffset;
 	uniform float yPixelOffset;
-
+	
 	varying vec4 ShadowCoord;
 	
-	float lookup( vec2 offSet)
-	{
-		return shadow2DProj(StatShadowMap, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
-	}
-
-	float lookupStatshadow( void )
-	{
-		float shadow = 1.0;
-
-		if (ShadowCoord.w > 1.0)
-		{
-			vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-				
-			shadow += lookup(vec2(-1.5, 1.5) + o);
-			shadow += lookup(vec2( 0.5, 1.5) + o);
-			shadow += lookup(vec2(-1.5, -0.5) + o);
-			shadow += lookup(vec2( 0.5, -0.5) + o);
-			shadow *= 0.25 ;
-		}
-		shadow += 0.3;
-		if(shadow > 1.0)
-			shadow = 1.0;
-	
-		return shadow;
-	}		
+	const int SHADOWMAP = 1;
+	const float shadow_fudge = 0.3;
 
 	void main( void )
 	{
-		float statshadowval = 1/fadeShadow * lookupStatshadow();	  
-
-		gl_FragColor = vec4(1.0);
-		gl_FragColor = (gl_FragColor * statshadowval);	   
+		gl_FragColor = vec4 (1.0/fadeShadow * lookupShadow (StatShadowMap, ShadowCoord));
 	}
 );
-
-static char shadow_fragment_program_ATI[] = STRINGIFY (
-
-	uniform sampler2D StatShadowMap;
-	uniform float fadeShadow;
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
-
-	varying vec4 ShadowCoord;
-
-	float lookup( vec2 offSet)
-	{
-		float shadow = 1.0;
-
-		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
-		// Used to lower moir pattern and self-shadowing
-		shadowCoordinateWdivide.z += 0.0005;
-
-		float distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;
-
-		if (ShadowCoord.w > 0.0)
-			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
-
-		return shadow;
-	}
-
-	float lookupStatshadow( void )
-	{
-		float shadow = 1.0;
-
-		if (ShadowCoord.w > 1.0)
-		{
-			vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-
-			shadow += lookup(vec2(-1.5, 1.5) + o);
-			shadow += lookup(vec2( 0.5, 1.5) + o);
-			shadow += lookup(vec2(-1.5, -0.5) + o);
-			shadow += lookup(vec2( 0.5, -0.5) + o);
-			shadow *= 0.25 ;
-		}
-		if(shadow > 1.0)
-			shadow = 1.0;
-
-		return shadow;
-	}
-
-	void main( void )
-	{
-		float statshadowval = 1/fadeShadow * lookupStatshadow();
-
-		gl_FragColor = vec4(1.0);
-		gl_FragColor = (gl_FragColor * statshadowval);
-	}
-);
-
 
 // Minimap
 static char minimap_vertex_program[] = STRINGIFY (
@@ -1960,7 +1614,7 @@ const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_at
 void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
 {
 	char		str[4096];
-	const char	*shaderStrings[4];
+	const char	*shaderStrings[5];
 	int			nResult;
 	int			i;
 	
@@ -1983,17 +1637,17 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 			shaderStrings[2] = "const int vertexOnly = 0;";
 	
 		shaderStrings[3] = vertex;
-		glShaderSourceARB( g_vertexShader, 4, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		glShaderSourceARB (g_vertexShader, 4, shaderStrings, NULL);
+		glCompileShaderARB (g_vertexShader);
+		glGetObjectParameterivARB (g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult);
 
-		if( nResult )
+		if (nResult)
 		{
-			glAttachObjectARB( *program, g_vertexShader );
+			glAttachObjectARB (*program, g_vertexShader);
 		}
 		else
 		{
-			Com_Printf("...%s Vertex Shader Compile Error\n", name);
+			Com_Printf ("...%s Vertex Shader Compile Error\n", name);
 			if (glGetShaderInfoLog != NULL)
 			{
 				glGetShaderInfoLog (g_vertexShader, sizeof(str), NULL, str);
@@ -2005,19 +1659,35 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	if (fragment != NULL)
 	{
 		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[1] = fragment;
-	
-		glShaderSourceARB( g_fragmentShader, 2, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-		if( nResult )
+		
+		if (gl_state.ati)
+			shaderStrings[1] = "#define AMD_GPU\n#define shadowsampler_t sampler2D\n";
+		else
+			shaderStrings[1] = "#define shadowsampler_t sampler2DShadow\n";
+		
+		if (strstr (fragment, USE_SHADOWMAP_LIBRARY))
 		{
-			glAttachObjectARB( *program, g_fragmentShader );
+			shaderStrings[2] = shadowmap_header;
+			shaderStrings[4] = shadowmap_library;
 		}
 		else
 		{
-			Com_Printf("...%s Fragment Shader Compile Error\n", name);
+			shaderStrings[2] = shaderStrings[4] = "";
+		}
+		
+		shaderStrings[3] = fragment;
+	
+		glShaderSourceARB (g_fragmentShader, 5, shaderStrings, NULL);
+		glCompileShaderARB (g_fragmentShader);
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if (nResult)
+		{
+			glAttachObjectARB (*program, g_fragmentShader);
+		}
+		else
+		{
+			Com_Printf ("...%s Fragment Shader Compile Error\n", name);
 			if (glGetShaderInfoLog != NULL)
 			{
 				glGetShaderInfoLog (g_fragmentShader, sizeof(str), NULL, str);
@@ -2125,10 +1795,7 @@ void R_LoadGLSLPrograms(void)
 	gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 
 	//standard bsp surfaces
-	if(gl_state.ati)
-		R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program_ATI, NO_ATTRIBUTES, &g_programObj);
-	else
-		R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program, NO_ATTRIBUTES, &g_programObj);
+	R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program, NO_ATTRIBUTES, &g_programObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_surfTexture = glGetUniformLocationARB( g_programObj, "surfTexture" );
@@ -2158,10 +1825,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_chromeTex = glGetUniformLocationARB( g_programObj, "chromeTex" );
 
 	//shadowed white bsp surfaces
-	if(gl_state.ati)
-		R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program_ATI, NO_ATTRIBUTES, &g_shadowprogramObj);
-	else
-		R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);
+	R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
