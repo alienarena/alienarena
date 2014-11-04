@@ -560,26 +560,21 @@ void R_RenderFlares (void)
 	flare_t	*l;
 	int i;
 	qboolean visible;
-	vec3_t mins, maxs;
-	trace_t r_trace;
 
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
-
-	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )return;
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL) return;
 	qglDepthMask (0);
 	qglShadeModel (GL_SMOOTH);
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
-	R_InitQuadVarrays();
+	R_InitQuadVarrays ();
 
 	qglDisable (GL_DEPTH_TEST);
 	GL_SelectTexture (0);
 	GL_TexEnv (GL_MODULATE);
 
 	l = r_flares;
-	for (i=0; i<r_numflares ; i++, l++)
+	for (i = 0; i < r_numflares ; i++, l++)
 	{
 
 		// periodically test visibility to ramp alpha
@@ -588,8 +583,7 @@ void R_RenderFlares (void)
 			if (!CM_inPVS_leafs (r_origin_leafnum, l->leafnum))
 				continue;
 
-			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
-			visible = r_trace.fraction == 1.0;
+			visible = CM_FastTrace (r_origin, l->origin, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			
 			l->alpha += (visible ? 0.03 : -0.15);  // ramp
 
@@ -907,15 +901,11 @@ void Mod_AddVegetationSurface (msurface_t *surf, image_t *tex, vec3_t color, flo
 // static light levels.
 void R_FinalizeGrass(void)
 {
-	vec3_t origin, orig2, mins, maxs;
-	trace_t	r_trace;
+	vec3_t origin, orig2;
 	grass_t *grass;
 	int i;
 	
 	grass = r_grasses;
-	
-	VectorSet (mins, 0, 0, 0);
-	VectorSet (maxs, 0, 0, 0);
 	
 	for (i=0; i<r_numgrasses; i++, grass++) 
 	{
@@ -929,8 +919,7 @@ void R_FinalizeGrass(void)
 		//cull for pathline to sunlight
 		VectorCopy (grass->origin, orig2);
 		orig2[2] += (grass->texsize/32) * grass->size;
-		r_trace = CM_BoxTrace(r_sunLight->origin, orig2, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-		grass->sunVisible = r_trace.fraction == 1.0;
+		grass->sunVisible = CM_FastTrace (r_sunLight->origin, orig2, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		
 		if (grass->type == 0)
 		{
@@ -968,7 +957,7 @@ void R_DrawVegetationSurface ( void )
 	int		i;
 	grass_t *grass;
 	float   scale;
-	vec3_t	origin, mins, maxs, right, up;
+	vec3_t	origin, right, up;
 	qboolean visible;
 	float	lightLevel[3];
 
@@ -984,9 +973,6 @@ void R_DrawVegetationSurface ( void )
 		g_lastGSort = Sys_Milliseconds();
 	}
 	
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);	
-
 	GL_SelectTexture (0);
 	
 	qglDepthMask( GL_FALSE );
@@ -1404,19 +1390,14 @@ void R_DrawSimpleItems ( void )
 {
 	int		i;
 	float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up;
-	qboolean visible;
-	trace_t r_trace;
+	vec3_t	origin, angle, right, up;
 	
 	if (!cl_simpleitems->integer)
 		return;
 
-	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 	
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);	
-
 	GL_SelectTexture (0);
 	
 	GLSTATE_ENABLE_BLEND
@@ -1431,7 +1412,7 @@ void R_DrawSimpleItems ( void )
 	
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
-	for (i=0 ; i<r_newrefdef.num_entities ; i++)
+	for (i = 0 ; i < r_newrefdef.num_entities; i++)
 	{
 		currententity = &r_newrefdef.entities[i];
 		if (!currententity->model || !currententity->model->simple_texnum)
@@ -1440,14 +1421,11 @@ void R_DrawSimpleItems ( void )
 		
 		VArray = &VArrayVerts[0];
 
-		VectorCopy(currententity->origin, origin);
+		VectorCopy (currententity->origin, origin);
 
 		//PVS checking is not necessary; the server already does that for
 		//entities.
-		r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-		visible = r_trace.fraction == 1.0;
-		
-		if(visible)
+		if (CM_FastTrace (r_origin, origin, r_worldmodel->firstnode, MASK_VISIBILILITY))
 		{
 			GL_Bind (currentmodel->simple_texnum);
 			switch (currentmodel->simple_color)
