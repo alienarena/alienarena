@@ -30,97 +30,102 @@ vec3_t vec3_origin = {0.0f,0.0f,0.0f};
 
 //============================================================================
 
+/**
+ * Rotates a point (or vector) around an arbitrary axis by the given angle.
+ * The axis ('dir') must be a unit vector.
+ *
+ * 2014-11 Note: Called only from r_main::R_SetFrustum().  Not
+ * efficient for transforming multiple points by same axis and angle,
+ * but that is not needed.
+ */
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
 {
-	float	m[3][3];
-	float	im[3][3];
-	float	zrot[3][3];
-	float	tmpmat[3][3];
-	float	rot[3][3];
-	int	i;
-	vec3_t vr, vup, vf;
+	float rot[3][3];
+	float angle;
+	float c, cc, s; /* cos, 1-cos, sin */
+	float ax, ay, az;
+	float ccaxay, ccaxaz, ccayaz;
+	float sax, say, saz;
+	float tmp;
+	int   i;
 
-	vf[0] = dir[0];
-	vf[1] = dir[1];
-	vf[2] = dir[2];
+	angle = DEG2RAD(degrees);
+	c  = cosf(angle);
+	s  = sinf(angle);
+	cc = 1.0f - c;
 
-	PerpendicularVector( vr, dir );
-	CrossProduct( vr, vf, vup );
+	/* axis unit vector */
+	ax = dir[0];
+	ay = dir[1];
+	az = dir[2];
 
-	m[0][0] = vr[0];
-	m[1][0] = vr[1];
-	m[2][0] = vr[2];
+	/* rotation matrix sub-components */
+	sax = s * ax;
+	say = s * ay;
+	saz = s * az;
+	tmp = cc * ax;
+	ccaxay = tmp * ay;
+	ccaxaz = tmp * az;
+	ccayaz = cc * ay * az;
 
-	m[0][1] = vup[0];
-	m[1][1] = vup[1];
-	m[2][1] = vup[2];
+	/* rotation matrix */
+	rot[0][0] = c + (cc * ax * ax);
+	rot[0][1] = ccaxay + saz;
+	rot[0][2] = ccaxaz - say;
 
-	m[0][2] = vf[0];
-	m[1][2] = vf[1];
-	m[2][2] = vf[2];
+	rot[1][0] = ccaxay - saz;
+	rot[1][1] = c + (cc * ay * ay);
+	rot[1][2] = ccayaz + sax;
 
-	memcpy( im, m, sizeof( im ) );
+	rot[2][0] = ccaxaz + say;
+	rot[2][1] = ccayaz - sax;
+	rot[2][2] = c + (cc * az * az);
 
-	im[0][1] = m[1][0];
-	im[0][2] = m[2][0];
-	im[1][0] = m[0][1];
-	im[1][2] = m[2][1];
-	im[2][0] = m[0][2];
-	im[2][1] = m[1][2];
-
-	memset( zrot, 0, sizeof( zrot ) );
-	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
-
-	zrot[0][0] = cosf( DEG2RAD( degrees ) );
-	zrot[0][1] = sinf( DEG2RAD( degrees ) );
-	zrot[1][0] = -sinf( DEG2RAD( degrees ) );
-	zrot[1][1] = cosf( DEG2RAD( degrees ) );
-
-	R_ConcatRotations( m, zrot, tmpmat );
-	R_ConcatRotations( tmpmat, im, rot );
-
+	/* rotate */
 	for ( i = 0; i < 3; i++ )
-	{
 		dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
-	}
+
 }
 
-
+/**
+ * Transforms vec3 of <pitch, yaw, roll> angles to forward, right, and
+ * up vectors. Arguments forward, right and up may be NULL if only a subset
+ * of the outputs is needed.
+ */
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * ((float)M_PI/180.0f);
+	angle = DEG2RAD(angles[YAW]);
 	sy = sinf( angle );
 	cy = cosf( angle );
-	angle = angles[PITCH] * ((float)M_PI/180.0f);
+	angle = DEG2RAD(angles[PITCH]);
 	sp = sinf( angle );
 	cp = cosf( angle );
-	if( right || up )
-	{ // if forward only, this is not used
-		angle = angles[ROLL] * ((float)M_PI/180.0f);
-		sr = sinf( angle );
-		cr = cosf( angle );
-	}
-
 	if (forward)
 	{
-		forward[0] = cp*cy;
-		forward[1] = cp*sy;
+		forward[0] = cp * cy;
+		forward[1] = cp * sy;
 		forward[2] = -sp;
 	}
-	if (right)
+	if( right || up )
 	{
-		right[0] = (-1.0f * sr * sp * cy + -1.0f * cr * -sy);
-		right[1] = (-1.0f * sr * sp * sy + -1.0f *cr * cy);
-		right[2] = -1.0f * sr * cp;
-	}
-	if (up)
-	{
-		up[0] = (cr*sp*cy+-sr*-sy);
-		up[1] = (cr*sp*sy+-sr*cy);
-		up[2] = cr*cp;
+		angle = DEG2RAD(angles[ROLL]);
+		sr = sinf( angle );
+		cr = cosf( angle );
+		if (right)
+		{
+			right[0] = -(sr * sp * cy) + (cr * sy);
+			right[1] = -(sr * sp * sy) - (cr * cy);
+			right[2] = -(sr * cp);
+		}
+		if (up)
+		{
+			up[0] = (cr * sp * cy) + (sr * sy);
+			up[1] = (cr * sp * sy) - (sr * cy);
+			up[2] = cr * cp;
+		}
 	}
 }
 
@@ -160,123 +165,6 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	angles[PITCH] = -pitch;
 	angles[YAW] = yaw;
 	angles[ROLL] = 0.0f;
-}
-
-void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
-{
-	float d;
-	vec3_t n;
-	float inv_denom;
-
-	inv_denom = 1.0F / DotProduct( normal, normal );
-
-	d = DotProduct( normal, p ) * inv_denom;
-
-	n[0] = normal[0] * inv_denom;
-	n[1] = normal[1] * inv_denom;
-	n[2] = normal[2] * inv_denom;
-
-	dst[0] = p[0] - d * n[0];
-	dst[1] = p[1] - d * n[1];
-	dst[2] = p[2] - d * n[2];
-}
-
-/*
-** assumes "src" is normalized
-*/
-void PerpendicularVector( vec3_t dst, const vec3_t src )
-{
-	int	pos;
-	int i;
-	float minelem = 1.0F;
-	vec3_t tempvec;
-
-	/*
-	** find the smallest magnitude axially aligned vector
-	*/
-	for ( pos = 0, i = 0; i < 3; i++ )
-	{
-		if ( fabsf( src[i] ) < minelem )
-		{
-			pos = i;
-			minelem = fabsf( src[i] );
-		}
-	}
-	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;
-	tempvec[pos] = 1.0F;
-
-	/*
-	** project the point onto the plane defined by src
-	*/
-	ProjectPointOnPlane( dst, tempvec, src );
-
-	/*
-	** normalize the result
-	*/
-	VectorNormalize( dst );
-}
-
-
-
-/*
-================
-R_ConcatRotations
-================
-*/
-void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3])
-{
-	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
-				in1[0][2] * in2[2][0];
-	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] +
-				in1[0][2] * in2[2][1];
-	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] +
-				in1[0][2] * in2[2][2];
-	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] +
-				in1[1][2] * in2[2][0];
-	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] +
-				in1[1][2] * in2[2][1];
-	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] +
-				in1[1][2] * in2[2][2];
-	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] +
-				in1[2][2] * in2[2][0];
-	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] +
-				in1[2][2] * in2[2][1];
-	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] +
-				in1[2][2] * in2[2][2];
-}
-
-
-/*
-================
-R_ConcatTransforms
-================
-*/
-void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4])
-{
-	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
-				in1[0][2] * in2[2][0];
-	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] +
-				in1[0][2] * in2[2][1];
-	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] +
-				in1[0][2] * in2[2][2];
-	out[0][3] = in1[0][0] * in2[0][3] + in1[0][1] * in2[1][3] +
-				in1[0][2] * in2[2][3] + in1[0][3];
-	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] +
-				in1[1][2] * in2[2][0];
-	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] +
-				in1[1][2] * in2[2][1];
-	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] +
-				in1[1][2] * in2[2][2];
-	out[1][3] = in1[1][0] * in2[0][3] + in1[1][1] * in2[1][3] +
-				in1[1][2] * in2[2][3] + in1[1][3];
-	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] +
-				in1[2][2] * in2[2][0];
-	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] +
-				in1[2][2] * in2[2][1];
-	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] +
-				in1[2][2] * in2[2][2];
-	out[2][3] = in1[2][0] * in2[0][3] + in1[2][1] * in2[1][3] +
-				in1[2][2] * in2[2][3] + in1[2][3];
 }
 
 
