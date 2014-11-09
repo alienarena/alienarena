@@ -374,62 +374,33 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 
 void MSG_WriteShort (sizebuf_t *sb, int c)
 {
-#if 0
-	/* Original Version */
-	byte	*buf;
-
-#ifdef PARANOID
-	if ( c > 65535 )
-	{ // unsigned short actually
-		//Com_Printf("MSG_WriteShort: range error: %i \n", c);
-		Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
-	}
-#endif
-
-	buf = SZ_GetSpace (sb, 2);
-	buf[0] = c&0xff;
-	buf[1] = c>>8;
-#else
-	/* Experimental Version */
 	short *buf;
 
 	buf  = (short*)SZ_GetSpace( sb , 2 );
 	*buf = LittleShort( c );
-#endif
 }
 
 void MSG_WriteLong (sizebuf_t *sb, int c)
 {
-#if 0
-	/* Original Version */
-	byte	*buf;
-
-	buf = SZ_GetSpace (sb, 4);
-	buf[0] = c&0xff;
-	buf[1] = (c>>8)&0xff;
-	buf[2] = (c>>16)&0xff;
-	buf[3] = c>>24;
-#else
-	/* Experimental Version */
 	int *buf;
 
 	buf  = (int*)SZ_GetSpace( sb, 4 );
 	*buf = LittleLong( c );
-#endif
 }
 
 void MSG_WriteSizeInt (sizebuf_t *sb, int bytes, int c)
 {
-	byte		*buf;
-	int			i;
-	
-	// manually construct two's complement encoding with appropriate bit depth
-	if (c < 0 && bytes != sizeof(c))
-		c += 1<<(8*bytes);
-	
-	buf = SZ_GetSpace (sb, bytes);
-	for (i = 0; i < bytes; i++)
-		buf[i] = (byte)((c>>(8*i))&0xff);
+	byte *buf;
+	int  i;
+
+	buf = SZ_GetSpace(sb, bytes);
+
+	buf[0] = (byte)(c & 0xff);
+	for (i = 1; i < bytes; ++i)
+	{
+		c >>= 8;
+		buf[i] = (byte)(c & 0xff);
+	}
 }
 
 void MSG_WriteFloat (sizebuf_t *sb, float f)
@@ -851,21 +822,6 @@ int MSG_ReadByte (sizebuf_t *msg_read)
 
 int MSG_ReadShort (sizebuf_t *msg_read)
 {
-#if 0
-	/* Origninal Version */
-	int	c;
-
-	if (msg_read->readcount+2 > msg_read->cursize)
-		c = -1;
-	else
-		c = (short)(msg_read->data[msg_read->readcount]
-		+ (msg_read->data[msg_read->readcount+1]<<8));
-
-	msg_read->readcount += 2;
-
-	return c;
-#else
-	/* Experimental Version */
 	int c     = -1;
 	int rc    = msg_read->readcount;
 	short *pi = (short*)(&msg_read->data[ rc ]);
@@ -878,28 +834,10 @@ int MSG_ReadShort (sizebuf_t *msg_read)
 	}
 
 	return c;
-#endif
 }
 
 int MSG_ReadLong (sizebuf_t *msg_read)
 {
-#if 0
-	/* Original Version */
-	int	c;
-
-	if (msg_read->readcount+4 > msg_read->cursize)
-		c = -1;
-	else
-		c = msg_read->data[msg_read->readcount]
-		+ (msg_read->data[msg_read->readcount+1]<<8)
-		+ (msg_read->data[msg_read->readcount+2]<<16)
-		+ (msg_read->data[msg_read->readcount+3]<<24);
-
-	msg_read->readcount += 4;
-
-	return c;
-#else
-	/* Experimental Version */
 	int c   = -1;
 	int rc  = msg_read->readcount;
 	int *pi = (int*)(&msg_read->data[rc]);
@@ -912,7 +850,6 @@ int MSG_ReadLong (sizebuf_t *msg_read)
 	}
 
 	return c;
-#endif
 }
 
 int MSG_ReadSizeInt (sizebuf_t *msg_read, int bytes)
@@ -1425,61 +1362,6 @@ void *Z_Malloc (int size)
 //============================================================================
 
 
-/*
-====================
-COM_BlockSequenceCheckByte
-
-For proxy protecting
-
-// THIS IS MASSIVELY BROKEN!  CHALLENGE MAY BE NEGATIVE
-// DON'T USE THIS FUNCTION!!!!!
-
-====================
-*/
-byte	COM_BlockSequenceCheckByte (byte *base, int length, int sequence, int challenge)
-{
-	Sys_Error("COM_BlockSequenceCheckByte called\n");
-
-#if 0
-	int		checksum;
-	byte	buf[68];
-	byte	*p;
-	float temp;
-	byte c;
-
-	temp = bytedirs[(sequence/3) % NUMVERTEXNORMALS][sequence % 3];
-	temp = LittleFloat(temp);
-	p = ((byte *)&temp);
-
-	if (length > 60)
-		length = 60;
-	memcpy (buf, base, length);
-
-	buf[length] = (sequence & 0xff) ^ p[0];
-	buf[length+1] = p[1];
-	buf[length+2] = ((sequence>>8) & 0xff) ^ p[2];
-	buf[length+3] = p[3];
-
-	temp = bytedirs[((sequence+challenge)/3) % NUMVERTEXNORMALS][(sequence+challenge) % 3];
-	temp = LittleFloat(temp);
-	p = ((byte *)&temp);
-
-	buf[length+4] = (sequence & 0xff) ^ p[3];
-	buf[length+5] = (challenge & 0xff) ^ p[2];
-	buf[length+6] = ((sequence>>8) & 0xff) ^ p[1];
-	buf[length+7] = ((challenge >> 7) & 0xff) ^ p[0];
-
-	length += 8;
-
-	checksum = LittleLong(Com_BlockChecksum (buf, length));
-
-	checksum &= 0xff;
-
-	return checksum;
-#endif
-	return 0;
-}
-
 static byte chktbl[1024] = {
 0x84, 0x47, 0x51, 0xc1, 0x93, 0x22, 0x21, 0x24, 0x2f, 0x66, 0x60, 0x4d, 0xb0, 0x7c, 0xda,
 0x88, 0x54, 0x15, 0x2b, 0xc6, 0x6c, 0x89, 0xc5, 0x9d, 0x48, 0xee, 0xe6, 0x8a, 0xb5, 0xf4,
@@ -1592,14 +1474,24 @@ byte	COM_BlockSequenceCRCByte (byte *base, int length, int sequence)
 
 //========================================================
 
+/*
+ * Returns a pseudo-random number in range [0.0f,1.0f]
+ */
 float	frand(void)
 {
-	return (rand()&32767)* (1.0/32767);
+	const float randmax_scale = 1.0f/(float)RAND_MAX;
+
+	return (float)rand() * randmax_scale;
 }
 
+/*
+ * Returns a pseudo-random number in range [-1.0f,1.0f]
+ */
 float	crand(void)
 {
-	return (rand()&32767)* (2.0/32767) - 1;
+	const float randmax_scale = 2.0f/(float)RAND_MAX;
+
+	return (float)rand() * randmax_scale - 1.0f;
 }
 
 void Key_Init (void);

@@ -212,10 +212,6 @@ void VectorInverse (vec3_t v);
 void VectorScale (const vec3_t in, vec_t scale, vec3_t out);
 int Q_log2(int val);
 
-void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
-void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
-
-void fast_sincosf( float angle, float *sina, float *cosa );
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 void vectoangles (vec3_t value1, vec3_t angles);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
@@ -238,8 +234,6 @@ float LerpAngle (float a1, float a2, float frac);
 	:										\
 		BoxOnPlaneSide( (emins), (emaxs), (p)))
 
-void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal );
-void PerpendicularVector( vec3_t dst, const vec3_t src );
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees );
 
 
