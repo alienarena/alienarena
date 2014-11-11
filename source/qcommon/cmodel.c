@@ -31,6 +31,7 @@ typedef struct
 {
 	cplane_t	*plane;
 	int			children[2];		// negative numbers are leafs
+	int			contents;			// contents of all children OR'd together
 } cnode_t;
 
 typedef struct
@@ -304,6 +305,19 @@ static void CMod_LoadSurfaces (lump_t *l)
 CMod_LoadNodes
 =================
 */
+static int RecursiveBuildNodeContents (int num)
+{
+	cnode_t		*node;
+	
+	if (num < 0)
+		return map_leafs[-1-num].contents;
+	
+	node = &map_nodes[num];
+	
+	return node->contents =
+		RecursiveBuildNodeContents (node->children[0]) |
+		RecursiveBuildNodeContents (node->children[1]);
+}
 static void CMod_LoadNodes (lump_t *l)
 {
 	dnode_t		*in;
@@ -333,7 +347,23 @@ static void CMod_LoadNodes (lump_t *l)
 			child = LittleLong (in->children[j]);
 			out->children[j] = child;
 		}
+		out->contents = ~0; // default contents (for brush models)
 	}
+	
+	for (i = 0; i < numcmodels; i++)
+		RecursiveBuildNodeContents (map_cmodels[i].headnode);
+	
+	int nempty = 0;
+	for (i = 0 ; i < numnodes ; i++)
+	{
+		if ((map_nodes[i].contents & CONTENTS_ORIGIN))
+			Com_Error (ERR_DROP, "Map has inaccessible nodes");
+		if (!(map_nodes[i].contents))
+			nempty++;
+		printf ("%d\n", map_nodes[i].contents);
+	}
+	
+	printf ("Empty: %d/%d\n", nempty, numnodes);
 
 }
 
@@ -399,6 +429,8 @@ static void CMod_LoadLeafs (lump_t *l)
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
 		out->contents = LittleLong (in->contents);
+		if (out->contents & CONTENTS_ORIGIN)
+			Com_Error (ERR_DROP, "CONTENTS_ORIGIN appears in this BSP!");
 		out->cluster = LittleShort (in->cluster);
 		out->area = LittleShort (in->area);
 		out->firstleafbrush = LittleShort (in->firstleafbrush);
@@ -2050,7 +2082,7 @@ re_test:
 
 	if (trace_trace.fraction <= p1f)
 		return;		// already hit something nearer
-
+	
 	// if < 0, we are in a leaf node
 	if (num < 0)
 	{
@@ -2058,11 +2090,15 @@ re_test:
 		return;
 	}
 
+	node = map_nodes + num;
+	
+	if (!(node->contents & trace_contents))
+		return; // This volume contains no leafs we're interested in
+	
 	//
 	// find the point distances to the seperating plane
 	// and the offset for the size of the box
 	//
-	node = map_nodes + num;
 	plane = node->plane;
 
 	if (plane->type < 3)
