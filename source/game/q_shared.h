@@ -47,6 +47,15 @@ typedef int qboolean;
 #define NULL ((void *)0)
 #endif
 
+// GCC-only intrinsics to tell the compiler what you're expecting
+#ifdef __GNUC__
+#define likely(expr)    __builtin_expect((expr), !0)
+#define unlikely(expr)  __builtin_expect((expr), 0
+#else
+#define likely
+#define unlikely
+#endif
+
 
 // angle indexes
 #define	PITCH				0		// up / down
