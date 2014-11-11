@@ -754,18 +754,18 @@ static qboolean RayIntersectsTriangle (const vec3_t p1, const vec3_t d, const ve
 	if (fabs (det) < FLT_EPSILON)
 		return false;
 	
-	inv_det = 1.0/det;
+	inv_det = 1.0f/det;
 	
 	VectorSubtract (p1, v0, T);
 	u = inv_det * DotProduct (P, T);
 	
-	if (u < 0.0 || u > 1.0)
+	if (u < 0.0f || u > 1.0f)
 		return false;
 	
 	CrossProduct (T, e1, Q);
 	v = inv_det * DotProduct (d, Q);
 	
-	if (v < 0.0 || u + v > 1.0)
+	if (v < 0.0f || u + v > 1.0f)
 		return false;
 	
 	t = inv_det * DotProduct (e2, Q);
@@ -1717,7 +1717,7 @@ BOX TRACING
 */
 
 // 1/32 epsilon to keep floating point happy
-#define	DIST_EPSILON	(0.03125)
+#define	DIST_EPSILON	(0.03125f)
 
 static vec3_t		trace_start, trace_end;
 static vec3_t		trace_mins, trace_maxs;
@@ -2105,14 +2105,14 @@ return;
 	// put the crosspoint DIST_EPSILON pixels on the near side
 	if (t1 < t2)
 	{
-		idist = 1.0/(t1-t2);
+		idist = 1.0f/(t1-t2);
 		side = 1;
 		frac2 = (t1 + offset + DIST_EPSILON)*idist;
 		frac = (t1 - offset + DIST_EPSILON)*idist;
 	}
 	else if (t1 > t2)
 	{
-		idist = 1.0/(t1-t2);
+		idist = 1.0f/(t1-t2);
 		side = 0;
 		frac2 = (t1 - offset - DIST_EPSILON)*idist;
 		frac = (t1 + offset + DIST_EPSILON)*idist;
@@ -2120,15 +2120,15 @@ return;
 	else
 	{
 		side = 0;
-		frac = 1;
-		frac2 = 0;
+		frac = 1.0f;
+		frac2 = 0.0f;
 	}
 
 	// move up to the node
-	if (frac < 0)
-		frac = 0;
-	if (frac > 1)
-		frac = 1;
+	if (frac < 0.0f)
+		frac = 0.0f;
+	if (frac > 1.0f)
+		frac = 1.0f;
 
 	midf = p1f + (p2f - p1f)*frac;
 	mid[0] = p1[0] + frac*(p2[0] - p1[0]);
@@ -2143,10 +2143,10 @@ return;
 
 
 	// go past the node
-	if (frac2 < 0)
-		frac2 = 0;
-	if (frac2 > 1)
-		frac2 = 1;
+	if (frac2 < 0.0f)
+		frac2 = 0.0f;
+	if (frac2 > 1.0f)
+		frac2 = 1.0f;
 
 	p1f += (p2f - p1f)*frac2;
 	p1[0] += frac2*(p2[0] - p1[0]);
@@ -2253,11 +2253,11 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 			if (mingrid[k] < 0)
 				mingrid[k] = 0;
 			
-			maxgrid[k] = (int)ceil((maxcoord-mod->mins[k]) / TERRAIN_GRIDSIZE + 0.1);
+			maxgrid[k] = (int)ceil((maxcoord-mod->mins[k]) / TERRAIN_GRIDSIZE + 0.1f);
 			if (maxgrid[k] > mod->numgrid[k])
 				maxgrid[k] = mod->numgrid[k];
 			
-			if (dir[k] < 0.0)
+			if (dir[k] < 0.0f)
 			{
 				griddir[k] = -1;
 				tmp = mingrid[k] - 1;
@@ -2306,7 +2306,7 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 						
 						plane = &tri->p;
 			
-						if (DotProduct (dir, plane->normal) > 0)
+						if (DotProduct (dir, plane->normal) > 0.0f)
 							continue;
 			
 						if (!bbox_in_trace (tri->mins, tri->maxs, p1, p2_extents))
@@ -2316,7 +2316,7 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 							continue;
 			
 						if (trace_ispoint)
-							offset = 0;
+							offset = 0.0f;
 						else
 							offset = fabs(trace_extents[0]*plane->normal[0]) +
 								fabs(trace_extents[1]*plane->normal[1]) +
