@@ -2284,11 +2284,14 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 					if (grid->numtris == 0)
 						continue;
 					
-					if (!bbox_in_trace (grid->mins, grid->maxs, p1, p2_extents))
-						continue;
+					if (grid->numtris > 2)
+					{
+						if (!bbox_in_trace (grid->mins, grid->maxs, p1, p2_extents))
+							continue;
 					
-					if (!RayIntersectsBBox (p1, dir, grid->mins, grid->maxs, &tmp))
-						continue;
+						if (!RayIntersectsBBox (p1, dir, grid->mins, grid->maxs, &tmp))
+							continue;
+					}
 		
 					for (j = 0; j < grid->numtris; j++)
 					{
