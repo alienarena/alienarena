@@ -667,7 +667,7 @@ static float RayFromSegment (const vec3_t start, const vec3_t end, vec3_t out_di
 }
 
 /* 
-Fast Ray-Box Intersection
+Heavily modified derivative of Fast Ray-Box Intersection algorithm
 by Andrew Woo
 from "Graphics Gems", Academic Press, 1990
 The copyright license of "Graphics Gems" permits use of this code.
@@ -675,39 +675,44 @@ The copyright license of "Graphics Gems" permits use of this code.
 static qboolean RayIntersectsBBox (const vec3_t origin, const vec3_t dir, const vec3_t mins, const vec3_t maxs, float *out_intersection_dist)
 {
 	qboolean inside = true;
-	enum {
-		right,
-		left,
-		middle
-	} quadrant[3];
 	int i;
-	int whichPlane;
-	vec3_t maxT;
-	vec3_t candidatePlane;
+	int whichPlane = -1;
 	vec3_t coord;
+	vec_t maxT = 0.0f;
 
-	/* Find candidate planes; this loop can be avoided if
-   	rays cast all from the eye(assume perpsective view) */
+	/* Find plane of intersection (corresponds to highest t value) */
 	for (i = 0; i < 3; i++)
 	{
 		if (origin[i] < mins[i])
 		{
-			quadrant[i] = left;
-			candidatePlane[i] = mins[i];
 			inside = false;
+			if (likely (dir[i] != 0.0f))
+			{
+				vec_t t = (mins[i] - origin[i]) / dir[i];
+				if (t > maxT)
+				{
+					maxT = t;
+					whichPlane = i;
+					coord[i] = mins[i];
+				}
+			}
 		}
 		else if (origin[i] > maxs[i])
 		{
-			quadrant[i] = right;
-			candidatePlane[i] = maxs[i];
 			inside = false;
-		}
-		else
-		{
-			quadrant[i] = middle;
+			if (likely (dir[i] != 0.0f))
+			{
+				vec_t t = (maxs[i] - origin[i]) / dir[i];
+				if (t > maxT)
+				{
+					maxT = t;
+					whichPlane = i;
+					coord[i] = maxs[i];
+				}
+			}
 		}
 	}
-
+	
 	/* Ray origin inside bounding box */
 	if(inside)
 	{
@@ -715,38 +720,16 @@ static qboolean RayIntersectsBBox (const vec3_t origin, const vec3_t dir, const 
 		return true;
 	}
 
-
-	/* Calculate T distances to candidate planes */
-	for (i = 0; i < 3; i++)
-	{
-		if (quadrant[i] != middle && dir[i] != 0.0)
-			maxT[i] = (candidatePlane[i]-origin[i]) / dir[i];
-		else
-			maxT[i] = -1.0;
-	}
-
-	/* Get largest of the maxT's for final choice of intersection */
-	whichPlane = 0;
-	for (i = 1; i < 3; i++)
-	{
-		if (maxT[whichPlane] < maxT[i])
-			whichPlane = i;
-	}
-
 	/* Check final candidate actually inside box */
-	if (maxT[whichPlane] < 0.0)
+	if (whichPlane == -1)
 		return false;
 	for (i = 0; i < 3; i++)
 	{
 		if (whichPlane != i)
 		{
-			coord[i] = origin[i] + maxT[whichPlane] * dir[i];
+			coord[i] = origin[i] + maxT * dir[i];
 			if (coord[i] < mins[i] || coord[i] > maxs[i])
 				return false;
-		}
-		else
-		{
-			coord[i] = candidatePlane[i];
 		}
 	}
 	
