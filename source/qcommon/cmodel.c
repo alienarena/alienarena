@@ -353,17 +353,11 @@ static void CMod_LoadNodes (lump_t *l)
 	for (i = 0; i < numcmodels; i++)
 		RecursiveBuildNodeContents (map_cmodels[i].headnode);
 	
-	int nempty = 0;
 	for (i = 0 ; i < numnodes ; i++)
 	{
 		if ((map_nodes[i].contents & CONTENTS_ORIGIN))
 			Com_Error (ERR_DROP, "Map has inaccessible nodes");
-		if (!(map_nodes[i].contents))
-			nempty++;
-		printf ("%d\n", map_nodes[i].contents);
 	}
-	
-	printf ("Empty: %d/%d\n", nempty, numnodes);
 
 }
 
