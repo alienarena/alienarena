@@ -2068,6 +2068,7 @@ static void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec
 	int			side;
 	float		midf;
 	vec3_t		p1_copy;
+	vec3_t		p_delta;
 
 re_test:
 	
@@ -2161,9 +2162,10 @@ return;
 		frac = 1.0f;
 
 	midf = p1f + (p2f - p1f)*frac;
-	mid[0] = p1[0] + frac*(p2[0] - p1[0]);
-	mid[1] = p1[1] + frac*(p2[1] - p1[1]);
-	mid[2] = p1[2] + frac*(p2[2] - p1[2]);
+	VectorSubtract (p2, p1, p_delta);
+	mid[0] = p1[0] + frac * p_delta[0];
+	mid[1] = p1[1] + frac * p_delta[1];
+	mid[2] = p1[2] + frac * p_delta[2];
 	
 	// so we can modify p1
 	VectorCopy (p1, p1_copy);
@@ -2179,9 +2181,9 @@ return;
 		frac2 = 1.0f;
 
 	p1f += (p2f - p1f)*frac2;
-	p1[0] += frac2*(p2[0] - p1[0]);
-	p1[1] += frac2*(p2[1] - p1[1]);
-	p1[2] += frac2*(p2[2] - p1[2]);
+	p1[0] += frac2 * p_delta[0];
+	p1[1] += frac2 * p_delta[1];
+	p1[2] += frac2 * p_delta[2];
 	
 	num = node->children[side^1];
 	goto re_test;
