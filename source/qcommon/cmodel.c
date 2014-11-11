@@ -53,7 +53,7 @@ typedef struct
 	int			contents;
 	int			numsides;
 	int			firstbrushside;
-	int			checkcount;		// to avoid repeated testings
+	int			checkcount;		// to avoid repeated testings (FIXME: not threadsafe!)
 } cbrush_t;
 
 typedef struct
@@ -119,6 +119,7 @@ typedef struct
 	cplane_t	p;
 	vec_t		*verts[3];
 	vec3_t		mins, maxs;
+	int			checkcount;		// to avoid repeated testings (FIXME: not threadsafe!)
 } cterraintri_t;
 
 // Terrain models are divided up into axis-aligned 3D grids of cube-shaped 
@@ -2192,18 +2193,14 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 	}
 }
 
-static qboolean bbox_in_trace (vec3_t box_mins, vec3_t box_maxs, vec3_t p1, vec3_t p2_extents)
+static qboolean bbox_in_trace (const vec3_t box_mins, const vec3_t box_maxs, const vec3_t p1, const vec3_t p2_extents)
 {
-	int	i;
-	
-	for (i = 0; i < 3; i++)
-	{
-		if (	(p1[i] > box_maxs[i] && p2_extents[i] > box_maxs[i]) ||
-				(p1[i] < box_mins[i] && p2_extents[i] < box_mins[i]))
-			return false;
-	}
-	
-	return true;
+	return !(	(p1[0] > box_maxs[0] && p2_extents[0] > box_maxs[0]) ||
+				(p1[0] < box_mins[0] && p2_extents[0] < box_mins[0]) ||
+				(p1[1] > box_maxs[1] && p2_extents[1] > box_maxs[1]) ||
+				(p1[1] < box_mins[1] && p2_extents[1] < box_mins[1]) ||
+				(p1[2] > box_maxs[2] && p2_extents[2] > box_maxs[2]) ||
+				(p1[2] < box_mins[2] && p2_extents[2] < box_mins[2]));
 }
 
 // FIXME: It's still quite possible to fall through a terrain mesh.
@@ -2298,9 +2295,13 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 						float			intersection_dist;
 						cterraintri_t	*tri = grid->tris[j];
 			
-						plane = &tri->p;
-			
 						// order the tests from least expensive to most
+						
+						if (tri->checkcount == checkcount) 
+							continue; // already checked this triangle in another cell
+						tri->checkcount = checkcount;
+						
+						plane = &tri->p;
 			
 						if (DotProduct (dir, plane->normal) > 0)
 							continue;
