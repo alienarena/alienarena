@@ -91,6 +91,8 @@ nobase_dist_pics_DATA = \
 	huds/20062.tga \
 	huds/20071.tga \
 	huds/20072.tga \
+	huds/20101.tga \
+	huds/20102.tga \
 	huds/8bit1.tga \
 	huds/8bit2.tga \
 	huds/alien1.tga \
