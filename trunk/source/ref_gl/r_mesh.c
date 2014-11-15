@@ -762,11 +762,10 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 			glUniform1iARB (uniforms->fromView, 0);
 		
 		glUniform1fARB (uniforms->time, rs_realtime);
-		glUniform1iARB (uniforms->fog, map_fog);
-
-		glUniform1iARB (uniforms->team, currententity->team);
-
 	}
+	
+	glUniform1iARB (uniforms->fog, map_fog);
+	glUniform1iARB (uniforms->team, currententity->team);
 
 	glUniform1fARB (uniforms->useShell, 0.0);
 	
