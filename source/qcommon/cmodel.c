@@ -1513,6 +1513,7 @@ void CM_InitBoxHull (void)
 
 		// nodes
 		c = &map_nodes[box_headnode+i];
+		c->contents = CONTENTS_MONSTER;
 		c->plane = map_planes + (numplanes+i*2);
 		c->children[side] = -1 - emptyleaf;
 		if (i != 5)
