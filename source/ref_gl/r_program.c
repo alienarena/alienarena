@@ -915,6 +915,8 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 				lightness = 1.0;
 			}
 			gl_FrontColor = gl_BackColor = vec4 (baseColor * lightness, 1.0);
+			if (FOG == 1) // TODO: team colors with normalmaps disabled!
+				gl_FogFragCoord = length (gl_Position);
 		}
 		else
 		{
