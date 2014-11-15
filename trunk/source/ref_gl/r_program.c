@@ -1575,6 +1575,7 @@ static char vegetation_vertex_program[] = STRINGIFY (
 		gl_Position = gl_ModelViewProjectionMatrix * vertex;
 		gl_TexCoord[0] = gl_MultiTexCoord0;
 		gl_FrontColor = gl_BackColor = gl_Color;
+		gl_FogFragCoord = length (gl_Position);
 	}
 );
 
