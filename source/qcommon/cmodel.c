@@ -2128,32 +2128,38 @@ return;
 		num = node->children[0];
 		goto re_test;
 	}
-	if (t1 < -offset && t2 < -offset)
+	if (t1 <= -offset && t2 <= -offset)
 	{
 		num = node->children[1];
 		goto re_test;
 	}
 
-	// put the crosspoint DIST_EPSILON pixels on the near side
+	// Split the trace into two segments along the dividing plane. Each
+	// segment has an offset-sized "tail" on the "wrong" side of the plane.
+	// Obstacles on one side might still stop the trace on the other side, as
+	// long as the distance from the obstacle to the trace endpoint <= offset.
 	if (t1 < t2)
 	{
 		idist = 1.0f/(t1-t2);
 		side = 1;
-		frac2 = (t1 + offset + DIST_EPSILON)*idist;
-		frac = (t1 - offset + DIST_EPSILON)*idist;
+		frac2 = (t1 + offset)*idist;
+		frac = (t1 - offset)*idist;
 	}
 	else if (t1 > t2)
 	{
 		idist = 1.0f/(t1-t2);
 		side = 0;
-		frac2 = (t1 - offset - DIST_EPSILON)*idist;
-		frac = (t1 + offset + DIST_EPSILON)*idist;
+		frac2 = (t1 - offset)*idist;
+		frac = (t1 + offset)*idist;
 	}
 	else
 	{
-		side = 0;
-		frac = 1.0f;
-		frac2 = 0.0f;
+		// Trace is parallel to the dividing plane. This is not an uncommon
+		// case, and we handle it by tracing the full distance in both sub-
+		// nodes.
+		side = 0; // This is arbitrary
+		frac = 1.0f; // Trace the whole distance in the 1st sub-node
+		frac2 = 0.0f; // Trace the whole distance in the 2nd sub-node too
 	}
 
 	// move up to the node
@@ -2168,7 +2174,7 @@ return;
 	mid[1] = p1[1] + frac * p_delta[1];
 	mid[2] = p1[2] + frac * p_delta[2];
 	
-	// so we can modify p1
+	// so deeper recursions can modify their p1 arguments
 	VectorCopy (p1, p1_copy);
 
 	// this is the only case where the function actually recurses
