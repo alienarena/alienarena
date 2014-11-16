@@ -2073,12 +2073,6 @@ static void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec
 
 re_test:
 	
-	if (trace_fast && trace_trace.fraction != 1.0f)
-		return;		// already hit anything at all
-
-	if (trace_trace.fraction <= p1f)
-		return;		// already hit something nearer
-	
 	// if < 0, we are in a leaf node
 	if (num < 0)
 	{
@@ -2180,6 +2174,8 @@ return;
 	// this is the only case where the function actually recurses
 	CM_RecursiveHullCheck (node->children[side], p1f, midf, p1_copy, mid);
 
+	if (trace_fast && trace_trace.fraction != 1.0f)
+		return;		// already hit anything at all
 
 	// go past the node
 	if (frac2 < 0.0f)
@@ -2188,6 +2184,10 @@ return;
 		frac2 = 1.0f;
 
 	p1f += (p2f - p1f)*frac2;
+	
+	if (trace_trace.fraction <= p1f)
+		return;		// already hit something nearer
+
 	p1[0] += frac2 * p_delta[0];
 	p1[1] += frac2 * p_delta[1];
 	p1[2] += frac2 * p_delta[2];
