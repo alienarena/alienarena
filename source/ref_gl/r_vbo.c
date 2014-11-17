@@ -215,7 +215,7 @@ void GL_SetupWorldVBO (void)
 
 static void VB_BuildVegetationVBO (void)
 {
-	int i, ng;
+	int i, j, ng;
 	int totalVBObufferSize = 0;
 	int currVertexNum = 0;
 	int vbo_idx = 0;
@@ -252,38 +252,51 @@ static void VB_BuildVegetationVBO (void)
 		for (ng = 0; ng < gcount; ng++)
 		{
 			int side, v;
-			float swayCoef, addright = 0.0f, addup = 0.0f;
+			float swayCoef, addright = 0.0f, addup = 0.0f, sumz = 0.0f;
 			trace_t r_trace;
-			vec3_t right, vertex[2];
+			vec3_t right, vertex[2][2];
 			vec2_t st;
 			AngleVectors (angle, NULL, right, NULL);
 			VectorScale (right, rightscale, right);
 			
 			if (grass->type == 1)
 			{
-				VectorCopy (origin, vertex[0]);
-				VectorCopy (origin, vertex[1]);
+				for (j = 0; j < 4; j++)
+					VectorCopy (origin, vertex[j/2][j%2]);
+			}
+			
+			for (side = 1; side >= 0; side--)
+			{
+				if (grass->type != 1)
+				{
+					VectorMA (origin, side ? 0.5f : -0.5f, right, vertex[side][0]);
+					VectorAdd (vertex[side][0], up, vertex[side][1]);
+					VectorSubtract (vertex[side][0], up, vertex[side][0]);
+					r_trace = CM_BoxTrace (vertex[side][1], vertex[side][0], vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_SOLID);
+					VectorMA (vertex[side][1], -2.0*r_trace.fraction, up, vertex[side][0]);
+					VectorAdd (vertex[side][0], up, vertex[side][1]);
+					sumz += vertex[side][1][2]; // Used later for weighted mean
+				}
 			}
 			
 			for (side = 1; side >= 0; side--)
 			{
 				st[1] = side ? grass->tex->sh : grass->tex->sl;
 				
+				// Level out the top of the sprite. A lower value of
+                // STRETCH_WEIGHT means more leveling. 1 is totally level,
+                // don't go less than 1. A higher value means the top is more
+                // parallel to the bottom.
+				#define STRETCH_WEIGHT 1.0f
 				if (grass->type != 1)
-				{
-					VectorMA (origin, side ? 0.5f : -0.5f, right, vertex[0]);
-					VectorAdd (vertex[0], up, vertex[1]);
-					VectorSubtract (vertex[0], up, vertex[0]);
-					r_trace = CM_BoxTrace (vertex[1], vertex[0], vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_SOLID);
-					VectorMA (vertex[1], -2.0*r_trace.fraction, up, vertex[0]);
-					VectorAdd (vertex[0], up, vertex[1]);
-				}
+					vertex[side][1][2] = (vertex[side][1][2] * (STRETCH_WEIGHT - 1.0f) + sumz) / (STRETCH_WEIGHT + 1.0f);
+				#undef STRETCH_WEIGHT
 				
 				for (v = 1; v >= 0; v--)
 				{
 					st[0] = side != v ? grass->tex->tl : grass->tex->th;
 					
-					AppendToVBO (vbo_idx, 3 * sizeof(float), vertex[side != v]);
+					AppendToVBO (vbo_idx, 3 * sizeof(float), vertex[side][side != v]);
 					AppendToVBO (vbo_idx, 2 * sizeof(float), st);
 					swayCoef = (grass->type == 1 ? 3 : 2) * v;
 					AppendToVBO (vbo_idx, sizeof(float), &swayCoef);
