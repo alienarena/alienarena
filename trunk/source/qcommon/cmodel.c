@@ -30,8 +30,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct
 {
 	cplane_t	*plane;
-	int			children[2];		// negative numbers are leafs
-	int			contents;			// contents of all children OR'd together
+	int			children[2];			// negative numbers are leafs
+	int			contents;				// contents of all children OR'd together
+	vec3_t		bspmins, bspmaxs;		// From BSP file
+	
+	// largest contiguous empty box volume in the node
+	vec3_t		emptymins, emptymaxs;
 } cnode_t;
 
 typedef struct
@@ -47,6 +51,7 @@ typedef struct
 	int			area;
 	unsigned short	firstleafbrush;
 	unsigned short	numleafbrushes;
+	vec3_t		mins, maxs;		// bbox read in from BSP file
 } cleaf_t;
 
 typedef struct
@@ -305,6 +310,66 @@ static void CMod_LoadSurfaces (lump_t *l)
 CMod_LoadNodes
 =================
 */
+static void RecursiveSubtractLeafBBox (volatile int num, vec3_t emptymins, vec3_t emptymaxs)
+{
+	int i;
+	if (num < 0)
+	{
+		int		j, start_axis;
+		cleaf_t	*leaf = &map_leafs[-1-num];
+		
+		if (leaf->contents == 0)
+			return;
+		
+		for (i = 0; i < 3; i++)
+		{
+			if (leaf->mins[i] >= emptymaxs[i])
+				return;
+			if (leaf->maxs[i] <= emptymins[i])
+				return;
+		}
+		start_axis = 0;
+		for (i = 1; i < 3; i++)
+		{
+			if (leaf->maxs[i] - leaf->mins[i] < leaf->maxs[start_axis] - leaf->mins[start_axis])
+				start_axis = i;
+		}
+		for (i = 0; i < 3; i++)
+		{
+			qboolean subtract_max, subtract_min;
+			
+			j = (i + start_axis) % 3;
+			
+			subtract_max = leaf->mins[j] < emptymaxs[j] && leaf->mins[j] > emptymins[j];
+			subtract_min = leaf->maxs[j] > emptymins[j] && leaf->maxs[j] < emptymaxs[j];
+			
+			if (subtract_max && subtract_min)
+			{
+				if (emptymaxs[j] - leaf->mins[j] < leaf->maxs[j] - emptymins[j])
+					subtract_min = false;
+				else
+					subtract_max = false;
+			}
+			if (subtract_max)
+			{
+				emptymaxs[j] = leaf->mins[j];
+				return;
+			}
+			if (subtract_min)
+			{
+				emptymins[j] = leaf->maxs[j];
+				return;
+			}
+		}
+		VectorClear (emptymins);
+		VectorClear (emptymaxs);
+	}
+	else if (map_nodes[num].contents)
+	{
+		RecursiveSubtractLeafBBox (map_nodes[num].children[0], emptymins, emptymaxs);
+		RecursiveSubtractLeafBBox (map_nodes[num].children[1], emptymins, emptymaxs);
+	}
+}
 static int RecursiveBuildNodeContents (int num)
 {
 	cnode_t		*node;
@@ -313,6 +378,12 @@ static int RecursiveBuildNodeContents (int num)
 		return map_leafs[-1-num].contents;
 	
 	node = &map_nodes[num];
+	
+	VectorCopy (node->bspmins, node->emptymins);
+	VectorCopy (node->bspmaxs, node->emptymaxs);
+	
+	RecursiveSubtractLeafBBox (node->children[0], node->emptymins, node->emptymaxs);
+	RecursiveSubtractLeafBBox (node->children[1], node->emptymins, node->emptymaxs);
 	
 	return node->contents =
 		RecursiveBuildNodeContents (node->children[0]) |
@@ -339,13 +410,18 @@ static void CMod_LoadNodes (lump_t *l)
 
 	numnodes = count;
 
-	for (i=0 ; i<count ; i++, out++, in++)
+	for (i = 0; i < count; i++, out++, in++)
 	{
 		out->plane = map_planes + LittleLong(in->planenum);
-		for (j=0 ; j<2 ; j++)
+		for (j = 0; j < 2; j++)
 		{
 			child = LittleLong (in->children[j]);
 			out->children[j] = child;
+		}
+		for (j = 0; j < 3; j++)
+		{
+			out->bspmins[j] = LittleShort (in->mins[j]);
+			out->bspmaxs[j] = LittleShort (in->maxs[j]);
 		}
 		out->contents = ~0; // default contents (for brush models)
 	}
@@ -400,7 +476,7 @@ CMod_LoadLeafs
 */
 static void CMod_LoadLeafs (lump_t *l)
 {
-	int			i;
+	int			i, j;
 	cleaf_t		*out;
 	dleaf_t 	*in;
 	int			count;
@@ -420,7 +496,7 @@ static void CMod_LoadLeafs (lump_t *l)
 	numleafs = count;
 	numclusters = 0;
 
-	for ( i=0 ; i<count ; i++, in++, out++)
+	for (i = 0; i < count; i++, in++, out++)
 	{
 		out->contents = LittleLong (in->contents);
 		if (out->contents & CONTENTS_ORIGIN)
@@ -429,6 +505,11 @@ static void CMod_LoadLeafs (lump_t *l)
 		out->area = LittleShort (in->area);
 		out->firstleafbrush = LittleShort (in->firstleafbrush);
 		out->numleafbrushes = LittleShort (in->numleafbrushes);
+		for (j = 0; j < 3; j++)
+		{
+			out->mins[j] = LittleShort (in->mins[j]);
+			out->maxs[j] = LittleShort (in->maxs[j]);
+		}
 
 		if (out->cluster >= numclusters)
 			numclusters = out->cluster + 1;
@@ -2084,6 +2165,18 @@ re_test:
 	
 	if (!(node->contents & trace_contents))
 		return; // This volume contains no leafs we're interested in
+	
+	// TODO: add bbox and gap stuff to BoxHull, change to trace_ispoint
+	if (trace_fast)
+	{
+		if (	p1[0] < node->emptymaxs[0] && p2[0] < node->emptymaxs[0] &&
+				p1[1] < node->emptymaxs[1] && p2[1] < node->emptymaxs[1] &&
+				p1[2] < node->emptymaxs[2] && p2[2] < node->emptymaxs[2] &&
+				p1[0] > node->emptymins[0] && p2[0] > node->emptymins[0] &&
+				p1[1] > node->emptymins[1] && p2[1] > node->emptymins[1] &&
+				p1[2] > node->emptymins[2] && p2[2] > node->emptymins[2])
+			return;
+	}
 	
 	//
 	// find the point distances to the seperating plane
