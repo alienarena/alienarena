@@ -138,6 +138,11 @@ typedef struct
 	vec3_t			mins, maxs;
 	int				numtris;
 	cterraintri_t	**tris;
+	struct
+	{
+		vec3_t		normal;
+		vec_t		dist;
+	} boundingplane; // All tris are on one side of this plane
 } cterraingrid_t;
 
 typedef struct
@@ -973,7 +978,7 @@ void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
 	rotation_matrix[2][2] = cospitch*cosroll;
 }
 
-void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
+static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 {
 	float rotation_matrix[3][3];
 	int i, j, k, l, m;
@@ -1126,10 +1131,25 @@ void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 				
 				if (grid->numtris == 0)
 					continue;
-			
+				
 				grid->tris = Z_Malloc (grid->numtris * sizeof(cterraintri_t *));
 				for (k = 0; k < grid->numtris; k++)
 					grid->tris[k] = tmp[k];
+				
+				VectorClear (grid->boundingplane.normal);
+				for (k = 0; k < grid->numtris; k++)
+					VectorAdd (grid->tris[k]->p.normal, grid->boundingplane.normal, grid->boundingplane.normal);
+				VectorNormalize (grid->boundingplane.normal);
+				grid->boundingplane.dist = DotProduct (grid->tris[0]->verts[0], grid->boundingplane.normal);
+				for (k = 0; k < grid->numtris; k++)
+				{
+					for (m = 0; m < 3; m++)
+					{
+						vec_t dist = DotProduct (grid->tris[k]->verts[m], grid->boundingplane.normal);
+						if (dist > grid->boundingplane.dist)
+							grid->boundingplane.dist = dist;
+					}
+				}
 				
 				// Try shrinking the grid's bounding box
 				
@@ -2414,6 +2434,13 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 					grid = &mod->grids[z*mod->numgrid[0]*mod->numgrid[1]+y*mod->numgrid[0]+x];
 					
 					if (grid->numtris == 0)
+						continue;
+					
+					// TODO: eventually make this trace_ispoint when we can
+					// be confident that this works
+					if (	trace_fast &&
+							DotProduct (p1, grid->boundingplane.normal) > grid->boundingplane.dist &&
+							DotProduct (p2_extents, grid->boundingplane.normal) > grid->boundingplane.dist)
 						continue;
 					
 					if (grid->numtris > 2)
