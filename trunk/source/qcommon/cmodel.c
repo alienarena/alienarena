@@ -29,13 +29,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 typedef struct
 {
-	cplane_t	*plane;
-	int			children[2];			// negative numbers are leafs
 	int			contents;				// contents of all children OR'd together
-	vec3_t		bspmins, bspmaxs;		// From BSP file
-	
+	qboolean	containsgap;
 	// largest contiguous empty box volume in the node
 	vec3_t		emptymins, emptymaxs;
+	cplane_t	*plane;
+	int			children[2];			// negative numbers are leafs
 } cnode_t;
 
 typedef struct
@@ -377,6 +376,7 @@ static void RecursiveSubtractLeafBBox (int num, vec3_t emptymins, vec3_t emptyma
 }
 static int RecursiveBuildNodeContents (int num)
 {
+	int i;
 	cnode_t		*node;
 	
 	if (num < 0)
@@ -384,11 +384,15 @@ static int RecursiveBuildNodeContents (int num)
 	
 	node = &map_nodes[num];
 	
-	VectorCopy (node->bspmins, node->emptymins);
-	VectorCopy (node->bspmaxs, node->emptymaxs);
-	
 	RecursiveSubtractLeafBBox (node->children[0], node->emptymins, node->emptymaxs);
 	RecursiveSubtractLeafBBox (node->children[1], node->emptymins, node->emptymaxs);
+	
+	node->containsgap = true;
+	for (i = 0; i < 3; i++)
+	{
+		if (node->emptymins[i] + 8.0f > node->emptymaxs[i])
+			node->containsgap = false;
+	}
 	
 	return node->contents =
 		RecursiveBuildNodeContents (node->children[0]) |
@@ -425,8 +429,10 @@ static void CMod_LoadNodes (lump_t *l)
 		}
 		for (j = 0; j < 3; j++)
 		{
-			out->bspmins[j] = LittleShort (in->mins[j]);
-			out->bspmaxs[j] = LittleShort (in->maxs[j]);
+			// Start out empty volume at node size (will be narrowed down
+			// later.)
+			out->emptymins[j] = LittleShort (in->mins[j]);
+			out->emptymaxs[j] = LittleShort (in->maxs[j]);
 		}
 		out->contents = ~0; // default contents (for brush models)
 	}
@@ -2188,16 +2194,15 @@ re_test:
 		return; // This volume contains no leafs we're interested in
 	
 	// TODO: add bbox and gap stuff to BoxHull, change to trace_ispoint
-	if (trace_fast)
-	{
-		if (	p1[0] < node->emptymaxs[0] && p2[0] < node->emptymaxs[0] &&
-				p1[1] < node->emptymaxs[1] && p2[1] < node->emptymaxs[1] &&
-				p1[2] < node->emptymaxs[2] && p2[2] < node->emptymaxs[2] &&
-				p1[0] > node->emptymins[0] && p2[0] > node->emptymins[0] &&
-				p1[1] > node->emptymins[1] && p2[1] > node->emptymins[1] &&
-				p1[2] > node->emptymins[2] && p2[2] > node->emptymins[2])
-			return;
-	}
+	if (	trace_fast &&
+			node->containsgap && 
+			p1[0] < node->emptymaxs[0] && p2[0] < node->emptymaxs[0] &&
+			p1[1] < node->emptymaxs[1] && p2[1] < node->emptymaxs[1] &&
+			p1[2] < node->emptymaxs[2] && p2[2] < node->emptymaxs[2] &&
+			p1[0] > node->emptymins[0] && p2[0] > node->emptymins[0] &&
+			p1[1] > node->emptymins[1] && p2[1] > node->emptymins[1] &&
+			p1[2] > node->emptymins[2] && p2[2] > node->emptymins[2])
+		return;
 	
 	//
 	// find the point distances to the seperating plane
