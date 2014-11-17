@@ -315,7 +315,7 @@ static void CMod_LoadSurfaces (lump_t *l)
 CMod_LoadNodes
 =================
 */
-static void RecursiveSubtractLeafBBox (volatile int num, vec3_t emptymins, vec3_t emptymaxs)
+static void RecursiveSubtractLeafBBox (int num, vec3_t emptymins, vec3_t emptymaxs)
 {
 	int i;
 	if (num < 0)
@@ -512,8 +512,10 @@ static void CMod_LoadLeafs (lump_t *l)
 		out->numleafbrushes = LittleShort (in->numleafbrushes);
 		for (j = 0; j < 3; j++)
 		{
-			out->mins[j] = LittleShort (in->mins[j]);
-			out->maxs[j] = LittleShort (in->maxs[j]);
+			// We expand the bbox by 1 in each direction because these are
+			// stored as integers, and may be up to 0.99999... off.
+			out->mins[j] = LittleShort (in->mins[j]) - 1;
+			out->maxs[j] = LittleShort (in->maxs[j]) + 1;
 		}
 
 		if (out->cluster >= numclusters)
@@ -2156,10 +2158,9 @@ static void CM_TestInLeaf (int leafnum)
 /*
 ==================
 CM_RecursiveHullCheck
-
 ==================
 */
-static void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, vec3_t p2)
+static void CM_RecursiveHullCheck (int num, float p1f, float p2f, vec3_t p1, const vec3_t p2)
 {
 	cnode_t		*node;
 	cplane_t	*plane;
