@@ -943,24 +943,20 @@ void R_SetupFog (float distance_boost)
 	}
 }
 
-static void R_DrawEntityBBox (entity_t *e)
+static void R_DrawBBox (const vec3_t mins, const vec3_t maxs)
 {
 	vec3_t	minmaxs[2];
 	int		side;
 	int		square[4][3] = 
 		{{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}};
-
+	
 	GL_EnableTexture (0, false);
 	qglColor4f (1, 0, 0, 1);
 	qglLineWidth (5.0);
-
-	qglPushMatrix ();
-
-	R_RotateForEntity (e);
-
-	VectorCopy (e->model->mins, minmaxs[0]);
-	VectorCopy (e->model->maxs, minmaxs[1]);
-
+	
+	VectorCopy (mins, minmaxs[0]);
+	VectorCopy (maxs, minmaxs[1]);
+	
 	for (side = 0; side < 6; side++)
 	{
 		int vertnum;
@@ -978,6 +974,17 @@ static void R_DrawEntityBBox (entity_t *e)
 		}
 		qglEnd ();
 	}
+	
+	GL_EnableTexture (0, true);
+}
+
+static void R_DrawEntityBBox (entity_t *e)
+{
+	qglPushMatrix ();
+
+	R_RotateForEntity (e);
+	
+	R_DrawBBox (e->model->mins, e->model->maxs);
 	
 	qglPopMatrix ();
 	GL_EnableTexture (0, true);
@@ -1091,7 +1098,7 @@ void R_RenderView (refdef_t *fd)
 		}
 	}
 
-    // Postprocessing
+	// Postprocessing
 	R_BloomBlend (&r_newrefdef);
 	R_RenderSun ();
 	R_GLSLPostProcess ();
