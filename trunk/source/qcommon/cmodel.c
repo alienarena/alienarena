@@ -2610,9 +2610,10 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 CM_BoxTrace
 ==================
 */
-trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
-						  vec3_t mins, vec3_t maxs,
-						  int headnode, int brushmask)
+static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
+								  vec3_t mins, vec3_t maxs,
+								  int headnode, int brushmask,
+								  qboolean enable_terrain)
 {
 	int		i;
 	vec3_t	local_start, local_end;
@@ -2661,7 +2662,8 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 		VectorCopy (end, local_end);
 		CM_RecursiveHullCheck (headnode, 0, 1, local_start, local_end);
 		
-		CM_TerrainTrace (start, end);
+		if (enable_terrain)
+			CM_TerrainTrace (start, end);
 		
 		if (trace_trace.fraction == 1)
 		{
@@ -2699,6 +2701,13 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 	}
 
 	return trace_trace;
+}
+
+trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
+						  vec3_t mins, vec3_t maxs,
+						  int headnode, int brushmask)
+{
+	return CM_BoxTrace_Core (start, end, mins, maxs, headnode, brushmask, true);
 }
 
 // Returns true if there is nothing blocking the path from start to end.
@@ -2814,8 +2823,7 @@ trace_t		CM_TransformedBoxTrace (vec3_t start, vec3_t end,
 	}
 
 	// sweep the box through the model
-	// FIXME: we have to suppress terrain tracing here!!!
-	trace = CM_BoxTrace (start_l, end_l, mins, maxs, headnode, brushmask);
+	trace = CM_BoxTrace_Core (start_l, end_l, mins, maxs, headnode, brushmask, false);
 
 	if (rotated && trace.fraction != 1.0)
 	{
