@@ -2540,6 +2540,7 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 	
 	trace_ispoint = true;
 	trace_fast = false;
+	checkcount++;
 	VectorClear (trace_extents);
 	
 	out_color[0] = out_color[1] = out_color[2] = 1.0f;
