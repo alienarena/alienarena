@@ -896,14 +896,32 @@ static qboolean RayIntersectsTriangle (const vec3_t p1, const vec3_t d, const ve
 }
 
 // NOTE: this function doesn't need to be fast, it only runs at load time.
-qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs)
+qboolean TriangleIntersectsBBox
+	(const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs, vec3_t out_mins, vec3_t out_maxs)
 {
-	int i, axis;
-	float l0, l1, l2;
-	vec3_t d0, d1, d2;
-	qboolean all_in;
+	int i, j, axis;
+	float len;
+	vec3_t dir;
+	qboolean all_in, ret;
 	float dist;
-	
+
+#define BBOX_ACCUM(pt) \
+{ \
+	if (	(out_mins != NULL || out_maxs != NULL) && \
+			pt[0] <= maxs[0] && pt[0] >= mins[0] && \
+			pt[1] <= maxs[1] && pt[1] >= mins[1] && \
+			pt[2] <= maxs[2] && pt[2] >= mins[2] ) \
+	{ \
+		for (j = 0; j < 3; j++) \
+		{ \
+			if (out_mins != NULL && pt[j] < out_mins[j]) \
+				out_mins[j] = pt[j]; \
+			if (out_maxs != NULL && pt[j] > out_maxs[j]) \
+				out_maxs[j] = pt[j]; \
+		} \
+	} \
+}
+
 	all_in = true;
 	for (i = 0; i < 3; i++)
 	{
@@ -930,10 +948,24 @@ qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t 
 			all_in = false; // at least one triangle point is outside the bbox
 	}
 	
+	BBOX_ACCUM (v0);
+	BBOX_ACCUM (v1);
+	BBOX_ACCUM (v2);
+	
 	if (all_in)
 		return true; // all triangle points are inside the bbox
+
+#define RAY_INTERSECTED(start,dir,dist) \
+{ \
+	vec3_t pt; \
+	if (!out_mins && !out_maxs) return true; \
+	VectorMA (start, dist, dir, pt); \
+	BBOX_ACCUM (pt); \
+	ret = true; \
+}
 	
 	// check if one of the edges of the bounding box goes through the triangle
+	ret = false;
 	for (axis = 0; axis < 3; axis++)
 	{
 		for (i = 0; i < 4; i++)
@@ -950,18 +982,34 @@ qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t 
 				start[(axis+2)%3] = mins[(axis+2)%3];
 		
 			if (RayIntersectsTriangle (start, dir, v0, v1, v2, &dist) && dist <= (maxs[axis] - mins[axis]))
-				return true;
+				RAY_INTERSECTED (start, dir, dist);
 		}
 	}
 	
 	// check if one of the edges of the triangle goes through the bbox
-	l0 = RayFromSegment (v0, v1, d0);
-	l1 = RayFromSegment (v1, v2, d1);
-	l2 = RayFromSegment (v2, v0, d2);
+#define _TRISIDE(v0,v1) \
+{ \
+	len = RayFromSegment (v0, v1, dir); \
+	if (RayIntersectsBBox (v0, dir, mins, maxs, &dist) && dist <= len) \
+		RAY_INTERSECTED (v0, dir, dist); \
+}
+#define TRISIDE(v0,v1) \
+{ \
+	_TRISIDE (v0, v1); \
+	if (dist == 0 && (out_mins != NULL || out_maxs != NULL)) \
+		_TRISIDE (v1, v0); \
+}
 	
-	return	(RayIntersectsBBox (v0, d0, mins, maxs, &dist) && dist <= l0) ||
-			(RayIntersectsBBox (v1, d1, mins, maxs, &dist) && dist <= l1) ||
-			(RayIntersectsBBox (v2, d2, mins, maxs, &dist) && dist <= l2);
+	TRISIDE (v0, v1);
+	TRISIDE (v1, v2);
+	TRISIDE (v2, v0);
+
+#undef _TRISIDE
+#undef TRISIDE
+#undef RAY_INTERSECTED
+#undef BBOX_ACCUM
+	
+	return	ret;
 }
 
 void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
@@ -1129,21 +1177,30 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 				grid->maxs[1] = mod->mins[1] + (i+1)*TERRAIN_GRIDSIZE;
 				grid->mins[2] = mod->mins[2] + l*TERRAIN_GRIDSIZE;
 				grid->maxs[2] = mod->mins[2] + (l+1)*TERRAIN_GRIDSIZE;
+				
+				// This will be the new bounding box; it will grow as the
+				// triangles get added.
+				VectorCopy (grid->maxs, tmpmins);
+				VectorCopy (grid->mins, tmpmaxs);
 			
 				for (k = 0; k < mod->numtriangles; k++)
 				{
 					cterraintri_t *tri = &mod->tris[k];
-					if (TriangleIntersectsBBox (tri->verts[0], tri->verts[1], tri->verts[2], grid->mins, grid->maxs))
+					if (TriangleIntersectsBBox (tri->verts[0], tri->verts[1], tri->verts[2], grid->mins, grid->maxs, tmpmins, tmpmaxs))
 						tmp[grid->numtris++] = tri;
 				}
 				
 				if (grid->numtris == 0)
 					continue;
 				
+				VectorCopy (tmpmins, grid->mins);
+				VectorCopy (tmpmaxs, grid->maxs);
+				
 				grid->tris = Z_Malloc (grid->numtris * sizeof(cterraintri_t *));
 				for (k = 0; k < grid->numtris; k++)
 					grid->tris[k] = tmp[k];
 				
+				// Create bounding plane
 				VectorClear (grid->boundingplane.normal);
 				for (k = 0; k < grid->numtris; k++)
 					VectorAdd (grid->tris[k]->p.normal, grid->boundingplane.normal, grid->boundingplane.normal);
@@ -1157,30 +1214,6 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 						if (dist > grid->boundingplane.dist)
 							grid->boundingplane.dist = dist;
 					}
-				}
-				
-				// Try shrinking the grid's bounding box
-				
-				VectorCopy (grid->tris[0]->mins, tmpmins);
-				VectorCopy (grid->tris[0]->maxs, tmpmaxs);
-				
-				for (k = 1; k < grid->numtris; k++)
-				{
-					for (m = 0; m < 3; m++)
-					{
-						if (grid->tris[k]->maxs[m] > tmpmaxs[m])
-							tmpmaxs[m] = grid->tris[k]->maxs[m];
-						if (grid->tris[k]->mins[m] < tmpmins[m])
-							tmpmins[m] = grid->tris[k]->mins[m];
-					}
-				}
-				
-				for (m = 0; m < 3; m++)
-				{
-					if (tmpmaxs[m] < grid->maxs[m])
-						grid->maxs[m] = tmpmaxs[m];
-					if (tmpmins[m] > grid->mins[m])
-						grid->mins[m] = tmpmins[m];
 				}
 			}
 		}
