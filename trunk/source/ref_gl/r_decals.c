@@ -9,7 +9,8 @@
 #define DECAL_POLYS MAX_TRIANGLES // This really is a bit high
 #define DECAL_VERTS (2*(3*DECAL_POLYS)) // double to make room for temp new verts
 
-extern qboolean TriangleIntersectsBBox (const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs);
+extern qboolean TriangleIntersectsBBox
+	(const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs, vec3_t out_mins, vec3_t out_maxs);
 extern void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3]);
 
 // Creates a rotation matrix that will *undo* the specified rotation. We must
@@ -140,7 +141,7 @@ static void Mod_AddToDecalModel (const decalorientation_t *pos, const decalinput
 			}
 		}
 		
-		if (!TriangleIntersectsBBox (verts[0], verts[1], verts[2], pos->mins, pos->maxs))
+		if (!TriangleIntersectsBBox (verts[0], verts[1], verts[2], pos->mins, pos->maxs, NULL, NULL))
 			continue;
 		
 		for (i = 0; i < 3; i++)
