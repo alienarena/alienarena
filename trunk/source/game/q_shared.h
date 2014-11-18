@@ -191,7 +191,7 @@ extern vec3_t vec3_origin;
 // o will be the elementwise product (i.e. Hadamard product) of a and b:
 #define VectorComponentMul(a,b,o)	((o)[0]=(a)[0]*(b)[0],(o)[1]=(a)[1]*(b)[1],(o)[2]=(a)[2]*(b)[2])
 
-void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
+void VectorMA (const vec3_t veca, float scale, const vec3_t vecb, vec3_t vecc);
 
 #define Vector4Set(v, a, b, c, d)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c),(v)[3] = (d))
 #define Vector4Copy(a,b)		((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
