@@ -106,4 +106,51 @@ maps/meshes/desert/cactus2
 		normalmap
 	}
 }
+maps/meshes/rocks/02/diffuse
+{
+	{
+		map maps/meshes/rocks/02/normal.jpg
+		normalmap
+	}
+}
+maps/meshes/rocks/03/diffuse
+{
+	{
+		map maps/meshes/rocks/03/normal.jpg
+		normalmap
+	}
+}
+
+maps/meshes/rocks/04/diffuse
+{
+	{
+		map maps/meshes/rocks/04/normal.jpg
+		normalmap
+	}
+}
+
+maps/meshes/rocks/05/diffuse
+{
+	{
+		map maps/meshes/rocks/05/normal.jpg
+		normalmap
+	}
+}
+maps/meshes/desert/platewall1
+{
+	{
+		map maps/meshes/desert/platewall1_normal.tga
+		normalmap
+	}
+}
+maps/meshes/desert/platewall2
+{
+	{
+		map maps/meshes/desert/platewall2_normal.tga
+		normalmap
+	}
+}
+
+
+
 
