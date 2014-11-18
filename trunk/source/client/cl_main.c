@@ -2372,9 +2372,15 @@ extern unsigned sys_frame_time;   // TODO: ditto
  *  cl_maxfps is set higher than the default.
  *
  *  PKTRATE_EARLY is the minimum msecs for catching up when packets are delayed
+ *
+ *  If neither the packet nor the render code will be triggered in the next
+ *  YIELD_MSEC milliseconds, sleep the process for a fraction of that time in
+ *  order to reduce the CPU usage of the process. Has to be a small fraction,
+ *  to allow the OS enough time to switch back to this process.
  */
 #define PKTRATE_CAP 16
 #define PKTRATE_EARLY 12
+#define YIELD_MSEC 4
 
 void CL_Frame( int msec )
 {
@@ -2537,6 +2543,19 @@ void CL_Frame( int msec )
 			}
 		}
 	}
+	
+#ifdef UNIX_VARIANT
+	// TODO: make this work on Windows
+	// TODO: disable this if vsync is on
+	if (	!packet_trigger && !send_packet_now && !cls.download &&
+			!render_trigger &&
+			packet_timer + packet_delay >= YIELD_MSEC &&
+			render_timer >= YIELD_MSEC )
+	{
+		usleep ((YIELD_MSEC * 1000) / 6);
+		return;
+	}
+#endif
 
 	if ( packet_trigger || send_packet_now || cls.download)
 	{
