@@ -4380,7 +4380,7 @@ static const DMFlag_control_t dmflag_control_names[] = {
 	{"quad drop",			false,	DF_QUAD_DROP},
 	{"friendly fire",		true,	DF_NO_FRIENDLY_FIRE},
 	{"bot chat",			false,	DF_BOTCHAT},
-	{"bot fuzzy aim",		false,	DF_BOT_FUZZYAIM},
+	{"bot perfect aim",		false,	DF_BOT_FUZZYAIM},
 	{"auto node save",		false,	DF_BOT_AUTOSAVENODES},
 	{"repeat level if "
 	 "bot wins",			true,	DF_BOT_LEVELAD},
