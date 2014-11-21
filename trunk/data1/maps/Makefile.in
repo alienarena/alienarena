@@ -382,6 +382,12 @@ nobase_dist_maps_DATA = \
 	meshes/desert/lantern_fx.tga \
 	meshes/desert/lantern_normal.jpg \
 	meshes/desert/metalbare_d.jpg \
+	meshes/desert/platewall1.md2 \
+	meshes/desert/platewall1.tga \
+	meshes/desert/platewall1_normal.tga \
+	meshes/desert/platewall2.md2 \
+	meshes/desert/platewall2.tga \
+	meshes/desert/platewall2_normal.tga \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
@@ -517,15 +523,27 @@ nobase_dist_maps_DATA = \
 	meshes/ribtube3.md2 \
 	meshes/ribtube.jpg \
 	meshes/ribtube_normal.jpg \
+	meshes/rocks/02/diffuse.jpg \
+	meshes/rocks/02/normal.jpg \
+	meshes/rocks/02/rock.md2 \
+	meshes/rocks/03/diffuse.jpg \
+	meshes/rocks/03/normal.jpg \
+	meshes/rocks/03/rock.md2 \
+	meshes/rocks/04/diffuse.jpg \
+	meshes/rocks/04/normal.jpg \
+	meshes/rocks/04/rock.md2 \
+	meshes/rocks/05/diffuse.jpg \
+	meshes/rocks/05/normal.jpg \
+	meshes/rocks/05/rock.md2 \
+	meshes/rocks/rock1.jpg \
+	meshes/rocks/rock1.md2 \
+	meshes/rocks/rock2.jpg \
 	meshes/rocks/rock2.md2 \
-	meshes/rocks/rock4.jpg \
+	meshes/rocks/rock3.jpg \
 	meshes/rocks/rock3.md2 \
+	meshes/rocks/rock4.jpg \
 	meshes/rocks/rock4.md2 \
 	meshes/rocks/rock5.md2 \
-	meshes/rocks/rock1.jpg \
-	meshes/rocks/rock2.jpg \
-	meshes/rocks/rock1.md2 \
-	meshes/rocks/rock3.jpg \
 	meshes/sconduit1.md2 \
 	meshes/sconduit2.md2 \
 	meshes/scopecover.md2 \
