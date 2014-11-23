@@ -1034,10 +1034,56 @@ void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
 	rotation_matrix[2][2] = cospitch*cosroll;
 }
 
+static void CM_LoadTerrain_PopulateGrid (cterrainmodel_t *mod, cterraingrid_t *grid, cterraintri_t **tmp)
+{
+	int i, j;
+	vec3_t tmpmaxs, tmpmins;
+	
+	grid->numtris = 0;
+	
+	// This will be the new bounding box; it will grow as the
+	// triangles get added.
+	VectorCopy (grid->maxs, tmpmins);
+	VectorCopy (grid->mins, tmpmaxs);
+
+	for (i = 0; i < mod->numtriangles; i++)
+	{
+		cterraintri_t *tri = &mod->tris[i];
+		if (TriangleIntersectsBBox (tri->verts[0], tri->verts[1], tri->verts[2], grid->mins, grid->maxs, tmpmins, tmpmaxs))
+			tmp[grid->numtris++] = tri;
+	}
+	
+	if (grid->numtris == 0)
+		return;
+	
+	VectorCopy (tmpmins, grid->mins);
+	VectorCopy (tmpmaxs, grid->maxs);
+	
+	grid->tris = Z_Malloc (grid->numtris * sizeof(cterraintri_t *));
+	for (i = 0; i < grid->numtris; i++)
+		grid->tris[i] = tmp[i];
+	
+	// Create bounding plane
+	VectorClear (grid->boundingplane.normal);
+	for (i = 0; i < grid->numtris; i++)
+		VectorAdd (grid->tris[i]->p.normal, grid->boundingplane.normal, grid->boundingplane.normal);
+	VectorNormalize (grid->boundingplane.normal);
+	grid->boundingplane.dist = DotProduct (grid->tris[0]->verts[0], grid->boundingplane.normal);
+	for (i = 0; i < grid->numtris; i++)
+	{
+		for (j = 0; j < 3; j++)
+		{
+			vec_t dist = DotProduct (grid->tris[i]->verts[j], grid->boundingplane.normal);
+			if (dist > grid->boundingplane.dist)
+				grid->boundingplane.dist = dist;
+		}
+	}
+}
+
 static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 {
 	float rotation_matrix[3][3];
-	int i, j, k, l, m;
+	int i, j, k, l;
 	cterrainmodel_t *mod;
 	char *buf;
 	terraindata_t data;
@@ -1166,10 +1212,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		{
 			for (l = 0; l < mod->numgrid[2]; l++)
 			{
-				vec3_t tmpmaxs, tmpmins;
-				
 				cterraingrid_t *grid = &mod->grids[l*mod->numgrid[0]*mod->numgrid[1]+i*mod->numgrid[0]+j];
-				grid->numtris = 0;
 				
 				grid->mins[0] = mod->mins[0] + j*TERRAIN_GRIDSIZE;
 				grid->maxs[0] = mod->mins[0] + (j+1)*TERRAIN_GRIDSIZE;
@@ -1178,43 +1221,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 				grid->mins[2] = mod->mins[2] + l*TERRAIN_GRIDSIZE;
 				grid->maxs[2] = mod->mins[2] + (l+1)*TERRAIN_GRIDSIZE;
 				
-				// This will be the new bounding box; it will grow as the
-				// triangles get added.
-				VectorCopy (grid->maxs, tmpmins);
-				VectorCopy (grid->mins, tmpmaxs);
-			
-				for (k = 0; k < mod->numtriangles; k++)
-				{
-					cterraintri_t *tri = &mod->tris[k];
-					if (TriangleIntersectsBBox (tri->verts[0], tri->verts[1], tri->verts[2], grid->mins, grid->maxs, tmpmins, tmpmaxs))
-						tmp[grid->numtris++] = tri;
-				}
-				
-				if (grid->numtris == 0)
-					continue;
-				
-				VectorCopy (tmpmins, grid->mins);
-				VectorCopy (tmpmaxs, grid->maxs);
-				
-				grid->tris = Z_Malloc (grid->numtris * sizeof(cterraintri_t *));
-				for (k = 0; k < grid->numtris; k++)
-					grid->tris[k] = tmp[k];
-				
-				// Create bounding plane
-				VectorClear (grid->boundingplane.normal);
-				for (k = 0; k < grid->numtris; k++)
-					VectorAdd (grid->tris[k]->p.normal, grid->boundingplane.normal, grid->boundingplane.normal);
-				VectorNormalize (grid->boundingplane.normal);
-				grid->boundingplane.dist = DotProduct (grid->tris[0]->verts[0], grid->boundingplane.normal);
-				for (k = 0; k < grid->numtris; k++)
-				{
-					for (m = 0; m < 3; m++)
-					{
-						vec_t dist = DotProduct (grid->tris[k]->verts[m], grid->boundingplane.normal);
-						if (dist > grid->boundingplane.dist)
-							grid->boundingplane.dist = dist;
-					}
-				}
+				CM_LoadTerrain_PopulateGrid (mod, grid, tmp);
 			}
 		}
 	}
