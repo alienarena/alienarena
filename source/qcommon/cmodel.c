@@ -1218,7 +1218,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 				grid->maxs[0] = mod->mins[0] + (j+1)*TERRAIN_GRIDSIZE;
 				grid->mins[1] = mod->mins[1] + i*TERRAIN_GRIDSIZE;
 				grid->maxs[1] = mod->mins[1] + (i+1)*TERRAIN_GRIDSIZE;
-				grid->mins[2] = mod->mins[2] + l*TERRAIN_GRIDSIZE;
+				grid->mins[2] = mod->mins[2] + l*TERRAIN_GRIDSIZE - 0.1; // HACK
 				grid->maxs[2] = mod->mins[2] + (l+1)*TERRAIN_GRIDSIZE;
 				
 				CM_LoadTerrain_PopulateGrid (mod, grid, tmp);
