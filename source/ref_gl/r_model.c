@@ -1812,9 +1812,22 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	dheader_t	*header;
 	mmodel_t 	*bm;
 	char		rs_name[MAX_OSPATH], tmp[MAX_QPATH];		// rscript - MrG
-
-	/* 2014-05-03 strat : increased from 0x1500000 because dm-zorn2k11.bsp overflows */
-	mod->extradata = Hunk_Begin (0x1800000);
+	const int 	maxsize = // adds up to about 31 MiB
+		sizeof (mvertex_t) * MAX_MAP_VERTS + 
+		sizeof (medge_t) * MAX_MAP_EDGES +
+		sizeof (int) * MAX_MAP_SURFEDGES + 
+		MAX_MAP_LIGHTING +
+		sizeof (cplane_t) * MAX_MAP_PLANES + 
+		2 * sizeof (mtexinfo_t) * MAX_MAP_TEXINFO + 
+		sizeof (msurface_t) * MAX_MAP_FACES +
+		sizeof (msurface_t *) * MAX_MAP_LEAFFACES +
+		MAX_MAP_VISIBILITY +
+		sizeof (mleaf_t) * MAX_MAP_LEAFS +
+		sizeof (mnode_t) * MAX_MAP_NODES + 
+		sizeof (mmodel_t) * MAX_MAP_MODELS +
+		32 * 16; // some extra for the padding added by Hunk_Alloc on win32
+	
+	mod->extradata = Hunk_Begin (maxsize);
 
 	if (r_lensflare->integer)
 		R_ClearFlares();
