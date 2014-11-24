@@ -1818,7 +1818,8 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		sizeof (int) * MAX_MAP_SURFEDGES + 
 		MAX_MAP_LIGHTING +
 		sizeof (cplane_t) * MAX_MAP_PLANES + 
-		2 * sizeof (mtexinfo_t) * MAX_MAP_TEXINFO + 
+		sizeof (mtexinfo_t) * MAX_MAP_TEXINFO +
+		sizeof (mtexinfo_t *) * MAX_MAP_TEXINFO + // unique texinfo
 		sizeof (msurface_t) * MAX_MAP_FACES +
 		sizeof (msurface_t *) * MAX_MAP_LEAFFACES +
 		MAX_MAP_VISIBILITY +
