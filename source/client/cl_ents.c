@@ -679,22 +679,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		else if (effects & EF_ANIM_ALLFAST)
 			ent.frame = cl.time / 100;
 		else
-			ent.frame = s1->frame;
-
-		// quad and pent can do different things on client
-		if (effects & EF_PENT)
-		{
-			effects &= ~EF_PENT;
-			effects |= EF_COLOR_SHELL;
-			renderfx |= RF_SHELL_RED;
-		}
-
-		if (effects & EF_QUAD)
-		{
-			effects &= ~EF_QUAD;
-			effects |= EF_COLOR_SHELL;
-			renderfx |= RF_SHELL_BLUE;
-		}
+			ent.frame = s1->frame;		
 
 		ent.oldframe = cent->prev.frame;
 		ent.backlerp = 1.0 - cl.lerpfrac;
@@ -752,6 +737,21 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.skinnum = s1->skinnum;
 			ent.skin = NULL;
 			ent.model = cl.model_draw[s1->modelindex];
+		}
+
+		// quad and pent can do different things on client
+		if (effects & EF_PENT)
+		{
+			effects &= ~EF_PENT;
+			effects |= EF_COLOR_SHELL;
+			renderfx |= RF_SHELL_RED;
+		}
+
+		if (effects & EF_QUAD)
+		{
+			effects &= ~EF_QUAD;
+			effects |= EF_COLOR_SHELL;
+			renderfx |= RF_SHELL_BLUE;
 		}
 		
 		if (renderfx & (RF_FRAMELERP))
@@ -862,10 +862,61 @@ void CL_AddPacketEntities (frame_t *frame)
 			// color shells generate a seperate entity for the main model
 			if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 			{
-		
-				ent.flags = renderfx | RF_TRANSLUCENT;
+				float	a1, a2;
+#if 1
+				if(playermodel && !(renderfx & RF_SHELL_GREEN))
+				{
+					if(renderfx & RF_SHELL_BLUE)
+					{
+						ent.model = R_RegisterModel("models/items/quaddama/tris.md2");
+						ent.skin = R_RegisterSkin ("models/items/quaddama/skin.tga");
+					}
+					else
+					{
+						ent.model = R_RegisterModel("models/items/invulner/tris.md2");
+						ent.skin = R_RegisterSkin ("models/items/invulner/skin.tga");
+					}
+					if(ent.flag)
+						ent.origin[2] += 72;
+					else
+						ent.origin[2] += 56;
+					ent.angles[0] = 0;
+					ent.angles[1] = autorotate;
+					ent.angles[2] = 0;
+
+					ent.lod1 = ent.lod2 = 0;
+				}
+				else
+#endif
+					ent.flags = renderfx | RF_TRANSLUCENT;
+
 				ent.alpha = 0.30;
 				V_AddViewEntity (&ent);			
+#if 1
+				if(playermodel && !(renderfx & RF_SHELL_GREEN))
+				{
+					//add shell too
+					ent.flags = renderfx | RF_TRANSLUCENT;
+					ent.alpha = 0.30;
+					V_AddViewEntity (&ent);		
+
+					//set angles and origin back
+					if(ent.flag)
+						ent.origin[2] -= 72;
+					else
+						ent.origin[2] -= 56;
+					// interpolate angles
+					for (i=0 ; i<3 ; i++)
+					{
+						a1 = cent->current.angles[i];
+						a2 = cent->prev.angles[i];
+						ent.angles[i] = LerpAngle (a2, a1, cl.lerpfrac);
+					}
+
+					ent.lod1 = ci->lod1;		
+					ent.lod2 = ci->lod2;
+#endif
+				}
 			}
 		}
 
