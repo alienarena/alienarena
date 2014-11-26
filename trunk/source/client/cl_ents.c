@@ -852,7 +852,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			CL_FlagEffects(ent.origin, 1);
 			ent.flag = 2;
 			ent.nodraw = 1;
-		}		
+		}
 		
 		if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 		{
@@ -891,7 +891,7 @@ void CL_AddPacketEntities (frame_t *frame)
 					ent.flags = renderfx | RF_TRANSLUCENT;
 
 				ent.alpha = 0.30;
-				V_AddViewEntity (&ent);			
+				V_AddEntity (&ent);			
 #if 1
 				if(playermodel && !(renderfx & RF_SHELL_GREEN))
 				{
