@@ -439,9 +439,10 @@ static int XLateKey( XKeyEvent *ev )
 
 			if ( key >= 'A' && key <= 'Z' )
 				key = key - 'A' + 'a';
-
-			if ( key >= 1 && key <= 26 ) /* ctrl+alpha */
+			else if ( key >= 1 && key <= 26 ) /* ctrl+alpha */
 				key = key + 'a' - 1;
+			else if ( key == 0 )
+				key = K_SPACE;
 		}
 		break;
 	}
