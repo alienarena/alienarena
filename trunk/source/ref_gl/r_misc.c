@@ -83,6 +83,8 @@ image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
+image_t		*r_doubledamage;
+image_t		*r_invulnerability;
 
 static size_t szr; // just for unused result warnings
 
@@ -326,6 +328,15 @@ void R_InitParticleTexture (void)
 		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 
+	r_doubledamage = GL_FindImage("pics/p_quad",it_pic);
+	if (!r_doubledamage) {
+		r_doubledamage = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+
+	r_invulnerability = GL_FindImage("pics/p_invulnerability",it_pic);
+	if (!r_invulnerability) {
+		r_invulnerability = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
 	//
 	// also use this for bad textures, but without alpha
 	//
