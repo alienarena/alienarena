@@ -837,7 +837,7 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		if (effects & EF_BUBBLES)
 		{
-			CL_PoweredEffects (ent.origin);
+			CL_PoweredEffects (ent.origin, EF_BUBBLES);
 		}
 
 		//cool new ctf flag effects
@@ -863,59 +863,24 @@ void CL_AddPacketEntities (frame_t *frame)
 			if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 			{
 				float	a1, a2;
-#if 1
+
+				//replace player color shells for powerups with floating gfx effect
 				if(playermodel && !(renderfx & RF_SHELL_GREEN))
 				{
 					if(renderfx & RF_SHELL_BLUE)
 					{
-						ent.model = R_RegisterModel("models/items/quaddama/tris.md2");
-						ent.skin = R_RegisterSkin ("models/items/quaddama/skin.tga");
+						CL_PoweredEffects (ent.origin, EF_QUAD);
 					}
 					else
 					{
-						ent.model = R_RegisterModel("models/items/invulner/tris.md2");
-						ent.skin = R_RegisterSkin ("models/items/invulner/skin.tga");
+						CL_PoweredEffects (ent.origin, EF_PENT);
 					}
-					if(ent.flag)
-						ent.origin[2] += 72;
-					else
-						ent.origin[2] += 56;
-					ent.angles[0] = 0;
-					ent.angles[1] = autorotate;
-					ent.angles[2] = 0;
-
-					ent.lod1 = ent.lod2 = 0;
 				}
 				else
-#endif
-					ent.flags = renderfx | RF_TRANSLUCENT;
-
-				ent.alpha = 0.30;
-				V_AddEntity (&ent);			
-#if 1
-				if(playermodel && !(renderfx & RF_SHELL_GREEN))
 				{
-					//add shell too
 					ent.flags = renderfx | RF_TRANSLUCENT;
 					ent.alpha = 0.30;
-					V_AddViewEntity (&ent);		
-
-					//set angles and origin back
-					if(ent.flag)
-						ent.origin[2] -= 72;
-					else
-						ent.origin[2] -= 56;
-					// interpolate angles
-					for (i=0 ; i<3 ; i++)
-					{
-						a1 = cent->current.angles[i];
-						a2 = cent->prev.angles[i];
-						ent.angles[i] = LerpAngle (a2, a1, cl.lerpfrac);
-					}
-
-					ent.lod1 = ci->lod1;		
-					ent.lod2 = ci->lod2;
-#endif
+					V_AddEntity (&ent);		
 				}
 			}
 		}

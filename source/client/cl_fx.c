@@ -3464,7 +3464,7 @@ Powered up effects
 */
 
 #define	BEAMLENGTH			16.0f
-void CL_PoweredEffects (vec3_t origin)
+void CL_PoweredEffects (vec3_t origin, unsigned int nEffect)
 {
 	int			i;
 	particle_t	*p;
@@ -3508,13 +3508,26 @@ void CL_PoweredEffects (vec3_t origin)
 		VectorClear (p->vel);
 		VectorClear (p->accel);
 
-		p->type = PARTICLE_STANDARD;
-		p->image = r_logotexture;
+		p->type = PARTICLE_STANDARD;		
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
 		p->scale = 2;
 		p->scalevel = 2;
-		p->color = 0xd4;
+		if(nEffect & EF_QUAD)
+		{
+			p->image = r_doubledamage;
+			p->color = 0x74;
+		}
+		else if(nEffect & EF_PENT)
+		{
+			p->image = r_invulnerability;
+			p->color = 0x40;
+		}
+		else
+		{
+			p->image = r_logotexture;
+			p->color = 0xd4;
+		}
 
 		p->alpha = .7;
 		p->alphavel = -50.0f / (0.5f + frand()*0.3f);

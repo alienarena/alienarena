@@ -432,7 +432,7 @@ void CL_NewLightning (vec3_t start, vec3_t end);
 void CL_BlueTeamLight(vec3_t pos);
 void CL_RedTeamLight(vec3_t pos);
 void CL_FlagEffects(vec3_t pos, qboolean team);
-void CL_PoweredEffects (vec3_t pos);
+void CL_PoweredEffects (vec3_t pos, unsigned int nEffect);
 void CL_SmokeTrail (vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
 void CL_SayIcon(vec3_t org);
 void CL_TeleportParticles (vec3_t org);
