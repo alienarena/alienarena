@@ -1253,7 +1253,6 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
 	{
 		glUseProgramObjectARB (g_worldprogramObj);
-		glUniform3fARB (worldsurf_uniforms.eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB (worldsurf_uniforms.fog, map_fog);
 		glUniform3fARB (worldsurf_uniforms.staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		glUniform1iARB (worldsurf_uniforms.surfTexture, 0);

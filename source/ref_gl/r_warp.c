@@ -271,7 +271,6 @@ void R_RenderWaterPolys (msurface_t *fa)
 			glUniform1iARB( g_location_reflect, 0);
 
 		//send these to the shader program	
-		glUniform3fARB( g_location_waterEyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform3fARB( g_location_lightPos, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
