@@ -595,7 +595,8 @@ struct
 	GLuint	shadowmapTexture, shadowmapTexture2;
 	GLuint	fog, parallax, dynamic, shadowmap, statshadow;
 	GLuint	xOffs, yOffs;
-	GLuint	eyePos, lightPosition, staticLightPosition, lightCutoffSquared;
+	GLuint	lightPosition, staticLightPosition; // in eye space
+	GLuint	lightCutoffSquared;
 	GLuint	lightColour;
 	GLuint	liquid, shiny;
 	GLuint	liquidTexture, liquidNormTex, chromeTex;
@@ -634,7 +635,6 @@ struct
 GLuint		g_location_baseTexture;
 GLuint		g_location_normTexture;
 GLuint		g_location_refTexture;
-GLuint		g_location_waterEyePos;
 GLuint		g_location_time;
 GLuint		g_location_lightPos;
 GLuint		g_location_reflect;

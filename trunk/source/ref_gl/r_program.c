@@ -56,7 +56,6 @@ PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
 //world Surfaces
 static char world_vertex_program[] = STRINGIFY (
-	uniform vec3 Eye;
 	uniform vec3 lightPosition;
 	uniform vec3 staticLightPosition;
 	uniform float rsTime;
@@ -84,13 +83,14 @@ static char world_vertex_program[] = STRINGIFY (
 		sPos = gl_Vertex;
 
 		gl_Position = ftransform();
+		
+		vec4 viewVertex = gl_ModelViewMatrix * gl_Vertex;
 
 		if(SHINY > 0)
 		{
 			vec3 norm = vec3(0, 0, 1); 
 
-			vec4 neyeDir = gl_ModelViewMatrix * gl_Vertex;
-			vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
+			vec3 refeyeDir = viewVertex.xyz / viewVertex.w;
 			refeyeDir = normalize(refeyeDir);
 
 			FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir,norm)),FresnelPower);
@@ -99,17 +99,17 @@ static char world_vertex_program[] = STRINGIFY (
 		gl_FrontColor = gl_Color;
 		
 		vec3 binormal = tangent.w * cross (gl_Normal, tangent.xyz);
-		mat3 tangentSpaceTransform = transpose (mat3 (tangent.xyz, binormal, gl_Normal));
+		mat3 tangentSpaceTransform = transpose (mat3 (gl_NormalMatrix * tangent.xyz, gl_NormalMatrix * binormal, gl_NormalMatrix * gl_Normal));
 		
-		EyeDir = tangentSpaceTransform * (Eye - gl_Vertex.xyz);
+		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
 
 		if (DYNAMIC > 0)
 		{
-			LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);
+			LightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (lightPosition, 1.0)).xyz - viewVertex.xyz);
 		}
 		if (PARALLAX > 0)
 		{
-			StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);
+			StaticLightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (staticLightPosition, 1.0)).xyz - viewVertex.xyz);
 		}
 
 		// pass any active texunits through
@@ -1199,7 +1199,6 @@ static char blankmesh_fragment_program[] = STRINGIFY (
 
 
 static char water_vertex_program[] = STRINGIFY (
-	uniform vec3 Eye; 
 	uniform vec3 LightPos;
 	uniform float time;
 	uniform int	REFLECT;
@@ -1220,10 +1219,11 @@ static char water_vertex_program[] = STRINGIFY (
 	{
 		gl_Position = ftransform();
 
+		vec4 viewVertex = gl_ModelViewMatrix * gl_Vertex;
 		vec3 binormal = tangent.w * cross (gl_Normal, tangent.xyz);
 		mat3 tangentSpaceTransform = transpose (mat3 (tangent.xyz, binormal, gl_Normal));
 
-		lightDir = tangentSpaceTransform * (LightPos - gl_Vertex.xyz);
+		lightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (LightPos, 1.0)).xyz - viewVertex.xyz);
 
 		vec4 neyeDir = gl_ModelViewMatrix * gl_Vertex;
 		vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
@@ -1233,7 +1233,7 @@ static char water_vertex_program[] = STRINGIFY (
 		// dot (refeyeDir,norm) is always refeyeDir.z
 		FresRatio = F + (1.0-F) * pow((1.0-refeyeDir.z),FresnelPower);
 
-		eyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
+		eyeDir = tangentSpaceTransform * (-viewVertex.xyz);
 
 		vec4 texco = gl_MultiTexCoord0;
 		if(REFLECT > 0) 
@@ -1813,7 +1813,6 @@ void R_LoadGLSLPrograms(void)
 
 	// Locate some parameters by name so we can set them later...
 	worldsurf_uniforms.surfTexture = glGetUniformLocationARB (g_worldprogramObj, "surfTexture");
-	worldsurf_uniforms.eyePos = glGetUniformLocationARB (g_worldprogramObj, "Eye");
 	worldsurf_uniforms.heightTexture = glGetUniformLocationARB (g_worldprogramObj, "HeightTexture");
 	worldsurf_uniforms.lmTexture = glGetUniformLocationARB (g_worldprogramObj, "lmTexture");
 	worldsurf_uniforms.normalTexture = glGetUniformLocationARB (g_worldprogramObj, "NormalTexture");
@@ -1886,7 +1885,6 @@ void R_LoadGLSLPrograms(void)
 	g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
 	g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
 	g_location_refTexture = glGetUniformLocationARB( g_waterprogramObj, "refTexture" );
-	g_location_waterEyePos = glGetUniformLocationARB( g_waterprogramObj, "Eye" );
 	g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
 	g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );
 	g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );
