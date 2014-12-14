@@ -93,6 +93,11 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 			// copy in vertex data
 			for (j = 0; j < 7; j++)
 				map[n++] = v[j];
+			
+			// normals and tangents are the same through the whole surface
+			for (j = 0; j < 6; j++)
+				map[n++] = surf->tangentSpaceTransform[j];
+			map[n++] = 1.0f;
 		
 			for (i = trinum; i < trinum+2; i++)
 			{
@@ -101,13 +106,18 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 				// copy in vertex data
 				for (j = 0; j < 7; j++)
 					map[n++] = v[j];
+				
+				// normals and tangents are the same through the whole surface
+				for (j = 0; j < 6; j++)
+					map[n++] = surf->tangentSpaceTransform[j];
+				map[n++] = 1.0f;
 			}
 		}
 		
 		surf->vbo_num_verts += 3*(p->numverts-2);
 	}
 	
-	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currVertexNum * 7 * sizeof(float), n * sizeof(float), &map);
+	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currVertexNum * 14 * sizeof(float), n * sizeof(float), &map);
 	
 	surf->vbo_first_vert = currVertexNum;
 	return currVertexNum + surf->vbo_num_verts;
@@ -131,7 +141,7 @@ static void VB_BuildWorldSurfaceVBO (void)
 		if (surf->texinfo->flags & (SURF_SKY|SURF_NODRAW))
 			continue;
 		for (p = surf->polys; p != NULL; p = p->next)
-			totalVBObufferSize += 7*3*(p->numverts-2);
+			totalVBObufferSize += 14*3*(p->numverts-2);
 	}
 	
 	qglGenBuffersARB (1, &bsp_vboId);
@@ -206,9 +216,11 @@ void GL_SetupWorldVBO (void)
 {
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_vboId);
 
-	R_VertexPointer (3, 7*sizeof(float), (void *)0);
-	R_TexCoordPointer (0, 7*sizeof(float), (void *)(3*sizeof(float)));
-	R_TexCoordPointer (1, 7*sizeof(float), (void *)(5*sizeof(float)));
+	R_VertexPointer (3, 14*sizeof(float), (void *)0);
+	R_TexCoordPointer (0, 14*sizeof(float), (void *)(3*sizeof(float)));
+	R_TexCoordPointer (1, 14*sizeof(float), (void *)(5*sizeof(float)));
+	R_NormalPointer (14*sizeof(float), (void *)(7*sizeof(float)));
+	R_AttribPointer (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, 14*sizeof(float), (void *)(10*sizeof(float)));
 	
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
