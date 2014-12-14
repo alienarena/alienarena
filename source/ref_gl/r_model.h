@@ -261,7 +261,9 @@ typedef struct msurface_s
 
 	entity_t	*entity;
 
-	float		*tangentSpaceTransform;
+	// tangent space basis vectors
+	vec3_t		normal;
+	vec4_t		tangent;
 
 	//vbo
 	int vbo_first_vert;
