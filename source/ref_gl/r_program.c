@@ -1804,31 +1804,31 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("BSP", (char*)bsp_vertex_program, (char*)bsp_fragment_program, NO_ATTRIBUTES, &g_programObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_surfTexture = glGetUniformLocationARB( g_programObj, "surfTexture" );
-	g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
-	g_tangentSpaceTransform = glGetUniformLocationARB( g_programObj, "tangentSpaceTransform");
-	g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
-	g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
-	g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
-	g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
-	g_location_bspShadowmapTexture2 = glGetUniformLocationARB( g_programObj, "StatShadowMap" );
-	g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
-	g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
-	g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
-	g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
-	g_Location_statshadow = glGetUniformLocationARB( g_programObj, "STATSHADOW" );
-	g_location_xOffs = glGetUniformLocationARB( g_programObj, "xPixelOffset" );
-	g_location_yOffs = glGetUniformLocationARB( g_programObj, "yPixelOffset" );
-	g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
-	g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
-	g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
-	g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
-	g_location_liquid = glGetUniformLocationARB( g_programObj, "LIQUID" );
-	g_location_shiny = glGetUniformLocationARB( g_programObj, "SHINY" );
-	g_location_rsTime = glGetUniformLocationARB( g_programObj, "rsTime" );
-	g_location_liquidTexture = glGetUniformLocationARB( g_programObj, "liquidTexture" );
-	g_location_liquidNormTex = glGetUniformLocationARB( g_programObj, "liquidNormTex" );
-	g_location_chromeTex = glGetUniformLocationARB( g_programObj, "chromeTex" );
+	worldsurf_uniforms.surfTexture = glGetUniformLocationARB (g_programObj, "surfTexture");
+	worldsurf_uniforms.eyePos = glGetUniformLocationARB (g_programObj, "Eye");
+	worldsurf_uniforms.tangentSpaceTransform = glGetUniformLocationARB (g_programObj, "tangentSpaceTransform");
+	worldsurf_uniforms.heightTexture = glGetUniformLocationARB (g_programObj, "HeightTexture");
+	worldsurf_uniforms.lmTexture = glGetUniformLocationARB (g_programObj, "lmTexture");
+	worldsurf_uniforms.normalTexture = glGetUniformLocationARB (g_programObj, "NormalTexture");
+	worldsurf_uniforms.shadowmapTexture = glGetUniformLocationARB (g_programObj, "ShadowMap");
+	worldsurf_uniforms.shadowmapTexture2 = glGetUniformLocationARB (g_programObj, "StatShadowMap");
+	worldsurf_uniforms.fog = glGetUniformLocationARB (g_programObj, "FOG");
+	worldsurf_uniforms.parallax = glGetUniformLocationARB (g_programObj, "PARALLAX");
+	worldsurf_uniforms.dynamic = glGetUniformLocationARB (g_programObj, "DYNAMIC");
+	worldsurf_uniforms.shadowmap = glGetUniformLocationARB (g_programObj, "SHADOWMAP");
+	worldsurf_uniforms.statshadow = glGetUniformLocationARB (g_programObj, "STATSHADOW");
+	worldsurf_uniforms.xOffs = glGetUniformLocationARB (g_programObj, "xPixelOffset");
+	worldsurf_uniforms.yOffs = glGetUniformLocationARB (g_programObj, "yPixelOffset");
+	worldsurf_uniforms.lightPosition = glGetUniformLocationARB (g_programObj, "lightPosition");
+	worldsurf_uniforms.staticLightPosition = glGetUniformLocationARB (g_programObj, "staticLightPosition");
+	worldsurf_uniforms.lightColour = glGetUniformLocationARB (g_programObj, "lightColour");
+	worldsurf_uniforms.lightCutoffSquared = glGetUniformLocationARB (g_programObj, "lightCutoffSquared");
+	worldsurf_uniforms.liquid = glGetUniformLocationARB (g_programObj, "LIQUID");
+	worldsurf_uniforms.shiny = glGetUniformLocationARB (g_programObj, "SHINY");
+	worldsurf_uniforms.rsTime = glGetUniformLocationARB (g_programObj, "rsTime");
+	worldsurf_uniforms.liquidTexture = glGetUniformLocationARB (g_programObj, "liquidTexture");
+	worldsurf_uniforms.liquidNormTex = glGetUniformLocationARB (g_programObj, "liquidNormTex");
+	worldsurf_uniforms.chromeTex = glGetUniformLocationARB (g_programObj, "chromeTex");
 
 	//shadowed white bsp surfaces
 	R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);

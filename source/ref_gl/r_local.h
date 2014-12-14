@@ -589,31 +589,19 @@ typedef struct
 void R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights); // See r_light.c
 
 //standard bsp surfaces
-GLuint		g_location_surfTexture;
-GLuint		g_location_eyePos;
-GLuint		g_tangentSpaceTransform;
-GLuint		g_location_heightTexture;
-GLuint		g_location_lmTexture;
-GLuint		g_location_normalTexture;
-GLuint		g_location_bspShadowmapTexture;
-GLuint		g_location_bspShadowmapTexture2;
-GLuint		g_location_fog;
-GLuint		g_location_parallax;
-GLuint		g_location_dynamic;
-GLuint		g_location_shadowmap;
-GLuint		g_Location_statshadow;
-GLuint		g_location_xOffs;
-GLuint		g_location_yOffs;
-GLuint		g_location_lightPosition;
-GLuint		g_location_staticLightPosition;
-GLuint		g_location_lightColour;
-GLuint		g_location_lightCutoffSquared;
-GLuint		g_location_liquid;
-GLuint		g_location_shiny;
-GLuint		g_location_rsTime;
-GLuint		g_location_liquidTexture;
-GLuint		g_location_liquidNormTex;
-GLuint		g_location_chromeTex;
+struct
+{
+	GLuint	surfTexture, heightTexture, lmTexture, normalTexture;
+	GLuint	shadowmapTexture, shadowmapTexture2;
+	GLuint	fog, parallax, dynamic, shadowmap, statshadow;
+	GLuint	xOffs, yOffs;
+	GLuint	eyePos, lightPosition, staticLightPosition, lightCutoffSquared;
+	GLuint	lightColour;
+	GLuint	liquid, shiny;
+	GLuint	liquidTexture, liquidNormTex, chromeTex;
+	GLuint	rsTime;
+	GLuint	tangentSpaceTransform;
+} worldsurf_uniforms;
 
 //shadow on white bsp polys
 GLuint		g_location_entShadow;
