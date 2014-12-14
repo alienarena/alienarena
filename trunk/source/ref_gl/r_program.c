@@ -498,10 +498,10 @@ static char rscript_vertex_program[] = STRINGIFY (
 	uniform int lightmap; 
 	
 	varying float fog;
-	varying vec3 normal;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
-	varying vec3 LightDir;
+	varying vec3 LightDir, LightVec;
+	varying float LightDistSquared;
 	
 	// This is just the maximum axis from lightAmount. It's used as a
 	// mathematical shortcut to avoid some unnecessary calculations.
@@ -519,7 +519,6 @@ static char rscript_vertex_program[] = STRINGIFY (
 		if (numblendtextures != 0)
 		{
 			orig_normal = gl_Normal.xyz;
-			normal = gl_NormalMatrix * gl_Normal;
 			orig_coord = gl_Vertex.xyz;
 		}
 		
@@ -551,7 +550,17 @@ static char rscript_vertex_program[] = STRINGIFY (
 		
 		if (DYNAMIC > 0)
 		{
-			LightDir = vec3 (gl_ModelViewMatrix * gl_Vertex) - lightPosition;
+			vec3 n = normalize (gl_NormalMatrix * gl_Normal);
+			vec3 t = normalize (gl_NormalMatrix * tangent.xyz);
+			vec3 b = tangent.w * normalize (gl_NormalMatrix * cross (n, t));
+			
+			LightVec = lightPosition - vec3 (gl_ModelViewMatrix * gl_Vertex);
+			LightDistSquared = dot (LightVec, LightVec);
+			
+			LightDir.x = dot (LightVec, t);
+			LightDir.y = dot (LightVec, b);
+			LightDir.z = dot (LightVec, n);
+			
 			lightCutoffSquared = max (max (lightAmount[0], lightAmount[1]), lightAmount[2]);
 		}
 	}
@@ -577,10 +586,10 @@ static char rscript_fragment_program[] = STRINGIFY (
 	uniform int lightmap;
 	
 	varying float fog;
-	varying vec3 normal;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
-	varying vec3 LightDir;
+	varying vec3 LightDir, LightVec;
+	varying float LightDistSquared;
 	
 	// This is just the maximum axis from lightAmount. It's used as a
 	// mathematical shortcut to avoid some unnecessary calculations.
@@ -661,7 +670,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 		
 		if (DYNAMIC > 0)
 		{
-			float dist2 = dot (LightDir, LightDir);
+			float dist2 = dot (LightVec, LightVec);
 			if (dist2 < lightCutoffSquared)
 			{
 				// If we get this far, the fragment is within range of the 
@@ -671,7 +680,7 @@ static char rscript_fragment_program[] = STRINGIFY (
 				{
 					// If we get this far, the fragment is facing the dynamic
 					// light.
-					float diffuseTerm = max (0.0, -dot (LightDir / dist2, normalize (normal)));
+					float diffuseTerm = max (0.0, -LightDir[2] / dist2);
 					vec3 swamp = attenuation * attenuation;
 					swamp *= swamp;
 					swamp *= swamp;
