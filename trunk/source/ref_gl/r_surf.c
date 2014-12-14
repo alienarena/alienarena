@@ -679,7 +679,6 @@ etc.
 int 		r_currLMTex = -9999; // only bind a lightmap texture if it is not
 								 // the same as previous surface
 mtexinfo_t	*r_currTexInfo = NULL; //texinfo struct
-float		*r_currTangentSpaceTransform; //etc.
 
 /*
 ================
@@ -860,13 +859,6 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf, qboolean glsl)
 		r_currLMTex = lmtex;
 	}
 	
-	if (glsl && r_currTangentSpaceTransform != surf->tangentSpaceTransform)
-	{
-		BSP_FlushVBOAccum ();
-		glUniformMatrix3fvARB (worldsurf_uniforms.tangentSpaceTransform, 1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform);
-		r_currTangentSpaceTransform = (float *)surf->tangentSpaceTransform; 
-	}
-	
 	// If we've gotten this far, it's because the surface is not translucent,
 	// warped, sky, or nodraw, thus it *will* be in the VBO.
 	BSP_AddSurfToVBOAccum (surf);
@@ -879,7 +871,6 @@ static void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	// reset VBO batching state
 	r_currLMTex = -99999;
 	r_currTexInfo = NULL;
-	r_currTangentSpaceTransform = NULL;
 	
 	BSP_FlushVBOAccum ();
 	BSP_InvalidateVBO ();
@@ -915,7 +906,6 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	// reset VBO batching state
 	r_currLMTex = -99999;
 	r_currTexInfo = NULL;
-	r_currTangentSpaceTransform = NULL;
 	
 	if (!gl_bspnormalmaps->integer)
 	{
@@ -1016,7 +1006,6 @@ static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 		// reset VBO batching state
 		r_currLMTex = -99999;		
 		r_currTexInfo = NULL;
-		r_currTangentSpaceTransform = NULL;
 		
 		BSP_ClearVBOAccum ();
 
@@ -1263,7 +1252,7 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 	// render all GLSL surfaces, including normalmapped and dynamically lit
 	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
 	{
-		glUseProgramObjectARB( g_programObj );
+		glUseProgramObjectARB (g_worldprogramObj);
 		glUniform3fARB (worldsurf_uniforms.eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB (worldsurf_uniforms.fog, map_fog);
 		glUniform3fARB (worldsurf_uniforms.staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
@@ -1271,9 +1260,9 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 		glUniform1iARB (worldsurf_uniforms.lmTexture, 1);
 		glUniform1iARB (worldsurf_uniforms.heightTexture, 2);
 		glUniform1iARB (worldsurf_uniforms.normalTexture, 3);
-		BSP_DrawGLSLSurfaces(forEnt); 
-		BSP_DrawGLSLDynamicSurfaces(forEnt);
-		glUseProgramObjectARB( 0 );
+		BSP_DrawGLSLSurfaces (forEnt); 
+		BSP_DrawGLSLDynamicSurfaces (forEnt);
+		glUseProgramObjectARB (0);
 	}
 	
 	BSP_SetScrolling (0);

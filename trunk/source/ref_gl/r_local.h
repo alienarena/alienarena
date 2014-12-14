@@ -534,7 +534,7 @@ cvar_t			*r_shadowcutoff;
 extern void	R_LoadGLSLPrograms(void);
 
 //glsl
-GLhandleARB g_programObj;
+GLhandleARB g_worldprogramObj;
 GLhandleARB g_shadowprogramObj;
 GLhandleARB g_warpprogramObj;
 GLhandleARB g_minimapprogramObj;
@@ -600,7 +600,6 @@ struct
 	GLuint	liquid, shiny;
 	GLuint	liquidTexture, liquidNormTex, chromeTex;
 	GLuint	rsTime;
-	GLuint	tangentSpaceTransform;
 } worldsurf_uniforms;
 
 //shadow on white bsp polys
@@ -636,7 +635,6 @@ GLuint		g_location_baseTexture;
 GLuint		g_location_normTexture;
 GLuint		g_location_refTexture;
 GLuint		g_location_waterEyePos;
-GLuint		g_location_tangentSpaceTransform;
 GLuint		g_location_time;
 GLuint		g_location_lightPos;
 GLuint		g_location_reflect;

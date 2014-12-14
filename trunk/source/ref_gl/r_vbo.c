@@ -95,9 +95,10 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 				map[n++] = v[j];
 			
 			// normals and tangents are the same through the whole surface
-			for (j = 0; j < 6; j++)
-				map[n++] = surf->tangentSpaceTransform[j];
-			map[n++] = 1.0f;
+			for (j = 0; j < 3; j++)
+				map[n++] = surf->normal[j];
+			for (j = 0; j < 4; j++)
+				map[n++] = surf->tangent[j];
 		
 			for (i = trinum; i < trinum+2; i++)
 			{
@@ -108,9 +109,10 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 					map[n++] = v[j];
 				
 				// normals and tangents are the same through the whole surface
-				for (j = 0; j < 6; j++)
-					map[n++] = surf->tangentSpaceTransform[j];
-				map[n++] = 1.0f;
+				for (j = 0; j < 3; j++)
+					map[n++] = surf->normal[j];
+				for (j = 0; j < 4; j++)
+					map[n++] = surf->tangent[j];
 			}
 		}
 		
