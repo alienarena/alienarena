@@ -54,15 +54,86 @@ PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
 //GLSL Programs
 
-//world Surfaces
-static char world_vertex_program[] = STRINGIFY (
+#define USE_DLIGHT_LIBRARY "/*USE_DLIGHT_LIBRARY*/"
+
+static char dlight_vertex_library[] = STRINGIFY (
+	uniform int DYNAMIC;
 	uniform vec3 lightPosition;
+	
+	varying vec3 EyeDir;
+	varying vec3 LightVec;
+	
+	vec4 viewVertex;
+	mat3 tangentSpaceTransform;
+	
+	// arguments given in model space
+	void computeDynamicLightingVert (vec3 normal, vec4 tangent)
+	{
+		vec3 bitangent = tangent.w * cross (normal, tangent.xyz);
+		tangentSpaceTransform = transpose (mat3 (gl_NormalMatrix * tangent.xyz, gl_NormalMatrix * bitangent, gl_NormalMatrix * normal));
+		
+		viewVertex = gl_ModelViewMatrix * gl_Vertex;
+		
+		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
+		
+		if (DYNAMIC > 0)
+		{
+			LightVec = tangentSpaceTransform * (lightPosition - viewVertex.xyz);
+		} 
+	}
+);
+
+static char dlight_fragment_library[] = STRINGIFY (
+	uniform int DYNAMIC;
+	uniform vec3 lightAmount;
+	uniform float lightCutoffSquared;
+	
+	varying vec3 EyeDir;
+	varying vec3 LightVec;
+	
+	// normal argument given in tangent space
+	vec3 computeDynamicLightingFrag (vec3 textureColor, vec3 normal, float specular)
+	{
+		float distanceSquared = dot (LightVec, LightVec);
+		if (distanceSquared < lightCutoffSquared)
+		{
+			// If we get this far, the fragment is within range of the 
+			// dynamic light
+			vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount), vec3 (0.0), vec3 (1.0));
+			if (attenuation != vec3 (0.0))
+			{
+				vec3 relativeLightDirection = LightVec / sqrt (distanceSquared);
+				float diffuseTerm = max (0.0, dot (relativeLightDirection, normal));
+				vec3 specularAdd = vec3 (0.0, 0.0, 0.0);
+				
+				if (diffuseTerm > 0.0)
+				{
+					vec3 halfAngleVector = normalize (relativeLightDirection + normalize (EyeDir));
+
+					float specularTerm = clamp (dot (normal, halfAngleVector), 0.0, 1.0);
+					specularTerm = pow (specularTerm, 32.0);
+
+					specularAdd = vec3 (specular * specularTerm / 2.0);
+				}
+				vec3 swamp = attenuation * attenuation;
+				swamp *= swamp;
+				swamp *= swamp;
+				swamp *= swamp;
+				
+				return (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor * 3.0 + specularAdd) * attenuation;
+			}
+		}
+		return vec3 (0.0); 
+	}
+);
+
+//world Surfaces
+static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform vec3 staticLightPosition;
 	uniform float rsTime;
 	uniform int LIQUID;
 	uniform int FOG;
 	uniform int PARALLAX;
-	uniform int DYNAMIC;
 	uniform int SHINY;
 	
 	attribute vec4 tangent;
@@ -72,7 +143,6 @@ static char world_vertex_program[] = STRINGIFY (
 	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
 
 	varying float FresRatio;
-	varying vec3 EyeDir;
 	varying vec3 LightDir;
 	varying vec3 StaticLightDir;
 	varying vec4 sPos;
@@ -84,8 +154,8 @@ static char world_vertex_program[] = STRINGIFY (
 
 		gl_Position = ftransform();
 		
-		vec4 viewVertex = gl_ModelViewMatrix * gl_Vertex;
-
+		computeDynamicLightingVert (gl_Normal, tangent);
+		
 		if(SHINY > 0)
 		{
 			vec3 norm = vec3(0, 0, 1); 
@@ -98,15 +168,6 @@ static char world_vertex_program[] = STRINGIFY (
 
 		gl_FrontColor = gl_Color;
 		
-		vec3 binormal = tangent.w * cross (gl_Normal, tangent.xyz);
-		mat3 tangentSpaceTransform = transpose (mat3 (gl_NormalMatrix * tangent.xyz, gl_NormalMatrix * binormal, gl_NormalMatrix * gl_Normal));
-		
-		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
-
-		if (DYNAMIC > 0)
-		{
-			LightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (lightPosition, 1.0)).xyz - viewVertex.xyz);
-		}
 		if (PARALLAX > 0)
 		{
 			StaticLightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (staticLightPosition, 1.0)).xyz - viewVertex.xyz);
@@ -124,7 +185,7 @@ static char world_vertex_program[] = STRINGIFY (
 	}
 );
 
-// You must shadow_fudge in your shader
+// You must define shadow_fudge in your shader
 #define USE_SHADOWMAP_LIBRARY "/*USE_SHADOWMAP_LIBRARY*/"
 
 static char shadowmap_header[] = STRINGIFY (
@@ -186,7 +247,7 @@ STRINGIFY (
 	}
 );
 
-static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
+static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform sampler2D surfTexture;
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
@@ -196,11 +257,8 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 	uniform sampler2D chromeTex;
 	uniform shadowsampler_t ShadowMap;
 	uniform shadowsampler_t StatShadowMap;
-	uniform vec3 lightColour;
-	uniform float lightCutoffSquared;
 	uniform int FOG;
 	uniform int PARALLAX;
-	uniform int DYNAMIC;
 	uniform int STATSHADOW;
 	uniform int SHADOWMAP;
 	uniform int LIQUID;
@@ -211,8 +269,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 
 	varying float FresRatio;
 	varying vec4 sPos;
-	varying vec3 EyeDir;
-	varying vec3 LightDir;
 	varying vec3 StaticLightDir;
 	varying float fog;
 	
@@ -232,17 +288,12 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 		float swamp;
 		float attenuation;
 		vec4 litColour;
-		vec3 varyingLightColour;
-		float varyingLightCutoffSquared;
 		float dynshadowval;
 		float statshadowval;
 		vec2 displacement;
 		vec2 displacement2;
 		vec2 displacement3;
 		vec2 displacement4;
-
-		varyingLightColour = lightColour;
-		varyingLightCutoffSquared = lightCutoffSquared;
 
 		vec3 relativeEyeDirection = normalize( EyeDir );
 
@@ -370,43 +421,17 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 	   if(DYNAMIC > 0) 
 	   {
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
-
-			//now do the dynamic lighting
-			distanceSquared = dot( LightDir, LightDir );
-			relativeLightDirection = LightDir / sqrt( distanceSquared );
-
-			diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );
-			vec3 colour = vec3( 0.0, 0.0, 0.0 );
-
-			if( diffuseTerm > 0.0 )
-			{
-				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
-
-				float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-				specularTerm = pow( specularTerm, 32.0 );
-
-				colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;
-			}
-
-			attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );
-
-			swamp = attenuation;
-			swamp *= swamp;
-			swamp *= swamp;
-			swamp *= swamp;
-
-			colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
-
-			vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
+			
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, 1.0) * dynshadowval;
+			
 			if(PARALLAX > 0) 
 			{
-				dynamicColour = max(dynamicColour, gl_FragColor);
+				gl_FragColor = max(vec4 (dynamicColor, 1.0), gl_FragColor);
 			}
 			else 
 			{
-				dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
+				gl_FragColor = max(vec4 (dynamicColor, 1.0), vec4(textureColour, 1.0) * lightmap * 2.0);
 			}
-			gl_FragColor = dynamicColour;
 	   }
 
 	   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
@@ -490,13 +515,10 @@ static char minimap_vertex_program[] = STRINGIFY (
 
 
 //RSCRIPTS
-static char rscript_vertex_program[] = STRINGIFY (
+static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform int envmap;
 	uniform int	numblendtextures;
 	uniform int FOG;
-	uniform int DYNAMIC;
-	uniform vec3 lightPosition;
-	uniform vec3 lightAmount;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap; 
@@ -504,12 +526,6 @@ static char rscript_vertex_program[] = STRINGIFY (
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
-	varying vec3 LightDir, LightVec;
-	varying float LightDistSquared;
-	
-	// This is just the maximum axis from lightAmount. It's used as a
-	// mathematical shortcut to avoid some unnecessary calculations.
-	varying float lightCutoffSquared; //TODO: make this uniform
 	
 	attribute vec4 tangent;
 	
@@ -552,25 +568,11 @@ static char rscript_vertex_program[] = STRINGIFY (
 			fog = clamp(fog, 0.0, 1.0);
 		}
 		
-		if (DYNAMIC > 0)
-		{
-			vec3 n = normalize (gl_NormalMatrix * gl_Normal);
-			vec3 t = normalize (gl_NormalMatrix * tangent.xyz);
-			vec3 b = tangent.w * normalize (gl_NormalMatrix * cross (n, t));
-			
-			LightVec = lightPosition - vec3 (gl_ModelViewMatrix * gl_Vertex);
-			LightDistSquared = dot (LightVec, LightVec);
-			
-			LightDir.x = dot (LightVec, t);
-			LightDir.y = dot (LightVec, b);
-			LightDir.z = dot (LightVec, n);
-			
-			lightCutoffSquared = max (max (lightAmount[0], lightAmount[1]), lightAmount[2]);
-		}
+		computeDynamicLightingVert (gl_Normal, tangent);
 	}
 );
 
-static char rscript_fragment_program[] = STRINGIFY (
+static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform sampler2D mainTexture;
 	uniform sampler2D mainTexture2;
 	uniform sampler2D lightmapTexture;
@@ -582,8 +584,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 	uniform sampler2D blendTexture5;
 	uniform int	numblendtextures;
 	uniform int FOG;
-	uniform int DYNAMIC;
-	uniform vec3 lightAmount;
 	uniform mat3x4 blendscales;
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
@@ -592,12 +592,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
-	varying vec3 LightDir, LightVec;
-	varying float LightDistSquared;
-	
-	// This is just the maximum axis from lightAmount. It's used as a
-	// mathematical shortcut to avoid some unnecessary calculations.
-	varying float lightCutoffSquared; //TODO: make this uniform
 	
 	// This is tri-planar projection, based on code from NVIDIA's GPU Gems
 	// website. Potentially could be replaced with bi-planar projection, for
@@ -674,24 +668,8 @@ static char rscript_fragment_program[] = STRINGIFY (
 		
 		if (DYNAMIC > 0)
 		{
-			float dist2 = dot (LightVec, LightVec);
-			if (dist2 < lightCutoffSquared)
-			{
-				// If we get this far, the fragment is within range of the 
-				// dynamic light
-				vec3 attenuation = clamp (vec3 (1.0) - (vec3 (dist2) / lightAmount), vec3 (0.0), vec3 (1.0));
-				if (attenuation != vec3 (0.0))
-				{
-					// If we get this far, the fragment is facing the dynamic
-					// light.
-					float diffuseTerm = max (0.0, -LightDir[2] / dist2);
-					vec3 swamp = attenuation * attenuation;
-					swamp *= swamp;
-					swamp *= swamp;
-					vec3 dynamicColor = ((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor * 3.0 * attenuation;
-					gl_FragColor.rgb = max (gl_FragColor.rgb, dynamicColor);
-				}
-			}
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, vec3 (0.0, 0.0, 1.0), 1.0);
+			gl_FragColor = max(vec4 (dynamicColor, 1.0), gl_FragColor);
 		}
 		
 		if (FOG > 0)
@@ -1628,7 +1606,7 @@ const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_at
 void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
 {
 	char		str[4096];
-	const char	*shaderStrings[5];
+	const char	*shaderStrings[6];
 	int			nResult;
 	int			i;
 	
@@ -1649,9 +1627,14 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 			shaderStrings[2] = "const int vertexOnly = 1;";
 		else
 			shaderStrings[2] = "const int vertexOnly = 0;";
+		
+		if (strstr (vertex, USE_DLIGHT_LIBRARY))
+			shaderStrings[3] = dlight_vertex_library;
+		else
+			shaderStrings[3] = "";
 	
-		shaderStrings[3] = vertex;
-		glShaderSourceARB (g_vertexShader, 4, shaderStrings, NULL);
+		shaderStrings[4] = vertex;
+		glShaderSourceARB (g_vertexShader, 5, shaderStrings, NULL);
 		glCompileShaderARB (g_vertexShader);
 		glGetObjectParameterivARB (g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult);
 
@@ -1682,16 +1665,21 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 		if (strstr (fragment, USE_SHADOWMAP_LIBRARY))
 		{
 			shaderStrings[2] = shadowmap_header;
-			shaderStrings[4] = shadowmap_library;
+			shaderStrings[5] = shadowmap_library;
 		}
 		else
 		{
-			shaderStrings[2] = shaderStrings[4] = "";
+			shaderStrings[2] = shaderStrings[5] = "";
 		}
 		
-		shaderStrings[3] = fragment;
+		if (strstr (fragment, USE_DLIGHT_LIBRARY))
+			shaderStrings[3] = dlight_fragment_library;
+		else
+			shaderStrings[3] = "";
+		
+		shaderStrings[4] = fragment;
 	
-		glShaderSourceARB (g_fragmentShader, 5, shaderStrings, NULL);
+		glShaderSourceARB (g_fragmentShader, 6, shaderStrings, NULL);
 		glCompileShaderARB (g_fragmentShader);
 		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
@@ -1729,6 +1717,7 @@ static void get_dlight_uniform_locations (GLhandleARB programObj, dlight_uniform
 	out->enableDynamic = glGetUniformLocationARB (programObj, "DYNAMIC");
 	out->lightAmountSquared = glGetUniformLocationARB (programObj, "lightAmount");
 	out->lightPosition = glGetUniformLocationARB (programObj, "lightPosition");
+	out->lightCutoffSquared = glGetUniformLocationARB (programObj, "lightCutoffSquared");
 }
 
 static void get_mesh_anim_uniform_locations (GLhandleARB programObj, mesh_anim_uniform_location_t *out)
@@ -1812,6 +1801,7 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("World", (char*)world_vertex_program, (char*)world_fragment_program, ATTRIBUTE_TANGENT, &g_worldprogramObj);
 
 	// Locate some parameters by name so we can set them later...
+	get_dlight_uniform_locations (g_worldprogramObj, &worldsurf_uniforms.dlight_uniforms);
 	worldsurf_uniforms.surfTexture = glGetUniformLocationARB (g_worldprogramObj, "surfTexture");
 	worldsurf_uniforms.heightTexture = glGetUniformLocationARB (g_worldprogramObj, "HeightTexture");
 	worldsurf_uniforms.lmTexture = glGetUniformLocationARB (g_worldprogramObj, "lmTexture");
@@ -1825,10 +1815,7 @@ void R_LoadGLSLPrograms(void)
 	worldsurf_uniforms.statshadow = glGetUniformLocationARB (g_worldprogramObj, "STATSHADOW");
 	worldsurf_uniforms.xOffs = glGetUniformLocationARB (g_worldprogramObj, "xPixelOffset");
 	worldsurf_uniforms.yOffs = glGetUniformLocationARB (g_worldprogramObj, "yPixelOffset");
-	worldsurf_uniforms.lightPosition = glGetUniformLocationARB (g_worldprogramObj, "lightPosition");
 	worldsurf_uniforms.staticLightPosition = glGetUniformLocationARB (g_worldprogramObj, "staticLightPosition");
-	worldsurf_uniforms.lightColour = glGetUniformLocationARB (g_worldprogramObj, "lightColour");
-	worldsurf_uniforms.lightCutoffSquared = glGetUniformLocationARB (g_worldprogramObj, "lightCutoffSquared");
 	worldsurf_uniforms.liquid = glGetUniformLocationARB (g_worldprogramObj, "LIQUID");
 	worldsurf_uniforms.shiny = glGetUniformLocationARB (g_worldprogramObj, "SHINY");
 	worldsurf_uniforms.rsTime = glGetUniformLocationARB (g_worldprogramObj, "rsTime");

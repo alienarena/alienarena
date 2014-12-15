@@ -913,6 +913,8 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	}
 	
 	BSP_ClearVBOAccum ();
+	
+	R_SetDlightUniforms (&worldsurf_uniforms.dlight_uniforms, false);
 
 	if(r_shadowmapcount == 2)
 	{
@@ -964,56 +966,21 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 {
 	int		 i;
-	dlight_t	*dl = NULL;
-	int			lnum, sv_lnum = 0;
-	float		add, brightest = 0;
 	vec3_t		lightVec;
-	float		lightCutoffSquared = 0.0f;
-	qboolean	foundLight = false;
 	
 	if (gl_dynamic->integer == 0)
 	{
 		return;
 	}
-
-	dl = r_newrefdef.dlights;
-	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+	
+	// reset VBO batching state
+	r_currLMTex = -99999;		
+	r_currTexInfo = NULL;
+	
+	BSP_ClearVBOAccum ();
+	
+	if (R_SetDlightUniforms (&worldsurf_uniforms.dlight_uniforms, true))
 	{
-		VectorSubtract (r_origin, dl->origin, lightVec);
-		add = dl->intensity - VectorLength(lightVec)/10;
-		if (add > brightest) //only bother with lights close by
-		{
-			brightest = add;
-			sv_lnum = lnum; //remember the position of most influencial light
-		}
-	}
-
-	if(brightest > 0) 
-	{ 
-		//we have a light
-		foundLight= true;
-		dynLight = r_newrefdef.dlights;
-		dynLight += sv_lnum; //our most influential light
-
-		lightCutoffSquared = ( dynLight->intensity - DLIGHT_CUTOFF );
-
-		if( lightCutoffSquared <= 0.0f )
-			lightCutoffSquared = 0.0f;
-
-		lightCutoffSquared *= 2.0f;
-		lightCutoffSquared *= lightCutoffSquared;		
-
-		// reset VBO batching state
-		r_currLMTex = -99999;		
-		r_currTexInfo = NULL;
-		
-		BSP_ClearVBOAccum ();
-
-		glUniform3fARB (worldsurf_uniforms.lightPosition, dynLight->origin[0], dynLight->origin[1], dynLight->origin[2]);
-		glUniform3fARB (worldsurf_uniforms.lightColour, dynLight->color[0], dynLight->color[1], dynLight->color[2]);
-
-		glUniform1fARB (worldsurf_uniforms.lightCutoffSquared, lightCutoffSquared);
-		
 		if(gl_shadowmaps->integer) 
 		{
 			//dynamic shadow
@@ -1029,10 +996,6 @@ static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 			glUniform1iARB (worldsurf_uniforms.shadowmap, 0);		
 	}
 
-	glUniform1iARB (worldsurf_uniforms.dynamic, foundLight);
-	
-	BSP_InvalidateVBO ();
-	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		msurface_t	*s;
