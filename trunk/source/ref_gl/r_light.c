@@ -159,8 +159,7 @@ void R_PushDlightsForBModel (entity_t *e)
 	}
 }
 
-// MUST be called with the modelview matrix set up for eye space.
-void R_TransformDlights (void)
+void R_UpdateDlights (void)
 {
 	int			i;
 	dlight_t	*l;
@@ -170,22 +169,20 @@ void R_TransformDlights (void)
 	{
 		float intensitySquared;
 		
-		R_ModelViewTransform (l->origin, l->eyeSpaceOrigin);
-		
-		intensitySquared = l->intensity - DLIGHT_CUTOFF;
+		l->intensitySquared = l->intensity - DLIGHT_CUTOFF;
 
-		if (intensitySquared <= 0.0f)
-			intensitySquared = 0.0f;
+		if (l->intensitySquared <= 0.0f)
+			l->intensitySquared = 0.0f;
 
-		intensitySquared *= 2.0f;
-		intensitySquared *= intensitySquared;
+		l->intensitySquared *= 2.0f;
+		l->intensitySquared *= l->intensitySquared;
 		
-		VectorScale (l->color, intensitySquared, l->lightAmountSquared);
+		VectorScale (l->color, l->intensitySquared, l->lightAmountSquared);
 	}
 }
 
 // TODO: use this for more than just RScript rendering.
-void R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights)
+qboolean R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights)
 {
 	qboolean dynamic = false;
 	
@@ -210,14 +207,21 @@ void R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_d
 		
 		if (dynamic)
 		{
+			vec3_t eyeSpaceOrigin;
 			dlight_t *dl = &r_newrefdef.dlights[best_lnum];
 			
-			glUniform3fARB (uniforms->lightPosition, dl->eyeSpaceOrigin[0], dl->eyeSpaceOrigin[1], dl->eyeSpaceOrigin[2]);
+			dynLight = dl; // FIXME this blows
+			
+			R_ModelViewTransform (dl->origin, eyeSpaceOrigin);
+			glUniform3fARB (uniforms->lightPosition, eyeSpaceOrigin[0], eyeSpaceOrigin[1], eyeSpaceOrigin[2]);
 			glUniform3fARB (uniforms->lightAmountSquared, dl->lightAmountSquared[0], dl->lightAmountSquared[1], dl->lightAmountSquared[2]);
+			glUniform1fARB (uniforms->lightCutoffSquared, dl->intensitySquared);
 		}
 	}
 	
 	glUniform1iARB (uniforms->enableDynamic, dynamic);
+	
+	return dynamic;
 }
 
 /*

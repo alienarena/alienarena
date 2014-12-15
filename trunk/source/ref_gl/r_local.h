@@ -227,7 +227,7 @@ void R_StaticLightPoint (vec3_t p, vec3_t color);
 void R_DynamicLightPoint (vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
 void R_PushDlights (void);
-void R_TransformDlights (void);
+void R_UpdateDlights (void);
 void R_PushDlightsForBModel (entity_t *e);
 
 //====================================================================
@@ -583,21 +583,21 @@ typedef struct
 {
 	GLuint	enableDynamic;
 	GLuint	lightAmountSquared;
-	GLuint	lightPosition;
+	GLuint	lightCutoffSquared;
+	GLuint	lightPosition; // in eye space
 } dlight_uniform_location_t;
 
-void R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights); // See r_light.c
+qboolean R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights); // See r_light.c
 
 //standard bsp surfaces
 struct
 {
+	dlight_uniform_location_t dlight_uniforms;
 	GLuint	surfTexture, heightTexture, lmTexture, normalTexture;
 	GLuint	shadowmapTexture, shadowmapTexture2;
 	GLuint	fog, parallax, dynamic, shadowmap, statshadow;
 	GLuint	xOffs, yOffs;
-	GLuint	lightPosition, staticLightPosition; // in eye space
-	GLuint	lightCutoffSquared;
-	GLuint	lightColour;
+	GLuint	staticLightPosition; 
 	GLuint	liquid, shiny;
 	GLuint	liquidTexture, liquidNormTex, chromeTex;
 	GLuint	rsTime;
