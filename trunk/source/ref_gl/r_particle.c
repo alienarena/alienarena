@@ -992,17 +992,19 @@ void R_DrawVegetationSurface ( void )
 	{
 		scale = 10.0*grass->size;
 
-		VectorCopy(grass->origin, origin);
-		
+		VectorCopy(grass->origin, origin);		
+
 		if (distancecull_particle (origin, scale))
 			continue;
 		
 		if (grass->type == 1) // foliage
 		{
+			grass->alpha = 1.0;
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 		}
 		else if (grass->type == 2) // shrubbery
 		{
+			grass->alpha = 1.0;
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 			
 			// adjust vertical position, scaled
@@ -1013,9 +1015,27 @@ void R_DrawVegetationSurface ( void )
 			// adjust vertical position, scaled
 			origin[2] += (grass->texsize/32.0) * grass->size/(grass->texsize/128.0);
 
-			visible = CM_inPVS_leafs (r_origin_leafnum, grass->leafnum);
-			if (visible)
-				visible = CM_FastTrace (r_origin, origin, r_worldmodel->firstnode, MASK_VISIBILILITY);
+			// periodically test visibility to ramp alpha
+			if(rs_realtime - grass->time > 0.02){
+
+				if (grass->type == 1 && !CM_inPVS_leafs (r_origin_leafnum, grass->leafnum))
+					continue;
+
+				visible = CM_FastTrace (r_origin, grass->origin, r_worldmodel->firstnode, MASK_VISIBILILITY);
+			
+				grass->alpha += (visible ? 0.03 : -0.15);  // ramp
+
+				if(grass->alpha > 1.0)  // clamp
+					grass->alpha = 1.0;
+				else if(grass->alpha < 0)
+					grass->alpha = 0.0;
+
+				grass->time = rs_realtime;
+			}
+			if (grass->alpha > 0.0)
+				visible = true;
+			else
+				visible = false;
 		}
 		
 		if(visible)
@@ -1031,7 +1051,7 @@ void R_DrawVegetationSurface ( void )
 			VectorAdd (grass->static_light, lightLevel, lightLevel);
 			
 			VectorScale(lightLevel, 2.0, lightLevel);
-			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
+			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), grass->alpha );
 			
 			R_DrawVarrays (GL_QUADS, grass->vbo_first_vert, grass->vbo_num_verts);
 		}
