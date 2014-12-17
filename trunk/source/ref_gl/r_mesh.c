@@ -330,7 +330,6 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	float dist;
 	vec3_t staticlight, dynamiclight;
 	vec3_t	temp, tempOrg, lightAdd;
-	trace_t r_trace;
 	float numlights, nonweighted_numlights, weight;
 	float bob;
 	qboolean copy;
@@ -501,6 +500,11 @@ static qboolean R_Mesh_CullModel (void)
 	
 	if ((currententity->flags & RF_WEAPONMODEL))
 		return r_lefthand->integer == 2;
+
+	//Do not cull large meshes - too many artifacts occur
+	if(currentmodel->maxs[0] - currentmodel->mins[0] > 72 || currentmodel->maxs[1] - currentmodel->mins[1] > 72 
+		|| currentmodel->maxs[2] - currentmodel->mins[2] > 72)
+		return false;
 	
 	/*
 	** rotate the bounding box
