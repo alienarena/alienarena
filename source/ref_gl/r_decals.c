@@ -620,6 +620,31 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		//through it.
 		buf = strtok (NULL, ";");
 	}
+
+	/*
+	** compute a full bounding box
+	*/
+	for ( i = 0; i < 8; i++ )
+	{
+		vec3_t   tmp;
+
+		if ( i & 1 )
+			tmp[0] = mod->mins[0];
+		else
+			tmp[0] = mod->maxs[0];
+
+		if ( i & 2 )
+			tmp[1] = mod->mins[1];
+		else
+			tmp[1] = mod->maxs[1];
+
+		if ( i & 4 )
+			tmp[2] = mod->mins[2];
+		else
+			tmp[2] = mod->maxs[2];
+
+		VectorCopy( tmp, mod->bbox[i] );
+	}	
 	
 	mod->type = mod_decal;
 	mod->typeFlags = MESH_INDEXED | MESH_DECAL;
