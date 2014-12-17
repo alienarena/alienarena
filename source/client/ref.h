@@ -58,6 +58,8 @@ typedef struct
 	int leafnum;
 	qboolean sunVisible; //can cast shadows in sunlight
 	vec3_t static_light;
+	float alpha;
+	float time;
 } grass_t;
 
 typedef struct
