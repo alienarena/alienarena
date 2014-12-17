@@ -162,6 +162,9 @@ nobase_dist_maps_DATA = \
 	meshes/desert/chair.jpg \
 	meshes/desert/chair.md2 \
 	meshes/desert/chair_normal.jpg \
+	meshes/desert/damage1.decal \
+	meshes/desert/damage2.decal \
+	meshes/desert/damage3.decal \
 	meshes/desert/lamp.jpg \
 	meshes/desert/lamp.md2 \
 	meshes/desert/lamp_fx.tga \
