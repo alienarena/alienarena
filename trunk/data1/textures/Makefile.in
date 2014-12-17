@@ -1173,6 +1173,9 @@ nobase_dist_textures_DATA = \
 	desert/barnwood_nm.tga \
 	desert/blacktrans.tga \
 	desert/bloodlava.tga \
+	desert/damage1.tga \
+	desert/damage2.tga \
+	desert/damage3.tga \
 	desert/floortile10.tga \
 	desert/floortile10_hm.tga \
 	desert/floortile10_nm.tga \
@@ -1180,6 +1183,7 @@ nobase_dist_textures_DATA = \
 	desert/floortile10w_hm.tga \
 	desert/floortile10w_nm.tga \
 	desert/foundtn.tga \
+	desert/hangingmoss.tga \
 	desert/o3metal1.tga \
 	desert/o3rock10.tga \
 	desert/o3rock10_hm.tga \
@@ -1193,6 +1197,8 @@ nobase_dist_textures_DATA = \
 	desert/o3roof2.tga \
 	desert/plank1.tga \
 	desert/plank1_nm.tga \
+	desert/platewall1.tga \
+	desert/platewall2.tga \
 	desert/rock1.tga \
 	desert/rock1_hm.tga \
 	desert/rock1_nm.tga \
@@ -1203,6 +1209,7 @@ nobase_dist_textures_DATA = \
 	desert/roughwood3.tga \
 	desert/roughwood3_nm.tga \
 	desert/roughwood4.tga \
+	desert/sign1.tga \
 	desert/skullsupp2.tga \
 	desert/tent1.tga \
 	desert/thatch1.tga \
