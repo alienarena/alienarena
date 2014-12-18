@@ -669,7 +669,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		if (DYNAMIC > 0)
 		{
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, vec3 (0.0, 0.0, 1.0), 1.0);
-			gl_FragColor = max(vec4 (dynamicColor, 1.0), gl_FragColor);
+			gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
 		}
 		
 		if (FOG > 0)
