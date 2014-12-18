@@ -1037,6 +1037,7 @@ void R_RenderView (refdef_t *fd)
 	R_PushDlights ();
 
 	R_SetupFrame ();
+	R_UpdateDlights ();
 
 	R_SetFrustum ();
 	
@@ -1051,8 +1052,6 @@ void R_RenderView (refdef_t *fd)
 
 	R_SetupFog (1);
 	
-	R_UpdateDlights ();
-
 	R_DrawWorldSurfs ();
 	
 	R_DrawTerrain ();
@@ -1182,9 +1181,9 @@ void R_RenderFramePlayerSetup( refdef_t *rfdf )
 	r_newrefdef = *rfdf;
 
 	R_SetupFrame();
+	R_UpdateDlights ();
 	R_SetFrustum();
 	R_SetupGL();
-	R_UpdateDlights ();
 	R_DrawEntitiesOnList();
 
 	R_SetGL2D();

@@ -579,6 +579,8 @@ GLhandleARB g_fragmentShader;
 
 // Uniform locations for GLSL shaders that support dynamic lighting
 // FIXME: currently only used by RScript surfaces.
+#define GLSL_MAX_DLIGHTS 1
+#define GLSL_MAX_DLIGHTS_STR "\n#define MAXLIGHTS 1\n"
 typedef struct
 {
 	GLuint	enableDynamic;

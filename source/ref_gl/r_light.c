@@ -159,6 +159,17 @@ void R_PushDlightsForBModel (entity_t *e)
 	}
 }
 
+static int compare_dlight (const void *a, const void *b)
+{
+	float diff = ((const dlight_t *)a)->sort_key - ((const dlight_t *)b)->sort_key;
+	
+	if (diff < 0.0f)
+		return 1;
+	else if (diff > 0.0f)
+		return -1;
+	return 0;
+}
+
 void R_UpdateDlights (void)
 {
 	int			i;
@@ -167,7 +178,7 @@ void R_UpdateDlights (void)
 	l = r_newrefdef.dlights;
 	for (i = 0; i < r_newrefdef.num_dlights; i++, l++)
 	{
-		float intensitySquared;
+		vec3_t relativePosition;
 		
 		l->intensitySquared = l->intensity - DLIGHT_CUTOFF;
 
@@ -178,48 +189,48 @@ void R_UpdateDlights (void)
 		l->intensitySquared *= l->intensitySquared;
 		
 		VectorScale (l->color, l->intensitySquared, l->lightAmountSquared);
+		
+		VectorSubtract (r_origin, l->origin, relativePosition);
+		l->sort_key = l->intensity - VectorLength (relativePosition) / 10.0f;
 	}
+	
+	// Sort from most important to least important
+	qsort (r_newrefdef.dlights, r_newrefdef.num_dlights, sizeof (dlight_t), compare_dlight);
+	
+	// Those dynamic lights of negative importance are never used
+	while (r_newrefdef.num_dlights > 0 && r_newrefdef.dlights[r_newrefdef.num_dlights - 1].sort_key <= 0.0f)
+		r_newrefdef.num_dlights--;
 }
 
 // TODO: use this for more than just RScript rendering.
 qboolean R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights)
 {
-	qboolean dynamic = false;
+	int i = 0;
+	qboolean dynamic = gl_dynamic->integer && enable_dlights && r_newrefdef.num_dlights > 0;
 	
-	if (gl_dynamic->integer && enable_dlights)
+	if (dynamic)
 	{
-		int		lnum, best_lnum;
-		float	add, brightest = 0;
+		vec3_t eyeSpaceOrigin[GLSL_MAX_DLIGHTS];
+		vec3_t lightAmountSquared[GLSL_MAX_DLIGHTS];
+		float lightCutoffSquared[GLSL_MAX_DLIGHTS];
 		
-		for (lnum = 0; lnum < r_newrefdef.num_dlights; lnum++)
-		{
-			vec3_t lightVec;
-			
-			VectorSubtract (r_origin, r_newrefdef.dlights[lnum].origin, lightVec);
-			add = r_newrefdef.dlights[lnum].intensity - VectorLength(lightVec)/10;
-			if (add > brightest) //only bother with lights close by
-			{
-				brightest = add;
-				best_lnum = lnum; //remember the position of most influencial light
-				dynamic = true;
-			}
-		}
+		dlight_t *dl = &r_newrefdef.dlights[0];
 		
-		if (dynamic)
+		dynLight = dl; // FIXME this blows
+		
+		// Build parallel arrays and send to GLSL
+		for (i = 0; i < GLSL_MAX_DLIGHTS && i < r_newrefdef.dlights && i < gl_dynamic->integer; i++, dl++)
 		{
-			vec3_t eyeSpaceOrigin;
-			dlight_t *dl = &r_newrefdef.dlights[best_lnum];
-			
-			dynLight = dl; // FIXME this blows
-			
-			R_ModelViewTransform (dl->origin, eyeSpaceOrigin);
-			glUniform3fARB (uniforms->lightPosition, eyeSpaceOrigin[0], eyeSpaceOrigin[1], eyeSpaceOrigin[2]);
-			glUniform3fARB (uniforms->lightAmountSquared, dl->lightAmountSquared[0], dl->lightAmountSquared[1], dl->lightAmountSquared[2]);
-			glUniform1fARB (uniforms->lightCutoffSquared, dl->intensitySquared);
+			R_ModelViewTransform (dl->origin, eyeSpaceOrigin[i]);
+			VectorCopy (dl->lightAmountSquared, lightAmountSquared[i]);
+			lightCutoffSquared[i] = dl->intensitySquared;
 		}
+		glUniform3fvARB (uniforms->lightPosition, i, (const GLfloat *) eyeSpaceOrigin);
+		glUniform3fvARB (uniforms->lightAmountSquared, i, (const GLfloat *) lightAmountSquared);
+		glUniform1fvARB (uniforms->lightCutoffSquared, i, (const GLfloat *) lightCutoffSquared);
 	}
 	
-	glUniform1iARB (uniforms->enableDynamic, dynamic);
+	glUniform1iARB (uniforms->enableDynamic, i);
 	
 	return dynamic;
 }
