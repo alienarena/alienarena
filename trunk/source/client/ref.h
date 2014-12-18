@@ -180,6 +180,7 @@ typedef struct
 	// The following fields are updated each frame by the renderer:
 	vec3_t	lightAmountSquared;
 	float	intensitySquared; // (4 * intensity * intensity)
+	float	sort_key;
 } dlight_t;
 
 typedef struct

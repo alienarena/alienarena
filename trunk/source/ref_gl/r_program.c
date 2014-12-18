@@ -42,6 +42,11 @@ PFNGLUNIFORM3FARBPROC				glUniform3fARB				= NULL;
 PFNGLUNIFORM2FARBPROC				glUniform2fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
 PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
+PFNGLUNIFORM4IVARBPROC				glUniform4ivARB				= NULL;
+PFNGLUNIFORM3FVARBPROC				glUniform3fvARB				= NULL;
+PFNGLUNIFORM2FVARBPROC				glUniform2fvARB				= NULL;
+PFNGLUNIFORM1IVARBPROC				glUniform1ivARB				= NULL;
+PFNGLUNIFORM1FVARBPROC				glUniform1fvARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 PFNGLUNIFORMMATRIX3X4FVARBPROC		glUniformMatrix3x4fvARB		= NULL;
 PFNGLVERTEXATTRIBPOINTERARBPROC	 glVertexAttribPointerARB	= NULL;
@@ -56,12 +61,12 @@ PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
 #define USE_DLIGHT_LIBRARY "/*USE_DLIGHT_LIBRARY*/"
 
-static char dlight_vertex_library[] = STRINGIFY (
+static char dlight_vertex_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 	uniform int DYNAMIC;
-	uniform vec3 lightPosition;
+	uniform vec3 lightPosition[MAXLIGHTS];
 	
 	varying vec3 EyeDir;
-	varying vec3 LightVec;
+	varying vec3 LightVec[MAXLIGHTS];
 	
 	vec4 viewVertex;
 	mat3 tangentSpaceTransform;
@@ -76,40 +81,44 @@ static char dlight_vertex_library[] = STRINGIFY (
 		
 		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
 		
+		const int i = 0;
+/*		for (int i = 0; i < DYNAMIC; i++)*/
 		if (DYNAMIC > 0)
-		{
-			LightVec = tangentSpaceTransform * (lightPosition - viewVertex.xyz);
-		} 
+			LightVec[i] = tangentSpaceTransform * (lightPosition[i] - viewVertex.xyz);
 	}
 );
 
-static char dlight_fragment_library[] = STRINGIFY (
+static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 	uniform int DYNAMIC;
-	uniform vec3 lightAmount;
-	uniform float lightCutoffSquared;
+	uniform vec3 lightAmount[MAXLIGHTS];
+	uniform float lightCutoffSquared[MAXLIGHTS];
 	
 	varying vec3 EyeDir;
-	varying vec3 LightVec;
+	varying vec3 LightVec[MAXLIGHTS];
 	
 	// normal argument given in tangent space
-	vec3 computeDynamicLightingFrag (vec3 textureColor, vec3 normal, float specular)
+	vec3 computeDynamicLightingFrag (const vec3 textureColor, const vec3 normal, const float specular)
 	{
-		float distanceSquared = dot (LightVec, LightVec);
-		if (distanceSquared < lightCutoffSquared)
+		vec3 ret = vec3 (0.0);
+		vec3 nEyeDir = normalize (EyeDir);
+		vec3 textureColor3 = textureColor * 3.0;
+		const int i = 0;
+/*		for (int i = 0; i < DYNAMIC; i++)*/
 		{
-			// If we get this far, the fragment is within range of the 
-			// dynamic light
-			vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount), vec3 (0.0), vec3 (1.0));
-			if (attenuation != vec3 (0.0))
+			float distanceSquared = dot (LightVec[i], LightVec[i]);
+			if (distanceSquared < lightCutoffSquared[i])
 			{
-				vec3 relativeLightDirection = LightVec / sqrt (distanceSquared);
+				// If we get this far, the fragment is within range of the 
+				// dynamic light
+				vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount[i]), vec3 (0.0), vec3 (1.0));
+				vec3 relativeLightDirection = LightVec[i] / sqrt (distanceSquared);
 				float diffuseTerm = max (0.0, dot (relativeLightDirection, normal));
 				vec3 specularAdd = vec3 (0.0, 0.0, 0.0);
-				
+		
 				if (diffuseTerm > 0.0)
 				{
-					vec3 halfAngleVector = normalize (relativeLightDirection + normalize (EyeDir));
-
+					vec3 halfAngleVector = normalize (relativeLightDirection + nEyeDir);
+				
 					float specularTerm = clamp (dot (normal, halfAngleVector), 0.0, 1.0);
 					specularTerm = pow (specularTerm, 32.0);
 
@@ -119,11 +128,11 @@ static char dlight_fragment_library[] = STRINGIFY (
 				swamp *= swamp;
 				swamp *= swamp;
 				swamp *= swamp;
-				
-				return (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor * 3.0 + specularAdd) * attenuation;
+		
+				ret += (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor3 + specularAdd) * attenuation;
 			}
 		}
-		return vec3 (0.0); 
+		return ret;
 	}
 );
 
@@ -671,6 +680,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, vec3 (0.0, 0.0, 1.0), 1.0);
 			gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
 		}
+
 		
 		if (FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
@@ -1770,6 +1780,11 @@ void R_LoadGLSLPrograms(void)
 		glUniform2fARB			= (PFNGLUNIFORM2FARBPROC)qwglGetProcAddress("glUniform2fARB");
 		glUniform1iARB			= (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
+		glUniform4ivARB			= (PFNGLUNIFORM4IVARBPROC)qwglGetProcAddress("glUniform4ivARB");
+		glUniform3fvARB			= (PFNGLUNIFORM3FVARBPROC)qwglGetProcAddress("glUniform3fvARB");
+		glUniform2fvARB			= (PFNGLUNIFORM2FVARBPROC)qwglGetProcAddress("glUniform2fvARB");
+		glUniform1ivARB			= (PFNGLUNIFORM1IVARBPROC)qwglGetProcAddress("glUniform1ivARB");
+		glUniform1fvARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fvARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
 		glUniformMatrix3x4fvARB	  = (PFNGLUNIFORMMATRIX3X4FVARBPROC)qwglGetProcAddress("glUniformMatrix3x4fv");
 		glVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)qwglGetProcAddress("glVertexAttribPointerARB");
@@ -1783,6 +1798,7 @@ void R_LoadGLSLPrograms(void)
 			!glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 			!glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
 				!glUniform4iARB || !glUniform1iARB || !glUniform1fARB ||
+				!glUniform3fvARB || !glUniform1fvARB ||
 				!glUniformMatrix3fvARB || !glUniformMatrix3x4fvARB ||
 				!glVertexAttribPointerARB || !glEnableVertexAttribArrayARB ||
 				!glBindAttribLocationARB)
