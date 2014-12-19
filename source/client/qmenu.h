@@ -171,6 +171,7 @@ typedef enum {
 #define RCOLUMN_OFFSET  12
 #define LCOLUMN_OFFSET -12
 #define LONGINPUT_SIZE	13 // times font width
+#define SLIDER_SIZE		9
 
 #define NUM_CURSOR_FRAMES 15
 #define FONTSCALE 1.5
@@ -287,15 +288,18 @@ typedef struct
 	int maxvalue;
 	float range;
 	int	  size;
+	float (*slidervaluesizecallback) (void *self);
 	
 	// slider and list
 	int curvalue;
+	
+	// slider and fields
+	char		buffer[80];
 	
 	// list only
 	const char **itemnames;
 	
 	// fields
-	char		buffer[80]; 
 	int			cursor;
 	int			length;
 } menumultival_s;
