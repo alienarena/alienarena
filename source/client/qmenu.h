@@ -171,7 +171,7 @@ typedef enum {
 #define RCOLUMN_OFFSET  12
 #define LCOLUMN_OFFSET -12
 #define LONGINPUT_SIZE	13 // times font width
-#define SLIDER_SIZE		9
+#define SLIDER_SIZE		11
 
 #define NUM_CURSOR_FRAMES 15
 #define FONTSCALE 1.5
