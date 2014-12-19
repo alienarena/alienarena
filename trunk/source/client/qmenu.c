@@ -624,7 +624,10 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 	switch ( self->type )
 	{
 		case MTYPE_SLIDER:
-			ret.x = font->width * LONGINPUT_SIZE + RCOLUMN_OFFSET;
+			ret.x = font->width * SLIDER_SIZE + RCOLUMN_OFFSET;
+			if (((menuslider_s *)self)->slidervaluesizecallback)
+				ret.x += 2.0f * font->width +
+						((menuslider_s *)self)->slidervaluesizecallback (self);
 			break;
 		case MTYPE_FIELD:
 			ret.y += 4;
@@ -1511,7 +1514,7 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 	
 	s->range = (float) curscroll / ( float ) maxscroll;
 	
-	width = charscale * (float)LONGINPUT_SIZE;
+	width = charscale * (float)SLIDER_SIZE;
 	scroll_range = width-charscale/2.0;
 	cursor_size = charscale;
 	
@@ -1524,6 +1527,8 @@ void Slider_Draw (menuslider_s *s, FNT_font_t font)
 		cursor_size, charscale,
 		s->generic.highlight_alpha
 	);
+	
+	Menu_DrawString (x + width + font->width, y, s->buffer, FNT_CMODE_TWO, FNT_ALIGN_LEFT, light_color);
 }
 
 void SpinControl_DoSlide( menulist_s *s, int dir )

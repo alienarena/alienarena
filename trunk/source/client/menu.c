@@ -48,6 +48,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
+// After a float has been sprintf'd to a buffer, strip trailing zeroes and
+// possibly trailing decimal point.
+static void cleanup_float_string (char *str)
+{
+	char *cursor = strchr (str, '\0') - 1;
+	
+	while (cursor > str && *cursor == '0')
+		*cursor-- = '\0';
+	
+	if (*cursor == '.')
+	{
+		if (cursor > str)
+			*cursor = '\0';
+		else
+			*cursor = '0';
+	}
+}
+
 /* ---- GAME MODES ---- */
 
 enum Game_mode
@@ -1543,6 +1561,8 @@ static void TextVarSpinOptionFunc (void *_self)
 	
 	cvarval = strchr(self->itemnames[self->curvalue], '\0')+1;
 	Cvar_Set( cvarname, cvarval);
+	
+	Com_sprintf (self->buffer, sizeof(self->buffer), "%s", self->itemnames[self->curvalue]);
 }
 
 static void UpdateDopplerEffectFunc( void *self )
@@ -1552,6 +1572,27 @@ static void UpdateDopplerEffectFunc( void *self )
 	S_UpdateDopplerFactor();
 }
 
+static float TextSliderValueSizeFunc (void *_self)
+{
+	menulist_s *self;
+	float valscale, cvarval;
+	const sliderlimit_t *limit;
+	int i;
+	float ret = 0.0f;
+	
+	self = (menulist_s *)_self;
+	
+	for (i = self->minvalue; i <= self->maxvalue; i++)
+	{
+		float cursize;
+		cursize = Menu_PredictSize (self->itemnames[i]);
+		if (cursize > ret)
+			ret = cursize;
+	}
+	
+	return ret;
+}
+
 static void SliderOptionFunc (void *_self)
 {
 	menuslider_s *self;
@@ -1559,7 +1600,7 @@ static void SliderOptionFunc (void *_self)
 	float cvarval, sliderval, valscale;
 	const sliderlimit_t *limit;
 	
-	self = (menulist_s *)_self;
+	self = (menuslider_s *)_self;
 	cvarname = self->generic.localstrings[0];
 	
 	limit = (const sliderlimit_t *) self->generic.localptrs[0];
@@ -1570,7 +1611,40 @@ static void SliderOptionFunc (void *_self)
 				(float)(limit->slider_max-limit->slider_min);
 	cvarval = limit->cvar_min + valscale*(sliderval-limit->slider_min);
 	
+	Com_sprintf (self->buffer, sizeof(self->buffer), "%f", cvarval);
+	cleanup_float_string (self->buffer);
+	
 	Cvar_SetValue (cvarname, cvarval);
+}
+
+static float NumericalSliderValueSizeFunc (void *_self)
+{
+	menuslider_s *self;
+	float valscale, cvarval;
+	const sliderlimit_t *limit;
+	int i;
+	char buffer[80];
+	float ret = 0.0f;
+	
+	self = (menuslider_s *)_self;
+	
+	limit = (const sliderlimit_t *) self->generic.localptrs[0];
+	
+	valscale = 	(limit->cvar_max-limit->cvar_min)/
+				(float)(limit->slider_max-limit->slider_min);
+	
+	for (i = self->minvalue; i <= self->maxvalue; i++)
+	{
+		float cursize;
+		cvarval = (float)(i - self->minvalue) * valscale;
+		Com_sprintf (buffer, sizeof(buffer), "%f", cvarval);
+		cleanup_float_string (buffer);
+		cursize = Menu_PredictSize (buffer);
+		if (cursize > ret)
+			ret = cursize;
+	}
+	
+	return ret;
 }
 
 static void NumberFieldOptionFunc (void *_self)
@@ -1685,7 +1759,6 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 		
 		case option_textcvarslider:
 			item->generic.type = MTYPE_SLIDER;
-			// TODO: use the name part in a tooltip or something
 			item->itemnames = optionname->names; 
 			item->minvalue = 0;
 			for (item->maxvalue = 0; item->itemnames[item->maxvalue+1]; item->maxvalue++)
@@ -1695,6 +1768,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 				item->generic.callback = UpdateDopplerEffectFunc;
 			else
 				item->generic.callback = TextVarSpinOptionFunc;
+			item->slidervaluesizecallback = TextSliderValueSizeFunc;
 			break;
 		
 		case option_textcvarspincontrol:
@@ -1741,6 +1815,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			item->maxvalue = limit->slider_max;
 			item->generic.callback = SliderOptionFunc;
 			item->generic.localptrs[0] = limit;
+			item->slidervaluesizecallback = NumericalSliderValueSizeFunc;
 			break;
 		
 		case option_numberfield:
@@ -1786,6 +1861,7 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 					break;
 				}
 			}
+			Com_sprintf (item->buffer, sizeof(item->buffer), "%s", item->itemnames[item->curvalue]);
 			break;
 		
 		case option_minimapspincontrol:
@@ -1808,6 +1884,8 @@ void Option_Setup (menumultival_s *item, option_name_t *optionname)
 						(limit->cvar_max-limit->cvar_min);
 			sliderval = limit->slider_min + valscale*(cvarval-limit->cvar_min);
 			item->curvalue = sliderval;
+			Com_sprintf (item->buffer, sizeof(item->buffer), "%f", cvarval);
+			cleanup_float_string (item->buffer);
 			break;
 		
 		case option_numberfield:
@@ -6406,7 +6484,7 @@ int Slider_CursorPositionX ( menuslider_s *s )
 	if ( range > 1)
 		range = 1;
 
-	return ( int )( font->width + RCOLUMN_OFFSET + (LONGINPUT_SIZE) * font->width * range );
+	return ( int )( font->width + RCOLUMN_OFFSET + (SLIDER_SIZE) * font->width * range );
 }
 
 int newSliderValueForX (int x, menuslider_s *s)
@@ -6420,7 +6498,7 @@ int newSliderValueForX (int x, menuslider_s *s)
 	
 	pos = x - (font->width + RCOLUMN_OFFSET + CHASELINK(s->generic.x)) - Menu_GetCtrX(*(s->generic.parent));
 
-	newValue = ((float)pos)/((LONGINPUT_SIZE-1)*font->width);
+	newValue = ((float)pos)/((SLIDER_SIZE-1)*font->width);
 	newValueInt = s->minvalue + newValue * (float)( s->maxvalue - s->minvalue );
 
 	return newValueInt;
