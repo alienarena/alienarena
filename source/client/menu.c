@@ -2348,6 +2348,11 @@ sliderlimit_t modulate_limits =
 	1, 5, 1.0f, 5.0f
 };
 
+sliderlimit_t dlight_limits = 
+{
+	0, 8, 0.0f, 8.0f
+};
+
 fieldsize_t resolution_width_limits = 
 {
 	4, 640, 2048
@@ -2476,6 +2481,13 @@ option_name_t video_option_names[] =
 		"texture quality",
 		NULL,
 		setnames (texquality_items)
+	},
+	{
+		option_slider,
+		"gl_dynamic",
+		"dynamic lights",
+		"Maximum number of dynamic lights on screen at once",
+		setlimits (dlight_limits)
 	},
 	{
 		option_spincontrol,
