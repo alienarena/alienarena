@@ -502,8 +502,8 @@ static qboolean R_Mesh_CullModel (void)
 		return r_lefthand->integer == 2;
 
 	//Do not cull large meshes - too many artifacts occur
-	if(currentmodel->maxs[0] - currentmodel->mins[0] > 72 || currentmodel->maxs[1] - currentmodel->mins[1] > 72 
-		|| currentmodel->maxs[2] - currentmodel->mins[2] > 72)
+	if((currentmodel->maxs[0] - currentmodel->mins[0] > 72 || currentmodel->maxs[1] - currentmodel->mins[1] > 72 
+		|| currentmodel->maxs[2] - currentmodel->mins[2] > 72) && currententity->frame < 199)
 		return false;
 	
 	/*
