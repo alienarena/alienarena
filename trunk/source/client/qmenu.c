@@ -626,7 +626,7 @@ static inline menuvec2_t Menu_Item_RightSize (menucommon_s *self, FNT_font_t fon
 		case MTYPE_SLIDER:
 			ret.x = font->width * SLIDER_SIZE + RCOLUMN_OFFSET;
 			if (((menuslider_s *)self)->slidervaluesizecallback)
-				ret.x += 2.0f * font->width +
+				ret.x += font->width +
 						((menuslider_s *)self)->slidervaluesizecallback (self);
 			break;
 		case MTYPE_FIELD:
