@@ -81,10 +81,27 @@ static char dlight_vertex_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 		
 		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
 		
-		const int i = 0;
-/*		for (int i = 0; i < DYNAMIC; i++)*/
-		if (DYNAMIC > 0)
-			LightVec[i] = tangentSpaceTransform * (lightPosition[i] - viewVertex.xyz);
+		switch (DYNAMIC)
+		{
+			case 8:
+				LightVec[7] = tangentSpaceTransform * (lightPosition[7] - viewVertex.xyz);
+			case 7:
+				LightVec[6] = tangentSpaceTransform * (lightPosition[6] - viewVertex.xyz);
+			case 6:
+				LightVec[5] = tangentSpaceTransform * (lightPosition[5] - viewVertex.xyz);
+			case 5:
+				LightVec[4] = tangentSpaceTransform * (lightPosition[4] - viewVertex.xyz);
+			case 4:
+				LightVec[3] = tangentSpaceTransform * (lightPosition[3] - viewVertex.xyz);
+			case 3:
+				LightVec[2] = tangentSpaceTransform * (lightPosition[2] - viewVertex.xyz);
+			case 2:
+				LightVec[1] = tangentSpaceTransform * (lightPosition[1] - viewVertex.xyz);
+			case 1:
+				LightVec[0] = tangentSpaceTransform * (lightPosition[0] - viewVertex.xyz);
+			default: // case 0
+				break;
+		}
 	}
 );
 
@@ -97,40 +114,61 @@ static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 	varying vec3 LightVec[MAXLIGHTS];
 	
 	// normal argument given in tangent space
+	void ComputeForLight (	const vec3 normal, const float specular,
+							const vec3 nEyeDir, const vec3 textureColor3,
+							const vec3 LightVec, const vec3 lightAmount, const float lightCutoffSquared,
+							inout vec3 ret )
+	{
+		float distanceSquared = dot (LightVec, LightVec);
+		if (distanceSquared < lightCutoffSquared)
+		{
+			// If we get this far, the fragment is within range of the 
+			// dynamic light
+			vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount), vec3 (0.0), vec3 (1.0));
+			vec3 relativeLightDirection = LightVec / sqrt (distanceSquared);
+			float diffuseTerm = max (0.0, dot (relativeLightDirection, normal));
+			vec3 specularAdd = vec3 (0.0, 0.0, 0.0);
+	
+			if (diffuseTerm > 0.0)
+			{
+				vec3 halfAngleVector = normalize (relativeLightDirection + nEyeDir);
+			
+				float specularTerm = clamp (dot (normal, halfAngleVector), 0.0, 1.0);
+				specularTerm = pow (specularTerm, 32.0);
+
+				specularAdd = vec3 (specular * specularTerm / 2.0);
+			}
+			vec3 swamp = attenuation * attenuation;
+			swamp *= swamp;
+			swamp *= swamp;
+			swamp *= swamp;
+	
+			ret += (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor3 + specularAdd) * attenuation;
+		}
+	}
 	vec3 computeDynamicLightingFrag (const vec3 textureColor, const vec3 normal, const float specular)
 	{
 		vec3 ret = vec3 (0.0);
 		vec3 nEyeDir = normalize (EyeDir);
 		vec3 textureColor3 = textureColor * 3.0;
-		const int i = 0;
-/*		for (int i = 0; i < DYNAMIC; i++)*/
+		switch (DYNAMIC)
 		{
-			float distanceSquared = dot (LightVec[i], LightVec[i]);
-			if (distanceSquared < lightCutoffSquared[i])
-			{
-				// If we get this far, the fragment is within range of the 
-				// dynamic light
-				vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount[i]), vec3 (0.0), vec3 (1.0));
-				vec3 relativeLightDirection = LightVec[i] / sqrt (distanceSquared);
-				float diffuseTerm = max (0.0, dot (relativeLightDirection, normal));
-				vec3 specularAdd = vec3 (0.0, 0.0, 0.0);
-		
-				if (diffuseTerm > 0.0)
-				{
-					vec3 halfAngleVector = normalize (relativeLightDirection + nEyeDir);
-				
-					float specularTerm = clamp (dot (normal, halfAngleVector), 0.0, 1.0);
-					specularTerm = pow (specularTerm, 32.0);
-
-					specularAdd = vec3 (specular * specularTerm / 2.0);
-				}
-				vec3 swamp = attenuation * attenuation;
-				swamp *= swamp;
-				swamp *= swamp;
-				swamp *= swamp;
-		
-				ret += (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor3 + specularAdd) * attenuation;
-			}
+			case 8:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[7], lightAmount[7], lightCutoffSquared[7], ret);
+			case 7:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[6], lightAmount[6], lightCutoffSquared[6], ret);
+			case 6:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[5], lightAmount[5], lightCutoffSquared[5], ret);
+			case 5:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[4], lightAmount[4], lightCutoffSquared[4], ret);
+			case 4:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[3], lightAmount[3], lightCutoffSquared[3], ret);
+			case 3:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[2], lightAmount[2], lightCutoffSquared[2], ret);
+			case 2:
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[1], lightAmount[1], lightCutoffSquared[1], ret);
+			default: // case 1
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[0], lightAmount[0], lightCutoffSquared[0], ret);
 		}
 		return ret;
 	}
