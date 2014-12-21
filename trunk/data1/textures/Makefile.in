@@ -1184,6 +1184,7 @@ nobase_dist_textures_DATA = \
 	desert/floortile10w_hm.tga \
 	desert/floortile10w_nm.tga \
 	desert/foundtn.tga \
+	desert/guardrail.tga \
 	desert/hangingmoss.tga \
 	desert/hangingmoss2.tga \
 	desert/hangingmoss3.tga \
@@ -1202,6 +1203,9 @@ nobase_dist_textures_DATA = \
 	desert/plank1_nm.tga \
 	desert/platewall1.tga \
 	desert/platewall2.tga \
+	desert/rebardamage1.tga \
+	desert/rebardamage2.tga \
+	desert/rebardamage3.tga \
 	desert/rock1.tga \
 	desert/rock1_hm.tga \
 	desert/rock1_nm.tga \
