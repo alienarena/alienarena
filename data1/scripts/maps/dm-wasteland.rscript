@@ -5,9 +5,9 @@ canyon1_texture
 		map2 textures/dm-wasteland/canyon1_blendtex2.tga	
 		blendmap 4			
 			200 textures/arena5/ground1.tga			
-			400 textures/dm-wasteland/clifftop.tga		
+			400 textures/desert/clifftop.tga		
 			200 textures/texturelib/ground_0045.jpg		
-			400 textures/arena10/heap4.tga
+			200 textures/desert/pebbles.tga
 	}
 }
 textures/arena7/light10
