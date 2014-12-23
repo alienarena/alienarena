@@ -568,10 +568,12 @@ models/weapons/v_blast/blaster
 models/weapons/v_alienblast/skin
 {
 	{
-		map models/weapons/v_alienblast/skin_normal.jpg
+		map models/weapons/v_alienblast/skin_normal.tga
 		normalmap
 		map2 models/weapons/v_alienblast/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/weapons/v_violator/skin
@@ -678,37 +680,45 @@ models/misc/spiderpod/spider
 players/martianenforcer/weapon
 {
 	{	
-		map models/weapons/v_alienblast/skin_normal.jpg
+		map models/weapons/v_alienblast/skin_normal.tga
 		normalmap
 		map2 models/weapons/v_alienblast/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/martianwarrior/weapon
 {
 	{	
-		map models/weapons/v_alienblast/skin_normal.jpg
+		map models/weapons/v_alienblast/skin_normal.tga
 		normalmap
 		map2 models/weapons/v_alienblast/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/martianoverlord/weapon
 {
 	{	
-		map models/weapons/v_alienblast/skin_normal.jpg
+		map models/weapons/v_alienblast/skin_normal.tga
 		normalmap
 		map2 models/weapons/v_alienblast/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}			
 }
 players/martiancyborg/weapon
 {
 	{	
-		map models/weapons/v_alienblast/skin_normal.jpg
+		map models/weapons/v_alienblast/skin_normal.tga
 		normalmap
 		map2 models/weapons/v_alienblast/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}		
 }
 players/lauren/weapon
