@@ -962,6 +962,10 @@ nobase_dist_textures_DATA = \
 	desert/barnwood_nm.tga \
 	desert/blacktrans.tga \
 	desert/bloodlava.tga \
+	desert/cliffblock.tga \
+	desert/cliffblock_nm.tga \
+	desert/clifftop.tga \
+	desert/clifftop_nm.tga \
 	desert/damage1.tga \
 	desert/damage2.tga \
 	desert/damage3.tga \
@@ -988,6 +992,8 @@ nobase_dist_textures_DATA = \
 	desert/o3rocks1_nm.tga \
 	desert/o3roof1.tga \
 	desert/o3roof2.tga \
+	desert/pebbles.tga \
+	desert/pebbles_nm.tga \
 	desert/plank1.tga \
 	desert/plank1_nm.tga \
 	desert/platewall1.tga \
@@ -1045,7 +1051,6 @@ nobase_dist_textures_DATA = \
 	dm-wasteland/canyon1_lightmaptex.tga \
 	dm-wasteland/canyon1_rocks.tga \
 	dm-wasteland/canyon1_vegetation.tga \
-	dm-wasteland/clifftop.tga \
 	evil/confllrtile2pad_nm.tga \
 	evil/confllrtile2pad.tga \
 	evil/drktek_symb_hm.tga \
