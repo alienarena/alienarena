@@ -532,12 +532,15 @@ cvar_t			*r_shadowcutoff;
 //shader programs
 extern void	R_LoadGLSLPrograms(void);
 
+#define GLSL_MAX_DLIGHTS 8
+#define CUR_NUM_DLIGHTS min (min (r_newrefdef.num_dlights, gl_dynamic->integer), GLSL_MAX_DLIGHTS)
+
 //glsl
-GLhandleARB g_worldprogramObj;
+GLhandleARB g_worldprogramObj[GLSL_MAX_DLIGHTS+1];
 GLhandleARB g_shadowprogramObj;
 GLhandleARB g_warpprogramObj;
 GLhandleARB g_minimapprogramObj;
-GLhandleARB g_rscriptprogramObj;
+GLhandleARB g_rscriptprogramObj[GLSL_MAX_DLIGHTS+1];
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
 GLhandleARB g_vertexonlymeshprogramObj;
@@ -577,9 +580,6 @@ GLhandleARB g_fragmentShader;
 #define MAX_ATTR_IDX		16
 
 // Uniform locations for GLSL shaders that support dynamic lighting
-// FIXME: currently only used by RScript surfaces.
-#define GLSL_MAX_DLIGHTS 8
-#define GLSL_MAX_DLIGHTS_STR "\n#define MAXLIGHTS 8\n"
 typedef struct
 {
 	GLuint	enableDynamic;
@@ -588,7 +588,7 @@ typedef struct
 	GLuint	lightPosition; // in eye space
 } dlight_uniform_location_t;
 
-qboolean R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights); // See r_light.c
+void R_SetDlightUniforms (dlight_uniform_location_t *uniforms); // See r_light.c
 
 //standard bsp surfaces
 struct
@@ -602,7 +602,7 @@ struct
 	GLuint	liquid, shiny;
 	GLuint	liquidTexture, liquidNormTex, chromeTex;
 	GLuint	rsTime;
-} worldsurf_uniforms;
+} worldsurf_uniforms[GLSL_MAX_DLIGHTS+1];
 
 //shadow on white bsp polys
 GLuint		g_location_entShadow;
@@ -630,7 +630,7 @@ struct
 	GLuint						lightmapTexture;
 	GLuint						blendscales;
 	GLuint						blendTexture[6];
-} rscript_uniforms;
+} rscript_uniforms[GLSL_MAX_DLIGHTS+1];
 
 //water
 GLuint		g_location_baseTexture;

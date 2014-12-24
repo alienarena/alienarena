@@ -61,12 +61,19 @@ PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
 #define USE_DLIGHT_LIBRARY "/*USE_DLIGHT_LIBRARY*/"
 
-static char dlight_vertex_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
-	uniform int DYNAMIC;
-	uniform vec3 lightPosition[MAXLIGHTS];
-	
+#define IFDYNAMIC(n,...) \
+"\n#if DYNAMIC >= " #n "\n" \
+#__VA_ARGS__ \
+"\n#endif\n"
+
+// Relies on DYNAMIC being defined as a macro
+static char dlight_vertex_library[] = 
+IFDYNAMIC (1, 
+	uniform vec3 lightPosition[DYNAMIC];
+	varying vec3 LightVec[DYNAMIC];
+)
+STRINGIFY (
 	varying vec3 EyeDir;
-	varying vec3 LightVec[MAXLIGHTS];
 	
 	vec4 viewVertex;
 	mat3 tangentSpaceTransform;
@@ -80,38 +87,28 @@ static char dlight_vertex_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 		viewVertex = gl_ModelViewMatrix * gl_Vertex;
 		
 		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
-		
-		switch (DYNAMIC)
-		{
-			case 8:
-				LightVec[7] = tangentSpaceTransform * (lightPosition[7] - viewVertex.xyz);
-			case 7:
-				LightVec[6] = tangentSpaceTransform * (lightPosition[6] - viewVertex.xyz);
-			case 6:
-				LightVec[5] = tangentSpaceTransform * (lightPosition[5] - viewVertex.xyz);
-			case 5:
-				LightVec[4] = tangentSpaceTransform * (lightPosition[4] - viewVertex.xyz);
-			case 4:
-				LightVec[3] = tangentSpaceTransform * (lightPosition[3] - viewVertex.xyz);
-			case 3:
-				LightVec[2] = tangentSpaceTransform * (lightPosition[2] - viewVertex.xyz);
-			case 2:
-				LightVec[1] = tangentSpaceTransform * (lightPosition[1] - viewVertex.xyz);
-			case 1:
-				LightVec[0] = tangentSpaceTransform * (lightPosition[0] - viewVertex.xyz);
-			default: // case 0
-				break;
-		}
+)
+IFDYNAMIC (1, LightVec[0] = tangentSpaceTransform * (lightPosition[0] - viewVertex.xyz);)
+IFDYNAMIC (2, LightVec[1] = tangentSpaceTransform * (lightPosition[1] - viewVertex.xyz);)
+IFDYNAMIC (3, LightVec[2] = tangentSpaceTransform * (lightPosition[2] - viewVertex.xyz);)
+IFDYNAMIC (4, LightVec[3] = tangentSpaceTransform * (lightPosition[3] - viewVertex.xyz);)
+IFDYNAMIC (5, LightVec[4] = tangentSpaceTransform * (lightPosition[4] - viewVertex.xyz);)
+IFDYNAMIC (6, LightVec[5] = tangentSpaceTransform * (lightPosition[5] - viewVertex.xyz);)
+IFDYNAMIC (7, LightVec[6] = tangentSpaceTransform * (lightPosition[6] - viewVertex.xyz);)
+IFDYNAMIC (8, LightVec[7] = tangentSpaceTransform * (lightPosition[7] - viewVertex.xyz);)
+STRINGIFY (
 	}
 );
 
-static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
-	uniform int DYNAMIC;
-	uniform vec3 lightAmount[MAXLIGHTS];
-	uniform float lightCutoffSquared[MAXLIGHTS];
-	
+// Relies on DYNAMIC being defined as a macro
+static char dlight_fragment_library[] = 
+IFDYNAMIC (1,
+	uniform vec3 lightAmount[DYNAMIC];
+	uniform float lightCutoffSquared[DYNAMIC];
+	varying vec3 LightVec[DYNAMIC];
+)
+STRINGIFY (
 	varying vec3 EyeDir;
-	varying vec3 LightVec[MAXLIGHTS];
 	
 	// normal argument given in tangent space
 	void ComputeForLight (	const vec3 normal, const float specular,
@@ -151,28 +148,19 @@ static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 		vec3 ret = vec3 (0.0);
 		vec3 nEyeDir = normalize (EyeDir);
 		vec3 textureColor3 = textureColor * 3.0;
-		switch (DYNAMIC)
-		{
-			case 8:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[7], lightAmount[7], lightCutoffSquared[7], 1.0, ret);
-			case 7:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[6], lightAmount[6], lightCutoffSquared[6], 1.0, ret);
-			case 6:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[5], lightAmount[5], lightCutoffSquared[5], 1.0, ret);
-			case 5:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[4], lightAmount[4], lightCutoffSquared[4], 1.0, ret);
-			case 4:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[3], lightAmount[3], lightCutoffSquared[3], 1.0, ret);
-			case 3:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[2], lightAmount[2], lightCutoffSquared[2], 1.0, ret);
-			case 2:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[1], lightAmount[1], lightCutoffSquared[1], 1.0, ret);
-			default: // case 1
-				// dynamic shadows currently only get cast by the first
-				// (most influential) dynamic light. That could change
-				// eventually.
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[0], lightAmount[0], lightCutoffSquared[0], shadowCoef, ret);
-		}
+)
+		// dynamic shadows currently only get cast by the first
+		// (most influential) dynamic light. That could change
+		// eventually.
+IFDYNAMIC (1, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[0], lightAmount[0], lightCutoffSquared[0], shadowCoef, ret);)
+IFDYNAMIC (2, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[1], lightAmount[1], lightCutoffSquared[1], 1.0, ret);)
+IFDYNAMIC (3, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[2], lightAmount[2], lightCutoffSquared[2], 1.0, ret);)
+IFDYNAMIC (4, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[3], lightAmount[3], lightCutoffSquared[3], 1.0, ret);)
+IFDYNAMIC (5, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[4], lightAmount[4], lightCutoffSquared[4], 1.0, ret);)
+IFDYNAMIC (6, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[5], lightAmount[5], lightCutoffSquared[5], 1.0, ret);)
+IFDYNAMIC (7, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[6], lightAmount[6], lightCutoffSquared[6], 1.0, ret);)
+IFDYNAMIC (8, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[7], lightAmount[7], lightCutoffSquared[7], 1.0, ret);)
+STRINGIFY (
 		return ret;
 	}
 );
@@ -1659,14 +1647,15 @@ const vertex_attribute_t standard_attributes[] =
 };
 const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
 	
-void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, GLhandleARB *program)
+void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, int ndynamic, GLhandleARB *program)
 {
-	char		str[4096];
+	char		str[4096], macros[64];
 	const char	*shaderStrings[6];
 	int			nResult;
 	int			i;
 	
-	shaderStrings[0] = "#version 120\n";
+	Com_sprintf (macros, sizeof (macros), "#version 120\n#define DYNAMIC %d\n", ndynamic);
+	shaderStrings[0] = macros;
 	
 	*program = glCreateProgramObjectARB();
 	
@@ -1805,7 +1794,7 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 
 void R_LoadGLSLPrograms(void)
 {
-	int i;
+	int i, j;
 	
 	//load glsl (to do - move to own file)
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ))
@@ -1860,32 +1849,34 @@ void R_LoadGLSLPrograms(void)
 	gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 
 	//standard bsp surfaces
-	R_LoadGLSLProgram ("World", (char*)world_vertex_program, (char*)world_fragment_program, ATTRIBUTE_TANGENT, &g_worldprogramObj);
+	for (i = 0; i <= GLSL_MAX_DLIGHTS; i++)
+	{
+		R_LoadGLSLProgram ("World", (char*)world_vertex_program, (char*)world_fragment_program, ATTRIBUTE_TANGENT, i, &g_worldprogramObj[i]);
 
-	// Locate some parameters by name so we can set them later...
-	get_dlight_uniform_locations (g_worldprogramObj, &worldsurf_uniforms.dlight_uniforms);
-	worldsurf_uniforms.surfTexture = glGetUniformLocationARB (g_worldprogramObj, "surfTexture");
-	worldsurf_uniforms.heightTexture = glGetUniformLocationARB (g_worldprogramObj, "HeightTexture");
-	worldsurf_uniforms.lmTexture = glGetUniformLocationARB (g_worldprogramObj, "lmTexture");
-	worldsurf_uniforms.normalTexture = glGetUniformLocationARB (g_worldprogramObj, "NormalTexture");
-	worldsurf_uniforms.shadowmapTexture = glGetUniformLocationARB (g_worldprogramObj, "ShadowMap");
-	worldsurf_uniforms.shadowmapTexture2 = glGetUniformLocationARB (g_worldprogramObj, "StatShadowMap");
-	worldsurf_uniforms.fog = glGetUniformLocationARB (g_worldprogramObj, "FOG");
-	worldsurf_uniforms.parallax = glGetUniformLocationARB (g_worldprogramObj, "PARALLAX");
-	worldsurf_uniforms.shadowmap = glGetUniformLocationARB (g_worldprogramObj, "SHADOWMAP");
-	worldsurf_uniforms.statshadow = glGetUniformLocationARB (g_worldprogramObj, "STATSHADOW");
-	worldsurf_uniforms.xOffs = glGetUniformLocationARB (g_worldprogramObj, "xPixelOffset");
-	worldsurf_uniforms.yOffs = glGetUniformLocationARB (g_worldprogramObj, "yPixelOffset");
-	worldsurf_uniforms.staticLightPosition = glGetUniformLocationARB (g_worldprogramObj, "staticLightPosition");
-	worldsurf_uniforms.liquid = glGetUniformLocationARB (g_worldprogramObj, "LIQUID");
-	worldsurf_uniforms.shiny = glGetUniformLocationARB (g_worldprogramObj, "SHINY");
-	worldsurf_uniforms.rsTime = glGetUniformLocationARB (g_worldprogramObj, "rsTime");
-	worldsurf_uniforms.liquidTexture = glGetUniformLocationARB (g_worldprogramObj, "liquidTexture");
-	worldsurf_uniforms.liquidNormTex = glGetUniformLocationARB (g_worldprogramObj, "liquidNormTex");
-	worldsurf_uniforms.chromeTex = glGetUniformLocationARB (g_worldprogramObj, "chromeTex");
+		get_dlight_uniform_locations (g_worldprogramObj[i], &worldsurf_uniforms[i].dlight_uniforms);
+		worldsurf_uniforms[i].surfTexture = glGetUniformLocationARB (g_worldprogramObj[i], "surfTexture");
+		worldsurf_uniforms[i].heightTexture = glGetUniformLocationARB (g_worldprogramObj[i], "HeightTexture");
+		worldsurf_uniforms[i].lmTexture = glGetUniformLocationARB (g_worldprogramObj[i], "lmTexture");
+		worldsurf_uniforms[i].normalTexture = glGetUniformLocationARB (g_worldprogramObj[i], "NormalTexture");
+		worldsurf_uniforms[i].shadowmapTexture = glGetUniformLocationARB (g_worldprogramObj[i], "ShadowMap");
+		worldsurf_uniforms[i].shadowmapTexture2 = glGetUniformLocationARB (g_worldprogramObj[i], "StatShadowMap");
+		worldsurf_uniforms[i].fog = glGetUniformLocationARB (g_worldprogramObj[i], "FOG");
+		worldsurf_uniforms[i].parallax = glGetUniformLocationARB (g_worldprogramObj[i], "PARALLAX");
+		worldsurf_uniforms[i].shadowmap = glGetUniformLocationARB (g_worldprogramObj[i], "SHADOWMAP");
+		worldsurf_uniforms[i].statshadow = glGetUniformLocationARB (g_worldprogramObj[i], "STATSHADOW");
+		worldsurf_uniforms[i].xOffs = glGetUniformLocationARB (g_worldprogramObj[i], "xPixelOffset");
+		worldsurf_uniforms[i].yOffs = glGetUniformLocationARB (g_worldprogramObj[i], "yPixelOffset");
+		worldsurf_uniforms[i].staticLightPosition = glGetUniformLocationARB (g_worldprogramObj[i], "staticLightPosition");
+		worldsurf_uniforms[i].liquid = glGetUniformLocationARB (g_worldprogramObj[i], "LIQUID");
+		worldsurf_uniforms[i].shiny = glGetUniformLocationARB (g_worldprogramObj[i], "SHINY");
+		worldsurf_uniforms[i].rsTime = glGetUniformLocationARB (g_worldprogramObj[i], "rsTime");
+		worldsurf_uniforms[i].liquidTexture = glGetUniformLocationARB (g_worldprogramObj[i], "liquidTexture");
+		worldsurf_uniforms[i].liquidNormTex = glGetUniformLocationARB (g_worldprogramObj[i], "liquidNormTex");
+		worldsurf_uniforms[i].chromeTex = glGetUniformLocationARB (g_worldprogramObj[i], "chromeTex");
+	}
 
 	//shadowed white bsp surfaces
-	R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, &g_shadowprogramObj);
+	R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, 0, &g_shadowprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
@@ -1894,40 +1885,42 @@ void R_LoadGLSLPrograms(void)
 	g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
 	
 	// Old-style per-vertex water effects
-	R_LoadGLSLProgram ("Warp", (char*)warp_vertex_program, NULL, NO_ATTRIBUTES, &g_warpprogramObj);
+	R_LoadGLSLProgram ("Warp", (char*)warp_vertex_program, NULL, NO_ATTRIBUTES, 0, &g_warpprogramObj);
 	
 	warp_uniforms.time = glGetUniformLocationARB (g_warpprogramObj, "time");
 	warp_uniforms.warpvert = glGetUniformLocationARB (g_warpprogramObj, "warpvert");
 	warp_uniforms.envmap = glGetUniformLocationARB (g_warpprogramObj, "envmap");
 	
 	// Minimaps
-	R_LoadGLSLProgram ("Minimap", (char*)minimap_vertex_program, NULL, ATTRIBUTE_MINIMAP, &g_minimapprogramObj);
+	R_LoadGLSLProgram ("Minimap", (char*)minimap_vertex_program, NULL, ATTRIBUTE_MINIMAP, 0, &g_minimapprogramObj);
 	
 	//rscript surfaces
-	R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, &g_rscriptprogramObj);
-	
-	// Locate some parameters by name so we can set them later...
-	get_dlight_uniform_locations (g_rscriptprogramObj, &rscript_uniforms.dlight_uniforms);
-	rscript_uniforms.envmap = glGetUniformLocationARB (g_rscriptprogramObj, "envmap");
-	rscript_uniforms.numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj, "numblendtextures");
-	rscript_uniforms.lightmap = glGetUniformLocationARB (g_rscriptprogramObj, "lightmap");
-	rscript_uniforms.fog = glGetUniformLocationARB (g_rscriptprogramObj, "FOG");
-	rscript_uniforms.mainTexture = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture");
-	rscript_uniforms.mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj, "mainTexture2");
-	rscript_uniforms.lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj, "lightmapTexture");
-	rscript_uniforms.blendscales = glGetUniformLocationARB (g_rscriptprogramObj, "blendscales");
-	
-	for (i = 0; i < 6; i++)
+	for (i = 0; i <= GLSL_MAX_DLIGHTS; i++)
 	{
-		char uniformname[] = "blendTexture.";
+		R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, i, &g_rscriptprogramObj[i]);
+	
+		get_dlight_uniform_locations (g_rscriptprogramObj[i], &rscript_uniforms[i].dlight_uniforms);
+		rscript_uniforms[i].envmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "envmap");
+		rscript_uniforms[i].numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj[i], "numblendtextures");
+		rscript_uniforms[i].lightmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmap");
+		rscript_uniforms[i].fog = glGetUniformLocationARB (g_rscriptprogramObj[i], "FOG");
+		rscript_uniforms[i].mainTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture");
+		rscript_uniforms[i].mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture2");
+		rscript_uniforms[i].lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmapTexture");
+		rscript_uniforms[i].blendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "blendscales");
+
+		for (j = 0; j < 6; j++)
+		{
+			char uniformname[] = "blendTexture.";
 		
-		assert (i < 10); // We only have space for one digit.
-		uniformname[12] = '0'+i;
-		rscript_uniforms.blendTexture[i] = glGetUniformLocationARB (g_rscriptprogramObj, uniformname);
+			assert (j < 10); // We only have space for one digit.
+			uniformname[12] = '0'+j;
+			rscript_uniforms[i].blendTexture[j] = glGetUniformLocationARB (g_rscriptprogramObj[i], uniformname);
+		}
 	}
 
 	// per-pixel warp(water) bsp surfaces
-	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, ATTRIBUTE_TANGENT, &g_waterprogramObj);
+	R_LoadGLSLProgram ("Water", (char*)water_vertex_program, (char*)water_fragment_program, ATTRIBUTE_TANGENT, 0, &g_waterprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
@@ -1940,17 +1933,17 @@ void R_LoadGLSLPrograms(void)
 	g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
 
 	//meshes
-	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_meshprogramObj);
+	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, 0, &g_meshprogramObj);
 	
 	get_mesh_uniform_locations (g_meshprogramObj, &mesh_uniforms);
 
 	//vertex-only meshes
-	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, &g_vertexonlymeshprogramObj);
+	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, 0, &g_vertexonlymeshprogramObj);
 	
 	get_mesh_uniform_locations (g_vertexonlymeshprogramObj, &mesh_vertexonly_uniforms);
 	
 	//Glass
-	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM, &g_glassprogramObj);
+	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM, 0, &g_glassprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	get_mesh_anim_uniform_locations (g_glassprogramObj, &glass_uniforms.anim_uniforms);
@@ -1963,13 +1956,13 @@ void R_LoadGLSLPrograms(void)
 	glass_uniforms.refTexture = glGetUniformLocationARB (g_glassprogramObj, "refTexture");
 
 	//Blank mesh (for shadowmapping efficiently)
-	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX, &g_blankmeshprogramObj);
+	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX, 0, &g_blankmeshprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	get_mesh_anim_uniform_locations (g_blankmeshprogramObj, &blankmesh_uniforms);
 	
 	//fullscreen distortion effects
-	R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, &g_fbprogramObj);
+	R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, 0, &g_fbprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	distort_uniforms.framebuffTex = glGetUniformLocationARB (g_fbprogramObj, "fbtexture");
@@ -1977,26 +1970,26 @@ void R_LoadGLSLPrograms(void)
 	distort_uniforms.intensity = glGetUniformLocationARB (g_fbprogramObj, "intensity");
 
 	//gaussian blur
-	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, &g_blurprogramObj);
+	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, 0, &g_blurprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
 	g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
 	
 	// Color scaling
-	R_LoadGLSLProgram ("Color Scaling", NULL, (char*)colorscale_fragment_program, NO_ATTRIBUTES, &g_colorscaleprogramObj);
+	R_LoadGLSLProgram ("Color Scaling", NULL, (char*)colorscale_fragment_program, NO_ATTRIBUTES, 0, &g_colorscaleprogramObj);
 	colorscale_uniforms.scale = glGetUniformLocationARB (g_colorscaleprogramObj, "scale");
 	colorscale_uniforms.source = glGetUniformLocationARB (g_colorscaleprogramObj, "textureSource");
 
 	//radial blur
-	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, &g_rblurprogramObj);
+	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, 0, &g_rblurprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
 	g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
 
 	//water droplets
-	R_LoadGLSLProgram ("Framebuffer Droplets", (char*)droplets_vertex_program, (char*)droplets_fragment_program, NO_ATTRIBUTES, &g_dropletsprogramObj);
+	R_LoadGLSLProgram ("Framebuffer Droplets", (char*)droplets_vertex_program, (char*)droplets_fragment_program, NO_ATTRIBUTES, 0, &g_dropletsprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_drSource = glGetUniformLocationARB( g_dropletsprogramObj, "drSource" );
@@ -2004,7 +1997,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
 
 	//god rays
-	R_LoadGLSLProgram ("God Rays", (char*)rgodrays_vertex_program, (char*)rgodrays_fragment_program, NO_ATTRIBUTES, &g_godraysprogramObj);
+	R_LoadGLSLProgram ("God Rays", (char*)rgodrays_vertex_program, (char*)rgodrays_fragment_program, NO_ATTRIBUTES, 0, &g_godraysprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_lightPositionOnScreen = glGetUniformLocationARB( g_godraysprogramObj, "lightPositionOnScreen" );
@@ -2013,7 +2006,7 @@ void R_LoadGLSLPrograms(void)
 	g_location_sunRadius = glGetUniformLocationARB( g_godraysprogramObj, "sunRadius");
 	
 	//vegetation
-	R_LoadGLSLProgram ("Vegetation", (char*)vegetation_vertex_program, NULL, ATTRIBUTE_SWAYCOEF|ATTRIBUTE_ADDUP|ATTRIBUTE_ADDRIGHT, &g_vegetationprogramObj);
+	R_LoadGLSLProgram ("Vegetation", (char*)vegetation_vertex_program, NULL, ATTRIBUTE_SWAYCOEF|ATTRIBUTE_ADDUP|ATTRIBUTE_ADDRIGHT, 0, &g_vegetationprogramObj);
 	
 	vegetation_uniforms.rsTime = glGetUniformLocationARB (g_vegetationprogramObj, "rsTime");
 	vegetation_uniforms.up = glGetUniformLocationARB (g_vegetationprogramObj, "up");

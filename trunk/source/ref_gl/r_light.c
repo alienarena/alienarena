@@ -170,6 +170,13 @@ static int compare_dlight (const void *a, const void *b)
 	return 0;
 }
 
+static struct
+{
+	vec3_t eyeSpaceOrigin[GLSL_MAX_DLIGHTS];
+	vec3_t lightAmountSquared[GLSL_MAX_DLIGHTS];
+	float lightCutoffSquared[GLSL_MAX_DLIGHTS];
+} dlight_uniform_values;
+
 void R_UpdateDlights (void)
 {
 	int			i;
@@ -200,37 +207,22 @@ void R_UpdateDlights (void)
 	// Those dynamic lights of negative importance are never used
 	while (r_newrefdef.num_dlights > 0 && r_newrefdef.dlights[r_newrefdef.num_dlights - 1].sort_key <= 0.0f)
 		r_newrefdef.num_dlights--;
+	
+	// Build parallel arrays for sending to GLSL
+	l = r_newrefdef.dlights;
+	for (i = 0; i < CUR_NUM_DLIGHTS; i++, l++)
+	{
+		R_ModelViewTransform (l->origin, dlight_uniform_values.eyeSpaceOrigin[i]);
+		VectorCopy (l->lightAmountSquared, dlight_uniform_values.lightAmountSquared[i]);
+		dlight_uniform_values.lightCutoffSquared[i] = l->intensitySquared;
+	}
 }
 
-// TODO: use this for more than just RScript rendering.
-qboolean R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enable_dlights)
+void R_SetDlightUniforms (dlight_uniform_location_t *uniforms)
 {
-	int i = 0;
-	qboolean dynamic = gl_dynamic->integer && enable_dlights && r_newrefdef.num_dlights > 0;
-	
-	if (dynamic)
-	{
-		vec3_t eyeSpaceOrigin[GLSL_MAX_DLIGHTS];
-		vec3_t lightAmountSquared[GLSL_MAX_DLIGHTS];
-		float lightCutoffSquared[GLSL_MAX_DLIGHTS];
-		
-		dlight_t *dl = &r_newrefdef.dlights[0];
-		
-		// Build parallel arrays and send to GLSL
-		for (i = 0; i < GLSL_MAX_DLIGHTS && i < r_newrefdef.dlights && i < gl_dynamic->integer; i++, dl++)
-		{
-			R_ModelViewTransform (dl->origin, eyeSpaceOrigin[i]);
-			VectorCopy (dl->lightAmountSquared, lightAmountSquared[i]);
-			lightCutoffSquared[i] = dl->intensitySquared;
-		}
-		glUniform3fvARB (uniforms->lightPosition, i, (const GLfloat *) eyeSpaceOrigin);
-		glUniform3fvARB (uniforms->lightAmountSquared, i, (const GLfloat *) lightAmountSquared);
-		glUniform1fvARB (uniforms->lightCutoffSquared, i, (const GLfloat *) lightCutoffSquared);
-	}
-	
-	glUniform1iARB (uniforms->enableDynamic, i);
-	
-	return dynamic;
+	glUniform3fvARB (uniforms->lightPosition, CUR_NUM_DLIGHTS, (const GLfloat *) dlight_uniform_values.eyeSpaceOrigin);
+	glUniform3fvARB (uniforms->lightAmountSquared, CUR_NUM_DLIGHTS, (const GLfloat *) dlight_uniform_values.lightAmountSquared);
+	glUniform1fvARB (uniforms->lightCutoffSquared, CUR_NUM_DLIGHTS, (const GLfloat *) dlight_uniform_values.lightCutoffSquared);
 }
 
 /*

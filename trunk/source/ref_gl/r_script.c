@@ -1151,20 +1151,26 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
-static void RS_SetupGLState (void)
+static qboolean rs_dlights_enabled;
+static void RS_SetupGLState (int dynamic)
 {
 	int i;
 	
-	glUseProgramObjectARB (g_rscriptprogramObj);
+	glUseProgramObjectARB (g_rscriptprogramObj[dynamic]);
 	
-	glUniform1iARB (rscript_uniforms.mainTexture, 0);
-	glUniform1iARB (rscript_uniforms.lightmapTexture, 1);
-	glUniform1iARB (rscript_uniforms.mainTexture2, 2);
+	glUniform1iARB (rscript_uniforms[dynamic].mainTexture, 0);
+	glUniform1iARB (rscript_uniforms[dynamic].lightmapTexture, 1);
+	glUniform1iARB (rscript_uniforms[dynamic].mainTexture2, 2);
 	for (i = 0; i < 6; i++)
-		glUniform1iARB (rscript_uniforms.blendTexture[i], 3+i);
-	glUniform1iARB (rscript_uniforms.fog, map_fog);
+		glUniform1iARB (rscript_uniforms[dynamic].blendTexture[i], 3+i);
+	glUniform1iARB (rscript_uniforms[dynamic].fog, map_fog);
+	
+	if (dynamic != 0)
+		R_SetDlightUniforms (&rscript_uniforms[dynamic].dlight_uniforms);
 	
 	qglMatrixMode (GL_TEXTURE);
+	
+	rs_dlights_enabled = dynamic != 0;
 }
 
 static void RS_CleanupGLState (void)
@@ -1184,7 +1190,6 @@ static void RS_CleanupGLState (void)
 }
 
 qboolean rs_in_group = false;
-static qboolean rs_dlights_enabled;
 
 // If you're about to draw a huge number of RScript surfaces in a row with
 // *no other types of surfaces* being drawn, you can surround them with 
@@ -1193,8 +1198,7 @@ static qboolean rs_dlights_enabled;
 void RS_Begin_Group (void)
 {
 	rs_in_group = true;
-	rs_dlights_enabled = -1;
-	RS_SetupGLState ();
+	RS_SetupGLState (CUR_NUM_DLIGHTS);
 }
 
 void RS_End_Group (void)
@@ -1210,7 +1214,8 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
 	int			i;
-
+	int			dynamic;
+	
 	if (!rs)
 		return;
 
@@ -1218,15 +1223,11 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
-
-	if (!rs_in_group)
-		RS_SetupGLState ();
 	
+	dynamic = enable_dlights ? CUR_NUM_DLIGHTS : 0;
+
 	if (!rs_in_group || rs_dlights_enabled != enable_dlights)
-	{
-		rs_dlights_enabled = enable_dlights;
-		R_SetDlightUniforms (&rscript_uniforms.dlight_uniforms, enable_dlights);
-	}
+		RS_SetupGLState (dynamic);
 	
 	do
 	{
@@ -1240,7 +1241,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		if (stage->lightmap && lm != rs_lightmap_off)
 			GL_MBind (1, lmtex);
 			
-		glUniform1iARB (rscript_uniforms.lightmap, stage->lightmap?lm:0);
+		glUniform1iARB (rscript_uniforms[dynamic].lightmap, stage->lightmap?lm:0);
 
 		GL_SelectTexture (0);
 		qglPushMatrix ();
@@ -1310,15 +1311,15 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 							0 );
 		}
 		
-		glUniform1iARB (rscript_uniforms.envmap, stage->envmap != 0);
-		glUniform1iARB (rscript_uniforms.numblendtextures, stage->num_blend_textures);
+		glUniform1iARB (rscript_uniforms[dynamic].envmap, stage->envmap != 0);
+		glUniform1iARB (rscript_uniforms[dynamic].numblendtextures, stage->num_blend_textures);
 		
 		if (stage->num_blend_textures > 0)
 		{
 			for (i = 0; i < stage->num_blend_textures; i++)
 				GL_MBind (3+i, stage->blend_textures[i]->texnum);
 			
-			glUniformMatrix3x4fvARB (rscript_uniforms.blendscales, 1, GL_FALSE, (const GLfloat *) stage->blend_scales);
+			glUniformMatrix3x4fvARB (rscript_uniforms[dynamic].blendscales, 1, GL_FALSE, (const GLfloat *) stage->blend_scales);
 		}
 		
 		GL_SelectTexture (0);
