@@ -279,7 +279,6 @@ extern void R_ReadMusicScript(char config_file[128]);
 extern int SignbitsForPlane (cplane_t *out);
 
 //Lights
-extern dlight_t *dynLight;
 extern vec3_t lightspot;
 extern void  VLight_Init (void);
 extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );

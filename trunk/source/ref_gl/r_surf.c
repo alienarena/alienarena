@@ -31,7 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static vec3_t	modelorg;		// relative to viewpoint
 
 vec3_t	r_worldLightVec;
-dlight_t *dynLight;
 
 #define LIGHTMAP_BYTES 4
 
