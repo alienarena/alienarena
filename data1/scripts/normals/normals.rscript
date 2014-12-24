@@ -1277,34 +1277,6 @@ models/items/mega_h/skin
 		glow
 	}
 }
-maps/meshes/urban/riored
-{
-	{
-		map maps/meshes/urban/rio_normal.jpg
-		normalmap
-	}
-}
-maps/meshes/urban/rioblue
-{
-	{
-		map maps/meshes/urban/rio_normal.jpg
-		normalmap
-	}
-}
-maps/meshes/urban/riosilver
-{
-	{
-		map maps/meshes/urban/rio_normal.jpg
-		normalmap
-	}
-}
-maps/meshes/urban/roadbarrell
-{
-	{
-		map maps/meshes/urban/roadbarrell_normal.jpg
-		normalmap
-	}
-}
 models/objects/electroball/skin
 {
 	{
@@ -1365,33 +1337,6 @@ maps/meshes/gothic/tree1
 	{
 		map maps/meshes/gothic/tree1_normal.jpg
 		normalmap
-	}
-}
-maps/meshes/urban/orangelantern
-{
-	{
-		map maps/meshes/urban/lantern_normal.jpg
-		normalmap
-		map2 maps/meshes/urban/orangelantern_fx.tga
-		glow
-	}
-}
-maps/meshes/urban/bluelantern
-{
-	{
-		map maps/meshes/urban/lantern_normal.jpg
-		normalmap
-		map2 maps/meshes/urban/bluelantern_fx.tga
-		glow
-	}
-}
-maps/meshes/urban/yellowlantern
-{
-	{
-		map maps/meshes/urban/lantern_normal.jpg
-		normalmap
-		map2 maps/meshes/urban/yellowlantern_fx.tga
-		glow
 	}
 }
 maps/meshes/tech/rotimage1
