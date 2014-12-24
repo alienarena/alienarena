@@ -216,8 +216,6 @@ qboolean R_SetDlightUniforms (dlight_uniform_location_t *uniforms, qboolean enab
 		
 		dlight_t *dl = &r_newrefdef.dlights[0];
 		
-		dynLight = dl; // FIXME this blows
-		
 		// Build parallel arrays and send to GLSL
 		for (i = 0; i < GLSL_MAX_DLIGHTS && i < r_newrefdef.dlights && i < gl_dynamic->integer; i++, dl++)
 		{

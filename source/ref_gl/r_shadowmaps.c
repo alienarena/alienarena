@@ -750,10 +750,9 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 
 extern cvar_t *cl_simpleitems;
 
-static void R_DrawDynamicCasterEntity (void)
+static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 {
 	vec3_t	dist;
-	trace_t	r_trace;
 	
 	if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
 		return;
@@ -774,13 +773,12 @@ static void R_DrawDynamicCasterEntity (void)
 	}
 
 	//distance from light, if too far, don't render(to do - check against brightness for dist!)
-	VectorSubtract(dynLight->origin, currententity->origin, dist);
-	if(VectorLength(dist) > 256.0f)
+	VectorSubtract (lightOrigin, currententity->origin, dist);
+	if (VectorLength (dist) > 256.0f)
 		return;
 
 	//trace visibility from light - we don't render objects the light doesn't hit!
-	r_trace = CM_BoxTrace(dynLight->origin, currententity->origin, vec3_origin, vec3_origin, r_worldmodel->firstnode, MASK_OPAQUE);
-	if(r_trace.fraction != 1.0)
+	if (!CM_FastTrace (currententity->origin, lightOrigin, r_worldmodel->firstnode, MASK_OPAQUE))
 		return;
 
 	currentmodel = currententity->model;
@@ -809,12 +807,14 @@ void R_DrawDynamicCaster(void)
 {
 	int		i;
 	int		RagDollID;
-	vec3_t origin = {0, 0, 0};
+	vec3_t	lightOrigin;
 
 	r_shadowmapcount = 0;
 		
-	if(!dynLight)  
+	if (r_newrefdef.num_dlights == 0)
 		return; //we have no lights of consequence
+	
+	VectorCopy (r_newrefdef.dlights[0].origin, lightOrigin);
 
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
@@ -836,20 +836,20 @@ void R_DrawDynamicCaster(void)
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
 	//set camera
-	SM_SetupMatrices(dynLight->origin[0],dynLight->origin[1],dynLight->origin[2]+64,dynLight->origin[0],dynLight->origin[1],dynLight->origin[2]-128);
+	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
 
 	//render world - very basic geometry
-	R_DrawShadowMapWorld(false, origin);
+	R_DrawShadowMapWorld (false, vec3_origin);
 
 	//render entities near light
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		R_DrawDynamicCasterEntity ();
+		R_DrawDynamicCasterEntity (lightOrigin);
 	}
 
 	if (r_ragdolls->integer)
@@ -861,15 +861,13 @@ void R_DrawDynamicCaster(void)
 		
 			currententity = &RagDollEntity[RagDollID];
 		
-			R_DrawDynamicCasterEntity ();
+			R_DrawDynamicCasterEntity (lightOrigin);
 		}
 	}
 
 	SM_SetTextureMatrix(0);
 
 	r_shadowmapcount = 1;
-
-	dynLight = NULL; //done with dynamic light shadows for this frame
 
 	qglDepthMask (1);		// back to writing
 
