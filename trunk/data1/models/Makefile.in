@@ -445,7 +445,7 @@ nobase_dist_models_DATA = \
 	weapons/v_alienblast/cover.md2 \
 	weapons/v_alienblast/skin.jpg \
 	weapons/v_alienblast/skin_fx.tga \
-	weapons/v_alienblast/skin_normal.jpg \
+	weapons/v_alienblast/skin_normal.tga \
 	weapons/v_alienblast/tris.iqm \
 	weapons/v_alienblast/tris.md2 \
 	weapons/v_alienblast/tris.skin \

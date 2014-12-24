@@ -320,6 +320,8 @@ nobase_dist_levelshots_DATA = \
 	dm-violator2k11.txt \
 	dm-warmachine2k10.jpg \
 	dm-warmachine2k10.txt \
+	dm-wasteland.jpg \
+	dm-wasteland.txt \
 	dm-zorn2k11.jpg \
 	dm-zorn2k11.txt \
 	dm-zion2k9.jpg \
