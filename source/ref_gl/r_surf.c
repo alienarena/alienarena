@@ -729,7 +729,7 @@ Update GL state as needed so we can draw a new batch of surfaces for the
 provided texinfo 
 ================
 */
-static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dynamic)
+static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, int dynamic)
 {
 	int		texnum;
 	
@@ -769,20 +769,20 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	GL_MBind (2, texinfo->heightMap->texnum);
 	GL_MBind (3, texinfo->normalMap->texnum);
 	
-	if (dynamic)
+		if (dynamic)
 	{
 		if(gl_bspnormalmaps->integer && texinfo->has_heightmap) 
 		{
 			if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
 			{
-				glUniform1iARB (worldsurf_uniforms.parallax, 1);
+				glUniform1iARB (worldsurf_uniforms[dynamic].parallax, 1);
 			}
 		}
 		else
 		{
 			if (!r_currTexInfo || r_currTexInfo->has_heightmap)
 			{
-				glUniform1iARB (worldsurf_uniforms.parallax, 0);
+				glUniform1iARB (worldsurf_uniforms[dynamic].parallax, 0);
 			}
 		}
 	}
@@ -791,8 +791,8 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	{
 		if (!r_currTexInfo)
 		{
-			glUniform1iARB (worldsurf_uniforms.liquid, 0);
-			glUniform1iARB (worldsurf_uniforms.shiny, 0);
+			glUniform1iARB (worldsurf_uniforms[dynamic].liquid, 0);
+			glUniform1iARB (worldsurf_uniforms[dynamic].shiny, 0);
 		}
 	}
 	else if	(r_currTexInfo &&
@@ -804,35 +804,35 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, qboolean dyn
 	else if (texinfo->flags & SURF_BLOOD) 
 	{
 		//need to bind the blood drop normal map, and set flag, and time
-		glUniform1iARB (worldsurf_uniforms.liquid, 8); //blood type 8, water 1
-		glUniform1iARB (worldsurf_uniforms.shiny, 0);
-		glUniform1fARB (worldsurf_uniforms.rsTime, rs_realtime);
-		glUniform1iARB (worldsurf_uniforms.liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquid, 8); //blood type 8, water 1
+		glUniform1iARB (worldsurf_uniforms[dynamic].shiny, 0);
+		glUniform1fARB (worldsurf_uniforms[dynamic].rsTime, rs_realtime);
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquidTexture, 4); //for blood we are going to need to send a diffuse texture with it
 		GL_MBind (4, r_blooddroplets->texnum);
-		glUniform1iARB (worldsurf_uniforms.liquidNormTex, 5); 
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquidNormTex, 5); 
 		GL_MBind (5, r_blooddroplets_nm->texnum);
 	}
 	else if (texinfo->flags & SURF_WATER) 
 	{
 		//need to bind the water drop normal map, and set flag, and time
-		glUniform1iARB (worldsurf_uniforms.liquid, 1); 
-		glUniform1iARB (worldsurf_uniforms.shiny, 0);
-		glUniform1fARB (worldsurf_uniforms.rsTime, rs_realtime);
-		glUniform1iARB (worldsurf_uniforms.liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquid, 1); 
+		glUniform1iARB (worldsurf_uniforms[dynamic].shiny, 0);
+		glUniform1fARB (worldsurf_uniforms[dynamic].rsTime, rs_realtime);
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquidNormTex, 4); //for blood we are going to need to send a diffuse texture with it(maybe even height!)
 		GL_MBind (4, r_droplets->texnum);
 	}
 	else if (texinfo->flags & SURF_SHINY)
 	{
-		glUniform1iARB (worldsurf_uniforms.liquid, 0);
-		glUniform1iARB (worldsurf_uniforms.shiny, 1);
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquid, 0);
+		glUniform1iARB (worldsurf_uniforms[dynamic].shiny, 1);
 
-		glUniform1iARB (worldsurf_uniforms.chromeTex, 4);
+		glUniform1iARB (worldsurf_uniforms[dynamic].chromeTex, 4);
 		GL_MBind (4, r_mirrorspec->texnum);
 	}
 	else if (!r_currTexInfo || r_currTexInfo->flags & (SURF_BLOOD|SURF_WATER|SURF_SHINY))
 	{
-		glUniform1iARB (worldsurf_uniforms.liquid, 0);
-		glUniform1iARB (worldsurf_uniforms.shiny, 0);
+		glUniform1iARB (worldsurf_uniforms[dynamic].liquid, 0);
+		glUniform1iARB (worldsurf_uniforms[dynamic].shiny, 0);
 	}
 	
 	r_currTexInfo = texinfo;
@@ -888,7 +888,7 @@ static void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 		}
 		if (!s)
 			continue;
-		BSP_TexinfoChanged (s->texinfo->equiv, false, false);
+		BSP_TexinfoChanged (s->texinfo->equiv, false, 0);
 		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, false);
 	}
@@ -896,6 +896,56 @@ static void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	BSP_FlushVBOAccum ();
 	
 	GLSTATE_DISABLE_ALPHATEST
+}
+
+// FIXME: figure out what this does and clean it up!
+static void BSP_SetupGLSL (int dynamic)
+{
+	glUseProgramObjectARB (g_worldprogramObj[dynamic]);
+	glUniform1iARB (worldsurf_uniforms[dynamic].fog, map_fog);
+	glUniform3fARB (worldsurf_uniforms[dynamic].staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+	glUniform1iARB (worldsurf_uniforms[dynamic].surfTexture, 0);
+	glUniform1iARB (worldsurf_uniforms[dynamic].lmTexture, 1);
+	glUniform1iARB (worldsurf_uniforms[dynamic].heightTexture, 2);
+	glUniform1iARB (worldsurf_uniforms[dynamic].normalTexture, 3);
+	
+	if(r_shadowmapcount == 2)
+	{
+		//static vegetation shadow
+		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmapTexture2, 6);
+		GL_MBind (6, r_depthtexture2->texnum);
+
+		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
+		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 1 );
+
+		glUniform1fARB (worldsurf_uniforms[dynamic].xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
+		glUniform1fARB (worldsurf_uniforms[dynamic].yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+	}
+	else
+	{
+		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 0);
+		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 0);
+	}
+	
+	if (dynamic)
+	{
+		R_SetDlightUniforms (&worldsurf_uniforms[dynamic].dlight_uniforms);
+		if (gl_shadowmaps->integer) 
+		{
+			//dynamic shadow
+			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmapTexture, 7);
+			GL_MBind (7, r_depthtexture->texnum);
+
+			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
+
+			glUniform1fARB (worldsurf_uniforms[dynamic].xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
+			glUniform1fARB (worldsurf_uniforms[dynamic].yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+		}
+		else
+			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 0);		
+	}
+
+	glUniform1iARB (worldsurf_uniforms[dynamic].parallax, 1);
 }
 
 static void BSP_DrawGLSLSurfaces (qboolean forEnt)
@@ -913,27 +963,7 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	
 	BSP_ClearVBOAccum ();
 	
-	R_SetDlightUniforms (&worldsurf_uniforms.dlight_uniforms, false);
-
-	if(r_shadowmapcount == 2)
-	{
-		//static vegetation shadow
-		glUniform1iARB (worldsurf_uniforms.shadowmapTexture2, 6);
-		GL_MBind (6, r_depthtexture2->texnum);
-
-		glUniform1iARB (worldsurf_uniforms.shadowmap, 1);
-		glUniform1iARB (worldsurf_uniforms.statshadow, 1 );
-
-		glUniform1fARB (worldsurf_uniforms.xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-		glUniform1fARB (worldsurf_uniforms.yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
-	}
-	else
-	{
-		glUniform1iARB (worldsurf_uniforms.shadowmap, 0);
-		glUniform1iARB (worldsurf_uniforms.statshadow, 0);
-	}
-
-	glUniform1iARB (worldsurf_uniforms.parallax, 1);  
+	BSP_SetupGLSL (0);
 	
 	BSP_InvalidateVBO ();
 	
@@ -951,7 +981,7 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 		}
 		if (!s)
 			continue;
-		BSP_TexinfoChanged (s->texinfo->equiv, true, false);
+		BSP_TexinfoChanged (s->texinfo->equiv, true, 0);
 		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, true);
 	}
@@ -977,23 +1007,8 @@ static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	
 	BSP_ClearVBOAccum ();
 	
-	if (R_SetDlightUniforms (&worldsurf_uniforms.dlight_uniforms, true))
-	{
-		if(gl_shadowmaps->integer) 
-		{
-			//dynamic shadow
-			glUniform1iARB (worldsurf_uniforms.shadowmapTexture, 7);
-			GL_MBind (7, r_depthtexture->texnum);
-
-			glUniform1iARB (worldsurf_uniforms.shadowmap, 1);
-
-			glUniform1fARB (worldsurf_uniforms.xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-			glUniform1fARB (worldsurf_uniforms.yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
-		}
-		else
-			glUniform1iARB (worldsurf_uniforms.shadowmap, 0);		
-	}
-
+	BSP_SetupGLSL (CUR_NUM_DLIGHTS);
+	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		msurface_t	*s;
@@ -1008,7 +1023,7 @@ static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 		}
 		if (!s)
 			continue;
-		BSP_TexinfoChanged (s->texinfo->equiv, true, true);
+		BSP_TexinfoChanged (s->texinfo->equiv, true, CUR_NUM_DLIGHTS);
 		for (; s; s = s->texturechain)
 			BSP_RenderLightmappedPoly(s, true);
 	}
@@ -1213,13 +1228,6 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 	// render all GLSL surfaces, including normalmapped and dynamically lit
 	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
 	{
-		glUseProgramObjectARB (g_worldprogramObj);
-		glUniform1iARB (worldsurf_uniforms.fog, map_fog);
-		glUniform3fARB (worldsurf_uniforms.staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-		glUniform1iARB (worldsurf_uniforms.surfTexture, 0);
-		glUniform1iARB (worldsurf_uniforms.lmTexture, 1);
-		glUniform1iARB (worldsurf_uniforms.heightTexture, 2);
-		glUniform1iARB (worldsurf_uniforms.normalTexture, 3);
 		BSP_DrawGLSLSurfaces (forEnt); 
 		BSP_DrawGLSLDynamicSurfaces (forEnt);
 		glUseProgramObjectARB (0);
