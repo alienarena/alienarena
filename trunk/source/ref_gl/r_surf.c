@@ -934,7 +934,6 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 		glUniform1iARB (worldsurf_uniforms.statshadow, 0);
 	}
 
-	glUniform1iARB (worldsurf_uniforms.dynamic, 0);
 	glUniform1iARB (worldsurf_uniforms.parallax, 1);  
 	
 	BSP_InvalidateVBO ();
