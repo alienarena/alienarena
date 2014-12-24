@@ -117,7 +117,7 @@ static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 	void ComputeForLight (	const vec3 normal, const float specular,
 							const vec3 nEyeDir, const vec3 textureColor3,
 							const vec3 LightVec, const vec3 lightAmount, const float lightCutoffSquared,
-							inout vec3 ret )
+							const float shadowCoef, inout vec3 ret )
 	{
 		float distanceSquared = dot (LightVec, LightVec);
 		if (distanceSquared < lightCutoffSquared)
@@ -143,10 +143,10 @@ static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 			swamp *= swamp;
 			swamp *= swamp;
 	
-			ret += (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor3 + specularAdd) * attenuation;
+			ret += shadowCoef * (((vec3 (0.5) - swamp) * diffuseTerm + swamp) * textureColor3 + specularAdd) * attenuation;
 		}
 	}
-	vec3 computeDynamicLightingFrag (const vec3 textureColor, const vec3 normal, const float specular)
+	vec3 computeDynamicLightingFrag (const vec3 textureColor, const vec3 normal, const float specular, const float shadowCoef)
 	{
 		vec3 ret = vec3 (0.0);
 		vec3 nEyeDir = normalize (EyeDir);
@@ -154,21 +154,24 @@ static char dlight_fragment_library[] = GLSL_MAX_DLIGHTS_STR STRINGIFY (
 		switch (DYNAMIC)
 		{
 			case 8:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[7], lightAmount[7], lightCutoffSquared[7], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[7], lightAmount[7], lightCutoffSquared[7], 1.0, ret);
 			case 7:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[6], lightAmount[6], lightCutoffSquared[6], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[6], lightAmount[6], lightCutoffSquared[6], 1.0, ret);
 			case 6:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[5], lightAmount[5], lightCutoffSquared[5], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[5], lightAmount[5], lightCutoffSquared[5], 1.0, ret);
 			case 5:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[4], lightAmount[4], lightCutoffSquared[4], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[4], lightAmount[4], lightCutoffSquared[4], 1.0, ret);
 			case 4:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[3], lightAmount[3], lightCutoffSquared[3], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[3], lightAmount[3], lightCutoffSquared[3], 1.0, ret);
 			case 3:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[2], lightAmount[2], lightCutoffSquared[2], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[2], lightAmount[2], lightCutoffSquared[2], 1.0, ret);
 			case 2:
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[1], lightAmount[1], lightCutoffSquared[1], ret);
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[1], lightAmount[1], lightCutoffSquared[1], 1.0, ret);
 			default: // case 1
-				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[0], lightAmount[0], lightCutoffSquared[0], ret);
+				// dynamic shadows currently only get cast by the first
+				// (most influential) dynamic light. That could change
+				// eventually.
+				ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVec[0], lightAmount[0], lightCutoffSquared[0], shadowCoef, ret);
 		}
 		return ret;
 	}
@@ -225,6 +228,7 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		gl_TexCoord[1] = gl_MultiTexCoord1;
 
 		//fog
+
 		if(FOG > 0){
 			fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
 			fog = clamp(fog, 0.0, 1.0);
@@ -335,7 +339,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		float swamp;
 		float attenuation;
 		vec4 litColour;
-		float dynshadowval;
 		float statshadowval;
 		vec2 displacement;
 		vec2 displacement2;
@@ -351,11 +354,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
 
 	   	//shadows
-		if(DYNAMIC > 0)
-			dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
-		else
-			dynshadowval = 0.0;
-
 		if(STATSHADOW > 0)
 			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		else
@@ -469,7 +467,8 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	   {
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 			
-			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, 1.0) * dynshadowval;
+			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, 1.0, dynshadowval);
 			
 			if(PARALLAX > 0) 
 			{
@@ -715,7 +714,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		
 		if (DYNAMIC > 0)
 		{
-			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, vec3 (0.0, 0.0, 1.0), 1.0);
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, vec3 (0.0, 0.0, 1.0), 1.0, 1.0);
 			gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
 		}
 
