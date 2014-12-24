@@ -683,26 +683,35 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			// Sigh, GLSL doesn't allow you to index arrays of samplers with
 			// variables.
 			gl_FragColor = vec4 (0.0);
-			switch (numblendtextures)
+			
+			// TODO: go back to switch-case as soon as we start using GLSL
+			// 1.30. 
+			if (mainColor.r > 0.0)
+				gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales[0].xy) * mainColor.r;
+			if (numblendtextures > 1)
 			{
-				case 6:
-					if (mainColor2.b > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales[2].zw) * mainColor2.b;
-				case 5:
-					if (mainColor2.g > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales[2].xy) * mainColor2.g;
-				case 4:
-					if (mainColor2.r > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales[1].zw) * mainColor2.r;
-				case 3:
+				if (mainColor.g > 0.0)
+					gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales[0].zw) * mainColor.g;
+				if (numblendtextures > 2)
+				{
 					if (mainColor.b > 0.0)
 						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales[1].xy) * mainColor.b;
-				case 2:
-					if (mainColor.g > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales[0].zw) * mainColor.g;
-				default:
-					if (mainColor.r > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales[0].xy) * mainColor.r;
+					if (numblendtextures > 3)
+					{
+						if (mainColor2.r > 0.0)
+							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales[1].zw) * mainColor2.r;
+						if (numblendtextures > 4)
+						{
+							if (mainColor2.g > 0.0)
+								gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales[2].xy) * mainColor2.g;
+							if (numblendtextures > 5)
+							{
+								if (mainColor2.b > 0.0)
+									gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales[2].zw) * mainColor2.b;
+							}
+						}
+					}
+				}
 			}
 		}
 		
