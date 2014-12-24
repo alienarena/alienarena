@@ -597,7 +597,7 @@ struct
 	dlight_uniform_location_t dlight_uniforms;
 	GLuint	surfTexture, heightTexture, lmTexture, normalTexture;
 	GLuint	shadowmapTexture, shadowmapTexture2;
-	GLuint	fog, parallax, dynamic, shadowmap, statshadow;
+	GLuint	fog, parallax, shadowmap, statshadow;
 	GLuint	xOffs, yOffs;
 	GLuint	staticLightPosition; 
 	GLuint	liquid, shiny;

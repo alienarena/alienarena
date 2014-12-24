@@ -1821,7 +1821,7 @@ void R_LoadGLSLPrograms(void)
 		glUniform3fvARB			= (PFNGLUNIFORM3FVARBPROC)qwglGetProcAddress("glUniform3fvARB");
 		glUniform2fvARB			= (PFNGLUNIFORM2FVARBPROC)qwglGetProcAddress("glUniform2fvARB");
 		glUniform1ivARB			= (PFNGLUNIFORM1IVARBPROC)qwglGetProcAddress("glUniform1ivARB");
-		glUniform1fvARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fvARB");
+		glUniform1fvARB		  = (PFNGLUNIFORM1FVARBPROC)qwglGetProcAddress("glUniform1fvARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
 		glUniformMatrix3x4fvARB	  = (PFNGLUNIFORMMATRIX3X4FVARBPROC)qwglGetProcAddress("glUniformMatrix3x4fv");
 		glVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)qwglGetProcAddress("glVertexAttribPointerARB");
@@ -1863,7 +1863,6 @@ void R_LoadGLSLPrograms(void)
 	worldsurf_uniforms.shadowmapTexture2 = glGetUniformLocationARB (g_worldprogramObj, "StatShadowMap");
 	worldsurf_uniforms.fog = glGetUniformLocationARB (g_worldprogramObj, "FOG");
 	worldsurf_uniforms.parallax = glGetUniformLocationARB (g_worldprogramObj, "PARALLAX");
-	worldsurf_uniforms.dynamic = glGetUniformLocationARB (g_worldprogramObj, "DYNAMIC");
 	worldsurf_uniforms.shadowmap = glGetUniformLocationARB (g_worldprogramObj, "SHADOWMAP");
 	worldsurf_uniforms.statshadow = glGetUniformLocationARB (g_worldprogramObj, "STATSHADOW");
 	worldsurf_uniforms.xOffs = glGetUniformLocationARB (g_worldprogramObj, "xPixelOffset");
