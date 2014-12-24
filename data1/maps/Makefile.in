@@ -628,18 +628,35 @@ nobase_dist_maps_DATA = \
 	meshes/unit.jpg \
 	meshes/unit.md2 \
 	meshes/unit_normal.jpg \
-	meshes/urban/bluelantern_fx.tga \
+	meshes/urban/acetyline.jpg \
+	meshes/urban/acetyline.md2 \
+	meshes/urban/acetyline_normal.jpg \
 	meshes/urban/bluelantern.jpg \
 	meshes/urban/bluelantern.md2 \
+	meshes/urban/bluelantern_fx.tga \
+	meshes/urban/deskstool.jpg \
+	meshes/urban/deskstool_normal.jpg \
+	meshes/urban/dumpster.jpg \
+	meshes/urban/dumpster.md2 \
+	meshes/urban/dumpster_normal.jpg \
+	meshes/urban/filecab.jpg \
+	meshes/urban/filecab.md2 \
+	meshes/urban/filecab_normal.jpg \
 	meshes/urban/lantern_normal.jpg \
 	meshes/urban/mercedes.jpg \
 	meshes/urban/mercedes.md2 \
-	meshes/urban/orangelantern_fx.tga \
 	meshes/urban/orangelantern.jpg \
 	meshes/urban/orangelantern.md2 \
+	meshes/urban/orangelantern_fx.tga \
+	meshes/urban/pallette.jpg \
+	meshes/urban/pallette.md2 \
+	meshes/urban/pallette_normal.jpg \
+	meshes/urban/pallettecar.jpg \
+	meshes/urban/pallettecar.md2 \
+	meshes/urban/pallettecar_normal.jpg \
+	meshes/urban/rio_normal.jpg \
 	meshes/urban/rioblue.jpg \
 	meshes/urban/rioblue.md2 \
-	meshes/urban/rio_normal.jpg \
 	meshes/urban/riored.jpg \
 	meshes/urban/riored.md2 \
 	meshes/urban/riosilver.jpg \
@@ -649,9 +666,16 @@ nobase_dist_maps_DATA = \
 	meshes/urban/roadbarrell_normal.jpg \
 	meshes/urban/rope.jpg \
 	meshes/urban/rope.md2 \
-	meshes/urban/yellowlantern_fx.tga \
+	meshes/urban/shelf.jpg \
+	meshes/urban/shelf.md2 \
+	meshes/urban/shelf_normal.jpg \
+	meshes/urban/stool.md2 \
+	meshes/urban/toolbox.jpg \
+	meshes/urban/toolbox.md2 \
+	meshes/urban/toolbox_normal.jpg \
 	meshes/urban/yellowlantern.jpg \
 	meshes/urban/yellowlantern.md2 \
+	meshes/urban/yellowlantern_fx.tga \
 	meshes/weaponpad_fx.tga \
 	meshes/weaponpad.md2 \
 	meshes/weaponpad_normal.tga \

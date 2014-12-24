@@ -70,7 +70,8 @@ nobase_dist_scripts_DATA = \
 	maps/tca-purgatory.rscript \
 	maps/tca-zion2k9.rscript \
 	menu.rscript \
-	normals/normals.rscript \
 	normals/desert.rscript \
+	normals/normals.rscript \
+	normals/urban.rscript \
 	textures.rscript
 
