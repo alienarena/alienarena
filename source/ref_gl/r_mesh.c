@@ -599,89 +599,15 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 	glUniform1fARB (uniforms->lerp, frontlerp);
 }
 
-static void R_Mesh_SetupShellRender (vec3_t lightcolor, qboolean fragmentshader)
+// Cobbled together from two different functions. TODO: clean this mess up!
+static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader, qboolean shell)
 {
 	int i;
 	float alpha;
 	vec3_t lightVec, lightVal;
 	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
 	
-	// FIXME HACK
-	// TODO: other meshes might want dynamic shell alpha too!
-	if (currententity->ragdoll)
-		alpha = currententity->shellAlpha;
-	else
-		alpha = 0.33f;
-	
-	//send light level and color to shader, ramp up a bit
-	VectorCopy (lightcolor, lightVal);
-	for (i = 0; i < 3; i++) 
-	{
-		if (lightVal[i] < shadelight[i]/2)
-			lightVal[i] = shadelight[i]/2; //never go completely black
-		lightVal[i] *= 5;
-		lightVal[i] += dynFactor;
-		if (lightVal[i] > 1.0+dynFactor)
-			lightVal[i] = 1.0+dynFactor;
-	}
-	
-	//brighten things slightly
-	for (i = 0; i < 3; i++)
-		lightVal[i] *= (currententity->ragdoll?1.25:2.5);
-	
-	//simple directional(relative light position)
-	VectorSubtract (lightPosition, currententity->origin, lightVec);
-	VectorMA (lightPosition, 1.0, lightVec, lightPosition);
-	R_ModelViewTransform (lightPosition, lightVec);
-
-	if (currententity->ragdoll)
-		qglDepthMask(false);
-
-	if (fragmentshader)
-		glUseProgramObjectARB (g_meshprogramObj);
-	else
-		glUseProgramObjectARB (g_vertexonlymeshprogramObj);
-
-	glUniform3fARB (uniforms->lightPosition, lightVec[0], lightVec[1], lightVec[2]);
-	
-	GL_MBind (0, r_shelltexture2->texnum);
-	glUniform1iARB (uniforms->baseTex, 0);
-
-	if (fragmentshader)
-	{
-		GL_MBind (1, r_shellnormal->texnum);
-		glUniform1iARB (uniforms->normTex, 1);
-	}
-
-	glUniform1iARB (uniforms->useFX, 0);
-	glUniform1iARB (uniforms->useGlow, 0);
-	glUniform1iARB (uniforms->useCube, 0);
-
-	glUniform1fARB (uniforms->useShell, currententity->ragdoll?1.6:0.4);
-	// FIXME: the GLSL shader doesn't support shell alpha!
-	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
-	glUniform1fARB (uniforms->time, rs_realtime);
-	
-	glUniform1iARB (uniforms->doShading, (currentmodel->typeFlags & MESH_DOSHADING) != 0);
-	glUniform1iARB (uniforms->fog, map_fog);
-	
-	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
-	
-	// set up the fixed-function pipeline too
-	if (!fragmentshader)
-		qglColor4f (shadelight[0], shadelight[1], shadelight[2], alpha);
-	
-	GLSTATE_ENABLE_BLEND
-	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
-
-static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader)
-{
-	int i;
-	vec3_t lightVec, lightVal;
-	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
-
-	if ((currentmodel->typeFlags & MESH_DECAL))
+	if (shell || (currentmodel->typeFlags & MESH_DECAL))
 	{
 		GLSTATE_ENABLE_BLEND
 	}
@@ -689,7 +615,16 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	{
 		GLSTATE_ENABLE_ALPHATEST
 	}
-
+	
+	// FIXME HACK
+	// TODO: other meshes might want dynamic shell alpha too!
+	if (!shell)
+		alpha = 1.0f;
+	if (currententity->ragdoll)
+		alpha = currententity->shellAlpha;
+	else
+		alpha = 0.33f;
+	
 	//send light level and color to shader, ramp up a bit
 	VectorCopy (lightcolor, lightVal);
 	for (i = 0; i < 3; i++)
@@ -708,9 +643,21 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 			if (lightVal[i] > 1.0+dynFactor)
 				lightVal[i] = 1.0+dynFactor;
 		}
+		if (shell)
+			lightVal[i] *= (currententity->ragdoll?1.25:2.5);
 	}
 	
-	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL)) //menu model
+	if (shell)
+	{
+		//simple directional(relative light position)
+		VectorSubtract (lightPosition, currententity->origin, lightVec);
+		VectorMA (lightPosition, 1.0, lightVec, lightPosition);
+		R_ModelViewTransform (lightPosition, lightVec);
+		
+		if (currententity->ragdoll)
+			qglDepthMask(false);
+	}
+	else if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL)) //menu model
 	{
 		//fixed light source pointing down, slightly forward and to the left
 		lightPosition[0] = -25.0;
@@ -733,49 +680,62 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		for (i = 0; i < 3; i++)
 			lightVal[i] *= 1.05;
 	}
-
+	
 	if (fragmentshader)
 		glUseProgramObjectARB (g_meshprogramObj);
 	else
 		glUseProgramObjectARB (g_vertexonlymeshprogramObj);
-
+	
 	glUniform3fARB (uniforms->lightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	// FIXME: the GLSL shader doesn't support shell alpha!
 	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
 	
-	GL_MBind (0, skinnum);
+	GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
 	glUniform1iARB (uniforms->baseTex, 0);
 
 	if (fragmentshader)
 	{
-		GL_MBind (1, rs->stage->texture->texnum);
 		glUniform1iARB (uniforms->normTex, 1);
-
-		GL_MBind (2, rs->stage->texture2->texnum);
-		glUniform1iARB (uniforms->fxTex, 2);
-
-		GL_MBind (3, rs->stage->texture3->texnum);
-		glUniform1iARB (uniforms->fx2Tex, 3);
 		
-		glUniform1iARB (uniforms->useFX, rs->stage->fx);
-		glUniform1iARB (uniforms->useGlow, rs->stage->glow);
-		glUniform1iARB (uniforms->useCube, rs->stage->cube);
+		if (!shell)
+		{
+			GL_MBind (1, rs->stage->texture->texnum);
+
+			GL_MBind (2, rs->stage->texture2->texnum);
+			glUniform1iARB (uniforms->fxTex, 2);
+
+			GL_MBind (3, rs->stage->texture3->texnum);
+			glUniform1iARB (uniforms->fx2Tex, 3);
+		}
+		else
+		{
+			GL_MBind (1, r_shellnormal->texnum);
+		}
+		
+		glUniform1iARB (uniforms->useFX, shell ? 0 : rs->stage->fx);
+		glUniform1iARB (uniforms->useGlow, shell ? 0 : rs->stage->glow);
+		glUniform1iARB (uniforms->useCube, shell ? 0 : rs->stage->cube);
 		
 		if ((currententity->flags & RF_WEAPONMODEL))
 			glUniform1iARB (uniforms->fromView, 1);
 		else
 			glUniform1iARB (uniforms->fromView, 0);
-		
-		glUniform1fARB (uniforms->time, rs_realtime);
 	}
+	
+	glUniform1fARB (uniforms->time, rs_realtime);
 	
 	glUniform1iARB (uniforms->fog, map_fog);
 	glUniform1iARB (uniforms->team, currententity->team);
 
-	glUniform1fARB (uniforms->useShell, 0.0);
+	glUniform1fARB (uniforms->useShell, shell ? (currententity->ragdoll?1.6:0.4) : 0.0);
 	
 	glUniform1iARB (uniforms->doShading, (currentmodel->typeFlags & MESH_DOSHADING) != 0);
 	
 	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
+	
+	// set up the fixed-function pipeline too
+	if (!fragmentshader)
+		qglColor4f (shadelight[0], shadelight[1], shadelight[2], alpha);
 }
 
 static void R_Mesh_SetupGlassRender (void)
@@ -964,12 +924,12 @@ static void R_Mesh_DrawFrame (int skinnum)
 		if (currententity->flags & RF_SHELL_ANY)
 		{
 			fragmentshader = gl_normalmaps->integer;
-			R_Mesh_SetupShellRender (lightcolor, fragmentshader);
+			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader, true);
 		}
 		else
 		{
 			fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
-			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader);
+			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader, false);
 		}
 	}
 	
