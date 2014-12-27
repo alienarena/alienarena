@@ -542,8 +542,8 @@ GLhandleARB g_warpprogramObj;
 GLhandleARB g_minimapprogramObj;
 GLhandleARB g_rscriptprogramObj[GLSL_MAX_DLIGHTS+1];
 GLhandleARB g_waterprogramObj;
-GLhandleARB g_meshprogramObj;
-GLhandleARB g_vertexonlymeshprogramObj;
+GLhandleARB g_meshprogramObj[GLSL_MAX_DLIGHTS+1];
+GLhandleARB g_vertexonlymeshprogramObj[GLSL_MAX_DLIGHTS+1];
 GLhandleARB g_glassprogramObj;
 GLhandleARB g_blankmeshprogramObj;
 GLhandleARB g_fbprogramObj;
@@ -657,9 +657,10 @@ typedef struct
 typedef struct
 {
 	mesh_anim_uniform_location_t	anim_uniforms;
-	GLuint							lightPosition;
+	dlight_uniform_location_t		dlight_uniforms;
+	GLuint							staticLightPosition, staticLightColor;
+	GLuint							totalLightPosition, totalLightColor;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
-	GLuint							color;
 	GLuint							time;
 	GLuint							fog;
 	GLuint							useFX;
@@ -671,7 +672,7 @@ typedef struct
 	GLuint							team;
 } mesh_uniform_location_t;
 
-mesh_uniform_location_t	mesh_uniforms, mesh_vertexonly_uniforms;
+mesh_uniform_location_t	mesh_uniforms[GLSL_MAX_DLIGHTS+1], mesh_vertexonly_uniforms[GLSL_MAX_DLIGHTS+1];
 
 // Uniform locations for glass rendering.
 struct
