@@ -796,8 +796,7 @@ static char mesh_anim_library[] = STRINGIFY (
 	// anim_compute () output
 	vec4 anim_vertex;
 	vec3 anim_normal;
-	vec3 anim_tangent;
-	vec3 anim_tangent_w;
+	vec4 anim_tangent;
 	
 	// if dotangent is true, compute anim_tangent and anim_tangent_w
 	// if donormal is true, compute anim_normal
@@ -815,10 +814,7 @@ static char mesh_anim_library[] = STRINGIFY (
 			if (donormal)
 				anim_normal = vec4 (gl_Normal, 0.0) * m;
 			if (dotangent)
-			{
-				anim_tangent = vec4 (tangent.xyz, 0.0) * m;
-				anim_tangent_w = vec4 (tangent.w, 0.0, 0.0, 0.0) * m;
-			}
+				anim_tangent = vec4 (vec4 (tangent.xyz, 0.0) * m, tangent.w);
 		}
 		else if (GPUANIM == 2)
 		{
@@ -826,11 +822,7 @@ static char mesh_anim_library[] = STRINGIFY (
 			if (donormal)
 				anim_normal = normalize (mix (oldnormal, gl_Normal, lerp));
 			if (dotangent)
-			{
-				vec4 tmptan = mix (oldtangent, tangent, lerp);
-				anim_tangent = tmptan.xyz;
-				anim_tangent_w = vec3 (tmptan.w);
-			}
+				anim_tangent = mix (oldtangent, tangent, lerp);
 		}
 		else
 		{
@@ -838,23 +830,22 @@ static char mesh_anim_library[] = STRINGIFY (
 			if (donormal)
 				anim_normal = gl_Normal;
 			if (dotangent)
-			{
-				anim_tangent = tangent.xyz;
-				anim_tangent_w = vec3 (tangent.w);
-			}
+				anim_tangent = tangent;
 		}
 	}
 );
 
 //MESHES
-static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
-	uniform vec3 lightPos;
+static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STRINGIFY (
+	uniform vec3 staticLightColor;
+	uniform vec3 staticLightPosition;
+	uniform vec3 totalLightPosition;
 	uniform float time;
 	uniform int FOG;
 	uniform int TEAM;
 	uniform float useShell; // doubles as shell scale
+	uniform int fromView;
 	uniform int useCube;
-	uniform vec3 baseColor;
 	// For now, only applies to vertexOnly. If 0, don't do the per-vertex shading.
 	uniform int doShading; 
 	
@@ -862,57 +853,38 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 	const float FresnelPower = 5.0;
 	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
 
-	varying vec3 LightDir;
-	varying vec3 EyeDir;
+	varying vec3 StaticLightDir;
 	varying float fog;
 	varying float FresRatio;
-	varying vec3 vertPos, lightVec;
-	varying vec3 worldNormal;
+	varying vec3 vertPos, SSlightVec, SSEyeDir, worldNormal;
 
 	void subScatterVS(in vec4 ecVert)
 	{
 		if(useShell == 0 && useCube == 0)
 		{
-			lightVec = lightPos - ecVert.xyz;
+			SSEyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
+			SSlightVec = totalLightPosition - ecVert.xyz;
 			vertPos = ecVert.xyz;
 		}
 	}
 
 	void main()
 	{
-		vec3 n;
-		vec3 t;
-		vec3 b;
-		vec4 neyeDir;
-		
 		anim_compute (true, true);
 		
 		if (useShell > 0)
 			anim_vertex += normalize (vec4 (anim_normal, 0)) * useShell;
-			
+		
 		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 		subScatterVS (gl_Position);
 		
-		n = normalize (gl_NormalMatrix * anim_normal);
-		t = normalize (gl_NormalMatrix * anim_tangent);
-		b = normalize (gl_NormalMatrix * anim_tangent_w) * cross (n, t);
+		worldNormal = normalize (gl_NormalMatrix * anim_normal);
 		
-		EyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
-		neyeDir = gl_ModelViewMatrix * anim_vertex;
+		computeDynamicLightingVert (anim_normal, anim_tangent);
+		StaticLightDir = tangentSpaceTransform * staticLightPosition;
 		
-		worldNormal = n;
-
-		vec3 v;
-		v.x = dot(lightPos, t);
-		v.y = dot(lightPos, b);
-		v.z = dot(lightPos, n);
-		LightDir = normalize(v);
-
-		v.x = dot(EyeDir, t);
-		v.y = dot(EyeDir, b);
-		v.z = dot(EyeDir, n);
-		EyeDir = normalize(v);
-
+		vec4 neyeDir = gl_ModelViewMatrix * anim_vertex;
+		
 		if(useShell > 0)
 		{
 			gl_TexCoord[0] = vec4 ((anim_vertex[1]+anim_vertex[0])/40.0, anim_vertex[2]/40.0 - time, 0.0, 1.0);
@@ -936,14 +908,14 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 			float lightness;
 			if (doShading == 1)
 			{
-				lightness = max (dot (worldNormal, LightDir), 0.0) + 0.25;
-				lightness = lightness * lightness + 0.25;
+				lightness = max (normalize (StaticLightDir).z, 0.0) * 3.0 + 0.25;
+				lightness += lightness * lightness * lightness;
 			}
 			else
 			{
 				lightness = 1.0;
 			}
-			gl_FrontColor = gl_BackColor = vec4 (baseColor * lightness, 1.0);
+			gl_FrontColor = gl_BackColor = vec4 (staticLightColor * lightness, 1.0);
 			if (FOG == 1) // TODO: team colors with normalmaps disabled!
 				gl_FogFragCoord = length (gl_Position);
 		}
@@ -954,7 +926,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 				vec3 refeyeDir = neyeDir.xyz / neyeDir.w;
 				refeyeDir = normalize(refeyeDir);
 
-				FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir, n)), FresnelPower);
+				FresRatio = F + (1.0-F) * pow((1.0-dot(refeyeDir, worldNormal)), FresnelPower);
 			}
 		
 			if(TEAM > 0)
@@ -974,12 +946,13 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
 	}
 );
 
-static char mesh_fragment_program[] = STRINGIFY (
+static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
+	uniform vec3 staticLightColor;
+	uniform vec3 totalLightPosition, totalLightColor;
 	uniform sampler2D baseTex;
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
-	uniform vec3 baseColor;
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int FOG;
 	uniform int TEAM;
@@ -988,18 +961,16 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform int useGlow;
 	uniform float useShell;
 	uniform int fromView;
-	uniform vec3 lightPos;
 	const float SpecularFactor = 0.55;
 	//next group could be made uniforms if we want to control this 
 	const float MaterialThickness = 2.0; //this val seems good for now
 	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
 	const float RimScalar = 10.0; //intensity of the rim effect
 
-	varying vec3 LightDir;
-	varying vec3 EyeDir;
+	varying vec3 StaticLightDir;
 	varying float fog;
 	varying float FresRatio;
-	varying vec3 vertPos, lightVec, worldNormal; 
+	varying vec3 vertPos, SSlightVec, SSEyeDir, worldNormal; 
 
 	float halfLambert(in vec3 vect1, in vec3 vect2)
 	{
@@ -1028,21 +999,19 @@ static char mesh_fragment_program[] = STRINGIFY (
 
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
 		{
-			vec4 SpecColor = vec4(baseColor, 1.0)/2.0;
+			vec4 SpecColor = vec4 (totalLightColor, 1.0)/2.0;
 
-			float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos)); 
+			float attenuation = 2.0 * (1.0 / distance(totalLightPosition, vertPos)); 
 			vec3 wNorm = worldNormal;
-			vec3 eVec = EyeDir;
-			vec3 lVec = normalize(lightVec);
+			vec3 eVec = normalize(SSEyeDir);
+			vec3 lVec = normalize(SSlightVec);
 
 			vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);
 
 			vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm, lVec)));
 			indirectLightComponent += MaterialThickness * halfLambert(-eVec, lVec);
 			indirectLightComponent *= attenuation;
-			indirectLightComponent.r *= ExtinctionCoefficient.r;
-			indirectLightComponent.g *= ExtinctionCoefficient.g;
-			indirectLightComponent.b *= ExtinctionCoefficient.b;
+			indirectLightComponent.rgb *= ExtinctionCoefficient.rgb;
 
 			vec3 rim = vec3(1.0 - max(0.0,dot(wNorm, eVec)));
 			rim *= rim;
@@ -1051,32 +1020,40 @@ static char mesh_fragment_program[] = STRINGIFY (
 			scatterCol = dotLN + vec4(indirectLightComponent, 1.0);
 			scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);
 			scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);
-			scatterCol.rgb *= baseColor;
+			scatterCol.rgb *= totalLightColor;
 			scatterCol.rgb /= (specmask.a*specmask.a);//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
 		}
+		
+		vec3 relativeLightDirection = normalize (StaticLightDir);
+
+		float diffuseTerm = dot (normal, relativeLightDirection);
+
+		if( diffuseTerm > 0.0 )
+		{
+			vec3 relativeEyeDirection = normalize (EyeDir);
+			vec3 halfAngleVector = normalize (relativeLightDirection + relativeEyeDirection);
+
+			float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
+			specularTerm = pow( specularTerm, 32.0 );
+
+			litColor = vec3 (specularTerm) + (3.0 * diffuseTerm) * textureColour;
+		}
+		else
+		{
+			litColor = vec3 (0.0);
+		}
+
+		gl_FragColor.a = 1.0;
+		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
+		
+		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
+		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
 		
 		//moving fx texture
 		if(useFX > 0)
 			fx = texture2D( fxTex, gl_TexCoord[1].xy );
 		else
 			fx = vec4(0.0, 0.0, 0.0, 0.0);
-
-		//glowing fx texture
-		if(useGlow > 0)
-			glow = texture2D(fxTex, gl_TexCoord[0].xy );
-
-		litColor = textureColour * max(dot(normal, LightDir), 0.0);
-		vec3 reflectDir = reflect(LightDir, normal);
-
-		float spec = max(dot(EyeDir, reflectDir), 0.0);
-		spec = pow(spec, 6.0);
-		spec *= (SpecularFactor*specmask.a);
-		litColor = min(litColor + spec, vec3(1.0));
-
-		//keep shadows from making meshes completely black
-		litColor = max(litColor, (textureColour * vec3(0.15)));
-
-		gl_FragColor = vec4(litColor * baseColor, 1.0);		
 
 		gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);
 
@@ -1085,16 +1062,16 @@ static char mesh_fragment_program[] = STRINGIFY (
 			vec3 relEyeDir;
 			
 			if(fromView > 0)
-				relEyeDir = normalize(LightDir);
+				relEyeDir = normalize(StaticLightDir);
 			else
 				relEyeDir = normalize(EyeDir);
-					
+			
 			vec3 reflection = reflect(relEyeDir, normal);
 			vec3 refraction = refract(relEyeDir, normal, 0.66);
 
 			vec4 Tl = texture2D(fx2Tex, reflection.xy );
 			vec4 Tr = texture2D(fx2Tex, refraction.xy );
-
+			
 			vec4 cubemap = mix(Tl,Tr,FresRatio);
 			
 			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor);
@@ -1103,7 +1080,10 @@ static char mesh_fragment_program[] = STRINGIFY (
 		}
 		
 		if(useGlow > 0)
+		{
+			glow = texture2D(fxTex, gl_TexCoord[0].xy );
 			gl_FragColor = mix(gl_FragColor, glow, glow.a);
+		}
 
 		if(TEAM == 1)
 			gl_FragColor = mix(gl_FragColor, vec4(0.3, 0.0, 0.0, 1.0), fog);
@@ -1775,12 +1755,15 @@ static void get_mesh_anim_uniform_locations (GLhandleARB programObj, mesh_anim_u
 static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_location_t *out)
 {
 	get_mesh_anim_uniform_locations (programObj, &out->anim_uniforms);
-	out->lightPosition = glGetUniformLocationARB (programObj, "lightPos");
+	get_dlight_uniform_locations (programObj, &out->dlight_uniforms);
+	out->staticLightPosition = glGetUniformLocationARB (programObj, "staticLightPosition");
+	out->staticLightColor = glGetUniformLocationARB (programObj, "staticLightColor");
+	out->totalLightPosition = glGetUniformLocationARB (programObj, "totalLightPosition");
+	out->totalLightColor = glGetUniformLocationARB (programObj, "totalLightColor");
 	out->baseTex = glGetUniformLocationARB (programObj, "baseTex");
 	out->normTex = glGetUniformLocationARB (programObj, "normalTex");
 	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
-	out->color = glGetUniformLocationARB (programObj, "baseColor");
 	out->time = glGetUniformLocationARB (programObj, "time");
 	out->fog = glGetUniformLocationARB (programObj, "FOG");
 	out->useFX = glGetUniformLocationARB (programObj, "useFX");
@@ -1932,15 +1915,26 @@ void R_LoadGLSLPrograms(void)
 	g_location_trans = glGetUniformLocationARB( g_waterprogramObj, "TRANSPARENT" );
 	g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
 
-	//meshes
-	R_LoadGLSLProgram ("Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, 0, &g_meshprogramObj);
+	for (i = 0; i <= GLSL_MAX_DLIGHTS; i++)
+	{
+		//meshes
+		R_LoadGLSLProgram (
+			"Mesh", (char*)mesh_vertex_program, (char*)mesh_fragment_program,
+			ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN,
+			i, &g_meshprogramObj[i]
+		);
 	
-	get_mesh_uniform_locations (g_meshprogramObj, &mesh_uniforms);
+		get_mesh_uniform_locations (g_meshprogramObj[i], &mesh_uniforms[i]);
 
-	//vertex-only meshes
-	R_LoadGLSLProgram ("VertexOnly_Mesh", (char*)mesh_vertex_program, NULL, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, 0, &g_vertexonlymeshprogramObj);
+		//vertex-only meshes
+		R_LoadGLSLProgram (
+			"VertexOnly_Mesh", (char*)mesh_vertex_program, NULL,
+			ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN,
+			i, &g_vertexonlymeshprogramObj[i]
+		);
 	
-	get_mesh_uniform_locations (g_vertexonlymeshprogramObj, &mesh_vertexonly_uniforms);
+		get_mesh_uniform_locations (g_vertexonlymeshprogramObj[i], &mesh_vertexonly_uniforms[i]);
+	}
 	
 	//Glass
 	R_LoadGLSLProgram ("Glass", (char*)glass_vertex_program, (char*)glass_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM, 0, &g_glassprogramObj);

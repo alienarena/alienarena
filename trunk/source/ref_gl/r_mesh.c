@@ -30,8 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_ragdoll.h"
 
 // FIXME: globals
-static vec3_t worldlight, shadelight, lightPosition;
-static float dynFactor; 
+static vec3_t worldlight, shadelight, totallight, totalLightPosition;
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 extern image_t *r_mirrortexture;
@@ -326,7 +325,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 {
 	int i, j, lnum;
-	dlight_t	*dl;
+	dlight_t *dl;
 	float dist;
 	vec3_t staticlight, dynamiclight;
 	vec3_t	temp, tempOrg, lightAdd;
@@ -335,8 +334,8 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	qboolean copy;
 
 	//light shining down if there are no lights at all
-	VectorCopy (meshOrigin, lightPosition);
-	lightPosition[2] += 128;
+	VectorCopy (meshOrigin, statLightPosition);
+	statLightPosition[2] += 128;
 
 	if ((currententity->flags & RF_BOBBING) && !RagDoll)
 		bob = currententity->bob;
@@ -411,7 +410,10 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 			statLightPosition[i] = lightAdd[i]/numlights;
 	}
 	
-	dynFactor = 0;
+	VectorCopy (staticlight, worldlight);
+	
+	// everything after this line is used only for subsurface scattering.
+	
 	if (gl_dynamic->integer != 0)
 	{
 		R_DynamicLightPoint (currententity->origin, dynamiclight);
@@ -435,7 +437,6 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 				numlights+=10*dl->intensity;
 
 				VectorSubtract (dl->origin, meshOrigin, temp);
-				dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 			}
 		}
 	}
@@ -444,12 +445,12 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		VectorClear (dynamiclight);
 	}
 	
-	VectorAdd (staticlight, dynamiclight, worldlight);
+	VectorAdd (staticlight, dynamiclight, totallight);
 
 	if (numlights > 0.0)
 	{
 		for (i = 0; i < 3; i++)
-			lightPosition[i] = lightAdd[i]/numlights;
+			totalLightPosition[i] = lightAdd[i]/numlights;
 	}
 }
 
@@ -602,10 +603,8 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 // Cobbled together from two different functions. TODO: clean this mess up!
 static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader, qboolean shell)
 {
-	int i;
 	float alpha;
-	vec3_t lightVec, lightVal;
-	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms : &mesh_vertexonly_uniforms;
+	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms[CUR_NUM_DLIGHTS] : &mesh_vertexonly_uniforms[CUR_NUM_DLIGHTS];
 	
 	if (shell || (currentmodel->typeFlags & MESH_DECAL))
 	{
@@ -625,70 +624,23 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 	else
 		alpha = 0.33f;
 	
-	//send light level and color to shader, ramp up a bit
-	VectorCopy (lightcolor, lightVal);
-	for (i = 0; i < 3; i++)
-	{
-		if (lightVal[i] < shadelight[i]/2)
-			lightVal[i] = shadelight[i]/2; //never go completely black
-		lightVal[i] *= 5;
-		lightVal[i] += dynFactor;
-		if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		{
-			if (lightVal[i] > 1.5)
-				lightVal[i] = 1.5;
-		}
-		else
-		{
-			if (lightVal[i] > 1.0+dynFactor)
-				lightVal[i] = 1.0+dynFactor;
-		}
-		if (shell)
-			lightVal[i] *= (currententity->ragdoll?1.25:2.5);
-	}
-	
-	if (shell)
-	{
-		//simple directional(relative light position)
-		VectorSubtract (lightPosition, currententity->origin, lightVec);
-		VectorMA (lightPosition, 1.0, lightVec, lightPosition);
-		R_ModelViewTransform (lightPosition, lightVec);
-		
-		if (currententity->ragdoll)
-			qglDepthMask(false);
-	}
-	else if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL)) //menu model
-	{
-		//fixed light source pointing down, slightly forward and to the left
-		lightPosition[0] = -25.0;
-		lightPosition[1] = 300.0;
-		lightPosition[2] = 400.0;
-		VectorMA (lightPosition, 5.0, lightVec, lightPosition);
-		R_ModelViewTransform (lightPosition, lightVec);
-
-		for (i = 0; i < 3; i++)
-			lightVal[i] = 1.1;
-	}
-	else
-	{
-		//simple directional(relative light position)
-		VectorSubtract (lightPosition, currententity->origin, lightVec);
-		VectorMA (lightPosition, 5.0, lightVec, lightPosition);
-		R_ModelViewTransform (lightPosition, lightVec);
-
-		//brighten things slightly
-		for (i = 0; i < 3; i++)
-			lightVal[i] *= 1.05;
-	}
-	
 	if (fragmentshader)
-		glUseProgramObjectARB (g_meshprogramObj);
+		glUseProgramObjectARB (g_meshprogramObj[CUR_NUM_DLIGHTS]);
 	else
-		glUseProgramObjectARB (g_vertexonlymeshprogramObj);
+		glUseProgramObjectARB (g_vertexonlymeshprogramObj[CUR_NUM_DLIGHTS]);
 	
-	glUniform3fARB (uniforms->lightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	R_SetDlightUniforms (&uniforms->dlight_uniforms);
+	
 	// FIXME: the GLSL shader doesn't support shell alpha!
-	glUniform3fARB (uniforms->color, lightVal[0], lightVal[1], lightVal[2]);
+	glUniform3fARB (uniforms->staticLightColor, shadelight[0], shadelight[1], shadelight[2]);
+	
+	{
+		vec3_t lightVec, tmp;
+		VectorSubtract (statLightPosition, currententity->origin, tmp);
+		VectorMA (statLightPosition, 5.0, tmp, tmp);
+		R_ModelViewTransform (tmp, lightVec);
+		glUniform3fARB (uniforms->staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	}
 	
 	GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
 	glUniform1iARB (uniforms->baseTex, 0);
@@ -720,6 +672,17 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 			glUniform1iARB (uniforms->fromView, 1);
 		else
 			glUniform1iARB (uniforms->fromView, 0);
+		
+		// for subsurface scattering, we hack in the old algorithm.
+		if (!shell && !rs->stage->cube)
+		{
+			vec3_t lightVec, tmp;
+			VectorSubtract (totalLightPosition, currententity->origin, tmp);
+			VectorMA (totalLightPosition, 5.0, tmp, tmp);
+			R_ModelViewTransform (tmp, lightVec);
+			glUniform3fARB (uniforms->totalLightPosition, lightVec[0], lightVec[1], lightVec[2]);
+			glUniform3fARB (uniforms->totalLightColor, totallight[0], totallight[1], totallight[2]);
+		}
 	}
 	
 	glUniform1fARB (uniforms->time, rs_realtime);
@@ -758,7 +721,7 @@ static void R_Mesh_SetupGlassRender (void)
 	
 	glUseProgramObjectARB (g_glassprogramObj);
 	
-	R_ModelViewTransform (lightPosition, lightVec);
+	R_ModelViewTransform (statLightPosition, lightVec);
 	glUniform3fARB (glass_uniforms.lightPos, lightVec[0], lightVec[1], lightVec[2]);
 
 	AngleVectors (currententity->angles, NULL, left, up);
