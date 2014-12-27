@@ -150,6 +150,14 @@ maps/meshes/desert/platewall2
 		normalmap
 	}
 }
+maps/meshes/desert/cliff1
+{
+	{
+		map maps/meshes/desert/cliff1_normal.tga
+		normalmap
+	}
+}
+
 
 
 
