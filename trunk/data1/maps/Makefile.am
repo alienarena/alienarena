@@ -162,6 +162,9 @@ nobase_dist_maps_DATA = \
 	meshes/desert/chair.jpg \
 	meshes/desert/chair.md2 \
 	meshes/desert/chair_normal.jpg \
+	meshes/desert/cliff1_normal.jpg \
+	meshes/desert/cliff1.jpg \
+	meshes/desert/cliff1.md2 \
 	meshes/desert/damage1.decal \
 	meshes/desert/damage2.decal \
 	meshes/desert/damage3.decal \
