@@ -1044,7 +1044,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		}
 
 		gl_FragColor.a = 1.0;
-		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
+		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * clamp(staticLightColor * 1.75, 0.0, 0.45);
 		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
 		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
