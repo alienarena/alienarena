@@ -7093,18 +7093,21 @@
 "classname" "misc_mapmodel"
 "origin" "1680.000000 -696.000000 252.000000"
 "model" "maps/meshes/gothic/meat1.md2"
+"spawnflags" "1"
 }
 // entity 86
 {
 "classname" "misc_mapmodel"
 "origin" "1584.000000 -516.000000 284.000000"
 "model" "maps/meshes/gothic/meat2.md2"
+"spawnflags" "1"
 }
 // entity 87
 {
 "classname" "misc_mapmodel"
 "origin" "1508.000000 -700.000000 224.000000"
 "model" "maps/meshes/gothic/meat3.md2"
+"spawnflags" "1"
 }
 // entity 88
 {
@@ -7112,6 +7115,7 @@
 "origin" "1660.000000 -415.999969 260.000000"
 "model" "maps/meshes/gothic/meat1.md2"
 "angle" "-36.813782"
+"spawnflags" "1"
 }
 // entity 89
 {
@@ -7503,4 +7507,86 @@
 "origin" "-546.999939 -1667.999878 23.000061"
 "model" "maps/meshes/urban/pallette.md2"
 "angles" "0.000002 -29.850430 -66.914864"
+}
+// entity 146
+{
+"classname" "misc_mapmodel"
+"origin" "1128.639648 814.700134 189.825058"
+"model" "maps/meshes/desert/cliff1.md2"
+"spawnflags" "1"
+"angles" "-10.407231 66.957710 2.727284"
+}
+// entity 147
+{
+"classname" "misc_mapmodel"
+"origin" "1079.537354 821.262146 190.572281"
+"model" "maps/meshes/desert/cliff1.md2"
+"spawnflags" "1"
+"angles" "-10.407231 66.957710 2.727284"
+}
+// entity 148
+{
+"classname" "misc_mapmodel"
+"origin" "1159.348389 806.184326 171.701828"
+"model" "maps/meshes/desert/cliff1.md2"
+"spawnflags" "1"
+"angles" "-10.407231 66.957710 2.727284"
+}
+// entity 149
+{
+"classname" "misc_mapmodel"
+"origin" "1102.305664 785.516541 237.721313"
+"model" "maps/meshes/desert/cliff1.md2"
+"spawnflags" "1"
+"angles" "-10.407231 66.957710 2.727284"
+}
+// entity 150
+{
+"classname" "misc_mapmodel"
+"origin" "1042.675659 831.448608 144.513245"
+"model" "maps/meshes/desert/cliff1.md2"
+"spawnflags" "1"
+"angles" "-10.407231 66.957710 2.727284"
+}
+// entity 151
+{
+"classname" "misc_mapmodel"
+"origin" "1190.641235 820.185608 170.087936"
+"model" "maps/meshes/rocks/02/rock.md2"
+"angles" "-28.037725 -178.417786 2.239970"
+}
+// entity 152
+{
+"classname" "misc_mapmodel"
+"origin" "1141.387085 857.367371 181.430374"
+"model" "maps/meshes/rocks/02/rock.md2"
+"angles" "-28.037725 104.475601 2.239970"
+}
+// entity 153
+{
+"classname" "misc_mapmodel"
+"origin" "1108.901245 871.014648 169.994888"
+"model" "maps/meshes/rocks/04/rock.md2"
+"angles" "-28.037725 -178.417786 2.239970"
+}
+// entity 154
+{
+"classname" "misc_mapmodel"
+"origin" "1133.142944 867.254639 171.799469"
+"model" "maps/meshes/rocks/04/rock.md2"
+"angles" "-72.175880 -175.433365 -1.364470"
+}
+// entity 155
+{
+"classname" "misc_mapmodel"
+"origin" "1063.929810 865.289795 169.751114"
+"model" "maps/meshes/rocks/02/rock.md2"
+"angles" "-44.534081 -105.890411 2.598853"
+}
+// entity 156
+{
+"classname" "misc_mapmodel"
+"origin" "1023.999939 872.000000 159.999969"
+"model" "maps/meshes/gothic/tree1.md2"
+"angles" "-11.250966 3.226881 -17.319674"
 }
