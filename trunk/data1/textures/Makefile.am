@@ -997,7 +997,11 @@ nobase_dist_textures_DATA = \
 	desert/plank1.tga \
 	desert/plank1_nm.tga \
 	desert/platewall1.tga \
+	desert/platewall1_hm.tga \
+	desert/platewall1_nm.tga \
 	desert/platewall2.tga \
+	desert/platewall2_hm.tga \
+	desert/platewall2_nm.tga \
 	desert/rebardamage1.tga \
 	desert/rebardamage2.tga \
 	desert/rebardamage3.tga \
