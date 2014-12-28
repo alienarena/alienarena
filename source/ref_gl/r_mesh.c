@@ -821,7 +821,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 	qboolean	lerped;
 	
 	// if true, then render through the RScript code
-	qboolean	rs_slowpath = false;
+	qboolean	rs_slowpath;
 	
 	rscript_t	*rs = NULL;
 	
@@ -829,16 +829,12 @@ static void R_Mesh_DrawFrame (int skinnum)
 		rs=(rscript_t *)currententity->script;
 	
 	//check for valid script
-	if (rs && rs->stage)
-	{
-		if (!strcmp("***r_notexture***", rs->stage->texture->name) || 
-			((rs->stage->fx || rs->stage->glow) && !strcmp("***r_notexture***", rs->stage->texture2->name)) ||
-			(rs->stage->cube && !strcmp("***r_notexture***", rs->stage->texture3->name)) ||
-			rs->stage->num_blend_textures != 0 || rs->stage->next != NULL || currentmodel->lightmap != NULL )
-		{
-			rs_slowpath = true;
-		}
-	}
+	rs_slowpath = rs != NULL && rs->stage != NULL && (
+		rs->stage->texture == r_notexture ||
+		((rs->stage->fx || rs->stage->glow) && rs->stage->texture2 == r_notexture) ||
+		(rs->stage->cube && rs->stage->texture3 == r_notexture) ||
+		rs->stage->num_blend_textures != 0 || rs->stage->next != NULL || currentmodel->lightmap != NULL
+	);
 	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
 	
