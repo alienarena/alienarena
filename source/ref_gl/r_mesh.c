@@ -601,7 +601,7 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 }
 
 // Cobbled together from two different functions. TODO: clean this mess up!
-static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t lightcolor, qboolean fragmentshader, qboolean shell)
+static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fragmentshader, qboolean shell)
 {
 	float alpha;
 	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms[CUR_NUM_DLIGHTS] : &mesh_vertexonly_uniforms[CUR_NUM_DLIGHTS];
@@ -668,10 +668,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, vec3_t light
 		glUniform1iARB (uniforms->useGlow, shell ? 0 : rs->stage->glow);
 		glUniform1iARB (uniforms->useCube, shell ? 0 : rs->stage->cube);
 		
-		if ((currententity->flags & RF_WEAPONMODEL))
-			glUniform1iARB (uniforms->fromView, 1);
-		else
-			glUniform1iARB (uniforms->fromView, 0);
+		glUniform1iARB (uniforms->fromView, (currententity->flags & RF_WEAPONMODEL) != 0);
 		
 		// for subsurface scattering, we hack in the old algorithm.
 		if (!shell && !rs->stage->cube)
@@ -820,8 +817,6 @@ R_Mesh_DrawFrame: should be able to handle all types of meshes.
 */
 static void R_Mesh_DrawFrame (int skinnum)
 {
-	vec3_t		lightcolor;
-	
 	// only applicable to MD2
 	qboolean	lerped;
 	
@@ -846,9 +841,6 @@ static void R_Mesh_DrawFrame (int skinnum)
 	}
 	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
-	
-	VectorCopy (shadelight, lightcolor);
-	VectorNormalize (lightcolor);
 	
 	if ((((currentmodel->typeFlags & MESH_MORPHTARGET) && lerped) || (currentmodel->typeFlags & MESH_SKELETAL) != 0) && rs_slowpath)
 	{
@@ -887,12 +879,12 @@ static void R_Mesh_DrawFrame (int skinnum)
 		if (currententity->flags & RF_SHELL_ANY)
 		{
 			fragmentshader = gl_normalmaps->integer;
-			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader, true);
+			R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, true);
 		}
 		else
 		{
 			fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
-			R_Mesh_SetupStandardRender (skinnum, rs, lightcolor, fragmentshader, false);
+			R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, false);
 		}
 	}
 	
@@ -1111,14 +1103,11 @@ void R_Mesh_Draw (void)
 	
 	qglColor4f (1,1,1,1);
 
-	if (r_minimap->integer && !currententity->ragdoll)
+	if (r_minimap->integer && !currententity->ragdoll && (currententity->flags & RF_MONSTER))
 	{
-		if ((currententity->flags & RF_MONSTER))
-		{
-			Vector4Set (RadarEnts[numRadarEnts].color, 1.0, 0.0, 2.0, 1.0);
-			VectorCopy (currententity->origin, RadarEnts[numRadarEnts].org);
-			numRadarEnts++;
-		}
+		Vector4Set (RadarEnts[numRadarEnts].color, 1.0, 0.0, 2.0, 1.0);
+		VectorCopy (currententity->origin, RadarEnts[numRadarEnts].org);
+		numRadarEnts++;
 	}
 }
 
