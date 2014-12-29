@@ -1210,7 +1210,7 @@ void R_Register( void )
 
 	gl_nosubimage = Cvar_Get( "gl_nosubimage", "0", 0 );
 
-	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE|CVARDOC_INT );
+	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE|CVARDOC_FLOAT);
 	Cvar_Describe (gl_modulate, "Brightness setting. Higher means brighter.");
 	gl_bitdepth = Cvar_Get( "gl_bitdepth", "0", 0 );
 	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
