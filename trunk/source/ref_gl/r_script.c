@@ -1186,7 +1186,6 @@ static void RS_CleanupGLState (void)
 
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_ALPHATEST
-	GLSTATE_DISABLE_TEXGEN
 }
 
 qboolean rs_in_group = false;

@@ -885,7 +885,6 @@ static void R_Mesh_DrawFrame (int skinnum)
 
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
-	GLSTATE_DISABLE_TEXGEN
 	
 	// FIXME: make this unnecessary
 	// Without this, the player options menu goes all funny due to
