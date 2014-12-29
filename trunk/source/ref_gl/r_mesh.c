@@ -333,6 +333,15 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	float bob;
 	qboolean copy;
 
+	if(currententity->flags & RF_MENUMODEL)
+	{
+		VectorSet(statLightPosition, -15.0, 180.0, 140.0);
+		VectorCopy(statLightPosition, totalLightPosition);
+		VectorSet(totallight, 0.75, 0.75, 0.75);
+
+		return;
+	}
+
 	//light shining down if there are no lights at all
 	VectorCopy (meshOrigin, statLightPosition);
 	statLightPosition[2] += 128;
