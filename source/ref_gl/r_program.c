@@ -961,7 +961,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform int useGlow;
 	uniform float useShell;
 	uniform int fromView;
-	const float SpecularFactor = 0.55;
+	const float SpecularFactor = 0.50;
 	//next group could be made uniforms if we want to control this 
 	const float MaterialThickness = 2.0; //this val seems good for now
 	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
@@ -1001,7 +1001,8 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		{
 			vec4 SpecColor = vec4 (totalLightColor, 1.0)/2.0;
 
-			float attenuation = 2.0 * (1.0 / distance(totalLightPosition, vertPos)); 
+			//overall brightness should be more of a factor than distance(for example, hold your hand up to block the sun)
+			float attenuation = length(clamp(totalLightColor, 0, .05)) * 0.1;
 			vec3 wNorm = worldNormal;
 			vec3 eVec = normalize(SSEyeDir);
 			vec3 lVec = normalize(SSlightVec);
@@ -1021,7 +1022,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);
 			scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);
 			scatterCol.rgb *= totalLightColor;
-			scatterCol.rgb /= (specmask.a*specmask.a);//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
+			scatterCol.rgb /= (specmask.a * specmask.a);//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
 		}
 		
 		vec3 relativeLightDirection = normalize (StaticLightDir);
@@ -1044,7 +1045,9 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		}
 
 		gl_FragColor.a = 1.0;
-		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * clamp(staticLightColor * 1.75, 0.0, 0.45);
+		float staticLightColor_magnitude = 1.65 * length (staticLightColor);
+		vec3 new_staticLightColor = normalize (staticLightColor) * clamp (staticLightColor_magnitude, 0.1, 0.70);
+		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * new_staticLightColor;
 		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
 		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
@@ -1074,7 +1077,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			
 			vec4 cubemap = mix(Tl,Tr,FresRatio);
 			
-			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor);
+			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor * new_staticLightColor);
 
 			gl_FragColor = mix(cubemap, gl_FragColor, specmask.a);
 		}
