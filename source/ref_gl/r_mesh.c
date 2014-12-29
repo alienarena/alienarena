@@ -867,21 +867,15 @@ static void R_Mesh_DrawFrame (int skinnum)
 	}
 	else
 	{
-		qboolean fragmentshader;
+		qboolean fragmentshader, shell;
 		
 		if (rs && rs->stage->depthhack)
 			qglDepthMask(false);
 		
-		if (currententity->flags & RF_SHELL_ANY)
-		{
-			fragmentshader = gl_normalmaps->integer;
-			R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, true);
-		}
-		else
-		{
-			fragmentshader = rs && rs->stage->normalmap && gl_normalmaps->integer;
-			R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, false);
-		}
+		shell = (currententity->flags & RF_SHELL_ANY) != 0;
+		fragmentshader = gl_normalmaps->integer && (shell || (rs && rs->stage->normalmap));
+		
+		R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, shell);
 	}
 	
 	R_Mesh_DrawVBO (lerped);
