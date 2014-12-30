@@ -25,10 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_iqm.h"
 #include "r_ragdoll.h"
 
-#if !defined max
-#define max(a,b)  (((a)<(b)) ? (b) : (a))
-#endif
-
 // This function will compute the quaternion's W based on its X, Y, and Z.)
 void Vec4_CompleteQuatW (vec4_t q)
 {
