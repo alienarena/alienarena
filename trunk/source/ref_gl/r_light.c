@@ -199,7 +199,7 @@ void R_UpdateDlights (void)
 		
 		VectorSubtract (r_origin, l->origin, relativePosition);
 		l->sort_key = l->intensity - VectorLength (relativePosition) / 10.0f;
-	}
+	}	
 	
 	// Sort from most important to least important
 	qsort (r_newrefdef.dlights, r_newrefdef.num_dlights, sizeof (dlight_t), compare_dlight);

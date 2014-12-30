@@ -37,6 +37,8 @@ extern image_t *r_mirrortexture;
 
 extern cvar_t *cl_gun;
 
+extern float sun_alpha;
+
 cvar_t *gl_mirror;
 
 #if 0
@@ -388,7 +390,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		{
 			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal) {}
 				//terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
-			else if (!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2])) {}
+			else if (!RagDoll && (currententity->flags & RF_WEAPONMODEL)) {}
 				//don't do traces for lights above weapon models, not smooth enough
 			else if (!CM_inPVS (tempOrg, LightGroups[i].group_origin))
 				continue;
@@ -403,6 +405,17 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
 			for (j = 0; j < 3; j++)
 				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+			numlights+=weight;
+			nonweighted_numlights++;
+		}
+
+		//A simple but effective effect to mimick the effect of sun silouetting(i.e, hold your hand up and partially block the sun, the 
+		//backside appears to grow very dark - so we can do this by weighting our static light average heavily towards the sun's origin.
+		if(sun_alpha > 0.0)
+		{
+			weight = 10000 * pow(sun_alpha, 10);
+			for (j = 0; j < 3; j++)
+				lightAdd[j] += r_sunLight->origin[j]*weight;
 			numlights+=weight;
 			nonweighted_numlights++;
 		}
