@@ -1045,9 +1045,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		}
 
 		gl_FragColor.a = 1.0;
-		float staticLightColor_magnitude = 1.65 * length (staticLightColor);
-		vec3 new_staticLightColor = normalize (staticLightColor) * clamp (staticLightColor_magnitude, 0.1, 0.70);
-		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * new_staticLightColor;
+		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
 		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
 		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
@@ -1077,7 +1075,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			
 			vec4 cubemap = mix(Tl,Tr,FresRatio);
 			
-			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor * new_staticLightColor);
+			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor * staticLightColor);
 
 			gl_FragColor = mix(cubemap, gl_FragColor, specmask.a);
 		}

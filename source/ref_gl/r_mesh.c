@@ -640,15 +640,21 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	
 	R_SetDlightUniforms (&uniforms->dlight_uniforms);
 	
-	// FIXME: the GLSL shader doesn't support shell alpha!
-	glUniform3fARB (uniforms->staticLightColor, shadelight[0], shadelight[1], shadelight[2]);
-	
 	{
-		vec3_t lightVec, tmp;
+		vec3_t lightVec, lightVal, tmp;
+		float lightVal_magnitude;
+		
 		VectorSubtract (statLightPosition, currententity->origin, tmp);
 		VectorMA (statLightPosition, 5.0, tmp, tmp);
 		R_ModelViewTransform (tmp, lightVec);
 		glUniform3fARB (uniforms->staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
+		
+		VectorCopy (shadelight, lightVal);
+		lightVal_magnitude = 1.65f * VectorNormalize (lightVal);
+		lightVal_magnitude = clamp (lightVal_magnitude, 0.1f, 0.35f * gl_modulate->value);
+		VectorScale (lightVal, lightVal_magnitude, lightVal);
+		// FIXME: the GLSL shader doesn't support shell alpha!
+		glUniform3fARB (uniforms->staticLightColor, lightVal[0], lightVal[1], lightVal[2]);
 	}
 	
 	GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
