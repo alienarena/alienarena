@@ -521,7 +521,6 @@ extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r
                       float g, float b, float alpha);
 extern void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin);
 extern void R_DrawVegetationCasters( qboolean forShadows );
-extern float sun_alpha;
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void R_GLSLGodRays(void)
 {

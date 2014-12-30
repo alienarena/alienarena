@@ -344,6 +344,7 @@ qboolean draw_sun;
 float sun_x;
 float sun_y;
 float sun_size;
+float sun_alpha;
 extern void R_InitSun();
 extern void R_RenderSun();
 
