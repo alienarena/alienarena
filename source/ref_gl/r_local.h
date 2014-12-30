@@ -38,6 +38,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define min(a,b) (((a)<(b)) ? (a) : (b))
 #endif
 
+#if !defined max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
+
+#if !defined clamp
+#define clamp(x,low,high) (min(max(low,x),high))
+#endif
+
 // up / down
 #define	PITCH	0
 
