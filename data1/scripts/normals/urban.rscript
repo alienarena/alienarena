@@ -109,3 +109,26 @@ maps/meshes/urban/yellowlantern
 		glow
 	}
 }
+maps/meshes/urban/barrier1
+{
+	{
+		map maps/meshes/urban/barrier1_normal.tga
+		normalmap
+	}
+}
+maps/meshes/urban/barrier2
+{
+	{
+		map maps/meshes/urban/barrier2_normal.tga
+		normalmap
+	}
+}
+maps/meshes/urban/bench
+{
+	{
+		map maps/meshes/urban/bench_normal.tga
+		normalmap
+	}
+}
+
+
