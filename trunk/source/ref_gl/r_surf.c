@@ -994,7 +994,6 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 {
 	int		 i;
-	vec3_t		lightVec;
 	
 	if (gl_dynamic->integer == 0)
 	{

@@ -98,7 +98,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 	if (targ->health < -999)
 		targ->health = -999;
 
-	if (targ->monsterinfo.aiflags & AI_NPC) { //cows never really die, they just return to their
+	if (targ->monsterinfo.aiflags & AI_NPC) { //npc's never really die, they just return to their
 											  //original spawn points
 		//send an effect
 		gi.WriteByte (svc_temp_entity);
@@ -306,7 +306,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	if ((targ != attacker) && ((deathmatch->value && (dmflags->integer & (DF_SKINTEAMS))) || ctf->value || tca->value || cp->value))
+	if ((targ != attacker) && ((deathmatch->value && (dmflags->integer & (DF_SKINTEAMS))) || ctf->value || tca->value))
 	{
 		if (OnSameTeam (targ, attacker) && mod != MOD_TELEFRAG) //telefrag kills no matter what
 		{

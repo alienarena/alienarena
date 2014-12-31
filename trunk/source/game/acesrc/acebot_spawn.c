@@ -991,9 +991,6 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	//vehicles
 	bot->in_vehicle = false;
 
-	//deathball
-	bot->in_deathball = false;
-
 	VectorCopy (mins, bot->mins);
 	VectorCopy (maxs, bot->maxs);
 	VectorClear (bot->velocity);
@@ -1562,11 +1559,7 @@ static void remove_bot( edict_t *bot )
 	{
 		CTFDeadDropFlag(bot, NULL);
 	}
-	if ( bot->in_deathball )
-	{
-		DeadDropDeathball(bot);
-	}
-
+	
 	if ( g_duel->integer )
 	{// duel mode, we need to bump people down the queue if its the player in game leaving
 		MoveClientsDownQueue(bot);

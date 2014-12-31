@@ -151,7 +151,7 @@ typedef struct teamcensus_s
 } teamcensus_t;
 
 #define TEAM_GAME ( (dmflags->integer & (DF_SKINTEAMS)) \
-		|| ctf->integer || tca->integer || cp->integer )
+		|| ctf->integer || tca->integer )
 
 //clientinfo origins
 #define INGAME					0
@@ -289,10 +289,9 @@ typedef struct
 #define WEAP_MINDERASER			13
 #define WEAP_BOMBER				14
 #define WEAP_STRAFER			15
-#define WEAP_DEATHBALL			16
-#define WEAP_HOVER				17
-#define WEAP_ABOMB				18
-#define WEAP_HBOMB				19
+#define WEAP_HOVER				16
+#define WEAP_ABOMB				17
+#define WEAP_HBOMB				18
 
 typedef struct gitem_s
 {
@@ -605,7 +604,6 @@ extern	cvar_t	*maxentities;
 extern	cvar_t	*deathmatch;
 extern  cvar_t  *ctf;
 extern  cvar_t  *tca;
-extern  cvar_t  *cp;
 extern	cvar_t	*dmflags;
 extern	cvar_t	*skill;
 extern	cvar_t	*fraglimit;
@@ -815,13 +813,6 @@ void VehicleSetup (edict_t *ent);
 qboolean Get_in_vehicle (edict_t *ent, edict_t *other);
 void Leave_vehicle(edict_t *ent, gitem_t *item);
 
-//deathball
-void ResetDeathball();
-void DeadDropDeathball(edict_t *self);
-void DeathballSetup (edict_t *ent);
-qboolean Pickup_deathball (edict_t *ent, edict_t *other);
-void DeathballDrop(edict_t *ent, gitem_t *item);
-
 //
 // g_utils.c
 //
@@ -945,9 +936,6 @@ void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int alt);
 void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed);
 #endif
-
-//deathball
-void fire_deathball (edict_t *self, vec3_t start, vec3_t dir, int speed);
 
 //grapple
 typedef enum {
@@ -1106,11 +1094,6 @@ extern void SP_trigger_counter (edict_t *ent);
 extern void SP_trigger_elevator (edict_t *ent);
 extern void SP_trigger_gravity (edict_t *ent);
 extern void SP_trigger_monsterjump (edict_t *ent);
-extern void SP_trigger_deathballtarget (edict_t *ent);
-extern void SP_trigger_reddeathballtarget (edict_t *ent);
-extern void SP_trigger_bluedeathballtarget (edict_t *ent);
-extern void SP_trigger_redcowtarget ( edict_t *ent);
-extern void SP_trigger_bluecowtarget (edict_t *ent);
 
 extern void SP_target_temp_entity (edict_t *ent);
 extern void SP_target_speaker (edict_t *ent);
@@ -1137,7 +1120,6 @@ extern void SP_point_combat (edict_t *self);
 extern void SP_misc_teleporter (edict_t *self);
 extern void SP_misc_teleporter_dest (edict_t *self);
 
-extern void SP_npc_cow (edict_t *self);
 extern void SP_npc_deathray(edict_t *self);
 
 //TCA
@@ -1395,9 +1377,6 @@ struct gclient_s
     float	Jet_remaining;  /*remaining fuel time*/
     float	Jet_next_think;
 
-	//deathball
-	qboolean in_deathball;
-
 	//grapple
 	void		*ctf_grapple;		// entity of grapple
 	int			ctf_grapplestate;		// true if pulling
@@ -1653,9 +1632,6 @@ struct edict_s
 
 	//vehicles
 	qboolean in_vehicle;
-
-	//deathball
-	qboolean in_deathball;
 
 	//Flamethrower and fire vars
 	float	 FlameDelay;

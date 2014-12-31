@@ -864,7 +864,7 @@ void G_SetClientEffects (edict_t *ent)
 	if(ctf->value)
 		CTFEffects(ent);
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value )
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value )
 		TeamEffects(ent);
 	else if (g_dmlights->integer && !g_tactical->integer)
 	    ent->s.effects |= EF_TEAM2;

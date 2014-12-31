@@ -449,7 +449,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 		}
 	    if (strcmp(target->classname, "player") == 0) //so players can't sneak RIGHT up on a bot
 		{
-			if(!target->deadflag && !self->in_deathball && !OnSameTeam(self, target) && !(target->client->invis_framenum > level.framenum))
+			if(!target->deadflag && !OnSameTeam(self, target) && !(target->client->invis_framenum > level.framenum))
 			{
 				self->movetarget = target;
 			}
@@ -536,39 +536,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 	{
 		flag1_item = FindItemByClassname("item_flag_red");
 		flag2_item = FindItemByClassname("item_flag_blue");
-	}
-
-	if(self->in_deathball && (self->health > 25)) 
-	{ 
-		//cannot, or should not, fire at players when in a deathball
-		//look for goal - if health is too low, drop the ball and fight back
-		target = findradius(NULL, self->s.origin, 200);
-		self->enemy = NULL;
-		while(target)
-		{
-			if(target->classname == NULL) 
-			{
-				self->enemy = NULL;
-				return false;
-			}
-			if(self->dmteam == RED_TEAM && target->classname == "item_blue_dbtarget")
-				self->enemy = target;
-			else if(self->dmteam == BLUE_TEAM && target->classname == "item_red_dbtarget")
-				self->enemy = target;
-			else if(self->dmteam == NO_TEAM && target->classname == "item_dbtarget")
-				self->enemy = target;
-			target = findradius(target, self->s.origin, 200);
-		}
-		if(self->enemy) 
-		{
-			//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
-			self->movetarget = self->enemy;
-			self->goalentity= self->enemy; //face it, and fire
-			return true;
-		}
-		else
-			return false;
-	}
+	}	
 
 	//only look for these if your team's spider is vulnerable
 	if(tca->value && ((self->dmteam == RED_TEAM && red_team_score < 2) || (self->dmteam == BLUE_TEAM && blue_team_score < 2))) {
@@ -838,7 +806,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	qboolean selected;
 	qboolean clear_shot;
 
-	if (self->in_vehicle || self->in_deathball)
+	if (self->in_vehicle)
 	{
 		return;
 	}

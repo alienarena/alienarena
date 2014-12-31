@@ -272,14 +272,11 @@ libgame_a_SOURCES =  \
 	game/acesrc/acebot_nodes.c \
 	game/acesrc/acebot_spawn.c \
 	game/c_cam.c \
-	game/cow.h \
 	game/g_ai.c \
 	game/g_chase.c \
 	game/g_cmds.c \
 	game/g_combat.c \
-	game/g_cow.c \
 	game/g_ctf.c \
-	game/g_deathball.c \
 	game/g_deathray.c \
 	game/g_deathray.h \
 	game/g_func.c \

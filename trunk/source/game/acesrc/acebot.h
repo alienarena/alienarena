@@ -154,11 +154,10 @@
 //vehicles
 #define ITEMLIST_BOMBER				36
 #define ITEMLIST_STRAFER			37
-#define ITEMLIST_DEATHBALL			38
-#define ITEMLIST_HOVER				39
+#define ITEMLIST_HOVER				38
 
 //mind eraser
-#define ITEMLIST_MINDERASER			40
+#define ITEMLIST_MINDERASER			39
 
 // Special CONTENT mask for acebots, so they can detect and climb ladders
 // replaces MASK_OPAQUE defined in game/q_shared.h

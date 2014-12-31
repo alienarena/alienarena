@@ -44,7 +44,6 @@ void Weapon_Vaporizer (edict_t *ent);
 void Weapon_Minderaser (edict_t *ent);
 void Weapon_Bomber (edict_t *ent);
 void Weapon_Strafer (edict_t *ent);
-void Weapon_Deathball (edict_t *ent);
 void Weapon_Hover (edict_t *ent);
 void Weapon_TacticalBomb ( edict_t *ent);
 #endif
@@ -1157,10 +1156,6 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	if((strcmp(ent->classname, "item_bomber") == 0) || (strcmp(ent->classname, "item_strafer") == 0)
 		|| (strcmp(ent->classname, "item_hover") == 0))
 		ent->think = VehicleSetup;
-
-	//ditto for deathball
-	if(strcmp(ent->classname, "item_deathball") == 0)
-		ent->think = DeathballSetup;
 }
 
 //======================================================================
@@ -1425,119 +1420,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL
 	},
-
-/*QUAKED item_deathball (1 0.2 0) (-16 -16 -24) (16 16 32)
-*/
-	{
-		"item_deathball",
-		Pickup_deathball,
-		NULL,
-		DeathballDrop,
-		Weapon_Deathball,
-		NULL,
-		"vehicles/deathball/deathball.md2", 0,
-		"vehicles/deathball/v_wep.md2",
-/* icon */		"grapple",
-/* pickup */	"Deathball",
-		0,
-		0,
-		NULL,
-		IT_WEAPON,
-		WEAP_DEATHBALL,
-		NULL,
-		0,
-		NULL
-	},
-
-	//a fake item for bots to use as a target for throwing a deathball at.
-	{
-		"item_dbtarget",
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		"models/objects/blank/tris.md2", 0,
-		NULL,
-		NULL,
-		NULL,
-		0,
-		0,
-		NULL,
-		IT_POWERUP,
-		WEAP_DEATHBALL,
-		NULL,
-		0,
-		NULL
-	},
-	{
-		"item_red_dbtarget",
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		"models/objects/blank/tris.md2", 0,
-		NULL,
-		NULL,
-		NULL,
-		0,
-		0,
-		NULL,
-		IT_POWERUP,
-		WEAP_DEATHBALL,
-		NULL,
-		0,
-		NULL
-	},
-	{
-		"item_blue_dbtarget",
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		"models/objects/blank/tris.md2", 0,
-		NULL,
-		NULL,
-		NULL,
-		0,
-		0,
-		NULL,
-		IT_POWERUP,
-		WEAP_DEATHBALL,
-		NULL,
-		0,
-		NULL
-	},
 #endif
-	//
-	// WEAPONS
-	//
-/* weapon_grapple (.3 .3 1) (-16 -16 -16) (16 16 16)
-always owned, never in the world
-*/
-	{
-		"weapon_grapple",
-		NULL,
-		Use_Weapon,
-		NULL,
-		CTFWeapon_Grapple,
-		"misc/w_pkup.wav",
-		NULL, 0,
-		"models/weapons/v_machn/tris.md2",
-/* icon */		"grapple",
-/* pickup */	"Grapple",
-		0,
-		0,
-		NULL,
-		IT_WEAPON,
-		WEAP_GRAPPLE,
-		NULL,
-		0,
-/* precache */ "weapons/electroball.wav"
-	},
-
 #ifdef ALTERIA
 	//note some of this is clearly temporary placeholder
 	{
