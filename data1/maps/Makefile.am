@@ -10,7 +10,6 @@ nobase_dist_maps_DATA = \
 	aoa-frost2k9.bsp \
 	aoa-morpheus.bsp \
 	aoa-zorn.bsp \
-	cp-ribeye.bsp \
 	ctf-corrosion.bsp \
 	ctf-corrosion.lightmap \
 	ctf-cryogenic.bsp \
@@ -28,9 +27,6 @@ nobase_dist_maps_DATA = \
 	ctf-vesuvius2k11.lightmap \
 	ctf-violator.bsp \
 	ctf-zion2k9.bsp \
-	db-chromium.bsp \
-	db-icarus.bsp \
-	db-vesuvius.bsp \
 	dm-annihilation.bsp \
 	dm-annihilation.lightmap \
 	dm-atlantis2k8.bsp \
@@ -520,7 +516,6 @@ nobase_dist_maps_DATA = \
 	scripts/aoa-frost2k9.mus \
 	scripts/aoa-morpheus.mus \
 	scripts/aoa-zorn.mus \
-	scripts/cp-ribeye.mus \
 	scripts/ctf-corrosion.fog \
 	scripts/ctf-corrosion.mus \
 	scripts/ctf-cryogenic.fog \
@@ -544,10 +539,6 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-violator.fog \
 	scripts/ctf-violator.mus \
 	scripts/ctf-zion2k9.mus \
-	scripts/db-chromium.mus \
-	scripts/db-icarus.mus \
-	scripts/db-vesuvius.fog \
-	scripts/db-vesuvius.mus \
 	scripts/dm-atlantis2k8.mus \
 	scripts/dm-annihilation.fog \
 	scripts/dm-annihilation.mus \

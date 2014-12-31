@@ -129,6 +129,7 @@ am_libgame_a_OBJECTS = game/acesrc/acebot_ai.$(OBJEXT) \
 	game/acesrc/acebot_spawn.$(OBJEXT) game/c_cam.$(OBJEXT) \
 	game/g_ai.$(OBJEXT) game/g_chase.$(OBJEXT) \
 	game/g_cmds.$(OBJEXT) game/g_combat.$(OBJEXT) \
+	game/g_ctf.$(OBJEXT) game/g_deathray.$(OBJEXT) \
 	game/g_func.$(OBJEXT) game/g_items.$(OBJEXT) \
 	game/g_main.$(OBJEXT) game/g_misc.$(OBJEXT) \
 	game/g_monster.$(OBJEXT) game/g_phys.$(OBJEXT) \

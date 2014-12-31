@@ -15,8 +15,6 @@ nobase_dist_levelshots_DATA = \
 	aoa-morpheus.txt \
 	aoa-zorn.jpg \
 	aoa-zorn.txt \
-	cp-ribeye.jpg \
-	cp-ribeye.txt \
 	ctf-corrosion.jpg \
 	ctf-corrosion.txt \
 	ctf-cryogenic.jpg \
@@ -41,12 +39,6 @@ nobase_dist_levelshots_DATA = \
 	ctf-violator.txt \
 	ctf-zion2k9.jpg \
 	ctf-zion2k9.txt \
-	db-chromium.jpg \
-	db-chromium.txt \
-	db-icarus.jpg \
-	db-icarus.txt \
-	db-vesuvius.jpg \
-	db-vesuvius.txt \
 	dm-annihilation.jpg \
 	dm-annihilation.txt \
 	dm-atlantis2k8.jpg \
