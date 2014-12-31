@@ -1653,7 +1653,7 @@ void R_Shutdown (void)
 	glDeleteObjectARB( g_vertexShader );
 	glDeleteObjectARB( g_fragmentShader );
 	// FIXME: should we be deleting the rest of them?
-	glDeleteObjectARB( g_worldprogramObj );
+	glDeleteObjectARB( *g_worldprogramObj );
 
 	QGL_Shutdown();
 

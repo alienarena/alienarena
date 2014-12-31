@@ -19,6 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
+/* To do - clean up these warnings
+
+10>C:\alienarena_w32\source\client\menu.c(1808): warning C4090: '=' : different 'const' qualifiers
+10>C:\alienarena_w32\source\client\menu.c(1820): warning C4090: '=' : different 'const' qualifiers
+
+*/
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
