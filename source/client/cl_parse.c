@@ -451,7 +451,6 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	char		model_filename[MAX_QPATH];
 	char		skin_filename[MAX_QPATH];
 	char		weapon_filename[MAX_QPATH];
-	FILE		*file;
 
 	strncpy(ci->cinfo, s, sizeof(ci->cinfo));
 	ci->cinfo[sizeof(ci->cinfo)-1] = 0;

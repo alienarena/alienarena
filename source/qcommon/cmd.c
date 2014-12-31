@@ -422,7 +422,7 @@ Cmd_Exec_f
 */
 void Cmd_Exec_f (void)
 {
-	char	*f, *f2;
+	char	*f;
 	int		len;
 
 	if (Cmd_Argc () != 2)

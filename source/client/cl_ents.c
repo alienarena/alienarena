@@ -862,8 +862,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			// color shells generate a seperate entity for the main model
 			if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 			{
-				float	a1, a2;
-
 				//replace player color shells for powerups with floating gfx effect
 				if(playermodel && !(renderfx & RF_SHELL_GREEN))
 				{

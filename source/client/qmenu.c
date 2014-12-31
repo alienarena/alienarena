@@ -19,6 +19,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+/* To do - cleanup these warnings
+
+10>C:\alienarena_w32\source\client\qmenu.c(165): warning C4133: '==' : incompatible types - from 'menufield_s *' to '_tag_menuitem *'
+10>C:\alienarena_w32\source\client\qmenu.c(177): warning C4133: '=' : incompatible types - from '_tag_menuitem *' to 'menufield_s *'
+10>C:\alienarena_w32\source\client\qmenu.c(993): warning C4133: '=' : incompatible types - from 'menucommon_s *' to 'menuitem_s *'
+10>C:\alienarena_w32\source\client\qmenu.c(1451): warning C4133: 'initializing' : incompatible types - from '_tag_menuitem *' to 'menucommon_s *'
+10>C:\alienarena_w32\source\client\qmenu.c(1499): warning C4133: 'function' : incompatible types - from 'menuslider_s *' to 'menuitem_s *'
+10>C:\alienarena_w32\source\client\qmenu.c(1558): warning C4133: 'function' : incompatible types - from 'menulist_s *' to 'menuitem_s *'
+
+*/
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

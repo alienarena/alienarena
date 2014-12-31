@@ -177,15 +177,15 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	// TODO: we can stop permanently keeping this (change it to normal
 	// Z_Malloc) as soon as shadow volumes are gone.
 	mod->extradata = Hunk_Begin (0x300000);
-	pheader = Hunk_Alloc (LittleLong(pinmodel->ofs_end));
+	pheader = (dmdl_t *)Hunk_Alloc (LittleLong(pinmodel->ofs_end));
 
 	// byte swap the header fields and sanity check
 	for (i=0 ; i<sizeof(dmdl_t)/sizeof(int) ; i++)
 		((int *)pheader)[i] = LittleLong (((int *)buffer)[i]);
 
 	if (pheader->skinheight > MAX_LBM_HEIGHT)
-		Com_Printf("model %s has a skin taller than %d", mod->name,
-				   MAX_LBM_HEIGHT);
+		Com_Printf("model %s has a skin taller than %d at %d", mod->name,
+		MAX_LBM_HEIGHT, pheader->skinheight);
 
 	if (pheader->num_xyz <= 0)
 		Com_Printf("model %s has no vertices", mod->name);

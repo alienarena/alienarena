@@ -38,6 +38,7 @@ extern cvar_t *name;
 extern char map_music[260];
 extern cvar_t *background_music;
 extern qboolean IsVisible(vec3_t org1,vec3_t org2);
+extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 
 cvar_t		*crosshair;
 cvar_t		*cl_testparticles;

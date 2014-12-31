@@ -2197,7 +2197,7 @@ static void R_DrawRadarEdges (void)
 	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, minimap_vboId);
 	R_VertexPointer (3, 5*sizeof(float), (void *)0);
 	R_AttribPointer (ATTR_MINIMAP_DATA_IDX, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)(3*sizeof(float)));
-	GL_BindVBO (NULL);
+	GL_BindVBO (0);
 	
 	glUseProgramObjectARB (g_minimapprogramObj);
 	
