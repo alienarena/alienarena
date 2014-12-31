@@ -5,9 +5,6 @@
 modelsdir=$(pkgdatadir)/data1/models
 
 nobase_dist_models_DATA = \
-	cow/helmet.md2 \
-	cow/skin.tga \
-	cow/tris.md2 \
 	items/adrenaline/skin_normal.tga \
 	items/adrenaline/skin.tga \
 	items/adrenaline/tris.md2 \
@@ -69,21 +66,6 @@ nobase_dist_models_DATA = \
 	misc/deathray/deathray.md2 \
 	misc/deathray/deathray_normal.tga \
 	misc/deathray/deathray.tga \
-	misc/electrode/cover.md2 \
-	misc/electrode/electrode.tga \
-	misc/electrode/tris.md2 \
-	misc/lamp2/lamp2.tga \
-	misc/lamp2/tris.md2 \
-	misc/lamp/lamp.tga \
-	misc/lamp/tris.md2 \
-	misc/pod/pod.tga \
-	misc/pod/tris.md2 \
-	misc/receptor/bulb.md2 \
-	misc/receptor/receptor.tga \
-	misc/receptor/tris.md2 \
-	misc/scope/cover.md2 \
-	misc/scope/scope.tga \
-	misc/scope/tris.md2 \
 	misc/spiderpod/helmet.iqm \
 	misc/spiderpod/helmet.md2 \
 	misc/spiderpod/skin.tga \
@@ -93,9 +75,6 @@ nobase_dist_models_DATA = \
 	misc/spiderpod/tris.iqm \
 	misc/spiderpod/tris.md2 \
 	misc/spiderpod/tris.skin \
-	misc/tube/cover.md2 \
-	misc/tube/tris.md2 \
-	misc/tube/tube.tga \
 	objects/blank/skin.tga \
 	objects/blank/tris.md2 \
 	objects/brass/skin.jpg \

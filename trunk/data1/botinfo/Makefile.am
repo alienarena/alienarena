@@ -35,9 +35,6 @@ nobase_dist_botinfo_DATA = \
 	aoa-frost2k9.tmp \
 	aoa-morpheus.tmp \
 	aoa-zorn.tmp \
-	db-chromium.tmp \
-	db-icarus.tmp \
-	db-vesuvius.tmp \
 	dm-annihilation.tmp \
 	dm-atlantis2k8.tmp \
 	dm-babel2k11.tmp \
@@ -77,7 +74,6 @@ nobase_dist_botinfo_DATA = \
 	nav/aoa-frost2k9.nod \
 	nav/aoa-morpheus.nod \
 	nav/aoa-zorn.nod \
-	nav/cp-ribeye.nod \
 	nav/ctf-corrosion.nod \
 	nav/ctf-cryogenic.nod \
 	nav/ctf-frostbyte.nod \
@@ -88,9 +84,6 @@ nobase_dist_botinfo_DATA = \
 	nav/ctf-titan2k8.nod \
 	nav/ctf-vesuvius2k11.nod \
 	nav/ctf-violator.nod \
-	nav/db-chromium.nod \
-	nav/db-icarus.nod \
-	nav/db-vesuvius.nod \
 	nav/dm-annihilation.nod \
 	nav/dm-atlantis2k8.nod \
 	nav/dm-babel2k11.nod \

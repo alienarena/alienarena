@@ -13,7 +13,6 @@ nobase_dist_scripts_DATA = \
 	maps/aoa-frost2k9.rscript \
 	maps/aoa-morpheus.rscript \
 	maps/aoa-zorn.rscript \
-	maps/cp-ribeye.rscript \
 	maps/ctf-corrosion.rscript \
 	maps/ctf-cryogenic.rscript \
 	maps/ctf-extermination.rscript \
@@ -26,9 +25,6 @@ nobase_dist_scripts_DATA = \
 	maps/ctf-vesuvius2k11.rscript \
 	maps/ctf-violator.rscript \
 	maps/ctf-zion2k9.rscript \
-	maps/db-chromium.rscript \
-	maps/db-icarus.rscript \
-	maps/db-vesuvius.rscript \
 	maps/dm-annihilation.rscript \
 	maps/dm-atlantis2k8.rscript \
 	maps/dm-babel2k11.rscript \
