@@ -634,6 +634,15 @@ nobase_dist_maps_DATA = \
 	meshes/urban/acetyline.jpg \
 	meshes/urban/acetyline.md2 \
 	meshes/urban/acetyline_normal.jpg \
+	meshes/urban/barrier1.jpg \
+	meshes/urban/barrier1.md2 \
+	meshes/urban/barrier1_normal.jpg \
+	meshes/urban/barrier2.jpg \
+	meshes/urban/barrier2.md2 \
+	meshes/urban/barrier2_normal.jpg \
+	meshes/urban/bench.jpg \
+	meshes/urban/bench.md2 \
+	meshes/urban/bench_normal.jpg \
 	meshes/urban/bluelantern.jpg \
 	meshes/urban/bluelantern.md2 \
 	meshes/urban/bluelantern_fx.tga \
