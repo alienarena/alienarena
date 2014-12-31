@@ -190,7 +190,6 @@ void InitGame (void)
 	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH | CVARDOC_BOOL);
 	ctf = gi.cvar ("ctf", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	tca = gi.cvar ("tca", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
-	cp = gi.cvar ("cp", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	skill = gi.cvar ("skill", "1", CVAR_LATCH | CVARDOC_INT);
 	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH | CVARDOC_INT);
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);

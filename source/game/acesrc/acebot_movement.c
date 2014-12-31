@@ -633,7 +633,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	{	//ultra skill level(will be 3)
 		c = random();
 
-		if(!self->in_deathball && grapple->value && c <= .7)
+		if(grapple->value && c <= .7)
 		{	//use the grapple once in awhile to pull itself around
 
 			if(self->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG)
@@ -1046,7 +1046,7 @@ standardmove:
 		c = random();
 		if ( self->health >= 70
 				&& self->skill >= 2
-		        && !self->in_vehicle && !self->in_deathball
+		        && !self->in_vehicle
 		        && ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" ) )
 		        && c < 0.6f )
 		{ // Rocket Jump

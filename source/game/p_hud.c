@@ -392,18 +392,18 @@ void BeginIntermission (edict_t *targ)
 			MoveClientToIntermission (client);
 	}
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || tca->integer || cp->integer) //team stuff
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || tca->integer) //team stuff
 	{
 		if ( blue_team_score > red_team_score )
 		{
-			if(ctf->integer || tca->integer || cp->integer)
+			if(ctf->integer || tca->integer)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins_ctf.wav"), 1, ATTN_NONE, 0);
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins.wav"), 1, ATTN_NONE, 0);
 		}
 		else if ( blue_team_score < red_team_score )
 		{
-			if(ctf->integer || tca->integer || cp->integer)
+			if(ctf->integer || tca->integer)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins_ctf.wav"), 1, ATTN_NONE, 0);
 
 			else
@@ -569,7 +569,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	if (g_tactical->integer)
 		return; //no scoreboard in tactical mode
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value) {
 		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
 	}

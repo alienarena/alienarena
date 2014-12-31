@@ -212,9 +212,7 @@
     <ClCompile Include="$(SrcDir)game/g_chase.c" />
     <ClCompile Include="$(SrcDir)game/g_cmds.c" />
     <ClCompile Include="$(SrcDir)game/g_combat.c" />
-    <ClCompile Include="$(SrcDir)game/g_cow.c" />
     <ClCompile Include="$(SrcDir)game/g_ctf.c" />
-    <ClCompile Include="$(SrcDir)game/g_deathball.c" />
     <ClCompile Include="$(SrcDir)game/g_deathray.c" />
     <ClCompile Include="$(SrcDir)game/g_func.c" />
     <ClCompile Include="$(SrcDir)game/g_items.c" />

@@ -384,10 +384,6 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 			else
 				return 0.0;
 
-		//deathball
-		case ITEMLIST_DEATHBALL:
-			return 3.0;
-
 		default:
 			return 0.0;
 
@@ -502,9 +498,6 @@ int ACEIT_ClassnameToIndex(char *classname)
 
 	if(strcmp(classname, "item_strafer") == 0)
 		return ITEMLIST_STRAFER;
-
-	if(strcmp(classname, "item_deathball") == 0)
-		return ITEMLIST_DEATHBALL;
 
 	return INVALID;
 }

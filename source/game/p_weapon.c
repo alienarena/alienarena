@@ -484,7 +484,7 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	int			ammo_index;
 	gitem_t		*ammo_item;
 
-	if (ent->in_vehicle || ent->in_deathball) {
+	if (ent->in_vehicle) {
 		return;
 	}
 
@@ -2041,51 +2041,6 @@ void Weapon_Minderaser (edict_t *ent)
 		ent->altfire = false;
 
 	Weapon_Generic (ent, 3, 11, 31, 35, pause_frames, fire_frames, weapon_minderaser_fire);
-}
-
-void Weapon_Deathball_Fire (edict_t *ent)
-{
-	vec3_t		start;
-	vec3_t		forward, right;
-	vec3_t		offset;
-
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
-
-	VectorSet(offset, 32, 5,  ent->viewheight-5);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	if(ent->client->ps.gunframe == 7) {
-
-		fire_deathball (ent, start, forward, 550);
-
-		// send muzzle flash
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_RAILGUN | is_silenced);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-		VectorAdd(start, forward, start);
-		start[2]+=6;
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-		
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0);
-		ent->client->weapon_sound = 0;
-	}
-	ent->client->ps.gunframe++;
-
-}
-void Weapon_Deathball (edict_t *ent)
-{
-	static int	pause_frames[]	= {33, 0};
-	static int	fire_frames[]	= {7,0};
-
-	Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Deathball_Fire);
 }
 
 /*

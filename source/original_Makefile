@@ -598,7 +598,6 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/acebot_nodes.o \
 	$(BUILDDIR)/game/acebot_spawn.o \
 	$(BUILDDIR)/game/c_cam.o \
-	$(BUILDDIR)/game/g_cow.o \
 	$(BUILDDIR)/game/g_deathray.o \
 	$(BUILDDIR)/game/q_shared.o \
 	$(BUILDDIR)/game/g_ai.o \
@@ -606,7 +605,6 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/g_cmds.o \
 	$(BUILDDIR)/game/g_combat.o \
 	$(BUILDDIR)/game/g_ctf.o \
-	$(BUILDDIR)/game/g_deathball.o \
 	$(BUILDDIR)/game/g_func.o \
 	$(BUILDDIR)/game/g_items.o \
 	$(BUILDDIR)/game/g_main.o \
@@ -659,9 +657,6 @@ $(BUILDDIR)/game/acebot_spawn.o :        $(GAME_DIR)/acesrc/acebot_spawn.c
 $(BUILDDIR)/game/c_cam.o :        $(GAME_DIR)/c_cam.c
 	$(DO_SHLIB_CC)
 
-$(BUILDDIR)/game/g_cow.o :        $(GAME_DIR)/g_cow.c
-	$(DO_SHLIB_CC)
-	
 $(BUILDDIR)/game/g_deathray.o :        $(GAME_DIR)/g_deathray.c
 	$(DO_SHLIB_CC)
 
@@ -678,9 +673,6 @@ $(BUILDDIR)/game/g_combat.o :    $(GAME_DIR)/g_combat.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_ctf.o :        $(GAME_DIR)/g_ctf.c
-	$(DO_SHLIB_CC)
-
-$(BUILDDIR)/game/g_deathball.o :    $(GAME_DIR)/g_deathball.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_func.o :      $(GAME_DIR)/g_func.c
@@ -765,14 +757,12 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/acebot_spawn.o \
 	$(BUILDDIR)/arena/q_shared.o \
 	$(BUILDDIR)/arena/c_cam.o \
-	$(BUILDDIR)/arena/g_cow.o \
 	$(BUILDDIR)/arena/g_deathray.o \
 	$(BUILDDIR)/arena/g_ai.o \
 	$(BUILDDIR)/arena/g_chase.o \
 	$(BUILDDIR)/arena/g_cmds.o \
 	$(BUILDDIR)/arena/g_combat.o \
 	$(BUILDDIR)/arena/g_ctf.o \
-	$(BUILDDIR)/arena/g_deathball.o \
 	$(BUILDDIR)/arena/g_func.o \
 	$(BUILDDIR)/arena/g_items.o \
 	$(BUILDDIR)/arena/g_main.o \
@@ -823,9 +813,6 @@ $(BUILDDIR)/arena/acebot_spawn.o :        $(ARENA_DIR)/acesrc/acebot_spawn.c
 $(BUILDDIR)/arena/c_cam.o :        $(ARENA_DIR)/c_cam.c
 	$(DO_ARENA_SHLIB_CC)
 
-$(BUILDDIR)/arena/g_cow.o :        $(ARENA_DIR)/g_cow.c
-	$(DO_ARENA_SHLIB_CC)
-	
 $(BUILDDIR)/arena/g_deathray.o :        $(ARENA_DIR)/g_deathray.c
 	$(DO_ARENA_SHLIB_CC)
 
@@ -842,9 +829,6 @@ $(BUILDDIR)/arena/g_combat.o :    $(ARENA_DIR)/g_combat.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_ctf.o :        $(ARENA_DIR)/g_ctf.c
-	$(DO_ARENA_SHLIB_CC)
-
-$(BUILDDIR)/arena/g_deathball.o :        $(ARENA_DIR)/g_deathball.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_func.o :      $(ARENA_DIR)/g_func.c

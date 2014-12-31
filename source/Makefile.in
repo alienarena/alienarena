@@ -129,8 +129,6 @@ am_libgame_a_OBJECTS = game/acesrc/acebot_ai.$(OBJEXT) \
 	game/acesrc/acebot_spawn.$(OBJEXT) game/c_cam.$(OBJEXT) \
 	game/g_ai.$(OBJEXT) game/g_chase.$(OBJEXT) \
 	game/g_cmds.$(OBJEXT) game/g_combat.$(OBJEXT) \
-	game/g_cow.$(OBJEXT) game/g_ctf.$(OBJEXT) \
-	game/g_deathball.$(OBJEXT) game/g_deathray.$(OBJEXT) \
 	game/g_func.$(OBJEXT) game/g_items.$(OBJEXT) \
 	game/g_main.$(OBJEXT) game/g_misc.$(OBJEXT) \
 	game/g_monster.$(OBJEXT) game/g_phys.$(OBJEXT) \
@@ -790,14 +788,11 @@ libgame_a_SOURCES = \
 	game/acesrc/acebot_nodes.c \
 	game/acesrc/acebot_spawn.c \
 	game/c_cam.c \
-	game/cow.h \
 	game/g_ai.c \
 	game/g_chase.c \
 	game/g_cmds.c \
 	game/g_combat.c \
-	game/g_cow.c \
 	game/g_ctf.c \
-	game/g_deathball.c \
 	game/g_deathray.c \
 	game/g_deathray.h \
 	game/g_func.c \
@@ -901,11 +896,7 @@ game/g_cmds.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 game/g_combat.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
-game/g_cow.$(OBJEXT): game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
 game/g_ctf.$(OBJEXT): game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/g_deathball.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 game/g_deathray.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
@@ -1491,9 +1482,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_chase.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_cmds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_combat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_cow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_ctf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_deathball.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_deathray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_func.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_items.Po@am__quote@

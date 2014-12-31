@@ -73,11 +73,9 @@ enum Game_mode
 #ifndef TACTICAL
 	mode_dm   = 0, 
 	mode_ctf  = 1, // team
-	mode_aoa  = 2,
-	mode_db   = 3, // team
+	mode_aoa  = 3,
 	mode_tca  = 4, // team
-	mode_cp   = 5, // team
-	mode_duel = 6
+	mode_duel = 5
 #else
 	mode_tac  = 0 // special team
 #endif
@@ -89,10 +87,8 @@ static const char *game_mode_names[] =
 	"deathmatch",        // 0 
 	"ctf",               // 1
 	"all out assault",   // 2
-	"deathball",         // 3
-	"team core assault", // 4
-	"cattle prod",       // 5
-	"duel",              // 6
+	"team core assault", // 3
+	"duel",              // 4
 #else
 	"tactical",          // 0
 #endif
@@ -107,10 +103,8 @@ static const char *map_prefixes[num_game_modes][3] =
 	{"dm",  "tourney", NULL}, // 0
 	{"ctf", NULL,      NULL}, // 1
 	{"aoa", NULL,      NULL}, // 2
-	{"db",  NULL,      NULL}, // 3
-	{"tca", NULL,      NULL}, // 4
-	{"cp",  NULL,      NULL}, // 5
-	{"dm",  "tourney", NULL}  // 6
+	{"tca", NULL,      NULL}, // 3
+	{"dm",  "tourney", NULL}  // 4
 #else
 	{"tac", NULL,      NULL}  // 0
 #endif
@@ -178,8 +172,7 @@ inline qboolean is_team_game( float rule_value )
 	Com_DPrintf("[is_team_game: rule_value:  %i]\n", rule_value );
 
 #ifndef TACTICAL
-	return ( rv == mode_ctf || rv == mode_db || rv == mode_tca 
-			 || rv ==	mode_cp );
+	return ( rv == mode_ctf || rv == mode_tca );
 #else
 	return false; /* tactical is a different kind of team */
 #endif
@@ -1575,8 +1568,6 @@ static void UpdateDopplerEffectFunc( void *self )
 static float TextSliderValueSizeFunc (void *_self)
 {
 	menulist_s *self;
-	float valscale, cvarval;
-	const sliderlimit_t *limit;
 	int i;
 	float ret = 0.0f;
 	
@@ -3507,7 +3498,6 @@ static char mod_names[] =
 	//cannot be wider than this boundary:	|
 	"\\ctf"             "\\capture the flag"
 	"\\tca"             "\\team core assault"
-	"\\cp"              "\\cattle prod"
 	"\\instagib"        "\\instagib"
 	"\\rocket_arena"    "\\rocket arena"
 	"\\low_grav"        "\\low gravity"
@@ -3537,7 +3527,6 @@ static char mods_desc[] =
 	//cannot be wider than this boundary:									|
 	"\\ctf"             "\\capture the enemy team's flag to earn points"
 	"\\tca"             "\\destroy the enemy team's spider node to win"
-	"\\cp"              "\\herd cows through your team's goal for points"
 	"\\instagib"        "\\disruptor only, instant kill, infinite ammo"
 	"\\rocket_arena"    "\\rocket launcher only, infinite ammo"
 	"\\low_grav"        "\\reduced gravity"
@@ -5201,8 +5190,6 @@ void StartServerActionFunc( void *self )
 	Cvar_FullSet( "ctf",    "0", cvflags );
 	Cvar_FullSet( "aoa",    "0", cvflags );
 	Cvar_FullSet( "tca",    "0", cvflags );
-	Cvar_FullSet( "db",     "0", cvflags );
-	Cvar_FullSet( "cp",     "0", cvflags );
 	Cvar_FullSet( "g_duel", "0", cvflags );
 	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
 #else
@@ -5215,26 +5202,20 @@ void StartServerActionFunc( void *self )
 	Cvar_ForceSet( "g_tactical", "0" );
 	switch (s_rules_box.curvalue)
 	{
-	case mode_ctf:
-		Cvar_ForceSet( "ctf", "1" );
-		break;
-	case mode_aoa:
-		Cvar_ForceSet( "aoa", "1" );
-		break;
-	case mode_tca:
-		Cvar_ForceSet( "tca", "1" );
-		break;
-	case mode_db:
-		Cvar_ForceSet( "db", "1" );
-		break;
-	case mode_cp:
-		Cvar_ForceSet( "cp", "1" );
-		break;
-	case mode_duel:
-		Cvar_ForceSet( "g_duel", "1" );
-		break;
-	default:
-		break;
+		case mode_ctf:
+			Cvar_ForceSet( "ctf", "1" );
+			break;
+		case mode_aoa:
+			Cvar_ForceSet( "aoa", "1" );
+			break;
+		case mode_tca:
+			Cvar_ForceSet( "tca", "1" );
+			break;
+		case mode_duel:
+			Cvar_ForceSet( "g_duel", "1" );
+			break;
+		default:
+			break;
 	}
 #endif
 

@@ -55,7 +55,6 @@ edict_t		*g_edicts;
 cvar_t	*deathmatch;
 cvar_t  *ctf;
 cvar_t  *tca;
-cvar_t  *cp;
 //mutators
 cvar_t  *instagib;
 cvar_t  *rocket_arena;
@@ -659,7 +658,7 @@ void EndDMLevel (void)
 		return;
 	}
 
-	if( ( ctf->integer || cp->integer ) && ! g_dedicated->integer )
+	if(ctf->integer && !g_dedicated->integer)
 	{ //ctf will just stay on same level unless specified by dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
@@ -1033,7 +1032,7 @@ void CheckDMRules (void)
 
 	if (timelimit->value)
 	{
-		if (level.time >= timelimit->value*60.0 && ((tca->integer || ctf->integer  || cp->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+		if (level.time >= timelimit->value*60.0 && ((tca->integer || ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 		{
 			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
@@ -1041,10 +1040,10 @@ void CheckDMRules (void)
 		}
 	}
 
-	if (fraglimit->integer && ((tca->integer || ctf->integer || cp->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+	if (fraglimit->integer && ((tca->integer || ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
 		//team scores
-		if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || cp->integer) //it's all about the team!
+		if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer) //it's all about the team!
 		{
 			if(blue_team_score >= fraglimit->integer)
 			{
@@ -1090,7 +1089,7 @@ void CheckDMRules (void)
 					return;
 				}
 			}
-			if(!tca->integer && !ctf->integer && !cp->integer) 
+			if(!tca->integer && !ctf->integer) 
 			{
 				i = fraglimit->integer - top_score;
 				switch(i) 

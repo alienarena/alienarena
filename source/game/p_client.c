@@ -890,8 +890,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 					CTFResetFlag(BLUE_TEAM);
 			}
 		}
-		if(self->in_deathball)
-			DeadDropDeathball(self);
 
 		CTFPlayerResetGrapple(self);
 
@@ -1537,7 +1535,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 
 	if (deathmatch->value) 
 	{
-		if (g_tactical->value || ctf->value || tca->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) 
+		if (g_tactical->value || ctf->value || tca->value || (dmflags->integer & DF_SKINTEAMS)) 
 		{			
 			spot = SelectCTFSpawnPoint(ent);
 			if(!spot)
@@ -1991,9 +1989,6 @@ void PutClientInServer (edict_t *ent)
 // ACEBOT_END
 	//vehicles
 	ent->in_vehicle = false;
-
-	//deathball
-	ent->in_deathball = false;
 
 	//anti-camp
 	ent->suicide_timeout = level.time + 10.0;
@@ -2572,7 +2567,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if((playervote.called || g_tactical->integer ) && whereFrom == INGAME)
 		return; //do not allow people to change info during votes or in tactical mode(yet)
 
-	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
+	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
 		safe_bprintf (PRINT_MEDIUM, "Changing settings not allowed during a team game\n");
 		return;
 	}*/
@@ -2996,8 +2991,6 @@ void ClientDisconnect (edict_t *ent)
     { //if carrying flag, don't take it with you! no attacker points.
 		CTFDeadDropFlag(ent, NULL);
     }
-
-	DeadDropDeathball(ent);
 
 	if(ent->deadflag && ent->client->chasetoggle == 1)
 		DeathcamRemove(ent, "off");

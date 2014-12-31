@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
+extern void SV_LinkEdict (edict_t *ent);
+
 typedef struct
 {
 	char	*name;
@@ -69,12 +71,7 @@ spawn_t	spawns[] = {
 	{"trigger_elevator", SP_trigger_elevator},
 	{"trigger_gravity", SP_trigger_gravity},
 	{"trigger_monsterjump", SP_trigger_monsterjump},
-	{"trigger_deathballtarget", SP_trigger_deathballtarget},
-	{"trigger_reddeathballtarget", SP_trigger_reddeathballtarget},
-	{"trigger_bluedeathballtarget", SP_trigger_bluedeathballtarget},
-	{"trigger_bluecowtarget", SP_trigger_bluecowtarget},
-	{"trigger_redcowtarget", SP_trigger_redcowtarget},
-
+	
 	{"target_temp_entity", SP_target_temp_entity},
 	{"target_speaker", SP_target_speaker},
 	{"target_explosion", SP_target_explosion},
@@ -103,7 +100,6 @@ spawn_t	spawns[] = {
 	{"misc_teleporter", SP_misc_teleporter},
 	{"misc_teleporter_dest", SP_misc_teleporter_dest},
 
-	{"npc_cow", SP_npc_cow},
 	{"npc_deathray", SP_npc_deathray},
 
 	//TCA
@@ -992,7 +988,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.configstring (CS_MAXCLIENTS, va("%i", g_maxclients->integer ) );
 
 	// status bar program
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || cp->integer)
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer)
 	{
 		gi.configstring (CS_STATUSBAR, team_statusbar);
 		if(ctf->value)
