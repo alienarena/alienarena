@@ -81,11 +81,10 @@ static void R_Mesh_VecsForTris(
 		vec3_t Tangent
 		)
 {
-	vec3_t vec1, vec2;
 	vec3_t planes[3];
 	float tmp;
-	float vec1_y, vec1_z, vec1_nrml;
-	float vec2_y, vec2_z, vec2_nrml;
+	float vec1_x, vec1_y, vec1_z, vec1_nrml;
+	float vec2_x, vec2_y, vec2_z, vec2_nrml;
 	int i;
 
 	vec1_y = st1[0]-st0[0];
@@ -98,37 +97,37 @@ static void R_Mesh_VecsForTris(
 
 	for (i=0; i<3; i++)
 	{
-		vec1[0] = v1[i]-v0[i];
+		vec1_x = v1[i]-v0[i];
 		// VectorNormalize(vec1);
-		tmp = (vec1[0] * vec1[0]) + vec1_nrml;
-		tmp = sqrt(tmp);
-		if ( tmp > 0.0 )
+		tmp = (vec1_x * vec1_x) + vec1_nrml;
+		tmp = sqrtf(tmp);
+		if ( tmp > 0.0f )
 		{
-			tmp = 1.0 / tmp;
-			vec1[0] *= tmp;
-			vec1[1] = vec1_y * tmp;
-			vec1[2] = vec1_z * tmp;
+			tmp = 1.0f / tmp;
+			vec1_x *= tmp;
+			vec1_y *= tmp;
+			vec1_z *= tmp;
 		}
 
-		vec2[0] = v2[i]-v0[i];
+		vec2_x = v2[i]-v0[i];
 		// --- VectorNormalize(vec2);
-		tmp = (vec2[0] * vec2[0]) + vec2_nrml;
-		tmp = sqrt(tmp);
-		if ( tmp > 0.0 )
+		tmp = (vec2_x * vec2_x) + vec2_nrml;
+		tmp = sqrtf(tmp);
+		if ( tmp > 0.0f )
 		{
-			tmp = 1.0 / tmp;
-			vec2[0] *= tmp;
-			vec2[1] = vec2_y * tmp;
-			vec2[2] = vec2_z * tmp;
+			tmp = 1.0f / tmp;
+			vec2_x *= tmp;
+			vec2_y *= tmp;
+			vec2_z *= tmp;
 		}
 
 		// --- CrossProduct(vec1,vec2,planes[i]);
-		planes[i][0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
-		planes[i][1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
-		planes[i][2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
+		planes[i][0] = vec1_y*vec2_z - vec1_z*vec2_y;
+		planes[i][1] = vec1_z*vec2_x - vec1_x*vec2_z;
+		planes[i][2] = vec1_x*vec2_y - vec1_y*vec2_x;
 		// ---
 
-		tmp = 1.0 / planes[i][0];
+		tmp = 1.0f / planes[i][0];
 		Tangent[i] = -planes[i][1]*tmp;
 	}
 

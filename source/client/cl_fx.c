@@ -3466,7 +3466,7 @@ Powered up effects
 #define	BEAMLENGTH			16.0f
 void CL_PoweredEffects (vec3_t origin, unsigned int nEffect)
 {
-	int			i;
+	int			i,j;
 	particle_t	*p;
 	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
@@ -3476,8 +3476,9 @@ void CL_PoweredEffects (vec3_t origin, unsigned int nEffect)
 
 	if (!avelocities[0][0])
 	{
-		for (i=0 ; i<NUMVERTEXNORMALS*3 ; i++)
-			avelocities[0][i] = (rand()&255) * 0.01;
+		for (i=0 ; i<NUMVERTEXNORMALS ; ++i)
+			for (j=0; j<3; ++j)
+				avelocities[i][j] = (rand()&255) * 0.01f;
 	}
 
 	ltime = (float)cl.time / 1000.0f;
