@@ -328,7 +328,7 @@ void CL_ParseMuzzleFlash (void)
 		break;
 	case MZ_MACHINEGUN:
 		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
-		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
+		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf1b.wav");
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
 		break;
 	case MZ_SHOTGUN:
@@ -343,7 +343,7 @@ void CL_ParseMuzzleFlash (void)
 	case MZ_CHAINGUN1:
 		dl->radius = 200 + (rand()&31);
 		dl->color[0] = 1;dl->color[1] = 0.25;dl->color[2] = 0;
-		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
+		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf1b.wav");
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
 		CL_BrassShells(shell_brass, dir, 1);
 		break;

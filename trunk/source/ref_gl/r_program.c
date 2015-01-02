@@ -121,7 +121,7 @@ STRINGIFY (
 		{
 			// If we get this far, the fragment is within range of the 
 			// dynamic light
-			vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount / 2.0), vec3 (0.0), vec3 (1.0));
+			vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount / 1.0), vec3 (0.0), vec3 (1.0));
 			vec3 relativeLightDirection = LightVec / sqrt (distanceSquared);
 			float diffuseTerm = max (0.0, dot (relativeLightDirection, normal));
 			vec3 specularAdd = vec3 (0.0, 0.0, 0.0);
