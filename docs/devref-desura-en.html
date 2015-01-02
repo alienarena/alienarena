@@ -1,267 +1,1226 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Alien Arena for Linux on Desura</title><meta name="generator" content="DocBook XSL Stylesheets V1.77.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article"><div class="titlepage"><div><div><h1 class="title"><a name="idp1371424500"></a>Alien Arena for Linux on Desura</h1></div><div><div class="author"><h3 class="author"><span class="orgname">COR Entertainment, LLC.</span></h3></div></div><div><p class="releaseinfo">$Id$</p></div><div><p class="copyright">Copyright © 2012 COR Entertainment, LLC.</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#About">About this Document</a></span></dt><dt><span class="section"><a href="#Support">Support</a></span></dt><dt><span class="section"><a href="#Overview">Overview</a></span></dt><dt><span class="section"><a href="#SystemEnvironments">Create the System Environments</a></span></dt><dt><span class="section"><a href="#Build">Create the Build</a></span></dt><dt><span class="section"><a href="#InstallationDirectory">Create the Installation Directory</a></span></dt><dt><span class="section"><a href="#CustomDocuments">Customize Documents for Desura</a></span></dt><dt><span class="section"><a href="#VerifySettings">Verify the Dependencies and Install Settings</a></span></dt><dt><span class="section"><a href="#UploadMCF">Create and Upload the MCF</a></span></dt><dt><span class="section"><a href="#CommitMCF">Commit the MCF, Get Approval, Test</a></span></dt><dt><span class="section"><a href="#UploadTarball">Upload the Release Tarball</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="About"></a>About this Document</h2></div></div></div><p>
-      This document is a reference for installing and maintaining Alien
-      Arena on the Desura digital distribution service, http://www.desura.com.
-    </p><p>
-      Currently (January 2013), this covers the Linux versions.
-    </p><p>
-      This document is DocBook 5. The formatting program is
-      <span class="application">xsltproc</span>. The stylesheet is
-      <code class="filename">docbook/xsl-ns-stylesheets/html/docbook.xsl</code>,
-      which is specified within the heading.  So, providing docbook support
-      is installed,  a script to generate the <code class="filename">.html</code>
-      file is something like this:
-      </p><pre class="programlisting">#!/bin/sh
-xsltproc -o devref-desura-en.html docsrc/devref-desura-en.xml</pre><p>
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Support"></a>Support</h2></div></div></div><p>
-      Finding and deciphering the documentation for installing Desura,
-      installing games from Desura, and distributing games on Desura is a bit
-      of a chore. The adminstrators are helpful and respond quickly, though.
-    </p><p>
-      The Linux-related forum is at: 
-      
-        http://www.desura.com/groups/desura/linux
-      
-    </p><p>
-      There is a Wiki at:
-      
-        https://trac.moddb.com/app/wiki
-      
-      (It may not be well-maintained, and could be out-of-date.)
-    </p><p>
-      This document assumes the initial setup for publication has been
-      done. Only updating an existing project is covered here.
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Overview"></a>Overview</h2></div></div></div><p>
-      Desura requires a binary executable that runs in the user's home
-      directory.  The builds for 7.60.1 AND 7.65 were done using Ubuntu
-      12.04 LTS.  Separate OS installations were used for x86 and x86_64.
-    </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Potential future headaches</h3><p>
-        The new Steam Linux implementation is similar. Currently, Steam
-        officially supports only Ubuntu. Desura's solution to problem
-        of supporting different Linux OS's, is to load various versions
-        of system libraries into the user's home directory. Steam may do
-        something similar in the future.  This technique is probably not a
-        good thing. It does not conform to common Linux standards, but, more
-        importantly, it will probably be a gigantic headache for developers.
-      </p></div><p>
-      These are the major steps for installation on Desura:
-      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Create the system build environments</p></li><li class="listitem"><p>Create the build</p></li><li class="listitem"><p>Create the installation directory</p></li><li class="listitem"><p>Create documents customized for Desura</p></li><li class="listitem"><p>Verify the dependencies and install settings</p></li><li class="listitem"><p>Create and upload the MCF</p></li><li class="listitem"><p>Commit, get approval and test</p></li><li class="listitem"><p>Upload the release tarball</p></li></ol></div><p>
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="SystemEnvironments"></a>Create the System Environments</h2></div></div></div><p>
-      Updating Desura requires a Desura/IndieDB/ModDB account, of course,
-      and, also developer access rights. (Access rights management can be
-      accessed through the Alien Arena Publish page; under the Profile list,
-      click on Access Rights.)
-    </p><p>
-      There are 2 OS system environments; 32-bit Linux x86 and 64-bit
-      Linux x86-64.  One could use either one and cross-compile to the
-      other. However, for testing purposes and for uploading to Desura it
-      may be best to have separate installations.  Ideally, this does not
-      need to be done for every release. Once the system environments are
-      in operation, they may be used for later releases.
-    </p><p>
-      For 7.60, I chose to use Ubuntu 12.04 LTS and create a multi-boot
-      environment on Gentoo x86 using "legacy" GRUB. The Ubuntu partitions are
-      about 30G each on a second drive using Extended Partitions.  The setup
-      one uses, of course, is mostly a matter of taste. The following is an
-      example and some notes.
-    </p><p>
-      The Ubuntu installation is not particularly happy with this arrangement,
-      and it requires some magic.  When installing from a DVD, after
-      selecting "Try Ubuntu", in a terminal do: <strong class="userinput"><code>ubiquity
-      --no-bootloader</code></strong> This prevents the installer,
-      <code class="filename">ubiquity</code>, from trying to create a boot sector
-      and install GRUB 2. The additions to <code class="filename">grub.conf</code>
-      look like this:
-    </p><p>
-      </p><div class="literallayout"><p><span class="emphasis"><em><br>
-title=Ubuntu Linux x86 (3.2.0-xx-generic-pae)<br>
-root (hd1,4)<br>
-kernel /vmlinuz  root=/dev/sdb5<br>
-initrd /initrd.img<br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.9">
+<title>Alien Arena for Linux on Desura</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+@media screen {
+  body {
+    max-width: 50em; /* approximately 80 characters wide */
+    margin-left: 16em;
+  }
+
+  #toc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 13em;
+    padding: 0.5em;
+    padding-bottom: 1.5em;
+    margin: 0;
+    overflow: auto;
+    border-right: 3px solid #f8f8f8;
+    background-color: white;
+  }
+
+  #toc .toclevel1 {
+    margin-top: 0.5em;
+  }
+
+  #toc .toclevel2 {
+    margin-top: 0.25em;
+    display: list-item;
+    color: #aaaaaa;
+  }
+
+  #toctitle {
+    margin-top: 0.5em;
+  }
+}
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>Alien Arena for Linux on Desura</h1>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph"><p>Copyright &#169; 2012 COR Entertainment, LLC.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_about_this_document">About this Document</h2>
+<div class="sectionbody">
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">(2014-11) This is just a reformat of the original document
+using AsciiDoc. Desura has had changes since this was written. So this
+document is for reference and to preserve some previous (possibly
+obsolete) knowledge. The <em>alienarena</em> build and install notes are most
+certainly obsolete.</td>
+</tr></table>
+</div>
+<div class="paragraph"><p>This document is a reference for installing and maintaining Alien
+Arena on the Desura digital distribution service, <a href="http://www.desura.com">http://www.desura.com</a>.</p></div>
+<div class="paragraph"><p>The source for this document uses AsciiDoc.  Briefly, AsciiDoc
+is a frontend for a variety of XSL document programs and runs on
+Linux.  Linux distributions have it in their package managers.
+Running it on Windows apparently requires using Cygwin,
+unfortunately.  In some ways, it is "DocBook-for-Dummies"
+and is relatively easy to edit.</p></div>
+<div class="paragraph"><p>The home page for AsciiDoc is <a href="http://www.methods.co.nz/asciidoc/">http://www.methods.co.nz/asciidoc/</a>.</p></div>
+<div class="paragraph"><p>The SourceForge repository is <a href="http://sourceforge.net/projects/asciidoc/">http://sourceforge.net/projects/asciidoc/</a>.</p></div>
+<div class="paragraph"><p>In the <em>alienarena/docs/docsrc</em> directory this is the command used to
+generate output.</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>$ asciidoc -b html5 -a toc2  devref-desura-en.asciidoc</pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_support">Support</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Finding and deciphering the documentation for installing Desura,
+installing games from Desura, and distributing games on Desura is
+a bit of a chore. The adminstrators are helpful and respond
+quickly, though.</p></div>
+<div class="paragraph"><p>The Linux-related forum is at:
+<a href="http://www.desura.com/groups/desura/linux">http://www.desura.com/groups/desura/linux</a></p></div>
+<div class="paragraph"><p>There is a Wiki at: <a href="https://trac.moddb.com/app/wiki/">https://trac.moddb.com/app/wiki/</a> (It may not be
+well-maintained, and could be out-of-date.) This document assumes the
+initial setup for publication has been done. Only updating an existing
+project is covered here.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_overview">Overview</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Desura requires a binary executable that runs in the user&#8217;s home
+directory.  The builds for 7.60.1 AND 7.65 were done using Ubuntu
+12.04 LTS. Separate OS installations were used for x86 and x86_64.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">The new Steam Linux implementation is similar. Currently, Steam
+officially supports only Ubuntu. Desura&#8217;s solution to problem of
+supporting different Linux OS&#8217;s, is to load various versions of system
+libraries into the user&#8217;s home directory. Steam may do something
+similar in the future.  This technique is probably not a good
+thing. It does not conform to common Linux standards, but, more
+importantly, it will probably be a gigantic headache for developers.</td>
+</tr></table>
+</div>
+<div class="paragraph"><p>These are the major steps for installation on Desura:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Create the system build environments.
+</p>
+</li>
+<li>
+<p>
+Create the build.
+</p>
+</li>
+<li>
+<p>
+Create the installation directory.
+</p>
+</li>
+<li>
+<p>
+Create documents customized for Desura.
+</p>
+</li>
+<li>
+<p>
+Verify the dependencies and install settings.
+</p>
+</li>
+<li>
+<p>
+Create and upload the MCF.
+</p>
+</li>
+<li>
+<p>
+Commit, get approval and test.
+</p>
+</li>
+<li>
+<p>
+Upload the release tarball.
+</p>
+</li>
+</ol></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_the_system_environments">Create the System Environments</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Updating Desura requires a Desura/IndieDB/ModDB account, of course,
+and, also developer access rights. (Access rights management can be
+accessed through the Alien Arena Publish page; under the Profile list,
+click on Access Rights.)</p></div>
+<div class="paragraph"><p>There are 2 OS system environments; 32-bit Linux x86 and 64-bit Linux
+x86-64.  One could use either one and cross-compile to the
+other. However, for testing purposes and for uploading to Desura it
+may be best to have separate installations.  Ideally, this does not
+need to be done for every release. Once the system environments are in
+operation, they may be used for later releases.</p></div>
+<div class="paragraph"><p>For 7.60, I chose to use Ubuntu 12.04 LTS and create a multi-boot
+environment on Gentoo x86 using "legacy" GRUB. The Ubuntu partitions
+are about 30G each on a second drive using Extended Partitions.  The
+setup one uses, of course, is mostly a matter of taste. The following
+is an example and some notes.</p></div>
+<div class="paragraph"><p>The Ubuntu installation is not particularly happy with this arrangement,
+and it requires some magic.  When installing from a DVD, after
+selecting "Try Ubuntu", in a terminal do:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>$ ubiquity --no-bootloader</pre>
+</div></div>
+<div class="paragraph"><p>This prevents the installer,<em>ubiquity</em>, from trying to create a boot
+sector and install GRUB 2. The additions to <em>grub.conf</em> look like
+this:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>title=Ubuntu Linux x86 (3.2.0-xx-generic-pae)
+root (hd1,4)
+kernel /vmlinuz  root=/dev/sdb5
+initrd /initrd.img
+
+title=Ubuntu Linux x86_64 (3.2.0.xx-generic)
+root (hd1,5)
+kernel /vmlinuz root=/dev/sdb6
+initrd /initrd.img</pre>
+</div></div>
+<div class="paragraph"><p>And at the top level of the partitions, these soft links supply
+references to the kernel boot files.</p></div>
+<div class="paragraph"><p>for x86:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>vmlinuz -&gt; boot/vmlinuz-3.2.0-32-generic-pae
+initrd.img -&gt; /boot/initrd.img-3.2.0-32-generic-pae</pre>
+</div></div>
+<div class="paragraph"><p>for x86-64:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>vmlinuz -&gt; boot/vmlinuz-3.2.0-32-generic
+initrd.img -&gt; /boot/initrd.img-3.2.0-32-generic</pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_the_build">Create the Build</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The directory for the build is separate from the Desura installation
+directory. Normally, it would be created by unpacking a release
+tarball according to usual instructions.</p></div>
+<div class="paragraph"><p>For Linux, Desura installs into the users home directory, so the
+<em>alternate install</em> configuration is used. The compiler options should
+follow distro packaging practice for generating an executable to run
+on different architectures. Distro&#8217;s also use stack protection, which
+is a good idea in this case.</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>$ export CFLAGS='-O2 -mtune=generic -fstack-protector-all  --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
+
+$ CXXFLAGS='-O2 -mtune=generic -fstack-protector-all --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
+
+$ ./configure --enable-alternate-install</pre>
+</div></div>
+<div class="paragraph"><p>To keep things simpler, the integrated libode should be used.
+Other configure options that are probably preferred are:</p></div>
+<div class="literalblock">
+<div class="content monospaced">
+<pre>--enable-maintainer-mode --disable-silent-rules</pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_the_installation_directory">Create the Installation Directory</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>For Desura, the installation directory is created separately.  This
+may not be strictly necessary, but if the build directory were used a
+lot of unnecessary files would be included.  (Just FYI, according to
+documentation, Desura will filter out <em>.svn</em> subdirectories.)</p></div>
+<div class="paragraph"><p>The installation directory is normally, and officially, named
+<em>alien-arena-2008</em>.  Other names may be used, but Desura will install
+in the official directory on the user&#8217;s system.</p></div>
+<div class="paragraph"><p>The contents of the installation directory are:</p></div>
+<div class="hdlist"><table>
+<tr>
+<td class="hdlist1">
+alienarena
 <br>
-title=Ubuntu Linux x86_64 (3.2.0.xx-generic)<br>
-root (hd1,5)<br>
-kernel /vmlinuz root=/dev/sdb6<br>
-initrd /initrd.img<br>
-        </em></span></p></div><p>
-    </p><p>
-      And at the top level of the partitions, these soft links supply
-      references to the kernel boot files.
-    </p><p>
-      </p><div class="literallayout"><p><span class="emphasis"><em><br>
-for x86:<br>
-vmlinuz -&gt; boot/vmlinuz-3.2.0-32-generic-pae<br>
-initrd.img -&gt; /boot/initrd.img-3.2.0-32-generic-pae<br>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The Linux binary.
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+README
 <br>
-for x86-64:<br>
-vmlinuz -&gt; boot/vmlinuz-3.2.0-32-generic<br>
-initrd.img -&gt; /boot/initrd.img-3.2.0-32-generic<br>
-        </em></span><br>
-      </p></div><p>
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="Build"></a>Create the Build</h2></div></div></div><p>
-      The directory for the build is separate from the Desura installation
-      directory. Normally, it would be created by unpacking a release tarball
-      according to usual instructions.
-    </p><p>
-      For Linux, Desura installs into the users home directory, so the
-      <span class="emphasis"><em>alternate install</em></span> configuration is used. The
-      compiler options should follow distro packaging practice for generating
-      an executable to run on different architectures. Distro's also use
-      stack protection, which is a good idea in this case.
-    </p><p>
-      <span class="command"><strong>export CFLAGS='-O2 -mtune=generic -fstack-protector-all
-        --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
-      </strong></span>
-    </p><p>
-      <span class="command"><strong>export CXXFLAGS='-O2 -mtune=generic
-        -fstack-protector-all --param=ssp-buffer-size=4
-        -D_FORTIFY_SOURCE=2'
-      </strong></span>
-    </p><p>
-      <span class="command"><strong>./configure --enable-alternate-install</strong></span>
-    </p><p>
-      To keep things simpler, the integrated libode should be used.
-      Other configure options that are probably preferred are:
-    </p><p>
-      <span class="command"><strong>--enable-maintainer-mode --disable-silent-rules</strong></span>
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="InstallationDirectory"></a>Create the Installation Directory</h2></div></div></div><p>
-      For Desura, the installation directory is created separately.  This may
-      not be strictly necessary, but if the build directory were used a
-      lot of unnecessary files would be included.  (Just FYI, according
-      to documentation, Desura will filter out <code class="filename">.svn</code>
-      subdirectories.)
-    </p><p>
-      The installation directory is normally, and officially, named
-      <code class="filename">alien-arena-2008</code>.  Other names may be used,
-      but Desura will install in the official directory on the user's
-      system.
-    </p><p>
-      The contents of the installation directory are:
-      </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
-            <code class="filename">alienarena</code>
-          </span></dt><dd>
-            The Linux binary.
-          </dd><dt><span class="term">
-            <code class="filename">README</code>
-          </span></dt><dd>
-            The Desura custom top-level readme file (see below)
-          </dd><dt><span class="term">
-            <code class="filename">arena/motd.txt</code>
-          </span></dt><dd>
-            The stock message-of-the-day file
-          </dd><dt><span class="term">
-            <code class="filename">botinfo/</code>
-          </span></dt><dd>
-            All the bot and nav files in the release
-          </dd><dt><span class="term">
-            <code class="filename">data1/</code>
-          </span></dt><dd>
-            All the game resource files in the release
-          </dd><dt><span class="term">
-            <code class="filename">docs/</code>
-          </span></dt><dd>
-            Documentation customized for Desura (see below)
-          </dd></dl></div><p>
-    </p><p>
-      The Linux dedicated server is not included on purpose.
-      It is assumed that a user would download the full tarball,
-      if there was an interest in running that.
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="CustomDocuments"></a>Customize Documents for Desura</h2></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
-          <code class="filename">README</code>
-        </span></dt><dd>
-          A special README for Desura pointing to the other documents in
-          the doc subdirectory.  Has information about the compiler and
-          configuration used to generate the binary for Desura.
-        </dd><dt><span class="term">
-          <code class="filename">GAME_README.TXT</code>
-        </span></dt><dd>
-          This is the general <code class="filename">readme.txt</code> reformatted for
-          Linux.  If that file is modified, then this one should be updated.
-        </dd><dt><span class="term">
-          <code class="filename">TECH_README.TXT</code>
-        </span></dt><dd>
-          This is the top-level Unix/Linux README.
-          The changed name is the only difference.
-        </dd><dt><span class="term">
-          <code class="filename">LICENSE.TXT</code>
-        </span></dt><dd>
-          This is the COR Entertainment, LLC. copyright and license.  The same
-          content as <code class="filename">license.txt</code> reformatted for Linux.
-        </dd><dt><span class="term">
-          <code class="filename">GPL.TXT</code>
-        </span></dt><dd>
-          The GNU GENERAL PUBLIC LICENSE, Version 2.
-        </dd><dt><span class="term">
-          <code class="filename">LGPL.TXT</code>
-        , </span><span class="term">
-          <code class="filename">ODE_LICENSE.TXT</code>
-        </span></dt><dd>
-          The GNU LESSER GENERAL PUBLIC LICENSE Version 2.1 and
-          the Open Dynamics Engine (ODE) License.  Included because
-          the Desura binary uses the integrated ODE version of the
-          <code class="filename">alienarena</code> build.
-        </dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="VerifySettings"></a>Verify the Dependencies and Install Settings</h2></div></div></div><p>
-      If the program adds a shared library to its link, the install settings
-      may need updating. Otherwise, install settings do not usually need to
-      be modified. It is a good idea to verify the settings in any case.
-    </p><p>
-      Here is a menu sequence for getting to the Alien Arena Publish
-      page:
-    </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">Play</li><li class="listitem">On the Toolbar line (after Games and Favorities), Development
-      </li><li class="listitem">Right Click on AlienArena</li><li class="listitem">Tools</li><li class="listitem">Desura Page (tab name is "Publish")</li></ol></div><p>
-      Once on the Publish page, on the Releases list, click on Upload.
-      Then, click on the Full Linux, and Full Linux 64 branches and verify
-      that the Dependencies are correct.
-    </p><p>
-      The Install Settings, also on the Releases list, control the program
-      file paths and should not be changed.
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="UploadMCF"></a>Create and Upload the MCF</h2></div></div></div><p>
-      The Managed Content File (MCF) is a Desura proprietary format used
-      to upload to the Desura Server. It is generated by Desura-supplied
-      procedures which calculate the difference between the current released
-      installation and the new version.
-    </p><p>
-      Initially, it can be confusing because the user-interface can be
-      mysterious.  The clickable links for the next step in the multi-step
-      process sometimes appear only after the current step is completed,
-      so it takes some "leaps of faith."  When there are no errors, the
-      process is easy. But when upload errors occur clearing the broken
-      upload and restarting does not always work.
-    </p><p>
-      Late in the process, a request for the changelog appears. It requires
-      changelog entries in a specific format. If possible, prepare this
-      beforehand.  Use the changelog for the Windows version, if it is
-      available.
-    </p><p>
-      Once the Installation Directory is ready, the MCF can be created and
-      uploaded.  Make sure the directory is clean with no extraneous files. If
-      the binary was built with debug symbols, they should be stripped.
-    </p><p>
-      The Create MCF command can be accessed through Play Menu. Access like
-      the sequence above, click on Create MCF rather than Desura Page.
-      Enter the path to the installation directory and wait. On success,
-      click on Upload MCF and upload the newly created MCF.
-    </p><p>
-      These commands may also be accessed through the Alien Arena Publish
-      page. Select Upload in the Release list. Then scroll to the Upload
-      section at the bottom of the page.
-    </p><p>
-      If the upload fails, clearing the upload and starting over does not
-      always work. Consult the support resources for work-arounds.
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="CommitMCF"></a>Commit the MCF, Get Approval, Test</h2></div></div></div><p>
-      Once the MCF is successfully uploaded, there will be a Submit for
-      Approval command on the Publish page.  Desura administrators usually
-      approve in a few days.
-    </p><p>      
-      At that point, the <span class="emphasis"><em>test</em></span> command is activated.
-      On a system with an existing installation, it will be updated with
-      changes.  In case this is not obvious: this is not the same as the
-      installation directory used to generate the MCF.  It will be found in the
-      <code class="filename">desura/common</code> directory in the user home directory.
-      It is probably a good idea to test a clean install, also.
-    </p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="UploadTarball"></a>Upload the Release Tarball</h2></div></div></div><p>
-      Desura calls this the <span class="emphasis"><em>standalone</em></span>. The standalone
-      upload page can be accessed through the Upload section or by clicking
-      on the existing standalone package listing. The tarball download is
-      listed as the 32-bit version; uploading a 64-bit labeled version
-      would be redundant.
-    </p></div></div></body></html>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The Desura custom top-level readme file (see below)
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+arena/motd.txt
+<br>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+The stock message-of-the-day file
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+botinfo/
+<br>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+All the bot and nav files in the release
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+data1/
+<br>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+All the game resource files in the release
+</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+docs/
+<br>
+</td>
+<td class="hdlist2">
+<p style="margin-top: 0;">
+Documentation customized for Desura (see below)
+</p>
+</td>
+</tr>
+</table></div>
+<div class="paragraph"><p>The Linux dedicated server is not included on purpose.  It is assumed
+that a user would download the full tarball, if there was an interest
+in running that.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_customize_documents_for_desura">Customize Documents for Desura</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+README
+</dt>
+<dd>
+<p>
+A special README for Desura pointing to the other documents
+in the doc subdirectory.  Has information about the compiler and
+configuration used to generate the binary for Desura.
+</p>
+</dd>
+<dt class="hdlist1">
+GAME_README.TXT
+</dt>
+<dd>
+<p>
+This is the general <em>readme.txt</em> Linux.  If that
+file is modified, then this one should be updated.
+</p>
+</dd>
+<dt class="hdlist1">
+TECH_README.TXT
+</dt>
+<dd>
+<p>
+This is the top-level Unix/Linux README.  The changed name is the only
+difference.
+</p>
+</dd>
+<dt class="hdlist1">
+LICENSE.TXT
+</dt>
+<dd>
+<p>
+This is the COR Entertainment, LLC. copyright and
+license.  The same content as <em>license.txt</em> reformatted for Linux.
+</p>
+</dd>
+<dt class="hdlist1">
+GPL.TXT
+</dt>
+<dd>
+<p>
+The GNU GENERAL PUBLIC LICENSE, Version 2.
+</p>
+</dd>
+<dt class="hdlist1">
+LGPL.TXT
+</dt>
+<dt class="hdlist1">
+ODE_LICENSE.TXT
+</dt>
+<dd>
+<p>
+The GNU LESSER GENERAL PUBLIC LICENSE Version 2.1 and the Open
+Dynamics Engine (ODE) License.  Included because the Desura binary
+uses the integrated ODE version of the <em>alienarena</em> build.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_verify_the_dependencies_and_install_settings">Verify the Dependencies and Install Settings</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>If the program adds a shared library to its link, the install settings
+may need updating. Otherwise, install settings do not usually need to
+be modified. It is a good idea to verify the settings in any case.</p></div>
+<div class="paragraph"><p>Here is a menu sequence for getting to the Alien Arena Publish page:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Play
+</p>
+</li>
+<li>
+<p>
+On the Toolbar line (after Games and Favorities), Development, Right
+Click on AlienArena
+</p>
+</li>
+<li>
+<p>
+Tools
+</p>
+</li>
+<li>
+<p>
+Desura Page (tab name is "Publish")
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Once on the Publish page, on the Releases list, click on Upload.
+Then, click on the Full Linux, and Full Linux 64 branches and verify
+that the Dependencies are correct.</p></div>
+<div class="paragraph"><p>The Install Settings, also on the Releases list, control the program
+file paths and should not be changed.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_and_upload_the_mcf">Create and Upload the MCF</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The Managed Content File (MCF) is a Desura proprietary format used to
+upload to the Desura Server. It is generated by Desura-supplied
+procedures which calculate the difference between the current released
+installation and the new version.</p></div>
+<div class="paragraph"><p>Initially, it can be confusing because the user-interface can be
+mysterious.  The clickable links for the next step in the multi-step
+process sometimes appear only after the current step is completed, so
+it takes some "leaps of faith."  When there are no errors, the process
+is easy. But when upload errors occur clearing the broken upload and
+restarting does not always work.</p></div>
+<div class="paragraph"><p>Late in the process, a request for the changelog appears. It requires
+changelog entries in a specific format. If possible, prepare this
+beforehand.  Use the changelog for the Windows version, if it is
+available.</p></div>
+<div class="paragraph"><p>Once the Installation Directory is ready, the MCF can be created and
+uploaded.  Make sure the directory is clean with no extraneous
+files. If the binary was built with debug symbols, they should be
+stripped.</p></div>
+<div class="paragraph"><p>The Create MCF command can be accessed through Play Menu. Access like
+the sequence above, click on Create MCF rather than Desura Page.
+Enter the path to the installation directory and wait. On success,
+click on Upload MCF and upload the newly created MCF.</p></div>
+<div class="paragraph"><p>These commands may also be accessed through the Alien Arena Publish
+page. Select Upload in the Release list. Then scroll to the Upload
+section at the bottom of the page.</p></div>
+<div class="paragraph"><p>If the upload fails, clearing the upload and starting over does not
+always work. Consult the support resources for work-arounds.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_commit_the_mcf_get_approval_test">Commit the MCF, Get Approval, Test</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Once the MCF is successfully uploaded, there will be a Submit for
+Approval command on the Publish page.  Desura administrators usually
+approve in a few days.</p></div>
+<div class="paragraph"><p>At that point, the &lt;emphasis&gt;test&lt;/emphasis&gt; command is activated.
+On a system with an existing installation, it will be updated with
+changes.  In case this is not obvious: this is not the same as the
+installation directory used to generate the MCF.  It will be found in the
+&lt;filename&gt;desura/common&lt;/filename&gt; directory in the user home directory.
+It is probably a good idea to test a clean install, also.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_upload_the_release_tarball">Upload the Release Tarball</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Desura calls this the <em>standalone</em>. The standalone upload page can be
+accessed through the Upload section or by clicking on the existing
+standalone package listing. The tarball download is listed as the
+32-bit version; uploading a 64-bit labeled version would be redundant.</p></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr></div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2014-11-28 18:31:06 PST
+</div>
+</div>
+</body>
+</html>
