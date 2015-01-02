@@ -1671,21 +1671,26 @@ void Machinegun_Fire (edict_t *ent)
 	else
 		damage = 18;
 
-	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
+	if (ent->client->ps.gunframe == 5 && ent->client->buttons & BUTTON_ATTACK)
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/machgup.wav"), 1, ATTN_IDLE, 0);
+
+
+	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
 
 		ent->client->ps.gunframe = 14;
 		ent->client->weapon_sound = 0;
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/machgdown.wav"), 1, ATTN_IDLE, 0);
 		return;
 	}
 	else if ((ent->client->ps.gunframe == 13) && (ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2)
 		&& ent->client->pers.inventory[ent->client->ammo_index])
 	{
-		ent->client->ps.gunframe = 5;
+		ent->client->ps.gunframe = 6;
 	}
-	else if (ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe > 6)
+	else if (ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe > 7)
 	{
-		if(ent->client->ps.gunframe == 7 || ent->client->ps.gunframe == 12) {
+		if(ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 12) {
 			ent->client->ps.gunframe = 14;
 			return;
 		}
@@ -1719,6 +1724,7 @@ void Machinegun_Fire (edict_t *ent)
 			gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
 			ent->pain_debounce_time = level.time + 1;
 		}
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/machgdown.wav"), 1, ATTN_IDLE, 0);
 		NoAmmoWeaponChange (ent);
 		return;
 	}
@@ -1730,7 +1736,7 @@ void Machinegun_Fire (edict_t *ent)
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);//was up
-	if((ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12) && ent->client->lean == 0.0)
+	if((ent->client->ps.gunframe == 7 || ent->client->ps.gunframe == 9 || ent->client->ps.gunframe == 11 || ent->client->ps.gunframe == 13) && ent->client->lean == 0.0)
 	{
 		if(ent->altfire)
 			ent->client->kick_angles[0] = -3; /* Kick view up */
@@ -1797,7 +1803,7 @@ void Machinegun_Fire (edict_t *ent)
 	}
 	else if(!ent->altfire){
 		
-		if (!(ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe > 6) {
+		if (!(ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe > 7) {
 			
 			// Make it easier to escape from the animation while not firing. 
 			// Since this is a rapid-fire weapon, there's no reason not to do
@@ -1805,6 +1811,8 @@ void Machinegun_Fire (edict_t *ent)
 			// cheat the maximum fire rate.)
 			if (!ent->is_bot && ent->client->newweapon)
 				ent->client->ps.gunframe = 14;
+
+			gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/machgdown.wav"), 1, ATTN_IDLE, 0);
 			
 			return; //Don't waste ammo
 		}
