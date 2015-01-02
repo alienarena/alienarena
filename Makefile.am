@@ -33,7 +33,8 @@ dist_unixdoc_DATA = \
 	unix_dist/README \
 	unix_dist/COPYING \
 	unix_dist/INSTALL \
-	unix_dist/GPLv2
+	unix_dist/GPLv2 \
+	unix_dist/NEWS
 endif
 
 #

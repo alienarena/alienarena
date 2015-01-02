@@ -1,0 +1,13 @@
+2015-01-02 PRELIMINARY FOR NEXT RELEASE OF ALIEN ARENA
+
+Distribution package maintainers please note that the installation is
+substantially modified compared to Version 7.66:
+
+1) The botinfo subdirectory is now a subdirectory of the data1
+directory.
+
+2) The user-writeable data directory is named `cor-games' and honors
+XDG_DATA_HOME.
+
+Please see the INSTALL document for details.
+

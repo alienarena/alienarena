@@ -177,7 +177,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" \
 	"$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"
 am__dist_unixdoc_DATA_DIST = unix_dist/README unix_dist/COPYING \
-	unix_dist/INSTALL unix_dist/GPLv2
+	unix_dist/INSTALL unix_dist/GPLv2 unix_dist/NEWS
 am__dist_unixicons_DATA_DIST = unix_dist/alienarena.png \
 	unix_dist/aa-tactical-demo.png
 DATA = $(dist_arena_DATA) $(dist_tactical_DATA) $(dist_unixdoc_DATA) \
@@ -392,7 +392,8 @@ ACLOCAL_AMFLAGS = -I m4
 @DOC_INSTALL_TRUE@	unix_dist/README \
 @DOC_INSTALL_TRUE@	unix_dist/COPYING \
 @DOC_INSTALL_TRUE@	unix_dist/INSTALL \
-@DOC_INSTALL_TRUE@	unix_dist/GPLv2
+@DOC_INSTALL_TRUE@	unix_dist/GPLv2 \
+@DOC_INSTALL_TRUE@	unix_dist/NEWS
 
 
 #
