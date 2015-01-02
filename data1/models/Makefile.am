@@ -86,15 +86,8 @@ nobase_dist_models_DATA = \
 	objects/debris3/skin.tga \
 	objects/debris3/tris.md2 \
 	objects/dmspot/skin.tga \
-	objects/dmspot/skin1.tga \
-	objects/dmspot/skin1_fx.tga \
-	objects/dmspot/skin1_normal.tga \
-	objects/dmspot/skin2.tga \
-	objects/dmspot/skin2_fx.tga \
 	objects/dmspot/skin_normal.tga \
 	objects/dmspot/tris.md2 \
-	objects/dmspot/tris1.md2 \
-	objects/dmspot/tris2.md2 \
 	objects/electroball/skin_fx.tga \
 	objects/electroball/skin.jpg \
 	objects/electroball/skin_normal.jpg \
