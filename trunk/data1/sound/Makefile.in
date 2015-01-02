@@ -435,11 +435,13 @@ nobase_dist_sound_DATA = \
 	weapons/hyprbf1a.wav \
 	weapons/lightoff.wav \
 	weapons/lighton.wav \
+	weapons/machgdown.wav \
 	weapons/machgf1b.wav \
 	weapons/machgf2b.wav \
 	weapons/machgf3b.wav \
 	weapons/machgf4b.wav \
 	weapons/machgf5b.wav \
+	weapons/machgup.wav \
 	weapons/minderaserfire.wav \
 	weapons/noammo.wav \
 	weapons/railgf1a.wav \
