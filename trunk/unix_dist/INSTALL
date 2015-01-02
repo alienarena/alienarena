@@ -1,6 +1,12 @@
 
                              Alien Arena
                             Version 7.66.1
+							
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+TODO: As of 2015-01-02 this document does NOT contain instructions for
+installing from the release package (tarball). Use the old-INSTALL
+document for reference; note that it is substantially obsolete.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 1. Scope and Introduction
 
