@@ -12,7 +12,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # A copy of the  GNU General Public License is included;
-# see the file, GPL2.
+# see the file, GPLv2.
 #
 
 noinst_LIBRARIES = libgame.a
@@ -181,7 +181,6 @@ alienarena_SOURCES = \
 	ref_gl/r_script.c \
 	ref_gl/r_script.h \
 	ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c \
 	ref_gl/r_surf.c \
 	ref_gl/r_terrain.c \
 	ref_gl/r_text.c \
