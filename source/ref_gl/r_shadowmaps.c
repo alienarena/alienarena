@@ -1128,9 +1128,6 @@ void R_GenerateEntityShadow( void )
 		if((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || (currententity->flags & RF_MENUMODEL))
 			return;
 
-		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 128))
-			return;
-
 		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
 		VectorScale (tmp, 1.666, tmp);
 		rad = VectorLength (tmp);		
