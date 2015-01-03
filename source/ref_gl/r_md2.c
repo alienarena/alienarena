@@ -258,7 +258,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 	mod->type = mod_md2;
-	mod->typeFlags = MESH_MORPHTARGET | MESH_DOSHADING; // TODO: these should use shadowmaps as well
+	mod->typeFlags = MESH_CASTSHADOWMAP | MESH_MORPHTARGET | MESH_DOSHADING; // TODO: these should use shadowmaps as well
 	mod->num_frames = pheader->num_frames;
 	
 	// skin names are not always valid or file may not exist

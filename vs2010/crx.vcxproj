@@ -242,7 +242,6 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_ragdoll.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_script.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_shadowmaps.c" />
-    <ClCompile Include="$(SrcDir)ref_gl\r_shadows.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_surf.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_text.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_ttf.c" />

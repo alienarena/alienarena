@@ -32,6 +32,7 @@ extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 void R_DrawBloodEffect (void);
 
 image_t *r_framebuffer;
+image_t *r_colorbuffer;
 image_t *r_distortwave;
 image_t *r_droplets;
 image_t	*r_blooddroplets;
@@ -263,122 +264,6 @@ void R_GLSLWaterDroplets(void)
 	glUseProgramObjectARB( 0 );
 
 	return;
-}
-
-
-/*
-==============
-R_ShadowBlend
-Draws projection shadow(s)
-from stenciled volume
-==============
-*/
-image_t *r_colorbuffer;
-
-void R_ShadowBlend(float alpha)
-{
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
-	qglLoadIdentity();
-	qglOrtho(0, 1, 1, 0, -99999, 99999);
-
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-	qglLoadIdentity();
-	
-	GL_SetupWholeScreen2DVBO (wholescreen_blank);
-
-	if(gl_state.fbo && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) 
-	{
-		alpha/=1.5; //necessary because we are blending two quads
-
-		//blit the stencil mask from main buffer
-		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fboId[2]);
-
-		qglBlitFramebufferEXT(0, 0, viddef.width, viddef.height, 0, 0, viddef.width, viddef.height,
-			GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-
-		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-
-		//render offscreen
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
-
-		qglDisable(GL_STENCIL_TEST);
-		GLSTATE_DISABLE_ALPHATEST
-		GLSTATE_ENABLE_BLEND
-		qglDisable (GL_DEPTH_TEST);
-		GL_EnableTexture (0, false);
-
-		qglColor4f (1,1,1, 1);
-
-		R_DrawVarrays (GL_QUADS, 0, 4);
-	}
-
-	qglColor4f (0,0,0, alpha);
-
-	GLSTATE_DISABLE_ALPHATEST
-	GLSTATE_ENABLE_BLEND
-	qglDisable (GL_DEPTH_TEST);
-	GL_EnableTexture (0, false);
-
-	qglEnable(GL_STENCIL_TEST);
-	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
-	qglStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-
-	R_DrawVarrays (GL_QUADS, 0, 4);
-
-	if(gl_state.fbo && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) 
-	{
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-		GLSTATE_ENABLE_BLEND
-		GL_EnableTexture (0, true);
-
-		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
-		qglDisable (GL_DEPTH_TEST);
-		qglDisable(GL_STENCIL_TEST);
-
-		qglColor4f (1,1,1,1);
-		
-		// FIXME: textures captured from the framebuffer need to be rendered
-		// upside down for some reason
-		GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
-		glUseProgramObjectARB( g_blurprogramObj );
-		GL_MBind (0, r_colorbuffer->texnum);
-		glUniform1iARB( g_location_source, 0);
-
-		// Render two blurred versions of the original hard shadows onto the
-		// framebuffer. (The second blur does NOT start with the first blur as
-		// input!) This is not a proper Gaussian blur, but is designed to
-		// create penumbra-like effects.
-		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
-		R_DrawVarrays (GL_QUADS, 0, 4);
-		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
-		R_DrawVarrays (GL_QUADS, 0, 4);
-
-		glUseProgramObjectARB (0);
-	}
-
-	//revert settings
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);
-	qglPopMatrix();
-
-	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GLSTATE_DISABLE_BLEND
-	GL_EnableTexture (0, true);
-	qglEnable (GL_DEPTH_TEST);
-	qglDisable(GL_STENCIL_TEST);
-
-	qglColor4f(1,1,1,1);
-	
-	R_KillVArrays ();
 }
 
 /*
