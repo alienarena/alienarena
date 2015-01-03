@@ -1002,8 +1002,8 @@ void R_RenderView (refdef_t *fd)
 	r_newrefdef = *fd;
 
 	//shadowmaps
-	if(gl_shadowmaps->integer) {
-
+	if(gl_shadowmaps->integer)
+	{
 		qglEnable(GL_DEPTH_TEST);
 		qglClearColor(0,0,0,1.0f);
 
@@ -1066,9 +1066,6 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawSimpleItems ();
 
-	R_CastShadow();
-
-	//move back ahead of r_castshadow when we figure out shadow jitter bug
 	R_SimulateAllRagdolls(); 
 	R_DrawRagdollsOnList (); 
 	
@@ -1482,8 +1479,6 @@ int R_Init( void *hinstance, void *hWnd )
 #endif
 
 	R_InitImageSubsystem();
-
-	R_InitShadowSubsystem();
 
 	R_LoadVBOSubsystem();
 

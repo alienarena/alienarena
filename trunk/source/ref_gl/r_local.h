@@ -502,8 +502,6 @@ void R_AttribPointer (	GLuint index, GLint size, GLenum type,
 						const GLvoid *pointer );
 
 //shadows
-extern  void R_InitShadowSubsystem(void);
-extern  void R_CastShadow(void);
 extern	cvar_t		*r_shadowmapscale;
 extern  int			r_lightgroups;
 extern  image_t		*r_depthtexture;
