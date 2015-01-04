@@ -322,10 +322,6 @@ typedef struct mleaf_s
 //
 
 typedef struct {
-	int n[3];
-} neighbors_t;
-
-typedef struct {
 
 	int hasHelmet;
 
@@ -476,8 +472,6 @@ typedef struct model_s
 
 	//md2 and iqm.
 	int				num_triangles;
-	// TODO: we can remove this when shadow volumes are gone.
-	neighbors_t *neighbors;	
 	
 	//terrain only
 	image_t         *lightmap;

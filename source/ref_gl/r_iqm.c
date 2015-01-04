@@ -213,7 +213,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	header->ofs_vertexarrays = LittleLong(header->ofs_vertexarrays);
 	header->num_triangles = LittleLong(header->num_triangles);
 	header->ofs_triangles = LittleLong(header->ofs_triangles);
-	header->ofs_neighbors = LittleLong(header->ofs_neighbors);
 	header->num_joints = LittleLong(header->num_joints);
 	header->ofs_joints = LittleLong(header->ofs_joints);
 	header->num_poses = LittleLong(header->num_poses);
@@ -524,24 +523,6 @@ do { \
 	vtriangles = (unsigned int *) (pbase + header->ofs_triangles);
 	for(i = 0; i < mod->numvertexes*3; i++)
 		vtriangles[i] = LittleLong (vtriangles[i]);
-
-	// load triangle neighbors
-	// TODO: we can remove this when shadow volumes are gone, and simply not
-	// load this data from the file.
-	if (header->ofs_neighbors)
-	{
-		inelements = (const int *) (pbase + header->ofs_neighbors);
-
-		mod->neighbors = (neighbors_t*)Hunk_Alloc(header->num_triangles * sizeof(neighbors_t));
-
-		for (i = 0;i < (int)header->num_triangles;i++)
-		{
-			mod->neighbors[i].n[0] = LittleLong(inelements[0]);
-			mod->neighbors[i].n[1] = LittleLong(inelements[1]);
-			mod->neighbors[i].n[2] = LittleLong(inelements[2]);
-			inelements += 3;
-		}
-	}
 
 	/*
 	 * get skin pathname from <model>.skin file and initialize skin
