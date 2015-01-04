@@ -26,81 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-/*
-========================
-MD2_FindTriangleWithEdge
-TODO: we can remove this when shadow volumes are gone.
-========================
-*/
-static int MD2_FindTriangleWithEdge(neighbors_t * neighbors, dtriangle_t * tris, int numtris, int triIndex, int edgeIndex)
-{
-	int i, j, found = -1, foundj = 0;
-	dtriangle_t *current = &tris[triIndex];
-	qboolean dup = false;
-
-	for (i = 0; i < numtris; i++) {
-		if (i == triIndex)
-			continue;
-
-		for (j = 0; j < 3; j++) {
-			if (((current->index_xyz[edgeIndex] == tris[i].index_xyz[j]) &&
-				 (current->index_xyz[(edgeIndex + 1) % 3] ==
-				  tris[i].index_xyz[(j + 1) % 3]))
-				||
-				((current->index_xyz[edgeIndex] ==
-				  tris[i].index_xyz[(j + 1) % 3])
-				 && (current->index_xyz[(edgeIndex + 1) % 3] ==
-					 tris[i].index_xyz[j]))) {
-				// no edge for this model found yet?
-				if (found == -1) {
-					found = i;
-					foundj = j;
-				} else
-					dup = true;	// the three edges story
-			}
-		}
-	}
-
-	// normal edge, setup neighbor pointers
-	if (!dup && found != -1) {
-		neighbors[found].n[foundj] = triIndex;
-		return found;
-	}
-	// naughty edge let no-one have the neighbor
-	return -1;
-}
-
-/*
-===============
-MD2_BuildTriangleNeighbors
-TODO: we can remove this when shadow volumes are gone.
-===============
-*/
-static void MD2_BuildTriangleNeighbors(neighbors_t * neighbors,
-									   dtriangle_t * tris, int numtris)
-{
-	int i, j;
-
-	// set neighbors to -1
-	for (i = 0; i < numtris; i++) {
-		for (j = 0; j < 3; j++)
-			neighbors[i].n[j] = -1;
-	}
-
-	// generate edges information (for shadow volumes)
-	// NOTE: We do this with the original vertices not the reordered onces
-	// since reordering them
-	// duplicates vertices and we only compare indices
-	for (i = 0; i < numtris; i++) {
-		for (j = 0; j < 3; j++) {
-			if (neighbors[i].n[j] == -1)
-				neighbors[i].n[j] =
-					MD2_FindTriangleWithEdge(neighbors, tris, numtris, i,
-											 j);
-		}
-	}
-}
-
 static mesh_framevbo_t *MD2_GetFrameVBO (void *data, int framenum)
 {
 	dmdl_t			*pheader = (dmdl_t *)data;
@@ -175,7 +100,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 				 mod->name, version, ALIAS_VERSION);
 
 	// TODO: we can stop permanently keeping this (change it to normal
-	// Z_Malloc) as soon as shadow volumes are gone.
+	// Z_Malloc) as soon as we find another place to store skin names.
 	mod->extradata = Hunk_Begin (0x300000);
 	pheader = (dmdl_t *)Hunk_Alloc (LittleLong(pinmodel->ofs_end));
 
@@ -230,12 +155,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 //
-// find neighbours - TODO: we can remove this when shadow volumes are gone.
-//
-	mod->neighbors = Hunk_Alloc(pheader->num_tris * sizeof(neighbors_t));
-	MD2_BuildTriangleNeighbors(mod->neighbors, pouttri, pheader->num_tris);
-
-//
 // load the frames
 //
 	for (i=0 ; i<pheader->num_frames ; i++)
@@ -258,7 +177,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	}
 
 	mod->type = mod_md2;
-	mod->typeFlags = MESH_CASTSHADOWMAP | MESH_MORPHTARGET | MESH_DOSHADING; // TODO: these should use shadowmaps as well
+	mod->typeFlags = MESH_CASTSHADOWMAP | MESH_MORPHTARGET | MESH_DOSHADING;
 	mod->num_frames = pheader->num_frames;
 	
 	// skin names are not always valid or file may not exist
