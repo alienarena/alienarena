@@ -2909,7 +2909,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
-		if (len < 4)
+		if (len < 4 && len + dec >= 4) // add only one, 4 units from end
 			addParticleLight (p,
 						p->scale*75.0f, 0,
 					.25, 0, .3);
