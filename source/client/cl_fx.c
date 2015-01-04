@@ -1642,12 +1642,12 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 		p->alpha = 0.3;
 
 		p->alphavel = -8.8f / ((ifl*2.0f) + frand()*0.3f);
-
-		if (i > 4)
-			addParticleLight (p,
-					p->scale*25.0f, 50,
-				0, .8, 1);
 	}
+
+	// add light for the last (most intense) particle
+	addParticleLight (p,
+			p->scale*25.0f, 50,
+		0, .8, 1);
 }
 
 /*
