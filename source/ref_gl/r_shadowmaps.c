@@ -1120,7 +1120,7 @@ void R_DrawEntityCaster(entity_t *ent)
 
 void R_GenerateEntityShadow( void )
 {
-	if(gl_shadowmaps->integer && gl_normalmaps->integer)
+	if (gl_shadowmaps->integer)
 	{
 		vec3_t dist, tmp;
 		float rad;
