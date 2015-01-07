@@ -50,14 +50,15 @@ float	vert_array[MAX_ARRAY][3];
 int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12, 5};
 
 static long int KillFlags = 0;
+#define MAX_TEXCOORDS		2
 #define KILL_TMU0_POINTER	1
-#define KILL_NORMAL_POINTER (KILL_TMU0_POINTER<<MAX_TMUS)
+#define KILL_NORMAL_POINTER (KILL_TMU0_POINTER<<MAX_TEXCOORDS)
 
 static long int KillAttribFlags = 0;
 
 void R_TexCoordPointer (int tmu, GLsizei stride, const GLvoid *pointer)
 {
-	assert (tmu < MAX_TMUS);
+	assert (tmu < MAX_TEXCOORDS);
 	
 	qglClientActiveTextureARB (GL_TEXTURE0 + tmu);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -139,7 +140,7 @@ void R_KillVArrays (void)
 	if(KillFlags & KILL_NORMAL_POINTER)
 		qglDisableClientState (GL_NORMAL_ARRAY);
 	
-	for (tmu = 0; tmu < MAX_TMUS; tmu++)
+	for (tmu = 0; tmu < MAX_TEXCOORDS; tmu++)
 	{
 		if ((KillFlags & (KILL_TMU0_POINTER << tmu)) != 0)
 		{
