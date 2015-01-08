@@ -437,7 +437,7 @@ typedef struct
 
     int         lightmap_textures;
 
-#define MAX_TMUS 8
+#define MAX_TMUS 16
     int         currenttextures[MAX_TMUS];
     int			currenttexturemodes[MAX_TMUS];
     qboolean	enabledtmus[MAX_TMUS];
@@ -626,13 +626,15 @@ struct
 {
 	dlight_uniform_location_t	dlight_uniforms;
 	GLuint						envmap;
-	GLuint						numblendtextures;
+	GLuint						numblendtextures, numblendnormalmaps;
 	GLuint						lightmap;
 	GLuint						fog;
-	GLuint						mainTexture, mainTexture2;
+	GLuint						mainTexture, mainTexture2, mainTexture3;
 	GLuint						lightmapTexture;
 	GLuint						blendscales;
 	GLuint						blendTexture[6];
+	GLuint						normalblendscales;
+	GLuint						blendNormalmap[3];
 } rscript_uniforms[GLSL_MAX_DLIGHTS+1];
 
 //water
