@@ -370,6 +370,13 @@ void RS_ReadyScript (rscript_t *rs)
 			if (!stage->blend_textures[i])
 				stage->blend_textures[i] = r_notexture;
 		}
+		
+		for (i = 0; i < stage->num_blend_normalmaps; i++)
+		{
+			stage->blend_normalmaps[i] = GL_FindImage (stage->normalblend_names[i], mode);
+			if (!stage->blend_normalmaps[i])
+				stage->blend_normalmaps[i] = r_notexture;
+		}
 
 		stage = stage->next;
 	}
@@ -746,12 +753,30 @@ static void rs_stage_if (rs_stage_t *stage, char **token)
 
 static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 {
-	int i;
+	int i, limit, numtextures;
+	float *scales;
+	char *names;
+	qboolean normal = !Q_strcasecmp (*token, "blendnormalmap");
 	
 	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->num_blend_textures = atoi(*token);
+	numtextures = atoi (*token);
 	
-	for (i = 0; i < stage->num_blend_textures; i++)
+	if (normal)
+	{
+		limit = 3;
+		stage->num_blend_normalmaps = min (numtextures, limit);
+		scales = stage->normalblend_scales;
+		names = stage->normalblend_names[0];
+	}
+	else
+	{
+		limit = 6;
+		stage->num_blend_textures = min (numtextures, limit);
+		scales = stage->blend_scales;
+		names = stage->blend_names[0];
+	}
+	
+	for (i = 0; i < numtextures; i++)
 	{
 		float scale[2];
 		int j;
@@ -771,21 +796,18 @@ static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 			scale[1] = scale[0];
 		}
 		
-		if (i < 6) // Current maximum
+		if (i < limit) // Current maximum
 		{
 			for (j = 0; j < 2; j++)
-				stage->blend_scales[2*i+j] = scale[j];
+				scales[2*i+j] = scale[j];
 		
-			strncpy (stage->blend_names[i], *token, sizeof(stage->blend_names[i]));
+			strncpy (names + i * MAX_OSPATH, *token, MAX_OSPATH);
 		}
 		else
 		{
-			Com_Printf ("WARN: skip blendmap channel %d (max 6)\n", i+1);
+			Com_Printf ("WARN: skip blendmap channel %d (max %d)\n", i+1, limit);
 		}
 	}
-	
-	if (stage->num_blend_textures > 6)
-		stage->num_blend_textures = 6;
 }
 
 // For legacy origin and angle commands that aren't actually used in the code.
@@ -820,48 +842,49 @@ static struct
 	void (*func)(rs_stage_t *shader, char **token);
 } rs_stagekeys[] =
 {
-	{	"colormap",		&rs_stage_colormap		},
-	{	"map",			&rs_stage_name			},
-	{	"map2",			&rs_stage_name2			},
-	{	"map3",			&rs_stage_name3			},
-	{	"scroll",		&rs_stage_scroll		},
-	{	"blendfunc",	&rs_stage_blendfunc		},
-	{	"alphashift",	&rs_stage_alphashift	},
-	{	"rand",			&rs_stage_random		},
-	{	"anim",			&rs_stage_anim			},
-	{	"envmap",		&rs_stage_envmap		},
-	{	"depthhack",	&rs_stage_depthhack		},
-	{	"nolightmap",	&rs_stage_nolightmap	},
-	{	"alphamask",	&rs_stage_alphamask		},
-	{	"rotate",		&rs_stage_rot_speed		},
-	{	"scale",		&rs_stage_scale			},
-	{	"lensflare",	&rs_stage_lensflare		},
-	{	"flaretype",	&rs_stage_flaretype		},
-	{	"normalmap",	&rs_stage_normalmap		},
-	{	"blendmap",		&rs_stage_blendmap		},
-	{	"grass",		&rs_stage_grass			},
-	{	"grasstype",	&rs_stage_grasstype		},
-	{	"beam",			&rs_stage_beam			},
-	{	"beamtype",		&rs_stage_beamtype		},
-	{	"xang",			&rs_stage_xang			},
-	{	"yang",			&rs_stage_yang			},
-	{	"rotating",		&rs_stage_rotating		},
-	{	"fx",			&rs_stage_fx			},
-	{	"glow",			&rs_stage_glow			},
-	{	"cube",			&rs_stage_cube			},
-	{	"if",			&rs_stage_if			},
+	{	"colormap",			&rs_stage_colormap		},
+	{	"map",				&rs_stage_name			},
+	{	"map2",				&rs_stage_name2			},
+	{	"map3",				&rs_stage_name3			},
+	{	"scroll",			&rs_stage_scroll		},
+	{	"blendfunc",		&rs_stage_blendfunc		},
+	{	"alphashift",		&rs_stage_alphashift	},
+	{	"rand",				&rs_stage_random		},
+	{	"anim",				&rs_stage_anim			},
+	{	"envmap",			&rs_stage_envmap		},
+	{	"depthhack",		&rs_stage_depthhack		},
+	{	"nolightmap",		&rs_stage_nolightmap	},
+	{	"alphamask",		&rs_stage_alphamask		},
+	{	"rotate",			&rs_stage_rot_speed		},
+	{	"scale",			&rs_stage_scale			},
+	{	"lensflare",		&rs_stage_lensflare		},
+	{	"flaretype",		&rs_stage_flaretype		},
+	{	"normalmap",		&rs_stage_normalmap		},
+	{	"blendmap",			&rs_stage_blendmap		},
+	{	"blendnormalmap",	&rs_stage_blendmap		},
+	{	"grass",			&rs_stage_grass			},
+	{	"grasstype",		&rs_stage_grasstype		},
+	{	"beam",				&rs_stage_beam			},
+	{	"beamtype",			&rs_stage_beamtype		},
+	{	"xang",				&rs_stage_xang			},
+	{	"yang",				&rs_stage_yang			},
+	{	"rotating",			&rs_stage_rotating		},
+	{	"fx",				&rs_stage_fx			},
+	{	"glow",				&rs_stage_glow			},
+	{	"cube",				&rs_stage_cube			},
+	{	"if",				&rs_stage_if			},
 	
-	// Depreciated stuff
-	{	"model",		&rs_stage_consume1		},
-	{	"frames",		&rs_stage_consume3		},
-	{	"origin",		&rs_stage_consume3		},
-	{	"angle",		&rs_stage_consume3		},
-	{	"dynamic",		&rs_stage_consume0		},
+	// Deprecated stuff
+	{	"model",			&rs_stage_consume1		},
+	{	"frames",			&rs_stage_consume3		},
+	{	"origin",			&rs_stage_consume3		},
+	{	"angle",			&rs_stage_consume3		},
+	{	"dynamic",			&rs_stage_consume0		},
 	
 	// Stuff we may bring back if anyone ever wants to use it
-	{	"alphafunc",	&rs_stage_consume1		},
+	{	"alphafunc",		&rs_stage_consume1		},
 
-	{	NULL,			NULL					}
+	{	NULL,				NULL					}
 };
 
 static int num_stagekeys = sizeof (rs_stagekeys) / sizeof(rs_stagekeys[0]) - 1;
@@ -1161,8 +1184,11 @@ static void RS_SetupGLState (int dynamic)
 	glUniform1iARB (rscript_uniforms[dynamic].mainTexture, 0);
 	glUniform1iARB (rscript_uniforms[dynamic].lightmapTexture, 1);
 	glUniform1iARB (rscript_uniforms[dynamic].mainTexture2, 2);
+	glUniform1iARB (rscript_uniforms[dynamic].mainTexture3, 3);
 	for (i = 0; i < 6; i++)
-		glUniform1iARB (rscript_uniforms[dynamic].blendTexture[i], 3+i);
+		glUniform1iARB (rscript_uniforms[dynamic].blendTexture[i], 4+i);
+	for (i = 0; i < 3; i++)
+		glUniform1iARB (rscript_uniforms[dynamic].blendNormalmap[i], 10+i);
 	glUniform1iARB (rscript_uniforms[dynamic].fog, map_fog);
 	
 	if (dynamic != 0)
@@ -1312,13 +1338,24 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		
 		glUniform1iARB (rscript_uniforms[dynamic].envmap, stage->envmap != 0);
 		glUniform1iARB (rscript_uniforms[dynamic].numblendtextures, stage->num_blend_textures);
+		glUniform1iARB (rscript_uniforms[dynamic].numblendnormalmaps, stage->num_blend_textures);
 		
 		if (stage->num_blend_textures > 0)
 		{
 			for (i = 0; i < stage->num_blend_textures; i++)
-				GL_MBind (3+i, stage->blend_textures[i]->texnum);
+				GL_MBind (4+i, stage->blend_textures[i]->texnum);
 			
-			glUniformMatrix3x4fvARB (rscript_uniforms[dynamic].blendscales, 1, GL_FALSE, (const GLfloat *) stage->blend_scales);
+			glUniform2fvARB (rscript_uniforms[dynamic].blendscales, stage->num_blend_textures, (const GLfloat *) stage->blend_scales);
+		}
+		
+		if (stage->num_blend_normalmaps > 0)
+		{
+			GL_MBind (3, stage->texture3->texnum);
+			
+			for (i = 0; i < stage->num_blend_normalmaps; i++)
+				GL_MBind (10+i, stage->blend_normalmaps[i]->texnum);
+			
+			glUniform2fvARB (rscript_uniforms[dynamic].normalblendscales, stage->num_blend_normalmaps, (const GLfloat *) stage->normalblend_scales);
 		}
 		
 		GL_SelectTexture (0);

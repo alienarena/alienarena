@@ -609,6 +609,7 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform sampler2D mainTexture;
 	uniform sampler2D mainTexture2;
+	uniform sampler2D mainTexture3;
 	uniform sampler2D lightmapTexture;
 	uniform sampler2D blendTexture0;
 	uniform sampler2D blendTexture1;
@@ -616,9 +617,13 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform sampler2D blendTexture3;
 	uniform sampler2D blendTexture4;
 	uniform sampler2D blendTexture5;
-	uniform int	numblendtextures;
+	uniform sampler2D blendNormalmap0;
+	uniform sampler2D blendNormalmap1;
+	uniform sampler2D blendNormalmap2;
+	uniform int	numblendtextures, numblendnormalmaps;
 	uniform int FOG;
-	uniform mat3x4 blendscales;
+	uniform vec2 blendscales[6];
+	uniform vec2 normalblendscales[3];
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
@@ -647,6 +652,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	{
 		
 		vec4 mainColor = texture2D (mainTexture, gl_TexCoord[0].st);
+		vec3 normal = vec3 (0.0, 0.0, 1.0);
 		
 		if (numblendtextures == 0)
 		{
@@ -658,10 +664,10 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			if (numblendtextures > 3)
 				mainColor2 = texture2D (mainTexture2, gl_TexCoord[0].st);
 			
-			float tmp =	mainColor.r + mainColor.g + mainColor.b +
-						mainColor2.r + mainColor2.g + mainColor2.b;
-			mainColor.rgb /= tmp;
-			mainColor2.rgb /= tmp;
+			float totalbrightness =		dot (mainColor.rgb, vec3 (1.0)) +
+										dot (mainColor2.rgb, vec3 (1.0));
+			mainColor.rgb /= totalbrightness;
+			mainColor2.rgb /= totalbrightness;
 			
 			vec3 blend_weights = abs (normalize (orig_normal));
 			blend_weights = (blend_weights - vec3 (0.2)) * 7;
@@ -675,31 +681,61 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			// TODO: go back to switch-case as soon as we start using GLSL
 			// 1.30. 
 			if (mainColor.r > 0.0)
-				gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales[0].xy) * mainColor.r;
+				gl_FragColor += triplanar_sample (blendTexture0, blend_weights, blendscales[0]) * mainColor.r;
 			if (numblendtextures > 1)
 			{
 				if (mainColor.g > 0.0)
-					gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales[0].zw) * mainColor.g;
+					gl_FragColor += triplanar_sample (blendTexture1, blend_weights, blendscales[1]) * mainColor.g;
 				if (numblendtextures > 2)
 				{
 					if (mainColor.b > 0.0)
-						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales[1].xy) * mainColor.b;
+						gl_FragColor += triplanar_sample (blendTexture2, blend_weights, blendscales[2]) * mainColor.b;
 					if (numblendtextures > 3)
 					{
 						if (mainColor2.r > 0.0)
-							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales[1].zw) * mainColor2.r;
+							gl_FragColor += triplanar_sample (blendTexture3, blend_weights, blendscales[3]) * mainColor2.r;
 						if (numblendtextures > 4)
 						{
 							if (mainColor2.g > 0.0)
-								gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales[2].xy) * mainColor2.g;
+								gl_FragColor += triplanar_sample (blendTexture4, blend_weights, blendscales[4]) * mainColor2.g;
 							if (numblendtextures > 5)
 							{
 								if (mainColor2.b > 0.0)
-									gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales[2].zw) * mainColor2.b;
+									gl_FragColor += triplanar_sample (blendTexture5, blend_weights, blendscales[5]) * mainColor2.b;
 							}
 						}
 					}
 				}
+			}
+			
+			if (DYNAMIC > 0 && numblendnormalmaps > 0)
+			{
+				vec4 mainColor3 = texture2D (mainTexture3, gl_TexCoord[0].st);
+				float totalnormal = dot (mainColor3.rgb, vec3 (1.0));
+				
+				// We assume that all channels from maintexture3 are copies of
+				// channels from maintexture1 or maintexture2 and normalize
+				// accordingly. 
+				mainColor3.rgb /= totalbrightness;
+				
+				// We substitute "straight up" as the normal for channels that
+				// don't have corresponding normalmaps.
+				normal = vec3 (0.5, 0.5, 1.0) * (1.0 - totalnormal/totalbrightness);
+				
+				if (mainColor3.r > 0.0)
+					normal += (triplanar_sample (blendNormalmap0, blend_weights, normalblendscales[0]) * mainColor3.r).rgb;
+				if (numblendnormalmaps > 1)
+				{
+					if (mainColor3.g > 0.0)
+						normal += (triplanar_sample (blendNormalmap1, blend_weights, normalblendscales[1]) * mainColor3.g).rgb;
+					if (numblendnormalmaps > 2)
+					{
+						if (mainColor3.g > 0.0)
+							normal += (triplanar_sample (blendNormalmap2, blend_weights, normalblendscales[2]) * mainColor3.b).rgb;
+					}
+				}
+				
+				normal = 2.0 * (normal - vec3 (0.5));
 			}
 		}
 		
@@ -711,7 +747,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		
 		if (DYNAMIC > 0)
 		{
-			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, vec3 (0.0, 0.0, 1.0), 1.0, 1.0);
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, normal, 1.0, 1.0);
 			gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
 		}
 
@@ -1817,7 +1853,7 @@ void R_LoadGLSLPrograms(void)
 			!glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 			!glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
 				!glUniform4iARB || !glUniform1iARB || !glUniform1fARB ||
-				!glUniform3fvARB || !glUniform1fvARB ||
+				!glUniform3fvARB || !glUniform2fvARB || !glUniform1fvARB ||
 				!glUniformMatrix3fvARB || !glUniformMatrix3x4fvARB ||
 				!glVertexAttribPointerARB || !glEnableVertexAttribArrayARB ||
 				!glBindAttribLocationARB)
@@ -1886,12 +1922,15 @@ void R_LoadGLSLPrograms(void)
 		get_dlight_uniform_locations (g_rscriptprogramObj[i], &rscript_uniforms[i].dlight_uniforms);
 		rscript_uniforms[i].envmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "envmap");
 		rscript_uniforms[i].numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj[i], "numblendtextures");
+		rscript_uniforms[i].numblendnormalmaps = glGetUniformLocationARB (g_rscriptprogramObj[i], "numblendnormalmaps");
 		rscript_uniforms[i].lightmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmap");
 		rscript_uniforms[i].fog = glGetUniformLocationARB (g_rscriptprogramObj[i], "FOG");
 		rscript_uniforms[i].mainTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture");
 		rscript_uniforms[i].mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture2");
+		rscript_uniforms[i].mainTexture3 = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture3");
 		rscript_uniforms[i].lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmapTexture");
 		rscript_uniforms[i].blendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "blendscales");
+		rscript_uniforms[i].normalblendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "normalblendscales");
 
 		for (j = 0; j < 6; j++)
 		{
@@ -1900,6 +1939,15 @@ void R_LoadGLSLPrograms(void)
 			assert (j < 10); // We only have space for one digit.
 			uniformname[12] = '0'+j;
 			rscript_uniforms[i].blendTexture[j] = glGetUniformLocationARB (g_rscriptprogramObj[i], uniformname);
+		}
+		
+		for (j = 0; j < 3; j++)
+		{
+			char uniformname[] = "blendNormalmap.";
+		
+			assert (j < 10); // We only have space for one digit.
+			uniformname[14] = '0'+j;
+			rscript_uniforms[i].blendNormalmap[j] = glGetUniformLocationARB (g_rscriptprogramObj[i], uniformname);
 		}
 	}
 
