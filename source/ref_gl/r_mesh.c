@@ -454,12 +454,12 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 			{
 				//make dynamic lights more influential than world
 				for (j = 0; j < 3; j++)
-					lightAdd[j] += dl->origin[j]*10*dl->intensity;
-				numlights+=10*dl->intensity;
-
-				VectorSubtract (dl->origin, meshOrigin, temp);
+					lightAdd[j] += dl->origin[j]*50*dl->intensity;
+				numlights+=50*dl->intensity;
 			}
 		}
+		//scale up this for a stronger subsurface effect
+		VectorScale(dynamiclight, 5.0, dynamiclight);
 	}
 	else
 	{
@@ -685,6 +685,35 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 
 			GL_MBind (3, rs->stage->texture3->texnum);
 			glUniform1iARB (uniforms->fx2Tex, 3);
+
+			if(r_shadowmapcount)
+			{
+				vec3_t tmp, lightVec;
+				float mag, dist, val;
+				int i;
+
+				GL_MBind (6, r_depthtexture2->texnum);
+				glUniform1iARB (uniforms->shadowmapTexture, 6);
+
+				glUniform1fARB (uniforms->xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
+				glUniform1fARB (uniforms->yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+
+				//HACK - this next section is an attempt to get shadows to line up better with the ones cast on BSP
+				//It's not perfect, but passable perhaps.  It should be corrected at some point properly.
+				VectorCopy(currententity->origin, tmp);
+				VectorSubtract(currententity->origin, statLightPosition, lightVec);
+				VectorNormalize(lightVec);
+				mag = sqrt(lightVec[0] * lightVec[0] + lightVec[1] * lightVec[1] + lightVec[2] * lightVec[2]);
+				dist = VectorLength(currententity->model->maxs);
+				val = dist / mag;
+				for(i=0; i<3; i++) 
+				{
+					tmp[i] = tmp[i] + ( lightVec[i] * val );
+				}
+
+				//because we are translating our entities, we need to supply the shader with the actual position of this mesh
+				glUniform3fARB ( uniforms->meshPosition, tmp[0], tmp[1], tmp[2]);
+			}
 		}
 		else
 		{
@@ -709,8 +738,9 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		}
 	}
 	
-	glUniform1fARB (uniforms->time, rs_realtime);
+	glUniform1fARB (uniforms->time, rs_realtime);	
 	
+	glUniform1iARB (uniforms->shadowmap, r_shadowmapcount); 
 	glUniform1iARB (uniforms->fog, map_fog);
 	glUniform1iARB (uniforms->team, currententity->team);
 
@@ -1057,7 +1087,6 @@ void R_Mesh_Draw (void)
 		qglMatrixMode(GL_MODELVIEW);
 	}
 
-
 	qglPushMatrix ();
 	if (!currententity->ragdoll) // HACK
 		R_RotateForEntity (currententity);
@@ -1114,6 +1143,8 @@ void R_Mesh_Draw (void)
 		qglCullFace (GL_FRONT);
 	}
 
+	r_shadowmapcount = 0; //reset shadowmap count after backend render
+
 	if ((currententity->flags & RF_DEPTHHACK)) // restore depth range
 		qglDepthRange (gldepthmin, gldepthmax);
 	
@@ -1129,7 +1160,7 @@ void R_Mesh_Draw (void)
 
 // TODO - alpha and alphamasks possible?
 // Should support every mesh type
-void R_Mesh_DrawCaster (void)
+void R_Mesh_DrawCaster (float offSetAng)
 {
 	// don't draw weapon model shadow casters or shells
 	if ((currententity->flags & (RF_WEAPONMODEL|RF_SHELL_ANY)))
@@ -1140,7 +1171,16 @@ void R_Mesh_DrawCaster (void)
 
 	qglPushMatrix ();
 	if (!currententity->ragdoll) // HACK
-		R_RotateForEntity (currententity);
+	{
+		qglTranslatef (currententity->origin[0],  currententity->origin[1],  currententity->origin[2]);
+		qglRotatef (currententity->angles[YAW]+offSetAng,		0, 0, 1);
+		// pitch and roll are handled by IQM_AnimateFrame. 
+		if (currententity->model == NULL || (currententity->flags & RF_WEAPONMODEL) || currententity->model->type != mod_iqm)
+		{
+			qglRotatef (currententity->angles[PITCH],	0, 1, 0);
+			qglRotatef (currententity->angles[ROLL],	1, 0, 0);
+		}
+	}
 	
 	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();

@@ -746,6 +746,11 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 	}
 }
 
+void R_DrawShadowMapTerrain (vec3_t origin)
+{
+	//draw polys close to this ent that would be in shadow
+}
+
 #include "r_lodcalc.h"
 
 extern cvar_t *cl_simpleitems;
@@ -800,7 +805,7 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	if (currententity->lod2)
 		currentmodel = currententity->lod2;
 
-	R_Mesh_DrawCaster ();
+	R_Mesh_DrawCaster (0.0);
 }
 
 void R_DrawDynamicCaster(void)
@@ -1003,11 +1008,12 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-void R_DrawEntityCaster(entity_t *ent)
+void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 {		
 	vec3_t	dist, mins, maxs;
 	trace_t	r_trace;
-	model_t *prev;
+	entity_t *prevEntity;
+	model_t *prevModel;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -1045,7 +1051,6 @@ void R_DrawEntityCaster(entity_t *ent)
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
-	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
 
 	//Disable color rendering, we only want to write to the Z-Buffer
@@ -1064,11 +1069,8 @@ void R_DrawEntityCaster(entity_t *ent)
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );	
 
-	//we could loop the entities here, and render any nearby models, to make sure we get shadows on the this entity if a mesh is nearby. 
-	//this would be only if we want to do self shadowing, or have player shadows cast on other mesh objects.  At this time, I think that the
-	//performance losses would not be worth doing this, but we can revisit.
-
-	prev = currentmodel;
+	prevEntity = currententity;
+	prevModel = currentmodel;
 	
 	// We only do LODs for non-ragdoll meshes-- for now.
 	if (!ent->ragdoll)
@@ -1081,19 +1083,24 @@ void R_DrawEntityCaster(entity_t *ent)
 		//set lod if available
 		if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
 		{
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
+			if(ent->lod2)
+				currentmodel = ent->lod2;
 		}
 		else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
 		{
-			if(currententity->lod1)
-				currentmodel = currententity->lod1;
+			if(ent->lod1)
+				currentmodel = ent->lod1;
 		}
-		if (currententity->lod2)
-			currentmodel = currententity->lod2;
+		if (ent->lod2)
+			currentmodel = ent->lod2;
 	}
 
-	R_Mesh_DrawCaster ();
+	//Hard to say why this needs to be done, but shadowmaps on meshes seem 90 deg off
+	//Note - need to see if this is also the case with IQM!
+	if(proxEnts)
+		R_Mesh_DrawCaster (90.0);
+	else
+		R_Mesh_DrawCaster (0.0);
 	
 	SM_SetTextureMatrix(1);
 		
@@ -1113,7 +1120,8 @@ void R_DrawEntityCaster(entity_t *ent)
 
 	r_shadowmapcount = 1;
 	
-	currentmodel = prev;
+	currententity = prevEntity;
+	currentmodel = prevModel;		
 	
 	GL_InvalidateTextureState (); // FIXME
 }
@@ -1122,8 +1130,11 @@ void R_GenerateEntityShadow( void )
 {
 	if (gl_shadowmaps->integer)
 	{
-		vec3_t dist, tmp;
+		vec3_t dist, origin, tmp;
 		float rad;
+		entity_t *prevEntity;
+		model_t *prevModel;
+		int i;
 
 		if((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || (currententity->flags & RF_MENUMODEL))
 			return;
@@ -1159,7 +1170,7 @@ void R_GenerateEntityShadow( void )
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		R_DrawEntityCaster(currententity);
+		R_DrawEntityCaster(false, currententity);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1173,11 +1184,48 @@ void R_GenerateEntityShadow( void )
 			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, currententity->origin);
+			//R_DrawShadowMapTerrain (currententity->origin);
 
 			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_DISABLE_BLEND
 		}
 
-		r_shadowmapcount = 0;
+		//now check for any entities close to this one, and add to the depth buffer 
+		VectorCopy(currententity->origin, origin);
+		prevEntity = currententity;
+		prevModel = currentmodel;
+
+		for (i = 0 ; i < r_newrefdef.num_entities; i++)
+		{
+			currententity = &r_newrefdef.entities[i];
+
+			//don't add this entity to the depth texture
+			if(currententity == prevEntity)
+				continue;
+
+			if (!currententity->model)
+				continue;
+
+			if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+				continue;
+
+			if (currententity->flags & RF_WEAPONMODEL || currententity->flags & RF_SHELL_ANY || currententity->flags & RF_VIEWERMODEL)
+				continue;
+
+			//if close enough to cast a shadow on this ent - render it into depth buffer
+			VectorSubtract(currententity->origin,origin, dist);
+			if(VectorLength(dist) > 64)
+				continue;
+
+			R_DrawEntityCaster(true, currententity);
+		}
+		currententity = prevEntity;
+		currentmodel = prevModel;		
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+		//Enabling color write (previously disabled for light POV z-buffer rendering)
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 }
+
