@@ -163,7 +163,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	iqmheader_t *header;
 	int i, j, k;
-	const int *inelements;
 	unsigned int *vtriangles = NULL;
 	skeletal_basevbo_t *basevbo = NULL;
 	mesh_framevbo_t *framevbo = NULL;

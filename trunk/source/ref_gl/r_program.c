@@ -876,6 +876,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 	uniform vec3 staticLightColor;
 	uniform vec3 staticLightPosition;
 	uniform vec3 totalLightPosition;
+	uniform vec3 meshPosition;
 	uniform float time;
 	uniform int FOG;
 	uniform int TEAM;
@@ -889,6 +890,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 	const float FresnelPower = 5.0;
 	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
 
+	varying vec4 sPos;
 	varying vec3 StaticLightDir;
 	varying float fog;
 	varying float FresRatio;
@@ -906,13 +908,17 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 
 	void main()
 	{
+		fog = 0.0;
+
 		anim_compute (true, true);
 		
 		if (useShell > 0)
-			anim_vertex += normalize (vec4 (anim_normal, 0)) * useShell;
+			anim_vertex += normalize (vec4 (anim_normal, 0)) * useShell;		
 		
 		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 		subScatterVS (gl_Position);
+
+		sPos = gl_Vertex + vec4(meshPosition, 0.0);
 		
 		worldNormal = normalize (gl_NormalMatrix * anim_normal);
 		
@@ -982,14 +988,16 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 	}
 );
 
-static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
+static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY STRINGIFY (
 	uniform vec3 staticLightColor;
 	uniform vec3 totalLightPosition, totalLightColor;
 	uniform sampler2D baseTex;
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
+	uniform shadowsampler_t StatShadowMap;
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
+	uniform int SHADOWMAP;
 	uniform int FOG;
 	uniform int TEAM;
 	uniform int useFX;
@@ -997,12 +1005,17 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform int useGlow;
 	uniform float useShell;
 	uniform int fromView;
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
+
 	const float SpecularFactor = 0.50;
 	//next group could be made uniforms if we want to control this 
 	const float MaterialThickness = 2.0; //this val seems good for now
 	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
 	const float RimScalar = 10.0; //intensity of the rim effect
+	const float shadow_fudge = 0.2; // Used by shadowmap library
 
+	varying vec4 sPos;
 	varying vec3 StaticLightDir;
 	varying float fog;
 	varying float FresRatio;
@@ -1026,12 +1039,16 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		vec4 fx;
 		vec4 glow;
 		vec4 scatterCol = vec4(0.0);
+		float shadowval;
 
 		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb * 1.1;
 		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5 ) );
 
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
+
+		if(SHADOWMAP > 0)
+			shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
 		{
@@ -1080,6 +1097,12 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			litColor = vec3 (0.0);
 		}
 
+		if(SHADOWMAP > 0)
+		{
+			shadowval = clamp(shadowval, 0.7 + fog, 1.0);
+			litColor = litColor * shadowval;
+		}
+
 		gl_FragColor.a = 1.0;
 		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
 		
@@ -1120,7 +1143,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		{
 			glow = texture2D(fxTex, gl_TexCoord[0].xy );
 			gl_FragColor = mix(gl_FragColor, glow, glow.a);
-		}
+		}		
 
 		if(TEAM == 1)
 			gl_FragColor = mix(gl_FragColor, vec4(0.3, 0.0, 0.0, 1.0), fog);
@@ -1797,10 +1820,15 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->staticLightColor = glGetUniformLocationARB (programObj, "staticLightColor");
 	out->totalLightPosition = glGetUniformLocationARB (programObj, "totalLightPosition");
 	out->totalLightColor = glGetUniformLocationARB (programObj, "totalLightColor");
+	out->meshPosition = glGetUniformLocationARB (programObj, "meshPosition");
 	out->baseTex = glGetUniformLocationARB (programObj, "baseTex");
 	out->normTex = glGetUniformLocationARB (programObj, "normalTex");
 	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
+	out->shadowmap = glGetUniformLocationARB (programObj, "SHADOWMAP");
+	out->shadowmapTexture = glGetUniformLocationARB (programObj, "StatShadowMap");
+	out->xOffs = glGetUniformLocationARB (programObj, "xPixelOffset");
+	out->yOffs = glGetUniformLocationARB (programObj, "yPixelOffset");
 	out->time = glGetUniformLocationARB (programObj, "time");
 	out->fog = glGetUniformLocationARB (programObj, "FOG");
 	out->useFX = glGetUniformLocationARB (programObj, "useFX");
