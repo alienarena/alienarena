@@ -55,6 +55,13 @@ PFNGLDISABLEVERTEXATTRIBARRAYARBPROC glDisableVertexAttribArrayARB = NULL;
 PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
 PFNGLGETSHADERINFOLOGPROC			glGetShaderInfoLog			= NULL;
 
+// Used for dumping internal assembly of GLSL programs. Purely for developer
+// use, end-users need not have this OpenGL extension supported.
+/*#define DUMP_GLSL_ASM*/
+#ifdef DUMP_GLSL_ASM
+static void (*glGetProgramBinary) (GLuint program, GLsizei bufsize, GLsizei *length, GLenum *binaryFormat, void *binary) = NULL;
+#endif
+
 #define STRINGIFY(...) #__VA_ARGS__
 
 //GLSL Programs
@@ -1726,7 +1733,7 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 		}
 		else
 		{
-			Com_Printf ("...%s Vertex Shader Compile Error\n", name);
+			Com_Printf ("...%s_%ddynamic Vertex Shader Compile Error\n", name, ndynamic);
 			if (glGetShaderInfoLog != NULL)
 			{
 				glGetShaderInfoLog (g_vertexShader, sizeof(str), NULL, str);
@@ -1771,7 +1778,7 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 		}
 		else
 		{
-			Com_Printf ("...%s Fragment Shader Compile Error\n", name);
+			Com_Printf ("...%s_%ddynamic Fragment Shader Compile Error\n", name, ndynamic);
 			if (glGetShaderInfoLog != NULL)
 			{
 				glGetShaderInfoLog (g_fragmentShader, sizeof(str), NULL, str);
@@ -1783,15 +1790,36 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	for (i = 0; i < num_standard_attributes; i++)
 	{
 		if (attributes & (1<<i))
-			glBindAttribLocationARB(*program, standard_attributes[i].index, standard_attributes[i].name);
+			glBindAttribLocationARB (*program, standard_attributes[i].index, standard_attributes[i].name);
 	}
 
-	glLinkProgramARB( *program );
-	glGetObjectParameterivARB( *program, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+	glLinkProgramARB (*program);
+	glGetObjectParameterivARB (*program, GL_OBJECT_LINK_STATUS_ARB, &nResult);
 
-	glGetInfoLogARB( *program, sizeof(str), NULL, str );
-	if( !nResult )
-		Com_Printf("...%s Shader Linking Error\n%s\n", name, str);
+	glGetInfoLogARB (*program, sizeof(str), NULL, str);
+	if (!nResult)
+	{
+		Com_Printf("...%s_%d Shader Linking Error\n%s\n", name, ndynamic, str);
+	}
+#ifdef DUMP_GLSL_ASM
+	else
+	{
+		char	binarydump[1<<16];
+		GLsizei	binarydump_length;
+		GLenum	format;
+		FILE	*out;
+		
+		// use this to get the actual assembly
+		// for i in *dump_*.dat ; do strings "$i" > "$i".txt ; rm "$i" ; done
+		Com_sprintf (str, sizeof (str), "dump_%s_%d.dat", name, ndynamic);
+		out = fopen (str, "wb");
+		
+		glGetProgramBinary (*program, sizeof(binarydump), &binarydump_length, &format, binarydump);
+		fwrite (binarydump, 1, sizeof(binarydump), out);
+		
+		fclose (out); 
+	}
+#endif
 }
 
 static void get_dlight_uniform_locations (GLhandleARB programObj, dlight_uniform_location_t *out)
@@ -1872,6 +1900,10 @@ void R_LoadGLSLPrograms(void)
 		glDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)qwglGetProcAddress("glDisableVertexAttribArrayARB");
 		glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)qwglGetProcAddress("glBindAttribLocationARB");
 		glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)qwglGetProcAddress("glGetShaderInfoLog");
+
+#ifdef DUMP_GLSL_ASM
+		glGetProgramBinary = qwglGetProcAddress("glGetProgramBinary");
+#endif
 
 		if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
 			!glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
