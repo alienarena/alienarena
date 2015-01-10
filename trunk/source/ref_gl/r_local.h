@@ -524,7 +524,6 @@ extern void		R_Mesh_DrawCaster (float offSetAng);
 extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);
-extern void		R_DrawEntityCaster(qboolean clearBuf, entity_t *ent);
 extern void		R_GenerateEntityShadow( void );
 extern void		R_GenerateRagdollShadow( int RagDollID );
 extern void		R_GenerateShadowsToReceive( void );
@@ -537,7 +536,7 @@ cvar_t			*r_shadowcutoff;
 //shader programs
 extern void	R_LoadGLSLPrograms(void);
 
-#define GLSL_MAX_DLIGHTS 8
+#define GLSL_MAX_DLIGHTS 6
 #define CUR_NUM_DLIGHTS min (min (r_newrefdef.num_dlights, gl_dynamic->integer), GLSL_MAX_DLIGHTS)
 
 //glsl
