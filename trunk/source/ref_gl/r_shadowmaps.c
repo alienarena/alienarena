@@ -1012,7 +1012,7 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 {		
 	vec3_t	dist, mins, maxs;
 	trace_t	r_trace;
-	entity_t *prevEntity;
+	//entity_t *prevEntity;
 	model_t *prevModel;
 
 	VectorSet(mins, 0, 0, 0);
@@ -1069,7 +1069,7 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );	
 
-	prevEntity = currententity;
+	//prevEntity = currententity;
 	prevModel = currentmodel;
 	
 	// We only do LODs for non-ragdoll meshes-- for now.
@@ -1120,7 +1120,7 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 
 	r_shadowmapcount = 1;
 	
-	currententity = prevEntity;
+	//currententity = prevEntity;
 	currentmodel = prevModel;		
 	
 	GL_InvalidateTextureState (); // FIXME
@@ -1133,7 +1133,6 @@ void R_GenerateEntityShadow( void )
 		vec3_t dist, origin, tmp;
 		float rad;
 		entity_t *prevEntity;
-		model_t *prevModel;
 		int i;
 
 		if((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || (currententity->flags & RF_MENUMODEL))
@@ -1193,7 +1192,6 @@ void R_GenerateEntityShadow( void )
 		//now check for any entities close to this one, and add to the depth buffer 
 		VectorCopy(currententity->origin, origin);
 		prevEntity = currententity;
-		prevModel = currentmodel;
 
 		for (i = 0 ; i < r_newrefdef.num_entities; i++)
 		{
@@ -1220,7 +1218,6 @@ void R_GenerateEntityShadow( void )
 			R_DrawEntityCaster(true, currententity);
 		}
 		currententity = prevEntity;
-		currentmodel = prevModel;		
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
