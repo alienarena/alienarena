@@ -1018,8 +1018,6 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	r_shadowmapcount = 0;
-
 	//check caster validity
 	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
 		return;
@@ -1051,7 +1049,8 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
-	qglClear( GL_DEPTH_BUFFER_BIT);
+	if(!proxEnts)
+		qglClear( GL_DEPTH_BUFFER_BIT);
 
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -1096,7 +1095,7 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 	}
 
 	//Hard to say why this needs to be done, but shadowmaps on meshes seem 90 deg off
-	//Note - need to see if this is also the case with IQM!
+	//Note - this may be necessary ONLY for md2 meshes, and not by "proxEnts"!
 	if(proxEnts)
 		R_Mesh_DrawCaster (90.0);
 	else
@@ -1168,6 +1167,8 @@ void R_GenerateEntityShadow( void )
 		qglClearColor(0,0,0,1.0f);
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+		r_shadowmapcount = 0;
 
 		R_DrawEntityCaster(false, currententity);
 
