@@ -1098,10 +1098,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		}
 
 		if(SHADOWMAP > 0)
-		{
-			shadowval = clamp(shadowval, 0.7 + fog, 1.0);
 			litColor = litColor * shadowval;
-		}
 
 		gl_FragColor.a = 1.0;
 		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
