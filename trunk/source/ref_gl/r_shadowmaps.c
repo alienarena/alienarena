@@ -1203,7 +1203,10 @@ void R_GenerateEntityShadow( void )
 			if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
 				continue;
 
-			if ((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY)))
+			if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
+				continue;
+
+			if (prevEntity->flags & RF_WEAPONMODEL && currententity->flags & RF_VIEWERMODEL)
 				continue;
 
 			//if close enough to cast a shadow on this ent - render it into depth buffer

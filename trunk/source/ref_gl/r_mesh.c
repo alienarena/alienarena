@@ -686,7 +686,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 			GL_MBind (3, rs->stage->texture3->texnum);
 			glUniform1iARB (uniforms->fx2Tex, 3);
 
-			if(r_shadowmapcount && !(currententity->flags & RF_WEAPONMODEL))
+			if(r_shadowmapcount)
 			{
 				vec3_t angles;
 				float rotationMatrix[3][3];
