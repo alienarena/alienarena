@@ -11,7 +11,6 @@
 
 extern qboolean TriangleIntersectsBBox
 	(const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs, vec3_t out_mins, vec3_t out_maxs);
-extern void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3]);
 
 // Creates a rotation matrix that will *undo* the specified rotation. We must
 // apply the rotations in the opposite order or else we won't properly be

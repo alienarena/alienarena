@@ -805,7 +805,7 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	if (currententity->lod2)
 		currentmodel = currententity->lod2;
 
-	R_Mesh_DrawCaster (0.0);
+	R_Mesh_DrawCaster ();
 }
 
 void R_DrawDynamicCaster(void)
@@ -1008,7 +1008,7 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
+static void R_DrawEntityCaster (entity_t *ent)
 {		
 	vec3_t	dist, mins, maxs;
 	trace_t	r_trace;
@@ -1049,8 +1049,7 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
-	if(!proxEnts)
-		qglClear( GL_DEPTH_BUFFER_BIT);
+	qglClear( GL_DEPTH_BUFFER_BIT);
 
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -1094,12 +1093,7 @@ void R_DrawEntityCaster(qboolean proxEnts, entity_t *ent)
 			currentmodel = ent->lod2;
 	}
 
-	//Hard to say why this needs to be done, but shadowmaps on meshes seem 90 deg off
-	//Note - this may be necessary ONLY for md2 meshes, and not by "proxEnts"!
-	if(proxEnts)
-		R_Mesh_DrawCaster (90.0);
-	else
-		R_Mesh_DrawCaster (0.0);
+	R_Mesh_DrawCaster ();
 	
 	SM_SetTextureMatrix(1);
 		
@@ -1169,8 +1163,7 @@ void R_GenerateEntityShadow( void )
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
 		r_shadowmapcount = 0;
-
-		R_DrawEntityCaster(false, currententity);
+		R_DrawEntityCaster(currententity);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1189,6 +1182,8 @@ void R_GenerateEntityShadow( void )
 			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_DISABLE_BLEND
 		}
+		
+		r_shadowmapcount = 0;
 
 		//now check for any entities close to this one, and add to the depth buffer 
 		VectorCopy(currententity->origin, origin);
@@ -1208,7 +1203,7 @@ void R_GenerateEntityShadow( void )
 			if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
 				continue;
 
-			if (currententity->flags & RF_WEAPONMODEL || currententity->flags & RF_SHELL_ANY || currententity->flags & RF_VIEWERMODEL)
+			if ((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY)))
 				continue;
 
 			//if close enough to cast a shadow on this ent - render it into depth buffer
@@ -1216,7 +1211,11 @@ void R_GenerateEntityShadow( void )
 			if(VectorLength(dist) > 64)
 				continue;
 
-			R_DrawEntityCaster(true, currententity);
+			R_DrawEntityCaster(currententity);
+			
+			// can't have multiple shadows in the same depth buffer :(
+			if (r_shadowmapcount) 
+				break; 
 		}
 		currententity = prevEntity;
 
