@@ -520,7 +520,7 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
-extern void		R_Mesh_DrawCaster (float offSetAng);
+extern void		R_Mesh_DrawCaster (void);
 extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);
@@ -666,7 +666,7 @@ typedef struct
 	dlight_uniform_location_t		dlight_uniforms;
 	GLuint							staticLightPosition, staticLightColor;
 	GLuint							totalLightPosition, totalLightColor;
-	GLuint							meshPosition;
+	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
 	GLuint							shadowmapTexture;
 	GLuint							shadowmap;

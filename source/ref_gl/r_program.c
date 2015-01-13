@@ -884,6 +884,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 	uniform vec3 staticLightPosition;
 	uniform vec3 totalLightPosition;
 	uniform vec3 meshPosition;
+	uniform mat3 meshRotation;
 	uniform float time;
 	uniform int FOG;
 	uniform int TEAM;
@@ -925,7 +926,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 		subScatterVS (gl_Position);
 
-		sPos = gl_Vertex + vec4(meshPosition, 0.0);
+		sPos = vec4 ((meshRotation * gl_Vertex.xyz) + meshPosition, 1.0);
 		
 		worldNormal = normalize (gl_NormalMatrix * anim_normal);
 		
@@ -1846,6 +1847,7 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->totalLightPosition = glGetUniformLocationARB (programObj, "totalLightPosition");
 	out->totalLightColor = glGetUniformLocationARB (programObj, "totalLightColor");
 	out->meshPosition = glGetUniformLocationARB (programObj, "meshPosition");
+	out->meshRotation = glGetUniformLocationARB (programObj, "meshRotation");
 	out->baseTex = glGetUniformLocationARB (programObj, "baseTex");
 	out->normTex = glGetUniformLocationARB (programObj, "normalTex");
 	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");

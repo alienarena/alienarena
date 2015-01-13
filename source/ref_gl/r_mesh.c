@@ -688,9 +688,8 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 
 			if(r_shadowmapcount)
 			{
-				vec3_t tmp, lightVec;
-				float mag, dist, val;
-				int i;
+				vec3_t angles;
+				float rotationMatrix[3][3];
 
 				GL_MBind (6, r_depthtexture2->texnum);
 				glUniform1iARB (uniforms->shadowmapTexture, 6);
@@ -698,21 +697,20 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 				glUniform1fARB (uniforms->xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
 				glUniform1fARB (uniforms->yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
 
-				//HACK - this next section is an attempt to get shadows to line up better with the ones cast on BSP
-				//It's not perfect, but passable perhaps.  It should be corrected at some point properly.
-				VectorCopy(currententity->origin, tmp);
-				VectorSubtract(currententity->origin, statLightPosition, lightVec);
-				VectorNormalize(lightVec);
-				mag = sqrt(lightVec[0] * lightVec[0] + lightVec[1] * lightVec[1] + lightVec[2] * lightVec[2]);
-				dist = VectorLength(currententity->model->maxs);
-				val = dist / mag;
-				for(i=0; i<3; i++) 
-				{
-					tmp[i] = tmp[i] + ( lightVec[i] * val );
-				}
-
-				//because we are translating our entities, we need to supply the shader with the actual position of this mesh
-				glUniform3fARB ( uniforms->meshPosition, tmp[0], tmp[1], tmp[2]);
+				// TODO: 4x4 matrix with translation, instead of separate 
+				// translation and rotation matrices.
+				
+				// because we are translating our entities, we need to supply the shader with the actual position of this mesh
+				glUniform3fvARB (uniforms->meshPosition, 1, (const GLfloat *)currententity->origin);
+				
+				// pitch and roll are handled by IQM_AnimateFrame.
+				VectorClear (angles); 
+				if (currentmodel->type != mod_iqm)
+					VectorCopy (currententity->angles, angles);
+				else
+					angles[YAW] = currententity->angles[YAW];
+				AnglesToMatrix3x3 (angles, rotationMatrix);
+				glUniformMatrix3fvARB (uniforms->meshRotation, 1, GL_TRUE, (const GLfloat *) rotationMatrix);
 			}
 		}
 		else
@@ -1160,7 +1158,7 @@ void R_Mesh_Draw (void)
 
 // TODO - alpha and alphamasks possible?
 // Should support every mesh type
-void R_Mesh_DrawCaster (float offSetAng)
+void R_Mesh_DrawCaster (void)
 {
 	// don't draw weapon model shadow casters or shells
 	if ((currententity->flags & (RF_WEAPONMODEL|RF_SHELL_ANY)))
@@ -1173,7 +1171,7 @@ void R_Mesh_DrawCaster (float offSetAng)
 	if (!currententity->ragdoll) // HACK
 	{
 		qglTranslatef (currententity->origin[0],  currententity->origin[1],  currententity->origin[2]);
-		qglRotatef (currententity->angles[YAW]+offSetAng,		0, 0, 1);
+		qglRotatef (currententity->angles[YAW],		0, 0, 1);
 		// pitch and roll are handled by IQM_AnimateFrame. 
 		if (currententity->model == NULL || (currententity->flags & RF_WEAPONMODEL) || currententity->model->type != mod_iqm)
 		{
