@@ -2506,7 +2506,6 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 ac_config_headers="$ac_config_headers config/config.h"
 
 
-
 am__api_version='1.13'
 
 # Find a good install program.  We prefer a C program (faster),
@@ -4998,11 +4997,6 @@ iconsdir=${with_icondir}
 
 
 #
-# "Precious" Environment Variables
-#
-
-
-#
 # Checks for libraries.
 #
 
@@ -7195,7 +7189,6 @@ fi
 done
 
 
-
 if test -z "$BUILD_CLIENT_TRUE"; then :
 
 
@@ -7214,7 +7207,7 @@ fi
 done
 
 if  test "x${jpeglib_h_found}" = xno ; then :
-  as_fn_error $? "\"Required JPEG header file not found.\"" "$LINENO" 5
+  as_fn_error jpeglib.h "\"Required JPEG header file" "$LINENO" 5
 fi
 
 openal_h_found=no
@@ -7232,7 +7225,7 @@ fi
 done
 
 if  test "x${openal_h_found}" = xno ; then :
-  as_fn_error $? "\"Required OpenAL header file not found.\"" "$LINENO" 5
+  as_fn_error al.h "\"Required OpenAL header file" "$LINENO" 5
 fi
 
 openalc_h_found=no
@@ -7250,7 +7243,7 @@ fi
 done
 
 if  test "x${openalc_h_found}" = xno ; then :
-  as_fn_error $? "\"Required OpenAL header file not found.\"" "$LINENO" 5
+  as_fn_error alc.h "\"Required OpenAL header file" "$LINENO" 5
 fi
 
 for ac_header in GL/gl.h
@@ -7262,7 +7255,7 @@ if test "x$ac_cv_header_GL_gl_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "\"Required OpenGL header files not found.\"" "$LINENO" 5
+  as_fn_error gl.h "\"Required OpenGL header file" "$LINENO" 5
 fi
 
 done
@@ -7276,7 +7269,7 @@ if test "x$ac_cv_header_GL_glx_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "\"Required OpenGL header files not found.\"" "$LINENO" 5
+  as_fn_error glx.h "\"Required OpenGL header file" "$LINENO" 5
 fi
 
 done
@@ -7294,7 +7287,7 @@ if test "x$ac_cv_header_ode_ode_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "\"Required ODE header file not found.\"" "$LINENO" 5
+  as_fn_error ode.h "\"Required ODE header file" "$LINENO" 5
 
 fi
 
@@ -7447,12 +7440,9 @@ _ACEOF
 fi
 
 
-
 #
 # Checks for library functions.
 #
-# TODO: verify use, separate logically
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for error_at_line" >&5
 $as_echo_n "checking for error_at_line... " >&6; }
 if ${ac_cv_lib_error_at_line+:} false; then :
@@ -8099,7 +8089,6 @@ _ACEOF
 fi
 done
 
-
 for ac_func in clock_gettime floor getcwd gethostbyname gettimeofday \
   isascii memmove memset mkdir munmap pow putenv select socket sqrt \
   strchr strrchr strstr strtoul
@@ -8113,7 +8102,6 @@ _ACEOF
 
 fi
 done
-
 
 for ac_func in stat fstat filelength strlcat strlcpy
 do :
@@ -8129,7 +8117,7 @@ done
 
 
 for ac_func in  _begin_thread _getcwd _mkdir _putenv _strdup _stricmp \
-  _strnicmp unlink _unlink
+   _strnicmp unlink _unlink
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -8186,48 +8174,68 @@ fi
 $as_echo "$ac_cv_sys_posix_termios" >&6; }
 
 
+
 if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -ffast-math "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -ffast-math"; } >&5
+
+  case $CFLAGS in #(
+  "* -ffast-math *|*-ffast-math") :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -ffast-math"; } >&5
   (: CFLAGS already contains -ffast-math) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -ffast-math\""; } >&5
-  (: CFLAGS="$CFLAGS -ffast-math") 2>&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -ffast-math"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-      CFLAGS="$CFLAGS -ffast-math"
-      ;;
-   esac
+     ;;
+esac
+
 else
-  CFLAGS="-ffast-math"
+
+  CFLAGS=-ffast-math
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
 fi
 
+
 if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *" -fno-strict-aliasing "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fno-strict-aliasing"; } >&5
+
+  case $CFLAGS in #(
+  "* -fno-strict-aliasing *|*-fno-strict-aliasing") :
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fno-strict-aliasing"; } >&5
   (: CFLAGS already contains -fno-strict-aliasing) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -fno-strict-aliasing\""; } >&5
-  (: CFLAGS="$CFLAGS -fno-strict-aliasing") 2>&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -fno-strict-aliasing"
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-      CFLAGS="$CFLAGS -fno-strict-aliasing"
-      ;;
-   esac
+     ;;
+esac
+
 else
-  CFLAGS="-fno-strict-aliasing"
+
+  CFLAGS=-fno-strict-aliasing
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
 fi
 
 
@@ -9901,6 +9909,7 @@ fi
 	$as_echo " doc-install ........... ${doc_install}"
 	$as_echo " icons-install: ........ ${icons_install}"
 	$as_echo " with data1: ........... ${with_data1pkg}"
+	$as_echo " assertions enabled: ... ${ac_enable_assert}"
 	$as_echo
 	$as_echo "Advanced Build Information:"
 	$as_echo " See README for information and recommendations."

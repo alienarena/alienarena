@@ -235,12 +235,15 @@ nobase_dist_gfx_DATA = \
 	blooddrops_nm.jpg \
 	bluecyborgfx.tga \
 	blueenforcerfx.tga \
+	bluelaurenfx.tga \
 	bluelightning2.tga \
 	bluelightning.tga \
 	bluemartianfx.tga \
 	blueoverlordfx.tga \
 	bluewarriorfx.tga \
 	bubbles.tga \
+	bush1.tga \
+	bush2.tga \
 	caustics.tga \
 	chrome2.tga \
 	chrome.tga \

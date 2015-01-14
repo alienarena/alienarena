@@ -60,6 +60,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-zorn2k11.rscript \
 	maps/dm-zion2k9.rscript \
 	maps/tac-extermination.rscript \
+	maps/tac-impact.rscript \
 	maps/tca-corrosion.rscript \
 	maps/tca-cryogenic.rscript \
 	maps/tca-extermination.rscript \

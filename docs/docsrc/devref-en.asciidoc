@@ -2,9 +2,8 @@ Alien Arena Developer Reference
 ===============================
 
 Copyright (C) 2011 COR Entertainment, LLC.
----------------------------------------------------------
-$Id$
----------------------------------------------------------
+
+Last update: 2015-01.
 
 == About this Document ==
 
@@ -32,20 +31,10 @@ The home page for AsciiDoc is http://www.methods.co.nz/asciidoc/.
 
 The SourceForge repository is http://sourceforge.net/projects/asciidoc/.
 
-In the 'alienarena/docs' directory these are the commands used to generate output.
-
-text::
-a2x --format=text --destination-dir=. docsrc/devref-en.asciidoc
-
-html::
-a2x --format=xhtml --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.asciidoc
-
-pdf::
-a2x --format=pdf --fop --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.asciidoc
-
-Where 'CSSPATH' is something like: 'docbook-xsl.css'
-
-Which references something like:  '/usr/share/asciidoc/stylesheets/docbook-xsl.css'
+In the 'alienarena/docs/docsrc' directory this is the command used to generate output.
+...............................................
+$ asciidoc -b html5 -a toc2  devref-en.asciidoc
+...............................................
 
 
 == Subversion Repository ==
@@ -78,6 +67,13 @@ Doing so could cause confusion and consternation.
 NOTE: For the libode 'config.h' (and maybe some other files), an
 alternative is to get a copy from someone who has a working
 installation.
+
+=== Visual C++ 2013 Express Build ===
+
+As of 2014-11, this is known to work, but is not in the SVN
+repository. The plan is to convert to VC++ 2013 in conjunction with
+the SDL2 port (if that is successful). In conjunction with that, other
+(non-SDL2) libraries should be updated.
 
 === Windows Subversion Client ===
 
@@ -119,12 +115,15 @@ reference.
 *Using premake for ODE config*
 
 A version of premake that supports VC++ 2010 is available at
-http://industriousone.com/premake.
+http://industriousone.com/premake. Look there and on the ODE website
+for clues.
 
-(TODO: add instructions for running 'premake4' with the proper
-options).
 
 *Some commentary on libraries*
+
+NOTE: (2014-11) It is likely that with VC++ 2013 we will include
+source subdirectories or pre-built versions for the 3rd party
+libraries.
 
 There is a rationale for keeping the libraries in the original
 '.zip' archives in SVN, rather than extracting them into
@@ -141,6 +140,7 @@ they were setup. The solution was to create projects in Visual
 Studio for each of them. This has advantages, but is more
 complicated than just using a supplied build. It does take
 some work to get the build details correct and consistent.
+
 
 === OpenAL 1.1 SDK ===
 
@@ -160,6 +160,7 @@ if you have not done that previously.
 The 'oalinst.exe' program installs whatever is required for
 OpenAL to use a particular systems sound hardware. It is
 included in the Alien Arena Windows distribution and is in SVN.
+
 
 === Directory Tree ===
 
@@ -258,6 +259,8 @@ See 'Developer's Not-Autotools Makefile' below.
 
 ==== Reading List for Autotools ====
 
+(Suggestion: Start with the 'Autotools Mythbuster'.)
+
 - John Calcote.
   'Autotools: A Practitioner's Guild to GNU Autoconf, Automake, and LibTool.'
 
@@ -295,58 +298,102 @@ See 'Developer's Not-Autotools Makefile' below.
   http://sourceware.org/autobook.
 
 
-=== Program Changes in 7.50 ===
+=== Build and Installation Changes for 7.66+ ===
 
-Previous versions had support for configurable 'DATADIR' and
-'LIBDIR' installation paths.  However, the implementation was
-not complete; due largely to the file system organization
-inherited from the Quake source.  The installation procedure
-now uses configure arguments for determining installation paths.
+These are changes for the future release following 7.66 that are in
+the SVN repository.
+
+==== User's Data Directory ====
+
+The user-writeable data and configuration directory is, by
+default, '$HOME/.local/share/cor-games'. The program honors the
+'XDG_DATA_HOME' environment variable. See:
+
+http://standards.freedesktop.org/basedir-spec/basedir-spec-0.6.html
+
+For development testing, the user-writeable directory may be
+temporarily changed by running like this:
+...............................................
+$ XDG_DATA_HOME=/someother/directory alienarena
+...............................................
+
+==== Botinfo Directories ====
+
+The 'botinfo' resource subdirectory is moved to the 'data1'
+directory. There are user-writeable 'botinfo' directories in the game
+subdirectories. So there is, potentially, an 'arena/botinfo' and a
+'tactical/botinfo' in '$XDG_DATA_HOME/cor-games'.
+
+The shared data installation directory is specified in the build by
+defining a 'COR_DATADIR' preprocessor symbol. The default is
+'/usr/local/share/alienarena'.
+
+==== Autotools-related Changes ====
+
+* Capability of separate source and data distribution packages.
+* Silent rules are disabled by default.
+* unix_dist repository directory. Documents are different.
+* the alternate install is eliminated with a better method.
+
+==== Program Changes in 7.50 ====
+
+(Included here for reference.)
+
+Previous versions had support for configurable 'DATADIR' and 'LIBDIR'
+installation paths.  However, the implementation was not complete; due
+largely to the file system organization inherited from the Quake
+source.  The installation procedure now uses configure arguments for
+determining installation paths.
 
 Linux distributions install the game in the '/usr' hierarchy in
 conformance with Unix file system standards.  The '/usr' hierarchy
-requires root privileges for writing, of course.  While the
-game already had support for a user writeable directory,
-'.codered/', in the users home directory, it did not implement
-a place to write bot information.  Therefore, support for a
-'botinfo' directory in the user's home directory was added.
+requires root privileges for writing, of course.  While the game
+already had support for a user writeable directory, '.codered/', in
+the users home directory, it did not implement a place to write bot
+information.  Therefore, support for a 'botinfo' directory in the
+user's home directory was added.
 
-To simplify the installation and to avoid the complications
-of using a shared library, the game module shared library,
-'game.so', is now a static library.  As a result, the 'LIBDIR'
-installation variable is eliminated.  Internally, the interface
-to the game module retains the dynamic link structure. Thus,
-it is still possible, in theory, to have a dynamic 'game.so'
-that overrides the statically linked version. This is not tested
-nor supported in version 7.50.
+To simplify the installation and to avoid the complications of using a
+shared library, the game module shared library, 'game.so', is now a
+static library.  As a result, the 'LIBDIR' installation variable is
+eliminated.  Internally, the interface to the game module retains the
+dynamic link structure. Thus, it is still possible, in theory, to have
+a dynamic 'game.so' that overrides the statically linked version. This
+is not tested nor supported in version 7.50.
 
-Two new functions were added to the server/game interface for
-file system access. The location of game data files depends on
-how the game is installed. The code should not make assumptions
-about the base path since it might be affected by "prefix"
-and "datadir" configuration options. The game module will now
-determine all file paths using those functions (eliminating
-problems where the code assumed the legacy Quake style file
-system).  The additional functions make it possible to place
-a 'botinfo' directory, in user-writeable file space. The two new
-functions supply the full filesystem path when given a relative
-path.  The functions are *FullPath()* and *FullWritePath()*.
-They are declared in 'game/game.h' and 'qcommon/qcommon.h'.
-They are defined in 'qcommon/files.c'.
+Two new functions were added to the server/game interface for file
+system access. The location of game data files depends on how the game
+is installed. The code should not make assumptions about the base path
+since it might be affected by "prefix" and "datadir" configuration
+options. The game module will now determine all file paths using those
+functions (eliminating problems where the code assumed the legacy
+Quake style file system).  The additional functions make it possible
+to place a 'botinfo' directory, in user-writeable file space. The two
+new functions supply the full filesystem path when given a relative
+path.  The functions are *FullPath()* and *FullWritePath()*.  They are
+declared in 'game/game.h' and 'qcommon/qcommon.h'.  They are defined
+in 'qcommon/files.c'.
 
-The name of the stand-alone dedicated server was changed from 'crded' to
-'crx-ded'. The purpose was to make it simple to change the name of the
-executable files using the standard built-in configure option. With the
-7.60 release, the dedicated server name was updated to 'alienarena-ded'.
+The name of the stand-alone dedicated server was changed from 'crded'
+to 'crx-ded'. The purpose was to make it simple to change the name of
+the executable files using the standard built-in configure
+option.
+
+==== Program Changes in 7.60 ====
+
+(Included here for reference.)
+
+With the 7.60 release, the dedicated server name was updated
+to 'alienarena-ded'.
 
 
 === Subversion Repository ===
 
 ==== Linux Subversion Client ====
 
-Install the free Apache (formerly Tigris) Subversion client
-using your package manager.  Or download it from the website
-at http://subversion.apache.org/ .
+Install the free Apache (formerly Tigris) Subversion client using your
+package manager.  Or download it from the website at
+http://subversion.apache.org/ .
 
 To download Alien Arena from the SVN Repository:
 
@@ -354,12 +401,11 @@ To download Alien Arena from the SVN Repository:
 - Run: 'svn checkout svn://icculus.org/alienarena/trunk PATH'.
 
 For example:
-
-+cd ~+
-
-+mkdir alienarena+
-
-+svn checkout svn://icculus.org/alienarena/trunk alienarena+
+...........................................................
+$ cd
+$ mkdir alienarena
+$ svn checkout svn://icculus.org/alienarena/trunk alienarena
+............................................................
 
 === Maintainer's Guide ===
 
@@ -371,20 +417,19 @@ configure.ac::
   source file for 'autoconf'.
 Makefile.am::
   top level source file for 'automake'.
-game_data.am::
-  lists of game asset files. included in 'Makefile.am'.
 source/Makefile.am::
-  'source' subdirectory source file for 'automake'
-  
+  'source' subdirectory source file for 'automake'.
+data1/configure.ac::
+  source file for 'autoconf' for generating separate data package.
+data1/Makefile.am::
+  'data1' top-or-second level source file for 'automake'.
+data1/*/Makefile.am::
+  subdirectory 'Makefiles' for 'data1' subdirectories.
   
 Some Autotools files are just copied without change:
 
 m4/*.m4::
   m4 macros from the autoconf-archive.
-INSTALL::
-  GNU build/install reference.
-COPYING::
-  GNU GPL, Version 2.
 config/compile::
 config/config.guess::
 config/config.sub::
@@ -392,7 +437,6 @@ config/depcomp::
 config/install-sh::
 config/missing::
   auxiliary shell scripts used by 'configure' and 'Makefiles'
-  
 
 ==== Autotools Generated Files ====
 
@@ -446,8 +490,9 @@ the archive, update it in the repository.
 
 After adding new 'AX_' macros to 'configure.ac', the '.m4' file needs to be
 added to the 'm4' subdirectory. This is done with the following command.
-
-+aclocal -I m4 --force --install+
+.................................
+$ aclocal -I m4 --force --install
+.................................
 
 ==== Adding, Removing, Renaming Program Source Files ====
 
@@ -460,44 +505,35 @@ Certain files may appear in several lists. For example, ''alienarena_SOURCES',
 
 ==== Adding, Removing, Renaming Game Asset Files ====
 
-The file, 'game_data.am' contains lists of game asset files. It
-is included in the top-level 'Makefile.am'. It is used to generate
-the distribution archive and for copying files to the 'datadir' in a
-'standard install'.
+There is a set of subdirectory 'Makefile.am' files that contain lists
+of game resources. These are invoked recursively during the 'make
+install' and 'make distcheck' procedures. They contain only those
+resources that are to be included in the distribution tarball.
 
-The downside is that 'game_data.am' needs to be kept up-to-date with
+The downside is that these files needs to be kept up-to-date with
 additions and deletions. The advantage is that the 'install' program
 handles the copying of game resources. For 'make uninstall' it handles
 deletion of what 'make install' installed.
 
+To make modifications, find the appropriate 'Makefile.am' and add,
+delete or modify the file entry. Makefile syntax requires that there
+be no trailing spaces after the '\'. Each entry should be preceeded by
+one TAB character.  The files are listed in (mostly) alphabetical
+order.
 
-To make modifications, find the appropriate list and add, delete or
-modify the file entry. Makefile syntax requires that there be no trailing
-spaces after the '\'. Each entry should be preceeded by one TAB character.
-The files are listed in (mostly) alphabetical order. 
-
-===== Version 7.60 changes to game_data.am =====
-
-With the game resource additions of 7.60, the 'game_data.am' list exceeded
-the command line length limit. After much agonizing and lamenting,
-a solution was found. The list is subdivided by the subdirectories of
-'data1/'. This works ok for the 'install' procedure. Unfortunately,
-it does not work for the distribution creation procedure. For that,
-a copy procedure is added to 'dist-hook' in 'Makefile.am'.
+Formerly, the game resource list was a monolithic file
+('game_data.am').  With version 7.60 the number of resources exceeded
+the command line length limit.
 
 ===== Is this a PITA, or what? =====
 
-Yes, it is. It would be nice not to have to reconfigure when game assets
-are added or deleted. The way to avoid this is to implement a custom
-'install' procedure that uses the game data file list to copy files
-when installing and deleting files when uninstalling. The game data file
-list would also be used for distribution creation. The method in version
-7.60 is crude; there is probably a faster way.  (However, speed is not
-important for tarball generation.)
-
-It would be good to support separate source and data tarballs.  This would
-make us more popular with distro packagers. Some distros split the tarball,
-possibly because the source code and game assets are under different licenses.
+Yes, it is. It would be nice not to have to reconfigure when game
+assets are added or deleted. It would be fairly straightforward to
+implement a simpler method, if the SVN repository contained only those
+resources that were part of the release package. Since that is not an
+option, any other method would need to have some kind of list of
+"official" resources. Changing that list might be simpler than
+editting Makefiles and reconfiguring, but not that much simpler.
 
 ==== Adding or Removing System Libraries ====
 
@@ -519,32 +555,58 @@ maintainer-clean::
 distclean::
   removes files generated by 'configure'.
 
-Following changes, run:
-
-+autoreconf --verbose --force --install+
-
-+./configure --enable-maintainer-mode <other options>+
-
-+make+
-
-+sudo make install+
+Following any changes changes to configure.ac files or Makefile.am
+files, or after 'make maintainer-clean' do:
+......................................................
+$ autoreconf --verbose --force --install
+$ ./configure --enable-maintainer-mode <other options>
+$ make
+$ sudo make install
+.......................................................
 
 The '--force' and '--install' options to 'autoreconf' are not usually
 needed. Run 'autoreconf --help' for descriptions. The '--install' option
 copies files to 'm4/' and 'config/'.
 
+For source code only updates, all that is needed are:
+........................
+$ make clean (usually optional)
+$ make
+$ sudo make install-exec
+........................
+
+After a 'make distclean', do:
+......................................................
+$ ./configure --enable-maintainer-mode <other options>
+$ make
+$ sudo make install (or install-exec)
+......................................................
+
+When game assets are modified it is usually a good idea to remove the
+existing assets installed by the last 'make install'. Do this with:
+.....................
+$ sudo make uninstall
+.....................
+
+If this is done after doing an SVN update and regenerating the
+installation Makefiles, it may not delete old files. So, it is a good
+idea to check that the installation directories are cleared. One way
+to do that:
+...........................................
+$ find /usr/local/share/alienarena -type f
+...........................................
+
 There are variations for the 'configure' and 'make install' commands, of course.
 See below for 'configure' options and compiler options.
+
+The 'make' command runs faster with a multicore CPU if you add the
+'-jN' option where 'N' is the number of cores plus one.
 
 Run some tests and, if all this goes well, commit the changed files to the
 repository. The 'svn status' command will show which files were modified.
 
-===== Installation Notes =====
-
-For the 'standard install', use 'make install-exec' to limit 
-copying to the executables. Note that the 'alternate install'
-always just copies the executables.
-
+If you want to commit only a subset of the changed files, the SVN
+'changelist' command is your friend.
 
 === Packager's Guide ===
 
@@ -555,7 +617,10 @@ Verify that your versions of 'autoconf', 'automake', and
 
 The 7.66 release uses 'autoconf 2.69' and 'automake 1.14'. If more than
 one dev is committing autotool related changes to SVN, it will be less
-confusing if all are using the same versions. 
+confusing if all are using the same versions.
+
+As of 2015-01, the "7.66.1" SVN development version is using 'automake
+1.13.4' (because that's my distro's default, that's why.).
 
 ==== Verify Alien Arena Version ====
 
@@ -574,21 +639,26 @@ build.
 Verify that the files in 'config/' and 'm4/' subdirectories
 are current.  One way to do this is to rename the 'config/'
 and 'm4/' directories and then run:
-
-+aclocal --force --install -I m4+
-
-+autoreconf --force --install+
+.................................
+$ aclocal --force --install -I m4
+$ autoreconf --force --install
+.................................
 
 Compare the files in the new 'config/' and 'm4/' with the
 previous ones.  If they match, proceed. If not, then the files
 in SVN need to be updated.  The cleanest thing to do would be
 to update SVN and do a new export.
 
+As of 2015-01, the only files in m4/ are manually copied. But, in the
+future it may contain 'libtool' files that are updated by the commands
+above.
+
 ==== Generate the Distribution Archive ====
 
 Run this command to build and verify the distribution package:
-
-+make distcheck+
+................
+$ make distcheck
+................
 
 If this succeeds, the alienarena-<version>.tar.gz has been created.
 
@@ -602,45 +672,74 @@ To test the dedicated server only build, create a subdirectory
 and build with an alternative test directory.  In the
 subdirectory, 'configure' is invoked with '../configure'.
 
-For completeness, the alternate install should also be tested.
-
 ==== Example ====
 
-An example of distribution package generation:
+An example for testing distribution package generation:
 
-- With a development directory in '$HOME/alienarena.'
-- Using standard install into '/usr/local'.
+- Assuming a development directory in '$HOME/alienarena.'
+- Generate tarball in $HOME/test_dist
+- Test build and install in $HOME/test_build
+- Installing in '/usr/local'.
 
-------------------------------------------------------------------------------
-$ cd ~
-$ mkdir aadist
+.........................................
 $ cd $HOME/alienarena
-$ svn export . $HOME/aadist/aaexport
-$ cd $HOME/aadist/aaexport
+$ svn export . $HOME/test_dist
+$ cd $HOME/test_dist
 $ ./configure
 $ make distcheck
 $ cd ..
-$ mkdir aainstall
-$ cd aainstall
-$ cp ../aaexport/alienarena-7.50.tar.gz .
-$ tar -xzf alienarena-7.50.tar.gz
-$ cd alienarena-7.50
+$ mkdir test_build
+$ cd test_build
+$ mv ../test_dist/alienarena-7.66.1.tar.gz .
+$ tar -xzf alienarena-7.66.1.tar.gz
+$ cd alienarena-7.66.1
 $ ./configure
 $ make
 $ sudo make install
 $ cd ~
 $ alienarena
-------------------------------------------------------------------------------
+...........................................
+
+==== Generate Separate Source and Data Archives ====
+
+For release, separate source and data archives should be generated in
+addition to the monolithic archive. This is primarily for the
+convenience of distro packagers. Distros normally use separate source
+and data packages; possibly, because the licenses for the source and
+data are different.
+
+For the source-only package:
+..........................
+$ ./configure --without-data
+$ make distcheck
+$ mv alienarena-7.66.1.tar.gz alienarena-src-7.66.1.tar.gz
+..........................
+
+WARNING: This will overwrite a previously generated monolithic
+tarball. Recommended: Do the separate source tarball and rename it
+first.
+
+For the data1-only package, in the data1 directory:
+.......................................
+$ ./configure
+$ make distcheck
+$ mv alienarena-7.66.1.tar.gz ../alienarena-data-7.66.1.tar.gz
+........................................
+
 
 ==== BASH script for distribution tarball generation ====
 
 This script uses several SVN 'export' commands to retrieve the
 subset of files needed for the release tarball. It then invokes
-'make dist-check' to build the tarball. Run the script in a
+'make distcheck' to build the tarballs. Run the script in a
 RELEASE directory.
 
-The following commands generate the checksums and then run a 'diff' to check
-for possibly missing files.
+The following commands generate the checksums and then run a 'diff' to
+check for possibly missing files. This compares the repository
+directories with what is in the tarball. Since, not all repository
+files are distributed, this requires knowing what files are not
+supposed to be in the tarball. (But, we are not too picky about
+putting "extra" stuff in the tarball.)
 
 In the RELEASE directory:
 
@@ -675,58 +774,51 @@ svn export --ignore-externals \
 svn export --ignore-externals \
  svn://icculus.org/alienarena/trunk/source alienarena/source
 ###
-# --- docs/ ---
+# --- unix_dist/ ---
 svn export --ignore-externals \
- svn://icculus.org/alienarena/trunk/docs alienarena/docs
-###
-# --- Tools/ (fuse.tar.gz only) ---
-svn export --ignore-externals --non-recursive \
- svn://icculus.org/alienarena/trunk/Tools alienarena/Tools
-###
-# --- Tools/LinuxScripts/ ---
-svn export --ignore-externals \
- svn://icculus.org/alienarena/trunk/Tools/LinuxScripts alienarena/Tools/LinuxScripts
+ svn://icculus.org/alienarena/trunk/unix_dist alienarena/unix_dist
 ###
 # --- arena/ ---
 svn export --ignore-externals \
  svn://icculus.org/alienarena/trunk/arena alienarena/arena
- ###
-# --- botinfo/ ---
+###
+# --- tactical/ ---
 svn export --ignore-externals \
- svn://icculus.org/alienarena/trunk/botinfo alienarena/botinfo
+ svn://icculus.org/alienarena/trunk/tactical alienarena/tactical
 ###
 # --- data1/ ---
 svn export --ignore-externals \
   svn://icculus.org/alienarena/trunk/data1 alienarena/data1
 ###
-# --- tarball construction ---
+# --- 
 cd alienarena
-./configure --enable-maintainer-mode
- make distcheckDeveloper's Not-Autotools Makefile
+###
+# --- source-only tarball construction ---
+./configure --without-data1pkg
+make distcheck
+mv alienarena-<version>.tar.gz alienarena-src-<version>.tar.gz
+make distclean
+###
+# --- data-only tarball construction ---
+cd data1
+./configure
+make distcheck
+mv alienarena-<version>.tar.gz alienarena-data-<version>.tar.gz
+make distclean
+cd ..
+###
+# --- combined source and data tarball construction ---
+./configure
+make distcheck
 --------------------------------------------------------------------------------
 
 === Configure options ===
 
-Run `./configure --help` to see all 'configure' options. These
-are 'configure' options added for Alien Arena.
-
-Post 7.60 release, certain debug options have been removed. Some were
-obsolete, but mostly this is a "philosophical" issue: debug options,
-including compiler warning options, may be confusing to the non-developer.
-For developers, specifying CFLAGS is more flexible. (Note: when the debug
-options were added, strat questioned these but deferred to blackice's 
-greater expertise with autotools. But time has shown them to be an 
-unnecessary complication.)
+Run `./configure --help` to see all 'configure' options. The ones
+described here are 'configure' options added for Alien Arena.
 
 --disable-client::
   build dedicated server only, not the client (default:no)
-
---enable-alternate-install::
-  traditional single directory, in-place installation
-  (default:no)
-
---enable-ansi-color::
-  ANSI terminal color (default: no) Added in 7.51.
 
 --disable-build-status::
   hide  the  status message at the end of the configuration
@@ -746,22 +838,32 @@ unnecessary complication.)
   Note: If 'with' is specified, then the library is required.
 
 --with(out)-zlib::
-  include Zlib compressDeveloper's Not-Autotools Makefileion support (default: check)
+  include Zlib compress support (default: check)
   Note: If 'with' is specified, then the library is required.
 
 --with-icondir=DIR::
   icon install directory (default:DATADIR/icons)
 
+--with(out)-data1pkg::
+  include game resources from data1 directory (default: with)
+  Note: used for creating separate source and data tarballs.
+
+--disable-assert::
+  supplied by AC_HEADER_ASSERT macro. defines NDEBUG in config.h
+
 
 === GCC Compiler Options ===
 
-Linux distro's use a variety of different gcc compile
-options. These can give more error warnings; and in rare cases
-program errors.
+Linux distro's use a variety of different gcc compile options. These
+can give more error warnings; and in rare cases program errors.
 
-Also for users who compile from source, there are CPU
-dependendent options that might give better performance. Might
-be good to document some of these in the README.
+Also for users who compile from source, there are CPU dependendent
+options that might give better performance. Might be good to document
+some of these in the README.
+
+These are commonly used or have been seen in distro builds:
+
+(2015-01 suggestion: see wiki.gentoo.org/wiki/GCC_optimization)
 
 Wall::
 Wextra::
@@ -775,20 +877,18 @@ O3::
   Optimization levels. O3 produces different warning messages, so should
   be tested before releases.
 
+pipe::
+  Use pipes, rather than temp files; speeds up compilation.
+
 m32::
 m64::
   Specify 32bit or 64bit build. Only needed when cross-compiling. 
 
 march::
-mtune::
-  Set for specific architectures. Might give better performance
-  than generic builds. For instance, `-march=core2` enables
-  higher performance features. Use `-mtune=generic` when building
-  release binaries; for Desura, for instance.
-
-mfpmath::
-  Testing shows that `-mfpmath=sse` gives better performance when
-  compiling with GNU gcc. 
+  Set for specific architectures. Might give better performance than
+  generic builds. For example, use `-march=native` for local builds.
+  Use `-march=generic` when building release binaries; for Desura, for
+  instance.
 
 FORTIFY_SOURCE::
   `-Wp,D_FORTIFY_SOURCE=2` part of "stack smashing" protection
@@ -805,50 +905,41 @@ param::
 fasynchronous-unwind-tables::
   From fedora. TBD.
 
-
 === config.h ===
 
-The config.h file is auto-generated for configurable builds
-(e.g Linux).  It is manually edited for non-configurable builds
-(e.g. Windows). The 'configure.ac' file does generate Windows
-related definitions in 'config.h' so it can be used as a
-basis for the Windows 'config.h'.
+The config.h file is auto-generated for configurable builds (e.g
+Linux).  It is manually edited for non-configurable builds
+(e.g. Windows). The 'configure.ac' file does generate Windows related
+definitions in 'config.h' so it can be used as a basis for the Windows
+'config.h'.
 
-Rather than use symbols built into the compiler these
-symbols (and some others related to targets) are defined:
-'WIN32_VARIANT' and 'UNIX_VARIANT'.  This should make it easier
-to keep system dependent variations organized. It is a good
-idea, of course, to minimize system dependent conditional
-compilation in the common code.
+Rather than use symbols built into the compiler these symbols (and
+some others related to targets) are defined: 'WIN32_VARIANT' and
+'UNIX_VARIANT'.  This should make it easier to keep system dependent
+variations organized. It is a good idea, of course, to minimize system
+dependent conditional compilation in the common code.
 
 === Open Dynamics Engine (ODE) Integration ===
 
-A static library, 'libode.a', is built and linked with the main
-program, 'alienarena'. Only files that are used in the Developer's Not-Autotools Makefilelibrary build
-are included in the source tree in SVN and in the distribution.
-There is only one 'config.h' and it includes what is needed
-for building 'libode.a'.
-
-The ODE update to version 0.12 removed a function that we use.
-This has been corrected in version 7.65 so ODE 0.12 may be used.
-The integrated libode still uses version 0.11.1.
-
+Formerly, we built and linked our own ODE static library. That is no
+longer the case.
 
 == MinGW Build ==
 
-Experimentally, Alien Arena has been built using MinGW using
-the Autotools build.  In the future, details and procedures
-may appear here.
+Experimentally, Alien Arena has been built using MinGW using the
+Autotools build. Since there was no particular reason to maintain it,
+the experimental MinGW support was removed from the Autotools build.
 
 == Mac OS X / Darwin X11 Build ==
 
-The Autotools build has experimental support for Mac OS X
-using the Darwin X11 environment. There are reports of some
-progress with this using MacPorts and Homebrew.
-
-As of Version 7.65, there still is no official Mac OS X support.
+The Autotools build has support for Mac OS X using the Darwin X11
+environment. MacPorts (www.macports.org) has port maintained by
+"ryandesign". It would be a good idea to consult with him before a
+release to verify that the Autotools build is correct.
 
 == Developer's Not-Autotools Makefile ==
+
+(This is way out of date. Included here for reference.)
 
 In the 'docs/' directory, the file, 'dev-makefile', is
 a 'Makefile' intended to support experimental builds. Its
@@ -866,7 +957,7 @@ source subdirectory.  Good for experimenting with optimizations.
 == Desura ==
 
 The information of Desura is in a separate document, devref-desura-en.html.
-It is generated from a docbook 5 source in docsrc/devref-desura-en.xml.
+It is generated from a AsciiDoc source in docsrc/devref-desura-en.asciidoc.
 
 == Static Analysis == 
 
@@ -874,15 +965,15 @@ TODO:
 
 == Phoronix Test Suite ==
 
-Some initial experimentation with PTS has been done.
-It has potential for collecting information about performance on 
-a variety of systems and for regression testing.
-The current (vers 7.65) benchmarking support in the code needs work.
-Briefly, 1) running timedemo benchmarks is not worthwhile without knowing
-what code is covered. 2) a benchmark mode is needed to simplify the 
-configuration. Normally, there should be no network activity, and sound
-should be disabled. Possible, but inconvenient to do with .cfgs.
-3) the benchmark output should be more detailed.
+Some initial experimentation with PTS has been done.  It has potential
+for collecting information about performance on a variety of systems
+and for regression testing.  The current (vers 7.65) benchmarking
+support in the code needs work.  Briefly, 1) running timedemo
+benchmarks is not worthwhile without knowing what code is covered. 2)
+a benchmark mode is needed to simplify the configuration. Normally,
+there should be no network activity, and sound should be
+disabled. Possible, but inconvenient to do with .cfgs.  3) the
+benchmark output should be more detailed.
 
 An opinion: It would be nice to be included in set of games Phoronix
 uses to test hardware. But, there is not much point in that unless we
