@@ -815,6 +815,7 @@ nobase_dist_maps_DATA = \
 	scripts/tac-extermination.fog \
 	scripts/tac-extermination.mus \
 	scripts/tac-impact.fog \
+	scripts/tac-impact.mus \
 	scripts/tca-corrosion.fog \
 	scripts/tca-corrosion.mus \
 	scripts/tca-cryogenic.fog \

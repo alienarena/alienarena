@@ -16,8 +16,6 @@
 # A copy of the GNU General Public License is included;
 # see the file, GPLv2
 #
-# TODO: COPYING for COR licenses,
-#  separate data pkg with COR data license
 
 AC_PREREQ([2.68])
 AC_INIT([alienarena],[7.66.1],[alienrace@comcast.net])
@@ -26,9 +24,6 @@ AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
-
-dnl insure default prefix. TODO: when/where would this help
-dnl AX_EXPAND_PREFIX
 
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
@@ -45,8 +40,9 @@ dnl non-developers who build from repository sources.
 AM_MAINTAINER_MODE
 
 dnl
-dnl Options for specifying whether to include "nested"  data1 package
-dnl  for make install and make distcheck.
+dnl Options for specifying whether to include "nested" data1 package
+dnl  for make install and make distcheck. The default is to include
+dnl  data1. 
 dnl
 AC_MSG_CHECKING([whether to include game resources package])
 AC_ARG_WITH([data1pkg],
@@ -124,7 +120,7 @@ AC_DEFINE_UNQUOTED([BUILDSTRING], "${host_os}", [Canonical OS identification])
 dnl
 dnl Set names of dlopened libraries for config.h
 dnl The Darwin configuration attempts to conform to MacPorts.
-dnl   As of 2013-12 consult with ryandesign@macports
+dnl   The maintainer at MacPorts is ryandesign@macports
 dnl   The dependency checks are below, under the BUILD_CLIENT conditional
 dnl
 AS_CASE([ ${unix_host} ],
@@ -198,11 +194,6 @@ AC_ARG_WITH(iconsdir,
 AC_SUBST([iconsdir], [${with_icondir}])
 
 #
-# "Precious" Environment Variables
-#
-
-
-#
 # Checks for libraries.
 #
 
@@ -216,24 +207,21 @@ dnl ---- real time
 AC_SEARCH_LIBS([clock_gettime],[rt])
 
 dnl
-dnl start of client-only library requirements
+dnl ---- start of client-only library requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],[
 
 dnl ---- pthread (client)
 AX_PTHREAD([],
 	[AC_MSG_ERROR(
-			["Required pthreads support not found (or invalid CFLAGS)."])])
+		["Required pthreads support not found (or invalid CFLAGS)."])])
 dnl This might be a workaround for DSO missing pthread library error:
 AS_IF([ test "x${PTHREAD_LIBS}" = x ],[PTHREAD_LIBS="-pthread"])
 
-dnl ----  X11 Libraries (client)
-dnl #AC_PATH_XTRA
 
-dnl ?this probably does not need to be darwin specific?
-dnl Darwin search for OpenGL library
+dnl ---- Darwin search for OpenGL library
 dnl  (ref: dlopen(3) for Mac OS X.)
-dnl  see above. as of 2013-12, consult with ryandesign@macports
+dnl  See Darwin notes above.
 gl_dlopen_path=default
 AS_IF([ test "x${unix_host}" = xdarwin ],[
 	AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
@@ -365,18 +353,18 @@ PKG_CHECK_MODULES( [ODE],[ode],,[
 
 ])
 dnl
-dnl end of client-only library requirements
+dnl ---- end of client-only library requirements
 dnl
 	
 #
 # Checks for header files
 #
-dnl TODO: organize for portability variations
-dnl priority? string.h and strings.h
-dnl ?w32 manual config.h
-dnl TODO: time function variants
-dnl TODO: separate these logically
 dnl see 5.6.2 Particular Header Checks
+dnl
+dnl  note: if the source code needs ifdef's for including some .h,
+dnl  then a check is required. realize that some source files may
+dnl  unconditionally include some .h files.
+dnl
 
 AC_HEADER_STDBOOL
 AC_HEADER_DIRENT
@@ -409,9 +397,8 @@ AC_CHECK_HEADERS([ \
 	sys/mman.h
 ])
 
-
 dnl
-dnl ------------------------ start of client-only header requirements
+dnl ---- start of client-only header requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],[
 
@@ -419,28 +406,28 @@ dnl ---- jpeg (client)
 jpeglib_h_found=no
 AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
 AS_IF([ test "x${jpeglib_h_found}" = xno ],
-	[AC_MSG_ERROR("Required JPEG header file not found.")])
+	[AC_MSG_ERROR("Required JPEG header file, jpeglib.h, not found.")])
 
 dnl ---- OpenAL (client)
 openal_h_found=no
 AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
 AS_IF([ test "x${openal_h_found}" = xno ],
-	[AC_MSG_ERROR("Required OpenAL header file not found.")])
+	[AC_MSG_ERROR("Required OpenAL header file, al.h, not found.")])
 
 openalc_h_found=no
 AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
 AS_IF([ test "x${openalc_h_found}" = xno ],
-	[AC_MSG_ERROR("Required OpenAL header file not found.")])
+	[AC_MSG_ERROR("Required OpenAL header file, alc.h, not found.")])
 
 dnl ---- OpenGL (client)
 AC_CHECK_HEADERS([GL/gl.h],,
-	[AC_MSG_ERROR("Required OpenGL header files not found.")])
+	[AC_MSG_ERROR("Required OpenGL header file, gl.h, not found.")])
 AC_CHECK_HEADERS([GL/glx.h],,
-	[AC_MSG_ERROR("Required OpenGL header files not found.")])
+	[AC_MSG_ERROR("Required OpenGL header file, glx.h,  not found.")])
 
 dnl ---- ODE (client)
 AC_CHECK_HEADERS([ode/ode.h],,
-	[AC_MSG_ERROR("Required ODE header file not found.")]
+	[AC_MSG_ERROR("Required ODE header file, ode.h, not found.")]
 	[],
 	[
 #define dDOUBLE
@@ -463,13 +450,9 @@ AC_TYPE_UINT64_T
 AC_CHECK_TYPES([ptrdiff_t])
 AC_CHECK_TYPES([uintptr_t])
 
-dnl TODO: AC_CHECK_TYPES([]) for Linux only sig typedef
-
 #
 # Checks for library functions.
 #
-# TODO: verify use, separate logically
-
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
@@ -477,26 +460,23 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_FUNC_OBSTACK
 
-dnl add variants
 AC_CHECK_FUNCS([vsnprintf])
 AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([strdup])
 AC_CHECK_FUNCS([nanosleep usleep])
-
 AC_CHECK_FUNCS([clock_gettime floor getcwd gethostbyname gettimeofday \
   isascii memmove memset mkdir munmap pow putenv select socket sqrt \
   strchr strrchr strstr strtoul])
-
 AC_CHECK_FUNCS([stat fstat filelength strlcat strlcpy])
 
-dnl maybe remove w32 specials, just in manual w32 config.h
+dnl these are windows specials for manual win32 config.h
 AC_CHECK_FUNCS([ _begin_thread _getcwd _mkdir _putenv _strdup _stricmp \
-  _strnicmp unlink _unlink ])
+   _strnicmp unlink _unlink ])
 
 dnl winsock
 AC_CHECK_FUNCS([closesocket])
 
-dnl termios headers and functions needed?
+dnl termios headers and functions may not be needed.
 AC_SYS_POSIX_TERMIOS
 
 dnl
@@ -548,6 +528,7 @@ AS_IF([ test "x${hide_status}" = xno ],[
 	AS_ECHO([" doc-install ........... ${doc_install}"])
 	AS_ECHO([" icons-install: ........ ${icons_install}"])
 	AS_ECHO([" with data1: ........... ${with_data1pkg}"])
+	AS_ECHO([" assertions enabled: ... ${ac_enable_assert}"])
 	AS_ECHO()
 	AS_ECHO(["Advanced Build Information:"])
 	AS_ECHO([" See README for information and recommendations."])
