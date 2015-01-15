@@ -25,15 +25,6 @@ players/martianenforcer/blue
 		glow
 	}	
 }
-players/martianenforcer/gamara
-{
-	{
-		map players/martianenforcer/gamara_normal.tga
-		normalmap
-		map2 gfx/gamarafx.tga
-		glow
-	}
-}
 players/martianwarrior/red
 {
 	{
@@ -115,15 +106,6 @@ players/enforcer/blue
 		glow
 	}	
 }
-players/enforcer/stryker
-{
-	{
-		map players/enforcer/default_normal.tga
-		normalmap
-		map2 gfx/defaultenforcerfx.tga
-		glow
-	}	
-}
 players/martiancyborg/blue
 {
 	{
@@ -156,7 +138,7 @@ players/lauren/blue
 	{
 		map players/lauren/default_normal.tga
 		normalmap
-		map2 gfx/defaultlaurenfx.tga
+		map2 gfx/bluelaurenfx.tga
 		glow
 	}	
 }
