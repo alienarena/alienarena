@@ -177,15 +177,15 @@ nobase_dist_models_DATA = \
 	tactical/hweappad_normal.tga \
 	tactical/hweappad.tga \
 	tactical/laser_normal.jpg \
+	weapons/g_bfg/tris.iqm \
 	weapons/g_bfg/tris.md2 \
+	weapons/g_bfg/tris.skin \
 	weapons/g_chain/tris.md2 \
 	weapons/g_hyperb/cover.iqm \
 	weapons/g_hyperb/cover.md2 \
 	weapons/g_hyperb/tris.iqm \
 	weapons/g_hyperb/tris.md2 \
 	weapons/g_hyperb/tris.skin \
-	weapons/g_launch/skin.tga \
-	weapons/g_launch/tris.md2 \
 	weapons/g_machn/tris.md2 \
 	weapons/g_minderaser/tris.md2 \
 	weapons/g_rail/tris.iqm \
@@ -212,7 +212,9 @@ nobase_dist_models_DATA = \
 	weapons/v_alienblast/tris.skin \
 	weapons/v_bfg/skin.jpg \
 	weapons/v_bfg/skin_normal.tga \
+	weapons/v_bfg/tris.iqm \
 	weapons/v_bfg/tris.md2 \
+	weapons/v_bfg/tris.skin \
 	weapons/v_blast/blaster.jpg \
 	weapons/v_blast/blaster_normal.tga \
 	weapons/v_blast/cover.iqm \
