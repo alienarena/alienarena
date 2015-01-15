@@ -187,7 +187,9 @@ nobase_dist_models_DATA = \
 	weapons/g_hyperb/tris.md2 \
 	weapons/g_hyperb/tris.skin \
 	weapons/g_machn/tris.md2 \
+	weapons/g_minderaser/tris.iqm \
 	weapons/g_minderaser/tris.md2 \
+	weapons/g_minderaser/tris.skin \
 	weapons/g_rail/tris.iqm \
 	weapons/g_rail/tris.md2 \
 	weapons/g_rail/tris.skin \
@@ -237,6 +239,8 @@ nobase_dist_models_DATA = \
 	weapons/v_hyperb/tris.md2 \
 	weapons/v_hyperb/tris.skin \
 	weapons/v_machn/tris.md2 \
+	weapons/v_minderaser/tris.iqm \
+	weapons/v_minderaser/tris.skin \
 	weapons/v_minderaser/minderaser.jpg \
 	weapons/v_minderaser/minderaser_normal.tga \
 	weapons/v_minderaser/tris.md2 \
