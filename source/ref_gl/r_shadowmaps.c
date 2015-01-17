@@ -805,12 +805,7 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	if (currententity->lod2)
 		currentmodel = currententity->lod2;
 
-	// Culling switching, rendering only backfaces
-	qglCullFace(GL_BACK);
-
 	R_Mesh_DrawCaster ();
-
-	qglCullFace(GL_FRONT);
 }
 
 void R_DrawDynamicCaster(void)
