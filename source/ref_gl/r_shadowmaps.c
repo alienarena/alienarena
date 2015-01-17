@@ -1013,7 +1013,6 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 	vec3_t	dist, adjLightPos, mins, maxs;
 	vec3_t lightVec;
 	vec2_t xyDist;
-	trace_t	r_trace;
 	model_t *prevModel;
 
 	VectorSet(mins, 0, 0, 0);
