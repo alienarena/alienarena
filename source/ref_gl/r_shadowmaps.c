@@ -805,7 +805,12 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	if (currententity->lod2)
 		currentmodel = currententity->lod2;
 
+	// Culling switching, rendering only backfaces
+	qglCullFace(GL_BACK);
+
 	R_Mesh_DrawCaster ();
+
+	qglCullFace(GL_FRONT);
 }
 
 void R_DrawDynamicCaster(void)
@@ -1044,7 +1049,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-	// Culling switching, rendering only frontfaces
+	// Culling switching, rendering only backfaces
 	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point
