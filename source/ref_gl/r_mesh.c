@@ -1141,7 +1141,10 @@ void R_Mesh_Draw (void)
 		qglCullFace (GL_FRONT);
 	}
 
-	r_shadowmapcount = 0; //reset shadowmap count after backend render
+	if(r_shadowmapcount)
+	{
+		r_shadowmapcount = 0; //reset shadowmap count after backend render
+	}
 
 	if ((currententity->flags & RF_DEPTHHACK)) // restore depth range
 		qglDepthRange (gldepthmin, gldepthmax);

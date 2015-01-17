@@ -1008,11 +1008,12 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-static void R_DrawEntityCaster (entity_t *ent)
+static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 {		
-	vec3_t	dist, mins, maxs;
+	vec3_t	dist, adjLightPos, mins, maxs;
+	vec3_t lightVec;
+	vec2_t xyDist;
 	trace_t	r_trace;
-	//entity_t *prevEntity;
 	model_t *prevModel;
 
 	VectorSet(mins, 0, 0, 0);
@@ -1021,9 +1022,6 @@ static void R_DrawEntityCaster (entity_t *ent)
 	//check caster validity
 	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
 		return;
-
-	if(!ent->model)
-		return;	
 	
 	if (cl_simpleitems->integer && ent->model->simple_texnum != 0)
 		return;
@@ -1035,9 +1033,9 @@ static void R_DrawEntityCaster (entity_t *ent)
 	}
 		
 	//trace visibility from light - we don't render objects the light doesn't hit!
-	r_trace = CM_BoxTrace(statLightPosition, ent->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-	if(r_trace.fraction != 1.0)
-		return;
+	//r_trace = CM_BoxTrace(statLightPosition, ent->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+	//if(r_trace.fraction != 1.0)
+	//	return;
 
 	qglMatrixMode(GL_PROJECTION);
 	qglPushMatrix();
@@ -1049,8 +1047,6 @@ static void R_DrawEntityCaster (entity_t *ent)
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
 
-	qglClear( GL_DEPTH_BUFFER_BIT);
-
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
@@ -1060,14 +1056,25 @@ static void R_DrawEntityCaster (entity_t *ent)
 	// attach the texture to FBO depth attachment point
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
 
-	//get light origin 
+	//get light origin
+	VectorCopy(statLightPosition, adjLightPos);
+
+	//adjust height/distance ratio of light source to limit the shadow projection 
+	//for preventing artifacts of massive shadows projecting all over the place	
+	VectorSubtract(statLightPosition, origin, lightVec);
+	xyDist[0] = lightVec[0];
+	xyDist[1] = lightVec[1];
+	if(abs(VectorLength(xyDist)) > abs(lightVec[2])*1.5)
+	{
+		adjLightPos[2] += abs(VectorLength(xyDist)) - abs(lightVec[2])*1.5;
+	}
+	
 	//set camera
-	SM_SetupMatrices(statLightPosition[0],statLightPosition[1],statLightPosition[2]+64,ent->origin[0],ent->origin[1],ent->origin[2]-128);
+	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2]);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );	
 
-	//prevEntity = currententity;
 	prevModel = currentmodel;
 	
 	// We only do LODs for non-ragdoll meshes-- for now.
@@ -1112,8 +1119,7 @@ static void R_DrawEntityCaster (entity_t *ent)
 	qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
-	
-	//currententity = prevEntity;
+
 	currentmodel = prevModel;		
 	
 	GL_InvalidateTextureState (); // FIXME
@@ -1123,13 +1129,22 @@ void R_GenerateEntityShadow( void )
 {
 	if (gl_shadowmaps->integer)
 	{
-		vec3_t dist, origin, tmp;
-		float rad;
+		vec3_t dist, origin, sLight, tmp;
+		float rad, mag, zOffset;
 		entity_t *prevEntity;
 		int i;
 
-		if((r_newrefdef.rdflags & RDF_NOWORLDMODEL) || (currententity->flags & RF_MENUMODEL))
+		r_shadowmapcount = 0;
+
+		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || currententity->flags & RF_MENUMODEL)
 			return;
+		
+		if(!currententity->model)
+			return;	
+
+		//root entity camera info
+		VectorCopy(currententity->origin, origin);
+		zOffset = currententity->model->maxs[2];
 
 		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
 		VectorScale (tmp, 1.666, tmp);
@@ -1141,9 +1156,16 @@ void R_GenerateEntityShadow( void )
 		//get view distance
 		VectorSubtract(r_origin, currententity->origin, dist);
 
-		//fade out shadows both by distance from view, and by distance from light
-		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST); 
+		//fade out shadows both by distance from view, and by distance from light.  Smaller entities fade out faster.
+		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST) * (zOffset/64 > 1.0 ? 1.0 : zOffset/64); 
 
+		R_LightPoint (origin, sLight, true);
+		VectorCopy (sLight, tmp);
+		mag = 4.0 * VectorNormalize (tmp);
+		mag = clamp (mag, 0.1f, 1.0f);
+		if(mag < 0.15f)
+			return;
+		
 		if (r_shadowcutoff->value < 0.1)
 			fadeShadow = 1.0;
 		else if (VectorLength (dist) > fadeshadow_cutoff)
@@ -1155,15 +1177,18 @@ void R_GenerateEntityShadow( void )
 				fadeShadow = 1.0 - fadeShadow/512.0; //fade out smoothly over 512 units.
 		}
 		else
-			fadeShadow = 1.0;
+			fadeShadow = 1.0*mag;
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+
+		qglClear( GL_DEPTH_BUFFER_BIT);
 		
 		qglEnable(GL_DEPTH_TEST);
 		qglClearColor(0,0,0,1.0f);
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		r_shadowmapcount = 0;
-		R_DrawEntityCaster(currententity);
+		R_DrawEntityCaster(currententity, origin, zOffset);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1177,51 +1202,70 @@ void R_GenerateEntityShadow( void )
 			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
 			R_DrawShadowMapWorld(true, currententity->origin);
-			//R_DrawShadowMapTerrain (currententity->origin);
+			//R_DrawShadowMapTerrain (currententity->origin); //note - we probably don't want to do this
 
 			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_DISABLE_BLEND
 		}
-		
-		r_shadowmapcount = 0;
 
-		//now check for any entities close to this one, and add to the depth buffer 
-		VectorCopy(currententity->origin, origin);
-		prevEntity = currententity;
-
-		for (i = 0 ; i < r_newrefdef.num_entities; i++)
+		if(!(currententity->flags & RF_VIEWERMODEL))
 		{
-			currententity = &r_newrefdef.entities[i];
+			//now check for any entities close to this one, and add to the depth buffer 
+			prevEntity = currententity;
 
-			//don't add this entity to the depth texture
-			if(currententity == prevEntity)
-				continue;
+			for (i = 0 ; i < r_newrefdef.num_entities; i++)
+			{
+				currententity = &r_newrefdef.entities[i];
 
-			if (!currententity->model)
-				continue;
+				//don't add this entity to the depth texture - it's already in there!
+				if(currententity == prevEntity)
+					continue;
 
-			if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
-				continue;
+				if (!currententity->model)
+					continue;
 
-			if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
-				continue;
+				if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+					continue;
 
-			if (prevEntity->flags & RF_WEAPONMODEL && currententity->flags & RF_VIEWERMODEL)
-				continue;
+				if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
+					continue;
 
-			//if close enough to cast a shadow on this ent - render it into depth buffer
-			VectorSubtract(currententity->origin,origin, dist);
-			if(VectorLength(dist) > 64)
-				continue;
+				if (prevEntity->flags & RF_WEAPONMODEL && currententity->flags & RF_VIEWERMODEL)
+					continue;
 
-			R_DrawEntityCaster(currententity);
-			
-			// can't have multiple shadows in the same depth buffer :(
-			if (r_shadowmapcount) 
-				break; 
+				//We don't need fade out the shadow here really.  This is because if it's by distance
+				//to r_origin, then it's not getting this far.  We also don't need to fade by lightmap
+				//because the shadow is subtracting from the mesh's lit surface, and therefore this matches
+				//up pretty good with how the bsp shadow is faded.
+
+				//if close enough to cast a shadow on this ent and in line of sight - render it into depth buffer
+				VectorSubtract(currententity->origin,origin, dist);
+				{
+					vec3_t lDist;
+					vec3_t lPos;
+					float thresh, xyDist;
+					float zDist =  statLightPosition[2]+prevEntity->model->maxs[2] - origin[2];					
+
+					VectorCopy(statLightPosition, lPos);
+					lPos[2] = origin[2];
+					VectorSubtract(lPos, origin, lDist);
+					xyDist = VectorLength(lDist);
+					
+					thresh = xyDist / (zDist/(currententity->origin[2]+(currententity->model->maxs[2]*1.5) - origin[2]));
+					if(VectorLength(dist) > thresh)
+						continue;
+
+					VectorSubtract(statLightPosition, origin, lDist);
+					//Wrong side of light!
+					if(VectorLength(dist) > VectorLength(lDist))
+						continue;
+				}
+
+				R_DrawEntityCaster(currententity, origin, zOffset);
+			}
+			currententity = prevEntity;
 		}
-		currententity = prevEntity;
-
+		
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
 		//Enabling color write (previously disabled for light POV z-buffer rendering)
