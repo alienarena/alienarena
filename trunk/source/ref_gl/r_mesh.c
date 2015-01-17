@@ -688,7 +688,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 
 			if(r_shadowmapcount)
 			{
-				vec3_t angles;
+				vec3_t angles, tmp;
 				float rotationMatrix[3][3];
 
 				GL_MBind (6, r_depthtexture2->texnum);
@@ -699,9 +699,14 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 
 				// TODO: 4x4 matrix with translation, instead of separate 
 				// translation and rotation matrices.
+				//HACK - this next section is an attempt to get shadows to line up better with the ones cast on BSP
+				//It's not perfect, but passable perhaps.  It should be corrected at some point properly.
+				VectorCopy(currententity->origin, tmp);
+				//tmp[2] -=currententity->model->maxs[2]/2.0; //Note - moving the translation to the center of the mesh seems to fix the position issue
+				//but the problem of shadows rendering on the front faces, and blocking what's behind remains to be solved.
 				
 				// because we are translating our entities, we need to supply the shader with the actual position of this mesh
-				glUniform3fvARB (uniforms->meshPosition, 1, (const GLfloat *)currententity->origin);
+				glUniform3fvARB (uniforms->meshPosition, 1, (const GLfloat *)tmp);
 				
 				// pitch and roll are handled by IQM_AnimateFrame.
 				VectorClear (angles); 
