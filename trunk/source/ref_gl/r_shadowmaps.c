@@ -1030,11 +1030,6 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 		if(ent->frame > 198)
 			return;
 	}
-		
-	//trace visibility from light - we don't render objects the light doesn't hit!
-	//r_trace = CM_BoxTrace(statLightPosition, ent->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-	//if(r_trace.fraction != 1.0)
-	//	return;
 
 	qglMatrixMode(GL_PROJECTION);
 	qglPushMatrix();
@@ -1050,7 +1045,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
 	// Culling switching, rendering only frontfaces
-	qglDisable(GL_CULL_FACE);
+	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
@@ -1107,7 +1102,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 
 	qglPolygonOffset( 0.0f, 0.0f );
 	qglDisable( GL_POLYGON_OFFSET_FILL );
-	qglEnable(GL_CULL_FACE);
+	qglCullFace(GL_FRONT);
 
 	// back to previous screen coordinates
 	R_SetupViewport ();
