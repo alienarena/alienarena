@@ -296,8 +296,14 @@ static void lookAt( float position_x , float position_y , float position_z , flo
 	qglTranslated( -position_x , -position_y , -position_z );
 }
 
-static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
+static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z, qboolean reverse)
 {
+	if(reverse)
+	{
+		lookAt_x = position_x + (position_x - lookAt_x);
+		lookAt_y = position_y + (position_y - lookAt_y);
+		lookAt_z = position_z + (position_z - lookAt_z);	
+	}
 
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity();
@@ -305,7 +311,27 @@ static void SM_SetupMatrices(float position_x,float position_y,float position_z,
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
+
+	//note - commenting out the top "reverse" condition, and using this at least shows "something" in the shadowmap, but it's wrong
+	//if(reverse)
+	//	lookAt( lookAt_x , lookAt_y , lookAt_z, -position_x , -position_y , -position_z );
+	//else
+	//	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
+
+/*
+void Light::apply(void)
+{
+	gluLookAt(position.x,position.y,position.z,lookAt.x,lookAt.y,lookAt.z,upVector.x,upVector.y,upVector.z);
+}
+
+
+void Light::applyBackView(void)
+{
+	Vertex reverseLookAt = position + (position - lookAt);
+	gluLookAt(position.x,position.y,position.z,reverseLookAt.x,reverseLookAt.y,reverseLookAt.z,upVector.x,upVector.y,upVector.z);
+}
+*/
 
 static void SM_SetTextureMatrix( qboolean mapnum )
 {
@@ -841,7 +867,7 @@ void R_DrawDynamicCaster(void)
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
 	//set camera
-	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128);
+	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128, false);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
@@ -991,7 +1017,7 @@ void R_DrawVegetationCaster(void)
 
 	//get sun light origin and target from map info, at map load
 	//set camera
-	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2]);
+	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2], false);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
@@ -1008,7 +1034,7 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
+static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean back)
 {		
 	vec3_t	dist, adjLightPos, mins, maxs;
 	vec3_t lightVec;
@@ -1036,7 +1062,10 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 	qglMatrixMode(GL_MODELVIEW);
 	qglPushMatrix();
 
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+	if(back)
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]); 
+	else
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
@@ -1048,7 +1077,10 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
+	if(back)
+		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
+	else
+		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
 
 	//get light origin
 	VectorCopy(statLightPosition, adjLightPos);
@@ -1063,8 +1095,8 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 		adjLightPos[2] += abs(VectorLength(xyDist)) - abs(lightVec[2])*1.5;
 	}
 	
-	//set camera
-	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2]);
+	//set camera - to do - check and see if this is actually exactly what is done here
+	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], back);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );	
@@ -1096,7 +1128,10 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 
 	R_Mesh_DrawCaster ();
 	
-	SM_SetTextureMatrix(1);
+	if(back)
+		SM_SetTextureMatrix(0);
+	else
+		SM_SetTextureMatrix(1);
 		
 	qglDepthMask (1);		// back to writing
 
@@ -1182,7 +1217,7 @@ void R_GenerateEntityShadow( void )
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		R_DrawEntityCaster(currententity, origin, zOffset);
+		R_DrawEntityCaster(currententity, origin, zOffset, false);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1255,10 +1290,17 @@ void R_GenerateEntityShadow( void )
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset);
+				R_DrawEntityCaster(currententity, origin, zOffset, false);
 			}
 			currententity = prevEntity;
 		}
+
+		//generate the back shadow here
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]); 
+
+		qglClear( GL_DEPTH_BUFFER_BIT);
+
+		R_DrawEntityCaster(currententity, origin, zOffset, true);
 		
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 

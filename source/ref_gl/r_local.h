@@ -669,6 +669,7 @@ typedef struct
 	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
 	GLuint							shadowmapTexture;
+	GLuint							shadowmapTexture2;
 	GLuint							shadowmap;
 	GLuint							xOffs, yOffs;
 	GLuint							time;

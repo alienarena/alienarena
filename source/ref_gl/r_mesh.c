@@ -691,6 +691,10 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 				vec3_t angles;
 				float rotationMatrix[3][3];
 
+				//to do - sort these more properly
+				GL_MBind (7, r_depthtexture->texnum);
+				glUniform1iARB (uniforms->shadowmapTexture2, 7);
+
 				GL_MBind (6, r_depthtexture2->texnum);
 				glUniform1iARB (uniforms->shadowmapTexture, 6);
 
