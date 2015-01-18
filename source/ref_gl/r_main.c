@@ -460,6 +460,22 @@ void R_DrawNullModel (void)
 	GL_EnableTexture (0, true);
 }
 
+void R_DrawMark (vec3_t origin, float size, const float rgba[])
+{
+	qglPushMatrix ();
+	qglTranslatef (origin[0],  origin[1],  origin[2]);
+	qglScalef (size, size, size);
+
+	GL_EnableTexture (0, false);
+	qglColor4fv (rgba);
+
+	GL_DrawNullModel ();
+
+	qglColor3f (1,1,1);
+	qglPopMatrix ();
+	GL_EnableTexture (0, true);
+}
+
 #include "r_lodcalc.h"
 
 extern cvar_t *cl_simpleitems;

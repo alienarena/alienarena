@@ -644,37 +644,6 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 		currentmodel->ragdoll.RagDollDims[WRIST_HISTOP] * (float)M_PI);
 }
 
-void R_DrawMark (vec3_t origin, int type)
-{
-
-	float scale;
-
-	if(type)
-		scale = 0.25f;
-	else
-		scale = 1.0f;
-
-	qglPushMatrix ();
-	qglTranslatef (origin[0],  origin[1],  origin[2]);
-	qglScalef (scale * 16.0f, scale * 16.0f, scale * 16.0f);
-
-	GL_EnableTexture (0, false);
-	if(type == 1)
-		qglColor3f (1,0,0);
-	else if(type == 2)
-		qglColor3f (0,1,0);
-	else if(type == 3)
-		qglColor3f (0,0,1);
-	else
-		qglColor3f(1,1,1);
-
-	GL_DrawNullModel ();
-
-	qglColor3f (1,1,1);
-	qglPopMatrix ();
-	GL_EnableTexture (0, true);
-}
-
 //For creating the surfaces for the ragdoll to collide with
 void RGD_BuildODEGeoms(msurface_t *surf)
 {
@@ -1039,11 +1008,11 @@ void R_SimulateAllRagdolls ( void )
 					odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[i].body);
 					VectorSet(org, odePos[0], odePos[1], odePos[2]);
 					if(i == HEAD)
-						R_DrawMark(org, 2);
+						R_DrawMark (org, 4.0f, RGBA (0, 1, 0, 1));
 					else if (i > LEFTFOOT)
-						R_DrawMark(org, 3);
+						R_DrawMark (org, 4.0f, RGBA (0, 0, 1, 1));
 					else
-						R_DrawMark(org, 1);
+						R_DrawMark (org, 4.0f, RGBA (1, 0, 0, 1));
 				}
 			}
 
