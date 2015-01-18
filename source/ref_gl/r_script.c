@@ -1174,7 +1174,7 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 	return &(expr->lval);
 }
 
-static qboolean rs_dlights_enabled;
+static int rs_dlights_enabled = -1;
 static void RS_SetupGLState (int dynamic)
 {
 	int i;
@@ -1196,7 +1196,7 @@ static void RS_SetupGLState (int dynamic)
 	
 	qglMatrixMode (GL_TEXTURE);
 	
-	rs_dlights_enabled = dynamic != 0;
+	rs_dlights_enabled = dynamic;
 }
 
 static void RS_CleanupGLState (void)
@@ -1251,7 +1251,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	
 	dynamic = enable_dlights ? CUR_NUM_DLIGHTS : 0;
 
-	if (!rs_in_group || rs_dlights_enabled != enable_dlights)
+	if (!rs_in_group || rs_dlights_enabled != dynamic)
 		RS_SetupGLState (dynamic);
 	
 	do
