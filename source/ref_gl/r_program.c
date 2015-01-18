@@ -1654,7 +1654,6 @@ static char rgodrays_fragment_program[] = STRINGIFY (
 	}
 );
 
-// This may eventually become the basis of all particle rendering
 static char vegetation_vertex_program[] = STRINGIFY (
 	uniform float rsTime;
 	uniform vec3 up, right;
@@ -1670,6 +1669,32 @@ static char vegetation_vertex_program[] = STRINGIFY (
 		gl_Position = gl_ModelViewProjectionMatrix * vertex;
 		gl_TexCoord[0] = gl_MultiTexCoord0;
 		gl_FrontColor = gl_BackColor = gl_Color;
+		gl_FogFragCoord = length (gl_Position);
+	}
+);
+
+static char lensflare_vertex_program[] = STRINGIFY (
+	uniform vec3 up, right;
+	attribute float size, addup, addright;
+	
+	void main ()
+	{
+		float dist = length (gl_ModelViewMatrix * gl_Vertex) * 0.01;
+
+		// Flares which are very close are too small to see; fade them out as
+		// we get closer.
+		float alpha = gl_Color.a;
+		if (dist < 2.0)
+			alpha *= (dist - 1.0) / 2.0;
+		gl_FrontColor = gl_BackColor = vec4 (gl_Color.rgb * alpha, 1.0);
+		
+		dist = min (dist, 10.0) * size + 1;
+		
+		vec4 vertex =	gl_Vertex +
+						addup * dist * vec4 (up, 0) +
+						addright * dist * vec4 (right, 0);
+		gl_Position = gl_ModelViewProjectionMatrix * vertex;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
 		gl_FogFragCoord = length (gl_Position);
 	}
 );
@@ -1703,7 +1728,9 @@ const vertex_attribute_t standard_attributes[] =
 	#define ATTRIBUTE_ADDUP		(1<<8)
 	{"addup",		ATTR_ADDUP_DATA_IDX},
 	#define ATTRIBUTE_ADDRIGHT	(1<<9)
-	{"addright",	ATTR_ADDRIGHT_DATA_IDX}
+	{"addright",	ATTR_ADDRIGHT_DATA_IDX},
+	#define ATTRIBUTE_SIZE		(1<<10)
+	{"size",		ATTR_SIZE_DATA_IDX},
 };
 const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_attribute_t);
 	
@@ -2129,5 +2156,11 @@ void R_LoadGLSLPrograms(void)
 	vegetation_uniforms.rsTime = glGetUniformLocationARB (g_vegetationprogramObj, "rsTime");
 	vegetation_uniforms.up = glGetUniformLocationARB (g_vegetationprogramObj, "up");
 	vegetation_uniforms.right = glGetUniformLocationARB (g_vegetationprogramObj, "right");
+	
+	//lens flare
+	R_LoadGLSLProgram ("Lens Flare", (char*)lensflare_vertex_program, NULL, ATTRIBUTE_SIZE|ATTRIBUTE_ADDUP|ATTRIBUTE_ADDRIGHT, 0, &g_lensflareprogramObj);
+	
+	lensflare_uniforms.up = glGetUniformLocationARB (g_lensflareprogramObj, "up");
+	lensflare_uniforms.right = glGetUniformLocationARB (g_lensflareprogramObj, "right");
 
 }

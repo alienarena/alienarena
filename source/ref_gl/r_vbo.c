@@ -27,7 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static GLuint bsp_vboId = 0;
 GLuint minimap_vboId = 0;
-GLuint vegetation_vboId = 0;
+static GLuint vegetation_vboId = 0;
+static GLuint lensflare_vboId = 0;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -298,9 +299,9 @@ static void VB_BuildVegetationVBO (void)
 				st[1] = side ? grass->tex->sh : grass->tex->sl;
 				
 				// Level out the top of the sprite. A lower value of
-                // STRETCH_WEIGHT means more leveling. 1 is totally level,
-                // don't go less than 1. A higher value means the top is more
-                // parallel to the bottom.
+				// STRETCH_WEIGHT means more leveling. 1 is totally level,
+				// don't go less than 1. A higher value means the top is more
+				// parallel to the bottom.
 				#define STRETCH_WEIGHT 1.0f
 				if (grass->type != 1)
 					vertex[side][1][2] = (vertex[side][1][2] * (STRETCH_WEIGHT - 1.0f) + sumz) / (STRETCH_WEIGHT + 1.0f);
@@ -331,21 +332,76 @@ static void VB_BuildVegetationVBO (void)
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
 
+static void VB_BuildLensFlareVBO (void)
+{
+	int i, j;
+	int totalVBObufferSize = 0;
+	int currVertexNum = 0;
+	int vbo_idx = 0;
+	flare_t *flare;
+	
+	for (flare = r_flares, i = 0; i < r_numflares; i++, flare++)
+		totalVBObufferSize += 4 * (3 + 2 + 1 + 1 + 1);
+	
+	qglGenBuffersARB (1, &lensflare_vboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, lensflare_vboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+	
+	for (flare = r_flares, i = 0; i < r_numflares; i++, flare++)
+	{
+		static float texcoords_and_attributes[4][4] = 
+		{
+		// 	texcoords	addup	addright
+			{0, 1,		-1,		1},
+			{0, 0,		-1,		-1},
+			{1, 0,		1,		-1},
+			{1, 1,		1,		1}
+		};
+		
+		flare->vbo_first_vert = currVertexNum;
+		currVertexNum += 4;
+		
+		for (j = 0; j < 4; j++)
+		{
+			AppendToVBO (vbo_idx, 3 * sizeof(float), flare->origin);
+			AppendToVBO (vbo_idx, 2 * sizeof(float), &texcoords_and_attributes[j][0]);
+			AppendToVBO (vbo_idx, sizeof(float), &flare->size);
+			AppendToVBO (vbo_idx, 2 * sizeof(float), &texcoords_and_attributes[j][2]);
+		}
+	}
+	
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
+}
+
 void VB_BuildWorldVBO (void)
 {
 	VB_BuildWorldSurfaceVBO ();
 	VB_BuildMinimapVBO ();
 	VB_BuildVegetationVBO ();
+	VB_BuildLensFlareVBO ();
 	fflush (stdout);
 }
 
 void GL_SetupVegetationVBO (void)
 {
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, vegetation_vboId);
-
+	
 	R_VertexPointer (3, 8*sizeof(float), (void *)0);
 	R_TexCoordPointer (0, 8*sizeof(float), (void *)(3*sizeof(float)));
 	R_AttribPointer (ATTR_SWAYCOEF_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(5*sizeof(float)));
+	R_AttribPointer (ATTR_ADDUP_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(6*sizeof(float)));
+	R_AttribPointer (ATTR_ADDRIGHT_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(7*sizeof(float)));
+	
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
+}
+
+void GL_SetupLensFlareVBO (void)
+{
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, lensflare_vboId);
+	
+	R_VertexPointer (3, 8*sizeof(float), (void *)0);
+	R_TexCoordPointer (0, 8*sizeof(float), (void *)(3*sizeof(float)));
+	R_AttribPointer (ATTR_SIZE_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(5*sizeof(float)));
 	R_AttribPointer (ATTR_ADDUP_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(6*sizeof(float)));
 	R_AttribPointer (ATTR_ADDRIGHT_DATA_IDX, 1, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void *)(7*sizeof(float)));
 	
