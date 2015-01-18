@@ -1338,7 +1338,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		
 		glUniform1iARB (rscript_uniforms[dynamic].envmap, stage->envmap != 0);
 		glUniform1iARB (rscript_uniforms[dynamic].numblendtextures, stage->num_blend_textures);
-		glUniform1iARB (rscript_uniforms[dynamic].numblendnormalmaps, stage->num_blend_textures);
+		glUniform1iARB (rscript_uniforms[dynamic].numblendnormalmaps, stage->num_blend_normalmaps);
 		
 		if (stage->num_blend_textures > 0)
 		{
