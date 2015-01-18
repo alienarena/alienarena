@@ -1175,6 +1175,14 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 }
 
 static int rs_dlights_enabled = -1;
+// uniforms that may change from stage to stage
+#define RS_STAGE_UNIFORMS X(lightmap) X(envmap) X(numblendtextures) X(numblendnormalmaps)
+static struct 
+{
+#define X(name) int name;
+    RS_STAGE_UNIFORMS
+#undef X
+} rs_stage_uniform_vals;
 static void RS_SetupGLState (int dynamic)
 {
 	int i;
@@ -1197,6 +1205,22 @@ static void RS_SetupGLState (int dynamic)
 	qglMatrixMode (GL_TEXTURE);
 	
 	rs_dlights_enabled = dynamic;
+	
+	memset (&rs_stage_uniform_vals, -1, sizeof (rs_stage_uniform_vals));
+}
+
+static void RS_SetStageUniforms (int dynamic, int lightmap, int envmap, int numblendtextures, int numblendnormalmaps)
+{
+#define X(name) \
+    if (rs_stage_uniform_vals.name != name) \
+    { \
+        rs_stage_uniform_vals.name = name; \
+        glUniform1iARB (rscript_uniforms[dynamic].name, name); \
+    }
+    
+    RS_STAGE_UNIFORMS
+
+#undef X
 }
 
 static void RS_CleanupGLState (void)
@@ -1265,9 +1289,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		
 		if (stage->lightmap && lm != rs_lightmap_off)
 			GL_MBind (1, lmtex);
-			
-		glUniform1iARB (rscript_uniforms[dynamic].lightmap, stage->lightmap?lm:0);
-
+		
 		GL_SelectTexture (0);
 		qglPushMatrix ();
 		
@@ -1336,10 +1358,6 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 							0 );
 		}
 		
-		glUniform1iARB (rscript_uniforms[dynamic].envmap, stage->envmap != 0);
-		glUniform1iARB (rscript_uniforms[dynamic].numblendtextures, stage->num_blend_textures);
-		glUniform1iARB (rscript_uniforms[dynamic].numblendnormalmaps, stage->num_blend_normalmaps);
-		
 		if (stage->num_blend_textures > 0)
 		{
 			for (i = 0; i < stage->num_blend_textures; i++)
@@ -1377,6 +1395,8 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		{
 			GLSTATE_DISABLE_ALPHATEST
 		}
+		
+		RS_SetStageUniforms (dynamic, stage->lightmap?lm:0, stage->envmap != 0, stage->num_blend_textures, stage->num_blend_normalmaps);
 		
 		draw_callback ();
 					
