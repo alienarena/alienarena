@@ -274,6 +274,9 @@ extern void R_DrawVehicleHUD (void);
 extern void R_DrawSkyBox (void);
 extern void Draw_InitLocal (void);
 
+//Instrumentation and visualization (TODO: new file for this?)
+void R_DrawMark (vec3_t origin, float size, const float rgba[]);
+
 //Renderer utils
 extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
