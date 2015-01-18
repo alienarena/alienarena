@@ -1180,7 +1180,7 @@ static int rs_dlights_enabled = -1;
 static struct 
 {
 #define X(name) int name;
-    RS_STAGE_UNIFORMS
+	RS_STAGE_UNIFORMS
 #undef X
 } rs_stage_uniform_vals;
 static void RS_SetupGLState (int dynamic)
@@ -1212,13 +1212,13 @@ static void RS_SetupGLState (int dynamic)
 static void RS_SetStageUniforms (int dynamic, int lightmap, int envmap, int numblendtextures, int numblendnormalmaps)
 {
 #define X(name) \
-    if (rs_stage_uniform_vals.name != name) \
-    { \
-        rs_stage_uniform_vals.name = name; \
-        glUniform1iARB (rscript_uniforms[dynamic].name, name); \
-    }
-    
-    RS_STAGE_UNIFORMS
+	if (rs_stage_uniform_vals.name != name) \
+	{ \
+		rs_stage_uniform_vals.name = name; \
+		glUniform1iARB (rscript_uniforms[dynamic].name, name); \
+	}
+
+	RS_STAGE_UNIFORMS
 
 #undef X
 }
@@ -1408,11 +1408,14 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		RS_CleanupGLState ();
 }
 
-static void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
+void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 {
 	int			lmtex = gl_state.lightmap_textures + surf->lightmaptexturenum;
 	vec2_t		rotate_center;
 	qboolean	translucent;
+	
+	if ((rs->flags & RS_CONTAINS_DRAWN) == 0)
+		return;
 	
 	BSP_AddSurfToVBOAccum (surf);
 	
@@ -1435,21 +1438,5 @@ void RS_LoadSpecialScripts (void) //the special case of water caustics
 	rs_caustics = RS_FindScript("caustics");
 	if(rs_caustics)
 		RS_ReadyScript(rs_caustics);
+	assert ((rs_caustics->flags & RS_PREVENT_BATCH) == 0);
 }
-
-void RS_Surface (msurface_t *surf)
-{
-	rscript_t *rs_shader;
-
-	//Underwater Caustics
-	if(rs_caustics)
-		if (surf->iflags & ISURF_UNDERWATER )
-				RS_DrawSurface (surf, rs_caustics);
-
-	//all other textures shaders
-	rs_shader = (rscript_t *)surf->texinfo->image->script;
-	if(rs_shader && (rs_shader->flags & RS_CONTAINS_DRAWN))
-		RS_DrawSurface (surf, rs_shader);
-}
-
-
