@@ -498,60 +498,16 @@ void Mod_AddFlareSurface (msurface_t *surf, int type )
 
 void PART_RenderFlare (flare_t *light)
 {
-	vec3_t	v, tmp;
-	float	dist;
-	float	alpha;
-	unsigned	flaretex;
-
 	if(light->style == 0)
-		flaretex =  r_flare->texnum;
+		GL_Bind (r_flare->texnum);
 	else
-		flaretex = r_flare1->texnum;
-
-	VectorSubtract (light->origin, r_origin, v);
-	dist = VectorLength(v) * (light->size*0.01);
-	
-	// Flares which are very close are too small to see; fade them out as we 
-	// get closer.
-	alpha = light->alpha;
-	if (dist < 2.0*light->size)
-		alpha *= 0.5*(dist-(float)light->size)/(float)light->size;
-	if (alpha < 0.0)
-		return;
-	
-	//limit their size to reasonable.
-	if(dist > 10*light->size)
-		dist = 10*light->size;
-
-	VectorMA (light->origin, -1-dist, vup, vert_array[1]);
-	VectorMA (vert_array[1], -1-dist, vright, vert_array[1]);
-
-	VectorMA (light->origin, 1+dist, vup, vert_array[3]);
-	VectorMA (vert_array[3], 1+dist, vright, vert_array[3]);
-	
-	if (R_CullBox (vert_array[1], vert_array[3]))
-		return;
-	
-	VectorMA (light->origin, -1-dist, vup, vert_array[0]);
-	VectorMA (vert_array[0], 1+dist, vright, vert_array[0]);
-	
-	VectorMA (light->origin, 1+dist, vup, vert_array[2]);
-	VectorMA (vert_array[2], -1-dist, vright, vert_array[2]);
+		GL_Bind (r_flare1->texnum);
 	
 	c_flares++;
 	
-	GL_Bind(flaretex);
-	
-	VectorScale(light->color, alpha, tmp );
-	
-	qglColor4f (tmp[0], tmp[1], tmp[2], 1);
+	qglColor4f (light->color[0], light->color[1], light->color[2], light->alpha);
 
-	VA_SetElem2(tex_array[0], 0, 1);
-	VA_SetElem2(tex_array[1], 0, 0);
-	VA_SetElem2(tex_array[2], 1, 0);
-	VA_SetElem2(tex_array[3], 1, 1);
-
-	R_DrawVarrays(GL_QUADS, 0 , 4);
+	R_DrawVarrays (GL_QUADS, light->vbo_first_vert, 4);
 
 }
 
@@ -560,14 +516,17 @@ void R_RenderFlares (void)
 	flare_t	*l;
 	int i;
 	qboolean visible;
-
+	
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL) return;
 	qglDepthMask (0);
 	qglShadeModel (GL_SMOOTH);
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 	
-	R_InitQuadVarrays ();
+	GL_SetupLensFlareVBO ();
+	glUseProgramObjectARB (g_lensflareprogramObj);
+	glUniform3fARB (lensflare_uniforms.up, vup[0], vup[1], vup[2]);
+	glUniform3fARB (lensflare_uniforms.right, vright[0], vright[1], vright[2]);
 
 	qglDisable (GL_DEPTH_TEST);
 	GL_SelectTexture (0);
@@ -602,6 +561,7 @@ void R_RenderFlares (void)
 	}
 	
 	R_KillVArrays ();
+	glUseProgramObjectARB (0);
 	GL_MTexEnv (0, GL_REPLACE);
 	qglEnable (GL_DEPTH_TEST);
 	qglColor3f (1,1,1);
@@ -957,7 +917,7 @@ void R_DrawVegetationSurface ( void )
 	int		i;
 	grass_t *grass;
 	float   scale;
-	vec3_t	origin, right, up;
+	vec3_t	origin;
 	qboolean visible;
 	float	lightLevel[3];
 
@@ -983,10 +943,9 @@ void R_DrawVegetationSurface ( void )
 	
 	GL_SetupVegetationVBO ();
 	glUseProgramObjectARB (g_vegetationprogramObj);
-	AngleVectors(r_newrefdef.viewangles, NULL, right, up);
 	glUniform1fARB (vegetation_uniforms.rsTime, rs_realtime);
-	glUniform3fARB (vegetation_uniforms.up, up[0], up[1], up[2]);
-	glUniform3fARB (vegetation_uniforms.right, right[0], right[1], right[2]);
+	glUniform3fARB (vegetation_uniforms.up, vup[0], vup[1], vup[2]);
+	glUniform3fARB (vegetation_uniforms.right, vright[0], vright[1], vright[2]);
 	
 	for (grass = r_grasses, i = 0; i < r_numgrasses; i++, grass++)
 	{

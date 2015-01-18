@@ -38,11 +38,12 @@ typedef struct
 {
 	vec3_t origin;
 	vec3_t color;
-	int size;
+	float size;
 	int style;
 	float alpha;
 	float time;
 	int leafnum;
+	unsigned int vbo_first_vert;
 } flare_t;
 
 typedef struct

@@ -317,6 +317,7 @@ void VB_BuildWorldVBO (void);
 void GL_SetupWorldVBO (void);
 void GL_SetupSkyboxVBO (void);
 void GL_SetupVegetationVBO (void);
+void GL_SetupLensFlareVBO (void);
 typedef enum
 {
     wholescreen_blank, wholescreen_textured, wholescreen_fliptextured
@@ -557,6 +558,7 @@ GLhandleARB g_rblurprogramObj;
 GLhandleARB g_dropletsprogramObj;
 GLhandleARB g_godraysprogramObj;
 GLhandleARB g_vegetationprogramObj;
+GLhandleARB g_lensflareprogramObj;
 
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
@@ -577,7 +579,8 @@ GLhandleARB g_fragmentShader;
 #define ATTR_MINIMAP_DATA_IDX	1
 
 // Particle rendering
-#define ATTR_SWAYCOEF_DATA_IDX  1
+#define ATTR_SWAYCOEF_DATA_IDX  1 // vegetation
+#define ATTR_SIZE_DATA_IDX  	1 // lens flare
 #define ATTR_ADDUP_DATA_IDX		11
 #define	ATTR_ADDRIGHT_DATA_IDX	12
 
@@ -738,6 +741,12 @@ struct
 	GLuint	rsTime;
 	GLuint	up, right;
 } vegetation_uniforms;
+
+//lens flare
+struct
+{
+	GLuint	up, right;
+} lensflare_uniforms;
 
 //Shared mesh items
 extern image_t	*r_mirrortexture;
