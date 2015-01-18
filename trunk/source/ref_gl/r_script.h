@@ -196,7 +196,7 @@ void RS_End_Group (void);
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 				qboolean translucent, rs_lightmaptype_t lm,
 				qboolean enable_dlights, void (*draw_callback) (void));
-void RS_Surface (msurface_t *surf);
+void RS_DrawSurface (msurface_t *surf, rscript_t *rs);
 void RS_LoadSpecialScripts(void);
 
 extern float rs_realtime;

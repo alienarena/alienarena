@@ -231,6 +231,7 @@ typedef struct msurface_s
 	//texture chains for batching
 	struct	msurface_s	*texturechain;
 	struct	msurface_s	*rscriptchain;
+	struct	msurface_s	*causticchain;
 	
 	//texture chain for lightstyle updating
 	struct	msurface_s	*flickerchain;

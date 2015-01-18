@@ -386,13 +386,14 @@ Special surfaces - Somewhat less common, require more work to render
 // surface linked lists can be preserved between frames if r_optimize is on,
 // whereas the entity linked lists must be cleared each time an entity is
 // drawn.
-surfchain_t	r_alpha_surfaces;
-surfchain_t	r_warp_surfaces;
+static surfchain_t	r_alpha_surfaces;
+static surfchain_t	r_warp_surfaces;
+static msurface_t  *r_caustic_surfaces; // no brush models can have caustic surfs
 
 // This is a chain of surfaces that may need to have their lightmaps updated.
 // They are not rendered in the order of this chain and will be linked into
 // other chains for rendering.
-msurface_t	*r_flicker_surfaces;
+static msurface_t	*r_flicker_surfaces;
 
 
 /*
@@ -496,6 +497,7 @@ always in front of the world surfaces. I chose always in front.
 Be sure to double-check alphasurftest THOROUGHLY when changing this code!
 ================
 */
+extern rscript_t *rs_caustics;
 static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 {
 	msurface_t	*s;
@@ -554,9 +556,12 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 		if (current_surf_type == 0)
 			R_RenderWaterPolys (s);
 		else if (current_surf_type == 1)
-			RS_Surface (s);
+			RS_DrawSurface (s, s->texinfo->image->script);
 		else
 			BSP_DrawAlphaPoly (s);
+		
+		if ((s->iflags & ISURF_UNDERWATER) != 0)
+			RS_DrawSurface (s, rs_caustics);
 	}
 
 	R_KillVArrays ();
@@ -596,6 +601,27 @@ static void R_DrawRSSurfaces (void)
 	
 	BSP_InvalidateVBO ();
 	RS_Begin_Group ();
+	
+	if (r_caustic_surfaces != NULL)
+	{
+		int currLMTex; 
+		msurface_t	*s = r_caustic_surfaces;
+		
+		while (s != NULL)
+		{
+			currLMTex = s->lightmaptexturenum;
+			
+			for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->causticchain)
+				BSP_AddSurfToVBOAccum (s);
+			
+			RS_Draw (	rs_caustics, gl_state.lightmap_textures + currLMTex,
+						vec3_origin, vec3_origin, false,
+						rs_lightmap_separate_texcoords, 
+						false, BSP_DrawVBOAccum );
+			
+			BSP_ClearVBOAccum ();
+		}
+	}
 
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
@@ -615,11 +641,11 @@ static void R_DrawRSSurfaces (void)
 		
 		rs = currentmodel->unique_texinfo[i]->image->script;
 		
-		if (rs == NULL || (rs->flags & RS_PREVENT_BATCH) != 0)
+		if ((rs->flags & RS_PREVENT_BATCH) != 0)
 		{
 			// fall back on drawing the surfaces one at a time
 			for (; s; s = s->rscriptchain)
-				RS_Surface(s);
+				RS_DrawSurface (s, rs);
 		}
 		else
 		{
@@ -1067,6 +1093,7 @@ static void BSP_ClearWorldTextureChains (void)
 	
 	r_warp_surfaces.worldchain = NULL;
 	r_alpha_surfaces.worldchain = NULL;
+	r_caustic_surfaces = NULL;
 	r_flicker_surfaces = NULL;
 }
 
@@ -1167,7 +1194,6 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	else 
 	{
 		AddToChainPair (surf->texinfo->equiv->lightmap_surfaces);
-
 	}
 	
 	// Add to the rscript chain if there is actually a shader
@@ -1176,8 +1202,13 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// submerged?
 	if (!forEnt && r_shaders->integer)
 	{
+		if ((surf->iflags & ISURF_UNDERWATER))
+		{
+			surf->causticchain = r_caustic_surfaces;
+			r_caustic_surfaces = surf;
+		}
 		rscript_t *rs = surf->texinfo->image->script;
-		if ((rs != NULL && (rs->flags & RS_CONTAINS_DRAWN)) || (surf->iflags & ISURF_UNDERWATER))
+		if (rs != NULL && (rs->flags & RS_CONTAINS_DRAWN))
 		{
 			surf->rscriptchain = surf->texinfo->equiv->rscript_surfaces;
 			surf->texinfo->equiv->rscript_surfaces = surf;
