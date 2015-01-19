@@ -1202,12 +1202,13 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// submerged?
 	if (!forEnt && r_shaders->integer)
 	{
+		rscript_t *rs = surf->texinfo->image->script;
 		if ((surf->iflags & ISURF_UNDERWATER))
 		{
 			surf->causticchain = r_caustic_surfaces;
 			r_caustic_surfaces = surf;
 		}
-		rscript_t *rs = surf->texinfo->image->script;
+		
 		if (rs != NULL && (rs->flags & RS_CONTAINS_DRAWN))
 		{
 			surf->rscriptchain = surf->texinfo->equiv->rscript_surfaces;
