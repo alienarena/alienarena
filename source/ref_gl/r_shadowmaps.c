@@ -300,9 +300,9 @@ static void SM_SetupMatrices(float position_x,float position_y,float position_z,
 {
 	if(reverse)
 	{
-		lookAt_x = position_x + (position_x - lookAt_x);
-		lookAt_y = position_y + (position_y - lookAt_y);
-		lookAt_z = position_z + (position_z - lookAt_z);	
+		position_x = lookAt_x + (lookAt_x - position_x);
+		position_y = lookAt_y + (lookAt_y - position_y);
+		position_z = lookAt_z + (lookAt_z - position_z);
 	}
 
 	qglMatrixMode(GL_PROJECTION);
@@ -311,12 +311,6 @@ static void SM_SetupMatrices(float position_x,float position_y,float position_z,
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
-
-	//note - commenting out the top "reverse" condition, and using this at least shows "something" in the shadowmap, but it's wrong
-	//if(reverse)
-	//	lookAt( lookAt_x , lookAt_y , lookAt_z, -position_x , -position_y , -position_z );
-	//else
-	//	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
 
 /*

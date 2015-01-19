@@ -235,7 +235,8 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 #define USE_SHADOWMAP_LIBRARY "/*USE_SHADOWMAP_LIBRARY*/"
 
 static char shadowmap_header[] = STRINGIFY (
-	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord, int back);
+	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord);
+	float lookupFBShadow (shadowsampler_t FrontMap, vec4 FrontShadowCoord, shadowsampler_t BackMap, vec4 BackShadowCoord);
 );
 
 static char shadowmap_library[] = 
@@ -267,13 +268,13 @@ STRINGIFY (
 )
 "\n#endif\n"
 STRINGIFY (
-	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord, int back)
+	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord)
 	{
 		float shadow = 1.0;
 
 		if(SHADOWMAP > 0) 
 		{			
-			if (ShadowCoord.w > 0.0 && back == 0)
+			if (ShadowCoord.w > 1.0)
 			{
 				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
 				
@@ -283,17 +284,40 @@ STRINGIFY (
 				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
 				shadow *= 0.25 ;
 			}
-			else if(ShadowCoord.w < 0.0 && back == 1)
+			shadow += internal_shadow_fudge; 
+			if(shadow > 1.0)
+				shadow = 1.0;
+		}
+		
+		return shadow;
+	}
+
+	float lookupFBShadow  (shadowsampler_t FrontMap, vec4 FrontShadowCoord, shadowsampler_t BackMap, vec4 BackShadowCoord)
+	{
+		float shadow = 1.0;
+
+		if(SHADOWMAP > 0) 
+		{			
+			if (FrontShadowCoord.w > 0)
 			{
 				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
 				
-				shadow += lookup (vec2(-1.5, 1.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2( 0.5, 1.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2(-1.5, -0.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2(-1.5, 1.5) + o, FrontMap, FrontShadowCoord);
+				shadow += lookup (vec2( 0.5, 1.5) + o, FrontMap, FrontShadowCoord);
+				shadow += lookup (vec2(-1.5, -0.5) + o, FrontMap, FrontShadowCoord);
+				shadow += lookup (vec2( 0.5, -0.5) + o, FrontMap, FrontShadowCoord);
 				shadow *= 0.25 ;
 			}
-	
+			else
+			{
+				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+				
+				shadow += lookup (vec2(-1.5, 1.5) + o, BackMap, BackShadowCoord);
+				shadow += lookup (vec2( 0.5, 1.5) + o, BackMap, BackShadowCoord);
+				shadow += lookup (vec2(-1.5, -0.5) + o, BackMap, BackShadowCoord);
+				shadow += lookup (vec2( 0.5, -0.5) + o, BackMap, BackShadowCoord);
+				shadow *= 0.25 ;
+			}
 			shadow += internal_shadow_fudge; 
 			if(shadow > 1.0)
 				shadow = 1.0;
@@ -360,7 +384,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 
 	   	//shadows
 		if(STATSHADOW > 0)
-			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos, 0);
+			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		else
 			statshadowval = 1.0;
 
@@ -472,7 +496,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	   {
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 			
-			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos, 0);
+			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, 1.0, dynshadowval);
 			
 			if(PARALLAX > 0) 
@@ -533,7 +557,7 @@ static char shadow_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 
 	void main( void )
 	{
-		gl_FragColor = vec4 (1.0/fadeShadow * lookupShadow (StatShadowMap, ShadowCoord, 0));
+		gl_FragColor = vec4 (1.0/fadeShadow * lookupShadow (StatShadowMap, ShadowCoord));
 	}
 );
 
@@ -1059,7 +1083,6 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec4 glow;
 		vec4 scatterCol = vec4(0.0);
 		float shadowval;
-		float backshadowval;
 
 		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb * 1.1;
 		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5 ) );
@@ -1069,8 +1092,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 
 		if(SHADOWMAP > 0)
 		{
-			shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos, 0);
-			backshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos, 1);
+			shadowval = lookupFBShadow (StatShadowMap, gl_TextureMatrix[6] * sPos, ShadowMap, gl_TextureMatrix[7] * sPos);
 		}
 
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
@@ -1121,7 +1143,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		}
 
 		if(SHADOWMAP > 0)
-			litColor = litColor * shadowval * backshadowval;
+			litColor = litColor * shadowval;
 
 		gl_FragColor.a = 1.0;
 		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
