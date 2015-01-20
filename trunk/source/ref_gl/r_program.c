@@ -1114,13 +1114,12 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		if(useShell == 0)
 		{
 			litColor = litColor * shadowval * staticLightColor;
-			litColor = max(litColor, textureColour * 0.15);
+			gl_FragColor.rgb = max(litColor, textureColour * 0.15);
 		}
 		else
-			litColor = max (litColor, textureColour * 0.5) * staticLightColor;
+			gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
 
 		gl_FragColor.a = 1.0;
-		gl_FragColor.rgb = litColor;
 		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
 		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
