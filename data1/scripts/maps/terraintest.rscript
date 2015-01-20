@@ -8,8 +8,7 @@ terraintest1_texture
 			400 textures/arena8/crackedrock4.tga
 			200 textures/texturelib/grass_0075.jpg
 			400 textures/texturelib/ground_0045.jpg
-		map3 textures/terraintest/plateau1_normalblendtex.tga
 		blendnormalmap 1
-			400 textures/arena8/crackedrock4_nm.tga
+			1 textures/arena8/crackedrock4_nm.tga
 	}
 }
