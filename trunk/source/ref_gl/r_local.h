@@ -636,11 +636,11 @@ struct
 	GLuint						numblendtextures, numblendnormalmaps;
 	GLuint						lightmap;
 	GLuint						fog;
-	GLuint						mainTexture, mainTexture2, mainTexture3;
+	GLuint						mainTexture, mainTexture2;
 	GLuint						lightmapTexture;
 	GLuint						blendscales;
 	GLuint						blendTexture[6];
-	GLuint						normalblendscales;
+	GLuint						normalblendindices;
 	GLuint						blendNormalmap[3];
 } rscript_uniforms[GLSL_MAX_DLIGHTS+1];
 

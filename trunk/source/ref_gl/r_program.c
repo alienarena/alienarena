@@ -651,7 +651,6 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform sampler2D mainTexture;
 	uniform sampler2D mainTexture2;
-	uniform sampler2D mainTexture3;
 	uniform sampler2D lightmapTexture;
 	uniform sampler2D blendTexture0;
 	uniform sampler2D blendTexture1;
@@ -665,7 +664,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform int	numblendtextures, numblendnormalmaps;
 	uniform int FOG;
 	uniform vec2 blendscales[6];
-	uniform vec2 normalblendscales[3];
+	uniform int normalblendindices[3];
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
@@ -752,30 +751,38 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			
 			if (DYNAMIC > 0 && numblendnormalmaps > 0)
 			{
-				vec4 mainColor3 = texture2D (mainTexture3, gl_TexCoord[0].st);
-				float totalnormal = dot (mainColor3.rgb, vec3 (1.0));
+				float totalnormal = 0.0;
 				
-				// We assume that all channels from maintexture3 are copies of
-				// channels from maintexture1 or maintexture2 and normalize
-				// accordingly. 
-				mainColor3.rgb /= totalbrightness;
+				normal = vec3 (0.0);
+				
+				float normalcoef = normalblendindices[0] >= 3 ? mainColor2[normalblendindices[0]-3] : mainColor[normalblendindices[0]];
+				if (normalcoef > 0.0)
+				{
+					totalnormal += normalcoef;
+					normal += (triplanar_sample (blendNormalmap0, blend_weights, blendscales[normalblendindices[0]]) * normalcoef).rgb;
+				}
+				if (numblendnormalmaps > 1)
+				{
+					normalcoef = normalblendindices[1] >= 3 ? mainColor2[normalblendindices[1]-3] : mainColor[normalblendindices[1]];
+					if (normalcoef > 0.0)
+					{
+						totalnormal += normalcoef;
+						normal += (triplanar_sample (blendNormalmap1, blend_weights, blendscales[normalblendindices[1]]) * normalcoef).rgb;
+					}
+					if (numblendnormalmaps > 2)
+					{
+						normalcoef = normalblendindices[2] >= 3 ? mainColor2[normalblendindices[2]-3] : mainColor[normalblendindices[2]];
+						if (normalcoef > 0.0)
+						{
+							totalnormal += normalcoef;
+							normal += (triplanar_sample (blendNormalmap2, blend_weights, blendscales[normalblendindices[2]]) * normalcoef).rgb;
+						}
+					}
+				}
 				
 				// We substitute "straight up" as the normal for channels that
 				// don't have corresponding normalmaps.
-				normal = vec3 (0.5, 0.5, 1.0) * (1.0 - totalnormal/totalbrightness);
-				
-				if (mainColor3.r > 0.0)
-					normal += (triplanar_sample (blendNormalmap0, blend_weights, normalblendscales[0]) * mainColor3.r).rgb;
-				if (numblendnormalmaps > 1)
-				{
-					if (mainColor3.g > 0.0)
-						normal += (triplanar_sample (blendNormalmap1, blend_weights, normalblendscales[1]) * mainColor3.g).rgb;
-					if (numblendnormalmaps > 2)
-					{
-						if (mainColor3.g > 0.0)
-							normal += (triplanar_sample (blendNormalmap2, blend_weights, normalblendscales[2]) * mainColor3.b).rgb;
-					}
-				}
+				normal += vec3 (0.5, 0.5, 1.0) * (1.0 - totalnormal);
 				
 				normal = 2.0 * (normal - vec3 (0.5));
 			}
@@ -2052,10 +2059,9 @@ void R_LoadGLSLPrograms(void)
 		rscript_uniforms[i].fog = glGetUniformLocationARB (g_rscriptprogramObj[i], "FOG");
 		rscript_uniforms[i].mainTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture");
 		rscript_uniforms[i].mainTexture2 = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture2");
-		rscript_uniforms[i].mainTexture3 = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture3");
 		rscript_uniforms[i].lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmapTexture");
 		rscript_uniforms[i].blendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "blendscales");
-		rscript_uniforms[i].normalblendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "normalblendscales");
+		rscript_uniforms[i].normalblendindices = glGetUniformLocationARB (g_rscriptprogramObj[i], "normalblendindices");
 
 		for (j = 0; j < 6; j++)
 		{

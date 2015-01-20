@@ -123,8 +123,10 @@ typedef struct rs_stage_s
 	char					blend_names[6][MAX_OSPATH];
 	image_t					*blend_textures[6];
 	
+	// For the nth blended normalmap, borrow the blend coefficient channel and
+	// texture scale from the normalblend_indices[n]th blended texture.
 	int						num_blend_normalmaps;
-	float					normalblend_scales[6];
+	int						normalblend_indices[3];
 	char					normalblend_names[3][MAX_OSPATH];
 	image_t					*blend_normalmaps[3];
 	

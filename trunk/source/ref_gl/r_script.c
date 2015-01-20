@@ -753,28 +753,12 @@ static void rs_stage_if (rs_stage_t *stage, char **token)
 
 static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 {
-	int i, limit, numtextures;
-	float *scales;
-	char *names;
-	qboolean normal = !Q_strcasecmp (*token, "blendnormalmap");
+	int i, numtextures;
 	
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	numtextures = atoi (*token);
 	
-	if (normal)
-	{
-		limit = 3;
-		stage->num_blend_normalmaps = min (numtextures, limit);
-		scales = stage->normalblend_scales;
-		names = stage->normalblend_names[0];
-	}
-	else
-	{
-		limit = 6;
-		stage->num_blend_textures = min (numtextures, limit);
-		scales = stage->blend_scales;
-		names = stage->blend_names[0];
-	}
+	stage->num_blend_textures = min (numtextures, 6);
 	
 	for (i = 0; i < numtextures; i++)
 	{
@@ -796,16 +780,46 @@ static void rs_stage_blendmap (rs_stage_t *stage, char **token)
 			scale[1] = scale[0];
 		}
 		
-		if (i < limit) // Current maximum
+		if (i < 6) // Current maximum
 		{
 			for (j = 0; j < 2; j++)
-				scales[2*i+j] = scale[j];
+				stage->blend_scales[2*i+j] = scale[j];
 		
-			strncpy (names + i * MAX_OSPATH, *token, MAX_OSPATH);
+			strncpy (stage->blend_names[i], *token, sizeof (stage->blend_names[i]));
 		}
 		else
 		{
-			Com_Printf ("WARN: skip blendmap channel %d (max %d)\n", i+1, limit);
+			Com_Printf ("WARN: skip blendmap channel %d (max 6)\n", i+1);
+		}
+	}
+}
+
+static void rs_stage_blendnormalmap (rs_stage_t *stage, char **token)
+{
+	int i, numtextures;
+	
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	numtextures = atoi (*token);
+	
+	stage->num_blend_normalmaps = min (numtextures, 3);
+	
+	for (i = 0; i < numtextures; i++)
+	{
+		int idx;
+		
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		idx = atoi (*token);
+		
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		
+		if (i < 3) // Current maximum
+		{
+			stage->normalblend_indices[i] = idx;
+			strncpy (stage->normalblend_names[i], *token, sizeof (stage->normalblend_names[i]));
+		}
+		else
+		{
+			Com_Printf ("WARN: skip blendnormalmap channel %d (max 3)\n", i+1);
 		}
 	}
 }
@@ -861,7 +875,7 @@ static struct
 	{	"flaretype",		&rs_stage_flaretype		},
 	{	"normalmap",		&rs_stage_normalmap		},
 	{	"blendmap",			&rs_stage_blendmap		},
-	{	"blendnormalmap",	&rs_stage_blendmap		},
+	{	"blendnormalmap",	&rs_stage_blendnormalmap},
 	{	"grass",			&rs_stage_grass			},
 	{	"grasstype",		&rs_stage_grasstype		},
 	{	"beam",				&rs_stage_beam			},
@@ -893,6 +907,7 @@ static int num_stagekeys = sizeof (rs_stagekeys) / sizeof(rs_stagekeys[0]) - 1;
 
 static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 {
+	int i;
 	qboolean scroll_enabled, scale_enabled;
 	
 	scroll_enabled =	stage->scroll.typeX != 0 ||
@@ -922,6 +937,19 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 		Com_Printf ("WARN: Incompatible combination: envmapping and rotating"
 					" in script %s!\nForcing envmap off.\n", rs->outname);
 		stage->envmap = false;
+	}
+	
+	for (i = 0; i < stage->num_blend_normalmaps; i++)
+	{
+		if (stage->normalblend_indices[i] >= stage->num_blend_textures)
+		{
+			Com_Printf ("WARN: Invalid blendnormalmap index %d"
+						" (num blendmap channels %d)"
+						" in script %s!\nForcing blendnormalmap off.\n",
+						stage->normalblend_indices[i], 
+						stage->num_blend_textures, rs->outname);
+			stage->num_blend_normalmaps = 0;
+		}
 	}
 	
 	if (stage->envmap)
@@ -1192,11 +1220,10 @@ static void RS_SetupGLState (int dynamic)
 	glUniform1iARB (rscript_uniforms[dynamic].mainTexture, 0);
 	glUniform1iARB (rscript_uniforms[dynamic].lightmapTexture, 1);
 	glUniform1iARB (rscript_uniforms[dynamic].mainTexture2, 2);
-	glUniform1iARB (rscript_uniforms[dynamic].mainTexture3, 3);
 	for (i = 0; i < 6; i++)
-		glUniform1iARB (rscript_uniforms[dynamic].blendTexture[i], 4+i);
+		glUniform1iARB (rscript_uniforms[dynamic].blendTexture[i], 3+i);
 	for (i = 0; i < 3; i++)
-		glUniform1iARB (rscript_uniforms[dynamic].blendNormalmap[i], 10+i);
+		glUniform1iARB (rscript_uniforms[dynamic].blendNormalmap[i], 9+i);
 	glUniform1iARB (rscript_uniforms[dynamic].fog, map_fog);
 	
 	if (dynamic != 0)
@@ -1361,19 +1388,17 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		if (stage->num_blend_textures > 0)
 		{
 			for (i = 0; i < stage->num_blend_textures; i++)
-				GL_MBind (4+i, stage->blend_textures[i]->texnum);
+				GL_MBind (3+i, stage->blend_textures[i]->texnum);
 			
 			glUniform2fvARB (rscript_uniforms[dynamic].blendscales, stage->num_blend_textures, (const GLfloat *) stage->blend_scales);
 		}
 		
 		if (stage->num_blend_normalmaps > 0)
 		{
-			GL_MBind (3, stage->texture3->texnum);
-			
 			for (i = 0; i < stage->num_blend_normalmaps; i++)
-				GL_MBind (10+i, stage->blend_normalmaps[i]->texnum);
+				GL_MBind (9+i, stage->blend_normalmaps[i]->texnum);
 			
-			glUniform2fvARB (rscript_uniforms[dynamic].normalblendscales, stage->num_blend_normalmaps, (const GLfloat *) stage->normalblend_scales);
+			glUniform1ivARB (rscript_uniforms[dynamic].normalblendindices, stage->num_blend_normalmaps, (const GLint *) stage->normalblend_indices);
 		}
 		
 		GL_SelectTexture (0);
