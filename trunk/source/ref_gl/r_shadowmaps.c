@@ -1123,8 +1123,8 @@ void R_GenerateEntityShadow( void )
 {
 	if (gl_shadowmaps->integer)
 	{
-		vec3_t dist, origin, sLight, tmp;
-		float rad, mag, zOffset;
+		vec3_t dist, origin, tmp;
+		float rad, zOffset;
 		entity_t *prevEntity;
 		int i;
 
@@ -1153,13 +1153,6 @@ void R_GenerateEntityShadow( void )
 		//fade out shadows both by distance from view, and by distance from light.  Smaller entities fade out faster.
 		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST) * (zOffset/64 > 1.0 ? 1.0 : zOffset/64); 
 
-		R_LightPoint (origin, sLight, true);
-		VectorCopy (sLight, tmp);
-		mag = 4.0 * VectorNormalize (tmp);
-		mag = clamp (mag, 0.1f, 1.0f);
-		if(mag < 0.15f)
-			return;
-		
 		if (r_shadowcutoff->value < 0.1)
 			fadeShadow = 1.0;
 		else if (VectorLength (dist) > fadeshadow_cutoff)
@@ -1171,7 +1164,7 @@ void R_GenerateEntityShadow( void )
 				fadeShadow = 1.0 - fadeShadow/512.0; //fade out smoothly over 512 units.
 		}
 		else
-			fadeShadow = 1.0*mag;
+			fadeShadow = 1.0;
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
@@ -1236,17 +1229,8 @@ void R_GenerateEntityShadow( void )
 				VectorSubtract(currententity->origin,origin, dist);
 				{
 					vec3_t lDist;
-					vec3_t lPos;
-					float thresh, xyDist;
-					float zDist =  statLightPosition[2]+prevEntity->model->maxs[2] - origin[2];					
-
-					VectorCopy(statLightPosition, lPos);
-					lPos[2] = origin[2];
-					VectorSubtract(lPos, origin, lDist);
-					xyDist = VectorLength(lDist);
 					
-					thresh = xyDist / (zDist/(currententity->origin[2]+(currententity->model->maxs[2]*1.5) - origin[2]));
-					if(VectorLength(dist) > thresh)
+					if(VectorLength(dist) > 128)
 						continue;
 
 					VectorSubtract(statLightPosition, origin, lDist);
