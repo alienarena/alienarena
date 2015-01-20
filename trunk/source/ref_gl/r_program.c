@@ -326,8 +326,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		vec4 alphamask;
 		vec4 bloodColor;
 		float distanceSquared;
-		vec3 relativeLightDirection;
-		float diffuseTerm;
 		vec3 halfAngleVector;
 		float specularTerm;
 		float swamp;
@@ -340,9 +338,11 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		vec2 displacement4;
 
 		vec3 relativeEyeDirection = normalize( EyeDir );
+		vec3 relativeLightDirection = normalize (StaticLightDir);
 
 		vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
 		vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
+		float diffuseTerm = dot( normal, relativeLightDirection );
 
 		lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
 		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
@@ -426,11 +426,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			Offset = Offset * 0.04 - 0.02;
 			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
 
-			diffuse = texture2D( surfTexture, TexCoords );
-
-			relativeLightDirection = normalize (StaticLightDir);
-
-			diffuseTerm = dot( normal, relativeLightDirection  );
+			diffuse = texture2D( surfTexture, TexCoords );		
 
 			if( diffuseTerm > 0.0 )
 			{
@@ -457,6 +453,11 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			gl_FragColor = (gl_FragColor * statshadowval);
 	   }
 
+	   //Normal map self shadowing
+	   float face_normal_coef = relativeLightDirection[2];
+       float normal_coef = diffuseTerm + (1.0 - face_normal_coef);
+       gl_FragColor.rgb *= normal_coef;
+       
 	   if(DYNAMIC > 0) 
 	   {
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
