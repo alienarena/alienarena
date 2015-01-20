@@ -1053,7 +1053,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec4 fx;
 		vec4 glow;
 		vec4 scatterCol = vec4(0.0);
-		float shadowval;
+		float shadowval = 1.0;
 
 		vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb * 1.1;
 		vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5 ) );
@@ -1061,7 +1061,8 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
-		shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
+		if(useShell == 0)
+			shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
 		{
@@ -1110,11 +1111,16 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 			litColor = vec3 (0.0);
 		}
 
-		if(SHADOWMAP > 0)
-			litColor = litColor * shadowval;
+		if(useShell == 0)
+		{
+			litColor = litColor * shadowval * staticLightColor;
+			litColor = max(litColor, textureColour * 0.15);
+		}
+		else
+			litColor = max (litColor, textureColour * 0.5) * staticLightColor;
 
 		gl_FragColor.a = 1.0;
-		gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
+		gl_FragColor.rgb = litColor;
 		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
 		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
