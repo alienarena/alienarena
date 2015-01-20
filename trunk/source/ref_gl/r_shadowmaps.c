@@ -296,23 +296,8 @@ static void lookAt( float position_x , float position_y , float position_z , flo
 	qglTranslated( -position_x , -position_y , -position_z );
 }
 
-static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z, qboolean reverse)
+static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
 {
-	//This reverses the camera to opposite side of target
-	//if(reverse)
-	//{
-	//	position_x = lookAt_x + (lookAt_x - position_x);
-	//	position_y = lookAt_y + (lookAt_y - position_y);
-	//	position_z = lookAt_z + (lookAt_z - position_z);
-	//}
-
-	//This reverses target to opposite side of camera - this is what Fabian appears to be doing in his code, I can't see how that would work!?
-	if(reverse)
-	{
-		lookAt_x = position_x + (position_x - lookAt_x);
-		lookAt_y = position_y + (position_y - lookAt_y);
-		lookAt_z = position_z + (position_z - lookAt_z);	
-	}
 
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity();
@@ -321,22 +306,6 @@ static void SM_SetupMatrices(float position_x,float position_y,float position_z,
 	qglLoadIdentity();
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
-
-
-//Fabian Sanglard's camera code from his tutorial
-/*
-void Light::apply(void)
-{
-	gluLookAt(position.x,position.y,position.z,lookAt.x,lookAt.y,lookAt.z,upVector.x,upVector.y,upVector.z);
-}
-
-
-void Light::applyBackView(void)
-{
-	Vertex reverseLookAt = position + (position - lookAt);
-	gluLookAt(position.x,position.y,position.z,reverseLookAt.x,reverseLookAt.y,reverseLookAt.z,upVector.x,upVector.y,upVector.z);
-}
-*/
 
 static void SM_SetTextureMatrix( qboolean mapnum )
 {
@@ -872,7 +841,7 @@ void R_DrawDynamicCaster(void)
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
 	//set camera
-	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128, false);
+	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
@@ -1022,7 +991,7 @@ void R_DrawVegetationCaster(void)
 
 	//get sun light origin and target from map info, at map load
 	//set camera
-	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2], false);
+	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2]);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
@@ -1039,7 +1008,7 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean back)
+static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 {		
 	vec3_t	dist, adjLightPos, mins, maxs;
 	vec3_t lightVec;
@@ -1067,10 +1036,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	qglMatrixMode(GL_MODELVIEW);
 	qglPushMatrix();
 
-	if(back)
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]); 
-	else
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
@@ -1078,14 +1044,11 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-	// Culling switching, rendering only backfaces
+	// Culling switching, rendering only frontfaces
 	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point
-	if(back)
-		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
-	else
-		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
 
 	//get light origin
 	VectorCopy(statLightPosition, adjLightPos);
@@ -1100,8 +1063,8 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 		adjLightPos[2] += abs(VectorLength(xyDist)) - abs(lightVec[2])*1.5;
 	}
 	
-	//set camera - to do - check and see if this is actually exactly what is done here
-	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], back);
+	//set camera
+	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2]);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );	
@@ -1133,10 +1096,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 
 	R_Mesh_DrawCaster ();
 	
-	if(back)
-		SM_SetTextureMatrix(0);
-	else
-		SM_SetTextureMatrix(1);
+	SM_SetTextureMatrix(1);
 		
 	qglDepthMask (1);		// back to writing
 
@@ -1222,7 +1182,7 @@ void R_GenerateEntityShadow( void )
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		R_DrawEntityCaster(currententity, origin, zOffset, false);
+		R_DrawEntityCaster(currententity, origin, zOffset);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1295,17 +1255,10 @@ void R_GenerateEntityShadow( void )
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset, false);
+				R_DrawEntityCaster(currententity, origin, zOffset);
 			}
 			currententity = prevEntity;
 		}
-
-		//generate the back shadow here
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]); 
-
-		qglClear( GL_DEPTH_BUFFER_BIT);
-
-		R_DrawEntityCaster(currententity, origin, zOffset, true);
 		
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 

@@ -236,7 +236,6 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 
 static char shadowmap_header[] = STRINGIFY (
 	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord);
-	float lookupFBShadow (shadowsampler_t FrontMap, vec4 FrontShadowCoord, shadowsampler_t BackMap, vec4 BackShadowCoord);
 );
 
 static char shadowmap_library[] = 
@@ -282,41 +281,6 @@ STRINGIFY (
 				shadow += lookup (vec2( 0.5, 1.5) + o, Map, ShadowCoord);
 				shadow += lookup (vec2(-1.5, -0.5) + o, Map, ShadowCoord);
 				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
-				shadow *= 0.25 ;
-			}
-			shadow += internal_shadow_fudge; 
-			if(shadow > 1.0)
-				shadow = 1.0;
-		}
-		
-		return shadow;
-	}
-
-	//Note - this version appears to be exactly what Fabian Sanglard was doing - I don't know if it is actually working.
-	float lookupFBShadow  (shadowsampler_t FrontMap, vec4 FrontShadowCoord, shadowsampler_t BackMap, vec4 BackShadowCoord)
-	{
-		float shadow = 1.0;
-
-		if(SHADOWMAP > 0) 
-		{			
-			if (FrontShadowCoord.w > 0)
-			{
-				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-				
-				shadow += lookup (vec2(-1.5, 1.5) + o, FrontMap, FrontShadowCoord);
-				shadow += lookup (vec2( 0.5, 1.5) + o, FrontMap, FrontShadowCoord);
-				shadow += lookup (vec2(-1.5, -0.5) + o, FrontMap, FrontShadowCoord);
-				shadow += lookup (vec2( 0.5, -0.5) + o, FrontMap, FrontShadowCoord);
-				shadow *= 0.25 ;
-			}
-			else
-			{
-				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-				
-				shadow += lookup (vec2(-1.5, 1.5) + o, BackMap, BackShadowCoord);
-				shadow += lookup (vec2( 0.5, 1.5) + o, BackMap, BackShadowCoord);
-				shadow += lookup (vec2(-1.5, -0.5) + o, BackMap, BackShadowCoord);
-				shadow += lookup (vec2( 0.5, -0.5) + o, BackMap, BackShadowCoord);
 				shadow *= 0.25 ;
 			}
 			shadow += internal_shadow_fudge; 
@@ -968,7 +932,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
 		subScatterVS (gl_Position);
 
-		sPos = vec4 ((meshRotation * gl_Vertex.xyz) + meshPosition, 1.0);
+		sPos = vec4 ((meshRotation * anim_vertex.xyz) + meshPosition, 1.0);
 		
 		worldNormal = normalize (gl_NormalMatrix * anim_normal);
 		
@@ -1045,8 +1009,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
-	uniform shadowsampler_t StatShadowMap; //front shadow
-	uniform shadowsampler_t ShadowMap; //back shadow
+	uniform shadowsampler_t StatShadowMap; 
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int SHADOWMAP;
 	uniform int FOG;
@@ -1098,11 +1061,8 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
-		if(SHADOWMAP > 0)
-		{
-			shadowval = lookupFBShadow (StatShadowMap, gl_TextureMatrix[6] * sPos, ShadowMap, gl_TextureMatrix[7] * sPos);
-		}
-
+		shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
+		
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
 		{
 			vec4 SpecColor = vec4 (totalLightColor, 1.0)/2.0;
@@ -1926,7 +1886,6 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
 	out->shadowmap = glGetUniformLocationARB (programObj, "SHADOWMAP");
 	out->shadowmapTexture = glGetUniformLocationARB (programObj, "StatShadowMap");
-	out->shadowmapTexture2 = glGetUniformLocationARB (programObj, "ShadowMap");
 	out->xOffs = glGetUniformLocationARB (programObj, "xPixelOffset");
 	out->yOffs = glGetUniformLocationARB (programObj, "yPixelOffset");
 	out->time = glGetUniformLocationARB (programObj, "time");
