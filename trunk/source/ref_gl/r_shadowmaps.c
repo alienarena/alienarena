@@ -298,11 +298,20 @@ static void lookAt( float position_x , float position_y , float position_z , flo
 
 static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z, qboolean reverse)
 {
+	//This reverses the camera to opposite side of target
+	//if(reverse)
+	//{
+	//	position_x = lookAt_x + (lookAt_x - position_x);
+	//	position_y = lookAt_y + (lookAt_y - position_y);
+	//	position_z = lookAt_z + (lookAt_z - position_z);
+	//}
+
+	//This reverses target to opposite side of camera - this is what Fabian appears to be doing in his code, I can't see how that would work!?
 	if(reverse)
 	{
-		position_x = lookAt_x + (lookAt_x - position_x);
-		position_y = lookAt_y + (lookAt_y - position_y);
-		position_z = lookAt_z + (lookAt_z - position_z);
+		lookAt_x = position_x + (position_x - lookAt_x);
+		lookAt_y = position_y + (position_y - lookAt_y);
+		lookAt_z = position_z + (position_z - lookAt_z);	
 	}
 
 	qglMatrixMode(GL_PROJECTION);
@@ -313,6 +322,8 @@ static void SM_SetupMatrices(float position_x,float position_y,float position_z,
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
 
+
+//Fabian Sanglard's camera code from his tutorial
 /*
 void Light::apply(void)
 {
