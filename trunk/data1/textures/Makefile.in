@@ -1611,14 +1611,15 @@ nobase_dist_textures_DATA = \
 	ramp1.wal \
 	rigel/baselightblue.tga \
 	rigel/baselightred.tga \
-	texturelib/grass_0099.jpg \
-	texturelib/grass_0102.jpg \
-	texturelib/grunge_leaking.jpg \
-	texturelib/stones_0027.jpg \
-	texturelib/ground_0045.jpg \
 	texturelib/grass_0048.jpg \
 	texturelib/grass_0075.jpg \
+	texturelib/grass_0099.jpg \
+	texturelib/grass_0102.jpg \
+	texturelib/ground_0045.jpg \
+	texturelib/ground_0045_nm.jpg \
 	texturelib/grunge_decal.tga \
+	texturelib/grunge_leaking.jpg \
+	texturelib/stones_0027.jpg \
 	water/blood_nm.tga \
 	water/blood.tga \
 	water/bluewater_nm.tga \
