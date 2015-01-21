@@ -1150,7 +1150,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 			
 			vec4 cubemap = mix(Tl,Tr,FresRatio);
 			
-			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor * staticLightColor);
+			cubemap.rgb = max(gl_FragColor.rgb, cubemap.rgb * litColor);
 
 			gl_FragColor = mix(cubemap, gl_FragColor, specmask.a);
 		}
