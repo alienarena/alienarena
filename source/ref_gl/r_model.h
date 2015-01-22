@@ -493,6 +493,7 @@ typedef mesh_framevbo_t *(*Mesh_GetFrameVBO_Callback) (void *data, int framenum)
 // calculated at load time.
 #define MESHLOAD_CALC_NORMAL 1
 #define MESHLOAD_CALC_TANGENT 2
+#define MESHLOAD_FORCE_HANDEDNESS 4
 void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...);
 
 //============================================================================

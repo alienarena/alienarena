@@ -48,6 +48,11 @@ void Matrix3x4_Add (matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
 void Matrix3x4_Copy (matrix3x4_t *out, matrix3x4_t in);
 void Matrix3x4GenRotate (matrix3x4_t *out, float angle, const vec3_t axis);
 
+void R_CalcTangent
+( 	const vec3_t v0, const vec3_t v1, const vec3_t v2,
+	const vec2_t st0, const vec2_t st1, const vec2_t st2,
+	const vec3_t normal, vec4_t tangent );
+
 // HACK: defined in cmodel.c
 extern void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3]);
 

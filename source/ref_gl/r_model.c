@@ -1011,11 +1011,11 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i;
-	vec3_t	v01, v02, temp1, temp2, temp3;
-	vec3_t	normal, bitangent, tangent;
+	vec3_t	v01, temp;
+	vec3_t	normal;
 	float	s = 0;
 	float	*vec;
-
+	
 	VectorSubtract (p->verts[1], p->verts[0], v01);
 	vec = p->verts[0];
 	VectorCopy (surf->plane->normal, normal);
@@ -1024,61 +1024,32 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	// leading to Valgrind complaining about use of uninitialized memory.
 	// dm-infinity and dm-zorn2k11 are two such maps. Probably not a huge
 	// deal, doesn't seem to be causing any issues.
-	for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+	for (v = p->verts[2], i = 2; i < p->numverts; i++, v += VERTEXSIZE)
 	{
-
+		// pick furthest vert we can find from vert 0, for greater numerical
+		// precision
 		float currentLength;
 		vec3_t currentNormal;
 
-		//do calculations for normal, tangent and binormal
-		if (i > 1) {
-			VectorSubtract (p->verts[i], p->verts[0], temp1);
+		VectorSubtract (p->verts[i], p->verts[0], temp);
 
-			CrossProduct (temp1, v01, currentNormal);
-			currentLength = VectorLength (currentNormal);
+		CrossProduct (temp, v01, currentNormal);
+		currentLength = VectorLength (currentNormal);
 
-			if (currentLength > s)
-			{
-				s = currentLength;
-				VectorCopy (currentNormal, normal);
+		if (currentLength > s)
+		{
+			s = currentLength;
+			VectorCopy (currentNormal, normal);
 
-				vec = p->verts[i];
-				VectorCopy (temp1, v02);
-
-			}
+			vec = p->verts[i];
 		}
 	}
 
 	VectorNormalize (normal); //we have the largest normal
-	
 	VectorCopy (normal, surf->normal);
 
-	//now get the tangent
-	s =	(p->verts[1][3] - p->verts[0][3]) * (vec[4] - p->verts[0][4]) -
-		(vec[3] - p->verts[0][3]) * (p->verts[1][4] - p->verts[0][4]);
-	s = 1.0f / s;
-
-	VectorScale (v01, vec[4] - p->verts[0][4], temp1);
-	VectorScale (v02, p->verts[1][4] - p->verts[0][4], temp2);
-	VectorSubtract (temp1, temp2, temp3);
-	VectorScale (temp3, s, tangent);
-	VectorNormalize (tangent);
-	
-	VectorCopy (tangent, surf->tangent);
-	surf->tangent[3] = 1.0f;
-
-	// now get the bitangent (used to check handedness)
-	// bitangent will be recomputed in vertex shaders.
-	VectorScale (v02, p->verts[1][3] - p->verts[0][3], temp1);
-	VectorScale (v01, vec[3] - p->verts[0][3], temp2);
-	VectorSubtract (temp1, temp2, temp3);
-	VectorScale (temp3, s, bitangent);
-	VectorNormalize (bitangent);
-
-	CrossProduct (normal, tangent, temp1);
-	// handedness
-	if (DotProduct (temp1, bitangent) < 0.0f)
-		surf->tangent[3] = -1.0f;
+	// now get the tangent
+	R_CalcTangent (p->verts[0], p->verts[1], vec, &p->verts[0][3], &p->verts[1][3], &vec[3], normal, surf->tangent);
 }
 
 void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale, int light_s, int light_t, int firstedge, int lnumverts);

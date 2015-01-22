@@ -328,3 +328,42 @@ void Matrix3x4GenRotate (matrix3x4_t *out, float angle, const vec3_t axis)
 	Vector4Set(out->b, axis[1]*axis[0]*(1-ck)+axis[2]*sk, axis[1]*axis[1]*(1-ck)+ck, axis[1]*axis[2]*(1-ck)-axis[0]*sk, 0);
 	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, 0);
 }
+
+void R_CalcTangent
+( 	const vec3_t v0, const vec3_t v1, const vec3_t v2,
+	const vec2_t st0, const vec2_t st1, const vec2_t st2,
+	const vec3_t normal, vec4_t tangent )
+{
+	float	s;
+	vec3_t	v01, v02, temp1, temp2, temp3;
+	vec3_t	bitangent;
+	
+	VectorSubtract (v1, v0, v01);
+	VectorSubtract (v2, v0, v02);
+	
+	// get the tangent
+	s =	(st1[0] - st0[0]) * (st2[1] - st0[1]) -
+		(st2[0] - st0[0]) * (st1[1] - st0[1]);
+	s = 1.0f / s;
+
+	VectorScale (v01, st2[1] - st0[1], temp1);
+	VectorScale (v02, st1[1] - st0[1], temp2);
+	VectorSubtract (temp1, temp2, temp3);
+	VectorScale (temp3, s, tangent);
+	VectorNormalize (tangent);
+	
+	// now get the bitangent (used to check handedness)
+	// bitangent will be recomputed in vertex shaders.
+	VectorScale (v02, st1[0] - st0[0], temp1);
+	VectorScale (v01, st2[0] - st0[0], temp2);
+	VectorSubtract (temp1, temp2, temp3);
+	VectorScale (temp3, s, bitangent);
+	VectorNormalize (bitangent);
+
+	// handedness
+	CrossProduct (normal, tangent, temp1);
+	if (DotProduct (temp1, bitangent) < 0.0f)
+		tangent[3] = -1.0f;
+	else
+		tangent[3] = 1.0f;
+}
