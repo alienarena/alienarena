@@ -557,6 +557,7 @@ static char minimap_vertex_program[] = STRINGIFY (
 
 //RSCRIPTS
 static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
+	uniform vec3 staticLightPosition;
 	uniform int envmap;
 	uniform int	numblendtextures;
 	uniform int FOG;
@@ -567,6 +568,7 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
+	varying vec3 StaticLightDir;
 	
 	attribute vec4 tangent;
 	
@@ -610,6 +612,8 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		}
 		
 		computeDynamicLightingVert (gl_Normal, tangent);
+		
+		StaticLightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (staticLightPosition, 1.0)).xyz - viewVertex.xyz);
 	}
 );
 
@@ -627,6 +631,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform sampler2D blendNormalmap1;
 	uniform sampler2D blendNormalmap2;
 	uniform int	numblendtextures, numblendnormalmaps;
+	uniform int	static_normalmaps;
 	uniform int FOG;
 	uniform vec2 blendscales[6];
 	uniform int normalblendindices[3];
@@ -637,6 +642,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
+	varying vec3 StaticLightDir;
 	
 	// This is tri-planar projection, based on code from NVIDIA's GPU Gems
 	// website. Potentially could be replaced with bi-planar projection, for
@@ -714,7 +720,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 				}
 			}
 			
-			if (DYNAMIC > 0 && numblendnormalmaps > 0)
+			if ((DYNAMIC > 0 || static_normalmaps != 0) && numblendnormalmaps > 0)
 			{
 				float totalnormal = 0.0;
 				
@@ -758,6 +764,21 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		
 		if (lightmap != 0)
 			gl_FragColor *= 2.0 * texture2D (lightmapTexture, gl_TexCoord[1].st);
+		
+		if (static_normalmaps != 0)
+		{
+			// We want any light attenuation to come from the normalmap, not
+			// from the normal of the polygon (since the lightmap compiler
+			// already accounts for that.) So we calculate how much light we'd
+			// lose from the normal of the polygon and give that much back.
+			
+			vec3 RelativeLightDirection = normalize (StaticLightDir);
+			// note that relativeLightDirection[2] == dot (RelativeLightDirection, up)
+			float face_normal_coef = RelativeLightDirection[2];
+			float normalmap_normal_coef = dot (normal, RelativeLightDirection);
+			float normal_coef = normalmap_normal_coef + (1.0 - face_normal_coef);
+			gl_FragColor.rgb *= normal_coef;
+		}
 		
 		if (DYNAMIC > 0)
 		{
@@ -2017,9 +2038,11 @@ void R_LoadGLSLPrograms(void)
 		R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, i, &g_rscriptprogramObj[i]);
 	
 		get_dlight_uniform_locations (g_rscriptprogramObj[i], &rscript_uniforms[i].dlight_uniforms);
+		rscript_uniforms[i].staticLightPosition = glGetUniformLocationARB (g_rscriptprogramObj[i], "staticLightPosition");
 		rscript_uniforms[i].envmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "envmap");
 		rscript_uniforms[i].numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj[i], "numblendtextures");
 		rscript_uniforms[i].numblendnormalmaps = glGetUniformLocationARB (g_rscriptprogramObj[i], "numblendnormalmaps");
+		rscript_uniforms[i].static_normalmaps = glGetUniformLocationARB (g_rscriptprogramObj[i], "static_normalmaps");
 		rscript_uniforms[i].lightmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmap");
 		rscript_uniforms[i].fog = glGetUniformLocationARB (g_rscriptprogramObj[i], "FOG");
 		rscript_uniforms[i].mainTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "mainTexture");
