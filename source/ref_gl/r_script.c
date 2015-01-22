@@ -1226,8 +1226,12 @@ static void RS_SetupGLState (int dynamic)
 		glUniform1iARB (rscript_uniforms[dynamic].blendNormalmap[i], 9+i);
 	glUniform1iARB (rscript_uniforms[dynamic].fog, map_fog);
 	
+	glUniform1iARB (rscript_uniforms[dynamic].static_normalmaps, gl_bspnormalmaps->integer);
+	
 	if (dynamic != 0)
 		R_SetDlightUniforms (&rscript_uniforms[dynamic].dlight_uniforms);
+	
+	glUniform3fARB (rscript_uniforms[dynamic].staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 	
 	qglMatrixMode (GL_TEXTURE);
 	

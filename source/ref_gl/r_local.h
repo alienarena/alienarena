@@ -632,6 +632,8 @@ struct
 struct
 {
 	dlight_uniform_location_t	dlight_uniforms;
+	GLuint						static_normalmaps;
+	GLuint						staticLightPosition;
 	GLuint						envmap;
 	GLuint						numblendtextures, numblendnormalmaps;
 	GLuint						lightmap;
