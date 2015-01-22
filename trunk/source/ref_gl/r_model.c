@@ -1016,9 +1016,9 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	float	s = 0;
 	float	*vec;
 
-	_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
+	VectorSubtract (p->verts[1], p->verts[0], v01);
 	vec = p->verts[0];
-	_VectorCopy(surf->plane->normal, normal);
+	VectorCopy (surf->plane->normal, normal);
 
 	// FIXME: on some maps, this code doesn't always initialize v02, 
 	// leading to Valgrind complaining about use of uninitialized memory.
@@ -1031,51 +1031,49 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 		vec3_t currentNormal;
 
 		//do calculations for normal, tangent and binormal
-		if( i > 1) {
-			_VectorSubtract( p->verts[ i ], p->verts[0], temp1 );
+		if (i > 1) {
+			VectorSubtract (p->verts[i], p->verts[0], temp1);
 
-			CrossProduct( temp1, v01, currentNormal );
-			currentLength = VectorLength( currentNormal );
+			CrossProduct (temp1, v01, currentNormal);
+			currentLength = VectorLength (currentNormal);
 
-			if( currentLength > s )
+			if (currentLength > s)
 			{
 				s = currentLength;
-				_VectorCopy( currentNormal, normal );
+				VectorCopy (currentNormal, normal);
 
 				vec = p->verts[i];
-				_VectorCopy( temp1, v02 );
+				VectorCopy (temp1, v02);
 
 			}
 		}
 	}
 
-	VectorNormalize( normal ); //we have the largest normal
+	VectorNormalize (normal); //we have the largest normal
 	
 	VectorCopy (normal, surf->normal);
 
 	//now get the tangent
-	s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
-		* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
-	s -= ( vec[ 3 ] - p->verts[ 0 ][ 3 ] )
-		 * ( p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ] );
+	s =	(p->verts[1][3] - p->verts[0][3]) * (vec[4] - p->verts[0][4]) -
+		(vec[3] - p->verts[0][3]) * (p->verts[1][4] - p->verts[0][4]);
 	s = 1.0f / s;
 
-	VectorScale( v01, vec[ 4 ] - p->verts[ 0 ][ 4 ], temp1 );
-	VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
-	_VectorSubtract( temp1, temp2, temp3 );
-	VectorScale( temp3, s, tangent );
-	VectorNormalize( tangent );
+	VectorScale (v01, vec[4] - p->verts[0][4], temp1);
+	VectorScale (v02, p->verts[1][4] - p->verts[0][4], temp2);
+	VectorSubtract (temp1, temp2, temp3);
+	VectorScale (temp3, s, tangent);
+	VectorNormalize (tangent);
 	
 	VectorCopy (tangent, surf->tangent);
 	surf->tangent[3] = 1.0f;
 
 	// now get the bitangent (used to check handedness)
 	// bitangent will be recomputed in vertex shaders.
-	VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
-	VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
-	_VectorSubtract( temp1, temp2, temp3 );
-	VectorScale( temp3, s, bitangent );
-	VectorNormalize( bitangent );
+	VectorScale (v02, p->verts[1][3] - p->verts[0][3], temp1);
+	VectorScale (v01, vec[3] - p->verts[0][3], temp2);
+	VectorSubtract (temp1, temp2, temp3);
+	VectorScale (temp3, s, bitangent);
+	VectorNormalize (bitangent);
 
 	CrossProduct (normal, tangent, temp1);
 	// handedness
@@ -1122,7 +1120,7 @@ void Mod_LoadRefineFaceLookups (lump_t *l)
 		format = LittleLong(in->format);
 		if (format >= LTMP_NUM_SUPPORTED_PIXFMTS)
 			continue;
-	    
+		
 		// make a federal case out of bad face offsets
 		facenum = LittleLong(in->facenum);
 		if (facenum >= MAX_MAP_FACES || facenum < 0)
@@ -1905,7 +1903,7 @@ PModelList_t BasePModels[] =
 	{ "martiancyborg" },
 	{ "martianoverlord" },
 	{ "martianwarrior" },
-    { "enforcer" },
+	{ "enforcer" },
 	{ "commander" },
 	{ "lauren" },
 	{ "slashbot" }
@@ -1917,12 +1915,12 @@ WModelList_t BaseWModels[] =
 {
 	{ "w_blaster.md2" },
 	{ "w_shotgun.md2" },
-    { "w_sshotgun.md2" },
+	{ "w_sshotgun.md2" },
 	{ "w_machinegun.md2" },
 	{ "w_chaingun.md2" },
 	{ "w_glauncher.md2" },
 	{ "w_rlauncher.md2" },
-    { "w_hyperblaster.md2" },
+	{ "w_hyperblaster.md2" },
 	{ "w_railgun.md2" },
 	{ "w_bfg.md2" },
 	{ "w_violator.md2" },
