@@ -41,113 +41,24 @@ extern float sun_alpha;
 
 cvar_t *gl_mirror;
 
-#if 0
-static void R_Mesh_VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
-{
-	vec3_t	vec1, vec2;
-	vec3_t	planes[3];
-	float	tmp;
-	int		i;
-
-	for (i=0; i<3; i++)
-	{
-		vec1[0] = v1[i]-v0[i];
-		vec1[1] = st1[0]-st0[0];
-		vec1[2] = st1[1]-st0[1];
-		vec2[0] = v2[i]-v0[i];
-		vec2[1] = st2[0]-st0[0];
-		vec2[2] = st2[1]-st0[1];
-		VectorNormalize(vec1);
-		VectorNormalize(vec2);
-		CrossProduct(vec1,vec2,planes[i]);
-	}
-
-	for (i=0; i<3; i++)
-	{
-		tmp = 1.0 / planes[i][0];
-		Tangent[i] = -planes[i][1]*tmp;
-	}
-	VectorNormalize(Tangent);
-}
-#else
-// Math rearrangement for MD2 load speedup
-static void R_Mesh_VecsForTris(
-		const float *v0,
-		const float *v1,
-		const float *v2,
-		const float *st0,
-		const float *st1,
-		const float *st2,
-		vec3_t Tangent
-		)
-{
-	vec3_t planes[3];
-	float tmp;
-	float vec1_x, vec1_y, vec1_z, vec1_nrml;
-	float vec2_x, vec2_y, vec2_z, vec2_nrml;
-	int i;
-
-	vec1_y = st1[0]-st0[0];
-	vec1_z = st1[1]-st0[1];
-	vec1_nrml = (vec1_y*vec1_y) + (vec1_z*vec1_z); // partial for normalize
-
-	vec2_y = st2[0]-st0[0];
-	vec2_z = st2[1]-st0[1];
-	vec2_nrml = (vec2_y*vec2_y) + (vec2_z*vec2_z); // partial for normalize
-
-	for (i=0; i<3; i++)
-	{
-		vec1_x = v1[i]-v0[i];
-		// VectorNormalize(vec1);
-		tmp = (vec1_x * vec1_x) + vec1_nrml;
-		tmp = sqrtf(tmp);
-		if ( tmp > 0.0f )
-		{
-			tmp = 1.0f / tmp;
-			vec1_x *= tmp;
-			vec1_y *= tmp;
-			vec1_z *= tmp;
-		}
-
-		vec2_x = v2[i]-v0[i];
-		// --- VectorNormalize(vec2);
-		tmp = (vec2_x * vec2_x) + vec2_nrml;
-		tmp = sqrtf(tmp);
-		if ( tmp > 0.0f )
-		{
-			tmp = 1.0f / tmp;
-			vec2_x *= tmp;
-			vec2_y *= tmp;
-			vec2_z *= tmp;
-		}
-
-		// --- CrossProduct(vec1,vec2,planes[i]);
-		planes[i][0] = vec1_y*vec2_z - vec1_z*vec2_y;
-		planes[i][1] = vec1_z*vec2_x - vec1_x*vec2_z;
-		planes[i][2] = vec1_x*vec2_y - vec1_y*vec2_x;
-		// ---
-
-		tmp = 1.0f / planes[i][0];
-		Tangent[i] = -planes[i][1]*tmp;
-	}
-
-	VectorNormalize(Tangent);
-}
-#endif
-
 static void R_Mesh_CompleteNormalsTangents
 	(model_t *mod, int calcflags, const nonskeletal_basevbo_t *basevbo, mesh_framevbo_t *framevbo, const unsigned int *vtriangles)
 {
-	int i, j;
+	int i, j, ndiscarded = 0;
 	unsigned int nonindexed_triangle[3];
 	const skeletal_basevbo_t *basevbo_sk = (const skeletal_basevbo_t *)basevbo;
 	qboolean *merged, *do_merge;
 	merged = Z_Malloc (mod->numvertexes * sizeof(qboolean));
 	do_merge = Z_Malloc (mod->numvertexes * sizeof(qboolean));
 	
+	// can't force handedness without calculating tangents
+	assert (!(calcflags & MESHLOAD_FORCE_HANDEDNESS) || (calcflags & MESHLOAD_CALC_TANGENT));
+	// can't calculate tangents without calculating normals (FIXME)
+	assert (!(calcflags & MESHLOAD_CALC_TANGENT) || (calcflags & MESHLOAD_CALC_NORMAL));
+	
 	for (i = 0; i < mod->num_triangles; i++)
 	{
-		vec3_t v1, v2, normal, tangent;
+		vec3_t v1, v2, normal;
 		const unsigned int *triangle;
 		
 		if ((mod->typeFlags & MESH_INDEXED))
@@ -161,19 +72,17 @@ static void R_Mesh_CompleteNormalsTangents
 				nonindexed_triangle[j] = 3*i+j;
 		}
 		
-		if ((calcflags & MESHLOAD_CALC_NORMAL))
+		if ((calcflags & (MESHLOAD_CALC_NORMAL|MESHLOAD_CALC_TANGENT)))
 		{
 			VectorSubtract (framevbo[triangle[0]].vertex, framevbo[triangle[1]].vertex, v1);
 			VectorSubtract (framevbo[triangle[2]].vertex, framevbo[triangle[1]].vertex, v2);
 			CrossProduct (v2, v1, normal);
 			VectorScale (normal, -1.0f, normal);
-			
-			for (j = 0; j < 3; j++)
-				VectorAdd (framevbo[triangle[j]].normal, normal, framevbo[triangle[j]].normal);
 		}
 		
 		if ((calcflags & MESHLOAD_CALC_TANGENT))
 		{
+			vec4_t tmp_tangent;
 			const nonskeletal_basevbo_t *basevbo_vert[3];
 			
 			for (j = 0; j < 3; j++)
@@ -184,18 +93,45 @@ static void R_Mesh_CompleteNormalsTangents
 					basevbo_vert[j] = &basevbo[triangle[j]];
 			}
 			
-			R_Mesh_VecsForTris (	framevbo[triangle[0]].vertex,
-									framevbo[triangle[1]].vertex,
-									framevbo[triangle[2]].vertex,
-									basevbo_vert[0]->st,
-									basevbo_vert[1]->st,
-									basevbo_vert[2]->st,
-									tangent );
-		
+			R_CalcTangent ( framevbo[triangle[0]].vertex,
+							framevbo[triangle[1]].vertex,
+							framevbo[triangle[2]].vertex,
+							basevbo_vert[0]->st,
+							basevbo_vert[1]->st,
+							basevbo_vert[2]->st,
+							normal, tmp_tangent );
+			
+			if ((calcflags & MESHLOAD_FORCE_HANDEDNESS) && tmp_tangent[3] == 1.0f)
+			{
+				// TODO: discard the entire triangle!
+				ndiscarded++;
+				goto discard_tangent_and_normal;
+			}
+			
 			for (j = 0; j < 3; j++)
-				VectorAdd (framevbo[triangle[j]].tangent, tangent, framevbo[triangle[j]].tangent);
+			{			
+				if (framevbo[triangle[j]].tangent[3] != 0.0f)
+				{
+					if ((framevbo[triangle[j]].tangent[3] > 0.0f) != (tmp_tangent[3] > 0.0f))
+						Com_DPrintf ("WARN: Inconsistent triangle handedness in %s! %f != %f\n",
+									mod->name, framevbo[triangle[j]].tangent[3], tmp_tangent[3]);
+				}
+
+				Vector4Add (framevbo[triangle[j]].tangent, tmp_tangent, framevbo[triangle[j]].tangent);
+			}
 		}
+		
+		if ((calcflags & MESHLOAD_CALC_NORMAL))
+		{
+			for (j = 0; j < 3; j++)
+				VectorAdd (framevbo[triangle[j]].normal, normal, framevbo[triangle[j]].normal);
+		}
+discard_tangent_and_normal:;
 	}
+	
+	if (ndiscarded > 0)
+		Com_Printf ("WARN: normals/tangents from %d triangles disregared in %s due to bad handedness!\n",
+					ndiscarded, mod->name);
 	
 	// In the case of texture seams in the mesh, we merge tangents/normals for
 	// verts with the same positions. This is also necessary for non-indexed
@@ -204,10 +140,13 @@ static void R_Mesh_CompleteNormalsTangents
 	{
 		if (merged[i]) continue;
 		
-		// Total normals/tangents up
+		// Total normals/tangents up, as long as vertex coords are the same
+		// and vertex handedness matches
 		for (j = i + 1; j < mod->numvertexes; j++)
 		{
-			if (VectorCompare (framevbo[i].vertex, framevbo[j].vertex))
+			if (	VectorCompare (framevbo[i].vertex, framevbo[j].vertex) &&
+					(framevbo[i].tangent[3] > 0.0f) == (framevbo[j].tangent[3] > 0.0f)
+				)
 			{
 				do_merge[j] = true;
 				
@@ -226,7 +165,7 @@ static void R_Mesh_CompleteNormalsTangents
 		if ((calcflags & MESHLOAD_CALC_TANGENT))
 		{
 			VectorNormalize (framevbo[i].tangent);
-			framevbo[i].tangent[3] = 1.0;
+			framevbo[i].tangent[3] /= fabsf (framevbo[i].tangent[3]);
 		}
 		
 		// Copy the averages where they need to go
