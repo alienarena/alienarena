@@ -6952,7 +6952,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "1331.999878 -903.999817 48.000046"
-"model" "maps/meshes/urban/riosilver.md2"
+"model" "maps/meshes/urban/riored.md2"
 "angles" "-41.265450 156.271255 -177.026276"
 }
 // entity 67
@@ -7572,4 +7572,47 @@
 "origin" "-928.000122 1120.000000 72.000000"
 "model" "maps/meshes/urban/bench.md2"
 "angle" "-76.942566"
+}
+// entity 155
+{
+"classname" "light"
+"origin" "-1264.000000 -600.000000 136.000000"
+"light" "50"
+}
+// entity 156
+{
+"classname" "light"
+"origin" "-672.000000 -1632.000000 544.000000"
+"light" "50"
+}
+// entity 157
+{
+"classname" "light"
+"origin" "-512.000000 -1624.000000 112.000000"
+"light" "15"
+}
+// entity 158
+{
+"classname" "light"
+"origin" "-776.000000 -1632.000000 112.000000"
+"light" "15"
+}
+// entity 159
+{
+"classname" "light"
+"origin" "-896.000000 1112.000000 120.000000"
+"light" "35"
+}
+// entity 160
+{
+"classname" "light"
+"origin" "544.000000 168.000000 64.000000"
+"light" "35"
+}
+// entity 161
+{
+"classname" "misc_mapmodel"
+"origin" "-1488.000000 -719.999939 8.000000"
+"model" "maps/meshes/urban/riored.md2"
+"angle" "-16.947048"
 }
