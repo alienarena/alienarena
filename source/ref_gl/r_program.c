@@ -117,6 +117,9 @@ IFDYNAMIC (1,
 STRINGIFY (
 	varying vec3 EyeDir;
 	
+	// increase this number to tone down dynamic lighting more
+	const float attenuation_boost = 1.5; 
+	
 	// normal argument given in tangent space
 	void ComputeForLight (	const vec3 normal, const float specular,
 							const vec3 nEyeDir, const vec3 textureColor3,
@@ -128,7 +131,7 @@ STRINGIFY (
 		{
 			// If we get this far, the fragment is within range of the 
 			// dynamic light
-			vec3 attenuation = clamp (vec3 (1.0) - (vec3 (distanceSquared) / lightAmount / 1.0), vec3 (0.0), vec3 (1.0));
+			vec3 attenuation = clamp (vec3 (1.0) - attenuation_boost * vec3 (distanceSquared) / lightAmount, vec3 (0.0), vec3 (1.0));
 			vec3 relativeLightDirection = LightVec / sqrt (distanceSquared);
 			float diffuseTerm = max (0.0, dot (relativeLightDirection, normal));
 			vec3 specularAdd = vec3 (0.0, 0.0, 0.0);
@@ -464,15 +467,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			
 			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, 1.0, dynshadowval);
-			
-			if(PARALLAX > 0) 
-			{
-				gl_FragColor = max(vec4 (dynamicColor, 1.0), gl_FragColor);
-			}
-			else 
-			{
-				gl_FragColor = max(vec4 (dynamicColor, 1.0), vec4(textureColour, 1.0) * lightmap * 2.0);
-			}
+			gl_FragColor.rgb += dynamicColor;
 	   }
 
 	   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
@@ -782,8 +777,8 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		
 		if (DYNAMIC > 0)
 		{
-			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, normal, 1.0, 1.0);
-			gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, normal, 0.0, 1.0);
+			gl_FragColor.rgb += dynamicColor;
 		}
 
 		
@@ -1144,7 +1139,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		gl_FragColor.a = 1.0;
 		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
-		gl_FragColor.rgb = max(dynamicColor, gl_FragColor.rgb);
+		gl_FragColor.rgb += dynamicColor;
 		
 		//moving fx texture
 		if(useFX > 0)
