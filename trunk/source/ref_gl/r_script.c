@@ -1226,7 +1226,7 @@ static void RS_SetupGLState (int dynamic)
 		glUniform1iARB (rscript_uniforms[dynamic].blendNormalmap[i], 9+i);
 	glUniform1iARB (rscript_uniforms[dynamic].fog, map_fog);
 	
-	glUniform1iARB (rscript_uniforms[dynamic].static_normalmaps, gl_bspnormalmaps->integer);
+	glUniform1iARB (rscript_uniforms[dynamic].static_normalmaps, r_worldnormalmaps->integer);
 	
 	if (dynamic != 0)
 		R_SetDlightUniforms (&rscript_uniforms[dynamic].dlight_uniforms);

@@ -154,8 +154,8 @@ extern cvar_t *r_ext_max_anisotropy;
 
 extern cvar_t	*r_overbrightbits;
 
-extern cvar_t	*gl_normalmaps;
-extern cvar_t	*gl_bspnormalmaps;
+extern cvar_t	*r_meshnormalmaps;
+extern cvar_t	*r_worldnormalmaps;
 extern cvar_t	*gl_shadowmaps;
 extern cvar_t	*gl_fog;
 
