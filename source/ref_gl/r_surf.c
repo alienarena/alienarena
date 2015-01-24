@@ -797,7 +797,7 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, int dynamic)
 	
 		if (dynamic)
 	{
-		if(gl_bspnormalmaps->integer && texinfo->has_heightmap) 
+		if(r_worldnormalmaps->integer && texinfo->has_heightmap) 
 		{
 			if (!r_currTexInfo || !r_currTexInfo->has_heightmap)
 			{
@@ -813,7 +813,7 @@ static void BSP_TexinfoChanged (mtexinfo_t *texinfo, qboolean glsl, int dynamic)
 		}
 	}
 	
-	if (!gl_bspnormalmaps->integer)
+	if (!r_worldnormalmaps->integer)
 	{
 		if (!r_currTexInfo)
 		{
@@ -982,7 +982,7 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	
-	if (!gl_bspnormalmaps->integer)
+	if (!r_worldnormalmaps->integer)
 	{
 		return;
 	}
@@ -1149,9 +1149,9 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	// etc. Note that with alpha, warp, and sky surfaces out of the way, all
 	// the remaining surfaces have lightmaps.
 
-	// XXX: we could require gl_bspnormalmaps here, but that would result in
+	// XXX: we could require r_worldnormalmaps here, but that would result in
 	// weird inconsistency with only meshes lighting up. Better to fall back
-	// on GLSL for dynamically lit surfaces, even with gl_bspnormalmaps 0.
+	// on GLSL for dynamically lit surfaces, even with r_worldnormalmaps 0.
 	if(r_newrefdef.num_dlights && gl_dynamic->integer)
 	{
 		// Dynamic surfaces must have normalmaps, as the old fixed-function
@@ -1185,7 +1185,7 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 		//always glsl for dynamic if it has a normalmap
 		AddToChainPair (surf->texinfo->equiv->dynamic_surfaces);
 	}
-	else if(gl_bspnormalmaps->integer
+	else if(r_worldnormalmaps->integer
 			&& surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap) 
 	{
@@ -1257,7 +1257,7 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 	BSP_DrawNonGLSLSurfaces(forEnt);
 
 	// render all GLSL surfaces, including normalmapped and dynamically lit
-	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
+	if(gl_dynamic->integer || r_worldnormalmaps->integer)
 	{
 		BSP_DrawGLSLSurfaces (forEnt); 
 		BSP_DrawGLSLDynamicSurfaces (forEnt);
@@ -1614,7 +1614,7 @@ static void R_CalcWorldLights( void )
 	float	dist, weight;
 	int		numlights = 0;
 
-	if(gl_dynamic->integer || gl_bspnormalmaps->integer)
+	if(gl_dynamic->integer || r_worldnormalmaps->integer)
 	{
 		//get light position relative to player's position
 		VectorClear(lightAdd);

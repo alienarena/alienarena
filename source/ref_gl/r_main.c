@@ -46,8 +46,8 @@ float			r_frametime;
 glconfig_t		gl_config;
 glstate_t		gl_state;
 
-cvar_t	*gl_normalmaps;
-cvar_t	*gl_bspnormalmaps;
+cvar_t	*r_meshnormalmaps;
+cvar_t	*r_worldnormalmaps;
 cvar_t  *gl_shadowmaps;
 cvar_t	*gl_fog;
 
@@ -1268,8 +1268,8 @@ void R_Register( void )
 
 	gl_vlights = Cvar_Get("gl_vlights", "1", CVAR_ARCHIVE);
 
-	gl_normalmaps = Cvar_Get("gl_normalmaps", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
-	gl_bspnormalmaps = Cvar_Get("gl_bspnormalmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_meshnormalmaps = Cvar_Get("r_meshnormalmaps", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_worldnormalmaps = Cvar_Get("r_worldnormalmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	gl_fog = Cvar_Get ("gl_fog", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	Cvar_Describe (gl_fog, "Fog and weather effects.");

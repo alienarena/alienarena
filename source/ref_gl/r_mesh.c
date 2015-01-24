@@ -867,7 +867,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 			qglDepthMask(false);
 		
 		shell = (currententity->flags & RF_SHELL_ANY) != 0;
-		fragmentshader = gl_normalmaps->integer && (shell || (rs && rs->stage->normalmap));
+		fragmentshader = r_meshnormalmaps->integer && (shell || (rs && rs->stage->normalmap));
 		
 		R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, shell);
 	}
@@ -938,7 +938,7 @@ static void R_Mesh_SetShadelight (void)
 	{
 		float minlight;
 
-		if (gl_normalmaps->integer)
+		if (r_meshnormalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -959,7 +959,7 @@ static void R_Mesh_SetShadelight (void)
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if (gl_normalmaps->integer)
+		if (r_meshnormalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
