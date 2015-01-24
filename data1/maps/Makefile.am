@@ -454,10 +454,12 @@ nobase_dist_maps_DATA = \
 	meshes/urban/rio_normal.jpg \
 	meshes/urban/rioblue.jpg \
 	meshes/urban/rioblue.md2 \
+	meshes/urban/rioblue_normal.jpg \
 	meshes/urban/riored.jpg \
 	meshes/urban/riored.md2 \
 	meshes/urban/riosilver.jpg \
 	meshes/urban/riosilver.md2 \
+	meshes/urban/riosilver_normal.jpg \
 	meshes/urban/roadbarrell.jpg \
 	meshes/urban/roadbarrell.md2 \
 	meshes/urban/roadbarrell_normal.jpg \
