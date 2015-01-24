@@ -343,9 +343,10 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		vec3 relativeEyeDirection = normalize( EyeDir );
 		vec3 relativeLightDirection = normalize (StaticLightDir);
 
-		vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
-		vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
-		float diffuseTerm = dot( normal, relativeLightDirection );
+		vec4 normal = texture2D (NormalTexture, gl_TexCoord[0].xy);
+		normal.xyz = 2.0 * (normal.xyz - vec3 (0.5));
+		vec3 textureColour = texture2D (surfTexture, gl_TexCoord[0].xy).rgb;
+		float diffuseTerm = dot (normal.xyz, relativeLightDirection);
 
 		lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
 		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
@@ -433,12 +434,12 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 
 			if( diffuseTerm > 0.0 )
 			{
-				halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );
+				halfAngleVector = normalize (relativeLightDirection + relativeEyeDirection);
 
-				specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-				specularTerm = pow( specularTerm, 32.0 );
+				specularTerm = clamp (dot (normal.xyz, halfAngleVector), 0.0, 1.0 );
+				specularTerm = pow (specularTerm, 32.0);
 
-				litColour = vec4 (specularTerm + ( 3.0 * diffuseTerm ) * textureColour, 6.0);
+				litColour = vec4 (specularTerm * normal.a + (3.0 * diffuseTerm) * textureColour, 6.0);
 			}
 			else
 			{
@@ -466,7 +467,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 			
 			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
-			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, 1.0, dynshadowval);
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal.xyz, normal.a, dynshadowval);
 			gl_FragColor.rgb += dynamicColor;
 	   }
 
@@ -474,8 +475,8 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 
 	   if(SHINY > 0)
 	   {
-		   vec3 reflection = reflect(relativeEyeDirection, normal);
-		   vec3 refraction = refract(relativeEyeDirection, normal, 0.66);
+		   vec3 reflection = reflect(relativeEyeDirection, normal.xyz);
+		   vec3 refraction = refract(relativeEyeDirection, normal.xyz, 0.66);
 
 		   vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
 		   vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
@@ -647,19 +648,17 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	
 	vec4 triplanar_sample (sampler2D tex, vec3 blend_weights, vec2 scale)
 	{
-		return vec4 (
-			blend_weights[0] * texture2D (tex, orig_coord.yz * scale).rgb +
-			blend_weights[1] * texture2D (tex, orig_coord.zx * scale).rgb +
-			blend_weights[2] * texture2D (tex, orig_coord.xy * scale).rgb,
-			1.0
-		);
+		return
+			blend_weights[0] * texture2D (tex, orig_coord.yz * scale) +
+			blend_weights[1] * texture2D (tex, orig_coord.zx * scale) +
+			blend_weights[2] * texture2D (tex, orig_coord.xy * scale);
 	}
 	
 	void main ()
 	{
 		
 		vec4 mainColor = texture2D (mainTexture, gl_TexCoord[0].st);
-		vec3 normal = vec3 (0.0, 0.0, 1.0);
+		vec4 normal = vec4 (0.0, 0.0, 1.0, 0.0);
 		
 		if (numblendtextures == 0)
 		{
@@ -719,13 +718,13 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			{
 				float totalnormal = 0.0;
 				
-				normal = vec3 (0.0);
+				normal = vec4 (0.0);
 				
 				float normalcoef = normalblendindices[0] >= 3 ? mainColor2[normalblendindices[0]-3] : mainColor[normalblendindices[0]];
 				if (normalcoef > 0.0)
 				{
 					totalnormal += normalcoef;
-					normal += (triplanar_sample (blendNormalmap0, blend_weights, blendscales[normalblendindices[0]]) * normalcoef).rgb;
+					normal += triplanar_sample (blendNormalmap0, blend_weights, blendscales[normalblendindices[0]]) * normalcoef;
 				}
 				if (numblendnormalmaps > 1)
 				{
@@ -733,7 +732,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 					if (normalcoef > 0.0)
 					{
 						totalnormal += normalcoef;
-						normal += (triplanar_sample (blendNormalmap1, blend_weights, blendscales[normalblendindices[1]]) * normalcoef).rgb;
+						normal += triplanar_sample (blendNormalmap1, blend_weights, blendscales[normalblendindices[1]]) * normalcoef;
 					}
 					if (numblendnormalmaps > 2)
 					{
@@ -741,16 +740,16 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 						if (normalcoef > 0.0)
 						{
 							totalnormal += normalcoef;
-							normal += (triplanar_sample (blendNormalmap2, blend_weights, blendscales[normalblendindices[2]]) * normalcoef).rgb;
+							normal += triplanar_sample (blendNormalmap2, blend_weights, blendscales[normalblendindices[2]]) * normalcoef;
 						}
 					}
 				}
 				
 				// We substitute "straight up" as the normal for channels that
 				// don't have corresponding normalmaps.
-				normal += vec3 (0.5, 0.5, 1.0) * (1.0 - totalnormal);
+				normal.xyz += vec3 (0.5, 0.5, 1.0) * (1.0 - totalnormal);
 				
-				normal = 2.0 * (normal - vec3 (0.5));
+				normal.xyz = 2.0 * (normal.xyz - vec3 (0.5));
 			}
 		}
 		
@@ -770,14 +769,14 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			vec3 RelativeLightDirection = normalize (StaticLightDir);
 			// note that relativeLightDirection[2] == dot (RelativeLightDirection, up)
 			float face_normal_coef = RelativeLightDirection[2];
-			float normalmap_normal_coef = dot (normal, RelativeLightDirection);
+			float normalmap_normal_coef = dot (normal.xyz, RelativeLightDirection);
 			float normal_coef = normalmap_normal_coef + (1.0 - face_normal_coef);
 			gl_FragColor.rgb *= normal_coef;
 		}
 		
 		if (DYNAMIC > 0)
 		{
-			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, normal, 0.0, 1.0);
+			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, normal.xyz, normal.a, 1.0);
 			gl_FragColor.rgb += dynamicColor;
 		}
 
