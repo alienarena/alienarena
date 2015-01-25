@@ -346,12 +346,11 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		vec4 normal = texture2D (NormalTexture, gl_TexCoord[0].xy);
 		normal.xyz = 2.0 * (normal.xyz - vec3 (0.5));
 		vec3 textureColour = texture2D (surfTexture, gl_TexCoord[0].xy).rgb;
-		float diffuseTerm = dot (normal.xyz, relativeLightDirection);
 
 		lightmap = texture2D( lmTexture, gl_TexCoord[1].st );
 		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
 
-	   	//shadows
+		//shadows
 		if(STATSHADOW > 0)
 			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		else
@@ -423,16 +422,18 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			}
 		}
 
-	   if(PARALLAX > 0) 
-	   {
+		if(PARALLAX > 0) 
+		{
 			//do the parallax mapping
 			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
 			Offset = Offset * 0.04 - 0.02;
 			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
 
-			diffuse = texture2D( surfTexture, TexCoords );		
+			diffuse = texture2D( surfTexture, TexCoords );
+			
+			float diffuseTerm = dot (normal.xyz, relativeLightDirection);
 
-			if( diffuseTerm > 0.0 )
+			if (diffuseTerm > 0.0)
 			{
 				halfAngleVector = normalize (relativeLightDirection + relativeEyeDirection);
 
@@ -449,44 +450,48 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			gl_FragColor = max(litColour, diffuse * 2.0);
 			gl_FragColor = (gl_FragColor * lightmap) + bloodColor;
 			gl_FragColor = (gl_FragColor * statshadowval);
-	   }
-	   else
-	   {
+			
+			// Normalmapping for static lighting. We want any light
+			// attenuation to come from the normalmap, not from the normal of
+			// the polygon (since the lightmap compiler already accounts for
+			// that.) So we calculate how much light we'd lose from the normal
+			// of the polygon and give that much back.
+			float face_normal_coef = relativeLightDirection[2];
+			float normal_coef = diffuseTerm + (1.0 - face_normal_coef);
+			gl_FragColor.rgb *= normal_coef;
+		}
+		else
+		{
 			diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);
 			gl_FragColor = (diffuse * lightmap * 2.0);
 			gl_FragColor = (gl_FragColor * statshadowval);
-	   }
+		}
 
-	   //Normal map self shadowing
-	   float face_normal_coef = relativeLightDirection[2];
-       float normal_coef = diffuseTerm + (1.0 - face_normal_coef);
-       gl_FragColor.rgb *= normal_coef;
-       
-	   if(DYNAMIC > 0) 
-	   {
+		if(DYNAMIC > 0) 
+		{
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
-			
+		
 			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal.xyz, normal.a, dynshadowval);
 			gl_FragColor.rgb += dynamicColor;
-	   }
+		}
 
-	   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
+		gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);
 
-	   if(SHINY > 0)
-	   {
-		   vec3 reflection = reflect(relativeEyeDirection, normal.xyz);
-		   vec3 refraction = refract(relativeEyeDirection, normal.xyz, 0.66);
+		if(SHINY > 0)
+		{
+			vec3 reflection = reflect(relativeEyeDirection, normal.xyz);
+			vec3 refraction = refract(relativeEyeDirection, normal.xyz, 0.66);
 
-		   vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
-		   vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
+			vec4 Tl = texture2DProj(chromeTex, vec4(reflection.xy, 1.0, 1.0) );
+			vec4 Tr = texture2DProj(chromeTex, vec4(refraction.xy, 1.0, 1.0) );
 
-		   vec4 cubemap = mix(Tl,Tr,FresRatio);  
+			vec4 cubemap = mix(Tl,Tr,FresRatio);  
 
-		   gl_FragColor = max(gl_FragColor, (cubemap * 0.05 * alphamask.a));
-	   }
+			gl_FragColor = max(gl_FragColor, (cubemap * 0.05 * alphamask.a));
+		}
 
-	   if(FOG > 0)
+		if(FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
 );
