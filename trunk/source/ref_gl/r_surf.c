@@ -978,14 +978,14 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 {
 	int		 i;
 
-	// reset VBO batching state
-	r_currLMTex = -99999;
-	r_currTexInfo = NULL;
-	
 	if (!r_worldnormalmaps->integer)
 	{
 		return;
 	}
+	
+	// reset VBO batching state
+	r_currLMTex = -99999;
+	r_currTexInfo = NULL;
 	
 	BSP_ClearVBOAccum ();
 	
@@ -1027,7 +1027,7 @@ static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	}
 	
 	// reset VBO batching state
-	r_currLMTex = -99999;		
+	r_currLMTex = -99999;
 	r_currTexInfo = NULL;
 	
 	BSP_ClearVBOAccum ();
