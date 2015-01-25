@@ -1405,7 +1405,7 @@ nobase_dist_textures_DATA = \
 	texturelib/grass_0099.jpg \
 	texturelib/grass_0102.jpg \
 	texturelib/ground_0045.jpg \
-	texturelib/ground_0045_nm.jpg \
+	texturelib/ground_0045_nm.tga \
 	texturelib/grunge_decal.tga \
 	texturelib/grunge_leaking.jpg \
 	texturelib/stones_0027.jpg \
