@@ -86,12 +86,12 @@ STRINGIFY (
 	mat3 tangentSpaceTransform;
 	
 	// arguments given in model space
-	void computeDynamicLightingVert (vec3 normal, vec4 tangent)
+	void computeDynamicLightingVert (vec4 vertex, vec3 normal, vec4 tangent)
 	{
 		vec3 bitangent = tangent.w * cross (normal, tangent.xyz);
 		tangentSpaceTransform = transpose (mat3 (gl_NormalMatrix * tangent.xyz, gl_NormalMatrix * bitangent, gl_NormalMatrix * normal));
 		
-		viewVertex = gl_ModelViewMatrix * gl_Vertex;
+		viewVertex = gl_ModelViewMatrix * vertex;
 		
 		EyeDir = tangentSpaceTransform * (-viewVertex.xyz);
 )
@@ -202,7 +202,7 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 
 		gl_Position = ftransform();
 		
-		computeDynamicLightingVert (gl_Normal, tangent);
+		computeDynamicLightingVert (gl_Vertex, gl_Normal, tangent);
 		
 		if(SHINY > 0)
 		{
@@ -612,7 +612,7 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			fog = clamp(fog, 0.0, 1.0);
 		}
 		
-		computeDynamicLightingVert (gl_Normal, tangent);
+		computeDynamicLightingVert (gl_Vertex, gl_Normal, tangent);
 		
 		StaticLightDir = tangentSpaceTransform * ((gl_ModelViewMatrix * vec4 (staticLightPosition, 1.0)).xyz - viewVertex.xyz);
 	}
@@ -957,7 +957,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 		
 		worldNormal = normalize (gl_NormalMatrix * anim_normal);
 		
-		computeDynamicLightingVert (anim_normal, anim_tangent);
+		computeDynamicLightingVert (anim_vertex, anim_normal, anim_tangent);
 		StaticLightDir = tangentSpaceTransform * staticLightPosition;
 		
 		vec4 neyeDir = gl_ModelViewMatrix * anim_vertex;
