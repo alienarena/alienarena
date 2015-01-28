@@ -986,6 +986,14 @@ void R_Mesh_Draw (void)
 	
 	R_GetLightVals (currententity->origin, false);
 
+	if(currentmodel->type == mod_terrain)
+	{
+		if(r_nosun)
+			VectorCopy(statLightPosition, r_worldLightVec);
+		else
+			VectorCopy( r_sunLight->origin, r_worldLightVec);
+	}
+
 	if ((currentmodel->typeFlags & MESH_CASTSHADOWMAP))
 		R_GenerateEntityShadow();
 	

@@ -764,19 +764,30 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		if (lightmap != 0)
 			gl_FragColor *= 2.0 * texture2D (lightmapTexture, gl_TexCoord[1].st);
 		
-		if (static_normalmaps != 0)
+		if (static_normalmaps != 0 && numblendnormalmaps > 0)
 		{
 			// We want any light attenuation to come from the normalmap, not
 			// from the normal of the polygon (since the lightmap compiler
 			// already accounts for that.) So we calculate how much light we'd
 			// lose from the normal of the polygon and give that much back.
-			
+
 			vec3 RelativeLightDirection = normalize (StaticLightDir);
 			// note that relativeLightDirection[2] == dot (RelativeLightDirection, up)
 			float face_normal_coef = RelativeLightDirection[2];
 			float normalmap_normal_coef = dot (normal.xyz, RelativeLightDirection);
 			float normal_coef = normalmap_normal_coef + (1.0 - face_normal_coef);
 			gl_FragColor.rgb *= normal_coef;
+
+			if (normalmap_normal_coef > 0.0)
+			{
+				vec3 relativeEyeDirection = normalize( EyeDir );
+				vec3 halfAngleVector = normalize (RelativeLightDirection + relativeEyeDirection);
+
+				float specularTerm = clamp (dot (normal.xyz, halfAngleVector), 0.0, 1.0 );
+				specularTerm = pow (specularTerm, 32.0) * normal.a;
+
+				gl_FragColor = max(gl_FragColor, vec4 (specularTerm + normalmap_normal_coef * textureColor, 1.0));
+			}
 		}
 		
 		if (DYNAMIC > 0)
