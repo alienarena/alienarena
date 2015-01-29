@@ -778,6 +778,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			float normal_coef = normalmap_normal_coef + (1.0 - face_normal_coef);
 			gl_FragColor.rgb *= normal_coef;
 
+			//add specularity for appropriate areas
 			if (normalmap_normal_coef > 0.0)
 			{
 				vec3 relativeEyeDirection = normalize( EyeDir );
@@ -786,7 +787,16 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 				float specularTerm = clamp (dot (normal.xyz, halfAngleVector), 0.0, 1.0 );
 				specularTerm = pow (specularTerm, 32.0) * normal.a;
 
-				gl_FragColor = max(gl_FragColor, vec4 (specularTerm + normalmap_normal_coef * textureColor, 1.0));
+				//Take away some of the effect of areas that are in shadow
+				float shadowTerm = clamp(length(texture2D (lightmapTexture, gl_TexCoord[1].st).rgb)/0.3, 0.15, 0.85);
+
+				//if a pretty dark area, let's try and subtly remove some specularity, without making too sharp of a line artifact
+				if(shadowTerm < 0.25)
+				{
+					specularTerm *= shadowTerm*2.0;
+				}
+
+				gl_FragColor.rgb = max(gl_FragColor.rgb, vec3 (specularTerm + normalmap_normal_coef * textureColor * shadowTerm));
 			}
 		}
 		
