@@ -995,7 +995,12 @@ void R_Mesh_Draw (void)
 	}
 
 	if ((currentmodel->typeFlags & MESH_CASTSHADOWMAP))
-		R_GenerateEntityShadow();
+	{
+		if(currentmodel->type == mod_terrain)
+			R_GenerateTerrainShadows();
+		else
+			R_GenerateEntityShadow();
+	}
 	
 	// Don't render your own avatar unless it's for shadows
 	if ((currententity->flags & RF_VIEWERMODEL))
@@ -1088,11 +1093,8 @@ void R_Mesh_Draw (void)
 		qglCullFace (GL_FRONT);
 	}
 
-	if(r_shadowmapcount)
-	{
-		r_shadowmapcount = 0; //reset shadowmap count after backend render
-	}
-
+	r_shadowmapcount = 0; //reset shadowmap count after backend render
+	
 	if ((currententity->flags & RF_DEPTHHACK)) // restore depth range
 		qglDepthRange (gldepthmin, gldepthmax);
 	

@@ -1232,6 +1232,27 @@ static void RS_SetupGLState (int dynamic)
 		R_SetDlightUniforms (&rscript_uniforms[dynamic].dlight_uniforms);
 	
 	glUniform3fARB (rscript_uniforms[dynamic].staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
+	if(r_shadowmapcount)
+	{
+		vec3_t angles;
+		float rotationMatrix[3][3];
+		
+		GL_MBind (6, r_depthtexture2->texnum);
+		glUniform1iARB (rscript_uniforms[dynamic].shadowmapTexture, 6);
+
+		glUniform1fARB (rscript_uniforms[dynamic].xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
+		glUniform1fARB (rscript_uniforms[dynamic].yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+
+		// because we are translating our entities, we need to supply the shader with the actual position of this mesh
+		glUniform3fvARB (rscript_uniforms[dynamic].meshPosition, 1, (const GLfloat *)currententity->origin);
+				
+		VectorCopy (currententity->angles, angles);
+		AnglesToMatrix3x3 (angles, rotationMatrix);
+		glUniformMatrix3fvARB (rscript_uniforms[dynamic].meshRotation, 1, GL_TRUE, (const GLfloat *) rotationMatrix);
+	}
+
+	glUniform1iARB (rscript_uniforms[dynamic].shadowmap, r_shadowmapcount); 
 	
 	qglMatrixMode (GL_TEXTURE);
 	

@@ -565,11 +565,14 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap; 
+	uniform vec3 meshPosition;
+	uniform mat3 meshRotation;
 	
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
 	varying vec3 StaticLightDir;
+	varying vec4 sPos;
 	
 	attribute vec4 tangent;
 	
@@ -577,6 +580,8 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	{
 		gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 		gl_FrontColor = gl_BackColor = gl_Color;
+
+		sPos = vec4 ((meshRotation * gl_Vertex.xyz) + meshPosition, 1.0);
 		
 		// XXX: tri-planar projection requires the vertex normal, so don't use
 		// the blendmap RScript command on BSP surfaces yet!
@@ -618,7 +623,7 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	}
 );
 
-static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
+static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY STRINGIFY (
 	uniform sampler2D mainTexture;
 	uniform sampler2D mainTexture2;
 	uniform sampler2D lightmapTexture;
@@ -639,11 +644,18 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
+	uniform shadowsampler_t StatShadowMap; 
+	uniform int SHADOWMAP;
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
+
+	const float shadow_fudge = 0.2; // Used by shadowmap library
 	
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
 	varying vec3 StaticLightDir;
+	varying vec4 sPos;
 	
 	// This is tri-planar projection, based on code from NVIDIA's GPU Gems
 	// website. Potentially could be replaced with bi-planar projection, for
@@ -664,7 +676,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 		
 		vec4 mainColor = texture2D (mainTexture, gl_TexCoord[0].st);
 		vec4 normal = vec4 (0.0, 0.0, 1.0, 0.0);
-		
+
 		if (numblendtextures == 0)
 		{
 			gl_FragColor = mainColor;
@@ -798,6 +810,11 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 
 				gl_FragColor.rgb = max(gl_FragColor.rgb, vec3 (specularTerm + normalmap_normal_coef * textureColor * shadowTerm));
 			}
+		}
+
+		if(SHADOWMAP > 0)
+		{
+			gl_FragColor.rgb *= lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		}
 		
 		if (DYNAMIC > 0)
@@ -2070,6 +2087,12 @@ void R_LoadGLSLPrograms(void)
 		rscript_uniforms[i].lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmapTexture");
 		rscript_uniforms[i].blendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "blendscales");
 		rscript_uniforms[i].normalblendindices = glGetUniformLocationARB (g_rscriptprogramObj[i], "normalblendindices");
+		rscript_uniforms[i].shadowmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "SHADOWMAP");
+		rscript_uniforms[i].shadowmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "StatShadowMap");
+		rscript_uniforms[i].xOffs = glGetUniformLocationARB (g_rscriptprogramObj[i], "xPixelOffset");
+		rscript_uniforms[i].yOffs = glGetUniformLocationARB (g_rscriptprogramObj[i], "yPixelOffset");
+		rscript_uniforms[i].meshPosition = glGetUniformLocationARB (g_rscriptprogramObj[i], "meshPosition");
+		rscript_uniforms[i].meshRotation = glGetUniformLocationARB (g_rscriptprogramObj[i], "meshRotation");
 
 		for (j = 0; j < 6; j++)
 		{

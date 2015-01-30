@@ -1251,3 +1251,60 @@ void R_GenerateEntityShadow( void )
 	}
 }
 
+void R_GenerateTerrainShadows( void )
+{
+	vec3_t origin, dist;
+	entity_t *prevEntity;
+	int i;
+
+	r_shadowmapcount = 0;
+
+	if(r_nosun)
+		VectorCopy(currententity->origin, origin);
+	else
+		VectorCopy(r_sunLight->target, origin);
+
+	//already set in r_mesh.c to proper loc
+	VectorCopy(r_worldLightVec, statLightPosition);	
+
+	//Com_Printf("Sun: %4.2f %4.2f %4.2f target: %4.2f %4.2f %4.2f\n", statLightPosition[0], statLightPosition[1], statLightPosition[2], origin[0], origin[1], origin[2]);
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+
+	qglClear( GL_DEPTH_BUFFER_BIT);
+		
+	qglEnable(GL_DEPTH_TEST);
+	qglClearColor(0,0,0,1.0f);
+
+	qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+	prevEntity = currententity;
+
+	for (i = 0 ; i < r_newrefdef.num_entities; i++)
+	{
+		currententity = &r_newrefdef.entities[i];
+
+		if (!currententity->model)
+			continue;
+
+		if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+			continue;
+
+		if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
+			continue;
+
+		VectorSubtract(r_origin, currententity->origin, dist);
+		if(VectorLength(dist) > r_shadowcutoff->value)
+			continue;
+
+		//if this entity isn't close to the player, don't bother 
+		R_DrawEntityCaster(currententity, origin, 0.0);
+	}
+	currententity = prevEntity;
+			
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+	//Enabling color write (previously disabled for light POV z-buffer rendering)
+	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+

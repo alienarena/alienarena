@@ -529,10 +529,10 @@ extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);
 extern void		R_GenerateEntityShadow( void );
+extern void		R_GenerateTerrainShadows( void );
 extern void		R_GenerateRagdollShadow( int RagDollID );
 extern void		R_GenerateShadowsToReceive( void );
 extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
-extern void		R_DrawShadowMapTerrain (vec3_t origin);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
 cvar_t			*r_shadowcutoff;
@@ -644,6 +644,12 @@ struct
 	GLuint						blendTexture[6];
 	GLuint						normalblendindices;
 	GLuint						blendNormalmap[3];
+	GLuint						shadowmapTexture;
+	GLuint						xOffs;
+	GLuint						yOffs;
+	GLuint						meshPosition;
+	GLuint						meshRotation;
+	GLuint						shadowmap;
 } rscript_uniforms[GLSL_MAX_DLIGHTS+1];
 
 //water
