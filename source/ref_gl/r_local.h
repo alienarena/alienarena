@@ -600,14 +600,22 @@ typedef struct
 
 void R_SetDlightUniforms (dlight_uniform_location_t *uniforms); // See r_light.c
 
+// Uniform locations for GLSL shaders that support shadows being cast on them
+typedef struct
+{
+	GLuint	xPixelOffset, yPixelOffset;
+} shadowmap_uniform_location_t;
+
+void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms); // see r_shadowmaps.c
+
 //standard bsp surfaces
 struct
 {
 	dlight_uniform_location_t dlight_uniforms;
+	shadowmap_uniform_location_t shadowmap_uniforms;
 	GLuint	surfTexture, heightTexture, lmTexture, normalTexture;
 	GLuint	shadowmapTexture, shadowmapTexture2;
 	GLuint	fog, parallax, shadowmap, statshadow;
-	GLuint	xOffs, yOffs;
 	GLuint	staticLightPosition; 
 	GLuint	liquid, shiny;
 	GLuint	liquidTexture, liquidNormTex, chromeTex;
@@ -632,6 +640,7 @@ struct
 struct
 {
 	dlight_uniform_location_t	dlight_uniforms;
+	shadowmap_uniform_location_t shadowmap_uniforms;
 	GLuint						static_normalmaps;
 	GLuint						staticLightPosition;
 	GLuint						envmap;
@@ -645,8 +654,6 @@ struct
 	GLuint						normalblendindices;
 	GLuint						blendNormalmap[3];
 	GLuint						shadowmapTexture;
-	GLuint						xOffs;
-	GLuint						yOffs;
 	GLuint						meshPosition;
 	GLuint						meshRotation;
 	GLuint						shadowmap;
@@ -678,13 +685,13 @@ typedef struct
 {
 	mesh_anim_uniform_location_t	anim_uniforms;
 	dlight_uniform_location_t		dlight_uniforms;
+	shadowmap_uniform_location_t	shadowmap_uniforms;
 	GLuint							staticLightPosition, staticLightColor;
 	GLuint							totalLightPosition, totalLightColor;
 	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
 	GLuint							shadowmapTexture;
 	GLuint							shadowmap;
-	GLuint							xOffs, yOffs;
 	GLuint							time;
 	GLuint							fog;
 	GLuint							useFX;
@@ -727,7 +734,7 @@ GLuint		g_location_source;
 //color scale shader
 struct 
 {
-    GLuint  scale, source;
+	GLuint  scale, source;
 } colorscale_uniforms;
 
 //radial blur	

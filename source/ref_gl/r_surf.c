@@ -944,8 +944,7 @@ static void BSP_SetupGLSL (int dynamic)
 		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
 		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 1 );
 
-		glUniform1fARB (worldsurf_uniforms[dynamic].xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-		glUniform1fARB (worldsurf_uniforms[dynamic].yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+		R_SetShadowmapUniforms (&worldsurf_uniforms[dynamic].shadowmap_uniforms);
 	}
 	else
 	{
@@ -964,8 +963,7 @@ static void BSP_SetupGLSL (int dynamic)
 
 			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
 
-			glUniform1fARB (worldsurf_uniforms[dynamic].xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-			glUniform1fARB (worldsurf_uniforms[dynamic].yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+			R_SetShadowmapUniforms (&worldsurf_uniforms[dynamic].shadowmap_uniforms);
 		}
 		else
 			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 0);		
