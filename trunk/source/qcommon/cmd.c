@@ -1090,12 +1090,29 @@ Cmd_List_f
 void Cmd_List_f (void)
 {
 	cmd_function_t	*cmd;
-	int				i;
+	int				matching, pattern;
 
-	i = 0;
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next, i++)
+	matching = 0;
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+	{
+		qboolean failedmatch = false;
+		for (pattern = 1; pattern < Cmd_Argc () && !failedmatch; pattern++)
+			failedmatch = !Com_PatternMatch (cmd->name, Cmd_Argv (pattern));
+		if (failedmatch)
+			continue;
+		matching++;
+		
 		Com_Printf ("%s\n", cmd->name);
-	Com_Printf ("%i commands\n", i);
+	}
+	
+	Com_Printf ("%i matching commands\n", matching);
+	if (Cmd_Argc () == 1)
+		Com_Printf ("Try cmdlist <pattern1> <pattern2>, <pattern3>... to narrow it down.\n");
+	if (Cmd_Argc () == 1 || matching == 0)
+	{
+		Com_Printf ("You may use \"*\" as a wildcard in your search patterns.\n");
+		Com_Printf ("All patterns must match in the command name in order for a cmd to be listed.\n");
+	}
 }
 
 /*
