@@ -238,6 +238,8 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 #define USE_SHADOWMAP_LIBRARY "/*USE_SHADOWMAP_LIBRARY*/"
 
 static char shadowmap_header[] = STRINGIFY (
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
 	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord);
 );
 
@@ -312,8 +314,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	uniform int LIQUID;
 	uniform int SHINY;
 	uniform float rsTime;
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
 
 	varying float FresRatio;
 	varying vec4 sPos;
@@ -514,8 +514,6 @@ static char shadow_vertex_program[] = STRINGIFY (
 static char shadow_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
 	uniform shadowsampler_t StatShadowMap;
 	uniform float fadeShadow;
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
 	
 	varying vec4 ShadowCoord;
 	
@@ -646,8 +644,6 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRAR
 	uniform int lightmap;
 	uniform shadowsampler_t StatShadowMap; 
 	uniform int SHADOWMAP;
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
 
 	const float shadow_fudge = 0.2; // Used by shadowmap library
 	
@@ -1078,8 +1074,6 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 	uniform int useGlow;
 	uniform float useShell;
 	uniform int fromView;
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
 
 	const float SpecularFactor = 0.50;
 	//next group could be made uniforms if we want to control this 
@@ -1934,10 +1928,17 @@ static void get_mesh_anim_uniform_locations (GLhandleARB programObj, mesh_anim_u
 	out->lerp = glGetUniformLocationARB (programObj, "lerp");
 }
 
+static void get_shadowmap_uniform_locations (GLhandleARB programObj, shadowmap_uniform_location_t *out)
+{
+	out->xPixelOffset = glGetUniformLocationARB (programObj, "xPixelOffset");
+	out->yPixelOffset = glGetUniformLocationARB (programObj, "yPixelOffset");
+}
+
 static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_location_t *out)
 {
 	get_mesh_anim_uniform_locations (programObj, &out->anim_uniforms);
 	get_dlight_uniform_locations (programObj, &out->dlight_uniforms);
+	get_shadowmap_uniform_locations (programObj, &out->shadowmap_uniforms);
 	out->staticLightPosition = glGetUniformLocationARB (programObj, "staticLightPosition");
 	out->staticLightColor = glGetUniformLocationARB (programObj, "staticLightColor");
 	out->totalLightPosition = glGetUniformLocationARB (programObj, "totalLightPosition");
@@ -1950,8 +1951,6 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
 	out->shadowmap = glGetUniformLocationARB (programObj, "SHADOWMAP");
 	out->shadowmapTexture = glGetUniformLocationARB (programObj, "StatShadowMap");
-	out->xOffs = glGetUniformLocationARB (programObj, "xPixelOffset");
-	out->yOffs = glGetUniformLocationARB (programObj, "yPixelOffset");
 	out->time = glGetUniformLocationARB (programObj, "time");
 	out->fog = glGetUniformLocationARB (programObj, "FOG");
 	out->useFX = glGetUniformLocationARB (programObj, "useFX");
@@ -2029,6 +2028,7 @@ void R_LoadGLSLPrograms(void)
 		R_LoadGLSLProgram ("World", (char*)world_vertex_program, (char*)world_fragment_program, ATTRIBUTE_TANGENT, i, &g_worldprogramObj[i]);
 
 		get_dlight_uniform_locations (g_worldprogramObj[i], &worldsurf_uniforms[i].dlight_uniforms);
+		get_shadowmap_uniform_locations (g_worldprogramObj[i], &worldsurf_uniforms[i].shadowmap_uniforms);
 		worldsurf_uniforms[i].surfTexture = glGetUniformLocationARB (g_worldprogramObj[i], "surfTexture");
 		worldsurf_uniforms[i].heightTexture = glGetUniformLocationARB (g_worldprogramObj[i], "HeightTexture");
 		worldsurf_uniforms[i].lmTexture = glGetUniformLocationARB (g_worldprogramObj[i], "lmTexture");
@@ -2039,8 +2039,6 @@ void R_LoadGLSLPrograms(void)
 		worldsurf_uniforms[i].parallax = glGetUniformLocationARB (g_worldprogramObj[i], "PARALLAX");
 		worldsurf_uniforms[i].shadowmap = glGetUniformLocationARB (g_worldprogramObj[i], "SHADOWMAP");
 		worldsurf_uniforms[i].statshadow = glGetUniformLocationARB (g_worldprogramObj[i], "STATSHADOW");
-		worldsurf_uniforms[i].xOffs = glGetUniformLocationARB (g_worldprogramObj[i], "xPixelOffset");
-		worldsurf_uniforms[i].yOffs = glGetUniformLocationARB (g_worldprogramObj[i], "yPixelOffset");
 		worldsurf_uniforms[i].staticLightPosition = glGetUniformLocationARB (g_worldprogramObj[i], "staticLightPosition");
 		worldsurf_uniforms[i].liquid = glGetUniformLocationARB (g_worldprogramObj[i], "LIQUID");
 		worldsurf_uniforms[i].shiny = glGetUniformLocationARB (g_worldprogramObj[i], "SHINY");
@@ -2075,6 +2073,7 @@ void R_LoadGLSLPrograms(void)
 		R_LoadGLSLProgram ("RScript", (char*)rscript_vertex_program, (char*)rscript_fragment_program, ATTRIBUTE_TANGENT, i, &g_rscriptprogramObj[i]);
 	
 		get_dlight_uniform_locations (g_rscriptprogramObj[i], &rscript_uniforms[i].dlight_uniforms);
+		get_shadowmap_uniform_locations (g_rscriptprogramObj[i], &rscript_uniforms[i].shadowmap_uniforms);
 		rscript_uniforms[i].staticLightPosition = glGetUniformLocationARB (g_rscriptprogramObj[i], "staticLightPosition");
 		rscript_uniforms[i].envmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "envmap");
 		rscript_uniforms[i].numblendtextures = glGetUniformLocationARB (g_rscriptprogramObj[i], "numblendtextures");
@@ -2089,8 +2088,6 @@ void R_LoadGLSLPrograms(void)
 		rscript_uniforms[i].normalblendindices = glGetUniformLocationARB (g_rscriptprogramObj[i], "normalblendindices");
 		rscript_uniforms[i].shadowmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "SHADOWMAP");
 		rscript_uniforms[i].shadowmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "StatShadowMap");
-		rscript_uniforms[i].xOffs = glGetUniformLocationARB (g_rscriptprogramObj[i], "xPixelOffset");
-		rscript_uniforms[i].yOffs = glGetUniformLocationARB (g_rscriptprogramObj[i], "yPixelOffset");
 		rscript_uniforms[i].meshPosition = glGetUniformLocationARB (g_rscriptprogramObj[i], "meshPosition");
 		rscript_uniforms[i].meshRotation = glGetUniformLocationARB (g_rscriptprogramObj[i], "meshRotation");
 

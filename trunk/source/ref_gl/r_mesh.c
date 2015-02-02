@@ -632,9 +632,8 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 
 				GL_MBind (6, r_depthtexture2->texnum);
 				glUniform1iARB (uniforms->shadowmapTexture, 6);
-
-				glUniform1fARB (uniforms->xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-				glUniform1fARB (uniforms->yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+				
+				R_SetShadowmapUniforms (&uniforms->shadowmap_uniforms);
 
 				// TODO: 4x4 matrix with translation, instead of separate 
 				// translation and rotation matrices.

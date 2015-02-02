@@ -688,8 +688,7 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		glUseProgramObjectARB( g_shadowprogramObj );
 
 		glUniform1iARB( g_location_entShadow, 6);
-		qglActiveTextureARB(GL_TEXTURE6);
-		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
+		GL_MBind (6, r_depthtexture2->texnum);
 
 		glUniform1fARB( g_location_xOffset, 1.0/(r_newrefdef.width*r_shadowmapscale->value));
 		glUniform1fARB( g_location_yOffset, 1.0/(r_newrefdef.height*r_shadowmapscale->value));
@@ -708,8 +707,6 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 		R_KillVArrays();
 
 		glUseProgramObjectARB( 0 );
-
-		qglActiveTextureARB(GL_TEXTURE0);
 
 		return;
 	}
@@ -821,7 +818,8 @@ void R_DrawDynamicCaster(void)
 	
 	VectorCopy (r_newrefdef.dlights[0].origin, lightOrigin);
 
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+	GL_SelectTexture (0);
+	GL_Bind (r_depthtexture->texnum);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);
 
@@ -970,7 +968,8 @@ void R_DrawVegetationCaster(void)
 	if(!r_sunLight->has_Sun || !r_hasleaves)
 		return; //no point if there is no sun or leaves!
 
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum); 
+	GL_SelectTexture (0);
+	GL_Bind (r_depthtexture2->texnum);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
@@ -1308,3 +1307,8 @@ void R_GenerateTerrainShadows( void )
 	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
+void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms)
+{
+	glUniform1fARB (uniforms->xPixelOffset, 1.0/(viddef.width*r_shadowmapscale->value));
+	glUniform1fARB (uniforms->yPixelOffset, 1.0/(viddef.height*r_shadowmapscale->value));
+}

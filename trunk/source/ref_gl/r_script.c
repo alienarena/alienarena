@@ -1238,11 +1238,10 @@ static void RS_SetupGLState (int dynamic)
 		vec3_t angles;
 		float rotationMatrix[3][3];
 		
-		GL_MBind (6, r_depthtexture2->texnum);
-		glUniform1iARB (rscript_uniforms[dynamic].shadowmapTexture, 6);
-
-		glUniform1fARB (rscript_uniforms[dynamic].xOffs, 1.0/(viddef.width*r_shadowmapscale->value));
-		glUniform1fARB (rscript_uniforms[dynamic].yOffs, 1.0/(viddef.height*r_shadowmapscale->value));
+		GL_MBind (12, r_depthtexture2->texnum);
+		glUniform1iARB (rscript_uniforms[dynamic].shadowmapTexture, 12);
+		
+		R_SetShadowmapUniforms (&rscript_uniforms[dynamic].shadowmap_uniforms);
 
 		// because we are translating our entities, we need to supply the shader with the actual position of this mesh
 		glUniform3fvARB (rscript_uniforms[dynamic].meshPosition, 1, (const GLfloat *)currententity->origin);
