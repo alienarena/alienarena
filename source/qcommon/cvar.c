@@ -567,6 +567,12 @@ void Cvar_Set_f (void)
 		Com_Printf ("usage: set <variable> <value> [u / s / g]\n");
 		return;
 	}
+	
+	if (strchr (Cmd_Argv(1), '*'))
+	{
+		Com_Printf ("set: variable names may not contain the \"*\" character!\n");
+		return;
+	}
 
 	if (c == 4)
 	{
@@ -624,12 +630,22 @@ List all cvars, also displaying their documentation if appropriate
 void Cvar_List_f (void)
 {
 	cvar_t	*var;
-	int		i;
+	int		matching, pattern;
 
-	i = 0;
-	for (var = cvar_vars ; var ; var = var->next, i++)
+	matching = 0;
+	for (var = cvar_vars; var; var = var->next)
 	{
-
+		qboolean failedmatch = false;
+		for (pattern = 1; pattern < Cmd_Argc () && !failedmatch; pattern++)
+		{
+			failedmatch = 
+				!Com_PatternMatch (var->name, Cmd_Argv (pattern)) &&
+				(var->description == NULL || !Com_PatternMatch (var->description, Cmd_Argv (pattern)));
+		}
+		if (failedmatch)
+			continue;
+		matching++;
+		
 		if (var->flags & CVAR_ARCHIVE)
 			Com_Printf ("*");
 		else
@@ -653,7 +669,14 @@ void Cvar_List_f (void)
 			Com_Printf (" - %s", var->description);
 		Com_Printf ("\n");
 	}
-	Com_Printf ("%i cvars\n", i);
+	Com_Printf ("%i matching cvars\n", matching);
+	if (Cmd_Argc () == 1)
+		Com_Printf ("Try cvarlist <pattern1> <pattern2>, <pattern3>... to narrow it down.\n");
+	if (Cmd_Argc () == 1 || matching == 0)
+	{
+		Com_Printf ("You may use \"*\" as a wildcard in your search patterns.\n");
+		Com_Printf ("All patterns must match in the cvar name or description in order for a cvar to be listed.\n");
+	}
 }
 
 /*

@@ -1245,6 +1245,36 @@ void Info_Print (char *s)
 	}
 }
 
+qboolean Com_PatternMatch (const char *string, const char *pattern)
+{
+	char *pattern_segmented, *pattern_segment;
+	const char *match_cursor;
+	qboolean matched = true;
+	
+	pattern_segmented = CopyString (pattern);
+	match_cursor = string;
+	
+	pattern_segment = strtok (pattern_segmented, "*");
+	
+	while (pattern_segment != NULL)
+	{
+		match_cursor = strstr (match_cursor, pattern_segment);
+		if (match_cursor == NULL || (pattern_segment == pattern_segmented && match_cursor != string))
+		{
+			matched = false;
+			break;
+		}
+		match_cursor += strlen (pattern_segment);
+		pattern_segment = strtok (NULL, "*");
+	}
+	
+	if (matched && pattern[strlen (pattern) - 1] != '*' && *match_cursor)
+		matched = false;
+	
+	Z_Free (pattern_segmented);
+	return matched;
+}
+
 
 /*
 ==============================================================================

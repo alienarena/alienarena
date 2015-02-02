@@ -193,6 +193,7 @@ void COM_Init (void);
 void COM_InitArgv (int argc, char **argv);
 
 char *CopyString (const char *in);
+qboolean Com_PatternMatch (const char *string, const char *pattern);
 
 //============================================================================
 
