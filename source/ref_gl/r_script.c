@@ -1235,7 +1235,6 @@ static void RS_SetupGLState (int dynamic)
 
 	if(r_shadowmapcount)
 	{
-		vec3_t angles;
 		float rotationMatrix[3][3];
 		
 		GL_MBind (12, r_depthtexture2->texnum);
@@ -1245,9 +1244,8 @@ static void RS_SetupGLState (int dynamic)
 
 		// because we are translating our entities, we need to supply the shader with the actual position of this mesh
 		glUniform3fvARB (rscript_uniforms[dynamic].meshPosition, 1, (const GLfloat *)currententity->origin);
-				
-		VectorCopy (currententity->angles, angles);
-		AnglesToMatrix3x3 (angles, rotationMatrix);
+
+		AnglesToMatrix3x3 (currententity->angles, rotationMatrix);
 		glUniformMatrix3fvARB (rscript_uniforms[dynamic].meshRotation, 1, GL_TRUE, (const GLfloat *) rotationMatrix);
 	}
 
