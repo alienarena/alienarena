@@ -161,6 +161,10 @@ void R_GenerateShadowFBO()
 	// GL_LINEAR removes pixelation - GL_NEAREST removes artifacts on outer edges in some cases
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	// Remove artefact on the edges of the shadowmap
+/*	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );*/
+/*	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );*/
 
 	// This is to allow usage of shadow2DProj function in the shader
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
@@ -296,15 +300,54 @@ static void lookAt( float position_x , float position_y , float position_z , flo
 	qglTranslated( -position_x , -position_y , -position_z );
 }
 
-static void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
+void transform_point(float out[4], const float m[16], const float in[4]);
+static void SM_ZoomCenter (const float *world_matrix, const float *project_matrix, vec3_t out)
 {
+	float origin[4], model[4], proj[4];
+	
+	VectorCopy (r_origin, origin);
+	origin[3] = 1.0;
+	
+	transform_point (model, world_matrix, origin);
+	transform_point (proj, project_matrix, model);
+	
+	VectorScale (proj, 1.0f/proj[3], out);
+}
 
+static void SM_SetupMatrices (float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z, qboolean followCamera, qboolean zoom)
+{
+	float	sm_world_matrix[16], sm_project_matrix[16];
+	vec3_t	camera_sm_pos;
+	
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity();
 	MYgluPerspective(120.0f, r_newrefdef.width/r_newrefdef.height, 10.0f, 4096.0f);
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
+	
+	if (!followCamera && !zoom)
+		return;
+	
+	qglGetFloatv (GL_PROJECTION_MATRIX, sm_project_matrix);
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	
+	if (zoom)
+	{
+		float zoomFactor = 8.0f; // TODO: calculate this somehow!
+		qglScalef (zoomFactor, zoomFactor, 1.0);
+	}
+	
+	if (followCamera)
+	{
+		qglGetFloatv (GL_MODELVIEW_MATRIX, sm_world_matrix);
+		SM_ZoomCenter (sm_world_matrix, sm_project_matrix, camera_sm_pos);
+		qglTranslatef (-camera_sm_pos[0], -camera_sm_pos[1], 0.0);
+	}
+	
+	qglMultMatrixf (sm_project_matrix);
+	qglMatrixMode(GL_MODELVIEW);
 }
 
 static void SM_SetTextureMatrix( qboolean mapnum )
@@ -839,7 +882,7 @@ void R_DrawDynamicCaster(void)
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
 	//set camera
-	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128);
+	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128, false, false);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
@@ -990,7 +1033,7 @@ void R_DrawVegetationCaster(void)
 
 	//get sun light origin and target from map info, at map load
 	//set camera
-	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2]);
+	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2], false, false);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );
@@ -1007,7 +1050,7 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
+static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean onTerrain)
 {		
 	vec3_t	dist, adjLightPos, mins, maxs;
 	vec3_t lightVec;
@@ -1063,7 +1106,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset)
 	}
 	
 	//set camera
-	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2]);
+	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], onTerrain, onTerrain);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
 	qglPolygonOffset( 0.5f, 0.5f );	
@@ -1174,7 +1217,7 @@ void R_GenerateEntityShadow( void )
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		R_DrawEntityCaster(currententity, origin, zOffset);
+		R_DrawEntityCaster(currententity, origin, zOffset, false);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1238,7 +1281,7 @@ void R_GenerateEntityShadow( void )
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset);
+				R_DrawEntityCaster(currententity, origin, zOffset, false);
 			}
 			currententity = prevEntity;
 		}
@@ -1297,7 +1340,7 @@ void R_GenerateTerrainShadows( void )
 			continue;
 
 		//if this entity isn't close to the player, don't bother 
-		R_DrawEntityCaster(currententity, origin, 0.0);
+		R_DrawEntityCaster(currententity, origin, 0.0, true);
 	}
 	currententity = prevEntity;
 			
