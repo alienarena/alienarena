@@ -1588,7 +1588,7 @@ static void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 		if (clipflags != 0 && !( surf->iflags & ISURF_DRAWTURB ))
 		{
-			if (R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
+			if (!r_nocull->integer && R_CullBox_ClipFlags (surf->mins, surf->maxs, clipflags)) 
 				continue;
 		}
 
