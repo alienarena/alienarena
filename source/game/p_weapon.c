@@ -1039,6 +1039,9 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 		fire_fireball (ent, start, forward, damage, 1500, damage_radius, 75);
 
+		//play sound
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -1046,8 +1049,6 @@ void weapon_flamethrower_fire (edict_t *ent)
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		ent->client->ps.gunframe++;
-
-		PlayerNoise(ent, start, PNOISE_WEAPON);
 
 		if (! ( dmflags->integer & DF_INFINITE_AMMO ) ) {
 			ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity*10;
@@ -1060,16 +1061,23 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 	if (!(ent->client->buttons & BUTTON_ATTACK) || (!ent->is_bot && ent->client->newweapon))
 	{
+		//play shutoff sound
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/grenlx1a.wav"), 1, ATTN_NORM, 0);
+
 		ent->client->ps.gunframe = 17;
 		return;
 	}
+	//play sound
+	if((ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe == 6)
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);	
+	else if((ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe == 14)
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/grenlr1b.wav"), 1, ATTN_NORM, 0);	
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_GRENADE | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (is_quad)
 		damage *= 2;
@@ -1096,8 +1104,6 @@ void weapon_flamethrower_fire (edict_t *ent)
 	fire_flamethrower (ent, start, forward, damage, 500, damage_radius);
 
 	ent->client->ps.gunframe++;
-
-	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( dmflags->integer & DF_INFINITE_AMMO ) ) {
 		ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity;
@@ -2128,19 +2134,14 @@ void Violator_Fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	if(ent->client->lean == 0.0)
-	{
-		VectorScale (forward, -6 * random(), ent->client->kick_origin);
-		ent->client->kick_angles[0] = -6 * random();
-	}
-	else if(g_tactical->integer)
+	if(g_tactical->integer)
 	{
 		if(ent->client->lean > 0.0)
 		{
 			right[0] = right[0] * ent->client->lean/15.0;
 			right[1] = right[1] * ent->client->lean/15.0;
 		}
-		else
+		else if(ent->client->lean < 0.0)
 		{
 			right[0] = right[0] * ent->client->lean/25.0;
 			right[1] = right[1] * ent->client->lean/25.0;

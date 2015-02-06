@@ -1916,7 +1916,7 @@ void burn_person(edict_t *target, edict_t *owner, int damage)
 	flame->think = Fire_Think;
 	flame->FlameDamage = damage+2;
 	flame->classname = "fire";
-	flame->s.sound = gi.soundindex ("weapons/grenlf1a.wav");
+	flame->s.sound = gi.soundindex ("weapons/grenlb1b.wav"); 
 	gi.linkentity (flame);
 
 	VectorCopy(target->s.origin,flame->s.origin);
@@ -1981,7 +1981,6 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->FlameDamage = damage;
 	flame->dmg_radius = damage_radius;
 	flame->classname = "flame";
-	flame->s.sound = gi.soundindex ("weapons/grenlf1a.wav");
 
 	gi.linkentity (flame);
 }
@@ -2061,7 +2060,7 @@ void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	fireball->radius_dmg = radius_damage;
 	fireball->dmg_radius = damage_radius;
 	fireball->FlameDamage = damage;
-	fireball->s.sound = gi.soundindex ("weapons/grenlf1a.wav");
+	//fireball->s.sound = gi.soundindex ("weapons/grenlf1a.wav");
 	fireball->classname = "flame";
 
 	gi.linkentity (fireball);

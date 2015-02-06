@@ -24736,13 +24736,13 @@
 // entity 120
 {
 "classname" "light"
-"light" "20"
+"light" "50"
 "origin" "-320.000000 592.000000 216.000000"
 }
 // entity 121
 {
 "classname" "light"
-"light" "20"
+"light" "50"
 "origin" "120.000000 592.000000 216.000000"
 }
 // entity 122
@@ -25871,4 +25871,120 @@
 "origin" "-706.000000 -844.000000 -0.000027"
 "model" "maps/meshes/urban/barrier1.md2"
 "angle" "6.940390"
+}
+// entity 275
+{
+"classname" "misc_mapmodel"
+"origin" "-127.999985 696.000000 8.000000"
+"model" "maps/meshes/urban/riored.md2"
+"angle" "-25.457644"
+}
+// entity 276
+{
+"classname" "misc_mapmodel"
+"origin" "-280.000031 696.000000 8.000000"
+"model" "maps/meshes/urban/rioblue.md2"
+"angle" "-139.714386"
+}
+// entity 277
+{
+"classname" "misc_mapmodel"
+"origin" "-144.000000 487.999969 8.000000"
+"model" "maps/meshes/urban/riored.md2"
+"angle" "169.836395"
+}
+// entity 278
+{
+"classname" "misc_mapmodel"
+"origin" "-192.000076 656.000000 23.999994"
+"model" "maps/meshes/urban/riosilver.md2"
+"angles" "-21.789660 50.179718 1.978496"
+}
+// entity 279
+{
+"classname" "misc_mapmodel"
+"origin" "80.000008 688.000000 8.000000"
+"model" "maps/meshes/urban/riosilver.md2"
+"angle" "10.453631"
+}
+// entity 280
+{
+"classname" "misc_mapmodel"
+"origin" "128.000046 496.000000 8.000000"
+"model" "maps/meshes/urban/rioblue.md2"
+"angle" "-22.921942"
+}
+// entity 281
+{
+"classname" "misc_mapmodel"
+"origin" "-56.000000 600.000000 216.000000"
+"model" "maps/meshes/gothic/meat1.md2"
+}
+// entity 282
+{
+"classname" "misc_mapmodel"
+"origin" "-192.000000 552.000000 224.000000"
+"model" "maps/meshes/gothic/meat2.md2"
+}
+// entity 283
+{
+"classname" "misc_mapmodel"
+"origin" "-328.000000 656.000000 248.000000"
+"model" "maps/meshes/gothic/meat3.md2"
+}
+// entity 284
+{
+"classname" "misc_mapmodel"
+"origin" "-40.000000 496.000000 0.000000"
+"model" "maps/meshes/urban/barrier1.md2"
+"angle" "35.718948"
+}
+// entity 285
+{
+"classname" "misc_mapmodel"
+"origin" "-431.999939 680.000000 0.000000"
+"model" "maps/meshes/urban/barrier1.md2"
+"angle" "-23.539030"
+}
+// entity 286
+{
+"classname" "misc_mapmodel"
+"origin" "-431.999969 496.000000 0.000000"
+"model" "maps/meshes/urban/barrier1.md2"
+"angle" "27.202595"
+}
+// entity 287
+{
+"classname" "misc_mapmodel"
+"origin" "16.000061 528.000000 0.000000"
+"model" "maps/meshes/urban/barrier2.md2"
+"angle" "-23.539034"
+}
+// entity 288
+{
+"classname" "misc_mapmodel"
+"origin" "168.000061 672.000000 0.000000"
+"model" "maps/meshes/urban/barrier2.md2"
+"angle" "-23.539034"
+}
+// entity 289
+{
+"classname" "misc_mapmodel"
+"origin" "-15.999963 712.000000 0.000002"
+"model" "maps/meshes/urban/shelf.md2"
+"angles" "-20.326824 -81.270966 -1.215491"
+}
+// entity 290
+{
+"classname" "misc_mapmodel"
+"origin" "248.000031 704.000000 0.000000"
+"model" "maps/meshes/urban/dumpster.md2"
+"angle" "-70.538139"
+}
+// entity 291
+{
+"classname" "misc_mapmodel"
+"origin" "104.000038 639.999939 8.000046"
+"model" "maps/meshes/urban/filecab.md2"
+"angles" "-17.477543 -71.210342 -5.834229"
 }

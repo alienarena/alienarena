@@ -1292,8 +1292,16 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}	
 	else if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
 	{
-		if(gun.frame > 5 && gun.frame < 7) {
+		if(gun.frame > 5 && gun.frame < 7) 
+		{
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
+			useFX = true;
+		}
+	}
+	else if(!(strcmp("models/weapons/v_blast/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame == 6) 
+		{
 			useFX = true;
 		}
 	}

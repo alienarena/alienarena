@@ -391,20 +391,20 @@ void CL_ParseMuzzleFlash (void)
 	case MZ_LOGIN:
 		dl->color[0] = 0;dl->color[1] = 1; dl->color[2] = 0;
 		dl->die = cl.time + 1.0;
-		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
 		//CL_LogoutEffect (pl->current.origin, weapon);
 		CL_TeleportParticles (pl->current.origin);
 		break;
 	case MZ_LOGOUT:
 		dl->color[0] = 1;dl->color[1] = 0; dl->color[2] = 0;
 		dl->die = cl.time + 1.0;
-		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
 		CL_LogoutEffect (pl->current.origin, weapon);
 		break;
 	case MZ_RESPAWN:
 		dl->color[0] = 1;dl->color[1] = 1; dl->color[2] = 0;
 		dl->die = cl.time + 1.0;
-		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
 		CL_LogoutEffect (pl->current.origin, weapon);
 		break;
 	}
