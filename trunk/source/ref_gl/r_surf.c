@@ -2300,7 +2300,7 @@ void R_DrawRadar(void)
 
 	qglColorMask(1,1,1,1);
 	GLSTATE_DISABLE_ALPHATEST;
-	qglAlphaFunc(GL_GREATER, 0.5);
+	qglAlphaFunc(GL_GREATER, 0.666);
 	qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
 	qglStencilFunc(GL_NOTEQUAL,4,4);
 	
