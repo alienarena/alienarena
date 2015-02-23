@@ -1298,6 +1298,9 @@ void R_GenerateTerrainShadows( void )
 	vec3_t origin, dist;
 	entity_t *prevEntity;
 	int i;
+	
+	if (!gl_shadowmaps->integer)
+		return;
 
 	r_shadowmapcount = 0;
 
