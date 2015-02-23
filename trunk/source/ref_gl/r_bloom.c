@@ -53,8 +53,6 @@ static GLuint bloom_fullsize_downsampling_RBO;
 static int		r_midsizetexture_size;
 static int		screen_texture_width, screen_texture_height;
 
-GLint MultiSampleEnabled = 0; //1 if MSAA is enabled
-
 //current refdef size:
 static int	curView_x;
 static int	curView_y;
@@ -154,8 +152,6 @@ static void R_Bloom_InitTextures (void)
 	GL_SelectTexture (0);
 	
 	qglGetError ();
-	
-	qglGetIntegerv(GL_SAMPLE_BUFFERS, &MultiSampleEnabled);
 	
 	//find closer power of 2 to screen size
 	for (screen_texture_width = 1;screen_texture_width < viddef.width;screen_texture_width *= 2);
@@ -368,7 +364,7 @@ static void R_Bloom_DownsampleView (void)
 	
 	GL_SelectTexture (0);
 	
-	if (MultiSampleEnabled != 0)
+	if (gl_state.msaaEnabled)
 	{
 		// If MSAA is enabled, the FBO blitting needs an extra step.
 		// Copy onto full-screen sized RBO first, to go from the multisample

@@ -463,6 +463,8 @@ typedef struct
     qboolean    hasFBOblit;
 
 	qboolean	ati;
+	
+	qboolean	msaaEnabled;
 
 } glstate_t;
 
