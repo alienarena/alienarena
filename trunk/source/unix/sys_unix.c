@@ -56,6 +56,7 @@ static void *game_library = NULL;
 
 cvar_t	*nostdout;
 cvar_t	*sys_ansicolor;
+cvar_t	*con_ignorecolorcodes;
 unsigned sys_frame_time;
 
 /* forward reference */
@@ -311,7 +312,8 @@ void Sys_ConsoleOutput( char *ostring )
 	if ( stdout_disabled() )
 		return;
 
-	if (sys_ansicolor != NULL && sys_ansicolor->integer)
+	if ((sys_ansicolor != NULL && sys_ansicolor->integer) && 
+		(con_ignorecolorcodes == NULL || !con_ignorecolorcodes->integer))
 	{
 		static int q3ToAnsi[ 8 ] =
 		{
@@ -568,6 +570,7 @@ int main( int argc, char** argv )
 	/* TODO: add help string */
 	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
 	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
+	con_ignorecolorcodes = Cvar_Get( "con_ignorecolorcodes", "0", CVARDOC_BOOL|CVAR_ARCHIVE );
 
     oldtime = Sys_Milliseconds();
 	for (;;)
@@ -625,6 +628,7 @@ main( int argc, char** argv )
 
  	nostdout = Cvar_Get( "nostdout", "0", CVARDOC_BOOL );
  	sys_ansicolor = Cvar_Get( "sys_ansicolor", "1", CVARDOC_BOOL|CVAR_ARCHIVE );
+	con_ignorecolorcodes = Cvar_Get( "con_ignorecolorcodes", "0", CVARDOC_BOOL|CVAR_ARCHIVE );
 
 	oldtime = Sys_Milliseconds();
 	for (;;)
