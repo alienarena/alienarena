@@ -33,6 +33,10 @@ struct CON_console_s	CON_console;
 /* CVar for notifications display time */
 cvar_t *		con_notifytime;
 
+// ignore color codes (useful if you're trying to kick/ban someone with lots
+// of color codes in their name)
+cvar_t			*con_ignorecolorcodes;
+#define cmode	(con_ignorecolorcodes != NULL && con_ignorecolorcodes->integer ? FNT_CMODE_NONE : FNT_CMODE_QUAKE_SRS)
 
 
 /**************************************************************************/
@@ -424,6 +428,7 @@ void CON_Initialise( )
 
 	// Register CVars
 	con_notifytime = Cvar_Get( "con_notifytime" , "3" , 0 );
+	con_ignorecolorcodes = Cvar_Get( "con_ignorecolorcodes", "0", CVARDOC_BOOL|CVAR_ARCHIVE );
 
 	// Register commands
 	Cmd_AddCommand( "toggleconsole", CON_ToggleConsole );
@@ -484,12 +489,12 @@ static void _CON_ComputeLineHeight( FNT_font_t font , int line )
 		box.width = viddef.width - font->size * 5 , box.height = 0;
 
 		if ( CON_console.lCount[ line ] == 1 ) {
-			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
+			FNT_WrappedPrint( font , CON_console.text[ line ] , cmode ,
 				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
 		} else {
 			char * buffer = Z_Malloc( CON_console.lCount[ line ] * CON_LINE_LENGTH );
 			_CON_CopyLine( buffer , line );
-			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
+			FNT_WrappedPrint( font , buffer , cmode ,
 				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
 			Z_Free( buffer );
 		}
@@ -584,12 +589,12 @@ static void _CON_DrawConsoleText(
 			box.height = 0;
 
 			if ( CON_console.lCount[ line ] == 1 ) {
-				FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
+				FNT_WrappedPrint( font , CON_console.text[ line ] , cmode ,
 					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
 			} else {
 				char * buffer = Z_Malloc( CON_console.lCount[ line ] * CON_LINE_LENGTH );
 				_CON_CopyLine( buffer , line );
-				FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
+				FNT_WrappedPrint( font , buffer , cmode ,
 					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
 				Z_Free( buffer );
 			}
@@ -694,14 +699,14 @@ static void _CON_DrawInputLine(
 	box.x = 0;
 	box.y = viddef.height;
 	box.width = box.height = 0;
-	FNT_BoundedPrint( font , text , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+	FNT_BoundedPrint( font , text , cmode , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 	wToCursor = box.width;
 	text[ key_linepos ] = old;
 
 	// ... and after the cursor
 	if ( key_linelen > key_linepos ) {
 		box.width = box.height = 0;
-		FNT_BoundedPrint( font , text + key_linepos , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+		FNT_BoundedPrint( font , text + key_linepos , cmode , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 		wAfterCursor = box.width;
 	} else {
 		wAfterCursor = 0;
@@ -720,7 +725,7 @@ static void _CON_DrawInputLine(
 		align = FNT_ALIGN_RIGHT;
 	}
 	box.width = wToCursor;
-	FNT_BoundedPrint( font , text , FNT_CMODE_QUAKE_SRS , align , &box , FNT_colors[ 2 ] );
+	FNT_BoundedPrint( font , text , cmode , align , &box , FNT_colors[ 2 ] );
 
 	// Draw cursor
 	if ( ( (int)( cls.realtime >> 8 ) & 1) != 0 ) {
@@ -733,7 +738,7 @@ static void _CON_DrawInputLine(
 		box.x += box.width + font->size;
 		box.width = viddef.width - ( box.width + font->size * 5 );
 		box.height = 0;
-		FNT_BoundedPrint( font , text + key_linepos , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+		FNT_BoundedPrint( font , text + key_linepos , cmode , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 	}
 }
 
