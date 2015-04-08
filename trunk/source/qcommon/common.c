@@ -1612,6 +1612,7 @@ void Qcommon_Init (int argc, char **argv)
 	log_dest_udp->modified = true;
 	
 	fasttrace_verify = Cvar_Get ("fasttrace_verify", "0", CVARDOC_BOOL);
+	test = Cvar_Get ("test", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 
 	if (dedicated->value)
 		Cmd_AddCommand ("quit", Com_Quit);
