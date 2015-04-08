@@ -974,6 +974,7 @@ extern	cvar_t	*host_speeds;
 extern	cvar_t	*log_stats;
 
 cvar_t *fasttrace_verify; // Test for CM_FastTrace
+cvar_t *test; // cvar to be used for testing/development purposes
 
 extern	FILE *log_stats_file;
 
