@@ -1,0 +1,9 @@
+maps/meshes/tech/obsupport1
+{
+	{
+		map maps/meshes/tech/obsupport1_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/obsupport1_fx.tga
+		glow
+	}
+}
