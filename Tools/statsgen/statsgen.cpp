@@ -1609,20 +1609,21 @@ void GeneratePlayerRankingHtml (void)
 				outfile << "<meta name=\"Author\" content=\"John Diamond\">\n";
 				outfile << "<meta name=\"GENERATOR\" content=\"Mozilla/4.78 [en] (Windows NT 5.0; U) [Netscape]\">\n";
 				outfile << "<title>Alien Arena Global Stats</title>\n";
+				outfile << "<link rel=\"stylesheet\" type=\"text/css\" href=\"stylesheet.css\">\n";
 				outfile << "</head>\n";
-				outfile << "<body style=\"color: rgb(255, 255, 255); background-color: rgb(153, 153, 153); background-image: url(images/default_r4_c5.jpg);\" alink=\"#000099\" link=\"#ffcc33\" vlink=\"#33ff33\">\n";
-				outfile << "<center><b><font face=\"Arial,Helvetica\">ALIEN ARENA GLOBAL STATS</font></b>\n";
-				sprintf(a_string, "<p><b><font face=\"Arial,Helvetica\"><font size=-2>Updated %i/%i/%i %i:%i GMT</font></b></center>", stime.wMonth, stime.wDay, stime.wYear, stime.wHour, stime.wMinute);
+				outfile << "<body link=\"#cccccc\" vlink=\"#777777\" alink=\"#ffffff\">\n";
+				outfile << "<div class=\"subtitle\">ALIEN ARENA GLOBAL STATS\n";
+				sprintf(a_string, "<p><div class=\"subtitle2\">Updated %i/%i/%i %i:%i GMT</div></p></div>", stime.wMonth, stime.wDay, stime.wYear, stime.wHour, stime.wMinute);				
 				outfile << a_string << endl;
 				outfile << "<p><br>\n";
-				outfile << "<center><table border=\"2\" cellspacing=\"0\" cellpadding=\"4\">\n";
+				outfile << "<center><table border=\"0\" cellspacing=\"0\" cellpadding=\"5\">\n";
 				outfile << "<tr>\n";
-				outfile << "<td align=\"center\" bgcolor=\"#cccccc\"><font face=\"Arial,Helvetica\"><font size=-1>RANK</font></td>\n";
-				outfile << "<td align=\"center\" bgcolor=\"#cccccc\"><font face=\"Arial,Helvetica\"><font size=-1>NAME</font></td>\n";
-				outfile << "<td align=\"center\" bgcolor=\"#cccccc\"><font face=\"Arial,Helvetica\"><font size=-1>POINTS</font></td>\n";
-				outfile << "<td align=\"center\" bgcolor=\"#cccccc\"><font face=\"Arial,Helvetica\"><font size=-1>FRAGS</font></td>\n";
-				outfile << "<td align=\"center\" bgcolor=\"#cccccc\"><font face=\"Arial,Helvetica\"><font size=-1>TIME</font></td>\n";
-				outfile << "<td align=\"center\" bgcolor=\"#cccccc\"><font face=\"Arial,Helvetica\"><font size=-1>FRAGRATE</font></td>\n";
+				outfile << "<td class=\"header\">RANK</td>\n";
+				outfile << "<td class=\"header\">NAME</td>\n";
+				outfile << "<td class=\"header\">POINTS</td>\n";
+				outfile << "<td class=\"header\">FRAGS</td>\n";
+				outfile << "<td class=\"header\">TIME</td>\n";
+				outfile << "<td class=\"header\">FRAGRATE</td>\n";
 				outfile << "</tr>" << endl;
 
 			}
@@ -1675,10 +1676,10 @@ void GeneratePlayerRankingHtml (void)
 			actualpoints *= 10.0;
 			fragrate     = ntotalfrags / actualtime;
 			outfile << "<tr>\n";
-			sprintf(a_string, "<td align=\"right\">%i</td>", rank);
+			sprintf(a_string, "<td class=\"datarow\" align=\"right\">%i</td>", rank);
 			outfile << a_string << endl;
 
-			outfile << "<td align=\"center\">" ;
+			outfile << "<td class=\"datarow\" align=\"center\">" ;
 			if ( ColorizePlayerName( name, a_string, sizeof(a_string) ))
 			{
 				outfile << a_string;
@@ -1690,13 +1691,13 @@ void GeneratePlayerRankingHtml (void)
 			outfile << "</td>\n" ;
 
 			//POINTS, FRAGS, TIME, FRAGRATE
-			sprintf(a_string, "<td align=\"right\">%4.2f</td>", actualpoints);
+			sprintf(a_string, "<td class=\"datarow\" align=\"right\">%4.2f</td>", actualpoints);
 			outfile << a_string << '\n';
-			sprintf(a_string, "<td align=\"right\">%s</td>", totalfrags);
+			sprintf(a_string, "<td class=\"datarow\" align=\"right\">%s</td>", totalfrags);
 			outfile << a_string << '\n';
-			sprintf(a_string, "<td align=\"right\">%4.2f&nbsp;hours</td>", actualtime);
+			sprintf(a_string, "<td class=\"datarow\" align=\"right\">%4.2f&nbsp;hours</td>", actualtime);
 			outfile << a_string << '\n';
-			sprintf(a_string, "<td align=\"right\">%4.2f&nbsp;frags/hr</td>", fragrate);
+			sprintf(a_string, "<td class=\"datarow\" align=\"right\">%4.2f&nbsp;frags/hr</td>", fragrate);
 			outfile << a_string << '\n';
 			outfile << "</tr>" << endl;
 
@@ -1705,7 +1706,7 @@ void GeneratePlayerRankingHtml (void)
 			{ // this page is full  ( rank == 100,200,... )
 				outfile << "</table>\n";
 				sprintf(a_string,
-					"<p><font face=\"Arial,Helvetica\"><font size=-1><a href=\"stats%i.html\">Page %i</a></font></center>",
+					"<p><font size=-1><a href=\"stats%i.html\">Page %i</a></font></center>",
 					page, page);
 				outfile << a_string << '\n';
 				outfile << "</body>\n";
@@ -1726,11 +1727,10 @@ void GeneratePlayerRankingHtml (void)
 	if(!closed)
 	{ // last page was partial. less than 1000 qualified players
 		outfile << "</table>\n";
-		sprintf(a_string, "<p><font face=\"Arial,Helvetica\"><font size=-1><a href=\"stats%i.html\">Page %i</a></font></font></center>", 1, 1);
+		sprintf(a_string, "<p><font size=-1><a href=\"stats%i.html\">Page %i</a></font></center>", 1, 1);
 		outfile << a_string << '\n';
 		outfile << "</body>\n";
 		outfile << "</html>" << endl;
-
 		outfile.close();
 	}
 }
