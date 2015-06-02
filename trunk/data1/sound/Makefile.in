@@ -301,6 +301,7 @@ nobase_dist_sound_DATA = \
 	misc/w_pkup.wav \
 	music/adrenaline.ogg \
 	music/cp-ribeye.ogg \
+	music/Divinity_Alien_Swarm.ogg \
 	music/Divinity_lack_of_success.ogg \
 	music/Divinity_misunderstood.ogg \
 	music/Divinity_never_ending.ogg \

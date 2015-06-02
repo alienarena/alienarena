@@ -217,6 +217,9 @@ top_srcdir = @top_srcdir@
 texturesdir = $(pkgdatadir)/data1/textures
 nobase_dist_textures_DATA = \
 	alien/support5.tga \
+	arena10/bluedoor.tga \
+	arena10/bluedoor_hm.jpg \
+	arena10/bluedoor_nm.jpg \
 	arena10/bluetile_hm.tga \
 	arena10/bluetile_nm.tga \
 	arena10/bluetile.tga \
@@ -393,7 +396,13 @@ nobase_dist_textures_DATA = \
 	arena10/neonsign22.tga \
 	arena10/neonsign23.tga \
 	arena10/neonsign24.tga \
+	arena10/neonsign25.tga \
+	arena10/neonsign26.tga \
+	arena10/neonsign27.tga \
+	arena10/neonsign28.tga \
+	arena10/neonsign29.tga \
 	arena10/neonsign2.tga \
+	arena10/neonsign30.tga \
 	arena10/neonsign3.tga \
 	arena10/neonsign4.tga \
 	arena10/neonsign5.tga \
@@ -406,6 +415,9 @@ nobase_dist_textures_DATA = \
 	arena10/pipes1.tga \
 	arena10/planks_nm.tga \
 	arena10/planks.tga \
+	arena10/reddoor.tga \
+	arena10/reddoor_hm.jpg \
+	arena10/reddoor_nm.jpg \
 	arena10/redtile_hm.tga \
 	arena10/redtile_nm.tga \
 	arena10/redtile.tga \
@@ -946,6 +958,9 @@ nobase_dist_textures_DATA = \
 	arena9/hexfloor3_hm.tga \
 	arena9/hexfloor3_nm.tga \
 	arena9/hexfloor3.tga \
+	arena9/hexfloor4.tga \
+	arena9/hexfloor4_hm.tga \
+	arena9/hexfloor4_nm.tga \
 	arena9/hexglass.tga \
 	arena9/hexgratefloor_hm.tga \
 	arena9/hexgratefloor_nm.tga \
@@ -1547,6 +1562,7 @@ nobase_dist_textures_DATA = \
 	phillipk/pk02_floor08b_nm.tga \
 	phillipk/pk02_floor08b.tga \
 	phillipk/pk02_floor08.tga \
+	phillipk/pk02_switches01a_hm.tga \
 	phillipk/pk02_switches01a_nm.tga \
 	phillipk/pk02_switches01a.tga \
 	phillipk/pk02_switches01b_nm.tga \
@@ -1557,8 +1573,10 @@ nobase_dist_textures_DATA = \
 	phillipk/pk02_wall07a.tga \
 	phillipk/pk02_wall07b_nm.tga \
 	phillipk/pk02_wall07b.tga \
+	phillipk/pk02_wall_big02a_hm.tga \
 	phillipk/pk02_wall_big02a_nm.tga \
 	phillipk/pk02_wall_big02a.tga \
+	phillipk/pk02_wall_big02b_hm.tga \
 	phillipk/pk02_wall_big02b_nm.tga \
 	phillipk/pk02_wall_big02b.tga \
 	rage/beam_purple_hm.tga \
