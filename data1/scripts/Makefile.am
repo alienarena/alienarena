@@ -49,6 +49,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-liberation.rscript \
 	maps/dm-neptune.rscript \
 	maps/dm-oblivion.rscript \
+	maps/dm-oblivion2k15.rscript \
 	maps/dm-omega2k8.rscript \
 	maps/dm-purgatory.rscript \
 	maps/dm-saucer2k9.rscript \
@@ -68,6 +69,7 @@ nobase_dist_scripts_DATA = \
 	maps/tca-zion2k9.rscript \
 	menu.rscript \
 	normals/desert.rscript \
+	normals/newtech.rscript \
 	normals/normals.rscript \
 	normals/urban.rscript \
 	textures.rscript

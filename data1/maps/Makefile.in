@@ -274,6 +274,7 @@ nobase_dist_maps_DATA = \
 	dm-neptune.lightmap \
 	dm-oblivion.bsp \
 	dm-oblivion.lightmap \
+	dm-oblivion2k15.bsp \
 	dm-omega2k8.bsp \
 	dm-omega2k8.lightmap \
 	dm-purgatory.bsp \
@@ -566,6 +567,10 @@ nobase_dist_maps_DATA = \
 	meshes/tech/blueribtube_fx.tga \
 	meshes/tech/blueribtube.jpg \
 	meshes/tech/glasstube.md2 \
+	meshes/tech/obsupport1.jpg \
+	meshes/tech/obsupport1.md2 \
+	meshes/tech/obsupport1_fx.tga \
+	meshes/tech/obsupport1_normal.jpg \
 	meshes/tech/railing2.md2 \
 	meshes/tech/railing3.md2 \
 	meshes/tech/railing4.md2 \
@@ -796,6 +801,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-neptune.mus \
 	scripts/dm-oblivion.fog \
 	scripts/dm-oblivion.mus \
+	scripts/dm-oblivion2k15.fog \
+	scripts/dm-oblivion2k15.mus \
 	scripts/dm-omega2k8.mus \
 	scripts/dm-purgatory.fog \
 	scripts/dm-purgatory.mus \
