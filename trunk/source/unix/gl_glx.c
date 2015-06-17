@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #if defined HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
+#include <limits.h>
 
 #include "qcommon/qcommon.h"
 #include "ref_gl/r_local.h"
@@ -95,17 +96,19 @@ qboolean have_stencil = false; // Stencil shadows - MrG
 #define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | \
 	       	StructureNotifyMask | PropertyChangeMask )
 
-/*****************************************************************************/
-/* MOUSE                                                                     */
-/*****************************************************************************/
-
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
 static int win_x, win_y;
 
-#if defined HAVE_XXF86VM
-static XF86VidModeModeInfo **vidmodes;
-#endif // defined HAVE_XXF86VM
+#ifdef HAVE_XXF86VM
+
+static XF86VidModeModeInfo saved_modeline;
+int (*old_handler)(Display*, XErrorEvent*);
+static qboolean vidmode_error_occurred;
+static XErrorEvent vidmode_XErrorEvent;
+
+#endif
+
 static qboolean vidmode_active = false;
 
 qboolean mouse_active = false;
@@ -223,10 +226,6 @@ void IN_Activate(qboolean active)
 	else
 		IN_DeactivateMouse ();
 }
-
-/*****************************************************************************/
-/* KEYBOARD                                                                  */
-/*****************************************************************************/
 
 static int XLateKey( XKeyEvent *ev )
 {
@@ -476,8 +475,6 @@ void HandleEvents( void )
 	{
 		XNextEvent( dpy, &event );
 
-		// TODO: check for errors here, maybe
-
 		switch ( event.type )
 		{
 
@@ -697,13 +694,173 @@ static void InitSig(void)
 	signal(SIGTERM, signal_handler);
 }
 
+
+#ifdef HAVE_XXF86VM
+/*
+ * X Error handler for XF86 VidMode switching.
+ */
+int vidmode_handler( Display *dpy, XErrorEvent *error_event )
+{
+	// flag and copy the error information.
+	vidmode_error_occurred = true;
+	memcpy(&vidmode_XErrorEvent, error_event, sizeof(XErrorEvent));
+
+	return 0; // per spec. this is ignored.
+}
+
+/*
+ * If in xf86vm fullscreen, restore original mode
+ */
+static void xf86vm_shutdown(void)
+{
+	char msgbfr[256];
+	
+	// Trap mode switch error using special error handler.
+	vidmode_error_occurred = false;
+	XSync(dpy,False);
+	old_handler = XSetErrorHandler(vidmode_handler);
+
+	XF86VidModeSwitchToMode(dpy, scrnum, &saved_modeline);
+
+	// Restore X error handler.
+	XSync(dpy, False);
+	XSetErrorHandler(old_handler);
+
+	if ( vidmode_error_occurred )
+	{
+		/* This, almost certainly, will mess up video configuration.
+		 * But, it means the saved_modeline got corrupted.
+		 */
+		Com_Printf("In video shutdown, restoring previous XF86vm mode failed:\n");
+		XGetErrorText(dpy, vidmode_XErrorEvent.error_code, msgbfr, sizeof(msgbfr));
+		Com_Printf("..%s\n..major opcode %u, minor opcode %u\n",
+			msgbfr, vidmode_XErrorEvent.request_code, vidmode_XErrorEvent.minor_code );
+	}
+}
+
+/*
+ * XF86 VidMode setting for full screen.
+ *
+ * Reference:
+ *  man 3 XF86VidModeQueryVersion
+ *  man 3 XF86VidModeSwitchToMode
+ *  man 3 XSetErrorHandler
+ */
+static void xf86vm_fullscreen( int req_width, int req_height )
+{
+	extern cvar_t *vid_xpos; // X coordinate of window position
+	extern cvar_t *vid_ypos; // Y coordinate of window position
+	int major, minor;
+	int num_vidmodes;
+	XF86VidModeModeInfo **vidmodes;
+	int best_fit, best_dist, dist, x, y;
+	int actualWidth, actualHeight;
+	int i;
+	int xpos, ypos;
+	char msgbfr[256];
+
+	vidmode_ext = XF86VidModeQueryVersion(dpy, &major, &minor);
+	if ( !vidmode_ext )
+	{
+		Com_Printf("XF86VidModeQueryVersion failed. XF86VidMode Extension not active.\n");
+		return;
+	}
+	Com_Printf("...Using XF86VidMode Extension Version %d.%d\n", major, minor);
+
+	if ( !XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes) )
+	{
+		vidmode_ext = false;
+		Com_Printf("XF86VidModeGetAllModeLines failed. XF86VidMode Extension not active.\n");
+		return;
+	}
+
+	// Current ModeLine is the first in list. Save it for later restoration.
+	memcpy( &saved_modeline, vidmodes[0], sizeof(XF86VidModeModeInfo) );
+
+	// Find best fit modeline for requested resolution.
+	best_dist = INT_MAX;
+	best_fit  = -1;
+	for (i = 0; i < num_vidmodes; i++)
+	{
+		Com_Printf("....XF86vm %i: %i x %i\n", i,
+				   vidmodes[i]->hdisplay, vidmodes[i]->vdisplay);
+		
+		if ( req_width > vidmodes[i]->hdisplay
+			 || req_height > vidmodes[i]->vdisplay)
+			continue; // vidmode has smaller width or height than requested resolution
+
+		x = req_width - vidmodes[i]->hdisplay;
+		y = req_height - vidmodes[i]->vdisplay;
+		dist = (x * x) + (y * y);
+		if (dist < best_dist)
+		{
+			// closest to requested resolution, so far
+			best_dist = dist;
+			best_fit = i;
+		}
+	}
+
+	if ( best_fit != -1 )
+	{
+		// the resolution to be used for fullscreen.
+		actualWidth  = vidmodes[best_fit]->hdisplay;
+		actualHeight = vidmodes[best_fit]->vdisplay;
+		Com_Printf("....XF86vm: requested %i X %i  actual: %i X %i\n",
+				   req_width, req_height, actualWidth, actualHeight);
+
+		// Trap mode switch error using special error handler.
+		vidmode_error_occurred = false;
+		XSync(dpy,False);
+		old_handler = XSetErrorHandler(vidmode_handler);
+
+		XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[best_fit]);
+
+		// Restore error handler.
+		XSync(dpy,False);
+		XSetErrorHandler(old_handler); 
+
+		if ( vidmode_error_occurred )
+		{
+			Com_Printf("....XF86vm mode switch failed:\n");
+			XGetErrorText(dpy, vidmode_XErrorEvent.error_code, msgbfr, sizeof(msgbfr));
+			Com_Printf(".....%s\n......major opcode %u, minor opcode %u\n",
+					msgbfr, vidmode_XErrorEvent.request_code, vidmode_XErrorEvent.minor_code );
+			
+			// cleanup and return.
+			vidmode_active = false; // just to be sure.
+			XFree(vidmodes);
+			return;
+		}
+	
+		vidmode_active = true; // XF86vm used for fullscreen.
+
+		// Move the viewport to top left
+		XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
+
+		if (req_width != actualWidth || req_height != actualHeight)
+		{
+			xpos = vid_xpos->integer;
+			ypos = vid_ypos->integer;
+			Com_Printf("Resolution %dx%d is not supported natively by the display!\n", req_width, req_height);
+			Com_Printf("Closest screen resolution is %dx%d. ", actualWidth, actualHeight);
+			Com_Printf("Use vid_xpos and vid_ypos to adjust the position of the game window (current offset is %d, %d)\n", xpos, ypos);
+
+		}
+	}
+	else
+	{
+		Com_Printf("....XF86vm mode match for %u X %u failed.\n", req_width, req_height);
+	}
+
+	XFree(vidmodes); // per spec
+}
+#endif // HAVE_XXF86VM
+
 /*
 ** GLimp_SetMode
 */
 rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
 {
-	extern cvar_t	*vid_xpos;	// X coordinate of window position
-	extern cvar_t	*vid_ypos;	// Y coordinate of window position
 	int xpos, ypos;
 
 	int width, height;
@@ -733,11 +890,6 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	XSizeHints *sizehints;
 	XClassHint *class_hint;
 	unsigned long mask;
-#if defined HAVE_XXF86VM
-	int MajorVersion, MinorVersion;
-	int actualWidth, actualHeight;
-	int i;
-#endif
 
 	/* release keyboard and mouse until after initialization */
 	uninstall_grabs();
@@ -770,20 +922,6 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	scrnum = DefaultScreen(dpy);
 	root = RootWindow(dpy, scrnum);
 
-	// Get video mode list
-#if defined HAVE_XXF86VM
-	MajorVersion = MinorVersion = 0;
-	if (!XF86VidModeQueryVersion(dpy, &MajorVersion, &MinorVersion)) {
-		vidmode_ext = false;
-	} else {
-		Com_Printf ( "Using XFree86-VidModeExtension Version %d.%d\n",
-			MajorVersion, MinorVersion);
-		vidmode_ext = true;
-	}
-#else // defined HAVE_XXF86VM
-	vidmode_ext = false;
-#endif // defined HAVE_XXF86VM
-
 	visinfo = qglXChooseVisual(dpy, scrnum, attrib);
 	if (!visinfo) {
 		fprintf(stderr, "Error couldn't get an RGB, Double-buffered, Depth visual, Stencil Buffered\n");
@@ -796,59 +934,17 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	else
 		have_stencil = true;
 
-	vidmode_active = false;
-	
 	xpos = ypos = 0;
-	
-#if defined HAVE_XXF86VM
-	if (vidmode_ext) {
-		int best_fit, best_dist, dist, x, y, num_vidmodes;
+	vidmode_ext = false; // XF86vm not used, until otherwise determined.
+	vidmode_active = false; // not XF86vm fullscreen, until otherwise determined.
 
-		XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
-
-		// Are we going fullscreen?  If so, let's change video mode
-		if (fullscreen && !r_fakeFullscreen->integer) {
-			best_dist = 9999999;
-			best_fit = -1;
-
-			for (i = 0; i < num_vidmodes; i++) {
-				if (width > vidmodes[i]->hdisplay ||
-					height > vidmodes[i]->vdisplay)
-					continue;
-
-				x = width - vidmodes[i]->hdisplay;
-				y = height - vidmodes[i]->vdisplay;
-				dist = (x * x) + (y * y);
-				if (dist < best_dist) {
-					best_dist = dist;
-					best_fit = i;
-				}
-			}
-
-			if (best_fit != -1) {
-				actualWidth = vidmodes[best_fit]->hdisplay;
-				actualHeight = vidmodes[best_fit]->vdisplay;
-
-				// change to the mode
-				XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[best_fit]);
-				vidmode_active = true;
-
-				// Move the viewport to top left
-				XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
-				
-				if (width != actualWidth || height != actualHeight)
-				{
-					xpos = vid_xpos->integer;
-					ypos = vid_ypos->integer;
-					Com_Printf ("Resolution %dx%d is not supported natively by the display!\n", width, height);
-					Com_Printf ("Closest screen resolution is %dx%d. ", actualWidth, actualHeight); 
-					Com_Printf ("Use vid_xpos and vid_ypos to adjust the position of the game window (current offset is %d, %d)\n", xpos, ypos);
-				}
-			} else
-				fullscreen = 0;
-		}
+#ifdef HAVE_XXF86VM	
+	if ( fullscreen && !r_fakeFullscreen->integer )
+	{
+		// Use XF86VidMode to request fullscreen of specified resolution.
+		xf86vm_fullscreen(width, height);
 	}
-#endif // defined HAVE_XXF86VM
+#endif	
 
 	/* window attributes */
 	attr.background_pixel = 0;
@@ -980,10 +1076,13 @@ void GLimp_Shutdown( void )
 			qglXDestroyContext(dpy, ctx);
 		if (win)
 			XDestroyWindow(dpy, win);
-#if defined HAVE_XXF86VM
+		
+#ifdef HAVE_XXF86VM
+		 // XF86vm fullscreen back to original resolution.
 		if (vidmode_active)
-			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
-#endif // defined HAVE_XXF86VM
+			xf86vm_shutdown();
+#endif		
+
 		XUngrabKeyboard(dpy, CurrentTime);
 		XCloseDisplay(dpy);
 	}
