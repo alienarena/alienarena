@@ -34,6 +34,18 @@ textures/arena7/light9
 		lensflare
 	}
 }
+textures/arena10/metalfloor21_water
+{
+	{
+		cube
+	}
+}
+textures/evil/e6horzlight
+{
+	{
+		cube
+	}
+}
 textures/evil/e6launchengine
 {
     {
