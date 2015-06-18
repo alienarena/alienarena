@@ -7,3 +7,12 @@ maps/meshes/tech/obsupport1
 		glow
 	}
 }
+maps/meshes/tech/obfloor1
+{
+	{
+		map maps/meshes/tech/obfloor1_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/obfloor1_fx.tga
+		glow
+	}
+}
