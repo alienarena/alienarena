@@ -352,25 +352,33 @@ nobase_dist_maps_DATA = \
 	meshes/straightconduit.md2 \
 	meshes/tech/bigribtube.jpg \
 	meshes/tech/bigribtube_normal.jpg \
+	meshes/tech/blueribtube.jpg \
 	meshes/tech/blueribtube1.md2 \
 	meshes/tech/blueribtube_fx.tga \
-	meshes/tech/blueribtube.jpg \
 	meshes/tech/glasstube.md2 \
+	meshes/tech/obfloor1.jpg \
+	meshes/tech/obfloor1.md2 \
+	meshes/tech/obfloor1_fx.tga \
+	meshes/tech/obfloor1_normal.jpg \
+	meshes/tech/obfloor2.md2 \
 	meshes/tech/obsupport1.jpg \
 	meshes/tech/obsupport1.md2 \
 	meshes/tech/obsupport1_fx.tga \
 	meshes/tech/obsupport1_normal.jpg \
+	meshes/tech/railing.jpg \
+	meshes/tech/railing.md2 \
 	meshes/tech/railing2.md2 \
 	meshes/tech/railing3.md2 \
 	meshes/tech/railing4.md2 \
 	meshes/tech/railing5.md2 \
-	meshes/tech/railing.jpg \
-	meshes/tech/railing.md2 \
 	meshes/tech/railing_normal.jpg \
+	meshes/tech/redribtube.jpg \
 	meshes/tech/redribtube1.md2 \
 	meshes/tech/redribtube_fx.tga \
-	meshes/tech/redribtube.jpg \
 	meshes/tech/ribtubebig1.md2 \
+	meshes/tech/ribtubebig10.md2 \
+	meshes/tech/ribtubebig11.md2 \
+	meshes/tech/ribtubebig12.md2 \
 	meshes/tech/ribtubebig2.md2 \
 	meshes/tech/ribtubebig3.md2 \
 	meshes/tech/ribtubebig4.md2 \
@@ -378,35 +386,36 @@ nobase_dist_maps_DATA = \
 	meshes/tech/ribtubebig6.md2 \
 	meshes/tech/ribtubebig7.md2 \
 	meshes/tech/ribtubebig8.md2 \
+	meshes/tech/ribtubebig9.md2 \
+	meshes/tech/rotator.jpg \
+	meshes/tech/rotator.md2 \
 	meshes/tech/rotator_fx.tga \
+	meshes/tech/rotator_normal.jpg \
 	meshes/tech/rotatorglass.md2 \
 	meshes/tech/rotatorimage1.md2 \
 	meshes/tech/rotatorimage2.md2 \
 	meshes/tech/rotatorimage3.md2 \
 	meshes/tech/rotatorimage4.md2 \
-	meshes/tech/rotator.jpg \
-	meshes/tech/rotator.md2 \
-	meshes/tech/rotator_normal.jpg \
-	meshes/tech/rotimage1_normal.tga \
 	meshes/tech/rotimage1.tga \
-	meshes/tech/rotimage2_normal.tga \
+	meshes/tech/rotimage1_normal.tga \
 	meshes/tech/rotimage2.tga \
-	meshes/tech/rotimage3_normal.tga \
+	meshes/tech/rotimage2_normal.tga \
 	meshes/tech/rotimage3.tga \
-	meshes/tech/rotimage4_normal.tga \
+	meshes/tech/rotimage3_normal.tga \
 	meshes/tech/rotimage4.tga \
-	meshes/tech/slimegen2.md2 \
+	meshes/tech/rotimage4_normal.tga \
 	meshes/tech/slimegen.jpg \
 	meshes/tech/slimegen.md2 \
+	meshes/tech/slimegen2.md2 \
 	meshes/tech/slimegen_fx.tga \
-	meshes/tech/slimegenblue_fx.tga \
+	meshes/tech/slimegen_normal.jpg \
+	meshes/tech/slimegen_s.md2 \
 	meshes/tech/slimegenblue.jpg \
 	meshes/tech/slimegenblue.md2 \
-	meshes/tech/slimegen_normal.jpg \
-	meshes/tech/slimegenred_fx.tga \
+	meshes/tech/slimegenblue_fx.tga \
 	meshes/tech/slimegenred.jpg \
 	meshes/tech/slimegenred.md2 \
-	meshes/tech/slimegen_s.md2 \
+	meshes/tech/slimegenred_fx.tga \
 	meshes/tech/slimetube1.md2 \
 	meshes/tech/turbinefan.jpg \
 	meshes/tech/turbinefan.md2 \
