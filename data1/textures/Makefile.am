@@ -159,6 +159,9 @@ nobase_dist_textures_DATA = \
 	arena10/metalfloor21w_hm.tga \
 	arena10/metalfloor21w_nm.tga \
 	arena10/metalfloor21w.tga \
+	arena10/metalfloor21_water.tga \
+	arena10/metalfloor21_water_hm.tga \
+	arena10/metalfloor21_water_nm.tga \
 	arena10/metalwall20_hm.tga \
 	arena10/metalwall20_nm.tga \
 	arena10/metalwall20.tga \
@@ -1090,6 +1093,8 @@ nobase_dist_textures_DATA = \
 	evil/e6grate_flr.tga \
 	evil/e6horzlight_green.tga \
 	evil/e6horzlight.tga \
+	evil/e6horzlight_hm.tga \
+	evil/e6horzlight_nm.tga \
 	evil/e6launchengine_hm.tga \
 	evil/e6launchengine_nm.tga \
 	evil/e6launchengine.tga \
