@@ -117,3 +117,294 @@ textures/arena10/metalfloor21
 		grasstype 0
 	}	
 }
+textures/arena10/neonsign8
+{
+	{
+		map textures/arena10/neonsign8
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+textures/arena10/neonsign7
+{
+	{
+		map textures/arena10/neonsign7
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/greenline.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+textures/arena10/neonsign10
+{
+	{
+		map textures/arena10/neonsign10
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+textures/arena10/floortile10w
+{
+	{
+		map gfx/noise.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 10 static 10
+		alphashift 0 0.2 0.2
+	}
+	{
+		map gfx/noise.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static -10 static -10
+		alphashift 0 0.2 0.2
+	}
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+	{
+		map gfx/rainfxa.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 16 .2 .3
+		scale static 1 static 1
+		anim 0.03
+			gfx/rainfxa.tga
+			gfx/rainfxb.tga
+			gfx/rainfxc.tga
+			gfx/rainfxd.tga
+			gfx/rainfxe.tga
+			gfx/rainfxf.tga
+			gfx/rainfxg.tga
+			gfx/rainfxh.tga
+		end
+	}
+}
+textures/arena10/metalfloor21w
+{
+	{
+		map gfx/noise.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 10 static 10
+		alphashift 0 0.2 0.2
+	}
+	{
+		map gfx/noise.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static -10 static -10
+		alphashift 0 0.2 0.2
+	}
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.05 0.05
+		envmap
+	}
+	{
+		map gfx/rainfxa.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 16 .2 .3
+		scale static 1 static 1
+		anim 0.03
+			gfx/rainfxa.tga
+			gfx/rainfxb.tga
+			gfx/rainfxc.tga
+			gfx/rainfxd.tga
+			gfx/rainfxe.tga
+			gfx/rainfxf.tga
+			gfx/rainfxg.tga
+			gfx/rainfxh.tga
+		end
+	}
+}
+textures/arena10/neonsign6
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign6r
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign16
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign16r
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign20
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign20r
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign18
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign18r
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign19
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena10/neonsign19r
+{
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+env/tekcityup
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcityrt
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitylf
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcityft
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitybk
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitydn
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}

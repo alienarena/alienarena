@@ -16,3 +16,12 @@ maps/meshes/tech/obfloor1
 		glow
 	}
 }
+maps/meshes/tech/obarch1
+{
+	{
+		map maps/meshes/tech/obarch1_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/obarch1_fx.tga
+		glow
+	}
+}
