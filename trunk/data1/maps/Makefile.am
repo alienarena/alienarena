@@ -356,6 +356,10 @@ nobase_dist_maps_DATA = \
 	meshes/tech/blueribtube1.md2 \
 	meshes/tech/blueribtube_fx.tga \
 	meshes/tech/glasstube.md2 \
+	meshes/tech/obarch1.jpg \
+	meshes/tech/obarch1.md2 \
+	meshes/tech/obarch1_fx.tga \
+	meshes/tech/obarch1_normal.jpg \
 	meshes/tech/obfloor1.jpg \
 	meshes/tech/obfloor1.md2 \
 	meshes/tech/obfloor1_fx.tga \
