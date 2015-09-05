@@ -121,9 +121,16 @@ qboolean	portalopen[MAX_MAP_AREAPORTALS];
 
 typedef struct
 {
-	cplane_t	p;
+	// allplanes is treaded as an array with 10 members. We do this so that
+	// the planes get checked in the most efficient order.
+	cplane_t	allplanes[0];
+	cplane_t	bboxplanes[6];
+	cplane_t	mainplane;
+	cplane_t	sideplanes[3];
 	vec_t		*verts[3];
 	vec3_t		mins, maxs;
+	int			neighbors[3];	// neighbors[i] shares verts i and (i+1)%3
+	char		neighbors_whichedge[3];
 	int			checkcount;		// to avoid repeated testings (FIXME: not threadsafe!)
 } cterraintri_t;
 
@@ -895,7 +902,6 @@ static qboolean RayIntersectsTriangle (const vec3_t p1, const vec3_t d, const ve
 	return t > FLT_EPSILON;
 }
 
-// NOTE: this function doesn't need to be fast, it only runs at load time.
 qboolean TriangleIntersectsBBox
 	(const vec3_t v0, const vec3_t v1, const vec3_t v2, const vec3_t mins, const vec3_t maxs, vec3_t out_mins, vec3_t out_maxs)
 {
@@ -1066,7 +1072,7 @@ static void CM_LoadTerrain_PopulateGrid (cterrainmodel_t *mod, cterraingrid_t *g
 	// Create bounding plane
 	VectorClear (grid->boundingplane.normal);
 	for (i = 0; i < grid->numtris; i++)
-		VectorAdd (grid->tris[i]->p.normal, grid->boundingplane.normal, grid->boundingplane.normal);
+		VectorAdd (grid->tris[i]->mainplane.normal, grid->boundingplane.normal, grid->boundingplane.normal);
 	VectorNormalize (grid->boundingplane.normal);
 	grid->boundingplane.dist = DotProduct (grid->tris[0]->verts[0], grid->boundingplane.normal);
 	for (i = 0; i < grid->numtris; i++)
@@ -1160,6 +1166,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	mod->lm_size[0] = DotProduct (lm_maxs, mod->lm_s_axis) - mod->lm_mins[0];
 	mod->lm_size[1] = DotProduct (lm_maxs, mod->lm_t_axis) - mod->lm_mins[1];
 	
+	// pass 1: vertices, main plane of each triangle, filter out downfacing
 	for (i = 0; i < data.num_triangles; i++)
 	{
 		cterraintri_t *tri;
@@ -1187,15 +1194,136 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		
 		VectorSubtract (tri->verts[1], tri->verts[0], side1);
 		VectorSubtract (tri->verts[2], tri->verts[0], side2);
-		CrossProduct (side2, side1, tri->p.normal);
-		VectorNormalize (tri->p.normal);
-		tri->p.dist = DotProduct (tri->verts[0], tri->p.normal);
-		tri->p.signbits = signbits_for_plane (&tri->p);
-		tri->p.type = PLANE_ANYZ;
+		CrossProduct (side2, side1, tri->mainplane.normal);
+		VectorNormalize (tri->mainplane.normal);
+		for (j = 0; j < 3; j++)
+		{
+			// cleanup -0
+			if (tri->mainplane.normal[j] == -0.0f) tri->mainplane.normal[j] = 0.0f;
+		}
+		tri->mainplane.dist = DotProduct (tri->verts[0], tri->mainplane.normal);
+		tri->mainplane.signbits = signbits_for_plane (&tri->mainplane);
+		if (fabsf (tri->mainplane.normal[0]) == 1.0f)
+			tri->mainplane.type = PLANE_X;
+		else if (fabsf (tri->mainplane.normal[1]) == 1.0f)
+			tri->mainplane.type = PLANE_Y;
+		else if (fabsf (tri->mainplane.normal[2]) == 1.0f)
+			tri->mainplane.type = PLANE_Z;
+		else
+			tri->mainplane.type = PLANE_ANYZ;
 		
 		// overwrite and don't use downward facing faces.
-		if (DotProduct (tri->p.normal, up) >= 0.0f)
-			mod->numtriangles++;
+		if (DotProduct (tri->mainplane.normal, up) < 0.0f)
+			continue;
+		
+		VectorSet (tri->neighbors, -1, -1, -1);
+		
+		mod->numtriangles++;
+	}
+	
+	// pass 2: find triangle neighbors
+	for (i = 0; i < mod->numtriangles; i++)
+	{
+		cterraintri_t *tri, *tri2;
+		int j, k, l;
+		
+		tri = &mod->tris[i];
+		
+		for (j = 0; j < 3; j++)
+		{
+			if (tri->neighbors[j] != -1)
+				continue;
+			
+			for (k = 0; k < mod->numtriangles; k++)
+			{
+				if (k == i) continue;
+				
+				tri2 = &mod->tris[k];
+				
+				for (l = 0; l < 3; l++)
+				{
+					if (tri2->neighbors[l] != -1)
+						continue;
+					
+					if (tri2->verts[l] != tri->verts[j] && tri2->verts[l] != tri->verts[(j + 1) % 3])
+						continue;
+					if (tri2->verts[(l + 1) % 3] != tri->verts[j] && tri2->verts[(l + 1) % 3] != tri->verts[(j + 1) % 3])
+						continue;
+					
+					tri2->neighbors[l] = i;
+					tri2->neighbors_whichedge[l] = j;
+					tri->neighbors[j] = k;
+					tri->neighbors_whichedge[j] = l;
+				}
+			}
+		}
+	}
+	
+	// pass 3: generate the rest of the data for the triangle
+	for (i = 0; i < mod->numtriangles; i++)
+	{
+		cterraintri_t *tri;
+		int j;
+		
+		tri = &mod->tris[i];
+		
+		for (j = 0; j < 3; j++)
+		{
+			cterraintri_t *neighbortri;
+
+			// generate a side plane from scratch
+			vec3_t side;
+			
+			VectorSubtract (tri->verts[(j + 1) % 3], tri->verts[j], side);
+			CrossProduct (tri->mainplane.normal, side, tri->sideplanes[j].normal);
+			VectorNormalize (tri->sideplanes[j].normal); 
+			for (k = 0; k < 3; k++)
+			{
+				// cleanup -0
+				if (tri->sideplanes[j].normal[k] == -0.0f) tri->sideplanes[j].normal[k] = 0.0f;
+			}
+			tri->sideplanes[j].dist = DotProduct (tri->verts[j], tri->sideplanes[j].normal);
+			tri->sideplanes[j].signbits = signbits_for_plane (&tri->sideplanes[j]);
+			if (fabsf (tri->sideplanes[j].normal[0]) == 1.0f)
+				tri->sideplanes[j].type = PLANE_X;
+			else if (fabsf (tri->sideplanes[j].normal[1]) == 1.0f)
+				tri->sideplanes[j].type = PLANE_Y;
+			else if (fabsf (tri->sideplanes[j].normal[2]) == 1.0f)
+				tri->sideplanes[j].type = PLANE_Z;
+			else
+				tri->sideplanes[j].type = PLANE_ANYZ;
+			
+			if (tri->neighbors[j] == -1)
+				continue;
+			
+			neighbortri = &mod->tris[tri->neighbors[j]];
+			
+			// If neighbor's angle with this triangle is concave, neighbor's
+			// main plane would exclude this triangle's main plane rather
+			// than cap it.
+			if (DotProduct (neighbortri->mainplane.normal, tri->verts[(j + 2) % 3]) >= neighbortri->mainplane.dist)
+				continue;
+			
+/*			if (DotProduct (tri->sideplanes[j].normal, neighbortri->verts[(tri->neighbors_whichedge[j] + 2) % 3]) >= tri->sideplanes[j].dist)*/
+/*				continue;*/
+			// use a neighbor's main plane as a side plane if the two tris
+			// together form a convex mesh, but *only* if it will be *more*
+			// restrictive than the "from-scratch" plane.
+			tri->sideplanes[j] = neighbortri->mainplane;
+		}
+		
+		for (j = 0; j < 3; j++)
+		{
+			tri->bboxplanes[j].type = tri->bboxplanes[j+3].type = PLANE_X + j;
+			tri->bboxplanes[j].dist = tri->maxs[j];
+			VectorClear (tri->bboxplanes[j].normal);
+			tri->bboxplanes[j].normal[j] = 1.0f;
+			tri->bboxplanes[j].signbits = 0.0f;
+			tri->bboxplanes[j+3].dist = -tri->mins[j];
+			VectorClear (tri->bboxplanes[j+3].normal);
+			tri->bboxplanes[j+3].normal[j] = -1.0f;
+			tri->bboxplanes[j+3].signbits = 1 << j;
+		}
 	}
 	
 	if (data.num_triangles != mod->numtriangles)
@@ -1365,8 +1493,8 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	CMod_LoadLeafs (&header.lumps[LUMP_LEAFS]);
 	CMod_LoadLeafBrushes (&header.lumps[LUMP_LEAFBRUSHES]);
 	CMod_LoadPlanes (&header.lumps[LUMP_PLANES]);
-	CMod_LoadBrushes (&header.lumps[LUMP_BRUSHES]);
 	CMod_LoadBrushSides (&header.lumps[LUMP_BRUSHSIDES]);
+	CMod_LoadBrushes (&header.lumps[LUMP_BRUSHES]);
 	CMod_LoadSubmodels (&header.lumps[LUMP_MODELS]);
 	CMod_LoadNodes (&header.lumps[LUMP_NODES]);
 	CMod_LoadAreas (&header.lumps[LUMP_AREAS]);
@@ -1907,16 +2035,63 @@ static qboolean		trace_ispoint;
 // otherwise, look for the *closest* intersection point
 static qboolean		trace_fast;
 
-/**
- * @brief  intersect test for axis-aligned box and a brush in a leaf.
- *
- * This is the innermost loop for CM_BoxTrace() general and point cases.
- * Does not use file level static variables; not sure why.
- *
- * @returns  if intersection occurred, information about the brush in the
- *           trace_t record. otherwise does not touch trace_t record
- *
- */
+static float CM_OffsetPlaneDist (const cplane_t *plane, const vec3_t mins, const vec3_t maxs)
+{
+	switch ( plane->type )
+	{
+	case PLANE_X:
+		if ( plane->signbits == 0x01 )
+			return plane->dist - (maxs[0]*plane->normal[0]);
+		else
+			return plane->dist - (mins[0]*plane->normal[0]);
+
+	case PLANE_Y:
+		if ( plane->signbits == 0x02 )
+			return plane->dist - (maxs[1]*plane->normal[1]);
+		else
+			return plane->dist - (mins[1]*plane->normal[1]);
+
+	case PLANE_Z:
+		if ( plane->signbits == 0x04 )
+			return plane->dist - (maxs[2]*plane->normal[2]);
+		else
+			return plane->dist - (mins[2]*plane->normal[2]);
+
+	default:
+		switch ( plane->signbits ) /* bit2=z<0, bit1=y<0, bit0=x<0 */
+		{
+		case 0: /* 000b */
+			return plane->dist - (mins[0]*plane->normal[0] +
+					mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+		case 1: /* 001b */
+			return plane->dist - (maxs[0]*plane->normal[0] +
+					mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+		case 2: /* 010b */
+			return plane->dist - (mins[0]*plane->normal[0] +
+					maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+		case 3: /* 011b */
+			return plane->dist - (maxs[0]*plane->normal[0] +
+					maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
+		case 4: /* 100b */
+			return plane->dist - (mins[0]*plane->normal[0] +
+					mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+		case 5: /* 101b */
+			return plane->dist - (maxs[0]*plane->normal[0] +
+					mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+		case 6: /* 110b */
+			return plane->dist - (mins[0]*plane->normal[0] +
+					maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+		case 7: /* 111b */
+			return plane->dist - (maxs[0]*plane->normal[0] +
+					maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
+
+		default:
+			Com_Error( ERR_DROP, "CM_OffsetPlaneDist: bad plane signbits\n");
+			return 0.0f; // unreachable. suppress bogus compiler warning
+		}
+	}
+}
+
 static void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 		trace_t *trace, cbrush_t *brush )
 {
@@ -1946,77 +2121,10 @@ static void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 	{
 		side = &map_brushsides[brush->firstbrushside+i];
 		plane = side->plane;
-		if ( !trace_ispoint )
-		{
-			switch ( plane->type )
-			{
-			case PLANE_X:
-				if ( plane->signbits == 0x01 )
-					dist = plane->dist - (maxs[0]*plane->normal[0]);
-				else
-					dist = plane->dist - (mins[0]*plane->normal[0]);
-				break;
-
-			case PLANE_Y:
-				if ( plane->signbits == 0x02 )
-					dist = plane->dist - (maxs[1]*plane->normal[1]);
-				else
-					dist = plane->dist - (mins[1]*plane->normal[1]);
-				break;
-
-			case PLANE_Z:
-				if ( plane->signbits == 0x04 )
-					dist = plane->dist - (maxs[2]*plane->normal[2]);
-				else
-					dist = plane->dist - (mins[2]*plane->normal[2]);
-				break;
-
-			default:
-				switch ( plane->signbits ) /* bit2=z<0, bit1=y<0, bit0=x<0 */
-				{
-				case 0: /* 000b */
-					dist = plane->dist - (mins[0]*plane->normal[0] +
-							mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
-					break;
-				case 1: /* 001b */
-					dist = plane->dist - (maxs[0]*plane->normal[0] +
-							mins[1]*plane->normal[1] + mins[2]*plane->normal[2]);
-					break;
-				case 2: /* 010b */
-					dist = plane->dist - (mins[0]*plane->normal[0] +
-							maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
-					break;
-				case 3: /* 011b */
-					dist = plane->dist - (maxs[0]*plane->normal[0] +
-							maxs[1]*plane->normal[1] + mins[2]*plane->normal[2]);
-					break;
-				case 4: /* 100b */
-					dist = plane->dist - (mins[0]*plane->normal[0] +
-							mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-					break;
-				case 5: /* 101b */
-					dist = plane->dist - (maxs[0]*plane->normal[0] +
-							mins[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-					break;
-				case 6: /* 110b */
-					dist = plane->dist - (mins[0]*plane->normal[0] +
-							maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-					break;
-				case 7: /* 111b */
-					dist = plane->dist - (maxs[0]*plane->normal[0] +
-							maxs[1]*plane->normal[1] + maxs[2]*plane->normal[2]);
-					break;
-
-				default:
-					Com_Error( ERR_DROP, "CM_ClipBoxToBrush: bad plane signbits\n");
-					return; // unreachable. suppress bogus compiler warning
-				}
-			}
-		}
+		if (trace_ispoint)
+			dist = plane->dist; // special point case
 		else
-		{	// special point case
-			dist = plane->dist;
-		}
+			dist = CM_OffsetPlaneDist (plane, mins, maxs);
 
 		d1 = DotProduct (p1, plane->normal) - dist;
 		d2 = DotProduct (p2, plane->normal) - dist;
@@ -2062,12 +2170,13 @@ static void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 			trace->allsolid = true;
 		return;
 	}
+	
 	if (enterfrac < leavefrac)
 	{
-		if (enterfrac > -1 && enterfrac < trace->fraction)
+		if (enterfrac > -1.0f && enterfrac < trace->fraction)
 		{
-			if (enterfrac < 0)
-				enterfrac = 0;
+			if (enterfrac < 0.0f)
+				enterfrac = 0.0f;
 			trace->fraction = enterfrac;
 			trace->plane = *clipplane;
 			trace->surface = &(leadside->surface->c);
@@ -2076,12 +2185,101 @@ static void CM_ClipBoxToBrush( vec3_t mins, vec3_t maxs, vec3_t p1, vec3_t p2,
 	}
 }
 
+static qboolean CM_ClipBoxToTerrainTri (const vec3_t mins, const vec3_t maxs, const vec3_t p1, const vec3_t p2, trace_t *trace, const cterraintri_t *tri)
+{
+	static csurface_t placeholder_surface; // no flags, no value
+	int           i;
+	const cplane_t     *plane, *clipplane;
+	float         dist;
+	float         enterfrac, leavefrac;
+	float         d1, d2;
+	qboolean      getout, startout;
+	float         f;
+
+	enterfrac = -1.0f;
+	leavefrac = 1.0f;
+	clipplane = NULL;
+
+	getout = false;
+	startout = false;
+
+	for (i=0 ; i<10 ; i++)
+	{
+		plane = &tri->allplanes[i];
+	
+		if (trace_ispoint)
+			dist = plane->dist; // special point case
+		else
+			dist = CM_OffsetPlaneDist (plane, mins, maxs);
+
+		d1 = DotProduct (p1, plane->normal) - dist;
+		d2 = DotProduct (p2, plane->normal) - dist;
+
+		if ( d2 > 0.0f )
+			getout = true; // endpoint is not in solid
+		if ( d1 > 0.0f )
+			startout = true;
+
+		// if completely in front of face, no intersection
+		if ( d1 > 0.0f && d2 >= d1 )
+			return false;
+
+		if ( d1 <= 0.0f && d2 <= 0.0f )
+			continue;
+
+		// crosses face
+		if (d1 > d2)
+		{	// enter
+			f = (d1-DIST_EPSILON) / (d1-d2);
+			if (f > enterfrac)
+			{
+				enterfrac = f;
+				clipplane = plane;
+			}
+		}
+		else if ( d1 < d2 )
+		{	// leave
+			f = (d1+DIST_EPSILON) / (d1-d2);
+			if (f < leavefrac)
+				leavefrac = f;
+		}
+		/* else d1 == d2, line segment is parallel to plane, cannot intersect.
+
+		   formerly processed like d1 < d2. now just continue to next
+		   brushside plane.  */
+	}
+
+	if (!startout)
+	{	// original point was inside brush
+		trace->startsolid = true;
+		if (!getout)
+			trace->allsolid = true;
+		return false;
+	}
+	
+	if (enterfrac < leavefrac)
+	{
+		if (enterfrac > -1.0f && enterfrac < trace->fraction)
+		{
+			if (enterfrac < 0.0f)
+				enterfrac = 0.0f;
+			trace->fraction = enterfrac;
+			trace->plane = *clipplane;
+			trace->surface = &placeholder_surface;
+			trace->contents = CONTENTS_SOLID;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 /*
 ================
 CM_TestBoxInBrush
 ================
 */
-static void CM_TestBoxInBrush (vec3_t mins, vec3_t maxs, vec3_t p1,
+static void CM_TestBoxInBrush (const vec3_t mins, const vec3_t maxs, const vec3_t p1,
 					  trace_t *trace, cbrush_t *brush)
 {
 	int			i, j;
@@ -2128,6 +2326,56 @@ static void CM_TestBoxInBrush (vec3_t mins, vec3_t maxs, vec3_t p1,
 	trace->startsolid = trace->allsolid = true;
 	trace->fraction = 0;
 	trace->contents = brush->contents;
+}
+
+static void CM_TestBoxInTerrainTri (const vec3_t mins, const vec3_t maxs, const vec3_t p1,
+					  trace_t *trace, cterraintri_t *tri)
+{
+	int			i, j;
+	cplane_t	*plane;
+	float		dist;
+	vec3_t		ofs;
+	float		d1;
+	vec3_t		pmins, pmaxs;
+	
+	for (i=0 ; i<10 ; i++)
+	{
+		plane = &tri->allplanes[i];
+
+		// FIXME: special case for axial
+
+		// general box case
+
+		// push the plane out apropriately for mins/maxs
+
+		// FIXME: use signbits into 8 way lookup for each mins/maxs
+		for (j=0 ; j<3 ; j++)
+		{
+			if (plane->normal[j] < 0.0f)
+				ofs[j] = maxs[j];
+			else
+				ofs[j] = mins[j];
+		}
+		dist = DotProduct (ofs, plane->normal);
+		dist = plane->dist - dist;
+
+		d1 = DotProduct (p1, plane->normal) - dist;
+
+		// if completely in front of face, no intersection
+		if (d1 > (DIST_EPSILON * 0.5f) )
+			return;
+
+	}
+	
+	VectorAdd (mins, p1, pmins);
+	VectorAdd (maxs, p1, pmaxs);
+	if (TriangleIntersectsBBox (tri->verts[0], tri->verts[1], tri->verts[2], pmins, pmaxs, NULL, NULL))
+	{
+		// inside this brush
+		trace->startsolid = trace->allsolid = true;
+		trace->fraction = 0;
+		trace->contents = CONTENTS_SOLID;
+	}
 }
 
 
@@ -2356,8 +2604,7 @@ return;
 }
 
 
-
-extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect))
+void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect))
 {
 	int i, j, x, y, z;
 	
@@ -2382,8 +2629,8 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 						qboolean does_intersect;
 					
 						does_intersect = RayIntersectsTriangle (start, dir, grid->tris[j]->verts[0], grid->tris[j]->verts[1], grid->tris[j]->verts[2], &tmp);
-			
-						do_draw ((const vec_t **)grid->tris[j]->verts, grid->tris[j]->p.normal, does_intersect);
+						
+						do_draw ((const vec_t **)grid->tris[j]->verts, grid->tris[j]->mainplane.normal, does_intersect);
 					}
 				}
 			}
@@ -2391,14 +2638,48 @@ extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw
 	}
 }
 
-static qboolean bbox_in_trace (const vec3_t box_mins, const vec3_t box_maxs, const vec3_t p1, const vec3_t p2_extents)
+static qboolean bbox_in_trace (const vec3_t box_mins, const vec3_t box_maxs, const vec3_t p1, const vec3_t p2, const vec3_t trace_mins, const vec3_t trace_maxs)
 {
-	return !(	(p1[0] > box_maxs[0] && p2_extents[0] > box_maxs[0]) ||
-				(p1[0] < box_mins[0] && p2_extents[0] < box_mins[0]) ||
-				(p1[1] > box_maxs[1] && p2_extents[1] > box_maxs[1]) ||
-				(p1[1] < box_mins[1] && p2_extents[1] < box_mins[1]) ||
-				(p1[2] > box_maxs[2] && p2_extents[2] > box_maxs[2]) ||
-				(p1[2] < box_mins[2] && p2_extents[2] < box_mins[2]));
+	vec3_t offset_maxs, offset_mins;
+
+	VectorSubtract (box_maxs, trace_mins, offset_maxs);
+	VectorSubtract (box_mins, trace_maxs, offset_mins);
+
+	return !(	(p1[0] > offset_maxs[0] && p2[0] > offset_maxs[0]) ||
+				(p1[0] < offset_mins[0] && p2[0] < offset_mins[0]) ||
+				(p1[1] > offset_maxs[1] && p2[1] > offset_maxs[1]) ||
+				(p1[1] < offset_mins[1] && p2[1] < offset_mins[1]) ||
+				(p1[2] > offset_maxs[2] && p2[2] > offset_maxs[2]) ||
+				(p1[2] < offset_mins[2] && p2[2] < offset_mins[2]));
+}
+
+static void CM_TerrainGridSwath (const cterrainmodel_t *mod, const vec3_t mincoords, const vec3_t maxcoords, const vec3_t dir, int mingrid[3], int maxgrid[3], int griddir[3])
+{
+	int i;
+	
+	for (i = 0; i < 3; i++)
+	{
+		mingrid[i] = (int)floor((mincoords[i]-mod->mins[i]) / TERRAIN_GRIDSIZE);
+		if (mingrid[i] < 0)
+			mingrid[i] = 0;
+		
+		maxgrid[i] = (int)ceil((maxcoords[i]-mod->mins[i]) / TERRAIN_GRIDSIZE + 0.1f);
+		if (maxgrid[i] > mod->numgrid[i])
+			maxgrid[i] = mod->numgrid[i];
+		
+		if (dir[i] < 0.0f)
+		{
+			float tmp;
+			griddir[i] = -1;
+			tmp = mingrid[i] - 1;
+			mingrid[i] = maxgrid[i] - 1;
+			maxgrid[i] = tmp;
+		}
+		else
+		{
+			griddir[i] = 1;
+		}
+	}
 }
 
 // FIXME: It's still quite possible to fall through a terrain mesh.
@@ -2408,66 +2689,37 @@ static qboolean bbox_in_trace (const vec3_t box_mins, const vec3_t box_maxs, con
 // CM_TerrainLightPoint.)
 static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 {
-	static csurface_t placeholder_surface; // no flags, no value
 	vec3_t		p2;
 	int			i, j, k, x, y, z;
-	float		offset;
-	cplane_t	*plane;
 	vec3_t		dir;
-	float		orig_dist;
-	vec3_t		p2_extents;
 	int			ret = -1;
 	
-	for (i = 0; i < 3; i++)
-		p2[i] = p1[i] + trace_trace.fraction * (end[i] - p1[i]);
-	
-	VectorSubtract (p2, p1, dir);
-	orig_dist = VectorNormalize (dir); // Update this every time p2 changes
-	
-	// Update this every time p2 changes
-	for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+	VectorSubtract (trace_end, trace_start, dir);
+	VectorMA (p1, trace_trace.fraction, dir, p2);
 	
 	for (i = 0; i < numterrainmodels; i++)
 	{
+		vec3_t mincoords, maxcoords;
 		int mingrid[3], maxgrid[3], griddir[3];
 		cterrainmodel_t	*mod = &terrain_models[i];
 		
-		if (!bbox_in_trace (mod->mins, mod->maxs, p1, p2_extents))
+		if (!bbox_in_trace (mod->mins, mod->maxs, p1, p2, trace_mins, trace_maxs))
 			continue;
+		
+		for (k = 0; k < 3; k++)
+		{
+			mincoords[k] = maxcoords[k] = p1[k];
+			if (p2[k] < mincoords[k])
+				mincoords[k] = p2[k];
+			if (p2[k] > maxcoords[k])
+				maxcoords[k] = p2[k];
+			mincoords[k] += trace_mins[k];
+			maxcoords[k] += trace_maxs[k];
+		}
 		
 		// We iterate through the grid layers, rows, and columns in order from
 		// closest to furthest. 
-		for (k = 0; k < 3; k++)
-		{
-			float mincoord, maxcoord, tmp;
-			
-			mincoord = maxcoord = p1[k];
-			if (p2_extents[k] < mincoord)
-				mincoord = p2_extents[k];
-			else if (p2_extents[k] > maxcoord)
-				maxcoord = p2_extents[k];
-			
-			mingrid[k] = (int)floor((mincoord-mod->mins[k]) / TERRAIN_GRIDSIZE);
-			if (mingrid[k] < 0)
-				mingrid[k] = 0;
-			
-			maxgrid[k] = (int)ceil((maxcoord-mod->mins[k]) / TERRAIN_GRIDSIZE + 0.1f);
-			if (maxgrid[k] > mod->numgrid[k])
-				maxgrid[k] = mod->numgrid[k];
-			
-			if (dir[k] < 0.0f)
-			{
-				griddir[k] = -1;
-				tmp = mingrid[k] - 1;
-				mingrid[k] = maxgrid[k] - 1;
-				maxgrid[k] = tmp;
-			}
-			else
-			{
-				griddir[k] = 1;
-			}
-		}
-		
+		CM_TerrainGridSwath (mod, mincoords, maxcoords, dir, mingrid, maxgrid, griddir);
 		for (z = mingrid[2]; z != maxgrid[2]; z += griddir[2])
 		{
 			for (y = mingrid[1]; y != maxgrid[1]; y += griddir[1])
@@ -2486,21 +2738,20 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 					// be confident that this works
 					if (	trace_fast &&
 							DotProduct (p1, grid->boundingplane.normal) > grid->boundingplane.dist &&
-							DotProduct (p2_extents, grid->boundingplane.normal) > grid->boundingplane.dist)
+							DotProduct (p2, grid->boundingplane.normal) > grid->boundingplane.dist)
 						continue;
 					
 					if (grid->numtris > 2)
 					{
-						if (!bbox_in_trace (grid->mins, grid->maxs, p1, p2_extents))
+						if (!bbox_in_trace (grid->mins, grid->maxs, p1, p2, trace_mins, trace_maxs))
 							continue;
 					
-						if (!RayIntersectsBBox (p1, dir, grid->mins, grid->maxs, &tmp))
+						if (trace_ispoint && !RayIntersectsBBox (p1, dir, grid->mins, grid->maxs, &tmp))
 							continue;
 					}
 		
 					for (j = 0; j < grid->numtris; j++)
 					{
-						float			intersection_dist;
 						cterraintri_t	*tri = grid->tris[j];
 			
 						// order the tests from least expensive to most
@@ -2509,37 +2760,11 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 							continue; // already checked this triangle in another cell
 						tri->checkcount = checkcount;
 						
-						plane = &tri->p;
-			
-						if (DotProduct (dir, plane->normal) > 0.0f)
+						if (!CM_ClipBoxToTerrainTri (trace_mins, trace_maxs, trace_start, trace_end, &trace_trace, tri))
 							continue;
-			
-						if (!bbox_in_trace (tri->mins, tri->maxs, p1, p2_extents))
-							continue;
-			
-						if (!RayIntersectsTriangle (p1, dir, tri->verts[0], tri->verts[1], tri->verts[2], &intersection_dist))
-							continue;
-			
-						if (trace_ispoint)
-							offset = 0.0f;
-						else
-							offset = fabs(trace_extents[0]*plane->normal[0]) +
-								fabs(trace_extents[1]*plane->normal[1]) +
-								fabs(trace_extents[2]*plane->normal[2]);
-			
-						intersection_dist -= offset;
-			
-						if (intersection_dist > orig_dist)
-							continue;
-			
+						
 						// At this point, we've found a new closest intersection point
-						trace_trace.fraction *= intersection_dist / orig_dist;
-						VectorMA (p1, intersection_dist, dir, p2);
-						orig_dist = intersection_dist;
-						VectorCopy (plane->normal, trace_trace.plane.normal);
-						trace_trace.contents = CONTENTS_SOLID;
-						trace_trace.surface = &placeholder_surface;
-						for (k = 0; k < 3; k++) p2_extents[k] = p2[k] + trace_extents[k]*dir[k];
+						VectorMA (p1, trace_trace.fraction, dir, p2);
 						ret = i;
 						
 						if (trace_fast)
@@ -2552,11 +2777,12 @@ static int CM_TerrainTrace (vec3_t p1, vec3_t end)
 					// Thus, if we've found any intersections in the previous
 					// grid cell, there won't be any closer intersections in
 					// the next one, so we can stop the tracing right here.
-					if (ret != -1)
-						goto done;
+					if (trace_ispoint && ret == i)
+						goto done_with_this_model;
 				}
 			}
 		}
+done_with_this_model:;
 	}
 	
 done:
@@ -2622,7 +2848,7 @@ static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
 								  int headnode, int brushmask,
 								  qboolean enable_terrain)
 {
-	int		i;
+	int		i, j, x, y, z;
 	vec3_t	local_start, local_end;
 
 	checkcount++;		// for multi-check avoidance
@@ -2688,6 +2914,8 @@ static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
 		int		i, numleafs;
 		vec3_t	c1, c2;
 		int		topnode;
+		
+		VectorCopy (start, trace_trace.endpos);
 
 		VectorAdd (start, mins, c1);
 		VectorAdd (start, maxs, c2);
@@ -2702,9 +2930,57 @@ static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
 		{
 			CM_TestInLeaf (leafs[i]);
 			if (trace_trace.allsolid)
-				break;
+				return trace_trace;
 		}
-		VectorCopy (start, trace_trace.endpos);
+		
+		if (!(CONTENTS_SOLID & trace_contents))
+			return trace_trace;
+		
+		for (i = 0; i < numterrainmodels; i++)
+		{
+			int mingrid[3], maxgrid[3], griddir[3];
+			cterrainmodel_t	*mod = &terrain_models[i];
+		
+			for (j = 0; j < 3; j++)
+			{
+				if (c1[j] > mod->maxs[j] || c2[j] < mod->mins[j])
+					goto skip_mod;
+			}
+		
+			// We iterate through the grid layers, rows, and columns in order from
+			// closest to furthest. 
+			CM_TerrainGridSwath (mod, c1, c2, vec3_origin, mingrid, maxgrid, griddir);
+			
+			for (z = mingrid[2]; z != maxgrid[2]; z += griddir[2])
+			{
+				for (y = mingrid[1]; y != maxgrid[1]; y += griddir[1])
+				{
+					for (x = mingrid[0]; x != maxgrid[0]; x += griddir[0])
+					{
+						cterraingrid_t *grid;
+					
+						grid = &mod->grids[z*mod->numgrid[0]*mod->numgrid[1]+y*mod->numgrid[0]+x];
+						for (j = 0; j < 3; j++)
+						{
+							if (c1[j] > mod->maxs[j] || c2[j] < mod->mins[j])
+								goto skip_grid;
+						}
+						
+						for (j = 0; j < grid->numtris; j++)
+						{
+							cterraintri_t	*tri = grid->tris[j];
+							
+							CM_TestBoxInTerrainTri (trace_mins, trace_maxs, trace_start, &trace_trace, tri);
+							
+							if (trace_trace.allsolid)
+								return trace_trace;
+						}
+skip_grid:;
+					}
+				}
+			}
+skip_mod:;
+		}
 	}
 
 	return trace_trace;
