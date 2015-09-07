@@ -180,6 +180,7 @@ cvar_t	*r_firstrun;
 //for testing
 cvar_t  *r_test;
 static cvar_t *r_tracetest, *r_fasttracetest, *r_tracetestlength;
+static cvar_t *r_tracebox, *r_showbox;
 
 //ODE initialization error check
 int r_odeinit_success; // 0 if dODEInit2() fails, 1 otherwise.
@@ -959,7 +960,22 @@ void R_SetupFog (float distance_boost)
 	}
 }
 
-static void R_DrawBBox (const vec3_t mins, const vec3_t maxs)
+void R_DrawVector (const vec3_t a, const vec3_t b)
+{
+	GL_EnableTexture (0, false);
+	
+	qglLineWidth (2.0);
+	qglBegin (GL_LINES);
+	qglColor4f (0, 0, 1, 1);
+	qglVertex3fv (a);
+	qglColor4f (1, 0, 0, 1);
+	qglVertex3fv (b);
+	qglEnd ();
+	
+	GL_EnableTexture (0, true);
+}
+
+void R_DrawBBox (const vec3_t mins, const vec3_t maxs)
 {
 	vec3_t	minmaxs[2];
 	int		side;
@@ -1144,6 +1160,30 @@ void R_RenderView (refdef_t *fd)
 		for (i = 0; i < r_fasttracetest->integer; i++)
 			CM_FastTrace (r_origin, targ, r_worldmodel->firstnode, MASK_OPAQUE);
 	}
+	if (r_tracebox->integer)
+	{
+		vec3_t	mins = {-16, -16, -24};
+		vec3_t	maxs = {16, 16, 32};
+		vec3_t start, targ;
+		VectorCopy (r_origin, start);
+		start[2] -= 22;
+		VectorMA (start, r_tracetestlength->value, forward, targ);
+		trace_t t = CM_BoxTrace (start, targ, mins, maxs, r_worldmodel->firstnode, MASK_PLAYERSOLID);
+		VectorAdd (mins, t.endpos, mins);
+		VectorAdd (maxs, t.endpos, maxs);
+		R_DrawBBox (mins, maxs);
+	}
+	if (*r_showbox->string)
+	{
+		vec3_t	mins = {-16, -16, -24};
+		vec3_t	maxs = {16, 16, 32};
+		vec3_t	ctr;
+		sscanf (r_showbox->string, "%f %f %f", ctr, ctr + 1, ctr + 2);
+		VectorAdd (mins, ctr, mins);
+		VectorAdd (maxs, ctr, maxs);
+		R_DrawBBox (mins, maxs);
+		R_DrawMark (ctr, 3.0f, RGBA (1, 0, 0, 1));
+	}
 
 	if(map_fog)
 		qglDisable(GL_FOG);
@@ -1309,8 +1349,15 @@ void R_Register( void )
 
 	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
 	r_tracetest = Cvar_Get("r_tracetest", "0", CVARDOC_INT); // BoxTrace performance test
-	r_fasttracetest = Cvar_Get("r_fasttracetest", "0", CVARDOC_INT); // FastTrace performance test
+	Cvar_Describe (r_tracetest, "Performs a number of CM_BoxTrace operations starting at the player's origin along the player's view vector for up to r_tracetestlength units. The value of the cvar controls how many traces to do. Useful for profiling & benchmarking.");
+	r_fasttracetest = Cvar_Get("r_fasttracetest", "0", CVARDOC_INT); // FastTace performance test
+	Cvar_Describe (r_fasttracetest, "Performs a number of CM_FastTrace operations starting at the player's origin along the player's view vector for up to r_tracetestlength units. The value of the cvar controls how many traces to do. Useful for profiling & benchmarking.");
 	r_tracetestlength = Cvar_Get("r_tracetestlength", "8192", CVARDOC_FLOAT);
+	Cvar_Describe (r_tracetestlength, "Length in game units of the traces for r_tracetest, r_fasttracetest, and r_tracebox.");
+	r_showbox = Cvar_Get("r_showbox", "", 0);
+	Cvar_Describe (r_showbox, "Shows a box the size of the player's bounding box at the specified coordinates. Use a value of the form \"X Y Z\" including the quotes. Useful for visualizing where a certain coordinate is.");
+	r_tracebox = Cvar_Get("r_tracebox", "", CVARDOC_BOOL);
+	Cvar_Describe (r_tracebox, "Trace from the player's origin along the player's view vector for up to r_tracetestlength units or until an obstacle is reached. Shows a box the size of the player's bounding box at the obstacle.");
 	
 	gl_showdecals = Cvar_Get("gl_showdecals", "0", CVARDOC_INT); //for testing things
 	Cvar_Describe (gl_showdecals, "Set this to 1 to show terrain decal bounding boxes. Set this to 2 to show terrain decals in wireframe.");
