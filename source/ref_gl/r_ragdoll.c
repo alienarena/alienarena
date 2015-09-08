@@ -870,7 +870,7 @@ void R_ClearAllRagdolls( void )
 	RGD_DestroyWorldTrimesh();
 }
 
-void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
+void RGD_AddNewRagdoll (const model_t *mod, vec3_t origin, char name[MAX_QPATH])
 {
 	int RagDollID, i;
 	vec3_t dist;
@@ -899,10 +899,10 @@ void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 			if(r_ragdoll_debug->integer == 2)
 			{
 				Com_Printf("RagDoll name: %s Ent name: %s Mesh: %s Ent Mesh: %s\n", RagDoll[RagDollID].name, name,
-					currentmodel->name, currentmodel->name);
+					mod->name, mod->name);
 
 				for(i = 0; i < 27; i++)
-					Com_Printf("ragdoll val %i: %4.2f\n", i, currentmodel->ragdoll.RagDollDims[i]);
+					Com_Printf("ragdoll val %i: %4.2f\n", i, mod->ragdoll.RagDollDims[i]);
 			}
 
 			if(r_ragdoll_debug->integer)
@@ -910,7 +910,7 @@ void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 					RagDoll[RagDollID].origin[2]);
 
 			//break glass effect for helmets so we don't need to render them
-			if(currentmodel->ragdoll.hasHelmet)
+			if(mod->ragdoll.hasHelmet)
 				CL_GlassShards(RagDoll[RagDollID].origin, dir, 5);
 			break;
 		}

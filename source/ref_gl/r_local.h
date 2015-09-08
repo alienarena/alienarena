@@ -526,7 +526,7 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
-extern void		R_Mesh_DrawCaster (void);
+extern void		R_Mesh_DrawCaster (entity_t *ent, model_t *mod);
 extern void		IQM_DrawRagDollCaster (int);
 void				R_GenerateGlobalShadows (void);
 extern void		R_GenerateEntityShadow( void );
@@ -782,7 +782,7 @@ extern void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
 //md2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
-void MD2_SelectFrame (void);
+void MD2_SelectFrame (entity_t *ent, model_t *mod);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);
