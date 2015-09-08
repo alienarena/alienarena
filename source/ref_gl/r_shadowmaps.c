@@ -235,6 +235,7 @@ void R_GenerateShadowFBO()
 	// later glClear calls.
 	qglClearColor (1, 1, 1, 1);
 	qglClear( GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
+	qglClearColor (0, 0, 0, 1.0f);
 	
 	// back to previous screen coordinates
 	R_SetupViewport ();
@@ -454,6 +455,7 @@ static void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	{
 		if (surf->visframe != r_framecount)
 			continue;
+
 
 		if (R_CullBox (surf->mins, surf->maxs)) 
 			continue;
@@ -786,9 +788,34 @@ void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
 	}
 }
 
-void R_DrawShadowMapTerrain (vec3_t origin)
+static void SM_SetupGLState (void)
 {
-	//draw polys close to this ent that would be in shadow
+	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value)); 
+
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	// Culling switching, rendering only frontfaces
+	qglCullFace(GL_BACK);
+
+	qglEnable( GL_POLYGON_OFFSET_FILL );
+	qglPolygonOffset( 0.5f, 0.5f );	
+}
+
+static void SM_TeardownGLState (void)
+{
+	qglPolygonOffset( 0.0f, 0.0f );
+	qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglCullFace(GL_FRONT);
+
+	// back to previous screen coordinates
+	R_SetupViewport ();
+	
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+	//Enabling color write (previously disabled for light POV z-buffer rendering)
+	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 #include "r_lodcalc.h"
@@ -848,7 +875,7 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	R_Mesh_DrawCaster ();
 }
 
-void R_DrawDynamicCaster(void)
+static void R_DrawDynamicCaster(void)
 {
 	int		i;
 	int		RagDollID;
@@ -860,32 +887,14 @@ void R_DrawDynamicCaster(void)
 		return; //we have no lights of consequence
 	
 	VectorCopy (r_newrefdef.dlights[0].origin, lightOrigin);
-
-	GL_SelectTexture (0);
-	GL_Bind (r_depthtexture->texnum);
-
+	
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
-
-	// Clear previous frame values
+	
+	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglCullFace(GL_BACK);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
-
+	
 	//set camera
 	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128, false, false);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );
 
 	//render world - very basic geometry
 	R_DrawShadowMapWorld (false, vec3_origin);
@@ -914,11 +923,6 @@ void R_DrawDynamicCaster(void)
 	SM_SetTextureMatrix(0);
 
 	r_shadowmapcount = 1;
-
-	qglDepthMask (1);		// back to writing
-
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
 	
 	GL_InvalidateTextureState (); // FIXME
 
@@ -1006,59 +1010,46 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 	GLSTATE_DISABLE_ALPHATEST
 }
 
-void R_DrawVegetationCaster(void)
+static void R_DrawVegetationCaster(void)
 {	
 	if(!r_sunLight->has_Sun || !r_hasleaves)
 		return; //no point if there is no sun or leaves!
 
-	GL_SelectTexture (0);
-	GL_Bind (r_depthtexture2->texnum);
-
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value)); 
-
+	
 	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglDisable(GL_CULL_FACE);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
-
+	
 	//get sun light origin and target from map info, at map load
 	//set camera
 	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2], false, false);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );
 
 	//render vegetation
 	R_DrawVegetationCasters(true); 
 	
 	SM_SetTextureMatrix(1);
-		
-	qglDepthMask (1);		// back to writing
-
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
-	qglEnable(GL_CULL_FACE);
 }
 
-static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean onTerrain)
-{		
-	vec3_t	dist, adjLightPos, mins, maxs;
+// There are two global shadowmaps: one cast by the sun, and one cast by the
+// dynamic light source. Static, non-sun shadows are not done globally.
+void R_GenerateGlobalShadows (void)
+{
+	qglEnable(GL_DEPTH_TEST);
+	qglEnable(GL_CULL_FACE);
+	SM_SetupGLState ();
+	
+	R_DrawDynamicCaster();
+	R_DrawVegetationCaster();
+	
+	SM_TeardownGLState ();
+}
+
+static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean onTerrain, qboolean do_clear)
+{
+	vec3_t	dist, adjLightPos;
 	vec3_t lightVec;
 	vec2_t xyDist;
 	model_t *prevModel;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
 
 	//check caster validity
 	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
@@ -1072,25 +1063,18 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 		if(ent->frame > 198)
 			return;
 	}
+	
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+	
+	if (do_clear)
+		qglClear (GL_DEPTH_BUFFER_BIT);
 
+	SM_SetupGLState ();
+	
 	qglMatrixMode(GL_PROJECTION);
 	qglPushMatrix();
 	qglMatrixMode(GL_MODELVIEW);
 	qglPushMatrix();
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglCullFace(GL_BACK);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
 
 	//get light origin
 	VectorCopy(statLightPosition, adjLightPos);
@@ -1107,9 +1091,6 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	
 	//set camera
 	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], onTerrain, onTerrain);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );	
 
 	prevModel = currentmodel;
 	
@@ -1139,15 +1120,8 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	R_Mesh_DrawCaster ();
 	
 	SM_SetTextureMatrix(1);
-		
-	qglDepthMask (1);		// back to writing
-
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
-	qglCullFace(GL_FRONT);
-
-	// back to previous screen coordinates
-	R_SetupViewport ();
+	
+	SM_TeardownGLState ();
 
 	qglPopMatrix();
 	qglMatrixMode(GL_PROJECTION);
@@ -1208,21 +1182,7 @@ void R_GenerateEntityShadow( void )
 		else
 			fadeShadow = 1.0;
 
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-		qglClear( GL_DEPTH_BUFFER_BIT);
-		
-		qglEnable(GL_DEPTH_TEST);
-		qglClearColor(0,0,0,1.0f);
-
-		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
-
-		R_DrawEntityCaster(currententity, origin, zOffset, false);
-
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		R_DrawEntityCaster(currententity, origin, zOffset, false, true);
 
 		//re-render affected polys with shadowmap for this entity
 		if(r_shadowmapcount > 0)
@@ -1281,15 +1241,10 @@ void R_GenerateEntityShadow( void )
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset, false);
+				R_DrawEntityCaster(currententity, origin, zOffset, false, false);
 			}
 			currententity = prevEntity;
 		}
-		
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 }
 
@@ -1298,6 +1253,7 @@ void R_GenerateTerrainShadows( void )
 	vec3_t origin, dist;
 	entity_t *prevEntity;
 	int i;
+	qboolean do_clear = true;
 	
 	if (!gl_shadowmaps->integer)
 		return;
@@ -1313,15 +1269,6 @@ void R_GenerateTerrainShadows( void )
 	VectorCopy(r_worldLightVec, statLightPosition);	
 
 	//Com_Printf("Sun: %4.2f %4.2f %4.2f target: %4.2f %4.2f %4.2f\n", statLightPosition[0], statLightPosition[1], statLightPosition[2], origin[0], origin[1], origin[2]);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	qglClear( GL_DEPTH_BUFFER_BIT);
-		
-	qglEnable(GL_DEPTH_TEST);
-	qglClearColor(0,0,0,1.0f);
-
-	qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
 	prevEntity = currententity;
 
@@ -1343,14 +1290,10 @@ void R_GenerateTerrainShadows( void )
 			continue;
 
 		//if this entity isn't close to the player, don't bother 
-		R_DrawEntityCaster(currententity, origin, 0.0, true);
+		R_DrawEntityCaster (currententity, origin, 0.0, true, do_clear);
+		do_clear = false;
 	}
 	currententity = prevEntity;
-			
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-	//Enabling color write (previously disabled for light POV z-buffer rendering)
-	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
 void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms)

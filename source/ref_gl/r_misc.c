@@ -612,7 +612,7 @@ void GL_SetDefaultState( void )
 	qglGetIntegerv(GL_SAMPLE_BUFFERS, &MultiSampleEnabled);
 	gl_state.msaaEnabled = MultiSampleEnabled != 0;
 	
-	qglClearColor (1,0, 0.5 , 0.5);
+	qglClearColor (0, 0, 0, 1.0f);
 	qglCullFace(GL_FRONT);
 	GL_EnableTexture (0, true);
 
