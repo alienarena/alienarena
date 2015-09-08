@@ -271,22 +271,12 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	mod->extradatasize = Hunk_End ();
 }
 
-void MD2_SelectFrame (void)
+void MD2_SelectFrame (entity_t *ent, model_t *mod)
 {
-	if ( (currententity->frame >= currentmodel->num_frames)
-		|| (currententity->frame < 0) )
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
+	if (    ent->frame >= mod->num_frames || ent->frame < 0 ||
+	        ent->oldframe >= mod->num_frames || ent->oldframe < 0)
+		ent->frame = ent->oldframe = 0;
 
-	if ( (currententity->oldframe >= currentmodel->num_frames)
-		|| (currententity->oldframe < 0))
-	{
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
-
-	if ( !r_lerpmodels->integer )
-		currententity->backlerp = 0;
+	if (!r_lerpmodels->integer)
+		ent->backlerp = 0;
 }

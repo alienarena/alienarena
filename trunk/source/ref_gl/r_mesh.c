@@ -445,7 +445,7 @@ static qboolean R_Mesh_CullBBox (vec3_t bbox[8])
 }
 
 // should be able to handle all mesh types
-static qboolean R_Mesh_CullModel (void)
+static qboolean R_Mesh_CullModel (entity_t *ent, model_t *mod)
 {
 	int		i;
 	vec3_t	vectors[3];
@@ -454,23 +454,23 @@ static qboolean R_Mesh_CullModel (void)
 	vec3_t	bbox[8];
 	
 	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		return !(currententity->flags & RF_MENUMODEL);
+		return !(ent->flags & RF_MENUMODEL);
 	
-	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
+	if (!cl_gun->integer && (ent->flags & RF_WEAPONMODEL))
 		return true;
 	
-	if ((currententity->flags & RF_WEAPONMODEL))
+	if ((ent->flags & RF_WEAPONMODEL))
 		return r_lefthand->integer == 2;
 
 	//Do not cull large meshes - too many artifacts occur
-	if((currentmodel->maxs[0] - currentmodel->mins[0] > 72 || currentmodel->maxs[1] - currentmodel->mins[1] > 72 
-		|| currentmodel->maxs[2] - currentmodel->mins[2] > 72) && currententity->frame < 199)
+	if((mod->maxs[0] - mod->mins[0] > 72 || mod->maxs[1] - mod->mins[1] > 72 
+		|| mod->maxs[2] - mod->mins[2] > 72) && ent->frame < 199)
 		return false;
 	
 	/*
 	** rotate the bounding box
 	*/
-	VectorCopy (currententity->angles, angles);
+	VectorCopy (ent->angles, angles);
 	angles[YAW] = -angles[YAW];
 	AngleVectors (angles, vectors[0], vectors[1], vectors[2]);
 
@@ -478,22 +478,22 @@ static qboolean R_Mesh_CullModel (void)
 	{
 		vec3_t tmp;
 
-		VectorCopy (currentmodel->bbox[i], tmp);
+		VectorCopy (mod->bbox[i], tmp);
 
 		bbox[i][0] = DotProduct (vectors[0], tmp);
 		bbox[i][1] = -DotProduct (vectors[1], tmp);
 		bbox[i][2] = DotProduct (vectors[2], tmp);
 
-		VectorAdd (currententity->origin, bbox[i], bbox[i]);
+		VectorAdd (ent->origin, bbox[i], bbox[i]);
 	}
 	
 	// Occlusion culling-- check if *any* part of the mesh is visible. 
 	// Possible to have meshes culled that shouldn't be, but quite rare.
 	// HACK: culling rocks is currently too slow, so we don't.
 	// TODO: parallelize?
-	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock"))
+	if (r_worldmodel && mod->type != mod_terrain && mod->type != mod_decal && !strstr (mod->name, "rock"))
 	{
-		qboolean unblocked = CM_FastTrace (currententity->origin, r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
+		qboolean unblocked = CM_FastTrace (ent->origin, r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 		for (i = 0; i < 8 && !unblocked; i++)
 			unblocked = CM_FastTrace (bbox[i], r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 		
@@ -501,34 +501,32 @@ static qboolean R_Mesh_CullModel (void)
 			return true;
 	}
 	
-	VectorSubtract(r_origin, currententity->origin, dist);
+	VectorSubtract(r_origin, ent->origin, dist);
 
 	// Keep nearby meshes so shadows don't blatantly disappear when out of frustom
 	if (VectorLength(dist) > 150 && R_Mesh_CullBBox (bbox))
 		return true;
 	
 	// TODO: could probably find a better place for this.
-	if (r_ragdolls->integer && (currentmodel->typeFlags & MESH_SKELETAL) && !currententity->ragdoll)
+	if (r_ragdolls->integer && (mod->typeFlags & MESH_SKELETAL) && !ent->ragdoll)
 	{
 		//Ragdolls take over at beginning of each death sequence
-		if	(	!(currententity->flags & RF_TRANSLUCENT) &&
-				currentmodel->hasRagDoll && 
-				(currententity->frame == 199 || 
-				currententity->frame == 220 ||
-				currententity->frame == 238)
+		if	(	!(ent->flags & RF_TRANSLUCENT) &&
+				mod->hasRagDoll && 
+				(ent->frame == 199 || ent->frame == 220 || ent->frame == 238)
 			)
 		{
-			RGD_AddNewRagdoll (currententity->origin, currententity->name);
+			RGD_AddNewRagdoll (mod, ent->origin, ent->name);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
-		if ((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
+		if ((mod->hasRagDoll || (ent->flags & RF_TRANSLUCENT)) && ent->frame > 198)
 			return true;
 	}
 
 	return false;
 }
 
-static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
+static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms, entity_t *ent, model_t *mod)
 {
 	int			animtype;
 	
@@ -536,20 +534,20 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 	qboolean	lerped;
 	float		frontlerp;
 	
-	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);
-	frontlerp = 1.0 - currententity->backlerp;
+	lerped = ent->backlerp != 0.0 && (ent->frame != 0 || mod->num_frames != 1);
+	frontlerp = 1.0 - ent->backlerp;
 	
 	animtype = 0;
 	
-	if ((currentmodel->typeFlags & MESH_MORPHTARGET) && lerped)
+	if ((mod->typeFlags & MESH_MORPHTARGET) && lerped)
 		animtype |= 2;
 	
-	if ((currentmodel->typeFlags & MESH_SKELETAL))
+	if ((mod->typeFlags & MESH_SKELETAL))
 	{
 		static matrix3x4_t outframe[SKELETAL_MAX_BONEMATS];
-		assert (currentmodel->type == mod_iqm);
+		assert (mod->type == mod_iqm);
 		IQM_AnimateFrame (outframe);
-		glUniformMatrix3x4fvARB (uniforms->outframe, currentmodel->num_joints, GL_FALSE, (const GLfloat *) outframe);
+		glUniformMatrix3x4fvARB (uniforms->outframe, mod->num_joints, GL_FALSE, (const GLfloat *) outframe);
 		animtype |= 1;
 	}
 	
@@ -684,7 +682,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	
 	glUniform1iARB (uniforms->doShading, (currentmodel->typeFlags & MESH_DOSHADING) != 0);
 	
-	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms);
+	R_Mesh_SetupAnimUniforms (&uniforms->anim_uniforms, currententity, currentmodel);
 	
 	// set up the fixed-function pipeline too
 	if (!fragmentshader)
@@ -741,22 +739,22 @@ static void R_Mesh_SetupGlassRender (void)
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_ONE, GL_ONE);
 	
-	R_Mesh_SetupAnimUniforms (&glass_uniforms.anim_uniforms);
+	R_Mesh_SetupAnimUniforms (&glass_uniforms.anim_uniforms, currententity, currentmodel);
 }
 
 // Should be able to handle all mesh types. This is the component of the 
 // mesh rendering process that does not need to care which GLSL shader is
 // being used-- they all support the same vertex data and vertex attributes.
-static void R_Mesh_DrawVBO (qboolean lerped)
+static void R_Mesh_DrawVBO (entity_t *ent, model_t *mod, qboolean lerped)
 {
-	const int typeFlags = currentmodel->typeFlags;
+	const int typeFlags = mod->typeFlags;
 	const int frames_idx =  ((typeFlags & MESH_INDEXED) ? 2 : 1);
-	const int framenum = ((typeFlags & MESH_MORPHTARGET) ? currententity->frame : 0);
+	const int framenum = ((typeFlags & MESH_MORPHTARGET) ? ent->frame : 0);
 	const size_t framestride = sizeof(mesh_framevbo_t);
 	const size_t basestride = (typeFlags & MESH_SKELETAL) ? sizeof(skeletal_basevbo_t) : sizeof(nonskeletal_basevbo_t);
 	
 	// base (non-frame-specific) data
-	GL_BindVBO (currentmodel->vboIDs[0]);
+	GL_BindVBO (mod->vboIDs[0]);
 	R_TexCoordPointer (0, basestride, (void *)FOFS (nonskeletal_basevbo_t, st));
 	if ((typeFlags & MESH_SKELETAL))
 	{
@@ -766,7 +764,7 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	}
 	
 	// primary frame data
-	GL_BindVBO (currentmodel->vboIDs[framenum + frames_idx]);
+	GL_BindVBO (mod->vboIDs[framenum + frames_idx]);
 	R_VertexPointer (3, framestride, (void *)FOFS (mesh_framevbo_t, vertex));
 	R_NormalPointer (framestride, (void *)FOFS (mesh_framevbo_t, normal));
 	R_AttribPointer (ATTR_TANGENT_IDX, 4, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, tangent));
@@ -775,7 +773,7 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	if ((typeFlags & MESH_MORPHTARGET) && lerped)
 	{
 		// Note: the lerp position is sent separately as a uniform to the GLSL shader.
-		GL_BindVBO (currentmodel->vboIDs[currententity->oldframe + frames_idx]);
+		GL_BindVBO (mod->vboIDs[ent->oldframe + frames_idx]);
 		R_AttribPointer (ATTR_OLDVTX_IDX, 3, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, vertex));
 		R_AttribPointer (ATTR_OLDNORM_IDX, 3, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, normal));
 		R_AttribPointer (ATTR_OLDTAN_IDX, 4, GL_FLOAT, GL_FALSE, framestride, (void *)FOFS (mesh_framevbo_t, tangent));
@@ -786,13 +784,13 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	// render
 	if ((typeFlags & MESH_INDEXED))
 	{
-		GL_BindIBO (currentmodel->vboIDs[1]);
-		qglDrawElements (GL_TRIANGLES, currentmodel->num_triangles*3, GL_UNSIGNED_INT, 0);
+		GL_BindIBO (mod->vboIDs[1]);
+		qglDrawElements (GL_TRIANGLES, mod->num_triangles*3, GL_UNSIGNED_INT, 0);
 		GL_BindIBO (0);
 	}
 	else
 	{
-		qglDrawArrays (GL_TRIANGLES, 0, currentmodel->num_triangles*3);
+		qglDrawArrays (GL_TRIANGLES, 0, mod->num_triangles*3);
 	}
 	
 	R_KillVArrays ();
@@ -800,7 +798,7 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 
 static void R_Mesh_DrawVBO_Callback (void)
 {
-	R_Mesh_DrawVBO (false);
+	R_Mesh_DrawVBO (currententity, currentmodel, false);
 }
 
 /*
@@ -871,7 +869,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 		R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, shell);
 	}
 	
-	R_Mesh_DrawVBO (lerped);
+	R_Mesh_DrawVBO (currententity, currentmodel, lerped);
 	
 	glUseProgramObjectARB (0);
 	qglDepthMask (true);
@@ -887,12 +885,12 @@ static void R_Mesh_DrawFrame (int skinnum)
 
 }
 
-static void R_Mesh_DrawBlankMeshFrame (void)
+static void R_Mesh_DrawBlankMeshFrame (entity_t *ent, model_t *mod)
 {
 	glUseProgramObjectARB (g_blankmeshprogramObj);
-	R_Mesh_SetupAnimUniforms (&blankmesh_uniforms);
+	R_Mesh_SetupAnimUniforms (&blankmesh_uniforms, ent, mod);
 	
-	R_Mesh_DrawVBO (currententity->frame != 0 || currentmodel->num_frames != 1);
+	R_Mesh_DrawVBO (ent, mod, ent->frame != 0 || mod->num_frames != 1);
 
 	glUseProgramObjectARB (0);
 }
@@ -980,7 +978,7 @@ void R_Mesh_Draw (void)
 {
 	image_t		*skin;
 
-	if (R_Mesh_CullModel ())
+	if (R_Mesh_CullModel (currententity, currentmodel))
 		return;
 	
 	R_GetLightVals (currententity->origin, false);
@@ -1006,7 +1004,7 @@ void R_Mesh_Draw (void)
 		return;
 	
 	if (currentmodel->type == mod_md2)
-		MD2_SelectFrame ();
+		MD2_SelectFrame (currententity, currentmodel);
 	// New model types go here
 
 	R_Mesh_SetShadelight ();
@@ -1072,7 +1070,7 @@ void R_Mesh_Draw (void)
 		qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 		qglDepthMask (false);
 		if (gl_showtris->integer > 1) qglDisable (GL_DEPTH_TEST);
-		R_Mesh_DrawBlankMeshFrame ();
+		R_Mesh_DrawBlankMeshFrame (currententity, currentmodel);
 		if (gl_showtris->integer > 1) qglEnable (GL_DEPTH_TEST);
 		qglDepthMask (true);
 		qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
@@ -1109,33 +1107,33 @@ void R_Mesh_Draw (void)
 
 // TODO - alpha and alphamasks possible?
 // Should support every mesh type
-void R_Mesh_DrawCaster (void)
+void R_Mesh_DrawCaster (entity_t *ent, model_t *mod)
 {
 	// don't draw weapon model shadow casters or shells
-	if ((currententity->flags & (RF_WEAPONMODEL|RF_SHELL_ANY)))
+	if ((ent->flags & (RF_WEAPONMODEL|RF_SHELL_ANY)))
 		return;
 
-	if (!(currententity->flags & RF_VIEWERMODEL) && R_Mesh_CullModel ())
+	if (!(ent->flags & RF_VIEWERMODEL) && R_Mesh_CullModel (ent, mod))
 		return;
 
 	qglPushMatrix ();
-	if (!currententity->ragdoll) // HACK
+	if (!ent->ragdoll) // HACK
 	{
-		qglTranslatef (currententity->origin[0],  currententity->origin[1],  currententity->origin[2]);
-		qglRotatef (currententity->angles[YAW],		0, 0, 1);
+		qglTranslatef (ent->origin[0], ent->origin[1], ent->origin[2]);
+		qglRotatef (ent->angles[YAW],		0, 0, 1);
 		// pitch and roll are handled by IQM_AnimateFrame. 
-		if (currententity->model == NULL || (currententity->flags & RF_WEAPONMODEL) || currententity->model->type != mod_iqm)
+		if (ent->model == NULL || (ent->flags & RF_WEAPONMODEL) || ent->model->type != mod_iqm)
 		{
-			qglRotatef (currententity->angles[PITCH],	0, 1, 0);
-			qglRotatef (currententity->angles[ROLL],	1, 0, 0);
+			qglRotatef (ent->angles[PITCH],	0, 1, 0);
+			qglRotatef (ent->angles[ROLL],	1, 0, 0);
 		}
 	}
 	
-	if (currentmodel->type == mod_md2)
-		MD2_SelectFrame ();
+	if (mod->type == mod_md2)
+		MD2_SelectFrame (ent, mod);
 	// New model types go here
 
-	R_Mesh_DrawBlankMeshFrame ();
+	R_Mesh_DrawBlankMeshFrame (ent, mod);
 
 	qglPopMatrix();
 }

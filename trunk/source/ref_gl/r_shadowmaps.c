@@ -872,7 +872,7 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	if (currententity->lod2)
 		currentmodel = currententity->lod2;
 
-	R_Mesh_DrawCaster ();
+	R_Mesh_DrawCaster (currententity, currentmodel);
 }
 
 static void R_DrawDynamicCaster(void)
@@ -1117,7 +1117,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 			currentmodel = ent->lod2;
 	}
 
-	R_Mesh_DrawCaster ();
+	R_Mesh_DrawCaster (currententity, currentmodel);
 	
 	SM_SetTextureMatrix(1);
 	
@@ -1141,7 +1141,6 @@ void R_GenerateEntityShadow( void )
 	{
 		vec3_t dist, origin, tmp;
 		float rad, zOffset;
-		entity_t *prevEntity;
 		int i;
 
 		r_shadowmapcount = 0;
@@ -1200,7 +1199,7 @@ void R_GenerateEntityShadow( void )
 		if(!(currententity->flags & RF_VIEWERMODEL))
 		{
 			//now check for any entities close to this one, and add to the depth buffer 
-			prevEntity = currententity;
+			entity_t *prevEntity = currententity;
 
 			for (i = 0 ; i < r_newrefdef.num_entities; i++)
 			{
