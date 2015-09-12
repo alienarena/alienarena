@@ -1040,19 +1040,11 @@ void R_GenerateGlobalShadows (void)
 	SM_TeardownGLState ();
 }
 
-static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean onTerrain, qboolean do_clear)
+static void SM_SetupCasterMatrices (const vec3_t origin, float zOffset, qboolean onTerrain)
 {
-	vec3_t	dist, adjLightPos;
+	vec3_t adjLightPos;
 	vec3_t lightVec;
 	vec2_t xyDist;
-	model_t *prevModel;
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-	
-	if (do_clear)
-		qglClear (GL_DEPTH_BUFFER_BIT);
-
-	SM_SetupGLState ();
 	
 	qglMatrixMode(GL_PROJECTION);
 	qglPushMatrix();
@@ -1067,13 +1059,32 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	VectorSubtract(statLightPosition, origin, lightVec);
 	xyDist[0] = lightVec[0];
 	xyDist[1] = lightVec[1];
-	if(abs(VectorLength(xyDist)) > abs(lightVec[2])*1.5)
-	{
-		adjLightPos[2] += abs(VectorLength(xyDist)) - abs(lightVec[2])*1.5;
-	}
+	if (abs (VectorLength (xyDist)) > abs (lightVec[2]) * 1.5)
+		adjLightPos[2] += abs (VectorLength (xyDist)) - abs (lightVec[2]) * 1.5;
 	
 	//set camera
-	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], onTerrain, onTerrain);
+	SM_SetupMatrices (adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], onTerrain, onTerrain);
+}
+
+static void SM_TeardownCasterMatrices ()
+{
+	qglPopMatrix ();
+	qglMatrixMode (GL_PROJECTION);
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
+}
+
+static void R_DrawEntityCaster (entity_t *ent, qboolean do_clear)
+{
+	vec3_t	dist;
+	model_t *prevModel;
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
+	
+	if (do_clear)
+		qglClear (GL_DEPTH_BUFFER_BIT);
+
+	SM_SetupGLState ();
 
 	prevModel = currentmodel;
 	
@@ -1105,11 +1116,6 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	SM_SetTextureMatrix(1);
 	
 	SM_TeardownGLState ();
-
-	qglPopMatrix();
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);	
 
 	r_shadowmapcount = 1;
 
@@ -1164,7 +1170,9 @@ void R_GenerateEntityShadow( void )
 		else
 			fadeShadow = 1.0;
 
-		R_DrawEntityCaster(currententity, origin, zOffset, false, true);
+		SM_SetupCasterMatrices (origin, zOffset, false);
+		R_DrawEntityCaster(currententity, true);
+		SM_TeardownCasterMatrices ();
 
 		//re-render affected polys with shadowmap for this entity
 		if(r_shadowmapcount > 0)
@@ -1179,10 +1187,12 @@ void R_GenerateEntityShadow( void )
 			GLSTATE_DISABLE_BLEND
 		}
 
-		if(!(currententity->flags & RF_VIEWERMODEL))
+		if (!(currententity->flags & RF_VIEWERMODEL))
 		{
 			//now check for any entities close to this one, and add to the depth buffer 
 			entity_t *prevEntity = currententity;
+			
+			SM_SetupCasterMatrices (origin, zOffset, false);
 
 			for (i = 0 ; i < r_newrefdef.num_entities; i++)
 			{
@@ -1223,9 +1233,10 @@ void R_GenerateEntityShadow( void )
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset, false, false);
+				R_DrawEntityCaster(currententity, false);
 			}
 			currententity = prevEntity;
+			SM_TeardownCasterMatrices ();
 		}
 	}
 }
@@ -1253,13 +1264,15 @@ void R_GenerateTerrainShadows( void )
 	//Com_Printf("Sun: %4.2f %4.2f %4.2f target: %4.2f %4.2f %4.2f\n", statLightPosition[0], statLightPosition[1], statLightPosition[2], origin[0], origin[1], origin[2]);
 
 	prevEntity = currententity;
+	
+	SM_SetupCasterMatrices (origin, 0.0, true);
 
 	for (i = 0 ; i < r_newrefdef.num_entities; i++)
 	{
 		currententity = &r_newrefdef.entities[i];
 
 		if (SM_Cull (currententity))
-			return;
+			continue;
 
 		if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
 			continue;
@@ -1272,10 +1285,11 @@ void R_GenerateTerrainShadows( void )
 			continue;
 
 		//if this entity isn't close to the player, don't bother 
-		R_DrawEntityCaster (currententity, origin, 0.0, true, do_clear);
+		R_DrawEntityCaster (currententity, do_clear);
 		do_clear = false;
 	}
 	currententity = prevEntity;
+	SM_TeardownCasterMatrices ();
 }
 
 void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms)
