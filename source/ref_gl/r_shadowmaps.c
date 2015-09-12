@@ -822,27 +822,23 @@ static void SM_TeardownGLState (void)
 
 extern cvar_t *cl_simpleitems;
 
+// returns false if the entity can cast a shadow
+static qboolean SM_Cull (entity_t *ent)
+{
+	return
+		(ent->flags & RF_NOSHADOWS) || (ent->flags & RF_TRANSLUCENT) ||
+		!ent->model || ent->model->type <= mod_brush ||
+		//TODO: simple items casting shadows?
+		(cl_simpleitems->integer && ent->model->simple_texnum != 0) || 
+		(r_ragdolls->integer && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll && ent->frame > 198);
+}
+
 static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 {
 	vec3_t	dist;
 	
-	if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
+	if (SM_Cull (currententity))
 		return;
-
-	if(!currententity->model)
-		return;
-
-	if (currententity->model->type <= mod_brush) 
-		return;
-	
-	if (cl_simpleitems->integer && currententity->model->simple_texnum != 0)
-		return; //TODO: simple items casting shadows?
-
-	if(r_ragdolls->value && currententity->model->type == mod_iqm && currententity->model->hasRagDoll && !currententity->ragdoll)
-	{
-		if(currententity->frame > 198)
-			return;
-	}
 
 	//distance from light, if too far, don't render(to do - check against brightness for dist!)
 	VectorSubtract (lightOrigin, currententity->origin, dist);
@@ -1051,19 +1047,6 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	vec2_t xyDist;
 	model_t *prevModel;
 
-	//check caster validity
-	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
-		return;
-	
-	if (cl_simpleitems->integer && ent->model->simple_texnum != 0)
-		return;
-
-	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll)
-	{
-		if(ent->frame > 198)
-			return;
-	}
-	
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 	
 	if (do_clear)
@@ -1148,8 +1131,8 @@ void R_GenerateEntityShadow( void )
 		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || currententity->flags & RF_MENUMODEL)
 			return;
 		
-		if(!currententity->model)
-			return;	
+		if (SM_Cull (currententity))
+			return;
 
 		//root entity camera info
 		VectorCopy(currententity->origin, origin);
@@ -1206,13 +1189,13 @@ void R_GenerateEntityShadow( void )
 				currententity = &r_newrefdef.entities[i];
 
 				//don't add this entity to the depth texture - it's already in there!
-				if(currententity == prevEntity)
+				if (currententity == prevEntity)
+					continue;
+				
+				if (SM_Cull (currententity))
 					continue;
 
-				if (!currententity->model)
-					continue;
-
-				if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+				if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
 					continue;
 
 				if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
@@ -1275,17 +1258,17 @@ void R_GenerateTerrainShadows( void )
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		if (!currententity->model)
-			continue;
+		if (SM_Cull (currententity))
+			return;
 
-		if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+		if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
 			continue;
 
 		if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
 			continue;
 
 		VectorSubtract(r_origin, currententity->origin, dist);
-		if(VectorLength(dist) > r_shadowcutoff->value)
+		if (VectorLength(dist) > r_shadowcutoff->value)
 			continue;
 
 		//if this entity isn't close to the player, don't bother 
