@@ -123,7 +123,7 @@ typedef struct
 {
 	// allplanes is treaded as an array with 10 members. We do this so that
 	// the planes get checked in the most efficient order.
-	cplane_t	allplanes[0];
+	cplane_t	allplanes[10];
 	cplane_t	bboxplanes[6];
 	cplane_t	mainplane;
 	cplane_t	sideplanes[3];

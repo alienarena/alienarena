@@ -1147,15 +1147,20 @@ void R_RenderView (refdef_t *fd)
 	}
 	if (r_tracebox->integer)
 	{
+		trace_t t;
+		vec3_t start, targ;
 		vec3_t	mins = {-16, -16, -24};
 		vec3_t	maxs = {16, 16, 32};
-		vec3_t start, targ;
+		
 		VectorCopy (r_origin, start);
 		start[2] -= 22;
 		VectorMA (start, r_tracetestlength->value, forward, targ);
-		trace_t t = CM_BoxTrace (start, targ, mins, maxs, r_worldmodel->firstnode, MASK_PLAYERSOLID);
+		
+		t = CM_BoxTrace (start, targ, mins, maxs, r_worldmodel->firstnode, MASK_PLAYERSOLID);
+
 		VectorAdd (mins, t.endpos, mins);
 		VectorAdd (maxs, t.endpos, maxs);
+
 		R_DrawBBox (mins, maxs);
 	}
 	if (*r_showbox->string)
