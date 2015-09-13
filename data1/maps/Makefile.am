@@ -73,6 +73,8 @@ nobase_dist_maps_DATA = \
 	dm-vesuvius2k11.lightmap \
 	dm-violator2k11.bsp \
 	dm-violator2k11.lightmap \
+	dm-violator2k15.bsp \
+	dm-violator2k15.lightmap \
 	dm-warmachine2k10.bsp \
 	dm-warmachine2k10.lightmap \
 	dm-wasteland.bsp \
@@ -208,6 +210,7 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/blade.jpg \
 	meshes/gothic/blade.md2 \
 	meshes/gothic/blade_normal.jpg \
+	meshes/gothic/blade2.md2 \
 	meshes/gothic/ceillamp.md2 \
 	meshes/gothic/column1.jpg \
 	meshes/gothic/column1.md2 \
@@ -360,6 +363,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obarch1.md2 \
 	meshes/tech/obarch1_fx.tga \
 	meshes/tech/obarch1_normal.jpg \
+	meshes/tech/obarch2.md2 \
 	meshes/tech/obfloor1.jpg \
 	meshes/tech/obfloor1.md2 \
 	meshes/tech/obfloor1_fx.tga \
@@ -369,6 +373,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obsupport1.md2 \
 	meshes/tech/obsupport1_fx.tga \
 	meshes/tech/obsupport1_normal.jpg \
+	meshes/tech/obsupport2.md2 \
 	meshes/tech/railing.jpg \
 	meshes/tech/railing.md2 \
 	meshes/tech/railing2.md2 \
@@ -616,6 +621,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-vesuvius2k11.mus \
 	scripts/dm-violator2k11.mus \
 	scripts/dm-violator2k11.fog \
+	scripts/dm-violator2k15.fog \
+	scripts/dm-violator2k15.mus \
 	scripts/dm-warmachine2k10.fog \
 	scripts/dm-warmachine2k10.mus \
 	scripts/dm-wasteland.fog \

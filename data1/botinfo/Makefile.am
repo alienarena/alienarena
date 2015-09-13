@@ -65,6 +65,7 @@ nobase_dist_botinfo_DATA = \
 	dm-turbo2k8.tmp \
 	dm-vesuvius2k11.tmp \
 	dm-violator2k11.tmp \
+	dm-violator2k15.tmp \
 	dm-warmachine2k10.tmp \
 	dm-zion2k9.tmp \
 	dm-zorn2k11.tmp \
@@ -114,6 +115,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-turbo2k8.nod \
 	nav/dm-vesuvius2k11.nod \
 	nav/dm-violator2k11.nod \
+	nav/dm-violator2k15.nod \
 	nav/dm-warmachine2k10.nod \
 	nav/dm-zion2k9.nod \
 	nav/dm-zorn2k11.nod \
