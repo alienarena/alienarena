@@ -347,16 +347,17 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 			nonweighted_numlights++;
 		}
 
-		//A simple but effective effect to mimick the effect of sun silouetting(i.e, hold your hand up and partially block the sun, the 
-		//backside appears to grow very dark - so we can do this by weighting our static light average heavily towards the sun's origin.
-		if(sun_alpha > 0.0)
-		{
-			weight = 10000 * pow(sun_alpha, 10);
-			for (j = 0; j < 3; j++)
-				lightAdd[j] += r_sunLight->origin[j]*weight;
-			numlights+=weight;
-			nonweighted_numlights++;
-		}
+		// TODO: see if we can reintroduce this effect without affecting shadows
+/*		//A simple but effective effect to mimick the effect of sun silouetting(i.e, hold your hand up and partially block the sun, the */
+/*		//backside appears to grow very dark - so we can do this by weighting our static light average heavily towards the sun's origin.*/
+/*		if(sun_alpha > 0.0)*/
+/*		{*/
+/*			weight = 10000 * pow(sun_alpha, 10);*/
+/*			for (j = 0; j < 3; j++)*/
+/*				lightAdd[j] += r_sunLight->origin[j]*weight;*/
+/*			numlights+=weight;*/
+/*			nonweighted_numlights++;*/
+/*		}*/
 		
 		cl_persistent_ents[currententity->number].oldnumlights = numlights;
 		VectorCopy (lightAdd, cl_persistent_ents[currententity->number].oldlightadd);
@@ -623,13 +624,15 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 			GL_MBind (3, rs->stage->texture3->texnum);
 			glUniform1iARB (uniforms->fx2Tex, 3);
 
-			if(r_shadowmapcount)
+			if (r_nonSunStaticShadowsOn || r_sunShadowsOn)
 			{
 				vec3_t angles;
 				float rotationMatrix[3][3];
 
-				GL_MBind (6, r_depthtexture2->texnum);
-				glUniform1iARB (uniforms->shadowmapTexture, 6);
+				GL_MBind (6, r_depthtextures[deptex_otherstatic]->texnum);
+				glUniform1iARB (uniforms->shadowmapTextureNonSun, 6);
+				GL_MBind (5, r_depthtextures[deptex_sunstatic]->texnum);
+				glUniform1iARB (uniforms->shadowmapTextureSun, 5);
 				
 				R_SetShadowmapUniforms (&uniforms->shadowmap_uniforms);
 
@@ -674,7 +677,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	
 	glUniform1fARB (uniforms->time, rs_realtime);	
 	
-	glUniform1iARB (uniforms->shadowmap, r_shadowmapcount); 
+	glUniform1iARB (uniforms->shadowmap, r_nonSunStaticShadowsOn || r_sunShadowsOn);
 	glUniform1iARB (uniforms->fog, map_fog);
 	glUniform1iARB (uniforms->team, currententity->team);
 
@@ -992,12 +995,7 @@ void R_Mesh_Draw (void)
 	}
 
 	if ((currentmodel->typeFlags & MESH_CASTSHADOWMAP))
-	{
-		if(currentmodel->type == mod_terrain)
-			R_GenerateTerrainShadows();
-		else
-			R_GenerateEntityShadow();
-	}
+		R_GenerateEntityShadow ();
 	
 	// Don't render your own avatar unless it's for shadows
 	if ((currententity->flags & RF_VIEWERMODEL))
@@ -1090,7 +1088,7 @@ void R_Mesh_Draw (void)
 		qglCullFace (GL_FRONT);
 	}
 
-	r_shadowmapcount = 0; //reset shadowmap count after backend render
+	r_nonSunStaticShadowsOn = false; // reset after backend render
 	
 	if ((currententity->flags & RF_DEPTHHACK)) // restore depth range
 		qglDepthRange (gldepthmin, gldepthmax);

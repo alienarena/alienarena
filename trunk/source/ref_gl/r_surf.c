@@ -935,14 +935,14 @@ static void BSP_SetupGLSL (int dynamic)
 	glUniform1iARB (worldsurf_uniforms[dynamic].heightTexture, 2);
 	glUniform1iARB (worldsurf_uniforms[dynamic].normalTexture, 3);
 	
-	if(r_shadowmapcount == 2)
+	if (r_sunShadowsOn)
 	{
-		//static vegetation shadow
+		//static sun shadow
 		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmapTexture2, 6);
-		GL_MBind (6, r_depthtexture2->texnum);
+		GL_MBind (6, r_depthtextures[deptex_sunstatic]->texnum);
 
 		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
-		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 1 );
+		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 1);
 
 		R_SetShadowmapUniforms (&worldsurf_uniforms[dynamic].shadowmap_uniforms);
 	}
@@ -959,7 +959,7 @@ static void BSP_SetupGLSL (int dynamic)
 		{
 			//dynamic shadow
 			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmapTexture, 7);
-			GL_MBind (7, r_depthtexture->texnum);
+			GL_MBind (7, r_depthtextures[deptex_dynamic]->texnum);
 
 			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
 

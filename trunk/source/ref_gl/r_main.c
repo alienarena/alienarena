@@ -58,7 +58,6 @@ cplane_t	frustum[4];
 
 int		r_visframecount;	// bumped when going to a new PVS
 int		r_framecount;		// used for dlight push checking
-int		r_shadowmapcount;	// number of shadowmaps rendered this frame
 
 // performance counters for r_speeds reports
 int last_c_brush_polys, c_brush_polys;
