@@ -123,10 +123,16 @@ typedef struct
 {
 	// allplanes is treaded as an array with 10 members. We do this so that
 	// the planes get checked in the most efficient order.
-	cplane_t	allplanes[10];
-	cplane_t	bboxplanes[6];
-	cplane_t	mainplane;
-	cplane_t	sideplanes[3];
+	union
+	{
+		cplane_t	allplanes[10];
+		struct
+		{
+			cplane_t	bboxplanes[6];
+			cplane_t	mainplane;
+			cplane_t	sideplanes[3];
+		} planes;
+	};
 	vec_t		*verts[3];
 	vec3_t		mins, maxs;
 	int			neighbors[3];	// neighbors[i] shares verts i and (i+1)%3
@@ -1072,7 +1078,7 @@ static void CM_LoadTerrain_PopulateGrid (cterrainmodel_t *mod, cterraingrid_t *g
 	// Create bounding plane
 	VectorClear (grid->boundingplane.normal);
 	for (i = 0; i < grid->numtris; i++)
-		VectorAdd (grid->tris[i]->mainplane.normal, grid->boundingplane.normal, grid->boundingplane.normal);
+		VectorAdd (grid->tris[i]->planes.mainplane.normal, grid->boundingplane.normal, grid->boundingplane.normal);
 	VectorNormalize (grid->boundingplane.normal);
 	grid->boundingplane.dist = DotProduct (grid->tris[0]->verts[0], grid->boundingplane.normal);
 	for (i = 0; i < grid->numtris; i++)
@@ -1194,26 +1200,26 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		
 		VectorSubtract (tri->verts[1], tri->verts[0], side1);
 		VectorSubtract (tri->verts[2], tri->verts[0], side2);
-		CrossProduct (side2, side1, tri->mainplane.normal);
-		VectorNormalize (tri->mainplane.normal);
+		CrossProduct (side2, side1, tri->planes.mainplane.normal);
+		VectorNormalize (tri->planes.mainplane.normal);
 		for (j = 0; j < 3; j++)
 		{
 			// cleanup -0
-			if (tri->mainplane.normal[j] == -0.0f) tri->mainplane.normal[j] = 0.0f;
+			if (tri->planes.mainplane.normal[j] == -0.0f) tri->planes.mainplane.normal[j] = 0.0f;
 		}
-		tri->mainplane.dist = DotProduct (tri->verts[0], tri->mainplane.normal);
-		tri->mainplane.signbits = signbits_for_plane (&tri->mainplane);
-		if (fabsf (tri->mainplane.normal[0]) == 1.0f)
-			tri->mainplane.type = PLANE_X;
-		else if (fabsf (tri->mainplane.normal[1]) == 1.0f)
-			tri->mainplane.type = PLANE_Y;
-		else if (fabsf (tri->mainplane.normal[2]) == 1.0f)
-			tri->mainplane.type = PLANE_Z;
+		tri->planes.mainplane.dist = DotProduct (tri->verts[0], tri->planes.mainplane.normal);
+		tri->planes.mainplane.signbits = signbits_for_plane (&tri->planes.mainplane);
+		if (fabsf (tri->planes.mainplane.normal[0]) == 1.0f)
+			tri->planes.mainplane.type = PLANE_X;
+		else if (fabsf (tri->planes.mainplane.normal[1]) == 1.0f)
+			tri->planes.mainplane.type = PLANE_Y;
+		else if (fabsf (tri->planes.mainplane.normal[2]) == 1.0f)
+			tri->planes.mainplane.type = PLANE_Z;
 		else
-			tri->mainplane.type = PLANE_ANYZ;
+			tri->planes.mainplane.type = PLANE_ANYZ;
 		
 		// overwrite and don't use downward facing faces.
-		if (DotProduct (tri->mainplane.normal, up) < 0.0f)
+		if (DotProduct (tri->planes.mainplane.normal, up) < 0.0f)
 			continue;
 		
 		VectorSet (tri->neighbors, -1, -1, -1);
@@ -1275,23 +1281,23 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 			vec3_t side;
 			
 			VectorSubtract (tri->verts[(j + 1) % 3], tri->verts[j], side);
-			CrossProduct (tri->mainplane.normal, side, tri->sideplanes[j].normal);
-			VectorNormalize (tri->sideplanes[j].normal); 
+			CrossProduct (tri->planes.mainplane.normal, side, tri->planes.sideplanes[j].normal);
+			VectorNormalize (tri->planes.sideplanes[j].normal); 
 			for (k = 0; k < 3; k++)
 			{
 				// cleanup -0
-				if (tri->sideplanes[j].normal[k] == -0.0f) tri->sideplanes[j].normal[k] = 0.0f;
+				if (tri->planes.sideplanes[j].normal[k] == -0.0f) tri->planes.sideplanes[j].normal[k] = 0.0f;
 			}
-			tri->sideplanes[j].dist = DotProduct (tri->verts[j], tri->sideplanes[j].normal);
-			tri->sideplanes[j].signbits = signbits_for_plane (&tri->sideplanes[j]);
-			if (fabsf (tri->sideplanes[j].normal[0]) == 1.0f)
-				tri->sideplanes[j].type = PLANE_X;
-			else if (fabsf (tri->sideplanes[j].normal[1]) == 1.0f)
-				tri->sideplanes[j].type = PLANE_Y;
-			else if (fabsf (tri->sideplanes[j].normal[2]) == 1.0f)
-				tri->sideplanes[j].type = PLANE_Z;
+			tri->planes.sideplanes[j].dist = DotProduct (tri->verts[j], tri->planes.sideplanes[j].normal);
+			tri->planes.sideplanes[j].signbits = signbits_for_plane (&tri->planes.sideplanes[j]);
+			if (fabsf (tri->planes.sideplanes[j].normal[0]) == 1.0f)
+				tri->planes.sideplanes[j].type = PLANE_X;
+			else if (fabsf (tri->planes.sideplanes[j].normal[1]) == 1.0f)
+				tri->planes.sideplanes[j].type = PLANE_Y;
+			else if (fabsf (tri->planes.sideplanes[j].normal[2]) == 1.0f)
+				tri->planes.sideplanes[j].type = PLANE_Z;
 			else
-				tri->sideplanes[j].type = PLANE_ANYZ;
+				tri->planes.sideplanes[j].type = PLANE_ANYZ;
 			
 			if (tri->neighbors[j] == -1)
 				continue;
@@ -1301,28 +1307,28 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 			// If neighbor's angle with this triangle is concave, neighbor's
 			// main plane would exclude this triangle's main plane rather
 			// than cap it.
-			if (DotProduct (neighbortri->mainplane.normal, tri->verts[(j + 2) % 3]) >= neighbortri->mainplane.dist)
+			if (DotProduct (neighbortri->planes.mainplane.normal, tri->verts[(j + 2) % 3]) >= neighbortri->planes.mainplane.dist)
 				continue;
 			
-/*			if (DotProduct (tri->sideplanes[j].normal, neighbortri->verts[(tri->neighbors_whichedge[j] + 2) % 3]) >= tri->sideplanes[j].dist)*/
+/*			if (DotProduct (tri->planes.sideplanes[j].normal, neighbortri->verts[(tri->neighbors_whichedge[j] + 2) % 3]) >= tri->planes.sideplanes[j].dist)*/
 /*				continue;*/
 			// use a neighbor's main plane as a side plane if the two tris
 			// together form a convex mesh, but *only* if it will be *more*
 			// restrictive than the "from-scratch" plane.
-			tri->sideplanes[j] = neighbortri->mainplane;
+			tri->planes.sideplanes[j] = neighbortri->planes.mainplane;
 		}
 		
 		for (j = 0; j < 3; j++)
 		{
-			tri->bboxplanes[j].type = tri->bboxplanes[j+3].type = PLANE_X + j;
-			tri->bboxplanes[j].dist = tri->maxs[j];
-			VectorClear (tri->bboxplanes[j].normal);
-			tri->bboxplanes[j].normal[j] = 1.0f;
-			tri->bboxplanes[j].signbits = 0.0f;
-			tri->bboxplanes[j+3].dist = -tri->mins[j];
-			VectorClear (tri->bboxplanes[j+3].normal);
-			tri->bboxplanes[j+3].normal[j] = -1.0f;
-			tri->bboxplanes[j+3].signbits = 1 << j;
+			tri->planes.bboxplanes[j].type = tri->planes.bboxplanes[j+3].type = PLANE_X + j;
+			tri->planes.bboxplanes[j].dist = tri->maxs[j];
+			VectorClear (tri->planes.bboxplanes[j].normal);
+			tri->planes.bboxplanes[j].normal[j] = 1.0f;
+			tri->planes.bboxplanes[j].signbits = 0.0f;
+			tri->planes.bboxplanes[j+3].dist = -tri->mins[j];
+			VectorClear (tri->planes.bboxplanes[j+3].normal);
+			tri->planes.bboxplanes[j+3].normal[j] = -1.0f;
+			tri->planes.bboxplanes[j+3].signbits = 1 << j;
 		}
 	}
 	
@@ -2630,7 +2636,7 @@ void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (cons
 					
 						does_intersect = RayIntersectsTriangle (start, dir, grid->tris[j]->verts[0], grid->tris[j]->verts[1], grid->tris[j]->verts[2], &tmp);
 						
-						do_draw ((const vec_t **)grid->tris[j]->verts, grid->tris[j]->mainplane.normal, does_intersect);
+						do_draw ((const vec_t **)grid->tris[j]->verts, grid->tris[j]->planes.mainplane.normal, does_intersect);
 					}
 				}
 			}
