@@ -267,6 +267,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-turbo2k8.rscript \
 	maps/dm-vesuvius2k11.rscript \
 	maps/dm-violator2k11.rscript \
+	maps/dm-violator2k15.rscript \
 	maps/dm-warmachine2k10.rscript \
 	maps/dm-wasteland.rscript \
 	maps/dm-zorn2k11.rscript \
