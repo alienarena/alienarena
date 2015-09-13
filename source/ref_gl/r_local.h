@@ -90,7 +90,8 @@ extern	entity_t	*currententity;
 extern	model_t		*currentmodel;
 extern	int			r_visframecount;
 extern	int			r_framecount;
-extern  int			r_shadowmapcount;	
+qboolean			r_sunShadowsOn; // any sun shadows this frame?
+qboolean			r_nonSunStaticShadowsOn; // any non-sun static shadows?
 extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
 extern 	int c_flares;
@@ -510,10 +511,9 @@ void R_AttribPointer (	GLuint index, GLint size, GLenum type,
 //shadows
 extern	cvar_t		*r_shadowmapscale;
 extern  int			r_lightgroups;
-extern  image_t		*r_depthtexture;
-extern	image_t		*r_depthtexture2;
+enum {deptex_dynamic, deptex_sunstatic, deptex_otherstatic, deptex_num};
+image_t *r_depthtextures[deptex_num];
 extern  image_t		*r_colorbuffer;
-extern GLuint   fboId[3];
 extern vec3_t	r_worldLightVec;
 typedef struct	LightGroup 
 {
@@ -530,7 +530,6 @@ extern void		R_Mesh_DrawCaster (entity_t *ent, model_t *mod);
 extern void		IQM_DrawRagDollCaster (int);
 void				R_GenerateGlobalShadows (void);
 extern void		R_GenerateEntityShadow( void );
-extern void		R_GenerateTerrainShadows( void );
 extern void		R_GenerateRagdollShadow( int RagDollID );
 extern void		R_GenerateShadowsToReceive( void );
 extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
@@ -691,7 +690,8 @@ typedef struct
 	GLuint							totalLightPosition, totalLightColor;
 	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
-	GLuint							shadowmapTexture;
+	GLuint							shadowmapTextureNonSun;
+	GLuint							shadowmapTextureSun;
 	GLuint							shadowmap;
 	GLuint							time;
 	GLuint							fog;
