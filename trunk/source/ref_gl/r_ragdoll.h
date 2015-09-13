@@ -216,6 +216,6 @@ extern void R_SimulateAllRagdolls ( void );
 extern void R_ClearAllRagdolls( void );
 extern void RGD_CreateWorldObject( void );
 extern void RGD_DestroyWorldObject( void );
-extern void RGD_AddNewRagdoll (const model_t *mod, vec3_t origin, char name[MAX_QPATH]);
+extern void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] );
 extern void RGD_DestroyWorldTrimesh();
 extern void RGD_BuildWorldTrimesh ();

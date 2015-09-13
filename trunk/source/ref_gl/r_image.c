@@ -34,10 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jpeglib.h"
 #endif
 
-static char deptex_names[deptex_num][32];
-
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
+image_t		*r_depthtexture;
+image_t		*r_depthtexture2;
 int			numgltextures;
 
 extern cvar_t	*cl_hudimage1; //custom huds
@@ -662,7 +662,6 @@ int crjpg_fill_input_buffer(j_decompress_ptr cinfo)
     Com_Printf("Premature end of JPEG data\n");
     cinfo->src->next_input_byte = eoi_buffer;
     cinfo->src->bytes_in_buffer = 2;
-
     crjpg_corrupted = true;
     return 1;
 }
@@ -1317,7 +1316,6 @@ image_t *GL_LoadPic (const char *name, byte *pic, int width, int height, imagety
 
 	image = GL_FindFreeImage (name, width, height, type);
 
-
 	if (type == it_skin && bits == 8)
 		R_FloodFillSkin(pic, width, height);
 	
@@ -1681,7 +1679,7 @@ void R_InitMirrorTextures( void )
 void R_InitDepthTextures( void )
 {
 	byte	*data;
-	int		size, texture_height, texture_width, i;
+	int		size, texture_height, texture_width;
 
 	//find closer power of 2 to screen size
 	for (texture_width = 1;texture_width < viddef.width;texture_width *= 2);
@@ -1698,17 +1696,8 @@ void R_InitDepthTextures( void )
 
 	data = malloc( size );
 	memset( data, 255, size );
-	
-	for (i = 0; i < deptex_num; i++)
-	{
-#if defined WIN32_VARIANT
-		sprintf_s (deptex_names[i], sizeof (deptex_names[i]), "***r_depthtexture%d***", i);
-#else
-		snprintf (deptex_names[i], sizeof (deptex_names[i]), "***r_depthtexture%d***", i);
-#endif
-		r_depthtextures[i] = GL_LoadPic (deptex_names[i], (byte *)data, texture_width, texture_height, it_pic, 3);
-	}
-	
+	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, texture_width, texture_height, it_pic, 3 );
+	r_depthtexture2 = GL_LoadPic( "***r_depthtexture2***", (byte *)data, texture_width, texture_height, it_pic, 3 );
 	free ( data );
 }
 

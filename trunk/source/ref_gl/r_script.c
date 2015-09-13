@@ -1233,11 +1233,11 @@ static void RS_SetupGLState (int dynamic)
 	
 	glUniform3fARB (rscript_uniforms[dynamic].staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
-	if (r_sunShadowsOn)
+	if(r_shadowmapcount)
 	{
 		float rotationMatrix[3][3];
 		
-		GL_MBind (12, r_depthtextures[deptex_sunstatic]->texnum);
+		GL_MBind (12, r_depthtexture2->texnum);
 		glUniform1iARB (rscript_uniforms[dynamic].shadowmapTexture, 12);
 		
 		R_SetShadowmapUniforms (&rscript_uniforms[dynamic].shadowmap_uniforms);
@@ -1249,7 +1249,7 @@ static void RS_SetupGLState (int dynamic)
 		glUniformMatrix3fvARB (rscript_uniforms[dynamic].meshRotation, 1, GL_TRUE, (const GLfloat *) rotationMatrix);
 	}
 
-	glUniform1iARB (rscript_uniforms[dynamic].shadowmap, r_sunShadowsOn); 
+	glUniform1iARB (rscript_uniforms[dynamic].shadowmap, r_shadowmapcount); 
 	
 	qglMatrixMode (GL_TEXTURE);
 	

@@ -58,6 +58,7 @@ cplane_t	frustum[4];
 
 int		r_visframecount;	// bumped when going to a new PVS
 int		r_framecount;		// used for dlight push checking
+int		r_shadowmapcount;	// number of shadowmaps rendered this frame
 
 // performance counters for r_speeds reports
 int last_c_brush_polys, c_brush_polys;
@@ -883,6 +884,7 @@ extern cvar_t *cl_add_blend;
 extern qboolean have_stencil;
 void R_Clear (void)
 {
+	qglClearColor(0,0,0,1);
 	if (gl_clear->integer)
 		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	else if (!cl_add_blend->integer && info_spectator->integer && (CM_PointContents(r_newrefdef.vieworg, 0) & CONTENTS_SOLID))
@@ -1034,7 +1036,21 @@ void R_RenderView (refdef_t *fd)
 	//shadowmaps
 	if(gl_shadowmaps->integer)
 	{
-		R_GenerateGlobalShadows ();
+		qglEnable(GL_DEPTH_TEST);
+		qglClearColor(0,0,0,1.0f);
+
+		qglEnable(GL_CULL_FACE);
+
+		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+		R_DrawDynamicCaster();
+
+		R_DrawVegetationCaster();
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+		//Enabling color write (previously disabled for light POV z-buffer rendering)
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
@@ -1146,20 +1162,15 @@ void R_RenderView (refdef_t *fd)
 	}
 	if (r_tracebox->integer)
 	{
-		trace_t t;
-		vec3_t start, targ;
 		vec3_t	mins = {-16, -16, -24};
 		vec3_t	maxs = {16, 16, 32};
-		
+		vec3_t start, targ;
 		VectorCopy (r_origin, start);
 		start[2] -= 22;
 		VectorMA (start, r_tracetestlength->value, forward, targ);
-		
-		t = CM_BoxTrace (start, targ, mins, maxs, r_worldmodel->firstnode, MASK_PLAYERSOLID);
-
+		trace_t t = CM_BoxTrace (start, targ, mins, maxs, r_worldmodel->firstnode, MASK_PLAYERSOLID);
 		VectorAdd (mins, t.endpos, mins);
 		VectorAdd (maxs, t.endpos, maxs);
-
 		R_DrawBBox (mins, maxs);
 	}
 	if (*r_showbox->string)
