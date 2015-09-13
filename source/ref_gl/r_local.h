@@ -90,8 +90,7 @@ extern	entity_t	*currententity;
 extern	model_t		*currentmodel;
 extern	int			r_visframecount;
 extern	int			r_framecount;
-qboolean			r_sunShadowsOn; // any sun shadows this frame?
-qboolean			r_nonSunStaticShadowsOn; // any non-sun static shadows?
+extern  int			r_shadowmapcount;	
 extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
 extern 	int c_flares;
@@ -511,9 +510,10 @@ void R_AttribPointer (	GLuint index, GLint size, GLenum type,
 //shadows
 extern	cvar_t		*r_shadowmapscale;
 extern  int			r_lightgroups;
-enum {deptex_dynamic, deptex_sunstatic, deptex_otherstatic, deptex_num};
-image_t *r_depthtextures[deptex_num];
+extern  image_t		*r_depthtexture;
+extern	image_t		*r_depthtexture2;
 extern  image_t		*r_colorbuffer;
+extern GLuint   fboId[3];
 extern vec3_t	r_worldLightVec;
 typedef struct	LightGroup 
 {
@@ -526,10 +526,12 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
-extern void		R_Mesh_DrawCaster (entity_t *ent, model_t *mod);
+extern void		R_Mesh_DrawCaster (void);
 extern void		IQM_DrawRagDollCaster (int);
-void				R_GenerateGlobalShadows (void);
+extern void		R_DrawDynamicCaster(void);
+extern void		R_DrawVegetationCaster(void);
 extern void		R_GenerateEntityShadow( void );
+extern void		R_GenerateTerrainShadows( void );
 extern void		R_GenerateRagdollShadow( int RagDollID );
 extern void		R_GenerateShadowsToReceive( void );
 extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
@@ -690,8 +692,7 @@ typedef struct
 	GLuint							totalLightPosition, totalLightColor;
 	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
-	GLuint							shadowmapTextureNonSun;
-	GLuint							shadowmapTextureSun;
+	GLuint							shadowmapTexture;
 	GLuint							shadowmap;
 	GLuint							time;
 	GLuint							fog;
@@ -782,7 +783,7 @@ extern void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
 //md2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
-void MD2_SelectFrame (entity_t *ent, model_t *mod);
+void MD2_SelectFrame (void);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);

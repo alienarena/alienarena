@@ -45,7 +45,7 @@ float r_fbeffectTime;
 
 extern  cvar_t	*cl_raindist;
 
-static GLuint distort_FBO, godray_FBO;
+static GLuint distort_FBO;
 
 /*
 =================
@@ -276,8 +276,6 @@ void R_FB_InitTextures( void )
 {
 	byte	*data;
 	int		size;
-	GLuint	rboId;
-	GLenum FBOstatus;
 
 	//init the various FBO textures
 	size = viddef.width * viddef.height * 4;
@@ -289,52 +287,6 @@ void R_FB_InitTextures( void )
 	
 	memset (data, 255, size);
 	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, viddef.width, viddef.height, it_pic, 3);
-	
-	//FBO for capturing stencil volumes
-	qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
-	qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	qglBindTexture(GL_TEXTURE_2D, 0);
-
-	qglGenFramebuffersEXT(1, &godray_FBO);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO);
-
-	qglGenRenderbuffersEXT(1, &rboId);
-	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
-	qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, vid.width, vid.height);
-	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
-
-	// attach a texture to FBO color attachement point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
-
-	// attach a renderbuffer to depth attachment point
-	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	// attach a renderbuffer to stencil attachment point
-	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO);
-
-	// check FBO status
-	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,vid.width,vid.height); 
-	
-	// Initialize frame values.
-	// This only makes a difference if the viewport is less than the screen
-	// size, like when the netgraph is on-- otherwise it's redundant with 
-	// later glClear calls.
-	qglClearColor (1, 1, 1, 1);
-	qglClear( GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-	qglClearColor (0, 0, 0, 1.0f);
-	
-	// back to previous screen coordinates
-	R_SetupViewport ();
-
-	// switch back to window-system-provided framebuffer
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	
 	//init the distortion textures
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg", it_pic);
@@ -468,7 +420,7 @@ void R_GLSLGodRays(void)
 		return;
 
 	//switch to fbo
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO); //need color buffer
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]); //need color buffer
 
 	qglDisable( GL_DEPTH_TEST );
 	qglDepthMask (1);

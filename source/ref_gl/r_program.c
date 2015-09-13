@@ -352,7 +352,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 
 		//shadows
 		if(STATSHADOW > 0)
-			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[5] * sPos);
+			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		else
 			statshadowval = 1.0;
 
@@ -810,7 +810,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRAR
 
 		if(SHADOWMAP > 0)
 		{
-			gl_FragColor.rgb *= lookupShadow (StatShadowMap, gl_TextureMatrix[5] * sPos);
+			gl_FragColor.rgb *= lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		}
 		
 		if (DYNAMIC > 0)
@@ -1064,7 +1064,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
-	uniform shadowsampler_t StatShadowMapNonSun, StatShadowMapSun; 
+	uniform shadowsampler_t StatShadowMap; 
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int SHADOWMAP;
 	uniform int FOG;
@@ -1115,7 +1115,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
 		if(useShell == 0)
-			shadowval = lookupShadow (StatShadowMapNonSun, gl_TextureMatrix[6] * sPos) * lookupShadow (StatShadowMapSun, gl_TextureMatrix[5] * sPos);
+			shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
 		{
@@ -1950,8 +1950,7 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
 	out->shadowmap = glGetUniformLocationARB (programObj, "SHADOWMAP");
-	out->shadowmapTextureNonSun = glGetUniformLocationARB (programObj, "StatShadowMapNonSun");
-	out->shadowmapTextureSun = glGetUniformLocationARB (programObj, "StatShadowMapSun");
+	out->shadowmapTexture = glGetUniformLocationARB (programObj, "StatShadowMap");
 	out->time = glGetUniformLocationARB (programObj, "time");
 	out->fog = glGetUniformLocationARB (programObj, "FOG");
 	out->useFX = glGetUniformLocationARB (programObj, "useFX");

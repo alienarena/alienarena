@@ -135,13 +135,6 @@ static void R_ParseLightEntity (char *match, char *block)
 		tok = Com_ParseExt(&bl, true);
 		if (!tok[0])
 			break;		// End of data
-		
-		// exclude sun from light groups
-		if (!Q_strcasecmp("targetname", tok)){
-			tok = Com_ParseExt(&bl, false);
-			if (!Q_strcasecmp("sunspot", tok) || !Q_strcasecmp("moonspot", tok))
-		   		return;
-		}
 
 		if (!Q_strcasecmp("origin", tok)){
 			for (i = 0; i < 3; i++){
