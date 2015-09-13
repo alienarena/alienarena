@@ -1701,7 +1701,11 @@ void R_InitDepthTextures( void )
 	
 	for (i = 0; i < deptex_num; i++)
 	{
+#if defined WIN32_VARIANT
+		sprintf_s (deptex_names[i], sizeof (deptex_names[i]), "***r_depthtexture%d***", i);
+#else
 		snprintf (deptex_names[i], sizeof (deptex_names[i]), "***r_depthtexture%d***", i);
+#endif
 		r_depthtextures[i] = GL_LoadPic (deptex_names[i], (byte *)data, texture_width, texture_height, it_pic, 3);
 	}
 	
