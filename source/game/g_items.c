@@ -1640,7 +1640,7 @@ always owned, never in the world
 /* icon */		"disruptor",
 /* pickup */	"Alien Disruptor",
 		0,
-		1,
+		5,
 		"Cells",
 		IT_WEAPON,
 		WEAP_DISRUPTOR,
