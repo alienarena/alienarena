@@ -311,6 +311,7 @@ typedef struct gitem_s
 	int			count_width;		// number of digits to display by icon
 
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
+	int			quantity2;		// for weapons how much per alt-fire
 	char		*ammo;			// for weapons
 	int			flags;			// IT_* flags
 
@@ -778,8 +779,8 @@ void Cmd_VoiceTaunt_f (edict_t *ent);
 void PrecacheItem (gitem_t *it);
 void InitItems (void);
 void SetItemNames (void);
-gitem_t	*FindItem (char *pickup_name);
-gitem_t	*FindItemByClassname (char *classname);
+gitem_t	*FindItem (const char *pickup_name);
+gitem_t	*FindItemByClassname (const char *classname);
 #define	ITEM_INDEX(x) ((x)-itemlist)
 edict_t *Drop_Item (edict_t *ent, gitem_t *item);
 void SetRespawn (edict_t *ent, float delay);

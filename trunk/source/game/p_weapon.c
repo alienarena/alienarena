@@ -395,45 +395,33 @@ NoAmmoWeaponChange
 */
 void NoAmmoWeaponChange (edict_t *ent)
 {
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))]
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] )
+	int i;
+	const char *weapons[] =
 	{
-		ent->client->newweapon = FindItem ("Disruptor");
-		return;
-	}
-
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("rockets"))]
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] )
+		// in descending order of preference:
+		"Disruptor", "Rocket Launcher", "Flame Thrower", "Pulse Rifle",
+		"Alien Smartgun", "Alien Disruptor"
+	};
+	const int n = sizeof (weapons) / sizeof (weapons[0]);
+	
+	
+	for (i = 0; i < n; i++)
 	{
-		ent->client->newweapon = FindItem ("Rocket Launcher");
-		return;
-	}
-
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("napalm"))]
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] )
-	{
-		ent->client->newweapon = FindItem ("Flame Thrower");
-		return;
-	}
-
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))] > 1
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] )
-	{
-		ent->client->newweapon = FindItem ("Pulse Rifle");
-		return;
-	}
-
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("alien smart grenade"))]
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] )
-	{
-		ent->client->newweapon = FindItem ("Alien Smartgun");
-		return;
-	}
-
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))] > 4
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] )
-	{
-		ent->client->newweapon = FindItem ("Alien Disruptor");
+		gitem_t *item, *ammo;
+		
+		item = FindItem (weapons[i]);
+		
+		// never autoswitch to the same weapon
+		if (ent->client->pers.weapon == item)
+			continue;
+		
+		ammo = FindItem (item->ammo);
+		
+		// only autosiwtch if we have enough ammo for primary fire
+		if (ent->client->pers.inventory[ITEM_INDEX (ammo)] < item->quantity)
+			continue;
+		
+		ent->client->newweapon = item;
 		return;
 	}
 
@@ -441,6 +429,7 @@ void NoAmmoWeaponChange (edict_t *ent)
 		ent->client->newweapon = FindItem ("Alien Blaster");
 	else
 		ent->client->newweapon = FindItem ("Blaster");
+	// TODO: something for alteria here?
 }
 
 /*
@@ -505,7 +494,7 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 			return;
 		}
 
-		if (ent->client->pers.inventory[ammo_index] < item->quantity)
+		if (ent->client->pers.inventory[ammo_index] < item->quantity && ent->client->pers.inventory[ammo_index] < item->quantity2)
 		{
 			safe_cprintf (ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
 			ent->client->pers.lastfailedswitch = item;
@@ -652,7 +641,7 @@ fire_begin:
 
 			ent->client->latched_buttons &= ~BUTTON_ATTACK2;
 			if ((!ent->client->ammo_index) ||
-				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
+				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity2))
 			{
 				gunframe = FRAME_FIRE_FIRST;
 				ent->client->weaponstate = WEAPON_FIRING;
@@ -730,6 +719,21 @@ fire_begin:
 			ent->client->weaponstate = WEAPON_READY;
 	}
 	#undef gunframe
+}
+
+static void take_ammo (edict_t *ent, qboolean altfire)
+{
+	int quantity;
+	
+	if ((dmflags->integer & DF_INFINITE_AMMO) || rocket_arena->integer || insta_rockets->integer || instagib->integer)
+		return;
+	
+	if (altfire)
+		quantity = ent->client->pers.weapon->quantity2;
+	else
+		quantity = ent->client->pers.weapon->quantity;
+	
+	ent->client->pers.inventory[ent->client->ammo_index] -= quantity;
 }
 
 #ifdef ALTERIA
@@ -858,21 +862,8 @@ void weapon_disruptor_fire (edict_t *ent)
 
 	ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
-
-	if ( !( (dmflags->integer & DF_INFINITE_AMMO) || instagib->integer
-		|| insta_rockets->integer ) )
-	{
-		if (ent->client->buttons & BUTTON_ATTACK2)
-		{
-			ent->client->pers.inventory[ent->client->ammo_index] =
-					ent->client->pers.inventory[ent->client->ammo_index]-10;
-		}
-		else
-		{
-			ent->client->pers.inventory[ent->client->ammo_index] =
-				ent->client->pers.inventory[ent->client->ammo_index]-5;
-		}
-	}
+	
+	take_ammo (ent, (ent->client->buttons & BUTTON_ATTACK2));
 }
 
 void Weapon_Disruptor (edict_t *ent)
@@ -962,15 +953,12 @@ void weapon_vaporizer_fire (edict_t *ent)
 			forward[1] = forward[1] * 4.6;
 			forward[2] = forward[2] * 4.6;
 			fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
-			if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
-				ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-1;
-
 		}
 		else {
-				fire_vaporizer (ent, start, forward, damage, kick);
-				if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
-					ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;
+			fire_vaporizer (ent, start, forward, damage, kick);
 		}
+		
+		take_ammo (ent, ent->altfire);
 
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
@@ -1051,7 +1039,8 @@ void weapon_flamethrower_fire (edict_t *ent)
 		ent->client->ps.gunframe++;
 
 		if (! ( dmflags->integer & DF_INFINITE_AMMO ) ) {
-			ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity*10;
+			ent->client->pers.inventory[ent->client->ammo_index] -=
+					ent->client->pers.weapon->quantity2;
 			if(ent->client->pers.inventory[ent->client->ammo_index] < 0)
 				ent->client->pers.inventory[ent->client->ammo_index] = 0;
 		}
@@ -1197,10 +1186,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if ( (!( dmflags->integer & DF_INFINITE_AMMO )) && !rocket_arena->integer && !insta_rockets->integer )
-	{
-		ent->client->pers.inventory[ent->client->ammo_index]--;
-	}
+	take_ammo (ent, (ent->client->buttons & BUTTON_ATTACK2));
 }
 
 void Weapon_RocketLauncher (edict_t *ent)
@@ -1414,10 +1400,6 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
-
-	//might want to work with this some
-	if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 void Weapon_Bomber (edict_t *ent)
 {
@@ -1636,8 +1618,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 				damage = 7;
 
 			Blaster_Fire (ent, offset, damage, true, false, effect);
-			if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
-				ent->client->pers.inventory[ent->client->ammo_index]--;
+			take_ammo (ent, (ent->client->buttons & BUTTON_ATTACK2));
 		}
 
 		ent->client->ps.gunframe++;
@@ -1946,8 +1927,7 @@ void weapon_smartgun_fire (edict_t *ent)
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
-	if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	take_ammo (ent, ent->altfire);
 }
 
 void Weapon_Smartgun (edict_t *ent)
@@ -2041,7 +2021,7 @@ void weapon_minderaser_fire (edict_t *ent)
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
-	ent->client->pers.inventory[ent->client->ammo_index]--;
+	take_ammo (ent, ent->altfire);
 }
 
 void Weapon_Minderaser (edict_t *ent)
@@ -2298,8 +2278,7 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 	}
 	ent->client->ps.gunframe++;
 
-	ent->client->pers.inventory[ent->client->ammo_index]--;
-
+	take_ammo (ent, (ent->client->buttons & BUTTON_ATTACK2));
 }
 void Weapon_TacticalBomb (edict_t *ent)
 {
