@@ -575,6 +575,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obarch1_fx.tga \
 	meshes/tech/obarch1_normal.jpg \
 	meshes/tech/obarch2.md2 \
+	meshes/tech/obarch3.md2 \
 	meshes/tech/obfloor1.jpg \
 	meshes/tech/obfloor1.md2 \
 	meshes/tech/obfloor1_fx.tga \
