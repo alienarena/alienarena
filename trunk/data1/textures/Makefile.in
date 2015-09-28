@@ -1510,6 +1510,14 @@ nobase_dist_textures_DATA = \
 	metal/wall6.tga \
 	metal/walllite.tga \
 	null.tga \
+	phillipk/pk01_door01.tga \
+	phillipk/pk01_door01_nm.tga \
+	phillipk/pk01_floor01_hm.tga \
+	phillipk/pk01_floor01_nm.tga \
+	phillipk/pk01_floor01a.tga \
+	phillipk/pk01_gra_floor01.tga \
+	phillipk/pk01_gra_floor01_hm.tga \
+	phillipk/pk01_gra_floor01_nm.tga \
 	phillipk/pk01_panel01a_hm.tga \
 	phillipk/pk01_panel01a.tga \
 	phillipk/pk01_panel01b_hm.tga \
@@ -1523,6 +1531,9 @@ nobase_dist_textures_DATA = \
 	phillipk/pk01_panel_small01_hm.tga \
 	phillipk/pk01_panel_small01_nm.tga \
 	phillipk/pk01_panel_small01.tga \
+	phillipk/pk01_pan_floor02.tga \
+	phillipk/pk01_pan_floor02_hm.tga \
+	phillipk/pk01_pan_floor02_nm.tga \
 	phillipk/pk01_pan_wall02a1_hm.tga \
 	phillipk/pk01_pan_wall02a1_nm.tga \
 	phillipk/pk01_pan_wall02a1.tga \
@@ -1550,6 +1561,12 @@ nobase_dist_textures_DATA = \
 	phillipk/pk01_wall02b_hm.tga \
 	phillipk/pk01_wall02b.tga \
 	phillipk/pk01_wall02_nm.tga \
+	phillipk/pk01_wall03.tga \
+	phillipk/pk01_wall03_hm.tga \
+	phillipk/pk01_wall03_nm.tga \
+	phillipk/pk01_wall04.tga \
+	phillipk/pk01_wall04_hm.tga \
+	phillipk/pk01_wall04_nm.tga \
 	phillipk/pk01_wall04b_hm.tga \
 	phillipk/pk01_wall04b_nm.tga \
 	phillipk/pk01_wall04b.tga \
