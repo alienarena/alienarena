@@ -247,6 +247,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-deathray.rscript \
 	maps/dm-deimos2k9.rscript \
 	maps/dm-dismal2k11.rscript \
+	maps/dm-dismal2k15.rscript \
 	maps/dm-downfall.rscript \
 	maps/dm-dynamo2k12.rscript \
 	maps/dm-eternal.rscript \

@@ -1067,6 +1067,14 @@ nobase_dist_textures_DATA = \
 	desert/woodwall3_nm.tga \
 	desert/woodwall4.tga \
 	desert/woodwall4_nm.tga \
+	dm-dismal/ice.jpg \
+	dm-dismal/ice_nm.jpg \
+	dm-dismal/snow.jpg \
+	dm-dismal/snow1.tga \
+	dm-dismal/snow1_blendtex.tga \
+	dm-dismal/snow1_blendtex2.tga \
+	dm-dismal/snow1_lightmaptex.tga \
+	dm-dismal/snow_nm.jpg \
 	dm-wasteland/canyon1.tga \
 	dm-wasteland/canyon1_blendtex.tga \
 	dm-wasteland/canyon1_blendtex2.tga \
@@ -1094,6 +1102,7 @@ nobase_dist_textures_DATA = \
 	evil/e6horzlight_green.tga \
 	evil/e6horzlight.tga \
 	evil/e6horzlight_hm.tga \
+	evil/e6horzlight_hm.jpg \
 	evil/e6horzlight_nm.tga \
 	evil/e6launchengine_hm.tga \
 	evil/e6launchengine_nm.tga \
@@ -1300,6 +1309,7 @@ nobase_dist_textures_DATA = \
 	metal/walllite.tga \
 	null.tga \
 	phillipk/pk01_door01.tga \
+	phillipk/pk01_door01_hm.tga \
 	phillipk/pk01_door01_nm.tga \
 	phillipk/pk01_floor01_hm.tga \
 	phillipk/pk01_floor01_nm.tga \
@@ -1308,8 +1318,10 @@ nobase_dist_textures_DATA = \
 	phillipk/pk01_gra_floor01_hm.tga \
 	phillipk/pk01_gra_floor01_nm.tga \
 	phillipk/pk01_panel01a_hm.tga \
+	phillipk/pk01_panel01a_nm.tga \
 	phillipk/pk01_panel01a.tga \
 	phillipk/pk01_panel01b_hm.tga \
+	phillipk/pk01_panel01b_nm.tga \
 	phillipk/pk01_panel01b.tga \
 	phillipk/pk01_panel03a_hm.tga \
 	phillipk/pk01_panel03a_nm.tga \
