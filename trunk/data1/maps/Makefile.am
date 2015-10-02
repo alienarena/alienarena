@@ -182,6 +182,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2.md2 \
 	meshes/desert/platewall2.tga \
 	meshes/desert/platewall2_normal.tga \
+	meshes/dm-dismal/snow1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
@@ -278,8 +279,10 @@ nobase_dist_maps_DATA = \
 	meshes/lamp2.jpg \
 	meshes/lamp2.md2 \
 	meshes/lamp2_normal.jpg \
+	meshes/martian.iqm \
 	meshes/martian.jpg \
 	meshes/martian.md2 \
+	meshes/martian.skin \
 	meshes/martian_normal.jpg \
 	meshes/metpipe1.md2 \
 	meshes/metpipe2.md2 \
@@ -375,6 +378,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obsupport1_fx.tga \
 	meshes/tech/obsupport1_normal.jpg \
 	meshes/tech/obsupport2.md2 \
+	meshes/tech/obsupport3.md2 \
 	meshes/tech/railing.jpg \
 	meshes/tech/railing.md2 \
 	meshes/tech/railing2.md2 \
@@ -420,6 +424,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/slimegen_fx.tga \
 	meshes/tech/slimegen_normal.jpg \
 	meshes/tech/slimegen_s.md2 \
+	meshes/tech/slimegen_ss.md2 \
 	meshes/tech/slimegenblue.jpg \
 	meshes/tech/slimegenblue.md2 \
 	meshes/tech/slimegenblue_fx.tga \
@@ -427,6 +432,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/slimegenred.md2 \
 	meshes/tech/slimegenred_fx.tga \
 	meshes/tech/slimetube1.md2 \
+	meshes/tech/slimetube2.md2 \
 	meshes/tech/turbinefan.jpg \
 	meshes/tech/turbinefan.md2 \
 	meshes/tech/turbinefan_normal.jpg \
