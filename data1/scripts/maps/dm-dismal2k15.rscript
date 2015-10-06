@@ -4,7 +4,19 @@ snow1_texture
 		map textures/dm-dismal/snow1_blendtex.tga		
 		blendmap 2			
 			200 textures/dm-dismal/ice.tga		
-			400 textures/dm-dismal/snow.tga		
+			200 textures/dm-dismal/snow.tga		
+		blendnormalmap 2 
+			0 textures/dm-dismal/ice_nm.tga
+			1 textures/dm-dismal/snow_nm.tga
+	}
+}
+rubble1_texture
+{	
+	{
+		map textures/dm-dismal/snow1_blendtex.tga		
+		blendmap 2			
+			200 textures/dm-dismal/ice.tga		
+			200 textures/dm-dismal/snow.tga		
 		blendnormalmap 2 
 			0 textures/dm-dismal/ice_nm.tga
 			1 textures/dm-dismal/snow_nm.tga
@@ -197,5 +209,22 @@ textures/blanks/blank5
 		scale static 15 static 15
 		colormap 1 1 1
 		beam
+	}
+}
+textures/blanks/blank6
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll sin 0 sin 0
+		anim .02
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
 	}
 }
