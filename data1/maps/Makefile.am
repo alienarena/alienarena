@@ -182,6 +182,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2.md2 \
 	meshes/desert/platewall2.tga \
 	meshes/desert/platewall2_normal.tga \
+	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
