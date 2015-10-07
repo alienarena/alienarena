@@ -85,6 +85,9 @@ nobase_dist_textures_DATA = \
 	arena10/container2_hm.tga \
 	arena10/container2_nm.tga \
 	arena10/container2.tga \
+	arena10/container2_broken.tga \
+	arena10/container2_broken_hm.tga \
+	arena10/container2_broken_nm.tga \
 	arena10/container3_hm.tga \
 	arena10/container3_nm.tga \
 	arena10/container3.tga \
@@ -1069,10 +1072,12 @@ nobase_dist_textures_DATA = \
 	desert/woodwall4_nm.tga \
 	dm-dismal/ice.jpg \
 	dm-dismal/ice_nm.jpg \
+	dm-dismal/rubble1.tga \
+	dm-dismal/rubble1_blendtex.tga \
+	dm-dismal/rubble1_lightmaptex.tga \
 	dm-dismal/snow.jpg \
 	dm-dismal/snow1.tga \
 	dm-dismal/snow1_blendtex.tga \
-	dm-dismal/snow1_blendtex2.tga \
 	dm-dismal/snow1_lightmaptex.tga \
 	dm-dismal/snow_nm.jpg \
 	dm-wasteland/canyon1.tga \
