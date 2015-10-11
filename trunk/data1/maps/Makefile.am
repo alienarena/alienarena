@@ -42,6 +42,7 @@ nobase_dist_maps_DATA = \
 	dm-deimos2k9.bsp \
 	dm-deimos2k9.lightmap \
 	dm-dismal2k11.bsp \
+	dm-dismal2k15.bsp \
 	dm-downfall.bsp \
 	dm-dynamo2k12.bsp \
 	dm-dynamo2k12.lightmap \
@@ -292,7 +293,6 @@ nobase_dist_maps_DATA = \
 	meshes/monitor2.md2 \
 	meshes/monitor_normal.tga \
 	meshes/monitor.jpg \
-	meshes/monitormask.tga \
 	meshes/monitor.md2 \
 	meshes/mpa1.jpg \
 	meshes/mpa1_normal.jpg \
@@ -438,6 +438,9 @@ nobase_dist_maps_DATA = \
 	meshes/tech/turbinefan.md2 \
 	meshes/tech/turbinefan_normal.jpg \
 	meshes/tech/turbinefan_vert.md2 \
+	meshes/test/martian.jpg \
+	meshes/test/martian_normal.tga \
+	meshes/test/martian_fx.tga \
 	meshes/toxicbarrell.jpg \
 	meshes/toxicbarrell.md2 \
 	meshes/toxicbarrell_normal.jpg \
@@ -592,6 +595,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-deimos2k9.mus \
 	scripts/dm-dismal2k11.fog \
 	scripts/dm-dismal2k11.mus \
+	scripts/dm-dismal2k15.fog \
+	scripts/dm-dismal2k15.mus \
 	scripts/dm-downfall.fog \
 	scripts/dm-downfall.mus \
 	scripts/dm-dynamo2k12.fog \

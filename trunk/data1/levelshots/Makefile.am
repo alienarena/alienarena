@@ -61,6 +61,8 @@ nobase_dist_levelshots_DATA = \
 	dm-deimos2k9.txt \
 	dm-dismal2k11.jpg \
 	dm-dismal2k11.txt \
+	dm-dismal2k15.jpg \
+	dm-dismal2k15.txt \
 	dm-downfall.jpg \
 	dm-downfall.txt \
 	dm-dynamo2k12.jpg \

@@ -257,6 +257,7 @@ nobase_dist_botinfo_DATA = \
 	dm-deathray.tmp \
 	dm-deimos2k9.tmp \
 	dm-dismal2k11.tmp \
+	dm-dismal2k15.tmp \
 	dm-downfall.tmp \
 	dm-dynamo2k12.tmp \
 	dm-eternal.tmp \
@@ -307,6 +308,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-deathray.nod \
 	nav/dm-deimos2k9.nod \
 	nav/dm-dismal2k11.nod \
+	nav/dm-dismal2k15.nod \
 	nav/dm-downfall.nod \
 	nav/dm-dynamo2k12.nod \
 	nav/dm-eternal.nod \
