@@ -905,7 +905,7 @@ void ACECO_ReadConfig( char *config_file )
 
 ======
  */
-void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
+void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
@@ -927,11 +927,11 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
 	if(!g_tactical->integer)
-		SelectSpawnPoint (bot, spawn_origin, spawn_angles);
+		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
 
-	index = bot - g_edicts - 1;
-	client = bot->client;
-	resp = bot->client->resp;
+	index = ent - g_edicts - 1;
+	client = ent->client;
+	resp = ent->client->resp;
 
 	// init pers.* variables, save and restore userinfo variables (name, skin)
 	memcpy(userinfo, client->pers.userinfo, MAX_INFO_STRING );
@@ -939,13 +939,13 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	memcpy(client->pers.userinfo, userinfo, MAX_INFO_STRING );
 
 	// set netname from userinfo
-	strncpy( bot->client->pers.netname,
+	strncpy( ent->client->pers.netname,
 			 (Info_ValueForKey( client->pers.userinfo, "name")),
-			 sizeof(bot->client->pers.netname)-1);
+			 sizeof(ent->client->pers.netname)-1);
 
 	// combine name and skin into a configstring
 	gi.configstring( CS_PLAYERSKINS+index, va("%s\\%s",
-			bot->client->pers.netname,
+			ent->client->pers.netname,
 			(Info_ValueForKey( client->pers.userinfo, "skin"))));
 
 	// clear everything but the persistant data ( pers.* and resp.*)
@@ -963,40 +963,40 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	client->rayImmunity = false;
 
 	// copy some data from the client to the entity
-	FetchClientEntData (bot);
+	FetchClientEntData (ent);
 
 	// clear entity values
-	bot->groundentity = NULL;
-	bot->client = &game.clients[index];
+	ent->groundentity = NULL;
+	ent->client = &game.clients[index];
 	if(g_spawnprotect->value)
-		bot->client->spawnprotected = true;
-	bot->takedamage = DAMAGE_AIM;
-	bot->movetype = MOVETYPE_WALK;
-	bot->viewheight = 24;
-	bot->classname = "bot";
-	bot->mass = 200;
-	bot->solid = SOLID_BBOX;
-	bot->deadflag = DEAD_NO;
-	bot->air_finished = level.time + 12;
-	bot->clipmask = MASK_PLAYERSOLID;
-	bot->model = "players/martianenforcer/tris.md2";
-	bot->pain = player_pain;
-	bot->die = player_die;
-	bot->waterlevel = 0;
-	bot->watertype = 0;
-	bot->flags &= ~FL_NO_KNOCKBACK;
-	bot->svflags &= ~SVF_DEADMONSTER;
-	bot->is_jumping = false;
+		ent->client->spawnprotected = true;
+	ent->takedamage = DAMAGE_AIM;
+	ent->movetype = MOVETYPE_WALK;
+	ent->viewheight = 24;
+	ent->classname = "bot";
+	ent->mass = 200;
+	ent->solid = SOLID_BBOX;
+	ent->deadflag = DEAD_NO;
+	ent->air_finished = level.time + 12;
+	ent->clipmask = MASK_PLAYERSOLID;
+	ent->model = "players/martianenforcer/tris.md2";
+	ent->pain = player_pain;
+	ent->die = player_die;
+	ent->waterlevel = 0;
+	ent->watertype = 0;
+	ent->flags &= ~FL_NO_KNOCKBACK;
+	ent->svflags &= ~SVF_DEADMONSTER;
+	ent->is_jumping = false;
 
 	//vehicles
-	bot->in_vehicle = false;
+	ent->in_vehicle = false;
 
-	VectorCopy (mins, bot->mins);
-	VectorCopy (maxs, bot->maxs);
-	VectorClear (bot->velocity);
+	VectorCopy (mins, ent->mins);
+	VectorCopy (maxs, ent->maxs);
+	VectorClear (ent->velocity);
 
 	// clear playerstate values
-	memset (&bot->client->ps, 0, sizeof(client->ps));
+	memset (&ent->client->ps, 0, sizeof(client->ps));
 
 //ZOID
 	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
@@ -1007,12 +1007,12 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
 	// clear entity state values
-	bot->s.effects = 0;
-	bot->s.skinnum = bot - g_edicts - 1;
-	bot->s.modelindex = 255;		// will use the skin specified model
-	bot->s.modelindex2 = 255;		// custom gun model
+	ent->s.effects = 0;
+	ent->s.skinnum = ent - g_edicts - 1;
+	ent->s.modelindex = 255;		// will use the skin specified model
+	ent->s.modelindex2 = 255;		// custom gun model
 
-	info = Info_ValueForKey (bot->client->pers.userinfo, "skin");
+	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
 	i = 0;
 	done = false;
 	strcpy(playermodel, " ");
@@ -1031,29 +1031,29 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
 		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
-		bot->s.modelindex3 = gi.modelindex(modelpath);
+		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
 	else
-		bot->s.modelindex3 = 0;
+		ent->s.modelindex3 = 0;
 
-	bot->s.modelindex4 = 0;
+	ent->s.modelindex4 = 0;
 
 	//check for gib file
-	bot->usegibs = 0; //alien is default
+	ent->usegibs = 0; //alien is default
 	sprintf(modelpath, "players/%s/usegibs", playermodel);
 	Q2_FindFile (modelpath, &file);
 	if(file) { //use model specific gibs
-		bot->usegibs = 1;
-		sprintf(bot->head, "players/%s/head.md2", playermodel);
-		sprintf(bot->body, "players/%s/body.md2", playermodel);
-		sprintf(bot->leg, "players/%s/leg.md2", playermodel);
-		sprintf(bot->arm, "players/%s/arm.md2", playermodel);
+		ent->usegibs = 1;
+		sprintf(ent->head, "players/%s/head.md2", playermodel);
+		sprintf(ent->body, "players/%s/body.md2", playermodel);
+		sprintf(ent->leg, "players/%s/leg.md2", playermodel);
+		sprintf(ent->arm, "players/%s/arm.md2", playermodel);
 		fclose(file);
 	}
 
 	//check for class file
-	bot->ctype = 0;
+	ent->ctype = 0;
 	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
 	if(file) 
@@ -1061,7 +1061,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		fclose(file);
 
 		//human
-		bot->ctype = 1;
+		ent->ctype = 1;
 		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 		{
 			if(g_tactical->integer)
@@ -1075,17 +1075,17 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 				//0-1 (has mind eraser)
 				//0-1 (has vaporizor)
 			
-				ParseClassFile(modelpath, bot); 
-				if(bot->has_bomb)
+				ParseClassFile(modelpath, ent); 
+				if(ent->has_bomb)
 				{
-					bot->client->pers.inventory[ITEM_INDEX(FindItem("Human Bomb"))] = 1;
-					bot->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Human Bomb"))] = 1;
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
 				}				
 				item = FindItem("Blaster");
 			}
 			else
 			{
-				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 100;
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
 				
@@ -1105,10 +1105,10 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		if(file && !g_tactical->integer) 
 		{ 
 			//robot - not used in tactical
-			bot->ctype = 2;
+			ent->ctype = 2;
 			if(classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value))
 			{
-				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 85;
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 175;
 			}
@@ -1117,21 +1117,21 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		else 
 		{ 
 			//alien
-			bot->ctype = 0;
+			ent->ctype = 0;
 			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
 			{
-				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
 				if(g_tactical->integer)
 				{
 					sprintf(modelpath, "players/%s/alien", playermodel);
 					Q2_FindFile (modelpath, &file);
 					if(file)
 					{
-						ParseClassFile(modelpath, bot); 		
-						if(bot->has_bomb)
+						ParseClassFile(modelpath, ent); 		
+						if(ent->has_bomb)
 						{
-							bot->client->pers.inventory[ITEM_INDEX(FindItem("Alien Bomb"))] = 1;
-							bot->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+							ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Bomb"))] = 1;
+							ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
 						}
 					}
 					item = FindItem("Blaster");
@@ -1155,41 +1155,41 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 
 	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)
-		SelectSpawnPoint (bot, spawn_origin, spawn_angles);
+		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
 	
 	client->ps.pmove.origin[0] = spawn_origin[0]*8;
 	client->ps.pmove.origin[1] = spawn_origin[1]*8;
 	client->ps.pmove.origin[2] = spawn_origin[2]*8;
 
-	bot->s.frame = 0;
-	VectorCopy (spawn_origin, bot->s.origin);
-	bot->s.origin[2] += 1;	// make sure off ground
+	ent->s.frame = 0;
+	VectorCopy (spawn_origin, ent->s.origin);
+	ent->s.origin[2] += 1;	// make sure off ground
 
 	// set the delta angle
 	for (i=0 ; i<3 ; i++)
 		client->ps.pmove.delta_angles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
 
-	bot->s.angles[PITCH] = 0;
-	bot->s.angles[YAW] = spawn_angles[YAW];
-	bot->s.angles[ROLL] = 0;
-	VectorCopy (bot->s.angles, client->ps.viewangles);
-	VectorCopy (bot->s.angles, client->v_angle);
+	ent->s.angles[PITCH] = 0;
+	ent->s.angles[YAW] = spawn_angles[YAW];
+	ent->s.angles[ROLL] = 0;
+	VectorCopy (ent->s.angles, client->ps.viewangles);
+	VectorCopy (ent->s.angles, client->v_angle);
 
 	// force the current weapon up
 	client->newweapon = client->pers.weapon;
-	ChangeWeapon (bot);
+	ChangeWeapon (ent);
 
-	bot->enemy = NULL;
-	bot->movetarget = NULL;
-	bot->yaw_speed = 37; // bot turning speed. angle in degrees
-	bot->state = STATE_MOVE;
+	ent->enemy = NULL;
+	ent->movetarget = NULL;
+	ent->yaw_speed = 37; // bot turning speed. angle in degrees
+	ent->state = STATE_MOVE;
 
 	// Set the current node
-	bot->current_node = ACEND_FindClosestReachableNode(bot,NODE_DENSITY, NODE_ALL);
-	bot->goal_node = bot->current_node;
-	bot->next_node = bot->current_node;
-	bot->next_move_time = level.time;
-	bot->suicide_timeout = level.time + 15.0;
+	ent->current_node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
+	ent->goal_node = ent->current_node;
+	ent->next_node = ent->current_node;
+	ent->next_move_time = level.time;
+	ent->suicide_timeout = level.time + 15.0;
 
 	if ( !respawn )
 	{
@@ -1198,18 +1198,18 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		 * from botinfo/<botname>.cfg file
 		 * ReadConfig sets defaults if there is no such file.
 		 */
-		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
+		info = Info_ValueForKey (ent->client->pers.userinfo, "name");
 		sprintf( bot_configfilename, "botinfo/%s.cfg", info );
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items
-		bot->skill = botvals.skill;
-		strcpy(bot->faveweap, botvals.faveweap);
+		ent->skill = botvals.skill;
+		strcpy(ent->faveweap, botvals.faveweap);
 		for(k = 1; k < 10; k++)
-			bot->weapacc[k] = botvals.weapacc[k];
-		bot->accuracy = 0.75; //start with this(changes when bot selects a weapon
-		bot->awareness = botvals.awareness;
-		memcpy (bot->chatmsg, botvals.chatmsg, sizeof (bot->chatmsg));
+			ent->weapacc[k] = botvals.weapacc[k];
+		ent->accuracy = 0.75; //start with this(changes when bot selects a weapon
+		ent->awareness = botvals.awareness;
+		memcpy (ent->chatmsg, botvals.chatmsg, sizeof (ent->chatmsg));
 
 		/*
 		 * adjust skill according to cvar. Single Player menu selections
@@ -1221,17 +1221,17 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		 */
 		if( skill->integer == 0 )
 		{
-			bot->skill = 0; //dumb as a box of rocks
+			ent->skill = 0; //dumb as a box of rocks
 		}
 		else if ( skill->integer == 2 )
 		{
-			bot->skill += 1;
-			if(bot->skill > 3)
-				bot->skill = 3;
+			ent->skill += 1;
+			if(ent->skill > 3)
+				ent->skill = 3;
 		}
 		else if ( skill->integer >= 3 )
 		{
-			bot->skill = 3;
+			ent->skill = 3;
 		}
 
 		/*
@@ -1248,34 +1248,34 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	// If we are not respawning hold off for up to three seconds before releasing into game
     if(!respawn)
 	{
-		bot->think = ACESP_HoldSpawn;
-		bot->nextthink = level.time + random()*3.0; // up to three seconds
+		ent->think = ACESP_HoldSpawn;
+		ent->nextthink = level.time + random()*3.0; // up to three seconds
 	}
 	else
 	{
-		if (!KillBox (bot))
+		if (!KillBox (ent))
 		{	// could't spawn in?
 		}
 
-		bot->s.event = EV_OTHER_TELEPORT; //fix "player flash" bug
-		gi.linkentity (bot);
+		ent->s.event = EV_OTHER_TELEPORT; //fix "player flash" bug
+		gi.linkentity (ent);
 
-		bot->think = ACEAI_Think;
-		bot->nextthink = level.time + FRAMETIME;
+		ent->think = ACEAI_Think;
+		ent->nextthink = level.time + FRAMETIME;
 
 			// send effect
 		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (bot-g_edicts);
+		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_LOGIN);
-		gi.multicast (bot->s.origin, MULTICAST_PVS);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}
 	client->spawnprotecttime = level.time;
 
 	//unlagged
 	if ( g_antilag->integer) {
-		G_ResetHistory( bot );
+		G_ResetHistory( ent );
 		// and this is as good a time as any to clear the saved state
-		bot->client->saved.leveltime = 0;
+		ent->client->saved.leveltime = 0;
 	}
 
 }

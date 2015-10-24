@@ -1934,6 +1934,7 @@ void PutClientInServer (edict_t *ent)
 	client->lasttaunttime = 0;
 	client->rayImmunity = false;
 
+	// init pers.* variables, save and restore userinfo variables (name, skin)
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
