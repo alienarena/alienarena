@@ -1,0 +1,6 @@
+heightmap textures/dm-turbo/rubble1.tga;
+texture rubble1_texture;
+lightmap textures/dm-turbo/rubble1_lightmaptex.tga;
+vegetation textures/dm-turbo/rubble1_vegetation.tga;
+mins -1000, -1000, -64;
+maxs 1000, 1000, 82;
