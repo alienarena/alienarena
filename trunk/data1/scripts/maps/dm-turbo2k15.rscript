@@ -1,3 +1,17 @@
+rubble1_texture
+{	
+	{
+		map textures/dm-turbo/rubble1_blendtex.tga	
+		blendmap 3			
+			200 textures/arena5/ground1.tga			
+			400 textures/arena10/rockdirt1.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 3 
+			0 textures/arena5/ground1_nm.tga
+			1 textures/arena10/rockdirt1_nm.tga	
+			2 textures/texturelib/ground_0045_nm.tga			
+	}
+}
 textures/arena7/light3
 {
 	{ 
