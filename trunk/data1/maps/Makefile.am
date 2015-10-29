@@ -185,6 +185,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2_normal.tga \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
+	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
@@ -374,6 +375,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obfloor1_fx.tga \
 	meshes/tech/obfloor1_normal.jpg \
 	meshes/tech/obfloor2.md2 \
+	meshes/tech/obfloor3.md2 \
 	meshes/tech/obsupport1.jpg \
 	meshes/tech/obsupport1.md2 \
 	meshes/tech/obsupport1_fx.tga \
@@ -628,6 +630,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-purgatory.mus \
 	scripts/dm-saucer2k9.fog \
 	scripts/dm-saucer2k9.mus \
+	scripts/dm-turbo2k15.fog \
+	scripts/dm-turbo2k15.mus \
 	scripts/dm-turbo2k8.fog \
 	scripts/dm-turbo2k8.mus \
 	scripts/dm-vesuvius2k11.fog \
