@@ -54,6 +54,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-omega2k8.rscript \
 	maps/dm-purgatory.rscript \
 	maps/dm-saucer2k9.rscript \
+	maps/dm-turbo2k15.rscript \
 	maps/dm-turbo2k8.rscript \
 	maps/dm-vesuvius2k11.rscript \
 	maps/dm-violator2k11.rscript \
