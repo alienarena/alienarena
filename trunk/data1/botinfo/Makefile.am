@@ -63,6 +63,7 @@ nobase_dist_botinfo_DATA = \
 	dm-omega2k8.tmp \
 	dm-purgatory.tmp \
 	dm-saucer2k9.tmp \
+	dm-turbo2k15.tmp \
 	dm-turbo2k8.tmp \
 	dm-vesuvius2k11.tmp \
 	dm-violator2k11.tmp \
@@ -114,6 +115,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-omega2k8.nod \
 	nav/dm-purgatory.nod \
 	nav/dm-saucer2k9.nod \
+	nav/dm-turbo2k15.nod \
 	nav/dm-turbo2k8.nod \
 	nav/dm-vesuvius2k11.nod \
 	nav/dm-violator2k11.nod \
