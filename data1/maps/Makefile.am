@@ -69,6 +69,7 @@ nobase_dist_maps_DATA = \
 	dm-omega2k8.lightmap \
 	dm-purgatory.bsp \
 	dm-saucer2k9.bsp \
+	dm-turbo2k15.bsp \
 	dm-turbo2k8.bsp \
 	dm-vesuvius2k11.bsp \
 	dm-vesuvius2k11.lightmap \
@@ -185,6 +186,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2_normal.tga \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
+	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \

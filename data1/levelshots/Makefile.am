@@ -95,6 +95,8 @@ nobase_dist_levelshots_DATA = \
 	dm-purgatory.txt \
 	dm-saucer2k9.jpg \
 	dm-saucer2k9.txt \
+	dm-turbo2k15.jpg \
+	dm-turbo2k15.txt \
 	dm-turbo2k8.jpg \
 	dm-turbo2k8.txt \
 	dm-vesuvius2k11.jpg \

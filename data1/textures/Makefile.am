@@ -1083,7 +1083,7 @@ nobase_dist_textures_DATA = \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \
-	dm-turbo/rubble1_vegetation.TGA \
+	dm-turbo/rubble1_vegetation.tga \
 	dm-wasteland/canyon1.tga \
 	dm-wasteland/canyon1_blendtex.tga \
 	dm-wasteland/canyon1_blendtex2.tga \
