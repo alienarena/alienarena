@@ -32,6 +32,7 @@ nobase_dist_maps_DATA = \
 	dm-atlantis2k8.bsp \
 	dm-babel2k11.bsp \
 	dm-bloodfactory2k12.bsp \
+	dm-bloodfactory2k15.bsp \
 	dm-chasmatic2k9.bsp \
 	dm-command2k9.bsp \
 	dm-corrosion.bsp \
@@ -184,6 +185,11 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2.md2 \
 	meshes/desert/platewall2.tga \
 	meshes/desert/platewall2_normal.tga \
+	meshes/dm-bloodfactory/blood1.decal \
+	meshes/dm-bloodfactory/blood2.decal \
+	meshes/dm-bloodfactory/blood3.decal \
+	meshes/dm-bloodfactory/rubble1.terrain \
+	meshes/dm-bloodfactory/rubble2.terrain \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
 	meshes/dm-turbo/blood.decal \
@@ -586,6 +592,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-babel2k11.mus \
 	scripts/dm-bloodfactory2k12.fog \
 	scripts/dm-bloodfactory2k12.mus \
+	scripts/dm-bloodfactory2k15.fog \
+	scripts/dm-bloodfactory2k15.mus \
 	scripts/dm-chasmatic2k9.fog \
 	scripts/dm-chasmatic2k9.mus \
 	scripts/dm-command2k9.fog \

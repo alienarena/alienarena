@@ -39,6 +39,7 @@ nobase_dist_botinfo_DATA = \
 	dm-atlantis2k8.tmp \
 	dm-babel2k11.tmp \
 	dm-bloodfactory2k12.tmp \
+	dm-bloodfactory2k15.tmp \
 	dm-chasmatic2k9.tmp \
 	dm-command2k9.tmp \
 	dm-corrosion.tmp \
@@ -91,6 +92,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-atlantis2k8.nod \
 	nav/dm-babel2k11.nod \
 	nav/dm-bloodfactory2k12.nod \
+	nav/dm-bloodfactory2k15.nod \
 	nav/dm-chasmatic2k9.nod \
 	nav/dm-command2k9.nod \
 	nav/dm-corrosion.nod \
