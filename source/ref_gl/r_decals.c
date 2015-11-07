@@ -754,5 +754,8 @@ void R_ParseDecalEntity (char *match, char *block)
 	}
 	
 	ent->model = R_RegisterModel (model_path);
-	strncpy (ent->model->name, fake_path, sizeof(fake_path));
+	if ( ent->model )
+		strncpy (ent->model->name, fake_path, sizeof(fake_path));
+	else
+		Com_DPrintf("Missing decal file: %s\n", model_path);
 }
