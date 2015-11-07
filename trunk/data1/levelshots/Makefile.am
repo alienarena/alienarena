@@ -47,6 +47,8 @@ nobase_dist_levelshots_DATA = \
 	dm-babel2k11.txt \
 	dm-bloodfactory2k12.jpg \
 	dm-bloodfactory2k12.txt \
+	dm-bloodfactory2k15.jpg \
+	dm-bloodfactory2k15.txt \
 	dm-chasmatic2k9.jpg \
 	dm-chasmatic2k9.txt \
 	dm-command2k9.jpg \

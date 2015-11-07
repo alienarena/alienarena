@@ -29,6 +29,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-atlantis2k8.rscript \
 	maps/dm-babel2k11.rscript \
 	maps/dm-bloodfactory2k12.rscript \
+	maps/dm-bloodfactory2k15.rscript \
 	maps/dm-chasmatic2k9.rscript \
 	maps/dm-command2k9.rscript \
 	maps/dm-corrosion.rscript \
