@@ -396,6 +396,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2.md2 \
 	meshes/desert/platewall2.tga \
 	meshes/desert/platewall2_normal.tga \
+	meshes/dm-bloodfactory/blood0.decal \
 	meshes/dm-bloodfactory/blood1.decal \
 	meshes/dm-bloodfactory/blood2.decal \
 	meshes/dm-bloodfactory/blood3.decal \

@@ -118,12 +118,12 @@ nobase_dist_textures_DATA = \
 	arena10/elecwall1.tga \
 	arena10/elecwall2_nm.tga \
 	arena10/elecwall2.tga \
-	arena10/factorybrick.jpg \
-	arena10/factorybrick_hm.jpg \
-	arena10/factorybrick_nm.jpg \
-	arena10/factoryfloor.jpg \
-	arena10/factoryfloor_hm.jpg \
-	arena10/factoryfloor_nm.jpg \
+	arena10/factorybrick.tga \
+	arena10/factorybrick_hm.tga \
+	arena10/factorybrick_nm.tga \
+	arena10/factoryfloor.tga \
+	arena10/factoryfloor_hm.tga \
+	arena10/factoryfloor_nm.tga \
 	arena10/floortile10_hm.tga \
 	arena10/floortile10_nm.tga \
 	arena10/floortile10.tga \
