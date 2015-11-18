@@ -608,7 +608,7 @@ models/weapons/v_bfg/skin
 		normalmap
 		map2 gfx/vapormask.tga
 		glow
-		map3 gfx/mirrorspec.tga
+		map3 gfx/chrome2.tga
 		cube
 	}
 }
