@@ -130,5 +130,13 @@ maps/meshes/urban/bench
 		normalmap
 	}
 }
-
+maps/meshes/urban/bulb
+{
+	{
+		map maps/meshes/urban/bulb_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/bulb_fx.tga
+		glow
+	}
+}
 
