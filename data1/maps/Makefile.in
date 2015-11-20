@@ -404,6 +404,12 @@ nobase_dist_maps_DATA = \
 	meshes/dm-bloodfactory/rubble2.terrain \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
+	meshes/dm-extermination/blood0.decal \
+	meshes/dm-extermination/blood1.decal \
+	meshes/dm-extermination/blood2.decal \
+	meshes/dm-extermination/blood3.decal \
+	meshes/dm-extermination/rubble1.terrain \
+	meshes/dm-extermination/rubble2.terrain \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
@@ -478,6 +484,10 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/skeleton3.md2 \
 	meshes/gothic/skeleton.jpg \
 	meshes/gothic/skeleton_normal.jpg \
+	meshes/gothic/skull.jpg \
+	meshes/gothic/skull1.md2 \
+	meshes/gothic/skull2.md2 \
+	meshes/gothic/skull_normal.jpg \
 	meshes/gothic/throne.jpg \
 	meshes/gothic/throne.md2 \
 	meshes/gothic/throne_normal.jpg \
@@ -580,6 +590,10 @@ nobase_dist_maps_DATA = \
 	meshes/straightconduit.md2 \
 	meshes/tech/bigribtube.jpg \
 	meshes/tech/bigribtube_normal.jpg \
+	meshes/tech/biotubebase.jpg \
+	meshes/tech/biotubebase.md2 \
+	meshes/tech/biotubebase_fx.tga \
+	meshes/tech/biotubebase_normal.jpg \
 	meshes/tech/blueribtube.jpg \
 	meshes/tech/blueribtube1.md2 \
 	meshes/tech/blueribtube_fx.tga \
@@ -687,6 +701,10 @@ nobase_dist_maps_DATA = \
 	meshes/urban/bluelantern.jpg \
 	meshes/urban/bluelantern.md2 \
 	meshes/urban/bluelantern_fx.tga \
+	meshes/urban/bulb.jpg \
+	meshes/urban/bulb.md2 \
+	meshes/urban/bulb_fx.tga \
+	meshes/urban/bulb_normal.jpg \
 	meshes/urban/deskstool.jpg \
 	meshes/urban/deskstool_normal.jpg \
 	meshes/urban/dumpster.jpg \
@@ -829,6 +847,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-eternal.mus \
 	scripts/dm-extermination.fog \
 	scripts/dm-extermination.mus \
+	scripts/dm-extermination15.fog \
+	scripts/dm-extermination15.mus \
 	scripts/dm-furious2k8.fog \
 	scripts/dm-furious2k8.mus \
 	scripts/dm-goregrinder.fog \

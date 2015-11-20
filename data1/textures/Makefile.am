@@ -1093,6 +1093,12 @@ nobase_dist_textures_DATA = \
 	dm-dismal/snow1_blendtex.tga \
 	dm-dismal/snow1_lightmaptex.tga \
 	dm-dismal/snow_nm.jpg \
+	dm-extermination/rubble1.tga \
+	dm-extermination/rubble1_blendtex.tga \
+	dm-extermination/rubble1_lightmaptex.tga \
+	dm-extermination/rubble2.tga \
+	dm-extermination/rubble2_blendtex.tga \
+	dm-extermination/rubble2_lightmaptex.tga \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \
