@@ -1,5 +1,5 @@
-heightmap textures/dm-bloodfactory/rubble2.tga;
+heightmap textures/dm-extermination/rubble2.tga;
 texture rubble2_texture;
-lightmap textures/dm-bloodfactory/rubble2_lightmaptex.tga;
-mins -400, -400, -64;
-maxs 450, 450, 175;
+lightmap textures/dm-extermination/rubble2_lightmaptex.tga;
+mins -560, -560, -16;
+maxs 560, 560, 128;
