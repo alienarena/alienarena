@@ -263,6 +263,9 @@ nobase_dist_textures_DATA = \
 	arena10/sign7_hm.tga \
 	arena10/sign7_nm.tga \
 	arena10/sign7.tga \
+	arena10/skullpile.tga \
+	arena10/skullpile_hm.tga \
+	arena10/skullpile_nm.tga \
 	arena10/skyscraper1_hm.tga \
 	arena10/skyscraper1_nm.tga \
 	arena10/skyscraper1.tga \
@@ -1099,6 +1102,9 @@ nobase_dist_textures_DATA = \
 	dm-extermination/rubble2.tga \
 	dm-extermination/rubble2_blendtex.tga \
 	dm-extermination/rubble2_lightmaptex.tga \
+	dm-extermination/rubble3.tga \
+	dm-extermination/rubble3_blendtex.tga \
+	dm-extermination/rubble3_lightmaptex.tga \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \
