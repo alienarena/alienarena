@@ -26,6 +26,18 @@ rubble2_texture
 			2 textures/texturelib/ground_0045_nm.tga			
 	}
 }
+rubble3_texture
+{	
+	{
+		map textures/dm-extermination/rubble3_blendtex.tga	
+		blendmap 2			
+			100 textures/arena10/skullpile.tga			
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 2 
+			0 textures/arena10/skullpile_nm.tga
+			1 textures/texturelib/ground_0045_nm.tga			
+	}
+}
 textures/arena9/greenglass
 {
 	{
