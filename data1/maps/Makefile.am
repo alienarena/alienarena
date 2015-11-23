@@ -199,6 +199,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-extermination/blood3.decal \
 	meshes/dm-extermination/rubble1.terrain \
 	meshes/dm-extermination/rubble2.terrain \
+	meshes/dm-extermination/rubble3.terrain \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \

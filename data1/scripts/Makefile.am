@@ -42,6 +42,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-dynamo2k12.rscript \
 	maps/dm-eternal.rscript \
 	maps/dm-extermination.rscript \
+	maps/dm-extermination2k15.rscript \
 	maps/dm-furious2k8.rscript \
 	maps/dm-goregrinder.rscript \
 	maps/dm-horus.rscript \
