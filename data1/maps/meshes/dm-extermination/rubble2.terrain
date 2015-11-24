@@ -1,5 +1,6 @@
 heightmap textures/dm-extermination/rubble2.tga;
 texture rubble2_texture;
+vegetation textures/dm-extermination/rubble2_vegetation.tga;
 lightmap textures/dm-extermination/rubble2_lightmaptex.tga;
 mins -560, -560, -16;
 maxs 560, 560, 128;
