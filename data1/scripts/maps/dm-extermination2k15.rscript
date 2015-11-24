@@ -191,7 +191,7 @@ textures/rage/metallight_2
 		lensflare
 	}
 }
-textures/arena10/cobblestone
+textures/arena10/factoryfloorg
 {
 	{
 		map gfx/weed3.tga
@@ -200,16 +200,6 @@ textures/arena10/cobblestone
 		grass
 		grasstype 0
 	}	
-}
-textures/arena9/roundlight
-{
-	{
-		map gfx/beam1.tga
-		scale static 10 static 10
-		colormap 1 1 1
-		beam
-		lensflare
-	}
 }
 textures/evil/e6launchengine
 {
@@ -257,7 +247,7 @@ textures/evil/e8_jumppad02
         	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
     	}
 }
-env/deadcityup
+env/alienup
 {
 	{
 		map gfx/clouds.tga
@@ -265,7 +255,7 @@ env/deadcityup
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcityrt
+env/alienrt
 {
 	{
 		map gfx/clouds.tga
@@ -273,7 +263,7 @@ env/deadcityrt
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcitylf
+env/alienlf
 {
 	{
 		map gfx/clouds.tga
@@ -281,7 +271,7 @@ env/deadcitylf
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcityft
+env/alienft
 {
 	{
 		map gfx/clouds.tga
@@ -289,7 +279,7 @@ env/deadcityft
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcitybk
+env/alienbk
 {
 	{
 		map gfx/clouds.tga
