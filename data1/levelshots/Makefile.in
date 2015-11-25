@@ -284,6 +284,8 @@ nobase_dist_levelshots_DATA = \
 	dm-eternal.txt \
 	dm-extermination.jpg \
 	dm-extermination.txt \
+	dm-extermination2k15.jpg \
+	dm-extermination2k15.txt \
 	dm-furious2k8.jpg \
 	dm-furious2k8.txt \
 	dm-goregrinder.jpg \

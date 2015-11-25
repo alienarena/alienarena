@@ -124,6 +124,12 @@ nobase_dist_textures_DATA = \
 	arena10/factoryfloor.tga \
 	arena10/factoryfloor_hm.tga \
 	arena10/factoryfloor_nm.tga \
+	arena10/factoryfloor_w.tga \
+	arena10/factoryfloor_w_hm.tga \
+	arena10/factoryfloor_w_nm.tga \
+	arena10/factoryfloorg.tga \
+	arena10/factoryfloorg_hm.tga \
+	arena10/factoryfloorg_nm.tga \
 	arena10/floortile10_hm.tga \
 	arena10/floortile10_nm.tga \
 	arena10/floortile10.tga \
@@ -1102,9 +1108,11 @@ nobase_dist_textures_DATA = \
 	dm-extermination/rubble2.tga \
 	dm-extermination/rubble2_blendtex.tga \
 	dm-extermination/rubble2_lightmaptex.tga \
+	dm-extermination/rubble2_vegetation.tga \
 	dm-extermination/rubble3.tga \
 	dm-extermination/rubble3_blendtex.tga \
 	dm-extermination/rubble3_lightmaptex.tga \
+	dm-extermination/rubble3_vegetation.tga \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \
