@@ -12631,6 +12631,42 @@
 ( 80 148 -64 ) ( 80 148 -62 ) ( 82 148 -64 ) desert/blacktrans 0 0 0 1 1 0 16 0
 ( 80 148 -64 ) ( 80 150 -64 ) ( 80 148 -62 ) desert/blacktrans 86 0 0 1 1 0 16 0
 }
+// brush 1368
+{
+( 448 80 -224 ) ( 416 80 -224 ) ( 416 32 -224 ) arena6/blacktrans 16 -112 0 1 1 0 16 0
+( 416 32 -160 ) ( 416 80 -160 ) ( 448 80 -160 ) arena6/blacktrans 16 -112 0 1 1 0 16 0
+( 416 32 -128 ) ( 448 32 -128 ) ( 448 32 -224 ) arena6/blacktrans 16 -88 0 1 1 0 16 0
+( 448 80 -160 ) ( 464 80 -224 ) ( 464 32 -224 ) arena6/blacktrans 112 -88 0 1 1 0 16 0
+( 448 56 -128 ) ( 416 56 -128 ) ( 416 56 -224 ) arena6/blacktrans 16 -88 0 1 1 0 16 0
+( 416 80 -128 ) ( 416 32 -128 ) ( 416 32 -224 ) arena6/blacktrans 112 -88 0 1 1 0 16 0
+}
+// brush 1369
+{
+( 304 64 -224 ) ( 304 32 -224 ) ( 352 32 -224 ) arena6/blacktrans 16 16 90 1 1 0 16 0
+( 352 32 -160 ) ( 304 32 -160 ) ( 304 64 -160 ) arena6/blacktrans 16 16 90 1 1 0 16 0
+( 352 32 -128 ) ( 352 64 -128 ) ( 352 64 -224 ) arena6/blacktrans 16 -88 0 1 1 0 16 0
+( 304 64 -160 ) ( 304 80 -224 ) ( 352 80 -224 ) arena6/blacktrans -16 -88 -180 1 -1 0 16 0
+( 328 64 -128 ) ( 328 32 -128 ) ( 328 32 -224 ) arena6/blacktrans 16 -88 0 1 1 0 16 0
+( 304 32 -128 ) ( 352 32 -128 ) ( 352 32 -224 ) arena6/blacktrans -16 -88 -180 1 -1 0 16 0
+}
+// brush 1370
+{
+( 464 -64 -224 ) ( 464 -32 -224 ) ( 416 -32 -224 ) arena6/blacktrans 0 -64 90 1 1 0 16 0
+( 416 -32 -160 ) ( 464 -32 -160 ) ( 464 -64 -160 ) arena6/blacktrans 0 -64 90 1 1 0 16 0
+( 416 -32 -128 ) ( 416 -64 -128 ) ( 416 -64 -224 ) arena6/blacktrans 0 -88 0 1 1 0 16 0
+( 464 -64 -160 ) ( 464 -80 -224 ) ( 416 -80 -224 ) arena6/blacktrans 64 -88 -180 1 -1 0 16 0
+( 440 -64 -128 ) ( 440 -32 -128 ) ( 440 -32 -224 ) arena6/blacktrans 0 -88 0 1 1 0 16 0
+( 464 -32 -128 ) ( 416 -32 -128 ) ( 416 -32 -224 ) arena6/blacktrans 64 -88 -180 1 -1 0 16 0
+}
+// brush 1371
+{
+( 320 -80 -224 ) ( 352 -80 -224 ) ( 352 -32 -224 ) arena6/blacktrans 0 -64 0 1 1 0 16 0
+( 352 -32 -160 ) ( 352 -80 -160 ) ( 320 -80 -160 ) arena6/blacktrans 0 -64 0 1 1 0 16 0
+( 352 -32 -128 ) ( 320 -32 -128 ) ( 320 -32 -224 ) arena6/blacktrans 0 -88 0 1 1 0 16 0
+( 320 -80 -160 ) ( 304 -80 -224 ) ( 304 -32 -224 ) arena6/blacktrans 64 -88 0 1 1 0 16 0
+( 320 -56 -128 ) ( 352 -56 -128 ) ( 352 -56 -224 ) arena6/blacktrans 0 -88 0 1 1 0 16 0
+( 352 -80 -128 ) ( 352 -32 -128 ) ( 352 -32 -224 ) arena6/blacktrans 64 -88 0 1 1 0 16 0
+}
 }
 // entity 1
 {
@@ -14365,5 +14401,37 @@
 "origin" "80.000008 159.999954 -64.000046"
 "model" "maps/meshes/urban/bulb.md2"
 "angles" "0.000010 179.999985 -90.000000"
+"spawnflags" "1"
+}
+// entity 249
+{
+"classname" "misc_mapmodel"
+"origin" "424 40 -216"
+"angle" "360"
+"model" "maps/meshes/ribtube1.md2"
+"spawnflags" "1"
+}
+// entity 250
+{
+"classname" "misc_mapmodel"
+"model" "maps/meshes/ribtube1.md2"
+"angle" "90"
+"origin" "344 40 -216"
+"spawnflags" "1"
+}
+// entity 251
+{
+"classname" "misc_mapmodel"
+"model" "maps/meshes/ribtube1.md2"
+"angle" "270"
+"origin" "424 -40 -216"
+"spawnflags" "1"
+}
+// entity 252
+{
+"classname" "misc_mapmodel"
+"model" "maps/meshes/ribtube1.md2"
+"angle" "180"
+"origin" "344 -40 -216"
 "spawnflags" "1"
 }
