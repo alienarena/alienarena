@@ -14357,7 +14357,7 @@
 // entity 242
 {
 "classname" "misc_decal"
-"origin" "-64.000000 1394.000000 -134.000000"
+"origin" "-96.000000 1482.000000 -134.000000"
 "model" "maps/meshes/dm-bloodfactory/blood3.decal"
 "angles" "90.000000 0.000000 -0.000000"
 }
@@ -14409,7 +14409,6 @@
 "origin" "424 40 -216"
 "angle" "360"
 "model" "maps/meshes/ribtube1.md2"
-"spawnflags" "1"
 }
 // entity 250
 {
@@ -14417,7 +14416,6 @@
 "model" "maps/meshes/ribtube1.md2"
 "angle" "90"
 "origin" "344 40 -216"
-"spawnflags" "1"
 }
 // entity 251
 {
@@ -14425,7 +14423,6 @@
 "model" "maps/meshes/ribtube1.md2"
 "angle" "270"
 "origin" "424 -40 -216"
-"spawnflags" "1"
 }
 // entity 252
 {
@@ -14433,5 +14430,11 @@
 "model" "maps/meshes/ribtube1.md2"
 "angle" "180"
 "origin" "344 -40 -216"
-"spawnflags" "1"
+}
+// entity 253
+{
+"classname" "misc_decal"
+"origin" "-64.000000 1538.000000 -150.000000"
+"model" "maps/meshes/dm-bloodfactory/blood3.decal"
+"angles" "90.000000 0.000000 -0.000000"
 }
