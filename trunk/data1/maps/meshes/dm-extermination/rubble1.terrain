@@ -2,4 +2,4 @@ heightmap textures/dm-extermination/rubble1.tga;
 texture rubble1_texture;
 lightmap textures/dm-extermination/rubble1_lightmaptex.tga;
 mins -320, -320, -24;
-maxs 320, 320, 100;
+maxs 340, 320, 100;
