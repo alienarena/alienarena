@@ -51,6 +51,7 @@ nobase_dist_maps_DATA = \
 	dm-extermination.bsp \
 	dm-extermination.lightmap \
 	dm-extermination2k15.bsp \
+	dm-extermination2k15.lightmap \
 	dm-furious2k8.bsp \
 	dm-furious2k8.lightmap \
 	dm-goregrinder.bsp \
