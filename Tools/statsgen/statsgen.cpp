@@ -984,12 +984,19 @@ void GetServerList (void)
 	fd_set stoc;
 	struct sockaddr_in dgFrom;
 	char recvBuff[0xFFFF], *p;
+	struct in_addr addr = { 0 };
+	//char *host_addr = NULL;
+
+	//host_addr = "68.84.11.36";
+
+	//addr.s_addr = inet_addr(host_addr);
 
 	numServers = 0; //global return value
 
 	for ( i=3 ; i-- ;)
 	{
-		hp = gethostbyname ("master.corservers.com");
+		hp = gethostbyname ("master2.corservers.com");
+		//hp = gethostbyaddr((char *) &addr, 4, AF_INET);
 		if ( hp )
 			break;
 		Sleep( 1000 );
