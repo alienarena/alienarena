@@ -50,6 +50,7 @@ nobase_dist_maps_DATA = \
 	dm-eternal.bsp \
 	dm-extermination.bsp \
 	dm-extermination.lightmap \
+	dm-extermination2k15.bsp \
 	dm-furious2k8.bsp \
 	dm-furious2k8.lightmap \
 	dm-goregrinder.bsp \
@@ -637,8 +638,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-eternal.mus \
 	scripts/dm-extermination.fog \
 	scripts/dm-extermination.mus \
-	scripts/dm-extermination15.fog \
-	scripts/dm-extermination15.mus \
+	scripts/dm-extermination2k15.fog \
+	scripts/dm-extermination2k15.mus \
 	scripts/dm-furious2k8.fog \
 	scripts/dm-furious2k8.mus \
 	scripts/dm-goregrinder.fog \

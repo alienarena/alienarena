@@ -52,6 +52,7 @@ nobase_dist_botinfo_DATA = \
 	dm-dynamo2k12.tmp \
 	dm-eternal.tmp \
 	dm-extermination.tmp \
+	dm-extermination2k15.tmp \
 	dm-furious2k8.tmp \
 	dm-goregrinder.tmp \
 	dm-horus.tmp \
@@ -105,6 +106,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-dynamo2k12.nod \
 	nav/dm-eternal.nod \
 	nav/dm-extermination.nod \
+	nav/dm-extermination2k15.nod \
 	nav/dm-furious2k8.nod \
 	nav/dm-goregrinder.nod \
 	nav/dm-horus.nod \
