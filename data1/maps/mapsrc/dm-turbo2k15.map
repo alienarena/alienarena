@@ -31086,8 +31086,7 @@
 {
 "classname" "misc_decal"
 "origin" "-320.000000 734.000000 -240.000000"
-"model" "maps/meshes/dm-turbo/blood.decal"
-"angles" "0.000010 179.999985 -179.999985"
+"model" "maps/meshes/dm-turbo/blood2.decal"
 }
 // entity 120
 {
@@ -31434,14 +31433,12 @@
 "classname" "misc_decal"
 "origin" "-214.000000 694.000000 -240.000000"
 "model" "maps/meshes/dm-turbo/blood.decal"
-"angles" "0.000010 179.999985 -179.999985"
 }
 // entity 168
 {
 "classname" "misc_decal"
 "origin" "-442.000000 704.000000 -240.000000"
-"model" "maps/meshes/dm-turbo/blood.decal"
-"angles" "0.000010 179.999985 -179.999985"
+"model" "maps/meshes/dm-turbo/blood2.decal"
 }
 // entity 169
 {
