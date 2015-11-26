@@ -200,6 +200,8 @@ static void generate_vertices_for_mesh (mesh_t *mesh)
 			else if (mesh->everts[i].pos[j] > mesh->maxs[j])
 				mesh->maxs[j] = mesh->everts[i].pos[j];
 		}
+		
+		mesh->everts[i].idx = i;
 	}
 	
 	vec_sub (mesh->maxs, mesh->mins, mesh->scale);
@@ -844,7 +846,10 @@ static void contract (mesh_t *mesh, edge_t *edge)
 }
 
 // Reencode the simplified geometry back into the format given as input
-void reconstruct_mesh (mesh_t *mesh)
+// * culls vertices
+// * simplification cannot be continued after this is called
+// * revises mesh->num_tris to match the reduced number of triangles
+static void reconstruct_mesh (mesh_t *mesh)
 {
 	idx_t	old_num_verts, old_num_tris;
 	idx_t	i;
@@ -891,12 +896,41 @@ void reconstruct_mesh (mesh_t *mesh)
 	assert (mesh->num_tris == mesh->simplified_num_tris);
 }
 
-// Continue to remove edges from the mesh until it reaches a target polygon
-// count.
-void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
+// Reencode the simplified geometry back into the format given as input
+// * leaves culled vertices
+// * simplification may be continued after this is called
+// * must look in mesh->simplified_num_tris to get the reduced number of
+//   triangles
+void export_mesh (mesh_t *mesh)
 {
-	edge_t	*next_contraction;
-	double	mins[AXES], maxs[AXES], scale[AXES];
+	idx_t	new_idx = 0;
+	idx_t	i;
+	
+	for (i = 0; i < mesh->num_tris; i++)
+	{
+		int		j;
+		tri_t	*tri;
+		
+		tri = &mesh->etris[i];
+		
+		if (tri->cull)
+			continue;
+		
+		for (j = 0; j < 3; j++)
+		{
+			assert (!tri->verts[j]->cull);
+			mesh->tris[3*new_idx+j] = tri->verts[j]->idx;
+		}
+		
+		new_idx++;
+	}
+	
+	assert (new_idx == mesh->simplified_num_tris);
+}
+
+void simplify_init (mesh_t *mesh)
+{
+	static double mins[AXES], maxs[AXES], scale[AXES];
 	
 	mesh->mins = mins;
 	mesh->maxs = maxs;
@@ -912,19 +946,35 @@ void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
 	generate_all_contractions (mesh);
 	
 	mesh->simplified_num_tris = mesh->num_tris;
-	
-	next_contraction = binheap_find_root (&mesh->edgeheap);
-	while (fabs (next_contraction->contract_error) < DBL_EPSILON || mesh->simplified_num_tris > target_polycount)
-	{
-		contract (mesh, next_contraction);
-		next_contraction = binheap_find_root (&mesh->edgeheap);
-	}
-	
-	reconstruct_mesh (mesh);
-	
+}
+
+void simplify_teardown (mesh_t *mesh)
+{
 	free (mesh->everts);
 	free (mesh->etris);
 	free (mesh->edges);
 	free (mesh->edgelinks);
 	free (mesh->edgeheap.items);
+}
+
+int simplify_step (mesh_t *mesh, idx_t target_polycount)
+{
+	edge_t *next_contraction = binheap_find_root (&mesh->edgeheap);
+	if (fabs (next_contraction->contract_error) < DBL_EPSILON || mesh->simplified_num_tris > target_polycount)
+	{
+		contract (mesh, next_contraction);
+		return 1;
+	}
+	
+	return 0;
+}
+
+// Continue to remove edges from the mesh until it reaches a target polygon
+// count.
+void simplify_mesh (mesh_t *mesh, idx_t target_polycount)
+{
+	simplify_init (mesh);
+	while (simplify_step (mesh, target_polycount));
+	reconstruct_mesh (mesh);
+	simplify_teardown (mesh);
 }
