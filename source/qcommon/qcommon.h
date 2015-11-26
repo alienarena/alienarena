@@ -1086,6 +1086,7 @@ typedef struct
 
 typedef struct
 {
+	char			*hmtex_path;
 	char			*texture_path;
 	char			*lightmap_path;
 	int				num_vertices;

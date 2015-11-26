@@ -105,12 +105,17 @@ terraindec_t *LoadTerrainDecorationType
 }
 
 // TODO: separate function for decorations, currently this is kind of hacky.
+#ifdef MESH_SIMPLIFICATION_VISUALIZER
+static mesh_t mesh;
+#endif
 void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations_only, float oversampling_factor, int reduction_amt, char *buf)
 {
 	int i, j, va, w, h, vtx_w, vtx_h;
-	char	*hmtex_path = NULL, *vegtex_path = NULL, *rocktex_path = NULL;
+	char	*vegtex_path = NULL, *rocktex_path = NULL;
 	byte	*alphamask; // Bitmask of "holes" in terrain from alpha channel
+#ifndef MESH_SIMPLIFICATION_VISUALIZER
 	mesh_t	mesh;
+#endif
 	vec3_t	scale;
 	char	*token;
 	byte	*texdata;
@@ -133,7 +138,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting " cmd_name " filename! (File %s is invalid)", name); \
 		} 
 		
-		FILENAME_ATTR ("heightmap", hmtex_path)
+		FILENAME_ATTR ("heightmap", out->hmtex_path)
 		FILENAME_ATTR ("texture", out->texture_path)
 		FILENAME_ATTR ("lightmap", out->lightmap_path)
 		FILENAME_ATTR ("vegetation", vegtex_path)
@@ -168,7 +173,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 		buf = strtok (NULL, ";");
 	}
 	
-	if (!hmtex_path)
+	if (!out->hmtex_path)
 		Com_Error (ERR_DROP, "LoadTerrainFile: Missing heightmap texture in %s!", name);
 	
 	if (!out->texture_path)
@@ -176,12 +181,10 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	
 	VectorSubtract (out->maxs, out->mins, scale);
 	
-	LoadTGA (hmtex_path, &texdata, &w, &h);
+	LoadTGA (out->hmtex_path, &texdata, &w, &h);
 	
 	if (texdata == NULL)
-		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", hmtex_path);
-	
-	Z_Free (hmtex_path);
+		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", out->hmtex_path);
 	
 	// Compile a list of all vegetation sprites that should be added to the
 	// map.
@@ -283,13 +286,28 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	mesh.vtexcoords = out->vert_texcoords;
 	mesh.tris = out->tri_indices;
 	
+#ifndef MESH_SIMPLIFICATION_VISUALIZER
 	start_time = Sys_Milliseconds ();
 	simplify_mesh (&mesh, out->num_triangles/reduction_amt);
 	Com_Printf ("Simplified mesh in %f seconds.\n", (float)(Sys_Milliseconds () - start_time)/1000.0f);
 	
 	out->num_vertices = mesh.num_verts;
 	out->num_triangles = mesh.num_tris;
+#else
+    simplify_init (&mesh);
+#endif
 }
+
+#ifdef MESH_SIMPLIFICATION_VISUALIZER
+void visualizer_step (terraindata_t *out, qboolean export)
+{
+    simplify_step (&mesh, out->num_triangles - 1);
+    if (export)
+        export_mesh (&mesh);
+    out->num_vertices = mesh.num_verts;
+	out->num_triangles = mesh.simplified_num_tris;
+}
+#endif
 
 void CleanupTerrainData (terraindata_t *dat)
 {
@@ -300,6 +318,7 @@ void CleanupTerrainData (terraindata_t *dat)
 		dat->field = NULL; \
 	}
 	
+	CLEANUPFIELD (hmtex_path)
 	CLEANUPFIELD (texture_path)
 	CLEANUPFIELD (lightmap_path)
 	CLEANUPFIELD (vert_positions)

@@ -28,3 +28,7 @@ typedef struct
 } mesh_t;
 
 void simplify_mesh (mesh_t *mesh, idx_t target_polycount);
+void simplify_init (mesh_t *mesh);
+void simplify_teardown (mesh_t *mesh);
+int simplify_step (mesh_t *mesh, idx_t target_polycount);
+void export_mesh (mesh_t *mesh);
