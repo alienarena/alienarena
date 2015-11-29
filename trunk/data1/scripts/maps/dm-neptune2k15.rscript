@@ -22,6 +22,16 @@ cave2_texture
 			1 textures/texturelib/ground_0045_nm.tga			
 	}
 }
+textures/arena10/messybricks1
+{
+	{
+		map gfx/weed3.tga
+		scale static 4 static 4
+		colormap .7 .6 .5
+		grass
+		grasstype 0
+	}	
+}
 textures/arena10/bluetile
 {
 	{
