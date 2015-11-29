@@ -1113,6 +1113,12 @@ nobase_dist_textures_DATA = \
 	dm-extermination/rubble3_blendtex.tga \
 	dm-extermination/rubble3_lightmaptex.tga \
 	dm-extermination/rubble3_vegetation.tga \
+	dm-neptune/cave1.tga \
+	dm-neptune/cave1_blendtex.tga \
+	dm-neptune/cave1_lightmaptex.tga \
+	dm-neptune/cave2.tga \
+	dm-neptune/cave2_blendtex.tga \
+	dm-neptune/cave2_lightmaptex.tga \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \
@@ -1503,6 +1509,7 @@ nobase_dist_textures_DATA = \
 	texturelib/grunge_decal.tga \
 	texturelib/grunge_leaking.jpg \
 	texturelib/stones_0027.jpg \
+	texturelib/stones_0027_hm.jpg \
 	water/blood_nm.tga \
 	water/blood.tga \
 	water/bluewater_nm.tga \

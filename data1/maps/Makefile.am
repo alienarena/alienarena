@@ -64,6 +64,7 @@ nobase_dist_maps_DATA = \
 	dm-leviathan2k12.bsp \
 	dm-liberation.bsp \
 	dm-neptune.bsp \
+	dm-neptune2k15.bsp \
 	dm-neptune.lightmap \
 	dm-oblivion.bsp \
 	dm-oblivion.lightmap \
@@ -202,6 +203,8 @@ nobase_dist_maps_DATA = \
 	meshes/dm-extermination/rubble1.terrain \
 	meshes/dm-extermination/rubble2.terrain \
 	meshes/dm-extermination/rubble3.terrain \
+	meshes/dm-neptune/cave1.terrain \
+	meshes/dm-neptune/cave2.terrain \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
@@ -655,6 +658,7 @@ nobase_dist_maps_DATA = \
 	scripts/dm-liberation.fog \
 	scripts/dm-liberation.mus \
 	scripts/dm-neptune.mus \
+	scripts/dm-neptune2k15.fog \
 	scripts/dm-oblivion.fog \
 	scripts/dm-oblivion.mus \
 	scripts/dm-oblivion2k15.fog \
