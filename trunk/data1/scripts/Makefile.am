@@ -51,6 +51,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-leviathan2k12.rscript \
 	maps/dm-liberation.rscript \
 	maps/dm-neptune.rscript \
+	maps/dm-neptune2k15.rscript \
 	maps/dm-oblivion.rscript \
 	maps/dm-oblivion2k15.rscript \
 	maps/dm-omega2k8.rscript \
