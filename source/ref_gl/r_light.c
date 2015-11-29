@@ -288,7 +288,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	{
 		tex = surf->texinfo;
 
-		if (tex->flags & (SURF_WARP|SURF_SKY))
+		if (tex->flags & (SURF_WARP|SURF_SKY|SURF_TRANS33|SURF_NODRAW))
 			continue;	// no lightmaps
 
 		s = DotProduct (mid, tex->vecs[0]) + tex->vecs[0][3];
