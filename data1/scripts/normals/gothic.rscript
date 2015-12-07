@@ -1,0 +1,7 @@
+maps/meshes/gothic/skull
+{
+	{
+		map maps/meshes/gothic/skull_normal.jpg
+		normalmap
+	}
+}
