@@ -22,6 +22,30 @@ cave2_texture
 			1 textures/texturelib/ground_0045_nm.tga			
 	}
 }
+cave3_texture
+{	
+	{
+		map textures/dm-neptune/cave3_blendtex.tga	
+		blendmap 2			
+			100 textures/texturelib/stones_0027.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 2 
+			0 textures/texturelib/stones_0027_nm.tga
+			1 textures/texturelib/ground_0045_nm.tga			
+	}
+}
+cave4_texture
+{	
+	{
+		map textures/dm-neptune/cave4_blendtex.tga	
+		blendmap 2			
+			100 textures/texturelib/stones_0027.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 2 
+			0 textures/texturelib/stones_0027_nm.tga
+			1 textures/texturelib/ground_0045_nm.tga			
+	}
+}
 textures/arena10/messybricks1
 {
 	{
@@ -31,6 +55,12 @@ textures/arena10/messybricks1
 		grass
 		grasstype 0
 	}	
+}
+textures/arena10/messybricks1_w
+{
+	{
+		cube
+	}
 }
 textures/arena10/bluetile
 {

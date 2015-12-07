@@ -1,0 +1,7 @@
+maps/meshes/dm-neptune/shark
+{
+	{
+		map maps/meshes/dm-neptune/shark_normal.jpg
+		normalmap
+	}
+}
