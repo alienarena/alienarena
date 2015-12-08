@@ -244,7 +244,7 @@ static void Mod_AddBSPToDecalModel (const decalorientation_t *pos, decalprogress
 	{
 		msurface_t *surf = &r_worldmodel->surfaces[surfnum];
 		
-		if ((surf->texinfo->flags & (SURF_SKY|SURF_WARP|SURF_FLOWING|SURF_NODRAW)))
+		if ((surf->texinfo->flags & (SURF_TRANS33|SURF_SKY|SURF_WARP|SURF_FLOWING|SURF_NODRAW)))
 			continue;
 		
 		in.nverts = surf->polys->numverts;
