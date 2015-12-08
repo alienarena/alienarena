@@ -146,12 +146,16 @@ nobase_dist_textures_DATA = \
 	arena10/gothwindow2.tga \
 	arena10/gothwindow2r_hm.tga \
 	arena10/gothwindow2r.tga \
-	arena10/gothwindow3_hm.tga \
 	arena10/gothwindow3.tga \
-	arena10/gothwindow3r_hm.tga \
+	arena10/gothwindow3_hm.tga \
+	arena10/gothwindow3_nm.tga \
 	arena10/gothwindow3r.tga \
+	arena10/gothwindow3r_hm.tga \
 	arena10/graffitiwall1.tga \
 	arena10/grafittiwall2.tga \
+	arena10/greenrustdoor.tga \
+	arena10/greenrustdoor_hm.tga \
+	arena10/greenrustdoor_nm.tga \
 	arena10/heap1_nm.tga \
 	arena10/heap1.tga \
 	arena10/heap2_nm.tga \
@@ -164,6 +168,12 @@ nobase_dist_textures_DATA = \
 	arena10/ivy1.tga \
 	arena10/ivy2_nm.tga \
 	arena10/ivy2.tga \
+	arena10/messybricks1.tga \
+	arena10/messybricks1_hm.tga \
+	arena10/messybricks1_nm.tga \
+	arena10/messybricks1_w.tga \
+	arena10/messybricks1_w_hm.tga \
+	arena10/messybricks1_w_nm.tga \
 	arena10/metalfence1.tga \
 	arena10/metalfence2.tga \
 	arena10/metalfloor20_hm.tga \
@@ -183,6 +193,9 @@ nobase_dist_textures_DATA = \
 	arena10/metalwall20.tga \
 	arena10/moltenrock_nm.tga \
 	arena10/moltenrock.tga \
+	arena10/mossybricks1.tga \
+	arena10/mossybricks1_hm.tga \
+	arena10/mossybricks1_nm.tga \
 	arena10/neonsign10r.tga \
 	arena10/neonsign10.tga \
 	arena10/neonsign11b.tga \
@@ -1119,6 +1132,12 @@ nobase_dist_textures_DATA = \
 	dm-neptune/cave2.tga \
 	dm-neptune/cave2_blendtex.tga \
 	dm-neptune/cave2_lightmaptex.tga \
+	dm-neptune/cave3.tga \
+	dm-neptune/cave3_blendtex.tga \
+	dm-neptune/cave3_lightmaptex.tga \
+	dm-neptune/cave4.tga \
+	dm-neptune/cave4_blendtex.tga \
+	dm-neptune/cave4_lightmaptex.tga \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \

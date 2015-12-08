@@ -205,6 +205,12 @@ nobase_dist_maps_DATA = \
 	meshes/dm-extermination/rubble3.terrain \
 	meshes/dm-neptune/cave1.terrain \
 	meshes/dm-neptune/cave2.terrain \
+	meshes/dm-neptune/cave3.terrain \
+	meshes/dm-neptune/cave4.terrain \
+	meshes/dm-neptune/shark.iqm \
+	meshes/dm-neptune/shark.jpg \
+	meshes/dm-neptune/shark.skin \
+	meshes/dm-neptune/shark_normal.jpg \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
@@ -659,6 +665,7 @@ nobase_dist_maps_DATA = \
 	scripts/dm-liberation.mus \
 	scripts/dm-neptune.mus \
 	scripts/dm-neptune2k15.fog \
+	scripts/dm-neptune2k15.mus \
 	scripts/dm-oblivion.fog \
 	scripts/dm-oblivion.mus \
 	scripts/dm-oblivion2k15.fog \
