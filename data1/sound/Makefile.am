@@ -256,6 +256,7 @@ nobase_dist_sound_DATA = \
 	world/electricity.wav \
 	world/explosion1.wav \
 	world/explosion2.wav \
+	world/foghorn.wav \
 	world/forcefield.wav \
 	world/hyprbf1a.wav \
 	world/jumppad1.wav \

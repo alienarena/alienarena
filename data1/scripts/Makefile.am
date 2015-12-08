@@ -75,8 +75,10 @@ nobase_dist_scripts_DATA = \
 	maps/tca-zion2k9.rscript \
 	menu.rscript \
 	normals/desert.rscript \
+	normals/gothic.rscript \
 	normals/newtech.rscript \
 	normals/normals.rscript \
+	normals/undersea.rscript \
 	normals/urban.rscript \
 	textures.rscript
 
