@@ -14833,7 +14833,41 @@
 {
 "classname" "target_speaker"
 "origin" "-132.000000 -152.000000 98.000000"
-"noise" "sound/world/foghorn.wav"
+"noise" "world/foghorn.wav"
 "volume" "1"
 "targetname" "quake1"
+"attenuation" "1"
+}
+// entity 193
+{
+"classname" "misc_decal"
+"origin" "-66.000000 -190.000000 -398.000000"
+"model" "maps/meshes/dm-neptune/blood0.decal"
+}
+// entity 194
+{
+"classname" "misc_decal"
+"origin" "-210.000000 -22.000000 -398.000000"
+"model" "maps/meshes/dm-neptune/blood0.decal"
+}
+// entity 195
+{
+"classname" "misc_decal"
+"origin" "-292.000000 -306.000000 -342.000000"
+"model" "maps/meshes/dm-bloodfactory/blood3.decal"
+"angles" "-0.000000 0.000000 90.000000"
+}
+// entity 196
+{
+"classname" "misc_decal"
+"origin" "-100.000000 -1130.000000 -46.000000"
+"model" "maps/meshes/dm-neptune/blood3.decal"
+"angles" "-0.000000 0.000000 90.000000"
+}
+// entity 197
+{
+"classname" "misc_decal"
+"origin" "612.000000 -1034.000000 -46.000000"
+"model" "maps/meshes/dm-neptune/blood2.decal"
+"angles" "-0.000000 0.000000 90.000000"
 }

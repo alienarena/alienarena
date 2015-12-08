@@ -1514,7 +1514,7 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_config.version_string = (const char*)qglGetString (GL_VERSION);
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
 	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
-	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
+	//Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
 
 	/*
 	** grab extensions
