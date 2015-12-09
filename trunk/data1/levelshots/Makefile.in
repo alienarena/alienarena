@@ -302,6 +302,8 @@ nobase_dist_levelshots_DATA = \
 	dm-liberation.txt \
 	dm-neptune.jpg \
 	dm-neptune.txt \
+	dm-neptune2k15.jpg \
+	dm-neptune2k15.txt \
 	dm-oblivion.jpg \
 	dm-oblivion.txt \
 	dm-omega2k8.jpg \

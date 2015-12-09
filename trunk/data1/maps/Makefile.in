@@ -414,6 +414,10 @@ nobase_dist_maps_DATA = \
 	meshes/dm-extermination/rubble1.terrain \
 	meshes/dm-extermination/rubble2.terrain \
 	meshes/dm-extermination/rubble3.terrain \
+	meshes/dm-neptune/blood0.decal \
+	meshes/dm-neptune/blood1.decal \
+	meshes/dm-neptune/blood2.decal \
+	meshes/dm-neptune/blood3.decal \
 	meshes/dm-neptune/cave1.terrain \
 	meshes/dm-neptune/cave2.terrain \
 	meshes/dm-neptune/cave3.terrain \

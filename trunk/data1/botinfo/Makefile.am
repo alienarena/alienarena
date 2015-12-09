@@ -61,6 +61,7 @@ nobase_dist_botinfo_DATA = \
 	dm-leviathan2k12.tmp \
 	dm-liberation.tmp \
 	dm-neptune.tmp \
+	dm-neptune2k15.tmp \
 	dm-oblivion.tmp \
 	dm-omega2k8.tmp \
 	dm-purgatory.tmp \
@@ -115,6 +116,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-leviathan2k12.nod \
 	nav/dm-liberation.nod \
 	nav/dm-neptune.nod \
+	nav/dm-neptune2k15.nod \
 	nav/dm-oblivion.nod \
 	nav/dm-omega2k8.nod \
 	nav/dm-purgatory.nod \
