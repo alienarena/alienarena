@@ -601,10 +601,10 @@ models/weapons/v_rail/beamgun
 		cube
 	}
 }
-models/weapons/v_bfg/skin
+models/weapons/v_bfg/vaporizer
 {	
 	{
-		map models/weapons/v_bfg/skin_normal.tga
+		map models/weapons/v_bfg/vaporizer_normal.tga
 		normalmap
 		map2 gfx/vapormask.tga
 		glow
