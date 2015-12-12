@@ -1398,6 +1398,55 @@ void CL_Voltage (vec3_t org)
 	}
 
 }
+
+void CL_BlueFlameParticle (vec3_t org, vec3_t angles)
+{
+	int			i, j;
+	particle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup;
+	float		rightoffset;
+
+	VectorCopy(org, mflashorg);
+	
+	AngleVectors (angles, vforward, vright, vup);
+
+	if (r_lefthand->value == 1.0F)
+		rightoffset = -1.1;
+	else
+		rightoffset = 1.1;
+
+	VectorMA(mflashorg, 24, vforward, mflashorg);
+	VectorMA(mflashorg, rightoffset, vright, mflashorg);
+	VectorMA(mflashorg, -1.3, vup, mflashorg);
+
+	for (i=0 ; i<4 ; i++)
+	{
+		if (!(p = new_particle()))
+			return;
+
+		p->type = PARTICLE_STANDARD;
+		p->image = r_particletexture;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->scale = .2;
+		p->scalevel = 0;
+
+		p->color = 0x74;
+
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = mflashorg[j];
+			p->vel[j] = crand()*-1;
+		}
+
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = PARTICLE_GRAVITY;
+		p->alpha = 1.0;
+
+		p->alphavel = -1.0f / (0.1f + frand()*0.15f);
+	}
+
+}
 /*
 ===============
 CL_Deathfield

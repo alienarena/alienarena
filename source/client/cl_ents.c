@@ -1305,6 +1305,11 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			useFX = true;
 		}
 	}
+	else if(!(strcmp("models/weapons/v_chain/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame > 18 && gun.frame < 50)
+			CL_BlueFlameParticle(gun.origin, gun.angles);
+	}	
 
 	V_AddViewEntity (&gun);
 	//add shells for viewweaps (all of em!)

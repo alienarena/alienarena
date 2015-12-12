@@ -442,6 +442,7 @@ void CL_MuzzleParticles (vec3_t org);
 void CL_BlueMuzzleParticles (vec3_t org);
 void CL_SmartMuzzle (vec3_t org);
 void CL_Voltage(vec3_t org);
+void CL_BlueFlameParticle (vec3_t org, vec3_t angles);
 void CL_Deathfield (vec3_t org, int type);
 void CL_BFGExplosionParticles (vec3_t org);
 void CL_DustParticles (vec3_t org);
