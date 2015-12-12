@@ -216,6 +216,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-neptune/shark.skin \
 	meshes/dm-neptune/shark_normal.jpg \
 	meshes/dm-turbo/blood.decal \
+	meshes/dm-turbo/blood2.decal \
 	meshes/dm-turbo/rubble1.terrain \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \

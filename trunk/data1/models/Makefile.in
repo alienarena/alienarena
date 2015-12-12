@@ -391,7 +391,9 @@ nobase_dist_models_DATA = \
 	weapons/g_bfg/tris.iqm \
 	weapons/g_bfg/tris.md2 \
 	weapons/g_bfg/tris.skin \
+	weapons/g_chain/tris.iqm \
 	weapons/g_chain/tris.md2 \
+	weapons/g_chain/tris.skin \
 	weapons/g_hyperb/cover.iqm \
 	weapons/g_hyperb/cover.md2 \
 	weapons/g_hyperb/tris.iqm \
@@ -437,6 +439,8 @@ nobase_dist_models_DATA = \
 	weapons/v_blast/tris.iqm \
 	weapons/v_blast/tris.md2 \
 	weapons/v_blast/tris.skin \
+	weapons/v_chain/flamethrower.tga \
+	weapons/v_chain/flamethrower_normal.jpg \
 	weapons/v_chain/skin.jpg \
 	weapons/v_chain/skin_normal.tga \
 	weapons/v_chain/tris.iqm \
