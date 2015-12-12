@@ -223,6 +223,13 @@ models/weapons/v_chain/skin
 		glow
 	}
 }
+models/weapons/v_chain/flamethrower
+{
+	{
+		map models/weapons/v_chain/flamethrower_normal.tga
+		normalmap
+	}
+}
 models/weapons/v_shotg2/skin
 {
 	{
