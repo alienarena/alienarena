@@ -219,6 +219,7 @@ nobase_dist_models_DATA = \
 	weapons/v_bfg/tris.iqm \
 	weapons/v_bfg/tris.md2 \
 	weapons/v_bfg/tris.skin \
+	weapons/v_bfg/vaporizer.jpg \
 	weapons/v_blast/blaster.jpg \
 	weapons/v_blast/blaster_normal.tga \
 	weapons/v_blast/cover.iqm \
