@@ -1529,6 +1529,7 @@ nobase_dist_textures_DATA = \
 	texturelib/grunge_leaking.jpg \
 	texturelib/stones_0027.jpg \
 	texturelib/stones_0027_hm.jpg \
+	texturelib/stones_0027_nm.jpg \
 	water/blood_nm.tga \
 	water/blood.tga \
 	water/bluewater_nm.tga \
