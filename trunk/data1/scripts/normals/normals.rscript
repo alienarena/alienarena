@@ -611,7 +611,7 @@ models/weapons/v_rail/beamgun
 models/weapons/v_bfg/vaporizer
 {	
 	{
-		map models/weapons/v_bfg/vaporizer_normal.tga
+		map models/weapons/v_bfg/vaporizer_normal.jpg
 		normalmap
 		map2 gfx/vapormask.tga
 		glow
