@@ -1219,7 +1219,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, len;
+	float		rightoffset, upoffset, len;
 
 	if(!from_client) {
 		VectorSubtract (org, cl.refdef.vieworg, vec);
@@ -1243,9 +1243,20 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 		else
 			rightoffset = 1.2;
 
+		upoffset = -1.0;
+
+		if(cl.refdef.fov_x > 90)
+		{
+			if (r_lefthand->value == 1.0F)
+				rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+			else
+				rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+			upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+		}
+	
 		VectorMA(mflashorg, 24, vforward, mflashorg);
 		VectorMA(mflashorg, rightoffset, vright, mflashorg);
-		VectorMA(mflashorg, -1.0, vup, mflashorg);
+		VectorMA(mflashorg, upoffset, vup, mflashorg);
 	}
 
 	if (!(p = new_particle()))
@@ -1274,7 +1285,7 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			i, j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, len, color;
+	float		rightoffset, upoffset, len, color;
 
 	if(!from_client) {
 		VectorSubtract (org, cl.refdef.vieworg, vec);
@@ -1294,13 +1305,24 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 		AngleVectors (angles, vforward, vright, vup);
 
 		if (r_lefthand->value == 1.0F)
-			rightoffset = -4.4;
+			rightoffset = -2.4;
 		else
-			rightoffset = 4.4;
+			rightoffset = 2.4;
 
+		upoffset = -1.0;
+
+		if(cl.refdef.fov_x > 90)
+		{
+			if (r_lefthand->value == 1.0F)
+				rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+			else
+				rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+			upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+		}
+	
 		VectorMA(mflashorg, 24, vforward, mflashorg);
 		VectorMA(mflashorg, rightoffset, vright, mflashorg);
-		VectorMA(mflashorg, -4.5, vup, mflashorg);
+		VectorMA(mflashorg, upoffset, vup, mflashorg);
 	}
 
 	//muzzleflash
@@ -1404,7 +1426,7 @@ void CL_BlueFlameParticle (vec3_t org, vec3_t angles)
 	int			i, j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup;
-	float		rightoffset;
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	
@@ -1415,9 +1437,20 @@ void CL_BlueFlameParticle (vec3_t org, vec3_t angles)
 	else
 		rightoffset = 1.1;
 
+	upoffset = -1.3;
+
+	if(cl.refdef.fov_x > 90)
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+		else
+			rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+		upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+	}
+	
 	VectorMA(mflashorg, 24, vforward, mflashorg);
 	VectorMA(mflashorg, rightoffset, vright, mflashorg);
-	VectorMA(mflashorg, -1.3, vup, mflashorg);
+	VectorMA(mflashorg, upoffset, vup, mflashorg);
 
 	for (i=0 ; i<4 ; i++)
 	{

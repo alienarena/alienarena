@@ -3,10 +3,10 @@ cave1_texture
 	{
 		map textures/dm-neptune/cave1_blendtex.tga	
 		blendmap 2			
-			100 textures/texturelib/stones_0027.tga		
+			100 textures/texturelib/stones_0027.jpg		
 			200 textures/texturelib/ground_0045.jpg		
 		blendnormalmap 2 
-			0 textures/texturelib/stones_0027_nm.tga
+			0 textures/texturelib/stones_0027_nm.jpg
 			1 textures/texturelib/ground_0045_nm.tga			
 	}
 }
@@ -15,10 +15,10 @@ cave2_texture
 	{
 		map textures/dm-neptune/cave2_blendtex.tga	
 		blendmap 2			
-			100 textures/texturelib/stones_0027.tga		
+			100 textures/texturelib/stones_0027.jpg	
 			200 textures/texturelib/ground_0045.jpg		
 		blendnormalmap 2 
-			0 textures/texturelib/stones_0027_nm.tga
+			0 textures/texturelib/stones_0027_nm.jpg
 			1 textures/texturelib/ground_0045_nm.tga			
 	}
 }
@@ -27,10 +27,10 @@ cave3_texture
 	{
 		map textures/dm-neptune/cave3_blendtex.tga	
 		blendmap 2			
-			100 textures/texturelib/stones_0027.tga		
+			100 textures/texturelib/stones_0027.jpg	
 			200 textures/texturelib/ground_0045.jpg		
 		blendnormalmap 2 
-			0 textures/texturelib/stones_0027_nm.tga
+			0 textures/texturelib/stones_0027_nm.jpg
 			1 textures/texturelib/ground_0045_nm.tga			
 	}
 }
