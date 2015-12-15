@@ -1773,8 +1773,11 @@ redoSkins:
 			while (precache_tex < numtexinfo)
 			{
 				char fn[MAX_OSPATH];
-
-				sprintf(fn, "textures/%s.tga", map_surfaces[precache_tex++].rname);
+				/* 2015-12-14 default extension for textures is now
+				 * jpg instead of tga.  CL_CheckOrDownloadFile will
+				 * check for tga if jpg is not found.
+				 */
+				sprintf(fn, "textures/%s.jpg", map_surfaces[precache_tex++].rname);
 				if (!CL_CheckOrDownloadFile(fn))
 					return; // started a download
 			}
