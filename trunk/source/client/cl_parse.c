@@ -130,6 +130,9 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	}
 
 	//if jpg, be sure to also try tga
+	/* 2015-12-14 For textures, jpg extension is now default, so jpg is
+	 * checked first then tga. See cl_main.c::CL_RequestNextDownload
+	 */
     if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
 
@@ -398,9 +401,10 @@ void CL_ParseServerData (void)
 	/* Pending sorting out multiple game and game plugin module issues,
 	 * changing the game and gamedir cvars is not supported.
 	 * NOTE: seems like servers do not always send a gamedir (default to "arena"?)
+	 * 2015-12-14 ARGH...fix stupid '==' not '=' bug.
 	 */
 	Com_DPrintf("[game: server: %s, client: %s]\n", cl.gamedir, fs_gamedirvar->string );
-	if ( cl.gamedir[0] = '\0' )
+	if ( cl.gamedir[0] == '\0' )
 		strcpy( cl.gamedir, "arena" );
 
 	// parse player entity number
