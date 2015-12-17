@@ -1,0 +1,81 @@
+canyon1_texture
+{	
+	{
+		map textures/ctf-frost/canyon1_blendtex.tga		
+		blendmap 3			
+			200 textures/dm-dismal/snow.tga			
+			200 textures/arena8/crackedrock4.tga		
+			200 textures/ctf-frost/frozengrass1.tga	
+		blendnormalmap 3 
+			0 textures/dm-dismal/snow_nm.tga
+			1 textures/arena8/crackedrock4_nm.tga
+			2 textures/ctf-frost/frozengrass1_nm.tga		
+	}
+}
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light5
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/arena9/trim2
+{
+	{
+		map gfx/bluelightning2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.3 0.9
+		scroll static 5 static 0
+		nolightmap
+	}
+	{
+		map gfx/trim2mask.tga
+		alphamask
+	}
+}
+textures/evil/e6launchengine
+{
+	{
+		map gfx/e6launchengine_glow.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 10 0.1 0.9
+		nolightmap
+	}
+}
+textures/arena9/lightwhite
+{
+	{
+		map gfx/beam1.tga
+		scale static 12 static 12
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}

@@ -1,0 +1,6 @@
+heightmap textures/ctf-frost/canyon1.tga;
+texture canyon1_texture;
+lightmap textures/ctf-frost/canyon1_lightmaptex.tga;
+vegetation textures/ctf-frost/canyon1_vegetation.tga;
+mins -2048, -2048, 64;
+maxs 2048, 2048, 500;
