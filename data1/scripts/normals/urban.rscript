@@ -139,4 +139,22 @@ maps/meshes/urban/bulb
 		glow
 	}
 }
+maps/meshes/urban/redbulb
+{
+	{
+		map maps/meshes/urban/bulb_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/redbulb_fx.tga
+		glow
+	}
+}
+maps/meshes/urban/bluebulb
+{
+	{
+		map maps/meshes/urban/bulb_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/bluebulb_fx.tga
+		glow
+	}
+}
 
