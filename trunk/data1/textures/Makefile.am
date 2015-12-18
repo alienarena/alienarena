@@ -988,6 +988,13 @@ nobase_dist_textures_DATA = \
 	common/weapclip.tga \
 	common/white.tga \
 	cr3blankclear.wal \
+	ctf-frost/canyon1.tga \
+	ctf-frost/canyon1_blendtex.tga \
+	ctf-frost/canyon1_lightmaptex.tga \
+	ctf-frost/canyon1_vegetation.tga \
+	ctf-frost/frozengrass1.tga \
+	ctf-frost/frozengrass1_hm.tga \
+	ctf-frost/frozengrass1_nm.tga \
 	dalek/column1.tga \
 	dalek/console1.tga \
 	dalek/floor2.tga \
