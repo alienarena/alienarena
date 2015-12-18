@@ -139,6 +139,7 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
+	meshes/ctf-frost/canyon1.terrain \
 	meshes/desert/barrel.jpg \
 	meshes/desert/barrel.md2 \
 	meshes/desert/barrel_normal.jpg \
@@ -489,6 +490,18 @@ nobase_dist_maps_DATA = \
 	meshes/tubecover.md2 \
 	meshes/tube.md2 \
 	meshes/tube.tga \
+	meshes/tundra/pinetree1.iqm \
+	meshes/tundra/pinetree1.md2 \
+	meshes/tundra/pinetree1.pcx \
+	meshes/tundra/pinetree1.skin \
+	meshes/tundra/pinetree1.tga \
+	meshes/tundra/pinetree1_normal.jpg \
+	meshes/tundra/pinetree2.iqm \
+	meshes/tundra/pinetree2.md2 \
+	meshes/tundra/pinetree2.skin \
+	meshes/tundra/pinetree3.iqm \
+	meshes/tundra/pinetree3.md2 \
+	meshes/tundra/pinetree3.skin \
 	meshes/unit.jpg \
 	meshes/unit.md2 \
 	meshes/unit_normal.jpg \
@@ -504,6 +517,9 @@ nobase_dist_maps_DATA = \
 	meshes/urban/bench.jpg \
 	meshes/urban/bench.md2 \
 	meshes/urban/bench_normal.jpg \
+	meshes/urban/bluebulb.jpg \
+	meshes/urban/bluebulb.md2 \
+	meshes/urban/bluebulb_fx.tga \
 	meshes/urban/bluelantern.jpg \
 	meshes/urban/bluelantern.md2 \
 	meshes/urban/bluelantern_fx.tga \
@@ -531,6 +547,9 @@ nobase_dist_maps_DATA = \
 	meshes/urban/pallettecar.jpg \
 	meshes/urban/pallettecar.md2 \
 	meshes/urban/pallettecar_normal.jpg \
+	meshes/urban/redbulb.jpg \
+	meshes/urban/redbulb.md2 \
+	meshes/urban/redbulb_fx.tga \
 	meshes/urban/rio_normal.jpg \
 	meshes/urban/rioblue.jpg \
 	meshes/urban/rioblue.md2 \
@@ -605,6 +624,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-europa2k8.mus \
 	scripts/ctf-extermination.fog  \
 	scripts/ctf-extermination.mus \
+	scripts/ctf-frost2k15.fog \
+	scripts/ctf-frost2k15.mus \
 	scripts/ctf-frostbyte.fog \
 	scripts/ctf-frostbyte.mus \
 	scripts/ctf-goregrinder.fog \
