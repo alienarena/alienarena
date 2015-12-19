@@ -12,6 +12,18 @@ canyon1_texture
 			2 textures/ctf-frost/frozengrass1_nm.tga		
 	}
 }
+snow1_texture
+{	
+	{
+		map textures/ctf-frost/snow1_blendtex.tga		
+		blendmap 2			
+			200 textures/dm-dismal/snow.tga			
+			200 textures/ctf-frost/frozengrass1.tga	
+		blendnormalmap 2 
+			0 textures/dm-dismal/snow_nm.tga
+			1 textures/ctf-frost/frozengrass1_nm.tga		
+	}
+}
 textures/arena7/light1
 {
 	{
@@ -34,6 +46,15 @@ textures/arena7/light10
 {
 	{
 		lensflare
+	}
+}
+textures/blanks/blank5
+{
+	{
+		map gfx/beam3.tga
+		scale static 15 static 15
+		colormap 1 1 1
+		beam
 	}
 }
 textures/arena9/trim2
@@ -77,5 +98,149 @@ textures/arena9/roundlight
 		colormap 1 1 1
 		beam
 		lensflare
+	}
+}
+textures/arena10/metalfloor21_water
+{
+	{
+		cube
+	}
+}
+textures/evil/e6horzlight
+{
+	{
+		cube
+	}
+}
+textures/evil/e8_launchpad1
+{
+	{
+		map gfx/e8_launchpad1_fx1.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 9 0 9
+		nolightmap
+	}
+	{
+		map gfx/e8_launchpad1_fx2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map gfx/e8_launchpad1_mask2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+	}
+}
+textures/blanks/blank6
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/arena10/metalfloor21
+{
+	{
+		map gfx/weed3.tga
+		scale static 6 static 6
+		colormap .7 .6 .5
+		grass
+		grasstype 0
+	}	
+}
+textures/arena10/factoryfloor
+{
+	{
+		map gfx/weed3.tga
+		scale static 6 static 6
+		colormap .7 .6 .5
+		grass
+		grasstype 0
+	}	
+}
+textures/arena10/neonsign8
+{
+	{
+		map textures/arena10/neonsign8
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+textures/arena10/neonsign10
+{
+	{
+		map textures/arena10/neonsign10
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+env/greenup
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/greenrt
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/greenlf
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/greenft
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/greenbk
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/greendn
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
 	}
 }
