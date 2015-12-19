@@ -157,4 +157,10 @@ maps/meshes/urban/bluebulb
 		glow
 	}
 }
-
+maps/meshes/urban/satdish
+{
+	{
+		map maps/meshes/urban/satdish_normal.jpg
+		normalmap
+	}
+}
