@@ -196,6 +196,28 @@ textures/arena10/neonsign10
 		nolightmap
 	}
 }
+textures/arena9/greenglass
+{
+	{
+		map textures/arena9/greenglass.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.5 0.5
+	}
+	{
+		map gfx/bubbles.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static -4 static -4
+		alphashift 0 0.3 0.3
+		scroll static 0 static -2
+	}
+	{
+		map gfx/bubbles.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.1 0.1
+		scale static -8 static -8
+		scroll static 0 static -1
+	}
+}
 env/greenup
 {
 	{
