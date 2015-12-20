@@ -140,6 +140,7 @@ nobase_dist_maps_DATA = \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
 	meshes/ctf-frost/canyon1.terrain \
+	meshes/ctf-frost/snow1.terrain \
 	meshes/desert/barrel.jpg \
 	meshes/desert/barrel.md2 \
 	meshes/desert/barrel_normal.jpg \
@@ -399,6 +400,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/bigribtube_normal.jpg \
 	meshes/tech/biotubebase.jpg \
 	meshes/tech/biotubebase.md2 \
+	meshes/tech/biotubebase_big.md2 \
 	meshes/tech/biotubebase_fx.tga \
 	meshes/tech/biotubebase_normal.jpg \
 	meshes/tech/blueribtube.jpg \
