@@ -15,6 +15,7 @@ nobase_dist_maps_DATA = \
 	ctf-cryogenic.bsp \
 	ctf-extermination.bsp \
 	ctf-extermination.lightmap \
+	ctf-frost2k15.bsp \
 	ctf-frostbyte.bsp \
 	ctf-goregrinder.bsp \
 	ctf-invasion.bsp \
@@ -494,7 +495,6 @@ nobase_dist_maps_DATA = \
 	meshes/tube.tga \
 	meshes/tundra/pinetree1.iqm \
 	meshes/tundra/pinetree1.md2 \
-	meshes/tundra/pinetree1.pcx \
 	meshes/tundra/pinetree1.skin \
 	meshes/tundra/pinetree1.tga \
 	meshes/tundra/pinetree1_normal.jpg \
