@@ -290,6 +290,7 @@ nobase_dist_scripts_DATA = \
 	normals/gothic.rscript \
 	normals/newtech.rscript \
 	normals/normals.rscript \
+	normals/tundra.rscript \
 	normals/undersea.rscript \
 	normals/urban.rscript \
 	textures.rscript

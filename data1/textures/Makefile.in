@@ -1206,6 +1206,9 @@ nobase_dist_textures_DATA = \
 	ctf-frost/frozengrass1.tga \
 	ctf-frost/frozengrass1_hm.tga \
 	ctf-frost/frozengrass1_nm.tga \
+	ctf-frost/snow1.tga \
+	ctf-frost/snow1_blendtex.tga \
+	ctf-frost/snow1_lightmaptex.tga \
 	dalek/column1.tga \
 	dalek/console1.tga \
 	dalek/floor2.tga \
