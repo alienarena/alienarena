@@ -1896,6 +1896,155 @@ void ParseClassFile( char *config_file, edict_t *ent )
 
 /*
 ===========
+Respawn_ClassSpecific
+
+Called when a player connects to a server or respawns in
+a deathmatch: give the player class-specific items
+============
+*/
+void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
+{
+	gitem_t	*item;
+	FILE	*file;
+	char	modelpath[MAX_OSPATH] = " ";
+	int		armor_index;
+	
+	//check for class file
+#ifdef ALTERIA
+	ent->ctype = 0; //wizard is default
+	sprintf(modelpath, "players/%s/human", ent->charModel);
+	Q2_FindFile (modelpath, &file);
+	if(file) 
+	{	//warrior
+		ent->ctype = 1;
+		
+		ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
+		armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+		client->pers.inventory[armor_index] += 30;
+		client->pers.inventory[ITEM_INDEX(FindItem("Warriorpunch"))] = 1;
+		item = FindItem("Warriorpunch");
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+		client->pers.weapon = item;
+		
+		fclose(file);
+	}
+	else 
+	{	//wizard
+		
+		ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
+		client->pers.inventory[ITEM_INDEX(FindItem("Wizardpunch"))] = 1;
+		//client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100; //to to - blue or yellow mana
+		item = FindItem("Wizardpunch");
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+		client->pers.weapon = item;
+	}
+#else
+	ent->ctype = 0; //alien is default
+	sprintf(modelpath, "players/%s/human", ent->charModel);
+	Q2_FindFile (modelpath, &file);
+	if(file) 
+	{ 
+		fclose(file);
+
+		//human
+		ent->ctype = 1;
+		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
+		{				
+			if(g_tactical->integer)
+			{
+				//read class file(tactical only)
+				//example:
+				//100-150 (health)
+				//0-3 (armor type)
+				//0-1 (has bomb)
+				//0-1 (has detonator)
+				//0-1 (has mind eraser)
+				//0-1 (has vaporizor)
+			
+				ParseClassFile(modelpath, ent); 
+				if(ent->has_bomb)
+				{
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Human Bomb"))] = 1;
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+				}				
+				item = FindItem("Blaster");
+			}
+			else
+			{
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 30;
+				
+				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+				item = FindItem("Rocket Launcher");
+			}
+			client->pers.selected_item = ITEM_INDEX(item);
+			client->pers.inventory[client->pers.selected_item] = 1;
+			client->pers.weapon = item;
+		}		
+	}
+	else 
+	{ 
+		//robot - not used in tactical - should we kick them out at this point, or just let them continue on the alien team?  
+		sprintf(modelpath, "players/%s/robot", ent->charModel);
+		Q2_FindFile (modelpath, &file);
+		if(file && !g_tactical->integer) 
+		{
+			ent->ctype = 2;
+			if(classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value))
+			{
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
+				armor_index = ITEM_INDEX(FindItem("Combat Armor"));
+				client->pers.inventory[armor_index] += 175;
+			}
+			fclose(file);
+		}
+		else
+		{ 
+			//alien
+			ent->ctype = 0;
+			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
+			{
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
+				if(g_tactical->integer)
+				{
+					sprintf(modelpath, "players/%s/alien", ent->charModel);
+					Q2_FindFile (modelpath, &file);
+					if(file)
+					{
+						ParseClassFile(modelpath, ent); 		
+						if(ent->has_bomb)
+						{
+							ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Bomb"))] = 1;
+							ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
+						}
+					}
+					item = FindItem("Blaster");
+					client->pers.selected_item = ITEM_INDEX(item);
+					client->pers.inventory[client->pers.selected_item] = 0;					
+				
+					item = FindItem("Alien Blaster");
+				}
+				else
+				{
+					client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+					client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+					item = FindItem("Alien Disruptor");
+				}
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 1;
+				client->pers.weapon = item;				
+			}
+		}
+	}
+#endif
+}
+
+/*
+===========
 PutClientInServer
 
 Called when a player connects to a server or respawns in
@@ -1906,15 +2055,13 @@ void PutClientInServer (edict_t *ent)
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
-	int		index, armor_index;
+	int		index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
-	gitem_t		*item;
 	int		i, done;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
 	char	*info;
-	char playermodel[MAX_OSPATH] = " ";
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char userinfo[MAX_INFO_STRING];
@@ -2015,27 +2162,27 @@ void PutClientInServer (edict_t *ent)
 	ent->s.skinnum = ent - g_edicts - 1;
 	ent->s.modelindex = 255;		// will use the skin specified model
 	ent->s.modelindex2 = 255;		// custom gun model
+	
 	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
-
 	i = 0;
 	done = false;
-	strcpy(playermodel, " ");
-	while(!done)
+	strcpy (ent->charModel, " ");
+	while (!done)
 	{
-		if((info[i] == '/') || (info[i] == '\\'))
+		if ((info[i] == '/') || (info[i] == '\\'))
 			done = true;
-		playermodel[i] = info[i];
+		ent->charModel[i] = info[i];
 		if(i > 62)
 			done = true;
 		i++;
 	}
-	playermodel[i-1] = 0;
+	ent->charModel[i-1] = 0;
 
-	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
+	sprintf(modelpath, "players/%s/helmet.md2", ent->charModel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) 
 	{
-		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
+		sprintf(modelpath, "players/%s/helmet.md2", ent->charModel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
@@ -2044,139 +2191,7 @@ void PutClientInServer (edict_t *ent)
 
 	ent->s.modelindex4 = 0;
 
-	//check for class file
-#ifdef ALTERIA
-	ent->ctype = 0; //wizard is default
-	sprintf(modelpath, "players/%s/human", playermodel);
-	Q2_FindFile (modelpath, &file);
-	if(file) 
-	{	//warrior
-		ent->ctype = 1;
-		
-		ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
-		armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-		client->pers.inventory[armor_index] += 30;
-		client->pers.inventory[ITEM_INDEX(FindItem("Warriorpunch"))] = 1;
-		item = FindItem("Warriorpunch");
-		client->pers.selected_item = ITEM_INDEX(item);
-		client->pers.inventory[client->pers.selected_item] = 1;
-		client->pers.weapon = item;
-		
-		fclose(file);
-	}
-	else 
-	{	//wizard
-		
-		ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
-		client->pers.inventory[ITEM_INDEX(FindItem("Wizardpunch"))] = 1;
-		//client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100; //to to - blue or yellow mana
-		item = FindItem("Wizardpunch");
-		client->pers.selected_item = ITEM_INDEX(item);
-		client->pers.inventory[client->pers.selected_item] = 1;
-		client->pers.weapon = item;
-	}
-#else
-	ent->ctype = 0; //alien is default
-	sprintf(modelpath, "players/%s/human", playermodel);
-	sprintf(ent->charModel, playermodel);
-	Q2_FindFile (modelpath, &file);
-	if(file) 
-	{ 
-		fclose(file);
-
-		//human
-		ent->ctype = 1;
-		if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
-		{				
-			if(g_tactical->integer)
-			{
-				//read class file(tactical only)
-				//example:
-				//100-150 (health)
-				//0-3 (armor type)
-				//0-1 (has bomb)
-				//0-1 (has detonator)
-				//0-1 (has mind eraser)
-				//0-1 (has vaporizor)
-			
-				ParseClassFile(modelpath, ent); 
-				if(ent->has_bomb)
-				{
-					ent->client->pers.inventory[ITEM_INDEX(FindItem("Human Bomb"))] = 1;
-					ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
-				}				
-				item = FindItem("Blaster");
-			}
-			else
-			{
-				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
-				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-				client->pers.inventory[armor_index] += 30;
-				
-				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-				item = FindItem("Rocket Launcher");
-			}
-			client->pers.selected_item = ITEM_INDEX(item);
-			client->pers.inventory[client->pers.selected_item] = 1;
-			client->pers.weapon = item;
-		}		
-	}
-	else 
-	{ 
-		//robot - not used in tactical - should we kick them out at this point, or just let them continue on the alien team?  
-		sprintf(modelpath, "players/%s/robot", playermodel);
-		Q2_FindFile (modelpath, &file);
-		if(file && !g_tactical->integer) 
-		{
-			ent->ctype = 2;
-			if(classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value))
-			{
-				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
-				armor_index = ITEM_INDEX(FindItem("Combat Armor"));
-				client->pers.inventory[armor_index] += 175;
-			}
-			fclose(file);
-		}
-		else
-		{ 
-			//alien
-			ent->ctype = 0;
-			if(g_tactical->integer || (classbased->value && !(rocket_arena->integer || instagib->integer || insta_rockets->value || excessive->value)))
-			{
-				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
-				if(g_tactical->integer)
-				{
-					sprintf(modelpath, "players/%s/alien", playermodel);
-					Q2_FindFile (modelpath, &file);
-					if(file)
-					{
-						ParseClassFile(modelpath, ent); 		
-						if(ent->has_bomb)
-						{
-							ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Bomb"))] = 1;
-							ent->client->pers.inventory[ITEM_INDEX(FindItem("bombs"))] = 1; //tactical note - humans will use same ammo, etc, just different weapons
-						}
-					}
-					item = FindItem("Blaster");
-					client->pers.selected_item = ITEM_INDEX(item);
-					client->pers.inventory[client->pers.selected_item] = 0;					
-				
-					item = FindItem("Alien Blaster");
-				}
-				else
-				{
-					client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-					client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
-					item = FindItem("Alien Disruptor");
-				}
-				client->pers.selected_item = ITEM_INDEX(item);
-				client->pers.inventory[client->pers.selected_item] = 1;
-				client->pers.weapon = item;				
-			}
-		}
-	}
-#endif
+	Respawn_ClassSpecific (ent, client);
 
 	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)

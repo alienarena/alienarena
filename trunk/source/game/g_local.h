@@ -970,6 +970,7 @@ edict_t	*PlayerTrail_LastSpot (void);
 void respawn (edict_t *ent);
 void BeginIntermission (edict_t *targ);
 void EndIntermission (void);
+void Respawn_ClassSpecific (edict_t *ent, gclient_t *client);
 void PutClientInServer (edict_t *ent);
 void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);
@@ -1658,7 +1659,7 @@ struct edict_s
 	qboolean has_vaporizor;
 	qboolean has_minderaser;
 	int armor_type;
-	char charModel[128];
+	char charModel[MAX_OSPATH];
 
 	//model specific gibs
 	int usegibs;
