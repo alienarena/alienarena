@@ -988,10 +988,10 @@ void SP_misc_teleporter (edict_t *ent)
 	gi.setmodel (ent, "models/objects/blank/tris.md2");
 	ent->s.skinnum = 1;
 	ent->s.effects = EF_TELEPORTER;
-	ent->solid     = SOLID_BBOX;
+	ent->solid     = SOLID_NOT;
 
-	VectorSet (ent->mins, -32, -32, -24);
-	VectorSet (ent->maxs, 32, 32, -16);
+	VectorSet (ent->mins, -32, -32, 0);
+	VectorSet (ent->maxs, 32, 32, 16);
 	gi.linkentity (ent);
 
 	trig = G_Spawn ();

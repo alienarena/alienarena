@@ -202,7 +202,6 @@
   <ItemGroup>
     <ClCompile Include="$(SrcDir)game/acesrc/acebot_ai.c" />
     <ClCompile Include="$(SrcDir)game/acesrc/acebot_cmds.c" />
-    <ClCompile Include="$(SrcDir)game/acesrc/acebot_compress.c" />
     <ClCompile Include="$(SrcDir)game/acesrc/acebot_items.c" />
     <ClCompile Include="$(SrcDir)game/acesrc/acebot_movement.c" />
     <ClCompile Include="$(SrcDir)game/acesrc/acebot_nodes.c" />
