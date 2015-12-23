@@ -2074,12 +2074,6 @@ void PutClientInServer (edict_t *ent)
 
 	index = ent-g_edicts-1;
 	client = ent->client;
-	client->is_bot = 0;
-	client->kill_streak = 0;
-	client->homing_shots = 0;
-	client->mapvote = 0;
-	client->lasttaunttime = 0;
-	client->rayImmunity = false;
 
 	// init pers.* variables, save and restore userinfo variables (name, skin)
 	resp = client->resp;
@@ -2137,9 +2131,6 @@ void PutClientInServer (edict_t *ent)
 	VectorCopy (mins, ent->mins);
 	VectorCopy (maxs, ent->maxs);
 	VectorClear (ent->velocity);
-
-	// clear playerstate values
-	memset (&ent->client->ps, 0, sizeof(client->ps));
 	
 	//remove these if there are there
 	if(ent->client->oldplayer)
@@ -2147,6 +2138,7 @@ void PutClientInServer (edict_t *ent)
 	if(ent->client->chasecam)
 		G_FreeEdict (ent->client->chasecam);
 
+	// init playerstate values
 	client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
 	if (client->ps.fov < 1)
 		client->ps.fov = 90;
@@ -2154,8 +2146,6 @@ void PutClientInServer (edict_t *ent)
 		client->ps.fov = 160;
 
 	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
-
-	client->zoomed = false;
 
 	// clear entity state values
 	ent->s.effects = 0;

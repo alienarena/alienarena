@@ -952,13 +952,7 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	client->pers = saved;
 	client->resp = resp;
 
-	// match p_client.c., all do not necessarily apply to bots
 	client->is_bot = 1;  // this is a bot
-	client->kill_streak = 0;
-	client->homing_shots = 0;
-	client->mapvote = 0;
-	client->lasttaunttime = 0;
-	client->rayImmunity = false;
 
 	// copy some data from the client to the entity
 	FetchClientEntData (ent);
@@ -993,9 +987,7 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	VectorCopy (maxs, ent->maxs);
 	VectorClear (ent->velocity);
 
-	// clear playerstate values
-	memset (&ent->client->ps, 0, sizeof(client->ps));
-
+    // init playerstate values
 //ZOID
 	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 //ZOID
