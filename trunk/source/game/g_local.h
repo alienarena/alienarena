@@ -1596,7 +1596,6 @@ struct edict_s
 
 // ACEBOT_ADD
 	qboolean is_bot;
-	qboolean is_jumping;
 
 	// For movement
 	vec3_t move_vector;
@@ -1609,7 +1608,6 @@ struct edict_s
 	int goal_node; // current goal node
 	int next_node; // the node that will take us one step closer to our goal
 	int node_timeout;
-	int last_node;
 	int tries;
 	int state;
 
@@ -1622,9 +1620,6 @@ struct edict_s
 	char		chatmsg[8][128];
 
 // ACEBOT_END
-	//chasecam
-	int chasedist1;
-	int chasedist2;
 
 	// for deathcam to remember position of player's death
 	vec3_t death_origin;

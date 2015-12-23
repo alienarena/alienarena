@@ -76,7 +76,7 @@ qboolean ACECM_Commands(edict_t *ent)
 	cmd = gi.argv(0);
 
 	if(Q_strcasecmp (cmd, "addnode") == 0 && debug_mode)
-		ent->last_node = ACEND_AddNode(ent,atoi(gi.argv(1)));
+		ACEND_AddNode(ent,atoi(gi.argv(1)));
 
 	else if(Q_strcasecmp (cmd, "removelink") == 0 && debug_mode)
 		ACEND_RemoveNodeEdge(ent,atoi(gi.argv(1)), atoi(gi.argv(2)));
