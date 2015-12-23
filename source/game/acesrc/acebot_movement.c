@@ -823,8 +823,38 @@ static const float ktgt_skill[4] =
 //accuracy factor = ktgt_skill[0] * self->accuracy minimum clamp
 static const float ktgt_acc = 0.35;
 
+/*
+1 : 1.0 //blaster accuracy
+2 : 1.0 //alien disruptor accuracy
+3 : 1.0 //pulse rifle accuracy
+4 : 1.0 //flame thrower accuracy
+5 : 1.0 //not used
+6 : 1.0 //rocket launcher accuracy
+7 : 1.0 //alien smartgun accuracy
+8 : 1.0 //alien beamgun accuracy
+9 : 1.0 //alien vaporizer accuracy
+*/
+
+struct
+{
+	int weapmodel_idx; // weapon model index from gitem_t
+	int accuracy_idx; // index into weapacc array
+} weapon_accuracy_idx_lookup[] = 
+{
+	{WEAP_BLASTER,			1},
+	{WEAP_DISRUPTOR,		2},
+	{WEAP_CHAINGUN,			3},
+	{WEAP_FLAMETHROWER,		4},
+	{WEAP_MINDERASER,		6}, // minderaser has same acc as RL
+	{WEAP_ROCKETLAUNCHER,	6},
+	{WEAP_SMARTGUN,			7},
+	{WEAP_BEAMGUN,			8},
+	{WEAP_VAPORIZER,		9},
+};
+
 static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 {
+	unsigned int i;
 	float accuracy;
 	float random_r;
 	float radius;
@@ -835,7 +865,22 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	/*
 	 * self->accuracy is weapon specific accuracy from bot .cfg file
 	 */
-	accuracy = self->accuracy;
+	accuracy = 0.75f; // default accuracy
+	if (self->client->pers.weapon != NULL)
+	{
+		if (self->client->pers.weapon->weapmodel == WEAP_VIOLATOR)
+		{
+			accuracy = 1.0f; // violator is always 100% accurate
+		}
+		else for (i = 0; i < sizeof (weapon_accuracy_idx_lookup) / sizeof (weapon_accuracy_idx_lookup[0]); i++)
+		{
+			if (self->client->pers.weapon->weapmodel == weapon_accuracy_idx_lookup[i].weapmodel_idx)
+			{
+				accuracy = self->weapacc[weapon_accuracy_idx_lookup[i].accuracy_idx];
+				break;
+			}
+		}
+	}
 	if ( accuracy < 0.5f )
 		accuracy = 0.5f;
 	else if ( accuracy > 1.0f )

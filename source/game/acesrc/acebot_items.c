@@ -127,6 +127,10 @@ qboolean ACEIT_ChangeWeapon (edict_t *ent, gitem_t *item)
 {
 	int			ammo_index;
 	gitem_t		*ammo_item;
+	
+	// make sure it's a valid item
+	if (item == NULL)
+	    return false;
 
 	// see if we're already using it
 	if (item == ent->client->pers.weapon)

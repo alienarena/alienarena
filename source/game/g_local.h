@@ -1287,7 +1287,6 @@ struct gclient_s
 	int			skill;
 	char		faveweap[64];
 	float		weapacc[10];
-	float		accuracy;
 	float		awareness;
 	char		chatmsg[8][128];
 	/*----------------------------*/
@@ -1616,7 +1615,6 @@ struct edict_s
 	int skill;
 	char faveweap[64];
 	float weapacc[10];
-	float accuracy;
 	float awareness;
 	char		chatmsg[8][128];
 
