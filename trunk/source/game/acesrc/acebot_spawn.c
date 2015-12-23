@@ -1073,7 +1073,6 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 		strcpy(ent->faveweap, botvals.faveweap);
 		for(k = 1; k < 10; k++)
 			ent->weapacc[k] = botvals.weapacc[k];
-		ent->accuracy = 0.75; //start with this(changes when bot selects a weapon
 		ent->awareness = botvals.awareness;
 		memcpy (ent->chatmsg, botvals.chatmsg, sizeof (ent->chatmsg));
 
