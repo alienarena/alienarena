@@ -2116,8 +2116,6 @@ void PutClientInServer (edict_t *ent)
 	ent->svflags &= ~SVF_DEADMONSTER;
 // ACEBOT_ADD
 	ent->is_bot = false;
-	ent->last_node = -1;
-	ent->is_jumping = false;
 // ACEBOT_END
 	//vehicles
 	ent->in_vehicle = false;

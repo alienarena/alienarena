@@ -978,7 +978,6 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	ent->watertype = 0;
 	ent->flags &= ~FL_NO_KNOCKBACK;
 	ent->svflags &= ~SVF_DEADMONSTER;
-	ent->is_jumping = false;
 
 	//vehicles
 	ent->in_vehicle = false;
