@@ -971,6 +971,7 @@ void respawn (edict_t *ent);
 void BeginIntermission (edict_t *targ);
 void EndIntermission (void);
 void Respawn_ClassSpecific (edict_t *ent, gclient_t *client);
+void Respawn_Player_ClearEnt (edict_t *ent);
 void PutClientInServer (edict_t *ent);
 void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);

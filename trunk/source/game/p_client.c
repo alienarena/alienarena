@@ -2045,6 +2045,45 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 
 /*
 ===========
+Respawn_Player_ClearEnt
+
+Called when a player connects to a server or respawns in
+a deathmatch: clear entity values
+============
+*/
+void Respawn_Player_ClearEnt (edict_t *ent)
+{
+	// copy some data from the client to the entity
+	FetchClientEntData (ent);
+
+	// clear entity values
+	ent->groundentity = NULL;
+	ent->client = &game.clients[ent - g_edicts - 1];
+	if(g_spawnprotect->value)
+		ent->client->spawnprotected = true;
+	ent->takedamage = DAMAGE_AIM;
+	ent->movetype = MOVETYPE_WALK;
+	ent->viewheight = 22;
+	ent->inuse = true;
+	ent->mass = 200;
+	ent->solid = SOLID_BBOX;
+	ent->deadflag = DEAD_NO;
+	ent->air_finished = level.time + 12;
+	ent->clipmask = MASK_PLAYERSOLID;
+	ent->model = "players/martianenforcer/tris.md2";
+	ent->pain = player_pain;
+	ent->die = player_die;
+	ent->waterlevel = 0;
+	ent->watertype = 0;
+	ent->flags &= ~FL_NO_KNOCKBACK;
+	ent->svflags &= ~SVF_DEADMONSTER;
+
+	//vehicles
+	ent->in_vehicle = false;
+}
+
+/*
+===========
 PutClientInServer
 
 Called when a player connects to a server or respawns in
@@ -2055,7 +2094,6 @@ void PutClientInServer (edict_t *ent)
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
-	int		index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
 	int		i, done;
@@ -2072,7 +2110,6 @@ void PutClientInServer (edict_t *ent)
 	if(!g_tactical->integer)
 		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
 
-	index = ent-g_edicts-1;
 	client = ent->client;
 
 	// init pers.* variables, save and restore userinfo variables (name, skin)
@@ -2089,36 +2126,12 @@ void PutClientInServer (edict_t *ent)
 		InitClientPersistant(client);
 	client->resp = resp;
 
-	// copy some data from the client to the entity
-	FetchClientEntData (ent);
-
-	// clear entity values
-	ent->groundentity = NULL;
-	ent->client = &game.clients[index];
-	if(g_spawnprotect->value)
-		ent->client->spawnprotected = true;
-	ent->takedamage = DAMAGE_AIM;
-	ent->movetype = MOVETYPE_WALK;
-	ent->viewheight = 22;
-	ent->inuse = true;
-	ent->classname = "player";
-	ent->mass = 200;
-	ent->solid = SOLID_BBOX;
-	ent->deadflag = DEAD_NO;
-	ent->air_finished = level.time + 12;
-	ent->clipmask = MASK_PLAYERSOLID;
-	ent->model = "players/martianenforcer/tris.md2";
-	ent->pain = player_pain;
-	ent->die = player_die;
-	ent->waterlevel = 0;
-	ent->watertype = 0;
-	ent->flags &= ~FL_NO_KNOCKBACK;
-	ent->svflags &= ~SVF_DEADMONSTER;
+	Respawn_Player_ClearEnt (ent);
+	
 // ACEBOT_ADD
 	ent->is_bot = false;
 // ACEBOT_END
-	//vehicles
-	ent->in_vehicle = false;
+	ent->classname = "player";
 
 	//anti-camp
 	ent->suicide_timeout = level.time + 10.0;
