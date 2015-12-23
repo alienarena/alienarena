@@ -915,7 +915,7 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	int		i, k, done;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
-	char    *info;
+	char	*info;
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char userinfo[MAX_INFO_STRING];
@@ -953,40 +953,16 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	client->resp = resp;
 
 	client->is_bot = 1;  // this is a bot
-
-	// copy some data from the client to the entity
-	FetchClientEntData (ent);
-
-	// clear entity values
-	ent->groundentity = NULL;
-	ent->client = &game.clients[index];
-	if(g_spawnprotect->value)
-		ent->client->spawnprotected = true;
-	ent->takedamage = DAMAGE_AIM;
-	ent->movetype = MOVETYPE_WALK;
-	ent->viewheight = 24;
+	
+	Respawn_Player_ClearEnt (ent);
+	
 	ent->classname = "bot";
-	ent->mass = 200;
-	ent->solid = SOLID_BBOX;
-	ent->deadflag = DEAD_NO;
-	ent->air_finished = level.time + 12;
-	ent->clipmask = MASK_PLAYERSOLID;
-	ent->model = "players/martianenforcer/tris.md2";
-	ent->pain = player_pain;
-	ent->die = player_die;
-	ent->waterlevel = 0;
-	ent->watertype = 0;
-	ent->flags &= ~FL_NO_KNOCKBACK;
-	ent->svflags &= ~SVF_DEADMONSTER;
-
-	//vehicles
-	ent->in_vehicle = false;
 
 	VectorCopy (mins, ent->mins);
 	VectorCopy (maxs, ent->maxs);
 	VectorClear (ent->velocity);
 
-    // init playerstate values
+	// init playerstate values
 //ZOID
 	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 //ZOID
@@ -1136,7 +1112,7 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	}
 
 	// If we are not respawning hold off for up to three seconds before releasing into game
-    if(!respawn)
+	if(!respawn)
 	{
 		ent->think = ACESP_HoldSpawn;
 		ent->nextthink = level.time + random()*3.0; // up to three seconds
