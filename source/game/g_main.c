@@ -1723,23 +1723,21 @@ void G_RunFrame (void)
 
 		playervote.time = level.time;
 		if(playervote.time-playervote.starttime > 15 ){ //15 seconds
-			//execute command if votes are sufficient
-			if(numActiveClients <= 2 && playervote.yay > playervote.nay+1) { //minimum of 2 votes to pass
+			// Execute command if votes are sufficient. Unanimous votes always
+			// pass, even if it's just a single person on the server.
+			// Otherwise 3-1 minimum to pass.
+			if (	(numActiveClients > 0 && playervote.yay == numActiveClients) ||
+					(playervote.yay > 2 && playervote.yay > playervote.nay+1))
+			{ 
 				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
-
-				//parse command(we will allow kick, map, fraglimit, timelimit).
-				G_ParseVoteCommand();
-
-			}
-			else if(playervote.yay > 2 && playervote.yay > playervote.nay+1) { //3-1 minimum to pass
-				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
-
 				//parse command(we will allow kick, map, fraglimit, timelimit).
 				G_ParseVoteCommand();
 
 			}
 			else
+			{
 				safe_bprintf(PRINT_HIGH, "Vote ^1Failed\n");
+			}
 
 			//clear
 			playervote.called = false;
