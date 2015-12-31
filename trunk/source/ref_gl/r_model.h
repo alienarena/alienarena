@@ -201,8 +201,7 @@ typedef struct mtexinfo_s
 	// Surface linked lists: all surfaces in these lists are grouped together
 	// by texinfo so the renderer can take advantage of the fact that they 
 	// share the same texture and the same surface flags.
-	surfchain_t	glsl_surfaces, dynamic_surfaces, lightmap_surfaces;
-	struct msurface_s *rscript_surfaces; // no brush models can have rscript surfs
+	surfchain_t	standard_surfaces, dynamic_surfaces;
 } mtexinfo_t;
 
 #define	VERTEXSIZE	10
@@ -230,7 +229,6 @@ typedef struct msurface_s
 	
 	//texture chains for batching
 	struct	msurface_s	*texturechain;
-	struct	msurface_s	*rscriptchain;
 	struct	msurface_s	*causticchain;
 	
 	//texture chain for lightstyle updating

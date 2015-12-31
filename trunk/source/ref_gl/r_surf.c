@@ -587,6 +587,7 @@ void R_DrawAlphaSurfaces (void)
 R_DrawRSSurfaces
 
 Draw shader surfaces
+TODO: rscript surfaces on brush models?
 ================
 */
 static void R_DrawRSSurfaces (void)
@@ -626,45 +627,48 @@ static void R_DrawRSSurfaces (void)
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		rscript_t	*rs;
-		msurface_t	*s = currentmodel->unique_texinfo[i]->rscript_surfaces;
-
-		if(!s)
-			continue;
-
-		if (!r_shaders->integer)
-		{
-			currentmodel->unique_texinfo[i]->rscript_surfaces = NULL;
-			continue;
-		}
-		
-		BSP_SetScrolling ((currentmodel->unique_texinfo[i]->flags & SURF_FLOWING) != 0);
+		msurface_t	*s;
 		
 		rs = currentmodel->unique_texinfo[i]->image->script;
+		if (!r_shaders->integer || rs == NULL || !(rs->flags & RS_CONTAINS_DRAWN))
+			continue;
+		
+		BSP_SetScrolling ((currentmodel->unique_texinfo[i]->flags & SURF_FLOWING) != 0);
 		
 		if ((rs->flags & RS_PREVENT_BATCH) != 0)
 		{
 			// fall back on drawing the surfaces one at a time
-			for (; s; s = s->rscriptchain)
+			for (s = currentmodel->unique_texinfo[i]->standard_surfaces.worldchain; s; s = s->texturechain)
+				RS_DrawSurface (s, rs);
+			for (s = currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain; s; s = s->texturechain)
 				RS_DrawSurface (s, rs);
 		}
 		else
 		{
-			// batch them up a bit
-			int currLMTex; 
+			int j;
+			int currLMTex; // still need to separate batches by lightmap texture
 			
-			while (s != NULL)
+			for (j = 0; j < 2; j++)
 			{
-				currLMTex = s->lightmaptexturenum;
+				if (j)
+					s = currentmodel->unique_texinfo[i]->standard_surfaces.worldchain;
+				else
+					s = currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain;
+			
+				while (s != NULL)
+				{
+					currLMTex = s->lightmaptexturenum;
 				
-				for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->rscriptchain)
-					BSP_AddSurfToVBOAccum (s);
+					for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->texturechain)
+						BSP_AddSurfToVBOAccum (s);
 				
-				RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
-							vec3_origin, vec3_origin, false,
-							rs_lightmap_separate_texcoords, 
-							true, BSP_DrawVBOAccum );
+					RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
+								vec3_origin, vec3_origin, false,
+								rs_lightmap_separate_texcoords, 
+								true, BSP_DrawVBOAccum );
 				
-				BSP_ClearVBOAccum ();
+					BSP_ClearVBOAccum ();
+				}
 			}
 		}
 	}
@@ -903,14 +907,20 @@ static void BSP_DrawNonGLSLSurfaces (qboolean forEnt)
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		msurface_t	*s;
+		
+		if (r_worldnormalmaps->integer &&
+			currentmodel->unique_texinfo[i]->has_heightmap &&
+			currentmodel->unique_texinfo[i]->has_normalmap)
+			continue;
+		
 		if (forEnt)
 		{
-			s = currentmodel->unique_texinfo[i]->lightmap_surfaces.entchain;
-			currentmodel->unique_texinfo[i]->lightmap_surfaces.entchain = NULL;
+			s = currentmodel->unique_texinfo[i]->standard_surfaces.entchain;
+			currentmodel->unique_texinfo[i]->standard_surfaces.entchain = NULL;
 		}
 		else
 		{
-			s = currentmodel->unique_texinfo[i]->lightmap_surfaces.worldchain;
+			s = currentmodel->unique_texinfo[i]->standard_surfaces.worldchain;
 		}
 		if (!s)
 			continue;
@@ -994,14 +1004,20 @@ static void BSP_DrawGLSLSurfaces (qboolean forEnt)
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		msurface_t	*s;
+		
+		if (!r_worldnormalmaps->integer ||
+			!currentmodel->unique_texinfo[i]->has_heightmap ||
+			!currentmodel->unique_texinfo[i]->has_normalmap)
+			continue;
+		
 		if (forEnt)
 		{
-			s = currentmodel->unique_texinfo[i]->glsl_surfaces.entchain;
-			currentmodel->unique_texinfo[i]->glsl_surfaces.entchain = NULL;
+			s = currentmodel->unique_texinfo[i]->standard_surfaces.entchain;
+			currentmodel->unique_texinfo[i]->standard_surfaces.entchain = NULL;
 		}
 		else
 		{
-			s = currentmodel->unique_texinfo[i]->glsl_surfaces.worldchain;
+			s = currentmodel->unique_texinfo[i]->standard_surfaces.worldchain;
 		}
 		if (!s)
 			continue;
@@ -1083,10 +1099,8 @@ static void BSP_ClearWorldTextureChains (void)
 	
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
-		currentmodel->unique_texinfo[i]->lightmap_surfaces.worldchain = NULL;
-		currentmodel->unique_texinfo[i]->glsl_surfaces.worldchain = NULL;
+		currentmodel->unique_texinfo[i]->standard_surfaces.worldchain = NULL;
 		currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain = NULL;
-		currentmodel->unique_texinfo[i]->rscript_surfaces = NULL;
 	}
 	
 	r_warp_surfaces.worldchain = NULL;
@@ -1121,12 +1135,16 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	if (surf->texinfo->flags & SURF_SKY)
 		return;
 	
-#define AddToChainPair(chainpair)  \
-	chain = (forEnt?\
-				&((chainpair).entchain):\
-				&((chainpair).worldchain));\
-	surf->texturechain = *chain; \
-	*chain = surf; 
+// The do-while is an old preprocessor trick to allow it to be controlled by
+// if-statements and ended with a semicolon.
+#define AddToChainPair(chainpair) \
+	do { \
+		chain = (forEnt?\
+					&((chainpair).entchain):\
+					&((chainpair).worldchain));\
+		surf->texturechain = *chain; \
+		*chain = surf; \
+	} while (0) 
 	
 	if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
 	{	// add to the translucent chain
@@ -1178,40 +1196,19 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 		}
 	}
 
-	if(is_dynamic) 
-	{
-		//always glsl for dynamic if it has a normalmap
+	if (is_dynamic)
 		AddToChainPair (surf->texinfo->equiv->dynamic_surfaces);
-	}
-	else if(r_worldnormalmaps->integer
-			&& surf->texinfo->has_heightmap
-			&& surf->texinfo->has_normalmap) 
-	{
-		AddToChainPair (surf->texinfo->equiv->glsl_surfaces);
-	}
 	else 
-	{
-		AddToChainPair (surf->texinfo->equiv->lightmap_surfaces);
-	}
+		AddToChainPair (surf->texinfo->equiv->standard_surfaces);
 	
-	// Add to the rscript chain if there is actually a shader
+	// Add to the caustics chain if surface is submerged
 	// TODO: investigate the possibility of doing this for brush models as 
 	// well-- might cause problems with caustics and brush models only half
 	// submerged?
-	if (!forEnt && r_shaders->integer)
+	if (!forEnt && r_shaders->integer && (surf->iflags & ISURF_UNDERWATER))
 	{
-		rscript_t *rs = surf->texinfo->image->script;
-		if ((surf->iflags & ISURF_UNDERWATER))
-		{
-			surf->causticchain = r_caustic_surfaces;
-			r_caustic_surfaces = surf;
-		}
-		
-		if (rs != NULL && (rs->flags & RS_CONTAINS_DRAWN))
-		{
-			surf->rscriptchain = surf->texinfo->equiv->rscript_surfaces;
-			surf->texinfo->equiv->rscript_surfaces = surf;
-		}
+		surf->causticchain = r_caustic_surfaces;
+		r_caustic_surfaces = surf;
 	}
 #undef AddToChainPair
 }
