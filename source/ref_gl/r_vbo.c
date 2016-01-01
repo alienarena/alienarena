@@ -79,8 +79,8 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 	int		n;
 	int		trinum;
 	float	map[MAX_VBO_XYZs];
+	int surf_num_verts = 0;
 	
-	surf->vbo_num_verts = 0;
 	n = 0;
 	
 	// XXX: for future reference, the glDrawRangeElements code was last seen
@@ -117,18 +117,18 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 			}
 		}
 		
-		surf->vbo_num_verts += 3*(p->numverts-2);
+		surf_num_verts += 3*(p->numverts-2);
 	}
 	
 	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currVertexNum * 14 * sizeof(float), n * sizeof(float), &map);
 	
 	surf->vbo_first_vert = currVertexNum;
-	return currVertexNum + surf->vbo_num_verts;
+	return surf->vbo_last_vert = currVertexNum + surf_num_verts;
 }
 
 static void VB_BuildWorldSurfaceVBO (void)
 {
-	msurface_t *surf, *surfs;
+	msurface_t *surf, *surfs, *prevsurf;
 	int i, firstsurf, lastsurf;
 	int	totalVBObufferSize = 0;
 	int currVertexNum = 0;
@@ -151,6 +151,7 @@ static void VB_BuildWorldSurfaceVBO (void)
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_vboId);
 	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
+	prevsurf = NULL;
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
@@ -160,6 +161,10 @@ static void VB_BuildWorldSurfaceVBO (void)
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
 					(surf->iflags & ISURF_PLANEBACK))
 				continue;
+			surf->vboprev = prevsurf;
+			if (prevsurf)
+				prevsurf->vbonext = surf;
+			prevsurf = surf;
 			currVertexNum = VB_AddWorldSurfaceToVBO (surf, currVertexNum);
 		}
 		for	(surf = &surfs[firstsurf]; surf < &surfs[lastsurf]; surf++)
@@ -167,9 +172,15 @@ static void VB_BuildWorldSurfaceVBO (void)
 			if (	(currentmodel->unique_texinfo[i] != surf->texinfo->equiv) ||
 					!(surf->iflags & ISURF_PLANEBACK))
 				continue;
+			surf->vboprev = prevsurf;
+			if (prevsurf)
+				prevsurf->vbonext = surf;
+			prevsurf = surf;
 			currVertexNum = VB_AddWorldSurfaceToVBO (surf, currVertexNum);
 		}
 	}
+	if (prevsurf)
+		prevsurf->vbonext = NULL;
 	
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }

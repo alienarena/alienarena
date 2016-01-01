@@ -103,25 +103,31 @@ VBO batching
 This system allows contiguous sequences of polygons to be merged into batches,
 even if they are added out of order.
 
+A batch is a sequence of surfaces which are contiguous in VBO allocation order
+and can thus be rendered with a single draw call. The first surface of a batch
+has a pointer to the last surface, and the last surface of a batch has a
+pointer to the first surface.
+
+There are no pointers to/from intermmediate surfaces of a batch, they are
+implicitly included in the batch because they are allocated between the first
+and last surface within the VBO.
+
+A batch with only one surface in it will have its batch_end and batch_start
+pointers pointing to itself.
+
+There is a double-linked non-circular list of all batches of surfaces. The
+batches are not added to the linked list in any particular order. However,
+within a batch, the surfaces are ordered quite strictly.
+
+The first surface of a batch is responsible for containing a pointer to last
+surface of the the previous batch. The last surface of a batch is responsible
+for containing a pointer to the first surface of the next batch.
+
 =========================================
 */
 
-// There is a linked list of these, but they are not dynamically allocated.
-// They are allocated from a static array. This prevents us wasting CPU with
-// lots of malloc/free calls. Keep this struct small for performance!
-typedef struct vbobatch_s {
-	int					first_vert, last_vert;
-	struct vbobatch_s 	*next;
-} vbobatch_t;
-
-#define MAX_VBO_BATCHES 100	// 100 ought to be enough. If we run out, we can 
-							// always just draw some prematurely. 
-
-// use a static array and counter to avoid lots of malloc nonsense
-int			num_vbo_batches; 
-vbobatch_t	vbobatch_buffer[MAX_VBO_BATCHES];
-// never used directly; linked list base only
-vbobatch_t	first_vbobatch[] = {{-1, -1, NULL}}; 
+// pointer to the first surface of the first batch
+static msurface_t *first_vbobatch_start = NULL;
 // if false, drawVBOAccum will set up the VBO GL state
 qboolean	r_vboOn = false; 
 // for the rspeed_vbobatches HUD gauge
@@ -137,7 +143,7 @@ void BSP_InvalidateVBO (void)
 // render all accumulated surfaces
 void BSP_DrawVBOAccum (void)
 {
-	vbobatch_t *batch = first_vbobatch->next;
+	msurface_t *batch = first_vbobatch_start;
 	
 	if (!batch)
 		return;
@@ -148,11 +154,9 @@ void BSP_DrawVBOAccum (void)
 		r_vboOn = true;
 	}
 	
-	// XXX: for future reference, the glDrawRangeElements code was last seen
-	// here at revision 3246.
-	for (; batch; batch = batch->next)
+	for (; batch; batch = batch->batch_end->batch_next)
 	{
-		qglDrawArrays (GL_TRIANGLES, batch->first_vert, batch->last_vert-batch->first_vert);
+		qglDrawArrays (GL_TRIANGLES, batch->vbo_first_vert, batch->batch_end->vbo_last_vert - batch->vbo_first_vert);
 		c_vbo_batches++;
 	}
 }
@@ -161,12 +165,18 @@ void BSP_DrawVBOAccum (void)
 // clear all accumulated surfaces without rendering
 void BSP_ClearVBOAccum (void)
 {
-	if (first_vbobatch->next == NULL)
+	msurface_t *batch = first_vbobatch_start;
+	
+	if (!batch)
 		return;
 	
-	memset (vbobatch_buffer, 0, sizeof(vbobatch_buffer));
-	num_vbo_batches = 0;
-	first_vbobatch->next = NULL;
+	for (; batch; batch = batch->batch_end->batch_next)
+	{
+		batch->batch_flags = 0;
+		batch->batch_end->batch_flags = 0;
+	}
+	
+	first_vbobatch_start = NULL;
 }
 
 // render all accumulated surfaces, then clear them
@@ -184,90 +194,71 @@ void BSP_FlushVBOAccum (void)
 // Whenever two batches touch each other, they are merged. Hundreds of
 // surfaces can be rendered with a single call, which is easier on the OpenGL
 // pipeline.
-static inline void BSP_AddToVBOAccum (int first_vert, int last_vert)
-{
-	vbobatch_t *batch = first_vbobatch->next, *prev = first_vbobatch;
-	vbobatch_t *new;
-	
-	if (!batch)
-	{
-		batch = first_vbobatch->next = vbobatch_buffer;
-		batch->first_vert = first_vert;
-		batch->last_vert = last_vert;
-		num_vbo_batches++;
-		return;
-	}
-	
-	// This is optimal. Because of the way the surface linked lists are built
-	// by BSP_AddToTextureChain, they are usually in reverse order, so it's
-	// best to start toward the beginning of the list of VBO batches where
-	// you're more likely to merge something.
-	
-	while (batch->next && batch->next->first_vert < first_vert)
-	{
-		prev = batch;
-		batch = batch->next;
-	}
-	
-	if (batch->first_vert > last_vert)
-	{
-		new = &vbobatch_buffer[num_vbo_batches++];
-		new->next = batch;
-		prev->next = new;
-		new->first_vert = first_vert;
-		new->last_vert = last_vert;
-	}
-	else if (batch->last_vert == first_vert)
-	{
-		batch->last_vert = last_vert;
-		if (batch->next && batch->next->first_vert == last_vert)
-		{
-			// This is the special case where the new surface bridges the gap
-			// between two existing batches, allowing us to merge them into 
-			// the first one. This is the only case where we actually remove a
-			// batch instead of growing one or adding one.
-			batch->last_vert = batch->next->last_vert;
-			if (batch->next == &vbobatch_buffer[num_vbo_batches-1])
-				num_vbo_batches--;
-			batch->next = batch->next->next;
-		}
-		return; //no need to check for maximum batch count being hit
-	}
-	else if (batch->next && batch->next->first_vert == last_vert)
-	{
-		batch->next->first_vert = first_vert;
-		return; //no need to check for maximum batch count being hit
-	}
-	else if (batch->first_vert == last_vert)
-	{
-		batch->first_vert = first_vert;
-		return; //no need to check for maximum batch count being hit
-	}
-	else //if (batch->last_vert < first_vert)
-	{
-		new = &vbobatch_buffer[num_vbo_batches++];
-		new->next = batch->next;
-		batch->next = new;
-		new->first_vert = first_vert;
-		new->last_vert = last_vert;
-	}
-	
-	//running out of space
-	if (num_vbo_batches == MAX_VBO_BATCHES)
-	{
-/*		Com_Printf ("MUSTFLUSH\n");*/
-		BSP_FlushVBOAccum ();
-	}
-}
-
 void BSP_AddSurfToVBOAccum (msurface_t *surf)
 {
-	BSP_AddToVBOAccum (surf->vbo_first_vert, surf->vbo_first_vert+surf->vbo_num_verts);
-}
-
-static qboolean BSP_RoomInVBOAccum (void)
-{
-	return num_vbo_batches + 1 < MAX_VBO_BATCHES;
+	// the start and end of the new batch we will be inserting
+	msurface_t *new_batch_start, *new_batch_end;
+	// surfaces immediately before and after this in VBO alloc order
+	msurface_t *prev = surf->vboprev, *next = surf->vbonext;
+	
+	// If the surface is right after an existing batch, append this surface to
+	// that batch.
+	if (prev != NULL && (prev->batch_flags & BATCH_END))
+	{
+		// unlink modified batch from list of batches
+		if (prev->batch_start->batch_prev)
+			prev->batch_start->batch_prev->batch_next = prev->batch_next;
+		if (prev->batch_next)
+			prev->batch_next->batch_prev = prev->batch_start->batch_prev;
+		if (prev->batch_start == first_vbobatch_start)
+			first_vbobatch_start = prev->batch_next;
+		// mark "prev" as no longer the end of a batch
+		prev->batch_flags &= ~BATCH_END;
+		// new batch will start where this old batch used to start
+		new_batch_start = prev->batch_start;
+	}
+	else
+	{
+		// Current surface is not right after an existing batch, therefore it
+		// will become the beginning of a new batch.
+		new_batch_start = surf;
+	}
+	
+	// If the surface is right before an existing batch, prepend this surface
+	// to that batch.
+	if (next != NULL && (next->batch_flags & BATCH_START))
+	{
+		// unlink modified batch from list of batches
+		if (next->batch_end->batch_next)
+			next->batch_end->batch_next->batch_prev = next->batch_prev;
+		if (next->batch_prev)
+			next->batch_prev->batch_next = next->batch_end->batch_next;
+		if (next == first_vbobatch_start)
+			first_vbobatch_start = next->batch_end->batch_next;
+		// mark "next" as no longer the start of a batch
+		next->batch_flags &= ~BATCH_START;
+		// new batch will end where this old batch used to end
+		new_batch_end = next->batch_end;
+	}
+	else
+	{
+		// Current surface is not right before an existing batch, therefore it
+		// will become the end of a new batch.
+		new_batch_end = surf;
+	}
+	
+	// Mark start and end of new batch
+	new_batch_start->batch_flags |= BATCH_START;
+	new_batch_end->batch_flags |= BATCH_END;
+	// Link start and end of new batch
+	new_batch_start->batch_end = new_batch_end;
+	new_batch_end->batch_start = new_batch_start;
+	// Insert new batch at the beginning of the linked list of all batches
+	if (first_vbobatch_start)
+		first_vbobatch_start->batch_prev = new_batch_end;
+	new_batch_end->batch_next = first_vbobatch_start;
+	new_batch_start->batch_prev = NULL;
+	first_vbobatch_start = new_batch_start;
 }
 
 
@@ -612,7 +603,7 @@ static void R_DrawRSSurfaces (void)
 		{
 			currLMTex = s->lightmaptexturenum;
 			
-			for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->causticchain)
+			for (; s && s->lightmaptexturenum == currLMTex; s = s->causticchain)
 				BSP_AddSurfToVBOAccum (s);
 			
 			RS_Draw (	rs_caustics, gl_state.lightmap_textures + currLMTex,
@@ -659,7 +650,7 @@ static void R_DrawRSSurfaces (void)
 				{
 					currLMTex = s->lightmaptexturenum;
 				
-					for (; s && s->lightmaptexturenum == currLMTex && BSP_RoomInVBOAccum (); s = s->texturechain)
+					for (; s && s->lightmaptexturenum == currLMTex; s = s->texturechain)
 						BSP_AddSurfToVBOAccum (s);
 				
 					RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,

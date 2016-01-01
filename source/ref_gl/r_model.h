@@ -227,6 +227,18 @@ typedef struct msurface_s
 
 	cplane_t	*plane;
 	
+	// double-linked list of all VBO surfaces in VBO allocation order. 
+	struct msurface_s	*vboprev, *vbonext;
+	
+	// vbo-batching data: a separate double-linked list of only those surfaces
+	// which are being prepared for batched rendering. See comments in "VBO
+	// batching" section of r_surf.c.
+#define BATCH_START	1
+#define BATCH_END	2
+	int batch_flags; // indicates whether this is the start, end, both, or neither of a batch
+	struct msurface_s	*batch_prev, *batch_end; // valid if flags & BATCH_START
+	struct msurface_s	*batch_next, *batch_start; // valid if flags & BATCH_END
+	
 	//texture chains for batching
 	struct	msurface_s	*texturechain;
 	struct	msurface_s	*causticchain;
@@ -265,8 +277,7 @@ typedef struct msurface_s
 	vec4_t		tangent;
 
 	//vbo
-	int vbo_first_vert;
-	int vbo_num_verts;
+	int vbo_first_vert, vbo_last_vert;
 	
 	// XXX: for future reference, the glDrawRangeElements code was last seen
 	// here at revision 3246.

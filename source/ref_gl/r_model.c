@@ -1297,6 +1297,7 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 		int firstedge = LittleLong(in->firstedge);
 		int numedges = LittleShort(in->numedges);
 		out->iflags = 0;
+		out->batch_flags = 0;
 		out->polys = NULL;
 
 		planenum = (unsigned short)LittleShort(in->planenum);
