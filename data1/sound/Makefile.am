@@ -196,6 +196,11 @@ nobase_dist_sound_DATA = \
 	taunts/martianwarrior/taunt3.wav \
 	taunts/martianwarrior/taunt4.wav \
 	taunts/martianwarrior/taunt5.wav \
+	taunts/rustbot/taunt1.wav \
+	taunts/rustbot/taunt2.wav \
+	taunts/rustbot/taunt3.wav \
+	taunts/rustbot/taunt4.wav \
+	taunts/rustbot/taunt5.wav \
 	taunts/slashbot/taunt1.wav \
 	taunts/slashbot/taunt2.wav \
 	taunts/slashbot/taunt3.wav \
