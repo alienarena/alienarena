@@ -214,6 +214,39 @@ players/commander/default
 		glow
 	}	
 }
+players/rustbot/red
+{
+	{
+		map players/rustbot/default_normal.tga
+		normalmap
+		map2 gfx/redrustbotfx.tga
+		glow
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
+players/rustbot/default
+{
+	{
+		map players/rustbot/default_normal.tga
+		normalmap
+		map2 gfx/defaultrustbotfx.tga
+		glow
+		map3 gfx/chrome2.tga
+		cube
+	}
+}
+players/rustbot/blue
+{
+	{
+		map players/rustbot/default_normal.tga
+		normalmap
+		map2 gfx/defaultrustbotfx.tga
+		glow
+		map3 gfx/chrome2.tga
+		cube
+	}	
+}
 models/weapons/v_chain/skin
 {
 	{

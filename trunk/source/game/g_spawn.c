@@ -1105,7 +1105,14 @@ void SP_worldspawn (edict_t *ent)
 	    gi.soundindex ("taunts/enforcer/taunt4.wav");
 	    gi.soundindex ("taunts/enforcer/taunt5.wav");
 
-	    gi.soundindex ("taunts/slashbot/taunt1.wav");
+	    gi.soundindex ("taunts/rustbot/taunt1.wav");
+	    gi.soundindex ("taunts/rustbot/taunt2.wav");
+	    gi.soundindex ("taunts/rustbot/taunt3.wav");
+	    gi.soundindex ("taunts/rustbot/taunt4.wav");
+	    gi.soundindex ("taunts/rustbot/taunt5.wav");
+
+		//for now - to be removed as a base player model 
+		gi.soundindex ("taunts/slashbot/taunt1.wav");
 	    gi.soundindex ("taunts/slashbot/taunt2.wav");
 	    gi.soundindex ("taunts/slashbot/taunt3.wav");
 	    gi.soundindex ("taunts/slashbot/taunt4.wav");
@@ -1143,13 +1150,14 @@ void SP_worldspawn (edict_t *ent)
 
 	    //precache all base player models.  this eliminates "stutter" when a player joins the game
 	    //this should be here for the cases of 7.45 clients and older
+		//to do - remove this block of code by next release - it is not needed.
 	    gi.modelindex ("players/martianenforcer/tris.md2");
 	    gi.modelindex ("players/martiancyborg/tris.md2");
 		gi.modelindex ("players/martianoverlord/tris.md2");
 		gi.modelindex ("players/martianwarrior/tris.md2");
 	    gi.modelindex ("players/enforcer/tris.md2");
 	    gi.modelindex ("players/lauren/tris.md2");
-	    gi.modelindex ("players/slashbot/tris.md2");
+	    gi.modelindex ("players/rustbot/tris.md2");
 	    gi.modelindex ("players/commander/tris.md2");
 
 	    //do the w_weps
@@ -1205,7 +1213,20 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/lauren/w_violator.md2");
 		gi.modelindex ("players/lauren/w_minderaser.md2");
 
-	    gi.modelindex ("players/slashbot/weapon.md2");
+	    gi.modelindex ("players/rustbot/weapon.md2");
+	    gi.modelindex ("players/rustbot/w_blaster.md2");
+	    gi.modelindex ("players/rustbot/w_shotgun.md2");
+	    gi.modelindex ("players/rustbot/w_sshotgun.md2");
+	    gi.modelindex ("players/rustbot/w_machinegun.md2");
+	    gi.modelindex ("players/rustbot/w_chaingun.md2");
+	    gi.modelindex ("players/rustbot/w_rlauncher.md2");
+	    gi.modelindex ("players/rustbot/w_hyperblaster.md2");
+	    gi.modelindex ("players/rustbot/w_railgun.md2");
+	    gi.modelindex ("players/rustbot/w_bfg.md2");
+	    gi.modelindex ("players/rustbot/w_violator.md2");
+		gi.modelindex ("players/rustbot/w_minderaser.md2");
+
+		gi.modelindex ("players/slashbot/weapon.md2");
 	    gi.modelindex ("players/slashbot/w_blaster.md2");
 	    gi.modelindex ("players/slashbot/w_shotgun.md2");
 	    gi.modelindex ("players/slashbot/w_sshotgun.md2");
