@@ -1878,8 +1878,8 @@ PModelList_t BasePModels[] =
 	{ "enforcer" },
 	{ "commander" },
 	{ "lauren" },
-	{ "slashbot" }
-
+	{ "slashbot" },
+	{ "rustbot" }
 };
 int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
 
