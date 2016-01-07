@@ -49,6 +49,7 @@ nobase_dist_gfx_DATA = \
 	defaultlaurenfx.tga \
 	defaultmartianfx.tga \
 	defaultoverlordfx.tga \
+	defaultrustbotfx.tga \
 	defaultslashbotfx.tga \
 	defaultwarriorfx.tga \
 	disruptorfx.tga \
@@ -124,6 +125,7 @@ nobase_dist_gfx_DATA = \
 	rayfx.tga \
 	redcircuit.tga \
 	redlightning.tga \
+	redrustbotfx.tga \
 	reflect.tga \
 	rlauncherfx.tga \
 	r_lightning.tga \
