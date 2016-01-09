@@ -995,6 +995,8 @@ nobase_dist_textures_DATA = \
 	ctf-frost/frozengrass1.tga \
 	ctf-frost/frozengrass1_hm.tga \
 	ctf-frost/frozengrass1_nm.tga \
+	ctf-frost/ice_blotch1.tga \
+	ctf-frost/ice_blotch2.tga \
 	ctf-frost/snow1.tga \
 	ctf-frost/snow1_blendtex.tga \
 	ctf-frost/snow1_lightmaptex.tga \
