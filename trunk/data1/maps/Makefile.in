@@ -352,6 +352,8 @@ nobase_dist_maps_DATA = \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
 	meshes/ctf-frost/canyon1.terrain \
+	meshes/ctf-frost/ice1.decal \
+	meshes/ctf-frost/ice2.decal \
 	meshes/ctf-frost/snow1.terrain \
 	meshes/desert/barrel.jpg \
 	meshes/desert/barrel.md2 \
