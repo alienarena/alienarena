@@ -568,6 +568,9 @@ nobase_dist_maps_DATA = \
 	meshes/urban/roadbarrell_normal.jpg \
 	meshes/urban/rope.jpg \
 	meshes/urban/rope.md2 \
+	meshes/urban/satdish.jpg \
+	meshes/urban/satdish.md2 \
+	meshes/urban/satdish_normal.jpg \
 	meshes/urban/shelf.jpg \
 	meshes/urban/shelf.md2 \
 	meshes/urban/shelf_normal.jpg \
