@@ -61,7 +61,7 @@ void R_InitImageSubsystem(void)
 {
 	int			max_aniso;
 
-	if ( strstr( gl_config.extensions_string, "GL_ARB_multitexture" ) )
+	if ( GL_QueryExtension("GL_ARB_multitexture") )
 	{
 		Com_Printf ("...using GL_ARB_multitexture\n" );
 		qglMTexCoord2fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
@@ -83,7 +83,7 @@ void R_InitImageSubsystem(void)
 		Com_Error (ERR_FATAL, "...GL_ARB_multitexture not found\n" );
 	}
 	
-	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
+	if ( GL_QueryExtension("GL_ARB_texture_env_combine") )
 	{
 		Com_Printf( "...using GL_ARB_texture_env_combine\n" );
 	}
@@ -92,7 +92,7 @@ void R_InitImageSubsystem(void)
 		Com_Error (ERR_FATAL, "...GL_ARB_texture_env_combine not found\n" );
 	}
 
-	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
+	if ( GL_QueryExtension("GL_EXT_texture_filter_anisotropic") )
 	{
 		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
 

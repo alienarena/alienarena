@@ -592,15 +592,75 @@ void GL_ScreenShot_f (void)
 	}
 }
 
-/*
-** GL_Strings_f
-*/
+/**
+ * Search for an extension supported by the GL driver.
+ *
+ * Note that strstr() on the GL_EXTENSIONS string is not robust
+ * because an extension name string can be an initial substring of
+ * another extension. Also, with OpenGL Version 3,
+ * glGetString(GL_EXTENSIONS) is deprecated. See doc for glGetStringi.
+ * 
+ */
+qboolean GL_QueryExtension( const char *extension_name )
+{
+	size_t name_len;
+	const char *strp;
+	const char *endp;
+
+	name_len = strlen( extension_name );
+	strp = gl_config.extensions_string;
+	endp = strp + strlen(strp);
+	
+	while ( strp < endp )
+	{
+		size_t n = strcspn( strp, " " ); // length of substring
+		if ( name_len == n && !strncmp(extension_name, strp, n) )
+			return true; // exit, found
+		strp += n + 1; // next substring 
+	}
+
+	return false;
+}
+
+/**
+ * Print the OpenGL driver's GL_EXTENSIONS string
+ *
+ * Cannot just Com_Printf because the extensions string length can
+ * overflow the print buffer.
+ *
+ */
+void GL_PrintExtensions(void)
+{
+	const char *strp;
+	const char *endp;
+	char extension_name[256];
+
+	Com_Printf("GL_EXTENSIONS:\n");
+	
+	strp = gl_config.extensions_string;
+	endp = strp + strlen(strp);
+	while ( strp < endp )
+	{
+		size_t n = strcspn( strp, " " ); // length of substring
+		if ( n < sizeof(extension_name) )
+		{
+			strncpy(extension_name, strp, n);
+			extension_name[n] = '\0';
+			Com_Printf(" %s\n", extension_name);
+		}
+		strp += n + 1; // next substring
+	}
+}
+
+/**
+ * Target of "gl_strings" console commmand.
+ */
 void GL_Strings_f( void )
 {
-	Com_Printf ("GL_VENDOR: %s\n", gl_config.vendor_string );
-	Com_Printf ("GL_RENDERER: %s\n", gl_config.renderer_string );
-	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
-	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
+	Com_Printf("GL_VENDOR: %s\n", gl_config.vendor_string);
+	Com_Printf("GL_RENDERER: %s\n", gl_config.renderer_string);
+	Com_Printf("GL_VERSION: %s\n", gl_config.version_string);
+	GL_PrintExtensions();
 }
 
 /*

@@ -65,6 +65,13 @@ void R_CheckFBOExtensions (void)
 	gl_state.fbo = true;
 	gl_state.hasFBOblit = false;
 
+	if ( !GL_QueryExtension("GL_EXT_framebuffer_object") )
+	{
+		Com_Printf("...Cannot find OpenGL Framebuffer extension, CANNOT use FBO\n");
+		gl_state.fbo = false;
+		return;
+	}
+		
 	qglGenFramebuffersEXT		= (PFNGLGENFRAMEBUFFERSEXTPROC)		qwglGetProcAddress("glGenFramebuffersEXT");
 	qglBindFramebufferEXT		= (PFNGLBINDFRAMEBUFFEREXTPROC)		qwglGetProcAddress("glBindFramebufferEXT");
 	qglFramebufferTexture2DEXT	= (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)	qwglGetProcAddress("glFramebufferTexture2DEXT");
@@ -84,7 +91,7 @@ void R_CheckFBOExtensions (void)
 	}
 
 	// Framebuffer object blit
-	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
+	if ( GL_QueryExtension("GL_EXT_framebuffer_blit") )
 	{
 		Com_Printf("...using GL_EXT_framebuffer_blit\n");
 		gl_state.hasFBOblit = true;
