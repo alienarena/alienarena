@@ -794,6 +794,11 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 void Mod_LoadDecalModel (model_t *mod, void *_buf);
 void R_ParseDecalEntity (char *match, char *block);
 
+// GL Extensions
+extern qboolean GL_QueryExtension(const char *extension_name);
+extern void GL_PrintExtensions(void);
+extern void GL_Strings_f(void);
+
 /*
 ====================================================================
 

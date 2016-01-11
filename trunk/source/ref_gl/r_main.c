@@ -74,8 +74,6 @@ float		v_blend[4];			// final blending color
 
 float		r_farclip, r_farclip_min, r_farclip_bias = 256.0f;
 
-void GL_Strings_f( void );
-
 //
 // view origin
 //
@@ -1514,13 +1512,13 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_config.version_string = (const char*)qglGetString (GL_VERSION);
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
 	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
-	//Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
+	GL_PrintExtensions();
 
 	/*
 	** grab extensions
 	*/
-	if ( strstr( gl_config.extensions_string, "GL_EXT_compiled_vertex_array" ) ||
-		 strstr( gl_config.extensions_string, "GL_SGI_compiled_vertex_array" ) )
+	if ( GL_QueryExtension("GL_EXT_compiled_vertex_array")
+		 || GL_QueryExtension("GL_SGI_compiled_vertex_array") )
 	{
 		Com_Printf ("...enabling GL_EXT_compiled_vertex_array\n" );
 		qglLockArraysEXT = ( void * ) qwglGetProcAddress( "glLockArraysEXT" );
@@ -1532,7 +1530,7 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 
 #if defined WIN32_VARIANT
-	if ( strstr( gl_config.extensions_string, "WGL_EXT_swap_control" ) )
+	if ( GL_QueryExtension("WGL_EXT_swap_control") )
 	{
 		qwglSwapIntervalEXT = ( BOOL (WINAPI *)(int)) qwglGetProcAddress( "wglSwapIntervalEXT" );
 		Com_Printf ("...enabling WGL_EXT_swap_control\n" );

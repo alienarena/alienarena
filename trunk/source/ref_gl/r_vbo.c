@@ -48,7 +48,7 @@ GLboolean		(APIENTRY * qglUnmapBufferARB)(GLenum target);
 static void VB_VCInit (void);
 void R_LoadVBOSubsystem(void)
 {
-	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
+	if ( GL_QueryExtension("GL_ARB_vertex_buffer_object") )
 	{
 		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
 		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");

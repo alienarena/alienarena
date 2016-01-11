@@ -1967,7 +1967,7 @@ void R_LoadGLSLPrograms(void)
 	int i, j;
 	
 	//load glsl (to do - move to own file)
-	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ))
+	if ( GL_QueryExtension("GL_ARB_shader_objects") )
 	{
 		glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
 		glDeleteObjectARB		 = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
