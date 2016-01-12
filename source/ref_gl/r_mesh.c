@@ -445,27 +445,27 @@ static qboolean R_Mesh_CullBBox (vec3_t bbox[8])
 }
 
 // should be able to handle all mesh types
-static qboolean R_Mesh_CullModel (void)
+typedef enum {draw_none, draw_shadow_only, draw_full} cull_result_t;
+static cull_result_t R_Mesh_CullModel (void)
 {
 	int		i;
 	vec3_t	vectors[3];
 	vec3_t  angles;
-	vec3_t	dist;
 	vec3_t	bbox[8];
+	vec3_t	size;
+	qboolean occlusion_cull;
 	
+	// Don't render your own avatar unless it's for shadows
+	if ((currententity->flags & RF_VIEWERMODEL))
+		return draw_shadow_only;
+	
+	// Menu models
 	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		return !(currententity->flags & RF_MENUMODEL);
+		return (!(currententity->flags & RF_MENUMODEL)) ? draw_full : draw_none;
 	
-	if (!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
-		return true;
-	
-	if ((currententity->flags & RF_WEAPONMODEL))
-		return r_lefthand->integer == 2;
-
-	//Do not cull large meshes - too many artifacts occur
-	if((currentmodel->maxs[0] - currentmodel->mins[0] > 72 || currentmodel->maxs[1] - currentmodel->mins[1] > 72 
-		|| currentmodel->maxs[2] - currentmodel->mins[2] > 72) && currententity->frame < 199)
-		return false;
+	// Weapon invisibility cvars
+	if ((currententity->flags & RF_WEAPONMODEL) && (!cl_gun->integer || r_lefthand->integer == 2))
+		return draw_none;
 	
 	/*
 	** rotate the bounding box
@@ -489,23 +489,23 @@ static qboolean R_Mesh_CullModel (void)
 	
 	// Occlusion culling-- check if *any* part of the mesh is visible. 
 	// Possible to have meshes culled that shouldn't be, but quite rare.
-	// HACK: culling rocks is currently too slow, so we don't.
 	// TODO: parallelize?
-	if (r_worldmodel && currentmodel->type != mod_terrain && currentmodel->type != mod_decal && !strstr (currentmodel->name, "rock"))
+	VectorSubtract (currentmodel->maxs, currentmodel->mins, size);
+	occlusion_cull =	r_worldmodel && currentmodel->type != mod_terrain &&
+						currentmodel->type != mod_decal &&
+						// HACK: culling rocks is currently too slow, so we don't.
+						!strstr (currentmodel->name, "rock") &&
+						// Do not occlusion-cull large meshes - too many artifacts occur
+						size[0] <= 72 && size[1] <= 72 && size[2] <= 72;
+	if (occlusion_cull)
 	{
 		qboolean unblocked = CM_FastTrace (currententity->origin, r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 		for (i = 0; i < 8 && !unblocked; i++)
 			unblocked = CM_FastTrace (bbox[i], r_origin, r_worldmodel->firstnode, MASK_OPAQUE);
 		
 		if (!unblocked)
-			return true;
+			return draw_none;
 	}
-	
-	VectorSubtract(r_origin, currententity->origin, dist);
-
-	// Keep nearby meshes so shadows don't blatantly disappear when out of frustom
-	if (VectorLength(dist) > 150 && R_Mesh_CullBBox (bbox))
-		return true;
 	
 	// TODO: could probably find a better place for this.
 	if (r_ragdolls->integer && (currentmodel->typeFlags & MESH_SKELETAL) && !currententity->ragdoll)
@@ -522,10 +522,16 @@ static qboolean R_Mesh_CullModel (void)
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
 		if ((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
-			return true;
+			return draw_none;
 	}
+	
+	// Shadowmap code uses its own CullSphere call. A CullBBox call is too
+	// strict for shadows since they might be visible even if the caster is
+	// out of the frustum.
+	if (R_Mesh_CullBBox (bbox))
+		return draw_shadow_only;
 
-	return false;
+	return draw_full;
 }
 
 static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
@@ -978,9 +984,12 @@ R_Mesh_Draw - animate and render a mesh. Should support all mesh types.
 */
 void R_Mesh_Draw (void)
 {
-	image_t		*skin;
+	cull_result_t cullresult;
+	image_t *skin;
+	
+	cullresult = R_Mesh_CullModel ();
 
-	if (R_Mesh_CullModel ())
+	if (cullresult == draw_none)
 		return;
 	
 	R_GetLightVals (currententity->origin, false);
@@ -1001,8 +1010,7 @@ void R_Mesh_Draw (void)
 			R_GenerateEntityShadow();
 	}
 	
-	// Don't render your own avatar unless it's for shadows
-	if ((currententity->flags & RF_VIEWERMODEL))
+	if (cullresult == draw_shadow_only)
 		return;
 	
 	if (r_showpolycounts->integer)
@@ -1122,7 +1130,7 @@ void R_Mesh_DrawCaster (void)
 	if ((currententity->flags & (RF_WEAPONMODEL|RF_SHELL_ANY)))
 		return;
 
-	if (!(currententity->flags & RF_VIEWERMODEL) && R_Mesh_CullModel ())
+	if (R_Mesh_CullModel () == draw_none)
 		return;
 
 	qglPushMatrix ();
