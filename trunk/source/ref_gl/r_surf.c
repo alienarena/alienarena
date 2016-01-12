@@ -552,7 +552,12 @@ static void R_DrawAlphaSurfaces_chain (msurface_t *chain)
 			BSP_DrawAlphaPoly (s);
 		
 		if ((s->iflags & ISURF_UNDERWATER) != 0)
+		{
 			RS_DrawSurface (s, rs_caustics);
+			// HACK: since we just called RS_DrawSurface, it's as if this
+			// surface type was an rscript surface, even if it wasn't.
+			last_surf_type = 1;
+		}
 	}
 
 	R_KillVArrays ();
