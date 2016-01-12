@@ -1005,6 +1005,13 @@ void R_Mesh_Draw (void)
 	if ((currententity->flags & RF_VIEWERMODEL))
 		return;
 	
+	if (r_showpolycounts->integer)
+	{
+		rendered_models[num_rendered_models].ent = currententity;
+		rendered_models[num_rendered_models].mod = currentmodel;
+		num_rendered_models++;
+	}
+	
 	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();
 	// New model types go here
