@@ -200,6 +200,7 @@ extern	cvar_t	*gl_screenshot_jpeg_quality;
 
 extern  cvar_t  *r_test;
 
+cvar_t *r_showpolycounts;
 cvar_t *gl_showdecals;
 
 extern	int		gl_lightmap_format;
@@ -276,6 +277,13 @@ extern void Draw_InitLocal (void);
 
 //Instrumentation and visualization (TODO: new file for this?)
 void R_DrawMark (vec3_t origin, float size, const float rgba[]);
+// for hovering polycount display
+struct
+{
+	const entity_t *ent;
+	const model_t *mod;
+} rendered_models[MAX_EDICTS+2*MAX_MAP_MODELS+MAX_ROCKS];
+int num_rendered_models;
 
 //Renderer utils
 extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);

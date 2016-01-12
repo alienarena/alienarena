@@ -1063,6 +1063,8 @@ void R_RenderView (refdef_t *fd)
 	c_grasses = 0;
 	c_beams = 0;
 	c_vbo_batches = 0;
+	
+	num_rendered_models = 0;
 
 	R_PushDlights ();
 
@@ -1215,12 +1217,37 @@ R_RenderFrame
 
 @@@@@@@@@@@@@@@@@@@@@
 */
-
+#include "r_text.h"
+extern FNT_auto_t	CL_gameFont;
+void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 void R_RenderFrame (refdef_t *fd)
 {
 	R_RenderView( fd );
 
 	R_SetGL2D ();
+	
+	if (r_showpolycounts->integer)
+	{
+		vec3_t				above_mod;
+		FNT_font_t			font;
+		struct FNT_window_s	box;
+		vec2_t				screen_pos;
+		int					i;
+		
+		font = FNT_AutoGet (CL_gameFont);
+		
+		for (i = 0; i < num_rendered_models; i++)
+		{
+			VectorCopy (rendered_models[i].ent->origin, above_mod);
+			above_mod[2] += rendered_models[i].mod->maxs[2];
+			R_TransformVectorToScreen (&r_newrefdef, above_mod, screen_pos);
+			box.x = (int)screen_pos[0];
+			box.y = r_newrefdef.height-(int)screen_pos[1]-font->height;
+			box.width = box.height = 0;
+			FNT_BoundedPrint (font, va ("%d", rendered_models[i].mod->num_triangles), FNT_CMODE_QUAKE_SRS,
+				FNT_ALIGN_LEFT, &box, FNT_colors[2]);
+		}
+	}
 }
 
 // FIXME HACK: this should really just setup the frustum and viewport, then 
@@ -1359,8 +1386,11 @@ void R_Register( void )
 	r_tracebox = Cvar_Get("r_tracebox", "", CVARDOC_BOOL);
 	Cvar_Describe (r_tracebox, "Trace from the player's origin along the player's view vector for up to r_tracetestlength units or until an obstacle is reached. Shows a box the size of the player's bounding box at the obstacle.");
 	
-	gl_showdecals = Cvar_Get("gl_showdecals", "0", CVARDOC_INT); //for testing things
+	gl_showdecals = Cvar_Get("gl_showdecals", "0", CVARDOC_INT);
 	Cvar_Describe (gl_showdecals, "Set this to 1 to show terrain decal bounding boxes. Set this to 2 to show terrain decals in wireframe.");
+	
+	r_showpolycounts = Cvar_Get("r_showpolycounts", "0", CVARDOC_BOOL);
+	Cvar_Describe (r_showpolycounts, "Set this to 1 to show the polycount of each mesh, hovering over the mesh itself.");
 	
 	// FIXME HACK copied over from the video menu code. These are initialized
 	// again elsewhere. TODO: work out any complications that may arise from
