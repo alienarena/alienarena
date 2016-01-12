@@ -2972,7 +2972,7 @@ static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
 								goto skip_grid;
 						}
 						
-						/*for (j = 0; j < grid->numtris; j++)
+						for (j = 0; j < grid->numtris; j++)
 						{
 							cterraintri_t	*tri = grid->tris[j];
 							
@@ -2980,7 +2980,7 @@ static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
 							
 							if (trace_trace.allsolid)
 								return trace_trace;
-						}*/
+						}
 skip_grid:;
 					}
 				}
