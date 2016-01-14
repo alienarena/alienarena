@@ -461,11 +461,11 @@ static cull_result_t R_Mesh_CullModel (void)
 	
 	// Menu models
 	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		return (!(currententity->flags & RF_MENUMODEL)) ? draw_full : draw_none;
+		return ((currententity->flags & RF_MENUMODEL)) ? draw_full : draw_none;
 	
 	// Weapon invisibility cvars
-	if ((currententity->flags & RF_WEAPONMODEL) && (!cl_gun->integer || r_lefthand->integer == 2))
-		return draw_none;
+	if ((currententity->flags & RF_WEAPONMODEL))
+		return (cl_gun->integer && r_lefthand->integer != 2) ? draw_full : draw_none;
 	
 	/*
 	** rotate the bounding box
