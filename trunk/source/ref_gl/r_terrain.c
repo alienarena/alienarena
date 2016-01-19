@@ -86,13 +86,10 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 		VectorSubtract (&data.vert_positions[3*triangle[2]], &data.vert_positions[3*triangle[1]], v2);
 		CrossProduct (v2, v1, normal);
 
-		if ((mod->typeFlags & MESH_INDEXED))
-		{
-			for(k = 0; k < 3; k++)
-				VectorCopy(&data.vert_positions[3*triangle[k]], RGVerts[k]);
-			RGD_BuildODETerrainGeoms(RGVerts);
-		}
-
+		for(k = 0; k < 3; k++)
+			VectorCopy(&data.vert_positions[3*triangle[k]], RGVerts[k]);
+		RGD_BuildODETerrainGeoms(RGVerts);
+		
 		if (normal[2] > 0.0f)
 			ndownward++;
 	}
