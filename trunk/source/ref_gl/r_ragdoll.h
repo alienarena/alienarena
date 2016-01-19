@@ -219,3 +219,4 @@ extern void RGD_DestroyWorldObject( void );
 extern void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] );
 extern void RGD_DestroyWorldTrimesh();
 extern void RGD_BuildWorldTrimesh ();
+extern void RGD_FinalizeWorldTrimesh ();
