@@ -4,6 +4,7 @@
 
 #include "r_local.h"
 
+extern void RGD_BuildODETerrainGeoms(vec3_t vertex[3]);
 void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 {
 	int i;
@@ -14,6 +15,8 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	int ndownward;
 	
 	LoadTerrainFile (&data, mod->name, false, 2.0, 32, (char *)_buf);
+	
+	Com_Printf("Loading terrain %s\n", mod->name);
 	
 	mod->numvertexes = data.num_vertices;
 	mod->num_triangles = data.num_triangles;
@@ -74,13 +77,22 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	for (i = 0; i < mod->num_triangles; i++)
 	{
 		vec3_t v1, v2, normal;
+		vec3_t RGVerts[3];
 		unsigned int *triangle = &data.tri_indices[3*i];
+		int k;
 		
 		// leave normal scaled proportional to triangle area
 		VectorSubtract (&data.vert_positions[3*triangle[0]], &data.vert_positions[3*triangle[1]], v1);
 		VectorSubtract (&data.vert_positions[3*triangle[2]], &data.vert_positions[3*triangle[1]], v2);
 		CrossProduct (v2, v1, normal);
-		
+
+		if ((mod->typeFlags & MESH_INDEXED))
+		{
+			for(k = 0; k < 3; k++)
+				VectorCopy(&data.vert_positions[3*triangle[k]], RGVerts[k]);
+			RGD_BuildODETerrainGeoms(RGVerts);
+		}
+
 		if (normal[2] > 0.0f)
 			ndownward++;
 	}

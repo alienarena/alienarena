@@ -736,6 +736,7 @@ void RGD_BuildODETerrainGeoms(vec3_t vertex[3])
 		RagDollTriWorld.ODETris = newTris;
 	}
 
+
 	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + 2;
 	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + 1;
 	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
@@ -750,6 +751,8 @@ R_DrawWorldTrimesh
 void RGD_BuildWorldTrimesh ( void )
 {
 	msurface_t *surf;	
+
+	Com_Printf("building trimesh for bsp\n");
 
 	RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
@@ -790,6 +793,8 @@ void RGD_FinalizeWorldTrimesh ( void )
 
 	dGeomSetPosition(RagDollTriWorld.geom, 0, 0, 0);
 	dGeomSetRotation(RagDollTriWorld.geom, rot);
+
+	Com_Printf("Trimesh finished\n");
 }
 
 /*
