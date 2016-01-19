@@ -2109,6 +2109,9 @@ void R_BeginRegistration (char *model)
 		Mod_Free (&mod_known[0]);	//do it every time to fix shader bugs in AA
 
 	r_worldmodel = Mod_ForName(fullname, true);
+
+	//ODE
+	RGD_BuildWorldTrimesh ();
 	
 	R_ParseTerrainEntities();
 	R_ParseLightEntities();
@@ -2123,7 +2126,7 @@ void R_BeginRegistration (char *model)
 	R_RegisterLightGroups();
 
 	//ODE
-	RGD_BuildWorldTrimesh ();
+	RGD_FinalizeWorldTrimesh ();
 
 	//VBO
 	VB_BuildWorldVBO();

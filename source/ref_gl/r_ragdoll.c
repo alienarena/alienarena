@@ -696,6 +696,52 @@ void RGD_BuildODEGeoms(msurface_t *surf)
 	}
 }
 
+//one terrain triangle
+void RGD_BuildODETerrainGeoms(vec3_t vertex[3])
+{
+	int		i;
+	int polyStart;
+
+	if(RagDollTriWorld.numODEVerts + 3 > RagDollTriWorld.maxODEVerts)
+	{
+		int growVerts = RagDollTriWorld.maxODEVerts;
+		dVector3 *newVerts;
+		while(RagDollTriWorld.numODEVerts + 3 > growVerts)
+			growVerts += GROW_ODE_VERTS;
+		newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
+		if(!newVerts) return;
+		RagDollTriWorld.maxODEVerts = growVerts;
+		RagDollTriWorld.ODEVerts = newVerts;
+	}
+
+	polyStart = RagDollTriWorld.numODEVerts;
+
+	for(i = 0; i < 3; i++)
+	{
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = vertex[i][0];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = vertex[i][1];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = vertex[i][2];
+		RagDollTriWorld.numODEVerts++;
+	}	
+
+	if(RagDollTriWorld.numODETris + 1 > RagDollTriWorld.maxODETris)
+	{
+		int growTris = RagDollTriWorld.maxODETris;
+		dTriIndex *newTris;
+		while(RagDollTriWorld.numODETris + 1 > growTris)
+			growTris += GROW_ODE_TRIS;
+		newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
+		if(!newTris) return;
+		RagDollTriWorld.maxODETris = growTris;
+		RagDollTriWorld.ODETris = newTris;
+	}
+
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + 2;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + 1;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
+	RagDollTriWorld.numODETris++;
+}
+
 /*
 =============
 R_DrawWorldTrimesh
@@ -703,8 +749,7 @@ R_DrawWorldTrimesh
 */
 void RGD_BuildWorldTrimesh ( void )
 {
-	msurface_t *surf;
-	dMatrix3 rot;
+	msurface_t *surf;	
 
 	RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
@@ -721,7 +766,12 @@ void RGD_BuildWorldTrimesh ( void )
 				RGD_BuildODEGeoms(surf);
 			}
 		}
-	}
+	}		
+}
+
+void RGD_FinalizeWorldTrimesh ( void )
+{
+	dMatrix3 rot;
 
 	dRSetIdentity(rot);
 
