@@ -737,9 +737,9 @@ void RGD_BuildODETerrainGeoms(vec3_t vertex[3])
 	}
 
 
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + 2;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + 0;
 	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + 1;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart + 2;
 	RagDollTriWorld.numODETris++;
 }
 
