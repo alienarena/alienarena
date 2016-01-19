@@ -1092,7 +1092,6 @@ static void CM_LoadTerrain_PopulateGrid (cterrainmodel_t *mod, cterraingrid_t *g
 	}
 }
 
-extern void RGD_BuildODETerrainGeoms(vec3_t vertex[3]);
 static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 {
 	float rotation_matrix[3][3];
@@ -1102,6 +1101,8 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	terraindata_t data;
 	cterraintri_t **tmp;
 	vec3_t up, lm_mins, lm_maxs;
+
+	Com_Printf("building trimesh for terrain\n");
 	
 	if (numterrainmodels == MAX_MAP_MODELS)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
@@ -1178,19 +1179,12 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	{
 		cterraintri_t *tri;
 		vec3_t side1, side2;
-		vec3_t RGverts[3];
 		int j, k;
 		
 		tri = &mod->tris[mod->numtriangles];
 		
 		for (j = 0; j < 3; j++)
-		{
 			tri->verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
-			VectorCopy(tri->verts[j], RGverts[j]);
-		}
-				
-		//send this triangle out to ragdoll trimesh accum
-		RGD_BuildODETerrainGeoms(RGverts);
 
 		VectorCopy (tri->verts[0], tri->mins);
 		VectorCopy (tri->verts[0], tri->maxs);
