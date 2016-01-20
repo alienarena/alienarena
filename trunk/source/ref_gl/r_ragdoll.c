@@ -827,7 +827,7 @@ void RGD_BuildWorldTrimesh ( void )
 				}	
 
 				//send the translated verts to our ODE routine to build a trimesh triangle
-				RGD_BuildODETerrainGeoms(RGDverts, vtriangles[3*trinum], vtriangles[3*trinum+l], vtriangles[3*trinum+2]);
+				RGD_BuildODETerrainGeoms(RGDverts, vtriangles[3*trinum], vtriangles[3*trinum+1], vtriangles[3*trinum+2]);
 			}	
 			totalVerts += terrainmodel->numvertexes;
 			qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
