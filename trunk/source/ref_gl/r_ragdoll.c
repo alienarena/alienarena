@@ -696,48 +696,102 @@ void RGD_BuildODEGeoms(msurface_t *surf)
 	}	
 }
 
-//One terrain triangle.  These are indexed, so we do need the proper indexes.
-static int totalVerts;
-void RGD_BuildODETerrainGeoms(vec3_t vertex[3], int indx0, int indx1, int indx2)
+//Build for single terrain mesh.  These are indexed, so we do need the proper indexes.
+void RGD_BuildODETerrainGeoms(model_t *terrainmodel, vec3_t angles, vec3_t origin)
 {
-	int		i;
+	mesh_framevbo_t *framevbo;
+	unsigned int *vtriangles;
+	GLuint vbo_xyz;
+	GLuint vbo_indices;
+	float rotation_matrix[3][3];
+	int trinum;
+	int vertnum;
+	int totalVerts;
 
-	if(RagDollTriWorld.numODEVerts + 3 > RagDollTriWorld.maxODEVerts)
+	vbo_xyz = terrainmodel->vboIDs[(terrainmodel->typeFlags & MESH_INDEXED) ? 2 : 1];
+	GL_BindVBO (vbo_xyz);
+	framevbo = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
+
+	if (framevbo == NULL)
+	{
+		Com_Printf ("RGD_BuildWorldTrimesh: qglMapBufferARB on vertex positions: %u\n", qglGetError ());	
+		return;
+	}
+			
+	totalVerts = RagDollTriWorld.numODEVerts;
+	if(RagDollTriWorld.numODEVerts + terrainmodel->numvertexes > RagDollTriWorld.maxODEVerts)
 	{
 		int growVerts = RagDollTriWorld.maxODEVerts;
 		dVector3 *newVerts;
-		while(RagDollTriWorld.numODEVerts + 3 > growVerts)
+		while(RagDollTriWorld.numODEVerts + terrainmodel->numvertexes > growVerts)
 			growVerts += GROW_ODE_VERTS;
 		newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
 		if(!newVerts) return;
 		RagDollTriWorld.maxODEVerts = growVerts;
 		RagDollTriWorld.ODEVerts = newVerts;
 	}
-
-	for(i = 0; i < 3; i++)
+						
+	AnglesToMatrix3x3 ( angles, rotation_matrix);
+		
+	for(vertnum = 0; vertnum < terrainmodel->numvertexes; vertnum++)
 	{
-		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = vertex[i][0];
-		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = vertex[i][1];
-		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = vertex[i][2];
-		RagDollTriWorld.numODEVerts++;
-	}	
+		int j;
+		vec3_t tmp, tmp2;
 
-	if(RagDollTriWorld.numODETris + 1 > RagDollTriWorld.maxODETris)
+		VectorCopy (framevbo[vertnum].vertex, tmp);
+		VectorClear (tmp2);
+		for (j = 0; j < 3; j++)
+		{
+			int k;
+			for (k = 0; k < 3; k++)
+				tmp2[j] += tmp[k] * rotation_matrix[j][k];
+		}
+		VectorAdd (tmp2, origin, tmp2);
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = tmp2[0];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = tmp2[1];
+		RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = tmp2[2];
+		RagDollTriWorld.numODEVerts++;
+	}
+
+	vbo_indices = terrainmodel->vboIDs[1];
+	GL_BindVBO (vbo_indices);
+	vtriangles = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
+
+	if(vtriangles == NULL)
+	{
+		Com_Printf ("RGD_BuildWorldTrimesh: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
+		GL_BindVBO (vbo_xyz);
+		qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
+		GL_BindVBO (0);
+		return;
+	}
+	
+	if(RagDollTriWorld.numODETris + terrainmodel->num_triangles > RagDollTriWorld.maxODETris)
 	{
 		int growTris = RagDollTriWorld.maxODETris;
 		dTriIndex *newTris;
-		while(RagDollTriWorld.numODETris + 1 > growTris)
+		while(RagDollTriWorld.numODETris + terrainmodel->num_triangles > growTris)
 			growTris += GROW_ODE_TRIS;
 		newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
 		if(!newTris) return;
 		RagDollTriWorld.maxODETris = growTris;
 		RagDollTriWorld.ODETris = newTris;
 	}
+			
+	for(trinum = 0; trinum < terrainmodel->num_triangles; trinum++)
+	{
+		//send the indices to the trimesh
+		RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = totalVerts + vtriangles[3*trinum+2];
+		RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = totalVerts + vtriangles[3*trinum+1];
+		RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = totalVerts + vtriangles[3*trinum];
+		RagDollTriWorld.numODETris++;
+	}	
 
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = totalVerts + indx2;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = totalVerts + indx1;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = totalVerts + indx0;
-	RagDollTriWorld.numODETris++;
+	qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
+
+	GL_BindVBO (vbo_xyz);
+	qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
+	GL_BindVBO (0);
 }
 
 /*
@@ -747,11 +801,13 @@ R_DrawWorldTrimesh
 */
 void RGD_BuildWorldTrimesh ( void )
 {
+	dMatrix3 rot;
 	msurface_t *surf;	
 	int i;
 
 	RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
+	//build bsp portion of trimesh
 	for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
 	{
 		if (surf->texinfo->flags & SURF_SKY)
@@ -765,83 +821,17 @@ void RGD_BuildWorldTrimesh ( void )
 				RGD_BuildODEGeoms(surf);
 			}
 		}
-	}		
-
-	totalVerts = RagDollTriWorld.numODEVerts;
+	}	
+	
+	//add terrain meshes
 	for (i = 0; i < num_terrain_entities; i++)
 	{
-		model_t *terrainmodel;
-		mesh_framevbo_t *framevbo;
-		unsigned int *vtriangles;
-		GLuint vbo_xyz;
-		GLuint vbo_indices;
-		float rotation_matrix[3][3];
-		int trinum;
-
-		terrainmodel = terrain_entities[i].model;
-
-		if ((terrainmodel->typeFlags & MESH_INDEXED))
+		//Only deal with actual terrains, other models would likely cause too much CPU overhead
+		if ((terrain_entities[i].model->typeFlags & MESH_INDEXED))
 		{
-			vbo_xyz = terrainmodel->vboIDs[(terrainmodel->typeFlags & MESH_INDEXED) ? 2 : 1];
-			GL_BindVBO (vbo_xyz);
-			framevbo = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
-
-			if (framevbo == NULL)
-			{
-				Com_Printf ("RGD_BuildWorldTrimesh: qglMapBufferARB on vertex positions: %u\n", qglGetError ());	
-				continue;
-			}
-
-			vbo_indices = terrainmodel->vboIDs[1];
-			GL_BindVBO (vbo_indices);
-			vtriangles = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
-
-			if(vtriangles == NULL)
-			{
-				Com_Printf ("RGD_BuildWorldTrimesh: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
-				GL_BindVBO (vbo_xyz);
-				qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
-				GL_BindVBO (0);
-				continue;
-			}
-
-			AnglesToMatrix3x3 ( terrain_entities[i].angles,rotation_matrix);
-
-			for(trinum = 0; trinum < terrainmodel->num_triangles; trinum++)
-			{
-				int j, l;
-				vec3_t tmp, tmp2;
-				vec3_t RGDverts[3];
-
-				for (l = 0; l < 3; l++)
-				{
-					VectorCopy (framevbo[vtriangles[3*trinum+l]].vertex, tmp);
-					VectorClear (tmp2);
-					for (j = 0; j < 3; j++)
-					{
-						int k;
-						for (k = 0; k < 3; k++)
-							tmp2[j] += tmp[k] * rotation_matrix[j][k];
-					}
-					VectorAdd (tmp2, terrain_entities[i].origin, RGDverts[l]);
-				}	
-
-				//send the translated verts to our ODE routine to build a trimesh triangle
-				RGD_BuildODETerrainGeoms(RGDverts, vtriangles[3*trinum], vtriangles[3*trinum+1], vtriangles[3*trinum+2]);
-			}	
-			totalVerts += terrainmodel->numvertexes;
-			qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
-
-			GL_BindVBO (vbo_xyz);
-			qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
-			GL_BindVBO (0);
+			RGD_BuildODETerrainGeoms(terrain_entities[i].model, terrain_entities[i].angles, terrain_entities[i].origin);
 		}
 	}
-}
-
-void RGD_FinalizeWorldTrimesh ( void )
-{
-	dMatrix3 rot;
 
 	dRSetIdentity(rot);
 

@@ -2124,7 +2124,6 @@ void R_BeginRegistration (char *model)
 
 	//ODE
 	RGD_BuildWorldTrimesh ();
-	RGD_FinalizeWorldTrimesh ();
 
 	//VBO
 	VB_BuildWorldVBO();
