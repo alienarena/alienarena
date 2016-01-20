@@ -4,7 +4,8 @@
 
 #include "r_local.h"
 
-extern void RGD_BuildODETerrainGeoms(vec3_t vertex[3]);
+int totalODEVerts;
+extern void RGD_BuildODETerrainGeoms(vec3_t vertex[3], int indx0, int indx1, int indx2);
 void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 {
 	int i;
@@ -88,11 +89,12 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 
 		for(k = 0; k < 3; k++)
 			VectorCopy(&data.vert_positions[3*triangle[k]], RGVerts[k]);
-		RGD_BuildODETerrainGeoms(RGVerts);
+		RGD_BuildODETerrainGeoms(RGVerts, 3*triangle[0], 3*triangle[1], 3*triangle[2]);
 		
 		if (normal[2] > 0.0f)
 			ndownward++;
 	}
+	totalODEVerts += mod->numvertexes;
 	
 	if (ndownward > 0)
 		Com_Printf ("WARN: %d downward facing polygons in %s!\n", ndownward, mod->name);
