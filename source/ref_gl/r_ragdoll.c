@@ -645,6 +645,10 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 }
 
 //For creating the surfaces for the ragdoll to collide with
+//track total verts externally
+int totalODEVerts;
+
+//For adding a single BSP surface(comprised of multiple triangles).
 void RGD_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p;
@@ -694,13 +698,14 @@ void RGD_BuildODEGeoms(msurface_t *surf)
 		RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
 		RagDollTriWorld.numODETris++;
 	}
+
+	totalODEVerts = RagDollTriWorld.numODEVerts;
 }
 
-//one terrain triangle
-void RGD_BuildODETerrainGeoms(vec3_t vertex[3])
+//One terrain triangle.  These are indexed, so we do need the proper indexes.
+void RGD_BuildODETerrainGeoms(vec3_t vertex[3], int indx0, int indx1, int indx2)
 {
 	int		i;
-	int polyStart;
 
 	if(RagDollTriWorld.numODEVerts + 3 > RagDollTriWorld.maxODEVerts)
 	{
@@ -713,8 +718,6 @@ void RGD_BuildODETerrainGeoms(vec3_t vertex[3])
 		RagDollTriWorld.maxODEVerts = growVerts;
 		RagDollTriWorld.ODEVerts = newVerts;
 	}
-
-	polyStart = RagDollTriWorld.numODEVerts;
 
 	for(i = 0; i < 3; i++)
 	{
@@ -736,10 +739,9 @@ void RGD_BuildODETerrainGeoms(vec3_t vertex[3])
 		RagDollTriWorld.ODETris = newTris;
 	}
 
-
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + 2;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + 1;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = totalODEVerts + indx2;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = totalODEVerts + indx1;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = totalODEVerts + indx0;
 	RagDollTriWorld.numODETris++;
 }
 
