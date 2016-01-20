@@ -1101,8 +1101,6 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	terraindata_t data;
 	cterraintri_t **tmp;
 	vec3_t up, lm_mins, lm_maxs;
-
-	Com_Printf("building trimesh for terrain\n");
 	
 	if (numterrainmodels == MAX_MAP_MODELS)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");

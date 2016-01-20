@@ -644,10 +644,6 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 		currentmodel->ragdoll.RagDollDims[WRIST_HISTOP] * (float)M_PI);
 }
 
-//For creating the surfaces for the ragdoll to collide with
-//track total verts externally
-int totalODEVerts;
-
 //For adding a single BSP surface(comprised of multiple triangles).
 void RGD_BuildODEGeoms(msurface_t *surf)
 {
@@ -697,12 +693,11 @@ void RGD_BuildODEGeoms(msurface_t *surf)
 		RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + i - 1;
 		RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
 		RagDollTriWorld.numODETris++;
-	}
-
-	totalODEVerts = RagDollTriWorld.numODEVerts;
+	}	
 }
 
 //One terrain triangle.  These are indexed, so we do need the proper indexes.
+static int totalVerts;
 void RGD_BuildODETerrainGeoms(vec3_t vertex[3], int indx0, int indx1, int indx2)
 {
 	int		i;
@@ -739,9 +734,9 @@ void RGD_BuildODETerrainGeoms(vec3_t vertex[3], int indx0, int indx1, int indx2)
 		RagDollTriWorld.ODETris = newTris;
 	}
 
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = totalODEVerts + indx2;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = totalODEVerts + indx1;
-	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = totalODEVerts + indx0;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = totalVerts + indx2;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = totalVerts + indx1;
+	RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = totalVerts + indx0;
 	RagDollTriWorld.numODETris++;
 }
 
@@ -753,8 +748,7 @@ R_DrawWorldTrimesh
 void RGD_BuildWorldTrimesh ( void )
 {
 	msurface_t *surf;	
-
-	Com_Printf("building trimesh for bsp\n");
+	int i;
 
 	RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
@@ -772,6 +766,77 @@ void RGD_BuildWorldTrimesh ( void )
 			}
 		}
 	}		
+
+	totalVerts = RagDollTriWorld.numODEVerts;
+	for (i = 0; i < num_terrain_entities; i++)
+	{
+		model_t *terrainmodel;
+		mesh_framevbo_t *framevbo;
+		unsigned int *vtriangles;
+		GLuint vbo_xyz;
+		GLuint vbo_indices;
+		float rotation_matrix[3][3];
+		int trinum;
+
+		terrainmodel = terrain_entities[i].model;
+
+		if ((terrainmodel->typeFlags & MESH_INDEXED))
+		{
+			vbo_xyz = terrainmodel->vboIDs[(terrainmodel->typeFlags & MESH_INDEXED) ? 2 : 1];
+			GL_BindVBO (vbo_xyz);
+			framevbo = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
+
+			if (framevbo == NULL)
+			{
+				Com_Printf ("RGD_BuildWorldTrimesh: qglMapBufferARB on vertex positions: %u\n", qglGetError ());	
+				continue;
+			}
+
+			vbo_indices = terrainmodel->vboIDs[1];
+			GL_BindVBO (vbo_indices);
+			vtriangles = qglMapBufferARB (GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
+
+			if(vtriangles == NULL)
+			{
+				Com_Printf ("RGD_BuildWorldTrimesh: qglMapBufferARB on vertex indices: %u\n", qglGetError ());
+				GL_BindVBO (vbo_xyz);
+				qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
+				GL_BindVBO (0);
+				continue;
+			}
+
+			AnglesToMatrix3x3 ( terrain_entities[i].angles,rotation_matrix);
+
+			for(trinum = 0; trinum < terrainmodel->num_triangles; trinum++)
+			{
+				int j, l;
+				vec3_t tmp, tmp2;
+				vec3_t RGDverts[3];
+
+				for (l = 0; l < 3; l++)
+				{
+					VectorCopy (framevbo[vtriangles[3*trinum+l]].vertex, tmp);
+					VectorClear (tmp2);
+					for (j = 0; j < 3; j++)
+					{
+						int k;
+						for (k = 0; k < 3; k++)
+							tmp2[j] += tmp[k] * rotation_matrix[j][k];
+					}
+					VectorAdd (tmp2, terrain_entities[i].origin, RGDverts[l]);
+				}	
+
+				//send the translated verts to our ODE routine to build a trimesh triangle
+				RGD_BuildODETerrainGeoms(RGDverts, vtriangles[3*trinum], vtriangles[3*trinum+l], vtriangles[3*trinum+2]);
+			}	
+			totalVerts += terrainmodel->numvertexes;
+			qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
+
+			GL_BindVBO (vbo_xyz);
+			qglUnmapBufferARB (GL_ARRAY_BUFFER_ARB);
+			GL_BindVBO (0);
+		}
+	}
 }
 
 void RGD_FinalizeWorldTrimesh ( void )
@@ -795,8 +860,6 @@ void RGD_FinalizeWorldTrimesh ( void )
 
 	dGeomSetPosition(RagDollTriWorld.geom, 0, 0, 0);
 	dGeomSetRotation(RagDollTriWorld.geom, rot);
-
-	Com_Printf("Trimesh finished\n");
 }
 
 /*
