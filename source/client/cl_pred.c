@@ -159,8 +159,9 @@ trace_t		CL_PMTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 	if (t.fraction < 1.0)
 		t.ent = (struct edict_s *)1;
 
+	//JKD - 1/22/2016 - No.  This was created for tracing BSP models, something CRX does not use. It creates major problems with terrain using this trace.
 	// check all other solid models
-	CL_ClipMoveToEntities (start, mins, maxs, end, &t);
+	//CL_ClipMoveToEntities (start, mins, maxs, end, &t);
 
 	return t;
 }
@@ -214,8 +215,9 @@ trace_t CL_PMSurfaceTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, i
    if (t.fraction < 1.0)
       t.ent = (struct edict_s *)1;
 
+   //JKD - 1/22/2016 - No.  This was created for tracing BSP models, something CRX does not use. It creates major problems with terrain using this trace.
    // check all other solid models
-   CL_ClipMoveToEntities (start, mins, maxs, end, &t);
+   //CL_ClipMoveToEntities (start, mins, maxs, end, &t);
 
    return t;
 }
