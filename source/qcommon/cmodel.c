@@ -2942,6 +2942,9 @@ static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
 		if (!(CONTENTS_SOLID & trace_contents))
 			return trace_trace;
 		
+		if (!enable_terrain)
+		    return trace_trace;
+		
 		for (i = 0; i < numterrainmodels; i++)
 		{
 			int mingrid[3], maxgrid[3], griddir[3];
