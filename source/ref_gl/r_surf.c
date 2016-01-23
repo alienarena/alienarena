@@ -143,6 +143,7 @@ void BSP_InvalidateVBO (void)
 // render all accumulated surfaces
 void BSP_DrawVBOAccum (void)
 {
+	extern GLuint bsp_iboId;
 	msurface_t *batch = first_vbobatch_start;
 	
 	if (!batch)
@@ -154,11 +155,15 @@ void BSP_DrawVBOAccum (void)
 		r_vboOn = true;
 	}
 	
+	GL_BindIBO (bsp_iboId);
+	
 	for (; batch; batch = batch->batch_end->batch_next)
 	{
-		qglDrawArrays (GL_TRIANGLES, batch->vbo_first_vert, batch->batch_end->vbo_last_vert - batch->vbo_first_vert);
+		qglDrawElements (GL_TRIANGLES, batch->batch_end->ibo_last_idx - batch->ibo_first_idx, GL_UNSIGNED_INT, (const GLvoid *)(sizeof (unsigned int) * batch->ibo_first_idx));
 		c_vbo_batches++;
 	}
+	
+	GL_BindIBO (0);
 }
 
 
