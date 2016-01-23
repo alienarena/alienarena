@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 static GLuint bsp_vboId = 0;
+GLuint bsp_iboId = 0;
 GLuint minimap_vboId = 0;
 static GLuint vegetation_vboId = 0;
 static GLuint lensflare_vboId = 0;
@@ -77,20 +78,17 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 	float	*v;
 	int		i, j;
 	int		n;
-	int		trinum;
 	float	map[MAX_VBO_XYZs];
 	int surf_num_verts = 0;
 	
 	n = 0;
 	
-	// XXX: for future reference, the glDrawRangeElements code was last seen
-	// here at revision 3246.
 	for (p = surf->polys; p != NULL; p = p->next)
 	{
-		for (trinum = 1; trinum < p->numverts-1; trinum++)
+		for (i = 0; i < p->numverts; i++)
 		{
-			v = p->verts[0];
-		
+			v = p->verts[i];
+	
 			// copy in vertex data
 			for (j = 0; j < 7; j++)
 				map[n++] = v[j];
@@ -100,24 +98,9 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 				map[n++] = surf->normal[j];
 			for (j = 0; j < 4; j++)
 				map[n++] = surf->tangent[j];
-		
-			for (i = trinum; i < trinum+2; i++)
-			{
-				v = p->verts[i];
-		
-				// copy in vertex data
-				for (j = 0; j < 7; j++)
-					map[n++] = v[j];
-				
-				// normals and tangents are the same through the whole surface
-				for (j = 0; j < 3; j++)
-					map[n++] = surf->normal[j];
-				for (j = 0; j < 4; j++)
-					map[n++] = surf->tangent[j];
-			}
 		}
 		
-		surf_num_verts += 3*(p->numverts-2);
+		surf_num_verts += p->numverts;
 	}
 	
 	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currVertexNum * 14 * sizeof(float), n * sizeof(float), &map);
@@ -126,12 +109,44 @@ static int VB_AddWorldSurfaceToVBO (msurface_t *surf, int currVertexNum)
 	return surf->vbo_last_vert = currVertexNum + surf_num_verts;
 }
 
+static int VB_AddWorldSurfaceToIBO (msurface_t *surf, int currIndexNum)
+{
+	glpoly_t *p;
+	int		i;
+	int		n;
+	int		baseidx;
+	int		trinum;
+	unsigned int	map[MAX_VBO_XYZs];
+	
+	n = 0;
+	baseidx = surf->vbo_first_vert;
+	
+	for (p = surf->polys; p != NULL; p = p->next)
+	{
+		for (trinum = 1; trinum < p->numverts-1; trinum++)
+		{
+			map[n++] = baseidx;
+		
+			for (i = trinum; i < trinum+2; i++)
+				map[n++] = baseidx + i;
+		}
+		
+		baseidx += p->numverts;
+	}
+	
+	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currIndexNum * sizeof(unsigned int), n * sizeof(unsigned int), &map);
+	
+	surf->ibo_first_idx = currIndexNum;
+	return surf->ibo_last_idx = currIndexNum + n;
+}
+
 static void VB_BuildWorldSurfaceVBO (void)
 {
-	msurface_t *surf, *surfs, *prevsurf;
+	msurface_t *surf, *surfs, *prevsurf, *vbo_first_surf;
 	int i, firstsurf, lastsurf;
-	int	totalVBObufferSize = 0;
+	int	totalVBObufferSize = 0, totalIBObufferSize = 0;
 	int currVertexNum = 0;
+	int currIndexNum = 0;
 	
 	// just to keep the lines of code short
 	surfs = r_worldmodel->surfaces;
@@ -144,14 +159,17 @@ static void VB_BuildWorldSurfaceVBO (void)
 		if (surf->texinfo->flags & (SURF_SKY|SURF_NODRAW))
 			continue;
 		for (p = surf->polys; p != NULL; p = p->next)
-			totalVBObufferSize += 14*3*(p->numverts-2);
+		{
+			totalIBObufferSize += 3*(p->numverts-2);
+			totalVBObufferSize += 14*p->numverts;
+		}
 	}
 	
 	qglGenBuffersARB (1, &bsp_vboId);
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_vboId);
 	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
 	
-	prevsurf = NULL;
+	vbo_first_surf = prevsurf = NULL;
 	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
 	{
 		if (currentmodel->unique_texinfo[i]->flags & (SURF_SKY|SURF_NODRAW))
@@ -164,6 +182,8 @@ static void VB_BuildWorldSurfaceVBO (void)
 			surf->vboprev = prevsurf;
 			if (prevsurf)
 				prevsurf->vbonext = surf;
+			else
+				vbo_first_surf = surf;
 			prevsurf = surf;
 			currVertexNum = VB_AddWorldSurfaceToVBO (surf, currVertexNum);
 		}
@@ -175,12 +195,21 @@ static void VB_BuildWorldSurfaceVBO (void)
 			surf->vboprev = prevsurf;
 			if (prevsurf)
 				prevsurf->vbonext = surf;
+			else
+				vbo_first_surf = surf;
 			prevsurf = surf;
 			currVertexNum = VB_AddWorldSurfaceToVBO (surf, currVertexNum);
 		}
 	}
 	if (prevsurf)
 		prevsurf->vbonext = NULL;
+	
+	qglGenBuffersARB (1, &bsp_iboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_iboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalIBObufferSize*sizeof(unsigned int), 0, GL_STATIC_DRAW_ARB);
+	
+	for	(surf = vbo_first_surf; surf != NULL; surf = surf->vbonext)
+		currIndexNum = VB_AddWorldSurfaceToIBO (surf, currIndexNum);
 	
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
@@ -558,6 +587,7 @@ void VB_WorldVCInit (void)
 {
 	//clear out previous buffer
 	qglDeleteBuffersARB (1, &bsp_vboId);
+	qglDeleteBuffersARB (1, &bsp_iboId);
 	qglDeleteBuffersARB (1, &minimap_vboId);
 }
 
