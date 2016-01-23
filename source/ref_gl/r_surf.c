@@ -166,6 +166,30 @@ void BSP_DrawVBOAccum (void)
 	GL_BindIBO (0);
 }
 
+static void BSP_DrawVBOAccum_Outlines (void)
+{
+	extern GLuint bsp_outlines_iboId;
+	msurface_t *batch = first_vbobatch_start;
+	
+	if (!batch)
+		return;
+	
+	if (!r_vboOn)
+	{
+		GL_SetupWorldVBO ();
+		r_vboOn = true;
+	}
+	
+	GL_BindIBO (bsp_outlines_iboId);
+	
+	for (; batch; batch = batch->batch_end->batch_next)
+	{
+		qglDrawElements (GL_LINES, batch->batch_end->ibo_last_outline_idx - batch->ibo_first_outline_idx, GL_UNSIGNED_INT, (const GLvoid *)(sizeof (unsigned int) * batch->ibo_first_outline_idx));
+		c_vbo_batches++;
+	}
+	
+	GL_BindIBO (0);
+}
 
 // clear all accumulated surfaces without rendering
 void BSP_ClearVBOAccum (void)
@@ -1073,6 +1097,74 @@ static void BSP_DrawGLSLDynamicSurfaces (qboolean forEnt)
 	GLSTATE_DISABLE_ALPHATEST
 }
 
+static void BSP_DrawSurfaceWireframes (qboolean forEnt)
+{
+	int		 i;
+	
+	/*
+	 * Mapping tool. Outline the light-mapped polygons.
+	 *  gl_showpolys == 1 : perform depth test.
+	 *  gl_showpolys == 2 : disable depth test. everything in "visible set"
+	 * gl_showtris is identical, but it shows the fully triangulated mesh
+	 * instead of surface outlines. Both are restricted to servers with
+	 * maxclients == 1.
+	 */
+	if (!gl_showpolys->integer && !gl_showtris->integer)
+		return;
+		
+	BSP_FlushVBOAccum ();
+	BSP_InvalidateVBO ();
+	
+	for (i = 0; i < currentmodel->num_unique_texinfos; i++)
+	{
+		msurface_t	*s;
+		
+		if (forEnt)
+			s = currentmodel->unique_texinfo[i]->standard_surfaces.entchain;
+		else
+			s = currentmodel->unique_texinfo[i]->standard_surfaces.worldchain;
+		for (; s; s = s->texturechain)
+			BSP_AddSurfToVBOAccum (s);
+		
+		if (forEnt)
+			s = currentmodel->unique_texinfo[i]->dynamic_surfaces.entchain;
+		else
+			s = currentmodel->unique_texinfo[i]->dynamic_surfaces.worldchain;
+		for (; s; s = s->texturechain)
+			BSP_AddSurfToVBOAccum (s);
+	}
+	
+	qglColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+	qglDisable (GL_TEXTURE_2D);
+	qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+	
+	if (gl_showtris->integer)
+	{
+		if (gl_showtris->integer >= 2) qglDisable (GL_DEPTH_TEST);
+		qglLineWidth (gl_showtris->integer >= 2 ? 2.5f : 1.5f); // when there are lots of lines, make them narrower
+		
+		BSP_DrawVBOAccum ();
+		
+		if (gl_showtris->integer >= 2) qglEnable (GL_DEPTH_TEST);
+	}
+	
+	if (gl_showpolys->integer)
+	{
+		if (gl_showpolys->integer >= 2) qglDisable (GL_DEPTH_TEST);
+		qglLineWidth (gl_showtris->integer >= 2 ? 3.0f : 2.0f); // when there are lots of lines, make them narrower
+		
+		BSP_DrawVBOAccum_Outlines ();
+		
+		if (gl_showpolys->integer >= 2) qglEnable (GL_DEPTH_TEST);
+	}
+	
+	BSP_ClearVBOAccum ();
+
+	qglLineWidth (1.0f);
+	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+	qglEnable (GL_TEXTURE_2D);
+}
+
 
 
 
@@ -1261,6 +1353,8 @@ static void BSP_DrawTextureChains (qboolean forEnt)
 	}
 	
 	BSP_SetScrolling (0);
+	
+	BSP_DrawSurfaceWireframes (forEnt);
 	
 	// this has to come last because it messes with GL state
 	BSP_DrawWarpSurfaces (forEnt);

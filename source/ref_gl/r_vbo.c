@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 static GLuint bsp_vboId = 0;
-GLuint bsp_iboId = 0;
+GLuint bsp_iboId = 0, bsp_outlines_iboId;
 GLuint minimap_vboId = 0;
 static GLuint vegetation_vboId = 0;
 static GLuint lensflare_vboId = 0;
@@ -140,11 +140,40 @@ static int VB_AddWorldSurfaceToIBO (msurface_t *surf, int currIndexNum)
 	return surf->ibo_last_idx = currIndexNum + n;
 }
 
+static int VB_AddWorldSurfaceToOutlineIBO (msurface_t *surf, int currIndexNum)
+{
+	glpoly_t *p;
+	int		i;
+	int		n;
+	int		baseidx;
+	int		trinum;
+	unsigned int	map[MAX_VBO_XYZs];
+	
+	n = 0;
+	baseidx = surf->vbo_first_vert;
+	
+	for (p = surf->polys; p != NULL; p = p->next)
+	{
+		for (i = 0; i < p->numverts; i++)
+		{
+			map[n++] = baseidx + i;
+			map[n++] = baseidx + (i + 1) % p->numverts;
+		}
+		
+		baseidx += p->numverts;
+	}
+	
+	qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, currIndexNum * sizeof(unsigned int), n * sizeof(unsigned int), &map);
+	
+	surf->ibo_first_outline_idx = currIndexNum;
+	return surf->ibo_last_outline_idx = currIndexNum + n;
+}
+
 static void VB_BuildWorldSurfaceVBO (void)
 {
 	msurface_t *surf, *surfs, *prevsurf, *vbo_first_surf;
 	int i, firstsurf, lastsurf;
-	int	totalVBObufferSize = 0, totalIBObufferSize = 0;
+	int	totalVBObufferSize = 0, totalIBObufferSize = 0, totalOutlineIBObufferSize = 0;
 	int currVertexNum = 0;
 	int currIndexNum = 0;
 	
@@ -162,6 +191,7 @@ static void VB_BuildWorldSurfaceVBO (void)
 		{
 			totalIBObufferSize += 3*(p->numverts-2);
 			totalVBObufferSize += 14*p->numverts;
+			totalOutlineIBObufferSize += 2*p->numverts;
 		}
 	}
 	
@@ -210,6 +240,14 @@ static void VB_BuildWorldSurfaceVBO (void)
 	
 	for	(surf = vbo_first_surf; surf != NULL; surf = surf->vbonext)
 		currIndexNum = VB_AddWorldSurfaceToIBO (surf, currIndexNum);
+	
+	qglGenBuffersARB (1, &bsp_outlines_iboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, bsp_outlines_iboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, totalOutlineIBObufferSize*sizeof(unsigned int), 0, GL_STATIC_DRAW_ARB);
+	
+	currIndexNum = 0;
+	for	(surf = vbo_first_surf; surf != NULL; surf = surf->vbonext)
+		currIndexNum = VB_AddWorldSurfaceToOutlineIBO (surf, currIndexNum);
 	
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
@@ -588,6 +626,7 @@ void VB_WorldVCInit (void)
 	//clear out previous buffer
 	qglDeleteBuffersARB (1, &bsp_vboId);
 	qglDeleteBuffersARB (1, &bsp_iboId);
+	qglDeleteBuffersARB (1, &bsp_outlines_iboId);
 	qglDeleteBuffersARB (1, &minimap_vboId);
 }
 
