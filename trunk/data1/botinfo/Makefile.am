@@ -72,6 +72,7 @@ nobase_dist_botinfo_DATA = \
 	dm-violator2k11.tmp \
 	dm-violator2k15.tmp \
 	dm-warmachine2k10.tmp \
+	dm-wasteland.tmp \
 	dm-zion2k9.tmp \
 	dm-zorn2k11.tmp \
 	tac-extermination.tmp \
