@@ -389,6 +389,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/damage1.decal \
 	meshes/desert/damage2.decal \
 	meshes/desert/damage3.decal \
+	meshes/desert/damage4.decal \
 	meshes/desert/lamp.jpg \
 	meshes/desert/lamp.md2 \
 	meshes/desert/lamp_fx.tga \
@@ -404,6 +405,9 @@ nobase_dist_maps_DATA = \
 	meshes/desert/platewall2.md2 \
 	meshes/desert/platewall2.tga \
 	meshes/desert/platewall2_normal.tga \
+	meshes/desert/saucer.jpg \
+	meshes/desert/saucer.md2 \
+	meshes/desert/saucer_normal.jpg \
 	meshes/dm-bloodfactory/blood0.decal \
 	meshes/dm-bloodfactory/blood1.decal \
 	meshes/dm-bloodfactory/blood2.decal \
