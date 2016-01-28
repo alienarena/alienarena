@@ -157,7 +157,13 @@ maps/meshes/desert/cliff1
 		normalmap
 	}
 }
-
+maps/meshes/desert/saucer
+{
+	{
+		map maps/meshes/desert/saucer_normal.jpg
+		normalmap
+	}
+}
 
 
 
