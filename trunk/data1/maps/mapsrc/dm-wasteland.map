@@ -8581,3 +8581,10 @@
 "origin" "1136.000000 1278.000000 168.000000"
 "model" "maps/meshes/desert/damage4.decal"
 }
+// entity 199
+{
+"classname" "misc_mapmodel"
+"origin" "542.000000 75.999992 38.000015"
+"model" "maps/meshes/gothic/skull1.md2"
+"angles" "-25.647814 115.651253 0.000000"
+}
