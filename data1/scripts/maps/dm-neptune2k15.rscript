@@ -2,24 +2,24 @@ cave1_texture
 {	
 	{
 		map textures/dm-neptune/cave1_blendtex.tga	
-		blendmap 2			
-			100 textures/texturelib/stones_0027.jpg		
-			200 textures/texturelib/ground_0045.jpg		
-		blendnormalmap 2 
-			0 textures/texturelib/stones_0027_nm.jpg
-			1 textures/texturelib/ground_0045_nm.tga			
+		blendmap 2	
+			100 textures/desert/clifftop.tga				
+			200 textures/texturelib/stones_0027.jpg	
+		blendnormalmap 2 			
+			0 textures/desert/clifftop_nm.tga
+			1 textures/texturelib/stones_0027_nm.jpg
 	}
 }
 cave2_texture
 {	
 	{
 		map textures/dm-neptune/cave2_blendtex.tga	
-		blendmap 2			
-			100 textures/texturelib/stones_0027.jpg	
-			200 textures/texturelib/ground_0045.jpg		
-		blendnormalmap 2 
-			0 textures/texturelib/stones_0027_nm.jpg
-			1 textures/texturelib/ground_0045_nm.tga			
+		blendmap 2	
+			100 textures/desert/clifftop.tga				
+			200 textures/texturelib/stones_0027.jpg	
+		blendnormalmap 2 			
+			0 textures/desert/clifftop_nm.tga
+			1 textures/texturelib/stones_0027_nm.jpg
 	}
 }
 cave3_texture
@@ -37,13 +37,14 @@ cave3_texture
 cave4_texture
 {	
 	{
-		map textures/dm-neptune/cave4_blendtex.tga	
-		blendmap 2			
-			100 textures/texturelib/stones_0027.tga		
+		map textures/dm-neptune/cave2_blendtex.tga	
+		blendmap 2	
+			100 textures/desert/clifftop.tga				
 			200 textures/texturelib/ground_0045.jpg		
-		blendnormalmap 2 
-			0 textures/texturelib/stones_0027_nm.tga
-			1 textures/texturelib/ground_0045_nm.tga			
+		blendnormalmap 2 			
+			0 textures/desert/clifftop_nm.tga
+			1 textures/texturelib/ground_0045_nm.tga		
+
 	}
 }
 textures/arena10/messybricks1
