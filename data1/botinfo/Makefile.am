@@ -128,6 +128,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-violator2k11.nod \
 	nav/dm-violator2k15.nod \
 	nav/dm-warmachine2k10.nod \
+	nav/dm-wasteland.nod \
 	nav/dm-zion2k9.nod \
 	nav/dm-zorn2k11.nod \
 	nav/tac-extermination.nod \
