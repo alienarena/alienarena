@@ -21,6 +21,8 @@ nobase_dist_levelshots_DATA = \
 	ctf-cryogenic.txt \
 	ctf-extermination.jpg \
 	ctf-extermination.txt \
+	ctf-frost2k15.jpg \
+	ctf-frost2k15.txt \
 	ctf-frostbyte.jpg \
 	ctf-frostbyte.txt \
 	ctf-goregrinder.jpg \
@@ -109,6 +111,8 @@ nobase_dist_levelshots_DATA = \
 	dm-vesuvius2k11.txt \
 	dm-violator2k11.jpg \
 	dm-violator2k11.txt \
+	dm-violator2k15.jpg \
+	dm-violator2k15.txt \
 	dm-warmachine2k10.jpg \
 	dm-warmachine2k10.txt \
 	dm-wasteland.jpg \
