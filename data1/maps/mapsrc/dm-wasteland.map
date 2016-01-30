@@ -7,6 +7,7 @@
 "_sun_ambient" "15"
 "_sun_color" "0.8 0.7 0.5"
 "_sun_light" "25"
+"message" "The Wasteland"
 // brush 0
 {
 ( -928 2040 64 ) ( -2080 2040 64 ) ( -928 2040 -64 ) arena8/crackedrock4 224 0 0 1 1 0 4 0
@@ -8568,7 +8569,7 @@
 // entity 185
 {
 "classname" "info_player_deathmatch"
-"origin" "-1072.000000 -1548.000000 216.000000"
+"origin" "-920.000000 -1428.000000 256.000000"
 "angle" "38.428497"
 }
 // entity 186
@@ -8604,13 +8605,13 @@
 // entity 191
 {
 "classname" "info_player_deathmatch"
-"origin" "320.000000 1254.000000 166.000000"
+"origin" "320.000000 1310.000000 166.000000"
 "angle" "-179.999985"
 }
 // entity 192
 {
 "classname" "info_player_intermission"
-"origin" "-708.000000 830.000000 238.000000"
+"origin" "676.000000 -1762.000000 150.000000"
 "angle" "30.886379"
 }
 // entity 193

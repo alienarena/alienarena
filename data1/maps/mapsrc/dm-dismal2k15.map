@@ -26361,8 +26361,8 @@
 // entity 11
 {
 "classname" "info_player_intermission"
-"angle" "-90.000000"
-"origin" "244.000000 800.000000 -136.000000"
+"angle" "90.000008"
+"origin" "452.000000 16.000000 -288.000000"
 }
 // entity 12
 {
