@@ -1,0 +1,6 @@
+heightmap textures/ctf-extermination/rubble4.tga;
+texture rubble4_texture;
+vegetation textures/ctf-extermination/rubble4_vegetation.tga;
+lightmap textures/ctf-extermination/rubble4_lightmaptex.tga;
+mins -450, -450, -16;
+maxs 450, 450, 200;
