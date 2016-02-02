@@ -15,6 +15,7 @@ nobase_dist_maps_DATA = \
 	ctf-cryogenic.bsp \
 	ctf-extermination.bsp \
 	ctf-extermination.lightmap \
+	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
 	ctf-frostbyte.bsp \
 	ctf-goregrinder.bsp \
@@ -140,6 +141,14 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
+	meshes/ctf-extermination/blood0.decal \
+	meshes/ctf-extermination/blood1.decal \
+	meshes/ctf-extermination/blood2.decal \
+	meshes/ctf-extermination/blood3.decal \
+	meshes/ctf-extermination/rubble1.terrain \
+	meshes/ctf-extermination/rubble2.terrain \
+	meshes/ctf-extermination/rubble3.terrain \
+	meshes/ctf-extermination/rubble4.terrain \
 	meshes/ctf-frost/canyon1.terrain \
 	meshes/ctf-frost/ice1.decal \
 	meshes/ctf-frost/ice2.decal \
@@ -635,6 +644,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-europa2k8.mus \
 	scripts/ctf-extermination.fog  \
 	scripts/ctf-extermination.mus \
+	scripts/ctf-extermination2k15.fog \
+	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
 	scripts/ctf-frost2k15.mus \
 	scripts/ctf-frostbyte.fog \

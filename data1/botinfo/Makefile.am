@@ -83,6 +83,7 @@ nobase_dist_botinfo_DATA = \
 	nav/aoa-zorn.nod \
 	nav/ctf-corrosion.nod \
 	nav/ctf-cryogenic.nod \
+	nav/ctf-extermination2k15.nod \
 	nav/ctf-frostbyte.nod \
 	nav/ctf-goregrinder.nod \
 	nav/ctf-invasion.nod \

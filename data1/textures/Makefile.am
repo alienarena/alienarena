@@ -988,6 +988,20 @@ nobase_dist_textures_DATA = \
 	common/weapclip.tga \
 	common/white.tga \
 	cr3blankclear.wal \
+	ctf-extermination/rubble1.tga \
+	ctf-extermination/rubble1_blendtex.tga \
+	ctf-extermination/rubble1_lightmaptex.tga \
+	ctf-extermination/rubble2.tga \
+	ctf-extermination/rubble2_blendtex.tga \
+	ctf-extermination/rubble2_lightmaptex.tga \
+	ctf-extermination/rubble3.tga \
+	ctf-extermination/rubble3_blendtex.tga \
+	ctf-extermination/rubble3_lightmaptex.tga \
+	ctf-extermination/rubble3_vegetation.tga \
+	ctf-extermination/rubble4.tga \
+	ctf-extermination/rubble4_blendtex.tga \
+	ctf-extermination/rubble4_lightmaptex.tga \
+	ctf-extermination/rubble4_vegetation.tga \
 	ctf-frost/canyon1.tga \
 	ctf-frost/canyon1_blendtex.tga \
 	ctf-frost/canyon1_lightmaptex.tga \

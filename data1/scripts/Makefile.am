@@ -16,6 +16,7 @@ nobase_dist_scripts_DATA = \
 	maps/ctf-corrosion.rscript \
 	maps/ctf-cryogenic.rscript \
 	maps/ctf-extermination.rscript \
+	maps/ctf-extermination2k15.rscript \
 	maps/ctf-frost2k15.rscript \
 	maps/ctf-frostbyte.rscript \
 	maps/ctf-goregrinder.rscript \
