@@ -3522,6 +3522,38 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			//dodging
 			client->dodge = false;
+			if (ucmd->buttons & BUTTON_LEANRIGHT)
+			{
+				AngleVectors (client->v_angle, NULL, right, NULL);
+				VectorScale (right, 32, ent->client->kick_origin);
+				client->kick_angles[ROLL] = client->lean = 45;
+			}		
+			if (ucmd->buttons & BUTTON_LEANLEFT)
+			{
+				AngleVectors (client->v_angle, NULL, right, NULL);
+				VectorScale (right, -32, ent->client->kick_origin);
+				client->kick_angles[ROLL] = client->lean = -45;
+			}
+			
+			if (ucmd->buttons & BUTTON_ZOOM)
+			{
+				if(level.time - client->zoomtime > FRAMETIME*10) //1 second delay between 
+				{
+					client->zoomed = !client->zoomed;
+					client->zoomtime = level.time;
+				}
+				if(client->zoomed)
+				{
+					client->ps.fov = 20;
+					ent->client->ps.stats[STAT_ZOOMED] = 1;
+				}
+				else
+				{
+					client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov"));
+					ent->client->ps.stats[STAT_ZOOMED] = 0;
+					ent->client->kick_angles[0] = -3; //just a little kick to refresh the draw
+				}
+			}			
 
 			if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false
 				&& client->keydown < 10 && ((level.time - client->lastmovetime) < .15))

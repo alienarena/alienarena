@@ -77,28 +77,18 @@ static void cleanup_float_string (char *str)
 
 enum Game_mode
 {
-#ifndef TACTICAL
 	mode_dm   = 0, 
 	mode_ctf  = 1, // team
-	mode_aoa  = 3,
-	mode_tca  = 4, // team
-	mode_duel = 5
-#else
-	mode_tac  = 0 // special team
-#endif
+	mode_tac  = 2, // team
+	mode_duel = 3
 };
 
 static const char *game_mode_names[] =
 {
-#ifndef TACTICAL
 	"deathmatch",        // 0 
 	"ctf",               // 1
-	"all out assault",   // 2
-	"team core assault", // 3
-	"duel",              // 4
-#else
-	"tactical",          // 0
-#endif
+	"tactical",          // 2
+	"duel",              // 3
 	NULL
 };
 #define num_game_modes (static_array_size(game_mode_names)-1)
@@ -106,19 +96,13 @@ static const char *game_mode_names[] =
 //same order as game_mode_names
 static const char *map_prefixes[num_game_modes][3] =
 {
-#ifndef TACTICAL
 	{"dm",  "tourney", NULL}, // 0
 	{"ctf", NULL,      NULL}, // 1
-	{"aoa", NULL,      NULL}, // 2
-	{"tca", NULL,      NULL}, // 3
-	{"dm",  "tourney", NULL}  // 4
-#else
-	{"tac", NULL,      NULL}  // 0
-#endif
+	{"tac", NULL,      NULL}, // 2
+	{"dm",  "tourney", NULL}  // 3
 };
 
 /*--------*/
-
 
 static int	m_main_cursor;
 
@@ -178,11 +162,7 @@ inline qboolean is_team_game( float rule_value )
 	int rv = (int)rule_value;
 	Com_DPrintf("[is_team_game: rule_value:  %i]\n", rule_value );
 
-#ifndef TACTICAL
-	return ( rv == mode_ctf || rv == mode_tca );
-#else
-	return false; /* tactical is a different kind of team */
-#endif
+	return ( rv == mode_ctf );
 }
 
 // common callbacks
@@ -1067,12 +1047,8 @@ void M_Main_Draw (menuvec2_t offset)
 	// When animating a transition away from the main menu, the background 
 	// slides away at double speed, disappearing and leaving just the menu 
 	// items themselves. Hence some things use offset.x*1.25.
-	
-#ifdef TACTICAL
-	Draw_StretchPic(offset.x*1.25, offset.y, viddef.width, viddef.height, "m_main_tactical");
-#else
+
 	Draw_StretchPic(offset.x*1.25, offset.y, viddef.width, viddef.height, "m_main");
-#endif
 
 	//draw the montage pics
 	mainalpha += cls.frametime; //fade image in
@@ -1242,9 +1218,9 @@ char *bindnames[][2] =
 {"+left",			"turn left (keyboard)"},
 {"+right",			"turn right (keyboard)"},
 
-{"+leanright",		"lean right (tactical)"},
-{"+leanleft",		"lean left (tactical)"},
-{"+zoom",			"zoom (tactical)"},
+{"+leanright",		"lean right"},
+{"+leanleft",		"lean left"},
+{"+zoom",			"zoom"},
 
 {"inven",			"inventory"},
 {"invuse",			"use item"},
@@ -3888,12 +3864,10 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 {
 	char *rLine;
 	char *token;
-#ifdef TACTICAL
 	char *token2;
 	char modstring[64];
 	qboolean isTactical;	
 	int i;
-#endif
 	char skillLevel[24];
 	char lasttoken[256];
 	char seps[]   = "\\";
@@ -3971,7 +3945,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 	
 	free (rLine);
 
-#ifdef TACTICAL
 	isTactical = false;
 
 	//Copy modstring over since strtok will modify it
@@ -3991,7 +3964,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 	}
 	if(!isTactical)
 		return false;
-#endif
 
 	//playerinfo
 	rankTotal = 0;
@@ -5193,30 +5165,19 @@ void StartServerActionFunc( void *self )
 	Cvar_SetValue( "deathmatch", 1 );
 
 	cvflags =  CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL;
-#ifndef TACTICAL
-	Cvar_FullSet( "ctf",    "0", cvflags );
-	Cvar_FullSet( "aoa",    "0", cvflags );
-	Cvar_FullSet( "tca",    "0", cvflags );
-	Cvar_FullSet( "g_duel", "0", cvflags );
-	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
-#else
-	Cvar_FullSet( "tac",    "0", cvflags );
-	Cvar_SetValue( "gamerules", (float)mode_tac );
-	Cvar_ForceSet( "g_tactical", "1" );
-#endif
 
-#ifndef TACTICAL
-	Cvar_ForceSet( "g_tactical", "0" );
+	Cvar_FullSet( "ctf",    "0", cvflags );
+	Cvar_FullSet( "g_duel", "0", cvflags );
+	Cvar_FullSet( "g_tactical", "0", cvflags );
+	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
+	
 	switch (s_rules_box.curvalue)
 	{
 		case mode_ctf:
 			Cvar_ForceSet( "ctf", "1" );
 			break;
-		case mode_aoa:
-			Cvar_ForceSet( "aoa", "1" );
-			break;
-		case mode_tca:
-			Cvar_ForceSet( "tca", "1" );
+		case mode_tac:
+			Cvar_ForceSet( "g_tactical", "1" );
 			break;
 		case mode_duel:
 			Cvar_ForceSet( "g_duel", "1" );
@@ -5224,12 +5185,10 @@ void StartServerActionFunc( void *self )
 		default:
 			break;
 	}
-#endif
 
 	Cbuf_AddText (va("startmap %s\n", startmap));
 	
 	M_ForceMenuOff ();
-
 }
 
 static void M_Menu_StartServer_f (void)
@@ -5353,9 +5312,8 @@ static void M_Menu_StartServer_f (void)
 	s_skill_box.curvalue = 1;
 	Menu_AddItem( &s_startserver_main_submenu, &s_skill_box );
 	
-#ifndef TACTICAL
+
 	add_action (s_startserver_menu, "Mutators", MutatorFunc, QMF_RIGHT_COLUMN);
-#endif
 	add_action (s_startserver_menu, "Bot Options", BotOptionsFunc, QMF_RIGHT_COLUMN);
 	add_action (s_startserver_menu, "Begin", StartServerActionFunc, QMF_RIGHT_COLUMN);
 	
@@ -6278,6 +6236,10 @@ ALIEN ARENA TACTICAL MENU
 =======================================================================
 */
 
+	
+//to do - allow for listen server to call this and host server
+//or - abort this entirely, and have an in-game way to join a team like we do in CTF
+
 static menuframework_s	s_tactical_screen;
 static menuaction_s		s_tactical_title_action;
 
@@ -6322,7 +6284,7 @@ static void TacticalJoinFunc ( void *item )
 	//set skin and model
 	Com_sprintf (buffer, sizeof(buffer), "%s/default", self->generic.localstrings[0]);
 	Cvar_Set ("skin", buffer);
-	
+
 	//join server
 	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[serverindex].local_server_netadr));
 	Cbuf_AddText (buffer);
