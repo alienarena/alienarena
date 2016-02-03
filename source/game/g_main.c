@@ -962,7 +962,7 @@ void CheckDMRules (void)
 		}
 		/* programming challenge: implement warmup for team games */
 	}
-	else
+	else 
 	{
 		if ( teamgame_cvar_state == -1 || teamgame_cvar_state == 1 )
 		{
@@ -975,50 +975,53 @@ void CheckDMRules (void)
 		 * note: broadcast sounds require first client to have sound info
 		 * whether or not first client is inuse (bot or not, also not important)
 		 */
-		if ( (warmup_state == 0) && (level.time <= warmuptime->value) )
-		{ /* start warmup countdown */
-			countdown_time = warmuptime->value - level.time;
-			warmup_state = (int)(ceil( countdown_time ));
+		if(!g_tactical->integer)
+		{
+			if ( (warmup_state == 0) && (level.time <= warmuptime->value) )
+			{ /* start warmup countdown */
+				countdown_time = warmuptime->value - level.time;
+				warmup_state = (int)(ceil( countdown_time ));
 
-		}
+			}
 
-		if ( warmup_state > 0 )
-		{ /* warmup in progress */
-			countdown_time = warmuptime->value - level.time;
-			if ( (float)warmup_state > ceil( countdown_time ) )
-			{ /* next state of countdown */
-				--warmup_state;
-				switch ( warmup_state )
-				{
-					case 3:
-						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/three.wav" ), 1, ATTN_NONE, 0 );
-						break;
-					case 2:
-						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/two.wav" ), 1, ATTN_NONE, 0 );
-						break;
-					case 1:
-						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/one.wav" ), 1, ATTN_NONE, 0 );
-						break;
-					case 0:
-						gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/fight.wav" ), 1, ATTN_NONE, 0 );
-						break;
-					default:
-						break;
-				}
-				if ( warmup_state > 0 )
-				{
-					for ( i = 1; i <= g_maxclients->integer; i++ )
+			if ( warmup_state > 0 )
+			{ /* warmup in progress */
+				countdown_time = warmuptime->value - level.time;
+				if ( (float)warmup_state > ceil( countdown_time ) )
+				{ /* next state of countdown */
+					--warmup_state;
+					switch ( warmup_state )
 					{
-						safe_centerprintf( &g_edicts[i], "%i...\n", warmup_state );
+						case 3:
+							gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/three.wav" ), 1, ATTN_NONE, 0 );
+							break;
+						case 2:
+							gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/two.wav" ), 1, ATTN_NONE, 0 );
+							break;
+						case 1:
+							gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/one.wav" ), 1, ATTN_NONE, 0 );
+							break;
+						case 0:
+							gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/fight.wav" ), 1, ATTN_NONE, 0 );
+							break;
+						default:
+							break;
 					}
-				}
-				else
-				{ /* end of warmup */
-					for ( i = 1; i <= g_maxclients->integer; i++ )
+					if ( warmup_state > 0 )
 					{
-						safe_centerprintf( &g_edicts[i], "FIGHT!\n" );
+						for ( i = 1; i <= g_maxclients->integer; i++ )
+						{
+							safe_centerprintf( &g_edicts[i], "%i...\n", warmup_state );
+						}
 					}
-					ResetLevel(false);
+					else
+					{ /* end of warmup */
+						for ( i = 1; i <= g_maxclients->integer; i++ )
+						{
+							safe_centerprintf( &g_edicts[i], "FIGHT!\n" );
+						}
+						ResetLevel(false);
+					}
 				}
 			}
 		}

@@ -1646,7 +1646,7 @@ void computer_think (edict_t *ent)
 	else
 		tacticalScore.humanComputerHealth = ent->health/15;
 
-	ent->s.frame = (ent->s.frame + 1) % 24;
+	ent->s.frame = (ent->s.frame + 1) % 39;
 	ent->nextthink = level.time + FRAMETIME;
 }
 
@@ -1759,7 +1759,7 @@ void powersrc_think (edict_t *ent)
 		tacticalScore.alienPowerSourceHealth = ent->health/15;
 	else
 		tacticalScore.humanPowerSourceHealth = ent->health/15;
-	ent->s.frame = (ent->s.frame + 1) % 24;
+	ent->s.frame = (ent->s.frame + 1) % 39;
 	ent->nextthink = level.time + FRAMETIME;
 }
 

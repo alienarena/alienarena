@@ -73,12 +73,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * USER_GAMEDATA : the user home subdirectory.
  */
 #define BASE_GAMEDATA "data1"
-
-#if defined TACTICAL
-# define GAME_GAMEDATA "tactical"
-#else
-# define GAME_GAMEDATA "arena"
-#endif
+#define GAME_GAMEDATA "arena"
 
 #ifdef UNIX_VARIANT
 # define USER_GAMEDATA "cor-games"

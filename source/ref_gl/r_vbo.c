@@ -146,7 +146,6 @@ static int VB_AddWorldSurfaceToOutlineIBO (msurface_t *surf, int currIndexNum)
 	int		i;
 	int		n;
 	int		baseidx;
-	int		trinum;
 	unsigned int	map[MAX_VBO_XYZs];
 	
 	n = 0;
