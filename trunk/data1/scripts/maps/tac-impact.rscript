@@ -1,3 +1,59 @@
+rubble1_texture
+{	
+	{
+		map textures/tac-impact/rubble1_blendtex.tga	
+		blendmap 3			
+			100 textures/arena10/heap4.tga			
+			100 textures/arena10/heap2.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 3 
+			0 textures/arena10/heap4_nm.tga
+			1 textures/arena10/heap2_nm.tga	
+			2 textures/texturelib/ground_0045_nm.tga			
+	}
+}
+rubble2_texture
+{	
+	{
+		map textures/tac-impact/rubble2_blendtex.tga	
+		blendmap 3			
+			100 textures/arena10/heap4.tga			
+			100 textures/arena10/heap2.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 3 
+			0 textures/arena10/heap4_nm.tga
+			1 textures/arena10/heap2_nm.tga	
+			2 textures/texturelib/ground_0045_nm.tga			
+	}
+}
+rubble3_texture
+{	
+	{
+		map textures/tac-impact/rubble3_blendtex.tga	
+		blendmap 3			
+			100 textures/arena10/heap4.tga			
+			100 textures/arena10/heap2.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 3 
+			0 textures/arena10/heap4_nm.tga
+			1 textures/arena10/heap2_nm.tga	
+			2 textures/texturelib/ground_0045_nm.tga			
+	}
+}
+rubble4_texture
+{	
+	{
+		map textures/tac-impact/rubble4_blendtex.tga	
+		blendmap 3			
+			100 textures/arena10/heap4.tga			
+			100 textures/arena10/heap2.tga		
+			200 textures/texturelib/ground_0045.jpg		
+		blendnormalmap 3 
+			0 textures/arena10/heap4_nm.tga
+			1 textures/arena10/heap2_nm.tga	
+			2 textures/texturelib/ground_0045_nm.tga			
+	}
+}
 textures/arena9/roundlight
 {
 	{
