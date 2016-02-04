@@ -24616,7 +24616,7 @@
 "origin" "2171.999512 168.038620 167.999985"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angles" "-0.000000 -179.446716 -81.698555"
-"spawnflags" "1"
+"spawnflags" "34"
 }
 // entity 148
 {
@@ -24624,7 +24624,7 @@
 "origin" "2068.000000 88.000000 128.000000"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angles" "-0.000000 0.000000 -81.698555"
-"spawnflags" "1"
+"spawnflags" "34"
 }
 // entity 149
 {
@@ -24666,7 +24666,7 @@
 "origin" "2539.999512 208.038620 167.999985"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angles" "-0.000000 -179.446716 -81.698555"
-"spawnflags" "1"
+"spawnflags" "34"
 }
 // entity 153
 {
@@ -24674,7 +24674,7 @@
 "origin" "2683.999512 -815.961365 167.999985"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angles" "-0.000000 -179.446716 -81.698555"
-"spawnflags" "1"
+"spawnflags" "35"
 }
 // entity 154
 {
@@ -24727,7 +24727,7 @@
 "origin" "2011.999878 -791.999817 160.000000"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angle" "-179.999985"
-"spawnflags" "1"
+"spawnflags" "34"
 }
 // entity 162
 {
@@ -24759,7 +24759,7 @@
 "origin" "1778.003418 -803.165039 160.000000"
 "model" "maps/meshes/tech/slimetube1.md2"
 "angle" "2.362448"
-"spawnflags" "1"
+"spawnflags" "34"
 }
 // entity 165
 {
@@ -24836,7 +24836,7 @@
 }
 // entity 176
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_shotgun"
 "origin" "1880.000000 -1368.000000 288.000000"
 }
 // entity 177
