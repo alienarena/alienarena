@@ -336,6 +336,8 @@ nobase_dist_levelshots_DATA = \
 	dm-zion2k9.txt \
 	tac-extermination2k15.jpg \
 	tac-extermination2k15.txt \
+	tac-impact.jpg \
+	tac-impact.txt \
 	tca-corrosion.jpg \
 	tca-corrosion.txt \
 	tca-cryogenic.jpg \

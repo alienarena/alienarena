@@ -622,6 +622,14 @@ nobase_dist_maps_DATA = \
 	meshes/spintube.md2 \
 	meshes/spintube_normal.jpg \
 	meshes/straightconduit.md2 \
+	meshes/tac-impact/blood0.decal \
+	meshes/tac-impact/blood1.decal \
+	meshes/tac-impact/blood2.decal \
+	meshes/tac-impact/blood3.decal \
+	meshes/tac-impact/rubble1.terrain \
+	meshes/tac-impact/rubble2.terrain \
+	meshes/tac-impact/rubble3.terrain \
+	meshes/tac-impact/rubble4.terrain \
 	meshes/tech/bigribtube.jpg \
 	meshes/tech/bigribtube_normal.jpg \
 	meshes/tech/biotubebase.jpg \

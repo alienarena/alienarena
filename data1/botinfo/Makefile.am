@@ -76,6 +76,7 @@ nobase_dist_botinfo_DATA = \
 	dm-zion2k9.tmp \
 	dm-zorn2k11.tmp \
 	tac-extermination2k15.tmp \
+	tac-impact.tmp \
 	nav/aoa-atlantis.nod \
 	nav/aoa-corrosion.nod \
 	nav/aoa-frost2k9.nod \
