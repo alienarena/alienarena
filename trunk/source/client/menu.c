@@ -3864,10 +3864,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 {
 	char *rLine;
 	char *token;
-	char *token2;
-	char modstring[64];
-	qboolean isTactical;	
-	int i;
 	char skillLevel[24];
 	char lasttoken[256];
 	char seps[]   = "\\";
@@ -3944,26 +3940,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 	}	
 	
 	free (rLine);
-
-	isTactical = false;
-
-	//Copy modstring over since strtok will modify it
-	Q_strncpyz(modstring, destserver->modInfo, sizeof(modstring));
-	
-	// populate all the data
-	token2 = strtok(modstring, "%%");
-	for (i = 0; i < MAX_SERVER_MODS; i++) 
-	{
-		if (!token2)
-			break;
-
-		if(!strcmp("g_tactical", token2))
-			isTactical = true;
-
-		token2 = strtok(NULL, "%%");
-	}
-	if(!isTactical)
-		return false;
 
 	//playerinfo
 	rankTotal = 0;
