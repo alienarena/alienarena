@@ -68,7 +68,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-wasteland.rscript \
 	maps/dm-zorn2k11.rscript \
 	maps/dm-zion2k9.rscript \
-	maps/tac-extermination.rscript \
+	maps/tac-extermination2k15.rscript \
 	maps/tac-impact.rscript \
 	maps/tca-corrosion.rscript \
 	maps/tca-cryogenic.rscript \

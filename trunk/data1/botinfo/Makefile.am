@@ -75,7 +75,7 @@ nobase_dist_botinfo_DATA = \
 	dm-wasteland.tmp \
 	dm-zion2k9.tmp \
 	dm-zorn2k11.tmp \
-	tac-extermination.tmp \
+	tac-extermination2k15.tmp \
 	nav/aoa-atlantis.nod \
 	nav/aoa-corrosion.nod \
 	nav/aoa-frost2k9.nod \
@@ -132,7 +132,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-wasteland.nod \
 	nav/dm-zion2k9.nod \
 	nav/dm-zorn2k11.nod \
-	nav/tac-extermination.nod \
+	nav/tac-extermination2k15.nod \
 	nav/tca-corrosion.nod \
 	nav/tca-cryogenic.nod \
 	nav/tca-invasion.nod \

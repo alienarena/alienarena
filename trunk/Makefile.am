@@ -43,8 +43,7 @@ endif
 if ICONS_INSTALL
 unixiconsdir=$(datadir)/icons/alienarena
 dist_unixicons_DATA = \
-	unix_dist/alienarena.png \
-	unix_dist/aa-tactical-demo.png
+	unix_dist/alienarena.png
 endif
 
 #
@@ -56,16 +55,6 @@ dist_arena_DATA = \
 	arena/server.cfg \
 	arena/default.cfg \
 	arena/maps.lst
-
-#
-# TACTICAL-DEMO Default configuration for client and server
-#
-tacticaldir=$(pkgdatadir)/tactical
-dist_tactical_DATA = \
-	tactical/motd.txt \
-	tactical/server.cfg \
-	tactical/default.cfg \
-	tactical/maps.lst
 
 # FUSE game server browser and Server management scripts
 # todo: verify/update scripts. deprecate fuse.

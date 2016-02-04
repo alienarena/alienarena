@@ -299,8 +299,7 @@ nobase_dist_maps_DATA = \
 	dm-wasteland.bsp \
 	dm-zorn2k11.bsp \
 	dm-zion2k9.bsp \
-	tac-extermination.bsp \
-	tac-extermination.lightmap \
+	tac-extermination2k15.bsp \
 	tac-impact.bsp \
 	tca-corrosion.bsp \
 	tca-corrosion.lightmap \
@@ -951,8 +950,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-zorn2k11.fog \
 	scripts/dm-zorn2k11.mus \
 	scripts/dm-zion2k9.mus \
-	scripts/tac-extermination.fog \
-	scripts/tac-extermination.mus \
+	scripts/tac-extermination2k15.fog \
+	scripts/tac-extermination2k15.mus \
 	scripts/tac-impact.fog \
 	scripts/tac-impact.mus \
 	scripts/tca-corrosion.fog \

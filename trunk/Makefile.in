@@ -101,11 +101,10 @@ subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(top_srcdir)/config/config.h.in $(dist_arena_DATA) \
-	$(dist_tactical_DATA) $(am__dist_unixdoc_DATA_DIST) \
-	$(am__dist_unixicons_DATA_DIST) config/compile \
-	config/config.guess config/config.sub config/depcomp \
-	config/install-sh config/missing $(top_srcdir)/config/compile \
-	$(top_srcdir)/config/config.guess \
+	$(am__dist_unixdoc_DATA_DIST) $(am__dist_unixicons_DATA_DIST) \
+	config/compile config/config.guess config/config.sub \
+	config/depcomp config/install-sh config/missing \
+	$(top_srcdir)/config/compile $(top_srcdir)/config/config.guess \
 	$(top_srcdir)/config/config.sub \
 	$(top_srcdir)/config/install-sh $(top_srcdir)/config/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -174,14 +173,12 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" \
-	"$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"
+am__installdirs = "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(unixdocdir)" \
+	"$(DESTDIR)$(unixiconsdir)"
 am__dist_unixdoc_DATA_DIST = unix_dist/README unix_dist/COPYING \
 	unix_dist/INSTALL unix_dist/GPLv2 unix_dist/NEWS
-am__dist_unixicons_DATA_DIST = unix_dist/alienarena.png \
-	unix_dist/aa-tactical-demo.png
-DATA = $(dist_arena_DATA) $(dist_tactical_DATA) $(dist_unixdoc_DATA) \
-	$(dist_unixicons_DATA)
+am__dist_unixicons_DATA_DIST = unix_dist/alienarena.png
+DATA = $(dist_arena_DATA) $(dist_unixdoc_DATA) $(dist_unixicons_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -401,8 +398,7 @@ ACLOCAL_AMFLAGS = -I m4
 #
 @ICONS_INSTALL_TRUE@unixiconsdir = $(datadir)/icons/alienarena
 @ICONS_INSTALL_TRUE@dist_unixicons_DATA = \
-@ICONS_INSTALL_TRUE@	unix_dist/alienarena.png \
-@ICONS_INSTALL_TRUE@	unix_dist/aa-tactical-demo.png
+@ICONS_INSTALL_TRUE@	unix_dist/alienarena.png
 
 
 #
@@ -414,17 +410,6 @@ dist_arena_DATA = \
 	arena/server.cfg \
 	arena/default.cfg \
 	arena/maps.lst
-
-
-#
-# TACTICAL-DEMO Default configuration for client and server
-#
-tacticaldir = $(pkgdatadir)/tactical
-dist_tactical_DATA = \
-	tactical/motd.txt \
-	tactical/server.cfg \
-	tactical/default.cfg \
-	tactical/maps.lst
 
 all: all-recursive
 
@@ -499,27 +484,6 @@ uninstall-dist_arenaDATA:
 	@list='$(dist_arena_DATA)'; test -n "$(arenadir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(arenadir)'; $(am__uninstall_files_from_dir)
-install-dist_tacticalDATA: $(dist_tactical_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(tacticaldir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(tacticaldir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(tacticaldir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(tacticaldir)" || exit $$?; \
-	done
-
-uninstall-dist_tacticalDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_tactical_DATA)'; test -n "$(tacticaldir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(tacticaldir)'; $(am__uninstall_files_from_dir)
 install-dist_unixdocDATA: $(dist_unixdoc_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_unixdoc_DATA)'; test -n "$(unixdocdir)" || list=; \
@@ -858,7 +822,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(tacticaldir)" "$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"; do \
+	for dir in "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(unixdocdir)" "$(DESTDIR)$(unixiconsdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -912,8 +876,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_arenaDATA install-dist_tacticalDATA \
-	install-dist_unixdocDATA install-dist_unixiconsDATA
+install-data-am: install-dist_arenaDATA install-dist_unixdocDATA \
+	install-dist_unixiconsDATA
 
 install-dvi: install-dvi-recursive
 
@@ -959,8 +923,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_arenaDATA uninstall-dist_tacticalDATA \
-	uninstall-dist_unixdocDATA uninstall-dist_unixiconsDATA
+uninstall-am: uninstall-dist_arenaDATA uninstall-dist_unixdocDATA \
+	uninstall-dist_unixiconsDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -972,16 +936,15 @@ uninstall-am: uninstall-dist_arenaDATA uninstall-dist_tacticalDATA \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dist_arenaDATA \
-	install-dist_tacticalDATA install-dist_unixdocDATA \
-	install-dist_unixiconsDATA install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-dist_arenaDATA \
-	uninstall-dist_tacticalDATA uninstall-dist_unixdocDATA \
+	install-dist_unixdocDATA install-dist_unixiconsDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-dist_arenaDATA uninstall-dist_unixdocDATA \
 	uninstall-dist_unixiconsDATA
 
 
