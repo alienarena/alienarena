@@ -1756,6 +1756,20 @@ nobase_dist_textures_DATA = \
 	ramp1.wal \
 	rigel/baselightblue.tga \
 	rigel/baselightred.tga \
+	tac-impact/rubble1.tga \
+	tac-impact/rubble1_blendtex.tga \
+	tac-impact/rubble1_lightmaptex.tga \
+	tac-impact/rubble1_vegetation.tga \
+	tac-impact/rubble2.tga \
+	tac-impact/rubble2_blendtex.tga \
+	tac-impact/rubble2_lightmaptex.tga \
+	tac-impact/rubble3.tga \
+	tac-impact/rubble3_blendtex.tga \
+	tac-impact/rubble3_lightmaptex.tga \
+	tac-impact/rubble3_vegetation.tga \
+	tac-impact/rubble4.tga \
+	tac-impact/rubble4_blendtex.tga \
+	tac-impact/rubble4_lightmaptex.tga \
 	texturelib/grass_0048.jpg \
 	texturelib/grass_0075.jpg \
 	texturelib/grass_0099.jpg \

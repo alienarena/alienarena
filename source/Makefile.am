@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DCOR_DATADIR='"$(pkgdatadir)"' -I$(top_srcdir)/source/include
 #
 bin_PROGRAMS = alienarena-ded
 if BUILD_CLIENT
-bin_PROGRAMS += alienarena  aa-tactical-demo
+bin_PROGRAMS += alienarena
 endif
 
 
@@ -51,33 +51,6 @@ alienarena_CFLAGS = \
 
 
 alienarena_LDADD = libgame.a \
-	$(PTHREAD_LIBS) \
-	$(X11_LIBS) \
-	$(XXF86VM_LIBS) \
-	$(XXF86DGA_LIBS) \
-	$(LIBCURL_LIBS) \
-	$(OGG_LIBS) \
-	$(VORBIS_LIBS) \
-	$(FREETYPE2_LIBS) \
-	$(ODE_LIBS) \
-	$(ZLIB_LIBS)
-
-
-aa_tactical_demo_CFLAGS = -DTACTICAL  \
-	$(AM_CPPFLAGS) \
-	$(PTHREAD_CFLAGS) \
-	$(X11_CFLAGS) \
-	$(XXF86VM_CFLAGS) \
-	$(XXF86DGA_CFLAGS) \
-	$(LIBCURL_CFLAGS) \
-	$(OGG_CFLAGS) \
-	$(VORBIS_CFLAGS) \
-	$(FREETYPE2_CFLAGS) \
-	$(ODE_CFLAGS) \
-	$(ZLIB_CFLAGS)
-
-
-aa_tactical_demo_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
 	$(XXF86VM_LIBS) \
@@ -211,10 +184,6 @@ alienarena_SOURCES = \
 	unix/rw_unix.h \
 	unix/sys_unix.c \
 	unix/vid_so.c
-
-
-# Tactical Demo Client
-aa_tactical_demo_SOURCES = $(alienarena_SOURCES)
 
 
 # Dedicated Server

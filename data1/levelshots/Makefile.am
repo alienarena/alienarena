@@ -123,8 +123,8 @@ nobase_dist_levelshots_DATA = \
 	dm-zorn2k11.txt \
 	dm-zion2k9.jpg \
 	dm-zion2k9.txt \
-	tac-extermination.jpg \
-	tac-extermination.txt \
+	tac-extermination2k15.jpg \
+	tac-extermination2k15.txt \
 	tca-corrosion.jpg \
 	tca-corrosion.txt \
 	tca-cryogenic.jpg \
