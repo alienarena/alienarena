@@ -61,6 +61,15 @@ players/martianoverlord/red
 		glow
 	}
 }
+players/martianwarrior/gamara
+{
+	{
+		map players/martianwarrior/gamara_normal.tga
+		normalmap
+		map2 gfx/gamarafx.tga
+		glow
+	}
+}
 players/martianoverlord/default
 {
 	{
@@ -1266,7 +1275,7 @@ maps/meshes/tech/slimegenblue
 maps/meshes/tech/redribtube
 {
 	{
-		map maps/meshes/tech/bigribtube_normal.jpg
+		map maps/meshes/tech/redribtube_normal.jpg
 		normalmap
 		map2 maps/meshes/tech/redribtube_fx.tga
 		glow
@@ -1275,7 +1284,7 @@ maps/meshes/tech/redribtube
 maps/meshes/tech/blueribtube
 {
 	{
-		map maps/meshes/tech/bigribtube_normal.jpg
+		map maps/meshes/tech/redribtube_normal.jpg
 		normalmap
 		map2 maps/meshes/tech/blueribtube_fx.tga
 		glow
