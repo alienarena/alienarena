@@ -23769,13 +23769,13 @@
 "spawnflags" "64"
 "origin" "2456.000000 160.000000 40.000000"
 "angle" "-135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 22
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "2536.000000 128.000000 40.000000"
 }
@@ -23926,7 +23926,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "1440.000000 -1072.000000 32.000000"
 }
@@ -23960,7 +23960,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "416.000000 -368.000000 8.000000"
 }
@@ -23970,7 +23970,7 @@
 "spawnflags" "64"
 "origin" "416.000000 -304.000000 8.000000"
 "angle" "-135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 52
 {
@@ -24403,7 +24403,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "552.000000 -1616.000000 16.000000"
 }
@@ -24411,7 +24411,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "536.000000 -1536.000000 16.000000"
 }
@@ -24471,7 +24471,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "524.000000 260.000000 12.000000"
 }
@@ -24487,7 +24487,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-172.803543"
 "origin" "230.387711 191.291351 12.000000"
 }
@@ -24503,7 +24503,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "origin" "360.000000 664.003967 24.039043"
 "angles" "-44.999981 179.944061 90.079109"
 }
@@ -24527,7 +24527,7 @@
 {
 "classname" "misc_mapmodel"
 "spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-45.000000"
 "origin" "-604.000000 707.999939 12.000000"
 }

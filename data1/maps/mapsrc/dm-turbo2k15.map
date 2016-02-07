@@ -31363,7 +31363,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "1172.000000 -478.000000 10.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 156
 {
@@ -31406,14 +31406,14 @@
 {
 "classname" "misc_mapmodel"
 "origin" "786.000000 90.000122 10.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "99.784828"
 }
 // entity 162
 {
 "classname" "misc_mapmodel"
 "origin" "761.999878 34.000011 10.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "171.331680"
 }
 // entity 163

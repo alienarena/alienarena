@@ -13854,7 +13854,7 @@
 "classname" "misc_mapmodel"
 "origin" "720 856 8"
 "angle" "225"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 76
 {
@@ -14034,7 +14034,7 @@
 // entity 99
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "225"
 "origin" "-484 848 264"
 }
