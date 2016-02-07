@@ -669,6 +669,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/redribtube.jpg \
 	meshes/tech/redribtube1.md2 \
 	meshes/tech/redribtube_fx.tga \
+	meshes/tech/redribtube_normal.jpg \
 	meshes/tech/ribtubebig1.md2 \
 	meshes/tech/ribtubebig10.md2 \
 	meshes/tech/ribtubebig11.md2 \
@@ -720,7 +721,7 @@ nobase_dist_maps_DATA = \
 	meshes/test/martian.jpg \
 	meshes/test/martian_normal.tga \
 	meshes/test/martian_fx.tga \
-	meshes/toxicbarrell.jpg \
+	meshes/toxicbarrell.tga \
 	meshes/toxicbarrell.md2 \
 	meshes/toxicbarrell_normal.jpg \
 	meshes/tubecover.md2 \
