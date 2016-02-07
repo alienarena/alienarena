@@ -486,6 +486,9 @@ nobase_dist_players_DATA = \
 	martianwarrior/drown1.wav \
 	martianwarrior/fall1.wav \
 	martianwarrior/fall2.wav \
+	martianwarrior/gamara.jpg \
+	martianwarrior/gamara_i.jpg \
+	martianwarrior/gamara_normal.tga \
 	martianwarrior/gasp1.wav \
 	martianwarrior/gasp2.wav \
 	martianwarrior/gurp1.wav \
