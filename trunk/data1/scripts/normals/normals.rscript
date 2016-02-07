@@ -3,7 +3,7 @@ players/martianenforcer/red
 	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
-		map2 gfx/defaultmartianfx.tga
+		map2 players/martianenforcer/defaultmartianfx.tga
 		glow
 	}
 }
@@ -12,7 +12,7 @@ players/martianenforcer/default
 	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
-		map2 gfx/defaultmartianfx.tga
+		map2 players/martianenforcer/defaultmartianfx.tga
 		glow
 	}
 }
@@ -21,7 +21,7 @@ players/martianenforcer/blue
 	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
-		map2 gfx/bluemartianfx.tga
+		map2 players/martianenforcer/bluemartianfx.tga
 		glow
 	}	
 }
@@ -30,7 +30,7 @@ players/martianwarrior/red
 	{
 		map players/martianwarrior/default_normal.tga
 		normalmap
-		map2 gfx/defaultwarriorfx.tga
+		map2 players/martianwarrior/defaultwarriorfx.tga
 		glow
 	}
 }
@@ -39,7 +39,7 @@ players/martianwarrior/default
 	{
 		map players/martianwarrior/default_normal.tga
 		normalmap
-		map2 gfx/defaultwarriorfx.tga
+		map2 players/martianwarrior/defaultwarriorfx.tga
 		glow
 	}
 }
@@ -48,25 +48,25 @@ players/martianwarrior/blue
 	{
 		map players/martianwarrior/default_normal.tga
 		normalmap
-		map2 gfx/bluewarriorfx.tga
+		map2 players/martianwarrior/bluewarriorfx.tga
 		glow
 	}	
-}
-players/martianoverlord/red
-{
-	{
-		map players/martianoverlord/default_normal.tga
-		normalmap
-		map2 gfx/defaultoverlordfx.tga
-		glow
-	}
 }
 players/martianwarrior/gamara
 {
 	{
 		map players/martianwarrior/gamara_normal.tga
 		normalmap
-		map2 gfx/gamarafx.tga
+		map2 players/martianwarrior/gamarafx.tga
+		glow
+	}
+}
+players/martianoverlord/red
+{
+	{
+		map players/martianoverlord/default_normal.tga
+		normalmap
+		map2 players/martianoverlord/defaultoverlordfx.tga
 		glow
 	}
 }
@@ -75,7 +75,7 @@ players/martianoverlord/default
 	{
 		map players/martianoverlord/default_normal.tga
 		normalmap
-		map2 gfx/defaultoverlordfx.tga
+		map2 players/martianoverlord/defaultoverlordfx.tga
 		glow
 	}
 }
@@ -84,7 +84,7 @@ players/martianoverlord/blue
 	{
 		map players/martianoverlord/default_normal.tga
 		normalmap
-		map2 gfx/blueoverlordfx.tga
+		map2 players/martianoverlord/blueoverlordfx.tga
 		glow
 	}	
 }
@@ -93,7 +93,7 @@ players/enforcer/default
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
-		map2 gfx/defaultenforcerfx.tga
+		map2 players/enforcer/defaultenforcerfx.tga
 		glow
 	}	
 }
@@ -102,7 +102,7 @@ players/enforcer/red
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
-		map2 gfx/defaultenforcerfx.tga
+		map2 players/enforcer/defaultenforcerfx.tga
 		glow
 	}	
 }
@@ -111,7 +111,7 @@ players/enforcer/blue
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
-		map2 gfx/blueenforcerfx.tga
+		map2 players/enforcer/blueenforcerfx.tga
 		glow
 	}	
 }
@@ -120,7 +120,7 @@ players/martiancyborg/blue
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
-		map2 gfx/bluecyborgfx.tga
+		map2 players/martiancyborg/bluecyborgfx.tga
 		glow
 	}	
 }
@@ -129,7 +129,7 @@ players/martiancyborg/red
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
-		map2 gfx/defaultcyborgfx.tga
+		map2 players/martiancyborg/defaultcyborgfx.tga
 		glow
 	}	
 }
@@ -138,7 +138,7 @@ players/martiancyborg/default
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
-		map2 gfx/defaultcyborgfx.tga
+		map2 players/martiancyborg/defaultcyborgfx.tga
 		glow
 	}	
 }
@@ -147,7 +147,7 @@ players/lauren/blue
 	{
 		map players/lauren/default_normal.tga
 		normalmap
-		map2 gfx/bluelaurenfx.tga
+		map2 players/lauren/bluelaurenfx.tga
 		glow
 	}	
 }
@@ -156,7 +156,7 @@ players/lauren/red
 	{
 		map players/lauren/default_normal.tga
 		normalmap
-		map2 gfx/defaultlaurenfx.tga
+		map2 players/lauren/defaultlaurenfx.tga
 		glow
 	}	
 }
@@ -165,7 +165,7 @@ players/lauren/default
 	{
 		map players/lauren/default_normal.tga
 		normalmap
-		map2 gfx/defaultlaurenfx.tga
+		map2 players/lauren/defaultlaurenfx.tga
 		glow
 	}	
 }
@@ -174,7 +174,7 @@ players/slashbot/red
 	{
 		map players/slashbot/default_normal.jpg
 		normalmap
-		map2 gfx/defaultslashbotfx.tga
+		map2 players/slashbot/defaultslashbotfx.tga
 		glow
 	}
 }
@@ -183,7 +183,7 @@ players/slashbot/default
 	{
 		map players/slashbot/default_normal.jpg
 		normalmap
-		map2 gfx/defaultslashbotfx.tga
+		map2 players/slashbot/defaultslashbotfx.tga
 		glow
 	}
 }
@@ -192,7 +192,7 @@ players/slashbot/blue
 	{
 		map players/slashbot/default_normal.jpg
 		normalmap
-		map2 gfx/defaultslashbotfx.tga
+		map2 players/slashbot/defaultslashbotfx.tga
 		glow
 	}	
 }
@@ -201,7 +201,7 @@ players/commander/blue
 	{
 		map players/commander/default_normal.tga
 		normalmap
-		map2 gfx/defaultcommanderfx.tga
+		map2 players/commander/defaultcommanderfx.tga
 		glow
 	}	
 }
@@ -210,7 +210,7 @@ players/commander/red
 	{
 		map players/commander/default_normal.tga
 		normalmap
-		map2 gfx/defaultcommanderfx.tga
+		map2 players/commander/defaultcommanderfx.tga
 		glow
 	}	
 }
@@ -219,7 +219,7 @@ players/commander/default
 	{
 		map players/commander/default_normal.tga
 		normalmap
-		map2 gfx/defaultcommanderfx.tga
+		map2 players/commander/defaultcommanderfx.tga
 		glow
 	}	
 }
@@ -228,7 +228,7 @@ players/rustbot/red
 	{
 		map players/rustbot/default_normal.tga
 		normalmap
-		map2 gfx/redrustbotfx.tga
+		map2 players/rustbot/redrustbotfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -239,7 +239,7 @@ players/rustbot/default
 	{
 		map players/rustbot/default_normal.tga
 		normalmap
-		map2 gfx/defaultrustbotfx.tga
+		map2 players/rustbot/defaultrustbotfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -250,7 +250,7 @@ players/rustbot/blue
 	{
 		map players/rustbot/default_normal.tga
 		normalmap
-		map2 gfx/defaultrustbotfx.tga
+		map2 players/rustbot/defaultrustbotfx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
