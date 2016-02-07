@@ -25242,7 +25242,7 @@
 // entity 4
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "272 -192 24"
 "spawnflags" "64"
@@ -25278,7 +25278,7 @@
 // entity 9
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "-352 -192 24"
 "spawnflags" "64"
@@ -25747,7 +25747,7 @@
 "spawnflags" "64"
 "origin" "2040.000000 -896.000000 -376.000000"
 "angle" "135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 43
 {
@@ -25919,7 +25919,7 @@
 "spawnflags" "64"
 "origin" "2296.000000 294.000000 -360.000000"
 "angle" "-135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 70
 {
@@ -26009,7 +26009,7 @@
 // entity 82
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "135.000000"
 "origin" "768.000000 175.000000 -248.000000"
 "spawnflags" "64"
@@ -26020,7 +26020,7 @@
 "spawnflags" "64"
 "origin" "617.000000 414.000000 -248.000000"
 "angle" "-135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 84
 {
@@ -26086,7 +26086,7 @@
 // entity 93
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "1296.000000 744.000000 -248.000000"
 "spawnflags" "64"
@@ -26780,7 +26780,7 @@
 "spawnflags" "64"
 "origin" "-2120.000000 -896.000000 -376.000031"
 "angle" "135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 189
 {
@@ -26952,7 +26952,7 @@
 "spawnflags" "64"
 "origin" "-2376.000000 294.000000 -360.000000"
 "angle" "-135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 216
 {
@@ -27044,7 +27044,7 @@
 // entity 228
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "135.000000"
 "origin" "-848.000122 175.000000 -248.000015"
 "spawnflags" "64"
@@ -27055,7 +27055,7 @@
 "spawnflags" "64"
 "origin" "-697.000122 414.000000 -248.000015"
 "angle" "-135.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 }
 // entity 230
 {
@@ -27097,7 +27097,7 @@
 // entity 236
 {
 "classname" "misc_mapmodel"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angle" "-135.000000"
 "origin" "-1376.000000 744.000000 -248.000015"
 "spawnflags" "64"

@@ -1168,6 +1168,13 @@ maps/meshes/toxicbarrell
 		normalmap
 	}
 }
+maps/meshes/toxicbarrell2
+{
+	{
+		map maps/meshes/toxicbarrell2_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/gothic/skeleton
 {
 	{

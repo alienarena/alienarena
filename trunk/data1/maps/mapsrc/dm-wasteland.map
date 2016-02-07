@@ -7599,7 +7599,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "-1544.000000 -516.000000 14.000000"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "spawnflags" "1"
 }
 // entity 40
@@ -7668,7 +7668,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "-864.000000 -1736.000000 7.999997"
-"model" "maps/meshes/toxicbarrell.md2"
+"model" "maps/meshes/toxicbarrell2.md2"
 "angles" "-5.416494 -66.123932 -2.392605"
 }
 // entity 49
@@ -8656,4 +8656,19 @@
 "origin" "542.000000 75.999992 38.000015"
 "model" "maps/meshes/gothic/skull1.md2"
 "angles" "-25.647814 115.651253 0.000000"
+}
+// entity 200
+{
+"classname" "item_quad"
+"origin" "480.000000 672.000000 592.000000"
+}
+// entity 201
+{
+"classname" "item_health_large"
+"origin" "-624.000000 240.000000 1120.000000"
+}
+// entity 202
+{
+"classname" "item_health_large"
+"origin" "-768.000000 280.000000 1120.000000"
 }
