@@ -22,14 +22,8 @@ nobase_dist_gfx_DATA = \
 	blasterfx.tga \
 	blooddrops.jpg \
 	blooddrops_nm.jpg \
-	bluecyborgfx.tga \
-	blueenforcerfx.tga \
-	bluelaurenfx.tga \
 	bluelightning2.tga \
 	bluelightning.tga \
-	bluemartianfx.tga \
-	blueoverlordfx.tga \
-	bluewarriorfx.tga \
 	bubbles.tga \
 	bush1.tga \
 	bush2.tga \
@@ -43,15 +37,6 @@ nobase_dist_gfx_DATA = \
 	comp1.tga \
 	comp2.tga \
 	cpribeyereflection.tga \
-	defaultcommanderfx.tga \
-	defaultcyborgfx.tga \
-	defaultenforcerfx.tga \
-	defaultlaurenfx.tga \
-	defaultmartianfx.tga \
-	defaultoverlordfx.tga \
-	defaultrustbotfx.tga \
-	defaultslashbotfx.tga \
-	defaultwarriorfx.tga \
 	disruptorfx.tga \
 	disruptormask.tga \
 	distortwave.jpg \
@@ -81,7 +66,6 @@ nobase_dist_gfx_DATA = \
 	flares/flare2.tga \
 	flash_noise.jpg \
 	flash.tga \
-	gamarafx.tga \
 	glightning.tga \
 	gold.tga \
 	grapplefx.tga \
@@ -125,7 +109,6 @@ nobase_dist_gfx_DATA = \
 	rayfx.tga \
 	redcircuit.tga \
 	redlightning.tga \
-	redrustbotfx.tga \
 	reflect.tga \
 	rlauncherfx.tga \
 	r_lightning.tga \

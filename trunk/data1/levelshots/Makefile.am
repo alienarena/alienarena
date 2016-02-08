@@ -5,139 +5,25 @@
 levelshotsdir=$(pkgdatadir)/data1/levelshots
 
 nobase_dist_levelshots_DATA = \
-	aoa-atlantis.jpg \
-	aoa-atlantis.txt \
-	aoa-corrosion.jpg \
-	aoa-corrosion.txt \
-	aoa-frost2k9.jpg \
-	aoa-frost2k9.txt \
-	aoa-morpheus.jpg \
-	aoa-morpheus.txt \
-	aoa-zorn.jpg \
-	aoa-zorn.txt \
-	ctf-corrosion.jpg \
-	ctf-corrosion.txt \
-	ctf-cryogenic.jpg \
-	ctf-cryogenic.txt \
-	ctf-extermination.jpg \
-	ctf-extermination.txt \
 	ctf-extermination2k15.jpg \
 	ctf-extermination2k15.txt \
 	ctf-frost2k15.jpg \
 	ctf-frost2k15.txt \
-	ctf-frostbyte.jpg \
-	ctf-frostbyte.txt \
-	ctf-goregrinder.jpg \
-	ctf-goregrinder.txt \
-	ctf-invasion.jpg \
-	ctf-invasion.txt \
-	ctf-oblivion.jpg \
-	ctf-oblivion.txt \
-	ctf-purgatory.jpg \
-	ctf-purgatory.txt \
-	ctf-titan2k8.jpg \
-	ctf-titan2k8.txt \
-	ctf-vesuvius2k11.jpg \
-	ctf-vesuvius2k11.txt \
-	ctf-violator.jpg \
-	ctf-violator.txt \
-	ctf-zion2k9.jpg \
-	ctf-zion2k9.txt \
-	dm-annihilation.jpg \
-	dm-annihilation.txt \
-	dm-atlantis2k8.jpg \
-	dm-atlantis2k8.txt \
-	dm-babel2k11.jpg \
-	dm-babel2k11.txt \
-	dm-bloodfactory2k12.jpg \
-	dm-bloodfactory2k12.txt \
 	dm-bloodfactory2k15.jpg \
 	dm-bloodfactory2k15.txt \
-	dm-chasmatic2k9.jpg \
-	dm-chasmatic2k9.txt \
-	dm-command2k9.jpg \
-	dm-command2k9.txt \
-	dm-corrosion.jpg \
-	dm-corrosion.txt \
-	dm-crucible2k12.jpg \
-	dm-crucible2k12.txt \
-	dm-deathray.jpg \
-	dm-deathray.txt \
-	dm-deimos2k9.jpg \
-	dm-deimos2k9.txt \
-	dm-dismal2k11.jpg \
-	dm-dismal2k11.txt \
 	dm-dismal2k15.jpg \
 	dm-dismal2k15.txt \
-	dm-downfall.jpg \
-	dm-downfall.txt \
-	dm-dynamo2k12.jpg \
-	dm-dynamo2k12.txt \
-	dm-eternal.jpg \
-	dm-eternal.txt \
-	dm-extermination.jpg \
-	dm-extermination.txt \
 	dm-extermination2k15.jpg \
 	dm-extermination2k15.txt \
-	dm-furious2k8.jpg \
-	dm-furious2k8.txt \
-	dm-goregrinder.jpg \
-	dm-goregrinder.txt \
-	dm-horus.jpg \
-	dm-horus.txt \
-	dm-impact.jpg \
-	dm-impact.txt \
-	dm-invasion.jpg \
-	dm-invasion.txt \
-	dm-leviathan2k12.jpg \
-	dm-leviathan2k12.txt \
-	dm-liberation.jpg \
-	dm-liberation.txt \
-	dm-neptune.jpg \
-	dm-neptune.txt \
 	dm-neptune2k15.jpg \
 	dm-neptune2k15.txt \
-	dm-oblivion.jpg \
-	dm-oblivion.txt \
-	dm-omega2k8.jpg \
-	dm-omega2k8.txt \
-	dm-purgatory.jpg \
-	dm-purgatory.txt \
-	dm-saucer2k9.jpg \
-	dm-saucer2k9.txt \
 	dm-turbo2k15.jpg \
 	dm-turbo2k15.txt \
-	dm-turbo2k8.jpg \
-	dm-turbo2k8.txt \
-	dm-vesuvius2k11.jpg \
-	dm-vesuvius2k11.txt \
-	dm-violator2k11.jpg \
-	dm-violator2k11.txt \
 	dm-violator2k15.jpg \
 	dm-violator2k15.txt \
-	dm-warmachine2k10.jpg \
-	dm-warmachine2k10.txt \
 	dm-wasteland.jpg \
 	dm-wasteland.txt \
-	dm-zorn2k11.jpg \
-	dm-zorn2k11.txt \
-	dm-zion2k9.jpg \
-	dm-zion2k9.txt \
 	tac-extermination2k15.jpg \
 	tac-extermination2k15.txt \
 	tac-impact.jpg \
-	tac-impact.txt \
-	tca-corrosion.jpg \
-	tca-corrosion.txt \
-	tca-cryogenic.jpg \
-	tca-cryogenic.txt \
-	tca-extermination.jpg \
-	tca-extermination.txt \
-	tca-frost.jpg \
-	tca-frost.txt \
-	tca-purgatory.jpg \
-	tca-purgatory.txt \
-	tca-titan2k8.jpg \
-	tca-titan2k8.txt \
-	tca-zion2k9.jpg \
-	tca-zion2k9.txt
+	tac-impact.txt
