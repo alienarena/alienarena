@@ -30,114 +30,21 @@ nobase_dist_botinfo_DATA = \
 	sample.cfg \
 	allbots.tmp \
 	team.tmp \
-	aoa-atlantis.tmp \
-	aoa-corrosion.tmp \
-	aoa-frost2k9.tmp \
-	aoa-morpheus.tmp \
-	aoa-zorn.tmp \
-	dm-annihilation.tmp \
-	dm-atlantis2k8.tmp \
-	dm-babel2k11.tmp \
-	dm-bloodfactory2k12.tmp \
 	dm-bloodfactory2k15.tmp \
-	dm-chasmatic2k9.tmp \
-	dm-command2k9.tmp \
-	dm-corrosion.tmp \
-	dm-crucible2k12.tmp \
-	dm-deathray.tmp \
-	dm-deimos2k9.tmp \
-	dm-dismal2k11.tmp \
 	dm-dismal2k15.tmp \
-	dm-downfall.tmp \
-	dm-dynamo2k12.tmp \
-	dm-eternal.tmp \
-	dm-extermination.tmp \
 	dm-extermination2k15.tmp \
-	dm-furious2k8.tmp \
-	dm-goregrinder.tmp \
-	dm-horus.tmp \
-	dm-impact.tmp \
-	dm-invasion.tmp \
-	dm-leviathan2k12.tmp \
-	dm-liberation.tmp \
-	dm-neptune.tmp \
 	dm-neptune2k15.tmp \
-	dm-oblivion.tmp \
-	dm-omega2k8.tmp \
-	dm-purgatory.tmp \
-	dm-saucer2k9.tmp \
 	dm-turbo2k15.tmp \
-	dm-turbo2k8.tmp \
-	dm-vesuvius2k11.tmp \
-	dm-violator2k11.tmp \
 	dm-violator2k15.tmp \
-	dm-warmachine2k10.tmp \
 	dm-wasteland.tmp \
-	dm-zion2k9.tmp \
-	dm-zorn2k11.tmp \
 	tac-extermination2k15.tmp \
 	tac-impact.tmp \
-	nav/aoa-atlantis.nod \
-	nav/aoa-corrosion.nod \
-	nav/aoa-frost2k9.nod \
-	nav/aoa-morpheus.nod \
-	nav/aoa-zorn.nod \
-	nav/ctf-corrosion.nod \
-	nav/ctf-cryogenic.nod \
 	nav/ctf-extermination2k15.nod \
-	nav/ctf-frostbyte.nod \
-	nav/ctf-goregrinder.nod \
-	nav/ctf-invasion.nod \
-	nav/ctf-oblivion.nod \
-	nav/ctf-purgatory.nod \
-	nav/ctf-titan2k8.nod \
-	nav/ctf-vesuvius2k11.nod \
-	nav/ctf-violator.nod \
-	nav/dm-annihilation.nod \
-	nav/dm-atlantis2k8.nod \
-	nav/dm-babel2k11.nod \
-	nav/dm-bloodfactory2k12.nod \
 	nav/dm-bloodfactory2k15.nod \
-	nav/dm-chasmatic2k9.nod \
-	nav/dm-command2k9.nod \
-	nav/dm-corrosion.nod \
-	nav/dm-crucible2k12.nod \
-	nav/dm-deathray.nod \
-	nav/dm-deimos2k9.nod \
-	nav/dm-dismal2k11.nod \
 	nav/dm-dismal2k15.nod \
-	nav/dm-downfall.nod \
-	nav/dm-dynamo2k12.nod \
-	nav/dm-eternal.nod \
-	nav/dm-extermination.nod \
 	nav/dm-extermination2k15.nod \
-	nav/dm-furious2k8.nod \
-	nav/dm-goregrinder.nod \
-	nav/dm-horus.nod \
-	nav/dm-impact.nod \
-	nav/dm-invasion.nod \
-	nav/dm-leviathan2k12.nod \
-	nav/dm-liberation.nod \
-	nav/dm-neptune.nod \
 	nav/dm-neptune2k15.nod \
-	nav/dm-oblivion.nod \
-	nav/dm-omega2k8.nod \
-	nav/dm-purgatory.nod \
-	nav/dm-saucer2k9.nod \
 	nav/dm-turbo2k15.nod \
-	nav/dm-turbo2k8.nod \
-	nav/dm-vesuvius2k11.nod \
-	nav/dm-violator2k11.nod \
 	nav/dm-violator2k15.nod \
-	nav/dm-warmachine2k10.nod \
 	nav/dm-wasteland.nod \
-	nav/dm-zion2k9.nod \
-	nav/dm-zorn2k11.nod \
-	nav/tac-extermination2k15.nod \
-	nav/tca-corrosion.nod \
-	nav/tca-cryogenic.nod \
-	nav/tca-invasion.nod \
-	nav/tca-purgatory.nod \
-	nav/tca-titan2k8.nod \
-	nav/tca-zion2k9.nod
-
+	nav/tac-extermination2k15.nod

@@ -5,100 +5,19 @@
 mapsdir=$(pkgdatadir)/data1/maps
 
 nobase_dist_maps_DATA = \
-	aoa-atlantis.bsp \
-	aoa-corrosion.bsp \
-	aoa-frost2k9.bsp \
-	aoa-morpheus.bsp \
-	aoa-zorn.bsp \
-	ctf-corrosion.bsp \
-	ctf-corrosion.lightmap \
-	ctf-cryogenic.bsp \
-	ctf-extermination.bsp \
-	ctf-extermination.lightmap \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
-	ctf-frostbyte.bsp \
-	ctf-goregrinder.bsp \
-	ctf-invasion.bsp \
-	ctf-invasion.lightmap \
-	ctf-oblivion.bsp \
-	ctf-oblivion.lightmap \
-	ctf-purgatory.bsp \
-	ctf-titan2k8.bsp \
-	ctf-vesuvius2k11.bsp \
-	ctf-vesuvius2k11.lightmap \
-	ctf-violator.bsp \
-	ctf-zion2k9.bsp \
-	dm-annihilation.bsp \
-	dm-annihilation.lightmap \
-	dm-atlantis2k8.bsp \
-	dm-babel2k11.bsp \
-	dm-bloodfactory2k12.bsp \
 	dm-bloodfactory2k15.bsp \
-	dm-chasmatic2k9.bsp \
-	dm-command2k9.bsp \
-	dm-corrosion.bsp \
-	dm-corrosion.lightmap \
-	dm-crucible2k12.bsp \
-	dm-crucible2k12.lightmap \
-	dm-deathray.bsp \
-	dm-deimos2k9.bsp \
-	dm-deimos2k9.lightmap \
-	dm-dismal2k11.bsp \
 	dm-dismal2k15.bsp \
-	dm-downfall.bsp \
-	dm-dynamo2k12.bsp \
-	dm-dynamo2k12.lightmap \
-	dm-eternal.bsp \
-	dm-extermination.bsp \
-	dm-extermination.lightmap \
 	dm-extermination2k15.bsp \
 	dm-extermination2k15.lightmap \
-	dm-furious2k8.bsp \
-	dm-furious2k8.lightmap \
-	dm-goregrinder.bsp \
-	dm-goregrinder.lightmap \
-	dm-horus.bsp \
-	dm-impact.bsp \
-	dm-impact.lightmap \
-	dm-invasion.bsp \
-	dm-invasion.lightmap \
-	dm-leviathan2k12.bsp \
-	dm-liberation.bsp \
-	dm-neptune.bsp \
 	dm-neptune2k15.bsp \
-	dm-neptune.lightmap \
-	dm-oblivion.bsp \
-	dm-oblivion.lightmap \
-	dm-oblivion2k15.bsp \
-	dm-omega2k8.bsp \
-	dm-omega2k8.lightmap \
-	dm-purgatory.bsp \
-	dm-saucer2k9.bsp \
 	dm-turbo2k15.bsp \
-	dm-turbo2k8.bsp \
-	dm-vesuvius2k11.bsp \
-	dm-vesuvius2k11.lightmap \
-	dm-violator2k11.bsp \
-	dm-violator2k11.lightmap \
 	dm-violator2k15.bsp \
 	dm-violator2k15.lightmap \
-	dm-warmachine2k10.bsp \
-	dm-warmachine2k10.lightmap \
 	dm-wasteland.bsp \
-	dm-zorn2k11.bsp \
-	dm-zion2k9.bsp \
 	tac-extermination2k15.bsp \
 	tac-impact.bsp \
-	tca-corrosion.bsp \
-	tca-corrosion.lightmap \
-	tca-cryogenic.bsp \
-	tca-extermination.bsp \
-	tca-invasion \
-	tca-invasion.entdef \
-	tca-purgatory.bsp \
-	tca-titan2k8.bsp \
-	tca-zion2k9.bsp \
 	meshes/arch_fx.tga \
 	meshes/arch.md2 \
 	meshes/arch_normal.jpg \
@@ -510,8 +429,15 @@ nobase_dist_maps_DATA = \
 	meshes/test/martian.jpg \
 	meshes/test/martian_normal.tga \
 	meshes/test/martian_fx.tga \
-	meshes/toxicbarrell.tga \
+	meshes/toxicbarrell.iqm \
 	meshes/toxicbarrell.md2 \
+	meshes/toxicbarrell.skin \
+	meshes/toxicbarrell.tga \
+	meshes/toxicbarrell2.iqm \
+	meshes/toxicbarrell2.md2 \
+	meshes/toxicbarrell2.skin \
+	meshes/toxicbarrell2.tga \
+	meshes/toxicbarrell2_normal.jpg \
 	meshes/toxicbarrell_normal.jpg \
 	meshes/tubecover.md2 \
 	meshes/tube.md2 \
@@ -638,126 +564,27 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.jpg \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
-	scripts/aoa-atlantis.mus \
-	scripts/aoa-corrosion.fog \
-	scripts/aoa-corrosion.mus \
-	scripts/aoa-frost2k9.fog \
-	scripts/aoa-frost2k9.mus \
-	scripts/aoa-morpheus.mus \
-	scripts/aoa-zorn.mus \
-	scripts/ctf-corrosion.fog \
-	scripts/ctf-corrosion.mus \
-	scripts/ctf-cryogenic.fog \
-	scripts/ctf-cryogenic.mus \
-	scripts/ctf-europa2k8.mus \
-	scripts/ctf-extermination.fog  \
-	scripts/ctf-extermination.mus \
 	scripts/ctf-extermination2k15.fog \
 	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
 	scripts/ctf-frost2k15.mus \
-	scripts/ctf-frostbyte.fog \
-	scripts/ctf-frostbyte.mus \
-	scripts/ctf-goregrinder.fog \
-	scripts/ctf-goregrinder.mus \
-	scripts/ctf-invasion.fog \
-	scripts/ctf-invasion.mus \
-	scripts/ctf-oblivion.fog \
-	scripts/ctf-oblivion.mus \
-	scripts/ctf-purgatory.fog \
-	scripts/ctf-purgatory.mus \
-	scripts/ctf-titan2k8.mus \
-	scripts/ctf-vesuvius2k11.fog \
-	scripts/ctf-vesuvius2k11.mus \
-	scripts/ctf-violator.fog \
-	scripts/ctf-violator.mus \
-	scripts/ctf-zion2k9.mus \
-	scripts/dm-atlantis2k8.mus \
-	scripts/dm-annihilation.fog \
-	scripts/dm-annihilation.mus \
-	scripts/dm-babel2k11.fog \
-	scripts/dm-babel2k11.mus \
-	scripts/dm-bloodfactory2k12.fog \
-	scripts/dm-bloodfactory2k12.mus \
 	scripts/dm-bloodfactory2k15.fog \
 	scripts/dm-bloodfactory2k15.mus \
-	scripts/dm-chasmatic2k9.fog \
-	scripts/dm-chasmatic2k9.mus \
-	scripts/dm-command2k9.fog \
-	scripts/dm-command2k9.mus \
-	scripts/dm-corrosion.fog \
-	scripts/dm-corrosion.mus \
-	scripts/dm-crucible2k12.fog \
-	scripts/dm-crucible2k12.mus \
-	scripts/dm-deathray.fog \
-	scripts/dm-deathray.mus \
-	scripts/dm-deimos2k9.mus \
-	scripts/dm-dismal2k11.fog \
-	scripts/dm-dismal2k11.mus \
 	scripts/dm-dismal2k15.fog \
 	scripts/dm-dismal2k15.mus \
-	scripts/dm-downfall.fog \
-	scripts/dm-downfall.mus \
-	scripts/dm-dynamo2k12.fog \
-	scripts/dm-dynamo2k12.mus \
-	scripts/dm-eternal.fog \
-	scripts/dm-eternal.mus \
-	scripts/dm-extermination.fog \
-	scripts/dm-extermination.mus \
 	scripts/dm-extermination2k15.fog \
 	scripts/dm-extermination2k15.mus \
-	scripts/dm-furious2k8.fog \
-	scripts/dm-furious2k8.mus \
-	scripts/dm-goregrinder.fog \
-	scripts/dm-goregrinder.mus \
-	scripts/dm-horus.mus \
-	scripts/dm-impact.fog \
-	scripts/dm-impact.mus \
-	scripts/dm-invasion.fog \
-	scripts/dm-invasion.mus \
-	scripts/dm-leviathan2k12.fog \
-	scripts/dm-leviathan2k12.mus \
-	scripts/dm-liberation.fog \
-	scripts/dm-liberation.mus \
-	scripts/dm-neptune.mus \
 	scripts/dm-neptune2k15.fog \
 	scripts/dm-neptune2k15.mus \
-	scripts/dm-oblivion.fog \
-	scripts/dm-oblivion.mus \
 	scripts/dm-oblivion2k15.fog \
 	scripts/dm-oblivion2k15.mus \
-	scripts/dm-omega2k8.mus \
-	scripts/dm-purgatory.fog \
-	scripts/dm-purgatory.mus \
-	scripts/dm-saucer2k9.fog \
-	scripts/dm-saucer2k9.mus \
 	scripts/dm-turbo2k15.fog \
 	scripts/dm-turbo2k15.mus \
-	scripts/dm-turbo2k8.fog \
-	scripts/dm-turbo2k8.mus \
-	scripts/dm-vesuvius2k11.fog \
-	scripts/dm-vesuvius2k11.mus \
-	scripts/dm-violator2k11.mus \
-	scripts/dm-violator2k11.fog \
 	scripts/dm-violator2k15.fog \
 	scripts/dm-violator2k15.mus \
-	scripts/dm-warmachine2k10.fog \
-	scripts/dm-warmachine2k10.mus \
 	scripts/dm-wasteland.fog \
 	scripts/dm-wasteland.mus \
-	scripts/dm-zorn2k11.fog \
-	scripts/dm-zorn2k11.mus \
-	scripts/dm-zion2k9.mus \
 	scripts/tac-extermination2k15.fog \
 	scripts/tac-extermination2k15.mus \
 	scripts/tac-impact.fog \
-	scripts/tac-impact.mus \
-	scripts/tca-corrosion.fog \
-	scripts/tca-corrosion.mus \
-	scripts/tca-cryogenic.fog \
-	scripts/tca-cryogenic.mus \
-	scripts/tca-extermination.fog \
-	scripts/tca-extermination.mus \
-	scripts/tca-purgatory.fog \
-	scripts/tca-purgatory.mus \
-	scripts/tca-zion2k9.mus
+	scripts/tac-impact.mus

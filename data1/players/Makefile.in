@@ -223,9 +223,10 @@ nobase_dist_players_DATA = \
 	commander/death2.wav \
 	commander/death3.wav \
 	commander/death4.wav \
-	commander/default_i.jpg \
 	commander/default.jpg \
+	commander/default_i.jpg \
 	commander/default_normal.tga \
+	commander/defaultcommanderfx.tga \
 	commander/drown1.wav \
 	commander/fall1.wav \
 	commander/fall2.wav \
@@ -290,17 +291,19 @@ nobase_dist_players_DATA = \
 	commander/w_violator.md2 \
 	commander/w_violator.skin \
 	enforcer/arm.md2 \
-	enforcer/blue_i.jpg \
 	enforcer/blue.jpg \
+	enforcer/blue_i.jpg \
+	enforcer/blueenforcerfx.tga \
 	enforcer/body.md2 \
 	enforcer/bump1.wav \
 	enforcer/death1.wav \
 	enforcer/death2.wav \
 	enforcer/death3.wav \
 	enforcer/death4.wav \
-	enforcer/default_i.jpg \
 	enforcer/default.jpg \
+	enforcer/default_i.jpg \
 	enforcer/default_normal.tga \
+	enforcer/defaultenforcerfx.tga \
 	enforcer/drown1.wav \
 	enforcer/fall1.wav \
 	enforcer/fall2.wav \
@@ -370,17 +373,19 @@ nobase_dist_players_DATA = \
 	enforcer/w_violator.md2 \
 	enforcer/w_violator.skin \
 	lauren/arm.md2 \
-	lauren/blue_i.jpg \
 	lauren/blue.jpg \
+	lauren/blue_i.jpg \
+	lauren/bluelaurenfx.tga \
 	lauren/body.md2 \
 	lauren/bump1.wav \
 	lauren/death1.wav \
 	lauren/death2.wav \
 	lauren/death3.wav \
 	lauren/death4.wav \
-	lauren/default_i.jpg \
 	lauren/default.jpg \
+	lauren/default_i.jpg \
 	lauren/default_normal.tga \
+	lauren/defaultlaurenfx.tga \
 	lauren/drown1.wav \
 	lauren/fall1.wav \
 	lauren/fall2.wav \
@@ -445,16 +450,18 @@ nobase_dist_players_DATA = \
 	lauren/w_violator.iqm \
 	lauren/w_violator.md2 \
 	lauren/w_violator.skin \
-	martiancyborg/blue_i.jpg \
 	martiancyborg/blue.jpg \
+	martiancyborg/blue_i.jpg \
+	martiancyborg/bluecyborgfx.tga \
 	martiancyborg/bump1.wav \
 	martiancyborg/death1.wav \
 	martiancyborg/death2.wav \
 	martiancyborg/death3.wav \
 	martiancyborg/death4.wav \
-	martiancyborg/default_i.jpg \
 	martiancyborg/default.jpg \
+	martiancyborg/default_i.jpg \
 	martiancyborg/default_normal.tga \
+	martiancyborg/defaultcyborgfx.tga \
 	martiancyborg/drown1.wav \
 	martiancyborg/fall1.wav \
 	martiancyborg/fall2.wav \
@@ -524,17 +531,19 @@ nobase_dist_players_DATA = \
 	martiancyborg/w_violator.skin \
 	martianenforcer/alien \
 	martianenforcer/arm.md2 \
-	martianenforcer/blue_i.jpg \
 	martianenforcer/blue.jpg \
+	martianenforcer/blue_i.jpg \
+	martianenforcer/bluemartianfx.tga \
 	martianenforcer/body.md2 \
 	martianenforcer/bump1.wav \
 	martianenforcer/death1.wav \
 	martianenforcer/death2.wav \
 	martianenforcer/death3.wav \
 	martianenforcer/death4.wav \
-	martianenforcer/default_i.jpg \
 	martianenforcer/default.jpg \
+	martianenforcer/default_i.jpg \
 	martianenforcer/default_normal.tga \
+	martianenforcer/defaultmartianfx.tga \
 	martianenforcer/drown1.wav \
 	martianenforcer/fall1.wav \
 	martianenforcer/fall2.wav \
@@ -607,16 +616,18 @@ nobase_dist_players_DATA = \
 	martianenforcer/w_violator.md2 \
 	martianenforcer/w_violator.skin \
 	martianoverlord/alien \
-	martianoverlord/blue_i.jpg \
 	martianoverlord/blue.jpg \
+	martianoverlord/blue_i.jpg \
+	martianoverlord/blueoverlordfx.tga \
 	martianoverlord/bump1.wav \
 	martianoverlord/death1.wav \
 	martianoverlord/death2.wav \
 	martianoverlord/death3.wav \
 	martianoverlord/death4.wav \
-	martianoverlord/default_i.jpg \
 	martianoverlord/default.jpg \
+	martianoverlord/default_i.jpg \
 	martianoverlord/default_normal.tga \
+	martianoverlord/defaultoverlordfx.tga \
 	martianoverlord/drown1.wav \
 	martianoverlord/fall1.wav \
 	martianoverlord/fall2.wav \
@@ -684,22 +695,25 @@ nobase_dist_players_DATA = \
 	martianoverlord/w_violator.md2 \
 	martianoverlord/w_violator.skin \
 	martianwarrior/alien \
-	martianwarrior/blue_i.jpg \
 	martianwarrior/blue.jpg \
+	martianwarrior/blue_i.jpg \
+	martianwarrior/bluewarriorfx.tga \
 	martianwarrior/bump1.wav \
 	martianwarrior/death1.wav \
 	martianwarrior/death2.wav \
 	martianwarrior/death3.wav \
 	martianwarrior/death4.wav \
-	martianwarrior/default_i.jpg \
 	martianwarrior/default.jpg \
+	martianwarrior/default_i.jpg \
 	martianwarrior/default_normal.tga \
+	martianwarrior/defaultwarriorfx.tga \
 	martianwarrior/drown1.wav \
 	martianwarrior/fall1.wav \
 	martianwarrior/fall2.wav \
 	martianwarrior/gamara.jpg \
 	martianwarrior/gamara_i.jpg \
 	martianwarrior/gamara_normal.tga \
+	martianwarrior/gamarafx.tga \
 	martianwarrior/gasp1.wav \
 	martianwarrior/gasp2.wav \
 	martianwarrior/gurp1.wav \
@@ -775,6 +789,7 @@ nobase_dist_players_DATA = \
 	rustbot/default.jpg \
 	rustbot/default_i.jpg \
 	rustbot/default_normal.tga \
+	rustbot/defaultrustbotfx.tga \
 	rustbot/drown1.wav \
 	rustbot/fall1.wav \
 	rustbot/fall2.wav \
@@ -799,6 +814,7 @@ nobase_dist_players_DATA = \
 	rustbot/pain75_2.wav \
 	rustbot/red.jpg \
 	rustbot/red_i.jpg \
+	rustbot/redrustbotfx.tga \
 	rustbot/robot \
 	rustbot/tris.iqm \
 	rustbot/tris.md2 \
@@ -849,9 +865,10 @@ nobase_dist_players_DATA = \
 	slashbot/death2.wav \
 	slashbot/death3.wav \
 	slashbot/death4.wav \
-	slashbot/default_i.jpg \
 	slashbot/default.jpg \
+	slashbot/default_i.jpg \
 	slashbot/default_normal.jpg \
+	slashbot/defaultslashbotfx.tga \
 	slashbot/drown1.wav \
 	slashbot/fall1.wav \
 	slashbot/fall2.wav \

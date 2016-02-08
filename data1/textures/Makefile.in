@@ -216,7 +216,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 texturesdir = $(pkgdatadir)/data1/textures
 nobase_dist_textures_DATA = \
-	alien/support5.tga \
 	arena10/bluedoor.tga \
 	arena10/bluedoor_hm.jpg \
 	arena10/bluedoor_nm.jpg \
@@ -545,41 +544,6 @@ nobase_dist_textures_DATA = \
 	arena10/wires1.tga \
 	arena10/wires2_nm.tga \
 	arena10/wires2.tga \
-	arena1/jpad1a.tga \
-	arena1/jpad1a.wal \
-	arena1/jpad1b.tga \
-	arena1/jpad1b.wal \
-	arena1/jpad1c.tga \
-	arena1/jpad1c.wal \
-	arena1/jpad1d.tga \
-	arena1/jpad1d.wal \
-	arena1/jpad1e.tga \
-	arena1/jpad1e.wal \
-	arena1/metalbrick1.tga \
-	arena1/metalbrick2.tga \
-	arena1/metalbrick3a.tga \
-	arena1/metalbrick3b.tga \
-	arena1/metalbrick3c.tga \
-	arena1/metalbrick3d.tga \
-	arena1/metalbrick4a.tga \
-	arena1/metalbrick4b.tga \
-	arena1/metalbrick4c.tga \
-	arena1/metalbrick4d.tga \
-	arena1/metalbrick5.tga \
-	arena1/o3arch1.tga \
-	arena1/o3bricks12.tga \
-	arena1/o3bricks21.tga \
-	arena1/o3bricks22.tga \
-	arena1/o3bricks23.tga \
-	arena1/o3bricks2.tga \
-	arena1/o3bricks3.tga \
-	arena1/o3bricks6.tga \
-	arena1/o3bricks.tga \
-	arena1/o3ice1.tga \
-	arena1/o3ice2.tga \
-	arena1/o3ice3.tga \
-	arena1/o3ice4.tga \
-	arena1/o3rocks1.tga \
 	arena2/grid2.tga \
 	arena2/grid3.tga \
 	arena2/grida.tga \
@@ -1225,18 +1189,6 @@ nobase_dist_textures_DATA = \
 	ctf-frost/snow1.tga \
 	ctf-frost/snow1_blendtex.tga \
 	ctf-frost/snow1_lightmaptex.tga \
-	dalek/column1.tga \
-	dalek/console1.tga \
-	dalek/floor2.tga \
-	dalek/floor3.tga \
-	dalek/floor4.tga \
-	dalek/wall1.tga \
-	dalek/wall2.tga \
-	dalek/wall3.tga \
-	dalek/wall4.tga \
-	dalek/wall5.tga \
-	dalek/wall6.tga \
-	dalek/wall7.tga \
 	desert/03door4.tga \
 	desert/03door4_hm.tga \
 	desert/03door4_nm.tga \
@@ -1522,7 +1474,6 @@ nobase_dist_textures_DATA = \
 	evil/trstmtl_panelbig_hm.tga \
 	evil/trstmtl_panelbig_nm.tga \
 	evil/trstmtl_panelbig.tga \
-	forsaken/glass.tga \
 	martian/biometal1_hm.tga \
 	martian/biometal1_nm.tga \
 	martian/biometal1.tga \
