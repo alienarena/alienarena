@@ -952,6 +952,11 @@ nobase_dist_textures_DATA = \
 	common/weapclip.tga \
 	common/white.tga \
 	cr3blankclear.wal \
+	ctf-abyss/canyon1.tga \
+	ctf-abyss/canyon1_blendtex.tga \
+	ctf-abyss/canyon1_blendtex2.tga \
+	ctf-abyss/canyon1_lightmaptex.tga \
+	ctf-abyss/canyon1_vegetation.tga \
 	ctf-extermination/rubble1.tga \
 	ctf-extermination/rubble1_blendtex.tga \
 	ctf-extermination/rubble1_lightmaptex.tga \
@@ -992,7 +997,16 @@ nobase_dist_textures_DATA = \
 	desert/bloodlava.tga \
 	desert/cliffblock.tga \
 	desert/cliffblock_nm.tga \
+	desert/cliffbottom.tga \
+	desert/cliffbottom_hm.tga \
+	desert/cliffbottom_nm.tga \
+	desert/cliffmiddle.tga \
+	desert/cliffmiddle_hm.tga \
+	desert/cliffmiddle_nm.tga \
 	desert/clifftop.tga \
+	desert/clifftop2.tga \
+	desert/clifftop2_hm.tga \
+	desert/clifftop2_nm.tga \
 	desert/clifftop_nm.tga \
 	desert/damage1.tga \
 	desert/damage2.tga \
@@ -1036,6 +1050,9 @@ nobase_dist_textures_DATA = \
 	desert/rock1.tga \
 	desert/rock1_hm.tga \
 	desert/rock1_nm.tga \
+	desert/rockground1.tga \
+	desert/rockground1_hm.tga \
+	desert/rockground1_nm.tga \
 	desert/roughwood1.tga \
 	desert/roughwood1_nm.tga \
 	desert/roughwood2.tga \
