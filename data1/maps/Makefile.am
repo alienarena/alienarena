@@ -5,6 +5,7 @@
 mapsdir=$(pkgdatadir)/data1/maps
 
 nobase_dist_maps_DATA = \
+	ctf-abyss.bsp \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
 	dm-bloodfactory2k15.bsp \
@@ -59,6 +60,7 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
+	meshes/ctf-abyss/canyon1.terrain \
 	meshes/ctf-extermination/blood0.decal \
 	meshes/ctf-extermination/blood1.decal \
 	meshes/ctf-extermination/blood2.decal \
@@ -564,6 +566,7 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.jpg \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
+	scripts/ctf-abyss.fog \
 	scripts/ctf-extermination2k15.fog \
 	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
