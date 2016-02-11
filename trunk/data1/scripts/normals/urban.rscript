@@ -164,3 +164,18 @@ maps/meshes/urban/satdish
 		normalmap
 	}
 }
+maps/meshes/urban/signpostred
+{
+	{
+		map maps/meshes/urban/signpost_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/urban/signpostblue
+{
+	{
+		map maps/meshes/urban/signpost_normal.jpg
+		normalmap
+	}
+}
+
