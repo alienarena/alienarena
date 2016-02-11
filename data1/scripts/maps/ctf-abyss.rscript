@@ -20,6 +20,12 @@ textures/arena7/light10
 		lensflare
 	}
 }
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
 env/hellup
 {
 	{
