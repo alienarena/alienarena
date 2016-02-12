@@ -734,6 +734,12 @@ nobase_dist_maps_DATA = \
 	meshes/urban/shelf.jpg \
 	meshes/urban/shelf.md2 \
 	meshes/urban/shelf_normal.jpg \
+	meshes/urban/signpost.md2 \
+	meshes/urban/signpost_normal.jpg \
+	meshes/urban/signpostblue.md2 \
+	meshes/urban/signpostblue.tga \
+	meshes/urban/signpostred.md2 \
+	meshes/urban/signpostred.tga \
 	meshes/urban/stool.md2 \
 	meshes/urban/toolbox.jpg \
 	meshes/urban/toolbox.md2 \
