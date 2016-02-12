@@ -1058,3 +1058,66 @@
 "angles" "74.779289 0.000001 62.151272"
 "spawnflags" "1"
 }
+// entity 57
+{
+"classname" "misc_mapmodel"
+"origin" "-1984.491699 -688.110046 187.977982"
+"model" "maps/meshes/gothic/skull2.md2"
+"angles" "13.956559 -82.112198 5.350494"
+}
+// entity 58
+{
+"classname" "misc_mapmodel"
+"origin" "-1974.000244 -679.999939 136.000076"
+"model" "maps/meshes/urban/signpost.md2"
+"angles" "-10.790076 -5.452721 13.744922"
+}
+// entity 59
+{
+"classname" "misc_mapmodel"
+"origin" "-2048.000000 189.999878 420.000000"
+"model" "maps/meshes/gothic/meat1.md2"
+"angle" "-41.994041"
+}
+// entity 60
+{
+"classname" "misc_mapmodel"
+"origin" "-2109.999756 -96.000015 420.000000"
+"model" "maps/meshes/gothic/meat3.md2"
+"angle" "55.980392"
+}
+// entity 61
+{
+"classname" "misc_mapmodel"
+"origin" "-2002.000000 -280.000305 420.000000"
+"model" "maps/meshes/gothic/meat3.md2"
+"angle" "-44.594429"
+}
+// entity 62
+{
+"classname" "misc_mapmodel"
+"origin" "-590.853149 -260.694031 370.971405"
+"model" "maps/meshes/gothic/skull2.md2"
+"angles" "11.697131 29.203485 -0.596930"
+}
+// entity 63
+{
+"classname" "misc_mapmodel"
+"origin" "-581.125610 -246.382294 321.477417"
+"model" "maps/meshes/urban/signpost.md2"
+"angles" "10.790076 174.547287 -13.744925"
+}
+// entity 64
+{
+"classname" "misc_mapmodel"
+"origin" "-592.276184 -247.145477 319.385803"
+"model" "maps/meshes/urban/signpost.md2"
+"angles" "-14.658176 -29.283825 17.711481"
+}
+// entity 65
+{
+"classname" "misc_mapmodel"
+"origin" "-583.194275 -238.374130 321.561188"
+"model" "maps/meshes/gothic/skull1.md2"
+"angles" "-30.499926 33.676811 7.215462"
+}
