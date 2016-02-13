@@ -271,7 +271,11 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
+	meshes/ctf-abyss/blood1.decal \
+	meshes/ctf-abyss/blood2.decal \
 	meshes/ctf-abyss/canyon1.terrain \
+	meshes/ctf-abyss/rocks1.decal \
+	meshes/ctf-abyss/rocks2.decal \
 	meshes/ctf-extermination/blood0.decal \
 	meshes/ctf-extermination/blood1.decal \
 	meshes/ctf-extermination/blood2.decal \
@@ -522,6 +526,9 @@ nobase_dist_maps_DATA = \
 	meshes/rocks/05/rock.md2 \
 	meshes/rocks/rock1.jpg \
 	meshes/rocks/rock1.md2 \
+	meshes/rocks/rock10.jpg \
+	meshes/rocks/rock10.md2 \
+	meshes/rocks/rock10_normal.jpg \
 	meshes/rocks/rock2.jpg \
 	meshes/rocks/rock2.md2 \
 	meshes/rocks/rock3.jpg \
@@ -529,6 +536,18 @@ nobase_dist_maps_DATA = \
 	meshes/rocks/rock4.jpg \
 	meshes/rocks/rock4.md2 \
 	meshes/rocks/rock5.md2 \
+	meshes/rocks/rock6.jpg \
+	meshes/rocks/rock6.md2 \
+	meshes/rocks/rock6_normal.jpg \
+	meshes/rocks/rock7.jpg \
+	meshes/rocks/rock7.md2 \
+	meshes/rocks/rock7_normal.jpg \
+	meshes/rocks/rock8.jpg \
+	meshes/rocks/rock8.md2 \
+	meshes/rocks/rock8_normal.jpg \
+	meshes/rocks/rock9.jpg \
+	meshes/rocks/rock9.md2 \
+	meshes/rocks/rock9_normal.jpg \
 	meshes/sconduit1.md2 \
 	meshes/sconduit2.md2 \
 	meshes/scopecover.md2 \
