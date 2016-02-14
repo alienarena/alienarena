@@ -2247,12 +2247,9 @@ void PutClientInServer (edict_t *ent)
 	client->spawnprotecttime = level.time;
 
 	//unlagged
-	if ( g_antilag->integer) 
-	{
-		G_ResetHistory( ent );
-		// and this is as good a time as any to clear the saved state
-		client->saved.leveltime = 0;
-	}
+	G_ResetHistory (ent);
+	// and this is as good a time as any to clear the saved state
+	client->saved.leveltime = 0;
 }
 
 //DUEL MODE
@@ -2491,10 +2488,10 @@ void ClientBeginDeathmatch (edict_t *ent)
 	else
 		safe_cprintf(ent, PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
-	if(g_antilag->value)
-		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^2ENABLED\n");
+	if (g_antilagprojectiles->integer)
+		safe_cprintf (ent, PRINT_HIGH, "Antilagged projectiles are ^2ENABLED\n");
 	else
-		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^1DISABLED\n");
+		safe_cprintf (ent, PRINT_HIGH, "Antilagged projectiles are ^1DISABLED\n");
 
 	//check bots with each player connect
 	ACESP_LoadBots( ent );
@@ -3349,8 +3346,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	//unlagged
-	if ( g_antilag->integer)
-		client->attackTime = gi.Sys_Milliseconds();
+	client->attackTime = gi.Sys_Milliseconds();
 
 	if (level.intermissiontime)
 	{

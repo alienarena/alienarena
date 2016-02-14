@@ -1712,7 +1712,6 @@ int			numipfilters;
 extern qboolean StringToFilter (char *s, ipfilter_t *f);
 
 //unlagged
-extern	cvar_t	*g_antilag;
 extern  cvar_t	*g_antilagdebug;
 extern	cvar_t	*g_antilagprojectiles;
 

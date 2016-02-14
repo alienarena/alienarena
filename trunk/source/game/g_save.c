@@ -276,8 +276,7 @@ void InitGame (void)
 	g_reward = gi.cvar("g_reward", "20", CVAR_SERVERINFO);
 
 	//antilag
-	g_antilag = gi.cvar("g_antilag", "1", CVAR_SERVERINFO | CVARDOC_BOOL);
-	g_antilagprojectiles = gi.cvar ("g_antilagprojectiles", "0", CVAR_GAMEINFO | CVARDOC_BOOL);
+	g_antilagprojectiles = gi.cvar ("g_antilagprojectiles", "1", CVAR_GAMEINFO | CVARDOC_BOOL);
 	g_antilagdebug = gi.cvar("g_antilagdebug", "0", 0 /*CVAR_SERVERINFO*/);
 
 	// change anytime vars
