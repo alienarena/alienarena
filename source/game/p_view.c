@@ -1239,7 +1239,6 @@ void ClientEndServerFrame (edict_t *ent)
 	if (ent->client->chasetoggle == 1)
         CheckDeathcam_Viewent(ent);
 
-	if ( g_antilag->integer)
-		G_StoreHistory( ent );
+	G_StoreHistory (ent);
 }
 

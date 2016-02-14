@@ -36,8 +36,7 @@ void fire_punch(edict_t *self, vec3_t start, vec3_t aimdir, int damage)
 	trace_t		tr;
 	edict_t		*ignore;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	VectorMA (start, 32, aimdir, end);
 	
@@ -63,8 +62,7 @@ void fire_punch(edict_t *self, vec3_t start, vec3_t aimdir, int damage)
 		}
 	}
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 #else
@@ -88,8 +86,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	qboolean	water = false;
 	int			content_mask = MASK_SHOT | MASK_WATER;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	self->client->resp.weapon_shots[3]++;
 
@@ -217,8 +214,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 		gi.multicast (pos, MULTICAST_PVS);
 	}
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 
@@ -437,7 +433,7 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 		bolt->touch (bolt, tr.ent, NULL, NULL);
 	}
 	
-	if ( g_antilag->integer && g_antilagprojectiles->integer)
+	if (g_antilagprojectiles->integer)
 		G_AntilagProjectile (bolt);
 }
 void fire_blaster (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper)
@@ -449,8 +445,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, in
 	int			mask;
 	qboolean	water;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	self->client->resp.weapon_shots[6]++;
 
@@ -509,8 +504,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, in
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 	}
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 /*
@@ -591,7 +585,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 	gi.linkentity (rocket);
 	
-	if ( g_antilag->integer && g_antilagprojectiles->integer)
+	if (g_antilagprojectiles->integer)
 		G_AntilagProjectile (rocket);
 }
 
@@ -665,8 +659,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	vec3_t		water_start;
 	int			content_mask = MASK_SHOT | MASK_WATER;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	self->client->resp.weapon_shots[0]++;
 
@@ -808,8 +801,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 		gi.multicast (pos, MULTICAST_PVS);
 	}
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 
 }
 void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate)
@@ -824,8 +816,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	vec3_t		water_start;
 	int			content_mask = MASK_SHOT | MASK_WATER;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
@@ -962,8 +953,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		gi.multicast (pos, MULTICAST_PVS);
 	}
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int kick)
@@ -975,8 +965,7 @@ void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, 
 	int			mask;
 	qboolean	water;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	self->client->resp.weapon_shots[1]++;
 
@@ -1036,8 +1025,7 @@ void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, 
 	if (self->client)
 		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 //vaporizer code
@@ -1052,8 +1040,7 @@ void fire_vaporizer (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int
 	int			mask;
 	qboolean	water;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	self->client->resp.weapon_shots[7]++;
 
@@ -1119,8 +1106,7 @@ void fire_vaporizer (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int
 	if (self->client)
 		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 
@@ -2074,8 +2060,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	trace_t		tr;
 	edict_t		*ignore;
 
-	if ( g_antilag->integer)
-		G_DoTimeShiftFor( self );
+	G_DoTimeShiftFor (self);
 
 	if(alt)
 		VectorMA (start, 6.4, aimdir, end);
@@ -2103,8 +2088,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	}
 	VectorCopy (tr.endpos, from);
 
-	if ( g_antilag->integer)
-		G_UndoTimeShiftFor( self );
+	G_UndoTimeShiftFor (self);
 }
 
 //Tactical - bombs

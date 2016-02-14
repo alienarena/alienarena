@@ -1137,11 +1137,9 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	client->spawnprotecttime = level.time;
 
 	//unlagged
-	if ( g_antilag->integer) {
-		G_ResetHistory( ent );
-		// and this is as good a time as any to clear the saved state
-		ent->client->saved.leveltime = 0;
-	}
+	G_ResetHistory (ent);
+	// and this is as good a time as any to clear the saved state
+	ent->client->saved.leveltime = 0;
 
 }
 

@@ -198,7 +198,6 @@ cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;
 
 //unlagged
-cvar_t	*g_antilag;
 cvar_t	*g_antilagdebug;
 cvar_t	*g_antilagprojectiles;
 
@@ -929,10 +928,10 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 	else
 		safe_bprintf(PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
-	if(g_antilag->integer)
-		safe_bprintf(PRINT_HIGH, "Antilag is ^2ENABLED\n");
+	if (g_antilagprojectiles->integer)
+		safe_bprintf (PRINT_HIGH, "Antilagged projectiles are ^2ENABLED\n");
 	else
-		safe_bprintf(PRINT_HIGH, "Antilag is ^1DISABLED\n");
+		safe_bprintf (PRINT_HIGH, "Antilagged projectiles are ^1DISABLED\n");
 
 	return;
 }
@@ -1689,19 +1688,6 @@ void G_RunFrame (void)
 			}
 		}
 
-		//this next block of code may not be practical for a server running at 10fps
-/*		if(ent->movetype & MOVETYPE_FLYMISSILE) {
-			//unlagged
-			if ( g_antilag->integer)
-				G_TimeShiftAllClients( level.previousTime, NULL );
-
-			G_RunEntity (ent);
-
-			//unlagged
-			if ( g_antilag->integer)
-		 		G_UnTimeShiftAllClients( NULL );
-		}
-		else*/
 		G_RunEntity (ent, FRAMETIME);
 	}
 
@@ -1718,8 +1704,7 @@ void G_RunFrame (void)
 	ACEND_DrawPath();
 
 	//unlagged
-	if ( g_antilag->integer)
-		level.frameStartTime = level.time;
+	level.frameStartTime = level.time;
 
 	//call voting
 	if(g_callvote->integer && playervote.called) {

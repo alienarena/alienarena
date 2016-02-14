@@ -4822,7 +4822,7 @@ static menufield_s	s_timelimit_field;
 static menufield_s	s_fraglimit_field;
 static menufield_s	s_maxclients_field;
 static menufield_s	s_hostname_field;
-static menulist_s	s_antilag_box;
+static menulist_s	s_antilagprojectiles_box;
 static menulist_s   s_public_box;
 static menulist_s	s_dedicated_box;
 static menulist_s   s_skill_box;
@@ -5133,7 +5133,7 @@ void StartServerActionFunc( void *self )
 		Cbuf_AddText ("setmaster master.corservers.com master2.corservers.com\n");
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
-	Cvar_SetValue( "g_antilag", s_antilag_box.curvalue);
+	Cvar_SetValue( "g_antilagprojectiles", s_antilagprojectiles_box.curvalue);
 
 	// The deathmatch cvar doesn't specifically indicate a pure frag-to-win
 	// game mode. It's actually the "enable multiplayer" cvar.
@@ -5218,10 +5218,10 @@ static void M_Menu_StartServer_f (void)
 	s_rules_box.generic.callback = RulesChangeFunc;
 	Menu_AddItem( &s_startserver_main_submenu, &s_rules_box );
 	
-	s_antilag_box.generic.name	= "antilag";
-	setup_tickbox (s_antilag_box);
-	s_antilag_box.curvalue = 1;
-	Menu_AddItem( &s_startserver_main_submenu, &s_antilag_box );
+	s_antilagprojectiles_box.generic.name	= "antilag projectiles";
+	setup_tickbox (s_antilagprojectiles_box);
+	s_antilagprojectiles_box.curvalue = 1;
+	Menu_AddItem( &s_startserver_main_submenu, &s_antilagprojectiles_box );
 
 	s_timelimit_field.generic.type = MTYPE_FIELD;
 	s_timelimit_field.generic.name = "time limit";
