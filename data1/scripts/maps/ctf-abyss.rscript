@@ -14,6 +14,15 @@ canyon1_texture
 			2 textures/desert/cliffbottom_nm.tga		
 	}
 }
+textures/metal/fade2
+{
+	{
+		map gfx/beam3.tga
+		scale static 45 static 80
+		colormap 1 1 1
+		beam
+	}
+}
 textures/arena7/light10
 {
 	{
@@ -21,6 +30,12 @@ textures/arena7/light10
 	}
 }
 textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light5
 {
 	{
 		lensflare

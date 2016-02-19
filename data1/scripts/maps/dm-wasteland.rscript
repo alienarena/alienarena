@@ -4,14 +4,14 @@ canyon1_texture
 		map textures/dm-wasteland/canyon1_blendtex.tga		
 		map2 textures/dm-wasteland/canyon1_blendtex2.tga	
 		blendmap 4			
-			200 textures/arena5/ground1.tga			
+			200 textures/desert/cliffmiddle.tga	
 			400 textures/desert/clifftop.tga		
-			200 textures/texturelib/ground_0045.jpg		
-			200 textures/desert/pebbles.tga
+			200 textures/texturelib/ground_0045.jpg	
+			100 textures/desert/rockground1.tga
 		blendnormalmap 3 
-			0 textures/arena5/ground1_nm.tga
+			0 textures/desert/cliffmiddle_nm.tga
 			1 textures/desert/clifftop_nm.tga
-			2 textures/texturelib/ground_0045_nm.tga			
+			2 textures/texturelib/ground_0045_nm.jpg			
 	}
 }
 textures/arena7/light10
