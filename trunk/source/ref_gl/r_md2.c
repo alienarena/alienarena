@@ -87,6 +87,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	int					cx;
 	float				s, t;
 	float				iw, ih;
+	float				min = 0, max = 0;
 	fstvert_t			*st;
 	char *pstring;
 	int count;
@@ -236,30 +237,34 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 	for ( i = 0; i < 3; i++ )
 	{
 		mod->mins[i] = pframe->translate[i];
+		if(mod->mins[i] < min)
+			min = mod->mins[i];
 		mod->maxs[i] = mod->mins[i] + pframe->scale[i]*255;
+		if(mod->maxs[i] > max)
+			max = mod->maxs[i];
 	}
 
 	/*
-	** compute a full bounding box
+	** compute a full bounding box(this bounding box MUST be created as a square shape because of rotations and culling)
 	*/
 	for ( i = 0; i < 8; i++ )
 	{
 		vec3_t   tmp;
 
 		if ( i & 1 )
-			tmp[0] = mod->mins[0];
+			tmp[0] = min;
 		else
-			tmp[0] = mod->maxs[0];
+			tmp[0] = max;
 
 		if ( i & 2 )
-			tmp[1] = mod->mins[1];
+			tmp[1] = min;
 		else
-			tmp[1] = mod->maxs[1];
+			tmp[1] = max;
 
 		if ( i & 4 )
-			tmp[2] = mod->mins[2];
+			tmp[2] = min;
 		else
-			tmp[2] = mod->maxs[2];
+			tmp[2] = max;
 
 		VectorCopy( tmp, mod->bbox[i] );
 	}	
