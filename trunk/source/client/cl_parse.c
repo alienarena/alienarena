@@ -93,6 +93,8 @@ void CL_DownloadComplete (void)
 	r = rename (oldn, newn);
 	if (r)
 		Com_Printf ("failed to rename.\n");
+	else
+		Com_Printf("Download complete: %s\n", cls.downloadname );
 }
 
 /*
@@ -166,7 +168,10 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 
 	// attempt an http download if available(never try to dl game model skins here)
 	if(cls.downloadurl[0] && CL_HttpDownload())
-			return false;
+	{
+		Com_Printf("HTTP download started: %s\n", cls.downloadname);
+		return false;
+	}
 
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
@@ -271,6 +276,23 @@ void CL_RegisterSounds (void)
 }
 
 
+/* Helper functions for CL_ParseDownload
+ */
+static void jpg_to_tga()
+{
+		
+	// substitute tga. downloadtmpname should be ok as is.
+	size_t exti = strlen(cls.downloadname) - 4;
+	Q_strncpyz( &cls.downloadname[exti], ".tga", 5 );
+
+}
+
+static qboolean is_jpg()
+{
+	size_t exti = strlen(cls.downloadname) - 4;
+	return  !Q_strncasecmp( ".jpg", &cls.downloadname[exti], 4 );
+}
+
 /*
 =====================
 CL_ParseDownload
@@ -288,20 +310,46 @@ void CL_ParseDownload (void)
 	percent = MSG_ReadByte (&net_message);
 	if (size < 0) //fix issues with bad data being dl'd
 	{
-		Com_Printf ("Server does not have file %s.\n", cls.downloadname);
-
-		//nuke the temp filename, we don't want that getting left around.
-		cls.downloadtempname[0] = 0;
-		cls.downloadname[0] = 0;
-
+		// if partial file resume failed, close and clear the .tmp
 		if (cls.download)
 		{
-			// if here, we tried to resume a file but the server said no
 			fclose (cls.download);
 			cls.download = NULL;
 		}
-		CL_RequestNextDownload ();
-		return;
+		
+		if ( !is_jpg() )
+		{
+			// Failed download was not a .jpg.
+			Com_Printf ("Server does not have file %s.\n", cls.downloadname);
+
+			//nuke the temp filename, we don't want that getting left around.
+			cls.downloadtempname[0] = 0;
+			cls.downloadname[0] = 0;
+
+			CL_RequestNextDownload ();
+			return;
+		}
+		else
+		{
+			/* 2016-02-22 If a jpg download failed here, start over
+			 * and look for a tga.
+			 */
+			Com_Printf("Server does not have jpg file %s. Trying tga.\n", cls.downloadname);
+			jpg_to_tga();
+			if ( cls.downloadurl[0] && CL_HttpDownload() )
+			{
+				Com_Printf("HTTP download started: %s\n", cls.downloadname);
+			}
+			else
+			{ // No HTTP, try UDP
+				Com_Printf("Downloading %s\n", cls.downloadname);
+				MSG_WriteByte(
+					&cls.netchan.message, clc_stringcmd);
+				MSG_WriteString(
+					&cls.netchan.message, va("download %s", cls.downloadname));
+			}
+			return;
+		}
 	}
 
 	// open the file if not opened yet
