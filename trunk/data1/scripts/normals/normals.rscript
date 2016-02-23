@@ -25,6 +25,15 @@ players/martianenforcer/blue
 		glow
 	}	
 }
+players/martianenforcer/destoroyah
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+		map2 players/martianenforcer/destoroyahfx.tga
+		glow
+	}
+}
 players/martianwarrior/red
 {
 	{
