@@ -1198,6 +1198,9 @@ nobase_dist_textures_DATA = \
 	desert/03door4.tga \
 	desert/03door4_hm.tga \
 	desert/03door4_nm.tga \
+	desert/arrow1.tga \
+	desert/arrow2.tga \
+	desert/arrow3.tga \
 	desert/barnroof.tga \
 	desert/barnroof_nm.tga \
 	desert/barnwindows.tga \
