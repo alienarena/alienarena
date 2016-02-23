@@ -803,6 +803,7 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
 	scripts/ctf-abyss.fog \
+	scripts/ctf-abyss.mus \
 	scripts/ctf-extermination2k15.fog \
 	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
