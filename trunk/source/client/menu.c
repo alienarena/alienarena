@@ -3560,6 +3560,7 @@ char *GetLine (char **contents, int *len)
 		num++;
 	}
 
+	line[num] = '\0';
 	ret = (char *)malloc (sizeof(line));
 	strcpy (ret, line);
 	return ret;
