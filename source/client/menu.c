@@ -3536,9 +3536,9 @@ static char mods_desc[] =
 
 char *GetLine (char **contents, int *len)
 {
+	static char line[2048];
 	int num;
 	int i;
-	char line[2048];
 	char *ret;
 
 	num = 0;
@@ -3552,18 +3552,14 @@ char *GetLine (char **contents, int *len)
 			*contents += (num + 1);
 			*len -= (num + 1);
 			line[num] = '\0';
-			ret = (char *)malloc (sizeof(line));
-			strcpy (ret, line);
-			return ret;
+			return line;
 		} 
 		line[num] = (*contents)[i];
 		num++;
 	}
 
 	line[num] = '\0';
-	ret = (char *)malloc (sizeof(line));
-	strcpy (ret, line);
-	return ret;
+	return line;
 }
 
 
@@ -3939,8 +3935,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
 		token = strtok( NULL, seps );
 	}	
-	
-	free (rLine);
 
 	//playerinfo
 	rankTotal = 0;
@@ -3960,8 +3954,6 @@ qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *dests
 			strncpy (playername, token, sizeof(playername)-1);
 		else
 			playername[0] = '\0';
-
-		free (rLine);
 
 		playername[sizeof(playername)-1] = '\0';
 
