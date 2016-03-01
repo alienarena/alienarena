@@ -4830,7 +4830,8 @@ static menulist_s   s_skill_box;
 
 static menuframework_s	s_levelshot_submenu;
 static menuitem_s		s_levelshot_preview;
-static menulist_s   	s_startserver_map_data[5];
+static menutxt_s   		s_startserver_map_data[5];
+static char			s_startserver_map_data_strings[5][128];
 
 void BotOptionsFunc( void *self )
 {
@@ -4860,7 +4861,7 @@ void MapInfoFunc( void *self ) {
 	char *pLine;
 	char *rLine;
 	int result;
-	int i;
+	int i = 0;
 	char seps[]   = "//";
 	char *token;
 	char startmap[128];
@@ -4887,16 +4888,11 @@ void MapInfoFunc( void *self ) {
 
 			/* Establish string and get the first token: */
 			token = strtok( rLine, seps );
-			i = 0;
-			while( token != NULL && i < 5) {
-
+			while (token != NULL && i < 5) {
+				/* While there are tokens in "string" */
+				Com_sprintf (s_startserver_map_data_strings[i], sizeof (s_startserver_map_data_strings[i]), "%s", token);
 				/* Get next token: */
 				token = strtok( NULL, seps );
-				/* While there are tokens in "string" */
-				s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
-				s_startserver_map_data[i].generic.name	= token;
-				s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
-
 				i++;
 			}
 
@@ -4905,15 +4901,11 @@ void MapInfoFunc( void *self ) {
 		fclose(desc_file);
 
 	}
-	else
-	{
-		for (i = 0; i < 5; i++ )
-		{
-			s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
-			s_startserver_map_data[i].generic.name	= "no data";
-			s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
-		}
-	}
+	
+	// If no tokens were parsed, fill all the labels. Otherwise, only fill the
+	// excess labels that weren't parsed.
+	for (; i < 5; i++)
+		Com_sprintf (s_startserver_map_data_strings[i], sizeof (s_startserver_map_data_strings[i]), "no data");
 	
 	Com_sprintf( levelshot, sizeof(levelshot), "/levelshots/%s", startmap );
 	s_levelshot_preview.generic.localstrings[0] = levelshot;
@@ -5203,7 +5195,8 @@ static void M_Menu_StartServer_f (void)
 
 	for ( i = 0; i < 5; i++) { 
 		s_startserver_map_data[i].generic.type	= MTYPE_TEXT;
-		s_startserver_map_data[i].generic.name	= "no data";
+		s_startserver_map_data[i].generic.name	= s_startserver_map_data_strings[i];
+		Com_sprintf (s_startserver_map_data_strings[i], sizeof (s_startserver_map_data_strings[i]), "no data");
 		s_startserver_map_data[i].generic.flags	= QMF_RIGHT_COLUMN;
 		Menu_AddItem( &s_levelshot_submenu, &s_startserver_map_data[i] );
 	}
