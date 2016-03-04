@@ -1583,6 +1583,10 @@ struct edict_s
 	
 	edict_t		*replaced_weapon;
 
+	// YAW event triggering - for doing smooth turns for various ents
+	int			last_turn_frame;
+	float		turn_angle_inc;
+
 // ACEBOT_ADD
 	qboolean is_bot;
 

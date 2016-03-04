@@ -1629,7 +1629,7 @@ void G_RunFrame (void)
 	int		i, numActiveClients = 0;
 	edict_t	*ent;
 
-	level.previousTime = gi.Sys_Milliseconds() - 100;
+	level.previousTime = gi.Sys_Milliseconds() - 1000*FRAMETIME;
 
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;

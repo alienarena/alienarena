@@ -39,7 +39,7 @@ void G_ResetHistory( edict_t *ent )
 
 	// fill up the history with data (assume the current position)
 	ent->client->historyHead = NUM_CLIENT_HISTORY - 1;
-	for ( i = ent->client->historyHead; i >= 0; i--, time -= 100 ) 
+	for ( i = ent->client->historyHead; i >= 0; i--, time -= 1000*FRAMETIME ) 
 	{
 		VectorCopy( ent->mins, ent->client->history[i].mins );
 		VectorCopy( ent->maxs, ent->client->history[i].maxs );
@@ -246,7 +246,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	}
 
 	// do the full lag compensation
-	time = ent->client->attackTime - ent->client->ping - 100; 
+	time = ent->client->attackTime - ent->client->ping - 1000*FRAMETIME; 
 	//100 ms is our "built-in" lag due to the 10fps server frame
 
 	G_TimeShiftAllClients( time, ent );
