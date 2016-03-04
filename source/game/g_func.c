@@ -1571,6 +1571,8 @@ void train_next (edict_t *self)
 	edict_t		*ent;
 	vec3_t		dest;
 	qboolean	first;
+	float		selfyaw;
+	float		targyaw;
 
 	first = true;
 again:
@@ -1624,7 +1626,34 @@ again:
 	VectorCopy (self->s.origin, self->moveinfo.start_origin);
 	VectorCopy (dest, self->moveinfo.end_origin);
 	Move_Calc (self, dest, train_wait);
-	VectorCopy (ent->s.angles, self->s.angles);
+
+	//trigger a turn, over multiple frames instead of simply snapping if we are running at a higher than 10fps rate
+	//this allows for much smoother turns! Let's just deal with ROLL for now, since that's all we ever use on these.
+	
+	//deal with positive angles only for simplicity's sake
+	if(self->s.angles[YAW] < 0)
+		selfyaw = 360 + self->s.angles[YAW];
+	else
+		selfyaw = self->s.angles[YAW];
+	if(ent->s.angles[YAW] < 0)
+		targyaw = 360 + ent->s.angles[YAW];
+	else
+		targyaw = ent->s.angles[YAW];
+
+	self->s.angles[YAW] = selfyaw;
+	ent->s.angles[YAW] = targyaw;
+
+	if(abs(targyaw - selfyaw < 180)) //move this direction
+	{
+		self->turn_angle_inc = (targyaw - selfyaw);
+	}
+	else //reverse it
+	{
+		self->turn_angle_inc = (targyaw - selfyaw > 0) ? ((targyaw - selfyaw)-360):((targyaw - selfyaw)+360);
+	}
+
+	self->last_turn_frame = level.framenum;	
+	
 	self->spawnflags |= TRAIN_START_ON;
 }
 
