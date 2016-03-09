@@ -25,6 +25,24 @@ maps/meshes/tech/obarch1
 		glow
 	}
 }
+maps/meshes/tech/obarch1_b
+{
+	{
+		map maps/meshes/tech/obarch1_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/obarch1_b_fx.tga
+		glow
+	}
+}
+maps/meshes/tech/obarch1_r
+{
+	{
+		map maps/meshes/tech/obarch1_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/obarch1_r_fx.tga
+		glow
+	}
+}
 maps/meshes/tech/biotubebase
 {
 	{
