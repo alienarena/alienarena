@@ -219,6 +219,7 @@ nobase_dist_maps_DATA = \
 	ctf-abyss.bsp \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
+	ctf-violator2k16.bsp \
 	dm-bloodfactory2k15.bsp \
 	dm-dismal2k15.bsp \
 	dm-extermination2k15.bsp \
@@ -583,9 +584,15 @@ nobase_dist_maps_DATA = \
 	meshes/tech/glasstube.md2 \
 	meshes/tech/obarch1.jpg \
 	meshes/tech/obarch1.md2 \
+	meshes/tech/obarch1_b.jpg \
+	meshes/tech/obarch1_b_fx.tga \
 	meshes/tech/obarch1_fx.tga \
 	meshes/tech/obarch1_normal.jpg \
+	meshes/tech/obarch1_r.jpg \
+	meshes/tech/obarch1_r_fx.tga \
 	meshes/tech/obarch2.md2 \
+	meshes/tech/obarch2_b.md2 \
+	meshes/tech/obarch2_r.md2 \
 	meshes/tech/obarch3.md2 \
 	meshes/tech/obfloor1.jpg \
 	meshes/tech/obfloor1.md2 \
@@ -808,6 +815,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
 	scripts/ctf-frost2k15.mus \
+	scripts/ctf-violator2k16.fog \
+	scripts/ctf-violator2k16.mus \
 	scripts/dm-bloodfactory2k15.fog \
 	scripts/dm-bloodfactory2k15.mus \
 	scripts/dm-dismal2k15.fog \

@@ -11,6 +11,8 @@ nobase_dist_levelshots_DATA = \
 	ctf-extermination2k15.txt \
 	ctf-frost2k15.jpg \
 	ctf-frost2k15.txt \
+	ctf-violator2k16.jpg \
+	ctf-violator2k16.txt \
 	dm-bloodfactory2k15.jpg \
 	dm-bloodfactory2k15.txt \
 	dm-dismal2k15.jpg \

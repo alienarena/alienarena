@@ -40,6 +40,7 @@ nobase_dist_botinfo_DATA = \
 	tac-extermination2k15.tmp \
 	tac-impact.tmp \
 	nav/ctf-extermination2k15.nod \
+	nav/ctf-violator2k16.nod \
 	nav/dm-bloodfactory2k15.nod \
 	nav/dm-dismal2k15.nod \
 	nav/dm-extermination2k15.nod \
