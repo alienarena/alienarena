@@ -512,6 +512,19 @@ static inline particle_t *new_particle (void)
 	return (active_particles = p);
 }
 
+#define WEATHER_PARTICLES 2048
+static int weather_particles;
+extern unsigned r_weather;
+
+static inline void free_particle (particle_t *p)
+{
+	if (p->type == PARTICLE_WEATHER || p->type == PARTICLE_FLUTTERWEATHER)
+		weather_particles--;
+	p->next = free_particles;
+	free_particles = p;
+	p->free = true;
+}
+
 float getColor(void)
 {
 	float color;
@@ -1421,9 +1434,9 @@ void CL_Voltage (vec3_t org)
 
 }
 
-void CL_BlueFlameParticle (vec3_t org, vec3_t angles)
+particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous)
 {
-	int			i, j;
+	int			j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup;
 	float		rightoffset, upoffset;
@@ -1452,33 +1465,47 @@ void CL_BlueFlameParticle (vec3_t org, vec3_t angles)
 	VectorMA(mflashorg, rightoffset, vright, mflashorg);
 	VectorMA(mflashorg, upoffset, vup, mflashorg);
 
-	for (i=0 ; i<4 ; i++)
+	if (!(p = new_particle()))
+		return NULL;
+
+	p->type = PARTICLE_CHAINED;
+	p->image = r_particletexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = .2;
+	p->scalevel = 2;
+
+	p->color = 0x74;
+	p->colorvel = 40;
+
+	for (j = 0; j < 3; j++)
 	{
-		if (!(p = new_particle()))
-			return;
-
-		p->type = PARTICLE_STANDARD;
-		p->image = r_particletexture;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-		p->scale = .2;
-		p->scalevel = 0;
-
-		p->color = 0x74;
-
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = mflashorg[j];
-			p->vel[j] = crand()*-1;
-		}
-
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = PARTICLE_GRAVITY;
-		p->alpha = 1.0;
-
-		p->alphavel = -1.0f / (0.1f + frand()*0.15f);
+		p->org[j] = mflashorg[j];
+		p->vel[j] = crand();
+		p->accel[j] = -p->vel[j];
 	}
+	
+	p->vel[2] += PARTICLE_GRAVITY * 0.1;
+	p->accel[2] = PARTICLE_GRAVITY / 2.5f;
+	p->alpha = 3.0;
 
+	p->alphavel = -1.0f / (0.1f + frand()*0.15f);
+	
+	if (previous != NULL)
+	{
+		vec3_t movement;
+		float dist;
+		
+		VectorSubtract (p->org, previous->org, movement);
+		dist = 25.0f * VectorLength (movement) / (p->time - previous->time);
+		if (dist < 1.0)
+			dist = 1.0;
+		p->alpha /= dist;
+	}
+	
+	p->chain_prev = previous;
+	
+	return p;
 }
 /*
 ===============
@@ -3311,10 +3338,6 @@ void CL_TeleportParticles (vec3_t orig_start)
 	}
 }
 
-#define WEATHER_PARTICLES 2048
-static int weather_particles;
-extern unsigned r_weather;
-
 /*
 Cl_WeatherEffects - originally adopted from Jay Dolan's Q2W
 */
@@ -3861,7 +3884,7 @@ void CL_AddParticles (void)
 	active = NULL;
 	tail = NULL;
 
-	for (p=active_particles ; p ; p=next)
+	for (p = active_particles; p; p = next)
 	{
 		next = p->next;
 
@@ -3872,10 +3895,7 @@ void CL_AddParticles (void)
 			p->current_alpha = p->alpha + time*p->alphavel;
 			if (p->current_alpha <= 0)
 			{	// faded out
-				if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_FLUTTERWEATHER)
-					weather_particles--;
-				p->next = free_particles;
-				free_particles = p;
+				free_particle (p);
 				continue;
 			}
 		}
@@ -3914,9 +3934,7 @@ void CL_AddParticles (void)
 		if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_FLUTTERWEATHER)
 		{
 			if (p->current_origin[2] <= p->end[2]){
-				p->next = free_particles;
-				free_particles = p;
-				weather_particles--;
+				free_particle (p);
 				continue;
 			}
 		}
@@ -3960,6 +3978,15 @@ void CL_AddParticles (void)
 				V_AddLight (p->current_origin, light, plight->lightcol[0], plight->lightcol[1], plight->lightcol[2]);
 			}
 		}
+	}
+
+	active_particles = active;
+	
+	// second pass: clean up chains that have had some of their members expire
+	for (p = active_particles; p; p = p->next)
+	{
+		if (p->type == PARTICLE_CHAINED && p->chain_prev != NULL && p->chain_prev->free)
+			p->chain_prev = NULL;
 		
 		// hack a scale up to keep particles from disapearing
         p->dist = ( p->current_origin[0] - r_origin[0] ) * vpn[0] +
@@ -3973,7 +4000,7 @@ void CL_AddParticles (void)
         else
             p->dist = 2;
         
-        if ((p->type == PARTICLE_CHAINED && true) != (p->chain_prev && true))
+        if ((p->type == PARTICLE_CHAINED) != (p->chain_prev != NULL))
         	continue;
         
         if (p->type == PARTICLE_CHAINED && p->chain_prev) {
@@ -3987,8 +4014,6 @@ void CL_AddParticles (void)
         
 		V_AddParticle (p);
 	}
-
-	active_particles = active;
 }
 
 

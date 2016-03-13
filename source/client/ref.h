@@ -209,6 +209,8 @@ typedef struct particle_s
 	struct particle_s	*next;
 
 	cplight_t	lights[P_LIGHTS_MAX];
+	
+	qboolean	free;
 
 	float		time;
 
