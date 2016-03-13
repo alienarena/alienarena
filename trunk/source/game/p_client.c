@@ -770,32 +770,6 @@ void TossClientWeapon (edict_t *self)
 
 /*
 ==================
-LookAtKiller
-==================
-*/
-void LookAtKiller (edict_t *self, edict_t *inflictor, edict_t *attacker)
-{
-	vec3_t		dir;
-
-	if (attacker && attacker != world && attacker != self)
-	{
-		VectorSubtract (attacker->s.origin, self->s.origin, dir);
-	}
-	else if (inflictor && inflictor != world && inflictor != self)
-	{
-		VectorSubtract (inflictor->s.origin, self->s.origin, dir);
-	}
-	else
-	{
-		self->client->killer_yaw = self->s.angles[YAW];
-		return;
-	}
-
-	self->client->killer_yaw = 180/M_PI*atan2(dir[1], dir[0]);
-}
-
-/*
-==================
 player_die
 ==================
 */
