@@ -55,6 +55,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
+#ifdef __GNUC__
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
+#endif
+
 // After a float has been sprintf'd to a buffer, strip trailing zeroes and
 // possibly trailing decimal point.
 static void cleanup_float_string (char *str)
@@ -137,7 +143,6 @@ void SetFontNames (char **list);
 void M_Menu_Main_f (void);
 	static void M_Menu_PlayerConfig_f (void);
 	static void M_Menu_Game_f (void);
-		static void M_Menu_Credits_f( void );
 	static void M_Menu_JoinServer_f (void);
 			static void M_Menu_AddressBook_f( void );
 			static void M_Menu_PlayerRanking_f( void );
@@ -150,14 +155,14 @@ void M_Menu_Main_f (void);
 		static void M_Menu_Keys_f (void);
 	static void M_Menu_Quit_f (void);
 
-	static void M_Menu_Credits( void );
+	static void M_Menu_Credits_f (void);
 
 qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 
 static size_t szr; // just for unused result warnings
 
-inline qboolean is_team_game( float rule_value )
+static inline qboolean is_team_game (float rule_value)
 {
 	int rv = (int)rule_value;
 	Com_DPrintf("[is_team_game: rule_value:  %i]\n", rule_value );
@@ -381,7 +386,7 @@ static inline void refreshCursorButton (int button)
 	cursor.buttonclicks[button] = 0;
 }
 
-void refreshAllCursorButtons(void)
+static void refreshAllCursorButtons (void)
 {
 	int i;
 	for (i = 0; i < MENU_CURSOR_BUTTON_MAX; i++)
@@ -418,7 +423,7 @@ void refreshAllCursorButtons(void)
 // pixels, positive or negative depending on the direction.  Call this
 // function repeatedly with your target, and it will return a series of pixel
 // offsets that can be used in your animation.
-int M_Interp (int progress, int target)
+static int M_Interp (int progress, int target)
 {
 	int increment = 0; // always positive
 	
@@ -683,10 +688,10 @@ static inline int MenuScreens_Animate_Outgoing_Start (void)
 	return ret;
 }
 
-void Menuscreens_Animate (void);
+static void Menuscreens_Animate (void);
 
 // state machine state transitions
-void Menuscreens_Animate_Insert_To_Steady (void)
+static void Menuscreens_Animate_Insert_To_Steady (void)
 {
 	int i;
 	for (i = 0; i < mstate.incoming.num_layers; i++)
@@ -698,7 +703,7 @@ void Menuscreens_Animate_Insert_To_Steady (void)
 	mstate.animation = 0;
 	Menuscreens_Animate ();
 }
-void Menuscreens_Animate_Remove_To_Steady (void)
+static void Menuscreens_Animate_Remove_To_Steady (void)
 {
 	mstate.outgoing.num_layers = 0;
 	mstate.state = mstate_steady;
@@ -710,12 +715,12 @@ void Menuscreens_Animate_Remove_To_Steady (void)
 	Menuscreens_Animate ();
 }
 
-void M_Main_Draw (menuvec2_t offset);
+static void M_Main_Draw (menuvec2_t offset);
 void CheckMainMenuMouse (void);
 
 // This is where the magic happens. (TODO: maybe separate the actual rendering
 // out into a different function?)
-void Menuscreens_Animate (void)
+static void Menuscreens_Animate (void)
 {
 	int shove_offset, anim_start, anim_end;
 	menuvec2_t main_offs;
@@ -834,7 +839,7 @@ void Menuscreens_Animate (void)
 // These functions (Push, Force Off, and Pop) are used by the outside world to
 // control the state machine.
 
-void M_PushMenu ( void (*draw) (menuframework_s *screen, menuvec2_t offset), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
+static void M_PushMenu (void (*draw) (menuframework_s *screen, menuvec2_t offset), const char *(*key) (menuframework_s *screen, int k), menuframework_s *screen)
 {
 	int			i, insertion_point;
 	qboolean	found = false;
@@ -893,7 +898,7 @@ void M_ForceMenuOff (void)
 	S_StartMapMusic();
 }
 
-void M_PopMenu (void)
+static void M_PopMenu (void)
 {
 	S_StartLocalSound( menu_out_sound );
 	if (mstate.active.num_layers == 0)
@@ -908,7 +913,7 @@ void M_PopMenu (void)
 }
 
 
-const char *Default_MenuKey (menuframework_s *m, int key)
+static const char *Default_MenuKey (UNUSED menuframework_s *m, int key)
 {
 	const char *sound = NULL;
 	
@@ -994,9 +999,10 @@ void (*main_open_funcs[MAIN_ITEMS])(void) =
 	&M_Menu_Credits_f
 };
 
-void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
+static void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 {
-	int w, h, i;
+	int w, h;
+	unsigned int i;
 	float scale;
 
 	scale = (float)(viddef.height)/600;
@@ -1004,7 +1010,7 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 	*totalheight = 0;
 	*widest = -1;
 
-	for ( i = 0; i < MAIN_ITEMS; i++ )
+	for (i = 0; i < MAIN_ITEMS; i++)
 	{
 		Draw_GetPicSize( &w, &h, main_names[i] );
 
@@ -1017,9 +1023,9 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 	*xoffset = ( viddef.width - *widest + 350*scale) / 2;
 }
 
-void M_Main_Draw (menuvec2_t offset)
+static void M_Main_Draw (menuvec2_t offset)
 {
-	int i;
+	unsigned int i;
 	int ystart, xstart, xend;
 	int	xoffset;
 	int widest = -1;
@@ -1080,7 +1086,7 @@ void M_Main_Draw (menuvec2_t offset)
 	}
 	
 	//draw the main menu buttons
-	for ( i = 0; i < MAIN_ITEMS; i++ )
+	for (i = 0; i < MAIN_ITEMS; i++)
 	{
 		strcpy( litname, main_names[i] );
 		if (i == m_main_cursor && cursor.menulayer == -1)
@@ -1123,7 +1129,7 @@ void CheckMainMenuMouse (void)
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 
 	i = (cursor.y - ystart - 24*scale)/(32*scale);
-	if (i < 0 || i >= MAIN_ITEMS)
+	if (i < 0 || (unsigned)i >= MAIN_ITEMS)
 	{
 		if (cursor.buttonclicks[MOUSEBUTTON1]==1)
 		{
@@ -1152,7 +1158,7 @@ void CheckMainMenuMouse (void)
 	}
 }
 
-const char *M_Main_Key (int key)
+static const char *M_Main_Key (int key)
 {
 	switch (key)
 	{
@@ -1165,7 +1171,7 @@ const char *M_Main_Key (int key)
 	case K_DOWNARROW:
 	case K_TAB:
 	case K_MWHEELDOWN:
-		if (++m_main_cursor >= MAIN_ITEMS)
+		if ((unsigned)(++m_main_cursor) >= MAIN_ITEMS)
 			m_main_cursor = 0;
 		break;
 
@@ -1371,7 +1377,7 @@ static void KeyBindingFunc( void *_self )
 
 static void Keys_MenuInit( void )
 {
-	int i = 0;
+	unsigned int i;
 
 	setup_window (s_keys_screen, s_keys_menu, "CUSTOMIZE CONTROLS");
 	
@@ -1495,7 +1501,7 @@ static void SpinOptionFunc (void *_self)
 	Cvar_SetValue( cvarname, self->curvalue );
 }
 
-static menuvec2_t FontSelectorSizeFunc (void *_self, FNT_font_t unused)
+static menuvec2_t FontSelectorSizeFunc (void *_self, UNUSED FNT_font_t unused)
 {
 	menuvec2_t ret;
 	menulist_s *self;
@@ -1510,7 +1516,7 @@ static menuvec2_t FontSelectorSizeFunc (void *_self, FNT_font_t unused)
 	return ret;
 }
 
-static void FontSelectorDrawFunc (void *_self, FNT_font_t unused)
+static void FontSelectorDrawFunc (void *_self, UNUSED FNT_font_t unused)
 {
 	extern const float light_color[4];
 	menulist_s *self;
@@ -1684,7 +1690,7 @@ extern cvar_t *cl_hudimage2;
 char *hud_names[MAX_HUDS];
 
 // initialize a menu item as an "option."
-void Option_Setup (menumultival_s *item, option_name_t *optionname)
+static void Option_Setup (menumultival_s *item, option_name_t *optionname)
 {
 	int val, maxval;
 	char *vartextval;
@@ -1887,7 +1893,7 @@ static int				last_options_menu_nitems;
 
 // Use this anywhere to reinitialize whatever options menu is currently 
 // showing so it reflects current cvar values.
-void Options_Menu_Reinitialize (void)
+static void Options_Menu_Reinitialize (void)
 {
 	int i;
 	for (i = 0; i < last_options_menu_nitems; i++)
@@ -1945,7 +1951,7 @@ static float ClampCvar( float min, float max, float value )
 	return value;
 }
 
-qboolean fontInList (char *check, int num, char **list)
+static qboolean fontInList (char *check, int num, char **list)
 {
 	int i;
 	for (i=0;i<num;i++)
@@ -1956,7 +1962,7 @@ qboolean fontInList (char *check, int num, char **list)
 
 // One string after another, both in the same memory block, but each with its
 // own null terminator. 
-char *str_combine (char *in1, char *in2)
+static char *str_combine (char *in1, char *in2)
 {
 	size_t outsize;
 	char *out;
@@ -1970,7 +1976,7 @@ char *str_combine (char *in1, char *in2)
 	return out;
 }
 
-void insertFile (char ** list, char *insert1, char *insert2, int ndefaults, int len )
+static void insertFile (char ** list, char *insert1, char *insert2, int ndefaults, int len)
 {
 	int i, j;
 	char *tmp;
@@ -2345,7 +2351,7 @@ option_name_t disp_option_names[] =
 
 menumultival_s options[num_options];
 
-static void OptionsResetDefaultsFunc( void *unused )
+static void OptionsResetDefaultsFunc (UNUSED void *unused)
 {
 	Cbuf_AddText ("exec default.cfg\n");
 	Cbuf_Execute();
@@ -2357,7 +2363,7 @@ static void OptionsResetDefaultsFunc( void *unused )
 
 }
 
-static void OptionsResetSavedFunc( void *unused )
+static void OptionsResetSavedFunc (UNUSED void *unused)
 {
 	Cbuf_AddText ("exec config.cfg\n");
 	Cbuf_Execute();
@@ -2622,7 +2628,7 @@ static void PresetCallback (void *_self)
 	Video_MenuInit (); //TODO: alert user of the need to apply here
 }
 
-void VidApplyFunc (void *self)
+static void VidApplyFunc (void *self)
 {
 #if defined UNIX_VARIANT
 	extern qboolean vid_restart;
@@ -2797,7 +2803,7 @@ static void InvertMouseFunc( void *_self )
 		Cvar_SetValue( "m_pitch", -m_pitch->value );
 }
 
-void CustomizeControlsFunc (void *unused)
+static void CustomizeControlsFunc (UNUSED void *unused)
 {
 	M_Menu_Keys_f ();
 }
@@ -2900,18 +2906,18 @@ static menufield_s		s_irc_nickname;
 static menufield_s		s_irc_kickrejoin;
 static menufield_s		s_irc_reconnectdelay;
 
-static void JoinIRCFunc( void *unused )
+static void JoinIRCFunc (UNUSED void *unused)
 {
 	if(PLAYER_NAME_UNIQUE)
 		CL_InitIRC();
 }
 
-static void QuitIRCFunc( void *unused )
+static void QuitIRCFunc (UNUSED void *unused)
 {
 	CL_IRCInitiateShutdown();
 }
 
-static void ApplyIRCSettings( void * self )
+static void ApplyIRCSettings (UNUSED void *self)
 {
 	qboolean running = CL_IRCIsRunning( );
 	if ( running ) {
@@ -3031,7 +3037,7 @@ static void M_FindIRCKey ( void )
 	Com_sprintf(IRC_key, sizeof(IRC_key), "(IRC Chat Key is %s)", Key_KeynumToString(twokeys[0]));
 }
 
-void IRC_MenuInit( void )
+static void IRC_MenuInit (void)
 {
 	if(!cl_IRC_connect_at_startup)
 		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
@@ -3053,7 +3059,7 @@ void IRC_MenuInit( void )
 }
 
 
-void IRC_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
+static void IRC_MenuDraw (UNUSED menuframework_s *dummy, menuvec2_t offset)
 {
 	//warn user that they cannot join until changing default player name
 	if(!PLAYER_NAME_UNIQUE)
@@ -3077,7 +3083,7 @@ void IRC_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 	Screen_Draw (&s_irc_screen, offset);
 }
 
-void M_Menu_IRC_f (void)
+static void M_Menu_IRC_f (void)
 {
 	IRC_MenuInit();
 	M_PushMenu (IRC_MenuDraw, Default_MenuKey, &s_irc_screen);
@@ -3129,7 +3135,7 @@ static void OptionScreenFunc (void *_self)
 	option_open_funcs[self->generic.localints[0]]();
 }
 
-void M_Menu_Options_f (void)
+static void M_Menu_Options_f (void)
 {
 	int i;
 	
@@ -3312,7 +3318,7 @@ static const char *idcredits[] =
 	0
 };
 
-void M_Credits_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
+static void M_Credits_MenuDraw (UNUSED menuframework_s *dummy, menuvec2_t offset)
 {
 	int i, y, scale;
 	FNT_font_t		font;
@@ -3348,7 +3354,7 @@ void M_Credits_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
 		credits_start_time = cls.realtime;
 }
 
-const char *M_Credits_Key (menuframework_s *dummy, int key)
+static const char *M_Credits_Key (UNUSED menuframework_s *dummy, int key)
 {
 	if (key == K_ESCAPE)
 	{
@@ -3361,7 +3367,7 @@ const char *M_Credits_Key (menuframework_s *dummy, int key)
 
 }
 
-void M_Menu_Credits_f( void )
+static void M_Menu_Credits_f (void)
 {
 	static menuframework_s dummy;
 	
@@ -3534,12 +3540,11 @@ static char mods_desc[] =
 	"\\g_dm_lights"     "\\high-visibility lights on players"
 	"\\";
 
-char *GetLine (char **contents, int *len)
+static char *GetLine (char **contents, int *len)
 {
 	static char line[2048];
 	int num;
 	int i;
-	char *ret;
 
 	num = 0;
 	line[0] = '\0';
@@ -3605,7 +3610,7 @@ static struct
 
 static int serverindex;
 
-void JoinServerFunc (void *unused)
+static void JoinServerFunc (UNUSED void *unused)
 {
 	int		i;
 	char	buffer[128];
@@ -3632,7 +3637,7 @@ void JoinServerFunc (void *unused)
 	M_ForceMenuOff ();
 }
 
-void ModList_SubmenuInit (void)
+static void ModList_SubmenuInit (void)
 {
 	int i;
 	char	modstring[64];
@@ -3680,7 +3685,7 @@ void ModList_SubmenuInit (void)
 	s_servers[serverindex].modlist_submenu.yscroll = 0;
 }
 
-void ServerInfo_SubmenuInit (void)
+static void ServerInfo_SubmenuInit (void)
 {
 	size_t sizes[2] = {sizeof(menutxt_s), sizeof(menutxt_s)};
 	
@@ -3754,7 +3759,7 @@ void ServerInfo_SubmenuInit (void)
 	Menu_AddItem (&s_servers[serverindex].menu, &s_servers[serverindex].serverinfo_submenu);
 }
 
-void PlayerList_SubmenuInit (void)
+static void PlayerList_SubmenuInit (void)
 {
 	int i, j;
 	
@@ -3857,7 +3862,7 @@ static void M_Menu_SelectedServer_f (void)
 }
 
 //TODO: Move this out of the menu section!
-qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserver)
+static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserver)
 {
 	char *rLine;
 	char *token;
@@ -4046,12 +4051,12 @@ void M_UpdateConnectedServerInfo (netadr_t adr, char *status_string)
 	remoteserver_jousting = connectedserver.joust;
 }
 
-void DeselectServer (void)
+static void DeselectServer (void)
 {
 	serverindex = -1;
 }
 
-void SelectServer (int index)
+static void SelectServer (int index)
 {
 	// used if the player hits enter without his mouse over the server list	
 	serverindex = index;
@@ -4060,7 +4065,7 @@ void SelectServer (int index)
 }
 
 //join on double click, return info on single click - to do - might consider putting player info in a tooltip on single click/right click
-void ClickServerFunc( void *self )
+static void ClickServerFunc (void *self)
 {
 	int		index = ( menuframework_s * ) self - s_serverlist_rows;
 
@@ -4079,17 +4084,17 @@ void ClickServerFunc( void *self )
 	JoinServerFunc (NULL);
 }
 
-void AddressBookFunc( void *self )
+static void AddressBookFunc (UNUSED void *self)
 {
 	M_Menu_AddressBook_f();
 }
 
-void PlayerRankingFunc( void *self )
+static void PlayerRankingFunc (UNUSED void *self)
 {
 	M_Menu_PlayerRanking_f();
 }
 
-void SearchLocalGames( void )
+static void SearchLocalGames (void)
 {
 	m_num_servers = 0;
 	DeselectServer ();
@@ -4109,7 +4114,7 @@ void SearchLocalGames( void )
 	Com_Printf (" Got %d servers- stragglers may follow.\n", m_num_servers);
 }
 
-void SearchLocalGamesFunc( void *self )
+static void SearchLocalGamesFunc (UNUSED void *self)
 {
 	SearchLocalGames();
 }
@@ -4200,7 +4205,7 @@ static void SortServerList_Func ( void *_self )
 	s_serverlist_submenu.yscroll = 0;
 }
 
-void ServerList_SubmenuInit (void)
+static void ServerList_SubmenuInit (void)
 {
 	int i, j;
 	
@@ -4268,7 +4273,7 @@ void ServerList_SubmenuInit (void)
 	
 }
 
-void ServerListHeader_SubmenuInit (void)
+static void ServerListHeader_SubmenuInit (void)
 {
 	s_joinserver_header.generic.type = MTYPE_SUBMENU;
 	s_joinserver_header.nitems = 0;
@@ -4418,7 +4423,7 @@ static const DMFlag_control_t dmflag_control_names[] = {
 static menuframework_s	s_dmflags_submenu;
 static menulist_s		s_dmflag_controls[num_dmflag_controls];
 
-void SetWeaponModeFunc(void *_self)
+static void SetWeaponModeFunc (void *_self)
 {
 	menulist_s *self;
 	int i, value;
@@ -4580,7 +4585,7 @@ struct botinfo {
 
 int slot;
 
-void LoadBotInfo( void )
+static void LoadBotInfo (void)
 {
 	FILE *pIn;
 	int i, count;
@@ -4647,7 +4652,7 @@ void LoadBotInfo( void )
 	fclose(pIn);
 }
 
-void AddbotFunc(void *self)
+static void AddbotFunc (void *self)
 {
 	int i, count;
 	char startmap[MAX_QPATH];
@@ -4825,29 +4830,18 @@ static menuitem_s		s_levelshot_preview;
 static menutxt_s   		s_startserver_map_data[5];
 static char			s_startserver_map_data_strings[5][128];
 
-void BotOptionsFunc( void *self )
+static void BotOptionsFunc (UNUSED void *self)
 {
 	M_Menu_BotOptions_f();
 }
 
-void MutatorFunc( void *self )
+static void MutatorFunc (UNUSED void *self)
 {
 	M_Menu_Mutators_f();
 }
-int Menu_FindFile (char *filename, FILE **file)
+
+static void MapInfoFunc (UNUSED void *self)
 {
-	*file = fopen (filename, "rb");
-	if (!*file) {
-		*file = NULL;
-		return -1;
-	}
-	return 1;
-
-}
-
-void MapInfoFunc( void *self ) {
-
-	// FILE *map_file; // unused
 	FILE *desc_file;
 	char line[500];
 	char *pLine;
@@ -4904,7 +4898,7 @@ void MapInfoFunc( void *self ) {
 
 }
 
-void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
+static void RulesChangeFunc (UNUSED void *self) //this has been expanded to rebuild map list
 {
 	char *buffer;
 	char  mapsname[1024];
@@ -5084,7 +5078,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	MapInfoFunc(NULL);
 }
 
-void StartServerActionFunc( void *self )
+static void StartServerActionFunc (UNUSED void *self)
 {
 	char	startmap[128];
 	int		timelimit;
@@ -5298,7 +5292,7 @@ BOT OPTIONS MENU
 static menuframework_s s_botoptions_screen;
 static menuframework_s s_botoptions_menu;
 
-void Read_Bot_Info()
+static void Read_Bot_Info ()
 {
 	FILE *pIn;
 	int i, count;
@@ -5604,7 +5598,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	FILE *modelfile;
 	int i;
 	extern float CalcFov( float fov_x, float w, float h );
-	float scale;
 	entity_t entity[3];
 	menumodel_s *self = (menumodel_s*) _self;
 	
@@ -5618,8 +5611,6 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	if (self->yaw > 360)
 		self->yaw = 0;
 
-	scale = (float)(viddef.height)/600;
-	
 	memset( &refdef, 0, sizeof( refdef ) );
 	
 	refdef.width = self->w*font->size;
@@ -5722,7 +5713,7 @@ static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
 static char *s_pmnames[MAX_PLAYERMODELS];
 static int s_numplayermodels = 0;
 
-static void ModelCallback (void *unused)
+static void ModelCallback (UNUSED void *unused)
 {
 	s_player_skin_box.itemnames = (const char **) s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
@@ -5730,7 +5721,7 @@ static void ModelCallback (void *unused)
 	Menu_ActivateItem ((menuitem_s *)&s_player_skin_box);
 }
 
-static void SkinCallback (void *unused)
+static void SkinCallback (UNUSED void *unused)
 {
 	char scratch[MAX_QPATH];
 	
@@ -5972,7 +5963,7 @@ static void PasswordCallback (void *_self)
 	}
 }
 
-void PConfigApplyFunc (void *self)
+static void PConfigApplyFunc (void *self)
 {
 	Menu_ApplyMenu (Menu_GetItemTree ((menuitem_s *)self));
 }
@@ -5991,7 +5982,7 @@ static menuvec2_t PlayerConfigModelSizeFunc (void *_self, FNT_font_t font)
 	return ret;
 }
 
-void PlayerConfig_MenuInit( void )
+static void PlayerConfig_MenuInit (void)
 {
 	extern cvar_t *name;
 	// extern cvar_t *team; // unused
@@ -5999,12 +5990,9 @@ void PlayerConfig_MenuInit( void )
 	char currentdirectory[1024];
 	char currentskin[1024];
 	int i = 0;
-	float scale;
 	int currentdirectoryindex = 0;
 	int currentskinindex = 0;
 	cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
-
-	scale = (float)(viddef.height)/600;
 
 	PlayerConfig_ScanDirectories();
 
@@ -6171,7 +6159,7 @@ void PlayerConfig_MenuInit( void )
 	}
 }
 
-void PlayerConfig_MenuDraw (menuframework_s *dummy, menuvec2_t offset)
+static void PlayerConfig_MenuDraw (UNUSED menuframework_s *dummy, menuvec2_t offset)
 {
 	if(!PLAYER_NAME_UNIQUE)
 		s_player_config_menu.statusbar = "You must change your player name before joining a server!";
@@ -6203,7 +6191,6 @@ ALIEN ARENA TACTICAL MENU
 //or - abort this entirely, and have an in-game way to join a team like we do in CTF
 
 static menuframework_s	s_tactical_screen;
-static menuaction_s		s_tactical_title_action;
 
 #define num_tactical_teams		2
 #define num_tactical_classes	3
@@ -6266,10 +6253,7 @@ static void TacticalScreen_Draw (menuframework_s *screen, menuvec2_t offset)
 static void M_Menu_Tactical_f (void)
 {
 	extern cvar_t *name;
-	float scale;
 	int i, j;
-	
-	scale = (float)(viddef.height)/600;
 	
 	for (i = 0; i < num_tactical_teams; i++)
 	{
@@ -6331,11 +6315,11 @@ QUIT MENU
 static menuframework_s	s_quit_screen;
 static menuframework_s	s_quit_menu;
 
-void quitActionNo (void *blah)
+static void quitActionNo (UNUSED void *blah)
 {
 	M_PopMenu();
 }
-void quitActionYes (void *blah)
+static void quitActionYes (UNUSED void *blah)
 {
 	CL_Quit_f();
 }
@@ -6382,7 +6366,7 @@ void refreshCursorLink (void)
 	cursor.click_menuitem = NULL;
 }
 
-int Slider_CursorPositionX ( menuslider_s *s )
+static int Slider_CursorPositionX (menuslider_s *s)
 {
 	float		range;
 	FNT_font_t	font;
@@ -6399,7 +6383,7 @@ int Slider_CursorPositionX ( menuslider_s *s )
 	return ( int )( font->width + RCOLUMN_OFFSET + (SLIDER_SIZE) * font->width * range );
 }
 
-int newSliderValueForX (int x, menuslider_s *s)
+static int newSliderValueForX (int x, menuslider_s *s)
 {
 	float 		newValue;
 	int 		newValueInt;
@@ -6416,7 +6400,7 @@ int newSliderValueForX (int x, menuslider_s *s)
 	return newValueInt;
 }
 
-void Slider_CheckSlide( menuslider_s *s )
+static void Slider_CheckSlide (menuslider_s *s)
 {
 	if ( s->curvalue > s->maxvalue )
 		s->curvalue = s->maxvalue;
@@ -6427,7 +6411,7 @@ void Slider_CheckSlide( menuslider_s *s )
 		s->generic.callback( s );
 }
 
-void Menu_DragSlideItem (void)
+static void Menu_DragSlideItem (void)
 {
 	menuslider_s *slider = ( menuslider_s * ) cursor.menuitem;
 
@@ -6435,7 +6419,7 @@ void Menu_DragSlideItem (void)
 	Slider_CheckSlide ( slider );
 }
 
-void Menu_ClickSlideItem (void)
+static void Menu_ClickSlideItem (void)
 {
 	int min, max;
 	menuslider_s *slider = ( menuslider_s * ) cursor.menuitem;
@@ -6449,7 +6433,7 @@ void Menu_ClickSlideItem (void)
 		Menu_SlideItem (1);
 }
 
-void Menu_DragVertScrollItem (void)
+static void Menu_DragVertScrollItem (void)
 {
 	float			scrollbar_pos;
 	menuframework_s	*menu = cursor.menuitem->generic.parent;
@@ -6463,7 +6447,7 @@ void Menu_DragVertScrollItem (void)
 		menu->yscroll = menu->maxscroll;
 }
 
-void M_Draw_Cursor (void)
+static void M_Draw_Cursor (void)
 {
 	Draw_Pic (cursor.x, cursor.y, "m_mouse_cursor");
 }
