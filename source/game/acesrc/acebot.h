@@ -202,7 +202,6 @@ extern int num_items;
 extern int num_bots;
 
 // id Function Protos I need
-void     LookAtKiller (edict_t *self, edict_t *inflictor, edict_t *attacker);
 void     ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker);
 void     TossClientWeapon (edict_t *self);
 void     ClientThink (edict_t *ent, usercmd_t *ucmd);
