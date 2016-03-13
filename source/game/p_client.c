@@ -90,7 +90,7 @@ void player_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-qboolean IsFemale (edict_t *ent)
+static qboolean IsFemale (edict_t *ent)
 {
 	char		*info;
 
@@ -1191,7 +1191,7 @@ PlayersRangeFromSpot
 Returns the distance to the nearest player from the given spot
 ================
 */
-float	PlayersRangeFromSpot (edict_t *spot)
+static float	PlayersRangeFromSpot (edict_t *spot)
 {
 	edict_t	*player;
 	float	bestplayerdistance;
@@ -1230,7 +1230,7 @@ go to a random point, but NOT the two points closest
 to other players
 ================
 */
-edict_t *SelectRandomDeathmatchSpawnPoint (void)
+static edict_t *SelectRandomDeathmatchSpawnPoint (void)
 {
 	edict_t	*spot, *spot1, *spot2;
 	int		count = 0;
@@ -1294,7 +1294,7 @@ go to a random point, but NOT the two points closest
 to other players
 ================
 */
-edict_t *SelectRandomCTFSpawnPoint (void)
+static edict_t *SelectRandomCTFSpawnPoint (void)
 {
 	edict_t	*spot, *spot1, *spot2;
 	int		count = 0;
@@ -1362,7 +1362,7 @@ SelectFarthestDeathmatchSpawnPoint
 
 ================
 */
-edict_t *SelectFarthestDeathmatchSpawnPoint (void)
+static edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 {
 	edict_t	*bestspot;
 	float	bestdistance, bestplayerdistance;
@@ -1395,7 +1395,7 @@ edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 	return spot;
 }
 
-edict_t *SelectDeathmatchSpawnPoint (void)
+static edict_t *SelectDeathmatchSpawnPoint (void)
 {
 	if ( dmflags->integer & DF_SPAWN_FARTHEST)
 		return SelectFarthestDeathmatchSpawnPoint ();
@@ -1411,7 +1411,7 @@ go to a ctf point, but NOT the two points closest
 to other players
 ================
 */
-edict_t *SelectCTFSpawnPoint (edict_t *ent)
+static edict_t *SelectCTFSpawnPoint (edict_t *ent)
 {
 	edict_t	*spot, *spot1, *spot2;
 	int		count = 0;
@@ -1549,7 +1549,8 @@ BodySink
 After sitting around for five seconds, fall into the ground and dissapear
 =============
 */
-void BodySink( edict_t *ent ) {
+static void BodySink (edict_t *ent)
+{
 	if ( level.time - ent->timestamp > 10.5 ) {
 		// the body ques are never actually freed, they are just unlinked
 		gi.unlinkentity( ent );
@@ -1567,7 +1568,7 @@ void BodySink( edict_t *ent ) {
 	ent->solid = SOLID_NOT; //don't gib sinking bodies
 }
 
-void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+static void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	self->s.modelindex3 = 0;
 	self->s.modelindex4 = 0;
@@ -1668,7 +1669,7 @@ void respawn (edict_t *self)
 }
 
 //spectator mode
-void spectator_respawn (edict_t *ent)
+static void spectator_respawn (edict_t *ent)
 {
 	int i, numspec;
 
@@ -2378,7 +2379,7 @@ A client has just connected to the server in
 deathmatch mode, so clear everything out before starting them.
 =====================
 */
-void ClientBeginDeathmatch (edict_t *ent)
+static void ClientBeginDeathmatch (edict_t *ent)
 {
 	G_InitEdict (ent);
 
@@ -2749,7 +2750,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 }
 
-void ClientChangeSkin (edict_t *ent)
+static void ClientChangeSkin (edict_t *ent)
 {
 	char *s;
 	int  playernum;
@@ -3015,7 +3016,7 @@ void ClientDisconnect (edict_t *ent)
 edict_t	*pm_passent;
 
 // pmove doesn't need to know about passent and contentmask
-trace_t	PM_trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
+static trace_t	PM_trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 {
 	if (pm_passent->health > 0)
 		return gi.trace (start, mins, maxs, end, pm_passent, MASK_PLAYERSOLID);
@@ -3023,7 +3024,7 @@ trace_t	PM_trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 		return gi.trace (start, mins, maxs, end, pm_passent, MASK_DEADSOLID);
 }
 
-unsigned CheckBlock (void *b, int c)
+static unsigned CheckBlock (void *b, int c)
 {
 	int	v,i;
 	v = 0;
@@ -3031,7 +3032,7 @@ unsigned CheckBlock (void *b, int c)
 		v+= ((byte *)b)[i];
 	return v;
 }
-void PrintPmove (pmove_t *pm)
+static void PrintPmove (pmove_t *pm)
 {
 	unsigned	c1, c2;
 
