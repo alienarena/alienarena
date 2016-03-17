@@ -367,9 +367,14 @@ nobase_dist_maps_DATA = \
 	meshes/tech/biotubebase_big.md2 \
 	meshes/tech/biotubebase_fx.tga \
 	meshes/tech/biotubebase_normal.jpg \
+	meshes/tech/biotubebottomonly.md2 \
 	meshes/tech/blueribtube.jpg \
 	meshes/tech/blueribtube1.md2 \
 	meshes/tech/blueribtube_fx.tga \
+	meshes/tech/drarch.jpg \
+	meshes/tech/drarch1.md2 \
+	meshes/tech/drarch_fx.tga \
+	meshes/tech/drarch_normal.jpg \
 	meshes/tech/glasstube.md2 \
 	meshes/tech/obarch1.jpg \
 	meshes/tech/obarch1.md2 \
