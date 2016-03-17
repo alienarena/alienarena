@@ -52,3 +52,21 @@ maps/meshes/tech/biotubebase
 		glow
 	}
 }
+maps/meshes/tech/drarch
+{
+	{
+		map maps/meshes/tech/drarch_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/drarch_fx.tga
+		glow
+	}
+}
+maps/meshes/tube
+{
+	{
+		map maps/meshes/tube_normal.jpg
+		normalmap
+		map2 maps/meshes/tube_fx.tga
+		glow
+	}
+}
