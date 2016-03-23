@@ -683,9 +683,11 @@ nobase_dist_maps_DATA = \
 	meshes/toxicbarrell2.tga \
 	meshes/toxicbarrell2_normal.jpg \
 	meshes/toxicbarrell_normal.jpg \
-	meshes/tubecover.md2 \
+	meshes/tube.jpg \
 	meshes/tube.md2 \
-	meshes/tube.tga \
+	meshes/tube_fx.tga \
+	meshes/tube_normal.jpg \
+	meshes/tubecover.md2 \
 	meshes/tundra/pinetree1.iqm \
 	meshes/tundra/pinetree1.md2 \
 	meshes/tundra/pinetree1.skin \
@@ -824,6 +826,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-violator2k16.mus \
 	scripts/dm-bloodfactory2k15.fog \
 	scripts/dm-bloodfactory2k15.mus \
+	scripts/dm-deathray2k16.fog \
+	scripts/dm-deathray2k16.mus \
 	scripts/dm-dismal2k15.fog \
 	scripts/dm-dismal2k15.mus \
 	scripts/dm-extermination2k15.fog \
