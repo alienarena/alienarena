@@ -117,4 +117,13 @@ textures/martian/metalrings1
 		alphashift 5 0.05 0.7
 	}
 }
-		
+textures/blanks/blank1
+{
+	{
+		map gfx/beam3.tga
+		scale static 7 static 7
+		colormap 1 1 1
+		beam
+	}
+}
+			
