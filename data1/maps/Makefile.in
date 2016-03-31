@@ -221,6 +221,7 @@ nobase_dist_maps_DATA = \
 	ctf-frost2k15.bsp \
 	ctf-violator2k16.bsp \
 	dm-bloodfactory2k15.bsp \
+	dm-deathray2k16.bsp \
 	dm-dismal2k15.bsp \
 	dm-extermination2k15.bsp \
 	dm-extermination2k15.lightmap \
@@ -348,6 +349,10 @@ nobase_dist_maps_DATA = \
 	meshes/dm-bloodfactory/blood3.decal \
 	meshes/dm-bloodfactory/rubble1.terrain \
 	meshes/dm-bloodfactory/rubble2.terrain \
+	meshes/dm-deathray/blood0.decal \
+	meshes/dm-deathray/blood1.decal \
+	meshes/dm-deathray/blood2.decal \
+	meshes/dm-deathray/blood3.decal \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
 	meshes/dm-extermination/blood0.decal \
@@ -670,6 +675,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/turbinefan.md2 \
 	meshes/tech/turbinefan_normal.jpg \
 	meshes/tech/turbinefan_vert.md2 \
+	meshes/tech/turbinefan_vert2.md2 \
 	meshes/test/martian.jpg \
 	meshes/test/martian_normal.tga \
 	meshes/test/martian_fx.tga \
