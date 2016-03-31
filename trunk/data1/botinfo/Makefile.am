@@ -31,6 +31,7 @@ nobase_dist_botinfo_DATA = \
 	allbots.tmp \
 	team.tmp \
 	dm-bloodfactory2k15.tmp \
+	dm-deathray2k16.tmp \
 	dm-dismal2k15.tmp \
 	dm-extermination2k15.tmp \
 	dm-neptune2k15.tmp \
@@ -42,6 +43,7 @@ nobase_dist_botinfo_DATA = \
 	nav/ctf-extermination2k15.nod \
 	nav/ctf-violator2k16.nod \
 	nav/dm-bloodfactory2k15.nod \
+	nav/dm-deathray2k16.nod \
 	nav/dm-dismal2k15.nod \
 	nav/dm-extermination2k15.nod \
 	nav/dm-neptune2k15.nod \
