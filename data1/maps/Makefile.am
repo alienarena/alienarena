@@ -14,6 +14,7 @@ nobase_dist_maps_DATA = \
 	dm-dismal2k15.bsp \
 	dm-extermination2k15.bsp \
 	dm-extermination2k15.lightmap \
+	dm-gauntlet2k16.bsp \
 	dm-neptune2k15.bsp \
 	dm-turbo2k15.bsp \
 	dm-violator2k15.bsp \
@@ -151,6 +152,10 @@ nobase_dist_maps_DATA = \
 	meshes/dm-extermination/rubble1.terrain \
 	meshes/dm-extermination/rubble2.terrain \
 	meshes/dm-extermination/rubble3.terrain \
+	meshes/dm-gauntlet/blood0.decal \
+	meshes/dm-gauntlet/blood1.decal \
+	meshes/dm-gauntlet/bottom.terrain \
+	meshes/dm-gauntlet/slime0.decal \
 	meshes/dm-neptune/blood0.decal \
 	meshes/dm-neptune/blood1.decal \
 	meshes/dm-neptune/blood2.decal \
@@ -627,6 +632,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-dismal2k15.mus \
 	scripts/dm-extermination2k15.fog \
 	scripts/dm-extermination2k15.mus \
+	scripts/dm-gauntlet2k16.fog \
+	scripts/dm-gauntlet2k16.mus \
 	scripts/dm-neptune2k15.fog \
 	scripts/dm-neptune2k15.mus \
 	scripts/dm-oblivion2k15.fog \

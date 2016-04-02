@@ -932,6 +932,7 @@ nobase_dist_textures_DATA = \
 	blood/blood_splatter2.tga \
 	blood/blood_splatter3.tga \
 	blood/blood_splatter4.tga \
+	blood/slime_splatter1.tga \
 	common/0_clip.tga \
 	common/0_hint.tga \
 	common/0_sky1.tga \
@@ -1125,6 +1126,9 @@ nobase_dist_textures_DATA = \
 	dm-extermination/rubble3_blendtex.tga \
 	dm-extermination/rubble3_lightmaptex.tga \
 	dm-extermination/rubble3_vegetation.tga \
+	dm-gauntlet/bottom.tga \
+	dm-gauntlet/bottom_blendtex.tga \
+	dm-gauntlet/bottom_lightmaptex.tga \
 	dm-neptune/cave1.tga \
 	dm-neptune/cave1_blendtex.tga \
 	dm-neptune/cave1_lightmaptex.tga \
