@@ -232,6 +232,8 @@ nobase_dist_levelshots_DATA = \
 	dm-dismal2k15.txt \
 	dm-extermination2k15.jpg \
 	dm-extermination2k15.txt \
+	dm-gauntlet2k16.jpg \
+	dm-gauntlet2k16.txt \
 	dm-neptune2k15.jpg \
 	dm-neptune2k15.txt \
 	dm-turbo2k15.jpg \
