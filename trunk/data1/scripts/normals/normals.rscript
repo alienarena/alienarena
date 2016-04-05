@@ -1008,8 +1008,10 @@ maps/meshes/scope
 maps/meshes/brainjar
 {
 	{
-		map maps/meshes/brainjar_normal.jpg
+		map maps/meshes/brainjar_normal.tga
 		normalmap
+		map2 maps/meshes/brainjar_fx.tga
+		glow
 	}
 }
 maps/meshes/bignode
