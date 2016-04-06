@@ -1035,7 +1035,7 @@ maps/meshes/controls
 maps/meshes/eyejar
 {
 	{
-		map maps/meshes/eyejar_normal.tga
+		map maps/meshes/eyejar_normal.jpg
 		normalmap
 		map2 maps/meshes/eyejar_fx.tga
 		glow

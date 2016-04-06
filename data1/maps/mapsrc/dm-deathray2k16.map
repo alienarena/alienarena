@@ -13991,17 +13991,18 @@
 // entity 51
 {
 "classname" "misc_mapmodel"
-"origin" "-78.133690 -34.010880 46.000000"
-"angle" "12.780194"
+"origin" "-78.164696 -34.039223 16.000000"
+"angle" "11.902939"
 "model" "maps/meshes/eyejar.md2"
+"spawnflags" "32"
 }
 // entity 52
 {
 "classname" "misc_mapmodel"
 "spawnflags" "16"
 "model" "maps/meshes/eyejarglass.md2"
-"angle" "12.780194"
-"origin" "-78.133690 -34.010880 46.000000"
+"angle" "11.902939"
+"origin" "-78.164696 -34.039223 16.000000"
 }
 // entity 53
 {
