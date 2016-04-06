@@ -248,10 +248,14 @@ nobase_dist_maps_DATA = \
 	meshes/bigribpipe.jpg \
 	meshes/bigribpipe.md2 \
 	meshes/bigribpipe_normal.jpg \
-	meshes/brainjarcover.md2 \
+	meshes/brainjar.iqm \
 	meshes/brainjar.md2 \
-	meshes/brainjar_normal.tga \
+	meshes/brainjar.skin \
 	meshes/brainjar.tga \
+	meshes/brainjar_fx.tga \
+	meshes/brainjar_normal.tga \
+	meshes/brainjarcover.iqm \
+	meshes/brainjarcover.md2 \
 	meshes/cables2.md2 \
 	meshes/cables3.md2 \
 	meshes/cables4.md2 \
