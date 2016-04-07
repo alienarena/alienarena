@@ -953,11 +953,6 @@ nobase_dist_textures_DATA = \
 	common/weapclip.tga \
 	common/white.tga \
 	cr3blankclear.wal \
-	ctf-abyss/canyon1.tga \
-	ctf-abyss/canyon1_blendtex.tga \
-	ctf-abyss/canyon1_blendtex2.tga \
-	ctf-abyss/canyon1_lightmaptex.tga \
-	ctf-abyss/canyon1_vegetation.tga \
 	ctf-extermination/rubble1.tga \
 	ctf-extermination/rubble1_blendtex.tga \
 	ctf-extermination/rubble1_lightmaptex.tga \
