@@ -5,7 +5,6 @@
 mapsdir=$(pkgdatadir)/data1/maps
 
 nobase_dist_maps_DATA = \
-	ctf-abyss.bsp \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
 	ctf-violator2k16.bsp \
@@ -67,11 +66,6 @@ nobase_dist_maps_DATA = \
 	meshes/controls.md2 \
 	meshes/controls_normal.tga \
 	meshes/controls.tga \
-	meshes/ctf-abyss/blood1.decal \
-	meshes/ctf-abyss/blood2.decal \
-	meshes/ctf-abyss/canyon1.terrain \
-	meshes/ctf-abyss/rocks1.decal \
-	meshes/ctf-abyss/rocks2.decal \
 	meshes/ctf-extermination/blood0.decal \
 	meshes/ctf-extermination/blood1.decal \
 	meshes/ctf-extermination/blood2.decal \
@@ -187,11 +181,14 @@ nobase_dist_maps_DATA = \
 	meshes/electrode.md2 \
 	meshes/electrode.tga \
 	meshes/electrode_normal.tga \
-	meshes/eyejar_fx.tga \
-	meshes/eyejarglass.md2 \
+	meshes/eyejar.iqm \
 	meshes/eyejar.md2 \
-	meshes/eyejar_normal.tga \
+	meshes/eyejar.skin \
 	meshes/eyejar.tga \
+	meshes/eyejar_fx.tga \
+	meshes/eyejar_normal.jpg \
+	meshes/eyejarglass.iqm \
+	meshes/eyejarglass.md2 \
 	meshes/flagpad_fx.tga \
 	meshes/flagpad.md2 \
 	meshes/flagpad_normal.tga \
@@ -620,8 +617,6 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.jpg \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
-	scripts/ctf-abyss.fog \
-	scripts/ctf-abyss.mus \
 	scripts/ctf-extermination2k15.fog \
 	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
