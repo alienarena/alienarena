@@ -241,6 +241,8 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->health = self->max_health;
 	self->gib_health = 0;
 	self->mass = 100;
+	self->s.angles[PITCH] = 0.0;
+	self->s.angles[ROLL] = 0.0;
 
 	self->pain = spider_pain;
 	self->die = spider_die;
