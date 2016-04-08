@@ -877,9 +877,9 @@ vehicles/deathball/skin
 maps/meshes/electrode
 {
 	{
-		map maps/meshes/electrode_normal.tga
+		map maps/meshes/electrode_normal.jpg
 		normalmap
-		map2 gfx/greenlightning.tga
+		map2 maps/meshes/electrode_fx.tga
 		fx
 	}
 }
