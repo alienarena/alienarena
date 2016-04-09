@@ -62,10 +62,12 @@ nobase_dist_maps_DATA = \
 	meshes/cmdconsole_normal.jpg \
 	meshes/conduit.jpg \
 	meshes/conduit_normal.jpg \
-	meshes/controls_fx.tga \
+	meshes/controls.iqm \
 	meshes/controls.md2 \
-	meshes/controls_normal.tga \
+	meshes/controls.skin \
 	meshes/controls.tga \
+	meshes/controls_fx.tga \
+	meshes/controls_normal.jpg \
 	meshes/ctf-extermination/blood0.decal \
 	meshes/ctf-extermination/blood1.decal \
 	meshes/ctf-extermination/blood2.decal \
@@ -141,6 +143,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-deathray/blood1.decal \
 	meshes/dm-deathray/blood2.decal \
 	meshes/dm-deathray/blood3.decal \
+	meshes/dm-deathray/slime0.decal \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
 	meshes/dm-extermination/blood0.decal \
@@ -180,7 +183,8 @@ nobase_dist_maps_DATA = \
 	meshes/electrodecover.md2 \
 	meshes/electrode.md2 \
 	meshes/electrode.tga \
-	meshes/electrode_normal.tga \
+	meshes/electrode_fx.tga \
+	meshes/electrode_normal.jpg \
 	meshes/eyejar.iqm \
 	meshes/eyejar.md2 \
 	meshes/eyejar.skin \
@@ -352,9 +356,10 @@ nobase_dist_maps_DATA = \
 	meshes/sconduit1.md2 \
 	meshes/sconduit2.md2 \
 	meshes/scopecover.md2 \
+	meshes/scope.jpg \
 	meshes/scope.md2 \
-	meshes/scope_normal.tga \
-	meshes/scope.tga \
+	meshes/scope_fx.tga \
+	meshes/scope_normal.jpg \
 	meshes/spingear_fx.tga \
 	meshes/spingear.jpg \
 	meshes/spingear.md2 \
