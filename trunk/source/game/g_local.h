@@ -308,7 +308,6 @@ typedef struct gitem_s
 	// client side info
 	char		*icon;
 	char		*pickup_name;	// for printing on pickup
-	int			count_width;		// number of digits to display by icon
 
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
 	int			quantity2;		// for weapons how much per alt-fire
