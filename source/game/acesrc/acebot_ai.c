@@ -807,7 +807,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		range = VectorLength( v );
 		clear_shot = ACEAI_CheckShot( self );
 	}
-	else if ( self->client->pers.weapon->weapmodel == WEAP_VIOLATOR )
+	else if (self->client->pers.weapon->classnum == weapon_violator)
 	{
 		// put away the violator, and select something else
 		//  using a fake range.
@@ -826,7 +826,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		// TODO: consider whether this prevents using violator
 		//       and whether or not that is a good thing.
-		if ( self->client->pers.weapon->weapmodel != WEAP_DISRUPTOR )
+		if (self->client->pers.weapon->classnum != weapon_hyperblaster) // disruptor
 		{
 			self->client->newweapon = FindItem( "Alien Disruptor" );
 			assert( self->client->newweapon != NULL );
@@ -837,7 +837,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 
 	if ( rocket_arena->integer )
 	{
-		if ( self->client->pers.weapon->weapmodel != WEAP_ROCKETLAUNCHER )
+		if (self->client->pers.weapon->classnum != weapon_rocketlauncher)
 		{
 			self->client->newweapon = FindItem( "Rocket Launcher" );
 			assert( self->client->newweapon != NULL );
@@ -851,7 +851,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if ( self->skill > 0 && range < 170.0F ) // Little closer than usual (normally 200)
 		{
-			if ( self->client->pers.weapon->weapmodel != WEAP_VIOLATOR )
+			if (self->client->pers.weapon->classnum != weapon_violator)
 			{
 				self->client->newweapon = FindItem( "Violator" );
 				assert( self->client->newweapon != NULL );
@@ -861,7 +861,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		}
 		if ( clear_shot && range > 169.0F && range < 450.0F ) // Medium Range, use Rockets
 		{
-			if ( self->client->pers.weapon->weapmodel != WEAP_ROCKETLAUNCHER )
+			if (self->client->pers.weapon->classnum != weapon_rocketlauncher)
 			{
 				self->client->newweapon = FindItem( "Rocket Launcher" );
 				assert( self->client->newweapon != NULL );
@@ -870,7 +870,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			return;
 		}
 		// Long range (or possibly short range for skill 0 bots)
-		if ( self->client->pers.weapon->weapmodel != WEAP_DISRUPTOR )
+		if (self->client->pers.weapon->classnum != weapon_hyperblaster) // disruptor
 		{
 			self->client->newweapon = FindItem( "Alien Disruptor" );
 			assert( self->client->newweapon != NULL );

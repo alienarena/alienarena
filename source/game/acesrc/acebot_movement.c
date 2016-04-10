@@ -837,19 +837,20 @@ static const float ktgt_acc = 0.35;
 
 struct
 {
-	int weapmodel_idx; // weapon model index from gitem_t
+	classnum_t classnum; // classnum enum from gitem_t
 	int accuracy_idx; // index into weapacc array
 } weapon_accuracy_idx_lookup[] = 
 {
-	{WEAP_BLASTER,			1},
-	{WEAP_DISRUPTOR,		2},
-	{WEAP_CHAINGUN,			3},
-	{WEAP_FLAMETHROWER,		4},
-	{WEAP_MINDERASER,		6}, // minderaser has same acc as RL
-	{WEAP_ROCKETLAUNCHER,	6},
-	{WEAP_SMARTGUN,			7},
-	{WEAP_BEAMGUN,			8},
-	{WEAP_VAPORIZER,		9},
+	{weapon_blaster,			1},
+	{weapon_alienblaster,		1}, // same accuracy as blaster
+	{weapon_hyperblaster,		2}, // disruptor
+	{weapon_supershotgun,		3}, // chaingun
+	{weapon_chaingun,			4}, // flamethrower
+	{weapon_rocketlauncher,		6},
+	{weapon_minderaser,			6}, // minderaser has same acc as RL
+	{weapon_shotgun,			7}, // smartgun
+	{weapon_railgun,			8}, // beamgun
+	{weapon_bfg,				9}, // vaporizer
 };
 
 static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
@@ -868,13 +869,15 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	accuracy = 0.75f; // default accuracy
 	if (self->client->pers.weapon != NULL)
 	{
-		if (self->client->pers.weapon->weapmodel == WEAP_VIOLATOR)
+		if (self->client->pers.weapon->classnum == weapon_violator ||
+		    self->client->pers.weapon->classnum == weapon_warrior_punch ||
+		    self->client->pers.weapon->classnum == weapon_wizard_punch)
 		{
-			accuracy = 1.0f; // violator is always 100% accurate
+			accuracy = 1.0f; // meelee is always 100% accurate
 		}
 		else for (i = 0; i < sizeof (weapon_accuracy_idx_lookup) / sizeof (weapon_accuracy_idx_lookup[0]); i++)
 		{
-			if (self->client->pers.weapon->weapmodel == weapon_accuracy_idx_lookup[i].weapmodel_idx)
+			if (self->client->pers.weapon->classnum == weapon_accuracy_idx_lookup[i].classnum)
 			{
 				accuracy = self->weapacc[weapon_accuracy_idx_lookup[i].accuracy_idx];
 				break;
