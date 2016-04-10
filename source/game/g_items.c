@@ -464,10 +464,10 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 	if (!ent->client)
 		return false;
 
-#define X(name,cvarname,itname,defbase,defmax,excessivemult)	\
-	if (item->tag == AMMO_##name) \
+#define X(name,itname,defbase,defmax,excessivemult)	\
+	if (item->classnum == ammo_##name) \
 	{ \
-		max = g_max##cvarname->integer; \
+		max = g_max##name->integer; \
 		if (excessive->value) \
 			max *= excessivemult; \
 		base = defbase; \
@@ -580,8 +580,8 @@ void Drop_Ammo (edict_t *ent, gitem_t *item)
 		dropped->count = ent->client->pers.inventory[index];
 
 	if (ent->client->pers.weapon &&
-		ent->client->pers.weapon->tag == AMMO_GRENADES &&
-		item->tag == AMMO_GRENADES &&
+		ent->client->pers.weapon->classnum == ammo_grenades &&
+		item->classnum == ammo_grenades &&
 		ent->client->pers.inventory[index] - dropped->count <= 0) {
 		safe_cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
 		G_FreeEdict(dropped);
@@ -1453,7 +1453,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/shells/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_shells", "Alien Smart Grenade", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (10, AMMO_SHELLS),
+		GITEM_INIT_AMMO (10),
 /* precache */ ""
 	},
 /*QUAKED ammo_grenades (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1463,7 +1463,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/grenades/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_grenades", "Napalm", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (50, AMMO_GRENADES),
+		GITEM_INIT_AMMO (50),
 /* precache */ ""
 	},
 
@@ -1474,7 +1474,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/bullets/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_bullets", "Bullets", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (50, AMMO_BULLETS),
+		GITEM_INIT_AMMO (50),
 /* precache */ ""
 	},
 
@@ -1485,7 +1485,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/cells/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_cells", "Cells", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (50, AMMO_CELLS),
+		GITEM_INIT_AMMO (50),
 /* precache */ ""
 	},
 
@@ -1496,7 +1496,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/rockets/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_rockets", "Rockets", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (5, AMMO_ROCKETS),
+		GITEM_INIT_AMMO (5),
 /* precache */ ""
 	},
 
@@ -1507,7 +1507,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("a_slugs", "Slugs", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (10, AMMO_SLUGS),
+		GITEM_INIT_AMMO (10),
 /* precache */ ""
 	},
 
@@ -1517,7 +1517,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("a_seekers", "Seekers", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (1, AMMO_SEEKERS),
+		GITEM_INIT_AMMO (1),
 /* precache */ ""
 	},
 
@@ -1527,7 +1527,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("a_bombs", "Bombs", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (1, AMMO_BOMBS),
+		GITEM_INIT_AMMO (1),
 /* precache */ ""
 	},
 

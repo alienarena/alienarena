@@ -267,15 +267,15 @@ float ACEIT_ItemNeed (edict_t *self, gitem_t *item)
 	idx = ITEM_INDEX (item);
 	
 	// if the item is an ammo type, make sure we have room for it
-#define X(name,cvarname,itname,base,max,excessivemult)	\
-	if (!Q_strcasecmp (item->pickup_name, itname)) \
+#define X(name,itname,base,max,excessivemult)	\
+	if (item->classnum == ammo_##name) \
 	{ \
 		if (excessive->integer) \
 		{ \
-			if (self->client->pers.inventory[idx] >= g_max##cvarname->integer*excessivemult) \
+			if (self->client->pers.inventory[idx] >= g_max##name->integer*excessivemult) \
 				return 0.0; \
 		} \
-		else if (self->client->pers.inventory[idx] >= g_max##cvarname->integer) \
+		else if (self->client->pers.inventory[idx] >= g_max##name->integer) \
 		{ \
 			return 0.0; \
 		} \

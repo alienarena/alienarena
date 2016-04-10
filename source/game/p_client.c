@@ -1086,8 +1086,8 @@ void InitClientPersistant (gclient_t *client)
 		//Allow custom health, even in excessive.
 		client->pers.health 		= g_spawnhealth->value * 3;
 		
-#define X(name,cvarname,itname,base,max,excessivemult)					\
-		client->pers.inventory[ITEM_INDEX(FindItem(itname))] = g_max##cvarname->value * excessivemult;
+#define X(name,itname,base,max,excessivemult)					\
+		client->pers.inventory[ITEM_INDEX(FindItem(itname))] = g_max##name->value * excessivemult;
 		
 		AMMO_TYPES
 	

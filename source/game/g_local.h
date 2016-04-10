@@ -115,24 +115,14 @@ typedef enum
 } weaponstate_t;
 
 #define AMMO_TYPES \
-	X (BULLETS,  bullets,  "bullets",             50, 200,  2.5) \
-	X (SHELLS,   shells,   "alien smart grenade", 10, 100,  5)   \
-	X (ROCKETS,  rockets,  "rockets",             10,  50, 10)   \
-	X (GRENADES, grenades, "napalm",              50,  50, 10)   \
-	X (CELLS,    cells,    "cells",               50, 200,  2.5) \
-	X (SLUGS,    slugs,    "slugs",               10,  50, 10)   \
-	X (SEEKERS,  seekers,  "seekers",              1,   1,  2)   \
-	X (BOMBS,    bombs,    "bombs",                1,   1,  2)
-
-#define X(name,cvarname,itname,base,max,excessivemult)	\
-	AMMO_##name,
-
-typedef enum
-{
-	AMMO_TYPES
-} ammo_t;
-
-#undef X
+	X (bullets,  "bullets",             50, 200,  2.5) \
+	X (shells,   "alien smart grenade", 10, 100,  5)   \
+	X (rockets,  "rockets",             10,  50, 10)   \
+	X (grenades, "napalm",              50,  50, 10)   \
+	X (cells,    "cells",               50, 200,  2.5) \
+	X (slugs,    "slugs",               10,  50, 10)   \
+	X (seekers,  "seekers",              1,   1,  2)   \
+	X (bombs,    "bombs",                1,   1,  2)
 
 // Each of these corresponds to the classname of an item type. However, not
 // all classnames correspond to one of these, only the classnames for item
@@ -369,8 +359,8 @@ typedef struct gitem_s
 	0, 0, NULL, NULL, 0, info, tag
 #define GITEM_INIT_WEAP(quantity,quantity2,ammo,view_model,weapmodel) \
 	quantity, quantity2, ammo, view_model, weapmodel, NULL, 0
-#define GITEM_INIT_AMMO(quantity,tag) \
-	quantity, 0, NULL, NULL, 0, NULL, tag
+#define GITEM_INIT_AMMO(quantity) \
+	quantity, 0, NULL, NULL, 0, NULL, 0
 #define GITEM_INIT_POWERUP(quantity) \
 	quantity, 0, NULL, NULL, 0, NULL, 0
 #define GITEM_INIT_OTHER() \
@@ -730,8 +720,8 @@ extern	cvar_t	*wep_selfdmgmulti;
 extern	cvar_t	*g_spawnhealth;
 extern	cvar_t	*g_maxhealth;
 
-#define X(name,cvarname,itname,base,max,excessivemult)	\
-	cvar_t *g_max##cvarname;
+#define X(name,itname,base,max,excessivemult)	\
+	cvar_t *g_max##name;
 
 AMMO_TYPES
 
