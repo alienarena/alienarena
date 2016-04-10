@@ -130,7 +130,7 @@ qboolean ACEIT_ChangeWeapon (edict_t *ent, gitem_t *item)
 	
 	// make sure it's a valid item
 	if (item == NULL)
-	    return false;
+		return false;
 
 	// see if we're already using it
 	if (item == ent->client->pers.weapon)
@@ -257,23 +257,25 @@ gitem_t	*ACEIT_WantedFlag (edict_t *self)
 // Any other logic that needs to be added for custom decision making
 // can be added here. For now it is very simple.
 ///////////////////////////////////////////////////////////////////////
-float ACEIT_ItemNeed(edict_t *self, int item)
+float ACEIT_ItemNeed (edict_t *self, gitem_t *item)
 {
-	gitem_t		*wantedFlag;
-	// Make sure item is at least close to being valid
-	if(item < 0 || item > 100)
+	int idx;
+	
+	if (item == NULL)
 		return 0.0;
+	
+	idx = ITEM_INDEX (item);
 	
 	// if the item is an ammo type, make sure we have room for it
 #define X(name,cvarname,itname,base,max,excessivemult)	\
-	if (item == ITEM_INDEX (FindItem (itname))) \
+	if (!Q_strcasecmp (item->pickup_name, itname)) \
 	{ \
 		if (excessive->integer) \
 		{ \
-			if (self->client->pers.inventory[item] >= g_max##cvarname->integer*excessivemult) \
+			if (self->client->pers.inventory[idx] >= g_max##cvarname->integer*excessivemult) \
 				return 0.0; \
 		} \
-		else if (self->client->pers.inventory[item] >= g_max##cvarname->integer) \
+		else if (self->client->pers.inventory[idx] >= g_max##cvarname->integer) \
 		{ \
 			return 0.0; \
 		} \
@@ -282,108 +284,79 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 	AMMO_TYPES
 	
 #undef X
-
-	switch(item)
+	
+	if (item->flags & IT_HEALTH)
 	{
-		// Health
-		case ITEMLIST_HEALTH_SMALL:
-		case ITEMLIST_HEALTH_MEDIUM:
-		case ITEMLIST_HEALTH_LARGE:
-		case ITEMLIST_HEALTH_MEGA:
-			if(self->health < 100)
-				return 1.0 - (float)self->health/100.0f; // worse off, higher priority
-			else
-				return 0.0;
-
-		case ITEMLIST_QUADDAMAGE:
-		case ITEMLIST_INVULNERABILITY:
-		case ITEMLIST_HASTE:
-		case ITEMLIST_SPROING:
-		case ITEMLIST_ADRENALINE:
+		if (self->health < 100)
+			return 1.0 - (float)self->health / 100.0f; // worse off, higher priority
+		else
+			return 0.0;
+	}
+	
+	if (item->flags & IT_POWERUP)
+		return 0.6;
+	
+	if (item->flags & IT_ARMOR)
+	{
+		if (ACEIT_CanUseArmor (item, self))
 			return 0.6;
+		else
+			return 0.0;
+	}
 
+	switch (item->classnum)
+	{
 		// Weapons
-		case ITEMLIST_ROCKETLAUNCHER:		
-		case ITEMLIST_CHAINGUN:		
-		case ITEMLIST_SUPERSHOTGUN:
-		case ITEMLIST_BFG10K:
+		case weapon_rocketlauncher: case weapon_chaingun:
+		case weapon_supershotgun: case weapon_bfg:
 			if(g_tactical->integer && self->ctype == 0)
 				return 0.0;
 			else if(g_tactical->integer && self->ctype == 1)
 			{
-				if(!self->client->pers.inventory[item])
+				if (!self->client->pers.inventory[idx])
 					return 0.9;
 				else
 					return 0.0;
 			}
-		case ITEMLIST_SHOTGUN:
-		case ITEMLIST_HYPERBLASTER:
-		case ITEMLIST_RAILGUN:
-		case ITEMLIST_MINDERASER:
+		case weapon_shotgun: case weapon_hyperblaster: case weapon_railgun:
+		case weapon_minderaser:
 			if(g_tactical->integer && self->ctype == 1)
 				return 0.0;
 			else if(g_tactical->integer && self->ctype == 0)
 			{
-				if(!self->client->pers.inventory[item])
+				if (!self->client->pers.inventory[idx])
 					return 0.9;
 				else
 					return 0.0;
 			}
 
 			//normal game mode
-			if(!self->client->pers.inventory[item])
+			if (!self->client->pers.inventory[idx])
 				return 0.9; //was .7
 			else
 				return 0.0;
 
 		// Ammo
-		case ITEMLIST_SLUGS:
+		case ammo_slugs:
 			return 0.4;
 
-		case ITEMLIST_BULLETS:
-		case ITEMLIST_SHELLS:
-		case ITEMLIST_CELLS:
-		case ITEMLIST_GRENADES:
+		case ammo_bullets: case ammo_shells: case ammo_cells:
+		case ammo_grenades:
 			return 0.3;
 
-		case ITEMLIST_ROCKETS:
+		case ammo_rockets:
 			return 1.5;
 		
-		case ITEMLIST_BODYARMOR:
-			if(ACEIT_CanUseArmor (FindItem("Body Armor"), self))
-				return 0.6;
-			else
-				return 0.0;
-
-		case ITEMLIST_COMBATARMOR:
-			if(ACEIT_CanUseArmor (FindItem("Combat Armor"), self))
-				return 0.6;
-			else
-				return 0.0;
-
-		case ITEMLIST_JACKETARMOR:
-			if(ACEIT_CanUseArmor (FindItem("Jacket Armor"), self))
-				return 0.6;
-			else
-				return 0.0;
 		//flags
-		case ITEMLIST_FLAG1:
-			wantedFlag = ACEIT_WantedFlag (self); //Returns the flag gitem_t
-			if (redflag != wantedFlag)
+		case item_flag_red: case item_flag_blue:
+			if (item != ACEIT_WantedFlag (self))
 				return 0.0;
 			else
 				return 3.0;
-		case ITEMLIST_FLAG2:
-			wantedFlag = ACEIT_WantedFlag (self); //Returns the flag gitem_t
-			if (blueflag != wantedFlag)
-				return 0.0;
-			else
-				return 3.0;
+		
 		//vehicles
-		case ITEMLIST_BOMBER:
-		case ITEMLIST_STRAFER:
-		case ITEMLIST_HOVER:
-			if(!self->client->pers.inventory[item])
+		case item_bomber: case item_strafer: case item_hover:
+			if (!self->client->pers.inventory[idx])
 				return 0.9;
 			else
 				return 0.0;
@@ -394,118 +367,6 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 	}
 
 }
-
-///////////////////////////////////////////////////////////////////////
-// Convert a classname to its index value
-//
-// I prefer to use integers/defines for simplicity sake. This routine
-// can lead to some slowdowns I guess, but makes the rest of the code
-// easier to deal with.
-///////////////////////////////////////////////////////////////////////
-int ACEIT_ClassnameToIndex(char *classname)
-{
-	if(strcmp(classname,"item_armor_body")==0)
-		return ITEMLIST_BODYARMOR;
-
-	if(strcmp(classname,"item_armor_combat")==0)
-		return ITEMLIST_COMBATARMOR;
-
-	if(strcmp(classname,"item_armor_jacket")==0)
-		return ITEMLIST_JACKETARMOR;
-
-	if(strcmp(classname,"item_armor_shard")==0)
-		return ITEMLIST_ARMORSHARD;
-
-	if(strcmp(classname,"weapon_blaster")==0)
-		return ITEMLIST_BLASTER;
-
-	if(strcmp(classname,"weapon_shotgun")==0)
-		return ITEMLIST_SHOTGUN;
-
-	if(strcmp(classname,"weapon_supershotgun")==0)
-		return ITEMLIST_SUPERSHOTGUN;
-
-	if(strcmp(classname,"weapon_chaingun")==0)
-		return ITEMLIST_CHAINGUN;
-
-	if(strcmp(classname,"ammo_grenades")==0)
-		return ITEMLIST_GRENADES;
-
-	if(strcmp(classname,"weapon_rocketlauncher")==0)
-		return ITEMLIST_ROCKETLAUNCHER;
-
-	if(strcmp(classname,"weapon_hyperblaster")==0)
-		return ITEMLIST_HYPERBLASTER;
-
-	if(strcmp(classname,"weapon_railgun")==0)
-		return ITEMLIST_RAILGUN;
-
-	if(strcmp(classname,"weapon_bfg")==0)
-		return ITEMLIST_BFG10K;
-
-	if(strcmp(classname, "weapon_minderaser") == 0)
-		return ITEMLIST_MINDERASER;
-
-	if(strcmp(classname,"ammo_shells")==0)
-		return ITEMLIST_SHELLS;
-
-	if(strcmp(classname,"ammo_bullets")==0)
-		return ITEMLIST_BULLETS;
-
-	if(strcmp(classname,"ammo_cells")==0)
-		return ITEMLIST_CELLS;
-
-	if(strcmp(classname,"ammo_rockets")==0)
-		return ITEMLIST_ROCKETS;
-
-	if(strcmp(classname,"ammo_slugs")==0)
-		return ITEMLIST_SLUGS;
-
-	if(strcmp(classname,"item_quad")==0)
-		return ITEMLIST_QUADDAMAGE;
-
-	if(strcmp(classname,"item_invunerability")==0)
-		return ITEMLIST_INVULNERABILITY;
-
-	if(strcmp(classname,"item_haste")==0)
-		return ITEMLIST_HASTE;
-
-	if(strcmp(classname,"item_sproing")==0)
-		return ITEMLIST_SPROING;
-
-	if(strcmp(classname,"item_adrenaline")==0)
-		return ITEMLIST_ADRENALINE;
-
-	if(strcmp(classname,"item_health")==0) // ??
-		return ITEMLIST_HEALTH;
-
-	if(strcmp(classname,"item_health_small")==0)
-		return ITEMLIST_HEALTH_SMALL;
-
-	if(strcmp(classname,"item_health_medium")==0)
-		return ITEMLIST_HEALTH_MEDIUM;
-
-	if(strcmp(classname,"item_health_large")==0)
-		return ITEMLIST_HEALTH_LARGE;
-
-	if(strcmp(classname,"item_health_mega")==0)
-		return ITEMLIST_HEALTH_MEGA;
-
-	if(strcmp(classname, "item_flag_red") == 0)
-		return ITEMLIST_FLAG1;
-
-	if(strcmp(classname, "item_flag_blue") == 0)
-		return ITEMLIST_FLAG2;
-
-	if(strcmp(classname, "item_bomber") == 0)
-		return ITEMLIST_BOMBER;
-
-	if(strcmp(classname, "item_strafer") == 0)
-		return ITEMLIST_STRAFER;
-
-	return INVALID;
-}
-
 
 ///////////////////////////////////////////////////////////////////////
 // Only called once per level, when saved will not be called again
@@ -519,7 +380,7 @@ int ACEIT_ClassnameToIndex(char *classname)
 void ACEIT_BuildItemNodeTable (qboolean rebuild)
 {
 	edict_t *items;
-	int i,item_index;
+	int i;
 	vec3_t v,v1,v2;
 
 #ifdef DEBUG
@@ -540,49 +401,38 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 		if(!items->classname)
 			continue;
 
-		/////////////////////////////////////////////////////////////////
-		// Items
-		/////////////////////////////////////////////////////////////////
-		item_index = ACEIT_ClassnameToIndex(items->classname);
-
-		////////////////////////////////////////////////////////////////
-		// SPECIAL NAV NODE DROPPING CODE
-		////////////////////////////////////////////////////////////////
-		// Special node dropping for platforms
 		if(strcmp(items->classname,"func_plat")==0)
 		{
+			// Special node dropping for platforms
 			if(!rebuild)
 				ACEND_AddNode(items,NODE_PLATFORM);
-			item_index = 99; // to allow to pass the item index test
 		}
-
-		// Special node dropping for teleporters
-		if(strcmp(items->classname,"misc_teleporter_dest")==0 || strcmp(items->classname,"misc_teleporter")==0)
+		else if (strcmp (items->classname, "misc_teleporter_dest") == 0 || strcmp (items->classname, "misc_teleporter") == 0)
 		{
+			// Special node dropping for teleporters
 			if(!rebuild)
 				ACEND_AddNode(items,NODE_TELEPORTER);
-			item_index = 99;
 		}
-
-		#ifdef DEBUG
-		if(item_index == INVALID)
-			fprintf(pOut,"Rejected item: %s node: %d pos: %f %f %f\n",items->classname,item_table[num_items].node,items->s.origin[0],items->s.origin[1],items->s.origin[2]);
-		else
-			fprintf(pOut,"item: %s node: %d pos: %f %f %f\n",items->classname,item_table[num_items].node,items->s.origin[0],items->s.origin[1],items->s.origin[2]);
-		#endif
-
-		if(item_index == INVALID)
+		else if (items->item == NULL)
+		{
+			// besides platforms and teleporters, all nodes must be items.
+#ifdef DEBUG
+			fprintf (pOut, "Rejected ent for not being an item: %s pos: %f %f %f\n", items->classname, items->s.origin[0], items->s.origin[1], items->s.origin[2]);
+#endif
 			continue;
+		}
 
 		// add a pointer to the item entity
 		item_table[num_items].ent = items;
-		item_table[num_items].item = item_index;
 
 		// If new, add nodes for items
 		if(!rebuild)
 		{
 			// Add a new node at the item's location.
 			item_table[num_items].node = ACEND_AddNode(items,NODE_ITEM);
+#ifdef DEBUG
+			fprintf (pOut, "item: %s node: %d pos: %f %f %f\n", items->classname, item_table[num_items].node, items->s.origin[0], items->s.origin[1], items->s.origin[2]);
+#endif
 			num_items++;
 		}
 		else // Now if rebuilding, just relink ent structures
@@ -621,7 +471,6 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 					{
 						// found a match now link to facts
 						item_table[num_items].node = i;
-
 #ifdef DEBUG
 						fprintf(pOut,"Relink item: %s node: %d pos: %f %f %f\n",items->classname,item_table[num_items].node,items->s.origin[0],items->s.origin[1],items->s.origin[2]);
 #endif

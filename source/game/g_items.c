@@ -1163,7 +1163,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 gitem_t	itemlist[] =
 {
 	{
-		NULL
+		-1, NULL
 	},	// leave index 0 alone
 
 	//
@@ -1173,8 +1173,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_body",
-		IT_ARMOR,
+		GITEM_INIT_IDENTIFY (item_armor_body, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/armor/body/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_bodyarmor", "Body Armor", "misc/ar1_pkup.wav"),
@@ -1185,8 +1184,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_combat (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_combat",
-		IT_ARMOR,
+		GITEM_INIT_IDENTIFY (item_armor_combat, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/armor/combat/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_combatarmor", "Combat Armor", "misc/ar1_pkup.wav"),
@@ -1197,8 +1195,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_jacket (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_jacket",
-		IT_ARMOR,
+		GITEM_INIT_IDENTIFY (item_armor_jacket, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/armor/jacket/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_jacketarmor", "Jacket Armor", "misc/ar1_pkup.wav"),
@@ -1209,8 +1206,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_shard",
-		IT_ARMOR,
+		GITEM_INIT_IDENTIFY (item_armor_shard, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/armor/shard/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_jacketarmor", "Armor Shard", "misc/ar2_pkup.wav"),
@@ -1222,8 +1218,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_flag_team1 (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
-		"item_flag_red",
-		0,
+		GITEM_INIT_IDENTIFY (item_flag_red, 0),
 		// should we supply a drop callback if we don't want players to drop
 		// it manually?
 		GITEM_INIT_CALLBACKS (CTFPickup_Flag, NULL, CTFDrop_Flag, NULL),
@@ -1236,8 +1231,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_flag_team2 (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
-		"item_flag_blue",
-		0,
+		GITEM_INIT_IDENTIFY (item_flag_blue, 0),
 		// should we supply a drop callback if we don't want players to drop
 		// it manually?
 		GITEM_INIT_CALLBACKS (CTFPickup_Flag, NULL, CTFDrop_Flag, NULL),
@@ -1251,8 +1245,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_bomber (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
-		"item_bomber",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (item_bomber, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Bomber),
 		GITEM_INIT_WORLDMODEL ("vehicles/bomber/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("bomber", "Bomber", NULL),
@@ -1260,11 +1253,10 @@ gitem_t	itemlist[] =
 		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/bomber/v_wep.md2", WEAP_BOMBER),
 		NULL
 	},
-/*QUAKED item_stafer (1 0.2 0) (-16 -16 -24) (16 16 32)
+/*QUAKED item_strafer (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
-		"item_strafer",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (item_strafer, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Strafer),
 		GITEM_INIT_WORLDMODEL ("vehicles/strafer/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("strafer", "Strafer", NULL),
@@ -1273,11 +1265,10 @@ gitem_t	itemlist[] =
 		NULL
 	},
 
-	/*QUAKED item_hover (1 0.2 0) (-16 -16 -24) (16 16 32)
+/*QUAKED item_hover (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
-		"item_hover",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (item_hover, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Hover),
 		GITEM_INIT_WORLDMODEL ("vehicles/hover/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("hover", "Hover", NULL),
@@ -1288,8 +1279,7 @@ gitem_t	itemlist[] =
 
 //Tactical bombs
 	{
-		"item_alien_bomb",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (item_alien_bomb, IT_WEAPON),
 		// perhaps eventually write a Pickup_alienBomb? only owner will be
 		// able to pick this item back up
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_TacticalBomb),
@@ -1301,8 +1291,7 @@ gitem_t	itemlist[] =
 	},
 
 	{
-		"item_human_bomb",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (item_human_bomb, IT_WEAPON),
 		// perhaps eventually write a Pickup_humanBomb? only owner will be
 		// able to pick this item back up
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_TacticalBomb),
@@ -1316,8 +1305,7 @@ gitem_t	itemlist[] =
 #ifdef ALTERIA
 	//note some of this is clearly temporary placeholder
 	{
-		"weapon_warrior_punch",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_warrior_punch, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Punch),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("warriorpunch", "Warriorpunch", "misc/w_pkup.wav"),
@@ -1326,8 +1314,7 @@ gitem_t	itemlist[] =
 	},
 
 	{
-		"weapon_wizard_punch",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_wizard_punch, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Punch),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		"models/weapons/v_wizardhands/tris.md2",
@@ -1340,8 +1327,7 @@ gitem_t	itemlist[] =
 always owned, never in the world
 */
 	{
-		"weapon_blaster",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_blaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Blaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("blaster", "Blaster", "misc/w_pkup.wav"),
@@ -1353,8 +1339,7 @@ always owned, never in the world
 always owned, never in the world
 */
 	{
-		"weapon_alienblaster",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_alienblaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_AlienBlaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
@@ -1363,8 +1348,7 @@ always owned, never in the world
 	},
 
 	{
-		"weapon_violator",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_violator, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Violator),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("violator", "Violator", "misc/w_pkup.wav"),
@@ -1375,8 +1359,7 @@ always owned, never in the world
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_shotgun",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_shotgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Smartgun),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("smartgun", "Alien Smartgun", "misc/w_pkup.wav"),
@@ -1387,8 +1370,7 @@ always owned, never in the world
 /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_supershotgun",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_supershotgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Chain),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
@@ -1399,8 +1381,7 @@ always owned, never in the world
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_chaingun",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_chaingun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Flame),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
@@ -1411,8 +1392,7 @@ always owned, never in the world
 /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_rocketlauncher",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_rocketlauncher, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_RocketLauncher),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_rocket/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("rocketlauncher", "Rocket Launcher", "misc/w_pkup.wav"),
@@ -1423,8 +1403,7 @@ always owned, never in the world
 /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_hyperblaster",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_hyperblaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Disruptor),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
@@ -1435,8 +1414,7 @@ always owned, never in the world
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_railgun",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_railgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Beamgun),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("beamgun", "Disruptor", "misc/w_pkup.wav"),
@@ -1447,8 +1425,7 @@ always owned, never in the world
 /*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_bfg",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_bfg, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("vaporizer", "Alien Vaporizer", "misc/w_pkup.wav"),
@@ -1457,8 +1434,7 @@ always owned, never in the world
 	},
 
 	{
-		"weapon_minderaser",
-		IT_WEAPON,
+		GITEM_INIT_IDENTIFY (weapon_minderaser, IT_WEAPON),
 		// not droppable, so drop callback not supplied
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, NULL, Weapon_Minderaser),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_minderaser/tris.md2", EF_ROTATE),
@@ -1473,19 +1449,17 @@ always owned, never in the world
 /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_shells",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_shells, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/shells/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_shells", "Alien Smart Grenade", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (10, AMMO_SHELLS),
 /* precache */ ""
 	},
-/*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
+/*QUAKED ammo_grenades (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_grenades",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_grenades, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/grenades/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_grenades", "Napalm", "misc/am_pkup.wav"),
@@ -1496,8 +1470,7 @@ always owned, never in the world
 /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_bullets",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_bullets, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/bullets/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_bullets", "Bullets", "misc/am_pkup.wav"),
@@ -1508,8 +1481,7 @@ always owned, never in the world
 /*QUAKED ammo_cells (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_cells",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_cells, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/cells/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_cells", "Cells", "misc/am_pkup.wav"),
@@ -1520,8 +1492,7 @@ always owned, never in the world
 /*QUAKED ammo_rockets (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_rockets",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_rockets, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/rockets/medium/tris.md2", 0),
 		GITEM_INIT_CLIENTSIDE ("a_rockets", "Rockets", "misc/am_pkup.wav"),
@@ -1532,8 +1503,7 @@ always owned, never in the world
 /*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"ammo_slugs",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_slugs, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("a_slugs", "Slugs", "misc/am_pkup.wav"),
@@ -1542,8 +1512,7 @@ always owned, never in the world
 	},
 
 	{
-		"ammo_seekers",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_seekers, IT_AMMO),
 		// maybe all callbacks should be NULL here?
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
@@ -1553,8 +1522,7 @@ always owned, never in the world
 	},
 
 	{
-		"ammo_bombs",
-		IT_AMMO,
+		GITEM_INIT_IDENTIFY (ammo_bombs, IT_AMMO),
 		// maybe all callbacks should be NULL here?
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
@@ -1569,8 +1537,7 @@ always owned, never in the world
 /*QUAKED item_quad (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_quad",
-		IT_POWERUP,
+		GITEM_INIT_IDENTIFY (item_quad, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Quad, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/quaddama/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_quad", "Alien Smart Grenade", "items/powerup.wav"),
@@ -1581,8 +1548,7 @@ always owned, never in the world
 /*QUAKED item_invulnerability (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_invulnerability",
-		IT_POWERUP,
+		GITEM_INIT_IDENTIFY (item_invulnerability, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invulnerability, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/invulner/tris.md2", EF_ROTATE),
 		// now "Alien Force" - incoming amage reduced to 1/3, max armor added
@@ -1595,8 +1561,7 @@ always owned, never in the world
 gives +1 to maximum health
 */
 	{
-		"item_adrenaline",
-		IT_HEALTH,
+		GITEM_INIT_IDENTIFY (item_adrenaline, IT_HEALTH),
 		GITEM_INIT_CALLBACKS (Pickup_Adrenaline, NULL, NULL, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/adrenaline/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_adrenaline", "Adrenaline", "items/n_health.wav"),
@@ -1605,6 +1570,7 @@ gives +1 to maximum health
 	},
 
 	{
+		-1,
 		NULL,
 		IT_HEALTH,
 		GITEM_INIT_CALLBACKS (Pickup_Health, NULL, NULL, NULL),
@@ -1615,8 +1581,7 @@ gives +1 to maximum health
 	},
 
 	{
-		"item_haste",
-		IT_POWERUP,
+		GITEM_INIT_IDENTIFY (item_haste, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Haste, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/haste/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_haste", "Haste", "items/powerup.wav"),
@@ -1624,8 +1589,7 @@ gives +1 to maximum health
 /* precache */ "items/hasteout.wav"
 	},
 	{
-		"item_sproing",
-		IT_POWERUP,
+		GITEM_INIT_IDENTIFY (item_sproing, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Sproing, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/sproing/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_sproing", "Sproing", "items/powerup.wav"),
@@ -1635,8 +1599,7 @@ gives +1 to maximum health
 
 	//these next two powerups are never placed in maps
 	{
-		"item_invisibility",
-		IT_POWERUP,
+		GITEM_INIT_IDENTIFY (item_invisibility, IT_POWERUP),
 		// we don't want people dropping this one, so drop callback not given
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invisibility, NULL, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, EF_ROTATE),
@@ -1646,7 +1609,7 @@ gives +1 to maximum health
 	},
 
 	// end of list marker
-	{NULL}
+	{-1, NULL}
 };
 
 

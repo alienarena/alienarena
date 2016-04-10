@@ -108,57 +108,6 @@
 #define MOVE_FORWARD 2
 #define MOVE_BACK 3
 
-// Item defines (got this list from somewhere??....so thanks to whoever created it)
-#define ITEMLIST_NULLINDEX			0
-#define ITEMLIST_BODYARMOR			1
-#define ITEMLIST_COMBATARMOR		2
-#define ITEMLIST_JACKETARMOR		3
-#define ITEMLIST_ARMORSHARD			4
-
-#define ITEMLIST_GRAPPLE            7
-
-#define ITEMLIST_BLASTER			8
-#define ITEMLIST_SHOTGUN			9
-#define ITEMLIST_SUPERSHOTGUN		10
-#define ITEMLIST_CHAINGUN			11
-#define ITEMLIST_GRENADES			12
-#define ITEMLIST_ROCKETLAUNCHER		13
-#define ITEMLIST_HYPERBLASTER		14
-#define ITEMLIST_RAILGUN			15
-#define ITEMLIST_BFG10K				16
-
-#define ITEMLIST_SHELLS				17
-#define ITEMLIST_BULLETS			18
-#define ITEMLIST_CELLS				19
-#define ITEMLIST_ROCKETS			20
-#define ITEMLIST_SLUGS				21
-#define ITEMLIST_QUADDAMAGE			22
-#define ITEMLIST_INVULNERABILITY	23
-#define ITEMLIST_ADRENALINE			24
-#define ITEMLIST_HEALTH				25
-
-// new for ctf
-#define ITEMLIST_FLAG1              26
-#define ITEMLIST_FLAG2              27
-#define ITEMLIST_HASTE				28
-#define ITEMLIST_SPROING			29
-
-// my additions
-#define ITEMLIST_HEALTH_SMALL		30
-#define ITEMLIST_HEALTH_MEDIUM		31
-#define ITEMLIST_HEALTH_LARGE		32
-#define ITEMLIST_BOT				33
-#define ITEMLIST_PLAYER				34
-#define ITEMLIST_HEALTH_MEGA        35
-
-//vehicles
-#define ITEMLIST_BOMBER				36
-#define ITEMLIST_STRAFER			37
-#define ITEMLIST_HOVER				38
-
-//mind eraser
-#define ITEMLIST_MINDERASER			39
-
 // Special CONTENT mask for acebots, so they can detect and climb ladders
 // replaces MASK_OPAQUE defined in game/q_shared.h
 #define BOTMASK_OPAQUE (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA|CONTENTS_LADDER)
@@ -173,11 +122,8 @@ typedef struct node_s
 
 typedef struct item_table_s
 {
-	int item;
-	float weight;
 	edict_t *ent;
 	int node;
-
 } item_table_t;
 
 // Bot config structure
@@ -230,8 +176,7 @@ qboolean ACEIT_IsVisible(edict_t *self, vec3_t goal);
 qboolean ACEIT_IsReachable(edict_t *self,vec3_t goal);
 qboolean ACEIT_ChangeWeapon (edict_t *ent, gitem_t *item);
 qboolean ACEIT_CanUseArmor (gitem_t *item, edict_t *other);
-float	 ACEIT_ItemNeed(edict_t *self, int item);
-int		 ACEIT_ClassnameToIndex(char *classname);
+float	 ACEIT_ItemNeed (edict_t *self, gitem_t *item);
 void     ACEIT_BuildItemNodeTable (qboolean rebuild);
 
 // acebot_movement.c protos
