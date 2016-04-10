@@ -293,31 +293,56 @@ typedef struct
 #define WEAP_ABOMB				17
 #define WEAP_HBOMB				18
 
+// Wherever possible, use the GITEM_INIT_* macros instead of supplying the
+// values directly in the initializer! The macros MUST be called in the
+// correct order or bad things will happen. (NOTE: if we ever drop the C98
+// compatibility requirement, C99 will make this unnecessary.)
 typedef struct gitem_s
 {
+	
+	// item identifying information
 	char		*classname;	// spawning name
+	int			flags;			// IT_* flags
+	
+	// callbacks
 	qboolean	(*pickup)(struct edict_s *ent, struct edict_s *other);
 	void		(*use)(struct edict_s *ent, struct gitem_s *item);
 	void		(*drop)(struct edict_s *ent, struct gitem_s *item);
 	void		(*weaponthink)(struct edict_s *ent);
-	char		*pickup_sound;
+#define GITEM_INIT_CALLBACKS(pickup,use,drop,weaponthink) \
+	pickup, use, drop, weaponthink
+	
+	// how to show this item before it's picked up
 	char		*world_model;
 	int			world_model_flags;
-	char		*view_model;
+#define GITEM_INIT_WORLDMODEL(world_model,world_model_flags) \
+	world_model, world_model_flags
 
 	// client side info
-	char		*icon;
+	char		*icon;			// for displaying in HUD
 	char		*pickup_name;	// for printing on pickup
+	char		*pickup_sound;	// for playing on pickup
+#define GITEM_INIT_CLIENTSIDE(icon,pickup_name,pickup_sound) \
+	icon, pickup_name, pickup_sound
 
+	// weapon/ammo/armor/powerup data
 	int			quantity;		// for ammo how much, for weapons how much is used per shot
 	int			quantity2;		// for weapons how much per alt-fire
 	char		*ammo;			// for weapons
-	int			flags;			// IT_* flags
-
+	char		*view_model;
 	int			weapmodel;		// weapon model index (for weapons)
-
 	void		*info;
 	int			tag;
+#define GITEM_INIT_ARMOR(info,tag) \
+	0, 0, NULL, NULL, 0, info, tag
+#define GITEM_INIT_WEAP(quantity,quantity2,ammo,view_model,weapmodel) \
+	quantity, quantity2, ammo, view_model, weapmodel, NULL, 0
+#define GITEM_INIT_AMMO(quantity,tag) \
+	quantity, 0, NULL, NULL, 0, NULL, tag
+#define GITEM_INIT_POWERUP(quantity) \
+	quantity, 0, NULL, NULL, 0, NULL, 0
+#define GITEM_INIT_OTHER() \
+	0, 0, NULL, NULL, 0, NULL, 0
 
 	char		*precaches;		// string of all models, sounds, and images this item will use
 } gitem_t;
