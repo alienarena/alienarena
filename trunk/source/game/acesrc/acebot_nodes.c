@@ -603,7 +603,7 @@ void ACEND_SaveNodes()
 	char filename[MAX_OSPATH];
 	char relative_path[MAX_QPATH];
 	int i,j;
-	int version = 1;
+	int version = 1, dummy_num_items = 0;
 	size_t sz;
 
 	// Resolve paths
@@ -625,15 +625,13 @@ void ACEND_SaveNodes()
 
 	sz = fwrite(&version,sizeof(int),1,pOut); // write version
 	sz = fwrite(&bot_numnodes,sizeof(int),1,pOut); // write count
-	sz = fwrite(&num_items,sizeof(int),1,pOut); // write facts count
+	sz = fwrite (&dummy_num_items, sizeof (int), 1, pOut); // facts count always 0 now
 
 	sz = fwrite(nodes,sizeof(node_t),bot_numnodes,pOut); // write nodes
 
 	for(i=0;i<bot_numnodes;i++)
 		for(j=0;j<bot_numnodes;j++)
 			sz = fwrite(&path_table[i][j],sizeof(short int),1,pOut); // write count
-
-	sz = fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
 
 	fclose(pOut);
 
@@ -677,20 +675,15 @@ void ACEND_LoadNodes(void)
 	{
 		gi.dprintf("ACE: Loading node table...");
 
-        //FIXME: This code sucks so bad. Didn't anyone ever tell this Yeager
-        //fellow that dumps of C structs don't make a proper file format? 
-        //If your compiler does padding differently, it breaks. If you want to
-        //add new field types, it breaks. 
 		sz = fread(&bot_numnodes,sizeof(int),1,pIn); // read count
-		sz = fread(&num_items,sizeof(int),1,pIn); // read facts count
+		// skip facts count (num_items) - we don't read these anymore
+		sz = fseek (pIn, sizeof (int), SEEK_CUR);
 		sz = fread(nodes,sizeof(node_t),bot_numnodes,pIn); 
 
 		for(i=0;i<bot_numnodes;i++)
 			for(j=0;j<bot_numnodes;j++)
 				sz = fread(&path_table[i][j],sizeof(short int),1,pIn); // write count
-
-	    for(i=0;i<num_items;i++)
-			sz = fread(item_table,sizeof(item_table_t),1,pIn);
+		
 		fclose(pIn);
 	}
 	else
