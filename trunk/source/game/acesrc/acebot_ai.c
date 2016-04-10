@@ -282,7 +282,7 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 			if(cost == INVALID || cost < 2) // ignore invalid and very short hops
 				continue;
 
-			weight = ACEIT_ItemNeed(self, item_table[i].item);
+			weight = ACEIT_ItemNeed(self, item_table[i].ent->item);
 
 			weight *= random(); // Allow random variations
 			weight /= cost; // Check against cost of getting there
@@ -458,8 +458,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 		{
 			if (infront(self, target) && ACEIT_IsVisibleSolid(self, target))
 			{
-				index = ACEIT_ClassnameToIndex(target->classname);
-				weight = ACEIT_ItemNeed(self, index);
+				weight = ACEIT_ItemNeed (self, target->item);
 
 				if(weight > best_weight)
 				{

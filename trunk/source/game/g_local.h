@@ -134,6 +134,34 @@ typedef enum
 
 #undef X
 
+// Each of these corresponds to the classname of an item type. However, not
+// all classnames correspond to one of these, only the classnames for item
+// types do. Also note that the order of this enum doesn't necessarily
+// correspond to the order of the itemlist array!
+typedef enum
+{
+	// armor
+	item_armor_body, item_armor_combat, item_armor_jacket, item_armor_shard,
+	// CTF
+	item_flag_red, item_flag_blue,
+	// vehicles (a type of weapon)
+	item_bomber, item_strafer, item_hover,
+	// other weapons
+	weapon_shotgun, weapon_supershotgun, weapon_chaingun, weapon_minderaser,
+	weapon_rocketlauncher, weapon_hyperblaster, weapon_railgun, weapon_bfg,
+	weapon_blaster, weapon_alienblaster, weapon_violator,
+	// ammo
+	ammo_shells, ammo_grenades, ammo_bullets, ammo_cells, ammo_rockets,
+	ammo_slugs, ammo_seekers, ammo_bombs,
+	// powerups
+	item_quad, item_invulnerability, item_adrenaline, item_haste,
+	item_sproing, item_invisibility,
+	// health
+	item_health, item_health_small, item_health_large, item_health_mega,
+	// tactical items
+	item_alien_bomb, item_human_bomb,
+} classnum_t;
+
 //teams
 typedef struct teamcensus_s
 { // see p_client.c::TeamCensus()
@@ -301,8 +329,11 @@ typedef struct gitem_s
 {
 	
 	// item identifying information
-	char		*classname;	// spawning name
+	classnum_t	classnum;
+	char		*classname;		// spawning name
 	int			flags;			// IT_* flags
+#define GITEM_INIT_IDENTIFY(classnum,flags) \
+	classnum, #classnum, flags
 	
 	// callbacks
 	qboolean	(*pickup)(struct edict_s *ent, struct edict_s *other);
