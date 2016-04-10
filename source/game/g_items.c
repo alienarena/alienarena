@@ -1174,21 +1174,11 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_armor_body",
-		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
-		"misc/ar1_pkup.wav",
-		"models/items/armor/body/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"i_bodyarmor",
-/* pickup */	"Body Armor",
-		0, 0,
-		NULL,
 		IT_ARMOR,
-		0,
-		&bodyarmor_info,
-		ARMOR_BODY,
+		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/body/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("i_bodyarmor", "Body Armor", "misc/ar1_pkup.wav"),
+		GITEM_INIT_ARMOR (&bodyarmor_info, ARMOR_BODY),
 /* precache */ ""
 	},
 
@@ -1196,21 +1186,11 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_armor_combat",
-		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
-		"misc/ar1_pkup.wav",
-		"models/items/armor/combat/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"i_combatarmor",
-/* pickup */	"Combat Armor",
-		0, 0,
-		NULL,
 		IT_ARMOR,
-		0,
-		&combatarmor_info,
-		ARMOR_COMBAT,
+		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/combat/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("i_combatarmor", "Combat Armor", "misc/ar1_pkup.wav"),
+		GITEM_INIT_ARMOR (&combatarmor_info, ARMOR_COMBAT),
 /* precache */ ""
 	},
 
@@ -1218,21 +1198,11 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_armor_jacket",
-		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
-		"misc/ar1_pkup.wav",
-		"models/items/armor/jacket/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"i_jacketarmor",
-/* pickup */	"Jacket Armor",
-		0, 0,
-		NULL,
 		IT_ARMOR,
-		0,
-		&jacketarmor_info,
-		ARMOR_JACKET,
+		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/jacket/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("i_jacketarmor", "Jacket Armor", "misc/ar1_pkup.wav"),
+		GITEM_INIT_ARMOR (&jacketarmor_info, ARMOR_JACKET),
 /* precache */ ""
 	},
 
@@ -1240,21 +1210,11 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_armor_shard",
-		Pickup_Armor,
-		NULL,
-		NULL,
-		NULL,
-		"misc/ar2_pkup.wav",
-		"models/items/armor/shard/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"i_jacketarmor",
-/* pickup */	"Armor Shard",
-		0, 0,
-		NULL,
 		IT_ARMOR,
-		0,
-		NULL,
-		ARMOR_SHARD,
+		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/shard/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("i_jacketarmor", "Armor Shard", "misc/ar2_pkup.wav"),
+		GITEM_INIT_ARMOR (NULL, ARMOR_SHARD),
 /* precache */ ""
 	},
 
@@ -1263,21 +1223,13 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_flag_red",
-		CTFPickup_Flag,
-		NULL,
-		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
-		NULL,
-		NULL,
-		"models/items/flags/flag1.md2", EF_TEAM1,
-		NULL,
-/* icon */		"i_flag1",
-/* pickup */	"Red Flag",
-		0, 0,
-		NULL,
 		0,
-		0,
-		NULL,
-		0,
+		// should we supply a drop callback if we don't want players to drop
+		// it manually?
+		GITEM_INIT_CALLBACKS (CTFPickup_Flag, NULL, CTFDrop_Flag, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/flags/flag1.md2", EF_TEAM1),
+		GITEM_INIT_CLIENTSIDE ("i_flag1", "Red Flag", NULL),
+		GITEM_INIT_OTHER (),
 /* precache */ "misc/red_scores.wav misc/red_takes.wav misc/red_increases.wav misc/red_wins.wav misc/scores_tied.wav misc/red_picked.wav"
 	},
 
@@ -1285,21 +1237,13 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_flag_blue",
-		CTFPickup_Flag,
-		NULL,
-		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
-		NULL,
-		NULL,
-		"models/items/flags/flag2.md2", EF_TEAM2,
-		NULL,
-/* icon */		"i_flag2",
-/* pickup */	"Blue Flag",
-		0, 0,
-		NULL,
 		0,
-		0,
-		NULL,
-		0,
+		// should we supply a drop callback if we don't want players to drop
+		// it manually?
+		GITEM_INIT_CALLBACKS (CTFPickup_Flag, NULL, CTFDrop_Flag, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/flags/flag2.md2", EF_TEAM2),
+		GITEM_INIT_CLIENTSIDE ("i_flag2", "Blue Flag", NULL),
+		GITEM_INIT_OTHER (),
 /* precache */ "misc/blue_scores.wav misc/blue_takes.wav misc/blue_increases.wav misc/blue_wins.wav misc/blue_picked.wav"
 	},
 
@@ -1308,42 +1252,24 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_bomber",
-		Get_in_vehicle,
-		NULL,
-		Leave_vehicle,
-		Weapon_Bomber,
-		NULL,
-		"vehicles/bomber/tris.md2", 0,
-		"vehicles/bomber/v_wep.md2",
-/* icon */		"bomber",
-/* pickup */	"Bomber",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_BOMBER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Bomber),
+		GITEM_INIT_WORLDMODEL ("vehicles/bomber/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("bomber", "Bomber", NULL),
+		// vehicles get infinite ammo, so both quantities are 0
+		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/bomber/v_wep.md2", WEAP_BOMBER),
 		NULL
 	},
 /*QUAKED item_stafer (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
 	{
 		"item_strafer",
-		Get_in_vehicle,
-		NULL,
-		Leave_vehicle,
-		Weapon_Strafer,
-		NULL,
-		"vehicles/strafer/tris.md2", 0,
-		"vehicles/strafer/v_wep.md2",
-/* icon */		"strafer",
-/* pickup */	"Strafer",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_STRAFER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Strafer),
+		GITEM_INIT_WORLDMODEL ("vehicles/strafer/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("strafer", "Strafer", NULL),
+		// vehicles get infinite ammo, so both quantities are 0
+		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/strafer/v_wep.md2", WEAP_STRAFER),
 		NULL
 	},
 
@@ -1351,62 +1277,39 @@ gitem_t	itemlist[] =
 */
 	{
 		"item_hover",
-		Get_in_vehicle,
-		NULL,
-		Leave_vehicle,
-		Weapon_Hover,
-		NULL,
-		"vehicles/hover/tris.md2", 0,
-		"vehicles/hover/v_wep.md2",
-/* icon */		"hover",
-/* pickup */	"Hover",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_HOVER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Hover),
+		GITEM_INIT_WORLDMODEL ("vehicles/hover/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("hover", "Hover", NULL),
+		// vehicles get infinite ammo, so both quantities are 0
+		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/hover/v_wep.md2", WEAP_HOVER),
 		NULL
 	},
 
 //Tactical bombs
 	{
 		"item_alien_bomb",
-		NULL, //Pickup_alienBomb, //only owner will be able to pick this item back up
-		Use_Weapon,
-		NULL, 
-		Weapon_TacticalBomb, //fire out bomb, not too far, like prox mines 
-		NULL,
-		"models/tactical/alien_bomb.iqm", 0,
-		"vehicles/deathball/v_wep.md2", //will use db's vweap for bombs and detonators
-/* icon */		"abomb", 
-/* pickup */	"Alien Bomb",
-		1, 1,
-		"bombs",
 		IT_WEAPON,
-		WEAP_ABOMB,
-		NULL,
-		0,
+		// perhaps eventually write a Pickup_alienBomb? only owner will be
+		// able to pick this item back up
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_TacticalBomb),
+		GITEM_INIT_WORLDMODEL ("models/tactical/alien_bomb.iqm", 0),
+		GITEM_INIT_CLIENTSIDE ("abomb", "Alien Bomb", NULL),
+		// will use db's vweap for bombs and detonators
+		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.md2", WEAP_ABOMB),
 		NULL
 	},
 
 	{
 		"item_human_bomb",
-		NULL, //Pickup_humanBomb, //only owner will be able to pick this item back up
-		Use_Weapon,
-		NULL, 
-		Weapon_TacticalBomb, //fire out bomb, not too far, like prox mines 
-		NULL,
-		"models/tactical/human_bomb.iqm", 0,
-		"vehicles/deathball/v_wep.md2", //will use db's vweap for bombs and detonators
-/* icon */		"abomb", 
-/* pickup */	"Human Bomb",
-		1, 1,
-		"bombs",
 		IT_WEAPON,
-		WEAP_HBOMB,
-		NULL,
-		0,
+		// perhaps eventually write a Pickup_humanBomb? only owner will be
+		// able to pick this item back up
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_TacticalBomb),
+		GITEM_INIT_WORLDMODEL ("models/tactical/human_bomb.iqm", 0),
+		GITEM_INIT_CLIENTSIDE ("abomb", "Human Bomb", NULL),
+		// will use db's vweap for bombs and detonators
+		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.md2", WEAP_HBOMB),
 		NULL
 	},
 #endif
@@ -1414,41 +1317,22 @@ gitem_t	itemlist[] =
 	//note some of this is clearly temporary placeholder
 	{
 		"weapon_warrior_punch",
-		NULL,
-		Use_Weapon,
-		NULL,
-		Weapon_Punch,
-		"misc/w_pkup.wav",
-		NULL, 0,
-		"models/weapons/v_warriorhands/tris.md2",
-/* icon */		"warriorpunch",
-/* pickup */	"Warriorpunch",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_VIOLATOR,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Punch),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("warriorpunch", "Warriorpunch", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_warriorhands/tris.md2", WEAP_VIOLATOR),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
 	},
 
 	{
 		"weapon_wizard_punch",
-		NULL,
-		Use_Weapon,
-		NULL,
-		Weapon_Punch,
-		"misc/w_pkup.wav",
-		NULL, 0,
-		"models/weapons/v_wizardhands/tris.md2",
-/* icon */		"wizardpunch",
-/* pickup */	"Wizardpunch",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_VIOLATOR,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Punch),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		"models/weapons/v_wizardhands/tris.md2",
+		GITEM_INIT_CLIENTSIDE ("wizardpunch", "Wizardpunch", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_wizardhands/tris.md2", WEAP_VIOLATOR),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
 	},
 #else
@@ -1457,21 +1341,11 @@ always owned, never in the world
 */
 	{
 		"weapon_blaster",
-		NULL,
-		Use_Weapon,
-		NULL,
-		Weapon_Blaster,
-		"misc/w_pkup.wav",
-		NULL, 0,
-		"models/weapons/v_blast/tris.md2",
-/* icon */		"blaster",
-/* pickup */	"Blaster",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_BLASTER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Blaster),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("blaster", "Blaster", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_blast/tris.md2", WEAP_BLASTER),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
 	},
 
@@ -1480,41 +1354,21 @@ always owned, never in the world
 */
 	{
 		"weapon_alienblaster",
-		NULL,
-		Use_Weapon,
-		NULL,
-		Weapon_AlienBlaster,
-		"misc/w_pkup.wav",
-		NULL, 0,
-		"models/weapons/v_alienblast/tris.md2",
-/* icon */		"alienblaster",
-/* pickup */	"Alien Blaster",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_BLASTER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_AlienBlaster),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.md2", WEAP_BLASTER),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav" //to do tactical - change sound
 	},
 
 	{
 		"weapon_violator",
-		NULL,
-		Use_Weapon,
-		NULL,
-		Weapon_Violator,
-		"misc/w_pkup.wav",
-		NULL, 0,
-		"models/weapons/v_violator/tris.md2",
-/* icon */		"violator",
-/* pickup */	"Violator",
-		0, 0,
-		NULL,
 		IT_WEAPON,
-		WEAP_VIOLATOR,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Violator),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("violator", "Violator", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_violator/tris.md2", WEAP_VIOLATOR),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
 	},
 
@@ -1522,21 +1376,11 @@ always owned, never in the world
 */
 	{
 		"weapon_shotgun",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Smartgun,
-		"misc/w_pkup.wav",
-		"models/weapons/g_shotg/tris.md2", EF_ROTATE,
-		"models/weapons/v_shotg/tris.md2",
-/* icon */		"smartgun",
-/* pickup */	"Alien Smartgun",
-		1, 1,
-		"Alien Smart Grenade",
 		IT_WEAPON,
-		WEAP_SMARTGUN,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Smartgun),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("smartgun", "Alien Smartgun", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 1, "Alien Smart Grenade", "models/weapons/v_shotg/tris.md2", WEAP_SMARTGUN),
 /* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},
 
@@ -1544,21 +1388,11 @@ always owned, never in the world
 */
 	{
 		"weapon_supershotgun",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Chain,
-		"misc/w_pkup.wav",
-		"models/weapons/g_shotg2/tris.md2", EF_ROTATE,
-		"models/weapons/v_shotg2/tris.md2",
-/* icon */		"chaingun",
-/* pickup */	"Pulse Rifle",
-		1, 1,
-		"Bullets",
 		IT_WEAPON,
-		WEAP_CHAINGUN,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Chain),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.md2", WEAP_CHAINGUN),
 /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav"
 	},
 
@@ -1566,21 +1400,11 @@ always owned, never in the world
 */
 	{
 		"weapon_chaingun",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Flame,
-		"misc/w_pkup.wav",
-		"models/weapons/g_chain/tris.md2", EF_ROTATE,
-		"models/weapons/v_chain/tris.md2",
-/* icon */		"flamethrower",
-/* pickup */	"Flame Thrower",
-		1, 10,
-		"Napalm",
 		IT_WEAPON,
-		WEAP_FLAMETHROWER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Flame),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_chain/tris.md2", WEAP_FLAMETHROWER),
 /* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav"
 	},
 
@@ -1588,21 +1412,11 @@ always owned, never in the world
 */
 	{
 		"weapon_rocketlauncher",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_RocketLauncher,
-		"misc/w_pkup.wav",
-		"models/weapons/g_rocket/tris.md2", EF_ROTATE,
-		"models/weapons/v_rocket/tris.md2",
-/* icon */		"rocketlauncher",
-/* pickup */	"Rocket Launcher",
-		1, 1,
-		"Rockets",
 		IT_WEAPON,
-		WEAP_ROCKETLAUNCHER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_RocketLauncher),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_rocket/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("rocketlauncher", "Rocket Launcher", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 1, "Rockets", "models/weapons/v_rocket/tris.md2", WEAP_ROCKETLAUNCHER),
 /* precache */ "models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav models/objects/debris2/tris.md2"
 	},
 
@@ -1610,21 +1424,11 @@ always owned, never in the world
 */
 	{
 		"weapon_hyperblaster",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Disruptor,
-		"misc/w_pkup.wav",
-		"models/weapons/g_hyperb/tris.md2", EF_ROTATE,
-		"models/weapons/v_hyperb/tris.md2",
-/* icon */		"disruptor",
-/* pickup */	"Alien Disruptor",
-		5, 10,
-		"Cells",
 		IT_WEAPON,
-		WEAP_DISRUPTOR,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Disruptor),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_hyperb/tris.md2", WEAP_DISRUPTOR),
 /* precache */ "weapons/railgf1a.wav"
 	},
 
@@ -1632,21 +1436,11 @@ always owned, never in the world
 */
 	{
 		"weapon_railgun",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Beamgun,
-		"misc/w_pkup.wav",
-		"models/weapons/g_rail/tris.md2", EF_ROTATE,
-		"models/weapons/v_rail/tris.md2",
-/* icon */		"beamgun",
-/* pickup */	"Disruptor",
-		1, 1,
-		"Cells",
 		IT_WEAPON,
-		WEAP_BEAMGUN,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Beamgun),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("beamgun", "Disruptor", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_rail/tris.md2", WEAP_BEAMGUN),
 /* precache */ "weapons/hyprbf1a.wav"
 	},
 
@@ -1654,41 +1448,22 @@ always owned, never in the world
 */
 	{
 		"weapon_bfg",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Vaporizer,
-		"misc/w_pkup.wav",
-		"models/weapons/g_bfg/tris.md2", EF_ROTATE,
-		"models/weapons/v_bfg/tris.md2",
-/* icon */		"vaporizor",
-/* pickup */	"Alien Vaporizer",
-		2, 1,
-		"Slugs",
 		IT_WEAPON,
-		WEAP_VAPORIZER,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("vaporizer", "Alien Vaporizer", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.md2", WEAP_VAPORIZER),
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav"
 	},
 
 	{
 		"weapon_minderaser",
-		Pickup_Weapon,
-		Use_Weapon,
-		NULL, //never drop
-		Weapon_Minderaser,
-		"misc/w_pkup.wav",
-		"models/weapons/g_minderaser/tris.md2", EF_ROTATE,
-		"models/weapons/v_minderaser/tris.md2",
-/* icon */		"minderaser",
-/* pickup */	"Minderaser",
-		1, 1,
-		"Seekers", 
 		IT_WEAPON,
-		WEAP_MINDERASER,
-		NULL,
-		0,
+		// not droppable, so drop callback not supplied
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, NULL, Weapon_Minderaser),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_minderaser/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("minderaser", "Minderaser", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.md2", WEAP_MINDERASER),
 /* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},
 #endif
@@ -1699,42 +1474,22 @@ always owned, never in the world
 */
 	{
 		"ammo_shells",
-		Pickup_Ammo,
-		NULL,
-		Drop_Ammo,
-		NULL,
-		"misc/am_pkup.wav",
-		"models/items/ammo/shells/medium/tris.md2", 0,
-		NULL,
-/* icon */		"a_shells",
-/* pickup */	"Alien Smart Grenade",
-		10, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_SHELLS,
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/shells/medium/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("a_shells", "Alien Smart Grenade", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (10, AMMO_SHELLS),
 /* precache */ ""
 	},
 /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
 		"ammo_grenades",
-		Pickup_Ammo,
-		NULL,
-		Drop_Ammo,
-		NULL,
-		"misc/am_pkup.wav",
-		"models/items/ammo/grenades/medium/tris.md2", 0,
-		NULL,
-/* icon */		"a_grenades",
-/* pickup */	"Napalm",
-		50, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_GRENADES,
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/grenades/medium/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("a_grenades", "Napalm", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (50, AMMO_GRENADES),
 /* precache */ ""
 	},
 
@@ -1742,21 +1497,11 @@ always owned, never in the world
 */
 	{
 		"ammo_bullets",
-		Pickup_Ammo,
-		NULL,
-		Drop_Ammo,
-		NULL,
-		"misc/am_pkup.wav",
-		"models/items/ammo/bullets/medium/tris.md2", 0,
-		NULL,
-/* icon */		"a_bullets",
-/* pickup */	"Bullets",
-		50, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_BULLETS,
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/bullets/medium/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("a_bullets", "Bullets", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (50, AMMO_BULLETS),
 /* precache */ ""
 	},
 
@@ -1764,21 +1509,11 @@ always owned, never in the world
 */
 	{
 		"ammo_cells",
-		Pickup_Ammo,
-		NULL,
-		Drop_Ammo,
-		NULL,
-		"misc/am_pkup.wav",
-		"models/items/ammo/cells/medium/tris.md2", 0,
-		NULL,
-/* icon */		"a_cells",
-/* pickup */	"Cells",
-		50, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_CELLS,
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/cells/medium/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("a_cells", "Cells", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (50, AMMO_CELLS),
 /* precache */ ""
 	},
 
@@ -1786,21 +1521,11 @@ always owned, never in the world
 */
 	{
 		"ammo_rockets",
-		Pickup_Ammo,
-		NULL,
-		Drop_Ammo,
-		NULL,
-		"misc/am_pkup.wav",
-		"models/items/ammo/rockets/medium/tris.md2", 0,
-		NULL,
-/* icon */		"a_rockets",
-/* pickup */	"Rockets",
-		5, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_ROCKETS,
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/rockets/medium/tris.md2", 0),
+		GITEM_INIT_CLIENTSIDE ("a_rockets", "Rockets", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (5, AMMO_ROCKETS),
 /* precache */ ""
 	},
 
@@ -1808,64 +1533,33 @@ always owned, never in the world
 */
 	{
 		"ammo_slugs",
-		Pickup_Ammo,
-		NULL,
-		Drop_Ammo,
-		NULL,
-		"misc/am_pkup.wav",
-		NULL,
-		0,
-		NULL,
-/* icon */		"a_slugs",
-/* pickup */	"Slugs",
-		10, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_SLUGS,
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("a_slugs", "Slugs", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (10, AMMO_SLUGS),
 /* precache */ ""
 	},
 
 	{
 		"ammo_seekers",
-		Pickup_Ammo, //set to null
-		NULL,
-		Drop_Ammo, //set to null
-		NULL,
-		"misc/am_pkup.wav",
-		NULL,
-		0,
-		NULL,
-/* icon */		"a_seekers",
-/* pickup */	"Seekers",
-		1, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_SEEKERS,
+		// maybe all callbacks should be NULL here?
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("a_seekers", "Seekers", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (1, AMMO_SEEKERS),
 /* precache */ ""
 	},
 
 	{
 		"ammo_bombs",
-		Pickup_Ammo, //set to null
-		NULL,
-		Drop_Ammo, //set to null
-		NULL,
-		"misc/am_pkup.wav",
-		NULL,
-		0,
-		NULL,
-/* icon */		"a_bombs",
-/* pickup */	"Bombs",
-		1, 0,
-		NULL,
 		IT_AMMO,
-		0,
-		NULL,
-		AMMO_BOMBS,
+		// maybe all callbacks should be NULL here?
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("a_bombs", "Bombs", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (1, AMMO_BOMBS),
 /* precache */ ""
 	},
 
@@ -1876,21 +1570,11 @@ always owned, never in the world
 */
 	{
 		"item_quad",
-		Pickup_Powerup,
-		Use_Quad,
-		Drop_General,
-		NULL,
-		"items/powerup.wav",
-		"models/items/quaddama/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"p_quad",
-/* pickup */	"Double Damage", //now double damage, rather than quad
-		150, 0,
-		NULL,
 		IT_POWERUP,
-		0,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Quad, Drop_General, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/quaddama/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("p_quad", "Alien Smart Grenade", "items/powerup.wav"),
+		GITEM_INIT_POWERUP (150),
 /* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
 	},
 
@@ -1898,21 +1582,12 @@ always owned, never in the world
 */
 	{
 		"item_invulnerability",
-		Pickup_Powerup,
-		Use_Invulnerability,
-		Drop_General,
-		NULL,
-		"items/powerup.wav",
-		"models/items/invulner/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"p_invulnerability",
-/* pickup */	"Alien Force", //now "Alien Force" - Damage reduced to 1/3, max armor added
-		300, 0,
-		NULL,
 		IT_POWERUP,
-		0,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invulnerability, Drop_General, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/invulner/tris.md2", EF_ROTATE),
+		// now "Alien Force" - incoming amage reduced to 1/3, max armor added
+		GITEM_INIT_CLIENTSIDE ("p_invulnerability", "Alien Force", "items/powerup.wav"),
+		GITEM_INIT_POWERUP (300),
 /* precache */ "items/protect.wav items/protect2.wav items/protect4.wav"
 	},
 
@@ -1921,102 +1596,52 @@ gives +1 to maximum health
 */
 	{
 		"item_adrenaline",
-		Pickup_Adrenaline,
-		NULL,
-		NULL,
-		NULL,
-		"items/n_health.wav",
-		"models/items/adrenaline/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"p_adrenaline",
-/* pickup */	"Adrenaline",
-		60, 0,
-		NULL,
 		IT_HEALTH,
-		0,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Adrenaline, NULL, NULL, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/adrenaline/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("p_adrenaline", "Adrenaline", "items/n_health.wav"),
+		GITEM_INIT_POWERUP (60),
 /* precache */ ""
 	},
 
 	{
 		NULL,
-		Pickup_Health,
-		NULL,
-		NULL,
-		NULL,
-		"items/l_health.wav",
-		NULL, 0,
-		NULL,
-/* icon */		"i_health",
-/* pickup */	"Health",
-		0, 0,
-		NULL,
 		IT_HEALTH,
-		0,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Health, NULL, NULL, NULL),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("i_health", "Health", "items/l_health.wav"),
+		GITEM_INIT_OTHER (),
 /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
 	},
 
 	{
 		"item_haste",
-		Pickup_Powerup,
-		Use_Haste,
-		Drop_General,
-		NULL,
-		"items/powerup.wav",
-		"models/items/haste/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"p_haste",
-/* pickup */	"Haste",
-		60, 0,
-		NULL,
 		IT_POWERUP,
-		0,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Haste, Drop_General, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/haste/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("p_haste", "Haste", "items/powerup.wav"),
+		GITEM_INIT_POWERUP (60),
 /* precache */ "items/hasteout.wav"
 	},
 	{
 		"item_sproing",
-		Pickup_Powerup,
-		Use_Sproing,
-		Drop_General,
-		NULL,
-		"items/powerup.wav",
-		"models/items/sproing/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"p_sproing",
-/* pickup */	"Sproing",
-		60, 0,
-		NULL,
 		IT_POWERUP,
-		0,
-		NULL,
-		0,
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Sproing, Drop_General, NULL),
+		GITEM_INIT_WORLDMODEL ("models/items/sproing/tris.md2", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("p_sproing", "Sproing", "items/powerup.wav"),
+		GITEM_INIT_POWERUP (60),
 /* precache */ "items/sproingout.wav"
 	},
 
 	//these next two powerups are never placed in maps
 	{
 		"item_invisibility",
-		Pickup_Powerup,
-		Use_Invisibility,
-		NULL,
-		NULL,
-		"items/powerup.wav",
-		NULL,
-		EF_ROTATE,
-		NULL,
-		NULL,
-		"Invisibility",
-		60, 0,
-		NULL,
 		IT_POWERUP,
-		0,
-		NULL,
-		0,
+		// we don't want people dropping this one, so drop callback not given
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invisibility, NULL, NULL),
+		GITEM_INIT_WORLDMODEL (NULL, EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE (NULL, "Invisibility", "items/powerup.wav"),
+		GITEM_INIT_POWERUP (60),
 /* precache */ "items/protect2.wav"
 	},
 
