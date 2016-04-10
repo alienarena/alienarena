@@ -1103,6 +1103,8 @@ models/misc/deathray/deathray
 	{
 		map models/misc/deathray/deathray_normal.jpg
 		normalmap
+		map2 models/misc/deathray/deathray_fx.tga
+		glow
 	}
 }
 maps/meshes/tech/rotator
