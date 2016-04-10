@@ -233,7 +233,7 @@ void SetRespawn (edict_t *ent, float delay)
 {
 
     if (	ent->item && g_duel->integer && 
-    		ent->item->weapmodel != WEAP_MINDERASER		)
+    		ent->item->classnum != weapon_minderaser		)
 	{
 		switch (ent->item->flags)
 		{

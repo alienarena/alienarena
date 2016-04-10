@@ -177,7 +177,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 			Add_Ammo (other, ammo, ammo->quantity, true, false);
 
 		//if ME, make sure original weapon gets respawned
-		if(!strcmp(ent->classname, "weapon_minderaser"))
+		if (ent->item->classnum == weapon_minderaser)
 		{
 			if(ent->replaced_weapon != NULL)
 				SetRespawn(ent->replaced_weapon, 5);
@@ -192,7 +192,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				else 
 				{
 					//weapon = FindItem (ent->item->weapon);
-					if(ent->item->weapmodel == WEAP_VAPORIZER)
+					if (ent->item->classnum == weapon_bfg)
 						SetRespawn (ent, 10);
 					else
 						SetRespawn (ent, 5);

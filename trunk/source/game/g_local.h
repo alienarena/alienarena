@@ -150,6 +150,7 @@ typedef enum
 	weapon_shotgun, weapon_supershotgun, weapon_chaingun, weapon_minderaser,
 	weapon_rocketlauncher, weapon_hyperblaster, weapon_railgun, weapon_bfg,
 	weapon_blaster, weapon_alienblaster, weapon_violator,
+	weapon_warrior_punch, weapon_wizard_punch,
 	// ammo
 	ammo_shells, ammo_grenades, ammo_bullets, ammo_cells, ammo_rockets,
 	ammo_slugs, ammo_seekers, ammo_bombs,
