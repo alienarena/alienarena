@@ -1076,207 +1076,68 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("misc/rampage.wav");
 	gi.soundindex ("misc/fight.wav");
 	gi.soundindex ("misc/minderaser.wav");
-
+	
     //if maxclients is 0 or 1, it means someone is probably just testing a map
     //or testing some code, so we really don't need to precache all this crap
-    if (game.maxclients > 1) {
-	    //precache all base player taunts
-	    gi.soundindex ("taunts/martianenforcer/taunt1.wav");
-	    gi.soundindex ("taunts/martianenforcer/taunt2.wav");
-	    gi.soundindex ("taunts/martianenforcer/taunt3.wav");
-	    gi.soundindex ("taunts/martianenforcer/taunt4.wav");
-	    gi.soundindex ("taunts/martianenforcer/taunt5.wav");
-
-	    gi.soundindex ("taunts/martiancyborg/taunt1.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt2.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt3.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt4.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt5.wav");
-
-	    gi.soundindex ("taunts/commander/taunt1.wav");
-	    gi.soundindex ("taunts/commander/taunt2.wav");
-	    gi.soundindex ("taunts/commander/taunt3.wav");
-	    gi.soundindex ("taunts/commander/taunt4.wav");
-	    gi.soundindex ("taunts/commander/taunt5.wav");
-
-	    gi.soundindex ("taunts/enforcer/taunt1.wav");
-	    gi.soundindex ("taunts/enforcer/taunt2.wav");
-	    gi.soundindex ("taunts/enforcer/taunt3.wav");
-	    gi.soundindex ("taunts/enforcer/taunt4.wav");
-	    gi.soundindex ("taunts/enforcer/taunt5.wav");
-
-	    gi.soundindex ("taunts/rustbot/taunt1.wav");
-	    gi.soundindex ("taunts/rustbot/taunt2.wav");
-	    gi.soundindex ("taunts/rustbot/taunt3.wav");
-	    gi.soundindex ("taunts/rustbot/taunt4.wav");
-	    gi.soundindex ("taunts/rustbot/taunt5.wav");
-
-		//for now - to be removed as a base player model 
-		gi.soundindex ("taunts/slashbot/taunt1.wav");
-	    gi.soundindex ("taunts/slashbot/taunt2.wav");
-	    gi.soundindex ("taunts/slashbot/taunt3.wav");
-	    gi.soundindex ("taunts/slashbot/taunt4.wav");
-	    gi.soundindex ("taunts/slashbot/taunt5.wav");
-
-	    gi.soundindex ("taunts/lauren/taunt1.wav");
-	    gi.soundindex ("taunts/lauren/taunt2.wav");
-	    gi.soundindex ("taunts/lauren/taunt3.wav");
-	    gi.soundindex ("taunts/lauren/taunt4.wav");
-	    gi.soundindex ("taunts/lauren/taunt5.wav");
-
-	    gi.soundindex ("taunts/martiancyborg/taunt1.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt2.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt3.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt4.wav");
-	    gi.soundindex ("taunts/martiancyborg/taunt5.wav");
-
-		gi.soundindex ("taunts/martianoverlord/taunt1.wav");
-	    gi.soundindex ("taunts/martianoverlord/taunt2.wav");
-	    gi.soundindex ("taunts/martianoverlord/taunt3.wav");
-	    gi.soundindex ("taunts/martianoverlord/taunt4.wav");
-	    gi.soundindex ("taunts/martianoverlord/taunt5.wav");
-
-		gi.soundindex ("taunts/martianwarrior/taunt1.wav");
-	    gi.soundindex ("taunts/martianwarrior/taunt2.wav");
-	    gi.soundindex ("taunts/martianwarrior/taunt3.wav");
-	    gi.soundindex ("taunts/martianwarrior/taunt4.wav");
-	    gi.soundindex ("taunts/martianwarrior/taunt5.wav");
-
+    if (game.maxclients > 1)
+    {
+    	static const char *player_names[] = {
+			"martianenforcer",
+			"martiancyborg",
+			"commander",
+			"enforcer",
+			"rustbot",
+			"slashbot",
+			"lauren",
+			"martiancyborg",
+			"martianoverlord",
+			"martianwarrior"
+		};
+		int num_players = sizeof (player_names) / sizeof (player_names[0]);
+		
+		int player_num, item_num;
+		char *w_weap_prefix;
+		
+		// loop through all the weapons and players, and index all the w_weap
+		// models and taunts.
+		for (player_num = 0; player_num < num_players + 1; player_num++)
+		{
+			// real players only:
+			if (player_num < num_players)
+			{
+				// precache all base player taunts
+				int taunt_num;
+				for (taunt_num = 0; taunt_num < 5; taunt_num++)
+					gi.soundindex (va ("taunts/%s/taunt%d.wav", player_names[player_num], taunt_num));
+				
+				// Precache the base player model itself. This eliminates
+				// "stutter" when a player joins the game. This should be here
+				// for the cases of 7.45 clients and older, and for game modes
+				// where unarmed combat is done (fists as a weapon.)
+				gi.modelindex (va ("players/%s/tris.md2", player_names[player_num]));
+				
+				w_weap_prefix = va ("players/%s/", player_names[player_num]);
+				gi.modelindex (va ("%sweapon.md2", w_weap_prefix));
+			}
+			else
+			{
+				// these are needed to insure that all clients have the same
+				// ordering for their weap model indexes.
+				w_weap_prefix = "#";
+			}
+			
+			for (item_num = 1; item_num < game.num_items; item_num++)
+			{
+				if (itemlist[item_num].weapmodel != NULL)
+					gi.modelindex (va ("%s%s", w_weap_prefix, itemlist[item_num].weapmodel));
+			}
+		}
+		
 	    //precache any gibs
 	    sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
 	    gi.modelindex ("models/objects/gibs/mart_gut/tris.md2");
 	    gi.modelindex ("models/objects/debris1/tris.md2");
 	    gi.modelindex ("models/objects/debris3/tris.md2");
-
-	    //precache all base player models.  this eliminates "stutter" when a player joins the game
-	    //this should be here for the cases of 7.45 clients and older
-		//to do - remove this block of code by next release - it is not needed.
-	    gi.modelindex ("players/martianenforcer/tris.md2");
-	    gi.modelindex ("players/martiancyborg/tris.md2");
-		gi.modelindex ("players/martianoverlord/tris.md2");
-		gi.modelindex ("players/martianwarrior/tris.md2");
-	    gi.modelindex ("players/enforcer/tris.md2");
-	    gi.modelindex ("players/lauren/tris.md2");
-	    gi.modelindex ("players/rustbot/tris.md2");
-	    gi.modelindex ("players/commander/tris.md2");
-
-	    //do the w_weps
-	    gi.modelindex ("players/martianenforcer/weapon.md2");
-	    gi.modelindex ("players/martianenforcer/w_blaster.md2");
-	    gi.modelindex ("players/martianenforcer/w_shotgun.md2");
-	    gi.modelindex ("players/martianenforcer/w_sshotgun.md2");
-	    gi.modelindex ("players/martianenforcer/w_machinegun.md2");
-	    gi.modelindex ("players/martianenforcer/w_chaingun.md2");
-	    gi.modelindex ("players/martianenforcer/w_rlauncher.md2");
-	    gi.modelindex ("players/martianenforcer/w_hyperblaster.md2");
-	    gi.modelindex ("players/martianenforcer/w_railgun.md2");
-	    gi.modelindex ("players/martianenforcer/w_bfg.md2");
-	    gi.modelindex ("players/martianenforcer/w_violator.md2");
-		gi.modelindex ("players/martianenforcer/w_minderaser.md2");
-
-	    gi.modelindex ("players/martiancyborg/weapon.md2");
-	    gi.modelindex ("players/martiancyborg/w_blaster.md2");
-	    gi.modelindex ("players/martiancyborg/w_shotgun.md2");
-	    gi.modelindex ("players/martiancyborg/w_sshotgun.md2");
-	    gi.modelindex ("players/martiancyborg/w_machinegun.md2");
-	    gi.modelindex ("players/martiancyborg/w_chaingun.md2");
-	    gi.modelindex ("players/martiancyborg/w_rlauncher.md2");
-	    gi.modelindex ("players/martiancyborg/w_hyperblaster.md2");
-	    gi.modelindex ("players/martiancyborg/w_railgun.md2");
-	    gi.modelindex ("players/martiancyborg/w_bfg.md2");
-	    gi.modelindex ("players/martiancyborg/w_violator.md2");
-		gi.modelindex ("players/martiancyborg/w_minderaser.md2");
-
-	    gi.modelindex ("players/enforcer/weapon.md2");
-	    gi.modelindex ("players/enforcer/w_blaster.md2");
-	    gi.modelindex ("players/enforcer/w_shotgun.md2");
-	    gi.modelindex ("players/enforcer/w_sshotgun.md2");
-	    gi.modelindex ("players/enforcer/w_machinegun.md2");
-	    gi.modelindex ("players/enforcer/w_chaingun.md2");
-	    gi.modelindex ("players/enforcer/w_rlauncher.md2");
-	    gi.modelindex ("players/enforcer/w_hyperblaster.md2");
-	    gi.modelindex ("players/enforcer/w_railgun.md2");
-	    gi.modelindex ("players/enforcer/w_bfg.md2");
-	    gi.modelindex ("players/enforcer/w_violator.md2");
-		gi.modelindex ("players/enforcer/w_minderaser.md2");
-
-	    gi.modelindex ("players/lauren/weapon.md2");
-	    gi.modelindex ("players/lauren/w_blaster.md2");
-	    gi.modelindex ("players/lauren/w_shotgun.md2");
-	    gi.modelindex ("players/lauren/w_sshotgun.md2");
-	    gi.modelindex ("players/lauren/w_machinegun.md2");
-	    gi.modelindex ("players/lauren/w_chaingun.md2");
-	    gi.modelindex ("players/lauren/w_rlauncher.md2");
-	    gi.modelindex ("players/lauren/w_hyperblaster.md2");
-	    gi.modelindex ("players/lauren/w_railgun.md2");
-	    gi.modelindex ("players/lauren/w_bfg.md2");
-	    gi.modelindex ("players/lauren/w_violator.md2");
-		gi.modelindex ("players/lauren/w_minderaser.md2");
-
-	    gi.modelindex ("players/rustbot/weapon.md2");
-	    gi.modelindex ("players/rustbot/w_blaster.md2");
-	    gi.modelindex ("players/rustbot/w_shotgun.md2");
-	    gi.modelindex ("players/rustbot/w_sshotgun.md2");
-	    gi.modelindex ("players/rustbot/w_machinegun.md2");
-	    gi.modelindex ("players/rustbot/w_chaingun.md2");
-	    gi.modelindex ("players/rustbot/w_rlauncher.md2");
-	    gi.modelindex ("players/rustbot/w_hyperblaster.md2");
-	    gi.modelindex ("players/rustbot/w_railgun.md2");
-	    gi.modelindex ("players/rustbot/w_bfg.md2");
-	    gi.modelindex ("players/rustbot/w_violator.md2");
-		gi.modelindex ("players/rustbot/w_minderaser.md2");
-
-		gi.modelindex ("players/slashbot/weapon.md2");
-	    gi.modelindex ("players/slashbot/w_blaster.md2");
-	    gi.modelindex ("players/slashbot/w_shotgun.md2");
-	    gi.modelindex ("players/slashbot/w_sshotgun.md2");
-	    gi.modelindex ("players/slashbot/w_machinegun.md2");
-	    gi.modelindex ("players/slashbot/w_chaingun.md2");
-	    gi.modelindex ("players/slashbot/w_rlauncher.md2");
-	    gi.modelindex ("players/slashbot/w_hyperblaster.md2");
-	    gi.modelindex ("players/slashbot/w_railgun.md2");
-	    gi.modelindex ("players/slashbot/w_bfg.md2");
-	    gi.modelindex ("players/slashbot/w_violator.md2");
-		gi.modelindex ("players/slashbot/w_minderaser.md2");
-
-	    gi.modelindex ("players/commander/weapon.md2");
-	    gi.modelindex ("players/commander/w_blaster.md2");
-	    gi.modelindex ("players/commander/w_shotgun.md2");
-	    gi.modelindex ("players/commander/w_sshotgun.md2");
-	    gi.modelindex ("players/commander/w_machinegun.md2");
-	    gi.modelindex ("players/commander/w_chaingun.md2");
-	    gi.modelindex ("players/commander/w_rlauncher.md2");
-	    gi.modelindex ("players/commander/w_hyperblaster.md2");
-	    gi.modelindex ("players/commander/w_railgun.md2");
-	    gi.modelindex ("players/commander/w_bfg.md2");
-	    gi.modelindex ("players/commander/w_violator.md2");
-		gi.modelindex ("players/commander/w_minderaser.md2");
-
-		gi.modelindex ("players/martianoverlord/weapon.md2");
-	    gi.modelindex ("players/martianoverlord/w_blaster.md2");
-	    gi.modelindex ("players/martianoverlord/w_shotgun.md2");
-	    gi.modelindex ("players/martianoverlord/w_sshotgun.md2");
-	    gi.modelindex ("players/martianoverlord/w_machinegun.md2");
-	    gi.modelindex ("players/martianoverlord/w_chaingun.md2");
-	    gi.modelindex ("players/martianoverlord/w_rlauncher.md2");
-	    gi.modelindex ("players/martianoverlord/w_hyperblaster.md2");
-	    gi.modelindex ("players/martianoverlord/w_railgun.md2");
-	    gi.modelindex ("players/martianoverlord/w_bfg.md2");
-	    gi.modelindex ("players/martianoverlord/w_violator.md2");
-		gi.modelindex ("players/martianoverlord/w_minderaser.md2");
-
-		gi.modelindex ("players/martianwarrior/weapon.md2");
-	    gi.modelindex ("players/martianwarrior/w_blaster.md2");
-	    gi.modelindex ("players/martianwarrior/w_shotgun.md2");
-	    gi.modelindex ("players/martianwarrior/w_sshotgun.md2");
-	    gi.modelindex ("players/martianwarrior/w_machinegun.md2");
-	    gi.modelindex ("players/martianwarrior/w_chaingun.md2");
-	    gi.modelindex ("players/martianwarrior/w_rlauncher.md2");
-	    gi.modelindex ("players/martianwarrior/w_hyperblaster.md2");
-	    gi.modelindex ("players/martianwarrior/w_railgun.md2");
-	    gi.modelindex ("players/martianwarrior/w_bfg.md2");
-	    gi.modelindex ("players/martianwarrior/w_violator.md2");
-		gi.modelindex ("players/martianwarrior/w_minderaser.md2");
 
 		//weapon models that aren't placed in levels
 		gi.modelindex ("models/weapons/v_minderaser/tris.md2");
@@ -1285,21 +1146,6 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("models/weapons/v_blast/tris.md2");
 		gi.modelindex ("models/weapons/v_violator/tris.md2");
 	}
-
-	//these are needed for custom player models for when they enter a game
-	gi.modelindex ("#w_blaster.md2");
-	gi.modelindex ("#w_shotgun.md2");
-	gi.modelindex ("#w_sshotgun.md2");
-	gi.modelindex ("#w_machinegun.md2");
-	gi.modelindex ("#w_chaingun.md2");
-	gi.modelindex ("#a_grenades.md2");
-	gi.modelindex ("#w_glauncher.md2");
-	gi.modelindex ("#w_rlauncher.md2");
-	gi.modelindex ("#w_hyperblaster.md2");
-	gi.modelindex ("#w_railgun.md2");
-	gi.modelindex ("#w_bfg.md2");
-	gi.modelindex ("#w_violator.md2");
-	gi.modelindex ("#w_minderaser.md2");
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.

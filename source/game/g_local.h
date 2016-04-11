@@ -293,25 +293,6 @@ typedef struct
 #define IT_POWERUP		16
 #define IT_HEALTH		32
 
-//to do - add alteria items - will require a number of other changes, particularly in bot code as well
-// gitem_t->weapmodel for weapons indicates model index
-#define WEAP_BLASTER			1
-#define WEAP_SMARTGUN			2
-#define WEAP_CHAINGUN			3
-#define WEAP_GRAPPLE			4
-#define WEAP_FLAMETHROWER		5
-#define WEAP_ROCKETLAUNCHER		8
-#define WEAP_DISRUPTOR			9
-#define WEAP_BEAMGUN			10
-#define WEAP_VAPORIZER			11
-#define WEAP_VIOLATOR			12
-#define WEAP_MINDERASER			13
-#define WEAP_BOMBER				14
-#define WEAP_STRAFER			15
-#define WEAP_HOVER				16
-#define WEAP_ABOMB				17
-#define WEAP_HBOMB				18
-
 // Wherever possible, use the GITEM_INIT_* macros instead of supplying the
 // values directly in the initializer! The macros MUST be called in the
 // correct order or bad things will happen. (NOTE: if we ever drop the C98
@@ -352,19 +333,22 @@ typedef struct gitem_s
 	int			quantity2;		// for weapons how much per alt-fire
 	char		*ammo;			// for weapons
 	char		*view_model;
-	int			weapmodel;		// weapon model index (for weapons)
+	char		*weapmodel;		// w_weap model name
+	// NEVER supply the weapmodel_idx manually! It is generated automatically
+	// by InitItems in g_items.c. Just supply a value of 0.
+	int			weapmodel_idx;	// weapon model index
 	void		*info;
 	int			tag;
 #define GITEM_INIT_ARMOR(info,tag) \
-	0, 0, NULL, NULL, 0, info, tag
+	0, 0, NULL, NULL, NULL, 0, info, tag
 #define GITEM_INIT_WEAP(quantity,quantity2,ammo,view_model,weapmodel) \
-	quantity, quantity2, ammo, view_model, weapmodel, NULL, 0
+	quantity, quantity2, ammo, view_model, weapmodel, 0, NULL, 0
 #define GITEM_INIT_AMMO(quantity) \
-	quantity, 0, NULL, NULL, 0, NULL, 0
+	quantity, 0, NULL, NULL, NULL, 0, NULL, 0
 #define GITEM_INIT_POWERUP(quantity) \
-	quantity, 0, NULL, NULL, 0, NULL, 0
+	quantity, 0, NULL, NULL, NULL, 0, NULL, 0
 #define GITEM_INIT_OTHER() \
-	0, 0, NULL, NULL, 0, NULL, 0
+	0, 0, NULL, NULL, NULL, 0, NULL, 0
 
 	char		*precaches;		// string of all models, sounds, and images this item will use
 } gitem_t;

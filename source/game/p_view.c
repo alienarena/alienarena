@@ -330,6 +330,7 @@ void SV_CalcViewOffset (edict_t *ent)
             ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2]*8;
             VectorCopy (ent->client->chasecam->s.angles, ent->client->ps.viewangles);
         }
+
     }
 	VectorCopy (v, ent->client->ps.viewoffset);
 }
@@ -428,32 +429,10 @@ void ResetWeaponModel (edict_t *ent)
 	strcpy(weaponmodel, " ");
 	weaponmodel[0] = 0;
 
-	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
-
-	if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_violator/tris.md2" ))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
-	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_rocket/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_alienblast/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_alienblaster.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_bfg/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_rail/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_railgun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_shotg2/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_sshotgun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_shotg/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_shotgun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_hyperb/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_chain/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_minderaser/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_minderaser.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "vehicles/deathball/v_wep.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
+    if (ent->client->pers.weapon->weapmodel != NULL)
+    	sprintf (weaponmodel, "players/%s%s", weaponame, ent->client->pers.weapon->weapmodel);
+    else
+		sprintf (weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
