@@ -950,6 +950,7 @@ void droptofloor (edict_t *ent)
 
 		ent->svflags |= SVF_NOCLIENT;
 		ent->solid = SOLID_NOT;
+
 		if (ent == ent->teammaster)
 		{
 			ent->nextthink = level.time + FRAMETIME;
@@ -1284,7 +1285,8 @@ gitem_t	itemlist[] =
 		// able to pick this item back up
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_TacticalBomb),
 		GITEM_INIT_WORLDMODEL ("models/tactical/alien_bomb.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("abomb", "Alien Bomb", NULL),
+		// TODO: make an icon for the alien bomb
+		GITEM_INIT_CLIENTSIDE (NULL, "Alien Bomb", NULL),
 		// will use db's vweap for bombs and detonators
 		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.md2", "w_machinegun.md2"),
 		NULL
@@ -1296,7 +1298,8 @@ gitem_t	itemlist[] =
 		// able to pick this item back up
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_TacticalBomb),
 		GITEM_INIT_WORLDMODEL ("models/tactical/human_bomb.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("abomb", "Human Bomb", NULL),
+		// TODO: make an icon for the human bomb
+		GITEM_INIT_CLIENTSIDE (NULL, "Human Bomb", NULL),
 		// will use db's vweap for bombs and detonators
 		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.md2", "w_machinegun.md2"),
 		NULL
@@ -1428,7 +1431,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_bfg, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.md2", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("vaporizer", "Alien Vaporizer", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.md2", "w_bfg.md2"),
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav"
 	},
@@ -1438,7 +1441,8 @@ always owned, never in the world
 		// not droppable, so drop callback not supplied
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, NULL, Weapon_Minderaser),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_minderaser/tris.md2", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("minderaser", "Minderaser", "misc/w_pkup.wav"),
+		// TODO: create an icon for the mind eraser!
+		GITEM_INIT_CLIENTSIDE (NULL, "Minderaser", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.md2", "w_minderaser.md2"),
 /* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},

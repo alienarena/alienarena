@@ -885,7 +885,7 @@ void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
 	int			index;
-	int			i;
+	int			i, j;
 	gitem_t		*flag1_item, *flag2_item;
 
 
@@ -1035,39 +1035,16 @@ void G_SetStats (edict_t *ent)
 		for(i = 0; i < 7; i++)
 			ent->client->ps.stats[STAT_WEAPN1+i] = 0;
 		i = 0;
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] &&
-			ent->client->pers.weapon != (FindItem("Alien Disruptor"))) {
-				ent->client->ps.stats[STAT_WEAPN1] = gi.imageindex ("disruptor");
+		for (j = 1; j < game.num_items && i < 7; j++)
+		{
+		    if (//ent->client->pers.inventory[j] &&
+		        (itemlist[j].flags & IT_WEAPON) && itemlist[j].icon != NULL &&
+		        ent->client->pers.weapon != &itemlist[j] &&
+		        (itemlist[j].quantity != 0 || itemlist[j].quantity2 != 0))
+		    {
+		        ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex (itemlist[j].icon);
 				i++;
-		}
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] &&
-			ent->client->pers.weapon != (FindItem("Alien Smartgun"))) {
-				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("smartgun");
-				i++;
-		}
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] &&
-			ent->client->pers.weapon != (FindItem("Pulse Rifle"))) {
-				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("chaingun");
-				i++;
-		}
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] &&
-			ent->client->pers.weapon != (FindItem("Flame Thrower"))) {
-				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("flamethrower");
-				i++;
-		}
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] &&
-			ent->client->pers.weapon != (FindItem("Rocket Launcher"))) {
-				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("rocketlauncher");
-				i++;
-		}
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] &&
-			ent->client->pers.weapon != (FindItem("Disruptor"))) {
-				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("beamgun");
-				i++;
-		}
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] &&
-			ent->client->pers.weapon != (FindItem("Alien Vaporizer"))) {
-				ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("vaporizor");
+		    }
 		}
 	}
 #endif
