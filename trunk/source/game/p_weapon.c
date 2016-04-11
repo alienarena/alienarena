@@ -272,7 +272,7 @@ void ChangeWeapon (edict_t *ent)
 	// set visible model
 	if (ent->s.modelindex == 255) {
 		if (ent->client->pers.weapon)
-			i = ((ent->client->pers.weapon->weapmodel & 0xff) << 8);
+			i = ((ent->client->pers.weapon->weapmodel_idx & 0xff) << 8);
 		else
 			i = 0;
 		ent->s.skinnum = (ent - g_edicts - 1) | i;
@@ -319,34 +319,10 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
-#ifdef ALTERIA
-	//add in Alteria definitions
-#else
-	if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_violator/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
-	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_rocket/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_alienblast/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_alienblaster.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_bfg/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_rail/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_railgun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_shotg2/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_sshotgun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_shotg/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_shotgun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_hyperb/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_chain/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_minderaser/tris.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_minderaser.md2");
-	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"vehicles/deathball/v_wep.md2"))
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-#endif
+	if (ent->client->pers.weapon->weapmodel != NULL)
+    	sprintf (weaponmodel, "players/%s%s", weaponame, ent->client->pers.weapon->weapmodel);
+    else
+		sprintf (weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	ent->s.modelindex2 = gi.checkmodelindex(weaponmodel);
