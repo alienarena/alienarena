@@ -275,8 +275,9 @@ nobase_dist_models_DATA = \
 	items/sproing/skin_normal.jpg \
 	items/sproing/tris.md2 \
 	misc/deathray/deathray.md2 \
-	misc/deathray/deathray_normal.tga \
 	misc/deathray/deathray.tga \
+	misc/deathray/deathray_fx.tga \
+	misc/deathray/deathray_normal.jpg \
 	misc/spiderpod/helmet.iqm \
 	misc/spiderpod/helmet.md2 \
 	misc/spiderpod/skin.tga \
