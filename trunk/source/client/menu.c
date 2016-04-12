@@ -5601,11 +5601,11 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	entity_t entity[3];
 	menumodel_s *self = (menumodel_s*) _self;
 	
-	self->mframe += cls.frametime*150;
-	if ( self->mframe > 390 )
-		self->mframe = 10;
-	if ( self->mframe < 10)
-		self->mframe = 10;
+	self->mframe += cls.frametime * 15.0f;
+	if (self->mframe > 39)
+		self->mframe = 1;
+	if (self->mframe < 1)
+		self->mframe = 1;
 
 	self->yaw += cls.frametime*50;
 	if (self->yaw > 360)
@@ -5664,9 +5664,9 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	{
 		// seems a little odd to use frame-1 for oldframe and frame%1 for 
 		// backlerp, but it works out
-		entity[i].frame = (int)(self->mframe/10);
-		entity[i].oldframe = (int)(self->mframe/10) - 1;
-		entity[i].backlerp = (float)((int)self->mframe%10)/10.0f;
+		entity[i].frame = (int)self->mframe;
+		entity[i].oldframe = entity[i].frame - 1;
+		entity[i].backlerp = self->mframe - (float)entity[i].frame;
 		entity[i].angles[1] = (int)self->yaw;
 		
 		VectorSet (entity[i].origin, 80, 0, -5);
