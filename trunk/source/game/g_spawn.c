@@ -1096,7 +1096,7 @@ void SP_worldspawn (edict_t *ent)
 		int num_players = sizeof (player_names) / sizeof (player_names[0]);
 		
 		int player_num, item_num;
-		char *w_weap_prefix;
+		char w_weap_prefix[MAX_QPATH];
 		
 		// loop through all the weapons and players, and index all the w_weap
 		// models and taunts.
@@ -1116,14 +1116,14 @@ void SP_worldspawn (edict_t *ent)
 				// where unarmed combat is done (fists as a weapon.)
 				gi.modelindex (va ("players/%s/tris.md2", player_names[player_num]));
 				
-				w_weap_prefix = va ("players/%s/", player_names[player_num]);
+				Com_sprintf (w_weap_prefix, sizeof (w_weap_prefix), "players/%s/", player_names[player_num]);
 				gi.modelindex (va ("%sweapon.md2", w_weap_prefix));
 			}
 			else
 			{
 				// these are needed to insure that all clients have the same
 				// ordering for their weap model indexes.
-				w_weap_prefix = "#";
+				Com_sprintf (w_weap_prefix, sizeof (w_weap_prefix), "#");
 			}
 			
 			for (item_num = 1; item_num < game.num_items; item_num++)
