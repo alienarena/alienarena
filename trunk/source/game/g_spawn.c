@@ -1107,7 +1107,7 @@ void SP_worldspawn (edict_t *ent)
 			{
 				// precache all base player taunts
 				int taunt_num;
-				for (taunt_num = 0; taunt_num < 5; taunt_num++)
+				for (taunt_num = 1; taunt_num <= 5; taunt_num++)
 					gi.soundindex (va ("taunts/%s/taunt%d.wav", player_names[player_num], taunt_num));
 				
 				// Precache the base player model itself. This eliminates
