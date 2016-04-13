@@ -1266,6 +1266,7 @@ void R_RenderFramePlayerSetup( refdef_t *rfdf )
 	R_UpdateDlights ();
 	R_SetFrustum();
 	R_SetupGL();
+	qglClear (GL_DEPTH_BUFFER_BIT);
 	R_DrawEntitiesOnList();
 
 	R_SetGL2D();
