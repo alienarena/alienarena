@@ -478,6 +478,10 @@ nobase_dist_textures_DATA = \
 	arena10/rustwall1_hm.tga \
 	arena10/rustwall1_nm.tga \
 	arena10/rustwall1.tga \
+	arena10/rustysign1.tga \
+	arena10/rustysign2.tga \
+	arena10/rustysign2_hm.tga \
+	arena10/rustysign2_nm.tga \
 	arena10/sevenup.tga \
 	arena10/sewergrate1_nm.tga \
 	arena10/sewergrate1.tga \
@@ -1271,6 +1275,12 @@ nobase_dist_textures_DATA = \
 	desert/roughwood3.tga \
 	desert/roughwood3_nm.tga \
 	desert/roughwood4.tga \
+	desert/rustydoor1.tga \
+	desert/rustydoor1_hm.tga \
+	desert/rustydoor1_nm.tga \
+	desert/rustydoor2.tga \
+	desert/rustydoor2_hm.tga \
+	desert/rustydoor2_nm.tga \
 	desert/sign1.tga \
 	desert/skullsupp2.tga \
 	desert/tent1.tga \
