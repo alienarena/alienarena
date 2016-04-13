@@ -5578,6 +5578,7 @@ typedef struct
 	const char *skin;
 	float w, h;
 	float mframe, yaw;
+	int frametime;
 } menumodel_s;
 
 static menuvec2_t PlayerModelSizeFunc (void *_self, FNT_font_t font)
@@ -5600,12 +5601,17 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	extern float CalcFov( float fov_x, float w, float h );
 	entity_t entity[3];
 	menumodel_s *self = (menumodel_s*) _self;
+	float old_frame = self->mframe;
 	
 	self->mframe += cls.frametime * 15.0f;
 	if (self->mframe > 39)
 		self->mframe = 1;
 	if (self->mframe < 1)
 		self->mframe = 1;
+	
+	// for IQM lerping
+	if ((int)old_frame != (int)self->mframe)
+		self->frametime = Sys_Milliseconds ();
 
 	self->yaw += cls.frametime*50;
 	if (self->yaw > 360)
@@ -5666,8 +5672,11 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		// backlerp, but it works out
 		entity[i].frame = (int)self->mframe;
 		entity[i].oldframe = entity[i].frame - 1;
+		// for MD2 lerping:
 		entity[i].backlerp = self->mframe - (float)entity[i].frame;
 		entity[i].angles[1] = (int)self->yaw;
+		// for IQM lerping:
+		entity[i].frametime = self->frametime;
 		
 		VectorSet (entity[i].origin, 80, 0, -5);
 		VectorCopy (entity[i].origin, entity[i].oldorigin);
