@@ -912,14 +912,13 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	int		index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
-	int		i, k, done;
+	int		i, done;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
 	char	*info;
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char userinfo[MAX_INFO_STRING];
-	char bot_configfilename[MAX_OSPATH];
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -1056,59 +1055,6 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	ent->next_node = ent->current_node;
 	ent->next_move_time = level.time;
 	ent->suicide_timeout = level.time + 15.0;
-
-	if ( !respawn )
-	{
-		/*
-		 * on initial spawn, load bot configuration
-		 * from botinfo/<botname>.cfg file
-		 * ReadConfig sets defaults if there is no such file.
-		 */
-		info = Info_ValueForKey (ent->client->pers.userinfo, "name");
-		sprintf( bot_configfilename, "botinfo/%s.cfg", info );
-		ACECO_ReadConfig(bot_configfilename);
-
-		//set config items
-		ent->skill = botvals.skill;
-		strcpy(ent->faveweap, botvals.faveweap);
-		for(k = 1; k < 10; k++)
-			ent->weapacc[k] = botvals.weapacc[k];
-		ent->awareness = botvals.awareness;
-		memcpy (ent->chatmsg, botvals.chatmsg, sizeof (ent->chatmsg));
-
-		/*
-		 * adjust skill according to cvar. Single Player menu selections
-		 *  force the cvar.
-		 *   0 : forces all to 0 skill (single player easy)
-		 *   1 : skill is cfg setting  (single player medium)
-		 *   2 : skill is cfg setting setting plus 1 (single player hard)
-		 *   3 : forces all to skill 3 (single player ultra)
-		 */
-		if( skill->integer == 0 )
-		{
-			ent->skill = 0; //dumb as a box of rocks
-		}
-		else if ( skill->integer == 2 )
-		{
-			ent->skill += 1;
-			if(ent->skill > 3)
-				ent->skill = 3;
-		}
-		else if ( skill->integer >= 3 )
-		{
-			ent->skill = 3;
-		}
-
-		/*
-		 * clear the weapon accuracy statistics.
-		 * for testing aim related settings.
-		 */
-		for(i = 0; i < 9; i++)
-		{
-			client->resp.weapon_shots[i] = 0;
-			client->resp.weapon_hits[i] = 0;
-		}
-	}
 
 	// If we are not respawning hold off for up to three seconds before releasing into game
 	if(!respawn)
@@ -1310,8 +1256,10 @@ qboolean ACESP_ClientConnect( edict_t *pbot )
 qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 {
 	char new_userinfo[MAX_INFO_STRING];
+	char bot_configfilename[MAX_OSPATH];
 	edict_t *pbot;
 	qboolean connect_allowed = false;
+	int i;
 
 
 	pbot = ACESP_FindFreeClient ();
@@ -1360,7 +1308,56 @@ qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 	InitClientResp( pbot->client);
 
 	// initial spawn
-	ACESP_PutClientInServer( pbot, false );
+	/*
+	 * on initial spawn, load bot configuration
+	 * from botinfo/<botname>.cfg file
+	 * ReadConfig sets defaults if there is no such file.
+	 */
+	sprintf (bot_configfilename, "botinfo/%s.cfg", pbot->client->pers.netname);
+	ACECO_ReadConfig (bot_configfilename);
+
+	//set config items
+	pbot->skill = botvals.skill;
+	strcpy (pbot->faveweap, botvals.faveweap);
+	for (i = 1; i < 10; i++)
+		pbot->weapacc[i] = botvals.weapacc[i];
+	pbot->awareness = botvals.awareness;
+	memcpy (pbot->chatmsg, botvals.chatmsg, sizeof (pbot->chatmsg));
+
+	/*
+	 * adjust skill according to cvar. Single Player menu selections
+	 *  force the cvar.
+	 *   0 : forces all to 0 skill (single player easy)
+	 *   1 : skill is cfg setting  (single player medium)
+	 *   2 : skill is cfg setting setting plus 1 (single player hard)
+	 *   3 : forces all to skill 3 (single player ultra)
+	 */
+	if (skill->integer == 0)
+	{
+		pbot->skill = 0; //dumb as a box of rocks
+	}
+	else if (skill->integer == 2)
+	{
+		pbot->skill += 1;
+		if (pbot->skill > 3)
+			pbot->skill = 3;
+	}
+	else if (skill->integer >= 3)
+	{
+		pbot->skill = 3;
+	}
+
+	/*
+	 * clear the weapon accuracy statistics.
+	 * for testing aim related settings.
+	 */
+	for (i = 0; i < 9; i++)
+	{
+		pbot->client->resp.weapon_shots[i] = 0;
+		pbot->client->resp.weapon_hits[i] = 0;
+	}
+	
+	ACESP_PutClientInServer (pbot, false);
 
 	ACESP_SaveBots(); // update bots.tmp and clients bot information
 
