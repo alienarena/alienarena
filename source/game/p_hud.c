@@ -1033,7 +1033,7 @@ void G_SetStats (edict_t *ent)
 		i = 0;
 		for (j = 1; j < game.num_items && i < 7; j++)
 		{
-		    if (//ent->client->pers.inventory[j] &&
+		    if (ent->client->pers.inventory[j] &&
 		        (itemlist[j].flags & IT_WEAPON) && itemlist[j].icon != NULL &&
 		        ent->client->pers.weapon != &itemlist[j] &&
 		        (itemlist[j].quantity != 0 || itemlist[j].quantity2 != 0))
