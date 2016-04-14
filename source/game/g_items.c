@@ -1544,7 +1544,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (item_quad, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Quad, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/quaddama/tris.md2", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("p_quad", "Alien Smart Grenade", "items/powerup.wav"),
+		GITEM_INIT_CLIENTSIDE ("p_quad", "Double Damage", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (150),
 /* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
 	},
