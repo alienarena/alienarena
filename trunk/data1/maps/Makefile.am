@@ -115,6 +115,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/damage2.decal \
 	meshes/desert/damage3.decal \
 	meshes/desert/damage4.decal \
+	meshes/desert/damage5.decal \
 	meshes/desert/lamp.jpg \
 	meshes/desert/lamp.md2 \
 	meshes/desert/lamp_fx.tga \
@@ -124,6 +125,18 @@ nobase_dist_maps_DATA = \
 	meshes/desert/lantern_fx.tga \
 	meshes/desert/lantern_normal.jpg \
 	meshes/desert/metalbare_d.jpg \
+	meshes/desert/oilcan1.jpg \
+	meshes/desert/oilcan1.md2 \
+	meshes/desert/oilcan1_normal.jpg \
+	meshes/desert/oilcan2.jpg \
+	meshes/desert/oilcan2.md2 \
+	meshes/desert/oilcan2_normal.jpg \
+	meshes/desert/oilcan3.jpg \
+	meshes/desert/oilcan3.md2 \
+	meshes/desert/oilcan3_normal.jpg \
+	meshes/desert/oiltank.jpg \
+	meshes/desert/oiltank.md2 \
+	meshes/desert/oiltank_normal.jpg \
 	meshes/desert/platewall1.md2 \
 	meshes/desert/platewall1.tga \
 	meshes/desert/platewall1_normal.tga \
@@ -133,6 +146,9 @@ nobase_dist_maps_DATA = \
 	meshes/desert/saucer.jpg \
 	meshes/desert/saucer.md2 \
 	meshes/desert/saucer_normal.jpg \
+	meshes/desert/tank.md2 \
+	meshes/desert/tank1.tga \
+	meshes/desert/tank1_normal.jpg \
 	meshes/dm-bloodfactory/blood0.decal \
 	meshes/dm-bloodfactory/blood1.decal \
 	meshes/dm-bloodfactory/blood2.decal \
@@ -176,6 +192,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
 	meshes/dm-wasteland/rocks1.decal \
+	meshes/dm-wasteland/slime0.decal \
 	meshes/dome.md2 \
 	meshes/dualpipes.jpg \
 	meshes/dualpipes.md2 \

@@ -1276,11 +1276,14 @@ nobase_dist_textures_DATA = \
 	desert/roughwood3_nm.tga \
 	desert/roughwood4.tga \
 	desert/rustydoor1.tga \
-	desert/rustydoor1_hm.tga \
 	desert/rustydoor1_nm.tga \
 	desert/rustydoor2.tga \
-	desert/rustydoor2_hm.tga \
 	desert/rustydoor2_nm.tga \
+	desert/rustydoor3.tga \
+	desert/rustydoor3_nm.tga \
+	desert/rustymetal1.tga \
+	desert/rustymetal1_hm.tga \
+	desert/rustymetal1_nm.tga \
 	desert/sign1.tga \
 	desert/skullsupp2.tga \
 	desert/tent1.tga \
