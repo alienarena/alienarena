@@ -1644,7 +1644,7 @@ void respawn (edict_t *self)
 		self->svflags &= ~SVF_NOCLIENT;
 		
 		if (self->is_bot)
-			ACESP_PutClientInServer (self, true);
+			ACESP_PutClientInServer (self);
 		else
 			PutClientInServer (self);
 
@@ -2306,7 +2306,7 @@ void MoveClientsDownQueue(edict_t *ent)
 				if(!g_edicts[i+1].is_bot)
 					PutClientInServer(g_edicts+i+1);
 				else
-					ACESP_PutClientInServer( g_edicts+i+1, true ); // respawn
+					ACESP_PutClientInServer (g_edicts+i+1);
 				safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
 				putonein = true;
 			}

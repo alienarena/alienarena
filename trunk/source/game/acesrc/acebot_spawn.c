@@ -750,23 +750,16 @@ int ACESP_FindBotNum(void)
 // Called by PutClient in Server to actually release the bot into the game
 // Keep from killin' each other when all spawned at once
 ///////////////////////////////////////////////////////////////////////
-void ACESP_HoldSpawn(edict_t *self)
+static void ACESP_HoldSpawn (edict_t *self)
 {
 
-	if ( !self->inuse || !self->is_bot )
+	if (!self->inuse || !self->is_bot)
 	{
 		gi.dprintf("ACEAI_HoldSpawn: bad call program error\n");
 		return;
 	}
-
-	if (!KillBox (self))
-	{	// could't spawn in?
-	}
-
-	gi.linkentity (self);
-
-	self->think = ACEAI_Think;
-	self->nextthink = level.time + FRAMETIME;
+	
+	ACESP_PutClientInServer (self);
 
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
@@ -905,7 +898,7 @@ void ACECO_ReadConfig( char *config_file )
 
 ======
  */
-void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
+void ACESP_PutClientInServer (edict_t *ent)
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
@@ -1056,30 +1049,17 @@ void ACESP_PutClientInServer (edict_t *ent, qboolean respawn )
 	ent->next_move_time = level.time;
 	ent->suicide_timeout = level.time + 15.0;
 
-	// If we are not respawning hold off for up to three seconds before releasing into game
-	if(!respawn)
-	{
-		ent->think = ACESP_HoldSpawn;
-		ent->nextthink = level.time + random()*3.0; // up to three seconds
-	}
-	else
-	{
-		if (!KillBox (ent))
-		{	// could't spawn in?
-		}
+	ent->s.event = EV_OTHER_TELEPORT; //fix "player flash" bug
+	gi.linkentity (ent);
 
-		ent->s.event = EV_OTHER_TELEPORT; //fix "player flash" bug
-		gi.linkentity (ent);
+	ent->think = ACEAI_Think;
+	ent->nextthink = level.time + FRAMETIME;
 
-		ent->think = ACEAI_Think;
-		ent->nextthink = level.time + FRAMETIME;
-
-			// send effect
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_LOGIN);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-	}
+		// send effect
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (ent-g_edicts);
+	gi.WriteByte (MZ_LOGIN);
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
 	client->spawnprotecttime = level.time;
 
 	//unlagged
@@ -1357,7 +1337,9 @@ qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 		pbot->client->resp.weapon_hits[i] = 0;
 	}
 	
-	ACESP_PutClientInServer (pbot, false);
+	// On initial spawn, hold off for up to three seconds before releasing into game
+	pbot->think = ACESP_HoldSpawn;
+	pbot->nextthink = level.time + random () * 3.0; // up to three seconds
 
 	ACESP_SaveBots(); // update bots.tmp and clients bot information
 
