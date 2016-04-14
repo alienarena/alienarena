@@ -838,7 +838,7 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 		if(ent->is_bot)
 		{
 			// respawn bots after warmup
-			ACESP_PutClientInServer( ent, true );
+			ACESP_PutClientInServer (ent);
 		}
 		else {
 			if(ent->deadflag)
@@ -1350,7 +1350,7 @@ void ExitLevel (void)
 		ent->deadflag = DEAD_NO;
 		if(ent->is_bot) 
 		{
-			ACESP_PutClientInServer( ent, true );
+			ACESP_PutClientInServer (ent);
 		} 
 		else 
 		{
