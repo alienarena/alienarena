@@ -1575,7 +1575,6 @@ struct edict_s
 	edict_t		*mynoise2;
 
 	int			noise_index;
-	int			noise_index2;
 	float		volume;
 	float		attenuation;
 

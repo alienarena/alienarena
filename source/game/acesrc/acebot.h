@@ -214,7 +214,6 @@ edict_t *ACESP_FindBot(const char *name);
 void	 ACESP_KickBot(edict_t *bot);
 void     ACESP_HoldSpawn(edict_t *self);
 void     ACESP_PutClientInServer (edict_t *bot, qboolean respawn);
-void     ACESP_Respawn (edict_t *self);
 edict_t *ACESP_FindFreeClient (void);
 void     ACESP_SetName(edict_t *bot, char *name, char *skin, char *userinfo );
 qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo);
