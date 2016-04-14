@@ -1209,6 +1209,7 @@ static float	PlayersRangeFromSpot (edict_t *spot)
 		if (!player->inuse)
 			continue;
 
+
 		if (player->health <= 0)
 			continue;
 
@@ -1635,22 +1636,17 @@ void respawn (edict_t *self)
 {
 	if (deathmatch->value)
 	{
-
-// ACEBOT_ADD special respawning code
-		if (self->is_bot)
-		{
-			ACESP_Respawn (self);
-			return;
-		}
-// ACEBOT_END
-
 		//spectator mode
 		// spectator's don't leave bodies
 		if (self->movetype != MOVETYPE_NOCLIP)
 			CopyToBodyQue (self);
 		//end spectator mode
 		self->svflags &= ~SVF_NOCLIENT;
-		PutClientInServer (self);
+		
+		if (self->is_bot)
+			ACESP_PutClientInServer (self, true);
+		else
+			PutClientInServer (self);
 
 		// add a teleportation effect
 		self->s.event = EV_PLAYER_TELEPORT;
