@@ -60,8 +60,6 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->haste_framenum = 0;
     ent->client->sproing_framenum = 0;
 	ent->client->invis_framenum = 0;
-	ent->client->grenade_blew_up = false;
-	ent->client->grenade_time = 0;
 
 	ent->viewheight = 0;
 	ent->s.modelindex = 0;
@@ -127,8 +125,6 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->haste_framenum = 0;
     winner->client->sproing_framenum = 0;
 	winner->client->invis_framenum = 0;
-	winner->client->grenade_blew_up = false;
-	winner->client->grenade_time = 0;
 
 	winner->s.effects = EF_ROTATE;
 	winner->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);

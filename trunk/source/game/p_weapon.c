@@ -28,7 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 static qboolean	is_quad;
-static byte		is_silenced;
 // static qboolean altfire;
 
 float damage_buildup = 1.0;
@@ -60,15 +59,6 @@ to a noise in hopes of seeing the player from there.
 void PlayerNoise(edict_t *who, vec3_t where, int type)
 {
 	edict_t		*noise;
-
-	if (type == PNOISE_WEAPON)
-	{
-		if (who->client->silencer_shots)
-		{
-			who->client->silencer_shots--;
-			return;
-		}
-	}
 
 	if (deathmatch->value)
 		return;
@@ -267,7 +257,6 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->pers.lastweapon = ent->client->pers.weapon;
 	ent->client->pers.weapon = ent->client->newweapon;
 	ent->client->newweapon = NULL;
-	ent->client->machinegun_shots = 0;
 
 	// set visible model
 	if (ent->s.modelindex == 255) {
@@ -428,10 +417,6 @@ void Think_Weapon (edict_t *ent)
 	if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink)
 	{
 		is_quad = (ent->client->quad_framenum > level.framenum);
-		if (ent->client->silencer_shots)
-			is_silenced = MZ_SILENCED;
-		else
-			is_silenced = 0;
 		ent->client->pers.weapon->weaponthink (ent);
 	}
 }
@@ -833,7 +818,7 @@ void weapon_disruptor_fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_RAILGUN | is_silenced);
+	gi.WriteByte (MZ_RAILGUN);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
@@ -939,7 +924,7 @@ void weapon_vaporizer_fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_RAILGUN | is_silenced);
+		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorAdd(start, forward, start);
@@ -1009,7 +994,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_GRENADE | is_silenced);
+		gi.WriteByte (MZ_GRENADE);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		ent->client->ps.gunframe++;
@@ -1041,7 +1026,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_GRENADE | is_silenced);
+	gi.WriteByte (MZ_GRENADE);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	if (is_quad)
@@ -1155,7 +1140,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_ROCKET | is_silenced);
+	gi.WriteByte (MZ_ROCKET);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
@@ -1265,11 +1250,11 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qb
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	if (hyper)
-		gi.WriteByte (MZ_HYPERBLASTER | is_silenced);
+		gi.WriteByte (MZ_HYPERBLASTER);
 	else if (ent->client->buttons & BUTTON_ATTACK2)
-		gi.WriteByte (MZ_RAILGUN | is_silenced);
+		gi.WriteByte (MZ_RAILGUN);
 	else
-		gi.WriteByte (MZ_BLASTER | is_silenced);
+		gi.WriteByte (MZ_BLASTER);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
@@ -1372,7 +1357,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG | is_silenced);
+	gi.WriteByte (MZ_BFG);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
@@ -1428,7 +1413,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG | is_silenced);
+	gi.WriteByte (MZ_BFG);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	VectorAdd(start, forward, start);
@@ -1465,7 +1450,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG | is_silenced);
+	gi.WriteByte (MZ_BFG);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	VectorAdd(start, forward, start);
@@ -1529,7 +1514,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG | is_silenced);
+	gi.WriteByte (MZ_BFG);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	if(ent->client->buttons & BUTTON_ATTACK2) {
@@ -1739,7 +1724,7 @@ void Machinegun_Fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte ((MZ_CHAINGUN1 + shots - 1) | is_silenced);
+		gi.WriteByte (MZ_CHAINGUN1 + shots - 1);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		//create smoke effect
@@ -1790,7 +1775,7 @@ void Machinegun_Fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte ((MZ_CHAINGUN1 + shots - 1) | is_silenced);
+		gi.WriteByte (MZ_CHAINGUN1 + shots - 1);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		//create visual muzzle flash sprite!
@@ -1885,7 +1870,7 @@ void weapon_smartgun_fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_SHOTGUN | is_silenced);
+	gi.WriteByte (MZ_SHOTGUN);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
@@ -1973,7 +1958,7 @@ void weapon_minderaser_fire (edict_t *ent)
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_RAILGUN | is_silenced);
+	gi.WriteByte (MZ_RAILGUN);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
@@ -2125,7 +2110,7 @@ void Violator_Fire (edict_t *ent)
 		// send muzzle flash and effects
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_RAILGUN | is_silenced);
+		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorScale(forward, 1.4, forward);
@@ -2160,7 +2145,7 @@ void Violator_Fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_RAILGUN | is_silenced);
+		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorScale(forward, 1.4, forward);
@@ -2239,7 +2224,7 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_RAILGUN | is_silenced);
+		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorAdd(start, forward, start);
