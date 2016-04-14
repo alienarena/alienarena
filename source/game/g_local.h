@@ -1346,8 +1346,6 @@ struct gclient_s
 	int			old_waterlevel;
 	int			breather_sound;
 
-	int			machinegun_shots;	// for weapon raising
-
 	float		lean; //for leaning around corners
 	int			zoomed; // for zooming in and out
 	int			zoomtime; // time of last zoom
@@ -1368,9 +1366,6 @@ struct gclient_s
 
 	float		losehealth_framenum;
 
-	qboolean	grenade_blew_up;
-	float		grenade_time;
-	int			silencer_shots;
 	int			weapon_sound;
 
 	float		pickup_msg_time;
@@ -1390,7 +1385,6 @@ struct gclient_s
     edict_t         *oldplayer;
 
 	//vehicles
-	qboolean in_vehicle;
 	float	Jet_framenum;   /*burn out time when jet is activated*/
     float	Jet_remaining;  /*remaining fuel time*/
     float	Jet_next_think;
@@ -1609,9 +1603,7 @@ struct edict_s
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 
-	edict_t		*flashlight;
-	
-	edict_t		*replaced_weapon;
+	edict_t		*replaced_weapon; // for mind eraser
 
 	// YAW event triggering - for doing smooth turns for various ents
 	int			last_turn_frame;
