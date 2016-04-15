@@ -581,14 +581,6 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 
 		sPos = vec4 ((meshRotation * gl_Vertex.xyz) + meshPosition, 1.0);
 		
-		// XXX: tri-planar projection requires the vertex normal, so don't use
-		// the blendmap RScript command on BSP surfaces yet!
-		if (numblendtextures != 0)
-		{
-			orig_normal = gl_Normal.xyz;
-			orig_coord = gl_Vertex.xyz;
-		}
-		
 		vec4 maincoord;
 		
 		if (envmap == 1)
@@ -601,7 +593,18 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 			maincoord = gl_MultiTexCoord0;
 		}
 		
-		gl_TexCoord[0] = gl_TextureMatrix[0] * maincoord;
+		// XXX: tri-planar projection requires the vertex normal, so don't use
+		// the blendmap RScript command on BSP surfaces yet!
+		if (numblendtextures != 0)
+		{
+			orig_normal = gl_Normal.xyz;
+			orig_coord = (gl_TextureMatrix[0] * gl_Vertex).xyz;
+			gl_TexCoord[0] = maincoord;
+		}
+		else
+		{
+			gl_TexCoord[0] = gl_TextureMatrix[0] * maincoord;
+		}
 		
 		if (lightmap == 1)
 			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord0;
