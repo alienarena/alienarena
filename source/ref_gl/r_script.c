@@ -1339,16 +1339,16 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 		if (stage->lightmap && lm != rs_lightmap_off)
 			GL_MBind (1, lmtex);
 		
-		GL_SelectTexture (0);
-		qglPushMatrix ();
+	 	if (stage->num_blend_textures > 3)
+	 		GL_MBind (2, stage->texture2->texnum);
 		
 		if (stage->anim_count)
 			GL_MBind (0, RS_Animate(stage));
 		else
 	 		GL_MBind (0, stage->texture->texnum);
 	 	
-	 	if (stage->num_blend_textures > 3)
-	 		GL_MBind (2, stage->texture2->texnum);
+	 	GL_SelectTexture (0);
+		qglPushMatrix ();
 		
 		if (stage->blendfunc.blend)
 		{
