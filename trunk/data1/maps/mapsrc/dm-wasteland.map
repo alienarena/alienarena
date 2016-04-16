@@ -9443,7 +9443,7 @@
 {
 "classname" "misc_decal"
 "origin" "-1766.000000 -488.000000 212.000000"
-"model" "maps/meshes/dm-deathray/slime0.decal"
+"model" "maps/meshes/dm-wasteland/slime0.decal"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 200
@@ -9459,4 +9459,45 @@
 "origin" "1504.000122 -688.000122 -0.000008"
 "model" "maps/meshes/desert/oilcan1.md2"
 "angle" "-50.796627"
+}
+// entity 202
+{
+"classname" "misc_decal"
+"origin" "-1678.000000 -1600.000000 68.000000"
+"model" "maps/meshes/dm-wasteland/mud1.decal"
+"angles" "90.000000 0.000000 -0.000000"
+}
+// entity 203
+{
+"classname" "misc_decal"
+"origin" "-1710.000000 -1336.000000 68.000000"
+"model" "maps/meshes/dm-wasteland/mud1.decal"
+"angles" "90.000000 0.000000 -0.000000"
+}
+// entity 204
+{
+"classname" "misc_decal"
+"origin" "-1670.000000 -1024.000000 68.000000"
+"model" "maps/meshes/dm-wasteland/mud1.decal"
+"angles" "90.000000 0.000000 -0.000000"
+}
+// entity 205
+{
+"classname" "misc_decal"
+"origin" "-958.000000 -720.000000 64.000000"
+"model" "maps/meshes/dm-wasteland/mud2.decal"
+"angles" "90.000000 0.000000 -0.000000"
+}
+// entity 206
+{
+"classname" "misc_decal"
+"origin" "-1038.000000 -640.000000 64.000000"
+"model" "maps/meshes/dm-wasteland/mud2.decal"
+"angles" "90.000000 0.000000 -0.000000"
+}
+// entity 207
+{
+"classname" "misc_decal"
+"origin" "-1566.000000 -1708.000000 64.000000"
+"model" "maps/meshes/dm-wasteland/mud2.decal"
 }
