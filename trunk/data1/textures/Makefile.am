@@ -983,7 +983,12 @@ nobase_dist_textures_DATA = \
 	ctf-frost/snow1.tga \
 	ctf-frost/snow1_blendtex.tga \
 	ctf-frost/snow1_lightmaptex.tga \
+	decals/damage1.tga \
+	decals/damage2.tga \
+	decals/damage3.tga \
+	decals/mud1.tga \
 	decals/rock1.tga \
+	decals/rust1.tga \
 	desert/03door4.tga \
 	desert/03door4_hm.tga \
 	desert/03door4_nm.tga \

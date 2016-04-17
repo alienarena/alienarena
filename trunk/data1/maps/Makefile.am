@@ -191,6 +191,8 @@ nobase_dist_maps_DATA = \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
+	meshes/dm-wasteland/mud1.decal \
+	meshes/dm-wasteland/mud2.decal \
 	meshes/dm-wasteland/rocks1.decal \
 	meshes/dm-wasteland/slime0.decal \
 	meshes/dome.md2 \
