@@ -637,9 +637,9 @@ fire_begin:
 			if (gunframe == FRAME_IDLE_LAST)
 			{
 #ifdef ALTERIA
-				gunframe = FRAME_IDLE_FIRST; //we can return this to alien arena if we ever decide to have idle animations again for weapons
+				gunframe = FRAME_IDLE_FIRST; //looping idle animation
 #endif
-				return;
+				return; //don't do this again unless reloading animation is desired
 			}
 
 			if (pause_frames)
@@ -653,7 +653,6 @@ fire_begin:
 					}
 				}
 			}
-
 			gunframe++;
 			return;
 		}
@@ -677,7 +676,12 @@ fire_begin:
 			gunframe++;
 
 		if (gunframe == FRAME_IDLE_FIRST+1)
+		{
+			if(ent->client->pers.weapon->classnum == weapon_hyperblaster || ent->client->pers.weapon->classnum == weapon_blaster
+				|| ent->client->pers.weapon->classnum == weapon_shotgun || ent->client->pers.weapon->classnum == weapon_rocketlauncher)
+				gunframe = FRAME_IDLE_LAST;
 			ent->client->weaponstate = WEAPON_READY;
+		}
 	}
 	#undef gunframe
 }
@@ -940,7 +944,6 @@ void weapon_vaporizer_fire (edict_t *ent)
 
 	}
 	ent->client->ps.gunframe++;
-
 }
 void Weapon_Vaporizer (edict_t *ent)
 {
