@@ -1335,7 +1335,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("blaster", "Blaster", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_blast/tris.md2", "w_blaster.md2"),
-/* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+/* precache */ "weapons/blastf1a.wav misc/lasfly.wav weapons/blasterreload.wav"
 	},
 
 	/* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1356,7 +1356,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("violator", "Violator", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_violator/tris.md2", "w_violator.md2"),
-/* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
+/* precache */ "weapons/viofire1.wav weapons/viofire2.wav weapons/violatorreload.wav"
 	},
 
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1378,7 +1378,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.md2", "w_sshotgun.md2"),
-/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav"
+/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/chaingunreload.wav"
 	},
 
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1400,7 +1400,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_rocket/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("rocketlauncher", "Rocket Launcher", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Rockets", "models/weapons/v_rocket/tris.md2", "w_rlauncher.md2"),
-/* precache */ "models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav models/objects/debris2/tris.md2"
+/* precache */ "models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav weapons/rlauncherreload.wav models/objects/debris2/tris.md2"
 	},
 
 /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1411,7 +1411,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_hyperb/tris.md2", "w_hyperblaster.md2"),
-/* precache */ "weapons/railgf1a.wav"
+/* precache */ "weapons/railgf1a.wav weapons/disruptorreload.wav"
 	},
 
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1422,7 +1422,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("beamgun", "Disruptor", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_rail/tris.md2", "w_railgun.md2"),
-/* precache */ "weapons/hyprbf1a.wav"
+/* precache */ "weapons/hyprbf1a.wav weapons/beamgunreload.wav"
 	},
 
 /*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1433,7 +1433,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.md2", "w_bfg.md2"),
-/* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav"
+/* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav weapons/vaporizerreload.wav"
 	},
 
 	{
@@ -1444,7 +1444,7 @@ always owned, never in the world
 		// TODO: create an icon for the mind eraser!
 		GITEM_INIT_CLIENTSIDE (NULL, "Minderaser", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.md2", "w_minderaser.md2"),
-/* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
+/* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav weapons/minderaserreload.wav"
 	},
 #endif
 	//

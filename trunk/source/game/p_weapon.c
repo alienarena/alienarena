@@ -654,6 +654,27 @@ fire_begin:
 				}
 			}
 			gunframe++;
+
+			//play a reloading sound
+			if(ent->client->pers.weapon->classnum == weapon_blaster && gunframe == FRAME_IDLE_FIRST + 5)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/blasterreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_violator && gunframe == FRAME_IDLE_FIRST + 3)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/violatorreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_supershotgun && gunframe == FRAME_IDLE_FIRST + 5)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/chaingunreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_rocketlauncher && gunframe == FRAME_IDLE_FIRST + 4)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/rlauncherreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_shotgun && gunframe == FRAME_IDLE_FIRST + 2)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/smartgunreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_hyperblaster && gunframe == FRAME_IDLE_FIRST + 4)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/disruptorreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_railgun && gunframe == FRAME_IDLE_FIRST + 5)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/beamgunreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_bfg && gunframe == FRAME_IDLE_FIRST + 5)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/vaporizerreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_minderaser && gunframe == FRAME_IDLE_FIRST + 3)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/minderaserreload.wav"), 1, ATTN_NORM, 0);
+
 			return;
 		}
 	}
