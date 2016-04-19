@@ -234,6 +234,13 @@ maps/meshes/desert/oilcan3
 		normalmap
 	}
 }
+maps/meshes/desert/tumbleweed
+{
+	{
+		map maps/meshes/desert/tumbleweed_normal.jpg
+		normalmap
+	}
+}
 
 
 

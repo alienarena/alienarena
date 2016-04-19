@@ -6239,7 +6239,7 @@
 ( -928 2040 64 ) ( -2080 2040 64 ) ( -928 2040 -64 ) arena8/crackedrock4 224 0 0 1 1 0 4 0
 ( 2056 -40 64 ) ( 2056 -40 -64 ) ( 2056 -1192 64 ) arena8/crackedrock4 104 0 0 1 1 0 4 0
 ( -2040 1360 -64 ) ( -2040 2512 -64 ) ( -2040 1360 64 ) arena8/crackedrock4 112 0 0 1 1 0 4 0
-( -456 576 2048 ) ( 696 -576 2048 ) ( -456 -576 2048 ) arena8/crackedrock4 136 0 0 1 1 0 4 0
+( -456 576 2048 ) ( 696 -576 2048 ) ( -456 -576 2048 ) desert/hangingmoss2 99.9396514893 257 0 0.3517516851 0.25 64 48 0
 ( -456 -576 2040 ) ( 696 -576 2040 ) ( -456 576 2040 ) arena8/crackedrock4 136 0 0 1 1 0 4 0
 ( 1256 -2056 -64 ) ( 1256 -2056 64 ) ( 2408 -2056 -64 ) arena8/crackedrock4 216 0 0 1 1 0 4 0
 }
@@ -9500,4 +9500,349 @@
 "classname" "misc_decal"
 "origin" "-1566.000000 -1708.000000 64.000000"
 "model" "maps/meshes/dm-wasteland/mud2.decal"
+}
+// entity 208
+{
+"classname" "path_corner"
+"origin" "-864.000000 960.000000 40.000000"
+"target" "stop1"
+"targetname" "stop0"
+"angle" "-90.000000"
+}
+// entity 209
+{
+"classname" "path_corner"
+"origin" "-824.000000 800.000000 40.000000"
+"angle" "-54.597019"
+"targetname" "stop1"
+"target" "stop2"
+}
+// entity 210
+{
+"classname" "path_corner"
+"origin" "-576.000000 576.000000 40.000000"
+"angle" "-12.971006"
+"target" "stop3"
+"targetname" "stop2"
+}
+// entity 211
+{
+"classname" "path_corner"
+"origin" "256.000000 216.000000 40.000000"
+"angle" "-4.291042"
+"targetname" "stop3"
+"target" "stop4"
+}
+// entity 212
+{
+"classname" "path_corner"
+"origin" "1008.000000 136.000000 16.000000"
+"target" "stop5"
+"targetname" "stop4"
+}
+// entity 213
+{
+"classname" "path_corner"
+"origin" "1464.000000 0.000000 24.000000"
+"angle" "-20.652105"
+"targetname" "stop5"
+"target" "stop6"
+}
+// entity 214
+{
+"classname" "path_corner"
+"origin" "1656.000000 -112.000000 40.000000"
+"angle" "-110.380569"
+"target" "stop7"
+"targetname" "stop6"
+}
+// entity 215
+{
+"classname" "path_corner"
+"origin" "1536.000000 -496.000000 16.000000"
+"angle" "-70.052765"
+"targetname" "stop7"
+"target" "stop8"
+}
+// entity 216
+{
+"classname" "path_corner"
+"origin" "1616.000000 -816.000000 40.000000"
+"angle" "-109.166443"
+"target" "stop9"
+"targetname" "stop8"
+}
+// entity 217
+{
+"classname" "path_corner"
+"origin" "1504.000000 -1128.000000 40.000000"
+"angle" "-99.512436"
+"targetname" "stop9"
+"target" "stop10"
+}
+// entity 218
+{
+"classname" "path_corner"
+"origin" "1096.000000 -1616.000000 24.000000"
+"angle" "-142.923737"
+"target" "stop11"
+"targetname" "stop10"
+}
+// entity 219
+{
+"classname" "path_corner"
+"origin" "672.000000 -1728.000000 40.000000"
+"angle" "173.713593"
+"targetname" "stop11"
+"target" "stop12"
+}
+// entity 220
+{
+"classname" "path_corner"
+"origin" "-440.000000 -1648.000000 16.000000"
+"angle" "162.021347"
+"target" "stop13"
+"targetname" "stop12"
+}
+// entity 221
+{
+"classname" "path_corner"
+"origin" "-864.000000 -1672.000000 16.000000"
+"angle" "-159.657120"
+"targetname" "stop13"
+"target" "stop14"
+}
+// entity 222
+{
+"classname" "path_corner"
+"origin" "-1496.000000 -1680.000000 16.000000"
+"angle" "120.718414"
+"target" "stop15"
+"targetname" "stop14"
+}
+// entity 223
+{
+"classname" "path_corner"
+"origin" "-1672.000000 -1432.000000 16.000000"
+"angle" "69.668907"
+"targetname" "stop15"
+"target" "stop16"
+}
+// entity 224
+{
+"classname" "path_corner"
+"origin" "-1584.000000 -1176.000000 16.000000"
+"angle" "99.156837"
+"target" "stop17"
+"targetname" "stop16"
+}
+// entity 225
+{
+"classname" "path_corner"
+"origin" "-1544.000000 -840.000000 16.000000"
+"angle" "26.131697"
+"targetname" "stop17"
+"target" "stop18"
+}
+// entity 226
+{
+"classname" "path_corner"
+"origin" "-1024.000000 -648.000000 32.000000"
+"angle" "-50.843510"
+"target" "stop19"
+"targetname" "stop18"
+}
+// entity 227
+{
+"classname" "path_corner"
+"origin" "-680.000000 -1120.000000 16.000000"
+"angle" "-53.740410"
+"targetname" "stop19"
+"target" "stop20"
+}
+// entity 228
+{
+"classname" "path_corner"
+"origin" "-576.000000 -1592.000000 24.000000"
+"angle" "-15.885618"
+"target" "stop21"
+"targetname" "stop20"
+}
+// entity 229
+{
+"classname" "path_corner"
+"origin" "-24.000000 -1704.000000 16.000000"
+"targetname" "stop21"
+"target" "stop22"
+}
+// entity 230
+{
+"classname" "path_corner"
+"origin" "632.000000 -1736.000000 16.000000"
+"angle" "9.341165"
+"target" "stop23"
+"targetname" "stop22"
+}
+// entity 231
+{
+"classname" "path_corner"
+"origin" "1160.000000 -1560.000000 56.000000"
+"angle" "51.474052"
+"targetname" "stop23"
+"target" "stop24"
+}
+// entity 232
+{
+"classname" "path_corner"
+"origin" "1424.000000 -1184.000000 40.000000"
+"angle" "69.720528"
+"target" "stop25"
+"targetname" "stop24"
+}
+// entity 233
+{
+"classname" "path_corner"
+"origin" "1640.000000 -616.000000 40.000000"
+"angle" "109.533058"
+"targetname" "stop25"
+"target" "stop26"
+}
+// entity 234
+{
+"classname" "path_corner"
+"origin" "1520.000000 -280.000000 40.000000"
+"angle" "68.493553"
+"target" "stop27"
+"targetname" "stop26"
+}
+// entity 235
+{
+"classname" "path_corner"
+"origin" "1600.000000 200.000000 40.000000"
+"angle" "85.372215"
+"targetname" "stop27"
+"target" "stop28"
+}
+// entity 236
+{
+"classname" "path_corner"
+"origin" "1624.000000 600.000000 40.000000"
+"angle" "97.852066"
+"target" "stop29"
+"targetname" "stop28"
+}
+// entity 237
+{
+"classname" "path_corner"
+"origin" "1496.000000 1008.000000 72.000000"
+"angle" "142.531357"
+"targetname" "stop29"
+"target" "stop30"
+}
+// entity 238
+{
+"classname" "path_corner"
+"origin" "1152.000000 1176.000000 32.000000"
+"angle" "161.482712"
+"target" "stop31"
+"targetname" "stop30"
+}
+// entity 239
+{
+"classname" "path_corner"
+"origin" "656.000000 1280.000000 24.000000"
+"angle" "166.944138"
+"targetname" "stop31"
+"target" "stop32"
+}
+// entity 240
+{
+"classname" "path_corner"
+"origin" "224.000000 1312.000000 24.000000"
+"angle" "-173.470596"
+"target" "stop33"
+"targetname" "stop32"
+}
+// entity 241
+{
+"classname" "path_corner"
+"origin" "-184.000000 1272.000000 24.000000"
+"angle" "153.174210"
+"targetname" "stop33"
+"target" "stop34"
+}
+// entity 242
+{
+"classname" "path_corner"
+"origin" "-464.000000 1272.000000 88.000000"
+"angle" "-121.862038"
+"targetname" "stop34"
+"target" "stop35"
+}
+// entity 243
+{
+"classname" "path_corner"
+"origin" "-656.000000 1064.000000 88.000000"
+"angle" "-121.542107"
+"target" "stop36"
+"targetname" "stop35"
+}
+// entity 244
+{
+"classname" "path_corner"
+"origin" "-760.000000 984.000000 64.000000"
+"angle" "-166.839890"
+"targetname" "stop36"
+"target" "stop0"
+}
+// entity 245
+{
+"classname" "func_train"
+"angle" "270"
+"model" "maps/meshes/desert/tumbleweed.iqm"
+"spawnflags" "41"
+"target" "stop0"
+// brush 0
+{
+( -960 872 144 ) ( -984 872 144 ) ( -984 848 144 ) arena6/blacktrans 104 80 0 1 1 16777216 0 0
+( -984 848 168 ) ( -984 872 168 ) ( -960 872 168 ) arena6/blacktrans 104 80 0 1 1 16777216 0 0
+( -984 848 168 ) ( -960 848 168 ) ( -960 848 160 ) arena6/blacktrans 104 120 0 1 1 16777216 0 0
+( -960 848 168 ) ( -960 872 168 ) ( -960 872 160 ) arena6/blacktrans 48 120 0 1 1 16777216 0 0
+( -960 872 168 ) ( -984 872 168 ) ( -984 872 160 ) arena6/blacktrans 104 120 0 1 1 16777216 0 0
+( -984 872 168 ) ( -984 848 168 ) ( -984 848 160 ) arena6/blacktrans 48 120 0 1 1 16777216 0 0
+}
+}
+// entity 246
+{
+"classname" "func_train"
+"angle" "270"
+"model" "maps/meshes/desert/tumbleweed.iqm"
+"spawnflags" "41"
+"target" "stop22"
+// brush 0
+{
+( -936 808 144 ) ( -960 808 144 ) ( -960 784 144 ) arena6/blacktrans 80 16 0 1 1 16777216 0 0
+( -960 784 168 ) ( -960 808 168 ) ( -936 808 168 ) arena6/blacktrans 80 16 0 1 1 16777216 0 0
+( -960 784 168 ) ( -936 784 168 ) ( -936 784 160 ) arena6/blacktrans 80 120 0 1 1 16777216 0 0
+( -936 784 168 ) ( -936 808 168 ) ( -936 808 160 ) arena6/blacktrans 112 120 0 1 1 16777216 0 0
+( -936 808 168 ) ( -960 808 168 ) ( -960 808 160 ) arena6/blacktrans 80 120 0 1 1 16777216 0 0
+( -960 808 168 ) ( -960 784 168 ) ( -960 784 160 ) arena6/blacktrans 112 120 0 1 1 16777216 0 0
+}
+}
+// entity 247
+{
+"classname" "func_train"
+"angle" "270"
+"model" "maps/meshes/desert/tumbleweed.iqm"
+"spawnflags" "41"
+"target" "stop30"
+// brush 0
+{
+( -976 824 144 ) ( -1000 824 144 ) ( -1000 800 144 ) arena6/blacktrans 120 32 0 1 1 16777216 0 0
+( -1000 800 168 ) ( -1000 824 168 ) ( -976 824 168 ) arena6/blacktrans 120 32 0 1 1 16777216 0 0
+( -1000 800 168 ) ( -976 800 168 ) ( -976 800 160 ) arena6/blacktrans 120 120 0 1 1 16777216 0 0
+( -976 800 168 ) ( -976 824 168 ) ( -976 824 160 ) arena6/blacktrans 96 120 0 1 1 16777216 0 0
+( -976 824 168 ) ( -1000 824 168 ) ( -1000 824 160 ) arena6/blacktrans 120 120 0 1 1 16777216 0 0
+( -1000 824 168 ) ( -1000 800 168 ) ( -1000 800 160 ) arena6/blacktrans 96 120 0 1 1 16777216 0 0
+}
 }

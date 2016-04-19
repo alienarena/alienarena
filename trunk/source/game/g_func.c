@@ -1617,7 +1617,7 @@ again:
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		if(self->spawnflags & 64)
 			self->s.sound = gi.soundindex("world/electricity.wav");
-		else
+		else if(self->spawnflags & 128)
 			self->s.sound = gi.soundindex ("world/turbine1.wav");
 	}
 
@@ -1689,7 +1689,6 @@ void func_train_find (edict_t *self)
 	}
 	self->target = ent->target;
 
-
 	VectorSubtract (ent->s.origin, self->mins, self->s.origin);
 
 	gi.linkentity (self);
@@ -1697,8 +1696,6 @@ void func_train_find (edict_t *self)
 	// if not triggered, start immediately
 	if (!self->targetname)
 		self->spawnflags |= TRAIN_START_ON;
-
-
 
 	if (self->spawnflags & TRAIN_START_ON)
 	{
@@ -1731,7 +1728,6 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_train (edict_t *self)
 {
-
 	self->movetype = MOVETYPE_PUSH;
 
 	VectorClear (self->s.angles);
@@ -1757,7 +1753,8 @@ void SP_func_train (edict_t *self)
 	if(self->spawnflags & 64)
 		self->s.effects |= EF_HYPERBLASTER; //teleporter type effect
 
-	self->moveinfo.sound_middle = gi.soundindex ("world/turbine1.wav");
+	if(self->spawnflags & 128)
+		self->moveinfo.sound_middle = gi.soundindex ("world/turbine1.wav");
 
 	if (!self->speed)
 		self->speed = 100;
