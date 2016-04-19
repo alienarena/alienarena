@@ -6,12 +6,12 @@ canyon1_texture
 		blendmap 4			
 			200 textures/desert/cliffmiddle.tga	
 			400 textures/desert/clifftop.tga		
-			200 textures/texturelib/ground_0045.jpg	
+			200 textures/desert/cliffbottom.tga	
 			100 textures/desert/rockground1.tga
 		blendnormalmap 3 
 			0 textures/desert/cliffmiddle_nm.tga
 			1 textures/desert/clifftop_nm.tga
-			2 textures/texturelib/ground_0045_nm.jpg			
+			2 textures/desert/cliffbottom_nm.tga				
 	}
 }
 textures/arena7/light10
