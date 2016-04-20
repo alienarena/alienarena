@@ -215,11 +215,15 @@ nobase_dist_sound_DATA = \
 	vehicles/warning.wav \
 	weapons/adetonatordown.wav \
 	weapons/adetonatorup.wav \
+	weapons/beamgunreload.wav \
 	weapons/biglaser.wav \
+	weapons/blasterreload.wav \
 	weapons/blastf1a.wav \
+	weapons/chaingunreload.wav \
 	weapons/clank.wav \
 	weapons/clink01.wav \
 	weapons/clink02.wav \
+	weapons/disruptorreload.wav \
 	weapons/electroball.wav \
 	weapons/energyfield.wav \
 	weapons/grenlb1b.wav \
@@ -238,21 +242,26 @@ nobase_dist_sound_DATA = \
 	weapons/machgf5b.wav \
 	weapons/machgup.wav \
 	weapons/minderaserfire.wav \
+	weapons/minderaserreload.wav \
 	weapons/noammo.wav \
 	weapons/railgf1a.wav \
+	weapons/rlauncherreload.wav \
 	weapons/rockfly.wav \
 	weapons/rocklf1a.wav \
 	weapons/rocklr1b.wav \
 	weapons/rocklx1a.wav \
-	weapons/seeker_fast.wav \
 	weapons/seeker.wav \
+	weapons/seeker_fast.wav \
 	weapons/seeker_zap.wav \
 	weapons/shotgf1b.wav \
 	weapons/smartgun_hum.wav \
+	weapons/smartgunreload.wav \
 	weapons/spidermov.wav \
 	weapons/vaporizer_hum.wav \
+	weapons/vaporizerreload.wav \
 	weapons/viofire1.wav \
 	weapons/viofire2.wav \
+	weapons/violatorreload.wav \
 	weapons/whoosh.wav \
 	world/botwon.wav \
 	world/button1.wav \
