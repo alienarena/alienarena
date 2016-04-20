@@ -8,7 +8,6 @@ nobase_dist_scripts_DATA = \
 	caustics.rscript \
 	consoles.rscript \
 	interactive/textures.rscript \
-	maps/ctf-abyss.rscript \
 	maps/ctf-extermination2k15.rscript \
 	maps/ctf-frost2k15.rscript \
 	maps/ctf-violator2k16.rscript \

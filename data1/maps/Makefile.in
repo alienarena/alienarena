@@ -360,6 +360,10 @@ nobase_dist_maps_DATA = \
 	meshes/desert/tank.md2 \
 	meshes/desert/tank1.tga \
 	meshes/desert/tank1_normal.jpg \
+	meshes/desert/tumbleweed.iqm \
+	meshes/desert/tumbleweed.skin \
+	meshes/desert/tumbleweed.tga \
+	meshes/desert/tumbleweed_normal.jpg \
 	meshes/dm-bloodfactory/blood0.decal \
 	meshes/dm-bloodfactory/blood1.decal \
 	meshes/dm-bloodfactory/blood2.decal \
