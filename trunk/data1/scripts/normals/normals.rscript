@@ -351,12 +351,10 @@ models/items/ammo/rockets/medium/skin
 {
 
 	{
-		map models/items/ammo/skin_normal.tga
+		map models/items/ammo/rockets/medium/skin_normal.jpg
 		normalmap
-		map2 gfx/redlightning.tga
-		fx
-		map3 gfx/chrome2.tga
-		cube
+		map2 models/items/ammo/rockets/medium/skin_fx.tga
+		glow
 	}
 }
 models/items/ammo/cells/medium/cell
