@@ -219,14 +219,26 @@ nobase_dist_models_DATA = \
 	items/adrenaline/skin_normal.tga \
 	items/adrenaline/skin.tga \
 	items/adrenaline/tris.md2 \
-	items/ammo/bullets/medium/skin.tga \
+	items/ammo/bullets/medium/skin.jpg \
+	items/ammo/bullets/medium/skin_fx.tga \
+	items/ammo/bullets/medium/skin_normal.jpg \
+	items/ammo/bullets/medium/tris.iqm \
 	items/ammo/bullets/medium/tris.md2 \
-	items/ammo/cells/medium/cell.tga \
+	items/ammo/bullets/medium/tris.skin \
+	items/ammo/cells/medium/skin.jpg \
+	items/ammo/cells/medium/skin_fx.tga \
+	items/ammo/cells/medium/skin_normal.jpg \
+	items/ammo/cells/medium/tris.iqm \
 	items/ammo/cells/medium/tris.md2 \
+	items/ammo/cells/medium/tris.skin \
 	items/ammo/grenades/medium/skin.tga \
 	items/ammo/grenades/medium/tris.md2 \
-	items/ammo/rockets/medium/skin.tga \
+	items/ammo/rockets/medium/skin.jpg \
 	items/ammo/rockets/medium/tris.md2 \
+	items/ammo/rockets/medium/skin_fx.tga \
+	items/ammo/rockets/medium/skin_normal.jpg \
+	items/ammo/rockets/medium/tris.iqm \
+	items/ammo/rockets/medium/tris.skin \
 	items/ammo/shells/medium/skin.tga \
 	items/ammo/shells/medium/tris.md2 \
 	items/ammo/skin_normal.tga \
