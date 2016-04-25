@@ -367,14 +367,11 @@ models/items/ammo/cells/medium/skin
 }
 models/items/ammo/shells/medium/skin
 {
-
 	{
-		map models/items/ammo/skin_normal.tga
+		map models/items/ammo/shells/medium/skin_normal.jpg
 		normalmap
-		map2 gfx/bluelightning.tga
-		fx
-		map3 gfx/chrome2.tga
-		cube
+		map2 models/items/ammo/shells/medium/skin_fx.tga
+		glow
 	}
 }
 models/items/ammo/bullets/medium/skin
@@ -388,14 +385,11 @@ models/items/ammo/bullets/medium/skin
 }
 models/items/ammo/grenades/medium/skin
 {
-
 	{
-		map models/items/ammo/skin_normal.tga
+		map models/items/ammo/grenades/medium/skin_normal.jpg
 		normalmap
-		map2 gfx/redlightning.tga
-		fx
-		map3 gfx/chrome2.tga
-		cube
+		map2 models/items/ammo/grenades/medium/skin_fx.tga
+		glow
 	}
 }
 models/items/armor/combat/skin
