@@ -2457,6 +2457,16 @@ static const char *texquality_items[] =
 	0
 };
 
+static const char *antialiasing_items[] = 
+{
+	"off\0000",
+	"2x\0002",
+	"4x\0004",
+	"8x\0008",
+	"16x\00016",
+	0
+};
+
 option_name_t video_option_names[] = 
 {
 	{
@@ -2583,6 +2593,13 @@ option_name_t video_option_names[] =
 		"should be on unless framerates dip below your monitor's refresh rate",
 		setnames (onoff_names),
 		QMF_ACTION_WAIT
+	},
+	{
+		option_textcvarslider,
+		"r_antialiasing",
+		"multisample anti-aliasing",
+		NULL,
+		setnames (antialiasing_items)
 	}
 };
 

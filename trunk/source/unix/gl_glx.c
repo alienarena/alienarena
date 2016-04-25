@@ -98,6 +98,7 @@ qboolean have_stencil = false; // Stencil shadows - MrG
 
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
+extern cvar_t	*r_antialiasing;
 static int win_x, win_y;
 
 #ifdef HAVE_XXF86VM
@@ -864,6 +865,20 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	int xpos, ypos;
 
 	int width, height;
+
+	int attribMSAA[] = {
+		GLX_RGBA,
+		GLX_DOUBLEBUFFER,
+		GLX_RED_SIZE, 4,
+		GLX_GREEN_SIZE, 4,
+		GLX_BLUE_SIZE, 4,
+		GLX_DEPTH_SIZE, 24,
+		GLX_STENCIL_SIZE, 8,
+		GLX_SAMPLE_BUFFERS  , 1,
+		GLX_SAMPLES         , r_antialiasing->integer,
+		None
+	};
+	
 	int attrib[] = {
 		GLX_RGBA,
 		GLX_DOUBLEBUFFER,
@@ -922,7 +937,16 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	scrnum = DefaultScreen(dpy);
 	root = RootWindow(dpy, scrnum);
 
-	visinfo = qglXChooseVisual(dpy, scrnum, attrib);
+	if ( r_antialiasing->integer )
+	{
+		visinfo = qglXChooseVisual(dpy, scrnum, attribMSAA);
+	}
+	
+	if ( !r_antialiasing->integer || !visinfo )
+	{
+		visinfo = qglXChooseVisual(dpy, scrnum, attrib);
+	}
+	
 	if (!visinfo) {
 		fprintf(stderr, "Error couldn't get an RGB, Double-buffered, Depth visual, Stencil Buffered\n");
 		visinfo = qglXChooseVisual(dpy, scrnum, attrib2);

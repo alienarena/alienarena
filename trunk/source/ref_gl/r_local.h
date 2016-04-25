@@ -151,6 +151,7 @@ extern  cvar_t	*vid_contrast;
 extern cvar_t *r_anisotropic;
 extern cvar_t *r_alphamasked_anisotropic;
 extern cvar_t *r_ext_max_anisotropy;
+extern cvar_t *r_antialiasing;
 
 extern cvar_t	*r_overbrightbits;
 

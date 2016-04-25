@@ -140,6 +140,7 @@ cvar_t	*vid_ref;
 cvar_t *r_anisotropic;
 cvar_t *r_alphamasked_anisotropic;
 cvar_t *r_ext_max_anisotropy;
+cvar_t *r_antialiasing;
 
 cvar_t	*r_shaders;
 cvar_t	*r_bloom;
@@ -1338,6 +1339,9 @@ void R_Register( void )
 
 	gl_vlights = Cvar_Get("gl_vlights", "1", CVAR_ARCHIVE);
 
+	// MSAA samples: 0 = off, 2, 4, 8, 16
+	r_antialiasing = Cvar_Get( "r_antialiasing", "0", CVAR_ARCHIVE|CVARDOC_INT );
+	
 	r_meshnormalmaps = Cvar_Get("r_meshnormalmaps", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	r_worldnormalmaps = Cvar_Get("r_worldnormalmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE|CVARDOC_BOOL);

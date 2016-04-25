@@ -41,15 +41,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "glw_win.h"
 #include "winquake.h"
 #include "resource.h"
+#include "ref_gl/wglext.h"
 
 static qboolean GLimp_SwitchFullscreen( int width, int height );
-qboolean GLimp_InitGL (void);
+qboolean GLimp_InitGL ( qboolean );
+void DestroyWindowGL ( glwstate_t* );
+void GetARBPixelFormat( PIXELFORMATDESCRIPTOR );
+
+char *	( WINAPI * wglGetExtensionsStringARB )( HDC );
+int		( WINAPI * wglChoosePixelFormatARB )( HDC, CONST int *, CONST FLOAT *, UINT, int *, UINT * );
 
 glwstate_t glw_state;
 
 extern cvar_t *vid_fullscreen;
 extern cvar_t *vid_ref;
 extern cvar_t *vid_displayfrequency;
+extern cvar_t *r_antialiasing;
+int pixelformatARB;
 
 qboolean have_stencil = false; // Stencil shadows - MrG
 
@@ -69,6 +77,7 @@ static qboolean VerifyDriver( void )
 ** VID_CreateWindow
 */
 #define	WINDOW_CLASS_NAME	"Quake 2"
+
 
 qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 {
@@ -128,6 +137,33 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		y = vid_ypos->value;
 	}
 
+	
+	pixelformatARB = 0;
+	if ( r_antialiasing->integer ) {
+		// We have to create a temporary window here, with a temporary context,
+		// else the function pointer to wglChoosePixelFormatARB can't be found or it will not work.
+		// And if we don't destroy it again afterwards it will crash.
+		
+		glw_state.hWnd = CreateWindowEx (
+			 exstyle,
+			 WINDOW_CLASS_NAME,
+			 "CRX",
+			 stylebits,
+			 x, y, w, h,
+			 NULL,
+			 NULL,
+			 glw_state.hInstance,
+			 NULL );
+
+		if (!glw_state.hWnd)
+			Com_Error (ERR_FATAL, "Couldn't create window");
+
+		// Only get the var pixelformatARB and return
+		GLimp_InitGL( true ) ;
+
+		DestroyWindowGL( &glw_state );
+	}
+	
 	glw_state.hWnd = CreateWindowEx (
 		 exstyle,
 		 WINDOW_CLASS_NAME,
@@ -137,7 +173,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		 NULL,
 		 NULL,
 		 glw_state.hInstance,
-		 NULL);
+		 NULL );
 
 	if (!glw_state.hWnd)
 		Com_Error (ERR_FATAL, "Couldn't create window");
@@ -146,7 +182,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	UpdateWindow( glw_state.hWnd );
 
 	// init all the gl stuff for the window
-	if (!GLimp_InitGL ())
+	if (!GLimp_InitGL( false ))
 	{
 		Com_Printf ("VID_CreateWindow() - GLimp_InitGL failed\n");
 		return false;
@@ -160,7 +196,6 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 
 	return true;
 }
-
 
 /*
 ** GLimp_SetMode
@@ -238,7 +273,6 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 			if ( !VID_CreateWindow (width, height, true) )
 				return rserr_invalid_mode;
-
 			return rserr_ok;
 		}
 		else
@@ -665,7 +699,7 @@ qboolean GLimp_Init( void *hinstance, void *wndproc )
 	return true;
 }
 
-qboolean GLimp_InitGL (void)
+qboolean GLimp_InitGL ( qboolean getPixelFormatARB )
 {
     PIXELFORMATDESCRIPTOR pfd =
 	{
@@ -688,9 +722,8 @@ qboolean GLimp_InitGL (void)
 		0,								// reserved
 		0, 0, 0							// layer masks ignored
     };
-    int  pixelformat;
+    int pixelformat = 0;
 	cvar_t *stereo;
-
 	stereo = Cvar_Get( "cl_stereo", "0", 0 );
 
 	/*
@@ -727,12 +760,26 @@ qboolean GLimp_InitGL (void)
 		return false;
 	}
 
+	if ( getPixelFormatARB ) {
+		// Needed for MSAA.
+		// Just get the ARB pixel format and return, the window will be destroyed.
+		// The next time it will use the ARB pixel format and skips qwglChoosePixelFormat or ChoosePixelFormat.
+		GetARBPixelFormat( pfd );
+		return true;
+	} else if ( pixelformatARB )
+	{
+		pixelformat = pixelformatARB;
+	}
+
 	if ( glw_state.minidriver )
 	{
-		if ( (pixelformat = qwglChoosePixelFormat( glw_state.hDC, &pfd)) == 0 )
+		if ( !pixelformat ) 
 		{
-			Com_Printf ("GLimp_Init() - qwglChoosePixelFormat failed\n");
-			return false;
+			if ( (pixelformat = qwglChoosePixelFormat( glw_state.hDC, &pfd)) == 0 )
+			{
+				Com_Printf ("GLimp_Init() - qwglChoosePixelFormat failed\n");
+				return false;
+			}
 		}
 		if ( qwglSetPixelFormat( glw_state.hDC, pixelformat, &pfd) == FALSE )
 		{
@@ -743,10 +790,13 @@ qboolean GLimp_InitGL (void)
 	}
 	else
 	{
-		if ( ( pixelformat = ChoosePixelFormat( glw_state.hDC, &pfd)) == 0 )
+		if ( !pixelformat ) 
 		{
-			Com_Printf ("GLimp_Init() - ChoosePixelFormat failed\n");
-			return false;
+			if ( ( pixelformat = ChoosePixelFormat( glw_state.hDC, &pfd)) == 0 )
+			{
+				Com_Printf ("GLimp_Init() - ChoosePixelFormat failed\n");
+				return false;
+			}
 		}
 		if ( SetPixelFormat( glw_state.hDC, pixelformat, &pfd) == FALSE )
 		{
@@ -891,4 +941,116 @@ void GLimp_AppActivate( qboolean active )
 		if ( vid_fullscreen->value )
 			ShowWindow( glw_state.hWnd, SW_MINIMIZE );
 	}
+}
+
+/*
+** DestroyWindowGL
+**
+** Destroy the OpenGL window and release resources
+**/
+void DestroyWindowGL ( glwstate_t* window )			
+{
+	if ( window->hWnd != 0 )
+	{	
+		if ( window->hDC != 0 )
+		{
+			qwglMakeCurrent( window->hDC, 0 );
+
+			if ( window->hGLRC != 0 )
+			{
+				qwglDeleteContext ( window->hGLRC );
+				window->hGLRC = 0;
+			}
+
+			ReleaseDC( window->hWnd, window->hDC );
+			window->hDC = 0;
+		}
+		DestroyWindow( window->hWnd );
+		window->hWnd = 0;
+	}
+}
+
+/*
+** GetARBPixelFormat
+**
+** Get the ARB pixel format for MSAA. 
+** If it can be retrieved successfully, it will be used in the second call to GLimp_InitGL 
+** and it skips ChoosePixelFormat or qwglChoosePixelFormat.
+**/
+void GetARBPixelFormat( PIXELFORMATDESCRIPTOR pfd )
+{
+	int pixelformat;
+	int iAttributes[] = {
+		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+        WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+        WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+		WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+        WGL_COLOR_BITS_ARB, 32,
+		WGL_RED_BITS_ARB, 8,
+		WGL_GREEN_BITS_ARB, 8, 
+		WGL_BLUE_BITS_ARB, 8,
+		WGL_ALPHA_BITS_ARB, 8,
+        WGL_DEPTH_BITS_ARB, 24,
+        WGL_STENCIL_BITS_ARB, 8,
+        WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+        WGL_SAMPLES_ARB, r_antialiasing->integer,
+        0
+	};
+
+    UINT numFormats;
+	HGLRC dummyContext;
+	const char *ARBExtensions;		
+
+	// ChoosePixelFormat, SetPixelFormat, and setting a dummy context, 
+	// is all needed to be able to get the function pointer to wglChoosePixelFormatARB.
+	if ( glw_state.minidriver )
+	{
+		pixelformat = qwglChoosePixelFormat( glw_state.hDC, &pfd );
+		qwglSetPixelFormat( glw_state.hDC, pixelformat, &pfd );
+	} else
+	{
+		pixelformat = ChoosePixelFormat( glw_state.hDC, &pfd );
+		SetPixelFormat( glw_state.hDC, pixelformat, &pfd );
+	}
+	dummyContext = qwglCreateContext( glw_state.hDC );
+	qwglMakeCurrent ( glw_state.hDC, dummyContext );
+			
+	if ( !wglGetExtensionsStringARB )
+	{
+		wglGetExtensionsStringARB = ( char* (WINAPI *)(HDC) ) qwglGetProcAddress( "wglGetExtensionsStringARB" );
+	}
+
+	if ( wglGetExtensionsStringARB )
+	{
+		ARBExtensions = wglGetExtensionsStringARB( qwglGetCurrentDC() );
+	}
+
+	if ( ARBExtensions ) 
+	{
+		if ( strstr( ARBExtensions, "WGL_ARB_multisample" ) && strstr( ARBExtensions, "WGL_ARB_pixel_format" ) )
+		{
+			Com_Printf( "WGL_ARB_multisample and WGL_ARB_pixel_format supported\n" );
+
+			if ( !wglChoosePixelFormatARB )
+			{
+				wglChoosePixelFormatARB = ( int (WINAPI *)(HDC, CONST int *, CONST FLOAT *, UINT, int *, UINT *) ) 
+					qwglGetProcAddress( "wglChoosePixelFormatARB" );
+			}
+			
+			if ( wglChoosePixelFormatARB && wglChoosePixelFormatARB( glw_state.hDC, iAttributes, NULL, 1, &pixelformatARB, &numFormats ) )
+			{
+				if ( pixelformatARB && ( numFormats >= 1 ) )
+				{
+					qglEnable( GL_MULTISAMPLE_ARB );
+				} else 
+				{
+					pixelformatARB = 0;
+				}
+			}
+		}
+	}
+
+	// Clean up the dummy context
+	qwglMakeCurrent( 0, 0 );
+	qwglDeleteContext( dummyContext );
 }
