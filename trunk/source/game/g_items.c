@@ -1134,7 +1134,6 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	if (strcmp(ent->classname, "item_flag_red") && //flags are special and don't get this
 		strcmp(ent->classname, "item_flag_blue")) {
 		ent->s.effects = EF_ROTATE;
-
 	}
 	ent->s.renderfx = RF_GLOW;
 	if((strcmp(ent->classname, "Health") == 0)) {
@@ -1157,6 +1156,14 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	if((strcmp(ent->classname, "item_bomber") == 0) || (strcmp(ent->classname, "item_strafer") == 0)
 		|| (strcmp(ent->classname, "item_hover") == 0))
 		ent->think = VehicleSetup;
+
+	//give ammo boxes and armor shards a pulsing shell(combined with RF_GLOW the renderer will know to phase it
+	if(strcmp(ent->classname, "ammo_rockets") == 0 || strcmp(ent->classname, "ammo_cells") == 0 || strcmp(ent->classname, "ammo_shells") == 0 ||
+		strcmp(ent->classname, "ammo_grenades") == 0 || strcmp(ent->classname, "ammo_bullets") == 0 || strcmp(ent->classname, "item_armor_shard") == 0)
+	{
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_GREEN;
+	}
 }
 
 //======================================================================

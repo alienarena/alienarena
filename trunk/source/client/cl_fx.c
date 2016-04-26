@@ -1659,61 +1659,6 @@ void CL_BigTeleportParticles (vec3_t org)
 					0, .6, 0.4);
 	}
 }
-/*
-===============
-CL_HealthParticles
-===============
-*/
-
-void CL_HealthParticles (vec3_t org, int color, float alpha)
-{
-	particle_t	*p;
-	float		angle, dist;
-
-	if (!(p = new_particle()))
-			return;
-
-	p->type = PARTICLE_STANDARD;
-	p->image = r_cflashtexture;
-	p->scale = 10 + (rand()&7);
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->color = color + (rand() & 1);
-
-	// angle = M_PI*2*(rand()&1023)/1023.0;
-	angle = (float)M_PI * 2.0f * frand();
-
-	dist = rand()&5;
-	p->org[0] = org[0] + cosf(angle)*dist;
-	p->vel[0] = cosf(angle)*(6+(rand()&6));
-	p->accel[0] = -cosf(angle)*6;
-
-	p->org[1] = org[1] + sinf(angle) * dist;
-	p->vel[1] = sinf(angle) * (6+(rand()&6));
-	p->accel[1] = -sinf(angle) * 100.0f;
-
-	p->org[2] = org[2] + 8.0f + (rand()%10);
-	p->vel[2] = -10.0f + (rand()&6);
-	p->accel[2] = (float)PARTICLE_GRAVITY * 10.0f;
-	p->alpha = alpha;
-
-	p->alphavel = -2.6f / (0.5f + frand()*0.3f);
-}
-
-void CL_SmallHealthParticles (vec3_t org)
-{
-	CL_HealthParticles (org, 0xd4, 0.2);
-}
-
-void CL_MedHealthParticles (vec3_t org)
-{
-	CL_HealthParticles (org, 0x74, 0.3);
-}
-
-void CL_LargeHealthParticles (vec3_t org)
-{
-	CL_HealthParticles (org, 0xff, 0.3);
-}
 
 /*
 ===============

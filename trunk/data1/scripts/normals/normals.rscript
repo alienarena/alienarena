@@ -323,8 +323,8 @@ models/items/healing/small/skin
 	{
 		map models/items/healing/health_normal.tga
 		normalmap
-		map3 gfx/chrome2.tga
-		cube
+		map2 models/items/healing/small/skin.jpg
+		glow
 	}
 }
 models/items/healing/medium/skin
@@ -333,8 +333,8 @@ models/items/healing/medium/skin
 	{
 		map models/items/healing/health_normal.tga
 		normalmap
-		map3 gfx/chrome2.tga
-		cube
+		map2 models/items/healing/medium/skin.jpg
+		glow
 	}
 }
 models/items/healing/large/skin
@@ -343,8 +343,8 @@ models/items/healing/large/skin
 	{
 		map models/items/healing/health_normal.tga
 		normalmap
-		map3 gfx/chrome2.tga
-		cube
+		map2 models/items/healing/large/skin.jpg
+		glow
 	}
 }
 models/items/ammo/rockets/medium/skin

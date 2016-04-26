@@ -581,14 +581,22 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		GLSTATE_ENABLE_ALPHATEST
 	}
 	
-	// FIXME HACK
-	// TODO: other meshes might want dynamic shell alpha too!
 	if (!shell)
 		alpha = 1.0f;
-	if (currententity->ragdoll)
-		alpha = currententity->shellAlpha;
 	else
-		alpha = 0.33f;
+	{
+		if (currententity->ragdoll)
+			alpha = currententity->shellAlpha;
+		else
+		{
+			if(currententity->flags & RF_GLOW)
+				alpha = 0.95f * sin(r_newrefdef.time*2.0f);
+			else
+				alpha = 0.33f; 
+		}
+
+		GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 	
 	if (fragmentshader)
 		glUseProgramObjectARB (g_meshprogramObj[CUR_NUM_DLIGHTS]);
@@ -610,11 +618,13 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		lightVal_magnitude = 1.65f * VectorNormalize (lightVal);
 		lightVal_magnitude = clamp (lightVal_magnitude, 0.1f, 0.35f * gl_modulate->value);
 		VectorScale (lightVal, lightVal_magnitude, lightVal);
-		// FIXME: the GLSL shader doesn't support shell alpha!
 		glUniform3fARB (uniforms->staticLightColor, lightVal[0], lightVal[1], lightVal[2]);
 	}
 	
-	GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
+	if(currententity->flags & RF_GLOW)
+		GL_MBind (0, shell ? r_shelltexture->texnum : skinnum);
+	else
+		GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
 	glUniform1iARB (uniforms->baseTex, 0);
 
 	if (fragmentshader)
@@ -659,7 +669,10 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		}
 		else
 		{
-			GL_MBind (1, r_shellnormal->texnum);
+			if(currententity->flags & RF_GLOW)
+				GL_MBind (1, r_shellnormal->texnum);
+			else
+				GL_MBind (1, r_shellnormal2->texnum);
 		}
 		
 		glUniform1iARB (uniforms->useFX, shell ? 0 : rs->stage->fx);
@@ -687,6 +700,7 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	glUniform1iARB (uniforms->team, currententity->team);
 
 	glUniform1fARB (uniforms->useShell, shell ? (currententity->ragdoll?1.6:0.4) : 0.0);
+	glUniform1fARB (uniforms->shellAlpha, alpha);
 	
 	glUniform1iARB (uniforms->doShading, (currentmodel->typeFlags & MESH_DOSHADING) != 0);
 	

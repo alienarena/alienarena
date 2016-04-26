@@ -896,17 +896,6 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 		{
-			//give health an "aura"
-			if(cl_healthaura->value && !cl_simpleitems->value) 
-			{
-				if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
-					CL_SmallHealthParticles(ent.origin);
-				if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/medium/tris.md2"))
-					CL_MedHealthParticles(ent.origin);
-				if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/large/tris.md2"))
-					CL_LargeHealthParticles(ent.origin);
-			}
-
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) 
 			{
 				//add clear cover

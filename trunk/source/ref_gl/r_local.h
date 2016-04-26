@@ -708,6 +708,7 @@ typedef struct
 	GLuint							useFX;
 	GLuint							useGlow;
 	GLuint							useShell;
+	GLuint							shellAlpha;
 	GLuint							useCube;
 	GLuint							fromView;
 	GLuint							doShading;
