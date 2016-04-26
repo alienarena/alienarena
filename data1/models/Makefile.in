@@ -231,16 +231,24 @@ nobase_dist_models_DATA = \
 	items/ammo/cells/medium/tris.iqm \
 	items/ammo/cells/medium/tris.md2 \
 	items/ammo/cells/medium/tris.skin \
-	items/ammo/grenades/medium/skin.tga \
+	items/ammo/grenades/medium/skin.jpg \
+	items/ammo/grenades/medium/skin_fx.tga \
+	items/ammo/grenades/medium/skin_normal.jpg \
+	items/ammo/grenades/medium/tris.iqm \
 	items/ammo/grenades/medium/tris.md2 \
+	items/ammo/grenades/medium/tris.skin \
 	items/ammo/rockets/medium/skin.jpg \
 	items/ammo/rockets/medium/tris.md2 \
 	items/ammo/rockets/medium/skin_fx.tga \
 	items/ammo/rockets/medium/skin_normal.jpg \
 	items/ammo/rockets/medium/tris.iqm \
 	items/ammo/rockets/medium/tris.skin \
-	items/ammo/shells/medium/skin.tga \
+	items/ammo/shells/medium/skin.jpg \
+	items/ammo/shells/medium/skin_fx.tga \
+	items/ammo/shells/medium/skin_normal.jpg \
+	items/ammo/shells/medium/tris.iqm \
 	items/ammo/shells/medium/tris.md2 \
+	items/ammo/shells/medium/tris.skin \
 	items/ammo/skin_normal.tga \
 	items/armor/body/skin.jpg \
 	items/armor/body/tris.md2 \
