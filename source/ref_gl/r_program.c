@@ -1076,6 +1076,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 	uniform int useCube;
 	uniform int useGlow;
 	uniform float useShell;
+	uniform float shellAlpha;
 	uniform int fromView;
 
 	const float SpecularFactor = 0.50;
@@ -1171,12 +1172,14 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		{
 			litColor = litColor * shadowval * staticLightColor;
 			gl_FragColor.rgb = max(litColor, textureColour * 0.15);
+			gl_FragColor.a = 1.0;
 		}
 		else
+		{
 			gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
+			gl_FragColor.a = shellAlpha;
+		}
 
-		gl_FragColor.a = 1.0;
-		
 		vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal, specmask.a, 1.0);
 		gl_FragColor.rgb += dynamicColor;
 		
@@ -1959,6 +1962,7 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->useFX = glGetUniformLocationARB (programObj, "useFX");
 	out->useGlow = glGetUniformLocationARB (programObj, "useGlow");
 	out->useShell = glGetUniformLocationARB (programObj, "useShell");
+	out->shellAlpha = glGetUniformLocationARB (programObj, "shellAlpha");
 	out->useCube = glGetUniformLocationARB (programObj, "useCube");
 	out->fromView = glGetUniformLocationARB (programObj, "fromView");
 	out->doShading = glGetUniformLocationARB (programObj, "doShading");

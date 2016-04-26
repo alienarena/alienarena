@@ -1067,7 +1067,7 @@ void R_SimulateAllRagdolls ( void )
 			{
 				dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[CHEST].body, 0, 0, 50); //lift into space
 
-				RagDollEntity[RagDollID].shellAlpha = (1 - dur/RAGDOLL_DURATION);
+				RagDollEntity[RagDollID].shellAlpha = (1 - dur/RAGDOLL_DURATION)*10.0f;
 				shellEffect = true;
 			}
 

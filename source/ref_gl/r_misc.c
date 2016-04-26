@@ -53,6 +53,7 @@ image_t		*r_deathfieldtexture2;
 image_t		*r_shelltexture;
 image_t		*r_shelltexture2;
 image_t		*r_shellnormal;
+image_t		*r_shellnormal2;
 image_t		*r_hittexture;
 image_t		*r_bubbletexture;
 image_t		*r_reflecttexture;
@@ -205,13 +206,17 @@ void R_InitParticleTexture (void)
 	if (!r_shelltexture) {
 		r_shelltexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
+	r_shellnormal = R_RegisterParticlePic("shell_normal");
+	if (!r_shellnormal) {
+		r_shellnormal = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
 	r_shelltexture2 = R_RegisterParticlePic("shell2");
 	if (!r_shelltexture2) {
 		r_shelltexture2 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
-	r_shellnormal = R_RegisterParticlePic("shell2_normal");
-	if (!r_shellnormal) {
-		r_shellnormal = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+	r_shellnormal2 = R_RegisterParticlePic("shell2_normal");
+	if (!r_shellnormal2) {
+		r_shellnormal2 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_hittexture = R_RegisterParticlePic("aflash");
 	if (!r_hittexture) {
