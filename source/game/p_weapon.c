@@ -666,6 +666,8 @@ fire_begin:
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/rlauncherreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_shotgun && gunframe == FRAME_IDLE_FIRST + 2)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/smartgunreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_chaingun && gunframe == FRAME_IDLE_FIRST + 2)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/flamereload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_hyperblaster && gunframe == FRAME_IDLE_FIRST + 4)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/disruptorreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_railgun && gunframe == FRAME_IDLE_FIRST + 5)
