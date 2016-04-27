@@ -270,7 +270,6 @@ extern	cvar_t	*cl_predict;
 extern	cvar_t	*cl_footsteps;
 extern	cvar_t	*cl_noskins;
 extern	cvar_t	*cl_autoskins;
-extern  cvar_t	*cl_healthaura;
 extern  cvar_t	*cl_noblood;
 extern  cvar_t	*cl_disbeamclr;
 extern  cvar_t	*cl_dmlights;
