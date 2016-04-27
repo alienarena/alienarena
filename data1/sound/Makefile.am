@@ -226,6 +226,7 @@ nobase_dist_sound_DATA = \
 	weapons/disruptorreload.wav \
 	weapons/electroball.wav \
 	weapons/energyfield.wav \
+	weapons/flamereload.wav \
 	weapons/grenlb1b.wav \
 	weapons/grenlf1a.wav \
 	weapons/grenlr1b.wav \

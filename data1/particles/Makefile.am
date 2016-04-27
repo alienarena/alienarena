@@ -38,9 +38,10 @@ nobase_dist_particles_DATA = \
 	ring.tga \
 	ripples.tga \
 	sayicon.tga \
-	shell2_normal.tga \
-	shell2.tga \
 	shell.tga \
+	shell2.tga \
+	shell2_normal.tga \
+	shell_normal.tga \
 	smoke_org.tga \
 	smoke.tga \
 	trash.tga \
