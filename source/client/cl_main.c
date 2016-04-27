@@ -143,9 +143,6 @@ cvar_t  *cl_master2;
 cvar_t	*cl_hudimage1;
 cvar_t	*cl_hudimage2;
 
-//health aura
-cvar_t	*cl_healthaura;
-
 //blood
 cvar_t  *cl_noblood;
 
@@ -1973,8 +1970,6 @@ void CL_InitLocal (void)
 	Cvar_Describe (cl_maxfps, "limit the frames drawn per second using a busy-wait loop.");
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_showPlayerNames, "0 means no nametags, 1 means show one nametag in the center of the screen, 2 means show a nametag over each player.");
-	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
-	Cvar_Describe (cl_healthaura, "show glowing effects around health pickups.");
 	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_disbeamclr, "beam color for the disruptor weapon. 0 = green, 1 = blue, 2 = red, 3 = yellow, 4 = purple.");
