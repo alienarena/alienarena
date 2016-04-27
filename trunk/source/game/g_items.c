@@ -1396,7 +1396,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.md2", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_chain/tris.md2", "w_chaingun.md2"),
-/* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav"
+/* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav weapons/flamereload.wav"
 	},
 
 /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1451,7 +1451,7 @@ always owned, never in the world
 		// TODO: create an icon for the mind eraser!
 		GITEM_INIT_CLIENTSIDE (NULL, "Minderaser", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.md2", "w_minderaser.md2"),
-/* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav weapons/minderaserreload.wav"
+/* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav weapons/minderaserreload.wav misc/minderaser.wav"
 	},
 #endif
 	//
