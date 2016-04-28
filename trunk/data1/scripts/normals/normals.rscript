@@ -319,32 +319,35 @@ maps/meshes/clamps
 }
 models/items/healing/small/skin
 {
-
 	{
-		map models/items/healing/health_normal.tga
+		map models/items/healing/health_normal.jpg
 		normalmap
-		map2 models/items/healing/small/skin.jpg
+		map2 models/items/healing/small/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/healing/medium/skin
 {
-
 	{
-		map models/items/healing/health_normal.tga
+		map models/items/healing/health_normal.jpg
 		normalmap
-		map2 models/items/healing/medium/skin.jpg
+		map2 models/items/healing/medium/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/healing/large/skin
 {
-
 	{
-		map models/items/healing/health_normal.tga
+		map models/items/healing/health_normal.jpg
 		normalmap
-		map2 models/items/healing/large/skin.jpg
+		map2 models/items/healing/large/skin_fx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}
 }
 models/items/ammo/rockets/medium/skin
