@@ -809,7 +809,6 @@ nobase_dist_textures_DATA = \
 	arena8/barnroof_nm.tga \
 	arena8/barnroof.tga \
 	arena8/barnwindows.tga \
-	arena8/barnwood2_nm.TGA \
 	arena8/barnwood2.tga \
 	arena8/barnwood_nm.tga \
 	arena8/barnwood.tga \

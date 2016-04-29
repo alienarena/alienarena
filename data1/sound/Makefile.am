@@ -43,9 +43,6 @@ nobase_dist_sound_DATA = \
 	misc/bluevulnerable.wav \
 	misc/blue_wins_ctf.wav \
 	misc/blue_wins.wav \
-	misc/cow/groan.wav \
-	misc/cow/moo.wav \
-	misc/cow/step1.wav \
 	misc/db_pickup.wav \
 	misc/db_score.wav \
 	misc/deathray/fizz.wav \
