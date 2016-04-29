@@ -885,7 +885,7 @@ models/items/quaddama/skin
 	{
 		map models/items/quaddama/skin_normal.tga
 		normalmap
-		map2 gfx/greenlightning.tga
+		map2 maps/meshes/electrode_fx.tga
 		fx
 		map3 gfx/chrome2.tga
 		cube
