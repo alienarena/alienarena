@@ -1164,6 +1164,12 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 		ent->s.effects |= EF_COLOR_SHELL;
 		ent->s.renderfx |= RF_SHELL_GREEN;
 	}
+
+	if(strcmp(ent->classname, "item_invulnerability") == 0)
+	{
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_RED;
+	}
 }
 
 //======================================================================
