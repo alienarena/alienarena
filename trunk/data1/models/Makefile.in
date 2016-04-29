@@ -272,12 +272,19 @@ nobase_dist_models_DATA = \
 	items/healing/globe/skin.tga \
 	items/healing/globe/tris.md2 \
 	items/healing/health_normal.tga \
-	items/healing/large/skin.tga \
+	items/healing/large/skin.jpg \
+	items/healing/large/tris.iqm \
 	items/healing/large/tris.md2 \
-	items/healing/medium/skin.tga \
+	items/healing/large/tris.skin \
+	items/healing/medium/skin.jpg \
+	items/healing/medium/skin_fx.tga \
+	items/healing/medium/tris.iqm \
 	items/healing/medium/tris.md2 \
-	items/healing/small/skin.tga \
+	items/healing/medium/tris.skin \
+	items/healing/small/skin.jpg \
+	items/healing/small/tris.iqm \
 	items/healing/small/tris.md2 \
+	items/healing/small/tris.skin \
 	items/invulner/skin_fx.tga \
 	items/invulner/skin.jpg \
 	items/invulner/skin_normal.jpg \
