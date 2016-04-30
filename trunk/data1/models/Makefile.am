@@ -57,11 +57,14 @@ nobase_dist_models_DATA = \
 	items/haste/skin.jpg \
 	items/haste/skin_fx.tga \
 	items/haste/skin_normal.jpg \
+	items/haste/tris.iqm \
 	items/haste/tris.md2 \
+	items/haste/tris.skin \
 	items/healing/globe/skin.tga \
 	items/healing/globe/tris.md2 \
 	items/healing/health_normal.tga \
 	items/healing/large/skin.jpg \
+	items/healing/large/skin_fx.tga \
 	items/healing/large/tris.iqm \
 	items/healing/large/tris.md2 \
 	items/healing/large/tris.skin \
@@ -71,20 +74,26 @@ nobase_dist_models_DATA = \
 	items/healing/medium/tris.md2 \
 	items/healing/medium/tris.skin \
 	items/healing/small/skin.jpg \
+	items/healing/small/skin_fx.tga \
 	items/healing/small/tris.iqm \
 	items/healing/small/tris.md2 \
 	items/healing/small/tris.skin \
-	items/invulner/skin_fx.tga \
 	items/invulner/skin.jpg \
+	items/invulner/skin_fx.tga \
 	items/invulner/skin_normal.jpg \
+	items/invulner/tris.iqm \
 	items/invulner/tris.md2 \
+	items/invulner/tris.skin \
 	items/mega_h/skin_fx.tga \
 	items/mega_h/skin.jpg \
 	items/mega_h/skin_normal.jpg \
 	items/mega_h/tris.md2 \
-	items/quaddama/skin_normal.tga \
 	items/quaddama/skin.tga \
+	items/quaddama/skin_normal.tga \
+	items/quaddama/tris.iqm \
 	items/quaddama/tris.md2 \
+	items/quaddama/tris.skin \
+	items/quaddama/unit.iqm \
 	items/quaddama/unit.md2 \
 	items/sproing/skin.jpg \
 	items/sproing/skin_fx.tga \
