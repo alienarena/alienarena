@@ -551,23 +551,7 @@ models/objects/dmspot/skin
 	{
 		map models/objects/dmspot/skin_normal.jpg
 		normalmap
-	}
-}
-models/objects/dmspot/skin1
-{
-	{
-		map models/objects/dmspot/skin1_normal.jpg
-		normalmap
-		map2 models/objects/dmspot/skin1_fx.tga
-		glow
-	}
-}
-models/objects/dmspot/skin2
-{
-	{
-		map models/objects/dmspot/skin1_normal.jpg
-		normalmap
-		map2 models/objects/dmspot/skin2_fx.tga
+		map2 models/objects/dmspot/skin_fx.tga
 		glow
 	}
 }
