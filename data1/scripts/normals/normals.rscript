@@ -889,8 +889,8 @@ models/items/adrenaline/skin
 	{
 		map models/items/adrenaline/skin_normal.tga
 		normalmap
-		map2 gfx/greenlightning.tga
-		fx
+		map2 models/items/adrenaline/skin_fx.tga
+		glow
 		map3 gfx/chrome.tga
 		cube
 	}
