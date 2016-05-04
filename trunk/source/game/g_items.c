@@ -1142,6 +1142,9 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	else if((strcmp(ent->classname, "item_quad") == 0)) {
 		ent->s.modelindex2 = gi.modelindex("models/items/quaddama/unit.md2");
 	}
+	else if((strcmp(ent->classname, "item_adrenaline") == 0)) {
+		ent->s.modelindex2 = gi.modelindex("models/items/adrenaline/glass.md2");
+	}
 
 	if (ent->model)
 		gi.modelindex (ent->model);
