@@ -251,14 +251,22 @@ nobase_dist_models_DATA = \
 	items/ammo/shells/medium/tris.skin \
 	items/ammo/skin_normal.tga \
 	items/armor/body/skin.jpg \
+	items/armor/body/tris.iqm \
 	items/armor/body/tris.md2 \
+	items/armor/body/tris.skin \
 	items/armor/combat/skin.jpg \
+	items/armor/combat/tris.iqm \
 	items/armor/combat/tris.md2 \
+	items/armor/combat/tris.skin \
 	items/armor/jacket/skin.jpg \
+	items/armor/jacket/tris.iqm \
 	items/armor/jacket/tris.md2 \
-	items/armor/shard/skin_normal.tga \
+	items/armor/jacket/tris.skin \
 	items/armor/shard/skin.tga \
+	items/armor/shard/skin_normal.tga \
+	items/armor/shard/tris.iqm \
 	items/armor/shard/tris.md2 \
+	items/armor/shard/tris.skin \
 	items/armor/skin_fx.tga \
 	items/armor/skin_normal.tga \
 	items/flags/blue.tga \
@@ -295,10 +303,12 @@ nobase_dist_models_DATA = \
 	items/invulner/tris.iqm \
 	items/invulner/tris.md2 \
 	items/invulner/tris.skin \
-	items/mega_h/skin_fx.tga \
 	items/mega_h/skin.jpg \
+	items/mega_h/skin_fx.tga \
 	items/mega_h/skin_normal.jpg \
+	items/mega_h/tris.iqm \
 	items/mega_h/tris.md2 \
+	items/mega_h/tris.skin \
 	items/quaddama/skin.tga \
 	items/quaddama/skin_normal.tga \
 	items/quaddama/tris.iqm \
@@ -309,7 +319,9 @@ nobase_dist_models_DATA = \
 	items/sproing/skin.jpg \
 	items/sproing/skin_fx.tga \
 	items/sproing/skin_normal.jpg \
+	items/sproing/tris.iqm \
 	items/sproing/tris.md2 \
+	items/sproing/tris.skin \
 	misc/deathray/deathray.md2 \
 	misc/deathray/deathray.tga \
 	misc/deathray/deathray_fx.tga \
@@ -333,9 +345,12 @@ nobase_dist_models_DATA = \
 	objects/debris2/tris.md2 \
 	objects/debris3/skin.tga \
 	objects/debris3/tris.md2 \
-	objects/dmspot/skin.tga \
-	objects/dmspot/skin_normal.tga \
+	objects/dmspot/skin.jpg \
+	objects/dmspot/skin_fx.tga \
+	objects/dmspot/skin_normal.jpg \
+	objects/dmspot/tris.iqm \
 	objects/dmspot/tris.md2 \
+	objects/dmspot/tris.skin \
 	objects/electroball/skin_fx.tga \
 	objects/electroball/skin.jpg \
 	objects/electroball/skin_normal.jpg \
