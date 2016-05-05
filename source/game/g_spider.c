@@ -316,8 +316,8 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	spider->movetype = MOVETYPE_BOUNCE;
 	spider->clipmask = MASK_SHOT;
 	spider->solid = SOLID_BBOX;
-	VectorClear (spider->mins);
-	VectorClear (spider->maxs);
+	VectorSet (spider->mins, -20, -20, -32);
+	VectorSet (spider->maxs, 20, 20, 20);
 	spider->s.modelindex = gi.modelindex("models/objects/spider/tris.md2");
 	spider->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.md2");
 	spider->s.frame = 31;
