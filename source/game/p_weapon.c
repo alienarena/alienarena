@@ -778,7 +778,7 @@ void Weapon_Wizard_Punch (edict_t *ent)
 #else
 void weapon_disruptor_fire (edict_t *ent)
 {
-	vec3_t		start, muzzle;
+	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
 
@@ -809,23 +809,21 @@ void weapon_disruptor_fire (edict_t *ent)
 		VectorScale (forward, -3, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -3;
 	}
-	else if(g_tactical->integer)
+	else
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
-	VectorSet(offset, 32, 5,  ent->viewheight-5);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
-	VectorSet(offset, 32, 0, ent->viewheight);
+	VectorSet(offset, 32, 4, ent->viewheight);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	if (ent->client->buttons & BUTTON_ATTACK2 && !instagib->integer && !insta_rockets->integer) 
@@ -840,7 +838,7 @@ void weapon_disruptor_fire (edict_t *ent)
 		gi.multicast (start, MULTICAST_PVS);
 	}
 	else
-		fire_disruptor (ent, start, muzzle, forward, damage*damage_buildup, kick);
+		fire_disruptor (ent, start, forward, damage*damage_buildup, kick);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -903,17 +901,17 @@ void weapon_vaporizer_fire (edict_t *ent)
 		VectorScale (forward, -3, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -3;
 	}
-	else if(g_tactical->integer)
+	else
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
@@ -995,17 +993,17 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 		AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-		if(g_tactical->integer && ent->client->lean != 0.0)
+		if(ent->client->lean != 0.0)
 		{
-			if(ent->client->lean > 0.0)
+			if(ent->client->lean < 0.0)
 			{
-				right[0] = right[0] * ent->client->lean/15.0;
-				right[1] = right[1] * ent->client->lean/15.0;
+				right[0] = right[0] * ent->client->lean/-15.0;
+				right[1] = right[1] * ent->client->lean/-15.0;
 			}
 			else
 			{
-				right[0] = right[0] * ent->client->lean/25.0;
-				right[1] = right[1] * ent->client->lean/25.0;
+				right[0] = right[0] * ent->client->lean/-25.0;
+				right[1] = right[1] * ent->client->lean/-25.0;
 			}
 		}
 
@@ -1060,17 +1058,17 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	if(g_tactical->integer && ent->client->lean != 0.0)
+	if(ent->client->lean != 0.0)
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
@@ -1130,17 +1128,17 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 		VectorScale (forward, 2, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -1;
 	}
-	else if(g_tactical->integer)
+	else
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
@@ -1196,7 +1194,7 @@ BLASTER
 ======================================================================
 */
 
-void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qboolean alien, int effect)
+void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int effect)
 {
 	vec3_t	forward, right;
 	vec3_t	start, muzzle;
@@ -1213,35 +1211,33 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, qb
 		ent->client->kick_angles[0] = -3;
 	}
 	
-	if(g_tactical->integer && ent->client->lean != 0.0)
+	if(ent->client->lean != 0.0)
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
-	if(hyper && (ent->client->buttons & BUTTON_ATTACK))
-		VectorSet(offset, 32, 6, ent->viewheight-8);
+	if(ent->client->lean == 0.0 && hyper && (ent->client->buttons & BUTTON_ATTACK))
+		VectorSet(offset, 30, 4, ent->viewheight-2);
+	else if(ent->client->lean == 0.0 && hyper && (ent->client->buttons & BUTTON_ATTACK2))
+		VectorSet(offset, 32, 6, ent->viewheight-7);
+	else if(hyper && (ent->client->buttons & BUTTON_ATTACK))
+		VectorSet(offset, 32, 6, ent->viewheight-3);
 	else if(hyper && (ent->client->buttons & BUTTON_ATTACK2))
-		VectorSet(offset, 32, 6, ent->viewheight-10);
-	else
+		VectorSet(offset, 32, 6, ent->viewheight-5);
+	else 
 		VectorSet(offset, 30, 6, ent->viewheight-5);
-	VectorAdd (offset, g_offset, offset);
+
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
-	if (hyper && (ent->client->buttons & BUTTON_ATTACK))
-	{
-		VectorSet(offset, 32, 0, ent->viewheight);
-		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	}
-	else
-		VectorCopy (muzzle, start);
+	VectorCopy (muzzle, start);
 
 	if(hyper) 
 	{
@@ -1302,7 +1298,7 @@ void Weapon_Blaster_Fire (edict_t *ent)
 
 	damage = 30;
 
-	Blaster_Fire (ent, vec3_origin, damage, false, false, EF_BLASTER);
+	Blaster_Fire (ent, damage, false, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
 
@@ -1318,14 +1314,13 @@ void Weapon_Blaster (edict_t *ent)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
 }
 
-//to do - tactical - create different effect(i think same damage and behavior though).
 void Weapon_AlienBlaster_Fire (edict_t *ent)
 {
 	int		damage;
 
 	damage = 30;
 
-	Blaster_Fire (ent, vec3_origin, damage, false, true, EF_ROCKET);
+	Blaster_Fire (ent, damage, false, true, EF_ROCKET);
 	ent->client->ps.gunframe++;
 }
 
@@ -1569,7 +1564,6 @@ void Weapon_Hover (edict_t *ent) //for now
 }
 void Weapon_Beamgun_Fire (edict_t *ent)
 {
-	vec3_t	offset;
 	int		effect;
 	int		damage;
 
@@ -1590,10 +1584,6 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 		}
 		else
 		{
-			offset[0] = 0;
-			offset[1] = 0;
-			offset[2] = 3;
-
 			if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
 				effect = EF_HYPERBLASTER;
 			else
@@ -1604,7 +1594,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 			else
 				damage = 7;
 
-			Blaster_Fire (ent, offset, damage, true, false, effect);
+			Blaster_Fire (ent, damage, true, false, effect);
 			take_ammo (ent, (ent->client->buttons & BUTTON_ATTACK2));
 		}
 
@@ -1721,17 +1711,17 @@ void Machinegun_Fire (edict_t *ent)
 		}
 	}
 
-	if(g_tactical->integer && ent->client->lean != 0.0)
+	if(ent->client->lean != 0.0)
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
@@ -1865,17 +1855,17 @@ void weapon_smartgun_fire (edict_t *ent)
 		VectorScale (forward, -2, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -1;
 	}
-	else if(g_tactical->integer)
+	else
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
@@ -1954,17 +1944,17 @@ void weapon_minderaser_fire (edict_t *ent)
 		VectorScale (forward, 2, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -1;
 	}
-	else if(g_tactical->integer)
+	else
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 
@@ -2101,20 +2091,17 @@ void Violator_Fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	if(g_tactical->integer)
+	if(ent->client->lean < 0.0)
 	{
-		if(ent->client->lean > 0.0)
-		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
-		}
-		else if(ent->client->lean < 0.0)
-		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
-		}
+		right[0] = right[0] * ent->client->lean/-15.0;
+		right[1] = right[1] * ent->client->lean/-15.0;
 	}
-
+	else if(ent->client->lean > 0.0)
+	{
+		right[0] = right[0] * ent->client->lean/-25.0;
+		right[1] = right[1] * ent->client->lean/-25.0;
+	}
+	
 	VectorScale(forward, 10, forward);
 	VectorScale(right, 10, right);
 	VectorScale (right, -10, left);
@@ -2227,17 +2214,17 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 		VectorScale (forward, -3, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -3;
 	}
-	else if(g_tactical->integer)
+	else
 	{
-		if(ent->client->lean > 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/15.0;
-			right[1] = right[1] * ent->client->lean/15.0;
+			right[0] = right[0] * ent->client->lean/-15.0;
+			right[1] = right[1] * ent->client->lean/-15.0;
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/25.0;
-			right[1] = right[1] * ent->client->lean/25.0;
+			right[0] = right[0] * ent->client->lean/-25.0;
+			right[1] = right[1] * ent->client->lean/-25.0;
 		}
 	}
 

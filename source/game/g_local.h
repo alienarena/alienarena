@@ -950,7 +950,7 @@ void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 void fire_blaster (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int kick);
+void fire_disruptor (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
 void fire_lightning_blast (edict_t *self);
 void fire_bomb (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, float timer);
 void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate, qboolean alien);
