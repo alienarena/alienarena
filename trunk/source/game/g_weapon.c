@@ -956,7 +956,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	G_UndoTimeShiftFor (self);
 }
 
-void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, int damage, int kick)
+void fire_disruptor (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 {
 	vec3_t		from;
 	vec3_t		end;
@@ -1005,7 +1005,7 @@ void fire_disruptor (edict_t *self, vec3_t start, vec3_t muzzle, vec3_t aimdir, 
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_RAILTRAIL);
-	gi.WritePosition (muzzle);
+	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
