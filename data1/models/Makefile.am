@@ -5,9 +5,13 @@
 modelsdir=$(pkgdatadir)/data1/models
 
 nobase_dist_models_DATA = \
+	items/adrenaline/glass.iqm \
+	items/adrenaline/skin.jpg \
+	items/adrenaline/skin_fx.tga \
 	items/adrenaline/skin_normal.tga \
-	items/adrenaline/skin.tga \
+	items/adrenaline/tris.iqm \
 	items/adrenaline/tris.md2 \
+	items/adrenaline/tris.skin \
 	items/ammo/bullets/medium/skin.jpg \
 	items/ammo/bullets/medium/skin_fx.tga \
 	items/ammo/bullets/medium/skin_normal.jpg \
