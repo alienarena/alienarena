@@ -112,6 +112,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	char	shortname[MAX_OSPATH];
 	char    shortname2[MAX_OSPATH];
 	qboolean	jpg = false;
+	qboolean	md2 = false;
 
 	if (strstr (filename, ".."))
 	{
@@ -131,12 +132,15 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		sprintf(filename, "%s.jpg", shortname);
 	}
 
-	//if jpg, be sure to also try tga
+	//if jpg, be sure to also try tga, if md2, also try iqm
 	/* 2015-12-14 For textures, jpg extension is now default, so jpg is
 	 * checked first then tga. See cl_main.c::CL_RequestNextDownload
 	 */
     if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
+
+	if(filename[strlen(filename)-2] == 'd' && filename[strlen(filename)-1] == '2')
+		md2 = true;
 
 	if (FS_LoadFile (filename, NULL) != -1)
 	{
@@ -151,6 +155,20 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		//if we find a .tga, don't try to download anything
 		COM_StripExtension ( filename, shortname );
 		sprintf(shortname2, "%s.tga", shortname);
+		if (FS_LoadFile (shortname2, NULL) != -1)
+		{
+			// it exists, no need to download
+			return true;
+		}
+	}
+
+	if(md2)
+	{
+		//didn't find .iqm, try for .md2
+		//check for presence of a local .md2(but leave filename as original extension)
+		//if we find a .md2, don't try to download anything
+		COM_StripExtension ( filename, shortname );
+		sprintf(shortname2, "%s.iqm", shortname);
 		if (FS_LoadFile (shortname2, NULL) != -1)
 		{
 			// it exists, no need to download
