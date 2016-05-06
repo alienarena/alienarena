@@ -419,7 +419,6 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 	edict_t *target;
 	float weight,best_weight=0.0;
 	edict_t *best = NULL;
-	int index;
 			
 	// look for a target (should make more efficent later)
 	target = findradius(NULL, self->s.origin, 200);
