@@ -1462,112 +1462,115 @@ void R_DrawSimpleItems ( void )
 
 void R_SetSimpleTexnum (model_t *loadmodel, const char *pathname)
 {
+	char	shortname[MAX_OSPATH];
+
 	loadmodel->simple_texnum = 0;
 	loadmodel->simple_color = simplecolor_white;
-	if (!Q_strcasecmp (pathname, "models/items/ammo/bullets/medium/tris.md2"))
+	COM_StripExtension(pathname, shortname);
+	if (!Q_strcasecmp (shortname, "models/items/ammo/bullets/medium/tris"))
 	{
 		loadmodel->simple_texnum = s_item0->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/ammo/cells/medium/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/ammo/cells/medium/tris"))
 	{
 		loadmodel->simple_texnum = s_item1->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/ammo/grenades/medium/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/ammo/grenades/medium/tris"))
 	{
 		loadmodel->simple_texnum = s_item2->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/ammo/rockets/medium/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/ammo/rockets/medium/tris"))
 	{
 		loadmodel->simple_texnum = s_item3->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/ammo/shells/medium/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/ammo/shells/medium/tris"))
 	{
 		loadmodel->simple_texnum = s_item4->texnum;
 	}
 	//powerups
-	else if (!Q_strcasecmp (pathname, "models/items/haste/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/haste/tris"))
 	{
 		loadmodel->simple_texnum = s_item5->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/invulner/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/invulner/tris"))
 	{
 		loadmodel->simple_texnum = s_item6->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/quaddama/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/quaddama/tris"))
 	{
 		loadmodel->simple_texnum = s_item7->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/sproing/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/sproing/tris"))
 	{
 		loadmodel->simple_texnum = s_item8->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/adrenaline/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/adrenaline/tris"))
 	{
 		loadmodel->simple_texnum = s_item9->texnum;
 	}
 	//armor
-	else if (!Q_strcasecmp (pathname, "models/items/armor/shard/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/armor/shard/tris"))
 	{
 		loadmodel->simple_texnum = s_item10->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/armor/jacket/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/armor/jacket/tris"))
 	{
 		loadmodel->simple_texnum = s_item11->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/armor/combat/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/armor/combat/tris"))
 	{
 		loadmodel->simple_texnum = s_item12->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/armor/body/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/armor/body/tris"))
 	{
 		loadmodel->simple_texnum = s_item13->texnum;
 	}
 	//health
-	else if (!Q_strcasecmp (pathname, "models/items/healing/small/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/healing/small/tris"))
 	{
 		loadmodel->simple_texnum = s_item14->texnum;
 		loadmodel->simple_color = simplecolor_green;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/healing/medium/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/healing/medium/tris"))
 	{
 		loadmodel->simple_texnum = s_item14->texnum;
 		loadmodel->simple_color = simplecolor_blue;
 	}
-	else if (!Q_strcasecmp (pathname, "models/items/healing/large/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/items/healing/large/tris"))
 	{
 		loadmodel->simple_texnum = s_item14->texnum;
 		loadmodel->simple_color = simplecolor_purple;
 	}
 	//weapons
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_rail/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_rail/tris"))
 	{
 		loadmodel->simple_texnum = s_item17->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_bfg/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_bfg/tris"))
 	{
 		loadmodel->simple_texnum = s_item18->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_hyperb/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_hyperb/tris"))
 	{
 		loadmodel->simple_texnum = s_item19->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_chain/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_chain/tris"))
 	{
 		loadmodel->simple_texnum = s_item20->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_shotg/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_shotg/tris"))
 	{
 		loadmodel->simple_texnum = s_item21->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_shotg2/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_shotg2/tris"))
 	{
 		loadmodel->simple_texnum = s_item22->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_rocket/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_rocket/tris"))
 	{
 		loadmodel->simple_texnum = s_item23->texnum;
 	}
-	else if (!Q_strcasecmp (pathname, "models/weapons/g_minderaser/tris.md2"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_minderaser/tris"))
 	{
 		loadmodel->simple_texnum = s_item24->texnum;
 	}

@@ -189,7 +189,7 @@ void ThrowClientHead (edict_t *self, int damage)
 	vec3_t	vd;
 	char	*gibname;
 
-	gibname = "models/objects/gibs/sm_meat/tris.md2";
+	gibname = "models/objects/gibs/sm_meat/tris.iqm";
 		self->s.skinnum = 0;
 
 	self->s.origin[2] += 32;
@@ -732,7 +732,7 @@ void func_explosive_explode (edict_t *self, edict_t *inflictor, edict_t *attacke
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
 			chunkorigin[2] = origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin);
+			ThrowDebris (self, "models/objects/debris1/tris.iqm", 1, chunkorigin);
 		}
 	}
 
@@ -745,7 +745,7 @@ void func_explosive_explode (edict_t *self, edict_t *inflictor, edict_t *attacke
 		chunkorigin[0] = origin[0] + crandom() * size[0];
 		chunkorigin[1] = origin[1] + crandom() * size[1];
 		chunkorigin[2] = origin[2] + crandom() * size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin);
+		ThrowDebris (self, "models/objects/debris2/tris.iqm", 2, chunkorigin);
 	}
 
 	G_UseTargets (self, attacker);
@@ -774,8 +774,8 @@ void SP_func_explosive (edict_t *self)
 {
 	self->movetype = MOVETYPE_PUSH;
 
-	gi.modelindex ("models/objects/debris1/tris.md2");
-	gi.modelindex ("models/objects/debris2/tris.md2");
+	gi.modelindex ("models/objects/debris1/tris.iqm");
+	gi.modelindex ("models/objects/debris2/tris.iqm");
 
 	gi.setmodel (self, self->model);
 
@@ -845,61 +845,61 @@ void barrel_explode (edict_t *self)
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris1/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris1/tris.iqm", spd, org);
 
 	// bottom corners
 	spd = 1.75 * (float)self->dmg / 200.0;
 	VectorCopy (self->absmin, org);
-	ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris3/tris.iqm", spd, org);
 	VectorCopy (self->absmin, org);
 	org[0] += self->size[0];
-	ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris3/tris.iqm", spd, org);
 	VectorCopy (self->absmin, org);
 	org[1] += self->size[1];
-	ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris3/tris.iqm", spd, org);
 	VectorCopy (self->absmin, org);
 	org[0] += self->size[0];
 	org[1] += self->size[1];
-	ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris3/tris.iqm", spd, org);
 
 	// a bunch of little chunks
 	spd = 2 * self->dmg / 200;
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 	org[0] = self->s.origin[0] + crandom() * size[0];
 	org[1] = self->s.origin[1] + crandom() * size[1];
 	org[2] = self->s.origin[2] + crandom() * size[2];
-	ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org);
+	ThrowDebris (self, "models/objects/debris2/tris.iqm", spd, org);
 
 	VectorCopy (save, self->s.origin);
 	if (self->groundentity)
@@ -985,7 +985,7 @@ void SP_misc_teleporter (edict_t *ent)
 	// The actual misc_teleporter is converted into a cosmetic object for the
 	// glowing effect, while a new entity is spawned to act as the functioning
 	// teleporter. 
-	gi.setmodel (ent, "models/objects/blank/tris.md2");
+	gi.setmodel (ent, "models/objects/blank/tris.iqm");
 	ent->s.skinnum = 1;
 	ent->s.effects = EF_TELEPORTER;
 	ent->solid     = SOLID_NOT;
@@ -1177,7 +1177,7 @@ void SP_misc_spiderpod (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 
-	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
+	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.iqm");
 
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -64, -64, 0);
@@ -1258,7 +1258,7 @@ void SP_misc_rednode (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
-	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2");
+	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.iqm");
 
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -32, -32, -24);
@@ -1340,7 +1340,7 @@ void SP_misc_bluenode (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
 
-	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2");
+	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.iqm");
 
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -32, -32, -24);
@@ -1401,8 +1401,8 @@ void SP_misc_redspidernode (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
 
-	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
-	ent->s.modelindex3 = gi.modelindex ("models/misc/spiderpod/helmet.md2");
+	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.iqm");
+	ent->s.modelindex3 = gi.modelindex ("models/misc/spiderpod/helmet.iqm");
 
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW);
 	VectorSet (ent->mins, -64, -64, 0);
@@ -1460,8 +1460,8 @@ void SP_misc_bluespidernode (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
 
-	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
-	ent->s.modelindex3 = gi.modelindex ("models/misc/spiderpod/helmet.md2");
+	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.iqm");
+	ent->s.modelindex3 = gi.modelindex ("models/misc/spiderpod/helmet.iqm");
 
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW);
 	VectorSet (ent->mins, -64, -64, 0);
@@ -1937,7 +1937,7 @@ void SP_misc_alienammodepot (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_YES;
 
-	ent->s.modelindex = gi.modelindex ("models/tactical/ammopad.md2");
+	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.iqm");
 
 	VectorSet (ent->mins, -32, -32, 0);
 	VectorSet (ent->maxs, 32, 32, 16);
@@ -1963,7 +1963,7 @@ void SP_misc_humanammodepot (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_YES;
 
-	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.md2");
+	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.iqm");
 
 	VectorSet (ent->mins, -32, -32, 0);
 	VectorSet (ent->maxs, 32, 32, 16);

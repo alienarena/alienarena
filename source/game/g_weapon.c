@@ -399,12 +399,12 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	if(effect == EF_ROCKET) 
 	{	//ack, kinda assbackwards, but the past mistakes haunt us
 		bolt->s.effects |= EF_BLASTER;
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
+		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.iqm");
 	}
 	else 
 	{
 		bolt->s.effects |= EF_PLASMA;
-		bolt->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
+		bolt->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
 	}
 	// All we care about is the effects. However, old clients will refuse to 
 	// draw them unless the modelindex is set. To work around this, newer
@@ -572,7 +572,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 		rocket->s.effects |= EF_ROCKET;
 	VectorClear (rocket->mins);
 	VectorClear (rocket->maxs);
-	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
+	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.iqm");
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
 	rocket->nextthink = level.time + 8000/speed;
@@ -629,7 +629,7 @@ void stinger_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 			{
 				n = rand() % 5;
 				while(n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
+					ThrowDebris (ent, "models/objects/debris2/tris.iqm", 2, ent->s.origin);
 			}
 		}
 	}
@@ -1174,7 +1174,7 @@ void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int
 	rocket->s.effects |= EF_ROCKET | EF_ROCKETEXHAUST ;
 	VectorClear (rocket->mins);
 	VectorClear (rocket->maxs);
-	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
+	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.iqm");
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
 
@@ -1367,7 +1367,7 @@ void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
 	VectorCopy (v, spud->mins);
 	v = tv(8,8,8);
 	VectorCopy (v, spud->maxs);
-	spud->s.modelindex = gi.modelindex ("models/objects/spud/tris.md2");
+	spud->s.modelindex = gi.modelindex ("models/objects/spud/tris.iqm");
 	spud->owner = self;
 	spud->touch = minderaser_touch;
 	spud->nade_timer = 0;
@@ -1671,7 +1671,7 @@ void fire_smartgrenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	floater->s.renderfx |= RF_SHELL_BLUE | RF_GLOW;
 	VectorClear (floater->mins);
 	VectorClear (floater->maxs);
-	floater->s.modelindex = gi.modelindex ("models/objects/electroball/tris.md2");
+	floater->s.modelindex = gi.modelindex ("models/objects/electroball/tris.iqm");
 	floater->owner = self;
 	floater->touch = smartgrenade_touch;
 	floater->nextthink = level.time + .1;
@@ -1706,7 +1706,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	prox->solid = SOLID_BBOX;
 	VectorClear (prox->mins);
 	VectorClear (prox->maxs);
-	prox->s.modelindex = gi.modelindex ("models/objects/electroball/tris.md2");
+	prox->s.modelindex = gi.modelindex ("models/objects/electroball/tris.iqm");
 	prox->owner = self;
 	prox->touch = smartgrenade_touch;
 	prox->nextthink = level.time + .1;
@@ -1814,7 +1814,7 @@ void fire_bomb (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	bomb->s.renderfx |= RF_GLOW;
 	VectorClear (bomb->mins);
 	VectorClear (bomb->maxs);
-	bomb->s.modelindex = gi.modelindex ("vehicles/bomber/bomb.md2");
+	bomb->s.modelindex = gi.modelindex ("vehicles/bomber/bomb.iqm");
 	bomb->owner = self;
 	bomb->touch = bomb_touch;
 	bomb->nextthink = level.time + .1;
@@ -1893,7 +1893,7 @@ void burn_person(edict_t *target, edict_t *owner, int damage)
 
 	VectorClear (flame->mins);
 	VectorClear (flame->maxs);
-	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
+	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
 	flame->owner = target;
 	flame->orb = owner;
 	flame->delay = level.time + 5;//8;//Jr Shorten it so it goes away faster
@@ -1954,7 +1954,7 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->s.renderfx = RF_TRANSLUCENT;
 	VectorClear (flame->mins);
 	VectorClear (flame->maxs);
-	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
+	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
 	// All we care about is the effects. However, old clients will refuse to 
 	// draw them unless the modelindex is set. To work around this, newer
 	// clients have an RF_NODRAW flag.
@@ -2037,7 +2037,7 @@ void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	fireball->s.renderfx = RF_TRANSLUCENT;
 	VectorClear (fireball->mins);
 	VectorClear (fireball->maxs);
-	fireball->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
+	fireball->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
 	fireball->owner = self;
 	fireball->touch = fireball_touch;
 	fireball->nextthink = level.time + 1500/speed;

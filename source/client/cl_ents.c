@@ -647,6 +647,7 @@ void CL_AddPacketEntities (frame_t *frame)
 	clientinfo_t		*ci;
 	unsigned int		effects, renderfx;
 	qboolean			playermodel;
+	char	shortname[MAX_OSPATH];
 
 	// bonus items rotate at a fixed rate
 	autorotate = anglemod(cl.time/10);
@@ -840,14 +841,15 @@ void CL_AddPacketEntities (frame_t *frame)
 			CL_PoweredEffects (ent.origin, EF_BUBBLES);
 		}
 
-		//cool new ctf flag effects
-		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag1.md2")) 
+		//Ctf flag particle effects
+		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
+		if (!Q_strcasecmp (shortname, "models/items/flags/flag1")) 
 		{
 			CL_FlagEffects(ent.origin, 0);
 			ent.flag = 1;
 			ent.nodraw = 1;
 		}
-		else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag2.md2")) 
+		else if (!Q_strcasecmp (shortname, "models/items/flags/flag2")) 
 		{
 			CL_FlagEffects(ent.origin, 1);
 			ent.flag = 2;
@@ -896,7 +898,7 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 		{
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) 
+			if (!Q_strcasecmp (shortname, "models/weapons/g_rocket/tris")) 
 			{
 				//add clear cover
 				if (!cl_simpleitems->integer)
@@ -907,7 +909,7 @@ void CL_AddPacketEntities (frame_t *frame)
 					V_AddEntity (&ent);
 				}
 			}	
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
+			if (!Q_strcasecmp (shortname, "models/weapons/g_hyperb/tris")) 
 			{
 				//add clear cover
 				if (!cl_simpleitems->integer)
@@ -944,21 +946,22 @@ void CL_AddPacketEntities (frame_t *frame)
 						
 			//here is where we will set the alpha for certain model parts - would like to eventually
 			//do something a little less uh, hardcoded.
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/healing/globe/tris.md2"))
+			COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex2)], shortname );
+			if (!Q_strcasecmp (shortname, "models/items/healing/globe/tris"))
 			{
 				if(cl_simpleitems->value)
 					continue;
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/quaddama/unit.md2"))
+			else if (!Q_strcasecmp (shortname, "models/items/quaddama/unit"))
 			{
 				if(cl_simpleitems->value)
 					continue;
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/adrenaline/glass.md2"))
+			else if (!Q_strcasecmp (shortname, "models/items/adrenaline/glass"))
 			{
 				if(cl_simpleitems->value)
 					continue;
@@ -1002,13 +1005,14 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.flags = 0;
 			ent.alpha = 1.0;
 
-			//new ctf flag effects
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag1.md2")) 
+			//Ctf flag effects
+			COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex4)], shortname );
+			if (!Q_strcasecmp (shortname, "models/items/flags/flag1")) 
 			{
 				CL_FlagEffects(ent.origin, 0);
 				ent.model = 0;
 			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2")) 
+			else if (!Q_strcasecmp (shortname, "models/items/flags/flag2")) 
 			{
 				CL_FlagEffects(ent.origin, 1);
 				ent.model = 0;
@@ -1136,7 +1140,7 @@ void CL_BrassShells(vec3_t org, vec3_t dir, int count)
 		le->alpha = 1.0;
 		le->alphavel = -0.1;
 		le->flags = CLM_BOUNCE | CLM_FRICTION | CLM_ROTATE | CLM_NOSHADOW | CLM_BRASS;
-		le->model = R_RegisterModel("models/objects/brass/tris.md2");
+		le->model = R_RegisterModel("models/objects/brass/tris.iqm");
 		le->ang = crand() * 360;
 		le->avel = crand() * 500;
 
@@ -1174,7 +1178,7 @@ void CL_GlassShards(vec3_t org, vec3_t dir, int count)
 		le->alpha = 1.0;
 		le->alphavel = -0.01;
 		le->flags = CLM_BOUNCE | CLM_FRICTION | CLM_ROTATE | CLM_NOSHADOW | CLM_GLASS;
-		le->model = R_RegisterModel("models/objects/debris1/tris.md2");
+		le->model = R_RegisterModel("models/objects/debris1/tris.iqm");
 		le->ang = crand() * 360;
 		le->avel = crand() * 500;
 
@@ -1201,6 +1205,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	qboolean	useFX = false;
 	vec3_t		offset_down;
 	vec3_t		offset_right;
+	char		shortname[MAX_OSPATH];
 
 	if (cl.frame.playerstate.stats[STAT_ZOOMED])
 		return;
@@ -1218,17 +1223,18 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	//if a vehicle console, we want to render as a 2D HUD now, if a player choses to
 	if(cl_vehicle_huds->value)
 	{
-		if(!(strcmp("vehicles/bomber/v_wep.md2", gun.model->name))) 
+		COM_StripExtension(gun.model->name, shortname);
+		if(!(strcmp("vehicles/bomber/v_wep", shortname))) 
 		{
 			vehicle_hud = 1;
 			return;
 		}
-		else if(!(strcmp("vehicles/strafer/v_wep.md2", gun.model->name))) 
+		else if(!(strcmp("vehicles/strafer/v_wep", shortname))) 
 		{
 			vehicle_hud = 2;
 			return;
 		}
-		else if(!(strcmp("vehicles/hover/v_wep.md2", gun.model->name))) 
+		else if(!(strcmp("vehicles/hover/v_wep", shortname))) 
 		{
 			vehicle_hud = 3;
 			return;

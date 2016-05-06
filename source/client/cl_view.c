@@ -363,7 +363,7 @@ void CL_PrepRefresh ( void )
 	Com_Printf ("                                     \r");
 
 	num_cl_weaponmodels = 1;
-	strcpy(cl_weaponmodels[0], "weapon.md2");
+	strcpy(cl_weaponmodels[0], "weapon.iqm");
 
 	for (i=1, max=0 ; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0] ; i++)
 		max++;
@@ -381,33 +381,33 @@ void CL_PrepRefresh ( void )
 			Com_sprintf( loadingMessages[1][1] , CL_LOADMSG_LENGTH , "^1%s" , name );
 
 			//check for types
-			if(!strcmp(name, "models/weapons/g_rocket/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_rocket/tris.iqm"))
 				rocketlauncher = 1;
-			if(!strcmp(name, "models/weapons/g_glaunch/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_glaunch/tris.iqm"))
 				rocketlauncher = 1;
-			if(!strcmp(name, "models/weapons/g_shotg2/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_shotg2/tris.iqm"))
 				chaingun = 1;
-			if(!strcmp(name, "models/weapons/g_shotg/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_shotg/tris.iqm"))
 				smartgun = 1;
-			if(!strcmp(name, "models/weapons/g_rail/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_rail/tris.iqm"))
 				beamgun = 1;
-			if(!strcmp(name, "models/weapons/g_hyperb/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_hyperb/tris.iqm"))
 				disruptor = 1;
-			if(!strcmp(name, "models/weapons/g_chain/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_chain/tris.iqm"))
 				flamethrower = 1;
-			if(!strcmp(name, "models/weapons/g_machn/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_machn/tris.iqm"))
 				vaporizer = 1;
-			if(!strcmp(name, "models/weapons/g_bfg/tris.md2"))
+			if(!strcmp(name, "models/weapons/g_bfg/tris.iqm"))
 				vaporizer = 1;
-			if(!strcmp(name, "models/items/quaddama/tris.md2"))
+			if(!strcmp(name, "models/items/quaddama/tris.iqm"))
 				quad = 1;
-			if(!strcmp(name, "models/items/haste/tris.md2"))
+			if(!strcmp(name, "models/items/haste/tris.iqm"))
 				haste = 1;
-			if(!strcmp(name, "models/items/sproing/tris.md2"))
+			if(!strcmp(name, "models/items/sproing/tris.iqm"))
 				sproing = 1;
-			if(!strcmp(name, "models/items/adrenaline/tris.md2"))
+			if(!strcmp(name, "models/items/adrenaline/tris.iqm"))
 				adren = 1;
-			if(!strcmp(name, "models/items/invulner/tris.md2"))
+			if(!strcmp(name, "models/items/invulner/tris.iqm"))
 				inv = 1;
 		}
 

@@ -928,10 +928,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 			for (n= 0; n < number_of_gibs; n++) {
 				if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
-					ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_SHIPEXHAUST);
+					ThrowGib (self, "models/objects/gibs/mart_gut/tris.iqm", damage, GIB_METALLIC, EF_SHIPEXHAUST);
 				else
-					ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
-				ThrowGib (self, "models/objects/debris2/tris.md2", damage, GIB_METALLIC, 0);
+					ThrowGib (self, "models/objects/gibs/mart_gut/tris.iqm", damage, GIB_METALLIC, EF_GREENGIB);
+				ThrowGib (self, "models/objects/debris2/tris.iqm", damage, GIB_METALLIC, 0);
 			}
 		}
 		else if(self->ctype == 2) 
@@ -939,8 +939,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gib_effect = 0;
 			for (n= 0; n < number_of_gibs; n++) 
 			{
-				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
-				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
+				ThrowGib (self, "models/objects/debris3/tris.iqm", damage, GIB_METALLIC, 0);
+				ThrowGib (self, "models/objects/debris1/tris.iqm", damage, GIB_METALLIC, 0);
 			}
 			//blow up too :)
 			gi.WriteByte (svc_temp_entity);
@@ -960,9 +960,9 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			for (n= 0; n < number_of_gibs; n++) 
 			{
 				if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
-					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_SHIPEXHAUST);
+					ThrowGib (self, "models/objects/gibs/sm_meat/tris.iqm", damage, GIB_METALLIC, EF_SHIPEXHAUST);
 				else
-					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
+					ThrowGib (self, "models/objects/gibs/sm_meat/tris.iqm", damage, GIB_METALLIC, EF_GIB);
 			}
 		}
 
@@ -2041,7 +2041,7 @@ void Respawn_Player_ClearEnt (edict_t *ent)
 	ent->deadflag = DEAD_NO;
 	ent->air_finished = level.time + 12;
 	ent->clipmask = MASK_PLAYERSOLID;
-	ent->model = "players/martianenforcer/tris.md2";
+	ent->model = "players/martianenforcer/tris.iqm";
 	ent->pain = player_pain;
 	ent->die = player_die;
 	ent->waterlevel = 0;
@@ -2150,11 +2150,11 @@ void PutClientInServer (edict_t *ent)
 	}
 	ent->charModel[i-1] = 0;
 
-	sprintf(modelpath, "players/%s/helmet.md2", ent->charModel);
+	sprintf(modelpath, "players/%s/helmet.iqm", ent->charModel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) 
 	{
-		sprintf(modelpath, "players/%s/helmet.md2", ent->charModel);
+		sprintf(modelpath, "players/%s/helmet.iqm", ent->charModel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
@@ -2533,7 +2533,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		else
 			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/default");
 
-		ent->s.modelindex3 = gi.modelindex("players/martianenforcer/helmet.md2");
+		ent->s.modelindex3 = gi.modelindex("players/martianenforcer/helmet.iqm");
 	}
 
 	if(whereFrom != SPAWN && whereFrom != CONNECT)
@@ -2698,11 +2698,11 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	}
 	playermodel[i-1] = 0;
 
-	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
+	sprintf(modelpath, "players/%s/helmet.iqm", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) 
 	{
-		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
+		sprintf(modelpath, "players/%s/helmet.iqm", playermodel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
@@ -2720,10 +2720,10 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	{ 
 		//use model specific gibs
 		ent->usegibs = 1;
-		sprintf(ent->head, "players/%s/head.md2", playermodel);
-		sprintf(ent->body, "players/%s/body.md2", playermodel);
-		sprintf(ent->leg, "players/%s/leg.md2", playermodel);
-		sprintf(ent->arm, "players/%s/arm.md2", playermodel);
+		sprintf(ent->head, "players/%s/head.iqm", playermodel);
+		sprintf(ent->body, "players/%s/body.iqm", playermodel);
+		sprintf(ent->leg, "players/%s/leg.iqm", playermodel);
+		sprintf(ent->arm, "players/%s/arm.iqm", playermodel);
 		fclose(file);
 	}
 
@@ -2769,7 +2769,7 @@ static void ClientChangeSkin (edict_t *ent)
 		else
 			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/default");
 
-		ent->s.modelindex3 = gi.modelindex("players/martianenforcer/helmet.md2");
+		ent->s.modelindex3 = gi.modelindex("players/martianenforcer/helmet.iqm");
 	}
 
 	// set name

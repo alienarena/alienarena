@@ -432,19 +432,19 @@ void ResetWeaponModel (edict_t *ent)
     if (ent->client->pers.weapon->weapmodel != NULL)
     	sprintf (weaponmodel, "players/%s%s", weaponame, ent->client->pers.weapon->weapmodel);
     else
-		sprintf (weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
+		sprintf (weaponmodel, "players/%s%s", weaponame, "weapon.iqm"); //default
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
 	if(!file)
 	{
-		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+		sprintf(weaponpath, "%s%s", weaponame, "weapon.iqm"); //no w_weaps, do we have this model?
 		Q2_FindFile (weaponpath, &file);
 		if(!file) //server does not have this player model
-			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
+			sprintf(weaponmodel, "players/martianenforcer/weapon.iqm");//default player(martian)
 		else
 		{ //have the model, but it has no w_weaps
-			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
+			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.iqm"); //custom weapon
 			fclose(file);
 		}
 	}

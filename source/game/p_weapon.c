@@ -306,12 +306,12 @@ void ChangeWeapon (edict_t *ent)
 	strcpy(weaponmodel, " ");
 	weaponmodel[0] = 0;
 
-	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
+	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.iqm"); //default
 
 	if (ent->client->pers.weapon->weapmodel != NULL)
     	sprintf (weaponmodel, "players/%s%s", weaponame, ent->client->pers.weapon->weapmodel);
     else
-		sprintf (weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
+		sprintf (weaponmodel, "players/%s%s", weaponame, "weapon.iqm"); //default
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	ent->s.modelindex2 = gi.checkmodelindex(weaponmodel);
@@ -321,13 +321,13 @@ void ChangeWeapon (edict_t *ent)
 		Q2_FindFile (weaponpath, &file); //does it really exist?
 		if(!file)
 		{
-			sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+			sprintf(weaponpath, "%s%s", weaponame, "weapon.iqm"); //no w_weaps, do we have this model?
 			Q2_FindFile (weaponpath, &file);
 			if(!file) //server does not have this player model
-				sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
+				sprintf(weaponmodel, "players/martianenforcer/weapon.iqm");//default player(martian)
 			else
 			{ //have the model, but it has no w_weaps
-				sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
+				sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.iqm"); //custom weapon
 				fclose(file);
 			}
 		}
@@ -337,7 +337,7 @@ void ChangeWeapon (edict_t *ent)
 	}
 
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
-	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2") )
+	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.iqm") )
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
 
 	ent->client->anim_priority = ANIM_PAIN;

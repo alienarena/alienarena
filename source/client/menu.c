@@ -5653,13 +5653,13 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	
 	memset( &entity, 0, sizeof( entity ) );
 
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", self->name );
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.iqm", self->name );
 	entity[0].model = R_RegisterModel( scratch );
 	Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.jpg", self->name, self->skin );
 	entity[0].skin = R_RegisterSkin( scratch );
 	entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", self->name );
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.iqm", self->name );
 	entity[1].model = R_RegisterModel( scratch );
 	Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.tga", self->name );
 	entity[1].skin = R_RegisterSkin( scratch );
@@ -5668,7 +5668,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	refdef.num_entities = 2;
 
 	//if a helmet or other special devce
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", self->name );
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.iqm", self->name );
 	FS_FOpenFile( scratch, &modelfile );
 	if ( modelfile )
 	{

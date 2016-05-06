@@ -554,9 +554,9 @@ void CTFEffects(edict_t *player)
 	flag2_item = FindItemByClassname("item_flag_blue");
 
 	if (player->client->pers.inventory[ITEM_INDEX(flag1_item)])
-		player->s.modelindex4 = gi.modelindex("models/items/flags/flag1.md2");
+		player->s.modelindex4 = gi.modelindex("models/items/flags/flag1.iqm");
 	else if (player->client->pers.inventory[ITEM_INDEX(flag2_item)])
-		player->s.modelindex4 = gi.modelindex("models/items/flags/flag2.md2");
+		player->s.modelindex4 = gi.modelindex("models/items/flags/flag2.iqm");
 	else
 		player->s.modelindex4 = 0;
 }
