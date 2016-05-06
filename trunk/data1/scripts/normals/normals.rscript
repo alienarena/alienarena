@@ -468,6 +468,8 @@ models/objects/gibs/mart_gut/skin
 	{
 		map models/objects/gibs/skin_normal.jpg
 		normalmap
+		map2 models/objects/gibs/mart_gut/skin_fx.tga
+		glow
 	}
 }
 models/objects/gibs/sm_meat/skin
