@@ -347,7 +347,7 @@ void ACEND_ShowNode(int node)
 	else
 		ent->s.renderfx = RF_SHELL_GREEN; // action nodes
 
-	ent->s.modelindex = gi.modelindex ("models/items/ammo/grenades/medium/tris.md2");
+	ent->s.modelindex = gi.modelindex ("models/items/ammo/grenades/medium/tris.iqm");
 	ent->owner = ent;
 	ent->nextthink = level.time + 200000.0;
 	ent->think = G_FreeEdict;

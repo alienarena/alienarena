@@ -984,10 +984,10 @@ void ACESP_PutClientInServer (edict_t *ent)
 	}
 	ent->charModel[i-1] = 0;
 
-	sprintf(modelpath, "players/%s/helmet.md2", ent->charModel);
+	sprintf(modelpath, "players/%s/helmet.iqm", ent->charModel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
-		sprintf(modelpath, "players/%s/helmet.md2", ent->charModel);
+		sprintf(modelpath, "players/%s/helmet.iqm", ent->charModel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
@@ -1002,10 +1002,10 @@ void ACESP_PutClientInServer (edict_t *ent)
 	Q2_FindFile (modelpath, &file);
 	if(file) { //use model specific gibs
 		ent->usegibs = 1;
-		sprintf(ent->head, "players/%s/head.md2", ent->charModel);
-		sprintf(ent->body, "players/%s/body.md2", ent->charModel);
-		sprintf(ent->leg, "players/%s/leg.md2", ent->charModel);
-		sprintf(ent->arm, "players/%s/arm.md2", ent->charModel);
+		sprintf(ent->head, "players/%s/head.iqm", ent->charModel);
+		sprintf(ent->body, "players/%s/body.iqm", ent->charModel);
+		sprintf(ent->leg, "players/%s/leg.iqm", ent->charModel);
+		sprintf(ent->arm, "players/%s/arm.iqm", ent->charModel);
 		fclose(file);
 	}
 

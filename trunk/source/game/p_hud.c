@@ -149,7 +149,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	pad->movetype = MOVETYPE_NONE;
 	pad->solid = SOLID_NOT;
 	pad->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
-	pad->s.modelindex = gi.modelindex("models/objects/dmspot/tris.md2");
+	pad->s.modelindex = gi.modelindex("models/objects/dmspot/tris.iqm");
 	pad->think = NULL;
 	pad->classname = "pad";
 	gi.linkentity (pad);

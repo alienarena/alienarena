@@ -1114,10 +1114,10 @@ void SP_worldspawn (edict_t *ent)
 				// "stutter" when a player joins the game. This should be here
 				// for the cases of 7.45 clients and older, and for game modes
 				// where unarmed combat is done (fists as a weapon.)
-				gi.modelindex (va ("players/%s/tris.md2", player_names[player_num]));
+				gi.modelindex (va ("players/%s/tris.iqm", player_names[player_num]));
 				
 				Com_sprintf (w_weap_prefix, sizeof (w_weap_prefix), "players/%s/", player_names[player_num]);
-				gi.modelindex (va ("%sweapon.md2", w_weap_prefix));
+				gi.modelindex (va ("%sweapon.iqm", w_weap_prefix));
 			}
 			else
 			{
@@ -1134,17 +1134,17 @@ void SP_worldspawn (edict_t *ent)
 		}
 		
 	    //precache any gibs
-	    sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
-	    gi.modelindex ("models/objects/gibs/mart_gut/tris.md2");
-	    gi.modelindex ("models/objects/debris1/tris.md2");
-	    gi.modelindex ("models/objects/debris3/tris.md2");
+	    sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.iqm");
+	    gi.modelindex ("models/objects/gibs/mart_gut/tris.iqm");
+	    gi.modelindex ("models/objects/debris1/tris.iqm");
+	    gi.modelindex ("models/objects/debris3/tris.iqm");
 
 		//weapon models that aren't placed in levels
-		gi.modelindex ("models/weapons/v_minderaser/tris.md2");
-		gi.modelindex ("models/weapons/g_minderaser/tris.md2");
-		gi.modelindex ("models/objects/spud/tris.md2");
-		gi.modelindex ("models/weapons/v_blast/tris.md2");
-		gi.modelindex ("models/weapons/v_violator/tris.md2");
+		gi.modelindex ("models/weapons/v_minderaser/tris.iqm");
+		gi.modelindex ("models/weapons/g_minderaser/tris.iqm");
+		gi.modelindex ("models/objects/spud/tris.iqm");
+		gi.modelindex ("models/weapons/v_blast/tris.iqm");
+		gi.modelindex ("models/weapons/v_violator/tris.iqm");
 	}
 
 //

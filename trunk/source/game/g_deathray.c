@@ -320,7 +320,7 @@ void SP_npc_deathray (edict_t *self)
 	sound_search = gi.soundindex ("misc/deathray/weird2.wav");
 	sound_sight = gi.soundindex ("misc/deathray/weird2.wav");
 
-	self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.md2");
+	self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.iqm");
 
 	VectorSet (self->mins, -16, -16, 0);
 	VectorSet (self->maxs, 16, 16, 48);
@@ -368,7 +368,7 @@ void SP_misc_deathray (edict_t *self)
 	if(self->spawnflags & 1)
 		self->s.modelindex = gi.modelindex("models/tactical/human_turret.iqm");
 	else
-		self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.md2");
+		self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.iqm");
 
 	VectorSet (self->mins, -16, -16, 0);
 	VectorSet (self->maxs, 16, 16, 48);

@@ -240,7 +240,6 @@
   <ItemGroup>
     <ClInclude Include="$(SrcDir)client/anorms.h" />
     <ClInclude Include="$(SrcDir)game/acesrc/acebot.h" />
-    <ClInclude Include="$(SrcDir)game/cow.h" />
     <ClInclude Include="$(SrcDir)game/game.h" />
     <ClInclude Include="$(SrcDir)game/g_deathray.h" />
     <ClInclude Include="$(SrcDir)game/g_local.h" />

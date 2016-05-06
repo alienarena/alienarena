@@ -164,9 +164,9 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 
 	if(md2)
 	{
-		//didn't find .iqm, try for .md2
-		//check for presence of a local .md2(but leave filename as original extension)
-		//if we find a .md2, don't try to download anything
+		//didn't find .md2, try for .iqm
+		//check for presence of a local .iqm(but leave filename as original extension)
+		//if we find a .iqm, don't try to download anything
 		COM_StripExtension ( filename, shortname );
 		sprintf(shortname2, "%s.iqm", shortname);
 		if (FS_LoadFile (shortname2, NULL) != -1)
@@ -550,10 +550,10 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 
 	if (cl_noskins->value || *s == 0)
 	{
-		Com_sprintf (model_filename, sizeof(model_filename), "players/martianenforcer/tris.md2");
-		Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/martianenforcer/weapon.md2");
-		Com_sprintf (skin_filename, sizeof(skin_filename), "players/martianenforcer/default.pcx");
-		Com_sprintf (ci->iconname, sizeof(ci->iconname), "/players/martianenforcer/default_i.pcx");
+		Com_sprintf (model_filename, sizeof(model_filename), "players/martianenforcer/tris.iqm");
+		Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/martianenforcer/weapon.iqm");
+		Com_sprintf (skin_filename, sizeof(skin_filename), "players/martianenforcer/default.jpg");
+		Com_sprintf (ci->iconname, sizeof(ci->iconname), "/players/martianenforcer/default_i.jpg");
 		ci->model = R_RegisterModel (model_filename);
 		ci->helmet = R_RegisterModel("players/martianenforcer/helmet.md2");
 		// weapon file
@@ -573,18 +573,18 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		strcpy (skin_name, s + strlen(model_name) + 1);
 
 		// model file
-		Com_sprintf (model_filename, sizeof(model_filename), "players/%s/tris.md2", model_name);
+		Com_sprintf (model_filename, sizeof(model_filename), "players/%s/tris.iqm", model_name);
 		ci->model = R_RegisterModel (model_filename);
 		if (!ci->model)
 		{
-			Com_sprintf (model_filename, sizeof(model_filename), "players/martianenforcer/tris.md2");
+			Com_sprintf (model_filename, sizeof(model_filename), "players/martianenforcer/tris.iqm");
 			ci->model = R_RegisterModel (model_filename);
-			ci->helmet = R_RegisterModel("players/martianenforcer/helmet.md2");
+			ci->helmet = R_RegisterModel("players/martianenforcer/helmet.iqm");
 			strcpy(model_name, "martianenforcer");
 		}
 
 		// skin file
-		Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/%s.pcx", model_name, skin_name);
+		Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/%s.jpg", model_name, skin_name);
 		ci->skin = R_RegisterSkin (skin_filename);
 
 		// if don't have a skin, it means that the model didn't have
@@ -592,7 +592,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		if (!ci->skin)
 		{
 			strcpy(skin_name, "default");
-			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.pcx", model_name);
+			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.jpg", model_name);
 			ci->skin = R_RegisterSkin (skin_filename);
 		}
 
@@ -610,7 +610,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		}
 
 		// icon file
-		Com_sprintf (ci->iconname, sizeof(ci->iconname), "/players/%s/%s_i.pcx", model_name, skin_name);
+		Com_sprintf (ci->iconname, sizeof(ci->iconname), "/players/%s/%s_i.jpg", model_name, skin_name);
 		ci->icon = R_RegisterPic (ci->iconname);
 	}
 
@@ -618,7 +618,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	if (cl_noskins->value || *s == 0)
 		strcpy(model_name, "martianenforcer");
 
-	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod1.md2", model_name);
+	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod1.iqm", model_name);
 	i = 0;
 	do
 		model_filename[i] = tolower(model_filename[i]);
@@ -626,7 +626,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 
 	ci->lod1 = R_RegisterModel(model_filename);
 
-	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod2.md2", model_name);
+	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod2.iqm", model_name);
 	i = 0;
 	do
 		model_filename[i] = tolower(model_filename[i]);

@@ -227,8 +227,8 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	sound_search = gi.soundindex ("weapons/seeker.wav");
 	sound_sight = gi.soundindex ("misc/deathray/weird2.wav");
 
-	self->s.modelindex = gi.modelindex("models/objects/spider/tris.md2");
-	self->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.md2");
+	self->s.modelindex = gi.modelindex("models/objects/spider/tris.iqm");
+	self->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.iqm");
 
 	self->classname = "proj_spider";
 
@@ -318,8 +318,8 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	spider->solid = SOLID_BBOX;
 	VectorSet (spider->mins, -20, -20, -32);
 	VectorSet (spider->maxs, 20, 20, 20);
-	spider->s.modelindex = gi.modelindex("models/objects/spider/tris.md2");
-	spider->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.md2");
+	spider->s.modelindex = gi.modelindex("models/objects/spider/tris.iqm");
+	spider->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.iqm");
 	spider->s.frame = 31;
 	spider->owner = self;
 	spider->touch = spider_touch;

@@ -1885,18 +1885,18 @@ int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
 
 WModelList_t BaseWModels[] =
 {
-	{ "w_blaster.md2" },
-	{ "w_shotgun.md2" },
-	{ "w_sshotgun.md2" },
-	{ "w_machinegun.md2" },
-	{ "w_chaingun.md2" },
-	{ "w_glauncher.md2" },
-	{ "w_rlauncher.md2" },
-	{ "w_hyperblaster.md2" },
-	{ "w_railgun.md2" },
-	{ "w_bfg.md2" },
-	{ "w_violator.md2" },
-	{ "weapon.md2" }
+	{ "w_blaster.iqm" },
+	{ "w_shotgun.iqm" },
+	{ "w_sshotgun.iqm" },
+	{ "w_machinegun.iqm" },
+	{ "w_chaingun.iqm" },
+	{ "w_glauncher.iqm" },
+	{ "w_rlauncher.iqm" },
+	{ "w_hyperblaster.iqm" },
+	{ "w_railgun.iqm" },
+	{ "w_bfg.iqm" },
+	{ "w_violator.iqm" },
+	{ "weapon.iqm" }
 };
 int WModelsCount = (int)(sizeof(BaseWModels)/sizeof(BaseWModels[0]));
 
@@ -1920,11 +1920,11 @@ void R_RegisterBasePlayerModels( void )
 	for (i = 0; i < PModelsCount; i++)
 	{
 		Com_Printf("Registering models for: %s\n", BasePModels[i].name);
-		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/tris.md2", BasePModels[i].name);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/tris.iqm", BasePModels[i].name);
 		R_RegisterModel(mod_filename);
-		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod1.md2", BasePModels[i].name);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod1.iqm", BasePModels[i].name);
 		R_RegisterModel(mod_filename);
-		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod2.md2", BasePModels[i].name);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod2.iqm", BasePModels[i].name);
 		R_RegisterModel(mod_filename);
 
 		//register weapon models
@@ -1977,15 +1977,15 @@ void R_RegisterCustomPlayerModels( void )
 			continue;
 
 		Com_Printf("Registering custom player model: %s\n", dirnames[i]);
-		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/tris.md2", dirnames[i]);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/tris.iqm", dirnames[i]);
 		if(FS_FileExists(mod_filename))
 			R_RegisterModel(mod_filename);
 		else
 			continue; //invalid player model
-		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/lod1.md2", dirnames[i]);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/lod1.iqm", dirnames[i]);
 		if(FS_FileExists(mod_filename))
 			R_RegisterModel(mod_filename);
-		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/lod2.md2", dirnames[i]);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/lod2.iqm", dirnames[i]);
 		if(FS_FileExists(mod_filename))
 			R_RegisterModel(mod_filename);
 

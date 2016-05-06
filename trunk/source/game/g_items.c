@@ -167,7 +167,7 @@ void SpawnMinderaser(edict_t *ent)
 	minderaser = G_Spawn();
 	VectorCopy(ent->s.origin, minderaser->s.origin);
 	minderaser->spawnflags = DROPPED_PLAYER_ITEM;
-	minderaser->model = "models/weapons/g_minderaser/tris.md2";
+	minderaser->model = "models/weapons/g_minderaser/tris.iqm";
 	minderaser->classname = "weapon_minderaser";
 	minderaser->item = FindItem ("Minderaser");
 	minderaser->s.effects = minderaser->item->world_model_flags;
@@ -849,7 +849,7 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	VectorSet (dropped->maxs, 15, 15, 15);
 	gi.setmodel (dropped, dropped->item->world_model);
 	if(!strcmp(item->classname, "item_bomber"))
-		dropped->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
+		dropped->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.iqm");
 	dropped->solid = SOLID_TRIGGER;
 	dropped->movetype = MOVETYPE_TOSS;
 	dropped->touch = drop_temp_touch;
@@ -1035,7 +1035,7 @@ void PrecacheItem (gitem_t *it)
 		// determine type based on extension
 		if (!strcmp(data+len-3, "md2"))
 			gi.modelindex (data);
-		else if (!strcmp(data+len-3, "sp2"))
+		else if (!strcmp(data+len-3, "iqm"))
 			gi.modelindex (data);
 		else if (!strcmp(data+len-3, "wav"))
 			gi.soundindex (data);
@@ -1137,13 +1137,13 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	}
 	ent->s.renderfx = RF_GLOW;
 	if((strcmp(ent->classname, "Health") == 0)) {
-		ent->s.modelindex2 = gi.modelindex("models/items/healing/globe/tris.md2");
+		ent->s.modelindex2 = gi.modelindex("models/items/healing/globe/tris.iqm");
 	}
 	else if((strcmp(ent->classname, "item_quad") == 0)) {
-		ent->s.modelindex2 = gi.modelindex("models/items/quaddama/unit.md2");
+		ent->s.modelindex2 = gi.modelindex("models/items/quaddama/unit.iqm");
 	}
 	else if((strcmp(ent->classname, "item_adrenaline") == 0)) {
-		ent->s.modelindex2 = gi.modelindex("models/items/adrenaline/glass.md2");
+		ent->s.modelindex2 = gi.modelindex("models/items/adrenaline/glass.iqm");
 	}
 
 	if (ent->model)
@@ -1192,7 +1192,7 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_armor_body, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/armor/body/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/body/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_bodyarmor", "Body Armor", "misc/ar1_pkup.wav"),
 		GITEM_INIT_ARMOR (&bodyarmor_info, ARMOR_BODY),
 /* precache */ ""
@@ -1203,7 +1203,7 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_armor_combat, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/armor/combat/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/combat/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_combatarmor", "Combat Armor", "misc/ar1_pkup.wav"),
 		GITEM_INIT_ARMOR (&combatarmor_info, ARMOR_COMBAT),
 /* precache */ ""
@@ -1214,7 +1214,7 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_armor_jacket, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/armor/jacket/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/jacket/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_jacketarmor", "Jacket Armor", "misc/ar1_pkup.wav"),
 		GITEM_INIT_ARMOR (&jacketarmor_info, ARMOR_JACKET),
 /* precache */ ""
@@ -1225,7 +1225,7 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_armor_shard, IT_ARMOR),
 		GITEM_INIT_CALLBACKS (Pickup_Armor, NULL, NULL, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/armor/shard/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/armor/shard/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_jacketarmor", "Armor Shard", "misc/ar2_pkup.wav"),
 		GITEM_INIT_ARMOR (NULL, ARMOR_SHARD),
 /* precache */ ""
@@ -1239,7 +1239,7 @@ gitem_t	itemlist[] =
 		// should we supply a drop callback if we don't want players to drop
 		// it manually?
 		GITEM_INIT_CALLBACKS (CTFPickup_Flag, NULL, CTFDrop_Flag, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/flags/flag1.md2", EF_TEAM1),
+		GITEM_INIT_WORLDMODEL ("models/items/flags/flag1.iqm", EF_TEAM1),
 		GITEM_INIT_CLIENTSIDE ("i_flag1", "Red Flag", NULL),
 		GITEM_INIT_OTHER (),
 /* precache */ "misc/red_scores.wav misc/red_takes.wav misc/red_increases.wav misc/red_wins.wav misc/scores_tied.wav misc/red_picked.wav"
@@ -1252,7 +1252,7 @@ gitem_t	itemlist[] =
 		// should we supply a drop callback if we don't want players to drop
 		// it manually?
 		GITEM_INIT_CALLBACKS (CTFPickup_Flag, NULL, CTFDrop_Flag, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/flags/flag2.md2", EF_TEAM2),
+		GITEM_INIT_WORLDMODEL ("models/items/flags/flag2.iqm", EF_TEAM2),
 		GITEM_INIT_CLIENTSIDE ("i_flag2", "Blue Flag", NULL),
 		GITEM_INIT_OTHER (),
 /* precache */ "misc/blue_scores.wav misc/blue_takes.wav misc/blue_increases.wav misc/blue_wins.wav misc/blue_picked.wav"
@@ -1264,10 +1264,10 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_bomber, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Bomber),
-		GITEM_INIT_WORLDMODEL ("vehicles/bomber/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("vehicles/bomber/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("bomber", "Bomber", NULL),
 		// vehicles get infinite ammo, so both quantities are 0
-		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/bomber/v_wep.md2", NULL),
+		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/bomber/v_wep.iqm", NULL),
 		NULL
 	},
 /*QUAKED item_strafer (1 0.2 0) (-16 -16 -24) (16 16 32)
@@ -1275,10 +1275,10 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_strafer, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Strafer),
-		GITEM_INIT_WORLDMODEL ("vehicles/strafer/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("vehicles/strafer/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("strafer", "Strafer", NULL),
 		// vehicles get infinite ammo, so both quantities are 0
-		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/strafer/v_wep.md2", NULL),
+		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/strafer/v_wep.iqm", NULL),
 		NULL
 	},
 
@@ -1287,10 +1287,10 @@ gitem_t	itemlist[] =
 	{
 		GITEM_INIT_IDENTIFY (item_hover, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Hover),
-		GITEM_INIT_WORLDMODEL ("vehicles/hover/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("vehicles/hover/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("hover", "Hover", NULL),
 		// vehicles get infinite ammo, so both quantities are 0
-		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/hover/v_wep.md2", NULL),
+		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/hover/v_wep.iqm", NULL),
 		NULL
 	},
 
@@ -1304,7 +1304,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the alien bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Alien Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.md2", "w_machinegun.md2"),
+		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
 		NULL
 	},
 
@@ -1317,7 +1317,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the human bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Human Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.md2", "w_machinegun.md2"),
+		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
 		NULL
 	},
 #endif
@@ -1328,7 +1328,7 @@ gitem_t	itemlist[] =
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Punch),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("warriorpunch", "Warriorpunch", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_warriorhands/tris.md2", "w_violator.md2"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_warriorhands/tris.iqm", "w_violator.iqm"),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
 	},
 
@@ -1336,9 +1336,9 @@ gitem_t	itemlist[] =
 		GITEM_INIT_IDENTIFY (weapon_wizard_punch, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Punch),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
-		"models/weapons/v_wizardhands/tris.md2",
+		"models/weapons/v_wizardhands/tris.iqm",
 		GITEM_INIT_CLIENTSIDE ("wizardpunch", "Wizardpunch", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_wizardhands/tris.md2", "w_violator.md2"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_wizardhands/tris.iqm", "w_violator.iqm"),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
 	},
 #else
@@ -1350,7 +1350,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Blaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("blaster", "Blaster", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_blast/tris.md2", "w_blaster.md2"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_blast/tris.iqm", "w_blaster.iqm"),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav weapons/blasterreload.wav"
 	},
 
@@ -1362,7 +1362,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_AlienBlaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.md2", "w_blaster.md2"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.iqm", "w_blaster.iqm"),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav" //to do tactical - change sound
 	},
 
@@ -1371,7 +1371,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Violator),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("violator", "Violator", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_violator/tris.md2", "w_violator.md2"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_violator/tris.iqm", "w_violator.iqm"),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav weapons/violatorreload.wav"
 	},
 
@@ -1380,9 +1380,9 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_shotgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Smartgun),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("smartgun", "Alien Smartgun", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Alien Smart Grenade", "models/weapons/v_shotg/tris.md2", "w_shotgun.md2"),
+		GITEM_INIT_WEAP (1, 1, "Alien Smart Grenade", "models/weapons/v_shotg/tris.iqm", "w_shotgun.iqm"),
 /* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},
 
@@ -1391,9 +1391,9 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_supershotgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Chain),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.md2", "w_sshotgun.md2"),
+		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.iqm", "w_sshotgun.iqm"),
 /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/chaingunreload.wav"
 	},
 
@@ -1402,9 +1402,9 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_chaingun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Flame),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_chain/tris.md2", "w_chaingun.md2"),
+		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_chain/tris.iqm", "w_chaingun.iqm"),
 /* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav weapons/flamereload.wav"
 	},
 
@@ -1413,10 +1413,10 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_rocketlauncher, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_RocketLauncher),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_rocket/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_rocket/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("rocketlauncher", "Rocket Launcher", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Rockets", "models/weapons/v_rocket/tris.md2", "w_rlauncher.md2"),
-/* precache */ "models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav weapons/rlauncherreload.wav models/objects/debris2/tris.md2"
+		GITEM_INIT_WEAP (1, 1, "Rockets", "models/weapons/v_rocket/tris.iqm", "w_rlauncher.iqm"),
+/* precache */ "models/objects/rocket/tris.iqm weapons/rockfly.wav weapons/rocklf1a.wav weapons/rlauncherreload.wav models/objects/debris2/tris.iqm"
 	},
 
 /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1424,9 +1424,9 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_hyperblaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Disruptor),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_hyperb/tris.md2", "w_hyperblaster.md2"),
+		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_hyperb/tris.iqm", "w_hyperblaster.iqm"),
 /* precache */ "weapons/railgf1a.wav weapons/disruptorreload.wav"
 	},
 
@@ -1435,9 +1435,9 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_railgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Beamgun),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("beamgun", "Disruptor", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_rail/tris.md2", "w_railgun.md2"),
+		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_rail/tris.iqm", "w_railgun.iqm"),
 /* precache */ "weapons/hyprbf1a.wav weapons/beamgunreload.wav"
 	},
 
@@ -1446,9 +1446,9 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (weapon_bfg, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.md2", "w_bfg.md2"),
+		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.iqm", "w_bfg.iqm"),
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav weapons/vaporizerreload.wav"
 	},
 
@@ -1456,10 +1456,10 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_minderaser, IT_WEAPON),
 		// not droppable, so drop callback not supplied
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, NULL, Weapon_Minderaser),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_minderaser/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_minderaser/tris.iqm", EF_ROTATE),
 		// TODO: create an icon for the mind eraser!
 		GITEM_INIT_CLIENTSIDE (NULL, "Minderaser", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.md2", "w_minderaser.md2"),
+		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.iqm", "w_minderaser.iqm"),
 /* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav weapons/minderaserreload.wav misc/minderaser.wav"
 	},
 #endif
@@ -1471,7 +1471,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (ammo_shells, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/ammo/shells/medium/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/shells/medium/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("a_shells", "Alien Smart Grenade", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (10),
 /* precache */ ""
@@ -1481,7 +1481,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (ammo_grenades, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/ammo/grenades/medium/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/grenades/medium/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("a_grenades", "Napalm", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (50),
 /* precache */ ""
@@ -1492,7 +1492,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (ammo_bullets, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/ammo/bullets/medium/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/bullets/medium/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("a_bullets", "Bullets", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (50),
 /* precache */ ""
@@ -1503,7 +1503,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (ammo_cells, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/ammo/cells/medium/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/cells/medium/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("a_cells", "Cells", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (50),
 /* precache */ ""
@@ -1514,7 +1514,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (ammo_rockets, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/ammo/rockets/medium/tris.md2", 0),
+		GITEM_INIT_WORLDMODEL ("models/items/ammo/rockets/medium/tris.iqm", 0),
 		GITEM_INIT_CLIENTSIDE ("a_rockets", "Rockets", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (5),
 /* precache */ ""
@@ -1559,7 +1559,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (item_quad, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Quad, Drop_General, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/quaddama/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/quaddama/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_quad", "Double Damage", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (150),
 /* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
@@ -1570,7 +1570,7 @@ always owned, never in the world
 	{
 		GITEM_INIT_IDENTIFY (item_invulnerability, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invulnerability, Drop_General, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/invulner/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/invulner/tris.iqm", EF_ROTATE),
 		// now "Alien Force" - incoming amage reduced to 1/3, max armor added
 		GITEM_INIT_CLIENTSIDE ("p_invulnerability", "Alien Force", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (300),
@@ -1583,7 +1583,7 @@ gives +1 to maximum health
 	{
 		GITEM_INIT_IDENTIFY (item_adrenaline, IT_HEALTH),
 		GITEM_INIT_CALLBACKS (Pickup_Adrenaline, NULL, NULL, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/adrenaline/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/adrenaline/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_adrenaline", "Adrenaline", "items/n_health.wav"),
 		GITEM_INIT_POWERUP (60),
 /* precache */ ""
@@ -1603,7 +1603,7 @@ gives +1 to maximum health
 	{
 		GITEM_INIT_IDENTIFY (item_haste, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Haste, Drop_General, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/haste/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/haste/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_haste", "Haste", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (60),
 /* precache */ "items/hasteout.wav"
@@ -1611,7 +1611,7 @@ gives +1 to maximum health
 	{
 		GITEM_INIT_IDENTIFY (item_sproing, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Sproing, Drop_General, NULL),
-		GITEM_INIT_WORLDMODEL ("models/items/sproing/tris.md2", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/items/sproing/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_sproing", "Sproing", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (60),
 /* precache */ "items/sproingout.wav"
@@ -1642,7 +1642,7 @@ void SP_item_health (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	self->model = "models/items/healing/medium/tris.md2";
+	self->model = "models/items/healing/medium/tris.iqm";
 	self->classname = "Health";
 	self->count = 10;
 	SpawnItem (self, FindItem ("Health"));
@@ -1659,7 +1659,7 @@ void SP_item_health_small (edict_t *self)
 		return;
 	}
 
-	self->model = "models/items/healing/small/tris.md2";
+	self->model = "models/items/healing/small/tris.iqm";
 	self->count = 5;
 	self->classname = "Health";
 	SpawnItem (self, FindItem ("Health"));
@@ -1677,7 +1677,7 @@ void SP_item_health_large (edict_t *self)
 		return;
 	}
 
-	self->model = "models/items/healing/large/tris.md2";
+	self->model = "models/items/healing/large/tris.iqm";
 	self->classname = "Health";
 	self->count = 25;
 	SpawnItem (self, FindItem ("Health"));
@@ -1694,7 +1694,7 @@ void SP_item_health_mega (edict_t *self)
 		return;
 	}
 
-	self->model = "models/items/mega_h/tris.md2";
+	self->model = "models/items/mega_h/tris.iqm";
 	self->count = 100;
 	SpawnItem (self, FindItem ("Health"));
 	gi.soundindex ("items/m_health.wav");
