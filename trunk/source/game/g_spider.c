@@ -311,13 +311,14 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	VectorCopy (start, spider->s.origin);
 	VectorScale (aimdir, speed, spider->velocity);
 	VectorMA (spider->velocity, 200 + crandom() * 10.0, up, spider->velocity);
-	VectorMA (spider->velocity, crandom() * 10.0, right, spider->velocity);
 	VectorSet (spider->avelocity, 300, 300, 300);
 	spider->movetype = MOVETYPE_BOUNCE;
 	spider->clipmask = MASK_SHOT;
 	spider->solid = SOLID_BBOX;
-	VectorSet (spider->mins, -20, -20, -32);
-	VectorSet (spider->maxs, 20, 20, 20);
+	VectorSet (spider->mins, -16, -16, 0);
+	VectorSet (spider->maxs, 16, 16, 32);
+	spider->s.angles[PITCH] = 0.0;
+	spider->s.angles[ROLL] = 0.0;
 	spider->s.modelindex = gi.modelindex("models/objects/spider/tris.iqm");
 	spider->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.iqm");
 	spider->s.frame = 31;
