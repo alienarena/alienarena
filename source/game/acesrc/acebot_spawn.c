@@ -995,20 +995,7 @@ void ACESP_PutClientInServer (edict_t *ent)
 		ent->s.modelindex3 = 0;
 
 	ent->s.modelindex4 = 0;
-
-	//check for gib file
-	ent->usegibs = 0; //alien is default
-	sprintf(modelpath, "players/%s/usegibs", ent->charModel);
-	Q2_FindFile (modelpath, &file);
-	if(file) { //use model specific gibs
-		ent->usegibs = 1;
-		sprintf(ent->head, "players/%s/head.iqm", ent->charModel);
-		sprintf(ent->body, "players/%s/body.iqm", ent->charModel);
-		sprintf(ent->leg, "players/%s/leg.iqm", ent->charModel);
-		sprintf(ent->arm, "players/%s/arm.iqm", ent->charModel);
-		fclose(file);
-	}
-
+	
 	Respawn_ClassSpecific (ent, client);
 
 	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical

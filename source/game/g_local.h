@@ -1669,13 +1669,6 @@ struct edict_s
 	int armor_type;
 	char charModel[MAX_OSPATH];
 
-	//model specific gibs
-	int usegibs;
-	char head[64];
-	char leg[64];
-	char arm[64];
-	char body[64];
-
 	// Anti-camp velocity accumulation
 	
 	/** @brief Velocities history

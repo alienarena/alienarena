@@ -965,18 +965,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 					ThrowGib (self, "models/objects/gibs/sm_meat/tris.iqm", damage, GIB_METALLIC, EF_GIB);
 			}
 		}
-
-		if(self->usegibs) 
-		{
-			if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
-				gib_effect = EF_SHIPEXHAUST;
-			ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->body, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
-		}
 	}
 	else
 	{	// normal death
@@ -2710,23 +2698,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		ent->s.modelindex3 = 0;
 
 	ent->s.modelindex4 = 0;
-
-	//do gib checking here - to do - let's replace these model specific gibs with class type specific(alien/robot/human)
-	//check for gib file
-	ent->usegibs = 0; //alien is default
-	sprintf(modelpath, "players/%s/usegibs", playermodel);
-	Q2_FindFile (modelpath, &file);
-	if(file) 
-	{ 
-		//use model specific gibs
-		ent->usegibs = 1;
-		sprintf(ent->head, "players/%s/head.iqm", playermodel);
-		sprintf(ent->body, "players/%s/body.iqm", playermodel);
-		sprintf(ent->leg, "players/%s/leg.iqm", playermodel);
-		sprintf(ent->arm, "players/%s/arm.iqm", playermodel);
-		fclose(file);
-	}
-
+	
 	// fov
 	ent->client->ps.fov = atoi(Info_ValueForKey(userinfo, "fov"));
 	if (ent->client->ps.fov < 1)
