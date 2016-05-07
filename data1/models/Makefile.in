@@ -221,28 +221,23 @@ nobase_dist_models_DATA = \
 	items/adrenaline/skin_fx.tga \
 	items/adrenaline/skin_normal.tga \
 	items/adrenaline/tris.iqm \
-	items/adrenaline/tris.md2 \
 	items/adrenaline/tris.skin \
 	items/ammo/bullets/medium/skin.jpg \
 	items/ammo/bullets/medium/skin_fx.tga \
 	items/ammo/bullets/medium/skin_normal.jpg \
 	items/ammo/bullets/medium/tris.iqm \
-	items/ammo/bullets/medium/tris.md2 \
 	items/ammo/bullets/medium/tris.skin \
 	items/ammo/cells/medium/skin.jpg \
 	items/ammo/cells/medium/skin_fx.tga \
 	items/ammo/cells/medium/skin_normal.jpg \
 	items/ammo/cells/medium/tris.iqm \
-	items/ammo/cells/medium/tris.md2 \
 	items/ammo/cells/medium/tris.skin \
 	items/ammo/grenades/medium/skin.jpg \
 	items/ammo/grenades/medium/skin_fx.tga \
 	items/ammo/grenades/medium/skin_normal.jpg \
 	items/ammo/grenades/medium/tris.iqm \
-	items/ammo/grenades/medium/tris.md2 \
 	items/ammo/grenades/medium/tris.skin \
 	items/ammo/rockets/medium/skin.jpg \
-	items/ammo/rockets/medium/tris.md2 \
 	items/ammo/rockets/medium/skin_fx.tga \
 	items/ammo/rockets/medium/skin_normal.jpg \
 	items/ammo/rockets/medium/tris.iqm \
@@ -251,139 +246,116 @@ nobase_dist_models_DATA = \
 	items/ammo/shells/medium/skin_fx.tga \
 	items/ammo/shells/medium/skin_normal.jpg \
 	items/ammo/shells/medium/tris.iqm \
-	items/ammo/shells/medium/tris.md2 \
 	items/ammo/shells/medium/tris.skin \
-	items/ammo/skin_normal.tga \
 	items/armor/body/skin.jpg \
 	items/armor/body/tris.iqm \
-	items/armor/body/tris.md2 \
 	items/armor/body/tris.skin \
 	items/armor/combat/skin.jpg \
 	items/armor/combat/tris.iqm \
-	items/armor/combat/tris.md2 \
 	items/armor/combat/tris.skin \
 	items/armor/jacket/skin.jpg \
 	items/armor/jacket/tris.iqm \
-	items/armor/jacket/tris.md2 \
 	items/armor/jacket/tris.skin \
 	items/armor/shard/skin.tga \
 	items/armor/shard/skin_normal.tga \
 	items/armor/shard/tris.iqm \
-	items/armor/shard/tris.md2 \
 	items/armor/shard/tris.skin \
 	items/armor/skin_fx.tga \
 	items/armor/skin_normal.tga \
-	items/flags/blue.tga \
 	items/flags/flag1.md2 \
 	items/flags/flag2.md2 \
-	items/flags/red.tga \
 	items/haste/skin.jpg \
 	items/haste/skin_fx.tga \
 	items/haste/skin_normal.jpg \
 	items/haste/tris.iqm \
-	items/haste/tris.md2 \
 	items/haste/tris.skin \
-	items/healing/globe/skin.tga \
-	items/healing/globe/tris.md2 \
+	items/healing/globe/tris.iqm \
 	items/healing/health_normal.tga \
 	items/healing/large/skin.jpg \
 	items/healing/large/skin_fx.tga \
 	items/healing/large/tris.iqm \
-	items/healing/large/tris.md2 \
 	items/healing/large/tris.skin \
 	items/healing/medium/skin.jpg \
 	items/healing/medium/skin_fx.tga \
 	items/healing/medium/tris.iqm \
-	items/healing/medium/tris.md2 \
 	items/healing/medium/tris.skin \
 	items/healing/small/skin.jpg \
 	items/healing/small/skin_fx.tga \
 	items/healing/small/tris.iqm \
-	items/healing/small/tris.md2 \
 	items/healing/small/tris.skin \
 	items/invulner/skin.jpg \
 	items/invulner/skin_fx.tga \
 	items/invulner/skin_normal.jpg \
 	items/invulner/tris.iqm \
-	items/invulner/tris.md2 \
 	items/invulner/tris.skin \
 	items/mega_h/skin.jpg \
 	items/mega_h/skin_fx.tga \
 	items/mega_h/skin_normal.jpg \
 	items/mega_h/tris.iqm \
-	items/mega_h/tris.md2 \
 	items/mega_h/tris.skin \
 	items/quaddama/skin.tga \
 	items/quaddama/skin_normal.tga \
 	items/quaddama/tris.iqm \
-	items/quaddama/tris.md2 \
 	items/quaddama/tris.skin \
 	items/quaddama/unit.iqm \
-	items/quaddama/unit.md2 \
 	items/sproing/skin.jpg \
 	items/sproing/skin_fx.tga \
 	items/sproing/skin_normal.jpg \
 	items/sproing/tris.iqm \
-	items/sproing/tris.md2 \
 	items/sproing/tris.skin \
-	misc/deathray/deathray.md2 \
+	misc/deathray/deathray.iqm \
+	misc/deathray/deathray.skin \
 	misc/deathray/deathray.tga \
 	misc/deathray/deathray_fx.tga \
 	misc/deathray/deathray_normal.jpg \
 	misc/spiderpod/helmet.iqm \
-	misc/spiderpod/helmet.md2 \
-	misc/spiderpod/skin.tga \
 	misc/spiderpod/spider_fx.tga \
 	misc/spiderpod/spider.jpg \
 	misc/spiderpod/spider_normal.jpg \
 	misc/spiderpod/tris.iqm \
-	misc/spiderpod/tris.md2 \
 	misc/spiderpod/tris.skin \
-	objects/blank/skin.tga \
-	objects/blank/tris.md2 \
 	objects/brass/skin.jpg \
 	objects/brass/tris.md2 \
 	objects/debris1/skin.tga \
-	objects/debris1/tris.md2 \
+	objects/debris1/tris.iqm \
+	objects/debris1/tris.skin \
 	objects/debris2/skin.tga \
-	objects/debris2/tris.md2 \
+	objects/debris2/tris.iqm \
+	objects/debris2/tris.skin \
 	objects/debris3/skin.tga \
-	objects/debris3/tris.md2 \
+	objects/debris3/tris.iqm \
+	objects/debris3/tris.skin \
 	objects/dmspot/skin.jpg \
 	objects/dmspot/skin_fx.tga \
 	objects/dmspot/skin_normal.jpg \
 	objects/dmspot/tris.iqm \
-	objects/dmspot/tris.md2 \
 	objects/dmspot/tris.skin \
-	objects/electroball/skin_fx.tga \
 	objects/electroball/skin.jpg \
+	objects/electroball/skin_fx.tga \
 	objects/electroball/skin_normal.jpg \
-	objects/electroball/tris.md2 \
-	objects/fireball/skin.tga \
-	objects/fireball/tris.md2 \
+	objects/electroball/tris.iqm \
+	objects/electroball/tris.skin \
+	objects/fireball/tris.iqm \
+	objects/fireball/tris.skin \
 	objects/gibs/mart_gut/skin.jpg \
-	objects/gibs/mart_gut/tris.md2 \
+	objects/gibs/mart_gut/skin_fx.tga \
+	objects/gibs/mart_gut/tris.iqm \
+	objects/gibs/mart_gut/tris.skin \
 	objects/gibs/skin_normal.jpg \
 	objects/gibs/sm_meat/skin.jpg \
-	objects/gibs/sm_meat/tris.md2 \
-	objects/icon/icon.jpg \
-	objects/icon/icon_normal.jpg \
-	objects/icon/tris.md2 \
-	objects/laser/skin.tga \
-	objects/laser/tris.md2 \
-	objects/rocket/skin.tga \
-	objects/rocket/tris.md2 \
+	objects/gibs/sm_meat/tris.iqm \
+	objects/gibs/sm_meat/tris.skin \
+	objects/rocket/tris.iqm \
+	objects/rocket/tris.skin \
 	objects/spider/helmet.iqm \
-	objects/spider/helmet.md2 \
 	objects/spider/tris.iqm \
-	objects/spider/tris.md2 \
 	objects/spider/tris.skin \
-	objects/spud/skin_fx2.tga \
-	objects/spud/skin_fx.tga \
-	objects/spud/skin_normal.jpg \
 	objects/spud/skin.tga \
-	objects/spud/spud.mdo \
-	objects/spud/tris.md2 \
+	objects/spud/skin_fx.tga \
+	objects/spud/skin_fx2.tga \
+	objects/spud/skin_normal.jpg \
+	objects/spud/tris.iqm \
+	objects/spud/tris.skin \
 	tactical/abackupgen_fx.tga \
 	tactical/abackupgen.jpg \
 	tactical/abackupgen_normal.jpg \
@@ -445,109 +417,78 @@ nobase_dist_models_DATA = \
 	tactical/hweappad.tga \
 	tactical/laser_normal.jpg \
 	weapons/g_bfg/tris.iqm \
-	weapons/g_bfg/tris.md2 \
 	weapons/g_bfg/tris.skin \
 	weapons/g_chain/tris.iqm \
-	weapons/g_chain/tris.md2 \
 	weapons/g_chain/tris.skin \
 	weapons/g_hyperb/cover.iqm \
-	weapons/g_hyperb/cover.md2 \
 	weapons/g_hyperb/tris.iqm \
-	weapons/g_hyperb/tris.md2 \
 	weapons/g_hyperb/tris.skin \
 	weapons/g_machn/tris.md2 \
 	weapons/g_minderaser/tris.iqm \
-	weapons/g_minderaser/tris.md2 \
 	weapons/g_minderaser/tris.skin \
 	weapons/g_rail/tris.iqm \
-	weapons/g_rail/tris.md2 \
 	weapons/g_rail/tris.skin \
 	weapons/g_rocket/cover.iqm \
-	weapons/g_rocket/cover.md2 \
 	weapons/g_rocket/tris.iqm \
-	weapons/g_rocket/tris.md2 \
 	weapons/g_rocket/tris.skin \
 	weapons/g_shotg/tris.iqm \
-	weapons/g_shotg/tris.md2 \
 	weapons/g_shotg/tris.skin \
 	weapons/g_shotg2/tris.iqm \
-	weapons/g_shotg2/tris.md2 \
 	weapons/g_shotg2/tris.skin \
 	weapons/v_alienblast/cover.iqm \
-	weapons/v_alienblast/cover.md2 \
 	weapons/v_alienblast/skin.jpg \
 	weapons/v_alienblast/skin_fx.tga \
 	weapons/v_alienblast/skin_normal.tga \
 	weapons/v_alienblast/tris.iqm \
-	weapons/v_alienblast/tris.md2 \
 	weapons/v_alienblast/tris.skin \
 	weapons/v_bfg/skin.jpg \
 	weapons/v_bfg/skin_normal.tga \
 	weapons/v_bfg/tris.iqm \
-	weapons/v_bfg/tris.md2 \
 	weapons/v_bfg/tris.skin \
 	weapons/v_bfg/vaporizer.jpg \
 	weapons/v_bfg/vaporizer_normal.tga \
 	weapons/v_blast/blaster.jpg \
 	weapons/v_blast/blaster_normal.tga \
 	weapons/v_blast/cover.iqm \
-	weapons/v_blast/cover.md2 \
-	weapons/v_blast/skin.jpg \
-	weapons/v_blast/skin_normal.tga \
 	weapons/v_blast/tris.iqm \
-	weapons/v_blast/tris.md2 \
 	weapons/v_blast/tris.skin \
 	weapons/v_chain/flamethrower.tga \
 	weapons/v_chain/flamethrower_normal.jpg \
 	weapons/v_chain/skin.jpg \
 	weapons/v_chain/skin_normal.tga \
 	weapons/v_chain/tris.iqm \
-	weapons/v_chain/tris.md2 \
 	weapons/v_chain/tris.skin \
-	weapons/v_hyperb/cover.md2 \
 	weapons/v_hyperb/cover.iqm \
 	weapons/v_hyperb/disruptor.jpg \
 	weapons/v_hyperb/disruptor_normal.tga \
 	weapons/v_hyperb/tris.iqm \
-	weapons/v_hyperb/tris.md2 \
 	weapons/v_hyperb/tris.skin \
 	weapons/v_machn/tris.md2 \
-	weapons/v_minderaser/tris.iqm \
-	weapons/v_minderaser/tris.skin \
 	weapons/v_minderaser/minderaser.jpg \
 	weapons/v_minderaser/minderaser_normal.tga \
-	weapons/v_minderaser/tris.md2 \
-	weapons/v_rail/tris.iqm \
-	weapons/v_rail/tris.skin \
+	weapons/v_minderaser/tris.iqm \
+	weapons/v_minderaser/tris.skin \
 	weapons/v_rail/beamgun.jpg \
 	weapons/v_rail/beamgun_normal.tga \
-	weapons/v_rail/tris.md2 \
+	weapons/v_rail/tris.iqm \
+	weapons/v_rail/tris.skin \
 	weapons/v_rocket/cover.iqm \
-	weapons/v_rocket/cover.md2 \
 	weapons/v_rocket/rocketlauncher.jpg \
 	weapons/v_rocket/rocketlauncher_normal.tga \
 	weapons/v_rocket/skin.jpg \
 	weapons/v_rocket/skin_normal.tga \
 	weapons/v_rocket/tris.iqm \
-	weapons/v_rocket/tris.md2 \
 	weapons/v_rocket/tris.skin \
 	weapons/v_shotg/skin.jpg \
 	weapons/v_shotg/skin_normal.tga \
 	weapons/v_shotg/tris.iqm \
-	weapons/v_shotg/tris.md2 \
 	weapons/v_shotg/tris.skin \
 	weapons/v_shotg2/chaingun.jpg \
 	weapons/v_shotg2/chaingun_fx.tga \
 	weapons/v_shotg2/chaingun_normal.tga \
-	weapons/v_shotg2/skin.jpg \
-	weapons/v_shotg2/skin_normal.tga \
 	weapons/v_shotg2/tris.iqm \
-	weapons/v_shotg2/tris.md2 \
 	weapons/v_shotg2/tris.skin \
-	weapons/v_violator/skin.jpg \
-	weapons/v_violator/skin_normal.jpg \
 	weapons/v_violator/tris.iqm \
-	weapons/v_violator/tris.md2 \
 	weapons/v_violator/tris.skin \
 	weapons/v_violator/violator.jpg \
 	weapons/v_violator/violator_normal.tga

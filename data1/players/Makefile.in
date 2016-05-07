@@ -235,10 +235,8 @@ nobase_dist_players_DATA = \
 	commander/human \
 	commander/jump1.wav \
 	commander/lod1.iqm \
-	commander/lod1.md2 \
 	commander/lod1.rgd \
 	commander/lod2.iqm \
-	commander/lod2.md2 \
 	commander/lod2.rgd \
 	commander/pain100_1.wav \
 	commander/pain100_2.wav \
@@ -251,50 +249,35 @@ nobase_dist_players_DATA = \
 	commander/red_i.jpg \
 	commander/red.jpg \
 	commander/tris.iqm \
-	commander/tris.md2 \
 	commander/tris.rgd \
 	commander/w_bfg.iqm \
-	commander/w_bfg.md2 \
 	commander/w_bfg.skin \
 	commander/w_blaster.iqm \
-	commander/w_blaster.md2 \
 	commander/w_blaster.skin \
 	commander/w_chaingun.iqm \
-	commander/w_chaingun.md2 \
 	commander/w_chaingun.skin \
 	commander/weapon.iqm \
 	commander/weapon.jpg \
-	commander/weapon.md2 \
 	commander/weapon.skin \
 	commander/w_hyperblaster.iqm \
-	commander/w_hyperblaster.md2 \
 	commander/w_hyperblaster.skin \
 	commander/w_machinegun.iqm \
-	commander/w_machinegun.md2 \
 	commander/w_machinegun.skin \
 	commander/w_minderaser.iqm \
-	commander/w_minderaser.md2 \
 	commander/w_minderaser.skin \
 	commander/w_railgun.iqm \
-	commander/w_railgun.md2 \
 	commander/w_railgun.skin \
 	commander/w_rlauncher.iqm \
-	commander/w_rlauncher.md2 \
 	commander/w_rlauncher.skin \
 	commander/w_shotgun.iqm \
-	commander/w_shotgun.md2 \
 	commander/w_shotgun.skin \
 	commander/w_sshotgun.iqm \
-	commander/w_sshotgun.md2 \
 	commander/w_sshotgun.skin \
 	commander/w_violator.iqm \
-	commander/w_violator.md2 \
 	commander/w_violator.skin \
-	enforcer/arm.md2 \
 	enforcer/blue.jpg \
 	enforcer/blue_i.jpg \
 	enforcer/blueenforcerfx.tga \
-	enforcer/body.md2 \
 	enforcer/bump1.wav \
 	enforcer/death1.wav \
 	enforcer/death2.wav \
@@ -309,17 +292,11 @@ nobase_dist_players_DATA = \
 	enforcer/fall2.wav \
 	enforcer/gurp1.wav \
 	enforcer/gurp2.wav \
-	enforcer/head.md2 \
-	enforcer/helmet.iqm \
-	enforcer/helmet.md2 \
 	enforcer/human \
 	enforcer/jump1.wav \
-	enforcer/leg.md2 \
 	enforcer/lod1.iqm \
-	enforcer/lod1.md2 \
 	enforcer/lod1.rgd \
 	enforcer/lod2.iqm \
-	enforcer/lod2.md2 \
 	enforcer/lod2.rgd \
 	enforcer/pain100_1.wav \
 	enforcer/pain100_2.wav \
@@ -332,51 +309,35 @@ nobase_dist_players_DATA = \
 	enforcer/red_i.jpg \
 	enforcer/red.jpg \
 	enforcer/tris.iqm \
-	enforcer/tris.md2 \
 	enforcer/tris.rgd \
-	enforcer/usegibs \
 	enforcer/w_bfg.iqm \
-	enforcer/w_bfg.md2 \
 	enforcer/w_bfg.skin \
 	enforcer/w_blaster.iqm \
-	enforcer/w_blaster.md2 \
 	enforcer/w_blaster.skin \
 	enforcer/w_chaingun.iqm \
-	enforcer/w_chaingun.md2 \
 	enforcer/w_chaingun.skin \
 	enforcer/weapon.iqm \
 	enforcer/weapon.jpg \
-	enforcer/weapon.md2 \
 	enforcer/weapon.skin \
 	enforcer/w_hyperblaster.iqm \
-	enforcer/w_hyperblaster.md2 \
 	enforcer/w_hyperblaster.skin \
 	enforcer/w_machinegun.iqm \
-	enforcer/w_machinegun.md2 \
 	enforcer/w_machinegun.skin \
 	enforcer/w_minderaser.iqm \
-	enforcer/w_minderaser.md2 \
 	enforcer/w_minderaser.skin \
 	enforcer/w_railgun.iqm \
-	enforcer/w_railgun.md2 \
 	enforcer/w_railgun.skin \
 	enforcer/w_rlauncher.iqm \
-	enforcer/w_rlauncher.md2 \
 	enforcer/w_rlauncher.skin \
 	enforcer/w_shotgun.iqm \
-	enforcer/w_shotgun.md2 \
 	enforcer/w_shotgun.skin \
 	enforcer/w_sshotgun.iqm \
-	enforcer/w_sshotgun.md2 \
 	enforcer/w_sshotgun.skin \
 	enforcer/w_violator.iqm \
-	enforcer/w_violator.md2 \
 	enforcer/w_violator.skin \
-	lauren/arm.md2 \
 	lauren/blue.jpg \
 	lauren/blue_i.jpg \
 	lauren/bluelaurenfx.tga \
-	lauren/body.md2 \
 	lauren/bump1.wav \
 	lauren/death1.wav \
 	lauren/death2.wav \
@@ -391,10 +352,8 @@ nobase_dist_players_DATA = \
 	lauren/fall2.wav \
 	lauren/gurp1.wav \
 	lauren/gurp2.wav \
-	lauren/head.md2 \
 	lauren/human \
 	lauren/jump1.wav \
-	lauren/leg.md2 \
 	lauren/lod1.iqm \
 	lauren/lod1.rgd \
 	lauren/lod2.iqm \
@@ -410,45 +369,31 @@ nobase_dist_players_DATA = \
 	lauren/red_i.jpg \
 	lauren/red.jpg \
 	lauren/tris.iqm \
-	lauren/tris.md2 \
 	lauren/tris.rgd \
-	lauren/usegibs \
 	lauren/w_bfg.iqm \
-	lauren/w_bfg.md2 \
 	lauren/w_bfg.skin \
 	lauren/w_blaster.iqm \
-	lauren/w_blaster.md2 \
 	lauren/w_blaster.skin \
 	lauren/w_chaingun.iqm \
-	lauren/w_chaingun.md2 \
 	lauren/w_chaingun.skin \
 	lauren/weapon.iqm \
 	lauren/weapon.jpg \
-	lauren/weapon.md2 \
 	lauren/weapon.skin \
 	lauren/w_hyperblaster.iqm \
-	lauren/w_hyperblaster.md2 \
 	lauren/w_hyperblaster.skin \
 	lauren/w_machinegun.iqm \
-	lauren/w_machinegun.md2 \
 	lauren/w_machinegun.skin \
 	lauren/w_minderaser.iqm \
-	lauren/w_minderaser.md2 \
 	lauren/w_minderaser.skin \
 	lauren/w_railgun.iqm \
-	lauren/w_railgun.md2 \
 	lauren/w_railgun.skin \
 	lauren/w_rlauncher.iqm \
-	lauren/w_rlauncher.md2 \
 	lauren/w_rlauncher.skin \
 	lauren/w_shotgun.iqm \
-	lauren/w_shotgun.md2 \
 	lauren/w_shotgun.skin \
 	lauren/w_sshotgun.iqm \
-	lauren/w_sshotgun.md2 \
 	lauren/w_sshotgun.skin \
 	lauren/w_violator.iqm \
-	lauren/w_violator.md2 \
 	lauren/w_violator.skin \
 	martiancyborg/blue.jpg \
 	martiancyborg/blue_i.jpg \
@@ -468,13 +413,10 @@ nobase_dist_players_DATA = \
 	martiancyborg/gurp1.wav \
 	martiancyborg/gurp2.wav \
 	martiancyborg/helmet.iqm \
-	martiancyborg/helmet.md2 \
 	martiancyborg/jump1.wav \
 	martiancyborg/lod1.iqm \
-	martiancyborg/lod1.md2 \
 	martiancyborg/lod1.rgd \
 	martiancyborg/lod2.iqm \
-	martiancyborg/lod2.md2 \
 	martiancyborg/lod2.rgd \
 	martiancyborg/pain100_1.wav \
 	martiancyborg/pain100_2.wav \
@@ -488,53 +430,38 @@ nobase_dist_players_DATA = \
 	martiancyborg/red.jpg \
 	martiancyborg/robot \
 	martiancyborg/tris.iqm \
-	martiancyborg/tris.md2 \
 	martiancyborg/tris.rgd \
 	martiancyborg/w_alienblaster.iqm \
 	martiancyborg/w_alienblaster.skin \
 	martiancyborg/w_bfg.iqm \
-	martiancyborg/w_bfg.md2 \
 	martiancyborg/w_bfg.skin \
 	martiancyborg/w_blaster.iqm \
-	martiancyborg/w_blaster.md2 \
 	martiancyborg/w_blaster.skin \
 	martiancyborg/w_chaingun.iqm \
-	martiancyborg/w_chaingun.md2 \
 	martiancyborg/w_chaingun.skin \
 	martiancyborg/weapon.iqm \
 	martiancyborg/weapon.jpg \
-	martiancyborg/weapon.md2 \
 	martiancyborg/weapon.skin \
 	martiancyborg/w_hyperblaster.iqm \
-	martiancyborg/w_hyperblaster.md2 \
 	martiancyborg/w_hyperblaster.skin \
 	martiancyborg/w_machinegun.iqm \
-	martiancyborg/w_machinegun.md2 \
 	martiancyborg/w_machinegun.skin \
 	martiancyborg/w_minderaser.iqm \
-	martiancyborg/w_minderaser.md2 \
 	martiancyborg/w_minderaser.skin \
 	martiancyborg/w_railgun.iqm \
-	martiancyborg/w_railgun.md2 \
 	martiancyborg/w_railgun.skin \
 	martiancyborg/w_rlauncher.iqm \
-	martiancyborg/w_rlauncher.md2 \
 	martiancyborg/w_rlauncher.skin \
 	martiancyborg/w_shotgun.iqm \
-	martiancyborg/w_shotgun.md2 \
 	martiancyborg/w_shotgun.skin \
 	martiancyborg/w_sshotgun.iqm \
-	martiancyborg/w_sshotgun.md2 \
 	martiancyborg/w_sshotgun.skin \
 	martiancyborg/w_violator.iqm \
-	martiancyborg/w_violator.md2 \
 	martiancyborg/w_violator.skin \
 	martianenforcer/alien \
-	martianenforcer/arm.md2 \
 	martianenforcer/blue.jpg \
 	martianenforcer/blue_i.jpg \
 	martianenforcer/bluemartianfx.tga \
-	martianenforcer/body.md2 \
 	martianenforcer/bump1.wav \
 	martianenforcer/death1.wav \
 	martianenforcer/death2.wav \
@@ -558,12 +485,9 @@ nobase_dist_players_DATA = \
 	martianenforcer/helmet.iqm \
 	martianenforcer/helmet.md2 \
 	martianenforcer/jump1.wav \
-	martianenforcer/leg.md2 \
 	martianenforcer/lod1.iqm \
-	martianenforcer/lod1.md2 \
 	martianenforcer/lod1.rgd \
 	martianenforcer/lod2.iqm \
-	martianenforcer/lod2.md2 \
 	martianenforcer/lod2.rgd \
 	martianenforcer/pain100_1.wav \
 	martianenforcer/pain100_2.wav \
@@ -576,47 +500,33 @@ nobase_dist_players_DATA = \
 	martianenforcer/red_i.jpg \
 	martianenforcer/red.jpg \
 	martianenforcer/tris.iqm \
-	martianenforcer/tris.md2 \
 	martianenforcer/tris.rgd \
-	martianenforcer/usegibs \
 	martianenforcer/w_alienblaster.iqm \
 	martianenforcer/w_alienblaster.skin \
 	martianenforcer/w_bfg.iqm \
-	martianenforcer/w_bfg.md2 \
 	martianenforcer/w_bfg.skin \
 	martianenforcer/w_blaster.iqm \
-	martianenforcer/w_blaster.md2 \
 	martianenforcer/w_blaster.skin \
 	martianenforcer/w_chaingun.iqm \
-	martianenforcer/w_chaingun.md2 \
 	martianenforcer/w_chaingun.skin \
 	martianenforcer/weapon.iqm \
 	martianenforcer/weapon.jpg \
-	martianenforcer/weapon.md2 \
 	martianenforcer/weapon.skin \
 	martianenforcer/w_hyperblaster.iqm \
-	martianenforcer/w_hyperblaster.md2 \
 	martianenforcer/w_hyperblaster.skin \
 	martianenforcer/w_machinegun.iqm \
-	martianenforcer/w_machinegun.md2 \
 	martianenforcer/w_machinegun.skin \
 	martianenforcer/w_minderaser.iqm \
-	martianenforcer/w_minderaser.md2 \
 	martianenforcer/w_minderaser.skin \
 	martianenforcer/w_railgun.iqm \
-	martianenforcer/w_railgun.md2 \
 	martianenforcer/w_railgun.skin \
 	martianenforcer/w_rlauncher.iqm \
-	martianenforcer/w_rlauncher.md2 \
 	martianenforcer/w_rlauncher.skin \
 	martianenforcer/w_shotgun.iqm \
-	martianenforcer/w_shotgun.md2 \
 	martianenforcer/w_shotgun.skin \
 	martianenforcer/w_sshotgun.iqm \
-	martianenforcer/w_sshotgun.md2 \
 	martianenforcer/w_sshotgun.skin \
 	martianenforcer/w_violator.iqm \
-	martianenforcer/w_violator.md2 \
 	martianenforcer/w_violator.skin \
 	martianoverlord/alien \
 	martianoverlord/blue.jpg \
@@ -639,7 +549,6 @@ nobase_dist_players_DATA = \
 	martianoverlord/gurp1.wav \
 	martianoverlord/gurp2.wav \
 	martianoverlord/helmet.iqm \
-	martianoverlord/helmet.md2 \
 	martianoverlord/jump1.wav \
 	martianoverlord/lod1.iqm \
 	martianoverlord/lod1.rgd \
@@ -656,46 +565,33 @@ nobase_dist_players_DATA = \
 	martianoverlord/red_i.jpg \
 	martianoverlord/red.jpg \
 	martianoverlord/tris.iqm \
-	martianoverlord/tris.md2 \
 	martianoverlord/tris.rgd \
 	martianoverlord/w_alienblaster.iqm \
 	martianoverlord/w_alienblaster.skin \
 	martianoverlord/w_bfg.iqm \
-	martianoverlord/w_bfg.md2 \
 	martianoverlord/w_bfg.skin \
 	martianoverlord/w_blaster.iqm \
-	martianoverlord/w_blaster.md2 \
 	martianoverlord/w_blaster.skin \
 	martianoverlord/w_chaingun.iqm \
-	martianoverlord/w_chaingun.md2 \
 	martianoverlord/w_chaingun.skin \
 	martianoverlord/weapon.iqm \
 	martianoverlord/weapon.jpg \
-	martianoverlord/weapon.md2 \
 	martianoverlord/weapon.skin \
 	martianoverlord/w_hyperblaster.iqm \
-	martianoverlord/w_hyperblaster.md2 \
 	martianoverlord/w_hyperblaster.skin \
 	martianoverlord/w_machinegun.iqm \
-	martianoverlord/w_machinegun.md2 \
 	martianoverlord/w_machinegun.skin \
 	martianoverlord/w_minderaser.iqm \
-	martianoverlord/w_minderaser.md2 \
 	martianoverlord/w_minderaser.skin \
 	martianoverlord/w_railgun.iqm \
-	martianoverlord/w_railgun.md2 \
 	martianoverlord/w_railgun.skin \
 	martianoverlord/w_rlauncher.iqm \
-	martianoverlord/w_rlauncher.md2 \
 	martianoverlord/w_rlauncher.skin \
 	martianoverlord/w_shotgun.iqm \
-	martianoverlord/w_shotgun.md2 \
 	martianoverlord/w_shotgun.skin \
 	martianoverlord/w_sshotgun.iqm \
-	martianoverlord/w_sshotgun.md2 \
 	martianoverlord/w_sshotgun.skin \
 	martianoverlord/w_violator.iqm \
-	martianoverlord/w_violator.md2 \
 	martianoverlord/w_violator.skin \
 	martianwarrior/alien \
 	martianwarrior/blue.jpg \
@@ -722,13 +618,10 @@ nobase_dist_players_DATA = \
 	martianwarrior/gurp1.wav \
 	martianwarrior/gurp2.wav \
 	martianwarrior/helmet.iqm \
-	martianwarrior/helmet.md2 \
 	martianwarrior/jump1.wav \
 	martianwarrior/lod1.iqm \
-	martianwarrior/lod1.md2 \
 	martianwarrior/lod1.rgd \
 	martianwarrior/lod2.iqm \
-	martianwarrior/lod2.md2 \
 	martianwarrior/lod2.rgd \
 	martianwarrior/pain100_1.wav \
 	martianwarrior/pain100_2.wav \
@@ -741,46 +634,33 @@ nobase_dist_players_DATA = \
 	martianwarrior/red_i.jpg \
 	martianwarrior/red.jpg \
 	martianwarrior/tris.iqm \
-	martianwarrior/tris.md2 \
 	martianwarrior/tris.rgd \
 	martianwarrior/w_alienblaster.iqm \
 	martianwarrior/w_alienblaster.skin \
 	martianwarrior/w_bfg.iqm \
-	martianwarrior/w_bfg.md2 \
 	martianwarrior/w_bfg.skin \
 	martianwarrior/w_blaster.iqm \
-	martianwarrior/w_blaster.md2 \
 	martianwarrior/w_blaster.skin \
 	martianwarrior/w_chaingun.iqm \
-	martianwarrior/w_chaingun.md2 \
 	martianwarrior/w_chaingun.skin \
 	martianwarrior/weapon.iqm \
 	martianwarrior/weapon.jpg \
-	martianwarrior/weapon.md2 \
 	martianwarrior/weapon.skin \
 	martianwarrior/w_hyperblaster.iqm \
-	martianwarrior/w_hyperblaster.md2 \
 	martianwarrior/w_hyperblaster.skin \
 	martianwarrior/w_machinegun.iqm \
-	martianwarrior/w_machinegun.md2 \
 	martianwarrior/w_machinegun.skin \
 	martianwarrior/w_minderaser.iqm \
-	martianwarrior/w_minderaser.md2 \
 	martianwarrior/w_minderaser.skin \
 	martianwarrior/w_railgun.iqm \
-	martianwarrior/w_railgun.md2 \
 	martianwarrior/w_railgun.skin \
 	martianwarrior/w_rlauncher.iqm \
-	martianwarrior/w_rlauncher.md2 \
 	martianwarrior/w_rlauncher.skin \
 	martianwarrior/w_shotgun.iqm \
-	martianwarrior/w_shotgun.md2 \
 	martianwarrior/w_shotgun.skin \
 	martianwarrior/w_sshotgun.iqm \
-	martianwarrior/w_sshotgun.md2 \
 	martianwarrior/w_sshotgun.skin \
 	martianwarrior/w_violator.iqm \
-	martianwarrior/w_violator.md2 \
 	martianwarrior/w_violator.skin \
 	rustbot/blue.jpg \
 	rustbot/blue_i.jpg \
@@ -801,7 +681,6 @@ nobase_dist_players_DATA = \
 	rustbot/gurp1.wav \
 	rustbot/gurp2.wav \
 	rustbot/helmet.iqm \
-	rustbot/helmet.md2 \
 	rustbot/jump1.wav \
 	rustbot/lod1.iqm \
 	rustbot/lod1.rgd \
@@ -820,46 +699,33 @@ nobase_dist_players_DATA = \
 	rustbot/redrustbotfx.tga \
 	rustbot/robot \
 	rustbot/tris.iqm \
-	rustbot/tris.md2 \
 	rustbot/tris.rgd \
 	rustbot/w_alienblaster.iqm \
 	rustbot/w_alienblaster.skin \
 	rustbot/w_bfg.iqm \
-	rustbot/w_bfg.md2 \
 	rustbot/w_bfg.skin \
 	rustbot/w_blaster.iqm \
-	rustbot/w_blaster.md2 \
 	rustbot/w_blaster.skin \
 	rustbot/w_chaingun.iqm \
-	rustbot/w_chaingun.md2 \
 	rustbot/w_chaingun.skin \
 	rustbot/w_hyperblaster.iqm \
-	rustbot/w_hyperblaster.md2 \
 	rustbot/w_hyperblaster.skin \
 	rustbot/w_machinegun.iqm \
-	rustbot/w_machinegun.md2 \
 	rustbot/w_machinegun.skin \
 	rustbot/w_minderaser.iqm \
-	rustbot/w_minderaser.md2 \
 	rustbot/w_minderaser.skin \
 	rustbot/w_railgun.iqm \
-	rustbot/w_railgun.md2 \
 	rustbot/w_railgun.skin \
 	rustbot/w_rlauncher.iqm \
-	rustbot/w_rlauncher.md2 \
 	rustbot/w_rlauncher.skin \
 	rustbot/w_shotgun.iqm \
-	rustbot/w_shotgun.md2 \
 	rustbot/w_shotgun.skin \
 	rustbot/w_sshotgun.iqm \
-	rustbot/w_sshotgun.md2 \
 	rustbot/w_sshotgun.skin \
 	rustbot/w_violator.iqm \
-	rustbot/w_violator.md2 \
 	rustbot/w_violator.skin \
 	rustbot/weapon.iqm \
 	rustbot/weapon.jpg \
-	rustbot/weapon.md2 \
 	rustbot/weapon.skin \
 	slashbot/blue_i.jpg \
 	slashbot/blue.jpg \
@@ -894,44 +760,31 @@ nobase_dist_players_DATA = \
 	slashbot/red.jpg \
 	slashbot/robot \
 	slashbot/tris.iqm \
-	slashbot/tris.md2 \
 	slashbot/tris.rgd \
 	slashbot/w_bfg.iqm \
-	slashbot/w_bfg.md2 \
 	slashbot/w_bfg.skin \
 	slashbot/w_blaster.iqm \
-	slashbot/w_blaster.md2 \
 	slashbot/w_blaster.skin \
 	slashbot/w_chaingun.iqm \
-	slashbot/w_chaingun.md2 \
 	slashbot/w_chaingun.skin \
 	slashbot/weapon.iqm \
 	slashbot/weapon.jpg \
-	slashbot/weapon.md2 \
 	slashbot/weapon.skin \
 	slashbot/w_hyperblaster.iqm \
-	slashbot/w_hyperblaster.md2 \
 	slashbot/w_hyperblaster.skin \
 	slashbot/w_machinegun.iqm \
-	slashbot/w_machinegun.md2 \
 	slashbot/w_machinegun.skin \
 	slashbot/w_minderaser.iqm \
-	slashbot/w_minderaser.md2 \
 	slashbot/w_minderaser.skin \
 	slashbot/w_railgun.iqm \
-	slashbot/w_railgun.md2 \
 	slashbot/w_railgun.skin \
 	slashbot/w_rlauncher.iqm \
-	slashbot/w_rlauncher.md2 \
 	slashbot/w_rlauncher.skin \
 	slashbot/w_shotgun.iqm \
-	slashbot/w_shotgun.md2 \
 	slashbot/w_shotgun.skin \
 	slashbot/w_sshotgun.iqm \
-	slashbot/w_sshotgun.md2 \
 	slashbot/w_sshotgun.skin \
 	slashbot/w_violator.iqm \
-	slashbot/w_violator.md2 \
 	slashbot/w_violator.skin
 
 all: all-am
