@@ -482,23 +482,20 @@ void SV_CalcBlend (edict_t *ent)
 	//vehicles(flying)
 	if ( Jet_Active(ent) )
 	{
-
 		/*update the fuel time*/
 		ent->client->Jet_remaining = ent->client->Jet_framenum - level.framenum;
 
 		/*if no fuel remaining, remove vehicle from inventory*/
-		if ( ent->client->Jet_remaining == 0 ) {
+		if ( ent->client->Jet_remaining == 0 ) 
+		{
 		  ent->client->pers.inventory[ITEM_INDEX(FindItem("jetpack"))] = 0;
 		  //set everything back
 		  Reset_player(ent);
-
 		}
 
 		/*Play jetting sound every 0.6 secs*/
-		if ( ((int)ent->client->Jet_remaining % 6) == 0 ) {
-			 vec3_t exhaust, distance;
-			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/grenlx1a.wav"), 0.9, ATTN_NORM, 0);
-
+		if ( ((int)ent->client->Jet_remaining % 6) == 0 ) 
+		{	
 			// send muzzle flash
 			gi.WriteByte (svc_muzzleflash);
 			gi.WriteShort (ent-g_edicts);
@@ -506,21 +503,7 @@ void SV_CalcBlend (edict_t *ent)
 			gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 			//add flame effect from jets
-			VectorSet(distance, -16, -32, 0);
-			G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
-			
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_EXPLOSION2);
-			gi.WritePosition (exhaust);
-			gi.multicast (exhaust, MULTICAST_PVS);
-
-			VectorSet(distance, -32, 0, 0);
-			G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
-			
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_EXPLOSION2);
-			gi.WritePosition (exhaust);
-			gi.multicast (exhaust, MULTICAST_PVS);
+			Jet_ApplyEffects( ent, forward, right );
 		}
 
 		/*beginning to fade if 4 secs or less*/
@@ -855,7 +838,7 @@ void G_SetClientEffects (edict_t *ent)
 	if(ctf->value)
 		CTFEffects(ent);
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value )
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value)
 		TeamEffects(ent);
 	else if (g_dmlights->integer && !g_tactical->integer)
 	    ent->s.effects |= EF_TEAM2;

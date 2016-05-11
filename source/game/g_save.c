@@ -28,8 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 int red_team_score;
 int blue_team_score;
-int red_team_matches; //for tca
-int blue_team_matches; //for tca
 int reddiff;
 int bluediff;
 int redwinning;
@@ -186,9 +184,12 @@ void InitGame (void)
 
 	g_maxclients = gi.cvar ("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH | CVARDOC_INT);
 	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO | CVARDOC_INT);
+
 	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH | CVARDOC_BOOL);
 	ctf = gi.cvar ("ctf", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
-	tca = gi.cvar ("tca", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	g_tactical = gi.cvar ("g_tactical", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+
 	skill = gi.cvar ("skill", "1", CVAR_LATCH | CVARDOC_INT);
 	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH | CVARDOC_INT);
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
@@ -205,12 +206,6 @@ void InitGame (void)
 	excessive = gi.cvar ("excessive", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	grapple = gi.cvar ("grapple", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	classbased = gi.cvar ("classbased", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
-
-	//duel mode
-	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
-
-	//tactical mode
-	g_tactical = gi.cvar ("g_tactical", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 
 	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH | CVARDOC_BOOL);
 	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH | CVARDOC_INT);
@@ -335,18 +330,9 @@ void InitGame (void)
 	game.clients = gi.TagMalloc (game.maxclients * sizeof(game.clients[0]), TAG_GAME);
 	globals.num_edicts = game.maxclients+1;
 
-	//clear out team scores and player counts
-	if(tca->integer) 
-	{
-		blue_team_score = red_team_score = 4;
-		blue_team_matches = red_team_matches = 0;
-	}
-	else 
-	{
-		red_team_score = 0;
-		blue_team_score = 0;
-	}
-
+	red_team_score = 0;
+	blue_team_score = 0;
+	
 	if(g_tactical->integer)
 	{
 		tacticalScore.alienAmmoDepot = 

@@ -170,7 +170,7 @@ typedef struct teamcensus_s
 } teamcensus_t;
 
 #define TEAM_GAME ( (dmflags->integer & (DF_SKINTEAMS)) \
-		|| ctf->integer || tca->integer )
+		|| ctf->integer )
 
 //clientinfo origins
 #define INGAME					0
@@ -572,8 +572,6 @@ extern	int	sm_meat_index;
 
 extern  int red_team_score;
 extern  int blue_team_score;
-extern	int	red_team_matches; //for tca
-extern	int	blue_team_matches; //for tca
 extern  int reddiff;
 extern	int bluediff;
 extern	int redwinning;
@@ -634,7 +632,6 @@ extern	edict_t			*g_edicts;
 extern	cvar_t	*maxentities;
 extern	cvar_t	*deathmatch;
 extern  cvar_t  *ctf;
-extern  cvar_t  *tca;
 extern	cvar_t	*dmflags;
 extern	cvar_t	*skill;
 extern	cvar_t	*fraglimit;
@@ -838,6 +835,7 @@ void Reset_player(edict_t *ent);
 void Jet_Explosion(edict_t *ent);
 qboolean Jet_Active(edict_t *ent);
 void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd );
+void Jet_ApplyEffects( edict_t *ent, vec3_t forward, vec3_t right );
 qboolean Jet_AvoidGround( edict_t *ent );
 void VehicleDeadDrop(edict_t *self);
 void VehicleSetup (edict_t *ent);
@@ -1154,13 +1152,6 @@ extern void SP_misc_teleporter (edict_t *self);
 extern void SP_misc_teleporter_dest (edict_t *self);
 
 extern void SP_npc_deathray(edict_t *self);
-
-//TCA
-extern void SP_misc_spiderpod (edict_t *self);
-extern void SP_misc_rednode (edict_t *self);
-extern void SP_misc_bluenode (edict_t *self);
-extern void SP_misc_bluespidernode (edict_t *self);
-extern void SP_misc_redspidernode (edict_t *self);
 
 //Tactical
 extern void SP_misc_aliencomputer (edict_t *self);

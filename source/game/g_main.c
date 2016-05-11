@@ -52,9 +52,12 @@ char *winningmap;
 
 edict_t		*g_edicts;
 
+//game modes
 cvar_t	*deathmatch;
 cvar_t  *ctf;
-cvar_t  *tca;
+cvar_t	*g_tactical;
+cvar_t	*g_duel;
+
 //mutators
 cvar_t  *instagib;
 cvar_t  *rocket_arena;
@@ -65,12 +68,6 @@ cvar_t  *vampire;
 cvar_t  *excessive;
 cvar_t  *grapple;
 cvar_t  *classbased;
-
-//duel mode
-cvar_t	*g_duel;
-
-//tactical mode
-cvar_t	*g_tactical;
 
 cvar_t	*g_losehealth;
 cvar_t	*g_losehealth_num;
@@ -908,19 +905,6 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 				break;
 			}
 		}
-		
-		if (!strcmp(ent->classname, "misc_bluenode") || !strcmp(ent->classname, "misc_rednode"))
-			ent->powered = true;
-		if (!strcmp(ent->classname, "misc_redspidernode"))
-		{
-			gi.unlinkentity (ent);
-			SP_misc_redspidernode (ent);
-		}
-		if (!strcmp(ent->classname, "misc_bluespidernode"))
-		{
-			gi.unlinkentity (ent);
-			SP_misc_bluespidernode (ent);
-		}
 	}
 
 	if(g_callvote->integer)
@@ -1034,7 +1018,7 @@ void CheckDMRules (void)
 
 	if (timelimit->value)
 	{
-		if (level.time >= timelimit->value*60.0 && ((tca->integer || ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+		if (level.time >= timelimit->value*60.0 && ((ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 		{
 			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
@@ -1042,7 +1026,7 @@ void CheckDMRules (void)
 		}
 	}
 
-	if (fraglimit->integer && ((tca->integer || ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+	if (fraglimit->integer && ((ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
 		//team scores
 		if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer) //it's all about the team!
@@ -1091,7 +1075,7 @@ void CheckDMRules (void)
 					return;
 				}
 			}
-			if(!tca->integer && !ctf->integer) 
+			if(!ctf->integer) 
 			{
 				i = fraglimit->integer - top_score;
 				switch(i) 
@@ -1145,40 +1129,6 @@ void CheckDMRules (void)
 						break;
 				}
 			}
-		}
-	}
-
-	if(tca->integer) 
-	{
-		if(red_team_matches == 2) 
-		{
-			safe_bprintf(PRINT_HIGH, "Red Team wins!\n");
-			bot_won = 0; //we don't care if it's a bot that wins
-			EndDMLevel();
-			return;
-		}
-		if(blue_team_matches == 2) 
-		{
-			safe_bprintf(PRINT_HIGH, "Blue Team wins!\n");
-			bot_won = 0; //we don't care if it's a bot that wins
-			EndDMLevel();
-			return;
-		}
-		if (blue_team_score == 0) 
-		{
-			safe_bprintf(PRINT_HIGH, "Red Team wins match %d out of 3!\n", red_team_matches);
-			bot_won = 0;
-			ResetLevel(true);
-			blue_team_score = red_team_score = 4;
-			return;
-		}
-		if (red_team_score == 0) 
-		{
-			safe_bprintf(PRINT_HIGH, "Blue Team wins match %d out of 3!\n", blue_team_matches);
-			bot_won = 0;
-			ResetLevel(true);
-			blue_team_score = red_team_score = 4;
-			return;
 		}
 	}
 
@@ -1370,23 +1320,10 @@ void ExitLevel (void)
 		//remove podiums
 		if(!strcmp(ent->classname, "pad"))
 			G_FreeEdict(ent);
-		if(tca->integer) 
-		{
-		    if(strstr(ent->classname, "spidernode"))
-		        ED_CallSpawn (ent);
-		    ent->powered = true;
-		}
 	}
-	if(tca->integer) 
-	{
-		blue_team_score = red_team_score = 4;
-		red_team_matches = blue_team_matches = 0;
-	}
-	else 
-	{
-		red_team_score = 0;
-		blue_team_score = 0;
-	}
+
+	red_team_score = 0;
+	blue_team_score = 0;
 
 	if(g_tactical->integer)
 	{

@@ -55,7 +55,7 @@ qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
 			return true;
 	}
 
-	if (!((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value))
+	if (!((dmflags->integer & DF_SKINTEAMS) || ctf->value))
 		return false;
 
 	strcpy (ent1Team, ClientTeam (ent1));
@@ -826,7 +826,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	gi.WritePosition (ent->s.origin);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	if (!((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value))
+	if (!((dmflags->integer & DF_SKINTEAMS) || ctf->value))
 		team = false;
 
 	if (team)
