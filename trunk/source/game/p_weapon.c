@@ -111,10 +111,6 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	int		index;
 	gitem_t		*ammo;
 
-	if (other->in_vehicle) {
-		return false;
-	}
-
 	index = ITEM_INDEX(ent->item);
 
 	//mutators
@@ -282,10 +278,6 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->ps.gunframe = 0;
 	ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
 
-	if (ent->in_vehicle) {
-		return;
-	}
-
 	//set up code to set player world weapon model, as well as some hacks :(
 
 	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
@@ -433,10 +425,6 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 {
 	int			ammo_index;
 	gitem_t		*ammo_item;
-
-	if (ent->in_vehicle) {
-		return;
-	}
 
 	// see if we're already using it
 	if (item == ent->client->pers.weapon)
@@ -1336,232 +1324,6 @@ void Weapon_AlienBlaster (edict_t *ent)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_AlienBlaster_Fire);
 }
 
-//vehicles
-void Weapon_Bomber_Fire (edict_t *ent)
-{
-	vec3_t	offset, start;
-	vec3_t	forward, right;
-	int		damage;
-	float	damage_radius;
-	int		radius_damage;
-
-	damage = 150;
-	radius_damage = 175;
-	damage_radius = 250;
-	if (is_quad)
-	{
-		damage *= 2;
-		radius_damage *= 2;
-	}
-
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
-
-	VectorSet(offset, 8, 8, ent->viewheight-4);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	if(ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe != 12) {
-		fire_rocket (ent, start, forward, damage/3, 1400, damage_radius/2, radius_damage/2);
-		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
-		ent->client->ps.gunframe = 12;
-	}
-	else if(ent->client->ps.gunframe != 6){
-		forward[0] = forward[0] * 2.6;
-		forward[1] = forward[1] * 2.6;
-
-		fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
-		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootbomb.wav"), 1, ATTN_NORM, 0);
-	}
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	ent->client->ps.gunframe++;
-}
-void Weapon_Bomber (edict_t *ent)
-{
-	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {6,12,0};
-	static int	excessive_fire_frames[]	= {6,8,10,12,0};
-
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
-		Weapon_Generic (ent, 5, 16, 39, 45, pause_frames, excessive_fire_frames, Weapon_Bomber_Fire);
-	else
-		Weapon_Generic (ent, 5, 16, 39, 45, pause_frames, fire_frames, Weapon_Bomber_Fire);
-}
-void Weapon_Strafer_Fire (edict_t *ent)
-{
-	vec3_t	forward, right;
-	vec3_t	start;
-	vec3_t	offset;
-	int damage;
-	float	damage_radius;
-	int		radius_damage;
-
-	radius_damage = 100;
-	damage_radius = 100;
-
-	if(excessive->value)
-		damage = 60;
-	else
-		damage = 20;
-
-	if (is_quad)
-		damage *= 2;
-
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
-
-	VectorSet(offset, 40, 6, ent->viewheight-5);
-
-	right[0] = right[0] * 5;
-	right[1] = right[1] * 5;
-
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	if(ent->client->buttons & BUTTON_ATTACK2)
-		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
-	else
-		fire_blaster_beam (ent, start, forward, damage, 0, true, false);
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	VectorAdd(start, forward, start);
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-	gi.WritePosition (start);
-	gi.multicast (start, MULTICAST_PVS);
-
-	//now do the other side
-
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
-
-	VectorSet(offset, 40, 6, ent->viewheight-5);
-
-	right[0] = right[0] * -5;
-	right[1] = right[1] * -5;
-
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	if(ent->client->buttons & BUTTON_ATTACK2) 
-	{
-		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
-		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
-	}
-	else 
-	{
-		fire_blaster_beam (ent, start, forward, damage, 0, true, false);
-		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
-	}
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	VectorAdd(start, forward, start);
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-	gi.WritePosition (start);
-	gi.multicast (start, MULTICAST_PVS);
-
-	ent->client->ps.gunframe++;
-}
-void Weapon_Strafer (edict_t *ent) //for now
-{
-	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {6,0};
-	static int	excessive_fire_frames[]	= {6,8,10,0};
-
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
-		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, excessive_fire_frames, Weapon_Strafer_Fire);
-	else
-		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Strafer_Fire);
-}
-void Weapon_Hover_Fire (edict_t *ent)
-{
-	vec3_t	forward, right;
-	vec3_t	start;
-	vec3_t	offset;
-	int damage;
-
-	if(excessive->value)
-		damage = 200;
-	else
-		damage = 20;
-
-	if (is_quad)
-		damage *= 2;
-
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
-	VectorScale (forward, -3, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -3;
-
-	VectorSet(offset, 40, 0, ent->viewheight-5);
-
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	if(ent->client->buttons & BUTTON_ATTACK2) {
-		fire_blasterball (ent, start, forward, damage*3, 1500, EF_ROCKET, false, false);
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hypbrl1a.wav"), 1, ATTN_NORM, 0);
-	}
-	else if(ent->client->ps.gunframe == 6) {
-		fire_hover_beam (ent, start, forward, damage, 0, true);
-		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
-
-		VectorAdd(start, forward, start);
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_CHAINGUNSMOKE);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-	}
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_BFG);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	if(ent->client->buttons & BUTTON_ATTACK2) {
-		forward[0] = forward[0] * 10;
-		forward[1] = forward[1] * 10;
-
-		VectorAdd(start, forward, start);
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_SMART_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-	}
-
-	ent->client->ps.gunframe++;
-}
-void Weapon_Hover (edict_t *ent) //for now
-{
-	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {6,8,10,0};
-	static int	excessive_fire_frames[]	= {6,8,10,0};
-
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
-		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, excessive_fire_frames, Weapon_Hover_Fire);
-	else
-		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Hover_Fire);
-}
 void Weapon_Beamgun_Fire (edict_t *ent)
 {
 	int		effect;

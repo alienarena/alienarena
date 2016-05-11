@@ -99,17 +99,12 @@ qboolean ACEMV_CanMove(edict_t *self, int direction)
 	trace_t tr;
 	gitem_t *vehicle;
 
-	vehicle = FindItemByClassname("item_bomber");
+	vehicle = FindItemByClassname("item_jetpack");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
 		return true; // yup, can move, we are in an air vehicle
 	}
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return true; // yup, can move, we are in an air vehicle
-	}
-
+	
 	// Now check to see if move will move us off an edge
 	VectorCopy(self->s.angles,angles);
 
@@ -957,7 +952,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		use_fuzzy_aim = false;
 	}
 
-	vehicle = FindItemByClassname("item_bomber");
+	vehicle = FindItemByClassname("item_jetpack");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) 
 	{
@@ -1094,7 +1089,6 @@ standardmove:
 		c = random();
 		if ( self->health >= 70
 				&& self->skill >= 2
-		        && !self->in_vehicle
 		        && ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" ) )
 		        && c < 0.6f )
 		{ // Rocket Jump
@@ -1201,23 +1195,6 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 				else
 					ucmd->buttons = BUTTON_ATTACK2;
-			}
-			
-			//vehicle alt-fires
-			if (self->client->pers.weapon == FindItem("bomber")
-				|| self->client->pers.weapon == FindItem("strafer")) 
-			{
-				if(range > 500)
-					ucmd->buttons = BUTTON_ATTACK2;
-				else
-					ucmd->buttons = BUTTON_ATTACK;
-			}
-			if (self->client->pers.weapon == FindItem("hover")) 
-			{
-				if(range < 300)
-					ucmd->buttons = BUTTON_ATTACK2;
-				else
-					ucmd->buttons = BUTTON_ATTACK;
 			}
 		}
 		else

@@ -1220,31 +1220,6 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	if (!gun.model)
 		return;
 
-	//if a vehicle console, we want to render as a 2D HUD now, if a player choses to
-	if(cl_vehicle_huds->value)
-	{
-		COM_StripExtension(gun.model->name, shortname);
-		if(!(strcmp("vehicles/bomber/v_wep", shortname))) 
-		{
-			vehicle_hud = 1;
-			return;
-		}
-		else if(!(strcmp("vehicles/strafer/v_wep", shortname))) 
-		{
-			vehicle_hud = 2;
-			return;
-		}
-		else if(!(strcmp("vehicles/hover/v_wep", shortname))) 
-		{
-			vehicle_hud = 3;
-			return;
-		}
-		else
-			vehicle_hud = 0;		
-	}
-	else
-		vehicle_hud = 0;
-
 	// nudge gun down and right if in wide angle view
 	if(cl.refdef.fov_x > 90)
 	{

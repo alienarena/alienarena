@@ -42,9 +42,6 @@ void Weapon_RocketLauncher (edict_t *ent);
 void Weapon_Beamgun (edict_t *ent);
 void Weapon_Vaporizer (edict_t *ent);
 void Weapon_Minderaser (edict_t *ent);
-void Weapon_Bomber (edict_t *ent);
-void Weapon_Strafer (edict_t *ent);
-void Weapon_Hover (edict_t *ent);
 void Weapon_TacticalBomb ( edict_t *ent);
 #endif
 
@@ -848,8 +845,6 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	VectorSet (dropped->mins, -15, -15, -15);
 	VectorSet (dropped->maxs, 15, 15, 15);
 	gi.setmodel (dropped, dropped->item->world_model);
-	if(!strcmp(item->classname, "item_bomber"))
-		dropped->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.iqm");
 	dropped->solid = SOLID_TRIGGER;
 	dropped->movetype = MOVETYPE_TOSS;
 	dropped->touch = drop_temp_touch;
@@ -1156,8 +1151,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	}
 
 	//vehicles have special handling
-	if((strcmp(ent->classname, "item_bomber") == 0) || (strcmp(ent->classname, "item_strafer") == 0)
-		|| (strcmp(ent->classname, "item_hover") == 0))
+	if((strcmp(ent->classname, "item_jetpack") == 0))
 		ent->think = VehicleSetup;
 
 	//give ammo boxes and armor shards a pulsing shell(combined with RF_GLOW the renderer will know to phase it
@@ -1259,40 +1253,6 @@ gitem_t	itemlist[] =
 	},
 
 #ifndef ALTERIA
-/*QUAKED item_bomber (1 0.2 0) (-16 -16 -24) (16 16 32)
-*/
-	{
-		GITEM_INIT_IDENTIFY (item_bomber, IT_WEAPON),
-		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Bomber),
-		GITEM_INIT_WORLDMODEL ("vehicles/bomber/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("bomber", "Bomber", NULL),
-		// vehicles get infinite ammo, so both quantities are 0
-		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/bomber/v_wep.iqm", NULL),
-		NULL
-	},
-/*QUAKED item_strafer (1 0.2 0) (-16 -16 -24) (16 16 32)
-*/
-	{
-		GITEM_INIT_IDENTIFY (item_strafer, IT_WEAPON),
-		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Strafer),
-		GITEM_INIT_WORLDMODEL ("vehicles/strafer/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("strafer", "Strafer", NULL),
-		// vehicles get infinite ammo, so both quantities are 0
-		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/strafer/v_wep.iqm", NULL),
-		NULL
-	},
-
-/*QUAKED item_hover (1 0.2 0) (-16 -16 -24) (16 16 32)
-*/
-	{
-		GITEM_INIT_IDENTIFY (item_hover, IT_WEAPON),
-		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, Weapon_Hover),
-		GITEM_INIT_WORLDMODEL ("vehicles/hover/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("hover", "Hover", NULL),
-		// vehicles get infinite ammo, so both quantities are 0
-		GITEM_INIT_WEAP (0, 0, NULL, "vehicles/hover/v_wep.iqm", NULL),
-		NULL
-	},
 
 //Tactical bombs
 	{
@@ -1615,6 +1575,16 @@ gives +1 to maximum health
 		GITEM_INIT_CLIENTSIDE ("p_sproing", "Sproing", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (60),
 /* precache */ "items/sproingout.wav"
+	},
+
+	//this item is handled uniquely 
+	{
+		GITEM_INIT_IDENTIFY (item_jetpack, IT_POWERUP),
+		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, NULL),
+		GITEM_INIT_WORLDMODEL ("vehicles/jetpack/tris.iqm", 0),
+		GITEM_INIT_CLIENTSIDE ("jetpack", "Jetpack", NULL),
+		GITEM_INIT_POWERUP (100),
+		NULL
 	},
 
 	//these next two powerups are never placed in maps

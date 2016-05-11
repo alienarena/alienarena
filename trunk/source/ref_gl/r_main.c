@@ -1133,7 +1133,6 @@ void R_RenderView (refdef_t *fd)
 	R_BloomBlend (&r_newrefdef);
 	R_RenderSun ();
 	R_GLSLPostProcess ();
-	R_DrawVehicleHUD ();
 	R_Flash ();
 	
 	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);

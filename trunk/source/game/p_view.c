@@ -405,10 +405,6 @@ void ResetWeaponModel (edict_t *ent)
 	char	weaponpath[MAX_OSPATH] = " ";
 	FILE *file;
 
-	if (ent->in_vehicle) {
-		return;
-	}
-
 	//set up code to set player world weapon model
 
 	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
@@ -492,23 +488,39 @@ void SV_CalcBlend (edict_t *ent)
 
 		/*if no fuel remaining, remove vehicle from inventory*/
 		if ( ent->client->Jet_remaining == 0 ) {
-		  ent->client->pers.inventory[ITEM_INDEX(FindItem("bomber"))] = 0;
-		  ent->client->pers.inventory[ITEM_INDEX(FindItem("strafer"))] = 0;
-		  ent->client->pers.inventory[ITEM_INDEX(FindItem("hover"))] = 0;
+		  ent->client->pers.inventory[ITEM_INDEX(FindItem("jetpack"))] = 0;
 		  //set everything back
 		  Reset_player(ent);
 
 		}
 
-		/*Play jetting sound every 0.6 secs (sound of monster icarus)*/
+		/*Play jetting sound every 0.6 secs*/
 		if ( ((int)ent->client->Jet_remaining % 6) == 0 ) {
-		  gi.sound (ent, CHAN_AUTO, gi.soundindex("vehicles/bomberidle.wav"), 0.9, ATTN_NORM, 0);
+			 vec3_t exhaust, distance;
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/grenlx1a.wav"), 0.9, ATTN_NORM, 0);
 
-		  // send muzzle flash
-		  gi.WriteByte (svc_muzzleflash);
-		  gi.WriteShort (ent-g_edicts);
-		  gi.WriteByte (MZ_RAILGUN | MZ_SILENCED);
-		  gi.multicast (ent->s.origin, MULTICAST_PVS);
+			// send muzzle flash
+			gi.WriteByte (svc_muzzleflash);
+			gi.WriteShort (ent-g_edicts);
+			gi.WriteByte (MZ_RAILGUN | MZ_SILENCED);
+			gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+			//add flame effect from jets
+			VectorSet(distance, -16, -32, 0);
+			G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
+			
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_EXPLOSION2);
+			gi.WritePosition (exhaust);
+			gi.multicast (exhaust, MULTICAST_PVS);
+
+			VectorSet(distance, -32, 0, 0);
+			G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
+			
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_EXPLOSION2);
+			gi.WritePosition (exhaust);
+			gi.multicast (exhaust, MULTICAST_PVS);
 		}
 
 		/*beginning to fade if 4 secs or less*/
@@ -957,12 +969,6 @@ void G_SetClientFrame (edict_t *ent)
 {
 	gclient_t	*client;
 	qboolean	duck, run;
-	//vehicles
-
-	if (ent->in_vehicle) { //don't animate the vehicle(yet!)
-		ent->s.frame = 0;
-		return;
-	}
 
 	if (ent->s.modelindex != 255)
 		return;		// not in the player model
@@ -1024,17 +1030,25 @@ newanim:
 
 	if (!ent->groundentity)
 	{
-	//ZOID: if on grapple, don't go into jump frame, go into standing
-//frame
-		if (client->ctf_grapple) {
+		if(ent->in_vehicle)
+		{
+			//we may change all of this, but for now this is ok and looks good
+			client->anim_priority = ANIM_JUMP;
+			if (ent->s.frame != FRAME_jump2)
+				ent->s.frame = FRAME_jump1;
+			client->anim_end = FRAME_jump2;
+		}
+		else if (client->ctf_grapple) 
+		{
 			ent->s.frame = FRAME_stand01;
 			client->anim_end = FRAME_stand40;
-		} else {
-//ZOID
-		client->anim_priority = ANIM_JUMP;
-		if (ent->s.frame != FRAME_jump2)
-			ent->s.frame = FRAME_jump1;
-		client->anim_end = FRAME_jump2;
+		} 
+		else 
+		{
+			client->anim_priority = ANIM_JUMP;
+			if (ent->s.frame != FRAME_jump2)
+				ent->s.frame = FRAME_jump1;
+			client->anim_end = FRAME_jump2;
 		}
 	}
 	else if (run)

@@ -355,7 +355,7 @@ float ACEIT_ItemNeed (edict_t *self, gitem_t *item)
 				return 3.0;
 		
 		//vehicles
-		case item_bomber: case item_strafer: case item_hover:
+		case item_jetpack:
 			if (!self->client->pers.inventory[idx])
 				return 0.9;
 			else

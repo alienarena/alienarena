@@ -272,7 +272,6 @@ extern void R_DrawAlphaSurfaces (void);
 extern void R_InitParticleTexture (void);
 extern void R_DrawParticles (void);
 extern void R_DrawRadar(void);
-extern void R_DrawVehicleHUD (void);
 extern void R_DrawSkyBox (void);
 extern void Draw_InitLocal (void);
 
