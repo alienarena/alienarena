@@ -306,7 +306,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	if ((targ != attacker) && ((deathmatch->value && (dmflags->integer & (DF_SKINTEAMS))) || ctf->value || tca->value))
+	if ((targ != attacker) && ((deathmatch->value && (dmflags->integer & (DF_SKINTEAMS))) || ctf->value))
 	{
 		if (OnSameTeam (targ, attacker) && mod != MOD_TELEFRAG) //telefrag kills no matter what
 		{
@@ -435,11 +435,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				SpawnDamage (TE_GUNSHOT, point, normal, take);
 			else
 				SpawnDamage (TE_BLOOD, point, normal, take);
-			if(tca->value)
-			{
-				if(!(strcmp(targ->classname, "misc_redspidernode")) || !(strcmp(targ->classname, "misc_bluespidernode")))
-					safe_centerprintf(attacker, "Spider health at %i percent", 100*(targ->health-take)/600);
-			}
+			
 			if(g_tactical->value)
 			{
 				if(!strcmp(targ->classname, "alien computer"))

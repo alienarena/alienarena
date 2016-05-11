@@ -102,13 +102,6 @@ spawn_t	spawns[] = {
 
 	{"npc_deathray", SP_npc_deathray},
 
-	//TCA
-	{"misc_spiderpod", SP_misc_spiderpod},
-	{"misc_rednode", SP_misc_rednode},
-	{"misc_bluenode", SP_misc_bluenode},
-	{"misc_redspidernode", SP_misc_redspidernode},
-	{"misc_bluespidernode", SP_misc_bluespidernode},
-
 	//Tactical
 	{"misc_aliencomputer", SP_misc_aliencomputer},
 	{"misc_humancomputer", SP_misc_humancomputer},
@@ -435,17 +428,9 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	gi.FreeTags (TAG_LEVEL);
 	
-	if(tca->integer) 
-	{
-		blue_team_score = red_team_score = 4;
-		red_team_matches = blue_team_matches = 0;
-	}
-	else 
-	{
-		red_team_score = 0;
-		blue_team_score = 0;
-	}
-
+	red_team_score = 0;
+	blue_team_score = 0;
+	
 	memset (&level, 0, sizeof(level));
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 
@@ -748,127 +733,6 @@ char *team_statusbar =
 "endif "
 ;
 
-char *tca_statusbar =
-// background
-"yb -256 "
-"xl	 0 "
-"pic 0 "
-"xr  -130 "
-"yt  2 "
-"pic 18 "
-
-// health
-"yb	-29 "
-"xl	11 "
-"hnum "
-
-// ammo
-"if 2 "
-"	xl	76 "
-"	anum "
-"endif "
-
-// armor
-"	xl	142 "
-"	rnum "
-
-// timer
-"if 9 "
-"	xv	324 "
-"   yb  -24 "
-"	num	2	10 "
-"	xv	358 "
-"   yb  -32 "
-"	pic	9 "
-"endif "
-
-// weapon icon
-"if 11 "
-"	xr	-72 "
-"   yt  196 "
-"	pic	11 "
-"endif "
-
-//  frags
-"xr	-67 "
-"yt 16 "
-"num 3 14"
-
-//  deaths
-"xr	-67 "
-"yt 48 "
-"num 3 19 "
-
-//  high scorer
-"yt 80 "
-"num 3 20 "
-
-//  red team
-"yt 132 "
-"num 1 6 "
-"xr -27 "
-"num 1 21 "
-//  blue team
-"yt 166 "
-"num 1 22 "
-"xr -67 "
-"num 1 7 "
-//  red label
-"yt 124 "
-"xr -30 "
-"string nodes "
-"xr -70 "
-"string matches "
-//  blue label
-"yt 158 "
-"xr -30 "
-"string nodes "
-"xr -70 "
-"string matches "
-
-//  flag
-"   xv 128 "
-"   yb -64 "
-"   pic 23 "
-
-//  weapon stats
-"if 25 "
-"xr -72 "
-"yt 227 "
-"pic 25 "
-"endif"
-
-"if 26 "
-"yt 258 "
-"pic 26 "
-"endif "
-
-"if 27 "
-"yt 289 "
-"pic 27 "
-"endif "
-
-"if 28 "
-"yt 320 "
-"pic 28 "
-"endif "
-
-"if 29 "
-"yt 351 "
-"pic 29 "
-"endif "
-
-"if 30 "
-"yt 382 "
-"pic 30 "
-"endif "
-
-"if 31 "
-"yt 413 "
-"pic 31 "
-"endif "
-;
-
 char *tactical_statusbar =
 // background
 "yb -256 "
@@ -994,8 +858,6 @@ void SP_worldspawn (edict_t *ent)
 		if(ctf->value)
 			CTFPrecache();
 	}
-	else if (tca->integer)
-		gi.configstring (CS_STATUSBAR, tca_statusbar);
 	else if (g_tactical->integer)
 		gi.configstring (CS_STATUSBAR, tactical_statusbar);
 	else

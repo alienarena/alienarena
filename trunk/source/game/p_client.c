@@ -1488,7 +1488,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 
 	if (deathmatch->value) 
 	{
-		if (g_tactical->value || ctf->value || tca->value || (dmflags->integer & DF_SKINTEAMS)) 
+		if (g_tactical->value || ctf->value || (dmflags->integer & DF_SKINTEAMS)) 
 		{			
 			spot = SelectCTFSpawnPoint(ent);
 			if(!spot)
@@ -2530,7 +2530,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if((playervote.called || g_tactical->integer ) && whereFrom == INGAME)
 		return; //do not allow people to change info during votes or in tactical mode(yet)
 
-	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
+	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
 		safe_bprintf (PRINT_MEDIUM, "Changing settings not allowed during a team game\n");
 		return;
 	}*/
@@ -3074,29 +3074,13 @@ void TeamCensus( teamcensus_t *teamcensus )
 			if ( red_team_score > blue_team_score )
 			{ // leader gets the bot
 				// real player being a good sport joins the team that is behind
-				if ( tca->integer )
-				{
-					team_for_bot = BLUE_TEAM;
-					team_for_real = RED_TEAM;
-				}
-				else
-				{
-					team_for_bot = RED_TEAM;
-					team_for_real = BLUE_TEAM;
-				}
+				team_for_bot = RED_TEAM;
+				team_for_real = BLUE_TEAM;
 			}
 			else if ( blue_team_score > red_team_score )
 			{
-				if ( tca->integer )
-				{
-					team_for_bot = RED_TEAM;
-					team_for_real = BLUE_TEAM;
-				}
-				else
-				{
-					team_for_bot = BLUE_TEAM;
-					team_for_real = RED_TEAM;
-				}
+				team_for_bot = BLUE_TEAM;
+				team_for_real = RED_TEAM;
 			}
 			else if ( rand() & 1 )
 			{

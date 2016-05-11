@@ -387,18 +387,18 @@ void BeginIntermission (edict_t *targ)
 			MoveClientToIntermission (client);
 	}
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer || tca->integer) //team stuff
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->integer) //team stuff
 	{
 		if ( blue_team_score > red_team_score )
 		{
-			if(ctf->integer || tca->integer)
+			if(ctf->integer)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins_ctf.wav"), 1, ATTN_NONE, 0);
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins.wav"), 1, ATTN_NONE, 0);
 		}
 		else if ( blue_team_score < red_team_score )
 		{
-			if(ctf->integer || tca->integer)
+			if(ctf->integer)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins_ctf.wav"), 1, ATTN_NONE, 0);
 
 			else
@@ -564,7 +564,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	if (g_tactical->integer)
 		return; //no scoreboard in tactical mode
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value) {
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value) {
 		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
 	}
@@ -850,12 +850,6 @@ void G_SetScoreStats (edict_t *ent)
 	ent->client->ps.stats[STAT_REDSCORE] = red_team_score;
 	ent->client->ps.stats[STAT_BLUESCORE] = blue_team_score;
 	
-	if (tca->integer) 
-	{
-		ent->client->ps.stats[STAT_RED_MATCHES] = red_team_matches;
-		ent->client->ps.stats[STAT_BLUE_MATCHES] = blue_team_matches;
-	}
-
 	if (g_tactical->integer) //just use the weapon slots since these aren't displayed in tactical anyway
 	{
 		ent->client->ps.stats[STAT_TACTICAL_SCORE] = gi.imageindex ("i_tactical");

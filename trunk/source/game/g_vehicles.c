@@ -40,7 +40,7 @@ qboolean Jet_AvoidGround( edict_t *ent )
 	new_origin[0] = ent->s.origin[0];
 	new_origin[1] = ent->s.origin[1];
 	new_origin[2] = ent->s.origin[2] + 0.5;
-	trace = gi.trace( ent->s.origin, ent->mins, ent->maxs, new_origin, ent, MASK_MONSTERSOLID );
+	trace = gi.trace( ent->s.origin, ent->mins, ent->maxs, new_origin, ent, MASK_PLAYERSOLID );
 
 	if ( (success=(trace.plane.normal[2]) == 0 ) )	/*no ceiling?*/
 		ent->s.origin[2] += 0.5;			/*then make sure off ground*/
@@ -98,6 +98,30 @@ void Jet_ApplyLifting( edict_t *ent )
 	trace = gi.trace( ent->s.origin, ent->mins, ent->maxs, new_origin, ent, MASK_PLAYERSOLID );
 	if ( trace.plane.normal[2] == 0 )
 		VectorCopy( new_origin, ent->s.origin );
+}
+
+void Jet_ApplyEffects( edict_t *ent, vec3_t forward, vec3_t right )
+{
+	vec3_t exhaust, distance;
+
+	gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/grenlx1a.wav"), 0.9, ATTN_NORM, 0);
+
+	//add smoke effect from jets
+	VectorSet(distance, -16, -32, 0);
+	G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
+			
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_EXPLOSION2);
+	gi.WritePosition (exhaust);
+	gi.multicast (exhaust, MULTICAST_PVS);
+
+	VectorSet(distance, -32, 0, 0);
+	G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
+			
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_EXPLOSION2);
+	gi.WritePosition (exhaust);
+	gi.multicast (exhaust, MULTICAST_PVS);
 }
 
 /*if the angle of the velocity vector is different to the viewing
@@ -177,29 +201,10 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 		/*if we crouch or jump add Up-Down-Booster acceleration (30)*/
 		if ( ucmd->upmove )
 		{
-			vec3_t exhaust, distance;
-
 			acc[2] += ucmd->upmove > 0 ? 30 : -30;
 			if(ucmd->upmove > 0 && !ent->deadflag)
 			{
-				gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/grenlx1a.wav"), 0.9, ATTN_NORM, 0);
-
-				//add smoke effect from jets
-				VectorSet(distance, -16, -32, 0);
-				G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
-			
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_EXPLOSION2);
-				gi.WritePosition (exhaust);
-				gi.multicast (exhaust, MULTICAST_PVS);
-
-				VectorSet(distance, -32, 0, 0);
-				G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
-			
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_EXPLOSION2);
-				gi.WritePosition (exhaust);
-				gi.multicast (exhaust, MULTICAST_PVS);
+				Jet_ApplyEffects( ent, forward, right );
 			}
 		}
 
@@ -266,6 +271,10 @@ void VehicleSetup (edict_t *ent)
 	trace_t		tr;
 	vec3_t		dest;
 	float		*v;
+
+	//no jetpacks in CTF(conflicts with carrying a flag model)
+	if(ctf->integer)
+		return;
 
 	v = tv(-24,-24,-24);
 	VectorCopy (v, ent->mins);

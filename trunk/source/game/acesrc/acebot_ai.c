@@ -530,40 +530,6 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		flag2_item = FindItemByClassname("item_flag_blue");
 	}	
 
-	//only look for these if your team's spider is vulnerable
-	if(tca->value && ((self->dmteam == RED_TEAM && red_team_score < 2) || (self->dmteam == BLUE_TEAM && blue_team_score < 2))) {
-		target = findradius(NULL, self->s.origin, 300);
-		self->enemy = NULL;
-		while(target)
-		{
-			if(target->classname == NULL) 
-			{
-				self->enemy = NULL;
-				return false;
-			}
-			if(self->dmteam == RED_TEAM) 
-			{
-				if(target->classname == "misc_bluespidernode")
-					self->enemy = target;
-			}
-			else if(self->dmteam == BLUE_TEAM) 
-			{
-				if(target->classname == "misc_redspidernode")
-					self->enemy = target;
-			}
-			target = findradius(target, self->s.origin, 300);
-			if(self->enemy) 
-			{
-				//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
-				self->movetarget = self->enemy;
-				self->goalentity= self->enemy; //face it, and fire
-				return true;
-			}
-			else
-				return false;
-		}
-	}
-
 	if(g_tactical->value) 
 	{
 		target = findradius(NULL, self->s.origin, 200);
