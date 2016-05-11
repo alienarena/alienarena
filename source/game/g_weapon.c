@@ -1723,7 +1723,6 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	gi.linkentity (prox);
 }
 
-//vehicles
 void bomb_think (edict_t *self)
 {
 	self->nextthink = level.time + FRAMETIME;

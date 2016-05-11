@@ -1595,7 +1595,7 @@ void CL_DustParticles (vec3_t org)
 			return;
 
 		p->type = PARTICLE_STANDARD;
-		p->image = r_pufftexture;
+		p->image = r_smoketexture;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 4 + (rand()&2);

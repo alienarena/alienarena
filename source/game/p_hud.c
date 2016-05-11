@@ -260,7 +260,6 @@ void BeginIntermission (edict_t *targ)
 		if (!client->inuse)
 			continue;
 		// remove from vehicle.
-		//  note: vehicle hud is client-side, so may remain in view
 		if (client->in_vehicle)
 		{
 			Reset_player( client );

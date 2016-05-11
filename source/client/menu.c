@@ -4547,10 +4547,7 @@ ADD BOTS MENU
 // For going from weapon pickup name to weapon icon. Used for displaying icon
 // previews of the bots' favorite weapons.
 static char *weapon_icon_names[][2] =
-{
-	{"Hover",			"hover"},
-	{"Bomber",			"bomber"},
-	{"Strafer",			"strafer"},
+{	
 	{"Grapple",			"grapple"},
 	{"Blaster",			"blaster"},
 	{"Violator",		"violator"},

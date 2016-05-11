@@ -400,14 +400,14 @@ edict_t *CreateTargetChangeLevel(char *map)
  * 8: "violator"
  *
  *--- weapon_hit[] incremented ---
- * 0 : blasterball_touch  : Weapon_Beamgun, Weapon_Blaster, Weapon_Hover
- * 0 : fire_blaster_beam  : Weapon_Beamgun, Weapon_Blaster, Weapon_Alienblaster, Weapon_Strafer
+ * 0 : blasterball_touch  : Weapon_Beamgun, Weapon_Blaster
+ * 0 : fire_blaster_beam  : Weapon_Beamgun, Weapon_Blaster, Weapon_Alienblaster
  * 1 : fire_disruptor     : Weapon_Disruptor
  * 2 : smartgrenade_think : Weapon_Smartgun
  * 3 : fire_lead          : Weapon_Chain
  * 4 : fireball_touch     : Weapon_Flame
  * 4 : flame_touch        : Weapon_Flame
- * 5 : rocket_touch       : Weapon_RocketLauncher, Weapon_Bomber, Weapon_Strafer
+ * 5 : rocket_touch       : Weapon_RocketLauncher
  * 6 : fire_blaster       : Weapon_Beamgun, Weapon_Blaster
  * 7 : bomb_touch         : Weapon_Bomber, Weapon_Vaporizer
  * 7 : fire_vaporizer     : Weapon_Vaporizer
@@ -430,14 +430,14 @@ static void game_report( void )
 {
 	static const char* weapname[] =
 	{
-		 "   blaster", // 0 blaster, hover
+		 "   blaster", // 0 
 		 " disruptor", // 1
 		 "  smartgun", // 2
 		 "  chaingun", // 3
 		 "     flame", // 4
-		 "    rocket", // 5 rocketlauncher, bomber, strafer
-		 "   beamgun", // 6 beamgun
-		 " vaporizer", // 7 +bomber's bomb
+		 "    rocket", // 5
+		 "   beamgun", // 6 
+		 " vaporizer", // 7
 		 "  violator"  // 8
 	};
 	/* cross-reference from weapon_hit to weapacc[] */

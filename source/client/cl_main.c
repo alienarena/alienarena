@@ -128,7 +128,6 @@ cvar_t	*gender;
 cvar_t	*gender_auto;
 
 cvar_t	*cl_vwep;
-cvar_t	*cl_vehicle_huds;
 
 cvar_t  *background_music;
 cvar_t	*background_music_vol;
@@ -2055,7 +2054,6 @@ void CL_InitLocal (void)
 	gender->modified = false; // clear this so we know when user sets it manually
 
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
-	cl_vehicle_huds = Cvar_Get ("cl_vehicle_huds", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 
 	cl_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE | CVARDOC_STR);
 	cl_master2 = Cvar_Get ("cl_master2", "master2.corservers.com", CVAR_ARCHIVE | CVARDOC_STR);
@@ -2167,9 +2165,6 @@ void CL_InitLocal (void)
 	(void)R_RegisterPic("m_main_mont3");
 	(void)R_RegisterPic("m_main_mont4");
 	(void)R_RegisterPic("m_main_mont5");
-	(void)R_RegisterPic("hud_bomber");
-	(void)R_RegisterPic("hud_strafer");
-	(void)R_RegisterPic("hud_hover");
 	(void)R_RegisterPic("blood_ring");
 
 	remoteserver_runspeed = 300; //default

@@ -134,8 +134,8 @@ typedef enum
 	item_armor_body, item_armor_combat, item_armor_jacket, item_armor_shard,
 	// CTF
 	item_flag_red, item_flag_blue,
-	// vehicles (a type of weapon)
-	item_bomber, item_strafer, item_hover,
+	// jetpack(a type of flying vehicle)
+	item_jetpack,
 	// other weapons
 	weapon_shotgun, weapon_supershotgun, weapon_chaingun, weapon_minderaser,
 	weapon_rocketlauncher, weapon_hyperblaster, weapon_railgun, weapon_bfg,

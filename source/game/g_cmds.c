@@ -258,12 +258,8 @@ void Cmd_Give_f (edict_t *ent)
 				continue;
 			ent->client->pers.inventory[i] = 1;
 		}
-		//don't give vehicles or flags
-		it = FindItem("Bomber");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-		it = FindItem("Strafer");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-		it = FindItem("Hover");
+		//don't give jetpacks or flags
+		it = FindItem("Jetpack");
 		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 		it = FindItem("Blue Flag");
 		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;

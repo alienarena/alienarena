@@ -495,19 +495,13 @@ qboolean ACEAI_infront (edict_t *self, edict_t *other)
 	vec3_t	forward;
 	gitem_t *vehicle;
 
-	vehicle = FindItemByClassname("item_bomber");
+	vehicle = FindItemByClassname("item_jetpack");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) 
 	{
 		return true;	//do this so that they aren't getting lost and just flying off
 	}
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) 
-	{
-		return true;	//do this so that they aren't getting lost and just flying off
-	}
-
+	
 	AngleVectors (self->s.angles, forward, NULL, NULL);
 	VectorSubtract (other->s.origin, self->s.origin, vec);
 	VectorNormalize (vec);
@@ -782,11 +776,6 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	qboolean clear_shot;
 	qboolean suppress_favorite;
 
-	if (self->in_vehicle)
-	{
-		return;
-	}
-
 	if(self->client->resp.powered)
 	{ //got enough reward points, use something
 		c = random();
@@ -931,7 +920,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 
 	// now go through normal weapon favoring routine
 	//  always favor the Vaporizor, unless close, then use the violator
-	if ( !g_tactical->integer && range < 200.0f && self->skill > 0 )
+	if ( !self->in_vehicle && !g_tactical->integer && range < 200.0f && self->skill > 0 )
 	{
 		selected = ACEIT_ChangeWeapon( self, FindItem( "Violator" ));
 		assert( selected );

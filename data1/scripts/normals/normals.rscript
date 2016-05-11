@@ -790,15 +790,11 @@ vehicles/hover/skin
 		cube
 	}
 }
-vehicles/bomber/skin
+vehicles/jetpack/skin
 {
 	{
-		map vehicles/bomber/skin_normal.tga
+		map vehicles/jetpack/skin_normal.jpg
 		normalmap
-		map2 vehicles/bomber/skin_fx.tga
-		glow
-		map3 gfx/chrome2.tga
-		cube
 	}
 }
 vehicles/strafer/skin
