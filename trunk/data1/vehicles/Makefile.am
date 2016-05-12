@@ -32,6 +32,10 @@ nobase_dist_vehicles_DATA = \
 	hover/tris.md2 \
 	hover/v_wep.md2 \
 	hover/window.md2 \
+	jetpack/skin.jpg \
+	jetpack/skin_normal.jpg \
+	jetpack/tris.iqm \
+	jetpack/tris.skin \
 	strafer/console_normal.tga \
 	strafer/console.tga \
 	strafer/skin_fx.tga \
