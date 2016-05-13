@@ -243,7 +243,6 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 
 	/*add rolling when we fly curves or boost left/right*/
 	Jet_ApplyRolling( ent, right );
-
 }
 
 void Use_Jet ( edict_t *ent)
@@ -251,7 +250,7 @@ void Use_Jet ( edict_t *ent)
     /*jetpack in inventory but no fuel time? must be one of the
       give all/give jetpack cheats, so put fuel in*/
     if ( ent->client->Jet_remaining == 0 )
-      ent->client->Jet_remaining = 700;
+      ent->client->Jet_remaining = 500;
 
     if ( Jet_Active(ent) )
       ent->client->Jet_framenum = 0;
@@ -266,6 +265,51 @@ static void VehicleThink(edict_t *ent)
 	ent->nextthink = level.time + FRAMETIME;
 }
 
+float jetpackTime;
+
+void SpawnJetpack(edict_t *ent)
+{
+	edict_t *jetpack, *cl_ent;
+	int i;
+
+	for (i = 0; i < g_maxclients->integer; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse || cl_ent->is_bot)
+			continue;
+		safe_centerprintf(cl_ent, "A Jetpack has spawned!\n");
+	}
+
+	//to do - play level wide klaxxon 
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/jetpackspawn.wav" ), 1, ATTN_NONE, 0 );
+
+	jetpack = G_Spawn();
+	VectorCopy(ent->s.origin, jetpack->s.origin);
+	jetpack->spawnflags = DROPPED_PLAYER_ITEM;
+	jetpack->model = "vehicles/jetpack/tris.iqm";
+	jetpack->classname = "item_jetpack";
+	jetpack->item = FindItem ("Jetpack");
+	jetpack->s.effects = jetpack->item->world_model_flags;
+	jetpack->s.effects |= EF_ROTATE;
+	jetpack->s.renderfx = RF_GLOW;
+	VectorSet (jetpack->mins, -15, -15, -15);
+	VectorSet (jetpack->maxs, 15, 15, 15);
+	gi.setmodel (jetpack, jetpack->item->world_model);
+	jetpack->solid = SOLID_TRIGGER;
+	jetpack->health = 100;
+	jetpack->movetype = MOVETYPE_TOSS;
+	jetpack->touch = Touch_Item;
+	jetpack->owner = NULL;
+
+	SetRespawn (ent, 1000000); //huge delay until jetpack is picked up from pad.			
+	jetpack->replaced_weapon = ent; //remember this entity
+
+	jetpack->nextthink = level.time + FRAMETIME;
+	jetpack->think = VehicleThink;
+
+	jetpackTime = level.time;
+}
+
 void VehicleSetup (edict_t *ent)
 {
 	trace_t		tr;
@@ -276,10 +320,8 @@ void VehicleSetup (edict_t *ent)
 	if(ctf->integer)
 		return;
 
-	v = tv(-24,-24,-24);
-	VectorCopy (v, ent->mins);
-	v = tv(24,24,24);
-	VectorCopy (v, ent->maxs);
+	VectorSet (ent->mins, -15, -15, -15);
+	VectorSet (ent->maxs, 15, 15, 15);
 
 	if (ent->model)
 		gi.setmodel (ent, ent->model);
@@ -291,7 +333,7 @@ void VehicleSetup (edict_t *ent)
 	ent->s.effects |= EF_ROTATE;
 	ent->touch = Touch_Item;
 
-	v = tv(0,0,-24);
+	v = tv(0,0,-128);
 	VectorAdd (ent->s.origin, v, dest);
 
 	tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
@@ -354,16 +396,19 @@ void VehicleDeadDrop(edict_t *self)
 void Reset_player(edict_t *ent)
 {
 	//set everything back
+	ent->client->Jet_remaining = 0;
+	ent->client->Jet_framenum = 0;
 	ent->s.modelindex4 = 0;
 	ent->in_vehicle = false;
 }
+
 void Leave_vehicle(edict_t *ent, gitem_t *item)
 {
+	gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );	
+
 	Reset_player(ent);
 	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
-
-	gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
-
+	
 	Drop_Item (ent, item);
 
 	safe_bprintf(PRINT_HIGH, "Jetpack has been dropped!\n");
@@ -393,7 +438,13 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 	other->client->pers.inventory[ITEM_INDEX(vehicle)] = 1;
 
 	if (!(ent->spawnflags & DROPPED_ITEM)) {
-		SetRespawn (ent, 60);
+			//if aoa, free this edict
+		if(all_out_assault->integer)
+		{
+			ent->think = G_FreeEdict;
+		}
+		else
+			SetRespawn (ent, 60);
 	}
 
 	Use_Jet(other);
