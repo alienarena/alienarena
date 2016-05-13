@@ -200,6 +200,7 @@ void InitGame (void)
 	instagib = gi.cvar ("instagib", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	rocket_arena = gi.cvar ("rocket_arena", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	insta_rockets = gi.cvar ("insta_rockets", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
+	all_out_assault = gi.cvar ("all_out_assault", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	low_grav = gi.cvar ("low_grav", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	regeneration = gi.cvar ("regeneration", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 	vampire = gi.cvar ("vampire", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
@@ -354,8 +355,8 @@ void InitGame (void)
 			100;
 	}
 
-	//reset minderaser
-	mindEraserTime = level.time;
+	//reset minderaser and jetpacks
+	mindEraserTime = jetpackTime = level.time;	
 
 	print1 = print2 = print3 = false;
 

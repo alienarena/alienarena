@@ -62,6 +62,7 @@ cvar_t	*g_duel;
 cvar_t  *instagib;
 cvar_t  *rocket_arena;
 cvar_t  *insta_rockets;
+cvar_t  *all_out_assault;
 cvar_t  *low_grav;
 cvar_t  *regeneration;
 cvar_t  *vampire;
@@ -881,7 +882,7 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 			0;
 	}
 
-	mindEraserTime = level.time;
+	mindEraserTime = jetpackTime = level.time;	
 
 	//reset level items
 	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++)

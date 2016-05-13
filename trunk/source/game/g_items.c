@@ -201,6 +201,39 @@ void DoRespawn (edict_t *ent)
 		}
 	}
 
+	//All Out Assault - replace weapons with jetpacks every minute, up to 3 max
+	if(all_out_assault->integer)
+	{
+		if(level.time > jetpackTime + 30.0)
+		{
+			int i;
+			int numJetPacks = 0;
+			edict_t *gEnt;
+
+			//make sure there are no more than 3 jetpacks around, as it can cause too many weapons to be "missing" at any given time in smaller matches.
+			for (i=1, gEnt=g_edicts+i ; i < globals.num_edicts ; i++,gEnt++)
+			{
+				if (!gEnt->inuse)
+					continue;
+				if(gEnt->client) //not players
+					continue;
+
+				if(!Q_strcasecmp(gEnt->classname, "item_jetpack") && !(gEnt->spawnflags & DROPPED_ITEM))
+					numJetPacks++;
+			}
+			if(numJetPacks < 3)
+			{
+				strcpy(szTmp, ent->classname);
+				szTmp[6] = 0;
+				if(!Q_strcasecmp(szTmp, "weapon"))
+				{
+					SpawnJetpack(ent);
+					return;
+				}
+			}
+		}
+	}
+
 	if (ent->team)
 	{
 		edict_t	*master;
@@ -236,7 +269,10 @@ void SetRespawn (edict_t *ent, float delay)
 		{
 			//TODO: playtest this and adjust the scaling factors.
 			case IT_WEAPON:
-				delay *= 3.0;
+				if(all_out_assault->integer)
+					delay *= 1.5;
+				else
+					delay *= 3.0;
 				break;
 			case IT_POWERUP:
 			case IT_AMMO: //intentional fallthrough
@@ -795,6 +831,16 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		else if (ent->item->pickup_sound)
 		{
 			gi.sound(other, CHAN_ITEM, gi.soundindex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
+		}
+
+		//if AOA, make sure original weapon gets respawned
+		if(all_out_assault->integer)
+		{
+			if (ent->item->classnum == item_jetpack)
+			{
+				if(ent->replaced_weapon != NULL)
+					SetRespawn(ent->replaced_weapon, 5);
+			}
 		}
 	}
 
@@ -1581,9 +1627,9 @@ gives +1 to maximum health
 	{
 		GITEM_INIT_IDENTIFY (item_jetpack, IT_POWERUP),
 		GITEM_INIT_CALLBACKS (Get_in_vehicle, NULL, Leave_vehicle, NULL),
-		GITEM_INIT_WORLDMODEL ("vehicles/jetpack/tris.iqm", 0),
+		GITEM_INIT_WORLDMODEL ("vehicles/jetpack/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("jetpack", "Jetpack", NULL),
-		GITEM_INIT_POWERUP (100),
+		GITEM_INIT_POWERUP (0),
 		NULL
 	},
 

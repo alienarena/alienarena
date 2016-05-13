@@ -678,6 +678,7 @@ extern  cvar_t	*sv_custombots;
 extern  cvar_t  *instagib;
 extern  cvar_t  *rocket_arena;
 extern  cvar_t *insta_rockets;
+extern  cvar_t *all_out_assault;
 extern  cvar_t  *low_grav;
 extern  cvar_t  *regeneration;
 extern  cvar_t  *vampire;
@@ -831,6 +832,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other);
 void CTFDrop_Flag(edict_t *ent, gitem_t *item);
 
 //Vehicles
+extern float jetpackTime;
 void Reset_player(edict_t *ent);
 void Jet_Explosion(edict_t *ent);
 qboolean Jet_Active(edict_t *ent);
@@ -838,6 +840,7 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd );
 void Jet_ApplyEffects( edict_t *ent, vec3_t forward, vec3_t right );
 qboolean Jet_AvoidGround( edict_t *ent );
 void VehicleDeadDrop(edict_t *self);
+void SpawnJetpack(edict_t *ent);
 void VehicleSetup (edict_t *ent);
 qboolean Get_in_vehicle (edict_t *ent, edict_t *other);
 void Leave_vehicle(edict_t *ent, gitem_t *item);

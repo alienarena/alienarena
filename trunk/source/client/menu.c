@@ -3504,6 +3504,7 @@ static char mod_names[] =
 	//cannot be wider than this boundary:	|
 	"\\ctf"             "\\capture the flag"
 	"\\tca"             "\\team core assault"
+	"\\all_out_assault" "\\all out assault"
 	"\\instagib"        "\\instagib"
 	"\\rocket_arena"    "\\rocket arena"
 	"\\low_grav"        "\\low gravity"
@@ -3533,6 +3534,7 @@ static char mods_desc[] =
 	//cannot be wider than this boundary:									|
 	"\\ctf"             "\\capture the enemy team's flag to earn points"
 	"\\tca"             "\\destroy the enemy team's spider node to win"
+	"\\all_out_assault" "\\random jet pack spawns, fast weapon spawns"
 	"\\instagib"        "\\disruptor only, instant kill, infinite ammo"
 	"\\rocket_arena"    "\\rocket launcher only, infinite ammo"
 	"\\low_grav"        "\\reduced gravity"
@@ -4359,7 +4361,8 @@ static const char *weaponModeNames[][2] =
 	{"rocket arena",	"rocket_arena"},
 	{"insta/rockets",	"insta_rockets"},
 	{"excessive",		"excessive"},
-	{"class based",		"classbased"}
+	{"class based",		"classbased"},
+	{"all out assault", "all_out_assault"}
 };
 #define num_weapon_modes static_array_size(weaponModeNames)
 static menulist_s s_weaponmode_list[num_weapon_modes];
