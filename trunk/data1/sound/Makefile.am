@@ -56,6 +56,7 @@ nobase_dist_sound_DATA = \
 	misc/headshot.wav \
 	misc/hit2.wav \
 	misc/hit.wav \
+	misc/jetpackspawn.wav \
 	misc/lasfly.wav \
 	misc/menu1.wav \
 	misc/menu2.wav \
