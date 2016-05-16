@@ -28,7 +28,7 @@ players/martianenforcer/blue
 players/martianenforcer/destoroyah
 {
 	{
-		map players/martianenforcer/default_normal.tga
+		map players/martianenforcer/destoroyah_normal.tga
 		normalmap
 		map2 players/martianenforcer/destoroyahfx.tga
 		glow
