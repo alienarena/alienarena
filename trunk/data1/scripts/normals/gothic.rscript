@@ -23,3 +23,10 @@ maps/meshes/gothic/skulllit
 		glow
 	}
 }
+maps/meshes/gothic/spike1
+{
+	{
+		map maps/meshes/gothic/spike1_normal.jpg
+		normalmap
+	}
+}
