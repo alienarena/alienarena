@@ -5,3 +5,21 @@ maps/meshes/gothic/skull
 		normalmap
 	}
 }
+maps/meshes/gothic/cowskull
+{
+	{
+		map maps/meshes/gothic/cowskull_normal.jpg
+		normalmap
+		map2 maps/meshes/gothic/cowskull_fx.tga
+		glow
+	}
+}
+maps/meshes/gothic/skulllit
+{
+	{
+		map maps/meshes/gothic/skulllit_normal.jpg
+		normalmap
+		map2 maps/meshes/gothic/skulllit_fx.tga
+		glow
+	}
+}
