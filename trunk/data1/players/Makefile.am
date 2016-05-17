@@ -262,6 +262,7 @@ nobase_dist_players_DATA = \
 	martianenforcer/defaultmartianfx.tga \
 	martianenforcer/destoroyah.jpg \
 	martianenforcer/destoroyah_i.jpg \
+	martianenforcer/destoroyah_normal.tga \
 	martianenforcer/destoroyahfx.tga \
 	martianenforcer/drown1.wav \
 	martianenforcer/fall1.wav \
