@@ -364,6 +364,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/tumbleweed.skin \
 	meshes/desert/tumbleweed.tga \
 	meshes/desert/tumbleweed_normal.jpg \
+	meshes/dm-babel/lavarock1.terrain \
 	meshes/dm-bloodfactory/blood0.decal \
 	meshes/dm-bloodfactory/blood1.decal \
 	meshes/dm-bloodfactory/blood2.decal \
@@ -435,6 +436,7 @@ nobase_dist_maps_DATA = \
 	meshes/generator.jpg \
 	meshes/generator.md2 \
 	meshes/generator_normal.jpg \
+	meshes/gothic/bigskull.md2 \
 	meshes/gothic/blade.jpg \
 	meshes/gothic/blade.md2 \
 	meshes/gothic/blade_normal.jpg \
@@ -443,6 +445,10 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/column1.jpg \
 	meshes/gothic/column1.md2 \
 	meshes/gothic/column1_normal.jpg \
+	meshes/gothic/cowskull.jpg \
+	meshes/gothic/cowskull.md2 \
+	meshes/gothic/cowskull_fx.tga \
+	meshes/gothic/cowskull_normal.jpg \
 	meshes/gothic/dragon.jpg \
 	meshes/gothic/dragon.md2 \
 	meshes/gothic/dragon_normal.jpg \
@@ -486,6 +492,13 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/skull1.md2 \
 	meshes/gothic/skull2.md2 \
 	meshes/gothic/skull_normal.jpg \
+	meshes/gothic/skulllit.jpg \
+	meshes/gothic/skulllit_fx.tga \
+	meshes/gothic/skulllit_normal.jpg \
+	meshes/gothic/spike1.jpg \
+	meshes/gothic/spike1.md2 \
+	meshes/gothic/spike1_normal.jpg \
+	meshes/gothic/spike2.md2 \
 	meshes/gothic/throne.jpg \
 	meshes/gothic/throne.md2 \
 	meshes/gothic/throne_normal.jpg \
@@ -862,6 +875,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-frost2k15.mus \
 	scripts/ctf-violator2k16.fog \
 	scripts/ctf-violator2k16.mus \
+	scripts/dm-babel2k16.fog \
+	scripts/dm-babel2k16.mus \
 	scripts/dm-bloodfactory2k15.fog \
 	scripts/dm-bloodfactory2k15.mus \
 	scripts/dm-deathray2k16.fog \
