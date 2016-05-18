@@ -1031,6 +1031,9 @@ nobase_dist_textures_DATA = \
 	desert/hangingmoss.tga \
 	desert/hangingmoss2.tga \
 	desert/hangingmoss3.tga \
+	desert/lavarock1.tga \
+	desert/lavarock1_hm.tga \
+	desert/lavarock1_nm.tga \
 	desert/o3metal1.tga \
 	desert/o3rock10.tga \
 	desert/o3rock10_hm.tga \
@@ -1111,6 +1114,9 @@ nobase_dist_textures_DATA = \
 	desert/woodwall3_nm.tga \
 	desert/woodwall4.tga \
 	desert/woodwall4_nm.tga \
+	dm-babel/lavarock1.tga \
+	dm-babel/lavarock1_blendtex.tga \
+	dm-babel/lavarock1_lightmaptex.tga \
 	dm-bloodfactory/rubble1.tga \
 	dm-bloodfactory/rubble1_blendtex.tga \
 	dm-bloodfactory/rubble1_lightmaptex.tga \
