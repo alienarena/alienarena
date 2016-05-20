@@ -30,3 +30,12 @@ maps/meshes/gothic/spike1
 		normalmap
 	}
 }
+maps/meshes/gothic/lavacolumn
+{
+	{
+		map maps/meshes/gothic/lavacolumn_normal.jpg
+		normalmap
+		map2 maps/meshes/gothic/lavacolumn_fx.jpg
+		fx
+	}
+}
