@@ -1298,7 +1298,10 @@ void SCR_ExecuteLayoutString (char *s)
 					Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
 				if( cl.configstrings[CS_IMAGES+value][0] )
 				{
-					Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
+					if(!strncmp(cl.configstrings[CS_IMAGES+value], "p_", 2))
+						Draw_ScaledPic (x, y, scale/8.0, cl.configstrings[CS_IMAGES+value]);
+					else
+						Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
 					if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_team1") || 
 						!strcmp(cl.configstrings[CS_IMAGES+value], "i_team2"))
 					{
