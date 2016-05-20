@@ -729,81 +729,81 @@ void SCR_DrawLoading (void)
 
 		//check for instance of icons we would like to show in loading process, ala q3
 		if(rocketlauncher) {
-			Draw_ScaledPic((int)(viddef.width/3), (int)(viddef.height/3.2), hudscale, "w_rlauncher");
+			Draw_ScaledPic((int)(viddef.width/3), (int)(viddef.height/3.2), hudscale/7.1, "w_rlauncher");
 			if(!rocketlauncher_drawn){
 				rocketlauncher_drawn = 40*hudscale;
 			}
 		}
 		if(chaingun) {
-			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale, "w_sshotgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_sshotgun");
 			if(!chaingun_drawn) {
 				chaingun_drawn = 40*hudscale;
 			}
 		}
 		if(smartgun) {
-			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale, "w_shotgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_shotgun");
 			if(!smartgun_drawn) {
 				smartgun_drawn = 40*hudscale;
 			}
 		}
 		if(beamgun) {
-			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale, "w_railgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_railgun");
 			if(!beamgun_drawn) {
 				beamgun_drawn = 40*hudscale;
 			}
 		}
 		if(flamethrower) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn
-				, (int)(viddef.height/3.2), hudscale, "w_chaingun");
+				, (int)(viddef.height/3.2), hudscale/7.1, "w_chaingun");
 			if(!flamethrower_drawn) {
 				flamethrower_drawn = 40*hudscale;
 			}
 		}
 		if(disruptor) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn
-				, (int)(viddef.height/3.2), hudscale, "w_hyperblaster");
+				, (int)(viddef.height/3.2), hudscale/7.1, "w_hyperblaster");
 			if(!disruptor_drawn) {
 				disruptor_drawn = 40*hudscale;
 			}
 		}
 		if(vaporizer) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn
-				, (int)(viddef.height/3.2), hudscale, "w_bfg");
+				, (int)(viddef.height/3.2), hudscale/7.1, "w_bfg");
 			if(!vaporizer_drawn) {
 				vaporizer_drawn = 40*hudscale;
 			}
 		}
 		if(quad) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn
-				, (int)(viddef.height/3.2), hudscale, "p_quad");
+				, (int)(viddef.height/3.2), hudscale/7.1, "p_quad");
 			if(!quad_drawn) {
 				quad_drawn = 40*hudscale;
 			}
 		}
 		if(haste) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn
-				, (int)(viddef.height/3.2), hudscale, "p_haste");
+				, (int)(viddef.height/3.2), hudscale/7.1, "p_haste");
 			if(!haste_drawn) {
 				haste_drawn = 40*hudscale;
 			}
 		}
 		if(sproing) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn
-				, (int)(viddef.height/3.2), hudscale, "p_sproing");
+				, (int)(viddef.height/3.2), hudscale/7.1, "p_sproing");
 			if(!sproing_drawn) {
 				sproing_drawn = 40*hudscale;
 			}
 		}
 		if(inv) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn
-				, (int)(viddef.height/3.2), hudscale, "p_invulnerability");
+				, (int)(viddef.height/3.2), hudscale/7.1, "p_invulnerability");
 			if(!inv_drawn) {
 				inv_drawn = 40*hudscale;
 			}
 		}
 		if(adren) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn+inv_drawn
-				, (int)(viddef.height/3.2), hudscale, "p_adrenaline");
+				, (int)(viddef.height/3.2), hudscale/7.1, "p_adrenaline");
 		}
 	}
 	else
