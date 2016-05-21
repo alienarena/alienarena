@@ -5,11 +5,14 @@
 botinfodir=$(pkgdatadir)/data1/botinfo
 
 nobase_dist_botinfo_DATA = \
+	^1Diablo.cfg \
 	^1Squirtney.cfg \
 	^3Marty.cfg \
+	^3Mephisto.cfg \
 	^3Shploik!.cfg \
 	^4Invad^6ur.cfg \
 	^5Beavis.cfg \
+	^6Baal.cfg \
 	^7Ruh^4Lur.cfg \
 	^7The^1Zapp.cfg \
 	Astral.cfg \
