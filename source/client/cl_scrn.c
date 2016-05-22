@@ -1493,10 +1493,10 @@ void SCR_ExecuteLayoutString (char *s)
 				FNT_BoundedPrint( font , va( "%i" , ping ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
 
 				if(team) { //draw pic on left side(done client side to save packetsize
-					Draw_ScaledPic (x, y-2*scale, scale, "/pics/blueplayerbox");
+					Draw_ScaledPic (x, y-2*scale, scale/4.0, "/pics/blueplayerbox");
 				}
 				else
-					Draw_ScaledPic(x, y-2*scale, scale, "/pics/redplayerbox");
+					Draw_ScaledPic(x, y-2*scale, scale/4.0, "/pics/redplayerbox");
 			}
 			else {
 				sprintf(block, "%3d %3d %s", score, ping, ci->name);
@@ -1511,10 +1511,10 @@ void SCR_ExecuteLayoutString (char *s)
 		{	// draw a pic from a name
 			token = COM_Parse (&s);
 			if(newSBlayout && !strcmp(token, "playerbox")) { //cannot simply fill y = ny here
-				Draw_ScaledPic (x, ny+32*scale, scale, token);
+				Draw_ScaledPic (x, ny+32*scale, scale/4.0, token);
 			}
 			else {
-				Draw_ScaledPic (x, y, scale, token);
+				Draw_ScaledPic (x, y, scale/4.0, token);
 			}
 			continue;
 		}
