@@ -1355,7 +1355,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_blaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Blaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
-		GITEM_INIT_CLIENTSIDE ("blaster", "Blaster", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_blaster", "Blaster", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_blast/tris.iqm", "w_blaster.iqm"),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav weapons/blasterreload.wav"
 	},
@@ -1367,7 +1367,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_alienblaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_AlienBlaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
-		GITEM_INIT_CLIENTSIDE ("alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.iqm", "w_blaster.iqm"),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav" //to do tactical - change sound
 	},
@@ -1376,7 +1376,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_violator, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_Violator),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
-		GITEM_INIT_CLIENTSIDE ("violator", "Violator", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_violator", "Violator", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_violator/tris.iqm", "w_violator.iqm"),
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav weapons/violatorreload.wav"
 	},
@@ -1387,7 +1387,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_shotgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Smartgun),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("smartgun", "Alien Smartgun", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_smartgun", "Alien Smartgun", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Alien Smart Grenade", "models/weapons/v_shotg/tris.iqm", "w_shotgun.iqm"),
 /* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},
@@ -1398,7 +1398,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_supershotgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Chain),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.iqm", "w_sshotgun.iqm"),
 /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/chaingunreload.wav"
 	},
@@ -1409,7 +1409,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_chaingun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Flame),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_chain/tris.iqm", "w_chaingun.iqm"),
 /* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav weapons/flamereload.wav"
 	},
@@ -1420,7 +1420,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_rocketlauncher, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_RocketLauncher),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_rocket/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("rocketlauncher", "Rocket Launcher", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_rocketlauncher", "Rocket Launcher", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Rockets", "models/weapons/v_rocket/tris.iqm", "w_rlauncher.iqm"),
 /* precache */ "models/objects/rocket/tris.iqm weapons/rockfly.wav weapons/rocklf1a.wav weapons/rlauncherreload.wav models/objects/debris2/tris.iqm"
 	},
@@ -1431,7 +1431,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_hyperblaster, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Disruptor),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_hyperb/tris.iqm", "w_hyperblaster.iqm"),
 /* precache */ "weapons/railgf1a.wav weapons/disruptorreload.wav"
 	},
@@ -1442,7 +1442,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_railgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Beamgun),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("beamgun", "Disruptor", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_beamgun", "Disruptor", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_rail/tris.iqm", "w_railgun.iqm"),
 /* precache */ "weapons/hyprbf1a.wav weapons/beamgunreload.wav"
 	},
@@ -1453,7 +1453,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_bfg, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.iqm", "w_bfg.iqm"),
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav weapons/vaporizerreload.wav"
 	},
