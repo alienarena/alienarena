@@ -363,6 +363,16 @@ nobase_dist_pics_DATA = \
 	i_flag2.tga \
 	i_flamegun.tga \
 	i_health.tga \
+	i_hud_beamgun.tga \
+	i_hud_blaster.tga \
+	i_hud_chaingun.tga \
+	i_hud_disruptor.tga \
+	i_hud_flamegun.tga \
+	i_hud_flamethrower.tga \
+	i_hud_rocketlauncher.tga \
+	i_hud_smartgun.tga \
+	i_hud_vaporizor.tga \
+	i_hud_violator.tga \
 	i_jacketarmor.tga \
 	i_minderaser.tga \
 	inventory.tga \

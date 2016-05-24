@@ -314,6 +314,8 @@ nobase_dist_models_DATA = \
 	misc/spiderpod/spider_normal.jpg \
 	misc/spiderpod/tris.iqm \
 	misc/spiderpod/tris.skin \
+	objects/blank/tris.iqm \
+	objects/blank/tris.skin \
 	objects/brass/skin.jpg \
 	objects/brass/tris.md2 \
 	objects/debris1/skin.tga \
