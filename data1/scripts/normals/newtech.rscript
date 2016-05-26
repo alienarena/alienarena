@@ -70,3 +70,12 @@ maps/meshes/tube
 		glow
 	}
 }
+maps/meshes/tech/wall_light
+{
+	{
+		map maps/meshes/tech/wall_light_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/wall_light_fx.tga
+		glow
+	}
+}
