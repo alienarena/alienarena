@@ -735,6 +735,10 @@ nobase_dist_maps_DATA = \
 	meshes/tech/turbinefan_normal.jpg \
 	meshes/tech/turbinefan_vert.md2 \
 	meshes/tech/turbinefan_vert2.md2 \
+	meshes/tech/wall_light.md2 \
+	meshes/tech/wall_light.tga \
+	meshes/tech/wall_light_fx.tga \
+	meshes/tech/wall_light_normal.jpg \
 	meshes/test/martian.jpg \
 	meshes/test/martian_fx.tga \
 	meshes/test/martian_normal.tga \
