@@ -500,7 +500,7 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/skeleton3.md2 \
 	meshes/gothic/skeleton.jpg \
 	meshes/gothic/skeleton_normal.jpg \
-	meshes/gothic/skull.jpg \
+	meshes/gothic/skull.tga \
 	meshes/gothic/skull1.md2 \
 	meshes/gothic/skull2.md2 \
 	meshes/gothic/skull_normal.jpg \
@@ -588,6 +588,7 @@ nobase_dist_maps_DATA = \
 	meshes/rocks/05/diffuse.jpg \
 	meshes/rocks/05/normal.jpg \
 	meshes/rocks/05/rock.md2 \
+	meshes/rocks/crystals.md2 \
 	meshes/rocks/rock1.jpg \
 	meshes/rocks/rock1.md2 \
 	meshes/rocks/rock10.jpg \
