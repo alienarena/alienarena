@@ -1401,94 +1401,151 @@ nobase_dist_textures_DATA = \
 	phillipk/pk01_floor01_hm.tga \
 	phillipk/pk01_floor01_nm.tga \
 	phillipk/pk01_floor01a.tga \
+	phillipk/pk01_floor02a.tga \
+	phillipk/pk01_floor02a_hm.tga \
+	phillipk/pk01_floor02a_nm.tga \
+	phillipk/pk01_floor02b.tga \
+	phillipk/pk01_floor02b_hm.tga \
+	phillipk/pk01_floor02b_nm.tga \
 	phillipk/pk01_gra_floor01.tga \
 	phillipk/pk01_gra_floor01_hm.tga \
 	phillipk/pk01_gra_floor01_nm.tga \
-	phillipk/pk01_panel01a_hm.tga \
-	phillipk/pk01_panel01a_nm.tga \
-	phillipk/pk01_panel01a.tga \
-	phillipk/pk01_panel01b_hm.tga \
-	phillipk/pk01_panel01b_nm.tga \
-	phillipk/pk01_panel01b.tga \
-	phillipk/pk01_panel03a_hm.tga \
-	phillipk/pk01_panel03a_nm.tga \
-	phillipk/pk01_panel03a.tga \
-	phillipk/pk01_panel03b_hm.tga \
-	phillipk/pk01_panel03b_nm.tga \
-	phillipk/pk01_panel03b.tga \
-	phillipk/pk01_panel_small01_hm.tga \
-	phillipk/pk01_panel_small01_nm.tga \
-	phillipk/pk01_panel_small01.tga \
+	phillipk/pk01_pan_floor01b.tga \
+	phillipk/pk01_pan_floor01b_hm.tga \
+	phillipk/pk01_pan_floor01b_nm.tga \
 	phillipk/pk01_pan_floor02.tga \
 	phillipk/pk01_pan_floor02_hm.tga \
 	phillipk/pk01_pan_floor02_nm.tga \
+	phillipk/pk01_pan_wall01.tga \
+	phillipk/pk01_pan_wall01_hm.tga \
+	phillipk/pk01_pan_wall01_nm.tga \
+	phillipk/pk01_pan_wall02a1.tga \
 	phillipk/pk01_pan_wall02a1_hm.tga \
 	phillipk/pk01_pan_wall02a1_nm.tga \
-	phillipk/pk01_pan_wall02a1.tga \
+	phillipk/pk01_pan_wall02b1.tga \
 	phillipk/pk01_pan_wall02b1_hm.tga \
 	phillipk/pk01_pan_wall02b1_nm.tga \
-	phillipk/pk01_pan_wall02b1.tga \
+	phillipk/pk01_panel01a.tga \
+	phillipk/pk01_panel01a_hm.tga \
+	phillipk/pk01_panel01a_nm.tga \
+	phillipk/pk01_panel01b.tga \
+	phillipk/pk01_panel01b_hm.tga \
+	phillipk/pk01_panel01b_nm.tga \
+	phillipk/pk01_panel03a.tga \
+	phillipk/pk01_panel03a_hm.tga \
+	phillipk/pk01_panel03a_nm.tga \
+	phillipk/pk01_panel03b.tga \
+	phillipk/pk01_panel03b_hm.tga \
+	phillipk/pk01_panel03b_nm.tga \
+	phillipk/pk01_panel_small01.tga \
+	phillipk/pk01_panel_small01_hm.tga \
+	phillipk/pk01_panel_small01_nm.tga \
+	phillipk/pk01_panel_small02.tga \
+	phillipk/pk01_panel_small02_hm.tga \
+	phillipk/pk01_panel_small02_nm.tga \
+	phillipk/pk01_thin_wall01b.tga \
 	phillipk/pk01_thin_wall01b_hm.tga \
 	phillipk/pk01_thin_wall01b_nm.tga \
-	phillipk/pk01_thin_wall01b.tga \
+	phillipk/pk01_thin_wall02b.tga \
 	phillipk/pk01_thin_wall02b_hm.tga \
 	phillipk/pk01_thin_wall02b_nm.tga \
-	phillipk/pk01_thin_wall02b.tga \
+	phillipk/pk01_trims01a.tga \
 	phillipk/pk01_trims01a_hm.tga \
 	phillipk/pk01_trims01a_nm.tga \
-	phillipk/pk01_trims01a.tga \
+	phillipk/pk01_trims01b.tga \
 	phillipk/pk01_trims01b_hm.tga \
 	phillipk/pk01_trims01b_nm.tga \
-	phillipk/pk01_trims01b.tga \
-	phillipk/pk01_vent_wall01a_hm.tga \
-	phillipk/pk01_vent_wall01a.tga \
 	phillipk/pk01_vent_wall01_nm.tga \
+	phillipk/pk01_vent_wall01a.tga \
+	phillipk/pk01_vent_wall01a_hm.tga \
+	phillipk/pk01_wall01.tga \
+	phillipk/pk01_wall01_hm.tga \
+	phillipk/pk01_wall01_nm.tga \
+	phillipk/pk01_wall02_nm.tga \
+	phillipk/pk01_wall02a.tga \
 	phillipk/pk01_wall02a_hm.tga \
 	phillipk/pk01_wall02a_nm.tga \
-	phillipk/pk01_wall02a.tga \
-	phillipk/pk01_wall02b_hm.tga \
 	phillipk/pk01_wall02b.tga \
-	phillipk/pk01_wall02_nm.tga \
+	phillipk/pk01_wall02b_hm.tga \
 	phillipk/pk01_wall03.tga \
 	phillipk/pk01_wall03_hm.tga \
 	phillipk/pk01_wall03_nm.tga \
 	phillipk/pk01_wall04.tga \
 	phillipk/pk01_wall04_hm.tga \
 	phillipk/pk01_wall04_nm.tga \
+	phillipk/pk01_wall04b.tga \
 	phillipk/pk01_wall04b_hm.tga \
 	phillipk/pk01_wall04b_nm.tga \
-	phillipk/pk01_wall04b.tga \
+	phillipk/pk02_ceiling02.tga \
 	phillipk/pk02_ceiling02_fx.tga \
 	phillipk/pk02_ceiling02_nm.tga \
-	phillipk/pk02_ceiling02.tga \
-	phillipk/pk02_ceiling02r_nm.tga \
 	phillipk/pk02_ceiling02r.tga \
+	phillipk/pk02_ceiling02r_nm.tga \
+	phillipk/pk02_computer01a.tga \
 	phillipk/pk02_computer01a_hm.tga \
 	phillipk/pk02_computer01a_nm.tga \
-	phillipk/pk02_computer01a.tga \
+	phillipk/pk02_door01.tga \
+	phillipk/pk02_door01_hm.tga \
+	phillipk/pk02_door01_nm.tga \
+	phillipk/pk02_floor01.tga \
+	phillipk/pk02_floor01_hm.tga \
+	phillipk/pk02_floor01_nm.tga \
+	phillipk/pk02_floor02.tga \
+	phillipk/pk02_floor02_hm.tga \
+	phillipk/pk02_floor02_nm.tga \
+	phillipk/pk02_floor08.tga \
 	phillipk/pk02_floor08a_hm.tga \
 	phillipk/pk02_floor08a_nm.tga \
+	phillipk/pk02_floor08b.tga \
 	phillipk/pk02_floor08b_hm.tga \
 	phillipk/pk02_floor08b_nm.tga \
-	phillipk/pk02_floor08b.tga \
-	phillipk/pk02_floor08.tga \
+	phillipk/pk02_light02_hm.tga \
+	phillipk/pk02_light02_nm.tga \
+	phillipk/pk02_light02a.tga \
+	phillipk/pk02_light03.tga \
+	phillipk/pk02_light03_hm.tga \
+	phillipk/pk02_light03_nm.tga \
+	phillipk/pk02_panels01a.tga \
+	phillipk/pk02_panels01a_hm.tga \
+	phillipk/pk02_panels01a_nm.tga \
+	phillipk/pk02_plates01a.tga \
+	phillipk/pk02_plates01a_hm.tga \
+	phillipk/pk02_plates01a_nm.tga \
+	phillipk/pk02_switches01a.tga \
 	phillipk/pk02_switches01a_hm.tga \
 	phillipk/pk02_switches01a_nm.tga \
-	phillipk/pk02_switches01a.tga \
-	phillipk/pk02_switches01b_nm.tga \
 	phillipk/pk02_switches01b.tga \
-	phillipk/pk02_switches01c_nm.tga \
+	phillipk/pk02_switches01b_nm.tga \
 	phillipk/pk02_switches01c.tga \
-	phillipk/pk02_wall07a_nm.tga \
+	phillipk/pk02_switches01c_nm.tga \
+	phillipk/pk02_trim03.tga \
+	phillipk/pk02_trim03_hm.tga \
+	phillipk/pk02_trim03_nm.tga \
+	phillipk/pk02_wall02a.tga \
+	phillipk/pk02_wall02a_hm.tga \
+	phillipk/pk02_wall02a_nm.tga \
+	phillipk/pk02_wall02c.tga \
+	phillipk/pk02_wall02c_hm.tga \
+	phillipk/pk02_wall02c_nm.tga \
+	phillipk/pk02_wall03b.tga \
+	phillipk/pk02_wall03b_hm.tga \
+	phillipk/pk02_wall03b_nm.tga \
+	phillipk/pk02_wall06a.tga \
+	phillipk/pk02_wall06a_hm.tga \
+	phillipk/pk02_wall06a_nm.tga \
 	phillipk/pk02_wall07a.tga \
-	phillipk/pk02_wall07b_nm.tga \
+	phillipk/pk02_wall07a_nm.tga \
 	phillipk/pk02_wall07b.tga \
+	phillipk/pk02_wall07b_nm.tga \
+	phillipk/pk02_wall08.tga \
+	phillipk/pk02_wall08_hm.tga \
+	phillipk/pk02_wall08_nm.tga \
+	phillipk/pk02_wall_big02a.tga \
 	phillipk/pk02_wall_big02a_hm.tga \
 	phillipk/pk02_wall_big02a_nm.tga \
-	phillipk/pk02_wall_big02a.tga \
+	phillipk/pk02_wall_big02b.tga \
 	phillipk/pk02_wall_big02b_hm.tga \
 	phillipk/pk02_wall_big02b_nm.tga \
-	phillipk/pk02_wall_big02b.tga \
 	rage/beam_purple_hm.tga \
 	rage/beam_purple_nm.tga \
 	rage/beam_purple.tga \
