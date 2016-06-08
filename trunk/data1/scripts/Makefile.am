@@ -15,6 +15,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-bloodfactory2k15.rscript \
 	maps/dm-deathray2k16.rscript \
 	maps/dm-dismal2k15.rscript \
+	maps/dm-dynamo2k16.rscript \
 	maps/dm-extermination2k15.rscript \
 	maps/dm-gauntlet2k16.rscript \
 	maps/dm-neptune2k15.rscript \

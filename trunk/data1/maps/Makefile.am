@@ -453,6 +453,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obarch2_b.md2 \
 	meshes/tech/obarch2_r.md2 \
 	meshes/tech/obarch3.md2 \
+	meshes/tech/obarch4.md2 \
 	meshes/tech/obfloor1.jpg \
 	meshes/tech/obfloor1.md2 \
 	meshes/tech/obfloor1_fx.tga \
@@ -693,6 +694,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-deathray2k16.mus \
 	scripts/dm-dismal2k15.fog \
 	scripts/dm-dismal2k15.mus \
+	scripts/dm-dynamo2k16.fog \
+	scripts/dm-dynamo2k16.mus \
 	scripts/dm-extermination2k15.fog \
 	scripts/dm-extermination2k15.mus \
 	scripts/dm-gauntlet2k16.fog \
