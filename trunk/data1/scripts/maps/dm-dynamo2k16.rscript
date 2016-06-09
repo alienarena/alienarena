@@ -23,6 +23,15 @@ textures/blanks/blank1
 		lensflare
 	}
 }
+textures/blanks/blank5
+{
+	{
+		map gfx/beam3.tga
+		scale static 15 static 15
+		colormap 1 1 1
+		beam
+	}
+}
 textures/arena7/light3
 {
 	{

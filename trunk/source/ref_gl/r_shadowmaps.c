@@ -465,7 +465,7 @@ static void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if (R_CullBox (surf->mins, surf->maxs)) 
 			continue;
 			
-		if (surf->texinfo->flags & SURF_SKY)
+		if (surf->texinfo->flags & SURF_SKY || surf->texinfo->flags & SURF_NOSHADOW)
 		{	// no skies here
 			continue;
 		}
@@ -676,7 +676,7 @@ static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin,
 		if (R_CullBox (surf->mins, surf->maxs)) 
 			continue;
 			
-		if (surf->texinfo->flags & SURF_SKY)
+		if (surf->texinfo->flags & SURF_SKY || surf->texinfo->flags & SURF_NOSHADOW)
 		{	// no skies here
 			continue;
 		}
