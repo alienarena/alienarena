@@ -224,6 +224,7 @@ nobase_dist_maps_DATA = \
 	dm-bloodfactory2k15.bsp \
 	dm-deathray2k16.bsp \
 	dm-dismal2k15.bsp \
+	dm-dynamo2k16.bsp \
 	dm-extermination2k15.bsp \
 	dm-extermination2k15.lightmap \
 	dm-gauntlet2k16.bsp \
@@ -385,6 +386,11 @@ nobase_dist_maps_DATA = \
 	meshes/dm-deathray/slime0.decal \
 	meshes/dm-dismal/rubble1.terrain \
 	meshes/dm-dismal/snow1.terrain \
+	meshes/dm-dynamo/blood0.decal \
+	meshes/dm-dynamo/blood1.decal \
+	meshes/dm-dynamo/blood2.decal \
+	meshes/dm-dynamo/blood3.decal \
+	meshes/dm-dynamo/slime0.decal \
 	meshes/dm-extermination/blood0.decal \
 	meshes/dm-extermination/blood1.decal \
 	meshes/dm-extermination/blood2.decal \
@@ -677,6 +683,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obsupport1_normal.jpg \
 	meshes/tech/obsupport2.md2 \
 	meshes/tech/obsupport3.md2 \
+	meshes/tech/obsupport5.md2 \
 	meshes/tech/railing.jpg \
 	meshes/tech/railing.md2 \
 	meshes/tech/railing2.md2 \
