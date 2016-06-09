@@ -362,6 +362,7 @@ typedef struct
 #define SURF_UNDERWATER	0x2000	// reflecting ripples; applied automatically 
 								// to underwater surfs but could be applied
 								// manually as well
+#define SURF_NOSHADOW	0x4000  // don't draw shadowmaps on this surface
 
 typedef struct
 {
