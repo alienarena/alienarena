@@ -365,8 +365,14 @@ void NoAmmoWeaponChange (edict_t *ent)
 	for (i = 0; i < n; i++)
 	{
 		gitem_t *item, *ammo;
+		int index;
 		
 		item = FindItem (weapons[i]);
+		index = ITEM_INDEX(item);
+
+		// do not autoswitch if you don't have this weapon
+		if(!ent->client->pers.inventory[index])
+			continue;
 		
 		// never autoswitch to the same weapon
 		if (ent->client->pers.weapon == item)
@@ -1502,7 +1508,7 @@ void Machinegun_Fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_CHAINGUN1 + shots - 1);
+		gi.WriteByte (MZ_CHAINGUN1);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		//create smoke effect
@@ -1553,7 +1559,7 @@ void Machinegun_Fire (edict_t *ent)
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_CHAINGUN1 + shots - 1);
+		gi.WriteByte (MZ_CHAINGUN1 + (rand()&2));
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		//create visual muzzle flash sprite!

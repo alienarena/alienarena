@@ -295,9 +295,9 @@ void CL_ParseMuzzleFlash (void)
 	VectorMA (dl->origin, 18, fv, dl->origin);
 	VectorMA (dl->origin, 16, rv, dl->origin);
 	if (silenced)
-		dl->radius = 100 + (rand()&31);
+		dl->radius = 75 + (rand()&31);
 	else
-		dl->radius = 200 + (rand()&31);
+		dl->radius = 125 + (rand()&31);
 	dl->minlight = 32;
 	dl->die = cl.time; // + 0.1;
 
@@ -319,11 +319,11 @@ void CL_ParseMuzzleFlash (void)
 	switch (weapon)
 	{
 	case MZ_BLASTER:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		dl->color[0] = 0;dl->color[1] = 1;dl->color[2] = 1;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
 		break;
 	case MZ_HYPERBLASTER:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		dl->color[0] = 0.5;dl->color[1] = 1;dl->color[2] = 0.2;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0);
 		break;
 	case MZ_MACHINEGUN:
@@ -334,23 +334,21 @@ void CL_ParseMuzzleFlash (void)
 	case MZ_SHOTGUN:
 		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0);
-		//[no file] S_StartSound (NULL, i, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
 		break;
 	case MZ_SSHOTGUN:
 		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/sshotf1b.wav"), volume, ATTN_NORM, 0);
 		break;
 	case MZ_CHAINGUN1:
-		dl->radius = 200 + (rand()&31);
+		dl->radius = 75 + (rand()&31);
 		dl->color[0] = 1;dl->color[1] = 0.25;dl->color[2] = 0;
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
 		CL_BrassShells(shell_brass, dir, 1);
 		break;
 	case MZ_CHAINGUN2:
-		dl->radius = 225 + (rand()&31);
-		dl->color[0] = 1;dl->color[1] = 0.5;dl->color[2] = 0;
-		dl->die = cl.time  + 0.1;	// long delay
+		dl->radius = 85 + (rand()&31);
+		dl->color[0] = 1;dl->color[1] = 0.35;dl->color[2] = 0;
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
@@ -358,9 +356,8 @@ void CL_ParseMuzzleFlash (void)
 		CL_BrassShells(shell_brass, dir, 1);
 		break;
 	case MZ_CHAINGUN3:
-		dl->radius = 250 + (rand()&31);
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
-		dl->die = cl.time  + 0.1;	// long delay
+		dl->radius = 100 + (rand()&31);
+		dl->color[0] = 1;dl->color[1] = .5;dl->color[2] = 0;
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
@@ -371,7 +368,6 @@ void CL_ParseMuzzleFlash (void)
 		break;
 	case MZ_RAILGUN:
 		dl->color[0] = 0.5;dl->color[1] = 0.5;dl->color[2] = 1.0;
-//		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/railgf1a.wav"), volume, ATTN_NORM, 0);
 		break;
 	case MZ_ROCKET:
 		dl->color[0] = 1;dl->color[1] = 0.5;dl->color[2] = 0.2;
@@ -392,7 +388,6 @@ void CL_ParseMuzzleFlash (void)
 		dl->color[0] = 0;dl->color[1] = 1; dl->color[2] = 0;
 		dl->die = cl.time + 1.0;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
-		//CL_LogoutEffect (pl->current.origin, weapon);
 		CL_TeleportParticles (pl->current.origin);
 		break;
 	case MZ_LOGOUT:
