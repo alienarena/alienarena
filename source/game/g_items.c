@@ -1310,7 +1310,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the alien bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Alien Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Bombs", "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
 		NULL
 	},
 
@@ -1323,7 +1323,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the human bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Human Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, NULL, "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Bombs", "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
 		NULL
 	},
 #endif
@@ -1368,7 +1368,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_AlienBlaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("i_hud_alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.iqm", "w_blaster.iqm"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.iqm", "w_alienblaster.iqm"),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav" //to do tactical - change sound
 	},
 

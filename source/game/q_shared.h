@@ -731,7 +731,7 @@ typedef struct
 #define	TE_DEATHFIELD2				13
 #define	TE_BULLET_SPARKS			14
 #define	TE_LASER_SPARKS				15
-#define	TE_DONTUSE					16
+#define	TE_GREEN_MUZZLEFLASH		16
 #define TE_ROCKET_EXPLOSION_WATER	17
 #define	TE_REDLASER					19
 #define	TE_BFG_BIGEXPLOSION			21

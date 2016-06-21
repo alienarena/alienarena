@@ -248,7 +248,7 @@ void ChangeWeapon (edict_t *ent)
 	int i;
 	int done;
 	char	weaponpath[MAX_OSPATH] = " ";
-	FILE *file;
+	FILE *file;	
 
 	ent->client->pers.lastweapon = ent->client->pers.weapon;
 	ent->client->pers.weapon = ent->client->newweapon;
@@ -329,7 +329,7 @@ void ChangeWeapon (edict_t *ent)
 	}
 
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
-	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.iqm") )
+	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.iqm") || Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_alienblast/tris.iqm"))
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
 
 	ent->client->anim_priority = ANIM_PAIN;
@@ -388,7 +388,7 @@ void NoAmmoWeaponChange (edict_t *ent)
 		return;
 	}
 
-	if(g_tactical->integer && ent->ctype == 0)
+	if(ent->ctype == 0)
 		ent->client->newweapon = FindItem ("Alien Blaster");
 	else
 		ent->client->newweapon = FindItem ("Blaster");
@@ -652,6 +652,8 @@ fire_begin:
 			//play a reloading sound
 			if(ent->client->pers.weapon->classnum == weapon_blaster && gunframe == FRAME_IDLE_FIRST + 5)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/blasterreload.wav"), 1, ATTN_NORM, 0);
+			else if(ent->client->pers.weapon->classnum == weapon_alienblaster && gunframe == FRAME_IDLE_FIRST + 5)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/blasterreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_violator && gunframe == FRAME_IDLE_FIRST + 3)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/violatorreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_supershotgun && gunframe == FRAME_IDLE_FIRST + 5)
@@ -695,7 +697,8 @@ fire_begin:
 		if (gunframe == FRAME_IDLE_FIRST+1)
 		{
 			if(ent->client->pers.weapon->classnum == weapon_hyperblaster || ent->client->pers.weapon->classnum == weapon_blaster
-				|| ent->client->pers.weapon->classnum == weapon_shotgun || ent->client->pers.weapon->classnum == weapon_rocketlauncher)
+				|| ent->client->pers.weapon->classnum == weapon_shotgun || ent->client->pers.weapon->classnum == weapon_rocketlauncher
+				|| ent->client->pers.weapon->classnum == weapon_alienblaster)
 				gunframe = FRAME_IDLE_LAST;
 			ent->client->weaponstate = WEAPON_READY;
 		}
@@ -1227,6 +1230,8 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 		VectorSet(offset, 32, 6, ent->viewheight-3);
 	else if(hyper && (ent->client->buttons & BUTTON_ATTACK2))
 		VectorSet(offset, 32, 6, ent->viewheight-5);
+	else if(alien)
+		VectorSet(offset, 30, 4, ent->viewheight-1);
 	else 
 		VectorSet(offset, 30, 6, ent->viewheight-5);
 
@@ -1275,14 +1280,31 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	//create visual muzzle flash sprite!
-	if(!hyper || (ent->client->buttons & BUTTON_ATTACK2))
+	VectorAdd(muzzle, forward, muzzle);
+	if(alien)
 	{
-		VectorAdd(muzzle, forward, muzzle);
+		if(!hyper && (ent->client->buttons & BUTTON_ATTACK))
+		{
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_GREEN_MUZZLEFLASH);
+			gi.WritePosition (muzzle);
+			gi.multicast (muzzle, MULTICAST_PVS);
+		}
+		if(hyper && (ent->client->buttons & BUTTON_ATTACK2))
+		{
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_BLUE_MUZZLEFLASH);
+			gi.WritePosition (muzzle);
+			gi.multicast (muzzle, MULTICAST_PVS);
+		}
+	}
+	else if(!hyper || (ent->client->buttons & BUTTON_ATTACK2))
+	{
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 		gi.WritePosition (muzzle);
 		gi.multicast (muzzle, MULTICAST_PVS);
-	}
+	}	
 }
 
 
@@ -2021,7 +2043,7 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 	}
 	ent->client->ps.gunframe++;
 
-	take_ammo (ent, (ent->client->buttons & BUTTON_ATTACK2));
+	take_ammo (ent, ent->altfire);
 }
 void Weapon_TacticalBomb (edict_t *ent)
 {

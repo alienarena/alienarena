@@ -1944,6 +1944,13 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 			client->pers.inventory[client->pers.selected_item] = 1;
 			client->pers.weapon = item;
 		}		
+		else if(!(rocket_arena->integer || instagib->integer || insta_rockets->value))
+		{
+			item = FindItem("Blaster");
+			client->pers.selected_item = ITEM_INDEX(item);
+			client->pers.inventory[client->pers.selected_item] = 1;
+			client->pers.weapon = item;
+		}
 	}
 	else 
 	{ 
@@ -1960,6 +1967,14 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 				client->pers.inventory[armor_index] += 175;
 			}
 			fclose(file);
+		
+			if(!(rocket_arena->integer || instagib->integer || insta_rockets->value))
+			{
+				item = FindItem("Blaster");
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 1;
+				client->pers.weapon = item;
+			}
 		}
 		else
 		{ 
@@ -1996,6 +2011,17 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
 				client->pers.weapon = item;				
+			}
+			else if(!(rocket_arena->integer || instagib->integer || insta_rockets->value))
+			{
+				item = FindItem("Blaster");
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 0;	
+
+				item = FindItem("Alien Blaster");
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 1;
+				client->pers.weapon = item;
 			}
 		}
 	}

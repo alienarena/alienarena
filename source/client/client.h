@@ -437,7 +437,7 @@ void CL_TeleportParticles (vec3_t org);
 void CL_BlasterParticles (vec3_t org, vec3_t dir);
 void CL_ExplosionParticles (vec3_t org);
 void CL_MuzzleParticles (vec3_t org);
-void CL_BlueMuzzleParticles (vec3_t org);
+void CL_BlasterMuzzleParticles (vec3_t org, float color);
 void CL_SmartMuzzle (vec3_t org);
 void CL_Voltage(vec3_t org);
 particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous);

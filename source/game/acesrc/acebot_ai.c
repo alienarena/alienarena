@@ -920,7 +920,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	if ( ACEIT_ChangeWeapon( self, FindItem( "Alien Disruptor" ) ))
 		return;
 
-	if(g_tactical->integer && self->ctype == 0)
+	if(self->ctype == 0)
 		selected = ACEIT_ChangeWeapon( self, FindItem( "Alien Blaster" ) );
 	else
 		selected = ACEIT_ChangeWeapon( self, FindItem( "Blaster" ) );

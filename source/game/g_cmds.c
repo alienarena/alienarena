@@ -411,6 +411,13 @@ void Cmd_Use_f (edict_t *ent)
 	char		*s;
 
 	s = gi.args();
+
+	if(ent->ctype == 0)
+	{
+		if(strcmp (s, "Blaster") == 0)
+			strcpy(s, "Alien Blaster");
+	}
+
 	it = FindItem (s);
 	if (!it)
 	{

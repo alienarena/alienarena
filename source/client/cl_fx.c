@@ -1186,34 +1186,33 @@ void CL_MuzzleParticles (vec3_t org)
 CL_MuzzleParticles - Blue
 ===============
 */
-void CL_BlueMuzzleParticles (vec3_t org)
+void CL_BlasterMuzzleParticles (vec3_t org, float color)
 {
 	int			i, j;
 	particle_t	*p;
 
-	for ( i = 0; i < 4; i++)
+	for ( i = 0; i < 3; i++)
 	{
 		if (!(p = new_particle()))
 			return;
 
 		p->type = PARTICLE_STANDARD;
 		p->image = r_cflashtexture;
-		p->scale = 16 + (rand()&7);
+		p->scale = 28/(i+1);
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 		for (j=0 ; j<3 ; j++)
 		{
-			p->org[j] = org[j] + ((rand()%2)-1);
+			p->org[j] = org[j];
+			p->angle[j] = 0;
 			p->vel[j] = 0;
+			p->accel[j] = 0;
 		}
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = 0;
-		p->alpha = 0.4;
-		p->color = 0x74; //(23 84 111)
+		p->alpha = 0.7;
+		p->color = color; 
 
-		p->alphavel = -2.8f / (0.5f + frand()*0.3f);
+		p->alphavel = -2.8 / (0.6f + frand()*0.2f);
 	}
-
 }
 
 /*
@@ -2095,6 +2094,30 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
+	//rotating more solid leading particle at start
+	if (!(p = new_particle()))
+		return;
+
+	p->alpha = 0.5;
+	p->alphavel = INSTANT_PARTICLE;
+	p->type = PARTICLE_ROTATINGROLL;
+	p->image = r_cflashtexture;
+	p->scale = 10;
+	p->angle[1] = cl.refdef.viewangles[0];
+	p->angle[0] = sinf(len);
+	p->angle[2] = cl.refdef.viewangles[2];
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0xd0 + (rand()&2);
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = move[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
+	
+	//now make the fading trail
 	dec = 20;
 	VectorScale (vec, dec, vec);
 

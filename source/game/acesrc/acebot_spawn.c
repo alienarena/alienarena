@@ -961,8 +961,6 @@ void ACESP_PutClientInServer (edict_t *ent)
 
 	client->ps.fov = 90;
 
-	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
-
 	// clear entity state values
 	ent->s.effects = 0;
 	ent->s.skinnum = ent - g_edicts - 1;
@@ -997,6 +995,8 @@ void ACESP_PutClientInServer (edict_t *ent)
 	ent->s.modelindex4 = 0;
 	
 	Respawn_ClassSpecific (ent, client);
+	
+	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
 	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)
