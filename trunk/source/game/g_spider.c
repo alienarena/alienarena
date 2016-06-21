@@ -218,7 +218,7 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 
 	VectorCopy(origin, self->s.origin);
 	VectorCopy(angle, self->s.angles);
-	self->s.origin[2] += 16;
+	self->s.origin[2] += 24;
 
 	sound_pain  = gi.soundindex ("misc/deathray/fizz.wav");
 	sound_die   = gi.soundindex ("misc/deathray/fizz.wav");
@@ -241,8 +241,6 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->health = self->max_health;
 	self->gib_health = 0;
 	self->mass = 100;
-	self->s.angles[PITCH] = 0.0;
-	self->s.angles[ROLL] = 0.0;
 
 	self->pain = spider_pain;
 	self->die = spider_die;
@@ -315,10 +313,10 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	spider->movetype = MOVETYPE_BOUNCE;
 	spider->clipmask = MASK_SHOT;
 	spider->solid = SOLID_BBOX;
-	VectorSet (spider->mins, -16, -16, 0);
-	VectorSet (spider->maxs, 16, 16, 32);
-	spider->s.angles[PITCH] = 0.0;
-	spider->s.angles[ROLL] = 0.0;
+	VectorClear (spider->mins);
+	VectorClear (spider->maxs);
+	//VectorSet (spider->mins, -16, -16, 0);
+	//VectorSet (spider->maxs, 16, 16, 32);
 	spider->s.modelindex = gi.modelindex("models/objects/spider/tris.iqm");
 	spider->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.iqm");
 	spider->s.frame = 31;

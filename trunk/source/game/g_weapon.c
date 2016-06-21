@@ -2096,6 +2096,9 @@ void tactical_bomb_think (edict_t *self)
 {	
 	self->nextthink = level.time + FRAMETIME;
 
+	self->s.angles[PITCH] = 0.0;
+	self->s.angles[ROLL] = 0.0;
+
 	if(self->armed)
 	{		
 		self->s.frame++;
@@ -2238,7 +2241,7 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	VectorSet (bomb->avelocity, 20, 20, 20);
 	bomb->movetype = MOVETYPE_BOUNCE;
 	bomb->clipmask = MASK_SHOT;
-	bomb->solid = SOLID_BBOX;
+	bomb->solid = SOLID_BBOX;	
 	v = tv(-8,-8,0);
 	VectorCopy (v, bomb->mins);
 	v = tv(8,8,16);

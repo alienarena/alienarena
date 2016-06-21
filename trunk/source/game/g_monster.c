@@ -567,6 +567,8 @@ void walkmonster_start_go (edict_t *self)
 
 void walkmonster_start (edict_t *self)
 {
+	self->s.angles[PITCH] = 0.0;
+	self->s.angles[ROLL] = 0.0;
 	self->think = walkmonster_start_go;
 	monster_start (self);
 }

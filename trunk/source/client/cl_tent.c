@@ -509,9 +509,13 @@ void CL_ParseTEnt (void)
 		CL_MuzzleFlashParticle(pos, cl.refdef.viewangles, false);
 		break;
 
+	case TE_GREEN_MUZZLEFLASH:
+		MSG_ReadPos (&net_message, pos);
+		CL_BlasterMuzzleParticles (pos, 0xd4);
+		break;
 	case TE_BLUE_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
-		CL_BlueMuzzleParticles (pos);
+		CL_BlasterMuzzleParticles (pos, 0x74);
 		break;
 	case TE_SMART_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
