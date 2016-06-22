@@ -184,6 +184,7 @@ nobase_dist_players_DATA = \
 	lauren/w_sshotgun.skin \
 	lauren/w_violator.iqm \
 	lauren/w_violator.skin \
+	martiancyborg/alien \
 	martiancyborg/blue.jpg \
 	martiancyborg/blue_i.jpg \
 	martiancyborg/bluecyborgfx.tga \
@@ -217,7 +218,6 @@ nobase_dist_players_DATA = \
 	martiancyborg/pain75_2.wav \
 	martiancyborg/red_i.jpg \
 	martiancyborg/red.jpg \
-	martiancyborg/robot \
 	martiancyborg/tris.iqm \
 	martiancyborg/tris.rgd \
 	martiancyborg/w_alienblaster.iqm \
@@ -300,7 +300,6 @@ nobase_dist_players_DATA = \
 	martianenforcer/w_chaingun.iqm \
 	martianenforcer/w_chaingun.skin \
 	martianenforcer/weapon.iqm \
-	martianenforcer/weapon.jpg \
 	martianenforcer/weapon.skin \
 	martianenforcer/w_hyperblaster.iqm \
 	martianenforcer/w_hyperblaster.skin \
@@ -434,7 +433,6 @@ nobase_dist_players_DATA = \
 	martianwarrior/w_chaingun.iqm \
 	martianwarrior/w_chaingun.skin \
 	martianwarrior/weapon.iqm \
-	martianwarrior/weapon.jpg \
 	martianwarrior/weapon.skin \
 	martianwarrior/w_hyperblaster.iqm \
 	martianwarrior/w_hyperblaster.skin \
