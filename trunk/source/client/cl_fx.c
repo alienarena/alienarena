@@ -2098,11 +2098,11 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 	if (!(p = new_particle()))
 		return;
 
-	p->alpha = 0.5;
+	p->alpha = 0.9;
 	p->alphavel = INSTANT_PARTICLE;
 	p->type = PARTICLE_ROTATINGROLL;
-	p->image = r_cflashtexture;
-	p->scale = 10;
+	p->image = r_shottexture;
+	p->scale = 8;
 	p->angle[1] = cl.refdef.viewangles[0];
 	p->angle[0] = sinf(len);
 	p->angle[2] = cl.refdef.viewangles[2];
