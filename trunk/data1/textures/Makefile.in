@@ -1840,6 +1840,10 @@ nobase_dist_textures_DATA = \
 	water/clearwater.tga \
 	water/flowingwater.tga \
 	water/waterpx.tga \
+	wires/wires1.tga \
+	wires/wires2.tga \
+	wires/wires3.tga \
+	wires/wires4.tga \
 	xempx/a3light1b.tga \
 	xempx/a6bt.tga \
 	xempx/a7light10.tga \
