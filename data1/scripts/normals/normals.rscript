@@ -795,6 +795,8 @@ vehicles/jetpack/skin
 	{
 		map vehicles/jetpack/skin_normal.jpg
 		normalmap
+		map2 vehicles/jetpack/skin_fx.jpg
+		glow
 	}
 }
 vehicles/strafer/skin
