@@ -46,7 +46,6 @@ nobase_dist_players_DATA = \
 	commander/w_chaingun.iqm \
 	commander/w_chaingun.skin \
 	commander/weapon.iqm \
-	commander/weapon.jpg \
 	commander/weapon.skin \
 	commander/w_hyperblaster.iqm \
 	commander/w_hyperblaster.skin \
@@ -106,7 +105,6 @@ nobase_dist_players_DATA = \
 	enforcer/w_chaingun.iqm \
 	enforcer/w_chaingun.skin \
 	enforcer/weapon.iqm \
-	enforcer/weapon.jpg \
 	enforcer/weapon.skin \
 	enforcer/w_hyperblaster.iqm \
 	enforcer/w_hyperblaster.skin \
@@ -166,7 +164,6 @@ nobase_dist_players_DATA = \
 	lauren/w_chaingun.iqm \
 	lauren/w_chaingun.skin \
 	lauren/weapon.iqm \
-	lauren/weapon.jpg \
 	lauren/weapon.skin \
 	lauren/w_hyperblaster.iqm \
 	lauren/w_hyperblaster.skin \
@@ -364,7 +361,6 @@ nobase_dist_players_DATA = \
 	martianoverlord/w_chaingun.iqm \
 	martianoverlord/w_chaingun.skin \
 	martianoverlord/weapon.iqm \
-	martianoverlord/weapon.jpg \
 	martianoverlord/weapon.skin \
 	martianoverlord/w_hyperblaster.iqm \
 	martianoverlord/w_hyperblaster.skin \
@@ -513,7 +509,6 @@ nobase_dist_players_DATA = \
 	rustbot/w_violator.iqm \
 	rustbot/w_violator.skin \
 	rustbot/weapon.iqm \
-	rustbot/weapon.jpg \
 	rustbot/weapon.skin \
 	slashbot/blue_i.jpg \
 	slashbot/blue.jpg \
@@ -556,7 +551,6 @@ nobase_dist_players_DATA = \
 	slashbot/w_chaingun.iqm \
 	slashbot/w_chaingun.skin \
 	slashbot/weapon.iqm \
-	slashbot/weapon.jpg \
 	slashbot/weapon.skin \
 	slashbot/w_hyperblaster.iqm \
 	slashbot/w_hyperblaster.skin \
