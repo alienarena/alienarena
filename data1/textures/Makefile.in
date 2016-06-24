@@ -1245,6 +1245,8 @@ nobase_dist_textures_DATA = \
 	desert/lavarock1.tga \
 	desert/lavarock1_hm.tga \
 	desert/lavarock1_nm.tga \
+	desert/metalmesh1.tga \
+	desert/metalmesh1_nm.tga \
 	desert/o3metal1.tga \
 	desert/o3rock10.tga \
 	desert/o3rock10_hm.tga \

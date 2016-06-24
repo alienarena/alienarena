@@ -244,6 +244,7 @@ nobase_dist_vehicles_DATA = \
 	hover/v_wep.md2 \
 	hover/window.md2 \
 	jetpack/skin.jpg \
+	jetpack/skin_fx.tga \
 	jetpack/skin_normal.jpg \
 	jetpack/tris.iqm \
 	jetpack/tris.skin \

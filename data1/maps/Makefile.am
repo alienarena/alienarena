@@ -173,7 +173,12 @@ nobase_dist_maps_DATA = \
 	meshes/dm-deathray/blood2.decal \
 	meshes/dm-deathray/blood3.decal \
 	meshes/dm-deathray/slime0.decal \
+	meshes/dm-dismal/blood0.decal \
+	meshes/dm-dismal/blood1.decal \
+	meshes/dm-dismal/blood2.decal \
+	meshes/dm-dismal/blood3.decal \
 	meshes/dm-dismal/rubble1.terrain \
+	meshes/dm-dismal/slime0.decal \
 	meshes/dm-dismal/snow1.terrain \
 	meshes/dm-dynamo/blood0.decal \
 	meshes/dm-dynamo/blood1.decal \
