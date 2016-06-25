@@ -239,8 +239,6 @@ players/rustbot/red
 		normalmap
 		map2 players/rustbot/redrustbotfx.tga
 		glow
-		map3 gfx/chrome2.tga
-		cube
 	}
 }
 players/rustbot/default
@@ -250,8 +248,6 @@ players/rustbot/default
 		normalmap
 		map2 players/rustbot/defaultrustbotfx.tga
 		glow
-		map3 gfx/chrome2.tga
-		cube
 	}
 }
 players/rustbot/blue
@@ -261,8 +257,6 @@ players/rustbot/blue
 		normalmap
 		map2 players/rustbot/defaultrustbotfx.tga
 		glow
-		map3 gfx/chrome2.tga
-		cube
 	}	
 }
 models/weapons/v_chain/skin
