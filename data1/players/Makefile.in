@@ -666,7 +666,7 @@ nobase_dist_players_DATA = \
 	rustbot/death4.wav \
 	rustbot/default.jpg \
 	rustbot/default_i.jpg \
-	rustbot/default_normal.tga \
+	rustbot/default_normal.jpg \
 	rustbot/defaultrustbotfx.tga \
 	rustbot/drown1.wav \
 	rustbot/fall1.wav \
