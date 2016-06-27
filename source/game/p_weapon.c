@@ -1941,7 +1941,7 @@ void Violator_Fire (edict_t *ent)
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 		fire_violator(ent, start, forward, damage, kick, 0);
 
-		if(ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 11)
+		if(ent->client->ps.gunframe == 6)
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/viofire1.wav"), 1, ATTN_NORM, 0);
 
 		ent->client->resp.weapon_shots[8]++;

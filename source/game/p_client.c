@@ -971,14 +971,18 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		if (!self->deadflag)
 		{
 			static int i;
-
-			i = (i+1)%3;
+			
 			// start a death animation
 			self->client->anim_priority = ANIM_DEATH;
 
+			//if a violator death, let's actually use a death frame that spawns a ragoll at the end of the sequence inst
+			if(mod == MOD_VIOLATOR)
+				i = 2;
+			else
+				i = (i+1)%3;
+
 			switch (i)
 			{
-			//all player models are now using the longer set of death frames only
 			case 0:
 				self->s.frame = FRAME_death501-1;
 				self->client->anim_end = FRAME_death518;

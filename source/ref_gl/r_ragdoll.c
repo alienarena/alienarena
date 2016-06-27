@@ -157,7 +157,7 @@ void RGD_addBody (int RagDollID, matrix3x4_t *bindmat, char *name, int objectID,
 	dBodySetPosition (RagDoll[RagDollID].RagDollObject[objectID].body, initmat.a[3], initmat.b[3], initmat.c[3]);
 	dBodySetRotation (RagDoll[RagDollID].RagDollObject[objectID].body, rot);
 	dBodySetForce (RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
-	dBodySetLinearVel (RagDoll[RagDollID].RagDollObject[objectID].body, 0, 40, 150); //a little initial upward velocity
+	dBodySetLinearVel (RagDoll[RagDollID].RagDollObject[objectID].body, 0, 40*RagDoll[RagDollID].velocity, 150*RagDoll[RagDollID].velocity); //a little initial upward velocity
 	dBodySetAngularVel (RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 	// This appears to make ODE less crashy.
 	dBodySetGyroscopicMode (RagDoll[RagDollID].RagDollObject[objectID].body, 0);
@@ -379,7 +379,7 @@ RagDollBind_t RagDollBinds[] =
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
 //build and set initial position of ragdoll
-void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
+void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH], float velocity )
 {
 	//Ragdoll  positions
 	vec3_t R_SHOULDER_POS;
@@ -427,6 +427,7 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 	VectorCopy(origin, RagDoll[RagDollID].origin);
 	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
+	RagDoll[RagDollID].velocity = velocity;
 	RagDoll[RagDollID].destroyed = false;
 
 	memset(bindmat, 0, sizeof(bindmat));
@@ -980,7 +981,7 @@ void R_ClearAllRagdolls( void )
 	RGD_DestroyWorldTrimesh();
 }
 
-void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
+void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH], float velocity )
 {
 	int RagDollID, i;
 	vec3_t dist;
@@ -1004,7 +1005,7 @@ void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 	{
 		if(RagDoll[RagDollID].destroyed)
 		{
-			RGD_RagdollBody_Init(RagDollID, origin, name);
+			RGD_RagdollBody_Init(RagDollID, origin, name, velocity);
 
 			if(r_ragdoll_debug->integer == 2)
 			{

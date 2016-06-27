@@ -454,6 +454,7 @@ static cull_result_t R_Mesh_CullModel (void)
 	vec3_t	bbox[8];
 	vec3_t	size;
 	qboolean occlusion_cull;
+	float velocity = 1.0;
 	
 	// Don't render your own avatar unless it's for shadows
 	if ((currententity->flags & RF_VIEWERMODEL))
@@ -513,15 +514,17 @@ static cull_result_t R_Mesh_CullModel (void)
 		//Ragdolls take over at beginning of each death sequence
 		if	(	!(currententity->flags & RF_TRANSLUCENT) &&
 				currentmodel->hasRagDoll && 
-				(currententity->frame == 199 || 
+				(currententity->frame == 208 || 
 				currententity->frame == 220 ||
 				currententity->frame == 238)
 			)
 		{
-			RGD_AddNewRagdoll (currententity->origin, currententity->name);
+			if(currententity->frame == 208)
+				velocity = 0.0001;
+			RGD_AddNewRagdoll (currententity->origin, currententity->name, velocity);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
-		if ((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
+		if ((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 207)
 			return draw_none;
 	}
 	

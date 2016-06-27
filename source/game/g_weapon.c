@@ -1131,6 +1131,8 @@ void homing_think (edict_t *ent)
 			continue;
 		if (!infront(ent, blip))
 			continue;
+		if(OnSameTeam(ent, blip))
+			continue;
 		VectorSubtract(blip->s.origin, ent->s.origin, blipdir);
 		blipdir[2] += 16;
 		if ((target == NULL) || (VectorLength(blipdir) < VectorLength(targetdir)))
@@ -1226,7 +1228,8 @@ void minderaser_think (edict_t *ent)
 			continue;
 		if (!visible(ent, blip))
 			continue;
-
+		if(OnSameTeam(ent, blip))
+			continue;
 		VectorSubtract(blip->s.origin, ent->s.origin, blipdir);
 		blipdir[2] += 16;
 		if ((target == NULL) || (VectorLength(blipdir) < VectorLength(targetdir)))
