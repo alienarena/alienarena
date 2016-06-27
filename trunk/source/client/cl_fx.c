@@ -1407,12 +1407,13 @@ void CL_Voltage (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_STANDARD;
+		p->type = PARTICLE_ROTATINGROLL;
 		p->image = r_voltagetexture;
-		p->scale = 14 + (rand()&14);
+		p->scale = 6 + (rand()&14);
 		p->color = 0xff; // (159 91 83)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
+		p->scalevel = 12;
 
 		for (j=0 ; j<3 ; j++)
 		{
@@ -1423,7 +1424,7 @@ void CL_Voltage (vec3_t org)
 		p->accel[2] = 0;
 		p->alpha = 0.7;
 
-		p->alphavel = -2.8f / (0.5f + frand()*0.3f);
+		p->alphavel = -1.8f / (0.5f + frand()*0.3f);
 	}
 
 }
