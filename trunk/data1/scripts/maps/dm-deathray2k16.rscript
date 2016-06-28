@@ -74,22 +74,12 @@ textures/evil/e6launchengine
         alphashift 2.5 0.0 1.0
     }
 }
-textures/arena9/roundlight
+textures/blanks/blank3
 {
 	{
 		map gfx/beam1.tga
-		scale static 10 static 10
-		colormap 1 1 1
-		beam
-		lensflare
-	}
-}
-textures/metal/fade2
-{
-	{
-		map gfx/beam3.tga
-		scale static 45 static 80
-		colormap 1 1 1
+		scale static 12 static 12
+		colormap .2 .2 .2
 		beam
 	}
 }
