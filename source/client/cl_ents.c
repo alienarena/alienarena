@@ -743,14 +743,14 @@ void CL_AddPacketEntities (frame_t *frame)
 		// quad and pent can do different things on client
 		if (effects & EF_PENT)
 		{
-			effects &= ~EF_PENT;
+			//effects &= ~EF_PENT;
 			effects |= EF_COLOR_SHELL;
 			renderfx |= RF_SHELL_RED;
 		}
 
 		if (effects & EF_QUAD)
 		{
-			effects &= ~EF_QUAD;
+			//effects &= ~EF_QUAD;
 			effects |= EF_COLOR_SHELL;
 			renderfx |= RF_SHELL_BLUE;
 		}
@@ -865,16 +865,13 @@ void CL_AddPacketEntities (frame_t *frame)
 			if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 			{
 				//replace player color shells for powerups with floating gfx effect
-				if(playermodel && !(renderfx & RF_SHELL_GREEN))
+				if((effects & EF_QUAD) && playermodel)
 				{
-					if(renderfx & RF_SHELL_BLUE)
-					{
-						CL_PoweredEffects (ent.origin, EF_QUAD);
-					}
-					else
-					{
-						CL_PoweredEffects (ent.origin, EF_PENT);
-					}
+					CL_PoweredEffects (ent.origin, EF_QUAD);
+				}
+				else if((effects & EF_PENT) && playermodel)
+				{
+					CL_PoweredEffects (ent.origin, EF_PENT);
 				}
 				else
 				{
