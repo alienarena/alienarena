@@ -832,6 +832,14 @@ void G_SetClientEffects (edict_t *ent)
 	ent->s.effects = 0;
 	ent->s.renderfx = 0;
 
+	//if extended violator death animation, electrocution effect
+	if(ent->s.frame == FRAME_death401 || ent->s.frame == FRAME_death403 ||ent->s.frame == FRAME_death405 || ent->s.frame == FRAME_death407)
+	{
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx |= RF_SHELL_BLUE;
+		return;
+	}
+
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
 
@@ -875,7 +883,6 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.renderfx |= RF_TRANSLUCENT;
 		ent->s.modelindex2 = 0;
 	}
-
 }
 
 

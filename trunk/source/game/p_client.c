@@ -979,7 +979,11 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			if(mod == MOD_VIOLATOR)
 				i = 2;
 			else
+			{
 				i = (i+1)%3;
+				if(i == 2)
+					i = 0; //only do this for violator deaths
+			}
 
 			switch (i)
 			{
