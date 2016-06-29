@@ -890,6 +890,7 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/lightbomb_fx.tga \
 	meshes/xempx/lightbomb.jpg \
 	meshes/xempx/lightbomb.md2 \
+	meshes/xempx/lightbomb_big.md2 \
 	meshes/xempx/lightbomb_normal.jpg \
 	meshes/xempx/powercore_fx.tga \
 	meshes/xempx/powercore.jpg \
