@@ -1,0 +1,6 @@
+heightmap textures/dm-purgatory/bottom2.tga;
+texture bottom2_texture;
+lightmap textures/dm-purgatory/bottom2_lightmaptex.tga;
+vegetation textures/dm-purgatory/bottom2_vegetation.tga;
+mins -680, -650, -1;
+maxs 640, 650, 64;
