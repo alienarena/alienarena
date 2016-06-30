@@ -803,91 +803,105 @@ nobase_dist_textures_DATA = \
 	arena7/tekwall9_nm.tga \
 	arena7/tekwall9.tga \
 	arena7/warning.tga \
+	arena8/bark1.tga \
 	arena8/bark1_hm.tga \
 	arena8/bark1_nm.tga \
-	arena8/bark1.tga \
-	arena8/barnroof_nm.tga \
 	arena8/barnroof.tga \
+	arena8/barnroof_nm.tga \
 	arena8/barnwindows.tga \
+	arena8/barnwood.tga \
 	arena8/barnwood2.tga \
 	arena8/barnwood_nm.tga \
-	arena8/barnwood.tga \
-	arena8/blackbrick1_nm.tga \
 	arena8/blackbrick1.tga \
+	arena8/blackbrick1_nm.tga \
+	arena8/blackbrick2.tga \
 	arena8/blackbrick2_hm.tga \
 	arena8/blackbrick2_nm.tga \
-	arena8/blackbrick2.tga \
 	arena8/blackbrick3.tga \
+	arena8/brickwall1.tga \
 	arena8/brickwall1_hm.tga \
 	arena8/brickwall1_nm.tga \
-	arena8/brickwall1.tga \
+	arena8/bustedwood1.tga \
+	arena8/ceilingtile1.tga \
+	arena8/cinderblocks.tga \
 	arena8/cinderblocks_hm.tga \
 	arena8/cinderblocks_nm.tga \
-	arena8/cinderblocks.tga \
+	arena8/crackedrock1.tga \
 	arena8/crackedrock1_hm.tga \
 	arena8/crackedrock1_nm.tga \
-	arena8/crackedrock1.tga \
+	arena8/crackedrock2.tga \
 	arena8/crackedrock2_hm.tga \
 	arena8/crackedrock2_nm.tga \
-	arena8/crackedrock2.tga \
+	arena8/crackedrock3.tga \
 	arena8/crackedrock3_hm.tga \
 	arena8/crackedrock3_nm.tga \
-	arena8/crackedrock3.tga \
+	arena8/crackedrock4.tga \
 	arena8/crackedrock4_hm.tga \
 	arena8/crackedrock4_nm.tga \
-	arena8/crackedrock4.tga \
+	arena8/egyptbrick1.tga \
 	arena8/egyptbrick1_hm.tga \
 	arena8/egyptbrick1_nm.tga \
-	arena8/egyptbrick1.tga \
-	arena8/egyptfloor1_nm.tga \
 	arena8/egyptfloor1.tga \
+	arena8/egyptfloor1_nm.tga \
+	arena8/egyptrock1.tga \
 	arena8/egyptrock1_hm.tga \
 	arena8/egyptrock1_nm.tga \
-	arena8/egyptrock1.tga \
-	arena8/egyptrock2_nm.tga \
 	arena8/egyptrock2.tga \
+	arena8/egyptrock2_nm.tga \
 	arena8/fern.tga \
+	arena8/floor3.tga \
 	arena8/floor3_hm.tga \
 	arena8/floor3_nm.tga \
-	arena8/floor3.tga \
+	arena8/floor4.tga \
 	arena8/floor4_hm.tga \
 	arena8/floor4_nm.tga \
-	arena8/floor4.tga \
-	arena8/grass2_nm.tga \
 	arena8/grass2.tga \
+	arena8/grass2_nm.tga \
 	arena8/grate1.tga \
+	arena8/ice.jpg \
 	arena8/ice.tga \
-	arena8/lavalmetal_nm.tga \
+	arena8/ice_hm.jpg \
+	arena8/ice_nm.jpg \
 	arena8/lavalmetal.tga \
+	arena8/lavalmetal_nm.tga \
 	arena8/leaves1.tga \
-	arena8/metal1_nm.tga \
 	arena8/metal1.tga \
+	arena8/metal1_nm.tga \
+	arena8/metalroof.tga \
 	arena8/metalroof_hm.tga \
 	arena8/metalroof_nm.tga \
-	arena8/metalroof.tga \
+	arena8/metaltrim1.tga \
 	arena8/metaltrim1_hm.tga \
 	arena8/metaltrim1_nm.tga \
-	arena8/metaltrim1.tga \
+	arena8/metaltrim2.tga \
 	arena8/metaltrim2_hm.tga \
 	arena8/metaltrim2_nm.tga \
-	arena8/metaltrim2.tga \
-	arena8/rock1_nm.tga \
 	arena8/rock1.tga \
-	arena8/roughwood_nm.tga \
+	arena8/rock1_nm.tga \
 	arena8/roughwood.tga \
+	arena8/roughwood_nm.tga \
 	arena8/sand1.tga \
 	arena8/sand2.tga \
-	arena8/slime_nm.tga \
 	arena8/slime.tga \
+	arena8/slime_nm.tga \
+	arena8/snow.tga \
 	arena8/snow_hm.tga \
 	arena8/snow_nm.tga \
-	arena8/snow.tga \
+	arena8/stonefloor1.tga \
 	arena8/stonefloor1_hm.tga \
 	arena8/stonefloor1_nm.tga \
-	arena8/stonefloor1.tga \
+	arena8/window1.tga \
+	arena8/window1_hm.tga \
+	arena8/window1_nm.tga \
+	arena8/window2.tga \
+	arena8/window2_hm.tga \
+	arena8/window2_nm.tga \
+	arena8/wood1.tga \
 	arena8/wood1_hm.tga \
 	arena8/wood1_nm.tga \
-	arena8/wood1.tga \
+	arena8/wood2.tga \
+	arena8/wood3.tga \
+	arena8/wood3_fx.tga \
 	arena9/beam_metal_nm.tga \
 	arena9/beam_metal.tga \
 	arena9/biggrate1_hm.tga \
@@ -1372,6 +1386,14 @@ nobase_dist_textures_DATA = \
 	dm-neptune/cave4.tga \
 	dm-neptune/cave4_blendtex.tga \
 	dm-neptune/cave4_lightmaptex.tga \
+	dm-purgatory/bottom.tga \
+	dm-purgatory/bottom2.tga \
+	dm-purgatory/bottom2_blendtex.tga \
+	dm-purgatory/bottom2_lightmaptex.tga \
+	dm-purgatory/bottom2_vegetation.tga \
+	dm-purgatory/bottom_blendtex.tga \
+	dm-purgatory/bottom_lightmaptex.tga \
+	dm-purgatory/bottom_vegetation.tga \
 	dm-turbo/rubble1.tga \
 	dm-turbo/rubble1_blendtex.tga \
 	dm-turbo/rubble1_lightmaptex.tga \

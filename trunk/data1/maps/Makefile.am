@@ -208,6 +208,12 @@ nobase_dist_maps_DATA = \
 	meshes/dm-neptune/shark.jpg \
 	meshes/dm-neptune/shark.skin \
 	meshes/dm-neptune/shark_normal.jpg \
+	meshes/dm-purgatory/blood0.decal \
+	meshes/dm-purgatory/blood1.decal \
+	meshes/dm-purgatory/blood2.decal \
+	meshes/dm-purgatory/blood3.decal \
+	meshes/dm-purgatory/bottom.terrain \
+	meshes/dm-purgatory/bottom2.terrain \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/blood2.decal \
 	meshes/dm-turbo/rubble1.terrain \
@@ -311,6 +317,8 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/spike1.md2 \
 	meshes/gothic/spike1_normal.jpg \
 	meshes/gothic/spike2.md2 \
+	meshes/gothic/stomearch.md2 \
+	meshes/gothic/stonearch1.jpg \
 	meshes/gothic/throne.jpg \
 	meshes/gothic/throne.md2 \
 	meshes/gothic/throne_normal.jpg \
@@ -717,6 +725,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-neptune2k15.mus \
 	scripts/dm-oblivion2k15.fog \
 	scripts/dm-oblivion2k15.mus \
+	scripts/dm-purgatory2k16.fog \
+	scripts/dm-purgatory2k16.mus \
 	scripts/dm-turbo2k15.fog \
 	scripts/dm-turbo2k15.mus \
 	scripts/dm-violator2k15.fog \
