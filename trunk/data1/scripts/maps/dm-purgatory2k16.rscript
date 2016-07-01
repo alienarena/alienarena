@@ -26,6 +26,20 @@ bottom2_texture
 			2 textures/desert/pebbles_nm.tga		
 	}
 }
+bottom3_texture
+{	
+	{
+		map textures/dm-purgatory/bottom3_blendtex.tga		
+		blendmap 4	
+			200 textures/desert/rockground1.tga		
+			400 textures/desert/cliffmiddle.tga					
+			200 textures/desert/pebbles.tga	
+		blendnormalmap 3 
+			0 textures/desert/rockground1_nm.tga	
+			1 textures/desert/cliffmiddle_nm.tga
+			2 textures/desert/pebbles_nm.tga		
+	}
+}
 textures/desert/pebbles
 {
 	{

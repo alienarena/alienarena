@@ -39,3 +39,10 @@ maps/meshes/gothic/lavacolumn
 		fx
 	}
 }
+maps/meshes/gothic/stonearch1
+{
+	{
+		map maps/meshes/gothic/stonearch1_normal.jpg
+		normalmap
+	}
+}
