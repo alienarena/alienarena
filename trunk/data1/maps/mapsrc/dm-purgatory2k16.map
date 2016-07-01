@@ -14528,6 +14528,7 @@
 "classname" "misc_mapmodel"
 "origin" "120.000000 112.000000 232.000000"
 "model" "maps/meshes/gothic/meat1.md2"
+"spawnflags" "1"
 }
 // entity 126
 {
@@ -14535,12 +14536,14 @@
 "origin" "168.000000 112.000000 232.000000"
 "model" "maps/meshes/gothic/meat2.md2"
 "angle" "-56.307961"
+"spawnflags" "1"
 }
 // entity 127
 {
 "classname" "misc_mapmodel"
 "origin" "120.000000 -256.000000 232.000000"
 "model" "maps/meshes/gothic/meat3.md2"
+"spawnflags" "1"
 }
 // entity 128
 {
@@ -14548,6 +14551,7 @@
 "origin" "168.000000 -256.000000 232.000000"
 "model" "maps/meshes/gothic/meat1.md2"
 "angle" "-56.307961"
+"spawnflags" "1"
 }
 // entity 129
 {
@@ -14620,4 +14624,34 @@
 "classname" "misc_terrainmodel"
 "origin" "-788.000000 1160.000000 -64.000000"
 "model" "maps/meshes/dm-purgatory/bottom3.terrain"
+}
+// entity 140
+{
+"classname" "misc_mapmodel"
+"origin" "-1608.000122 311.999969 448.000000"
+"model" "maps/meshes/gothic/gargoyle.md2"
+"angle" "-179.999985"
+"spawnflags" "1"
+}
+// entity 141
+{
+"classname" "misc_mapmodel"
+"origin" "-1608.000122 -448.000031 448.000000"
+"model" "maps/meshes/gothic/gargoyle.md2"
+"angle" "-179.999985"
+"spawnflags" "1"
+}
+// entity 142
+{
+"classname" "misc_mapmodel"
+"origin" "-2072.000000 152.000000 -56.000050"
+"model" "maps/meshes/gothic/column1.md2"
+"angles" "23.753990 0.000000 -5.516407"
+}
+// entity 143
+{
+"classname" "misc_mapmodel"
+"origin" "-2112.000000 -287.999969 -56.000126"
+"model" "maps/meshes/gothic/column1.md2"
+"angles" "11.619994 -1.417159 6.144886"
 }

@@ -46,3 +46,10 @@ maps/meshes/gothic/stonearch1
 		normalmap
 	}
 }
+maps/meshes/gothic/gargoyle
+{
+	{
+		map maps/meshes/gothic/gargoyle_normal.jpg
+		normalmap
+	}
+}
