@@ -1180,6 +1180,9 @@ nobase_dist_textures_DATA = \
 	dm-purgatory/bottom2_blendtex.tga \
 	dm-purgatory/bottom2_lightmaptex.tga \
 	dm-purgatory/bottom2_vegetation.tga \
+	dm-purgatory/bottom3.tga \
+	dm-purgatory/bottom3_blendtex.tga \
+	dm-purgatory/bottom3_lightmaptex.tga \
 	dm-purgatory/bottom_blendtex.tga \
 	dm-purgatory/bottom_lightmaptex.tga \
 	dm-purgatory/bottom_vegetation.tga \

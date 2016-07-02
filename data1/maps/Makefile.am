@@ -214,6 +214,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-purgatory/blood3.decal \
 	meshes/dm-purgatory/bottom.terrain \
 	meshes/dm-purgatory/bottom2.terrain \
+	meshes/dm-purgatory/bottom3.terrain \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/blood2.decal \
 	meshes/dm-turbo/rubble1.terrain \
@@ -270,6 +271,9 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/fdstatue_red.md2 \
 	meshes/gothic/freedom_statue_green.jpg \
 	meshes/gothic/freedom_statue_red.jpg \
+	meshes/gothic/gargoyle.jpg \
+	meshes/gothic/gargoyle.md2 \
+	meshes/gothic/gargoyle_normal.jpg \
 	meshes/gothic/lamp2b_fx.tga \
 	meshes/gothic/lamp2b.md2 \
 	meshes/gothic/lamp2b.tga \
@@ -318,6 +322,7 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/spike1_normal.jpg \
 	meshes/gothic/spike2.md2 \
 	meshes/gothic/stomearch.md2 \
+	meshes/gothic/stomearch2.md2 \
 	meshes/gothic/stonearch1.jpg \
 	meshes/gothic/throne.jpg \
 	meshes/gothic/throne.md2 \
