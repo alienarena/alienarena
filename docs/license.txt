@@ -9,6 +9,8 @@ Permission is granted to freely distribute (without restriction) the game data(m
 The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
+Gargoyle #3DST27 by alban is licensed under CC Attribution https://skfb.ly/BSYr - original work modified to fit game format.
+
 Alien Arena, as part of its source code, incorporates an SHA-2 implementation which is copyright (C) 2005, 2007 Oliver Gay, and is licensed under the three-clause BSD license. The license for this code may be found in sha2_license.txt. 
 
 ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.

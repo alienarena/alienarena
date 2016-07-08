@@ -1335,7 +1335,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.flags = oldeffects;
 	}
 
-	//add glass pieces
+	//add glass and effect pieces
 	
 	if(!(strcmp("models/weapons/v_rocket/tris.iqm", gun.model->name))) 
 	{
@@ -1344,21 +1344,40 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
 	{
+		int oldeffects = gun.flags, pnum;
+
 		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
+		gun.flags = oldeffects;
+		gun.alpha = 1.0;
+		gun.model = R_RegisterModel("models/weapons/v_hyperb/effects.iqm");
+		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_blast/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_shotg/tris.iqm", gun.model->name))) 
+	{
+		gun.model = R_RegisterModel("models/weapons/v_shotg/effects.iqm");
+		V_AddViewEntity (&gun);
+	}
+	else if(!(strcmp("models/weapons/v_rail/tris.iqm", gun.model->name))) 
+	{
+		int oldeffects = gun.flags, pnum;
+		gun.model = R_RegisterModel("models/weapons/v_rail/effects.iqm");
+		gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_GREEN;
+		gun.alpha = 0.50;
+		V_AddViewEntity (&gun);
+	}
+	else if(!(strcmp("models/weapons/v_blast/tris.iqm", gun.model->name))) 
 	{
 		gun.model = R_RegisterModel("models/weapons/v_blast/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_alienblast/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_alienblast/tris.iqm", gun.model->name))) 
 	{
 		gun.model = R_RegisterModel("models/weapons/v_alienblast/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
