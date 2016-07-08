@@ -616,6 +616,15 @@ models/weapons/v_hyperb/disruptor
 	}
 		
 }
+models/weapons/v_hyperb/effects
+{
+	{
+		map models/weapons/v_hyperb/disruptor_normal.tga
+		normalmap
+		map2 models/weapons/v_hyperb/disruptor_fx.tga
+		fx
+	}
+}
 models/weapons/v_rail/beamgun
 {
 	{
@@ -657,6 +666,15 @@ models/weapons/v_shotg/skin
 		map2 gfx/smartgunmask.tga
 		glow
 	}		
+}
+models/weapons/v_shotg/effects
+{
+	{
+		map models/weapons/v_shotg/skin_normal.tga
+		normalmap
+		map2 models/weapons/v_shotg/smartgun_fx.tga
+		fx
+	}
 }
 models/weapons/v_rocket/skin
 {
