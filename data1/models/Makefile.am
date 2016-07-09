@@ -251,7 +251,11 @@ nobase_dist_models_DATA = \
 	weapons/v_chain/tris.skin \
 	weapons/v_hyperb/cover.iqm \
 	weapons/v_hyperb/disruptor.jpg \
+	weapons/v_hyperb/disruptor_fx.tga \
 	weapons/v_hyperb/disruptor_normal.tga \
+	weapons/v_hyperb/effects.iqm \
+	weapons/v_hyperb/effects.skin \
+	weapons/v_hyperb/effects.tga \
 	weapons/v_hyperb/tris.iqm \
 	weapons/v_hyperb/tris.skin \
 	weapons/v_machn/tris.md2 \
@@ -261,6 +265,7 @@ nobase_dist_models_DATA = \
 	weapons/v_minderaser/tris.skin \
 	weapons/v_rail/beamgun.jpg \
 	weapons/v_rail/beamgun_normal.tga \
+	weapons/v_rail/effects.iqm \
 	weapons/v_rail/tris.iqm \
 	weapons/v_rail/tris.skin \
 	weapons/v_rocket/cover.iqm \
@@ -270,8 +275,12 @@ nobase_dist_models_DATA = \
 	weapons/v_rocket/skin_normal.tga \
 	weapons/v_rocket/tris.iqm \
 	weapons/v_rocket/tris.skin \
+	weapons/v_shotg/effects.iqm \
+	weapons/v_shotg/effects.skin \
+	weapons/v_shotg/effects.tga \
 	weapons/v_shotg/skin.jpg \
 	weapons/v_shotg/skin_normal.tga \
+	weapons/v_shotg/smartgun_fx.tga \
 	weapons/v_shotg/tris.iqm \
 	weapons/v_shotg/tris.skin \
 	weapons/v_shotg2/chaingun.jpg \

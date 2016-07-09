@@ -252,6 +252,7 @@ nobase_dist_botinfo_DATA = \
 	dm-extermination2k15.tmp \
 	dm-gauntlet2k16.tmp \
 	dm-neptune2k15.tmp \
+	dm-purgatory2k16.tmp \
 	dm-turbo2k15.tmp \
 	dm-violator2k15.tmp \
 	dm-wasteland.tmp \
@@ -267,6 +268,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-dynamo2k16.nod \
 	nav/dm-extermination2k15.nod \
 	nav/dm-neptune2k15.nod \
+	nav/dm-purgatory2k16.nod \
 	nav/dm-turbo2k15.nod \
 	nav/dm-violator2k15.nod \
 	nav/dm-wasteland.nod \
