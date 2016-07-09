@@ -8,6 +8,21 @@ nobase_dist_maps_DATA = \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
 	ctf-violator2k16.bsp \
+	decals/blood0.decal \
+	decals/blood1.decal \
+	decals/blood2.decal \
+	decals/blood3.decal \
+	decals/damage1.decal \
+	decals/damage2.decal \
+	decals/damage3.decal \
+	decals/damage4.decal \
+	decals/ice1.decal \
+	decals/ice2.decal \
+	decals/ivy1.decal \
+	decals/mud1.decal \
+	decals/mud2.decal \
+	decals/rocks1.decal \
+	decals/slime0.decal \
 	dm-babel2k16.bsp \
 	dm-babel2k16.lightmap \
 	dm-bloodfactory2k15.bsp \
@@ -18,6 +33,8 @@ nobase_dist_maps_DATA = \
 	dm-extermination2k15.lightmap \
 	dm-gauntlet2k16.bsp \
 	dm-neptune2k15.bsp \
+	dm-purgatory2k16.bsp \
+	dm-purgatory2k16.lightmap \
 	dm-turbo2k15.bsp \
 	dm-violator2k15.bsp \
 	dm-violator2k15.lightmap \
@@ -208,10 +225,6 @@ nobase_dist_maps_DATA = \
 	meshes/dm-neptune/shark.jpg \
 	meshes/dm-neptune/shark.skin \
 	meshes/dm-neptune/shark_normal.jpg \
-	meshes/dm-purgatory/blood0.decal \
-	meshes/dm-purgatory/blood1.decal \
-	meshes/dm-purgatory/blood2.decal \
-	meshes/dm-purgatory/blood3.decal \
 	meshes/dm-purgatory/bottom.terrain \
 	meshes/dm-purgatory/bottom2.terrain \
 	meshes/dm-purgatory/bottom3.terrain \
