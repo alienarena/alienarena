@@ -1686,6 +1686,7 @@ static const char *doppler_effect_items[] =
 int	numhuds = 0;
 extern cvar_t *cl_hudimage1;
 extern cvar_t *cl_hudimage2;
+extern cvar_t *cl_hudimage3;
 #define MAX_HUDS 256
 char *hud_names[MAX_HUDS];
 
@@ -2094,27 +2095,32 @@ static void HudFunc( void *item )
 	menulist_s *self;
 	char hud1[MAX_OSPATH];
 	char hud2[MAX_OSPATH];
+	char hud3[MAX_OSPATH];
 	
 	self = (menulist_s *)item;
 
 	if(self->curvalue == 0) { //none
 		sprintf(hud1, "none");
 		sprintf(hud2, "none");
+		sprintf(hud3, "none");
 	}
 
 	if(self->curvalue == 1) {
 		sprintf(hud1, "pics/i_health.tga");
 		sprintf(hud2, "pics/i_score.tga");
+		sprintf(hud3, "pics/i_ammo.tga");
 	}
 
 	if(self->curvalue > 1) {
 		sprintf(hud1, "pics/huds/%s1", hud_names[self->curvalue]);
 		sprintf(hud2, "pics/huds/%s2", hud_names[self->curvalue]);
+		sprintf(hud3, "pics/huds/%s3", hud_names[self->curvalue]);
 	}
 
-	//set the cvars, both of them
+	//set the cvars, all of them
 	Cvar_Set( "cl_hudimage1", hud1 );
 	Cvar_Set( "cl_hudimage2", hud2 );
+	Cvar_Set( "cl_hudimage3", hud3 );
 }
 
 void SetHudNames (char **list)

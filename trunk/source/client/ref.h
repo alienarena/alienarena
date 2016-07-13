@@ -342,6 +342,7 @@ qboolean	Draw_PicExists (const char *name);
 void	Draw_GetPicSize (int *w, int *h, const char *name);
 void	Draw_Pic (float x, float y, const char *name);
 void	Draw_ScaledPic (float x, float y, float scale, const char *pic);
+void	Draw_AngledScaledPic (float x, float y, float scale, const char *pic, qboolean isNum);
 void	Draw_StretchPic (float x, float y, float w, float h, const char *name);
 void	Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char *name, float alphaval);
 void	Draw_AlphaStretchPic (float x, float y, float w, float h, const char *name, float alphaval);

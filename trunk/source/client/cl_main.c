@@ -141,6 +141,7 @@ cvar_t  *cl_master2;
 //custom huds
 cvar_t	*cl_hudimage1;
 cvar_t	*cl_hudimage2;
+cvar_t  *cl_hudimage3;
 
 //blood
 cvar_t  *cl_noblood;
@@ -2061,6 +2062,7 @@ void CL_InitLocal (void)
 	//custom huds
 	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE | CVARDOC_STR);
 	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_hudimage3 = Cvar_Get("cl_hudimage3", "pics/i_ammo.tga", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//stats server
 	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE | CVARDOC_STR);
