@@ -138,13 +138,13 @@ static void Draw_AlphaStretchImage (float x, float y, float w, float h, const im
 	
 	COM_StripExtension ( gl->name, shortname );
 	
-	rs = gl->script;
-
-	//if we draw the red team bar, we are on red team
+	//if we draw the red team icon, we are on red team
 	if(!strcmp(shortname, "pics/i_team1"))
 		r_teamColor = 1;
 	else if(!strcmp(shortname, "pics/i_team2"))
 		r_teamColor = 2;
+	
+	rs = gl->script;
 
 	R_InitQuadVarrays();
 	
@@ -172,16 +172,6 @@ static void Draw_AlphaStretchImage (float x, float y, float w, float h, const im
 	
 		qglColor4f(1,1,1, alphaval);
 
-		//set color of hud by team
-		if(r_teamColor == 1) {
-			if(!strcmp(shortname, "pics/i_health"))
-				qglColor4f(1, .2, .2, alphaval);
-		}
-		else if(r_teamColor == 2) {
-			if(!strcmp(shortname, "pics/i_health"))
-				qglColor4f(.1, .4, .8, alphaval);
-		}
-
 		GL_Bind (gl->texnum);
 		if (tiling == draw_with_tiling)
 		{
@@ -192,6 +182,7 @@ static void Draw_AlphaStretchImage (float x, float y, float w, float h, const im
 		VA_SetElem2(tex_array[1], gl->crop_sh, gl->crop_tl);
 		VA_SetElem2(tex_array[2], gl->crop_sh, gl->crop_th);
 		VA_SetElem2(tex_array[3], gl->crop_sl, gl->crop_th);
+
 		R_DrawVarrays (GL_QUADS, 0, 4);
 		GLSTATE_DISABLE_BLEND
 		GLSTATE_ENABLE_ALPHATEST
@@ -227,6 +218,107 @@ static void Draw_AlphaStretchImage (float x, float y, float w, float h, const im
 
 		R_KillVArrays();
 	}
+}
+
+static void Draw_AlphaAngledStretchImage (float x, float y, float w, float h, const image_t *gl, float alphaval, qboolean isNum)
+{
+	char shortname[MAX_QPATH];
+	float xscale, yscale;
+	float cropped_x, cropped_y, cropped_w, cropped_h;
+	float topRStretch = 0.0, botRStretch = 0.0, topLStretch = 0.0, botLStretch = 0.0;
+	
+	COM_StripExtension ( gl->name, shortname );
+
+	R_InitQuadVarrays();
+	
+	GL_SelectTexture (0);
+	
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_ENABLE_BLEND
+	GL_TexEnv( GL_MODULATE );
+		
+	xscale = (float)w/(float)gl->upload_width;
+	yscale = (float)h/(float)gl->upload_height;
+		
+	cropped_x = x + xscale*(float)gl->crop_left;
+	cropped_y = y + yscale*(float)gl->crop_top;
+	
+	cropped_w = xscale*(float)gl->crop_width; 
+	cropped_h = yscale*(float)gl->crop_height;
+
+	//bottom left quadrant
+	if(cropped_x < r_newrefdef.width/2.0 && cropped_y > r_newrefdef.height/2.0)
+	{
+		topRStretch = cropped_w/15.0;
+		botRStretch = cropped_w/10.0;
+
+		topLStretch = botLStretch = 0.0;
+
+		if(isNum)
+		{
+			//adjust position 
+			cropped_y += ((r_newrefdef.height/10.0)*(r_newrefdef.width/(x - r_newrefdef.width)) + (r_newrefdef.height/11.0));
+		}
+	}
+
+	//top right quadrant
+	if(cropped_x > r_newrefdef.width/2.0 && cropped_y < r_newrefdef.height/2.0)
+	{
+		topLStretch = -cropped_w/10.0;
+		botLStretch = -cropped_w/15.0;
+
+		topRStretch = botRStretch = 0.0;
+
+		if(isNum)
+		{
+			//adjust position 
+			cropped_y -= ((r_newrefdef.height/10.0)*((x - r_newrefdef.width)/r_newrefdef.width));
+		}
+	}
+
+	//bottom right quadrant
+	if(cropped_x > r_newrefdef.width/1.5 && cropped_y > r_newrefdef.height/2.0)
+	{
+		topLStretch = cropped_w/15.0;
+		botLStretch = cropped_w/10.0;
+
+		topRStretch = botRStretch = 0.0;
+
+		if(isNum)
+		{
+			//adjust position 
+			cropped_y += ((r_newrefdef.height/10.0)*((x - r_newrefdef.width)/r_newrefdef.width));
+		}
+	}
+		
+	VA_SetElem2(vert_array[0], cropped_x,			cropped_y - topLStretch);
+	VA_SetElem2(vert_array[1], cropped_x+cropped_w, cropped_y - topRStretch);
+	VA_SetElem2(vert_array[2], cropped_x+cropped_w, cropped_y+cropped_h - botRStretch);
+	VA_SetElem2(vert_array[3], cropped_x,			cropped_y+cropped_h - botLStretch);
+	
+	qglColor4f(1,1,1, alphaval);
+
+	//set color of hud by team
+	if(r_teamColor == 1) {
+		if(!strcmp(shortname, "pics/i_health") || !strcmp(shortname, "pics/i_ammo"))
+			qglColor4f(.7, .2, .2, alphaval);
+	}
+	else if(r_teamColor == 2) {
+		if(!strcmp(shortname, "pics/i_health") || !strcmp(shortname, "pics/i_ammo"))
+			qglColor4f(.1, .4, .6, alphaval);
+	}
+
+	GL_Bind (gl->texnum);
+	
+	VA_SetElem2(tex_array[0], gl->crop_sl, gl->crop_tl);
+	VA_SetElem2(tex_array[1], gl->crop_sh, gl->crop_tl);
+	VA_SetElem2(tex_array[2], gl->crop_sh, gl->crop_th);
+	VA_SetElem2(tex_array[3], gl->crop_sl, gl->crop_th);
+
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_ENABLE_ALPHATEST
+	R_KillVArrays();
 }
 
 void Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char *pic, float alphaval)
@@ -290,6 +382,23 @@ void Draw_ScaledPic (float x, float y, float scale, const char *pic)
 	h = (float)gl->height*scale;
 	
 	Draw_AlphaStretchImage (x, y, w, h, gl, DIV254BY255, draw_without_tiling);
+}
+
+void Draw_AngledScaledPic (float x, float y, float scale, const char *pic, qboolean isNum)
+{
+	image_t *gl;
+	float w, h;
+
+	gl = R_RegisterPic (pic);
+	if (!gl)
+	{
+		return;
+	}
+
+	w = (float)gl->width*scale;
+	h = (float)gl->height*scale;
+	
+	Draw_AlphaAngledStretchImage (x, y, w, h, gl, DIV254BY255, isNum);
 }
 
 /*

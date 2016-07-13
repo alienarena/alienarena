@@ -1158,7 +1158,7 @@ void SCR_DrawField (int x, int y, int color, int width, int value, float scale)
 		else
 			frame = *ptr -'0';
 
-		Draw_ScaledPic (x,y,scale/7.2,sb_nums[color][frame]);
+		Draw_AngledScaledPic (x,y,scale/7.2,sb_nums[color][frame], true);
 		x += CHAR_WIDTH*scale;
 		ptr++;
 		l--;
@@ -1300,10 +1300,13 @@ void SCR_ExecuteLayoutString (char *s)
 				{
 					if(!strncmp(cl.configstrings[CS_IMAGES+value], "p_", 2))
 						Draw_ScaledPic (x, y, scale/8.0, cl.configstrings[CS_IMAGES+value]);
+					else if(!strncmp(cl.configstrings[CS_IMAGES+value], "i_flag", 6) || !strncmp(cl.configstrings[CS_IMAGES+value], "i_team", 6))
+						Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
 					else if(!strncmp(cl.configstrings[CS_IMAGES+value], "i_", 2))
-						Draw_ScaledPic (x, y, scale/4.0, cl.configstrings[CS_IMAGES+value]);
+						Draw_AngledScaledPic (x, y, scale/4.0, cl.configstrings[CS_IMAGES+value], false);					
 					else
 						Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
+
 					if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_team1") || 
 						!strcmp(cl.configstrings[CS_IMAGES+value], "i_team2"))
 					{

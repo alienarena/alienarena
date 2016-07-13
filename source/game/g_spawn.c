@@ -543,6 +543,9 @@ char *dm_statusbar =
 "xr  -130 "
 "yt  2 "
 "pic 18 "
+"yb -256 "
+"xr -256 "
+"pic 2 "
 
 // health
 "yb	-29 "
@@ -551,12 +554,14 @@ char *dm_statusbar =
 
 // ammo
 "if 2 "
-"	xl	76 "
+"	yb	-38 "
+"	xr	-140 "
 "	anum "
 "endif "
 
 // armor
-"	xl	142 "
+"   yb -29 "
+"	xl	76 "
 "	rnum "
 
 // timer
@@ -571,8 +576,8 @@ char *dm_statusbar =
 
 // weapon icon
 "if 11 "
-"	xr	-72 "
-"   yt  196 "
+"	xr	-80 "
+"   yb  -43 "
 "	pic	11 "
 "endif "
 
@@ -589,43 +594,6 @@ char *dm_statusbar =
 //  high scorer
 "yt 80 "
 "num 3 20 "
-
-//  weapon stats
-"if 25 "
-"xr -72 "
-"yt 227 "
-"pic 25 "
-"endif"
-
-"if 26 "
-"yt 258 "
-"pic 26 "
-"endif "
-
-"if 27 "
-"yt 289 "
-"pic 27 "
-"endif "
-
-"if 28 "
-"yt 320 "
-"pic 28 "
-"endif "
-
-"if 29 "
-"yt 351 "
-"pic 29 "
-"endif "
-
-"if 30 "
-"yt 382 "
-"pic 30 "
-"endif "
-
-"if 31 "
-"yt 413 "
-"pic 31 "
-"endif "
 ;
 
 char *team_statusbar =
@@ -636,6 +604,9 @@ char *team_statusbar =
 "xr  -130 "
 "yt  2 "
 "pic 18 "
+"yb -256 "
+"xr -256 "
+"pic 2 "
 
 // health
 "yb	-29 "
@@ -644,28 +615,30 @@ char *team_statusbar =
 
 // ammo
 "if 2 "
-"	xl	76 "
+"	yb	-38 "
+"	xr	-140 "
 "	anum "
 "endif "
 
 // armor
-"	xl	142 "
+"   yb -29 "
+"	xl	76 "
 "	rnum "
 
 // timer
 "if 9 "
-"	xv	324 "
+"	xv	262 "
 "   yb  -24 "
 "	num	2	10 "
-"	xv	358 "
+"	xv	296 "
 "   yb  -32 "
 "	pic	9 "
 "endif "
 
 // weapon icon
 "if 11 "
-"	xr	-72 "
-"   yt  196 "
+"	xr	-80 "
+"   yb  -43 "
 "	pic	11 "
 "endif "
 
@@ -691,46 +664,9 @@ char *team_statusbar =
 "num 3 22 "
 
 //  flag
-"   xv 128 "
-"   yb -64 "
+"   xv 100 "
+"   yb -120 "
 "   pic 23 "
-
-//  weapon stats
-"if 25 "
-"xr -72 "
-"yt 227 "
-"pic 25 "
-"endif"
-
-"if 26 "
-"yt 258 "
-"pic 26 "
-"endif "
-
-"if 27 "
-"yt 289 "
-"pic 27 "
-"endif "
-
-"if 28 "
-"yt 320 "
-"pic 28 "
-"endif "
-
-"if 29 "
-"yt 351 "
-"pic 29 "
-"endif "
-
-"if 30 "
-"yt 382 "
-"pic 30 "
-"endif "
-
-"if 31 "
-"yt 413 "
-"pic 31 "
-"endif "
 ;
 
 char *tactical_statusbar =
@@ -741,6 +677,9 @@ char *tactical_statusbar =
 "xr  -130 "
 "yt  2 "
 "pic 8 "
+"yb -256 "
+"xr -256 "
+"pic 2 "
 
 // health
 "yb	-29 "
@@ -749,12 +688,14 @@ char *tactical_statusbar =
 
 // ammo
 "if 2 "
-"	xl	76 "
+"	yb	-38 "
+"	xr	-140 "
 "	anum "
 "endif "
 
 // armor
-"	xl	142 "
+"   yb -29 "
+"	xl	76 "
 "	rnum "
 
 //  Human Computer
@@ -782,24 +723,12 @@ char *tactical_statusbar =
 "yt 186 "
 "num 3 30 "
 
-// timer
-"if 9 "
-"	xv	324 "
-"   yb  -24 "
-"	num	2	10 "
-"	xv	358 "
-"   yb  -32 "
-"	pic	9 "
-"endif "
-
 // weapon icon
 "if 11 "
-"	xr	-72 "
-"   yt  196 "
+"	xr	-80 "
+"   yb  -43 "
 "	pic	11 "
 "endif "
-
-
 ;
 /*QUAKED worldspawn (0 0 0) ?
 

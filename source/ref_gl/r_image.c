@@ -42,6 +42,7 @@ int			numgltextures;
 
 extern cvar_t	*cl_hudimage1; //custom huds
 extern cvar_t	*cl_hudimage2;
+extern cvar_t	*cl_hudimage3;
 
 unsigned	d_8to24table[256];
 
@@ -1502,6 +1503,8 @@ image_t	*GL_FindImage (const char *name, imagetype_t type)
 		return GL_FindImage (cl_hudimage1->string, type);
 	if(!strcmp(name, "pics/i_score.pcx"))
 		return GL_FindImage (cl_hudimage2->string, type);
+	if(!strcmp(name, "pics/i_ammo.pcx"))
+		return GL_FindImage (cl_hudimage3->string, type);
 
 	// look for it
 	image = GL_GetImage( name );

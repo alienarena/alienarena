@@ -397,6 +397,7 @@ extern void	Draw_GetPicSize (int *w, int *h, const char *name);
 extern void	Draw_Pic (float x, float y, const char *name);
 extern void	Draw_ScaledPic (float x, float y, float scale, const char *pic);
 extern void	Draw_StretchPic (float x, float y, float w, float h, const char *name);
+extern void Draw_AngledScaledPic (float x, float y, float scale, const char *pic, qboolean isNum);
 
 extern void	R_BeginFrame( float camera_separation );
 extern void	R_SwapBuffers( int );

@@ -890,15 +890,14 @@ void G_SetStats (edict_t *ent)
 	//
 	// ammo
 	//
+	ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex ("i_ammo");
 	if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */)
 	{
-		ent->client->ps.stats[STAT_AMMO_ICON] = 0;
 		ent->client->ps.stats[STAT_AMMO] = 0;
 	}
 	else
 	{
 		item = &itemlist[ent->client->ammo_index];
-		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
 
@@ -910,12 +909,12 @@ void G_SetStats (edict_t *ent)
     if (index)
     {
         item = GetItemByIndex (index);
-        ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
+        //ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
         ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
     }
     else
     {
-        ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
+        //ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
         ent->client->ps.stats[STAT_ARMOR] = 0;
     }
 
@@ -974,8 +973,6 @@ void G_SetStats (edict_t *ent)
 				ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ( "i_team1");
 			else if(ent->dmteam == BLUE_TEAM)
 				ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ( "i_team2");
-			else
-				ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ( "bar_loading");
 		}
 	}
 	else { //do teams
@@ -983,8 +980,6 @@ void G_SetStats (edict_t *ent)
 			ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ( "i_team1");
 		else if(ent->dmteam == BLUE_TEAM)
 			ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ( "i_team2");
-		else
-			ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ( "bar_loading");
 	}
 
 	//
@@ -1015,28 +1010,6 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_DEATHS] = ent->client->resp.deaths;
 	
 	G_SetScoreStats (ent);
-
-#ifndef ALTERIA
-
-	if(!g_tactical->integer)
-	{
-		//weapon/ammo inventories
-		for(i = 0; i < 7; i++)
-			ent->client->ps.stats[STAT_WEAPN1+i] = 0;
-		i = 0;
-		for (j = 1; j < game.num_items && i < 7; j++)
-		{
-		    if (ent->client->pers.inventory[j] &&
-		        (itemlist[j].flags & IT_WEAPON) && itemlist[j].icon != NULL &&
-		        ent->client->pers.weapon != &itemlist[j] &&
-		        (itemlist[j].quantity != 0 || itemlist[j].quantity2 != 0))
-		    {
-		        ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex (itemlist[j].icon);
-				i++;
-		    }
-		}
-	}
-#endif
 
 	//
 	// current weapon
