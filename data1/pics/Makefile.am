@@ -87,62 +87,7 @@ nobase_dist_pics_DATA = \
 	hud_hover.tga \
 	hud_strafer_fx.tga \
 	hud_strafer.tga \
-	huds/20061.tga \
-	huds/20062.tga \
-	huds/20071.tga \
-	huds/20072.tga \
-	huds/20101.tga \
-	huds/20102.tga \
-	huds/20151.tga \
-	huds/20152.tga \
-	huds/8bit1.tga \
-	huds/8bit2.tga \
-	huds/alien1.tga \
-	huds/alien2.tga \
-	huds/alienblood1.tga \
-	huds/alienblood2.tga \
-	huds/blood1.tga \
-	huds/blood2.tga \
-	huds/classic1.tga \
-	huds/classic2.tga \
-	huds/cleanblue1.tga \
-	huds/cleanblue2.tga \
-	huds/cleangreen1.tga \
-	huds/cleangreen2.tga \
-	huds/cleanred1.tga \
-	huds/cleanred2.tga \
-	huds/corpse1.tga \
-	huds/corpse2.tga \
-	huds/cpu1.tga \
-	huds/cpu2.tga \
-	huds/freezy1.tga \
-	huds/freezy2.tga \
-	huds/gtv1.tga \
-	huds/gtv2.tga \
-	huds/marscreen1.tga \
-	huds/marscreen2.tga \
-	huds/mechanic1.tga \
-	huds/mechanic2.tga \
-	huds/nki_dark1.tga \
-	huds/nki_dark2.tga \
-	huds/nki_darkb1.tga \
-	huds/nki_darkb2.tga \
-	huds/oldskool1.tga \
-	huds/oldskool2.tga \
-	huds/retro1.tga \
-	huds/retro2.tga \
-	huds/talon1.tga \
-	huds/talon2.tga \
-	huds/terminal-blue1.tga \
-	huds/terminal-blue2.tga \
-	huds/terminal-green1.tga \
-	huds/terminal-green2.tga \
-	huds/terminal-purple1.tga \
-	huds/terminal-purple2.tga \
-	huds/terminal-red1.tga \
-	huds/terminal-red2.tga \
-	huds/therock1.tga \
-	huds/therock2.tga \
+	i_ammo.tga \
 	i_beamgun.tga \
 	i_bodyarmor.tga \
 	i_chaingun.tga \

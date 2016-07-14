@@ -548,6 +548,7 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/stomearch.md2 \
 	meshes/gothic/stomearch2.md2 \
 	meshes/gothic/stonearch1.jpg \
+	meshes/gothic/stonearch1_normal.jpg \
 	meshes/gothic/throne.jpg \
 	meshes/gothic/throne.md2 \
 	meshes/gothic/throne_normal.jpg \
