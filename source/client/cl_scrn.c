@@ -1783,9 +1783,9 @@ void SCR_showTimer(void)
 	}
 
 	font = FNT_AutoGet( CL_gameFont );
-	Draw_StretchPic( viddef.width - 13 * font->size , viddef.height - 5.25 * font->size , 4 * font->size , 4 * font->size , "timer");
+	Draw_StretchPic( viddef.width - 13 * font->size , viddef.height - 13.25 * font->size , 4 * font->size , 4 * font->size , "timer");
 	FNT_RawPrint( font , temptime , strlen( temptime ) , false ,
-		viddef.width - 8 * font->size , viddef.height - 3.75 * font->size , FNT_colors[ 7 ] );
+		viddef.width - 8 * font->size , viddef.height - 11.75 * font->size , FNT_colors[ 7 ] );
 }
 
 /*
@@ -1873,7 +1873,7 @@ void SCR_showPerfTest (perftest_t *test, int slotnum) {
 	
 	font = FNT_AutoGet( CL_gameFont );
 
-	height = viddef.height - 2.0 * font->size * (slotnum + 1);
+	height = viddef.height - font->size * (2.0 * (slotnum + 1) + 8.0);
 	if (cl_drawtimer->integer)
 		height -= 5.25 * font->size;
 	FNT_RawPrint( font , test->text , strlen( test->text ) , false ,
