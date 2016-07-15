@@ -889,6 +889,23 @@ void ACECO_ReadConfig( char *config_file )
 
 }
 
+void ACESP_SpawnInitializeAI (edict_t *ent)
+{
+	ent->enemy = NULL;
+	ent->movetarget = NULL;
+	ent->yaw_speed = 37; // bot turning speed. angle in degrees
+	ent->state = STATE_MOVE;
+
+	// Set the current node
+	ent->current_node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
+	ent->goal_node = ent->current_node;
+	ent->next_node = ent->current_node;
+	ent->next_move_time = level.time;
+	ent->suicide_timeout = level.time + 15.0;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->think = ACEAI_Think;
+}
+
 /*
 ======
  ACESP_PutClientInServer
@@ -921,21 +938,21 @@ void ACESP_PutClientInServer (edict_t *ent)
 
 	index = ent - g_edicts - 1;
 	client = ent->client;
-	resp = ent->client->resp;
 
 	// init pers.* variables, save and restore userinfo variables (name, skin)
-	memcpy(userinfo, client->pers.userinfo, MAX_INFO_STRING );
+	resp = client->resp;
+	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
 	memcpy(client->pers.userinfo, userinfo, MAX_INFO_STRING );
 
 	// set netname from userinfo
-	strncpy( ent->client->pers.netname,
+	strncpy( client->pers.netname,
 			 (Info_ValueForKey( client->pers.userinfo, "name")),
-			 sizeof(ent->client->pers.netname)-1);
+			 sizeof(client->pers.netname)-1);
 
 	// combine name and skin into a configstring
 	gi.configstring( CS_PLAYERSKINS+index, va("%s\\%s",
-			ent->client->pers.netname,
+			client->pers.netname,
 			(Info_ValueForKey( client->pers.userinfo, "skin"))));
 
 	// clear everything but the persistant data ( pers.* and resp.*)
@@ -944,10 +961,10 @@ void ACESP_PutClientInServer (edict_t *ent)
 	client->pers = saved;
 	client->resp = resp;
 
-	client->is_bot = 1;  // this is a bot
 	
 	Respawn_Player_ClearEnt (ent);
 	
+	client->is_bot = true;
 	ent->classname = "bot";
 
 	VectorCopy (mins, ent->mins);
@@ -959,15 +976,19 @@ void ACESP_PutClientInServer (edict_t *ent)
 	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 //ZOID
 
-	client->ps.fov = 90;
-
+	client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
+	if (client->ps.fov < 1)
+		client->ps.fov = 90;
+	else if (client->ps.fov > 160)
+		client->ps.fov = 160;
+	
 	// clear entity state values
 	ent->s.effects = 0;
 	ent->s.skinnum = ent - g_edicts - 1;
 	ent->s.modelindex = 255;		// will use the skin specified model
 	ent->s.modelindex2 = 255;		// custom gun model
 
-	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
+	info = Info_ValueForKey (client->pers.userinfo, "skin");
 	i = 0;
 	done = false;
 	strcpy (ent->charModel, " ");
@@ -984,7 +1005,8 @@ void ACESP_PutClientInServer (edict_t *ent)
 
 	sprintf(modelpath, "players/%s/helmet.iqm", ent->charModel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
-	if(file) {
+	if(file)
+	{
 		sprintf(modelpath, "players/%s/helmet.iqm", ent->charModel);
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
@@ -1024,23 +1046,13 @@ void ACESP_PutClientInServer (edict_t *ent)
 	client->newweapon = client->pers.weapon;
 	ChangeWeapon (ent);
 
-	ent->enemy = NULL;
-	ent->movetarget = NULL;
-	ent->yaw_speed = 37; // bot turning speed. angle in degrees
-	ent->state = STATE_MOVE;
+	ACESP_SpawnInitializeAI (ent);
 
-	// Set the current node
-	ent->current_node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
-	ent->goal_node = ent->current_node;
-	ent->next_node = ent->current_node;
-	ent->next_move_time = level.time;
-	ent->suicide_timeout = level.time + 15.0;
-
-	ent->s.event = EV_OTHER_TELEPORT; //fix "player flash" bug
+	if (!KillBox (ent))
+	{	// could't spawn in?
+	}
+	ent->s.event = EV_OTHER_TELEPORT; //to fix "player flash" bug
 	gi.linkentity (ent);
-
-	ent->think = ACEAI_Think;
-	ent->nextthink = level.time + FRAMETIME;
 
 		// send effect
 	gi.WriteByte (svc_muzzleflash);
@@ -1052,8 +1064,7 @@ void ACESP_PutClientInServer (edict_t *ent)
 	//unlagged
 	G_ResetHistory (ent);
 	// and this is as good a time as any to clear the saved state
-	ent->client->saved.leveltime = 0;
-
+	client->saved.leveltime = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////

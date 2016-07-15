@@ -2111,7 +2111,7 @@ void PutClientInServer (edict_t *ent)
 	InitClientPersistant (client);
 	ClientUserinfoChanged (ent, userinfo, SPAWN);
 
-	// clear everything but the persistant data
+	// clear everything but the persistant data ( pers.* and resp.*)
 	saved = client->pers;
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
@@ -2121,9 +2121,7 @@ void PutClientInServer (edict_t *ent)
 
 	Respawn_Player_ClearEnt (ent);
 	
-// ACEBOT_ADD
 	ent->is_bot = false;
-// ACEBOT_END
 	ent->classname = "player";
 
 	//anti-camp
@@ -2137,10 +2135,10 @@ void PutClientInServer (edict_t *ent)
 	VectorClear (ent->velocity);
 	
 	//remove these if there are there
-	if(ent->client->oldplayer)
-		G_FreeEdict (ent->client->oldplayer);
-	if(ent->client->chasecam)
-		G_FreeEdict (ent->client->chasecam);
+	if(client->oldplayer)
+		G_FreeEdict (client->oldplayer);
+	if(client->chasecam)
+		G_FreeEdict (client->chasecam);
 
 	// init playerstate values
 	client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
@@ -2157,7 +2155,7 @@ void PutClientInServer (edict_t *ent)
 	ent->s.modelindex = 255;		// will use the skin specified model
 	ent->s.modelindex2 = 255;		// custom gun model
 	
-	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
+	info = Info_ValueForKey (client->pers.userinfo, "skin");
 	i = 0;
 	done = false;
 	strcpy (ent->charModel, " ");
@@ -2219,7 +2217,7 @@ void PutClientInServer (edict_t *ent)
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
 		ent->svflags |= SVF_NOCLIENT;
-		ent->client->ps.gunindex = 0;
+		client->ps.gunindex = 0;
 		gi.linkentity (ent);
 		return;
 	}
