@@ -446,7 +446,6 @@ nobase_dist_pics_DATA = \
 	tag2.tga \
 	team1.tga \
 	team2.tga \
-	timer.tga \
 	uparrow.tga \
 	vaporizor.tga \
 	violator.tga \

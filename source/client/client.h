@@ -756,7 +756,9 @@ int stringLen (char *string);
 
 //
 // perf testing
-// A performance test measures some form of "something per second."
+// A performance test measures some form of "something per second" or "total
+// accumulated something." However, "special" tests allow you to display any
+// text you want.
 //
 
 typedef struct perftest_s {
@@ -768,6 +770,7 @@ typedef struct perftest_s {
     char        format[32]; //format one float, never output >32 chars
     float       scale; //for scaling the rate
     qboolean    is_timerate; //true to display "something per second."
+    qboolean	is_special; //if you want to update the "text" field yourself
     //update this once per frame:
     float       counter; //for whatever you're measuring
     //these are internal to SCR_showPerfTest:

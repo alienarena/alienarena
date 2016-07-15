@@ -1761,10 +1761,16 @@ SCR_showTimer
 int	seconds, minutes;
 void SCR_showTimer(void)
 {
-	static char		temptime[ 32 ];
 	static int		timecounter;
-	FNT_font_t		font;
-
+    static perftest_t *test = NULL;
+    if (!test) {
+        test = get_perftest("timer");
+        if (!test)
+            return; //couldn't acquire test
+        test->is_special = true;
+        test->cvar = cl_drawtimer;
+    }
+    
 	if (cls.key_dest == key_menu || cls.key_dest == key_console)
 		return;
 
@@ -1778,14 +1784,9 @@ void SCR_showTimer(void)
 			minutes++;
 			seconds = 0;
 		}
-		Com_sprintf(temptime, sizeof(temptime),"%i:%2.2i", minutes, seconds);
+		Com_sprintf(test->text, sizeof(test->text),"time %i:%2.2i", minutes, seconds);
 		timecounter = cls.realtime + 1000;
 	}
-
-	font = FNT_AutoGet( CL_gameFont );
-	Draw_StretchPic( viddef.width - 13 * font->size , viddef.height - 13.25 * font->size , 4 * font->size , 4 * font->size , "timer");
-	FNT_RawPrint( font , temptime , strlen( temptime ) , false ,
-		viddef.width - 8 * font->size , viddef.height - 11.75 * font->size , FNT_colors[ 7 ] );
 }
 
 /*
@@ -1836,7 +1837,7 @@ void SCR_showPerfTest (perftest_t *test, int slotnum) {
 		return;
 	}
 	
-	if (test->restart) {
+	if (test->restart && !test->is_special) {
 	    test->start_msec = Sys_Milliseconds();
 	    test->counter = 0.0f;
 	    test->framecounter = 0.0f;
@@ -1847,7 +1848,7 @@ void SCR_showPerfTest (perftest_t *test, int slotnum) {
 	}
 	
 	test->framecounter += 1.0f;
-	if (test->framecounter >= test->update_trigger) {
+	if (test->framecounter >= test->update_trigger && !test->is_special) {
 	    end_msec = Sys_Milliseconds();
         time_sec = ((float)(end_msec - test->start_msec)) / 1000.0f;
 	    if (test->is_timerate) {
@@ -1874,8 +1875,6 @@ void SCR_showPerfTest (perftest_t *test, int slotnum) {
 	font = FNT_AutoGet( CL_gameFont );
 
 	height = viddef.height - font->size * (2.0 * (slotnum + 1) + 8.0);
-	if (cl_drawtimer->integer)
-		height -= 5.25 * font->size;
 	FNT_RawPrint( font , test->text , strlen( test->text ) , false ,
 		viddef.width - 8 * font->size , height, FNT_colors[ 2 ] );
 }
@@ -2149,13 +2148,14 @@ void SCR_UpdateScreen (void)
 			}
 
 			SCR_showRSpeeds(); /* map-maker's performance counters */
-			
-			SCR_showAllPerfTests();
 
 			if(cl_drawtimer->integer)
 			{
 				SCR_showTimer();
 			}
+			
+			SCR_showAllPerfTests();
+
 			SCR_DrawPlayerIcon();
 		}
 	}
