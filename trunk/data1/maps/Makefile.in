@@ -545,6 +545,7 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/spike1.md2 \
 	meshes/gothic/spike1_normal.jpg \
 	meshes/gothic/spike2.md2 \
+	meshes/gothic/spike3.md2 \
 	meshes/gothic/stomearch.md2 \
 	meshes/gothic/stomearch2.md2 \
 	meshes/gothic/stonearch1.jpg \
@@ -941,6 +942,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-babel2k16.mus \
 	scripts/dm-bloodfactory2k15.fog \
 	scripts/dm-bloodfactory2k15.mus \
+	scripts/dm-crucible2k16.fog \
+	scripts/dm-crucible2k16.mus \
 	scripts/dm-deathray2k16.fog \
 	scripts/dm-deathray2k16.mus \
 	scripts/dm-dismal2k15.fog \
