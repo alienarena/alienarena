@@ -2105,18 +2105,17 @@ void PutClientInServer (edict_t *ent)
 
 	client = ent->client;
 
+	// deathmatch wipes most client data every spawn.
+	// NOTE: to implement a single-player game, look at how the code was prior
+	// to SVN rev 125.
 	// init pers.* variables, save and restore userinfo variables (name, skin)
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
 	ClientUserinfoChanged (ent, userinfo, SPAWN);
-
-	// clear everything but the persistant data ( pers.* and resp.*)
 	saved = client->pers;
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
-	if (client->pers.health <= 0)
-		InitClientPersistant(client);
 	client->resp = resp;
 
 	Respawn_Player_ClearEnt (ent);
