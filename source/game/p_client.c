@@ -2133,12 +2133,6 @@ void PutClientInServer (edict_t *ent)
 	VectorCopy (maxs, ent->maxs);
 	VectorClear (ent->velocity);
 	
-	//remove these if there are there
-	if(client->oldplayer)
-		G_FreeEdict (client->oldplayer);
-	if(client->chasecam)
-		G_FreeEdict (client->chasecam);
-
 	// init playerstate values
 	client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
 	if (client->ps.fov < 1)
