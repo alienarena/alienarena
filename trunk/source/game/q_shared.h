@@ -308,11 +308,11 @@ float	*tv (float x, float y, float z);
 #define	MAX_INFO_VALUE		64
 #define	MAX_INFO_STRING		512
 
-char *Info_ValueForKey (char *s, char *key);
+char *Info_ValueForKey (const char *s, const char *key);
 qboolean Info_KeyExists (const char *s, const char *key);
-void Info_RemoveKey (char *s, char *key);
-void Info_SetValueForKey (char *s, char *key, char *value);
-qboolean Info_Validate (char *s);
+void Info_RemoveKey (char *s, const char *key);
+void Info_SetValueForKey (char *s, const char *key, const char *value);
+qboolean Info_Validate (const char *s);
 
 size_t ValidatePlayerName( char *player_name, size_t player_name_size );
 
