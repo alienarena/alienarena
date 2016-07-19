@@ -1026,6 +1026,7 @@ void ACESP_PutClientInServer (edict_t *ent)
 	ent->s.frame = 0;
 	VectorCopy (spawn_origin, ent->s.origin);
 	ent->s.origin[2] += 1;	// make sure off ground
+	VectorCopy (ent->s.origin, ent->s.old_origin);
 
 	// set the delta angle
 	for (i=0 ; i<3 ; i++)
