@@ -1186,7 +1186,7 @@ Searches the string for the given
 key and returns the associated value, or an empty string.
 ===============
 */
-char *Info_ValueForKey (char *s, char *key)
+char *Info_ValueForKey (const char *s, const char *key)
 {
 	/*
 	 * 2010-11 Increase static buffers from 2 to 8 to avoid collisions
@@ -1231,7 +1231,7 @@ char *Info_ValueForKey (char *s, char *key)
 	}
 }
 
-void Info_RemoveKey (char *s, char *key)
+void Info_RemoveKey (char *s, const char *key)
 {
 	char	*start;
 	char	pkey[512];
@@ -1295,7 +1295,7 @@ Some characters are illegal in info strings because they
 can mess up the server's parsing
 ==================
 */
-qboolean Info_Validate (char *s)
+qboolean Info_Validate (const char *s)
 {
 	if (strstr (s, "\""))
 		return false;
@@ -1304,7 +1304,7 @@ qboolean Info_Validate (char *s)
 	return true;
 }
 
-void Info_SetValueForKey (char *s, char *key, char *value)
+void Info_SetValueForKey (char *s, const char *key, const char *value)
 {
 	char	newi[MAX_INFO_STRING], *v;
 	int		c;
