@@ -2146,8 +2146,6 @@ void PutClientInServer (edict_t *ent)
 	else if (client->ps.fov > 160)
 		client->ps.fov = 160;
 
-	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
-
 	// clear entity state values
 	ent->s.effects = 0;
 	ent->s.skinnum = ent - g_edicts - 1;
