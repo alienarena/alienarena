@@ -1085,7 +1085,7 @@ void ClientEndServerFrame (edict_t *ent)
 	current_player = ent;
 	current_client = ent->client;
 	
-	if (ent->client->chase_target != NULL && ent->client->resp.spectator != 0)
+	if (ent->client->chase_target != NULL && !player_participating (ent))
 	{
 		ent->redirect_number = ent->client->chase_target->s.number;
 		// This isn't needed to make spectators follow the chase target 

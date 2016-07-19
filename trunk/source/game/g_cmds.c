@@ -146,10 +146,7 @@ void ValidateSelectedItem (edict_t *ent)
 
 void DrawChatBubble (edict_t *ent)
 {
-
-	if(!ent->client)
-		return;
-	if(ent->client->resp.spectator)
+	if (!ent->client || !player_participating (ent))
 		return;
 
 	gi.WriteByte (svc_temp_entity);
