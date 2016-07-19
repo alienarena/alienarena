@@ -971,10 +971,6 @@ void ACESP_PutClientInServer (edict_t *ent)
 	VectorClear (ent->velocity);
 
 	// init playerstate values
-//ZOID
-	client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
-//ZOID
-
 	client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
 	if (client->ps.fov < 1)
 		client->ps.fov = 90;
@@ -1053,11 +1049,6 @@ void ACESP_PutClientInServer (edict_t *ent)
 	ent->s.event = EV_OTHER_TELEPORT; //to fix "player flash" bug
 	gi.linkentity (ent);
 
-		// send effect
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_LOGIN);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
 	client->spawnprotecttime = level.time;
 
 	//unlagged
