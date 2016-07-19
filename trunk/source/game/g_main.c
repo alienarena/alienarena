@@ -1061,7 +1061,7 @@ void CheckDMRules (void)
 
 				if (cl->resp.score >= fraglimit->integer)
 				{
-					if(cl->is_bot)
+					if(g_edicts[i+1].is_bot)
 					{
 						bot_won = 1; //a bot has won the match
 						safe_bprintf (PRINT_HIGH, "Fraglimit hit by bot.\n");
