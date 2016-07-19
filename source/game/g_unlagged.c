@@ -215,11 +215,8 @@ void G_TimeShiftAllClients( int time, edict_t *skip )
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
 			continue;
-
-		if ( ent->client && ent->inuse && !ent->client->resp.spectator && ent != skip ) 
-		{
-			G_TimeShiftClient( ent, time, false, skip );
-		}
+		if (player_participating (ent) && ent != skip)
+			G_TimeShiftClient (ent, time, false, skip);
 	}
 }
 
@@ -291,10 +288,8 @@ void G_UnTimeShiftAllClients( edict_t *skip )
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
 			continue;
-		if ( ent->client && ent->inuse && !ent->client->resp.spectator && ent != skip ) 
-		{
-			G_UnTimeShiftClient( ent );
-		}
+		if (player_participating (ent) && ent != skip)
+			G_UnTimeShiftClient (ent);
 	}
 }
 

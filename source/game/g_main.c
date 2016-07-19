@@ -460,7 +460,7 @@ static void game_report( void )
 
 	for ( i = 0, pclient = &g_edicts[1] ; i < game.maxclients ; ++pclient, i++ )
 	{ // for each possible client, human or bot
-		if ( pclient->inuse && game.clients[i].resp.spectator == 0 )
+		if (pclient->inuse && player_participating (pclient))
 		{
 			int weap;
 
@@ -548,7 +548,7 @@ void EndDMLevel (void)
 	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + i + 1;
-		if (!ent->inuse || ent->client->resp.spectator)
+		if (!ent->inuse || !player_participating (ent))
 			continue;
 		if(!ent->is_bot && ent->deadflag)
 			DeathcamRemove (ent, "off");
@@ -827,7 +827,7 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + i + 1;
-		if (!ent->inuse || ent->client->resp.spectator)
+		if (!ent->inuse || !player_participating (ent))
 			continue;
 		if (keepscores)
 			backup_score = ent->client->resp.score;

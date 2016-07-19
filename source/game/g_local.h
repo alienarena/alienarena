@@ -1249,6 +1249,13 @@ typedef struct {
 } clientHistory_t;
 //unlagged - backward reconciliation #1
 
+// a non-participating player can be:
+// * spectating
+// * yet to pick a team
+// * waiting his turn in duel mode
+#define player_participating(ent) \
+    (!(ent->client->resp.spectator))
+
 // client data that stays across deathmatch respawns
 typedef struct
 {

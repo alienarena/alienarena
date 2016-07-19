@@ -1222,7 +1222,7 @@ static void remove_bot( edict_t *bot )
 	if ( g_duel->integer )
 	{// duel mode, we need to bump people down the queue if its the player in game leaving
 		MoveClientsDownQueue(bot);
-		if( !bot->client->resp.spectator )
+		if (player_participating (bot))
 		{ // bot was in duel
 			int j;
 			for ( j = 1; j <= game.maxclients; j++)

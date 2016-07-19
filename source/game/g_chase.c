@@ -31,7 +31,7 @@ void UpdateChaseCam(edict_t *ent)
 {
 	// is our chase target gone?
 	if (!ent->client->chase_target->inuse
-		|| ent->client->chase_target->client->resp.spectator) {
+		|| !player_participating (ent->client->chase_target)) {
 		edict_t *old = ent->client->chase_target;
 		ChaseNext(ent);
 		if (ent->client->chase_target == old) {
@@ -61,7 +61,7 @@ void ChaseNext(edict_t *ent)
 		e = g_edicts + i;
 		if (!e->inuse)
 			continue;
-		if (!e->client->resp.spectator)
+		if (player_participating (e))
 			break;
 	} while (e != ent->client->chase_target);
 
@@ -88,7 +88,7 @@ void ChasePrev(edict_t *ent)
 		e = g_edicts + i;
 		if (!e->inuse)
 			continue;
-		if (!e->client->resp.spectator)
+		if (player_participating (e))
 			break;
 	} while (e != ent->client->chase_target);
 
@@ -106,7 +106,7 @@ void GetChaseTarget(edict_t *ent)
 
 	for (i = 1; i <= g_maxclients->value; i++) {
 		other = g_edicts + i;
-		if (other->inuse && !other->client->resp.spectator) {
+		if (other->inuse && player_participating (other)) {
 			ent->client->chase_target = other;
 			ent->client->update_chase = true;
 			G_CleanPlayerName( other->client->pers.netname, clean_name );

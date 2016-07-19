@@ -271,7 +271,7 @@ void BeginIntermission (edict_t *targ)
 		}
 		client->s.frame = 0;
 		// disconnect spectators from target to prevent point-of-view errors
-		if ( client->client && client->client->resp.spectator )
+		if (client->client && !player_participating (client))
 		{
 			if ( client->client->chase_target != NULL )
 			{
@@ -321,7 +321,7 @@ void BeginIntermission (edict_t *targ)
 	//get the lowest score in the game, and use that as the base high score to start
 	for (i=0; i<game.maxclients; i++) {
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || game.clients[i].resp.spectator)
+		if (!cl_ent->inuse || !player_participating (cl_ent))
 			continue;
 		if(game.clients[i].resp.score <= low_score)
 			low_score = game.clients[i].resp.score;
@@ -332,7 +332,7 @@ void BeginIntermission (edict_t *targ)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || game.clients[i].resp.spectator)
+		if (!cl_ent->inuse || !player_participating (cl_ent))
 			continue;
 
 		if(game.clients[i].resp.score >= high_score) {
@@ -346,7 +346,7 @@ void BeginIntermission (edict_t *targ)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || game.clients[i].resp.spectator || (cl_ent == winner))
+		if (!cl_ent->inuse || !player_participating (cl_ent) || (cl_ent == winner))
 			continue;
 
 		if(game.clients[i].resp.score >= high_score) {
@@ -360,7 +360,7 @@ void BeginIntermission (edict_t *targ)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || game.clients[i].resp.spectator || (cl_ent == winner) ||
+		if (!cl_ent->inuse || !player_participating (cl_ent) || (cl_ent == winner) ||
 			(cl_ent == firstrunnerup))
 			continue;
 
@@ -511,7 +511,7 @@ void EndIntermission(void)
 	for (i=0 ; i<g_maxclients->integer; i++)
 	{
 		ent = g_edicts + 1 + i;
-        if (!ent->inuse || ent->client->resp.spectator)
+        if (!ent->inuse || !player_participating (ent))
             continue;
 
         if(!ent->is_bot && ent->client->chasetoggle > 0)
@@ -573,7 +573,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || (!g_duel->integer && game.clients[i].resp.spectator))
+		if (!cl_ent->inuse || (!g_duel->integer && !player_participating (cl_ent)))
 			continue;
 
 		score = game.clients[i].resp.score;
@@ -625,7 +625,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		stringlength += j;
 
 		// send the layout
-		if(!cl->resp.spectator)
+		if (player_participating (cl_ent))
 			Com_sprintf (entry, sizeof(entry),
 				"client %i %i %i %i %i %i ",
 				x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe)/600);
@@ -1074,7 +1074,7 @@ void G_UpdateStats( edict_t *ent )
 {
 	gclient_t *gcl = ent->client;
 
-	if ( gcl->resp.spectator && !ent->is_bot )
+	if (!player_participating (ent) && !ent->is_bot)
 	{
 		if ( gcl->chase_target != NULL && level.intermissiontime <= 0.0f )
 		{ // clone chase target's stats for hud
