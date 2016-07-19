@@ -1013,8 +1013,6 @@ void ACESP_PutClientInServer (edict_t *ent)
 	
 	Respawn_ClassSpecific (ent, client);
 	
-	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
-
 	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)
 		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
@@ -1038,10 +1036,6 @@ void ACESP_PutClientInServer (edict_t *ent)
 	VectorCopy (ent->s.angles, client->ps.viewangles);
 	VectorCopy (ent->s.angles, client->v_angle);
 
-	// force the current weapon up
-	client->newweapon = client->pers.weapon;
-	ChangeWeapon (ent);
-
 	ACESP_SpawnInitializeAI (ent);
 
 	if (!KillBox (ent))
@@ -1049,6 +1043,10 @@ void ACESP_PutClientInServer (edict_t *ent)
 	}
 	ent->s.event = EV_OTHER_TELEPORT; //to fix "player flash" bug
 	gi.linkentity (ent);
+
+	// force the current weapon up
+	client->newweapon = client->pers.weapon;
+	ChangeWeapon (ent);
 
 	client->spawnprotecttime = level.time;
 
