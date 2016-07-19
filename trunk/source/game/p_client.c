@@ -2223,11 +2223,11 @@ void PutClientInServer (edict_t *ent)
 		ACESP_SpawnInitializeAI (ent);
 	
 	// spectator mode (non-bot players only)
+	client->resp.spectator = client->pers.spectator;
 	if (client->pers.spectator != 0)
 	{
 		// spawn a spectator
 		client->chase_target = NULL;
-		client->resp.spectator = client->pers.spectator;
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
 		ent->svflags |= SVF_NOCLIENT;
