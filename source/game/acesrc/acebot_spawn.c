@@ -964,7 +964,6 @@ void ACESP_PutClientInServer (edict_t *ent)
 	
 	Respawn_Player_ClearEnt (ent);
 	
-	client->is_bot = true;
 	ent->classname = "bot";
 
 	VectorCopy (mins, ent->mins);

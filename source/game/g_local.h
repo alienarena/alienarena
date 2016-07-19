@@ -1301,9 +1301,6 @@ struct gclient_s
 	 */
 	int		motd_frames;
 
-	//stuff for bots
-	qboolean	is_bot;
-
 	int			ammo_index;
 
 	int			buttons;
