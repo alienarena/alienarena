@@ -1639,10 +1639,7 @@ void respawn (edict_t *self)
 		//end spectator mode
 		self->svflags &= ~SVF_NOCLIENT;
 		
-		if (self->is_bot)
-			ACESP_PutClientInServer (self);
-		else
-			PutClientInServer (self);
+		PutClientInServer (self);
 
 		// add a teleportation effect
 		self->s.event = EV_PLAYER_TELEPORT;
@@ -1719,6 +1716,7 @@ static void spectator_respawn (edict_t *ent)
 	ent->client->resp.score = 0;
 
 	ent->svflags &= ~SVF_NOCLIENT;
+	ent->is_bot = false;
 	PutClientInServer (ent);
 
 	// add a teleportation effect
@@ -2112,7 +2110,27 @@ void PutClientInServer (edict_t *ent)
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
-	ClientUserinfoChanged (ent, userinfo, SPAWN);
+	if (ent->is_bot)
+	{
+		// TODO: make ClientUserinfoChanged handle bots correctly.
+		int index = ent - g_edicts - 1;
+		
+		memcpy(client->pers.userinfo, userinfo, MAX_INFO_STRING );
+
+		// set netname from userinfo
+		strncpy( client->pers.netname,
+				 (Info_ValueForKey( client->pers.userinfo, "name")),
+				 sizeof(client->pers.netname)-1);
+
+		// combine name and skin into a configstring
+		gi.configstring( CS_PLAYERSKINS+index, va("%s\\%s",
+				client->pers.netname,
+				(Info_ValueForKey( client->pers.userinfo, "skin"))));
+	}
+	else
+	{
+		ClientUserinfoChanged (ent, userinfo, SPAWN);
+	}
 	saved = client->pers;
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
@@ -2120,14 +2138,16 @@ void PutClientInServer (edict_t *ent)
 
 	Respawn_Player_ClearEnt (ent);
 	
-	ent->is_bot = false;
-	ent->classname = "player";
+	ent->classname = ent->is_bot ? "bot" : "player";
 
-	//anti-camp
-	ent->suicide_timeout = level.time + 10.0;
-	VectorClear (ent->velocity_accum);
-	ent->old_velocities_current = -1;
-	ent->old_velocities_count = 0;
+	if (!ent->is_bot)
+	{
+		// anti-camp (bots use this mechanism for something else)
+		ent->suicide_timeout = level.time + 10.0;
+		VectorClear (ent->velocity_accum);
+		ent->old_velocities_current = -1;
+		ent->old_velocities_count = 0;
+	}
 
 	VectorCopy (mins, ent->mins);
 	VectorCopy (maxs, ent->maxs);
@@ -2199,10 +2219,13 @@ void PutClientInServer (edict_t *ent)
 	VectorCopy (ent->s.angles, client->ps.viewangles);
 	VectorCopy (ent->s.angles, client->v_angle);
 
-	//spectator mode
-	// spawn a spectator
-	if ( client->pers.spectator != 0 )
+	if (ent->is_bot)
+		ACESP_SpawnInitializeAI (ent);
+	
+	// spectator mode (non-bot players only)
+	if (client->pers.spectator != 0)
 	{
+		// spawn a spectator
 		client->chase_target = NULL;
 		client->resp.spectator = client->pers.spectator;
 		ent->movetype = MOVETYPE_NOCLIP;
@@ -2212,9 +2235,6 @@ void PutClientInServer (edict_t *ent)
 		gi.linkentity (ent);
 		return;
 	}
-	else if ( !g_duel->integer )
-		client->resp.spectator = 0;
-	//end spectator mode
 
 	if (!KillBox (ent))
 	{	// could't spawn in?
@@ -2314,10 +2334,7 @@ void MoveClientsDownQueue(edict_t *ent)
 				g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
 				g_edicts[i+1].movetype = MOVETYPE_WALK;
 				g_edicts[i+1].solid = SOLID_BBOX;
-				if(!g_edicts[i+1].is_bot)
-					PutClientInServer(g_edicts+i+1);
-				else
-					ACESP_PutClientInServer (g_edicts+i+1);
+				PutClientInServer(g_edicts+i+1);
 				safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
 				putonein = true;
 			}
@@ -2397,6 +2414,7 @@ static void ClientBeginDeathmatch (edict_t *ent)
 	// locate ent at a spawn point
 	if(!ent->client->pers.spectator) //fixes invisible player bugs caused by leftover svf_noclients
 		ent->svflags &= ~SVF_NOCLIENT;
+	ent->is_bot = false;
 	PutClientInServer (ent);
 
 	//kick and blackhole a player in tactical that is not using an authorized character!

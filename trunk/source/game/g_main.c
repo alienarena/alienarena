@@ -833,16 +833,9 @@ void ResetLevel (qboolean keepscores) //for resetting players and items after wa
 			backup_score = ent->client->resp.score;
 		// locate ent at a spawn point and reset everything
 		InitClientResp (ent->client);
-		if(ent->is_bot)
-		{
-			// respawn bots after warmup
-			ACESP_PutClientInServer (ent);
-		}
-		else {
-			if(ent->deadflag)
-				DeathcamRemove (ent, "off");
-			PutClientInServer (ent);
-		}
+		if (!ent->is_bot && ent->deadflag)
+			DeathcamRemove (ent, "off");
+		PutClientInServer (ent);
 		ent->client->homing_shots = 0;
 		if (keepscores)
 			ent->client->resp.score = backup_score;
@@ -1299,14 +1292,7 @@ void ExitLevel (void)
 		ent->takedamage = DAMAGE_AIM;
 		ent->solid = SOLID_BBOX;
 		ent->deadflag = DEAD_NO;
-		if(ent->is_bot) 
-		{
-			ACESP_PutClientInServer (ent);
-		} 
-		else 
-		{
-			PutClientInServer (ent);
-		}
+		PutClientInServer (ent);
 		if(g_duel->integer) 
 		{
 			ClientPlaceInQueue(ent);
