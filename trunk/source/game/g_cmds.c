@@ -909,6 +909,11 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 
 }
 
+static const char *participation_descriptions[participation_numstates] = 
+{
+	"", " (spectator)", " (picking team)", " (waiting for turn)"
+};
+
 void Cmd_PlayerList_f(edict_t *ent)
 {
 	int i;
@@ -928,7 +933,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 			e2->client->ping,
 			e2->client->resp.score,
 			e2->client->pers.netname,
-			e2->client->resp.spectator ? " (spectator)" : "");
+			participation_descriptions[e2->client->resp.participation]);
 		if (strlen(text) + strlen(st) > sizeof(text) - 50) {
 			sprintf(text+strlen(text), "And more...\n");
 			safe_cprintf(ent, PRINT_HIGH, "%s", text);
@@ -937,6 +942,24 @@ void Cmd_PlayerList_f(edict_t *ent)
 		strcat(text, st);
 	}
 	safe_cprintf(ent, PRINT_HIGH, "%s", text);
+}
+
+void Cmd_TeamSelect_f (edict_t *ent)
+{
+	if (!TEAM_GAME)
+	{
+		safe_cprintf (ent, PRINT_HIGH, "You do not need to pick a team on "
+		              "this server.\n");
+		return;
+	}
+	if (ent->client->resp.participation == participation_spectating)
+	{
+		// TODO: should we just stuff "set spectator 0" instead?
+		safe_cprintf (ent, PRINT_HIGH, "Exit spectator mode (set spectator 0) "
+		              "to choose a team.\n");
+		return;
+	}
+	ent->dmteam = NO_TEAM;
 }
 
 /*
@@ -1245,6 +1268,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_strcasecmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	else if (Q_strcasecmp(cmd, "teamselect") == 0)
+		Cmd_TeamSelect_f (ent);
 	else if (Q_strcasecmp (cmd, "chatbubble") == 0)
 		DrawChatBubble(ent);
 	else	// anything that doesn't match a command will be a chat

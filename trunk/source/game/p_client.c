@@ -221,7 +221,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				for (i=0 ; i<game.maxclients ; i++)
 				{
 					cl_ent = g_edicts + 1 + i;
-					if (!cl_ent->inuse || game.clients[i].resp.spectator)
+					if (!cl_ent->inuse || !player_participating (cl_ent))
 						continue;
 
 					if(attacker->client->resp.score+1 >= game.clients[i].resp.score)
@@ -1027,7 +1027,7 @@ void InitClientPersistant (gclient_t *client)
 {
 	gitem_t		*item;
 	int			queue=0;
-
+	
 	if(g_duel->integer) //need to save this off in duel mode.  Potentially dangerous?
 		queue = client->pers.queue;
 
@@ -1035,7 +1035,7 @@ void InitClientPersistant (gclient_t *client)
 
 	if(g_duel->integer)
 		client->pers.queue = queue;
-
+	
 #ifdef ALTERIA
 	item = FindItem("Warriorpunch");
 #else
@@ -1658,58 +1658,67 @@ void respawn (edict_t *self)
 }
 
 //spectator mode
-static void spectator_respawn (edict_t *ent)
+
+static qboolean veto_spectator_state (edict_t *ent, const char *userinfo, const char **rejmsg)
 {
-	int i, numspec;
+	char	*value;
+	int		i, numspec;
+	
+	value = Info_ValueForKey (userinfo, "spectator");
+	
+	if (deathmatch->value && *value && strcmp(value, "0")) {
 
-	// if the user wants to become a spectator, make sure he doesn't
-	// exceed max_spectators
+		value = Info_ValueForKey( userinfo, "spectator_password" );
 
-	if (ent->client->pers.spectator) {
-		char *value = Info_ValueForKey (ent->client->pers.userinfo, "spectator_password");
 		if (*spectator_password->string &&
-			strcmp(spectator_password->string, "none") &&
-			strcmp(spectator_password->string, value)) {
-			gi.cprintf(ent, PRINT_HIGH, "%s", "Spectator password incorrect.\n");
-			ent->client->pers.spectator = 0;
-			gi.WriteByte (svc_stufftext);
-			gi.WriteString ("spectator 0\n");
-			gi.unicast(ent, true);
-			return;
+			strcmp (spectator_password->string, "none") &&
+			strcmp (spectator_password->string, value)) {
+			*rejmsg = "Spectator password required or incorrect.";
+			return true;
 		}
 
 		// count spectators
-		for (i = 1, numspec = 0; i <= g_maxclients->value; i++)
-			if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
+		for (i = numspec = 0; i < g_maxclients->value; i++)
+			if (g_edicts[i+1].inuse && g_edicts[i+1].client->pers.spectator)
 				numspec++;
 
 		if (numspec >= maxspectators->value) {
-			gi.cprintf(ent, PRINT_HIGH, "%s", "Server spectator limit is full.");
-			ent->client->pers.spectator = 0;
-			// reset his spectator var
-			gi.WriteByte (svc_stufftext);
-			gi.WriteString ("spectator 0\n");
-			gi.unicast(ent, true);
-			return;
+			*rejmsg = "Server spectator limit is full.";
+			return true;
 		}
-	} else {
-		// he was a spectator and wants to join the game
-		// he must have the right password
-		char *value = Info_ValueForKey (ent->client->pers.userinfo, "password");
-		if (*password->string && strcmp(password->string, "none") &&
-			strcmp(password->string, value))
-		{
-			gi.cprintf(ent, PRINT_HIGH, "%s", "Password incorrect.\n");
-			ent->client->pers.spectator = 1;
-			gi.WriteByte (svc_stufftext);
-			gi.WriteString ("spectator 1\n");
-			gi.unicast(ent, true);
-			return;
+	} else if (!ent->is_bot) {
+		// check for a password
+		value = Info_ValueForKey (userinfo, "password");
+		if (*password->string && strcmp (password->string, "none") &&
+			strcmp (password->string, value)) {
+			*rejmsg = "Password required or incorrect.";
+			return true;
 		}
 	}
+	
+	return false;
+}
 
+qboolean player_participating (const edict_t *ent)
+{
+	return	ent->inuse && ent->client != NULL &&
+			ent->client->resp.participation == participation_playing;
+}
+
+participation_t player_desired_participation (const edict_t *ent)
+{
+	if (ent->client->pers.spectator)
+		return participation_spectating;
+	// in ctf, initially start in chase mode, and allow them to choose a team
+	if (TEAM_GAME && ent->dmteam == NO_TEAM)
+		return participation_pickingteam;
+	return participation_playing;
+}
+
+static void spectator_respawn (edict_t *ent)
+{
 	/* Remove deathcam if changed to spectator after death */
-	if (ent->client->pers.spectator && ent->deadflag)
+	if (!player_participating (ent) && ent->deadflag)
 		DeathcamRemove (ent, "off");
 
 	// clear client on respawn
@@ -1720,7 +1729,8 @@ static void spectator_respawn (edict_t *ent)
 	PutClientInServer (ent);
 
 	// add a teleportation effect
-	if (!ent->client->pers.spectator)  {
+	if (player_participating (ent))
+	{
 		// send effect
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -1730,18 +1740,14 @@ static void spectator_respawn (edict_t *ent)
 		// hold in place briefly
 		ent->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
 		ent->client->ps.pmove.pm_time = 14;
-	}
-
-	ent->client->respawn_time = level.time;
-
-	if (ent->client->pers.spectator)
-	{ // pers.spectator > 0, entering spectator mode
-		safe_bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
-	}
-	else
-	{ // pers.spectator==0, leaving spectator mode
+		
 		safe_bprintf (PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
 	}
+	else
+	{
+		safe_bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
+	}
+
 	if ( sv_botkickthreshold && sv_botkickthreshold->integer )
 	{ // player entered or left playing field, update for auto botkick
 		ACESP_LoadBots( ent );
@@ -2223,16 +2229,29 @@ void PutClientInServer (edict_t *ent)
 		ACESP_SpawnInitializeAI (ent);
 	
 	// spectator mode (non-bot players only)
-	client->resp.spectator = client->pers.spectator;
-	if (client->pers.spectator != 0)
+	// this should be the only place to modify this variable.
+	client->resp.participation = player_desired_participation (ent);
+	if (!player_participating (ent))
 	{
-		// spawn a spectator
+		// spawn a "ghost"
 		client->chase_target = NULL;
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
 		ent->svflags |= SVF_NOCLIENT;
 		client->ps.gunindex = 0;
 		gi.linkentity (ent);
+
+		// clear team affiliation
+		ent->dmteam = NO_TEAM;
+
+		// if in team select mode, show scoreboard
+		if (client->resp.participation == participation_pickingteam) 
+		{
+			CTFScoreboardMessage (ent, NULL, false);
+			gi.unicast (ent, true);
+			ent->teamset = client->showscores = true;
+		}
+
 		return;
 	}
 
@@ -2292,7 +2311,8 @@ void ClientCheckQueue(edict_t *ent)
 	if(ent->client->pers.queue > 2) 
 	{ 
 		//everyone in line remains a spectator
-		ent->client->pers.spectator = ent->client->resp.spectator = 1;
+		#warning fixme
+//		ent->client->pers.spectator = ent->client->resp.spectator = 1;
 		ent->client->chase_target = NULL;
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
@@ -2310,8 +2330,9 @@ void ClientCheckQueue(edict_t *ent)
 					numplayers++;
 			}
 		}
-		if(numplayers < 3) //only put him in if there are less than two
-			ent->client->pers.spectator = ent->client->resp.spectator = 0;
+		#warning fixme
+		//if(numplayers < 3) //only put him in if there are less than two
+			//ent->client->pers.spectator = ent->client->resp.spectator = 0;
 	}
 }
 void MoveClientsDownQueue(edict_t *ent)
@@ -2327,10 +2348,11 @@ void MoveClientsDownQueue(edict_t *ent)
 			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue)
 				g_edicts[i+1].client->pers.queue--;
 
-			if(!putonein && g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) 
+#warning fixme
+			if(!putonein && g_edicts[i+1].client->pers.queue == 2)// && g_edicts[i+1].client->resp.spectator) 
 			{ 
 				//make sure those who should be in game are
-				g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
+//				g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
 				g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
 				g_edicts[i+1].movetype = MOVETYPE_WALK;
 				g_edicts[i+1].solid = SOLID_BBOX;
@@ -2412,7 +2434,7 @@ static void ClientBeginDeathmatch (edict_t *ent)
 	ent->dmteam = NO_TEAM;
 
 	// locate ent at a spawn point
-	if(!ent->client->pers.spectator) //fixes invisible player bugs caused by leftover svf_noclients
+	if (player_participating (ent)) //fixes invisible player bugs caused by leftover svf_noclients
 		ent->svflags &= ~SVF_NOCLIENT;
 	ent->is_bot = false;
 	PutClientInServer (ent);
@@ -2433,27 +2455,6 @@ static void ClientBeginDeathmatch (edict_t *ent)
 				safe_bprintf(PRINT_HIGH, "%s was kicked for using invalid character class!\n", ent->client->pers.netname);
 				ClientDisconnect (ent);
 			}
-		}
-	}
-
-	//in ctf, initially start in chase mode, and allow them to choose a team
-	if( TEAM_GAME ) 
-	{
-		ent->client->pers.spectator = 1;
-		ent->client->chase_target = NULL;
-		ent->client->resp.spectator = 1;
-		ent->movetype = MOVETYPE_NOCLIP;
-		ent->solid = SOLID_NOT;
-		ent->svflags |= SVF_NOCLIENT;
-		ent->client->ps.gunindex = 0;
-		gi.linkentity (ent);
-		//bring up scoreboard if not on a team
-		if(ent->dmteam == NO_TEAM)
-		{
-			ent->client->showscores = true;
-			CTFScoreboardMessage (ent, NULL, false);
-			gi.unicast (ent, true);
-			ent->teamset = true; // used to error check team skin
 		}
 	}
 
@@ -2551,7 +2552,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	char tmp_playername[PLAYERNAME_SIZE];
 	FILE *file;
 	teamcensus_t teamcensus;
-
+	const char *rejmsg;
+	
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
 	{
@@ -2586,41 +2588,35 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			sizeof(ent->client->pers.netname));
 	// end name validate
 
-	//spectator mode
-	if ( !g_duel->integer )
-	{ 
+	if (!g_duel->integer)
+	{
 		// never fool with spectating in duel mode
 		// set spectator
+		qboolean desired_spectator;
+		
 		s = Info_ValueForKey (userinfo, "spectator");
-		if ( TEAM_GAME )
-		{ //
-			if ( strcmp( s, "2" ) )
-			{ 
-				// not special team game spectate
-				// so make sure it stays 0
-				Info_SetValueForKey( userinfo, "spectator", "0");
-			}
-			else
-			{
-				ent->client->pers.spectator = 2;
-			}
-		}
+		desired_spectator = atoi (s) != 0;
+		
+		if (veto_spectator_state (ent, userinfo, &rejmsg))
+			gi.cprintf (ent, PRINT_HIGH, "%s\n", rejmsg);
+		else if (deathmatch->value)
+			ent->client->pers.spectator = desired_spectator;
 		else
+			ent->client->pers.spectator = 0;
+		
+		if (ent->client->pers.spectator != desired_spectator)
 		{
-			if ( deathmatch->value && *s && strcmp(s, "0") )
-				ent->client->pers.spectator = atoi(s);
-			else
-				ent->client->pers.spectator = 0;
+			gi.WriteByte (svc_stufftext);
+			gi.WriteString (va ("spectator %d\n", ent->client->pers.spectator));
+			gi.unicast(ent, true);
 		}
 	}
-	//end spectator mode
-
+	
 	// set skin
 	s = Info_ValueForKey (userinfo, "skin");
 
 	// do the team skin check
-	if ( TEAM_GAME
-			&& ent->client->pers.spectator != 2 && ent->client->resp.spectator != 2 )
+	if (TEAM_GAME && player_participating (ent))
 	{
 		copychar = false;
 		strcpy( playerskin, " " );
@@ -2880,7 +2876,7 @@ loadgames will.
 qboolean ClientConnect (edict_t *ent, char *userinfo)
 {
 	char	*value;
-	int		i, numspec;
+	const char *rejmsg;
 
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey (userinfo, "ip");
@@ -2889,47 +2885,11 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 		return false;
 	}
 
-	//spectator mode
-	// check for a spectator
-
-	value = Info_ValueForKey (userinfo, "spectator");
-
-	if ( TEAM_GAME  && strcmp(value, "0") )
-	{ // for team game, force spectator off
-		Info_SetValueForKey( userinfo, "spectator", "0" );
-		ent->client->pers.spectator = 0;
+	if (veto_spectator_state (ent, userinfo, &rejmsg))
+	{
+		Info_SetValueForKey(userinfo, "rejmsg", rejmsg);
+		return false;
 	}
-
-	if (deathmatch->value && *value && strcmp(value, "0")) {
-
-		value = Info_ValueForKey( userinfo, "spectator_password" );
-
-		if (*spectator_password->string &&
-			strcmp(spectator_password->string, "none") &&
-			strcmp(spectator_password->string, value)) {
-			Info_SetValueForKey(userinfo, "rejmsg", "Spectator password required or incorrect.");
-			return false;
-		}
-
-		// count spectators
-		for (i = numspec = 0; i < g_maxclients->value; i++)
-			if (g_edicts[i+1].inuse && g_edicts[i+1].client->pers.spectator)
-				numspec++;
-
-		if (numspec >= maxspectators->value) {
-			Info_SetValueForKey(userinfo, "rejmsg", "Server spectator limit is full.");
-			return false;
-		}
-	} else if(!ent->is_bot){
-		// check for a password
-		value = Info_ValueForKey (userinfo, "password");
-		if (*password->string && strcmp(password->string, "none") &&
-			strcmp(password->string, value)) {
-			Info_SetValueForKey(userinfo, "rejmsg", "Password required or incorrect.");
-			return false;
-		}
-	}
-	//end specator mode
 
 	// they can connect
 	ent->client = game.clients + (ent - g_edicts - 1);
@@ -2984,6 +2944,7 @@ void ClientDisconnect (edict_t *ent)
 		DeathcamRemove(ent, "off");
 
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
+#if 0
 	if(g_duel->integer) {
 		MoveClientsDownQueue(ent);
 		if(!ent->client->resp.spectator) {
@@ -2992,6 +2953,8 @@ void ClientDisconnect (edict_t *ent)
 					g_edicts[i+1].client->resp.score = 0;
 		}
 	}
+#endif
+#warning fixme
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -3213,45 +3176,31 @@ static inline void ClientTeamSelection( edict_t * ent ,
 {
 	teamcensus_t teamcensus;
 
-	if ( client->pers.spectator == 2 )
-	{ // entered with special team spectator mode on
-		// force it off, does not appear to help much. (?)
-		ent->dmteam = NO_TEAM;
-		client->pers.spectator = 0;
-	}
-
-	if ( ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM )
+	if (level.time / 2 == ceil (level.time / 2))
 	{
-		client->pers.spectator = 0;
-	}
-
-	if ( level.time / 2 == ceil( level.time / 2 )
-			&& client->pers.spectator == 1
-			&& ent->dmteam == NO_TEAM ) {
-		// send "how to join" message
+		// periodically send "how to join" message
 		if ( g_autobalance->integer )
 		{
-			safe_centerprintf( ent,
+			safe_centerprintf (ent,
 				"\n\n\nPress <fire> to join\n"
-				"autobalanced team\n" );
+				"autobalanced team\n");
 		}
 		else
 		{
-			safe_centerprintf( ent,
+			safe_centerprintf (ent,
 				"\n\n\nPress <fire> to autojoin\n"
 				"or <jump> to join BLUE\n"
-				"or <crouch> to join RED\n" );
+				"or <crouch> to join RED\n");
 		}
 	}
 
 	if ( client->latched_buttons & BUTTON_ATTACK )
 	{ // <fire> to auto join
 		client->latched_buttons = 0;
-		if ( client->pers.spectator == 1 && ent->dmteam == NO_TEAM)
+		if (ent->dmteam == NO_TEAM)
 		{
 			TeamCensus( &teamcensus ); // apply team balance rules
 			ent->dmteam = teamcensus.team_for_real;
-			client->pers.spectator = 0;
 			ClientChangeSkin( ent );
 		}
 	}
@@ -3261,7 +3210,6 @@ static inline void ClientTeamSelection( edict_t * ent ,
 		if ( !g_autobalance->integer )
 		{ // jump to join blue
 			ent->dmteam = BLUE_TEAM;
-			client->pers.spectator = 0;
 			ClientChangeSkin( ent );
 		}
 	}
@@ -3270,7 +3218,6 @@ static inline void ClientTeamSelection( edict_t * ent ,
 		if ( !g_autobalance->integer )
 		{ // crouch to join red
 			ent->dmteam = RED_TEAM;
-			client->pers.spectator = 0;
 			ClientChangeSkin( ent );
 		}
 	}
@@ -3686,7 +3633,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// monster sighting AI
 	ent->light_level = ucmd->lightlevel;
 
-	if ( client->resp.spectator == 0 )
+	if (player_participating (ent))
 	{ // regular (non-spectator) mode
 		if (client->latched_buttons & BUTTON_ATTACK)
 		{
@@ -3699,7 +3646,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 	else
 	{ // spectator mode
-		if ( TEAM_GAME && client->resp.spectator < 2 )
+		if (TEAM_GAME && client->resp.participation == participation_pickingteam)
 		{ // team selection state
 			ClientTeamSelection( ent , client , ucmd );
 		} /* team selection state */
@@ -3831,8 +3778,8 @@ static inline void _UpdateAntiCamp( edict_t * ent )
 	}
 
 	// Inflict anti-camp damage
-	if ( ent->suicide_timeout < level.time && ent->takedamage == DAMAGE_AIM
-			&& ! ent->client->resp.spectator) {
+	if (ent->suicide_timeout < level.time && ent->takedamage == DAMAGE_AIM
+			&& player_participating (ent)) {
 		T_Damage (ent, world, world, vec3_origin, ent->s.origin,
 				vec3_origin, ent->dmg, 0, DAMAGE_NO_ARMOR,
 				MOD_SUICIDE);
@@ -3859,29 +3806,13 @@ void ClientBeginServerFrame (edict_t *ent)
 
 	client = ent->client;
 
-	//spectator mode
-	if ( deathmatch->value && client->pers.spectator != client->resp.spectator
+	if (deathmatch->value
+			&& player_desired_participation (ent) != client->resp.participation
 			&& (level.time - client->respawn_time) >= 5 )
 	{
-		if ( TEAM_GAME && client->pers.spectator == 2 )
-		{ // special team game spectator mode (has problems)
-			if ( client->resp.spectator == 1 )
-			{ // special team spectator mode
-				spectator_respawn( ent );
-				client->resp.spectator = 2;
-			}
-		}
-		else if ( TEAM_GAME && client->resp.spectator == 2 )
-		{ // pers != resp, exit spectator mode not allowed
-			client->pers.spectator = 2;
-		}
-		else
-		{ // enter or exit spectator mode
-			spectator_respawn( ent );
-		}
-		return;
+		// enter or exit spectator mode
+		spectator_respawn (ent);
 	}
-	//end spectator mode
 
 	//anti-camp
 	// do not apply to godmode cheat or bots.
@@ -3891,11 +3822,7 @@ void ClientBeginServerFrame (edict_t *ent)
 		_UpdateAntiCamp( ent );
 	}
 
-	//spectator mode
-
-	if (!client->weapon_thunk && !client->resp.spectator)
-	//end spectator mode
-
+	if (!client->weapon_thunk && player_participating (ent))
 		Think_Weapon (ent);
 	else
 		client->weapon_thunk = false;
