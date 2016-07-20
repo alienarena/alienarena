@@ -1213,7 +1213,7 @@ typedef struct
 	int			game_helpchanged;
 	int			helpchanged;
 
-	int			spectator;			// client is a spectator
+	qboolean	spectator;	// client wants to be a spectator
 	int	queue;				// client queue position for duel mode
 
 	//unlagged - client options
@@ -1253,8 +1253,17 @@ typedef struct {
 // * spectating
 // * yet to pick a team
 // * waiting his turn in duel mode
-#define player_participating(ent) \
-    (!(ent->client->resp.spectator))
+typedef enum
+{
+	participation_playing,
+	participation_spectating,
+	participation_pickingteam,
+	participation_duelwaiting,
+	participation_numstates
+} participation_t;
+
+qboolean player_participating (const edict_t *ent);
+participation_t player_desired_participation (const edict_t *ent);
 
 // client data that stays across deathmatch respawns
 typedef struct
@@ -1279,7 +1288,8 @@ typedef struct
 	//voting
 	qboolean voted;
 
-	int			spectator;			// client is a spectator
+	// please only modify this in PutClientInServer.
+	participation_t participation;
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
