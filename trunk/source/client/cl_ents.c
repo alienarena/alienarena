@@ -1202,7 +1202,6 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	qboolean	useFX = false;
 	vec3_t		offset_down;
 	vec3_t		offset_right;
-	char		shortname[MAX_OSPATH];
 
 	if (cl.frame.playerstate.stats[STAT_ZOOMED])
 		return;
@@ -1346,7 +1345,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}
 	else if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
 	{
-		int oldeffects = gun.flags, pnum;
+		int oldeffects = gun.flags;
 
 		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
@@ -1364,7 +1363,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}
 	else if(!(strcmp("models/weapons/v_rail/tris.iqm", gun.model->name))) 
 	{
-		int oldeffects = gun.flags, pnum;
+		int oldeffects = gun.flags;
 		gun.model = R_RegisterModel("models/weapons/v_rail/effects.iqm");
 		gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_GREEN;
 		gun.alpha = 0.50;
