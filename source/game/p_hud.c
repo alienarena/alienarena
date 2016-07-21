@@ -874,7 +874,6 @@ void G_SetStats (edict_t *ent)
 {
 	gitem_t		*item;
 	int			index;
-	int			i, j;
 	gitem_t		*flag1_item, *flag2_item;
 
 
