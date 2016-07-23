@@ -1712,11 +1712,15 @@ participation_t player_desired_participation (const edict_t *ent)
 	// in ctf, initially start in chase mode, and allow them to choose a team
 	if (TEAM_GAME && ent->dmteam == NO_TEAM)
 		return participation_pickingteam;
+	if (g_duel->integer && ent->client->pers.queue > 2)
+		return participation_duelwaiting;
 	return participation_playing;
 }
 
-static void spectator_respawn (edict_t *ent)
+void spectator_respawn (edict_t *ent)
 {
+	const char *msg;
+	
 	/* Remove deathcam if changed to spectator after death */
 	if (!player_participating (ent) && ent->deadflag)
 		DeathcamRemove (ent, "off");
@@ -1727,28 +1731,39 @@ static void spectator_respawn (edict_t *ent)
 	ent->svflags &= ~SVF_NOCLIENT;
 	ent->is_bot = false;
 	PutClientInServer (ent);
-
-	// add a teleportation effect
-	if (player_participating (ent))
+	
+	switch (ent->client->resp.participation)
 	{
-		// send effect
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_LOGIN);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
+		case participation_playing:
+			// add a teleportation effect
+			gi.WriteByte (svc_muzzleflash);
+			gi.WriteShort (ent-g_edicts);
+			gi.WriteByte (MZ_LOGIN);
+			gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-		// hold in place briefly
-		ent->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
-		ent->client->ps.pmove.pm_time = 14;
+			// hold in place briefly
+			ent->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
+			ent->client->ps.pmove.pm_time = 14;
+
+			msg = g_duel->integer ? "has joined the duel" : "has joined the game";
+			break;
 		
-		safe_bprintf (PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
+		case participation_pickingteam:
+			msg = "is picking a team";
+			break;
+		
+		case participation_duelwaiting:
+			msg = "has joined the duel queue";
+			break;
+		
+		default:
+			msg = "has moved to the sidelines";
+			break;
 	}
-	else
-	{
-		safe_bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
-	}
+	
+	safe_bprintf (PRINT_HIGH, "%s %s.\n", ent->client->pers.netname, msg);
 
-	if ( sv_botkickthreshold && sv_botkickthreshold->integer )
+	if (sv_botkickthreshold && sv_botkickthreshold->integer || g_duel->integer)
 	{ // player entered or left playing field, update for auto botkick
 		ACESP_LoadBots( ent );
 	}
@@ -2274,97 +2289,67 @@ void PutClientInServer (edict_t *ent)
 }
 
 //DUEL MODE
-void ClientPlaceInQueue(edict_t *ent)
+void ClientPlaceInQueue (edict_t *ent)
 {
 	int		i;
-	int		highestpos, induel, numplayers;
-
-	highestpos = induel = numplayers = 0;
+	int		highestpos = 0;
 
 	for (i = 0; i < g_maxclients->value; i++) 
 	{
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client)
+		edict_t *cl_ent = &g_edicts[i+1];
+		if (!cl_ent->inuse || !cl_ent->client)
+			continue;
+		if (game.clients[i].resp.participation == participation_playing ||
+			game.clients[i].resp.participation == participation_duelwaiting)
 		{
-			if(g_edicts[i+1].client->pers.queue > highestpos) //only count players that are actually in
-				highestpos = g_edicts[i+1].client->pers.queue;
-			if(g_edicts[i+1].client->pers.queue && g_edicts[i+1].client->pers.queue < 3)
-				induel++;
-			if(g_edicts[i+1].client->pers.queue) //only count players that are actually in
-				numplayers++;
+			if (game.clients[i].pers.queue > highestpos) //only count players that are actually in
+				highestpos = game.clients[i].pers.queue;
 		}
 	}
-
-	if(induel > 1) //make sure no more than two are in the duel at once
-		if(highestpos < 2)
-			highestpos = 2; //in case two people somehow managed to have pos 1
-	if(highestpos < numplayers)
-		highestpos = numplayers;
-
-	if(!ent->client->pers.queue)
-		ent->client->pers.queue = highestpos+1;
+	
+	ent->client->pers.queue = highestpos+1;
 }
-void ClientCheckQueue(edict_t *ent)
+void MoveClientsDownQueue (edict_t *ent)
 {
-	int		i;
-	int		numplayers = 0;
-
-	if(ent->client->pers.queue > 2) 
-	{ 
-		//everyone in line remains a spectator
-		#warning fixme
-//		ent->client->pers.spectator = ent->client->resp.spectator = 1;
-		ent->client->chase_target = NULL;
-		ent->movetype = MOVETYPE_NOCLIP;
-		ent->solid = SOLID_NOT;
-		ent->svflags |= SVF_NOCLIENT;
-		ent->client->ps.gunindex = 0;
-		gi.linkentity (ent);
-	}
-	else 
-	{
-		for (i = 0; i < g_maxclients->value; i++) 
-		{
-			if(g_edicts[i+1].inuse && g_edicts[i+1].client) 
-			{
-				if(!g_edicts[i+1].client->pers.spectator && g_edicts[i+1].client->pers.queue)
-					numplayers++;
-			}
-		}
-		#warning fixme
-		//if(numplayers < 3) //only put him in if there are less than two
-			//ent->client->pers.spectator = ent->client->resp.spectator = 0;
-	}
-}
-void MoveClientsDownQueue(edict_t *ent)
-{
-	int		i;
-	qboolean putonein = false;
+	int i;
+	
+	if (ent->client->pers.queue == 0)
+		return;
 
 	for (i = 0; i < g_maxclients->value; i++) 
 	{ 
-		//move everyone down
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) 
+		edict_t *cl_ent = &g_edicts[i+1];
+		if (!cl_ent->inuse || !cl_ent->client)
+			continue;
+		if (game.clients[i].resp.participation == participation_playing ||
+			game.clients[i].resp.participation == participation_duelwaiting)
 		{
-			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue)
-				g_edicts[i+1].client->pers.queue--;
-
-#warning fixme
-			if(!putonein && g_edicts[i+1].client->pers.queue == 2)// && g_edicts[i+1].client->resp.spectator) 
-			{ 
-				//make sure those who should be in game are
-//				g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
-				g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
-				g_edicts[i+1].movetype = MOVETYPE_WALK;
-				g_edicts[i+1].solid = SOLID_BBOX;
-				PutClientInServer(g_edicts+i+1);
-				safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
-				putonein = true;
-			}
+			if (game.clients[i].pers.queue > ent->client->pers.queue)
+				game.clients[i].pers.queue--;
 		}
-
 	}
-	if(ent->client)
-		ent->client->pers.queue = 0;
+	
+	ent->client->pers.queue = 0;
+}
+void DemoteDuelLoser (void)
+{
+	int	i;
+	int lowscore;
+	int loser = -1;
+	
+	for (i = 0; i < g_maxclients->integer; i++)
+	{
+		edict_t *ent = &g_edicts[i+1];
+		if (ent->inuse && ent->client && player_participating (ent) &&
+			(loser == -1 || game.clients[i].resp.score < lowscore))
+		{
+			loser = i;
+			lowscore = game.clients[i].resp.score;
+		}
+	}
+	
+	MoveClientsDownQueue (&g_edicts[loser+1]);
+	ClientPlaceInQueue (&g_edicts[loser+1]);
 }
 //END DUEL MODE
 
@@ -2460,11 +2445,8 @@ static void ClientBeginDeathmatch (edict_t *ent)
 
 	//if duel mode, then check number of existing players.  If more there are already two in the game, force
 	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
-	else if(g_duel->integer) 
-	{
-		ClientPlaceInQueue(ent);
-		ClientCheckQueue(ent);
-	}
+	else if (g_duel->integer) 
+		ClientPlaceInQueue (ent);
 
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
@@ -2588,28 +2570,25 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			sizeof(ent->client->pers.netname));
 	// end name validate
 
-	if (!g_duel->integer)
+	// never fool with spectating in duel mode
+	// set spectator
+	qboolean desired_spectator;
+	
+	s = Info_ValueForKey (userinfo, "spectator");
+	desired_spectator = atoi (s) != 0;
+	
+	if (veto_spectator_state (ent, userinfo, &rejmsg))
+		gi.cprintf (ent, PRINT_HIGH, "%s\n", rejmsg);
+	else if (deathmatch->value)
+		ent->client->pers.spectator = desired_spectator;
+	else
+		ent->client->pers.spectator = 0;
+	
+	if (ent->client->pers.spectator != desired_spectator)
 	{
-		// never fool with spectating in duel mode
-		// set spectator
-		qboolean desired_spectator;
-		
-		s = Info_ValueForKey (userinfo, "spectator");
-		desired_spectator = atoi (s) != 0;
-		
-		if (veto_spectator_state (ent, userinfo, &rejmsg))
-			gi.cprintf (ent, PRINT_HIGH, "%s\n", rejmsg);
-		else if (deathmatch->value)
-			ent->client->pers.spectator = desired_spectator;
-		else
-			ent->client->pers.spectator = 0;
-		
-		if (ent->client->pers.spectator != desired_spectator)
-		{
-			gi.WriteByte (svc_stufftext);
-			gi.WriteString (va ("spectator %d\n", ent->client->pers.spectator));
-			gi.unicast(ent, true);
-		}
+		gi.WriteByte (svc_stufftext);
+		gi.WriteString (va ("spectator %d\n", ent->client->pers.spectator));
+		gi.unicast(ent, true);
 	}
 	
 	// set skin
@@ -2944,17 +2923,14 @@ void ClientDisconnect (edict_t *ent)
 		DeathcamRemove(ent, "off");
 
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
-#if 0
 	if(g_duel->integer) {
 		MoveClientsDownQueue(ent);
-		if(!ent->client->resp.spectator) {
+		if (player_participating (ent)) {
 			for (i = 0; i < g_maxclients->value; i++)  //clear scores if player was in duel
 				if(g_edicts[i+1].inuse && g_edicts[i+1].client && !g_edicts[i+1].is_bot)
 					g_edicts[i+1].client->resp.score = 0;
 		}
 	}
-#endif
-#warning fixme
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -3806,7 +3782,7 @@ void ClientBeginServerFrame (edict_t *ent)
 
 	client = ent->client;
 
-	if (deathmatch->value
+	if (deathmatch->value && !ent->is_bot
 			&& player_desired_participation (ent) != client->resp.participation
 			&& (level.time - client->respawn_time) >= 5 )
 	{

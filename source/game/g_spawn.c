@@ -437,8 +437,11 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	strncpy (level.mapname, mapname, sizeof(level.mapname)-1);
 
 	// set client fields on player ents
-	for (i=0 ; i<game.maxclients ; i++)
+	for (i = 0; i < game.maxclients; i++)
+	{
 		g_edicts[i+1].client = game.clients + i;
+		game.clients[i].pers.queue = 0; // FIXME: kinda hacky
+	}
 
 	ent = NULL;
 	inhibit = 0;

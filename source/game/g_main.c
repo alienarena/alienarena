@@ -1289,14 +1289,17 @@ void ExitLevel (void)
 		ent->client->resp.deaths = 0;
 		ent->client->resp.reward_pts = 0;
 		ent->client->homing_shots = 0;
-		ent->takedamage = DAMAGE_AIM;
-		ent->solid = SOLID_BBOX;
-		ent->deadflag = DEAD_NO;
-		PutClientInServer (ent);
-		if(g_duel->integer) 
+		// FIXME: kinda hacky
+		if (ent->is_bot)
 		{
-			ClientPlaceInQueue(ent);
-			ClientCheckQueue(ent);
+			ent->takedamage = DAMAGE_AIM;
+			ent->solid = SOLID_BBOX;
+			ent->deadflag = DEAD_NO;
+			PutClientInServer (ent);
+		}
+		else
+		{
+			spectator_respawn (ent);
 		}
 	}
 	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) 

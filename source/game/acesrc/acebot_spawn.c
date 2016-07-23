@@ -379,33 +379,21 @@ typedef struct gamecensus_s
 
 static void game_census( gamecensus_t *gamecensus )
 {
-	edict_t *pentity;
-	int clients;
+	int i;
 	int real = 0;
 	int bots = 0;
 
-	clients = game.maxclients;
-	for ( pentity = &g_edicts[1]; clients--; ++pentity )
+	for (i = 0 ; i < game.maxclients; i++)
 	{
-		if ( pentity->inuse )
-		{
-			if ( pentity->is_bot )
-			{
-				++bots;
-			}
-			else
-			{
-				if ( g_duel->integer )
-				{ // in duel, spectators count as being ingame
-					++real;
-				}
-				else if ( pentity->client->pers.spectator == 0 )
-				{
-					++real;
-				}
-			}
-
-		}
+		edict_t *cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse)
+			continue;
+		
+		if (cl_ent->is_bot)
+			bots++;
+		else
+			real +=	game.clients[i].resp.participation == participation_playing ||
+					game.clients[i].resp.participation == participation_duelwaiting;
 	}
 	gamecensus->real = real;
 	gamecensus->bots = bots;
@@ -1180,11 +1168,8 @@ qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 
 	ACESP_SaveBots(); // update bots.tmp and clients bot information
 
-	if ( g_duel->integer )
-	{
-		ClientPlaceInQueue( pbot );
-		ClientCheckQueue( pbot );
-	}
+	if (g_duel->integer)
+		ClientPlaceInQueue (pbot);
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame( pbot );
