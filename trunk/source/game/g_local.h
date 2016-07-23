@@ -1010,8 +1010,8 @@ void InitBodyQue (void);
 void ClientBeginServerFrame (edict_t *ent);
 void Q2_FindFile (char *filename, FILE **file);
 void ClientPlaceInQueue(edict_t *ent);
-void ClientCheckQueue(edict_t *ent);
 void MoveClientsDownQueue(edict_t *ent);
+void DemoteDuelLoser (void);
 void SaveClientData (void);
 void FetchClientEntData (edict_t *ent);
 void TeamCensus( teamcensus_t* team_census );
@@ -1264,6 +1264,7 @@ typedef enum
 
 qboolean player_participating (const edict_t *ent);
 participation_t player_desired_participation (const edict_t *ent);
+void spectator_respawn (edict_t *ent);
 
 // client data that stays across deathmatch respawns
 typedef struct

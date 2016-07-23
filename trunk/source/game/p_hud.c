@@ -436,77 +436,13 @@ void BeginIntermission (edict_t *targ)
 
 }
 
-//duel code
-int highestpos, numplayers;
-void MoveEveryoneDownQueue(void) {
-	int i, induel = 0;
-
-	for (i = 0; i < g_maxclients->integer; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-			//move everyone else down a notch(never less than 0)
-			if(induel > 1 && g_edicts[i+1].client->pers.queue <= 3) //houston, we have a problem
-				return; //abort, stop moving people
-			if(g_edicts[i+1].client->pers.queue > 1)
-					g_edicts[i+1].client->pers.queue-=1;
-			if(g_edicts[i+1].client->pers.queue < 3)
-				induel++;
-		}
-	}
-}
-void CheckDuelWinner(void) {
-	int	i;
-	int highscore, induel;
-
-	highscore = 0;
-	numplayers = 0;
-	highestpos = 0;
-	induel = 0;
-
-	for (i = 0; i < g_maxclients->integer; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-			if(g_edicts[i+1].client->resp.score > highscore)
-				highscore = g_edicts[i+1].client->resp.score;
-			if(g_edicts[i+1].client->pers.queue > highestpos)
-				highestpos = g_edicts[i+1].client->pers.queue;
-			numplayers++;
-		}
-	}
-	if(highestpos < numplayers)
-		highestpos = numplayers;
-
-	for (i = 0; i < g_maxclients->integer; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
-				g_edicts[i+1].client->pers.queue = highestpos+1; //loser, kicked to the back of the line
-				highestpos++;
-			}
-		}
-	}
-
-	MoveEveryoneDownQueue();
-
-	//last resort checking after positions have changed
-	//check for any screwups and correct the queue
-	while(induel < 2 && numplayers > 1) {
-		induel = 0;
-		for (i = 0; i < g_maxclients->integer; i++) {
-			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-				if(g_edicts[i+1].client->pers.queue < 3 && g_edicts[i+1].client->pers.queue)
-					induel++;
-			}
-		}
-		if(induel < 2) //something is wrong(i.e winner left), move everyone down.
-			MoveEveryoneDownQueue();
-	}
-}
-
 void EndIntermission(void)
 {
 	int		i;
 	edict_t	*ent;
 
-	if(g_duel->integer)
-		CheckDuelWinner();
+	if (g_duel->integer)
+		DemoteDuelLoser ();
 
 	for (i=0 ; i<g_maxclients->integer; i++)
 	{
@@ -573,7 +509,10 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || (!g_duel->integer && !player_participating (cl_ent)))
+		if (!cl_ent->inuse)
+			continue;
+		if (game.clients[i].resp.participation != participation_playing &&
+			game.clients[i].resp.participation != participation_duelwaiting)
 			continue;
 
 		score = game.clients[i].resp.score;
