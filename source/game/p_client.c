@@ -2535,6 +2535,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	FILE *file;
 	teamcensus_t teamcensus;
 	const char *rejmsg;
+	qboolean desired_spectator;
 	
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
@@ -2571,8 +2572,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	// end name validate
 
 	// never fool with spectating in duel mode
-	// set spectator
-	qboolean desired_spectator;
+	// set spectator	
 	
 	s = Info_ValueForKey (userinfo, "spectator");
 	desired_spectator = atoi (s) != 0;
