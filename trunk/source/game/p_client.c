@@ -2556,11 +2556,6 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if((playervote.called || g_tactical->integer ) && whereFrom == INGAME)
 		return; //do not allow people to change info during votes or in tactical mode(yet)
 
-	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
-		safe_bprintf (PRINT_MEDIUM, "Changing settings not allowed during a team game\n");
-		return;
-	}*/
-
 	// validate and set name
 	s = Info_ValueForKey (userinfo, "name");
 	if ( s == NULL || *s == 0 )
@@ -2571,7 +2566,6 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			sizeof(ent->client->pers.netname));
 	// end name validate
 
-	// never fool with spectating in duel mode
 	// set spectator	
 	
 	s = Info_ValueForKey (userinfo, "spectator");
