@@ -1556,8 +1556,6 @@ void G_RunFrame (void)
 	int		i, numActiveClients = 0;
 	edict_t	*ent;
 
-	level.previousTime = gi.Sys_Milliseconds() - 1000*FRAMETIME;
-
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;
 
@@ -1629,9 +1627,6 @@ void G_RunFrame (void)
 
 	// For bot debugging
 	ACEND_DrawPath();
-
-	//unlagged
-	level.frameStartTime = level.time;
 
 	//call voting
 	if(g_callvote->integer && playervote.called) {

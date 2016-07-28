@@ -388,7 +388,6 @@ typedef struct
 {
 	int			framenum;
 	float		time;
-	int			previousTime; //in milleseconds
 
 	char		level_name[MAX_QPATH];	// the descriptive name (Outer Base, etc)
 	char		mapname[MAX_QPATH];		// the server name (base1, etc)
@@ -423,12 +422,6 @@ typedef struct
 
 	edict_t		*current_entity;	// entity running from G_RunFrame
 	int			body_que;			// dead bodies
-
-	//unlagged - backward reconciliation #4
-	// actual time this server frame started
-	float		frameStartTime;
-	//unlagged - backward reconciliation #4
-
 } level_locals_t;
 
 // spawn_temp_t is only used to hold entity field values that
