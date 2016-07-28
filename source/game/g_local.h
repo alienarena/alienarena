@@ -1359,7 +1359,7 @@ struct gclient_s
 	qboolean	anim_run;
 
 	// powerup timers
-	float		quad_framenum;
+	float		doubledamage_expiretime;
 	float		invincible_framenum;
 	float		haste_framenum;
 	float		sproing_framenum;

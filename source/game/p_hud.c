@@ -55,7 +55,7 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
 	// clean up powerup info
-	ent->client->quad_framenum = 0;
+	ent->client->doubledamage_expiretime = 0;
 	ent->client->invincible_framenum = 0;
 	ent->client->haste_framenum = 0;
     ent->client->sproing_framenum = 0;
@@ -120,7 +120,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->ps.rdflags &= ~RDF_UNDERWATER;
 
 	// clean up powerup info
-	winner->client->quad_framenum = 0;
+	winner->client->doubledamage_expiretime = 0;
 	winner->client->invincible_framenum = 0;
 	winner->client->haste_framenum = 0;
     winner->client->sproing_framenum = 0;
@@ -859,10 +859,10 @@ void G_SetStats (edict_t *ent)
 	//
 	// timers
 	//
-	if (ent->client->quad_framenum > level.framenum)
+	if (ent->client->doubledamage_expiretime > level.time)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_quad");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum)/10;
+		ent->client->ps.stats[STAT_TIMER] = ent->client->doubledamage_expiretime - level.time;
 	}
 	else if (ent->client->invincible_framenum > level.framenum)
 	{

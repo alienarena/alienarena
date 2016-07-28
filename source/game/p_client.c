@@ -713,7 +713,7 @@ void TossClientWeapon (edict_t *self)
 		if (!(dmflags->integer & DF_QUAD_DROP))
 			quad = false;
 		else
-			quad = (self->client->quad_framenum > (level.framenum + 10));
+			quad = self->client->doubledamage_expiretime > (level.time + 1);
 
 		sproing = (self->client->sproing_framenum > (level.framenum + 10));
 		haste = (self->client->haste_framenum > (level.framenum + 10));
@@ -739,7 +739,7 @@ void TossClientWeapon (edict_t *self)
 			drop->spawnflags |= DROPPED_PLAYER_ITEM;
 
 			drop->touch = Touch_Item;
-			drop->nextthink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
+			drop->nextthink = self->client->doubledamage_expiretime;
 			drop->think = G_FreeEdict;
 		}
 		if (sproing && !self->client->resp.powered)
@@ -889,7 +889,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	}
 
 	// remove powerups
-	self->client->quad_framenum = 0;
+	self->client->doubledamage_expiretime = 0;
 	self->client->invincible_framenum = 0;
 	self->client->haste_framenum = 0;
 	self->client->sproing_framenum = 0;

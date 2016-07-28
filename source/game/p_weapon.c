@@ -414,7 +414,7 @@ void Think_Weapon (edict_t *ent)
 	// call active weapon think routine
 	if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink)
 	{
-		is_quad = (ent->client->quad_framenum > level.framenum);
+		is_quad = ent->client->doubledamage_expiretime > level.time;
 		ent->client->pers.weapon->weaponthink (ent);
 	}
 }
@@ -683,7 +683,7 @@ fire_begin:
 		{
 			if (gunframe == fire_frames[n])
 			{
-				if (ent->client->quad_framenum > level.framenum)
+				if (ent->client->doubledamage_expiretime > level.time)
 					gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
 
 				fire (ent);
