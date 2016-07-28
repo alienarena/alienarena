@@ -1233,7 +1233,7 @@ static void remove_bot( edict_t *bot )
 	bot->s.effects = 0;
 
 	// remove powerups
-	bot->client->quad_framenum = 0;
+	bot->client->doubledamage_expiretime = 0;
 	bot->client->invincible_framenum = 0;
 	bot->client->haste_framenum = 0;
 	bot->client->sproing_framenum = 0;

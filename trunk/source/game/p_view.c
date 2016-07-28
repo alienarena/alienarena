@@ -515,12 +515,12 @@ void SV_CalcBlend (edict_t *ent)
 		if (ent->client->Jet_remaining > 40 || ( (int)ent->client->Jet_remaining & 4) )
 		  SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
 	}
-	else if (ent->client->quad_framenum > level.framenum)
+	else if (ent->client->doubledamage_expiretime > level.time)
 	{
-		remaining = ent->client->quad_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
+		float remaining = ent->client->doubledamage_expiretime - level.time;
+		if (remaining == 3.0f) // beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage2.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
+		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
 	}
 	else if (ent->client->invincible_framenum > level.framenum || ent->client->spawnprotected)
@@ -827,8 +827,6 @@ G_SetClientEffects
 */
 void G_SetClientEffects (edict_t *ent)
 {
-	int		remaining;
-
 	ent->s.effects = 0;
 	ent->s.renderfx = 0;
 
@@ -851,16 +849,16 @@ void G_SetClientEffects (edict_t *ent)
 	else if (g_dmlights->integer && !g_tactical->integer)
 	    ent->s.effects |= EF_TEAM2;
 
-	if (ent->client->quad_framenum > level.framenum)
+	if (ent->client->doubledamage_expiretime > level.time)
 	{
-		remaining = ent->client->quad_framenum - level.framenum;
-		if (remaining > 30 || (remaining & 4) )
+		float remaining = ent->client->doubledamage_expiretime - level.time;
+		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			ent->s.effects |= EF_QUAD;
 	}
 
 	if (ent->client->invincible_framenum > level.framenum)
 	{
-		remaining = ent->client->invincible_framenum - level.framenum;
+		int remaining = ent->client->invincible_framenum - level.framenum;
 		if (remaining > 30 || (remaining & 4) )
 			ent->s.effects |= EF_PENT;
 	}

@@ -57,7 +57,7 @@ static int	body_armor_index;
 #define HEALTH_TIMED		2
 
 void Use_Quad (edict_t *ent, gitem_t *item);
-static int	quad_drop_timeout_hack;
+static int	doubledamage_drop_timeout_hack;
 
 //======================================================================
 
@@ -321,7 +321,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 		if ((dmflags->integer & DF_INSTANT_ITEMS) || (ent->item->use == Use_Quad && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
 		{
 			if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
-				quad_drop_timeout_hack = (ent->nextthink - level.time) / FRAMETIME;
+				doubledamage_drop_timeout_hack = ent->nextthink - level.time;
 			ent->item->use (other, ent->item);
 		}
 	}
@@ -362,20 +362,20 @@ void Use_Quad (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	if (quad_drop_timeout_hack)
+	if (doubledamage_drop_timeout_hack)
 	{
-		timeout = quad_drop_timeout_hack;
-		quad_drop_timeout_hack = 0;
+		timeout = doubledamage_drop_timeout_hack;
+		doubledamage_drop_timeout_hack = 0;
 	}
 	else
 	{
-		timeout = 300;
+		timeout = 30;
 	}
 
-	if (ent->client->quad_framenum > level.framenum)
-		ent->client->quad_framenum += timeout;
+	if (ent->client->doubledamage_expiretime > level.time)
+		ent->client->doubledamage_expiretime += timeout;
 	else
-		ent->client->quad_framenum = level.framenum + timeout;
+		ent->client->doubledamage_expiretime = level.time + timeout;
 
 	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
 }
