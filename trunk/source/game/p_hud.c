@@ -54,12 +54,7 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->ps.blend[3] = 0;
 	ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
-	// clean up powerup info
-	ent->client->doubledamage_expiretime = 0;
-	ent->client->invincible_framenum = 0;
-	ent->client->haste_framenum = 0;
-    ent->client->sproing_framenum = 0;
-	ent->client->invis_framenum = 0;
+	Player_ResetPowerups (ent);
 
 	ent->viewheight = 0;
 	ent->s.modelindex = 0;
@@ -119,12 +114,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->ps.blend[3] = 0;
 	winner->client->ps.rdflags &= ~RDF_UNDERWATER;
 
-	// clean up powerup info
-	winner->client->doubledamage_expiretime = 0;
-	winner->client->invincible_framenum = 0;
-	winner->client->haste_framenum = 0;
-    winner->client->sproing_framenum = 0;
-	winner->client->invis_framenum = 0;
+	Player_ResetPowerups (winner);
 
 	winner->s.effects = EF_ROTATE;
 	winner->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);

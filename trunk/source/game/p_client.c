@@ -767,6 +767,16 @@ void TossClientWeapon (edict_t *self)
 	}
 }
 
+void Player_ResetPowerups (edict_t *ent)
+{
+	ent->client->doubledamage_expiretime = 0;
+	ent->client->invincible_framenum = 0;
+	ent->client->haste_framenum = 0;
+	ent->client->sproing_framenum = 0;
+	ent->client->invis_framenum = 0;
+	ent->client->regen_framenum = 0;
+}
+
 
 /*
 ==================
@@ -888,12 +898,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		}
 	}
 
-	// remove powerups
-	self->client->doubledamage_expiretime = 0;
-	self->client->invincible_framenum = 0;
-	self->client->haste_framenum = 0;
-	self->client->sproing_framenum = 0;
-	self->client->invis_framenum = 0;
+	Player_ResetPowerups (self);
 
 	// clear inventory
 	memset(self->client->pers.inventory, 0, sizeof(self->client->pers.inventory));

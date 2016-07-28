@@ -1232,12 +1232,7 @@ static void remove_bot( edict_t *bot )
 	bot->client->weapon_sound = 0;
 	bot->s.effects = 0;
 
-	// remove powerups
-	bot->client->doubledamage_expiretime = 0;
-	bot->client->invincible_framenum = 0;
-	bot->client->haste_framenum = 0;
-	bot->client->sproing_framenum = 0;
-	bot->client->invis_framenum = 0;
+	Player_ResetPowerups (bot);
 
 	// clear inventory
 	memset( bot->client->pers.inventory, 0, sizeof(bot->client->pers.inventory));
