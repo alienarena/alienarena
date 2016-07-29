@@ -2673,11 +2673,8 @@ void CL_Frame( int msec )
 			 */
 			cls.frametime  = ((float)packet_timer) / 1000.0f;
 			Sys_SendKeyEvents();
-			/*
-			 * update view angles based on accumulated keyboard and mouse 
-			 * events, which are *not* reset
-			 */
-			IN_Move(NULL);
+			
+			CL_PredictMovement();
 		}
 
 		/*

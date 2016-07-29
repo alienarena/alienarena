@@ -200,20 +200,23 @@ CL_KeyState
 Returns the fraction of the frame that the key was down
 ===============
 */
-float CL_KeyState (kbutton_t *key)
+static float CL_KeyState (kbutton_t *key, qboolean reset_accum)
 {
 	float		val;
 	int			msec;
 
-	key->state &= 1;		// clear impulses
+	if (reset_accum)
+		key->state &= 1; // clear impulses
 
 	msec = key->msec;
-	key->msec = 0;
+	if (reset_accum)
+		key->msec = 0;
 
-	if (key->state)
-	{	// still down
+	if ((key->state & 1))
+	{	// non-impulse keypress
 		msec += sys_frame_time - key->downtime;
-		key->downtime = sys_frame_time;
+		if (reset_accum)
+			key->downtime = sys_frame_time;
 	}
 
 #if 0
@@ -256,7 +259,7 @@ CL_AdjustAngles
 Moves the local angle positions
 ================
 */
-void CL_AdjustAngles (void)
+static void CL_AdjustAngles (void)
 {
 	float	speed;
 	float	up, down;
@@ -268,17 +271,17 @@ void CL_AdjustAngles (void)
 
 	if (!(in_strafe.state & 1))
 	{
-		cl.viewangles[YAW] -= speed*cl_yawspeed->value*CL_KeyState (&in_right);
-		cl.viewangles[YAW] += speed*cl_yawspeed->value*CL_KeyState (&in_left);
+		cl.viewangles[YAW] -= speed*cl_yawspeed->value*CL_KeyState (&in_right, true);
+		cl.viewangles[YAW] += speed*cl_yawspeed->value*CL_KeyState (&in_left, true);
 	}
 	if (in_klook.state & 1)
 	{
-		cl.viewangles[PITCH] -= speed*cl_pitchspeed->value * CL_KeyState (&in_forward);
-		cl.viewangles[PITCH] += speed*cl_pitchspeed->value * CL_KeyState (&in_back);
+		cl.viewangles[PITCH] -= speed*cl_pitchspeed->value * CL_KeyState (&in_forward, true);
+		cl.viewangles[PITCH] += speed*cl_pitchspeed->value * CL_KeyState (&in_back, true);
 	}
 
-	up = CL_KeyState (&in_lookup);
-	down = CL_KeyState(&in_lookdown);
+	up = CL_KeyState (&in_lookup, true);
+	down = CL_KeyState (&in_lookdown, true);
 
 	cl.viewangles[PITCH] -= speed*cl_pitchspeed->value * up;
 	cl.viewangles[PITCH] += speed*cl_pitchspeed->value * down;
@@ -291,29 +294,36 @@ CL_BaseMove
 Send the intended movement message to the server
 ================
 */
-void CL_BaseMove (usercmd_t *cmd)
+void CL_BaseMove (usercmd_t *cmd, qboolean reset_accum)
 {
-	CL_AdjustAngles ();
+	frame_msec = sys_frame_time - old_sys_frame_time;
+	if (frame_msec < 1)
+		frame_msec = 1;
+	if (frame_msec > 200)
+		frame_msec = 200;
+
+	if (reset_accum)
+		CL_AdjustAngles ();
 
 	memset (cmd, 0, sizeof(*cmd));
 
 	VectorCopy (cl.viewangles, cmd->angles);
 	if (in_strafe.state & 1)
 	{
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right, reset_accum);
+		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left, reset_accum);
 	}
 
-	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
+	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright, reset_accum);
+	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft, reset_accum);
 
-	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
-	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
+	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up, reset_accum);
+	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down, reset_accum);
 
 	if (! (in_klook.state & 1) )
 	{
-		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
-		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back);
+		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward, reset_accum);
+		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back, reset_accum);
 	}
 
 //
@@ -411,14 +421,8 @@ usercmd_t CL_CreateCmd (void)
 {
 	usercmd_t	cmd;
 
-	frame_msec = sys_frame_time - old_sys_frame_time;
-	if (frame_msec < 1)
-		frame_msec = 1;
-	if (frame_msec > 200)
-		frame_msec = 200;
-
 	// get basic movement from keyboard
-	CL_BaseMove (&cmd);
+	CL_BaseMove (&cmd, true);
 
 	// allow mice or other external controllers to add to the move
 	IN_Move (&cmd);
