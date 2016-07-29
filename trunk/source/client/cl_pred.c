@@ -300,6 +300,25 @@ void CL_PredictMovement (void)
 		cl.predicted_step_time = cls.realtime - cls.frametime * 500;
 	}
 
+	VectorCopy (pm.viewangles, cl.predicted_angles);
+	VectorCopy (pm.viewangles, cl.last_predicted_angles);
+
+	if (cl_test->integer)
+	{
+		/*
+		 * update view angles and create a movement command, based on
+		 * accumulated keyboard and mouse events, which are *not* reset
+		 */
+		IN_Move (NULL);
+		CL_BaseMove (&pm.cmd, false);
+		for (i = 0; i < 3; i++)
+		{
+			pm.cmd.angles[i] = ANGLE2SHORT (cl.predicted_angles[i]);
+			pm.s.delta_angles[i] = 0;
+		}
+		pm.cmd.msec = cls.frametime * 1000;
+		Pmove (&pm);
+	}
 
 	// copy results out for rendering
 	cl.predicted_origin[0] = pm.s.origin[0]*0.125;
@@ -309,9 +328,6 @@ void CL_PredictMovement (void)
 	cl.predicted_velocity[0] = pm.s.velocity[0]*0.125;
 	cl.predicted_velocity[1] = pm.s.velocity[1]*0.125;
 	cl.predicted_velocity[2] = pm.s.velocity[2]*0.125;
-
-	VectorCopy (pm.viewangles, cl.predicted_angles);
-	VectorCopy (pm.viewangles, cl.last_predicted_angles);
 }
 
 /*

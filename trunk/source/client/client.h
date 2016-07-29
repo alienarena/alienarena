@@ -528,11 +528,10 @@ void CL_ClearState (void);
 
 int  CL_ReadFromServer (void);
 void CL_WriteToServer (usercmd_t *cmd);
-void CL_BaseMove (usercmd_t *cmd);
+void CL_BaseMove (usercmd_t *cmd, qboolean reset_accum);
 
 void IN_CenterView (void);
 
-float CL_KeyState (kbutton_t *key);
 char *Key_KeynumToString (int keynum);
 
 extern qboolean mouse_available;
