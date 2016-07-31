@@ -654,81 +654,6 @@ qboolean ACEAI_CheckShot(edict_t *self)
 }
 
 
-void ACEAI_Use_Invisibility (edict_t *ent)
-{
-	gitem_t *it;
-
-	it = FindItem("Invisibility");
-	ent->client->pers.inventory[ITEM_INDEX(it)]--;
-	ValidateSelectedItem (ent);
-
-	it = FindItem("Sproing");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-	it = FindItem("Haste");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-	ent->client->resp.reward_pts = 0;
-	ent->client->resp.powered = false;
-
-	if (ent->client->invis_framenum > level.framenum)
-		ent->client->invis_framenum += 300;
-	else
-		ent->client->invis_framenum = level.framenum + 300;
-
-	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
-}
-
-void ACEAI_Use_Haste (edict_t *ent)
-{
-	gitem_t *it;
-
-	it = FindItem("Haste");
-	ent->client->pers.inventory[ITEM_INDEX(it)]--;
-	ValidateSelectedItem (ent);
-
-	it = FindItem("Sproing");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-	it = FindItem("Invisibility");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-	ent->client->resp.reward_pts = 0;
-	ent->client->resp.powered = false;
-
-	if (ent->client->haste_framenum > level.framenum)
-		ent->client->haste_framenum += 300;
-	else
-		ent->client->haste_framenum = level.framenum + 300;
-
-	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
-}
-
-void ACEAI_Use_Sproing (edict_t *ent)
-{
-	gitem_t *it;
-
-	it = FindItem("Sproing");
-	ent->client->pers.inventory[ITEM_INDEX(it)]--;
-	ValidateSelectedItem (ent);
-
-	it = FindItem("Haste");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-	it = FindItem("Invisibility");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-	ent->client->resp.reward_pts = 0;
-	ent->client->resp.powered = false;
-
-	if (ent->client->sproing_framenum > level.framenum)
-		ent->client->sproing_framenum += 300;
-	else
-		ent->client->sproing_framenum = level.framenum + 300;
-
-	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Choose the best weapon for bot
 ///////////////////////////////////////////////////////////////////////
@@ -742,15 +667,20 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	qboolean clear_shot;
 	qboolean suppress_favorite;
 
-	if(self->client->resp.powered)
+	if (self->client->resp.powered)
 	{ //got enough reward points, use something
+		gitem_t *it;
 		c = random();
-		if( c < 0.5)
-			ACEAI_Use_Invisibility(self);
+		if (c < 0.5)
+			it = FindItem ("Invisibility");
 		else if (c < 0.7)
-			ACEAI_Use_Haste(self);
+			it = FindItem ("Haste");
 		else
-			ACEAI_Use_Sproing(self);
+			it = FindItem ("Sproing");
+		self->client->resp.powered = false;
+		self->client->resp.reward_pts = 0;
+		self->client->pers.inventory[ITEM_INDEX (it)] += 1;
+		it->use (self, it);
 	}
 
 	// calculate distance to enemy target for range-based weapon selection

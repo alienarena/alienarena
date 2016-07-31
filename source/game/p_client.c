@@ -1085,19 +1085,6 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(item)] = 1;
 	}
 
-	//if powered up, give back powerups
-	if(client->resp.powered) 
-	{
-		item = FindItem("Invisibility");
-		client->pers.inventory[ITEM_INDEX(item)] += 1;
-
-		item = FindItem("Sproing");
-		client->pers.inventory[ITEM_INDEX(item)] += 1;
-
-		item = FindItem("Haste");
-		client->pers.inventory[ITEM_INDEX(item)] += 1;
-	}
-
 	client->pers.connected = true;
 }
 
@@ -2326,21 +2313,9 @@ void PlayerGrantRewardPoints (edict_t *ent, int points_granted)
 {
 	ent->client->resp.reward_pts += points_granted;
 
-	if (ent->client->resp.reward_pts >= g_reward->integer && !ent->client->resp.powered) 
-	{	//give them speed and invis powerups
-		gitem_t *it;
-		
-		it = FindItem ("Invisibility");
-		ent->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-		it = FindItem ("Sproing");
-		ent->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-		it = FindItem ("Haste");
-		ent->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
+	if (ent->client->resp.reward_pts >= g_reward->integer && !ent->client->resp.powered)
+	{
 		ent->client->resp.powered = true;
-
 		gi.sound (ent, CHAN_VOICE, gi.soundindex ("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
 	}
 }

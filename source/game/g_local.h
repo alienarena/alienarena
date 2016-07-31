@@ -292,6 +292,7 @@ typedef struct
 #define IT_KEY			8
 #define IT_POWERUP		16
 #define IT_HEALTH		32
+#define IT_BUYABLE		64		// this item is available through rewards system
 
 // Wherever possible, use the GITEM_INIT_* macros instead of supplying the
 // values directly in the initializer! The macros MUST be called in the
