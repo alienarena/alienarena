@@ -774,22 +774,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 				// other gets another 10 frag bonus
 				other->client->resp.score += 10;//CTF_CAPTURE_BONUS;
 				//reward points bonus
-				other->client->resp.reward_pts+=5;
-
-				if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
-					it = FindItem("Invisibility");
-					other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					it = FindItem("Sproing");
-					other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					it = FindItem("Haste");
-					other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					other->client->resp.powered = true;
-
-					gi.sound (other, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-				}
+				PlayerGrantRewardPoints (other, 5);
 
 				CTFResetFlags();
 				return false;
@@ -806,22 +791,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_returned.wav"), 1, ATTN_NONE, 0);
 
 		//reward points bonus
-		other->client->resp.reward_pts+=2;
-
-		if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
-			it = FindItem("Invisibility");
-			other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-			it = FindItem("Sproing");
-			other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-			it = FindItem("Haste");
-			other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-			other->client->resp.powered = true;
-
-			gi.sound (other, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-		}
+		PlayerGrantRewardPoints (other, 2);
 
 		//CTFResetFlag will remove this entity!  We must return false
 		CTFResetFlag(ctf_team);
@@ -837,8 +807,6 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 	else
 		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_picked.wav"), 1, ATTN_NONE, 0);
 
-	other->client->resp.reward_pts+=2;
-
 	//if a bot, break off of path, so we can find base path
 	if(other->is_bot)
 	{
@@ -846,20 +814,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 		other->wander_timeout = level.time + 1.0;
 	}
 
-	if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
-		it = FindItem("Invisibility");
-		other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-		it = FindItem("Sproing");
-		other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-		it = FindItem("Haste");
-		other->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-		other->client->resp.powered = true;
-
-		gi.sound (other, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-	}
+	PlayerGrantRewardPoints (other, 2);
 
 	other->client->pers.inventory[ITEM_INDEX(flag_item)] = 1;
 
