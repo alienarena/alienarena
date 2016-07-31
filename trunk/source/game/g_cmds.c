@@ -429,6 +429,14 @@ void Cmd_Use_f (edict_t *ent)
 	index = ITEM_INDEX(it);
 	if (!ent->client->pers.inventory[index])
 	{
+		if ((it->flags & IT_BUYABLE) && ent->client->resp.powered)
+		{	// obtainable through the rewards system.
+			ent->client->resp.powered = false;
+			ent->client->resp.reward_pts = 0;
+			ent->client->pers.inventory[index] = 1;
+			it->use (ent, it);
+			return;
+		}
 		safe_cprintf (ent, PRINT_HIGH, "Out of item: %s\n", s);
 		if (it->flags & IT_WEAPON) {
 		    ent->client->pers.lastfailedswitch = it;

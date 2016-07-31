@@ -400,21 +400,8 @@ static void Use_Alienforce (edict_t *ent, gitem_t *item)
 
 void Use_Haste (edict_t *ent, gitem_t *item)
 {
-	gitem_t *it;
-
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
-
-	if(ent->client->resp.powered) {
-		it = FindItem("Sproing");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		it = FindItem("Invisibility");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		ent->client->resp.reward_pts = 0;
-		ent->client->resp.powered = false;
-	}
 
 	if (ent->client->haste_framenum > level.framenum)
 		ent->client->haste_framenum += 300;
@@ -427,22 +414,8 @@ void Use_Haste (edict_t *ent, gitem_t *item)
 
 void Use_Sproing (edict_t *ent, gitem_t *item)
 {
-	gitem_t *it;
-
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
-
-	if(ent->client->resp.powered) {
-
-		it = FindItem("Invisibility");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		it = FindItem("Haste");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		ent->client->resp.reward_pts = 0;
-		ent->client->resp.powered = false;
-	}
 
 	if (ent->client->sproing_framenum > level.framenum)
 		ent->client->sproing_framenum += 300;
@@ -454,21 +427,8 @@ void Use_Sproing (edict_t *ent, gitem_t *item)
 
 void Use_Invisibility (edict_t *ent, gitem_t *item)
 {
-	gitem_t *it;
-
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
-
-	if(ent->client->resp.powered) {
-		it = FindItem("Sproing");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		it = FindItem("Haste");
-		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-		ent->client->resp.reward_pts = 0;
-		ent->client->resp.powered = false;
-	}
 
 	if (ent->client->invis_framenum > level.framenum)
 		ent->client->invis_framenum += 300;
@@ -1607,7 +1567,7 @@ gives +1 to maximum health
 	},
 
 	{
-		GITEM_INIT_IDENTIFY (item_haste, IT_POWERUP),
+		GITEM_INIT_IDENTIFY (item_haste, IT_POWERUP|IT_BUYABLE),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Haste, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/haste/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_haste", "Haste", "items/powerup.wav"),
@@ -1615,7 +1575,7 @@ gives +1 to maximum health
 /* precache */ "items/hasteout.wav"
 	},
 	{
-		GITEM_INIT_IDENTIFY (item_sproing, IT_POWERUP),
+		GITEM_INIT_IDENTIFY (item_sproing, IT_POWERUP|IT_BUYABLE),
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Sproing, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/sproing/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_sproing", "Sproing", "items/powerup.wav"),
@@ -1635,7 +1595,7 @@ gives +1 to maximum health
 
 	//these next two powerups are never placed in maps
 	{
-		GITEM_INIT_IDENTIFY (item_invisibility, IT_POWERUP),
+		GITEM_INIT_IDENTIFY (item_invisibility, IT_POWERUP|IT_BUYABLE),
 		// we don't want people dropping this one, so drop callback not given
 		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invisibility, NULL, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, EF_ROTATE),
