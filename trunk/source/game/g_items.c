@@ -56,8 +56,8 @@ static int	body_armor_index;
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
 
-void Use_Quad (edict_t *ent, gitem_t *item);
-static int	doubledamage_drop_timeout_hack;
+static void Use_Doubledamage (edict_t *ent, gitem_t *item);
+static float doubledamage_drop_timeout_hack;
 
 //======================================================================
 
@@ -311,16 +311,16 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 	{
 		int randomSpawn;
 		//Phenax - Add random time to quad spawn
-		if(ent->item->use == Use_Quad && g_randomquad->integer)
+		if (ent->item->use == Use_Doubledamage && g_randomquad->integer)
 			randomSpawn = 10 + rand() % (30 - 10); //10 to 30 seconds randomness
 		else
 			randomSpawn = 0;
 
 		if (!(ent->spawnflags & DROPPED_ITEM) )
 			SetRespawn (ent, ent->item->quantity + randomSpawn);
-		if ((dmflags->integer & DF_INSTANT_ITEMS) || (ent->item->use == Use_Quad && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
+		if ((dmflags->integer & DF_INSTANT_ITEMS) || (ent->item->use == Use_Doubledamage && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
 		{
-			if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
+			if ((ent->item->use == Use_Doubledamage) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
 				doubledamage_drop_timeout_hack = ent->nextthink - level.time;
 			ent->item->use (other, ent->item);
 		}
@@ -355,21 +355,21 @@ qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
 
 //======================================================================
 
-void Use_Quad (edict_t *ent, gitem_t *item)
+static void Use_Doubledamage (edict_t *ent, gitem_t *item)
 {
-	int		timeout;
+	float timeout;
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	if (doubledamage_drop_timeout_hack)
+	if (doubledamage_drop_timeout_hack != 0.0f)
 	{
 		timeout = doubledamage_drop_timeout_hack;
-		doubledamage_drop_timeout_hack = 0;
+		doubledamage_drop_timeout_hack = 0.0f;
 	}
 	else
 	{
-		timeout = 30;
+		timeout = 30.0f;
 	}
 
 	if (ent->client->doubledamage_expiretime > level.time)
@@ -382,15 +382,15 @@ void Use_Quad (edict_t *ent, gitem_t *item)
 
 //======================================================================
 
-void	Use_Invulnerability (edict_t *ent, gitem_t *item)
+static void Use_Alienforce (edict_t *ent, gitem_t *item)
 {
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	if (ent->client->invincible_framenum > level.framenum)
-		ent->client->invincible_framenum += 300;
+	if (ent->client->alienforce_expiretime > level.time)
+		ent->client->alienforce_expiretime += 30.0f;
 	else
-		ent->client->invincible_framenum = level.framenum + 300;
+		ent->client->alienforce_expiretime = level.time + 30.0f;
 
 	//add full armor
 	ent->client->pers.inventory[combat_armor_index] = 200;
@@ -1564,7 +1564,7 @@ always owned, never in the world
 */
 	{
 		GITEM_INIT_IDENTIFY (item_quad, IT_POWERUP),
-		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Quad, Drop_General, NULL),
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Doubledamage, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/quaddama/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("p_quad", "Double Damage", "items/powerup.wav"),
 		GITEM_INIT_POWERUP (150),
@@ -1575,7 +1575,7 @@ always owned, never in the world
 */
 	{
 		GITEM_INIT_IDENTIFY (item_invulnerability, IT_POWERUP),
-		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Invulnerability, Drop_General, NULL),
+		GITEM_INIT_CALLBACKS (Pickup_Powerup, Use_Alienforce, Drop_General, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/invulner/tris.iqm", EF_ROTATE),
 		// now "Alien Force" - incoming amage reduced to 1/3, max armor added
 		GITEM_INIT_CLIENTSIDE ("p_invulnerability", "Alien Force", "items/powerup.wav"),

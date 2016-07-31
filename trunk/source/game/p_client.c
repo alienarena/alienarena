@@ -770,7 +770,7 @@ void TossClientWeapon (edict_t *self)
 void Player_ResetPowerups (edict_t *ent)
 {
 	ent->client->doubledamage_expiretime = 0;
-	ent->client->invincible_framenum = 0;
+	ent->client->alienforce_expiretime = 0;
 	ent->client->haste_framenum = 0;
 	ent->client->sproing_framenum = 0;
 	ent->client->invis_framenum = 0;

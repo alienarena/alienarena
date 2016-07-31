@@ -854,10 +854,10 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_quad");
 		ent->client->ps.stats[STAT_TIMER] = ent->client->doubledamage_expiretime - level.time;
 	}
-	else if (ent->client->invincible_framenum > level.framenum)
+	else if (ent->client->alienforce_expiretime > level.time)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_invulnerability");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum)/10;
+		ent->client->ps.stats[STAT_TIMER] = ent->client->alienforce_expiretime - level.time;
 	}
 	else if (ent->client->haste_framenum > level.framenum)
 	{

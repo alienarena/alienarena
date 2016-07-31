@@ -513,7 +513,8 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 
 	if (ent->client->weaponstate == WEAPON_ACTIVATING)
 	{
-		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
+		if (excessive->value || quickweap->value || ent->client->alienforce_expiretime > level.time)
+		{
 			ent->client->weaponstate = WEAPON_READY;
 			gunframe = FRAME_IDLE_FIRST;
 			goto fire_begin; //velociraptors be damned
@@ -540,7 +541,8 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 
 	if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING || gunframe == FRAME_FIRE_FIRST || gunframe == FRAME_FIRE_LAST))
 	{
-		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
+		if (excessive->value || quickweap->value || ent->client->alienforce_expiretime > level.time)
+		{
 			ChangeWeapon (ent);
 			return;
 		}
@@ -855,7 +857,7 @@ void Weapon_Disruptor (edict_t *ent)
 	static int	fire_frames[]	= {5, 0};
 	static int	excessive_fire_frames[] = {5,7,9,11,0};
 
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
+	if (excessive->value || ent->client->alienforce_expiretime > level.time)
 		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, excessive_fire_frames, weapon_disruptor_fire);
 	else
 		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, fire_frames, weapon_disruptor_fire);
@@ -1177,7 +1179,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	fire_frames[]	= {6, 0};
 	static int	excessive_fire_frames[]	= {5,7,9,11,13, 0};
 
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
+	if (excessive->value || ent->client->alienforce_expiretime > level.time)
 		Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, excessive_fire_frames, Weapon_RocketLauncher_Fire);
 	else
 		Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
@@ -1324,7 +1326,7 @@ void Weapon_Blaster (edict_t *ent)
 	static int	fire_frames[]	= {5,0};
 	static int  excessive_fire_frames[] = {5,6,7,8,0};
 
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
+	if (excessive->value || ent->client->alienforce_expiretime > level.time)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, excessive_fire_frames, Weapon_Blaster_Fire);
 	else
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
@@ -1346,7 +1348,7 @@ void Weapon_AlienBlaster (edict_t *ent)
 	static int	fire_frames[]	= {5,0};
 	static int  excessive_fire_frames[] = {5,6,7,8,0};
 
-	if(excessive->value || ent->client->invincible_framenum > level.framenum)
+	if (excessive->value || ent->client->alienforce_expiretime > level.time)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, excessive_fire_frames, Weapon_AlienBlaster_Fire);
 	else
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_AlienBlaster_Fire);
