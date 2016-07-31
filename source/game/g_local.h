@@ -1005,6 +1005,7 @@ void Q2_FindFile (char *filename, FILE **file);
 void ClientPlaceInQueue(edict_t *ent);
 void MoveClientsDownQueue(edict_t *ent);
 void DemoteDuelLoser (void);
+void PlayerGrantRewardPoints (edict_t *ent, int points_granted);
 void SaveClientData (void);
 void FetchClientEntData (edict_t *ent);
 void TeamCensus( teamcensus_t* team_census );

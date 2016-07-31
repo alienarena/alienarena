@@ -433,16 +433,16 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 						if(!self->groundentity) 
 						{
-							attacker->client->resp.reward_pts+=3;
+							PlayerGrantRewardPoints (attacker, 3);
 							safe_centerprintf(attacker, "Midair shot!\n");
 						}
 						else
-							attacker->client->resp.reward_pts++;
+							PlayerGrantRewardPoints (attacker, 1);
 
 						if(mod == MOD_HEADSHOT) 
 						{	
 							//3 more pts for a headshot
-							attacker->client->resp.reward_pts+=3;
+							PlayerGrantRewardPoints (attacker, 3);
 							safe_centerprintf(attacker, "HEADSHOT!\n");
 							gi.sound(attacker, CHAN_AUTO, gi.soundindex("misc/headshot.wav"), 1, ATTN_STATIC, 0);
 						}
@@ -494,7 +494,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									safe_centerprintf(cl_ent, "%s is on a rampage!\n", cleanname2);
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/rampage.wav"), 1, ATTN_NONE, 0);
-								attacker->client->resp.reward_pts+=10;
+								PlayerGrantRewardPoints (attacker, 10);
 								break;
 							case 8:
 								for (i=0 ; i<g_maxclients->value ; i++)
@@ -514,7 +514,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									safe_centerprintf(cl_ent, "%s is a god!\n", cleanname2);
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/godlike.wav"), 1, ATTN_NONE, 0);
-								attacker->client->resp.reward_pts+=20;
+								PlayerGrantRewardPoints (attacker, 20);
 								break;
 							default:
 								break;
@@ -531,22 +531,6 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 					}
 
-				}
-				if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) 
-				{ 
-					//give them speed and invis powerups
-					it = FindItem("Invisibility");
-					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					it = FindItem("Sproing");
-					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					it = FindItem("Haste");
-					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					attacker->client->resp.powered = true;
-
-					gi.sound (attacker, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
 				}
 				self->client->kill_streak = 0; //reset, you are dead
 				return;
@@ -874,28 +858,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			Cmd_Score_f( self );
 		}
 
-		if(attacker)
-		{
-			if(self->health < -40 && attacker->client) 
-			{
-				attacker->client->resp.reward_pts++;
-				if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) 
-				{	//give them speed and invis powerups
-					it = FindItem("Invisibility");
-					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					it = FindItem("Sproing");
-					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					it = FindItem("Haste");
-					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
-
-					attacker->client->resp.powered = true;
-
-					gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-				}
-			}
-		}
+		if (self->health < -40 && attacker &&  attacker->client) 
+			PlayerGrantRewardPoints (attacker, 1);
 	}
 
 	Player_ResetPowerups (self);
@@ -2357,6 +2321,29 @@ void DemoteDuelLoser (void)
 	ClientPlaceInQueue (&g_edicts[loser+1]);
 }
 //END DUEL MODE
+
+void PlayerGrantRewardPoints (edict_t *ent, int points_granted)
+{
+	ent->client->resp.reward_pts += points_granted;
+
+	if (ent->client->resp.reward_pts >= g_reward->integer && !ent->client->resp.powered) 
+	{	//give them speed and invis powerups
+		gitem_t *it;
+		
+		it = FindItem ("Invisibility");
+		ent->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+		it = FindItem ("Sproing");
+		ent->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+		it = FindItem ("Haste");
+		ent->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+		ent->client->resp.powered = true;
+
+		gi.sound (ent, CHAN_VOICE, gi.soundindex ("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
+	}
+}
 
 #define MAX_MOTD_SIZE	500
 
