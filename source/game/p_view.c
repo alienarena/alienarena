@@ -88,7 +88,7 @@ void P_DamageFeedback (edict_t *player)
 	client->ps.stats[STAT_FLASHES] &= ~(1|2);
 	if (client->damage_blood)
 		client->ps.stats[STAT_FLASHES] |= 1;
-	if (client->damage_armor && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum))
+	if (client->damage_armor && !(player->flags & FL_GODMODE) && (client->alienforce_expiretime <= level.time))
 		client->ps.stats[STAT_FLASHES] |= 2;
 
 	// total points of damage shot at the player this frame
@@ -133,7 +133,7 @@ void P_DamageFeedback (edict_t *player)
 		count = 10;	// always make a visible effect
 
 	// play an apropriate pain sound
-	if ((level.time > player->pain_debounce_time) && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum))
+	if ((level.time > player->pain_debounce_time) && !(player->flags & FL_GODMODE) && (client->alienforce_expiretime <= level.time))
 	{
 		r = 1 + (rand()&1);
 		player->pain_debounce_time = level.time + 0.7;
@@ -523,12 +523,12 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
 	}
-	else if (ent->client->invincible_framenum > level.framenum || ent->client->spawnprotected)
+	else if (ent->client->alienforce_expiretime > level.time || ent->client->spawnprotected)
 	{
-		remaining = ent->client->invincible_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
+		float remaining = ent->client->alienforce_expiretime - level.time;
+		if (remaining == 3.0f)	// beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
+		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (1, 1, 0, 0.08, ent->client->ps.blend);
 	}
 	else if (ent->client->haste_framenum > level.framenum)
@@ -786,7 +786,7 @@ void P_WorldEffects (void)
 		{
 			if (current_player->health > 0
 				&& current_player->pain_debounce_time <= level.time
-				&& current_client->invincible_framenum < level.framenum)
+				&& current_client->alienforce_expiretime < level.time)
 			{
 				if (rand()&1)
 					gi.sound (current_player, CHAN_VOICE, gi.soundindex("player/burn1.wav"), 1, ATTN_NORM, 0);
@@ -827,6 +827,7 @@ G_SetClientEffects
 */
 void G_SetClientEffects (edict_t *ent)
 {
+	float remaining;
 	ent->s.effects = 0;
 	ent->s.renderfx = 0;
 
@@ -851,15 +852,15 @@ void G_SetClientEffects (edict_t *ent)
 
 	if (ent->client->doubledamage_expiretime > level.time)
 	{
-		float remaining = ent->client->doubledamage_expiretime - level.time;
+		remaining = ent->client->doubledamage_expiretime - level.time;
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			ent->s.effects |= EF_QUAD;
 	}
 
-	if (ent->client->invincible_framenum > level.framenum)
+	if (ent->client->alienforce_expiretime > level.time)
 	{
-		int remaining = ent->client->invincible_framenum - level.framenum;
-		if (remaining > 30 || (remaining & 4) )
+		remaining = ent->client->alienforce_expiretime - level.time;
+		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			ent->s.effects |= EF_PENT;
 	}
 
