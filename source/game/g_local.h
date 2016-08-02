@@ -1364,7 +1364,7 @@ struct gclient_s
 	// powerup timers
 	float		doubledamage_expiretime;
 	float		alienforce_expiretime;
-	float		haste_framenum;
+	float		haste_expiretime;
 	float		sproing_framenum;
 	float		regen_framenum;
 	float		invis_framenum;
