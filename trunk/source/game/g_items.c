@@ -417,10 +417,10 @@ void Use_Sproing (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	if (ent->client->sproing_framenum > level.framenum)
-		ent->client->sproing_framenum += 300;
+	if (ent->client->sproing_expiretime > level.time)
+		ent->client->sproing_expiretime += 30.0f;
 	else
-		ent->client->sproing_framenum = level.framenum + 300;
+		ent->client->sproing_expiretime = level.time + 30.0f;
 
 	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
 }

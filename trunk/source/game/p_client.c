@@ -699,7 +699,7 @@ void TossClientWeapon (edict_t *self)
 		else
 			quad = self->client->doubledamage_expiretime > level.time + 1.0f;
 
-		sproing = (self->client->sproing_framenum > (level.framenum + 10));
+		sproing = self->client->sproing_expiretime > level.time + 1.0f;
 		haste = self->client->haste_expiretime > level.time + 1.0f;
 
 		if ((item && quad) || (item && haste) || (item && sproing))
@@ -734,7 +734,7 @@ void TossClientWeapon (edict_t *self)
 			drop->spawnflags |= DROPPED_PLAYER_ITEM;
 
 			drop->touch = Touch_Item;
-			drop->nextthink = level.time + (self->client->sproing_framenum - level.framenum) * FRAMETIME;
+			drop->nextthink = self->client->sproing_expiretime;
 			drop->think = G_FreeEdict;
 		}
 		if (haste && !self->client->resp.powered)
@@ -756,7 +756,7 @@ void Player_ResetPowerups (edict_t *ent)
 	ent->client->doubledamage_expiretime = 0;
 	ent->client->alienforce_expiretime = 0;
 	ent->client->haste_expiretime = 0;
-	ent->client->sproing_framenum = 0;
+	ent->client->sproing_expiretime = 0;
 	ent->client->invis_framenum = 0;
 	ent->client->regen_framenum = 0;
 }
@@ -3490,7 +3490,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0))
 		{
-			sproing = client->sproing_framenum > level.framenum;
+			sproing = client->sproing_expiretime > level.time;
 			haste = client->haste_expiretime > level.time;
 			if(sproing) 
 			{

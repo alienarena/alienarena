@@ -539,12 +539,12 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
 	}
-	else if (ent->client->sproing_framenum > level.framenum)
+	else if (ent->client->sproing_expiretime > level.time)
 	{
-		remaining = ent->client->sproing_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
+		float remaining = ent->client->sproing_expiretime - level.time;
+		if (remaining == 3.0f)	// beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/sproingout.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
+		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
 	}
 	else if (ent->client->invis_framenum > level.framenum)
