@@ -758,7 +758,7 @@ void Player_ResetPowerups (edict_t *ent)
 	ent->client->haste_expiretime = 0;
 	ent->client->sproing_expiretime = 0;
 	ent->client->invis_framenum = 0;
-	ent->client->regen_framenum = 0;
+	ent->client->next_regen_time = 0;
 }
 
 
@@ -3629,12 +3629,15 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	//mutators
-	if((regeneration->value || excessive->value) && !ent->deadflag) 
+	if ((regeneration->integer || excessive->integer) && !ent->deadflag)
 	{
-		if((ent->health < ent->max_health) && (client->regen_framenum < level.framenum)) 
+		if (ent->health < ent->max_health && client->next_regen_time < level.time)
 		{
-			client->regen_framenum = level.framenum + 5;
-			ent->health+=2;
+			// 2 HP every half second until max health
+			client->next_regen_time = level.time + 0.5f;
+			ent->health += 2;
+			if (ent->health > ent->max_health)
+				ent->health = ent->max_health;
 		}
 	}
 
