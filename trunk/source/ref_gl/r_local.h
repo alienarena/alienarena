@@ -603,7 +603,6 @@ GLhandleARB g_fragmentShader;
 // Uniform locations for GLSL shaders that support dynamic lighting
 typedef struct
 {
-	GLuint	enableDynamic;
 	GLuint	lightAmountSquared;
 	GLuint	lightCutoffSquared;
 	GLuint	lightPosition; // in eye space

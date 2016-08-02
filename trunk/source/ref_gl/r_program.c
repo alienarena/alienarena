@@ -1921,7 +1921,6 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 
 static void get_dlight_uniform_locations (GLhandleARB programObj, dlight_uniform_location_t *out)
 {
-	out->enableDynamic = glGetUniformLocationARB (programObj, "DYNAMIC");
 	out->lightAmountSquared = glGetUniformLocationARB (programObj, "lightAmount");
 	out->lightPosition = glGetUniformLocationARB (programObj, "lightPosition");
 	out->lightCutoffSquared = glGetUniformLocationARB (programObj, "lightCutoffSquared");
