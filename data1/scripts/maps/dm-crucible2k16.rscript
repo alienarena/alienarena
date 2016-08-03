@@ -1,3 +1,55 @@
+ground1_texture
+{	
+	{
+		map textures/dm-crucible/ground1_blendtex.tga		
+		blendmap 4			
+			400 textures/desert/cliffbottom.tga		
+			200 textures/desert/rockground1.tga	
+			200 textures/desert/pebbles.tga	
+		blendnormalmap 3 
+			0 textures/desert/cliffbottom_nm.tga
+			1 textures/desert/rockground1_nm.tga	
+			2 textures/desert/pebbles_nm.tga		
+	}
+}
+ground2_texture
+{	
+	{
+		map textures/dm-crucible/ground2_blendtex.tga		
+		blendmap 4			
+			400 textures/desert/cliffbottom.tga		
+			200 textures/desert/rockground1.tga	
+			200 textures/desert/pebbles.tga	
+		blendnormalmap 3 
+			0 textures/desert/cliffbottom_nm.tga
+			1 textures/desert/rockground1_nm.tga	
+			2 textures/desert/pebbles_nm.tga		
+	}
+}
+ground3_texture
+{	
+	{
+		map textures/dm-crucible/ground3_blendtex.tga		
+		blendmap 4			
+			400 textures/desert/cliffbottom.tga		
+			200 textures/desert/rockground1.tga	
+			200 textures/desert/pebbles.tga	
+		blendnormalmap 3 
+			0 textures/desert/cliffbottom_nm.tga
+			1 textures/desert/rockground1_nm.tga	
+			2 textures/desert/pebbles_nm.tga		
+	}
+}
+textures/arena8/blockmetalfloor1
+{
+	{
+		map gfx/weed3.tga
+		scale static 4 static 4
+		colormap .7 .6 .5
+		grass
+		grasstype 0
+	}
+}
 textures/evil/e8_jumppad02
 {
     	{
