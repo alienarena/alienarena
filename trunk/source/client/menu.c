@@ -2540,21 +2540,24 @@ option_name_t video_option_names[] =
 		"vid_gamma",
 		"texture brightness",
 		NULL,
-		setlimits (brightnesscontrast_limits)
+		setlimits (brightnesscontrast_limits),
+		QMF_ACTION_WAIT
 	},
 	{
 		option_slider,
 		"vid_contrast",
 		"texture contrast",
 		NULL,
-		setlimits (brightnesscontrast_limits)
+		setlimits (brightnesscontrast_limits),
+		QMF_ACTION_WAIT
 	},
 	{
 		option_slider,
 		"gl_modulate",
 		"lightmap brightness",
 		NULL,
-		setlimits (modulate_limits)
+		setlimits (modulate_limits),
+		QMF_ACTION_WAIT
 	},
 	{
 		option_spincontrol,
@@ -2582,7 +2585,8 @@ option_name_t video_option_names[] =
 		"gl_picmip",
 		"texture quality",
 		NULL,
-		setnames (texquality_items)
+		setnames (texquality_items),
+		QMF_ACTION_WAIT
 	},
 	{
 		option_slider,
@@ -2633,7 +2637,8 @@ option_name_t video_option_names[] =
 		"r_antialiasing",
 		"multisample anti-aliasing",
 		NULL,
-		setnames (antialiasing_items)
+		setnames (antialiasing_items),
+		QMF_ACTION_WAIT
 	}
 };
 
