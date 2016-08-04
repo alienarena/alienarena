@@ -745,7 +745,7 @@ void CL_DrawInventory (void);
 //
 // cl_pred.c
 //
-void CL_PredictMovement (void);
+void CL_PredictMovement (int msec_since_packet);
 
 //
 // cl_view, cl_scrn
