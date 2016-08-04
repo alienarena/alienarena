@@ -2624,11 +2624,14 @@ void CL_Frame( int msec )
 		/* resend a connection request if necessary */
 		CL_CheckForResend();
 
+		/* retrigger packet send timer */
+		packet_timer = 0;
+
 		/*
 		 * predict movement for un-acked client-to-server packets
 		 * [The Quake trick that keeps players view smooth in on-line play.]
 		 */
-		CL_PredictMovement();
+		CL_PredictMovement (packet_timer);
 		
 		if (speedometer && speedometer->cvar->integer) {
 	        speedometer->counter = sqrt(
@@ -2652,9 +2655,6 @@ void CL_Frame( int msec )
 	        accelerometer->counter += new_vel-old_vel;
 	        old_vel = new_vel;
 	    }
-
-		/* retrigger packet send timer */
-		packet_timer = 0;
 	}
 
 	/*
@@ -2674,7 +2674,7 @@ void CL_Frame( int msec )
 			cls.frametime  = ((float)packet_timer) / 1000.0f;
 			Sys_SendKeyEvents();
 			
-			CL_PredictMovement();
+			CL_PredictMovement (packet_timer);
 		}
 
 		/*

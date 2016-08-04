@@ -228,7 +228,7 @@ CL_PredictMovement
 Sets cl.predicted_origin and cl.predicted_angles
 =================
 */
-void CL_PredictMovement (void)
+void CL_PredictMovement (int msec_since_packet)
 {
 	int			ack, current;
 	int			frame;
@@ -316,7 +316,7 @@ void CL_PredictMovement (void)
 			pm.cmd.angles[i] = ANGLE2SHORT (cl.predicted_angles[i]);
 			pm.s.delta_angles[i] = 0;
 		}
-		pm.cmd.msec = cls.frametime * 1000;
+		pm.cmd.msec = msec_since_packet;
 		Pmove (&pm);
 	}
 
