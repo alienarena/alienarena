@@ -221,8 +221,9 @@ typedef struct
 	float highlight_alpha;
 	
 	// action callbacks
-	void		(*callback) (void *self); // clicked on/activated
+	void		(*callback) (void *self); // clicked on/activated/applied
 	void		(*cursorcallback) (void *self, FNT_font_t font); // moused over
+	void		(*waitcallback) (void *self); // ACTION_WAIT widget activated
 	
 	// layout callbacks for each column
 	menuvec2_t	(*namesizecallback) (void *self, FNT_font_t font); // left

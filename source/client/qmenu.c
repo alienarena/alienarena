@@ -1419,6 +1419,8 @@ void Menu_ActivateItem (menuitem_s *item)
 			item->generic.apply_pending = true;
 			Menu_GetItemTree (item)->num_apply_pending++;
 		}
+		if (item->generic.waitcallback != NULL)
+			item->generic.waitcallback (item);
 	}
 	else
 	{

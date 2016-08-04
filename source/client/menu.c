@@ -1532,6 +1532,13 @@ static void FontSelectorDrawFunc (void *_self, UNUSED FNT_font_t unused)
 	FNT_BoundedPrint (font, self->itemnames[self->curvalue], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, &menu_box, light_color);
 }
 
+static void TextVarSpinOptionUpdateLabelFunc (void *_self)
+{
+	menulist_s *self = (menulist_s *)_self;
+	
+	Com_sprintf (self->buffer, sizeof (self->buffer), "%s", self->itemnames[self->curvalue]);
+}
+
 static void TextVarSpinOptionFunc (void *_self)
 {
 	menulist_s *self;
@@ -1542,9 +1549,9 @@ static void TextVarSpinOptionFunc (void *_self)
 	cvarname = self->generic.localstrings[0];
 	
 	cvarval = strchr(self->itemnames[self->curvalue], '\0')+1;
-	Cvar_Set( cvarname, cvarval);
+	Cvar_Set (cvarname, cvarval);
 	
-	Com_sprintf (self->buffer, sizeof(self->buffer), "%s", self->itemnames[self->curvalue]);
+	TextVarSpinOptionUpdateLabelFunc (_self);
 }
 
 static void UpdateDopplerEffectFunc( void *self )
@@ -1718,6 +1725,7 @@ static void Option_Setup (menumultival_s *item, option_name_t *optionname)
 	item->generic.localstrings[0] = optionname->cvarname;
 	item->generic.flags = optionname->flags;
 	item->generic.apply_pending = false;
+	item->generic.waitcallback = NULL;
 	
 	switch (optionname->type)
 	{
@@ -1749,6 +1757,7 @@ static void Option_Setup (menumultival_s *item, option_name_t *optionname)
 				item->generic.callback = UpdateDopplerEffectFunc;
 			else
 				item->generic.callback = TextVarSpinOptionFunc;
+			item->generic.waitcallback = TextVarSpinOptionUpdateLabelFunc;
 			item->slidervaluesizecallback = TextSliderValueSizeFunc;
 			break;
 		
