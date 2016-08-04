@@ -1580,15 +1580,10 @@ static float TextSliderValueSizeFunc (void *_self)
 	return ret;
 }
 
-static void SliderOptionFunc (void *_self)
+static float SliderOptionGetVal (const menuslider_s *self)
 {
-	menuslider_s *self;
-	const char *cvarname;
-	float cvarval, sliderval, valscale;
+	float sliderval, valscale;
 	const sliderlimit_t *limit;
-	
-	self = (menuslider_s *)_self;
-	cvarname = self->generic.localstrings[0];
 	
 	limit = (const sliderlimit_t *) self->generic.localptrs[0];
 	
@@ -1596,12 +1591,35 @@ static void SliderOptionFunc (void *_self)
 	
 	valscale = 	(limit->cvar_max-limit->cvar_min)/
 				(float)(limit->slider_max-limit->slider_min);
-	cvarval = limit->cvar_min + valscale*(sliderval-limit->slider_min);
+
+	return limit->cvar_min + valscale*(sliderval-limit->slider_min);
+}
+
+static void SliderOptionUpdateLabelFunc (void *_self)
+{
+	menuslider_s *self;
+	float cvarval;
 	
-	Com_sprintf (self->buffer, sizeof(self->buffer), "%f", cvarval);
+	self = (menuslider_s *)_self;
+	
+	cvarval = SliderOptionGetVal (self);
+	Com_sprintf (self->buffer, sizeof (self->buffer), "%f", cvarval);
 	cleanup_float_string (self->buffer);
+}
+
+static void SliderOptionFunc (void *_self)
+{
+	menuslider_s *self;
+	const char *cvarname;
+	float cvarval;
 	
+	self = (menuslider_s *)_self;
+	cvarname = self->generic.localstrings[0];
+	
+	cvarval = SliderOptionGetVal (self);
 	Cvar_SetValue (cvarname, cvarval);
+	
+	SliderOptionUpdateLabelFunc (_self);
 }
 
 static float NumericalSliderValueSizeFunc (void *_self)
@@ -1804,6 +1822,7 @@ static void Option_Setup (menumultival_s *item, option_name_t *optionname)
 			item->minvalue = limit->slider_min;
 			item->maxvalue = limit->slider_max;
 			item->generic.callback = SliderOptionFunc;
+			item->generic.waitcallback = SliderOptionUpdateLabelFunc;
 			item->generic.localptrs[0] = limit;
 			item->slidervaluesizecallback = NumericalSliderValueSizeFunc;
 			break;
