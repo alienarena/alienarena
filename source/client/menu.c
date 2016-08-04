@@ -6439,8 +6439,7 @@ static void Slider_CheckSlide (menuslider_s *s)
 	else if ( s->curvalue < s->minvalue )
 		s->curvalue = s->minvalue;
 
-	if ( s->generic.callback )
-		s->generic.callback( s );
+	Menu_ActivateItem (s);
 }
 
 static void Menu_DragSlideItem (void)
