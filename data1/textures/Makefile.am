@@ -1150,6 +1150,15 @@ nobase_dist_textures_DATA = \
 	dm-bloodfactory/rubble2.tga \
 	dm-bloodfactory/rubble2_blendtex.tga \
 	dm-bloodfactory/rubble2_lightmaptex.tga \
+	dm-crucible/ground1.tga \
+	dm-crucible/ground1_blendtex.tga \
+	dm-crucible/ground1_lightmaptex.tga \
+	dm-crucible/ground2.tga \
+	dm-crucible/ground2_blendtex.tga \
+	dm-crucible/ground2_lightmaptex.tga \
+	dm-crucible/ground3.tga \
+	dm-crucible/ground3_blendtex.tga \
+	dm-crucible/ground3_lightmaptex.tga \
 	dm-dismal/ice.jpg \
 	dm-dismal/ice_nm.jpg \
 	dm-dismal/rubble1.tga \
