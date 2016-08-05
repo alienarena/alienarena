@@ -396,6 +396,9 @@ nobase_dist_maps_DATA = \
 	meshes/dm-bloodfactory/blood3.decal \
 	meshes/dm-bloodfactory/rubble1.terrain \
 	meshes/dm-bloodfactory/rubble2.terrain \
+	meshes/dm-crucible/ground1.terrain \
+	meshes/dm-crucible/ground2.terrain \
+	meshes/dm-crucible/ground3.terrain \
 	meshes/dm-deathray/blood0.decal \
 	meshes/dm-deathray/blood1.decal \
 	meshes/dm-deathray/blood2.decal \
