@@ -53,3 +53,12 @@ maps/meshes/gothic/gargoyle
 		normalmap
 	}
 }
+maps/meshes/gothic/eyeball
+{
+	{
+		map maps/meshes/gothic/eyeball_normal.jpg
+		normalmap
+		map2 maps/meshes/gothic/eyeball_fx.tga
+		glow
+	}
+}
