@@ -9224,6 +9224,7 @@
 "origin" "712.000000 -192.000015 143.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "38.796509 0.000004 90.000000"
+"spawnflags" "1"
 }
 // entity 100
 {
@@ -9231,6 +9232,7 @@
 "origin" "720.000000 -192.000000 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000001 0.000003 90.000000"
+"spawnflags" "1"
 }
 // entity 101
 {
@@ -9238,6 +9240,7 @@
 "origin" "711.999878 -127.999969 143.999924"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "19.275019 -179.999985 90.000008"
+"spawnflags" "1"
 }
 // entity 102
 {
@@ -9245,6 +9248,7 @@
 "origin" "719.999817 -127.999985 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-9.463190 -179.999985 90.000008"
+"spawnflags" "1"
 }
 // entity 103
 {
@@ -9252,6 +9256,7 @@
 "origin" "712.000000 127.999985 143.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "38.796509 0.000004 90.000000"
+"spawnflags" "1"
 }
 // entity 104
 {
@@ -9259,6 +9264,7 @@
 "origin" "720.000000 128.000000 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000001 0.000003 90.000000"
+"spawnflags" "1"
 }
 // entity 105
 {
@@ -9266,6 +9272,7 @@
 "origin" "711.999878 192.000031 143.999924"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "19.275019 -179.999985 90.000008"
+"spawnflags" "1"
 }
 // entity 106
 {
@@ -9273,6 +9280,7 @@
 "origin" "719.999817 192.000015 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-9.463190 -179.999985 90.000008"
+"spawnflags" "1"
 }
 // entity 107
 {
@@ -9280,6 +9288,7 @@
 "origin" "808.000000 -32.000000 536.000061"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "70.423904 179.999985 -90.000008"
+"spawnflags" "1"
 }
 // entity 108
 {
@@ -9287,6 +9296,7 @@
 "origin" "816.000061 -32.000000 455.999969"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-36.092018 0.000004 90.000000"
+"spawnflags" "1"
 }
 // entity 109
 {
@@ -9294,6 +9304,7 @@
 "origin" "824.000000 -32.000000 383.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000001 0.000003 90.000000"
+"spawnflags" "1"
 }
 // entity 110
 {
@@ -9301,6 +9312,7 @@
 "origin" "815.999939 32.000019 455.999969"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-43.614929 -179.999985 90.000000"
+"spawnflags" "1"
 }
 // entity 111
 {
@@ -9308,6 +9320,7 @@
 "origin" "807.999939 32.000023 535.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "16.156645 -179.999985 90.000008"
+"spawnflags" "1"
 }
 // entity 112
 {
@@ -9315,6 +9328,7 @@
 "origin" "823.999939 32.000027 383.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-22.467350 -179.999985 90.000000"
+"spawnflags" "1"
 }
 // entity 113
 {
@@ -9400,6 +9414,7 @@
 "origin" "-44.000000 32.000015 455.999969"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-43.614929 -179.999985 90.000000"
+"spawnflags" "1"
 }
 // entity 124
 {
@@ -9407,6 +9422,7 @@
 "origin" "-35.999939 32.000023 535.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "16.156645 -179.999985 90.000008"
+"spawnflags" "1"
 }
 // entity 125
 {
@@ -9414,6 +9430,7 @@
 "origin" "-51.999939 32.000031 383.999939"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-22.467350 -179.999985 90.000000"
+"spawnflags" "1"
 }
 // entity 126
 {
@@ -9421,6 +9438,7 @@
 "origin" "-43.201935 -32.416126 456.760406"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "43.614929 0.000010 90.000015"
+"spawnflags" "1"
 }
 // entity 127
 {
@@ -9428,6 +9446,7 @@
 "origin" "-33.220203 -28.631948 520.129822"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-16.156639 0.000010 90.000008"
+"spawnflags" "1"
 }
 // entity 128
 {
@@ -9435,6 +9454,7 @@
 "origin" "-33.106644 -29.214483 400.084137"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "22.467350 0.000005 90.000008"
+"spawnflags" "1"
 }
 // entity 129
 {
@@ -9442,6 +9462,7 @@
 "origin" "352.289612 424.832123 531.896606"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000009 -90.000000 90.809425"
+"spawnflags" "1"
 }
 // entity 130
 {
@@ -9449,6 +9470,7 @@
 "origin" "352.289612 432.832123 467.896606"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000009 -90.000000 90.809425"
+"spawnflags" "1"
 }
 // entity 131
 {
@@ -9456,6 +9478,7 @@
 "origin" "352.289612 444.832123 415.896606"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000009 -90.000000 90.809425"
+"spawnflags" "1"
 }
 // entity 132
 {
@@ -9463,6 +9486,7 @@
 "origin" "414.052399 420.062683 531.083435"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-75.284393 94.477455 80.293640"
+"spawnflags" "1"
 }
 // entity 133
 {
@@ -9470,6 +9494,7 @@
 "origin" "415.888550 431.480347 467.327606"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-44.488449 95.753036 84.026138"
+"spawnflags" "1"
 }
 // entity 134
 {
@@ -9477,6 +9502,7 @@
 "origin" "417.295410 439.167908 415.910645"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 90.000008 89.190575"
+"spawnflags" "1"
 }
 // entity 135
 {
@@ -9484,6 +9510,7 @@
 "origin" "352.289642 -443.167877 408.103485"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000009 -90.000000 90.809425"
+"spawnflags" "1"
 }
 // entity 136
 {
@@ -9491,6 +9518,7 @@
 "origin" "352.289642 -435.167877 472.103394"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000009 -90.000000 90.809425"
+"spawnflags" "1"
 }
 // entity 137
 {
@@ -9498,6 +9526,7 @@
 "origin" "352.289642 -423.167877 524.103394"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000009 -90.000000 90.809425"
+"spawnflags" "1"
 }
 // entity 138
 {
@@ -9505,6 +9534,7 @@
 "origin" "414.052399 -447.937317 408.916565"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-75.284355 94.477455 80.293640"
+"spawnflags" "1"
 }
 // entity 139
 {
@@ -9512,6 +9542,7 @@
 "origin" "415.888550 -436.519653 472.672333"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-44.488457 95.753036 84.026138"
+"spawnflags" "1"
 }
 // entity 140
 {
@@ -9519,6 +9550,7 @@
 "origin" "417.295441 -428.832123 524.089355"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 90.000008 89.190575"
+"spawnflags" "1"
 }
 // entity 141
 {
@@ -9567,6 +9599,7 @@
 "origin" "56.000011 -192.000015 143.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "38.796509 0.000004 90.000000"
+"spawnflags" "1"
 }
 // entity 148
 {
@@ -9574,6 +9607,7 @@
 "origin" "48.000004 -192.000015 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000001 0.000003 90.000000"
+"spawnflags" "1"
 }
 // entity 149
 {
@@ -9595,6 +9629,7 @@
 "origin" "576.000000 336.000000 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 90.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 152
 {
@@ -9602,6 +9637,7 @@
 "origin" "575.999939 320.000031 159.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-23.457880 90.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 153
 {
@@ -9609,6 +9645,7 @@
 "origin" "512.000122 328.000061 215.999985"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 -90.000000 90.000008"
+"spawnflags" "1"
 }
 // entity 154
 {
@@ -9616,6 +9653,7 @@
 "origin" "511.338928 319.920685 171.780228"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "61.111698 90.000000 -90.000000"
+"spawnflags" "1"
 }
 // entity 155
 {
@@ -9651,6 +9689,7 @@
 "origin" "256.000000 -336.000061 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 90.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 160
 {
@@ -9658,6 +9697,7 @@
 "origin" "255.999939 -319.999969 159.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-23.457891 90.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 161
 {
@@ -9665,6 +9705,7 @@
 "origin" "192.000122 -328.000000 215.999985"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 -90.000000 90.000008"
+"spawnflags" "1"
 }
 // entity 162
 {
@@ -9672,6 +9713,7 @@
 "origin" "191.338928 -319.920685 171.780228"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "61.111698 90.000000 -90.000000"
+"spawnflags" "1"
 }
 // entity 163
 {
@@ -9679,6 +9721,7 @@
 "origin" "576.000000 -336.000061 223.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 90.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 164
 {
@@ -9686,6 +9729,7 @@
 "origin" "575.999939 -319.999969 159.999954"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "-23.457891 90.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 165
 {
@@ -9693,6 +9737,7 @@
 "origin" "512.000122 -328.000000 215.999985"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "0.000010 -90.000000 90.000008"
+"spawnflags" "1"
 }
 // entity 166
 {
@@ -9700,6 +9745,7 @@
 "origin" "511.338928 -319.920685 171.780228"
 "model" "maps/meshes/gothic/spike3.md2"
 "angles" "61.111698 90.000000 -90.000000"
+"spawnflags" "1"
 }
 // entity 167
 {
