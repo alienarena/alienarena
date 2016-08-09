@@ -1425,7 +1425,7 @@ void Machinegun_Fire (edict_t *ent)
 	if(excessive->value)
 		damage = 60;
 	else
-		damage = 18;
+		damage = 12;
 
 	if (ent->client->ps.gunframe == 5 && ent->client->buttons & BUTTON_ATTACK)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/machgup.wav"), 1, ATTN_IDLE, 0);
