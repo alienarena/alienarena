@@ -10247,14 +10247,14 @@
 "origin" "384.000000 -248.000015 -64.000000"
 "model" "maps/meshes/gothic/eyeball.md2"
 "angle" "90.000000"
-"spawnflags" "32"
+"spawnflags" "33"
 }
 // entity 240
 {
 "classname" "misc_mapmodel"
 "origin" "392.000000 248.000046 -63.999989"
 "model" "maps/meshes/gothic/eyeball.md2"
-"spawnflags" "32"
+"spawnflags" "33"
 "angles" "-0.000000 -90.000000 26.195353"
 }
 // entity 241
@@ -10262,7 +10262,7 @@
 "classname" "misc_mapmodel"
 "origin" "632.000061 0.000012 -63.999992"
 "model" "maps/meshes/gothic/eyeball.md2"
-"spawnflags" "32"
+"spawnflags" "33"
 "angles" "-0.000000 -179.999985 -27.384550"
 }
 // entity 242
@@ -10271,7 +10271,7 @@
 "origin" "135.999939 -0.000015 -64.000000"
 "model" "maps/meshes/gothic/eyeball.md2"
 "angle" "0.000009"
-"spawnflags" "32"
+"spawnflags" "33"
 }
 // entity 243
 {
