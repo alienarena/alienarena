@@ -23,9 +23,12 @@ nobase_dist_maps_DATA = \
 	decals/mud2.decal \
 	decals/rocks1.decal \
 	decals/slime0.decal \
+	decals/slime1.decal \
 	dm-babel2k16.bsp \
 	dm-babel2k16.lightmap \
 	dm-bloodfactory2k15.bsp \
+	dm-crucible2k16.bsp \
+	dm-crucible2k16.lightmap \
 	dm-deathray2k16.bsp \
 	dm-dismal2k15.bsp \
 	dm-dynamo2k16.bsp \
@@ -282,6 +285,12 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/dragon.jpg \
 	meshes/gothic/dragon.md2 \
 	meshes/gothic/dragon_normal.jpg \
+	meshes/gothic/eyeball.iqm \
+	meshes/gothic/eyeball.jpg \
+	meshes/gothic/eyeball.md2 \
+	meshes/gothic/eyeball.skin \
+	meshes/gothic/eyeball_fx.tga \
+	meshes/gothic/eyeball_normal.jpg \
 	meshes/gothic/fdstatue_green.md2 \
 	meshes/gothic/fd_statue_normal.jpg \
 	meshes/gothic/fdstatue_red.md2 \
