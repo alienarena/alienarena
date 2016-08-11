@@ -35,6 +35,7 @@ nobase_dist_botinfo_DATA = \
 	team.tmp \
 	dm-babel2k16.tmp \
 	dm-bloodfactory2k15.tmp \
+	dm-crucible2k16.tmp \
 	dm-deathray2k16.tmp \
 	dm-dismal2k15.tmp \
 	dm-dynamo2k16.tmp \
@@ -52,6 +53,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-babel2k16.nod \
 	nav/dm-bloodfactory2k15.nod \
 	nav/dm-chasmatic2k9.nod \
+	nav/dm-crucible2k16.nod \
 	nav/dm-deathray2k16.nod \
 	nav/dm-dismal2k15.nod \
 	nav/dm-dynamo2k16.nod \
