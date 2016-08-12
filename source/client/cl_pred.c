@@ -317,6 +317,9 @@ void CL_PredictMovement (int msec_since_packet)
 			pm.s.delta_angles[i] = 0;
 		}
 		pm.cmd.msec = msec_since_packet;
+		// Don't even try to jump except on packet frames. It can't work because
+		// of how jump simulation is done.
+		pm.cmd.upmove = 0;
 		Pmove (&pm);
 	}
 
