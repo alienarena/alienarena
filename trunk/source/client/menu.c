@@ -108,6 +108,36 @@ static const char *map_prefixes[num_game_modes][3] =
 	{"dm",  "tourney", NULL}  // 3
 };
 
+static void SetGameModeCvars (enum Game_mode mode)
+{
+	int cvflags = CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL;
+
+	// The deathmatch cvar doesn't specifically indicate a pure frag-to-win
+	// game mode. It's actually the "enable multiplayer" cvar.
+	// It protects from running vestigial Quake non-multiplayer code.
+	Cvar_SetValue ("deathmatch", 1);
+
+	Cvar_FullSet ("ctf",    "0", cvflags);
+	Cvar_FullSet ("g_duel", "0", cvflags);
+	Cvar_FullSet ("g_tactical", "0", cvflags);
+	Cvar_SetValue ("gamerules", mode);
+	
+	switch (mode)
+	{
+		case mode_ctf:
+			Cvar_ForceSet ("ctf", "1");
+			break;
+		case mode_tac:
+			Cvar_ForceSet ("g_tactical", "1");
+			break;
+		case mode_duel:
+			Cvar_ForceSet ("g_duel", "1");
+			break;
+		default:
+			break;
+	}
+}
+
 /*--------*/
 
 static int	m_main_cursor;
@@ -142,6 +172,7 @@ void SetFontNames (char **list);
 
 void M_Menu_Main_f (void);
 	static void M_Menu_PlayerConfig_f (void);
+	static void M_Menu_Game_prototype_f (void);
 	static void M_Menu_Game_f (void);
 	static void M_Menu_JoinServer_f (void);
 			static void M_Menu_AddressBook_f( void );
@@ -978,9 +1009,14 @@ MAIN MENU
 =======================================================================
 */
 
+//#define NEW_SINGLEPLAYER
+
 char *main_names[] =
 {
 	"m_main_game",
+#ifdef NEW_SINGLEPLAYER
+	"m_main_game",
+#endif
 	"m_main_join",
 	"m_main_host",
 	"m_main_options",
@@ -992,6 +1028,9 @@ char *main_names[] =
 void (*main_open_funcs[MAIN_ITEMS])(void) = 
 {
 	&M_Menu_Game_f,
+#ifdef NEW_SINGLEPLAYER
+	&M_Menu_Game_prototype_f,
+#endif
 	&M_Menu_JoinServer_f,
 	&M_Menu_StartServer_f,
 	&M_Menu_Options_f,
@@ -3474,6 +3513,34 @@ static void SinglePlayerGameFunc (void *data)
 	StartGame ();
 }
 
+static void SinglePlayerGameFuncPrototype (void *_self)
+{
+	extern cvar_t *name;
+	char pw[64];
+	menuaction_s *self;
+	char skill[2];
+	
+	self = (menuaction_s *)_self;
+	
+	skill[1] = '\0';
+	skill[0] = self->generic.localints[0]+'0';
+	Cvar_ForceSet ("skill", skill);
+	
+	// disable updates
+	cl.servercount = -1;
+	M_ForceMenuOff ();
+	
+	//listen servers are passworded (TODO: just unset public!)
+	sprintf(pw, "%s%4.2f", name->string, crand());
+	Cvar_Set ("password", pw);
+	
+	printf ("WANT MODE %d\n", self->generic.localints[1]);
+	SetGameModeCvars (self->generic.localints[1]);
+	
+	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
+	cls.key_dest = key_game;
+}
+
 static void M_Menu_Game_f (void)
 {
 	static menuframework_s	s_game_screen;
@@ -3507,6 +3574,79 @@ static void M_Menu_Game_f (void)
 	Menu_Center (&s_game_screen);
 	
 	M_PushMenu_Defaults (s_game_screen);
+}
+
+static void SinglePlayerSelectSkillFunc (void *_self)
+{
+	static char				selfname[1024];
+	static menuaction_s		*self;
+	
+	static menuframework_s	s_skill_screen;
+	static menuframework_s	s_skill_menu;
+
+	static const char *singleplayer_skill_level_names[][2] = {
+		{"Easy",	"You will win"},
+		{"Medium",	"You might win"},
+		{"Hard",	"Very challenging"},
+		{"Ultra",	"Only the best will win"}
+	};
+	#define num_singleplayer_skill_levels  static_array_size(singleplayer_skill_level_names)
+	static menuaction_s		s_singleplayer_skill_actions[num_singleplayer_skill_levels];
+	
+	int i;
+	
+	self = (menuaction_s *)_self;
+	
+	for (i = 0; i < sizeof(selfname) - 1 && self->generic.name[i]; i++)
+		selfname[i] = toupper (self->generic.name[i]);
+	selfname[i] = '\0';
+	
+	setup_window (s_skill_screen, s_skill_menu, selfname);
+	
+	for (i = 0; i < num_singleplayer_skill_levels; i++)
+	{
+		s_singleplayer_skill_actions[i].generic.type = MTYPE_ACTION;
+		s_singleplayer_skill_actions[i].generic.flags = QMF_BUTTON;
+		s_singleplayer_skill_actions[i].generic.name = singleplayer_skill_level_names[i][0];
+		s_singleplayer_skill_actions[i].generic.tooltip = singleplayer_skill_level_names[i][1];
+		s_singleplayer_skill_actions[i].generic.localints[0] = i;
+		s_singleplayer_skill_actions[i].generic.localints[1] = self->generic.localints[0];
+		s_singleplayer_skill_actions[i].generic.callback = SinglePlayerGameFuncPrototype;
+		Menu_AddItem (&s_skill_menu, &s_singleplayer_skill_actions[i]);
+	}
+
+	Menu_AutoArrange (&s_skill_screen);
+	Menu_Center (&s_skill_screen);
+	
+	M_PushMenu_Defaults (s_skill_screen);
+}
+
+static void M_Menu_Game_prototype_f (void)
+{
+	static menuframework_s	s_mode_screen;
+	static menuframework_s	s_mode_menu;
+	
+	static menuaction_s		s_singleplayer_mode_actions[num_game_modes];
+	
+	int i;
+	
+	setup_window (s_mode_screen, s_mode_menu, "SINGLE PLAYER");
+	
+	for (i = 0; i < num_game_modes; i++)
+	{
+		s_singleplayer_mode_actions[i].generic.type = MTYPE_ACTION;
+		s_singleplayer_mode_actions[i].generic.flags = QMF_BUTTON;
+		s_singleplayer_mode_actions[i].generic.name = game_mode_names[i];
+		// TODO: tooltip
+		s_singleplayer_mode_actions[i].generic.localints[0] = i;
+		s_singleplayer_mode_actions[i].generic.callback = SinglePlayerSelectSkillFunc;
+		Menu_AddItem (&s_mode_menu, &s_singleplayer_mode_actions[i]);
+	}
+
+	Menu_AutoArrange (&s_mode_screen);
+	Menu_Center (&s_mode_screen);
+	
+	M_PushMenu_Defaults (s_mode_screen);
 }
 
 
@@ -5140,7 +5280,6 @@ static void StartServerActionFunc (UNUSED void *self)
 	int		timelimit;
 	int		fraglimit;
 	int		maxclients;
-	int  cvflags;
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 
@@ -5169,33 +5308,8 @@ static void StartServerActionFunc (UNUSED void *self)
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "g_antilagprojectiles", s_antilagprojectiles_box.curvalue);
-
-	// The deathmatch cvar doesn't specifically indicate a pure frag-to-win
-	// game mode. It's actually the "enable multiplayer" cvar.
-	// It protects from running vestigial Quake non-multiplayer code.
-	Cvar_SetValue( "deathmatch", 1 );
-
-	cvflags =  CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL;
-
-	Cvar_FullSet( "ctf",    "0", cvflags );
-	Cvar_FullSet( "g_duel", "0", cvflags );
-	Cvar_FullSet( "g_tactical", "0", cvflags );
-	Cvar_SetValue( "gamerules", s_rules_box.curvalue );
 	
-	switch (s_rules_box.curvalue)
-	{
-		case mode_ctf:
-			Cvar_ForceSet( "ctf", "1" );
-			break;
-		case mode_tac:
-			Cvar_ForceSet( "g_tactical", "1" );
-			break;
-		case mode_duel:
-			Cvar_ForceSet( "g_duel", "1" );
-			break;
-		default:
-			break;
-	}
+	SetGameModeCvars (s_rules_box.curvalue);
 
 	Cbuf_AddText (va("startmap %s\n", startmap));
 	
