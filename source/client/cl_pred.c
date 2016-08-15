@@ -291,15 +291,6 @@ void CL_PredictMovement (int msec_since_packet)
 		VectorCopy (pm.s.origin, cl.predicted_origins[frame]);
 	}
 
-	oldframe = (ack-2) & (CMD_BACKUP-1);
-	oldz = cl.predicted_origins[oldframe][2];
-	step = pm.s.origin[2] - oldz;
-	if (step > 63 && step < 160 && (pm.s.pm_flags & PMF_ON_GROUND) )
-	{
-		cl.predicted_step = step * 0.125;
-		cl.predicted_step_time = cls.realtime - cls.frametime * 500;
-	}
-
 	VectorCopy (pm.viewangles, cl.predicted_angles);
 	VectorCopy (pm.viewangles, cl.last_predicted_angles);
 
@@ -321,6 +312,15 @@ void CL_PredictMovement (int msec_since_packet)
 		// of how jump simulation is done.
 		pm.cmd.upmove = 0;
 		Pmove (&pm);
+	}
+
+	oldframe = (ack-2) & (CMD_BACKUP-1);
+	oldz = cl.predicted_origins[oldframe][2];
+	step = pm.s.origin[2] - oldz;
+	if (step > 63 && step < 160 && (pm.s.pm_flags & PMF_ON_GROUND) )
+	{
+		cl.predicted_step = step * 0.125;
+		cl.predicted_step_time = cls.realtime - cls.frametime * 500;
 	}
 
 	// copy results out for rendering
