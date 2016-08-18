@@ -847,7 +847,7 @@ void G_SetClientEffects (edict_t *ent)
 
 	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value)
 		TeamEffects(ent);
-	else 
+	else if (g_dmlights->integer && !g_tactical->integer)
 	    ent->s.effects |= EF_TEAM2;
 
 	if (ent->client->doubledamage_expiretime > level.time)
