@@ -337,7 +337,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		float statshadowval;
 		vec2 displacement;
 		vec2 displacement2;
-		vec2 displacement3;
 		vec2 displacement4;
 
 		vec3 relativeEyeDirection = normalize( EyeDir );
@@ -362,7 +361,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		{
 			vec3 noiseVec;
 			vec3 noiseVec2;
-			vec3 noiseVec3;
 
 			//for liquid fx scrolling
 			vec4 texco = gl_TexCoord[0];
@@ -372,9 +370,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			texco2.t = texco2.t - rsTime*0.9/LIQUID;
 			//shift the horizontal here a bit
 			texco2.s = texco2.s/1.5;
-
-			vec4 texco3 = gl_TexCoord[0];
-			texco3.t = texco3.t - rsTime*0.6/LIQUID;
 
 			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
 			Offset = Offset * 0.04 - 0.02;
@@ -390,35 +385,33 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 			noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;
 			noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
 
+			displacement.x = texco.s + noiseVec.x + TexCoords.x;
+			displacement.y = texco.t + noiseVec.y + TexCoords.y;
+			displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
+			displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
+
 			if(LIQUID > 2)
 			{
-				displacement3 = texco3.st;
+				vec2 texco3 = gl_TexCoord[0].st;
+				texco3.t = texco3.t - rsTime*0.6/LIQUID;
 
-				noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;
+				vec2 noiseVec3 = normalize(texture2D(liquidNormTex, texco3)).xy;
 				noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
+
+				vec2 displacement3 = texco3 + noiseVec3 + TexCoords;
+				
+				vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
+				vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
+				vec4 diffuse3 = texture2D(liquidTexture, texco3 + displacement3);
+				vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
+				bloodColor = max(diffuse1, diffuse2);
+				bloodColor = max(bloodColor, diffuse3);
 			}
 			else
 			{
 				//used for water effect only
 				displacement4.x = noiseVec.x + noiseVec2.x;
 				displacement4.y = noiseVec.y + noiseVec2.y;
-			}
-
-			displacement.x = texco.s + noiseVec.x + TexCoords.x;
-			displacement.y = texco.t + noiseVec.y + TexCoords.y;
-			displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
-			displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
-			displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;
-			displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;
-
-			if(LIQUID > 2)
-			{
-				vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
-				vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
-				vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);
-				vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
-				bloodColor = max(diffuse1, diffuse2);
-				bloodColor = max(bloodColor, diffuse3);
 			}
 		}
 
