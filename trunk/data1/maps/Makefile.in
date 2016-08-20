@@ -238,6 +238,7 @@ nobase_dist_maps_DATA = \
 	dm-babel2k16.bsp \
 	dm-babel2k16.lightmap \
 	dm-bloodfactory2k15.bsp \
+	dm-bloodfactory2k15.lightmap \
 	dm-crucible2k16.bsp \
 	dm-crucible2k16.lightmap \
 	dm-deathray2k16.bsp \
