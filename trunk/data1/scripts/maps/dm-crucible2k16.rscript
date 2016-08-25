@@ -40,7 +40,7 @@ ground3_texture
 			2 textures/desert/pebbles_nm.tga		
 	}
 }
-textures/arena8/blockmetalfloor1
+textures/arena10/factoryfloorg
 {
 	{
 		map gfx/weed3.tga
