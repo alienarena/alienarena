@@ -821,6 +821,10 @@ nobase_dist_textures_DATA = \
 	arena9/metalfloor1.tga \
 	arena9/metalflooryellow.tga \
 	arena9/metalflooryellow2.tga \
+	arena9/metalflooryellow2_hm.tga \
+	arena9/metalflooryellow2_nm.tga \
+	arena9/metalflooryellow_hm.tga \
+	arena9/metalflooryellow_nm.tga \
 	arena9/metalgrate1.tga \
 	arena9/metalhole.tga \
 	arena9/metalplate1_nm.tga \
