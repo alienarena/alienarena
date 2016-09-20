@@ -2486,12 +2486,12 @@ sliderlimit_t dlight_limits =
 
 fieldsize_t resolution_width_limits = 
 {
-	4, 640, 2048
+	4, 640, 7680
 };
 
 fieldsize_t resolution_height_limits = 
 {
-	4, 480, 1536
+	4, 480, 4320
 };
 
 static const char *resolution_items[] =
@@ -2507,8 +2507,13 @@ static const char *resolution_items[] =
 	"[1366 768 ]\0008",
 	"[1600 1200]\0009",
 	"[1680 1050]\00010",
-	"[1920 1080]\00011",
-	"[2048 1536]\00012",
+	"[1920 1080]\00011", // FHD/1080P
+	"[2560 1080]\00013", // UWFHD/1080P ultrawide (21:9)
+	"[2048 1536]\00012", // out of order mode name to preserve cvar compat
+	"[2560 1440]\00014", // QHD/1440P
+	"[3440 1440]\00015", // UWQHD/1440P ultrawide (21:9)
+	"[3840 2160]\00016", // 4K
+	"[7680 4320]\00017", // 8K
 	"[custom   ]\000-1",
 	0
 };
