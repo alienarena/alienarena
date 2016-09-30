@@ -38,11 +38,13 @@ PFNGLGETINFOLOGARBPROC				glGetInfoLogARB				= NULL;
 PFNGLLINKPROGRAMARBPROC				glLinkProgramARB			= NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB		= NULL;
 PFNGLUNIFORM4IARBPROC				glUniform4iARB				= NULL;
+PFNGLUNIFORM4FARBPROC				glUniform4fARB				= NULL;
 PFNGLUNIFORM3FARBPROC				glUniform3fARB				= NULL;
 PFNGLUNIFORM2FARBPROC				glUniform2fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
 PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORM4IVARBPROC				glUniform4ivARB				= NULL;
+PFNGLUNIFORM4FVARBPROC				glUniform4fvARB				= NULL;
 PFNGLUNIFORM3FVARBPROC				glUniform3fvARB				= NULL;
 PFNGLUNIFORM2FVARBPROC				glUniform2fvARB				= NULL;
 PFNGLUNIFORM1IVARBPROC				glUniform1ivARB				= NULL;
@@ -1980,11 +1982,13 @@ void R_LoadGLSLPrograms(void)
 		glLinkProgramARB		  = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
 		glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
 		glUniform4iARB			= (PFNGLUNIFORM4IARBPROC)qwglGetProcAddress("glUniform4iARB");
+		glUniform4fARB			= (PFNGLUNIFORM4FARBPROC)qwglGetProcAddress("glUniform4fARB");
 		glUniform3fARB			= (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
 		glUniform2fARB			= (PFNGLUNIFORM2FARBPROC)qwglGetProcAddress("glUniform2fARB");
 		glUniform1iARB			= (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniform4ivARB			= (PFNGLUNIFORM4IVARBPROC)qwglGetProcAddress("glUniform4ivARB");
+		glUniform4fvARB			= (PFNGLUNIFORM4FVARBPROC)qwglGetProcAddress("glUniform4FvARB");
 		glUniform3fvARB			= (PFNGLUNIFORM3FVARBPROC)qwglGetProcAddress("glUniform3fvARB");
 		glUniform2fvARB			= (PFNGLUNIFORM2FVARBPROC)qwglGetProcAddress("glUniform2fvARB");
 		glUniform1ivARB			= (PFNGLUNIFORM1IVARBPROC)qwglGetProcAddress("glUniform1ivARB");
@@ -2005,6 +2009,7 @@ void R_LoadGLSLPrograms(void)
 			!glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
 			!glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 			!glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
+				!glUniform4fARB || !glUniform4fvARB || !glUniform4ivARB ||
 				!glUniform4iARB || !glUniform1iARB || !glUniform1fARB ||
 				!glUniform3fvARB || !glUniform2fvARB || !glUniform1fvARB ||
 				!glUniformMatrix3fvARB || !glUniformMatrix3x4fvARB ||
