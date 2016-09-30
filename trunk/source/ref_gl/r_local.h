@@ -568,6 +568,7 @@ GLhandleARB g_blankmeshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
 GLhandleARB g_colorscaleprogramObj;
+GLhandleARB g_colorexpprogramObj;
 GLhandleARB g_rblurprogramObj;
 GLhandleARB g_dropletsprogramObj;
 GLhandleARB g_godraysprogramObj;
@@ -747,6 +748,12 @@ struct
 {
 	GLuint  scale, source;
 } colorscale_uniforms;
+
+//color exponentiation shader
+struct 
+{
+	GLuint  exponent, source;
+} colorexp_uniforms;
 
 //radial blur	
 GLuint		g_location_rsource;
