@@ -254,17 +254,27 @@ static void R_Bloom_DoGuassian (void)
 	
 	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
 	
-	qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	GLSTATE_ENABLE_BLEND
-	
 	//darkening passes
-	if( r_bloom_darken->integer )
+	if (r_bloom_darken->value)
 	{
-		GL_BlendFunction (GL_DST_COLOR, GL_ZERO);
-		GL_SelectTexture (0);
-		GL_TexEnv (GL_MODULATE);
-		for(i=0; i<r_bloom_darken->integer ;i++)
+		if (r_test->integer)
+		{
+			float exp = r_bloom_darken->value + 1.0f;
+			glUseProgramObjectARB (g_colorexpprogramObj);
+			glUniform1iARB (colorexp_uniforms.source, 0);
+			glUniform4fARB (colorexp_uniforms.exponent, exp, exp, exp, 1.0f);
 			R_DrawVarrays (GL_QUADS, 0, 4);
+		}
+		else
+		{
+			qglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+			GLSTATE_ENABLE_BLEND
+			GL_BlendFunction (GL_DST_COLOR, GL_ZERO);
+			GL_SelectTexture (0);
+			GL_TexEnv (GL_MODULATE);
+			for(i=0; i<r_bloom_darken->integer ;i++)
+				R_DrawVarrays (GL_QUADS, 0, 4);
+		}
 		qglCopyTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, 0, 0, BLOOM_SIZE, BLOOM_SIZE);
 	}
 	

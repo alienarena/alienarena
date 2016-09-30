@@ -1478,6 +1478,17 @@ static char colorscale_fragment_program[] = STRINGIFY (
 	}
 );
 
+//COLOR EXPONENTIATION SHADER - for contrast boosting
+static char color_exponent_fragment_program[] = STRINGIFY (
+	uniform vec4		exponent;
+	uniform sampler2D	textureSource;
+	
+	void main (void)
+	{
+		gl_FragColor = pow (texture2D (textureSource, gl_TexCoord[0].st), exponent);
+	}
+);
+
 //GAUSSIAN BLUR EFFECTS
 static char blur_vertex_program[] = STRINGIFY (
 	varying vec2	texcoord1, texcoord2, texcoord3,
@@ -2186,7 +2197,12 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("Color Scaling", NULL, (char*)colorscale_fragment_program, NO_ATTRIBUTES, 0, &g_colorscaleprogramObj);
 	colorscale_uniforms.scale = glGetUniformLocationARB (g_colorscaleprogramObj, "scale");
 	colorscale_uniforms.source = glGetUniformLocationARB (g_colorscaleprogramObj, "textureSource");
-
+	
+	// Color exponentiation
+	R_LoadGLSLProgram ("Color Exponentiation", NULL, (char*)color_exponent_fragment_program, NO_ATTRIBUTES, 0, &g_colorexpprogramObj);
+	colorexp_uniforms.exponent = glGetUniformLocationARB (g_colorexpprogramObj, "exponent");
+	colorexp_uniforms.source = glGetUniformLocationARB (g_colorexpprogramObj, "textureSource");
+	
 	//radial blur
 	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, 0, &g_rblurprogramObj);
 
