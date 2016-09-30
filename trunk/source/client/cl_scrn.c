@@ -1010,7 +1010,7 @@ void SCR_TimeRefresh_f( void )
 	save_yaw    = cl.refdef.viewangles[YAW];
 	num_frames  = scr_timerefcount->value;
 	frame_count = scr_timerefcount->integer;
-	if ( frame_count < 1 || frame_count > 1440 )
+	if ( frame_count < 1 || frame_count > 4320 )
 	{ // silently protect against unreasonable setting
 		num_frames = 128.0f;
 		frame_count = 128;
