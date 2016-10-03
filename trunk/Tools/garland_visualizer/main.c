@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <unistd.h>
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 
@@ -178,6 +179,8 @@ int main (int argc, char *argv[])
             }
         }
         gfx_frame (&loaded);
+        
+        usleep ((1000*1000)/120);
     }
     
     return 0;
