@@ -105,9 +105,6 @@ typedef struct tri_s
 {
 	char	cull; // 1 if we're not keeping it
 	vert_t	*verts[3];
-	// Guard planes for triangle inversion mitigation
-	double	opposite_plane_normal[3][3];
-	double	opposite_plane_dist[3];
 } tri_t;
 
 
@@ -440,27 +437,65 @@ static double vec3_dot (const double a[3], const double b[3])
 	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-// See Garland's thesis, section 3.7
+// check if a hypothetical triangle comprised of these three verts in the given
+// order would be inverted
+static int triangle_would_invert (const vert_t *v0, const vert_t *v1, const vert_t *v2)
+{
+	int i;
+	double	temp[3], bitangent[3], tangent[3], normal[3];
+	double	posdiff1[3], posdiff2[3];
+	double	stdiff1[2], stdiff2[2];
+	
+	vec3_sub (v1->pos, v0->pos, posdiff1);
+	vec3_sub (v2->pos, v0->pos, posdiff2);
+	
+#if AXES == 5 // take texcoords into account for inversion detection
+#define TEXIDX(i) (i+3)
+#elif AXES == 3 // just look at vertex ordering alone
+#define TEXIDX(i) (i)
+#else
+#error must customize triangle_is_inverted for the current number of axes!
+#endif
+	for (i = 0; i < 2; i++)
+	{
+		stdiff1[i] = v1->pos[TEXIDX(i)] - v0->pos[TEXIDX(i)];
+		stdiff2[i] = v2->pos[TEXIDX(i)] - v0->pos[TEXIDX(i)];
+	}
+#undef TEXIDX
+	
+	// get the tangent & bitangent (though not scaled or normalized correctly)
+	for (i = 0; i < 3; i++)
+	{
+		tangent[i] = posdiff1[i] * stdiff2[1] - posdiff2[i] * stdiff1[1];
+		bitangent[i] = posdiff2[i] * stdiff1[0] - posdiff1[i] * stdiff2[0];
+	}
+	
+	// get the normal vector
+	vec3_cross (posdiff2, posdiff1, normal);
+
+	// handedness
+	vec3_cross (normal, tangent, temp);
+	return vec3_dot (temp, bitangent) >= 0.0;
+}
+
+// would any triangles get inverted if we contracted a and b onto a?
 // This helps, but FIXME: why isn't this catching everything?
-static double get_cross_error (const vert_t *a, const vert_t *b)
+static double penalize_inversions (const vert_t *a, const vert_t *b)
 {
 	const trilist_t *link;
 	double penalty = 0.0;
 	
-	for (link = a->tris; link != NULL; link = link->next)
+	for (link = b->tris; link != NULL; link = link->next)
 	{
 		const vert_t *e2_a, *e2_b;
-		double b_dist;
 		
 		e2_a = link->tri->verts[(link->idx + 1) % 3];
 		e2_b = link->tri->verts[(link->idx + 2) % 3];
 		
-		if (e2_a == b || e2_b == b)
+		if (e2_a == a || e2_b == a)
 			continue;
 		
-		b_dist = vec3_dot (link->tri->opposite_plane_normal[link->idx], b->pos);
-		
-		if (b_dist > link->tri->opposite_plane_dist[link->idx])
+		if (triangle_would_invert (a, e2_a, e2_b))
 			penalty += 1000.0;
 	}
 	
@@ -474,11 +509,9 @@ static void generate_contraction (edge_t *edge)
 	
 	add_quadrices (&edge->vtx_a->quadric, &edge->vtx_b->quadric, &q);
 	
-	a_error = b_error =	get_cross_error (edge->vtx_a, edge->vtx_b) +
-						get_cross_error (edge->vtx_b, edge->vtx_a);
-	
 	// what would happen if we contracted a and b into a?
-	a_error += get_quadric_error (&q, edge->vtx_a->pos);
+	a_error =	get_quadric_error (&q, edge->vtx_a->pos) + 
+				penalize_inversions (edge->vtx_a, edge->vtx_b);
 	
 	// If a and b are on the same plane, it doesn't matter which we pick.
 	if (fabs (a_error) < DBL_EPSILON)
@@ -490,7 +523,8 @@ static void generate_contraction (edge_t *edge)
 	}
 	
 	// what would happen if we contracted a and b into b?
-	b_error += get_quadric_error (&q, edge->vtx_b->pos);
+	b_error =	get_quadric_error (&q, edge->vtx_b->pos) + 
+				penalize_inversions (edge->vtx_b, edge->vtx_a);
 	
 	if (b_error < a_error)
 	{
@@ -536,38 +570,6 @@ static void add_edge_quadrices (vert_t *vtx_a, vert_t *vtx_b, vert_t *vtx_c, dou
 		add_quadrices (&vtx_a->quadric, &q2, &vtx_a->quadric);
 		add_quadrices (&vtx_b->quadric, &q2, &vtx_b->quadric);
 	}
-}
-
-// See Garland's thesis, section 3.7
-static void generate_guard_planes_for_tri (tri_t *tri)
-{
-	int i;
-	
-	for (i = 0; i < 3; i++)
-	{
-		const vert_t *a, *b, *c;
-		double	guard_tangent1[3], guard_tangent2[3], temp[3];
-		
-		a = tri->verts[i];
-		b = tri->verts[(i + 1) % 3];
-		c = tri->verts[(i + 2) % 3];
-		
-		vec3_sub (a->pos, b->pos, temp);
-		vec3_sub (c->pos, b->pos, guard_tangent1);
-		
-		vec3_cross (guard_tangent1, temp, guard_tangent2);
-		vec3_cross (guard_tangent1, guard_tangent2, tri->opposite_plane_normal[i]);
-		
-		tri->opposite_plane_dist[i] = vec3_dot (tri->opposite_plane_normal[i], b->pos);
-	}
-}
-
-static void generate_guard_planes_for_mesh (mesh_t *mesh)
-{
-	idx_t i;
-	
-	for (i = 0; i < mesh->num_tris; i++)
-		generate_guard_planes_for_tri (&mesh->etris[i]);
 }
 
 static void generate_quadrices_for_tri (tri_t *tri)
@@ -759,7 +761,6 @@ static void replace_vertex (mesh_t *mesh, vert_t *a, vert_t *b)
 		
 		if (!link->tri->cull)
 		{
-			generate_guard_planes_for_tri (link->tri);
 			link->next = a->tris;
 			a->tris = link;
 		}
@@ -942,7 +943,6 @@ void simplify_init (mesh_t *mesh)
 	generate_vertices_for_mesh (mesh);
 	generate_edges_for_mesh (mesh);
 	generate_quadrices_for_mesh (mesh);
-	generate_guard_planes_for_mesh (mesh);
 	generate_all_contractions (mesh);
 	
 	mesh->simplified_num_tris = mesh->num_tris;
