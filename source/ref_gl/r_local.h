@@ -130,6 +130,7 @@ extern	cvar_t	*gl_picmip;
 extern	cvar_t	*gl_skymip;
 extern	cvar_t	*gl_showtris;
 extern	cvar_t	*gl_showpolys;
+extern	cvar_t	*gl_showcollisionmesh;
 extern	cvar_t	*gl_finish;
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_cull;
@@ -335,6 +336,7 @@ typedef enum
 } wholescreen_drawtype_t;
 void GL_SetupWholeScreen2DVBO (wholescreen_drawtype_t drawtype);
 void GL_DrawNullModel (void);
+void GL_DrawCollisionMesh (void);
 #define GL_BindVBO(ptr) qglBindBufferARB (GL_ARRAY_BUFFER_ARB, ptr)
 #define GL_BindIBO(ptr) qglBindBufferARB (GL_ELEMENT_ARRAY_BUFFER, ptr)
 

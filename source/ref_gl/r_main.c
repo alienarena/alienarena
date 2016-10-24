@@ -122,6 +122,7 @@ cvar_t	*gl_picmip;
 cvar_t	*gl_skymip;
 cvar_t	*gl_showtris;
 cvar_t	*gl_showpolys;
+cvar_t	*gl_showcollisionmesh;
 cvar_t	*gl_finish;
 cvar_t	*gl_clear;
 cvar_t	*gl_cull;
@@ -944,8 +945,6 @@ static void R_DrawTerrainTri (const vec_t *verts[3], const vec3_t normal, qboole
 	GL_EnableTexture (0, true);
 }
 
-extern void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect));
-
 void R_SetupFog (float distance_boost)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
@@ -1136,8 +1135,24 @@ void R_RenderView (refdef_t *fd)
 	R_Flash ();
 	
 	AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
-	if (gl_showpolys->integer)
-		CM_TerrainDrawIntersecting (r_origin, forward, R_DrawTerrainTri);
+	
+	if (gl_showcollisionmesh->integer)
+	{
+		qglColor4f (0.0f, 1.0f, 0.0f, 1.0f);
+		qglDisable (GL_TEXTURE_2D);
+		qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+	
+		if (gl_showcollisionmesh->integer >= 2) qglDisable (GL_DEPTH_TEST);
+		qglLineWidth (gl_showcollisionmesh->integer >= 2 ? 2.5f : 1.5f); // when there are lots of lines, make them narrower
+		
+		GL_DrawCollisionMesh ();
+		
+		if (gl_showcollisionmesh->integer >= 2) qglEnable (GL_DEPTH_TEST);
+	
+		qglLineWidth (1.0f);
+		qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+		qglEnable (GL_TEXTURE_2D);
+	}
 	
 	if (gl_showdecals->integer)
 	{	
@@ -1305,6 +1320,8 @@ void R_Register( void )
 	gl_showtris = Cvar_Get ("gl_showtris", "0", 0);
 	gl_showpolys = Cvar_Get ("gl_showpolys", "0", CVARDOC_INT);
 	Cvar_Describe (gl_showpolys, "Useful tool for mappers. 1 means show world polygon outlines for visible surfaces. 2 means show outlines for all surfaces in the PVS, even if they are hidden.");
+	gl_showcollisionmesh = Cvar_Get ("gl_showcollisionmesh", "0", CVARDOC_INT);
+	Cvar_Describe (gl_showcollisionmesh, "Useful tool for mappers. Shows all the collision geometry for terrain in wireframe. 2 disables depth culling for this wireframe.");
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
 	Cvar_Describe (gl_finish, "Waits for graphics driver to finish drawing each frame before drawing the next one. Hurts performance but may improve smoothness on very low-end machines.");
 	gl_clear = Cvar_Get ("gl_clear", "0", CVARDOC_BOOL);

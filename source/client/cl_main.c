@@ -2254,17 +2254,18 @@ typedef struct
 
 cheatvar_t cheatvars[] =
 {
-	{"timescale",     "1", NULL},
-	{"timedemo",      "0", NULL},
-	{"r_drawworld",   "1", NULL},
-	{"cl_testlights", "0", NULL},
-	{"r_fullbright",  "0", NULL},
-	{"r_drawflat",    "0", NULL},
-	{"paused",        "0", NULL},
-	{"fixedtime",     "0", NULL},
-	{"gl_lightmap",   "0", NULL},
-	{"gl_showpolys",  "0", NULL},
-	{"gl_showtris",   "0", NULL},
+	{"timescale",				"1", NULL},
+	{"timedemo",				"0", NULL},
+	{"r_drawworld",				"1", NULL},
+	{"cl_testlights",			"0", NULL},
+	{"r_fullbright",			"0", NULL},
+	{"r_drawflat",				"0", NULL},
+	{"paused",					"0", NULL},
+	{"fixedtime",				"0", NULL},
+	{"gl_lightmap",				"0", NULL},
+	{"gl_showpolys",			"0", NULL},
+	{"gl_showtris",				"0", NULL},
+	{"gl_showcollisionmesh",	"0", NULL},
 	{NULL, NULL, NULL}
 };
 
