@@ -1999,7 +1999,7 @@ void R_LoadGLSLPrograms(void)
 		glUniform1iARB			= (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniform4ivARB			= (PFNGLUNIFORM4IVARBPROC)qwglGetProcAddress("glUniform4ivARB");
-		glUniform4fvARB			= (PFNGLUNIFORM4FVARBPROC)qwglGetProcAddress("glUniform4FvARB");
+		glUniform4fvARB			= (PFNGLUNIFORM4FVARBPROC)qwglGetProcAddress("glUniform4fvARB");
 		glUniform3fvARB			= (PFNGLUNIFORM3FVARBPROC)qwglGetProcAddress("glUniform3fvARB");
 		glUniform2fvARB			= (PFNGLUNIFORM2FVARBPROC)qwglGetProcAddress("glUniform2fvARB");
 		glUniform1ivARB			= (PFNGLUNIFORM1IVARBPROC)qwglGetProcAddress("glUniform1ivARB");
