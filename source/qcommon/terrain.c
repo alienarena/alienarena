@@ -19,23 +19,47 @@ static float grayscale_sample (const byte *texture, int tex_w, int tex_h, float 
     return (res[0] + res[1] + res[2]) / 3.0;
 }
 
-terraindec_t *LoadTerrainDecorationType 
-	(	char *texpath, const vec3_t mins, const vec3_t scale, 
+static terraindec_t *LoadTerrainDecorationType 
+	(	char *texpath, const vec3_t mins, const vec3_t scale, float gridsz,
 		const byte *hmtexdata, float hm_w, float hm_h,
 		const int channeltypes[3], int *out_counter
 	)
 {
-	byte *texdata = NULL;
+	byte *texdata_orig = NULL;
+	byte *texdata_resampled = NULL;
 	terraindec_t *ret = NULL;
-	int i, j, k, w, h;
+	int i, j, k, w, h, w_orig, h_orig;
 	int counter = 0;
 	
-	LoadTGA (texpath, &texdata, &w, &h);
+	LoadTGA (texpath, &texdata_orig, &w_orig, &h_orig);
 	
-	if (texdata == NULL)
+	if (texdata_orig == NULL)
 		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", texpath);
 	
 	Z_Free (texpath);
+	
+	// resample decorations texture to new resolution
+	// this is to make decoration density independent of decoration texture
+	w = ceilf (scale[0] / gridsz);
+	h = ceilf (scale[1] / gridsz);
+	texdata_resampled = Z_Malloc (w*h*3);
+	for (i = 0; i < h; i++)
+	{
+		for (j = 0; j < w; j++)
+		{
+			float s, t;
+			vec4_t res;
+			
+			s = ((float)j)/(float)w;
+			t = ((float)i)/(float)h;
+			bilinear_sample (texdata_orig, w_orig, h_orig, s, t, res);
+			
+			for (k = 0; k < 3; k++)
+				texdata_resampled[3*(i*w+j)+k] = floorf (res[k] * 255.0f);
+		}
+	}
+	
+	free (texdata_orig);
 	
 	// Count how many decorations we should allocate.
 	for (j = 0; j < 3; j++)
@@ -44,7 +68,7 @@ terraindec_t *LoadTerrainDecorationType
 			continue;
 		for (i = 0; i < w*h; i++)
 		{
-			if (texdata[i*4+j] != 0)
+			if (texdata_resampled[i*3+j] != 0)
 				counter++;
 		}
 	}
@@ -53,7 +77,7 @@ terraindec_t *LoadTerrainDecorationType
 	
 	if (counter == 0)
 	{
-		free (texdata);
+		Z_Free (texdata_resampled);
 		return NULL;
 	}
 	
@@ -74,7 +98,7 @@ terraindec_t *LoadTerrainDecorationType
 				float x, y, z, s, t, xrand, yrand;
 				byte size;
 			
-				size = texdata[((h-i-1)*w+j)*4+k];
+				size = texdata_resampled[((h-i-1)*w+j)*3+k];
 				if (size == 0)
 					continue;
 		
@@ -99,7 +123,7 @@ terraindec_t *LoadTerrainDecorationType
 	
 	assert (counter == *out_counter);
 	
-	free (texdata);
+	Z_Free (texdata_resampled);
 	
 	return ret;
 }
@@ -193,7 +217,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 		// Green pixels in the vegetation map indicate grass.
 		// Red pixels indicate shrubbery.
 		const int channeltypes[3] = {2, 0, 1};
-		out->vegetation = LoadTerrainDecorationType (vegtex_path, out->mins, scale, texdata, h, w, channeltypes, &out->num_vegetation);
+		out->vegetation = LoadTerrainDecorationType (vegtex_path, out->mins, scale, 64.0f, texdata, h, w, channeltypes, &out->num_vegetation);
 	}
 	
 	// Compile a list of all rock entities that should be added to the map
@@ -201,7 +225,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	{
 		// Red pixels in the rock map indicate smallish rocks.
 		const int channeltypes[3] = {0, -1, -1};
-		out->rocks = LoadTerrainDecorationType (rocktex_path, out->mins, scale, texdata, h, w, channeltypes, &out->num_rocks);
+		out->rocks = LoadTerrainDecorationType (rocktex_path, out->mins, scale, 64.0f, texdata, h, w, channeltypes, &out->num_rocks);
 	}
 	
 	if (decorations_only)
@@ -290,6 +314,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	start_time = Sys_Milliseconds ();
 	simplify_mesh (&mesh, out->num_triangles/reduction_amt);
 	Com_Printf ("Simplified mesh in %f seconds.\n", (float)(Sys_Milliseconds () - start_time)/1000.0f);
+	Com_Printf ("%d to %d\n", out->num_triangles, mesh.num_tris);
 	
 	out->num_vertices = mesh.num_verts;
 	out->num_triangles = mesh.num_tris;
