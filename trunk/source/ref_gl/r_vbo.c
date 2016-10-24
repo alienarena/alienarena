@@ -30,6 +30,8 @@ GLuint bsp_iboId = 0, bsp_outlines_iboId;
 GLuint minimap_vboId = 0;
 static GLuint vegetation_vboId = 0;
 static GLuint lensflare_vboId = 0;
+static GLuint collision_vboId = 0, collision_iboId = 0;
+static int num_collision_tris;
 
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
@@ -305,6 +307,55 @@ void GL_SetupWorldVBO (void)
 	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, 0);
 }
 
+static void VB_BuildCollisionVBO (void)
+{
+	int numvertices, numtriangles, i;
+	
+	numvertices = CM_NumVertices ();
+	num_collision_tris = numtriangles = CM_NumTriangles ();
+	
+	qglGenBuffersARB (1, &collision_vboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, collision_vboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, numvertices*3*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+	
+	for (i = 0; i < numvertices; i++)
+	{
+		vec3_t tmp;
+		
+		CM_GetVertex (i, tmp);
+			
+		qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, (GLintptrARB)(3 * i * sizeof(float)), 3 * sizeof(float), tmp);
+	}
+	
+	qglGenBuffersARB (1, &collision_iboId);
+	qglBindBufferARB (GL_ARRAY_BUFFER_ARB, collision_iboId);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, numtriangles*3*sizeof(unsigned int), 0, GL_STATIC_DRAW_ARB);
+	
+	for	(i = 0; i < numtriangles; i++)
+	{
+		int tmp[3];
+		
+		CM_GetTriangle (i, tmp);
+		
+		qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB, (GLintptrARB)(i * 3 * sizeof(unsigned int)), 3 * sizeof(unsigned int), tmp);
+	}
+	
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+}
+
+void GL_DrawCollisionMesh (void)
+{
+	GL_BindVBO (collision_vboId);
+	R_VertexPointer (3, 0, (void *)0);
+	GL_BindVBO (0);
+	GL_BindIBO (collision_iboId);
+	
+	qglDrawElements (GL_TRIANGLES, 3 * num_collision_tris, GL_UNSIGNED_INT, (const GLvoid *)0);
+	
+	GL_BindIBO (0);
+	R_KillVArrays ();
+}
+
 static void VB_BuildVegetationVBO (void)
 {
 	int i, j, ng;
@@ -456,6 +507,7 @@ void VB_BuildWorldVBO (void)
 	VB_BuildMinimapVBO ();
 	VB_BuildVegetationVBO ();
 	VB_BuildLensFlareVBO ();
+	VB_BuildCollisionVBO ();
 	fflush (stdout);
 }
 
