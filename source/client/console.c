@@ -50,7 +50,6 @@ void CON_ToggleConsole( void )
 {
 	SCR_EndLoadingPlaque ();	// get rid of loading plaque
 
-	Key_ClearTyping ();
 	CON_ClearNotify( );
 
 	if (cls.key_dest == key_console)
