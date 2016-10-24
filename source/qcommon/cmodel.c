@@ -160,7 +160,7 @@ typedef struct
 typedef struct
 {
 	vec3_t			mins, maxs;
-	int				numtriangles;
+	int				numtriangles, numvertices;
 	vec_t			*verts;
 	cterraintri_t	*tris;
 	
@@ -179,6 +179,10 @@ typedef struct
 	(int)floor((coord[0]-terrainmod->mins[0]) / TERRAIN_GRIDSIZE))
 	int numgrid[3]; // how many grid planes there are on each axis.
 	cterraingrid_t	*grids;
+	
+	// For exporting all terrain geometry as if it was a single model: we need
+	// to know how many vertexes and triangles preceded this one.
+	int firsttriangle, firstvertex;
 } cterrainmodel_t;
 
 static int		numterrainmodels;
@@ -1109,7 +1113,10 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	if (Q_strcasecmp (COM_FileExtension (name), "terrain"))
 		return;
 	
-	mod = &terrain_models[numterrainmodels++];
+	mod = &terrain_models[numterrainmodels];
+	mod->firsttriangle = CM_NumTriangles ();
+	mod->firstvertex = CM_NumVertices ();
+	numterrainmodels++;
 	
 	FS_LoadFile (name, (void**)&buf);
 	
@@ -1152,6 +1159,8 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 				mod->maxs[j] = mod->verts[3*i+j];
 		}
 	}
+	
+	mod->numvertices = data.num_vertices;
 	
 	VectorSet (mod->lm_s_axis, rotation_matrix[0][0], rotation_matrix[1][0], rotation_matrix[2][0]);
 	VectorSet (mod->lm_t_axis, rotation_matrix[0][1], rotation_matrix[1][1], rotation_matrix[2][1]);
@@ -2610,40 +2619,6 @@ return;
 }
 
 
-void CM_TerrainDrawIntersecting (vec3_t start, vec3_t dir, void (*do_draw) (const vec_t *verts[3], const vec3_t normal, qboolean does_intersect))
-{
-	int i, j, x, y, z;
-	
-	for (i = 0; i < numterrainmodels; i++)
-	{
-		cterrainmodel_t *mod = &terrain_models[i];
-		
-		for (x = 0; x < mod->numgrid[0]; x++)
-		{
-			for (y = 0; y < mod->numgrid[1]; y++)
-			{
-				for (z = 0; z < mod->numgrid[2]; z++)
-				{
-					float tmp;
-					cterraingrid_t *grid = &mod->grids[z*mod->numgrid[0]*mod->numgrid[1]+y*mod->numgrid[0]+x];
-					
-					if (!RayIntersectsBBox (start, dir, grid->mins, grid->maxs, &tmp))
-						continue;
-					
-					for (j = 0; j < grid->numtris; j++)
-					{
-						qboolean does_intersect;
-					
-						does_intersect = RayIntersectsTriangle (start, dir, grid->tris[j]->verts[0], grid->tris[j]->verts[1], grid->tris[j]->verts[2], &tmp);
-						
-						do_draw ((const vec_t **)grid->tris[j]->verts, grid->tris[j]->planes.mainplane.normal, does_intersect);
-					}
-				}
-			}
-		}
-	}
-}
-
 static qboolean bbox_in_trace (const vec3_t box_mins, const vec3_t box_maxs, const vec3_t p1, const vec3_t p2, const vec3_t trace_mins, const vec3_t trace_maxs)
 {
 	vec3_t offset_maxs, offset_mins;
@@ -3492,4 +3467,70 @@ qboolean CM_inPHS (vec3_t p1, vec3_t p2)
 		return false;		// a door blocks hearing
 
 	return true;
+}
+
+/*
+=================
+Functions related to exporting collision geometry to other parts of the code,
+for example the ragdoll physics. Currently just does terrain meshes, but someday
+we could unify BSP geometry into this system as well. Then the ragdoll code
+would be able to ignore the difference between terrain and BSP geometry.
+=================
+*/
+
+int CM_NumVertices (void)
+{
+	cterrainmodel_t *mod;
+	if (numterrainmodels == 0)
+		return 0;
+	
+	mod = &terrain_models[numterrainmodels - 1];
+	return mod->firstvertex + mod->numvertices;
+}
+
+int CM_NumTriangles (void)
+{
+	cterrainmodel_t *mod;
+	if (numterrainmodels == 0)
+		return 0;
+	
+	mod = &terrain_models[numterrainmodels - 1];
+	return mod->firsttriangle + mod->numtriangles;
+}
+
+void CM_GetVertex (int num, vec3_t out)
+{
+	int i;
+	
+	for (i = 0; i < numterrainmodels; i++)
+	{
+		int num_adjusted;
+		cterrainmodel_t *mod = &terrain_models[i];
+		
+		num_adjusted = num - mod->firstvertex;
+		if (num_adjusted >= 0 && num_adjusted < mod->numvertices)
+		{
+			VectorCopy (&mod->verts[3*num_adjusted], out);
+			return;
+		}
+	}
+}
+
+void CM_GetTriangle (int num, int out[3])
+{
+	int i, j;
+	
+	for (i = 0; i < numterrainmodels; i++)
+	{
+		int num_adjusted;
+		cterrainmodel_t *mod = &terrain_models[i];
+		
+		num_adjusted = num - mod->firsttriangle;
+		if (num_adjusted >= 0 && num_adjusted < mod->numtriangles)
+		{
+			for (j = 0; j < 3; j++)
+				out[j] = (mod->tris[num_adjusted].verts[j] - mod->verts) / 3 + mod->firstvertex;
+			return;
+		}
+	}
 }

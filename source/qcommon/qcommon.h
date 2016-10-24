@@ -735,6 +735,11 @@ qboolean 	CM_inPHS (vec3_t p1, vec3_t p2);
 
 extern char map_name[MAX_QPATH];
 
+int			CM_NumVertices (void);
+int			CM_NumTriangles (void);
+void		CM_GetVertex (int num, vec3_t out);
+void		CM_GetTriangle (int num, int out[3]);
+
 /*
 ==============================================================
 
