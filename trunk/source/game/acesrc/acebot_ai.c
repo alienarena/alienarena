@@ -303,7 +303,7 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		for(i = 0; i < game.maxclients; i++)
 		{
 			ent = g_edicts + i + 1;
-			if(ent == self || !ent->inuse || (ent->client->invis_framenum > level.framenum))
+			if(ent == self || !ent->inuse || (ent->client->invis_expiretime > level.time))
 				continue;
 
 			node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY,NODE_ALL);
@@ -400,7 +400,7 @@ qboolean ACEIT_IsVisibleSolid(edict_t *self, edict_t *other)
 	trace_t tr;
 
 	if(other->client) {
-		if(other->client->invis_framenum > level.framenum)
+		if(other->client->invis_expiretime > level.time)
 			return false;
 	}
 
@@ -448,7 +448,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 		}
 	    if (strcmp(target->classname, "player") == 0) //so players can't sneak RIGHT up on a bot
 		{
-			if(!target->deadflag && !OnSameTeam(self, target) && !(target->client->invis_framenum > level.framenum))
+			if(!target->deadflag && !OnSameTeam(self, target) && !(target->client->invis_expiretime > level.time))
 			{
 				self->movetarget = target;
 			}

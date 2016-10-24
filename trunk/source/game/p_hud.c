@@ -869,10 +869,10 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_sproing");
 		ent->client->ps.stats[STAT_TIMER] = ent->client->sproing_expiretime - level.time;
 	}
-	else if (ent->client->invis_framenum > level.framenum)
+	else if (ent->client->invis_expiretime > level.time)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_invis");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->invis_framenum - level.framenum)/10;
+		ent->client->ps.stats[STAT_TIMER] = ent->client->invis_expiretime - level.time;
 	}
 	else if (ent->client->resp.powered)
 	{
