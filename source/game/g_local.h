@@ -1367,7 +1367,7 @@ struct gclient_s
 	float		haste_expiretime;
 	float		sproing_expiretime;
 	float		next_regen_time;
-	float		invis_framenum;
+	float		invis_expiretime;
 
 	float		losehealth_framenum;
 

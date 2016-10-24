@@ -458,7 +458,7 @@ void SV_CalcBlend (edict_t *ent)
 {
 	int		contents;
 	vec3_t	vieworg;
-	int		remaining;
+	float	remaining;
 
 	ent->client->ps.blend[0] = ent->client->ps.blend[1] =
 		ent->client->ps.blend[2] = ent->client->ps.blend[3] = 0;
@@ -517,7 +517,7 @@ void SV_CalcBlend (edict_t *ent)
 	}
 	else if (ent->client->doubledamage_expiretime > level.time)
 	{
-		float remaining = ent->client->doubledamage_expiretime - level.time;
+		remaining = ent->client->doubledamage_expiretime - level.time;
 		if (remaining == 3.0f) // beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage2.wav"), 1, ATTN_NORM, 0);
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
@@ -525,7 +525,7 @@ void SV_CalcBlend (edict_t *ent)
 	}
 	else if (ent->client->alienforce_expiretime > level.time || ent->client->spawnprotected)
 	{
-		float remaining = ent->client->alienforce_expiretime - level.time;
+		remaining = ent->client->alienforce_expiretime - level.time;
 		if (remaining == 3.0f)	// beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
@@ -533,7 +533,7 @@ void SV_CalcBlend (edict_t *ent)
 	}
 	else if (ent->client->haste_expiretime > level.time)
 	{
-		float remaining = ent->client->haste_expiretime - level.time;
+		remaining = ent->client->haste_expiretime - level.time;
 		if (remaining == 3.0f)	// beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/hasteout.wav"), 1, ATTN_NORM, 0);
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
@@ -541,20 +541,20 @@ void SV_CalcBlend (edict_t *ent)
 	}
 	else if (ent->client->sproing_expiretime > level.time)
 	{
-		float remaining = ent->client->sproing_expiretime - level.time;
+		remaining = ent->client->sproing_expiretime - level.time;
 		if (remaining == 3.0f)	// beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/sproingout.wav"), 1, ATTN_NORM, 0);
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
 	}
-	else if (ent->client->invis_framenum > level.framenum)
+	else if (ent->client->invis_expiretime > level.time)
 	{
-		remaining = ent->client->invis_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
+		remaining = ent->client->invis_expiretime - level.time;
+		if (remaining == 3.0f)	// beginning to fade
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
+		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
-		if (remaining == 1) { //put weapon model back
+		if (remaining == 1.0f) { //put weapon model back
 			ResetWeaponModel(ent);
 		}
 	}
@@ -878,7 +878,7 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.effects |= EF_BUBBLES;
 
 	//invisibility
-	if(ent->client->invis_framenum > level.framenum) {
+	if(ent->client->invis_expiretime > level.time) {
 		ent->s.renderfx |= RF_TRANSLUCENT;
 		ent->s.modelindex2 = 0;
 	}
