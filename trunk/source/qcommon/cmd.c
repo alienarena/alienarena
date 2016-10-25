@@ -1208,6 +1208,7 @@ void Cmd_Init (void)
 	Cmd_AddCommand ("echo",Cmd_Echo_f);
 	Cmd_AddCommand ("alias",Cmd_Alias_f);
 	Cmd_AddCommand ("unalias",Cmd_Unalias_f);
+	Cmd_SetCompleter ("unalias", Cmd_CompleteCommand, Cmd_IsComplete, COMPLETION_ALIASES);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 	Cmd_AddCommand ("hang", Cmd_SimulateHang_f);
 }
