@@ -466,6 +466,11 @@ void	Cmd_SetCompleter (char *cmd_name, xcompleter_t completer, xcompletionchecke
 #define COMPLETION_COMMANDS	4
 #define COMPLETION_ALL		(~0)
 
+// For extended completion capabilities: use this for the actual substitution
+// of the completion.
+char *Cmd_MakeCompletedCommand (int argnum, const char *new_tok);
+char *Cmd_CompleteWithInexactMatch (int argnum, int nmatch, char **matches);
+
 // The following two functions require that Cmd_TokenizeString be called first
 // on the partial command. They each take an argnum indicating which token
 // should be checked first. User code should always start with 0.
