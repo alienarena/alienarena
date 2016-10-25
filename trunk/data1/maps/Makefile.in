@@ -704,6 +704,9 @@ nobase_dist_maps_DATA = \
 	meshes/tech/drarch_fx.tga \
 	meshes/tech/drarch_normal.jpg \
 	meshes/tech/glasstube.md2 \
+	meshes/tech/martian_dead.iqm \
+	meshes/tech/martian_dead.md2 \
+	meshes/tech/martian_dead.skin \
 	meshes/tech/obarch1.jpg \
 	meshes/tech/obarch1.md2 \
 	meshes/tech/obarch1_b.jpg \
@@ -945,6 +948,8 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.jpg \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
+	scripts/ctf-cryogenic2k16.fog \
+	scripts/ctf-cryogenic2k16.mus \
 	scripts/ctf-extermination2k15.fog \
 	scripts/ctf-extermination2k15.mus \
 	scripts/ctf-frost2k15.fog \
