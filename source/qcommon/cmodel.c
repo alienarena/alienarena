@@ -1557,7 +1557,7 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 
 cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 	char        *buf;
-	char        *buf_bak;
+	const char	*line;
 	int		    length;
 	cmodel_t    *tmp;
 
@@ -1577,28 +1577,25 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 			return CM_LoadBSP (va("%s.bsp", name), clientload, checksum);
 	}
 
-	//since buf will be repeatedly modified, we keep a backup pointer
-	buf_bak = buf;
-
 	// get the name of the BSP and entdef files
 	// if we ever add more map data files, be sure to add them here
-	buf = strtok (buf, ";");
-	while (buf) {
-		token = COM_Parse (&buf);
-		if (!buf && !(buf = strtok (NULL, ";")))
+	line = strtok (buf, ";");
+	while (line) {
+		token = COM_Parse (&line);
+		if (!line && !(line = strtok (NULL, ";")))
 			break;
 
 		if (!Q_strcasecmp (token, "bsp")){
 			if (bsp_file)
 				Z_Free (bsp_file);
-			bsp_file = CopyString (COM_Parse (&buf));
-			if (!buf)
+			bsp_file = CopyString (COM_Parse (&line));
+			if (!line)
 				Com_Error (ERR_DROP, "CM_LoadMap: EOL when expecting BSP filename! (File %s is invalid)", name);
 		} else if (!Q_strcasecmp (token, "entdef")){
 			if (ent_file)
 				Z_Free (ent_file);
-			ent_file = CopyString (COM_Parse (&buf));
-			if (!buf)
+			ent_file = CopyString (COM_Parse (&line));
+			if (!line)
 				Com_Error (ERR_DROP, "CM_LoadMap: EOL when expecting entdef filename! (File %s is invalid)", name);
 		}
 
@@ -1607,10 +1604,10 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 		//arguments supplied to it, then this is probably supported in a newer
 		//newer version of CRX. But the best we can do is just fast-forward
 		//through it.
-		buf = strtok (NULL, ";");
+		line = strtok (NULL, ";");
 	}
 
-	FS_FreeFile (buf_bak);
+	FS_FreeFile (buf);
 
 	if (!bsp_file)
 		Com_Error (ERR_DROP, "CM_LoadMap: BSP file not defined! (File %s is invalid)", name);

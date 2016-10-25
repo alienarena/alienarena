@@ -213,7 +213,7 @@ void R_ReadFogScript( char *config_file )
 	int length;
 	char a_string[128];
 	char *buffer;
-	char *s;
+	const char *s;
 	size_t result;	
 
 	if((fp = fopen(config_file, "rb" )) == NULL)
@@ -288,7 +288,7 @@ void R_ReadMusicScript( char *config_file )
 	FILE *fp;
 	int length;
 	char *buffer;
-	char *s;
+	const char *s;
 	size_t result;
 
 	if((fp = fopen(config_file, "rb" )) == NULL)

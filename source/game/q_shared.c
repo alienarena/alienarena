@@ -739,11 +739,11 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *COM_Parse (char **data_p)
+char *COM_Parse (const char **data_p)
 {
 	int		c;
 	int		len;
-	char	*data;
+	const char	*data;
 
 	data = *data_p;
 	len = 0;

@@ -199,7 +199,7 @@ cvar_t  *sv_custombots;
 cvar_t	*g_antilagdebug;
 cvar_t	*g_antilagprojectiles;
 
-void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
+void SpawnEntities (char *mapname, const char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
 qboolean ClientConnect (edict_t *ent, char *userinfo);
 void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom);
@@ -529,6 +529,7 @@ void EndDMLevel (void)
 {
 	edict_t		*ent;
 	char *s, *t, *f;
+	const char *buf_cursor;
 	static const char *seps = " ,\n\r";
 	char *buffer;
 	char  mapsname[MAX_OSPATH];
@@ -715,12 +716,12 @@ void EndDMLevel (void)
 	szr = fread( buffer, length, 1, fp );
 	buffer[length] = 0;
 
-	s = buffer;
+	buf_cursor = buffer;
 
 	i = 0;
 	while ( i < length )
 	{
-		if ( s[i] == '\r' )
+		if (buf_cursor[i] == '\r')
 			nummaps++;
 		i++;
 	}
@@ -728,25 +729,25 @@ void EndDMLevel (void)
 	mapnames = malloc( sizeof( char * ) * ( nummaps + 1 ) );
 	memset( mapnames, 0, sizeof( char * ) * ( nummaps + 1 ) );
 
-	s = buffer;
+	buf_cursor = buffer;
 
 	for ( i = 0; i < nummaps; i++ )
 	{
-    char  shortname[MAX_TOKEN_CHARS];
-    char  longname[MAX_TOKEN_CHARS];
+		char  shortname[MAX_TOKEN_CHARS];
+		char  longname[MAX_TOKEN_CHARS];
 		char  scratch[200];
 #if defined WIN32_VARIANT
 		int  j;
 #endif
 		int l;
 
-		strcpy( shortname, COM_Parse( &s ) );
+		strcpy (shortname, COM_Parse (&buf_cursor));
 		l = strlen(shortname);
 #if defined WIN32_VARIANT
 		for (j=0 ; j<l ; j++)
 			shortname[j] = toupper(shortname[j]);
 #endif
-		strcpy( longname, COM_Parse( &s ) );
+		strcpy (longname, COM_Parse (&buf_cursor));
 		Com_sprintf( scratch, sizeof( scratch ), "%s", shortname );
 
 		mapnames[i] = malloc( strlen( scratch ) + 1 );

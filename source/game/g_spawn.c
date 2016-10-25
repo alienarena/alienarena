@@ -301,7 +301,7 @@ Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 ====================
 */
-char *ED_ParseEdict (char *data, edict_t *ent)
+static const char *ED_ParseEdict (const char *data, edict_t *ent)
 {
 	qboolean	init;
 	char		keyname[256];
@@ -408,7 +408,7 @@ parsing textual entity definitions out of an ent file.
 ==============
 */
 int levelnum;
-void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
+void SpawnEntities (char *mapname, const char *entities, char *spawnpoint)
 {
 	edict_t		*ent;
 	int			inhibit;
