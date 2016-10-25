@@ -942,7 +942,7 @@ void	Cmd_SetCompleter (char *cmd_name, xcompleter_t completer, xcompletionchecke
 Cmd_CompleteCommand
 ============
 */
-static char *Cmd_MakeCompletedCommand (int argnum, const char *new_tok)
+char *Cmd_MakeCompletedCommand (int argnum, const char *new_tok)
 {
 	int i;
 	static char		retval[256];
@@ -960,6 +960,43 @@ static char *Cmd_MakeCompletedCommand (int argnum, const char *new_tok)
 	return retval;
 }
 
+char *Cmd_CompleteWithInexactMatch (int argnum, int nmatches, char **matches)
+{
+	qboolean        diff = false;
+	int				i, j;
+	char			matching_portion[256];
+	
+	if (nmatches == 0)
+		return NULL;
+	
+	if (nmatches == 1)
+		return Cmd_MakeCompletedCommand (argnum, matches[0]);
+	
+	Com_Printf("\nListing matches for '%s'...\n", Cmd_Argv (argnum));
+	for (i = 0; i < nmatches; i++)
+		Com_Printf("  %s\n", matches[i]);
+
+	strcpy (matching_portion, "");
+	j = 0;
+	while (!diff && j < 256)
+	{
+		matching_portion[j] = matches[0][j];
+		for (i = 0; i < nmatches; i++)
+		{
+			if (j > strlen (matches[i]))
+				continue;
+			if (matching_portion[j] != matches[i][j])
+			{
+				matching_portion[j] = 0;
+				diff = true;
+			}
+		}
+		j++;
+	}
+	Com_Printf ("Found %i matches\n", nmatches);
+	return Cmd_MakeCompletedCommand (argnum, matching_portion);
+}
+
 char *Cmd_CompleteCommand (int argnum, int flags)
 {
 	static char		retval[256];
@@ -969,7 +1006,6 @@ char *Cmd_CompleteCommand (int argnum, int flags)
 	cmdalias_t     *a;
 	cvar_t         *cvar;
 	char           *pmatch[1024];
-	qboolean        diff = false;
 	unsigned int	hash_key;
 
 	if (argnum == 0 && Cmd_Argc () == 0)
@@ -1025,32 +1061,8 @@ char *Cmd_CompleteCommand (int argnum, int flags)
 				pmatch[i] = cvar->name;
 				i++;
 			}
-	if (i) {
-		if (i == 1)
-			return Cmd_MakeCompletedCommand (argnum, pmatch[0]);
-
-		Com_Printf("\nListing matches for '%s'...\n", partial);
-		for (o = 0; o < i; o++)
-			Com_Printf("  %s\n", pmatch[o]);
-
- 		strcpy(retval, "");
-		p = 0;
-		while (!diff && p < 256) {
-			retval[p] = pmatch[0][p];
-			for (o = 0; o < i; o++) {
-				if (p > strlen(pmatch[o]))
-					continue;
-				if (retval[p] != pmatch[o][p]) {
-					retval[p] = 0;
-					diff = true;
-				}
-			}
-			p++;
-		}
-		Com_Printf("Found %i matches\n", i);
-		return Cmd_MakeCompletedCommand (argnum, retval);
-	}
-	return NULL;
+	
+	return Cmd_CompleteWithInexactMatch (argnum, i, pmatch);
 }
 
 qboolean Cmd_IsComplete (int argnum, int flags)
