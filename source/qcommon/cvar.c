@@ -849,7 +849,9 @@ Reads in all archived cvars
 void Cvar_Init (void)
 {
 	Cmd_AddCommand ("set", Cvar_Set_f);
+	Cmd_SetCompleter ("set", Cmd_CompleteCommand, Cmd_IsComplete, COMPLETION_CVARS);
 	Cmd_AddCommand ("cvarlist", Cvar_List_f);
 	Cmd_AddCommand ("help", Cvar_Help_f);
+	Cmd_SetCompleter ("help", Cmd_CompleteCommand, Cmd_IsComplete, COMPLETION_CVARS);
 
 }
