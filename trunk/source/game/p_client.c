@@ -1745,7 +1745,7 @@ void ParseClassFile( char *config_file, edict_t *ent )
 	int length;
 	char a_string[128];
 	char *buffer;
-	char *s;
+	const char *s;
 	size_t result;	
 
 	if ( gi.FullPath( full_path, sizeof(full_path), config_file ) )

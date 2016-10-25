@@ -1197,7 +1197,7 @@ SCR_ExecuteLayoutString
 
 ================
 */
-void SCR_ExecuteLayoutString (char *s)
+static void SCR_ExecuteLayoutString (const char *s)
 {
 	FNT_font_t		font;
 	struct FNT_window_s	box;

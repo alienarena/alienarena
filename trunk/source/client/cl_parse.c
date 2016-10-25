@@ -665,7 +665,7 @@ void CL_ParseClientinfo (int player)
 	CL_LoadClientinfo (ci, s);
 }
 
-void CL_ParseTaunt( char *s)
+static void CL_ParseTaunt (const char *s)
 {
 	int l, j;
 	char tauntsound[MAX_OSPATH];

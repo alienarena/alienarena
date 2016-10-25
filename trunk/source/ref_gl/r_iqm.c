@@ -76,7 +76,7 @@ static qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 	FILE *fp;
 	int length;
 	char *buffer;
-	char *s;
+	const char *s;
 
 	if((fp = fopen(skin_file, "rb" )) == NULL)
 	{
@@ -95,7 +95,7 @@ static qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 	}
 	s = buffer;
 
-	strcpy( skinpath, COM_Parse( &s ) );
+	strcpy (skinpath, COM_Parse (&s));
 	skinpath[length] = 0; //clear any possible garbage
 
 	if ( fp != 0 )
@@ -115,7 +115,7 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 	FILE *fp;
 	int length;
 	char *buffer;
-	char *s;
+	const char *s;
 	int result;
 	char a_string[128];
 	int i;
@@ -139,10 +139,10 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 
 				for(i = 0; i < RAGDOLL_DIMS; i++)
 				{
-					strcpy( a_string, COM_Parse( &s ) );
+					strcpy (a_string, COM_Parse (&s));
 					mod->ragdoll.RagDollDims[i] = atof(a_string);
 				}
-				strcpy( a_string, COM_Parse( &s ) );
+				strcpy (a_string, COM_Parse (&s));
 				mod->ragdoll.hasHelmet = atoi(a_string);
 			}
 			else
@@ -179,7 +179,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	char skinname[MAX_QPATH], shortname[MAX_QPATH], fullname[MAX_OSPATH];
 	char *pskinpath_buffer;
 	int skinpath_buffer_length;
-	char *parse_string;
+	const char *parse_string;
 	int remaining_varray_types;
 	float min = 0, max = 0;
 
@@ -543,7 +543,7 @@ do { \
 
 		// get relative image pathname for model's skin from .skin file data
 		parse_string = pskinpath_buffer;
-		strcpy( skinname, COM_Parse( &parse_string ) );
+		strcpy (skinname, COM_Parse (&parse_string));
 		Z_Free( pskinpath_buffer ); // free Z_Malloc'd read buffer
 
 		// get image file for skin

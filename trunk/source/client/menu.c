@@ -5104,6 +5104,7 @@ static void RulesChangeFunc (UNUSED void *self) //this has been expanded to rebu
 	char *buffer;
 	char  mapsname[1024];
 	char *s;
+	const char *buf_cursor;
 	int length;
 	int i, k;
 	FILE *fp;
@@ -5166,13 +5167,13 @@ static void RulesChangeFunc (UNUSED void *self) //this has been expanded to rebu
 	bspnames = malloc( sizeof( char * ) * ( MAX_MAPS + 2 ) );  //was + 1, but caused memory errors
 	memset( bspnames, 0, sizeof( char * ) * ( MAX_MAPS + 2 ) );
 
-	s = buffer;
+	buf_cursor = buffer;
 
 	k = 0;
 	for ( i = 0; i < nummaps; i++ )
 	{
 
-		strcpy( shortname, COM_Parse( &s ) );
+		strcpy( shortname, COM_Parse( &buf_cursor ) );
 		l = strlen(shortname);
 #if defined WIN32_VARIANT
 		for (j=0 ; j<l ; j++)
@@ -5182,7 +5183,7 @@ static void RulesChangeFunc (UNUSED void *self) //this has been expanded to rebu
 		bspnames[i] = malloc( strlen( shortname ) + 1 );
 		strcpy(bspnames[i], shortname);
 
-		strcpy( longname, COM_Parse( &s ) );
+		strcpy( longname, COM_Parse( &buf_cursor ) );
 		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", longname, shortname );
 		
 		// Each game mode has one or more map name prefixes. For example, if

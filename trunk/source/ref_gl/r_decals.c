@@ -572,20 +572,21 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	char	*token;
 	qboolean maxborder;
 	char *buf = (char *)_buf;
+	const char *line;
 	decalorientation_t pos;
 	
-	buf = strtok (buf, ";");
-	while (buf)
+	line = strtok (buf, ";");
+	while (line)
 	{
-		token = COM_Parse (&buf);
-		if (!buf && !(buf = strtok (NULL, ";")))
+		token = COM_Parse (&line);
+		if (!line && !(line = strtok (NULL, ";")))
 			break;
 
 #define FILENAME_ATTR(cmd_name,out) \
 		if (!Q_strcasecmp (token, cmd_name)) \
 		{ \
-			out = CopyString (COM_Parse (&buf)); \
-			if (!buf) \
+			out = CopyString (COM_Parse (&line)); \
+			if (!line) \
 				Com_Error (ERR_DROP, "Mod_LoadDecalFile: EOL when expecting " cmd_name " filename! (File %s is invalid)", mod->name); \
 		} 
 		
@@ -597,8 +598,8 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		{
 			for (i = 0; i < 3; i++)
 			{
-				mod->mins[i] = atof (COM_Parse (&buf));
-				if (!buf)
+				mod->mins[i] = atof (COM_Parse (&line));
+				if (!line)
 					Com_Error (ERR_DROP, "Mod_LoadDecalFile: EOL when expecting mins %c axis! (File %s is invalid)", "xyz"[i], mod->name);
 			}
 		}
@@ -606,8 +607,8 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		{
 			for (i = 0; i < 3; i++)
 			{
-				mod->maxs[i] = atof (COM_Parse (&buf));
-				if (!buf)
+				mod->maxs[i] = atof (COM_Parse (&line));
+				if (!line)
 					Com_Error (ERR_DROP, "Mod_LoadDecalFile: EOL when expecting maxs %c axis! (File %s is invalid)", "xyz"[i], mod->name);
 			}
 		}
@@ -617,7 +618,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		//arguments supplied to it, then this is probably supported in a newer
 		//newer version of CRX. But the best we can do is just fast-forward
 		//through it.
-		buf = strtok (NULL, ";");
+		line = strtok (NULL, ";");
 	}
 
 	/*

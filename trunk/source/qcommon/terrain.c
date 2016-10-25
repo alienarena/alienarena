@@ -141,24 +141,25 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	mesh_t	mesh;
 #endif
 	vec3_t	scale;
+	const char *line;
 	char	*token;
 	byte	*texdata;
 	int		start_time;
 	
 	memset (out, 0, sizeof(*out));
 	
-	buf = strtok (buf, ";");
-	while (buf)
+	line = strtok (buf, ";");
+	while (line)
 	{
-		token = COM_Parse (&buf);
-		if (!buf && !(buf = strtok (NULL, ";")))
+		token = COM_Parse (&line);
+		if (!line && !(line = strtok (NULL, ";")))
 			break;
 
 #define FILENAME_ATTR(cmd_name,out) \
 		if (!Q_strcasecmp (token, cmd_name)) \
 		{ \
-			out = CopyString (COM_Parse (&buf)); \
-			if (!buf) \
+			out = CopyString (COM_Parse (&line)); \
+			if (!line) \
 				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting " cmd_name " filename! (File %s is invalid)", name); \
 		} 
 		
@@ -174,8 +175,8 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 		{
 			for (i = 0; i < 3; i++)
 			{
-				out->mins[i] = atof (COM_Parse (&buf));
-				if (!buf)
+				out->mins[i] = atof (COM_Parse (&line));
+				if (!line)
 					Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting mins %c axis! (File %s is invalid)", "xyz"[i], name);
 			}
 		}
@@ -183,8 +184,8 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 		{
 			for (i = 0; i < 3; i++)
 			{
-				out->maxs[i] = atof (COM_Parse (&buf));
-				if (!buf)
+				out->maxs[i] = atof (COM_Parse (&line));
+				if (!line)
 					Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting maxs %c axis! (File %s is invalid)", "xyz"[i], name);
 			}
 		}
@@ -194,7 +195,7 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 		//arguments supplied to it, then this is probably supported in a newer
 		//newer version of CRX. But the best we can do is just fast-forward
 		//through it.
-		buf = strtok (NULL, ";");
+		line = strtok (NULL, ";");
 	}
 	
 	if (!out->hmtex_path)

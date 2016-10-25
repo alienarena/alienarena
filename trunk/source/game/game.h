@@ -215,7 +215,7 @@ typedef struct
 	void		(*Shutdown) (void);
 
 	// each new level entered will cause a call to SpawnEntities
-	void		(*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
+	void		(*SpawnEntities) (char *mapname, const char *entstring, char *spawnpoint);
 
 	qboolean	(*ClientConnect)( edict_t *ent, char *userinfo);
 	
