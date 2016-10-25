@@ -1,3 +1,21 @@
+textures/desert/arrow2
+{
+	{
+		map textures/desert/arrow2_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 9 0.0 1.0
+		nolightmap
+	}
+}
+textures/desert/arrow3
+{
+	{
+		map textures/desert/arrow3_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 9 0.0 1.0
+		nolightmap
+	}
+}
 textures/arena5/light1
 {
 	{
