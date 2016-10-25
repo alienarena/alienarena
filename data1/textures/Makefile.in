@@ -1176,6 +1176,9 @@ nobase_dist_textures_DATA = \
 	blood/blood_splatter3.tga \
 	blood/blood_splatter4.tga \
 	blood/slime_splatter1.tga \
+	blood/slime_splatter2.tga \
+	blood/slime_splatter2_hm.tga \
+	blood/slime_splatter2_nm.tga \
 	common/0_clip.tga \
 	common/0_hint.tga \
 	common/0_sky1.tga \
