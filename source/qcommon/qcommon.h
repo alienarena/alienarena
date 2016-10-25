@@ -439,6 +439,8 @@ then searches for a command or variable that matches the first token.
 */
 
 typedef void (*xcommand_t) (void);
+typedef qboolean (*xcompletionchecker_t) (int argnum, int data);
+typedef char *(*xcompleter_t) (int argnum, int data);
 
 void	Cmd_Init (void);
 
@@ -453,9 +455,26 @@ void	Cmd_RemoveCommand (char *cmd_name);
 // used by the cvar code to check for cvar / command name overlap
 qboolean Cmd_Exists (char *cmd_name);
 
+// For extended completion capabilities: add the optional argument completer
+// callbacks.
+void	Cmd_SetCompleter (char *cmd_name, xcompleter_t completer, xcompletionchecker_t checker, int data);
+
+// For extended completion capabilities: what kind of token is valid to be typed
+// next.
+#define COMPLETION_CVARS	1
+#define COMPLETION_ALIASES	2
+#define COMPLETION_COMMANDS	4
+#define COMPLETION_ALL		(~0)
+
+// The following two functions require that Cmd_TokenizeString be called first
+// on the partial command. They each take an argnum indicating which token
+// should be checked first. User code should always start with 0.
+
 // attempts to match a partial command for automatic command line completion
 // returns NULL if nothing fits
-char 	*Cmd_CompleteCommand (char *partial);
+char 	*Cmd_CompleteCommand (int argnum, int flags);
+// returns true if the command, as it stands now, is valid.
+qboolean Cmd_IsComplete (int argnum, int flags);
 
 // The functions that execute commands get their parameters with these
 // functions. Cmd_Argv () will return an empty string, not a NULL

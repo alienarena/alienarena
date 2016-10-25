@@ -594,8 +594,11 @@ typedef struct cmd_function_s
 {
 	struct cmd_function_s		*next;
 	unsigned int			hash_key;
-	char				*name;
-	xcommand_t			function;
+	char					*name;
+	xcommand_t				function;
+	xcompleter_t			completer;
+	xcompletionchecker_t	checker;
+	int						completion_data;
 } cmd_function_t;
 
 
@@ -848,6 +851,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	ncmd->name = cmd_name;
 	ncmd->hash_key = hash_key;
 	ncmd->function = function;
+	ncmd->completer = NULL;
 	ncmd->next = cmd;
 	*prev = ncmd;
 }
@@ -894,8 +898,8 @@ qboolean	Cmd_Exists (char *cmd_name)
 	cmd_function_t	*cmd;
 	unsigned int i, hash_key;
 
-// compute the hash key for the command name
-	COMPUTE_HASH_KEY( hash_key, cmd_name , i );
+	// compute the hash key for the command name
+	COMPUTE_HASH_KEY (hash_key, cmd_name, i);
 
 	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key; cmd=cmd->next)
 	{
@@ -906,6 +910,31 @@ qboolean	Cmd_Exists (char *cmd_name)
 	return false;
 }
 
+/*
+============
+Cmd_SetCompleter
+============
+*/
+void	Cmd_SetCompleter (char *cmd_name, xcompleter_t completer, xcompletionchecker_t checker, int data)
+{
+	cmd_function_t	*cmd;
+	unsigned int i, hash_key;
+
+	// compute the hash key for the command name
+	COMPUTE_HASH_KEY (hash_key, cmd_name, i);
+
+	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key; cmd=cmd->next)
+	{
+		if (cmd->hash_key == hash_key && !Q_strcasecmp (cmd_name,cmd->name))
+		{
+			cmd->completer = completer;
+			cmd->checker = checker;
+			cmd->completion_data = data;
+			return;
+		}
+	}
+}
+
 
 
 /*
@@ -913,9 +942,28 @@ qboolean	Cmd_Exists (char *cmd_name)
 Cmd_CompleteCommand
 ============
 */
-char	retval[256];
-char *Cmd_CompleteCommand (char *partial)
+static char *Cmd_MakeCompletedCommand (int argnum, const char *new_tok)
 {
+	int i;
+	static char		retval[256];
+	
+	retval[0] = '\0';
+	
+	for (i = 0; i < Cmd_Argc (); i++)
+	{
+		const char *txt = (i == argnum) ? new_tok : Cmd_Argv (i);
+		strncat (retval, txt, sizeof (retval) - strlen (retval) - 1);
+		if (i + 1 < Cmd_Argc ())
+			strncat (retval, " ", sizeof (retval) - strlen (retval) - 1);
+	}
+	
+	return retval;
+}
+
+char *Cmd_CompleteCommand (int argnum, int flags)
+{
+	static char		retval[256];
+	char			*partial;
 	cmd_function_t *cmd;
 	int             len, i, o, p;
 	cmdalias_t     *a;
@@ -924,24 +972,34 @@ char *Cmd_CompleteCommand (char *partial)
 	qboolean        diff = false;
 	unsigned int	hash_key;
 
-	len = strlen(partial);
-	if (!len)
+	if (argnum == 0 && Cmd_Argc () == 0)
 		return NULL;
+	if (Cmd_Argc () <= argnum)
+		return Cmd_MakeCompletedCommand (argnum, NULL);
+	partial = Cmd_Argv (argnum);
+	len = strlen(partial);
 
-        /* check for exact match */
-	COMPUTE_HASH_KEY( hash_key , partial , i );
+    /* check for exact match */
+	COMPUTE_HASH_KEY (hash_key, partial, i);
 
-	for (cmd = cmd_functions; cmd && cmd->hash_key <= hash_key; cmd = cmd->next)
-		if (hash_key == cmd->hash_key && !Q_strcasecmp(partial, cmd->name))
-			return cmd->name;
+	if (flags & COMPLETION_COMMANDS)
+		for (cmd = cmd_functions; cmd && cmd->hash_key <= hash_key; cmd = cmd->next)
+			if (hash_key == cmd->hash_key && !Q_strcasecmp(partial, cmd->name))
+			{
+				if (argnum == 0 && cmd->completer != NULL)
+					return cmd->completer (1, cmd->completion_data); 
+				return Cmd_MakeCompletedCommand (argnum, cmd->name);
+			}
 
-	for (a = cmd_alias; a && a->hash_key <= hash_key; a = a->next)
-		if (hash_key == a->hash_key && !Q_strcasecmp(partial, a->name))
-			return a->name;
+	if (flags & COMPLETION_ALIASES)
+		for (a = cmd_alias; a && a->hash_key <= hash_key; a = a->next)
+			if (hash_key == a->hash_key && !Q_strcasecmp(partial, a->name))
+				return Cmd_MakeCompletedCommand (argnum, a->name);
 
-	for (cvar = cvar_vars; cvar && cvar->hash_key <= hash_key; cvar = cvar->next)
-		if (hash_key == cvar->hash_key && !Q_strcasecmp(partial, cvar->name))
-			return cvar->name;
+	if (flags & COMPLETION_CVARS)
+		for (cvar = cvar_vars; cvar && cvar->hash_key <= hash_key; cvar = cvar->next)
+			if (hash_key == cvar->hash_key && !Q_strcasecmp(partial, cvar->name))
+				return Cmd_MakeCompletedCommand (argnum, cvar->name);
 
 	// clear matches
 	for (i = 0; i < 1024; i++)
@@ -949,24 +1007,27 @@ char *Cmd_CompleteCommand (char *partial)
 	i = 0;
 
 	/* check for partial match */
-	for (cmd = cmd_functions; cmd; cmd = cmd->next)
-		if (!Q_strncasecmp(partial, cmd->name, len)) {
-			pmatch[i] = cmd->name;
-			i++;
-		}
-	for (a = cmd_alias; a; a = a->next)
-		if (!Q_strncasecmp(partial, a->name, len)) {
-			pmatch[i] = a->name;
-			i++;
-		}
-	for (cvar = cvar_vars; cvar; cvar = cvar->next)
-		if (!Q_strncasecmp(partial, cvar->name, len)) {
-			pmatch[i] = cvar->name;
-			i++;
-		}
+	if (flags & COMPLETION_COMMANDS)
+		for (cmd = cmd_functions; cmd; cmd = cmd->next)
+			if (!Q_strncasecmp(partial, cmd->name, len)) {
+				pmatch[i] = cmd->name;
+				i++;
+			}
+	if (flags & COMPLETION_ALIASES)
+		for (a = cmd_alias; a; a = a->next)
+			if (!Q_strncasecmp(partial, a->name, len)) {
+				pmatch[i] = a->name;
+				i++;
+			}
+	if (flags & COMPLETION_CVARS)
+		for (cvar = cvar_vars; cvar; cvar = cvar->next)
+			if (!Q_strncasecmp(partial, cvar->name, len)) {
+				pmatch[i] = cvar->name;
+				i++;
+			}
 	if (i) {
 		if (i == 1)
-			return pmatch[0];
+			return Cmd_MakeCompletedCommand (argnum, pmatch[0]);
 
 		Com_Printf("\nListing matches for '%s'...\n", partial);
 		for (o = 0; o < i; o++)
@@ -987,32 +1048,49 @@ char *Cmd_CompleteCommand (char *partial)
 			p++;
 		}
 		Com_Printf("Found %i matches\n", i);
-		return retval;
+		return Cmd_MakeCompletedCommand (argnum, retval);
 	}
 	return NULL;
 }
 
-qboolean Cmd_IsComplete(char *command)
+qboolean Cmd_IsComplete (int argnum, int flags)
 {
+	char *command;
 	cmd_function_t *cmd;
 	cmdalias_t     *a;
 	cvar_t         *cvar;
 	unsigned int	hash_key, i;
-
+	
+	if (Cmd_Argc () <= argnum)
+		return argnum > 0;
+	command = Cmd_Argv (argnum);
+	
 	/* check for exact match */
-	COMPUTE_HASH_KEY( hash_key , command , i );
+	COMPUTE_HASH_KEY (hash_key, command, i);
 
-	for (cmd = cmd_functions; cmd && cmd->hash_key <= hash_key; cmd = cmd->next)
-		if (hash_key == cmd->hash_key && !Q_strcasecmp(command, cmd->name))
-			return true;
+	if (flags & COMPLETION_COMMANDS)
+		for (cmd = cmd_functions; cmd && cmd->hash_key <= hash_key; cmd = cmd->next)
+			if (hash_key == cmd->hash_key && !Q_strcasecmp(command, cmd->name))
+			{
+				if (argnum == 0 && cmd->checker != NULL)
+					return cmd->checker (1, cmd->completion_data);
+				return Cmd_Argc () - 1 == argnum;
+			}
 
-	for (a = cmd_alias; a && a->hash_key <= hash_key; a = a->next)
-		if (hash_key == a->hash_key && !Q_strcasecmp(command, a->name))
-			return true;
+	// Never attempt to complete multi-token commands starting with aliases or
+	// cvars.
+	if (Cmd_Argc () > argnum + 1)
+		return false;
 
-	for (cvar = cvar_vars; cvar && cvar->hash_key <= hash_key; cvar = cvar->next)
-		if (hash_key == cvar->hash_key && !Q_strcasecmp(command, cvar->name))
-			return true;
+	if (flags & COMPLETION_ALIASES)
+		for (a = cmd_alias; a && a->hash_key <= hash_key; a = a->next)
+			if (hash_key == a->hash_key && !Q_strcasecmp(command, a->name))
+				return true;
+
+	if (flags & COMPLETION_CVARS)
+		for (cvar = cvar_vars; cvar && cvar->hash_key <= hash_key; cvar = cvar->next)
+			if (hash_key == cvar->hash_key && !Q_strcasecmp(command, cvar->name))
+				return true;
 
 	return false;
 }

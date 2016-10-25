@@ -177,31 +177,36 @@ void Key_ClearTyping (void)
 	key_linelen = key_linepos = 1;
 }
 
-qboolean        Cmd_IsComplete(char *cmd);
 extern void		Q_strncpyz( char *dest, const char *src, size_t size );
 void CompleteCommand (void)
 {
 	char           *cmd, *s;
 
-        s = key_lines[edit_line] + 1;
-        if (*s == '\\' || *s == '/')
-                s++;
+	s = key_lines[edit_line] + 1;
+	if (*s == '\\' || *s == '/')
+		s++;
 
-        cmd = Cmd_CompleteCommand(s);
-        if (cmd) {
-                key_lines[edit_line][1] = '/';
-                Q_strncpyz(key_lines[edit_line] + 2, cmd, sizeof(key_lines[0]));
-                key_linelen = key_linepos = strlen(cmd) + 2;
-                if (Cmd_IsComplete(cmd)) {
-                        key_lines[edit_line][key_linepos] = ' ';
-                        key_linepos++;
-                        key_lines[edit_line][key_linepos] = 0;
+	Cmd_TokenizeString (s, false);
+	cmd = Cmd_CompleteCommand (0, COMPLETION_ALL);
+	if (cmd)
+	{
+		key_lines[edit_line][1] = '/';
+		Q_strncpyz (key_lines[edit_line] + 2, cmd, sizeof(key_lines[0]));
+		key_linelen = key_linepos = strlen (cmd) + 2;
+		Cmd_TokenizeString (key_lines[edit_line] + 2, false);
+		if (Cmd_IsComplete (0, COMPLETION_ALL))
+		{
+			key_lines[edit_line][key_linepos] = ' ';
+			key_linepos++;
+			key_lines[edit_line][key_linepos] = 0;
 			key_linelen++;
-                } else {
-                        key_lines[edit_line][key_linepos] = 0;
-                }
-                return;
-        }
+		}
+		else
+		{
+				key_lines[edit_line][key_linepos] = 0;
+		}
+		return;
+	}
 }
 
 /*
