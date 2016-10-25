@@ -148,6 +148,91 @@ Goes directly to a given map without any savegame archiving.
 For development work
 ==================
 */
+static char *SV_MapCommand_Completer (int argnum, int ignore)
+{
+	int		i;
+	char	*ret = NULL;
+	char	findname[MAX_QPATH];
+	char	**foundmaps, **founddemos, **matches;
+	int		nmaps = 0, ndemos = 0, nmatches;
+	
+	assert (argnum == 1);
+	
+	if (Cmd_Argc () <= argnum)
+		return Cmd_MakeCompletedCommand (argnum, NULL);
+	
+	Com_sprintf (findname, sizeof (findname), "maps/%s*.bsp", Cmd_Argv (argnum));
+	foundmaps = FS_ListFilesInFS (findname, &nmaps, 0, 0);
+	if (nmaps < 0)
+		nmaps = 0;
+	
+	Com_sprintf (findname, sizeof (findname), "demos/%s*", Cmd_Argv (argnum));
+	founddemos = FS_ListFilesInFS (findname, &ndemos, 0, 0);
+	if (ndemos < 0)
+		ndemos = 0;
+	
+	// We might filter out some of the demo results, so nmatches isn't
+	// necessarily equal to nmaps + ndemos. But we allocate that many pointers
+	// anyway.
+	matches = Z_Malloc (sizeof (char *) * (nmaps + ndemos));
+	nmatches = 0;
+	
+	if (foundmaps != NULL)
+	{
+		for (i = 0; i < nmaps; i++)
+		{
+			char *find = strrchr (foundmaps[i], '/') + 1;
+			memmove (foundmaps[i], find, strlen (find) + 1);
+			
+			COM_StripExtension (foundmaps[i], foundmaps[i]);
+			matches[nmatches++] = foundmaps[i]; 
+		}
+		
+		free (foundmaps);
+	}
+	
+	if (founddemos != NULL)
+	{
+		for (i = 0; i < ndemos; i++)
+		{
+			char *find = strrchr (founddemos[i], '/') + 1;
+			memmove (founddemos[i], find, strlen (find) + 1);
+			
+			if (COM_HasExtension (founddemos[i], ".dm2"))
+				matches[nmatches++] = founddemos[i];
+			else
+				free (founddemos[i]);
+		}
+		
+		free (founddemos);
+	}
+	
+	ret = Cmd_CompleteWithInexactMatch (argnum, nmatches, matches);
+	
+	for (i = 0; i < nmatches; i++)
+		free (matches[i]);
+	
+	Z_Free (matches);
+	
+	return ret;
+}
+
+static qboolean SV_MapCommand_CompletionChecker (int argnum, int ignore)
+{
+	char	findname[MAX_QPATH];
+	
+	assert (argnum == 1);
+	
+	if (Cmd_Argc () <= argnum)
+		return true;
+	
+	if (COM_HasExtension (Cmd_Argv (argnum), ".dm2"))
+		Com_sprintf (findname, sizeof (findname), "demos/%s", Cmd_Argv (argnum));
+	else
+		Com_sprintf (findname, sizeof (findname), "maps/%s.bsp", Cmd_Argv (argnum));
+	return FS_FileExists (findname);
+}
+
 void SV_Map_f (void)
 {
 	char	*map;
@@ -577,8 +662,11 @@ void SV_InitOperatorCommands (void)
 	Cmd_AddCommand ("dumpuser", SV_DumpUser_f);
 
 	Cmd_AddCommand ("map", SV_Map_f);
+	Cmd_SetCompleter ("map", SV_MapCommand_Completer, SV_MapCommand_CompletionChecker, 0);
 	Cmd_AddCommand ("startmap", SV_StartMap_f);
+	Cmd_SetCompleter ("startmap", SV_MapCommand_Completer, SV_MapCommand_CompletionChecker, 0);
 	Cmd_AddCommand ("demomap", SV_DemoMap_f);
+	Cmd_SetCompleter ("demomap", SV_MapCommand_Completer, SV_MapCommand_CompletionChecker, 0);
 	Cmd_AddCommand ("setmaster", SV_SetMaster_f);
 
 	if ( dedicated->value )
