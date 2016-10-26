@@ -4423,7 +4423,7 @@
 ( 1880 1984 -24 ) ( 1880 1984 832 ) ( 1840 1984 832 ) arena9/metal1 0 0 0 1 1 0 4 0
 ( 1920 1784 -24 ) ( 1920 1784 832 ) ( 1920 1984 832 ) arena9/metal1 -64 0 0 1 1 0 4 0
 ( 1840 576 -24 ) ( 1840 576 832 ) ( 1880 576 832 ) arena9/metal1 0 0 0 1 1 0 4 0
-( 1840 1976 -24 ) ( 1840 1976 832 ) ( 1840 1776 832 ) evil/ex_wall_pipe_d 64 0 90 0.5 0.5 0 0 0
+( 1840 1976 -24 ) ( 1840 1976 832 ) ( 1840 1776 832 ) evil/ex_wall_pipe_d 64 512 90 0.5 0.5 0 0 0
 }
 // brush 491
 {
@@ -4446,7 +4446,7 @@
 // brush 493
 {
 ( 1816 1920 -24 ) ( 1816 1712 -24 ) ( 1864 1712 -24 ) arena9/metal1 0 48 0 1 1 0 4 0
-( 1864 1712 -8 ) ( 1816 1712 -8 ) ( 1816 1920 -8 ) arena9/metal1 0 48 0 1 1 0 4 0
+( 1864 1712 -8 ) ( 1816 1712 -8 ) ( 1816 1920 -8 ) evil/ex_wall_pipe_d 64 0 0 0.5 0.5 0 0 0
 ( 1864 1920 -24 ) ( 1864 1920 -8 ) ( 1816 1920 -8 ) arena9/metal1 0 0 0 1 1 0 4 0
 ( 1840 1048 -24 ) ( 1840 1048 -8 ) ( 1840 1256 -8 ) arena9/metal1 -48 0 0 1 1 0 4 0
 ( 1808 1920 -24 ) ( 1808 1920 -8 ) ( 1808 1712 -8 ) arena9/metal1 -48 0 0 1 1 0 4 0
@@ -24148,210 +24148,204 @@
 }
 // entity 327
 {
-"classname" "light"
-"origin" "904.000000 1104.000000 264.000000"
-"light" "50"
-}
-// entity 328
-{
 "classname" "misc_mapmodel"
 "origin" "904.000000 1120.000000 384.000000"
 "model" "maps/meshes/xempx/ceillightbig.md2"
 "angle" "-90.000000"
 }
-// entity 329
+// entity 328
 {
 "classname" "light"
 "origin" "928.000000 1264.000000 136.000000"
 "light" "50"
 }
-// entity 330
+// entity 329
 {
 "classname" "misc_mapmodel"
 "origin" "928.000000 1280.000000 256.000000"
 "model" "maps/meshes/xempx/ceillightbig.md2"
 "angle" "-90.000000"
 }
-// entity 331
+// entity 330
 {
 "classname" "light"
 "origin" "1168.000000 1528.000000 264.000000"
 "light" "50"
 }
-// entity 332
+// entity 331
 {
 "classname" "misc_mapmodel"
 "origin" "1184.000000 1528.000122 384.000000"
 "model" "maps/meshes/xempx/ceillightbig.md2"
 "angle" "179.999985"
 }
-// entity 333
+// entity 332
 {
 "classname" "misc_mapmodel"
 "origin" "1104.000000 2176.000000 184.000061"
 "model" "maps/meshes/tech/ribtubebig1.md2"
 "angles" "-0.000000 -178.903275 90.000000"
 }
-// entity 334
+// entity 333
 {
 "classname" "misc_mapmodel"
 "origin" "1192.000244 2175.999756 191.999939"
 "model" "maps/meshes/tech/ribtubebig1.md2"
 "angles" "0.000001 -0.474333 -90.000000"
 }
-// entity 335
+// entity 334
 {
 "classname" "misc_mapmodel"
 "origin" "1631.999878 1735.999756 656.000305"
 "model" "maps/meshes/tech/ribtubebig1.md2"
 "angles" "0.000010 179.525665 90.000000"
 }
-// entity 336
+// entity 335
 {
 "classname" "misc_mapmodel"
 "origin" "1624.000122 888.000366 663.999756"
 "model" "maps/meshes/tech/ribtubebig1.md2"
 "angles" "0.000001 179.525665 -90.000000"
 }
-// entity 337
+// entity 336
 {
 "classname" "misc_mapmodel"
 "origin" "1174.000000 1214.000000 231.999985"
 "model" "maps/meshes/tech/slimetube2.md2"
 "angles" "-2.895116 -21.250347 -88.874771"
 }
-// entity 338
+// entity 337
 {
 "classname" "misc_decal"
 "origin" "1228.000000 1252.000000 82.000000"
 "model" "maps/decals/slime1.decal"
 }
-// entity 339
+// entity 338
 {
 "classname" "misc_decal"
 "origin" "1136.000000 1280.000000 62.000000"
 "model" "maps/decals/slime1.decal"
 }
-// entity 340
+// entity 339
 {
 "classname" "misc_decal"
 "origin" "1148.000000 1900.000000 42.000000"
 "model" "maps/decals/slime1.decal"
 }
-// entity 341
+// entity 340
 {
 "classname" "misc_decal"
 "origin" "1212.000000 1972.000000 42.000000"
 "model" "maps/decals/slime1.decal"
 }
-// entity 342
+// entity 341
 {
 "classname" "misc_mapmodel"
 "origin" "1088.000000 2118.000000 0.000000"
 "model" "maps/meshes/tech/biotubebase.md2"
 "angle" "-59.501350"
 }
-// entity 343
+// entity 342
 {
 "classname" "misc_mapmodel"
 "origin" "1212.000000 2118.000000 0.000000"
 "model" "maps/meshes/tech/biotubebase.md2"
 "angle" "-110.317825"
 }
-// entity 344
+// entity 343
 {
 "classname" "misc_decal"
 "origin" "1096.000000 2022.000000 42.000000"
 "model" "maps/decals/slime1.decal"
 }
-// entity 345
+// entity 344
 {
 "classname" "misc_decal"
-"origin" "1444.000000 1780.000000 186.000000"
+"origin" "1440.000000 1788.000000 186.000000"
 "model" "maps/decals/slime1.decal"
-"angles" "0.0 0.0 90.0"
+"angles" "-0.000000 0.000000 90.000000"
 }
-// entity 346
+// entity 345
 {
 "classname" "light"
 "light" "50"
 "origin" "-396.000000 80.000000 104.000000"
 }
-// entity 347
+// entity 346
 {
 "classname" "light"
 "light" "50"
 "origin" "-392.000000 -492.000000 104.000000"
 }
-// entity 348
+// entity 347
 {
 "classname" "misc_mapmodel"
 "origin" "1152.000000 2016.000000 6.000000"
 "model" "maps/meshes/flagpad.md2"
 }
-// entity 349
+// entity 348
 {
 "classname" "misc_mapmodel"
 "origin" "1040.000122 2003.999878 116.000031"
 "model" "maps/meshes/desert/platewall2.md2"
 "angles" "7.055076 -179.999985 90.000000"
 }
-// entity 350
+// entity 349
 {
 "classname" "misc_mapmodel"
 "origin" "768.000000 1544.000000 88.000000"
 "model" "maps/meshes/injector.md2"
 }
-// entity 351
+// entity 350
 {
 "classname" "misc_mapmodel"
 "origin" "704.000000 1424.000000 -32.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
-// entity 352
+// entity 351
 {
 "classname" "misc_mapmodel"
 "origin" "704.000000 1432.000000 -72.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
-// entity 353
+// entity 352
 {
 "classname" "misc_mapmodel"
 "origin" "704.000000 1660.000000 -32.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
-// entity 354
+// entity 353
 {
 "classname" "misc_mapmodel"
 "origin" "704.000000 1648.000000 -72.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
-// entity 355
+// entity 354
 {
 "classname" "misc_mapmodel"
 "origin" "900.000000 1204.000122 324.000031"
 "model" "maps/meshes/tech/ribtubebig4.md2"
 "angles" "-0.000000 -90.000000 -90.000000"
 }
-// entity 356
+// entity 355
 {
 "classname" "misc_mapmodel"
 "origin" "972.000000 1204.000122 324.000031"
 "model" "maps/meshes/tech/ribtubebig4.md2"
 "angles" "-0.000000 -90.000000 -90.000000"
 }
-// entity 357
+// entity 356
 {
 "classname" "misc_mapmodel"
 "origin" "1252.000000 1376.000000 48.000000"
 "angle" "0.000003"
 "model" "maps/meshes/weaponpad.md2"
 }
-// entity 358
+// entity 357
 {
 "classname" "misc_mapmodel"
 "origin" "868.000000 1056.000000 -272.000000"
