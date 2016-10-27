@@ -653,6 +653,13 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		Com_Error (ERR_DROP, "Mod_LoadDecalFile: Missing texture in %s!", mod->name);
 	tex = GL_FindImage (tex_path, it_wall);
 	mod->skins[0] = tex;
+	if (mod->skins[0] != NULL)
+	{
+		//load shader for skin
+		mod->script = mod->skins[0]->script;
+		if (mod->script)
+			RS_ReadyScript ((rscript_t *)mod->script);
+	}
 	
 	memset (&data, 0, sizeof(data));
 	
