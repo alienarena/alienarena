@@ -354,6 +354,24 @@ vec_t VectorNormalize (vec3_t v)
 
 }
 
+vec_t Vector2Normalize (vec2_t v)
+{
+	float	length, ilength;
+
+	length = v[0]*v[0] + v[1]*v[1];
+	length = sqrtf(length);
+
+	if (length)
+	{
+		ilength = 1.0f/length;
+		v[0] *= ilength;
+		v[1] *= ilength;
+	}
+
+	return length;
+
+}
+
 vec_t VectorNormalize2 (vec3_t v, vec3_t out)
 {
 	float	length, ilength;
@@ -378,6 +396,12 @@ void VectorMA (const vec3_t veca, float scale, const vec3_t vecb, vec3_t vecc)
 	vecc[0] = veca[0] + scale*vecb[0];
 	vecc[1] = veca[1] + scale*vecb[1];
 	vecc[2] = veca[2] + scale*vecb[2];
+}
+
+void Vector2MA (const vec2_t veca, float scale, const vec2_t vecb, vec2_t vecc)
+{
+	vecc[0] = veca[0] + scale*vecb[0];
+	vecc[1] = veca[1] + scale*vecb[1];
 }
 
 vec_t _DotProduct (vec3_t v1, vec3_t v2)

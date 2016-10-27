@@ -179,6 +179,12 @@ extern vec3_t vec3_origin;
 
 #define Vector2Copy(i,o)			((o)[0]=(i)[0],(o)[1]=(i)[1])
 #define Vector2Set(v, x, y)			((v)[0]=(x), (v)[1]=(y))
+#define Vector2Subtract(a,b,o)		((o)[0]=(a)[0]-(b)[0],(o)[1]=(a)[1]-(b)[1])
+#define Vector2Add(a,b,o)			((o)[0]=(a)[0]+(b)[0],(o)[1]=(a)[1]+(b)[1])
+#define Vector2Clear(a)				((a)[0]=(a)[1]=0)
+
+void Vector2MA (const vec2_t veca, float scale, const vec2_t vecb, vec2_t vecc);
+vec_t Vector2Normalize (vec2_t v);		// returns vector length
 
 #define DotProduct(x,y)				((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #define VectorSubtract(a,b,o)		((o)[0]=(a)[0]-(b)[0],(o)[1]=(a)[1]-(b)[1],(o)[2]=(a)[2]-(b)[2])
