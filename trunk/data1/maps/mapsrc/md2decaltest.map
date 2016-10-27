@@ -71,27 +71,48 @@
 }
 // entity 3
 {
-"classname" "misc_decal"
-"origin" "64.000000 0.000000 0.000000"
-"model" "maps/meshes/terraintest/rocks1.decal"
-}
-// entity 4
-{
 "classname" "light"
 "origin" "64.000000 0.000000 256.000000"
 "light" "100"
 }
+// entity 4
+{
+"classname" "misc_terrainmodel"
+"origin" "-96.000000 0.000000 24.000000"
+"model" "maps/meshes/xempx/qtube.md2"
+"angles" "-0.000000 0.000000 0.000003"
+}
 // entity 5
+{
+"classname" "misc_terrainmodel"
+"origin" "-96.000000 32.000000 24.000000"
+"model" "maps/meshes/xempx/qtube.md2"
+"angles" "0 180 0"
+}
+// entity 6
+{
+"classname" "misc_decal"
+"origin" "64.000000 0.000000 0.000000"
+"model" "maps/meshes/terraintest/rocks1.decal"
+}
+// entity 7
 {
 "classname" "misc_terrainmodel"
 "origin" "64.000000 0.000000 24.000000"
 "model" "maps/meshes/xempx/qtube.md2"
 "angles" "-0.000000 0.000000 0.000003"
 }
-// entity 6
+// entity 8
 {
 "classname" "misc_terrainmodel"
 "origin" "64 32 24"
 "model" "maps/meshes/xempx/qtube.md2"
 "angles" "0.0000 180 0.000000"
+}
+// entity 9
+{
+"classname" "misc_decal"
+"origin" "-96.000000 0.000000 16.000000"
+"model" "maps/meshes/terraintest/whirlyspotlight.decal"
+"angles" "30.000011 0.000000 0.000000"
 }
