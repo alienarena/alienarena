@@ -846,6 +846,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 	
 	//check for valid script
 	rs_slowpath = rs != NULL && rs->stage != NULL && (
+		(rs->flags & RS_PREVENT_FASTPATH) != 0 ||
 		rs->stage->texture == r_notexture ||
 		((rs->stage->fx || rs->stage->glow) && rs->stage->texture2 == r_notexture) ||
 		(rs->stage->cube && rs->stage->texture3 == r_notexture) ||
@@ -865,11 +866,12 @@ static void R_Mesh_DrawFrame (int skinnum)
 	if (rs_slowpath)
 	{
 		int lmtex = 0;
+		vec2_t rotate_center = {0.5f, 0.5f};
 		
 		if (currentmodel->lightmap != NULL)
 			lmtex = currentmodel->lightmap->texnum;
 		
-		RS_Draw (	rs, lmtex, vec3_origin, vec3_origin, false,
+		RS_Draw (	rs, lmtex, rotate_center, vec3_origin, false,
 					lmtex != 0 ? rs_lightmap_on : rs_lightmap_off,
 					true, R_Mesh_DrawVBO_Callback );
 		
