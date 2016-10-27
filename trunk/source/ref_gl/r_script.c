@@ -958,6 +958,12 @@ static void sanity_check_stage (rscript_t *rs, rs_stage_t *stage)
 	if (stage->rot_speed != 0.0)
 		rs->flags |= RS_CONTAINS_ROTATE;
 	
+	if (scroll_enabled)
+		rs->flags |= RS_CONTAINS_SCROLL;
+	
+	if (scale_enabled)
+		rs->flags |= RS_CONTAINS_SCALE;
+	
 	if (!(stage->lensflare || stage->grass || stage->beam || stage->cube))
 		rs->flags |= RS_CONTAINS_DRAWN;
 }
