@@ -681,7 +681,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 	int ctf_team;
 	char team_name[16] = " ";
 	char enemy_team_name[16] = " ";
-	gitem_t *flag_item, *enemy_flag_item, *it;
+	gitem_t *flag_item, *enemy_flag_item;
 
 	// figure out what team this flag is
 	if (strcmp(ent->classname, "item_flag_red") == 0)
