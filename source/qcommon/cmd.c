@@ -1002,7 +1002,7 @@ char *Cmd_CompleteCommand (int argnum, int flags)
 	static char		retval[256];
 	char			*partial;
 	cmd_function_t *cmd;
-	int             len, i, o, p;
+	int             len, i;
 	cmdalias_t     *a;
 	cvar_t         *cvar;
 	char           *pmatch[1024];

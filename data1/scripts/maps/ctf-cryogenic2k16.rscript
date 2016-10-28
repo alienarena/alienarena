@@ -139,6 +139,16 @@ textures/blanks/blank5
 		beam
 	}
 }
+textures/blanks/blank6
+{
+	{
+		map gfx/greenline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift .2 0.4 0.8
+	}
+}
 textures/blanks/blank7
 {
 	{

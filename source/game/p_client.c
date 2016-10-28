@@ -116,7 +116,6 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	char cleanname2[PLAYERNAME_SIZE];
 	int			i, pos, total, place;
 	edict_t		*cl_ent;
-	gitem_t		*it;
 
 	if (deathmatch->value)
 	{
@@ -775,7 +774,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int	number_of_gibs = 0;
 	int	gib_effect = EF_GREENGIB;
 	int hasFlag = false;
-	gitem_t *it, *flag1_item, *flag2_item;
+	gitem_t *flag1_item, *flag2_item;
 	int mod;
 
 	mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
