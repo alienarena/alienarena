@@ -45,6 +45,7 @@ float r_fbeffectTime;
 
 extern  cvar_t	*cl_raindist;
 
+// TODO: fix the way FBOs all over the codebase "leak" at vid_restart
 static GLuint distort_FBO;
 
 /*

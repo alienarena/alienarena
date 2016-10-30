@@ -34,10 +34,6 @@ vec3_t	r_worldLightVec;
 
 #define LIGHTMAP_BYTES 4
 
-//Pretty safe bet most cards support this
-#define	LIGHTMAP_SIZE	2048 
-#define	MAX_LIGHTMAPS	12
-
 int		c_visible_lightmaps;
 int		c_visible_textures;
 

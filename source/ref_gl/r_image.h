@@ -61,6 +61,10 @@ typedef struct image_s
 
 } image_t;
 
+//Pretty safe bet most cards support this
+#define	LIGHTMAP_SIZE	2048 
+#define	MAX_LIGHTMAPS	12
+
 #define	TEXNUM_LIGHTMAPS	1024
 #define	TEXNUM_SCRAPS		1152
 #define	TEXNUM_IMAGES		1153
