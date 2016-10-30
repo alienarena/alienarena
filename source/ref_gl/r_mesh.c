@@ -42,11 +42,10 @@ extern float sun_alpha;
 cvar_t *gl_mirror;
 
 static void R_Mesh_CompleteNormalsTangents
-	(model_t *mod, int calcflags, const nonskeletal_basevbo_t *basevbo, mesh_framevbo_t *framevbo, const unsigned int *vtriangles)
+	(model_t *mod, int calcflags, const void *basevbo, size_t basevbo_stride, mesh_framevbo_t *framevbo, const unsigned int *vtriangles)
 {
 	int i, j, ndiscarded = 0;
 	unsigned int nonindexed_triangle[3];
-	const skeletal_basevbo_t *basevbo_sk = (const skeletal_basevbo_t *)basevbo;
 	qboolean *merged, *do_merge;
 	merged = Z_Malloc (mod->numvertexes * sizeof(qboolean));
 	do_merge = Z_Malloc (mod->numvertexes * sizeof(qboolean));
@@ -86,12 +85,7 @@ static void R_Mesh_CompleteNormalsTangents
 			const nonskeletal_basevbo_t *basevbo_vert[3];
 			
 			for (j = 0; j < 3; j++)
-			{
-				if ((mod->typeFlags & MESH_SKELETAL))
-					basevbo_vert[j] = &basevbo_sk[triangle[j]].common;
-				else
-					basevbo_vert[j] = &basevbo[triangle[j]];
-			}
+				basevbo_vert[j] = (nonskeletal_basevbo_t *)(((byte *)basevbo) + triangle[j] * basevbo_stride);
 			
 			R_CalcTangent ( framevbo[triangle[0]].vertex,
 							framevbo[triangle[1]].vertex,
@@ -188,13 +182,30 @@ discard_tangent_and_normal:;
 	Z_Free (do_merge);
 }
 
+static size_t R_Mesh_GetBaseVBO_Stride (int typeFlags)
+{
+	switch (typeFlags & (MESH_SKELETAL | MESH_LM_SEPARATE_COORDS))
+	{
+		default: // this line is only to shut the compiler warning up
+		case 0:
+			return sizeof (nonskeletal_basevbo_t);
+		case MESH_SKELETAL:
+			return sizeof (skeletal_basevbo_t);
+		case MESH_LM_SEPARATE_COORDS:
+			return sizeof (nonskeletal_lm_basevbo_t);
+		case MESH_LM_SEPARATE_COORDS | MESH_SKELETAL:
+			return sizeof (skeletal_lm_basevbo_t);
+	}
+}
+
 void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
 {
 	const int maxframes = ((mod->typeFlags & MESH_MORPHTARGET) ? mod->num_frames : 1);
 	const int frames_idx = ((mod->typeFlags & MESH_INDEXED) ? 2 : 1);
 	mesh_framevbo_t *framevbo;
 	const unsigned int *vtriangles = NULL;
-	const nonskeletal_basevbo_t *basevbo;
+	const void *basevbo;
+	size_t basevbo_stride;
 	va_list ap;
 	
 	mod->vboIDs = malloc ((maxframes + frames_idx) * sizeof(*mod->vboIDs));
@@ -203,17 +214,9 @@ void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
 	va_start (ap, calcflags);
 	
 	GL_BindVBO (mod->vboIDs[0]);
-	if ((mod->typeFlags & MESH_SKELETAL))
-	{
-		const skeletal_basevbo_t *basevbo_sk = va_arg (ap, const skeletal_basevbo_t *);
-		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*basevbo_sk), basevbo_sk, GL_STATIC_DRAW_ARB);
-		basevbo = &basevbo_sk->common;
-	}
-	else
-	{
-		basevbo = va_arg (ap, const nonskeletal_basevbo_t *);
-		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*basevbo), basevbo, GL_STATIC_DRAW_ARB);
-	}
+	basevbo = va_arg (ap, const void *);
+	basevbo_stride = R_Mesh_GetBaseVBO_Stride (mod->typeFlags);
+	qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * basevbo_stride, basevbo, GL_STATIC_DRAW_ARB);
 	
 	if ((mod->typeFlags & MESH_INDEXED))
 	{
@@ -226,7 +229,7 @@ void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
 	{
 		framevbo = va_arg (ap, mesh_framevbo_t *);
 		if (calcflags != 0)
-			R_Mesh_CompleteNormalsTangents (mod, calcflags, basevbo, framevbo, vtriangles);
+			R_Mesh_CompleteNormalsTangents (mod, calcflags, basevbo, basevbo_stride, framevbo, vtriangles);
 		GL_BindVBO (mod->vboIDs[frames_idx]);
 		qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*framevbo), framevbo, GL_STATIC_DRAW_ARB);
 	}
@@ -240,7 +243,7 @@ void R_Mesh_LoadVBO (model_t *mod, int calcflags, ...)
 		{
 			mesh_framevbo_t *framevbo = callback (data, framenum);
 			if (calcflags != 0)
-				R_Mesh_CompleteNormalsTangents (mod, calcflags, basevbo, framevbo, vtriangles);
+				R_Mesh_CompleteNormalsTangents (mod, calcflags, basevbo, basevbo_stride, framevbo, vtriangles);
 			GL_BindVBO (mod->vboIDs[framenum + frames_idx]);
 			qglBufferDataARB (GL_ARRAY_BUFFER_ARB, mod->numvertexes * sizeof(*framevbo), framevbo, GL_STATIC_DRAW_ARB);
 		}
@@ -629,20 +632,31 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	else
 		GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
 	glUniform1iARB (uniforms->baseTex, 0);
+	
+	if (currentmodel->lightmap != NULL)
+	{
+		glUniform1iARB (uniforms->lightmap, (currentmodel->typeFlags & MESH_LM_SEPARATE_COORDS) ? rs_lightmap_separate_texcoords : rs_lightmap_on);
+		glUniform1iARB (uniforms->lightmapTexture, 1);
+		GL_MBind (1, currentmodel->lightmap->texnum);
+	}
+	else
+	{
+		glUniform1iARB (uniforms->lightmap, rs_lightmap_off);
+	}
 
 	if (fragmentshader)
 	{
-		glUniform1iARB (uniforms->normTex, 1);
+		glUniform1iARB (uniforms->normTex, 2);
 		
 		if (!shell)
 		{
-			GL_MBind (1, rs->stage->texture->texnum);
+			GL_MBind (2, rs->stage->texture->texnum);
 
-			GL_MBind (2, rs->stage->texture2->texnum);
-			glUniform1iARB (uniforms->fxTex, 2);
+			GL_MBind (3, rs->stage->texture2->texnum);
+			glUniform1iARB (uniforms->fxTex, 3);
 
-			GL_MBind (3, rs->stage->texture3->texnum);
-			glUniform1iARB (uniforms->fx2Tex, 3);
+			GL_MBind (4, rs->stage->texture3->texnum);
+			glUniform1iARB (uniforms->fx2Tex, 4);
 
 			if(r_shadowmapcount)
 			{
@@ -776,7 +790,7 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 	const int frames_idx =  ((typeFlags & MESH_INDEXED) ? 2 : 1);
 	const int framenum = ((typeFlags & MESH_MORPHTARGET) ? currententity->frame : 0);
 	const size_t framestride = sizeof(mesh_framevbo_t);
-	const size_t basestride = (typeFlags & MESH_SKELETAL) ? sizeof(skeletal_basevbo_t) : sizeof(nonskeletal_basevbo_t);
+	const size_t basestride = R_Mesh_GetBaseVBO_Stride (typeFlags);
 	
 	// base (non-frame-specific) data
 	GL_BindVBO (currentmodel->vboIDs[0]);
@@ -786,6 +800,12 @@ static void R_Mesh_DrawVBO (qboolean lerped)
 		// Note: bone positions are sent separately as uniforms to the GLSL shader.
 		R_AttribPointer (ATTR_WEIGHTS_IDX, 4, GL_UNSIGNED_BYTE, GL_TRUE, basestride, (void *)FOFS (skeletal_basevbo_t, blendweights));
 		R_AttribPointer (ATTR_BONES_IDX, 4, GL_UNSIGNED_BYTE, GL_FALSE, basestride, (void *)FOFS (skeletal_basevbo_t, blendindices));
+		if ((typeFlags & MESH_LM_SEPARATE_COORDS))
+			R_TexCoordPointer (1, basestride, (void *)FOFS (skeletal_lm_basevbo_t, lm_st));
+	}
+	else if ((typeFlags & MESH_LM_SEPARATE_COORDS))
+	{
+		R_TexCoordPointer (1, basestride, (void *)FOFS (nonskeletal_lm_basevbo_t, lm_st));
 	}
 	
 	// primary frame data
@@ -850,7 +870,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 		rs->stage->texture == r_notexture ||
 		((rs->stage->fx || rs->stage->glow) && rs->stage->texture2 == r_notexture) ||
 		(rs->stage->cube && rs->stage->texture3 == r_notexture) ||
-		rs->stage->num_blend_textures != 0 || rs->stage->next != NULL || currentmodel->lightmap != NULL
+		rs->stage->num_blend_textures != 0 || rs->stage->next != NULL
 	);
 	
 	lerped = currententity->backlerp != 0.0 && (currententity->frame != 0 || currentmodel->num_frames != 1);

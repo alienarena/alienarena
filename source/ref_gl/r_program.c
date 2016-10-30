@@ -952,6 +952,9 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 	uniform int useCube;
 	// For now, only applies to vertexOnly. If 0, don't do the per-vertex shading.
 	uniform int doShading; 
+	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
+	// means lightmap using its own set of texcoords.
+	uniform int lightmap;
 	
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
@@ -1005,8 +1008,13 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 			vec4 texco = gl_MultiTexCoord0;
 			texco.s = texco.s + time*1.0;
 			texco.t = texco.t + time*2.0;
-			gl_TexCoord[1] = texco;
+			gl_TexCoord[2] = texco;
 		}
+		
+		if (lightmap == 1)
+			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord0;
+		else if (lightmap == 2)
+			gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 
 		// vertexOnly is defined as const, so this branch should get optimized
 		// out.
@@ -1062,7 +1070,11 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 	uniform sampler2D normalTex;
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
+	uniform sampler2D lightmapTexture;
 	uniform shadowsampler_t StatShadowMap; 
+	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
+	// means lightmap using its own set of texcoords.
+	uniform int lightmap;
 	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int SHADOWMAP;
 	uniform int FOG;
@@ -1116,7 +1128,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		if(useShell == 0)
 			shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		
-		if(useShell == 0 && useCube == 0 && specmask.a < 1.0)
+		if(useShell == 0 && useCube == 0 && specmask.a < 1.0 && lightmap == 0)
 		{
 			vec4 SpecColor = vec4 (totalLightColor, 1.0)/2.0;
 
@@ -1147,23 +1159,29 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec3 relativeLightDirection = normalize (StaticLightDir);
 
 		float diffuseTerm = dot (normal, relativeLightDirection);
-
-		if( diffuseTerm > 0.0 )
+		if (diffuseTerm > 0.0)
 		{
 			vec3 relativeEyeDirection = normalize (EyeDir);
 			vec3 halfAngleVector = normalize (relativeLightDirection + relativeEyeDirection);
 
-			float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );
-			specularTerm = pow( specularTerm, 32.0 );
-
-			litColor = vec3 (specularTerm) + (3.0 * diffuseTerm) * textureColour;
+			float specularTerm = clamp (dot (normal, halfAngleVector), 0.0, 1.0);
+			specularTerm = pow (specularTerm, 32.0);
+			
+			litColor = vec3 (specularTerm);
+			if (lightmap == 0)
+				 litColor += (3.0 * diffuseTerm) * textureColour;
 		}
 		else
 		{
 			litColor = vec3 (0.0);
 		}
 
-		if(useShell == 0)
+		if (lightmap != 0)
+		{
+			gl_FragColor.rgb = litColor + 2.0 * texture2D (lightmapTexture, gl_TexCoord[1].st).rgb * textureColour;
+			gl_FragColor.a = 1.0;
+		}
+		else if (useShell == 0)
 		{
 			litColor = litColor * shadowval * staticLightColor;
 			gl_FragColor.rgb = max(litColor, textureColour * 0.15);
@@ -1180,7 +1198,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		
 		//moving fx texture
 		if(useFX > 0)
-			fx = texture2D( fxTex, gl_TexCoord[1].xy );
+			fx = texture2D( fxTex, gl_TexCoord[2].xy );
 		else
 			fx = vec4(0.0, 0.0, 0.0, 0.0);
 
@@ -1960,9 +1978,11 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->normTex = glGetUniformLocationARB (programObj, "normalTex");
 	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
+	out->lightmapTexture = glGetUniformLocationARB (programObj, "lightmapTexture");
 	out->shadowmap = glGetUniformLocationARB (programObj, "SHADOWMAP");
 	out->shadowmapTexture = glGetUniformLocationARB (programObj, "StatShadowMap");
 	out->time = glGetUniformLocationARB (programObj, "time");
+	out->lightmap = glGetUniformLocationARB (programObj, "lightmap");
 	out->fog = glGetUniformLocationARB (programObj, "FOG");
 	out->useFX = glGetUniformLocationARB (programObj, "useFX");
 	out->useGlow = glGetUniformLocationARB (programObj, "useGlow");
