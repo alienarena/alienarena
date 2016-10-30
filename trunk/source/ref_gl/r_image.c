@@ -1724,6 +1724,7 @@ void	GL_InitImages (void)
 	R_FB_InitTextures();//FULLSCREEN EFFECTS
 	R_SI_InitTextures();//SIMPLE ITEMS
 	R_InitBloomTextures();//BLOOMS
+	R_Decals_InitFBO (); // DECALS
 }
 
 /*
