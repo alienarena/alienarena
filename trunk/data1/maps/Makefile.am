@@ -5,6 +5,7 @@
 mapsdir=$(pkgdatadir)/data1/maps
 
 nobase_dist_maps_DATA = \
+	ctf-cryogenic2k16.bsp \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
 	ctf-violator2k16.bsp \
@@ -499,10 +500,12 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obarch1.jpg \
 	meshes/tech/obarch1.md2 \
 	meshes/tech/obarch1_b.jpg \
+	meshes/tech/obarch1_b.md2 \
 	meshes/tech/obarch1_b_fx.tga \
 	meshes/tech/obarch1_fx.tga \
 	meshes/tech/obarch1_normal.jpg \
 	meshes/tech/obarch1_r.jpg \
+	meshes/tech/obarch1_r.md2 \
 	meshes/tech/obarch1_r_fx.tga \
 	meshes/tech/obarch2.md2 \
 	meshes/tech/obarch2_b.md2 \
@@ -593,6 +596,7 @@ nobase_dist_maps_DATA = \
 	meshes/test/martianenforcer.skin \
 	meshes/test/weapon.iqm \
 	meshes/test/weapon.skin \
+	meshes/terraintest/whirlyspotlight.decal \
 	meshes/toxicbarrell.iqm \
 	meshes/toxicbarrell.md2 \
 	meshes/toxicbarrell.skin \
