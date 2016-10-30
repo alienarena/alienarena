@@ -703,7 +703,9 @@ typedef struct
 	GLuint							totalLightPosition, totalLightColor;
 	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
+	GLuint							lightmapTexture;
 	GLuint							shadowmapTexture;
+	GLuint							lightmap;
 	GLuint							shadowmap;
 	GLuint							time;
 	GLuint							fog;

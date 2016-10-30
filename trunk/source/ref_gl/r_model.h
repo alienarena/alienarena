@@ -346,42 +346,56 @@ typedef enum {mod_bad, mod_brush, mod_md2, mod_iqm, mod_terrain, mod_decal, num_
 // These flags (for mod->typeFlags) encode the traits of various mesh formats.
 
 // If set, this model type can cast shadowmaps (otherwise it may use stencils.)
-#define	MESH_CASTSHADOWMAP	1
+#define	MESH_CASTSHADOWMAP		1
 
 // Morph target animation is what the MD2 format uses exclusively. Vertex
 // positions, normals, and tangents are stored in VBOs for every frame and
 // interpolated by the vertex shader. It's possible to combine this with
 // skeletal animation, although we don't support any formats that do this yet.
-#define MESH_MORPHTARGET	2
+#define MESH_MORPHTARGET		2
 
 // If set, the blendweights and blendindexes vertex attributes are used. NOTE:
 // this is still basically IQM-specific, we're not trying to generalize across
 // every possible skeletal format-- yet.
-#define MESH_SKELETAL		4
+#define MESH_SKELETAL			4
 
 // Set if the vertex data is indexed. If so, an IBO is used.
-#define MESH_INDEXED		8
+#define MESH_INDEXED			8
 
 // Set if a polygon offset should be used to prevent z-fighting, as well as if
 // blending should be used.
-#define MESH_DECAL			16
+#define MESH_DECAL				16
 
 // Set if any sort of static per-pixel or per-vertex lighting should be done
 // on this mesh type. (The eventual goal is to do dynamic lighting on all mesh
 // types.)
-#define MESH_DOSHADING		32
+#define MESH_DOSHADING			32
 
-// XXX: These structs should always be packed tight!
+// Set if this mesh has separate texcoords for lightmap textures
+#define MESH_LM_SEPARATE_COORDS	64
+
+// XXX: These structs should always be packed tight! Also, the main texture
+// "st" should always be at the beginning of each vertex's data!
 typedef struct
 {
-	vec2_t					st;
+	vec2_t						st;
 } nonskeletal_basevbo_t;
 typedef struct
 {
-	nonskeletal_basevbo_t	common;  // sizeof(float) == 4 so should be ok
-	unsigned char			blendweights[4];
-	unsigned char			blendindices[4];
+	nonskeletal_basevbo_t		common;  // sizeof(float) == 4 so should be ok
+	unsigned char				blendweights[4];
+	unsigned char				blendindices[4];
 } skeletal_basevbo_t;
+typedef struct
+{
+	nonskeletal_basevbo_t		common;  // sizeof(float) == 4 so should be ok
+	vec2_t						lm_st;
+} nonskeletal_lm_basevbo_t;
+typedef struct
+{
+	skeletal_basevbo_t			common;  // sizeof(float) == 4 so should be ok
+	vec2_t						lm_st;
+} skeletal_lm_basevbo_t;
 typedef struct
 {
 	vec3_t					vertex;
