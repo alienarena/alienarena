@@ -29,6 +29,7 @@ nobase_dist_scripts_DATA = \
 	maps/tac-extermination2k15.rscript \
 	maps/tac-impact.rscript \
 	menu.rscript \
+	normals/decals.rscript \
 	normals/desert.rscript \
 	normals/gothic.rscript \
 	normals/newtech.rscript \

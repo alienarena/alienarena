@@ -5,6 +5,8 @@
 levelshotsdir=$(pkgdatadir)/data1/levelshots
 
 nobase_dist_levelshots_DATA = \
+	ctf-cryogenic2k16.jpg \
+	ctf-cryogenic2k16.txt \
 	ctf-extermination2k15.jpg \
 	ctf-extermination2k15.txt \
 	ctf-frost2k15.jpg \
