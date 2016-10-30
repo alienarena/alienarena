@@ -81,9 +81,11 @@ void R_CheckFBOExtensions (void)
 	qglRenderbufferStorageEXT	= (PFNGLRENDERBUFFERSTORAGEEXTPROC)qwglGetProcAddress("glRenderbufferStorageEXT");
 	qglFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)qwglGetProcAddress("glFramebufferRenderbufferEXT");
 	qglBlitFramebufferEXT = (PFNGLBLITFRAMEBUFFEREXTPROC)qwglGetProcAddress("glBlitFramebufferEXT");
+	qglGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC)qwglGetProcAddress("glGenerateMipmapEXT");
 
 	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT
-		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT)
+		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT
+		|| !qglGenerateMipmapEXT)
 	{
 		Com_Printf("...Cannot find OpenGL Framebuffer extension, CANNOT use FBO\n");
 		gl_state.fbo = false;
