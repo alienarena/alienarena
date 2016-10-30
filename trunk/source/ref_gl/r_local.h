@@ -811,6 +811,7 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf);
 void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 
 //terrain decals
+void R_Decals_InitFBO (void);
 void Mod_LoadDecalModel (model_t *mod, void *_buf);
 void R_ParseDecalEntity (char *match, char *block);
 
