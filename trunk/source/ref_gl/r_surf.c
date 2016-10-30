@@ -739,7 +739,7 @@ of lightmapped surfaces. For GLSL renders, this is unnecessary, as the shader
 handles this job.
 ================
 */
-static void R_SetLightingMode (void)
+void R_SetLightingMode (void)
 {
 	GL_SelectTexture (0);
 	GL_TexEnv ( GL_COMBINE_EXT );

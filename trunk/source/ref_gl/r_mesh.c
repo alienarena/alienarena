@@ -638,6 +638,12 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		glUniform1iARB (uniforms->lightmap, (currentmodel->typeFlags & MESH_LM_SEPARATE_COORDS) ? rs_lightmap_separate_texcoords : rs_lightmap_on);
 		glUniform1iARB (uniforms->lightmapTexture, 1);
 		GL_MBind (1, currentmodel->lightmap->texnum);
+		
+		if (!fragmentshader)
+		{
+			GL_EnableTexture (1, true);
+			R_SetLightingMode ();
+		}
 	}
 	else
 	{
@@ -861,6 +867,8 @@ static void R_Mesh_DrawFrame (int skinnum)
 	
 	rscript_t	*rs = NULL;
 	
+	qboolean	fixed_function_lightmap = false;
+	
 	if (r_shaders->integer)
 		rs=(rscript_t *)currententity->script;
 	
@@ -912,6 +920,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 		
 		shell = (currententity->flags & RF_SHELL_ANY) != 0;
 		fragmentshader = r_meshnormalmaps->integer && (shell || (rs && rs->stage->normalmap));
+		fixed_function_lightmap = currentmodel->lightmap != NULL && !fragmentshader;
 		
 		R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, shell);
 	}
@@ -920,6 +929,13 @@ static void R_Mesh_DrawFrame (int skinnum)
 	
 	glUseProgramObjectARB (0);
 	qglDepthMask (true);
+	
+	if (fixed_function_lightmap)
+	{
+		GL_EnableTexture (1, false);
+		GL_SelectTexture (0);
+		GL_TexEnv (GL_MODULATE);
+	}
 
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
