@@ -68,15 +68,24 @@ static void (*glGetProgramBinary) (GLuint program, GLsizei bufsize, GLsizei *len
 
 //GLSL Programs
 
-#define USE_DLIGHT_LIBRARY "/*USE_DLIGHT_LIBRARY*/"
+// Functions and other declarations for the GLSL standard vertex library.
+// Prepended to every GLSL vertex shader. We rely on the GLSL compiler to throw
+// away anything that a given shader doesn't use.
+static char vertex_library[] = STRINGIFY (
+
+	// common declarations, must be used the same way in every script if they're
+	// used at all
+	attribute vec4 tangent;
+)
 
 #define IFDYNAMIC(n,...) \
 "\n#if DYNAMIC >= " #n "\n" \
 #__VA_ARGS__ \
 "\n#endif\n"
 
-// Relies on DYNAMIC being defined as a macro
-static char dlight_vertex_library[] = 
+	// Dynamic Lighting
+	// Relies on DYNAMIC being defined as a macro within the GLSL, but don't 
+	// worry. R_LoadGLSLProgram handles that for you.
 IFDYNAMIC (1, 
 	uniform vec3 lightPosition[DYNAMIC];
 	varying vec3 LightVec[DYNAMIC];
@@ -107,10 +116,73 @@ IFDYNAMIC (7, LightVec[6] = tangentSpaceTransform * (lightPosition[6] - viewVert
 IFDYNAMIC (8, LightVec[7] = tangentSpaceTransform * (lightPosition[7] - viewVertex.xyz);)
 STRINGIFY (
 	}
+
+	// Mesh Animation
+	uniform mat3x4 bonemats[70]; // Keep this equal to SKELETAL_MAX_BONEMATS
+	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
+	
+	// MD2 only
+	uniform float lerp; // 1.0 = all new vertex, 0.0 = all old vertex
+
+	// IQM only
+	attribute vec4 weights;
+	attribute vec4 bones;
+	
+	// MD2 only
+	attribute vec3 oldvertex;
+	attribute vec3 oldnormal;
+	attribute vec4 oldtangent;
+	
+	// anim_compute () output
+	vec4 anim_vertex;
+	vec3 anim_normal;
+	vec4 anim_tangent;
+	
+	// if dotangent is true, compute anim_tangent and anim_tangent_w
+	// if donormal is true, compute anim_normal
+	// hopefully the if statements for these booleans will get optimized out
+	void anim_compute (bool dotangent, bool donormal)
+	{
+		if (GPUANIM == 1)
+		{
+			mat3x4 m = bonemats[int(bones.x)] * weights.x;
+			m += bonemats[int(bones.y)] * weights.y;
+			m += bonemats[int(bones.z)] * weights.z;
+			m += bonemats[int(bones.w)] * weights.w;
+			
+			anim_vertex = vec4 (gl_Vertex * m, gl_Vertex.w);
+			if (donormal)
+				anim_normal = vec4 (gl_Normal, 0.0) * m;
+			if (dotangent)
+				anim_tangent = vec4 (vec4 (tangent.xyz, 0.0) * m, tangent.w);
+		}
+		else if (GPUANIM == 2)
+		{
+			anim_vertex = mix (vec4 (oldvertex, 1), gl_Vertex, lerp);
+			if (donormal)
+				anim_normal = normalize (mix (oldnormal, gl_Normal, lerp));
+			if (dotangent)
+				anim_tangent = mix (oldtangent, tangent, lerp);
+		}
+		else
+		{
+			anim_vertex = gl_Vertex;
+			if (donormal)
+				anim_normal = gl_Normal;
+			if (dotangent)
+				anim_tangent = tangent;
+		}
+	}
 );
 
-// Relies on DYNAMIC being defined as a macro
-static char dlight_fragment_library[] = 
+// Functions and other declarations for the GLSL standard fragment library.
+// Prepended to every GLSL fragment shader. We rely on the GLSL compiler to
+// throw away anything that a given shader doesn't use.
+static char fragment_library[] =
+
+	// Dynamic Lighting
+	// Relies on DYNAMIC being defined as a macro within the GLSL, but don't 
+	// worry. R_LoadGLSLProgram handles that for you.
 IFDYNAMIC (1,
 	uniform vec3 lightAmount[DYNAMIC];
 	uniform float lightCutoffSquared[DYNAMIC];
@@ -120,7 +192,7 @@ STRINGIFY (
 	varying vec3 EyeDir;
 	
 	// increase this number to tone down dynamic lighting more
-	const float attenuation_boost = 1.5; 
+	const float attenuation_boost = 1.5;
 	
 	// normal argument given in tangent space
 	void ComputeForLight (	const vec3 normal, const float specular,
@@ -175,10 +247,64 @@ IFDYNAMIC (8, ComputeForLight (normal, specular, nEyeDir, textureColor3, LightVe
 STRINGIFY (
 		return ret;
 	}
+	
+	// Shadow Mapping
+	uniform float xPixelOffset;
+	uniform float yPixelOffset;
+	float lookupShadow (int enabled, shadowsampler_t Map, vec4 ShadowCoord, float _fudge);
+)
+"\n#ifndef AMD_GPU\n#define fudge _fudge\n"
+STRINGIFY (
+	float lookup (vec2 offSet, sampler2DShadow Map, vec4 ShadowCoord)
+	{	
+		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+	}
+)
+"\n#else\n#define fudge 0.0\n"
+STRINGIFY (
+	float lookup (vec2 offSet, sampler2D Map, vec4 ShadowCoord)
+	{
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		// Used to lower moir pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;
+
+		float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
+
+		if (ShadowCoord.w > 0.0)
+			return distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
+		return 1.0;
+	}
+)
+"\n#endif\n"
+STRINGIFY (
+	float lookupShadow (int enabled, shadowsampler_t Map, vec4 ShadowCoord, float _fudge)
+	{
+		float shadow = 1.0;
+
+		if (enabled > 0) 
+		{			
+			if (ShadowCoord.w > 1.0)
+			{
+				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+				
+				shadow += lookup (vec2(-1.5, 1.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2( 0.5, 1.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2(-1.5, -0.5) + o, Map, ShadowCoord);
+				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
+				shadow *= 0.25 ;
+			}
+			shadow += fudge; 
+			if(shadow > 1.0)
+				shadow = 1.0;
+		}
+		
+		return shadow;
+	}
 );
 
+
 //world Surfaces
-static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
+static char world_vertex_program[] = STRINGIFY (
 	uniform vec3 staticLightPosition;
 	uniform float rsTime;
 	uniform int LIQUID;
@@ -186,8 +312,6 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	uniform int PARALLAX;
 	uniform int SHINY;
 	
-	attribute vec4 tangent;
-
 	const float Eta = 0.66;
 	const float FresnelPower = 5.0;
 	const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));
@@ -236,70 +360,7 @@ static char world_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	}
 );
 
-// You must define shadow_fudge in your shader
-#define USE_SHADOWMAP_LIBRARY "/*USE_SHADOWMAP_LIBRARY*/"
-
-static char shadowmap_header[] = STRINGIFY (
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
-	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord);
-);
-
-static char shadowmap_library[] = 
-"\n#ifndef AMD_GPU\n"
-STRINGIFY (
-	float lookup (vec2 offSet, sampler2DShadow Map, vec4 ShadowCoord)
-	{	
-		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
-	}
-	
-	const float internal_shadow_fudge = shadow_fudge;
-)
-"\n#else\n"
-STRINGIFY (
-	float lookup (vec2 offSet, sampler2D Map, vec4 ShadowCoord)
-	{
-		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
-		// Used to lower moir pattern and self-shadowing
-		shadowCoordinateWdivide.z += 0.0005;
-
-		float distanceFromLight = texture2D(Map, shadowCoordinateWdivide.xy).z;
-
-		if (ShadowCoord.w > 0.0)
-			return distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;
-		return 1.0;
-	}
-	
-	const float internal_shadow_fudge = 0.0;
-)
-"\n#endif\n"
-STRINGIFY (
-	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord)
-	{
-		float shadow = 1.0;
-
-		if(SHADOWMAP > 0) 
-		{			
-			if (ShadowCoord.w > 1.0)
-			{
-				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-				
-				shadow += lookup (vec2(-1.5, 1.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2( 0.5, 1.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2(-1.5, -0.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
-				shadow *= 0.25 ;
-			}
-			shadow += internal_shadow_fudge; 
-			if(shadow > 1.0)
-				shadow = 1.0;
-		}
-		
-		return shadow;
-	}
-);
-
-static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY STRINGIFY (
+static char world_fragment_program[] = STRINGIFY (
 	uniform sampler2D surfTexture;
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
@@ -322,8 +383,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	varying vec4 sPos;
 	varying vec3 StaticLightDir;
 	varying float fog;
-	
-	const float shadow_fudge = 0.2; // Used by shadowmap library
 	
 	// results of liquid_effects function
 	vec4 bloodColor;
@@ -400,7 +459,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 
 		//shadows
 		if (STATSHADOW > 0)
-			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
+			statshadowval = lookupShadow (SHADOWMAP, StatShadowMap, gl_TextureMatrix[6] * sPos, 0.2);
 		else
 			statshadowval = 1.0;
 
@@ -458,7 +517,7 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		{
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 		
-			float dynshadowval = lookupShadow (ShadowMap, gl_TextureMatrix[7] * sPos);
+			float dynshadowval = lookupShadow (SHADOWMAP, ShadowMap, gl_TextureMatrix[7] * sPos, 0.2);
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal.xyz, normal.a, dynshadowval);
 			gl_FragColor.rgb += dynamicColor;
 		}
@@ -498,18 +557,15 @@ static char shadow_vertex_program[] = STRINGIFY (
 	}
 );
 
-static char shadow_fragment_program[] = USE_SHADOWMAP_LIBRARY STRINGIFY (
+static char shadow_fragment_program[] = STRINGIFY (
 	uniform shadowsampler_t StatShadowMap;
 	uniform float fadeShadow;
 	
 	varying vec4 ShadowCoord;
 	
-	const int SHADOWMAP = 1;
-	const float shadow_fudge = 0.3;
-
 	void main( void )
 	{
-		gl_FragColor = vec4 (1.0/fadeShadow * lookupShadow (StatShadowMap, ShadowCoord));
+		gl_FragColor = vec4 (1.0/fadeShadow * lookupShadow (1, StatShadowMap, ShadowCoord, 0.3));
 	}
 );
 
@@ -542,7 +598,7 @@ static char minimap_vertex_program[] = STRINGIFY (
 
 
 //RSCRIPTS
-static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
+static char rscript_vertex_program[] = STRINGIFY (
 	uniform vec3 staticLightPosition;
 	uniform int envmap;
 	uniform int	numblendtextures;
@@ -558,8 +614,6 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	varying vec3 orig_coord;
 	varying vec3 StaticLightDir;
 	varying vec4 sPos;
-	
-	attribute vec4 tangent;
 	
 	void main ()
 	{
@@ -611,7 +665,7 @@ static char rscript_vertex_program[] = USE_DLIGHT_LIBRARY STRINGIFY (
 	}
 );
 
-static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY STRINGIFY (
+static char rscript_fragment_program[] = STRINGIFY (
 	uniform sampler2D mainTexture;
 	uniform sampler2D mainTexture2;
 	uniform sampler2D lightmapTexture;
@@ -635,8 +689,6 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRAR
 	uniform shadowsampler_t StatShadowMap; 
 	uniform int SHADOWMAP;
 
-	const float shadow_fudge = 0.2; // Used by shadowmap library
-	
 	varying float fog;
 	varying vec3 orig_normal;
 	varying vec3 orig_coord;
@@ -798,10 +850,7 @@ static char rscript_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRAR
 			}
 		}
 
-		if(SHADOWMAP > 0)
-		{
-			gl_FragColor.rgb *= lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
-		}
+		gl_FragColor.rgb *= lookupShadow (SHADOWMAP, StatShadowMap, gl_TextureMatrix[6] * sPos, 0.2);
 		
 		if (DYNAMIC > 0)
 		{
@@ -865,72 +914,8 @@ static char warp_vertex_program[] = STRINGIFY (
 	}
 );
 
-
-#define USE_MESH_ANIM_LIBRARY "/*USE_MESH_ANIM_LIBRARY*/"
-static char mesh_anim_library[] = STRINGIFY (
-	uniform mat3x4 bonemats[70]; // Keep this equal to SKELETAL_MAX_BONEMATS
-	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
-	
-	// MD2 only
-	uniform float lerp; // 1.0 = all new vertex, 0.0 = all old vertex
-
-	// IQM and MD2
-	attribute vec4 tangent;
-	
-	// IQM only
-
-	attribute vec4 weights;
-	attribute vec4 bones;
-	
-	// MD2 only
-	attribute vec3 oldvertex;
-	attribute vec3 oldnormal;
-	attribute vec4 oldtangent;
-	
-	// anim_compute () output
-	vec4 anim_vertex;
-	vec3 anim_normal;
-	vec4 anim_tangent;
-	
-	// if dotangent is true, compute anim_tangent and anim_tangent_w
-	// if donormal is true, compute anim_normal
-	// hopefully the if statements for these booleans will get optimized out
-	void anim_compute (bool dotangent, bool donormal)
-	{
-		if (GPUANIM == 1)
-		{
-			mat3x4 m = bonemats[int(bones.x)] * weights.x;
-			m += bonemats[int(bones.y)] * weights.y;
-			m += bonemats[int(bones.z)] * weights.z;
-			m += bonemats[int(bones.w)] * weights.w;
-			
-			anim_vertex = vec4 (gl_Vertex * m, gl_Vertex.w);
-			if (donormal)
-				anim_normal = vec4 (gl_Normal, 0.0) * m;
-			if (dotangent)
-				anim_tangent = vec4 (vec4 (tangent.xyz, 0.0) * m, tangent.w);
-		}
-		else if (GPUANIM == 2)
-		{
-			anim_vertex = mix (vec4 (oldvertex, 1), gl_Vertex, lerp);
-			if (donormal)
-				anim_normal = normalize (mix (oldnormal, gl_Normal, lerp));
-			if (dotangent)
-				anim_tangent = mix (oldtangent, tangent, lerp);
-		}
-		else
-		{
-			anim_vertex = gl_Vertex;
-			if (donormal)
-				anim_normal = gl_Normal;
-			if (dotangent)
-				anim_tangent = tangent;
-		}
-	}
-);
-
 //MESHES
-static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STRINGIFY (
+static char mesh_vertex_program[] = STRINGIFY (
 	uniform vec3 staticLightColor;
 	uniform vec3 staticLightPosition;
 	uniform vec3 totalLightPosition;
@@ -1055,7 +1040,7 @@ static char mesh_vertex_program[] = USE_MESH_ANIM_LIBRARY USE_DLIGHT_LIBRARY STR
 	}
 );
 
-static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY STRINGIFY (
+static char mesh_fragment_program[] = STRINGIFY (
 	uniform vec3 staticLightColor;
 	uniform vec3 totalLightPosition, totalLightColor;
 	uniform sampler2D baseTex;
@@ -1083,7 +1068,6 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 	const float MaterialThickness = 2.0; //this val seems good for now
 	const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20); //controls subsurface value
 	const float RimScalar = 10.0; //intensity of the rim effect
-	const float shadow_fudge = 0.2; // Used by shadowmap library
 
 	varying vec4 sPos;
 	varying vec3 StaticLightDir;
@@ -1118,7 +1102,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
 		if(useShell == 0)
-			shadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
+			shadowval = lookupShadow (SHADOWMAP, StatShadowMap, gl_TextureMatrix[6] * sPos, 0.2);
 		
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0 && lightmap == 0)
 		{
@@ -1236,7 +1220,7 @@ static char mesh_fragment_program[] = USE_DLIGHT_LIBRARY USE_SHADOWMAP_LIBRARY S
 );
 
 //GLASS 
-static char glass_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
+static char glass_vertex_program[] = STRINGIFY (
 
 	uniform int FOG;
 
@@ -1285,7 +1269,7 @@ static char glass_fragment_program[] = STRINGIFY (
 	varying vec3 r;
 	varying float fog;
 	varying vec3 orig_normal, normal, vert;
-
+	
 	void main (void)
 	{
 		vec3 light_dir = normalize( LightPos - vert );  	
@@ -1323,7 +1307,7 @@ static char glass_fragment_program[] = STRINGIFY (
 );
 
 //NO TEXTURE 
-static char blankmesh_vertex_program[] = USE_MESH_ANIM_LIBRARY STRINGIFY (
+static char blankmesh_vertex_program[] = STRINGIFY (
 	void main(void)
 	{
 		anim_compute (false, false);
@@ -1344,8 +1328,6 @@ static char water_vertex_program[] = STRINGIFY (
 	uniform float time;
 	uniform int	REFLECT;
 	uniform int FOG;
-	
-	attribute vec4 tangent;
 
 	const float Eta = 0.66;
 	const float FresnelPower = 2.5;
@@ -1462,7 +1444,7 @@ static char fb_fragment_program[] = STRINGIFY (
 	uniform sampler2D fbtexture;
 	uniform sampler2D distortiontexture;
 	uniform float intensity;
-
+	
 	void main(void)
 	{
 		vec2 noiseVec;
@@ -1530,7 +1512,7 @@ static char blur_fragment_program[] = STRINGIFY (
 					texcoord4, texcoord5, texcoord6,
 					texcoord7, texcoord8, texcoord9;
 	uniform sampler2D textureSource;
-
+	
 	void main()
 	{
 	   vec4 sum = vec4(0.0);
@@ -1562,7 +1544,7 @@ static char rblur_vertex_program[] = STRINGIFY (
 static char rblur_fragment_program[] = STRINGIFY (
 	uniform sampler2D rtextureSource;
 	uniform vec3 radialBlurParams;
-
+	
 	void main(void)
 	{
 		float wScissor;
@@ -1629,7 +1611,7 @@ static char droplets_vertex_program[] = STRINGIFY (
 static char droplets_fragment_program[] = STRINGIFY (
 	uniform sampler2D drSource;
 	uniform sampler2D drTex;
-
+	
 	void main(void)
 	{
 		vec3 noiseVec;
@@ -1681,7 +1663,7 @@ static char rgodrays_fragment_program[] = STRINGIFY (
 	const float density = 0.84;
 	const float weight = 5.65;
 	const int NUM_SAMPLES = 75;
-
+	
 	void main()
 	{
 		vec2 deltaTextCoord = vec2( gl_TexCoord[0].st - lightPositionOnScreen.xy );
@@ -1807,7 +1789,7 @@ const int num_standard_attributes = sizeof(standard_attributes)/sizeof(vertex_at
 void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attributes, int ndynamic, GLhandleARB *program)
 {
 	char		str[4096], macros[64];
-	const char	*shaderStrings[6];
+	const char	*shaderStrings[5];
 	int			nResult;
 	int			i;
 	
@@ -1818,25 +1800,16 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 	
 	if (vertex != NULL)
 	{
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-	
-		if (strstr (vertex, USE_MESH_ANIM_LIBRARY))
-			shaderStrings[1] = mesh_anim_library;
-		else
-			shaderStrings[1] = "";
-	
+		g_vertexShader = glCreateShaderObjectARB (GL_VERTEX_SHADER_ARB);
+		
+		shaderStrings[1] = vertex_library;
 		if (fragment == NULL)
 			shaderStrings[2] = "const int vertexOnly = 1;";
 		else
 			shaderStrings[2] = "const int vertexOnly = 0;";
+		shaderStrings[3] = vertex;
 		
-		if (strstr (vertex, USE_DLIGHT_LIBRARY))
-			shaderStrings[3] = dlight_vertex_library;
-		else
-			shaderStrings[3] = "";
-	
-		shaderStrings[4] = vertex;
-		glShaderSourceARB (g_vertexShader, 5, shaderStrings, NULL);
+		glShaderSourceARB (g_vertexShader, 4, shaderStrings, NULL);
 		glCompileShaderARB (g_vertexShader);
 		glGetObjectParameterivARB (g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult);
 
@@ -1863,25 +1836,10 @@ void R_LoadGLSLProgram (const char *name, char *vertex, char *fragment, int attr
 			shaderStrings[1] = "#define AMD_GPU\n#define shadowsampler_t sampler2D\n";
 		else
 			shaderStrings[1] = "#define shadowsampler_t sampler2DShadow\n";
-		
-		if (strstr (fragment, USE_SHADOWMAP_LIBRARY))
-		{
-			shaderStrings[2] = shadowmap_header;
-			shaderStrings[5] = shadowmap_library;
-		}
-		else
-		{
-			shaderStrings[2] = shaderStrings[5] = "";
-		}
-		
-		if (strstr (fragment, USE_DLIGHT_LIBRARY))
-			shaderStrings[3] = dlight_fragment_library;
-		else
-			shaderStrings[3] = "";
-		
-		shaderStrings[4] = fragment;
+		shaderStrings[2] = fragment_library;
+		shaderStrings[3] = fragment;
 	
-		glShaderSourceARB (g_fragmentShader, 6, shaderStrings, NULL);
+		glShaderSourceARB (g_fragmentShader, 4, shaderStrings, NULL);
 		glCompileShaderARB (g_fragmentShader);
 		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
