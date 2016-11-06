@@ -304,8 +304,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	uniform sampler2D HeightTexture;
 	uniform sampler2D NormalTexture;
 	uniform sampler2D lmTexture;
-	uniform sampler2D liquidTexture;
-	uniform sampler2D liquidNormTex;
 	uniform sampler2D chromeTex;
 	uniform shadowsampler_t ShadowMap;
 	uniform shadowsampler_t StatShadowMap;
@@ -313,8 +311,11 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	uniform int PARALLAX;
 	uniform int STATSHADOW;
 	uniform int SHADOWMAP;
-	uniform int LIQUID;
 	uniform int SHINY;
+	
+	uniform sampler2D liquidTexture;
+	uniform sampler2D liquidNormTex;
+	uniform int LIQUID;
 	uniform float rsTime;
 
 	varying float FresRatio;
@@ -323,13 +324,62 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 	varying float fog;
 	
 	const float shadow_fudge = 0.2; // Used by shadowmap library
+	
+	// results of liquid_effects function
+	vec4 bloodColor;
+	vec2 liquidDisplacement;
+	
+	// this function will be inlined by the GLSL compiler.
+	void liquid_effects (vec3 relativeEyeDirection, vec4 Offset, vec2 BaseTexCoords)
+	{
+		bloodColor = vec4 (0.0);
+		liquidDisplacement = vec2 (0.0);
+		if (LIQUID > 0)
+		{
+			//for liquid fx scrolling
+			vec2 texco = BaseTexCoords;
+			texco.t -= rsTime*1.0/LIQUID;
+
+			vec2 texco2 = BaseTexCoords;
+			texco2.t -= rsTime*0.9/LIQUID;
+			//shift the horizontal here a bit
+			texco2.s /= 1.5;
+
+			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + BaseTexCoords;
+
+			vec2 noiseVec = normalize (texture2D (liquidNormTex, texco)).xy;
+			noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
+
+			vec2 noiseVec2 = normalize (texture2D (liquidNormTex, texco2)).xy;
+			noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
+
+			if (LIQUID > 2)
+			{
+				vec2 texco3 = BaseTexCoords;
+				texco3.t -= rsTime*0.6/LIQUID;
+
+				vec2 noiseVec3 = normalize (texture2D (liquidNormTex, texco3)).xy;
+				noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
+
+				vec4 diffuse1 = texture2D (liquidTexture, 2.0 * texco + noiseVec + TexCoords);
+				vec4 diffuse2 = texture2D (liquidTexture, 2.0 * texco2 + noiseVec2 + TexCoords);
+				vec4 diffuse3 = texture2D (liquidTexture, 2.0 * texco3 + noiseVec3 + TexCoords);
+				bloodColor = max (diffuse1, diffuse2);
+				bloodColor = max (bloodColor, diffuse3);
+			}
+			else
+			{
+				// used for water effect only
+				liquidDisplacement = noiseVec + noiseVec2;
+			}
+		}
+	}
 
 	void main( void )
 	{
 		vec4 diffuse;
 		vec4 lightmap;
 		vec4 alphamask;
-		vec4 bloodColor;
 		float distanceSquared;
 		vec3 halfAngleVector;
 		float specularTerm;
@@ -337,9 +387,6 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		float attenuation;
 		vec4 litColour;
 		float statshadowval;
-		vec2 displacement;
-		vec2 displacement2;
-		vec2 displacement4;
 
 		vec3 relativeEyeDirection = normalize( EyeDir );
 		vec3 relativeLightDirection = normalize (StaticLightDir);
@@ -352,77 +399,22 @@ static char world_fragment_program[] = USE_SHADOWMAP_LIBRARY USE_DLIGHT_LIBRARY 
 		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
 
 		//shadows
-		if(STATSHADOW > 0)
+		if (STATSHADOW > 0)
 			statshadowval = lookupShadow (StatShadowMap, gl_TextureMatrix[6] * sPos);
 		else
 			statshadowval = 1.0;
 
-		bloodColor = vec4(0.0, 0.0, 0.0, 0.0);
-		displacement4 = vec2(0.0, 0.0);
-		if(LIQUID > 0)
+		if (PARALLAX > 0) 
 		{
-			vec3 noiseVec;
-			vec3 noiseVec2;
-
-			//for liquid fx scrolling
-			vec4 texco = gl_TexCoord[0];
-			texco.t = texco.t - rsTime*1.0/LIQUID;
-
-			vec4 texco2 = gl_TexCoord[0];
-			texco2.t = texco2.t - rsTime*0.9/LIQUID;
-			//shift the horizontal here a bit
-			texco2.s = texco2.s/1.5;
-
-			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
+			vec4 Offset = texture2D (HeightTexture, gl_TexCoord[0].xy);
 			Offset = Offset * 0.04 - 0.02;
-			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;
-
-			displacement = texco.st;
-
-			noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;
-			noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
-
-			displacement2 = texco2.st;
-
-			noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;
-			noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;
-
-			displacement.x = texco.s + noiseVec.x + TexCoords.x;
-			displacement.y = texco.t + noiseVec.y + TexCoords.y;
-			displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;
-			displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;
-
-			if(LIQUID > 2)
-			{
-				vec2 texco3 = gl_TexCoord[0].st;
-				texco3.t = texco3.t - rsTime*0.6/LIQUID;
-
-				vec2 noiseVec3 = normalize(texture2D(liquidNormTex, texco3)).xy;
-				noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;
-
-				vec2 displacement3 = texco3 + noiseVec3 + TexCoords;
-				
-				vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);
-				vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);
-				vec4 diffuse3 = texture2D(liquidTexture, texco3 + displacement3);
-				vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);
-				bloodColor = max(diffuse1, diffuse2);
-				bloodColor = max(bloodColor, diffuse3);
-			}
-			else
-			{
-				//used for water effect only
-				displacement4.x = noiseVec.x + noiseVec2.x;
-				displacement4.y = noiseVec.y + noiseVec2.y;
-			}
-		}
-
-		if(PARALLAX > 0) 
-		{
+			
+			// Liquid effects only get applied if parallax mapping is on for the
+			// surface.
+			liquid_effects (relativeEyeDirection, Offset, gl_TexCoord[0].st);
+			
 			//do the parallax mapping
-			vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );
-			Offset = Offset * 0.04 - 0.02;
-			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;
+			vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + liquidDisplacement.xy;
 
 			diffuse = texture2D( surfTexture, TexCoords );
 			
