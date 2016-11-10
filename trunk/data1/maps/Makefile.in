@@ -487,6 +487,7 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/blade.md2 \
 	meshes/gothic/blade_normal.jpg \
 	meshes/gothic/blade2.md2 \
+	meshes/gothic/blade3.md2 \
 	meshes/gothic/ceillamp.md2 \
 	meshes/gothic/column1.jpg \
 	meshes/gothic/column1.md2 \
@@ -800,6 +801,9 @@ nobase_dist_maps_DATA = \
 	meshes/tech/wall_light.tga \
 	meshes/tech/wall_light_fx.tga \
 	meshes/tech/wall_light_normal.jpg \
+	meshes/tech/wall_lightr.md2 \
+	meshes/tech/wall_lightr.tga \
+	meshes/tech/wall_lightr_fx.tga \
 	meshes/test/martian.jpg \
 	meshes/test/martian_fx.tga \
 	meshes/test/martian_normal.tga \
@@ -960,6 +964,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-frost2k15.mus \
 	scripts/ctf-violator2k16.fog \
 	scripts/ctf-violator2k16.mus \
+	scripts/ctf-zion2k16.fog \
+	scripts/ctf-zion2k16.mus \
 	scripts/dm-babel2k16.fog \
 	scripts/dm-babel2k16.mus \
 	scripts/dm-bloodfactory2k15.fog \

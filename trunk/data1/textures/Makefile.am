@@ -1067,6 +1067,7 @@ nobase_dist_textures_DATA = \
 	desert/hangingmoss.tga \
 	desert/hangingmoss2.tga \
 	desert/hangingmoss3.tga \
+	desert/hangingmoss4.tga \
 	desert/lavarock1.tga \
 	desert/lavarock1_hm.tga \
 	desert/lavarock1_nm.tga \
