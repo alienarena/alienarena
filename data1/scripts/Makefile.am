@@ -12,6 +12,7 @@ nobase_dist_scripts_DATA = \
 	maps/ctf-extermination2k15.rscript \
 	maps/ctf-frost2k15.rscript \
 	maps/ctf-violator2k16.rscript \
+	maps/ctf-zion2k16.rscript \
 	maps/dm-babel2k16.rscript \
 	maps/dm-bloodfactory2k15.rscript \
 	maps/dm-crucible2k16.rscript \
