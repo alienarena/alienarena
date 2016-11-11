@@ -1,16 +1,31 @@
 textures/decals/rock1
+
 {
+	
 	{
+
 		map textures/decals/rock1_normal.tga
+
 		normalmap
+	
 	}
+
 }
 
+
 textures/decals/whirly_spotlight
+
 {
+
 	{
+
 		map textures/decals/whirly_spotlight.tga
+
 		rotate 50
+
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+
 	}
+
 }
+
