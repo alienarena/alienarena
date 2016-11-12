@@ -22568,16 +22568,16 @@
 // entity 297
 {
 "classname" "misc_mapmodel"
-"origin" "-496.000122 571.999939 288.000000"
+"origin" "-495.999878 564.000061 288.000000"
 "model" "maps/meshes/tech/ribtubebig3.md2"
-"angle" "0.000003"
+"angle" "-180.000000"
 }
 // entity 298
 {
 "classname" "misc_mapmodel"
-"angle" "-179.999985"
+"angle" "0.000016"
 "model" "maps/meshes/tech/ribtubebig3.md2"
-"origin" "-736.000061 572.000000 288.000000"
+"origin" "-744.000000 572.000061 288.000000"
 }
 // entity 299
 {
@@ -22645,7 +22645,8 @@
 {
 "classname" "misc_mapmodel"
 "model" "maps/meshes/tech/ribtubebig3.md2"
-"origin" "784.000000 1020.000000 288.000000"
+"origin" "784.000000 1027.999878 288.000000"
+"angle" "-180.000000"
 }
 // entity 309
 {
@@ -22658,16 +22659,16 @@
 // entity 310
 {
 "classname" "misc_mapmodel"
-"origin" "440.000244 1236.000000 288.000000"
+"origin" "447.999756 1236.000000 288.000000"
 "model" "maps/meshes/tech/ribtubebig3.md2"
-"angle" "90.000015"
+"angle" "-89.999985"
 }
 // entity 311
 {
 "classname" "misc_mapmodel"
 "model" "maps/meshes/tech/ribtubebig3.md2"
-"origin" "440.000122 996.000000 288.000000"
-"angle" "-90.000000"
+"origin" "447.999908 995.999939 288.000000"
+"angle" "90.000000"
 }
 // entity 312
 {
