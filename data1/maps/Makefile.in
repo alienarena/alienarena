@@ -220,6 +220,7 @@ nobase_dist_maps_DATA = \
 	ctf-extermination2k15.bsp \
 	ctf-frost2k15.bsp \
 	ctf-violator2k16.bsp \
+	ctf-zion2k16.bsp \
 	decals/blood0.decal \
 	decals/blood1.decal \
 	decals/blood2.decal \
@@ -724,6 +725,8 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obarch2_r.md2 \
 	meshes/tech/obarch3.md2 \
 	meshes/tech/obarch4.md2 \
+	meshes/tech/obarch5_b.md2 \
+	meshes/tech/obarch5_r.md2 \
 	meshes/tech/obfloor1.jpg \
 	meshes/tech/obfloor1.md2 \
 	meshes/tech/obfloor1_fx.tga \
