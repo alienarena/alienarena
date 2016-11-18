@@ -262,6 +262,7 @@ nobase_dist_botinfo_DATA = \
 	nav/ctf-cryogenic2k16.nod \
 	nav/ctf-extermination2k15.nod \
 	nav/ctf-violator2k16.nod \
+	nav/ctf-zion2k16.nod \
 	nav/dm-babel2k16.nod \
 	nav/dm-bloodfactory2k15.nod \
 	nav/dm-chasmatic2k9.nod \
