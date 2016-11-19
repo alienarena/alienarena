@@ -270,7 +270,7 @@ static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 	int i, j, lnum;
 	dlight_t *dl;
 	float dist;
-	vec3_t staticlight, dynamiclight;
+	vec3_t dynamiclight;
 	vec3_t	temp, tempOrg, lightAdd;
 	float numlights, nonweighted_numlights, weight;
 	float bob;
@@ -316,14 +316,14 @@ static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 	
 	if (copy)
 	{
-		numlights =  cl_persistent_ents[currententity->number].oldnumlights;
+		numlights = cl_persistent_ents[currententity->number].oldnumlights;
 		VectorCopy (cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
-		VectorCopy (cl_persistent_ents[currententity->number].oldstaticlight, staticlight);
+		VectorCopy (cl_persistent_ents[currententity->number].oldstaticlight, worldlight);
 	}
 	else
 	{
-		R_StaticLightPoint (currententity->origin, staticlight);
-		VectorCopy (staticlight, cl_persistent_ents[currententity->number].oldstaticlight);
+		R_StaticLightPoint (currententity->origin, worldlight);
+		VectorCopy (worldlight, cl_persistent_ents[currententity->number].oldstaticlight);
 		for (i = 0; i < r_lightgroups; i++)
 		{
 			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal) {}
@@ -370,8 +370,6 @@ static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 			statLightPosition[i] = lightAdd[i]/numlights;
 	}
 	
-	VectorCopy (staticlight, worldlight);
-	
 	// everything after this line is used only for subsurface scattering.
 	
 	if (gl_dynamic->integer != 0)
@@ -405,7 +403,7 @@ static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 		VectorClear (dynamiclight);
 	}
 	
-	VectorAdd (staticlight, dynamiclight, totallight);
+	VectorAdd (worldlight, dynamiclight, totallight);
 
 	if (numlights > 0.0)
 	{
