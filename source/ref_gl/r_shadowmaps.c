@@ -489,7 +489,7 @@ static void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 }
 
 
-static inline float point_dist_from_plane (cplane_t *plane, vec3_t point)
+static inline float point_dist_from_plane (const cplane_t *plane, const vec3_t point)
 {
 	switch (plane->type)
 	{
@@ -512,10 +512,10 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 
 static float fadeshadow_cutoff;
 
-static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
+static qboolean SM_SurfaceIsShadowed (const msurface_t *surf, const vec3_t origin, const vec3_t statLightPosition)
 {
-	glpoly_t	*p = surf->polys;
-	float		*v, *v2;
+	const glpoly_t	*p = surf->polys;
+	const float		*v, *v2;
 	int			i;
 	float		sq_len, vsq_len;
 	vec3_t		vDist;
@@ -577,7 +577,7 @@ static qboolean SM_SurfaceIsShadowed (msurface_t *surf, vec3_t origin)
 	return ret;
 }
 
-static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin, vec3_t absmins, vec3_t absmaxs)
+static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, const vec3_t origin, const vec3_t absmins, const vec3_t absmaxs, const vec3_t statLightPosition)
 {
 	int			c;
 	float		dist, dist_model, dist_light;
@@ -667,7 +667,7 @@ static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin,
 	}
 	
 	// recurse down the children, front side first
-	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin, absmins, absmaxs);
+	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin, absmins, absmaxs, statLightPosition);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
@@ -690,7 +690,7 @@ static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, vec3_t origin,
 		{
 			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
-				if (SM_SurfaceIsShadowed (surf, origin))
+				if (SM_SurfaceIsShadowed (surf, origin, statLightPosition))
 					BSP_AddSurfToVBOAccum (surf);
 			}
 		}
@@ -713,91 +713,82 @@ skip_draw:
 		return;
 
 	// recurse down the back side
-	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin, absmins, absmaxs);
+	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin, absmins, absmaxs, statLightPosition);
 }
 
+static void R_RedrawWorldWithShadow (const vec3_t origin, const vec3_t statLightPosition)
+{
+	vec3_t absmins, absmaxs;
+	
+	if (!r_drawworld->integer)
+		return;
 
-/*
-=============
-R_DrawWorld
-=============
-*/
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+	
+	glUseProgramObjectARB (g_shadowprogramObj);
 
-void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
+	glUniform1iARB (g_location_entShadow, 6);
+	GL_MBind (6, r_depthtexture2->texnum);
+
+	glUniform1fARB (g_location_xOffset, 1.0/(r_newrefdef.width*r_shadowmapscale->value));
+	glUniform1fARB (g_location_yOffset, 1.0/(r_newrefdef.height*r_shadowmapscale->value));
+
+	glUniform1fARB (g_location_fadeShadow, fadeShadow);
+	
+	VectorAdd (currentmodel->mins, origin, absmins);
+	VectorAdd (currentmodel->maxs, origin, absmaxs);
+
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	
+	// TODO: brush models too?
+	SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs, statLightPosition);
+	
+	BSP_FlushVBOAccum ();
+	
+	R_KillVArrays ();
+
+	glUseProgramObjectARB (0);
+}
+
+void R_DrawBSPShadowCasters (void)
 {
 	int i;
 
 	if (!r_drawworld->integer)
 		return;
 
-	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
-	if(forEnt)
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	
+	SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
+	
+	// Flush the VBO accumulator now because each brush model will mess
+	// with the modelview matrix when rendering its own surfaces.
+	BSP_FlushVBOAccum ();
+
+	// draw brush models
+	for (i = 0 ; i < r_newrefdef.num_entities; i++)
 	{
-		vec3_t absmins, absmaxs;
-		
-		glUseProgramObjectARB( g_shadowprogramObj );
+		currententity = &r_newrefdef.entities[i];
+		if (currententity->flags & RF_TRANSLUCENT)
+			continue;	// transluscent
 
-		glUniform1iARB( g_location_entShadow, 6);
-		GL_MBind (6, r_depthtexture2->texnum);
+		currentmodel = currententity->model;
 
-		glUniform1fARB( g_location_xOffset, 1.0/(r_newrefdef.width*r_shadowmapscale->value));
-		glUniform1fARB( g_location_yOffset, 1.0/(r_newrefdef.height*r_shadowmapscale->value));
-
-		glUniform1fARB( g_location_fadeShadow, fadeShadow );
-		
-		VectorAdd (currentmodel->mins, origin, absmins);
-		VectorAdd (currentmodel->maxs, origin, absmaxs);
-
-		qglEnableClientState (GL_VERTEX_ARRAY);
-		
-		SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs);
-		
-		BSP_FlushVBOAccum ();
-		
-		R_KillVArrays();
-
-		glUseProgramObjectARB( 0 );
-
-		return;
-	}
-	else
-	{
-		qglEnableClientState (GL_VERTEX_ARRAY);
-		
-		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
-		
-		// Flush the VBO accumulator now because each brush model will mess
-		// with the modelview matrix when rendering its own surfaces.
-		BSP_FlushVBOAccum ();
-
-		//draw brush models(not for ent shadow, for now)
-		for (i=0 ; i<r_newrefdef.num_entities ; i++)
+		if (!currentmodel)
 		{
-			currententity = &r_newrefdef.entities[i];
-			if (currententity->flags & RF_TRANSLUCENT)
-				continue;	// transluscent
-
-			currentmodel = currententity->model;
-
-			if (!currentmodel)
-			{
-				continue;
-			}
-			if( currentmodel->type == mod_brush)
-				BSP_DrawTexturelessBrushModel (currententity);
-			else
-				continue;
+			continue;
 		}
-		
-		R_KillVArrays();
+		if (currentmodel->type == mod_brush)
+			BSP_DrawTexturelessBrushModel (currententity);
+		else
+			continue;
 	}
-}
-
-void R_DrawShadowMapTerrain (vec3_t origin)
-{
-	//draw polys close to this ent that would be in shadow
+	
+	R_KillVArrays();
 }
 
 #include "r_lodcalc.h"
@@ -897,7 +888,7 @@ void R_DrawDynamicCaster(void)
 	qglPolygonOffset( 0.5f, 0.5f );
 
 	//render world - very basic geometry
-	R_DrawShadowMapWorld (false, vec3_origin);
+	R_DrawBSPShadowCasters ();
 
 	//render entities near light
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -1059,15 +1050,12 @@ void R_DrawVegetationCaster(void)
 	qglEnable(GL_CULL_FACE);
 }
 
-static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qboolean onTerrain)
+static void R_DrawEntityCaster (entity_t *ent, const vec3_t origin, float zOffset, qboolean onTerrain, const vec3_t statLightPosition)
 {		
-	vec3_t	dist, adjLightPos, mins, maxs;
+	vec3_t	dist, adjLightPos;
 	vec3_t lightVec;
 	vec2_t xyDist;
 	model_t *prevModel;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
 
 	//check caster validity
 	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
@@ -1170,7 +1158,7 @@ static void R_DrawEntityCaster (entity_t *ent, vec3_t origin, float zOffset, qbo
 	GL_InvalidateTextureState (); // FIXME
 }
 
-void R_GenerateEntityShadow( void )
+void R_GenerateEntityShadow (const vec3_t statLightPosition)
 {
 	if (gl_shadowmaps->integer)
 	{
@@ -1226,7 +1214,7 @@ void R_GenerateEntityShadow( void )
 
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		R_DrawEntityCaster(currententity, origin, zOffset, false);
+		R_DrawEntityCaster(currententity, origin, zOffset, false, statLightPosition);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1239,8 +1227,7 @@ void R_GenerateEntityShadow( void )
 			GLSTATE_ENABLE_BLEND
 			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
-			R_DrawShadowMapWorld(true, currententity->origin);
-			//R_DrawShadowMapTerrain (currententity->origin); //note - we probably don't want to do this
+			R_RedrawWorldWithShadow (currententity->origin, statLightPosition);
 
 			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_DISABLE_BLEND
@@ -1290,7 +1277,7 @@ void R_GenerateEntityShadow( void )
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset, false);
+				R_DrawEntityCaster(currententity, origin, zOffset, false, statLightPosition);
 			}
 			currententity = prevEntity;
 		}
@@ -1318,10 +1305,7 @@ void R_GenerateTerrainShadows( void )
 	else
 		VectorCopy(r_sunLight->target, origin);
 
-	//already set in r_mesh.c to proper loc
-	VectorCopy(r_worldLightVec, statLightPosition);	
-
-	//Com_Printf("Sun: %4.2f %4.2f %4.2f target: %4.2f %4.2f %4.2f\n", statLightPosition[0], statLightPosition[1], statLightPosition[2], origin[0], origin[1], origin[2]);
+	//Com_Printf("Sun: %4.2f %4.2f %4.2f target: %4.2f %4.2f %4.2f\n", r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2], origin[0], origin[1], origin[2]);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
@@ -1352,7 +1336,7 @@ void R_GenerateTerrainShadows( void )
 			continue;
 
 		//if this entity isn't close to the player, don't bother 
-		R_DrawEntityCaster(currententity, origin, 0.0, true);
+		R_DrawEntityCaster(currententity, origin, 0.0, true, r_worldLightVec);
 	}
 	currententity = prevEntity;
 			

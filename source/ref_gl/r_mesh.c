@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_ragdoll.h"
 
 // FIXME: globals
-static vec3_t worldlight, shadelight, totallight, totalLightPosition;
+static vec3_t worldlight, shadelight, totallight, statLightPosition, totalLightPosition;
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 extern image_t *r_mirrortexture;
@@ -1062,7 +1062,7 @@ void R_Mesh_Draw (void)
 		if(currentmodel->type == mod_terrain)
 			R_GenerateTerrainShadows();
 		else
-			R_GenerateEntityShadow();
+			R_GenerateEntityShadow (statLightPosition);
 	}
 	
 	if (cullresult == draw_shadow_only)

@@ -539,14 +539,11 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
 extern void		R_Mesh_DrawCaster (void);
-extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);
-extern void		R_GenerateEntityShadow( void );
+extern void		R_GenerateEntityShadow (const vec3_t statLightPosition);
 extern void		R_GenerateTerrainShadows( void );
-extern void		R_GenerateRagdollShadow( int RagDollID );
-extern void		R_GenerateShadowsToReceive( void );
-extern void		R_DrawShadowMapWorld(qboolean forEnt, vec3_t origin);
+extern void		R_DrawBSPShadowCasters (void);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
 cvar_t			*r_shadowcutoff;
@@ -791,7 +788,6 @@ struct
 //Shared mesh items
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
-vec3_t statLightPosition;
 extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
