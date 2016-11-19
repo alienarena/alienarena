@@ -341,7 +341,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 R_LightPoint
 ===============
 */
-void R_StaticLightPoint (vec3_t p, vec3_t color)
+void R_StaticLightPoint (const vec3_t p, vec3_t color)
 {
 	vec3_t		end;
 	
@@ -357,7 +357,7 @@ void R_StaticLightPoint (vec3_t p, vec3_t color)
 	}
 }
 
-void R_DynamicLightPoint (vec3_t p, vec3_t color)
+void R_DynamicLightPoint (const vec3_t p, vec3_t color)
 {
 	int			lnum;
 	dlight_t	*dl;

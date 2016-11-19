@@ -234,8 +234,8 @@ void GL_InvalidateTextureState (void);
 extern void vectoangles (vec3_t value1, vec3_t angles);
 
 // dynamic lights
-void R_StaticLightPoint (vec3_t p, vec3_t color);
-void R_DynamicLightPoint (vec3_t p, vec3_t color);
+void R_StaticLightPoint (const vec3_t p, vec3_t color);
+void R_DynamicLightPoint (const vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
 void R_PushDlights (void);
 void R_UpdateDlights (void);
