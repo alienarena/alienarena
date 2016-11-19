@@ -336,14 +336,12 @@ void R_DrawBloodEffect (void)
 
 extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
                       float g, float b, float alpha);
-extern void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin);
 extern void R_DrawVegetationCasters( qboolean forShadows );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void R_GLSLGodRays(void)
 {
 	float size, screenaspect;
 	vec2_t fxScreenPos;
-	vec3_t origin = {0, 0, 0};
 
 	if(!r_godrays->integer || !r_drawsun->integer)
 		return;
@@ -400,7 +398,7 @@ void R_GLSLGodRays(void)
 	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
-	R_DrawShadowMapWorld(false, origin); //could tweak this to only draw surfaces that are in the sun?
+	R_DrawBSPShadowCasters (); //could tweak this to only draw surfaces that are in the sun?
 	R_DrawVegetationCasters(false);
 	
 	qglMatrixMode(GL_PROJECTION);
