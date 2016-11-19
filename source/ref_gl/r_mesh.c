@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_ragdoll.h"
 
 // FIXME: globals
-static vec3_t worldlight, shadelight, totallight, statLightPosition, totalLightPosition;
+static vec3_t worldlight, shadelight, totallight, totalLightPosition;
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 extern image_t *r_mirrortexture;
@@ -265,7 +265,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
-static void R_GetLightVals (vec3_t meshOrigin)
+static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 {
 	int i, j, lnum;
 	dlight_t *dl;
@@ -570,8 +570,9 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 }
 
 // Cobbled together from two different functions. TODO: clean this mess up!
-static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fragmentshader, qboolean shell)
+static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, qboolean shell, const vec3_t lightVec)
 {
+	image_t *skin;
 	float alpha;
 	mesh_uniform_location_t *uniforms = fragmentshader ? &mesh_uniforms[CUR_NUM_DLIGHTS] : &mesh_vertexonly_uniforms[CUR_NUM_DLIGHTS];
 	
@@ -608,12 +609,11 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	
 	R_SetDlightUniforms (&uniforms->dlight_uniforms);
 	
+	glUniform3fARB (uniforms->staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	
 	{
-		vec3_t lightVec, lightVal;
+		vec3_t lightVal;
 		float lightVal_magnitude;
-		
-		R_ModelViewTransform (statLightPosition, lightVec);
-		glUniform3fARB (uniforms->staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
 		
 		VectorCopy (shadelight, lightVal);
 		lightVal_magnitude = 1.65f * VectorNormalize (lightVal);
@@ -622,10 +622,17 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		glUniform3fARB (uniforms->staticLightColor, lightVal[0], lightVal[1], lightVal[2]);
 	}
 	
-	if(currententity->flags & RF_GLOW)
-		GL_MBind (0, shell ? r_shelltexture->texnum : skinnum);
+	// select skin
+	if (shell)
+		skin = (currententity->flags & RF_GLOW) ? r_shelltexture : r_shelltexture2;
+	else if (currententity->skin) 
+		skin = currententity->skin;
 	else
-		GL_MBind (0, shell ? r_shelltexture2->texnum : skinnum);
+		skin = currentmodel->skins[0];
+	if (!skin)
+		skin = r_notexture;	// fallback..
+	
+	GL_MBind (0, skin->texnum);
 	glUniform1iARB (uniforms->baseTex, 0);
 	
 	if (currentmodel->lightmap != NULL)
@@ -729,9 +736,9 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 		qglColor4f (shadelight[0], shadelight[1], shadelight[2], alpha);
 }
 
-static void R_Mesh_SetupGlassRender (void)
+static void R_Mesh_SetupGlassRender (const vec3_t lightVec)
 {
-	vec3_t lightVec, left, up;
+	vec3_t left, up;
 	int type;
 	qboolean mirror, glass;
 	
@@ -749,7 +756,6 @@ static void R_Mesh_SetupGlassRender (void)
 	
 	glUseProgramObjectARB (g_glassprogramObj);
 	
-	R_ModelViewTransform (statLightPosition, lightVec);
 	glUniform3fARB (glass_uniforms.lightPos, lightVec[0], lightVec[1], lightVec[2]);
 
 	AngleVectors (currententity->angles, NULL, left, up);
@@ -852,8 +858,11 @@ static void R_Mesh_DrawVBO_Callback (void)
 R_Mesh_DrawFrame: should be able to handle all types of meshes.
 =============
 */
-static void R_Mesh_DrawFrame (int skinnum)
+static void R_Mesh_DrawFrame (const vec3_t statLightPosition)
 {
+	// model-space static light position
+	vec3_t		lightVec;
+	
 	// only applicable to MD2
 	qboolean	lerped;
 	
@@ -900,11 +909,14 @@ static void R_Mesh_DrawFrame (int skinnum)
 		
 		return;
 	}
-	else if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
+	
+	R_ModelViewTransform (statLightPosition, lightVec);
+	
+	if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
 	{
 		qglDepthMask(false);
 		
-		R_Mesh_SetupGlassRender ();
+		R_Mesh_SetupGlassRender (lightVec);
 	}
 	else
 	{
@@ -917,7 +929,7 @@ static void R_Mesh_DrawFrame (int skinnum)
 		fragmentshader = r_meshnormalmaps->integer && (shell || (rs && rs->stage->normalmap));
 		fixed_function_lightmap = currentmodel->lightmap != NULL && !fragmentshader;
 		
-		R_Mesh_SetupStandardRender (skinnum, rs, fragmentshader, shell);
+		R_Mesh_SetupStandardRender (rs, fragmentshader, shell, lightVec);
 	}
 	
 	R_Mesh_DrawVBO (lerped);
@@ -1034,22 +1046,22 @@ R_Mesh_Draw - animate and render a mesh. Should support all mesh types.
 */
 void R_Mesh_Draw (void)
 {
+	vec3_t statLightPosition;
 	cull_result_t cullresult;
-	image_t *skin;
 	
 	cullresult = R_Mesh_CullModel ();
 
 	if (cullresult == draw_none)
 		return;
 	
-	R_GetLightVals (currententity->origin);
+	R_GetLightVals (currententity->origin, statLightPosition);
 
 	if(currentmodel->type == mod_terrain)
 	{
 		if(r_nosun)
-			VectorCopy(statLightPosition, r_worldLightVec);
+			VectorCopy (statLightPosition, r_worldLightVec);
 		else
-			VectorCopy( r_sunLight->origin, r_worldLightVec);
+			VectorCopy (r_sunLight->origin, r_worldLightVec);
 	}
 
 	if ((currentmodel->typeFlags & MESH_CASTSHADOWMAP))
@@ -1105,14 +1117,6 @@ void R_Mesh_Draw (void)
 	if (!currententity->ragdoll) // HACK
 		R_RotateForEntity (currententity);
 
-	// select skin
-	if (currententity->skin) 
-		skin = currententity->skin;
-	else
-		skin = currentmodel->skins[0];
-	if (!skin)
-		skin = r_notexture;	// fallback..
-	
 	qglShadeModel (GL_SMOOTH);
 	GL_MTexEnv (0, GL_MODULATE);
 	
@@ -1123,7 +1127,7 @@ void R_Mesh_Draw (void)
 		qglDepthMask (false);
 	}
 
-	R_Mesh_DrawFrame (skin->texnum);
+	R_Mesh_DrawFrame (statLightPosition);
 	
 	if ((currentmodel->typeFlags & MESH_DECAL))
 	{
