@@ -609,12 +609,10 @@ static void R_Mesh_SetupStandardRender (int skinnum, rscript_t *rs, qboolean fra
 	R_SetDlightUniforms (&uniforms->dlight_uniforms);
 	
 	{
-		vec3_t lightVec, lightVal, tmp;
+		vec3_t lightVec, lightVal;
 		float lightVal_magnitude;
 		
-		VectorSubtract (statLightPosition, currententity->origin, tmp);
-		VectorMA (statLightPosition, 5.0, tmp, tmp);
-		R_ModelViewTransform (tmp, lightVec);
+		R_ModelViewTransform (statLightPosition, lightVec);
 		glUniform3fARB (uniforms->staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
 		
 		VectorCopy (shadelight, lightVal);
