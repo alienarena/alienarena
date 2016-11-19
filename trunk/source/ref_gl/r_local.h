@@ -788,7 +788,6 @@ struct
 //Shared mesh items
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
-extern void	R_GetLightVals(vec3_t origin, qboolean RagDoll);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 

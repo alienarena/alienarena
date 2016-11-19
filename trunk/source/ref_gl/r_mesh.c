@@ -265,7 +265,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
-void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
+static void R_GetLightVals (vec3_t meshOrigin)
 {
 	int i, j, lnum;
 	dlight_t *dl;
@@ -289,7 +289,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	VectorCopy (meshOrigin, statLightPosition);
 	statLightPosition[2] += 128;
 
-	if ((currententity->flags & RF_BOBBING) && !RagDoll)
+	if ((currententity->flags & RF_BOBBING))
 		bob = currententity->bob;
 	else
 		bob = 0;
@@ -300,21 +300,18 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 	numlights = nonweighted_numlights = 0;
 	VectorClear(lightAdd);
 	
-	if (!RagDoll)
+	copy = cl_persistent_ents[currententity->number].setlightstuff;
+	// ragdolls share the same "number" as the corresponding player, so if a
+	// player and his corpse are on screen at the same time, the code will
+	// interpret this as oscillation between the two positions, so the cached
+	// lighting values won't be saved. (FIXME)
+	for (i = 0; i < 3; i++)
 	{
-		copy = cl_persistent_ents[currententity->number].setlightstuff;
-		for (i = 0; i < 3; i++)
+		if (fabs(meshOrigin[i] - cl_persistent_ents[currententity->number].oldorigin[i]) > 0.0001)
 		{
-			if (fabs(meshOrigin[i] - cl_persistent_ents[currententity->number].oldorigin[i]) > 0.0001)
-			{
-				copy = false;
-				break;
-			}
+			copy = false;
+			break;
 		}
-	}
-	else
-	{
-		copy = false;
 	}
 	
 	if (copy)
@@ -331,7 +328,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll)
 		{
 			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal) {}
 				//terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
-			else if (!RagDoll && (currententity->flags & RF_WEAPONMODEL)) {}
+			else if ((currententity->flags & RF_WEAPONMODEL)) {}
 				//don't do traces for lights above weapon models, not smooth enough
 			else if (!CM_inPVS (tempOrg, LightGroups[i].group_origin))
 				continue;
@@ -1047,7 +1044,7 @@ void R_Mesh_Draw (void)
 	if (cullresult == draw_none)
 		return;
 	
-	R_GetLightVals (currententity->origin, false);
+	R_GetLightVals (currententity->origin);
 
 	if(currentmodel->type == mod_terrain)
 	{
