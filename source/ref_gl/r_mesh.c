@@ -29,9 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 #include "r_ragdoll.h"
 
-// FIXME: globals
-static vec3_t worldlight, shadelight, totallight, totalLightPosition;
-
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 extern image_t *r_mirrortexture;
 
@@ -265,126 +262,209 @@ void R_Mesh_FreeVBO (model_t *mod)
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
-static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
+static void R_GetStaticLightingForEnt (const entity_t *ent, vec3_t out_position, vec3_t out_color)
 {
-	int i, j, lnum;
-	dlight_t *dl;
+	int i, j;
 	float dist;
-	vec3_t dynamiclight;
 	vec3_t	temp, tempOrg, lightAdd;
 	float numlights, nonweighted_numlights, weight;
 	float bob;
 	qboolean copy;
 
-	if(currententity->flags & RF_MENUMODEL)
+	if (ent->flags & RF_MENUMODEL)
 	{
-		VectorSet(statLightPosition, -15.0, 180.0, 140.0);
-		VectorCopy(statLightPosition, totalLightPosition);
-		VectorSet(totallight, 0.75, 0.75, 0.75);
+		VectorSet (out_position, -15.0, 180.0, 140.0);
+	}
+	else
+	{
+		//light shining down if there are no lights at all
+		VectorCopy (ent->origin, out_position);
+		out_position[2] += 128;
 
+		if ((ent->flags & RF_BOBBING))
+			bob = ent->bob;
+		else
+			bob = 0;
+
+		VectorCopy (ent->origin, tempOrg);
+			tempOrg[2] += 24 - bob; //generates more consistent tracing
+
+		numlights = nonweighted_numlights = 0;
+		VectorClear(lightAdd);
+	
+		copy = cl_persistent_ents[ent->number].setlightstuff;
+		// ragdolls share the same "number" as the corresponding player, so if a
+		// player and his corpse are on screen at the same time, the code will
+		// interpret this as oscillation between the two positions, so the cached
+		// lighting values won't be saved. (FIXME)
+		for (i = 0; i < 3; i++)
+		{
+			if (fabs (ent->origin[i] - cl_persistent_ents[ent->number].oldorigin[i]) > 0.0001)
+			{
+				copy = false;
+				break;
+			}
+		}
+	
+		if (copy)
+		{
+			numlights = cl_persistent_ents[ent->number].oldnumlights;
+			VectorCopy (cl_persistent_ents[ent->number].oldlightadd, lightAdd);
+			VectorCopy (cl_persistent_ents[ent->number].oldstaticlight, out_color);
+		}
+		else
+		{
+			R_StaticLightPoint (ent->origin, out_color);
+			VectorCopy (out_color, cl_persistent_ents[ent->number].oldstaticlight);
+			for (i = 0; i < r_lightgroups; i++)
+			{
+				if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal) {}
+					//terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
+				else if ((ent->flags & RF_WEAPONMODEL)) {}
+					//don't do traces for lights above weapon models, not smooth enough
+				else if (!CM_inPVS (tempOrg, LightGroups[i].group_origin))
+					continue;
+				else if (!CM_FastTrace (tempOrg, LightGroups[i].group_origin, r_worldmodel->firstnode, MASK_OPAQUE))
+					continue;
+
+				VectorSubtract(ent->origin, LightGroups[i].group_origin, temp);
+				dist = VectorLength(temp);
+				if (dist == 0)
+					dist = 1;
+				dist = dist*dist;
+				weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+				for (j = 0; j < 3; j++)
+					lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+				numlights+=weight;
+				nonweighted_numlights++;
+			}
+
+			//A simple but effective effect to mimick the effect of sun silouetting(i.e, hold your hand up and partially block the sun, the 
+			//backside appears to grow very dark - so we can do this by weighting our static light average heavily towards the sun's origin.
+			if(sun_alpha > 0.0)
+			{
+				weight = 10000 * pow(sun_alpha, 10);
+				for (j = 0; j < 3; j++)
+					lightAdd[j] += r_sunLight->origin[j]*weight;
+				numlights+=weight;
+				nonweighted_numlights++;
+			}
+		
+			cl_persistent_ents[ent->number].oldnumlights = numlights;
+			VectorCopy (lightAdd, cl_persistent_ents[ent->number].oldlightadd);
+			cl_persistent_ents[ent->number].setlightstuff = true;
+			VectorCopy (ent->origin, cl_persistent_ents[ent->number].oldorigin);
+		}
+
+		if (numlights > 0.0)
+		{
+			for (i = 0; i < 3; i++)
+				out_position[i] = lightAdd[i]/numlights;
+		}
+	}
+	
+	// override static light value for some effects
+	if ((currententity->flags & RF_SHELL_ANY))
+	{
+		VectorClear (out_color);
+		if ((currententity->flags & RF_SHELL_HALF_DAM))
+			VectorSet (out_color, 0.56, 0.59, 0.45);
+		if ((currententity->flags & RF_SHELL_DOUBLE))
+		{
+			out_color[0] = 0.9;
+			out_color[1] = 0.7;
+		}
+		if ((currententity->flags & RF_SHELL_RED))
+			out_color[0] = 1.0;
+		if ((currententity->flags & RF_SHELL_GREEN))
+		{
+			out_color[1] = 1.0;
+			out_color[2] = 0.6;
+		}
+		if ((currententity->flags & RF_SHELL_BLUE))
+		{
+			out_color[2] = 1.0;
+			out_color[0] = 0.6;
+		}
+	}
+	else if ((currententity->flags & RF_FULLBRIGHT) || currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
+	{
+		// Because decals and terrain have their own precompiled lightmaps, we
+		// set them fullbright as well (so as not to dim their lighting.)
+		VectorSet (out_color, 1.0, 1.0, 1.0);
+	}
+	
+	// adjust static light value for some effects
+	if ((currententity->flags & RF_MINLIGHT))
+	{
+		float minlight;
+
+		if (r_meshnormalmaps->integer)
+			minlight = 0.1;
+		else
+			minlight = 0.2;
+		for (i=0 ; i<3 ; i++)
+			if (out_color[i] > minlight)
+				break;
+		if (i == 3)
+		{
+			out_color[0] = minlight;
+			out_color[1] = minlight;
+			out_color[2] = minlight;
+		}
+	}
+	if ((currententity->flags & RF_GLOW))
+	{	// bonus items will pulse with time
+		float	scale;
+		float	minlight;
+
+		scale = 0.2 * sin(r_newrefdef.time*7);
+		if (r_meshnormalmaps->integer)
+			minlight = 0.1;
+		else
+			minlight = 0.2;
+		for (i=0 ; i<3 ; i++)
+		{
+			out_color[i] += scale;
+			if (out_color[i] < minlight)
+				out_color[i] = minlight;
+		}
+	}
+}
+
+// calculate a combined value of static and dynamic lights (FOR SUBSURFACE
+// SCATTERING ONLY!)
+static void R_GetCombinedLightVals (const entity_t *ent, vec3_t out_position, vec3_t out_color)
+{
+	vec3_t temp, lightAdd, dynamiclight, staticlight;
+	int i, j, lnum, numlights;
+	dlight_t *dl;
+	float dist;
+	
+	if (ent->flags & RF_MENUMODEL)
+	{
+		VectorSet (out_position, -15.0, 180.0, 140.0);
+		VectorSet (out_color, 0.75, 0.75, 0.75);
 		return;
 	}
-
-	//light shining down if there are no lights at all
-	VectorCopy (meshOrigin, statLightPosition);
-	statLightPosition[2] += 128;
-
-	if ((currententity->flags & RF_BOBBING))
-		bob = currententity->bob;
-	else
-		bob = 0;
-
-	VectorCopy(meshOrigin, tempOrg);
-		tempOrg[2] += 24 - bob; //generates more consistent tracing
-
-	numlights = nonweighted_numlights = 0;
-	VectorClear(lightAdd);
 	
-	copy = cl_persistent_ents[currententity->number].setlightstuff;
-	// ragdolls share the same "number" as the corresponding player, so if a
-	// player and his corpse are on screen at the same time, the code will
-	// interpret this as oscillation between the two positions, so the cached
-	// lighting values won't be saved. (FIXME)
-	for (i = 0; i < 3; i++)
-	{
-		if (fabs(meshOrigin[i] - cl_persistent_ents[currententity->number].oldorigin[i]) > 0.0001)
-		{
-			copy = false;
-			break;
-		}
-	}
-	
-	if (copy)
-	{
-		numlights = cl_persistent_ents[currententity->number].oldnumlights;
-		VectorCopy (cl_persistent_ents[currententity->number].oldlightadd, lightAdd);
-		VectorCopy (cl_persistent_ents[currententity->number].oldstaticlight, worldlight);
-	}
-	else
-	{
-		R_StaticLightPoint (currententity->origin, worldlight);
-		VectorCopy (worldlight, cl_persistent_ents[currententity->number].oldstaticlight);
-		for (i = 0; i < r_lightgroups; i++)
-		{
-			if (currentmodel->type == mod_terrain || currentmodel->type == mod_decal) {}
-				//terrain meshes can actually occlude themselves. TODO: move to precompiled lightmaps for terrain.
-			else if ((currententity->flags & RF_WEAPONMODEL)) {}
-				//don't do traces for lights above weapon models, not smooth enough
-			else if (!CM_inPVS (tempOrg, LightGroups[i].group_origin))
-				continue;
-			else if (!CM_FastTrace (tempOrg, LightGroups[i].group_origin, r_worldmodel->firstnode, MASK_OPAQUE))
-				continue;
-
-			VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
-			dist = VectorLength(temp);
-			if (dist == 0)
-				dist = 1;
-			dist = dist*dist;
-			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-			for (j = 0; j < 3; j++)
-				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-			numlights+=weight;
-			nonweighted_numlights++;
-		}
-
-		//A simple but effective effect to mimick the effect of sun silouetting(i.e, hold your hand up and partially block the sun, the 
-		//backside appears to grow very dark - so we can do this by weighting our static light average heavily towards the sun's origin.
-		if(sun_alpha > 0.0)
-		{
-			weight = 10000 * pow(sun_alpha, 10);
-			for (j = 0; j < 3; j++)
-				lightAdd[j] += r_sunLight->origin[j]*weight;
-			numlights+=weight;
-			nonweighted_numlights++;
-		}
-		
-		cl_persistent_ents[currententity->number].oldnumlights = numlights;
-		VectorCopy (lightAdd, cl_persistent_ents[currententity->number].oldlightadd);
-		cl_persistent_ents[currententity->number].setlightstuff = true;
-		VectorCopy (currententity->origin, cl_persistent_ents[currententity->number].oldorigin);
-	}
-
-	if (numlights > 0.0)
-	{
-		for (i = 0; i < 3; i++)
-			statLightPosition[i] = lightAdd[i]/numlights;
-	}
-	
-	// everything after this line is used only for subsurface scattering.
+	numlights = cl_persistent_ents[ent->number].oldnumlights;
+	VectorCopy (cl_persistent_ents[ent->number].oldlightadd, lightAdd);
+	VectorCopy (cl_persistent_ents[ent->number].oldstaticlight, staticlight);
 	
 	if (gl_dynamic->integer != 0)
 	{
-		R_DynamicLightPoint (currententity->origin, dynamiclight);
+		R_DynamicLightPoint (ent->origin, dynamiclight);
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
 		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
 		{
-			VectorSubtract (meshOrigin, dl->origin, temp);
+			VectorSubtract (ent->origin, dl->origin, temp);
 			dist = VectorLength (temp);
 			if (dist >= dl->intensity)
 				continue;
 
-			VectorCopy(meshOrigin, temp);
+			VectorCopy (ent->origin, temp);
 			temp[2] += 24; //generates more consistent tracing
 
 			if (CM_FastTrace (temp, dl->origin, r_worldmodel->firstnode, MASK_OPAQUE))
@@ -395,6 +475,7 @@ static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 				numlights+=50*dl->intensity;
 			}
 		}
+
 		//scale up this for a stronger subsurface effect
 		VectorScale(dynamiclight, 5.0, dynamiclight);
 	}
@@ -403,12 +484,12 @@ static void R_GetLightVals (const vec3_t meshOrigin, vec3_t statLightPosition)
 		VectorClear (dynamiclight);
 	}
 	
-	VectorAdd (worldlight, dynamiclight, totallight);
+	VectorAdd (staticlight, dynamiclight, out_color);
 
 	if (numlights > 0.0)
 	{
 		for (i = 0; i < 3; i++)
-			totalLightPosition[i] = lightAdd[i]/numlights;
+			out_position[i] = lightAdd[i]/numlights;
 	}
 }
 
@@ -568,7 +649,7 @@ static void R_Mesh_SetupAnimUniforms (mesh_anim_uniform_location_t *uniforms)
 }
 
 // Cobbled together from two different functions. TODO: clean this mess up!
-static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, qboolean shell, const vec3_t lightVec)
+static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, qboolean shell, const vec3_t statLightVec, const vec3_t statLightColor)
 {
 	image_t *skin;
 	float alpha;
@@ -607,17 +688,17 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 	
 	R_SetDlightUniforms (&uniforms->dlight_uniforms);
 	
-	glUniform3fARB (uniforms->staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
+	glUniform3fvARB (uniforms->staticLightPosition, 1, (const GLfloat *)statLightVec);
 	
 	{
 		vec3_t lightVal;
 		float lightVal_magnitude;
 		
-		VectorCopy (shadelight, lightVal);
+		VectorCopy (statLightColor, lightVal);
 		lightVal_magnitude = 1.65f * VectorNormalize (lightVal);
 		lightVal_magnitude = clamp (lightVal_magnitude, 0.1f, 0.35f * gl_modulate->value);
 		VectorScale (lightVal, lightVal_magnitude, lightVal);
-		glUniform3fARB (uniforms->staticLightColor, lightVal[0], lightVal[1], lightVal[2]);
+		glUniform3fvARB (uniforms->staticLightColor, 1, (const GLfloat *)lightVal);
 	}
 	
 	// select skin
@@ -707,12 +788,15 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 		// for subsurface scattering, we hack in the old algorithm.
 		if (!shell && !rs->stage->cube)
 		{
-			vec3_t lightVec, tmp;
-			VectorSubtract (totalLightPosition, currententity->origin, tmp);
-			VectorMA (totalLightPosition, 5.0, tmp, tmp);
+			vec3_t lightVec, tmp, pos, color;
+			
+			R_GetCombinedLightVals (currententity, tmp, color);
+			
+			VectorSubtract (pos, currententity->origin, tmp);
+			VectorMA (pos, 5.0, tmp, tmp);
 			R_ModelViewTransform (tmp, lightVec);
-			glUniform3fARB (uniforms->totalLightPosition, lightVec[0], lightVec[1], lightVec[2]);
-			glUniform3fARB (uniforms->totalLightColor, totallight[0], totallight[1], totallight[2]);
+			glUniform3fvARB (uniforms->totalLightPosition, 1, (const GLfloat *)lightVec);
+			glUniform3fvARB (uniforms->totalLightColor, 1, (const GLfloat *)color);
 		}
 	}
 	
@@ -731,7 +815,7 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 	
 	// set up the fixed-function pipeline too
 	if (!fragmentshader)
-		qglColor4f (shadelight[0], shadelight[1], shadelight[2], alpha);
+		qglColor4f (statLightColor[0], statLightColor[1], statLightColor[2], alpha);
 }
 
 static void R_Mesh_SetupGlassRender (const vec3_t lightVec)
@@ -856,7 +940,7 @@ static void R_Mesh_DrawVBO_Callback (void)
 R_Mesh_DrawFrame: should be able to handle all types of meshes.
 =============
 */
-static void R_Mesh_DrawFrame (const vec3_t statLightPosition)
+static void R_Mesh_DrawFrame (const vec3_t statLightPosition, const vec3_t statLightColor)
 {
 	// model-space static light position
 	vec3_t		lightVec;
@@ -927,7 +1011,7 @@ static void R_Mesh_DrawFrame (const vec3_t statLightPosition)
 		fragmentshader = r_meshnormalmaps->integer && (shell || (rs && rs->stage->normalmap));
 		fixed_function_lightmap = currentmodel->lightmap != NULL && !fragmentshader;
 		
-		R_Mesh_SetupStandardRender (rs, fragmentshader, shell, lightVec);
+		R_Mesh_SetupStandardRender (rs, fragmentshader, shell, lightVec, statLightColor);
 	}
 	
 	R_Mesh_DrawVBO (lerped);
@@ -963,80 +1047,6 @@ static void R_Mesh_DrawBlankMeshFrame (void)
 	glUseProgramObjectARB (0);
 }
 
-static void R_Mesh_SetShadelight (void)
-{
-	int i;
-	
-	if ((currententity->flags & RF_SHELL_ANY))
-	{
-		VectorClear (shadelight);
-		if ((currententity->flags & RF_SHELL_HALF_DAM))
-			VectorSet (shadelight, 0.56, 0.59, 0.45);
-		if ((currententity->flags & RF_SHELL_DOUBLE))
-		{
-			shadelight[0] = 0.9;
-			shadelight[1] = 0.7;
-		}
-		if ((currententity->flags & RF_SHELL_RED))
-			shadelight[0] = 1.0;
-		if ((currententity->flags & RF_SHELL_GREEN))
-		{
-			shadelight[1] = 1.0;
-			shadelight[2] = 0.6;
-		}
-		if ((currententity->flags & RF_SHELL_BLUE))
-		{
-			shadelight[2] = 1.0;
-			shadelight[0] = 0.6;
-		}
-	}
-	else if ((currententity->flags & RF_FULLBRIGHT) || currentmodel->type == mod_terrain || currentmodel->type == mod_decal)
-	{
-		// Treat terrain as fullbright for now. TODO: move to precompiled lightmaps for terrain.
-		VectorSet (shadelight, 1.0, 1.0, 1.0);
-	}
-	else
-	{
-		VectorCopy (worldlight, shadelight); // worldlight is set in R_GetLightVals
-	}
-	if ((currententity->flags & RF_MINLIGHT))
-	{
-		float minlight;
-
-		if (r_meshnormalmaps->integer)
-			minlight = 0.1;
-		else
-			minlight = 0.2;
-		for (i=0 ; i<3 ; i++)
-			if (shadelight[i] > minlight)
-				break;
-		if (i == 3)
-		{
-			shadelight[0] = minlight;
-			shadelight[1] = minlight;
-			shadelight[2] = minlight;
-		}
-	}
-
-	if ((currententity->flags & RF_GLOW))
-	{	// bonus items will pulse with time
-		float	scale;
-		float	minlight;
-
-		scale = 0.2 * sin(r_newrefdef.time*7);
-		if (r_meshnormalmaps->integer)
-			minlight = 0.1;
-		else
-			minlight = 0.2;
-		for (i=0 ; i<3 ; i++)
-		{
-			shadelight[i] += scale;
-			if (shadelight[i] < minlight)
-				shadelight[i] = minlight;
-		}
-	}
-}
-
 /*
 =================
 R_Mesh_Draw - animate and render a mesh. Should support all mesh types.
@@ -1044,7 +1054,7 @@ R_Mesh_Draw - animate and render a mesh. Should support all mesh types.
 */
 void R_Mesh_Draw (void)
 {
-	vec3_t statLightPosition;
+	vec3_t statLightPosition, statLightColor;
 	cull_result_t cullresult;
 	
 	cullresult = R_Mesh_CullModel ();
@@ -1052,7 +1062,7 @@ void R_Mesh_Draw (void)
 	if (cullresult == draw_none)
 		return;
 	
-	R_GetLightVals (currententity->origin, statLightPosition);
+	R_GetStaticLightingForEnt (currententity, statLightPosition, statLightColor);
 
 	if(currentmodel->type == mod_terrain)
 	{
@@ -1083,8 +1093,6 @@ void R_Mesh_Draw (void)
 	if (currentmodel->type == mod_md2)
 		MD2_SelectFrame ();
 	// New model types go here
-
-	R_Mesh_SetShadelight ();
 
 	if (!(currententity->flags & RF_WEAPONMODEL))
 		c_alias_polys += currentmodel->num_triangles; /* for rspeed_epoly count */
@@ -1125,7 +1133,7 @@ void R_Mesh_Draw (void)
 		qglDepthMask (false);
 	}
 
-	R_Mesh_DrawFrame (statLightPosition);
+	R_Mesh_DrawFrame (statLightPosition, statLightColor);
 	
 	if ((currentmodel->typeFlags & MESH_DECAL))
 	{
