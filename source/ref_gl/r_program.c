@@ -941,7 +941,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 	varying vec3 StaticLightDir;
 	varying float fog;
 	varying float FresRatio;
-	varying vec3 vertPos, SSlightVec, SSEyeDir, worldNormal;
+	varying vec3 SSlightVec, SSEyeDir, worldNormal;
 
 	void subScatterVS(in vec4 ecVert)
 	{
@@ -949,7 +949,6 @@ static char mesh_vertex_program[] = STRINGIFY (
 		{
 			SSEyeDir = vec3(gl_ModelViewMatrix * anim_vertex);
 			SSlightVec = totalLightPosition - ecVert.xyz;
-			vertPos = ecVert.xyz;
 		}
 	}
 
@@ -1052,7 +1051,6 @@ static char mesh_fragment_program[] = STRINGIFY (
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
-	uniform int GPUANIM; // 0 for none, 1 for IQM skeletal, 2 for MD2 lerp
 	uniform int SHADOWMAP;
 	uniform int FOG;
 	uniform int TEAM;
@@ -1073,7 +1071,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 	varying vec3 StaticLightDir;
 	varying float fog;
 	varying float FresRatio;
-	varying vec3 vertPos, SSlightVec, SSEyeDir, worldNormal; 
+	varying vec3 SSlightVec, SSEyeDir, worldNormal; 
 
 	float halfLambert(in vec3 vect1, in vec3 vect2)
 	{
@@ -1319,6 +1317,34 @@ static char blankmesh_fragment_program[] = STRINGIFY (
 	void main (void)
 	{		
 		gl_FragColor = vec4(1.0);
+	}
+);
+
+// For dumping the static lighting into a lightmap texture
+static char mesh_extract_lightmap_vertex_program[] = STRINGIFY (
+	uniform vec3 staticLightPosition;
+	
+	varying vec3 StaticLightDir;
+
+	void main()
+	{
+		anim_compute (true, true);
+		StaticLightDir = tangentSpaceTransform * staticLightPosition;
+		gl_Position = gl_MultiTexCoord0;
+		gl_Position.xy *= 2.0;
+		gl_Position.xy -= vec2 (1.0);
+    }
+);
+
+static char mesh_extract_lightmap_fragment_program[] = STRINGIFY (
+	uniform vec3 staticLightColor;
+
+	varying vec3 StaticLightDir;
+
+	void main()
+	{
+		gl_FragColor.rgb = vec3 (max (1.5 * staticLightColor * normalize (StaticLightDir).z, 0.075));
+		gl_FragColor.a = 1.0;
 	}
 );
 
@@ -2147,6 +2173,14 @@ void R_LoadGLSLPrograms(void)
 
 	// Locate some parameters by name so we can set them later...
 	get_mesh_anim_uniform_locations (g_blankmeshprogramObj, &blankmesh_uniforms);
+	
+	//Per-pixel static lightmapped mesh rendered into texture space
+	R_LoadGLSLProgram ("Extract Lightmap", (char*)mesh_extract_lightmap_vertex_program, (char*)mesh_extract_lightmap_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, 0, &g_extractlightmapmeshprogramObj);
+	
+	get_mesh_anim_uniform_locations (g_extractlightmapmeshprogramObj, &mesh_extract_lightmap_uniforms.anim_uniforms);
+	mesh_extract_lightmap_uniforms.staticLightPosition = glGetUniformLocationARB (g_extractlightmapmeshprogramObj, "staticLightPosition");
+	mesh_extract_lightmap_uniforms.staticLightColor = glGetUniformLocationARB (g_extractlightmapmeshprogramObj, "staticLightColor");
+	
 	
 	//fullscreen distortion effects
 	R_LoadGLSLProgram ("Framebuffer Distort", (char*)fb_vertex_program, (char*)fb_fragment_program, NO_ATTRIBUTES, 0, &g_fbprogramObj);

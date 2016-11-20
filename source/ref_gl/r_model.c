@@ -2110,8 +2110,10 @@ void R_BeginRegistration (char *model)
 
 	r_worldmodel = Mod_ForName(fullname, true);	
 	
-	R_ParseTerrainEntities();
+	memset (cl_persistent_ents, 0, sizeof(cl_persistent_ents));
 	R_ParseLightEntities();
+	R_RegisterLightGroups();
+	R_ParseTerrainEntities();
 	R_FindSunEntity();
 	R_FinalizeGrass();
 	memset (cl_persistent_ents, 0, sizeof(cl_persistent_ents));
@@ -2119,8 +2121,6 @@ void R_BeginRegistration (char *model)
 	r_viewcluster = -1;
 
 	r_teamColor = 0;
-
-	R_RegisterLightGroups();
 
 	//ODE
 	RGD_BuildWorldTrimesh ();
