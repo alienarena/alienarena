@@ -982,13 +982,16 @@ static void R_Mesh_DrawFrame (const vec3_t statLightPosition, const vec3_t statL
 	if (rs_slowpath)
 	{
 		int lmtex = 0;
+		rs_lightmaptype_t lm = rs_lightmap_off;
 		vec2_t rotate_center = {0.5f, 0.5f};
 		
 		if (currentmodel->lightmap != NULL)
+		{
 			lmtex = currentmodel->lightmap->texnum;
+			lm = (currentmodel->typeFlags & MESH_LM_SEPARATE_COORDS) ? rs_lightmap_separate_texcoords : rs_lightmap_on;
+		}
 		
-		RS_Draw (	rs, lmtex, rotate_center, vec3_origin, false,
-					lmtex != 0 ? rs_lightmap_on : rs_lightmap_off,
+		RS_Draw (	rs, lmtex, rotate_center, vec3_origin, false, lm,
 					true, R_Mesh_DrawVBO_Callback );
 		
 		return;
@@ -1217,4 +1220,46 @@ void R_Mesh_DrawCaster (void)
 	R_Mesh_DrawBlankMeshFrame ();
 
 	qglPopMatrix();
+}
+
+void R_Mesh_ExtractLightmap (entity_t *ent, model_t *mod)
+{
+	vec3_t statLightPosition, statLightColor;
+	vec3_t lightVec, lightVal;
+	vec3_t tmp;
+	float lightVal_magnitude;
+	model_t *bakmod;
+	
+	// FIXME hack!
+	currententity = ent;
+	bakmod = currentmodel;
+	currentmodel = mod;
+	
+	if (currentmodel->type == mod_md2)
+		MD2_SelectFrame ();
+	// New model types go here
+	
+	R_GetStaticLightingForEnt (currententity, statLightPosition, statLightColor);
+	
+	VectorSubtract (statLightPosition, currententity->origin, tmp);
+	VectorMA (statLightPosition, 5.0, tmp, tmp);
+	R_ModelViewTransform (tmp, lightVec);
+	
+	glUseProgramObjectARB (g_extractlightmapmeshprogramObj);
+	
+	R_Mesh_SetupAnimUniforms (&mesh_extract_lightmap_uniforms.anim_uniforms);
+	
+	glUniform3fvARB (mesh_extract_lightmap_uniforms.staticLightPosition, 1, (const GLfloat *)lightVec);
+	
+	VectorCopy (statLightColor, lightVal);
+	lightVal_magnitude = 1.65f * VectorNormalize (lightVal);
+	lightVal_magnitude = clamp (lightVal_magnitude, 0.1f, 0.35f * gl_modulate->value);
+	VectorScale (lightVal, lightVal_magnitude, lightVal);
+	glUniform3fvARB (mesh_extract_lightmap_uniforms.staticLightColor, 1, (const GLfloat *)lightVal);
+	
+	R_Mesh_DrawVBO (currententity->frame != 0 || currentmodel->num_frames != 1);
+
+	glUseProgramObjectARB (0);
+	
+	currentmodel = bakmod;
 }

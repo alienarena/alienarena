@@ -71,10 +71,20 @@ void AnglesToMatrix3x3_Backwards (const vec3_t angles, float rotation_matrix[3][
 // vertex is also marked with what lightmap texture it's in. All verts in a
 // single triangle must have the same lightmap texture.
 typedef struct
+ {
+	enum {lmsrc_tex, lmsrc_ent} type;
+	union
+	{
+		int			texnum;
+		entity_t	*ent;
+	};
+} lightmapsource_t;
+#define srcequal(a,b) (!memcmp (&(a), &(b), sizeof (lightmapsource_t)))
+typedef struct
 {
 	vec3_t	vertex;
 	vec2_t	st;
-	int		lightmaptexturenum;
+	lightmapsource_t src;
 } decalrawvertex_t;
 
 // This structure is used to accumulate 3D geometry that will make up a 
@@ -175,7 +185,7 @@ static void Mod_AddToDecalModel (const decalorientation_t *pos, const decalinput
 					Com_Error (ERR_FATAL, "Mod_AddTerrainToDecalModel: DECAL_VERTS");
 				VectorCopy (verts[i], out->verts[index_table[orig_idx]-1].vertex);
 				Vector2Copy (in->inputverts[in->vtriangles[3*trinum+i]].st, out->verts[index_table[orig_idx]-1].st);
-				out->verts[index_table[orig_idx]-1].lightmaptexturenum = in->inputverts[in->vtriangles[3*trinum+i]].lightmaptexturenum;
+				out->verts[index_table[orig_idx]-1].src = in->inputverts[in->vtriangles[3*trinum+i]].src;
 			}
 			
 			out->polys[out->npolys][i] = index_table[orig_idx]-1;
@@ -196,7 +206,7 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	model_t *terrainmodel;
 	mesh_framevbo_t *framevbo;
 	void *_basevbo;
-	int lightmaptexturenum;
+	lightmapsource_t src;
 	
 	GLuint vbo_xyz;
 	
@@ -252,11 +262,17 @@ static void Mod_AddTerrainToDecalModel (const decalorientation_t *pos, entity_t 
 	
 	// All verts from the same terrain mesh have the same lightmap texture
 	if (terrainmodel->lightmap != NULL)
-		lightmaptexturenum = terrainmodel->lightmap->texnum;
+	{
+		src.type = lmsrc_tex;
+		src.texnum = terrainmodel->lightmap->texnum;
+	}
 	else
-		lightmaptexturenum = 0;
+	{
+		src.type = lmsrc_ent;
+		src.ent = terrainentity;
+	}
 	for (i = 0; i < in.nverts; i++)
-		in.inputverts[i].lightmaptexturenum = lightmaptexturenum;
+		in.inputverts[i].src = src;
 	
 	if ((terrainmodel->typeFlags & MESH_INDEXED))
 	{
@@ -309,6 +325,7 @@ static void Mod_AddBSPToDecalModel (const decalorientation_t *pos, decalprogress
 	// code as we use for other mesh types.
 	for (surfnum = 0; surfnum < r_worldmodel->numsurfaces; surfnum++)
 	{
+		lightmapsource_t src;
 		msurface_t *surf = &r_worldmodel->surfaces[surfnum];
 		
 		if ((surf->texinfo->flags & (SURF_TRANS33|SURF_SKY|SURF_WARP|SURF_FLOWING|SURF_NODRAW)))
@@ -317,11 +334,14 @@ static void Mod_AddBSPToDecalModel (const decalorientation_t *pos, decalprogress
 		in.nverts = surf->polys->numverts;
 		in.inputverts = Z_Malloc (in.nverts * sizeof(*in.inputverts));
 		
+		src.type = lmsrc_tex;
+		src.texnum = surf->lightmaptexturenum + TEXNUM_LIGHTMAPS;
+		
 		for (vertnum = 0, v = surf->polys->verts[0]; vertnum < in.nverts; vertnum++, v += VERTEXSIZE)
 		{
 			VectorCopy (v, in.inputverts[vertnum].vertex);
 			Vector2Copy (v+5, in.inputverts[vertnum].st);
-			in.inputverts[vertnum].lightmaptexturenum = surf->lightmaptexturenum + TEXNUM_LIGHTMAPS;
+			in.inputverts[vertnum].src = src;
 		}
 		
 		in.npolys = in.nverts - 2;
@@ -421,7 +441,7 @@ static void ClipTriangleAgainstBorder (int trinum, const decalorientation_t *pos
 			
 			VectorMA (out->verts[insideidx[0]].vertex, new_len * old_len, dir, new_vert->vertex);
 			Vector2MA (out->verts[insideidx[0]].st, new_len * old_stlen, stdir, new_vert->st);
-			new_vert->lightmaptexturenum = out->verts[outsideidx[i]].lightmaptexturenum;
+			new_vert->src = out->verts[outsideidx[i]].src;
 			out->polys[trinum][outside[i]] = out->nverts++;
 		}
 		
@@ -461,7 +481,7 @@ static void ClipTriangleAgainstBorder (int trinum, const decalorientation_t *pos
 		
 		VectorMA (out->verts[insideidx[i]].vertex, new_len * old_len, dir, new_vert->vertex);
 		Vector2MA (out->verts[insideidx[i]].st, new_len * old_stlen, stdir, new_vert->st);
-		new_vert->lightmaptexturenum = out->verts[outsideidx[0]].lightmaptexturenum;
+		new_vert->src = out->verts[outsideidx[0]].src;
 	}
 	
 	VectorSubtract (out->verts[out->polys[trinum][1]].vertex, out->verts[out->polys[trinum][0]].vertex, v0);
@@ -602,7 +622,7 @@ static void ReUnifyVertexes (decalprogress_t *out)
 						goto not_a_duplicate;
 				}
 				
-				if (out->verts[tmpidx].lightmaptexturenum == out->verts[idx].lightmaptexturenum)
+				if (srcequal (out->verts[tmpidx].src, out->verts[idx].src))
 					break;
 not_a_duplicate:;
 			}
@@ -645,25 +665,28 @@ not_a_duplicate:;
 	Z_Free (new_verts);
 }
 
-static void GenerateLightmap (decalprogress_t *out, model_t *mod)
+static entity_t *load_decalentity;
+
+// Vertices are grouped by what lightmap texture the original geometry used. Or
+// 0 for none.
+typedef struct {
+	lightmapsource_t src;
+	vec2_t orig_mins, orig_maxs, orig_fpsize;
+	vec2_t new_mins, new_maxs, new_fpsize;
+	int size_used[2];
+	int orig_int_mins[2], orig_int_maxs[2];
+	int int_mins[2], int_maxs[2];
+} decal_vertgroup_t;
+
+static decal_vertgroup_t *GenerateLightmapTexcoords (decalprogress_t *out, model_t *mod, int *out_numgroups, int final_size[2])
 {
 	int i, j, k;
-	struct {
-		int lightmaptexturenum;
-		vec2_t orig_mins, orig_maxs, orig_fpsize;
-		vec2_t new_mins, new_maxs, new_fpsize;
-		int size_used[2];
-		int orig_int_mins[2], orig_int_maxs[2];
-		int int_mins[2], int_maxs[2];
-	} *groups;
+	decal_vertgroup_t *groups;
 	int *group_given_vertex;
 	int *allocated;
-	int final_size[2];
 	int max_group_tex_size[2] = {0, 0}, total_group_tex_size[2] = {0, 0};
 	int numgroups = 0;
 	qboolean transpose;
-	static int num_lm_texes = 0;
-	char lm_tex_name[MAX_QPATH];
 	
 	// Build a complete list of lightmap textures used
 	groups = Z_Malloc (out->nverts * sizeof(*groups));
@@ -673,7 +696,7 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 	{
 		for (j = 0; j < numgroups; j++)
 		{
-			if (groups[j].lightmaptexturenum == out->verts[i].lightmaptexturenum)
+			if (srcequal (groups[j].src, out->verts[i].src))
 			{
 				for (k = 0; k < 2; k++)
 				{
@@ -689,7 +712,7 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 		
 		if (j == numgroups)
 		{
-			groups[numgroups].lightmaptexturenum = out->verts[i].lightmaptexturenum;
+			groups[numgroups].src = out->verts[i].src;
 			Vector2Copy (out->verts[i].st, groups[numgroups].orig_maxs);
 			Vector2Copy (out->verts[i].st, groups[numgroups].orig_mins);
 			group_given_vertex[i] = numgroups++;
@@ -704,11 +727,11 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 	for (i = 0; i < numgroups; i++)
 	{
 		int texsize[2] = {0, 0};
-		int texnum = groups[i].lightmaptexturenum;
+		lightmapsource_t src = groups[i].src;
 		
 		Vector2Subtract (groups[i].orig_maxs, groups[i].orig_mins, groups[i].orig_fpsize);
 		
-		if (texnum == 0)
+		if (src.type == lmsrc_ent)
 		{
 			// for geometry without an underlying lightmap, we use a fraction of
 			// the size of the decal texture
@@ -718,17 +741,17 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 				texsize[1] = mod->skins[0]->height / 2;
 			}
 		}
-		else if (texnum >= TEXNUM_LIGHTMAPS && texnum < TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS)
+		else if (src.texnum >= TEXNUM_LIGHTMAPS && src.texnum < TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS)
 		{
 			// BSP lightmap
 			texsize[0] = texsize[1] = LIGHTMAP_SIZE;
 		}
-		else if (texnum >= TEXNUM_IMAGES && texnum < TEXNUM_IMAGES + MAX_GLTEXTURES)
+		else if (src.texnum >= TEXNUM_IMAGES && src.texnum < TEXNUM_IMAGES + MAX_GLTEXTURES)
 		{
 			// underlying lightmap texture is allocated as a regular texture (as
 			// it would be on a terrain mesh.)
-			texsize[0] = gltextures[texnum - TEXNUM_IMAGES].width;
-			texsize[1] = gltextures[texnum - TEXNUM_IMAGES].height;
+			texsize[0] = gltextures[src.texnum - TEXNUM_IMAGES].width;
+			texsize[1] = gltextures[src.texnum - TEXNUM_IMAGES].height;
 		}
 		
 		for (j = 0; j < 2; j++)
@@ -813,7 +836,26 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 		}
 	}
 	
-	// now we build the actual lightmap texture
+	// Final step is to regenerate the lightmap texcoords for all the vertices
+	for (i = 0; i < out->nverts; i++)
+	{
+		int g = group_given_vertex[i];
+		for (j = 0; j < 2; j++)
+			out->verts[i].st[j] = groups[g].new_mins[j] + groups[g].new_fpsize[j] * (out->verts[i].st[j] - groups[g].orig_mins[j]) / groups[g].orig_fpsize[j];
+	}
+	
+	Z_Free (group_given_vertex);
+	
+	*out_numgroups = numgroups;
+	return groups;
+}
+
+static void GenerateLightmapTexture (model_t *mod, decal_vertgroup_t *groups, int numgroups, int final_size[2])
+{
+	int i;
+	char lm_tex_name[MAX_QPATH];
+	static int num_lm_texes = 0;
+	
 	Com_sprintf (lm_tex_name, sizeof (lm_tex_name), "***decal_lightmap_%d***", num_lm_texes++);
 	mod->lightmap = GL_FindFreeImage (lm_tex_name, final_size[0], final_size[1], it_lightmap);
 	GL_SelectTexture (0);
@@ -833,12 +875,47 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 	qglClear (GL_COLOR_BUFFER_BIT);
 	
 	qglBindFramebufferEXT (GL_READ_FRAMEBUFFER_EXT, orig_lm_fbo);
+	
+	// uncomment to make every block of the lightmap a different bright color.
+	/*qglEnable (GL_SCISSOR_TEST);
 	for (i = 0; i < numgroups; i++)
 	{
-		if (groups[i].lightmaptexturenum == 0)
-			continue;
+		qglScissor (
+			groups[i].int_mins[0], groups[i].int_mins[1],
+			groups[i].size_used[0], groups[i].size_used[1]
+		);
 		
-		qglFramebufferTexture2DEXT (GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, groups[i].lightmaptexturenum, 0);
+		i++;
+		qglClearColor ((i & 1) ? 1.0 : 0.0, (i & 2) ? 1.0 : 0.0, (i & 4) ? 1.0 : 0.0, 1.0);
+		i--;
+		qglClear (GL_COLOR_BUFFER_BIT);
+		
+		continue;
+	}
+	qglDisable (GL_SCISSOR_TEST);*/
+	
+	for (i = 0; i < numgroups; i++)
+	{
+		if (groups[i].src.type == lmsrc_ent)
+		{
+			qglEnable (GL_SCISSOR_TEST);
+			qglDisable (GL_DEPTH_TEST);
+			qglViewport (
+				groups[i].int_mins[0] - groups[i].orig_int_mins[0],
+				groups[i].int_mins[1] - groups[i].orig_int_mins[1],
+				mod->skins[0]->width / 2, mod->skins[0]->height / 2
+			);
+			qglScissor (
+				groups[i].int_mins[0], groups[i].int_mins[1],
+				groups[i].size_used[0], groups[i].size_used[1]
+			);
+			R_Mesh_ExtractLightmap (groups[i].src.ent, groups[i].src.ent->model);
+			qglDisable (GL_SCISSOR_TEST);
+			qglEnable (GL_DEPTH_TEST);
+			continue;
+		}
+		
+		qglFramebufferTexture2DEXT (GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, groups[i].src.texnum, 0);
 		qglBlitFramebufferEXT (
 				groups[i].orig_int_mins[0], groups[i].orig_int_mins[1],
 				groups[i].orig_int_maxs[0], groups[i].orig_int_maxs[1],
@@ -855,20 +932,9 @@ static void GenerateLightmap (decalprogress_t *out, model_t *mod)
 	R_SetupViewport ();
 	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 	
-	// Final step is to regenerate the lightmap texcoords for all the vertices
-	for (i = 0; i < out->nverts; i++)
-	{
-		int g = group_given_vertex[i];
-		for (j = 0; j < 2; j++)
-			out->verts[i].st[j] = groups[g].new_mins[j] + groups[g].new_fpsize[j] * (out->verts[i].st[j] - groups[g].orig_mins[j]) / groups[g].orig_fpsize[j];
-	}
-	
 	Z_Free (groups);
-	Z_Free (group_given_vertex);
 	GL_Bind (0);
 }
-
-static entity_t *load_decalentity;
 
 void Mod_LoadDecalModel (model_t *mod, void *_buf)
 {
@@ -883,6 +949,9 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	char *buf = (char *)_buf;
 	const char *line;
 	decalorientation_t pos;
+	int final_lightmap_size[2];
+	decal_vertgroup_t *groups;
+	int numgroups;
 	
 	line = strtok (buf, ";");
 	while (line)
@@ -996,7 +1065,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	}
 	
 	ReUnifyVertexes (&data);
-	GenerateLightmap (&data, mod);
+	groups = GenerateLightmapTexcoords (&data, mod, &numgroups, final_lightmap_size);
 	
 	mod->numvertexes = data.nverts;
 	mod->num_triangles = data.npolys;
@@ -1018,6 +1087,8 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	
 	Z_Free (framevbo);
 	Z_Free (basevbo);
+	
+	GenerateLightmapTexture (mod, groups, numgroups, final_lightmap_size);
 }
 
 void R_ParseDecalEntity (char *match, char *block)

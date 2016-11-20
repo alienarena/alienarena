@@ -267,6 +267,7 @@ extern void R_SetupViewport (void);
 extern void R_RenderView (refdef_t *fd);
 extern void GL_ScreenShot_f (void);
 extern void R_Mesh_Draw (void);
+extern void R_Mesh_ExtractLightmap (entity_t *ent, model_t *mod);
 extern void R_DrawBrushModel (void);
 extern void R_DrawWorldSurfs (void);
 extern void R_DrawAlphaSurfaces (void);
@@ -565,6 +566,7 @@ GLhandleARB g_meshprogramObj[GLSL_MAX_DLIGHTS+1];
 GLhandleARB g_vertexonlymeshprogramObj[GLSL_MAX_DLIGHTS+1];
 GLhandleARB g_glassprogramObj;
 GLhandleARB g_blankmeshprogramObj;
+GLhandleARB g_extractlightmapmeshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
 GLhandleARB g_colorscaleprogramObj;
@@ -733,6 +735,13 @@ struct
 
 // Uniform locations for blank meshes.
 mesh_anim_uniform_location_t blankmesh_uniforms;
+
+// Uniform locations for dumping out the static lighting into a lightmap texture
+struct
+{
+	mesh_anim_uniform_location_t	anim_uniforms;
+	GLuint							staticLightPosition, staticLightColor;
+} mesh_extract_lightmap_uniforms;
 
 //fullscreen distortion effects
 struct
