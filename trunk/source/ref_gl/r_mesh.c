@@ -942,6 +942,8 @@ R_Mesh_DrawFrame: should be able to handle all types of meshes.
 */
 static void R_Mesh_DrawFrame (const vec3_t statLightPosition, const vec3_t statLightColor)
 {
+	vec3_t tmp;
+	
 	// model-space static light position
 	vec3_t		lightVec;
 	
@@ -992,7 +994,9 @@ static void R_Mesh_DrawFrame (const vec3_t statLightPosition, const vec3_t statL
 		return;
 	}
 	
-	R_ModelViewTransform (statLightPosition, lightVec);
+	VectorSubtract (statLightPosition, currententity->origin, tmp);
+	VectorMA (statLightPosition, 5.0, tmp, tmp);
+	R_ModelViewTransform (tmp, lightVec);
 	
 	if ((currententity->flags & RF_TRANSLUCENT) && !(currententity->flags & RF_SHELL_ANY))
 	{
