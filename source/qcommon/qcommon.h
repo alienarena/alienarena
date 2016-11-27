@@ -1106,6 +1106,7 @@ typedef struct
 	vec3_t	origin;
 	float	size;
 	int		type;
+	const char *path; // ptr into decoration_variant_paths
 } terraindec_t;
 
 typedef struct
@@ -1119,10 +1120,9 @@ typedef struct
 	int				num_triangles;
 	unsigned int	*tri_indices;
 	vec3_t			mins, maxs;
-	int				num_vegetation;
-	terraindec_t	*vegetation;
-	int				num_rocks;
-	terraindec_t	*rocks;
+	int				num_decorations;
+	terraindec_t	*decorations;
+	char			*decoration_variant_paths; // lots of NULL-separated strings
 } terraindata_t;
 
 // out will be populated with a simplified version of the mesh. 
