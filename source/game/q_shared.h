@@ -261,7 +261,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 char *COM_SkipPath (const char *pathname);
 void COM_StripExtension (const char *in, char *out);
-qboolean COM_HasExtension (char *path, char *extension);
+qboolean COM_HasExtension (const char *path, const char *extension);
 char *COM_FileExtension (char *in);
 void COM_FileBase (char *in, char *out);
 void COM_FilePath (char *in, char *out);
