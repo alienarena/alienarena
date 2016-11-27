@@ -67,8 +67,8 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	
 	for (i = 0; i < mod->numvertexes; i++)
 	{
-	    Vector2Copy (&data.vert_texcoords[2*i], basevbo[i].st);
-	    VectorCopy (&data.vert_positions[3*i], framevbo[i].vertex);
+		Vector2Copy (&data.vert_texcoords[2*i], basevbo[i].st);
+		VectorCopy (&data.vert_positions[3*i], framevbo[i].vertex);
 	}
 	
 	ndownward = 0;
@@ -101,7 +101,7 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 {
 	char *buf;
 	int len;
-	int i;
+	int i, j;
 	terraindata_t data;
 	trace_t plant;
 	vec3_t start, end;
@@ -123,96 +123,70 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 	FS_FreeFile ((void *)buf);
 	
 	// TODO: transformed terrain model support!
-	for (i = 0; i < data.num_vegetation; i++)
+	for (i = 0; i < data.num_decorations; i++)
 	{
-		vec3_t org;
-		char *texture;
-		static char *weedtextures[] = 
+		// FIXME: make a utility function for this
+		static const char *mesh_extensions[] =
 		{
-			"gfx/weed1.tga",
-			"gfx/weed2.tga",
-			"gfx/weed3.tga",
-			"gfx/weed4.tga"
+			".md2", ".iqm", ".decal", ".terrain", ".bsp"
 		};
-		static char *bushtextures[] = 
+		qboolean is_mesh = false;
+		for (j = 0; j < 5; j++)
 		{
-			"gfx/bush1.tga",
-			"gfx/bush2.tga"
-		};
-		int type;
-		float size;
-		
-		VectorAdd (origin, data.vegetation[i].origin, org);
-		size = data.vegetation[i].size;
-		
-		if (size < 3.0)
-			continue;
-		
-		switch (data.vegetation[i].type)
-		{
-		default:
-		case 0:
-			texture = "gfx/grass.tga";
-			type = 0;
-			break;
-		case 1:
-			texture = weedtextures[rand()%4];
-			size /= 2.0;
-			type = 0;
-			break;
-		case 2:
-			texture = bushtextures[rand()%2];
-			size *= 1.5;
-			type = 2;
-			break;
+			if (COM_HasExtension (data.decorations[i].path, mesh_extensions[j]))
+			{
+				is_mesh = true;
+				break;
+			}
 		}
 		
-		// Figure out where to "plant" the plant.
-		VectorCopy (org, start);
-		start[2] += 256;
-		VectorCopy (org, end);
-		end[2] -= 256;
-		plant = CM_BoxTrace (start, end, vec3_origin, vec3_origin, 0, MASK_ALL);
-		
-		Mod_AddVegetation (	org, plant.plane.normal,
-							GL_FindImage (texture, it_wall), color,
-							data.vegetation[i].size, texture, type );
-	}
-	
-	for (i = 0; i < data.num_rocks; i++)
-	{
-		entity_t *ent;
-		static char *rockmeshes[] =
+		if (is_mesh)
 		{
-			"maps/meshes/rocks/rock1.md2",
-			"maps/meshes/rocks/rock2.md2",
-			"maps/meshes/rocks/rock3.md2",
-			"maps/meshes/rocks/rock4.md2",
-			"maps/meshes/rocks/rock5.md2"
-		};
-		
-		if (num_rock_entities == MAX_ROCKS)
-			break;
+			entity_t *ent;
+			
+			if (num_rock_entities == MAX_ROCKS)
+				break;
+
+			ent = &rock_entities[num_rock_entities];
+			memset (ent, 0, sizeof(*ent));
+			ent->number = MAX_EDICTS+MAX_MAP_MODELS+num_rock_entities++;
+			ent->model = R_RegisterModel (data.decorations[i].path);
 	
-		ent = &rock_entities[num_rock_entities];
-		memset (ent, 0, sizeof(*ent));
-		ent->number = MAX_EDICTS+MAX_MAP_MODELS+num_rock_entities++;
-		ent->model = R_RegisterModel (rockmeshes[rand()%5]);
-		
-		VectorAdd (origin, data.rocks[i].origin, ent->origin);
-		
-		// Figure out where to "plant" the rock.
-		VectorCopy (ent->origin, start);
-		start[2] += 256;
-		VectorCopy (ent->origin, end);
-		end[2] -= 256;
-		plant = CM_BoxTrace (start, end, ent->model->mins, ent->model->maxs, 0, MASK_ALL);
-		
-		vectoangles (plant.plane.normal, ent->angles);
-		// Entities are oriented such that their angles point forward, not up
-		ent->angles[PITCH] += 90.0; 
-		
-/*		ent->angles[YAW] = 360.0*frand();*/
+			VectorAdd (origin, data.decorations[i].origin, ent->origin);
+	
+			// Figure out where to "plant" the rock.
+			VectorCopy (ent->origin, start);
+			start[2] += 256;
+			VectorCopy (ent->origin, end);
+			end[2] -= 256;
+			plant = CM_BoxTrace (start, end, ent->model->mins, ent->model->maxs, 0, MASK_ALL);
+	
+			vectoangles (plant.plane.normal, ent->angles);
+			// Entities are oriented such that their angles point forward, not up
+			ent->angles[PITCH] += 90.0; 
+	
+/*			ent->angles[YAW] = 360.0*frand();*/
+		}
+		else
+		{
+			vec3_t org;
+			
+			if (data.decorations[i].size < 3.0)
+				continue;
+			
+			VectorAdd (origin, data.decorations[i].origin, org);
+			
+			// Figure out where to "plant" the plant.
+			VectorCopy (org, start);
+			start[2] += 256;
+			VectorCopy (org, end);
+			end[2] -= 256;
+			plant = CM_BoxTrace (start, end, vec3_origin, vec3_origin, 0, MASK_ALL);
+	
+			Mod_AddVegetation (	org, plant.plane.normal,
+								GL_FindImage (data.decorations[i].path, it_wall), color,
+								data.decorations[i].size, data.decorations[i].path, data.decorations[i].type );
+		}
 	}
 	
 	CleanupTerrainData (&data);

@@ -7,6 +7,94 @@
 #include "binheap.h"
 #include "libgarland.h"
 
+// This describes a single decoration type that has been parsed out of the
+// .terrain file.
+typedef struct decoration_channel_s
+{
+	struct decoration_channel_s	*next;
+	int							type;
+	// identify a texture channel for this decoration type
+	int							channel_num;
+	char						*texture_path;
+	// list of texture or mesh paths
+#define MAX_DECORATION_VARIANTS 64
+	int							num_variants;
+	char						*variant_paths[MAX_DECORATION_VARIANTS];
+	float						gridsz; // average spacing for the decorations
+	float						sizecoef; // scaling for each decoration
+	// output fields, to be set by the loader
+	int							out_num_decorations;
+	terraindec_t				*out_decorations;
+} decoration_channel_t;
+
+// Create structures for the legacy hardcoded decoration types (TODO: remove
+// before release?)
+static const decoration_channel_t legacy_shrub_channel = 
+{
+	NULL,		// no next
+	2,
+	0,			// red channel indicates shrubbery
+	NULL,		// must override texture path before using!
+	2,			// 2 different shrub textures
+	{
+		"gfx/bush1.tga",
+		"gfx/bush2.tga"
+	},
+	64.0f,
+	1.0f/16.0f,
+	0, NULL
+};
+static const decoration_channel_t legacy_grass_channel = 
+{
+	NULL,		// no next
+	0,
+	1,			// green channel indicates grass
+	NULL,		// must override texture path before using!
+	1,			// only 1 grass texture
+	{
+		"gfx/grass.tga"
+	},
+	64.0f,
+	1.0f/16.0f,
+	0, NULL
+};
+static const decoration_channel_t legacy_weed_channel = 
+{
+	NULL,		// no next
+	0,
+	2,			// blue channel indicates weeds
+	NULL,		// must override texture path before using!
+	4,			// 4 different weed textures
+	{
+		"gfx/weed1.tga",
+		"gfx/weed2.tga",
+		"gfx/weed3.tga",
+		"gfx/weed4.tga"
+	},
+	64.0f,
+	1.0f/16.0f,
+	0, NULL
+};
+static const decoration_channel_t legacy_rocks_channel = 
+{
+	NULL,		// no next
+	0,
+	0,			// red channel indicates rocks
+	NULL,		// must override texture path before using!
+	5,			// 5 different rock meshes
+	{
+		"maps/meshes/rocks/rock1.md2",
+		"maps/meshes/rocks/rock2.md2",
+		"maps/meshes/rocks/rock3.md2",
+		"maps/meshes/rocks/rock4.md2",
+		"maps/meshes/rocks/rock5.md2"
+	},
+	64.0f,
+	1.0,		// meshes can't yet be scaled anyway
+	0, NULL
+};
+
+
 static float grayscale_sample (const byte *texture, int tex_w, int tex_h, float u, float v, float *out_alpha)
 {
     vec4_t res;
@@ -19,30 +107,29 @@ static float grayscale_sample (const byte *texture, int tex_w, int tex_h, float 
     return (res[0] + res[1] + res[2]) / 3.0;
 }
 
-static terraindec_t *LoadTerrainDecorationType 
-	(	char *texpath, const vec3_t mins, const vec3_t scale, float gridsz,
-		const byte *hmtexdata, float hm_w, float hm_h,
-		const int channeltypes[3], int *out_counter
+static void LoadTerrainDecorationType
+	(	decoration_channel_t *channel, const vec3_t mins, const vec3_t scale,
+		const byte *hmtexdata, float hm_w, float hm_h
 	)
 {
 	byte *texdata_orig = NULL;
 	byte *texdata_resampled = NULL;
 	terraindec_t *ret = NULL;
-	int i, j, k, w, h, w_orig, h_orig;
+	int i, j, w, h, w_orig, h_orig;
 	int counter = 0;
 	
-	LoadTGA (texpath, &texdata_orig, &w_orig, &h_orig);
+	LoadTGA (channel->texture_path, &texdata_orig, &w_orig, &h_orig);
 	
 	if (texdata_orig == NULL)
-		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", texpath);
+		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", channel->texture_path);
 	
-	Z_Free (texpath);
+	Z_Free (channel->texture_path);
 	
 	// resample decorations texture to new resolution
 	// this is to make decoration density independent of decoration texture
-	w = ceilf (scale[0] / gridsz);
-	h = ceilf (scale[1] / gridsz);
-	texdata_resampled = Z_Malloc (w*h*3);
+	w = ceilf (scale[0] / channel->gridsz);
+	h = ceilf (scale[1] / channel->gridsz);
+	texdata_resampled = Z_Malloc (w*h);
 	for (i = 0; i < h; i++)
 	{
 		for (j = 0; j < w; j++)
@@ -54,31 +141,21 @@ static terraindec_t *LoadTerrainDecorationType
 			t = ((float)i)/(float)h;
 			bilinear_sample (texdata_orig, w_orig, h_orig, s, t, res);
 			
-			for (k = 0; k < 3; k++)
-				texdata_resampled[3*(i*w+j)+k] = floorf (res[k] * 255.0f);
+			texdata_resampled[i*w+j] = floorf (res[channel->channel_num] * 255.0f);
+			
+			// Count how many decorations we should allocate.
+			counter += texdata_resampled[i*w+j] != 0;
 		}
 	}
 	
 	free (texdata_orig);
 	
-	// Count how many decorations we should allocate.
-	for (j = 0; j < 3; j++)
-	{
-		if (channeltypes[j] == -1)
-			continue;
-		for (i = 0; i < w*h; i++)
-		{
-			if (texdata_resampled[i*3+j] != 0)
-				counter++;
-		}
-	}
-	
-	*out_counter = counter;
+	channel->out_num_decorations = counter;
 	
 	if (counter == 0)
 	{
 		Z_Free (texdata_resampled);
-		return NULL;
+		return;
 	}
 	
 	ret = Z_Malloc (counter * sizeof(terraindec_t));
@@ -86,46 +163,41 @@ static terraindec_t *LoadTerrainDecorationType
 	counter = 0;
 	
 	// Fill in the decorations
-	for (k = 0; k < 3; k++)
+	for (i = 0; i < h; i++)
 	{
-		if (channeltypes[k] == -1)
-			continue;
-		
-		for (i = 0; i < h; i++)
+		for (j = 0; j < w; j++)
 		{
-			for (j = 0; j < w; j++)
-			{
-				float x, y, z, s, t, xrand, yrand;
-				byte size;
-			
-				size = texdata_resampled[((h-i-1)*w+j)*3+k];
-				if (size == 0)
-					continue;
+			float x, y, z, s, t, xrand, yrand;
+			byte size;
 		
-				xrand = 2.0*(frand()-0.5);
-				yrand = 2.0*(frand()-0.5);
-		
-				s = ((float)j+xrand)/(float)w;
-				t = 1.0 - ((float)i+yrand)/(float)h;
-		
-				x = scale[0]*((float)j/(float)w) + mins[0] + scale[0]*xrand/(float)w;
-				y = scale[1]*((float)i/(float)h) + mins[1] + scale[1]*yrand/(float)h;
-				z = scale[2] * grayscale_sample (hmtexdata, hm_h, hm_w, s, t, NULL) + mins[2];
-		
-				VectorSet (ret[counter].origin, x, y, z);
-				ret[counter].size = (float)size/16.0f;
-				ret[counter].type = channeltypes[k];
-		
-				counter++;
-			}
+			size = texdata_resampled[(h-i-1)*w+j];
+			if (size == 0)
+				continue;
+	
+			xrand = 2.0*(frand()-0.5);
+			yrand = 2.0*(frand()-0.5);
+	
+			s = ((float)j+xrand)/(float)w;
+			t = 1.0 - ((float)i+yrand)/(float)h;
+	
+			x = scale[0]*((float)j/(float)w) + mins[0] + scale[0]*xrand/(float)w;
+			y = scale[1]*((float)i/(float)h) + mins[1] + scale[1]*yrand/(float)h;
+			z = scale[2] * grayscale_sample (hmtexdata, hm_h, hm_w, s, t, NULL) + mins[2];
+	
+			VectorSet (ret[counter].origin, x, y, z);
+			ret[counter].size = (float)size * channel->sizecoef;
+			ret[counter].path = channel->variant_paths[rand () % channel->num_variants];
+			ret[counter].type = channel->type;
+	
+			counter++;
 		}
 	}
 	
-	assert (counter == *out_counter);
+	assert (counter == channel->out_num_decorations);
 	
 	Z_Free (texdata_resampled);
 	
-	return ret;
+	channel->out_decorations = ret;
 }
 
 // TODO: separate function for decorations, currently this is kind of hacky.
@@ -145,6 +217,11 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	char	*token;
 	byte	*texdata;
 	int		start_time;
+	const char *prev_decoration_texture = NULL;
+	decoration_channel_t *decoration_channels = NULL, *c, *cnext;
+	char	*variant_path_cursor;
+	int		total_variant_path_len;
+	terraindec_t *decoration_cursor;
 	
 	memset (out, 0, sizeof(*out));
 	
@@ -189,6 +266,47 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 					Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting maxs %c axis! (File %s is invalid)", "xyz"[i], name);
 			}
 		}
+		if (!Q_strcasecmp (token, "decoration"))
+		{
+			const char *cur_decoration_texture, *cur_variant_path, *prev_variant_path = NULL;
+			decoration_channel_t *new_channel = Z_Malloc (sizeof (decoration_channel_t));
+			new_channel->next = decoration_channels;
+			decoration_channels = new_channel;
+#define DECORATION_ATTR(attr_name,transformation) \
+			new_channel->attr_name = transformation (COM_Parse (&line)); \
+			if (!line) \
+				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting %s for decoration! (File %s is invalid)", #attr_name, name);
+			cur_decoration_texture = COM_Parse (&line);
+			if (!line)
+				Com_Error (ERR_DROP, "LoadTerrainFile: EOL when expecting texture_path for decoration! (File %s is invalid)", name);
+			if (!Q_strcasecmp (cur_decoration_texture, "DITTO"))
+			{
+				if (prev_decoration_texture != NULL)
+					cur_decoration_texture = prev_decoration_texture;
+				else
+					Com_Error (ERR_DROP, "LoadTerrainFile: \"DITTO\" cannot be used as the first texture_path! (File %s is invalid)", name);
+			}
+			prev_decoration_texture = new_channel->texture_path = CopyString (cur_decoration_texture);
+			DECORATION_ATTR (channel_num, atoi)
+			DECORATION_ATTR (type, atoi)
+			DECORATION_ATTR (gridsz, atof)
+			DECORATION_ATTR (sizecoef, atof)
+#undef DECORATION_ATTR
+			new_channel->num_variants = 0;
+			cur_variant_path = COM_Parse (&line);
+			while (line && new_channel->num_variants < MAX_DECORATION_VARIANTS)
+			{
+				if (!Q_strcasecmp (cur_variant_path, "DITTO"))
+				{
+					if (prev_variant_path != NULL)
+						cur_variant_path = prev_variant_path;
+					else
+						Com_Error (ERR_DROP, "LoadTerrainFile: \"DITTO\" cannot be used as the first variant path name! (File %s is invalid)", name);
+				}
+				prev_variant_path = new_channel->variant_paths[new_channel->num_variants++] = CopyString (cur_variant_path);
+				cur_variant_path = COM_Parse (&line);
+			}
+		}
 		
 		//For forward compatibility-- if this file has a statement type we
 		//don't recognize, or if a recognized statement type has extra
@@ -211,22 +329,73 @@ void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations
 	if (texdata == NULL)
 		Com_Error (ERR_DROP, "LoadTerrainFile: Can't find file %s\n", out->hmtex_path);
 	
-	// Compile a list of all vegetation sprites that should be added to the
-	// map.
+	// preprocess decorations to move all variant paths to the same buffer for
+	// easier freeing later
+	total_variant_path_len = 0;
+	for (c = decoration_channels; c != NULL; c = c->next)
+	{
+		for (i = 0; i < c->num_variants; i++)
+			total_variant_path_len += strlen (c->variant_paths[i]) + 1;
+	}
+	variant_path_cursor = out->decoration_variant_paths = Z_Malloc (total_variant_path_len);
+	for (c = decoration_channels; c != NULL; c = c->next)
+	{
+		for (i = 0; i < c->num_variants; i++)
+		{
+			int sz = strlen (c->variant_paths[i]) + 1;
+			memcpy (variant_path_cursor, c->variant_paths[i], sz);
+			Z_Free (c->variant_paths[i]);
+			c->variant_paths[i] = variant_path_cursor;
+			variant_path_cursor += sz;
+		}
+	}
+
+	// legacy channels use static strings so don't need preprocessing.
+#define ADD_LEGACY_CHANNEL(template,path) \
+{ \
+	decoration_channel_t *new_channel = Z_Malloc (sizeof (decoration_channel_t)); \
+	memcpy (new_channel, &template, sizeof (decoration_channel_t)); \
+	new_channel->texture_path = CopyString (path); \
+	new_channel->next = decoration_channels; \
+	decoration_channels = new_channel; \
+}
+	
 	if (vegtex_path != NULL)
 	{
-		// Green pixels in the vegetation map indicate grass.
-		// Red pixels indicate shrubbery.
-		const int channeltypes[3] = {2, 0, 1};
-		out->vegetation = LoadTerrainDecorationType (vegtex_path, out->mins, scale, 64.0f, texdata, h, w, channeltypes, &out->num_vegetation);
+		ADD_LEGACY_CHANNEL (legacy_shrub_channel, vegtex_path);
+		ADD_LEGACY_CHANNEL (legacy_grass_channel, vegtex_path);
+		ADD_LEGACY_CHANNEL (legacy_weed_channel, vegtex_path);
+		Z_Free (vegtex_path);
 	}
 	
-	// Compile a list of all rock entities that should be added to the map
 	if (rocktex_path != NULL)
 	{
-		// Red pixels in the rock map indicate smallish rocks.
-		const int channeltypes[3] = {0, -1, -1};
-		out->rocks = LoadTerrainDecorationType (rocktex_path, out->mins, scale, 64.0f, texdata, h, w, channeltypes, &out->num_rocks);
+		ADD_LEGACY_CHANNEL (legacy_rocks_channel, rocktex_path);
+		Z_Free (rocktex_path);
+	}
+
+#undef ADD_LEGACY_CHANNEL
+	
+	// compile a list of all decorations that should be added to the map for
+	// each decoration type
+	out->num_decorations = 0;
+	for (c = decoration_channels; c != NULL; c = c->next)
+	{
+		LoadTerrainDecorationType (c, out->mins, scale, texdata, h, w);
+		out->num_decorations += c->out_num_decorations;
+	}
+	// concatenate all decoration lists together
+	decoration_cursor = out->decorations = Z_Malloc (out->num_decorations * sizeof (terraindec_t));
+	for (c = decoration_channels; c != NULL; c = cnext)
+	{
+		if (c->out_num_decorations)
+		{
+			memcpy (decoration_cursor, c->out_decorations, c->out_num_decorations * sizeof (terraindec_t));
+			Z_Free (c->out_decorations);
+		}
+		decoration_cursor += c->out_num_decorations;
+		cnext = c->next;
+		Z_Free (c);
 	}
 	
 	if (decorations_only)
@@ -350,8 +519,8 @@ void CleanupTerrainData (terraindata_t *dat)
 	CLEANUPFIELD (vert_positions)
 	CLEANUPFIELD (vert_texcoords)
 	CLEANUPFIELD (tri_indices)
-	CLEANUPFIELD (vegetation)
-	CLEANUPFIELD (rocks)
+	CLEANUPFIELD (decorations)
+	CLEANUPFIELD (decoration_variant_paths)
 	
 #undef CLEANUPFIELD
 }
