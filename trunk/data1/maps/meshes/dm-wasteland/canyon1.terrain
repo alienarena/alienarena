@@ -11,6 +11,5 @@ decoration DITTO 2 0 32.0 0.0625
 	gfx/weed3.tga
 	gfx/weed4.tga;
 lightmap textures/dm-wasteland/canyon1_lightmaptex.tga;
-vegetation textures/dm-wasteland/canyon1_vegetation.tga;
 mins -2048, -2048, 1;
 maxs 2048, 2048, 1000;
