@@ -332,7 +332,7 @@ void SV_InitGame (void)
 	svs.client_entities = Z_Malloc (sizeof(entity_state_t)*svs.num_client_entities);
 
 	// init network stuff
-	NET_Config ( (maxclients->value > 1) );
+	NET_Config (maxclients->value > 1 || dedicated->integer);
 
 	// heartbeats will always be sent to the COR master
 	svs.last_heartbeat = -999999;		// send immediately
