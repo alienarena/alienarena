@@ -54,7 +54,7 @@ void R_CalcTangent
 	const vec3_t normal, vec4_t tangent );
 
 // HACK: defined in cmodel.c
-extern void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3]);
+extern void AnglesToMatrix3x3 (const vec3_t angles, float rotation_matrix[3][3]);
 
 #define nanmask (255<<23)
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
