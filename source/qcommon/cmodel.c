@@ -1028,7 +1028,7 @@ qboolean TriangleIntersectsBBox
 	return	ret;
 }
 
-void AnglesToMatrix3x3 (vec3_t angles, float rotation_matrix[3][3])
+void AnglesToMatrix3x3 (const vec3_t angles, float rotation_matrix[3][3])
 {
 	float cosyaw, cospitch, cosroll, sinyaw, sinpitch, sinroll;
 	
@@ -1096,48 +1096,37 @@ static void CM_LoadTerrain_PopulateGrid (cterrainmodel_t *mod, cterraingrid_t *g
 	}
 }
 
-static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
+static void CM_LoadTerrainModel (const vec3_t angles, const vec3_t origin,
+								 const char *lightmap_path, int num_vertices,
+								 const float *vert_positions, int num_triangles,
+								 const unsigned int *tri_indices,
+								 const vec3_t mins, const vec3_t maxs)
 {
 	float rotation_matrix[3][3];
 	int i, j, k, l;
 	cterrainmodel_t *mod;
-	char *buf;
-	terraindata_t data;
 	cterraintri_t **tmp;
 	vec3_t up, lm_mins, lm_maxs;
 	
 	if (numterrainmodels == MAX_MAP_MODELS)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: MAX_MAP_MODELS");
 	
-	// Can only handle .terrain meshes so far
-	if (Q_strcasecmp (COM_FileExtension (name), "terrain"))
-		return;
-	
 	mod = &terrain_models[numterrainmodels];
 	mod->firsttriangle = CM_NumTriangles ();
 	mod->firstvertex = CM_NumVertices ();
 	numterrainmodels++;
 	
-	FS_LoadFile (name, (void**)&buf);
-	
-	if (!buf)
-		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
-	
 	AnglesToMatrix3x3 (angles, rotation_matrix);
 	
-	// This ends up being 1/4 as much detail as is used for rendering. You 
-	// need a surprisingly large amount to maintain accurate physics.
-	LoadTerrainFile (&data, name, false, 0.5, 8, buf);
-	
-	if (data.lightmap_path != NULL)
-		LoadTGA (data.lightmap_path, &mod->lightmaptex, &mod->lm_w, &mod->lm_h);
+	if (lightmap_path != NULL)
+		LoadTGA (lightmap_path, &mod->lightmaptex, &mod->lm_w, &mod->lm_h);
 	else
 		mod->lightmaptex = NULL;
 	
 	mod->numtriangles = 0;
 	
-	mod->verts = Z_Malloc (data.num_vertices*sizeof(vec3_t));
-	mod->tris = Z_Malloc (data.num_triangles*sizeof(cterraintri_t));
+	mod->verts = Z_Malloc (num_vertices*sizeof(vec3_t));
+	mod->tris = Z_Malloc (num_triangles*sizeof(cterraintri_t));
 	
 	// Technically, because the mins can be positive or the maxs can be 
 	// negative, this isn't always correct, but it errs on the side of more
@@ -1145,13 +1134,13 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	VectorCopy (origin, mod->mins);
 	VectorCopy (origin, mod->maxs);
 	
-	for (i = 0; i < data.num_vertices; i++)
+	for (i = 0; i < num_vertices; i++)
 	{
 		for (j = 0; j < 3; j++)
 		{
 			mod->verts[3*i+j] = origin[j];
 			for (k = 0; k < 3; k++)
-				mod->verts[3*i+j] += data.vert_positions[3*i+k] * rotation_matrix[j][k];
+				mod->verts[3*i+j] += vert_positions[3*i+k] * rotation_matrix[j][k];
 				
 			if (mod->verts[3*i+j] < mod->mins[j])
 				mod->mins[j] = mod->verts[3*i+j];
@@ -1160,7 +1149,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		}
 	}
 	
-	mod->numvertices = data.num_vertices;
+	mod->numvertices = num_vertices;
 	
 	VectorSet (mod->lm_s_axis, rotation_matrix[0][0], rotation_matrix[1][0], rotation_matrix[2][0]);
 	VectorSet (mod->lm_t_axis, rotation_matrix[0][1], rotation_matrix[1][1], rotation_matrix[2][1]);
@@ -1171,8 +1160,8 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		lm_mins[j] = lm_maxs[j] = origin[j];
 		for (k = 0; k < 3; k++)
 		{
-			lm_mins[j] += data.mins[k] * rotation_matrix[j][k];
-			lm_maxs[j] += data.maxs[k] * rotation_matrix[j][k];
+			lm_mins[j] += mins[k] * rotation_matrix[j][k];
+			lm_maxs[j] += maxs[k] * rotation_matrix[j][k];
 		}
 	}
 	
@@ -1182,7 +1171,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 	mod->lm_size[1] = DotProduct (lm_maxs, mod->lm_t_axis) - mod->lm_mins[1];
 	
 	// pass 1: vertices, main plane of each triangle, filter out downfacing
-	for (i = 0; i < data.num_triangles; i++)
+	for (i = 0; i < num_triangles; i++)
 	{
 		cterraintri_t *tri;
 		vec3_t side1, side2;
@@ -1191,7 +1180,7 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		tri = &mod->tris[mod->numtriangles];
 		
 		for (j = 0; j < 3; j++)
-			tri->verts[j] = &mod->verts[3*data.tri_indices[3*i+j]];
+			tri->verts[j] = &mod->verts[3*tri_indices[3*i+j]];
 
 		VectorCopy (tri->verts[0], tri->mins);
 		VectorCopy (tri->verts[0], tri->maxs);
@@ -1341,8 +1330,8 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		}
 	}
 	
-	if (data.num_triangles != mod->numtriangles)
-		Com_Printf ("WARN: %d downward facing collision polygons in %s!\n", data.num_triangles - mod->numtriangles, name);
+	if (num_triangles != mod->numtriangles)
+		Com_Printf ("WARN: %d downward facing collision polygons in model %d!\n", num_triangles - mod->numtriangles, numterrainmodels-1);
 	
 	for (i = 0; i < 3; i++)
 		mod->numgrid[i] = ceil((mod->maxs[i] - mod->mins[i]) / TERRAIN_GRIDSIZE + 0.1);
@@ -1369,6 +1358,30 @@ static void CM_LoadTerrainModel (char *name, vec3_t angles, vec3_t origin)
 		}
 	}
 	Z_Free (tmp);
+}
+
+static void CM_LoadTerrainModel_FromFile (char *name, const vec3_t angles, const vec3_t origin)
+{
+	char *buf;
+	terraindata_t data;
+	
+	// Can only handle .terrain meshes so far
+	if (Q_strcasecmp (COM_FileExtension (name), "terrain"))
+		return;
+	
+	FS_LoadFile (name, (void**)&buf);
+	
+	if (!buf)
+		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
+	
+	// This ends up being 1/4 as much detail as is used for rendering. You 
+	// need a surprisingly large amount to maintain accurate physics.
+	LoadTerrainFile (&data, name, false, 0.5, 8, buf);
+	
+	CM_LoadTerrainModel (angles, origin, data.lightmap_path,
+						 data.num_vertices, data.vert_positions,
+						 data.num_triangles, data.tri_indices,
+						 data.mins, data.maxs);
 	
 	CleanupTerrainData (&data);
 	
@@ -1415,7 +1428,7 @@ static void CM_ParseTerrainModelEntity (char *match, char *block)
 			Com_SkipRestOfLine(&bl);
 	}
 	
-	CM_LoadTerrainModel (pathname, angles, origin);
+	CM_LoadTerrainModel_FromFile (pathname, angles, origin);
 	
 	Z_Free (pathname);
 }
@@ -1551,6 +1564,8 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 		
 		CM_FilterParseEntities ("classname", 1, classnames, CM_ParseTerrainModelEntity);
 	}
+	
+	printf ("\n\nverts %d tris %d\n\n", CM_NumVertices (), CM_NumTriangles ());
 
 	return &map_cmodels[0];
 }
