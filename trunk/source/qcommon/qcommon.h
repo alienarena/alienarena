@@ -851,7 +851,7 @@ void FS_FullWritePath( char *full_path, size_t pathsize,
  * @param file 
  * @return 
  */
-int  FS_FOpenFile( char *filename, FILE **file );
+int  FS_FOpenFile (const char *filename, FILE **file);
 
 /**
  * @brief
@@ -867,7 +867,7 @@ void FS_FCloseFile( FILE *f );
  * @param buffer 
  * @return 
  */
-int FS_LoadFile( char *path, void **buffer );
+int FS_LoadFile (const char *path, void **buffer);
 
 /**
  * @brief
@@ -878,8 +878,8 @@ int FS_LoadFile( char *path, void **buffer );
  * @param statbuffer_len 
  * @return 
  */
-int FS_LoadFile_TryStatic( char *path, void **buffer, void *statbuffer,
-							size_t statbuffer_len );
+int FS_LoadFile_TryStatic (const char *path, void **buffer, void *statbuffer,
+							size_t statbuffer_len);
 
 /**
  * @brief
@@ -1089,7 +1089,7 @@ IMAGE LOADING
 ==============================================================
 */
 
-void LoadTGA (char *name, byte **pic, int *width, int *height);
+void LoadTGA (const char *name, byte **pic, int *width, int *height);
 void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec4_t out);
 
 /*
