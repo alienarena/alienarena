@@ -550,7 +550,7 @@ FS_FOpenFile
 
 ===========
 */
-int FS_FOpenFile (char *filename, FILE **file)
+int FS_FOpenFile (const char *filename, FILE **file)
 {
 	char netpath[MAX_OSPATH];
 	qboolean found;
@@ -646,7 +646,7 @@ Background: Some people may extract game paths/files as uppercase onto their
 -JR / 20050802 / 1
 ==================
 */
-char *FS_TolowerPath (char *path)
+static const char *FS_TolowerPath (const char *path)
 {
 	int	i = 0;
 	static char buf[MAX_OSPATH]; // path can be const char *, so thats why
@@ -670,7 +670,7 @@ Given relative path
    For text files, this means the buffer is nul-terminated c-string.
 ============
 */
-int FS_LoadFile (char *path, void **buffer)
+int FS_LoadFile (const char *path, void **buffer)
 {
 	FILE	*h;
 	byte	*buf = NULL;
@@ -732,7 +732,7 @@ The calling function is responsible for comparing the value of *buffer with
 statbuffer, and determining whether or not to use FS_FreeFile on it.
 ============
 */
-int FS_LoadFile_TryStatic (char *path, void **buffer, void *statbuffer, size_t statbuffer_len)
+int FS_LoadFile_TryStatic (const char *path, void **buffer, void *statbuffer, size_t statbuffer_len)
 {
 	FILE	*h;
 	byte	*buf = NULL;
@@ -1060,7 +1060,7 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 **
 ** target of "dir" command
 */
-void FS_Dir_f( void )
+static void FS_Dir_f (void)
 {
 	char	*path = NULL;
 	char	findname[1024];
@@ -1122,7 +1122,7 @@ FS_Path_f
 
 ============
 */
-void FS_Path_f (void)
+static void FS_Path_f (void)
 {
 	int i;
 
