@@ -805,6 +805,7 @@ gitem_t	*FindItem (const char *pickup_name);
 gitem_t	*FindItemByClassname (const char *classname);
 #define	ITEM_INDEX(x) ((x)-itemlist)
 edict_t *Drop_Item (edict_t *ent, gitem_t *item);
+edict_t *Throw_Item (edict_t *ent, gitem_t *item);
 void SetRespawn (edict_t *ent, float delay);
 void ChangeWeapon (edict_t *ent);
 void SpawnItem (edict_t *ent, gitem_t *item);

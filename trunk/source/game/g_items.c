@@ -903,6 +903,55 @@ void Use_Item (edict_t *ent, edict_t *other, edict_t *activator)
 	gi.linkentity (ent);
 }
 
+edict_t *Throw_Item (edict_t *ent, gitem_t *item)
+{
+	edict_t	*dropped;
+	vec3_t	forward, right;
+	vec3_t	offset;
+
+	dropped = G_Spawn();
+
+	dropped->classname = item->classname;
+	dropped->item = item;
+	dropped->spawnflags = DROPPED_ITEM;
+	dropped->s.renderfx = RF_GLOW;
+	dropped->s.effects = EF_ROTATE;
+	VectorSet (dropped->mins, -15, -15, -15);
+	VectorSet (dropped->maxs, 15, 15, 15);
+	gi.setmodel (dropped, dropped->item->world_model);
+	dropped->solid = SOLID_TRIGGER;
+	dropped->movetype = MOVETYPE_TOSS;
+	dropped->touch = drop_temp_touch;
+	dropped->owner = ent;
+
+	if (ent->client)
+	{
+		trace_t	trace;
+
+		AngleVectors (ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 0, -16);
+		G_ProjectSource (ent->s.origin, offset, forward, right, dropped->s.origin);
+		trace = gi.trace (ent->s.origin, dropped->mins, dropped->maxs,
+			dropped->s.origin, ent, CONTENTS_SOLID);
+		VectorCopy (trace.endpos, dropped->s.origin);
+	}
+	else
+	{
+		AngleVectors (ent->s.angles, forward, right, NULL);
+		VectorCopy (ent->s.origin, dropped->s.origin);
+	}
+
+	dropped->velocity[0] = 200.0 * crandom();
+	dropped->velocity[1] = 200.0 * crandom();
+	dropped->velocity[2] = 300.0 + 200.0 * random();
+
+	dropped->think = drop_make_touchable;
+	dropped->nextthink = level.time + 1;
+
+	gi.linkentity (dropped);
+
+	return dropped;
+}
 //======================================================================
 
 /*
