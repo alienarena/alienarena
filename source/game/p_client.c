@@ -823,7 +823,32 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		else 
 		{
 			if(!excessive->value)
-				TossClientWeapon (self);
+			{
+				if(mod == MOD_VIOLATOR)
+				{
+					int i;
+					gitem_t		*it;
+					//spew entire inventory out
+					for (i=0 ; i<MAX_ITEMS ; i++)
+					{
+						if (!self->client->pers.inventory[i])
+							continue;
+						it = GetItemByIndex (i);
+
+						//do not toss things that are not tossable
+						if (strcmp (it->pickup_name, "Blaster") == 0)
+							continue;
+						if (strcmp (it->pickup_name, "Alien Blaster") == 0)
+							continue;
+						if (strcmp (it->pickup_name, "Violator") == 0)
+							continue;
+						Throw_Item (self, it);
+					}
+					//perhaps throw out some armor and health if the player has a lot of it
+				}
+				else
+					TossClientWeapon (self);
+			}
 		}
 
 		if(ctf->value) 
