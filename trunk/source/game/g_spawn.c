@@ -939,6 +939,9 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("models/objects/spud/tris.iqm");
 		gi.modelindex ("models/weapons/v_blast/tris.iqm");
 		gi.modelindex ("models/weapons/v_violator/tris.iqm");
+		gi.modelindex ("models/items/activated/double/tris.iqm");
+		gi.modelindex ("models/items/activated/double/glass.iqm");
+		gi.modelindex ("models/items/activated/force/tris.iqm");
 	}
 
 //

@@ -918,6 +918,26 @@ models/items/armor/shard/skin
 		cube
 	}
 }
+models/items/activated/double/skin
+{
+	{
+		map models/items/activated/double/skin_normal.jpg
+		normalmap
+		map2 models/items/activated/double/skin_fx.tga
+		glow
+		map3 maps/meshes/electrode_fx.tga
+		fx
+	}
+}
+models/items/activated/force/skin
+{
+	{
+		map models/items/activated/force/skin_normal.jpg
+		normalmap
+		map2 models/items/activated/force/skin_fx.tga
+		glow
+	}
+}
 maps/meshes/injector
 {
 	{

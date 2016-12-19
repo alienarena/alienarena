@@ -867,7 +867,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				//replace player color shells for powerups with floating gfx effect
 				if((effects & EF_QUAD) && playermodel)
 				{
-					CL_PoweredEffects (ent.origin, EF_QUAD);
+					CL_PoweredEffects (ent.origin, EF_QUAD);					
 				}
 				else if((effects & EF_PENT) && playermodel)
 				{
@@ -970,6 +970,29 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.flags |= RF_VIEWERMODEL;
 
 			V_AddEntity (&ent);
+			
+			if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
+			{				
+				if(ent.frame < 174)
+				{
+					//if frame is not death, set the model effect
+					if((effects & EF_QUAD) && playermodel)
+					{
+						ent.model = R_RegisterModel("models/items/activated/double/tris.iqm");
+						V_AddEntity (&ent);		
+					
+						ent.model = R_RegisterModel("models/items/activated/double/glass.iqm");
+						ent.flags |= RF_TRANSLUCENT;
+						ent.alpha = 0.30;
+						V_AddEntity (&ent);		
+					}
+					else if((effects & EF_PENT) && playermodel)
+					{
+						ent.model = R_RegisterModel("models/items/activated/force/tris.iqm");
+						V_AddEntity (&ent);		
+					}
+				}
+			}
 
 			//PGM - make sure these get reset.
 			ent.flags = 0;
