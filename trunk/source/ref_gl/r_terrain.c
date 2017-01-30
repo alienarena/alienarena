@@ -178,9 +178,9 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 			
 			// Figure out where to "plant" the plant.
 			VectorCopy (org, start);
-			start[2] += 256;
+			start[2] += 128;
 			VectorCopy (org, end);
-			end[2] -= 256;
+			end[2] -= 128;
 			plant = CM_BoxTrace (start, end, vec3_origin, vec3_origin, 0, MASK_ALL);
 	
 			Mod_AddVegetation (	org, plant.plane.normal,
