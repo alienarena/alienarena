@@ -271,8 +271,6 @@ nobase_dist_models_DATA = \
 	weapons/v_rocket/cover.iqm \
 	weapons/v_rocket/rocketlauncher.jpg \
 	weapons/v_rocket/rocketlauncher_normal.tga \
-	weapons/v_rocket/skin.jpg \
-	weapons/v_rocket/skin_normal.tga \
 	weapons/v_rocket/tris.iqm \
 	weapons/v_rocket/tris.skin \
 	weapons/v_shotg/effects.iqm \
