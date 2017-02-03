@@ -1477,6 +1477,18 @@ always owned, never in the world
 		GITEM_INIT_WEAP (1, 1, "Seekers", "models/weapons/v_minderaser/tris.iqm", "w_minderaser.iqm"),
 /* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav weapons/minderaserreload.wav misc/minderaser.wav"
 	},
+
+	{
+		GITEM_INIT_IDENTIFY (weapon_grapple, IT_WEAPON),
+		// not droppable, so drop callback not supplied
+		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, CTFWeapon_Grapple),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		// TODO: create an icon for the mind eraser!
+		GITEM_INIT_CLIENTSIDE (NULL, "grapple", "misc/w_pkup.wav"),
+		GITEM_INIT_WEAP (1, 1, NULL, "models/weapons/v_machn/tris.md2", "w_machinegun.iqm"),
+/* precache */ "weapons/electroball.wav"
+	},
+		
 #endif
 	//
 	// AMMO ITEMS

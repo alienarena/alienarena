@@ -337,7 +337,7 @@ void G_AntilagProjectile( edict_t *ent )
 		return;
 	}
 	
-	for (ping = owner->client->ping; ping > FRAMETIME*1000; ping -= FRAMETIME*1000)
+	for (ping = owner->client->ping; ping > FRAMETIME * 1000; ping -= FRAMETIME * 1000)
 	{
 		// do the full lag compensation, without the "built in" lag
 		time = owner->client->attackTime - ping; 

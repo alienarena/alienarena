@@ -3368,7 +3368,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		
 		if (ucmd->buttons & BUTTON_ZOOM)
 		{
-			if(level.time - client->zoomtime > FRAMETIME*10) //1 second delay between 
+			if(level.time - client->zoomtime > (FRAMETIME * 0.1/FRAMETIME)*10) //1 second delay between 
 			{
 				client->zoomed = !client->zoomed;
 				client->zoomtime = level.time;
@@ -3388,34 +3388,31 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		//dodging
 		client->dodge = false;	
-		if(!g_tactical->integer)
-		{			
-			if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false
-				&& client->keydown < 10 && ((level.time - client->lastmovetime) < .15))
+		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false
+			&& client->keydown < (10 * 1) && ((level.time - client->lastmovetime) < .15))
+		{
+			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) 
 			{
-				if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) 
-				{
-					if(ucmd->sidemove > 0)
-						client->dodge = 1;
-					else
-						client->dodge = -1;
-					ucmd->upmove += 100;
-				}
+				if(ucmd->sidemove > 0)
+					client->dodge = 1;
+				else
+					client->dodge = -1;
+				ucmd->upmove += 100;
 			}
-			if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove != 0 && ucmd->sidemove == 0 && client->moved == false
-				&& client->keydown < 10 && ((level.time - client->lastmovetime) < .15))
-			{
-				if((ucmd->forwardmove < 0 && client->lastforwardmove < 0) || (ucmd->forwardmove > 0 && client->lastforwardmove > 0)) 
-				{
-					if(ucmd->forwardmove > 0)
-						client->dodge = 2;
-					else
-						client->dodge = -2;
-					ucmd->upmove += 100;
-				}
-			}			
 		}
-		
+		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove != 0 && ucmd->sidemove == 0 && client->moved == false
+			&& client->keydown < (10 * 1) && ((level.time - client->lastmovetime) < .15))
+		{
+			if((ucmd->forwardmove < 0 && client->lastforwardmove < 0) || (ucmd->forwardmove > 0 && client->lastforwardmove > 0)) 
+			{
+				if(ucmd->forwardmove > 0)
+					client->dodge = 2;
+				else
+					client->dodge = -2;
+				ucmd->upmove += 100;
+			}
+		}			
+				
 		//checking previous frame's movement
 		if(client->moved == true && (ucmd->buttons & BUTTON_ANY))
 		{

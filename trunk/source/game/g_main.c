@@ -195,6 +195,9 @@ cvar_t  *g_background_music;
 cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;
 
+cvar_t  *sv_tickrate;
+float   FRAMETIME;
+
 //unlagged
 cvar_t	*g_antilagdebug;
 cvar_t	*g_antilagprojectiles;
@@ -1558,7 +1561,7 @@ void G_RunFrame (void)
 	edict_t	*ent;
 
 	level.framenum++;
-	level.time = level.framenum*FRAMETIME;
+	level.time = level.framenum*FRAMETIME*(0.1/FRAMETIME);
 
 	/*
 	 * update bot info in first client always, and in other active clients
@@ -1614,7 +1617,7 @@ void G_RunFrame (void)
 			}
 		}
 
-		G_RunEntity (ent, FRAMETIME);
+		G_RunEntity (ent, FRAMETIME * (0.1/FRAMETIME));
 	}
 
 	// see if it is time to end a deathmatch

@@ -70,7 +70,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
 
-#define	FRAMETIME		0.1
+//#define	FRAMETIME		0.0083333333333333 //0.1
+extern float FRAMETIME;
 
 //unlagged - true ping
 #define NUM_PING_SAMPLES 64
@@ -139,7 +140,7 @@ typedef enum
 	// other weapons
 	weapon_shotgun, weapon_supershotgun, weapon_chaingun, weapon_minderaser,
 	weapon_rocketlauncher, weapon_hyperblaster, weapon_railgun, weapon_bfg,
-	weapon_blaster, weapon_alienblaster, weapon_violator,
+	weapon_blaster, weapon_alienblaster, weapon_violator, weapon_grapple,
 	weapon_warrior_punch, weapon_wizard_punch,
 	// ammo
 	ammo_shells, ammo_grenades, ammo_bullets, ammo_cells, ammo_rockets,
@@ -667,6 +668,8 @@ extern  cvar_t  *g_background_music;
 
 extern  cvar_t  *sv_botkickthreshold;
 extern  cvar_t	*sv_custombots;
+
+extern  cvar_t  *sv_tickrate;
 
 //mutators
 extern  cvar_t  *instagib;
@@ -1236,7 +1239,7 @@ typedef struct
 
 //unlagged - backward reconciliation #1
 // the size of history we'll keep
-#define NUM_CLIENT_HISTORY 17
+#define NUM_CLIENT_HISTORY 97
 
 // everything we need to know to backward reconcile
 typedef struct {

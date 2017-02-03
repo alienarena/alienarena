@@ -92,7 +92,7 @@ void Move_Final (edict_t *ent)
 		return;
 	}
 
-	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
+	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / (FRAMETIME * 0.1/FRAMETIME), ent->velocity);
 
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
@@ -102,7 +102,7 @@ void Move_Begin (edict_t *ent)
 {
 	float	frames;
 
-	if ((ent->moveinfo.speed * FRAMETIME) >= ent->moveinfo.remaining_distance)
+	if ((ent->moveinfo.speed * (FRAMETIME * 0.1/FRAMETIME)) >= ent->moveinfo.remaining_distance)
 	{
 		Move_Final (ent);
 		return;
@@ -170,7 +170,7 @@ void AngleMove_Final (edict_t *ent)
 		return;
 	}
 
-	VectorScale (move, 1.0/FRAMETIME, ent->avelocity);
+	VectorScale (move, 1.0/(FRAMETIME * 0.1/FRAMETIME), ent->avelocity);
 
 	ent->think = AngleMove_Done;
 	ent->nextthink = level.time + FRAMETIME;
@@ -201,7 +201,7 @@ void AngleMove_Begin (edict_t *ent)
 		return;
 	}
 
-	frames = floor(traveltime / FRAMETIME);
+	frames = floor(traveltime / (FRAMETIME * 0.1/FRAMETIME));
 
 	// scale the destdelta vector by the time spent traveling to get velocity
 	VectorScale (destdelta, 1.0 / traveltime, ent->avelocity);
@@ -1888,7 +1888,7 @@ void SP_func_timer (edict_t *self)
 
 	if (self->random >= self->wait)
 	{
-		self->random = self->wait - FRAMETIME;
+		self->random = self->wait - (FRAMETIME * 0.1/FRAMETIME);
 		gi.dprintf("func_timer at %s has random >= wait\n", vtos(self->s.origin));
 	}
 

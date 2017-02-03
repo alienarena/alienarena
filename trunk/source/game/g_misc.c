@@ -825,7 +825,7 @@ void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 
 	ratio = (float)other->mass / (float)self->mass;
 	VectorSubtract (self->s.origin, other->s.origin, v);
-	M_walkmove (self, vectoyaw(v), 20 * ratio * FRAMETIME);
+	M_walkmove (self, vectoyaw(v), 20 * ratio * (FRAMETIME * 0.1/FRAMETIME));
 }
 
 void barrel_explode (edict_t *self)

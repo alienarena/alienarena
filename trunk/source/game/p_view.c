@@ -289,7 +289,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	v[2] += ent->viewheight;
 
 	// add fall height
-	ratio = (ent->client->fall_time - level.time) / FALL_TIME;
+	ratio = (ent->client->fall_time - level.time) / (FALL_TIME * FRAMETIME/0.1);
 	if (ratio < 0)
 		ratio = 0;
 	v[2] -= ratio * ent->client->fall_value;
@@ -637,7 +637,7 @@ void P_FallingDamage (edict_t *ent)
 	ent->client->fall_value = delta;
 	if (ent->client->fall_value > 20)
 		ent->client->fall_value = 20;
-	ent->client->fall_time = level.time + FALL_TIME;
+	ent->client->fall_time = level.time + FALL_TIME * (FRAMETIME/0.1);
 
 	if (delta > 30)
 	{
