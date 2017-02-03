@@ -176,7 +176,7 @@ void ACEAI_Think (edict_t *self)
 
 clientthink:
 	// debug_printf("State: %d\n",self->state);
-	ucmd.msec = 100; // bots "client loop" runs at server frame rate
+	ucmd.msec = 100; // bots "client loop" runs at 100ms
 	self->client->ping = 0; //show in scoreboard ping of 0
 
 	// set bot's view angle
