@@ -335,7 +335,7 @@ void InitGame (void)
 	red_team_score = 0;
 	blue_team_score = 0;
 
-	if(sv_tickrate->integer > 120)
+	/*if(sv_tickrate->integer > 120)
 	{
 		safe_bprintf(PRINT_HIGH, "Server rate too high, clamping at 120fps\n");
 		FRAMETIME = 1.0/120.0;
@@ -348,7 +348,8 @@ void InitGame (void)
 		gi.cvar_set("sv_tickrate", "10");
 	}
 	else
-		FRAMETIME = 1.0/(float)sv_tickrate->integer;	
+		FRAMETIME = 1.0/(float)sv_tickrate->integer;	*/
+	FRAMETIME = 0.1;
 	
 	if(g_tactical->integer)
 	{

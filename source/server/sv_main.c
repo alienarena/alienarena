@@ -1064,6 +1064,9 @@ void SV_PrepWorldFrame (void)
 SV_RunGameFrame
 =================
 */
+
+#define FRAMETIME 0.1
+
 void SV_RunGameFrame (void)
 {
 	if (host_speeds->integer)
@@ -1074,7 +1077,7 @@ void SV_RunGameFrame (void)
 	// compression can get confused when a client
 	// has the "current" frame
 	sv.framenum++;
-	sv.time = sv.framenum*100;
+	sv.time = sv.framenum*FRAMETIME*1000;
 
 	// don't run if paused
 	if (!sv_paused->integer || maxclients->integer > 1)
@@ -1129,11 +1132,11 @@ void SV_Frame (int msec)
 	if (!sv_timedemo->integer && svs.realtime < sv.time)
 	{
 		// never let the time get too far off
-		if (sv.time - svs.realtime > 100)
+		if (sv.time - svs.realtime > FRAMETIME*1000)
 		{
 			if (sv_showclamp->integer)
 				Com_Printf ("sv lowclamp\n");
-			svs.realtime = sv.time - 100;
+			svs.realtime = sv.time - FRAMETIME*1000;
 		}
 		NET_Sleep(sv.time - svs.realtime);
 		return;
@@ -1163,7 +1166,7 @@ void SV_Frame (int msec)
 	tmp_systime = Sys_Milliseconds ();
 	tmp_hangtime = tmp_systime-old_systime;
 	old_systime = tmp_systime;
-	if (tmp_hangtime > 150) {
+	if (tmp_hangtime > FRAMETIME * 1500) {
 		sys_lasthang = tmp_systime;
 	}
 
