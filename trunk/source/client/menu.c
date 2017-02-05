@@ -920,9 +920,9 @@ void M_ForceMenuOff (void)
 	if (cls.state == ca_active && cls.key_dest == key_menu)
 	{
 		//-JD kill the music when leaving the menu of course
-		S_StopAllSounds();
+		S_StopAllSounds ();
 		background_music = Cvar_Get ("background_music", "1", CVAR_ARCHIVE);
-		S_StartMapMusic();
+		S_StartMapMusic ();
 	}
 
 	cls.key_dest = key_game;
