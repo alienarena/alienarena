@@ -195,7 +195,7 @@ void InitGame (void)
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
 	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");
-	sv_tickrate = gi.cvar("sv_tickrate", "40", CVAR_LATCH | CVARDOC_INT);
+	sv_tickrate = gi.cvar("sv_tickrate", "10", CVAR_LATCH | CVARDOC_INT);
 
 	//mutator
 	instagib = gi.cvar ("instagib", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
