@@ -1238,7 +1238,7 @@ typedef struct
 
 //unlagged - backward reconciliation #1
 // the size of history we'll keep
-#define NUM_CLIENT_HISTORY 17 //move this to 97 when 120 fps is allowed
+#define NUM_CLIENT_HISTORY 97 //was 17 which is optimal for a 20fps server rate, overkill for 10
 
 // everything we need to know to backward reconcile
 typedef struct {
