@@ -69,8 +69,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FL_POWER_ARMOR			0x00001000	// power armor (if any) is active
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
-
-//#define	FRAMETIME		0.0083333333333333 //0.1
+#define TENFPS 0.1
 extern float FRAMETIME;
 
 //unlagged - true ping
@@ -1341,6 +1340,9 @@ struct gclient_s
 	weaponstate_t	weaponstate;
 	vec3_t		kick_angles;	// weapon kicks
 	vec3_t		kick_origin;
+	vec3_t		lean_angles;	//lean
+	vec3_t		lean_origin;	
+	vec3_t		jet_angles;		//jetpack roll
 	float		v_dmg_roll, v_dmg_pitch, v_dmg_time;	// damage kicks
 	float		fall_time, fall_value;		// for view drop on fall
 	float		damage_alpha;
@@ -1364,6 +1366,15 @@ struct gclient_s
 	int			anim_priority;
 	qboolean	anim_duck;
 	qboolean	anim_run;
+	int			last_anim_frame;
+	int			last_weap_think_frame;
+	int			last_fire_frame;
+	int			last_jump_frame;
+	int			last_kick_frame;
+	int			last_stop_frame;
+	int			last_fall_frame;
+	float		fall_ratio;
+	float		xyspeed;
 
 	// powerup timers
 	float		doubledamage_expiretime;
@@ -1617,6 +1628,9 @@ struct edict_s
 	int			last_turn_frame;
 	float		turn_angle_inc;
 
+	// non-client animation vars
+	int			last_anim_frame;
+
 // ACEBOT_ADD
 	qboolean is_bot;
 
@@ -1639,6 +1653,10 @@ struct edict_s
 	char faveweap[64];
 	float weapacc[10];
 	float awareness;
+	float targDeltaX;
+	float targDeltaY;
+	int targDirSwitchX;
+	int targDirSwitchY;
 	char		chatmsg[8][128];
 
 // ACEBOT_END

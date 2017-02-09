@@ -107,12 +107,16 @@ qboolean SV_RunThink (edict_t *ent)
 		//if animated mesh, animate at this target
 		if (ent->spawnflags & 32)
 		{
-			ent->s.frame = (ent->s.frame + 1)%24;
+			if(level.framenum - ent->last_anim_frame > (int)(0.1/FRAMETIME) - 1)
+			{
+				ent->s.frame = (ent->s.frame + 1)%24;
+				ent->last_anim_frame = level.framenum;
+			}
 		}
 		//make a turn, smoothly over 4 frames for a smoother motion
-		if(level.framenum - ent->last_turn_frame < 9)
+		if(level.framenum - ent->last_turn_frame < (TENFPS/FRAMETIME * 8 + 1))
 		{
-			ent->s.angles[YAW] += ent->turn_angle_inc/8.0;
+			ent->s.angles[YAW] += ent->turn_angle_inc/(TENFPS/FRAMETIME * 8);
 			if(ent->s.angles[YAW] < 0)
 				ent->s.angles[YAW] += 360;
 			if(ent->s.angles[YAW] > 360)

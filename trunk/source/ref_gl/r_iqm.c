@@ -837,7 +837,7 @@ qboolean IQM_InAnimGroup(int frame, int oldframe)
 	//this code I believe can be replaced with anim groups that IQM supports
 	if(currententity->flags & RF_WEAPONMODEL)
 	{
-		return false;
+		return true;
 	}
 	else
 	{

@@ -2210,6 +2210,9 @@ void PutClientInServer (edict_t *ent)
 	ent->s.origin[2] += 1;	// make sure off ground
 	VectorCopy (ent->s.origin, ent->s.old_origin);
 
+	//clear lean		
+	client->lean = 0;
+
 	// set the delta angle
 	for (i=0 ; i<3 ; i++)
 		client->ps.pmove.delta_angles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
@@ -3348,27 +3351,41 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ucmd->sidemove = -200;
 		}
 
-		ucmd->forwardmove *= 1.3;
-
-		//clear lean		
-		client->lean = 0;
+		ucmd->forwardmove *= 1.3;		
 
 		if (ucmd->buttons & BUTTON_LEANRIGHT)
 		{
 			AngleVectors (client->v_angle, NULL, right, NULL);
-			VectorScale (right, 32, ent->client->kick_origin);
-			client->kick_angles[ROLL] = client->lean = -45;
+			
+			if(client->lean < 28)
+				client->lean += 2;
+			client->lean_angles[ROLL] = client->lean;
+			VectorScale (right, client->lean, ent->client->lean_origin);
 		}		
-		if (ucmd->buttons & BUTTON_LEANLEFT)
+		else if (ucmd->buttons & BUTTON_LEANLEFT)
 		{
 			AngleVectors (client->v_angle, NULL, right, NULL);
-			VectorScale (right, -32, ent->client->kick_origin);
-			client->kick_angles[ROLL] = client->lean = 45;
+			
+			if(client->lean > -28)
+				client->lean -= 2;
+			client->lean_angles[ROLL] = client->lean;
+			VectorScale (right, client->lean, ent->client->lean_origin);
+		}
+		else
+		{			
+			AngleVectors (client->v_angle, NULL, right, NULL);
+
+			if(client->lean < 0)
+				client->lean += 2;
+			if(client->lean > 0)
+				client->lean -= 2;
+			client->lean_angles[ROLL] = client->lean;
+			VectorScale (right, client->lean, ent->client->lean_origin);
 		}
 		
 		if (ucmd->buttons & BUTTON_ZOOM)
 		{
-			if(level.time - client->zoomtime > (FRAMETIME * 0.1/FRAMETIME)*10) //1 second delay between 
+			if(level.time - client->zoomtime > 1.0) //1 second delay between 
 			{
 				client->zoomed = !client->zoomed;
 				client->zoomtime = level.time;

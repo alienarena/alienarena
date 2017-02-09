@@ -96,7 +96,7 @@ gibs
 void gib_think (edict_t *self)
 {
 	self->s.frame++;
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS; 
 
 	if (self->s.frame > 9)
 	{
@@ -126,7 +126,7 @@ void gib_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		{
 			self->s.frame = 0;//++;
 			self->think = gib_think;
-			self->nextthink = level.time + FRAMETIME;
+			self->nextthink = level.time + TENFPS;
 		}
 	}
 }
@@ -658,7 +658,7 @@ void SP_func_object (edict_t *self)
 		self->solid = SOLID_BSP;
 		self->movetype = MOVETYPE_PUSH;
 		self->think = func_object_release;
-		self->nextthink = level.time + 2 * FRAMETIME;
+		self->nextthink = level.time + 2 * TENFPS;
 	}
 	else
 	{
@@ -825,7 +825,7 @@ void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 
 	ratio = (float)other->mass / (float)self->mass;
 	VectorSubtract (self->s.origin, other->s.origin, v);
-	M_walkmove (self, vectoyaw(v), 20 * ratio * (FRAMETIME * 0.1/FRAMETIME));
+	M_walkmove (self, vectoyaw(v), 20 * ratio * TENFPS);
 }
 
 void barrel_explode (edict_t *self)
@@ -911,7 +911,7 @@ void barrel_explode (edict_t *self)
 void barrel_delay (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	self->takedamage = DAMAGE_NO;
-	self->nextthink = level.time + 2 * FRAMETIME;
+	self->nextthink = level.time + 2 * TENFPS;
 	self->think = barrel_explode;
 	self->activator = attacker;
 }
@@ -1025,7 +1025,7 @@ void misc_mapmodel_think (edict_t *ent)
 		ent->s.frame = (ent->s.frame + 1) % 39;
 	else
 		ent->s.frame = (ent->s.frame + 1) % 24;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 {
@@ -1047,7 +1047,7 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 		else
 			ent->s.frame = rand()%24;
 		ent->think = misc_mapmodel_think;
-		ent->nextthink = level.time + FRAMETIME;
+		ent->nextthink = level.time + TENFPS;
 	}
 	else //static mesh
 		ent->s.frame = 0;
@@ -1216,7 +1216,7 @@ void misc_laser_think (edict_t *self)
 
 	VectorCopy (tr.endpos, self->s.old_origin);
 
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS;
 }
 
 void misc_laser_start (edict_t *self)
@@ -1288,7 +1288,7 @@ void computer_think (edict_t *ent)
 		tacticalScore.humanComputerHealth = ent->health/15;
 
 	ent->s.frame = (ent->s.frame + 1) % 39;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -1360,7 +1360,7 @@ void SP_misc_aliencomputer (edict_t *ent)
 	ent->health = 1500; 
 	ent->die = computer_die;
 	ent->think = computer_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien computer";
 
 	gi.linkentity (ent);
@@ -1386,7 +1386,7 @@ void SP_misc_humancomputer (edict_t *ent)
 	ent->health = 1500; 
 	ent->die = computer_die;
 	ent->think = computer_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human computer";
 
 	gi.linkentity (ent);
@@ -1401,7 +1401,7 @@ void powersrc_think (edict_t *ent)
 	else
 		tacticalScore.humanPowerSourceHealth = ent->health/15;
 	ent->s.frame = (ent->s.frame + 1) % 39;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -1473,7 +1473,7 @@ void SP_misc_alienpowersrc (edict_t *ent)
 	ent->health = 1500; 
 	ent->die = powersrc_die;
 	ent->think = powersrc_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien powersrc";
 
 	gi.linkentity (ent);
@@ -1499,7 +1499,7 @@ void SP_misc_humanpowersrc (edict_t *ent)
 	ent->health = 1500; 
 	ent->die = powersrc_die;
 	ent->think = powersrc_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human powersrc";
 
 	gi.linkentity (ent);
@@ -1513,7 +1513,7 @@ void ammodepot_think (edict_t *ent)
 		tacticalScore.alienAmmoDepotHealth = ent->health/15;
 	else
 		tacticalScore.humanAmmoDepotHealth = ent->health/15;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -1585,7 +1585,7 @@ void SP_misc_alienammodepot (edict_t *ent)
 	ent->health = 1500; 
 	ent->die = ammodepot_die;
 	ent->think = ammodepot_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien ammodepot";
 
 	gi.linkentity (ent);
@@ -1611,7 +1611,7 @@ void SP_misc_humanammodepot (edict_t *ent)
 	ent->health = 1500; 
 	ent->die = ammodepot_die;
 	ent->think = ammodepot_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human ammodepot";
 
 	gi.linkentity (ent);
@@ -1638,7 +1638,7 @@ void backupgen_think (edict_t *ent)
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/reject.wav"), 1, ATTN_STATIC, 0);
 		}
 	}	
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void backupgen_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -1708,7 +1708,7 @@ void SP_misc_alienbackupgen (edict_t *ent)
 	ent->health = 300; 
 	ent->die = backupgen_die;
 	ent->think = backupgen_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien backupgen";
 
 	gi.linkentity (ent);
@@ -1734,7 +1734,7 @@ void SP_misc_humanbackupgen (edict_t *ent)
 	ent->health = 300; 
 	ent->die = backupgen_die;
 	ent->think = backupgen_think;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human backupgen";
 
 	gi.linkentity (ent);

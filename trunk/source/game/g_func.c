@@ -92,25 +92,25 @@ void Move_Final (edict_t *ent)
 		return;
 	}
 
-	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / (FRAMETIME * 0.1/FRAMETIME), ent->velocity);
+	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / TENFPS, ent->velocity);
 
 	ent->think = Move_Done;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void Move_Begin (edict_t *ent)
 {
 	float	frames;
 
-	if ((ent->moveinfo.speed * (FRAMETIME * 0.1/FRAMETIME)) >= ent->moveinfo.remaining_distance)
+	if ((ent->moveinfo.speed * TENFPS) >= ent->moveinfo.remaining_distance)
 	{
 		Move_Final (ent);
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
-	frames = floor((ent->moveinfo.remaining_distance / ent->moveinfo.speed) / FRAMETIME);
-	ent->moveinfo.remaining_distance -= frames * ent->moveinfo.speed * FRAMETIME;
-	ent->nextthink = level.time + (frames * FRAMETIME);
+	frames = floor((ent->moveinfo.remaining_distance / ent->moveinfo.speed) / TENFPS);
+	ent->moveinfo.remaining_distance -= frames * ent->moveinfo.speed * TENFPS;
+	ent->nextthink = level.time + (frames * TENFPS);
 	ent->think = Move_Final;
 }
 
@@ -131,7 +131,7 @@ void Move_Calc (edict_t *ent, vec3_t dest, void(*func)(edict_t*))
 		}
 		else
 		{
-			ent->nextthink = level.time + FRAMETIME;
+			ent->nextthink = level.time + TENFPS;
 			ent->think = Move_Begin;
 		}
 	}
@@ -140,7 +140,7 @@ void Move_Calc (edict_t *ent, vec3_t dest, void(*func)(edict_t*))
 		// accelerative
 		ent->moveinfo.current_speed = 0;
 		ent->think = Think_AccelMove;
-		ent->nextthink = level.time + FRAMETIME;
+		ent->nextthink = level.time + TENFPS;
 	}
 }
 
@@ -170,10 +170,10 @@ void AngleMove_Final (edict_t *ent)
 		return;
 	}
 
-	VectorScale (move, 1.0/(FRAMETIME * 0.1/FRAMETIME), ent->avelocity);
+	VectorScale (move, 1.0/(TENFPS), ent->avelocity);
 
 	ent->think = AngleMove_Done;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void AngleMove_Begin (edict_t *ent)
@@ -195,19 +195,19 @@ void AngleMove_Begin (edict_t *ent)
 	// divide by speed to get time to reach dest
 	traveltime = len / ent->moveinfo.speed;
 
-	if (traveltime < FRAMETIME)
+	if (traveltime < TENFPS)
 	{
 		AngleMove_Final (ent);
 		return;
 	}
 
-	frames = floor(traveltime / (FRAMETIME * 0.1/FRAMETIME));
+	frames = floor(traveltime / (TENFPS));
 
 	// scale the destdelta vector by the time spent traveling to get velocity
 	VectorScale (destdelta, 1.0 / traveltime, ent->avelocity);
 
 	// set nextthink to trigger a think when dest is reached
-	ent->nextthink = level.time + frames * FRAMETIME;
+	ent->nextthink = level.time + frames * TENFPS;
 	ent->think = AngleMove_Final;
 }
 
@@ -221,7 +221,7 @@ void AngleMove_Calc (edict_t *ent, void(*func)(edict_t*))
 	}
 	else
 	{
-		ent->nextthink = level.time + FRAMETIME;
+		ent->nextthink = level.time + TENFPS;
 		ent->think = AngleMove_Begin;
 	}
 }
@@ -354,7 +354,7 @@ void Think_AccelMove (edict_t *ent)
 	}
 
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.current_speed*10, ent->velocity);
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->think = Think_AccelMove;
 }
 
@@ -627,7 +627,7 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 void func_rotating_animate (edict_t *ent)
 {
 	ent->s.frame = (ent->s.frame + 1) % 39;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void SP_func_rotating (edict_t *ent)
@@ -686,7 +686,7 @@ void SP_func_rotating (edict_t *ent)
 	{
 		if(!strcmp(ent->targetname, "animate"))
 		{
-			ent->nextthink = level.time + FRAMETIME;
+			ent->nextthink = level.time + TENFPS;
 			ent->think = func_rotating_animate;
 		}
 	}
@@ -1262,7 +1262,7 @@ void SP_func_door (edict_t *ent)
 
 	gi.linkentity (ent);
 
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	if (ent->targetname)
 	    ent->think = Think_CalcMoveSpeed;
 	else
@@ -1393,7 +1393,7 @@ void SP_func_door_rotating (edict_t *ent)
 
 	gi.linkentity (ent);
 
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	if (ent->health || ent->targetname)
 		ent->think = Think_CalcMoveSpeed;
 	else
@@ -1699,7 +1699,7 @@ void func_train_find (edict_t *self)
 
 	if (self->spawnflags & TRAIN_START_ON)
 	{
-		self->nextthink = level.time + FRAMETIME;
+		self->nextthink = level.time + TENFPS;
 		self->think = train_next;
 		self->activator = self;
 	}
@@ -1770,7 +1770,7 @@ void SP_func_train (edict_t *self)
 	{
 		// start trains on the second frame, to make sure their targets have had
 		// a chance to spawn
-		self->nextthink = level.time + FRAMETIME;
+		self->nextthink = level.time + TENFPS;
 		self->think = func_train_find;
 	}
 	else
@@ -1836,7 +1836,7 @@ void trigger_elevator_init (edict_t *self)
 void SP_trigger_elevator (edict_t *self)
 {
 	self->think = trigger_elevator_init;
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS;
 }
 
 
@@ -1888,7 +1888,7 @@ void SP_func_timer (edict_t *self)
 
 	if (self->random >= self->wait)
 	{
-		self->random = self->wait - (FRAMETIME * 0.1/FRAMETIME);
+		self->random = self->wait - TENFPS;
 		gi.dprintf("func_timer at %s has random >= wait\n", vtos(self->s.origin));
 	}
 

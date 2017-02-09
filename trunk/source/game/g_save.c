@@ -195,7 +195,7 @@ void InitGame (void)
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
 	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");
-	sv_tickrate = gi.cvar("sv_tickrate", "60", CVAR_LATCH | CVARDOC_INT);
+	sv_tickrate = gi.cvar("sv_tickrate", "30", CVAR_LATCH | CVARDOC_INT);
 
 	//mutator
 	instagib = gi.cvar ("instagib", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
@@ -335,7 +335,7 @@ void InitGame (void)
 	red_team_score = 0;
 	blue_team_score = 0;
 
-	/*if(sv_tickrate->integer > 120)
+	if(sv_tickrate->integer > 120)
 	{
 		safe_bprintf(PRINT_HIGH, "Server rate too high, clamping at 120fps\n");
 		FRAMETIME = 1.0/120.0;
@@ -348,8 +348,8 @@ void InitGame (void)
 		gi.cvar_set("sv_tickrate", "10");
 	}
 	else
-		FRAMETIME = 1.0/(float)sv_tickrate->integer;	*/
-	FRAMETIME = 0.1;
+		FRAMETIME = 1.0/(float)sv_tickrate->integer;	
+	//FRAMETIME = 0.025;
 	
 	if(g_tactical->integer)
 	{

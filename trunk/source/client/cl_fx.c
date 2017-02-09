@@ -3842,6 +3842,7 @@ void CL_AddParticles (void)
 	float			time = 0.0f;
 	particle_t		*active, *tail;
 	int				i;
+	float FRAMETIME = 1.0/(float)server_tickrate;
 
 	Cl_WeatherEffects();
 
@@ -3855,7 +3856,8 @@ void CL_AddParticles (void)
 		// PMM - added INSTANT_PARTICLE handling for heat beam
 		if (p->alphavel != INSTANT_PARTICLE)
 		{
-			time = (cl.time - p->time)*0.001;
+			time = (cl.time - p->time)*0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps
+		
 			p->current_alpha = p->alpha + time*p->alphavel;
 			if (p->current_alpha <= 0)
 			{	// faded out
@@ -3869,14 +3871,14 @@ void CL_AddParticles (void)
 			p->alpha = p->alphavel = 0.0f;
 		}
 		if(p->scalevel > 1) {
-			time = (cl.time - p->time)*0.001;
+			time = (cl.time - p->time)*0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps
 			p->current_scale = p->scale + time * p->scalevel;
 		}
 		else
 			p->current_scale = p->scale;
 			
         if (p->colorvel != 0) {
-            time = (cl.time - p->time)*0.001;
+            time = (cl.time - p->time)*0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps
             p->current_color = (p->color + time * p->colorvel);
         } else
             p->current_color = p->color;
