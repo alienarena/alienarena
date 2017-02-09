@@ -740,7 +740,6 @@ void P_FallingDamage (edict_t *ent)
 }
 
 
-
 /*
 =============
 P_WorldEffects
@@ -1046,7 +1045,7 @@ void G_SetClientFrame (edict_t *ent)
 	else
 		run = false;
 
-	// check for stand/duck and stop/go transitions
+	// check for stand/duck and stop/go transitions(TO DO - is it possible to start a duck transition animation over a couple of frames?)
 	if (duck != client->anim_duck && client->anim_priority < ANIM_DEATH)
 		goto newanim;
 	if (run != client->anim_run && client->anim_priority == ANIM_BASIC)

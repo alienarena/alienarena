@@ -206,7 +206,7 @@ void R_GLSLDistortion(void)
 	}
 	else
 	{
-		r_fbeffectLen = 0.1f;
+		r_fbeffectLen = 0.2f;
 		R_DrawBloodEffect();
 		
 		//do a radial blur

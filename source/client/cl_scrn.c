@@ -1541,13 +1541,17 @@ static void SCR_ExecuteLayoutString (const char *s)
 		{	// health number
 			if(strcmp(cl_hudimage1->string, "none")) {
 				int		color;
+				float FRAMETIME = 1.0/(float)server_tickrate;
+				long nFrame;
+
+				nFrame = 1 + ((0.1/FRAMETIME) + 1L)/2.0;
 
 				numwidth = 3;
 				value = cl.frame.playerstate.stats[STAT_HEALTH];
 				if (value > 25)
 					color = 0;	// green
 				else if (value > 0)
-					color = (cl.frame.serverframe>>2) & 1;		// flash
+					color = (cl.frame.serverframe>>nFrame) & 1;		// flash
 				else
 					color = 1;
 
@@ -1569,13 +1573,17 @@ static void SCR_ExecuteLayoutString (const char *s)
 		{	// ammo number
 			if(strcmp(cl_hudimage1->string, "none")) {
 				int		color;
+				float FRAMETIME = 1.0/(float)server_tickrate;
+				long nFrame;
+
+				nFrame = 1 + ((0.1/FRAMETIME) + 1L)/2.0;
 
 				numwidth = 3;
 				value = cl.frame.playerstate.stats[STAT_AMMO];
 				if (value > 5)
 					color = 0;	// green
 				else if (value >= 0)
-					color = (cl.frame.serverframe>>2) & 1;		// flash
+					color = (cl.frame.serverframe>>nFrame) & 1;		// flash
 				else
 					continue;	// negative number = don't show
 

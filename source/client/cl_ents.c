@@ -1663,6 +1663,7 @@ void CL_AddClEntities()
 	float time, time2, grav = Cvar_VariableValue("sv_gravity");
 	static vec3_t mins = { -2, -2, -2 }; 
     static vec3_t maxs = { 2, 2, 2 }; 
+	float FRAMETIME = 1.0/(float)server_tickrate;
 
 	if (!grav)
 		grav = 1;
@@ -1677,7 +1678,7 @@ void CL_AddClEntities()
 	for (le = active_clentities; le; le = next) {
 		next = le->next;
 
-		time = (cl.time - le->time) * 0.001;
+		time = (cl.time - le->time) * 0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps;
 		alpha = le->alpha + time * le->alphavel;
 
 		if (alpha <= 0) {		// faded out
@@ -1755,7 +1756,7 @@ void CL_AddClEntities()
 				float time =
 					cl.time - (cls.frametime +
 							   cls.frametime * trace.fraction) * 1000;
-				time = (time - le->time) * 0.001;
+				time = (time - le->time) * 0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps;
 
 				VectorSet(vel, le->vel[0], le->vel[1], le->vel[2] + le->accel[2] * time * grav);
 				VectorReflect(vel, trace.plane.normal, le->vel);
