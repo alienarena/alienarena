@@ -73,9 +73,9 @@ void Jet_ApplyLifting( edict_t *ent )
 	float		delta;
 	vec3_t	new_origin;
 	trace_t	trace;
-	int 		time = 24;     /*must be >0, time/10 = time in sec for a
+	int 		time = 24*TENFPS/FRAMETIME;     /*must be >0, time/10 = time in sec for a
                                  complete cycle (up/down)*/
-	float		amplitude = 2.0;
+	float		amplitude = 2.0/(TENFPS/FRAMETIME);
 
 	/*calculate the z-distance to lift in this step*/
 	delta = sin( (float)((level.framenum%time)*(360/time))/180*M_PI ) * amplitude;
@@ -134,7 +134,8 @@ void Jet_ApplyRolling( edict_t *ent, vec3_t right )
         sign = -1;    /*set this to +1 if you want to roll contrariwise*/
 
 	roll = DotProduct( ent->velocity, right ) * value * sign;
-	ent->client->kick_angles[ROLL] = roll;
+
+	ent->client->jet_angles[ROLL] = roll;
 }
 
 
@@ -204,7 +205,11 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 			acc[2] += ucmd->upmove > 0 ? 30 : -30;
 			if(ucmd->upmove > 0 && !ent->deadflag)
 			{
-				Jet_ApplyEffects( ent, forward, right );
+				int nPeriod = 6*TENFPS/FRAMETIME;
+				if ( ((int)ent->client->Jet_remaining % nPeriod) == 0 ) 
+				{					
+					Jet_ApplyEffects( ent, forward, right );
+				}
 			}
 		}
 
@@ -250,7 +255,7 @@ void Use_Jet ( edict_t *ent)
     /*jetpack in inventory but no fuel time? must be one of the
       give all/give jetpack cheats, so put fuel in*/
     if ( ent->client->Jet_remaining == 0 )
-      ent->client->Jet_remaining = 500;
+      ent->client->Jet_remaining = 500*TENFPS/FRAMETIME;
 
     if ( Jet_Active(ent) )
       ent->client->Jet_framenum = 0;
@@ -262,7 +267,7 @@ void Use_Jet ( edict_t *ent)
 
 static void VehicleThink(edict_t *ent)
 {
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 float jetpackTime;
@@ -304,7 +309,7 @@ void SpawnJetpack(edict_t *ent)
 	SetRespawn (ent, 1000000); //huge delay until jetpack is picked up from pad.			
 	jetpack->replaced_weapon = ent; //remember this entity
 
-	jetpack->nextthink = level.time + FRAMETIME;
+	jetpack->nextthink = level.time + TENFPS;
 	jetpack->think = VehicleThink;
 
 	jetpackTime = level.time;
@@ -348,7 +353,7 @@ void VehicleSetup (edict_t *ent)
 
 	gi.linkentity (ent);
 
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 	ent->think = VehicleThink;
 }
 
@@ -398,6 +403,7 @@ void Reset_player(edict_t *ent)
 	//set everything back
 	ent->client->Jet_remaining = 0;
 	ent->client->Jet_framenum = 0;
+	VectorClear(ent->client->jet_angles);
 	ent->s.modelindex4 = 0;
 	ent->in_vehicle = false;
 }
@@ -431,7 +437,7 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 	}
 	
 	other->in_vehicle = true;
-	other->client->Jet_remaining = 500;
+	other->client->Jet_remaining = 500*TENFPS/FRAMETIME;
 
 	other->s.origin[2] +=24;
 

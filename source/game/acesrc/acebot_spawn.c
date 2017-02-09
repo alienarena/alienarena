@@ -881,7 +881,11 @@ void ACESP_SpawnInitializeAI (edict_t *ent)
 {
 	ent->enemy = NULL;
 	ent->movetarget = NULL;
-	ent->yaw_speed = 37; // bot turning speed. angle in degrees
+	ent->targDeltaX = 0;
+	ent->targDeltaY = 0;
+	ent->targDirSwitchX = false;
+	ent->targDirSwitchY = false;
+	ent->yaw_speed = 37 * FRAMETIME/0.1; // bot turning speed. angle in degrees
 	ent->state = STATE_MOVE;
 
 	// Set the current node

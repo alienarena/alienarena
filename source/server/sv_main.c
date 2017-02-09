@@ -65,7 +65,9 @@ cvar_t	*sv_iplimit;
 
 cvar_t	*sv_downloadurl;
 
-cvar_t	*sv_iplogfile;		// Log file by IP address
+cvar_t	*sv_iplogfile;			// Log file by IP address
+
+cvar_t  *sv_tickrate;			//server frame rate
 
 int		sv_numbots;
 
@@ -842,7 +844,11 @@ void SV_ConnectionlessPacket (void)
 		SVC_RemoteCommand ();
 	else if (!strcmp(c, "teamgame")) {
 		Netchan_OutOfBandPrint (NS_SERVER, net_from, "teamgame %f", Cvar_VariableValue ("g_teamgame"));
-	} else
+	} 
+	else if (!strcmp(c, "tickrate")) {
+		Netchan_OutOfBandPrint (NS_SERVER, net_from, "tickrate %f", Cvar_VariableValue ("sv_tickrate"));
+	} 
+	else
 		Com_Printf ("bad connectionless packet from %s:\n%s\n"
 		, NET_AdrToString (net_from), s);
 }
@@ -1065,10 +1071,10 @@ SV_RunGameFrame
 =================
 */
 
-#define FRAMETIME 0.1
-
 void SV_RunGameFrame (void)
 {
+	float FRAMETIME = 1.0/(float)sv_tickrate->integer;
+
 	if (host_speeds->integer)
 		time_before_game = Sys_Milliseconds ();
 
@@ -1109,6 +1115,8 @@ void SV_Frame (int msec)
 {
 	int tmp_systime, tmp_hangtime;
 	static int old_systime = 0;
+	float FRAMETIME = 1.0/(float)sv_tickrate->integer;
+
 	if (!old_systime)
 		old_systime = Sys_Milliseconds ();
 	time_before_game = time_after_game = 0;
@@ -1390,7 +1398,7 @@ void SV_Init (void)
 	Cvar_Get ("fraglimit", "0", CVAR_SERVERINFO);
 	Cvar_Get ("timelimit", "0", CVAR_SERVERINFO);
 	Cvar_Get ("cheats", "0", CVAR_SERVERINFO|CVAR_LATCH);
-	Cvar_Get ("protocol", va("%i", PROTOCOL_VERSION), CVAR_SERVERINFO|CVAR_NOSET);;
+	Cvar_Get ("protocol", va("%i", PROTOCOL_VERSION), CVAR_SERVERINFO|CVAR_NOSET);
 	maxclients = Cvar_Get ("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH);
 	hostname = Cvar_Get ("hostname", "noname", CVAR_SERVERINFO | CVAR_ARCHIVE);
 	timeout = Cvar_Get ("timeout", "125", 0);
@@ -1405,6 +1413,7 @@ void SV_Init (void)
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
+	sv_tickrate = Cvar_Get("sv_tickrate", "40", CVAR_SERVERINFO | CVAR_ARCHIVE);
 
 	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 

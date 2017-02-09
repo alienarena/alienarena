@@ -262,6 +262,7 @@ void R_Mesh_FreeVBO (model_t *mod)
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
+extern int server_tickrate;
 static void R_GetStaticLightingForEnt (const entity_t *ent, vec3_t out_position, vec3_t out_color)
 {
 	int i, j;
@@ -417,8 +418,9 @@ static void R_GetStaticLightingForEnt (const entity_t *ent, vec3_t out_position,
 	{	// bonus items will pulse with time
 		float	scale;
 		float	minlight;
+		float FRAMETIME = 1.0/(float)server_tickrate;
 
-		scale = 0.2 * sin(r_newrefdef.time*7);
+		scale = 0.2 * sin(r_newrefdef.time * 7 * FRAMETIME/0.1);
 		if (r_meshnormalmaps->integer)
 			minlight = 0.1;
 		else
@@ -788,13 +790,13 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 		// for subsurface scattering, we hack in the old algorithm.
 		if (!shell && !rs->stage->cube)
 		{
-			vec3_t lightVec, tmp, pos, color;
+			vec3_t lightVec, tmp, color;
 			
 			R_GetCombinedLightVals (currententity, tmp, color);
 			
-			VectorSubtract (pos, currententity->origin, tmp);
-			VectorMA (pos, 5.0, tmp, tmp);
+			VectorSubtract (tmp, currententity->origin, tmp);
 			R_ModelViewTransform (tmp, lightVec);
+
 			glUniform3fvARB (uniforms->totalLightPosition, 1, (const GLfloat *)lightVec);
 			glUniform3fvARB (uniforms->totalLightColor, 1, (const GLfloat *)color);
 		}

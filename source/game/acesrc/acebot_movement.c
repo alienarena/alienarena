@@ -852,10 +852,10 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 {
 	unsigned int i;
 	float accuracy;
-	float random_r;
-	float radius;
-	float angle;
-	float ca,sa;
+	//float random_r;
+	//float radius;
+	//float angle;
+	//float ca,sa;
 	float dx,dy;
 
 	/*
@@ -903,16 +903,55 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 		break;
 	}
 
-	//radius calc
-	random_r = ktgt_scale * crandom();
-	radius =  (random_r * ( ktgt_acc / accuracy)) + ktgt_ofs;
-	//angle calc
-	angle = random() * 2.0f * M_PI;
-	sa = sinf( angle );
-	ca = cosf( angle );
-	//apply delta to target
-	*pdx += dx = ca * radius;
-	*pdy += dy = sa * radius;
+	////radius calc
+	//random_r = ktgt_scale * crandom();
+	//radius =  (random_r * ( ktgt_acc / accuracy)) + ktgt_ofs;
+	////angle calc
+	//angle = random() * 2.0f * M_PI;
+	//sa = sinf( angle );
+	//ca = cosf( angle );
+	////apply delta to target
+	//*pdx += dx = ca * radius;
+	//*pdy += dy = sa * radius;
+
+	//The above is far too twitchy, let's do something that can be made smooth.
+	dx = random() * 24.0f/(TENFPS/FRAMETIME);
+	dy = random() * 24.0f/(TENFPS/FRAMETIME);
+
+	if(self->targDeltaX > 64.0/accuracy)
+	{
+		self->targDeltaX = 63.9/accuracy;
+		self->targDirSwitchX = true;
+	}
+	else if(self->targDeltaX < -64.0/accuracy)
+	{
+		self->targDeltaX = -63.9/accuracy;
+		self->targDirSwitchX = false;
+	}
+
+	if(self->targDirSwitchX)
+		self->targDeltaX -= dx;
+	else
+		self->targDeltaX += dx;
+
+	if(self->targDeltaY > 64.0/accuracy)
+	{
+		self->targDeltaY = 63.9/accuracy;
+		self->targDirSwitchY = true;
+	}
+	else if(self->targDeltaY < -64.0/accuracy)
+	{
+		self->targDeltaY = -63.9/accuracy;
+		self->targDirSwitchY = false;
+	}
+
+	if(self->targDirSwitchY)
+		self->targDeltaY -= dy;
+	else
+		self->targDeltaY += dy;
+
+	*pdx += self->targDeltaX;
+	*pdy += self->targDeltaY;
 
 //	if ( debug_mode )
 //	{
@@ -1081,7 +1120,8 @@ standardmove:
 	c = random(); //really mix this up some
 	if ( self->health >= 50 && c < crouch_thresh )
 	{
-		ucmd->upmove -= 200;
+		//TO DO - no crouching for now - maybe ever.  It's too un-human like, and the animation is non-existent for going in and out of crouches as of yet
+		//ucmd->upmove -= 200;
 	}
 	else if ( c > jump_thresh )
 	{

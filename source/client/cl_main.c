@@ -207,6 +207,8 @@ static int numServers = 0;
 
 static size_t szr; // just for unused result warnings
 
+int server_tickrate = 10; //what framerate is the server running(default to 10 for servers that don't have the info(legacy)).
+
 //
 // Fonts
 //
@@ -1316,6 +1318,12 @@ static void CL_ConnectionlessPacket (void)
 		return;
 	}
 
+	if (!strcmp(c, "tickrate"))
+	{
+		server_tickrate = atoi (Cmd_Argv(1));
+		return;
+	}
+
 	Com_Printf ("Unknown command.\n");
 }
 
@@ -1877,6 +1885,9 @@ redoSkins:
 		// legacy DM servers don't send visibility lights anyway
 		server_is_team = true;
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, "teamgame\n");
+
+		server_tickrate = 10;
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, "tickrate\n");
 	}
 }
 

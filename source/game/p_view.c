@@ -225,10 +225,14 @@ void SV_CalcViewOffset (edict_t *ent)
 	float		bob;
 	float		ratio;
 	float		delta;
-	vec3_t	v;
+	vec3_t	v, vKickAng, vKickOrg;
+	int frameSpan = (int)(TENFPS/FRAMETIME) * 2;
 
 	// base angles
 	angles = ent->client->ps.kick_angles;
+
+	VectorSet(vKickAng, 0, 0, 0);
+	VectorSet(vKickOrg, 0, 0, 0);
 
 	// if dead, fix the angle and don't add any kick
 	if (ent->deadflag)
@@ -241,9 +245,47 @@ void SV_CalcViewOffset (edict_t *ent)
 	}
 	else
 	{
-		// add angles based on weapon kick
-		VectorCopy (ent->client->kick_angles, angles);
+		//if it's a lean, we move and hold steady - if not, then move to angle, and back over twice the framerate ratio
+		if(ent->client->lean != 0)
+		{
+			VectorCopy(ent->client->lean_angles, vKickAng);
+			VectorCopy(ent->client->lean_origin, vKickOrg);
+		}
+		else if(VectorLength(ent->client->jet_angles) > 0)
+		{
+			VectorCopy(ent->client->jet_angles, vKickAng);
+		}
+		else
+		{
+			// add angles based on weapon kick
+			if((VectorLength(ent->client->kick_angles) > 0 || VectorLength(ent->client->kick_origin) > 0) && (level.framenum - ent->client->last_kick_frame > frameSpan))
+			{
+				//trigger event animation over twice framerate ratio to 100ms				
+				ent->client->last_kick_frame = level.framenum;	
+			}
+			if(level.framenum - ent->client->last_kick_frame < frameSpan)
+			{		
+				float div;
+				int i;
 
+				div = (level.framenum - ent->client->last_kick_frame < frameSpan/2) ? (level.framenum - ent->client->last_kick_frame) : 
+					frameSpan - (level.framenum - ent->client->last_kick_frame);
+		
+				for(i = 0; i < 3; i++)
+				{
+					vKickAng[i] = ent->client->kick_angles[i] * div/(frameSpan/2.0);
+					vKickOrg[i] = ent->client->kick_origin[i] * div/(frameSpan/2.0);
+				}	
+			}
+			else
+			{
+				VectorClear(ent->client->kick_angles);
+				VectorClear(ent->client->kick_origin);
+			}
+		}
+
+		VectorCopy (vKickAng, angles);
+		
 		// add angles based on damage kick
 		ratio = (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
 		if (ratio < 0)
@@ -254,13 +296,6 @@ void SV_CalcViewOffset (edict_t *ent)
 		}
 		angles[PITCH] += ratio * ent->client->v_dmg_pitch;
 		angles[ROLL] += ratio * ent->client->v_dmg_roll;
-
-		// add pitch based on fall kick
-
-// 		ratio = (ent->client->fall_time - level.time) / FALL_TIME;
-// 		if (ratio < 0)
-// 			ratio = 0;
-// 		angles[PITCH] += ratio * ent->client->fall_value;
 
 		// add angles based on velocity
 		delta = DotProduct (ent->velocity, forward);
@@ -289,10 +324,24 @@ void SV_CalcViewOffset (edict_t *ent)
 	v[2] += ent->viewheight;
 
 	// add fall height
-	ratio = (ent->client->fall_time - level.time) / (FALL_TIME * FRAMETIME/0.1);
+	ratio = (ent->client->fall_time - level.time) / FALL_TIME;
 	if (ratio < 0)
 		ratio = 0;
-	v[2] -= ratio * ent->client->fall_value;
+	if(ratio > 0 && level.framenum - ent->client->last_fall_frame > frameSpan)
+	{
+		//trigger event animation
+		ent->client->last_fall_frame = level.framenum;	
+		ent->client->fall_ratio = ratio;
+	}
+	if(level.framenum - ent->client->last_fall_frame < frameSpan)
+	{		
+		float div;
+
+		div = (level.framenum - ent->client->last_fall_frame < frameSpan/2) ? (level.framenum - ent->client->last_fall_frame) + 1 : 
+					frameSpan - (level.framenum - ent->client->last_fall_frame) + 1;
+
+		v[2] -= ent->client->fall_ratio * ent->client->fall_value * div/(frameSpan/(TENFPS/FRAMETIME));
+	}
 
 	// add bob height
 	bob = bobfracsin * xyspeed * bob_up->value;
@@ -301,7 +350,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	v[2] += bob;
 
 	// add kick offset
-	VectorAdd (v, ent->client->kick_origin, v);
+	VectorAdd (v, vKickOrg, v);
 
 	// absolutely bound offsets
 	// so the view can never be outside the player box
@@ -343,6 +392,8 @@ SV_CalcGunOffset
 void SV_CalcGunOffset (edict_t *ent)
 {
 	int		i;
+	float	angOffset;
+	float   heightOffset;
 
 	// gun angles from bobbing
 	ent->client->ps.gunangles[ROLL] = xyspeed * bobfracsin * 0.005;
@@ -355,7 +406,7 @@ void SV_CalcGunOffset (edict_t *ent)
 
 	ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005;
 
-	VectorClear (ent->client->ps.gunoffset);
+	VectorClear (ent->client->ps.gunoffset);	
 
 	// gun_x / gun_y / gun_z are development tools
 	for (i=0 ; i<3 ; i++)
@@ -365,14 +416,29 @@ void SV_CalcGunOffset (edict_t *ent)
 		ent->client->ps.gunoffset[i] += up[i]* (-gun_z->value);
 
 	}
-
+	
 	//landing on jumps
 	if(ent->s.event == EV_FALLSHORT || ent->s.event == EV_FALL || ent->s.event == EV_FALLFAR) {
-		ent->client->ps.gunoffset[2] -=1.5;
-		ent->client->ps.gunangles[PITCH] -= 1;
-		ent->client->ps.gunangles[ROLL] -= 1;
+		//trigger event animation over twice framerate ratio to 100ms
+		ent->client->last_jump_frame = level.framenum;
+	}
+
+	//need to move down and back, for smooth animation if framerate is faster than 100ms
+	if(level.framenum - ent->client->last_jump_frame < (int)(0.1/FRAMETIME) * 2)
+	{		
+		float div;
+
+		div = (level.framenum - ent->client->last_jump_frame < (int)(0.1/FRAMETIME)) ? (level.framenum - ent->client->last_jump_frame) : 
+			(int)(0.1/FRAMETIME) * 2 - (level.framenum - ent->client->last_jump_frame);
+		
+		angOffset = 1.0 * div/(0.1/FRAMETIME);
+		heightOffset = 1.5 * div/(0.1/FRAMETIME);
+		ent->client->ps.gunoffset[2] -= heightOffset;
+		ent->client->ps.gunangles[PITCH] -= angOffset; 
+		ent->client->ps.gunangles[ROLL] -= angOffset; 
 	}
 }
+
 
 
 /*
@@ -482,6 +548,8 @@ void SV_CalcBlend (edict_t *ent)
 	//vehicles(flying)
 	if ( Jet_Active(ent) )
 	{
+		int nPeriod;
+
 		/*update the fuel time*/
 		ent->client->Jet_remaining = ent->client->Jet_framenum - level.framenum;
 
@@ -494,7 +562,8 @@ void SV_CalcBlend (edict_t *ent)
 		}
 
 		/*Play jetting sound every 0.6 secs*/
-		if ( ((int)ent->client->Jet_remaining % 6) == 0 ) 
+		nPeriod = 6*TENFPS/FRAMETIME;
+		if ( ((int)ent->client->Jet_remaining % nPeriod) == 0 ) 
 		{	
 			// send muzzle flash
 			gi.WriteByte (svc_muzzleflash);
@@ -507,12 +576,16 @@ void SV_CalcBlend (edict_t *ent)
 		}
 
 		/*beginning to fade if 4 secs or less*/
-		if (ent->client->Jet_remaining <= 40)
+		if (ent->client->Jet_remaining <= 40*TENFPS/FRAMETIME)
+		{
 		  /*play on/off sound every sec*/
-		  if ( ((int)ent->client->Jet_remaining % 10) == 0 )
+		  nPeriod = 10*TENFPS/FRAMETIME;
+		  if ( ((int)ent->client->Jet_remaining % nPeriod) == 0 )
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("vehicles/warning.wav"), 1, ATTN_NORM, 0);
+		}
 
-		if (ent->client->Jet_remaining > 40 || ( (int)ent->client->Jet_remaining & 4) )
+		nPeriod = 4*TENFPS/FRAMETIME;
+		if (ent->client->Jet_remaining > 40*TENFPS/FRAMETIME || ( (int)ent->client->Jet_remaining & nPeriod) )
 		  SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
 	}
 	else if (ent->client->doubledamage_expiretime > level.time)
@@ -995,7 +1068,11 @@ void G_SetClientFrame (edict_t *ent)
 	}
 	else if (ent->s.frame < client->anim_end)
 	{	// continue an animation
-		ent->s.frame++;
+		if(level.framenum - client->last_anim_frame > (int)(0.1/FRAMETIME) - 1)
+		{
+			ent->s.frame++;
+			client->last_anim_frame = level.framenum;
+		}
 		return;
 	}
 
@@ -1065,6 +1142,7 @@ newanim:
 			ent->s.frame = FRAME_stand01;
 			client->anim_end = FRAME_stand40;
 		}
+		client->last_anim_frame = level.framenum;
 	}
 }
 
@@ -1148,21 +1226,45 @@ void ClientEndServerFrame (edict_t *ent)
 	// all cyclic walking effects
 	//
 
-	xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
+	// need to account for sudden shifts in speed causing sudden weapon bob changes
+	xyspeed = ent->client->xyspeed;
+
+	ent->client->xyspeed += sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1])/(0.1/FRAMETIME);
+	if(ent->client->xyspeed > sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]))
+		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
 	if (xyspeed < 5 || !ent->groundentity)
 	{
-		bobmove = 0;
-		current_client->bobtime = 0;	// start at beginning of cycle again
+		if(FRAMETIME == 0.1)
+		{
+			current_client->bobtime = 0; // start at beginning of cycle again
+			bobmove = 0;
+		}
+		else 
+		{
+			if(level.framenum - ent->client->last_stop_frame > (int)(0.1/FRAMETIME) * 2)
+			{
+				//trigger event animation over framerate ratio to 100ms
+				ent->client->last_stop_frame = level.framenum;		
+			}
+			if(level.framenum - ent->client->last_stop_frame < (int)(0.1/FRAMETIME) * 2)
+			{					
+				bobmove /= 2.0;	// slow movement down gradually
+			}
+			else
+			{
+				bobmove = 0; //stop bobbing completely
+			}
+		}
 	}
 	else
 	{	// so bobbing only cycles when on ground
 		if (xyspeed > 210)
-			bobmove = 0.25;
+			bobmove = 0.25 / (0.1/FRAMETIME);
 		else if (xyspeed > 100)
-			bobmove = 0.125;
+			bobmove = 0.125 / (0.1/FRAMETIME);
 		else
-			bobmove = 0.0625;
+			bobmove = 0.0625 / (0.1/FRAMETIME);
 	}
 
 	bobtime = (current_client->bobtime += bobmove);
@@ -1204,10 +1306,6 @@ void ClientEndServerFrame (edict_t *ent)
 
 	VectorCopy (ent->velocity, ent->client->oldvelocity);
 	VectorCopy (ent->client->ps.viewangles, ent->client->oldviewangles);
-
-	// clear weapon kicks
-	VectorClear (ent->client->kick_origin);
-	VectorClear (ent->client->kick_angles);
 
 	// if the scoreboard is up, update it
 	if (ent->client->showscores && !(level.framenum & 31) )

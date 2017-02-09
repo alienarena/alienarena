@@ -634,6 +634,8 @@ struct model_s
 	char		name[MAX_QPATH];
 };
 
+static float FRAMETIME;
+
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
@@ -649,8 +651,10 @@ void CL_AddPacketEntities (frame_t *frame)
 	qboolean			playermodel;
 	char	shortname[MAX_OSPATH];
 
+	FRAMETIME = 1.0/(float)server_tickrate;
+
 	// bonus items rotate at a fixed rate
-	autorotate = anglemod(cl.time/10);
+	autorotate = anglemod(cl.time/(10.0*(0.1/FRAMETIME))); 
 
 	// brush models can auto animate their frames
 	autoanim = 2*cl.time/1000;
@@ -784,8 +788,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.angles[1] = autorotate;
 			ent.angles[2] = 0;
 			// bobbing items
-			bob_scale = (0.005f + s1->number * 0.00001f) * 0.5;
-			bob = 5 + cos( (cl.time + 1000) * bob_scale ) * 5;
+			bob_scale = (0.005f + s1->number * 0.00001f) * 0.5/(0.1/FRAMETIME);
+			bob = 5 + cos( (cl.time + (1000*(0.1/FRAMETIME))) * bob_scale ) * 5;
 			ent.oldorigin[2] += bob;
 			ent.origin[2] += bob;
 

@@ -1155,7 +1155,7 @@ void homing_think (edict_t *ent)
 		VectorScale(targetdir, speed, ent->velocity);
 	}
 
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 
 void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
@@ -1302,7 +1302,7 @@ void minderaser_think (edict_t *ent)
 	}
 	
 	ent->nade_timer++;
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 
 	if(ent->nade_timer > 300) 
 	{	//explode
@@ -1375,7 +1375,7 @@ void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
 	spud->touch = minderaser_touch;
 	spud->nade_timer = 0;
 		
-	spud->nextthink = level.time + FRAMETIME;
+	spud->nextthink = level.time + TENFPS;
 	spud->think = minderaser_think;
 
 	spud->s.sound = gi.soundindex ("weapons/seeker.wav"); 
@@ -1547,7 +1547,7 @@ void smartgrenade_think (edict_t *self)
 	}
 
 	self->s.frame = (self->s.frame + 1) % 23; //pulse grotesquely
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS;
 	self->nade_timer++;
 
 	if(self->nade_timer > 10) { //explode
@@ -1598,7 +1598,7 @@ void prox_think (edict_t *self)
 	}
 
 	self->s.frame = (self->s.frame + 1) % 23; //pulse grotesquely
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS;
 	self->nade_timer++;
 
 	if(self->nade_timer > 300)
@@ -1728,7 +1728,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 
 void bomb_think (edict_t *self)
 {
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS;
 }
 void bomb_blow (edict_t *self)
 {
@@ -2097,7 +2097,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 
 void tactical_bomb_think (edict_t *self)
 {	
-	self->nextthink = level.time + FRAMETIME;
+	self->nextthink = level.time + TENFPS;
 
 	self->s.angles[PITCH] = 0.0;
 	self->s.angles[ROLL] = 0.0;
@@ -2263,7 +2263,7 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	}
 	bomb->owner = self;
 	bomb->think = tactical_bomb_think; 
-	bomb->nextthink = level.time + .1;    
+	bomb->nextthink = level.time + TENFPS;    
     bomb->dmg = 1000; //insane amount of damage power
 	bomb->radius_dmg = 1000;
 	bomb->dmg_radius = 512;	

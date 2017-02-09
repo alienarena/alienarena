@@ -1561,7 +1561,7 @@ void G_RunFrame (void)
 	edict_t	*ent;
 
 	level.framenum++;
-	level.time = level.framenum*FRAMETIME*(0.1/FRAMETIME);
+	level.time = level.framenum*FRAMETIME;
 
 	/*
 	 * update bot info in first client always, and in other active clients
@@ -1617,7 +1617,7 @@ void G_RunFrame (void)
 			}
 		}
 
-		G_RunEntity (ent, FRAMETIME * (0.1/FRAMETIME));
+		G_RunEntity (ent, FRAMETIME);
 	}
 
 	// see if it is time to end a deathmatch

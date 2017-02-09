@@ -404,18 +404,31 @@ Called by ClientBeginServerFrame and ClientThink
 */
 void Think_Weapon (edict_t *ent)
 {
-	// if just died, put the weapon away
-	if (ent->health < 1)
-	{
-		ent->client->newweapon = NULL;
-		ChangeWeapon (ent);
-	}
 
-	// call active weapon think routine
-	if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink)
+	if ( (((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) || ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2)) &&
+		level.framenum - ent->client->last_fire_frame > (int)(0.1/FRAMETIME) - 1)
 	{
-		is_quad = ent->client->doubledamage_expiretime > level.time;
-		ent->client->pers.weapon->weaponthink (ent);
+		//Trigger a weapon think, no matter were the weapon think is in it's cycle - don't allow this for another .1 seconds.
+		//What this does is give us more responsiveness if the server framerate is greater than 10fps, without creating a rapid fire effect.
+		ent->client->last_fire_frame = level.framenum;
+		ent->client->last_weap_think_frame = 0; //will trigger next section immediately.
+	}
+	if(level.framenum - ent->client->last_weap_think_frame > (int)(0.1/FRAMETIME) - 1)
+	{	
+		// if just died, put the weapon away
+		if (ent->health < 1)
+		{
+			ent->client->newweapon = NULL;
+			ChangeWeapon (ent);
+		}
+
+		// call active weapon think routine
+		if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink)
+		{
+			is_quad = ent->client->doubledamage_expiretime > level.time;
+			ent->client->pers.weapon->weaponthink (ent);
+		}
+		ent->client->last_weap_think_frame = level.framenum;
 	}
 }
 
@@ -812,13 +825,11 @@ void weapon_disruptor_fire (edict_t *ent)
 	{
 		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
+			VectorScale(right, -2.8, right);
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
+			VectorScale(right, 3.7, right);
 		}
 	}
 
@@ -904,13 +915,11 @@ void weapon_vaporizer_fire (edict_t *ent)
 	{
 		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
+			VectorScale(right, -2.8, right);
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
+			VectorScale(right, 3.7, right);
 		}
 	}
 
@@ -992,18 +1001,13 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 		AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-		if(ent->client->lean != 0.0)
+		if(ent->client->lean < 0.0)
 		{
-			if(ent->client->lean < 0.0)
-			{
-				right[0] = right[0] * ent->client->lean/-15.0;
-				right[1] = right[1] * ent->client->lean/-15.0;
-			}
-			else
-			{
-				right[0] = right[0] * ent->client->lean/-25.0;
-				right[1] = right[1] * ent->client->lean/-25.0;
-			}
+			VectorScale(right, -2.8, right);
+		}
+		else if(ent->client->lean > 0.0)
+		{
+			VectorScale(right, 3.7, right);
 		}
 
 		VectorSet(offset, 8, 8, ent->viewheight-8);
@@ -1057,18 +1061,13 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	if(ent->client->lean != 0.0)
+	if(ent->client->lean < 0.0)
 	{
-		if(ent->client->lean < 0.0)
-		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
-		}
-		else
-		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
-		}
+		VectorScale(right, -2.8, right);
+	}
+	else if(ent->client->lean > 0.0)
+	{
+		VectorScale(right, 3.7, right);
 	}
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
@@ -1131,13 +1130,11 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	{
 		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
+			VectorScale(right, -2.8, right);
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
+			VectorScale(right, 3.7, right);
 		}
 	}
 
@@ -1210,18 +1207,13 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 		ent->client->kick_angles[0] = -3;
 	}
 	
-	if(ent->client->lean != 0.0)
+	if(ent->client->lean < 0.0)
 	{
-		if(ent->client->lean < 0.0)
-		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
-		}
-		else
-		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
-		}
+		VectorScale(right, -2.8, right);
+	}
+	else if(ent->client->lean > 0.0)
+	{
+		VectorScale(right, 3.7, right);
 	}
 
 	if(ent->client->lean == 0.0 && hyper && (ent->client->buttons & BUTTON_ATTACK))
@@ -1503,18 +1495,13 @@ void Machinegun_Fire (edict_t *ent)
 		}
 	}
 
-	if(ent->client->lean != 0.0)
+	if(ent->client->lean < 0.0)
 	{
-		if(ent->client->lean < 0.0)
-		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
-		}
-		else
-		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
-		}
+		VectorScale(right, -2.8, right);
+	}
+	else if(ent->client->lean > 0.0)
+	{
+		VectorScale(right, 3.7, right);
 	}
 
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
@@ -1651,13 +1638,11 @@ void weapon_smartgun_fire (edict_t *ent)
 	{
 		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
+			VectorScale(right, -2.8, right);
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
+			VectorScale(right, 3.7, right);
 		}
 	}
 
@@ -1740,13 +1725,11 @@ void weapon_minderaser_fire (edict_t *ent)
 	{
 		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
+			VectorScale(right, -2.8, right);
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
+			VectorScale(right, 3.7, right);
 		}
 	}
 
@@ -1885,13 +1868,11 @@ void Violator_Fire (edict_t *ent)
 
 	if(ent->client->lean < 0.0)
 	{
-		right[0] = right[0] * ent->client->lean/-15.0;
-		right[1] = right[1] * ent->client->lean/-15.0;
+		VectorScale(right, -2.8, right);
 	}
 	else if(ent->client->lean > 0.0)
 	{
-		right[0] = right[0] * ent->client->lean/-25.0;
-		right[1] = right[1] * ent->client->lean/-25.0;
+		VectorScale(right, 3.7, right);
 	}
 	
 	VectorScale(forward, 10, forward);
@@ -2010,13 +1991,11 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 	{
 		if(ent->client->lean < 0.0)
 		{
-			right[0] = right[0] * ent->client->lean/-15.0;
-			right[1] = right[1] * ent->client->lean/-15.0;
+			VectorScale(right, -2.8, right);
 		}
 		else
 		{
-			right[0] = right[0] * ent->client->lean/-25.0;
-			right[1] = right[1] * ent->client->lean/-25.0;
+			VectorScale(right, 3.7, right);
 		}
 	}
 

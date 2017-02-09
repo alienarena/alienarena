@@ -495,6 +495,7 @@ void CL_ParseLayout (void);
 // cl_main
 //
 extern qboolean send_packet_now;
+extern int server_tickrate;
 void CL_Init (void);
 
 void CL_FixUpGender(void);
