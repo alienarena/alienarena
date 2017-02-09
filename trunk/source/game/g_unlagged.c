@@ -38,7 +38,7 @@ void G_ResetHistory( edict_t *ent )
 	time = gi.Sys_Milliseconds();
 
 	// fill up the history with data (assume the current position)
-	ent->client->historyHead = NUM_CLIENT_HISTORY - 1;
+	ent->client->historyHead = (NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME);
 	for ( i = ent->client->historyHead; i >= 0; i--, time -= 1000*FRAMETIME ) 
 	{
 		VectorCopy( ent->mins, ent->client->history[i].mins );
@@ -61,7 +61,7 @@ void G_StoreHistory( edict_t *ent )
 	int		head;
 
 	ent->client->historyHead++;
-	if ( ent->client->historyHead >= NUM_CLIENT_HISTORY ) 
+	if ( ent->client->historyHead >= ((NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME) + 1) ) 
 	{
 		ent->client->historyHead = 0;
 	}
@@ -148,7 +148,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		j--;
 		if ( j < 0 ) 
 		{
-			j = NUM_CLIENT_HISTORY - 1;
+			j = (NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME);
 		}
 	}
 	while ( j != ent->client->historyHead );
