@@ -306,8 +306,8 @@ void CL_ParseMuzzleFlash (void)
 	else
 		volume = 1;
 
-	VectorMA(pl->current.origin, 10, fv, shell_brass);
-	VectorMA(shell_brass, 6, rv, shell_brass);
+	VectorMA(pl->current.origin, 40, fv, shell_brass);
+	VectorMA(shell_brass, 15, rv, shell_brass);
 	VectorMA(shell_brass, 21, up, shell_brass);
 
 	for (j = 0; j < 3; j++)
