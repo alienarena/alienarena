@@ -594,9 +594,6 @@ float IQM_SelectFrame (void)
 	if(time > 1.0)
 		time = 1.0;
 
-	if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
-		time = 0;
-
 	//Check for stopped death anims
 	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
 		time = 0;	
@@ -829,28 +826,4 @@ void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
 		IQM_AnimateFrame_ragdoll (outframe, currententity->RagDollData->initframe);
 	else
 		IQM_AnimateFrame_standard (outframe);
-}
-
-//Can these next two be replaced with some type of animation grouping from the model?
-qboolean IQM_InAnimGroup(int frame, int oldframe)
-{
-	//this code I believe can be replaced with anim groups that IQM supports
-	if(currententity->flags & RF_WEAPONMODEL)
-	{
-		return true;
-	}
-	else
-	{
-		//check if we are in a player anim group that is commonly looping
-		if(frame >= 0 && frame <= 39 && oldframe >=0 && oldframe <= 39)
-			return true; //standing, or 40 frame static mesh
-		else if(frame >= 40 && frame <=45 && oldframe >= 40 && oldframe <=45)
-			return true; //running
-		else if(frame >= 66 && frame <= 71 && oldframe >= 66 && oldframe <= 71)
-			return true; //jumping
-		else if(frame >= 0 && frame <= 23 && oldframe >= 0 && oldframe <= 23)
-			return true; //static meshes are 24 frames
-		else
-			return false;
-	}	
 }
