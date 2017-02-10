@@ -328,7 +328,6 @@ nobase_dist_models_DATA = \
 	objects/blank/tris.iqm \
 	objects/blank/tris.skin \
 	objects/brass/skin.jpg \
-	objects/brass/tris.md2 \
 	objects/debris1/skin.tga \
 	objects/debris1/tris.iqm \
 	objects/debris1/tris.skin \
