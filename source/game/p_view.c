@@ -1029,7 +1029,7 @@ G_SetClientFrame
 void G_SetClientFrame (edict_t *ent)
 {
 	gclient_t	*client;
-	qboolean	duck, run;
+	qboolean	ducking, duck, standingup, run;
 
 	if (ent->s.modelindex != 255)
 		return;		// not in the player model
@@ -1037,19 +1037,49 @@ void G_SetClientFrame (edict_t *ent)
 	client = ent->client;
 
 	if (client->ps.pmove.pm_flags & PMF_DUCKED)
-		duck = true;
+	{	
+		//last duck frame will be set when ducking is completed
+		if(level.framenum - client->last_duck_frame > 2 * (int)(0.1/FRAMETIME) - 1) //go into actual ducking mode after the 2 ducking frames transition
+		{
+			duck = false;
+			ducking = true;
+		}
+		else
+		{					
+			client->last_duck_frame = level.framenum;
+			duck = true;
+			ducking = false;
+		}
+		standingup = false;
+	}
 	else
+	{
 		duck = false;
+		ducking = false;
+
+		if(level.framenum - client->last_duck_frame < (int)(0.1/FRAMETIME))
+			standingup = true;
+		else
+			standingup = false;
+	}
+
 	if (xyspeed)
 		run = true;
 	else
 		run = false;
 
-	// check for stand/duck and stop/go transitions(TO DO - is it possible to start a duck transition animation over a couple of frames?)
+	// check for ducking and stand/duck transitions
 	if (duck != client->anim_duck && client->anim_priority < ANIM_DEATH)
 		goto newanim;
+	if (ducking != client->anim_ducking && client->anim_priority < ANIM_DEATH)
+		goto newanim;
+	if (standingup != client->anim_standingup && client->anim_priority < ANIM_DEATH)
+		goto newanim;
+	// check for running/stopping
 	if (run != client->anim_run && client->anim_priority == ANIM_BASIC)
 		goto newanim;
+
+	// check for jump
 	if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
 		goto newanim;
 
@@ -1071,6 +1101,11 @@ void G_SetClientFrame (edict_t *ent)
 		{
 			ent->s.frame++;
 			client->last_anim_frame = level.framenum;
+			if(ducking)
+			{
+				if(ent->s.frame == client->anim_end)
+					client->last_duck_frame = level.framenum;
+			}
 		}
 		return;
 	}
@@ -1091,6 +1126,8 @@ newanim:
 	// return to either a running or standing frame
 	client->anim_priority = ANIM_BASIC;
 	client->anim_duck = duck;
+	client->anim_ducking = ducking;
+	client->anim_standingup = standingup;
 	client->anim_run = run;
 
 	if (!ent->groundentity)
@@ -1135,6 +1172,16 @@ newanim:
 		{
 			ent->s.frame = FRAME_crstnd01;
 			client->anim_end = FRAME_crstnd19;
+		}
+		else if (ducking)
+		{
+			ent->s.frame = FRAME_jump3;
+			client->anim_end = FRAME_jump4;
+		}
+		else if (standingup)
+		{
+			ent->s.frame = FRAME_jump5;
+			client->anim_end = FRAME_jump6;
 		}
 		else
 		{

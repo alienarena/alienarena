@@ -1365,6 +1365,8 @@ struct gclient_s
 	int			anim_end;
 	int			anim_priority;
 	qboolean	anim_duck;
+	qboolean    anim_ducking;
+	qboolean	anim_standingup;
 	qboolean	anim_run;
 	int			last_anim_frame;
 	int			last_weap_think_frame;
@@ -1373,6 +1375,7 @@ struct gclient_s
 	int			last_kick_frame;
 	int			last_stop_frame;
 	int			last_fall_frame;
+	int			last_duck_frame;
 	float		fall_ratio;
 	float		xyspeed;
 

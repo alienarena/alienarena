@@ -1121,7 +1121,7 @@ standardmove:
 	if ( self->health >= 50 && c < crouch_thresh )
 	{
 		//TO DO - no crouching for now - maybe ever.  It's too un-human like, and the animation is non-existent for going in and out of crouches as of yet
-		//ucmd->upmove -= 200;
+		ucmd->upmove -= 200;
 	}
 	else if ( c > jump_thresh )
 	{
