@@ -3542,6 +3542,7 @@ void CL_PoweredEffects (vec3_t origin, unsigned int nEffect)
 	vec3_t		forward;
 	float		dist = 64;
 	float		ltime;
+	float FRAMETIME = 1.0/(float)server_tickrate;
 
 	if (!avelocities[0][0])
 	{
@@ -3550,7 +3551,7 @@ void CL_PoweredEffects (vec3_t origin, unsigned int nEffect)
 				avelocities[i][j] = (rand()&255) * 0.01f;
 	}
 
-	ltime = (float)cl.time / 1000.0f;
+	ltime = (float)cl.time / 1000.0f /(0.1/FRAMETIME);
 	for (i=0 ; i<32 ; i+=2)
 	{
 		angle = ltime * avelocities[i][0];

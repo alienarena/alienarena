@@ -1122,6 +1122,10 @@ void G_SetClientFrame (edict_t *ent)
 		return;
 	}
 
+	//if it fell through because it's done an animation, wait until looping 
+	if(level.framenum - client->last_anim_frame < (int)(0.1/FRAMETIME))
+		return;
+
 newanim:
 	// return to either a running or standing frame
 	client->anim_priority = ANIM_BASIC;
@@ -1187,9 +1191,9 @@ newanim:
 		{
 			ent->s.frame = FRAME_stand01;
 			client->anim_end = FRAME_stand40;
-		}
-		client->last_anim_frame = level.framenum;
+		}		
 	}
+	client->last_anim_frame = level.framenum;
 }
 
 
