@@ -1514,7 +1514,7 @@ void Machinegun_Fire (edict_t *ent)
 		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, bullet_count, MOD_CGALTFIRE);
 
 		//play a booming sound
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("world/rocket.wav"), 1, ATTN_NORM, 0);
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/shotgf1b.wav"), 1, ATTN_NORM, 0);
 
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);

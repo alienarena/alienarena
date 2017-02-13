@@ -1409,7 +1409,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_hud_chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.iqm", "w_sshotgun.iqm"),
-/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/chaingunreload.wav"
+/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/shotg1fb.wav weapons/chaingunreload.wav"
 	},
 
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
