@@ -41,10 +41,10 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 2.	SYSTEM REQUIREMENTS
 
-1.8 GHz CPU
-1.5 GiB RAM
+2.8 GHz CPU
+4 GiB RAM
 1.2 GiB hard disk space
-3D Accelerator with at least 128 MiB texture memory available
+3D Accelerator with at least 512 MiB texture memory available
 
 3.	GETTING STARTED
 
@@ -130,12 +130,12 @@ For Linux users, see the README documentation file.
 There is a long list of credits - ALIEN ARENA is greatly indebted to the following for its creation and completion:
 
 Design:  John Diamond with input from the community at large.
-Programming:  John Diamond, Jim Bower, Dave Stewart, Emmanuel Benoit, Max Eliaser, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
-Models and skins:  John Diamond, Alex Perez, Shawn Keeth, Franc Cassar
+Programming:  John Diamond, Max Eliaser, Jim Bower, Dave Stewart, Emmanuel Benoit, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
+Models and skins:  John Diamond, Shawn Keeth, Franc Cassar
 Maps:  John Diamond, Dennis "xEMPx" Zedlach, Charles Hudson, Torben Fahrnbach
-Textures and Artwork:  John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
+Textures and Artwork:  John Diamond, Phillip K, Dennis "xEMPx" Zedlach, Adam Saizlai, Yves Allaire
 Sounds:  John Diamond, Sound Rangers, Jon Ward, Jim Bower
-Music:  Paul Joyce, Arteria Games, Divinity, Whitelipper, and SoundRangers
+Music:  Divinity, Paul Joyce, Arteria Games, Whitelipper, and SoundRangers
 Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
 
 Linux Port: Shane Bayer, John Diamond, Jim Bower
