@@ -322,7 +322,7 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	spider->s.frame = 31;
 	spider->owner = self;
 	spider->touch = spider_touch;
-	spider->nextthink = level.time + .1;
+	spider->nextthink = level.time + TENFPS;
     spider->think = spider_think;
    
 	spider->s.sound = gi.soundindex ("weapons/electroball.wav");
