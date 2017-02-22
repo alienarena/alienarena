@@ -52,6 +52,15 @@ maps/meshes/tech/biotubebase
 		glow
 	}
 }
+maps/meshes/tech/biocrate
+{
+	{
+		map maps/meshes/tech/biocrate_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/biocrate_fx.tga
+		glow
+	}
+}
 maps/meshes/tech/drarch
 {
 	{

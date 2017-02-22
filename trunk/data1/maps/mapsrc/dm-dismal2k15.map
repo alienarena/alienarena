@@ -27168,7 +27168,7 @@
 {
 "classname" "misc_mapmodel"
 "angle" "45.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 "origin" "-1456.000000 452.000000 -232.000000"
 "spawnflags" "64"
 }
@@ -27176,7 +27176,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "-1464.000000 356.000000 -232.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 "angle" "90.000000"
 "spawnflags" "64"
 }
@@ -27185,7 +27185,7 @@
 "classname" "misc_mapmodel"
 "spawnflags" "64"
 "origin" "-664 532 -232"
-"model" "maps/meshes/xempx/crate64.md2"
+"model" "maps/meshes/tech/crate64.md2"
 "angle" "45"
 }
 // entity 102
@@ -27193,14 +27193,14 @@
 "classname" "misc_mapmodel"
 "spawnflags" "64"
 "angle" "90"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 "origin" "-584 564 -232"
 }
 // entity 103
 {
 "classname" "misc_mapmodel"
 "origin" "-485 553 -232"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 "angle" "360"
 "spawnflags" "64"
 }
@@ -27301,7 +27301,7 @@
 {
 "classname" "misc_mapmodel"
 "angle" "45.000000"
-"model" "maps/meshes/xempx/crate64.md2"
+"model" "maps/meshes/tech/crate64.md2"
 "origin" "622.000000 7.000000 -488.000000"
 "spawnflags" "64"
 }
@@ -27309,7 +27309,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "617.000000 93.000000 -488.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 "angle" "90.000000"
 "spawnflags" "64"
 }
@@ -27318,7 +27318,7 @@
 "classname" "misc_mapmodel"
 "spawnflags" "64"
 "angle" "360"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 "origin" "697 -8 -488"
 }
 // entity 119
