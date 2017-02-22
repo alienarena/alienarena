@@ -15815,7 +15815,7 @@
 {
 "classname" "misc_mapmodel"
 "origin" "368.000000 1200.000000 -136.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 }
 // entity 157
 {
@@ -15883,38 +15883,38 @@
 {
 "classname" "misc_mapmodel"
 "origin" "356.000000 1244.000000 -140.000000"
-"model" "maps/meshes/xempx/crate64.md2"
+"model" "maps/meshes/tech/crate64.md2"
 }
 // entity 166
 {
 "classname" "misc_mapmodel"
 "origin" "336.000000 1280.000000 -80.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 }
 // entity 167
 {
 "classname" "misc_mapmodel"
 "origin" "352.000000 1296.000000 -48.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 }
 // entity 168
 {
 "classname" "misc_mapmodel"
 "origin" "376.000000 1296.000000 -80.000000"
-"model" "maps/meshes/xempx/crate32.md2"
+"model" "maps/meshes/tech/crate32.md2"
 }
 // entity 169
 {
 "classname" "misc_mapmodel"
 "origin" "300.000061 1292.000000 -140.000000"
-"model" "maps/meshes/xempx/crate64.md2"
+"model" "maps/meshes/tech/crate64.md2"
 "angle" "42.097458"
 }
 // entity 170
 {
 "classname" "misc_mapmodel"
 "origin" "364.000061 1316.000000 -140.000000"
-"model" "maps/meshes/xempx/crate64.md2"
+"model" "maps/meshes/tech/crate64.md2"
 "angle" "42.097458"
 }
 // entity 171
