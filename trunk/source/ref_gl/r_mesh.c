@@ -765,7 +765,7 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 				
 				// pitch and roll are handled by IQM_AnimateFrame.
 				VectorClear (angles); 
-				if (currentmodel->type != mod_iqm)
+				if (currentmodel->type != mod_iqm || currentmodel->num_poses > 173)
 					VectorCopy (currententity->angles, angles);
 				else
 					angles[YAW] = currententity->angles[YAW];
@@ -1207,8 +1207,8 @@ void R_Mesh_DrawCaster (void)
 	{
 		qglTranslatef (currententity->origin[0],  currententity->origin[1],  currententity->origin[2]);
 		qglRotatef (currententity->angles[YAW],		0, 0, 1);
-		// pitch and roll are handled by IQM_AnimateFrame for player models(any IQM greater than 41 frames). 
-		if (currententity->model == NULL || (currententity->flags & RF_WEAPONMODEL) || (currententity->model->num_poses < 41))
+		// pitch and roll are handled by IQM_AnimateFrame for player models(any IQM greater than 173 frames). 
+		if (currententity->model == NULL || (currententity->flags & RF_WEAPONMODEL) || (currententity->model->num_poses < 173))
 		{
 			qglRotatef (currententity->angles[PITCH],	0, 1, 0);
 			qglRotatef (currententity->angles[ROLL],	1, 0, 0);

@@ -1812,11 +1812,11 @@ void fire_bomb (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	bomb->movetype = MOVETYPE_BOUNCE;
 	bomb->clipmask = MASK_SHOT;
 	bomb->solid = SOLID_BBOX;
-	bomb->s.effects |= EF_ROTATE;
+	bomb->s.effects |= EF_TELEPORTER;
 	bomb->s.renderfx |= RF_GLOW;
 	VectorClear (bomb->mins);
 	VectorClear (bomb->maxs);
-	bomb->s.modelindex = gi.modelindex ("vehicles/bomber/bomb.iqm");
+	bomb->s.modelindex = gi.modelindex ("models/objects/blank/tris.iqm");
 	bomb->owner = self;
 	bomb->touch = bomb_touch;
 	bomb->nextthink = level.time + .1;

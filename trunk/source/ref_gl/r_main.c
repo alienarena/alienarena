@@ -425,8 +425,8 @@ void R_RotateForEntity (entity_t *e)
     qglTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
 
     qglRotatef (e->angles[YAW],		0, 0, 1);
-    // pitch and roll are handled by IQM_AnimateFrame for player models(any IQM greater than 41 frames). 
-    if (e->model == NULL || (e->flags & RF_WEAPONMODEL) || (e->model->num_poses < 41))
+    // pitch and roll are handled by IQM_AnimateFrame for player models(any IQM greater than 173 frames). 
+    if (e->model == NULL || (e->flags & RF_WEAPONMODEL) || (e->model->num_poses < 173))
     {
 		{
 			qglRotatef (e->angles[PITCH],	0, 1, 0);
