@@ -1067,38 +1067,41 @@ void G_SetClientFrame (edict_t *ent)
 		run = true;
 	else
 		run = false;
-
-	// check for ducking and stand/duck transitions
-	if (duck != client->anim_duck && client->anim_priority < ANIM_DEATH)
-		goto newanim;
-	if (ducking != client->anim_ducking && client->anim_priority < ANIM_DEATH)
-		goto newanim;
-	if (standingup != client->anim_standingup && client->anim_priority < ANIM_DEATH)
-		goto newanim;
-	// check for running/stopping
-	if (run != client->anim_run && client->anim_priority == ANIM_BASIC)
-		goto newanim;
-
-	// check for jump
-	if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
-		goto newanim;
-
-	//check for running while shooting
-	if (run && client->anim_priority == ANIM_ATTACK)
-		goto newanim;
-
-	if(client->anim_priority == ANIM_REVERSE)
-	{
-		if(ent->s.frame > client->anim_end)
+	
+	if(level.framenum - client->last_anim_frame > (int)(0.1/FRAMETIME) - 1)
+	{	
+		// check for jump
+		if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
 		{
-			ent->s.frame--;
-			return;
+			goto newanim;
 		}
-	}
-	else if (ent->s.frame < client->anim_end)
-	{	// continue an animation
-		if(level.framenum - client->last_anim_frame > (int)(0.1/FRAMETIME) - 1)
+
+		// check for ducking and stand/duck transitions
+		if (duck != client->anim_duck && client->anim_priority < ANIM_DEATH)
+			goto newanim;
+		if (ducking != client->anim_ducking && client->anim_priority < ANIM_DEATH)
+			goto newanim;
+		if (standingup != client->anim_standingup && client->anim_priority < ANIM_DEATH)
+			goto newanim;
+		// check for running/stopping
+		if (run != client->anim_run && client->anim_priority == ANIM_BASIC)
+			goto newanim;
+
+		//check for running while shooting
+		if (run && client->anim_priority == ANIM_ATTACK)
+			goto newanim;
+
+		if(client->anim_priority == ANIM_REVERSE)
 		{
+			if(ent->s.frame > client->anim_end)
+			{
+				ent->s.frame--;
+				return;
+			}
+		}
+		else if (ent->s.frame < client->anim_end)
+		{	
+			// continue an animation
 			ent->s.frame++;
 			client->last_anim_frame = level.framenum;
 			if(ducking)
@@ -1106,25 +1109,27 @@ void G_SetClientFrame (edict_t *ent)
 				if(ent->s.frame == client->anim_end)
 					client->last_duck_frame = level.framenum;
 			}
+			return;
 		}
-		return;
-	}
 
-	if (client->anim_priority == ANIM_DEATH)
-		return;		// stay there
-	if (client->anim_priority == ANIM_JUMP)
-	{
-		if (!ent->groundentity)
+		if (client->anim_priority == ANIM_DEATH)
 			return;		// stay there
-		ent->client->anim_priority = ANIM_WAVE;
-		ent->s.frame = FRAME_jump3;
-		ent->client->anim_end = FRAME_jump6;
+
+		if (client->anim_priority == ANIM_JUMP)
+		{
+			if (!ent->groundentity)
+				return;		// stay there
+			ent->client->anim_priority = ANIM_WAVE;
+			ent->s.frame = FRAME_jump3;
+			ent->client->anim_end = FRAME_jump6;
+			return;
+		}
+	}
+	else
+	{
+		//if it fell through, wait until looping 
 		return;
 	}
-
-	//if it fell through because it's done an animation, wait until looping 
-	if(level.framenum - client->last_anim_frame < (int)(0.1/FRAMETIME))
-		return;
 
 newanim:
 	// return to either a running or standing frame
