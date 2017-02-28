@@ -290,7 +290,10 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 			if (cl_shownet->value == 3)
 				Com_Printf ("   remove: %i\n", newnum);
 			if (oldnum != newnum)
-				Com_Printf ("U_REMOVE: oldnum != newnum\n");
+			{
+				if (cl_shownet->value == 3)
+					Com_Printf ("U_REMOVE: oldnum != newnum\n");
+			}
 
 			oldindex++;
 
@@ -512,6 +515,7 @@ void CL_ParseFrame (void)
 	int			len;
 	frame_t		*old;
 	byte		new_areabits[MAX_MAP_AREAS/8];
+	float FRAMETIME = 1.0/(float)server_tickrate;
 
 	//HACK: reduce the number of areabit changes detected
 	memcpy (new_areabits, cl.frame.areabits, MAX_MAP_AREAS/8);
@@ -520,7 +524,7 @@ void CL_ParseFrame (void)
 
 	cl.frame.serverframe = MSG_ReadLong (&net_message);
 	cl.frame.deltaframe = MSG_ReadLong (&net_message);
-	cl.frame.servertime = cl.frame.serverframe*100;
+	cl.frame.servertime = cl.frame.serverframe*1000*FRAMETIME;
 
 	// BIG HACK to let old demos continue to work
 	if (cls.serverProtocol != 26)
@@ -554,6 +558,7 @@ void CL_ParseFrame (void)
 		}
 		else if (cl.parse_entities - old->parse_entities > MAX_PARSE_ENTITIES-128)
 		{
+			if (cl_shownet->value == 3)
 			Com_Printf ("Delta parse_entities too old.\n");
 		}
 		else
@@ -563,8 +568,8 @@ void CL_ParseFrame (void)
 	// clamp time
 	if (cl.time > cl.frame.servertime)
 		cl.time = cl.frame.servertime;
-	else if (cl.time < cl.frame.servertime - 100)
-		cl.time = cl.frame.servertime - 100;
+	else if (cl.time < cl.frame.servertime - 1000*FRAMETIME)
+		cl.time = cl.frame.servertime - 1000*FRAMETIME;
 
 	// read areabits
 	len = MSG_ReadByte (&net_message);
@@ -634,8 +639,6 @@ struct model_s
 	char		name[MAX_QPATH];
 };
 
-static float FRAMETIME;
-
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
@@ -651,10 +654,8 @@ void CL_AddPacketEntities (frame_t *frame)
 	qboolean			playermodel;
 	char	shortname[MAX_OSPATH];
 
-	FRAMETIME = 1.0/(float)server_tickrate;
-
 	// bonus items rotate at a fixed rate
-	autorotate = anglemod(cl.time/(10.0*(0.1/FRAMETIME))); 
+	autorotate = anglemod(cl.time/10.0); 
 
 	// brush models can auto animate their frames
 	autoanim = 2*cl.time/1000;
@@ -788,8 +789,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.angles[1] = autorotate;
 			ent.angles[2] = 0;
 			// bobbing items
-			bob_scale = (0.005f + s1->number * 0.00001f) * 0.5/(0.1/FRAMETIME);
-			bob = 5 + cos( (cl.time + (1000*(0.1/FRAMETIME))) * bob_scale ) * 5;
+			bob_scale = (0.005f + s1->number * 0.00001f) * 0.5;
+			bob = 5 + cos( (cl.time + (1000)) * bob_scale ) * 5;
 			ent.oldorigin[2] += bob;
 			ent.origin[2] += bob;
 
@@ -1665,8 +1666,7 @@ void CL_AddClEntities()
 	float time, time2, grav = Cvar_VariableValue("sv_gravity");
 	static vec3_t mins = { -2, -2, -2 }; 
     static vec3_t maxs = { 2, 2, 2 }; 
-	float FRAMETIME = 1.0/(float)server_tickrate;
-
+	
 	if (!grav)
 		grav = 1;
 	else
@@ -1680,7 +1680,7 @@ void CL_AddClEntities()
 	for (le = active_clentities; le; le = next) {
 		next = le->next;
 
-		time = (cl.time - le->time) * 0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps;
+		time = (cl.time - le->time) * 0.001; 
 		alpha = le->alpha + time * le->alphavel;
 
 		if (alpha <= 0) {		// faded out
@@ -1758,7 +1758,7 @@ void CL_AddClEntities()
 				float time =
 					cl.time - (cls.frametime +
 							   cls.frametime * trace.fraction) * 1000;
-				time = (time - le->time) * 0.001 * FRAMETIME/0.1; //FRAMETIME vs 10fps;
+				time = (time - le->time) * 0.001;
 
 				VectorSet(vel, le->vel[0], le->vel[1], le->vel[2] + le->accel[2] * time * grav);
 				VectorReflect(vel, trace.plane.normal, le->vel);
