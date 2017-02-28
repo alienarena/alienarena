@@ -2403,6 +2403,7 @@ void CL_Frame( int msec )
 	int packet_trigger;
 	static perftest_t *speedometer = NULL;
 	static perftest_t *accelerometer = NULL;
+	float FRAMETIME = 1.0/(float)server_tickrate;
 
 	if ( dedicated->integer )
 	{ // crx running as dedicated server crashes without this.
@@ -2479,9 +2480,9 @@ void CL_Frame( int msec )
 	if ( cls.state == ca_connected )
 	{ // receiving configstrings from the server, run at nominal 10PPS
 		// avoids unnecessary load on the server
-		if ( packetrate_cap != 100 )
+		if ( packetrate_cap != 1000*FRAMETIME )
 			Com_DPrintf("packet rate change: 10 PPS\n");
-		packetrate_cap = 100;
+		packetrate_cap = 1000*FRAMETIME;
 	}
 	else if ( framerate_cap >= PKTRATE_CAP )
 	{ // do not to throttle packet sending, run in sync with render

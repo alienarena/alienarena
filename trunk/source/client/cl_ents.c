@@ -1508,6 +1508,8 @@ Emits all entities, particles, and lights to the refresh
 */
 void CL_AddEntities (void)
 {
+	float FRAMETIME = 1.0/(float)server_tickrate;
+
 	if (cls.state != ca_active)
 		return;
 
@@ -1518,15 +1520,15 @@ void CL_AddEntities (void)
 		cl.time = cl.frame.servertime;
 		cl.lerpfrac = 1.0;
 	}
-	else if (cl.time < cl.frame.servertime - 100)
+	else if (cl.time < cl.frame.servertime - 1000*FRAMETIME)
 	{
 		if (cl_showclamp->value)
-			Com_Printf ("low clamp %i\n", cl.frame.servertime-100 - cl.time);
-		cl.time = cl.frame.servertime - 100;
+			Com_Printf ("low clamp %i\n", cl.frame.servertime- 1000*FRAMETIME - cl.time);
+		cl.time = cl.frame.servertime - 1000*FRAMETIME;
 		cl.lerpfrac = 0;
 	}
 	else
-		cl.lerpfrac = 1.0 - (cl.frame.servertime - cl.time) * 0.01;
+		cl.lerpfrac = 1.0 - (cl.frame.servertime - cl.time) * FRAMETIME/10.0; 
 
 	if (cl_timedemo->value)
 		cl.lerpfrac = 1.0;
