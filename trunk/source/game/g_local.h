@@ -1268,7 +1268,7 @@ void spectator_respawn (edict_t *ent);
 // client data that stays across deathmatch respawns
 typedef struct
 {
-	int			enterframe;			// level.framenum the client entered the game
+	float		entertime;			// leve.time the client entered the game
 	int			score;				// frags, etc
 	int			deaths;				// deaths, etc
 	vec3_t		cmd_angles;			// angles sent over in the last command

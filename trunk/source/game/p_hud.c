@@ -557,7 +557,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		if (player_participating (cl_ent))
 			Com_sprintf (entry, sizeof(entry),
 				"client %i %i %i %i %i %i ",
-				x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe)/600);
+				x, y, sorted[i], cl->resp.score, cl->ping, (int)((level.time - cl->resp.entertime)/60));
 		else //duel mode will have queued spectators
 			Com_sprintf (entry, sizeof(entry),
 				"queued %i %i %i %i %i %i ",

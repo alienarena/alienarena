@@ -1116,7 +1116,7 @@ void InitClientPersistant (gclient_t *client)
 void InitClientResp (gclient_t *client)
 {
 	memset (&client->resp, 0, sizeof(client->resp));
-	client->resp.enterframe = level.framenum;
+	client->resp.entertime = level.time;
 }
 
 /*

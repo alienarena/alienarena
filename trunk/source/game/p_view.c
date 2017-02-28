@@ -1039,7 +1039,7 @@ void G_SetClientFrame (edict_t *ent)
 	if (client->ps.pmove.pm_flags & PMF_DUCKED)
 	{	
 		//last duck frame will be set when ducking is completed
-		if(level.framenum - client->last_duck_frame > 2 * (int)(0.1/FRAMETIME) - 1) //go into actual ducking mode after the 2 ducking frames transition
+		if(level.framenum - client->last_duck_frame > 2 * (int)(TENFPS/FRAMETIME) - 1) //go into actual ducking mode after the 2 ducking frames transition
 		{
 			duck = false;
 			ducking = true;
@@ -1057,7 +1057,7 @@ void G_SetClientFrame (edict_t *ent)
 		duck = false;
 		ducking = false;
 
-		if(level.framenum - client->last_duck_frame < (int)(0.1/FRAMETIME))
+		if(level.framenum - client->last_duck_frame < (int)(TENFPS/FRAMETIME))
 			standingup = true;
 		else
 			standingup = false;
@@ -1068,7 +1068,7 @@ void G_SetClientFrame (edict_t *ent)
 	else
 		run = false;
 	
-	if(level.framenum - client->last_anim_frame > (int)(0.1/FRAMETIME) - 1)
+	if(level.framenum - client->last_anim_frame > (int)(TENFPS/FRAMETIME) - 1)
 	{	
 		// check for jump
 		if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
