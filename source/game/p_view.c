@@ -424,15 +424,15 @@ void SV_CalcGunOffset (edict_t *ent)
 	}
 
 	//need to move down and back, for smooth animation if framerate is faster than 100ms
-	if(level.framenum - ent->client->last_jump_frame < (int)(0.1/FRAMETIME) * 2)
+	if(level.framenum - ent->client->last_jump_frame < round(TENFPS/FRAMETIME) * 2)
 	{		
 		float div;
 
-		div = (level.framenum - ent->client->last_jump_frame < (int)(0.1/FRAMETIME)) ? (level.framenum - ent->client->last_jump_frame) : 
-			(int)(0.1/FRAMETIME) * 2 - (level.framenum - ent->client->last_jump_frame);
+		div = (level.framenum - ent->client->last_jump_frame < round(0.1/FRAMETIME)) ? (level.framenum - ent->client->last_jump_frame) : 
+			round(TENFPS/FRAMETIME) * 2 - (level.framenum - ent->client->last_jump_frame);
 		
-		angOffset = 1.0 * div/(0.1/FRAMETIME);
-		heightOffset = 1.5 * div/(0.1/FRAMETIME);
+		angOffset = 1.0 * div/(TENFPS/FRAMETIME);
+		heightOffset = 1.5 * div/(TENFPS/FRAMETIME);
 		ent->client->ps.gunoffset[2] -= heightOffset;
 		ent->client->ps.gunangles[PITCH] -= angOffset; 
 		ent->client->ps.gunangles[ROLL] -= angOffset; 
@@ -710,7 +710,7 @@ void P_FallingDamage (edict_t *ent)
 	ent->client->fall_value = delta;
 	if (ent->client->fall_value > 20)
 		ent->client->fall_value = 20;
-	ent->client->fall_time = level.time + FALL_TIME * (FRAMETIME/0.1);
+	ent->client->fall_time = level.time + FALL_TIME * (FRAMETIME/TENFPS);
 
 	if (delta > 30)
 	{
@@ -1039,7 +1039,7 @@ void G_SetClientFrame (edict_t *ent)
 	if (client->ps.pmove.pm_flags & PMF_DUCKED)
 	{	
 		//last duck frame will be set when ducking is completed
-		if(level.framenum - client->last_duck_frame > 2 * (int)(TENFPS/FRAMETIME) - 1) //go into actual ducking mode after the 2 ducking frames transition
+		if(level.framenum - client->last_duck_frame >= 2 * round(TENFPS/FRAMETIME)) //go into actual ducking mode after the 2 ducking frames transition
 		{
 			duck = false;
 			ducking = true;
@@ -1057,7 +1057,7 @@ void G_SetClientFrame (edict_t *ent)
 		duck = false;
 		ducking = false;
 
-		if(level.framenum - client->last_duck_frame < (int)(TENFPS/FRAMETIME))
+		if(level.framenum - client->last_duck_frame < round(TENFPS/FRAMETIME))
 			standingup = true;
 		else
 			standingup = false;
@@ -1068,7 +1068,7 @@ void G_SetClientFrame (edict_t *ent)
 	else
 		run = false;
 	
-	if(level.framenum - client->last_anim_frame > (int)(TENFPS/FRAMETIME) - 1)
+	if(level.framenum - client->last_anim_frame >= round(TENFPS/FRAMETIME))
 	{	
 		// check for jump
 		if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
@@ -1284,25 +1284,25 @@ void ClientEndServerFrame (edict_t *ent)
 	// need to account for sudden shifts in speed causing sudden weapon bob changes
 	xyspeed = ent->client->xyspeed;
 
-	ent->client->xyspeed += sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1])/(0.1/FRAMETIME);
+	ent->client->xyspeed += sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1])/(TENFPS/FRAMETIME);
 	if(ent->client->xyspeed > sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]))
 		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
 	if (xyspeed < 5 || !ent->groundentity)
 	{
-		if(FRAMETIME == 0.1)
+		if(FRAMETIME == TENFPS)
 		{
 			current_client->bobtime = 0; // start at beginning of cycle again
 			bobmove = 0;
 		}
 		else 
 		{
-			if(level.framenum - ent->client->last_stop_frame > (int)(0.1/FRAMETIME) * 2)
+			if(level.framenum - ent->client->last_stop_frame > round(TENFPS/FRAMETIME) * 2)
 			{
 				//trigger event animation over framerate ratio to 100ms
 				ent->client->last_stop_frame = level.framenum;		
 			}
-			if(level.framenum - ent->client->last_stop_frame < (int)(0.1/FRAMETIME) * 2)
+			if(level.framenum - ent->client->last_stop_frame < round(TENFPS/FRAMETIME) * 2)
 			{					
 				bobmove /= 2.0;	// slow movement down gradually
 			}

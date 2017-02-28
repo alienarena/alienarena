@@ -865,8 +865,9 @@ void	G_CleanPlayerName ( const char *source, char *dest );
 
 char	*vtos (vec3_t v);
 
-float vectoyaw (vec3_t vec);
+float	vectoyaw (vec3_t vec);
 // void vectoangles (vec3_t vec, vec3_t angles);
+int		round(double number);
 
 //
 // g_combat.c
