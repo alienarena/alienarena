@@ -546,3 +546,8 @@ void G_CleanPlayerName ( const char *source, char *dest )
 	}
 }
 
+//useful rounding func
+int round(double number)
+{
+    return (number >= 0) ? (int)(number + 0.5) : (int)(number - 0.5);
+}

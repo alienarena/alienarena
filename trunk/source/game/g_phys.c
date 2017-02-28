@@ -107,7 +107,7 @@ qboolean SV_RunThink (edict_t *ent)
 		//if animated mesh, animate at this target
 		if (ent->spawnflags & 32)
 		{
-			if(level.framenum - ent->last_anim_frame > (int)(0.1/FRAMETIME) - 1)
+			if(level.framenum - ent->last_anim_frame >= round(TENFPS/FRAMETIME))
 			{
 				ent->s.frame = (ent->s.frame + 1)%24;
 				ent->last_anim_frame = level.framenum;

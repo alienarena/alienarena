@@ -406,14 +406,14 @@ void Think_Weapon (edict_t *ent)
 {
 
 	if ( (((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) || ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2)) &&
-		level.framenum - ent->client->last_fire_frame > (int)(0.1/FRAMETIME) - 1)
+		level.framenum - ent->client->last_fire_frame >= round(0.1/FRAMETIME))
 	{
 		//Trigger a weapon think, no matter were the weapon think is in it's cycle - don't allow this for another .1 seconds.
 		//What this does is give us more responsiveness if the server framerate is greater than 10fps, without creating a rapid fire effect.
 		ent->client->last_fire_frame = level.framenum;
 		ent->client->last_weap_think_frame = 0; //will trigger next section immediately.
 	}
-	if(level.framenum - ent->client->last_weap_think_frame > (int)(0.1/FRAMETIME) - 1)
+	if(level.framenum - ent->client->last_weap_think_frame >= round(0.1/FRAMETIME))
 	{	
 		// if just died, put the weapon away
 		if (ent->health < 1)
