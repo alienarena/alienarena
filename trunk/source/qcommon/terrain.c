@@ -504,6 +504,94 @@ void visualizer_step (terraindata_t *out, qboolean export)
 }
 #endif
 
+// writes out entire terraindata_t struct to file
+void WriteTerrainData (terraindata_t *in, const char *name)
+{
+	FILE* file;
+	char collisionFile[MAX_QPATH];
+	int		i;
+	size_t sz;
+
+	sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
+
+    file = fopen(collisionFile, "wb");
+    if (file != NULL) 
+	{
+		sz = fwrite(&in->num_vertices,sizeof(int), 1, file); 
+		for(i = 0; i < in->num_vertices*2; i++)
+		{
+			sz = fwrite(&in->vert_texcoords[i],sizeof(float), 1, file); 
+		}
+
+		for(i = 0; i < in->num_vertices*3; i++)
+		{
+			sz = fwrite(&in->vert_positions[i],sizeof(float), 1, file); 
+		}		
+	
+		sz = fwrite(&in->num_triangles,sizeof(int), 1, file); 
+		for(i = 0; i < in->num_triangles*3; i++)
+		{
+			sz = fwrite(&in->tri_indices[i],sizeof(unsigned int), 1, file); 
+		}
+
+		for(i = 0; i < 3; i++)
+		{
+			sz = fwrite(&in->maxs[i], sizeof(float), 1, file);
+			sz = fwrite(&in->mins[i], sizeof(float), 1, file);
+		}
+
+        fclose(file);
+    }
+}
+// read in terraindata_t struct from file
+qboolean ReadTerrainData (terraindata_t *out, const char *name)
+{
+	FILE* file;
+	char collisionFile[MAX_QPATH];
+	int		i;
+	size_t sz;
+
+	sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
+
+	file = fopen(collisionFile, "rb");
+    if (file != NULL) 
+	{
+		memset (out, 0, sizeof(*out));
+
+		sz = fread(&out->num_vertices, sizeof(int), 1, file);		
+		out->vert_texcoords = Z_Malloc (out->num_vertices*2*sizeof(float));
+		out->vert_positions = Z_Malloc (out->num_vertices*3*sizeof(float));
+
+		for(i = 0; i < out->num_vertices*2; i++)
+		{ 
+			sz = fread(&out->vert_texcoords[i],sizeof(float), 1, file); 
+		}
+
+		for(i = 0; i < out->num_vertices*3; i++)
+		{ 
+			sz = fread(&out->vert_positions[i],sizeof(float), 1, file);
+		}
+					
+		sz = fread(&out->num_triangles,sizeof(int), 1, file); 
+		out->tri_indices = Z_Malloc (out->num_triangles*3*sizeof(unsigned int));
+
+		for(i = 0; i < out->num_triangles*3; i++)
+		{
+			sz = fread(&out->tri_indices[i],sizeof(unsigned int), 1, file); 
+		}
+
+		for(i = 0; i < 3; i++)
+		{
+			sz = fread(&out->maxs[i], sizeof(float), 1, file);
+			sz = fread(&out->mins[i], sizeof(float), 1, file);
+		}
+		
+		fclose(file);
+		return true;
+	}
+	return false;
+}
+
 void CleanupTerrainData (terraindata_t *dat)
 {
 #define CLEANUPFIELD(field) \
