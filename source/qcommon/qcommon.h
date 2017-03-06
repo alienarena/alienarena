@@ -1135,6 +1135,11 @@ typedef struct
 // buf is a string containing the text of a .terrain file.
 void LoadTerrainFile (terraindata_t *out, const char *name, qboolean decorations_only, float oversampling_factor, int reduction_amt, char *buf);
 
+// writes out entire terraindata_t struct to file
+void WriteTerrainData (terraindata_t *in, const char *name); 
+// read in terraindata_t struct from file
+qboolean ReadTerrainData (terraindata_t *out, const char *name);
+
 // Frees any allocated buffers in dat.
 void CleanupTerrainData (terraindata_t *dat);
 
