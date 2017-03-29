@@ -505,14 +505,17 @@ void visualizer_step (terraindata_t *out, qboolean export)
 #endif
 
 // writes out entire terraindata_t struct to file
-void WriteTerrainData (terraindata_t *in, const char *name)
+void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 {
 	FILE* file;
 	char collisionFile[MAX_QPATH];
-	int		i;
+	int		i, pathLen;
 	size_t sz;
 
-	sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
+	if(forRender)
+		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
+	else
+		sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
 
     file = fopen(collisionFile, "wb");
     if (file != NULL) 
@@ -540,18 +543,44 @@ void WriteTerrainData (terraindata_t *in, const char *name)
 			sz = fwrite(&in->mins[i], sizeof(float), 1, file);
 		}
 
+		if(forRender)
+		{
+			sz = fwrite (in->hmtex_path, sizeof(char) * MAX_OSPATH, 1, file);
+			sz = fwrite (in->texture_path, sizeof(char) * MAX_OSPATH, 1, file);
+			sz = fwrite (in->lightmap_path, sizeof(char) * MAX_OSPATH, 1, file);
+
+			pathLen = strlen(in->decoration_variant_paths);
+			sz = fwrite (&pathLen, sizeof(int), 1, file);
+			sz = fwrite (in->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
+
+			sz = fwrite (&in->num_decorations, sizeof(int), 1, file);
+			for(i = 0; i < in->num_decorations; i++)
+			{
+				//origin
+				sz = fwrite (&in->decorations[i].origin[0], sizeof(float), 1, file);
+				sz = fwrite (&in->decorations[i].origin[1], sizeof(float), 1, file);
+				sz = fwrite (&in->decorations[i].origin[2], sizeof(float), 1, file);
+
+				sz = fwrite (&in->decorations[i].size, sizeof(float), 1, file);
+				sz = fwrite (&in->decorations[i].type, sizeof(int), 1, file);
+			}
+		}
+
         fclose(file);
     }
 }
 // read in terraindata_t struct from file
-qboolean ReadTerrainData (terraindata_t *out, const char *name)
+qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 {
 	FILE* file;
 	char collisionFile[MAX_QPATH];
-	int		i;
+	int		i, pathLen;
 	size_t sz;
 
-	sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
+	if(forRender)
+		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
+	else
+		sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
 
 	file = fopen(collisionFile, "rb");
     if (file != NULL) 
@@ -584,6 +613,42 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name)
 		{
 			sz = fread(&out->maxs[i], sizeof(float), 1, file);
 			sz = fread(&out->mins[i], sizeof(float), 1, file);
+		}
+
+		if(forRender)
+		{			
+			out->hmtex_path = Z_Malloc (MAX_OSPATH * sizeof(char));
+			out->texture_path = Z_Malloc (MAX_OSPATH * sizeof(char));
+			out->lightmap_path = Z_Malloc (MAX_OSPATH * sizeof(char));
+
+			sz = fread (out->hmtex_path, sizeof(char) * MAX_OSPATH, 1, file);
+			sz = fread (out->texture_path, sizeof(char) * MAX_OSPATH, 1, file);
+			sz = fread (out->lightmap_path, sizeof(char) * MAX_OSPATH, 1, file);
+
+			sz = fread (&pathLen, sizeof(int), 1, file);
+
+			out->decoration_variant_paths = Z_Malloc (sizeof(char) * pathLen);
+			sz = fread (out->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
+
+			sz = fread (&out->num_decorations, sizeof(int), 1, file);
+			if(out->num_decorations > 0)
+			{
+				out->decorations = Z_Malloc (out->num_decorations * sizeof(terraindec_t));
+				for(i = 0; i < out->num_decorations; i++)
+				{
+					//origin
+					sz = fread (&out->decorations[i].origin[0], sizeof(float), 1, file);
+					sz = fread (&out->decorations[i].origin[1], sizeof(float), 1, file);
+					sz = fread (&out->decorations[i].origin[2], sizeof(float), 1, file);
+
+					sz = fread (&out->decorations[i].size, sizeof(float), 1, file);
+					sz = fread (&out->decorations[i].type, sizeof(int), 1, file);
+
+					sz = fread (&pathLen, sizeof(int), 1, file);
+
+					out->decorations[i].path = out->decoration_variant_paths;
+				}
+			}
 		}
 		
 		fclose(file);
