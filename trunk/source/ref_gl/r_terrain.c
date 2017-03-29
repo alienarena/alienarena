@@ -11,9 +11,15 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	mesh_framevbo_t *framevbo = NULL;
 	image_t	*tex = NULL;
 	terraindata_t data;
-	int ndownward;
-	
-	LoadTerrainFile (&data, mod->name, false, 2.0, 32, (char *)_buf);
+	int ndownward;	
+
+	if(!ReadTerrainData (&data, mod->name, true))
+	{	
+		LoadTerrainFile (&data, mod->name, false, 2.0, 32, (char *)_buf);
+
+		//write this out this time
+		WriteTerrainData (&data, mod->name, true);
+	}
 	
 	Com_Printf("Loading terrain %s\n", mod->name);
 	

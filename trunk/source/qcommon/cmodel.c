@@ -1374,14 +1374,14 @@ static void CM_LoadTerrainModel_FromFile (char *name, const vec3_t angles, const
 	if (!buf)
 		Com_Error (ERR_DROP, "CM_LoadTerrainModel: Missing terrain model %s!", name);
 
-	if(!ReadTerrainData (&data, name))
+	if(!ReadTerrainData (&data, name, false))
 	{	
 		// This ends up being 1/4 as much detail as is used for rendering. You 
 		// need a surprisingly large amount to maintain accurate physics.
 		LoadTerrainFile (&data, name, false, 0.5, 8, buf);
 
 		//write this out this time
-		WriteTerrainData (&data, name);
+		WriteTerrainData (&data, name, false);
 	}
 
 	//here we should read this collision mesh in from a file that we generate from terraindata_t "data" if it's not already there.
