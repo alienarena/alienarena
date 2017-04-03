@@ -587,32 +587,41 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 	{
 		memset (out, 0, sizeof(*out));
 
-		sz = fread(&out->num_vertices, sizeof(int), 1, file);		
+		sz = fread(&out->num_vertices, sizeof(int), 1, file);	
+		out->num_vertices = LittleLong(out->num_vertices);
+
 		out->vert_texcoords = Z_Malloc (out->num_vertices*2*sizeof(float));
 		out->vert_positions = Z_Malloc (out->num_vertices*3*sizeof(float));
 
 		for(i = 0; i < out->num_vertices*2; i++)
 		{ 
 			sz = fread(&out->vert_texcoords[i],sizeof(float), 1, file); 
+			out->vert_texcoords[i] = LittleFloat(out->vert_texcoords[i]);
 		}
 
 		for(i = 0; i < out->num_vertices*3; i++)
 		{ 
 			sz = fread(&out->vert_positions[i],sizeof(float), 1, file);
+			out->vert_positions[i] = LittleFloat(out->vert_positions[i]);
 		}
 					
 		sz = fread(&out->num_triangles,sizeof(int), 1, file); 
+		out->num_triangles = LittleLong(out->num_triangles);
+
 		out->tri_indices = Z_Malloc (out->num_triangles*3*sizeof(unsigned int));
 
 		for(i = 0; i < out->num_triangles*3; i++)
 		{
 			sz = fread(&out->tri_indices[i],sizeof(unsigned int), 1, file); 
+			out->tri_indices[i] = LittleLong(out->tri_indices[i]);
 		}
 
 		for(i = 0; i < 3; i++)
 		{
 			sz = fread(&out->maxs[i], sizeof(float), 1, file);
+			out->maxs[i] = LittleFloat(out->maxs[i]);
 			sz = fread(&out->mins[i], sizeof(float), 1, file);
+			out->mins[i] = LittleFloat(out->mins[i]);
 		}
 
 		if(forRender)
@@ -626,11 +635,14 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 			sz = fread (out->lightmap_path, sizeof(char) * MAX_OSPATH, 1, file);
 
 			sz = fread (&pathLen, sizeof(int), 1, file);
+			pathLen = LittleLong(pathLen);
 
 			out->decoration_variant_paths = Z_Malloc (sizeof(char) * pathLen);
 			sz = fread (out->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
 
 			sz = fread (&out->num_decorations, sizeof(int), 1, file);
+			out->num_decorations = LittleLong(out->num_decorations);
+
 			if(out->num_decorations > 0)
 			{
 				out->decorations = Z_Malloc (out->num_decorations * sizeof(terraindec_t));
@@ -638,13 +650,16 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 				{
 					//origin
 					sz = fread (&out->decorations[i].origin[0], sizeof(float), 1, file);
+					out->decorations[i].origin[0] = LittleFloat(out->decorations[i].origin[0]);
 					sz = fread (&out->decorations[i].origin[1], sizeof(float), 1, file);
+					out->decorations[i].origin[1] = LittleFloat(out->decorations[i].origin[1]);
 					sz = fread (&out->decorations[i].origin[2], sizeof(float), 1, file);
+					out->decorations[i].origin[2] = LittleFloat(out->decorations[i].origin[2]);
 
 					sz = fread (&out->decorations[i].size, sizeof(float), 1, file);
+					out->decorations[i].size = LittleFloat(out->decorations[i].size);
 					sz = fread (&out->decorations[i].type, sizeof(int), 1, file);
-
-					sz = fread (&pathLen, sizeof(int), 1, file);
+					out->decorations[i].type = LittleLong(out->decorations[i].type);
 
 					out->decorations[i].path = out->decoration_variant_paths;
 				}
