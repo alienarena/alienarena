@@ -512,6 +512,8 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 	int		i, pathLen;
 	size_t sz;
 
+	Swap_Force(false);
+
 	if(forRender)
 		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
 	else
@@ -520,26 +522,33 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
     file = fopen(collisionFile, "wb");
     if (file != NULL) 
 	{
+		in->num_vertices = LittleLong(in->num_vertices);
 		sz = fwrite(&in->num_vertices,sizeof(int), 1, file); 
 		for(i = 0; i < in->num_vertices*2; i++)
 		{
+			in->vert_texcoords[i] = LittleFloat(in->vert_texcoords[i]);
 			sz = fwrite(&in->vert_texcoords[i],sizeof(float), 1, file); 
 		}
 
 		for(i = 0; i < in->num_vertices*3; i++)
 		{
+			in->vert_positions[i] = LittleFloat(in->vert_positions[i]);
 			sz = fwrite(&in->vert_positions[i],sizeof(float), 1, file); 
 		}		
 	
+		in->num_triangles = LittleLong(in->num_triangles);
 		sz = fwrite(&in->num_triangles,sizeof(int), 1, file); 
 		for(i = 0; i < in->num_triangles*3; i++)
 		{
+			in->tri_indices[i] = LittleLong(in->tri_indices[i]);
 			sz = fwrite(&in->tri_indices[i],sizeof(unsigned int), 1, file); 
 		}
 
 		for(i = 0; i < 3; i++)
 		{
+			in->maxs[i] = LittleFloat(in->maxs[i]);
 			sz = fwrite(&in->maxs[i], sizeof(float), 1, file);
+			in->mins[i] = LittleFloat(in->mins[i]);
 			sz = fwrite(&in->mins[i], sizeof(float), 1, file);
 		}
 
@@ -550,6 +559,7 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 			sz = fwrite (in->lightmap_path, sizeof(char) * MAX_OSPATH, 1, file);
 
 			pathLen = strlen(in->decoration_variant_paths);
+			pathLen = LittleLong(pathLen);
 			sz = fwrite (&pathLen, sizeof(int), 1, file);
 			sz = fwrite (in->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
 
@@ -557,17 +567,23 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 			for(i = 0; i < in->num_decorations; i++)
 			{
 				//origin
+				in->decorations[i].origin[0] = LittleFloat(in->decorations[i].origin[0]);
 				sz = fwrite (&in->decorations[i].origin[0], sizeof(float), 1, file);
+				in->decorations[i].origin[1] = LittleFloat(in->decorations[i].origin[1]);
 				sz = fwrite (&in->decorations[i].origin[1], sizeof(float), 1, file);
+				in->decorations[i].origin[2] = LittleFloat(in->decorations[i].origin[2]);
 				sz = fwrite (&in->decorations[i].origin[2], sizeof(float), 1, file);
 
+				in->decorations[i].size = LittleFloat(in->decorations[i].size);
 				sz = fwrite (&in->decorations[i].size, sizeof(float), 1, file);
+				in->decorations[i].type = LittleLong(in->decorations[i].type);
 				sz = fwrite (&in->decorations[i].type, sizeof(int), 1, file);
 			}
 		}
 
         fclose(file);
     }
+	Swap_Init();
 }
 // read in terraindata_t struct from file
 qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
@@ -576,9 +592,6 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 	char collisionFile[MAX_QPATH];
 	int		i, pathLen;
 	size_t sz;
-
-	//force endieness to little
-	Swap_Force(false);
 
 	if(forRender)
 		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
@@ -668,11 +681,9 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 				}
 			}
 		}
-		Swap_Init();
 		fclose(file);
 		return true;
 	}
-	Swap_Init();
 	return false;
 }
 

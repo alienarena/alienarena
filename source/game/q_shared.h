@@ -301,7 +301,6 @@ float	BigFloat (float l);
 float	LittleFloat (float l);
 
 void	Swap_Init (void);
-void	Swap_Force (qboolean endieness);
 char	*va(char *format, ...);
 float	*atv(void);
 float	*tv (float x, float y, float z);
