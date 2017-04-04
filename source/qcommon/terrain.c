@@ -577,6 +577,9 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 	int		i, pathLen;
 	size_t sz;
 
+	//force endieness to little
+	Swap_Force(false);
+
 	if(forRender)
 		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
 	else
@@ -665,10 +668,11 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 				}
 			}
 		}
-		
+		Swap_Init();
 		fclose(file);
 		return true;
 	}
+	Swap_Init();
 	return false;
 }
 
