@@ -512,8 +512,6 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 	int		i, pathLen;
 	size_t sz;
 
-	Swap_Force(false);
-
 	if(forRender)
 		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
 	else
@@ -583,7 +581,6 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 
         fclose(file);
     }
-	Swap_Init();
 }
 // read in terraindata_t struct from file
 qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
