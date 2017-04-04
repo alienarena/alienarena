@@ -724,6 +724,33 @@ void Swap_Init (void)
 
 }
 
+void Swap_Force (qboolean endieness)
+{
+
+// set the byte swapping variables in a portable manner
+	if ( !endieness )
+	{
+		bigendien = false;
+		_BigShort = ShortSwap;
+		_LittleShort = ShortNoSwap;
+		_BigLong = LongSwap;
+		_LittleLong = LongNoSwap;
+		_BigFloat = FloatSwap;
+		_LittleFloat = FloatNoSwap;
+	}
+	else
+	{
+		bigendien = true;
+		_BigShort = ShortNoSwap;
+		_LittleShort = ShortSwap;
+		_BigLong = LongNoSwap;
+		_LittleLong = LongSwap;
+		_BigFloat = FloatNoSwap;
+		_LittleFloat = FloatSwap;
+	}
+
+}
+
 
 
 /*
