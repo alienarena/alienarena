@@ -679,6 +679,7 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 			}
 		}
 		fclose(file);
+		Com_Printf("Terrain file %s loaded sucessfully!\n", collisionFile);
 		return true;
 	}
 	return false;
