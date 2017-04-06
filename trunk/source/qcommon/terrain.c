@@ -552,9 +552,10 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 
 		if(forRender)
 		{
-			sz = fwrite (in->hmtex_path, sizeof(char) * MAX_OSPATH, 1, file);
-			sz = fwrite (in->texture_path, sizeof(char) * MAX_OSPATH, 1, file);
-			sz = fwrite (in->lightmap_path, sizeof(char) * MAX_OSPATH, 1, file);
+			//Use 128(Windows MAX_OSPATH) for string length
+			sz = fwrite (in->hmtex_path, sizeof(char) * 128, 1, file);
+			sz = fwrite (in->texture_path, sizeof(char) * 128, 1, file);
+			sz = fwrite (in->lightmap_path, sizeof(char) * 128, 1, file);
 
 			pathLen = strlen(in->decoration_variant_paths);
 			pathLen = LittleLong(pathLen);
@@ -639,18 +640,18 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 
 		if(forRender)
 		{			
-			out->hmtex_path = Z_Malloc (MAX_OSPATH * sizeof(char));
-			out->texture_path = Z_Malloc (MAX_OSPATH * sizeof(char));
-			out->lightmap_path = Z_Malloc (MAX_OSPATH * sizeof(char));
+			out->hmtex_path = (char *)Z_Malloc (128 * sizeof(char));
+			out->texture_path = (char *)Z_Malloc (128 * sizeof(char));
+			out->lightmap_path = (char *)Z_Malloc (128 * sizeof(char));
 
-			sz = fread (out->hmtex_path, sizeof(char) * MAX_OSPATH, 1, file);
-			sz = fread (out->texture_path, sizeof(char) * MAX_OSPATH, 1, file);
-			sz = fread (out->lightmap_path, sizeof(char) * MAX_OSPATH, 1, file);
+			sz = fread (out->hmtex_path, sizeof(char) * 128, 1, file);
+			sz = fread (out->texture_path, sizeof(char) * 128, 1, file);
+			sz = fread (out->lightmap_path, sizeof(char) * 128, 1, file);
 
 			sz = fread (&pathLen, sizeof(int), 1, file);
 			pathLen = LittleLong(pathLen);
 
-			out->decoration_variant_paths = Z_Malloc (sizeof(char) * pathLen);
+			out->decoration_variant_paths = (char *)Z_Malloc (sizeof(char) * pathLen);
 			sz = fread (out->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
 
 			sz = fread (&out->num_decorations, sizeof(int), 1, file);
