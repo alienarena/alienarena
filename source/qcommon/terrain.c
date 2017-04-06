@@ -590,99 +590,113 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 	char collisionFile[MAX_QPATH];
 	int		i, pathLen;
 	size_t sz;
+	char    *path;
 
-	if(forRender)
-		sprintf(collisionFile, "%s/%sr", BASE_GAMEDATA, name);
-	else
-		sprintf(collisionFile, "%s/%sx", BASE_GAMEDATA, name);
+	path = NULL;
 
-	file = fopen(collisionFile, "rb");
-    if (file != NULL) 
+	for(;;)
 	{
-		memset (out, 0, sizeof(*out));
-
-		sz = fread(&out->num_vertices, sizeof(int), 1, file);	
-		out->num_vertices = LittleLong(out->num_vertices);
-
-		out->vert_texcoords = Z_Malloc (out->num_vertices*2*sizeof(float));
-		out->vert_positions = Z_Malloc (out->num_vertices*3*sizeof(float));
-
-		for(i = 0; i < out->num_vertices*2; i++)
-		{ 
-			sz = fread(&out->vert_texcoords[i],sizeof(float), 1, file); 
-			out->vert_texcoords[i] = LittleFloat(out->vert_texcoords[i]);
-		}
-
-		for(i = 0; i < out->num_vertices*3; i++)
-		{ 
-			sz = fread(&out->vert_positions[i],sizeof(float), 1, file);
-			out->vert_positions[i] = LittleFloat(out->vert_positions[i]);
-		}
-					
-		sz = fread(&out->num_triangles,sizeof(int), 1, file); 
-		out->num_triangles = LittleLong(out->num_triangles);
-
-		out->tri_indices = Z_Malloc (out->num_triangles*3*sizeof(unsigned int));
-
-		for(i = 0; i < out->num_triangles*3; i++)
+		path = FS_NextPath( path );
+		if( !path )
 		{
-			sz = fread(&out->tri_indices[i],sizeof(unsigned int), 1, file); 
-			out->tri_indices[i] = LittleLong(out->tri_indices[i]);
-		}
-
-		for(i = 0; i < 3; i++)
-		{
-			sz = fread(&out->maxs[i], sizeof(float), 1, file);
-			out->maxs[i] = LittleFloat(out->maxs[i]);
-			sz = fread(&out->mins[i], sizeof(float), 1, file);
-			out->mins[i] = LittleFloat(out->mins[i]);
+			break;
 		}
 
 		if(forRender)
-		{			
-			out->hmtex_path = (char *)Z_Malloc (128 * sizeof(char));
-			out->texture_path = (char *)Z_Malloc (128 * sizeof(char));
-			out->lightmap_path = (char *)Z_Malloc (128 * sizeof(char));
+			sprintf(collisionFile, "%s/%sr", path, name);
+		else
+			sprintf(collisionFile, "%s/%sx", path, name);
 
-			sz = fread (out->hmtex_path, sizeof(char) * 128, 1, file);
-			sz = fread (out->texture_path, sizeof(char) * 128, 1, file);
-			sz = fread (out->lightmap_path, sizeof(char) * 128, 1, file);
+		i = 0;
+		file = fopen(collisionFile, "rb");
+		if(file != NULL) 
+		{
+			memset (out, 0, sizeof(*out));
 
-			sz = fread (&pathLen, sizeof(int), 1, file);
-			pathLen = LittleLong(pathLen);
+			sz = fread(&out->num_vertices, sizeof(int), 1, file);	
+			out->num_vertices = LittleLong(out->num_vertices);
 
-			out->decoration_variant_paths = (char *)Z_Malloc (sizeof(char) * pathLen);
-			sz = fread (out->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
+			out->vert_texcoords = Z_Malloc (out->num_vertices*2*sizeof(float));
+			out->vert_positions = Z_Malloc (out->num_vertices*3*sizeof(float));
 
-			sz = fread (&out->num_decorations, sizeof(int), 1, file);
-			out->num_decorations = LittleLong(out->num_decorations);
+			for(i = 0; i < out->num_vertices*2; i++)
+			{ 
+				sz = fread(&out->vert_texcoords[i],sizeof(float), 1, file); 
+				out->vert_texcoords[i] = LittleFloat(out->vert_texcoords[i]);
+			}
 
-			if(out->num_decorations > 0)
+			for(i = 0; i < out->num_vertices*3; i++)
+			{ 
+				sz = fread(&out->vert_positions[i],sizeof(float), 1, file);
+				out->vert_positions[i] = LittleFloat(out->vert_positions[i]);
+			}
+					
+			sz = fread(&out->num_triangles,sizeof(int), 1, file); 
+			out->num_triangles = LittleLong(out->num_triangles);
+
+			out->tri_indices = Z_Malloc (out->num_triangles*3*sizeof(unsigned int));
+
+			for(i = 0; i < out->num_triangles*3; i++)
 			{
-				out->decorations = Z_Malloc (out->num_decorations * sizeof(terraindec_t));
-				for(i = 0; i < out->num_decorations; i++)
+				sz = fread(&out->tri_indices[i],sizeof(unsigned int), 1, file); 
+				out->tri_indices[i] = LittleLong(out->tri_indices[i]);
+			}
+
+			for(i = 0; i < 3; i++)
+			{
+				sz = fread(&out->maxs[i], sizeof(float), 1, file);
+				out->maxs[i] = LittleFloat(out->maxs[i]);
+				sz = fread(&out->mins[i], sizeof(float), 1, file);
+				out->mins[i] = LittleFloat(out->mins[i]);
+			}
+
+			if(forRender)
+			{			
+				out->hmtex_path = (char *)Z_Malloc (128 * sizeof(char));
+				out->texture_path = (char *)Z_Malloc (128 * sizeof(char));
+				out->lightmap_path = (char *)Z_Malloc (128 * sizeof(char));
+
+				sz = fread (out->hmtex_path, sizeof(char) * 128, 1, file);
+				sz = fread (out->texture_path, sizeof(char) * 128, 1, file);
+				sz = fread (out->lightmap_path, sizeof(char) * 128, 1, file);
+
+				sz = fread (&pathLen, sizeof(int), 1, file);
+				pathLen = LittleLong(pathLen);
+
+				out->decoration_variant_paths = (char *)Z_Malloc (sizeof(char) * pathLen);
+				sz = fread (out->decoration_variant_paths, sizeof(char) * pathLen, 1, file);
+
+				sz = fread (&out->num_decorations, sizeof(int), 1, file);
+				out->num_decorations = LittleLong(out->num_decorations);
+
+				if(out->num_decorations > 0)
 				{
-					//origin
-					sz = fread (&out->decorations[i].origin[0], sizeof(float), 1, file);
-					out->decorations[i].origin[0] = LittleFloat(out->decorations[i].origin[0]);
-					sz = fread (&out->decorations[i].origin[1], sizeof(float), 1, file);
-					out->decorations[i].origin[1] = LittleFloat(out->decorations[i].origin[1]);
-					sz = fread (&out->decorations[i].origin[2], sizeof(float), 1, file);
-					out->decorations[i].origin[2] = LittleFloat(out->decorations[i].origin[2]);
+					out->decorations = Z_Malloc (out->num_decorations * sizeof(terraindec_t));
+					for(i = 0; i < out->num_decorations; i++)
+					{
+						//origin
+						sz = fread (&out->decorations[i].origin[0], sizeof(float), 1, file);
+						out->decorations[i].origin[0] = LittleFloat(out->decorations[i].origin[0]);
+						sz = fread (&out->decorations[i].origin[1], sizeof(float), 1, file);
+						out->decorations[i].origin[1] = LittleFloat(out->decorations[i].origin[1]);
+						sz = fread (&out->decorations[i].origin[2], sizeof(float), 1, file);
+						out->decorations[i].origin[2] = LittleFloat(out->decorations[i].origin[2]);
 
-					sz = fread (&out->decorations[i].size, sizeof(float), 1, file);
-					out->decorations[i].size = LittleFloat(out->decorations[i].size);
-					sz = fread (&out->decorations[i].type, sizeof(int), 1, file);
-					out->decorations[i].type = LittleLong(out->decorations[i].type);
+						sz = fread (&out->decorations[i].size, sizeof(float), 1, file);
+						out->decorations[i].size = LittleFloat(out->decorations[i].size);
+						sz = fread (&out->decorations[i].type, sizeof(int), 1, file);
+						out->decorations[i].type = LittleLong(out->decorations[i].type);
 
-					out->decorations[i].path = out->decoration_variant_paths;
+						out->decorations[i].path = out->decoration_variant_paths;
+					}
 				}
 			}
+			fclose(file);
+			Com_Printf("Terrain file %s loaded sucessfully!\n", collisionFile);
+			return true;
 		}
-		fclose(file);
-		Com_Printf("Terrain file %s loaded sucessfully!\n", collisionFile);
-		return true;
-	}
+	}	
+		
 	if(!forRender)
 		Com_Printf("Could not locate terrain collision mesh %s!\n", collisionFile);
 	return false;
