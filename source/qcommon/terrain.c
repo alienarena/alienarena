@@ -684,7 +684,7 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 		return true;
 	}
 	if(!forRender)
-		Com_Printf("Could not locate terrain collision mesh!\n", collisionFile);
+		Com_Printf("Could not locate terrain collision mesh %s!\n", collisionFile);
 	return false;
 }
 
