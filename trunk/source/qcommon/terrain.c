@@ -587,7 +587,7 @@ void WriteTerrainData (terraindata_t *in, const char *name, int forRender)
 qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 {
 	FILE* file;
-	char collisionFile[MAX_QPATH];
+	char collisionFile[256];
 	int		i, pathLen;
 	size_t sz;
 	char    *path;
