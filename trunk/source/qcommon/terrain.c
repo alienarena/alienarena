@@ -616,8 +616,8 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 			sz = fread(&out->num_vertices, sizeof(int), 1, file);	
 			out->num_vertices = LittleLong(out->num_vertices);
 
-			out->vert_texcoords = Z_Malloc (out->num_vertices*2*sizeof(float));
-			out->vert_positions = Z_Malloc (out->num_vertices*3*sizeof(float));
+			out->vert_texcoords = (float *)Z_Malloc (out->num_vertices*2*sizeof(float));
+			out->vert_positions = (float *)Z_Malloc (out->num_vertices*3*sizeof(float));
 
 			for(i = 0; i < out->num_vertices*2; i++)
 			{ 
@@ -671,7 +671,7 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 
 				if(out->num_decorations > 0)
 				{
-					out->decorations = Z_Malloc (out->num_decorations * sizeof(terraindec_t));
+					out->decorations = (terraindec_t *)Z_Malloc (out->num_decorations * sizeof(terraindec_t));
 					for(i = 0; i < out->num_decorations; i++)
 					{
 						//origin
