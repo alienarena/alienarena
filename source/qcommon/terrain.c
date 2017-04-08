@@ -605,7 +605,10 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 		if(forRender)
 			sprintf(collisionFile, "%s/%sr", path, name);
 		else
+		{
 			sprintf(collisionFile, "%s/%sx", path, name);
+			Com_Printf("Searching for collision file at %s\n", collisionFile);
+		}
 
 		i = 0;
 		file = fopen(collisionFile, "rb");
@@ -698,7 +701,7 @@ qboolean ReadTerrainData (terraindata_t *out, const char *name, int forRender)
 	}	
 		
 	if(!forRender)
-		Com_Printf("Could not locate terrain collision mesh %s!\n", collisionFile);
+		Com_Printf("Could not locate terrain collision mesh!\n");
 	return false;
 }
 
