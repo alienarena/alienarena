@@ -633,7 +633,7 @@ int IQM_NextFrame(int frame)
 			case 53:
 				outframe = 46;
 				break;
-			//player jumping
+			//player jumping - this one may not be necessary - it is not a looped animation
 			case 71:
 				outframe = 0;
 				break;
@@ -645,10 +645,15 @@ int IQM_NextFrame(int frame)
 			case 159:
 				outframe = 154;
 				break;
+			//player crouched shooting
 			case 168:
 				outframe = 160;
 				break;
-			//deaths
+			//player sneaking
+			case 180:
+				outframe = 173;
+				break;
+			//deaths - do not advance animations at end
 			case 219:
 				outframe = 219;
 				break;

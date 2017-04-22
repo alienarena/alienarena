@@ -4013,6 +4013,9 @@ void CL_FootSteps (entity_state_t *ent, qboolean loud)
    struct sfx_s   *stepsound;
    float volume = 0.5;
 
+   if(ent->effects & EF_SILENT)
+	   return;
+
    r = (rand()&3);
 
    VectorCopy(ent->origin,end);

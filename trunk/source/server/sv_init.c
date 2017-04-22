@@ -55,7 +55,10 @@ int SV_FindIndex (char *name, int start, int max, qboolean create)
 		return 0;
 
 	if (i == max)
-		Com_Error (ERR_DROP, "*Index: overflow");
+	{
+		Com_Printf("*Index: overflow at %i", i);
+		return 0;
+	}
 
 	strncpy (sv.configstrings[start+i], name, sizeof(sv.configstrings[i]));
 
