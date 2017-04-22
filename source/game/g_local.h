@@ -1345,6 +1345,7 @@ struct gclient_s
 	vec3_t		kick_origin;
 	vec3_t		lean_angles;	//lean
 	vec3_t		lean_origin;	
+	qboolean	sneaking;		//sneaking
 	vec3_t		jet_angles;		//jetpack roll
 	float		v_dmg_roll, v_dmg_pitch, v_dmg_time;	// damage kicks
 	float		fall_time, fall_value;		// for view drop on fall
@@ -1645,6 +1646,7 @@ struct edict_s
 	float next_move_time;
 	float wander_timeout;
 	float suicide_timeout;
+	float sneak_timeout;
 
 	// For node code
 	int current_node; // current node

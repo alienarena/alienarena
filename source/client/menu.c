@@ -1268,6 +1268,7 @@ char *bindnames[][2] =
 
 {"+leanright",		"lean right"},
 {"+leanleft",		"lean left"},
+{"+sneak",			"sneak"},
 {"+zoom",			"zoom"},
 
 {"inven",			"inventory"},

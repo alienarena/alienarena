@@ -1169,6 +1169,11 @@ newanim:
 			ent->s.frame = FRAME_crwalk1;
 			client->anim_end = FRAME_crwalk6;
 		}
+		else if(client->ps.pmove.pm_flags & PMF_SNEAKING)
+		{
+			ent->s.frame = FRAME_sneak1;
+			client->anim_end = FRAME_sneak8;
+		}
 		else
 		{
 			ent->s.frame = FRAME_run1;

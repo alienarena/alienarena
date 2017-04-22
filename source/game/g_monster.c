@@ -223,7 +223,7 @@ void M_droptofloor (edict_t *ent)
 
 void M_SetEffects (edict_t *ent)
 {
-	ent->s.effects &= ~(EF_COLOR_SHELL|EF_POWERSCREEN);
+	ent->s.effects &= ~(EF_COLOR_SHELL);
 	ent->s.renderfx &= ~(RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE);
 
 	if (ent->monsterinfo.aiflags & AI_RESURRECTING)

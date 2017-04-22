@@ -564,6 +564,7 @@ typedef enum
 #define	PMF_TIME_LAND		16	// pm_time is time before rejump
 #define	PMF_TIME_TELEPORT	32	// pm_time is non-moving time
 #define PMF_NO_PREDICTION	64	// temporarily disables prediction (used for grappling hook)
+#define PMF_SNEAKING		128 // for sneaking movement, silent, slow
 
 // this structure needs to be communicated bit-accurate
 // from the server to the client to guarantee that
@@ -592,6 +593,7 @@ typedef struct
 #define BUTTON_LEANLEFT		8
 #define BUTTON_LEANRIGHT	16
 #define BUTTON_ZOOM			32
+#define BUTTON_SNEAK		64
 #define	BUTTON_ANY			128			// any key whatsoever
 
 // usercmd_t is sent to the server each client frame
@@ -647,7 +649,7 @@ typedef struct
 #define	EF_HYPERBLASTER		0x00000040
 #define	EF_BFG				0x00000080
 #define EF_COLOR_SHELL		0x00000100
-#define EF_POWERSCREEN		0x00000200
+#define EF_SILENT			0x00000200
 #define	EF_ANIM01			0x00000400		// automatically cycle between frames 0 and 1 at 2 hz
 #define	EF_ANIM23			0x00000800		// automatically cycle between frames 2 and 3 at 2 hz
 #define EF_ANIM_ALL			0x00001000		// automatically cycle through all frames at 2hz

@@ -61,6 +61,7 @@ pml_t		pml;
 float	pm_stopspeed = 100;
 float	pm_maxspeed = 300;
 float	pm_duckspeed = 100;
+float	pm_sneakspeed = 75;
 float	pm_accelerate = 10;
 float	pm_airaccelerate = 0;
 float	pm_wateraccelerate = 10;
@@ -627,6 +628,8 @@ void PM_AirMove (void)
 // clamp to server defined max speed
 //
 	maxspeed = (pm->s.pm_flags & PMF_DUCKED) ? pm_duckspeed : pm_maxspeed;
+	if(pm->s.pm_flags & PMF_SNEAKING)
+		maxspeed = pm_sneakspeed;
 
 	if (wishspeed > maxspeed)
 	{

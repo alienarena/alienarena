@@ -1626,7 +1626,12 @@ void respawn (edict_t *self)
 
 		// hold in place briefly
 		self->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
-		self->client->ps.pmove.pm_time = 14;
+		self->client->ps.pmove.pm_time = 60;
+
+		// set animation to spawn sequence
+		self->state = STATE_STAND;
+		self->s.frame = FRAME_rise1;
+		self->client->anim_end = FRAME_rise17;
 
 		self->client->respawn_time = level.time;
 
@@ -2212,6 +2217,9 @@ void PutClientInServer (edict_t *ent)
 
 	//clear lean		
 	client->lean = 0;
+
+	//clear sneaking
+	client->sneaking = false;
 
 	// set the delta angle
 	for (i=0 ; i<3 ; i++)
@@ -3353,6 +3361,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		ucmd->forwardmove *= 1.3;		
 
+		//leaning
 		if (ucmd->buttons & BUTTON_LEANRIGHT)
 		{
 			AngleVectors (client->v_angle, NULL, right, NULL);
@@ -3382,7 +3391,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			client->lean_angles[ROLL] = client->lean;
 			VectorScale (right, client->lean, ent->client->lean_origin);
 		}
+
+		//sneaking
+		if(ucmd->buttons & BUTTON_SNEAK)
+		{
+			pm.s.pm_flags |= PMF_SNEAKING;
+			ent->s.effects |= EF_SILENT;
+		}
+		else if(!ent->is_bot)
+		{
+			pm.s.pm_flags &= ~ PMF_SNEAKING;
+			ent->s.effects &= ~ EF_SILENT;
+		}
 		
+		//zooming
 		if (ucmd->buttons & BUTTON_ZOOM)
 		{
 			if(level.time - client->zoomtime > 1.0) //1 second delay between 

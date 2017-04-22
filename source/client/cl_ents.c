@@ -940,10 +940,33 @@ void CL_AddPacketEntities (frame_t *frame)
 					if (!ent.model)
 						ent.model = cl.baseclientinfo.weaponmodel[0];
 				}
+				
+				//set team of this weapon model
+				if (effects & EF_TEAM1)
+					ent.team = 1;
+				else if (effects & EF_TEAM2)
+				{
+					if(server_is_team)
+						ent.team = 2;
+					else
+						ent.team = 3;
+				}
 			}
 			else 
 			{
 				ent.model = cl.model_draw[s1->modelindex2];
+				if(playermodel)
+				{
+					if (effects & EF_TEAM1)
+						ent.team = 1;
+					else if (effects & EF_TEAM2)
+					{
+						if(server_is_team)
+							ent.team = 2;
+						else
+							ent.team = 3;
+					}
+				}
 			}
 						
 			//here is where we will set the alpha for certain model parts - would like to eventually
@@ -978,7 +1001,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			
 			if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 			{				
-				if(ent.frame < 174)
+				if(ent.frame < 182)
 				{
 					//if frame is not death, set the model effect
 					if((effects & EF_QUAD) && playermodel)

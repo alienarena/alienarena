@@ -118,9 +118,7 @@ void ACEAI_Think (edict_t *self)
 	{
 		self->client->buttons = 0;
 		ucmd.buttons = BUTTON_ATTACK;
-		/*
-		 * do nothing else until respawned.
-		 */
+		// do nothing else until respawned.
 		ClientThink (self, &ucmd);
 		self->nextthink = level.time + FRAMETIME;
 		return;
@@ -141,11 +139,11 @@ void ACEAI_Think (edict_t *self)
 		goto clientthink;
 	}
 
-	//reset the state from pauses for taunting
+	// reset the state from pauses for taunting
 	if(self->suicide_timeout < level.time + 8)
 		self->state = STATE_WANDER;
 
-	//times up on spawn protection
+	// times up on spawn protection
 	if(level.time > self->client->spawnprotecttime + g_spawnprotect->integer)
 		self->client->spawnprotected = false;
 
@@ -156,11 +154,33 @@ void ACEAI_Think (edict_t *self)
 	// Look for enemies
 	if ( ACEAI_FindEnemy( self ) )
 	{
+		self->client->ps.pmove.pm_flags &= ~ PMF_SNEAKING;
+
 		ACEAI_ChooseWeapon( self );
 		ACEMV_Attack( self, &ucmd );
 	}
 	else
 	{
+		// high skill bots will just strafejump all over and murder you
+		// under 3, and they'll take some time to quietly sneak around
+		if( self->skill < 3 )
+		{
+			if(level.time - self->sneak_timeout > 10.0)
+			{
+				self->sneak_timeout = level.time;
+				if(random() < 0.4)
+				{
+					self->client->ps.pmove.pm_flags |= PMF_SNEAKING;
+					self->s.effects |= EF_SILENT;
+				}
+				else
+				{
+					self->client->ps.pmove.pm_flags &= ~ PMF_SNEAKING;
+					self->s.effects &= ~ EF_SILENT;
+				}
+			}
+		}
+		
 		// Execute the move, or wander
 		ACEAI_ChooseWeapon( self ); // for deselecting violator
 		if ( self->state == STATE_WANDER )
@@ -329,6 +349,13 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	else
 	{
 		qboolean hadCTFnode = false;
+
+		//never sneak with the flag!
+		self->client->ps.pmove.pm_flags &= ~ PMF_SNEAKING;
+		self->s.effects &= ~ EF_SILENT;
+		//don't bother checking either
+		self->sneak_timeout = level.time;
+
 		//we need to get node at the end of the path
 		//We can walk the node table and get the last linked node of this type further down the list than this node
 		for(i = 0;i < bot_numnodes; i++)
@@ -462,7 +489,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 				if(weight > best_weight)
 				{
 					best_weight = weight;
-					best = target;
+					best = target;				
 				}
 			}
 		}
@@ -479,7 +506,6 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 			debug_printf("%s selected a %s for SR goal.\n",self->client->pers.netname, self->movetarget->classname);
 
 		self->goalentity = best;
-
 	}
 
 }
