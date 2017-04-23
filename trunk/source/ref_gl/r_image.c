@@ -43,6 +43,7 @@ int			numgltextures;
 extern cvar_t	*cl_hudimage1; //custom huds
 extern cvar_t	*cl_hudimage2;
 extern cvar_t	*cl_hudimage3;
+extern viddef_t vid;
 
 unsigned	d_8to24table[256];
 
@@ -1671,7 +1672,7 @@ void R_InitMirrorTextures( void )
 	int		size_oneside;
 
 	//init the partial screen texture
-	size_oneside = ceil((512.0f/1080.0f)*(float)viddef.height);
+	size_oneside = ceil((512.0f/1080.0f)*(float)vid.height);
 	size = size_oneside * size_oneside * 4;
 	data = malloc( size );
 	memset( data, 255, size );
@@ -1685,8 +1686,8 @@ void R_InitDepthTextures( void )
 	int		size, texture_height, texture_width;
 
 	//find closer power of 2 to screen size
-	for (texture_width = 1;texture_width < viddef.width;texture_width *= 2);
-	for (texture_height = 1;texture_height < viddef.height;texture_height *= 2);
+	for (texture_width = 1;texture_width < vid.width;texture_width *= 2);
+	for (texture_height = 1;texture_height < vid.height;texture_height *= 2);
 
 	//limit to 2048x2048 - anything larger is generally going to cause problems, and AA doesn't support res higher
 	if(texture_width > 2048)

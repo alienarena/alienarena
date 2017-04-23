@@ -110,9 +110,9 @@ static void Distort_RenderQuad (int x, int y, int w, int h)
 	// framebuffer, copy a margin to avoid artifacts
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, distort_FBO);
 	if (xl > 0) xl--;
-	if (xr < viddef.width) xr++;
+	if (xr < vid.width) xr++;
 	if (yt > 0) yt--;
-	if (yb < viddef.height) yb++;
+	if (yb < vid.height) yb++;
 	qglBlitFramebufferEXT (xl, yt, xr, yb, xl, yt, xr, yb, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, 0);
 	
@@ -123,8 +123,8 @@ static void Distort_RenderQuad (int x, int y, int w, int h)
 	GL_SelectTexture (0);
 	qglMatrixMode (GL_TEXTURE);
 	qglPushMatrix ();
-	qglTranslatef ((float)x/(float)viddef.width, (float)y/(float)viddef.height, 0);
-	qglScalef ((float)w/(float)viddef.width, (float)h/(float)viddef.height, 1);
+	qglTranslatef ((float)x/(float)vid.width, (float)y/(float)vid.height, 0);
+	qglScalef ((float)w/(float)vid.width, (float)h/(float)vid.height, 1);
 	
 	// FIXME: textures captured from the framebuffer need to be rendered
 	// upside down for some reason
@@ -150,6 +150,7 @@ void R_GLSLDistortion(void)
 	{
 		//is it in our view?
 		AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
+
 		VectorSubtract (r_explosionOrigin, r_newrefdef.vieworg, vec);
 		VectorNormalize (vec);
 		dot = DotProduct (vec, forward);
@@ -190,6 +191,7 @@ void R_GLSLDistortion(void)
 		scale = 8.0f + (rs_realtime - r_fbeffectTime) * 78.0f / r_fbeffectLen;
 		VectorMA (r_explosionOrigin, -scale, vright, ul_3d);
 		VectorMA (ul_3d, scale, vup, ul_3d);
+
 		R_TransformVectorToScreen(&r_newrefdef, ul_3d, ul_2d);
 		VectorMA (r_explosionOrigin, scale, vright, lr_3d);
 		VectorMA (lr_3d, -scale, vup, lr_3d);
@@ -214,9 +216,9 @@ void R_GLSLDistortion(void)
 
 		glUniform1iARB( g_location_rsource, 0);
 
-		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
+		glUniform3fARB( g_location_rparams, vid.width/2.0, vid.height/2.0, 0.25);
 
-		Distort_RenderQuad (0, 0, viddef.width, viddef.height);
+		Distort_RenderQuad (0, 0, vid.width, vid.height);
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -260,7 +262,7 @@ void R_GLSLWaterDroplets(void)
 
 	glUniform1fARB( g_location_drTime, rs_realtime);
 	
-	Distort_RenderQuad (0, 0, viddef.width, viddef.height);
+	Distort_RenderQuad (0, 0, vid.width, vid.height);
 
 	glUseProgramObjectARB( 0 );
 
@@ -279,15 +281,15 @@ void R_FB_InitTextures( void )
 	int		size;
 
 	//init the various FBO textures
-	size = viddef.width * viddef.height * 4;
+	size = vid.width * vid.height * 4;
 	if (size < 16 * 16 * 4) // nullpic min size
 		size = 16 * 16 * 4;
 	data = malloc (size);
 
-	r_framebuffer = R_Postprocess_AllocFBOTexture ("***r_framebuffer***", viddef.width, viddef.height, &distort_FBO);
+	r_framebuffer = R_Postprocess_AllocFBOTexture ("***r_framebuffer***", vid.width, vid.height, &distort_FBO);
 	
 	memset (data, 255, size);
-	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, viddef.width, viddef.height, it_pic, 3);
+	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, vid.width, vid.height, it_pic, 3);
 	
 	//init the distortion textures
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg", it_pic);
@@ -424,9 +426,8 @@ void R_GLSLGodRays(void)
 
 	R_TransformVectorToScreen(&r_newrefdef, sun_origin, fxScreenPos);
 
-	fxScreenPos[0] /= viddef.width; 
-	fxScreenPos[1] /= viddef.height;
-
+	fxScreenPos[0] /= vid.width; 
+	fxScreenPos[1] /= vid.height;
 	glUniform2fARB( g_location_lightPositionOnScreen, fxScreenPos[0], fxScreenPos[1]);
 
 	glUniform1fARB( g_location_godrayScreenAspect, screenaspect);
@@ -435,6 +436,9 @@ void R_GLSLGodRays(void)
 	//render quad 
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
+
+	// This is needed in case the window has been resized
+	qglViewport(0, 0, vid.width, vid.height);
 	
 	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
 	R_DrawVarrays (GL_QUADS, 0, 4);
@@ -449,6 +453,9 @@ void R_GLSLGodRays(void)
     qglMatrixMode(GL_PROJECTION);
     qglPopMatrix();
     qglMatrixMode(GL_MODELVIEW);	
+
+	// back to previous screen coordinates
+	R_SetupViewport ();	
 }
 
 void R_GLSLPostProcess(void)

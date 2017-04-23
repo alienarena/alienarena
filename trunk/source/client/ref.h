@@ -338,6 +338,12 @@ typedef struct
 float *RGBA (float r, float g, float b, float a);
 #define RGBA8(a,b,c,d) RGBA((a)/255.0f, (b)/255.0f, (c)/255.0f, (d)/255.0f)
 
+#define RCF_TOPLEFT 1
+#define RCF_TOPRIGHT 2
+#define RCF_BOTTOMLEFT 4
+#define RCF_BOTTOMRIGHT 8
+#define RCF_ALL 15
+
 qboolean	Draw_PicExists (const char *name);
 void	Draw_GetPicSize (int *w, int *h, const char *name);
 void	Draw_Pic (float x, float y, const char *name);
@@ -348,6 +354,8 @@ void	Draw_AlphaStretchTilingPic (float x, float y, float w, float h, const char 
 void	Draw_AlphaStretchPic (float x, float y, float w, float h, const char *name, float alphaval);
 void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, const char *pic, float alphaval);
 void	Draw_Fill (float x, float y, float w, float h, const float rgba[]);
+void	Draw_Fill_RoundedCorners (float x, float y, float w, float h, const float rgba[], float radius, int corners);
+void 	Draw_Fill_Circle (float x, float y, float radius, const float rgba[], int start, int end);
 
 void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );

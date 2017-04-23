@@ -53,10 +53,14 @@ int		( WINAPI * wglChoosePixelFormatARB )( HDC, CONST int *, CONST FLOAT *, UINT
 
 glwstate_t glw_state;
 
+extern cvar_t *vid_xpos;
+extern cvar_t *vid_ypos;
 extern cvar_t *vid_fullscreen;
 extern cvar_t *vid_ref;
 extern cvar_t *vid_displayfrequency;
 extern cvar_t *r_antialiasing;
+extern cvar_t *vid_width;
+extern cvar_t *vid_height;
 int pixelformatARB;
 
 qboolean have_stencil = false; // Stencil shadows - MrG
@@ -79,14 +83,16 @@ static qboolean VerifyDriver( void )
 #define	WINDOW_CLASS_NAME	"Quake 2"
 
 
-qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
+qboolean VID_CreateWindow(int x, int y, int width, int height, windowmode_t windowmode )
 {
 	WNDCLASS		wc;
 	RECT			r;
-	cvar_t			*vid_xpos, *vid_ypos;
 	int				stylebits;
-	int				x, y, w, h;
 	int				exstyle;
+	HMONITOR		monitor;
+	MONITORINFO		info;
+	int				workAreaWidth, workAreaHeight;
+	int				showWindowMode = SW_SHOW;
 
 	/* Register the frame class */
     wc.style         = 0;
@@ -103,15 +109,20 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
     if (!RegisterClass (&wc) )
 		Com_Error (ERR_FATAL, "Couldn't register window class");
 
-	if (fullscreen)
+	switch (windowmode)
 	{
-		exstyle = WS_EX_TOPMOST;
-		stylebits = WS_POPUP|WS_VISIBLE;
-	}
-	else
-	{
-		exstyle = 0;
-		stylebits = WINDOW_STYLE;
+		case windowmode_exclusive_fullscreen:
+			exstyle = WS_EX_TOPMOST;
+			stylebits = FULLSCREEN_STYLE;
+			break;
+		case windowmode_windowed:
+			exstyle = 0;
+			stylebits = WINDOW_STYLE;
+			break;
+		case windowmode_borderless_windowed:
+			exstyle = 0;
+			stylebits = FULLSCREEN_STYLE;
+			break;
 	}
 
 	r.left = 0;
@@ -119,24 +130,10 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	r.right  = width;
 	r.bottom = height;
 
-	AdjustWindowRect (&r, stylebits, FALSE);
+	AdjustWindowRect (&r, stylebits, (windowmode == windowmode_windowed));
 
-	w = r.right - r.left;
-	h = r.bottom - r.top;
-
-	if (fullscreen)
-	{
-		x = 0;
-		y = 0;
-	}
-	else
-	{
-		vid_xpos = Cvar_Get ("vid_xpos", "0", 0);
-		vid_ypos = Cvar_Get ("vid_ypos", "0", 0);
-		x = vid_xpos->value;
-		y = vid_ypos->value;
-	}
-
+	if (windowmode == windowmode_exclusive_fullscreen || windowmode == windowmode_borderless_windowed)
+		x = y = 0;
 	
 	pixelformatARB = 0;
 	if ( r_antialiasing->integer ) {
@@ -149,7 +146,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 			 WINDOW_CLASS_NAME,
 			 "CRX",
 			 stylebits,
-			 x, y, w, h,
+			 x, y, width, height,
 			 NULL,
 			 NULL,
 			 glw_state.hInstance,
@@ -169,7 +166,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 		 WINDOW_CLASS_NAME,
 		 "CRX",
 		 stylebits,
-		 x, y, w, h,
+		 x, y, width, height,
 		 NULL,
 		 NULL,
 		 glw_state.hInstance,
@@ -178,7 +175,23 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	if (!glw_state.hWnd)
 		Com_Error (ERR_FATAL, "Couldn't create window");
 
-	ShowWindow( glw_state.hWnd, SW_SHOW );
+	// Check monitor work area width and height to see if we have to maximize the window or not. 
+	// If the window width or height doesn't fit, it will be maximized.
+	if (windowmode == windowmode_windowed)
+	{
+		info.cbSize = sizeof(MONITORINFO);
+		monitor = MonitorFromWindow (glw_state.hWnd, MONITOR_DEFAULTTOPRIMARY);				
+
+		GetMonitorInfo (monitor, &info);
+
+		workAreaWidth = info.rcWork.right - info.rcWork.left;
+		workAreaHeight = info.rcWork.bottom - info.rcWork.top;
+			
+		if (width >= workAreaWidth || height >= workAreaHeight)
+			showWindowMode = SW_SHOWMAXIMIZED;
+	}
+
+	ShowWindow( glw_state.hWnd, showWindowMode );
 	UpdateWindow( glw_state.hWnd );
 
 	// init all the gl stuff for the window
@@ -193,6 +206,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 
 	// let the sound and input subsystems know about the new window
 	VID_NewWindow (width, height);
+	VID_NewPosition (x, y);
 
 	return true;
 }
@@ -200,22 +214,25 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 /*
 ** GLimp_SetMode
 */
-rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode (unsigned *pwidth, unsigned *pheight, int mode, windowmode_t windowmode)
 {
-	int width, height;
-	const char *win_fs[] = { "W", "FS" };
+	int x, y, width, height, max_width, max_height;
+	const char *win_fs[] = {"Windowed", "Borderless Windowed", "Exclusive Fullscreen"};
 
 	Com_Printf ("Initializing OpenGL display\n");
 
 	Com_Printf ("...setting mode %d:", mode );
 
-	if ( !VID_GetModeInfo( &width, &height, mode ) )
+	if (!VID_GetModeInfo (&max_width, &max_height, &width, &height, mode, windowmode))
 	{
-		Com_Printf( " invalid mode\n" );
+		Com_Printf (" invalid mode\n");
 		return rserr_invalid_mode;
 	}
+	
+	x = vid_xpos->integer;
+	y = vid_ypos->integer;
 
-	Com_Printf (" %d %d %s\n", width, height, win_fs[fullscreen] );
+	Com_Printf ("Position %d %d, %d %d %s\n", x, y, width, height, win_fs[windowmode] );
 
 	// destroy the existing window
 	if (glw_state.hWnd)
@@ -223,10 +240,17 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		GLimp_Shutdown ();
 	}
 
+	*pwidth = max_width;
+	*pheight = max_height;
+
 	// do a CDS if needed
-	if ( fullscreen )
+	if (windowmode == windowmode_exclusive_fullscreen)
 	{
 		DEVMODE dm;
+
+		x = y = 0;
+		width = max_width;
+		height = max_height;
 
 		Com_Printf ("...attempting fullscreen\n" );
 
@@ -264,22 +288,16 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		Com_Printf ("...calling CDS: " );
 		if ( ChangeDisplaySettings( &dm, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
 		{
-			*pwidth = width;
-			*pheight = height;
-
 			gl_state.fullscreen = true;
 
 			Com_Printf ("ok\n" );
 
-			if ( !VID_CreateWindow (width, height, true) )
+			if ( !VID_CreateWindow (x, y, width, height, windowmode_exclusive_fullscreen) )
 				return rserr_invalid_mode;
 			return rserr_ok;
 		}
 		else
 		{
-			*pwidth = width;
-			*pheight = height;
-
 			Com_Printf ("failed\n" );
 
 			Com_Printf ("...calling CDS assuming dual monitors:" );
@@ -313,34 +331,38 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 				ChangeDisplaySettings( 0, 0 );
 
-				*pwidth = width;
-				*pheight = height;
 				gl_state.fullscreen = false;
-				if ( !VID_CreateWindow (width, height, false) )
+				if ( !VID_CreateWindow (x, y, width, height, windowmode_windowed) )
 					return rserr_invalid_mode;
 				return rserr_invalid_fullscreen;
 			}
 			else
 			{
 				Com_Printf (" ok\n" );
-				if ( !VID_CreateWindow (width, height, true) )
+				if ( !VID_CreateWindow (x, y, width, height, windowmode_windowed) )
 					return rserr_invalid_mode;
 
 				gl_state.fullscreen = true;
 				return rserr_ok;
 			}
 		}
-	}
-	else
+	} else 
 	{
-		Com_Printf ("...setting windowed mode\n" );
+		qboolean borderlessfullscreen = (windowmode == windowmode_borderless_windowed);
+		if (borderlessfullscreen)
+		{
+			x = y = 0;
+			width = max_width;
+			height = max_height;
+		}
+
+		Com_Printf ("...setting %s mode\n", 
+			borderlessfullscreen ? "borderless fullscreen" : "windowed" );
 
 		ChangeDisplaySettings( 0, 0 );
 
-		*pwidth = width;
-		*pheight = height;
 		gl_state.fullscreen = false;
-		if ( !VID_CreateWindow (width, height, false) )
+		if ( !VID_CreateWindow (x, y, width, height, windowmode) )
 			return rserr_invalid_mode;
 	}
 
@@ -659,7 +681,7 @@ qboolean GLimp_Init( void *hinstance, void *wndproc )
 	glw_state.allowdisplaydepthchange = false;
 
 	//set high process priority for fullscreen mode
-	if(vid_fullscreen->value && sys_priority->value )
+	if(vid_fullscreen->integer == windowmode_exclusive_fullscreen && sys_priority->value )
 		SetPriorityClass (GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	else
 		SetPriorityClass (GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
@@ -934,12 +956,14 @@ void GLimp_AppActivate( qboolean active )
 	if ( active )
 	{
 		SetForegroundWindow( glw_state.hWnd );
-		ShowWindow( glw_state.hWnd, SW_RESTORE );
+		ShowWindow( glw_state.hWnd, vid_fullscreen->integer == windowmode_exclusive_fullscreen ? SW_RESTORE : SW_SHOW );
 	}
 	else
 	{
-		if ( vid_fullscreen->value )
+		if ( vid_fullscreen->integer == windowmode_exclusive_fullscreen )
+		{
 			ShowWindow( glw_state.hWnd, SW_MINIMIZE );
+		}
 	}
 }
 

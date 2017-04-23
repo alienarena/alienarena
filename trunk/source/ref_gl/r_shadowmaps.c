@@ -236,7 +236,7 @@ void R_GenerateShadowFBO()
 		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,vid.width,vid.height); 
+	qglViewport(0,0,viddef.width,viddef.height); 
 	
 	// Initialize frame values.
 	// This only makes a difference if the viewport is less than the screen
@@ -1348,6 +1348,6 @@ void R_GenerateTerrainShadows( void )
 
 void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms)
 {
-	glUniform1fARB (uniforms->xPixelOffset, 1.0/(viddef.width*r_shadowmapscale->value));
-	glUniform1fARB (uniforms->yPixelOffset, 1.0/(viddef.height*r_shadowmapscale->value));
+	glUniform1fARB (uniforms->xPixelOffset, 1.0/(vid.width*r_shadowmapscale->value));
+	glUniform1fARB (uniforms->yPixelOffset, 1.0/(vid.height*r_shadowmapscale->value));
 }
