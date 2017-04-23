@@ -1055,7 +1055,9 @@ void CL_AddPacketEntities (frame_t *frame)
 			if (s1->number == cl.playernum+1) {
 				ent.flags |= RF_VIEWERMODEL;
 			}
-			V_AddEntity (&ent);
+
+			if (ent.model) // Special hack for legacy servers and nonexistant helmets
+				V_AddEntity (&ent);
 		}
 
 		if (s1->number == cl.playernum+1)
