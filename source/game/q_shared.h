@@ -647,7 +647,7 @@ typedef struct
 #define	EF_ROCKET			0x00000010		// redlight + trail
 #define	EF_GRENADE			0x00000020
 #define	EF_HYPERBLASTER		0x00000040
-#define	EF_BFG				0x00000080
+#define	EF_SPAWNPROTECTED	0x00000080
 #define EF_COLOR_SHELL		0x00000100
 #define EF_SILENT			0x00000200
 #define	EF_ANIM01			0x00000400		// automatically cycle between frames 0 and 1 at 2 hz

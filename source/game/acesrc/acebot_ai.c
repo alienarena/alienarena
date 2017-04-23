@@ -550,6 +550,10 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 	edict_t *target;
 	edict_t	*ent;
 
+	// try to seem a little more human here, don't just immediately start finding an enemy and firing at it after spawning
+	if(self->client->spawnprotected)
+		return false; 
+
 	if(ctf->value) 
 	{
 		flag1_item = FindItemByClassname("item_flag_red");

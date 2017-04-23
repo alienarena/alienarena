@@ -944,7 +944,7 @@ void G_SetClientEffects (edict_t *ent)
 	}
 
 	if(ent->client->spawnprotected)
-		ent->s.effects |= EF_PENT;
+		ent->s.effects |= EF_SPAWNPROTECTED; 
 
 	if(ent->client->kill_streak >= 8)
 		ent->s.effects |= EF_BUBBLES;
