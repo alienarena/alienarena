@@ -70,12 +70,6 @@ void VID_Restart_f (void)
 /*
 ** VID_GetModeInfo
 */
-typedef struct vidmode_s
-{
-	const char *description;
-	int         width, height;
-	int         mode;
-} vidmode_t;
 
 vidmode_t vid_modes[] =
 {
@@ -100,31 +94,32 @@ vidmode_t vid_modes[] =
 };
 
 static int s_numVidModes = ( sizeof(vid_modes) / sizeof(vid_modes[0]));
-qboolean VID_GetModeInfo ( int *width, int *height, int mode)
+qboolean VID_GetModeInfo (int *max_width, int *max_height, int *current_width, int *current_height, int mode, windowmode_t windowmode)
 {
-	vidmode_t *vm;
-
-	if ( mode < -1 )
-	{
+	if (mode < -1 || mode >= s_numVidModes)
 		return false;
-	}
 
-	if ( mode >= s_numVidModes )
+	if (mode == -1)
 	{
-		return false;
+		*max_width = vid_width->value;
+		*max_height = vid_height->value;
 	}
-
-	if ( mode == -1 )
+	else
 	{
-		*width = vid_width->value;
-		*height = vid_height->value;
-		return true;
+		*max_width = vid_modes[mode].width;
+		*max_height = vid_modes[mode].height;
 	}
 
-	vm = &vid_modes[mode];
-
-	*width = vm->width;
-	*height = vm->height;
+	if (windowmode == windowmode_windowed)
+	{
+		*current_width = (viddef.width && viddef.width < *max_width) ? viddef.width : *max_width;
+		*current_height = (viddef.height && viddef.height < *max_height) ? viddef.height : *max_height;
+	}
+	else
+	{
+		*current_width = *max_width;
+		*current_height = *max_height;
+	}
 
 	return true;
 }
@@ -143,10 +138,18 @@ void VID_ModeList_f(void)
 /*
 ** VID_NewWindow
 */
-void VID_NewWindow ( int width, int height)
+void VID_NewWindow ( int width, int height )
 {
-	viddef.width  = width;
+	viddef.width = width;
 	viddef.height = height;
+
+	cl.force_refdef = true;		// can't use a paused refdef
+}
+
+void VID_NewPosition( int x, int y )
+{
+	Cvar_SetValue( "vid_xpos", x);
+	Cvar_SetValue( "vid_ypos", y);
 }
 
 /*
@@ -205,8 +208,8 @@ void VID_Init (void)
 	vid_ypos = Cvar_Get ("vid_ypos", "0", CVAR_ARCHIVE);
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "0", CVAR_ARCHIVE);
 	vid_gamma = Cvar_Get( "vid_gamma", "1", CVAR_ARCHIVE );
-	vid_width = Cvar_Get ( "vid_width", "640", CVAR_ARCHIVE );
-	vid_height = Cvar_Get ( "vid_height", "480", CVAR_ARCHIVE );
+	vid_width = Cvar_Get ( "vid_width", "1024", CVAR_ARCHIVE );
+	vid_height = Cvar_Get ( "vid_height", "768", CVAR_ARCHIVE );
 
 	/* Add some console commands that we want to handle */
 	Cmd_AddCommand ("vid_restart", VID_Restart_f);

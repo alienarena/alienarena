@@ -889,8 +889,8 @@ void SCR_DrawConsole (void)
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 	{	// connected, but can't render
+		Draw_Fill(0, 0, viddef.width, viddef.height, RGBA(0, 0, 0, 1));
 		CON_DrawConsole( scr_consize->value );
-		Draw_Fill (0, viddef.height/2, viddef.width, viddef.height/2, RGBA(0,0,0,1));
 		return;
 	}
 
@@ -2136,7 +2136,7 @@ void SCR_UpdateScreen (void)
 
 			SCR_DrawConsole ();
 
-			M_Draw ();
+			M_Draw ( false );
 
 			SCR_DrawLoading ();
 

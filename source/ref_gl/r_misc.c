@@ -459,7 +459,7 @@ void GL_ScreenShot_JPEG(void)
 	}
 
 	/* Allocate room for a copy of the framebuffer */
-	rgbdata = malloc(vid.width * vid.height * 3);
+	rgbdata = malloc(viddef.width * viddef.height * 3);
 
 	if (!rgbdata) {
 		fclose(f);
@@ -467,7 +467,7 @@ void GL_ScreenShot_JPEG(void)
 	}
 
 	/* Read the framebuffer into our storage */
-	qglReadPixels(0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
+	qglReadPixels(0, 0, viddef.width, viddef.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
 
 	/* Initialise the JPEG compression object */
 	cinfo.err = jpeg_std_error(&jerr);
@@ -475,8 +475,8 @@ void GL_ScreenShot_JPEG(void)
 	jpeg_stdio_dest(&cinfo, f);
 
 	/* Setup JPEG Parameters */
-	cinfo.image_width = vid.width;
-	cinfo.image_height = vid.height;
+	cinfo.image_width = viddef.width;
+	cinfo.image_height = viddef.height;
 	cinfo.in_color_space = JCS_RGB;
 	cinfo.input_components = 3;
 	jpeg_set_defaults(&cinfo);
@@ -551,19 +551,19 @@ void GL_ScreenShot_TGA (void)
 		return;
 	}
 
-	buffer = malloc(vid.width*vid.height*3 + 18);
+	buffer = malloc(viddef.width*viddef.height*3 + 18);
 	memset (buffer, 0, 18);
 	buffer[2] = 2;		// uncompressed type
-	buffer[12] = vid.width&255;
-	buffer[13] = vid.width>>8;
-	buffer[14] = vid.height&255;
-	buffer[15] = vid.height>>8;
+	buffer[12] = viddef.width&255;
+	buffer[13] = viddef.width>>8;
+	buffer[14] = viddef.height&255;
+	buffer[15] = viddef.height>>8;
 	buffer[16] = 24;	// pixel size
 
-	qglReadPixels (0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 );
+	qglReadPixels (0, 0, viddef.width, viddef.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 );
 
 	// swap rgb to bgr
-	c = 18+vid.width*vid.height*3;
+	c = 18+viddef.width*viddef.height*3;
 	for (i=18 ; i<c ; i+=3)
 	{
 		temp = buffer[i];

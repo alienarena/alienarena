@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <termios.h>
+#include <time.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -72,7 +73,7 @@ void		GLimp_BeginFrame( float camera_separation );
 void		GLimp_EndFrame( void );
 qboolean	GLimp_Init( void *hinstance, void *hWnd );
 void		GLimp_Shutdown( void );
-rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
+rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, windowmode_t windowmode );
 void		GLimp_AppActivate( qboolean active );
 
 
@@ -93,9 +94,14 @@ qboolean have_stencil = false; // Stencil shadows - MrG
 #define KEY_MASK (KeyPressMask | KeyReleaseMask)
 #define MOUSE_MASK (ButtonPressMask | ButtonReleaseMask | \
 		    PointerMotionMask | ButtonMotionMask )
+
 #define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | \
 	       	StructureNotifyMask | PropertyChangeMask )
 
+extern cvar_t	*vid_xpos;
+extern cvar_t	*vid_ypos;
+extern cvar_t	*vid_width;
+extern cvar_t	*vid_height;
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
 extern cvar_t	*r_antialiasing;
@@ -149,7 +155,7 @@ void install_grabs(void)
 #else // defined DEBUG_GDB_NOGRAB
 # if !defined HAVE_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
-	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
+	XWarpPointer(dpy, None, win, 0, 0, 0, 0, viddef.width / 2, viddef.height / 2);
 	Cvar_Set( "in_dgamouse", "0" );
 	dgamouse = false;
 # else // !defined HAVE_XXF86DGA
@@ -168,10 +174,10 @@ void install_grabs(void)
 			Com_Printf ( "Failed to detect XF86DGA Mouse\n" );
 			Cvar_Set( "in_dgamouse", "0" );
 			dgamouse = false;
-			XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
+			XWarpPointer(dpy, None, win, 0, 0, 0, 0, viddef.width / 2, viddef.height / 2);
 		}
 	} else {
-		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
+		XWarpPointer(dpy, None, win, 0, 0, 0, 0, viddef.width / 2, viddef.height / 2);
 	}
 # endif // !defined HAVE_XXF86DGA
 
@@ -315,7 +321,16 @@ static int XLateKey( XKeyEvent *ev )
 		break;
 
 	case XK_Return:
-		key = K_ENTER;
+		if (ev->state & Mod1Mask) 
+		{ 	// ALT-ENTER			
+			if ( vid_fullscreen )
+			{
+				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value ); // TODO: update for the fact that this isn't boolean anymore!
+			}		
+		} else
+		{
+			key = K_ENTER;
+		}
 		break;
 
 	case XK_Tab:
@@ -454,8 +469,8 @@ void HandleEvents( void )
 {
 	XEvent event;
 	qboolean dowarp = false;
-	int mwx = vid.width / 2;
-	int mwy = vid.height / 2;
+	int mwx = viddef.width / 2;
+	int mwy = viddef.height / 2;
 	int multiclicktime = 750;
 	int mouse_button;
 	static int last_mouse_x = 0, last_mouse_y = 0;
@@ -630,6 +645,10 @@ void HandleEvents( void )
 		case ConfigureNotify:
 			win_x = event.xconfigure.x;
 			win_y = event.xconfigure.y;
+			
+			VID_NewWindow( event.xconfigure.width, event.xconfigure.height );
+			VID_NewPosition( win_x, win_y );
+
 			break;
 
 		case ClientMessage:
@@ -638,7 +657,7 @@ void HandleEvents( void )
 			break;
 		}
 	}
-	
+
 	if ( mouse_is_position )
 	{ // allow mouse movement on menus in windowed mode
 		mouse_diff_x = last_mouse_x;
@@ -749,8 +768,6 @@ static void xf86vm_shutdown(void)
  */
 static void xf86vm_fullscreen( int req_width, int req_height )
 {
-	extern cvar_t *vid_xpos; // X coordinate of window position
-	extern cvar_t *vid_ypos; // Y coordinate of window position
 	int major, minor;
 	int num_vidmodes;
 	XF86VidModeModeInfo **vidmodes;
@@ -857,14 +874,29 @@ static void xf86vm_fullscreen( int req_width, int req_height )
 }
 #endif // HAVE_XXF86VM
 
+void GoBorderlessFullscreen() 
+{
+	Atom state = XInternAtom(dpy, "_NET_WM_STATE", False);
+	Atom stateFullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	Atom atoms[2] = { stateFullscreen, None };	
+
+	XChangeProperty(
+		dpy, 
+		win, 
+		state,
+		XA_ATOM, 32, PropModeReplace, (unsigned char *) atoms, 1
+	);
+}
+
 /*
 ** GLimp_SetMode
 */
-rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode (unsigned *pwidth, unsigned *pheight, int mode, windowmode_t windowmode)
 {
 	int xpos, ypos;
 
-	int width, height;
+	int width, height, max_width, max_height;
+	const char *win_fs[] = {"Windowed", "Borderless Windowed", "Exclusive Fullscreen"};
 
 	int attribMSAA[] = {
 		GLX_RGBA,
@@ -909,22 +941,31 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	/* release keyboard and mouse until after initialization */
 	uninstall_grabs();
 
-	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE);
+	r_fakeFullscreen = Cvar_Get ("r_fakeFullscreen", "0", CVAR_ARCHIVE);
 
 	Com_Printf ( "Initializing OpenGL display\n");
 
-	if (fullscreen)
-		Com_Printf ("...setting fullscreen mode %d:", mode );
-	else
-		Com_Printf ("...setting mode %d:", mode );
+	switch (windowmode) {
+		case windowmode_exclusive_fullscreen:
+			Com_Printf ("...setting fullscreen mode %d:", mode);
+			break;
+		case windowmode_borderless_windowed:
+			Com_Printf ("...setting borderless windowed mode %d:", mode);
+			break;
+		default:
+			Com_Printf ("...setting mode %d:", mode);
+	}
 
-	if ( !VID_GetModeInfo( &width, &height, mode ) )
+	if (!VID_GetModeInfo (&max_width, &max_height, &width, &height, mode, windowmode))
 	{
-		Com_Printf ( " invalid mode\n" );
+		Com_Printf (" invalid mode\n");
 		return rserr_invalid_mode;
 	}
 
-	Com_Printf ( " %d %d\n", width, height );
+	xpos = vid_xpos->integer;
+	ypos = vid_ypos->integer;
+
+	Com_Printf ("Position %d %d, %d %d %s\n", xpos, ypos, width, height, win_fs[windowmode]);
 
 	// destroy the existing window
 	GLimp_Shutdown ();
@@ -958,12 +999,11 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	else
 		have_stencil = true;
 
-	xpos = ypos = 0;
 	vidmode_ext = false; // XF86vm not used, until otherwise determined.
 	vidmode_active = false; // not XF86vm fullscreen, until otherwise determined.
 
 #ifdef HAVE_XXF86VM	
-	if ( fullscreen && !r_fakeFullscreen->integer )
+	if (windowmode == windowmode_exclusive_fullscreen && !r_fakeFullscreen->integer)
 	{
 		// Use XF86VidMode to request fullscreen of specified resolution.
 		xf86vm_fullscreen(width, height);
@@ -984,28 +1024,35 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	} else
 		mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
-	win = XCreateWindow(dpy, root, 0, 0, width, height,
-						0, visinfo->depth, InputOutput,
-						visinfo->visual, mask, &attr);
+	win = XCreateWindow(dpy, root, xpos, ypos, width, height,
+	 					0, visinfo->depth, InputOutput,
+	 					visinfo->visual, mask, &attr);
+	
+	if (windowmode == windowmode_borderless_windowed) 
+	{		
+		GoBorderlessFullscreen();
+	} else if (windowmode == windowmode_windowed) 
+	{	
+		sizehints = XAllocSizeHints();
+		if ( sizehints ) {
+			sizehints->base_width = width;
+			sizehints->base_height = height;
+			sizehints->max_width = max_width;
+			sizehints->max_height = max_height;
+			sizehints->min_width = VID_MIN_WIDTH;
+			sizehints->min_height = VID_MIN_HEIGHT;
+			sizehints->x = xpos;
+			sizehints->y = ypos;
+			
+			sizehints->flags = PMinSize | PMaxSize | PBaseSize | PPosition;
+		}
 
-	sizehints = XAllocSizeHints();
-	if (sizehints) {
-		sizehints->min_width = width;
-		sizehints->min_height = height;
-		sizehints->max_width = width;
-		sizehints->max_height = height;
-		sizehints->base_width = width;
-		sizehints->base_height = vid.height;
+		XSetWMProperties(dpy, win, NULL, NULL, NULL, 0,
+				sizehints, None, None);
 
-		sizehints->flags = PMinSize | PMaxSize | PBaseSize;
+		if (sizehints)
+			XFree(sizehints);
 	}
-
-	XSetWMProperties(dpy, win, NULL, NULL, NULL, 0,
-			sizehints, None, None);
-
-	if (sizehints)
-		XFree(sizehints);
-
 	/* For Gnome 3
 	 * Ref: .desktop files, and Gnome 3 doc
 	 */
@@ -1046,6 +1093,8 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 #if defined HAVE_XXF86VM
 	if (vidmode_active) {
+		xpos = ypos = 0;
+
 		XMoveWindow(dpy, win, xpos, ypos);
 		XRaiseWindow(dpy, win);
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
@@ -1061,18 +1110,18 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 	qglXMakeCurrent(dpy, win, ctx);
 
-	*pwidth = width;
-	*pheight = height;
+	*pwidth = max_width;
+	*pheight = max_height;
 
 	// let the sound and input subsystems know about the new window
 	VID_NewWindow (width, height);
+	VID_NewPosition (xpos, ypos);
 
 	XDefineCursor(dpy, win, CreateNullCursor(dpy, win));
 
 	qglXMakeCurrent(dpy, win, ctx);
 
 	RS_ScanPathForScripts();		// load all found scripts
-
 
 	/* re-acquire keyboard and mouse */
 	install_grabs();

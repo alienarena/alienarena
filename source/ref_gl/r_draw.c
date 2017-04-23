@@ -111,6 +111,8 @@ void Draw_GetPicSize (int *w, int *h, const char *pic)
 }
 
 #define DIV254BY255 (0.9960784313725490196078431372549f)
+#define DEG2RAD (0.0174532925f)
+
 /*
 =============
 Draw_AlphaStretchPic
@@ -457,6 +459,114 @@ void Draw_Fill (float x, float y, float w, float h, const float rgba[])
 }
 //=============================================================================
 
+/*
+** Fills a box of pixels with a single color, and with rounded corners at the specified corners.
+** Parameter corners: flags RCF_TOPLEFT, RCF_TOPRIGHT, RCF_BOTTOMLEFT, RCF_BOTTOMRIGHT, RCF_ALL
+*/
+void Draw_Fill_RoundedCorners (float x, float y, float w, float h, const float rgba[], float radius, int corners)
+{
+	GL_EnableTexture (0, false);
+	GLSTATE_ENABLE_BLEND;
+	GLSTATE_DISABLE_ALPHATEST;
+	qglColor4fv (rgba);
+	
+	qglBegin (GL_QUADS);		
+		qglVertex2f (x + radius, y);
+		qglVertex2f (x + w - radius, y);			
+		qglVertex2f (x + w - radius, y + radius);
+		qglVertex2f (x + radius, y + radius);
+
+		qglVertex2f (x, y + radius);
+		qglVertex2f (x + w, y + radius);			
+		qglVertex2f (x + w, y + h - radius);
+		qglVertex2f (x, y + h - radius);
+
+		qglVertex2f (x + radius, y + h);
+		qglVertex2f (x + w - radius, y + h);			
+		qglVertex2f (x + w - radius, y + h - radius);
+		qglVertex2f (x + radius, y + h - radius);
+
+		if (!(corners & RCF_TOPLEFT))
+		{
+			qglVertex2f (x, y);
+			qglVertex2f (x + radius, y);			
+			qglVertex2f (x + radius, y + radius);
+			qglVertex2f (x, y + radius);				
+		}
+		if (!(corners & RCF_TOPRIGHT)) 
+		{
+			qglVertex2f (x + w - radius, y);
+			qglVertex2f (x + w, y);			
+			qglVertex2f (x + w, y + radius);
+			qglVertex2f (x + w - radius, y + radius);	
+		}
+		if (!(corners & RCF_BOTTOMLEFT)) 
+		{
+			qglVertex2f (x, y + h - radius);
+			qglVertex2f (x + radius, y + h - radius);			
+			qglVertex2f (x + radius, y + h);
+			qglVertex2f (x, y + h);	
+		}
+		if (!(corners & RCF_BOTTOMRIGHT))
+		{
+			qglVertex2f (x + w - radius, y + h - radius);
+			qglVertex2f (x + w, y + h - radius);			
+			qglVertex2f (x + w, y + h);
+			qglVertex2f (x + w - radius, y + h);	
+		}
+	qglEnd ();
+	
+	if (corners & RCF_TOPLEFT)
+		Draw_Fill_Circle (x + radius, y + radius, radius, rgba, 180, 270);
+
+	if (corners & RCF_TOPRIGHT)
+		Draw_Fill_Circle (x + w - radius, y + radius, radius, rgba, 270, 360);		
+
+	if (corners & RCF_BOTTOMLEFT)
+		Draw_Fill_Circle (x + radius, y + h - radius, radius, rgba, 90, 180);
+
+	if (corners & RCF_BOTTOMRIGHT)
+		Draw_Fill_Circle (x + w - radius, y + h - radius, radius, rgba, 0, 90);
+
+	GLSTATE_DISABLE_BLEND;
+	qglColor3f (1,1,1);
+	GL_EnableTexture (0, true);
+}
+
+/*
+** Draw and fill a circle with the specified radius and the start and end degree (0-360) to draw.
+*/
+void Draw_Fill_Circle(float x, float y, float radius, const float rgba[], int startDegree, int endDegree)
+{
+	float y1 = y;
+	float x1 = x;
+	int i;
+
+	GL_EnableTexture (0, false);
+	GLSTATE_ENABLE_BLEND;
+	GLSTATE_DISABLE_ALPHATEST;
+	qglShadeModel (GL_SMOOTH);
+	qglColor4fv (rgba);
+
+	qglBegin(GL_TRIANGLE_FAN);
+		for (i = startDegree; i <= endDegree; i++)
+		{
+			float degInRad = i * DEG2RAD;
+			float x2 = x + ((float) cos(degInRad) * radius);
+			float y2 = y + ((float) sin(degInRad) * radius);                
+			qglVertex2f (x, y);                
+			qglVertex2f (x1, y1);                
+			qglVertex2f (x2, y2);
+			y1 = y2;
+			x1 = x2;
+		}
+	qglEnd();
+
+	qglShadeModel (GL_FLAT);
+	GLSTATE_DISABLE_BLEND;
+	qglColor3f (1,1,1);
+	GL_EnableTexture (0, true);
+}
 /*
 ================
 RGBA - This really should be a macro, but MSVC doesn't support C99.

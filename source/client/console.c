@@ -37,7 +37,29 @@ cvar_t *		con_notifytime;
 // of color codes in their name)
 cvar_t			*con_ignorecolorcodes;
 #define cmode	(con_ignorecolorcodes != NULL && con_ignorecolorcodes->integer ? FNT_CMODE_NONE : FNT_CMODE_QUAKE_SRS)
+cvar_t			*con_color;
 
+float consolecolors[ 6 ][ 4 ] =
+{
+	{0.0, 0.0, 0.0, 0.2},
+	{0.5, 0.0, 0.0, 0.2},
+	{0.0, 0.5, 0.0, 0.2},
+	{0.0, 0.0, 0.5, 0.2},
+	{0.0, 0.5, 0.5, 0.2},
+	{0.5, 0.0, 0.5, 0.2}
+};
+
+float consolecolors_menu[ 6 ][ 4 ] =
+{
+	{0.0, 0.0, 0.0, 0.85},
+	{0.15, 0.0, 0.0, 0.85},
+	{0.0, 0.15, 0.0, 0.85},
+	{0.0, 0.0, 0.15, 0.85},
+	{0.0, 0.15, 0.15, 0.85},
+	{0.15, 0.0, 0.15, 0.85}
+};
+
+extern viddef_t vid;
 
 /**************************************************************************/
 /* VARIOUS COMMANDS                                                       */
@@ -429,6 +451,14 @@ void CON_Initialise( )
 	con_notifytime = Cvar_Get( "con_notifytime" , "3" , 0 );
 	con_ignorecolorcodes = Cvar_Get( "con_ignorecolorcodes", "0", CVARDOC_BOOL|CVAR_ARCHIVE );
 
+	// 0 = off
+	// 1 = red
+	// 2 = green
+	// 3 = blue
+	// 4 = cyan
+	// 5 = purple
+	con_color = Cvar_Get( "con_color", "0", CVARDOC_INT|CVAR_ARCHIVE );
+
 	// Register commands
 	Cmd_AddCommand( "toggleconsole", CON_ToggleConsole );
 	Cmd_AddCommand( "togglechat", _CON_ToggleChat );
@@ -811,25 +841,44 @@ void CON_DrawConsole( float relSize )
 	
 	// FIXME: lots of copy-pasted code here. Doesn't matter, we will 
 	// eventually redo the whole console using the menu code. 
+	
 	{
 		int _tile_w, _tile_h;
 		float tile_w, tile_h;
-		
+		qboolean fromMenu = (cls.state == ca_disconnected && cls.key_dest != key_game);
+		int color = con_color->integer;
+
 		// assume all tiles are the same size
 		Draw_GetPicSize (&_tile_w, &_tile_h, "menu/m_topcorner" );
 	
 		tile_w = (float)_tile_w/64.0*(float)font->size*4.0;
 		tile_h = (float)_tile_h/64.0*(float)font->size*4.0;
-		
-		
+
+		if (fromMenu) 
+		{
+			// Refresh menu
+			M_Draw(true);
+		}
+
+		if (color < 0 || color > 5) {
+			color = 0;
+		}
+
+		if (color > 0 || fromMenu) 
+		{
+			Draw_Fill_RoundedCorners(font->size - 2, 0, viddef.width - font->size * 2 + 5, dHeight + 4, 
+				fromMenu ? consolecolors_menu[color] : consolecolors[color], font->size, RCF_BOTTOMLEFT|RCF_BOTTOMRIGHT);
+		}
+
 		Draw_AlphaStretchTilingPic( -tile_w/4, dHeight-tile_h/2, tile_w, tile_h, "menu/m_bottomcorner", 1 );
 		Draw_AlphaStretchTilingPic( viddef.width+tile_w/4, dHeight-tile_h/2, -tile_w, tile_h, "menu/m_bottomcorner", 1 );
 		
 		Draw_AlphaStretchTilingPic( tile_w*0.75, dHeight-tile_h/2, viddef.width-tile_w*1.5, tile_h, "menu/m_bottom", 1 );
 		
 		Draw_AlphaStretchTilingPic( -tile_w/4, 0, tile_w, dHeight-tile_h/2, "menu/m_side", 1 );
+		
 		Draw_AlphaStretchTilingPic( viddef.width+tile_w/4, 0, -tile_w, dHeight-tile_h/2, "menu/m_side", 1 );
-		Draw_AlphaStretchTilingPic( tile_w*0.75, 0, viddef.width-tile_w, dHeight-tile_h/2, "menu/m_background", 1 );
+		Draw_AlphaStretchTilingPic( tile_w*0.75, 0, viddef.width-tile_w*1.5, dHeight-tile_h/2, "menu/m_background", 1 );		
 	}
 
 	// Draw version string and download status

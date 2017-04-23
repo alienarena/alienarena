@@ -2347,14 +2347,15 @@ RadarEnt_t	RadarEnts[MAX_RADAR_ENTS];
 void R_DrawRadar(void)
 {
 	int		i;
+	int 	minimap_size = (int) r_minimap_size->value;
 
 	if ((r_newrefdef.rdflags & RDF_NOWORLDMODEL)) return;
 	if (!r_minimap->integer) return;
 	if (!r_newrefdef.areabits) return;
 
-	qglViewport	(	r_newrefdef.x+r_newrefdef.width-r_minimap_size->value,
-					vid.height-r_newrefdef.y-r_newrefdef.height, 
-					r_minimap_size->value, r_minimap_size->value);
+	qglViewport	(	r_newrefdef.x + r_newrefdef.width - minimap_size,
+					viddef.height - r_newrefdef.y - r_newrefdef.height, 
+					minimap_size, minimap_size);
 
 	qglDisable (GL_DEPTH_TEST);
   	qglMatrixMode (GL_PROJECTION);
@@ -2444,7 +2445,7 @@ void R_DrawRadar(void)
 
 	qglPopMatrix();
 
-	qglViewport(0,0,vid.width,vid.height);
+	qglViewport(0,0,viddef.width,viddef.height);
 
 	qglMatrixMode(GL_PROJECTION);
 	qglPopMatrix();

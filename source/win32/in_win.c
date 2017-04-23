@@ -407,7 +407,7 @@ void IN_Frame (void)
 	if ( !cl.refresh_prepped && cls.key_dest != key_menu || cls.key_dest == key_console)
 	{
 		// temporarily deactivate if in fullscreen
-		if (Cvar_VariableValue ("vid_fullscreen") == 0)
+		if (Cvar_VariableValue ("vid_fullscreen") != windowmode_exclusive_fullscreen)
 		{
 			IN_DeactivateMouse ();
 			return;

@@ -816,9 +816,8 @@ void R_SetupViewport (void)
 	
 	x = r_newrefdef.x;
 	w = r_newrefdef.width;
-	y = vid.height - r_newrefdef.y - r_newrefdef.height;
+	y = viddef.height - r_newrefdef.y - r_newrefdef.height;
 	h = r_newrefdef.height;
-	
 	qglViewport (x, y, w, h);	// MPO : note this happens every frame interestingly enough
 }
 
@@ -1215,10 +1214,10 @@ void R_RenderView (refdef_t *fd)
 static void	R_SetGL2D (void)
 {
 	// set 2D virtual screen size
-	qglViewport (0,0, vid.width, vid.height);
+	qglViewport (0, 0, viddef.width, viddef.height);
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity ();
-	qglOrtho  (0, vid.width, vid.height, 0, -99999, 99999);
+	qglOrtho  (0, viddef.width, viddef.height, 0, -99999, 99999);
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity ();
 	qglDisable (GL_DEPTH_TEST);
@@ -1347,7 +1346,12 @@ void R_Register( void )
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
-	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
+	// see windowmode_t;
+	// 0 = windowed
+	// 1 = full screen
+	// 2 = borderless fullscreen
+	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_INT);
+
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
 	vid_contrast = Cvar_Get( "vid_contrast", "1.0", CVAR_ARCHIVE);
 	//TODO: remove, unless we decide to add GL ES support or something.
@@ -1439,14 +1443,14 @@ R_SetMode
 static qboolean R_SetMode (void)
 {
 	rserr_t err;
-	qboolean fullscreen;
+	windowmode_t windowmode;
 
-	fullscreen = vid_fullscreen->integer;
+	windowmode = vid_fullscreen->integer;
 
 	vid_fullscreen->modified = false;
 	gl_mode->modified = false;
 
-	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->integer, fullscreen ) ) == rserr_ok )
+	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->integer, windowmode ) ) == rserr_ok )
 	{
 		gl_state.prev_mode = gl_mode->integer;
 	}
@@ -1454,10 +1458,10 @@ static qboolean R_SetMode (void)
 	{
 		if ( err == rserr_invalid_fullscreen )
 		{
-			Cvar_SetValue( "vid_fullscreen", 0);
+			Cvar_SetValue( "vid_fullscreen", windowmode_windowed);
 			vid_fullscreen->modified = false;
 			Com_Printf ("ref_gl::R_SetMode() - fullscreen unavailable in this mode\n" );
-			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->integer, false ) ) == rserr_ok )
+			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_mode->integer, windowmode_windowed ) ) == rserr_ok )
 				return true;
 		}
 		else if ( err == rserr_invalid_mode )
@@ -1468,7 +1472,7 @@ static qboolean R_SetMode (void)
 		}
 
 		// try setting it back to something safe
-		if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_state.prev_mode, false ) ) != rserr_ok )
+		if ( ( err = GLimp_SetMode( &vid.width, &vid.height, gl_state.prev_mode, windowmode_windowed ) ) != rserr_ok )
 		{
 			Com_Printf ("ref_gl::R_SetMode() - could not revert to safe mode\n" );
 			return false;
@@ -1565,6 +1569,7 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_config.version_string = (const char*)qglGetString (GL_VERSION);
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
 	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
+
 	GL_PrintExtensions();
 
 	/*
@@ -1786,6 +1791,9 @@ R_BeginFrame
 */
 void R_BeginFrame (float camera_separation)
 {
+#if defined UNIX_VARIANT
+	extern qboolean vid_restart;
+#endif
 
 	gl_state.camera_separation = camera_separation;
 
@@ -1797,7 +1805,11 @@ void R_BeginFrame (float camera_separation)
 		cvar_t	*ref;
 
 		ref = Cvar_Get ("vid_ref", "gl", 0);
+#if defined UNIX_VARIANT
+		vid_restart = true;
+#else
 		ref->modified = true;
+#endif		
 	}
 
 	GLimp_BeginFrame( camera_separation );

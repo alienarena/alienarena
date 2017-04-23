@@ -291,6 +291,14 @@ static const char *offon_names[] =
 	0
 };
 
+static const char *windowmode_names[] =
+{
+	"windowed",
+	"fullscreen (borderless window)",
+	"fullscreen (exclusive)",
+	0
+};
+
 static menuvec2_t IconSpinSizeFunc (void *_self, FNT_font_t font)
 {
 	menuvec2_t ret;
@@ -2283,6 +2291,17 @@ static const char *color_names[] =
 	0
 };
 
+static const char *console_color_names[] =
+{
+	"^7none",
+	"^1red",
+	"^2green",
+	"^4blue",
+	"^5cyan",
+	"^6purple",
+	0
+};
+
 static const char *handedness_names[] =
 {
 	"right",
@@ -2344,6 +2363,13 @@ option_name_t disp_option_names[] =
 		"console font",
 		"select the font used to display the console",
 		setnames (font_names)
+	},
+	{
+		option_spincontrol,
+		"con_color",
+		"console color",
+		"select console background color accent",
+		setnames (console_color_names)
 	},
 	{
 		option_textcvarspincontrol,
@@ -2578,9 +2604,9 @@ option_name_t video_option_names[] =
 	{
 		option_spincontrol,
 		"vid_fullscreen",
-		"fullscreen",
+		"window mode",
 		NULL,
-		setnames (onoff_names),
+		setnames (windowmode_names),
 		QMF_ACTION_WAIT
 	},
 	{
@@ -6643,10 +6669,11 @@ static void M_Draw_Cursor (void)
 
 
 // draw all menus on screen
-void M_Draw (void)
+void M_Draw (qboolean refreshmenu)
 {
-	if (cls.key_dest != key_menu)
+	if (cls.key_dest != key_menu && !refreshmenu)	    
 		return;
+
 	Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0, 0, 0, 1));
 	Menuscreens_Animate ();
 	if (mstate.state == mstate_steady)

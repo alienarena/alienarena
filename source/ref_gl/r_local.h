@@ -837,7 +837,7 @@ extern void		GLimp_BeginFrame( float camera_separation );
 extern void		GLimp_EndFrame( void );
 extern qboolean	GLimp_Init( void *hinstance, void *hWnd );
 extern void		GLimp_Shutdown( void );
-extern rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
+extern rserr_t	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, windowmode_t windowmode );
 extern void		GLimp_AppActivate( qboolean active );
 
 /*

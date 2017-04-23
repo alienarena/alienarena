@@ -309,13 +309,34 @@ LONG WINAPI MainWndProc (
 		}
         return DefWindowProc (hWnd, uMsg, wParam, lParam);
 
+	case WM_GETMINMAXINFO:
+		{
+			LPMINMAXINFO mmi = (LPMINMAXINFO) lParam;
+			mmi->ptMinTrackSize.x = VID_MIN_WIDTH;
+			mmi->ptMinTrackSize.y = VID_MIN_HEIGHT;
+			mmi->ptMaxTrackSize.x = VID_MAX_WIDTH;
+			mmi->ptMaxTrackSize.y = VID_MAX_HEIGHT;
+		}
+		return 0;
+
+	case WM_SIZE:
+		if (vid_fullscreen->integer == windowmode_windowed)
+		{
+			int width, height;
+			width = (short) LOWORD(lParam);
+			height = (short) HIWORD(lParam);
+
+			VID_NewWindow (width, height);
+		}
+		return DefWindowProc (hWnd, uMsg, wParam, lParam);
+
 	case WM_MOVE:
 		{
 			int		xPos, yPos;
 			RECT r;
 			int		style;
 
-			if (!vid_fullscreen->value)
+			if (vid_fullscreen->integer == windowmode_windowed)
 			{
 				xPos = (short) LOWORD(lParam);    // horizontal position
 				yPos = (short) HIWORD(lParam);    // vertical position
@@ -326,12 +347,10 @@ LONG WINAPI MainWndProc (
 				r.bottom = 1;
 
 				style = GetWindowLong( hWnd, GWL_STYLE );
-				AdjustWindowRect( &r, style, FALSE );
+				AdjustWindowRect( &r, style, TRUE );
 
-				Cvar_SetValue( "vid_xpos", xPos + r.left);
-				Cvar_SetValue( "vid_ypos", yPos + r.top);
-				vid_xpos->modified = false;
-				vid_ypos->modified = false;
+				VID_NewPosition (xPos, yPos);
+
 				if (ActiveApp)
 					IN_Activate (true);
 			}
@@ -389,7 +408,7 @@ LONG WINAPI MainWndProc (
 		{
 			if ( vid_fullscreen )
 			{
-				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value );
+				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value ); // TODO: update for the fact that this isn't boolean anymore!
 			}
 			return 0;
 		}
@@ -435,12 +454,6 @@ void VID_Front_f( void )
 /*
 ** VID_GetModeInfo
 */
-typedef struct vidmode_s
-{
-	const char *description;
-	int         width, height;
-	int         mode;
-} vidmode_t;
 
 //Gonna get rid of the lower resolution - so that the HUD doesn't get knocked off the screen
 //besides, who the hell wants to play at anything less than 640x480
@@ -466,34 +479,35 @@ vidmode_t vid_modes[] =
 	{ "Mode 17: 7680x4320", 7680, 4320, 17 },
 };
 
-static int s_numVidModes = ( sizeof(vid_modes) / sizeof(vid_modes[0]));
-qboolean VID_GetModeInfo ( int *width, int *height, int mode)
+static int s_numVidModes = ( sizeof(vid_modes) / sizeof(vid_modes[0]) );
+qboolean VID_GetModeInfo (int *max_width, int *max_height, int *current_width, int *current_height, int mode, windowmode_t windowmode)
 {
-        vidmode_t *vm;
+	if (mode < -1 || mode >= s_numVidModes)
+		return false;
 
-        if ( mode < -1 )
-        {
-                return false;
-        }
+	if (mode == -1)
+	{
+		*max_width = vid_width->value;
+		*max_height = vid_height->value;
+	}
+	else
+	{
+		*max_width = vid_modes[mode].width;
+		*max_height = vid_modes[mode].height;
+	}
 
-        if ( mode >= s_numVidModes )
-        {
-                return false;
-        }
+	if (windowmode == windowmode_windowed)
+	{
+		*current_width = (viddef.width && viddef.width < *max_width) ? viddef.width : *max_width;
+		*current_height = (viddef.height && viddef.height < *max_height) ? viddef.height : *max_height;
+	}
+	else
+	{
+		*current_width = *max_width;
+		*current_height = *max_height;
+	}
 
-        if ( mode == -1 )
-        {
-                *width = vid_width->value;
-                *height = vid_height->value;
-                return true;
-        }
-
-        vm = &vid_modes[mode];
-
-        *width = vm->width;
-        *height = vm->height;
-
-        return true;
+	return true;
 }
 
 void VID_ModeList_f(void)
@@ -508,29 +522,6 @@ void VID_ModeList_f(void)
 }
 
 /*
-** VID_UpdateWindowPosAndSize
-*/
-void VID_UpdateWindowPosAndSize( int x, int y )
-{
-	RECT r;
-	int		style;
-	int		w, h;
-
-	r.left   = 0;
-	r.top    = 0;
-	r.right  = viddef.width;
-	r.bottom = viddef.height;
-
-	style = GetWindowLong( cl_hwnd, GWL_STYLE );
-	AdjustWindowRect( &r, style, FALSE );
-
-	w = r.right - r.left;
-	h = r.bottom - r.top;
-
-	MoveWindow( cl_hwnd, vid_xpos->value, vid_ypos->value, w, h, TRUE );
-}
-
-/*
 ** VID_NewWindow
 */
 void VID_NewWindow ( int width, int height)
@@ -539,6 +530,12 @@ void VID_NewWindow ( int width, int height)
 	viddef.height = height;
 
 	cl.force_refdef = true;		// can't use a paused refdef
+}
+
+void VID_NewPosition( int x, int y )
+{
+	Cvar_SetValue( "vid_xpos", x);
+	Cvar_SetValue( "vid_ypos", y);	
 }
 
 void VID_FreeReflib (void)
@@ -625,18 +622,6 @@ void VID_CheckChanges (void)
 		}
 		cls.disable_screen = false;
 	}
-
-	/*
-	** update our window position
-	*/
-	if ( vid_xpos->modified || vid_ypos->modified )
-	{
-		if (!vid_fullscreen->value)
-			VID_UpdateWindowPosAndSize( vid_xpos->value, vid_ypos->value );
-
-		vid_xpos->modified = false;
-		vid_ypos->modified = false;
-	}
 }
 
 /*
@@ -648,8 +633,8 @@ void VID_Init (void)
 {
 	/* Create the video variables so we know how to start the graphics drivers */
 	vid_ref = Cvar_Get ("vid_ref", "soft", CVAR_ARCHIVE);
-	vid_xpos = Cvar_Get ("vid_xpos", "3", CVAR_ARCHIVE);
-	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
+	vid_xpos = Cvar_Get ("vid_xpos", "0", CVAR_ARCHIVE);
+	vid_ypos = Cvar_Get ("vid_ypos", "0", CVAR_ARCHIVE);
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "1", CVAR_ARCHIVE);
 	vid_gamma = Cvar_Get ( "vid_gamma", "1", CVAR_ARCHIVE );
 	vid_width = Cvar_Get ( "vid_width", "1024", CVAR_ARCHIVE );

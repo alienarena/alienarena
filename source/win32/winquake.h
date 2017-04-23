@@ -26,14 +26,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // not used
 // #include <dsound.h>
 
-#define	WINDOW_STYLE	(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE)
+#define WINDOW_STYLE		(WS_OVERLAPPEDWINDOW)
+#define FULLSCREEN_STYLE	(WS_POPUP|WS_VISIBLE)
 
-extern	HINSTANCE	global_hInstance;
-
-/* old sound stuff (2010-08)
+extern	HINSTANCE	global_hInstance;/* old sound stuff (2010-08)
 extern LPDIRECTSOUND pDS;
 extern LPDIRECTSOUNDBUFFER pDSBuf;
-
 extern DWORD gSndBufSize;
 */
 
