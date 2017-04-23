@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 clentity_t *active_clentities, *free_clentities;
 clentity_t clentities[MAX_CLENTITIES];
+extern cvar_t *r_shaders;
 
 /*
 =========================================================================
@@ -1001,7 +1002,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			
 			if (s1->modelindex != 0 && !(renderfx & RF_NODRAW))
 			{				
-				if(ent.frame < 182)
+				if(ent.frame < 198)
 				{
 					//if frame is not death, set the model effect
 					if((effects & EF_QUAD) && playermodel)
@@ -1017,6 +1018,18 @@ void CL_AddPacketEntities (frame_t *frame)
 					else if((effects & EF_PENT) && playermodel)
 					{
 						ent.model = R_RegisterModel("models/items/activated/force/tris.iqm");
+						V_AddEntity (&ent);		
+					}
+					else if((effects & EF_SPAWNPROTECTED) && playermodel)
+					{
+						ent.model = R_RegisterModel("models/objects/powerdome/tris.iqm");
+						ent.flags |= RF_NOSHADOWS;
+						if (!r_shaders->integer)
+						{
+							ent.flags |= RF_TRANSLUCENT;
+							ent.flags |= RF_SHELL_BLUE;
+							ent.alpha = 0.30;
+						}
 						V_AddEntity (&ent);		
 					}
 				}

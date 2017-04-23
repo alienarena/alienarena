@@ -1626,12 +1626,7 @@ void respawn (edict_t *self)
 
 		// hold in place briefly
 		self->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
-		self->client->ps.pmove.pm_time = 60;
-
-		// set animation to spawn sequence
-		self->state = STATE_STAND;
-		self->s.frame = FRAME_rise1;
-		self->client->anim_end = FRAME_rise17;
+		self->client->ps.pmove.pm_time = 14;
 
 		self->client->respawn_time = level.time;
 
@@ -2277,6 +2272,13 @@ void PutClientInServer (edict_t *ent)
 	G_ResetHistory (ent);
 	// and this is as good a time as any to clear the saved state
 	client->saved.leveltime = 0;
+
+	//client->ps.pmove.pm_time = 60;
+
+	// set animation to spawn sequence
+	ent->state = STATE_STAND;
+	ent->s.frame = FRAME_rise1;
+	ent->client->anim_end = FRAME_rise16;
 }
 
 //DUEL MODE

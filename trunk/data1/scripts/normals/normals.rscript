@@ -1562,3 +1562,12 @@ maps/meshes/test/martian
 		glow
 	}
 }
+models/objects/powerdome/skin
+{
+	{
+		map models/objects/powerdome/skin_normal.jpg
+		normalmap
+		map2 models/objects/powerdome/skin_fx.tga
+		fx
+	}
+}
