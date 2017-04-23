@@ -56,7 +56,7 @@ int SV_FindIndex (char *name, int start, int max, qboolean create)
 
 	if (i == max)
 	{
-		Com_Printf("*Index: overflow at %i", i);
+		Com_Printf("*Index: overflow at %i %s\n", i, name);
 		return 0;
 	}
 
