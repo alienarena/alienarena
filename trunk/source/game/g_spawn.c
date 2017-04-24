@@ -931,17 +931,24 @@ void SP_worldspawn (edict_t *ent)
 	    sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.iqm");
 	    gi.modelindex ("models/objects/gibs/mart_gut/tris.iqm");
 	    gi.modelindex ("models/objects/debris1/tris.iqm");
+		gi.modelindex ("models/objects/debris2/tris.iqm");
 	    gi.modelindex ("models/objects/debris3/tris.iqm");
 
-		//weapon models that aren't placed in levels
+		//misc game models
 		gi.modelindex ("models/weapons/v_minderaser/tris.iqm");
 		gi.modelindex ("models/weapons/g_minderaser/tris.iqm");
 		gi.modelindex ("models/objects/spud/tris.iqm");
+		gi.modelindex ("models/objects/spider/tris.iqm");
+		gi.modelindex ("models/objects/spider/helmet.iqm");
+		gi.modelindex ("models/objects/blank/tris.iqm");
+		gi.modelindex ("models/objects/electroball/tris.iqm");
 		gi.modelindex ("models/weapons/v_blast/tris.iqm");
+		gi.modelindex ("models/weapons/v_alienblast/tris.iqm");
 		gi.modelindex ("models/weapons/v_violator/tris.iqm");
 		gi.modelindex ("models/items/activated/double/tris.iqm");
 		gi.modelindex ("models/items/activated/double/glass.iqm");
 		gi.modelindex ("models/items/activated/force/tris.iqm");
+		gi.modelindex ("models/objects/dmspot/tris.iqm");
 	}
 
 //
