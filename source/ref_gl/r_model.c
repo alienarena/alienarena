@@ -1886,16 +1886,17 @@ int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
 WModelList_t BaseWModels[] =
 {
 	{ "w_blaster.iqm" },
+	{ "w_alienblaster.iqm" },
 	{ "w_shotgun.iqm" },
 	{ "w_sshotgun.iqm" },
 	{ "w_machinegun.iqm" },
 	{ "w_chaingun.iqm" },
-	{ "w_glauncher.iqm" },
 	{ "w_rlauncher.iqm" },
 	{ "w_hyperblaster.iqm" },
 	{ "w_railgun.iqm" },
 	{ "w_bfg.iqm" },
 	{ "w_violator.iqm" },
+	{ "w_minderaser.iqm" },
 	{ "weapon.iqm" }
 };
 int WModelsCount = (int)(sizeof(BaseWModels)/sizeof(BaseWModels[0]));
