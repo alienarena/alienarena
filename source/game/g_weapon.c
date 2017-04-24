@@ -399,12 +399,12 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	if(effect == EF_ROCKET) 
 	{	//ack, kinda assbackwards, but the past mistakes haunt us
 		bolt->s.effects |= EF_BLASTER;
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.iqm");
+		bolt->s.modelindex = gi.modelindex ("models/objects/blank/tris.iqm");
 	}
 	else 
 	{
 		bolt->s.effects |= EF_PLASMA;
-		bolt->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
+		bolt->s.modelindex = gi.modelindex ("models/objects/blank/tris.iqm");
 	}
 	// All we care about is the effects. However, old clients will refuse to 
 	// draw them unless the modelindex is set. To work around this, newer
@@ -1895,7 +1895,7 @@ void burn_person(edict_t *target, edict_t *owner, int damage)
 
 	VectorClear (flame->mins);
 	VectorClear (flame->maxs);
-	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
+	flame->s.modelindex = gi.modelindex ("models/objects/blank/tris.iqm");
 	flame->owner = target;
 	flame->orb = owner;
 	flame->delay = level.time + 5;//8;//Jr Shorten it so it goes away faster
@@ -1956,7 +1956,7 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->s.renderfx = RF_TRANSLUCENT;
 	VectorClear (flame->mins);
 	VectorClear (flame->maxs);
-	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
+	flame->s.modelindex = gi.modelindex ("models/objects/blank/tris.iqm");
 	// All we care about is the effects. However, old clients will refuse to 
 	// draw them unless the modelindex is set. To work around this, newer
 	// clients have an RF_NODRAW flag.
@@ -2039,7 +2039,7 @@ void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	fireball->s.renderfx = RF_TRANSLUCENT;
 	VectorClear (fireball->mins);
 	VectorClear (fireball->maxs);
-	fireball->s.modelindex = gi.modelindex ("models/objects/fireball/tris.iqm");
+	fireball->s.modelindex = gi.modelindex ("models/objects/blank/tris.iqm");
 	fireball->owner = self;
 	fireball->touch = fireball_touch;
 	fireball->nextthink = level.time + 1500/speed;
