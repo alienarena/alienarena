@@ -98,7 +98,7 @@ static void R_Bloom_InitEffectTexture (void)
 	BLOOM_WIDTH = vid.width / r_bloom_sample_scaledown->value;
 	BLOOM_HEIGHT = vid.height / r_bloom_sample_scaledown->value;
 	// we use mipmapping to calculate a 1-pixel average color for auto-exposure
-	BLOOM_NUM_MIPMAPS = floor (log2 (BLOOM_WIDTH > BLOOM_HEIGHT ? BLOOM_WIDTH : BLOOM_HEIGHT));
+	BLOOM_NUM_MIPMAPS = floor (Q_log2 (BLOOM_WIDTH > BLOOM_HEIGHT ? BLOOM_WIDTH : BLOOM_HEIGHT));
 
 	r_bloomeffecttexture = R_Postprocess_AllocFBOTexture ("***r_bloomeffecttexture***", BLOOM_WIDTH, BLOOM_HEIGHT, &bloomeffectFBO);
 
