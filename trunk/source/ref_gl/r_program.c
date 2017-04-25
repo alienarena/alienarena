@@ -1541,20 +1541,61 @@ static char blur_fragment_program[] = STRINGIFY (
 	
 	void main()
 	{
-	   vec4 sum = vec4(0.0);
+		vec4 sum = vec4(0.0);
 
-	   // take nine samples
-	   sum += texture2D(textureSource, texcoord1) * 0.05;
-	   sum += texture2D(textureSource, texcoord2) * 0.09;
-	   sum += texture2D(textureSource, texcoord3) * 0.12;
-	   sum += texture2D(textureSource, texcoord4) * 0.15;
-	   sum += texture2D(textureSource, texcoord5) * 0.16;
-	   sum += texture2D(textureSource, texcoord6) * 0.15;
-	   sum += texture2D(textureSource, texcoord7) * 0.12;
-	   sum += texture2D(textureSource, texcoord8) * 0.09;
-	   sum += texture2D(textureSource, texcoord9) * 0.05;
+		// take nine samples
+		sum += texture2D(textureSource, texcoord1) * 0.05;
+		sum += texture2D(textureSource, texcoord2) * 0.09;
+		sum += texture2D(textureSource, texcoord3) * 0.12;
+		sum += texture2D(textureSource, texcoord4) * 0.15;
+		sum += texture2D(textureSource, texcoord5) * 0.16;
+		sum += texture2D(textureSource, texcoord6) * 0.15;
+		sum += texture2D(textureSource, texcoord7) * 0.12;
+		sum += texture2D(textureSource, texcoord8) * 0.09;
+		sum += texture2D(textureSource, texcoord9) * 0.05;
 
-	   gl_FragColor = sum;
+		gl_FragColor = sum;
+	}
+);
+
+//KAWASE BLUR FILTER
+// for an explanation of how this works, see these references:
+// https://software.intel.com/en-us/blogs/2014/07/15/an-investigation-of-fast-real-time-gpu-based-image-blur-algorithms
+// http://www.daionet.gr.jp/~masa/archives/GDC2003_DSTEAL.ppt
+static char kawase_vertex_program[] = STRINGIFY (
+	varying vec2	texcoord1, texcoord2, texcoord3, texcoord4;
+
+	// scale should be desired blur size (i.e. 9 for 9x9 blur) / 2 - 1. Since
+	// the desired blur size is always an odd number, scale always has a
+	// fractional part of 0.5. Blurs are created by running successive Kawase
+	// filters at increasing scales until the desired size is reached. Divide
+	// scale value by resolution of the input texture to get this scale vector.
+	uniform vec2	ScaleU;
+	
+	void main()
+	{
+		gl_Position = ftransform();
+		
+		// If we do all this math here, and let GLSL do its built-in
+		// interpolation of varying variables, the math still comes out right,
+		// but it's faster.
+		texcoord1 = gl_MultiTexCoord0.xy + ScaleU * vec2 (-1, -1);
+		texcoord2 = gl_MultiTexCoord0.xy + ScaleU * vec2 (-1, 1);
+		texcoord3 = gl_MultiTexCoord0.xy + ScaleU * vec2 (1, -1);
+		texcoord4 = gl_MultiTexCoord0.xy + ScaleU * vec2 (1, 1);
+	}
+);
+
+static char kawase_fragment_program[] = STRINGIFY (
+	varying vec2	texcoord1, texcoord2, texcoord3, texcoord4;
+	uniform sampler2D textureSource;
+	
+	void main()
+	{
+		gl_FragColor = (texture2D (textureSource, texcoord1) +
+						texture2D (textureSource, texcoord2) +
+						texture2D (textureSource, texcoord3) +
+						texture2D (textureSource, texcoord4)) / 4.0;
 	}
 );
 
@@ -2194,8 +2235,15 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, 0, &g_blurprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
-	g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
+	gaussian_uniforms.scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
+	gaussian_uniforms.source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
+
+	//kawase filter blur
+	R_LoadGLSLProgram ("Framebuffer Blur", (char*)kawase_vertex_program, (char*)kawase_fragment_program, NO_ATTRIBUTES, 0, &g_kawaseprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	kawase_uniforms.scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
+	kawase_uniforms.source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
 	
 	// Color scaling
 	R_LoadGLSLProgram ("Color Scaling", NULL, (char*)colorscale_fragment_program, NO_ATTRIBUTES, 0, &g_colorscaleprogramObj);
