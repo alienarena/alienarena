@@ -1024,6 +1024,7 @@ void CL_AddPacketEntities (frame_t *frame)
 					{
 						ent.model = R_RegisterModel("models/objects/powerdome/tris.iqm");
 						ent.flags |= RF_NOSHADOWS;
+						ent.team = 0;
 						if (!r_shaders->integer)
 						{
 							ent.flags |= RF_TRANSLUCENT;
