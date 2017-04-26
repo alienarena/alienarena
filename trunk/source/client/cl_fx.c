@@ -3295,8 +3295,8 @@ void CL_TeleportParticles (vec3_t orig_start)
 		p->vel[2] = (float)PARTICLE_GRAVITY * 2.0f;
 		if (i < 1)
 		addParticleLight (p,
-					p->scale, 10,
-				0, 1, 1);
+					p->scale*10, 10,
+				.3, .4, .7);
 
 		start[2] += 16.0f;
 	}
