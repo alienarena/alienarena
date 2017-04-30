@@ -1382,6 +1382,7 @@ struct gclient_s
 	int			last_duck_frame;
 	float		fall_ratio;
 	float		xyspeed;
+	int			sidemove;
 
 	// powerup timers
 	float		doubledamage_expiretime;
@@ -1647,6 +1648,10 @@ struct edict_s
 	float wander_timeout;
 	float suicide_timeout;
 	float sneak_timeout;
+	int sidemove;
+	int last_sidemove;
+	float last_sidemove_time;
+	float sidemove_speed;
 
 	// For node code
 	int current_node; // current node

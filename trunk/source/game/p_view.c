@@ -1091,6 +1091,10 @@ void G_SetClientFrame (edict_t *ent)
 		if (run && client->anim_priority == ANIM_ATTACK)
 			goto newanim;
 
+		//changed strafe direction
+		if(ent->sidemove !=0 && ent->last_sidemove != ent->sidemove)
+			goto newanim;
+
 		if(client->anim_priority == ANIM_REVERSE)
 		{
 			if(ent->s.frame > client->anim_end)
@@ -1174,6 +1178,16 @@ newanim:
 			ent->s.frame = FRAME_sneak1;
 			client->anim_end = FRAME_sneak8;
 		}
+		else if(ent->sidemove == 1)
+		{
+			ent->s.frame = FRAME_stepright1;
+			client->anim_end = FRAME_stepright6;
+		}
+		else if(ent->sidemove == -1)
+		{
+			ent->s.frame = FRAME_stepleft1;
+			client->anim_end = FRAME_stepleft6;
+		}
 		else
 		{
 			ent->s.frame = FRAME_run1;
@@ -1202,6 +1216,7 @@ newanim:
 			ent->s.frame = FRAME_stand01;
 			client->anim_end = FRAME_stand40;
 		}		
+		ent->sidemove = 0; //always reset this when not running
 	}
 	client->last_anim_frame = level.framenum;
 }
