@@ -440,7 +440,7 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 			VectorSubtract (self->movetarget->s.origin, self->s.origin, self->move_vector);
 			ACEMV_ChangeBotAngle(self);
 
-			// strafe left/right
+			// move left/right
 			if(rand()%1 && ACEMV_CanMove(self, MOVE_LEFT))
 					ucmd->sidemove = -mSpeed;
 			else if(ACEMV_CanMove(self, MOVE_RIGHT))
@@ -659,6 +659,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			if(weight > 300)
 				strafeJump = true;
 
+			//note - do not use sidemove animations when strafejumping
 			if(strafeJump)
 			{
 				if(c > .7)
@@ -771,7 +772,7 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 				ucmd->sidemove = mSpeed;
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
 				ucmd->sidemove = -mSpeed;
-
+	
 		if(!M_CheckBottom(self) || !self->groundentity) // if there is ground continue, otherwise wait for next move.
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
@@ -984,6 +985,11 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	else 
 		mSpeed = 400;
 
+	self->last_sidemove = self->sidemove;
+
+	if(level.time - self->last_sidemove_time > 0.125)
+		self->sidemove = 0;
+
 	ucmd->buttons = 0;
 	use_fuzzy_aim = true; // unless overridden by special cases
 	if ( dmflags->integer & DF_BOT_FUZZYAIM )
@@ -1019,7 +1025,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	default:
 		strafespeed   = 400;
 		jump_thresh   = 0.95f;
-		crouch_thresh = 0.85f; // crouch much
+		crouch_thresh = 0.6f; // crouch much
 		break;
 
 	case 2:
@@ -1028,7 +1034,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		if ( !joustmode->integer )
 		{
 			jump_thresh   = 0.8f;
-			crouch_thresh = 0.7f;
+			crouch_thresh = 0.5f;
 		}
 		else
 		{
@@ -1059,18 +1065,29 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 					|| self->client->pers.weapon == FindItem( "Disruptor" )))
 	{
 		//strafe no matter what
-		if ( c < 0.5f && ACEMV_CanMove( self, MOVE_LEFT ) )
+		if(level.time - self->last_sidemove_time > 0.125)
 		{
-			ucmd->sidemove -= mSpeed;
-		}
-		else if ( c < 1.0f && ACEMV_CanMove( self, MOVE_RIGHT ) )
-		{
-			ucmd->sidemove += mSpeed;
+			if ( c < 0.5f && ACEMV_CanMove( self, MOVE_LEFT ) )
+			{
+				ucmd->sidemove -= mSpeed;
+				self->sidemove = -1;
+				self->last_sidemove_time = level.time;
+			}
+			else if ( c < 1.0f && ACEMV_CanMove( self, MOVE_RIGHT ) )
+			{
+				ucmd->sidemove += mSpeed;
+				self->sidemove = 1;
+				self->last_sidemove_time = level.time;
+			}
+			else
+			{ //don't want high skill level bots just standing around
+				goto standardmove;
+			}
+							
+			self->sidemove_speed = ucmd->sidemove;
 		}
 		else
-		{ //don't want high skill level bots just standing around
-			goto standardmove;
-		}
+			ucmd->sidemove = self->sidemove_speed;
 
 		//allow for some circle strafing
 		if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
@@ -1094,15 +1111,27 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 standardmove:
 
-	if ( c < 0.2f && ACEMV_CanMove( self, MOVE_LEFT ) )
+	if(level.time - self->last_sidemove_time > 0.125)
 	{
-		ucmd->sidemove -= strafespeed;
-		//300 for low skill 800 for hardest(3 levels?)
+		if ( c < 0.2f && ACEMV_CanMove( self, MOVE_LEFT ) )
+		{
+			ucmd->sidemove -= mSpeed;
+			self->sidemove = -1;
+			self->last_sidemove_time = level.time;
+		}
+		else if ( c < 0.4f && ACEMV_CanMove( self, MOVE_RIGHT ) )
+		{
+			ucmd->sidemove += mSpeed;
+			self->sidemove = 1;
+			self->last_sidemove_time = level.time;
+		}
+		else
+			self->sidemove = 0;
+		
+		self->sidemove_speed = ucmd->sidemove;
 	}
-	else if ( c < 0.4f && ACEMV_CanMove( self, MOVE_RIGHT ) )
-	{
-		ucmd->sidemove += strafespeed;
-	}
+	else
+		ucmd->sidemove = self->sidemove_speed;
 
 	if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
 	{ //run away if wounded

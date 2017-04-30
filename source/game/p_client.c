@@ -3361,6 +3361,17 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ucmd->sidemove = -200;
 		}
 
+		ent->last_sidemove = ent->sidemove;
+		if(abs(ucmd->sidemove) > abs(ucmd->forwardmove))
+		{
+			if(ucmd->sidemove > 0)
+				ent->sidemove = 1;
+			else
+				ent->sidemove = -1;
+		}
+		else
+			client->sidemove = 0;
+
 		ucmd->forwardmove *= 1.3;		
 
 		//leaning

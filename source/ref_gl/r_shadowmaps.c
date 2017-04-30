@@ -1066,7 +1066,7 @@ static void R_DrawEntityCaster (entity_t *ent, const vec3_t origin, float zOffse
 
 	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll)
 	{
-		if(ent->frame > 198)
+		if(ent->frame > 198 && ent->frame < 260)
 			return;
 	}
 
