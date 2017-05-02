@@ -1382,7 +1382,6 @@ struct gclient_s
 	int			last_duck_frame;
 	float		fall_ratio;
 	float		xyspeed;
-	int			sidemove;
 
 	// powerup timers
 	float		doubledamage_expiretime;
