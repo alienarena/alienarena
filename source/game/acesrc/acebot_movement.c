@@ -411,6 +411,9 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 {
 	short mSpeed;
 
+	//not going to use sidestepping animations
+	self->sidemove = 0;
+
 	if(g_tactical->integer)
 		mSpeed = 200;
 	else 
@@ -479,6 +482,8 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	int i;
 	float c;
 	short mSpeed;
+
+	self->sidemove = 0;
 
 	if(g_tactical->integer)
 		mSpeed = 200;
@@ -690,6 +695,9 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 	vec3_t  temp;
 	float c;
 	short mSpeed;
+
+	//not going to use sidestepping animations(for now)
+	self->sidemove = 0;
 
 	if(g_tactical->integer)
 		mSpeed = 200;
