@@ -3370,7 +3370,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ent->sidemove = -1;
 		}
 		else
-			client->sidemove = 0;
+			ent->sidemove = 0;
 
 		ucmd->forwardmove *= 1.3;		
 
