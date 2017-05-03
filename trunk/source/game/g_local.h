@@ -1647,6 +1647,7 @@ struct edict_s
 	float wander_timeout;
 	float suicide_timeout;
 	float sneak_timeout;
+	qboolean backpedal;
 	int sidemove;
 	int last_sidemove;
 	float last_sidemove_time;
