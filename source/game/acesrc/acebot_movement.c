@@ -186,9 +186,15 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 		if(!tr.allsolid)
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
+			{
 				ucmd->forwardmove = mSpeed;
+				self->backpedal = false;
+			}
 			else if(ACEMV_CanMove(self, MOVE_BACK))
+			{
 				ucmd->forwardmove = -mSpeed;
+			}
+
 			ucmd->upmove = -400;
 			return true;
 		}
@@ -201,9 +207,14 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 		if(!tr.allsolid)
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
+			{
 				ucmd->forwardmove = mSpeed;
+				self->backpedal = false;
+			}
 			else if(ACEMV_CanMove(self, MOVE_BACK))
+			{
 				ucmd->forwardmove = -mSpeed;
+			}
 			ucmd->upmove = 400;
 			return true;
 		}
@@ -264,7 +275,10 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	{
 		ucmd->upmove = 400;
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
+		{
 			ucmd->forwardmove = mSpeed;
+			self->backpedal = false;
+		}
 		return true;
 	}
 
@@ -272,7 +286,10 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	if ( traceFront.fraction >= 1.0f )
 	{
 		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
+		{
 			ucmd->forwardmove = mSpeed; //only try forward, bot should be looking to move in direction of eyes
+			self->backpedal = false;
+		}
 		return true;
 	}
 
@@ -312,7 +329,10 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 			else
 				self->s.angles[YAW] += -(1.0 - traceRight.fraction) * 45.0;
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
+			{
 				ucmd->forwardmove = mSpeed;
+				self->backpedal = false;
+			}
 			return true;
 		}
 	}
@@ -436,7 +456,10 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 			//turn and run like hell away from it
 			//to do - needs improvement - bot should run when getting hit by seeker as well
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
+			{
 				ucmd->forwardmove = mSpeed;
+				self->backpedal = false;
+			}
 		}
 		else
 		{
@@ -459,14 +482,24 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 		ACEMV_ChangeBotAngle(self);
 
 		//try moving forward, if blocked, strafe around it if possible.
+		self->backpedal = false;
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
+		{
 			ucmd->forwardmove = mSpeed;
+		}
 		else if(ACEMV_CanMove(self, MOVE_BACK))
+		{
 				ucmd->forwardmove = -mSpeed;
+				self->backpedal = true;
+		}
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
+		{
 				ucmd->sidemove = mSpeed;
+		}
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
+		{
 				ucmd->sidemove = -mSpeed;
+		}
 		return;
 	}
 }
@@ -484,6 +517,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	short mSpeed;
 
 	self->sidemove = 0;
+	self->backpedal = false;
 
 	if(g_tactical->integer)
 		mSpeed = 200;
@@ -527,7 +561,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 		self->move_vector[2] = 0; // kill z movement
 		if(VectorLength(self->move_vector) > 10)
 			ucmd->forwardmove = 200; // walk to center
-
+	
 		ACEMV_ChangeBotAngle(self);
 
 		return; // No move, riding elevator
@@ -613,15 +647,27 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			return;
 
 		self->s.angles[YAW] += random() * 180 - 90;
+			
 		// Try moving foward, if not, try to strafe around obstacle
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
+		{
 			ucmd->forwardmove = mSpeed;
+		}
 		else if(ACEMV_CanMove(self, MOVE_BACK))
+		{
 			ucmd->forwardmove = -mSpeed;
+			self->backpedal = true;
+		}
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
-				ucmd->sidemove = mSpeed;
+		{
+			ucmd->sidemove = mSpeed;
+			self->sidemove = 1;
+		}
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
-				ucmd->sidemove = -mSpeed;
+		{
+			ucmd->sidemove = -mSpeed;
+			self->sidemove = -1;
+		}
 		return;
 	}
 
@@ -698,6 +744,7 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 
 	//not going to use sidestepping animations(for now)
 	self->sidemove = 0;
+	self->backpedal = false;
 
 	if(g_tactical->integer)
 		mSpeed = 200;
@@ -773,14 +820,24 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 
 		// Try to move forward, if blocked, try to strafe around obstacle
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
+		{
 			ucmd->forwardmove = mSpeed;
+		}
 		else if(ACEMV_CanMove(self, MOVE_BACK))
+		{
 			ucmd->forwardmove = -mSpeed;
+			self->backpedal = true;
+		}
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
-				ucmd->sidemove = mSpeed;
+		{
+			ucmd->sidemove = mSpeed;
+			self->sidemove = 1;
+		}
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
-				ucmd->sidemove = -mSpeed;
-	
+		{
+			ucmd->sidemove = -mSpeed;
+			self->sidemove = -1;
+		}
 		if(!M_CheckBottom(self) || !self->groundentity) // if there is ground continue, otherwise wait for next move.
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
@@ -997,6 +1054,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	if(level.time - self->last_sidemove_time > 0.125)
 		self->sidemove = 0;
+	self->backpedal = false;
 
 	ucmd->buttons = 0;
 	use_fuzzy_aim = true; // unless overridden by special cases
@@ -1060,7 +1118,10 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	{
 		use_fuzzy_aim = false; // avoid potential odd melee attack behaviour
 		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
+		{
 			ucmd->forwardmove += 400; //lunge at enemy
+			self->backpedal = false;
+		}
 		goto attack;
 	}
 
@@ -1101,14 +1162,17 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
 		{
 			ucmd->forwardmove -= mSpeed;
+			self->backpedal = true;
 		}
 		else if ( c < 0.6f && ACEMV_CanMove( self, MOVE_FORWARD ) )
 		{ //keep this at default, not make them TOO hard
 			ucmd->forwardmove += mSpeed;
+			self->backpedal = false;
 		}
 		else if ( c < 0.8f && ACEMV_CanMove( self, MOVE_BACK ) )
 		{
 			ucmd->forwardmove -= mSpeed;
+			self->backpedal = true;
 		}
 		goto attack;
 		//skip any jumping or crouching
@@ -1144,14 +1208,17 @@ standardmove:
 	if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
 	{ //run away if wounded
 		ucmd->forwardmove -= mSpeed;
+		self->backpedal = true;
 	}
 	else if ( c < 0.6f && ACEMV_CanMove( self, MOVE_FORWARD ) )
 	{ //keep this at default, not make them TOO hard
 		ucmd->forwardmove += mSpeed;
+		self->backpedal = false;
 	}
 	else if ( c < 0.8f && ACEMV_CanMove( self, MOVE_BACK ) )
 	{
 		ucmd->forwardmove -= mSpeed;
+		self->backpedal = true;
 	}
 
 	c = random(); //really mix this up some

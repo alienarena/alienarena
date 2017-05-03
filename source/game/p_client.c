@@ -340,6 +340,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 				if(!(attacker->client->ps.pmove.pm_flags & PMF_DUCKED)) {
 					attacker->state = STATE_STAND;
+					attacker->client->anim_priority = ANIM_WAVE;
 					attacker->s.frame = FRAME_taunt01-1;
 					attacker->client->anim_end = FRAME_taunt17;
 
@@ -3361,6 +3362,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ucmd->sidemove = -200;
 		}
 
+		//various running movement types
 		ent->last_sidemove = ent->sidemove;
 		ent->sidemove = 0;
 		if(abs(ucmd->sidemove) > abs(ucmd->forwardmove))
@@ -3370,6 +3372,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			else
 				ent->sidemove = -1;
 		}
+		if(ucmd->forwardmove < 0)
+			ent->backpedal = true;
+		else
+			ent->backpedal = false;
 
 		ucmd->forwardmove *= 1.3;		
 

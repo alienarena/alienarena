@@ -1172,12 +1172,7 @@ newanim:
 		{
 			ent->s.frame = FRAME_crwalk1;
 			client->anim_end = FRAME_crwalk6;
-		}
-		else if(client->ps.pmove.pm_flags & PMF_SNEAKING)
-		{
-			ent->s.frame = FRAME_sneak1;
-			client->anim_end = FRAME_sneak8;
-		}
+		}		
 		else if(ent->sidemove == 1)
 		{
 			ent->s.frame = FRAME_stepright1;
@@ -1187,6 +1182,16 @@ newanim:
 		{
 			ent->s.frame = FRAME_stepleft1;
 			client->anim_end = FRAME_stepleft6;
+		}
+		else if(client->ps.pmove.pm_flags & PMF_SNEAKING)
+		{
+			ent->s.frame = FRAME_sneak1;
+			client->anim_end = FRAME_sneak8;
+		}
+		else if(ent->backpedal)
+		{
+			ent->s.frame = FRAME_backpedal1;
+			client->anim_end = FRAME_backpedal6;
 		}
 		else
 		{
@@ -1216,7 +1221,6 @@ newanim:
 			ent->s.frame = FRAME_stand01;
 			client->anim_end = FRAME_stand40;
 		}		
-		ent->sidemove = 0; //always reset this when not running
 	}
 	client->last_anim_frame = level.framenum;
 }

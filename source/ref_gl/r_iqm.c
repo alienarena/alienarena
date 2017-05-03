@@ -669,6 +669,9 @@ int IQM_NextFrame(int frame)
 			case 271:
 				outframe = 266;
 				break;
+			case 277:
+				outframe = 272;
+				break;
 			default:
 				outframe = frame + 1;
 				break;
