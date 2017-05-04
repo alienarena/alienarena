@@ -130,6 +130,15 @@ maps/meshes/urban/bench
 		normalmap
 	}
 }
+maps/meshes/urban/neonarrow
+{
+	{
+		map maps/meshes/urban/neonarrow_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/neonarrow_fx.tga
+		glow
+	}
+}
 maps/meshes/urban/bulb
 {
 	{

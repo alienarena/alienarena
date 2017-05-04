@@ -22,12 +22,6 @@ textures/arena7/light10
 		lensflare
 	}
 }
-textures/arena7/light11
-{
-	{
-		lensflare
-	}
-}
 textures/arena7/light3
 {
 	{
@@ -114,6 +108,12 @@ textures/blanks/blank1
 		scale static 7 static 7
 		colormap 1 1 1
 		beam
+	}
+}
+textures/blood/slime_splatter2
+{
+	{
+		cube
 	}
 }
 			
