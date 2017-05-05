@@ -217,8 +217,6 @@ nobase_dist_players_DATA = \
 	martiancyborg/red.jpg \
 	martiancyborg/tris.iqm \
 	martiancyborg/tris.rgd \
-	martiancyborg/w_alienblaster.iqm \
-	martiancyborg/w_alienblaster.skin \
 	martiancyborg/w_bfg.iqm \
 	martiancyborg/w_bfg.skin \
 	martiancyborg/w_blaster.iqm \
@@ -288,8 +286,6 @@ nobase_dist_players_DATA = \
 	martianenforcer/red.jpg \
 	martianenforcer/tris.iqm \
 	martianenforcer/tris.rgd \
-	martianenforcer/w_alienblaster.iqm \
-	martianenforcer/w_alienblaster.skin \
 	martianenforcer/w_bfg.iqm \
 	martianenforcer/w_bfg.skin \
 	martianenforcer/w_blaster.iqm \
@@ -352,8 +348,6 @@ nobase_dist_players_DATA = \
 	martianoverlord/red.jpg \
 	martianoverlord/tris.iqm \
 	martianoverlord/tris.rgd \
-	martianoverlord/w_alienblaster.iqm \
-	martianoverlord/w_alienblaster.skin \
 	martianoverlord/w_bfg.iqm \
 	martianoverlord/w_bfg.skin \
 	martianoverlord/w_blaster.iqm \
@@ -420,8 +414,6 @@ nobase_dist_players_DATA = \
 	martianwarrior/red.jpg \
 	martianwarrior/tris.iqm \
 	martianwarrior/tris.rgd \
-	martianwarrior/w_alienblaster.iqm \
-	martianwarrior/w_alienblaster.skin \
 	martianwarrior/w_bfg.iqm \
 	martianwarrior/w_bfg.skin \
 	martianwarrior/w_blaster.iqm \

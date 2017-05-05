@@ -421,6 +421,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-deathray/blood2.decal \
 	meshes/dm-deathray/blood3.decal \
 	meshes/dm-deathray/slime0.decal \
+	meshes/dm-deathray/slime1.decal \
 	meshes/dm-dismal/blood0.decal \
 	meshes/dm-dismal/blood1.decal \
 	meshes/dm-dismal/blood2.decal \
@@ -591,6 +592,9 @@ nobase_dist_maps_DATA = \
 	meshes/hanger.tga \
 	meshes/hangingmartian.md2 \
 	meshes/hangingmhelmet.md2 \
+	meshes/hangingmartian.iqm \
+	meshes/hangingmartian.skin \
+	meshes/hangingmhelmet.iqm \
 	meshes/hatch.jpg \
 	meshes/hatch.md2 \
 	meshes/hatch_normal.jpg \
@@ -933,6 +937,11 @@ nobase_dist_maps_DATA = \
 	meshes/urban/yellowlantern.jpg \
 	meshes/urban/yellowlantern.md2 \
 	meshes/urban/yellowlantern_fx.tga \
+	meshes/urban/neonarrow.jpg \
+	meshes/urban/neonarrow_fx.tga \
+	meshes/urban/neonarrow_normal.jpg \
+	meshes/urban/neonarrowl.md2 \
+	meshes/urban/neonarrowr.md2 \
 	meshes/weaponpad_fx.tga \
 	meshes/weaponpad.md2 \
 	meshes/weaponpad_normal.tga \
