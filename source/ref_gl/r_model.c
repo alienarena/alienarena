@@ -1886,7 +1886,6 @@ int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
 WModelList_t BaseWModels[] =
 {
 	{ "w_blaster.iqm" },
-	{ "w_alienblaster.iqm" },
 	{ "w_shotgun.iqm" },
 	{ "w_sshotgun.iqm" },
 	{ "w_machinegun.iqm" },

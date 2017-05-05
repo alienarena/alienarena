@@ -1377,7 +1377,7 @@ always owned, never in the world
 		GITEM_INIT_CALLBACKS (NULL, Use_Weapon, NULL, Weapon_AlienBlaster),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		GITEM_INIT_CLIENTSIDE ("i_hud_alienblaster", "Alien Blaster", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.iqm", "w_alienblaster.iqm"),
+		GITEM_INIT_WEAP (0, 0, NULL, "models/weapons/v_alienblast/tris.iqm", "w_blaster.iqm"),
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav" //to do tactical - change sound
 	},
 
