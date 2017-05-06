@@ -116,6 +116,7 @@ void R_CheckFBOExtensions (void)
 //used for post process stencil volume blurring and shadowmapping
 void R_GenerateShadowFBO()
 {
+	const GLfloat bordercolor[] = {1.0f, 1.0f, 1.0f, 1.0f};
 	int shadowMapWidth = vid.width * r_shadowmapscale->value;
 	int shadowMapHeight = vid.height * r_shadowmapscale->value;
 	GLenum FBOstatus;
@@ -172,8 +173,9 @@ void R_GenerateShadowFBO()
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
 	// Remove artefact on the edges of the shadowmap
-/*	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );*/
-/*	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );*/
+	qglTexParameterfv (GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 	// This is to allow usage of shadow2DProj function in the shader
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
