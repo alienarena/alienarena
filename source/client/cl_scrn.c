@@ -881,6 +881,9 @@ SCR_DrawConsole
 float sendBubbleNow;
 void SCR_DrawConsole (void)
 {
+	if (cls.key_dest == key_menu)
+		return;
+
 	if (cls.state == ca_disconnected || cls.state == ca_connecting)
 	{	// forced full screen console
 		CON_DrawConsole( scr_consize->value );
@@ -2134,9 +2137,9 @@ void SCR_UpdateScreen (void)
 
 			SCR_DrawPause ();
 
-			SCR_DrawConsole ();
+			M_Draw ();
 
-			M_Draw ( false );
+			SCR_DrawConsole ();
 
 			SCR_DrawLoading ();
 

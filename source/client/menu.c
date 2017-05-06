@@ -6669,9 +6669,9 @@ static void M_Draw_Cursor (void)
 
 
 // draw all menus on screen
-void M_Draw (qboolean refreshmenu)
+void M_Draw (void)
 {
-	if (cls.key_dest != key_menu && !refreshmenu)	    
+	if (cls.key_dest != key_menu && (cls.state != ca_disconnected || cls.key_dest != key_console))
 		return;
 
 	Draw_Fill (0, 0, viddef.width, viddef.height, RGBA(0, 0, 0, 1));
