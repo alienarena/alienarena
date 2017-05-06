@@ -740,6 +740,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/obarch2_r.md2 \
 	meshes/tech/obarch3.md2 \
 	meshes/tech/obarch4.md2 \
+	meshes/tech/obarch4w.md2 \
 	meshes/tech/obarch5_b.md2 \
 	meshes/tech/obarch5_r.md2 \
 	meshes/tech/obfloor1.jpg \
