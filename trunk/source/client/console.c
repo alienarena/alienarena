@@ -854,12 +854,6 @@ void CON_DrawConsole( float relSize )
 		tile_w = (float)_tile_w/64.0*(float)font->size*4.0;
 		tile_h = (float)_tile_h/64.0*(float)font->size*4.0;
 
-		if (fromMenu) 
-		{
-			// Refresh menu
-			M_Draw(true);
-		}
-
 		if (color < 0 || color > 5) {
 			color = 0;
 		}
