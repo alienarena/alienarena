@@ -936,8 +936,9 @@ void M_ForceMenuOff (void)
 	cls.key_dest = key_game;
 	Key_ClearStates ();
 	Cvar_Set ("paused", "0");
-	
-	mstate_reset ();
+
+	if (cls.state == ca_active)
+		mstate_reset ();
 }
 
 static void M_PopMenu (void)
@@ -1247,7 +1248,8 @@ void M_Menu_Main_f (void)
 {
 	S_StartMenuMusic();
 	cls.key_dest = key_menu;
-	mstate_reset ();
+	if (cls.state == ca_active)
+		mstate_reset ();
 }
 
 /*
