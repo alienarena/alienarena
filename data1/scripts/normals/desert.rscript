@@ -136,6 +136,20 @@ maps/meshes/rocks/05/diffuse
 		normalmap
 	}
 }
+maps/meshes/rocks/rock1
+{
+	{
+		map maps/meshes/rocks/rock1_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/rocks/rock3
+{
+	{
+		map maps/meshes/rocks/rock3_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/rocks/rock6
 {
 	{
