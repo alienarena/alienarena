@@ -1019,7 +1019,6 @@ nobase_dist_textures_DATA = \
 	decals/damage3.tga \
 	decals/mud1.tga \
 	decals/rock1.tga \
-	decals/rock1_normal.tga \
 	decals/rust1.tga \
 	decals/whirly_spotlight.tga \
 	desert/03door4.tga \

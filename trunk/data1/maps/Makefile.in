@@ -584,6 +584,10 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/tree1.jpg \
 	meshes/gothic/tree1.md2 \
 	meshes/gothic/tree1_normal.jpg \
+	meshes/gothic/meat1.iqm \
+	meshes/gothic/meat1.skin \
+	meshes/gothic/meat2.iqm \
+	meshes/gothic/meat2.skin \
 	meshes/greenblob_fx.tga \
 	meshes/greenblob.jpg \
 	meshes/greenblob.md2 \
@@ -683,6 +687,11 @@ nobase_dist_maps_DATA = \
 	meshes/rocks/rock9.jpg \
 	meshes/rocks/rock9.md2 \
 	meshes/rocks/rock9_normal.jpg \
+	meshes/rocks/flatrock1.md2 \
+	meshes/rocks/flatrock2.md2 \
+	meshes/rocks/rock1_normal.jpg \
+	meshes/rocks/rock3_normal.jpg \
+	meshes/rocks/rubble1.md2 \
 	meshes/sconduit1.md2 \
 	meshes/sconduit2.md2 \
 	meshes/scopecover.md2 \
