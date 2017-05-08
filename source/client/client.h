@@ -451,6 +451,7 @@ void CL_ParticleSmokeEffect2(cl_sustain_t *self);
 void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
 void CL_BulletSparks ( vec3_t org, vec3_t dir);
+void CL_FlameThrower (vec3_t org, vec3_t dir);
 void CL_SplashEffect ( vec3_t org, vec3_t dir, int color, int count);
 void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);
 void CL_BrassShells(vec3_t org, vec3_t dir, int count);

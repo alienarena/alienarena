@@ -744,7 +744,7 @@ typedef struct
 #define	TE_REDLASER					19
 #define	TE_BFG_BIGEXPLOSION			21
 #define	TE_BOSSTPORT				22			
-#define	TE_DONTUSE2					23
+#define	TE_FLAMETHROWER				23
 #define	TE_GREENBLOOD				26
 #define	TE_LIGHTNING				33
 #define	TE_VAPORBEAM				38

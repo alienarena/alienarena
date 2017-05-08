@@ -1952,7 +1952,7 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->movetype = MOVETYPE_FLYMISSILE;
 	flame->clipmask = MASK_SHOT;
 	flame->solid = SOLID_BBOX;
-	flame->s.effects |= EF_SHIPEXHAUST;
+	//flame->s.effects |= EF_FLAMETHROWER;
 	flame->s.renderfx = RF_TRANSLUCENT;
 	VectorClear (flame->mins);
 	VectorClear (flame->maxs);
@@ -1971,6 +1971,13 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->classname = "flame";
 
 	gi.linkentity (flame);
+
+	//send a flame effect from point of origin, and have particle engine handle the rest
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_FLAMETHROWER);
+	gi.WritePosition (start);
+	gi.WriteDir (dir);
+	gi.multicast (start, MULTICAST_PHS);
 }
 void fireball_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
