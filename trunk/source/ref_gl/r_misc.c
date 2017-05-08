@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 image_t		*r_notexture;		// use for bad textures
 image_t		*r_particletexture;	// little dot for particles
 image_t		*r_smoketexture;	// for smoke, etc...
+image_t		*r_fireballtexture;
 image_t		*r_explosiontexture;
 image_t		*r_explosion1texture;
 image_t		*r_explosion2texture;
@@ -141,6 +142,14 @@ void R_InitParticleTexture (void)
 	r_smoketexture = R_RegisterParticlePic("smoke");
 	if (!r_smoketexture) {
 		r_smoketexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_fireballtexture = R_RegisterParticlePic("fireball");
+	if (!r_fireballtexture) {
+		r_fireballtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_explosiontexture = R_RegisterParticlePic("explosion");
+	if (!r_explosiontexture) {
+		r_explosiontexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_explosiontexture = R_RegisterParticlePic("explosion");
 	if (!r_explosiontexture) {

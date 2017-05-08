@@ -780,6 +780,95 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	}
 }
 
+void CL_FlameThrower (vec3_t org, vec3_t dir)
+{
+	int			i, j;
+	float		scale, nudge;
+	particle_t	*p;
+	
+	for( i=0; i<3; i++) {
+		nudge = frand();
+		if(nudge < 0.5)
+			dir[i] += frand()/10.0;
+		else
+			dir[i] -= frand()/10.0;
+	}
+		
+	scale = frand()*8.0f;
+	
+	if (!(p = new_particle()))
+		return;
+
+	p->color = 0xe0 + (rand()&2); 
+	p->type = PARTICLE_STANDARD;
+	p->image = r_fireballtexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 10.0f + scale;
+	p->scalevel = 55.0f;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = 100.0f * dir[j];
+	}
+
+	p->accel[0] = 75*dir[0];
+	p->accel[1] = 75*dir[1];
+	p->accel[2] = ((float)PARTICLE_GRAVITY) / (0.75f);
+	p->alpha = .4;
+
+	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
+
+	if (!(p = new_particle()))
+		return;
+
+	p->color = 0x74 + (rand()&7);
+	p->type = PARTICLE_STANDARD;
+	p->image = r_fireballtexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 7.0f + scale/2.0;
+	p->scalevel = 20.0f;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = 50.0f * dir[j];
+	}
+
+	p->accel[0] = 45*dir[0];
+	p->accel[1] = 45*dir[1];
+	p->accel[2] = ((float)PARTICLE_GRAVITY) / (4.5f);
+	p->alpha = .5;
+
+	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
+
+	if (!(p = new_particle()))
+		return;
+
+	p->color = 0x74 + (rand()&7);
+	p->type = PARTICLE_STANDARD;
+	p->image = r_fireballtexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 3.5f + scale/3.0;
+	p->scalevel = 10;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = 30.0f * dir[j];
+	}
+
+	p->accel[0] = 25*dir[0];
+	p->accel[1] = 25*dir[1];
+	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
+	p->alpha = .75;
+
+	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
+}
+
 /*
 ===============
 CL_SplashEffect

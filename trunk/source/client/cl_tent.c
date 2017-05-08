@@ -549,6 +549,12 @@ void CL_ParseTEnt (void)
 			R_ApplyForceToRagdolls(pos2, 100);
 		}
 		break;
+	case TE_FLAMETHROWER:
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadDir (&net_message, dir);
+
+		CL_FlameThrower (pos, dir);
+		break;
 
 	default:			// Do we really want to drop an error for this?
 		//Com_Error (ERR_DROP, "CL_ParseTEnt: bad type");

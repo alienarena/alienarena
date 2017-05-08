@@ -1070,7 +1070,8 @@ void weapon_flamethrower_fire (edict_t *ent)
 		VectorScale(right, 3.7, right);
 	}
 
-	VectorSet(offset, 8, 8, ent->viewheight-8);
+	VectorSet(offset, 8, 8, ent->viewheight-4);
+	VectorScale(forward, 12, forward);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	fire_flamethrower (ent, start, forward, damage, 500, damage_radius);
