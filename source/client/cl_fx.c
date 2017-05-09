@@ -847,7 +847,7 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 	if (!(p = new_particle()))
 		return;
 
-	p->color = 0x74 + (rand()&7);
+	p->color = 15 + (rand()&2);
 	p->type = PARTICLE_STANDARD;
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
@@ -864,7 +864,31 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 	p->accel[0] = 25*dir[0];
 	p->accel[1] = 25*dir[1];
 	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
-	p->alpha = .75;
+	p->alpha = .5;
+
+	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
+
+	if (!(p = new_particle()))
+		return;
+
+	p->color = 15 + (rand()&2);
+	p->type = PARTICLE_STANDARD;
+	p->image = r_fireballtexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 3.5f + scale/3.0;
+	p->scalevel = 10;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = 15.0f * dir[j];
+	}
+
+	p->accel[0] = 15*dir[0];
+	p->accel[1] = 15*dir[1];
+	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
+	p->alpha = .5;
 
 	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
 }
@@ -1360,7 +1384,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 
 	p->type = PARTICLE_STANDARD;
 	p->image = r_bflashtexture;
-	p->scale = 7 + (rand()&4);
+	p->scale = 10 + (rand()&4);
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	for (j=0 ; j<3 ; j++)
