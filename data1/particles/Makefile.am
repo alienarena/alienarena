@@ -21,6 +21,7 @@ nobase_dist_particles_DATA = \
 	disbeam2.tga \
 	disbeam3.tga \
 	explosion.tga \
+	fireball.tga \
 	flag.tga \
 	flare.tga \
 	leaderfield.tga \
