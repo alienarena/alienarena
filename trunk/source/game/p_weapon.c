@@ -1045,7 +1045,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 		return;
 	}
 	//play sound
-	if((ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe == 6)
+	if((ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe == 9)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);	
 	else if((ent->client->buttons & BUTTON_ATTACK) && ent->client->ps.gunframe == 14)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/grenlr1b.wav"), 1, ATTN_NORM, 0);	
@@ -1070,8 +1070,8 @@ void weapon_flamethrower_fire (edict_t *ent)
 		VectorScale(right, 3.7, right);
 	}
 
-	VectorSet(offset, 8, 8, ent->viewheight-4);
-	VectorScale(forward, 12, forward);
+	VectorSet(offset, 8, 8, ent->viewheight-6);
+	VectorScale(forward, 8, forward);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	fire_flamethrower (ent, start, forward, damage, 500, damage_radius);
@@ -1089,9 +1089,9 @@ void weapon_flamethrower_fire (edict_t *ent)
 void Weapon_Flame (edict_t *ent)
 {
 	static int	pause_frames[]	= {36, 0};
-	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0};
+	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0};
 
-	Weapon_Generic (ent, 5, 16, 36, 40, pause_frames, fire_frames, weapon_flamethrower_fire);
+	Weapon_Generic (ent, 5, 15, 36, 40, pause_frames, fire_frames, weapon_flamethrower_fire);
 }
 
 /*
@@ -1515,15 +1515,7 @@ void Machinegun_Fire (edict_t *ent)
 		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, bullet_count, MOD_CGALTFIRE);
 
 		//play a booming sound
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/shotgf1b.wav"), 1, ATTN_NORM, 0);
-
-		// send muzzle flash
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_CHAINGUN1);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-		//create smoke effect
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/shotgf1b.wav"), 1, ATTN_NORM, 0);		
 
 		forward[0] = forward[0] * 24;
 		forward[1] = forward[1] * 24;
@@ -1531,12 +1523,19 @@ void Machinegun_Fire (edict_t *ent)
 		right[1] = right[1] * 3;
 		start[2] -= 2;
 
+		//create smoke effect
 		VectorAdd(start, forward, start);
 		VectorAdd(start, right, start);
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_CHAINGUNSMOKE);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
+
+		// send muzzle flash
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (ent-g_edicts);
+		gi.WriteByte (MZ_CHAINGUN1);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
@@ -1568,19 +1567,17 @@ void Machinegun_Fire (edict_t *ent)
 			fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
 		}
 
-		// send muzzle flash
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_CHAINGUN1 + (rand()&2));
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-		//create visual muzzle flash sprite!
-
 		forward[0] = forward[0] * 24;
 		forward[1] = forward[1] * 24;
 		right[0] = right[0] * 3;
 		right[1] = right[1] * 3;
 		start[2] -= 2;
+		
+		// send muzzle flash
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (ent-g_edicts);
+		gi.WriteByte (MZ_CHAINGUN1 + (rand()&2));
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorAdd(start, forward, start);
 		VectorAdd(start, right, start);
