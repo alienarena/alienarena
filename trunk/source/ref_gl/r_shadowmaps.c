@@ -57,8 +57,7 @@ void            (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 // GL_EXT_framebuffer_blit
 void			(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-GLuint			fboId[3];
-static GLuint	rboId;
+GLuint			fboId[deptex_num];
 
 void R_CheckFBOExtensions (void)
 {
@@ -71,7 +70,7 @@ void R_CheckFBOExtensions (void)
 		gl_state.fbo = false;
 		return;
 	}
-		
+
 	qglGenFramebuffersEXT		= (PFNGLGENFRAMEBUFFERSEXTPROC)		qwglGetProcAddress("glGenFramebuffersEXT");
 	qglBindFramebufferEXT		= (PFNGLBINDFRAMEBUFFEREXTPROC)		qwglGetProcAddress("glBindFramebufferEXT");
 	qglFramebufferTexture2DEXT	= (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)	qwglGetProcAddress("glFramebufferTexture2DEXT");
@@ -113,143 +112,76 @@ void R_CheckFBOExtensions (void)
 }
     
 
-//used for post process stencil volume blurring and shadowmapping
+//used for shadowmapping
 void R_GenerateShadowFBO()
 {
-	const GLfloat bordercolor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	int shadowMapWidth = vid.width * r_shadowmapscale->value;
-	int shadowMapHeight = vid.height * r_shadowmapscale->value;
+	int size;
+	int i;
 	GLenum FBOstatus;
 	
 	if (!gl_state.fbo || !gl_state.hasFBOblit)
 	return;
-
-	//FBO for shadowmapping
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
-
-	// GL_LINEAR removes pixelation - GL_NEAREST removes artifacts on outer edges in some cases
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	// Remove artefact on the edges of the shadowmap
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-
-	// This is to allow usage of shadow2DProj function in the shader
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-	qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
-
-	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
-	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-	qglBindTexture(GL_TEXTURE_2D, 0);
-
-	// create a framebuffer object
-	qglGenFramebuffersEXT(1, &fboId[0]);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[0]);
-
-	// Instruct openGL that we won't bind a color texture with the currently binded FBO
-	qglDrawBuffer(GL_NONE);
-	qglReadBuffer(GL_NONE);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
-
-	// check FBO status
-	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+	
+	for (i = 0; i < deptex_num; i++)
 	{
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
-		gl_state.fbo = false;
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		//FBO for shadowmapping
+		qglBindTexture(GL_TEXTURE_2D, r_depthtextures[i]->texnum);
+
+		// GL_LINEAR removes pixelation - GL_NEAREST removes artifacts on outer edges in some cases
+		if (i == deptex_dynamic)
+		{
+			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+			// Remove artefact on the edges of the shadowmap
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		}
+		else
+		{
+			const GLfloat bordercolor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+			
+			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			
+			// Remove artefact on the edges of the shadowmap
+			qglTexParameterfv (GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		}
+
+		// This is to allow usage of shadow2DProj function in the shader
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
+
+		// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
+		size = r_depthtextures[i]->upload_width;
+		qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, size, size, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+		qglBindTexture(GL_TEXTURE_2D, 0);
+
+		// create a framebuffer object
+		qglGenFramebuffersEXT(1, &fboId[i]);
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[i]);
+
+		// Instruct openGL that we won't bind a color texture with the currently binded FBO
+		qglDrawBuffer(GL_NONE);
+		qglReadBuffer(GL_NONE);
+
+		// attach the texture to FBO depth attachment point
+		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtextures[i]->texnum, 0);
+
+		// check FBO status
+		FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+		{
+			Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+			gl_state.fbo = false;
+			qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
-
-	//Second FBO for shadowmapping
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
-
-	// GL_LINEAR removes pixelation - GL_NEAREST removes artifacts on outer edges in some cases
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
-	// Remove artefact on the edges of the shadowmap
-	qglTexParameterfv (GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	// This is to allow usage of shadow2DProj function in the shader
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-	qglTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY); 
-
-	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
-	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-	qglBindTexture(GL_TEXTURE_2D, 0);
-
-	// create a framebuffer object
-	qglGenFramebuffersEXT(1, &fboId[1]);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
-
-	// Instruct openGL that we won't bind a color texture with the currently binded FBO
-	qglDrawBuffer(GL_NONE);
-	qglReadBuffer(GL_NONE);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
-
-	// check FBO status
-	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-	{
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
-		gl_state.fbo = false;
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	}
-
-	//FBO for capturing stencil volumes
-
-    qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
-    qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    qglBindTexture(GL_TEXTURE_2D, 0);
-
-	qglGenFramebuffersEXT(1, &fboId[2]);
-    qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
-
-    qglGenRenderbuffersEXT(1, &rboId);
-    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
-    qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, vid.width, vid.height);
-    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
-
-    // attach a texture to FBO color attachement point
-    qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
-
-    // attach a renderbuffer to depth attachment point
-    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	// attach a renderbuffer to stencil attachment point
-    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
-
-	// check FBO status
-	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,viddef.width,viddef.height); 
-	
-	// Initialize frame values.
-	// This only makes a difference if the viewport is less than the screen
-	// size, like when the netgraph is on-- otherwise it's redundant with 
-	// later glClear calls.
-	qglClearColor (1, 1, 1, 1);
-	qglClear( GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
-	
-	// back to previous screen coordinates
-	R_SetupViewport ();
-
 	// switch back to window-system-provided framebuffer
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
@@ -325,28 +257,53 @@ static void SM_ZoomCenter (const float *world_matrix, const float *project_matri
 	VectorScale (proj, 1.0f/proj[3], out);
 }
 
-static void SM_SetupMatrices (float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z, qboolean followCamera, qboolean zoom)
+// for point light sources, we generate the shadow depth buffer using a
+// perspective transform
+static void SM_SetupMatrices (float position_x, float position_y, float position_z, float lookAt_x, float lookAt_y, float lookAt_z)
 {
-	float	sm_world_matrix[16], sm_project_matrix[16];
-	vec3_t	camera_sm_pos;
-	
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity();
 	MYgluPerspective(120.0f, r_newrefdef.width/r_newrefdef.height, 10.0f, 4096.0f);
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
+}
+
+// for the sun, we generate the shadow depth buffer using an orthographic
+// transform, and we pan and zoom so that only the area surrounding the player
+// gets shadowed, thus requiring a smaller shadow buffer for the same detail
+static void SM_SetupSunMatrices (float position_x, float position_y, float position_z, float lookAt_x, float lookAt_y, float lookAt_z, qboolean followCamera, qboolean zoom)
+{
+	float	sm_world_matrix[16], sm_project_matrix[16];
+	vec3_t	camera_sm_pos;
+
+	// Keep the homogeneous coordinates equivalent but boost the w-coordinate
+	// above 1 everywhere. The shader wants w to be > 1 for the shadows to take
+	// effect, and that is necessary to make perspective shadows work without
+	// artifacts. But for ortho shadows, we need to artifically boost the w.
+	const GLdouble scale[16] = {
+		2.0, 0.0, 0.0, 0.0,
+		0.0, 2.0, 0.0, 0.0,
+		0.0, 0.0, 2.0, 0.0,
+		0.0, 0.0, 0.0, 2.0};
+	
+	qglMatrixMode (GL_PROJECTION);
+	qglLoadMatrixd (scale);
+	qglOrtho (-2048, 2048, -2048, 2048, 10, 4096);
+	qglMatrixMode (GL_MODELVIEW);
+	qglLoadIdentity ();
+	lookAt (position_x, position_y, position_z, lookAt_x, lookAt_y, lookAt_z);
 	
 	if (!followCamera && !zoom)
 		return;
 	
 	qglGetFloatv (GL_PROJECTION_MATRIX, sm_project_matrix);
-	qglMatrixMode(GL_PROJECTION);
-	qglLoadIdentity();
+	qglMatrixMode (GL_PROJECTION);
+	qglLoadIdentity ();
 	
 	if (zoom)
 	{
-		float zoomFactor = 8.0f; // TODO: calculate this somehow!
+		float zoomFactor = 2.0f; // TODO: calculate this somehow!
 		qglScalef (zoomFactor, zoomFactor, 1.0);
 	}
 	
@@ -358,10 +315,10 @@ static void SM_SetupMatrices (float position_x,float position_y,float position_z
 	}
 	
 	qglMultMatrixf (sm_project_matrix);
-	qglMatrixMode(GL_MODELVIEW);
+	qglMatrixMode (GL_MODELVIEW);
 }
 
-static void SM_SetTextureMatrix( qboolean mapnum )
+static void SM_SetTextureMatrix (int mapnum)
 {
 	static double modelView[16];
 	static double projection[16];
@@ -380,10 +337,7 @@ static void SM_SetTextureMatrix( qboolean mapnum )
 	qglGetDoublev(GL_PROJECTION_MATRIX, projection);
 
 	qglMatrixMode(GL_TEXTURE);
-	if(mapnum)
-		GL_MBind (6, r_depthtexture2->texnum);
-	else
-		GL_MBind (7, r_depthtexture->texnum);
+	GL_SelectTexture (mapnum);
 
 	qglLoadIdentity();
 	qglLoadMatrixd(bias);
@@ -465,6 +419,7 @@ static void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	{
 		if (surf->visframe != r_framecount)
 			continue;
+
 
 		if (R_CullBox (surf->mins, surf->maxs)) 
 			continue;
@@ -727,30 +682,24 @@ static void R_RedrawWorldWithShadow (const vec3_t origin, const vec3_t statLight
 
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-	
+
 	glUseProgramObjectARB (g_shadowprogramObj);
-
-	glUniform1iARB (g_location_entShadow, 6);
-	GL_MBind (6, r_depthtexture2->texnum);
-
-	glUniform1fARB (g_location_xOffset, 1.0/(r_newrefdef.width*r_shadowmapscale->value));
-	glUniform1fARB (g_location_yOffset, 1.0/(r_newrefdef.height*r_shadowmapscale->value));
-
-	glUniform1fARB (g_location_fadeShadow, fadeShadow);
+	
+	R_SetShadowmapUniforms (&secondpass_bsp_shadow_uniforms.shadowmap_uniforms, 6, true);
+	glUniform1fARB (secondpass_bsp_shadow_uniforms.fade, fadeShadow);
 	
 	VectorAdd (currentmodel->mins, origin, absmins);
 	VectorAdd (currentmodel->maxs, origin, absmaxs);
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	
-	// TODO: brush models too?
 	SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs, statLightPosition);
 	
 	BSP_FlushVBOAccum ();
 	
-	R_KillVArrays ();
+	R_KillVArrays();
 
-	glUseProgramObjectARB (0);
+	glUseProgramObjectARB( 0 );
 }
 
 void R_DrawBSPShadowCasters (void)
@@ -758,9 +707,6 @@ void R_DrawBSPShadowCasters (void)
 	int i;
 
 	if (!r_drawworld->integer)
-		return;
-
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
@@ -772,7 +718,7 @@ void R_DrawBSPShadowCasters (void)
 	BSP_FlushVBOAccum ();
 
 	// draw brush models
-	for (i = 0 ; i < r_newrefdef.num_entities; i++)
+	for (i = 0; i < r_newrefdef.num_entities; i++)
 	{
 		currententity = &r_newrefdef.entities[i];
 		if (currententity->flags & RF_TRANSLUCENT)
@@ -784,7 +730,7 @@ void R_DrawBSPShadowCasters (void)
 		{
 			continue;
 		}
-		if (currentmodel->type == mod_brush)
+		if( currentmodel->type == mod_brush)
 			BSP_DrawTexturelessBrushModel (currententity);
 		else
 			continue;
@@ -793,31 +739,54 @@ void R_DrawBSPShadowCasters (void)
 	R_KillVArrays();
 }
 
+static void SM_SetupGLState ()
+{
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+	// Culling switching, rendering only frontfaces
+	qglCullFace (GL_BACK);
+
+	qglEnable (GL_POLYGON_OFFSET_FILL);
+	qglPolygonOffset (0.5f, 0.5f);	
+
+	qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+}
+
+static void SM_TeardownGLState (void)
+{
+	qglPolygonOffset( 0.0f, 0.0f );
+	qglDisable( GL_POLYGON_OFFSET_FILL );
+	qglCullFace(GL_FRONT);
+
+	// back to previous screen coordinates
+	R_SetupViewport ();
+
+	//Enabling color write (previously disabled for light POV z-buffer rendering)
+	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
 #include "r_lodcalc.h"
 
 extern cvar_t *cl_simpleitems;
+
+// returns false if the entity can cast a shadow
+static qboolean SM_Cull (entity_t *ent)
+{
+	return
+		(ent->flags & RF_NOSHADOWS) || (ent->flags & RF_TRANSLUCENT) ||
+		!ent->model || ent->model->type <= mod_brush ||
+		//TODO: simple items casting shadows?
+		(cl_simpleitems->integer && ent->model->simple_texnum != 0) || 
+		(r_ragdolls->integer && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll && ent->frame > 198 && ent->frame < 260);
+}
 
 static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 {
 	vec3_t	dist;
 	
-	if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
+	if (SM_Cull (currententity))
 		return;
-
-	if(!currententity->model)
-		return;
-
-	if (currententity->model->type <= mod_brush) 
-		return;
-	
-	if (cl_simpleitems->integer && currententity->model->simple_texnum != 0)
-		return; //TODO: simple items casting shadows?
-
-	if(r_ragdolls->value && currententity->model->type == mod_iqm && currententity->model->hasRagDoll && !currententity->ragdoll)
-	{
-		if(currententity->frame > 198)
-			return;
-	}
 
 	//distance from light, if too far, don't render(to do - check against brightness for dist!)
 	VectorSubtract (lightOrigin, currententity->origin, dist);
@@ -850,44 +819,26 @@ static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
 	R_Mesh_DrawCaster ();
 }
 
-void R_DrawDynamicCaster(void)
+static void R_DrawDynamicCaster(void)
 {
 	int		i;
 	int		RagDollID;
 	vec3_t	lightOrigin;
-
-	r_shadowmapcount = 0;
 		
 	if (r_newrefdef.num_dlights == 0)
 		return; //we have no lights of consequence
 	
+	qglViewport (0, 0, r_depthtextures[deptex_dynamic]->upload_width, r_depthtextures[deptex_dynamic]->upload_height);
+	
 	VectorCopy (r_newrefdef.dlights[0].origin, lightOrigin);
-
-	GL_SelectTexture (0);
-	GL_Bind (r_depthtexture->texnum);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
-
-	// Clear previous frame values
+	
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_dynamic]);
+	
+	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglCullFace(GL_BACK);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
-
+	
 	//set camera
-	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128, false, false);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );
+	SM_SetupMatrices (lightOrigin[0], lightOrigin[1], lightOrigin[2] + 64, lightOrigin[0], lightOrigin[1], lightOrigin[2] - 128);
 
 	//render world - very basic geometry
 	R_DrawBSPShadowCasters ();
@@ -913,14 +864,7 @@ void R_DrawDynamicCaster(void)
 		}
 	}
 
-	SM_SetTextureMatrix(0);
-
-	r_shadowmapcount = 1;
-
-	qglDepthMask (1);		// back to writing
-
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
+	SM_SetTextureMatrix (7);
 	
 	GL_InvalidateTextureState (); // FIXME
 
@@ -992,8 +936,7 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 
 		if (grass->sunVisible) 
 		{
-			if (forShadows)
-				r_shadowmapcount = 2;
+			r_sunShadowsOn = forShadows;
 			
 			GL_Bind (grass->tex->texnum);
 			
@@ -1008,107 +951,10 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 	GLSTATE_DISABLE_ALPHATEST
 }
 
-void R_DrawVegetationCaster(void)
-{	
-	if(!r_sunLight->has_Sun || !r_hasleaves)
-		return; //no point if there is no sun or leaves!
-
-	GL_SelectTexture (0);
-	GL_Bind (r_depthtexture2->texnum);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value)); 
-
-	//Clear previous frame values
-	qglClear( GL_DEPTH_BUFFER_BIT);
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglDisable(GL_CULL_FACE);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
-
-	//get sun light origin and target from map info, at map load
-	//set camera
-	SM_SetupMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2], false, false);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );
-
-	//render vegetation
-	R_DrawVegetationCasters(true); 
-	
-	SM_SetTextureMatrix(1);
-		
-	qglDepthMask (1);		// back to writing
-
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
-	qglEnable(GL_CULL_FACE);
-}
-
-static void R_DrawEntityCaster (entity_t *ent, const vec3_t origin, float zOffset, qboolean onTerrain, const vec3_t statLightPosition)
-{		
-	vec3_t	dist, adjLightPos;
-	vec3_t lightVec;
-	vec2_t xyDist;
+static void R_DrawEntityCaster (entity_t *ent)
+{
+	vec3_t	dist;
 	model_t *prevModel;
-
-	//check caster validity
-	if (ent->flags & RF_NOSHADOWS || ent->flags & RF_TRANSLUCENT)
-		return;
-	
-	if (cl_simpleitems->integer && ent->model->simple_texnum != 0)
-		return;
-
-	if(r_ragdolls->value && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll)
-	{
-		if(ent->frame > 198 && ent->frame < 260)
-			return;
-	}
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapscale->value),(int)(vid.height * r_shadowmapscale->value));  
-
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-	// Culling switching, rendering only frontfaces
-	qglCullFace(GL_BACK);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture2->texnum, 0);
-
-	//get light origin
-	VectorCopy(statLightPosition, adjLightPos);
-
-	//adjust height/distance ratio of light source to limit the shadow projection 
-	//for preventing artifacts of massive shadows projecting all over the place	
-	VectorSubtract(statLightPosition, origin, lightVec);
-	xyDist[0] = lightVec[0];
-	xyDist[1] = lightVec[1];
-	if(abs(VectorLength(xyDist)) > abs(lightVec[2])*1.5)
-	{
-		adjLightPos[2] += abs(VectorLength(xyDist)) - abs(lightVec[2])*1.5;
-	}
-	
-	//set camera
-	SM_SetupMatrices(adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2], onTerrain, onTerrain);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-	qglPolygonOffset( 0.5f, 0.5f );	
 
 	prevModel = currentmodel;
 	
@@ -1136,46 +982,134 @@ static void R_DrawEntityCaster (entity_t *ent, const vec3_t origin, float zOffse
 	}
 
 	R_Mesh_DrawCaster ();
+
+	currentmodel = prevModel;
+}
+
+static void R_DrawSunShadows (void)
+{
+	vec3_t dist;
+	int i;
+
+	r_sunShadowsOn = false;
 	
-	SM_SetTextureMatrix(1);
+	if (r_nosun || !r_sunLight->has_Sun)
+		return; //no point if there is no sun!
+	
+	qglViewport (0, 0, r_depthtextures[deptex_sunstatic]->upload_width, r_depthtextures[deptex_sunstatic]->upload_height);
+
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_sunstatic]); 
+	
+	//Clear previous frame values
+	qglClear (GL_DEPTH_BUFFER_BIT);
+	
+	//get sun light origin and target from map info, at map load
+	//set camera
+	// FIXME: hack for zooming!
+	SM_SetupSunMatrices(r_sunLight->origin[0],r_sunLight->origin[1],r_sunLight->origin[2],r_sunLight->target[0],r_sunLight->target[1],r_sunLight->target[2], true, true);
+
+	//render vegetation
+	if (r_hasleaves)
+		R_DrawVegetationCasters (true);
+	
+	for (i = 0 ; i < r_newrefdef.num_entities; i++)
+	{
+		currententity = &r_newrefdef.entities[i];
+
+		if (SM_Cull (currententity))
+			continue;
+
+		if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+			continue;
+
+		if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
+			continue;
+
+		// We don't do a trace to the sun entity because that results in shadows
+		// popping in and out abruptly. We'll need a different mechanism for
+		// detecting indoors.
+
+		//if this entity isn't close to the player, don't bother 
+		VectorSubtract (r_origin, currententity->origin, dist);
+		if (VectorLength (dist) > r_shadowcutoff->value)
+			continue;
 		
-	qglDepthMask (1);		// back to writing
+		r_sunShadowsOn = true;
 
-	qglPolygonOffset( 0.0f, 0.0f );
-	qglDisable( GL_POLYGON_OFFSET_FILL );
-	qglCullFace(GL_FRONT);
-
-	// back to previous screen coordinates
-	R_SetupViewport ();
-
-	qglPopMatrix();
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);	
-
-	r_shadowmapcount = 1;
-
-	currentmodel = prevModel;		
+		R_DrawEntityCaster (currententity);
+	}
 	
-	GL_InvalidateTextureState (); // FIXME
+	SM_SetTextureMatrix (5);
+}
+
+// There are two global shadowmaps: one cast by the sun, and one cast by the
+// dynamic light source. Static, non-sun shadows are not done globally.
+void R_GenerateGlobalShadows (void)
+{
+	qglEnable(GL_DEPTH_TEST);
+	qglEnable(GL_CULL_FACE);
+	SM_SetupGLState ();
+	
+	R_DrawDynamicCaster ();
+	R_DrawSunShadows ();
+	
+	SM_TeardownGLState ();
+	qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+}
+
+static void SM_SetupCasterMatrices (const vec3_t origin, float zOffset, const vec3_t statLightPosition)
+{
+	vec3_t adjLightPos;
+	vec3_t lightVec;
+	vec2_t xyDist;
+	
+	qglMatrixMode(GL_PROJECTION);
+	qglPushMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	qglPushMatrix();
+
+	//get light origin
+	VectorCopy(statLightPosition, adjLightPos);
+
+	//adjust height/distance ratio of light source to limit the shadow projection 
+	//for preventing artifacts of massive shadows projecting all over the place	
+	VectorSubtract(statLightPosition, origin, lightVec);
+	xyDist[0] = lightVec[0];
+	xyDist[1] = lightVec[1];
+	if (abs (VectorLength (xyDist)) > abs (lightVec[2]) * 1.5)
+		adjLightPos[2] += abs (VectorLength (xyDist)) - abs (lightVec[2]) * 1.5;
+	
+	//set camera
+	SM_SetupMatrices (adjLightPos[0], adjLightPos[1], adjLightPos[2]+zOffset, origin[0], origin[1], origin[2]);
+}
+
+static void SM_TeardownCasterMatrices ()
+{
+	qglPopMatrix ();
+	qglMatrixMode (GL_PROJECTION);
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
 }
 
 void R_GenerateEntityShadow (const vec3_t statLightPosition)
 {
+	r_nonSunStaticShadowsOn = false;
+
 	if (gl_shadowmaps->integer)
 	{
 		vec3_t dist, origin, tmp;
 		float rad, zOffset;
-		entity_t *prevEntity;
 		int i;
-
-		r_shadowmapcount = 0;
 
 		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || currententity->flags & RF_MENUMODEL)
 			return;
 		
-		if(!currententity->model)
-			return;	
+		if (SM_Cull (currententity))
+			return;
+		
+		// don't bother casting the shadow unless there are non-sun lights!
+		if (cl_persistent_ents[currententity->number].oldnumlights < 3.0f)
+ 			return;
 
 		//root entity camera info
 		VectorCopy(currententity->origin, origin);
@@ -1206,52 +1140,58 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 		}
 		else
 			fadeShadow = 1.0;
-
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-		qglClear( GL_DEPTH_BUFFER_BIT);
 		
-		qglEnable(GL_DEPTH_TEST);
-		qglClearColor(0,0,0,1.0f);
+		// heavily fade out non-sun static shadows if there will be a sun
+		// static shadow cast by this entity
+		if (!r_nosun && r_sunLight->has_Sun && CM_FastTrace (r_sunLight->origin, origin, r_worldmodel->firstnode, MASK_VISIBILILITY))
+			fadeShadow /= 4.0f;
+		
+		r_nonSunStaticShadowsOn = true;
 
-		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
-
-		R_DrawEntityCaster(currententity, origin, zOffset, false, statLightPosition);
-
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		SM_SetupCasterMatrices (origin, zOffset, statLightPosition);
+		qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_otherstatic]);
+		qglClear (GL_DEPTH_BUFFER_BIT);
+		SM_SetupGLState ();
+		qglViewport (0, 0, r_depthtextures[deptex_otherstatic]->upload_width, r_depthtextures[deptex_otherstatic]->upload_height);
+		
+		R_DrawEntityCaster(currententity);
+		
+		SM_SetTextureMatrix (6);
+		SM_TeardownGLState ();
+		SM_TeardownCasterMatrices ();
+		qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 
 		//re-render affected polys with shadowmap for this entity
-		if(r_shadowmapcount > 0)
-		{
-			GLSTATE_ENABLE_BLEND
-			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
+		GLSTATE_ENABLE_BLEND
+		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
-			R_RedrawWorldWithShadow (currententity->origin, statLightPosition);
+		R_RedrawWorldWithShadow (currententity->origin, statLightPosition);
 
-			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			GLSTATE_DISABLE_BLEND
-		}
+		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		GLSTATE_DISABLE_BLEND
 
-		if(!(currententity->flags & RF_VIEWERMODEL))
+		if (!(currententity->flags & RF_VIEWERMODEL))
 		{
 			//now check for any entities close to this one, and add to the depth buffer 
-			prevEntity = currententity;
+			entity_t *prevEntity = currententity;
+			
+			SM_SetupCasterMatrices (origin, zOffset, statLightPosition);
+			qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_otherstatic]);
+			SM_SetupGLState ();
+			qglViewport (0, 0, r_depthtextures[deptex_otherstatic]->upload_width, r_depthtextures[deptex_otherstatic]->upload_height);
 
 			for (i = 0 ; i < r_newrefdef.num_entities; i++)
 			{
 				currententity = &r_newrefdef.entities[i];
 
 				//don't add this entity to the depth texture - it's already in there!
-				if(currententity == prevEntity)
+				if (currententity == prevEntity)
+					continue;
+				
+				if (SM_Cull (currententity))
 					continue;
 
-				if (!currententity->model)
-					continue;
-
-				if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+				if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
 					continue;
 
 				if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
@@ -1279,77 +1219,48 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity, origin, zOffset, false, statLightPosition);
+				R_DrawEntityCaster(currententity);
 			}
 			currententity = prevEntity;
+			SM_SetTextureMatrix (6);
+			SM_TeardownGLState ();
+			SM_TeardownCasterMatrices ();
+			qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 		}
-		
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 }
 
-void R_GenerateTerrainShadows( void )
+void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms, int tmu, qboolean enable)
 {
-	vec3_t origin, dist;
-	entity_t *prevEntity;
-	int i;
-	
-	if (!gl_shadowmaps->integer)
-		return;
-
-	r_shadowmapcount = 0;
-
-	if(r_nosun)
-		VectorCopy(currententity->origin, origin);
-	else
-		VectorCopy(r_sunLight->target, origin);
-
-	//Com_Printf("Sun: %4.2f %4.2f %4.2f target: %4.2f %4.2f %4.2f\n", r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2], origin[0], origin[1], origin[2]);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
-
-	qglClear( GL_DEPTH_BUFFER_BIT);
-		
-	qglEnable(GL_DEPTH_TEST);
-	qglClearColor(0,0,0,1.0f);
-
-	qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
-
-	prevEntity = currententity;
-
-	for (i = 0 ; i < r_newrefdef.num_entities; i++)
+	if (uniforms->sunStatic.texture != ~0u)
 	{
-		currententity = &r_newrefdef.entities[i];
-
-		if (!currententity->model)
-			continue;
-
-		if(currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
-			continue;
-
-		if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
-			continue;
-
-		VectorSubtract(r_origin, currententity->origin, dist);
-		if(VectorLength(dist) > r_shadowcutoff->value)
-			continue;
-
-		//if this entity isn't close to the player, don't bother 
-		R_DrawEntityCaster(currententity, origin, 0.0, true, r_worldLightVec);
+		glUniform1iARB (uniforms->sunStatic.enabled, r_sunShadowsOn && enable);
+		if (r_sunShadowsOn && enable)
+		{
+			float offs = 1.0 / r_depthtextures[deptex_sunstatic]->upload_width;
+			glUniform1fARB (uniforms->sunStatic.pixelOffset, offs);
+			GL_MBind (tmu, r_depthtextures[deptex_sunstatic]->texnum);
+			glUniform1iARB (uniforms->sunStatic.texture, tmu++);
+		}
 	}
-	currententity = prevEntity;
-			
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-
-	//Enabling color write (previously disabled for light POV z-buffer rendering)
-	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-}
-
-void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms)
-{
-	glUniform1fARB (uniforms->xPixelOffset, 1.0/(vid.width*r_shadowmapscale->value));
-	glUniform1fARB (uniforms->yPixelOffset, 1.0/(vid.height*r_shadowmapscale->value));
+	
+	if (uniforms->otherStatic.texture != ~0u)
+	{
+		glUniform1iARB (uniforms->otherStatic.enabled, r_nonSunStaticShadowsOn && enable);
+		if (r_nonSunStaticShadowsOn && enable)
+		{
+			float offs = 1.0 / r_depthtextures[deptex_otherstatic]->upload_width;
+			glUniform1fARB (uniforms->otherStatic.pixelOffset, offs);
+			GL_MBind (tmu, r_depthtextures[deptex_otherstatic]->texnum);
+			glUniform1iARB (uniforms->otherStatic.texture, tmu++);
+		}
+	}
+	
+	if (uniforms->dynamic.texture != ~0u)
+	{
+		float offs = 1.0 / r_depthtextures[deptex_dynamic]->upload_width;
+		glUniform1fARB (uniforms->dynamic.pixelOffset, offs);
+		GL_MBind (tmu, r_depthtextures[deptex_dynamic]->texnum);
+		glUniform1iARB (uniforms->dynamic.texture, tmu++);
+	}
 }

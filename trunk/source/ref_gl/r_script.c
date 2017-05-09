@@ -1209,6 +1209,7 @@ static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 }
 
 static int rs_dlights_enabled = -1;
+static qboolean rs_shadows_enabled = -1;
 // uniforms that may change from stage to stage
 #define RS_STAGE_UNIFORMS X(lightmap) X(envmap) X(numblendtextures) X(numblendnormalmaps)
 static struct 
@@ -1217,7 +1218,7 @@ static struct
 	RS_STAGE_UNIFORMS
 #undef X
 } rs_stage_uniform_vals;
-static void RS_SetupGLState (int dynamic)
+static void RS_SetupGLState (int dynamic, qboolean shadows)
 {
 	int i;
 	
@@ -1239,14 +1240,11 @@ static void RS_SetupGLState (int dynamic)
 	
 	glUniform3fARB (rscript_uniforms[dynamic].staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
-	if(r_shadowmapcount)
+	R_SetShadowmapUniforms (&rscript_uniforms[dynamic].shadowmap_uniforms, 12, shadows);
+
+	if (r_sunShadowsOn && shadows)
 	{
 		float rotationMatrix[3][3];
-		
-		GL_MBind (12, r_depthtexture2->texnum);
-		glUniform1iARB (rscript_uniforms[dynamic].shadowmapTexture, 12);
-		
-		R_SetShadowmapUniforms (&rscript_uniforms[dynamic].shadowmap_uniforms);
 
 		// because we are translating our entities, we need to supply the shader with the actual position of this mesh
 		glUniform3fvARB (rscript_uniforms[dynamic].meshPosition, 1, (const GLfloat *)currententity->origin);
@@ -1255,11 +1253,10 @@ static void RS_SetupGLState (int dynamic)
 		glUniformMatrix3fvARB (rscript_uniforms[dynamic].meshRotation, 1, GL_TRUE, (const GLfloat *) rotationMatrix);
 	}
 
-	glUniform1iARB (rscript_uniforms[dynamic].shadowmap, r_shadowmapcount); 
-	
 	qglMatrixMode (GL_TEXTURE);
 	
 	rs_dlights_enabled = dynamic;
+	rs_shadows_enabled = shadows;
 	
 	memset (&rs_stage_uniform_vals, -1, sizeof (rs_stage_uniform_vals));
 }
@@ -1302,7 +1299,7 @@ qboolean rs_in_group = false;
 void RS_Begin_Group (void)
 {
 	rs_in_group = true;
-	RS_SetupGLState (CUR_NUM_DLIGHTS);
+	RS_SetupGLState (CUR_NUM_DLIGHTS, true);
 }
 
 void RS_End_Group (void)
@@ -1313,7 +1310,8 @@ void RS_End_Group (void)
 
 void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 				qboolean translucent, rs_lightmaptype_t lm,
-				qboolean enable_dlights, void (*draw_callback) (void))
+				qboolean enable_dlights, qboolean enable_shadows,
+				void (*draw_callback) (void))
 {
 	vec3_t		vectors[3];
 	rs_stage_t	*stage;
@@ -1330,8 +1328,8 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	
 	dynamic = enable_dlights ? CUR_NUM_DLIGHTS : 0;
 
-	if (!rs_in_group || rs_dlights_enabled != dynamic)
-		RS_SetupGLState (dynamic);
+	if (!rs_in_group || rs_dlights_enabled != dynamic || rs_shadows_enabled != enable_shadows)
+		RS_SetupGLState (dynamic, enable_shadows);
 	
 	do
 	{
@@ -1479,7 +1477,7 @@ void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 	
 	RS_Draw (	rs, lmtex, rotate_center, surf->plane->normal, translucent,
 				translucent?rs_lightmap_off:rs_lightmap_separate_texcoords,
-				true, BSP_DrawVBOAccum );
+				true, !translucent, BSP_DrawVBOAccum );
 	
 	BSP_ClearVBOAccum ();
 }

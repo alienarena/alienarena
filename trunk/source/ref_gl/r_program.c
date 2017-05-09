@@ -249,22 +249,22 @@ STRINGIFY (
 	}
 	
 	// Shadow Mapping
-	uniform float xPixelOffset;
-	uniform float yPixelOffset;
-	float lookupShadow (int enabled, shadowsampler_t Map, vec4 ShadowCoord, float _fudge);
+	uniform int sunstatic_enabled, otherstatic_enabled;
+	uniform shadowsampler_t sunstatic_texture, otherstatic_texture, dynamic_texture; 
+	uniform float sunstatic_pixelOffset, otherstatic_pixelOffset, dynamic_pixelOffset;
 )
 "\n#ifndef AMD_GPU\n#define fudge _fudge\n"
 STRINGIFY (
 	float lookup (vec2 offSet, sampler2DShadow Map, vec4 ShadowCoord)
 	{	
-		return shadow2DProj(Map, ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.05, 0.0) ).w;
+		return shadow2DProj(Map, ShadowCoord + vec4(offSet * ShadowCoord.w, 0.05, 0.0) ).w;
 	}
 )
 "\n#else\n#define fudge 0.0\n"
 STRINGIFY (
 	float lookup (vec2 offSet, sampler2D Map, vec4 ShadowCoord)
 	{
-		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet.x * xPixelOffset * ShadowCoord.w, offSet.y * yPixelOffset * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
+		vec4 shadowCoordinateWdivide = (ShadowCoord + vec4(offSet * ShadowCoord.w, 0.0, 0.0)) / ShadowCoord.w ;
 		// Used to lower moir pattern and self-shadowing
 		shadowCoordinateWdivide.z += 0.0005;
 
@@ -277,30 +277,56 @@ STRINGIFY (
 )
 "\n#endif\n"
 STRINGIFY (
-	float lookupShadow (int enabled, shadowsampler_t Map, vec4 ShadowCoord, float _fudge)
+	float lookupShadow (shadowsampler_t Map, vec4 ShadowCoord, float offset, float _fudge)
 	{
 		float shadow = 1.0;
 
-		if (enabled > 0) 
-		{			
-			if (ShadowCoord.w > 1.0)
-			{
-				vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
-				
-				shadow += lookup (vec2(-1.5, 1.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2( 0.5, 1.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2(-1.5, -0.5) + o, Map, ShadowCoord);
-				shadow += lookup (vec2( 0.5, -0.5) + o, Map, ShadowCoord);
-				shadow *= 0.25 ;
-			}
-			shadow += fudge; 
-			if(shadow > 1.0)
-				shadow = 1.0;
+		if (ShadowCoord.w > 1.0)
+		{
+			vec2 o = mod(floor(gl_FragCoord.xy), 2.0);
+			
+			shadow += lookup ((vec2(-1.5, 1.5) + o) * offset, Map, ShadowCoord);
+			shadow += lookup ((vec2( 0.5, 1.5) + o) * offset, Map, ShadowCoord);
+			shadow += lookup ((vec2(-1.5, -0.5) + o) * offset, Map, ShadowCoord);
+			shadow += lookup ((vec2( 0.5, -0.5) + o) * offset, Map, ShadowCoord);
+			shadow *= 0.25 ;
 		}
+		shadow += fudge; 
+		if(shadow > 1.0)
+			shadow = 1.0;
 		
 		return shadow;
 	}
+	float lookup_sunstatic (vec4 sPos, float _fudge)
+	{
+		if (sunstatic_enabled == 0)
+			return 1.0;
+		vec4 coord = gl_TextureMatrix[5] * sPos;
+		return lookupShadow (sunstatic_texture, coord, sunstatic_pixelOffset, fudge);
+	}
+	float lookup_otherstatic_always (vec4 sPos, float _fudge)
+	{
+		vec4 coord = gl_TextureMatrix[6] * sPos;
+		if (coord.w <= 1.0)
+			return 1.0;
+		return lookupShadow (otherstatic_texture, coord, otherstatic_pixelOffset, fudge);
+	}
+	float lookup_otherstatic (vec4 sPos, float _fudge)
+	{
+		if (otherstatic_enabled == 0)
+			return 1.0;
+		return lookup_otherstatic_always (sPos, fudge);
+	}
+	float lookup_dynamic (vec4 sPos, float _fudge)
+	{
+		vec4 coord = gl_TextureMatrix[7] * sPos;
+		if (coord.w <= 1.0)
+			return 1.0;
+		return lookupShadow (dynamic_texture, coord, dynamic_pixelOffset, fudge);
+	}
 );
+
+
 
 
 //world Surfaces
@@ -366,12 +392,8 @@ static char world_fragment_program[] = STRINGIFY (
 	uniform sampler2D NormalTexture;
 	uniform sampler2D lmTexture;
 	uniform sampler2D chromeTex;
-	uniform shadowsampler_t ShadowMap;
-	uniform shadowsampler_t StatShadowMap;
 	uniform int FOG;
 	uniform int PARALLAX;
-	uniform int STATSHADOW;
-	uniform int SHADOWMAP;
 	uniform int SHINY;
 	
 	uniform sampler2D liquidTexture;
@@ -383,7 +405,7 @@ static char world_fragment_program[] = STRINGIFY (
 	varying vec4 sPos;
 	varying vec3 StaticLightDir;
 	varying float fog;
-	
+
 	// results of liquid_effects function
 	vec4 bloodColor;
 	vec2 liquidDisplacement;
@@ -458,10 +480,7 @@ static char world_fragment_program[] = STRINGIFY (
 		alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );
 
 		//shadows
-		if (STATSHADOW > 0)
-			statshadowval = lookupShadow (SHADOWMAP, StatShadowMap, gl_TextureMatrix[6] * sPos, 0.2);
-		else
-			statshadowval = 1.0;
+		statshadowval = lookup_sunstatic (sPos, 0.2);
 
 		if (PARALLAX > 0) 
 		{
@@ -517,7 +536,7 @@ static char world_fragment_program[] = STRINGIFY (
 		{
 			lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 		
-			float dynshadowval = lookupShadow (SHADOWMAP, ShadowMap, gl_TextureMatrix[7] * sPos, 0.2);
+			float dynshadowval = lookup_dynamic (sPos, 0.2);
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColour, normal.xyz, normal.a, dynshadowval);
 			gl_FragColor.rgb += dynamicColor;
 		}
@@ -545,11 +564,11 @@ static char world_fragment_program[] = STRINGIFY (
 
 //SHADOWS
 static char shadow_vertex_program[] = STRINGIFY (		
-	varying vec4 ShadowCoord;
+	varying vec4 sPos;
 
 	void main( void )
 	{
-		ShadowCoord = gl_TextureMatrix[6] * gl_Vertex;
+		sPos = gl_Vertex;
 
 		gl_Position = ftransform();
 
@@ -558,14 +577,13 @@ static char shadow_vertex_program[] = STRINGIFY (
 );
 
 static char shadow_fragment_program[] = STRINGIFY (
-	uniform shadowsampler_t StatShadowMap;
 	uniform float fadeShadow;
 	
-	varying vec4 ShadowCoord;
-	
+	varying vec4 sPos;
+
 	void main( void )
 	{
-		gl_FragColor = vec4 (1.0/fadeShadow * lookupShadow (1, StatShadowMap, ShadowCoord, 0.3));
+		gl_FragColor = vec4 (1.0/fadeShadow * lookup_otherstatic_always (sPos, 0.3));
 	}
 );
 
@@ -686,8 +704,6 @@ static char rscript_fragment_program[] = STRINGIFY (
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
-	uniform shadowsampler_t StatShadowMap; 
-	uniform int SHADOWMAP;
 
 	varying float fog;
 	varying vec3 orig_normal;
@@ -850,15 +866,14 @@ static char rscript_fragment_program[] = STRINGIFY (
 			}
 		}
 
-		gl_FragColor.rgb *= lookupShadow (SHADOWMAP, StatShadowMap, gl_TextureMatrix[6] * sPos, 0.2);
-		
+		gl_FragColor.rgb *= lookup_sunstatic (sPos, 0.2);
+
 		if (DYNAMIC > 0)
 		{
 			vec3 dynamicColor = computeDynamicLightingFrag (textureColor, normal.xyz, normal.a, 1.0);
 			gl_FragColor.rgb += dynamicColor;
 		}
 
-		
 		if (FOG > 0)
 			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 	}
@@ -1047,11 +1062,9 @@ static char mesh_fragment_program[] = STRINGIFY (
 	uniform sampler2D fxTex;
 	uniform sampler2D fx2Tex;
 	uniform sampler2D lightmapTexture;
-	uniform shadowsampler_t StatShadowMap; 
 	// 0 means no lightmap, 1 means lightmap using the main texcoords, and 2
 	// means lightmap using its own set of texcoords.
 	uniform int lightmap;
-	uniform int SHADOWMAP;
 	uniform int FOG;
 	uniform int TEAM;
 	uniform int useFX;
@@ -1100,7 +1113,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);
 
 		if(useShell == 0)
-			shadowval = lookupShadow (SHADOWMAP, StatShadowMap, gl_TextureMatrix[6] * sPos, 0.2);
+			shadowval = lookup_otherstatic (sPos, 0.2) * lookup_sunstatic (sPos, 0.2);
 		
 		if(useShell == 0 && useCube == 0 && specmask.a < 1.0 && lightmap == 0)
 		{
@@ -1333,7 +1346,7 @@ static char mesh_extract_lightmap_vertex_program[] = STRINGIFY (
 		gl_Position = gl_MultiTexCoord0;
 		gl_Position.xy *= 2.0;
 		gl_Position.xy -= vec2 (1.0);
-    }
+	}
 );
 
 static char mesh_extract_lightmap_fragment_program[] = STRINGIFY (
@@ -1974,10 +1987,25 @@ static void get_mesh_anim_uniform_locations (GLhandleARB programObj, mesh_anim_u
 	out->lerp = glGetUniformLocationARB (programObj, "lerp");
 }
 
+static void get_shadowmap_channel_uniform_locations (GLhandleARB programObj, shadowmap_channel_uniform_location_t *out, const char *prefix)
+{
+	char name[64];
+	
+	Com_sprintf (name, sizeof (name), "%s_enabled", prefix);
+	out->enabled = glGetUniformLocationARB (programObj, name);
+	
+	Com_sprintf (name, sizeof (name), "%s_pixelOffset", prefix);
+	out->pixelOffset = glGetUniformLocationARB (programObj, name);
+	
+	Com_sprintf (name, sizeof (name), "%s_texture", prefix);
+	out->texture = glGetUniformLocationARB (programObj, name);
+}
+
 static void get_shadowmap_uniform_locations (GLhandleARB programObj, shadowmap_uniform_location_t *out)
 {
-	out->xPixelOffset = glGetUniformLocationARB (programObj, "xPixelOffset");
-	out->yPixelOffset = glGetUniformLocationARB (programObj, "yPixelOffset");
+	get_shadowmap_channel_uniform_locations (programObj, &out->sunStatic, "sunstatic");
+	get_shadowmap_channel_uniform_locations (programObj, &out->otherStatic, "otherstatic");
+	get_shadowmap_channel_uniform_locations (programObj, &out->dynamic, "dynamic");
 }
 
 static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_location_t *out)
@@ -1996,8 +2024,6 @@ static void get_mesh_uniform_locations (GLhandleARB programObj, mesh_uniform_loc
 	out->fxTex = glGetUniformLocationARB (programObj, "fxTex");
 	out->fx2Tex = glGetUniformLocationARB (programObj, "fx2Tex");
 	out->lightmapTexture = glGetUniformLocationARB (programObj, "lightmapTexture");
-	out->shadowmap = glGetUniformLocationARB (programObj, "SHADOWMAP");
-	out->shadowmapTexture = glGetUniformLocationARB (programObj, "StatShadowMap");
 	out->time = glGetUniformLocationARB (programObj, "time");
 	out->lightmap = glGetUniformLocationARB (programObj, "lightmap");
 	out->fog = glGetUniformLocationARB (programObj, "FOG");
@@ -2085,12 +2111,8 @@ void R_LoadGLSLPrograms(void)
 		worldsurf_uniforms[i].heightTexture = glGetUniformLocationARB (g_worldprogramObj[i], "HeightTexture");
 		worldsurf_uniforms[i].lmTexture = glGetUniformLocationARB (g_worldprogramObj[i], "lmTexture");
 		worldsurf_uniforms[i].normalTexture = glGetUniformLocationARB (g_worldprogramObj[i], "NormalTexture");
-		worldsurf_uniforms[i].shadowmapTexture = glGetUniformLocationARB (g_worldprogramObj[i], "ShadowMap");
-		worldsurf_uniforms[i].shadowmapTexture2 = glGetUniformLocationARB (g_worldprogramObj[i], "StatShadowMap");
 		worldsurf_uniforms[i].fog = glGetUniformLocationARB (g_worldprogramObj[i], "FOG");
 		worldsurf_uniforms[i].parallax = glGetUniformLocationARB (g_worldprogramObj[i], "PARALLAX");
-		worldsurf_uniforms[i].shadowmap = glGetUniformLocationARB (g_worldprogramObj[i], "SHADOWMAP");
-		worldsurf_uniforms[i].statshadow = glGetUniformLocationARB (g_worldprogramObj[i], "STATSHADOW");
 		worldsurf_uniforms[i].staticLightPosition = glGetUniformLocationARB (g_worldprogramObj[i], "staticLightPosition");
 		worldsurf_uniforms[i].liquid = glGetUniformLocationARB (g_worldprogramObj[i], "LIQUID");
 		worldsurf_uniforms[i].shiny = glGetUniformLocationARB (g_worldprogramObj[i], "SHINY");
@@ -2104,10 +2126,8 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("Shadow", (char*)shadow_vertex_program, (char*)shadow_fragment_program, NO_ATTRIBUTES, 0, &g_shadowprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	g_location_entShadow = glGetUniformLocationARB( g_shadowprogramObj, "StatShadowMap" );
-	g_location_fadeShadow = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
-	g_location_xOffset = glGetUniformLocationARB( g_shadowprogramObj, "xPixelOffset" );
-	g_location_yOffset = glGetUniformLocationARB( g_shadowprogramObj, "yPixelOffset" );
+	secondpass_bsp_shadow_uniforms.fade = glGetUniformLocationARB( g_shadowprogramObj, "fadeShadow" );
+	get_shadowmap_uniform_locations (g_shadowprogramObj, &secondpass_bsp_shadow_uniforms.shadowmap_uniforms);
 	
 	// Old-style per-vertex water effects
 	R_LoadGLSLProgram ("Warp", (char*)warp_vertex_program, NULL, NO_ATTRIBUTES, 0, &g_warpprogramObj);
@@ -2138,8 +2158,6 @@ void R_LoadGLSLPrograms(void)
 		rscript_uniforms[i].lightmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "lightmapTexture");
 		rscript_uniforms[i].blendscales = glGetUniformLocationARB (g_rscriptprogramObj[i], "blendscales");
 		rscript_uniforms[i].normalblendindices = glGetUniformLocationARB (g_rscriptprogramObj[i], "normalblendindices");
-		rscript_uniforms[i].shadowmap = glGetUniformLocationARB (g_rscriptprogramObj[i], "SHADOWMAP");
-		rscript_uniforms[i].shadowmapTexture = glGetUniformLocationARB (g_rscriptprogramObj[i], "StatShadowMap");
 		rscript_uniforms[i].meshPosition = glGetUniformLocationARB (g_rscriptprogramObj[i], "meshPosition");
 		rscript_uniforms[i].meshRotation = glGetUniformLocationARB (g_rscriptprogramObj[i], "meshRotation");
 
