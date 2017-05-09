@@ -34,10 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jpeglib.h"
 #endif
 
+static char deptex_names[deptex_num][32];
+
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
-image_t		*r_depthtexture;
-image_t		*r_depthtexture2;
 int			numgltextures;
 
 extern cvar_t	*cl_hudimage1; //custom huds
@@ -1683,25 +1683,29 @@ void R_InitMirrorTextures( void )
 void R_InitDepthTextures( void )
 {
 	byte	*data;
-	int		size, texture_height, texture_width;
-
-	//find closer power of 2 to screen size
-	for (texture_width = 1;texture_width < vid.width;texture_width *= 2);
-	for (texture_height = 1;texture_height < vid.height;texture_height *= 2);
-
-	//limit to 2048x2048 - anything larger is generally going to cause problems, and AA doesn't support res higher
-	if(texture_width > 2048)
-		texture_width = 2048;
-	if(texture_height > 2048)
-		texture_height = 2048;
+	int		size, buffersize;
+	int 	bigsize, littlesize;
+	int		i;
 
 	//init the framebuffer textures
-	size = texture_width * texture_height * 4;
+	bigsize = max (vid.width, vid.height) * 2 * r_shadowmapscale->value;
+	littlesize = min (vid.width, vid.height) * r_shadowmapscale->value;
+	bigsize = littlesize;
+	buffersize = bigsize * bigsize * 4;
 
-	data = malloc( size );
-	memset( data, 255, size );
-	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, texture_width, texture_height, it_pic, 3 );
-	r_depthtexture2 = GL_LoadPic( "***r_depthtexture2***", (byte *)data, texture_width, texture_height, it_pic, 3 );
+	data = malloc (buffersize);
+	memset (data, 255, buffersize);
+
+	for (i = 0; i < deptex_num; i++)
+	{
+		Com_sprintf (deptex_names[i], sizeof (deptex_names[i]), "***r_depthtexture%d***", i);
+		if (i == deptex_sunstatic)
+			size = bigsize;
+		else
+			size = littlesize;
+		r_depthtextures[i] = GL_LoadPic (deptex_names[i], (byte *)data, size, size, it_pic, 32);
+	}
+
 	free ( data );
 }
 

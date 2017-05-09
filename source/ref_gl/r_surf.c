@@ -639,7 +639,7 @@ static void R_DrawRSSurfaces (void)
 			RS_Draw (	rs_caustics, gl_state.lightmap_textures + currLMTex,
 						vec3_origin, vec3_origin, false,
 						rs_lightmap_separate_texcoords, 
-						false, BSP_DrawVBOAccum );
+						false, false, BSP_DrawVBOAccum );
 			
 			BSP_ClearVBOAccum ();
 		}
@@ -686,7 +686,7 @@ static void R_DrawRSSurfaces (void)
 					RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
 								vec3_origin, vec3_origin, false,
 								rs_lightmap_separate_texcoords, 
-								true, BSP_DrawVBOAccum );
+								true, true, BSP_DrawVBOAccum );
 				
 					BSP_ClearVBOAccum ();
 				}
@@ -965,40 +965,10 @@ static void BSP_SetupGLSL (int dynamic)
 	glUniform1iARB (worldsurf_uniforms[dynamic].lmTexture, 1);
 	glUniform1iARB (worldsurf_uniforms[dynamic].heightTexture, 2);
 	glUniform1iARB (worldsurf_uniforms[dynamic].normalTexture, 3);
-	
-	if(r_shadowmapcount == 2)
-	{
-		//static vegetation shadow
-		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmapTexture2, 6);
-		GL_MBind (6, r_depthtexture2->texnum);
 
-		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
-		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 1 );
-
-		R_SetShadowmapUniforms (&worldsurf_uniforms[dynamic].shadowmap_uniforms);
-	}
-	else
-	{
-		glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 0);
-		glUniform1iARB (worldsurf_uniforms[dynamic].statshadow, 0);
-	}
-	
+	R_SetShadowmapUniforms (&worldsurf_uniforms[dynamic].shadowmap_uniforms, 6, true);
 	if (dynamic)
-	{
 		R_SetDlightUniforms (&worldsurf_uniforms[dynamic].dlight_uniforms);
-		if (gl_shadowmaps->integer) 
-		{
-			//dynamic shadow
-			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmapTexture, 7);
-			GL_MBind (7, r_depthtexture->texnum);
-
-			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 1);
-
-			R_SetShadowmapUniforms (&worldsurf_uniforms[dynamic].shadowmap_uniforms);
-		}
-		else
-			glUniform1iARB (worldsurf_uniforms[dynamic].shadowmap, 0);		
-	}
 
 	glUniform1iARB (worldsurf_uniforms[dynamic].parallax, 1);
 }

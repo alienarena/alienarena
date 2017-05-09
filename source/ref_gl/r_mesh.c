@@ -340,16 +340,17 @@ static void R_GetStaticLightingForEnt (const entity_t *ent, vec3_t out_position,
 				nonweighted_numlights++;
 			}
 
+			// TODO: see if we can reintroduce this effect without affecting shadows
 			//A simple but effective effect to mimick the effect of sun silouetting(i.e, hold your hand up and partially block the sun, the 
 			//backside appears to grow very dark - so we can do this by weighting our static light average heavily towards the sun's origin.
-			if(sun_alpha > 0.0)
+			/*if(sun_alpha > 0.0)
 			{
 				weight = 10000 * pow(sun_alpha, 10);
 				for (j = 0; j < 3; j++)
 					lightAdd[j] += r_sunLight->origin[j]*weight;
 				numlights+=weight;
 				nonweighted_numlights++;
-			}
+			}*/
 		
 			cl_persistent_ents[ent->number].oldnumlights = numlights;
 			VectorCopy (lightAdd, cl_persistent_ents[ent->number].oldlightadd);
@@ -747,15 +748,12 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 			GL_MBind (4, rs->stage->texture3->texnum);
 			glUniform1iARB (uniforms->fx2Tex, 4);
 
-			if(r_shadowmapcount)
+			R_SetShadowmapUniforms (&uniforms->shadowmap_uniforms, 5, true);
+
+			if (r_nonSunStaticShadowsOn || r_sunShadowsOn)
 			{
 				vec3_t angles;
 				float rotationMatrix[3][3];
-
-				GL_MBind (6, r_depthtexture2->texnum);
-				glUniform1iARB (uniforms->shadowmapTexture, 6);
-				
-				R_SetShadowmapUniforms (&uniforms->shadowmap_uniforms);
 
 				// TODO: 4x4 matrix with translation, instead of separate 
 				// translation and rotation matrices.
@@ -804,7 +802,6 @@ static void R_Mesh_SetupStandardRender (rscript_t *rs, qboolean fragmentshader, 
 	
 	glUniform1fARB (uniforms->time, rs_realtime);	
 	
-	glUniform1iARB (uniforms->shadowmap, r_shadowmapcount); 
 	glUniform1iARB (uniforms->fog, map_fog);
 	glUniform1iARB (uniforms->team, currententity->team);
 
@@ -994,7 +991,7 @@ static void R_Mesh_DrawFrame (const vec3_t statLightPosition, const vec3_t statL
 		}
 		
 		RS_Draw (	rs, lmtex, rotate_center, vec3_origin, false, lm,
-					true, R_Mesh_DrawVBO_Callback );
+					true, true, R_Mesh_DrawVBO_Callback );
 		
 		return;
 	}
@@ -1082,12 +1079,7 @@ void R_Mesh_Draw (void)
 	}
 
 	if ((currentmodel->typeFlags & MESH_CASTSHADOWMAP))
-	{
-		if(currentmodel->type == mod_terrain)
-			R_GenerateTerrainShadows();
-		else
-			R_GenerateEntityShadow (statLightPosition);
-	}
+		R_GenerateEntityShadow (statLightPosition);
 	
 	if (cullresult == draw_shadow_only)
 		return;
@@ -1176,7 +1168,7 @@ void R_Mesh_Draw (void)
 		qglCullFace (GL_FRONT);
 	}
 
-	r_shadowmapcount = 0; //reset shadowmap count after backend render
+	r_nonSunStaticShadowsOn = false; // reset after backend render
 	
 	if ((currententity->flags & RF_DEPTHHACK)) // restore depth range
 		qglDepthRange (gldepthmin, gldepthmax);

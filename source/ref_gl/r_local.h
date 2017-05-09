@@ -90,7 +90,8 @@ extern	entity_t	*currententity;
 extern	model_t		*currentmodel;
 extern	int			r_visframecount;
 extern	int			r_framecount;
-extern  int			r_shadowmapcount;	
+qboolean			r_sunShadowsOn; // any sun shadows this frame?
+qboolean			r_nonSunStaticShadowsOn; // any non-sun static shadows?
 extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
 extern 	int c_flares;
@@ -523,10 +524,9 @@ void R_AttribPointer (	GLuint index, GLint size, GLenum type,
 //shadows
 extern	cvar_t		*r_shadowmapscale;
 extern  int			r_lightgroups;
-extern  image_t		*r_depthtexture;
-extern	image_t		*r_depthtexture2;
+enum {deptex_dynamic, deptex_sunstatic, deptex_otherstatic, deptex_num};
+image_t *r_depthtextures[deptex_num];
 extern  image_t		*r_colorbuffer;
-extern GLuint   fboId[3];
 extern vec3_t	r_worldLightVec;
 typedef struct	LightGroup 
 {
@@ -540,10 +540,8 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
 extern void		R_Mesh_DrawCaster (void);
-extern void		R_DrawDynamicCaster(void);
-extern void		R_DrawVegetationCaster(void);
+void			R_GenerateGlobalShadows (void);
 extern void		R_GenerateEntityShadow (const vec3_t statLightPosition);
-extern void		R_GenerateTerrainShadows( void );
 extern void		R_DrawBSPShadowCasters (void);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
@@ -617,10 +615,14 @@ void R_SetDlightUniforms (dlight_uniform_location_t *uniforms); // See r_light.c
 // Uniform locations for GLSL shaders that support shadows being cast on them
 typedef struct
 {
-	GLuint	xPixelOffset, yPixelOffset;
+	GLuint	enabled, pixelOffset, texture;
+} shadowmap_channel_uniform_location_t;
+typedef struct
+{
+	shadowmap_channel_uniform_location_t sunStatic, otherStatic, dynamic;
 } shadowmap_uniform_location_t;
 
-void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms); // see r_shadowmaps.c
+void R_SetShadowmapUniforms (shadowmap_uniform_location_t *uniforms, int tmu, qboolean enable); // see r_shadowmaps.c
 
 //standard bsp surfaces
 struct
@@ -628,8 +630,7 @@ struct
 	dlight_uniform_location_t dlight_uniforms;
 	shadowmap_uniform_location_t shadowmap_uniforms;
 	GLuint	surfTexture, heightTexture, lmTexture, normalTexture;
-	GLuint	shadowmapTexture, shadowmapTexture2;
-	GLuint	fog, parallax, shadowmap, statshadow;
+	GLuint	fog, parallax;
 	GLuint	staticLightPosition; 
 	GLuint	liquid, shiny;
 	GLuint	liquidTexture, liquidNormTex, chromeTex;
@@ -637,10 +638,11 @@ struct
 } worldsurf_uniforms[GLSL_MAX_DLIGHTS+1];
 
 //shadow on white bsp polys
-GLuint		g_location_entShadow;
-GLuint		g_location_fadeShadow;
-GLuint		g_location_xOffset;
-GLuint		g_location_yOffset;
+struct
+{
+	shadowmap_uniform_location_t shadowmap_uniforms;
+	GLuint fade;
+} secondpass_bsp_shadow_uniforms;
 
 // Old-style per-vertex water effects
 struct
@@ -667,10 +669,8 @@ struct
 	GLuint						blendTexture[6];
 	GLuint						normalblendindices;
 	GLuint						blendNormalmap[3];
-	GLuint						shadowmapTexture;
 	GLuint						meshPosition;
 	GLuint						meshRotation;
-	GLuint						shadowmap;
 } rscript_uniforms[GLSL_MAX_DLIGHTS+1];
 
 //water
@@ -705,9 +705,7 @@ typedef struct
 	GLuint							meshPosition, meshRotation;
 	GLuint							baseTex, normTex, fxTex, fx2Tex;
 	GLuint							lightmapTexture;
-	GLuint							shadowmapTexture;
 	GLuint							lightmap;
-	GLuint							shadowmap;
 	GLuint							time;
 	GLuint							fog;
 	GLuint							useFX;

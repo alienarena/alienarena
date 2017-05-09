@@ -39,7 +39,7 @@ void Mod_LoadTerrainModel (model_t *mod, void *_buf)
 	
 	mod->skins[0] = tex;
 	mod->type = mod_terrain;
-	mod->typeFlags = MESH_INDEXED | MESH_CASTSHADOWMAP;
+	mod->typeFlags = MESH_INDEXED;
 	
 	if (mod->skins[0] != NULL)
 		mod->script = mod->skins[0]->script;
