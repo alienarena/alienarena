@@ -235,10 +235,22 @@ Request a download from the server
 void	CL_Download_f (void)
 {
 	char filename[MAX_OSPATH];
+	qboolean udp, not_connected, not_enough_args;
 
-	if (Cmd_Argc() != 2)
+	not_enough_args = Cmd_Argc () != 2;
+	udp = !Q_strcasecmp (Cmd_Argv (0), "download");
+	not_connected = udp && cls.state < ca_connected;
+
+	if (not_connected)
+		Com_Printf ("download command cannot be used unless connected to a server! Try downloadhttp instead.\n");
+
+	if (cls.download)
+		Com_Printf ("Already downloading something.\n");
+
+	if (not_enough_args || not_connected || cls.download)
 	{
-		Com_Printf("Usage: download <filename>\n");
+		Com_Printf ("Usage: download <filename> - download from connected game server via UDP\n");
+		Com_Printf ("       downloadhttp <filename> - download from central HTTP repository\n");
 		return;
 	}
 
@@ -265,11 +277,20 @@ void	CL_Download_f (void)
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
 
-	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-	MSG_WriteString (&cls.netchan.message,
-		va("download %s", cls.downloadname));
+	if (udp)
+	{
+		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+		MSG_WriteString (&cls.netchan.message,
+			va("download %s", cls.downloadname));
 
-	cls.downloadnumber++;
+		cls.downloadnumber++;
+	}
+	else
+	{
+		cls.downloadfromcommand = true;
+		if (!CL_HttpDownload ())
+			Com_Printf ("Error initializing http download.\n");
+	}
 }
 
 /*

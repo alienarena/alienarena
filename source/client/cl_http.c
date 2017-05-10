@@ -207,7 +207,10 @@ void CL_HttpDownloadCleanup(){
 
 		c = strlen(curlerr) ? curlerr : CL_HttpResponseCode(status);
 	
-		Com_DPrintf("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, c);
+		if (cls.downloadfromcommand)
+			Com_Printf ("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, c);
+		else
+			Com_DPrintf ("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, c);
 		
 		_unlink(dnld_file);  // delete partial or empty file
 		
@@ -220,7 +223,8 @@ void CL_HttpDownloadCleanup(){
 				CL_HttpDownloadFromHost (currentHost+1, cls.downloadname);
 				break;
 			case default_2:
-				if (	strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_1) &&
+				if (	cls.downloadurl[0] &&
+						strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_1) &&
 						strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_2))
 				{
 					Com_DPrintf ("Trying server custom HTTP.\n");
@@ -228,9 +232,13 @@ void CL_HttpDownloadCleanup(){
 					break;
 				}
 			case server_custom:
-				Com_DPrintf ("Trying UDP.\n");
-				MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
-				MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
+				if (cls.state >= ca_connected)
+				{
+					Com_DPrintf ("Trying UDP.\n");
+					MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
+					MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
+				}
+				cls.downloadfromcommand = false;
 				break;
 		}
 	}
@@ -252,7 +260,7 @@ void CL_HttpDownloadThink(void){
 	int i;
 	int runt;
 
-	if(!cls.downloadurl[0] || !cls.download)
+	if (!cls.download)
 		return;  // nothing to do
 
 	// process the download as long as data is avaialble
