@@ -254,6 +254,14 @@ void	CL_Download_f (void)
 		return;
 	}
 
+	if (udp)
+	{
+		Com_Printf ("The \"download\" command is kept only for compatibility\n"
+					"and will not be able to download files unless they're on\n"
+					"the current connected game server. Consider using the\n"
+					"\"downloadhttp\" command instead.\n");
+	}
+
 	Com_sprintf(filename, sizeof(filename), "%s", Cmd_Argv(1));
 
 	if (strstr (filename, ".."))
