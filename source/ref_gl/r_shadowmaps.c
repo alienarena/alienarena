@@ -1029,7 +1029,11 @@ static void R_DrawSunShadows (void)
 		// popping in and out abruptly. We'll need a different mechanism for
 		// detecting indoors.
 
-		//if this entity isn't close to the player, don't bother 
+		//for now do it anyway - make sure it's unblocked from the sun - otherwise horrible artifacts occur indoors
+		if(!CM_FastTrace (r_sunLight->origin, currententity->origin, r_worldmodel->firstnode, MASK_VISIBILILITY))
+			continue;
+
+		//if this entity isn't close to the player, don't bother - to do - fade as we do indoor shadows
 		VectorSubtract (r_origin, currententity->origin, dist);
 		if (VectorLength (dist) > r_shadowcutoff->value)
 			continue;
