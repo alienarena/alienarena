@@ -1078,8 +1078,6 @@ nobase_dist_maps_DATA = \
 	scripts/dm-gauntlet2k16.mus \
 	scripts/dm-neptune2k15.fog \
 	scripts/dm-neptune2k15.mus \
-	scripts/dm-oblivion2k15.fog \
-	scripts/dm-oblivion2k15.mus \
 	scripts/dm-purgatory2k16.fog \
 	scripts/dm-purgatory2k16.mus \
 	scripts/dm-turbo2k15.fog \
