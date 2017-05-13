@@ -1014,6 +1014,9 @@ static void R_DrawSunShadows (void)
 	
 	for (i = 0 ; i < r_newrefdef.num_entities; i++)
 	{
+		trace_t tr;
+		vec3_t start;
+
 		currententity = &r_newrefdef.entities[i];
 
 		if (SM_Cull (currententity))
@@ -1030,12 +1033,19 @@ static void R_DrawSunShadows (void)
 		// detecting indoors.
 
 		//for now do it anyway - make sure it's unblocked from the sun - otherwise horrible artifacts occur indoors
-		if(!CM_FastTrace (r_sunLight->origin, currententity->origin, r_worldmodel->firstnode, MASK_VISIBILILITY))
-			continue;
+		VectorCopy(currententity->origin, start);
+		start[2] += 128; //in cases of being buried a bit in terrain, or bobbing
+		tr = CM_BoxTrace(start, r_sunLight->origin, vec3_origin, vec3_origin, 0, MASK_VISIBILILITY);
 
-		//if this entity isn't close to the player, don't bother - to do - fade as we do indoor shadows
+		if(tr.fraction != 1.0)
+		{
+			if(!(tr.surface->flags & SURF_SKY))
+					continue;
+		}
+
+		//if this entity isn't close to the player, don't bother
 		VectorSubtract (r_origin, currententity->origin, dist);
-		if (VectorLength (dist) > r_shadowcutoff->value)
+		if (VectorLength (dist) > 5.0 * r_shadowcutoff->value)
 			continue;
 		
 		r_sunShadowsOn = true;
