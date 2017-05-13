@@ -228,3 +228,9 @@ textures/blanks/blank6
 		end
 	}
 }
+textures/blood/slime_splatter2
+{
+	{
+		cube
+	}
+}
