@@ -26,6 +26,9 @@ nobase_dist_maps_DATA = \
 	decals/rocks1.decal \
 	decals/slime0.decal \
 	decals/slime1.decal \
+	decals/snow1.decal \
+	decals/snow2.decal \
+	decals/snow3.decal \
 	dm-babel2k16.bsp \
 	dm-babel2k16.lightmap \
 	dm-bloodfactory2k15.bsp \
