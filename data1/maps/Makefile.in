@@ -835,6 +835,12 @@ nobase_dist_maps_DATA = \
 	meshes/tech/wall_lightr.md2 \
 	meshes/tech/wall_lightr.tga \
 	meshes/tech/wall_lightr_fx.tga \
+	meshes/tech/biocrate.jpg \
+	meshes/tech/biocrate_fx.tga \
+	meshes/tech/biocrate_normal.jpg \
+	meshes/tech/crate32.md2 \
+	meshes/tech/crate64.md2 \
+	meshes/tech/crate96.md2 \
 	meshes/test/martian.jpg \
 	meshes/test/martian_fx.tga \
 	meshes/test/martian_normal.tga \
