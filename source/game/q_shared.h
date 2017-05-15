@@ -761,6 +761,7 @@ typedef struct
 #define	TE_STAIN					63
 #define	TE_FIRE						64
 #define	TE_SMOKE					66
+#define TE_JETEXHAUST				67
 
 #define SPLASH_UNKNOWN		0
 #define SPLASH_SPARKS		1

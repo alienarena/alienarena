@@ -102,7 +102,9 @@ void Jet_ApplyLifting( edict_t *ent )
 
 void Jet_ApplyEffects( edict_t *ent, vec3_t forward, vec3_t right )
 {
-	vec3_t exhaust, distance;
+	vec3_t exhaust, distance, dir;
+
+	VectorSet(dir, 0, 0, -1);
 
 	gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/grenlx1a.wav"), 0.9, ATTN_NORM, 0);
 
@@ -111,17 +113,19 @@ void Jet_ApplyEffects( edict_t *ent, vec3_t forward, vec3_t right )
 	G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
 			
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_EXPLOSION2);
+	gi.WriteByte (TE_JETEXHAUST);
 	gi.WritePosition (exhaust);
-	gi.multicast (exhaust, MULTICAST_PVS);
+	gi.WriteDir (dir);
+	gi.multicast (exhaust, MULTICAST_PHS);
 
 	VectorSet(distance, -32, 0, 0);
 	G_ProjectSource (ent->s.origin, distance, forward, right, exhaust);
 			
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_EXPLOSION2);
+	gi.WriteByte (TE_JETEXHAUST);
 	gi.WritePosition (exhaust);
-	gi.multicast (exhaust, MULTICAST_PVS);
+	gi.WriteDir (dir);
+	gi.multicast (exhaust, MULTICAST_PHS);
 }
 
 /*if the angle of the velocity vector is different to the viewing

@@ -7,11 +7,10 @@ textures/arena10/metalfloor21_water
 textures/blanks/blank5
 {
 	{
-		map gfx/beam1.tga
-		scale static 10 static 10
+		map gfx/beam3.tga
+		scale static 15 static 15
 		colormap 1 1 1
 		beam
-		lensflare
 	}
 }
 textures/arena7/light3

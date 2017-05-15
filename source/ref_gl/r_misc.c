@@ -77,6 +77,7 @@ image_t		*r_leaftexture;
 image_t		*r_trashtexture;
 image_t		*r_splashtexture;
 image_t		*r_splash2texture;
+image_t		*r_lavasplashtexture;
 image_t		*r_around;
 image_t		*r_flare;
 image_t		*r_flare1;
@@ -306,6 +307,10 @@ void R_InitParticleTexture (void)
 	r_splash2texture = R_RegisterParticlePic("watersplash");
 	if (!r_splash2texture) {
 		r_splash2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_lavasplashtexture = R_RegisterParticlePic("lavasplash");
+	if (!r_lavasplashtexture) {
+		r_lavasplashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 
 	//to do - move more or all of this to their appropriate places

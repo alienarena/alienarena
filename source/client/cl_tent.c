@@ -373,7 +373,7 @@ void CL_ParseTEnt (void)
 		else
 			color = splash_color[r];
 
-		CL_SplashEffect (pos, dir, color, cnt);
+		CL_SplashEffect (pos, dir, color, cnt, r);
 
 		if (r == SPLASH_SPARKS)
 		{
@@ -547,6 +547,12 @@ void CL_ParseTEnt (void)
 			CL_BlasterMark(pos2, trace.plane.normal);
 			R_ApplyForceToRagdolls(pos2, 100);
 		}
+		break;
+	case TE_JETEXHAUST:
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadDir (&net_message, dir);
+
+		CL_JetExhaust (pos, dir);
 		break;
 	case TE_FLAMETHROWER:
 		MSG_ReadPos (&net_message, pos);

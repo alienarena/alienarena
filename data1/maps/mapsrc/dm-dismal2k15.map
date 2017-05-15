@@ -27127,16 +27127,16 @@
 // entity 88
 {
 "classname" "misc_mapmodel"
-"origin" "616 944 -680"
+"origin" "624.000000 944.000000 -680.000000"
 "model" "maps/meshes/tech/ribtubebig2.md2"
-"angle" "180"
+"angle" "-179.999985"
 }
 // entity 89
 {
 "classname" "misc_mapmodel"
-"angle" "180"
+"angle" "-179.999985"
 "model" "maps/meshes/tech/ribtubebig2.md2"
-"origin" "616 816 -680"
+"origin" "624.000000 816.000000 -680.000000"
 }
 // entity 90
 {
