@@ -116,6 +116,7 @@ extern image_t		*r_leaftexture;
 extern image_t		*r_trashtexture;
 extern image_t		*r_splashtexture;
 extern image_t		*r_splash2texture;
+extern image_t		*r_lavasplashtexture;
 extern image_t		*r_flagtexture;
 extern image_t		*r_logotexture;
 extern image_t		*r_distort;

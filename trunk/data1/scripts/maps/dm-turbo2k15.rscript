@@ -195,7 +195,7 @@ textures/evil/e8_jumppad02
 env/greenup
 {
 	{
-		map gfx/clouds.tga
+		map gfx/cloudsthick.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
@@ -203,7 +203,7 @@ env/greenup
 env/greenrt
 {
 	{
-		map gfx/clouds.tga
+		map gfx/cloudsthick.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
@@ -211,7 +211,7 @@ env/greenrt
 env/greenlf
 {
 	{
-		map gfx/clouds.tga
+		map gfx/cloudsthick.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
@@ -219,7 +219,7 @@ env/greenlf
 env/greenft
 {
 	{
-		map gfx/clouds.tga
+		map gfx/cloudsthick.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
@@ -227,7 +227,7 @@ env/greenft
 env/greenbk
 {
 	{
-		map gfx/clouds.tga
+		map gfx/cloudsthick.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}
@@ -235,7 +235,7 @@ env/greenbk
 env/greendn
 {
 	{
-		map gfx/clouds.tga
+		map gfx/cloudsthick.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 0.8
 	}

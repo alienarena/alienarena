@@ -1024,7 +1024,7 @@ void misc_mapmodel_think (edict_t *ent)
 	if(ent->spawnflags & 2)
 		ent->s.frame = (ent->s.frame + 1) % 39;
 	else
-		ent->s.frame = (ent->s.frame + 1) % 24;
+		ent->s.frame = (ent->s.frame + 1) % 23;
 	ent->nextthink = level.time + TENFPS;
 }
 void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
@@ -1073,7 +1073,10 @@ void watersplash_think (edict_t *ent)
 	gi.WriteByte (8);
 	gi.WritePosition (ent->s.origin);
 	gi.WriteDir (up);
-	gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this
+	if(ent->spawnflags & 1)
+		gi.WriteByte (SPLASH_LAVA);
+	else
+		gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->nextthink = level.time + 1.0;
