@@ -24,6 +24,7 @@ nobase_dist_particles_DATA = \
 	fireball.tga \
 	flag.tga \
 	flare.tga \
+	lavasplash.tga
 	leaderfield.tga \
 	leaf.tga \
 	logo.tga \
