@@ -788,7 +788,7 @@ static void Menuscreens_Animate (void)
 			mstate.active.offset = Menuscreens_Animate_Active ();
 		
 		anim_start = mstate.active.offset+viddef.width;
-		anim_end = MenuScreens_Animate_Incoming_Target ();
+		anim_end = MenuScreens_Animate_Incoming_Target ();  
 		
 		mstate.animation = M_Interp (mstate.animation, anim_end-anim_start);
 		if (mstate.animation <= anim_end-anim_start)
@@ -912,6 +912,7 @@ static void M_PushMenu (void (*draw) (menuframework_s *screen, menuvec2_t offset
 		layergroup_last(mstate.incoming).screen = screen;
 		mstate.state = mstate_insert;
 		insertion_point = cursor.menulayer;
+		S_StartLocalSound ("doors/dr1_end.wav");
 	}
 	
 	for (i = insertion_point+1; i < mstate.active.num_layers; i++)
