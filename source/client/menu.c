@@ -5778,6 +5778,7 @@ PLAYER CONFIG MENU
 
 =============================================================================
 */
+static qboolean s_switched = true;
 
 typedef struct 
 {
@@ -5806,24 +5807,46 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	char scratch[MAX_OSPATH];
 	FILE *modelfile;
 	int i;
+	int renderHelmet = 0;
 	extern float CalcFov( float fov_x, float w, float h );
-	entity_t entity[3];
+	entity_t entity[5];
 	menumodel_s *self = (menumodel_s*) _self;
 	float old_frame = self->mframe;
 	
+	//181 - 197 to start from rising position
+
+	if(self->mframe == 0 || s_switched)
+		self->mframe = 181;
+
 	self->mframe += cls.frametime * 15.0f;
-	if (self->mframe > 39)
+
+	if (self->mframe > 197)
 		self->mframe = 1;
-	if (self->mframe < 1)
-		self->mframe = 1;
+	
+	if(self->mframe < 181)
+	{
+		if (self->mframe > 39)
+			self->mframe = 1;
+		if (self->mframe < 1)
+			self->mframe = 1;
+	}
 	
 	// for IQM lerping
 	if ((int)old_frame != (int)self->mframe)
 		self->frametime = Sys_Milliseconds ();
 
-	self->yaw += cls.frametime*50;
-	if (self->yaw > 360)
+	if(self->mframe > 0 && self->mframe < 40)
+		self->yaw += cls.frametime*50;
+	if (self->yaw > 360 )
 		self->yaw = 0;
+	if(s_switched)
+		self->yaw = 180;
+
+	if(s_switched)
+	{
+		S_StartLocalSound ("misc/tele1.wav");
+		s_switched = false;
+	}
 
 	memset( &refdef, 0, sizeof( refdef ) );
 	
@@ -5858,6 +5881,10 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	
 	refdef.num_entities = 2;
 
+	entity[2].model = R_RegisterModel("models/objects/dmspot/tris.iqm");
+	entity[2].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+	refdef.num_entities = 3;
+
 	//if a helmet or other special devce
 	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.iqm", self->name );
 	FS_FOpenFile( scratch, &modelfile );
@@ -5865,13 +5892,23 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	{
 		fclose(modelfile);
 		
-		entity[2].model = R_RegisterModel( scratch );
+		entity[3].model = R_RegisterModel( scratch );
 		Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", self->name );
-		entity[2].skin = R_RegisterSkin( scratch );
-		entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
-		entity[2].alpha = 0.4;
+		entity[3].skin = R_RegisterSkin( scratch );
+		entity[3].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
+		entity[3].alpha = 0.4;
 		
-		refdef.num_entities = 3;
+		refdef.num_entities = 4;
+		renderHelmet = 1;
+	}
+
+	
+	if(self->mframe >= 181)
+	{
+		entity[3+renderHelmet].model = R_RegisterModel("models/objects/powerdome/tris.iqm");
+		entity[3+renderHelmet].flags = RF_FULLBRIGHT | RF_MENUMODEL;
+
+		refdef.num_entities = 4+renderHelmet;
 	}
 	
 	for (i = 0; i < refdef.num_entities; i++)
@@ -5886,7 +5923,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		// for IQM lerping:
 		entity[i].frametime = self->frametime;
 		
-		VectorSet (entity[i].origin, 80, 0, -5);
+		VectorSet (entity[i].origin, 80, 0, -3 - (i==2?6.5:0.0));
 		VectorCopy (entity[i].origin, entity[i].oldorigin);
 	}
 		
@@ -5934,6 +5971,8 @@ static void ModelCallback (UNUSED void *unused)
 {
 	s_player_skin_box.itemnames = (const char **) s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
+
+	s_switched = true;
 	
 	Menu_ActivateItem ((menuitem_s *)&s_player_skin_box);
 }
