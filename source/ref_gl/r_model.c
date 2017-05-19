@@ -2057,6 +2057,7 @@ void R_BeginRegistration (char *model)
 	r_sunX = 0;
 	r_sunY = 0;
 	r_sunZ = 0;
+	r_sunIntens = 1.0;
 	for(;;)
 	{
 		path = FS_NextPath( path );

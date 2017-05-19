@@ -482,6 +482,9 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 			spacebox = false; //we will change this to sun vs star
 		}
 
+		if(r_sunIntens == 0.0)
+			r_sunIntens = 1.0;
+
 		if (gl_skymip->integer)
 			gl_picmip->integer -= gl_skymip->integer;
 	}

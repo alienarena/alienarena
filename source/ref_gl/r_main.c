@@ -199,6 +199,7 @@ unsigned r_nosun;
 float r_sunX;
 float r_sunY;
 float r_sunZ;
+float r_sunIntens;
 
 /*
 =================
@@ -253,6 +254,8 @@ void R_ReadFogScript( char *config_file )
 			r_sunY = atof(a_string);
 			strcpy( a_string, COM_Parse( &s ) );
 			r_sunZ = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_sunIntens = atof(a_string);
 
 			if(fog.density > 0)
 				map_fog = true;
