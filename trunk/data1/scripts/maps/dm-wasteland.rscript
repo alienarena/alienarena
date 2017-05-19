@@ -20,51 +20,51 @@ textures/arena7/light10
 		lensflare
 	}
 }
-env/hellup
+env/desertup
 {
 	{
 		map gfx/clouds.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 .8 .8
+		alphashift 0 1 1
 	}
 }
-env/hellrt
+env/desertrt
 {
 	{
 		map gfx/clouds.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 .8 .8
+		alphashift 0 1 1
 	}
 }
-env/helllf
+env/desertlf
 {
 	{
 		map gfx/clouds.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 .8 .8
+		alphashift 0 1 1
 	}
 }
-env/hellft
+env/desertft
 {
 	{
 		map gfx/clouds.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 .8 .8
+		alphashift 0 1 1
 	}
 }
-env/hellbk
+env/desertbk
 {
 	{
 		map gfx/clouds.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 .8 .8
+		alphashift 0 1 1
 	}
 }
-env/helldn
+env/desertdn
 {
 	{
 		map gfx/clouds.tga
 		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 .8 .8
+		alphashift 0 1 1
 	}
 }

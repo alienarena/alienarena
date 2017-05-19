@@ -417,7 +417,7 @@ void R_GLSLGodRays(void)
     qglLoadIdentity();
 
 	size = r_newrefdef.width * sun_size/4.0;
-    PART_RenderSunFlare(sun2_object, 0, size, 1.0, 1.0, 1.0, 1.0);
+    PART_RenderSunFlare(sun2_object, 0, size, 1.0, 1.0, 1.0, 0.5);
     
 	qglPopMatrix();
     qglMatrixMode(GL_PROJECTION);
@@ -479,7 +479,7 @@ void R_GLSLGodRays(void)
 	glUniform2fARB( g_location_lightPositionOnScreen, fxScreenPos[0], fxScreenPos[1]);
 
 	glUniform1fARB( g_location_godrayScreenAspect, screenaspect);
-    glUniform1fARB( g_location_sunRadius, sun_size*r_godray_intensity->value);
+    glUniform1fARB( g_location_sunRadius, r_sunIntens*sun_size*r_godray_intensity->value);
     
 	//render quad 
 	GLSTATE_ENABLE_BLEND
