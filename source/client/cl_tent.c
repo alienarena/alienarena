@@ -167,6 +167,8 @@ void CL_ParseSteam (void)
 	}
 }
 
+//TO DO - these next 3 should be combined
+
 void CL_ParseFire (void)
 {
 	vec3_t	pos, dir;
@@ -254,6 +256,59 @@ void CL_ParseSmoke (void)
 			s->magnitude = 400;//MSG_ReadShort (&net_message);
 			s->endtime = cl.time + 10000000;//MSG_ReadLong (&net_message);
 			s->think = CL_ParticleSmokeEffect2;
+			s->thinkinterval = 16; //~ 60 fps
+			s->nextthink = cl.time;
+		}
+		else
+		{
+//				Com_Printf ("No free sustains!\n");
+			// FIXME - read the stuff anyway
+			cnt = MSG_ReadByte (&net_message);
+			MSG_ReadPos (&net_message, pos);
+			MSG_ReadDir (&net_message, dir);
+			r = MSG_ReadByte (&net_message);
+			magnitude = MSG_ReadShort (&net_message);
+			magnitude = MSG_ReadLong (&net_message); // really interval
+		}
+	}
+
+}
+
+void CL_ParseDust (void)
+{
+	vec3_t	pos, dir;
+	int		id, i;
+	int		r;
+	int		cnt;
+	int		magnitude;
+	cl_sustain_t	*s, *free_sustain;
+
+//	id = MSG_ReadShort (&net_message);		// an id of -1 is an instant effect
+	id = 25;
+	if (id != -1) // sustains
+	{
+//			Com_Printf ("Sustain effect id %d\n", id);
+		free_sustain = NULL;
+		for (i=0, s=cl_sustains; i<MAX_SUSTAINS; i++, s++)
+		{
+			if (s->id == 0)
+			{
+				free_sustain = s;
+				break;
+			}
+		}
+		if (free_sustain)
+		{
+			s->id = id;
+			s->count = MSG_ReadByte (&net_message);
+			s->count = 10;//just for testing here
+			MSG_ReadPos (&net_message, s->org);
+			MSG_ReadDir (&net_message, s->dir);
+			r = MSG_ReadByte (&net_message);
+			s->color = r & 0xff;
+			s->magnitude = 150;//MSG_ReadShort (&net_message);
+			s->endtime = cl.time + 10000000;//MSG_ReadLong (&net_message);
+			s->think = CL_ParticleDustEffect;
 			s->thinkinterval = 16; //~ 60 fps
 			s->nextthink = cl.time;
 		}
@@ -481,6 +536,9 @@ void CL_ParseTEnt (void)
 		break;
 	case TE_FIRE:
 		CL_ParseFire();
+		break;
+	case TE_DUST:
+		CL_ParseDust();
 		break;
 	case TE_SMOKE:
 		CL_ParseSmoke();

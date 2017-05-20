@@ -86,6 +86,7 @@ spawn_t	spawns[] = {
 	{"target_lightramp", SP_target_lightramp},
 	{"target_earthquake", SP_target_earthquake},
 	{"target_fire", SP_target_fire},
+	{"target_dust", SP_target_dust},
 	{"target_changelevel", SP_target_changelevel},
 
 	{"worldspawn", SP_worldspawn},

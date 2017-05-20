@@ -1143,6 +1143,7 @@ extern void SP_target_laser (edict_t *self);
 extern void SP_target_lightramp (edict_t *self);
 extern void SP_target_earthquake (edict_t *ent);
 extern void SP_target_fire (edict_t *ent);
+extern void SP_target_dust (edict_t *ent);
 extern void SP_target_changelevel (edict_t *ent);
 
 extern void SP_worldspawn (edict_t *ent);
