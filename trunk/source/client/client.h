@@ -449,6 +449,7 @@ void CL_BlueBlasterParticles (vec3_t org, vec3_t dir);
 void CL_ParticleSteamEffect(cl_sustain_t *self);
 void CL_ParticleFireEffect2(cl_sustain_t *self);
 void CL_ParticleSmokeEffect2(cl_sustain_t *self);
+void CL_ParticleDustEffect (cl_sustain_t *self);
 void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
 void CL_BulletSparks ( vec3_t org, vec3_t dir);

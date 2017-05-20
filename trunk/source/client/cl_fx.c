@@ -4062,6 +4062,52 @@ void CL_ParticleSmokeEffect2 (cl_sustain_t *self)
 	self->nextthink += self->thinkinterval;
 }
 
+void CL_ParticleDustEffect (cl_sustain_t *self)
+{
+	int			i, j;
+	particle_t	*p;
+	float		d;
+	vec3_t		r, u;
+	vec3_t		dir;
+
+	VectorCopy (self->dir, dir);
+	MakeNormalVectors (dir, r, u);
+
+	for (i=0 ; i<1 ; i++)
+	{
+		if (!(p = new_particle()))
+			return;
+
+		p->type = PARTICLE_STANDARD;
+		p->image = r_fireballtexture;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->color = 14;
+		p->scale = 256 + (rand()&7);
+		p->scalevel = 100;
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = self->org[j] + self->magnitude*0.1*crand();
+
+		}
+		p->vel[2] = 100;
+		VectorScale (dir, self->magnitude, p->vel);
+		d = crand()*self->magnitude/3;
+		VectorMA (p->vel, d, r, p->vel);
+		d = crand()*self->magnitude/3;
+		VectorMA (p->vel, d, u, p->vel);
+
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = -PARTICLE_GRAVITY/2;
+		p->alpha = 0.02;
+
+		p->alphavel = -.01f / (0.8f + frand()*0.3f);
+
+		p->fromsustainedeffect = true;
+	}
+	self->nextthink += self->thinkinterval;
+}
+
 /*
 ===============
 CL_AddParticles

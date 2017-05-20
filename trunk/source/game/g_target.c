@@ -309,6 +309,29 @@ void SP_target_fire (edict_t *self)
 	self->s.effects = EF_HYPERBLASTER;//give it a glow
 	self->svflags = SVF_NOCLIENT;
 }
+
+void use_target_dust (edict_t *self, edict_t *other, edict_t *activator)
+{
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_DUST);
+	gi.WriteByte (self->count);
+	gi.WritePosition (self->s.origin);
+	gi.WriteDir (self->movedir);
+	gi.WriteByte (self->sounds);
+	gi.multicast (self->s.origin, MULTICAST_ALL);
+}
+
+void SP_target_dust (edict_t *self)
+{
+	self->use = use_target_dust;
+	G_SetMovedir (self->s.angles, self->movedir);
+
+	if (!self->count)
+		self->count = 32;
+
+	self->svflags = SVF_NOCLIENT;
+}
 //==========================================================
 
 /*QUAKED target_spawner (1 0 0) (-8 -8 -8) (8 8 8)
