@@ -17,6 +17,12 @@ nobase_dist_env_DATA = \
 	deadcitylf.tga \
 	deadcityrt.tga \
 	deadcityup.tga \
+	desertbk.jpg \
+	desertdn.jpg \
+	desertft.jpg \
+	desertlf.jpg \
+	desertrt.jpg \
+	desertup.jpg \
 	egyptbk.tga \
 	egyptdn.tga \
 	egyptft.tga \

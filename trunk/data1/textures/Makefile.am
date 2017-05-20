@@ -1043,6 +1043,7 @@ nobase_dist_textures_DATA = \
 	desert/bloodlava.tga \
 	desert/cliffblock.tga \
 	desert/cliffblock_nm.tga \
+	desert/cliffblock_hm.tga \
 	desert/cliffbottom.tga \
 	desert/cliffbottom_hm.tga \
 	desert/cliffbottom_nm.tga \
@@ -1112,12 +1113,18 @@ nobase_dist_textures_DATA = \
 	desert/roughwood3.tga \
 	desert/roughwood3_nm.tga \
 	desert/roughwood4.tga \
+	desert/rustpanel1.tga \
+	desert/rustpanel1_nm.tga \
+	desert/rustpanel2.tga \
+	desert/rustpanel2_nm.tga \
 	desert/rustydoor1.tga \
 	desert/rustydoor1_nm.tga \
 	desert/rustydoor2.tga \
 	desert/rustydoor2_nm.tga \
 	desert/rustydoor3.tga \
 	desert/rustydoor3_nm.tga \
+	desert/rustygrill1.tga \
+	desert/rustygrill1_nm.tga \
 	desert/rustymetal1.tga \
 	desert/rustymetal1_hm.tga \
 	desert/rustymetal1_nm.tga \
