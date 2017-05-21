@@ -244,7 +244,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	cplane_t	*plane;
 	vec3_t		mid;
 	msurface_t	*surf;
-	int			s, t, ds, dt;
+	int64_t		s, t, ds, dt;
 	int			i;
 	mtexinfo_t	*tex;
 	byte		*lightmap;
