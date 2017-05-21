@@ -1857,21 +1857,29 @@ may be worthwhile anyway.
 void DetectUniformColor (int facenum)
 {
 	byte		*sample_buf, *sample;
-	int			width, height, s, t;
+	int			width, height, s, t, style, newsize, oldsize;;
 	
 	sample_buf = &dlightdata[dfaces[facenum].lightofs];
 	
 	width = lfacelookups[facenum].width;
 	height = lfacelookups[facenum].height;
-	
-	for (t = 0; t < height; t++)
+	oldsize = width * height * 3;
+
+	if (width < 2 || height < 2)
+		return;
+
+	for (style = 0; style < MAXLIGHTMAPS && style < facelight[facenum].numstyles; style++)
 	{
-		for (s = 0; s < width; s++)
+		for (t = 0; t < height; t++)
 		{
-			sample = &sample_buf[(t*width+s)*3];
-			if (sample[0] != sample_buf[0] || sample[1] != sample_buf[1] || sample[2] != sample_buf[2])
-				return;
+			for (s = 0; s < width; s++)
+			{
+				sample = &sample_buf[(t*width+s)*3];
+				if (sample[0] != sample_buf[0] || sample[1] != sample_buf[1] || sample[2] != sample_buf[2])
+					return;
+			}
 		}
+		sample_buf += oldsize;
 	}
 	
 	// just use a really big number
@@ -1880,5 +1888,14 @@ void DetectUniformColor (int facenum)
 	
 	lfacelookups[facenum].width = 2;
 	lfacelookups[facenum].height = 2;
-	
+
+	// make sure the samples are in the right place for other lightstyles
+	newsize = lfacelookups[facenum].width * lfacelookups[facenum].height * 3;
+	assert (newsize <= oldsize);
+	sample_buf = &dlightdata[dfaces[facenum].lightofs];
+	for (style = 1; style < MAXLIGHTMAPS && style < facelight[facenum].numstyles; style++)
+	{
+		memcpy (sample_buf + style * newsize, sample_buf + style * oldsize, newsize);
+		sample_buf += newsize;
+	}
 }
