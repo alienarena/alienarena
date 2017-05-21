@@ -1147,13 +1147,15 @@ void Mod_LoadRefineLighting (lump_t *l)
 		int in_offset = lfacelookups[i].offset;
 		if (in_offset)
 		{
-			int size = 0;
+			int nstyles, size = 0;
 			switch (lfacelookups[i].format)
 			{
 				case LTMP_PIXFMT_RGB24:
 					size = 3*lfacelookups[i].width*lfacelookups[i].height;
 					break;
 			}
+			for (nstyles = 0; nstyles < MAXLIGHTMAPS && loadmodel->surfaces[i].styles[nstyles] != 255; nstyles++);
+			size *= nstyles;
 			if (lightdatasize + size >= MAX_OVERRIDE_LIGHTING)
 			{
 				overflowed = true;

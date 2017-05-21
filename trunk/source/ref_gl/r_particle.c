@@ -874,7 +874,7 @@ void R_FinalizeGrass(void)
 		if (grass->type != 1)
 			origin[2] += (grass->texsize/32) * grass->size;
 		// XXX: HACK!
-		R_StaticLightPoint (origin, grass->static_light);
+		grass->static_light_expires = R_StaticLightPoint (origin, grass->static_light);
 	
 		//cull for pathline to sunlight
 		VectorCopy (grass->origin, orig2);
@@ -1007,6 +1007,8 @@ void R_DrawVegetationSurface ( void )
 				R_DynamicLightPoint (origin, lightLevel);
 			else
 				VectorClear (lightLevel);
+			if (grass->static_light_expires)
+			    R_StaticLightPoint (origin, grass->static_light);
 			VectorAdd (grass->static_light, lightLevel, lightLevel);
 			
 			VectorScale(lightLevel, 2.0, lightLevel);
