@@ -249,8 +249,8 @@ typedef struct msurface_s
 	vec3_t mins;
 	vec3_t maxs;
 
-	int			texturemins[2];
-	int			extents[2];
+	int64_t		texturemins[2];
+	int64_t		extents[2];
 
 	glpoly_t	*polys;				// multiple if warped
 

@@ -943,7 +943,7 @@ void CalcSurfaceExtents (msurface_t *s, qboolean override, int *smax, int *tmax,
 	int		i,j, e, vnum;
 	mvertex_t	*v;
 	mtexinfo_t	*tex;
-	int		bmins[2], bmaxs[2];
+	int64_t bmins[2], bmaxs[2];
 
 	mins[0] = mins[1] = 999999;
 	maxs[0] = maxs[1] = -99999;
