@@ -1074,6 +1074,7 @@ nobase_dist_textures_DATA = \
 	desert/lavarock1.tga \
 	desert/lavarock1_hm.tga \
 	desert/lavarock1_nm.tga \
+	desert/lipsign.tga \
 	desert/metalmesh1.tga \
 	desert/metalmesh1_nm.tga \
 	desert/o3metal1.tga \
@@ -1113,6 +1114,10 @@ nobase_dist_textures_DATA = \
 	desert/roughwood3.tga \
 	desert/roughwood3_nm.tga \
 	desert/roughwood4.tga \
+	desert/rustbeam1.tga \
+	desert/rustbeam1_nm.tga \
+	desert/rustbeam2.tga \
+	desert/rustbeam2_nm.tga \
 	desert/rustpanel1.tga \
 	desert/rustpanel1_nm.tga \
 	desert/rustpanel2.tga \
@@ -1148,6 +1153,14 @@ nobase_dist_textures_DATA = \
 	desert/window3_nm.tga \
 	desert/window5.tga \
 	desert/window5_nm.tga \
+	desert/wires1.tga \
+	desert/wires1_nm.tga \
+	desert/wires2.tga \
+	desert/wires2_nm.tga \
+	desert/wires3.tga \
+	desert/wires3_nm.tga \
+	desert/wires4.tga \
+	desert/wires4_nm.tga \
 	desert/wood1.tga \
 	desert/wood2.tga \
 	desert/wood3.tga \
