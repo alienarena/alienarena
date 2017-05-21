@@ -311,11 +311,14 @@ static void R_GetStaticLightingForEnt (const entity_t *ent, vec3_t out_position,
 		{
 			numlights = cl_persistent_ents[ent->number].oldnumlights;
 			VectorCopy (cl_persistent_ents[ent->number].oldlightadd, lightAdd);
-			VectorCopy (cl_persistent_ents[ent->number].oldstaticlight, out_color);
+			if (cl_persistent_ents[ent->number].useoldstaticlight)
+				VectorCopy (cl_persistent_ents[ent->number].oldstaticlight, out_color);
+			else
+				cl_persistent_ents[ent->number].useoldstaticlight = !R_StaticLightPoint (ent->origin, out_color);
 		}
 		else
 		{
-			R_StaticLightPoint (ent->origin, out_color);
+			cl_persistent_ents[ent->number].useoldstaticlight = !R_StaticLightPoint (ent->origin, out_color);
 			VectorCopy (out_color, cl_persistent_ents[ent->number].oldstaticlight);
 			for (i = 0; i < r_lightgroups; i++)
 			{

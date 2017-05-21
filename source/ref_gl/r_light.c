@@ -237,7 +237,7 @@ vec3_t			pointcolor;
 cplane_t		*lightplane;		// used as shadow plane
 vec3_t			lightspot;
 
-int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
+static int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end, qboolean *out_uses_lightstyle)
 {
 	float		front, back, frac;
 	int			side;
@@ -251,6 +251,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	int			maps;
 	int			r;
 	vec3_t		scale;
+	int			stylesize;
 
 	if (node->contents != -1)
 		return -1;		// didn't hit anything
@@ -264,7 +265,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	side = front < 0;
 
 	if ( (back < 0) == side)
-		return RecursiveLightPoint (node->children[side], start, end);
+		return RecursiveLightPoint (node->children[side], start, end, out_uses_lightstyle);
 
 	frac = front / (front-back);
 	mid[0] = start[0] + (end[0] - start[0])*frac;
@@ -272,7 +273,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	mid[2] = start[2] + (end[2] - start[2])*frac;
 
 // go down front side
-	r = RecursiveLightPoint (node->children[side], start, mid);
+	r = RecursiveLightPoint (node->children[side], start, mid, out_uses_lightstyle);
 	if (r >= 0)
 		return r;		// hit something
 
@@ -317,6 +318,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 		VectorClear (pointcolor);
 
 		lightmap += 3*(dt * ((int)floor((float)surf->extents[0]/surf->lightmap_xscale)+1) + ds);
+		stylesize = 3 * ((int)floor((float)surf->extents[1]/surf->lightmap_yscale)+1) * ((int)floor((float)surf->extents[0]/surf->lightmap_xscale)+1);
 
 		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;	maps++)
 		{
@@ -326,14 +328,16 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 			pointcolor[0] += lightmap[0] * scale[0] * (1.0/255);
 			pointcolor[1] += lightmap[1] * scale[1] * (1.0/255);
 			pointcolor[2] += lightmap[2] * scale[2] * (1.0/255);
-			lightmap += 3*((surf->extents[0]>>4)+1) * ((surf->extents[1]>>4)+1);
+			if (surf->styles[maps] != 0)
+				*out_uses_lightstyle = true;
+			lightmap += stylesize;
 		}
 
 		return 1;
 	}
 
 // go down back side
-	return RecursiveLightPoint (node->children[!side], mid, end);
+	return RecursiveLightPoint (node->children[!side], mid, end, out_uses_lightstyle);
 }
 
 /*
@@ -341,9 +345,13 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 R_LightPoint
 ===============
 */
-void R_StaticLightPoint (const vec3_t p, vec3_t color)
+
+// Return true if the point included light from a changing lightstyle. If the
+// return is true, 
+qboolean R_StaticLightPoint (const vec3_t p, vec3_t color)
 {
 	vec3_t		end;
+	qboolean	uses_lightstyle = false;
 	
 	color[0] = color[1] = color[2] = 1.0f;
 
@@ -352,9 +360,11 @@ void R_StaticLightPoint (const vec3_t p, vec3_t color)
 		CM_TerrainLightPoint (p, end, color);
 		VectorScale (color, gl_modulate->value, color);
 	
-		if (r_worldmodel->lightdata && RecursiveLightPoint (r_worldmodel->nodes, p, end) != -1)
+		if (r_worldmodel->lightdata && RecursiveLightPoint (r_worldmodel->nodes, p, end, &uses_lightstyle) != -1)
 			VectorCopy (pointcolor, color);
 	}
+
+	return uses_lightstyle;
 }
 
 void R_DynamicLightPoint (const vec3_t p, vec3_t color)

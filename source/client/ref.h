@@ -59,6 +59,7 @@ typedef struct
 	int leafnum;
 	qboolean sunVisible; //can cast shadows in sunlight
 	vec3_t static_light;
+	qboolean static_light_expires;
 	float alpha;
 	float time;
 } grass_t;
@@ -161,6 +162,7 @@ typedef struct {
 	qboolean			setlightstuff;
 	float				oldnumlights;
 	vec3_t				oldlightadd;
+	qboolean			useoldstaticlight;
 	vec3_t				oldstaticlight;
 	vec3_t				oldorigin;
 } cl_entity_pers_t;
