@@ -167,10 +167,14 @@ nobase_dist_maps_DATA = \
 	meshes/desert/oiltank.jpg \
 	meshes/desert/oiltank.md2 \
 	meshes/desert/oiltank_normal.jpg \
+	meshes/desert/platewall1.iqm \
 	meshes/desert/platewall1.md2 \
+	meshes/desert/platewall1.skin \
 	meshes/desert/platewall1.tga \
 	meshes/desert/platewall1_normal.tga \
+	meshes/desert/platewall2.iqm \
 	meshes/desert/platewall2.md2 \
+	meshes/desert/platewall2.skin \
 	meshes/desert/platewall2.tga \
 	meshes/desert/platewall2_normal.tga \
 	meshes/desert/saucer.jpg \
