@@ -217,6 +217,6 @@ void R_SimulateAllRagdolls (void);
 void R_ClearAllRagdolls (void);
 void RGD_CreateWorldObject (void);
 void RGD_DestroyWorldObject (void);
-void RGD_AddNewRagdoll (entity_t *ent, float velocity);
+void RGD_AddNewRagdoll (const entity_t *ent, float velocity);
 void RGD_DestroyWorldTrimesh (void);
 void RGD_BuildWorldTrimesh (void);

@@ -1218,7 +1218,7 @@ static struct
 	RS_STAGE_UNIFORMS
 #undef X
 } rs_stage_uniform_vals;
-static void RS_SetupGLState (int dynamic, qboolean shadows)
+static void RS_SetupGLState (const entity_t *ent, int dynamic, qboolean shadows)
 {
 	int i;
 	
@@ -1247,9 +1247,9 @@ static void RS_SetupGLState (int dynamic, qboolean shadows)
 		float rotationMatrix[3][3];
 
 		// because we are translating our entities, we need to supply the shader with the actual position of this mesh
-		glUniform3fvARB (rscript_uniforms[dynamic].meshPosition, 1, (const GLfloat *)currententity->origin);
+		glUniform3fvARB (rscript_uniforms[dynamic].meshPosition, 1, (const GLfloat *)ent->origin);
 
-		AnglesToMatrix3x3 (currententity->angles, rotationMatrix);
+		AnglesToMatrix3x3 (ent->angles, rotationMatrix);
 		glUniformMatrix3fvARB (rscript_uniforms[dynamic].meshRotation, 1, GL_TRUE, (const GLfloat *) rotationMatrix);
 	}
 
@@ -1296,10 +1296,10 @@ qboolean rs_in_group = false;
 // *no other types of surfaces* being drawn, you can surround them with 
 // RS_Begin_Group and RS_End_Group for some extra performance.
 
-void RS_Begin_Group (void)
+void RS_Begin_Group (const entity_t *ent)
 {
 	rs_in_group = true;
-	RS_SetupGLState (CUR_NUM_DLIGHTS, true);
+	RS_SetupGLState (ent, CUR_NUM_DLIGHTS, true);
 }
 
 void RS_End_Group (void)
@@ -1308,8 +1308,8 @@ void RS_End_Group (void)
 	RS_CleanupGLState ();
 }
 
-void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
-				qboolean translucent, rs_lightmaptype_t lm,
+void RS_Draw (	rscript_t *rs, const entity_t *ent, int lmtex, vec2_t rotate_center,
+				vec3_t normal, qboolean translucent, rs_lightmaptype_t lm,
 				qboolean enable_dlights, qboolean enable_shadows,
 				void (*draw_callback) (void))
 {
@@ -1329,7 +1329,7 @@ void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
 	dynamic = enable_dlights ? CUR_NUM_DLIGHTS : 0;
 
 	if (!rs_in_group || rs_dlights_enabled != dynamic || rs_shadows_enabled != enable_shadows)
-		RS_SetupGLState (dynamic, enable_shadows);
+		RS_SetupGLState (ent, dynamic, enable_shadows);
 	
 	do
 	{
@@ -1475,7 +1475,8 @@ void RS_DrawSurface (msurface_t *surf, rscript_t *rs)
 	
 	translucent = (surf->texinfo->flags & (SURF_TRANS33 | SURF_TRANS66)) != 0;
 	
-	RS_Draw (	rs, lmtex, rotate_center, surf->plane->normal, translucent,
+	RS_Draw (	rs, currententity, lmtex, rotate_center, surf->plane->normal,
+				translucent,
 				translucent?rs_lightmap_off:rs_lightmap_separate_texcoords,
 				true, !translucent, BSP_DrawVBOAccum );
 	

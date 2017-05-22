@@ -622,7 +622,7 @@ static void R_DrawRSSurfaces (void)
 	qglPolygonOffset(-3, -2);
 	
 	BSP_InvalidateVBO ();
-	RS_Begin_Group ();
+	RS_Begin_Group (currententity);
 	
 	if (r_caustic_surfaces != NULL)
 	{
@@ -636,7 +636,8 @@ static void R_DrawRSSurfaces (void)
 			for (; s && s->lightmaptexturenum == currLMTex; s = s->causticchain)
 				BSP_AddSurfToVBOAccum (s);
 			
-			RS_Draw (	rs_caustics, gl_state.lightmap_textures + currLMTex,
+			RS_Draw (	rs_caustics, currententity,
+						gl_state.lightmap_textures + currLMTex,
 						vec3_origin, vec3_origin, false,
 						rs_lightmap_separate_texcoords, 
 						false, false, BSP_DrawVBOAccum );
@@ -683,7 +684,8 @@ static void R_DrawRSSurfaces (void)
 					for (; s && s->lightmaptexturenum == currLMTex; s = s->texturechain)
 						BSP_AddSurfToVBOAccum (s);
 				
-					RS_Draw (	rs, gl_state.lightmap_textures + currLMTex,
+					RS_Draw (	rs, currententity,
+								gl_state.lightmap_textures + currLMTex,
 								vec3_origin, vec3_origin, false,
 								rs_lightmap_separate_texcoords, 
 								true, true, BSP_DrawVBOAccum );

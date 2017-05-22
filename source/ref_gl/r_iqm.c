@@ -34,7 +34,7 @@ void Vec4_CompleteQuatW (vec4_t q)
 	q[3] = -sqrt (max (1.0 - pow (VectorLength (q_xyz), 2), 0.0));
 }
 
-void Matrix3x4ForEntity (matrix3x4_t *out, entity_t *ent)
+void Matrix3x4ForEntity (matrix3x4_t *out, const entity_t *ent)
 {
 	matrix3x4_t rotmat;
 	vec3_t rotaxis;
@@ -584,29 +584,30 @@ do { \
 	return true;
 }
 
-float IQM_SelectFrame (void)
+static float IQM_SelectFrame (const entity_t *ent)
 {
 	float		time;
 	
 	//frame interpolation
-	time = (Sys_Milliseconds() - currententity->frametime) / 100;
+	time = (Sys_Milliseconds () - ent->frametime) / 100;
 	
-	if(time > 1.0)
+	if (time > 1.0)
 		time = 1.0;
 
 	//Check for stopped death anims
-	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
+	if (ent->frame == 257 || ent->frame == 237 || ent->frame == 219)
 		time = 0;	
 	
-	return currententity->frame + time;
+	return ent->frame + time;
 }
 
-int IQM_NextFrame(int frame)
+static int IQM_NextFrame (const entity_t *ent, const model_t *mod)
 {
 	int outframe;
+	int frame = ent->frame;
 
 	//just for now
-	if(currententity->flags & RF_WEAPONMODEL)
+	if (ent->flags & RF_WEAPONMODEL)
 	{
 		outframe = frame + 1;
 	}
@@ -616,7 +617,7 @@ int IQM_NextFrame(int frame)
 		{
 			//map models can be 24 or 40 frames
 			case 23:
-				if(currentmodel->num_poses > 24)
+				if (mod->num_poses > 24)
 					outframe = frame + 1;
 				else
 					outframe = 0;
@@ -707,7 +708,7 @@ static inline void IQM_Bend (matrix3x4_t *temp, matrix3x4_t rmat, matrix3x4_t *b
 	Matrix3x4_Copy(outjoint, *temp);
 }
 
-static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
+static void IQM_AnimateFrame_standard (const entity_t *ent, const model_t *mod, matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
 {
 	int frame1, frame2;
 	float frameoffset;
@@ -718,26 +719,26 @@ static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMAT
 	float modelpitch;
 	float modelroll;
 	
-	curframe = IQM_SelectFrame ();
-	nextframe = IQM_NextFrame (currententity->frame);
+	curframe = IQM_SelectFrame (ent);
+	nextframe = IQM_NextFrame (ent, mod);
 
 	frame1 = (int)floor (curframe);
 	frame2 = nextframe;
 	frameoffset = curframe - frame1;
-	frame1 %= currentmodel->num_poses;
-	frame2 %= currentmodel->num_poses;
+	frame1 %= mod->num_poses;
+	frame2 %= mod->num_poses;
 
-	mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints];
-	mat2 = &currentmodel->frames[frame2 * currentmodel->num_joints];
+	mat1 = &mod->frames[frame1 * mod->num_joints];
+	mat2 = &mod->frames[frame2 * mod->num_joints];
 	
-	modelpitch = DEG2RAD (currententity->angles[PITCH]); 
-	modelroll = DEG2RAD (currententity->angles[ROLL]);
+	modelpitch = DEG2RAD (ent->angles[PITCH]); 
+	modelroll = DEG2RAD (ent->angles[ROLL]);
 	
 	// Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
 	// Concatenate the result with the inverse of the base pose.
 	// You would normally do animation blending and inter-frame blending here in a 3D engine.
 
-	for (i = 0; i < currentmodel->num_joints; i++)
+	for (i = 0; i < mod->num_joints; i++)
 	{
 		const char *currentjoint_name;
 		signed int currentjoint_parent;
@@ -748,8 +749,8 @@ static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMAT
 
 		Matrix3x4_Add (&mat, mat, temp);
 		
-		currentjoint_name = &currentmodel->jointname[currentmodel->joints[i].name];
-		currentjoint_parent = currentmodel->joints[i].parent;
+		currentjoint_name = &mod->jointname[mod->joints[i].name];
+		currentjoint_parent = mod->joints[i].parent;
 
 		if (currentjoint_parent >= 0)
 			Matrix3x4_Multiply (&outframe[i], outframe[currentjoint_parent], mat);
@@ -762,7 +763,7 @@ static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMAT
 			VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
 			Matrix3x4GenRotate(&rmat, modelpitch, rot);
 			
-			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+			IQM_Bend (&temp, rmat, &mod->baseframe[i], &outframe[i]);
 		}
 		//now rotate the legs back
 		if (!strcmp(currentjoint_name, "hip.l") || !strcmp(currentjoint_name, "hip.r"))
@@ -770,7 +771,7 @@ static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMAT
 			VectorSet(rot, 0, 1, 0);
 			Matrix3x4GenRotate(&rmat, -modelpitch, rot);
 			
-			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+			IQM_Bend (&temp, rmat, &mod->baseframe[i], &outframe[i]);
 		}
 
 		//bend the model at the waist for player roll
@@ -779,7 +780,7 @@ static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMAT
 			VectorSet(rot, 1, 0, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
 			Matrix3x4GenRotate(&rmat, modelroll, rot);
 			
-			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+			IQM_Bend (&temp, rmat, &mod->baseframe[i], &outframe[i]);
 		}
 		//now rotate the legs back
 		if (!strcmp(currentjoint_name, "hip.l") || !strcmp(currentjoint_name, "hip.r"))
@@ -787,28 +788,28 @@ static void IQM_AnimateFrame_standard (matrix3x4_t outframe[SKELETAL_MAX_BONEMAT
 			VectorSet(rot, 1, 0, 0);
 			Matrix3x4GenRotate(&rmat, -modelroll, rot);
 			
-			IQM_Bend (&temp, rmat, &currentmodel->baseframe[i], &outframe[i]);
+			IQM_Bend (&temp, rmat, &mod->baseframe[i], &outframe[i]);
 		}
 	}
 }
 
-static void IQM_AnimateFrame_ragdoll (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS], const matrix3x4_t *initframe)
+static void IQM_AnimateFrame_ragdoll (const entity_t *ent, const model_t *mod, matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
 {
 	//we only deal with one frame
 
 	//animate using the rotations from our corresponding ODE objects.
 	int i, j;
 	{
-		for (i = 0; i < currentmodel->num_joints; i++)
+		for (i = 0; i < mod->num_joints; i++)
 		{
 			int parent;
 
 			for (j = 0; j < RagDollBindsCount; j++)
 			{
-				if (!strcmp (&currentmodel->jointname[currentmodel->joints[i].name], RagDollBinds[j].name))
+				if (!strcmp (&mod->jointname[mod->joints[i].name], RagDollBinds[j].name))
 				{
 					matrix3x4_t rmat;
-					RagDollObject_t *object = &currententity->RagDollData->RagDollObject[RagDollBinds[j].object];
+					RagDollObject_t *object = &ent->RagDollData->RagDollObject[RagDollBinds[j].object];
 					const dReal *odeRot = dBodyGetRotation (object->body);
 					const dReal *odePos = dBodyGetPosition (object->body);
 					Matrix3x4GenFromODE (&rmat, odeRot, odePos);
@@ -817,13 +818,13 @@ static void IQM_AnimateFrame_ragdoll (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS
 				}
 			}
 
-			parent = currentmodel->joints[i].parent;
+			parent = mod->joints[i].parent;
 			if (parent >= 0)
 			{
 				matrix3x4_t mat;
 				// FIXME: inefficient
-				Matrix3x4_Invert(&mat, initframe[parent]);
-				Matrix3x4_Multiply(&mat, mat, initframe[i]);
+				Matrix3x4_Invert (&mat, ent->RagDollData->initframe[parent]);
+				Matrix3x4_Multiply (&mat, mat, ent->RagDollData->initframe[i]);
 				Matrix3x4_Multiply (&outframe[i], outframe[parent], mat);
 			}
 			else
@@ -834,10 +835,10 @@ static void IQM_AnimateFrame_ragdoll (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS
 	}
 }
 
-void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
+void IQM_AnimateFrame (const entity_t *ent, const model_t *mod, matrix3x4_t outframe[SKELETAL_MAX_BONEMATS])
 {
-	if (currententity->ragdoll)
-		IQM_AnimateFrame_ragdoll (outframe, currententity->RagDollData->initframe);
+	if (ent->ragdoll)
+		IQM_AnimateFrame_ragdoll (ent, mod, outframe);
 	else
-		IQM_AnimateFrame_standard (outframe);
+		IQM_AnimateFrame_standard (ent, mod, outframe);
 }

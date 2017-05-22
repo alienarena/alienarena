@@ -64,14 +64,14 @@ static void norm3 (vec3_t v, vec3_t out)
 	}
 }
 
-extern void Matrix3x4ForEntity(matrix3x4_t *out, entity_t *ent);
+extern void Matrix3x4ForEntity (matrix3x4_t *out, const entity_t *ent);
 extern void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in);
 extern void Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
 extern void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
 extern void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale);
 
 //routine to create ragdoll body parts between two joints
-static void RGD_addBody (model_t *mod, int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
+static void RGD_addBody (const model_t *mod, int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
 {
 	//Adds a capsule body between joint positions p1 and p2 and with given
 	//radius to the ragdoll.
@@ -167,7 +167,7 @@ static void RGD_addFixedJoint (int RagDollID, matrix3x4_t *bindmat, int jointID,
 	dJointSetFixed(RagDoll[RagDollID].RagDollJoint[jointID]);
 }
 
-static void RGD_addHingeJoint (model_t *mod, int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
+static void RGD_addHingeJoint (const model_t *mod, int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
 {
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -203,7 +203,7 @@ static void RGD_addHingeJoint (model_t *mod, int RagDollID, matrix3x4_t *bindmat
 	dJointSetHingeParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop,  hiStop);
 }
 
-static void RGD_addBallJoint (model_t *mod, int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor)
+static void RGD_addBallJoint (const model_t *mod, int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor)
 {
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -223,7 +223,7 @@ static void RGD_addBallJoint (model_t *mod, int RagDollID, matrix3x4_t *bindmat,
 	dJointSetBallAnchor(RagDoll[RagDollID].RagDollJoint[jointID], wanchor[0], wanchor[1], wanchor[2]);
 }
 
-static void RGD_addUniversalJoint (model_t *mod, int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2,
+static void RGD_addUniversalJoint (const model_t *mod, int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2,
 	float loStop1, float hiStop1, float loStop2, float hiStop2)
 {
 	vec3_t wanchor, waxis1, waxis2;
@@ -371,7 +371,7 @@ RagDollBind_t RagDollBinds[] =
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
 //build and set initial position of ragdoll
-static void RGD_RagdollBody_Init (entity_t *ent, model_t *mod, int RagDollID, float velocity)
+static void RGD_RagdollBody_Init (const entity_t *ent, const model_t *mod, int RagDollID, float velocity)
 {
 	//Ragdoll  positions
 	vec3_t R_SHOULDER_POS;
@@ -413,9 +413,9 @@ static void RGD_RagdollBody_Init (entity_t *ent, model_t *mod, int RagDollID, fl
 
 	// IQM is currently the only supported mesh type for ragdolls
 	assert (ent->model->type == mod_iqm);
-	IQM_AnimateFrame (RagDoll[RagDollID].initframe);
+	IQM_AnimateFrame (ent, mod, RagDoll[RagDollID].initframe);
 
-	_VectorCopy (ent->angles, RagDoll[RagDollID].angles);
+	VectorCopy (ent->angles, RagDoll[RagDollID].angles);
 	VectorCopy (ent->origin, RagDoll[RagDollID].origin);
 	VectorCopy (ent->origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
@@ -927,7 +927,7 @@ void R_ClearAllRagdolls( void )
 	RGD_DestroyWorldTrimesh();
 }
 
-void RGD_AddNewRagdoll (entity_t *ent, float velocity)
+void RGD_AddNewRagdoll (const entity_t *ent, float velocity)
 {
 	int RagDollID, i;
 	vec3_t dist;
