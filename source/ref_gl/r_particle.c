@@ -1395,21 +1395,20 @@ void R_DrawSimpleItems ( void )
 
 	for (i = 0 ; i < r_newrefdef.num_entities; i++)
 	{
-		currententity = &r_newrefdef.entities[i];
-		if (!currententity->model || !currententity->model->simple_texnum)
+	    model_t *mod = r_newrefdef.entities[i].model;
+		if (!mod || !mod->simple_texnum)
 			continue;
-		currentmodel = currententity->model;
 		
 		VArray = &VArrayVerts[0];
 
-		VectorCopy (currententity->origin, origin);
+		VectorCopy (r_newrefdef.entities[i].origin, origin);
 
 		//PVS checking is not necessary; the server already does that for
 		//entities.
 		if (CM_FastTrace (r_origin, origin, r_worldmodel->firstnode, MASK_VISIBILILITY))
 		{
-			GL_Bind (currentmodel->simple_texnum);
-			switch (currentmodel->simple_color)
+			GL_Bind (mod->simple_texnum);
+			switch (mod->simple_color)
 			{
 				case simplecolor_white:
 					qglColor4f( 1, 1, 1, 1 ); //uses texture for color unless specified
@@ -1424,14 +1423,14 @@ void R_DrawSimpleItems ( void )
 					qglColor4f( 1, 0, 1, 1 ); 
 					break;
 			}
-			if (	(currentmodel->simple_texnum == s_item17->texnum) ||
-					(currentmodel->simple_texnum == s_item18->texnum) ||
-					(currentmodel->simple_texnum == s_item19->texnum) ||
-					(currentmodel->simple_texnum == s_item20->texnum) ||
-					(currentmodel->simple_texnum == s_item21->texnum) ||
-					(currentmodel->simple_texnum == s_item22->texnum) ||
-					(currentmodel->simple_texnum == s_item23->texnum) ||
-					(currentmodel->simple_texnum == s_item24->texnum))
+			if (	(mod->simple_texnum == s_item17->texnum) ||
+					(mod->simple_texnum == s_item18->texnum) ||
+					(mod->simple_texnum == s_item19->texnum) ||
+					(mod->simple_texnum == s_item20->texnum) ||
+					(mod->simple_texnum == s_item21->texnum) ||
+					(mod->simple_texnum == s_item22->texnum) ||
+					(mod->simple_texnum == s_item23->texnum) ||
+					(mod->simple_texnum == s_item24->texnum))
 			{
 				scale = 40.0;
 			}
