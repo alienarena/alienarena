@@ -397,7 +397,7 @@ void R_DrawSkyBox (void)
 				continue;
 			
 			skyboxside = i;
-			RS_Draw (rs, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, false, Sky_DrawQuad_Callback);
+			RS_Draw (rs, NULL, 0, vec3_origin, vec3_origin, false, rs_lightmap_off, false, false, Sky_DrawQuad_Callback);
 		}
 		
 		// restore the original blend mode

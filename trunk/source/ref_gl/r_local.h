@@ -268,8 +268,8 @@ void R_SetupFog (float distance_boost);
 extern void R_SetupViewport (void);
 extern void R_RenderView (refdef_t *fd);
 extern void GL_ScreenShot_f (void);
-extern void R_Mesh_Draw (void);
-extern void R_Mesh_ExtractLightmap (entity_t *ent, model_t *mod);
+extern void R_Mesh_Draw (entity_t *ent, const model_t *mod);
+extern void R_Mesh_ExtractLightmap (entity_t *ent, const model_t *mod);
 extern void R_DrawBrushModel (void);
 extern void R_DrawWorldSurfs (void);
 extern void R_DrawAlphaSurfaces (void);
@@ -294,7 +294,7 @@ extern void R_SubdivideSurface (msurface_t *fa, int firstedge, int numedges);
 extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 extern qboolean R_CullOrigin(vec3_t origin);
 extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
-extern void R_RotateForEntity (entity_t *e);
+void R_RotateForEntity (const entity_t *e);
 extern void R_MarkWorldSurfs (void);
 void R_RenderWaterPolys (msurface_t *fa);
 extern void R_ReadFogScript(char config_file[128]);
@@ -540,9 +540,9 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 
 extern void		R_CheckFBOExtensions (void);
 extern void		R_GenerateShadowFBO(void);
-extern void		R_Mesh_DrawCaster (void);
+extern void		R_Mesh_DrawCaster (entity_t *ent, const model_t *mod);
 void			R_GenerateGlobalShadows (void);
-extern void		R_GenerateEntityShadow (const vec3_t statLightPosition);
+extern void		R_GenerateEntityShadow (entity_t *ent, const vec3_t statLightPosition);
 extern void		R_DrawBSPShadowCasters (void);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
@@ -800,11 +800,11 @@ extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
-extern void IQM_AnimateFrame (matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
+extern void IQM_AnimateFrame (const entity_t *ent, const model_t *mod, matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
 //md2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
-void MD2_SelectFrame (void);
+void MD2_SelectFrame (entity_t *ent, const model_t *mod);
 
 //terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);

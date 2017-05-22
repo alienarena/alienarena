@@ -422,7 +422,7 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 }
 
 // should be able to handle every mesh type
-void R_RotateForEntity (entity_t *e)
+void R_RotateForEntity (const entity_t *e)
 {
     qglTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
 
@@ -546,7 +546,7 @@ static void R_DrawEntity (void)
 	    case mod_iqm:
 	    case mod_terrain:
 	    case mod_decal:
-	        R_Mesh_Draw ();
+	        R_Mesh_Draw (currententity, currentmodel);
 			break;
 		case mod_brush:
 			R_DrawBrushModel ();

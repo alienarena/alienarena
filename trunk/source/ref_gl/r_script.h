@@ -197,10 +197,10 @@ typedef enum
 	rs_lightmap_on,
 	rs_lightmap_separate_texcoords
 } rs_lightmaptype_t;
-void RS_Begin_Group (void);
+void RS_Begin_Group (const entity_t *ent);
 void RS_End_Group (void);
-void RS_Draw (	rscript_t *rs, int lmtex, vec2_t rotate_center, vec3_t normal,
-				qboolean translucent, rs_lightmaptype_t lm,
+void RS_Draw (	rscript_t *rs, const entity_t *ent, int lmtex, vec2_t rotate_center,
+				vec3_t normal, qboolean translucent, rs_lightmaptype_t lm,
 				qboolean enable_dlights, qboolean enable_shadows,
 				void (*draw_callback) (void));
 void RS_DrawSurface (msurface_t *surf, rscript_t *rs);

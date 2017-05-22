@@ -469,20 +469,17 @@ SM_RecursiveWorldNode2 - this variant of the classic routine renders only one si
 
 static float fadeshadow_cutoff;
 
-static qboolean SM_SurfaceIsShadowed (const msurface_t *surf, const vec3_t origin, const vec3_t statLightPosition)
+static qboolean SM_SurfaceIsShadowed (const msurface_t *surf, const vec3_t origin, const vec3_t absmins, const vec3_t absmaxs, const vec3_t statLightPosition)
 {
 	const glpoly_t	*p = surf->polys;
 	const float		*v, *v2;
 	int			i;
 	float		sq_len, vsq_len;
 	vec3_t		vDist;
-	vec3_t		tmp, mins, maxs;
+	vec3_t		tmp;
 	qboolean	ret = false;
 
-	VectorAdd (currentmodel->maxs, origin, maxs);
-	VectorAdd (currentmodel->mins, origin, mins);
-
-	VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+	VectorSubtract (absmaxs, absmins, tmp);
 
 	/* lengths used for comparison only, so squared lengths may be used.*/
 	sq_len = tmp[0]*tmp[0] + tmp[1]*tmp[1] + tmp[2]*tmp[2] ;
@@ -513,7 +510,7 @@ static qboolean SM_SurfaceIsShadowed (const msurface_t *surf, const vec3_t origi
 		plane.signbits = SignbitsForPlane (&plane);
 
 		// CullBox-type operation
-		if (BoxOnPlaneSide (mins, maxs, &plane) == 2)
+		if (BoxOnPlaneSide (absmins, absmaxs, &plane) == 2)
 			//completely clipped; we can skip this surface
 			return false;
 
@@ -534,7 +531,7 @@ static qboolean SM_SurfaceIsShadowed (const msurface_t *surf, const vec3_t origi
 	return ret;
 }
 
-static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, const vec3_t origin, const vec3_t absmins, const vec3_t absmaxs, const vec3_t statLightPosition)
+static void SM_RecursiveWorldNode2 (const entity_t *ent, mnode_t *node, int clipflags, const vec3_t absmins, const vec3_t absmaxs, const vec3_t statLightPosition)
 {
 	int			c;
 	float		dist, dist_model, dist_light;
@@ -598,7 +595,7 @@ static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, const vec3_t o
 	plane = node->plane;
 	
 	dist = point_dist_from_plane (plane, r_origin);
-	dist_model = point_dist_from_plane (plane, origin);
+	dist_model = point_dist_from_plane (plane, ent->origin);
 	dist_light = point_dist_from_plane (plane, statLightPosition);
 	
 	side = dist < 0;
@@ -624,7 +621,7 @@ static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, const vec3_t o
 	}
 	
 	// recurse down the children, front side first
-	SM_RecursiveWorldNode2 (node->children[side], clipflags, origin, absmins, absmaxs, statLightPosition);
+	SM_RecursiveWorldNode2 (ent, node->children[side], clipflags, absmins, absmaxs, statLightPosition);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
@@ -647,7 +644,7 @@ static void SM_RecursiveWorldNode2 (mnode_t *node, int clipflags, const vec3_t o
 		{
 			if (!( surf->iflags & ISURF_DRAWTURB ) )
 			{
-				if (SM_SurfaceIsShadowed (surf, origin, statLightPosition))
+				if (SM_SurfaceIsShadowed (surf, ent->origin, absmins, absmaxs, statLightPosition))
 					BSP_AddSurfToVBOAccum (surf);
 			}
 		}
@@ -670,10 +667,10 @@ skip_draw:
 		return;
 
 	// recurse down the back side
-	SM_RecursiveWorldNode2 (node->children[!side], clipflags, origin, absmins, absmaxs, statLightPosition);
+	SM_RecursiveWorldNode2 (ent, node->children[!side], clipflags, absmins, absmaxs, statLightPosition);
 }
 
-static void R_RedrawWorldWithShadow (const vec3_t origin, const vec3_t statLightPosition)
+static void R_RedrawWorldWithShadow (const entity_t *ent, const model_t *mod, const vec3_t statLightPosition)
 {
 	vec3_t absmins, absmaxs;
 	
@@ -688,12 +685,12 @@ static void R_RedrawWorldWithShadow (const vec3_t origin, const vec3_t statLight
 	R_SetShadowmapUniforms (&secondpass_bsp_shadow_uniforms.shadowmap_uniforms, 6, true);
 	glUniform1fARB (secondpass_bsp_shadow_uniforms.fade, fadeShadow);
 	
-	VectorAdd (currentmodel->mins, origin, absmins);
-	VectorAdd (currentmodel->maxs, origin, absmaxs);
+	VectorAdd (mod->mins, ent->origin, absmins);
+	VectorAdd (mod->maxs, ent->origin, absmaxs);
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	
-	SM_RecursiveWorldNode2 (r_worldmodel->nodes, 15, origin, absmins, absmaxs, statLightPosition);
+	SM_RecursiveWorldNode2 (ent, r_worldmodel->nodes, 15, absmins, absmaxs, statLightPosition);
 	
 	BSP_FlushVBOAccum ();
 	
@@ -771,7 +768,7 @@ static void SM_TeardownGLState (void)
 extern cvar_t *cl_simpleitems;
 
 // returns false if the entity can cast a shadow
-static qboolean SM_Cull (entity_t *ent)
+static qboolean SM_Cull (const entity_t *ent)
 {
 	return
 		(ent->flags & RF_NOSHADOWS) || (ent->flags & RF_TRANSLUCENT) ||
@@ -781,42 +778,43 @@ static qboolean SM_Cull (entity_t *ent)
 		(r_ragdolls->integer && ent->model->type == mod_iqm && ent->model->hasRagDoll && !ent->ragdoll && ent->frame > 198 && ent->frame < 260);
 }
 
-static void R_DrawDynamicCasterEntity (vec3_t lightOrigin)
+static void R_DrawDynamicCasterEntity (entity_t *ent, vec3_t lightOrigin)
 {
 	vec3_t	dist;
+	model_t *mod;
 	
-	if (SM_Cull (currententity))
+	if (SM_Cull (ent))
 		return;
 
 	//distance from light, if too far, don't render(to do - check against brightness for dist!)
-	VectorSubtract (lightOrigin, currententity->origin, dist);
+	VectorSubtract (lightOrigin, ent->origin, dist);
 	if (VectorLength (dist) > 256.0f)
 		return;
 
 	//trace visibility from light - we don't render objects the light doesn't hit!
-	if (!CM_FastTrace (currententity->origin, lightOrigin, r_worldmodel->firstnode, MASK_OPAQUE))
+	if (!CM_FastTrace (ent->origin, lightOrigin, r_worldmodel->firstnode, MASK_OPAQUE))
 		return;
 
-	currentmodel = currententity->model;
+	mod = ent->model;
 
 	//get distance
-	VectorSubtract(r_origin, currententity->origin, dist);
+	VectorSubtract (r_origin, ent->origin, dist);
 	
 	//set lod if available
 	if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
 	{
-		if(currententity->lod2)
-			currentmodel = currententity->lod2;
+		if (ent->lod2)
+			mod = ent->lod2;
 	}
 	else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
 	{
-		if(currententity->lod1)
-			currentmodel = currententity->lod1;
+		if (ent->lod1)
+			mod = ent->lod1;
 	}
-	if (currententity->lod2)
-		currentmodel = currententity->lod2;
+	if (ent->lod2)
+		mod = ent->lod2;
 
-	R_Mesh_DrawCaster ();
+	R_Mesh_DrawCaster (ent, mod);
 }
 
 static void R_DrawDynamicCaster(void)
@@ -846,9 +844,7 @@ static void R_DrawDynamicCaster(void)
 	//render entities near light
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
 	{
-		currententity = &r_newrefdef.entities[i];
-
-		R_DrawDynamicCasterEntity (lightOrigin);
+		R_DrawDynamicCasterEntity (&r_newrefdef.entities[i], lightOrigin);
 	}
 
 	if (r_ragdolls->integer)
@@ -858,9 +854,7 @@ static void R_DrawDynamicCaster(void)
 			if (RagDoll[RagDollID].destroyed)
 				continue;
 		
-			currententity = &RagDollEntity[RagDollID];
-		
-			R_DrawDynamicCasterEntity (lightOrigin);
+			R_DrawDynamicCasterEntity (&RagDollEntity[RagDollID], lightOrigin);
 		}
 	}
 
@@ -954,36 +948,30 @@ void R_DrawVegetationCasters ( qboolean forShadows )
 static void R_DrawEntityCaster (entity_t *ent)
 {
 	vec3_t	dist;
-	model_t *prevModel;
-
-	prevModel = currentmodel;
+	const model_t *mod = ent->model;
 	
 	// We only do LODs for non-ragdoll meshes-- for now.
 	if (!ent->ragdoll)
 	{
-		currentmodel = ent->model;
-
 		//get view distance
-		VectorSubtract(r_origin, ent->origin, dist);
+		VectorSubtract (r_origin, ent->origin, dist);
 		
 		//set lod if available
 		if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
 		{
-			if(ent->lod2)
-				currentmodel = ent->lod2;
+			if (ent->lod2)
+				mod = ent->lod2;
 		}
 		else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
 		{
-			if(ent->lod1)
-				currentmodel = ent->lod1;
+			if (ent->lod1)
+				mod = ent->lod1;
 		}
 		if (ent->lod2)
-			currentmodel = ent->lod2;
+			mod = ent->lod2;
 	}
 
-	R_Mesh_DrawCaster ();
-
-	currentmodel = prevModel;
+	R_Mesh_DrawCaster (ent, mod);
 }
 
 static void R_DrawSunShadows (void)
@@ -1016,16 +1004,15 @@ static void R_DrawSunShadows (void)
 	{
 		trace_t tr;
 		vec3_t start;
+		entity_t *ent = &r_newrefdef.entities[i];
 
-		currententity = &r_newrefdef.entities[i];
-
-		if (SM_Cull (currententity))
+		if (SM_Cull (ent))
 			continue;
 
-		if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+		if (ent->model->type != mod_iqm && ent->model->type != mod_md2)
 			continue;
 
-		if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
+		if (ent->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
 			continue;
 
 		// We don't do a trace to the sun entity because that results in shadows
@@ -1033,7 +1020,7 @@ static void R_DrawSunShadows (void)
 		// detecting indoors.
 
 		//for now do it anyway - make sure it's unblocked from the sun - otherwise horrible artifacts occur indoors
-		VectorCopy(currententity->origin, start);
+		VectorCopy (ent->origin, start);
 		start[2] += 128; //in cases of being buried a bit in terrain, or bobbing
 		tr = CM_BoxTrace(start, r_sunLight->origin, vec3_origin, vec3_origin, 0, MASK_VISIBILILITY);
 
@@ -1044,13 +1031,13 @@ static void R_DrawSunShadows (void)
 		}
 
 		//if this entity isn't close to the player, don't bother
-		VectorSubtract (r_origin, currententity->origin, dist);
+		VectorSubtract (r_origin, ent->origin, dist);
 		if (VectorLength (dist) > 5.0 * r_shadowcutoff->value)
 			continue;
 		
 		r_sunShadowsOn = true;
 
-		R_DrawEntityCaster (currententity);
+		R_DrawEntityCaster (ent);
 	}
 	
 	SM_SetTextureMatrix (5);
@@ -1105,7 +1092,7 @@ static void SM_TeardownCasterMatrices ()
 	qglMatrixMode (GL_MODELVIEW);
 }
 
-void R_GenerateEntityShadow (const vec3_t statLightPosition)
+void R_GenerateEntityShadow (entity_t *ent, const vec3_t statLightPosition)
 {
 	r_nonSunStaticShadowsOn = false;
 
@@ -1115,29 +1102,29 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 		float rad, zOffset;
 		int i;
 
-		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || currententity->flags & RF_MENUMODEL)
+		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || ent->flags & RF_MENUMODEL)
 			return;
 		
-		if (SM_Cull (currententity))
+		if (SM_Cull (ent))
 			return;
 		
 		// don't bother casting the shadow unless there are non-sun lights!
-		if (cl_persistent_ents[currententity->number].oldnumlights < 3.0f)
+		if (cl_persistent_ents[ent->number].oldnumlights < 3.0f)
  			return;
 
 		//root entity camera info
-		VectorCopy(currententity->origin, origin);
-		zOffset = currententity->model->maxs[2];
+		VectorCopy (ent->origin, origin);
+		zOffset = ent->model->maxs[2];
 
-		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
+		VectorSubtract (ent->model->maxs, ent->model->mins, tmp);
 		VectorScale (tmp, 1.666, tmp);
 		rad = VectorLength (tmp);		
 
-		if( R_CullSphere( currententity->origin, rad, 15 ) )
+		if (R_CullSphere (ent->origin, rad, 15))
 			return;
 
 		//get view distance
-		VectorSubtract(r_origin, currententity->origin, dist);
+		VectorSubtract (r_origin, ent->origin, dist);
 
 		//fade out shadows both by distance from view, and by distance from light.  Smaller entities fade out faster.
 		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST) * (zOffset/64 > 1.0 ? 1.0 : zOffset/64); 
@@ -1168,7 +1155,7 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 		SM_SetupGLState ();
 		qglViewport (0, 0, r_depthtextures[deptex_otherstatic]->upload_width, r_depthtextures[deptex_otherstatic]->upload_height);
 		
-		R_DrawEntityCaster(currententity);
+		R_DrawEntityCaster (ent);
 		
 		SM_SetTextureMatrix (6);
 		SM_TeardownGLState ();
@@ -1179,16 +1166,13 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 		GLSTATE_ENABLE_BLEND
 		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
-		R_RedrawWorldWithShadow (currententity->origin, statLightPosition);
+		R_RedrawWorldWithShadow (ent, ent->model, statLightPosition);
 
 		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GLSTATE_DISABLE_BLEND
 
-		if (!(currententity->flags & RF_VIEWERMODEL))
+		if (!(ent->flags & RF_VIEWERMODEL))
 		{
-			//now check for any entities close to this one, and add to the depth buffer 
-			entity_t *prevEntity = currententity;
-			
 			SM_SetupCasterMatrices (origin, zOffset, statLightPosition);
 			qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_otherstatic]);
 			SM_SetupGLState ();
@@ -1196,22 +1180,22 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 
 			for (i = 0 ; i < r_newrefdef.num_entities; i++)
 			{
-				currententity = &r_newrefdef.entities[i];
+				entity_t *ent2 = &r_newrefdef.entities[i];
 
 				//don't add this entity to the depth texture - it's already in there!
-				if (currententity == prevEntity)
+				if (ent2 == ent)
 					continue;
 				
-				if (SM_Cull (currententity))
+				if (SM_Cull (ent2))
 					continue;
 
-				if (currententity->model->type != mod_iqm && currententity->model->type != mod_md2)
+				if (ent2->model->type != mod_iqm && ent2->model->type != mod_md2)
 					continue;
 
-				if (currententity->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
+				if (ent2->flags & (RF_WEAPONMODEL | RF_SHELL_ANY))
 					continue;
 
-				if (prevEntity->flags & RF_WEAPONMODEL && currententity->flags & RF_VIEWERMODEL)
+				if ((ent->flags & RF_WEAPONMODEL) && (ent2->flags & RF_VIEWERMODEL))
 					continue;
 
 				//We don't need fade out the shadow here really.  This is because if it's by distance
@@ -1220,7 +1204,7 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 				//up pretty good with how the bsp shadow is faded.
 
 				//if close enough to cast a shadow on this ent and in line of sight - render it into depth buffer
-				VectorSubtract(currententity->origin,origin, dist);
+				VectorSubtract (ent2->origin, origin, dist);
 				{
 					vec3_t lDist;
 					
@@ -1233,9 +1217,8 @@ void R_GenerateEntityShadow (const vec3_t statLightPosition)
 						continue;
 				}
 
-				R_DrawEntityCaster(currententity);
+				R_DrawEntityCaster (ent2);
 			}
-			currententity = prevEntity;
 			SM_SetTextureMatrix (6);
 			SM_TeardownGLState ();
 			SM_TeardownCasterMatrices ();
