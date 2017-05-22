@@ -606,7 +606,7 @@ static cull_result_t R_Mesh_CullModel (void)
 		{
 			if(currententity->frame == 208)
 				velocity = 0.0001;
-			RGD_AddNewRagdoll (currententity->origin, currententity->name, velocity);
+			RGD_AddNewRagdoll (currententity, velocity);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
 		if ((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && (currententity->frame > 207 && currententity->frame < 260))
