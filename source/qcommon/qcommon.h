@@ -721,10 +721,10 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color);
 int			CM_PointContents (vec3_t p, int headnode);
 int			CM_TransformedPointContents (vec3_t p, int headnode, vec3_t origin, vec3_t angles);
 
-trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
+trace_t		CM_BoxTrace (const vec3_t start, const vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask);
-qboolean CM_FastTrace (vec3_t start, vec3_t end, int headnode, int brushmask);
+qboolean CM_FastTrace (const vec3_t start, const vec3_t end, int headnode, int brushmask);
 trace_t		CM_TransformedBoxTrace (vec3_t start, vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask,

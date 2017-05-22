@@ -2688,7 +2688,7 @@ static void CM_TerrainGridSwath (const cterrainmodel_t *mod, const vec3_t mincoo
 // Returns -1 for no intersection, otherwise it returns the index within 
 // terrain_models where the intersection was found (used by
 // CM_TerrainLightPoint.)
-static int CM_TerrainTrace (vec3_t p1, vec3_t end)
+static int CM_TerrainTrace (const vec3_t p1, const vec3_t end)
 {
 	vec3_t		p2;
 	int			i, j, k, x, y, z;
@@ -2844,7 +2844,7 @@ void CM_TerrainLightPoint (vec3_t in_point, vec3_t out_point, vec3_t out_color)
 CM_BoxTrace
 ==================
 */
-static trace_t	CM_BoxTrace_Core (vec3_t start, vec3_t end,
+static trace_t	CM_BoxTrace_Core (const vec3_t start, const vec3_t end,
 								  vec3_t mins, vec3_t maxs,
 								  int headnode, int brushmask,
 								  qboolean enable_terrain)
@@ -2990,7 +2990,7 @@ skip_mod:;
 	return trace_trace;
 }
 
-trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
+trace_t		CM_BoxTrace (const vec3_t start, const vec3_t end,
 						  vec3_t mins, vec3_t maxs,
 						  int headnode, int brushmask)
 {
@@ -3000,7 +3000,7 @@ trace_t		CM_BoxTrace (vec3_t start, vec3_t end,
 // Returns true if there is nothing blocking the path from start to end.
 // Provides no way to know what the obstacle was if there was one. Faster than
 // standard BoxTrace. If start == end, will always return true.
-qboolean CM_FastTrace (vec3_t start, vec3_t end, int headnode, int brushmask)
+qboolean CM_FastTrace (const vec3_t start, const vec3_t end, int headnode, int brushmask)
 {
 	vec3_t	local_start, local_end;
 
