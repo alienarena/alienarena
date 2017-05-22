@@ -357,6 +357,11 @@ nobase_dist_models_DATA = \
 	objects/gibs/sm_meat/skin.jpg \
 	objects/gibs/sm_meat/tris.iqm \
 	objects/gibs/sm_meat/tris.skin \
+	objects/powerdome/skin.tga \
+	objects/powerdome/skin_fx.tga \
+	objects/powerdome/skin_normal.jpg \
+	objects/powerdome/tris.iqm \
+	objects/powerdome/tris.skin \
 	objects/rocket/tris.iqm \
 	objects/rocket/tris.skin \
 	objects/spider/helmet.iqm \
