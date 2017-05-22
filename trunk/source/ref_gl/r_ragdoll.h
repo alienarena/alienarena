@@ -213,10 +213,10 @@ entity_t RagDollEntity[MAX_RAGDOLLS];
 RagDollWorld_t RagDollTriWorld;
 
 //Funcs
-extern void R_SimulateAllRagdolls ( void );
-extern void R_ClearAllRagdolls( void );
-extern void RGD_CreateWorldObject( void );
-extern void RGD_DestroyWorldObject( void );
-extern void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH], float velocity );
-extern void RGD_DestroyWorldTrimesh();
-extern void RGD_BuildWorldTrimesh ();
+void R_SimulateAllRagdolls (void);
+void R_ClearAllRagdolls (void);
+void RGD_CreateWorldObject (void);
+void RGD_DestroyWorldObject (void);
+void RGD_AddNewRagdoll (vec3_t origin, char name[MAX_QPATH], float velocity);
+void RGD_DestroyWorldTrimesh (void);
+void RGD_BuildWorldTrimesh (void);

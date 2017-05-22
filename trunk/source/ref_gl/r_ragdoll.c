@@ -46,15 +46,7 @@ cvar_t *r_ragdoll_debug;
 
 vec3_t rightAxis, leftAxis, upAxis, downAxis, bkwdAxis, fwdAxis;
 
-signed int sign(signed int x)
-{
-	if (x >= 0)
-		return 1;
-	else
-		return -1;
-}
-
-void norm3(vec3_t v, vec3_t out)
+static void norm3 (vec3_t v, vec3_t out)
 {
 	float l = VectorLength(v);
 
@@ -79,7 +71,7 @@ extern void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
 extern void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale);
 
 //routine to create ragdoll body parts between two joints
-void RGD_addBody (int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
+static void RGD_addBody (int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
 {
 	//Adds a capsule body between joint positions p1 and p2 and with given
 	//radius to the ragdoll.
@@ -165,7 +157,7 @@ void RGD_addBody (int RagDollID, matrix3x4_t *bindmat, char *name, int objectID,
 }
 
 //joint creation routines
-void RGD_addFixedJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2)
+static void RGD_addFixedJoint (int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2)
 {
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -175,7 +167,7 @@ void RGD_addFixedJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int obj
 	dJointSetFixed(RagDoll[RagDollID].RagDollJoint[jointID]);
 }
 
-void RGD_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
+static void RGD_addHingeJoint (int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
 {
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -211,7 +203,7 @@ void RGD_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int obj
 	dJointSetHingeParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop,  hiStop);
 }
 
-void RGD_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor)
+static void RGD_addBallJoint (int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor)
 {
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -231,7 +223,7 @@ void RGD_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int obje
 	dJointSetBallAnchor(RagDoll[RagDollID].RagDollJoint[jointID], wanchor[0], wanchor[1], wanchor[2]);
 }
 
-void RGD_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2,
+static void RGD_addUniversalJoint (int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2,
 	float loStop1, float hiStop1, float loStop2, float hiStop2)
 {
 	vec3_t wanchor, waxis1, waxis2;
@@ -379,7 +371,7 @@ RagDollBind_t RagDollBinds[] =
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
 //build and set initial position of ragdoll
-void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH], float velocity )
+static void RGD_RagdollBody_Init (int RagDollID, vec3_t origin, char name[MAX_QPATH], float velocity)
 {
 	//Ragdoll  positions
 	vec3_t R_SHOULDER_POS;
@@ -646,7 +638,7 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH], f
 }
 
 //For adding a single BSP surface(comprised of multiple triangles).
-void RGD_BuildODEGeoms(msurface_t *surf)
+static void RGD_BuildODEGeoms (msurface_t *surf)
 {
 	glpoly_t *p;
 	float	*v;
@@ -762,7 +754,7 @@ static void RGD_BuildODETerrainGeoms (void)
 R_DrawWorldTrimesh
 =============
 */
-void RGD_BuildWorldTrimesh ( void )
+void RGD_BuildWorldTrimesh (void)
 {
 	dMatrix3 rot;
 	msurface_t *surf;	
@@ -814,7 +806,7 @@ void RGD_BuildWorldTrimesh ( void )
 	joints if they do.
 */
 
-static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
+static void near_callback (void *data, dGeomID geom1, dGeomID geom2)
 {
 	dContact contact[MAX_CONTACTS];
 	int i, numc;
@@ -871,7 +863,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 	}
 }
 
-void R_DestroyRagDoll(int RagDollID, qboolean nuke)
+static void R_DestroyRagDoll (int RagDollID, qboolean nuke)
 {
 	int i;
 
@@ -908,7 +900,7 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	}
 }
 
-void RGD_DestroyWorldTrimesh( void )
+void RGD_DestroyWorldTrimesh (void)
 {
 	if(RagDollTriWorld.geom)
 		dGeomDestroy(RagDollTriWorld.geom);
