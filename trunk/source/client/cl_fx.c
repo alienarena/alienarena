@@ -1015,7 +1015,7 @@ CL_SplashEffect
 void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count, int type)
 {
 	int			i, j, k;
-	float		scale, nudge;
+	float		scale, nudge, sHeight;
 	particle_t	*p;
 	vec3_t		angle;
 
@@ -1026,7 +1026,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count, int type)
 	p->image = r_splashtexture;
 	p->blendsrc = GL_DST_COLOR;
 	p->blenddst = GL_SRC_COLOR;
-	p->scale = 1;
+	p->scale = 0.5;
 	p->scalevel = 8;
 	p->color = 0 + (rand() & 1); //(0-15 0-15 0-15) (0-0.0588...)
 
@@ -1045,6 +1045,8 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count, int type)
 
 	p->alphavel = -0.1f / (1.0f + frand()*0.3f);
 
+	//if(type == SPLASH_BLOOD)
+	//	count = 24;
 
 	for( k=0; k<count/4; k++) {
 
@@ -1057,10 +1059,6 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count, int type)
 		}
 
 		VectorNormalize(dir);
-		if(type == 5)
-			scale = 15.0;
-		else
-			scale = 1.0;
 
 		//shoot off small plume
 		i = 0;
@@ -1068,29 +1066,52 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count, int type)
 		{
 			if (!(p = new_particle()))
 				return;
-
-			p->color = color - (rand()&2);
-			p->type = PARTICLE_VERT;
-			if(type == 5)
+			
+			switch(type)
+			{
+			case SPLASH_LAVA:
 				p->image = r_lavasplashtexture;
-			else
+				p->color = color - (rand()&2);
+				p->blendsrc = GL_SRC_ALPHA;
+				p->blenddst = GL_ONE;
+				p->alpha = 0.5;
+				scale = 15.0;
+				sHeight = 10.0;
+				break;
+			case SPLASH_BLOOD:
 				p->image = r_splash2texture;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE;
+				p->color = 0xe8;
+				p->blendsrc = GL_SRC_ALPHA;
+				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+				p->alpha = 0.666;
+				scale = 1.0;
+				sHeight = 8.0;
+				break;
+			default:
+				p->image = r_splash2texture;
+				p->color = color - (rand()&2);
+				p->blendsrc = GL_SRC_ALPHA;
+				p->blenddst = GL_ONE;
+				p->alpha = 0.5;
+				scale = 1.0;
+				sHeight = 10.0;
+				break;
+			}
+						
+			p->type = PARTICLE_VERT;			
 			p->scale = scale * 4 * (rand()&8);
 			p->scalevel = 2;
 
 			for (j=0; j<3; j++)
 			{
-				p->org[j] = org[j] + 10*dir[j];
+				p->org[j] = org[j] + sHeight*dir[j];
 				p->vel[j] = 60*dir[j];
 			}
-			p->org[2]+=32;
+			p->org[2]+=sHeight*3.2;
 
 			p->accel[0] = 0;
 			p->accel[1] = 0;
-			p->accel[2] = -((float)PARTICLE_GRAVITY) / 0.5f;
-			p->alpha = .5;
+			p->accel[2] = -((float)PARTICLE_GRAVITY) / 0.5f;			
 
 			p->alphavel = -1.0f / (1.5f + frand()*0.3f);
 		}

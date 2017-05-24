@@ -1075,8 +1075,10 @@ void watersplash_think (edict_t *ent)
 	gi.WriteDir (up);
 	if(ent->spawnflags & 1)
 		gi.WriteByte (SPLASH_LAVA);
+	else if(ent->spawnflags & 2)
+		gi.WriteByte (SPLASH_BLOOD);
 	else
-		gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this
+		gi.WriteByte (SPLASH_BLUE_WATER); 
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->nextthink = level.time + 1.0;
