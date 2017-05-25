@@ -708,6 +708,7 @@ nobase_dist_textures_DATA = \
 	arena6/flamejet.tga \
 	arena6/flare.tga \
 	arena6/fodblue.tga \
+	arena6/fodgreen.tga \
 	arena6/girder1.tga \
 	arena6/girder2.tga \
 	arena6/icerock2_nm.tga \
@@ -778,6 +779,7 @@ nobase_dist_textures_DATA = \
 	arena7/lightgid2.tga \
 	arena7/lightgid.tga \
 	arena7/metal1.tga \
+	arena7/metal2_hm.tga \
 	arena7/metal2_nm.tga \
 	arena7/metal2.tga \
 	arena7/metal3.tga \

@@ -60,6 +60,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-dismal2k15.nod \
 	nav/dm-dynamo2k16.nod \
 	nav/dm-extermination2k15.nod \
+	nav/dm-gauntlet2k16.nod \
 	nav/dm-neptune2k15.nod \
 	nav/dm-purgatory2k16.nod \
 	nav/dm-turbo2k15.nod \
