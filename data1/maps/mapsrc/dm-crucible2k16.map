@@ -234,7 +234,7 @@
 ( -392 -640 -200 ) ( -392 -592 -200 ) ( -328 -592 -200 ) arena6/blacktrans 32 -8 0 1 1 0 16 0
 ( -392 -640 -160 ) ( -328 -640 -160 ) ( -328 -640 -256 ) arena6/blacktrans 32 -120 0 1 1 0 16 0
 ( -328 -584 -256 ) ( -328 -640 -256 ) ( -360 -584 -200 ) arena6/blacktrans 40 -120 0 1 1 0 16 0
-( -320 -584 -160 ) ( -384 -584 -160 ) ( -384 -584 -256 ) arena6/blacktrans 32 -120 0 1 1 0 16 0
+( -322 -520 -160 ) ( -386 -520 -160 ) ( -386 -520 -256 ) arena6/blacktrans 34 8 0 1 1 0 16 0
 ( -384 -584 -160 ) ( -384 -632 -160 ) ( -384 -632 -256 ) arena6/blacktrans 40 -120 0 1 1 0 16 0
 }
 // brush 25
@@ -8435,6 +8435,51 @@
 ( 8192 -8304 -256 ) ( 8192 8080 -256 ) ( -8192 -8304 -256 ) arena6/blacktrans 80 16 0 0.5 0.5 65536 0 0
 ( 8192 8080 -144 ) ( 8192 -8304 -144 ) ( -8192 -8304 -144 ) arena6/blacktrans 80 16 0 0.5 0.5 65536 0 0
 }
+// brush 930
+{
+( -394 770 -54 ) ( -394 714 -54 ) ( -448 770 -54 ) arena6/blacktrans 62 0 0 1 1 0 16 0
+( -396 770 -114 ) ( -450 770 -114 ) ( -396 770 -116 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -396 770 -114 ) ( -396 770 -116 ) ( -396 714 -114 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -454 714 -126 ) ( -400 714 -126 ) ( -454 770 -126 ) arena6/blacktrans 4 0 0 1 1 0 16 0
+( -450 714 -116 ) ( -450 714 -114 ) ( -396 714 -116 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -450 714 -116 ) ( -450 770 -116 ) ( -450 714 -114 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+}
+// brush 931
+{
+( 920 620 530 ) ( 920 510 530 ) ( 202 620 530 ) arena6/blacktrans 104 0 0 1 1 0 16 0
+( 896 620 704 ) ( 178 620 704 ) ( 896 620 288 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 896 620 704 ) ( 896 620 288 ) ( 896 510 704 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 174 510 352 ) ( 892 510 352 ) ( 174 620 352 ) arena6/blacktrans 4 0 0 1 1 0 16 0
+( 178 510 288 ) ( 178 510 704 ) ( 896 510 288 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 178 510 288 ) ( 178 620 288 ) ( 178 510 704 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+}
+// brush 932
+{
+( 960 510 530 ) ( 960 262 530 ) ( 840 510 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 960 510 530 ) ( 840 510 530 ) ( 960 510 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 960 510 530 ) ( 960 510 352 ) ( 960 262 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 840 262 352 ) ( 960 262 352 ) ( 840 510 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 874 -264 352 ) ( 874 -264 530 ) ( 994 -264 352 ) arena6/blacktrans 94 0 0 1 1 0 16 0
+( 840 262 352 ) ( 840 510 352 ) ( 840 262 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+}
+// brush 933
+{
+( 592 -512 530 ) ( 592 -622 530 ) ( -136 -512 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 592 -512 530 ) ( -136 -512 530 ) ( 592 -512 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( 592 -512 530 ) ( 592 -512 352 ) ( 592 -622 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -136 -622 352 ) ( 592 -622 352 ) ( -136 -512 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -136 -622 352 ) ( -136 -622 530 ) ( 592 -622 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -136 -622 352 ) ( -136 -512 352 ) ( -136 -622 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+}
+// brush 934
+{
+( -72 -6 530 ) ( -72 -508 530 ) ( -198 -6 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -90 252 530 ) ( -216 252 530 ) ( -90 252 352 ) arena6/blacktrans 18 0 0 1 1 0 16 0
+( -72 -6 530 ) ( -72 -6 352 ) ( -72 -508 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -198 -508 352 ) ( -72 -508 352 ) ( -198 -6 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -198 -508 352 ) ( -198 -508 530 ) ( -72 -508 352 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+( -198 -508 352 ) ( -198 -6 352 ) ( -198 -508 530 ) arena6/blacktrans 0 0 0 1 1 0 16 0
+}
 }
 // entity 1
 {
@@ -8830,8 +8875,8 @@
 // entity 56
 {
 "classname" "info_player_deathmatch"
-"angle" "270"
-"origin" "384 640 -232"
+"angle" "-90.000000"
+"origin" "410.000000 618.000000 -232.000000"
 }
 // entity 57
 {
@@ -8982,74 +9027,71 @@
 // entity 79
 {
 "classname" "misc_mapmodel"
-"origin" "256 0 584"
+"origin" "256.000000 0.000000 592.000000"
 "model" "maps/meshes/gothic/meat1.md2"
 "spawnflags" "33"
-"angle" "360"
 }
 // entity 80
 {
 "classname" "misc_mapmodel"
-"angle" "90"
+"angle" "90.000000"
 "spawnflags" "33"
 "model" "maps/meshes/gothic/meat2.md2"
-"origin" "488 0 584"
+"origin" "488.000000 0.000000 592.000000"
 }
 // entity 81
 {
 "classname" "misc_mapmodel"
-"origin" "384 -116 584"
+"origin" "384.000000 -116.000000 592.000000"
 "model" "maps/meshes/gothic/meat2.md2"
 "spawnflags" "33"
-"angle" "270"
+"angle" "-90.000000"
 }
 // entity 82
 {
 "classname" "misc_mapmodel"
-"angle" "360"
 "spawnflags" "33"
 "model" "maps/meshes/gothic/meat1.md2"
-"origin" "384 -184 584"
+"origin" "384.000000 -184.000000 592.000000"
 }
 // entity 83
 {
 "classname" "misc_mapmodel"
-"angle" "90"
+"angle" "90.000000"
 "spawnflags" "33"
 "model" "maps/meshes/gothic/meat1.md2"
-"origin" "560 0 584"
+"origin" "560.000000 0.000000 592.000000"
 }
 // entity 84
 {
 "classname" "misc_mapmodel"
-"origin" "384 128 584"
+"origin" "384.000000 128.000000 592.000000"
 "model" "maps/meshes/gothic/meat2.md2"
 "spawnflags" "33"
-"angle" "225"
+"angle" "-135.000000"
 }
 // entity 85
 {
 "classname" "misc_mapmodel"
-"angle" "360"
-"spawnflags" "1"
+"spawnflags" "33"
 "model" "maps/meshes/gothic/meat1.md2"
-"origin" "376 0 184"
+"origin" "384.000000 32.000000 192.000000"
+"angle" "-90.000000"
 }
 // entity 86
 {
 "classname" "misc_mapmodel"
-"origin" "416 0 184"
-"model" "maps/meshes/gothic/meat3.md2"
-"spawnflags" "1"
-"angle" "90"
+"origin" "416.000000 -8.000000 192.000000"
+"model" "maps/meshes/gothic/meat2.md2"
+"spawnflags" "33"
+"angle" "90.000000"
 }
 // entity 87
 {
 "classname" "misc_mapmodel"
-"origin" "386 -30 184"
+"origin" "386.000000 -30.000000 192.000000"
 "model" "maps/meshes/gothic/meat2.md2"
-"spawnflags" "1"
-"angle" "360"
+"spawnflags" "33"
 }
 // entity 88
 {
