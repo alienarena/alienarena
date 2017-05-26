@@ -364,8 +364,10 @@ nobase_dist_textures_DATA = \
 	arena10/gothwindow1_hm.tga \
 	arena10/gothwindow1.tga \
 	arena10/gothwindow2_hm.tga \
+	arena10/gothwindow2_nm.tga \
 	arena10/gothwindow2.tga \
 	arena10/gothwindow2r_hm.tga \
+	arena10/gothwindow2r_nm.tga \
 	arena10/gothwindow2r.tga \
 	arena10/gothwindow3.tga \
 	arena10/gothwindow3_hm.tga \
@@ -559,6 +561,8 @@ nobase_dist_textures_DATA = \
 	arena10/wires1.tga \
 	arena10/wires2_nm.tga \
 	arena10/wires2.tga \
+	arena10/wires3.tga \
+	arena10/wires4.tga \
 	arena2/grid2.tga \
 	arena2/grid3.tga \
 	arena2/grida.tga \
