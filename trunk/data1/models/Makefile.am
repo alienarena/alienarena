@@ -5,6 +5,9 @@
 modelsdir=$(pkgdatadir)/data1/models
 
 nobase_dist_models_DATA = \
+	items/activated/double/tris.iqm \
+	items/activated/double/glass.iqm \
+	items/activated/force/tris.iqm \
 	items/adrenaline/glass.iqm \
 	items/adrenaline/skin.jpg \
 	items/adrenaline/skin_fx.tga \
