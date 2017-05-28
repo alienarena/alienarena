@@ -248,7 +248,7 @@ nobase_dist_maps_DATA = \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/blood2.decal \
 	meshes/dm-turbo/rubble1.terrain \
-	meshes/dm-violator/blood1.decal
+	meshes/dm-violator/blood1.decal \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
 	meshes/dm-wasteland/ivy1.decal \
