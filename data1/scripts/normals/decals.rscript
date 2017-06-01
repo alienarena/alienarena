@@ -14,3 +14,31 @@ textures/decals/whirly_spotlight
 
 }
 
+textures/decals/stonearch
+{
+	
+	{
+
+		map textures/decals/stonearch_normal.tga
+
+		normalmap
+	
+	}
+
+}
+
+
+textures/decals/stonearch2
+{
+	
+	{
+
+		map textures/decals/stonearch2_normal.tga
+
+		normalmap
+	
+	}
+
+}
+
+
