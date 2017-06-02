@@ -1248,10 +1248,14 @@ nobase_dist_textures_DATA = \
 	decals/mud1.tga \
 	decals/rock1.tga \
 	decals/rust1.tga \
-	decals/whirly_spotlight.tga \
 	decals/snow1.tga \
 	decals/snow2.tga \
 	decals/snow3.tga \
+	decals/stonearch.tga \
+	decals/stonearch2.tga \
+	decals/stonearch2_normal.tga \
+	decals/stonearch_normal.tga \
+	decals/whirly_spotlight.tga \
 	desert/03door4.tga \
 	desert/03door4_hm.tga \
 	desert/03door4_nm.tga \
