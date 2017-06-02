@@ -251,6 +251,8 @@ nobase_dist_maps_DATA = \
 	decals/snow1.decal \
 	decals/snow2.decal \
 	decals/snow3.decal \
+	decals/stonearch1.decal \
+	decals/stonearch2.decal \
 	dm-babel2k16.bsp \
 	dm-babel2k16.lightmap \
 	dm-bloodfactory2k15.bsp \
