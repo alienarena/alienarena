@@ -1026,6 +1026,67 @@ void G_SetClientSound (edict_t *ent)
 G_SetClientFrame
 ===============
 */
+
+void SetGroundFrames(edict_t *ent, int run, int duck, int ducking, int standingup)
+{
+	if (run)
+	{	// running
+		if (duck)
+		{
+			ent->s.frame = FRAME_crwalk1;
+			ent->client->anim_end = FRAME_crwalk6;
+		}		
+		else if(ent->sidemove == 1)
+		{
+			ent->s.frame = FRAME_stepright1;
+			ent->client->anim_end = FRAME_stepright6;
+		}
+		else if(ent->sidemove == -1)
+		{
+			ent->s.frame = FRAME_stepleft1;
+			ent->client->anim_end = FRAME_stepleft6;
+		}
+		else if(ent->client->ps.pmove.pm_flags & PMF_SNEAKING)
+		{
+			ent->s.frame = FRAME_sneak1;
+			ent->client->anim_end = FRAME_sneak8;
+		}
+		else if(ent->backpedal)
+		{
+			ent->s.frame = FRAME_backpedal1;
+			ent->client->anim_end = FRAME_backpedal6;
+		}
+		else
+		{
+			ent->s.frame = FRAME_run1;
+			ent->client->anim_end = FRAME_run6;
+		}
+	}
+	else
+	{	// standing
+		if (duck)
+		{
+			ent->s.frame = FRAME_crstnd01;
+			ent->client->anim_end = FRAME_crstnd19;
+		}
+		else if (ducking)
+		{
+			ent->s.frame = FRAME_jump3;
+			ent->client->anim_end = FRAME_jump4;
+		}
+		else if (standingup)
+		{
+			ent->s.frame = FRAME_jump5;
+			ent->client->anim_end = FRAME_jump6;
+		}
+		else
+		{
+			ent->s.frame = FRAME_stand01;
+			ent->client->anim_end = FRAME_stand40;
+		}		
+	}
+		
+}
 void G_SetClientFrame (edict_t *ent)
 {
 	gclient_t	*client;
@@ -1158,70 +1219,21 @@ newanim:
 			ent->s.frame = FRAME_stand01;
 			client->anim_end = FRAME_stand40;
 		} 
-		else 
+		else if(client->ps.pmove.pm_flags & PMF_JUMP_HELD)
 		{
 			client->anim_priority = ANIM_JUMP;
 			if (ent->s.frame != FRAME_jump2)
 				ent->s.frame = FRAME_jump1;
 			client->anim_end = FRAME_jump2;
 		}
-	}
-	else if (run)
-	{	// running
-		if (duck)
-		{
-			ent->s.frame = FRAME_crwalk1;
-			client->anim_end = FRAME_crwalk6;
-		}		
-		else if(ent->sidemove == 1)
-		{
-			ent->s.frame = FRAME_stepright1;
-			client->anim_end = FRAME_stepright6;
-		}
-		else if(ent->sidemove == -1)
-		{
-			ent->s.frame = FRAME_stepleft1;
-			client->anim_end = FRAME_stepleft6;
-		}
-		else if(client->ps.pmove.pm_flags & PMF_SNEAKING)
-		{
-			ent->s.frame = FRAME_sneak1;
-			client->anim_end = FRAME_sneak8;
-		}
-		else if(ent->backpedal)
-		{
-			ent->s.frame = FRAME_backpedal1;
-			client->anim_end = FRAME_backpedal6;
-		}
 		else
 		{
-			ent->s.frame = FRAME_run1;
-			client->anim_end = FRAME_run6;
+			SetGroundFrames(ent, run, duck, ducking, standingup);
 		}
 	}
-	else
-	{	// standing
-		if (duck)
-		{
-			ent->s.frame = FRAME_crstnd01;
-			client->anim_end = FRAME_crstnd19;
-		}
-		else if (ducking)
-		{
-			ent->s.frame = FRAME_jump3;
-			client->anim_end = FRAME_jump4;
-		}
-		else if (standingup)
-		{
-			ent->s.frame = FRAME_jump5;
-			client->anim_end = FRAME_jump6;
-		}
-		else
-		{
-			ent->s.frame = FRAME_stand01;
-			client->anim_end = FRAME_stand40;
-		}		
-	}
+	else 
+		SetGroundFrames(ent, run, duck, ducking, standingup);
+
 	client->last_anim_frame = level.framenum;
 }
 
