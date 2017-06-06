@@ -23912,28 +23912,28 @@
 // entity 323
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 1424.000000 -32.000000"
+"origin" "704.000000 1426.000000 -30.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 324
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 1432.000000 -72.000000"
+"origin" "704.000000 1434.000000 -70.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 325
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 1660.000000 -32.000000"
+"origin" "704.000000 1660.000000 -30.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 326
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 1648.000000 -72.000000"
+"origin" "704.000000 1652.000000 -68.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
@@ -24414,28 +24414,28 @@
 // entity 360
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 -1808.000000 -32.000000"
+"origin" "704.000000 -1812.000000 -30.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 361
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 -1816.000000 -72.000000"
+"origin" "704.000000 -1822.000000 -70.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 362
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 -2044.000000 -32.000000"
+"origin" "704.000000 -2046.000000 -30.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
 // entity 363
 {
 "classname" "misc_mapmodel"
-"origin" "704.000000 -2032.000000 -72.000000"
+"origin" "704.000000 -2038.000000 -70.000000"
 "model" "maps/meshes/spintube.md2"
 "angles" "90.000000 0.000000 -0.000000"
 }
