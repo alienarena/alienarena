@@ -715,7 +715,7 @@
 // brush 79
 {
 ( -928 512 0 ) ( -960 512 0 ) ( -960 456 0 ) arena9/metal4 -16 127 0 1 1 0 0 250
-( -960 456 80 ) ( -960 512 80 ) ( -928 512 80 ) arena9/metalflooryellow 0 0 0 0.1000000015 0.1000000015 0 0 0
+( -960 456 80 ) ( -960 512 80 ) ( -928 512 80 ) arena9/metalflooryellow_s 0 0 0 0.25 0.25 0 0 0
 ( -968 320 96 ) ( -936 320 96 ) ( -936 320 0 ) arena9/metal4 -16 127 0 1 1 0 0 250
 ( -696 440 96 ) ( -696 496 96 ) ( -696 496 0 ) arena9/metal4 -16 127 0 1 1 0 0 250
 ( -928 496 96 ) ( -960 496 96 ) ( -960 496 0 ) evil/stepside_mtl 56 0 0 0.5 0.5 0 0 0
@@ -12560,7 +12560,7 @@
 "classname" "misc_mapmodel"
 "model" "maps/meshes/monitor.md2"
 "angle" "-90.000000"
-"origin" "-928.000000 112.000000 444.000000"
+"origin" "-948.000000 114.000000 444.000000"
 "spawnflags" "1"
 }
 // entity 59
@@ -12705,14 +12705,14 @@
 "classname" "misc_mapmodel"
 "model" "maps/meshes/monitor.md2"
 "angle" "-90.000000"
-"origin" "-562.000000 912.000000 188.000000"
+"origin" "-582.000000 914.000000 188.000000"
 "spawnflags" "1"
 }
 // entity 81
 {
 "classname" "misc_mapmodel"
 "spawnflags" "1"
-"origin" "-668.000000 912.000000 444.000000"
+"origin" "-688.000000 914.000000 444.000000"
 "angle" "-90.000000"
 "model" "maps/meshes/monitor.md2"
 }
@@ -13910,7 +13910,7 @@
 "classname" "misc_mapmodel"
 "model" "maps/meshes/monitor.md2"
 "angle" "-90.000000"
-"origin" "-928.000000 112.000000 188.000000"
+"origin" "-948.000000 114.000000 188.000000"
 "spawnflags" "1"
 }
 // entity 163
