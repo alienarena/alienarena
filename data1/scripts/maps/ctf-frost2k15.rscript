@@ -99,6 +99,12 @@ textures/arena9/roundlight
 		beam
 		lensflare
 	}
+	{
+		map textures/arena9/roundlight.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 1 1 1
+		nolightmap
+	}
 }
 textures/arena10/metalfloor21_water
 {
@@ -135,11 +141,10 @@ textures/evil/e8_launchpad1
 textures/blanks/blank6
 {
 	{
-		map gfx/beam1.tga
-		scale static 10 static 10
+		map gfx/beam3.tga
+		scale static 15 static 15
 		colormap 1 1 1
 		beam
-		lensflare
 	}
 }
 textures/arena10/metalfloor21
