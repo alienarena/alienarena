@@ -616,3 +616,294 @@ void swimmonster_start (edict_t *self)
 	self->think = swimmonster_start_go;
 	monster_start (self);
 }
+
+//Since Alien Arena has no real "monsters" other than these, just place them all here in one locale.
+
+static int	sound_chomp;
+
+void fish_stand (edict_t *self);
+
+qboolean bite (edict_t *self, vec3_t aim, int damage, int kick)
+{
+	trace_t		tr;
+	vec3_t		forward, right, up;
+	vec3_t		v;
+	vec3_t		point;
+	float		range;
+	vec3_t		dir;
+
+	//see if enemy is in range
+	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
+	range = VectorLength(dir);
+	if (range > aim[0])
+		return false;
+
+	if (aim[1] > self->mins[0] && aim[1] < self->maxs[0])
+	{
+		// the hit is straight on so back the range up to the edge of their bbox
+		range -= self->enemy->maxs[0];
+	}
+	else
+	{
+		// this is a side hit so adjust the "right" value out to the edge of their bbox
+		if (aim[1] < 0)
+			aim[1] = self->enemy->mins[0];
+		else
+			aim[1] = self->enemy->maxs[0];
+	}
+
+	VectorMA (self->s.origin, range, dir, point);
+
+	tr = gi.trace (self->s.origin, NULL, NULL, point, self, MASK_SHOT);
+	if (tr.fraction < 1)
+	{
+		if (!tr.ent->takedamage)
+			return false;
+		// if it will hit any client/monster then hit the one we wanted to hit
+		if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
+			tr.ent = self->enemy;
+	}
+
+	AngleVectors(self->s.angles, forward, right, up);
+	VectorMA (self->s.origin, range, forward, point);
+	VectorMA (point, aim[1], right, point);
+	VectorMA (point, aim[2], up, point);
+	VectorSubtract (point, self->enemy->s.origin, dir);
+
+	// do the damage
+	T_Damage (tr.ent, self, self, dir, point, vec3_origin, damage, kick/2, DAMAGE_NO_KNOCKBACK, MOD_VIOLATOR);
+
+	gi.sound (self, CHAN_VOICE, sound_chomp, 1, ATTN_NORM, 0);
+
+	if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
+		return false;
+
+	// do our special form of knockback here
+	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, v);
+	VectorSubtract (v, point, v);
+	VectorNormalize (v);
+	VectorMA (self->enemy->velocity, kick, v, self->enemy->velocity);
+	if (self->enemy->velocity[2] > 0)
+		self->enemy->groundentity = NULL;
+	return true;
+}
+
+mframe_t fish_frames_stand [] =
+{
+	ai_stand, 0, NULL
+};
+	
+mmove_t	fish_move_stand = {0, 0, fish_frames_stand, NULL};
+
+void fish_stand (edict_t *self)
+{
+		self->monsterinfo.currentmove = &fish_move_stand;
+}
+
+#define FISH_SWIM_SPEED	12
+
+mframe_t fish_frames_run [] =
+{
+	ai_run, FISH_SWIM_SPEED, NULL,	
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,	
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,	
+	ai_run, FISH_SWIM_SPEED, NULL,
+	ai_run, FISH_SWIM_SPEED, NULL,	
+	ai_run, FISH_SWIM_SPEED, NULL		
+};
+mmove_t fish_move_run = {56, 73, fish_frames_run, NULL};
+
+void fish_run (edict_t *self)
+{
+	self->monsterinfo.currentmove = &fish_move_run;
+}
+
+/* Standard Swimming */ 
+mframe_t fish_frames_walk [] =
+{
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL,
+	ai_walk, 4, NULL
+};
+mmove_t fish_move_walk = {0, 54, fish_frames_walk, NULL};
+
+void fish_walk (edict_t *self)
+{
+	self->monsterinfo.currentmove = &fish_move_walk;
+}
+
+void fish_bite (edict_t *self)
+{
+	vec3_t	aim;
+
+	VectorSet (aim, MELEE_DISTANCE, 0, 0);
+	bite (self, aim, 5, 0);
+}
+
+
+mframe_t fish_frames_attack [] =
+{
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	fish_bite,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	NULL,
+	ai_charge, FISH_SWIM_SPEED,	fish_bite,
+	ai_charge, FISH_SWIM_SPEED,	NULL
+};
+mmove_t fish_move_attack = {74, 97, fish_frames_attack, fish_run};
+
+void fish_melee(edict_t *self)
+{
+	self->monsterinfo.currentmove = &fish_move_attack;
+}
+
+void fish_sight (edict_t *self, edict_t *other)
+{
+	self->monsterinfo.currentmove = &fish_move_run;
+}
+
+void fish_pain (edict_t *self, edict_t *other, float kick, int damage)
+{
+
+}
+
+void fish_search (edict_t *self)
+{
+
+}
+
+void fish_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	self->movetype = MOVETYPE_TOSS;
+	self->svflags |= SVF_DEADMONSTER;
+
+	self->deadflag = DEAD_DEAD;
+
+	self->think = G_FreeEdict;
+
+	gi.linkentity (self);
+
+	G_FreeEdict(self);
+}
+
+void SP_monster_piranha (edict_t *self)
+{
+	sound_chomp		= gi.soundindex ("misc/piranha.wav");
+
+	self->movetype = MOVETYPE_STEP;
+	self->solid = SOLID_BBOX;
+	self->s.modelindex = gi.modelindex ("models/misc/piranha/tris.iqm");
+	VectorSet (self->mins, -24, -24, 0);
+	VectorSet (self->maxs, 24, 24, 24);
+
+	self->takedamage = DAMAGE_YES; 
+	self->health = 50;
+	self->gib_health = -30;
+	self->mass = 100;
+
+	self->monsterinfo.sight = fish_sight;
+	self->monsterinfo.stand = fish_stand;
+	self->monsterinfo.walk = fish_walk;
+	self->monsterinfo.run = fish_run;
+	self->monsterinfo.melee = fish_melee;
+	self->monsterinfo.attack = fish_run;
+	self->monsterinfo.sight = fish_sight;
+	self->monsterinfo.search = fish_search;
+	self->monsterinfo.dodge = NULL;
+	self->s.renderfx |= RF_MONSTER;
+
+	self->pain = fish_pain;
+	self->die = fish_die;
+	self->enemy = NULL;
+	self->monsterinfo.scale = 1.0;
+
+	gi.linkentity (self);
+
+	self->monsterinfo.currentmove = &fish_move_stand;	
+
+	swimmonster_start (self);
+}
+
+
