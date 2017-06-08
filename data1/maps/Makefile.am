@@ -510,6 +510,7 @@ nobase_dist_maps_DATA = \
 	meshes/tech/biotubebase_big.md2 \
 	meshes/tech/biotubebase_fx.tga \
 	meshes/tech/biotubebase_normal.jpg \
+	meshes/tech/biotubebottomonly_small.md2 \
 	meshes/tech/biotubebottomonly.md2 \
 	meshes/tech/blueribtube.jpg \
 	meshes/tech/blueribtube1.md2 \
