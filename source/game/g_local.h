@@ -1171,6 +1171,9 @@ extern void SP_misc_humanbackupgen (edict_t *self);
 extern void SP_misc_deathray (edict_t *self);
 extern void SP_misc_laser (edict_t *self);
 
+//Monster hazards
+extern void SP_monster_piranha (edict_t *self);
+
 extern void SP_misc_mapmodel (edict_t *self);
 extern void SP_misc_watersplash (edict_t *ent);
 extern void SP_misc_electroflash (edict_t *ent);

@@ -5,3 +5,12 @@ maps/meshes/dm-neptune/shark
 		normalmap
 	}
 }
+models/misc/piranha/piranha
+{
+	{
+		map models/misc/piranha/piranha_normal.jpg
+		normalmap
+		map2 models/misc/piranha/piranha_fx.tga
+		glow
+	}
+}
