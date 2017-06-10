@@ -322,6 +322,11 @@ nobase_dist_models_DATA = \
 	misc/deathray/deathray.tga \
 	misc/deathray/deathray_fx.tga \
 	misc/deathray/deathray_normal.jpg \
+	misc/piranha/piranha.jpg \
+	misc/piranha/piranha_fx.tga \
+	misc/piranha/piranha_normal.jpg \
+	misc/piranha/tris.iqm \
+	misc/piranha/tris.skin \
 	misc/spiderpod/helmet.iqm \
 	misc/spiderpod/spider_fx.tga \
 	misc/spiderpod/spider.jpg \

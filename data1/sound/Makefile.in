@@ -286,6 +286,7 @@ nobase_dist_sound_DATA = \
 	misc/minderaser.wav \
 	misc/one.wav \
 	misc/pc_up.wav \
+	misc/piranha.wav \
 	misc/rampage.wav \
 	misc/red_increases.wav \
 	misc/red_picked.wav \
