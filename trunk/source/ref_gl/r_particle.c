@@ -770,6 +770,7 @@ void R_RenderSun()
 		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 		GL_MTexEnv (0, GL_MODULATE);
 		qglDepthRange (0, 0.3);
+		qglDepthMask (GL_FALSE);
 
 		size = r_newrefdef.width * sun_size;
 		PART_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
@@ -786,6 +787,7 @@ void R_RenderSun()
 			PART_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
 		}
 
+		qglDepthMask (GL_TRUE);
 		qglDepthRange(0, 1);
 		qglColor4f(1, 1, 1, 1);
 		GLSTATE_DISABLE_BLEND
