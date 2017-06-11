@@ -384,28 +384,49 @@ void R_DrawBloodEffect (void)
 	GLSTATE_DISABLE_BLEND
 }
 
-extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
+extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float depth, float r,
                       float g, float b, float alpha);
+void PART_GetSunFlareBounds (float offset, float radius, vec2_t out_mins, vec2_t out_maxs);
 extern void R_DrawVegetationCasters( qboolean forShadows );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void R_GLSLGodRays(void)
 {
 	float size, screenaspect;
 	vec2_t fxScreenPos;
+	vec2_t sun_mins, sun_maxs;
+	GLint isun_mins[2], isun_maxs[2], isun_size[2];
 
 	if(!r_godrays->integer || !r_drawsun->integer)
 		return;
 
 	 if (!draw_sun || sun_alpha <= 0)
 		return;
+	
+	size = r_newrefdef.width * sun_size/4.0;
 
 	//switch to fbo
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO); //need color buffer
 
-	qglDisable( GL_DEPTH_TEST );
 	qglDepthMask (1);
 
 	qglClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+	
+	// blit over the occluding BSP/terrain depth data from the framebuffer.
+	PART_GetSunFlareBounds (0, size, sun_mins, sun_maxs);
+	isun_mins[0] = floor (sun_mins[0]);
+	isun_maxs[0] = ceil (sun_maxs[0]);
+	// pixel coordinates have a flipped y axis from our ortho projection
+	isun_mins[1] = r_newrefdef.height - ceil (sun_maxs[1]);
+	isun_maxs[1] = r_newrefdef.height - floor (sun_mins[1]);
+	// ...but viewport is double-backwards because it starts at the lower-left
+	isun_size[0] = ceil (sun_maxs[0]) - isun_mins[0];
+	isun_size[1] = ceil (sun_maxs[1]) - isun_mins[1];
+
+	qglBindFramebufferEXT (GL_READ_FRAMEBUFFER_EXT, 0);
+	qglBlitFramebufferEXT (isun_mins[0], isun_mins[1], isun_maxs[0], isun_maxs[1],
+	                       isun_mins[0], isun_mins[1], isun_maxs[0], isun_maxs[1],
+	                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	qglBindFramebufferEXT (GL_READ_FRAMEBUFFER_EXT, godray_FBO);
 
 	//render sun object center
 	qglMatrixMode(GL_PROJECTION);
@@ -416,15 +437,15 @@ void R_GLSLGodRays(void)
     qglPushMatrix();
     qglLoadIdentity();
 
-	size = r_newrefdef.width * sun_size/4.0;
-    PART_RenderSunFlare(sun2_object, 0, size, 1.0, 1.0, 1.0, 0.5);
+	// don't ask me why we need to use the nearVal to make it far, I don't know
+    PART_RenderSunFlare(sun2_object, 0, size, -99999, 1.0, 1.0, 1.0, 0.5);
     
 	qglPopMatrix();
     qglMatrixMode(GL_PROJECTION);
     qglPopMatrix();
 	qglLoadIdentity();
 
-	//render occuders simple, textureless
+	//render vegetation occuders simple, textureless
 	//need to set up proper matrix for this view!
 	screenaspect = (float)r_newrefdef.width/(float)r_newrefdef.height;    
 
@@ -448,12 +469,12 @@ void R_GLSLGodRays(void)
 	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
-	GL_EnableTexture (0, false);
 	if (map_fog)
 		qglDisable (GL_FOG);
 	qglColor4f (0,0,0,1);
-	R_DrawBSPShadowCasters (); //could tweak this to only draw surfaces that are in the sun?
-	GL_EnableTexture (0, true);
+	qglDisable( GL_DEPTH_TEST );
+	// crop out any vegetation casters that won't directly occlude the sun
+	qglViewport (isun_mins[0], isun_mins[1], isun_size[0], isun_size[1]);
 	R_DrawVegetationCasters(false);
 	if (map_fog)
 		qglEnable (GL_FOG);
@@ -489,7 +510,6 @@ void R_GLSLGodRays(void)
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
 
-	// This is needed in case the window has been resized
 	qglViewport(0, 0, vid.width, vid.height);
 	
 	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
