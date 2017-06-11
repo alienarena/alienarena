@@ -543,7 +543,6 @@ extern void		R_GenerateShadowFBO(void);
 extern void		R_Mesh_DrawCaster (entity_t *ent, const model_t *mod);
 void			R_GenerateGlobalShadows (void);
 extern void		R_GenerateEntityShadow (entity_t *ent, const vec3_t statLightPosition);
-extern void		R_DrawBSPShadowCasters (void);
 int				FB_texture_width, FB_texture_height;
 float			fadeShadow;
 cvar_t			*r_shadowcutoff;

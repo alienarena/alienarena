@@ -651,15 +651,9 @@ void R_InitSun()
 }
 
 
-void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
-					  float g, float b, float alpha)
+void PART_GetSunFlareBounds (float offset, float radius, vec2_t out_mins, vec2_t out_maxs)
 {
-	float minx, miny, maxx, maxy;
-	float new_x, new_y;
-	float diameter = 2.0*radius;
-
-	qglColor4f (r, g, b, alpha);
-	GL_MBind (0, tex->texnum);
+	vec_t new_x, new_y;
 
 	if (offset) {
 		new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
@@ -669,45 +663,57 @@ void PART_RenderSunFlare(image_t * tex, float offset, float radius, float r,
 		new_y = sun_y;
 	}
 
-	
-	minx = new_x - radius;
-	miny = new_y - radius;
-	maxx = new_x + radius;
-	maxy = new_y + radius;
+	out_mins[0] = new_x - radius;
+	out_mins[1] = new_y - radius;
+	out_maxs[0] = new_x + radius;
+	out_maxs[1] = new_y + radius;
+}
+
+
+void PART_RenderSunFlare(image_t * tex, float offset, float radius, float depth, float r,
+					  float g, float b, float alpha)
+{
+	vec2_t mins, maxs;
+	float diameter = 2.0*radius;
+
+	qglColor4f (r, g, b, alpha);
+	GL_MBind (0, tex->texnum);
+
+	PART_GetSunFlareBounds (offset, radius, mins, maxs);
 	
 	if (r_test->integer && false)
 	{
 		// TODO: add an alpha channel to gfx/sun.jpg (will require converting
 		// to TGA) because otherwise this code makes no difference.
 		
-		minx += diameter * (float)tex->crop_left / (float)tex->upload_width;
-		miny += diameter * (float)tex->crop_top / (float)tex->upload_height;
-		maxx = minx + diameter * (float)tex->crop_width / (float)tex->upload_width;
-		maxy = miny + diameter * (float)tex->crop_height / (float)tex->upload_height;
+		mins[0] += diameter * (float)tex->crop_left / (float)tex->upload_width;
+		mins[1] += diameter * (float)tex->crop_top / (float)tex->upload_height;
+		maxs[0] = mins[0] + diameter * (float)tex->crop_width / (float)tex->upload_width;
+		maxs[1] = mins[1] + diameter * (float)tex->crop_height / (float)tex->upload_height;
 		
-		qglBegin(GL_QUADS);
-		qglTexCoord2f(tex->crop_sl, tex->crop_tl);
-		qglVertex2f(minx, miny);
-		qglTexCoord2f(tex->crop_sh, tex->crop_tl);
-		qglVertex2f(maxx, miny);
-		qglTexCoord2f(tex->crop_sh, tex->crop_th);
-		qglVertex2f(maxx, maxy);
-		qglTexCoord2f(tex->crop_sl, tex->crop_th);
-		qglVertex2f(minx, maxy);
-		qglEnd();
+		qglBegin (GL_QUADS);
+		qglTexCoord2f (tex->crop_sl, tex->crop_tl);
+		qglVertex3f (mins[0], mins[1], depth);
+		qglTexCoord2f (tex->crop_sh, tex->crop_tl);
+		qglVertex3f (maxs[0], mins[1], depth);
+		qglTexCoord2f (tex->crop_sh, tex->crop_th);
+		qglVertex3f (maxs[0], maxs[1], depth);
+		qglTexCoord2f (tex->crop_sl, tex->crop_th);
+		qglVertex3f (mins[0], maxs[1], depth);
+		qglEnd ();
 	}
 	else
 	{
-		qglBegin(GL_QUADS);
-		qglTexCoord2f(0, 0);
-		qglVertex2f(minx, miny);
-		qglTexCoord2f(1, 0);
-		qglVertex2f(maxx, miny);
-		qglTexCoord2f(1, 1);
-		qglVertex2f(maxx, maxy);
-		qglTexCoord2f(0, 1);
-		qglVertex2f(minx, maxy);
-		qglEnd();
+		qglBegin (GL_QUADS);
+		qglTexCoord2f (0, 0);
+		qglVertex3f (mins[0], mins[1], depth);
+		qglTexCoord2f (1, 0);
+		qglVertex3f (maxs[0], mins[1], depth);
+		qglTexCoord2f (1, 1);
+		qglVertex3f (maxs[0], maxs[1], depth);
+		qglTexCoord2f (0, 1);
+		qglVertex3f (mins[0], maxs[1], depth);
+		qglEnd ();
 	}
 }
 
@@ -773,18 +779,18 @@ void R_RenderSun()
 		qglDepthMask (GL_FALSE);
 
 		size = r_newrefdef.width * sun_size;
-		PART_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
+		PART_RenderSunFlare(sun_object, 0, size, 0, .75, .75, .75, sun_alpha);
 		if (r_drawsun->value == 2) {
-			PART_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
-			PART_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
-			PART_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);
-			PART_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0.1, 0.1, 0.1, sun_alpha);
-			PART_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0.1, 0, 0, sun_alpha);
-			PART_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0.1, 0, sun_alpha);
-			PART_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0.1, 0.1, 0, sun_alpha);
-			PART_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0.1, 0.1, 0.1, sun_alpha);
-			PART_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0.1, 0, 0, sun_alpha);
-			PART_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0, 0.1, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0, 0.1, sun_alpha);
+			PART_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0, 0.1, 0, 0, sun_alpha);
+			PART_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0, 0.1, 0.1, 0.1, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0, 0.1, 0, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0, 0.1, 0.1, 0, sun_alpha);
+			PART_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0, 0.1, 0.1, 0.1, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0, 0.1, 0, 0, sun_alpha);
+			PART_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0, 0.1, 0.1, 0, sun_alpha);
 		}
 
 		qglDepthMask (GL_TRUE);
