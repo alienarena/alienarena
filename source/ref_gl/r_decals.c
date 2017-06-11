@@ -873,6 +873,7 @@ static void GenerateLightmapTexture (model_t *mod, decal_vertgroup_t *groups, in
 	qglViewport (0, 0, final_size[0], final_size[1]);
 	qglClearColor (0.75, 0.75, 0.75, 1.0);
 	qglClear (GL_COLOR_BUFFER_BIT);
+	qglClearColor (0.0, 0.0, 0.0, 1.0);
 	
 	qglBindFramebufferEXT (GL_READ_FRAMEBUFFER_EXT, orig_lm_fbo);
 	
