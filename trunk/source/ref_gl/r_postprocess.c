@@ -448,11 +448,15 @@ void R_GLSLGodRays(void)
 	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
-	qglDisable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, false);
+	if (map_fog)
+		qglDisable (GL_FOG);
 	qglColor4f (0,0,0,1);
 	R_DrawBSPShadowCasters (); //could tweak this to only draw surfaces that are in the sun?
-	qglEnable (GL_TEXTURE_2D);
+	GL_EnableTexture (0, true);
 	R_DrawVegetationCasters(false);
+	if (map_fog)
+		qglEnable (GL_FOG);
 
 	qglMatrixMode(GL_PROJECTION);
     qglPushMatrix();
