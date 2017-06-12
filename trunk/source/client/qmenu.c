@@ -1146,6 +1146,9 @@ void Screen_Draw (menuframework_s *screen, menuvec2_t offset)
 	screen->x = offset.x;
 	//TODO: figure out what to do about centered windows
 /*	screen->y = offset.y;*/ 
+	
+	Draw_StretchPic(offset.x*1.25, offset.y, viddef.width/1.5, viddef.height, "m_submenu_bg");
+
 	Menu_AutoArrange (screen);
 	Menu_Draw (screen, font);
 }
