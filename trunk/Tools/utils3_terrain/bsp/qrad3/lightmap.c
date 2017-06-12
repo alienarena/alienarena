@@ -763,7 +763,7 @@ typedef struct
 	float		*origins;
 	int			numstyles;
 	int			stylenums[MAX_STYLES];
-	float		*samples[MAX_STYLES];
+	sample_t	*samples[MAX_STYLES];
 	sample_blur_t	*blur_amt;
 } facelight_t;
 
@@ -1176,8 +1176,9 @@ LightContributionToPoint
 =============
 */
 void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
-									vec3_t normal, vec3_t color, 
-									float lightscale2, 
+									vec3_t normal,
+									sample_t *out_color,
+									float lightscale2, // adjust for multisamples, -extra cmd line arg
 									qboolean *sun_main_once, 
 									qboolean *sun_ambient_once,
 									float *lightweight,
@@ -1187,12 +1188,15 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 	vec3_t			delta, target, occluded, color_nodist;
 	float			dot, dot2;
 	float			dist;
-	float			scale = 0.0f;
+	float			direct_scale = 0.0f, directsun_scale = 0.0f, ambient_scale = 0.0f;
 	float			inv;
 	int				i;
 	int				lcn;
+	vec_t			*curr_color = l->color;
 
-	VectorClear (color);
+	VectorClear (out_color->direct);
+	VectorClear (out_color->directsun);
+	VectorClear (out_color->ambient);
 	*lightweight = 0;
 	
 	if (l->type == emit_sky && *sun_main_once)
@@ -1248,7 +1252,7 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 		if (add_direct)
 		{
 			*sun_main_once = *sun_ambient_once = true;
-			scale = sun_main * dot2;
+			directsun_scale = sun_main * dot2;
 		}
 		else
 		{
@@ -1257,19 +1261,16 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 			lcn = lowestCommonNode(nodenum, l->nodenum);
 			if (!noblock && TestLine_color (lcn, pos, l->origin, occluded, cache))
 				return;		// occluded
-			scale = 0.0;
 		}
 		
 		if (add_ambient)
 		{
 			*sun_ambient_once = true;
-			scale += sun_ambient;
+			ambient_scale = sun_ambient;
 		}
 		
-		if( sun_alt_color ) // set in .map
-			VectorScale ( sun_color, scale, color );
-		else
-			VectorScale ( l->color, scale, color );
+		if (sun_alt_color) // set in .map
+			curr_color = sun_color;
 	}
 	else
 	{
@@ -1280,30 +1281,30 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 		switch ( l->type )
 		{
 		case emit_point:
-			scale = PointLight( dot, l->intensity, dist );
+			direct_scale = PointLight (dot, l->intensity, dist);
 			break;
 
 		case emit_surface:
 			dot2 = -DotProduct (delta, l->normal);
-			scale = SurfaceLight( dot, l->intensity, dist, dot2, inv );
+			// surfaces are 50/50 ambient and direct for now. FIXME: we can do
+			// better than this.
+			direct_scale = ambient_scale = 0.5f * SurfaceLight (dot, l->intensity, dist, dot2, inv);
 			break;
 
 		case emit_spotlight:
 			dot2 = -DotProduct(delta, l->normal);
-			scale = SpotLight( dot, l->intensity, dist, dot2, l->stopdot );
+			direct_scale = SpotLight (dot, l->intensity, dist, dot2, l->stopdot);
 			break;
 
 		default:
 			Error("Invalid light entity type.\n" );
 			break;
 		} /* switch() */
-		
-		if ( scale > 0.0f )
-		{
-			scale *= lightscale2; // adjust for multisamples, -extra cmd line arg
-			VectorScale ( l->color, scale, color );
-		}
 	}
+	
+	VectorScale (curr_color, direct_scale * lightscale2, out_color->direct);
+	VectorScale (curr_color, directsun_scale * lightscale2, out_color->directsun);
+	VectorScale (curr_color, ambient_scale * lightscale2, out_color->ambient);
 	
 	// 441.67 = roughly (sqrt(3*255^2))
 	VectorScale (l->color, l->intensity/441.67, color_nodist);
@@ -1311,7 +1312,9 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 	for (i = 0; i < 3; i++)
 	{
 		color_nodist[i] *= occluded[i];
-		color[i] *= occluded[i];
+		out_color->direct[i] *= occluded[i];
+		out_color->directsun[i] *= occluded[i];
+		out_color->ambient[i] *= occluded[i];
 	}
 	
 	*lightweight = VectorLength (color_nodist)/sqrt(3.0);
@@ -1326,14 +1329,13 @@ Lightscale2 is the normalizer for multisampling, -extra cmd line arg
 */
 
 void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
-			float **styletable, int offset, int mapsize, float lightscale2,
+			sample_t **styletable, int offset, int mapsize, float lightscale2,
 			qboolean *sun_main_once, qboolean *sun_ambient_once)
 {
 	int				i;
 	directlight_t	*l;
 	byte			pvs[(MAX_MAP_LEAFS+7)/8];
-	float			*dest;
-	vec3_t			color;
+	sample_t		*dest;
 	int				nodenum;
 	float			lightweight;
 	occlusioncache_t cache;
@@ -1354,10 +1356,11 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint (l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once, &lightweight, &cache);
+			sample_t sample;
+			LightContributionToPoint (l, pos, nodenum, normal, &sample, lightscale2, sun_main_once, sun_ambient_once, &lightweight, &cache);
 			
 			// no contribution
-			if ( VectorCompare ( color, vec3_origin ) )
+			if (VectorCompare (sample.direct, vec3_origin) && VectorCompare (sample.directsun, vec3_origin) && VectorCompare (sample.ambient, vec3_origin))
 				continue;
 
 			// if this style doesn't have a table yet, allocate one
@@ -1368,9 +1371,9 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 			}
 
 			dest = styletable[l->style] + offset;
-			dest[0] += color[0];
-			dest[1] += color[1];
-			dest[2] += color[2];
+			VectorAdd (dest->direct, sample.direct, dest->direct);
+			VectorAdd (dest->directsun, sample.directsun, dest->directsun);
+			VectorAdd (dest->ambient, sample.ambient, dest->ambient);
 			
 			if (doing_blur)
 			{
@@ -1445,9 +1448,8 @@ void BuildFacelights (int facenum)
 #else
 	lightinfo_t	liteinfo[5];
 #endif
-	float		*styletable[MAX_LSTYLES];
+	sample_t	*styletable[MAX_LSTYLES];
 	int			i, j;
-	float		*spot;
 	patch_t		*patch;
 	int			numsamples;
 	int			tablesize;
@@ -1463,7 +1465,7 @@ void BuildFacelights (int facenum)
 	liteinfo = malloc(sizeof(lightinfo_t)*5);
 #endif
 
-	memset (styletable,0, sizeof(styletable));
+	memset (styletable, 0, sizeof(styletable));
 
 	if (extrasamples) // set with -extra option
 		numsamples = 5;
@@ -1490,7 +1492,7 @@ void BuildFacelights (int facenum)
 		CalcPoints (&liteinfo[i], sampleofs[i][0], sampleofs[i][1]);
 	}
 
-	tablesize = liteinfo[0].numsurfpt * sizeof(vec3_t);
+	tablesize = liteinfo[0].numsurfpt * sizeof(sample_t);
 	styletable[0] = malloc(tablesize);
 	memset (styletable[0], 0, tablesize);
 
@@ -1510,11 +1512,13 @@ void BuildFacelights (int facenum)
 		for (j=0 ; j<numsamples ; j++)
 		{
 			GatherSampleLight (liteinfo[j].surfpt[i], &fl->blur_amt[i], liteinfo[0].facenormal, styletable,
-				i*3, tablesize, 1.0/numsamples, &sun_main_once, &sun_ambient_once);
+				i, tablesize, 1.0/numsamples, &sun_main_once, &sun_ambient_once);
 		}
 
 		// contribute the sample to one or more patches
-		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0]+i*3, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0][i].direct, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0][i].directsun, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0][i].ambient, facenum);
 	}
 
 	// average up the direct light on each patch for radiosity
@@ -1541,22 +1545,95 @@ void BuildFacelights (int facenum)
 		fl->numstyles++;
 	}
 
-	// the light from DIRECT_LIGHTS is sent out, but the
-	// texture itself should still be full bright
-	if (face_patches[facenum]->baselight[0] >= DIRECT_LIGHT ||
-		face_patches[facenum]->baselight[1] >= DIRECT_LIGHT ||
-		face_patches[facenum]->baselight[2] >= DIRECT_LIGHT
-		)
-	{
-		spot = fl->samples[0];
-		for (i=0 ; i<liteinfo[0].numsurfpt ; i++, spot+=3)
-		{
-			VectorAdd (spot, face_patches[facenum]->baselight, spot);
-		}
-	}
 #ifdef STACK_CONSTRAINED
 	free (liteinfo);
 #endif
+}
+
+
+/*
+=============
+PostProcessLightSample
+
+Apply -ambient, -maxlight, -scale, and -grayscale options to light sample, add
+in radiosity light if applicable
+=============
+*/
+void PostProcessLightSample (const sample_t *in, const vec3_t radiosity_add, sample_t *out, vec3_t out_combined_color)
+{
+	int i;
+	vec_t max, newmax;
+	vec3_t direct_proportion, directsun_proportion, ambient_proportion;
+
+	memcpy (out, in, sizeof (sample_t));
+
+	VectorAdd (out->ambient, radiosity_add, out->ambient);
+
+	/*
+	 * to allow experimenting, ambient and lightscale are not limited
+	 *  to reasonable ranges.
+	 */
+	if (ambient >= -255.0f && ambient <= 255.0f)
+	{ // add fixed white ambient.
+		for (i = 0; i < 3; i++)
+			out->ambient[i] += ambient;
+	}
+	if (lightscale > 0.0f)
+	{ // apply lightscale, scale down or up
+		VectorScale (out->direct, lightscale, out->direct);
+		VectorScale (out->directsun, lightscale, out->directsun);
+		VectorScale (out->ambient, lightscale, out->ambient);
+	}
+	// negative values not allowed
+	for (i = 0; i < 3; i++)
+	{
+		out->direct[0] = (out->direct[0] < 0.0f) ? 0.0f : out->direct[0];
+		out->directsun[0] = (out->directsun[0] < 0.0f) ? 0.0f : out->directsun[0];
+		out->ambient[0] = (out->ambient[0] < 0.0f) ? 0.0f : out->ambient[0];
+	}
+
+	// Create combined color
+	VectorCopy (out->direct, out_combined_color);
+	VectorAdd (out->directsun, out_combined_color, out_combined_color);
+	VectorAdd (out->ambient, out_combined_color, out_combined_color);
+	for (i = 0; i < 3; i++)
+	{
+		direct_proportion[i] = out->direct[i] / out_combined_color[i];
+		directsun_proportion[i] = out->directsun[i] / out_combined_color[i];
+		ambient_proportion[i] = out->ambient[i] / out_combined_color[i];
+	}
+
+	// determine max of R,G,B
+	max = out_combined_color[0] > out_combined_color[1] ? out_combined_color[0] : out_combined_color[1];
+	max = max > out_combined_color[2] ? max : out_combined_color[2];
+
+	if (grayscale > 0.0f && grayscale <= 1.0f)
+	{ // reduce color per NTSC model on combined color
+		max = (0.299f * out_combined_color[0]) + (0.587f * out_combined_color[1]) * (0.144f * out_combined_color[2]);
+		VectorScale (out_combined_color, 1.0f - grayscale, out_combined_color);
+		for (i = 0; i < 3; i++)
+			out_combined_color[i] += max * grayscale;
+	}
+	if (max < 1.0f)
+		max = 1.0f;
+
+	// note that maxlight based scaling is per-sample based on
+	//  highest value of R, G, and B
+	// adjust for -maxlight option
+	newmax = max;
+	if ( max > maxlight ) {
+		newmax = maxlight;
+		// scale into 0.0..maxlight range
+		VectorScale (out_combined_color, newmax / max, out_combined_color);
+	}
+
+	// break processed combined color back into separate channels
+	for (i = 0; i < 3; i++)
+	{
+		out->direct[i] = direct_proportion[i] * out_combined_color[i];
+		out->directsun[i] = directsun_proportion[i] * out_combined_color[i];
+		out->ambient[i] = ambient_proportion[i] * out_combined_color[i];
+	}
 }
 
 
@@ -1572,13 +1649,10 @@ void FinalLightFace (int facenum)
 {
 	dface_t		*f;
 	int			i, j, /*k,*/ st;
-	vec3_t		lb;
 	patch_t		*patch;
 	triangulation_t	*trian = NULL;
 	facelight_t	*fl;
 	// float		minlight;
-	float		max;
-	float newmax;
 	byte		*dest;
 	triangle_t	*last_valid;
 	int			pfacenum;
@@ -1688,75 +1762,20 @@ void FinalLightFace (int facenum)
 
 		for (j=0 ; j<fl->numsamples ; j++)
 		{
-			VectorCopy ( (fl->samples[st]+j*3), lb);
+			sample_t processed;
+			vec3_t combined_color, radiosity_add;
+
+			VectorClear (radiosity_add);
+
 			if (numbounce > 0 && st == 0)
-			{
-				vec3_t	add;
+				SampleTriangulation (fl->origins + j*3, trian, &last_valid, radiosity_add);
 
-				SampleTriangulation (fl->origins + j*3, trian, &last_valid, add);
-				VectorAdd (lb, add, lb);
-			}
+			PostProcessLightSample (fl->samples[st] + j, radiosity_add, &processed, combined_color);
 
-
-			/*
-			 * to allow experimenting, ambient and lightscale are not limited
-			 *  to reasonable ranges.
-			 */
-			if ( ambient >= -255.0f && ambient <= 255.0f )
-			{ // add fixed white ambient.
-				lb[0] += ambient;
-				lb[1] += ambient;
-				lb[2] += ambient;
-			}
-			if ( lightscale > 0.0f  )
-			{ // apply lightscale, scale down or up
-				lb[0] *= lightscale;
-				lb[1] *= lightscale;
-				lb[2] *= lightscale;
-			}
-			// negative values not allowed
-			lb[0] = (lb[0] < 0.0f) ? 0.0f : lb[0];
-			lb[1] = (lb[1] < 0.0f) ? 0.0f : lb[1];
-			lb[2] = (lb[2] < 0.0f) ? 0.0f : lb[2];
-
-
-/*			qprintf("{%f %f %f}:",lb[0],lb[1],lb[2]);*/
-
-			// determine max of R,G,B
-			max = lb[0] > lb[1] ? lb[0] : lb[1];
-			max = max > lb[2] ? max : lb[2];
-
-			if( grayscale > 0.0f && grayscale <= 1.0f  )
-			{ // reduce color per NTSC model
-				max = (0.299f * lb[0]) + (0.587f * lb[1]) * (0.144f * lb[2]);
-				lb[0] = (lb[0] * (1.0f - grayscale)) + (max * grayscale);
-				lb[1] = (lb[1] * (1.0f - grayscale)) + (max * grayscale);
-				lb[2] = (lb[2] * (1.0f - grayscale)) + (max * grayscale);
-			}
-			if ( max < 1.0f )
-				max = 1.0f;
-
-			// note that maxlight based scaling is per-sample based on
-			//  highest value of R, G, and B
-			// adjust for -maxlight option
-			newmax = max;
-			if ( max > maxlight ) {
-				newmax = maxlight;
-				newmax /= max; // scaling factor 0.0..1.0
-				// scale into 0.0..maxlight range
-				lb[0] *= newmax;
-				lb[1] *= newmax;
-				lb[2] *= newmax;
-			}
-
-/*
-			qprintf("{%x %x %x}\n",
-					(byte)(lb[0]+0.5), (byte)(lb[1]+0.5), (byte)(lb[2]+0.5) );
-*/
 			// and output to 8:8:8 RGB
-			*dest++ = (byte)(lb[0] + 0.5);
-			*dest++ = (byte)(lb[1] + 0.5);
-			*dest++ = (byte)(lb[2] + 0.5);
+			*dest++ = (byte)(combined_color[0] + 0.5);
+			*dest++ = (byte)(combined_color[1] + 0.5);
+			*dest++ = (byte)(combined_color[2] + 0.5);
 		}
 	}
 
