@@ -133,6 +133,27 @@ extern	directlight_t	*directlights[MAX_MAP_LEAFS];
 
 extern	byte	nodehit[MAX_MAP_NODES];
 
+typedef struct
+{
+	vec3_t	direct; // occluded by shadow casters in the engine
+	vec3_t	directsun; // occluded by shadow casters in the engine
+	vec3_t	ambient; // not shadowed
+} sample_t;
+typedef struct
+{
+	struct cterraintri_s *mru, *lru;
+} occlusioncache_t;
+void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
+									vec3_t normal,
+									sample_t *out_color,
+									float lightscale2, // adjust for multisamples, -extra cmd line arg
+									qboolean *sun_main_once, 
+									qboolean *sun_ambient_once,
+									float *lightweight,
+									occlusioncache_t *cache
+								);
+void PostProcessLightSample (const sample_t *in, const vec3_t radiosity_add, sample_t *out, vec3_t out_combined_color);
+
 void BuildLightmaps (void);
 
 void BuildFacelights (int facenum);
@@ -142,11 +163,6 @@ void BlurFace (int facenum);
 void DetectUniformColor (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
-
-typedef struct
-{
-	struct cterraintri_s *mru, *lru;
-} occlusioncache_t;
 
 int	PointInNodenum (vec3_t point);
 int TestLine (vec3_t start, vec3_t stop);

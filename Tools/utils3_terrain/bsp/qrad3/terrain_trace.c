@@ -755,16 +755,6 @@ qboolean Fast_Terrain_Trace_Cache_Miss (vec3_t start, vec3_t end, occlusioncache
 	return fraction == 1.0;
 }
 
-extern
-void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
-									vec3_t normal, vec3_t color, 
-									float lightscale2, 
-									qboolean *sun_main_once, 
-									qboolean *sun_ambient_once,
-									float *lightweight,
-									occlusioncache_t *cache
-								);
-
 // On maps with sunlight, a grid of light sources is created along each sky
 // surface. However, when computing the amount of illumination from sunlight,
 // only one light source per sample ends up actually mattering. If a sample
@@ -784,7 +774,7 @@ typedef struct
 
 static void TerrainPointLight_TryCluster (	int clusternum,
 											vec3_t surface_pos, vec3_t normal,
-											vec3_t out_color,
+											sample_t *out_color,
 											occlusioncache_t *cache,
 											suncache_t *suncache,
 											qboolean *sun_main_once,
@@ -792,7 +782,7 @@ static void TerrainPointLight_TryCluster (	int clusternum,
 {
 	directlight_t	*l;
 	float			lightweight = 0.0;
-	vec3_t			color;
+	sample_t		sample;
 	
 	for (l=directlights[clusternum]; l != NULL; l=l->next)
 	{
@@ -802,7 +792,7 @@ static void TerrainPointLight_TryCluster (	int clusternum,
 		if (l == suncache->light)
 			continue;
 		
-		LightContributionToPoint (l, surface_pos, 0, normal, color, 1.0, sun_main_once, sun_ambient_once, &lightweight, cache);
+		LightContributionToPoint (l, surface_pos, 0, normal, &sample, 1.0, sun_main_once, sun_ambient_once, &lightweight, cache);
 		
 		// If this light is a sky/sun light and it illuminated this
 		// sample, cache it. We may "evict" a light that only does ambient
@@ -814,16 +804,17 @@ static void TerrainPointLight_TryCluster (	int clusternum,
 			suncache->clusternum = clusternum;
 		}
 		
-		VectorAdd (out_color, color, out_color);
+		VectorAdd (out_color->direct, sample.direct, out_color->direct);
+		VectorAdd (out_color->directsun, sample.directsun, out_color->directsun);
+		VectorAdd (out_color->ambient, sample.ambient, out_color->ambient);
 	}
 }
 
-static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *cache, suncache_t *suncache)
+static void TerrainPointLight (vec3_t pos, sample_t *out_color, occlusioncache_t *cache, suncache_t *suncache)
 {
 	int				i;
 	qboolean		sun_main_once = false, sun_ambient_once = false;
 	float			lightweight = 0.0;
-	vec3_t			color;
 	vec3_t			normal;
 	vec3_t			start, end;
 	vec3_t			surface_pos;
@@ -840,12 +831,11 @@ static void TerrainPointLight (vec3_t pos, vec3_t out_color, occlusioncache_t *c
 	// intersect or miss it incorrectly due to FP inaccuracy.
 	VectorAdd (surface_pos, normal, surface_pos);
 	
-	VectorClear (out_color);
+	memset (out_color, 0, sizeof (*out_color));
 	
 	if (suncache->light != NULL)
 	{
-		LightContributionToPoint (suncache->light, surface_pos, 0, normal, color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
-		VectorAdd (out_color, color, out_color);
+		LightContributionToPoint (suncache->light, surface_pos, 0, normal, out_color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
 		if (!sun_ambient_once)
 			suncache->light = NULL; // The light did nothing
 	}
@@ -876,27 +866,18 @@ static void GenerateTerrainModelLightmapRow (int t)
 	VectorMA (mod->mins, mod->lm_size[1]*(float)t/(float)mod->lm_h, mod->lm_t_axis, oloop_pos);
 	for (s = 0; s < mod->lm_w; s++)
 	{
-		float max;
-		vec3_t iloop_pos, color;
-		
+		vec3_t iloop_pos, combined_color;
+		sample_t sample, processed;
+
 		VectorMA (oloop_pos, mod->lm_size[0]*(float)s/(float)mod->lm_w, mod->lm_s_axis, iloop_pos);
-		
-		TerrainPointLight (iloop_pos, color, &cache, &suncache);
-		
-		max = 0;
+
+		TerrainPointLight (iloop_pos, &sample, &cache, &suncache);
+
+		PostProcessLightSample (&sample, vec3_origin, &processed, combined_color);
+
 		for (i = 0; i < 3; i++)
 		{
-			color[i] += ambient;
-			if (color[i] > max)
-				max = color[i];
-		}
-		
-		if (max > maxlight)
-			VectorScale (color, maxlight/max, color);
-			
-		for (i = 0; i < 3; i++)
-		{
-			int c = color[i];
+			int c = combined_color[i] + 0.5;
 			tex[3*(mod->lm_w*t+s)+i] = c;
 		}
 	}
