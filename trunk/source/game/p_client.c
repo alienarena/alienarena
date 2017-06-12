@@ -981,6 +981,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 			switch (i)
 			{
+			default:
 			case 0:
 				self->s.frame = FRAME_death501-1;
 				self->client->anim_end = FRAME_death518;
