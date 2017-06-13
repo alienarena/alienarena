@@ -24,11 +24,8 @@ nobase_dist_pics_DATA = \
 	a_slugs.tga \
 	bar_background.tga \
 	bar_loading.tga \
-	beamgun.tga \
-	blaster.tga \
 	blood_ring.tga \
 	blueplayerbox.tga \
-	bomber.tga \
 	bots/enforcer/blue_i.jpg \
 	bots/enforcer/default_i.jpg \
 	bots/enforcer/red_i.jpg \
@@ -43,7 +40,6 @@ nobase_dist_pics_DATA = \
 	ch1.tga \
 	ch2.tga \
 	ch3.tga \
-	chaingun.tga \
 	colormap.pcx \
 	conchars.tga \
 	crosshairs/alien2a.tga \
@@ -75,18 +71,9 @@ nobase_dist_pics_DATA = \
 	crosshairs/vista.tga \
 	ctf1.tga \
 	ctf2.tga \
-	disruptor.tga \
 	dnarrow.tga \
-	flamethrower.tga \
-	grapple.tga \
 	help.tga \
-	hover.tga \
-	hud_bomber_fx.tga \
-	hud_bomber.tga \
-	hud_hover_fx.tga \
 	hud_hover.tga \
-	hud_strafer_fx.tga \
-	hud_strafer.tga \
 	i_ammo.tga \
 	i_beamgun.tga \
 	i_bodyarmor.tga \
@@ -167,6 +154,7 @@ nobase_dist_pics_DATA = \
 	m_quit.tga \
 	m_single.tga \
 	m_startserver.tga \
+	m_submenu_bg.tga \
 	m_tactical.tga \
 	m_video.tga \
 	menu/button_border_end.tga \
@@ -225,19 +213,14 @@ nobase_dist_pics_DATA = \
 	p_shard.tga \
 	p_sproing.tga \
 	redplayerbox.tga \
-	rocketlauncher.tga \
 	sbfctf1.tga \
 	sbfctf2.tga \
-	smartgun.tga \
 	statbox.tga \
-	strafer.tga \
 	tag1.tga \
 	tag2.tga \
 	team1.tga \
 	team2.tga \
 	uparrow.tga \
-	vaporizor.tga \
-	violator.tga \
 	votebox.tga \
 	w_bfg.tga \
 	w_blaster.tga \
