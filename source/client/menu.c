@@ -141,6 +141,7 @@ static void SetGameModeCvars (enum Game_mode mode)
 /*--------*/
 
 static int	m_main_cursor;
+static int news_start_time;
 
 extern int CL_GetPingStartTime(netadr_t adr);
 
@@ -1075,6 +1076,16 @@ static void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *wi
 	*xoffset = ( viddef.width - *widest + 350*scale) / 2;
 }
 
+static const char *news[] =
+{
+	"+Alien Arena News Feed",
+	"",
+	"+LATEST AA NEWS!",
+	"This is a test.",
+	"Real news coming soon!",
+	0
+};
+
 static void M_Main_Draw (menuvec2_t offset)
 {
 	unsigned int i;
@@ -1086,9 +1097,12 @@ static void M_Main_Draw (menuvec2_t offset)
 	float scale, hscale, hscaleoffs;
 	float widscale;
 	int w, h;
+	int y;
 	char montagepicname[16];
 	char backgroundpic[16];
-	char *version_warning;
+	char *version_warning;	
+	FNT_font_t		font;
+	struct FNT_window_s	box;
 	
 	static float mainalpha;
 	static int montagepic = 1;
@@ -1161,6 +1175,33 @@ static void M_Main_Draw (menuvec2_t offset)
 		hscaleoffs = (float)h*scale-(float)h*hscale*scale;
 		Draw_StretchPic( xstart, (int)(ystart + i * 32.5*scale + 13*scale + hscaleoffs), xend-xstart, h*hscale*scale, litname );
 	}
+
+	//draw the news feed - this is temp, test code.  Actual news will be dynamically read in from http	
+	font = FNT_AutoGet( CL_menuFont );
+	scale = font->size / 8.0;
+
+	for ( i = 0, y = viddef.height/8.0 - ( ( cls.realtime - news_start_time ) / 40.0F ); news[i]; y += 12*scale, i++ )
+	{
+		if ( y <= 12*scale || y > 48*scale)
+			continue;
+		
+		box.y = offset.y + y;
+		box.x = offset.x;
+		box.height = 0;
+		box.width = viddef.width/4.0;
+
+		if ( news[i][0] == '+' )
+		{
+			FNT_BoundedPrint (font, news[i]+1, FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[3]);
+		}
+		else
+		{
+			FNT_BoundedPrint (font, news[i], FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[7]);
+		}
+	}
+
+	if ( y <= 12*scale )
+		news_start_time = cls.realtime;
 }
 
 void CheckMainMenuMouse (void)
