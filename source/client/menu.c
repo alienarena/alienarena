@@ -5168,7 +5168,7 @@ static void MapInfoFunc (UNUSED void *self)
 	for (; i < 5; i++)
 		Com_sprintf (s_startserver_map_data_strings[i], sizeof (s_startserver_map_data_strings[i]), "no data");
 	
-	Com_sprintf( levelshot, sizeof(levelshot), "/levelshots/%s", startmap );
+	Com_sprintf( levelshot, sizeof(levelshot), "/levelshots/%s_p", startmap );
 	s_levelshot_preview.generic.localstrings[0] = levelshot;
 
 }
