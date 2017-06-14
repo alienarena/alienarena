@@ -10950,7 +10950,7 @@
 "origin" "694.000000 526.000000 -146.000000"
 "model" "maps/meshes/gothic/meat3.md2"
 "angle" "-159.319397"
-"spawnflags" "1"
+"spawnflags" "33"
 }
 // entity 159
 {
@@ -10974,7 +10974,7 @@
 "origin" "-312.000092 740.000061 -146.000000"
 "model" "maps/meshes/gothic/meat3.md2"
 "angle" "146.340347"
-"spawnflags" "1"
+"spawnflags" "33"
 }
 // entity 162
 {
