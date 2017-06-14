@@ -8645,7 +8645,7 @@
 "classname" "misc_mapmodel"
 "origin" "1508.000000 -700.000000 224.000000"
 "model" "maps/meshes/gothic/meat3.md2"
-"spawnflags" "1"
+"spawnflags" "33"
 }
 // entity 49
 {

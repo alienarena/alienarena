@@ -13977,7 +13977,7 @@
 {
 "classname" "misc_mapmodel"
 "angle" "270"
-"spawnflags" "1"
+"spawnflags" "33"
 "model" "maps/meshes/gothic/meat3.md2"
 "origin" "-152 80 112"
 }
@@ -13994,7 +13994,7 @@
 "classname" "misc_mapmodel"
 "origin" "320 -168 232"
 "model" "maps/meshes/gothic/meat3.md2"
-"spawnflags" "1"
+"spawnflags" "33"
 "angle" "360"
 }
 // entity 93
@@ -14033,7 +14033,7 @@
 {
 "classname" "misc_mapmodel"
 "angle" "360"
-"spawnflags" "1"
+"spawnflags" "33"
 "model" "maps/meshes/gothic/meat3.md2"
 "origin" "-800 -72 232"
 }
