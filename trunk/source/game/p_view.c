@@ -1153,7 +1153,7 @@ void G_SetClientFrame (edict_t *ent)
 			goto newanim;
 
 		//changed strafe direction
-		if(ent->sidemove !=0 && ent->last_sidemove != ent->sidemove)
+		if((ent->sidemove !=0 && ent->last_sidemove != ent->sidemove) && client->anim_priority < ANIM_DEATH)
 			goto newanim;
 
 		if(client->anim_priority == ANIM_REVERSE)
