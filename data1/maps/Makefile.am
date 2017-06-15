@@ -336,8 +336,10 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/meat2.jpg \
 	meshes/gothic/meat2.md2 \
 	meshes/gothic/meat2_normal.jpg \
+	meshes/gothic/meat3.iqm \
 	meshes/gothic/meat3.jpg \
 	meshes/gothic/meat3.md2 \
+	meshes/gothic/meat3.skin \
 	meshes/gothic/meat3_normal.jpg \
 	meshes/gothic/neptune.jpg \
 	meshes/gothic/neptune.md2 \
