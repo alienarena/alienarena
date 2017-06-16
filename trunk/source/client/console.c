@@ -52,11 +52,11 @@ float consolecolors[ 6 ][ 4 ] =
 float consolecolors_menu[ 6 ][ 4 ] =
 {
 	{0.0, 0.0, 0.0, 0.85},
-	{0.15, 0.0, 0.0, 0.85},
-	{0.0, 0.15, 0.0, 0.85},
-	{0.0, 0.0, 0.15, 0.85},
-	{0.0, 0.15, 0.15, 0.85},
-	{0.15, 0.0, 0.15, 0.85}
+	{0.1, 0.0, 0.0, 0.85},
+	{0.0, 0.1, 0.0, 0.85},
+	{0.0, 0.0, 0.1, 0.85},
+	{0.0, 0.1, 0.1, 0.85},
+	{0.1, 0.0, 0.1, 0.85}
 };
 
 extern viddef_t vid;
@@ -845,8 +845,11 @@ void CON_DrawConsole( float relSize )
 	{
 		int _tile_w, _tile_h;
 		float tile_w, tile_h;
-		qboolean fromMenu = (cls.state == ca_disconnected && cls.key_dest != key_game);
+		//qboolean fromMenu = (cls.state == ca_disconnected && cls.key_dest != key_game);
+		qboolean fromMenu = (cls.state == ca_disconnected || cls.state == ca_connecting);
 		int color = con_color->integer;
+
+//Com_Printf("%d %d\n", cls.state, cls.key_dest);
 
 		// assume all tiles are the same size
 		Draw_GetPicSize (&_tile_w, &_tile_h, "menu/m_topcorner" );
@@ -860,7 +863,7 @@ void CON_DrawConsole( float relSize )
 
 		if (color > 0 || fromMenu) 
 		{
-			Draw_Fill_RoundedCorners(font->size - 2, 0, viddef.width - font->size * 2 + 5, dHeight + 4, 
+			Draw_Fill_CutCorners(font->size / 3, 0, viddef.width - font->size / 1.5, dHeight + font->size * 1.5, 
 				fromMenu ? consolecolors_menu[color] : consolecolors[color], font->size, RCF_BOTTOMLEFT|RCF_BOTTOMRIGHT);
 		}
 
