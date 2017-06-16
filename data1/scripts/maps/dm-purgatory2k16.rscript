@@ -2,41 +2,40 @@ bottom_texture
 {	
 	{
 		map textures/dm-purgatory/bottom_blendtex.tga		
-		blendmap 4	
-			200 textures/desert/rockground1.tga		
-			400 textures/desert/cliffmiddle.tga					
+		blendmap 3	
+			200 textures/texturelib/grass_0075.jpg		
+			400 textures/texturelib/grass_0048.jpg					
 			200 textures/desert/pebbles.tga	
-		blendnormalmap 3 
-			0 textures/desert/rockground1_nm.tga	
-			1 textures/desert/cliffmiddle_nm.tga
-			2 textures/desert/pebbles_nm.tga		
+		blendnormalmap 2 
+			0 textures/texturelib/grass_0075_nm.tga	
+			1 textures/texturelib/grass_0048_nm.tga
+	
 	}
 }
 bottom2_texture
 {	
 	{
 		map textures/dm-purgatory/bottom2_blendtex.tga		
-		blendmap 4			
+		blendmap 3			
 			400 textures/desert/cliffbottom.tga		
 			200 textures/desert/rockground1.tga	
 			200 textures/desert/pebbles.tga	
-		blendnormalmap 3 
+		blendnormalmap 2 
 			0 textures/desert/cliffbottom_nm.tga
 			1 textures/desert/rockground1_nm.tga	
-			2 textures/desert/pebbles_nm.tga		
 	}
 }
 bottom3_texture
 {	
 	{
-		map textures/dm-purgatory/bottom3_blendtex.tga		
-		blendmap 4	
-			200 textures/desert/rockground1.tga		
-			400 textures/desert/cliffmiddle.tga					
+		map textures/dm-purgatory/bottom_blendtex.tga		
+		blendmap 3	
+			200 textures/texturelib/grass_0075.jpg		
+			400 textures/texturelib/grass_0048.jpg					
 			200 textures/desert/pebbles.tga	
 		blendnormalmap 3 
-			0 textures/desert/rockground1_nm.tga	
-			1 textures/desert/cliffmiddle_nm.tga
+			0 textures/texturelib/grass_0075_nm.tga	
+			1 textures/texturelib/grass_0048_nm.tga
 			2 textures/desert/pebbles_nm.tga		
 	}
 }
