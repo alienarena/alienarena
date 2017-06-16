@@ -24531,7 +24531,7 @@
 // entity 479
 {
 "classname" "misc_mapmodel"
-"origin" "665.999939 -948.000000 260.000000"
+"origin" "661.999939 -948.000000 260.000000"
 "model" "maps/meshes/tech/obarch5_r.md2"
 "angle" "-90.000000"
 "spawnflags" "1"
@@ -24555,7 +24555,7 @@
 // entity 482
 {
 "classname" "misc_mapmodel"
-"origin" "-616.000061 -532.000000 260.000000"
+"origin" "-617.000061 -532.000000 260.000000"
 "model" "maps/meshes/tech/obarch5_r.md2"
 "angle" "-90.000000"
 "spawnflags" "1"
@@ -24571,7 +24571,7 @@
 // entity 484
 {
 "classname" "misc_mapmodel"
-"origin" "-616.000061 1000.000000 260.000000"
+"origin" "-617.000061 1000.000000 260.000000"
 "model" "maps/meshes/tech/obarch5_b.md2"
 "angle" "-90.000000"
 "spawnflags" "1"
