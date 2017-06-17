@@ -1927,7 +1927,9 @@ nobase_dist_textures_DATA = \
 	tac-impact/rubble4_blendtex.tga \
 	tac-impact/rubble4_lightmaptex.tga \
 	texturelib/grass_0048.jpg \
+	texturelib/grass_0048_nm.tga \
 	texturelib/grass_0075.jpg \
+	texturelib/grass_0075_nm.tga \
 	texturelib/grass_0099.jpg \
 	texturelib/grass_0102.jpg \
 	texturelib/ground_0045.jpg \
