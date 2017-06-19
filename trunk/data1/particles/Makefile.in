@@ -246,7 +246,31 @@ nobase_dist_particles_DATA = \
 	fireball.tga \
 	flag.tga \
 	flare.tga \
-	lavasplash.tga
+	lavasplash.tga \
+	leaderfield.tga \
+	leaf.tga \
+	logo.tga \
+	puff.tga \
+	reflect.tga \
+	r_explod_1.tga \
+	r_explod_2.tga \
+	r_explod_3.tga \
+	r_explod_4.tga \
+	r_explod_5.tga \
+	r_explod_6.tga \
+	r_explod_7.tga \
+	ring.tga \
+	ripples.tga \
+	sayicon.tga \
+	shell.tga \
+	shell2.tga \
+	shell2_normal.tga \
+	shell_normal.tga \
+	smoke_org.tga \
+	smoke.tga \
+	trash.tga \
+	voltage.tga \
+	watersplash.tga
 
 all: all-am
 
@@ -460,30 +484,6 @@ uninstall-am: uninstall-nobase_dist_particlesDATA
 
 .PRECIOUS: Makefile
 
-	leaderfield.tga \
-	leaf.tga \
-	logo.tga \
-	puff.tga \
-	reflect.tga \
-	r_explod_1.tga \
-	r_explod_2.tga \
-	r_explod_3.tga \
-	r_explod_4.tga \
-	r_explod_5.tga \
-	r_explod_6.tga \
-	r_explod_7.tga \
-	ring.tga \
-	ripples.tga \
-	sayicon.tga \
-	shell.tga \
-	shell2.tga \
-	shell2_normal.tga \
-	shell_normal.tga \
-	smoke_org.tga \
-	smoke.tga \
-	trash.tga \
-	voltage.tga \
-	watersplash.tga
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

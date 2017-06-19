@@ -5,9 +5,6 @@
 picsdir=$(pkgdatadir)/data1/pics
 
 nobase_dist_pics_DATA = \
-	a_bullets.tga \
-	a_cells.tga \
-	a_grenades.tga \
 	anum_0.tga \
 	anum_1.tga \
 	anum_2.tga \
@@ -19,9 +16,6 @@ nobase_dist_pics_DATA = \
 	anum_8.tga \
 	anum_9.tga \
 	anum_minus.tga \
-	a_rockets.tga \
-	a_shells.tga \
-	a_slugs.tga \
 	bar_background.tga \
 	bar_loading.tga \
 	blood_ring.tga \
@@ -73,7 +67,6 @@ nobase_dist_pics_DATA = \
 	ctf2.tga \
 	dnarrow.tga \
 	help.tga \
-	hud_hover.tga \
 	i_ammo.tga \
 	i_beamgun.tga \
 	i_bodyarmor.tga \
@@ -104,14 +97,7 @@ nobase_dist_pics_DATA = \
 	i_team1.tga \
 	i_team2.tga \
 	i_vaporizer.tga \
-	m_bots.tga \
-	m_controls.tga \
-	m_cursor0.tga \
-	m_dmoptions.tga \
-	menu_back.jpg \
 	menu_back_fx.tga \
-	m_irc.tga \
-	m_joinserver.tga \
 	m_main_credits.tga \
 	m_main_credits_fx.tga \
 	m_main_credits_sel.tga \
@@ -148,15 +134,10 @@ nobase_dist_pics_DATA = \
 	m_main_video_sel.tga \
 	m_main_video.tga \
 	m_mouse_cursor.tga \
-	m_mutators.tga \
-	m_options.tga \
-	m_player.tga \
 	m_quit.tga \
-	m_single.tga \
 	m_startserver.tga \
 	m_submenu_bg.tga \
 	m_tactical.tga \
-	m_video.tga \
 	menu/button_border_end.tga \
 	menu/button_border.tga \
 	menu/dnarrow.tga \
