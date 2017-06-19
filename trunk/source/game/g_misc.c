@@ -986,8 +986,8 @@ void SP_misc_teleporter (edict_t *ent)
 	// glowing effect, while a new entity is spawned to act as the functioning
 	// teleporter. 
 	gi.setmodel (ent, "models/objects/blank/tris.iqm");
-	ent->s.skinnum = 1;
-	ent->s.effects = EF_TELEPORTER;
+	ent->s.effects = EF_TELEPORTER;	
+	ent->s.renderfx |= RF_NODRAW;
 	ent->solid     = SOLID_NOT;
 
 	VectorSet (ent->mins, -32, -32, 0);
@@ -1003,7 +1003,6 @@ void SP_misc_teleporter (edict_t *ent)
 	VectorSet (trig->mins, -8, -8, 8);
 	VectorSet (trig->maxs, 8, 8, 24);
 	gi.linkentity (trig);
-
 }
 
 /*QUAKED misc_teleporter_dest (1 0 0) (-32 -32 -24) (32 32 -16)
