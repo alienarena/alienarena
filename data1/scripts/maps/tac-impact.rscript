@@ -54,6 +54,12 @@ rubble4_texture
 			2 textures/texturelib/ground_0045_nm.tga			
 	}
 }
+textures/arena10/skyscraper6
+{
+	{
+		cube
+	}
+}
 textures/arena9/roundlight
 {
 	{
@@ -64,7 +70,7 @@ textures/arena9/roundlight
 		lensflare
 	}
 }
-textures/arena10/cobblestone1
+textures/arena10/cobblestone2
 {
 	{
 		map gfx/weed3.tga
@@ -74,7 +80,7 @@ textures/arena10/cobblestone1
 		grasstype 0
 	}
 }
-textures/arena10/rockdirt1
+textures/desert/pebbles
 {
 	{
 		map gfx/weed3.tga
@@ -94,7 +100,7 @@ textures/arena10/cobblestoneng
 		grasstype 0
 	}
 }
-textures/arena10/road1
+textures/arena10/road4
 {
 	{
 		map gfx/weed3.tga
@@ -104,20 +110,10 @@ textures/arena10/road1
 		grasstype 0
 	}
 }
-textures/arena10/road2
+textures/arena10/road5
 {
 	{
 		map gfx/weed3.tga
-		scale static 4 static 4
-		colormap .7 .6 .5
-		grass
-		grasstype 0
-	}
-}
-textures/arena10/road3
-{
-	{
-		map gfx/weed1.tga
 		scale static 4 static 4
 		colormap .7 .6 .5
 		grass
