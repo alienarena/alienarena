@@ -289,7 +289,7 @@ textures/evil/e8_jumppad02
         	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
     	}
 }
-env/alienup
+env/halienup
 {
 	{
 		map gfx/clouds.tga
@@ -297,7 +297,7 @@ env/alienup
 		alphashift 0 0.8 0.8
 	}
 }
-env/alienrt
+env/halienrt
 {
 	{
 		map gfx/clouds.tga
@@ -305,7 +305,7 @@ env/alienrt
 		alphashift 0 0.8 0.8
 	}
 }
-env/alienlf
+env/halienlf
 {
 	{
 		map gfx/clouds.tga
@@ -313,7 +313,7 @@ env/alienlf
 		alphashift 0 0.8 0.8
 	}
 }
-env/alienft
+env/halienft
 {
 	{
 		map gfx/clouds.tga
@@ -321,7 +321,7 @@ env/alienft
 		alphashift 0 0.8 0.8
 	}
 }
-env/alienbk
+env/halienbk
 {
 	{
 		map gfx/clouds.tga
@@ -329,7 +329,7 @@ env/alienbk
 		alphashift 0 0.8 0.8
 	}
 }
-env/aliendn
+env/haliendn
 {
 	{
 		map gfx/clouds.tga

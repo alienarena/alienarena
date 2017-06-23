@@ -145,7 +145,7 @@ textures/phillipk/pk02_floor02
 		cube
 	}
 }
-env/greenup
+env/halienup
 {
 	{
 		map gfx/cloudsthick.tga
@@ -153,7 +153,7 @@ env/greenup
 		alphashift 0 1 1
 	}
 }
-env/greenrt
+env/halienrt
 {
 	{
 		map gfx/cloudsthick.tga
@@ -161,7 +161,7 @@ env/greenrt
 		alphashift 0 1 1
 	}
 }
-env/greenlf
+env/halienlf
 {
 	{
 		map gfx/cloudsthick.tga
@@ -169,7 +169,7 @@ env/greenlf
 		alphashift 0 1 1
 	}
 }
-env/greenft
+env/halienft
 {
 	{
 		map gfx/cloudsthick.tga
@@ -177,7 +177,7 @@ env/greenft
 		alphashift 0 1 1
 	}
 }
-env/greenbk
+env/halienbk
 {
 	{
 		map gfx/cloudsthick.tga
@@ -185,7 +185,7 @@ env/greenbk
 		alphashift 0 1 1
 	}
 }
-env/greendn
+env/haliendn
 {
 	{
 		map gfx/cloudsthick.tga
