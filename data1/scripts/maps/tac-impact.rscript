@@ -120,6 +120,16 @@ textures/arena10/road5
 		grasstype 0
 	}
 }
+textures/texturelib/grass_0048
+{
+	{
+		map gfx/weed3.tga
+		scale static 8 static 8
+		colormap .7 .6 .5
+		grass
+		grasstype 0
+	}
+}
 textures/arena6/icerock
 {
 	{
@@ -172,7 +182,7 @@ textures/water/clearwater
 		distort
 	}
 }
-env/tekcityup
+env/halienup
 {
 	{
 		map gfx/clouds.tga
@@ -180,7 +190,7 @@ env/tekcityup
 		alphashift 0 0.8 0.8
 	}
 }
-env/tekcityrt
+env/halienrt
 {
 	{
 		map gfx/clouds.tga
@@ -188,7 +198,7 @@ env/tekcityrt
 		alphashift 0 0.8 0.8
 	}
 }
-env/tekcitylf
+env/halienlf
 {
 	{
 		map gfx/clouds.tga
@@ -196,7 +206,7 @@ env/tekcitylf
 		alphashift 0 0.8 0.8
 	}
 }
-env/tekcityft
+env/halienft
 {
 	{
 		map gfx/clouds.tga
@@ -204,7 +214,7 @@ env/tekcityft
 		alphashift 0 0.8 0.8
 	}
 }
-env/tekcitybk
+env/halienbk
 {
 	{
 		map gfx/clouds.tga
@@ -212,7 +222,7 @@ env/tekcitybk
 		alphashift 0 0.8 0.8
 	}
 }
-env/tekcitydn
+env/haliendn
 {
 	{
 		map gfx/clouds.tga

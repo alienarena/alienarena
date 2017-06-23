@@ -28,7 +28,7 @@ textures/arena7/light3
 		lensflare
 	}
 }
-env/hellup
+env/hhellup
 {
 	{
 		map gfx/cloudsthick.tga
@@ -36,7 +36,7 @@ env/hellup
 		alphashift 0 1 1
 	}
 }
-env/hellrt
+env/hhellrt
 {
 	{
 		map gfx/cloudsthick.tga
@@ -44,7 +44,7 @@ env/hellrt
 		alphashift 0 1 1
 	}
 }
-env/helllf
+env/hhelllf
 {
 	{
 		map gfx/cloudsthick.tga
@@ -52,7 +52,7 @@ env/helllf
 		alphashift 0 1 1
 	}
 }
-env/hellft
+env/hhellft
 {
 	{
 		map gfx/cloudsthick.tga
@@ -60,7 +60,7 @@ env/hellft
 		alphashift 0 1 1
 	}
 }
-env/hellbk
+env/hhellbk
 {
 	{
 		map gfx/cloudsthick.tga
@@ -68,7 +68,7 @@ env/hellbk
 		alphashift 0 1 1
 	}
 }
-env/helldn
+env/hhelldn
 {
 	{
 		map gfx/cloudsthick.tga

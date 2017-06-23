@@ -165,7 +165,7 @@ textures/evil/e8_jumppad02
         	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
     	}
 }
-env/deadcityup
+env/hgreenup
 {
 	{
 		map gfx/clouds.tga
@@ -173,7 +173,7 @@ env/deadcityup
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcityrt
+env/hgreenrt
 {
 	{
 		map gfx/clouds.tga
@@ -181,7 +181,7 @@ env/deadcityrt
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcitylf
+env/hgreenlf
 {
 	{
 		map gfx/clouds.tga
@@ -189,7 +189,7 @@ env/deadcitylf
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcityft
+env/hgreenft
 {
 	{
 		map gfx/clouds.tga
@@ -197,7 +197,7 @@ env/deadcityft
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcitybk
+env/hgreenbk
 {
 	{
 		map gfx/clouds.tga
@@ -205,7 +205,7 @@ env/deadcitybk
 		alphashift 0 0.8 0.8
 	}
 }
-env/deadcitydn
+env/hgreendn
 {
 	{
 		map gfx/clouds.tga
