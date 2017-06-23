@@ -6,7 +6,7 @@
 "_sun_ambient" "0"
 "_sun_light" "25"
 "_sun_color" "0.4 0.3 0.3"
-"sky" "green"
+"sky" "hmount"
 // brush 0
 {
 ( -1728 -736 64 ) ( -1728 -672 160 ) ( -1920 -672 160 ) arena10/stonewall3 0 256 0 1 1 0 0 0

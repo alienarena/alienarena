@@ -2,7 +2,7 @@
 // entity 0
 {
 "classname" "worldspawn"
-"sky" "green"
+"sky" "hgreen"
 "message" "The Dynamo"
 // brush 0
 {

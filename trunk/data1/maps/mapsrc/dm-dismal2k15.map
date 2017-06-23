@@ -4,7 +4,7 @@
 "classname" "worldspawn"
 "angle" "270"
 "message" "Dismal Outpost"
-"sky" "green"
+"sky" "hgreen"
 "_sun" "moonspot"
 "_sun_ambient" "0"
 "_sun_color" "0.4 0.7 0.5"

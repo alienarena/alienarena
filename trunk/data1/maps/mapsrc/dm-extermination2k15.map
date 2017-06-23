@@ -7,7 +7,7 @@
 "_sun_ambient" "0"
 "_sun" "moonspot"
 "message" "Final Extermination"
-"sky" "alien"
+"sky" "halien"
 // brush 0
 {
 ( 1864 -416 -384 ) ( 1808 -416 -384 ) ( 1808 -512 -384 ) arena6/blacktrans 16 8 0 1 1 65536 16 0
