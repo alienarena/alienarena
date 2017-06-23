@@ -3,7 +3,7 @@
 {
 "classname" "worldspawn"
 "spawnflags" "1"
-"sky" "green"
+"sky" "halien"
 "message" "Gauntlet Chasm"
 "height" "900"
 "speed" "400"

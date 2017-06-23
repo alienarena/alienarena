@@ -2,7 +2,7 @@
 // entity 0
 {
 "classname" "worldspawn"
-"sky" "green"
+"sky" "hgreen"
 "message" "Last Days of Zion"
 "_sun" "sunspot"
 "_sun_ambient" "0"

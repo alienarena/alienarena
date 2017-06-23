@@ -2,7 +2,7 @@
 // entity 0
 {
 "classname" "worldspawn"
-"sky" "hell"
+"sky" "hhell"
 "message" "The Tower of Babel"
 "_sun" "moonspot"
 "_sun_ambient" "0"

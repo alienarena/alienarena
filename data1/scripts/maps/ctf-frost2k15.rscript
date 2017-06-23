@@ -223,7 +223,7 @@ textures/arena9/greenglass
 		scroll static 0 static -1
 	}
 }
-env/greenup
+env/hgreenup
 {
 	{
 		map gfx/cloudsthick.tga
@@ -231,7 +231,7 @@ env/greenup
 		alphashift 0 0.8 0.8
 	}
 }
-env/greenrt
+env/hgreenrt
 {
 	{
 		map gfx/cloudsthick.tga
@@ -239,7 +239,7 @@ env/greenrt
 		alphashift 0 0.8 0.8
 	}
 }
-env/greenlf
+env/hgreenlf
 {
 	{
 		map gfx/cloudsthick.tga
@@ -247,7 +247,7 @@ env/greenlf
 		alphashift 0 0.8 0.8
 	}
 }
-env/greenft
+env/hgreenft
 {
 	{
 		map gfx/cloudsthick.tga
@@ -255,7 +255,7 @@ env/greenft
 		alphashift 0 0.8 0.8
 	}
 }
-env/greenbk
+env/hgreenbk
 {
 	{
 		map gfx/cloudsthick.tga
@@ -263,7 +263,7 @@ env/greenbk
 		alphashift 0 0.8 0.8
 	}
 }
-env/greendn
+env/hgreendn
 {
 	{
 		map gfx/cloudsthick.tga

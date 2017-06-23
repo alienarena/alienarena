@@ -7,6 +7,7 @@
 "_sun_light" "25"
 "_sun_color" "0.4 0.3 0.3"
 "message" "The Violator"
+"sky" "hspace"
 // brush 0
 {
 ( 240 -48 272 ) ( 240 -112 272 ) ( 240 -112 264 ) evil/stepside_mtl 39 24 270 1 1 134217728 0 0

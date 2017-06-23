@@ -7,7 +7,7 @@
 "_sun_ambient" "0"
 "_sun_light" "35"
 "_sun_color" "0.4 0.3 0.3"
-"sky" "green"
+"sky" "halien"
 // brush 0
 {
 ( 1148 -680 -168 ) ( 1148 -728 -168 ) ( 1148 -728 -120 ) arena9/metal4 32 -127 90 1 -1 134217728 0 0
