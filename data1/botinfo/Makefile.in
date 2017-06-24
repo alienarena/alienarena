@@ -288,7 +288,8 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-turbo2k15.nod \
 	nav/dm-violator2k15.nod \
 	nav/dm-wasteland.nod \
-	nav/tac-extermination2k15.nod
+	nav/tac-extermination2k15.nod \
+	nav/tac-impact.nod 
 
 all: all-am
 

@@ -290,17 +290,23 @@ nobase_dist_textures_DATA = \
 	arena10/cement1ns_nm.tga \
 	arena10/cement1ns.tga \
 	arena10/cement1.tga \
+	arena10/cobblestone.tga \
+	arena10/cobblestone2.tga \
+	arena10/cobblestone2_hm.tga \
+	arena10/cobblestone2_nm.tga \
 	arena10/cobblestone_hm.tga \
+	arena10/cobblestone_nm.tga \
+	arena10/cobblestoneng.tga \
 	arena10/cobblestoneng_hm.tga \
 	arena10/cobblestoneng_nm.tga \
-	arena10/cobblestoneng.tga \
-	arena10/cobblestone_nm.tga \
-	arena10/cobblestonens_nm.tga \
 	arena10/cobblestonens.tga \
-	arena10/cobblestone.tga \
+	arena10/cobblestonens_nm.tga \
 	arena10/cobwebs2.tga \
 	arena10/cobwebs.tga \
 	arena10/cocacola.tga \
+	arena10/concrete1.tga \
+	arena10/concrete1_hm.tga \
+	arena10/concrete1_nm.tga \
 	arena10/container1_hm.tga \
 	arena10/container1_nm.tga \
 	arena10/container1.tga \
@@ -465,15 +471,21 @@ nobase_dist_textures_DATA = \
 	arena10/redtile_hm.tga \
 	arena10/redtile_nm.tga \
 	arena10/redtile.tga \
+	arena10/road1.tga \
 	arena10/road1_hm.tga \
 	arena10/road1_nm.tga \
-	arena10/road1.tga \
+	arena10/road2.tga \
 	arena10/road2_hm.tga \
 	arena10/road2_nm.tga \
-	arena10/road2.tga \
+	arena10/road3.tga \
 	arena10/road3_hm.tga \
 	arena10/road3_nm.tga \
-	arena10/road3.tga \
+	arena10/road4.tga \
+	arena10/road4_hm.tga \
+	arena10/road4_nm.tga \
+	arena10/road5.tga \
+	arena10/road5_hm.tga \
+	arena10/road5_nm.tga \
 	arena10/roadbarrier_hm.tga \
 	arena10/roadbarrier_nm.tga \
 	arena10/roadbarrier.tga \
@@ -1248,6 +1260,7 @@ nobase_dist_textures_DATA = \
 	decals/damage1.tga \
 	decals/damage2.tga \
 	decals/damage3.tga \
+	decals/damage4.tga \
 	decals/mud1.tga \
 	decals/rock1.tga \
 	decals/rust1.tga \
@@ -1324,6 +1337,7 @@ nobase_dist_textures_DATA = \
 	desert/o3roof1.tga \
 	desert/o3roof2.tga \
 	desert/pebbles.tga \
+	desert/pebbles_hm.tga \
 	desert/pebbles_nm.tga \
 	desert/plank1.tga \
 	desert/plank1_nm.tga \
