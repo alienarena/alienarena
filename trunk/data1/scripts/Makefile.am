@@ -22,7 +22,6 @@ nobase_dist_scripts_DATA = \
 	maps/dm-extermination2k15.rscript \
 	maps/dm-gauntlet2k16.rscript \
 	maps/dm-neptune2k15.rscript \
-	maps/dm-oblivion2k15.rscript \
 	maps/dm-purgatory2k16.rscript \
 	maps/dm-turbo2k15.rscript \
 	maps/dm-violator2k15.rscript \

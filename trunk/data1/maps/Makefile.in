@@ -240,6 +240,7 @@ nobase_dist_maps_DATA = \
 	decals/damage2.decal \
 	decals/damage3.decal \
 	decals/damage4.decal \
+	decals/damage5.decal \
 	decals/ice1.decal \
 	decals/ice2.decal \
 	decals/ivy1.decal \
