@@ -44,6 +44,8 @@ extern cvar_t *pw_hashed;
 static char szVerificationString[64];
 static char *cpr; // mostly for unused result warnings
 
+steamstats_t stStats;
+
 static FILE* statsdb_open( const char* mode )
 {
 	FILE* file;
@@ -379,5 +381,43 @@ void STATS_Logout (void)
 	else
 	{
 		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
+}
+
+//Steam stats section
+void STATS_ST_Init (void)
+{
+	// Set everything to 0 - we will only be tracking this session's numbers.
+	stStats.g_NumBaseKills = 0;
+	stStats.g_NumFlagCaptures = 0;
+	stStats.g_NumGames = 0;
+	stStats.g_NumGodLikes = 0;
+	stStats.g_NumHeadShots = 0;
+	stStats.g_NumKills = 0;
+	stStats.g_NumWins = 0;
+}
+
+void STATS_ST_Write (void)
+{
+	// Write out file that our steam client will read in
+	FILE* file;
+	char statsFile[MAX_QPATH];
+	size_t sz;
+
+	sprintf(statsFile, "%s/swdata.db", GAME_GAMEDATA);
+
+    file = fopen(statsFile, "wb");
+    if (file != NULL) 
+	{
+		
+		sz = fwrite(&stStats.g_NumBaseKills,sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumFlagCaptures,sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumGames,sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumGodLikes,sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumHeadShots,sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumKills,sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumWins,sizeof(int), 1, file); 
+
+		fclose(file);
 	}
 }

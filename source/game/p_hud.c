@@ -424,6 +424,25 @@ void BeginIntermission (edict_t *targ)
 	if(secondrunnerup && secondrunnerup->client && secondrunnerup->inuse)
 		PlaceWinnerOnVictoryPad(secondrunnerup, -32);
 
+	// Send stats to winner
+	if(!winner->is_bot)
+	{
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte(TE_PLAYERWON);
+		gi.unicast (winner, false);
+	}
+
+	// Send stats to the losers
+	for (i=0 ; i<game.maxclients ; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse || cl_ent->is_bot || !player_participating (cl_ent) || (cl_ent == winner))
+			continue;
+
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte(TE_PLAYERLOST);
+		gi.unicast (cl_ent, false);
+	}
 }
 
 void EndIntermission(void)

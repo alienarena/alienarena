@@ -619,6 +619,30 @@ void CL_ParseTEnt (void)
 		CL_FlameThrower (pos, dir);
 		break;
 
+	// Steam stat events
+	case TE_PLAYERWON:
+		stStats.g_NumGames++;
+		stStats.g_NumWins++;
+		break;
+	case TE_PLAYERLOST:
+		stStats.g_NumGames++;
+		break;
+	case TE_KILL:
+		stStats.g_NumKills++;
+		break;
+	case TE_FLAGCAPTURE:
+		stStats.g_NumFlagCaptures++;
+		break;
+	case TE_HEADSHOT:
+		stStats.g_NumHeadShots++;
+		break;
+	case TE_GODLIKE:
+		stStats.g_NumGodLikes++;
+		break;
+	case TE_BASEKILL:
+		stStats.g_NumBaseKills++;
+		break;
+
 	default:			// Do we really want to drop an error for this?
 		//Com_Error (ERR_DROP, "CL_ParseTEnt: bad type");
 		Com_Printf("CL_ParseTEnt: bad type\n");

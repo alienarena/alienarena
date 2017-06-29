@@ -1342,6 +1342,14 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 
+	if(!attacker->is_bot) 
+	{
+		// Send Steam stats
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte(TE_BASEKILL);
+		gi.unicast (attacker, false);
+	}
+
 	G_FreeEdict (self);
 }
 
@@ -1455,6 +1463,14 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 
+	if(!attacker->is_bot) 
+	{
+		// Send Steam stats
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte(TE_BASEKILL);
+		gi.unicast (attacker, false);
+	}
+
 	G_FreeEdict (self);
 }
 
@@ -1566,6 +1582,14 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	}
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	if(!attacker->is_bot) 
+	{
+		// Send Steam stats
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte(TE_BASEKILL);
+		gi.unicast (attacker, false);
+	}
 
 	G_FreeEdict (self);
 }
@@ -1689,6 +1713,14 @@ void backupgen_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	}
 	
 	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
+
+	if(!attacker->is_bot) 
+	{
+		// Send Steam stats
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte(TE_BASEKILL);
+		gi.unicast (attacker, false);
+	}
 
 	G_FreeEdict (self);
 }
