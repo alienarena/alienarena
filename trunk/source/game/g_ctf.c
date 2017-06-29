@@ -712,10 +712,19 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 			// the flag is at home base.  if the player has the enemy
 			// flag, he's just won!
 
-			if (other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)]) {
+			if (other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)]) 
+			{
 				safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
 						other->client->pers.netname, enemy_team_name);
 				other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)] = 0;
+
+				if(!other->is_bot) 
+				{
+					// Send Steam stats
+					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte(TE_FLAGCAPTURE);
+					gi.unicast (other, true);
+				}
 
 				if (ctf_team == RED_TEAM)
 				{

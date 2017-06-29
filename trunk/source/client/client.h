@@ -87,6 +87,19 @@ typedef struct
 	struct model_s  *lod2;
 } clientinfo_t;
 
+typedef struct
+{
+	int g_NumWins;
+	int g_NumKills;
+	int g_NumHeadShots;
+	int g_NumBaseKills;
+	int g_NumFlagCaptures;
+	int g_NumGames;
+	int g_NumGodLikes;
+} steamstats_t;
+
+extern steamstats_t stStats;
+
 extern char cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
 extern int num_cl_weaponmodels;
 
@@ -609,6 +622,8 @@ void STATS_Logout (void);
 PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
 PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
 LOGINSTATE currLoginState;
+void STATS_ST_Init (void);
+void STATS_ST_Write (void);
 
 //
 // cl_updates.c

@@ -2830,6 +2830,9 @@ void CL_Init (void)
 	{
 		ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	}
+
+	// init Steam data
+	STATS_ST_Init();
 }
 
 
@@ -2853,6 +2856,8 @@ void CL_Shutdown(void)
 	isdown = true;
 
 	STATS_Logout();
+
+	STATS_ST_Write();
 
 	CL_IRCInitiateShutdown();
 	CL_ShutdownHttpDownload();

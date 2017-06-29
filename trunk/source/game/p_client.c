@@ -214,7 +214,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			G_CleanPlayerName ( self->client->pers.netname , cleanname );
 			G_CleanPlayerName ( attacker->client->pers.netname , cleanname2 );
 
-			if(!attacker->is_bot) {
+			if(!attacker->is_bot) 
+			{
 				pos = 0;
 				total = 0;
 				for (i=0 ; i<game.maxclients ; i++)
@@ -244,6 +245,11 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					safe_centerprintf(attacker, "You fragged %s\n", cleanname);
 					break;
 				}
+
+				// Send Steam stats
+				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte(TE_KILL);
+				gi.unicast (attacker, false);
 			}
 
 			switch (mod)
@@ -445,6 +451,14 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 							PlayerGrantRewardPoints (attacker, 3);
 							safe_centerprintf(attacker, "HEADSHOT!\n");
 							gi.sound(attacker, CHAN_AUTO, gi.soundindex("misc/headshot.wav"), 1, ATTN_STATIC, 0);
+
+							if(!attacker->is_bot) 
+							{
+								// Send Steam stats
+								gi.WriteByte (svc_temp_entity);
+								gi.WriteByte(TE_HEADSHOT);
+								gi.unicast (attacker, false);
+							}
 						}
 
 						//mutators
@@ -515,6 +529,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/godlike.wav"), 1, ATTN_NONE, 0);
 								PlayerGrantRewardPoints (attacker, 20);
+								if(!attacker->is_bot) 
+								{
+									// Send Steam stats
+									gi.WriteByte (svc_temp_entity);
+									gi.WriteByte(TE_GODLIKE);
+									gi.unicast (attacker, false);
+								}
 								break;
 							default:
 								break;

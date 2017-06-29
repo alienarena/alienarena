@@ -763,6 +763,14 @@ typedef struct
 #define	TE_SMOKE					66
 #define TE_JETEXHAUST				67
 #define TE_DUST						68
+// Steamworks stat events
+#define TE_PLAYERWON				69
+#define TE_PLAYERLOST				70
+#define TE_KILL						71
+#define TE_FLAGCAPTURE				72
+#define TE_HEADSHOT					73
+#define TE_GODLIKE					74
+#define TE_BASEKILL					75
 
 #define SPLASH_UNKNOWN		0
 #define SPLASH_SPARKS		1
