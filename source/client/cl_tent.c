@@ -633,14 +633,32 @@ void CL_ParseTEnt (void)
 	case TE_FLAGCAPTURE:
 		stStats.g_NumFlagCaptures++;
 		break;
+	case TE_FLAGRETURN:
+		stStats.g_NumFlagReturns++;
+		break;
 	case TE_HEADSHOT:
 		stStats.g_NumHeadShots++;
+		break;
+	case TE_KILLSTREAK:
+		stStats.g_NumKillStreaks++;
+		break;
+	case TE_RAMPAGE:
+		stStats.g_NumRampages++;
+		break;
+	case TE_UNSTOPPABLE:
+		stStats.g_NumUnstoppables++;
 		break;
 	case TE_GODLIKE:
 		stStats.g_NumGodLikes++;
 		break;
 	case TE_BASEKILL:
 		stStats.g_NumBaseKills++;
+		break;
+	case TE_MINDERASED:
+		stStats.g_NumMindErases++;
+		break;
+	case TE_DISINTEGRATED:
+		stStats.g_NumDisintegrates++;
 		break;
 
 	default:			// Do we really want to drop an error for this?

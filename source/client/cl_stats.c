@@ -390,9 +390,15 @@ void STATS_ST_Init (void)
 	// Set everything to 0 - we will only be tracking this session's numbers.
 	stStats.g_NumBaseKills = 0;
 	stStats.g_NumFlagCaptures = 0;
+	stStats.g_NumFlagReturns = 0;
 	stStats.g_NumGames = 0;
+	stStats.g_NumKillStreaks = 0;
+	stStats.g_NumRampages = 0;
+	stStats.g_NumUnstoppables = 0;
 	stStats.g_NumGodLikes = 0;
 	stStats.g_NumHeadShots = 0;
+	stStats.g_NumMindErases = 0;
+	stStats.g_NumDisintegrates = 0;
 	stStats.g_NumKills = 0;
 	stStats.g_NumWins = 0;
 }
@@ -408,15 +414,20 @@ void STATS_ST_Write (void)
 
     file = fopen(statsFile, "wb");
     if (file != NULL) 
-	{
-		
-		sz = fwrite(&stStats.g_NumBaseKills,sizeof(int), 1, file); 
-		sz = fwrite(&stStats.g_NumFlagCaptures,sizeof(int), 1, file); 
-		sz = fwrite(&stStats.g_NumGames,sizeof(int), 1, file); 
-		sz = fwrite(&stStats.g_NumGodLikes,sizeof(int), 1, file); 
-		sz = fwrite(&stStats.g_NumHeadShots,sizeof(int), 1, file); 
-		sz = fwrite(&stStats.g_NumKills,sizeof(int), 1, file); 
-		sz = fwrite(&stStats.g_NumWins,sizeof(int), 1, file); 
+	{		
+		sz = fwrite(&stStats.g_NumBaseKills, sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumFlagCaptures, sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumFlagReturns, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumGames, sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumKillStreaks, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumRampages, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumUnstoppables, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumGodLikes, sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumHeadShots, sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumMindErases, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumDisintegrates, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumKills, sizeof(int), 1, file); 
+		sz = fwrite(&stStats.g_NumWins, sizeof(int), 1, file); 
 
 		fclose(file);
 	}

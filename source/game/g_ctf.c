@@ -802,6 +802,15 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 		//reward points bonus
 		PlayerGrantRewardPoints (other, 2);
 
+		// Steam stats update
+		if(!other->is_bot) 
+		{
+			// Send Steam stats
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte(TE_FLAGRETURN);
+			gi.unicast (other, false);
+		}
+
 		//CTFResetFlag will remove this entity!  We must return false
 		CTFResetFlag(ctf_team);
 		return false;
@@ -830,7 +839,8 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 	// pick up the flag
 	// if it's not a dropped flag, we just make is disappear
 	// if it's dropped, it will be removed by the pickup caller
-	if (!(ent->spawnflags & DROPPED_ITEM)) {
+	if (!(ent->spawnflags & DROPPED_ITEM)) 
+	{
 		ent->flags |= FL_RESPAWN;
 		ent->svflags |= SVF_NOCLIENT;
 		ent->solid = SOLID_NOT;
