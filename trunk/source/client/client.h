@@ -96,6 +96,12 @@ typedef struct
 	int g_NumFlagCaptures;
 	int g_NumGames;
 	int g_NumGodLikes;
+	int g_NumKillStreaks;
+	int g_NumRampages;
+	int g_NumUnstoppables;
+	int g_NumFlagReturns;
+	int g_NumMindErases;
+	int g_NumDisintegrates;
 } steamstats_t;
 
 extern steamstats_t stStats;

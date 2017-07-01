@@ -771,6 +771,12 @@ typedef struct
 #define TE_HEADSHOT					73
 #define TE_GODLIKE					74
 #define TE_BASEKILL					75
+#define TE_KILLSTREAK				76
+#define TE_RAMPAGE					77
+#define TE_UNSTOPPABLE				78
+#define TE_FLAGRETURN				79
+#define TE_MINDERASED				80
+#define TE_DISINTEGRATED			81
 
 #define SPLASH_UNKNOWN		0
 #define SPLASH_SPARKS		1

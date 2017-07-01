@@ -536,13 +536,15 @@ Walking monsters that touch this will jump in the direction of the trigger's ang
 
 void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-
 	if (self->nextthink)
 		return;		// already been triggered
 
 	if (other->flags & (FL_FLY | FL_SWIM) )
 		return;
 	if (other->svflags & SVF_DEADMONSTER)
+		return;
+
+	if((other->s.effects & EF_GIB) || (other->classname == "g_gib"))
 		return;
 
 // set XY even if not on ground, so the jump will clear lips

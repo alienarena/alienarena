@@ -146,6 +146,8 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type, int effects)
 
 	gib = G_Spawn();
 
+	gib->classname = "g_gib";
+
 	VectorScale (self->size, 1, size);
 	VectorAdd (self->absmin, size, origin);
 	gib->s.origin[0] = origin[0] + crandom() * size[0];
@@ -190,7 +192,7 @@ void ThrowClientHead (edict_t *self, int damage)
 	char	*gibname;
 
 	gibname = "models/objects/gibs/sm_meat/tris.iqm";
-		self->s.skinnum = 0;
+	self->s.skinnum = 0;
 
 	self->s.origin[2] += 32;
 	self->s.frame = 0;

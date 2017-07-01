@@ -420,6 +420,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					{
 						self->client->resp.reward_pts = 0; 
 						self->client->resp.powered = false;
+						if(!attacker->is_bot) 
+						{
+							// Send Steam stats
+							gi.WriteByte (svc_temp_entity);
+							gi.WriteByte(TE_MINDERASED);
+							gi.unicast (attacker, false);
+						}
 					}
 
 					if (ff) 
@@ -498,6 +505,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 										continue;
 									safe_centerprintf(cl_ent, "%s is on a killing spree!\n", cleanname2);
 								}
+								if(!attacker->is_bot) 
+								{
+									// Send Steam stats
+									gi.WriteByte (svc_temp_entity);
+									gi.WriteByte(TE_KILLSTREAK);
+									gi.unicast (attacker, false);
+								}
 								break;
 							case 5:
 								for (i=0 ; i<g_maxclients->value ; i++)
@@ -509,6 +523,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/rampage.wav"), 1, ATTN_NONE, 0);
 								PlayerGrantRewardPoints (attacker, 10);
+								if(!attacker->is_bot) 
+								{
+									// Send Steam stats
+									gi.WriteByte (svc_temp_entity);
+									gi.WriteByte(TE_RAMPAGE);
+									gi.unicast (attacker, false);
+								}
 								break;
 							case 8:
 								for (i=0 ; i<g_maxclients->value ; i++)
@@ -517,6 +538,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									if (!cl_ent->inuse || cl_ent->is_bot)
 										continue;
 									safe_centerprintf(cl_ent, "%s is unstoppable!\n", cleanname2);
+								}
+								if(!attacker->is_bot) 
+								{
+									// Send Steam stats
+									gi.WriteByte (svc_temp_entity);
+									gi.WriteByte(TE_UNSTOPPABLE);
+									gi.unicast (attacker, false);
 								}
 								break;
 							case 10:
@@ -801,7 +829,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
 
-	if (self->in_vehicle) {
+	if (self->in_vehicle) 
+	{
 		Reset_player(self);	//get the player out of the vehicle
 		Jet_Explosion(self); //blow that bitch up!
 		got_vehicle = 1; //so we know how to handle dropping it
@@ -932,6 +961,17 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			/* No deathcam, handle player's view and model with ThrowClientHead() */
 			ThrowClientHead (self, damage);
 			number_of_gibs = DEATH_GIBS_TO_THROW - 1;
+		}
+
+		if(!instagib->integer && attacker->client)
+		{
+			if(!attacker->is_bot) 
+			{
+				// Send Steam stats
+				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte(TE_DISINTEGRATED);
+				gi.unicast (attacker, false);
+			}
 		}
 
 		if(self->ctype == 0) 
