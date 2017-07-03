@@ -102,6 +102,8 @@ typedef struct
 	int g_NumFlagReturns;
 	int g_NumMindErases;
 	int g_NumDisintegrates;
+	int g_NumViolations;
+	int g_NumMidAirShots;
 } steamstats_t;
 
 extern steamstats_t stStats;

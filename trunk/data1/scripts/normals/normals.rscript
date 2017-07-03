@@ -70,6 +70,15 @@ players/martianwarrior/gamara
 		glow
 	}
 }
+players/martianwarrior/hedorah
+{
+	{
+		map players/martianwarrior/hedorah_normal.tga
+		normalmap
+		map2 players/martianwarrior/hedorahfx.tga
+		glow
+	}
+}
 players/martianoverlord/red
 {
 	{
@@ -227,6 +236,15 @@ players/commander/default
 {
 	{
 		map players/commander/default_normal.tga
+		normalmap
+		map2 players/commander/defaultcommanderfx.tga
+		glow
+	}	
+}
+players/commander/antonio
+{
+	{
+		map players/commander/antonio_normal.tga
 		normalmap
 		map2 players/commander/defaultcommanderfx.tga
 		glow

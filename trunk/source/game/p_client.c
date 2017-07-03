@@ -429,6 +429,17 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 					}
 
+					if(mod == MOD_VIOLATOR)
+					{
+						if(!attacker->is_bot) 
+						{
+							// Send Steam stats
+							gi.WriteByte (svc_temp_entity);
+							gi.WriteByte(TE_VIOLATED);
+							gi.unicast (attacker, false);
+						}
+					}
+
 					if (ff) 
 					{
 						attacker->client->resp.score--;
@@ -448,6 +459,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						{
 							PlayerGrantRewardPoints (attacker, 3);
 							safe_centerprintf(attacker, "Midair shot!\n");
+							if(!attacker->is_bot) 
+							{
+								// Send Steam stats
+								gi.WriteByte (svc_temp_entity);
+								gi.WriteByte(TE_MIDAIRSHOT);
+								gi.unicast (attacker, false);
+							}
 						}
 						else
 							PlayerGrantRewardPoints (attacker, 1);
