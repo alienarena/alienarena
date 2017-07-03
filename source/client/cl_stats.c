@@ -399,6 +399,8 @@ void STATS_ST_Init (void)
 	stStats.g_NumHeadShots = 0;
 	stStats.g_NumMindErases = 0;
 	stStats.g_NumDisintegrates = 0;
+	stStats.g_NumViolations = 0;
+	stStats.g_NumMidAirShots = 0;
 	stStats.g_NumKills = 0;
 	stStats.g_NumWins = 0;
 }
@@ -426,6 +428,8 @@ void STATS_ST_Write (void)
 		sz = fwrite(&stStats.g_NumHeadShots, sizeof(int), 1, file); 
 		sz = fwrite(&stStats.g_NumMindErases, sizeof(int), 1, file);
 		sz = fwrite(&stStats.g_NumDisintegrates, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumViolations, sizeof(int), 1, file);
+		sz = fwrite(&stStats.g_NumMidAirShots, sizeof(int), 1, file);
 		sz = fwrite(&stStats.g_NumKills, sizeof(int), 1, file); 
 		sz = fwrite(&stStats.g_NumWins, sizeof(int), 1, file); 
 

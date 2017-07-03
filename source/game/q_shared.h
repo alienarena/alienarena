@@ -777,6 +777,8 @@ typedef struct
 #define TE_FLAGRETURN				79
 #define TE_MINDERASED				80
 #define TE_DISINTEGRATED			81
+#define TE_VIOLATED 				82
+#define TE_MIDAIRSHOT				83
 
 #define SPLASH_UNKNOWN		0
 #define SPLASH_SPARKS		1

@@ -437,12 +437,14 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		if (gl_skymip->integer)
 			gl_picmip->integer += gl_skymip->integer;
 
-		Com_sprintf (pathname, sizeof(pathname), "env/%s%s.tga", skyname, suf[i]);
+		Com_sprintf (pathname, sizeof(pathname), "env/%s%s.jpg", skyname, suf[i]);
 
 		sky_images[i] = GL_FindImage (pathname, it_sky);
 		if (!sky_images[i])
 			sky_images[i] = r_notexture;
-		else { //valid sky, load shader
+		else 
+		{
+			//valid sky, load shader
 			strcpy(pathname,sky_images[i]->name);
 			pathname[strlen(pathname)-4]=0;
 			if(sky_images[i]->script)
@@ -459,17 +461,9 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		//set only if not set by fog script
 		if(r_sunX == 0.0 && r_sunY == 0.0 && r_sunZ == 0.0)
 		{
-			if (strstr(pathname, "space")) {
+			if (strstr(pathname, "hspace")) {
 				VectorSet(sun_origin, -5000, -100000, 115000);
 				spacebox = true;
-			}
-			else if (strstr(pathname, "sea")) {
-				VectorSet(sun_origin, 140000, -80000, 125000);
-				spacebox = false;
-			}
-			else if (strstr(pathname, "hell")) {
-				VectorSet(sun_origin, 140000, 160000, 85000);
-				spacebox = false;
 			}
 			else {
 				VectorSet(sun_origin, 140000, -80000, 45000);
