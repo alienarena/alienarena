@@ -218,7 +218,7 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 
 	VectorCopy(origin, self->s.origin);
 	VectorCopy(angle, self->s.angles);
-	self->s.origin[2] += 24;
+	self->s.origin[2] += 4;
 
 	sound_pain  = gi.soundindex ("misc/deathray/fizz.wav");
 	sound_die   = gi.soundindex ("misc/deathray/fizz.wav");
@@ -233,7 +233,7 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->classname = "proj_spider";
 
 	VectorSet (self->mins, -16, -16, 0);
-	VectorSet (self->maxs, 16, 16, 32);
+	VectorSet (self->maxs, 16, 16, 24);
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 	self->takedamage = DAMAGE_YES; 
@@ -253,7 +253,6 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->monsterinfo.melee = spider_attack;
 	self->monsterinfo.sight = spider_sight;
 	self->monsterinfo.search = spider_search;
-	self->s.renderfx |= RF_MONSTER;
 
 	self->monsterinfo.currentmove = &spider_move_stand;
 	self->monsterinfo.scale = MODEL_SCALE;
@@ -315,14 +314,14 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	spider->solid = SOLID_BBOX;
 	VectorClear (spider->mins);
 	VectorClear (spider->maxs);
-	//VectorSet (spider->mins, -16, -16, 0);
-	//VectorSet (spider->maxs, 16, 16, 32);
+	VectorSet (spider->mins, -32, -32, -32);
+	VectorSet (spider->maxs, 32, 32, 32);
 	spider->s.modelindex = gi.modelindex("models/objects/spider/tris.iqm");
 	spider->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.iqm");
 	spider->s.frame = 31;
 	spider->owner = self;
 	spider->touch = spider_touch;
-	spider->nextthink = level.time + TENFPS;
+	spider->nextthink = level.time + FRAMETIME;
     spider->think = spider_think;
    
 	spider->s.sound = gi.soundindex ("weapons/electroball.wav");
