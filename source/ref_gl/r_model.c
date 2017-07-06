@@ -1737,6 +1737,22 @@ void Mod_SummarizePVS (void)
 	loadmodel->num_areas++;
 }
 
+void R_ClearTerrains (void)
+{
+	model_t	*mod;
+	int i;
+
+	for (i = 0, mod = mod_known ; i < mod_numknown ; i++, mod++)
+	{
+		if (!mod->name[0])
+			continue;
+		if (mod->type == mod_terrain)
+		{	
+			Mod_Free (mod);
+		}
+	}
+}
+
 /*
 =================
 Mod_LoadBrushModel
@@ -1788,6 +1804,9 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	//ODE - create new world(flush out old first)
 	RGD_DestroyWorldObject();
 	RGD_CreateWorldObject();
+
+	// Terrain - flush out 
+	R_ClearTerrains();
 
 	r_numWorldLights = 0;
 
@@ -2244,6 +2263,7 @@ void Mod_FreeAll (void)
 	for (i=0 ; i<mod_numknown ; i++)
 		Mod_Free (&mod_known[i]);
 }
+
 
 
 

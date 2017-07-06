@@ -520,6 +520,9 @@ void M_MoveToGoal (edict_t *ent, float dist)
 {
 	edict_t		*goal;
 
+	//Account for time
+	dist /= TENFPS/FRAMETIME;
+
 	goal = ent->goalentity;
 
 	if (!ent->groundentity && !(ent->flags & (FL_FLY|FL_SWIM)))
