@@ -31579,3 +31579,21 @@
 "classname" "item_jetpack"
 "origin" "64.000000 792.000000 48.000000"
 }
+// entity 176
+{
+"classname" "misc_decal"
+"origin" "1096.000000 -376.000000 32.000000"
+"model" "maps/decals/slime0.decal"
+}
+// entity 177
+{
+"classname" "misc_decal"
+"origin" "856.000000 -16.000000 32.000000"
+"model" "maps/decals/slime0.decal"
+}
+// entity 178
+{
+"classname" "misc_decal"
+"origin" "-312.000000 -416.000000 32.000000"
+"model" "maps/decals/slime0.decal"
+}
