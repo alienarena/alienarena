@@ -156,13 +156,13 @@ R_InitBloomTextures
 void R_InitBloomTextures( void )
 {
 
-	r_bloom = Cvar_Get ("r_bloom", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_bloom = Cvar_Get ("r_bloom", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 	r_bloom_alpha = Cvar_Get ("r_bloom_alpha", "0.2", CVAR_ARCHIVE|CVARDOC_FLOAT);
 	r_bloom_diamond_size = Cvar_Get( "r_bloom_diamond_size", "8", CVAR_ARCHIVE|CVARDOC_INT);
 	r_bloom_intensity = Cvar_Get ("r_bloom_intensity", "0.5", CVAR_ARCHIVE|CVARDOC_FLOAT);
 	r_bloom_darken = Cvar_Get ("r_bloom_darken", "8", CVAR_ARCHIVE|CVARDOC_FLOAT);
 	r_bloom_sample_scaledown = Cvar_Get ("r_bloom_sample_scaledown", "2", CVAR_ARCHIVE|CVARDOC_FLOAT);
-	r_bloom_autoexposure = Cvar_Get ("r_bloom_autoexposure", "0", CVAR_ARCHIVE|CVARDOC_BOOL);
+	r_bloom_autoexposure = Cvar_Get ("r_bloom_autoexposure", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
 	BLOOM_WIDTH = BLOOM_HEIGHT = 0;
 	if( !r_bloom->integer )
