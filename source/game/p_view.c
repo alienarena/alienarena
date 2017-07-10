@@ -1216,8 +1216,9 @@ newanim:
 		}
 		else if (client->ctf_grapple) 
 		{
-			ent->s.frame = FRAME_stand01;
-			client->anim_end = FRAME_stand40;
+			ent->client->anim_priority = ANIM_DANGLE;
+			ent->s.frame = FRAME_dangle1;
+			client->anim_end = FRAME_dangle12;
 		} 
 		else if(client->ps.pmove.pm_flags & PMF_JUMP_HELD)
 		{
@@ -1225,6 +1226,12 @@ newanim:
 			if (ent->s.frame != FRAME_jump2)
 				ent->s.frame = FRAME_jump1;
 			client->anim_end = FRAME_jump2;
+		}
+		else if (ent->waterlevel >= 2)
+		{
+			ent->client->anim_priority = ANIM_SWIM;
+			ent->s.frame = FRAME_swim1;
+			client->anim_end = FRAME_swim7;
 		}
 		else
 		{

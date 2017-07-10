@@ -1189,6 +1189,8 @@ extern void SP_misc_electroflash (edict_t *ent);
 #define	ANIM_ATTACK		4
 #define	ANIM_DEATH		5
 #define	ANIM_REVERSE	6
+#define ANIM_SWIM		7
+#define ANIM_DANGLE		8
 
 // client data that stays across multiple level loads
 typedef struct

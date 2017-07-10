@@ -673,6 +673,12 @@ static int IQM_NextFrame (const entity_t *ent, const model_t *mod)
 			case 277:
 				outframe = 272;
 				break;
+			case 284:
+				outframe = 278;
+				break;
+			case 295:
+				outframe = 285;
+				break;
 			default:
 				outframe = frame + 1;
 				break;
