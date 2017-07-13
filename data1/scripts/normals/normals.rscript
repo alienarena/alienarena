@@ -133,6 +133,15 @@ players/enforcer/blue
 		glow
 	}	
 }
+players/enforcer/victor
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+		map2 players/enforcer/defaultenforcerfx.tga
+		glow
+	}	
+}
 players/martiancyborg/blue
 {
 	{
