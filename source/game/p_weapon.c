@@ -1517,11 +1517,11 @@ void Machinegun_Fire (edict_t *ent)
 		//play a booming sound
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/shotgf1b.wav"), 1, ATTN_NORM, 0);		
 
-		forward[0] = forward[0] * 24;
-		forward[1] = forward[1] * 24;
+		forward[0] = forward[0] * 48;
+		forward[1] = forward[1] * 48;
 		right[0] = right[0] * 3;
 		right[1] = right[1] * 3;
-		start[2] -= 2;
+		start[2] -= 4;
 
 		//create smoke effect
 		VectorAdd(start, forward, start);
@@ -1567,11 +1567,11 @@ void Machinegun_Fire (edict_t *ent)
 			fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
 		}
 
-		forward[0] = forward[0] * 24;
-		forward[1] = forward[1] * 24;
+		forward[0] = forward[0] * 48;
+		forward[1] = forward[1] * 48;
 		right[0] = right[0] * 3;
 		right[1] = right[1] * 3;
-		start[2] -= 2;
+		start[2] -= 4;
 		
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
