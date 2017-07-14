@@ -707,9 +707,9 @@ void PM_CatagorizePosition (void)
 // see if standing on something solid
 	point[0] = pml.origin[0];
 	point[1] = pml.origin[1];
-	point[2] = pml.origin[2] - 0.5; //Irritant - changed from 0.25 - this seems to fix the issue
+	point[2] = pml.origin[2] - 16.0; //Irritant - changed from 0.25 to 0.5 - this seems to fix the issue
 									 //in which sometimes while strafejumping it seemed the jump
-									 //was getting "lost"
+									 //was getting "lost" - changed again from 0.5 to 16 (we really don't want minor bumps making us think we aren't on the ground)
 	if (pml.velocity[2] > 180) //!!ZOID changed from 100 to 180 (ramp accel)
 	{
 		pm->s.pm_flags &= ~PMF_ON_GROUND;
