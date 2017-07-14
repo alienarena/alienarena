@@ -1132,7 +1132,7 @@ void G_SetClientFrame (edict_t *ent)
 	if(level.framenum - client->last_anim_frame >= round(TENFPS/FRAMETIME))
 	{	
 		// check for jump
-		if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
+		if (!ent->groundentity && ((client->ps.pmove.pm_flags & PMF_TIME_LAND) || (client->ps.pmove.pm_flags & PMF_JUMP_HELD)) && client->anim_priority <= ANIM_WAVE)
 		{
 			goto newanim;
 		}
