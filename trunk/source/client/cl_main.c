@@ -1750,7 +1750,7 @@ redoSkins:
 				{
 					int n = precache_check++ - ENV_CNT - 1;
 
-					Com_sprintf(fn, sizeof(fn), "env/%s%s.tga",
+					Com_sprintf(fn, sizeof(fn), "env/%s%s.jpg",
 							cl.configstrings[CS_SKY], env_suf[n/2]);
 					if (!CL_CheckOrDownloadFile(fn))
 						return; // started a download

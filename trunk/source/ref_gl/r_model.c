@@ -1154,13 +1154,14 @@ void Mod_LoadRefineLighting (lump_t *l)
 					size = 3*lfacelookups[i].width*lfacelookups[i].height;
 					break;
 			}
-			for (nstyles = 0; nstyles < MAXLIGHTMAPS && loadmodel->surfaces[i].styles[nstyles] != 255; nstyles++);
+			// To Do - disable this block until it is fixed.
+			/*for (nstyles = 0; nstyles < MAXLIGHTMAPS && loadmodel->surfaces[i].styles[nstyles] != 255; nstyles++);
 			size *= nstyles;
 			if (lightdatasize + size >= MAX_OVERRIDE_LIGHTING)
 			{
 				overflowed = true;
 				break;
-			}
+			}*/
 			memcpy (override_lightdata+lightdatasize, in_buffer+in_offset-1, size);
 			lfacelookups[i].offset = lightdatasize+1;
 			lightdatasize += size;
