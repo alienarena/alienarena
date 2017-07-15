@@ -716,8 +716,11 @@ nobase_dist_textures_DATA = \
 	arena8/wood1_hm.tga \
 	arena8/wood1_nm.tga \
 	arena8/wood2.tga \
+	arena8/wood2_nm.tga \
 	arena8/wood3.tga \
 	arena8/wood3_fx.tga \
+	arena8/wood3_hm.tga \
+	arena8/wood3_nofx.tga \
 	arena9/beam_metal_nm.tga \
 	arena9/beam_metal.tga \
 	arena9/biggrate1_hm.tga \
