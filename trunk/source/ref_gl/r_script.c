@@ -1062,7 +1062,8 @@ void RS_LoadScript (char *script)
 void RS_ScanPathForScripts (void)
 {
 	char	script[MAX_OSPATH];
-	char	**script_list, *c;
+	char	**script_list;
+	const char *c;
 	int	script_count, i;
 
 

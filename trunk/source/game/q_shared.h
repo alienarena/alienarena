@@ -259,7 +259,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 #define vsnprintf	_vsnprintf
 #endif
 
-char *COM_SkipPath (const char *pathname);
+const char *COM_SkipPath (const char *pathname);
 void COM_StripExtension (const char *in, char *out);
 qboolean COM_HasExtension (const char *path, const char *extension);
 char *COM_FileExtension (char *in);

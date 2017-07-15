@@ -482,17 +482,15 @@ int Q_log2(int val)
 COM_SkipPath
 ============
 */
-char *COM_SkipPath (const char *pathname)
+const char *COM_SkipPath (const char *pathname)
 {
-	char	*last;
+	const char	*last;
 
-	// This is kind of an end-run around the type-system, but appropriate in
-	// this case.
-	last = (char *)pathname;
+	last = pathname;
 	while (*pathname)
 	{
 		if (*pathname=='/')
-			last = (char *)pathname+1;
+			last = pathname+1;
 		pathname++;
 	}
 	return last;
