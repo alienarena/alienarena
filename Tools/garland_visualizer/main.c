@@ -19,7 +19,7 @@ void gfx_init (void)
     SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
     
-    assert (SDL_SetVideoMode (win_w, win_h, 24, SDL_OPENGL));
+    assert (SDL_SetVideoMode (win_w, win_h, 24, SDL_OPENGL | SDL_RESIZABLE));
     
     glClearColor (0, 1, 0, 1);
     glViewport (1, 1, win_w - 2, win_h - 2);
@@ -110,6 +110,12 @@ static void gfx_process_events (void)
                     default:
                         break;
                 }
+                break;
+            case SDL_VIDEORESIZE:
+                if (event.resize.w < 3 || event.resize.h < 3)
+                    break;
+                assert (SDL_SetVideoMode (event.resize.w, event.resize.h, 24, SDL_OPENGL | SDL_RESIZABLE));
+                glViewport (1, 1, event.resize.w - 2, event.resize.h - 2);
                 break;
             case SDL_QUIT:
                 exit (0);
