@@ -226,7 +226,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	float		ratio;
 	float		delta;
 	vec3_t	v, vKickAng, vKickOrg;
-	int frameSpan = (int)(TENFPS/FRAMETIME) * 2;
+	int frameSpan = round(TENFPS/FRAMETIME) * 2;
 
 	// base angles
 	angles = ent->client->ps.kick_angles;
@@ -428,7 +428,7 @@ void SV_CalcGunOffset (edict_t *ent)
 	{		
 		float div;
 
-		div = (level.framenum - ent->client->last_jump_frame < round(0.1/FRAMETIME)) ? (level.framenum - ent->client->last_jump_frame) : 
+		div = (level.framenum - ent->client->last_jump_frame < round(TENFPS/FRAMETIME)) ? (level.framenum - ent->client->last_jump_frame) : 
 			round(TENFPS/FRAMETIME) * 2 - (level.framenum - ent->client->last_jump_frame);
 		
 		angOffset = 1.0 * div/(TENFPS/FRAMETIME);
@@ -1358,11 +1358,11 @@ void ClientEndServerFrame (edict_t *ent)
 	else
 	{	// so bobbing only cycles when on ground
 		if (xyspeed > 210)
-			bobmove = 0.25 / (0.1/FRAMETIME);
+			bobmove = 0.25 / (TENFPS/FRAMETIME);
 		else if (xyspeed > 100)
-			bobmove = 0.125 / (0.1/FRAMETIME);
+			bobmove = 0.125 / (TENFPS/FRAMETIME);
 		else
-			bobmove = 0.0625 / (0.1/FRAMETIME);
+			bobmove = 0.0625 / (TENFPS/FRAMETIME);
 	}
 
 	bobtime = (current_client->bobtime += bobmove);
