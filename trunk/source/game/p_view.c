@@ -969,12 +969,12 @@ void G_SetClientEvent (edict_t *ent)
 
 	if ( ent->groundentity && xyspeed > 225)
 	{
-		if ( (int)(current_client->bobtime+bobmove) != bobcycle )
+		if ( (int)(current_client->bobtime + bobmove / (TENFPS/FRAMETIME)) != bobcycle )
 			ent->s.event = EV_FOOTSTEP;
 
 		if ( ((ent->waterlevel == 1) || (ent->waterlevel == 2)) && (xyspeed > 100) )
 		{
-			if ( (int)(current_client->bobtime+bobmove) != bobcycle )
+			if ( (int)(current_client->bobtime + bobmove/ (TENFPS/FRAMETIME)) != bobcycle )
 			{
 				ent->s.event = EV_WADE;
 			}
@@ -1324,48 +1324,41 @@ void ClientEndServerFrame (edict_t *ent)
 	// all cyclic walking effects
 	//
 
-	// need to account for sudden shifts in speed causing sudden weapon bob changes
-	xyspeed = ent->client->xyspeed;
-
+	// need to account for sudden shifts in speed causing sudden weapon bob changes	
 	ent->client->xyspeed += sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1])/(TENFPS/FRAMETIME);
 	if(ent->client->xyspeed > sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]))
 		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
+
+	if(ent->client->xyspeed < xyspeed)
+		ent->client->xyspeed -= (xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
+	if(ent->client->xyspeed < 0.0)
+		ent->client->xyspeed = 0.0;
+
+	xyspeed = ent->client->xyspeed;
 
 	if (xyspeed < 5 || !ent->groundentity)
 	{
 		if(FRAMETIME == TENFPS)
 		{
-			current_client->bobtime = 0; // start at beginning of cycle again
+			current_client->bobtime = 0; // start at beginning of cycle again(only works well for 10 fps to just snap it to start position)
 			bobmove = 0;
 		}
 		else 
 		{
-			if(level.framenum - ent->client->last_stop_frame > round(TENFPS/FRAMETIME) * 2)
-			{
-				//trigger event animation over framerate ratio to 100ms
-				ent->client->last_stop_frame = level.framenum;		
-			}
-			if(level.framenum - ent->client->last_stop_frame < round(TENFPS/FRAMETIME) * 2)
-			{					
-				bobmove /= 2.0;	// slow movement down gradually
-			}
-			else
-			{
-				bobmove = 0; //stop bobbing completely
-			}
+			bobmove = 0; //stop bobbing completely, but hold in place.
 		}
 	}
 	else
 	{	// so bobbing only cycles when on ground
 		if (xyspeed > 210)
-			bobmove = 0.25 / (TENFPS/FRAMETIME);
+			bobmove = 0.25;
 		else if (xyspeed > 100)
-			bobmove = 0.125 / (TENFPS/FRAMETIME);
+			bobmove = 0.125;
 		else
-			bobmove = 0.0625 / (TENFPS/FRAMETIME);
+			bobmove = 0.0625;
 	}
 
-	bobtime = (current_client->bobtime += bobmove);
+	bobtime = (current_client->bobtime += bobmove / (TENFPS/FRAMETIME));
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
 		bobtime *= 4;
