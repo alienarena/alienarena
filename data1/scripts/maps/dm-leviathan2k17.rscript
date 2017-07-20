@@ -14,3 +14,13 @@ canyon1_texture
 			2 textures/desert/cliffbottom_nm.tga		
 	}
 }
+textures/arena6/icerock
+{
+	{
+		map gfx/leaves1.tga
+		scale static 12 static 12
+		colormap 1 1 1
+		grass
+		grasstype 1
+	}
+}
