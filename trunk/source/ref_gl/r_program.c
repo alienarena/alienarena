@@ -1226,7 +1226,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		else if(TEAM == 3)
 			gl_FragColor = mix(gl_FragColor, vec4(0.0, 0.4, 0.3, 1.0), fog);
 		else if(FOG > 0)
-			gl_FragColor = mix(gl_FragColor, normalize(gl_Fog.color), fog);		
+			gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);		
 	}
 );
 

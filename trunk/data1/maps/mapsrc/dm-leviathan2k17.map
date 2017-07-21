@@ -3144,12 +3144,39 @@
 }
 // brush 348
 {
-( 128.9079284668 45.2960662842 348 ) ( 156.919631958 29.8252716064 348 ) ( 172.390411377 57.8369750977 348 ) arena7/warning 69.0574111938 53.9727096558 -28.9117641449 1 1 64 0 0
-( 172.390411377 57.8369750977 349 ) ( 156.919631958 29.8252716064 349 ) ( 128.9079284668 45.2960662842 349 ) arena9/weapongrate 69.0574111938 53.9727096558 -28.9117641449 1 1 64 0 0
-( 164.6550140381 43.8311309814 356 ) ( 136.6433258057 59.3019104004 356 ) ( 136.6433258057 59.3019104004 352 ) arena7/warning 53.5866203308 92 0 1.1423802376 1 64 0 0
-( 150.1657104492 50.6911468506 353 ) ( 134.6949310303 22.6794586182 353 ) ( 134.6949310303 22.6794586182 349 ) arena7/warning 13.7119903564 92 0 1.1423802376 1 64 0 0
-( 136.159866333 58.4265441895 356 ) ( 164.1715545654 42.9557647705 356 ) ( 164.1715545654 42.9557647705 352 ) arena7/warning 53.5866203308 92 0 1.1423802376 1 64 0 0
-( 143.3056793213 36.2018432617 356 ) ( 158.776473999 64.2135314941 356 ) ( 158.776473999 64.2135314941 352 ) arena7/warning 13.7119903564 92 0 1.1423802376 1 64 0 0
+( 664 -336 344 ) ( 696 -336 344 ) ( 696 -304 344 ) arena7/warning 8 0 0 1 1 64 0 0
+( 696 -304 345 ) ( 696 -336 345 ) ( 664 -336 345 ) arena9/weapongrate 8 0 0 1 1 64 0 0
+( 696 -320 352 ) ( 664 -320 352 ) ( 664 -320 348 ) arena7/warning 8 88 0 1 1 64 0 0
+( 680 -321 349 ) ( 680 -353 349 ) ( 680 -353 345 ) arena7/warning 0 88 0 1 1 64 0 0
+( 664 -321 352 ) ( 696 -321 352 ) ( 696 -321 348 ) arena7/warning 8 88 0 1 1 64 0 0
+( 681 -337 352 ) ( 681 -305 352 ) ( 681 -305 348 ) arena7/warning 0 88 0 1 1 64 0 0
+}
+// brush 349
+{
+( 152 51 349 ) ( 152 50 349 ) ( 151 51 349 ) arena9/weapongrate 69.0574111938 53.9727096558 -28.9117641449 1 1 64 0 0
+( 152 51 349 ) ( 151 51 349 ) ( 152 51 348 ) arena7/warning 0 0 0 0.5 0.5 64 0 0
+( 152 51 349 ) ( 152 51 348 ) ( 152 50 349 ) arena7/warning 0 0 0 0.5 0.5 64 0 0
+( 151 50 348 ) ( 152 50 348 ) ( 151 51 348 ) arena7/warning 0 0 0 0.5 0.5 64 0 0
+( 151 50 348 ) ( 151 50 349 ) ( 152 50 348 ) arena7/warning 0 0 0 0.5 0.5 64 0 0
+( 151 50 348 ) ( 151 51 348 ) ( 151 50 349 ) arena7/warning 0 0 0 0.5 0.5 64 0 0
+}
+// brush 350
+{
+( 1236 -530 1011 ) ( 1236 -694 1011 ) ( -343 -530 1011 ) arena6/blacktrans 0 0 0 0.5 0.5 65536 16 0
+( 1236 -530 1011 ) ( -343 -530 1011 ) ( 1236 -530 4 ) arena6/blacktrans 0 0 0 0.5 0.5 65536 16 0
+( 1236 -530 1011 ) ( 1236 -530 4 ) ( 1236 -694 1011 ) arena6/blacktrans 0 0 0 0.5 0.5 65536 16 0
+( -343 -694 4 ) ( 1236 -694 4 ) ( -343 -530 4 ) arena6/blacktrans 0 0 0 0.5 0.5 65536 16 0
+( -343 -694 4 ) ( -343 -694 1011 ) ( 1236 -694 4 ) arena6/blacktrans 0 0 0 0.5 0.5 65536 16 0
+( -343 -694 4 ) ( -343 -530 4 ) ( -343 -694 1011 ) arena6/blacktrans 0 0 0 0.5 0.5 65536 16 0
+}
+// brush 351
+{
+( -532 258 348 ) ( -500 258 348 ) ( -500 290 348 ) arena7/warning 52 82 0 1 1 64 0 0
+( -500 290 349 ) ( -500 258 349 ) ( -532 258 349 ) arena9/weapongrate 52 82 0 1 1 64 0 0
+( -500 274 356 ) ( -532 274 356 ) ( -532 274 352 ) arena7/warning 52 92 0 1 1 64 0 0
+( -516 273 353 ) ( -516 241 353 ) ( -516 241 349 ) arena7/warning 46 92 0 1 1 64 0 0
+( -532 273 356 ) ( -500 273 356 ) ( -500 273 352 ) arena7/warning 52 92 0 1 1 64 0 0
+( -515 257 356 ) ( -515 289 356 ) ( -515 289 352 ) arena7/warning 46 92 0 1 1 64 0 0
 }
 }
 // entity 1
@@ -3533,4 +3560,146 @@
 "angle" "-118.911774"
 "origin" "150.649185 51.566521 356.000000"
 "spawnflags" "64"
+}
+// entity 55
+{
+"classname" "weapon_rocketlauncher"
+"origin" "680.000000 -320.000000 384.000000"
+}
+// entity 56
+{
+"classname" "misc_mapmodel"
+"spawnflags" "64"
+"origin" "680.000000 -320.000000 352.000000"
+"angle" "-90.000000"
+"model" "maps/meshes/weaponpad.md2"
+}
+// entity 57
+{
+"classname" "item_quad"
+"origin" "834.000000 357.000000 255.000000"
+}
+// entity 58
+{
+"classname" "misc_mapmodel"
+"origin" "850.000000 180.999985 194.000015"
+"model" "maps/meshes/urban/riosilver.md2"
+"angles" "-18.006254 -116.033890 -4.086218"
+}
+// entity 59
+{
+"classname" "weapon_railgun"
+"origin" "-516.000000 274.000000 380.000000"
+}
+// entity 60
+{
+"classname" "misc_mapmodel"
+"spawnflags" "64"
+"origin" "-516.000000 274.000000 356.000000"
+"angle" "-90.000000"
+"model" "maps/meshes/weaponpad.md2"
+}
+// entity 61
+{
+"classname" "item_health_large"
+"origin" "-280.000000 -292.000000 420.000000"
+}
+// entity 62
+{
+"classname" "item_armor_shard"
+"origin" "-420.000000 340.000000 388.000000"
+}
+// entity 63
+{
+"classname" "ammo_bullets"
+"origin" "-532.000000 128.000000 404.000000"
+}
+// entity 64
+{
+"classname" "item_armor_shard"
+"origin" "-364.000000 340.000000 388.000000"
+}
+// entity 65
+{
+"classname" "item_armor_shard"
+"origin" "-308.000000 340.000000 388.000000"
+}
+// entity 66
+{
+"classname" "item_armor_combat"
+"origin" "-496.000000 -384.000000 192.000000"
+}
+// entity 67
+{
+"classname" "item_armor_shard"
+"origin" "-716.000000 -584.000000 192.000000"
+}
+// entity 68
+{
+"classname" "ammo_bullets"
+"origin" "-848.000000 -560.000000 192.000000"
+}
+// entity 69
+{
+"classname" "misc_mapmodel"
+"spawnflags" "1"
+"model" "maps/meshes/urban/orangelantern.md2"
+"origin" "275.561249 89.344360 600.000000"
+"angle" "56.300068"
+}
+// entity 70
+{
+"classname" "misc_mapmodel"
+"angle" "56.300068"
+"origin" "346.581238 175.834564 552.000000"
+"model" "maps/meshes/urban/bluelantern.md2"
+"spawnflags" "1"
+}
+// entity 71
+{
+"classname" "misc_mapmodel"
+"angle" "56.300068"
+"origin" "209.418777 8.165436 652.000000"
+"model" "maps/meshes/urban/yellowlantern.md2"
+"spawnflags" "1"
+}
+// entity 72
+{
+"classname" "misc_mapmodel"
+"origin" "288.000000 100.000000 596.000000"
+"model" "maps/meshes/urban/rope.md2"
+"angles" "15.927178 -48.190323 -25.732727"
+"spawnflags" "1"
+}
+// entity 73
+{
+"classname" "misc_mapmodel"
+"origin" "-244.000000 136.000015 320.000000"
+"model" "maps/meshes/urban/rope.md2"
+"angles" "-8.064668 -46.380253 -0.299671"
+"spawnflags" "1"
+}
+// entity 74
+{
+"classname" "misc_mapmodel"
+"spawnflags" "1"
+"model" "maps/meshes/urban/orangelantern.md2"
+"origin" "-240.438751 137.344360 316.000000"
+"angle" "56.300068"
+}
+// entity 75
+{
+"classname" "misc_mapmodel"
+"angle" "56.300068"
+"origin" "-146.581223 228.165436 320.000000"
+"model" "maps/meshes/urban/yellowlantern.md2"
+"spawnflags" "1"
+}
+// entity 76
+{
+"classname" "misc_mapmodel"
+"angle" "56.300068"
+"origin" "-345.418762 39.834564 324.000000"
+"model" "maps/meshes/urban/bluelantern.md2"
+"spawnflags" "1"
 }
