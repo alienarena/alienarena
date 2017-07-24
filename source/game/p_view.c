@@ -1124,7 +1124,7 @@ void G_SetClientFrame (edict_t *ent)
 			standingup = false;
 	}
 
-	if (xyspeed)
+	if (ent->client->xyspeed)
 		run = true;
 	else
 		run = false;
@@ -1330,9 +1330,7 @@ void ClientEndServerFrame (edict_t *ent)
 		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
 	if(ent->client->xyspeed < xyspeed)
-		ent->client->xyspeed -= (xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
-	if(ent->client->xyspeed < 0.0)
-		ent->client->xyspeed = 0.0;
+		ent->client->xyspeed += (xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
 
 	xyspeed = ent->client->xyspeed;
 
