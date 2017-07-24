@@ -1,1 +1,1 @@
-//dm-babel//4-12 players//RL, CG, BG, AV//Quad//Invulnerability// //
+//dm-babel//2-8 players//RL, CG, BG, AV//Quad//Invulnerability// //
