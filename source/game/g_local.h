@@ -866,7 +866,7 @@ void	G_CleanPlayerName ( const char *source, char *dest );
 char	*vtos (vec3_t v);
 
 float	vectoyaw (vec3_t vec);
-// void vectoangles (vec3_t vec, vec3_t angles);
+ void vectoangles (vec3_t vec, vec3_t angles);
 #if defined WIN32_VARIANT
 int		round(double number);
 #endif
