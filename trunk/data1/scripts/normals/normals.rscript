@@ -34,6 +34,15 @@ players/martianenforcer/destoroyah
 		glow
 	}
 }
+players/martianenforcer/doctor_braino
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+		map2 players/martianenforcer/doctor_brainofx.tga
+		glow
+	}
+}
 players/martianwarrior/red
 {
 	{
