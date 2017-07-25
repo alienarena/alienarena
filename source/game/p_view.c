@@ -1124,37 +1124,33 @@ void G_SetClientFrame (edict_t *ent)
 			standingup = false;
 	}
 
-	if (ent->client->xyspeed)
+	if (ent->client->xyspeed >= 5.0f)
 		run = true;
 	else
 		run = false;
+
+	// check for jump
+	if (!ent->groundentity && ((client->ps.pmove.pm_flags & PMF_TIME_LAND) || (client->ps.pmove.pm_flags & PMF_JUMP_HELD)) && client->anim_priority <= ANIM_WAVE)
+		goto newanim;		
+	// check for ducking and stand/duck transitions
+	if (duck != client->anim_duck && client->anim_priority < ANIM_DEATH)
+		goto newanim;
+	if (ducking != client->anim_ducking && client->anim_priority < ANIM_DEATH)
+		goto newanim;
+	if (standingup != client->anim_standingup && client->anim_priority < ANIM_DEATH)
+		goto newanim;
+	// check for running/stopping
+	if (run != client->anim_run && client->anim_priority == ANIM_BASIC)
+		goto newanim;
+	//check for running while shooting
+	if (run && client->anim_priority == ANIM_ATTACK)
+		goto newanim;
+	//changed strafe direction
+	if((ent->sidemove !=0 && ent->last_sidemove != ent->sidemove) && client->anim_priority < ANIM_DEATH && client->anim_priority != ANIM_JUMP)
+		goto newanim;
 	
 	if(level.framenum - client->last_anim_frame >= round(TENFPS/FRAMETIME))
 	{	
-		// check for jump
-		if (!ent->groundentity && ((client->ps.pmove.pm_flags & PMF_TIME_LAND) || (client->ps.pmove.pm_flags & PMF_JUMP_HELD)) && client->anim_priority <= ANIM_WAVE)
-		{
-			goto newanim;
-		}
-
-		// check for ducking and stand/duck transitions
-		if (duck != client->anim_duck && client->anim_priority < ANIM_DEATH)
-			goto newanim;
-		if (ducking != client->anim_ducking && client->anim_priority < ANIM_DEATH)
-			goto newanim;
-		if (standingup != client->anim_standingup && client->anim_priority < ANIM_DEATH)
-			goto newanim;
-		// check for running/stopping
-		if (run != client->anim_run && client->anim_priority == ANIM_BASIC)
-			goto newanim;
-
-		//check for running while shooting
-		if (run && client->anim_priority == ANIM_ATTACK)
-			goto newanim;
-
-		//changed strafe direction
-		if((ent->sidemove !=0 && ent->last_sidemove != ent->sidemove) && client->anim_priority < ANIM_DEATH)
-			goto newanim;
 
 		if(client->anim_priority == ANIM_REVERSE)
 		{
@@ -1334,32 +1330,32 @@ void ClientEndServerFrame (edict_t *ent)
 
 	xyspeed = ent->client->xyspeed;
 
-	if (xyspeed < 5 || !ent->groundentity)
+	if (xyspeed < 5.0f || !ent->groundentity)
 	{
 		if(FRAMETIME == TENFPS)
 		{
 			current_client->bobtime = 0; // start at beginning of cycle again(only works well for 10 fps to just snap it to start position)
-			bobmove = 0;
+			bobmove = 0.0f;
 		}
 		else 
 		{
-			bobmove = 0; //stop bobbing completely, but hold in place.
+			bobmove = 0.0f; //stop bobbing completely, but hold in place.
 		}
 	}
 	else
 	{	// so bobbing only cycles when on ground
-		if (xyspeed > 210)
-			bobmove = 0.25;
-		else if (xyspeed > 100)
-			bobmove = 0.125;
+		if (xyspeed > 210.0f)
+			bobmove = 0.25f;
+		else if (xyspeed > 100.0f)
+			bobmove = 0.125f;
 		else
-			bobmove = 0.0625;
+			bobmove = 0.0625f;
 	}
 
 	bobtime = (current_client->bobtime += bobmove / (TENFPS/FRAMETIME));
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
-		bobtime *= 4;
+		bobtime *= 4.0f;
 
 	bobcycle = (int)bobtime;
 	bobfracsin = fabs(sin(bobtime*M_PI));
