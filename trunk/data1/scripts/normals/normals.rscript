@@ -178,6 +178,15 @@ players/martiancyborg/default
 		glow
 	}	
 }
+players/martiancyborg/anseris
+{
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+		map2 players/martiancyborg/anserisfx.tga
+		glow
+	}	
+}
 players/lauren/blue
 {
 	{
@@ -202,6 +211,15 @@ players/lauren/default
 		map players/lauren/default_normal.tga
 		normalmap
 		map2 players/lauren/defaultlaurenfx.tga
+		glow
+	}	
+}
+players/lauren/muerte
+{
+	{
+		map players/lauren/muerte_normal.tga
+		normalmap
+		map2 players/lauren/muertefx.tga
 		glow
 	}	
 }
