@@ -1326,10 +1326,8 @@ void ClientEndServerFrame (edict_t *ent)
 	if(ent->client->xyspeed > sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]))
 		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
-	if(ent->client->xyspeed < ent->client->prev_xyspeed)
+	if(ent->client->xyspeed < ent->client->prev_xyspeed && FRAMETIME < TENFPS)
 		ent->client->xyspeed += (ent->client->prev_xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
-
-	xyspeed = ent->client->xyspeed;
 
 	if (ent->client->xyspeed < 5.0f || !ent->groundentity)
 	{
