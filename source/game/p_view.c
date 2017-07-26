@@ -31,7 +31,6 @@ static	edict_t		*current_player;
 static	gclient_t	*current_client;
 
 static	vec3_t	forward, right, up;
-float	xyspeed;
 
 float	bobmove;
 int		bobcycle;		// odd cycles are right foot going forward
@@ -305,11 +304,11 @@ void SV_CalcViewOffset (edict_t *ent)
 		angles[ROLL] += delta*run_roll->value;
 
 		// add angles based on bob
-		delta = bobfracsin * bob_pitch->value * xyspeed;
+		delta = bobfracsin * bob_pitch->value * ent->client->xyspeed;
 		if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			delta *= 6;		// crouching
 		angles[PITCH] += delta;
-		delta = bobfracsin * bob_roll->value * xyspeed;
+		delta = bobfracsin * bob_roll->value * ent->client->xyspeed;
 		if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			delta *= 6;		// crouching
 		if (bobcycle & 1)
@@ -344,7 +343,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	}
 
 	// add bob height
-	bob = bobfracsin * xyspeed * bob_up->value;
+	bob = bobfracsin * ent->client->xyspeed * bob_up->value;
 	if (bob > 6)
 		bob = 6;
 	v[2] += bob;
@@ -396,15 +395,15 @@ void SV_CalcGunOffset (edict_t *ent)
 	float   heightOffset;
 
 	// gun angles from bobbing
-	ent->client->ps.gunangles[ROLL] = xyspeed * bobfracsin * 0.005;
-	ent->client->ps.gunangles[YAW] = xyspeed * bobfracsin * 0.01;
+	ent->client->ps.gunangles[ROLL] = ent->client->xyspeed * bobfracsin * 0.005;
+	ent->client->ps.gunangles[YAW] = ent->client->xyspeed * bobfracsin * 0.01;
 	if (bobcycle & 1)
 	{
 		ent->client->ps.gunangles[ROLL] = -ent->client->ps.gunangles[ROLL];
 		ent->client->ps.gunangles[YAW] = -ent->client->ps.gunangles[YAW];
 	}
 
-	ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005;
+	ent->client->ps.gunangles[PITCH] = ent->client->xyspeed * bobfracsin * 0.005;
 
 	VectorClear (ent->client->ps.gunoffset);	
 
@@ -967,12 +966,12 @@ void G_SetClientEvent (edict_t *ent)
 	if (ent->s.event)
 		return;
 
-	if ( ent->groundentity && xyspeed > 225)
+	if ( ent->groundentity && ent->client->xyspeed > 225)
 	{
 		if ( (int)(current_client->bobtime + bobmove / (TENFPS/FRAMETIME)) != bobcycle )
 			ent->s.event = EV_FOOTSTEP;
 
-		if ( ((ent->waterlevel == 1) || (ent->waterlevel == 2)) && (xyspeed > 100) )
+		if ( ((ent->waterlevel == 1) || (ent->waterlevel == 2)) && (ent->client->xyspeed > 100) )
 		{
 			if ( (int)(current_client->bobtime + bobmove/ (TENFPS/FRAMETIME)) != bobcycle )
 			{
@@ -1320,17 +1319,19 @@ void ClientEndServerFrame (edict_t *ent)
 	// all cyclic walking effects
 	//
 
+	ent->client->prev_xyspeed = ent->client->xyspeed;
+
 	// need to account for sudden shifts in speed causing sudden weapon bob changes	
 	ent->client->xyspeed += sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1])/(TENFPS/FRAMETIME);
 	if(ent->client->xyspeed > sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]))
 		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 
-	if(ent->client->xyspeed < xyspeed)
-		ent->client->xyspeed += (xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
+	if(ent->client->xyspeed < ent->client->prev_xyspeed)
+		ent->client->xyspeed += (ent->client->prev_xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
 
 	xyspeed = ent->client->xyspeed;
 
-	if (xyspeed < 5.0f || !ent->groundentity)
+	if (ent->client->xyspeed < 5.0f || !ent->groundentity)
 	{
 		if(FRAMETIME == TENFPS)
 		{
@@ -1344,9 +1345,9 @@ void ClientEndServerFrame (edict_t *ent)
 	}
 	else
 	{	// so bobbing only cycles when on ground
-		if (xyspeed > 210.0f)
+		if (ent->client->xyspeed > 210.0f)
 			bobmove = 0.25f;
-		else if (xyspeed > 100.0f)
+		else if (ent->client->xyspeed > 100.0f)
 			bobmove = 0.125f;
 		else
 			bobmove = 0.0625f;
