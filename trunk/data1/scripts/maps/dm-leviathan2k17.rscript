@@ -11,7 +11,7 @@ canyon1_texture
 		blendnormalmap 3 
 			0 textures/desert/cliffblock_nm.tga
 			1 textures/desert/cliffmiddle_nm.tga	
-			2 textures/desert/cliffbottom_nm.tga		
+			2 textures/desert/cliffbottom_nm_wet.tga		
 	}
 }
 textures/arena6/icerock
