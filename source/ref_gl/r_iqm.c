@@ -181,7 +181,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	int skinpath_buffer_length;
 	const char *parse_string;
 	int remaining_varray_types;
-	float min = 0, max = 0;
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
@@ -483,14 +482,10 @@ do { \
 				bounds[i].mins[j] = LittleFloat(bounds[i].mins[j]);
 				if (mod->mins[j] > bounds[i].mins[j])
 					mod->mins[j] = bounds[i].mins[j];
-				if(mod->mins[j] < min)
-					min = mod->mins[j];
 				
 				bounds[i].maxs[j] = LittleFloat(bounds[i].maxs[j]);
 				if (mod->maxs[j] < bounds[i].maxs[j])
 					mod->maxs[j] = bounds[i].maxs[j];
-				if(mod->maxs[j] > max)
-					max= mod->maxs[j];
 			}
 			
 			bounds[i].radius = LittleFloat(bounds[i].radius);
@@ -501,25 +496,25 @@ do { \
 		mod->radius = radius;
 	}
 
-	//compute a full bounding box(this box must be made square so that rotating doesn't cause culling issues)
+	//compute a full bounding box
 	for ( i = 0; i < 8; i++ )
 	{
 		vec3_t   tmp;
 
 		if ( i & 1 )
-			tmp[0] = min;
+			tmp[0] = mod->mins[0];
 		else
-			tmp[0] = max;
+			tmp[0] = mod->maxs[0];
 
 		if ( i & 2 )
-			tmp[1] = min;
+			tmp[1] = mod->mins[1];
 		else
-			tmp[1] = max;
+			tmp[1] = mod->maxs[1];
 
 		if ( i & 4 )
-			tmp[2] = min;
+			tmp[2] = mod->mins[2];
 		else
-			tmp[2] = max;
+			tmp[2] = mod->maxs[2];
 
 		VectorCopy( tmp, mod->bbox[i] );
 	}	
