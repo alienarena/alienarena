@@ -1076,6 +1076,7 @@ nobase_dist_textures_DATA = \
 	desert/cliffbottom.tga \
 	desert/cliffbottom_hm.tga \
 	desert/cliffbottom_nm.tga \
+	desert/cliffbottom_nm_wet.tga \
 	desert/cliffmiddle.tga \
 	desert/cliffmiddle_hm.tga \
 	desert/cliffmiddle_nm.tga \
@@ -1734,6 +1735,7 @@ nobase_dist_textures_DATA = \
 	texturelib/stones_0027.jpg \
 	texturelib/stones_0027_hm.jpg \
 	texturelib/stones_0027_nm.jpg \
+	water/algae_water.tga \
 	water/blood_nm.tga \
 	water/blood.tga \
 	water/bluewater_nm.tga \
