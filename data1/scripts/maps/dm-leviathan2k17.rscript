@@ -8,7 +8,7 @@ canyon1_texture
 			200 textures/desert/cliffmiddle.tga	
 			200 textures/desert/cliffbottom.tga	
 			100 textures/desert/pebbles.tga
-			100 textures/water/algae_water.tga
+			100 textures/arena8/moss.tga
 		blendnormalmap 3 
 			0 textures/desert/cliffblock_nm.tga
 			1 textures/desert/cliffmiddle_nm.tga	
