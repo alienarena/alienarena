@@ -313,6 +313,15 @@ players/rustbot/blue
 		glow
 	}	
 }
+players/rustbot/classic
+{
+	{
+		map players/rustbot/classic_normal.tga
+		normalmap
+		map2 players/rustbot/classicfx.tga
+		glow
+	}	
+}
 models/weapons/v_chain/skin
 {
 	{
