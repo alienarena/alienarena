@@ -692,6 +692,7 @@ nobase_dist_textures_DATA = \
 	arena8/metalwall1.tga \
 	arena8/metalwall1_hm.tga \
 	arena8/metalwall1_nm.tga \
+	arena8/moss.tga \
 	arena8/rock1.tga \
 	arena8/rock1_nm.tga \
 	arena8/roughwood.tga \
@@ -1736,6 +1737,7 @@ nobase_dist_textures_DATA = \
 	texturelib/stones_0027_hm.jpg \
 	texturelib/stones_0027_nm.jpg \
 	water/algae_water.tga \
+	water/algae_water_nm.tga \
 	water/blood_nm.tga \
 	water/blood.tga \
 	water/bluewater_nm.tga \
