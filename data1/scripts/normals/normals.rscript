@@ -250,6 +250,15 @@ players/slashbot/blue
 		glow
 	}	
 }
+players/slashbot/injector
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+		map2 players/slashbot/injectorfx.tga
+		glow
+	}	
+}
 players/commander/blue
 {
 	{
