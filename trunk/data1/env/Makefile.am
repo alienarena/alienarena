@@ -50,5 +50,6 @@ nobase_dist_env_DATA = \
 	hspacebk.jpg \
 	hspacedn.jpg \
 	hspaceft.jpg \
+	hspacelf.jpg \
 	hspacert.jpg \
 	hspaceup.jpg
