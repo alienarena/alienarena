@@ -4,7 +4,7 @@ canyon1_texture
 		map textures/dm-leviathan/canyon1_blendtex.tga		
 		map2 textures/dm-leviathan/canyon1_blendtex2.tga	
 		blendmap 5			
-			400 textures/desert/cliffblock.tga		
+			200 textures/desert/cliffblock.tga		
 			200 textures/desert/cliffmiddle.tga	
 			200 textures/desert/cliffbottom.tga	
 			100 textures/desert/pebbles.tga

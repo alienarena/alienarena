@@ -115,6 +115,15 @@ players/martianoverlord/blue
 		glow
 	}	
 }
+players/martianoverlord/mastermind
+{
+	{
+		map players/martianoverlord/mastermind_normal.tga
+		normalmap
+		map2 players/martianoverlord/mastermindfx.tga
+		glow
+	}	
+}
 players/enforcer/default
 {
 	{
