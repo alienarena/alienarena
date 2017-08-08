@@ -24,6 +24,7 @@ nobase_dist_maps_DATA = \
 	decals/ivy1.decal \
 	decals/mud1.decal \
 	decals/mud2.decal \
+	decals/pondscum.decal \
 	decals/rocks1.decal \
 	decals/slime0.decal \
 	decals/slime1.decal \
