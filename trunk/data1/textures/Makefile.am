@@ -1044,6 +1044,7 @@ nobase_dist_textures_DATA = \
 	decals/damage3.tga \
 	decals/damage4.tga \
 	decals/mud1.tga \
+	decals/pondscum.tga \
 	decals/rock1.tga \
 	decals/rust1.tga \
 	decals/snow1.tga \
