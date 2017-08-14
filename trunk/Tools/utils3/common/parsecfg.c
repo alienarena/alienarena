@@ -138,3 +138,33 @@ char *WalkConfiguration()
 
     return arg_node_root->param;
 }
+
+// System for creating a string containing all arguments, so that you can see
+// how a map was compiled by inspecting the output file. So far, only used by
+// qrad3 for .lightmap files, but lightmap compilation is the most likely to
+// use wierd options that to be re-created.
+static size_t total_size;
+static char *all_options;
+
+void CreateConfigurationString (void)
+{
+	arg_node *node;
+
+	total_size = 1; // for delimeter
+	for (node = arg_node_root; node != NULL; node = node->next)
+		total_size += strlen (node->param) + 1;
+
+	all_options = malloc (total_size);
+	memset (all_options, 0, total_size);
+	
+	for (node = arg_node_root; node != NULL; node = node->next)
+	{
+		strcat (all_options, node->param);
+		strcat (all_options, " ");
+	}
+}
+
+const char *GetConfigurationString (void)
+{
+	return all_options;
+}

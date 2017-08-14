@@ -767,6 +767,7 @@ void ShootLight (int patchnum)
 }
 
 
+
 /*
 =============
 BounceLight
@@ -845,7 +846,7 @@ void CheckPatches (void)
 RadWorld
 =============
 */
-void RadWorld (void)
+static void RadWorld (const char *mapname)
 {
 
 	if (numnodes == 0 || numfaces == 0)
@@ -862,6 +863,8 @@ void RadWorld (void)
 
 	// create directlights out of patches and lights
 	CreateDirectLights ();
+	
+	GenerateAllTerrainLightmaps (mapname);
 	
 	// build initial facelights
 	RunThreadsOnIndividual (numfaces, true, BuildFacelights);
@@ -904,7 +907,7 @@ void RadWorld (void)
 	LinkPlaneFaces ();
 
 	lightdatasize = 0;
-	RunThreadsOnIndividual (numfaces, true, FinalLightFace);
+	RunThreadsOn (numfaces, true, FinalLightFace_Worker);
 }
 
 
@@ -933,10 +936,11 @@ int main (int argc, char **argv)
 {
 	int		/*n,*/ full_help;
 	double	start, end;
-	char	name[1024];
+	char	name[1024], short_mapname_buf[1024], *short_mapname;
     char	game_path[1024] = "";
     char	refine_fname[1024];
     char	*param, *param2 = NULL;
+    int		i;
 #ifdef USE_SETRLIMIT
 	const rlim_t kStackSize = 16L * 1024L * 1024L; //16 megs
 	struct rlimit rl;
@@ -963,11 +967,11 @@ int main (int argc, char **argv)
     full_help = false;
     numthreads = 4;
     refine_amt = 1;
+    terrain_refine = 4;
 
     LoadConfigurationFile("qrad3", 0);
     LoadConfiguration(argc-1, argv+1);
-    
-    dlightdata_ptr = dlightdata;
+    CreateConfigurationString ();
 
     while((param = WalkConfiguration()) != NULL)
 	{
@@ -1065,8 +1069,6 @@ int main (int argc, char **argv)
 		else if (!strcmp(param,"-blur"))
 		{
 			doing_blur = true;
-			dlightdata_ptr = dlightdata_raw;
-			
 		}
 //		else if (!strcmp(param,"-memory"))
 //		{
@@ -1107,6 +1109,19 @@ int main (int argc, char **argv)
 					Error ("Valid refine settings are 1, 2, 4, and 8");
 			}
 		}
+		else if (!strcmp(param,"-terrainrefine"))
+		{
+			param2 = WalkConfiguration();
+			terrain_refine = atoi (param2);
+			switch (terrain_refine)
+			{
+				case 1: case 2: case 4: case 8: case 16:
+				case 32: //heaven forbid
+					break;
+				default:
+					Error ("Valid terrain refine settings are 1, 2, 4, and 8");
+			}
+		}
 		else if (!strcmp (param,"-tmpin"))
 			strcpy (inbase, "/tmp");
 		else if (!strcmp (param,"-tmpout"))
@@ -1121,17 +1136,18 @@ int main (int argc, char **argv)
 		printf ("Recommend refine setting of 8 or 16 for -blur!\n");
 
     printf("-------------------------\n");
-	printf("ambient   : %f\n", ambient );
-	printf("scale     : %f\n", lightscale );
-	printf("maxlight  : %f\n", maxlight );
-	printf("entity    : %f\n", entity_scale );
-	printf("direct    : %f\n", direct_scale );
-	printf("grayscale : %f\n", grayscale );
-	printf("desaturate: %f\n", desaturate );
-	printf("bounce    : %d\n", numbounce );
-	printf("radmin    : %f\n", patch_cutoff );
-	printf("subdiv    : %f\n", subdiv );
-	printf("refine    : %d\n", refine_amt );
+	printf("ambient      : %f\n", ambient );
+	printf("scale        : %f\n", lightscale );
+	printf("maxlight     : %f\n", maxlight );
+	printf("entity       : %f\n", entity_scale );
+	printf("direct       : %f\n", direct_scale );
+	printf("grayscale    : %f\n", grayscale );
+	printf("desaturate   : %f\n", desaturate );
+	printf("bounce       : %d\n", numbounce );
+	printf("radmin       : %f\n", patch_cutoff );
+	printf("subdiv       : %f\n", subdiv );
+	printf("refine       : %d\n", refine_amt );
+	printf("terrainrefine: %d\n", terrain_refine );
 	if ( extrasamples )
 		printf("with extra samples\n");
 	if ( doing_blur )
@@ -1188,9 +1204,27 @@ int main (int argc, char **argv)
     // param is map/bsp file name
 	strcpy (source, ExpandArg(param));
 	StripExtension (source);
+	strcpy (short_mapname_buf, source);
 	strcpy (refine_fname, source);
 	DefaultExtension (source, ".bsp");
 	DefaultExtension (refine_fname, ".lightmap");
+
+	// FIXME: duplicates COM_SkipPath.
+	short_mapname = short_mapname_buf;
+	while (true)
+	{
+		char *tmp = strchr (short_mapname, '/');
+		if (!tmp)
+			break;
+		short_mapname = tmp + 1;
+	}
+	while (true)
+	{
+		char *tmp = strchr (short_mapname, '\\');
+		if (!tmp)
+			break;
+		short_mapname = tmp + 1;
+	}
 
 //	ReadLightFile ();
 
@@ -1198,6 +1232,7 @@ int main (int argc, char **argv)
 	printf ("reading %s\n", name);
 	LoadBSPFile (name);
 	ParseEntities ();
+	LoadAllTerrain ();
 	CalcTextureReflectivity ();
 
 	if (!visdatasize)
@@ -1207,11 +1242,8 @@ int main (int argc, char **argv)
 		ambient = 16; // 2010-09 was 0.1, makes no sense, but 16 may not either.
  	}
 
-	RadWorld ();
+	RadWorld (short_mapname);
 	
-	if (doing_blur)
-	    RunThreadsOnIndividual (numfaces, true, BlurFace);
-
 	if (refine_setting > 0)
 	{
 		sprintf (name, "%s%s", outbase, refine_fname);
@@ -1231,7 +1263,7 @@ int main (int argc, char **argv)
 	{
 		WriteBSPFile (name);
 	}
-
+	
 	end = I_FloatTime ();
 	printf ("%5.0f seconds elapsed\n", end-start);
 

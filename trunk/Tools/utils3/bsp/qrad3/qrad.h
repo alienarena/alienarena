@@ -42,6 +42,7 @@ typedef struct directlight_s
     dplane_t    *plane;
     dleaf_t     *leaf;
     int			nodenum;
+	float		proportion_direct, proportion_directsun, proportion_indirect;
 
 } directlight_t;
 
@@ -133,19 +134,45 @@ extern	directlight_t	*directlights[MAX_MAP_LEAFS];
 
 extern	byte	nodehit[MAX_MAP_NODES];
 
+typedef struct
+{
+	vec3_t	direct; // occluded by shadow casters in the engine
+	vec3_t	directsun; // occluded by shadow casters in the engine
+	vec3_t	indirect; // not shadowed
+} sample_t;
+//for each sample, we keep track of how much blurring we should do
+typedef struct {
+	//divide these for a weighted blur average for a single sample
+	double	total_blur;
+	int		num_lights;
+} sample_blur_t[4];
+typedef struct
+{
+	struct cterraintri_s *mru, *lru;
+} occlusioncache_t;
+void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
+									vec3_t normal,
+									sample_t *out_color,
+									float lightscale2, // adjust for multisamples, -extra cmd line arg
+									qboolean *sun_main_once, 
+									qboolean *sun_ambient_once,
+									sample_blur_t blur,
+									occlusioncache_t *cache
+								);
+void PostProcessLightSample (const sample_t *in, const vec3_t radiosity_add, sample_t *out, vec3_t out_combined_color);
+
 void BuildLightmaps (void);
 
 void BuildFacelights (int facenum);
 
-void FinalLightFace (int facenum);
-void BlurFace (int facenum);
+void FinalLightFace_Worker (int facenum);
 void DetectUniformColor (int facenum);
 
 qboolean PvsForOrigin (vec3_t org, byte *pvs);
 
 int	PointInNodenum (vec3_t point);
 int TestLine (vec3_t start, vec3_t stop);
-int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded);
+int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded, occlusioncache_t *cache);
 int TestLine_r (int node, vec3_t start, vec3_t stop);
 
 void CreateDirectLights (void);
@@ -169,6 +196,7 @@ extern float sun_ambient;
 extern vec3_t sun_color;
 
 int	refine_amt, refine_setting;
+int terrain_refine;
 
 int	PointInLeafnum (vec3_t point);
 void MakeTnodes (dmodel_t *bm);
@@ -177,5 +205,53 @@ void SubdividePatches (void);
 void PairEdges (void);
 void CalcTextureReflectivity (void);
 
-byte	*dlightdata_ptr; 
-byte	dlightdata_raw[MAX_OVERRIDE_LIGHTING];
+void bilinear_sample (const byte *texture, int tex_w, int tex_h, float u, float v, vec4_t out);
+
+
+#define Z_Free free
+void *Z_Malloc (size_t sz);
+char *CopyString (const char *in);
+
+#define M_PI       3.14159265358979323846
+
+typedef vec_t vec2_t[2];
+#define VectorSet(v, x, y, z)		((v)[0]=(x), (v)[1]=(y), (v)[2]=(z))
+#define	PITCH				0		// up / down
+#define	YAW					1		// left / right
+#define	ROLL				2		// fall over
+#define DEG2RAD( a ) (( (a) * M_PI ) / 180.0F)
+#define RAD2DEG( a ) (( (a) * 180.0F ) / M_PI)
+
+typedef struct
+{
+	char			*texture_path;
+	char			*lightmap_path;
+	int				num_vertices;
+	float			*vert_positions;
+	float			*vert_texcoords;
+	int				num_triangles;
+	unsigned int	*tri_indices;
+	vec3_t			mins, maxs;
+	int             heightmap_w, heightmap_h;
+} terraindata_t;
+
+// out will be populated with a simplified version of the mesh. 
+// name is just the path of the .terrain file, only used for error messages.
+// oversampling_factor indicates how much detail to sample the heightmap 
+// at before simplification. 2.0 means 4x as many samples as there are pixels,
+// 0.5 means 0.25x as many.
+// reduction_amt indicates how many times fewer triangles the simplified mesh
+// should have.
+// buf is a string containing the text of a .terrain file.
+void LoadTerrainFile (terraindata_t *out, const char *name, float oversampling_factor, int reduction_amt, char *buf);
+
+// Frees any allocated buffers in dat.
+void CleanupTerrainData (terraindata_t *dat);
+
+qboolean Terrain_Trace (vec3_t start, vec3_t end, vec3_t out_end, vec3_t out_normal);
+qboolean Fast_Terrain_Trace_Try_Cache (vec3_t start, vec3_t end, occlusioncache_t *cache);
+qboolean Fast_Terrain_Trace_Cache_Miss (vec3_t start, vec3_t end, occlusioncache_t *cache);
+void LoadAllTerrain (void);
+void GenerateAllTerrainLightmaps (const char *mapname);
+
+void SaveTGA (const byte *texture, int tex_w, int tex_h, const char *name);

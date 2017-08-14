@@ -356,16 +356,21 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *COM_Parse (char *data)
+char *COM_Parse (char **data_p)
 {
 	int		c;
 	int		len;
+	char	*data;
 
+	data = *data_p;
 	len = 0;
 	com_token[0] = 0;
 
 	if (!data)
-		return NULL;
+	{
+		*data_p = NULL;
+		return "";
+	}
 
 // skip whitespace
 skipwhite:
@@ -373,8 +378,8 @@ skipwhite:
 	{
 		if (c == 0)
 		{
-			com_eof = true;
-			return NULL;			// end of file;
+			*data_p = NULL;
+			return "";
 		}
 		data++;
 	}
@@ -387,46 +392,48 @@ skipwhite:
 		goto skipwhite;
 	}
 
-
 // handle quoted strings specially
 	if (c == '\"')
 	{
 		data++;
-		do
+		while (1)
 		{
 			c = *data++;
-			if (c=='\"')
+			if (c=='\"' || !c)
 			{
 				com_token[len] = 0;
-				return data;
+				*data_p = data;
+				return com_token;
 			}
-			com_token[len] = c;
-			len++;
-		} while (1);
-	}
-
-// parse single characters
-	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c==':')
-	{
-		com_token[len] = c;
-		len++;
-		com_token[len] = 0;
-		return data+1;
+			if (len < MAX_TOKEN_CHARS)
+			{
+				com_token[len] = c;
+				len++;
+			}
+		}
 	}
 
 // parse a regular word
 	do
 	{
-		com_token[len] = c;
+		if (len < MAX_TOKEN_CHARS)
+		{
+			com_token[len] = c;
+			len++;
+		}
 		data++;
-		len++;
 		c = *data;
-	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c==':')
-			break;
 	} while (c>32);
 
+	if (len == MAX_TOKEN_CHARS)
+	{
+//		Com_Printf ("Token exceeded %i chars, discarded.\n", MAX_TOKEN_CHARS);
+		len = 0;
+	}
 	com_token[len] = 0;
-	return data;
+
+	*data_p = data;
+	return com_token;
 }
 
 
@@ -517,6 +524,7 @@ int CheckParm (char *check)
 
 	return 0;
 }
+
 
 
 

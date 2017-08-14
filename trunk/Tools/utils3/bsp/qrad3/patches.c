@@ -516,13 +516,19 @@ void	DicePatch (patch_t *patch)
 	vec_t	dist;
 	int		i;
 	patch_t	*newp;
+	float local_subdiv = subdiv;
+	
+	// Subdivide sky less finely to prevent compile times for maps with
+	// sunlight from getting out of hand.
+	if (patch->sky)
+	    local_subdiv *= 3.0;
 
 	w = patch->winding;
 	WindingBounds (w, mins, maxs); // 3D AABB for polygon
 
 	for (i=0 ; i<3 ; i++)
 	{ // if an AABB dimension > subdiv then split (?)
-		if (floor((mins[i]+1)/subdiv) < floor((maxs[i]-1)/subdiv))
+		if (floor((mins[i]+1)/local_subdiv) < floor((maxs[i]-1)/local_subdiv))
 			break;
 	}
 
@@ -536,7 +542,7 @@ void	DicePatch (patch_t *patch)
 	//
 	VectorCopy (vec3_origin, split);
 	split[i] = 1;
-	dist = subdiv * ( 1 + floor( (mins[i]+1) / subdiv) );
+	dist = local_subdiv * ( 1 + floor( (mins[i]+1) / local_subdiv) );
 	// {split,dist} is the dividing plane (?)
 	ClipWindingEpsilon (w, split, dist, ON_EPSILON, &o1, &o2);
 
