@@ -334,14 +334,10 @@ inline const float *GetRGBASample (int node_leaf, const vec3_t orig_start, const
 	smax = texture_sizes[texnum][0];
 	tmax = texture_sizes[texnum][1];
 	
-	fs = DotProduct (point, tex->vecs[0]) + tex->vecs[0][3];
-	while (fs < 0)
-		fs += smax;
+	fs = fmodf (DotProduct (point, tex->vecs[0]) + tex->vecs[0][3], smax) + smax;
 	s = (int)fs%smax;
 	
-	ft = DotProduct (point, tex->vecs[1]) + tex->vecs[1][3];
-	while (ft < 0)
-		ft += tmax;
+	ft = fmodf (DotProduct (point, tex->vecs[1]) + tex->vecs[1][3], tmax) + tmax;
 	t = (int)ft%tmax;
 
 	
@@ -533,9 +529,11 @@ re_test:
 }
 
 
+// Checking terrain in this one is not appropriate
 int TestLine (vec3_t start, vec3_t stop)
 {
     vec3_t occluded;
+    
     occluded[0] = occluded[1] = occluded[2] = 1.0;
 	if (doing_texcheck)
 		return TestLine_r_texcheck (0, 0, start, stop, start, stop, occluded);
@@ -543,13 +541,25 @@ int TestLine (vec3_t start, vec3_t stop)
 		return TestLine_r (0, start, stop);
 }
 
-int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded)
+// Checking terrain in this one *is* appropriate
+int TestLine_color (int node, vec3_t start, vec3_t stop, vec3_t occluded, occlusioncache_t *cache)
 {
+	qboolean bsp_occluded;
+	
 	occluded[0] = occluded[1] = occluded[2] = 1.0;
+	
+	if (!Fast_Terrain_Trace_Try_Cache (start, stop, cache))
+		return true;
+	
 	if (doing_texcheck)
-		return TestLine_r_texcheck (node, 0, start, stop, start, stop, occluded);
+		bsp_occluded = TestLine_r_texcheck (node, 0, start, stop, start, stop, occluded);
 	else
-		return TestLine_r (node, start, stop);
+		bsp_occluded = TestLine_r (node, start, stop);
+	
+	if (bsp_occluded)
+		return true;
+	
+	return !Fast_Terrain_Trace_Cache_Miss (start, stop, cache);
 }
 
 /*

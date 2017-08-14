@@ -89,7 +89,8 @@ int		BigLong (int l);
 int		LittleLong (int l);
 float	BigFloat (float l);
 float	LittleFloat (float l);
-char *COM_Parse (char *data);
+#define	MAX_TOKEN_CHARS		1024		// max length of an individual token
+char *COM_Parse (char **data_p);
 
 extern	char		com_token[1024];
 extern	qboolean	com_eof;

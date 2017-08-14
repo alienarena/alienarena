@@ -10,7 +10,7 @@ extern	byte		dvisdata[MAX_MAP_VISIBILITY];
 extern	dvis_t		*dvis;
 
 extern	int			lightdatasize;
-extern	byte		dlightdata[MAX_OVERRIDE_LIGHTING];
+extern	byte		dlightdata[4][MAX_OVERRIDE_LIGHTING];
 
 extern	int			entdatasize;
 extern	char		dentdata[MAX_MAP_ENTSTRING];

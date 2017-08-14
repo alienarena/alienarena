@@ -473,14 +473,23 @@ typedef struct
 #define IDLIGHTMAPHEADER	(('P'<<24)+('M'<<16)+('T'<<8)+'L')
 // Increase this number whenever incompatible changes are made to the file 
 // format
-#define LTMPVERSION			2
+#define LEGACY_LTMPVERSION	2 // 2.0 format
+#define LTMPVERSION			3
 // Increase this number whenever backwards-compatible changes are made to the
 // file format
 #define LTMPVERSION_MINOR	0
 
-#define LTMP_LUMP_FACELOOKUP	0
-#define LTMP_LUMP_LIGHTING		1
-#define LTMP_LUMPS				2
+#define LTMP_LUMP_FACELOOKUP			0
+// NOTE: to keep the code simple, ALL FOUR of these lighting lumps are
+// MANDATORY for lightmap files of version 3.0 (2.0 only has the combined one.)
+#define LTMP_LUMP_LIGHTING				1
+#define LTMP_VERSION_2_0_LUMPS			2
+#define LTMP_LUMP_LIGHTING_DIRECT		2
+#define LTMP_LUMP_LIGHTING_DIRECTSUN	3
+#define LTMP_LUMP_LIGHTING_INDIRECT		4
+// A string containing all options that got passed to qrad3
+#define LTMP_LUMP_QRAD_OPTIONS			5
+#define LTMP_LUMPS						6
 
 // Each override has its own pixel format. Currently, the only one is 24-bit
 // RGB, but we may eventually add S3TC/ASTC formats as well.
@@ -523,6 +532,6 @@ typedef struct
 	int			height;	 	// height in pixels
 	// qrad3 may output heights scaled differently from widths at some point
 	// in the future
-	float		xscale;     // xscale in game units per lightmap pixel
+	float		xscale;		// xscale in game units per lightmap pixel
 	float		yscale;		// yscale in game units per lightmap pixel
 } ltmp_facelookup_t;

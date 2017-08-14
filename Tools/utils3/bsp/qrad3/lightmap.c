@@ -1,5 +1,7 @@
 #include "qrad.h"
 
+#include <assert.h>
+
 #define	MAX_LSTYLES	256
 
 typedef struct
@@ -747,13 +749,6 @@ void CalcPoints (lightinfo_t *l, float sofs, float tofs)
 //==============================================================
 
 
-//for each sample, we keep track of how much blurring we should do
-typedef struct {
-	//divide these for a weighted blur average for a single sample
-	double	total_blur;
-	int		num_lights;
-} sample_blur_t;
-
 #define	MAX_STYLES	32
 typedef struct
 {
@@ -761,7 +756,7 @@ typedef struct
 	float		*origins;
 	int			numstyles;
 	int			stylenums[MAX_STYLES];
-	float		*samples[MAX_STYLES];
+	sample_t	*samples[MAX_STYLES];
 	sample_blur_t	*blur_amt;
 } facelight_t;
 
@@ -808,12 +803,13 @@ void CreateDirectLights (void)
 	char	*name;
 	char	*target;
 	float	angle;
+
 	vec3_t	dest;
-	char	*_color;
+	char	*_color, *_channels;
 	float	intensity;
-    char    *sun_target = NULL;
-    char    *proc_num;
-    qboolean sun_light;
+	char	*sun_target = NULL;
+	char	*proc_num;
+	qboolean sun_light;
 
 	//
 	// entities
@@ -824,51 +820,51 @@ void CreateDirectLights (void)
 		name = ValueForKey (e, "classname");
 		if (strncmp (name, "light", 5))
 		{
-            if (!strncmp (name, "worldspawn", 10))
+			if (!strncmp (name, "worldspawn", 10))
 			{
-                sun_target = ValueForKey(e, "_sun");
-                if(strlen(sun_target) > 0)
+				sun_target = ValueForKey(e, "_sun");
+				if(strlen(sun_target) > 0)
 				{
-                    printf("Sun activated.\n");
-                    sun = true;
+					printf("Sun activated.\n");
+					sun = true;
 				}
 
-                proc_num = ValueForKey(e, "_sun_ambient");
-                if(strlen(proc_num) > 0)
+				proc_num = ValueForKey(e, "_sun_ambient");
+				if(strlen(proc_num) > 0)
 				{
-                    sun_ambient = atof(proc_num);
+					sun_ambient = atof(proc_num);
 				}
 
-                proc_num = ValueForKey(e, "_sun_light");
-                if(strlen(proc_num) > 0)
+				proc_num = ValueForKey(e, "_sun_light");
+				if(strlen(proc_num) > 0)
 				{
-                    sun_main = atof(proc_num);
+					sun_main = atof(proc_num);
 				}
 
-                proc_num = ValueForKey(e, "_sun_color");
-                if(strlen(proc_num) > 0)
+				proc_num = ValueForKey(e, "_sun_color");
+				if(strlen(proc_num) > 0)
 				{
 					GetVectorForKey (e, "_sun_color", sun_color);
 
-                    sun_alt_color = true;
+					sun_alt_color = true;
 					ColorNormalize (sun_color, sun_color);
 				}
 			}
 
-            continue;
+			continue;
 		}
 
-        sun_light = false;
+		sun_light = false;
 
-        target = ValueForKey (e, "target");
+		target = ValueForKey (e, "target");
 
-        if(strlen(target) >= 1 && !strcmp(target, sun_target))
+		if(strlen(target) >= 1 && !strcmp(target, sun_target))
 		{
-            vec3_t sun_s, sun_t;
+			vec3_t sun_s, sun_t;
 
-            GetVectorForKey(e, "origin", sun_s);
+			GetVectorForKey(e, "origin", sun_s);
 
-            sun_light = true;
+			sun_light = true;
 
 			e2 = FindTargetEntity (target);
 
@@ -876,9 +872,9 @@ void CreateDirectLights (void)
 			{
 				printf ("WARNING: sun missing target, 0,0,0 used\n");
 
-                sun_t[0] = 0;
-                sun_t[1] = 0;
-                sun_t[2] = 0;
+				sun_t[0] = 0;
+				sun_t[1] = 0;
+				sun_t[2] = 0;
 			}
 			else
 			{
@@ -909,29 +905,29 @@ void CreateDirectLights (void)
 		dl->next = directlights[cluster];
 		directlights[cluster] = dl;
 
-        proc_num = ValueForKey(e, "_wait");
-        if(strlen(proc_num) > 0)
-            dl->wait = atof(proc_num);
-        else
+		proc_num = ValueForKey(e, "_wait");
+		if(strlen(proc_num) > 0)
+			dl->wait = atof(proc_num);
+		else
 		{
-            proc_num = ValueForKey(e, "wait");
+			proc_num = ValueForKey(e, "wait");
 
-            if(strlen(proc_num) > 0)
-                dl->wait = atof(proc_num);
-            else
-                dl->wait = 1.0f;
+			if(strlen(proc_num) > 0)
+				dl->wait = atof(proc_num);
+			else
+				dl->wait = 1.0f;
 		}
 
 		if (dl->wait <= 0.001)
 			dl->wait = 1.0f;
 
 		proc_num = ValueForKey(e, "_angwait");
-        if(strlen(proc_num) > 0)
-            dl->adjangle = atof(proc_num);
-        else
-            dl->adjangle = 1.0f;
+		if(strlen(proc_num) > 0)
+			dl->adjangle = atof(proc_num);
+		else
+			dl->adjangle = 1.0f;
 
-        intensity = FloatForKey (e, "light");
+		intensity = FloatForKey (e, "light");
 		if (!intensity)
 			intensity = FloatForKey (e, "_light");
 		if (!intensity)
@@ -945,6 +941,17 @@ void CreateDirectLights (void)
 		}
 		else
 			dl->color[0] = dl->color[1] = dl->color[2] = 1.0;
+
+		_channels = ValueForKey (e, "_channel_proportions");
+		if (_channels && _channels[0])
+		{
+			sscanf (_channels, "%f %f %f", &dl->proportion_direct, &dl->proportion_directsun, &dl->proportion_indirect);
+		}
+		else
+		{
+			dl->proportion_direct = 1.0f;
+			dl->proportion_directsun = dl->proportion_indirect = 0.0f;
+		}
 
 		dl->intensity = intensity * entity_scale;
 		dl->type = emit_point;
@@ -1000,9 +1007,20 @@ void CreateDirectLights (void)
 	//
 	for (i=0, p=patches ; i<num_patches ; i++, p++)
 	{
+		vec3_t trace_start, tmp, tmp2;
+		
 		if ((!sun || !p->sky) && p->totallight[0] < DIRECT_LIGHT
 			&& p->totallight[1] < DIRECT_LIGHT
 			&& p->totallight[2] < DIRECT_LIGHT)
+			continue;
+		
+		// If any light is underneath some terrain, it is "underground" and 
+		// therefore should be ignored. This check is necessary because 
+		// terrain is not used when constructing the BSP tree, so an area may
+		// be solid or outside the map even if the BSP tree says it isn't.
+		VectorCopy (p->origin, trace_start);
+		trace_start[2] += 2048;
+		if (!Terrain_Trace (trace_start, p->origin, tmp, tmp2))
 			continue;
 
 		numdlights++;
@@ -1016,18 +1034,22 @@ void CreateDirectLights (void)
 		dl->next = directlights[cluster];
 		directlights[cluster] = dl;
 
-        VectorCopy (p->plane->normal, dl->normal);
+		VectorCopy (p->plane->normal, dl->normal);
 
 		if(sun && p->sky)
 		{
-            dl->leaf = leaf;
-            dl->plane = p->plane;
-            dl->type = emit_sky;
-            dl->intensity = 1.0f;
+			dl->leaf = leaf;
+			dl->plane = p->plane;
+			dl->type = emit_sky;
+			dl->intensity = 1.0f;
 		}
 		else
 		{
-            dl->type = emit_surface;
+			dl->type = emit_surface;
+			// surfaces are 50/50 indirect and direct for now. FIXME: we can do
+			// better than this.
+			dl->proportion_direct = dl->proportion_indirect = 0.5f;
+			dl->proportion_directsun = 0.0f;
 			dl->intensity = ColorNormalize (p->totallight, dl->color);
 			dl->intensity *= p->area * direct_scale;
 		}
@@ -1162,32 +1184,38 @@ LightContributionToPoint
 =============
 */
 void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
-									vec3_t normal, vec3_t color, 
-									float lightscale2, 
+									vec3_t normal,
+									sample_t *out_color,
+									float lightscale2, // adjust for multisamples, -extra cmd line arg
 									qboolean *sun_main_once, 
 									qboolean *sun_ambient_once,
-									float *lightweight
+									sample_blur_t blur,
+									occlusioncache_t *cache
 								)
 {
 	vec3_t			delta, target, occluded, color_nodist;
 	float			dot, dot2;
 	float			dist;
-	float			scale = 0.0f;
+	float			direct_scale = 0.0f, directsun_scale = 0.0f, indirect_scale = 0.0f, temp_scale = 0.0f;
 	float			inv;
-    float           main_val;
-    int				i;
-    int				lcn;
-	qboolean		set_main;
+	int				i;
+	int				lcn;
+	float			combined_lightweight;
+	vec_t			*curr_color = l->color;
 
-	VectorClear (color);
+	VectorClear (out_color->direct);
+	VectorClear (out_color->directsun);
+	VectorClear (out_color->indirect);
+	
+	if (l->type == emit_sky && *sun_main_once)
+		return;
+	
 	VectorSubtract (l->origin, pos, delta);
 	dist = DotProduct (delta, delta);
 	
-	*lightweight = 0;
-
 	if (dist == 0)
 		return;
-
+	
 	dist = sqrt (dist);
 	inv = 1.0f / dist;
 	delta[0] *= inv;
@@ -1197,94 +1225,96 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 	dot = DotProduct (delta, normal);
 	if (dot <= 0.001)
 		return;		// behind sample surface
-
-	lcn = lowestCommonNode(nodenum, l->nodenum);
-	if (!noblock && TestLine_color (lcn, pos, l->origin, occluded))
-		return;		// occluded
-
+	
 	if( l->type == emit_sky )
 	{  // this might be the sun ambient and it might be directional
-		set_main = false;
-		if( *sun_main_once ) // don't do -extra multisampling on sun
+		qboolean add_ambient, add_direct;
+		
+		// Should only add the direct light once per point. If we've added the
+		// direct light, we've added the ambient light too, so there's nothing
+		// left to do.
+		if( *sun_main_once )
 			return;
 
 		dot2 = -DotProduct (delta, l->normal);
 		if( dot2 <= 0.001f )
 			return; // behind light surface
+		
+		// Should only add the ambient light once per point. If direct light
+		// is added, then ambient light is added too, unless ambient light was
+		// already added previously.
+		add_ambient = !*sun_ambient_once; 
 
-		if( !*sun_ambient_once ) // Ambient sky, no -extra multisampling
-			scale = sun_ambient;
-		else
-			scale = 0.0f;
-
-		// Main sky
 		dot2 = DotProduct (sun_pos, normal); // sun_pos from target entity
-		if( dot2 > 0.001f ) // Main sky
+		
+		// If this surface faces the sun, we could possibly add direct light.
+        // Only if the trace directly to the sun's position fails do we fall
+        // back on tracing to the directlight_t-- if a directlight_t is for
+        // sunlight, we only trace to it for ambient light, and ambient light
+        // is implied by direct light anyway.
+		add_direct =	dot2 > 0.001f && (noblock ||
+							(	RayPlaneIntersect (	l->plane->normal,
+													l->plane->dist, pos,
+													sun_pos, target ) &&
+								!TestLine_color (0, pos, target, occluded, cache)));
+		if (add_direct)
 		{
-			set_main = true;
-			main_val = sun_main * dot2;
-			if ( !noblock )
-			{
-				if( !RayPlaneIntersect(
-					l->plane->normal, l->plane->dist, pos, sun_pos, target )
-					||
-					TestLine_color (0, pos, target, occluded)
-				)
-				{
-					set_main = *sun_main_once;
-					main_val = 0.0f;
-				}
-				else
-				{
-					scale += main_val;
-					main_val = 0.0f; // done with it
-				}
-			}
+			*sun_main_once = *sun_ambient_once = true;
+			directsun_scale = sun_main * dot2;
 		}
 		else
 		{
-			if( *sun_ambient_once )
+			if (!add_ambient)
 				return;
-			set_main = false;
-			main_val = 0.0f;
+			lcn = lowestCommonNode(nodenum, l->nodenum);
+			if (!noblock && TestLine_color (lcn, pos, l->origin, occluded, cache))
+				return;		// occluded
 		}
-		if( sun_alt_color ) // set in .map
-			VectorScale ( sun_color, scale, color );
-		else
-			VectorScale ( l->color, scale, color );
-
-		*sun_ambient_once = true;
-		*sun_main_once = set_main;
+		
+		if (add_ambient)
+		{
+			*sun_ambient_once = true;
+			indirect_scale = sun_ambient;
+		}
+		
+		if (sun_alt_color) // set in .map
+			curr_color = sun_color;
 	}
 	else
 	{
+		lcn = lowestCommonNode(nodenum, l->nodenum);
+		if (!noblock && TestLine_color (lcn, pos, l->origin, occluded, cache))
+			return;		// occluded
+		
 		switch ( l->type )
 		{
 		case emit_point:
-			scale = PointLight( dot, l->intensity, dist );
+			temp_scale = PointLight (dot, l->intensity, dist);
 			break;
 
 		case emit_surface:
 			dot2 = -DotProduct (delta, l->normal);
-			scale = SurfaceLight( dot, l->intensity, dist, dot2, inv );
+			temp_scale = SurfaceLight (dot, l->intensity, dist, dot2, inv);
 			break;
 
 		case emit_spotlight:
 			dot2 = -DotProduct(delta, l->normal);
-			scale = SpotLight( dot, l->intensity, dist, dot2, l->stopdot );
+			temp_scale = SpotLight (dot, l->intensity, dist, dot2, l->stopdot);
 			break;
 
 		default:
 			Error("Invalid light entity type.\n" );
 			break;
 		} /* switch() */
-		
-		if ( scale > 0.0f )
-		{
-			scale *= lightscale2; // adjust for multisamples, -extra cmd line arg
-			VectorScale ( l->color, scale, color );
-		}
+
+		direct_scale = temp_scale * l->proportion_direct;
+		directsun_scale = temp_scale * l->proportion_directsun;
+		indirect_scale = temp_scale * l->proportion_indirect;
 	}
+	
+	VectorScale (curr_color, direct_scale * lightscale2, out_color->direct);
+	VectorScale (curr_color, directsun_scale * lightscale2, out_color->directsun);
+	VectorScale (curr_color, indirect_scale * lightscale2, out_color->indirect);
 	
 	// 441.67 = roughly (sqrt(3*255^2))
 	VectorScale (l->color, l->intensity/441.67, color_nodist);
@@ -1292,10 +1322,32 @@ void LightContributionToPoint	(	directlight_t *l, vec3_t pos, int nodenum,
 	for (i = 0; i < 3; i++)
 	{
 		color_nodist[i] *= occluded[i];
-		color[i] *= occluded[i];
+		out_color->direct[i] *= occluded[i];
+		out_color->directsun[i] *= occluded[i];
+		out_color->indirect[i] *= occluded[i];
 	}
 	
-	*lightweight = VectorLength (color_nodist)/sqrt(3.0);
+	if (doing_blur)
+	{
+		float combined_lightweight = VectorLength (color_nodist)/sqrt(3.0);
+		blur[0].total_blur += combined_lightweight;
+		blur[0].num_lights++;
+		if (l->proportion_direct != 0.0f)
+		{
+			blur[1].total_blur += combined_lightweight * l->proportion_direct;
+			blur[1].num_lights++;
+		}
+		if (l->proportion_directsun != 0.0f)
+		{
+			blur[2].total_blur += combined_lightweight * l->proportion_directsun;
+			blur[2].num_lights++;
+		}
+		if (l->proportion_indirect != 0.0f)
+		{
+			blur[3].total_blur = combined_lightweight * l->proportion_indirect;
+			blur[3].num_lights++;
+		}
+	}
 }
 
 /*
@@ -1306,17 +1358,16 @@ Lightscale2 is the normalizer for multisampling, -extra cmd line arg
 =============
 */
 
-void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
-			float **styletable, int offset, int mapsize, float lightscale2,
+static void GatherSampleLight (vec3_t pos, sample_blur_t blur, vec3_t normal,
+			sample_t **styletable, int offset, int mapsize, float lightscale2,
 			qboolean *sun_main_once, qboolean *sun_ambient_once)
 {
 	int				i;
 	directlight_t	*l;
 	byte			pvs[(MAX_MAP_LEAFS+7)/8];
-	float			*dest;
-	vec3_t			color;
+	sample_t		*dest;
 	int				nodenum;
-	float			lightweight;
+	occlusioncache_t cache;
 
 	// get the PVS for the pos to limit the number of checks
 	if (!PvsForOrigin (pos, pvs))
@@ -1324,6 +1375,8 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 		return;
 	}
 	nodenum = PointInNodenum(pos);
+	
+	memset (&cache, 0, sizeof(cache));
 
 	for (i = 0 ; i<dvis->numclusters ; i++)
 	{
@@ -1332,10 +1385,11 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint ( l, pos, nodenum, normal, color, lightscale2, sun_main_once, sun_ambient_once, &lightweight);
-
+			sample_t sample;
+			LightContributionToPoint (l, pos, nodenum, normal, &sample, lightscale2, sun_main_once, sun_ambient_once, blur, &cache);
+			
 			// no contribution
-			if ( VectorCompare ( color, vec3_origin ) )
+			if (VectorCompare (sample.direct, vec3_origin) && VectorCompare (sample.directsun, vec3_origin) && VectorCompare (sample.indirect, vec3_origin))
 				continue;
 
 			// if this style doesn't have a table yet, allocate one
@@ -1346,15 +1400,9 @@ void GatherSampleLight (vec3_t pos, sample_blur_t *blur, vec3_t normal,
 			}
 
 			dest = styletable[l->style] + offset;
-			dest[0] += color[0];
-			dest[1] += color[1];
-			dest[2] += color[2];
-			
-			if (doing_blur)
-			{
-				blur->total_blur += lightweight;
-				blur->num_lights++;
-			}
+			VectorAdd (dest->direct, sample.direct, dest->direct);
+			VectorAdd (dest->directsun, sample.directsun, dest->directsun);
+			VectorAdd (dest->indirect, sample.indirect, dest->indirect);
 		}
 	}
 
@@ -1423,9 +1471,8 @@ void BuildFacelights (int facenum)
 #else
 	lightinfo_t	liteinfo[5];
 #endif
-	float		*styletable[MAX_LSTYLES];
+	sample_t	*styletable[MAX_LSTYLES];
 	int			i, j;
-	float		*spot;
 	patch_t		*patch;
 	int			numsamples;
 	int			tablesize;
@@ -1441,7 +1488,7 @@ void BuildFacelights (int facenum)
 	liteinfo = malloc(sizeof(lightinfo_t)*5);
 #endif
 
-	memset (styletable,0, sizeof(styletable));
+	memset (styletable, 0, sizeof(styletable));
 
 	if (extrasamples) // set with -extra option
 		numsamples = 5;
@@ -1468,7 +1515,7 @@ void BuildFacelights (int facenum)
 		CalcPoints (&liteinfo[i], sampleofs[i][0], sampleofs[i][1]);
 	}
 
-	tablesize = liteinfo[0].numsurfpt * sizeof(vec3_t);
+	tablesize = liteinfo[0].numsurfpt * sizeof(sample_t);
 	styletable[0] = malloc(tablesize);
 	memset (styletable[0], 0, tablesize);
 
@@ -1476,23 +1523,24 @@ void BuildFacelights (int facenum)
 	fl->numsamples = liteinfo[0].numsurfpt;
 	fl->origins = malloc (tablesize);
 	fl->blur_amt = malloc (liteinfo[0].numsurfpt * sizeof(sample_blur_t));
+	memset (fl->blur_amt, 0, liteinfo[0].numsurfpt * sizeof(sample_blur_t));
 	memcpy (fl->origins, liteinfo[0].surfpt, tablesize);
 
 	for (i=0 ; i<liteinfo[0].numsurfpt ; i++)
 	{
-        sun_ambient_once = false;
-        sun_main_once = false;
-		fl->blur_amt[i].total_blur = 0;
-		fl->blur_amt[i].num_lights = 0;
+		sun_ambient_once = false;
+		sun_main_once = false;
 
 		for (j=0 ; j<numsamples ; j++)
 		{
-			GatherSampleLight (liteinfo[j].surfpt[i], &fl->blur_amt[i], liteinfo[0].facenormal, styletable,
-				i*3, tablesize, 1.0/numsamples, &sun_main_once, &sun_ambient_once);
+			GatherSampleLight (liteinfo[j].surfpt[i], fl->blur_amt[i], liteinfo[0].facenormal, styletable,
+				i, tablesize, 1.0/numsamples, &sun_main_once, &sun_ambient_once);
 		}
 
 		// contribute the sample to one or more patches
-		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0]+i*3, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0][i].direct, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0][i].directsun, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0][i].indirect, facenum);
 	}
 
 	// average up the direct light on each patch for radiosity
@@ -1519,19 +1567,6 @@ void BuildFacelights (int facenum)
 		fl->numstyles++;
 	}
 
-	// the light from DIRECT_LIGHTS is sent out, but the
-	// texture itself should still be full bright
-	if (face_patches[facenum]->baselight[0] >= DIRECT_LIGHT ||
-		face_patches[facenum]->baselight[1] >= DIRECT_LIGHT ||
-		face_patches[facenum]->baselight[2] >= DIRECT_LIGHT
-		)
-	{
-		spot = fl->samples[0];
-		for (i=0 ; i<liteinfo[0].numsurfpt ; i++, spot+=3)
-		{
-			VectorAdd (spot, face_patches[facenum]->baselight, spot);
-		}
-	}
 #ifdef STACK_CONSTRAINED
 	free (liteinfo);
 #endif
@@ -1540,24 +1575,113 @@ void BuildFacelights (int facenum)
 
 /*
 =============
-FinalLightFace
+PostProcessLightSample
 
-Add the indirect lighting on top of the direct
-lighting and save into final map format
+Apply -ambient, -maxlight, -scale, and -grayscale options to light sample, add
+in radiosity light if applicable
 =============
 */
-void FinalLightFace (int facenum)
+void PostProcessLightSample (const sample_t *in, const vec3_t radiosity_add, sample_t *out, vec3_t out_combined_color)
+{
+	int i;
+	vec_t max, newmax;
+	vec3_t direct_proportion, directsun_proportion, indirect_proportion;
+
+	memcpy (out, in, sizeof (sample_t));
+
+	VectorAdd (out->indirect, radiosity_add, out->indirect);
+
+	/*
+	 * to allow experimenting, ambient and lightscale are not limited
+	 *  to reasonable ranges.
+	 */
+	if (ambient >= -255.0f && ambient <= 255.0f)
+	{ // add fixed white ambient.
+		for (i = 0; i < 3; i++)
+			out->indirect[i] += ambient;
+	}
+	if (lightscale > 0.0f)
+	{ // apply lightscale, scale down or up
+		VectorScale (out->direct, lightscale, out->direct);
+		VectorScale (out->directsun, lightscale, out->directsun);
+		VectorScale (out->indirect, lightscale, out->indirect);
+	}
+	// negative values not allowed
+	for (i = 0; i < 3; i++)
+	{
+		out->direct[0] = (out->direct[0] < 0.0f) ? 0.0f : out->direct[0];
+		out->directsun[0] = (out->directsun[0] < 0.0f) ? 0.0f : out->directsun[0];
+		out->indirect[0] = (out->indirect[0] < 0.0f) ? 0.0f : out->indirect[0];
+	}
+
+	// Create combined color
+	VectorCopy (out->direct, out_combined_color);
+	VectorAdd (out->directsun, out_combined_color, out_combined_color);
+	VectorAdd (out->indirect, out_combined_color, out_combined_color);
+	for (i = 0; i < 3; i++)
+	{
+		if (out_combined_color[i] != 0.0f)
+		{
+			direct_proportion[i] = out->direct[i] / out_combined_color[i];
+			directsun_proportion[i] = out->directsun[i] / out_combined_color[i];
+			indirect_proportion[i] = out->indirect[i] / out_combined_color[i];
+		}
+		else
+		{
+			direct_proportion[i] = directsun_proportion[i] = indirect_proportion[i] = 0.0f;
+		}
+	}
+
+	// determine max of R,G,B
+	max = out_combined_color[0] > out_combined_color[1] ? out_combined_color[0] : out_combined_color[1];
+	max = max > out_combined_color[2] ? max : out_combined_color[2];
+
+	if (grayscale > 0.0f && grayscale <= 1.0f)
+	{ // reduce color per NTSC model on combined color
+		max = (0.299f * out_combined_color[0]) + (0.587f * out_combined_color[1]) * (0.144f * out_combined_color[2]);
+		VectorScale (out_combined_color, 1.0f - grayscale, out_combined_color);
+		for (i = 0; i < 3; i++)
+			out_combined_color[i] += max * grayscale;
+	}
+	if (max < 1.0f)
+		max = 1.0f;
+
+	// note that maxlight based scaling is per-sample based on
+	//  highest value of R, G, and B
+	// adjust for -maxlight option
+	newmax = max;
+	if ( max > maxlight ) {
+		newmax = maxlight;
+		// scale into 0.0..maxlight range
+		VectorScale (out_combined_color, newmax / max, out_combined_color);
+	}
+
+	// break processed combined color back into separate channels
+	for (i = 0; i < 3; i++)
+	{
+		out->direct[i] = direct_proportion[i] * out_combined_color[i];
+		out->directsun[i] = directsun_proportion[i] * out_combined_color[i];
+		out->indirect[i] = indirect_proportion[i] * out_combined_color[i];
+	}
+}
+
+
+/*
+=============
+FinalLightFace
+
+Add the indirect lighting on top of the direct lighting
+=============
+*/
+static void FinalLightFace (float *dest_bufs[4], int facenum)
 {
 	dface_t		*f;
 	int			i, j, /*k,*/ st;
-	vec3_t		lb;
 	patch_t		*patch;
 	triangulation_t	*trian = NULL;
 	facelight_t	*fl;
 	// float		minlight;
-	float		max;
-	float newmax;
-	byte		*dest;
+	float		*dest_combined, *dest_direct, *dest_directsun, *dest_indirect;
 	triangle_t	*last_valid;
 	int			pfacenum;
 	vec3_t		facemins, facemaxs;
@@ -1574,12 +1698,12 @@ void FinalLightFace (int facenum)
 
 	if (refine_setting == 0 && lightdatasize > MAX_MAP_LIGHTING)
 	{
-	    printf ("face %d of %d\n", facenum, numfaces);
+		printf ("face %d of %d\n", facenum, numfaces);
 		Error ("MAX_MAP_LIGHTING");
 	}
 	if (refine_setting > 0 && lightdatasize > MAX_OVERRIDE_LIGHTING)
 	{
-	    printf ("face %d of %d\n", facenum, numfaces);
+		printf ("face %d of %d\n", facenum, numfaces);
 		Error ("MAX_OVERRIDE_LIGHTING");
 	}
 	ThreadUnlock ();
@@ -1631,12 +1755,6 @@ void FinalLightFace (int facenum)
 			memset (trian->edgematrix[i], 0, trian->numpoints*sizeof(trian->edgematrix[0][0]) );
 		TriangulatePoints (trian);
 	}
-
-	//
-	// sample the triangulation
-	//
-
-
 	// _minlight allows models that have faces that would not be
 	// illuminated to receive a mottled light pattern instead of
 	// black
@@ -1644,7 +1762,10 @@ void FinalLightFace (int facenum)
 	// 2010-09 - probably not used, too crude
  	minlight = FloatForKey (face_entity[facenum], "_minlight") * 128;
 */
-	dest = &dlightdata_ptr[f->lightofs];
+	dest_combined = dest_bufs[0];
+	dest_direct = dest_bufs[1];
+	dest_directsun = dest_bufs[2];
+	dest_indirect = dest_bufs[3];
 
 	if (fl->numstyles > MAXLIGHTMAPS)
 	{
@@ -1666,75 +1787,24 @@ void FinalLightFace (int facenum)
 
 		for (j=0 ; j<fl->numsamples ; j++)
 		{
-			VectorCopy ( (fl->samples[st]+j*3), lb);
+			sample_t processed;
+			vec3_t combined_color, radiosity_add;
+
+			VectorClear (radiosity_add);
+
 			if (numbounce > 0 && st == 0)
-			{
-				vec3_t	add;
+				SampleTriangulation (fl->origins + j*3, trian, &last_valid, radiosity_add);
 
-				SampleTriangulation (fl->origins + j*3, trian, &last_valid, add);
-				VectorAdd (lb, add, lb);
-			}
+			PostProcessLightSample (fl->samples[st] + j, radiosity_add, &processed, combined_color);
 
-
-			/*
-			 * to allow experimenting, ambient and lightscale are not limited
-			 *  to reasonable ranges.
-			 */
-			if ( ambient >= -255.0f && ambient <= 255.0f )
-			{ // add fixed white ambient.
-				lb[0] += ambient;
-				lb[1] += ambient;
-				lb[2] += ambient;
-			}
-			if ( lightscale > 0.0f  )
-			{ // apply lightscale, scale down or up
-				lb[0] *= lightscale;
-				lb[1] *= lightscale;
-				lb[2] *= lightscale;
-			}
-			// negative values not allowed
-			lb[0] = (lb[0] < 0.0f) ? 0.0f : lb[0];
-			lb[1] = (lb[1] < 0.0f) ? 0.0f : lb[1];
-			lb[2] = (lb[2] < 0.0f) ? 0.0f : lb[2];
-
-
-/*			qprintf("{%f %f %f}:",lb[0],lb[1],lb[2]);*/
-
-			// determine max of R,G,B
-			max = lb[0] > lb[1] ? lb[0] : lb[1];
-			max = max > lb[2] ? max : lb[2];
-
-			if( grayscale > 0.0f && grayscale <= 1.0f  )
-            { // reduce color per NTSC model
-                max = (0.299f * lb[0]) + (0.587f * lb[1]) * (0.144f * lb[2]);
-                lb[0] = (lb[0] * (1.0f - grayscale)) + (max * grayscale);
-                lb[1] = (lb[1] * (1.0f - grayscale)) + (max * grayscale);
-                lb[2] = (lb[2] * (1.0f - grayscale)) + (max * grayscale);
-            }
-			if ( max < 1.0f )
-				max = 1.0f;
-
-			// note that maxlight based scaling is per-sample based on
-			//  highest value of R, G, and B
-			// adjust for -maxlight option
-			newmax = max;
-			if ( max > maxlight ) {
-				newmax = maxlight;
-				newmax /= max; // scaling factor 0.0..1.0
-				// scale into 0.0..maxlight range
-				lb[0] *= newmax;
-				lb[1] *= newmax;
-				lb[2] *= newmax;
-			}
-
-/*
-			qprintf("{%x %x %x}\n",
-					(byte)(lb[0]+0.5), (byte)(lb[1]+0.5), (byte)(lb[2]+0.5) );
-*/
 			// and output to 8:8:8 RGB
-			*dest++ = (byte)(lb[0] + 0.5);
-			*dest++ = (byte)(lb[1] + 0.5);
-			*dest++ = (byte)(lb[2] + 0.5);
+			for (i = 0; i < 3; i++)
+			{
+				*dest_combined++ = combined_color[i];
+				*dest_direct++ = processed.direct[i];
+				*dest_directsun++ = processed.directsun[i];
+				*dest_indirect++ = processed.indirect[i];
+			}
 		}
 	}
 
@@ -1742,99 +1812,171 @@ void FinalLightFace (int facenum)
 		FreeTriangulation (trian);
 }
 
-
 /*
 =============
 BlurFace
 
-Simple blur for each face
+Weighted blur for each face
 =============
 */
-void BlurFace (int facenum)
+static void BlurFace (float *src_bufs[4], float *dest_bufs[4], int facenum)
 {
 	dface_t		*f;
 	facelight_t	*fl;
-	byte		*src_buf, *dest_buf, *src, *dest;
+	const float	*src_buf, *src;
+	float		*dest_buf, *dest;
 	int			width, height, s, t;
 	int			blur_radius;
+	int			lightchannel;
 	
 	f = &dfaces[facenum];
 	fl = &facelight[facenum];
-	src_buf = &dlightdata_raw[f->lightofs];
-	dest_buf = &dlightdata[f->lightofs];
-	
-	width = lfacelookups[facenum].width;
-	height = lfacelookups[facenum].height;
-	
-	if (refine_amt == 16)
-		blur_radius = 2;
-	else
-		blur_radius = 1;
-	
-	for (t = 0; t < height; t++)
+
+	for (lightchannel = 0; lightchannel < 4; lightchannel++)
 	{
-		for (s = 0; s < width; s++)
+		src_buf = src_bufs[lightchannel];
+		dest_buf = dest_bufs[lightchannel];
+
+		width = lfacelookups[facenum].width;
+		height = lfacelookups[facenum].height;
+
+		if (refine_amt == 16)
+			blur_radius = 2;
+		else
+			blur_radius = 1;
+
+		for (t = 0; t < height; t++)
 		{
-			int i, j;
-			double red = 0, green = 0, blue = 0, nsamples, blur_avg;
-			
-			if (fl->blur_amt[t*width+s].num_lights == 0)
+			for (s = 0; s < width; s++)
 			{
-				// Special case-- this is for samples that have no direct 
-				// illumination, and are only lit up by radiosity bounces, if
-				// at all. Since radiosity isn't done at a high enough 
-				// resolution to actually cast shadows, it makes no sense to
-				// factor radiosity bouncing into the weighted average light
-				// distance, so we don't. Which means, for this sample, there
-				// *is* no weighted average light distance, so we don't do any
-				// blurring.
-				dest = &dest_buf[(t*width+s)*3];
-				src = &src_buf[(t*width+s)*3];
-				*dest++ = *src++;
-				*dest++ = *src++;
-				*dest++ = *src++;
-				continue;
-			}
-			
-			//blurring by distance needs a little work
-			blur_avg = sqrt(sqrt(fl->blur_amt[t*width+s].total_blur/(double)fl->blur_amt[t*width+s].num_lights));
-			nsamples = 2.0*(2.0-blur_avg);
-			
-			src = &src_buf[(t*width+s)*3];
-			red = nsamples*src[0];
-			green = nsamples*src[1];
-			blue = nsamples*src[2];
-			
-#define SAMPLE(s,t,weight) \
-			src = &src_buf[(t*width+s)*3];\
-			nsamples += weight;\
-			red += weight*src[0];\
-			green += weight*src[1];\
-			blue += weight*src[2];
-			
-#define SAMPLES(sd,td) \
-			if (	((sd < 0 && s+sd >= 0) || (sd > 0 && s+sd < width) || !sd) &&\
-					((td < 0 && t+td >= 0) || (td > 0 && t+td < height) || !td)) \
-			{\
-				SAMPLE((s+sd),(t+td),(blur_avg/sqrt(sd*sd+td*td)))\
-			}
-			
-			for (i = -blur_radius; i < blur_radius+1; i++)
-			{
-				for (j = -blur_radius; j < blur_radius+1; j++)
+				int i, j;
+				double red = 0, green = 0, blue = 0, nsamples, blur_avg;
+
+				if (fl->blur_amt[t*width+s][lightchannel].num_lights == 0)
 				{
-					if (i != 0 || j != 0)
+					// Special case-- this is for samples that have no direct 
+					// illumination, and are only lit up by radiosity bounces, if
+					// at all. Since radiosity isn't done at a high enough 
+					// resolution to actually cast shadows, it makes no sense to
+					// factor radiosity bouncing into the weighted average light
+					// distance, so we don't. Which means, for this sample, there
+					// *is* no weighted average light distance, so we don't do any
+					// blurring.
+					dest = &dest_buf[(t*width+s)*3];
+					src = &src_buf[(t*width+s)*3];
+					*dest++ = *src++;
+					*dest++ = *src++;
+					*dest++ = *src++;
+					continue;
+				}
+
+				//blurring by distance needs a little work
+				blur_avg = sqrt(sqrt(fl->blur_amt[t*width+s][lightchannel].total_blur/(double)fl->blur_amt[t*width+s][lightchannel].num_lights));
+				nsamples = 2.0*(2.0-blur_avg);
+
+				src = &src_buf[(t*width+s)*3];
+				red = nsamples*src[0];
+				green = nsamples*src[1];
+				blue = nsamples*src[2];
+		
+#define SAMPLE(s,t,weight) \
+				src = &src_buf[(t*width+s)*3];\
+				nsamples += weight;\
+				red += weight*src[0];\
+				green += weight*src[1];\
+				blue += weight*src[2];
+	
+#define SAMPLES(sd,td) \
+				if (	((sd < 0 && s+sd >= 0) || (sd > 0 && s+sd < width) || !sd) &&\
+						((td < 0 && t+td >= 0) || (td > 0 && t+td < height) || !td)) \
+				{\
+					SAMPLE((s+sd),(t+td),(blur_avg/sqrt(sd*sd+td*td)))\
+				}
+
+				for (i = -blur_radius; i < blur_radius+1; i++)
+				{
+					for (j = -blur_radius; j < blur_radius+1; j++)
 					{
-						SAMPLES(i,j);
+						if (i != 0 || j != 0)
+						{
+							SAMPLES(i,j);
+						}
 					}
 				}
+
+				dest = &dest_buf[(t*width+s)*3];
+				dest[0] = red / nsamples;
+				dest[1] = green / nsamples;
+				dest[2] = blue / nsamples;
 			}
-			
-			dest = &dest_buf[(t*width+s)*3];
-			dest[0] = (int)(red/nsamples);
-			dest[1] = (int)(green/nsamples);
-			dest[2] = (int)(blue/nsamples);
 		}
+	}
+}
+
+/*
+=============
+QuantizeFace
+
+Convert floating-point pixel data to integer and save into final map format
+=============
+*/
+static void QuantizeFace (float *src_bufs[4], int facenum)
+{
+	dface_t		*f;
+	facelight_t	*fl;
+	float		*src;
+	byte		*dest;
+	int			i, size, lightchannel;
+
+	f = &dfaces[facenum];
+	fl = &facelight[facenum];
+
+	for (lightchannel = 0; lightchannel < 4; lightchannel++)
+	{
+		src = src_bufs[lightchannel];
+		dest = &dlightdata[lightchannel][f->lightofs];
+
+		size = lfacelookups[facenum].width * lfacelookups[facenum].height * fl->numstyles * 3;
+		for (i = 0; i < size; i++)
+			*dest++ = (byte)((*src++) + 0.5f);
+	}
+}
+
+void FinalLightFace_Worker (int threadnum)
+{
+	int channelnum, facenum;
+	float *nonblurred_bufs[4], *blurred_bufs[4];
+
+	// allocate scratch memory space for this thread
+	for (channelnum = 0; channelnum < 4; channelnum++)
+	{
+		nonblurred_bufs[channelnum] = malloc (sizeof (float) * SINGLEMAP/4*3);
+		if (doing_blur)
+			blurred_bufs[channelnum] = malloc (sizeof (float) * SINGLEMAP/4*3);
+	}
+
+	while (1)
+	{
+		facenum = GetThreadWork ();
+		if (facenum == -1)
+			break;
+		FinalLightFace (nonblurred_bufs, facenum);
+		if (doing_blur)
+		{
+			BlurFace (nonblurred_bufs, blurred_bufs, facenum);
+			QuantizeFace (blurred_bufs, facenum);
+		}
+		else
+		{
+			QuantizeFace (nonblurred_bufs, facenum);
+		}
+	}
+
+	for (channelnum = 0; channelnum < 4; channelnum++)
+	{
+		free (nonblurred_bufs[channelnum]);
+		if (doing_blur)
+			free (blurred_bufs[channelnum]);
 	}
 }
 
@@ -1857,9 +1999,7 @@ may be worthwhile anyway.
 void DetectUniformColor (int facenum)
 {
 	byte		*sample_buf, *sample;
-	int			width, height, s, t, style, newsize, oldsize;;
-	
-	sample_buf = &dlightdata[dfaces[facenum].lightofs];
+	int			width, height, s, t, style, newsize, oldsize, lightchannel;
 	
 	width = lfacelookups[facenum].width;
 	height = lfacelookups[facenum].height;
@@ -1867,19 +2007,24 @@ void DetectUniformColor (int facenum)
 
 	if (width < 2 || height < 2)
 		return;
-
-	for (style = 0; style < MAXLIGHTMAPS && style < facelight[facenum].numstyles; style++)
+	
+	for (lightchannel = 0; lightchannel < 4; lightchannel++)
 	{
-		for (t = 0; t < height; t++)
+		sample_buf = &dlightdata[lightchannel][dfaces[facenum].lightofs];
+
+		for (style = 0; style < MAXLIGHTMAPS && style < facelight[facenum].numstyles; style++)
 		{
-			for (s = 0; s < width; s++)
+			for (t = 0; t < height; t++)
 			{
-				sample = &sample_buf[(t*width+s)*3];
-				if (sample[0] != sample_buf[0] || sample[1] != sample_buf[1] || sample[2] != sample_buf[2])
-					return;
+				for (s = 0; s < width; s++)
+				{
+					sample = &sample_buf[(t*width+s)*3];
+					if (sample[0] != sample_buf[0] || sample[1] != sample_buf[1] || sample[2] != sample_buf[2])
+						return;
+				}
 			}
+			sample_buf += oldsize;
 		}
-		sample_buf += oldsize;
 	}
 	
 	// just use a really big number
@@ -1892,10 +2037,13 @@ void DetectUniformColor (int facenum)
 	// make sure the samples are in the right place for other lightstyles
 	newsize = lfacelookups[facenum].width * lfacelookups[facenum].height * 3;
 	assert (newsize <= oldsize);
-	sample_buf = &dlightdata[dfaces[facenum].lightofs];
-	for (style = 1; style < MAXLIGHTMAPS && style < facelight[facenum].numstyles; style++)
+	for (lightchannel = 0; lightchannel < 4; lightchannel++)
 	{
-		memcpy (sample_buf + style * newsize, sample_buf + style * oldsize, newsize);
-		sample_buf += newsize;
+		sample_buf = &dlightdata[lightchannel][dfaces[facenum].lightofs];
+		for (style = 1; style < MAXLIGHTMAPS && style < facelight[facenum].numstyles; style++)
+		{
+			memcpy (sample_buf + style * newsize, sample_buf + style * oldsize, newsize);
+			sample_buf += newsize;
+		}
 	}
 }

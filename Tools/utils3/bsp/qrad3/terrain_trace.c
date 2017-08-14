@@ -781,7 +781,7 @@ static void TerrainPointLight_TryCluster (	int clusternum,
 											qboolean *sun_ambient_once )
 {
 	directlight_t	*l;
-	float			lightweight = 0.0;
+	sample_blur_t	blur; //TODO: do something with this!
 	sample_t		sample;
 	
 	for (l=directlights[clusternum]; l != NULL; l=l->next)
@@ -792,7 +792,7 @@ static void TerrainPointLight_TryCluster (	int clusternum,
 		if (l == suncache->light)
 			continue;
 		
-		LightContributionToPoint (l, surface_pos, 0, normal, &sample, 1.0, sun_main_once, sun_ambient_once, &lightweight, cache);
+		LightContributionToPoint (l, surface_pos, 0, normal, &sample, 1.0, sun_main_once, sun_ambient_once, blur, cache);
 		
 		// If this light is a sky/sun light and it illuminated this
 		// sample, cache it. We may "evict" a light that only does ambient
@@ -806,7 +806,7 @@ static void TerrainPointLight_TryCluster (	int clusternum,
 		
 		VectorAdd (out_color->direct, sample.direct, out_color->direct);
 		VectorAdd (out_color->directsun, sample.directsun, out_color->directsun);
-		VectorAdd (out_color->ambient, sample.ambient, out_color->ambient);
+		VectorAdd (out_color->indirect, sample.indirect, out_color->indirect);
 	}
 }
 
@@ -814,7 +814,7 @@ static void TerrainPointLight (vec3_t pos, sample_t *out_color, occlusioncache_t
 {
 	int				i;
 	qboolean		sun_main_once = false, sun_ambient_once = false;
-	float			lightweight = 0.0;
+	sample_blur_t	blur; // FIXME: do something with this!
 	vec3_t			normal;
 	vec3_t			start, end;
 	vec3_t			surface_pos;
@@ -835,7 +835,7 @@ static void TerrainPointLight (vec3_t pos, sample_t *out_color, occlusioncache_t
 	
 	if (suncache->light != NULL)
 	{
-		LightContributionToPoint (suncache->light, surface_pos, 0, normal, out_color, 1.0, &sun_main_once, &sun_ambient_once, &lightweight, cache);
+		LightContributionToPoint (suncache->light, surface_pos, 0, normal, out_color, 1.0, &sun_main_once, &sun_ambient_once, blur, cache);
 		if (!sun_ambient_once)
 			suncache->light = NULL; // The light did nothing
 	}
@@ -851,7 +851,7 @@ static void TerrainPointLight (vec3_t pos, sample_t *out_color, occlusioncache_t
 }
 
 static cterrainmodel_t *generate_mod;
-static byte *tex;
+static byte *tex[4];
 static void GenerateTerrainModelLightmapRow (int t)
 {
 	int s, i;
@@ -877,32 +877,47 @@ static void GenerateTerrainModelLightmapRow (int t)
 
 		for (i = 0; i < 3; i++)
 		{
-			int c = combined_color[i] + 0.5;
-			tex[3*(mod->lm_w*t+s)+i] = c;
+			tex[0][3*(mod->lm_w*t+s)+i] = (byte)(combined_color[i] + 0.5);
+			tex[1][3*(mod->lm_w*t+s)+i] = (byte)(processed.direct[i] + 0.5);
+			tex[2][3*(mod->lm_w*t+s)+i] = (byte)(processed.directsun[i] + 0.5);
+			tex[3][3*(mod->lm_w*t+s)+i] = (byte)(processed.indirect[i] + 0.5);
 		}
 	}
 }
 
-static void GenerateTerrainModelLightmap (cterrainmodel_t *mod)
+// FIXME: more code sharing with CRX engine would eliminate some of this
+static void GenerateTerrainModelLightmap (cterrainmodel_t *mod, const char *mapname, int modelnum)
 {
+    int i;
+    char template[1024], lightmap_base[1024], generated_name[1024];
+    const char *channel_names[4] = {"combined", "direct", "directsun", "indirect"};
+
 	if (mod->lightmap_path == NULL)
 		return;
 	
 	generate_mod = mod;
-	tex = Z_Malloc (mod->lm_h*mod->lm_w*3);
-	
-	printf ("Creating %s\n", mod->lightmap_path);
+	for (i = 0; i < 4; i++)
+		tex[i] = Z_Malloc (mod->lm_h*mod->lm_w*3);
 	
 	// parallelize across rows
 	RunThreadsOnIndividual (mod->lm_h, true, GenerateTerrainModelLightmapRow);
-	
-	SaveTGA (tex, mod->lm_w, mod->lm_h, mod->lightmap_path);
+
+	strcpy (lightmap_base, mod->lightmap_path);
+	StripExtension (lightmap_base);
+	sprintf	(template, "%s_%s_%d", lightmap_base, mapname, modelnum);
+	for (i = 0; i < 4; i++)
+	{
+		sprintf (generated_name, "%s_%s.tga", template, channel_names[i]);
+		printf ("Creating %s\n", generated_name);
+		assert (strlen (generated_name) - strlen (moddir) < 64 && "TGA name is too long! Consider setting the \"lightmap\" value in the .terrain file to something shorter!");
+		SaveTGA (tex[i], mod->lm_w, mod->lm_h, generated_name);
+	}
 }
 
-void GenerateAllTerrainLightmaps (void)
+void GenerateAllTerrainLightmaps (const char *mapname)
 {
 	int i;
 	
 	for (i = 0; i < numterrainmodels; i++)
-		GenerateTerrainModelLightmap (&terrain_models[i]);
+		GenerateTerrainModelLightmap (&terrain_models[i], mapname, i+1);
 }

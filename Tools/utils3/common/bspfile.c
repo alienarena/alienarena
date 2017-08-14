@@ -8,6 +8,7 @@ static char THIS_FILE[] = __FILE__;
 #include "mathlib.h"
 #include "bspfile.h"
 #include "scriplib.h"
+#include "parsecfg.h"
 
 #ifdef USE_ZLIB
 #include <zlib.h>
@@ -66,7 +67,7 @@ byte		dvisdata[MAX_MAP_VISIBILITY];
 dvis_t		*dvis = (dvis_t *)dvisdata;
 
 int			lightdatasize;
-byte		dlightdata[MAX_OVERRIDE_LIGHTING];
+byte		dlightdata[4][MAX_OVERRIDE_LIGHTING];
 
 int			entdatasize;
 char		dentdata[MAX_MAP_ENTSTRING];
@@ -445,7 +446,7 @@ void	LoadBSPFile (char *filename)
 	numareaportals = CopyLump (LUMP_AREAPORTALS, dareaportals, sizeof(dareaportal_t));
 
 	visdatasize = CopyLump (LUMP_VISIBILITY, dvisdata, 1);
-	lightdatasize = CopyLump (LUMP_LIGHTING, dlightdata, 1);
+	lightdatasize = CopyLump (LUMP_LIGHTING, dlightdata[0], 1);
 	entdatasize = CopyLump (LUMP_ENTITIES, dentdata, 1);
 
 	CopyLump (LUMP_POP, dpop, 1);
@@ -556,7 +557,7 @@ void	WriteBSPFile (char *filename)
 	AddLump (LUMP_AREAS, dareas, numareas*sizeof(darea_t));
 	AddLump (LUMP_AREAPORTALS, dareaportals, numareaportals*sizeof(dareaportal_t));
 
-	AddLump (LUMP_LIGHTING, dlightdata, lightdatasize);
+	AddLump (LUMP_LIGHTING, dlightdata[0], lightdatasize);
 	AddLump (LUMP_VISIBILITY, dvisdata, visdatasize);
 	AddLump (LUMP_ENTITIES, dentdata, entdatasize);
 	AddLump (LUMP_POP, dpop, sizeof(dpop));
@@ -837,7 +838,7 @@ byte lightmap_data_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
 #define SIZEOF_LIGHTMAP_COMPRESSED (SIZEOF_LIGHTMAP_UNCOMPRESSED+18)
 byte lightmap_output_buf[SIZEOF_LIGHTMAP_COMPRESSED];
 
-void WriteToLightmapBuf (void *data, int len, size_t *ofs)
+static void WriteToLightmapBuf (const void *data, int len, size_t *ofs)
 {
 	if (*ofs+len >= SIZEOF_LIGHTMAP_UNCOMPRESSED)
 		Error ("SIZEOF_LIGHTMAP_UNCOMPRESSED\n");
@@ -845,7 +846,7 @@ void WriteToLightmapBuf (void *data, int len, size_t *ofs)
 	*ofs+=len;
 }
 
-void AddLumpToLightmapBuf (int lumpnum, void *data, int len, size_t *ofs)
+static void AddLumpToLightmapBuf (int lumpnum, const void *data, int len, size_t *ofs)
 {
 	lump_t *lump;
 
@@ -858,11 +859,14 @@ void AddLumpToLightmapBuf (int lumpnum, void *data, int len, size_t *ofs)
 
 void	WriteLTMPFile (char *filename)
 {
+    const char *configuration_string;
 	size_t ofs = 0;
 	size_t start = 0;
 	int compressed_size;
 	lheader = (lightmapheader_t *)(&lightmap_outheader);
 	memset (lheader, 0, sizeof(lightmapheader_t));
+
+	configuration_string = GetConfigurationString ();
 
 	SwapBSPFile (true);
 
@@ -873,7 +877,11 @@ void	WriteLTMPFile (char *filename)
 	WriteToLightmapBuf (lheader, sizeof(lightmapheader_t), &ofs);	// overwritten later
 
 	AddLumpToLightmapBuf (LTMP_LUMP_FACELOOKUP, lfacelookups, numfaces*sizeof(ltmp_facelookup_t), &ofs);
-	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING, dlightdata, lightdatasize, &ofs);
+	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING, dlightdata[0], lightdatasize, &ofs);
+	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING_DIRECT, dlightdata[1], lightdatasize, &ofs);
+	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING_DIRECTSUN, dlightdata[2], lightdatasize, &ofs);
+	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING_INDIRECT, dlightdata[3], lightdatasize, &ofs);
+	AddLumpToLightmapBuf (LTMP_LUMP_QRAD_OPTIONS, configuration_string, strlen (configuration_string) + 1, &ofs);
 
 	WriteToLightmapBuf (lheader, sizeof(lightmapheader_t), &start);
 #ifdef USE_ZLIB
