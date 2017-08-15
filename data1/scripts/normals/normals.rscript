@@ -160,6 +160,15 @@ players/enforcer/victor
 		glow
 	}	
 }
+players/enforcer/bozo
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+		map2 players/enforcer/bozofx.tga
+		glow
+	}	
+}
 players/martiancyborg/blue
 {
 	{
@@ -215,6 +224,15 @@ players/lauren/red
 	}	
 }
 players/lauren/default
+{
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+		map2 players/lauren/defaultlaurenfx.tga
+		glow
+	}	
+}
+players/lauren/patriot
 {
 	{
 		map players/lauren/default_normal.tga
@@ -347,6 +365,8 @@ players/rustbot/classic
 		normalmap
 		map2 players/rustbot/classicfx.tga
 		glow
+		map3 gfx/chrome2.tga
+		cube
 	}	
 }
 models/weapons/v_chain/skin
