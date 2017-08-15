@@ -304,6 +304,15 @@ players/commander/antonio
 		glow
 	}	
 }
+players/commander/infected
+{
+	{
+		map players/commander/infected_normal.tga
+		normalmap
+		map2 players/commander/infectedfx.tga
+		glow
+	}	
+}
 players/rustbot/red
 {
 	{
