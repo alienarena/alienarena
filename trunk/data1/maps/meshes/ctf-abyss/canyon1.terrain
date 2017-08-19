@@ -1,6 +1,6 @@
 heightmap textures/ctf-abyss/canyon1.tga;
 texture canyon1_texture;
-lightmap textures/ctf-abyss/canyon1_lightmaptex.tga;
+lightmap textures/ctf-abyss/c1_lm.tga;
 vegetation textures/ctf-abyss/canyon1_vegetation.tga;
 mins -2560, -2560, 1;
 maxs 2560, 2560, 700;
