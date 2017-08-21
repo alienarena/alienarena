@@ -23,7 +23,7 @@ WITHOUT_PTHREAD ?= -DUSE_SETRLIMIT
 # THREADING_OPTION = WITH_PTHREAD or WITHOUT_PTHREAD
 THREADING_OPTION ?= $(WITH_PTHREAD)
 BASE_CFLAGS ?= -Wall $(THREADING_OPTION) -DUSE_ZLIB
-RELEASE_CFLAGS ?= $(BASE_CFLAGS) -O3 
+RELEASE_CFLAGS ?= $(BASE_CFLAGS) -O3 -g -ggdb
 DEBUG_CFLAGS ?= $(BASE_CFLAGS) -O0 -g -ggdb
 
 # Link Options
@@ -142,15 +142,15 @@ qvis3_dep = $(addprefix $(depdir)/, $(qvis3_srcs:.c=.d) )
 # files for qrad3
 #
 qrad3_srcs =	\
+	qrad3.c		\
+	lightmap.c	\
+	patches.c 	\
+	trace.c		\
 	binheap.c	\
 	image.c		\
 	libgarland.c\
-	lightmap.c	\
-	patches.c	\
-	qrad3.c		\
 	terrain.c	\
-	terrain_trace.c\
-	trace.c
+	terrain_trace.c
 
 qrad3_cmnobjs = \
 	bspfile.o	\
@@ -232,7 +232,7 @@ install:
 	cp $(builddir)/qbsp3   $(INSTALL_DIR)
 	cp $(builddir)/qvis3   $(INSTALL_DIR)
 	cp $(builddir)/qrad3   $(INSTALL_DIR)
-
+	
 ##	cp $(builddir)/bspinfo3 $(INSTALL_DIR)
 
 dependents: $(cmn_dep) $(qbsp3_dep) $(qvis3_dep) $(qrad3_dep)
