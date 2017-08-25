@@ -636,7 +636,7 @@ static void SM_RecursiveWorldNode2 (const entity_t *ent, mnode_t *node, int clip
 		{	// no skies here
 			continue;
 		}
-		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaMasked (surf))
+		else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
 		{	// no trans surfaces
 			continue;
 		}
@@ -768,10 +768,10 @@ static void SM_TeardownGLState (void)
 extern cvar_t *cl_simpleitems;
 
 // returns false if the entity can cast a shadow
-static qboolean SM_Cull (const entity_t *ent)
+static qboolean SM_Cull (const entity_t *ent, qboolean receive_shadows)
 {
 	return
-		(ent->flags & RF_NOSHADOWS) || (ent->flags & RF_TRANSLUCENT) ||
+		((ent->flags & RF_NOSHADOWS) && !receive_shadows) || (ent->flags & RF_TRANSLUCENT) ||
 		!ent->model || ent->model->type <= mod_brush ||
 		//TODO: simple items casting shadows?
 		(cl_simpleitems->integer && ent->model->simple_texnum != 0) || 
@@ -783,7 +783,7 @@ static void R_DrawDynamicCasterEntity (entity_t *ent, vec3_t lightOrigin)
 	vec3_t	dist;
 	model_t *mod;
 	
-	if (SM_Cull (ent))
+	if (SM_Cull (ent, false))
 		return;
 
 	//distance from light, if too far, don't render(to do - check against brightness for dist!)
@@ -1006,7 +1006,7 @@ static void R_DrawSunShadows (void)
 		vec3_t start;
 		entity_t *ent = &r_newrefdef.entities[i];
 
-		if (SM_Cull (ent))
+		if (SM_Cull (ent, false))
 			continue;
 
 		if (ent->model->type != mod_iqm && ent->model->type != mod_md2)
@@ -1105,7 +1105,7 @@ void R_GenerateEntityShadow (entity_t *ent, const vec3_t statLightPosition)
 		if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || ent->flags & RF_MENUMODEL)
 			return;
 		
-		if (SM_Cull (ent))
+		if (SM_Cull (ent, true))
 			return;
 		
 		// don't bother casting the shadow unless there are non-sun lights!
@@ -1186,7 +1186,7 @@ void R_GenerateEntityShadow (entity_t *ent, const vec3_t statLightPosition)
 				if (ent2 == ent)
 					continue;
 				
-				if (SM_Cull (ent2))
+				if (SM_Cull (ent2, false))
 					continue;
 
 				if (ent2->model->type != mod_iqm && ent2->model->type != mod_md2)
