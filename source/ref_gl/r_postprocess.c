@@ -389,44 +389,68 @@ extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float d
 void PART_GetSunFlareBounds (float offset, float radius, vec2_t out_mins, vec2_t out_maxs);
 extern void R_DrawVegetationCasters( qboolean forShadows );
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+extern void SM_RecursiveWorldNode (mnode_t *node, int clipflags);
+void R_DrawShadowMapWorld (qboolean forEnt, vec3_t origin)
+{
+	int i;
+
+	if (!r_drawworld->integer)
+		return;
+
+	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
+		return;
+	
+	{
+		qglEnableClientState (GL_VERTEX_ARRAY);
+		
+		SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
+		
+		// Flush the VBO accumulator now because each brush model will mess
+		// with the modelview matrix when rendering its own surfaces.
+		BSP_FlushVBOAccum ();
+
+		//draw brush models(not for ent shadow, for now)
+		for (i=0 ; i<r_newrefdef.num_entities ; i++)
+		{
+			currententity = &r_newrefdef.entities[i];
+			if (currententity->flags & RF_TRANSLUCENT)
+				continue;	// transluscent
+
+			currentmodel = currententity->model;
+
+			if (!currentmodel)
+			{
+				continue;
+			}
+			if( currentmodel->type == mod_brush)
+				BSP_DrawTexturelessBrushModel (currententity);
+			else
+				continue;
+		}
+		
+		R_KillVArrays();
+	}
+}
+
 void R_GLSLGodRays(void)
 {
 	float size, screenaspect;
 	vec2_t fxScreenPos;
-	vec2_t sun_mins, sun_maxs;
-	GLint isun_mins[2], isun_maxs[2], isun_size[2];
+	vec3_t origin = {0, 0, 0};
 
 	if(!r_godrays->integer || !r_drawsun->integer)
 		return;
 
 	 if (!draw_sun || sun_alpha <= 0)
 		return;
-	
-	size = r_newrefdef.width * sun_size/4.0;
 
 	//switch to fbo
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO); //need color buffer
 
+	qglDisable( GL_DEPTH_TEST );
 	qglDepthMask (1);
 
 	qglClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-	
-	// blit over the occluding BSP/terrain depth data from the framebuffer.
-	PART_GetSunFlareBounds (0, size, sun_mins, sun_maxs);
-	isun_mins[0] = floor (sun_mins[0]);
-	isun_maxs[0] = ceil (sun_maxs[0]);
-	// pixel coordinates have a flipped y axis from our ortho projection
-	isun_mins[1] = r_newrefdef.height - ceil (sun_maxs[1]);
-	isun_maxs[1] = r_newrefdef.height - floor (sun_mins[1]);
-	// ...but viewport is double-backwards because it starts at the lower-left
-	isun_size[0] = ceil (sun_maxs[0]) - isun_mins[0];
-	isun_size[1] = ceil (sun_maxs[1]) - isun_mins[1];
-
-	qglBindFramebufferEXT (GL_READ_FRAMEBUFFER_EXT, 0);
-	qglBlitFramebufferEXT (isun_mins[0], isun_mins[1], isun_maxs[0], isun_maxs[1],
-	                       isun_mins[0], isun_mins[1], isun_maxs[0], isun_maxs[1],
-	                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	qglBindFramebufferEXT (GL_READ_FRAMEBUFFER_EXT, godray_FBO);
 
 	//render sun object center
 	qglMatrixMode(GL_PROJECTION);
@@ -437,7 +461,7 @@ void R_GLSLGodRays(void)
     qglPushMatrix();
     qglLoadIdentity();
 
-	// don't ask me why we need to use the nearVal to make it far, I don't know
+	size = r_newrefdef.width * sun_size/4.0;
     PART_RenderSunFlare(sun2_object, 0, size, -99999, 1.0, 1.0, 1.0, 0.5);
     
 	qglPopMatrix();
@@ -445,7 +469,7 @@ void R_GLSLGodRays(void)
     qglPopMatrix();
 	qglLoadIdentity();
 
-	//render vegetation occuders simple, textureless
+	//render occuders simple, textureless
 	//need to set up proper matrix for this view!
 	screenaspect = (float)r_newrefdef.width/(float)r_newrefdef.height;    
 
@@ -469,16 +493,9 @@ void R_GLSLGodRays(void)
 	if (gl_cull->integer)
 		qglEnable(GL_CULL_FACE);
 
-	if (map_fog)
-		qglDisable (GL_FOG);
-	qglColor4f (0,0,0,1);
-	qglDisable( GL_DEPTH_TEST );
-	// crop out any vegetation casters that won't directly occlude the sun
-	qglViewport (isun_mins[0], isun_mins[1], isun_size[0], isun_size[1]);
+	R_DrawShadowMapWorld(false, origin); //could tweak this to only draw surfaces that are in the sun?
 	R_DrawVegetationCasters(false);
-	if (map_fog)
-		qglEnable (GL_FOG);
-
+	
 	qglMatrixMode(GL_PROJECTION);
     qglPushMatrix();
     qglLoadIdentity();
@@ -499,18 +516,17 @@ void R_GLSLGodRays(void)
 
 	R_TransformVectorToScreen(&r_newrefdef, sun_origin, fxScreenPos);
 
-	fxScreenPos[0] /= vid.width; 
-	fxScreenPos[1] /= vid.height;
+	fxScreenPos[0] /= viddef.width; 
+	fxScreenPos[1] /= viddef.height;
+
 	glUniform2fARB( g_location_lightPositionOnScreen, fxScreenPos[0], fxScreenPos[1]);
 
 	glUniform1fARB( g_location_godrayScreenAspect, screenaspect);
-    glUniform1fARB( g_location_sunRadius, r_sunIntens*sun_size*r_godray_intensity->value);
+    glUniform1fARB( g_location_sunRadius, sun_size*r_godray_intensity->value);
     
 	//render quad 
 	GLSTATE_ENABLE_BLEND
 	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE);
-
-	qglViewport(0, 0, vid.width, vid.height);
 	
 	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
 	R_DrawVarrays (GL_QUADS, 0, 4);
@@ -525,9 +541,6 @@ void R_GLSLGodRays(void)
     qglMatrixMode(GL_PROJECTION);
     qglPopMatrix();
     qglMatrixMode(GL_MODELVIEW);	
-
-	// back to previous screen coordinates
-	R_SetupViewport ();	
 }
 
 void R_GLSLPostProcess(void)

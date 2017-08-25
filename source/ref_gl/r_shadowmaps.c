@@ -357,7 +357,7 @@ SM_RecursiveWorldNode - this variant of the classic routine renders both sides f
 ================
 */
 
-static void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
+void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
 	int			c;
 	msurface_t	*surf, **mark;
