@@ -636,8 +636,8 @@ static void SM_RecursiveWorldNode2 (const entity_t *ent, mnode_t *node, int clip
 		{	// no skies here
 			continue;
 		}
-		else if (SurfaceIsTranslucent(surf) && !SurfaceIsAlphaMasked (surf))
-		{	// no trans surfaces
+		else if (SurfaceIsTranslucent(surf) || SurfaceIsAlphaMasked (surf))
+		{	// no trans surfaces - creates major artifacts because of draw order!
 			continue;
 		}
 		else

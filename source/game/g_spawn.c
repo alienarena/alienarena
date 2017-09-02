@@ -168,11 +168,6 @@ void ED_CallSpawn (edict_t *ent)
 		if (!item->classname)
 			continue;
 
-		//-JD - removing old weapons, and in the case of the vaporizer, duplicates.
-		if(!Q_strcasecmp(ent->classname, "weapon_grenadelauncher"))
-			ent->classname = "weapon_rocketlauncher"; //hack to remove old weapons
-		if(!Q_strcasecmp(ent->classname, "weapon_machinegun"))
-			ent->classname = "weapon_vaporizer"; //hack to remove old weapons
 		if(!Q_strcasecmp(ent->classname, "weapon_minderaser"))
 			continue; //never place one of these traditionally
 
