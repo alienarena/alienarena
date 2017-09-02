@@ -383,21 +383,17 @@ void CL_PrepRefresh ( void )
 			//check for types
 			if(!strcmp(name, "models/weapons/g_rocket/tris.iqm"))
 				rocketlauncher = 1;
-			if(!strcmp(name, "models/weapons/g_glaunch/tris.iqm"))
-				rocketlauncher = 1;
-			if(!strcmp(name, "models/weapons/g_shotg2/tris.iqm"))
+			if(!strcmp(name, "models/weapons/g_chaingun/tris.iqm"))
 				chaingun = 1;
-			if(!strcmp(name, "models/weapons/g_shotg/tris.iqm"))
+			if(!strcmp(name, "models/weapons/g_smartgun/tris.iqm"))
 				smartgun = 1;
-			if(!strcmp(name, "models/weapons/g_rail/tris.iqm"))
+			if(!strcmp(name, "models/weapons/g_beamgun/tris.iqm"))
 				beamgun = 1;
-			if(!strcmp(name, "models/weapons/g_hyperb/tris.iqm"))
+			if(!strcmp(name, "models/weapons/g_disruptor/tris.iqm"))
 				disruptor = 1;
-			if(!strcmp(name, "models/weapons/g_chain/tris.iqm"))
+			if(!strcmp(name, "models/weapons/g_flamethrower/tris.iqm"))
 				flamethrower = 1;
-			if(!strcmp(name, "models/weapons/g_machn/tris.iqm"))
-				vaporizer = 1;
-			if(!strcmp(name, "models/weapons/g_bfg/tris.iqm"))
+			if(!strcmp(name, "models/weapons/g_vaporizer/tris.iqm"))
 				vaporizer = 1;
 			if(!strcmp(name, "models/items/quaddama/tris.iqm"))
 				quad = 1;

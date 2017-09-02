@@ -735,40 +735,40 @@ void SCR_DrawLoading (void)
 			}
 		}
 		if(chaingun) {
-			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_sshotgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_chaingun");
 			if(!chaingun_drawn) {
 				chaingun_drawn = 40*hudscale;
 			}
 		}
 		if(smartgun) {
-			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_shotgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_smartgun");
 			if(!smartgun_drawn) {
 				smartgun_drawn = 40*hudscale;
 			}
 		}
 		if(beamgun) {
-			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_railgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale/7.1, "w_beamgun");
 			if(!beamgun_drawn) {
 				beamgun_drawn = 40*hudscale;
 			}
 		}
 		if(flamethrower) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn
-				, (int)(viddef.height/3.2), hudscale/7.1, "w_chaingun");
+				, (int)(viddef.height/3.2), hudscale/7.1, "w_flamethrower");
 			if(!flamethrower_drawn) {
 				flamethrower_drawn = 40*hudscale;
 			}
 		}
 		if(disruptor) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn
-				, (int)(viddef.height/3.2), hudscale/7.1, "w_hyperblaster");
+				, (int)(viddef.height/3.2), hudscale/7.1, "w_disruptor");
 			if(!disruptor_drawn) {
 				disruptor_drawn = 40*hudscale;
 			}
 		}
 		if(vaporizer) {
 			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn
-				, (int)(viddef.height/3.2), hudscale/7.1, "w_bfg");
+				, (int)(viddef.height/3.2), hudscale/7.1, "w_vaporizer");
 			if(!vaporizer_drawn) {
 				vaporizer_drawn = 40*hudscale;
 			}

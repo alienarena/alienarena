@@ -1331,7 +1331,7 @@ char *bindnames[][2] =
 
 {"use Blaster",			"switch to Blaster"},
 {"use Alien Disruptor",	"switch to Alien Disruptor"},
-{"use Pulse Rifle",		"switch to Chaingun"},
+{"use Chaingun",		"switch to Chaingun"},
 {"use Flame Thrower",	"switch to Flame Thrower"},
 {"use Rocket Launcher",	"switch to Rocket Launcher"},
 {"use Alien Smartgun",	"switch to Alien Smartgun"},
@@ -4813,7 +4813,7 @@ static char *weapon_icon_names[][2] =
 	{"Blaster",			"blaster"},
 	{"Violator",		"violator"},
 	{"Alien Smartgun",	"smartgun"},
-	{"Pulse Rifle",		"chaingun"},
+	{"Chaingun",		"chaingun"},
 	{"Flame Thrower",	"flamethrower"},
 	{"Rocket Launcher",	"rocketlauncher"},
 	{"Alien Disruptor",	"disruptor"},
@@ -6502,7 +6502,7 @@ static const char *tactical_skin_names[num_tactical_teams][num_tactical_classes]
 	},
 	//HUMAN CLASSES
 	{
-		{"Lauren",		"lauren"},
+		{"Femborg",		"femborg"},
 		{"Enforcer",	"enforcer"},
 		{"Commander",	"commander"}
 	}

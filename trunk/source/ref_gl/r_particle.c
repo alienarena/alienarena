@@ -1348,11 +1348,11 @@ void R_SI_InitTextures( void )
 	GL_Bind(s_item ## itemnum ->texnum); \
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
 
-	R_SI_InitTexture (0,  w_sshotgun);
-	R_SI_InitTexture (1,  w_railgun);
-	R_SI_InitTexture (2,  w_chaingun);
+	R_SI_InitTexture (0,  w_chaingun);
+	R_SI_InitTexture (1,  w_beamgun);
+	R_SI_InitTexture (2,  w_flamethrower);
 	R_SI_InitTexture (3,  w_rlauncher);
-	R_SI_InitTexture (4,  w_shotgun);
+	R_SI_InitTexture (4,  w_smartgun);
 	R_SI_InitTexture (5,  p_haste);
 	R_SI_InitTexture (6,  p_invulnerability);
 	R_SI_InitTexture (7,  p_quad);
@@ -1366,7 +1366,7 @@ void R_SI_InitTextures( void )
 	R_SI_InitTexture (17, i_beamgun);
 	R_SI_InitTexture (18, i_vaporizer);
 	R_SI_InitTexture (19, i_disruptor);
-	R_SI_InitTexture (20, i_flamegun);
+	R_SI_InitTexture (20, i_flamethrower);
 	R_SI_InitTexture (21, i_smartgun);
 	R_SI_InitTexture (22, i_chaingun);
 	R_SI_InitTexture (23, i_rocketlauncher);
@@ -1551,27 +1551,27 @@ void R_SetSimpleTexnum (model_t *loadmodel, const char *pathname)
 		loadmodel->simple_color = simplecolor_purple;
 	}
 	//weapons
-	else if (!Q_strcasecmp (shortname, "models/weapons/g_rail/tris"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_beamgun/tris"))
 	{
 		loadmodel->simple_texnum = s_item17->texnum;
 	}
-	else if (!Q_strcasecmp (shortname, "models/weapons/g_bfg/tris"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_vaporizer/tris"))
 	{
 		loadmodel->simple_texnum = s_item18->texnum;
 	}
-	else if (!Q_strcasecmp (shortname, "models/weapons/g_hyperb/tris"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_disruptor/tris"))
 	{
 		loadmodel->simple_texnum = s_item19->texnum;
 	}
-	else if (!Q_strcasecmp (shortname, "models/weapons/g_chain/tris"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_flamethrower/tris"))
 	{
 		loadmodel->simple_texnum = s_item20->texnum;
 	}
-	else if (!Q_strcasecmp (shortname, "models/weapons/g_shotg/tris"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_smartgun/tris"))
 	{
 		loadmodel->simple_texnum = s_item21->texnum;
 	}
-	else if (!Q_strcasecmp (shortname, "models/weapons/g_shotg2/tris"))
+	else if (!Q_strcasecmp (shortname, "models/weapons/g_chaingun/tris"))
 	{
 		loadmodel->simple_texnum = s_item22->texnum;
 	}

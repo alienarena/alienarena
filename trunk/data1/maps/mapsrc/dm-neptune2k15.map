@@ -13684,7 +13684,7 @@
 }
 // entity 56
 {
-"classname" "weapon_chaingun"
+"classname" "weapon_flamethrower"
 "origin" "200 192 -32"
 "angle" "0"
 }
@@ -13853,7 +13853,7 @@
 }
 // entity 81
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "angle" "0"
 "origin" "704 -40 -96"
 }
@@ -14183,7 +14183,7 @@
 }
 // entity 128
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "-512 -128 -384"
 "angle" "0"
 }
@@ -14214,7 +14214,7 @@
 }
 // entity 133
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "angle" "0"
 "origin" "-872 -864 -96"
 }

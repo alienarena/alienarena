@@ -887,7 +887,7 @@ static const float ktgt_acc = 0.35;
 /*
 1 : 1.0 //blaster accuracy
 2 : 1.0 //alien disruptor accuracy
-3 : 1.0 //pulse rifle accuracy
+3 : 1.0 //chaingun accuracy
 4 : 1.0 //flame thrower accuracy
 5 : 1.0 //not used
 6 : 1.0 //rocket launcher accuracy
@@ -904,14 +904,14 @@ struct
 {
 	{weapon_blaster,			1},
 	{weapon_alienblaster,		1}, // same accuracy as blaster
-	{weapon_hyperblaster,		2}, // disruptor
-	{weapon_supershotgun,		3}, // chaingun
-	{weapon_chaingun,			4}, // flamethrower
+	{weapon_disruptor,			2}, // disruptor
+	{weapon_chaingun,			3}, // chaingun
+	{weapon_flamethrower,		4}, // flamethrower
 	{weapon_rocketlauncher,		6},
 	{weapon_minderaser,			6}, // minderaser has same acc as RL
-	{weapon_shotgun,			7}, // smartgun
-	{weapon_railgun,			8}, // beamgun
-	{weapon_bfg,				9}, // vaporizer
+	{weapon_smartgun,			7}, // smartgun
+	{weapon_beamgun,			8}, // beamgun
+	{weapon_vaporizer,			9}, // vaporizer
 };
 
 static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
@@ -1130,7 +1130,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 			&& self->skill >= 2
 			&& (self->client->pers.weapon == FindItem( "Blaster" )
 					|| self->client->pers.weapon == FindItem( "Alien Blaster" )
-					|| self->client->pers.weapon == FindItem( "Pulse Rifle" )
+					|| self->client->pers.weapon == FindItem( "Chaingun" )
 					|| self->client->pers.weapon == FindItem( "Disruptor" )))
 	{
 		//strafe no matter what
@@ -1309,7 +1309,7 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK2;
 			}
 
-			if (self->client->pers.weapon == FindItem("Pulse Rifle")) 
+			if (self->client->pers.weapon == FindItem("Chaingun")) 
 			{
 				if(range < 200)
 					ucmd->buttons = BUTTON_ATTACK2;

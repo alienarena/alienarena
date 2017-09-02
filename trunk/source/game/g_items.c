@@ -1146,7 +1146,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 		}
 		if ( dmflags->integer & DF_INFINITE_AMMO )
 		{
-			if ( (item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_bfg") == 0) )
+			if ( (item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_vaporizer") == 0) )
 			{
 				G_FreeEdict (ent);
 				return;
@@ -1154,14 +1154,13 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 		}
 		if(excessive->integer || instagib->integer || rocket_arena->integer || insta_rockets->integer )
 		{
-			if (item->flags == IT_AMMO || (strcmp(ent->classname, "weapon_bfg") == 0) ||
-				(strcmp(ent->classname, "weapon_hyperblaster") == 0) ||
-				(strcmp(ent->classname, "weapon_railgun") == 0) ||
+			if (item->flags == IT_AMMO || (strcmp(ent->classname, "weapon_vaporizer") == 0) ||
+				(strcmp(ent->classname, "weapon_disruptor") == 0) ||
+				(strcmp(ent->classname, "weapon_beamgun") == 0) ||
 				(strcmp(ent->classname, "weapon_rocketlauncher") == 0) ||
-				(strcmp(ent->classname, "weapon_grenadelauncher") == 0) ||
 				(strcmp(ent->classname, "weapon_chaingun") == 0) ||
-				(strcmp(ent->classname, "weapon_supershotgun") == 0) ||
-				(strcmp(ent->classname, "weapon_shotgun") == 0))
+				(strcmp(ent->classname, "weapon_flamethrower") == 0) ||
+				(strcmp(ent->classname, "weapon_smartgun") == 0))
 			{
 				G_FreeEdict (ent);
 				return;
@@ -1390,36 +1389,36 @@ always owned, never in the world
 /* precache */ "weapons/viofire1.wav weapons/viofire2.wav weapons/violatorreload.wav"
 	},
 
-/*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+/*QUAKED weapon_smartgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		GITEM_INIT_IDENTIFY (weapon_shotgun, IT_WEAPON),
+		GITEM_INIT_IDENTIFY (weapon_smartgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Smartgun),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg/tris.iqm", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_smartgun/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_hud_smartgun", "Alien Smartgun", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Alien Smart Grenade", "models/weapons/v_shotg/tris.iqm", "w_shotgun.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Alien Smart Grenade", "models/weapons/v_smartgun/tris.iqm", "w_smartgun.iqm"),
 /* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
-	},
-
-/*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-	{
-		GITEM_INIT_IDENTIFY (weapon_supershotgun, IT_WEAPON),
-		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Chain),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_shotg2/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("i_hud_chaingun", "Pulse Rifle", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_shotg2/tris.iqm", "w_sshotgun.iqm"),
-/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/shotgf1b.wav weapons/chaingunreload.wav"
 	},
 
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
 		GITEM_INIT_IDENTIFY (weapon_chaingun, IT_WEAPON),
+		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Chain),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_chaingun/tris.iqm", EF_ROTATE),
+		GITEM_INIT_CLIENTSIDE ("i_hud_chaingun", "Chaingun", "misc/w_pkup.wav"), 
+		GITEM_INIT_WEAP (1, 1, "Bullets", "models/weapons/v_chaingun/tris.iqm", "w_chaingun.iqm"),
+/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/shotgf1b.wav weapons/chaingunreload.wav"
+	},
+
+/*QUAKED weapon_flamethrower (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		GITEM_INIT_IDENTIFY (weapon_flamethrower, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Flame),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_chain/tris.iqm", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_flamethrower/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_hud_flamethrower", "Flame Thrower", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_chain/tris.iqm", "w_chaingun.iqm"),
+		GITEM_INIT_WEAP (1, 10, "Napalm", "models/weapons/v_flamethrower/tris.iqm", "w_flamethrower.iqm"),
 /* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav weapons/flamereload.wav"
 	},
 
@@ -1434,36 +1433,36 @@ always owned, never in the world
 /* precache */ "models/objects/rocket/tris.iqm weapons/rockfly.wav weapons/rocklf1a.wav weapons/rlauncherreload.wav models/objects/debris2/tris.iqm"
 	},
 
-/*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
+/*QUAKED weapon_disruptor (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		GITEM_INIT_IDENTIFY (weapon_hyperblaster, IT_WEAPON),
+		GITEM_INIT_IDENTIFY (weapon_disruptor, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Disruptor),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_hyperb/tris.iqm", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_disruptor/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_hud_disruptor", "Alien Disruptor", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_hyperb/tris.iqm", "w_hyperblaster.iqm"),
+		GITEM_INIT_WEAP (5, 10, "Cells", "models/weapons/v_disruptor/tris.iqm", "w_disruptor.iqm"),
 /* precache */ "weapons/railgf1a.wav weapons/disruptorreload.wav"
 	},
 
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		GITEM_INIT_IDENTIFY (weapon_railgun, IT_WEAPON),
+		GITEM_INIT_IDENTIFY (weapon_beamgun, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Beamgun),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_rail/tris.iqm", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_beamgun/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_hud_beamgun", "Disruptor", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_rail/tris.iqm", "w_railgun.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Cells", "models/weapons/v_beamgun/tris.iqm", "w_beamgun.iqm"),
 /* precache */ "weapons/hyprbf1a.wav weapons/beamgunreload.wav"
 	},
 
-/*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16)
+/*QUAKED weapon_vaporizer (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		GITEM_INIT_IDENTIFY (weapon_bfg, IT_WEAPON),
+		GITEM_INIT_IDENTIFY (weapon_vaporizer, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
-		GITEM_INIT_WORLDMODEL ("models/weapons/g_bfg/tris.iqm", EF_ROTATE),
+		GITEM_INIT_WORLDMODEL ("models/weapons/g_vaporizer/tris.iqm", EF_ROTATE),
 		GITEM_INIT_CLIENTSIDE ("i_hud_vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_bfg/tris.iqm", "w_bfg.iqm"),
+		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_vaporizer/tris.iqm", "w_vaporizer.iqm"),
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav weapons/vaporizerreload.wav"
 	},
 
@@ -1485,7 +1484,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		// TODO: create an icon for the mind eraser!
 		GITEM_INIT_CLIENTSIDE (NULL, "grapple", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, NULL, "models/weapons/v_machn/tris.md2", "w_machinegun.iqm"),
+		GITEM_INIT_WEAP (1, 1, NULL, "models/weapons/v_grapple/tris.md2", "w_grapple.iqm"),
 /* precache */ "weapons/electroball.wav"
 	},
 		
@@ -1547,7 +1546,7 @@ always owned, never in the world
 /* precache */ ""
 	},
 
-/*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16)
+/*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16) - To Do - not sure we use this, check on that.
 */
 	{
 		GITEM_INIT_IDENTIFY (ammo_slugs, IT_AMMO),

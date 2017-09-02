@@ -970,7 +970,7 @@ void G_SetStats (edict_t *ent)
 	if	(	ent->client->pers.weapon == FindItem ("Alien Disruptor") || 
 			ent->client->pers.weapon == FindItem ("Violator") || 
 			ent->client->pers.weapon == FindItem ("Disruptor") ||
-			ent->client->pers.weapon == FindItem ("Pulse Rifle"))
+			ent->client->pers.weapon == FindItem ("Chaingun"))
 		ent->client->ps.stats[STAT_FLAGS] |= STAT_FLAGS_CROSSHAIRCENTER;
 	else if (ent->client->pers.weapon == FindItem ("Rocket Launcher"))
 		ent->client->ps.stats[STAT_FLAGS] |= STAT_FLAGS_CROSSHAIRPOS2;

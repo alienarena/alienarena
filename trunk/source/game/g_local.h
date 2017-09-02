@@ -137,8 +137,8 @@ typedef enum
 	// jetpack(a type of flying vehicle)
 	item_jetpack,
 	// other weapons
-	weapon_shotgun, weapon_supershotgun, weapon_chaingun, weapon_minderaser,
-	weapon_rocketlauncher, weapon_hyperblaster, weapon_railgun, weapon_bfg,
+	weapon_smartgun, weapon_chaingun, weapon_flamethrower, weapon_minderaser,
+	weapon_rocketlauncher, weapon_disruptor, weapon_beamgun, weapon_vaporizer,
 	weapon_blaster, weapon_alienblaster, weapon_violator, weapon_grapple,
 	weapon_warrior_punch, weapon_wizard_punch,
 	// ammo

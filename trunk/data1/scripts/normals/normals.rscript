@@ -369,37 +369,19 @@ players/rustbot/classic
 		cube
 	}	
 }
-models/weapons/v_chain/skin
+models/weapons/v_flamethrower/flamethrower
 {
 	{
-		map models/weapons/v_chain/skin_normal.tga
-		normalmap
-		map2 gfx/flamethrower_fx.tga
-		glow
-	}
-}
-models/weapons/v_chain/flamethrower
-{
-	{
-		map models/weapons/v_chain/flamethrower_normal.tga
+		map models/weapons/v_flamethrower/flamethrower_normal.tga
 		normalmap
 	}
 }
-models/weapons/v_shotg2/skin
+models/weapons/v_chaingun/chaingun
 {
 	{
-		map models/weapons/v_shotg2/skin_normal.tga
+		map models/weapons/v_chaingun/chaingun_normal.tga
 		normalmap
-		map3 gfx/chrome.tga
-		cube
-	}
-}
-models/weapons/v_shotg2/chaingun
-{
-	{
-		map models/weapons/v_shotg2/chaingun_normal.tga
-		normalmap
-		map2 models/weapons/v_shotg2/chaingun_fx.tga
+		map2 models/weapons/v_chaingun/chaingun_fx.tga
 		glow 
 		map3 gfx/chrome.tga
 		cube
@@ -705,10 +687,10 @@ models/weapons/v_violator/violator
 		cube
 	}
 }
-models/weapons/v_hyperb/disruptor
+models/weapons/v_disruptor/disruptor
 {
 	{	
-		map models/weapons/v_hyperb/disruptor_normal.tga
+		map models/weapons/v_disruptor/disruptor_normal.tga
 		normalmap
 		map2 gfx/disruptorfx.tga
 		glow
@@ -717,19 +699,19 @@ models/weapons/v_hyperb/disruptor
 	}
 		
 }
-models/weapons/v_hyperb/effects
+models/weapons/v_disruptor/effects
 {
 	{
-		map models/weapons/v_hyperb/disruptor_normal.tga
+		map models/weapons/v_disruptor/disruptor_normal.tga
 		normalmap
-		map2 models/weapons/v_hyperb/disruptor_fx.tga
+		map2 models/weapons/v_disruptor/disruptor_fx.tga
 		fx
 	}
 }
-models/weapons/v_rail/beamgun
+models/weapons/v_beamgun/beamgun
 {
 	{
-		map models/weapons/v_rail/beamgun_normal.jpg
+		map models/weapons/v_beamgun/beamgun_normal.jpg
 		normalmap
 		map2 gfx/beamgunfx.tga
 		glow
@@ -737,10 +719,10 @@ models/weapons/v_rail/beamgun
 		cube
 	}
 }
-models/weapons/v_bfg/vaporizer
+models/weapons/v_vaporizer/vaporizer
 {	
 	{
-		map models/weapons/v_bfg/vaporizer_normal.tga
+		map models/weapons/v_vaporizer/vaporizer_normal.tga
 		normalmap
 		map2 gfx/vapormask.tga
 		glow
@@ -759,21 +741,21 @@ models/weapons/v_minderaser/minderaser
 		cube
 	}
 }
-models/weapons/v_shotg/skin
+models/weapons/v_smartgun/skin
 {
 	{	
-		map models/weapons/v_shotg/skin_normal.tga
+		map models/weapons/v_smartgun/skin_normal.tga
 		normalmap
 		map2 gfx/smartgunmask.tga
 		glow
 	}		
 }
-models/weapons/v_shotg/effects
+models/weapons/v_smartgun/effects
 {
 	{
-		map models/weapons/v_shotg/skin_normal.tga
+		map models/weapons/v_smartgun/skin_normal.tga
 		normalmap
-		map2 models/weapons/v_shotg/smartgun_fx.tga
+		map2 models/weapons/v_smartgun/smartgun_fx.tga
 		fx
 	}
 }

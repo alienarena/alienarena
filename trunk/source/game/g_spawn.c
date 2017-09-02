@@ -101,8 +101,6 @@ spawn_t	spawns[] = {
 	{"misc_teleporter", SP_misc_teleporter},
 	{"misc_teleporter_dest", SP_misc_teleporter_dest},
 
-	{"npc_deathray", SP_npc_deathray},
-
 	//Tactical
 	{"misc_aliencomputer", SP_misc_aliencomputer},
 	{"misc_humancomputer", SP_misc_humancomputer},
@@ -115,8 +113,9 @@ spawn_t	spawns[] = {
 	{"misc_deathray", SP_misc_deathray}, //note - spawnflags determine team for this item(1 for human)
 	{"misc_laser", SP_misc_laser}, //spawnflag 1 for human
 
-	//Monster hazards
-	{"monster_piranha", SP_monster_piranha},
+	//Monsters and hazards
+	{"npc_piranha", SP_monster_piranha},	
+	{"npc_deathray", SP_npc_deathray},
 
 	{"misc_mapmodel", SP_misc_mapmodel},
 	{"misc_watersplash", SP_misc_watersplash},
@@ -173,7 +172,7 @@ void ED_CallSpawn (edict_t *ent)
 		if(!Q_strcasecmp(ent->classname, "weapon_grenadelauncher"))
 			ent->classname = "weapon_rocketlauncher"; //hack to remove old weapons
 		if(!Q_strcasecmp(ent->classname, "weapon_machinegun"))
-			ent->classname = "weapon_bfg"; //hack to remove old weapons
+			ent->classname = "weapon_vaporizer"; //hack to remove old weapons
 		if(!Q_strcasecmp(ent->classname, "weapon_minderaser"))
 			continue; //never place one of these traditionally
 
@@ -886,7 +885,7 @@ void SP_worldspawn (edict_t *ent)
 			"enforcer",
 			"rustbot",
 			"slashbot",
-			"lauren",
+			"femborg",
 			"martiancyborg",
 			"martianoverlord",
 			"martianwarrior"

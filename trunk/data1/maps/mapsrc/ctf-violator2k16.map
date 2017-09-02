@@ -22156,7 +22156,7 @@
 }
 // entity 62
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "origin" "-472 0 40"
 }
 // entity 63
@@ -22169,7 +22169,7 @@
 }
 // entity 64
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "-384 0 300"
 }
 // entity 65
@@ -22261,7 +22261,7 @@
 }
 // entity 78
 {
-"classname" "weapon_chaingun"
+"classname" "weapon_flamethrower"
 "origin" "-24 952 48"
 }
 // entity 79
@@ -23147,7 +23147,7 @@
 }
 // entity 113
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "-384 800 296"
 }
 // entity 114
@@ -23958,7 +23958,7 @@
 }
 // entity 172
 {
-"classname" "weapon_chaingun"
+"classname" "weapon_flamethrower"
 "origin" "-24 -952 48"
 }
 // entity 173
@@ -24081,7 +24081,7 @@
 }
 // entity 189
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "-384 -800 296"
 }
 // entity 190
@@ -24500,7 +24500,7 @@
 }
 // entity 216
 {
-"classname" "weapon_shotgun"
+"classname" "weapon_smartgun"
 "origin" "-800 -1184 120"
 }
 // entity 217
@@ -24894,7 +24894,7 @@
 }
 // entity 240
 {
-"classname" "weapon_shotgun"
+"classname" "weapon_smartgun"
 "origin" "-800 1184 120"
 }
 // entity 241

@@ -15180,7 +15180,7 @@
 }
 // entity 29
 {
-"classname" "weapon_shotgun"
+"classname" "weapon_smartgun"
 "origin" "576 864 -120"
 }
 // entity 30
@@ -15215,12 +15215,12 @@
 }
 // entity 36
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "-512 -128 -120"
 }
 // entity 37
 {
-"classname" "weapon_chaingun"
+"classname" "weapon_flamethrower"
 "origin" "608 320 40"
 }
 // entity 38
@@ -15230,7 +15230,7 @@
 }
 // entity 39
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "32 1440 40"
 }
 // entity 40
@@ -16525,19 +16525,19 @@
 }
 // entity 223
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "256.000000 -672.000000 -24.000000"
 "angle" "-180.000000"
 }
 // entity 224
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "200.000000 -744.000000 -24.000000"
 "angle" "136.506714"
 }
 // entity 225
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "264.000000 -568.000000 -24.000000"
 "angle" "-161.964020"
 }

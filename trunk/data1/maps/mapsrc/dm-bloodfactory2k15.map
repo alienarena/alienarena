@@ -13575,7 +13575,7 @@
 }
 // entity 29
 {
-"classname" "weapon_chaingun"
+"classname" "weapon_flamethrower"
 "origin" "-384 128 296"
 }
 // entity 30
@@ -13585,12 +13585,12 @@
 }
 // entity 31
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "264 704 288"
 }
 // entity 32
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "784 0 96"
 }
 // entity 33

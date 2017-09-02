@@ -1010,9 +1010,9 @@ void G_SetClientSound (edict_t *ent)
 	else
 		weap = "";
 
-	if (strcmp(weap, "weapon_bfg") == 0)
+	if (strcmp(weap, "weapon_vaporizer") == 0)
 		ent->s.sound = gi.soundindex("weapons/vaporizer_hum.wav");
-	else if (strcmp(weap, "weapon_shotgun") == 0)
+	else if (strcmp(weap, "weapon_smartgun") == 0)
 		ent->s.sound = gi.soundindex("weapons/smartgun_hum.wav");
 	else if (ent->client->weapon_sound)
 		ent->s.sound = ent->client->weapon_sound;
