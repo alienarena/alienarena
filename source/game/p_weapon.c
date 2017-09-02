@@ -124,18 +124,18 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		//certain classes can only use certain weapons
 		if(other->ctype == 0)
 		{
-			if(!strcmp(ent->classname, "weapon_rocketlauncher") || !strcmp(ent->classname, "weapon_chaingun") || !strcmp(ent->classname, "weapon_bfg")
-				|| !strcmp(ent->classname, "weapon_supershotgun"))
+			if(!strcmp(ent->classname, "weapon_rocketlauncher") || !strcmp(ent->classname, "weapon_flamethrower") || !strcmp(ent->classname, "weapon_vaporizer")
+				|| !strcmp(ent->classname, "weapon_chaingun"))
 				return false;
 		}
-		else if (!strcmp(ent->classname, "weapon_shotgun") || !strcmp(ent->classname, "weapon_hyperblaster") || !strcmp(ent->classname, "weapon_railgun")
+		else if (!strcmp(ent->classname, "weapon_smartgun") || !strcmp(ent->classname, "weapon_disruptor") || !strcmp(ent->classname, "weapon_beamgun")
 				|| !strcmp(ent->classname, "weapon_minderaser"))
 				return false;
 
 		//do not pick up a weapon if you already have one - the premise behind this is that it will give others opportunities to pick up weapons since they do not respawn
 		if(other->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))]
 			|| other->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))]
-			|| other->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] )
+			|| other->client->pers.inventory[ITEM_INDEX(FindItem("Chaingun"))] || other->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] )
 		{
 			safe_centerprintf(other, "Cannot pick up weapon, you already have a weapon");
 			return false;
@@ -178,7 +178,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				else 
 				{
 					//weapon = FindItem (ent->item->weapon);
-					if (ent->item->classnum == weapon_bfg)
+					if (ent->item->classnum == weapon_vaporizer)
 						SetRespawn (ent, 10);
 					else
 						SetRespawn (ent, 5);
@@ -356,7 +356,7 @@ void NoAmmoWeaponChange (edict_t *ent)
 	const char *weapons[] =
 	{
 		// in descending order of preference:
-		"Disruptor", "Rocket Launcher", "Flame Thrower", "Pulse Rifle",
+		"Disruptor", "Rocket Launcher", "Flame Thrower", "Chaingun",
 		"Alien Smartgun", "Alien Disruptor"
 	};
 	const int n = sizeof (weapons) / sizeof (weapons[0]);
@@ -671,19 +671,19 @@ fire_begin:
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/blasterreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_violator && gunframe == FRAME_IDLE_FIRST + 3)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/violatorreload.wav"), 1, ATTN_NORM, 0);
-			else if(ent->client->pers.weapon->classnum == weapon_supershotgun && gunframe == FRAME_IDLE_FIRST + 5)
+			else if(ent->client->pers.weapon->classnum == weapon_chaingun && gunframe == FRAME_IDLE_FIRST + 5)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/chaingunreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_rocketlauncher && gunframe == FRAME_IDLE_FIRST + 4)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/rlauncherreload.wav"), 1, ATTN_NORM, 0);
-			else if(ent->client->pers.weapon->classnum == weapon_shotgun && gunframe == FRAME_IDLE_FIRST + 2)
+			else if(ent->client->pers.weapon->classnum == weapon_smartgun && gunframe == FRAME_IDLE_FIRST + 2)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/smartgunreload.wav"), 1, ATTN_NORM, 0);
-			else if(ent->client->pers.weapon->classnum == weapon_chaingun && gunframe == FRAME_IDLE_FIRST + 2)
+			else if(ent->client->pers.weapon->classnum == weapon_flamethrower && gunframe == FRAME_IDLE_FIRST + 2)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/flamereload.wav"), 1, ATTN_NORM, 0);
-			else if(ent->client->pers.weapon->classnum == weapon_hyperblaster && gunframe == FRAME_IDLE_FIRST + 4)
+			else if(ent->client->pers.weapon->classnum == weapon_disruptor && gunframe == FRAME_IDLE_FIRST + 4)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/disruptorreload.wav"), 1, ATTN_NORM, 0);
-			else if(ent->client->pers.weapon->classnum == weapon_railgun && gunframe == FRAME_IDLE_FIRST + 5)
+			else if(ent->client->pers.weapon->classnum == weapon_beamgun && gunframe == FRAME_IDLE_FIRST + 5)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/beamgunreload.wav"), 1, ATTN_NORM, 0);
-			else if(ent->client->pers.weapon->classnum == weapon_bfg && gunframe == FRAME_IDLE_FIRST + 5)
+			else if(ent->client->pers.weapon->classnum == weapon_vaporizer && gunframe == FRAME_IDLE_FIRST + 5)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/vaporizerreload.wav"), 1, ATTN_NORM, 0);
 			else if(ent->client->pers.weapon->classnum == weapon_minderaser && gunframe == FRAME_IDLE_FIRST + 3)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/minderaserreload.wav"), 1, ATTN_NORM, 0);
@@ -711,8 +711,8 @@ fire_begin:
 
 		if (gunframe == FRAME_IDLE_FIRST+1)
 		{
-			if(ent->client->pers.weapon->classnum == weapon_hyperblaster || ent->client->pers.weapon->classnum == weapon_blaster
-				|| ent->client->pers.weapon->classnum == weapon_shotgun || ent->client->pers.weapon->classnum == weapon_rocketlauncher
+			if(ent->client->pers.weapon->classnum == weapon_disruptor || ent->client->pers.weapon->classnum == weapon_blaster
+				|| ent->client->pers.weapon->classnum == weapon_smartgun || ent->client->pers.weapon->classnum == weapon_rocketlauncher
 				|| ent->client->pers.weapon->classnum == weapon_alienblaster)
 				gunframe = FRAME_IDLE_LAST;
 			ent->client->weaponstate = WEAPON_READY;

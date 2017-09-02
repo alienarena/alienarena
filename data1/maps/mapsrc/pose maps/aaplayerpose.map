@@ -1390,3 +1390,25 @@
 "origin" "-1222.961304 0.547363 280.000000"
 "model" "maps/meshes/playerpose/martianenforcer_sneak_weapon.iqm"
 }
+// entity 36
+{
+"classname" "misc_mapmodel"
+"origin" "-1219.595215 48.272007 264.000000"
+"model" "maps/meshes/playerpose/martianwarrior.iqm"
+"angle" "51.980278"
+}
+// entity 37
+{
+"classname" "misc_mapmodel"
+"origin" "-1219.595215 48.272007 264.000000"
+"model" "maps/meshes/playerpose/martianwarrior_helmet.iqm"
+"spawnflags" "16"
+"angle" "51.980278"
+}
+// entity 38
+{
+"classname" "misc_mapmodel"
+"origin" "-1219.595215 48.272007 264.000000"
+"model" "maps/meshes/playerpose/martianwarrior_weapon.iqm"
+"angle" "51.980278"
+}

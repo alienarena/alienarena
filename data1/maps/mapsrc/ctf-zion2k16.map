@@ -20432,7 +20432,7 @@
 }
 // entity 33
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "2200.000000 -868.000000 128.000000"
 "angle" "-179.999985"
 }
@@ -20446,7 +20446,7 @@
 }
 // entity 35
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "2200.000000 -164.000000 128.000000"
 "angle" "-179.999985"
 }
@@ -20474,7 +20474,7 @@
 }
 // entity 39
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "origin" "88.000000 -1060.000000 296.000000"
 "angle" "-179.999985"
 }
@@ -20542,7 +20542,7 @@
 }
 // entity 49
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "664.000000 508.000000 296.000000"
 "angle" "-179.999985"
 }
@@ -22604,7 +22604,7 @@
 }
 // entity 273
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "-2152.000000 924.000000 128.000000"
 "angle" "-179.999985"
 }
@@ -22618,7 +22618,7 @@
 }
 // entity 275
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "-2152.000000 220.000000 128.000000"
 "angle" "-179.999985"
 }
@@ -22646,7 +22646,7 @@
 }
 // entity 279
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "origin" "-40.000000 1116.000000 296.000000"
 "angle" "-179.999985"
 }
@@ -22714,7 +22714,7 @@
 }
 // entity 289
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "-616.000000 -452.000000 296.000000"
 "angle" "-179.999985"
 }
@@ -22728,7 +22728,7 @@
 }
 // entity 291
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "24.000000 28.000000 296.000000"
 "angle" "-179.999985"
 }

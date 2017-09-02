@@ -7887,6 +7887,7 @@
 "origin" "122.000015 -225.000015 232.000031"
 "model" "maps/meshes/tech/slimegen_ss.md2"
 "angles" "0.000010 -179.999985 -90.000000"
+"spawnflags" "1"
 }
 // entity 76
 {
@@ -7894,6 +7895,7 @@
 "origin" "150.000000 722.000000 231.999985"
 "model" "maps/meshes/tech/slimegen_ss.md2"
 "angles" "-90.000000 0.000000 90.000000"
+"spawnflags" "1"
 }
 // entity 77
 {

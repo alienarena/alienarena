@@ -2998,7 +2998,7 @@
 }
 // entity 120
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "1028.000000 -2048.000000 200.000000"
 }
 // entity 121
@@ -3069,7 +3069,7 @@
 }
 // entity 131
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "-2092.000000 -114.000000 172.000000"
 }
 // entity 132
@@ -3088,7 +3088,7 @@
 }
 // entity 134
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "2192.000000 4.000000 176.000000"
 }
 // entity 135
@@ -3108,7 +3108,7 @@
 }
 // entity 137
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "1750.000000 1986.000000 182.000000"
 }
 // entity 138
@@ -3128,7 +3128,7 @@
 }
 // entity 140
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "-1862.000000 1300.000000 172.000000"
 }
 // entity 141
@@ -3141,7 +3141,7 @@
 }
 // entity 142
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "origin" "-438.000000 -712.000000 236.000000"
 }
 // entity 143
@@ -3384,7 +3384,7 @@
 }
 // entity 186
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "-1096.000000 -1848.000000 104.000000"
 "angle" "-179.999985"
 }
@@ -3396,13 +3396,13 @@
 }
 // entity 188
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "-1128.000000 -1856.000000 104.000000"
 "angle" "0.000009"
 }
 // entity 189
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "-1064.000000 -1856.000000 104.000000"
 "angle" "-179.999985"
 }
@@ -3473,19 +3473,19 @@
 }
 // entity 200
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "-64.000000 -1452.000000 104.000000"
 "angle" "-179.999985"
 }
 // entity 201
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "-28.000000 -1452.000000 104.000000"
 "angle" "-179.999985"
 }
 // entity 202
 {
-"classname" "monster_piranha"
+"classname" "npc_piranha"
 "origin" "652.000000 -1808.000000 104.000000"
 "angle" "-179.999985"
 }

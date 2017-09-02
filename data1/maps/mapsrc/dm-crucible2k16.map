@@ -8547,7 +8547,7 @@
 }
 // entity 11
 {
-"classname" "weapon_shotgun"
+"classname" "weapon_smartgun"
 "origin" "784 -656 48"
 }
 // entity 12
@@ -8572,7 +8572,7 @@
 }
 // entity 16
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "960 576 -208"
 }
 // entity 17
@@ -10279,6 +10279,6 @@
 }
 // entity 251
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "260.000000 -640.000000 -208.000000"
 }

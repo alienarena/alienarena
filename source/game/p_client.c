@@ -710,9 +710,9 @@ void TossClientWeapon (edict_t *self)
 				drop->spawnflags = DROPPED_PLAYER_ITEM;
 			}
 		}
-		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] == 1)
+		if(self->client->pers.inventory[ITEM_INDEX(FindItem("Chaingun"))] == 1)
 		{	
-			item = FindItem( "Pulse Rifle" );
+			item = FindItem( "Chaingun" );
 			if(item)
 			{
 				spread = 70;
@@ -1164,7 +1164,7 @@ void InitClientPersistant (gclient_t *client)
 	#undef X
 
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] = 1;
+		client->pers.inventory[ITEM_INDEX(FindItem("Chaingun"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] = 1;
@@ -2514,7 +2514,7 @@ static void ClientBeginDeathmatch (edict_t *ent)
 	{
 		//we want to actually check their model to be one of the valid ones we use
 		if(strcmp("martianenforcer", ent->charModel) && strcmp("martianwarrior", ent->charModel) && strcmp("martianoverlord", ent->charModel)
-			&& strcmp("lauren", ent->charModel) && strcmp("enforcer", ent->charModel) && strcmp("commander", ent->charModel))
+			&& strcmp("femborg", ent->charModel) && strcmp("enforcer", ent->charModel) && strcmp("commander", ent->charModel))
 		{
 			if ( ent->is_bot )
 			{

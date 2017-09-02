@@ -9960,17 +9960,17 @@
 }
 // entity 22
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "64 1152 -80"
 }
 // entity 23
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "origin" "1184 320 -320"
 }
 // entity 24
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "64 320 48"
 }
 // entity 25
@@ -10143,7 +10143,7 @@
 }
 // entity 53
 {
-"classname" "weapon_hyperblaster"
+"classname" "weapon_disruptor"
 "origin" "-720 600 -320"
 }
 // entity 54

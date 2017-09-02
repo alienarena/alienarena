@@ -912,12 +912,12 @@ void CL_AddPacketEntities (frame_t *frame)
 					V_AddEntity (&ent);
 				}
 			}	
-			if (!Q_strcasecmp (shortname, "models/weapons/g_hyperb/tris")) 
+			if (!Q_strcasecmp (shortname, "models/weapons/g_disruptor/tris")) 
 			{
 				//add clear cover
 				if (!cl_simpleitems->integer)
 				{
-					ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.iqm");
+					ent.model = R_RegisterModel("models/weapons/g_disruptor/cover.iqm");
 					ent.flags |= RF_TRANSLUCENT;
 					ent.alpha = 0.30;
 					V_AddEntity (&ent);
@@ -1326,12 +1326,12 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
 	//add an attached muzzleflash for chaingun
-	if(!(strcmp("models/weapons/v_shotg2/tris.iqm", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_chaingun/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
 	}	
-	else if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_disruptor/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame > 5 && gun.frame < 7) 
 		{
@@ -1347,7 +1347,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		}
 	}
 	
-	if (!strcmp("models/weapons/v_chain/tris.iqm", gun.model->name) && gun.frame > 18 && gun.frame < 50)
+	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 18 && gun.frame < 50)
 		last_blue_flame = CL_BlueFlameParticle (gun.origin, gun.angles, last_blue_flame);
 	else
 		last_blue_flame = NULL;
@@ -1410,28 +1410,28 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	else if(!(strcmp("models/weapons/v_hyperb/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_disruptor/tris.iqm", gun.model->name))) 
 	{
 		int oldeffects = gun.flags;
 
-		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.iqm");
+		gun.model = R_RegisterModel("models/weapons/v_disruptor/cover.iqm");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 		gun.flags = oldeffects;
 		gun.alpha = 1.0;
-		gun.model = R_RegisterModel("models/weapons/v_hyperb/effects.iqm");
+		gun.model = R_RegisterModel("models/weapons/v_disruptor/effects.iqm");
 		V_AddViewEntity (&gun);
 	}
-	else if(!(strcmp("models/weapons/v_shotg/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_smartgun/tris.iqm", gun.model->name))) 
 	{
-		gun.model = R_RegisterModel("models/weapons/v_shotg/effects.iqm");
+		gun.model = R_RegisterModel("models/weapons/v_smartgun/effects.iqm");
 		V_AddViewEntity (&gun);
 	}
-	else if(!(strcmp("models/weapons/v_rail/tris.iqm", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_beamgun/tris.iqm", gun.model->name))) 
 	{
 		int oldeffects = gun.flags;
-		gun.model = R_RegisterModel("models/weapons/v_rail/effects.iqm");
+		gun.model = R_RegisterModel("models/weapons/v_beamgun/effects.iqm");
 		gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_GREEN;
 		gun.alpha = 0.50;
 		V_AddViewEntity (&gun);

@@ -30206,17 +30206,17 @@
 }
 // entity 27
 {
-"classname" "weapon_bfg"
+"classname" "weapon_vaporizer"
 "origin" "380.000000 -896.000000 32.000000"
 }
 // entity 28
 {
-"classname" "weapon_shotgun"
+"classname" "weapon_smartgun"
 "origin" "896 0 32"
 }
 // entity 29
 {
-"classname" "weapon_railgun"
+"classname" "weapon_beamgun"
 "origin" "64.000000 240.000000 304.000000"
 }
 // entity 30
@@ -30226,7 +30226,7 @@
 }
 // entity 31
 {
-"classname" "weapon_supershotgun"
+"classname" "weapon_chaingun"
 "origin" "-448.000000 380.000000 -216.000000"
 }
 // entity 32

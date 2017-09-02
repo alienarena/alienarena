@@ -1906,7 +1906,7 @@ PModelList_t BasePModels[] =
 	{ "martianwarrior" },
 	{ "enforcer" },
 	{ "commander" },
-	{ "lauren" },
+	{ "femborg" },
 	{ "slashbot" },
 	{ "rustbot" }
 };
@@ -1915,14 +1915,14 @@ int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
 WModelList_t BaseWModels[] =
 {
 	{ "w_blaster.iqm" },
-	{ "w_shotgun.iqm" },
-	{ "w_sshotgun.iqm" },
-	{ "w_machinegun.iqm" },
+	{ "w_smartgun.iqm" },
 	{ "w_chaingun.iqm" },
+	{ "w_grapple.iqm" },
+	{ "w_flamethrower.iqm" },
 	{ "w_rlauncher.iqm" },
-	{ "w_hyperblaster.iqm" },
-	{ "w_railgun.iqm" },
-	{ "w_bfg.iqm" },
+	{ "w_disruptor.iqm" },
+	{ "w_beamgun.iqm" },
+	{ "w_vaporizer.iqm" },
 	{ "w_violator.iqm" },
 	{ "w_minderaser.iqm" },
 	{ "weapon.iqm" }

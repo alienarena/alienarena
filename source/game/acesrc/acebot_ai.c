@@ -740,7 +740,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		// TODO: consider whether this prevents using violator
 		//       and whether or not that is a good thing.
-		if (self->client->pers.weapon->classnum != weapon_hyperblaster) // disruptor
+		if (self->client->pers.weapon->classnum != weapon_disruptor) // disruptor
 		{
 			self->client->newweapon = FindItem( "Alien Disruptor" );
 			assert( self->client->newweapon != NULL );
@@ -784,7 +784,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			return;
 		}
 		// Long range (or possibly short range for skill 0 bots)
-		if (self->client->pers.weapon->classnum != weapon_hyperblaster) // disruptor
+		if (self->client->pers.weapon->classnum != weapon_disruptor) // disruptor
 		{
 			self->client->newweapon = FindItem( "Alien Disruptor" );
 			assert( self->client->newweapon != NULL );
@@ -875,7 +875,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	}
 	if ( ACEIT_ChangeWeapon( self, FindItem( "Disruptor" ) ))
 		return;
-	if ( ACEIT_ChangeWeapon( self, FindItem( "Pulse Rifle" ) ))
+	if ( ACEIT_ChangeWeapon( self, FindItem( "Chaingun" ) ))
 		return;
 	if ( ACEIT_ChangeWeapon( self, FindItem( "Alien Disruptor" ) ))
 		return;

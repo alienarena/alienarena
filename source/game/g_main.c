@@ -418,7 +418,7 @@ edict_t *CreateTargetChangeLevel(char *map)
  * weapon_hit[] :to: bot weapacc[]
  * 0: 1: blaster
  * 1: 2: alien disruptor
- * 3: 3: pulse rifle (chaingun)
+ * 3: 3: chaingun
  * 4: 4: flame thrower
  * x: 5: homing rocket launcher (not implemented)
  * 5: 6: rocket launcher

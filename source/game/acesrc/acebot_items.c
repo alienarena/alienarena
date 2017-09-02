@@ -308,7 +308,7 @@ float ACEIT_ItemNeed (edict_t *self, gitem_t *item)
 	{
 		// Weapons
 		case weapon_rocketlauncher: case weapon_chaingun:
-		case weapon_supershotgun: case weapon_bfg:
+		case weapon_flamethrower: case weapon_vaporizer:
 			if(g_tactical->integer && self->ctype == 0)
 				return 0.0;
 			else if(g_tactical->integer && self->ctype == 1)
@@ -318,7 +318,7 @@ float ACEIT_ItemNeed (edict_t *self, gitem_t *item)
 				else
 					return 0.0;
 			}
-		case weapon_shotgun: case weapon_hyperblaster: case weapon_railgun:
+		case weapon_smartgun: case weapon_disruptor: case weapon_beamgun:
 		case weapon_minderaser:
 			if(g_tactical->integer && self->ctype == 1)
 				return 0.0;
