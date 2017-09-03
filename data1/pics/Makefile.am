@@ -36,31 +36,31 @@ nobase_dist_pics_DATA = \
 	ch3.tga \
 	colormap.pcx \
 	conchars.tga \
+	crosshairs/alien.tga \
+	crosshairs/alien2.tga \
 	crosshairs/alien2a.tga \
 	crosshairs/alien2b.tga \
-	crosshairs/alien2.tga \
-	crosshairs/alien.tga \
 	crosshairs/chexcross.tga \
 	crosshairs/dot1.tga \
 	crosshairs/hardcorech.tga \
+	crosshairs/havoc.tga \
 	crosshairs/havoc2.tga \
 	crosshairs/havoc3.tga \
-	crosshairs/havoc.tga \
+	crosshairs/intimidator.tga \
 	crosshairs/intimidator2.tga \
 	crosshairs/intimidator3.tga \
-	crosshairs/intimidator.tga \
 	crosshairs/mechano.tga \
 	crosshairs/ncool.tga \
+	crosshairs/nile.tga \
 	crosshairs/nile2.tga \
 	crosshairs/nile3.tga \
-	crosshairs/nile.tga \
 	crosshairs/rage_cross.tga \
 	crosshairs/rgb.tga \
 	crosshairs/robot.tga \
 	crosshairs/sniper.tga \
 	crosshairs/sungod.tga \
-	crosshairs/tech2.tga \
 	crosshairs/tech.tga \
+	crosshairs/tech2.tga \
 	crosshairs/transcircle.tga \
 	crosshairs/vista.tga \
 	ctf1.tga \
@@ -75,21 +75,19 @@ nobase_dist_pics_DATA = \
 	i_disruptor.tga \
 	i_flag1.tga \
 	i_flag2.tga \
-	i_flamegun.tga \
+	i_flamethrower.tga \
 	i_health.tga \
 	i_hud_beamgun.tga \
 	i_hud_blaster.tga \
 	i_hud_chaingun.tga \
 	i_hud_disruptor.tga \
-	i_hud_flamegun.tga \
 	i_hud_flamethrower.tga \
 	i_hud_rocketlauncher.tga \
 	i_hud_smartgun.tga \
-	i_hud_vaporizor.tga \
+	i_hud_vaporizer.tga \
 	i_hud_violator.tga \
 	i_jacketarmor.tga \
 	i_minderaser.tga \
-	inventory.tga \
 	i_rocketlauncher.tga \
 	i_score.tga \
 	i_smartgun.tga \
@@ -97,76 +95,77 @@ nobase_dist_pics_DATA = \
 	i_team1.tga \
 	i_team2.tga \
 	i_vaporizer.tga \
-	menu_back_fx.tga \
+	inventory.tga \
+	m_main.tga \
 	m_main_credits.tga \
 	m_main_credits_fx.tga \
 	m_main_credits_sel.tga \
+	m_main_game.tga \
 	m_main_game_fx.tga \
 	m_main_game_sel.tga \
-	m_main_game.tga \
+	m_main_host.tga \
 	m_main_host_fx.tga \
 	m_main_host_sel.tga \
-	m_main_host.tga \
+	m_main_irc.tga \
 	m_main_irc_fx.tga \
 	m_main_irc_sel.tga \
-	m_main_irc.tga \
+	m_main_join.tga \
 	m_main_join_fx.tga \
 	m_main_join_sel.tga \
-	m_main_join.tga \
 	m_main_mont0.tga \
 	m_main_mont1.tga \
 	m_main_mont2.tga \
 	m_main_mont3.tga \
 	m_main_mont4.tga \
 	m_main_mont5.tga \
+	m_main_options.tga \
 	m_main_options_fx.tga \
 	m_main_options_sel.tga \
-	m_main_options.tga \
+	m_main_player.tga \
 	m_main_player_fx.tga \
 	m_main_player_sel.tga \
-	m_main_player.tga \
+	m_main_quit.tga \
 	m_main_quit_fx.tga \
 	m_main_quit_sel.tga \
-	m_main_quit.tga \
 	m_main_tactical.tga \
-	m_main.tga \
+	m_main_video.tga \
 	m_main_video_fx.tga \
 	m_main_video_sel.tga \
-	m_main_video.tga \
 	m_mouse_cursor.tga \
 	m_quit.tga \
 	m_startserver.tga \
 	m_submenu_bg.tga \
 	m_tactical.tga \
-	menu/button_border_end.tga \
 	menu/button_border.tga \
+	menu/button_border_end.tga \
 	menu/dnarrow.tga \
 	menu/field_cursor.tga \
 	menu/icon_border.tga \
 	menu/m_background.tga \
-	menu/m_bottomcorner.tga \
 	menu/m_bottom.tga \
-	menu/midarrow.tga \
+	menu/m_bottomcorner.tga \
 	menu/m_side.tga \
-	menu/m_topcorner.tga \
 	menu/m_top.tga \
+	menu/m_topcorner.tga \
+	menu/midarrow.tga \
 	menu/on.tga \
 	menu/radio_border.tga \
-	menu/scroll_border_end.tga \
 	menu/scroll_border.tga \
-	menu/scroll_cursor_end.tga \
+	menu/scroll_border_end.tga \
 	menu/scroll_cursor.tga \
-	menu/slide_border_end.tga \
+	menu/scroll_cursor_end.tga \
 	menu/slide_border.tga \
-	menu/slide_cursor_end.tga \
+	menu/slide_border_end.tga \
 	menu/slide_cursor.tga \
+	menu/slide_cursor_end.tga \
 	menu/sm_background.tga \
-	menu/sm_bottomcorner.tga \
 	menu/sm_bottom.tga \
+	menu/sm_bottomcorner.tga \
 	menu/sm_side.tga \
-	menu/sm_topcorner.tga \
 	menu/sm_top.tga \
+	menu/sm_topcorner.tga \
 	menu/uparrow.tga \
+	menu_back_fx.tga \
 	net.tga \
 	num_0.tga \
 	num_1.tga \
@@ -187,12 +186,12 @@ nobase_dist_pics_DATA = \
 	p_invis.tga \
 	p_invulnerability.tga \
 	p_jacket.tga \
-	playerbox.tga \
 	p_powered.tga \
 	p_quad.tga \
 	p_rewardpts.tga \
 	p_shard.tga \
 	p_sproing.tga \
+	playerbox.tga \
 	redplayerbox.tga \
 	sbfctf1.tga \
 	sbfctf2.tga \
@@ -203,18 +202,15 @@ nobase_dist_pics_DATA = \
 	team2.tga \
 	uparrow.tga \
 	votebox.tga \
-	w_bfg.tga \
+	w_beamgun.tga \
 	w_blaster.tga \
 	w_chaingun.tga \
-	w_glauncher.tga \
-	w_hyperblaster.tga \
-	w_machinegun.tga \
-	w_railgun.tga \
+	w_disruptor.tga \
+	w_flamethrower.tga \
 	w_rlauncher.tga \
-	w_shotgun.tga \
-	w_sshotgun.tga \
+	w_smartgun.tga \
+	w_vaporizer.tga \
 	zoomscope1.tga \
 	zoomscope2.tga \
 	zoomscope3.tga
-
 

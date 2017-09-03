@@ -441,85 +441,83 @@ nobase_dist_models_DATA = \
 	tactical/hweappad_normal.tga \
 	tactical/hweappad.tga \
 	tactical/laser_normal.jpg \
-	weapons/g_bfg/tris.iqm \
-	weapons/g_bfg/tris.skin \
-	weapons/g_chain/tris.iqm \
-	weapons/g_chain/tris.skin \
-	weapons/g_hyperb/cover.iqm \
-	weapons/g_hyperb/tris.iqm \
-	weapons/g_hyperb/tris.skin \
-	weapons/g_machn/tris.md2 \
+	weapons/g_beamgun/tris.iqm \
+	weapons/g_beamgun/tris.skin \
+	weapons/g_chaingun/tris.iqm \
+	weapons/g_chaingun/tris.skin \
+	weapons/g_disruptor/cover.iqm \
+	weapons/g_disruptor/tris.iqm \
+	weapons/g_disruptor/tris.skin \
+	weapons/g_flamethrower/tris.iqm \
+	weapons/g_flamethrower/tris.skin \
+	weapons/g_grapple/tris.md2 \
 	weapons/g_minderaser/tris.iqm \
 	weapons/g_minderaser/tris.skin \
-	weapons/g_rail/tris.iqm \
-	weapons/g_rail/tris.skin \
 	weapons/g_rocket/cover.iqm \
 	weapons/g_rocket/tris.iqm \
 	weapons/g_rocket/tris.skin \
-	weapons/g_shotg/tris.iqm \
-	weapons/g_shotg/tris.skin \
-	weapons/g_shotg2/tris.iqm \
-	weapons/g_shotg2/tris.skin \
+	weapons/g_smartgun/tris.iqm \
+	weapons/g_smartgun/tris.skin \
+	weapons/g_vaporizer/tris.iqm \
+	weapons/g_vaporizer/tris.skin \
 	weapons/v_alienblast/cover.iqm \
 	weapons/v_alienblast/skin.jpg \
 	weapons/v_alienblast/skin_fx.tga \
 	weapons/v_alienblast/skin_normal.tga \
 	weapons/v_alienblast/tris.iqm \
 	weapons/v_alienblast/tris.skin \
-	weapons/v_bfg/skin.jpg \
-	weapons/v_bfg/skin_normal.tga \
-	weapons/v_bfg/tris.iqm \
-	weapons/v_bfg/tris.skin \
-	weapons/v_bfg/vaporizer.jpg \
-	weapons/v_bfg/vaporizer_normal.tga \
+	weapons/v_beamgun/beamgun.jpg \
+	weapons/v_beamgun/beamgun_normal.tga \
+	weapons/v_beamgun/effects.iqm \
+	weapons/v_beamgun/tris.iqm \
+	weapons/v_beamgun/tris.skin \
 	weapons/v_blast/blaster.jpg \
 	weapons/v_blast/blaster_normal.tga \
 	weapons/v_blast/cover.iqm \
 	weapons/v_blast/tris.iqm \
 	weapons/v_blast/tris.skin \
-	weapons/v_chain/flamethrower.tga \
-	weapons/v_chain/flamethrower_normal.jpg \
-	weapons/v_chain/skin.jpg \
-	weapons/v_chain/skin_normal.tga \
-	weapons/v_chain/tris.iqm \
-	weapons/v_chain/tris.skin \
-	weapons/v_hyperb/cover.iqm \
-	weapons/v_hyperb/disruptor.jpg \
-	weapons/v_hyperb/disruptor_fx.tga \
-	weapons/v_hyperb/disruptor_normal.tga \
-	weapons/v_hyperb/effects.iqm \
-	weapons/v_hyperb/effects.skin \
-	weapons/v_hyperb/effects.tga \
-	weapons/v_hyperb/tris.iqm \
-	weapons/v_hyperb/tris.skin \
-	weapons/v_machn/tris.md2 \
+	weapons/v_chaingun/chaingun.jpg \
+	weapons/v_chaingun/chaingun_fx.tga \
+	weapons/v_chaingun/chaingun_normal.tga \
+	weapons/v_chaingun/tris.iqm \
+	weapons/v_chaingun/tris.skin \
+	weapons/v_disruptor/cover.iqm \
+	weapons/v_disruptor/disruptor.jpg \
+	weapons/v_disruptor/disruptor_fx.tga \
+	weapons/v_disruptor/disruptor_normal.tga \
+	weapons/v_disruptor/effects.iqm \
+	weapons/v_disruptor/effects.skin \
+	weapons/v_disruptor/effects.tga \
+	weapons/v_disruptor/tris.iqm \
+	weapons/v_disruptor/tris.skin \
+	weapons/v_flamethrower/flamethrower.tga \
+	weapons/v_flamethrower/flamethrower_normal.jpg \
+	weapons/v_flamethrower/tris.iqm \
+	weapons/v_flamethrower/tris.skin \
+	weapons/v_grapple/tris.md2 \
 	weapons/v_minderaser/minderaser.jpg \
 	weapons/v_minderaser/minderaser_normal.tga \
 	weapons/v_minderaser/tris.iqm \
 	weapons/v_minderaser/tris.skin \
-	weapons/v_rail/beamgun.jpg \
-	weapons/v_rail/beamgun_normal.tga \
-	weapons/v_rail/effects.iqm \
-	weapons/v_rail/tris.iqm \
-	weapons/v_rail/tris.skin \
 	weapons/v_rocket/cover.iqm \
 	weapons/v_rocket/rocketlauncher.jpg \
 	weapons/v_rocket/rocketlauncher_normal.tga \
 	weapons/v_rocket/tris.iqm \
 	weapons/v_rocket/tris.skin \
-	weapons/v_shotg/effects.iqm \
-	weapons/v_shotg/effects.skin \
-	weapons/v_shotg/effects.tga \
-	weapons/v_shotg/skin.jpg \
-	weapons/v_shotg/skin_normal.tga \
-	weapons/v_shotg/smartgun_fx.tga \
-	weapons/v_shotg/tris.iqm \
-	weapons/v_shotg/tris.skin \
-	weapons/v_shotg2/chaingun.jpg \
-	weapons/v_shotg2/chaingun_fx.tga \
-	weapons/v_shotg2/chaingun_normal.tga \
-	weapons/v_shotg2/tris.iqm \
-	weapons/v_shotg2/tris.skin \
+	weapons/v_smartgun/effects.iqm \
+	weapons/v_smartgun/effects.skin \
+	weapons/v_smartgun/effects.tga \
+	weapons/v_smartgun/skin.jpg \
+	weapons/v_smartgun/skin_normal.tga \
+	weapons/v_smartgun/smartgun_fx.tga \
+	weapons/v_smartgun/tris.iqm \
+	weapons/v_smartgun/tris.skin \
+	weapons/v_vaporizer/skin.jpg \
+	weapons/v_vaporizer/skin_normal.tga \
+	weapons/v_vaporizer/tris.iqm \
+	weapons/v_vaporizer/tris.skin \
+	weapons/v_vaporizer/vaporizer.jpg \
+	weapons/v_vaporizer/vaporizer_normal.tga \
 	weapons/v_violator/tris.iqm \
 	weapons/v_violator/tris.skin \
 	weapons/v_violator/violator.jpg \

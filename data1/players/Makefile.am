@@ -5,8 +5,8 @@
 playersdir=$(pkgdatadir)/data1/players
 
 nobase_dist_players_DATA = \
-	commander/blue_i.jpg \
 	commander/blue.jpg \
+	commander/blue_i.jpg \
 	commander/bump1.wav \
 	commander/death1.wav \
 	commander/death2.wav \
@@ -35,34 +35,34 @@ nobase_dist_players_DATA = \
 	commander/pain50_2.wav \
 	commander/pain75_1.wav \
 	commander/pain75_2.wav \
-	commander/red_i.jpg \
 	commander/red.jpg \
+	commander/red_i.jpg \
 	commander/tris.iqm \
 	commander/tris.rgd \
-	commander/w_bfg.iqm \
-	commander/w_bfg.skin \
+	commander/w_beamgun.iqm \
+	commander/w_beamgun.skin \
 	commander/w_blaster.iqm \
 	commander/w_blaster.skin \
 	commander/w_chaingun.iqm \
 	commander/w_chaingun.skin \
-	commander/weapon.iqm \
-	commander/weapon.skin \
-	commander/w_hyperblaster.iqm \
-	commander/w_hyperblaster.skin \
-	commander/w_machinegun.iqm \
-	commander/w_machinegun.skin \
+	commander/w_disruptor.iqm \
+	commander/w_disruptor.skin \
+	commander/w_flamethrower.iqm \
+	commander/w_flamethrower.skin \
+	commander/w_grapple.iqm \
+	commander/w_grapple.skin \
 	commander/w_minderaser.iqm \
 	commander/w_minderaser.skin \
-	commander/w_railgun.iqm \
-	commander/w_railgun.skin \
 	commander/w_rlauncher.iqm \
 	commander/w_rlauncher.skin \
-	commander/w_shotgun.iqm \
-	commander/w_shotgun.skin \
-	commander/w_sshotgun.iqm \
-	commander/w_sshotgun.skin \
+	commander/w_smartgun.iqm \
+	commander/w_smartgun.skin \
+	commander/w_vaporizer.iqm \
+	commander/w_vaporizer.skin \
 	commander/w_violator.iqm \
 	commander/w_violator.skin \
+	commander/weapon.iqm \
+	commander/weapon.skin \
 	enforcer/blue.jpg \
 	enforcer/blue_i.jpg \
 	enforcer/blueenforcerfx.tga \
@@ -94,93 +94,93 @@ nobase_dist_players_DATA = \
 	enforcer/pain50_2.wav \
 	enforcer/pain75_1.wav \
 	enforcer/pain75_2.wav \
-	enforcer/red_i.jpg \
 	enforcer/red.jpg \
+	enforcer/red_i.jpg \
 	enforcer/tris.iqm \
 	enforcer/tris.rgd \
-	enforcer/w_bfg.iqm \
-	enforcer/w_bfg.skin \
+	enforcer/w_beamgun.iqm \
+	enforcer/w_beamgun.skin \
 	enforcer/w_blaster.iqm \
 	enforcer/w_blaster.skin \
 	enforcer/w_chaingun.iqm \
 	enforcer/w_chaingun.skin \
-	enforcer/weapon.iqm \
-	enforcer/weapon.skin \
-	enforcer/w_hyperblaster.iqm \
-	enforcer/w_hyperblaster.skin \
-	enforcer/w_machinegun.iqm \
-	enforcer/w_machinegun.skin \
+	enforcer/w_disruptor.iqm \
+	enforcer/w_disruptor.skin \
+	enforcer/w_flamethrower.iqm \
+	enforcer/w_flamethrower.skin \
+	enforcer/w_grapple.iqm \
+	enforcer/w_grapple.skin \
 	enforcer/w_minderaser.iqm \
 	enforcer/w_minderaser.skin \
-	enforcer/w_railgun.iqm \
-	enforcer/w_railgun.skin \
 	enforcer/w_rlauncher.iqm \
 	enforcer/w_rlauncher.skin \
-	enforcer/w_shotgun.iqm \
-	enforcer/w_shotgun.skin \
-	enforcer/w_sshotgun.iqm \
-	enforcer/w_sshotgun.skin \
+	enforcer/w_smartgun.iqm \
+	enforcer/w_smartgun.skin \
+	enforcer/w_vaporizer.iqm \
+	enforcer/w_vaporizer.skin \
 	enforcer/w_violator.iqm \
 	enforcer/w_violator.skin \
-	lauren/blue.jpg \
-	lauren/blue_i.jpg \
-	lauren/bluelaurenfx.tga \
-	lauren/bump1.wav \
-	lauren/death1.wav \
-	lauren/death2.wav \
-	lauren/death3.wav \
-	lauren/death4.wav \
-	lauren/default.jpg \
-	lauren/default_i.jpg \
-	lauren/default_normal.tga \
-	lauren/defaultlaurenfx.tga \
-	lauren/drown1.wav \
-	lauren/fall1.wav \
-	lauren/fall2.wav \
-	lauren/gurp1.wav \
-	lauren/gurp2.wav \
-	lauren/human \
-	lauren/jump1.wav \
-	lauren/lod1.iqm \
-	lauren/lod1.rgd \
-	lauren/lod2.iqm \
-	lauren/lod2.rgd \
-	lauren/pain100_1.wav \
-	lauren/pain100_2.wav \
-	lauren/pain25_1.wav \
-	lauren/pain25_2.wav \
-	lauren/pain50_1.wav \
-	lauren/pain50_2.wav \
-	lauren/pain75_1.wav \
-	lauren/pain75_2.wav \
-	lauren/red_i.jpg \
-	lauren/red.jpg \
-	lauren/tris.iqm \
-	lauren/tris.rgd \
-	lauren/w_bfg.iqm \
-	lauren/w_bfg.skin \
-	lauren/w_blaster.iqm \
-	lauren/w_blaster.skin \
-	lauren/w_chaingun.iqm \
-	lauren/w_chaingun.skin \
-	lauren/weapon.iqm \
-	lauren/weapon.skin \
-	lauren/w_hyperblaster.iqm \
-	lauren/w_hyperblaster.skin \
-	lauren/w_machinegun.iqm \
-	lauren/w_machinegun.skin \
-	lauren/w_minderaser.iqm \
-	lauren/w_minderaser.skin \
-	lauren/w_railgun.iqm \
-	lauren/w_railgun.skin \
-	lauren/w_rlauncher.iqm \
-	lauren/w_rlauncher.skin \
-	lauren/w_shotgun.iqm \
-	lauren/w_shotgun.skin \
-	lauren/w_sshotgun.iqm \
-	lauren/w_sshotgun.skin \
-	lauren/w_violator.iqm \
-	lauren/w_violator.skin \
+	enforcer/weapon.iqm \
+	enforcer/weapon.skin \
+	femborg/blue.jpg \
+	femborg/blue_i.jpg \
+	femborg/bluelaurenfx.tga \
+	femborg/bump1.wav \
+	femborg/death1.wav \
+	femborg/death2.wav \
+	femborg/death3.wav \
+	femborg/death4.wav \
+	femborg/default.jpg \
+	femborg/default_i.jpg \
+	femborg/default_normal.tga \
+	femborg/defaultlaurenfx.tga \
+	femborg/drown1.wav \
+	femborg/fall1.wav \
+	femborg/fall2.wav \
+	femborg/gurp1.wav \
+	femborg/gurp2.wav \
+	femborg/human \
+	femborg/jump1.wav \
+	femborg/lod1.iqm \
+	femborg/lod1.rgd \
+	femborg/lod2.iqm \
+	femborg/lod2.rgd \
+	femborg/pain100_1.wav \
+	femborg/pain100_2.wav \
+	femborg/pain25_1.wav \
+	femborg/pain25_2.wav \
+	femborg/pain50_1.wav \
+	femborg/pain50_2.wav \
+	femborg/pain75_1.wav \
+	femborg/pain75_2.wav \
+	femborg/red.jpg \
+	femborg/red_i.jpg \
+	femborg/tris.iqm \
+	femborg/tris.rgd \
+	femborg/w_beamgun.iqm \
+	femborg/w_beamgun.skin \
+	femborg/w_blaster.iqm \
+	femborg/w_blaster.skin \
+	femborg/w_chaingun.iqm \
+	femborg/w_chaingun.skin \
+	femborg/w_disruptor.iqm \
+	femborg/w_disruptor.skin \
+	femborg/w_flamethrower.iqm \
+	femborg/w_flamethrower.skin \
+	femborg/w_grapple.iqm \
+	femborg/w_grapple.skin \
+	femborg/w_minderaser.iqm \
+	femborg/w_minderaser.skin \
+	femborg/w_rlauncher.iqm \
+	femborg/w_rlauncher.skin \
+	femborg/w_smartgun.iqm \
+	femborg/w_smartgun.skin \
+	femborg/w_vaporizer.iqm \
+	femborg/w_vaporizer.skin \
+	femborg/w_violator.iqm \
+	femborg/w_violator.skin \
+	femborg/weapon.iqm \
+	femborg/weapon.skin \
 	martiancyborg/alien \
 	martiancyborg/blue.jpg \
 	martiancyborg/blue_i.jpg \
@@ -213,35 +213,35 @@ nobase_dist_players_DATA = \
 	martiancyborg/pain50_2.wav \
 	martiancyborg/pain75_1.wav \
 	martiancyborg/pain75_2.wav \
-	martiancyborg/red_i.jpg \
 	martiancyborg/red.jpg \
+	martiancyborg/red_i.jpg \
 	martiancyborg/tris.iqm \
 	martiancyborg/tris.rgd \
-	martiancyborg/w_bfg.iqm \
-	martiancyborg/w_bfg.skin \
+	martiancyborg/w_beamgun.iqm \
+	martiancyborg/w_beamgun.skin \
 	martiancyborg/w_blaster.iqm \
 	martiancyborg/w_blaster.skin \
 	martiancyborg/w_chaingun.iqm \
 	martiancyborg/w_chaingun.skin \
+	martiancyborg/w_disruptor.iqm \
+	martiancyborg/w_disruptor.skin \
+	martiancyborg/w_flamethrower.iqm \
+	martiancyborg/w_flamethrower.skin \
+	martiancyborg/w_grapple.iqm \
+	martiancyborg/w_grapple.skin \
+	martiancyborg/w_minderaser.iqm \
+	martiancyborg/w_minderaser.skin \
+	martiancyborg/w_rlauncher.iqm \
+	martiancyborg/w_rlauncher.skin \
+	martiancyborg/w_smartgun.iqm \
+	martiancyborg/w_smartgun.skin \
+	martiancyborg/w_vaporizer.iqm \
+	martiancyborg/w_vaporizer.skin \
+	martiancyborg/w_violator.iqm \
+	martiancyborg/w_violator.skin \
 	martiancyborg/weapon.iqm \
 	martiancyborg/weapon.jpg \
 	martiancyborg/weapon.skin \
-	martiancyborg/w_hyperblaster.iqm \
-	martiancyborg/w_hyperblaster.skin \
-	martiancyborg/w_machinegun.iqm \
-	martiancyborg/w_machinegun.skin \
-	martiancyborg/w_minderaser.iqm \
-	martiancyborg/w_minderaser.skin \
-	martiancyborg/w_railgun.iqm \
-	martiancyborg/w_railgun.skin \
-	martiancyborg/w_rlauncher.iqm \
-	martiancyborg/w_rlauncher.skin \
-	martiancyborg/w_shotgun.iqm \
-	martiancyborg/w_shotgun.skin \
-	martiancyborg/w_sshotgun.iqm \
-	martiancyborg/w_sshotgun.skin \
-	martiancyborg/w_violator.iqm \
-	martiancyborg/w_violator.skin \
 	martianenforcer/alien \
 	martianenforcer/blue.jpg \
 	martianenforcer/blue_i.jpg \
@@ -282,34 +282,34 @@ nobase_dist_players_DATA = \
 	martianenforcer/pain50_2.wav \
 	martianenforcer/pain75_1.wav \
 	martianenforcer/pain75_2.wav \
-	martianenforcer/red_i.jpg \
 	martianenforcer/red.jpg \
+	martianenforcer/red_i.jpg \
 	martianenforcer/tris.iqm \
 	martianenforcer/tris.rgd \
-	martianenforcer/w_bfg.iqm \
-	martianenforcer/w_bfg.skin \
+	martianenforcer/w_beamgun.iqm \
+	martianenforcer/w_beamgun.skin \
 	martianenforcer/w_blaster.iqm \
 	martianenforcer/w_blaster.skin \
 	martianenforcer/w_chaingun.iqm \
 	martianenforcer/w_chaingun.skin \
-	martianenforcer/weapon.iqm \
-	martianenforcer/weapon.skin \
-	martianenforcer/w_hyperblaster.iqm \
-	martianenforcer/w_hyperblaster.skin \
-	martianenforcer/w_machinegun.iqm \
-	martianenforcer/w_machinegun.skin \
+	martianenforcer/w_disruptor.iqm \
+	martianenforcer/w_disruptor.skin \
+	martianenforcer/w_flamethrower.iqm \
+	martianenforcer/w_flamethrower.skin \
+	martianenforcer/w_grapple.iqm \
+	martianenforcer/w_grapple.skin \
 	martianenforcer/w_minderaser.iqm \
 	martianenforcer/w_minderaser.skin \
-	martianenforcer/w_railgun.iqm \
-	martianenforcer/w_railgun.skin \
 	martianenforcer/w_rlauncher.iqm \
 	martianenforcer/w_rlauncher.skin \
-	martianenforcer/w_shotgun.iqm \
-	martianenforcer/w_shotgun.skin \
-	martianenforcer/w_sshotgun.iqm \
-	martianenforcer/w_sshotgun.skin \
+	martianenforcer/w_smartgun.iqm \
+	martianenforcer/w_smartgun.skin \
+	martianenforcer/w_vaporizer.iqm \
+	martianenforcer/w_vaporizer.skin \
 	martianenforcer/w_violator.iqm \
 	martianenforcer/w_violator.skin \
+	martianenforcer/weapon.iqm \
+	martianenforcer/weapon.skin \
 	martianoverlord/alien \
 	martianoverlord/blue.jpg \
 	martianoverlord/blue_i.jpg \
@@ -344,34 +344,34 @@ nobase_dist_players_DATA = \
 	martianoverlord/pain50_2.wav \
 	martianoverlord/pain75_1.wav \
 	martianoverlord/pain75_2.wav \
-	martianoverlord/red_i.jpg \
 	martianoverlord/red.jpg \
+	martianoverlord/red_i.jpg \
 	martianoverlord/tris.iqm \
 	martianoverlord/tris.rgd \
-	martianoverlord/w_bfg.iqm \
-	martianoverlord/w_bfg.skin \
+	martianoverlord/w_beamgun.iqm \
+	martianoverlord/w_beamgun.skin \
 	martianoverlord/w_blaster.iqm \
 	martianoverlord/w_blaster.skin \
 	martianoverlord/w_chaingun.iqm \
 	martianoverlord/w_chaingun.skin \
-	martianoverlord/weapon.iqm \
-	martianoverlord/weapon.skin \
-	martianoverlord/w_hyperblaster.iqm \
-	martianoverlord/w_hyperblaster.skin \
-	martianoverlord/w_machinegun.iqm \
-	martianoverlord/w_machinegun.skin \
+	martianoverlord/w_disruptor.iqm \
+	martianoverlord/w_disruptor.skin \
+	martianoverlord/w_flamethrower.iqm \
+	martianoverlord/w_flamethrower.skin \
+	martianoverlord/w_grapple.iqm \
+	martianoverlord/w_grapple.skin \
 	martianoverlord/w_minderaser.iqm \
 	martianoverlord/w_minderaser.skin \
-	martianoverlord/w_railgun.iqm \
-	martianoverlord/w_railgun.skin \
 	martianoverlord/w_rlauncher.iqm \
 	martianoverlord/w_rlauncher.skin \
-	martianoverlord/w_shotgun.iqm \
-	martianoverlord/w_shotgun.skin \
-	martianoverlord/w_sshotgun.iqm \
-	martianoverlord/w_sshotgun.skin \
+	martianoverlord/w_smartgun.iqm \
+	martianoverlord/w_smartgun.skin \
+	martianoverlord/w_vaporizer.iqm \
+	martianoverlord/w_vaporizer.skin \
 	martianoverlord/w_violator.iqm \
 	martianoverlord/w_violator.skin \
+	martianoverlord/weapon.iqm \
+	martianoverlord/weapon.skin \
 	martianwarrior/alien \
 	martianwarrior/blue.jpg \
 	martianwarrior/blue_i.jpg \
@@ -410,34 +410,34 @@ nobase_dist_players_DATA = \
 	martianwarrior/pain50_2.wav \
 	martianwarrior/pain75_1.wav \
 	martianwarrior/pain75_2.wav \
-	martianwarrior/red_i.jpg \
 	martianwarrior/red.jpg \
+	martianwarrior/red_i.jpg \
 	martianwarrior/tris.iqm \
 	martianwarrior/tris.rgd \
-	martianwarrior/w_bfg.iqm \
-	martianwarrior/w_bfg.skin \
+	martianwarrior/w_beamgun.iqm \
+	martianwarrior/w_beamgun.skin \
 	martianwarrior/w_blaster.iqm \
 	martianwarrior/w_blaster.skin \
 	martianwarrior/w_chaingun.iqm \
 	martianwarrior/w_chaingun.skin \
-	martianwarrior/weapon.iqm \
-	martianwarrior/weapon.skin \
-	martianwarrior/w_hyperblaster.iqm \
-	martianwarrior/w_hyperblaster.skin \
-	martianwarrior/w_machinegun.iqm \
-	martianwarrior/w_machinegun.skin \
+	martianwarrior/w_disruptor.iqm \
+	martianwarrior/w_disruptor.skin \
+	martianwarrior/w_flamethrower.iqm \
+	martianwarrior/w_flamethrower.skin \
+	martianwarrior/w_grapple.iqm \
+	martianwarrior/w_grapple.skin \
 	martianwarrior/w_minderaser.iqm \
 	martianwarrior/w_minderaser.skin \
-	martianwarrior/w_railgun.iqm \
-	martianwarrior/w_railgun.skin \
 	martianwarrior/w_rlauncher.iqm \
 	martianwarrior/w_rlauncher.skin \
-	martianwarrior/w_shotgun.iqm \
-	martianwarrior/w_shotgun.skin \
-	martianwarrior/w_sshotgun.iqm \
-	martianwarrior/w_sshotgun.skin \
+	martianwarrior/w_smartgun.iqm \
+	martianwarrior/w_smartgun.skin \
+	martianwarrior/w_vaporizer.iqm \
+	martianwarrior/w_vaporizer.skin \
 	martianwarrior/w_violator.iqm \
 	martianwarrior/w_violator.skin \
+	martianwarrior/weapon.iqm \
+	martianwarrior/weapon.skin \
 	rustbot/blue.jpg \
 	rustbot/blue_i.jpg \
 	rustbot/bump1.wav \
@@ -478,32 +478,32 @@ nobase_dist_players_DATA = \
 	rustbot/tris.rgd \
 	rustbot/w_alienblaster.iqm \
 	rustbot/w_alienblaster.skin \
-	rustbot/w_bfg.iqm \
-	rustbot/w_bfg.skin \
+	rustbot/w_beamgun.iqm \
+	rustbot/w_beamgun.skin \
 	rustbot/w_blaster.iqm \
 	rustbot/w_blaster.skin \
 	rustbot/w_chaingun.iqm \
 	rustbot/w_chaingun.skin \
-	rustbot/w_hyperblaster.iqm \
-	rustbot/w_hyperblaster.skin \
-	rustbot/w_machinegun.iqm \
-	rustbot/w_machinegun.skin \
+	rustbot/w_disruptor.iqm \
+	rustbot/w_disruptor.skin \
+	rustbot/w_flamethrower.iqm \
+	rustbot/w_flamethrower.skin \
+	rustbot/w_grapple.iqm \
+	rustbot/w_grapple.skin \
 	rustbot/w_minderaser.iqm \
 	rustbot/w_minderaser.skin \
-	rustbot/w_railgun.iqm \
-	rustbot/w_railgun.skin \
 	rustbot/w_rlauncher.iqm \
 	rustbot/w_rlauncher.skin \
-	rustbot/w_shotgun.iqm \
-	rustbot/w_shotgun.skin \
-	rustbot/w_sshotgun.iqm \
-	rustbot/w_sshotgun.skin \
+	rustbot/w_smartgun.iqm \
+	rustbot/w_smartgun.skin \
+	rustbot/w_vaporizer.iqm \
+	rustbot/w_vaporizer.skin \
 	rustbot/w_violator.iqm \
 	rustbot/w_violator.skin \
 	rustbot/weapon.iqm \
 	rustbot/weapon.skin \
-	slashbot/blue_i.jpg \
 	slashbot/blue.jpg \
+	slashbot/blue_i.jpg \
 	slashbot/bump1.wav \
 	slashbot/death1.wav \
 	slashbot/death2.wav \
@@ -520,8 +520,8 @@ nobase_dist_players_DATA = \
 	slashbot/gurp2.wav \
 	slashbot/jump1.wav \
 	slashbot/lod1.iqm \
-	slashbot/lod2.iqm \
 	slashbot/lod1.rgd \
+	slashbot/lod2.iqm \
 	slashbot/lod2.rgd \
 	slashbot/pain100_1.wav \
 	slashbot/pain100_2.wav \
@@ -531,32 +531,32 @@ nobase_dist_players_DATA = \
 	slashbot/pain50_2.wav \
 	slashbot/pain75_1.wav \
 	slashbot/pain75_2.wav \
-	slashbot/red_i.jpg \
 	slashbot/red.jpg \
+	slashbot/red_i.jpg \
 	slashbot/robot \
 	slashbot/tris.iqm \
 	slashbot/tris.rgd \
-	slashbot/w_bfg.iqm \
-	slashbot/w_bfg.skin \
+	slashbot/w_beamgun.iqm \
+	slashbot/w_beamgun.skin \
 	slashbot/w_blaster.iqm \
 	slashbot/w_blaster.skin \
 	slashbot/w_chaingun.iqm \
 	slashbot/w_chaingun.skin \
-	slashbot/weapon.iqm \
-	slashbot/weapon.skin \
-	slashbot/w_hyperblaster.iqm \
-	slashbot/w_hyperblaster.skin \
-	slashbot/w_machinegun.iqm \
-	slashbot/w_machinegun.skin \
+	slashbot/w_disruptor.iqm \
+	slashbot/w_disruptor.skin \
+	slashbot/w_flamethrower.iqm \
+	slashbot/w_flamethrower.skin \
+	slashbot/w_grapple.iqm \
+	slashbot/w_grapple.skin \
 	slashbot/w_minderaser.iqm \
 	slashbot/w_minderaser.skin \
-	slashbot/w_railgun.iqm \
-	slashbot/w_railgun.skin \
 	slashbot/w_rlauncher.iqm \
 	slashbot/w_rlauncher.skin \
-	slashbot/w_shotgun.iqm \
-	slashbot/w_shotgun.skin \
-	slashbot/w_sshotgun.iqm \
-	slashbot/w_sshotgun.skin \
+	slashbot/w_smartgun.iqm \
+	slashbot/w_smartgun.skin \
+	slashbot/w_vaporizer.iqm \
+	slashbot/w_vaporizer.skin \
 	slashbot/w_violator.iqm \
-	slashbot/w_violator.skin
+	slashbot/w_violator.skin \
+	slashbot/weapon.iqm \
+	slashbot/weapon.skin

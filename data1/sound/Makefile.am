@@ -170,11 +170,11 @@ nobase_dist_sound_DATA = \
 	taunts/enforcer/taunt3.wav \
 	taunts/enforcer/taunt4.wav \
 	taunts/enforcer/taunt5.wav \
-	taunts/lauren/taunt1.wav \
-	taunts/lauren/taunt2.wav \
-	taunts/lauren/taunt3.wav \
-	taunts/lauren/taunt4.wav \
-	taunts/lauren/taunt5.wav \
+	taunts/femborg/taunt1.wav \
+	taunts/femborg/taunt2.wav \
+	taunts/femborg/taunt3.wav \
+	taunts/femborg/taunt4.wav \
+	taunts/femborg/taunt5.wav \
 	taunts/martiancyborg/taunt1.wav \
 	taunts/martiancyborg/taunt2.wav \
 	taunts/martiancyborg/taunt3.wav \
