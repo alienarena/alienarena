@@ -1149,27 +1149,35 @@ void R_GenerateEntityShadow (entity_t *ent, const vec3_t statLightPosition)
 		
 		r_nonSunStaticShadowsOn = true;
 
-		SM_SetupCasterMatrices (origin, zOffset, statLightPosition);
-		qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_otherstatic]);
-		qglClear (GL_DEPTH_BUFFER_BIT);
-		SM_SetupGLState ();
-		qglViewport (0, 0, r_depthtextures[deptex_otherstatic]->upload_width, r_depthtextures[deptex_otherstatic]->upload_height);
+		if(!(ent->flags & RF_NOSHADOWS))
+		{
+			SM_SetupCasterMatrices (origin, zOffset, statLightPosition);
+			qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_otherstatic]);
+			qglClear (GL_DEPTH_BUFFER_BIT);
+			SM_SetupGLState ();
+			qglViewport (0, 0, r_depthtextures[deptex_otherstatic]->upload_width, r_depthtextures[deptex_otherstatic]->upload_height);
 		
-		R_DrawEntityCaster (ent);
+			R_DrawEntityCaster (ent);
 		
-		SM_SetTextureMatrix (6);
-		SM_TeardownGLState ();
-		SM_TeardownCasterMatrices ();
-		qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+			SM_SetTextureMatrix (6);
+			SM_TeardownGLState ();
+			SM_TeardownCasterMatrices ();
+			qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 
-		//re-render affected polys with shadowmap for this entity
-		GLSTATE_ENABLE_BLEND
-		GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
+			//re-render affected polys with shadowmap for this entity
+			GLSTATE_ENABLE_BLEND
+			GL_BlendFunction (GL_ZERO, GL_SRC_COLOR);
 
-		R_RedrawWorldWithShadow (ent, ent->model, statLightPosition);
+			R_RedrawWorldWithShadow (ent, ent->model, statLightPosition);
 
-		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		GLSTATE_DISABLE_BLEND
+			GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GLSTATE_DISABLE_BLEND
+		}
+		else
+		{
+			qglBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fboId[deptex_otherstatic]);
+			qglClear (GL_DEPTH_BUFFER_BIT);
+		}
 
 		if (!(ent->flags & RF_VIEWERMODEL))
 		{
