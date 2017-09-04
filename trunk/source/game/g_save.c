@@ -349,7 +349,6 @@ void InitGame (void)
 	}
 	else
 		FRAMETIME = 1.0/(float)sv_tickrate->integer;	
-	//FRAMETIME = 0.025;
 	
 	if(g_tactical->integer)
 	{

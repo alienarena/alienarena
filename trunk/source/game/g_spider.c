@@ -267,7 +267,7 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 
 void spider_think (edict_t *self)
 {	
-	self->nextthink = level.time + TENFPS;
+	self->nextthink = level.time + FRAMETIME;
 }
 
 void spider_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
