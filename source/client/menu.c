@@ -46,6 +46,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
+#include "curl/curl.h"
+
 #include "client.h"
 #include "client/qmenu.h"
 
@@ -160,6 +162,7 @@ extern cvar_t *background_music;
 extern cvar_t *background_music_vol;
 extern cvar_t *fov;
 extern cvar_t *stats_password;
+extern CURL *curl;
 
 static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
@@ -1081,10 +1084,78 @@ static const char *news[] =
 	"+Alien Arena News Feed",
 	"",
 	"+LATEST AA NEWS!",
-	"This is a test.",
-	"Real news coming soon!",
+	//"This is a test.",
+	//"Real news coming soon!",
 	0
 };
+
+static char newsFeed[256][256];
+
+static FILE* newsfile_open( const char* mode )
+{
+	FILE* file;
+	char pathbfr[MAX_OSPATH];
+
+	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/%s", FS_Gamedir(), "newsfeed.db");
+	file = fopen( pathbfr, mode );
+
+	return file;
+}
+
+static size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
+{
+	FILE* file;
+	size_t bytecount = 0;
+
+	file = newsfile_open( "a" ); //append, don't rewrite
+
+	if(file) {
+		//write buffer to file
+		bytecount = fwrite( buffer, size, nmemb, file );
+		fclose(file);
+	}
+	return bytecount;
+}
+
+void GetNews()
+{
+	FILE* file;
+	char newsserver[128];
+	char line[256];
+	int i = 0;
+
+	CURL* easyhandle = curl_easy_init() ;
+
+	file = newsfile_open( "w" ); //create new, blank file for writing
+	if(file)
+		fclose(file);
+
+	Com_sprintf(newsserver, sizeof(newsserver), "http://stats.planetarena.org/newsfeed.db");
+
+	curl_easy_setopt( easyhandle, CURLOPT_URL, newsserver ) ;
+
+	// time out in 5s
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+
+	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;
+
+	curl_easy_perform( easyhandle );
+
+	curl_easy_cleanup( easyhandle );
+
+	// parse the file and build string array
+	file = newsfile_open( "r" ) ;
+
+	if(file != NULL) 
+	{
+		while(fgets(line, sizeof(line), file) != NULL)
+		{
+			strcpy(newsFeed[i], line);
+			i++;
+		}
+		fclose(file);
+	}
+}
 
 static void M_Main_Draw (menuvec2_t offset)
 {
@@ -1200,6 +1271,27 @@ static void M_Main_Draw (menuvec2_t offset)
 		}
 	}
 
+	//add in dynamicly read news portions here.
+	for ( i = 0; strlen(newsFeed[i]) > 4; y += 12*scale, i++ )
+	{
+		if ( y <= 12*scale || y > 48*scale)
+			continue;
+
+		box.y = offset.y + y;
+		box.x = offset.x;
+		box.height = 0;
+		box.width = viddef.width/4.0;
+
+		if ( newsFeed[i][0] == '+' )
+		{
+			FNT_BoundedPrint (font, newsFeed[i]+1, FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[3]);
+		}
+		else
+		{
+			FNT_BoundedPrint (font, newsFeed[i], FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[7]);
+		}
+	}
+
 	if ( y <= 12*scale )
 		news_start_time = cls.realtime;
 }
@@ -1289,6 +1381,7 @@ static const char *M_Main_Key (int key)
 void M_Menu_Main_f (void)
 {
 	S_StartMenuMusic();
+	GetNews();
 	cls.key_dest = key_menu;
 	if (cls.state == ca_active)
 		mstate_reset ();
