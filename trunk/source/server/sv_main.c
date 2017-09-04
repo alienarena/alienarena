@@ -480,7 +480,7 @@ void SVC_DirectConnect (void)
 	version = atoi(Cmd_Argv(1));
 	if (version != PROTOCOL_VERSION)
 	{
-		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is protocol version %s\n", PROTOCOL_VERSION);
+		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is protocol version %i\n", PROTOCOL_VERSION);
 		Com_DPrintf ("    rejected connect from protocol version %i\n", version);
 		SV_LogEvent( adr , "RVR" , NULL );
 		return;
