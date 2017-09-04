@@ -276,9 +276,14 @@ void M_MoveFrame (edict_t *self)
 		{
 			if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
 			{
-				self->s.frame++;
-				if (self->s.frame > move->lastframe)
-					self->s.frame = move->firstframe;
+				if(level.framenum - self->last_anim_frame >= round(TENFPS/FRAMETIME))
+				{
+					self->s.frame++;
+					if (self->s.frame > move->lastframe)
+						self->s.frame = move->firstframe;
+
+					self->last_anim_frame = level.framenum;
+				}
 			}
 		}
 	}
