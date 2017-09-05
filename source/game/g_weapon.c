@@ -2169,7 +2169,7 @@ void abomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
 		safe_bprintf(PRINT_HIGH, "Alien bomb is armed!\n"); 
 		gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "weapons/adetonatorup.wav" ), 1, ATTN_NONE, 0 );
 	}
-	else if((other->has_minderaser || other->has_vaporizor) && ent->armed)
+	else if((other->has_minderaser || other->has_vaporizer) && ent->armed)
 	{
 		ent->armed = false;
 		safe_bprintf(PRINT_HIGH, "Alien bomb is disarmed!\n");
@@ -2199,7 +2199,7 @@ void hbomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
 		safe_bprintf(PRINT_HIGH, "Bomb is armed!\n"); 
 		gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "weapons/hdetonatorup.wav" ), 1, ATTN_NONE, 0 );
 	}
-	else if((other->has_minderaser || other->has_vaporizor) && ent->armed)
+	else if((other->has_minderaser || other->has_vaporizer) && ent->armed)
 	{
 		ent->armed = false;
 		safe_bprintf(PRINT_HIGH, "Bomb is disarmed!\n");

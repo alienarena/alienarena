@@ -3061,7 +3061,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 	}
 }
 
-#define VAPORIZORTRAILSPACE 20
+#define VAPORIZERTRAILSPACE 20
 
 void CL_VaporizerBeam (vec3_t start, vec3_t end)
 {
@@ -3078,11 +3078,11 @@ void CL_VaporizerBeam (vec3_t start, vec3_t end)
 
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
-	VectorScale (vec, VAPORIZORTRAILSPACE, vec);
+	VectorScale (vec, VAPORIZERTRAILSPACE, vec);
 	VectorCopy (start, move);
 
 	//muzzleflash
-	VectorScale (vec2, -VAPORIZORTRAILSPACE/2, vec2);
+	VectorScale (vec2, -VAPORIZERTRAILSPACE/2, vec2);
 	VectorAdd(start, vec2, start);
 	for(i = 0; i < 8; i++) {
 
@@ -3107,7 +3107,7 @@ void CL_VaporizerBeam (vec3_t start, vec3_t end)
 		}
 	}
 
-	for (; len>0; len -= VAPORIZORTRAILSPACE)
+	for (; len>0; len -= VAPORIZERTRAILSPACE)
 	{
 		VectorCopy (move, last);
 		VectorAdd (move, vec, move);
