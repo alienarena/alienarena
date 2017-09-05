@@ -4911,7 +4911,7 @@ static char *weapon_icon_names[][2] =
 	{"Rocket Launcher",	"rocketlauncher"},
 	{"Alien Disruptor",	"disruptor"},
 	{"Disruptor",		"beamgun"},
-	{"Alien Vaporizer",	"vaporizor"} // note the different spellings
+	{"Alien Vaporizer",	"vaporizer"} // note the different spellings
 };
 #define num_weapon_icons static_array_size(weapon_icon_names)
 

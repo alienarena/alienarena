@@ -1461,7 +1461,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (weapon_vaporizer, IT_WEAPON),
 		GITEM_INIT_CALLBACKS (Pickup_Weapon, Use_Weapon, Drop_Weapon, Weapon_Vaporizer),
 		GITEM_INIT_WORLDMODEL ("models/weapons/g_vaporizer/tris.iqm", EF_ROTATE),
-		GITEM_INIT_CLIENTSIDE ("i_hud_vaporizor", "Alien Vaporizer", "misc/w_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("i_hud_vaporizer", "Alien Vaporizer", "misc/w_pkup.wav"),
 		GITEM_INIT_WEAP (2, 1, "Slugs", "models/weapons/v_vaporizer/tris.iqm", "w_vaporizer.iqm"),
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav weapons/vaporizerreload.wav"
 	},

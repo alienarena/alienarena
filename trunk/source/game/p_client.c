@@ -1896,7 +1896,7 @@ void ParseClassFile( char *config_file, edict_t *ent )
 				strcpy( a_string, COM_Parse( &s ) );
 				ent->has_minderaser = atoi(a_string);
 				strcpy( a_string, COM_Parse( &s ) );
-				ent->has_vaporizor = atoi(a_string);
+				ent->has_vaporizer = atoi(a_string);
 
 				//note - we may or may not need the ent vars, for now keep them
 				if(ent->max_health > 0)
@@ -1926,7 +1926,7 @@ void ParseClassFile( char *config_file, edict_t *ent )
 					ent->client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = 1;
 				}
 
-				if(ent->has_vaporizor)
+				if(ent->has_vaporizer)
 				{
 					ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] = 1;
 					ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 4;
@@ -2008,7 +2008,7 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 				//0-1 (has bomb)
 				//0-1 (has detonator)
 				//0-1 (has mind eraser)
-				//0-1 (has vaporizor)
+				//0-1 (has vaporizer)
 			
 				ParseClassFile(modelpath, ent); 
 				if(ent->has_bomb)

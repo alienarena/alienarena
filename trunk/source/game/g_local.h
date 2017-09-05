@@ -1711,7 +1711,7 @@ struct edict_s
 	//tactical mode
 	qboolean has_bomb;
 	qboolean has_detonator;
-	qboolean has_vaporizor;
+	qboolean has_vaporizer;
 	qboolean has_minderaser;
 	int armor_type;
 	char charModel[MAX_OSPATH];
