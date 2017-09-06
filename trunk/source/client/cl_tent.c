@@ -661,6 +661,12 @@ void CL_ParseTEnt (void)
 	case TE_DISINTEGRATED:
 		stStats.g_NumDisintegrates++;
 		break;
+	case TE_VIOLATED:
+		stStats.g_NumViolations++;
+		break;
+	case TE_MIDAIRSHOT:
+		stStats.g_NumMidAirShots++;
+		break;
 
 	default:			// Do we really want to drop an error for this?
 		//Com_Error (ERR_DROP, "CL_ParseTEnt: bad type");
