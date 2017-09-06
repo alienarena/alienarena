@@ -54,8 +54,10 @@ nobase_dist_models_DATA = \
 	items/armor/shard/tris.skin \
 	items/armor/skin_fx.tga \
 	items/armor/skin_normal.tga \
-	items/flags/flag1.md2 \
-	items/flags/flag2.md2 \
+	items/flags/flag1.iqm \
+	items/flags/flag1.skin \
+	items/flags/flag2.iqm \
+	items/flags/flag2.skin \
 	items/haste/skin.jpg \
 	items/haste/skin_fx.tga \
 	items/haste/skin_normal.jpg \
