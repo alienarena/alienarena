@@ -76,22 +76,6 @@ maps/meshes/desert/bookshelf
 		normalmap
 	}
 }
-models/weapons/v_warriorhands/skin
-{
-	{
-		map models/weapons/v_warriorhands/skin_normal.tga
-		normalmap
-	}
-}
-models/weapons/v_wizardhands/skin
-{
-	{
-		map models/weapons/v_wizardhands/skin_normal.tga
-		normalmap
-		map2 models/weapons/v_wizardhands/skin_fx.tga
-		glow
-	}
-}
 maps/meshes/desert/cactus1
 {
 	{
