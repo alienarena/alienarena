@@ -4282,7 +4282,12 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 	while( token != NULL ) 
 	{
 		/* While there are tokens in "string" */
-		if (!Q_strcasecmp (lasttoken, "admin"))
+		if (!Q_strcasecmp (lasttoken, "protocol"))
+		{
+			if(atoi(token) != PROTOCOL_VERSION)
+				return false;
+		}
+		else if (!Q_strcasecmp (lasttoken, "admin"))
 			Com_sprintf(destserver->szAdmin, sizeof(destserver->szAdmin), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "website"))
 			Com_sprintf(destserver->szWebsite, sizeof(destserver->szWebsite), "%s", token);
