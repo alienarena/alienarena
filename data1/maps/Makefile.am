@@ -526,7 +526,6 @@ nobase_dist_maps_DATA = \
 	meshes/tech/drarch_normal.jpg \
 	meshes/tech/glasstube.md2 \
 	meshes/tech/martian_dead.iqm \
-	meshes/tech/martian_dead.md2 \
 	meshes/tech/martian_dead.skin \
 	meshes/tech/obarch1.jpg \
 	meshes/tech/obarch1.md2 \
