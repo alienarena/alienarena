@@ -2730,10 +2730,13 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			if (!cl_ent->inuse)
 				continue;
 
-			if(!strcmp(ent->client->pers.netname, cl_ent->client->pers.netname)) {
-
+			if(!strcmp(ent->client->pers.netname, cl_ent->client->pers.netname)) 
+			{
 				if(playernum != j)
+				{
 					duplicate = true;
+					break;
+				}
 			}
 		}
 

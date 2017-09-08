@@ -1546,6 +1546,18 @@ always owned, never in the world
 /* precache */ ""
 	},
 
+	/*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16) - To Do - not sure we use this, check on that.
+*/
+	{
+		GITEM_INIT_IDENTIFY (ammo_slugs, IT_AMMO),
+		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
+		GITEM_INIT_WORLDMODEL (NULL, 0),
+		GITEM_INIT_CLIENTSIDE ("w_vaporizer", "Slugs", "misc/am_pkup.wav"),
+		GITEM_INIT_AMMO (10),
+/* precache */ ""
+	},
+
+
 	{
 		GITEM_INIT_IDENTIFY (ammo_seekers, IT_AMMO),
 		// maybe all callbacks should be NULL here?
