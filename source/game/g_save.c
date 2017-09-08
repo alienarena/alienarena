@@ -288,7 +288,7 @@ void InitGame (void)
 
 	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
 	
-	g_dmlights = gi.cvar ("g_dm_lights", "0", CVAR_ARCHIVE | CVAR_GAMEINFO);
+	g_dmlights = gi.cvar ("g_dm_lights", "1", CVAR_ARCHIVE | CVAR_GAMEINFO);
 
 	run_pitch = gi.cvar ("run_pitch", "0.002", 0);
 	run_roll = gi.cvar ("run_roll", "0.005", 0);
