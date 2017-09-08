@@ -116,4 +116,15 @@ textures/blood/slime_splatter2
 		cube
 	}
 }
+textures/arena9/circuitwall1
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		alphashift 5 0.2 0.75
+		scroll static 0 sin 1
+		nolightmap
+	}
+}
 			

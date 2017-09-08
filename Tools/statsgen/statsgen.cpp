@@ -2705,13 +2705,14 @@ int main( int argc, char** argv )
 		}
 
 		//each day, check for inactive players, and decay their point totals
+#ifdef DECAY
 		if ( st_poll.wDayOfWeek != st_decay.wDayOfWeek )
 		{ //daily edge trigger
 			cout << "Checking for inactive players..." << endl;
 			CheckInactivePlayers();
 			st_decay = st_poll;
 		}
-
+#endif
 		//backup database every hour
 		if ( st_poll.wHour != st_backup.wHour )
 		{ //hourly edge trigger

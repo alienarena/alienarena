@@ -1498,7 +1498,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (ammo_shells, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/shells/medium/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("a_shells", "Alien Smart Grenade", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("w_smartgun", "Alien Smart Grenade", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (10),
 /* precache */ ""
 	},
@@ -1508,7 +1508,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (ammo_grenades, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/grenades/medium/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("a_grenades", "Napalm", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("w_flamethrower", "Napalm", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (50),
 /* precache */ ""
 	},
@@ -1519,7 +1519,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (ammo_bullets, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/bullets/medium/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("a_bullets", "Bullets", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("w_chaingun", "Bullets", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (50),
 /* precache */ ""
 	},
@@ -1530,7 +1530,7 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (ammo_cells, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/cells/medium/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("a_cells", "Cells", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("w_beamgun", "Cells", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (50),
 /* precache */ ""
 	},
@@ -1541,19 +1541,8 @@ always owned, never in the world
 		GITEM_INIT_IDENTIFY (ammo_rockets, IT_AMMO),
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL ("models/items/ammo/rockets/medium/tris.iqm", 0),
-		GITEM_INIT_CLIENTSIDE ("a_rockets", "Rockets", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE ("w_rlauncher", "Rockets", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (5),
-/* precache */ ""
-	},
-
-/*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16) - To Do - not sure we use this, check on that.
-*/
-	{
-		GITEM_INIT_IDENTIFY (ammo_slugs, IT_AMMO),
-		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
-		GITEM_INIT_WORLDMODEL (NULL, 0),
-		GITEM_INIT_CLIENTSIDE ("a_slugs", "Slugs", "misc/am_pkup.wav"),
-		GITEM_INIT_AMMO (10),
 /* precache */ ""
 	},
 
@@ -1562,7 +1551,7 @@ always owned, never in the world
 		// maybe all callbacks should be NULL here?
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
-		GITEM_INIT_CLIENTSIDE ("a_seekers", "Seekers", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE (NULL, "Seekers", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (1),
 /* precache */ ""
 	},
@@ -1572,7 +1561,7 @@ always owned, never in the world
 		// maybe all callbacks should be NULL here?
 		GITEM_INIT_CALLBACKS (Pickup_Ammo, NULL, Drop_Ammo, NULL),
 		GITEM_INIT_WORLDMODEL (NULL, 0),
-		GITEM_INIT_CLIENTSIDE ("a_bombs", "Bombs", "misc/am_pkup.wav"),
+		GITEM_INIT_CLIENTSIDE (NULL, "Bombs", "misc/am_pkup.wav"),
 		GITEM_INIT_AMMO (1),
 /* precache */ ""
 	},
