@@ -3729,7 +3729,7 @@ static void M_Menu_Game_f (void)
 	
 	int i;
 	
-	setup_window (s_game_screen, s_game_menu, "SINGLE PLAYER");
+	setup_window (s_game_screen, s_game_menu, "PRACTICE");
 	
 	for (i = 0; i < num_singleplayer_skill_levels; i++)
 	{
