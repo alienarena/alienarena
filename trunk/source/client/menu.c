@@ -3985,6 +3985,11 @@ static void JoinServerFunc (UNUSED void *unused)
 	int		i;
 	char	buffer[128];
 	
+	if(!PLAYER_NAME_UNIQUE) {
+		M_Menu_PlayerConfig_f();
+		return;
+	}
+	
 	cl.tactical = false;
 
 	remoteserver_runspeed = 300; //default
@@ -4219,10 +4224,11 @@ static void M_Menu_SelectedServer_f (void)
 	
 	s_servers[serverindex].serverinfo_submenu.statusbar = NULL;
 	s_servers[serverindex].connect.generic.statusbar = NULL;
-	if (serverIsOutdated (mservers[serverindex].szVersion))
-		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
-	else if (!PLAYER_NAME_UNIQUE)
+			
+	if (!PLAYER_NAME_UNIQUE)
 		s_servers[serverindex].connect.generic.statusbar = "You must change your player name from the default before connecting!";
+	else if (serverIsOutdated (mservers[serverindex].szVersion))
+		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
 	else
 		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
 	
@@ -4449,11 +4455,6 @@ static void ClickServerFunc (void *self)
 		SelectServer (index);
 		if (cursor.buttonclicks[MOUSEBUTTON1] != 2)
 			return;
-	}
-
-	if(!PLAYER_NAME_UNIQUE) {
-		M_Menu_PlayerConfig_f();
-		return;
 	}
 	
 	JoinServerFunc (NULL);
