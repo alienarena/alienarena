@@ -349,7 +349,6 @@ nobase_dist_pics_DATA = \
 	m_main_quit.tga \
 	m_main_quit_fx.tga \
 	m_main_quit_sel.tga \
-	m_main_tactical.tga \
 	m_main_video.tga \
 	m_main_video_fx.tga \
 	m_main_video_sel.tga \

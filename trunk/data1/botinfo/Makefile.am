@@ -33,38 +33,37 @@ nobase_dist_botinfo_DATA = \
 	sample.cfg \
 	allbots.tmp \
 	team.tmp \
-	dm-babel2k16.tmp \
-	dm-bloodfactory2k15.tmp \
-	dm-crucible2k16.tmp \
-	dm-deathray2k16.tmp \
-	dm-dismal2k15.tmp \
-	dm-dynamo2k16.tmp \
-	dm-extermination2k15.tmp \
-	dm-gauntlet2k16.tmp \
-	dm-neptune2k15.tmp \
-	dm-purgatory2k16.tmp \
-	dm-turbo2k15.tmp \
-	dm-violator2k15.tmp \
+	dm-babel.tmp \
+	dm-bloodfactory.tmp \
+	dm-crucible.tmp \
+	dm-deathray.tmp \
+	dm-dismal.tmp \
+	dm-dynamo.tmp \
+	dm-extermination.tmp \
+	dm-gauntlet.tmp \
+	dm-neptune.tmp \
+	dm-purgatory.tmp \
+	dm-turbo.tmp \
+	dm-violator.tmp \
 	dm-wasteland.tmp \
-	tac-extermination2k15.tmp \
+	tac-extermination.tmp \
 	tac-impact.tmp \
-	nav/ctf-cryogenic2k16.nod \
-	nav/ctf-extermination2k15.nod \
-	nav/ctf-violator2k16.nod \
-	nav/ctf-zion2k16.nod \
-	nav/dm-babel2k16.nod \
-	nav/dm-bloodfactory2k15.nod \
-	nav/dm-chasmatic2k9.nod \
-	nav/dm-crucible2k16.nod \
-	nav/dm-deathray2k16.nod \
-	nav/dm-dismal2k15.nod \
-	nav/dm-dynamo2k16.nod \
-	nav/dm-extermination2k15.nod \
-	nav/dm-gauntlet2k16.nod \
-	nav/dm-neptune2k15.nod \
-	nav/dm-purgatory2k16.nod \
-	nav/dm-turbo2k15.nod \
-	nav/dm-violator2k15.nod \
+	nav/ctf-cryogenic.nod \
+	nav/ctf-extermination.nod \
+	nav/ctf-violator.nod \
+	nav/ctf-zion.nod \
+	nav/dm-babel.nod \
+	nav/dm-bloodfactory.nod \
+	nav/dm-crucible.nod \
+	nav/dm-deathray.nod \
+	nav/dm-dismal.nod \
+	nav/dm-dynamo.nod \
+	nav/dm-extermination.nod \
+	nav/dm-gauntlet.nod \
+	nav/dm-neptune.nod \
+	nav/dm-purgatory.nod \
+	nav/dm-turbo.nod \
+	nav/dm-violator.nod \
 	nav/dm-wasteland.nod \
-	nav/tac-extermination2k15.nod \
+	nav/tac-extermination.nod \
 	nav/tac-impact.nod 

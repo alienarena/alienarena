@@ -227,11 +227,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 mapsdir = $(pkgdatadir)/data1/maps
 nobase_dist_maps_DATA = \
-	ctf-cryogenic2k16.bsp \
-	ctf-extermination2k15.bsp \
-	ctf-frost2k15.bsp \
-	ctf-violator2k16.bsp \
-	ctf-zion2k16.bsp \
+	ctf-cryogenic.bsp \
+	ctf-extermination.bsp \
+	ctf-frost.bsp \
+	ctf-violator.bsp \
+	ctf-zion.bsp \
 	decals/blood0.decal \
 	decals/blood1.decal \
 	decals/blood2.decal \
@@ -255,26 +255,26 @@ nobase_dist_maps_DATA = \
 	decals/snow3.decal \
 	decals/stonearch1.decal \
 	decals/stonearch2.decal \
-	dm-babel2k16.bsp \
-	dm-babel2k16.lightmap \
-	dm-bloodfactory2k15.bsp \
-	dm-bloodfactory2k15.lightmap \
-	dm-crucible2k16.bsp \
-	dm-crucible2k16.lightmap \
-	dm-deathray2k16.bsp \
-	dm-dismal2k15.bsp \
-	dm-dynamo2k16.bsp \
-	dm-extermination2k15.bsp \
-	dm-extermination2k15.lightmap \
-	dm-gauntlet2k16.bsp \
-	dm-neptune2k15.bsp \
-	dm-purgatory2k16.bsp \
-	dm-purgatory2k16.lightmap \
-	dm-turbo2k15.bsp \
-	dm-violator2k15.bsp \
-	dm-violator2k15.lightmap \
+	dm-babel.bsp \
+	dm-babel.lightmap \
+	dm-bloodfactory.bsp \
+	dm-bloodfactory.lightmap \
+	dm-crucible.bsp \
+	dm-crucible.lightmap \
+	dm-deathray.bsp \
+	dm-dismal.bsp \
+	dm-dynamo.bsp \
+	dm-extermination.bsp \
+	dm-extermination.lightmap \
+	dm-gauntlet.bsp \
+	dm-neptune.bsp \
+	dm-purgatory.bsp \
+	dm-purgatory.lightmap \
+	dm-turbo.bsp \
+	dm-violator.bsp \
+	dm-violator.lightmap \
 	dm-wasteland.bsp \
-	tac-extermination2k15.bsp \
+	tac-extermination.bsp \
 	tac-impact.bsp \
 	meshes/arch_fx.tga \
 	meshes/arch.md2 \
@@ -1071,44 +1071,44 @@ nobase_dist_maps_DATA = \
 	meshes/tac-impact/rubble2.terrainx \
 	meshes/tac-impact/rubble3.terrainx \
 	meshes/tac-impact/rubble4.terrainx \
-	scripts/ctf-cryogenic2k16.fog \
-	scripts/ctf-cryogenic2k16.mus \
-	scripts/ctf-extermination2k15.fog \
-	scripts/ctf-extermination2k15.mus \
-	scripts/ctf-frost2k15.fog \
-	scripts/ctf-frost2k15.mus \
-	scripts/ctf-violator2k16.fog \
-	scripts/ctf-violator2k16.mus \
-	scripts/ctf-zion2k16.fog \
-	scripts/ctf-zion2k16.mus \
-	scripts/dm-babel2k16.fog \
-	scripts/dm-babel2k16.mus \
-	scripts/dm-bloodfactory2k15.fog \
-	scripts/dm-bloodfactory2k15.mus \
-	scripts/dm-crucible2k16.fog \
-	scripts/dm-crucible2k16.mus \
-	scripts/dm-deathray2k16.fog \
-	scripts/dm-deathray2k16.mus \
-	scripts/dm-dismal2k15.fog \
-	scripts/dm-dismal2k15.mus \
-	scripts/dm-dynamo2k16.fog \
-	scripts/dm-dynamo2k16.mus \
-	scripts/dm-extermination2k15.fog \
-	scripts/dm-extermination2k15.mus \
-	scripts/dm-gauntlet2k16.fog \
-	scripts/dm-gauntlet2k16.mus \
-	scripts/dm-neptune2k15.fog \
-	scripts/dm-neptune2k15.mus \
-	scripts/dm-purgatory2k16.fog \
-	scripts/dm-purgatory2k16.mus \
-	scripts/dm-turbo2k15.fog \
-	scripts/dm-turbo2k15.mus \
-	scripts/dm-violator2k15.fog \
-	scripts/dm-violator2k15.mus \
+	scripts/ctf-cryogenic.fog \
+	scripts/ctf-cryogenic.mus \
+	scripts/ctf-extermination.fog \
+	scripts/ctf-extermination.mus \
+	scripts/ctf-frost.fog \
+	scripts/ctf-frost.mus \
+	scripts/ctf-violator.fog \
+	scripts/ctf-violator.mus \
+	scripts/ctf-zion.fog \
+	scripts/ctf-zion.mus \
+	scripts/dm-babel.fog \
+	scripts/dm-babel.mus \
+	scripts/dm-bloodfactory.fog \
+	scripts/dm-bloodfactory.mus \
+	scripts/dm-crucible.fog \
+	scripts/dm-crucible.mus \
+	scripts/dm-deathray.fog \
+	scripts/dm-deathray.mus \
+	scripts/dm-dismal.fog \
+	scripts/dm-dismal.mus \
+	scripts/dm-dynamo.fog \
+	scripts/dm-dynamo.mus \
+	scripts/dm-extermination.fog \
+	scripts/dm-extermination.mus \
+	scripts/dm-gauntlet.fog \
+	scripts/dm-gauntlet.mus \
+	scripts/dm-neptune.fog \
+	scripts/dm-neptune.mus \
+	scripts/dm-purgatory.fog \
+	scripts/dm-purgatory.mus \
+	scripts/dm-turbo.fog \
+	scripts/dm-turbo.mus \
+	scripts/dm-violator.fog \
+	scripts/dm-violator.mus \
 	scripts/dm-wasteland.fog \
 	scripts/dm-wasteland.mus \
-	scripts/tac-extermination2k15.fog \
-	scripts/tac-extermination2k15.mus \
+	scripts/tac-extermination.fog \
+	scripts/tac-extermination.mus \
 	scripts/tac-impact.fog \
 	scripts/tac-impact.mus
 
