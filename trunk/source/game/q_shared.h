@@ -500,16 +500,6 @@ typedef struct cplane_s
 	byte	pad[2];
 } cplane_t;
 
-// structure offset for asm code
-#define CPLANE_NORMAL_X			0
-#define CPLANE_NORMAL_Y			4
-#define CPLANE_NORMAL_Z			8
-#define CPLANE_DIST				12
-#define CPLANE_TYPE				16
-#define CPLANE_SIGNBITS			17
-#define CPLANE_PAD0				18
-#define CPLANE_PAD1				19
-
 typedef struct cmodel_s
 {
 	vec3_t			mins, maxs;
