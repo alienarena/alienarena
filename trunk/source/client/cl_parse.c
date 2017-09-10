@@ -972,7 +972,12 @@ void CL_ParseServerMessage (void)
 		case svc_stufftext:
 			s = MSG_ReadString (&net_message);
 			Com_DPrintf ("stufftext: %s\n", s);
-			Cbuf_AddText (s);
+			// HACK to unbreak demo playback (since we can't wait until next
+			// frame for the cbuf to get executed.)
+			if (!Q_strcasecmp (s, "precache\n"))
+			    CL_Precache_f ();
+			else
+			    Cbuf_AddText (s);
 			break;
 
 		case svc_serverdata:
