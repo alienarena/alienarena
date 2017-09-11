@@ -321,11 +321,20 @@ static int XLateKey( XKeyEvent *ev )
 		break;
 
 	case XK_Return:
-		if (ev->state & Mod1Mask) 
+		if ( ev->state & Mod1Mask ) 
 		{ 	// ALT-ENTER			
 			if ( vid_fullscreen )
 			{
-				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value ); // TODO: update for the fact that this isn't boolean anymore!
+				switch ( vid_fullscreen->integer ) {
+					case windowmode_windowed:
+						Cvar_SetValue( "vid_fullscreen", vid_preferred_fullscreen->value );
+						break;
+					case windowmode_borderless_windowed:
+					case windowmode_exclusive_fullscreen:
+						Cvar_SetValue( "vid_preferred_fullscreen", vid_fullscreen->value );
+						Cvar_SetValue( "vid_fullscreen", windowmode_windowed );
+						break;
+				}
 			}		
 		} else
 		{
