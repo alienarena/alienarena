@@ -133,6 +133,7 @@ cvar_t	*gl_texturesolidmode;
 cvar_t	*gl_lockpvs;
 
 cvar_t	*vid_fullscreen;
+cvar_t	*vid_preferred_fullscreen;
 cvar_t	*vid_gamma;
 cvar_t  *vid_contrast;
 cvar_t	*vid_ref;
@@ -1335,9 +1336,13 @@ void R_Register( void )
 
 	// see windowmode_t;
 	// 0 = windowed
-	// 1 = full screen
-	// 2 = borderless fullscreen
+	// 1 = borderless windowed
+	// 2 = exclusive fullscreen
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_INT);
+
+	// Last used fullscreen mode: borderless windowed (1) or exclusive fullscreen (2).
+	// Used for toggling between fullscreen and windowed with alt-enter.
+	vid_preferred_fullscreen = Cvar_Get( "vid_preferred_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_INT);
 
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
 	vid_contrast = Cvar_Get( "vid_contrast", "1.0", CVAR_ARCHIVE);

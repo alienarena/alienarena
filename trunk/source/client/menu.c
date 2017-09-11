@@ -1687,6 +1687,13 @@ static void SpinOptionFunc (void *_self)
 	cvarname = self->generic.localstrings[0];
 	
 	Cvar_SetValue( cvarname, self->curvalue );
+
+	if (cvarname == "vid_fullscreen" && 
+		(self->curvalue == windowmode_borderless_windowed || self->curvalue == windowmode_exclusive_fullscreen))
+	{
+		// Store preferred full screen mode for toggling between windowed and fullscreen with alt-enter
+		Cvar_SetValue( "vid_preferred_fullscreen", self->curvalue );
+	}
 }
 
 static menuvec2_t FontSelectorSizeFunc (void *_self, UNUSED FNT_font_t unused)

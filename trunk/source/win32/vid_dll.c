@@ -46,6 +46,7 @@ cvar_t		*vid_ref;			// Name of Refresh DLL loaded
 cvar_t		*vid_xpos;			// X coordinate of window position
 cvar_t		*vid_ypos;			// Y coordinate of window position
 cvar_t		*vid_fullscreen;
+cvar_t		*vid_preferred_fullscreen;
 cvar_t		*vid_width;
 cvar_t		*vid_height;
 cvar_t		*vid_displayfrequency;
@@ -408,7 +409,16 @@ LONG WINAPI MainWndProc (
 		{
 			if ( vid_fullscreen )
 			{
-				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value ); // TODO: update for the fact that this isn't boolean anymore!
+				switch ( vid_fullscreen->integer ) {
+					case windowmode_windowed:
+						Cvar_SetValue( "vid_fullscreen", vid_preferred_fullscreen->value );
+						break;
+					case windowmode_borderless_windowed:
+					case windowmode_exclusive_fullscreen:
+						Cvar_SetValue( "vid_preferred_fullscreen", vid_fullscreen->value );
+						Cvar_SetValue( "vid_fullscreen", windowmode_windowed );
+						break;
+				}
 			}
 			return 0;
 		}
@@ -636,9 +646,9 @@ void VID_Init (void)
 	vid_xpos = Cvar_Get ("vid_xpos", "0", CVAR_ARCHIVE);
 	vid_ypos = Cvar_Get ("vid_ypos", "0", CVAR_ARCHIVE);
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "1", CVAR_ARCHIVE);
+	vid_preferred_fullscreen = Cvar_Get ("vid_preferred_fullscreen", "1", CVAR_ARCHIVE);
 	vid_gamma = Cvar_Get ( "vid_gamma", "1", CVAR_ARCHIVE );
 	vid_width = Cvar_Get ( "vid_width", "1024", CVAR_ARCHIVE );
-	vid_height = Cvar_Get ( "vid_height", "768", CVAR_ARCHIVE );
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
 	vid_displayfrequency = Cvar_Get( "vid_displayfrequency", "0", CVAR_ARCHIVE );
 
