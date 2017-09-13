@@ -579,19 +579,21 @@ do { \
 	return true;
 }
 
+extern int server_tickrate;
 static float IQM_SelectFrame (const entity_t *ent)
 {
-	float		time;
+	float time;
+	float FRAMETIME = 1.0f/(float)server_tickrate;
 	
 	//frame interpolation
 	time = (Sys_Milliseconds () - ent->frametime) / 100;
 	
-	if (time > 1.0)
-		time = 1.0;
+	if (time > (1.0f - FRAMETIME))
+		time = 1.0f - FRAMETIME;
 
 	//Check for stopped death anims
 	if (ent->frame == 257 || ent->frame == 237 || ent->frame == 219)
-		time = 0;	
+		time = 0.0f;	
 	
 	return ent->frame + time;
 }
@@ -723,7 +725,7 @@ static void IQM_AnimateFrame_standard (const entity_t *ent, const model_t *mod, 
 	curframe = IQM_SelectFrame (ent);
 	nextframe = IQM_NextFrame (ent, mod);
 
-	frame1 = (int)floor (curframe);
+	frame1 =  (int)floor (curframe);
 	frame2 = nextframe;
 	frameoffset = curframe - frame1;
 	frame1 %= mod->num_poses;
