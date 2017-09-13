@@ -15821,6 +15821,7 @@
 "classname" "misc_mapmodel"
 "origin" "416.000000 384.000000 0.000000"
 "model" "maps/meshes/tech/obarch4w.md2"
+"spawnflags" "1"
 }
 // entity 126
 {
@@ -15857,6 +15858,7 @@
 "classname" "misc_mapmodel"
 "origin" "-160.000000 384.000000 0.000000"
 "model" "maps/meshes/tech/obarch4w.md2"
+"spawnflags" "1"
 }
 // entity 131
 {
@@ -15864,6 +15866,7 @@
 "origin" "128.000000 -288.000000 0.000000"
 "model" "maps/meshes/tech/obarch4w.md2"
 "angle" "-90.000000"
+"spawnflags" "1"
 }
 // entity 132
 {
