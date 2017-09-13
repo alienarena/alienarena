@@ -681,7 +681,7 @@ models/weapons/v_violator/violator
 	{
 		map models/weapons/v_violator/violator_normal.jpg
 		normalmap
-		map2 gfx/violator2fx.tga
+		map2 models/weapons/v_violator/violator_fx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -692,7 +692,7 @@ models/weapons/v_disruptor/disruptor
 	{	
 		map models/weapons/v_disruptor/disruptor_normal.tga
 		normalmap
-		map2 gfx/disruptorfx.tga
+		map2 models/weapons/v_disruptor/disruptor_fx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -704,7 +704,7 @@ models/weapons/v_disruptor/effects
 	{
 		map models/weapons/v_disruptor/disruptor_normal.tga
 		normalmap
-		map2 models/weapons/v_disruptor/disruptor_fx.tga
+		map2 models/weapons/v_disruptor/effects_fx.tga
 		fx
 	}
 }
@@ -713,7 +713,7 @@ models/weapons/v_beamgun/beamgun
 	{
 		map models/weapons/v_beamgun/beamgun_normal.jpg
 		normalmap
-		map2 gfx/beamgunfx.tga
+		map2 models/weapons/v_beamgun/beamgun_fx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -724,7 +724,7 @@ models/weapons/v_vaporizer/vaporizer
 	{
 		map models/weapons/v_vaporizer/vaporizer_normal.tga
 		normalmap
-		map2 gfx/vapormask.tga
+		map2 models/weapons/v_vaporizer/vaporizer_fx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -735,35 +735,28 @@ models/weapons/v_minderaser/minderaser
 	{
 		map models/weapons/v_minderaser/minderaser_normal.jpg
 		normalmap
-		map2 gfx/minderaser_fx.tga
+		map2 models/weapons/v_minderaser/minderaser_fx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
 	}
 }
-models/weapons/v_smartgun/skin
+models/weapons/v_smartgun/smartgun
 {
 	{	
-		map models/weapons/v_smartgun/skin_normal.tga
+		map models/weapons/v_smartgun/smartgun_normal.tga
 		normalmap
-		map2 gfx/smartgunmask.tga
+		map2 models/weapons/v_smartgun/smartgun_fx.tga
 		glow
 	}		
 }
 models/weapons/v_smartgun/effects
 {
 	{
-		map models/weapons/v_smartgun/skin_normal.tga
+		map models/weapons/v_smartgun/smartgun_normal.tga
 		normalmap
-		map2 models/weapons/v_smartgun/smartgun_fx.tga
+		map2 models/weapons/v_smartgun/effects_fx.tga
 		fx
-	}
-}
-models/weapons/v_rocket/skin
-{
-	{
-		map models/weapons/v_rocket/skin_normal.tga
-		normalmap
 	}
 }
 models/weapons/v_rocket/rocketlauncher
@@ -771,7 +764,7 @@ models/weapons/v_rocket/rocketlauncher
 	{
 		map models/weapons/v_rocket/rocketlauncher_normal.tga
 		normalmap
-		map2 gfx/rlauncherfx.tga
+		map2 models/weapons/v_rocket/rocketlauncher_fx.tga
 		glow
 		map3 gfx/chrome2.tga
 		cube
@@ -874,61 +867,12 @@ players/commander/weapon
 		cube
 	}
 }
-vehicles/hover/skin
-{
-	{
-		map vehicles/hover/skin_normal.tga
-		normalmap
-		map2 vehicles/hover/skin_fx.tga
-		glow
-		map3 gfx/chrome2.tga
-		cube
-	}
-}
 vehicles/jetpack/skin
 {
 	{
 		map vehicles/jetpack/skin_normal.jpg
 		normalmap
 		map2 vehicles/jetpack/skin_fx.tga
-		glow
-	}
-}
-vehicles/strafer/skin
-{
-	{
-		map vehicles/strafer/skin_normal.tga
-		normalmap
-		map2 vehicles/strafer/skin_fx.tga
-		glow
-		map3 gfx/mirrorspec.tga
-		cube
-	}
-}
-vehicles/hover/console
-{
-	{
-		map vehicles/hover/console_normal.tga
-		normalmap
-		map2 gfx/hconsole.tga
-		glow
-	}	
-}
-vehicles/bomber/console
-{
-	{
-		map vehicles/bomber/console_normal.tga
-		normalmap
-		map2 gfx/bconsole.tga
-		glow
-	}
-}
-vehicles/strafer/console
-{
-	{
-		map vehicles/strafer/console_normal.tga
-		normalmap
-		map2 gfx/sconsole.tga
 		glow
 	}
 }
