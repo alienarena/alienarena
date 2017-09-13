@@ -3811,9 +3811,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	{
 		if(regeneration->value || excessive->value || vampire->value)
 			return;
-		if((ent->health > g_losehealth_num->value) && (client->losehealth_framenum < level.framenum)) 
+		if((ent->health > g_losehealth_num->value) && (client->losehealth_frametime < level.time)) 
 		{
-			client->losehealth_framenum = level.framenum + 10;
+			client->losehealth_frametime = level.time + 1.0f;
 			ent->health-=1;
 		}
 	}

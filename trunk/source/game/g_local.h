@@ -1398,7 +1398,7 @@ struct gclient_s
 	float		next_regen_time;
 	float		invis_expiretime;
 
-	float		losehealth_framenum;
+	float		losehealth_frametime;
 
 	int			weapon_sound;
 
