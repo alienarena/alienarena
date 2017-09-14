@@ -259,6 +259,7 @@ void ACEND_SetGoal(edict_t *self, int goal_node)
 qboolean ACEND_FollowPath(edict_t *self)
 {
 	vec3_t v;
+	int sFactor = (self->client->ps.pmove.pm_flags & PMF_SNEAKING?4:1);
 
 	//////////////////////////////////////////
 	// Show the path
@@ -269,9 +270,9 @@ qboolean ACEND_FollowPath(edict_t *self)
 	//////////////////////////////////////////
 
 	// Try again?
-	if(self->node_timeout ++ > 30 * (TENFPS/FRAMETIME))
+	if(self->node_timeout ++ > 30 * (sFactor * TENFPS/FRAMETIME))
 	{
-		if(self->tries++ > 3 * (TENFPS/FRAMETIME))
+		if(self->tries++ > 3 * (sFactor * TENFPS/FRAMETIME))
 			return false;
 		else
 			ACEND_SetGoal(self,self->goal_node);
