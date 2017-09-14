@@ -269,9 +269,9 @@ qboolean ACEND_FollowPath(edict_t *self)
 	//////////////////////////////////////////
 
 	// Try again?
-	if(self->node_timeout ++ > 30)
+	if(self->node_timeout ++ > 30 * (TENFPS/FRAMETIME))
 	{
-		if(self->tries++ > 3)
+		if(self->tries++ > 3 * (TENFPS/FRAMETIME))
 			return false;
 		else
 			ACEND_SetGoal(self,self->goal_node);
