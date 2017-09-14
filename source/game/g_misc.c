@@ -1608,7 +1608,7 @@ void SP_misc_alienammodepot (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_YES;
 
-	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.iqm");
+	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.md2");
 
 	VectorSet (ent->mins, -32, -32, 0);
 	VectorSet (ent->maxs, 32, 32, 16);
@@ -1634,7 +1634,7 @@ void SP_misc_humanammodepot (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_YES;
 
-	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.iqm");
+	ent->s.modelindex = gi.modelindex ("maps/meshes/flagpad.md2");
 
 	VectorSet (ent->mins, -32, -32, 0);
 	VectorSet (ent->maxs, 32, 32, 16);
