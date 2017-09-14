@@ -2278,9 +2278,17 @@ void PutClientInServer (edict_t *ent)
 
 	Respawn_ClassSpecific (ent, client);
 
-	//has to be done after determining the class/team - note - we don't care about spawn distances in tactical
+	// has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)
+	{
 		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
+
+		// let player know what they need to do
+		if(ent->has_bomb && !ent->is_bot)
+			safe_centerprintf(ent, "Place bomb near enemy base!");
+		else if(ent->has_detonator && !ent->is_bot)
+			safe_centerprintf(ent, "Walk over bombs to detonate them!");
+	}
 
 	client->ps.pmove.origin[0] = spawn_origin[0]*8;
 	client->ps.pmove.origin[1] = spawn_origin[1]*8;
