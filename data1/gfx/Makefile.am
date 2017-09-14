@@ -5,21 +5,12 @@
 gfxdir=$(pkgdatadir)/data1/gfx
 
 nobase_dist_gfx_DATA = \
-	aaglow.tga \
-	adrenalbase.tga \
-	adrenalmask.tga \
 	annhiliationreflection.jpg \
-	alienarena2gl.tga \
-	bannerfx.tga \
-	bconsole2.tga \
-	bconsole.tga \
 	beam1.tga \
 	beam2.tga \
 	beam3.tga \
 	beam4.tga \
 	beamfx.tga \
-	beamgunfx.tga \
-	blasterfx.tga \
 	blooddrops.jpg \
 	blooddrops_nm.jpg \
 	bluelightning2.tga \
@@ -36,13 +27,8 @@ nobase_dist_gfx_DATA = \
 	cloudsthick.tga \
 	comp1.tga \
 	comp2.tga \
-	cpribeyereflection.tga \
 	disruptorfx.tga \
-	disruptormask.tga \
 	distortwave.jpg \
-	dmaquousreflection.tga \
-	dmbeyondreflection.tga \
-	dmdreadreflection.tga \
 	dmturboreflection.tga \
 	droplets.jpg \
 	e6launchengine_fx.tga \
@@ -60,7 +46,6 @@ nobase_dist_gfx_DATA = \
 	electrics3d.tga \
 	electrics3.tga \
 	electrics.tga \
-	flamethrower_fx.tga \
 	flares/flare0.tga \
 	flares/flare1.tga \
 	flares/flare2.tga \
@@ -75,10 +60,6 @@ nobase_dist_gfx_DATA = \
 	greencircuit.tga \
 	greenlightning.tga \
 	greenline.tga \
-	hconsole2.tga \
-	hconsole3.tga \
-	hconsole.tga \
-	hoverfx.tga \
 	leaves1.tga \
 	lightning.tga \
 	m_banner_main_mask.tga \
@@ -86,9 +67,7 @@ nobase_dist_gfx_DATA = \
 	menubar2.tga \
 	menubar3.tga \
 	menubar4.tga \
-	metal3glow.tga \
 	metalenvmap.jpg \
-	minderaser_fx.tga \
 	mirrorspec.tga \
 	newblasterfx.tga \
 	noise.tga \
@@ -110,23 +89,14 @@ nobase_dist_gfx_DATA = \
 	redcircuit.tga \
 	redlightning.tga \
 	reflect.tga \
-	rlauncherfx.tga \
 	r_lightning.tga \
-	sconsole.tga \
-	shard_fx.tga \
-	shardmask.tga \
 	skullglow.tga \
-	smartgunmask.tga \
 	stepside_mtl4light_fx1.tga \
 	sun1.jpg \
 	sun2.jpg \
 	sun.jpg \
 	tekwallmask.tga \
 	trim2mask.tga \
-	vaporbase.tga \
-	vapormask.tga \
-	violator2fx.tga \
-	violatorfx.tga \
 	water/distort1.tga \
 	water/normal1.tga \
 	weed1.tga \
