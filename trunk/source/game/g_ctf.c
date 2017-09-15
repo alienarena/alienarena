@@ -279,7 +279,7 @@ void CTFGrappleDrawCable(edict_t *self)
 	float	distance;
 
 	AngleVectors (self->owner->client->v_angle, f, r, NULL);
-	VectorSet(offset, 32, 6, self->owner->viewheight-5);
+	VectorSet(offset, 42, 6, self->owner->viewheight-5);
 	P_ProjectSource (self->owner->client, self->owner->s.origin, offset, f, r, start);
 
 	VectorSubtract(start, self->owner->s.origin, offset);
@@ -436,13 +436,9 @@ void CTFGrappleFire (edict_t *ent, vec3_t g_offset, int damage, int effect)
 		return; // it's already out
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
-//	VectorSet(offset, 24, 16, ent->viewheight-8+2);
-	VectorSet(offset, 24, 8, ent->viewheight-8+2);
+	VectorSet(offset, 24, 8, ent->viewheight-6);
 	VectorAdd (offset, g_offset, offset);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
 
 	CTFFireGrapple (ent, start, forward, damage, CTF_GRAPPLE_SPEED, effect);
 
@@ -461,15 +457,15 @@ void CTFWeapon_Grapple_Fire (edict_t *ent)
 
 void CTFWeapon_Grapple (edict_t *ent)
 {
-	static int	pause_frames[]	= {10, 18, 27, 0};
-	static int	fire_frames[]	= {6, 0};
+	static int	pause_frames[]	= {52, 0};
+	static int	fire_frames[]	= {5,0};
 	int prevstate;
 
 	// if the the attack button is still down, stay in the firing frame
 	if ((ent->client->buttons & BUTTON_ATTACK) &&
 		ent->client->weaponstate == WEAPON_FIRING &&
 		ent->client->ctf_grapple)
-		ent->client->ps.gunframe = 9;
+		ent->client->ps.gunframe = 8;
 
 	if (!(ent->client->buttons & BUTTON_ATTACK) &&
 		ent->client->ctf_grapple) {
@@ -484,11 +480,12 @@ void CTFWeapon_Grapple (edict_t *ent)
 		ent->client->weaponstate == WEAPON_FIRING) {
 		// he wants to change weapons while grappled
 		ent->client->weaponstate = WEAPON_DROPPING;
-		ent->client->ps.gunframe = 32;
+		ent->client->ps.gunframe = 53;
 	}
 
 	prevstate = ent->client->weaponstate;
-	Weapon_Generic (ent, 5, 9, 31, 36, pause_frames, fire_frames,
+
+	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames,
 		CTFWeapon_Grapple_Fire);
 
 	// if we just switched back to grapple, immediately go to fire frame
@@ -496,9 +493,9 @@ void CTFWeapon_Grapple (edict_t *ent)
 		ent->client->weaponstate == WEAPON_READY &&
 		ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY) {
 		if (!(ent->client->buttons & BUTTON_ATTACK))
-			ent->client->ps.gunframe = 9;
+			ent->client->ps.gunframe = 8;
 		else
-			ent->client->ps.gunframe = 5;
+			ent->client->ps.gunframe = 4;
 		ent->client->weaponstate = WEAPON_FIRING;
 	}
 }
