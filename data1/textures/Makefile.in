@@ -1292,6 +1292,9 @@ nobase_dist_textures_DATA = \
 	desert/barnwood2.tga \
 	desert/barnwood2_nm.tga \
 	desert/barnwood_nm.tga \
+	desert/beamwall.tga \
+	desert/beamwall_hm.tga \
+	desert/beamwall_nm.tga \
 	desert/blacktrans.tga \
 	desert/bloodlava.tga \
 	desert/cliffblock.tga \

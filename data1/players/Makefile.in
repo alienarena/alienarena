@@ -346,7 +346,7 @@ nobase_dist_players_DATA = \
 	enforcer/weapon.skin \
 	femborg/blue.jpg \
 	femborg/blue_i.jpg \
-	femborg/bluelaurenfx.tga \
+	femborg/bluefemborgfx.tga \
 	femborg/bump1.wav \
 	femborg/death1.wav \
 	femborg/death2.wav \
@@ -355,7 +355,7 @@ nobase_dist_players_DATA = \
 	femborg/default.jpg \
 	femborg/default_i.jpg \
 	femborg/default_normal.tga \
-	femborg/defaultlaurenfx.tga \
+	femborg/defaultfemborgfx.tga \
 	femborg/drown1.wav \
 	femborg/fall1.wav \
 	femborg/fall2.wav \
