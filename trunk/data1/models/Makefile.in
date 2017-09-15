@@ -500,8 +500,11 @@ nobase_dist_models_DATA = \
 	weapons/v_flamethrower/flamethrower_normal.jpg \
 	weapons/v_flamethrower/tris.iqm \
 	weapons/v_flamethrower/tris.skin \
+	weapons/v_grapple/grapple.jpg \
 	weapons/v_grapple/grapple_fx.tga \
-	weapons/v_grapple/tris.md2 \
+	weapons/v_grapple/grapple_normal.jpg \
+	weapons/v_grapple/tris.iqm \
+	weapons/v_grapple/tris.skin \
 	weapons/v_minderaser/minderaser.jpg \
 	weapons/v_minderaser/minderaser_fx.tga \
 	weapons/v_minderaser/minderaser_normal.tga \
