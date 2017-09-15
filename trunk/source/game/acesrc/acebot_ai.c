@@ -168,7 +168,7 @@ void ACEAI_Think (edict_t *self)
 			if(level.time - self->sneak_timeout > 10.0)
 			{
 				self->sneak_timeout = level.time;
-				if(random() < 0.4)
+				if(random() < ((ctf->integer || g_tactical->integer)?0.2:0.4))
 				{
 					self->client->ps.pmove.pm_flags |= PMF_SNEAKING;
 					self->s.effects |= EF_SILENT;
