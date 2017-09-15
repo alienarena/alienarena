@@ -1318,7 +1318,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the alien bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Alien Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, "Bombs", "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Bombs", "models/objects/blank/tris.iqm", "models/objects/blank/tris.iqm"),
 		NULL
 	},
 
@@ -1331,7 +1331,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the human bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Human Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, "Bombs", "vehicles/deathball/v_wep.iqm", "w_machinegun.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Bombs", "models/objects/blank/tris.iqm", "models/objects/blank/tris.iqm"),
 		NULL
 	},
 #endif
@@ -1484,7 +1484,7 @@ always owned, never in the world
 		GITEM_INIT_WORLDMODEL (NULL, 0),
 		// TODO: create an icon for the mind eraser!
 		GITEM_INIT_CLIENTSIDE (NULL, "grapple", "misc/w_pkup.wav"),
-		GITEM_INIT_WEAP (1, 1, NULL, "models/weapons/v_grapple/tris.md2", "w_grapple.iqm"),
+		GITEM_INIT_WEAP (1, 1, NULL, "models/weapons/v_grapple/tris.iqm", "w_grapple.iqm"),
 /* precache */ "weapons/electroball.wav"
 	},
 		

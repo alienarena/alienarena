@@ -205,48 +205,48 @@ players/martiancyborg/anseris
 		glow
 	}	
 }
-players/lauren/blue
+players/femborg/blue
 {
 	{
-		map players/lauren/default_normal.tga
+		map players/femborg/default_normal.tga
 		normalmap
-		map2 players/lauren/bluelaurenfx.tga
+		map2 players/femborg/bluefemborgfx.tga
 		glow
 	}	
 }
-players/lauren/red
+players/femborg/red
 {
 	{
-		map players/lauren/default_normal.tga
+		map players/femborg/default_normal.tga
 		normalmap
-		map2 players/lauren/defaultlaurenfx.tga
+		map2 players/femborg/defaultfemborgfx.tga
 		glow
 	}	
 }
-players/lauren/default
+players/femborg/default
 {
 	{
-		map players/lauren/default_normal.tga
+		map players/femborg/default_normal.tga
 		normalmap
-		map2 players/lauren/defaultlaurenfx.tga
+		map2 players/femborg/defaultfemborgfx.tga
 		glow
 	}	
 }
-players/lauren/patriot
+players/femborg/patriot
 {
 	{
-		map players/lauren/default_normal.tga
+		map players/femborg/default_normal.tga
 		normalmap
-		map2 players/lauren/defaultlaurenfx.tga
+		map2 players/femborg/defaultfemborgfx.tga
 		glow
 	}	
 }
-players/lauren/muerte
+players/femborg/muerte
 {
 	{
-		map players/lauren/muerte_normal.tga
+		map players/femborg/muerte_normal.tga
 		normalmap
-		map2 players/lauren/muertefx.tga
+		map2 players/femborg/muertefx.tga
 		glow
 	}	
 }
@@ -770,6 +770,15 @@ models/weapons/v_rocket/rocketlauncher
 		cube
 	}
 }
+models/weapons/v_grapple/grapple
+{
+	{
+		map models/weapons/v_grapple/grapple_normal.jpg
+		normalmap
+		map2 models/weapons/v_grapple/grapple_fx.tga
+		glow
+	}
+}
 models/misc/spiderpod/spider
 {
 	{
@@ -823,7 +832,7 @@ players/martiancyborg/weapon
 		cube
 	}		
 }
-players/lauren/weapon
+players/femborg/weapon
 {
 	{
 		map models/weapons/v_blast/blaster_normal.tga
