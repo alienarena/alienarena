@@ -2395,7 +2395,12 @@ void MoveClientsDownQueue (edict_t *ent)
 {
 	int i;
 	
-	if (ent->client->pers.queue == 0)
+	if(ent->client)
+	{
+		if (ent->client->pers.queue == 0)
+			return;
+	}
+	else
 		return;
 
 	for (i = 0; i < g_maxclients->value; i++) 
