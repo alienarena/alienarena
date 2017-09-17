@@ -854,24 +854,26 @@ static void GenerateLightmapTexture (model_t *mod, decal_vertgroup_t *groups, in
 {
 	int i;
 	char lm_tex_name[MAX_QPATH];
+	image_t *lightmap_aux;
 	static int num_lm_texes = 0;
-	
-	Com_sprintf (lm_tex_name, sizeof (lm_tex_name), "***decal_lightmap_%d***", num_lm_texes++);
-	mod->lightmap = GL_FindFreeImage (lm_tex_name, final_size[0], final_size[1], it_lightmap);
+
+	// We render into this texture first, then render into the final texture
+	// with the defringe filter.
+	lightmap_aux = GL_FindFreeImage ("***decal_lightmap_temp***", final_size[0], final_size[1], it_lightmap);
+
 	GL_SelectTexture (0);
-	GL_Bind (mod->lightmap->texnum);
+	GL_Bind (lightmap_aux->texnum);
 	
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_tex_solid_format, final_size[0], final_size[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	
-	// TODO: get rid for all lightmaps?
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->integer);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+	qglTexImage2D (GL_TEXTURE_2D, 0, gl_tex_alpha_format, final_size[0], final_size[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	
 	qglBindFramebufferEXT (GL_DRAW_FRAMEBUFFER_EXT, new_lm_fbo);
-	qglFramebufferTexture2DEXT (GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mod->lightmap->texnum, 0);
+	qglFramebufferTexture2DEXT (GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, lightmap_aux->texnum, 0);
 	qglViewport (0, 0, final_size[0], final_size[1]);
-	qglClearColor (0.75, 0.75, 0.75, 1.0);
+	qglClearColor (0.75, 0.75, 0.75, 0.0);
 	qglClear (GL_COLOR_BUFFER_BIT);
 	qglClearColor (0.0, 0.0, 0.0, 1.0);
 	
@@ -925,9 +927,49 @@ static void GenerateLightmapTexture (model_t *mod, decal_vertgroup_t *groups, in
 				GL_COLOR_BUFFER_BIT, GL_NEAREST
 		);
 	}
+
+	Com_sprintf (lm_tex_name, sizeof (lm_tex_name), "***decal_lightmap_%d***", num_lm_texes++);
+	mod->lightmap = GL_FindFreeImage (lm_tex_name, final_size[0], final_size[1], it_lightmap);
+
+	GL_Bind (mod->lightmap->texnum);
 	
-	// Can't use the GL_GENERATE_MIPMAP texture parameter because it won't
-	// update the mipmap from a glBlitFramebuffer call.
+	qglTexImage2D (GL_TEXTURE_2D, 0, gl_tex_solid_format, final_size[0], final_size[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	
+	// TODO: get rid for all lightmaps?
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->integer);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+
+	GL_Bind (lightmap_aux->texnum);
+	qglFramebufferTexture2DEXT (GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, mod->lightmap->texnum, 0);
+	qglViewport (0, 0, final_size[0], final_size[1]);
+
+	glUseProgramObjectARB (g_defringeprogramObj);
+	glUniform1iARB (defringe_uniforms.source, 0);
+	glUniform2fARB (defringe_uniforms.scale, final_size[0], final_size[1]);
+	GL_SetupWholeScreen2DVBO (wholescreen_fliptextured);
+
+	qglMatrixMode (GL_PROJECTION);
+	qglPushMatrix ();
+	qglLoadIdentity ();
+	qglOrtho (0, 1, 1, 0, -10, 100);
+	qglMatrixMode (GL_MODELVIEW);
+	qglPushMatrix ();
+	qglLoadIdentity ();
+
+	qglDisable (GL_DEPTH_TEST);
+	R_DrawVarrays (GL_QUADS, 0, 4);
+	qglEnable (GL_DEPTH_TEST);
+
+	qglPopMatrix ();
+	qglMatrixMode (GL_PROJECTION);
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
+
+	glUseProgramObjectARB (0);
+	R_KillVArrays ();
+
+	GL_Bind (mod->lightmap->texnum);
 	qglGenerateMipmapEXT (GL_TEXTURE_2D);
 	
 	R_SetupViewport ();
@@ -935,6 +977,7 @@ static void GenerateLightmapTexture (model_t *mod, decal_vertgroup_t *groups, in
 	
 	Z_Free (groups);
 	GL_Bind (0);
+	GL_FreeImage (lightmap_aux);
 }
 
 void Mod_LoadDecalModel (model_t *mod, void *_buf)
