@@ -1571,6 +1571,85 @@ static char blur_fragment_program[] = STRINGIFY (
 	}
 );
 
+//TRANSPARENT-ONLY BLUR EFFECTS-- image preprocessor for fixing fringing artifacts.
+static char defringe_vertex_program[] = STRINGIFY (
+	varying vec2	texcoordul, texcoorduc, texcoordur,
+					texcoordcl, texcoordcc, texcoordcr,
+					texcoordll, texcoordlc, texcoordlr;
+	uniform vec2	ScaleU; // Should be set to the pixel size of the image
+	
+	void main()
+	{
+		gl_Position = ftransform ();
+		
+		texcoordul = texcoorduc = texcoordur =
+		texcoordcl = texcoordcc = texcoordcr =
+		texcoordlr = texcoordlc = texcoordlr = gl_MultiTexCoord0.xy;
+		texcoordul.y += 1.0/ScaleU.y;
+		texcoorduc.y += 1.0/ScaleU.y;
+		texcoordur.y += 1.0/ScaleU.y;
+		texcoordll.y -= 1.0/ScaleU.y;
+		texcoordlc.y -= 1.0/ScaleU.y;
+		texcoordlr.y -= 1.0/ScaleU.y;
+		texcoordur.x += 1.0/ScaleU.x;
+		texcoordcr.x += 1.0/ScaleU.x;
+		texcoordlr.x += 1.0/ScaleU.x;
+		texcoordul.x -= 1.0/ScaleU.x;
+		texcoordcl.x -= 1.0/ScaleU.x;
+		texcoordll.x -= 1.0/ScaleU.x;
+	}
+);
+
+static char defringe_fragment_program[] = STRINGIFY (
+	varying vec2	texcoordul, texcoorduc, texcoordur,
+					texcoordcl, texcoordcc, texcoordcr,
+					texcoordll, texcoordlc, texcoordlr;
+	uniform sampler2D textureSource;
+	
+	void main()
+	{
+		vec4 center = texture2D (textureSource, texcoordcc);
+
+		// fast path for non-transparent samples
+		if (center.a > 0.0)
+		{
+			gl_FragColor = center;
+			return;
+		}
+
+		// for opaque samples, we borrow color from neighbor pixels
+		vec4 sum = vec4 (0.0);
+		vec4 sample;
+
+		sample = texture2D (textureSource, texcoordul);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoorduc);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoordur);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoordcl);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoordcr);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoordll);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoordlc);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+		sample = texture2D (textureSource, texcoordlr);
+		sum += vec4 (sample.xyz * sample.a, sample.a);
+
+		// if there are no neighboring non-transparent pixels at all, nothing
+		// we can do
+		if (sum.a == 0.0)
+		{
+			gl_FragColor = center;
+			return;
+		}
+
+		gl_FragColor = vec4 (sum.xyz / sum.a, 0.0);
+	}
+);
+
 //KAWASE BLUR FILTER
 // for an explanation of how this works, see these references:
 // https://software.intel.com/en-us/blogs/2014/07/15/an-investigation-of-fast-real-time-gpu-based-image-blur-algorithms
@@ -2250,14 +2329,21 @@ void R_LoadGLSLPrograms(void)
 	distort_uniforms.intensity = glGetUniformLocationARB (g_fbprogramObj, "intensity");
 
 	//gaussian blur
-	R_LoadGLSLProgram ("Framebuffer Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, 0, &g_blurprogramObj);
+	R_LoadGLSLProgram ("Framebuffer Gaussian Blur", (char*)blur_vertex_program, (char*)blur_fragment_program, NO_ATTRIBUTES, 0, &g_blurprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	gaussian_uniforms.scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
 	gaussian_uniforms.source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
 
+	//defringe filter (transparent-only blur)
+	R_LoadGLSLProgram ("Framebuffer Defringe Filter", (char*)defringe_vertex_program, (char*)defringe_fragment_program, NO_ATTRIBUTES, 0, &g_defringeprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	defringe_uniforms.scale = glGetUniformLocationARB (g_defringeprogramObj, "ScaleU");
+	defringe_uniforms.source = glGetUniformLocationARB (g_defringeprogramObj, "textureSource");
+
 	//kawase filter blur
-	R_LoadGLSLProgram ("Framebuffer Blur", (char*)kawase_vertex_program, (char*)kawase_fragment_program, NO_ATTRIBUTES, 0, &g_kawaseprogramObj);
+	R_LoadGLSLProgram ("Framebuffer Kawase Blur", (char*)kawase_vertex_program, (char*)kawase_fragment_program, NO_ATTRIBUTES, 0, &g_kawaseprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	kawase_uniforms.scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );

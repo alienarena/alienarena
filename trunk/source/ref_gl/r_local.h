@@ -568,6 +568,7 @@ GLhandleARB g_blankmeshprogramObj;
 GLhandleARB g_extractlightmapmeshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
+GLhandleARB g_defringeprogramObj;
 GLhandleARB g_kawaseprogramObj;
 GLhandleARB g_colorscaleprogramObj;
 GLhandleARB g_colorexpprogramObj;
@@ -750,11 +751,11 @@ struct
 	GLuint	intensity;
 } distort_uniforms;
 
-//color scale shader, gaussian blur, kawase filter
+//color scale shader, gaussian blur, kawase filter, defringe
 struct 
 {
 	GLuint  scale, source;
-} colorscale_uniforms, gaussian_uniforms, kawase_uniforms;
+} colorscale_uniforms, gaussian_uniforms, defringe_uniforms, kawase_uniforms;
 
 //color exponentiation shader
 struct 
