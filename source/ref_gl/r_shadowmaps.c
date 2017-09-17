@@ -690,7 +690,9 @@ static void R_RedrawWorldWithShadow (const entity_t *ent, const model_t *mod, co
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	
+	qglDepthMask (false);
 	SM_RecursiveWorldNode2 (ent, r_worldmodel->nodes, 15, absmins, absmaxs, statLightPosition);
+	qglDepthMask (true);
 	
 	BSP_FlushVBOAccum ();
 	
