@@ -2435,8 +2435,11 @@ void DemoteDuelLoser (void)
 		}
 	}
 	
-	MoveClientsDownQueue (&g_edicts[loser+1]);
-	ClientPlaceInQueue (&g_edicts[loser+1]);
+	if(loser != -1)
+	{
+		MoveClientsDownQueue (&g_edicts[loser+1]);
+		ClientPlaceInQueue (&g_edicts[loser+1]);
+	}
 }
 //END DUEL MODE
 

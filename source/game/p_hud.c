@@ -453,7 +453,7 @@ void EndIntermission(void)
 	if (g_duel->integer)
 		DemoteDuelLoser ();
 
-	for (i=0 ; i<g_maxclients->integer; i++)
+	for (i = 0 ; i < g_maxclients->integer; i++)
 	{
 		ent = g_edicts + 1 + i;
         if (!ent->inuse || !player_participating (ent))
