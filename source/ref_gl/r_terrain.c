@@ -112,6 +112,8 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 	trace_t plant;
 	vec3_t start, end;
 	vec3_t color = {1, 1, 1};
+	char* gfxpath;
+	char* tmppath;
 	
 	if (Q_strcasecmp (COM_FileExtension (path), "terrain"))
 		return; // not a .terrain mesh
@@ -188,10 +190,16 @@ void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin)
 			VectorCopy (org, end);
 			end[2] -= 128;
 			plant = CM_BoxTrace (start, end, vec3_origin, vec3_origin, 0, MASK_ALL);
-	
+
+			// if path has gfx/*, point past gfx/. R_RegisterGFXPic() prepends gfx/
+			gfxpath = data.decorations[i].path;
+			tmppath = strstr( gfxpath, "gfx/" );	
+			if ( tmppath )
+				gfxpath = tmppath+4;
+			
 			Mod_AddVegetation (	org, plant.plane.normal,
 								GL_FindImage (data.decorations[i].path, it_wall), color,
-								data.decorations[i].size, data.decorations[i].path, data.decorations[i].type );
+								data.decorations[i].size, gfxpath, data.decorations[i].type );
 		}
 	}
 	
