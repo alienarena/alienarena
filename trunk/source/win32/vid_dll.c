@@ -649,7 +649,7 @@ void VID_Init (void)
 	vid_preferred_fullscreen = Cvar_Get ("vid_preferred_fullscreen", "1", CVAR_ARCHIVE);
 	vid_gamma = Cvar_Get ( "vid_gamma", "1", CVAR_ARCHIVE );
 	vid_width = Cvar_Get ( "vid_width", "1024", CVAR_ARCHIVE );
-	vid_height = Cvar_Get ( "vid_width", "768", CVAR_ARCHIVE );
+	vid_height = Cvar_Get ( "vid_height", "768", CVAR_ARCHIVE );
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
 	vid_displayfrequency = Cvar_Get( "vid_displayfrequency", "0", CVAR_ARCHIVE );
 
