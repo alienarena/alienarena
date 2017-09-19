@@ -37,8 +37,8 @@ static const decoration_channel_t legacy_shrub_channel =
 	NULL,		// must override texture path before using!
 	2,			// 2 different shrub textures
 	{
-		"bush1.tga",
-		"bush2.tga"
+		"gfx/bush1.tga",
+		"gfx/bush2.tga"
 	},
 	64.0f,
 	1.0f/16.0f,
@@ -52,7 +52,7 @@ static const decoration_channel_t legacy_grass_channel =
 	NULL,		// must override texture path before using!
 	1,			// only 1 grass texture
 	{
-		"grass.tga"
+		"gfx/grass.tga"
 	},
 	64.0f,
 	1.0f/16.0f,
@@ -66,10 +66,10 @@ static const decoration_channel_t legacy_weed_channel =
 	NULL,		// must override texture path before using!
 	4,			// 4 different weed textures
 	{
-		"weed1.tga",
-		"weed2.tga",
-		"weed3.tga",
-		"weed4.tga"
+		"gfx/weed1.tga",
+		"gfx/weed2.tga",
+		"gfx/weed3.tga",
+		"gfx/weed4.tga"
 	},
 	64.0f,
 	1.0f/16.0f,
