@@ -862,7 +862,8 @@ void ai_run (edict_t *self, float dist)
 //			dprint("regained sight\n");
 		M_MoveToGoal (self, dist);
 		self->monsterinfo.aiflags &= ~AI_LOST_SIGHT;
-		VectorCopy (self->enemy->s.origin, self->monsterinfo.last_sighting);
+		if(self->enemy != NULL)
+			VectorCopy (self->enemy->s.origin, self->monsterinfo.last_sighting);
 		self->monsterinfo.trail_time = level.time;
 		return;
 	}
