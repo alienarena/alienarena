@@ -476,8 +476,6 @@ nobase_dist_players_DATA = \
 	rustbot/robot \
 	rustbot/tris.iqm \
 	rustbot/tris.rgd \
-	rustbot/w_alienblaster.iqm \
-	rustbot/w_alienblaster.skin \
 	rustbot/w_beamgun.iqm \
 	rustbot/w_beamgun.skin \
 	rustbot/w_blaster.iqm \
