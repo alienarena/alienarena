@@ -981,14 +981,17 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			number_of_gibs = DEATH_GIBS_TO_THROW - 1;
 		}
 
-		if(!instagib->integer && attacker->client)
+		if(attacker != NULL)
 		{
-			if(!attacker->is_bot) 
+			if(!instagib->integer && attacker->client)
 			{
-				// Send Steam stats
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte(TE_DISINTEGRATED);
-				gi.unicast (attacker, false);
+				if(!attacker->is_bot) 
+				{
+					// Send Steam stats
+					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte(TE_DISINTEGRATED);
+					gi.unicast (attacker, false);
+				}
 			}
 		}
 
