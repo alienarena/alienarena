@@ -911,6 +911,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 							continue;
 						if (strcmp (it->pickup_name, "Violator") == 0)
 							continue;
+						if (strcmp (it->pickup_name, "Red Flag") == 0)
+							continue;
+						if (strcmp (it->pickup_name, "Blue Flag") == 0)
+							continue;
 						Throw_Item (self, it);
 					}
 					//perhaps throw out some armor and health if the player has a lot of it
