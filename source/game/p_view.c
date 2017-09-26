@@ -1319,15 +1319,10 @@ void ClientEndServerFrame (edict_t *ent)
 	// all cyclic walking effects
 	//
 
-	ent->client->prev_xyspeed = ent->client->xyspeed;
-
 	// need to account for sudden shifts in speed causing sudden weapon bob changes	
 	ent->client->xyspeed += sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1])/(TENFPS/FRAMETIME);
 	if(ent->client->xyspeed > sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]))
 		ent->client->xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
-
-	if(ent->client->xyspeed < ent->client->prev_xyspeed && FRAMETIME < TENFPS)
-		ent->client->xyspeed += (ent->client->prev_xyspeed - ent->client->xyspeed)/(TENFPS/FRAMETIME);
 
 	if (ent->client->xyspeed < 5.0f || !ent->groundentity)
 	{
