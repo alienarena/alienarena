@@ -684,7 +684,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		else if (effects & EF_ANIM_ALL)
 			ent.frame = autoanim;
 		else if (effects & EF_ANIM_ALLFAST)
-			ent.frame = cl.time / 100;
+			ent.frame = cl.time / 100; //To Do - check this at different tickrates, looks like another 10fps hardcoded in
 		else
 			ent.frame = s1->frame;		
 
@@ -1548,7 +1548,7 @@ Emits all entities, particles, and lights to the refresh
 */
 void CL_AddEntities (void)
 {
-	float FRAMETIME = 1.0/(float)server_tickrate;
+	float FRAMETIME = 1.0f/(float)server_tickrate;
 
 	if (cls.state != ca_active)
 		return;
@@ -1560,15 +1560,15 @@ void CL_AddEntities (void)
 		cl.time = cl.frame.servertime;
 		cl.lerpfrac = 1.0;
 	}
-	else if (cl.time < cl.frame.servertime - 1000*FRAMETIME)
+	else if (cl.time < cl.frame.servertime - (100.0f * 0.1f/FRAMETIME))
 	{
 		if (cl_showclamp->value)
-			Com_Printf ("low clamp %i\n", cl.frame.servertime- 1000*FRAMETIME - cl.time);
-		cl.time = cl.frame.servertime - 1000*FRAMETIME;
+			Com_Printf ("low clamp %i\n", cl.frame.servertime-(100.0f * 0.1f/FRAMETIME) - cl.time);
+		cl.time = cl.frame.servertime - (100.0f * FRAMETIME/0.1f);
 		cl.lerpfrac = 0;
 	}
 	else
-		cl.lerpfrac = 1.0 - (cl.frame.servertime - cl.time) * FRAMETIME/10.0; 
+		cl.lerpfrac = 1.0 - ((cl.frame.servertime - cl.time) * 0.01f * 0.1f/FRAMETIME);
 
 	if (cl_timedemo->value)
 		cl.lerpfrac = 1.0;
@@ -1583,8 +1583,6 @@ void CL_AddEntities (void)
 	CL_AddClEntities();
 	CL_AddLightStyles ();
 }
-
-
 
 /*
 ===============
