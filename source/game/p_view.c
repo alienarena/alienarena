@@ -1346,9 +1346,7 @@ void ClientEndServerFrame (edict_t *ent)
 			bobmove = 0.0625f;
 	}
 
-	bobtime = (current_client->bobtime += (bobmove * (FRAMETIME/TENFPS)));
-
-	current_client->bobtime = bobtime;
+	bobtime = (current_client->bobtime += (bobmove / (TENFPS/FRAMETIME)));
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
 		bobtime *= 4.0f;
