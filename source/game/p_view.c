@@ -1250,6 +1250,7 @@ and right after spawning
 */
 void ClientEndServerFrame (edict_t *ent)
 {
+	float	bobtime;
 	int		i;
 	current_player = ent;
 	current_client = ent->client;
@@ -1345,13 +1346,15 @@ void ClientEndServerFrame (edict_t *ent)
 			bobmove = 0.0625f;
 	}
 
-	current_client->bobtime += (bobmove * (FRAMETIME/TENFPS));
+	bobtime = (current_client->bobtime += (bobmove * (FRAMETIME/TENFPS)));
+
+	current_client->bobtime = bobtime;
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
-		current_client->bobtime *= 4.0f;
+		bobtime *= 4.0f;
 
-	bobcycle = (int)current_client->bobtime;
-	bobfracsin = fabs(sin(current_client->bobtime*M_PI));
+	bobcycle = (int)bobtime;
+	bobfracsin = fabs(sin(bobtime*M_PI));
 
 	// detect hitting the floor
 	P_FallingDamage (ent);
