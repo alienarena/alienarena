@@ -626,7 +626,7 @@ void SV_CalcBlend (edict_t *ent)
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
 		if (remaining > 3.0f || fmodf (remaining, 1.0f) > 0.5f)
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
-		if (remaining == 1.0f) { //put weapon model back
+		if (remaining == 0.0f) { //put weapon model back
 			ResetWeaponModel(ent);
 		}
 	}

@@ -538,9 +538,11 @@ static cull_result_t R_Mesh_CullModel (const entity_t *ent, const model_t *mod)
 	vec3_t  angles;
 	vec3_t	bbox[8];
 	vec3_t	size;
+	vec3_t  tmp;
 	qboolean occlusion_cull;
 	float velocity = 1.0;
-	
+	float rad;
+
 	// Don't render your own avatar unless it's for shadows
 	if ((ent->flags & RF_VIEWERMODEL))
 		return draw_shadow_only;
@@ -610,10 +612,12 @@ static cull_result_t R_Mesh_CullModel (const entity_t *ent, const model_t *mod)
 			return draw_none;
 	}
 	
-	// Shadowmap code uses its own CullSphere call. A CullBBox call is too
-	// strict for shadows since they might be visible even if the caster is
-	// out of the frustum.
-	if (R_Mesh_CullBBox (bbox))
+
+	//Cull by frustom - switched to Cullsphere, as CallBBox was too harsh, and causing far too many meshes to blip in and out.
+	VectorSubtract (mod->maxs,mod->mins, tmp);
+	VectorScale (tmp, 1.666, tmp);
+	rad = VectorLength (tmp);		
+	if (R_CullSphere (ent->origin, rad, 15))
 		return draw_shadow_only;
 
 	return draw_full;

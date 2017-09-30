@@ -1578,6 +1578,7 @@ struct edict_s
 	float		damage_debounce_time;
 	float		fly_sound_debounce_time;	//move to clientinfo
 	float		last_move_time;
+	float		last_action;
 
 	int			health;
 	int			max_health;

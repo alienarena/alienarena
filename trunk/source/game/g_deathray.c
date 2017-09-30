@@ -92,6 +92,12 @@ void deathrayShot (edict_t *self)
 	int		damage = 50;
     trace_t tr;
 
+	//don't shoot any faster than 2 seconds apart
+	if(self->last_action - level.time > 2)
+		self->last_action = level.time;
+	else
+		return;
+
 	//tactical
 	if(g_tactical->value)
 	{
@@ -348,6 +354,8 @@ void SP_npc_deathray (edict_t *self)
 	self->monsterinfo.currentmove = &deathray_move_stand;
 	self->monsterinfo.scale = MODEL_SCALE;
 
+	self->last_action = level.time;
+
 	gi.linkentity (self);
 
 	walkmonster_start (self);
@@ -395,6 +403,8 @@ void SP_misc_deathray (edict_t *self)
 
 	self->monsterinfo.currentmove = &deathray_move_stand;
 	self->monsterinfo.scale = MODEL_SCALE;
+
+	self->last_action = level.time;
 
 	gi.linkentity (self);
 
