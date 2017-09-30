@@ -656,7 +656,7 @@ void TossClientWeapon (edict_t *self)
 	qboolean	haste;
 	float		spread;
 
-	if ((!deathmatch->value) || instagib->integer || rocket_arena->integer || insta_rockets->value)
+	if (!deathmatch->value)
 	{
 		return;
 	}
@@ -891,7 +891,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			VehicleDeadDrop(self);
 		else 
 		{
-			if(!excessive->value)
+			if(!excessive->value && !instagib->value && !rocket_arena->value && !insta_rockets->value)
 			{
 				if(mod == MOD_VIOLATOR)
 				{

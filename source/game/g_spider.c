@@ -103,6 +103,12 @@ void spiderShot (edict_t *self) //same as deathray shot
 	int		damage = 50;
     trace_t tr;
 
+	//don't shoot any faster than 2 seconds apart
+	if(self->last_action - level.time > 2)
+		self->last_action = level.time;
+	else
+		return;
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 	VectorSet(offset, 16, 0, 16);
 	G_ProjectSource (self->s.origin, offset, forward, right, start);
@@ -259,6 +265,8 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->enemy = NULL;
 
 	self->owner = owner;
+
+	self->last_action = level.time;
 
 	gi.linkentity (self);
 
