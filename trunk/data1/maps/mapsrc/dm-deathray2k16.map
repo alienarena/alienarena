@@ -16432,7 +16432,7 @@
 // entity 341
 {
 "classname" "misc_decal"
-"origin" "-382.000000 1046.000000 50.000000"
+"origin" "-382.000000 1022.000000 50.000000"
 "model" "maps/decals/pondscum.decal"
 "angles" "-45.000008 0.000000 0.000000"
 }
