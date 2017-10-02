@@ -104,7 +104,7 @@ void spiderShot (edict_t *self) //same as deathray shot
     trace_t tr;
 
 	//don't shoot any faster than 2 seconds apart
-	if(self->last_action - level.time > 2)
+	if( (level.time - self->last_action) > 2.0f )
 		self->last_action = level.time;
 	else
 		return;
