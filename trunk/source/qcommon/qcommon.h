@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "game/q_shared.h"
 
 #if !defined VERSION
-#define	VERSION		"7.66"
+#define	VERSION		"7.7"
 #endif
 
 #define MENU_STATIC_WIDTH	720.0f
