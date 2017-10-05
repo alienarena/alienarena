@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.StatusList = new System.Windows.Forms.ListView();
-            this.button1 = new System.Windows.Forms.Button();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // StatusList
@@ -45,7 +45,12 @@
             this.StatusList.Size = new System.Drawing.Size(429, 166);
             this.StatusList.TabIndex = 0;
             this.StatusList.UseCompatibleStateImageBehavior = false;
-            this.StatusList.View = System.Windows.Forms.View.List;
+            this.StatusList.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Status";
+            this.columnHeader1.Width = 423;
             // 
             // button1
             // 
@@ -56,11 +61,6 @@
             this.button1.Text = "Start Server";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "Status";
-            this.columnHeader1.Width = 300;
             // 
             // ACCServer
             // 

@@ -92,8 +92,8 @@ void deathrayShot (edict_t *self)
 	int		damage = 50;
     trace_t tr;
 
-	//don't shoot any faster than 2 seconds apart
-	if( (level.time - self->last_action) > 2.0f )
+	//don't shoot any faster than .1 seconds apart
+	if( (level.time - self->last_action) > TENFPS )
 		self->last_action = level.time;
 	else
 		return;
