@@ -29,10 +29,25 @@ namespace Alien_Arena_Account_Server_Manager
             ListViewItem pItem = null;
 
             //good idea to clear the list after say 100 entries.
+            if (StatusList.Items.Count > 100)
+                StatusList.Items.Clear();
 
             pItem = StatusList.Items.Add(message);
             pItem.Selected = false;
             pItem.Focused = false;
+        }
+
+        public void UpdatePlayerList()
+        {
+            PlayerList.Items.Clear();
+
+            for(int i = 0; i < netStuff.players.name.Count; i++)
+            {
+                ListViewItem pItem = null;
+                pItem = PlayerList.Items.Add(netStuff.players.name[i]);
+                pItem.Selected = false;
+                pItem.Focused = false;
+            }
         }
     }
 }

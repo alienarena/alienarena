@@ -37,6 +37,9 @@ namespace Alien_Arena_Account_Server_Manager
 
             name.RemoveAt(idx);
             time.RemoveAt(idx);
+
+            //we've removed a player, update the listview
+            ACCServer.sDialog.UpdatePlayerList();
         }
 
         //this called only when a packet of "login" is received, and the player is validated
@@ -53,6 +56,9 @@ namespace Alien_Arena_Account_Server_Manager
             //timestamp
             time.Add(DateTime.UtcNow.Hour);
 
+            //we've added a player, update the listview
+            ACCServer.sDialog.UpdatePlayerList();
+
             //check for expired players(those who never sent a logout)
             CheckPlayers();
         }
@@ -66,7 +72,8 @@ namespace Alien_Arena_Account_Server_Manager
             if (name.Exists(name => name == Name))
                 DropPlayer(Name);
 
-            //DumpValidPlayersToFile(); //set db field to "inactive"
+            //set db field to "inactive"
+            DBOperations.SetPlayerStatus(Name, "Inactive");
         }
 
         //check list for possible expired players(5 hour window)
@@ -183,7 +190,7 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
-        public static void ChangePlayerPassword(string Name, string NewPassword)
+        public static void SetPlayerStatus(string Name, string Status)
         {
             SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
@@ -198,11 +205,42 @@ namespace Alien_Arena_Account_Server_Manager
 
             try
             {
-                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), vString varchar(32), Status varchar(16));", sqlConn);
-
+                SqlCommand cmd = new SqlCommand("UPDATE Players SET Status = @1 WHERE Name = @0", sqlConn);
+                cmd.Parameters.Add(new SqlParameter("0", Name));
+                cmd.Parameters.Add(new SqlParameter("1", Status));
                 cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
 
-                cmd.CommandText = "UPDATE Players SET Password = @1 WHERE Name = @0";
+            try
+            {
+                sqlConn.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        public static void ChangePlayerPassword(string Name, string NewPassword)
+        {
+            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+
+            try
+            {
+                sqlConn.Open();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {   
+                SqlCommand cmd = new SqlCommand("UPDATE Players SET Password = @1 WHERE Name = @0", sqlConn);
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", NewPassword));
                 cmd.ExecuteNonQuery();
@@ -375,6 +413,7 @@ namespace Alien_Arena_Account_Server_Manager
                     ACCServer.sDialog.UpdateStatus("Adding " + sParams[4] + " to active player list.");
                     players.AddPlayer(sParams[4]);
                     SendValidationToClient();
+                    DBOperations.SetPlayerStatus(sParams[4], "Active");
                 }
             }
 
