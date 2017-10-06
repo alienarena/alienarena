@@ -1194,7 +1194,6 @@ static void CL_ConnectionlessPacket (void)
 		switch(currLoginState.requestType)
 		{
 			case STATSLOGIN:
-
 				STATS_AuthenticateStats(s);
 				break;
 			case STATSPWCHANGE:

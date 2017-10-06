@@ -10,14 +10,17 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Text;
+using System.ComponentModel;
 
 namespace Alien_Arena_Account_Server_Manager
 {
     public struct pProfile
     {
         public string Name;
-        public string vString;
+        public string Location;
         public string Password;
+        public double StatPoints;
+        public string Status;
     }
 
     public class playerList
@@ -92,6 +95,23 @@ namespace Alien_Arena_Account_Server_Manager
 
             }
         }
+
+        //clear the list completely
+        public void Clear()
+        {
+            name.RemoveAll(AllStrings);
+            time.RemoveAll(AllInts);
+        }
+
+        private static bool AllStrings(String s)
+        {
+            return true;
+        }
+
+        private static bool AllInts(int i)
+        {
+            return true;
+        }
     }
 
     public class DBOperations
@@ -101,8 +121,10 @@ namespace Alien_Arena_Account_Server_Manager
             pProfile Profile;
 
             Profile.Name = "Invalid";
-            Profile.vString = "Invalid";
+            Profile.Location = "Invalid";
             Profile.Password = "Invalid";
+            Profile.StatPoints = 0.0f;
+            Profile.Status = "Inactive";
 
             SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
@@ -119,15 +141,17 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 SqlDataReader rdr = null;
 
-                SqlCommand cmd = new SqlCommand("SELECT Name, vString, Password FROM Players", sqlConn);
+                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, Location, Status FROM Players", sqlConn);
                 rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
                     if (Name == rdr["Name"].ToString())
                     {
                         Profile.Name = rdr["Name"].ToString();
-                        Profile.vString = rdr["vString"].ToString();
+                        Profile.Location = rdr["Location"].ToString();
                         Profile.Password = rdr["Password"].ToString();
+                        Profile.StatPoints = Convert.ToDouble(rdr["Points"].ToString());
+                        Profile.Status = rdr["Status"].ToString();
                     }
                 }
                 rdr.Close();
@@ -149,7 +173,7 @@ namespace Alien_Arena_Account_Server_Manager
             return Profile;
         }
 
-        public static void AddProfile(string Name, string Password, string vString)
+        public static void AddProfile(string Name, string Password, string Location)
         {
             SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
@@ -164,14 +188,14 @@ namespace Alien_Arena_Account_Server_Manager
 
             try
             {
-                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), vString varchar(32), Status varchar(16));", sqlConn);
+                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), Points varchar(16), Location varchar(32), Status varchar(16));", sqlConn);
 
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "if NOT exists (SELECT * FROM Players where Name = @0) INSERT INTO Players(Name, Password, vString, Status) VALUES(@0, @1, @2, @3)";
+                cmd.CommandText = "if NOT exists (SELECT * FROM Players where Name = @0) INSERT INTO Players(Name, Password, Points, Location, Status) VALUES(@0, @1, '0.0', @2, @3)";
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", Password));
-                cmd.Parameters.Add(new SqlParameter("2", vString));
+                cmd.Parameters.Add(new SqlParameter("2", Location));
                 cmd.Parameters.Add(new SqlParameter("3", "Active"));
                 cmd.ExecuteNonQuery();
             }
@@ -265,6 +289,7 @@ namespace Alien_Arena_Account_Server_Manager
     {
         public static netStuff sServer = new netStuff();
         static UdpClient sListener;
+        static Thread RunStats;
         static IPEndPoint source;
 
         public static playerList players = new playerList();
@@ -278,28 +303,18 @@ namespace Alien_Arena_Account_Server_Manager
         {
             string vString = "";
 
-            //look for existing account in DB
-            pProfile Profile = DBOperations.CheckPlayer(Name);
+            Random rnd = new Random();
 
-            if (Profile.Name == "Invalid")
+            //create randomstring
+            for (int i = 0; i < 32; i++)
             {
-                Random rnd = new Random();
-
-                //create randomstring
-                for (int i = 0; i < 32; i++)
-                {
-                    vString += Convert.ToChar(rnd.Next(0, 78) + 30);
-                }
+                vString += Convert.ToChar(rnd.Next(0, 78) + 30);
             }
-            else
-            {
-                vString = Profile.vString;
-            }
-
+           
             return vString;
         }
 
-        static bool ValidatePlayer(string Name, string Password, string vString)
+        static bool ValidatePlayer(string Name, string Password, string Location)
         {
             //look for existing account in DB
             pProfile Profile = DBOperations.CheckPlayer(Name);
@@ -309,7 +324,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 //add to database
                 ACCServer.sDialog.UpdateStatus("Adding " + Name + " to database.");
-                DBOperations.AddProfile(Name, Password, vString);
+                DBOperations.AddProfile(Name, Password, Location);
                 return true;
             }
             else
@@ -408,7 +423,7 @@ namespace Alien_Arena_Account_Server_Manager
                     return;
                 }
 
-                if(ValidatePlayer(sParams[4], sParams[6], sParams[8]))
+                if(ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                 {
                     ACCServer.sDialog.UpdateStatus("Adding " + sParams[4] + " to active player list.");
                     players.AddPlayer(sParams[4]);
@@ -430,7 +445,7 @@ namespace Alien_Arena_Account_Server_Manager
                     return;
                 }
 
-                if (ValidatePlayer(sParams[4], sParams[6], sParams[8]))
+                if (ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                 {
                     ACCServer.sDialog.UpdateStatus("Removing " + sParams[4] + " from active player list.");
                     players.RemovePlayer(sParams[4]);
@@ -453,7 +468,7 @@ namespace Alien_Arena_Account_Server_Manager
 
                 if (sParams[6] == "password") //Setting from a new system for an existing player
                 {
-                    if (ValidatePlayer(sParams[4], sParams[8], sParams[10]))
+                    if (ValidatePlayer(sParams[4], sParams[8], source.Address.ToString()))
                     {
                         ACCServer.sDialog.UpdateStatus("Setting password for " + sParams[4] + " .");
                         DBOperations.ChangePlayerPassword(sParams[4], sParams[8]);
@@ -462,36 +477,168 @@ namespace Alien_Arena_Account_Server_Manager
                 }
                 else 
                 {
-                    if (ValidatePlayer(sParams[4], sParams[6], sParams[10]))
+                    if (ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                     {
                         ACCServer.sDialog.UpdateStatus("Changing password for " + sParams[4] + " .");
                         DBOperations.ChangePlayerPassword(sParams[4], sParams[8]);
                         SendValidationToClient();
                     }
                 }
-            }
+            }            
             else
             {
                 //Unknown request
                 ACCServer.sDialog.UpdateStatus("Unknown request!");
             }
         }
+               
+        public void RequestServerList()
+        {
+            IPEndPoint Master = new IPEndPoint(IPAddress.Parse("69.243.97.80"), 27900);
+            //master 2 149.210.138.19
+            //master 1 69.243.97.80
+
+            Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            string message = "query";
+
+            byte[] send_buffer = Encoding.Default.GetBytes(message);
+
+            //Send to client
+            try
+            {
+                sending_socket.SendTo(send_buffer, Master);
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+
+            byte[] bytes = new byte[1024];
+            try
+            {
+                sending_socket.Receive(bytes);
+
+                int start = 12;
+                int result = bytes.Length - 12;
+                while (result > 0)
+                {
+                    //read 32 bit IP address (network byte order)
+                    byte[] ip = bytes.Skip(start).Take(4).ToArray();
+                    IPAddress sIP = new IPAddress(ip);
+
+                    if (sIP.ToString() == "0.0.0.0")
+                        break;
+
+                    start += 4;
+
+                    byte[] port = bytes.Skip(start).Take(2).ToArray();
+                    Array.Reverse(port);
+                    ushort sPort = BitConverter.ToUInt16(port, 0);
+                    start += 2;
+
+                    result -= 6; //6 bytes per server entry
+
+                    //Add to list
+                    Stats.Servers.Add(sIP.ToString(), sPort, "Server", "Map");
+                }
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+
+            //Close this socket
+            try
+            {
+                sending_socket.Close();
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
+
+        public void GetServerInfo(string Ip, ushort Port, int sNum)
+        {
+            IPEndPoint Server = new IPEndPoint(IPAddress.Parse(Ip), Port);
+
+            Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            string message = "\xFF\xFF\xFF\xFFstatus\n";
+
+            byte[] send_buffer = Encoding.Default.GetBytes(message);
+
+            //Send to client
+            try
+            {
+                sending_socket.SendTo(send_buffer, Server);
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+
+            byte[] bytes = new byte[1024];
+            try
+            {
+                sending_socket.ReceiveTimeout = 3;
+                sending_socket.Receive(bytes);
+
+                message = Encoding.Default.GetString(bytes, 0, bytes.Length);
+
+                string[] sParams = message.Split('\\');
+
+                for (int i = 0; i < sParams.Length; i++)
+                {
+                    //after "mods" comes the large space delimited piece with player info
+                    //MessageBox.Show(sParams[i]);
+                    if(i != 0)
+                    {
+                        if (sParams[i - 1] == "hostname")
+                            Stats.Servers.Name[sNum] = sParams[i];
+                        if(sParams[i - 1] == "mapname")
+                            Stats.Servers.Map[sNum] = sParams[i];
+
+                        if (sParams[i - 1] == "mods" && sParams[i].Length > 0)
+                        {
+                            string[] sPlayers = sParams[i].Split('\n');
+                            for(int j = 0; j < sPlayers.Length; j++)
+                            {
+                                if (sPlayers[j].Length > 0 && j > 0)
+                                {
+                                    string[] sPlayer = sPlayers[j].Split(' ');
+                                    if (sPlayer.Length > 2)
+                                    {
+                                        string Name = sPlayer[2].Trim('"');
+                                        Stats.Servers.players.AddPlayer(Name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception exc) {  }
+
+            //Close this socket
+            try
+            {
+                sending_socket.Close();
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
 
         static void OnUdpData(IAsyncResult result)
         {
-            UdpClient socket = result.AsyncState as UdpClient;
+            try
+            {
+                UdpClient socket = result.AsyncState as UdpClient;
 
-            // points towards whoever had sent the message:
-            source = new IPEndPoint(0, 0);
+                //Points towards whoever had sent the message
+                source = new IPEndPoint(0, 0);
 
-            // get the actual message and fill out the source:
-            byte[] message = socket.EndReceive(result, ref source);
+                //Get the actual message and fill out the source
+                byte[] message = socket.EndReceive(result, ref source);
 
-            string received_data = Encoding.Default.GetString(message, 0, message.Length);
-            //MessageBox.Show(received_data);
-            ParseData(received_data);
-            // schedule the next receive operation once reading is done:
-            socket.BeginReceive(new AsyncCallback(OnUdpData), socket);
+                string received_data = Encoding.Default.GetString(message, 0, message.Length);
+                ParseData(received_data);
+
+                //Schedule the next receive operation once reading is done
+                socket.BeginReceive(new AsyncCallback(OnUdpData), socket);
+            }
+            catch (Exception exc)
+            {
+                //do nothing 
+            }
         }
 
         public void OpenListener()
@@ -501,13 +648,19 @@ namespace Alien_Arena_Account_Server_Manager
             sListener.BeginReceive(new AsyncCallback(OnUdpData), sListener);
 
             ACCServer.sDialog.UpdateStatus("Listening...");
+
+            //Start new thread for stats collection.
+            Stats.getStats = true;
+            RunStats = new Thread(new ThreadStart(Stats.StatsGen));
+            RunStats.Start();
         }
 
         public void Close_Socket()
         {
             try
             {
-                sListener.Close();
+                Stats.getStats = false;
+                sListener.Close();               
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
