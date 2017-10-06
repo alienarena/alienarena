@@ -23,6 +23,14 @@ namespace Alien_Arena_Account_Server_Manager
         {
             netStuff.sServer.OpenListener();
         }
+        
+        private void StopServer_Click(object sender, EventArgs e)
+        {
+            netStuff.sServer.Close_Socket();
+            PlayerList.Items.Clear();
+            netStuff.players.Clear();
+            UpdateStatus("stopped...");
+        }
 
         public void UpdateStatus(string message)
         {

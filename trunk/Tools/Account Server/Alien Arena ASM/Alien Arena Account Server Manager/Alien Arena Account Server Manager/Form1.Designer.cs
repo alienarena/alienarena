@@ -30,8 +30,8 @@
         {
             this.StatusList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.StartServer = new System.Windows.Forms.Button();
+            this.StopServer = new System.Windows.Forms.Button();
             this.PlayerList = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
@@ -55,24 +55,25 @@
             this.columnHeader1.Text = "Status";
             this.columnHeader1.Width = 245;
             // 
-            // button1
+            // StartServer
             // 
-            this.button1.Location = new System.Drawing.Point(12, 421);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Start Server";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.StartServer.Location = new System.Drawing.Point(12, 421);
+            this.StartServer.Name = "StartServer";
+            this.StartServer.Size = new System.Drawing.Size(75, 23);
+            this.StartServer.TabIndex = 1;
+            this.StartServer.Text = "Start Server";
+            this.StartServer.UseVisualStyleBackColor = true;
+            this.StartServer.Click += new System.EventHandler(this.button1_Click);
             // 
-            // button2
+            // StopServer
             // 
-            this.button2.Location = new System.Drawing.Point(93, 421);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "Stop Server";
-            this.button2.UseVisualStyleBackColor = true;
+            this.StopServer.Location = new System.Drawing.Point(93, 421);
+            this.StopServer.Name = "StopServer";
+            this.StopServer.Size = new System.Drawing.Size(75, 23);
+            this.StopServer.TabIndex = 2;
+            this.StopServer.Text = "Stop Server";
+            this.StopServer.UseVisualStyleBackColor = true;
+            this.StopServer.Click += new System.EventHandler(this.StopServer_Click);
             // 
             // PlayerList
             // 
@@ -98,8 +99,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(453, 456);
             this.Controls.Add(this.PlayerList);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.StopServer);
+            this.Controls.Add(this.StartServer);
             this.Controls.Add(this.StatusList);
             this.Name = "ACCServer";
             this.Text = "Account Server";
@@ -110,9 +111,9 @@
         #endregion
 
         private System.Windows.Forms.ListView StatusList;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button StartServer;
         private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button StopServer;
         private System.Windows.Forms.ListView PlayerList;
         private System.Windows.Forms.ColumnHeader columnHeader2;
     }
