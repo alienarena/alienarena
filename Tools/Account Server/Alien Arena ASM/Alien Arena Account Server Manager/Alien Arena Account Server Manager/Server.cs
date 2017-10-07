@@ -20,18 +20,26 @@ namespace Alien_Arena_Account_Server_Manager
         public string Location;
         public string Password;
         public double StatPoints;
+        public double TotalFragRate;
+        public double TotalTime;
         public string Status;
     }
 
     public class playerList
     {
         public List<string> name;
-        public List<int> time;
+        public List<int> score;
+        public List<int> frags;
+        public List<int> hour;
+        public List<int> minutes;
 
         public playerList()
         {
             name = new List<string>();
-            time = new List<int>();
+            score = new List<int>();
+            frags = new List<int>();
+            hour = new List<int>();
+            minutes = new List<int>();
         }
 
         public void DropPlayer(string Name)
@@ -39,7 +47,10 @@ namespace Alien_Arena_Account_Server_Manager
             int idx = name.IndexOf(Name);
 
             name.RemoveAt(idx);
-            time.RemoveAt(idx);
+            score.RemoveAt(idx);
+            frags.RemoveAt(idx);
+            hour.RemoveAt(idx);
+            minutes.RemoveAt(idx);
 
             //we've removed a player, update the listview
             ACCServer.sDialog.UpdatePlayerList();
@@ -55,9 +66,12 @@ namespace Alien_Arena_Account_Server_Manager
                 return;
 
             name.Add(Name);
+            score.Add(0); //no score needed for this list
+            frags.Add(0);
 
             //timestamp
-            time.Add(DateTime.UtcNow.Hour);
+            hour.Add(DateTime.UtcNow.Hour);
+            minutes.Add(DateTime.UtcNow.Minute);
 
             //we've added a player, update the listview
             ACCServer.sDialog.UpdatePlayerList();
@@ -79,6 +93,30 @@ namespace Alien_Arena_Account_Server_Manager
             DBOperations.SetPlayerStatus(Name, "Inactive");
         }
 
+        public void AddPlayerInfo(string Name, int Score, int Frags, int Hour, int Minutes)
+        {
+            //we need to actually use insert and put these in a sorted order by fragrates
+            int insertPos = 0;
+
+            //check if this player is already in the list
+            int idx = name.IndexOf(Name);
+
+            if (name.Exists(name => name == Name))
+                return;
+
+            for(idx = 0; idx < name.Count; idx++)
+            {
+                if ((float)Frags / ((float)Hour * 60.0f + (float)Minutes) >= (float)frags[idx] / ((float)hour[idx] * 60.0f + (float)minutes[idx]))
+                    insertPos = idx;
+            }
+
+            name.Insert(insertPos, Name);
+            score.Insert(insertPos, Score);
+            frags.Insert(insertPos, Frags); 
+            hour.Insert(insertPos, Hour);
+            minutes.Insert(insertPos, Minutes);
+        }
+
         //check list for possible expired players(5 hour window)
         public void CheckPlayers()
         {
@@ -86,21 +124,36 @@ namespace Alien_Arena_Account_Server_Manager
 
             for (int idx = 0; idx < name.Count; idx++)
             {
-                if (time[idx] > curTime)
+                if (hour[idx] > curTime)
                 {
                     curTime += 24;
-                    if (curTime - time[idx] > 5)
+                    if (curTime - hour[idx] > 5)
                         DropPlayer(name[idx]);
                 }
-
             }
+        }
+
+        public int GetPlayerIndex(string Name)
+        {
+            for (int idx = 0; idx < name.Count; idx++)
+            {
+                if (Name == name[idx])
+                {
+                    return idx;
+                }
+            }
+
+            return -1;
         }
 
         //clear the list completely
         public void Clear()
         {
             name.RemoveAll(AllStrings);
-            time.RemoveAll(AllInts);
+            score.RemoveAll(AllInts);
+            frags.RemoveAll(AllInts);
+            hour.RemoveAll(AllInts);
+            minutes.RemoveAll(AllInts);
         }
 
         private static bool AllStrings(String s)
@@ -124,6 +177,8 @@ namespace Alien_Arena_Account_Server_Manager
             Profile.Location = "Invalid";
             Profile.Password = "Invalid";
             Profile.StatPoints = 0.0f;
+            Profile.TotalFragRate = 0.0f;
+            Profile.TotalTime = 0.0f;
             Profile.Status = "Inactive";
 
             SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
@@ -141,7 +196,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 SqlDataReader rdr = null;
 
-                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, Location, Status FROM Players", sqlConn);
+                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFragRate, TotalTime, Location, Status FROM Players", sqlConn);
                 rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
@@ -151,6 +206,8 @@ namespace Alien_Arena_Account_Server_Manager
                         Profile.Location = rdr["Location"].ToString();
                         Profile.Password = rdr["Password"].ToString();
                         Profile.StatPoints = Convert.ToDouble(rdr["Points"].ToString());
+                        Profile.TotalFragRate = Convert.ToDouble(rdr["TotalFragRate"].ToString());
+                        Profile.TotalTime = Convert.ToDouble(rdr["TotalTime"].ToString());
                         Profile.Status = rdr["Status"].ToString();
                     }
                 }
@@ -188,11 +245,11 @@ namespace Alien_Arena_Account_Server_Manager
 
             try
             {
-                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), Points varchar(16), Location varchar(32), Status varchar(16));", sqlConn);
+                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), Points varchar(16), TotalFragRate varchar(16), TotalTime varchar(16), Location varchar(32), Status varchar(16));", sqlConn);
 
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "if NOT exists (SELECT * FROM Players where Name = @0) INSERT INTO Players(Name, Password, Points, Location, Status) VALUES(@0, @1, '0.0', @2, @3)";
+                cmd.CommandText = "if NOT exists (SELECT * FROM Players where Name = @0) INSERT INTO Players(Name, Password, Points, TotalFragRate, TotalTime, Location, Status) VALUES(@0, @1, '0.0', '0.0', '0.0', @2, @3)";
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", Password));
                 cmd.Parameters.Add(new SqlParameter("2", Location));
@@ -575,6 +632,8 @@ namespace Alien_Arena_Account_Server_Manager
 
                 message = Encoding.Default.GetString(bytes, 0, bytes.Length);
 
+                //MessageBox.Show(message);
+
                 string[] sParams = message.Split('\\');
 
                 for (int i = 0; i < sParams.Length; i++)
@@ -599,7 +658,26 @@ namespace Alien_Arena_Account_Server_Manager
                                     if (sPlayer.Length > 2)
                                     {
                                         string Name = sPlayer[2].Trim('"');
-                                        Stats.Servers.players.AddPlayer(Name);
+                                        //Get index of this player in active, signed in player list
+                                        //If this player is not logged in, forget them
+                                        int idx = players.GetPlayerIndex(Name);
+                                        if (idx != -1)
+                                        {
+                                            int Score = Convert.ToInt32(sPlayer[0]);
+                                            int Hours = DateTime.UtcNow.Hour - players.hour[idx];
+                                            int Minutes = DateTime.UtcNow.Minute - players.minutes[idx];
+                                            if (Hours < 0)
+                                            {
+                                                Hours += 24;
+                                                Minutes = 60 - Minutes;
+                                            }
+                                            int Frags = players.frags[idx] + (Score - players.score[idx] > 0? Score - players.score[idx]:0);
+                                            //check score vs what's already in the registered list to get frags to add to total
+                                            Stats.Servers.players.AddPlayerInfo(Name, Score, Frags, Hours, Minutes);
+                                            //Then update the registered list with the updated score and frag total.
+                                            players.frags[idx] = Frags;
+                                            players.score[idx] = Score;
+                                        }
                                     }
                                 }
                             }
