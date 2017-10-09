@@ -83,12 +83,12 @@ namespace Alien_Arena_Account_Server_Manager
                 series.Points.Add(Stats.PlayerCount[i]);
             }
 
-            series = this.playercount.Series.Add("Validated");
+            Series vseries = this.playercount.Series.Add("Validated");
 
             //track last 10 polls.
             for (int i = Stats.ValidatedPlayerCount.Count - 1; i >= 0; i--)
             {
-                series.Points.Add(Stats.ValidatedPlayerCount[i]);
+                vseries.Points.Add(Stats.ValidatedPlayerCount[i]);
             }
         }
     }
