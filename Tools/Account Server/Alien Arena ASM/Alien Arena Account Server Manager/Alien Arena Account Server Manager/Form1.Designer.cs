@@ -28,12 +28,22 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatusList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.StartServer = new System.Windows.Forms.Button();
             this.StopServer = new System.Windows.Forms.Button();
             this.PlayerList = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.servercount = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.playercount = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            ((System.ComponentModel.ISupportInitialize)(this.servercount)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.playercount)).BeginInit();
             this.SuspendLayout();
             // 
             // StatusList
@@ -93,17 +103,56 @@
             this.columnHeader2.Text = "Active Players";
             this.columnHeader2.Width = 154;
             // 
+            // servercount
+            // 
+            chartArea1.Name = "ChartArea1";
+            this.servercount.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.servercount.Legends.Add(legend1);
+            this.servercount.Location = new System.Drawing.Point(447, 12);
+            this.servercount.Name = "servercount";
+            series1.ChartArea = "ChartArea1";
+            series1.IsXValueIndexed = true;
+            series1.Legend = "Legend1";
+            series1.LegendText = "Servers";
+            series1.Name = "Servers";
+            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
+            this.servercount.Series.Add(series1);
+            this.servercount.Size = new System.Drawing.Size(300, 202);
+            this.servercount.TabIndex = 4;
+            this.servercount.Text = "Servers";
+            // 
+            // playercount
+            // 
+            chartArea2.Name = "ChartArea1";
+            this.playercount.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.playercount.Legends.Add(legend2);
+            this.playercount.Location = new System.Drawing.Point(447, 220);
+            this.playercount.Name = "playercount";
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Players";
+            this.playercount.Series.Add(series2);
+            this.playercount.Size = new System.Drawing.Size(300, 195);
+            this.playercount.TabIndex = 5;
+            this.playercount.Text = "Players";
+            // 
             // ACCServer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(453, 456);
+            this.ClientSize = new System.Drawing.Size(775, 456);
+            this.Controls.Add(this.playercount);
+            this.Controls.Add(this.servercount);
             this.Controls.Add(this.PlayerList);
             this.Controls.Add(this.StopServer);
             this.Controls.Add(this.StartServer);
             this.Controls.Add(this.StatusList);
             this.Name = "ACCServer";
             this.Text = "Account Server";
+            ((System.ComponentModel.ISupportInitialize)(this.servercount)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.playercount)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -116,6 +165,8 @@
         private System.Windows.Forms.Button StopServer;
         private System.Windows.Forms.ListView PlayerList;
         private System.Windows.Forms.ColumnHeader columnHeader2;
+        private System.Windows.Forms.DataVisualization.Charting.Chart servercount;
+        private System.Windows.Forms.DataVisualization.Charting.Chart playercount;
     }
 }
 
