@@ -196,7 +196,8 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 SqlDataReader rdr = null;
 
-                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFragRate, TotalTime, Location, Status FROM Players", sqlConn);
+                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFragRate, TotalTime, Location, Status FROM Players WHERE Name = @0", sqlConn);
+                cmd.Parameters.Add(new SqlParameter("0", Name));
                 rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
@@ -249,7 +250,7 @@ namespace Alien_Arena_Account_Server_Manager
 
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "if NOT exists (SELECT * FROM Players where Name = @0) INSERT INTO Players(Name, Password, Points, TotalFragRate, TotalTime, Location, Status) VALUES(@0, @1, '0.0', '0.0', '0.0', @2, @3)";
+                cmd.CommandText = "if NOT exists (SELECT * FROM Players WHERE Name = @0) INSERT INTO Players(Name, Password, Points, TotalFragRate, TotalTime, Location, Status) VALUES(@0, @1, '0.0', '0.0', '0.0', @2, @3)";
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", Password));
                 cmd.Parameters.Add(new SqlParameter("2", Location));
@@ -324,6 +325,43 @@ namespace Alien_Arena_Account_Server_Manager
                 SqlCommand cmd = new SqlCommand("UPDATE Players SET Password = @1 WHERE Name = @0", sqlConn);
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", NewPassword));
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                sqlConn.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        public static void UpdatePlayer(string Name, string Points, string TotalFragRate, string TotalTime )
+        {
+            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+
+            try
+            {
+                sqlConn.Open();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE Players SET Points = @1, TotalFragRate = @2, TotalTime = @3 WHERE Name = @0", sqlConn);
+                cmd.Parameters.Add(new SqlParameter("0", Name));
+                cmd.Parameters.Add(new SqlParameter("1", Points));
+                cmd.Parameters.Add(new SqlParameter("2", TotalFragRate));
+                cmd.Parameters.Add(new SqlParameter("3", TotalTime));
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
@@ -659,6 +697,7 @@ namespace Alien_Arena_Account_Server_Manager
                                     {
                                         string Name = sPlayer[2].Trim('"');
                                         //Get index of this player in active, signed in player list
+                                        Stats.TotalPlayers++;
                                         //If this player is not logged in, forget them
                                         int idx = players.GetPlayerIndex(Name);
                                         if (idx != -1)
@@ -673,7 +712,7 @@ namespace Alien_Arena_Account_Server_Manager
                                             }
                                             int Frags = players.frags[idx] + (Score - players.score[idx] > 0? Score - players.score[idx]:0);
                                             //check score vs what's already in the registered list to get frags to add to total
-                                            Stats.Servers.players.AddPlayerInfo(Name, Score, Frags, Hours, Minutes);
+                                            Stats.players.AddPlayerInfo(Name, Score, Frags, Hours, Minutes);
                                             //Then update the registered list with the updated score and frag total.
                                             players.frags[idx] = Frags;
                                             players.score[idx] = Score;

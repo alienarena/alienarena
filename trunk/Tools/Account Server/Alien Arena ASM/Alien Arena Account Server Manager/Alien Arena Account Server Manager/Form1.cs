@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Alien_Arena_Account_Server_Manager
 {
@@ -55,6 +56,39 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem = PlayerList.Items.Add(netStuff.players.name[i]);
                 pItem.Selected = false;
                 pItem.Focused = false;
+            }
+        }
+
+        public void UpdateServerChart()
+        {
+            this.servercount.Series.Clear();
+
+            Series series = this.servercount.Series.Add("Servers");
+
+            //track last 10 polls.
+            for (int i = Stats.ServerCount.Count-1; i >= 0; i--)
+            {   
+                series.Points.Add(Stats.ServerCount[i]);
+            }
+        }
+        public void UpdatePlayerChart()
+        {
+            this.playercount.Series.Clear();
+
+            Series series = this.playercount.Series.Add("All Clients");
+
+            //track last 10 polls.
+            for (int i = Stats.PlayerCount.Count - 1; i >= 0; i--)
+            {
+                series.Points.Add(Stats.PlayerCount[i]);
+            }
+
+            series = this.playercount.Series.Add("Validated");
+
+            //track last 10 polls.
+            for (int i = Stats.ValidatedPlayerCount.Count - 1; i >= 0; i--)
+            {
+                series.Points.Add(Stats.ValidatedPlayerCount[i]);
             }
         }
     }
