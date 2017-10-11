@@ -461,9 +461,9 @@ namespace Alien_Arena_Account_Server_Manager
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
-        static void SendVStringToClient(string Name)
-        {
 
+        static void SendVStringToClient(string Name, IPEndPoint dest)
+        {
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
             string message = "ÿÿÿÿvstring ";
@@ -474,7 +474,7 @@ namespace Alien_Arena_Account_Server_Manager
             //Send to client
             try
             {
-                sending_socket.SendTo(send_buffer, source);
+                sending_socket.SendTo(send_buffer, dest);
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
 
@@ -501,8 +501,8 @@ namespace Alien_Arena_Account_Server_Manager
                 }
 
                 //Send verification string to client.
-                ACCServer.sDialog.UpdateStatus("Sending verification string to " + sParams[4] + ".");
-                SendVStringToClient(sParams[4]);
+                ACCServer.sDialog.UpdateStatus("Sending verification string to " + sParams[4] + " at " + source.Address.ToString() + ":" + source.Port.ToString() + ".");
+                SendVStringToClient(sParams[4], source);
             }
 
             else if (message.Contains("ÿÿÿÿlogin"))
@@ -746,13 +746,15 @@ namespace Alien_Arena_Account_Server_Manager
                 //Get the actual message and fill out the source
                 byte[] message = socket.EndReceive(result, ref source);
 
+                //Schedule the next receive operation once reading is done
+                socket.BeginReceive(new AsyncCallback(OnUdpData), socket);
+
+                //Process the data - after opening receive
                 string received_data = Encoding.Default.GetString(message, 0, message.Length);
                 ParseData(received_data);
 
-                //Schedule the next receive operation once reading is done
-                socket.BeginReceive(new AsyncCallback(OnUdpData), socket);
             }
-            catch (Exception exc)
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
             {
                 //do nothing 
             }
