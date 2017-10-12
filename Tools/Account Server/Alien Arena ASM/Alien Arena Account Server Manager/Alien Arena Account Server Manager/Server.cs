@@ -385,7 +385,8 @@ namespace Alien_Arena_Account_Server_Manager
         public static netStuff sServer = new netStuff();
         static UdpClient sListener;
         static Thread RunStats;
-        static IPEndPoint source;
+        static Thread RunListener;
+        static bool runListener = false;
 
         public static playerList players = new playerList();
 
@@ -438,9 +439,10 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
-        static void SendValidationToClient()
+        static void SendValidationToClient(IPEndPoint dest)
         {
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            sending_socket.Ttl = 60;
 
             string message = "ÿÿÿÿvalidated";
 
@@ -449,7 +451,8 @@ namespace Alien_Arena_Account_Server_Manager
             //Send to client
             try
             {
-                sending_socket.SendTo(send_buffer, source);
+                sending_socket.SendTo(send_buffer, dest);
+                //sListener.Send(send_buffer, send_buffer.Length, dest);
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
 
@@ -461,10 +464,10 @@ namespace Alien_Arena_Account_Server_Manager
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
-
         static void SendVStringToClient(string Name, IPEndPoint dest)
         {
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            sending_socket.Ttl = 60;
 
             string message = "ÿÿÿÿvstring ";
 
@@ -475,6 +478,7 @@ namespace Alien_Arena_Account_Server_Manager
             try
             {
                 sending_socket.SendTo(send_buffer, dest);
+                //sListener.Send(send_buffer, send_buffer.Length, dest);
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
 
@@ -486,7 +490,7 @@ namespace Alien_Arena_Account_Server_Manager
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
-        static void ParseData(string message)
+        static void ParseData(string message, IPEndPoint source)
         {
             if (message.Contains("ÿÿÿÿrequestvstring"))
             {
@@ -522,7 +526,7 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     ACCServer.sDialog.UpdateStatus("Adding " + sParams[4] + " to active player list.");
                     players.AddPlayer(sParams[4]);
-                    SendValidationToClient();
+                    SendValidationToClient(source);
                     DBOperations.SetPlayerStatus(sParams[4], "Active");
                 }
             }
@@ -567,7 +571,7 @@ namespace Alien_Arena_Account_Server_Manager
                     {
                         ACCServer.sDialog.UpdateStatus("Setting password for " + sParams[4] + " .");
                         DBOperations.ChangePlayerPassword(sParams[4], sParams[8]);
-                        SendValidationToClient();
+                        SendValidationToClient(source);
                     }
                 }
                 else 
@@ -576,14 +580,14 @@ namespace Alien_Arena_Account_Server_Manager
                     {
                         ACCServer.sDialog.UpdateStatus("Changing password for " + sParams[4] + " .");
                         DBOperations.ChangePlayerPassword(sParams[4], sParams[8]);
-                        SendValidationToClient();
+                        SendValidationToClient(source);
                     }
                 }
             }            
             else
             {
                 //Unknown request
-                ACCServer.sDialog.UpdateStatus("Unknown request!");
+                ACCServer.sDialog.UpdateStatus("Unknown request! " + message);
             }
         }
                
@@ -594,7 +598,7 @@ namespace Alien_Arena_Account_Server_Manager
             //master 1 69.243.97.80
 
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
+            
             string message = "query";
 
             byte[] send_buffer = Encoding.Default.GetBytes(message);
@@ -650,6 +654,7 @@ namespace Alien_Arena_Account_Server_Manager
             IPEndPoint Server = new IPEndPoint(IPAddress.Parse(Ip), Port);
 
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            sending_socket.Ttl = 60;
 
             string message = "\xFF\xFF\xFF\xFFstatus\n";
 
@@ -741,7 +746,7 @@ namespace Alien_Arena_Account_Server_Manager
                 UdpClient socket = result.AsyncState as UdpClient;
 
                 //Points towards whoever had sent the message
-                source = new IPEndPoint(0, 0);
+                IPEndPoint source = new IPEndPoint(0, 0);
 
                 //Get the actual message and fill out the source
                 byte[] message = socket.EndReceive(result, ref source);
@@ -749,18 +754,42 @@ namespace Alien_Arena_Account_Server_Manager
                 //Schedule the next receive operation once reading is done
                 socket.BeginReceive(new AsyncCallback(OnUdpData), socket);
 
-                //Process the data - after opening receive
+                //Process the data - after opening new receive
                 string received_data = Encoding.Default.GetString(message, 0, message.Length);
-                ParseData(received_data);
-
+                if (received_data.Length > 4)
+                    ParseData(received_data, source);
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
-            {
-                //do nothing 
-            }
         }
 
-        public void OpenListener()
+        public void Listen()
+        {
+            bool done = false;
+            sListener = new UdpClient(27902);
+            sListener.Ttl = 100;
+            IPEndPoint source = new IPEndPoint(0, 0);
+            string received_data;
+            byte[] receive_byte_array;
+            try
+            {
+                while (!done)
+                {
+                    receive_byte_array = sListener.Receive(ref source);
+                    received_data = Encoding.Default.GetString(receive_byte_array, 0, receive_byte_array.Length);
+                    if (received_data.Length > 4)
+                        ParseData(received_data, source);
+                }
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+
+            try
+            {
+                sListener.Close();
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
+
+        public void Start_Server()
         {
             sListener = new UdpClient(27902);
 
@@ -768,18 +797,27 @@ namespace Alien_Arena_Account_Server_Manager
 
             ACCServer.sDialog.UpdateStatus("Listening...");
 
+            //runListener = true;
+
+            //RunListener = new Thread(new ThreadStart(Listen));
+            //RunListener.Start();
+
             //Start new thread for stats collection.
             Stats.getStats = true;
             RunStats = new Thread(new ThreadStart(Stats.StatsGen));
             RunStats.Start();
         }
 
-        public void Close_Socket()
+        public void Stop_Server()
         {
             try
             {
-                Stats.getStats = false;
-                sListener.Close();               
+                try
+                {
+                    sListener.Close();
+                }
+                catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+                Stats.getStats = false;                              
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }

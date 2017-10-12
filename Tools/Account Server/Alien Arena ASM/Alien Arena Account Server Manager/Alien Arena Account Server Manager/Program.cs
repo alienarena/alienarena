@@ -20,7 +20,7 @@ namespace Alien_Arena_Account_Server_Manager
             Application.Run(ACCServer.sDialog);
 
             //close listener socket
-            netStuff.sServer.Close_Socket();
+            netStuff.sServer.Stop_Server();
         }
     }
 }

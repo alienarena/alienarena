@@ -22,12 +22,12 @@ namespace Alien_Arena_Account_Server_Manager
 
         private void button1_Click(object sender, EventArgs e)
         {
-            netStuff.sServer.OpenListener();
+            netStuff.sServer.Start_Server();
         }
         
         private void StopServer_Click(object sender, EventArgs e)
         {
-            netStuff.sServer.Close_Socket();
+            netStuff.sServer.Stop_Server();
             PlayerList.Items.Clear();
             netStuff.players.Clear();
             UpdateStatus("stopped...");
