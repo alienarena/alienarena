@@ -48,6 +48,8 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem = StatusList.Items.Add(message);
                 pItem.Selected = false;
                 pItem.Focused = false;
+
+                pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }

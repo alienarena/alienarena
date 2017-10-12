@@ -11,6 +11,7 @@ using System.Net;
 using System.Threading;
 using System.Text;
 using System.ComponentModel;
+using System.IO;
 
 namespace Alien_Arena_Account_Server_Manager
 {
@@ -378,6 +379,75 @@ namespace Alien_Arena_Account_Server_Manager
                 MessageBox.Show(e.ToString());
             }
         }
+
+        public static void GenerateStatsFile()
+        {
+            pProfile Profile;
+
+            Profile.Name = "Invalid";
+            Profile.Location = "Invalid";
+            Profile.Password = "Invalid";
+            Profile.StatPoints = 0.0f;
+            Profile.TotalFragRate = 0.0f;
+            Profile.TotalTime = 0.0f;
+            Profile.Status = "Inactive";
+
+            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+
+            try
+            {
+                sqlConn.Open();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                int total = 0;
+                SqlDataReader rdr = null;
+
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Players ORDER BY Points DESC", sqlConn);
+
+                StreamWriter file = new System.IO.StreamWriter(@"playerrank.db");
+
+                rdr = cmd.ExecuteReader();
+                while (rdr.Read() && total < 1000)
+                {
+                    file.WriteLine(rdr["Name"].ToString());
+                    file.WriteLine("127.0.0.1");
+                    file.WriteLine(rdr["Points"].ToString());
+                    //current frags
+                    file.WriteLine("0");
+                    //total fragrate
+                    file.WriteLine(rdr["TotalFragRate"].ToString());
+                    //current time
+                    file.WriteLine("0");
+                    file.WriteLine(rdr["TotalTime"].ToString());
+                    //next two not needed any longer(server ip and poll number)
+                    file.WriteLine("0");
+                    file.WriteLine("0");
+                   
+                    total++;
+                }
+                rdr.Close();
+                file.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                sqlConn.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
     }
 
     public class netStuff
@@ -385,8 +455,7 @@ namespace Alien_Arena_Account_Server_Manager
         public static netStuff sServer = new netStuff();
         static UdpClient sListener;
         static Thread RunStats;
-        static Thread RunListener;
-        static bool runListener = false;
+        static Thread UploadStats;
 
         public static playerList players = new playerList();
 
@@ -442,7 +511,7 @@ namespace Alien_Arena_Account_Server_Manager
         static void SendValidationToClient(IPEndPoint dest)
         {
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            sending_socket.Ttl = 60;
+            sending_socket.Ttl = 100;
 
             string message = "ÿÿÿÿvalidated";
 
@@ -467,7 +536,7 @@ namespace Alien_Arena_Account_Server_Manager
         static void SendVStringToClient(string Name, IPEndPoint dest)
         {
             Socket sending_socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            sending_socket.Ttl = 60;
+            sending_socket.Ttl = 100;
 
             string message = "ÿÿÿÿvstring ";
 
@@ -761,34 +830,7 @@ namespace Alien_Arena_Account_Server_Manager
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
-
-        public void Listen()
-        {
-            bool done = false;
-            sListener = new UdpClient(27902);
-            sListener.Ttl = 100;
-            IPEndPoint source = new IPEndPoint(0, 0);
-            string received_data;
-            byte[] receive_byte_array;
-            try
-            {
-                while (!done)
-                {
-                    receive_byte_array = sListener.Receive(ref source);
-                    received_data = Encoding.Default.GetString(receive_byte_array, 0, receive_byte_array.Length);
-                    if (received_data.Length > 4)
-                        ParseData(received_data, source);
-                }
-            }
-            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
-
-            try
-            {
-                sListener.Close();
-            }
-            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
-        }
-
+        
         public void Start_Server()
         {
             sListener = new UdpClient(27902);
@@ -797,15 +839,15 @@ namespace Alien_Arena_Account_Server_Manager
 
             ACCServer.sDialog.UpdateStatus("Listening...");
 
-            //runListener = true;
-
-            //RunListener = new Thread(new ThreadStart(Listen));
-            //RunListener.Start();
-
             //Start new thread for stats collection.
             Stats.getStats = true;
             RunStats = new Thread(new ThreadStart(Stats.StatsGen));
             RunStats.Start();
+
+            //Start new thread for stats uploading.
+            Stats.uploadStats = true;
+            UploadStats = new Thread(new ThreadStart(Stats.UploadStats));
+            UploadStats.Start();
         }
 
         public void Stop_Server()
