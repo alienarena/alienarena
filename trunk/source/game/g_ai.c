@@ -511,9 +511,6 @@ qboolean M_CheckAttack (edict_t *self)
 	// melee attack
 	if (enemy_range == RANGE_MELEE)
 	{
-		// don't always melee in easy mode
-		if (skill->value == 0 && (rand()&3) )
-			return false;
 		if (self->monsterinfo.melee)
 			self->monsterinfo.attack_state = AS_MELEE;
 		else
@@ -528,11 +525,12 @@ qboolean M_CheckAttack (edict_t *self)
 	if (level.time < self->monsterinfo.attack_finished)
 		return false;
 
-	if(strcmp(self->classname, "npc_deathray"))
-		if (enemy_range == RANGE_FAR)
-			return false;
-
-	if(strcmp(self->classname, "proj_spider"))
+	if(!strcmp(self->classname, "npc_deathray"))
+	{
+		
+			chance = 0.8;
+	}
+	else if(!strcmp(self->classname, "proj_spider"))
 	{
 		chance = 0.8;
 	}
@@ -552,7 +550,7 @@ qboolean M_CheckAttack (edict_t *self)
 	{
 		chance = 0.02;
 	}
-	else if (enemy_range == RANGE_FAR && !strcmp(self->classname, "npc_deathray"))
+	else if (enemy_range == RANGE_FAR)
 	{
 		chance = 0.02;
 	}
