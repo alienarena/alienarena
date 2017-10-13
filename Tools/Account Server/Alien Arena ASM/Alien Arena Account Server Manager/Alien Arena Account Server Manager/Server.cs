@@ -26,6 +26,30 @@ namespace Alien_Arena_Account_Server_Manager
         public string Status;
     }
 
+    public class rankingList
+    {
+        public List<pProfile> player;
+
+        public rankingList()
+        {
+            player = new List<pProfile>();
+        }
+
+        public void Add(pProfile Player)
+        {
+            player.Add(Player);
+        }
+
+        public void Clear()
+        {
+            player.RemoveAll(AllProfiles);
+        }
+        private static bool AllProfiles(pProfile i)
+        {
+            return true;
+        }
+    }
+
     public class playerList
     {
         public List<string> name;
@@ -364,6 +388,59 @@ namespace Alien_Arena_Account_Server_Manager
                 cmd.Parameters.Add(new SqlParameter("2", Convert.ToInt32(TotalFrags)));
                 cmd.Parameters.Add(new SqlParameter("3", Convert.ToInt32(TotalTime)));
                 cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                sqlConn.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        public static void GenerateRankingsList()
+        {
+            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+
+            try
+            {
+                sqlConn.Open();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                SqlDataReader rdr = null;
+
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Players ORDER BY Points DESC", sqlConn);
+
+                Stats.allPlayers.Clear();
+
+                rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    pProfile Profile;
+
+                    Profile.Name = rdr["Name"].ToString();
+                    Profile.Location = rdr["Location"].ToString();
+                    Profile.Password = rdr["Password"].ToString();
+                    Profile.StatPoints = Convert.ToDouble(rdr["Points"]);
+                    Profile.TotalFrags = Convert.ToDouble(rdr["TotalFrags"]);
+                    Profile.TotalTime = Convert.ToDouble(rdr["TotalTime"]);
+                    Profile.Status = rdr["Status"].ToString();
+
+                    Stats.allPlayers.Add(Profile);
+                }
+                rdr.Close();
             }
             catch (Exception e)
             {
@@ -743,8 +820,18 @@ namespace Alien_Arena_Account_Server_Manager
 
                         if (sParams[i - 1] == "mods" && sParams[i].Length > 0)
                         {
-                            if (sParams[i].Contains("ctf") || sParams[i].Contains("g_tactical"))
-                                Stats.Servers.Name[sNum] = "Skip";
+                            if (sParams[i].Contains("ctf"))
+                            {
+                                Stats.Servers.Status[sNum] = "Ctf";
+                                Stats.CTFServers++;
+                            }
+                            if (sParams[i].Contains("g_tactical"))
+                            {
+                                Stats.Servers.Status[sNum] = "Tactical";
+                                Stats.TACServers++;
+                            }
+                            else
+                                Stats.DMServers++;
 
                             string[] sPlayers = sParams[i].Split('\n');
                             for(int j = 0; j < sPlayers.Length; j++)
@@ -795,7 +882,6 @@ namespace Alien_Arena_Account_Server_Manager
 
         public void Listen()
         {
-            bool done = false;
             sListener = new UdpClient(27902);
             sListener.Ttl = 100;
             IPEndPoint source = new IPEndPoint(0, 0);
@@ -803,7 +889,7 @@ namespace Alien_Arena_Account_Server_Manager
             byte[] receive_byte_array;
             try
             {
-                while (!done)
+                while (runListener)
                 {
                     receive_byte_array = sListener.Receive(ref source);
                     received_data = Encoding.Default.GetString(receive_byte_array, 0, receive_byte_array.Length);
