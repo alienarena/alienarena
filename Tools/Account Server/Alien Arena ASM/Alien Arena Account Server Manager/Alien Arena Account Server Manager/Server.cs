@@ -21,7 +21,7 @@ namespace Alien_Arena_Account_Server_Manager
         public string Location;
         public string Password;
         public double StatPoints;
-        public double TotalFragRate;
+        public double TotalFrags;
         public double TotalTime;
         public string Status;
     }
@@ -178,7 +178,7 @@ namespace Alien_Arena_Account_Server_Manager
             Profile.Location = "Invalid";
             Profile.Password = "Invalid";
             Profile.StatPoints = 0.0f;
-            Profile.TotalFragRate = 0.0f;
+            Profile.TotalFrags = 0.0f;
             Profile.TotalTime = 0.0f;
             Profile.Status = "Inactive";
 
@@ -197,7 +197,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 SqlDataReader rdr = null;
 
-                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFragRate, TotalTime, Location, Status FROM Players WHERE Name = @0", sqlConn);
+                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFrags, TotalTime, Location, Status FROM Players WHERE Name = @0", sqlConn);
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 rdr = cmd.ExecuteReader();
                 while (rdr.Read())
@@ -208,7 +208,7 @@ namespace Alien_Arena_Account_Server_Manager
                         Profile.Location = rdr["Location"].ToString();
                         Profile.Password = rdr["Password"].ToString();
                         Profile.StatPoints = Convert.ToDouble(rdr["Points"]);
-                        Profile.TotalFragRate = Convert.ToDouble(rdr["TotalFragRate"]);
+                        Profile.TotalFrags = Convert.ToDouble(rdr["TotalFrags"]);
                         Profile.TotalTime = Convert.ToDouble(rdr["TotalTime"]);
                         Profile.Status = rdr["Status"].ToString();
                     }
@@ -247,11 +247,11 @@ namespace Alien_Arena_Account_Server_Manager
 
             try
             {
-                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), Points float, TotalFragRate float, TotalTime int, Location varchar(32), Status varchar(16));", sqlConn);
+                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), Points float, TotalFrags int, TotalTime int, Location varchar(32), Status varchar(16));", sqlConn);
 
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "if NOT exists (SELECT * FROM Players WHERE Name = @0) INSERT INTO Players(Name, Password, Points, TotalFragRate, TotalTime, Location, Status) VALUES(@0, @1, 0.0, 0.0, 0, @2, @3)";
+                cmd.CommandText = "if NOT exists (SELECT * FROM Players WHERE Name = @0) INSERT INTO Players(Name, Password, Points, TotalFrags, TotalTime, Location, Status) VALUES(@0, @1, 0.0, 0.0, 0, @2, @3)";
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", Password));
                 cmd.Parameters.Add(new SqlParameter("2", Location));
@@ -343,7 +343,7 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
-        public static void UpdatePlayer(string Name, string Points, string TotalFragRate, string TotalTime )
+        public static void UpdatePlayer(string Name, string Points, string TotalFrags, string TotalTime )
         {
             SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
@@ -358,10 +358,10 @@ namespace Alien_Arena_Account_Server_Manager
 
             try
             {
-                SqlCommand cmd = new SqlCommand("UPDATE Players SET Points = @1, TotalFragRate = @2, TotalTime = @3 WHERE Name = @0", sqlConn);
+                SqlCommand cmd = new SqlCommand("UPDATE Players SET Points = @1, TotalFrags = @2, TotalTime = @3 WHERE Name = @0", sqlConn);
                 cmd.Parameters.Add(new SqlParameter("0", Name));
                 cmd.Parameters.Add(new SqlParameter("1", Math.Round(Convert.ToDouble(Points), 3)));
-                cmd.Parameters.Add(new SqlParameter("2", Math.Round(Convert.ToDouble(TotalFragRate), 3)));
+                cmd.Parameters.Add(new SqlParameter("2", Convert.ToInt32(TotalFrags)));
                 cmd.Parameters.Add(new SqlParameter("3", Convert.ToInt32(TotalTime)));
                 cmd.ExecuteNonQuery();
             }
@@ -388,7 +388,7 @@ namespace Alien_Arena_Account_Server_Manager
             Profile.Location = "Invalid";
             Profile.Password = "Invalid";
             Profile.StatPoints = 0.0f;
-            Profile.TotalFragRate = 0.0f;
+            Profile.TotalFrags = 0.0f;
             Profile.TotalTime = 0.0f;
             Profile.Status = "Inactive";
 
@@ -421,7 +421,7 @@ namespace Alien_Arena_Account_Server_Manager
                     //current frags
                     file.WriteLine("0");
                     //total fragrate
-                    file.WriteLine(rdr["TotalFragRate"].ToString());
+                    file.WriteLine(rdr["TotalFrags"].ToString());
                     //current time
                     file.WriteLine("0");
                     file.WriteLine(rdr["TotalTime"].ToString());
