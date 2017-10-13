@@ -120,10 +120,7 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 			{ // end-of-file
 				break;
 			}
-			if ( name[strlen(name) - 1] == '\n' )
-			{
-				name[strlen(name) - 1] = 0; //truncate garbage byte
-			}
+			name[strlen(name) - 2] = 0; //truncate line feed
 			//remote address
 			cpr = fgets(remote_address, sizeof(remote_address), file);
 			//points
@@ -147,7 +144,7 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 
 			player.ranking++;
 
-			if(!strcmp(player.playername, name)) {
+			if(!stricmp(player.playername, name)) {
 				foundplayer = true;
 				break; //get out we are done
 			}
@@ -182,7 +179,7 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 			//name
 			cpr = fgets(name, sizeof(name), file);
 			strcpy(player.playername, name);
-			player.playername[strlen(player.playername)-1] = 0; //remove line feed
+			player.playername[strlen(player.playername)-2] = 0; //remove line feed
 			//remote address
 			cpr = fgets(remote_address, sizeof(remote_address), file);
 			//points
