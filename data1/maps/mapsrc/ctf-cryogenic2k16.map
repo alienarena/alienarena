@@ -21089,7 +21089,7 @@
 // entity 4
 {
 "classname" "info_player_blue"
-"origin" "-384.000000 -888.000000 -352.000000"
+"origin" "-384.000000 -888.000000 -336.000000"
 "angle" "90.000000"
 }
 // entity 5
@@ -21828,8 +21828,8 @@
 // entity 43
 {
 "classname" "info_player_red"
-"angle" "270"
-"origin" "-384 504 -368"
+"angle" "-90.000000"
+"origin" "-384.000000 504.000000 -352.000000"
 }
 // entity 44
 {
