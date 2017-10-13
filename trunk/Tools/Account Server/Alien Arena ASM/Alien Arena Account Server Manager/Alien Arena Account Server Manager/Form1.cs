@@ -166,5 +166,108 @@ namespace Alien_Arena_Account_Server_Manager
                 this.Invoke(updatePChart, new object[] { });
             }
         }
+
+        public delegate void UpdateSTypeChartDelegate();
+
+        public void UpdateSTypeChart()
+        {
+            try
+            {
+                this.ServerTypes.Series.Clear();
+
+                Series series = this.ServerTypes.Series.Add("Servers");
+
+                series.ChartType = SeriesChartType.Pie;
+                series.Points.Add(Stats.DMServers);                
+                series.Points.Add(Stats.CTFServers);
+                series.Points.Add(Stats.TACServers);
+
+                series.Points[0].AxisLabel = "Deathmatch";
+                series.Points[1].AxisLabel = "CTF";
+                series.Points[2].AxisLabel = "Tactical";
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
+        public void UpdateServerTypeChart()
+        {
+            if (this.InvokeRequired == false)
+            {
+                UpdateSTypeChart();
+            }
+            else
+            {
+                UpdateSTypeChartDelegate updateSTypeChart = new UpdateSTypeChartDelegate(UpdateSTypeChart);
+                this.Invoke(updateSTypeChart, new object[] { });
+            }
+        }
+
+        public delegate void UpdateRankingsDelegate();
+
+        public void UpdateRankings()
+        {
+            try
+            {
+                this.Rankings.Items.Clear();
+                DBOperations.GenerateRankingsList();
+                for (int i = 0; i < Stats.allPlayers.player.Count; i++)
+                {
+                    ListViewItem pItem = null;
+                    pItem = Rankings.Items.Add((i+1).ToString());
+                    pItem.Selected = false;
+                    pItem.Focused = true;
+
+                    pItem.SubItems.Add(Stats.allPlayers.player[i].Name);
+                    pItem.SubItems.Add(Stats.allPlayers.player[i].StatPoints.ToString());
+                    pItem.SubItems.Add(Stats.allPlayers.player[i].Status);
+                }
+                
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
+        public void UpdateRankingList()
+        {
+            if (this.InvokeRequired == false)
+            {
+                UpdateRankings();
+            }
+            else
+            {
+                UpdateRankingsDelegate updateRankings = new UpdateRankingsDelegate(UpdateRankings);
+                this.Invoke(updateRankings, new object[] { });
+            }
+        }
+
+        public delegate void UpdateServersDelegate();
+
+        public void UpdateServers()
+        {
+            try
+            {
+                this.ServerList.Items.Clear();
+
+                for (int i = 0; i < Stats.Servers.Name.Count; i++)
+                {
+                    ListViewItem pItem = null;
+                    pItem = ServerList.Items.Add(Stats.Servers.Name[i]);
+                    pItem.Selected = false;
+                    pItem.Focused = true;
+
+                    pItem.SubItems.Add(Stats.Servers.Ip[i] + ":" + Stats.Servers.Port[i]);
+                }
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
+        public void UpdateServerList()
+        {
+            if (this.InvokeRequired == false)
+            {
+                UpdateServers();
+            }
+            else
+            {
+                UpdateServersDelegate updateServers = new UpdateServersDelegate(UpdateServers);
+                this.Invoke(updateServers, new object[] { });
+            }
+        }
     }
 }

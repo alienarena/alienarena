@@ -20,7 +20,11 @@ namespace Alien_Arena_Account_Server_Manager
         public static bool getStats = false;
         public static bool uploadStats = false;
         public static playerList players = new playerList();
+        public static rankingList allPlayers = new rankingList();
         public static int TotalPlayers = 0;
+        public static int DMServers = 0;
+        public static int CTFServers = 0;
+        public static int TACServers = 0;
 
         public static List<int> ServerCount = new List<int>(new int[10]); //Servers
         public static List<int> PlayerCount = new List<int>(new int[10]); //Clients(all, including bots)
@@ -31,7 +35,8 @@ namespace Alien_Arena_Account_Server_Manager
             public List<string> Ip;
             public List<ushort> Port;
             public List<string> Name;
-            public List<string> Map;           
+            public List<string> Map;
+            public List<string> Status;     
 
             public ServerList()
             {
@@ -39,6 +44,7 @@ namespace Alien_Arena_Account_Server_Manager
                 Port = new List<ushort>();
                 Name = new List<string>();
                 Map = new List<string>();
+                Status = new List<string>();
            }
 
             public void Add(string Ip, ushort Port, string Name, string Map)
@@ -47,6 +53,7 @@ namespace Alien_Arena_Account_Server_Manager
                 this.Port.Add(Port);
                 this.Name.Add(Name);
                 this.Map.Add(Map);
+                Status.Add("Active");
             }
 
             public void Clear()
@@ -55,6 +62,7 @@ namespace Alien_Arena_Account_Server_Manager
                 Port.RemoveAll(AllUShorts);
                 Name.RemoveAll(AllStrings);
                 Map.RemoveAll(AllStrings);
+                Status.RemoveAll(AllStrings);
             }
 
             private static bool AllStrings(String s)
@@ -141,6 +149,9 @@ namespace Alien_Arena_Account_Server_Manager
 
             Servers.Clear();
             TotalPlayers = 0;
+            DMServers = 0;
+            CTFServers = 0;
+            TACServers = 0;
 
             netStuff.sServer.RequestServerList();
 
@@ -153,7 +164,7 @@ namespace Alien_Arena_Account_Server_Manager
                 players.Clear();
                 netStuff.sServer.GetServerInfo(Servers.Ip[i], Servers.Port[i], i);
 
-                if(players.name.Count > 0 && Servers.Name[i] != "Skip")
+                if(players.name.Count > 0 && Servers.Status[i] == "Active")
                     ProcessPlayers();
             }
 
@@ -172,8 +183,13 @@ namespace Alien_Arena_Account_Server_Manager
             if (ValidatedPlayerCount.Count > 10)
                 ValidatedPlayerCount.RemoveRange(10, ValidatedPlayerCount.Count - 10);
 
+            //Update the graphic displays
             ACCServer.sDialog.UpdateServerChart();
             ACCServer.sDialog.UpdatePlayerChart();
+            ACCServer.sDialog.UpdateServerTypeChart();
+
+            ACCServer.sDialog.UpdateRankingList();
+            ACCServer.sDialog.UpdateServers();
         }
 
         public static void StatsGen()

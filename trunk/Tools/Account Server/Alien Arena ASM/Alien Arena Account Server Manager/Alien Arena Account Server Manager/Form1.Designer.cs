@@ -34,6 +34,9 @@
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatusList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.StartServer = new System.Windows.Forms.Button();
@@ -42,8 +45,26 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.servercount = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.playercount = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.ClearStats = new System.Windows.Forms.Button();
+            this.BanPlayer = new System.Windows.Forms.Button();
+            this.Rankings = new System.Windows.Forms.ListView();
+            this.Rank = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.PlayerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Points = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.UnBanPlayer = new System.Windows.Forms.Button();
+            this.ResetPlayer = new System.Windows.Forms.Button();
+            this.SetActive = new System.Windows.Forms.Button();
+            this.SetInactive = new System.Windows.Forms.Button();
+            this.MasterList = new System.Windows.Forms.ListView();
+            this.MasterStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ServerList = new System.Windows.Forms.ListView();
+            this.ServerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ServerAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ServerTypes = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.servercount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.playercount)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ServerTypes)).BeginInit();
             this.SuspendLayout();
             // 
             // StatusList
@@ -63,11 +84,11 @@
             // columnHeader1
             // 
             this.columnHeader1.Text = "Status";
-            this.columnHeader1.Width = 245;
+            this.columnHeader1.Width = 225;
             // 
             // StartServer
             // 
-            this.StartServer.Location = new System.Drawing.Point(12, 421);
+            this.StartServer.Location = new System.Drawing.Point(753, 730);
             this.StartServer.Name = "StartServer";
             this.StartServer.Size = new System.Drawing.Size(75, 23);
             this.StartServer.TabIndex = 1;
@@ -77,7 +98,7 @@
             // 
             // StopServer
             // 
-            this.StopServer.Location = new System.Drawing.Point(93, 421);
+            this.StopServer.Location = new System.Drawing.Point(834, 730);
             this.StopServer.Name = "StopServer";
             this.StopServer.Size = new System.Drawing.Size(75, 23);
             this.StopServer.TabIndex = 2;
@@ -94,6 +115,7 @@
             this.PlayerList.Location = new System.Drawing.Point(273, 12);
             this.PlayerList.Name = "PlayerList";
             this.PlayerList.Size = new System.Drawing.Size(168, 403);
+            this.PlayerList.Sorting = System.Windows.Forms.SortOrder.Descending;
             this.PlayerList.TabIndex = 3;
             this.PlayerList.UseCompatibleStateImageBehavior = false;
             this.PlayerList.View = System.Windows.Forms.View.Details;
@@ -101,7 +123,7 @@
             // columnHeader2
             // 
             this.columnHeader2.Text = "Active Players";
-            this.columnHeader2.Width = 154;
+            this.columnHeader2.Width = 139;
             // 
             // servercount
             // 
@@ -138,11 +160,170 @@
             this.playercount.TabIndex = 5;
             this.playercount.Text = "Players";
             // 
+            // ClearStats
+            // 
+            this.ClearStats.Location = new System.Drawing.Point(753, 421);
+            this.ClearStats.Name = "ClearStats";
+            this.ClearStats.Size = new System.Drawing.Size(75, 23);
+            this.ClearStats.TabIndex = 6;
+            this.ClearStats.Text = "Clear Stats";
+            this.ClearStats.UseVisualStyleBackColor = true;
+            // 
+            // BanPlayer
+            // 
+            this.BanPlayer.ForeColor = System.Drawing.Color.Red;
+            this.BanPlayer.Location = new System.Drawing.Point(834, 421);
+            this.BanPlayer.Name = "BanPlayer";
+            this.BanPlayer.Size = new System.Drawing.Size(75, 23);
+            this.BanPlayer.TabIndex = 7;
+            this.BanPlayer.Text = "Ban Player";
+            this.BanPlayer.UseVisualStyleBackColor = true;
+            // 
+            // Rankings
+            // 
+            this.Rankings.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Rank,
+            this.PlayerName,
+            this.Points,
+            this.Status});
+            this.Rankings.GridLines = true;
+            this.Rankings.Location = new System.Drawing.Point(753, 12);
+            this.Rankings.Name = "Rankings";
+            this.Rankings.Size = new System.Drawing.Size(298, 403);
+            this.Rankings.TabIndex = 8;
+            this.Rankings.UseCompatibleStateImageBehavior = false;
+            this.Rankings.View = System.Windows.Forms.View.Details;
+            // 
+            // Rank
+            // 
+            this.Rank.Text = "Rank";
+            this.Rank.Width = 40;
+            // 
+            // PlayerName
+            // 
+            this.PlayerName.Text = "Player Name";
+            this.PlayerName.Width = 120;
+            // 
+            // Points
+            // 
+            this.Points.Text = "Points";
+            this.Points.Width = 54;
+            // 
+            // Status
+            // 
+            this.Status.Text = "Status";
+            this.Status.Width = 51;
+            // 
+            // UnBanPlayer
+            // 
+            this.UnBanPlayer.ForeColor = System.Drawing.Color.Green;
+            this.UnBanPlayer.Location = new System.Drawing.Point(915, 421);
+            this.UnBanPlayer.Name = "UnBanPlayer";
+            this.UnBanPlayer.Size = new System.Drawing.Size(136, 23);
+            this.UnBanPlayer.TabIndex = 9;
+            this.UnBanPlayer.Text = "Unban Player";
+            this.UnBanPlayer.UseVisualStyleBackColor = true;
+            // 
+            // ResetPlayer
+            // 
+            this.ResetPlayer.Location = new System.Drawing.Point(915, 450);
+            this.ResetPlayer.Name = "ResetPlayer";
+            this.ResetPlayer.Size = new System.Drawing.Size(136, 23);
+            this.ResetPlayer.TabIndex = 10;
+            this.ResetPlayer.Text = "Reset Player";
+            this.ResetPlayer.UseVisualStyleBackColor = true;
+            // 
+            // SetActive
+            // 
+            this.SetActive.Location = new System.Drawing.Point(753, 450);
+            this.SetActive.Name = "SetActive";
+            this.SetActive.Size = new System.Drawing.Size(75, 23);
+            this.SetActive.TabIndex = 11;
+            this.SetActive.Text = "Set Active";
+            this.SetActive.UseVisualStyleBackColor = true;
+            // 
+            // SetInactive
+            // 
+            this.SetInactive.Location = new System.Drawing.Point(834, 450);
+            this.SetInactive.Name = "SetInactive";
+            this.SetInactive.Size = new System.Drawing.Size(75, 23);
+            this.SetInactive.TabIndex = 12;
+            this.SetInactive.Text = "Set Inactive";
+            this.SetInactive.UseVisualStyleBackColor = true;
+            // 
+            // MasterList
+            // 
+            this.MasterList.BackColor = System.Drawing.SystemColors.InfoText;
+            this.MasterList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.MasterStatus});
+            this.MasterList.ForeColor = System.Drawing.SystemColors.Info;
+            this.MasterList.Location = new System.Drawing.Point(12, 421);
+            this.MasterList.Name = "MasterList";
+            this.MasterList.Size = new System.Drawing.Size(255, 332);
+            this.MasterList.TabIndex = 13;
+            this.MasterList.UseCompatibleStateImageBehavior = false;
+            this.MasterList.View = System.Windows.Forms.View.Details;
+            // 
+            // MasterStatus
+            // 
+            this.MasterStatus.Text = "Master Status";
+            this.MasterStatus.Width = 222;
+            // 
+            // ServerList
+            // 
+            this.ServerList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ServerName,
+            this.ServerAddress});
+            this.ServerList.GridLines = true;
+            this.ServerList.Location = new System.Drawing.Point(273, 421);
+            this.ServerList.Name = "ServerList";
+            this.ServerList.Size = new System.Drawing.Size(474, 332);
+            this.ServerList.TabIndex = 14;
+            this.ServerList.UseCompatibleStateImageBehavior = false;
+            this.ServerList.View = System.Windows.Forms.View.Details;
+            // 
+            // ServerName
+            // 
+            this.ServerName.Text = "Name";
+            this.ServerName.Width = 300;
+            // 
+            // ServerAddress
+            // 
+            this.ServerAddress.Text = "Address";
+            this.ServerAddress.Width = 145;
+            // 
+            // ServerTypes
+            // 
+            chartArea3.Name = "ChartArea1";
+            this.ServerTypes.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.ServerTypes.Legends.Add(legend3);
+            this.ServerTypes.Location = new System.Drawing.Point(753, 479);
+            this.ServerTypes.Name = "ServerTypes";
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie;
+            series3.Legend = "Legend1";
+            series3.Name = "Servers";
+            this.ServerTypes.Series.Add(series3);
+            this.ServerTypes.Size = new System.Drawing.Size(298, 245);
+            this.ServerTypes.TabIndex = 15;
+            this.ServerTypes.Text = "ServerTypes";
+            // 
             // ACCServer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(775, 456);
+            this.ClientSize = new System.Drawing.Size(1063, 765);
+            this.Controls.Add(this.ServerTypes);
+            this.Controls.Add(this.ServerList);
+            this.Controls.Add(this.MasterList);
+            this.Controls.Add(this.SetInactive);
+            this.Controls.Add(this.SetActive);
+            this.Controls.Add(this.ResetPlayer);
+            this.Controls.Add(this.UnBanPlayer);
+            this.Controls.Add(this.Rankings);
+            this.Controls.Add(this.BanPlayer);
+            this.Controls.Add(this.ClearStats);
             this.Controls.Add(this.playercount);
             this.Controls.Add(this.servercount);
             this.Controls.Add(this.PlayerList);
@@ -153,6 +334,7 @@
             this.Text = "Account Server";
             ((System.ComponentModel.ISupportInitialize)(this.servercount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.playercount)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ServerTypes)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -167,6 +349,23 @@
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.DataVisualization.Charting.Chart servercount;
         private System.Windows.Forms.DataVisualization.Charting.Chart playercount;
+        private System.Windows.Forms.Button ClearStats;
+        private System.Windows.Forms.Button BanPlayer;
+        private System.Windows.Forms.ListView Rankings;
+        private System.Windows.Forms.ColumnHeader Rank;
+        private System.Windows.Forms.ColumnHeader PlayerName;
+        private System.Windows.Forms.ColumnHeader Points;
+        private System.Windows.Forms.ColumnHeader Status;
+        private System.Windows.Forms.Button UnBanPlayer;
+        private System.Windows.Forms.Button ResetPlayer;
+        private System.Windows.Forms.Button SetActive;
+        private System.Windows.Forms.Button SetInactive;
+        private System.Windows.Forms.ListView MasterList;
+        private System.Windows.Forms.ColumnHeader MasterStatus;
+        private System.Windows.Forms.ListView ServerList;
+        private System.Windows.Forms.ColumnHeader ServerName;
+        private System.Windows.Forms.ColumnHeader ServerAddress;
+        private System.Windows.Forms.DataVisualization.Charting.Chart ServerTypes;
     }
 }
 
