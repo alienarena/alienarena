@@ -55,6 +55,7 @@ namespace Alien_Arena_Account_Server_Manager
         public List<string> name;
         public List<int> score;
         public List<int> frags;
+        public List<int> fragsThisPoll;
         public List<int> hour;
         public List<int> minutes;
 
@@ -63,6 +64,7 @@ namespace Alien_Arena_Account_Server_Manager
             name = new List<string>();
             score = new List<int>();
             frags = new List<int>();
+            fragsThisPoll = new List<int>();
             hour = new List<int>();
             minutes = new List<int>();
         }
@@ -74,6 +76,7 @@ namespace Alien_Arena_Account_Server_Manager
             name.RemoveAt(idx);
             score.RemoveAt(idx);
             frags.RemoveAt(idx);
+            fragsThisPoll.RemoveAt(idx);
             hour.RemoveAt(idx);
             minutes.RemoveAt(idx);
 
@@ -93,6 +96,7 @@ namespace Alien_Arena_Account_Server_Manager
             name.Add(Name);
             score.Add(0); //no score needed for this list
             frags.Add(0);
+            fragsThisPoll.Add(0);
 
             //timestamp
             hour.Add(DateTime.UtcNow.Hour);
@@ -137,7 +141,8 @@ namespace Alien_Arena_Account_Server_Manager
 
             name.Insert(insertPos, Name);
             score.Insert(insertPos, Score);
-            frags.Insert(insertPos, Frags); 
+            frags.Insert(insertPos, Frags);
+            fragsThisPoll.Insert(insertPos, Frags); //can just use frags for initial value
             hour.Insert(insertPos, Hour);
             minutes.Insert(insertPos, Minutes);
         }
@@ -857,11 +862,12 @@ namespace Alien_Arena_Account_Server_Manager
                                                 Minutes = 60 - Minutes;
                                             }
                                             int Frags = players.frags[idx] + (Score - players.score[idx] > 0? Score - players.score[idx]:0);
+                                            players.fragsThisPoll[idx] = Score - players.score[idx];
                                             //check score vs what's already in the registered list to get frags to add to total
                                             Stats.players.AddPlayerInfo(Name, Score, Frags, Hours, Minutes);
                                             //Then update the registered list with the updated score and frag total.
                                             players.frags[idx] = Frags;
-                                            players.score[idx] = Score;
+                                            players.score[idx] = Score;                                         
                                         }
                                     }
                                 }
