@@ -92,6 +92,10 @@ namespace Alien_Arena_Account_Server_Manager
         {
             double avg = 1.0f;
 
+            //Don't reward player by playing by himself against bots too much, but don't penalize him either.
+            if (players.name.Count == 1)
+                return 0.5f;
+
             for (int i = 0; i < players.name.Count; i++)
             {
                 pProfile Profile = DBOperations.CheckPlayer(players.name[i]);
@@ -111,12 +115,12 @@ namespace Alien_Arena_Account_Server_Manager
 
             double rFactor = AverageFragrate();
 
-            //calcuate points for each player based on position and fragrate
+            //Calcuate points for each player based on position and fragrate.
             for(int i = 0; i < players.name.Count; i++)
             {
                 int thisPos = 1;
 
-                //Find the current, fragrate based position(we insert in order, so no sorting needed here)
+                //Find the current fragrate based position(we insert in order, so no sorting needed here).
                 for (int j = 0; j < players.name.Count; j++)
                 {
                     if (players.name[i] == players.name[j])
@@ -128,7 +132,7 @@ namespace Alien_Arena_Account_Server_Manager
 
                 double pFactor = 1.0f - (double)thisPos / (players.name.Count>0?players.name.Count:1);
 
-                //Get this player's profile and add data to it
+                //Get this player's profile and add data to it.
                 pProfile Profile = DBOperations.CheckPlayer(players.name[i]);
 
                 double pFragrate = Math.Round(players.frags[i] / (players.hour[i] * 60.0f + players.minutes[i] > 0 ? players.hour[i] * 60.0f + players.minutes[i] : 1), 3);
@@ -136,7 +140,7 @@ namespace Alien_Arena_Account_Server_Manager
                 //ACCServer.sDialog.UpdateStatus(Profile.Name + " nums - Pos: " + thisPos.ToString() + " pFactor:" + pFactor.ToString() + " rFactor" + rFactor.ToString() + " pFragrate" + pFragrate.ToString());
             
                 Profile.StatPoints += Math.Round(pFragrate * pFactor * rFactor * 0.01f, 3);
-                Profile.TotalFrags += players.frags[i]; //change to totalfrags throughout
+                Profile.TotalFrags += players.fragsThisPoll[i]; 
                 Profile.TotalTime += 1; //one minute per poll
 
                 DBOperations.UpdatePlayer(Profile.Name, Profile.StatPoints.ToString(), Profile.TotalFrags.ToString(), Profile.TotalTime.ToString());
