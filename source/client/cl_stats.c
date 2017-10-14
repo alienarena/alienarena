@@ -144,7 +144,7 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 
 			player.ranking++;
 
-			if(!stricmp(player.playername, name)) {
+			if(!Q_strcasecmp(player.playername, name)) {
 				foundplayer = true;
 				break; //get out we are done
 			}
