@@ -1,21 +1,13 @@
 
-                             Alien Arena
-                            Version 7.66.1
+					 Alien Arena Warriors of Mars
+                            Version 7.7
 							
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-TODO: As of 2015-01-02 this document does NOT contain instructions for
-installing from the release package (tarball). Use the old-INSTALL
-document for reference; note that it is substantially obsolete.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 1. Scope and Introduction
 
 This document includes information about the GNU-Linux/Unix version of
-Alien Arena and Alien Arena Tactical Demo. The information here
-applies to the development version in the Subversion Repository
-starting with Revision 4215 (March 9, 2014). This document does not
-currently include details about the Tactical Demo and running a
-dedicated server.
+Alien Arena Warriors of Mars. This document applies to the Beta
+release of October 14, 2017 and later "Generation 3" versions. This
+document does not cover running a dedicated server.
 
 Custom options and other information specific to this version are
 included here. For general information, licensing, and contributers,
@@ -23,12 +15,12 @@ see the README, COPYING and GPLv2 documents. For generic information
 about installation using GNU Autotools: the original GNU INSTALL
 document is included at the end of this document.
 
-There are links to the Alien Arena Forum and other helpful
-Internet resources on the Alien Arena Homepage:
+There are links to the Alien Arena Forum and other helpful Internet
+resources on the Alien Arena Homepage:
 
   red.planetarena.org
 
-The Alien Arena IRC (Internet Relay Chat) channel is now served by:
+The Alien Arena IRC (Internet Relay Chat) channel is served by:
 
   irc.planetarena.org
 
@@ -39,45 +31,20 @@ The in-game IRC connects to the #alienarena channel there.
 
 2.1 System Requirements
 
+See README for requirements.
+
 A video adapter with 3D acceleration using the latest proprietary
 OpenGL driver is recommended. If you have not previously run a 3D FPS
 (First Person Shooter) at playable frame rates, or if you do not know
 what this means, you may want to verify your system has adequate 3D
 performance before proceeding.
 
-2.2 Installing Subversion
+2.2 Installing Tools and Libraries
 
-The Subversion program is required to download from the Subversion
-Repository. Use your Linux distribution's package manager to install
-Subversion. Subversion is commonly referred to as SVN (for instance:
-"I installed from SVN" or "I updated to the latest SVN").
-
-2.3 Subversion Initial Download and Updating
-
-Anonymous read-only download (checkout) is available using this
-command line:
-
-  $ svn co svn://svn.icculus.org/alienarena/trunk alienarena
-
-This is run in a terminal, normally in your HOME directory.
-
-To update to the latest version after the initial download, change to
-your alienarena subdirectory and use this command line:
-
-  $ svn update
-
-It is a good idea to browse the repository before doing the initial
-download or updates. The initial download is large. Updates are much
-smaller. You can browse the repository using this URL:
-
-  http://svn.icculus.org/alienarena/trunk/
-
-2.4 Installing Tools and Libraries
-
-For Linux, there is no pre-built executable. The executable is built
-after the initial download and rebuilt after updates using an
-automated system called GNU Autotools. This system is also used for
-installation of executables and data.
+For the Warriors of Mars Beta, there is no pre-built executable. The
+executable is built after extracting the compressed distribution file
+using an automated system called GNU Autotools. This system is also
+used for installation of executables and data.
 
 But, before that can be done, certain tools and libraries must be
 installed. Use your distribution's package manager to install
@@ -105,16 +72,35 @@ dependencies.
 For Debian-based distributions (such as Ubuntu and Mint), this command
 should get all of what you need. Enter it all on one command line.
 
-  $ sudo apt-get install libx11-dev libxxf86dga-dev libxxf86vm-dev \
+  $ sudo apt-get install build-essentials libx11-dev libxxf86vm-dev \
     libgl1-mesa-dev libopenal-dev libogg-dev libvorbis-dev \ 
-    libcurl4-gnutls-dev libfreetype6-dev libjpeg8-dev libode-dev g++
-
+    libcurl4-gnutls-dev libfreetype6-dev libjpeg8-dev libode-dev
 
 3. Building and Installing
+
+3.1 Unpacking the tarball.
+
+If you are reading this, you may have already unpacked the
+distribution archive (aka, "tarball") into your HOME directory.
+Otherwise, the terminal command line for unpacking the archive
+is:
+
+  $ tar -xzf alienarena-7.7.tar.gz
+  
+Or, using the graphical file browser, right click on the file
+name, and left click on "Extract Here."  Then follow the
+instructions below to build the program.
+
+3.2 Build and Install Commands
 
 Using the terminal, change to the destination directory for the svn
 checkout command (normally, ~/alienarena). If required libraries are
 missing, the 'configure' command will exit with error messages.
+
+Using the terminal, change to the "alienarena-7.7" directory and
+enter these commands:
+
+--- Simple Version ---
 
 The following commands will build and install the program and data
 with the default configuration:
@@ -122,6 +108,8 @@ with the default configuration:
   $ ./configure
   $ make
   $ sudo make install
+
+--- Not-so-Simple Version ---
 
 However, for better build and run-time performance, you should use
 these commands instead:
@@ -131,6 +119,18 @@ these commands instead:
   $ make -jN  (where N is your CPU's number of cores + 1)
   $ sudo make install
 
+If you are familiar with Linux/Unix, the installation may be
+customized. For more information, run:
+
+  $ ./configure --help
+
+Following installation, intermediate files generated by the build
+may be removed using:
+
+  $ make clean
+
+3.3 Installation Information
+
 By default, 'sudo make install' will install the game programs
 and data using this directory hierarchy:
 
@@ -138,87 +138,35 @@ and data using this directory hierarchy:
     bin/
       alienarena
       alienarena-ded  (dedicated server)
-      aa-tactical-demo
     share/
       alienarena/
         arena/
         data1/
-        tactical/
       doc/
         alienarena/
       icons/
         alienarena/
 
-Following installation, intermediate files generated by the build
-may be removed using:
-
-  $ make clean
+3.4 Uninstall
 
 To uninstall the program and data that 'sudo make install'
 installed, run:
 
   $ sudo make uninstall
 
-The uninstall procedure may not remove all files and directories.
-Some manual removal may be required.
-
-If you know what you are doing, the installation may be
-customized. For more information, run:
-
-  $ ./configure --help
+The uninstall procedure does not remove all files and directories.
+Some manual removal may be needed. For instance, while files in
+/usr/local/share/alienarena are removed, directories are not. Also,
+nothing in ~/.local/share/cor-games is automatically removed.
 
 
-4. Updating
+4. Running
 
-4.1 The Safe Way to Update
-
-Sometimes during development there are changes that remove data
-files. In order to prevent that from causing problems, the following
-is the safest way to update (using the recommended configuration).
-
-  $ cd ~/alienarena
-  $ sudo make uninstall
-  $ make clean
-  $ svn update
-  $ export CFLAGS='-march=native -O3 -g -pipe -DNDEBUG'
-  $ ./configure
-  $ make
-  $ sudo make install
-
-4.2 A Faster Way to Update
-
-Often the only changes in the SVN Repository are to program source
-files (which have '.c' or '.h' extensions). If you update frequently,
-it is faster to use the following commands. If you do not know what
-all this means, you should use the safer way shown above.
-
-  $ cd ~/alienarena
-  $ svn update
-  $ make
-
-If the update output showed that only program source files were
-changed:
-
-  $ sudo make install-exec
-
-If the update output showed that resource files were added:
-
-  $ sudo make install
-
-It is a good idea to browse the repository before doing an update to
-see what has changed since your last update. You can browse the
-repository using this URL:
-
-  http://svn.icculus.org/alienarena/trunk/
-
-
-5. Running
-
-5.1 Setup
+4.1 Setup
 
 Use the Menu for setting video configuration and other options.
 
-For the first run, do the following:
+For the first run, do the following in a terminal:
 
  $ cd
  $ alienarena
@@ -235,37 +183,43 @@ Configuration, screen shots, and other data is stored in:
 
   ~/.local/share/cor-games/arena
 
-Note that this is different from earlier versions of Alien Arena.
+Note that this is different from 7.66 and earlier versions of Alien
+Arena.
 
 The file, 'config.cfg', stores the current settings when the game
 exits normally. Do not edit this file. For custom settings, create a
 file named 'autoexec.cfg'. Visit the Forums for more information on
 custom configuration.
 
-There are a number of 3rd-party and legacy maps that are not installed
-as part of the standard installation. These may be downloaded and
-stored in the 'cor-games/arena' subdirectory. When playing online,
-maps that you do not have are automatically downloaded and stored
-there.
+Note that with "Generation 3" previous 3rd party and legacy maps are
+no longer compatible. If there are 3rd-party maps, they are not
+installed as part of the standard installation.  These may be
+downloaded and stored in the 'cor-games/arena' subdirectory. When
+playing online, maps that you do not have are automatically downloaded
+and stored there.
 
-SVN installation and update DO NOT alter files in the 'cor-games'
+Installation and updates DO NOT alter files in the 'cor-games'
 subdirectory.
 
 Files in the 'cor-games' subdirectory have precedence over the
 standard files in '/usr/local/share/alienarena'. Normally, this in not
-a problem, but sometimes SVN updates or downloads result in obsolete
-files in 'cor-games' overriding newer files.
+a problem, but sometimes updates or downloads result in obsolete files
+in 'cor-games' overriding newer files.
 
-5.2 Normal Operation
+4.2 Normal Operation
 
 To run:
   $ cd	
   $ alienarena
 
-In the menu, SINGLE PLAYER will run a simple pre-configured local
-games. For more single player options, go to the HOST SERVER menu.
+For more info about running the game, see the README file.
+
+In the menu, PRACTICE OFFLINE will run a simple pre-configured local
+game. For more single player options, go to the HOST SERVER menu.
 Setting "public server" to "no" will keep your local game from being
-broadcast with the master server list.
+broadcast with the master server list. If "public server" is set to
+"yes" and your network connection is configured to allow it, you will
+be running a "listen server" that other players may connect to.
 
 For multiplayer, online play, go to the JOIN SERVER menu to find a
 Server. Bots will always show ping of 0. They have some mean sounding,
@@ -277,7 +231,7 @@ format inherited from Alien Arena's Quake 2 roots. Command line
 options are the same as console commands, normally using a '+'
 character prefix. The details are beyond the scope of this document.
 
-5.3 Special "In-place" Operation
+4.3 Special "In-place" Operation
 
 For various reasons (map making, for example), one may want to run the
 program using data installed in one's HOME directory, rather than in
@@ -286,10 +240,10 @@ longer the case. Running the program from the directory containing
 the data1/ sub-directory will cause the program to use that directory
 for data instead of /usr/local/share/alienarena.
 
-For example, assuming the program has been checked out from SVN and
-built in ~/alienarena.
+For example, assuming the program has been built in ~/alienarena and
+installed in /usr/local
 
-To run normally:
+To run normally using files in /usr/local/share:
 
   $ cd
   $ alienarena
@@ -312,13 +266,6 @@ These ports are used by the program:
   * UDP 27910 is the default for a server, but is often configured otherwise.
   * TCP 6667  is the default for in-game connection to the IRC channel.
 
-The cURL library is used to retrieve game resources, player
-ranking information, and current version information from these
-URLs:
-  * http://red.planetarena.org/sv_downloadurl
-  * http://stats.planetarena.org/playerrank.db
-  * http://red.planetarena.org/version/crx_version
-
 Online performance will vary depending on the network connection
 between the your computer (the client) and the server. Servers
 with *lower* ping are better.
@@ -335,7 +282,7 @@ information:
 
 Bug reports are posted in the Support/Bug Reports section. If you are
 reporting a new bug, please include information about your system and
-the SVN Revision you are running.
+the version you are running.
 
 
 ************************************************************************

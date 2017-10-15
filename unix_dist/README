@@ -16,25 +16,23 @@ ALIEN ARENA
 
 1.	INTRODUCTION
 
-ALIEN ARENA is a standalone 3D first person online deathmatch shooter
-crafted from the original source code of Quake II and Quake III,
-released by id Software under the GPL license.  With features
-including 32 bit graphics, new particle engine and effects, light
-blooms, reflective water, hi resolution textures and skins, hi poly
-models, stain maps, ALIEN ARENA pushes the envelope of graphical
-beauty rivaling today's top games.
+ALIEN ARENA is a fast paced arena FPS game with multiple modes,
+mutators and level, wrapped in a macabre sci-fi theme that harkens
+back to the classic themes of the 1950's.
 
-The game features many levels, which can be played online against other
-players, or against the built in CodeRED bots.
+The game features 23 levels, which can be played competitively online
+against other players, or practice offline against the built in
+AI(bots).
 
-Alien Arena offers CTF, AOA (All Out Assault), in which players
-can climb into vehicles to do battle, Deathball, Team Core Assault,
-where teams disable enemy power nodes to eventually destroy the enemy
-power core, and Cattle Prod, where teams guide cows into goal areas.
-Simply go into the multiplayer menu to start a server, change the game
-rules , and choose a map to play on.  You can also select from five
-different mutators(instagib, rocket arena, excessive, low grav, regen,
-and vampire) to further customize your game experience.
+Alien Arena offers Capture The Flag, All Out Assault(players can climb
+into randomly spawned jetpacks to do battle), and Tactical(Alien Vs
+Human in a battle to destroy the other's base by planting bombs and
+other means).  Simply go into the multiplayer menu to start a server,
+change the game rules , and choose a map to play on.  You can also
+select from a large variety of different mutators(instagib, rocket
+arena, excessive, low grav, regen, vampire, etc) to further customize
+your game experience.
+
 
 Alien Arena : Many are called, only one will reign supreme.
 
@@ -84,30 +82,14 @@ Alien Arena?
 
 2.	SYSTEM REQUIREMENTS
 
-1.8 GHz CPU
-1.5 GiB RAM
+2.8 GHz CPU
+4 GiB RAM
 1.2 GiB hard disk space
-3D Accelerator with at least 128 MiB texture memory available
+3D Accelerator with at least 512 MiB texture memory available
 
 3.	GETTING STARTED
 
 * INSTALLATION
-
-(Windows)
-
-Installation has been made very simple.  After downloading, simply
-click on the .exe file and the installation will begin.  Follow the
-instructions of the Innosetup program. If you are running Windows, you
-should have administrative privileges.  If not, you may get some
-errors when the program tries to write the uninstall information to
-the registry.  If so, simply click "ignore", and the installation will
-continue without problem.
-
-Once finished, you can click on the Alien Arena icon that has been
-placed on your desktop to start a game or the Alien Arena Chat icon to
-join the IRC chat channel.
-
-(Unix/GNU-Linux)
 
 See the INSTALL documentation file.
 
@@ -118,29 +100,28 @@ few notable exceptions.
 
 The player will have the following weapons:
 
-1.	Blaster (automatically equipped at spawn)
-2.	Alien Disruptor
-3.	Chaingun
-4.	Flame Thrower
-5.	Rocket Launcher
-6.	Alien Smart Gun
-7.	Disruptor
-8.	Alien Vaporizer
-9.	Violator (automatically equipped at spawn)
+1.  Blaster (automatically equipped at spawn)
+2.  Alien Disruptor
+3.  Chaingun
+4.  Flame Thrower
+5.  Rocket Launcher
+6.  Alien Smart Gun
+7.  Disruptor
+8.  Alien Vaporizer
+9.  Violator (automatically equipped at spawn)
+10. Minderaser(replaces re-spawning weapon every 2 minutes)
 
 Weapons also have alternate firing modes.  In you controls menu,
 select your secondary fire key and this will allow you to use these
 modes.  The default key for alternate fire is MOUSE2 (right click).
 
-There are new powerups such as haste and sproing, in addition to the
-venerable quad damage and invulnerability.
+There are powerups such as double damage, alien force, haste and
+sproing.
 
-It would be advisable for you to change video settings for however you
-wish to view the game, and what gives you reasonable performance. The
-game's default settings are at a mid range setting, so try tweaking
-them or adding/removing effects depending on your framerate.  If you
-wish to see your framerate, you can type "set cl_drawfps 1" at the
-console (brought down using the ` key).
+Although the game automatically detects hardware capability on intial
+run, it would be advisable for you to change video settings for
+however you wish to view the game, and what gives you reasonable
+performance.
 
 ALIEN ARENA also allows for colored names just as Quake 3, using the ^
 character followed by a number to set the color.
@@ -150,42 +131,30 @@ doublejumping, and other Quake type movements.  In Alien Arena, you
 can also dodge, similarly to Unreal Tournament, by pressing a strafe
 key, releasing it fully, and pressing it again.  Dodges can be linked
 together into sequences, similar to strafejumping, called
-strafedodging.
+strafedodging.  You can also lean around corners, and sneak silently.
 
 * COMPLETING LEVELS
 
-In Alien Arena you can play a single player tournament where your goal
-will to be to reach the fraglimit before a bot does.  If you fail, you
-will be forced to repeat the level until you do. These rules can be
-changed in the menu system.  You can also play people online, where
-your goal is to reach the fraglimit before your opponents, or by
+Your goal is to reach the fraglimit before your opponents, or by
 scoring the most frags before the time limit is up.
 
 In CTF mode, you'll be on a team, and trying to capture the enemy's
 flag and return it to your own flag's location.  The team reaching the
 capture limit first, wins.
 
-In Deathball, the goal is to score as many points as possible, either
-by killing your opponents, or by finding the ball and shooting it into
-the goal (worth 10 frags).  When a player is inside of the deathball,
-he is defensless.
-
-In Team Core Assault, your goal is to disable your enemy teams power
-nodes, then destroy the central spider node.  You can only do damage
-to the spider node when all other power nodes are disabled.
-
-In Cattle Prod, each team tries to guide the cows in the middle of the
-map to the goals in the enemy base.  Cows follow players after a
-connection is automatically established between the cow and the
-player, when the player is within sight and range of the cow.  This
-connection is broken when either the player or the cow is killed.
+In Tactical, the goal is to destroy all of the components of the enemy
+base before they destroy yours.  As items are destroyed, defenses such
+as laser beams and deathrays gradually begin to malfuncion or weaken.
+There are 3 classes on each team, each with different capabilities
+such as planting bombs, detonating them, or having a superweapon to
+protect the bomber/detonators.
 
 * CONNECTING TO A SERVER
 
-You can either select "join server" from the "multiplayer" menu and
-select a server in the list, or you can use the CodeRED Galaxy server
-browser (windows only).  In the in-game browser, servers are listed in
-order of ping, with lowest ping at the top of the list.
+You can select "join server" from the "multiplayer" menu and select a
+server in the list.  Servers are listed in order of ping, with lowest
+ping at the top of the list.
+
 
 4.	THE CODERED ACE BOT
 
@@ -214,50 +183,47 @@ against the bots, selecting "easy" will make all bots skill level 0.
 Selecting "normal" will leave them at whatever level they are
 configured. Selecting "hard" will make them all move up 1 skill level.
 
+
 5.	THE REWARDS SYSTEM
 
 In Alien Arena, you are given points for getting kills (one point for
 kill), two points for special kills (midair kills, gib kills), and
 five extra points for killing sprees.  These points add up, and when
 these points reach the point threshold (set by the server), they can
-be used to purchase temporary powerups: invisibility, haste, and
+be used to purchase temporary powerups:  invisibility, haste, and
 sproing.  Invisibility makes you appear like glass, haste makes your
 jumps increase your speed dramatically (linking jumps together makes
 this difference even more drastic), and sproing greatly increases the
 player jump height.  These powerups last for 30 seconds.
 
+
 6.	HOW TO UNINSTALL ALIEN ARENA
 
-For Unix/GNU-Linux users, see the INSTALL documentation file. 
-
-To uninstall Alien Arena, simply go to your start programs menu,
-select your Alien Arena folder, and click on "Uninstall".  You can
-also go into your control panel, and uninstall Alien Arena in the
-programs and software section.
-
+For Linux users, see the INSTALL documentation file. 
 
 7.	CREDITS
 
 There is a long list of credits - ALIEN ARENA is greatly indebted to
 the following for its creation and completion:
 
-Design:  John Diamond with input from the community at large.
+Design:  John Diamond, Max Eliaser, Jim Bower with input from the
+community at large.
 
-Programming: John Diamond, Jim Bower, Dave Stewart, Emmanuel Benoit,
-Max Eliaser, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer,
-Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
+Programming:  John Diamond, Max Eliaser, Jim Bower, Dave Stewart,
+Emmanuel Benoit, Charles Hudson, Lee Salzman, Victor Luchits, Shane
+Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
 
-Models and skins:  John Diamond, Alex Perez, Shawn Keeth, Franc Cassar
+Models and skins:  John Diamond, Dennis Zedlach
 
-Maps:  John Diamond, Dennis "xEMPx" Zedlach, Charles Hudson, Torben Fahrnbach
+Maps:  John Diamond, Charles Hudson
 
-Textures and Artwork:  John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
+Textures and Artwork:  John Diamond, Phillip K, Dennis Zedlach, Adam
+Saizlai, Yves Allaire
 
 Sounds:  John Diamond, Sound Rangers, Jon Ward, Jim Bower
 
-Music:  Paul Joyce, Arteria Games, Divinity, Whitelipper, and SoundRangers
-
-Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
+Music:  Divinity, Paul Joyce, Arteria Games, Whitelipper, and
+SoundRangers
 
 Linux Port: Shane Bayer, John Diamond, Jim Bower
 
@@ -267,7 +233,9 @@ Gentoo portage: Paul Bredbury
 
 Debian packaging: Andres Mejia
 
-Alien Arena IRC Channel: Victor B "Bonfire" (visit us @ irc.planetarena.org #alienarena)
+Public Relations:  Victor Balke
+
+Alien Arena IRC Channel: irc.planetarena.org #alienarena
 
 There are other major contributions from the gaming community,
 including MrG, Jay Dolan, Psychospaz, Barnes, Jalisko, Heffo, Chayfo,
@@ -280,9 +248,44 @@ community members who contributed to the crosshair and hud contest. A
 full list of those contributors can be found in the in-game credit
 list.
 
+
 8.	COPYRIGHT INFORMATION
 
-See the file, COPYING.
+ALIEN ARENA and it's original content are a copyright of COR
+Entertainment, LLC.
+
+The source code of Alien Arena is Free Software. You can redistribute
+it and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version. Source code can be
+located at http://red.planetarena.org
+
+The included TrueType fonts (FreeSans and FreeMono) are from the GNU
+FreeFont package (http://www.gnu.org/software/freefont/); they are
+free software distributed under the terms of the GNU General Public
+License version 3 (http://www.gnu.org/licenses/gpl.html).
+
+Permission is granted to freely distribute (without restriction) the
+game data in this installation(models, maps, textures, sound, etc) as
+a whole, and with the intention of being used with Alien
+Arena. However, it is not permissible to distribute, sell, or use for
+profit individual portions or items of the game data without express
+consent from COR Entertainment.
+
+'rcon' and 'svstat' ruby scripts are Copyright (C) 2009 Tony Jackson
+and Licensed under the GNU Lesser General Public License
+
+The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com>
+and is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
+
+ALIEN ARENA may be included in free compilation CD's and similar
+packages without consent, provided it adheres to the above
+restrictions.
+
+
+Contact:  http://red.planetarena.org
+
+Privacy Policy: http://icculus.org/alienarena/rpa/privacy2.html
 
 
 
