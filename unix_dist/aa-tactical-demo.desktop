@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Alien Arena Tactical Demo
-Exec=aa-tactical-demo
-Icon=/usr/local/share/icons/alienarena/aa-tactical-demo.png
-Terminal=true
-StartupNotify=true
-
-
