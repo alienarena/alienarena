@@ -28,15 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatusList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.StartServer = new System.Windows.Forms.Button();
@@ -127,35 +127,35 @@
             // 
             // servercount
             // 
-            chartArea1.Name = "ChartArea1";
-            this.servercount.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.servercount.Legends.Add(legend1);
+            chartArea4.Name = "ChartArea1";
+            this.servercount.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.servercount.Legends.Add(legend4);
             this.servercount.Location = new System.Drawing.Point(447, 12);
             this.servercount.Name = "servercount";
-            series1.ChartArea = "ChartArea1";
-            series1.IsXValueIndexed = true;
-            series1.Legend = "Legend1";
-            series1.LegendText = "Servers";
-            series1.Name = "Servers";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
-            this.servercount.Series.Add(series1);
+            series4.ChartArea = "ChartArea1";
+            series4.IsXValueIndexed = true;
+            series4.Legend = "Legend1";
+            series4.LegendText = "Servers";
+            series4.Name = "Servers";
+            series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
+            this.servercount.Series.Add(series4);
             this.servercount.Size = new System.Drawing.Size(300, 202);
             this.servercount.TabIndex = 4;
             this.servercount.Text = "Servers";
             // 
             // playercount
             // 
-            chartArea2.Name = "ChartArea1";
-            this.playercount.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.playercount.Legends.Add(legend2);
+            chartArea5.Name = "ChartArea1";
+            this.playercount.ChartAreas.Add(chartArea5);
+            legend5.Name = "Legend1";
+            this.playercount.Legends.Add(legend5);
             this.playercount.Location = new System.Drawing.Point(447, 220);
             this.playercount.Name = "playercount";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Players";
-            this.playercount.Series.Add(series2);
+            series5.ChartArea = "ChartArea1";
+            series5.Legend = "Legend1";
+            series5.Name = "Players";
+            this.playercount.Series.Add(series5);
             this.playercount.Size = new System.Drawing.Size(300, 195);
             this.playercount.TabIndex = 5;
             this.playercount.Text = "Players";
@@ -168,6 +168,7 @@
             this.ClearStats.TabIndex = 6;
             this.ClearStats.Text = "Clear Stats";
             this.ClearStats.UseVisualStyleBackColor = true;
+            this.ClearStats.Click += new System.EventHandler(this.ClearStats_Click);
             // 
             // BanPlayer
             // 
@@ -178,6 +179,7 @@
             this.BanPlayer.TabIndex = 7;
             this.BanPlayer.Text = "Ban Player";
             this.BanPlayer.UseVisualStyleBackColor = true;
+            this.BanPlayer.Click += new System.EventHandler(this.BanPlayer_Click);
             // 
             // Rankings
             // 
@@ -187,12 +189,15 @@
             this.Points,
             this.Status});
             this.Rankings.GridLines = true;
+            this.Rankings.HideSelection = false;
             this.Rankings.Location = new System.Drawing.Point(753, 12);
+            this.Rankings.MultiSelect = false;
             this.Rankings.Name = "Rankings";
             this.Rankings.Size = new System.Drawing.Size(298, 403);
             this.Rankings.TabIndex = 8;
             this.Rankings.UseCompatibleStateImageBehavior = false;
             this.Rankings.View = System.Windows.Forms.View.Details;
+            this.Rankings.SelectedIndexChanged += new System.EventHandler(this.Rankings_SelectedIndexChanged);
             // 
             // Rank
             // 
@@ -223,6 +228,7 @@
             this.UnBanPlayer.TabIndex = 9;
             this.UnBanPlayer.Text = "Unban Player";
             this.UnBanPlayer.UseVisualStyleBackColor = true;
+            this.UnBanPlayer.Click += new System.EventHandler(this.UnBanPlayer_Click);
             // 
             // ResetPlayer
             // 
@@ -232,6 +238,7 @@
             this.ResetPlayer.TabIndex = 10;
             this.ResetPlayer.Text = "Reset Player";
             this.ResetPlayer.UseVisualStyleBackColor = true;
+            this.ResetPlayer.Click += new System.EventHandler(this.ResetPlayer_Click);
             // 
             // SetActive
             // 
@@ -241,6 +248,7 @@
             this.SetActive.TabIndex = 11;
             this.SetActive.Text = "Set Active";
             this.SetActive.UseVisualStyleBackColor = true;
+            this.SetActive.Click += new System.EventHandler(this.SetActive_Click);
             // 
             // SetInactive
             // 
@@ -250,6 +258,7 @@
             this.SetInactive.TabIndex = 12;
             this.SetInactive.Text = "Set Inactive";
             this.SetInactive.UseVisualStyleBackColor = true;
+            this.SetInactive.Click += new System.EventHandler(this.SetInactive_Click);
             // 
             // MasterList
             // 
@@ -294,17 +303,17 @@
             // 
             // ServerTypes
             // 
-            chartArea3.Name = "ChartArea1";
-            this.ServerTypes.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.ServerTypes.Legends.Add(legend3);
+            chartArea6.Name = "ChartArea1";
+            this.ServerTypes.ChartAreas.Add(chartArea6);
+            legend6.Name = "Legend1";
+            this.ServerTypes.Legends.Add(legend6);
             this.ServerTypes.Location = new System.Drawing.Point(753, 479);
             this.ServerTypes.Name = "ServerTypes";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie;
-            series3.Legend = "Legend1";
-            series3.Name = "Servers";
-            this.ServerTypes.Series.Add(series3);
+            series6.ChartArea = "ChartArea1";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie;
+            series6.Legend = "Legend1";
+            series6.Name = "Servers";
+            this.ServerTypes.Series.Add(series6);
             this.ServerTypes.Size = new System.Drawing.Size(298, 245);
             this.ServerTypes.TabIndex = 15;
             this.ServerTypes.Text = "ServerTypes";
@@ -331,7 +340,7 @@
             this.Controls.Add(this.StartServer);
             this.Controls.Add(this.StatusList);
             this.Name = "ACCServer";
-            this.Text = "Account Server";
+            this.Text = "Alien Arena Mission Control";
             ((System.ComponentModel.ISupportInitialize)(this.servercount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.playercount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ServerTypes)).EndInit();

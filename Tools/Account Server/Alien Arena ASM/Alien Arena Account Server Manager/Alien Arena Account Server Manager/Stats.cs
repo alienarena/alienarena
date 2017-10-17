@@ -36,7 +36,8 @@ namespace Alien_Arena_Account_Server_Manager
             public List<ushort> Port;
             public List<string> Name;
             public List<string> Map;
-            public List<string> Status;     
+            public List<string> Status;
+            public List<ushort> LastHeartbeat;
 
             public ServerList()
             {
@@ -45,15 +46,27 @@ namespace Alien_Arena_Account_Server_Manager
                 Name = new List<string>();
                 Map = new List<string>();
                 Status = new List<string>();
+                LastHeartbeat = new List<ushort>();
            }
 
-            public void Add(string Ip, ushort Port, string Name, string Map)
+            public void Add(string Ip, ushort Port, string Name, string Map, ushort Hearbeat)
             {
                 this.Ip.Add(Ip);
                 this.Port.Add(Port);
                 this.Name.Add(Name);
                 this.Map.Add(Map);
                 Status.Add("Active");
+                LastHeartbeat.Add(0);
+            }
+
+            public void Drop(int idx)
+            {
+                Ip.RemoveAt(idx);
+                Port.RemoveAt(idx);
+                Name.RemoveAt(idx);
+                Map.RemoveAt(idx);
+                Status.RemoveAt(idx);
+                LastHeartbeat.RemoveAt(idx);
             }
 
             public void Clear()
@@ -63,6 +76,7 @@ namespace Alien_Arena_Account_Server_Manager
                 Name.RemoveAll(AllStrings);
                 Map.RemoveAll(AllStrings);
                 Status.RemoveAll(AllStrings);
+                LastHeartbeat.RemoveAll(AllUShorts);
             }
 
             private static bool AllStrings(String s)
@@ -157,7 +171,8 @@ namespace Alien_Arena_Account_Server_Manager
             CTFServers = 0;
             TACServers = 0;
 
-            netStuff.sServer.RequestServerList();
+            //accountServer.sServer.RequestServerList();
+            masterServer.sServer.GetServerList();
 
             //Check for invalid list
             if (Servers.Ip.Count < 1)
@@ -166,7 +181,7 @@ namespace Alien_Arena_Account_Server_Manager
             for(i = 0; i < Servers.Ip.Count; i++)
             {
                 players.Clear();
-                netStuff.sServer.GetServerInfo(Servers.Ip[i], Servers.Port[i], i);
+                accountServer.sServer.GetServerInfo(Servers.Ip[i], Servers.Port[i], i);
 
                 if(players.name.Count > 0 && Servers.Status[i] == "Active")
                     ProcessPlayers();
@@ -183,7 +198,7 @@ namespace Alien_Arena_Account_Server_Manager
                 PlayerCount.RemoveRange(10, PlayerCount.Count - 10);
 
             //Keep track of validated
-            ValidatedPlayerCount.Insert(0, netStuff.players.name.Count);
+            ValidatedPlayerCount.Insert(0, accountServer.players.name.Count);
             if (ValidatedPlayerCount.Count > 10)
                 ValidatedPlayerCount.RemoveRange(10, ValidatedPlayerCount.Count - 10);
 

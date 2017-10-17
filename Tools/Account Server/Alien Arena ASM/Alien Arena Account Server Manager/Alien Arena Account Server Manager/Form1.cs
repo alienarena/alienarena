@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -14,6 +7,7 @@ namespace Alien_Arena_Account_Server_Manager
     public partial class ACCServer : Form
     {
         public static ACCServer sDialog;
+        private static string SelectedPlayerName = "Invalid";
 
         public ACCServer()
         {
@@ -22,14 +16,14 @@ namespace Alien_Arena_Account_Server_Manager
 
         private void button1_Click(object sender, EventArgs e)
         {
-            netStuff.sServer.Start_Server();
+            accountServer.sServer.Start_Server();
         }
         
         private void StopServer_Click(object sender, EventArgs e)
         {
-            netStuff.sServer.Stop_Server();
+            accountServer.sServer.Stop_Server();
             PlayerList.Items.Clear();
-            netStuff.players.Clear();
+            accountServer.players.Clear();
             UpdateStatus("stopped...");
         }
 
@@ -49,7 +43,7 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem.Selected = false;
                 pItem.Focused = false;
 
-                pItem.EnsureVisible();
+                //pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
@@ -76,10 +70,10 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 PlayerList.Items.Clear();
 
-                for (int i = 0; i < netStuff.players.name.Count; i++)
+                for (int i = 0; i < accountServer.players.name.Count; i++)
                 {
                     ListViewItem pItem = null;
-                    pItem = PlayerList.Items.Add(netStuff.players.name[i]);
+                    pItem = PlayerList.Items.Add(accountServer.players.name[i]);
                     pItem.Selected = false;
                     pItem.Focused = true;
                 }
@@ -100,6 +94,41 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
+        public delegate void UpdateMasterStatusDelegate(string message);
+
+        public void UpdateMasterStatusList(string message)
+        {
+            try
+            {
+                ListViewItem pItem = null;
+
+                //good idea to clear the list after say 1000 entries.
+                if (MasterList.Items.Count > 1000)
+                    MasterList.Items.Clear();
+
+                pItem = MasterList.Items.Add(message);
+                pItem.Selected = false;
+                pItem.Focused = false;
+
+                pItem.EnsureVisible();
+            }
+            catch (Exception exc) { MessageBox.Show(exc.ToString()); }
+        }
+
+        public void UpdateMasterStatus(string message)
+        {
+            if (this.InvokeRequired == false)
+            {
+                UpdateMasterStatusList(message);
+            }
+            else
+            {
+                UpdateMasterStatusDelegate updateMasterStatus = new UpdateMasterStatusDelegate(UpdateMasterStatusList);
+                this.Invoke(updateMasterStatus, new object[] { message });
+            }
+
+        }
+
         public delegate void UpdateSChartDelegate();
 
         public void UpdateSChart()
@@ -110,10 +139,14 @@ namespace Alien_Arena_Account_Server_Manager
 
                 Series series = this.servercount.Series.Add("Servers");
 
+                series.YAxisType = AxisType.Primary;
+
                 for (int i = Stats.ServerCount.Count - 1; i >= 0; i--)
                 {
                     series.Points.Add(Stats.ServerCount[i]);
                 }
+
+                this.servercount.ChartAreas[0].RecalculateAxesScale();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
@@ -151,6 +184,8 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     vseries.Points.Add(Stats.ValidatedPlayerCount[i]);
                 }
+
+                this.servercount.ChartAreas[0].RecalculateAxesScale();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
@@ -268,6 +303,45 @@ namespace Alien_Arena_Account_Server_Manager
                 UpdateServersDelegate updateServers = new UpdateServersDelegate(UpdateServers);
                 this.Invoke(updateServers, new object[] { });
             }
+        }
+
+        private void ClearStats_Click(object sender, EventArgs e)
+        {
+            DBOperations.ClearAllStats();
+            ACCServer.sDialog.UpdateRankingList();
+        }
+
+        private void SetActive_Click(object sender, EventArgs e)
+        {
+            DBOperations.SetPlayerActive(SelectedPlayerName);
+            ACCServer.sDialog.UpdateRankingList();
+        }
+
+        private void SetInactive_Click(object sender, EventArgs e)
+        {
+            DBOperations.SetPlayerInactive(SelectedPlayerName);
+            ACCServer.sDialog.UpdateRankingList();
+        }
+
+        private void ResetPlayer_Click(object sender, EventArgs e)
+        {
+            DBOperations.ResetPlayer(SelectedPlayerName);
+            ACCServer.sDialog.UpdateRankingList();
+        }
+
+        private void BanPlayer_Click(object sender, EventArgs e)
+        {
+            ACCServer.sDialog.UpdateRankingList();
+        }
+
+        private void UnBanPlayer_Click(object sender, EventArgs e)
+        {
+            ACCServer.sDialog.UpdateRankingList();
+        }
+
+        private void Rankings_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //SelectedPlayerName = Rankings.SelectedIndices();
         }
     }
 }
