@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using System.Data;
-using System.Data.SqlClient;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Text;
-using System.ComponentModel;
-using System.IO;
 
 namespace Alien_Arena_Account_Server_Manager
 {
@@ -197,353 +192,21 @@ namespace Alien_Arena_Account_Server_Manager
         }
     }
 
-    public class DBOperations
+    
+
+    public class accountServer
     {
-        public static pProfile CheckPlayer(string Name)
-        {
-            pProfile Profile;
-
-            Profile.Name = "Invalid";
-            Profile.Location = "Invalid";
-            Profile.Password = "Invalid";
-            Profile.StatPoints = 0.0f;
-            Profile.TotalFrags = 0.0f;
-            Profile.TotalTime = 0.0f;
-            Profile.Status = "Inactive";
-
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlDataReader rdr = null;
-
-                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFrags, TotalTime, Location, Status FROM Players WHERE Name = @0", sqlConn);
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                rdr = cmd.ExecuteReader();
-                while (rdr.Read())
-                {
-                    if (Name == rdr["Name"].ToString())
-                    {
-                        Profile.Name = rdr["Name"].ToString();
-                        Profile.Location = rdr["Location"].ToString();
-                        Profile.Password = rdr["Password"].ToString();
-                        Profile.StatPoints = Convert.ToDouble(rdr["Points"]);
-                        Profile.TotalFrags = Convert.ToDouble(rdr["TotalFrags"]);
-                        Profile.TotalTime = Convert.ToDouble(rdr["TotalTime"]);
-                        Profile.Status = rdr["Status"].ToString();
-                    }
-                }
-                rdr.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            return Profile;
-        }
-
-        public static void AddProfile(string Name, string Password, string Location)
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand("If NOT exists (select name from sysobjects where name = 'Players') CREATE TABLE Players(Name varchar(32), Password varchar(256), Points float, TotalFrags int, TotalTime int, Location varchar(32), Status varchar(16));", sqlConn);
-
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "if NOT exists (SELECT * FROM Players WHERE Name = @0) INSERT INTO Players(Name, Password, Points, TotalFrags, TotalTime, Location, Status) VALUES(@0, @1, 0.0, 0.0, 0, @2, @3)";
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                cmd.Parameters.Add(new SqlParameter("1", Password));
-                cmd.Parameters.Add(new SqlParameter("2", Location));
-                cmd.Parameters.Add(new SqlParameter("3", "Active"));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        public static void SetPlayerStatus(string Name, string Status)
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand("UPDATE Players SET Status = @1 WHERE Name = @0", sqlConn);
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                cmd.Parameters.Add(new SqlParameter("1", Status));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        public static void ChangePlayerPassword(string Name, string NewPassword)
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {   
-                SqlCommand cmd = new SqlCommand("UPDATE Players SET Password = @1 WHERE Name = @0", sqlConn);
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                cmd.Parameters.Add(new SqlParameter("1", NewPassword));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        public static void UpdatePlayer(string Name, string Points, string TotalFrags, string TotalTime )
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand("UPDATE Players SET Points = @1, TotalFrags = @2, TotalTime = @3 WHERE Name = @0", sqlConn);
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                cmd.Parameters.Add(new SqlParameter("1", Math.Round(Convert.ToDouble(Points), 3)));
-                cmd.Parameters.Add(new SqlParameter("2", Convert.ToInt32(TotalFrags)));
-                cmd.Parameters.Add(new SqlParameter("3", Convert.ToInt32(TotalTime)));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        public static void GenerateRankingsList()
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlDataReader rdr = null;
-
-                SqlCommand cmd = new SqlCommand("SELECT * FROM Players ORDER BY Points DESC", sqlConn);
-
-                Stats.allPlayers.Clear();
-
-                rdr = cmd.ExecuteReader();
-                while (rdr.Read())
-                {
-                    pProfile Profile;
-
-                    Profile.Name = rdr["Name"].ToString();
-                    Profile.Location = rdr["Location"].ToString();
-                    Profile.Password = rdr["Password"].ToString();
-                    Profile.StatPoints = Convert.ToDouble(rdr["Points"]);
-                    Profile.TotalFrags = Convert.ToDouble(rdr["TotalFrags"]);
-                    Profile.TotalTime = Convert.ToDouble(rdr["TotalTime"]);
-                    Profile.Status = rdr["Status"].ToString();
-
-                    Stats.allPlayers.Add(Profile);
-                }
-                rdr.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        public static void GenerateStatsFile()
-        {
-            pProfile Profile;
-
-            Profile.Name = "Invalid";
-            Profile.Location = "Invalid";
-            Profile.Password = "Invalid";
-            Profile.StatPoints = 0.0f;
-            Profile.TotalFrags = 0.0f;
-            Profile.TotalTime = 0.0f;
-            Profile.Status = "Inactive";
-
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                int total = 0;
-                SqlDataReader rdr = null;
-
-                SqlCommand cmd = new SqlCommand("SELECT * FROM Players ORDER BY Points DESC", sqlConn);
-
-                StreamWriter file = new System.IO.StreamWriter(@"playerrank.db");
-
-                rdr = cmd.ExecuteReader();
-                while (rdr.Read() && total < 1000)
-                {
-                    file.WriteLine(rdr["Name"].ToString());
-                    file.WriteLine("127.0.0.1");
-                    file.WriteLine(rdr["Points"].ToString());
-                    //current frags
-                    file.WriteLine("0");
-                    //total fragrate
-                    file.WriteLine(rdr["TotalFrags"].ToString());
-                    //current time
-                    file.WriteLine("0");
-                    file.WriteLine(rdr["TotalTime"].ToString());
-                    //next two not needed any longer(server ip and poll number)
-                    file.WriteLine("0");
-                    file.WriteLine("0");
-
-                    total++;
-                }
-                rdr.Close();
-                file.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-    }
-
-    public class netStuff
-    {
-        public static netStuff sServer = new netStuff();
+        public static accountServer sServer = new accountServer();
         static UdpClient sListener;
         static Thread RunStats;
         static Thread UploadStats;
         static Thread RunListener;
+        static Thread RunMaster;
         static bool runListener = false;
 
         public static playerList players = new playerList();
 
-        public netStuff()
+        public accountServer()
         {
             //nothing to do yet.
         }
@@ -768,7 +431,7 @@ namespace Alien_Arena_Account_Server_Manager
                     result -= 6; //6 bytes per server entry
 
                     //Add to list
-                    Stats.Servers.Add(sIP.ToString(), sPort, "Server", "Map");
+                    Stats.Servers.Add(sIP.ToString(), sPort, "Server", "Map", 0);
                 }
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
@@ -914,12 +577,19 @@ namespace Alien_Arena_Account_Server_Manager
 
         public void Start_Server()
         {
-            ACCServer.sDialog.UpdateStatus("Listening...");
+            ACCServer.sDialog.UpdateStatus("Listening on port 27902...");
 
-            //Start a thread for the listener.
+            ACCServer.sDialog.UpdateMasterStatus("Listening on port 27900...");
+
+            //Start a thread for the account listener.
             runListener = true;
             RunListener = new Thread(new ThreadStart(Listen));
             RunListener.Start();
+
+            //Start a thread for the master listener.
+            masterServer.runListener = true;
+            RunMaster = new Thread(new ThreadStart(masterServer.sServer.Listen));
+            RunMaster.Start();
 
             //Start new thread for stats collection.
             Stats.getStats = true;
