@@ -12,13 +12,12 @@ namespace Alien_Arena_Account_Server_Manager
 {
     public class masterServer
     {
-        static public masterServer sServer = new masterServer();
+        public static masterServer sServer = new masterServer();
 
         static UdpClient sListener;        
-        static public bool runListener = false;
-        static private ushort FrameTime = 0;
+        public static bool runListener = false;
+        private static ushort FrameTime = 0;
 
-        //Note - it will make more sense eventually to use one list throughout the program.
         static ServerList Servers = new ServerList();
 
         public masterServer()
@@ -28,12 +27,14 @@ namespace Alien_Arena_Account_Server_Manager
 
         public class ServerList
         {
+            public List<string> Address;
             public List<string> Ip;
             public List<ushort> Port;
             public List<ushort> LastHeartbeat;
 
             public ServerList()
             {
+                Address = new List<string>();
                 Ip = new List<string>();
                 Port = new List<ushort>();
                 LastHeartbeat = new List<ushort>();
@@ -41,13 +42,16 @@ namespace Alien_Arena_Account_Server_Manager
 
             public void Add(string Ip, ushort Port, ushort LastHeartbeat)
             {
+                Address.Add(Ip + ":" + Port.ToString());
                 this.Ip.Add(Ip);
                 this.Port.Add(Port);
                 this.LastHeartbeat.Add(LastHeartbeat);
             }
 
-            public void Drop(int idx)
+            public void Drop(string Address)
             {
+                int idx = this.Address.IndexOf(Address);
+
                 Ip.RemoveAt(idx);
                 Port.RemoveAt(idx);
                 LastHeartbeat.RemoveAt(idx);
@@ -73,17 +77,22 @@ namespace Alien_Arena_Account_Server_Manager
 
         static void RunServerCheck()
         {
+            //Heartbeats are sent by servers every 5 minutes.  If we don't receive a heartbeat, we ping the server for two minutes(once a minute).
+            //If it doesn't respond after two minutes, shut it down.
             for (int i = 0; i < Servers.Ip.Count; i++)
             {
                 //Frametime has looped, so in this case update times of servers to be current.
                 if (Servers.LastHeartbeat[i] > FrameTime)
-                    Servers.LastHeartbeat[i] = FrameTime; 
-                if(FrameTime - Servers.LastHeartbeat[i] > 2)
+                {
+                    Servers.LastHeartbeat[i] = FrameTime;
+                }
+                else if (FrameTime - Servers.LastHeartbeat[i] > 8)
                 {
                     //Never received a response from the ping sent
-                    Servers.Drop(i);
+                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + Servers.Address[i] + ".", 1);
+                    Servers.Drop(Servers.Address[i]);
                 }
-                else if(FrameTime - Servers.LastHeartbeat[i] > 1)
+                else if (FrameTime - Servers.LastHeartbeat[i] > 5) 
                 {
                     IPAddress ip = IPAddress.Parse(Servers.Ip[i]);
 
@@ -97,7 +106,7 @@ namespace Alien_Arena_Account_Server_Manager
                     try
                     {
                         sListener.Send(send_buffer, send_buffer.Length, dest);
-                        ACCServer.sDialog.UpdateMasterStatus("Sending ping to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".");
+                        ACCServer.sDialog.UpdateMasterStatus("Sending ping to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 2);
                     }
                     catch (Exception exc) { MessageBox.Show(exc.ToString()); }
                 }
@@ -106,6 +115,10 @@ namespace Alien_Arena_Account_Server_Manager
 
         static void SendServerListToClient(IPEndPoint dest)
         {
+            //Check if this IP is coming from a banned player
+            if (DBOperations.CheckIfBanned(dest.Address.ToString()))
+                return;
+
             string message = "ÿÿÿÿservers ";
 
             byte[] send_buffer = Encoding.Default.GetBytes(message);
@@ -127,14 +140,16 @@ namespace Alien_Arena_Account_Server_Manager
             try
             {
                 sListener.Send(send_buffer, send_buffer.Length, dest);
-                ACCServer.sDialog.UpdateMasterStatus("Sending server list to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".");
+                ACCServer.sDialog.UpdateMasterStatus("Sending server list to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 0);
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
         static void HeartBeat(IPEndPoint dest)
         {
-            for(int i = 0; i < Servers.Ip.Count; i++)
+            ACCServer.sDialog.UpdateMasterStatus("Heartbeat from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 0);
+
+            for (int i = 0; i < Servers.Ip.Count; i++)
             {
                 if (dest.Address.ToString() == Servers.Ip[i] && dest.Port == Servers.Port[i])
                 {
@@ -148,8 +163,8 @@ namespace Alien_Arena_Account_Server_Manager
                     //Send to client
                     try
                     {
+                        ACCServer.sDialog.UpdateMasterStatus("Sending Ack to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 0);
                         sListener.Send(send_buffer, send_buffer.Length, dest);
-                        ACCServer.sDialog.UpdateMasterStatus("Heartbeat from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".");
                         return;
                     }
                     catch (Exception exc) { MessageBox.Show(exc.ToString()); }
@@ -167,7 +182,8 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     //Matched, so update the hearbeat time of this server
                     Servers.LastHeartbeat[i] = FrameTime;
-                    ACCServer.sDialog.UpdateMasterStatus("Ack from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".");
+                    ACCServer.sDialog.UpdateMasterStatus("Ack from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 2);
+                    break;
                 }
             }
         }
@@ -180,15 +196,15 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 if (dest.Address.ToString() == Servers.Ip[i] && dest.Port == Servers.Port[i])
                 {
-                    ACCServer.sDialog.UpdateMasterStatus("Ping from duplicate server " + dest.Address.ToString() + ":" + dest.Port.ToString() + " ignored!");
                     duplicate = true;
+                    break;
                 }
             }
 
-            if(!duplicate)
+            if (!duplicate)
             {
                 Servers.Add(dest.Address.ToString(), Convert.ToUInt16(dest.Port), FrameTime);
-                ACCServer.sDialog.UpdateMasterStatus("Added " + dest.Address.ToString() + ":" + dest.Port.ToString() + " to list!");
+                ACCServer.sDialog.UpdateMasterStatus("Added " + dest.Address.ToString() + ":" + dest.Port.ToString() + " to list!", 2);
             }
         }
 
@@ -198,43 +214,44 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 if (dest.Address.ToString() == Servers.Ip[i] && dest.Port == Servers.Port[i])
                 {
-                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".");
+                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 1);
+                    Servers.Drop(Servers.Address[i]);
+                    break;
                 }
             }
         }
 
         static void ParseData(string message, IPEndPoint source)
-        {            
-            if (message.Contains("getservers") || message.Contains("query"))
+        {
+            if (message.Contains("ÿÿÿÿgetservers") || message.Contains("query"))
             {                
                 SendServerListToClient(source);
             }
-            else if (message.Contains("ping"))
+            else if (message.Contains("ÿÿÿÿping"))
             {
                 AddServerToList(source);
             }
-            else if(message.Contains("ack"))
+            else if(message.Contains("ÿÿÿÿack"))
             {
                 Ack(source);
             }
-            else if(message.Contains("heartbeat"))
+            else if(message.Contains("ÿÿÿÿheartbeat"))
             {
                 HeartBeat(source);
             }
-            else if(message.Contains("shutdown"))
+            else if(message.Contains("ÿÿÿÿshutdown"))
             {
                 Shutdown(source);
             }
             else
-               ACCServer.sDialog.UpdateMasterStatus("Unknown command from " + source.Address.ToString() + ":" + source.Port.ToString() + ".");
+               ACCServer.sDialog.UpdateMasterStatus("Unknown command from " + source.Address.ToString() + ":" + source.Port.ToString() + ".", 1);
         }
 
-        //Leave for now - it works safely across threads, but we can probably just use one list for this.
         public void GetServerList()
         {
             for (int i = 0; i < Servers.Ip.Count; i++)
             {
-                Stats.Servers.Add(Servers.Ip[i], Servers.Port[i], "Server", "Map", 0);
+                Stats.Servers.Add(Servers.Ip[i], Servers.Port[i], "Server", "Map");
             }
         }
 
@@ -242,6 +259,8 @@ namespace Alien_Arena_Account_Server_Manager
         {
             sListener = new UdpClient(27900);
             sListener.Ttl = 100;
+            int LastCheck = 0;
+
             IPEndPoint source = new IPEndPoint(0, 0);
             string received_data;
             byte[] receive_byte_array;
@@ -249,13 +268,18 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 while (runListener)
                 {
+                    FrameTime = Convert.ToUInt16(DateTime.UtcNow.Minute);
+
                     receive_byte_array = sListener.Receive(ref source);
                     received_data = Encoding.Default.GetString(receive_byte_array, 0, receive_byte_array.Length);
                     if (received_data.Length > 1)
                         ParseData(received_data, source);
-
-                    FrameTime = Convert.ToUInt16(DateTime.UtcNow.Minute);
-                   // RunServerCheck();
+                    
+                    if (FrameTime - LastCheck >= 1)
+                    {
+                        LastCheck = FrameTime;
+                        RunServerCheck();
+                    }
                 }
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }

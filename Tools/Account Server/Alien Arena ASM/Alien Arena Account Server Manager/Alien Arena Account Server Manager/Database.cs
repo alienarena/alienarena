@@ -70,6 +70,63 @@ namespace Alien_Arena_Account_Server_Manager
             return Profile;
         }
 
+        public static bool CheckIfBanned(string Location)
+        {
+            pProfile Profile;
+
+            Profile.Name = "Invalid";
+            Profile.Location = "Invalid";
+            Profile.Password = "Invalid";
+            Profile.StatPoints = 0.0f;
+            Profile.TotalFrags = 0.0f;
+            Profile.TotalTime = 0.0f;
+            Profile.Status = "Inactive";
+
+            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+
+            try
+            {
+                sqlConn.Open();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                SqlDataReader rdr = null;
+
+                SqlCommand cmd = new SqlCommand("SELECT Name, Password, Points, TotalFrags, TotalTime, Location, Status FROM Players WHERE Location = @0", sqlConn);
+                cmd.Parameters.Add(new SqlParameter("0", Location));
+                rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    if (Location == rdr["Location"].ToString())
+                    {
+                        if (rdr["Status"].ToString() == "Banned")
+                            return true;
+                    }
+                }
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            try
+            {
+                sqlConn.Close();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+            return false;
+        }
+
         public static void AddProfile(string Name, string Password, string Location)
         {
             SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
@@ -253,6 +310,10 @@ namespace Alien_Arena_Account_Server_Manager
                     Profile.Status = rdr["Status"].ToString();
 
                     Stats.allPlayers.Add(Profile);
+
+                    //add all players marked active to our active player list.
+                    if (Profile.Status == "Active")
+                        accountServer.sServer.players.AddPlayer(Profile.Name);
                 }
                 rdr.Close();
             }
@@ -405,74 +466,6 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 MessageBox.Show(e.ToString());
             }
-        }
-
-        public static void SetPlayerActive(string Name)
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand("UPDATE Players SET Status = 'Active' WHERE Name = @0", sqlConn);
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
-
-        public static void SetPlayerInactive(string Name)
-        {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
-
-            try
-            {
-                sqlConn.Open();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                SqlCommand cmd = new SqlCommand("UPDATE Players SET Status = 'Inactive' WHERE Name = @0", sqlConn);
-                cmd.Parameters.Add(new SqlParameter("0", Name));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-
-            try
-            {
-                sqlConn.Close();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
-            }
-        }
+        }       
     }
 }

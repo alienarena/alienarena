@@ -37,7 +37,6 @@ namespace Alien_Arena_Account_Server_Manager
             public List<string> Name;
             public List<string> Map;
             public List<string> Status;
-            public List<ushort> LastHeartbeat;
 
             public ServerList()
             {
@@ -46,17 +45,15 @@ namespace Alien_Arena_Account_Server_Manager
                 Name = new List<string>();
                 Map = new List<string>();
                 Status = new List<string>();
-                LastHeartbeat = new List<ushort>();
            }
 
-            public void Add(string Ip, ushort Port, string Name, string Map, ushort Hearbeat)
+            public void Add(string Ip, ushort Port, string Name, string Map)
             {
                 this.Ip.Add(Ip);
                 this.Port.Add(Port);
                 this.Name.Add(Name);
                 this.Map.Add(Map);
                 Status.Add("Active");
-                LastHeartbeat.Add(0);
             }
 
             public void Drop(int idx)
@@ -66,7 +63,6 @@ namespace Alien_Arena_Account_Server_Manager
                 Name.RemoveAt(idx);
                 Map.RemoveAt(idx);
                 Status.RemoveAt(idx);
-                LastHeartbeat.RemoveAt(idx);
             }
 
             public void Clear()
@@ -76,7 +72,6 @@ namespace Alien_Arena_Account_Server_Manager
                 Name.RemoveAll(AllStrings);
                 Map.RemoveAll(AllStrings);
                 Status.RemoveAll(AllStrings);
-                LastHeartbeat.RemoveAll(AllUShorts);
             }
 
             private static bool AllStrings(String s)
@@ -132,6 +127,11 @@ namespace Alien_Arena_Account_Server_Manager
             //Calcuate points for each player based on position and fragrate.
             for(int i = 0; i < players.name.Count; i++)
             {
+                //Don't penalize the player if he didn't even get a single kill this poll - just assume he is idling, or was kicked out and our list didn't
+                //receive notification.
+                if (players.fragsThisPoll[i] == 0)
+                    continue;
+
                 int thisPos = 1;
 
                 //Find the current fragrate based position(we insert in order, so no sorting needed here).
@@ -150,9 +150,7 @@ namespace Alien_Arena_Account_Server_Manager
                 pProfile Profile = DBOperations.CheckPlayer(players.name[i]);
 
                 double pFragrate = Math.Round(players.frags[i] / (players.hour[i] * 60.0f + players.minutes[i] > 0 ? players.hour[i] * 60.0f + players.minutes[i] : 1), 3);
-
-                //ACCServer.sDialog.UpdateStatus(Profile.Name + " nums - Pos: " + thisPos.ToString() + " pFactor:" + pFactor.ToString() + " rFactor" + rFactor.ToString() + " pFragrate" + pFragrate.ToString());
-            
+                                
                 Profile.StatPoints += Math.Round(pFragrate * pFactor * rFactor * 0.01f, 3);
                 Profile.TotalFrags += players.fragsThisPoll[i]; 
                 Profile.TotalTime += 1; //one minute per poll
@@ -198,7 +196,7 @@ namespace Alien_Arena_Account_Server_Manager
                 PlayerCount.RemoveRange(10, PlayerCount.Count - 10);
 
             //Keep track of validated
-            ValidatedPlayerCount.Insert(0, accountServer.players.name.Count);
+            ValidatedPlayerCount.Insert(0, accountServer.sServer.players.name.Count);
             if (ValidatedPlayerCount.Count > 10)
                 ValidatedPlayerCount.RemoveRange(10, ValidatedPlayerCount.Count - 10);
 
