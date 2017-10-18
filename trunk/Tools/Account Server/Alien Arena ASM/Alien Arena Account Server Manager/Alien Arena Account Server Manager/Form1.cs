@@ -23,7 +23,7 @@ namespace Alien_Arena_Account_Server_Manager
         {
             accountServer.sServer.Stop_Server();
             PlayerList.Items.Clear();
-            accountServer.players.Clear();
+            accountServer.sServer.players.Clear();
             UpdateStatus("stopped...");
         }
 
@@ -43,7 +43,7 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem.Selected = false;
                 pItem.Focused = false;
 
-                //pItem.EnsureVisible();
+                pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
@@ -70,10 +70,10 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 PlayerList.Items.Clear();
 
-                for (int i = 0; i < accountServer.players.name.Count; i++)
+                for (int i = 0; i < accountServer.sServer.players.name.Count; i++)
                 {
                     ListViewItem pItem = null;
-                    pItem = PlayerList.Items.Add(accountServer.players.name[i]);
+                    pItem = PlayerList.Items.Add(accountServer.sServer.players.name[i]);
                     pItem.Selected = false;
                     pItem.Focused = true;
                 }
@@ -94,9 +94,9 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
-        public delegate void UpdateMasterStatusDelegate(string message);
+        public delegate void UpdateMasterStatusDelegate(string message, int level);
 
-        public void UpdateMasterStatusList(string message)
+        public void UpdateMasterStatusList(string message, int level)
         {
             try
             {
@@ -110,21 +110,26 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem.Selected = false;
                 pItem.Focused = false;
 
+                if(level == 1)
+                    pItem.ForeColor = System.Drawing.Color.Red;
+                if (level == 2)
+                    pItem.ForeColor = System.Drawing.Color.Green;
+
                 pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
-        public void UpdateMasterStatus(string message)
+        public void UpdateMasterStatus(string message, int level)
         {
             if (this.InvokeRequired == false)
             {
-                UpdateMasterStatusList(message);
+                UpdateMasterStatusList(message, level);
             }
             else
             {
                 UpdateMasterStatusDelegate updateMasterStatus = new UpdateMasterStatusDelegate(UpdateMasterStatusList);
-                this.Invoke(updateMasterStatus, new object[] { message });
+                this.Invoke(updateMasterStatus, new object[] { message, level });
             }
 
         }
@@ -185,7 +190,7 @@ namespace Alien_Arena_Account_Server_Manager
                     vseries.Points.Add(Stats.ValidatedPlayerCount[i]);
                 }
 
-                this.servercount.ChartAreas[0].RecalculateAxesScale();
+                this.playercount.ChartAreas[0].RecalculateAxesScale();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
@@ -313,13 +318,13 @@ namespace Alien_Arena_Account_Server_Manager
 
         private void SetActive_Click(object sender, EventArgs e)
         {
-            DBOperations.SetPlayerActive(SelectedPlayerName);
+            accountServer.sServer.players.AddPlayer(SelectedPlayerName);
             ACCServer.sDialog.UpdateRankingList();
         }
 
         private void SetInactive_Click(object sender, EventArgs e)
         {
-            DBOperations.SetPlayerInactive(SelectedPlayerName);
+            accountServer.sServer.players.RemovePlayer(SelectedPlayerName);
             ACCServer.sDialog.UpdateRankingList();
         }
 
@@ -331,17 +336,19 @@ namespace Alien_Arena_Account_Server_Manager
 
         private void BanPlayer_Click(object sender, EventArgs e)
         {
+            DBOperations.SetPlayerStatus(SelectedPlayerName, "Banned");
             ACCServer.sDialog.UpdateRankingList();
         }
 
         private void UnBanPlayer_Click(object sender, EventArgs e)
         {
+            DBOperations.SetPlayerStatus(SelectedPlayerName, "Inactive");
             ACCServer.sDialog.UpdateRankingList();
         }
 
         private void Rankings_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //SelectedPlayerName = Rankings.SelectedIndices();
+            SelectedPlayerName = Stats.allPlayers.player[Rankings.SelectedIndices[0]].Name;
         }
     }
 }

@@ -82,9 +82,6 @@ namespace Alien_Arena_Account_Server_Manager
         //this called only when a packet of "login" is received, and the player is validated
         public void AddPlayer(string Name)
         {
-            //check if this player is already in the list
-            int idx = name.IndexOf(Name);
-
             if (name.Exists(name => name == Name))
                 return;
 
@@ -99,6 +96,9 @@ namespace Alien_Arena_Account_Server_Manager
 
             //we've added a player, update the listview
             ACCServer.sDialog.UpdatePlayerList();
+
+            //set db field to "active"
+            DBOperations.SetPlayerStatus(Name, "Active");
 
             //check for expired players(those who never sent a logout)
             CheckPlayers();
@@ -190,9 +190,7 @@ namespace Alien_Arena_Account_Server_Manager
         {
             return true;
         }
-    }
-
-    
+    }    
 
     public class accountServer
     {
@@ -204,7 +202,7 @@ namespace Alien_Arena_Account_Server_Manager
         static Thread RunMaster;
         static bool runListener = false;
 
-        public static playerList players = new playerList();
+        public playerList players = new playerList();
 
         public accountServer()
         {
@@ -320,9 +318,8 @@ namespace Alien_Arena_Account_Server_Manager
                 if(ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                 {
                     ACCServer.sDialog.UpdateStatus("Adding " + sParams[4] + " to active player list.");
-                    players.AddPlayer(sParams[4]);
+                    sServer.players.AddPlayer(sParams[4]);
                     SendValidationToClient(source);
-                    DBOperations.SetPlayerStatus(sParams[4], "Active");
                 }
             }
 
@@ -342,7 +339,7 @@ namespace Alien_Arena_Account_Server_Manager
                 if (ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                 {
                     ACCServer.sDialog.UpdateStatus("Removing " + sParams[4] + " from active player list.");
-                    players.RemovePlayer(sParams[4]);
+                    sServer.players.RemovePlayer(sParams[4]);
                 }
 
             }
@@ -431,7 +428,7 @@ namespace Alien_Arena_Account_Server_Manager
                     result -= 6; //6 bytes per server entry
 
                     //Add to list
-                    Stats.Servers.Add(sIP.ToString(), sPort, "Server", "Map", 0);
+                    Stats.Servers.Add(sIP.ToString(), sPort, "Server", "Map");
                 }
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
@@ -470,15 +467,11 @@ namespace Alien_Arena_Account_Server_Manager
 
                 message = Encoding.Default.GetString(bytes, 0, bytes.Length);
 
-                //MessageBox.Show(message);
-
                 string[] sParams = message.Split('\\');
 
                 for (int i = 0; i < sParams.Length; i++)
                 {
                     //after "mods" comes the large space delimited piece with player info
-                    //MessageBox.Show(sParams[i]);                   
-
                     if(i != 0)
                     {
                         if (sParams[i - 1] == "hostname")
@@ -562,7 +555,7 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     receive_byte_array = sListener.Receive(ref source);
                     received_data = Encoding.Default.GetString(receive_byte_array, 0, receive_byte_array.Length);
-                    if (received_data.Length > 4)
+                    if (received_data.Length > 1)
                         ParseData(received_data, source);
                 }
             }
@@ -579,7 +572,7 @@ namespace Alien_Arena_Account_Server_Manager
         {
             ACCServer.sDialog.UpdateStatus("Listening on port 27902...");
 
-            ACCServer.sDialog.UpdateMasterStatus("Listening on port 27900...");
+            ACCServer.sDialog.UpdateMasterStatus("Listening on port 27900...", 0);
 
             //Start a thread for the account listener.
             runListener = true;
@@ -607,6 +600,7 @@ namespace Alien_Arena_Account_Server_Manager
             try
             {
                 runListener = false;
+                masterServer.runListener = false;
                 Stats.getStats = false;
                 Stats.uploadStats = false;                       
             }
