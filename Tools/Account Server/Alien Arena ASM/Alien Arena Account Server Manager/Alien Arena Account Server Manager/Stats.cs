@@ -185,6 +185,9 @@ namespace Alien_Arena_Account_Server_Manager
                     ProcessPlayers();
             }
 
+            //check for expired players(those who never sent a logout)
+            accountServer.sServer.players.CheckPlayers();
+
             //Keep track of server counts
             ServerCount.Insert(0, Servers.Ip.Count);
             if (ServerCount.Count > 10)
@@ -215,7 +218,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 if (CheckInternetConnection() == true)
                 {
-                    ACCServer.sDialog.UpdateStatus("Polling Servers...");
+                    ACCServer.sDialog.UpdateStatus("Polling Servers...", ACCServer.sLevel.INFO);
                     PingServers();
                 }
                 //Poll each minute
@@ -251,7 +254,7 @@ namespace Alien_Arena_Account_Server_Manager
                 client.Credentials = new NetworkCredential("aastats", " ");
                 client.UploadFile("ftp://martianbackup.com/playerrank.db", "STOR", "playerrank.db");
 
-                ACCServer.sDialog.UpdateStatus("Upload DB Complete.");
+                ACCServer.sDialog.UpdateStatus("Upload DB Complete.", ACCServer.sLevel.SYSTEM);
             }
         }
 
@@ -260,7 +263,7 @@ namespace Alien_Arena_Account_Server_Manager
             while (uploadStats == true)
             {
                 //Upload each hour
-                ACCServer.sDialog.UpdateStatus("Uploading Stats...");
+                ACCServer.sDialog.UpdateStatus("Uploading Stats...", ACCServer.sLevel.SYSTEM);
 
                 DBOperations.GenerateStatsFile();
                 UploadStatsFile();

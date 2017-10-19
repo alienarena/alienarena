@@ -31,12 +31,12 @@ namespace Alien_Arena_Account_Server_Manager
             accountServer.sServer.Stop_Server();
             PlayerList.Items.Clear();
             accountServer.sServer.players.Clear();
-            UpdateStatus("stopped...");
+            UpdateStatus("stopped...", sLevel.WARNING);
         }
 
-        public delegate void UpdateStatusDelegate(string message);
+        public delegate void UpdateStatusDelegate(string message, sLevel level);
 
-        public void UpdateStatusList(string message)
+        public void UpdateStatusList(string message, sLevel level)
         {
             try
             {
@@ -49,22 +49,23 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem = StatusList.Items.Add(message);
                 pItem.Selected = false;
                 pItem.Focused = false;
+                pItem.ForeColor = SetColor(level);
 
                 pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
-        public void UpdateStatus(string message)
+        public void UpdateStatus(string message, sLevel level)
         {
             if (this.InvokeRequired == false)
             {
-                UpdateStatusList(message);
+                UpdateStatusList(message, level);
             }
             else
             {
                 UpdateStatusDelegate updateStatus = new UpdateStatusDelegate(UpdateStatusList);
-                this.Invoke(updateStatus, new object[] { message });
+                this.Invoke(updateStatus, new object[] { message, level });
             }
 
         }
@@ -101,6 +102,22 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
+        private System.Drawing.Color SetColor(sLevel level)
+        {
+            switch (level)
+            {
+                default:
+                case sLevel.INFO:
+                    return System.Drawing.Color.Ivory;
+                 case sLevel.WARNING:
+                    return System.Drawing.Color.Red;
+                case sLevel.UPDATE:
+                    return System.Drawing.Color.Green;
+                case sLevel.SYSTEM:
+                    return System.Drawing.Color.Aqua;
+            }
+        }
+
         public delegate void UpdateMasterStatusDelegate(string message, sLevel level);
 
         public void UpdateMasterStatusList(string message, sLevel level)
@@ -116,24 +133,8 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem = MasterList.Items.Add(message);
                 pItem.Selected = false;
                 pItem.Focused = false;
-
-                switch (level)
-                {
-                    default:
-                    case sLevel.INFO:
-                        pItem.ForeColor = System.Drawing.Color.Ivory;
-                        break;
-                    case sLevel.WARNING:
-                        pItem.ForeColor = System.Drawing.Color.Red;
-                        break;
-                    case sLevel.UPDATE:
-                        pItem.ForeColor = System.Drawing.Color.Green;
-                        break;
-                    case sLevel.SYSTEM:
-                        pItem.ForeColor = System.Drawing.Color.Aqua;
-                        break;
-                }
-
+                pItem.ForeColor = SetColor(level);
+               
                 pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }

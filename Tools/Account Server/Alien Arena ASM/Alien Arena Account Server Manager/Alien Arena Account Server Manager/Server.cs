@@ -99,9 +99,6 @@ namespace Alien_Arena_Account_Server_Manager
 
             //set db field to "active"
             DBOperations.SetPlayerStatus(Name, "Active");
-
-            //check for expired players(those who never sent a logout)
-            CheckPlayers();
         }
 
         //logout player
@@ -233,7 +230,7 @@ namespace Alien_Arena_Account_Server_Manager
             if (Profile.Name == "Invalid")
             {
                 //add to database
-                ACCServer.sDialog.UpdateStatus("Adding " + Name + " to database.");
+                ACCServer.sDialog.UpdateStatus("Adding " + Name + " to database.", ACCServer.sLevel.UPDATE);
                 DBOperations.AddProfile(Name, Password, Location);
                 return true;
             }
@@ -242,12 +239,12 @@ namespace Alien_Arena_Account_Server_Manager
                 if (Password == Profile.Password)
                 {
                     //matched!
-                    ACCServer.sDialog.UpdateStatus("Found " + Name + " in database.");
+                    ACCServer.sDialog.UpdateStatus("Found " + Name + " in database.", ACCServer.sLevel.INFO);
                     return true;
                 }
                 else
                 {
-                    ACCServer.sDialog.UpdateStatus("Mismatched password for " + Name + " .");
+                    ACCServer.sDialog.UpdateStatus("Mismatched password for " + Name + " .", ACCServer.sLevel.WARNING);
                     return false;
                 }
             }
@@ -293,12 +290,12 @@ namespace Alien_Arena_Account_Server_Manager
                 //Check protocol
                 if (sParams[2] != "1")
                 {                    
-                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] +  " from " + source.Address.ToString() + ".");
+                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] +  " from " + source.Address.ToString() + ".", ACCServer.sLevel.WARNING);
                     return;
                 }
 
                 //Send verification string to client.
-                ACCServer.sDialog.UpdateStatus("Sending verification string to " + sParams[4] + " at " + source.Address.ToString() + ":" + source.Port.ToString() + ".");
+                ACCServer.sDialog.UpdateStatus("Sending verification string to " + sParams[4] + " at " + source.Address.ToString() + ":" + source.Port.ToString() + ".", ACCServer.sLevel.INFO);
                 SendVStringToClient(sParams[4], source);
             }
 
@@ -311,13 +308,13 @@ namespace Alien_Arena_Account_Server_Manager
 
                 if (sParams[2] != "1")
                 {
-                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] + " from " + source.Address.ToString() + ".");
+                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] + " from " + source.Address.ToString() + ".", ACCServer.sLevel.WARNING);
                     return;
                 }
 
                 if(ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                 {
-                    ACCServer.sDialog.UpdateStatus("Adding " + sParams[4] + " to active player list.");
+                    ACCServer.sDialog.UpdateStatus("Adding " + sParams[4] + " to active player list.", ACCServer.sLevel.UPDATE);
                     sServer.players.AddPlayer(sParams[4]);
                     SendValidationToClient(source);
                 }
@@ -332,13 +329,13 @@ namespace Alien_Arena_Account_Server_Manager
 
                 if (sParams[2] != "1")
                 {
-                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] + " from " + source.Address.ToString() + ".");
+                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] + " from " + source.Address.ToString() + ".", ACCServer.sLevel.WARNING);
                     return;
                 }
 
                 if (ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                 {
-                    ACCServer.sDialog.UpdateStatus("Removing " + sParams[4] + " from active player list.");
+                    ACCServer.sDialog.UpdateStatus("Removing " + sParams[4] + " from active player list.", ACCServer.sLevel.UPDATE);
                     sServer.players.RemovePlayer(sParams[4]);
                 }
 
@@ -353,7 +350,7 @@ namespace Alien_Arena_Account_Server_Manager
 
                 if (sParams[2] != "1")
                 {
-                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] + " from " + source.Address.ToString() + ".");
+                    ACCServer.sDialog.UpdateStatus("Wrong protocol " + sParams[2] + " from " + source.Address.ToString() + ".", ACCServer.sLevel.WARNING);
                     return;
                 }
 
@@ -361,7 +358,7 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     if (ValidatePlayer(sParams[4], sParams[8], source.Address.ToString()))
                     {
-                        ACCServer.sDialog.UpdateStatus("Setting password for " + sParams[4] + " .");
+                        ACCServer.sDialog.UpdateStatus("Setting password for " + sParams[4] + " .", ACCServer.sLevel.UPDATE);
                         DBOperations.ChangePlayerPassword(sParams[4], sParams[8]);
                         SendValidationToClient(source);
                     }
@@ -370,7 +367,7 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     if (ValidatePlayer(sParams[4], sParams[6], source.Address.ToString()))
                     {
-                        ACCServer.sDialog.UpdateStatus("Changing password for " + sParams[4] + " .");
+                        ACCServer.sDialog.UpdateStatus("Changing password for " + sParams[4] + " .", ACCServer.sLevel.UPDATE);
                         DBOperations.ChangePlayerPassword(sParams[4], sParams[8]);
                         SendValidationToClient(source);
                     }
@@ -379,7 +376,7 @@ namespace Alien_Arena_Account_Server_Manager
             else
             {
                 //Unknown request
-                ACCServer.sDialog.UpdateStatus("Unknown request! " + message);
+                ACCServer.sDialog.UpdateStatus("Unknown request! " + message, ACCServer.sLevel.WARNING);
             }
         }
                
@@ -570,9 +567,9 @@ namespace Alien_Arena_Account_Server_Manager
 
         public void Start_Server()
         {
-            ACCServer.sDialog.UpdateStatus("Listening on port 27902...");
+            ACCServer.sDialog.UpdateStatus("Listening on port 27902...", ACCServer.sLevel.SYSTEM);
 
-            ACCServer.sDialog.UpdateMasterStatus("Listening on port 27900...", 0);
+            ACCServer.sDialog.UpdateMasterStatus("Listening on port 27900...", ACCServer.sLevel.SYSTEM);
 
             //Start a thread for the account listener.
             runListener = true;
