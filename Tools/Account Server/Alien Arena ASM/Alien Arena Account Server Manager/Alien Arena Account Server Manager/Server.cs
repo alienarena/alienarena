@@ -142,7 +142,7 @@ namespace Alien_Arena_Account_Server_Manager
             minutes.Insert(insertPos, Minutes);
         }
 
-        //check list for possible expired players(5 hour window)
+        //check list for possible expired players(3 hours, no frags, very likely has crashed or missed the logout command somehow)
         public void CheckPlayers()
         {
             int curTime = DateTime.UtcNow.Hour;
@@ -152,7 +152,7 @@ namespace Alien_Arena_Account_Server_Manager
                 if (hour[idx] > curTime)
                 {
                     curTime += 24;
-                    if (curTime - hour[idx] > 5)
+                    if (curTime - hour[idx] > 3 && fragsThisPoll[idx] == 0)
                         DropPlayer(name[idx]);
                 }
             }

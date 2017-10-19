@@ -8,6 +8,13 @@ namespace Alien_Arena_Account_Server_Manager
     {
         public static ACCServer sDialog;
         private static string SelectedPlayerName = "Invalid";
+        public enum sLevel
+        {
+            INFO = 0,
+            WARNING = 1,
+            UPDATE = 2,
+            SYSTEM = 3
+        }
 
         public ACCServer()
         {
@@ -94,9 +101,9 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
-        public delegate void UpdateMasterStatusDelegate(string message, int level);
+        public delegate void UpdateMasterStatusDelegate(string message, sLevel level);
 
-        public void UpdateMasterStatusList(string message, int level)
+        public void UpdateMasterStatusList(string message, sLevel level)
         {
             try
             {
@@ -110,17 +117,29 @@ namespace Alien_Arena_Account_Server_Manager
                 pItem.Selected = false;
                 pItem.Focused = false;
 
-                if(level == 1)
-                    pItem.ForeColor = System.Drawing.Color.Red;
-                if (level == 2)
-                    pItem.ForeColor = System.Drawing.Color.Green;
+                switch (level)
+                {
+                    default:
+                    case sLevel.INFO:
+                        pItem.ForeColor = System.Drawing.Color.Ivory;
+                        break;
+                    case sLevel.WARNING:
+                        pItem.ForeColor = System.Drawing.Color.Red;
+                        break;
+                    case sLevel.UPDATE:
+                        pItem.ForeColor = System.Drawing.Color.Green;
+                        break;
+                    case sLevel.SYSTEM:
+                        pItem.ForeColor = System.Drawing.Color.Aqua;
+                        break;
+                }
 
                 pItem.EnsureVisible();
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
-        public void UpdateMasterStatus(string message, int level)
+        public void UpdateMasterStatus(string message, sLevel level)
         {
             if (this.InvokeRequired == false)
             {

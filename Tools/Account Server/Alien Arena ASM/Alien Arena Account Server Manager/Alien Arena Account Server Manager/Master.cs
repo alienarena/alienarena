@@ -16,7 +16,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         static UdpClient sListener;        
         public static bool runListener = false;
-        private static ushort FrameTime = 0;
+        private static int FrameTime = 0;
 
         static ServerList Servers = new ServerList();
 
@@ -30,17 +30,17 @@ namespace Alien_Arena_Account_Server_Manager
             public List<string> Address;
             public List<string> Ip;
             public List<ushort> Port;
-            public List<ushort> LastHeartbeat;
+            public List<int> LastHeartbeat;
 
             public ServerList()
             {
                 Address = new List<string>();
                 Ip = new List<string>();
                 Port = new List<ushort>();
-                LastHeartbeat = new List<ushort>();
+                LastHeartbeat = new List<int>();
             }
 
-            public void Add(string Ip, ushort Port, ushort LastHeartbeat)
+            public void Add(string Ip, ushort Port, int LastHeartbeat)
             {
                 Address.Add(Ip + ":" + Port.ToString());
                 this.Ip.Add(Ip);
@@ -61,7 +61,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 Ip.RemoveAll(AllStrings);
                 Port.RemoveAll(AllUShorts);
-                LastHeartbeat.RemoveAll(AllUShorts);
+                LastHeartbeat.RemoveAll(AllInts);
             }
 
             private static bool AllStrings(String s)
@@ -70,6 +70,11 @@ namespace Alien_Arena_Account_Server_Manager
             }
 
             private static bool AllUShorts(ushort i)
+            {
+                return true;
+            }
+
+            private static bool AllInts(int i)
             {
                 return true;
             }
@@ -89,7 +94,7 @@ namespace Alien_Arena_Account_Server_Manager
                 else if (FrameTime - Servers.LastHeartbeat[i] > 8)
                 {
                     //Never received a response from the ping sent
-                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + Servers.Address[i] + ".", 1);
+                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + Servers.Address[i] + ".", ACCServer.sLevel.WARNING);
                     Servers.Drop(Servers.Address[i]);
                 }
                 else if (FrameTime - Servers.LastHeartbeat[i] > 5) 
@@ -106,7 +111,7 @@ namespace Alien_Arena_Account_Server_Manager
                     try
                     {
                         sListener.Send(send_buffer, send_buffer.Length, dest);
-                        ACCServer.sDialog.UpdateMasterStatus("Sending ping to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 2);
+                        ACCServer.sDialog.UpdateMasterStatus("Sending ping to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", ACCServer.sLevel.UPDATE);
                     }
                     catch (Exception exc) { MessageBox.Show(exc.ToString()); }
                 }
@@ -140,14 +145,14 @@ namespace Alien_Arena_Account_Server_Manager
             try
             {
                 sListener.Send(send_buffer, send_buffer.Length, dest);
-                ACCServer.sDialog.UpdateMasterStatus("Sending server list to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 0);
+                ACCServer.sDialog.UpdateMasterStatus("Sending server list to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", ACCServer.sLevel.INFO);
             }
             catch (Exception exc) { MessageBox.Show(exc.ToString()); }
         }
 
         static void HeartBeat(IPEndPoint dest)
         {
-            ACCServer.sDialog.UpdateMasterStatus("Heartbeat from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 0);
+            ACCServer.sDialog.UpdateMasterStatus("Heartbeat from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", ACCServer.sLevel.INFO);
 
             for (int i = 0; i < Servers.Ip.Count; i++)
             {
@@ -163,7 +168,7 @@ namespace Alien_Arena_Account_Server_Manager
                     //Send to client
                     try
                     {
-                        ACCServer.sDialog.UpdateMasterStatus("Sending Ack to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 0);
+                        ACCServer.sDialog.UpdateMasterStatus("Sending Ack to " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", ACCServer.sLevel.INFO);
                         sListener.Send(send_buffer, send_buffer.Length, dest);
                         return;
                     }
@@ -182,7 +187,7 @@ namespace Alien_Arena_Account_Server_Manager
                 {
                     //Matched, so update the hearbeat time of this server
                     Servers.LastHeartbeat[i] = FrameTime;
-                    ACCServer.sDialog.UpdateMasterStatus("Ack from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 2);
+                    ACCServer.sDialog.UpdateMasterStatus("Ack from " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", ACCServer.sLevel.UPDATE);
                     break;
                 }
             }
@@ -204,7 +209,7 @@ namespace Alien_Arena_Account_Server_Manager
             if (!duplicate)
             {
                 Servers.Add(dest.Address.ToString(), Convert.ToUInt16(dest.Port), FrameTime);
-                ACCServer.sDialog.UpdateMasterStatus("Added " + dest.Address.ToString() + ":" + dest.Port.ToString() + " to list!", 2);
+                ACCServer.sDialog.UpdateMasterStatus("Added " + dest.Address.ToString() + ":" + dest.Port.ToString() + " to list!", ACCServer.sLevel.UPDATE);
             }
         }
 
@@ -214,7 +219,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 if (dest.Address.ToString() == Servers.Ip[i] && dest.Port == Servers.Port[i])
                 {
-                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", 1);
+                    ACCServer.sDialog.UpdateMasterStatus("Shutting down " + dest.Address.ToString() + ":" + dest.Port.ToString() + ".", ACCServer.sLevel.WARNING);
                     Servers.Drop(Servers.Address[i]);
                     break;
                 }
@@ -244,7 +249,7 @@ namespace Alien_Arena_Account_Server_Manager
                 Shutdown(source);
             }
             else
-               ACCServer.sDialog.UpdateMasterStatus("Unknown command from " + source.Address.ToString() + ":" + source.Port.ToString() + ".", 1);
+               ACCServer.sDialog.UpdateMasterStatus("Unknown command from " + source.Address.ToString() + ":" + source.Port.ToString() + ".", ACCServer.sLevel.WARNING);
         }
 
         public void GetServerList()
@@ -268,7 +273,9 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 while (runListener)
                 {
-                    FrameTime = Convert.ToUInt16(DateTime.UtcNow.Minute);
+                    FrameTime = DateTime.UtcNow.DayOfYear * 1440 + DateTime.UtcNow.Hour * 60 + DateTime.UtcNow.Minute;
+                    if (FrameTime == 0)
+                        LastCheck = 0;
 
                     receive_byte_array = sListener.Receive(ref source);
                     received_data = Encoding.Default.GetString(receive_byte_array, 0, receive_byte_array.Length);
@@ -277,6 +284,7 @@ namespace Alien_Arena_Account_Server_Manager
                     
                     if (FrameTime - LastCheck >= 1)
                     {
+                        ACCServer.sDialog.UpdateMasterStatus("Server Check at: " + FrameTime.ToString(), ACCServer.sLevel.SYSTEM);
                         LastCheck = FrameTime;
                         RunServerCheck();
                     }

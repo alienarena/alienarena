@@ -28,15 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend7 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend8 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea9 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend9 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatusList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.StartServer = new System.Windows.Forms.Button();
@@ -127,35 +127,35 @@
             // 
             // servercount
             // 
-            chartArea7.Name = "ChartArea1";
-            this.servercount.ChartAreas.Add(chartArea7);
-            legend7.Name = "Legend1";
-            this.servercount.Legends.Add(legend7);
+            chartArea4.Name = "ChartArea1";
+            this.servercount.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.servercount.Legends.Add(legend4);
             this.servercount.Location = new System.Drawing.Point(447, 12);
             this.servercount.Name = "servercount";
-            series7.ChartArea = "ChartArea1";
-            series7.IsXValueIndexed = true;
-            series7.Legend = "Legend1";
-            series7.LegendText = "Servers";
-            series7.Name = "Servers";
-            series7.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
-            this.servercount.Series.Add(series7);
+            series4.ChartArea = "ChartArea1";
+            series4.IsXValueIndexed = true;
+            series4.Legend = "Legend1";
+            series4.LegendText = "Servers";
+            series4.Name = "Servers";
+            series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
+            this.servercount.Series.Add(series4);
             this.servercount.Size = new System.Drawing.Size(300, 202);
             this.servercount.TabIndex = 4;
             this.servercount.Text = "Servers";
             // 
             // playercount
             // 
-            chartArea8.Name = "ChartArea1";
-            this.playercount.ChartAreas.Add(chartArea8);
-            legend8.Name = "Legend1";
-            this.playercount.Legends.Add(legend8);
+            chartArea5.Name = "ChartArea1";
+            this.playercount.ChartAreas.Add(chartArea5);
+            legend5.Name = "Legend1";
+            this.playercount.Legends.Add(legend5);
             this.playercount.Location = new System.Drawing.Point(447, 220);
             this.playercount.Name = "playercount";
-            series8.ChartArea = "ChartArea1";
-            series8.Legend = "Legend1";
-            series8.Name = "Players";
-            this.playercount.Series.Add(series8);
+            series5.ChartArea = "ChartArea1";
+            series5.Legend = "Legend1";
+            series5.Name = "Players";
+            this.playercount.Series.Add(series5);
             this.playercount.Size = new System.Drawing.Size(300, 195);
             this.playercount.TabIndex = 5;
             this.playercount.Text = "Players";
@@ -266,7 +266,7 @@
             this.MasterList.BackColor = System.Drawing.SystemColors.InfoText;
             this.MasterList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.MasterStatus});
-            this.MasterList.ForeColor = System.Drawing.SystemColors.Info;
+            this.MasterList.ForeColor = System.Drawing.Color.Ivory;
             this.MasterList.Location = new System.Drawing.Point(12, 421);
             this.MasterList.Name = "MasterList";
             this.MasterList.Size = new System.Drawing.Size(255, 332);
@@ -304,17 +304,17 @@
             // 
             // ServerTypes
             // 
-            chartArea9.Name = "ChartArea1";
-            this.ServerTypes.ChartAreas.Add(chartArea9);
-            legend9.Name = "Legend1";
-            this.ServerTypes.Legends.Add(legend9);
+            chartArea6.Name = "ChartArea1";
+            this.ServerTypes.ChartAreas.Add(chartArea6);
+            legend6.Name = "Legend1";
+            this.ServerTypes.Legends.Add(legend6);
             this.ServerTypes.Location = new System.Drawing.Point(753, 479);
             this.ServerTypes.Name = "ServerTypes";
-            series9.ChartArea = "ChartArea1";
-            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie;
-            series9.Legend = "Legend1";
-            series9.Name = "Servers";
-            this.ServerTypes.Series.Add(series9);
+            series6.ChartArea = "ChartArea1";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Pie;
+            series6.Legend = "Legend1";
+            series6.Name = "Servers";
+            this.ServerTypes.Series.Add(series6);
             this.ServerTypes.Size = new System.Drawing.Size(298, 245);
             this.ServerTypes.TabIndex = 15;
             this.ServerTypes.Text = "ServerTypes";
