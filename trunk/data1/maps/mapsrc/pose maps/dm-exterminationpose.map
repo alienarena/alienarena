@@ -14605,3 +14605,9 @@
 "model" "maps/meshes/playerpose/enforcer_weapon.iqm"
 "angle" "25.380800"
 }
+// entity 309
+{
+"classname" "light"
+"light" "60"
+"origin" "640.000000 -352.000000 -104.000000"
+}
