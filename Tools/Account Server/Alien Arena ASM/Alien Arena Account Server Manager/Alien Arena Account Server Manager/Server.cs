@@ -153,7 +153,7 @@ namespace Alien_Arena_Account_Server_Manager
                 if (Stats.players.GetPlayerIndex(name[idx]) == -1)
                 {
                     ACCServer.sDialog.UpdateStatus("Dropping " + name[idx] + " for inactivity.", ACCServer.sLevel.WARNING);
-                    DropPlayer(name[idx]);
+                    RemovePlayer(name[idx]);
                 }
             }
         }
