@@ -20,6 +20,7 @@ namespace Alien_Arena_Account_Server_Manager
         public static bool getStats = false;
         public static bool uploadStats = false;
         public static playerList players = new playerList();
+        public static playerList playersIngame = new playerList();
         public static rankingList allPlayers = new rankingList();
         public static int TotalPlayers = 0;
         public static int DMServers = 0;
@@ -175,6 +176,8 @@ namespace Alien_Arena_Account_Server_Manager
             //Check for invalid list
             if (Servers.Ip.Count < 1)
                 return;
+
+            playersIngame.Clear();
 
             for(i = 0; i < Servers.Ip.Count; i++)
             {
