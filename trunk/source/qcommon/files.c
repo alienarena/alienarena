@@ -164,7 +164,7 @@ static void FS_init_paths( void )
 	char fs_homedir[MAX_OSPATH];
 	char base_gamedata[MAX_OSPATH];
 	char game_gamedata[MAX_OSPATH];
-#ifdef UNIX_VARIANT
+#if defined(UNIX_VARIANT) && !defined(STEAM_VARIANT)
 	char user_base_gamedata[MAX_OSPATH];
 	char user_game_gamedata[MAX_OSPATH];
 	char xdg_data_home[MAX_OSPATH];
@@ -180,7 +180,7 @@ static void FS_init_paths( void )
 	memset( fs_homedir, 0, sizeof(fs_homedir));
 	memset( base_gamedata, 0, sizeof(base_gamedata));
 	memset( game_gamedata, 0, sizeof(game_gamedata));
-#ifdef UNIX_VARIANT
+#if defined(UNIX_VARIANT) && !defined(STEAM_VARIANT)
 	memset( user_base_gamedata, 0, sizeof(base_gamedata));
 	memset( user_game_gamedata, 0, sizeof(game_gamedata));
 	memset( xdg_data_home, 0, sizeof(xdg_data_home));
@@ -188,6 +188,8 @@ static void FS_init_paths( void )
 
 	/*
 	 * For Windows, CWD is both the 'datadir' and the user data directory.
+	 *
+	 * For Linux running in Steam, if works the same as Windows.
 	 *
 	 * For Unix/Linux, CWD serves as an "in-place" 'datadir' overriding COR_DATADIR
 	 *  (which is equivalent to what was the "alternate install"). To activate this
@@ -199,13 +201,17 @@ static void FS_init_paths( void )
 	 *  directory (unlike Windows).
 	 * Note: in-place install is a tool for developers and testers. 
 	 *  It is also needed for running the aaradiant map editor.
+	 * Note: if you do a regular install (ie. program is in PATH,
+	 *  eg. in /usr/local/bin). It is not necessary to copy the
+	 *  executable, just cd to the topdir and run from there.
+	 *
 	 */
 	cwdstr = _getcwd( fs_bindir, sizeof(fs_bindir) );
 	if ( cwdstr == NULL )
 		Sys_Error( "path initialization (getcwd error: %i)", strerror(errno) );
 	Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
 
-#ifdef UNIX_VARIANT
+#if defined(UNIX_VARIANT) && !defined(STEAM_VARIANT)
 	/* use the traditional file to check existence of data1 in the cwd */
 	Com_sprintf( testfile_path, sizeof( testfile_path ), "%s/%s",
 				 fs_bindir, "data1/pics/colormap.pcx"  );
@@ -227,7 +233,7 @@ static void FS_init_paths( void )
 	else
 	{
 		/* we are running "in-place", fs_datadir is already the absolute path
-		 * to the game data.
+		 * to the game data. The only option for Steam.
 		 */
 		fclose( testfile );
 	}
@@ -239,15 +245,11 @@ static void FS_init_paths( void )
 	Com_sprintf( base_gamedata, sizeof( base_gamedata ), "%s/%s",
 				 fs_datadir, BASE_GAMEDATA );
 
-
 	/* Pending sorting out multiple game and plugin game module issues,
 	 * game and gamedir cvars are fixed at startup.
 	 *
-	 * 'alienarena' is always "arena", "aa-tactical-demo" is always "tactical"
-	 *  based on preprocessor -DTACTICAL (-DARENA is ok, but not required)
-	 *
 	 * 'alienarena-ded' uses +set game arena|tactical" on command line.
-	 *  defaults to arena if not set.
+	 *  defaults to arena if not set. (Is this true in Gen3?)
 	 * 
 	 */
 #if defined DEDICATED_ONLY
@@ -260,7 +262,8 @@ static void FS_init_paths( void )
 
 	Com_Printf("Game sub-directory: %s\n", game_gamedata );
 
-#ifdef UNIX_VARIANT
+
+#if defined(UNIX_VARIANT) && !defined(STEAM_VARIANT)
 	/* absolute path to user-writeable data */
 	/* per spec, $XDG_DATA_HOME must be an absolute path */
 	/* To override, and put this some place else for testing
@@ -319,7 +322,7 @@ static void FS_init_paths( void )
 		Sys_Error( "Home data directory configuration error: %s",
 				   xdg_data_home );
 	}
-#endif
+#endif	
 
 	/*
 	 * Create absolute search paths
@@ -334,11 +337,11 @@ static void FS_init_paths( void )
 		memset( fs_gamesearch[i], 0, MAX_OSPATH );
 	}
 	i = 0;
-#ifdef UNIX_VARIANT
+#if defined(UNIX_VARIANT) && !defined(STEAM_VARIANT)
 	Q_strncpyz2(fs_gamesearch[i++],user_game_gamedata,sizeof(fs_gamesearch[0]));
 #endif
 	Q_strncpyz2( fs_gamesearch[i++], game_gamedata, sizeof(fs_gamesearch[0]) );
-#ifdef UNIX_VARIANT
+#if defined(UNIX_VARIANT) && !defined(STEAM_VARIANT)
 	Q_strncpyz2(fs_gamesearch[i++],user_base_gamedata,sizeof(fs_gamesearch[0]));
 #endif
 	Q_strncpyz2( fs_gamesearch[i++], base_gamedata, sizeof(fs_gamesearch[0]) );
@@ -1196,8 +1199,6 @@ void FS_InitFilesystem (void)
 	Cvar_FullSet( "gamedir", var->string, CVAR_ROM|CVAR_SERVERINFO );
 #else
 	/* game from client/listen server preprocessor def
-	 * alienarena (-DARENA or none) executable runs "arena" server
-	 * aa-tactical-demo (-DTACTICAL) executable runs "tactical" server
 	 */
 	Cvar_FullSet( "game", GAME_GAMEDATA, CVAR_ROM|CVAR_SERVERINFO );
 	var = Cvar_Get( "game", "", 0 );
