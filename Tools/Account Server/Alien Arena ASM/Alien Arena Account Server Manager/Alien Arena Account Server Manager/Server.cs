@@ -137,21 +137,7 @@ namespace Alien_Arena_Account_Server_Manager
             fragsThisPoll.Insert(insertPos, Frags); //can just use frags for initial value
             hour.Insert(insertPos, Hour);
             minutes.Insert(insertPos, Minutes);
-        }
-
-        //check list for possible expired players - if they aren't in a server somewhere, log them out.
-        public void CheckPlayers()
-        {
-           ACCServer.sDialog.UpdateStatus("Checking for inactive players.", ACCServer.sLevel.INFO);
-            for (int idx = 0; idx < name.Count; idx++)
-            {
-                if (Stats.playersIngame.GetPlayerIndex(name[idx]) == -1)
-                {
-                    ACCServer.sDialog.UpdateStatus("Dropping " + name[idx] + " for inactivity.", ACCServer.sLevel.WARNING);
-                    RemovePlayer(name[idx]);
-                }
-            }
-        }
+        }       
 
         public int GetPlayerIndex(string Name)
         {
