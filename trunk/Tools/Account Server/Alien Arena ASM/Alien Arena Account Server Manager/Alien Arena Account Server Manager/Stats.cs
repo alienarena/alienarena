@@ -160,6 +160,26 @@ namespace Alien_Arena_Account_Server_Manager
             }
         }
 
+        //check list for possible expired players - if they aren't in a server somewhere, log them out.
+        private static void CheckPlayers()
+        {
+            ACCServer.sDialog.UpdateStatus("Checking for inactive players.", ACCServer.sLevel.INFO);
+            for (int idx = 0; idx < accountServer.sServer.players.name.Count; idx++)
+            {
+                int currTime = DateTime.UtcNow.Minute;
+
+                if (accountServer.sServer.players.minutes[idx] > currTime)
+                    currTime += 60;
+
+                //ACCServer.sDialog.UpdateStatus(accountServer.sServer.players.name[idx] + " Time: " + accountServer.sServer.players.minutes[idx].ToString() + " vs " + currTime.ToString(), ACCServer.sLevel.WARNING);
+                if (playersIngame.GetPlayerIndex(accountServer.sServer.players.name[idx]) == -1 && (currTime - accountServer.sServer.players.minutes[idx]) > 5)
+                {
+                    ACCServer.sDialog.UpdateStatus("Dropping " + accountServer.sServer.players.name[idx] + " for inactivity.", ACCServer.sLevel.WARNING);
+                    accountServer.sServer.players.RemovePlayer(accountServer.sServer.players.name[idx]);
+                }
+            }
+        }
+
         private static void PingServers()
         {
             int i = 0;
@@ -189,7 +209,7 @@ namespace Alien_Arena_Account_Server_Manager
             }
 
             //check for expired players(those who never sent a logout)
-            accountServer.sServer.players.CheckPlayers();
+            CheckPlayers();
 
             //Keep track of server counts
             ServerCount.Insert(0, Servers.Ip.Count);
@@ -254,7 +274,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 WebClient client = new WebClient();
 
-                client.Credentials = new NetworkCredential("aastats", " ");
+                client.Credentials = new NetworkCredential("aastats", "");
                 client.UploadFile("ftp://martianbackup.com/playerrank.db", "STOR", "playerrank.db");
 
                 ACCServer.sDialog.UpdateStatus("Upload DB Complete.", ACCServer.sLevel.SYSTEM);
