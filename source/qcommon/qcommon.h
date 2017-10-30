@@ -214,7 +214,7 @@ PROTOCOL
 
 // protocol.h -- communications protocols
 
-#define	PROTOCOL_VERSION	35
+#define	PROTOCOL_VERSION	36
 
 //=========================================
 
