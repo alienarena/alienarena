@@ -51,7 +51,13 @@ static FILE* statsdb_open( const char* mode )
 	FILE* file;
 	char pathbfr[MAX_OSPATH];
 
+#if defined WIN32_VARIANT
+	char *appData = getenv("AppData");
+	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/AAWoM/%s", appData, "stats.db");
+#else
 	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/%s", FS_Gamedir(), "stats.db");
+#endif
+
 	file = fopen( pathbfr, mode );
 
 	return file;
@@ -409,7 +415,12 @@ void STATS_ST_Write (void)
 	char statsFile[MAX_QPATH];
 	size_t sz;
 
+#if defined WIN32_VARIANT
+	char *appData = getenv("AppData");
+	sprintf(statsFile, "%s/AAWoM/swdata.db", appData);
+#else
 	sprintf(statsFile, "%s/swdata.db", GAME_GAMEDATA);
+#endif
 
     file = fopen(statsFile, "wb");
     if (file != NULL) 

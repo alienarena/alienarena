@@ -844,6 +844,9 @@ qboolean FS_FullPath( char *full_path, size_t pathsize,
 void FS_FullWritePath( char *full_path, size_t pathsize,
 					   const char *relative_path );
 
+void FS_WriteAPPDATA( char *full_path, size_t pathsize, 
+					   const char* relative_path);
+
 /**
  * @brief
  *

@@ -1219,6 +1219,12 @@ static char mesh_fragment_program[] = STRINGIFY (
 			gl_FragColor = mix(gl_FragColor, glow, glow.a);
 		}		
 
+		//potential for outlining players for certain instances.
+		/*if(dot(normal, EyeDir) <= 0.01)
+		{
+			gl_FragColor = vec4(0.2, 1.0, 0.0, 1.0);
+		}*/
+
 		if(TEAM == 1)
 			gl_FragColor = mix(gl_FragColor, vec4(0.3, 0.0, 0.0, 1.0), fog);
 		else if(TEAM == 2)

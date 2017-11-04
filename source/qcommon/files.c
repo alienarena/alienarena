@@ -507,6 +507,49 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 	return found;
 }
 
+qboolean FS_APPDATA( char *full_path, size_t pathsize, const char *relative_path )
+{
+	char search_path[MAX_OSPATH];
+	qboolean found = false;
+	char *appData = getenv("AppData");
+
+	*full_path = 0;
+
+	if ( strlen( relative_path ) >= MAX_QPATH )
+	{
+		Com_DPrintf("FS_APPDATA: relative path size error: %s\n", relative_path );
+		return false;
+	}
+		
+	Com_sprintf( search_path, sizeof(search_path), "%s/AAWoM/%s",
+					appData, relative_path);
+	found = FS_CheckFile( search_path );
+
+	if ( found )
+	{
+		if ( strlen( search_path ) < pathsize )
+		{
+			Q_strncpyz2( full_path, search_path, pathsize );
+			if ( developer && developer->integer == 2 )
+			{ // tracing for found files, not an error.
+				Com_DPrintf("FS_APPDATA: found : %s\n", full_path );
+			}
+		}
+		else
+		{
+			Com_DPrintf("FS_APPDATA: full path size error: %s\n", search_path );
+			found = false;
+		}
+	}
+	else if ( developer && developer->integer == 2 )
+	{ // tracing for not found files, not necessarily an error.
+		Com_DPrintf("FS_APPDATA: not found : %s\n", relative_path );
+	}
+
+	return found;
+}
+
+
 
 /*
 ===
@@ -533,6 +576,21 @@ void FS_FullWritePath( char *full_path, size_t pathsize, const char* relative_pa
 
 }
 
+void FS_WriteAPPDATA( char *full_path, size_t pathsize, const char* relative_path)
+{
+	char *appData = getenv("AppData");
+
+	if ( strlen( relative_path ) >= MAX_QPATH )
+	{
+		Com_DPrintf("FS_FullPath: relative path size error: %s\n", relative_path );
+		*full_path = 0;
+		return;
+	}
+
+	Com_sprintf( full_path, pathsize, "%s/AAWoM/%s", appData, relative_path);
+	FS_CreatePath( full_path );	
+}
+
 /*
 ==============
 FS_FCloseFile
@@ -541,6 +599,12 @@ FS_FCloseFile
 void FS_FCloseFile (FILE *f)
 {
 	fclose (f);
+}
+
+static qboolean is_cfg(const char *filename)
+{
+	size_t exti = strlen(filename) - 4;
+	return  !Q_strncasecmp( ".cfg", &filename[exti], 4 );
 }
 
 /*
@@ -556,10 +620,15 @@ FS_FOpenFile
 int FS_FOpenFile (const char *filename, FILE **file)
 {
 	char netpath[MAX_OSPATH];
-	qboolean found;
+	qboolean found = false;
 	int length = -1;
 
-	found = FS_FullPath( netpath, sizeof(netpath), filename );
+	//For windows, check appData first for config files
+	if(is_cfg(filename))
+		found = FS_APPDATA( netpath, sizeof(netpath), filename );
+
+	if(!found)
+		found = FS_FullPath( netpath, sizeof(netpath), filename );
 	if ( found )
 	{
 		*file = fopen( netpath, "rb" );

@@ -1524,7 +1524,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 
 	p->type = PARTICLE_STANDARD;
 	p->image = r_bflashtexture;
-	p->scale = 10 + (rand()&4);
+	p->scale = 7 + (rand()&3);
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	for (j=0 ; j<3 ; j++)
@@ -1534,7 +1534,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	}
 	p->accel[0] = p->accel[1] = 0;
 	p->accel[2] = 0;
-	p->alpha = 0.8;
+	p->alpha = 0.7;
 	p->color = 0xd9; //(255 255 167)
 	p->alphavel = -100.0f;
 

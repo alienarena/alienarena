@@ -443,6 +443,29 @@ void Cmd_Exec_f (void)
 	FS_FreeFile (f);
 }
 
+void Cmd_Exec_f_APPDATA (void)
+{
+	char	*f;
+	int		len;
+
+	if (Cmd_Argc () != 2)
+	{
+		Com_Printf ("exec <filename> : execute a script file\n");
+		return;
+	}
+
+	len = FS_LoadFile (Cmd_Argv(1), (void **)&f);
+	if (!f)
+	{
+		Com_Printf ("Could not exec %s\n",Cmd_Argv(1));
+		return;
+	}
+	Com_Printf ("execing %s\n",Cmd_Argv(1));
+
+	Cbuf_InsertText(f); /* FS_LoadFile nul-terminates the buffer */
+	FS_FreeFile (f);
+}
+
 
 /*
 ===============
