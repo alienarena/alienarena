@@ -20,7 +20,7 @@ namespace Alien_Arena_Account_Server_Manager
             Profile.TotalTime = 0.0f;
             Profile.Status = "Inactive";
 
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -82,7 +82,7 @@ namespace Alien_Arena_Account_Server_Manager
             Profile.TotalTime = 0.0f;
             Profile.Status = "Inactive";
 
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -129,7 +129,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void AddProfile(string Name, string Password, string Location)
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -170,7 +170,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void SetPlayerStatus(string Name, string Status)
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -205,7 +205,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void ChangePlayerPassword(string Name, string NewPassword)
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -240,7 +240,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void UpdatePlayer(string Name, string Points, string TotalFrags, string TotalTime)
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -277,7 +277,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void GenerateRankingsList()
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -344,7 +344,7 @@ namespace Alien_Arena_Account_Server_Manager
             Profile.TotalTime = 0.0f;
             Profile.Status = "Inactive";
 
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -403,7 +403,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void ClearAllStats()
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {
@@ -436,7 +436,7 @@ namespace Alien_Arena_Account_Server_Manager
 
         public static void ResetPlayer(string Name)
         {
-            SqlConnection sqlConn = new SqlConnection("Server=MERCURY\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
+            SqlConnection sqlConn = new SqlConnection("Server=SASHA\\SQLEXPRESS; Database = AAPlayers; Trusted_Connection = true");
 
             try
             {

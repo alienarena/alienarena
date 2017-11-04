@@ -1096,7 +1096,13 @@ static FILE* newsfile_open( const char* mode )
 	FILE* file;
 	char pathbfr[MAX_OSPATH];
 
+#if defined WIN32_VARIANT
+	char *appData = getenv("AppData");
+	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/AAWoM/%s", appData, "newsfeed.db");
+#else
 	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/%s", FS_Gamedir(), "newsfeed.db");
+#endif
+
 	file = fopen( pathbfr, mode );
 
 	return file;

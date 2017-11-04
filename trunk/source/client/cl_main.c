@@ -2200,7 +2200,12 @@ void CL_WriteConfiguration (void)
 	if (cls.state == ca_uninitialized)
 		return;
 
+#if defined WIN32_VARIANT
+	FS_WriteAPPDATA( path, sizeof(path), "config.cfg");
+#else
 	FS_FullWritePath( path, sizeof(path), "config.cfg");
+#endif	
+
 	f = fopen (path, "w");
 	if (!f)
 	{
@@ -2233,7 +2238,12 @@ void CL_WriteProfile (void)
 	if(!currLoginState.hashed)
 		return; //We don't ever want to write out non-hashed passwords, period!
 
+#if defined WIN32_VARIANT
+	FS_WriteAPPDATA( path, sizeof(path), "profile.cfg");
+#else
 	FS_FullWritePath( path, sizeof(path), "profile.cfg");
+#endif	
+
 	f = fopen (path, "w");
 	if (!f)
 	{
