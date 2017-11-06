@@ -33,6 +33,7 @@ nobase_dist_botinfo_DATA = \
 	sample.cfg \
 	allbots.tmp \
 	team.tmp \
+	dm-annihilation.tmp \
 	dm-babel.tmp \
 	dm-bloodfactory.tmp \
 	dm-crucible.tmp \
@@ -41,6 +42,7 @@ nobase_dist_botinfo_DATA = \
 	dm-dynamo.tmp \
 	dm-extermination.tmp \
 	dm-gauntlet.tmp \
+	dm-leviathan.tmp \
 	dm-neptune.tmp \
 	dm-purgatory.tmp \
 	dm-turbo.tmp \
@@ -48,11 +50,13 @@ nobase_dist_botinfo_DATA = \
 	dm-wasteland.tmp \
 	tac-extermination.tmp \
 	tac-impact.tmp \
+	nav/ctf-abyss.nod \
 	nav/ctf-cryogenic.nod \
 	nav/ctf-extermination.nod \
 	nav/ctf-frost.nod \
 	nav/ctf-violator.nod \
 	nav/ctf-zion.nod \
+	nav/dm-annihilation.nod \
 	nav/dm-babel.nod \
 	nav/dm-bloodfactory.nod \
 	nav/dm-crucible.nod \
@@ -61,6 +65,7 @@ nobase_dist_botinfo_DATA = \
 	nav/dm-dynamo.nod \
 	nav/dm-extermination.nod \
 	nav/dm-gauntlet.nod \
+	nav/dm-leviathan.nod \
 	nav/dm-neptune.nod \
 	nav/dm-purgatory.nod \
 	nav/dm-turbo.nod \

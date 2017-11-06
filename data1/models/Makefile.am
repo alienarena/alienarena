@@ -125,6 +125,8 @@ nobase_dist_models_DATA = \
 	objects/blank/tris.iqm \
 	objects/blank/tris.skin \
 	objects/brass/skin.jpg \
+	objects/brass/tris.iqm \
+	objects/brass/tris.skin \
 	objects/debris1/skin.tga \
 	objects/debris1/tris.iqm \
 	objects/debris1/tris.skin \

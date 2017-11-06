@@ -1013,6 +1013,11 @@ nobase_dist_textures_DATA = \
 	common/weapclip.tga \
 	common/white.tga \
 	cr3blankclear.wal \
+	ctf-abyss/canyon1.tga \
+	ctf-abyss/canyon1_blendtex.tga \
+	ctf-abyss/canyon1_blendtex2.tga \
+	ctf-abyss/canyon1_lightmaptex.tga \
+	ctf-abyss/canyon1_vegetation.tga \
 	ctf-extermination/rubble1.tga \
 	ctf-extermination/rubble1_blendtex.tga \
 	ctf-extermination/rubble1_lightmaptex.tga \
@@ -1211,6 +1216,13 @@ nobase_dist_textures_DATA = \
 	desert/woodwall3_nm.tga \
 	desert/woodwall4.tga \
 	desert/woodwall4_nm.tga \
+	dm-annihilation/rubble1.tga \
+	dm-annihilation/rubble1_blendtex.tga \
+	dm-annihilation/rubble1_lightmaptex.tga \
+	dm-annihilation/rubble1_vegetation.tga \
+	dm-annihilation/rubble2.tga \
+	dm-annihilation/rubble2_blendtex.tga \
+	dm-annihilation/rubble2_lightmaptex.tga \
 	dm-babel/lavarock1.tga \
 	dm-babel/lavarock1_blendtex.tga \
 	dm-babel/lavarock1_lightmaptex.tga \
@@ -1253,6 +1265,11 @@ nobase_dist_textures_DATA = \
 	dm-gauntlet/bottom.tga \
 	dm-gauntlet/bottom_blendtex.tga \
 	dm-gauntlet/bottom_lightmaptex.tga \
+	dm-leviathan/canyon1.tga \
+	dm-leviathan/canyon1_blendtex.tga \
+	dm-leviathan/canyon1_blendtex2.tga \
+	dm-leviathan/canyon1_lightmaptex.tga \
+	dm-leviathan/canyon1_vegetation.tga \
 	dm-neptune/cave1.tga \
 	dm-neptune/cave1_blendtex.tga \
 	dm-neptune/cave1_lightmaptex.tga \

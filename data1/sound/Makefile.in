@@ -312,9 +312,23 @@ nobase_dist_sound_DATA = \
 	music/adrenaline.ogg \
 	music/cp-ribeye.ogg \
 	music/Divinity_Alien_Swarm.ogg \
+	music/Divinity_Angry.ogg \
+	music/Divinity_Deep.ogg \
+	music/Divinity_Hunted.ogg \
+	music/Divinity_Massive.ogg \
+	music/Divinity_Mystery.ogg \
+	music/Divinity_Ominous.ogg \
+	music/Divinity_Poison.ogg \
+	music/Divinity_Shattering.ogg \
+	music/Divinity_Special.ogg \
+	music/Divinity_compression.ogg \
 	music/Divinity_lack_of_success.ogg \
+	music/Divinity_menace.ogg \
 	music/Divinity_misunderstood.ogg \
+	music/Divinity_morphing.ogg \
 	music/Divinity_never_ending.ogg \
+	music/Divinity_powerful.ogg \
+	music/Divinity_redress.ogg \
 	music/dm-annihilation.ogg \
 	music/dm-deathray.ogg \
 	music/dm-deimos.ogg \

@@ -8,11 +8,13 @@ nobase_dist_scripts_DATA = \
 	caustics.rscript \
 	consoles.rscript \
 	interactive/textures.rscript \
+	maps/ctf-abyss.rscript \
 	maps/ctf-cryogenic.rscript \
 	maps/ctf-extermination.rscript \
 	maps/ctf-frost.rscript \
 	maps/ctf-violator.rscript \
 	maps/ctf-zion.rscript \
+	maps/dm-annihilation.rscript \
 	maps/dm-babel.rscript \
 	maps/dm-bloodfactory.rscript \
 	maps/dm-crucible.rscript \
@@ -21,6 +23,7 @@ nobase_dist_scripts_DATA = \
 	maps/dm-dynamo.rscript \
 	maps/dm-extermination.rscript \
 	maps/dm-gauntlet.rscript \
+	maps/dm-leviathan.rscript \
 	maps/dm-neptune.rscript \
 	maps/dm-purgatory.rscript \
 	maps/dm-turbo.rscript \
