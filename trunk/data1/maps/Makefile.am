@@ -210,7 +210,7 @@ nobase_dist_maps_DATA = \
 	meshes/desert/tumbleweed.skin \
 	meshes/desert/tumbleweed.tga \
 	meshes/desert/tumbleweed_normal.jpg \
-	meshes/dm-annihilation/blood0.decal
+	meshes/dm-annihilation/blood0.decal \
 	meshes/dm-annihilation/blood1.decal \
 	meshes/dm-annihilation/blood2.decal \
 	meshes/dm-annihilation/blood3.decal \
@@ -581,14 +581,11 @@ nobase_dist_maps_DATA = \
 	meshes/tac-impact/rubble1.terrainr \
 	meshes/tac-impact/rubble1.terrainx \
 	meshes/tac-impact/rubble2.terrain \
-	meshes/tac-impact/rubble2.terrain \
 	meshes/tac-impact/rubble2.terrainr \
 	meshes/tac-impact/rubble2.terrainx \
 	meshes/tac-impact/rubble3.terrain \
-	meshes/tac-impact/rubble3.terrain \
 	meshes/tac-impact/rubble3.terrainr \
 	meshes/tac-impact/rubble3.terrainx \
-	meshes/tac-impact/rubble4.terrain \
 	meshes/tac-impact/rubble4.terrain \
 	meshes/tac-impact/rubble4.terrainr \
 	meshes/tac-impact/rubble4.terrainx \
@@ -873,67 +870,6 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.jpg \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
-	meshes/ctf-extermination/rubble1.terrainr \
-	meshes/ctf-extermination/rubble2.terrainr \
-	meshes/ctf-extermination/rubble3.terrainr \
-	meshes/ctf-extermination/rubble4.terrainr \
-	meshes/ctf-frost/canyon1.terrainr \
-	meshes/ctf-frost/snow1.terrainr \
-	meshes/dm-babel/lavarock1.terrainr \
-	meshes/dm-bloodfactory/rubble1.terrainr \
-	meshes/dm-bloodfactory/rubble2.terrainr \
-	meshes/dm-crucible/ground1.terrainr \
-	meshes/dm-crucible/ground2.terrainr \
-	meshes/dm-crucible/ground3.terrainr \
-	meshes/dm-dismal/rubble1.terrainr \
-	meshes/dm-dismal/snow1.terrainr \
-	meshes/dm-extermination/rubble1.terrainr \
-	meshes/dm-extermination/rubble2.terrainr \
-	meshes/dm-extermination/rubble3.terrainr \
-	meshes/dm-gauntlet/bottom.terrainr \
-	meshes/dm-neptune/cave1.terrainr \
-	meshes/dm-neptune/cave2.terrainr \
-	meshes/dm-neptune/cave3.terrainr \
-	meshes/dm-neptune/cave4.terrainr \
-	meshes/dm-purgatory/bottom.terrainr \
-	meshes/dm-purgatory/bottom2.terrainr \
-	meshes/dm-purgatory/bottom3.terrainr \
-	meshes/dm-turbo/rubble1.terrainr \
-	meshes/dm-wasteland/canyon1.terrainr \
-	meshes/tac-impact/rubble1.terrainr \
-	meshes/tac-impact/rubble2.terrainr \
-	meshes/tac-impact/rubble3.terrainr \
-	meshes/tac-impact/rubble4.terrainr \
-	meshes/ctf-extermination/rubble1.terrainx \
-	meshes/ctf-extermination/rubble2.terrainx \
-	meshes/ctf-extermination/rubble3.terrainx \
-	meshes/ctf-extermination/rubble4.terrainx \
-	meshes/ctf-frost/canyon1.terrainx \
-	meshes/ctf-frost/snow1.terrainx \
-	meshes/dm-babel/lavarock1.terrainx \
-	meshes/dm-bloodfactory/rubble1.terrainx \
-	meshes/dm-bloodfactory/rubble2.terrainx \
-	meshes/dm-crucible/ground2.terrainx \
-	meshes/dm-crucible/ground3.terrainx \
-	meshes/dm-dismal/rubble1.terrainx \
-	meshes/dm-dismal/snow1.terrainx \
-	meshes/dm-extermination/rubble1.terrainx \
-	meshes/dm-extermination/rubble2.terrainx \
-	meshes/dm-extermination/rubble3.terrainx \
-	meshes/dm-gauntlet/bottom.terrainx \
-	meshes/dm-neptune/cave1.terrainx \
-	meshes/dm-neptune/cave2.terrainx \
-	meshes/dm-neptune/cave3.terrainx \
-	meshes/dm-neptune/cave4.terrainx \
-	meshes/dm-purgatory/bottom.terrainx \
-	meshes/dm-purgatory/bottom2.terrainx \
-	meshes/dm-purgatory/bottom3.terrainx \
-	meshes/dm-turbo/rubble1.terrainx \
-	meshes/dm-wasteland/canyon1.terrainx \
-	meshes/tac-impact/rubble1.terrainx \
-	meshes/tac-impact/rubble2.terrainx \
-	meshes/tac-impact/rubble3.terrainx \
-	meshes/tac-impact/rubble4.terrainx \
 	scripts/ctf-cryogenic.fog \
 	scripts/ctf-cryogenic.mus \
 	scripts/ctf-extermination.fog \
