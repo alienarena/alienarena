@@ -5,6 +5,9 @@
 levelshotsdir=$(pkgdatadir)/data1/levelshots
 
 nobase_dist_levelshots_DATA = \
+	ctf-abyss.jpg \
+	ctf-abyss_p.tga \
+	ctf-abyss.txt \
 	ctf-cryogenic.jpg \
 	ctf-cryogenic.txt \
 	ctf-cryogenic_p.tga \
@@ -20,6 +23,9 @@ nobase_dist_levelshots_DATA = \
 	ctf-zion.jpg \
 	ctf-zion.txt \
 	ctf-zion_p.tga \
+	dm-annihilation.jpg \
+	dm-annihilation_p.tga \
+	dm-annihilation.txt \
 	dm-babel.jpg \
 	dm-babel.txt \
 	dm-babel_p.tga \
@@ -44,6 +50,9 @@ nobase_dist_levelshots_DATA = \
 	dm-gauntlet.jpg \
 	dm-gauntlet.txt \
 	dm-gauntlet_p.tga \
+	dm-leviathan.jpg \
+	dm-leviathan_p.tga \
+	dm-leviathan.txt \
 	dm-neptune.jpg \
 	dm-neptune.txt \
 	dm-neptune_p.tga \

@@ -33,6 +33,7 @@ nobase_dist_maps_DATA = \
 	decals/snow3.decal \
 	decals/stonearch1.decal \
 	decals/stonearch2.decal \
+	dm-annihilation.lightmap \
 	dm-babel.bsp \
 	dm-babel.lightmap \
 	dm-bloodfactory.bsp \
@@ -454,9 +455,11 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/meat1.skin \
 	meshes/gothic/meat2.iqm \
 	meshes/gothic/meat2.skin \
-	meshes/greenblob_fx.tga \
+	meshes/greenblob.iqm \
 	meshes/greenblob.jpg \
 	meshes/greenblob.md2 \
+	meshes/greenblob.skin \
+	meshes/greenblob_fx.tga \
 	meshes/hanger.md2 \
 	meshes/hanger_normal.jpg \
 	meshes/hanger.tga \
@@ -507,9 +510,11 @@ nobase_dist_maps_DATA = \
 	meshes/railcar.md2 \
 	meshes/railcarmhelmet.md2 \
 	meshes/railcar_normal.jpg \
-	meshes/redblob_fx.tga \
+	meshes/redblob.iqm \
 	meshes/redblob.jpg \
 	meshes/redblob.md2 \
+	meshes/redblob.skin \
+	meshes/redblob_fx.tga \
 	meshes/redblob_normal.jpg \
 	meshes/ribtube1.md2 \
 	meshes/ribtube2.md2 \
@@ -693,7 +698,9 @@ nobase_dist_maps_DATA = \
 	meshes/tech/slimegenred.jpg \
 	meshes/tech/slimegenred.md2 \
 	meshes/tech/slimegenred_fx.tga \
+	meshes/tech/slimetube1.iqm \
 	meshes/tech/slimetube1.md2 \
+	meshes/tech/slimetube1.skin \
 	meshes/tech/slimetube2.md2 \
 	meshes/tech/turbinefan.jpg \
 	meshes/tech/turbinefan.md2 \
@@ -870,6 +877,8 @@ nobase_dist_maps_DATA = \
 	meshes/xempx/tripes1.jpg \
 	meshes/xempx/tripes1.md2 \
 	meshes/xempx/tripes1_normal.jpg \
+	scripts/ctf-abyss.fog \
+	scripts/ctf-abyss.mus \
 	scripts/ctf-cryogenic.fog \
 	scripts/ctf-cryogenic.mus \
 	scripts/ctf-extermination.fog \
@@ -880,6 +889,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-violator.mus \
 	scripts/ctf-zion.fog \
 	scripts/ctf-zion.mus \
+	scripts/dm-annihilation.fog \
+	scripts/dm-annihilation.mus \
 	scripts/dm-babel.fog \
 	scripts/dm-babel.mus \
 	scripts/dm-bloodfactory.fog \
@@ -896,6 +907,8 @@ nobase_dist_maps_DATA = \
 	scripts/dm-extermination.mus \
 	scripts/dm-gauntlet.fog \
 	scripts/dm-gauntlet.mus \
+	scripts/dm-leviathan.fog \
+	scripts/dm-leviathan.mus \
 	scripts/dm-neptune.fog \
 	scripts/dm-neptune.mus \
 	scripts/dm-purgatory.fog \
