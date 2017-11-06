@@ -1132,9 +1132,6 @@ rserr_t GLimp_SetMode (unsigned *pwidth, unsigned *pheight, int mode, windowmode
 
 	RS_ScanPathForScripts();		// load all found scripts
 
-	/* re-acquire keyboard and mouse */
-	install_grabs();
-
 	return rserr_ok;
 }
 
