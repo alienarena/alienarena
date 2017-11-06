@@ -101,18 +101,37 @@ nobase_dist_maps_DATA = \
 	meshes/controls.tga \
 	meshes/controls_fx.tga \
 	meshes/controls_normal.jpg \
+	meshes/ctf-abyss/blood1.decal \
+	meshes/ctf-abyss/blood2.decal \
+	meshes/ctf-abyss/canyon1.terrain \
+	meshes/ctf-abyss/canyon1.terrainr \
+	meshes/ctf-abyss/canyon1.terrainx \
+	meshes/ctf-abyss/rocks1.decal \
+	meshes/ctf-abyss/rocks2.decal \
 	meshes/ctf-extermination/blood0.decal \
 	meshes/ctf-extermination/blood1.decal \
 	meshes/ctf-extermination/blood2.decal \
 	meshes/ctf-extermination/blood3.decal \
 	meshes/ctf-extermination/rubble1.terrain \
+	meshes/ctf-extermination/rubble1.terrainr \
+	meshes/ctf-extermination/rubble1.terrainx \
 	meshes/ctf-extermination/rubble2.terrain \
+	meshes/ctf-extermination/rubble2.terrainr \
+	meshes/ctf-extermination/rubble2.terrainx \
 	meshes/ctf-extermination/rubble3.terrain \
+	meshes/ctf-extermination/rubble3.terrainr \
+	meshes/ctf-extermination/rubble3.terrainx \
 	meshes/ctf-extermination/rubble4.terrain \
+	meshes/ctf-extermination/rubble4.terrainr \
+	meshes/ctf-extermination/rubble4.terrainx \
 	meshes/ctf-frost/canyon1.terrain \
+	meshes/ctf-frost/canyon1.terrainr \
+	meshes/ctf-frost/canyon1.terrainx \
 	meshes/ctf-frost/ice1.decal \
 	meshes/ctf-frost/ice2.decal \
 	meshes/ctf-frost/snow1.terrain \
+	meshes/ctf-frost/snow1.terrainr \
+	meshes/ctf-frost/snow1.terrainx \
 	meshes/desert/barrel.jpg \
 	meshes/desert/barrel.md2 \
 	meshes/desert/barrel_normal.jpg \
@@ -191,20 +210,42 @@ nobase_dist_maps_DATA = \
 	meshes/desert/tumbleweed.skin \
 	meshes/desert/tumbleweed.tga \
 	meshes/desert/tumbleweed_normal.jpg \
+	meshes/dm-annihilation/blood0.decal
+	meshes/dm-annihilation/blood1.decal \
+	meshes/dm-annihilation/blood2.decal \
+	meshes/dm-annihilation/blood3.decal \
+	meshes/dm-annihilation/rubble1.terrain \
+	meshes/dm-annihilation/rubble1.terrainr \
+	meshes/dm-annihilation/rubble1.terrainx \
+	meshes/dm-annihilation/rubble2.terrain \
+	meshes/dm-annihilation/rubble2.terrainr \
+	meshes/dm-annihilation/rubble2.terrainx \
 	meshes/dm-babel/blood0.decal \
 	meshes/dm-babel/blood1.decal \
 	meshes/dm-babel/blood2.decal \
 	meshes/dm-babel/blood3.decal \
 	meshes/dm-babel/lavarock1.terrain \
+	meshes/dm-babel/lavarock1.terrainr \
+	meshes/dm-babel/lavarock1.terrainx \
 	meshes/dm-bloodfactory/blood0.decal \
 	meshes/dm-bloodfactory/blood1.decal \
 	meshes/dm-bloodfactory/blood2.decal \
 	meshes/dm-bloodfactory/blood3.decal \
 	meshes/dm-bloodfactory/rubble1.terrain \
+	meshes/dm-bloodfactory/rubble1.terrainr \
+	meshes/dm-bloodfactory/rubble1.terrainx \
 	meshes/dm-bloodfactory/rubble2.terrain \
+	meshes/dm-bloodfactory/rubble2.terrainr \
+	meshes/dm-bloodfactory/rubble2.terrainx \
 	meshes/dm-crucible/ground1.terrain \
+	meshes/dm-crucible/ground1.terrainr \
+	meshes/dm-crucible/ground1.terrainx \
 	meshes/dm-crucible/ground2.terrain \
+	meshes/dm-crucible/ground2.terrainr \
+	meshes/dm-crucible/ground2.terrainx \
 	meshes/dm-crucible/ground3.terrain \
+	meshes/dm-crucible/ground3.terrainr \
+	meshes/dm-crucible/ground3.terrainx \
 	meshes/dm-deathray/blood0.decal \
 	meshes/dm-deathray/blood1.decal \
 	meshes/dm-deathray/blood2.decal \
@@ -216,8 +257,12 @@ nobase_dist_maps_DATA = \
 	meshes/dm-dismal/blood2.decal \
 	meshes/dm-dismal/blood3.decal \
 	meshes/dm-dismal/rubble1.terrain \
+	meshes/dm-dismal/rubble1.terrainr \
+	meshes/dm-dismal/rubble1.terrainx \
 	meshes/dm-dismal/slime0.decal \
 	meshes/dm-dismal/snow1.terrain \
+	meshes/dm-dismal/snow1.terrainr \
+	meshes/dm-dismal/snow1.terrainx \
 	meshes/dm-dynamo/blood0.decal \
 	meshes/dm-dynamo/blood1.decal \
 	meshes/dm-dynamo/blood2.decal \
@@ -230,31 +275,60 @@ nobase_dist_maps_DATA = \
 	meshes/dm-extermination/rubble1.terrain \
 	meshes/dm-extermination/rubble2.terrain \
 	meshes/dm-extermination/rubble3.terrain \
+	meshes/dm-extermination/rubble1.terrainr \
+	meshes/dm-extermination/rubble1.terrainx \
+	meshes/dm-extermination/rubble2.terrainr \
+	meshes/dm-extermination/rubble2.terrainx \
+	meshes/dm-extermination/rubble3.terrainr \
+	meshes/dm-extermination/rubble3.terrainx \
 	meshes/dm-gauntlet/blood0.decal \
 	meshes/dm-gauntlet/blood1.decal \
 	meshes/dm-gauntlet/bottom.terrain \
+	meshes/dm-gauntlet/bottom.terrainr \
+	meshes/dm-gauntlet/bottom.terrainx \
 	meshes/dm-gauntlet/slime0.decal \
+	meshes/dm-leviathan/canyon1.terrain \
+	meshes/dm-leviathan/canyon1.terrainr \
+	meshes/dm-leviathan/canyon1.terrainx \
 	meshes/dm-neptune/blood0.decal \
 	meshes/dm-neptune/blood1.decal \
 	meshes/dm-neptune/blood2.decal \
 	meshes/dm-neptune/blood3.decal \
 	meshes/dm-neptune/cave1.terrain \
+	meshes/dm-neptune/cave1.terrainr \
+	meshes/dm-neptune/cave1.terrainx \
 	meshes/dm-neptune/cave2.terrain \
+	meshes/dm-neptune/cave2.terrainr \
+	meshes/dm-neptune/cave2.terrainx \
 	meshes/dm-neptune/cave3.terrain \
+	meshes/dm-neptune/cave3.terrainr \
+	meshes/dm-neptune/cave3.terrainx \
 	meshes/dm-neptune/cave4.terrain \
+	meshes/dm-neptune/cave4.terrainr \
+	meshes/dm-neptune/cave4.terrainx \
 	meshes/dm-neptune/shark.iqm \
 	meshes/dm-neptune/shark.jpg \
 	meshes/dm-neptune/shark.skin \
 	meshes/dm-neptune/shark_normal.jpg \
 	meshes/dm-purgatory/bottom.terrain \
+	meshes/dm-purgatory/bottom.terrainr \
+	meshes/dm-purgatory/bottom.terrainx \
 	meshes/dm-purgatory/bottom2.terrain \
+	meshes/dm-purgatory/bottom2.terrainr \
+	meshes/dm-purgatory/bottom2.terrainx \
 	meshes/dm-purgatory/bottom3.terrain \
+	meshes/dm-purgatory/bottom3.terrainr \
+	meshes/dm-purgatory/bottom3.terrainx \
 	meshes/dm-turbo/blood.decal \
 	meshes/dm-turbo/blood2.decal \
 	meshes/dm-turbo/rubble1.terrain \
+	meshes/dm-turbo/rubble1.terrainr \
+	meshes/dm-turbo/rubble1.terrainx \
 	meshes/dm-violator/blood1.decal \
 	meshes/dm-wasteland/blood_splatter3.decal \
 	meshes/dm-wasteland/canyon1.terrain \
+	meshes/dm-wasteland/canyon1.terrainr \
+	meshes/dm-wasteland/canyon1.terrainx \
 	meshes/dm-wasteland/ivy1.decal \
 	meshes/dm-wasteland/mud1.decal \
 	meshes/dm-wasteland/mud2.decal \
@@ -504,9 +578,20 @@ nobase_dist_maps_DATA = \
 	meshes/tac-impact/blood2.decal \
 	meshes/tac-impact/blood3.decal \
 	meshes/tac-impact/rubble1.terrain \
+	meshes/tac-impact/rubble1.terrainr \
+	meshes/tac-impact/rubble1.terrainx \
 	meshes/tac-impact/rubble2.terrain \
+	meshes/tac-impact/rubble2.terrain \
+	meshes/tac-impact/rubble2.terrainr \
+	meshes/tac-impact/rubble2.terrainx \
 	meshes/tac-impact/rubble3.terrain \
+	meshes/tac-impact/rubble3.terrain \
+	meshes/tac-impact/rubble3.terrainr \
+	meshes/tac-impact/rubble3.terrainx \
 	meshes/tac-impact/rubble4.terrain \
+	meshes/tac-impact/rubble4.terrain \
+	meshes/tac-impact/rubble4.terrainr \
+	meshes/tac-impact/rubble4.terrainx \
 	meshes/tech/bigribtube.jpg \
 	meshes/tech/bigribtube_normal.jpg \
 	meshes/tech/biotubebase.jpg \
