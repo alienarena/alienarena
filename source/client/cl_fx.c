@@ -794,7 +794,7 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 			dir[i] -= frand()/10.0;
 	}
 		
-	scale = frand()*8.0f;
+	scale = frand()*2.0f;
 	
 	if (!(p = new_particle()))
 		return;
@@ -804,7 +804,7 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 10.0f + scale;
+	p->scale = 3.0f + scale;
 	p->scalevel = 55.0f;
 
 	for (j=0 ; j<3 ; j++)
@@ -820,6 +820,10 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 
 	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
 
+	addParticleLight (p,
+						p->scale*60.0f, 0,
+					.2, .2, 0.05);
+
 	if (!(p = new_particle()))
 		return;
 
@@ -828,7 +832,31 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 7.0f + scale/2.0;
+	p->scale = 2.0f + scale/2.0;
+	p->scalevel = 20.0f;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = 75.0f * dir[j];
+	}
+
+	p->accel[0] = 60*dir[0];
+	p->accel[1] = 60*dir[1];
+	p->accel[2] = ((float)PARTICLE_GRAVITY) / (4.5f);
+	p->alpha = .5;
+
+	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
+
+	if (!(p = new_particle()))
+		return;
+
+	p->color = 0x74 + (rand()&7);
+	p->type = PARTICLE_STANDARD;
+	p->image = r_fireballtexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 2.0f + scale/2.0;
 	p->scalevel = 20.0f;
 
 	for (j=0 ; j<3 ; j++)
@@ -852,7 +880,7 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 3.5f + scale/3.0;
+	p->scale = 1.25f + scale/3.0;
 	p->scalevel = 10;
 
 	for (j=0 ; j<3 ; j++)
@@ -876,7 +904,31 @@ void CL_FlameThrower (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 3.5f + scale/3.0;
+	p->scale = 1.25f + scale/3.0;
+	p->scalevel = 10;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = 20.0f * dir[j];
+	}
+
+	p->accel[0] = 20*dir[0];
+	p->accel[1] = 20*dir[1];
+	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
+	p->alpha = .5;
+
+	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
+
+	if (!(p = new_particle()))
+		return;
+
+	p->color = 15 + (rand()&2);
+	p->type = PARTICLE_STANDARD;
+	p->image = r_fireballtexture;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 1.25f + scale/3.0;
 	p->scalevel = 10;
 
 	for (j=0 ; j<3 ; j++)
@@ -907,7 +959,7 @@ void CL_JetExhaust (vec3_t org, vec3_t dir)
 			dir[i] -= frand()/10.0;
 	}
 		
-	scale = frand()*4.0f;
+	scale = frand();
 	
 	if (!(p = new_particle()))
 		return;
@@ -917,7 +969,7 @@ void CL_JetExhaust (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 5.0f + scale;
+	p->scale = 3.0f + scale;
 	p->scalevel = 25.0f;
 
 	for (j=0 ; j<3 ; j++)
@@ -941,7 +993,7 @@ void CL_JetExhaust (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 3.5f + scale/2.0;
+	p->scale = 1.25f + scale/2.0;
 	p->scalevel = 10.0f;
 
 	for (j=0 ; j<3 ; j++)
@@ -965,7 +1017,7 @@ void CL_JetExhaust (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 1.75f + scale/3.0;
+	p->scale = 0.5f + scale/3.0;
 	p->scalevel = 5;
 
 	for (j=0 ; j<3 ; j++)
@@ -989,7 +1041,7 @@ void CL_JetExhaust (vec3_t org, vec3_t dir)
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 1.75f + scale/3.0;
+	p->scale = 0.5f + scale/3.0;
 	p->scalevel = 5;
 
 	for (j=0 ; j<3 ; j++)
@@ -1302,7 +1354,7 @@ void CL_ExplosionParticles (vec3_t org)
 			p->type = PARTICLE_STANDARD;
 			p->accel[0] = p->accel[1] = p->accel[2] = 0;
 			p->alpha = 0.2;
-			p->scale = 6;
+			p->scale = 10;
 			p->scalevel = 52;
 			p->color = 0xd9 + (rand()&7); //(255 255-171 167-7)
 
@@ -1346,10 +1398,10 @@ void CL_ExplosionParticles (vec3_t org)
 					p->image = r_explosion1texture;
 					break;
 			}
-			if (p && i < 4)
+			if (p && i < 3)
 				addParticleLight (p,
 						p->scale*50.0f*ifl, 0,
-					.4, .4, 0.1);
+					.1, .1, 0.025);
 		}
 	}
 
