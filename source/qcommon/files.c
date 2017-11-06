@@ -136,7 +136,7 @@ they shouldn't.
  * fs_gamedirvar is the cvar holding the subdirectory name
  *   for the currently running game.
  */
-char fs_gamedir[64];
+char fs_gamedir[MAX_OSPATH - MAX_QPATH];
 cvar_t *fs_gamedirvar;
 
 /* This is the default for the user data subdirectory.
