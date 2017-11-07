@@ -852,6 +852,14 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			CL_MuzzleFlashParticle(ent.origin, ent.angles, false);
 		}
+		else if (effects & EF_GREENMZF) 
+		{
+			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0xd4, false);
+		}
+		else if (effects & EF_BLUEMZF) 
+		{
+			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0x74, false);
+		}
 
 		//Ctf flag particle effects
 		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
@@ -1159,15 +1167,14 @@ void CL_AddPacketEntities (frame_t *frame)
 			{
 				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 			}
-
 			else if (effects & EF_PLASMA)
 			{
-				CL_BlasterBall (cent->lerp_origin, ent.origin);
-				V_AddLight (ent.origin, 200, 0, 1, 1);
+				CL_BlasterTrail (cent->lerp_origin, ent.origin, 0x72);
+				V_AddLight (ent.origin, 200, 0, .3, .5);
 			}
 			else if (effects & EF_BLASTER)
 			{
-				CL_BlasterTrail(cent->lerp_origin, ent.origin, cent);
+				CL_BlasterTrail (cent->lerp_origin, ent.origin, 0xd0);
 				V_AddLight (ent.origin, 200, 0, .5, .1);
 			}
 		}
@@ -1345,10 +1352,27 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			useFX = true;
 		}
 	}
+	else if(!(strcmp("models/weapons/v_alienblast/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame == 6) 
+		{
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0xd4, true);
+			useFX = true;
+		}
+	}
 	else if(!(strcmp("models/weapons/v_blast/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame == 6) 
 		{
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0x74, true);
+			useFX = true;
+		}
+	}
+	else if(!(strcmp("models/weapons/v_violator/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame == 6 || gun.frame == 8 || gun.frame == 10 || gun.frame == 12) 
+		{
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0x74, true);
 			useFX = true;
 		}
 	}

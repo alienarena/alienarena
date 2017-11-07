@@ -64,6 +64,7 @@ image_t		*r_sayicontexture;
 image_t		*r_flaretexture;
 image_t		*r_flagtexture;
 image_t		*r_logotexture;
+image_t		*r_beamstart;
 image_t		*r_beamtexture;
 image_t		*r_beam2texture;
 image_t		*r_beam3texture;
@@ -268,6 +269,10 @@ void R_InitParticleTexture (void)
 	r_logotexture = R_RegisterParticlePic("logo");
 	if (!r_logotexture) {
 		r_logotexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_beamstart = R_RegisterParticlePic("beamstart");
+	if (!r_beamstart) {
+		r_beamstart = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_beamtexture = R_RegisterGfxPic("glightning");
 	if (!r_beamtexture) {

@@ -441,11 +441,8 @@ void CL_ClearClEntities(void);
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
 
-void CL_BlasterBall (vec3_t start, vec3_t end);
 void CL_DisruptorBeam (vec3_t start, vec3_t end);
-void CL_LaserBeam (vec3_t start, vec3_t end);
-void CL_BlasterBeam (vec3_t start, vec3_t end);
-void CL_RedBlasterBeam (vec3_t start, vec3_t end);
+void CL_LaserBeam (vec3_t start, vec3_t end, float color, qboolean use_start);
 void CL_VaporizerBeam (vec3_t start, vec3_t end);
 void CL_BubbleTrail (vec3_t start, vec3_t end);
 void CL_NewLightning (vec3_t start, vec3_t end);
@@ -459,7 +456,7 @@ void CL_TeleportParticles (vec3_t org);
 void CL_BlasterParticles (vec3_t org, vec3_t dir);
 void CL_ExplosionParticles (vec3_t org);
 void CL_MuzzleParticles (vec3_t org);
-void CL_BlasterMuzzleParticles (vec3_t org, float color);
+void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean from_client);
 void CL_SmartMuzzle (vec3_t org);
 void CL_Voltage(vec3_t org);
 particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous);
@@ -515,7 +512,6 @@ void IN_Accumulate (void);
 
 void CL_ParseLayout (void);
 
-
 //
 // cl_main
 //
@@ -529,6 +525,7 @@ void CL_Disconnect_f (void);
 void CL_GetChallengePacket (void);
 void CL_PingServers_f (void);
 void CL_Snd_Restart_f (void);
+void CL_Precache_f (void);
 void CL_RequestNextDownload (void);
 
 //
@@ -707,7 +704,7 @@ trace_t CL_PMSurfaceTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, i
 cdlight_t *CL_AllocDlight (int key);
 void CL_BigTeleportParticles (vec3_t org);
 void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old);
-void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old);
+void CL_BlasterTrail (vec3_t start, vec3_t end, float color);
 void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur, qboolean isDis);

@@ -960,14 +960,6 @@ void weapon_vaporizer_fire (edict_t *ent)
 		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-		VectorAdd(start, forward, start);
-		start[2]+=6;
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-
-
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0);
 		ent->client->weapon_sound = 0;
 
@@ -1226,9 +1218,9 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 	else if(hyper && (ent->client->buttons & BUTTON_ATTACK2))
 		VectorSet(offset, 32, 6, ent->viewheight-5);
 	else if(alien)
-		VectorSet(offset, 30, 4, ent->viewheight-1);
+		VectorSet(offset, 30, 4, ent->viewheight-2);
 	else 
-		VectorSet(offset, 30, 6, ent->viewheight-5);
+		VectorSet(offset, 30, 6, ent->viewheight-3);
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, muzzle);
 	VectorCopy (muzzle, start);
@@ -1273,33 +1265,6 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 		gi.WriteByte (MZ_BLASTER);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 	PlayerNoise(ent, start, PNOISE_WEAPON);
-
-	//create visual muzzle flash sprite!
-	VectorAdd(muzzle, forward, muzzle);
-	if(alien)
-	{
-		if(!hyper && (ent->client->buttons & BUTTON_ATTACK))
-		{
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_GREEN_MUZZLEFLASH);
-			gi.WritePosition (muzzle);
-			gi.multicast (muzzle, MULTICAST_PVS);
-		}
-		if(hyper && (ent->client->buttons & BUTTON_ATTACK2))
-		{
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-			gi.WritePosition (muzzle);
-			gi.multicast (muzzle, MULTICAST_PVS);
-		}
-	}
-	else if(!hyper || (ent->client->buttons & BUTTON_ATTACK2))
-	{
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (muzzle);
-		gi.multicast (muzzle, MULTICAST_PVS);
-	}	
 }
 
 
@@ -1766,11 +1731,6 @@ void weapon_minderaser_fire (edict_t *ent)
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-	gi.WritePosition (start);
-	gi.multicast (start, MULTICAST_PVS);
-
 	take_ammo (ent, ent->altfire);
 }
 
@@ -1907,11 +1867,6 @@ void Violator_Fire (edict_t *ent)
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-
 		//kick it ahead, we don't want it continuing to pump
 		ent->client->ps.gunframe = 12;
 
@@ -1942,11 +1897,6 @@ void Violator_Fire (edict_t *ent)
 		gi.WriteByte (TE_VOLTAGE);
 		gi.WritePosition (start);
 		gi.WriteDir(forward);
-		gi.multicast (start, MULTICAST_PVS);
-
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 		
 		// Make it easier to escape from the animation while firing. Since 
@@ -2010,13 +1960,6 @@ void Weapon_TacticalBomb_Fire (edict_t *ent)
 		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-		VectorAdd(start, forward, start);
-		start[2]+=6;
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-		
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0); // to do - change me
 		ent->client->weapon_sound = 0;
 	}

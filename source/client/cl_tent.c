@@ -412,12 +412,6 @@ void CL_ParseTEnt (void)
 		// [no file] S_StartSound (pos, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_LASERBEAM:				// martian laser effect
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadPos (&net_message, pos2);
-		CL_LaserBeam (pos, pos2);
-		break;
-
 	case TE_SPLASH:			// bullet hitting water
 		cnt = MSG_ReadByte (&net_message);
 		MSG_ReadPos (&net_message, pos);
@@ -507,7 +501,13 @@ void CL_ParseTEnt (void)
 	case TE_REDLASER:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
-		CL_RedBlasterBeam (pos, pos2);
+		CL_LaserBeam (pos, pos2, 0xe8, true);
+		break;
+		
+	case TE_LASERBEAM:				// martian laser effect
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadPos (&net_message, pos2);
+		CL_LaserBeam (pos, pos2, 0xd4, true);
 		break;
 
 	case TE_BOSSTPORT:			// boss teleporting to station
@@ -554,27 +554,16 @@ void CL_ParseTEnt (void)
 		CL_TeleportParticles (pos);
 		break;
 
-	case TE_LEADERBLASTER:
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadPos (&net_message, pos2);
-		CL_RedBlasterBeam (pos, pos2);
-		S_StartSound (pos, 0, 0, S_RegisterSound ("weapons/biglaser.wav"), 1, ATTN_NONE, 0);
-		break;
-
 	case TE_CHAINGUNSMOKE:
 		MSG_ReadPos (&net_message, pos);
 		CL_MuzzleParticles (pos);
-		//CL_MuzzleFlashParticle(pos, cl.refdef.viewangles, false);
 		break;
 
 	case TE_GREEN_MUZZLEFLASH:
-		MSG_ReadPos (&net_message, pos);
-		CL_BlasterMuzzleParticles (pos, 0xd4);
-		break;
 	case TE_BLUE_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
-		CL_BlasterMuzzleParticles (pos, 0x74);
 		break;
+
 	case TE_SMART_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
 		CL_SmartMuzzle (pos);
@@ -591,6 +580,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		CL_Deathfield (pos, 0);
 		break;
+
 	case TE_DEATHFIELD2:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
@@ -600,19 +590,21 @@ void CL_ParseTEnt (void)
 	case TE_BLASTERBEAM:			// blaster beam effect
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
-		CL_BlasterBeam (pos, pos2);
+		CL_LaserBeam (pos, pos2, 0x74, true);
 		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
 		if(trace.contents) {
 			CL_BlasterMark(pos2, trace.plane.normal);
 			R_ApplyForceToRagdolls(pos2, 100);
 		}
 		break;
+
 	case TE_JETEXHAUST:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 
 		CL_JetExhaust (pos, dir);
 		break;
+
 	case TE_FLAMETHROWER:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
