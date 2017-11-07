@@ -88,6 +88,7 @@ extern image_t		*r_bloodtexture;
 extern image_t		*r_pufftexture;
 extern image_t		*r_bflashtexture;
 extern image_t		*r_cflashtexture;
+extern image_t		*r_fflashtexture;
 extern image_t		*r_leaderfieldtexture;
 extern image_t		*r_deathfieldtexture;
 extern image_t		*r_deathfieldtexture2;

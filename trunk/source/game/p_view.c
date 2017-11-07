@@ -948,6 +948,10 @@ void G_SetClientEffects (edict_t *ent)
 	if(ent->client->kill_streak >= 8)
 		ent->s.effects |= EF_BUBBLES;
 
+	// Muzzle particle effects
+	if (ent->client->pers.weapon->classnum == weapon_chaingun && ent->client->ps.gunframe > 4 && ent->client->ps.gunframe < 14)
+		ent->s.effects |= EF_CHAINGUN;
+
 	//invisibility
 	if(ent->client->invis_expiretime > level.time) {
 		ent->s.renderfx |= RF_TRANSLUCENT;
