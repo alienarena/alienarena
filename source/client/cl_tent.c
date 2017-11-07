@@ -564,7 +564,7 @@ void CL_ParseTEnt (void)
 	case TE_CHAINGUNSMOKE:
 		MSG_ReadPos (&net_message, pos);
 		CL_MuzzleParticles (pos);
-		CL_MuzzleFlashParticle(pos, cl.refdef.viewangles, false);
+		//CL_MuzzleFlashParticle(pos, cl.refdef.viewangles, false);
 		break;
 
 	case TE_GREEN_MUZZLEFLASH:

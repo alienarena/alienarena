@@ -847,6 +847,12 @@ void CL_AddPacketEntities (frame_t *frame)
 			CL_PoweredEffects (ent.origin, EF_BUBBLES);
 		}
 
+		//Various muzzleflash effects use some more renderfx defs?
+		if (effects & EF_CHAINGUN) 
+		{
+			CL_MuzzleFlashParticle(ent.origin, ent.angles, false);
+		}
+
 		//Ctf flag particle effects
 		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
 		if (!Q_strcasecmp (shortname, "models/items/flags/flag1")) 
@@ -1034,7 +1040,7 @@ void CL_AddPacketEntities (frame_t *frame)
 						V_AddEntity (&ent);		
 					}
 				}
-			}
+			}		
 
 			//PGM - make sure these get reset.
 			ent.flags = 0;
