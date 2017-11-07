@@ -633,8 +633,8 @@ typedef struct
 // even if it has a zero index model.
 #define	EF_ROTATE			0x00000001		// rotate (bonus items)
 #define	EF_GIB				0x00000002		// leave a trail
-#define	EF_BLASTER			0x00000008		// redlight + trail
-#define	EF_ROCKET			0x00000010		// redlight + trail
+#define	EF_BLASTER			0x00000008		
+#define	EF_ROCKET			0x00000010		
 #define	EF_GRENADE			0x00000020
 #define	EF_HYPERBLASTER		0x00000040
 #define	EF_SPAWNPROTECTED	0x00000080
@@ -650,8 +650,10 @@ typedef struct
 #define	EF_TELEPORTER		0x00020000		// particle fountain
 #define EF_TEAM1			0x00040000
 #define EF_TEAM2			0x00080000
+#define EF_BLUEMZF			0x00100000
 #define EF_GREENGIB			0x00200000
 #define EF_CHAINGUN			0x00400000
+#define EF_GREENMZF			0x00800000
 #define EF_PLASMA			0x01000000
 #define EF_SHIPEXHAUST  	0x02000000
 #define EF_ROCKETEXHAUST	0x80000000
@@ -742,7 +744,6 @@ typedef struct
 #define	TE_STEAM					40
 #define	TE_SAYICON					45
 #define	TE_TELEPORT_EFFECT			48
-#define	TE_LEADERBLASTER			56
 #define	TE_CHAINGUNSMOKE			57
 #define	TE_BLUE_MUZZLEFLASH			58
 #define	TE_SMART_MUZZLEFLASH		59

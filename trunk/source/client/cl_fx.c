@@ -1488,36 +1488,107 @@ void CL_MuzzleParticles (vec3_t org)
 }
 /*
 ===============
-CL_MuzzleParticles - Blue
+CL_MuzzleParticles
 ===============
 */
-void CL_BlasterMuzzleParticles (vec3_t org, float color)
+extern cvar_t *r_lefthand;
+void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean from_client)
 {
-	int			i, j;
+	int			j;
 	particle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup, vec;
+	float		rightoffset, upoffset, len;
 
-	for ( i = 0; i < 3; i++)
+	// Already being rendered by client, don't render it twice
+	if(!from_client) 
 	{
-		if (!(p = new_particle()))
+		VectorSubtract (org, cl.refdef.vieworg, vec);
+		len = VectorNormalize (vec);
+		if(len < 128)
 			return;
-
-		p->type = PARTICLE_STANDARD;
-		p->image = r_cflashtexture;
-		p->scale = 28/(i+1);
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j];
-			p->angle[j] = 0;
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-		p->alpha = 0.7;
-		p->color = color; 
-
-		p->alphavel = -2.8 / (0.6f + frand()*0.2f);
 	}
+
+	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+
+	}
+
+	AngleVectors (angles, vforward, vright, vup);
+
+	if(from_client) 
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset = -2.0;
+		else
+			rightoffset = 2.0;
+
+		upoffset = -1.0;
+
+		if(cl.refdef.fov_x > 90)
+		{
+			if (r_lefthand->value == 1.0F)
+				rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+			else
+				rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+			upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+		}
+	
+		VectorMA(mflashorg, 24, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset, vright, mflashorg);
+		VectorMA(mflashorg, upoffset, vup, mflashorg);
+	}
+	else
+	{
+		VectorMA(mflashorg, 42, vforward, mflashorg);
+		VectorMA(mflashorg, 14, vup, mflashorg);
+	}
+	
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_STANDARD;
+	p->image = r_cflashtexture;
+	p->scale = 10 + (rand()&3);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.7;
+	p->color = color;
+	p->alphavel = -100.0f;
+
+	// Add second sprite for blast coming fowward
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_BEAM;
+	p->image = r_fflashtexture;
+	p->scale = 7 + (rand()&3);
+	//project a point forward
+	VectorNormalize(vforward);
+	VectorScale(vforward, 12.0f, vforward);
+	VectorAdd(mflashorg, vforward, mflashorg);
+	VectorAdd(mflashorg, vforward, vec);
+	VectorSet(p->angle, vec[0], vec[1], vec[2]);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.7;
+	p->color = color;
+	p->alphavel = -100.0f;	
 }
 
 /*
@@ -1525,7 +1596,7 @@ void CL_BlasterMuzzleParticles (vec3_t org, float color)
 CL_MuzzleFlashParticle
 ===============
 */
-extern cvar_t *r_lefthand;
+
 void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 {
 	int			j;
@@ -1533,6 +1604,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	vec3_t		mflashorg, vforward, vright, vup, vec;
 	float		rightoffset, upoffset, len;
 
+	// Already being rendered by client, don't render it twice
 	if(!from_client) 
 	{
 		VectorSubtract (org, cl.refdef.vieworg, vec);
@@ -2038,68 +2110,6 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 
 /*
 ===============
-CL_BlasterBall
-
-===============
-*/
-void CL_BlasterBall (vec3_t start, vec3_t end)
-{
-	vec3_t		move;
-	vec3_t		vec;
-	float		len;
-	int			j;
-	particle_t	*p;
-
-	VectorCopy (start, move);
-	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-
-	VectorScale (vec, 5, vec);
-
-	if (!(p = new_particle()))
-		return;
-
-	p->alpha = 1;
-	p->alphavel = INSTANT_PARTICLE;
-	p->type = PARTICLE_ROTATINGROLL;
-	p->image = r_shottexture;
-	p->scale = 8;
-	p->angle[1] = cl.refdef.viewangles[0];
-	p->angle[0] = sinf(len);
-	p->angle[2] = cl.refdef.viewangles[2];
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->color = 0x72; //(71 119 139)
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = move[j];
-		p->vel[j] = 0;
-		p->accel[j] = 0;
-	}
-
-	if (!(p = new_particle()))
-		return;
-
-	p->alpha = .95;
-	p->alphavel = INSTANT_PARTICLE;
-	p->type = PARTICLE_STANDARD;
-	p->image = r_cflashtexture;
-	p->scale = 15.0f + 5.0f * frand();
-	p->blendsrc = GL_ONE;
-	p->blenddst = GL_ONE;
-	p->color = 0x79; //(7 47 63)
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = move[j];
-		p->vel[j] = 0;
-		p->accel[j] = 0;
-	}
-}
-
-/*
-===============
 Player Lights
 ===============
 */
@@ -2413,13 +2423,12 @@ CL_RocketTrail
 */
 void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
 {
-
 	// smoke
 	CL_DiminishingTrail (start, end, old, EF_ROCKET);
 
 }
 
-void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
+void CL_BlasterTrail (vec3_t start, vec3_t end, float color)
 {
 	vec3_t		move;
 	vec3_t		vec;
@@ -2446,7 +2455,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 	p->angle[2] = cl.refdef.viewangles[2];
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->color = 0xd0 + (rand()&2);
+	p->color = color + (rand()&2);
 
 	for (j=0 ; j<3 ; j++)
 	{
@@ -2469,7 +2478,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 				return;
 
 			VectorClear (p->accel);
-			p->color = 0xd0 + (rand()&2); // (0 255 0), (63 211 27)
+			p->color = color + (rand()&2); // (0 255 0), (63 211 27)
 			p->scale = 2 + (rand()&7);
 			p->scalevel = 5;
 			p->alpha = .3;
@@ -2941,204 +2950,48 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 	}
 }
 
-void CL_LaserBeam (vec3_t start, vec3_t end)
+void CL_LaserBeam (vec3_t start, vec3_t end, float color, qboolean use_start)
 {
-
 	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
+	vec3_t		vec, last;
 	float		len;
-	vec3_t		right, up;
-	particle_t	*p, *pr;
+	particle_t	*p;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
 
-	MakeNormalVectors (vec, right, up);
-	VectorCopy (vec, vec2);
-	VectorScale (vec, RAILTRAILSPACE, vec);
+	VectorScale (vec, LASERTRAILSPACE, vec);
 	VectorCopy (start, move);
 
-	//muzzleflash
-	VectorScale (vec2, -RAILTRAILSPACE/2, vec2);
-	VectorAdd(start, vec2, start);
-	for(i = 0; i < 3; i++) {
-
-		if (!(p = new_particle()))
-			return;
-		p->alpha = 0.9;
-		p->alphavel = -2.8 / (0.6f + frand()*0.2f);
-		p->blenddst = GL_ONE;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->image = r_cflashtexture;
-		p->scale = 12/(i+1);
-		for(j=0; j< 3; j++)
-			p->angle[j] = 0;
-		p->type = PARTICLE_STANDARD;
-		p->scalevel = 8;
-		p->color = 0xd4;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = start[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-	}
-	
-	//Dummy particle that won't get drawn -- the first particle in a chain is
-	//always skipped.
-	if (!(pr = new_particle ()))
-		return;
-	pr->alpha = 0.9;
-	pr->alphavel = -2.8f;
-	pr->scale = 4;
-	pr->scalevel = 0;
-	VectorCopy (start, pr->org);
-	VectorClear (pr->vel);
-	VectorClear (pr->accel);
-	pr->type = PARTICLE_CHAINED;
-	pr->color = 0xd4;
-	pr->image = r_beam2texture;
-	
-	if (!(p = new_particle()))
-		return;
-	
-	p->alpha = 0.9;
-	p->alphavel = -2.8f;
-	p->blenddst = GL_ONE;
-	p->blendsrc = GL_SRC_ALPHA;
-
-	p->image = r_beam2texture;
-	p->scale = 4;
-	VectorCopy(move, p->angle);
-	p->type = PARTICLE_CHAINED;
-	p->scalevel = 0;
-
-	p->color = 0xd4;
-	p->chain_prev = pr;
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = end[j];
-		p->vel[j] = 0;
-		p->accel[j] = 0;
-	}
-
-	for (; len>0; len -= RAILTRAILSPACE)
+	for (i = 0; len>0; len -= LASERTRAILSPACE, i++)
 	{
 		VectorCopy (move, last);
 		VectorAdd (move, vec, move);
-		
-		if (len > 40)
-			continue;
 
 		if (!(p = new_particle()))
 				return;
 
-		p->alpha = 0.9;
-		p->alphavel = -2.8f;
+		p->alpha = 1;
+		p->alphavel = -2.0f;
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
-		p->image = r_flaretexture;
-		p->scale = 24;
-		for(j=0; j< 3; j++)
-			p->angle[j] = 0;
-		p->type = PARTICLE_STANDARD;
-		p->scalevel = 12;
-		p->color = 0xd4;
+
+		if(i == 0 && use_start)
+			p->image = r_beamstart;
+		else
+			p->image = r_beam2texture;
+		p->scale = 2;
+
+		VectorCopy(move, p->angle);
+		p->type = PARTICLE_BEAM;
+		p->scalevel = 0;
+
+		p->color = color;
 
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = last[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-	}
-}
-void CL_BlasterBeam (vec3_t start, vec3_t end)
-{
-
-	vec3_t		move;
-	vec3_t		vec, point, vec2;
-	float		len;
-	vec3_t		right, up;
-	particle_t	*p, *pr;
-	int			i,j;
-
-	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
-	MakeNormalVectors (vec, right, up);
-	VectorCopy (vec, vec2);
-	VectorScale (vec, LASERTRAILSPACE, vec);
-	VectorCopy (start, move);
-
-
-	//puff of blue gas
-	VectorScale (vec2, -LASERTRAILSPACE/2, vec2);
-	VectorAdd(start, vec2, start);
-	for(i = 0; i < 6; i++) {
-
-		if (!(p = new_particle()))
-			return;
-		p->alpha = 0.9;
-		p->alphavel = -1.8f / (0.6f + frand()*0.2f);
-		p->blenddst = GL_ONE;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->image = r_cflashtexture;
-		p->scale = 8/(i+1);
-		for(j=0; j< 3; j++)
-			p->angle[j] = 0;
-		p->type = PARTICLE_STANDARD;
-		p->scalevel = 4;
-		p->color = 0x74;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = start[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-	}
-	
-	//Dummy particle that won't get drawn -- the first particle in a chain is
-	//always skipped.
-	if (!(pr = new_particle ()))
-		return;
-	pr->alpha = 0.9;
-	pr->alphavel = -1.8f;
-	pr->scale = 2;
-	pr->scalevel = 0;
-	VectorCopy (start, pr->org);
-	VectorClear (pr->vel);
-	VectorClear (pr->accel);
-	pr->type = PARTICLE_CHAINED;
-	pr->color = 0x74;
-	pr->image = r_beam2texture;
-	
-	for (i = 0; i < 3; i++)
-	{
-		if (!(p = new_particle()))
-			return;
-		
-		p->alpha = 0.9;
-		p->alphavel = -1.8f;
-		p->blenddst = GL_ONE;
-		p->blendsrc = GL_SRC_ALPHA;
-
-		p->image = r_beam2texture;
-		p->scale = 2;
-		VectorCopy(move, p->angle);
-		p->type = PARTICLE_CHAINED;
-		p->scalevel = 0;
-
-		p->color = 0x74;
-		p->chain_prev = pr;
-
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = end[j];
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
@@ -3333,85 +3186,6 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 
 }
 
-void CL_RedBlasterBeam (vec3_t start, vec3_t end)
-{
-
-	vec3_t		move;
-	vec3_t		vec, point, last, vec2;
-	float		len;
-	vec3_t		right, up;
-	particle_t	*p;
-	int			i,j;
-
-	VectorCopy (start, move);
-	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-	VectorCopy (vec, point);
-
-	MakeNormalVectors (vec, right, up);
-	VectorCopy (vec, vec2);
-	VectorScale (vec, LASERTRAILSPACE, vec);
-	VectorCopy (start, move);
-
-
-	//puff of blue gas
-	VectorScale (vec2, -LASERTRAILSPACE/2, vec2);
-	VectorAdd(start, vec2, start);
-	for(i = 0; i < 6; i++) {
-
-		if (!(p = new_particle()))
-			return;
-		p->alpha = 0.9;
-		p->alphavel = -1.8f / (0.6f + frand()*0.2f);
-		p->blenddst = GL_ONE;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->image = r_cflashtexture;
-		p->scale = 8/(i+1);
-		for(j=0; j< 3; j++)
-			p->angle[j] = 0;
-		p->type = PARTICLE_STANDARD;
-		p->scalevel = 4;
-		p->color = 0xe8;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = start[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-	}
-
-	for (; len>0; len -= LASERTRAILSPACE)
-	{
-		VectorCopy (move, last);
-		VectorAdd (move, vec, move);
-
-		for(i = 0; i < 3; i++) {
-			if (!(p = new_particle()))
-					return;
-
-			p->alpha = 0.9;
-			p->alphavel = -1.8f;
-			p->blenddst = GL_ONE;
-			p->blendsrc = GL_SRC_ALPHA;
-
-			p->image = r_beam2texture;
-			p->scale = 2;
-			VectorCopy(move, p->angle);
-			p->type = PARTICLE_BEAM;
-			p->scalevel = 0;
-
-			p->color = 0xe8;
-
-			for (j=0 ; j<3 ; j++)
-			{
-				p->org[j] = last[j];
-				p->vel[j] = 0;
-				p->accel[j] = 0;
-			}
-		}
-	}
-
-}
 /*
 ===============
 CL_BubbleTrail

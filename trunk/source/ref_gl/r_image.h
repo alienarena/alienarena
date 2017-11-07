@@ -105,6 +105,7 @@ extern image_t		*r_bullettexture;
 extern image_t		*r_bulletnormal;
 extern image_t		*r_sayicontexture;
 extern image_t		*r_flaretexture;
+extern image_t		*r_beamstart;
 extern image_t		*r_beamtexture;
 extern image_t		*r_beam2texture;
 extern image_t		*r_beam3texture;
