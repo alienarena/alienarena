@@ -559,6 +559,8 @@ void CL_ParseTEnt (void)
 		CL_MuzzleParticles (pos);
 		break;
 
+		//Not reading these bytes can cause problems if a server sent them
+		//If we break protocol, remove all instances of unused t_ent code
 	case TE_GREEN_MUZZLEFLASH:
 	case TE_BLUE_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
@@ -571,9 +573,7 @@ void CL_ParseTEnt (void)
 
 	case TE_VOLTAGE:
 		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-		CL_Voltage (pos);
-		R_ApplyForceToRagdolls(pos, -50);
+		MSG_ReadDir (&net_message, dir);		
 		break;
 
 	case TE_DEATHFIELD:

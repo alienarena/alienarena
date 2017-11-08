@@ -1591,6 +1591,105 @@ void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean
 	p->alphavel = -100.0f;	
 }
 
+void CL_LightningBall (vec3_t org, vec3_t angles, float color, qboolean from_client)
+{
+	int			j;
+	particle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup, vec;
+	float		rightoffset, upoffset, len;
+
+	// Already being rendered by client, don't render it twice
+	if(!from_client) 
+	{
+		VectorSubtract (org, cl.refdef.vieworg, vec);
+		len = VectorNormalize (vec);
+		if(len < 64)
+			return;
+	}
+
+	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+
+	}
+
+	AngleVectors (angles, vforward, vright, vup);
+
+	if(from_client) 
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset = -2.0;
+		else
+			rightoffset = 2.0;
+
+		upoffset = -1.0;
+
+		if(cl.refdef.fov_x > 90)
+		{
+			if (r_lefthand->value == 1.0F)
+				rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+			else
+				rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+			upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+		}
+	
+		VectorMA(mflashorg, 24, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset, vright, mflashorg);
+		VectorMA(mflashorg, upoffset, vup, mflashorg);
+	}
+	else
+	{
+		VectorMA(mflashorg, 42, vforward, mflashorg);
+		VectorMA(mflashorg, 14, vup, mflashorg);
+	}
+	
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_ROTATINGROLL;
+	p->image = r_shottexture;
+	p->scale = 10 + (rand()&3);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 1.0;
+	p->color = color;
+	p->alphavel = -100.0f;
+
+	// Add second sprite for blast coming fowward
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_BEAM;
+	p->image = r_fflashtexture;
+	p->scale = 7 + (rand()&3);
+	//project a point forward
+	VectorNormalize(vforward);
+	VectorScale(vforward, 12.0f, vforward);
+	VectorAdd(mflashorg, vforward, mflashorg);
+	VectorAdd(mflashorg, vforward, vec);
+	VectorSet(p->angle, vec[0], vec[1], vec[2]);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.7;
+	p->color = color;
+	p->alphavel = -100.0f;	
+}
+
 /*
 ===============
 CL_MuzzleFlashParticle
@@ -1797,43 +1896,6 @@ void CL_SmartMuzzle (vec3_t org)
 		p->alpha = 0.7;
 
 		p->alphavel = -2.8f / (0.5f + frand()*0.3f);
-	}
-
-}
-
-/*
-===============
-CL_SmartMuzzle
-===============
-*/
-void CL_Voltage (vec3_t org)
-{
-	int			i, j;
-	particle_t	*p;
-
-	for ( i = 0; i < 3; i++)
-	{
-		if (!(p = new_particle()))
-			return;
-
-		p->type = PARTICLE_ROTATINGROLL;
-		p->image = r_voltagetexture;
-		p->scale = 6 + (rand()&14);
-		p->color = 0xff; // (159 91 83)
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-		p->scalevel = 12;
-
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j] + ((rand()%2)-1);
-			p->vel[j] = 0;
-		}
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = 0;
-		p->alpha = 0.7;
-
-		p->alphavel = -1.8f / (0.5f + frand()*0.3f);
 	}
 
 }
