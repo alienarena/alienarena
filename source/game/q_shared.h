@@ -656,6 +656,7 @@ typedef struct
 #define EF_GREENMZF			0x00800000
 #define EF_PLASMA			0x01000000
 #define EF_SHIPEXHAUST  	0x02000000
+#define EF_SHOCKBALL		0x04000000
 #define EF_ROCKETEXHAUST	0x80000000
 
 // entity_state_t->renderfx flags

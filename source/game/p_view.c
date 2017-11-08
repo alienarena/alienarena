@@ -954,8 +954,10 @@ void G_SetClientEffects (edict_t *ent)
 	else if (ent->client->pers.weapon->classnum == weapon_blaster && ent->client->ps.gunframe == 6)
 		ent->s.effects |= EF_BLUEMZF;
 	else if (ent->client->pers.weapon->classnum == weapon_violator && (ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12))
-		ent->s.effects |= EF_BLUEMZF;
+		ent->s.effects |= EF_SHOCKBALL;
 	else if (ent->client->pers.weapon->classnum == weapon_chaingun && ent->client->ps.gunframe > 4 && ent->client->ps.gunframe < 14)
+		ent->s.effects |= EF_CHAINGUN;
+	else if (ent->client->pers.weapon->classnum == weapon_beamgun && ent->client->ps.gunframe > 6 && ent->client->ps.gunframe < 25)
 		ent->s.effects |= EF_CHAINGUN;
 
 	//invisibility

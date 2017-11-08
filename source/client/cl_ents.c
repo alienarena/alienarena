@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 clentity_t *active_clentities, *free_clentities;
 clentity_t clentities[MAX_CLENTITIES];
 extern cvar_t *r_shaders;
+extern void R_ApplyForceToRagdolls(vec3_t origin, float force);
 
 /*
 =========================================================================
@@ -860,6 +861,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0x74, false);
 		}
+		else if (effects & EF_SHOCKBALL)
+		{
+			CL_LightningBall (ent.origin, ent.angles, 0x74, false);
+		}
 
 		//Ctf flag particle effects
 		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
@@ -1352,6 +1357,13 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			useFX = true;
 		}
 	}
+	else if(!(strcmp("models/weapons/v_beamgun/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame > 6 && gun.frame < 25) 
+		{
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0xd4, true);
+		}
+	}
 	else if(!(strcmp("models/weapons/v_alienblast/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame == 6) 
@@ -1372,8 +1384,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	{
 		if(gun.frame == 6 || gun.frame == 8 || gun.frame == 10 || gun.frame == 12) 
 		{
-			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0x74, true);
-			useFX = true;
+			CL_LightningBall (gun.origin, gun.angles, 0x74, true);
+			R_ApplyForceToRagdolls(gun.origin, -50);
 		}
 	}
 	

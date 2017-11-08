@@ -1892,12 +1892,6 @@ void Violator_Fire (edict_t *ent)
 		VectorAdd(start, forward, start);
 		VectorScale(right, -0.5, right);
 		VectorAdd(start, right, start);
-
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_VOLTAGE);
-		gi.WritePosition (start);
-		gi.WriteDir(forward);
-		gi.multicast (start, MULTICAST_PVS);
 		
 		// Make it easier to escape from the animation while firing. Since 
 		// this is a rapid-fire weapon, there's no reason not to do this. (If
