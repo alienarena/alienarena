@@ -230,6 +230,7 @@ nobase_dist_particles_DATA = \
 	aflash.tga \
 	basic.tga \
 	beam.tga \
+	beamstart.tga \
 	bflash.tga \
 	blood.tga \
 	bubble.tga \
@@ -243,6 +244,7 @@ nobase_dist_particles_DATA = \
 	disbeam2.tga \
 	disbeam3.tga \
 	explosion.tga \
+	fflash.tga \
 	fireball.tga \
 	flag.tga \
 	flare.tga \
