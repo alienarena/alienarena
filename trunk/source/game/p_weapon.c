@@ -1719,7 +1719,12 @@ void weapon_minderaser_fire (edict_t *ent)
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
-	take_ammo (ent, ent->altfire);
+	// do not use take_ammo (ent, ent->altfire);
+	// always take, mind eraser cannot have infinite ammo
+	ent->client->pers.inventory[ent->client->ammo_index] -=
+		ent->altfire ?
+		ent->client->pers.weapon->quantity2 :
+		ent->client->pers.weapon->quantity;
 }
 
 void Weapon_Minderaser (edict_t *ent)
