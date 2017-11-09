@@ -1144,7 +1144,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count, int type)
 				p->color = color - (rand()&2);
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE;
-				p->alpha = 0.5;
+				p->alpha = 0.25;
 				scale = 1.0;
 				sHeight = 10.0;
 				break;
