@@ -848,7 +848,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			CL_PoweredEffects (ent.origin, EF_BUBBLES);
 		}
 
-		//Various muzzleflash effects use some more renderfx defs?
+		//Various muzzleflash effects
 		if (effects & EF_CHAINGUN) 
 		{
 			CL_MuzzleFlashParticle(ent.origin, ent.angles, false);
@@ -868,6 +868,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		else if (effects & EF_SMARTMZF)
 		{
 			CL_SmartMuzzle (ent.origin, ent.angles, false);
+		}
+		else if (effects & EF_PLASMAMZF)
+		{
+			CL_PlasmaFlashParticle(ent.origin, ent.angles, false);
 		}
 
 		//Ctf flag particle effects
@@ -1355,7 +1359,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}	
 	else if(!(strcmp("models/weapons/v_disruptor/tris.iqm", gun.model->name))) 
 	{
-		if(gun.frame > 5 && gun.frame < 7) 
+		if(gun.frame == 6) 
 		{
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
 			useFX = true;
