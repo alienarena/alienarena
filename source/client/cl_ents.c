@@ -865,6 +865,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			CL_LightningBall (ent.origin, ent.angles, 0x74, false);
 		}
+		else if (effects & EF_SMARTMZF)
+		{
+			CL_SmartMuzzle (ent.origin, ent.angles, false);
+		}
 
 		//Ctf flag particle effects
 		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
@@ -1386,6 +1390,13 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		{
 			CL_LightningBall (gun.origin, gun.angles, 0x74, true);
 			R_ApplyForceToRagdolls(gun.origin, -50);
+		}
+	}
+	else if(!(strcmp("models/weapons/v_smartgun/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame == 6) 
+		{
+			CL_SmartMuzzle (gun.origin, gun.angles, true);
 		}
 	}
 	

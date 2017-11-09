@@ -1869,35 +1869,77 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 CL_SmartMuzzle
 ===============
 */
-void CL_SmartMuzzle (vec3_t org)
+void CL_SmartMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 {
-	int			i, j;
+	int			j;
 	particle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup, vec;
+	float		rightoffset, upoffset, len;
 
-	for ( i = 0; i < 3; i++)
+	// Already being rendered by client, don't render it twice
+	if(!from_client) 
 	{
-		if (!(p = new_particle()))
+		VectorSubtract (org, cl.refdef.vieworg, vec);
+		len = VectorNormalize (vec);
+		if(len < 128)
 			return;
-
-		p->type = PARTICLE_STANDARD;
-		p->image = r_leaderfieldtexture;
-		p->scale = 24 + (rand()&2);
-		p->color = 0xff; // (159 91 83)
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j] + ((rand()%2)-1);
-			p->vel[j] = 0;
-		}
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = 0;
-		p->alpha = 0.7;
-
-		p->alphavel = -2.8f / (0.5f + frand()*0.3f);
 	}
 
+	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+
+	}
+
+	AngleVectors (angles, vforward, vright, vup);
+
+	if(from_client) 
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset = -3;
+		else
+			rightoffset = 3;
+
+		upoffset = -1.0;
+
+		if(cl.refdef.fov_x > 90)
+		{
+			if (r_lefthand->value == 1.0F)
+				rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+			else
+				rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+			upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+		}
+	
+		VectorMA(mflashorg, 24, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset, vright, mflashorg);
+		VectorMA(mflashorg, upoffset, vup, mflashorg);
+	}
+	else
+	{
+		VectorMA(mflashorg, 40, vforward, mflashorg);
+		VectorMA(mflashorg, 14, vup, mflashorg);
+	}
+	
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_STANDARD;
+	p->image = r_leaderfieldtexture;
+	p->scale = 12 + (rand()&2);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 1.0;
+	p->color = 0xff; 
+	p->alphavel = -100.0f;
 }
 
 particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous)

@@ -959,6 +959,8 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.effects |= EF_CHAINGUN;
 	else if (ent->client->pers.weapon->classnum == weapon_beamgun && ent->client->ps.gunframe > 6 && ent->client->ps.gunframe < 25)
 		ent->s.effects |= EF_CHAINGUN;
+	else if (ent->client->pers.weapon->classnum == weapon_smartgun && ent->client->ps.gunframe == 6)
+		ent->s.effects |= EF_SMARTMZF;
 
 	//invisibility
 	if(ent->client->invis_expiretime > level.time) {
