@@ -1632,18 +1632,6 @@ void weapon_smartgun_fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
-
-//create visual muzzle flash sprite!
-
-	forward[0] = forward[0] * 10;
-	forward[1] = forward[1] * 10;
-
-	VectorAdd(start, forward, start);
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_SMART_MUZZLEFLASH);
-	gi.WritePosition (start);
-	gi.multicast (start, MULTICAST_PVS);
-
 	take_ammo (ent, ent->altfire);
 }
 

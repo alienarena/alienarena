@@ -563,12 +563,8 @@ void CL_ParseTEnt (void)
 		//If we break protocol, remove all instances of unused t_ent code
 	case TE_GREEN_MUZZLEFLASH:
 	case TE_BLUE_MUZZLEFLASH:
-		MSG_ReadPos (&net_message, pos);
-		break;
-
 	case TE_SMART_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
-		CL_SmartMuzzle (pos);
 		break;
 
 	case TE_VOLTAGE:

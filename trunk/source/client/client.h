@@ -458,7 +458,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir);
 void CL_ExplosionParticles (vec3_t org);
 void CL_MuzzleParticles (vec3_t org);
 void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean from_client);
-void CL_SmartMuzzle (vec3_t org);
+void CL_SmartMuzzle (vec3_t org, vec3_t angles, qboolean from_client);
 particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous);
 void CL_Deathfield (vec3_t org, int type);
 void CL_BFGExplosionParticles (vec3_t org);
