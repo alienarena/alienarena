@@ -49,6 +49,7 @@ image_t		*r_pufftexture;
 image_t		*r_bflashtexture;
 image_t		*r_cflashtexture;
 image_t		*r_fflashtexture;
+image_t		*r_pflashtexture;
 image_t		*r_leaderfieldtexture;
 image_t		*r_deathfieldtexture;
 image_t		*r_deathfieldtexture2;
@@ -205,6 +206,10 @@ void R_InitParticleTexture (void)
 	r_fflashtexture = R_RegisterParticlePic("fflash");
 	if (!r_fflashtexture) {
 		r_fflashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_pflashtexture = R_RegisterParticlePic("pflash");
+	if (!r_pflashtexture) {
+		r_pflashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_leaderfieldtexture = R_RegisterParticlePic("leaderfield");
 	if (!r_leaderfieldtexture) {

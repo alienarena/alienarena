@@ -925,19 +925,11 @@ void weapon_vaporizer_fire (edict_t *ent)
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-
-	if(ent->client->ps.gunframe == 12) {
-
-		VectorAdd(start, forward, start);
-		start[2]+=6;
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
-		gi.WritePosition (start);
-		gi.multicast (start, MULTICAST_PVS);
-	}
-
-	if(ent->client->ps.gunframe == 13) {
-		if(ent->altfire) {//alt fire
+	
+	if(ent->client->ps.gunframe == 13) 
+	{
+		if(ent->altfire) 
+		{
 			AngleVectors (ent->client->v_angle, forward, right, NULL);
 			VectorScale (forward, -2, ent->client->kick_origin);
 			ent->client->kick_angles[0] = -1;
@@ -948,7 +940,11 @@ void weapon_vaporizer_fire (edict_t *ent)
 			forward[2] = forward[2] * 4.6;
 			fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
 		}
-		else {
+		else
+		{
+			AngleVectors (ent->client->v_angle, forward, right, NULL);
+			VectorSet(offset, 32, 2, ent->viewheight-1);
+			P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 			fire_vaporizer (ent, start, forward, damage, kick);
 		}
 		

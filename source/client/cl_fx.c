@@ -1816,15 +1816,16 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 
 	}
 
-	if(from_client) {
-		AngleVectors (angles, vforward, vright, vup);
+	AngleVectors (angles, vforward, vright, vup);
 
+	if(from_client) 
+	{
 		if (r_lefthand->value == 1.0F)
-			rightoffset = -2.4;
+			rightoffset = -2.0;
 		else
-			rightoffset = 2.4;
+			rightoffset = 2.0;
 
-		upoffset = -1.0;
+		upoffset = -0.0;
 
 		if(cl.refdef.fov_x > 90)
 		{
@@ -1839,6 +1840,11 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 		VectorMA(mflashorg, rightoffset, vright, mflashorg);
 		VectorMA(mflashorg, upoffset, vup, mflashorg);
 	}
+	else
+	{
+		VectorMA(mflashorg, 60, vforward, mflashorg);
+		VectorMA(mflashorg, 14, vup, mflashorg);
+	}
 
 	//muzzleflash
 	color = getColor();
@@ -1847,7 +1853,7 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
         if (!(p = new_particle()))
             return;
         p->alpha = 0.4;
-        p->alphavel = -2.8f / (0.6f + frand()*0.2f);
+        p->alphavel = -100.0f;
         p->blenddst = GL_ONE;
         p->blendsrc = GL_SRC_ALPHA;
         p->image = r_cflashtexture;
@@ -1862,6 +1868,32 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 			p->accel[j] = 0;
 		}
     }
+
+	// Add second sprite for blast coming fowward
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_BEAM;
+	p->image = r_pflashtexture;
+	p->scale = 7 + (rand()&3);
+	//project a point forward
+	VectorNormalize(vforward);
+	VectorScale(vforward, 32.0f, vforward);
+	VectorAdd(mflashorg, vforward, mflashorg);
+	VectorAdd(mflashorg, vforward, vec);
+	VectorSet(p->angle, vec[0], vec[1], vec[2]);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.7;
+	p->color = color; //(255 255 167)
+	p->alphavel = -100.0f;	
 
 }
 /*
