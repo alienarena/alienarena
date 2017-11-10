@@ -30,6 +30,7 @@ nobase_dist_particles_DATA = \
 	leaderfield.tga \
 	leaf.tga \
 	logo.tga \
+	pflash.tga \
 	puff.tga \
 	reflect.tga \
 	r_explod_1.tga \

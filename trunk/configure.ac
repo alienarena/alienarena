@@ -17,8 +17,8 @@
 # see the file, GPLv2
 #
 
-AC_PREREQ([2.68])
-AC_INIT([alienarena],[7.7.0],[alienrace@comcast.net])
+AC_PREREQ([2.69])
+AC_INIT([alienarena],[7.70.0],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -29,7 +29,7 @@ dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output, default off
 dnl one might add dist-zip, dist-bzip2 for other distributions besides tar.gz
-AM_INIT_AUTOMAKE([1.11.3 foreign subdir-objects silent-rules])
+AM_INIT_AUTOMAKE([1.15 foreign subdir-objects silent-rules])
 AM_SILENT_RULES([no])
 
 dnl use --enable-maintainer-mode to get full set of make targets.
