@@ -1270,9 +1270,15 @@ void SP_misc_laser (edict_t *ent)
 	ent->dmg = 500; //cause severe damage, especially if multiples(most cases)
 
 	if(ent->spawnflags & 1)
+	{
 		ent->s.modelindex = gi.modelindex ("models/tactical/human_laser.iqm");
+		ent->ctype = 1;
+	}
 	else
+	{
 		ent->s.modelindex = gi.modelindex ("models/tactical/alien_laser.iqm");
+		ent->ctype = 0;
+	}
 
 	VectorSet (ent->mins, -16, -16, -16);
 	VectorSet (ent->maxs, 16, 16, 16);
@@ -1376,6 +1382,7 @@ void SP_misc_aliencomputer (edict_t *ent)
 	ent->think = computer_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien computer";
+	ent->ctype = 0;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1402,6 +1409,7 @@ void SP_misc_humancomputer (edict_t *ent)
 	ent->think = computer_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human computer";
+	ent->ctype = 1;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1497,6 +1505,7 @@ void SP_misc_alienpowersrc (edict_t *ent)
 	ent->think = powersrc_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien powersrc";
+	ent->ctype = 0;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1523,6 +1532,7 @@ void SP_misc_humanpowersrc (edict_t *ent)
 	ent->think = powersrc_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human powersrc";
+	ent->ctype = 1;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1617,6 +1627,7 @@ void SP_misc_alienammodepot (edict_t *ent)
 	ent->think = ammodepot_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien ammodepot";
+	ent->ctype = 0;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1643,6 +1654,7 @@ void SP_misc_humanammodepot (edict_t *ent)
 	ent->think = ammodepot_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human ammodepot";
+	ent->ctype = 1;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1748,6 +1760,7 @@ void SP_misc_alienbackupgen (edict_t *ent)
 	ent->think = backupgen_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "alien backupgen";
+	ent->ctype = 0;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
@@ -1774,7 +1787,132 @@ void SP_misc_humanbackupgen (edict_t *ent)
 	ent->think = backupgen_think;
 	ent->nextthink = level.time + TENFPS;
 	ent->classname = "human backupgen";
+	ent->ctype = 1;
 
 	gi.linkentity (ent);
 	M_droptofloor (ent);
+}
+
+void Check_tactical_items(edict_t *self)
+{
+	int i;
+	edict_t *ent;
+
+	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++)
+	{
+		vec3_t dist;
+	
+		if (!ent->inuse)
+			continue;
+		if(ent->client) //not players
+			continue;
+		
+		if(!(infront(self, ent)))
+			continue;
+
+		VectorSubtract(self->s.origin, ent->s.origin, dist);
+
+		if(VectorLength(dist) > 256)
+			continue;
+
+		if(self->ctype == 0)
+		{
+			if (self->client->pers.weapon == FindItem("Alien Bomb")) 
+				safe_centerprintf(self, "Press <fire> to plant a bomb!");
+
+			if(ent->classname == "human powersrc")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on power source.");
+				else
+					safe_centerprintf(self, "Fire weapon on power source to destroy it!");
+			}
+			else if(ent->classname == "human ammodepot")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on ammo depot.");
+				else
+					safe_centerprintf(self, "Fire weapon on ammo depot to destroy it!");
+			}
+			else if(ent->classname == "human computer")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on computer.");
+				else
+					safe_centerprintf(self, "Fire weapon on computer to destroy it!");
+			}
+			else if(ent->classname == "human backupgen")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on backup generator.");
+				else
+					safe_centerprintf(self, "Fire weapon on backup generator to destroy it!");
+			}
+			else if(ent->classname == "abomb")
+			{
+				if(self->has_detonator)
+					safe_centerprintf(self, "Touch this bomb to activate it!");
+			}
+		}
+		else if(self->ctype == 1)
+		{
+			if (self->client->pers.weapon == FindItem("Human Bomb")) 
+				safe_centerprintf(self, "Press <fire> to plant a bomb!");
+
+			if(ent->classname == "alien powersrc")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on power source.");
+				else
+					safe_centerprintf(self, "Fire weapon on power source to destroy it!");
+			}
+			else if(ent->classname == "alien ammodepot")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on ammo depot.");
+				else
+					safe_centerprintf(self, "Fire weapon on ammo depot to destroy it!");
+			}
+			else if(ent->classname == "alien computer")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on computer.");
+				else
+					safe_centerprintf(self, "Fire weapon on computer to destroy it!");
+			}
+			else if(ent->classname == "alien backupgen")
+			{
+				if(self->has_bomb)
+					safe_centerprintf(self, "Plant a bomb here or fire weapon on backup generator.");
+				else
+					safe_centerprintf(self, "Fire weapon on backup generator to destroy it!");
+			}
+			else if(ent->classname == "hbomb")
+			{
+				if(self->has_detonator)
+					safe_centerprintf(self, "Touch this bomb to activate it!");
+			}
+		}
+	}
+}
+
+// Provide tips for players to learn the game, etc
+void Tactical_tutorial_think(edict_t *ent)
+{
+	if(ent->is_bot)
+		return;
+
+	if(!ent->inuse)
+		return;
+
+	if(!ent->client)
+		return;
+
+	// Dont' spam 
+	if(level.time - 2.0 > ent->lastTmsg)
+	{
+		Check_tactical_items(ent);
+		ent->lastTmsg = level.time;
+	}
+
 }

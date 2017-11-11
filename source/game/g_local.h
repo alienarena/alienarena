@@ -1061,6 +1061,7 @@ void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer, int mapvote)
 void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent));
 void PlayerNoise(edict_t *who, vec3_t where, int type);
+void NoAmmoWeaponChange (edict_t *ent);
 
 //
 // m_move.c
@@ -1170,6 +1171,7 @@ extern void SP_misc_alienbackupgen (edict_t *self);
 extern void SP_misc_humanbackupgen (edict_t *self);
 extern void SP_misc_deathray (edict_t *self);
 extern void SP_misc_laser (edict_t *self);
+extern void Tactical_tutorial_think(edict_t *ent);
 
 //Monster hazards
 extern void SP_monster_piranha (edict_t *self);
@@ -1715,6 +1717,7 @@ struct edict_s
 	qboolean has_minderaser;
 	int armor_type;
 	char charModel[MAX_OSPATH];
+	float lastTmsg; 
 
 	// Anti-camp velocity accumulation
 	

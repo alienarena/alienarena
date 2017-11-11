@@ -374,9 +374,15 @@ void SP_misc_deathray (edict_t *self)
 
 	//to do - make different mesh for human weapon
 	if(self->spawnflags & 1)
+	{
+		self->ctype = 1;
 		self->s.modelindex = gi.modelindex("models/tactical/human_turret.iqm");
+	}
 	else
+	{
+		self->ctype = 0;
 		self->s.modelindex = gi.modelindex("models/misc/deathray/deathray.iqm");
+	}
 
 	VectorSet (self->mins, -16, -16, 0);
 	VectorSet (self->maxs, 16, 16, 48);

@@ -2261,12 +2261,14 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 		bomb->s.modelindex = gi.modelindex ("models/tactical/human_bomb.iqm"); 
 		bomb->touch = hbomb_touch;
 		bomb->classname = "hbomb";
+		bomb->ctype = 1;
 	}
 	else
 	{
 		bomb->s.modelindex = gi.modelindex ("models/tactical/alien_bomb.iqm");
 		bomb->touch = abomb_touch;
 		bomb->classname = "abomb";
+		bomb->ctype = 0;
 	}
 	bomb->owner = self;
 	bomb->think = tactical_bomb_think; 
@@ -2281,6 +2283,8 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	bomb->nade_timer = 0;
 
 	gi.linkentity (bomb);
+
+	NoAmmoWeaponChange(self);
 }
 
 #endif

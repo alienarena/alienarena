@@ -1318,7 +1318,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the alien bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Alien Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, "Bombs", "models/objects/blank/tris.iqm", "models/objects/blank/tris.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Bombs", "models/objects/blank/tris.iqm", "weapon.iqm"),
 		NULL
 	},
 
@@ -1331,7 +1331,7 @@ gitem_t	itemlist[] =
 		// TODO: make an icon for the human bomb
 		GITEM_INIT_CLIENTSIDE (NULL, "Human Bomb", NULL),
 		// will use db's vweap for bombs and detonators
-		GITEM_INIT_WEAP (1, 1, "Bombs", "models/objects/blank/tris.iqm", "models/objects/blank/tris.iqm"),
+		GITEM_INIT_WEAP (1, 1, "Bombs", "models/objects/blank/tris.iqm", "weapon.iqm"),
 		NULL
 	},
 #endif

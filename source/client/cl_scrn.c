@@ -1377,6 +1377,26 @@ static void SCR_ExecuteLayoutString (const char *s)
 			continue;
 		}
 
+		if (!strcmp(token, "tacsb"))
+		{
+			//print header here
+			x = midx - 256*scale;
+			y = midy - 72*scale;
+
+			while ( x <= midx ) {
+				box.x = x + 14 * scale , box.y = y;
+				FNT_RawPrint( font , "Player" , 6 , false , box.x , box.y , FNT_colors[ 7 ] );
+				box.x += 118 * scale , box.width = 56 * scale , box.height = 0;
+				FNT_BoundedPrint( font , "Kills" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+				box.x += 56 * scale , box.width = 48 * scale , box.height = 0;
+				FNT_BoundedPrint( font , "Ping" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+				x += 256 * scale;
+			}
+
+			newSBlayout = true;
+			continue;
+		}
+
 		if (!strcmp(token, "client") || !strcmp(token, "queued"))
 		{	// draw a deathmatch client block
 			qboolean	isQueued = ( token[ 0 ] == 'q' );
@@ -1462,8 +1482,8 @@ static void SCR_ExecuteLayoutString (const char *s)
 
 			continue;
 		}
-		if (!strcmp(token, "ctf"))
-		{	// draw a ctf client block
+		if (!strcmp(token, "ctf") || !strcmp(token, "tac"))
+		{	// draw a team client block
 			int	score, ping;
 			char	block[80];
 			int		team;
