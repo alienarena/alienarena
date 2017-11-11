@@ -485,6 +485,180 @@ DeathmatchScoreboardMessage
 
 ==================
 */
+void TACScoreBoaredMessage (edict_t *ent, edict_t *killer, int mapvote)
+{
+	char	entry[1024];
+	char	string[1400];
+	int		len;
+	int		i, j, k, x, y;
+	int		sorted[2][MAX_CLIENTS];
+	int		sortedscores[2][MAX_CLIENTS];
+	int		score, total[2], totalscore[2];
+
+	gclient_t	*cl;
+	edict_t		*cl_ent;
+	int team;
+	int maxsize = 1024;
+	
+	// sort the clients by team and score
+	total[0] = total[1] = 0;
+	totalscore[0] = totalscore[1] = 0;
+	for (i=0 ; i<game.maxclients ; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse)
+			continue;
+		if (cl_ent->ctype == 1)
+			team = 0;
+		else if (cl_ent->ctype == 0)
+			team = 1;
+		else
+			continue; // unknown team?
+
+		score = game.clients[i].resp.score;
+		for (j=0 ; j<total[team] ; j++)
+		{
+			if (score > sortedscores[team][j])
+				break;
+		}
+		for (k=total[team] ; k>j ; k--)
+		{
+			sorted[team][k] = sorted[team][k-1];
+			sortedscores[team][k] = sortedscores[team][k-1];
+		}
+		sorted[team][j] = i;
+		sortedscores[team][j] = score;
+		totalscore[team] += score;
+		total[team]++;
+	}
+
+	// print level name and exit rules
+	// add the clients in sorted order
+	*string = 0;
+	len = 0;
+
+	sprintf(string, "tacsb xv 32 yv -8 picn team1 "
+			"xv 286 yv -8 picn team2 ");
+
+	len = strlen(string);
+	
+	for (i=0 ; i<16 ; i++)
+	{
+		if (i >= total[0] && i >= total[1])
+			break; // we're done
+
+		*entry = 0;
+
+		// left side
+		if (i < total[0]) {
+			cl = &game.clients[sorted[0][i]];
+			cl_ent = g_edicts + 1 + sorted[0][i];
+
+			sprintf(entry+strlen(entry),
+				"tac -96 %d %d %d %d ",
+				42 + i * 16,
+				sorted[0][i],
+				cl->resp.score,
+				cl->ping > 999 ? 999 : cl->ping);
+
+			if (cl_ent->has_bomb)
+			{
+				if(cl_ent->client->pers.inventory[ITEM_INDEX(FindItem("Bombs"))] >= 1)
+					sprintf(entry + strlen(entry), "xv -92 yv %d picn tacbomb ",
+						43 + i * 16);
+				else
+					sprintf(entry + strlen(entry), "xv -92 yv %d picn tacbombout ",
+					43 + i * 16);
+			}
+			else if (cl_ent->has_detonator)
+				sprintf(entry + strlen(entry), "xv -92 yv %d picn tacdetonator ",
+					43 + i * 16);
+
+			if (maxsize - len > strlen(entry)) {
+				strcat(string, entry);
+				len = strlen(string);
+			}
+		}
+
+		// right side
+		if (i < total[1]) {
+			cl = &game.clients[sorted[1][i]];
+			cl_ent = g_edicts + 1 + sorted[1][i];
+
+			sprintf(entry+strlen(entry),
+				"tac 160 %d %d %d %d ",
+				42 + i * 16,
+				sorted[1][i],
+				cl->resp.score,
+				cl->ping > 999 ? 999 : cl->ping);
+
+			if (cl_ent->has_bomb)
+			{
+				if(cl_ent->client->pers.inventory[ITEM_INDEX(FindItem("Bombs"))] >= 1)
+					sprintf(entry + strlen(entry), "xv 164 yv %d picn tacbomb ",
+						43 + i * 16);
+				else
+					sprintf(entry + strlen(entry), "xv 164 yv %d picn tacbombout ",
+						43 + i * 16);
+			}
+			else if (cl_ent->has_detonator)
+				sprintf(entry + strlen(entry), "xv 164 yv %d picn tacdetonator ",
+					43 + i * 16);
+
+			if (maxsize - len > strlen(entry)) {
+				strcat(string, entry);
+				len = strlen(string);
+			}
+		}
+	}
+
+	if(mapvote) {
+		y = 64;
+		x = 96;
+		Com_sprintf(entry, sizeof(entry),
+			"xv %i yt %i string Vote ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 136;
+		Com_sprintf(entry, sizeof(entry),
+			"xv %i yt %i string for ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 168;
+		Com_sprintf(entry, sizeof(entry),
+			"xv %i yt %i string next ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 208;
+		Com_sprintf(entry, sizeof(entry),
+			"xv %i yt %i string map: ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 96;
+		for(i=0; i<4; i++) {
+
+			Com_sprintf(entry, sizeof(entry),
+			"xv %i yt %i string %i.%s ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname);
+			if(maxsize - len > strlen(entry)) {
+				strcat(string, entry);
+				len = strlen(string);
+			}
+		}
+
+	}
+
+	gi.WriteByte (svc_layout);
+	gi.WriteString (string);
+}
+
 void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 {
 	char	entry[1024];
@@ -507,9 +681,13 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		return;
 
 	if (g_tactical->integer)
-		return; //no scoreboard in tactical mode
+	{
+		TACScoreBoaredMessage(ent, killer, mapvote);
+		return;
+	}
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value) {
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value) 
+	{
 		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
 	}

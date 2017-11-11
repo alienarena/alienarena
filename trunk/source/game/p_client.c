@@ -2033,10 +2033,16 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 				
 				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+
 				item = FindItem("Rocket Launcher");
 			}
 			client->pers.selected_item = ITEM_INDEX(item);
 			client->pers.inventory[client->pers.selected_item] = 1;
+			if(ent->has_bomb)
+			{
+				item = FindItem("Human Bomb");
+				client->pers.selected_item = ITEM_INDEX(item);
+			}
 			client->pers.weapon = item;
 		}		
 		else if(!(rocket_arena->integer || instagib->integer || insta_rockets->value))
@@ -2105,6 +2111,11 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 				}
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
+				if(ent->has_bomb)
+				{
+						item = FindItem("Alien Bomb");
+						client->pers.selected_item = ITEM_INDEX(item);
+				}
 				client->pers.weapon = item;				
 			}
 			else if(!(rocket_arena->integer || instagib->integer || insta_rockets->value))
@@ -2119,6 +2130,17 @@ void Respawn_ClassSpecific (edict_t *ent, gclient_t *client)
 				client->pers.weapon = item;
 			}
 		}
+	}
+
+	if(g_tactical->integer)
+	{
+		// let player know what they need to do
+		if(ent->has_bomb && !ent->is_bot)
+		{
+			safe_centerprintf(ent, "Place bomb near enemy base!");
+		}
+		else if(ent->has_detonator && !ent->is_bot)
+			safe_centerprintf(ent, "Walk over bombs to detonate them!");
 	}
 #endif
 }
@@ -2287,16 +2309,8 @@ void PutClientInServer (edict_t *ent)
 
 	// has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)
-	{
-		SelectSpawnPoint (ent, spawn_origin, spawn_angles);
-
-		// let player know what they need to do
-		if(ent->has_bomb && !ent->is_bot)
-			safe_centerprintf(ent, "Place bomb near enemy base!");
-		else if(ent->has_detonator && !ent->is_bot)
-			safe_centerprintf(ent, "Walk over bombs to detonate them!");
-	}
-
+		SelectSpawnPoint (ent, spawn_origin, spawn_angles);	
+	
 	client->ps.pmove.origin[0] = spawn_origin[0]*8;
 	client->ps.pmove.origin[1] = spawn_origin[1]*8;
 	client->ps.pmove.origin[2] = spawn_origin[2]*8;
@@ -3466,6 +3480,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ucmd->sidemove = 200;
 			if(ucmd->sidemove < -200)
 				ucmd->sidemove = -200;
+
+			Tactical_tutorial_think(ent);
 		}
 
 		//various running movement types

@@ -92,7 +92,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		sprintf(string, "newctfsb xv -16 yv -8 picn ctf1 "
 			"xv +12 yv 4 num 3 21 "
 			"xv 238 yv -8 picn ctf2 "
-			"xv 264 yv 4 num 3 22 ");
+			"xv 264 yv -16 num 3 22 ");
 		len = strlen(string);
 	}
 	else {
@@ -100,7 +100,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		sprintf(string, "newctfsb xv -16 yv -8 picn team1 "
 			"xv +12 yv 4 num 3 21 "
 			"xv 238 yv -8 picn team2 "
-			"xv 264 yv 4 num 3 22 ");
+			"xv 264 yv -16 num 3 22 ");
 		len = strlen(string);
 	}
 
