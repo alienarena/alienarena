@@ -49,7 +49,7 @@ static char update_notice[256];
  *
  * valid dotted version numbers
  *   double  <0..99>.<0..99> (.point is 0)
- *   triple  <0..99>.<0..99>.<1..99>
+ *   triple  <0..99>.<0..99>.<0..99> (point can be 0)
  *   with the exceptions: 0.0 and 0.0.d are not valid
  *
  * @param vstring      string from server
@@ -75,8 +75,8 @@ static qboolean parse_version( const char* vstring, struct dotted_triple *versio
 			if ( isdigit( *pch_start ) )
 			{
 				minor = strtoul( pch_start, &pch_end, 10 );
-				if ( ((major >= 1UL && minor >= 0UL) ||
-						(major == 0UL && minor >= 1UL)) && minor <= 99UL )
+				if ( (major >= 1UL || (major == 0UL && minor >= 1UL)) 
+					&& minor <= 99UL )
 				{
 					if ( *pch_end == '.' )
 					{
@@ -84,7 +84,7 @@ static qboolean parse_version( const char* vstring, struct dotted_triple *versio
 						if ( isdigit( *pch_start ) )
 						{
 							point = strtoul( pch_start, &pch_end, 10 );
-							if ( point >= 1UL && point <= 99UL && *pch_end == '\0')
+							if ( point <= 99UL && *pch_end == '\0')
 							{ /* valid x.y.z */
 								version_out->major = major;
 								version_out->minor = minor;
