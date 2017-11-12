@@ -233,6 +233,10 @@ nobase_dist_particles_DATA = \
 	beamstart.tga \
 	bflash.tga \
 	blood.tga \
+	blood2.tga \
+	blood3.tga \
+	blood4.tga \
+	blood5.tga \
 	bubble.tga \
 	bullethole2.tga \
 	bullethole.tga \
