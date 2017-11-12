@@ -195,6 +195,9 @@ nobase_dist_pics_DATA = \
 	sbfctf1.tga \
 	sbfctf2.tga \
 	statbox.tga \
+	tacbomb.tga \
+	tacbombout.tga \
+	tacdetonator.tga \
 	tag1.tga \
 	tag2.tga \
 	team1.tga \
