@@ -441,6 +441,7 @@ void CL_ClearClEntities(void);
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
 
+void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count);
 void CL_DisruptorBeam (vec3_t start, vec3_t end);
 void CL_LaserBeam (vec3_t start, vec3_t end, float color, qboolean use_start);
 void CL_VaporizerBeam (vec3_t start, vec3_t end);
