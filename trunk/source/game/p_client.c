@@ -2237,6 +2237,9 @@ void PutClientInServer (edict_t *ent)
 		gi.configstring( CS_PLAYERSKINS+index, va("%s\\%s",
 				client->pers.netname,
 				(Info_ValueForKey( client->pers.userinfo, "skin"))));
+
+		if (ent->skill < 0)
+			ent->client->pers.max_health = ent->client->pers.health = ent->client->pers.max_health / 2;
 	}
 	else
 	{
@@ -2389,6 +2392,9 @@ void PutClientInServer (edict_t *ent)
 	ent->state = STATE_STAND;
 	ent->s.frame = FRAME_rise1;
 	ent->client->anim_end = FRAME_rise16;
+
+	if (!ent->is_bot && skill->integer < 0)
+		ent->client->spawnprotecttime += g_spawnprotect->integer * 2;
 }
 
 //DUEL MODE
@@ -3842,7 +3848,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	//spawn protection has run out
-	if(level.time > ent->client->spawnprotecttime + g_spawnprotect->integer)
+	if (level.time > ent->client->spawnprotecttime + g_spawnprotect->integer)
 		ent->client->spawnprotected = false;
 
 	//lose one health every second

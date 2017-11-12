@@ -415,8 +415,8 @@ void SpawnEntities (char *mapname, const char *entities, char *spawnpoint)
 	float		skill_level;
 
 	skill_level = floor (skill->value);
-	if (skill_level < 0)
-		skill_level = 0;
+	if (skill_level < -1)
+		skill_level = -1;
 	if (skill_level > 3)
 		skill_level = 3;
 	if (skill->value != skill_level)

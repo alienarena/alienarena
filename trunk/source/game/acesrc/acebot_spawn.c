@@ -1141,9 +1141,9 @@ qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 	 *   2 : skill is cfg setting setting plus 1 (single player hard)
 	 *   3 : forces all to skill 3 (single player ultra)
 	 */
-	if (skill->integer == 0)
+	if (skill->integer == 0 || skill->integer == -1)
 	{
-		pbot->skill = 0; //dumb as a box of rocks
+		pbot->skill = skill->integer; //dumb as a box of rocks
 	}
 	else if (skill->integer == 2)
 	{
