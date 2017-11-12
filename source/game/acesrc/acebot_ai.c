@@ -837,7 +837,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		(!strcmp (self->faveweap, "Flame Thrower") &&
 			range >= (self->skill == 3 ? 800.0f : 500.0f)) ||
 		(!strcmp (self->faveweap, "Violator") &&
-			(self->skill == 0 || range >= 300.0f)) || //because it's a fav weap, we want them to really try and use it
+			(self->skill <= 0 || range >= 300.0f)) || //because it's a fav weap, we want them to really try and use it
 		(!strcmp (self->faveweap, "Alien Smartgun") && !clear_shot) ||
 		(!strcmp (self->faveweap, "Alien Vaporizer") && self->skill < 2);
 	

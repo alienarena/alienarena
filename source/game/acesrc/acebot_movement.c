@@ -138,6 +138,15 @@ qboolean ACEMV_CanMove(edict_t *self, int direction)
 	return true; // yup, can move
 }
 
+static int ACEMV_GetWalkSpeed (edict_t *self)
+{
+	if (self->skill < 0)
+		return 150;
+	if (g_tactical->integer)
+		return 200;
+	return 400;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Handle special cases of crouch/jump
 //
@@ -149,12 +158,7 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 	vec3_t dir,forward,right,start,end,offset;
 	vec3_t top;
 	trace_t tr;
-	short mSpeed;
-
-	if(g_tactical->integer)
-		mSpeed = 200;
-	else 
-		mSpeed = 400;
+	short mSpeed = ACEMV_GetWalkSpeed (self);
 
 	// Get current direction
 	VectorCopy(self->client->ps.viewangles,dir);
@@ -238,13 +242,8 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	vec3_t  leftstart, rightstart,focalpoint;
 	vec3_t  upstart,upend;
 	vec3_t  dir,offset;
-	short mSpeed;
 	trace_t traceRight,traceLeft,traceUp, traceFront; // for eyesight
-	
-	if(g_tactical->integer)
-		mSpeed = 200;
-	else 
-		mSpeed = 400;
+	short mSpeed = ACEMV_GetWalkSpeed (self);
 	
 	// Get current angle and set up "eyes"
 
@@ -429,15 +428,10 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 {
-	short mSpeed;
+	short mSpeed = ACEMV_GetWalkSpeed (self);
 
 	//not going to use sidestepping animations
 	self->sidemove = 0;
-
-	if(g_tactical->integer)
-		mSpeed = 200;
-	else 
-		mSpeed = 400;
 
 	// If a rocket or grenade is around deal with it
 	// Simple, but effective (could be rewritten to be more accurate)
@@ -514,15 +508,10 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	int next_node_type=-1;
 	int i;
 	float c;
-	short mSpeed;
+	short mSpeed = ACEMV_GetWalkSpeed (self);
 
 	self->sidemove = 0;
 	self->backpedal = false;
-
-	if(g_tactical->integer)
-		mSpeed = 200;
-	else 
-		mSpeed = 400;
 
 	// Get current and next node back from nav code.
 	if(!ACEND_FollowPath(self))
@@ -643,7 +632,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
  	if(VectorLength(self->velocity) < 37)
 	{
 		// Keep a random factor just in case....
-		if(random() > 0.1 && ACEMV_SpecialMove(self, ucmd))
+		if (self->skill >= 0 && random() > 0.1 && ACEMV_SpecialMove(self, ucmd))
 			return;
 
 		self->s.angles[YAW] += random() * 180 - 90;
@@ -740,16 +729,11 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 {
 	vec3_t  temp;
 	float c;
-	short mSpeed;
+	short mSpeed = ACEMV_GetWalkSpeed (self);
 
 	//not going to use sidestepping animations(for now)
 	self->sidemove = 0;
 	self->backpedal = false;
-
-	if(g_tactical->integer)
-		mSpeed = 200;
-	else 
-		mSpeed = 400;
 
 	// Do not move
 	if(self->next_move_time > level.time)
@@ -953,6 +937,7 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	//calc weap accuracy factor with scaling on bot skill
 	switch ( self->skill )
 	{
+	case -1:
 	case 0:
 		accuracy *= ktgt_skill[0];
 		break;
@@ -1036,19 +1021,13 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	vec3_t  target;
 	vec3_t  angles;
 	vec3_t down;
-	int strafespeed;
 	float jump_thresh;
 	float crouch_thresh;
 	gitem_t *vehicle;
 	float range = 0.0f;
 	vec3_t v;
 	qboolean use_fuzzy_aim;
-	short mSpeed;
-
-	if(g_tactical->integer)
-		mSpeed = 200;
-	else 
-		mSpeed = 400;
+	short mSpeed = ACEMV_GetWalkSpeed (self);
 
 	self->last_sidemove = self->sidemove;
 
@@ -1081,22 +1060,20 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	switch ( self->skill )
 	{ // set up the skill levels
+	case -1:
 	case 0:
-		strafespeed   = 300;
 		jump_thresh   = 1.0f;  // never jump
 		crouch_thresh = 0.0f;  // never crouch
 		break;
 
 	case 1:
 	default:
-		strafespeed   = 400;
 		jump_thresh   = 0.95f;
 		crouch_thresh = 0.6f; // crouch much
 		break;
 
 	case 2:
 	case 3:
-		strafespeed = 800;
 		if ( !joustmode->integer )
 		{
 			jump_thresh   = 0.8f;
@@ -1178,7 +1155,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		//skip any jumping or crouching
 	}
 
-	if ( self->skill == 0 && d < 0.9f )
+	if (self->skill <= 0 && d < 0.9f)
 		goto attack; //skill 0 bots will barely move while firing
 
 standardmove:

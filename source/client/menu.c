@@ -3691,9 +3691,8 @@ static void StartGame( void )
 
 static void SinglePlayerGameFunc (void *data)
 {
-	char skill[2];
-	skill[1] = '\0';
-	skill[0] = ((menuaction_s*)data)->generic.localints[0]+'0';
+	char skill[3];
+	Com_sprintf(skill, sizeof(skill), "%d", ((menuaction_s*)data)->generic.localints[0]);
 	Cvar_ForceSet ("skill", skill);
 	StartGame ();
 }
@@ -3732,10 +3731,11 @@ static void M_Menu_Game_f (void)
 	static menuframework_s	s_game_menu;
 
 	static const char *singleplayer_skill_level_names[][2] = {
-		{"Easy",	"You will win"},
-		{"Medium",	"You might win"},
-		{"Hard",	"Very challenging"},
-		{"Ultra",	"Only the best will win"}
+		{"Very Easy",	"Bot slaughter"},
+		{"Easy",		"You will win"},
+		{"Medium",		"You might win"},
+		{"Hard",		"Very challenging"},
+		{"Ultra",		"Only the best will win"}
 	};
 	#define num_singleplayer_skill_levels  static_array_size(singleplayer_skill_level_names)
 	static menuaction_s		s_singleplayer_game_actions[num_singleplayer_skill_levels];
@@ -3750,7 +3750,7 @@ static void M_Menu_Game_f (void)
 		s_singleplayer_game_actions[i].generic.flags = QMF_BUTTON;
 		s_singleplayer_game_actions[i].generic.name = singleplayer_skill_level_names[i][0];
 		s_singleplayer_game_actions[i].generic.tooltip = singleplayer_skill_level_names[i][1];
-		s_singleplayer_game_actions[i].generic.localints[0] = i;
+		s_singleplayer_game_actions[i].generic.localints[0] = i - 1;
 		s_singleplayer_game_actions[i].generic.callback = SinglePlayerGameFunc;
 		Menu_AddItem (&s_game_menu, &s_singleplayer_game_actions[i]);
 	}
