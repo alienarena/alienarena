@@ -855,11 +855,11 @@ void CL_AddPacketEntities (frame_t *frame)
 		}
 		else if (effects & EF_GREENMZF) 
 		{
-			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0xd4, false);
+			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0xd4, 0.7, false);
 		}
 		else if (effects & EF_BLUEMZF) 
 		{
-			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0x74, false);
+			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0x74, 0.7, false);
 		}
 		else if (effects & EF_SHOCKBALL)
 		{
@@ -1369,14 +1369,14 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	{
 		if(gun.frame > 6 && gun.frame < 25) 
 		{
-			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0xd4, true);
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0xd4, 0.4, true);
 		}
 	}
 	else if(!(strcmp("models/weapons/v_alienblast/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame == 6) 
 		{
-			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0xd4, true);
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0xd4, 0.7, true);
 			useFX = true;
 		}
 	}
@@ -1384,7 +1384,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	{
 		if(gun.frame == 6) 
 		{
-			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0x74, true);
+			CL_BlasterMuzzleParticles (gun.origin, gun.angles, 0x74, 0.7, true);
 			useFX = true;
 		}
 	}

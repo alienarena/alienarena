@@ -1627,7 +1627,7 @@ CL_MuzzleParticles
 ===============
 */
 extern cvar_t *r_lefthand;
-void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean from_client)
+void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, float alpha, qboolean from_client)
 {
 	int			j;
 	particle_t	*p;
@@ -1695,7 +1695,7 @@ void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean
 	}
 	p->accel[0] = p->accel[1] = 0;
 	p->accel[2] = 0;
-	p->alpha = 0.7;
+	p->alpha = alpha;
 	p->color = color;
 	p->alphavel = -100.0f;
 
@@ -1721,7 +1721,7 @@ void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, qboolean
 	}
 	p->accel[0] = p->accel[1] = 0;
 	p->accel[2] = 0;
-	p->alpha = 0.7;
+	p->alpha = alpha;
 	p->color = color;
 	p->alphavel = -100.0f;	
 }
