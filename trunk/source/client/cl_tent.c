@@ -356,12 +356,12 @@ void CL_ParseTEnt (void)
 	case TE_BLOOD:			// bullet hitting flesh
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		CL_ParticleEffect (pos, dir, 450, 60);// doing the blood here - color is red
+		CL_BloodEffect (pos, dir, 450, 4);// doing the blood here - color is red
 		break;
 	case TE_GREENBLOOD:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		CL_ParticleEffect (pos, dir, 550, 60);// doing the blood here - color is green
+		CL_BloodEffect (pos, dir, 550, 4);// doing the blood here - color is green
 		break;
 	case TE_GUNSHOT:
 	case TE_SPARKS:

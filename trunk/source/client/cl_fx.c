@@ -780,6 +780,141 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	}
 }
 
+/*
+===============
+CL_BloodSplatter - simple blood effects
+===============
+*/
+
+void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
+{
+	particle_t *p;
+	vec3_t		v;
+	int			j;
+	trace_t	trace;
+	static vec3_t mins = { -1.0f, -1.0f, -1.0f };
+    static vec3_t maxs = { 1.0f, 1.0f, 1.0f };
+
+	//trace to see if impact occurs with nearby brush
+	trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
+	if(trace.contents) { //hit a brush
+
+		if(!(p = new_particle()))
+			return;
+
+		p->image = r_bloodtexture;
+		p->color = color + (rand() & 1);
+		p->type = PARTICLE_DECAL;
+		p->blendsrc = GL_SRC_ALPHA;
+		if(blend) //glowing blood
+			p->blenddst = GL_ONE;
+		else
+			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->scale = 2;
+		p->scalevel = 0;
+
+		VectorScale(trace.plane.normal, -1, v);
+		RotateForNormal(v, p->angle);
+		p->angle[ROLL] = rand() % 360;
+		VectorAdd(pos2, trace.plane.normal, p->org);
+
+		p->alpha = 1.0;
+		p->alphavel = -0.2f / (2.0f + frand() * 0.3f);
+		for (j=0 ; j<3 ; j++)
+		{
+				p->accel[j] = 0;
+				p->vel[j] = 0;
+		}
+	}
+}
+
+void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count)
+{
+	int			i, j, k;
+	particle_t	*p;
+	float		d;
+
+	if((color == 450 || color == 550) && cl_noblood->value)
+		return;
+
+	for (i=0 ; i<count ; i++)
+	{
+		vec3_t porg, pvel;
+
+		d = rand()&31;
+		for (j=0 ; j<3 ; j++)
+		{
+			porg[j] = org[j] + ((rand()&7)-4) + d*dir[j];
+			pvel[j] = crand()*40;
+		}
+
+		// add stains
+		if (!cl_noblood->value)
+		{
+			vec3_t start, end;
+			VectorCopy(org, start);
+			VectorCopy(org, end);
+			start[2] +=128;
+			end[2] -=128;
+			if (color == 450)
+				CL_BloodSplatter(start, end, 0xe8, 0);
+			else if (color == 550)
+				CL_BloodSplatter(start, end, 0xd0, 1);
+		}
+
+		for(k = 0; k < 5; k++)
+		{
+			if (!(p = new_particle()))
+				return;
+			
+			VectorCopy(porg, p->org);
+			VectorCopy(pvel, p->vel);
+
+			p->accel[0] = p->accel[1] = 0;
+			p->accel[2] = -PARTICLE_GRAVITY/2.0f;
+		
+			p->type = PARTICLE_STANDARD;
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE;
+			p->alpha = 0.5f;
+			p->scalevel = 20.0f;
+		 
+			p->scale = 10;
+				
+			if (color == 450)
+			{
+				p->color = 0xe8;
+			}
+			else if (color == 550)
+			{
+				p->color = 0xd0 + (rand()&3); 
+			}
+
+			p->alphavel = -4.0f / ((float)k + 5.0f);
+
+			switch(k) {
+				case 0:
+					p->image = r_bloodtexture;
+					break;
+				case 1:
+					p->image = r_blood2texture;
+					break;
+				case 2:
+					p->image = r_blood3texture;
+					break;
+				case 3:
+					p->image = r_blood4texture;
+					break;
+				case 4:
+					p->image = r_blood5texture;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+}
+
 void CL_FlameThrower (vec3_t org, vec3_t dir)
 {
 	int			i, j;
@@ -1343,8 +1478,8 @@ void CL_ExplosionParticles (vec3_t org)
 
 			float kfl = (float)k;
 	
-		if (!(p = new_particle()))
-			return;
+			if (!(p = new_particle()))
+				return;
 
 			for (j=0 ; j<3 ; j++)
 			{
@@ -2359,54 +2494,6 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 
 /*
 ===============
-CL_BloodSplatter - simple blood effects
-===============
-*/
-
-void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
-{
-	particle_t *p;
-	vec3_t		v;
-	int			j;
-	trace_t	trace;
-	static vec3_t mins = { -1.0f, -1.0f, -1.0f };
-    static vec3_t maxs = { 1.0f, 1.0f, 1.0f };
-
-	//trace to see if impact occurs with nearby brush
-	trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
-	if(trace.contents) { //hit a brush
-
-		if(!(p = new_particle()))
-			return;
-
-		p->image = r_bloodtexture;
-		p->color = color + (rand() & 1);
-		p->type = PARTICLE_DECAL;
-		p->blendsrc = GL_SRC_ALPHA;
-		if(blend) //glowing blood
-			p->blenddst = GL_ONE;
-		else
-			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-		p->scale = 2;
-		p->scalevel = 0;
-
-		VectorScale(trace.plane.normal, -1, v);
-		RotateForNormal(v, p->angle);
-		p->angle[ROLL] = rand() % 360;
-		VectorAdd(pos2, trace.plane.normal, p->org);
-
-		p->alpha = 0.7;
-		p->alphavel = -0.2f / (2.0f + frand() * 0.3f);
-		for (j=0 ; j<3 ; j++)
-		{
-				p->accel[j] = 0;
-				p->vel[j] = 0;
-		}
-	}
-}
-
-/*
-===============
 CL_DiminishingTrail
 ===============
 */
@@ -2471,14 +2558,14 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 
 			if (flags & EF_GIB)
 			{
-				p->alpha = .6;//1.0;
-				p->alphavel = -1.0f / (1.0f + frand()*0.4f);
+				p->alpha = .3;//1.0;
+				p->alphavel = -1.0f / (2.0f + frand()*0.4f);
 				p->type = PARTICLE_STANDARD;
-				p->image = r_bloodtexture;
+				p->image = r_blood3texture;
 				p->blendsrc = GL_SRC_ALPHA;
-				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+				p->blenddst = GL_ONE;
 				p->color = 0xe8; //(155 31 0)
-				p->scale = 6;
+				p->scale = 10;
 				p->scalevel = 1.5;
 				for (j=0 ; j<3 ; j++)
 				{
@@ -2490,14 +2577,14 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 			}
 			else if (flags & EF_GREENGIB)
 			{
-				p->alpha = .6;
-				p->alphavel = -1.0f / (1.0f + frand()*0.4f);
+				p->alpha = .3;
+				p->alphavel = -1.0f / (2.0f + frand()*0.4f);
 				p->type = PARTICLE_STANDARD;
-				p->image = r_bloodtexture;
+				p->image = r_blood3texture;
 				p->blendsrc = GL_SRC_ALPHA;
-				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+				p->blenddst = GL_ONE;
 				p->color = 0xd0+ (rand()&3); //(0-83 255-187 0-39)
-				p->scale = 6;
+				p->scale = 10;
 				p->scalevel = 1.5;
 				for (j=0; j< 3; j++)
 				{

@@ -45,6 +45,10 @@ image_t		*r_explosion5texture;
 image_t		*r_explosion6texture;
 image_t		*r_explosion7texture;
 image_t		*r_bloodtexture;
+image_t		*r_blood2texture;
+image_t		*r_blood3texture;
+image_t		*r_blood4texture;
+image_t		*r_blood5texture;
 image_t		*r_pufftexture;
 image_t		*r_bflashtexture;
 image_t		*r_cflashtexture;
@@ -190,6 +194,22 @@ void R_InitParticleTexture (void)
 	r_bloodtexture = R_RegisterParticlePic("blood");
 	if (!r_bloodtexture) {
 		r_bloodtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_blood2texture = R_RegisterParticlePic("blood2");
+	if (!r_blood2texture) {
+		r_blood2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_blood3texture = R_RegisterParticlePic("blood3");
+	if (!r_blood3texture) {
+		r_blood3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_blood4texture = R_RegisterParticlePic("blood4");
+	if (!r_blood4texture) {
+		r_blood4texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_blood5texture = R_RegisterParticlePic("blood5");
+	if (!r_blood5texture) {
+		r_blood5texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_pufftexture = R_RegisterParticlePic("puff");
 	if (!r_pufftexture) {
