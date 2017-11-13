@@ -797,8 +797,9 @@ void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 
 	//trace to see if impact occurs with nearby brush
 	trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
-	if(trace.contents) { //hit a brush
-
+	if(trace.contents) 
+	{	
+		//hit a brush
 		if(!(p = new_particle()))
 			return;
 
@@ -828,6 +829,53 @@ void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 	}
 }
 
+void CL_BigBloodSplatterGround(vec3_t org, int color, int blend)
+{
+	particle_t *p;
+	vec3_t		v, end, dir;
+	int			j;
+	trace_t	trace;
+	static vec3_t mins = { -1.0f, -1.0f, -1.0f };
+    static vec3_t maxs = { 1.0f, 1.0f, 1.0f };
+
+	//VectorAdd(org, dir, end);
+	VectorCopy(org, end);
+	end[2] -= 128;
+	trace = CL_Trace ( org, mins, maxs, end, -1, MASK_SOLID, true, NULL);
+	if(trace.contents) 
+	{	
+		if(!(p = new_particle()))
+			return;
+
+		p->image = r_bloodtexture;
+		p->color = color + (rand() & 1);
+		p->type = PARTICLE_DECAL;
+		p->blendsrc = GL_SRC_ALPHA;
+		if(blend) //glowing blood
+			p->blenddst = GL_ONE;
+		else
+			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->scale = 4;
+		p->scalevel = 0;
+
+		VectorSet(dir, 0, 0, 1);
+
+		VectorScale(dir, -1, v);
+		RotateForNormal(v, p->angle);
+		p->angle[ROLL] = rand() % 360;
+
+		VectorCopy(trace.endpos, p->org);
+
+		p->alpha = 0.6;
+		p->alphavel = -0.2f / (2.0f + frand() * 0.3f);
+		for (j=0 ; j<3 ; j++)
+		{
+				p->accel[j] = 0;
+				p->vel[j] = 0;
+		}
+	}
+}
+
 void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
@@ -848,18 +896,13 @@ void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count)
 			pvel[j] = crand()*40;
 		}
 
-		// add stains
+		// add blood stains
 		if (!cl_noblood->value)
-		{
-			vec3_t start, end;
-			VectorCopy(org, start);
-			VectorCopy(org, end);
-			start[2] +=128;
-			end[2] -=128;
+		{	
 			if (color == 450)
-				CL_BloodSplatter(start, end, 0xe8, 0);
+				CL_BigBloodSplatterGround(porg, 0xe8, 0);
 			else if (color == 550)
-				CL_BloodSplatter(start, end, 0xd0, 1);
+				CL_BigBloodSplatterGround(porg, 0xd0, 1);
 		}
 
 		for(k = 0; k < 5; k++)

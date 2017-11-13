@@ -1039,7 +1039,7 @@ static char mesh_vertex_program[] = STRINGIFY (
 		
 			if(TEAM > 0)
 			{
-				fog = (gl_Position.z - 50.0)/1000.0;
+				fog = (gl_Position.z - 100.0)/1000.0;
 				if(TEAM == 3)
 					fog = clamp(fog, 0.0, 0.5);
 				else
