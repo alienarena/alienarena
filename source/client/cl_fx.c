@@ -918,7 +918,7 @@ void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count)
 		
 			p->type = PARTICLE_STANDARD;
 			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE;
+			
 			p->alpha = 0.5f;
 			p->scalevel = 20.0f;
 		 
@@ -927,9 +927,11 @@ void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count)
 			if (color == 450)
 			{
 				p->color = 0xe8;
+				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 			}
 			else if (color == 550)
 			{
+				p->blenddst = GL_ONE;
 				p->color = 0xd0 + (rand()&3); 
 			}
 
@@ -2606,7 +2608,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 				p->type = PARTICLE_STANDARD;
 				p->image = r_blood3texture;
 				p->blendsrc = GL_SRC_ALPHA;
-				p->blenddst = GL_ONE;
+				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 				p->color = 0xe8; //(155 31 0)
 				p->scale = 10;
 				p->scalevel = 1.5;
