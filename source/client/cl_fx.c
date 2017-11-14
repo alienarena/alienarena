@@ -2209,7 +2209,7 @@ void CL_RocketMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 	}
 	else
 	{
-		VectorMA(mflashorg, 40, vforward, mflashorg);
+		VectorMA(mflashorg, 50, vforward, mflashorg);
 		VectorMA(mflashorg, 14, vup, mflashorg);
 	}
 	
@@ -2256,34 +2256,37 @@ void CL_RocketMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 	if (!(p = new_particle()))
 		return;
 
-	//shoot some flame out of vent
-	VectorCopy(org, mflashorg);
-
-	VectorMA(mflashorg, 5, vforward, mflashorg);
-	VectorMA(mflashorg, rightoffset * -0.125f, vright, mflashorg);
-	VectorMA(mflashorg, upoffset+1.0f, vup, mflashorg);
-
-	p->type = PARTICLE_BEAM;
-	p->image = r_fflashtexture;
-	p->scale = 0.3f;
-	p->scalevel = 0;
-	//project a point forward
-	VectorScale(vforward, -1.0f, vforward);
-	VectorMA(vforward, -0.3, vright, vforward);
-	VectorAdd(mflashorg, vforward, vec);
-	VectorSet(p->angle, vec[0], vec[1], vec[2]);
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	for (j=0 ; j<3 ; j++)
+	if(from_client)
 	{
-		p->org[j] = mflashorg[j];
-		p->vel[j] = 0;
+		//shoot some flame out of vent
+		VectorCopy(org, mflashorg);
+
+		VectorMA(mflashorg, 5, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset * -0.125f, vright, mflashorg);
+		VectorMA(mflashorg, upoffset+1.0f, vup, mflashorg);
+
+		p->type = PARTICLE_BEAM;
+		p->image = r_fflashtexture;
+		p->scale = 0.3f;
+		p->scalevel = 0;
+		//project a point forward
+		VectorScale(vforward, -1.0f, vforward);
+		VectorMA(vforward, -0.3, vright, vforward);
+		VectorAdd(mflashorg, vforward, vec);
+		VectorSet(p->angle, vec[0], vec[1], vec[2]);
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = mflashorg[j];
+			p->vel[j] = 0;
+		}
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = 0;
+		p->alpha = 0.7;
+		p->color = 0xd9; //(255 255 167)
+		p->alphavel = -10.0f;	
 	}
-	p->accel[0] = p->accel[1] = 0;
-	p->accel[2] = 0;
-	p->alpha = 0.7;
-	p->color = 0xd9; //(255 255 167)
-	p->alphavel = -10.0f;	
 }
 
 particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous)
