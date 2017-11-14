@@ -873,6 +873,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			CL_PlasmaFlashParticle(ent.origin, ent.angles, false);
 		}
+		else if (effects & EF_ROCKETMZF)
+		{
+			CL_RocketMuzzle(ent.origin, ent.angles, false);
+		}
 
 		//Ctf flag particle effects
 		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
