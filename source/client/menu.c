@@ -6608,15 +6608,15 @@ static const char *tactical_skin_names[num_tactical_teams][num_tactical_classes]
 {
 	//ALIEN CLASSES
 	{
-		{"Enforcer",	"martianenforcer"},
-		{"Warrior",		"martianwarrior"},
-		{"Overlord",	"martianoverlord"}
+		{"Enforcer(detonators)",	"martianenforcer"},
+		{"Warrior(bombs)",			"martianwarrior"},
+		{"Overlord(minderaser)",	"martianoverlord"}
 	},
 	//HUMAN CLASSES
 	{
-		{"Femborg",		"femborg"},
-		{"Enforcer",	"enforcer"},
-		{"Commander",	"commander"}
+		{"Femborg(detonators)",		"femborg"},
+		{"Enforcer(bombs)",			"enforcer"},
+		{"Commander(minderaser)",	"commander"}
 	}
 };
 
