@@ -2900,7 +2900,6 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	{
 		PutClientInServer(ent);
 	}
-
 }
 
 static void ClientChangeSkin (edict_t *ent)
