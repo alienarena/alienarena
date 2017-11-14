@@ -2681,8 +2681,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(whereFrom != SPAWN && whereFrom != CONNECT)
 		whereFrom = INGAME;
 
-	if((playervote.called || g_tactical->integer ) && whereFrom == INGAME)
-		return; //do not allow people to change info during votes or in tactical mode(yet)
+	if(playervote.called && whereFrom == INGAME)
+		return; //do not allow people to change info during votes
 
 	// validate and set name
 	s = Info_ValueForKey (userinfo, "name");
@@ -2760,6 +2760,45 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		Info_SetValueForKey (userinfo, "skin", s);
 	}
 	// end skin check
+
+	// Do tactical checks.
+	if(g_tactical->integer)
+	{
+		copychar = false;
+		strcpy( playermodel, " " );
+		j = k = 0;
+		for ( i = 0; i <= strlen( s ) && i < MAX_OSPATH; i++ )
+		{
+				if(copychar){
+				playerskin[k] = s[i];
+				k++;
+			}
+				else {
+				playermodel[j] = s[i];
+				j++;
+			}
+			if ( s[i] == '/' )
+				copychar = true;
+		}
+		playermodel[j] = 0;
+
+		if(ent->ctype == 0)
+		{
+			if(stricmp(playermodel, "martianenforcer/") && stricmp(playermodel, "martianwarrior/") && stricmp(playermodel, "martianoverlord/"))
+			{
+				//safe_bprintf( PRINT_MEDIUM,	"Invalid Character!\n");
+				return;
+			}
+		}
+		else if(ent->ctype == 1)
+		{
+			if(stricmp(playermodel, "commander/") && stricmp(playermodel, "enforcer/") && stricmp(playermodel, "femborg/"))
+			{
+				//safe_bprintf( PRINT_MEDIUM,	"Invalid Character!\n");
+				return;
+			}
+		}
+	}
 
 	playernum = ent-g_edicts-1;
 
@@ -2856,6 +2895,11 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	// save off the userinfo in case we want to check something later
 	Q_strncpyz2( ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo) );
+
+	if(g_tactical->integer && player_participating(ent) && whereFrom == INGAME)
+	{
+		PutClientInServer(ent);
+	}
 
 }
 
