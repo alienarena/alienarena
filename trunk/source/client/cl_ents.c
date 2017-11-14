@@ -1403,6 +1403,13 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			CL_SmartMuzzle (gun.origin, gun.angles, true);
 		}
 	}
+	else if(!(strcmp("models/weapons/v_rocket/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame == 7) 
+		{
+			CL_RocketMuzzle (gun.origin, gun.angles, true);
+		}
+	}
 	
 	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 18 && gun.frame < 50)
 		last_blue_flame = CL_BlueFlameParticle (gun.origin, gun.angles, last_blue_flame);

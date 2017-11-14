@@ -2076,6 +2076,7 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	p->alphavel = -100.0f;	
 
 }
+
 /*
 ===============
 CL_SmartMuzzle
@@ -2152,6 +2153,137 @@ void CL_SmartMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 	p->alpha = 1.0;
 	p->color = 0xff; 
 	p->alphavel = -100.0f;
+}
+
+/*
+===============
+CL_RocketMuzzle
+===============
+*/
+void CL_RocketMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
+{
+	int			i, j;
+	particle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup, vec;
+	float		rightoffset, upoffset, len;
+
+	// Already being rendered by client, don't render it twice
+	if(!from_client) 
+	{
+		VectorSubtract (org, cl.refdef.vieworg, vec);
+		len = VectorNormalize (vec);
+		if(len < 128)
+			return;
+	}
+
+	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+
+	}
+
+	AngleVectors (angles, vforward, vright, vup);
+
+	if(from_client) 
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset = -3;
+		else
+			rightoffset = 3;
+
+		upoffset = -2.0;
+
+		if(cl.refdef.fov_x > 90)
+		{
+			if (r_lefthand->value == 1.0F)
+				rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+			else
+				rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+			upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+		}
+	
+		VectorMA(mflashorg, 24, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset, vright, mflashorg);
+		VectorMA(mflashorg, upoffset, vup, mflashorg);
+	}
+	else
+	{
+		VectorMA(mflashorg, 40, vforward, mflashorg);
+		VectorMA(mflashorg, 14, vup, mflashorg);
+	}
+	
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_STANDARD;
+	p->image = r_explosion1texture;
+	p->scale = 12 + (rand()&2);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.6;
+	p->color = 0xd9 + (rand()&7);
+	p->alphavel = -100.0f;
+
+	//puff of smoke
+	for(i = 0; i < 5; i++)
+	{
+		if (!(p = new_particle()))
+		return;
+
+		p->type = PARTICLE_STANDARD;
+		p->image = r_smoketexture;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->scale = 1.0f;
+		p->color = 15; //(235 235 235)
+		p->scalevel = 20.0f;
+		VectorCopy(mflashorg, p->org);
+		VectorScale(vforward, 5, p->vel);
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = 5;
+		p->alpha = 0.15;
+		p->alphavel = -0.2f;
+	}
+
+	if (!(p = new_particle()))
+		return;
+
+	//shoot some flame out of vent
+	VectorCopy(org, mflashorg);
+
+	VectorMA(mflashorg, 5, vforward, mflashorg);
+	VectorMA(mflashorg, rightoffset * -0.125f, vright, mflashorg);
+	VectorMA(mflashorg, upoffset+1.0f, vup, mflashorg);
+
+	p->type = PARTICLE_BEAM;
+	p->image = r_fflashtexture;
+	p->scale = 0.3f;
+	p->scalevel = 0;
+	//project a point forward
+	VectorScale(vforward, -1.0f, vforward);
+	VectorMA(vforward, -0.3, vright, vforward);
+	VectorAdd(mflashorg, vforward, vec);
+	VectorSet(p->angle, vec[0], vec[1], vec[2]);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.7;
+	p->color = 0xd9; //(255 255 167)
+	p->alphavel = -10.0f;	
 }
 
 particle_t *CL_BlueFlameParticle (vec3_t org, vec3_t angles, particle_t *previous)
