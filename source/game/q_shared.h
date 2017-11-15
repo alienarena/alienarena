@@ -976,6 +976,7 @@ typedef struct
 {
 	char name[MAX_INFO_STRING];
 	int score;
+	int dmteam;
 } bot_t;
 
 // player_state_t is the information needed in addition to pmove_state_t

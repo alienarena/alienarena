@@ -187,6 +187,7 @@ typedef struct _PLAYERINFO {
 	char playername[PLAYERNAME_SIZE];
 	int ping;
 	int score;
+	char team[8];
 } PLAYERINFO;
 
 typedef struct _SERVERINFO {

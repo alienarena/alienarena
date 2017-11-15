@@ -251,8 +251,10 @@ static int client_botupdate( void )
 					pclient->client->ps.botnum = pclient->client->resp.botnum = botnum;
 					strcpy( pclient->client->resp.bots[botidx].name, botname );
 					strcpy( pclient->client->ps.bots[botidx].name, botname );
-					pclient->client->resp.bots[botidx].score = pbot->client->resp.score;
-					pclient->client->ps.bots[botidx].score   = pbot->client->resp.score;
+					pclient->client->resp.bots[botidx].score  = pbot->client->resp.score;
+					pclient->client->ps.bots[botidx].score    = pbot->client->resp.score;
+					pclient->client->resp.bots[botidx].dmteam = pbot->dmteam;
+					pclient->client->ps.bots[botidx].dmteam   = pbot->dmteam;
 					firstclient = false;
 				}
 			}

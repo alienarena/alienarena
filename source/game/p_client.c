@@ -2312,7 +2312,15 @@ void PutClientInServer (edict_t *ent)
 
 	// has to be done after determining the class/team - note - we don't care about spawn distances in tactical
 	if(g_tactical->integer)
+	{
+		// note - these teams are currently only used for server info passed - and is redundant to ctype in tactical code for now
+		if(ent->ctype == 0)
+			ent->dmteam = ALIEN_TEAM;
+		if(ent->ctype == 1)
+			ent->dmteam = HUMAN_TEAM;
+
 		SelectSpawnPoint (ent, spawn_origin, spawn_angles);	
+	}
 	
 	client->ps.pmove.origin[0] = spawn_origin[0]*8;
 	client->ps.pmove.origin[1] = spawn_origin[1]*8;

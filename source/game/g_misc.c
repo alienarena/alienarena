@@ -1208,7 +1208,7 @@ void misc_laser_think (edict_t *self)
 
 		// hurt it if we can
 		if (tr.ent->takedamage)
-			T_Damage (tr.ent, self, self->activator, self->movedir, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
+			T_Damage (tr.ent, self, self, self->movedir, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
 
 		// if we hit something that's not a player, we're done
 		if (!tr.ent->client)
