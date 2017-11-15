@@ -4150,12 +4150,20 @@ static void ServerInfo_SubmenuInit (void)
 static void PlayerList_SubmenuInit (void)
 {
 	int i, j;
-	
+	//qboolean is_team_server = false;
+
 	char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
 	size_t sizes[3] = {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
 	
 	if (mservers[serverindex].players == 0)
 		return;
+
+	//
+	//for ( i = 0; i < MAX_SERVER_MODS; i++ )
+	//{
+	//	if(!stricmp("ctf", s_servers[serverindex].modnames[i]) || !stricmp("g_tactical", s_servers[serverindex].modnames[i]))
+	//		is_team_server = true;
+	//}
 	
 	s_servers[serverindex].playerlist_submenu.generic.type = MTYPE_SUBMENU;
 	s_servers[serverindex].playerlist_submenu.navagable = true;
@@ -4180,6 +4188,8 @@ static void PlayerList_SubmenuInit (void)
 	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_NAME].generic.name	= "^7Name";
 	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_SCORE].generic.name	= "^7Score";
 	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_PING].generic.name	= "^7Ping";
+	s_servers[serverindex].playerlist_header_columns[SVDATA_PLAYERINFO_TEAM].generic.name	= "^7Team";
+
 	for (i = 0; i < SVDATA_PLAYERINFO; i++)
 	{
 		s_servers[serverindex].playerlist_header_columns[i].generic.type			= MTYPE_TEXT;
@@ -4263,6 +4273,7 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 	int result;
 	
 	char playername[PLAYERNAME_SIZE];
+	char team[8];
 	int score, ping, rankTotal, starttime;
 	PLAYERSTATS	player;
 
@@ -4356,6 +4367,25 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 
 		playername[sizeof(playername)-1] = '\0';
 
+		token = strtok( NULL, "\"");
+		token = strtok( NULL, "\"");
+		token = strtok( NULL, seps);
+		if (token)
+		{
+			if(atoi(token) == 0)
+				strcpy(team, "red");
+			else if(atoi(token) == 1)
+				strcpy(team, "blue");
+			else if(atoi(token) == 3)
+				strcpy(team, "alien");
+			else if(atoi(token) == 4)
+				strcpy(team, "human");
+			else
+				strcpy(team, "none");
+		}
+		else
+			strcpy(team, "unknown");
+
 		//get ranking
 		Q_strncpyz2( player.playername, playername, sizeof(player.playername));
 		player.totalfrags = player.totaltime = player.ranking = 0;
@@ -4372,6 +4402,10 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_PING],
 						SVDATA_PLAYERINFO_COLSIZE,
 						"%i", ping
+					);
+		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_TEAM],
+						SVDATA_PLAYERINFO_COLSIZE,
+						"%s", team
 					);
 		destserver->playerRankings[players] = player.ranking;
 

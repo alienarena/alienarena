@@ -99,6 +99,8 @@ struct edict_s
 #define RED_TEAM				0
 #define BLUE_TEAM				1
 #define NO_TEAM					2
+#define ALIEN_TEAM				3
+#define HUMAN_TEAM				4
 
 	// the game dll can add anything it wants after
 	// this point in the structure

@@ -188,8 +188,8 @@ char *SV_StatusString (void)
 			 * do not send actual ip addresses for security/privacy reasons
 			 */
 			Com_sprintf( player, sizeof(player),
-					"%i %i \"%s\" \"127.0.0.1\"\n",
-					cl_score, cl->ping, cl->name);
+					"%i %i \"%s\" \"127.0.0.1\" %i\n",
+					cl_score, cl->ping, cl->name, cl->edict->dmteam);
 			if ( (strlen(status) + strlen(player) + 1) < sizeof(status) )
 			{
 				strncat( status, player, strlen(player) );
@@ -216,10 +216,10 @@ char *SV_StatusString (void)
 				{
 					int bot_score = ps_bot->score;
 					Com_sprintf( player, sizeof(player),
-							"%i %i \"%s\" \"127.0.0.1\"\n",
+							"%i %i \"%s\" \"127.0.0.1\" %i\n",
 							bot_score,
 							0, // bot ping
-							ps_bot->name );
+							ps_bot->name, ps_bot->dmteam);
 					if ( (strlen(status) + strlen(player) + 1) < sizeof(status) )
 					{
 						strncat( status, player, strlen(player) );
