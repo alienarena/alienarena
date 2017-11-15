@@ -2783,18 +2783,22 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		playermodel[j] = 0;
 
 		if(ent->ctype == 0)
-		{
-			if(stricmp(playermodel, "martianenforcer/") && stricmp(playermodel, "martianwarrior/") && stricmp(playermodel, "martianoverlord/"))
+		{ // alien
+			if ( Q_strcasecmp(playermodel, "martianenforcer/")
+				 && Q_strcasecmp(playermodel, "martianwarrior/")
+				 && Q_strcasecmp(playermodel, "martianoverlord/") )
 			{
-				//safe_bprintf( PRINT_MEDIUM,	"Invalid Character!\n");
+				//safe_bprintf( PRINT_MEDIUM, "Invalid Character!\n");
 				return;
 			}
 		}
 		else if(ent->ctype == 1)
-		{
-			if(stricmp(playermodel, "commander/") && stricmp(playermodel, "enforcer/") && stricmp(playermodel, "femborg/"))
+		{ // human
+			if ( Q_strcasecmp(playermodel, "commander/")
+				&& Q_strcasecmp(playermodel, "enforcer/")
+				&& Q_strcasecmp(playermodel, "femborg/") )
 			{
-				//safe_bprintf( PRINT_MEDIUM,	"Invalid Character!\n");
+				//safe_bprintf( PRINT_MEDIUM, "Invalid Character!\n");
 				return;
 			}
 		}
