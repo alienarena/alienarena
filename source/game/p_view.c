@@ -965,6 +965,8 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.effects |= EF_PLASMAMZF;
 	else if (ent->client->pers.weapon->classnum == weapon_rocketlauncher && ent->client->ps.gunframe == 7)
 		ent->s.effects |= EF_ROCKETMZF;
+	else if (ent->client->pers.weapon->classnum == weapon_minderaser && ent->client->ps.gunframe == 7)
+		ent->s.effects |= EF_MEMZF;
 
 	//invisibility
 	if(ent->client->invis_expiretime > level.time) {
