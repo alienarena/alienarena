@@ -660,6 +660,7 @@ typedef struct
 #define EF_SMARTMZF			0x08000000
 #define EF_PLASMAMZF		0x10000000
 #define EF_ROCKETMZF		0x20000000
+#define EF_MEMZF			0x40000000
 #define EF_ROCKETEXHAUST	0x80000000
 
 // entity_state_t->renderfx flags

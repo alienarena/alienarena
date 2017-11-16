@@ -877,6 +877,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			CL_RocketMuzzle(ent.origin, ent.angles, false);
 		}
+		else if (effects & EF_MEMZF)
+		{
+			CL_MEMuzzle(ent.origin, ent.angles, false);
+		}
 
 		//Ctf flag particle effects
 		COM_StripExtension ( cl.configstrings[CS_MODELS+(s1->modelindex)], shortname );
@@ -1412,6 +1416,13 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		if(gun.frame == 7) 
 		{
 			CL_RocketMuzzle (gun.origin, gun.angles, true);
+		}
+	}
+	else if(!(strcmp("models/weapons/v_minderaser/tris.iqm", gun.model->name))) 
+	{
+		if(gun.frame == 7) 
+		{
+			CL_MEMuzzle (gun.origin, gun.angles, true);
 		}
 	}
 	

@@ -1703,18 +1703,6 @@ void weapon_minderaser_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	//create visual muzzle flash sprite!
-	forward[0] = forward[0] * 2;
-	forward[1] = forward[1] * 2;
-
-	VectorAdd(start, forward, start);
-	start[2]+=6;
-
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BOSSTPORT);
-	gi.WritePosition (start);
-	gi.multicast (start, MULTICAST_PVS);
-
 	// do not use take_ammo (ent, ent->altfire);
 	// always take, mind eraser cannot have infinite ammo
 	ent->client->pers.inventory[ent->client->ammo_index] -=

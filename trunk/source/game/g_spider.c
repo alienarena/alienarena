@@ -109,6 +109,9 @@ void spiderShot (edict_t *self) //same as deathray shot
 	else
 		return;
 
+	if(g_tactical->integer && (self->ctype == self->enemy->ctype))
+		return;
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 	VectorSet(offset, 16, 0, 16);
 	G_ProjectSource (self->s.origin, offset, forward, right, start);
@@ -265,6 +268,9 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->enemy = NULL;
 
 	self->owner = owner;
+
+	if(g_tactical->integer)
+		self->ctype = owner->ctype;
 
 	self->last_action = level.time;
 
