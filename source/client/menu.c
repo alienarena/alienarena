@@ -4153,7 +4153,8 @@ static void PlayerList_SubmenuInit (void)
 	//qboolean is_team_server = false;
 
 	char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
-	size_t sizes[3] = {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
+	size_t sizes[SVDATA_PLAYERINFO]
+		= {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
 	
 	if (mservers[serverindex].players == 0)
 		return;
