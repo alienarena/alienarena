@@ -970,7 +970,7 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 	if(from_client)
 		sFactor = 200.0f;
 	else
-		sFactor = 65.0f;
+		sFactor = 80.0f;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -985,7 +985,7 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 	else
 		rightoffset = 2.0f;
 
-	if(!from_client)
+	if(from_client)
 		upoffset = -2.0f;
 	else
 		upoffset = 4.0f;
@@ -1081,12 +1081,12 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 
 	VectorNormalize(dir);
 
-	if(nudge < 0.3f)
-		nudge = 0.3f;
-	VectorMA(mflashorg, sFactor - 50.0f * nudge, vforward, mflashorg);
+	if(nudge < 0.4f)
+		nudge = 0.4f;
+	VectorMA(mflashorg, 90.0f * nudge, vforward, mflashorg);
 
 	i = 0;
-	for (inc=1.0f ; inc<2.0f ; inc+=0.05f, i++)
+	for (inc=1.0f ; inc<2.0f ; inc+=0.1f, i++)
 	{
 		if (!(p = new_particle()))
 			return;
@@ -2115,7 +2115,7 @@ void CL_SmartMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 {
 	int			j;
 	particle_t	*p;
-	vec3_t		mflashorg, vforward, vright, vup, vec;
+	vec3_t		mflashorg, vforward, vright, vup;
 	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
