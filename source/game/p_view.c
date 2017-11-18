@@ -958,7 +958,7 @@ void G_SetClientEffects (edict_t *ent)
 	else if (ent->client->pers.weapon->classnum == weapon_chaingun && ent->client->ps.gunframe > 4 && ent->client->ps.gunframe < 14)
 		ent->s.effects |= EF_CHAINGUN;
 	else if (ent->client->pers.weapon->classnum == weapon_beamgun && ent->client->ps.gunframe > 6 && ent->client->ps.gunframe < 25)
-		ent->s.effects |= EF_CHAINGUN;
+		ent->s.effects |= EF_GREENMZF;
 	else if (ent->client->pers.weapon->classnum == weapon_flamethrower && ent->client->ps.gunframe > 5 && ent->client->ps.gunframe < 19)
 		ent->s.effects |= EF_FLAMETHROWER;
 	else if (ent->client->pers.weapon->classnum == weapon_smartgun && ent->client->ps.gunframe == 6)
