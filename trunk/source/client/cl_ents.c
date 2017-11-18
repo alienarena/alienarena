@@ -849,37 +849,44 @@ void CL_AddPacketEntities (frame_t *frame)
 		}
 
 		//Various muzzleflash effects
-		if (effects & EF_CHAINGUN) 
+		if(!(ent.flags & RF_VIEWERMODEL))
 		{
-			CL_MuzzleFlashParticle(ent.origin, ent.angles, false);
-		}
-		else if (effects & EF_GREENMZF) 
-		{
-			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0xd4, 0.7, false);
-		}
-		else if (effects & EF_BLUEMZF) 
-		{
-			CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0x74, 0.7, false);
-		}
-		else if (effects & EF_SHOCKBALL)
-		{
-			CL_LightningBall (ent.origin, ent.angles, 0x74, false);
-		}
-		else if (effects & EF_SMARTMZF)
-		{
-			CL_SmartMuzzle (ent.origin, ent.angles, false);
-		}
-		else if (effects & EF_PLASMAMZF)
-		{
-			CL_PlasmaFlashParticle(ent.origin, ent.angles, false);
-		}
-		else if (effects & EF_ROCKETMZF)
-		{
-			CL_RocketMuzzle(ent.origin, ent.angles, false);
-		}
-		else if (effects & EF_MEMZF)
-		{
-			CL_MEMuzzle(ent.origin, ent.angles, false);
+			if (effects & EF_CHAINGUN) 
+			{
+				CL_MuzzleFlashParticle(ent.origin, ent.angles, false);
+			}
+			else if (effects & EF_GREENMZF) 
+			{
+				CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0xd4, 0.7, false);
+			}
+			else if (effects & EF_BLUEMZF) 
+			{
+				CL_BlasterMuzzleParticles(ent.origin, ent.angles, 0x74, 0.7, false);
+			}
+			else if (effects & EF_SHOCKBALL)
+			{
+				CL_LightningBall (ent.origin, ent.angles, 0x74, false);
+			}
+			else if (effects & EF_SMARTMZF)
+			{
+				CL_SmartMuzzle (ent.origin, ent.angles, false);
+			}
+			else if (effects & EF_PLASMAMZF)
+			{
+				CL_PlasmaFlashParticle(ent.origin, ent.angles, false);
+			}
+			else if (effects & EF_ROCKETMZF)
+			{
+				CL_RocketMuzzle(ent.origin, ent.angles, false);
+			}
+			else if (effects & EF_MEMZF)
+			{
+				CL_MEMuzzle(ent.origin, ent.angles, false);
+			}
+			else if (effects & EF_FLAMETHROWER)
+			{
+				CL_FlameThrower (ent.origin, ent.angles, false);
+			}
 		}
 
 		//Ctf flag particle effects
@@ -1296,6 +1303,7 @@ CL_AddViewWeapon
 static int gunPrevFrame = 0;
 static int gunFrameTime = 0;
 static particle_t *last_blue_flame = NULL;
+static particle_t *last_flame = NULL;
 void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {
 	entity_t	gun;		// view model
@@ -1425,11 +1433,20 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			CL_MEMuzzle (gun.origin, gun.angles, true);
 		}
 	}
+	else if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19)
+	{
+		CL_FlameThrower (gun.origin, gun.angles, true);
+	}
 	
 	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 18 && gun.frame < 50)
 		last_blue_flame = CL_BlueFlameParticle (gun.origin, gun.angles, last_blue_flame);
 	else
 		last_blue_flame = NULL;
+
+	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19)
+		last_flame = CL_FlameThrowerParticle (gun.origin, gun.angles, last_flame);
+	else
+		last_flame = NULL;
 
 	V_AddViewEntity (&gun);
 	//add shells for viewweaps (all of em!)

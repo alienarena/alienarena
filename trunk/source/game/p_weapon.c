@@ -1229,7 +1229,6 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 			ent->altfire = !ent->altfire;
 			if(ent->altfire) 
 			{
-				gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/blastf1a.wav"), 1, ATTN_NORM, 0);
 				fire_blasterball (ent, start, forward, damage*3, 1000, effect, hyper, false);
 			}
 		}
@@ -1250,13 +1249,17 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 		else
 			fire_blasterball (ent, start, forward, damage, 1200, effect, hyper, alien);
 	}
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
 	if (hyper)
-		gi.WriteByte (MZ_HYPERBLASTER);
-	else if (ent->client->buttons & BUTTON_ATTACK2)
-		gi.WriteByte (MZ_RAILGUN);
+	{
+		if (ent->client->buttons & BUTTON_ATTACK2)
+			gi.WriteByte (MZ_BLASTER);
+		else
+			gi.WriteByte (MZ_HYPERBLASTER);
+	}
 	else
 		gi.WriteByte (MZ_BLASTER);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);

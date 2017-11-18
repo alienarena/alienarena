@@ -76,6 +76,8 @@ extern image_t		*r_notexture;
 extern image_t		*r_particletexture;
 extern image_t		*r_smoketexture; 
 extern image_t		*r_fireballtexture;
+extern image_t		*r_firestreamtexture;
+extern image_t		*r_firestream3ptexture;
 extern image_t		*r_explosiontexture;
 extern image_t		*r_explosion1texture;
 extern image_t		*r_explosion2texture;

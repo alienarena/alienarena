@@ -633,6 +633,7 @@ typedef struct
 // even if it has a zero index model.
 #define	EF_ROTATE			0x00000001		// rotate (bonus items)
 #define	EF_GIB				0x00000002		// leave a trail
+#define EF_FLAMETHROWER		0x00000004
 #define	EF_BLASTER			0x00000008		
 #define	EF_ROCKET			0x00000010		
 #define	EF_GRENADE			0x00000020

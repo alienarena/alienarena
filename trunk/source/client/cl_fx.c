@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern particle_t	particles[MAX_PARTICLES];
 extern int			cl_numparticles;
 extern cvar_t		*vid_ref;
-
+extern cvar_t *r_lefthand;
 extern void MakeNormalVectors (vec3_t forward, vec3_t right, vec3_t up);
 
 void CL_LogoutEffect (vec3_t org, int type);
@@ -323,7 +323,7 @@ void CL_ParseMuzzleFlash (void)
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
 		break;
 	case MZ_HYPERBLASTER:
-		dl->color[0] = 0.5;dl->color[1] = 1;dl->color[2] = 0.2;
+		dl->color[0] = 0.1;dl->color[1] = 1;dl->color[2] = 0.2;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0);
 		break;
 	case MZ_MACHINEGUN:
@@ -960,169 +960,232 @@ void CL_BloodEffect (vec3_t org, vec3_t dir, int color, int count)
 	}
 }
 
-void CL_FlameThrower (vec3_t org, vec3_t dir)
+void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 {
 	int			i, j;
-	float		scale, nudge;
+	float		inc, scale, nudge, rightoffset, upoffset, sFactor;
 	particle_t	*p;
+	vec3_t mflashorg, vforward, vright, vup, vec, dir;
+
+	if(from_client)
+		sFactor = 200.0f;
+	else
+		sFactor = 65.0f;
+
+	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+	}
+
+	AngleVectors (angles, vforward, vright, vup);
 	
+	if (r_lefthand->value == 1.0F)
+		rightoffset = -2.0f;
+	else
+		rightoffset = 2.0f;
+
+	if(!from_client)
+		upoffset = -2.0f;
+	else
+		upoffset = 4.0f;
+
+	if(cl.refdef.fov_x > 90)
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+		else
+			rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+		upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+	}
+	
+	VectorMA(mflashorg, 24, vforward, mflashorg);
+	VectorMA(mflashorg, rightoffset, vright, mflashorg);
+	VectorMA(mflashorg, upoffset, vup, mflashorg);
+	
+	VectorCopy(vforward, dir);
+
 	for( i=0; i<3; i++) {
 		nudge = frand();
-		if(nudge < 0.5)
-			dir[i] += frand()/10.0;
+		if(nudge < 0.5f)
+			dir[i] += frand()/10.0f;
 		else
-			dir[i] -= frand()/10.0;
-	}
+			dir[i] -= frand()/10.0f;
+	}		
 		
 	scale = frand()*2.0f;
 	
 	if (!(p = new_particle()))
-		return;
-
-	p->color = 0xe0 + (rand()&2); 
-	p->type = PARTICLE_STANDARD;
-	p->image = r_fireballtexture;
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->scale = 3.0f + scale;
-	p->scalevel = 55.0f;
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
-		p->vel[j] = 100.0f * dir[j];
-	}
-
-	p->accel[0] = 75*dir[0];
-	p->accel[1] = 75*dir[1];
-	p->accel[2] = ((float)PARTICLE_GRAVITY) / (0.75f);
-	p->alpha = .4;
-
-	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
-
-	addParticleLight (p,
-						p->scale*60.0f, 0,
-					.2, .2, 0.05);
-
-	if (!(p = new_particle()))
-		return;
-
-	p->color = 0x74 + (rand()&7);
-	p->type = PARTICLE_STANDARD;
-	p->image = r_fireballtexture;
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->scale = 2.0f + scale/2.0;
-	p->scalevel = 20.0f;
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
-		p->vel[j] = 75.0f * dir[j];
-	}
-
-	p->accel[0] = 60*dir[0];
-	p->accel[1] = 60*dir[1];
-	p->accel[2] = ((float)PARTICLE_GRAVITY) / (4.5f);
-	p->alpha = .5;
-
-	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
-
-	if (!(p = new_particle()))
-		return;
-
-	p->color = 0x74 + (rand()&7);
-	p->type = PARTICLE_STANDARD;
-	p->image = r_fireballtexture;
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->scale = 2.0f + scale/2.0;
-	p->scalevel = 20.0f;
-
-	for (j=0 ; j<3 ; j++)
-	{
-		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
-		p->vel[j] = 50.0f * dir[j];
-	}
-
-	p->accel[0] = 45*dir[0];
-	p->accel[1] = 45*dir[1];
-	p->accel[2] = ((float)PARTICLE_GRAVITY) / (4.5f);
-	p->alpha = .5;
-
-	p->alphavel = -1.0f / (3.0f + frand()*0.3f);
-
-	if (!(p = new_particle()))
-		return;
+		return;	
 
 	p->color = 15 + (rand()&2);
 	p->type = PARTICLE_STANDARD;
 	p->image = r_fireballtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 1.25f + scale/3.0;
-	p->scalevel = 10;
+	p->scale = 1.0f + scale/3.0f;
+	p->scalevel = sFactor/4.0f;
+	p->colorvel = 5.0f;
 
+	VectorNormalize(dir);
 	for (j=0 ; j<3 ; j++)
 	{
-		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
-		p->vel[j] = 30.0f * dir[j];
+		p->org[j] = mflashorg[j] + (15.0f*scale) * dir[j]; 
+		p->vel[j] = sFactor * dir[j];
 	}
 
-	p->accel[0] = 25*dir[0];
-	p->accel[1] = 25*dir[1];
-	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
-	p->alpha = .5;
+	p->accel[0] = sFactor*dir[0];
+	p->accel[1] = sFactor*dir[1];
+	p->accel[2] = PARTICLE_GRAVITY/2.0f;
+	p->alpha = 1.0f;
 
-	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
+	p->alphavel = -1.0f / (1.0f + frand()*0.5f);
+
+	if(!from_client)
+	{
+		// Add sprite for blast coming fowward
+		if (!(p = new_particle()))
+			return;
+
+		p->type = PARTICLE_BEAM;
+		p->image = r_firestream3ptexture;
+		p->scale = 12 + (rand()&3);
+		VectorMA(mflashorg, 16, vup, mflashorg);
+		VectorMA(mflashorg, 60, vforward, mflashorg);
+		VectorAdd(mflashorg, vforward, vec);
+		VectorSet(p->angle, vec[0], vec[1], vec[2]);
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = mflashorg[j];
+			p->vel[j] = 0.0f;
+		}
+		p->accel[0] = p->accel[1] = 0.0f;
+		p->accel[2] = 0.0f;
+		p->alpha = 1.0f;
+		p->color = 0xd9 + (rand()&7);
+		p->alphavel = -50.0f;	
+	}
+
+	//shoot off sparks
+	scale = frand();
+
+	for( i=0; i<3; i++) {
+		nudge = frand();
+		if(nudge < 0.5f)
+			dir[i] += frand()/5.0f;
+		else
+			dir[i] -= frand()/5.0f;
+	}	
+
+	VectorNormalize(dir);
+
+	if(nudge < 0.3f)
+		nudge = 0.3f;
+	VectorMA(mflashorg, sFactor - 50.0f * nudge, vforward, mflashorg);
+
+	i = 0;
+	for (inc=1.0f ; inc<2.0f ; inc+=0.05f, i++)
+	{
+		if (!(p = new_particle()))
+			return;
+
+		p->color = 15 + (rand()&2);
+		p->type = PARTICLE_STANDARD;
+		p->image = r_particletexture;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->scale = 1.5f*scale/inc;
+		p->scalevel = 0;
+
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = mflashorg[j] + i*(-1.5f*scale)*dir[j];
+			p->vel[j] = 60.0f*dir[j];
+		}
+
+		p->accel[0] = 0;
+		p->accel[1] = 0;
+		p->accel[2] = -((float)PARTICLE_GRAVITY) / (0.5f*inc);
+		p->alpha = .5;
+
+		p->alphavel = -1.0f / (1.5f + frand()*0.3f);
+	}	
+}
+
+particle_t *CL_FlameThrowerParticle (vec3_t org, vec3_t angles, particle_t *previous)
+{
+	int			j;
+	particle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup;
+	float		rightoffset, upoffset;
+
+	AngleVectors (angles, vforward, vright, vup);
+
+	VectorCopy(org, mflashorg);
+
+	if (r_lefthand->value == 1.0F)
+		rightoffset = -1.1;
+	else
+		rightoffset = 1.1;
+
+	upoffset = -0.75;
+
+	if(cl.refdef.fov_x > 90)
+	{
+		if (r_lefthand->value == 1.0F)
+			rightoffset -= (cl.refdef.fov_x - 90.0)/4.0;
+		else
+			rightoffset -= (cl.refdef.fov_x - 90.0)/25.0;
+		upoffset += (cl.refdef.fov_x - 90.0)/10.3;
+	}
+	
+	VectorMA(mflashorg, 24, vforward, mflashorg);
+	VectorMA(mflashorg, rightoffset, vright, mflashorg);
+	VectorMA(mflashorg, upoffset, vup, mflashorg);
 
 	if (!(p = new_particle()))
-		return;
+		return NULL;
 
-	p->color = 15 + (rand()&2);
-	p->type = PARTICLE_STANDARD;
-	p->image = r_fireballtexture;
+	p->type = PARTICLE_CHAINED;
+	p->image = r_firestreamtexture;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 1.25f + scale/3.0;
-	p->scalevel = 10;
+	p->scale = 6.0f;
+	p->scalevel = 4.0f;
 
-	for (j=0 ; j<3 ; j++)
+	p->color = 15;
+	p->colorvel = 15.0f;
+
+	for (j = 0; j < 3; j++)
 	{
-		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
-		p->vel[j] = 20.0f * dir[j];
+		p->org[j] = mflashorg[j];
+		p->vel[j] = vforward[j] * 175.0f;
+		p->accel[j] = p->vel[j];
 	}
+	
+	p->vel[2] += PARTICLE_GRAVITY * 0.1;
+	p->accel[2] = PARTICLE_GRAVITY/2.0f;
+	p->alpha = 2.0;
 
-	p->accel[0] = 20*dir[0];
-	p->accel[1] = 20*dir[1];
-	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
-	p->alpha = .5;
-
-	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
-
-	if (!(p = new_particle()))
-		return;
-
-	p->color = 15 + (rand()&2);
-	p->type = PARTICLE_STANDARD;
-	p->image = r_fireballtexture;
-	p->blendsrc = GL_SRC_ALPHA;
-	p->blenddst = GL_ONE;
-	p->scale = 1.25f + scale/3.0;
-	p->scalevel = 10;
-
-	for (j=0 ; j<3 ; j++)
+	p->alphavel = -4.0f;// / (0.1f + frand()*0.15f);
+	
+	if (previous != NULL)
 	{
-		p->org[j] = org[j] + (15.0f*scale) * dir[j]; 
-		p->vel[j] = 15.0f * dir[j];
+		vec3_t movement;
+		float dist;
+		
+		VectorSubtract (p->org, previous->org, movement);
+		dist = 5.0f * VectorLength (movement) / (p->time - previous->time);
+		if (dist < 1.0)
+			dist = 1.0;
+		p->alpha /= dist;
 	}
-
-	p->accel[0] = 15*dir[0];
-	p->accel[1] = 15*dir[1];
-	p->accel[2] = ((float)PARTICLE_GRAVITY) / (10.0f);
-	p->alpha = .5;
-
-	p->alphavel = -1.0f / (2.5f + frand()*0.3f);
+	
+	p->chain_prev = previous;
+	
+	return p;
 }
 
 void CL_JetExhaust (vec3_t org, vec3_t dir)
@@ -1671,22 +1734,13 @@ void CL_MuzzleParticles (vec3_t org)
 CL_MuzzleParticles
 ===============
 */
-extern cvar_t *r_lefthand;
+
 void CL_BlasterMuzzleParticles (vec3_t org, vec3_t angles, float color, float alpha, qboolean from_client)
 {
 	int			j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len;
-
-	// Already being rendered by client, don't render it twice
-	if(!from_client) 
-	{
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 128)
-			return;
-	}
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -1776,16 +1830,7 @@ void CL_LightningBall (vec3_t org, vec3_t angles, float color, qboolean from_cli
 	int			j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len;
-
-	// Already being rendered by client, don't render it twice
-	if(!from_client) 
-	{
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 64)
-			return;
-	}
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -1881,16 +1926,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len;
-
-	// Already being rendered by client, don't render it twice
-	if(!from_client) 
-	{
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 128)
-			return;
-	}
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -1980,14 +2016,7 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			i, j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len, color;
-
-	if(!from_client) {
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 128)
-			return;
-	}
+	float		rightoffset, upoffset, color;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -2087,16 +2116,7 @@ void CL_SmartMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len;
-
-	// Already being rendered by client, don't render it twice
-	if(!from_client) 
-	{
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 128)
-			return;
-	}
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -2165,16 +2185,7 @@ void CL_RocketMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			i, j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len;
-
-	// Already being rendered by client, don't render it twice
-	if(!from_client) 
-	{
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 128)
-			return;
-	}
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -2294,15 +2305,7 @@ void CL_MEMuzzle (vec3_t org, vec3_t angles, qboolean from_client)
 	int			i, j;
 	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
-	float		rightoffset, upoffset, len;
-
-	if(!from_client) 
-	{
-		VectorSubtract (org, cl.refdef.vieworg, vec);
-		len = VectorNormalize (vec);
-		if(len < 128)
-			return;
-	}
+	float		rightoffset, upoffset;
 
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)

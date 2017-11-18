@@ -36,6 +36,8 @@ image_t		*r_notexture;		// use for bad textures
 image_t		*r_particletexture;	// little dot for particles
 image_t		*r_smoketexture;	// for smoke, etc...
 image_t		*r_fireballtexture;
+image_t		*r_firestreamtexture;
+image_t		*r_firestream3ptexture;
 image_t		*r_explosiontexture;
 image_t		*r_explosion1texture;
 image_t		*r_explosion2texture;
@@ -154,6 +156,14 @@ void R_InitParticleTexture (void)
 	r_fireballtexture = R_RegisterParticlePic("fireball");
 	if (!r_fireballtexture) {
 		r_fireballtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_firestreamtexture = R_RegisterParticlePic("firestream");
+	if (!r_firestreamtexture) {
+		r_firestreamtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_firestream3ptexture = R_RegisterParticlePic("firestream3p");
+	if (!r_firestream3ptexture) {
+		r_firestream3ptexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_explosiontexture = R_RegisterParticlePic("explosion");
 	if (!r_explosiontexture) {

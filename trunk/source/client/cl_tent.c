@@ -605,7 +605,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 
-		CL_FlameThrower (pos, dir);
+		//CL_FlameThrower (pos, dir);
 		break;
 
 	// Steam stat events
