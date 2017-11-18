@@ -1234,7 +1234,6 @@ void Blaster_Fire (edict_t *ent, int damage, qboolean hyper, qboolean alien, int
 		}
 		else 
 		{
-			// [no file]gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
 			fire_blaster (ent, start, muzzle, forward, damage, 2800, effect, hyper);
 		}
 	}
