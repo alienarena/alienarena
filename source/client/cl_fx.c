@@ -1050,7 +1050,7 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 		p->type = PARTICLE_BEAM;
 		p->image = r_firestream3ptexture;
 		p->scale = 12 + (rand()&3);
-		VectorMA(mflashorg, 16, vup, mflashorg);
+		VectorMA(mflashorg, 8, vup, mflashorg);
 		VectorMA(mflashorg, 60, vforward, mflashorg);
 		VectorAdd(mflashorg, vforward, vec);
 		VectorSet(p->angle, vec[0], vec[1], vec[2]);
