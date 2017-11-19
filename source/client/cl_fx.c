@@ -1167,9 +1167,9 @@ particle_t *CL_FlameThrowerParticle (vec3_t org, vec3_t angles, particle_t *prev
 	
 	p->vel[2] += PARTICLE_GRAVITY * 0.1;
 	p->accel[2] = PARTICLE_GRAVITY/2.0f;
-	p->alpha = 2.0;
+	p->alpha = 5.0;
 
-	p->alphavel = -4.0f;// / (0.1f + frand()*0.15f);
+	p->alphavel = -10.0f;// / (0.1f + frand()*0.15f);
 	
 	if (previous != NULL)
 	{
