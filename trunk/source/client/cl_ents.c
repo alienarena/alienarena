@@ -1302,6 +1302,8 @@ CL_AddViewWeapon
 
 static int gunPrevFrame = 0;
 static int gunFrameTime = 0;
+static int lastFireFrameTime = 0;
+static qboolean fire = false;
 static particle_t *last_blue_flame = NULL;
 static particle_t *last_flame = NULL;
 void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
@@ -1357,8 +1359,16 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}
 	else 
 	{
-		gun.frametime = gunFrameTime;
+		gun.frametime = gunFrameTime;		
 	}
+
+	if(Sys_Milliseconds() - lastFireFrameTime > 30)
+	{
+		lastFireFrameTime = Sys_Milliseconds();
+		fire = true;
+	}
+	else
+		fire = false;
 
 	VectorSubtract(gun.origin, offset_down, gun.origin);
 	VectorSubtract(gun.origin, offset_right, gun.origin);
@@ -1433,7 +1443,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			CL_MEMuzzle (gun.origin, gun.angles, true);
 		}
 	}
-	else if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19)
+	else if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19 && fire)
 	{
 		CL_FlameThrower (gun.origin, gun.angles, true);
 	}
@@ -1443,9 +1453,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	else
 		last_blue_flame = NULL;
 
-	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19)
+	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19 && fire)
 		last_flame = CL_FlameThrowerParticle (gun.origin, gun.angles, last_flame);
-	else
+	else if(fire)
 		last_flame = NULL;
 
 	V_AddViewEntity (&gun);
