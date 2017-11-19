@@ -885,7 +885,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if (effects & EF_FLAMETHROWER)
 			{
-				CL_FlameThrower (ent.origin, ent.angles, false);
+				if(Sys_Milliseconds() - ent.frametime > 30)
+					CL_FlameThrower (ent.origin, ent.angles, false);
 			}
 		}
 
