@@ -28,6 +28,8 @@ nobase_dist_particles_DATA = \
 	explosion.tga \
 	fflash.tga \
 	fireball.tga \
+	firestream.tga \
+	firestream3p.tga \
 	flag.tga \
 	flare.tga \
 	lavasplash.tga \
