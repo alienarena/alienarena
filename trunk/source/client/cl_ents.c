@@ -641,6 +641,8 @@ struct model_s
 	char		name[MAX_QPATH];
 };
 
+static int lastEntFireFrameTime = 0;
+static qboolean runFire = false;
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
@@ -663,6 +665,15 @@ void CL_AddPacketEntities (frame_t *frame)
 	autoanim = 2*cl.time/1000;
 
 	memset (&ent, 0, sizeof(ent));
+
+	// run fire effects only at a roughly 30 fps rate
+	if(Sys_Milliseconds() - lastEntFireFrameTime > 30)
+	{
+		lastEntFireFrameTime = Sys_Milliseconds();
+		runFire = true;
+	}
+	else
+		runFire = false;
 
 	for (pnum = 0 ; pnum<frame->num_entities ; pnum++)
 	{
@@ -885,8 +896,13 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if (effects & EF_FLAMETHROWER)
 			{
-				if(Sys_Milliseconds() - ent.frametime > 30)
+				if(runFire)
 					CL_FlameThrower (ent.origin, ent.angles, false);
+			}
+			else if (effects & EF_FIRE)
+			{
+				if(runFire)
+					CL_FireParticles(ent.origin);
 			}
 		}
 
@@ -1155,10 +1171,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			{
 				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 			}
-			else if (effects & EF_GRENADE)
-			{
-				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
-			}
 			//we can leave these effects as an additional option for those who really have eye issues
 			else if ((effects & EF_TEAM1) && cl_dmlights->integer)
 			{
@@ -1177,7 +1189,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if ((effects & EF_TEAM2) && cl_dmlights->integer)
 			{
-
 				vec3_t right;
 				vec3_t start;
 				vec3_t up;

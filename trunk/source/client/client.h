@@ -715,6 +715,7 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
 void CL_BulletSparks ( vec3_t org, vec3_t dir);
 void CL_FlameThrower (vec3_t org, vec3_t dir, qboolean from_client);
+void CL_FireParticles (vec3_t org);
 void CL_JetExhaust (vec3_t org, vec3_t dir);
 void CL_SplashEffect ( vec3_t org, vec3_t dir, int color, int count, int type);
 void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);

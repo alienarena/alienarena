@@ -1045,7 +1045,7 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 	}
 	else
 	{
-		p->alpha = 0.5f;
+		p->alpha = 0.75f;
 	}
 
 	p->alphavel = -1.0f / (1.0f + frand()*0.5f);
@@ -1074,7 +1074,7 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 		p->accel[2] = 0.0f;
 		p->alpha = 1.0f;
 		p->color = 0xd9 + (rand()&7);
-		p->alphavel = -50.0f;	
+		p->alphavel = -17.0f;	
 	}
 
 	//shoot off sparks
@@ -1708,6 +1708,72 @@ void CL_ExplosionParticles (vec3_t org)
 
 		p->image = r_smoketexture;
 
+	}
+}
+
+void CL_FireParticles (vec3_t org)
+{
+	int			i, j;
+	particle_t	*p;
+
+	//for glsl framebuffer distortion effects
+	if(!r_drawing_fbeffect && cl_explosiondist->value) {
+		r_fbFxType = 1; //EXPLOSION
+		r_drawing_fbeffect = true;
+		VectorCopy(org, r_explosionOrigin);
+		r_fbeffectTime = rs_realtime;
+	}	
+	
+	if (!(p = new_particle()))
+		return;
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + ((rand()%16)-8);
+		p->vel[j] = 0;
+	}
+	p->vel[2] = PARTICLE_GRAVITY*1.5f;
+	p->type = PARTICLE_STANDARD;
+	p->accel[0] = p->accel[1] = p->accel[2] = 0;
+	p->alpha = 0.3f;
+	p->scale = 10.0f;
+	p->scalevel = 30.0f;
+	p->color = 0xd9 + (rand()&7); //(255 255-171 167-7)
+	p->alphavel = -1.0f;
+
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->image = r_explosiontexture;
+			
+	addParticleLight (p,
+				p->scale*10.0f, 0,
+			.1, .1, 0.025);	
+	
+	// add smoke
+	for (i=0 ; i<4; i++)
+	{
+
+		if (!(p = new_particle()))
+			return;
+
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = org[j] + ((rand()%32)-16);
+			p->vel[j] = 0;
+		}
+		p->type = PARTICLE_STANDARD;
+		p->accel[0] = p->accel[1] = p->accel[2] = 0;
+		p->alpha = 0.2;
+		p->alphavel = -2.0f / (20.0f + frand()*1.4f); //smoke lingers longer
+
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->scale = 1 + (rand()&4);
+		p->scalevel = 12.0;
+		p->color = 1 + (rand()&10); // (15 15 15), (47 47 47), (139 139 139), (171 171 171)
+		p->accel[2] = 10;
+
+		p->image = r_smoketexture;
 	}
 }
 
