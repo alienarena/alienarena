@@ -1024,20 +1024,29 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	p->scale = 1.0f + scale/3.0f;
-	p->scalevel = sFactor/4.0f;
+	p->scalevel = sFactor/4.0f;	
 	p->colorvel = 5.0f;
-
 	VectorNormalize(dir);
 	for (j=0 ; j<3 ; j++)
 	{
-		p->org[j] = mflashorg[j] + (15.0f*scale) * dir[j]; 
+		if(from_client)
+			p->org[j] = mflashorg[j] + (15.0f*scale) * dir[j]; 
+		else
+			p->org[j] = mflashorg[j] + (45.0f*scale) * dir[j]; 
 		p->vel[j] = sFactor * dir[j];
 	}
 
 	p->accel[0] = sFactor*dir[0];
 	p->accel[1] = sFactor*dir[1];
 	p->accel[2] = PARTICLE_GRAVITY/2.0f;
-	p->alpha = 1.0f;
+	if(from_client)
+	{		
+		p->alpha = 1.0f;
+	}
+	else
+	{
+		p->alpha = 0.5f;
+	}
 
 	p->alphavel = -1.0f / (1.0f + frand()*0.5f);
 
@@ -1083,7 +1092,11 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 
 	if(nudge < 0.4f)
 		nudge = 0.4f;
-	VectorMA(mflashorg, 90.0f * nudge, vforward, mflashorg);
+
+	if(from_client)
+		VectorMA(mflashorg, 90.0f * nudge, vforward, mflashorg);
+	else
+		VectorMA(mflashorg, 60.0f * nudge, vforward, mflashorg);
 
 	i = 0;
 	for (inc=1.0f ; inc<2.0f ; inc+=0.1f, i++)
@@ -1102,7 +1115,10 @@ void CL_FlameThrower (vec3_t org, vec3_t angles, qboolean from_client)
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = mflashorg[j] + i*(-1.5f*scale)*dir[j];
-			p->vel[j] = 60.0f*dir[j];
+			if(from_client)
+				p->vel[j] = 60.0f*dir[j];
+			else
+				p->vel[j] = 35.0f*dir[j];
 		}
 
 		p->accel[0] = 0;
