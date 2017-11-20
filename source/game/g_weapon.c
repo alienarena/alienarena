@@ -1887,7 +1887,7 @@ void burn_person(edict_t *target, edict_t *owner, int damage)
 	flame->movetype = MOVETYPE_NOCLIP;
 	flame->clipmask = MASK_SHOT;
 	flame->solid = SOLID_NOT;
-	flame->s.effects |= EF_SHIPEXHAUST;
+	flame->s.effects |= EF_FIRE;
 	flame->s.renderfx = RF_TRANSLUCENT;
 	flame->velocity[0] = target->velocity[0];
 	flame->velocity[1] = target->velocity[1];
