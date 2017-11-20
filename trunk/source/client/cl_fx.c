@@ -2731,7 +2731,6 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 
 	int			i;
 	particle_t	*p;
-	float		dist, angle;
 
 	if (!(p = new_particle()))
 		return;
@@ -2741,7 +2740,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	p->alpha = 1.0;
 	p->type = PARTICLE_ROTATINGYAW;
 	p->image = r_flagtexture;
-	p->blendsrc = GL_ONE;
+	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	if(team)
 		p->color = 0x74; //(23 83 111)
@@ -2757,39 +2756,29 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	}
 	p->org[2] += 64.0f;
 
-
-
 	if (!(p = new_particle()))
 			return;
 
-	p->type = PARTICLE_STANDARD;
-	p->image = r_cflashtexture;
-	p->scale = 20.0f + (rand()&7);
-	p->blendsrc = GL_ONE;
+	p->alpha = 1.0;
+	p->type = PARTICLE_ROTATINGROLL;
+	p->image = r_leaderfieldtexture;
+	p->scale = 24.0f;
+	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	if(team)
-		p->color = 0x74; //(23 83 111)
+		p->color = 0x74 + 2*crand(); //(23 83 111)
 	else
-		p->color = 0xe8; //(155 31 0)
+		p->color = 0xe8 + 2*crand(); //(155 31 0)
 
-	//angle = M_PI*2*(rand()&1023)/1023.0;
-	angle = (float)M_PI * 2.0f * frand();
-
-	dist = rand()&5;
-	p->org[0] = pos[0] + cosf(angle)*dist;
-	p->vel[0] = cosf(angle) * (6+(rand()&6));
-	p->accel[0] = -cosf(angle) * 6.0f;
-
-	p->org[1] = pos[1] + sinf(angle)*dist;
-	p->vel[1] = sinf(angle) * (6+(rand()&6));
-	p->accel[1] = -sinf(angle) * 100.0f;
-
-	p->org[2] = pos[2] + 56.0f + (rand()%10);
-	p->vel[2] = -10.0f + (rand()&6);
-	p->accel[2] = (float)PARTICLE_GRAVITY * 10.0f;
-	p->alpha = 0.2f;
-
-	p->alphavel = -50.0f / (0.5f + frand()*0.3f);
+	p->scale = 20 + crand();
+	p->alphavel = INSTANT_PARTICLE;
+	for (i=0 ; i<3 ; i++)
+	{
+		p->org[i] = pos[i];
+		p->vel[i] = 0.0f;
+		p->accel[i] = 0.0f;
+	}
+	p->org[2] += 64.0f;
 }
 
 /*

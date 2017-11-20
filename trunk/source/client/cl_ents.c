@@ -1352,7 +1352,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	else
 		gun.oldframe = ops->gunframe;
 
-	//animation timestamps are set here
+	// animation timestamps are set here
 	if(gunPrevFrame != ps->gunframe) 
 	{
 		gunPrevFrame = ps->gunframe;
@@ -1378,7 +1378,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	gun.backlerp = 1.0 - cl.lerpfrac;
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
-	//add an attached muzzleflash for chaingun
+	// add an attached muzzleflash for chaingun
 	if(!(strcmp("models/weapons/v_chaingun/tris.iqm", gun.model->name))) 
 	{
 		if(gun.frame > 4 && gun.frame < 14)
@@ -1449,9 +1449,10 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		CL_FlameThrower (gun.origin, gun.angles, true);
 	}
 	
-	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 18 && gun.frame < 50)
+	// both of these two effects look best at 30fps, so limit them to roughly that.
+	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 18 && gun.frame < 50 && fire)
 		last_blue_flame = CL_BlueFlameParticle (gun.origin, gun.angles, last_blue_flame);
-	else
+	else if(fire)
 		last_blue_flame = NULL;
 
 	if (!strcmp("models/weapons/v_flamethrower/tris.iqm", gun.model->name) && gun.frame > 5 && gun.frame < 19 && fire)
@@ -1460,7 +1461,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		last_flame = NULL;
 
 	V_AddViewEntity (&gun);
-	//add shells for viewweaps (all of em!)
+
+	// add shells
 	{
 		int oldeffects = gun.flags, pnum;
 		entity_state_t	*s1;
@@ -1508,7 +1510,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.flags = oldeffects;
 	}
 
-	//add glass and effect pieces
+	// add glass and effect pieces
 	
 	if(!(strcmp("models/weapons/v_rocket/tris.iqm", gun.model->name))) 
 	{

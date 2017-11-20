@@ -1886,7 +1886,6 @@ redoSkins:
 		server_is_team = true;
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, "teamgame\n");
 
-		server_tickrate = 10;
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, "tickrate\n");
 	}
 }
