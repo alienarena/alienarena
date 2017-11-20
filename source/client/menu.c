@@ -1656,8 +1656,10 @@ typedef struct
 	float cvar_min, cvar_max;
 } sliderlimit_t;
 
-typedef struct {
-	enum {
+typedef struct 
+{
+	enum 
+	{
 		option_slider,
 		option_textcvarslider,
 		option_spincontrol,
@@ -4341,6 +4343,8 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 			Com_sprintf(destserver->modInfo, sizeof(destserver->modInfo), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "sv_joustmode"))
 			destserver->joust = atoi(token);
+		else if (!Q_strcasecmp (lasttoken, "sv_tickrate"))
+			server_tickrate = atoi(token);
 
 		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);

@@ -274,7 +274,7 @@ namespace Alien_Arena_Account_Server_Manager
             {
                 WebClient client = new WebClient();
 
-                client.Credentials = new NetworkCredential("aastats", "AlienArena12@#");
+                client.Credentials = new NetworkCredential("aastats", "");
                 client.UploadFile("ftp://martianbackup.com/playerrank.db", "STOR", "playerrank.db");
 
                 ACCServer.sDialog.UpdateStatus("Upload DB Complete.", ACCServer.sLevel.SYSTEM);
