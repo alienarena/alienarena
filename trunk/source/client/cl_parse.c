@@ -474,7 +474,7 @@ void CL_ParseServerData (void)
 	cls.serverProtocol = i;
 
 	// BIG HACK to let demos from release work with the 3.0x patch!!!
-	if (Com_ServerState() && PROTOCOL_VERSION == 34)
+	if (Com_ServerState() && (PROTOCOL_VERSION == 34 || PROTOCOL_VERSION == 35 || PROTOCOL_VERSION == 36))
 	{
 	}
 	else if (i != PROTOCOL_VERSION)
