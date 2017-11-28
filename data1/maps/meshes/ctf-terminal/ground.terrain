@@ -1,0 +1,5 @@
+heightmap textures/ctf-terminal/ground.tga;
+texture ground_texture;
+lightmap textures/ctf-terminal/ground_lightmaptex.tga;
+mins -2048, -2048, 1;
+maxs 2048, 2048, 2000;
