@@ -572,6 +572,9 @@ extern	int redwinning;
 extern	int print1;
 extern  int print2;
 extern  int print3;
+extern  int printT1;
+extern  int printT2;
+extern  int printT5;
 
 // means of death
 #define MOD_UNKNOWN			0

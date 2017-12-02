@@ -32,6 +32,7 @@ int reddiff;
 int bluediff;
 int redwinning;
 int print1, print2, print3;
+int printT5, printT2, printT1;
 
 mmove_t mmove_reloc;
 
@@ -374,7 +375,7 @@ void InitGame (void)
 	//reset minderaser and jetpacks
 	mindEraserTime = jetpackTime = level.time;	
 
-	print1 = print2 = print3 = false;
+	print1 = print2 = print3 = printT5 = printT2 = printT1= false;
 
 }
 

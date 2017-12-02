@@ -1015,7 +1015,50 @@ void CheckDMRules (void)
 		return;
 
 	if (timelimit->value)
-	{
+	{		
+		if (timelimit->value*60 - level.time < 120)
+		{
+			if(!printT2)
+			{
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot)
+						continue;
+						safe_centerprintf(cl_ent, "2 minutes remain!\n");
+				}
+				printT2 = true;
+			}
+		}
+		if (timelimit->value*60 - level.time < 60)
+		{
+			if(!printT1)
+			{
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot)
+						continue;
+						safe_centerprintf(cl_ent, "1 minute remains!\n");
+				}
+				printT1 = true;
+			}
+		}
+		if (timelimit->value*60 - level.time < 30)
+		{
+			if(!printT5)
+			{
+				for (i=0 ; i<g_maxclients->integer ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot)
+						continue;
+						safe_centerprintf(cl_ent, "30 seconds remain!\n");
+				}
+				printT5 = true;
+			}
+		}
+		
 		if (level.time >= timelimit->value*60.0 && ((ctf->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 		{
 			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
