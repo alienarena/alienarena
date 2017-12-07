@@ -197,6 +197,7 @@ cvar_t  *sv_custombots;
 
 cvar_t  *sv_tickrate;
 float   FRAMETIME;
+cvar_t  *sv_gamereport;
 
 //unlagged
 cvar_t	*g_antilagdebug;
@@ -378,27 +379,34 @@ edict_t *CreateTargetChangeLevel(char *map)
 }
 
 
-/**
- * \brief Log scores and stats
- *
- * \detail This is a somewhat crude formatted dump of game information to
- *         the server console and log file. This version is mostly intended
- *         to collect some data about bot targeting accuracy.
- *
- *         The odds that the array indexes for the weapon hit data and weapon
- *         accuracy data are correctly cross-referenced are slim.
- *
- *  --- from hud stat report (p_hud.c) ---
- * --- currently def'd out ---
- * 0: "blaster"
- * 1: "disruptor"
- * 2: "smartgun"
- * 3: "chaingun"
- * 4: "flame"
- * 5: "rocket"
- * 6: "beamgun"
- * 7: "vaporizer"
- * 8: "violator"
+// Note: This function returns a pointer to a substring of the original string.
+// If the given string was allocated dynamically, the caller must not overwrite
+// that pointer with the returned value, since the original pointer must be
+// deallocated using the same allocator with which it was allocated.  The return
+// value must NOT be deallocated using free() etc.
+char *trimwhitespace(char *str)
+{
+  char *end;
+
+  // Trim leading space
+  while(isspace((unsigned char)*str)) str++;
+
+  if(*str == 0)  // All spaces?
+    return str;
+
+  // Trim trailing space
+  end = str + strlen(str) - 1;
+  while(end > str && isspace((unsigned char)*end)) end--;
+
+  // Write new null terminator
+  *(end+1) = 0;
+
+  return str;
+}
+
+/*
+ * Log scores and stats into a game report file on the server in json format.
+ * Bots will be skipped.
  *
  *--- weapon_hit[] incremented ---
  * 0 : blasterball_touch  : Weapon_Beamgun, Weapon_Blaster
@@ -413,111 +421,118 @@ edict_t *CreateTargetChangeLevel(char *map)
  * 7 : bomb_touch         : Weapon_Bomber, Weapon_Vaporizer
  * 7 : fire_vaporizer     : Weapon_Vaporizer
  * 8 : fire_violator      : Weapon_Violator
-
- * --- from sample.cfg accuracy
- * weapon_hit[] :to: bot weapacc[]
- * 0: 1: blaster
- * 1: 2: alien disruptor
- * 3: 3: chaingun
- * 4: 4: flame thrower
- * x: 5: homing rocket launcher (not implemented)
- * 5: 6: rocket launcher
- * 2: 7: alien smartgun
- * 6: 8: alien beamgun
- * 7: 9: alien vaporizer
- * 8: x: violator
  */
 static void game_report( void )
 {
 	static const char* weapname[] =
 	{
-		 "   blaster", // 0 
-		 " disruptor", // 1
-		 "  smartgun", // 2
-		 "  chaingun", // 3
-		 "     flame", // 4
-		 "    rocket", // 5
-		 "   beamgun", // 6 
-		 " vaporizer", // 7
-		 "  violator"  // 8
-	};
-	/* cross-reference from weapon_hit to weapacc[] */
-	static const int accxref[] =
-	{
-		1, /* 0 blaster   */
-		2, /* 1 disruptor */
-		7, /* 2 smartgun  */
-		3, /* 3 chaingun  */
-		4, /* 4 flame     */
-		6, /* 5 rocket    */
-		8, /* 6 beamgun   */
-		9, /* 7 vaporizer */
-		0  /* 8 violator  */ /* no weapacc[] for this */
+		"blaster",        // 0 
+		"disruptor",      // 1
+		"smartgun",       // 2
+		"chaingun",       // 3
+		"flamethrower",   // 4
+		"rocketlauncher", // 5
+		"beamgun",        // 6 
+		"vaporizer",      // 7
+		"violator"        // 8
 	};
 
 	edict_t *pclient;
 	int i;
 	char *client_name;
+	int	count;
+	int	index[256];
+	char base_filename[MAX_OSPATH];
+	char filename[MAX_OSPATH];
+	FILE *jsonfile;
 
-	gi.dprintf( "<GAME-REPORT-BEGIN>\n" );
+	time_t t = time(NULL);
+	struct tm tm = *gmtime(&t);
 
-	for ( i = 0, pclient = &g_edicts[1] ; i < game.maxclients ; ++pclient, i++ )
-	{ // for each possible client, human or bot
-		if (pclient->inuse && player_participating (pclient))
+	Com_sprintf(base_filename, sizeof(filename), "game report %04d-%02d-%02d %02d:%02d:%02d.json", 
+				tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	gi.FullWritePath(filename, sizeof(filename), base_filename);
+
+	jsonfile = fopen(filename, "w");
+	if (!jsonfile) {
+		Com_Printf("ERROR: couldn't open %s.\n", filename);
+		return;
+	}
+
+	count = 0;
+	for ( i = 0; i < game.maxclients; i++ )
+	{
+		pclient = g_edicts + 1 + i;
+		if (pclient->inuse && player_participating (pclient) && !pclient->is_bot)
 		{
-			int weap;
+			index[count] = i;
+			count++;
+		}
+	}
+	
+	// sort by frags descending
+	qsort (index, count, sizeof(index[0]), G_PlayerSortDescending);
 
-			/* scoring - UNSORTED */
+	fprintf(jsonfile, "{\n");
+	fprintf(jsonfile, "\t\"players\": [\n");
+
+	for ( i = 0; i < count; i++ )
+	{ 	
+		int weap;
+		qboolean weaponSkillPrinted = false;
+
+		pclient = g_edicts + 1 + index[i];
+		if (pclient->inuse && player_participating (pclient) && !pclient->is_bot)
+		{						
+			int ratio = 0;
+			if (game.clients[index[i]].resp.deaths != 0)
+			{
+				ratio = 100 * game.clients[index[i]].resp.score / game.clients[index[i]].resp.deaths;
+			}
+
+			/* scoring */
 			client_name = Info_ValueForKey( pclient->client->pers.userinfo, "name" );
-			if ( pclient->is_bot )
-			{
-				gi.dprintf( "%s (%i,%0.2f): %i\n",
-						client_name,
-						pclient->skill, pclient->awareness,
-						game.clients[i].resp.score );
-			}
-			else
-			{
-				gi.dprintf( "%s: %i\n",
-						client_name,
-						game.clients[i].resp.score );
-			}
 
+			fprintf(jsonfile, "\t\t{\n");
+			fprintf(jsonfile, "\t\t\t\"name\": \"%s\",\n", trimwhitespace(client_name));
+			fprintf(jsonfile, "\t\t\t\"score\": %i,\n", game.clients[index[i]].resp.score);
+			fprintf(jsonfile, "\t\t\t\"deaths\": %i,\n", game.clients[index[i]].resp.deaths);
+			fprintf(jsonfile, "\t\t\t\"ratio\": %i,\n", ratio);
+			
 			/* weapon skill */
+			fprintf(jsonfile, "\t\t\t\"weapon_skill\": [\n");
 			for ( weap = 0; weap < 9; weap++ )
 			{
 				if ( pclient->client->resp.weapon_shots[weap] != 0 )
 				{
 					int hits  = pclient->client->resp.weapon_hits[weap];
 					int shots = pclient->client->resp.weapon_shots[weap];
-					int percent = (100 * hits) / shots;
-
-					if ( pclient->is_bot )
+					int percent = 100 * hits / shots;
+				
+					if (weaponSkillPrinted)
 					{
-						if ( weap == 8 )
-						{ /* violator - no weapacc[], accuracy always 1.0 */
-							gi.dprintf( " %s (1.0): %i/%i = %i%%\n",
-								weapname[weap], hits, shots, percent );
-						}
-						else
-						{
-							gi.dprintf( " %s (%0.2f): %i/%i = %i%%\n",
-								weapname[weap],
-								pclient->weapacc[accxref[weap]],
-								hits, shots, percent );
-						}
+						fprintf(jsonfile, ",\n");
 					}
-					else
-					{
-						gi.dprintf( " %s : %i/%i = %i%%\n",
-								weapname[weap], hits, shots, percent );
-					}
+					fprintf(jsonfile, "\t\t\t\t{\"weapon\": \"%s\", \"hits\": %i, \"shots\": %i, \"accuracy\": %i}",
+							weapname[weap], hits, shots, percent);				
+					weaponSkillPrinted = true;
 				}
+			}
+			fprintf(jsonfile, "\n\t\t\t]\n");
+
+			if (i < count - 1)
+			{
+				fprintf(jsonfile, "\t\t},\n");
+			}
+			else
+			{
+				fprintf(jsonfile, "\t\t}\n");
 			}
 		}
 	}
-	gi.dprintf("<GAME-REPORT-END>\n");
-
+	fprintf(jsonfile, "\t]\n");
+	fprintf(jsonfile, "}\n");
+	fclose(jsonfile);
 }
 
 
@@ -542,8 +557,8 @@ void EndDMLevel (void)
 	int i;
 	FILE *fp;
 
-	// log game scoring, statistics. currently crude for bot testing mostly.
-	if ( g_dedicated && g_dedicated->integer != 0 )
+	// Output game scoring and statistics into a game report in json format.
+	if ( g_dedicated && g_dedicated->integer != 0 && sv_gamereport->value )
 	{
 		game_report();
 	}
