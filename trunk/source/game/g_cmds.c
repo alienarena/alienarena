@@ -694,30 +694,6 @@ void Cmd_PutAway_f (edict_t *ent)
 	ent->client->showinventory = false;
 }
 
-
-int PlayerSort (void const *a, void const *b)
-{
-	int		anum, bnum;
-
-	anum = *(int *)a;
-	bnum = *(int *)b;
-
-	if ( game.clients[anum].ps.stats[STAT_SPECTATOR] == 0 )
-		anum = game.clients[anum].ps.stats[STAT_FRAGS];
-	else
-		anum = 0;
-	if ( game.clients[bnum].ps.stats[STAT_SPECTATOR] == 0 )
-		bnum = game.clients[bnum].ps.stats[STAT_FRAGS];
-	else
-		bnum = 0;
-
-	if (anum < bnum)
-		return -1;
-	if (anum > bnum)
-		return 1;
-	return 0;
-}
-
 /*
 =================
 Cmd_Players_f
@@ -739,8 +715,8 @@ void Cmd_Players_f (edict_t *ent)
 			count++;
 		}
 
-	// sort by frags
-	qsort (index, count, sizeof(index[0]), PlayerSort);
+	// sort by frags ascending
+	qsort (index, count, sizeof(index[0]), G_PlayerSortAscending);
 
 	// print information
 	large[0] = 0;

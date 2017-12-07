@@ -672,6 +672,7 @@ extern  cvar_t  *sv_botkickthreshold;
 extern  cvar_t	*sv_custombots;
 
 extern  cvar_t  *sv_tickrate;
+extern  cvar_t  *sv_gamereport;
 
 //mutators
 extern  cvar_t  *instagib;
@@ -865,6 +866,8 @@ void	G_TouchSolids (edict_t *ent);
 
 char	*G_CopyString (const char *in);
 void	G_CleanPlayerName ( const char *source, char *dest );
+int     G_PlayerSortAscending (void const *a, void const *b);
+int     G_PlayerSortDescending (void const *a, void const *b);
 
 char	*vtos (vec3_t v);
 

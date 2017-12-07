@@ -665,12 +665,12 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	char	string[1400];
 	int		stringlength;
 	int		i, j, k;
-	int		sorted[MAX_CLIENTS];
-	int		sortedscores[MAX_CLIENTS];
-	int		score, total;
 	int		x, y;
 	gclient_t	*cl;
 	edict_t		*cl_ent;
+	int		count;
+	int		index[256];
+	
 #if 0
 	// 2010-12 unused. see below
 	char	acc[16];
@@ -691,9 +691,9 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
 	}
-	// sort the clients by score
-	total = 0;
-	for (i=0 ; i<game.maxclients ; i++)
+
+	count = 0;
+	for (i = 0; i < game.maxclients; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse)
@@ -702,22 +702,13 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			game.clients[i].resp.participation != participation_duelwaiting)
 			continue;
 
-		score = game.clients[i].resp.score;
-		for (j=0 ; j<total ; j++)
-		{
-			if (score > sortedscores[j])
-				break;
-		}
-		for (k=total ; k>j ; k--)
-		{
-			sorted[k] = sorted[k-1];
-			sortedscores[k] = sortedscores[k-1];
-		}
-		sorted[j] = i;
-		sortedscores[j] = score;
-		total++;
+		index[count] = i;
+		count++;	
 	}
 
+	// sort by frags descending
+	qsort (index, count, sizeof(index[0]), G_PlayerSortDescending);
+	
 	// print level name and exit rules
 	string[0] = 0;
 
@@ -729,13 +720,14 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	stringlength += j;
 
 	// add the clients in sorted order
-	if (total > 12)
-		total = 12;
-
-	for (i=0 ; i<total ; i++)
+	if (count > 12)
+		count = 12;
+	
+	for (i = 0; i < count; i++)
 	{
-		cl = &game.clients[sorted[i]];
-		cl_ent = g_edicts + 1 + sorted[i];
+		cl = &game.clients[index[i]];
+		cl_ent = g_edicts + 1 + index[i];
+		
 
 		x = 0;
 		y = 32 + 32 * (i%12);
@@ -754,11 +746,11 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		if (player_participating (cl_ent))
 			Com_sprintf (entry, sizeof(entry),
 				"client %i %i %i %i %i %i ",
-				x, y, sorted[i], cl->resp.score, cl->ping, (int)((level.time - cl->resp.entertime)/60));
+				x, y, index[i], cl->resp.score, cl->ping, (int)((level.time - cl->resp.entertime)/60));
 		else //duel mode will have queued spectators
 			Com_sprintf (entry, sizeof(entry),
 				"queued %i %i %i %i %i %i ",
-				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue-2);
+				x, y, index[i], cl->resp.score, cl->ping, cl->pers.queue-2);
 
 		j = strlen(entry);
 		if (stringlength + j > 1024)

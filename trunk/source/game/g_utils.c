@@ -546,6 +546,58 @@ void G_CleanPlayerName ( const char *source, char *dest )
 	}
 }
 
+int PlayerSort (void const *a, void const *b, qboolean ascending)
+{
+	int		anum, bnum;
+	int		afrags, bfrags;
+	int		adeaths, bdeaths;
+
+	anum = *(int *)a;
+	bnum = *(int *)b;
+
+	if ( game.clients[anum].ps.stats[STAT_SPECTATOR] == 0 )
+	{
+		afrags = game.clients[anum].resp.score;
+		adeaths = game.clients[anum].resp.deaths;
+	}
+	else
+	{
+		afrags = 0;
+		adeaths = 0;
+	}
+	if ( game.clients[bnum].ps.stats[STAT_SPECTATOR] == 0 )
+	{
+		bfrags = game.clients[bnum].resp.score;
+		bdeaths = game.clients[bnum].resp.deaths;
+	}
+	else
+	{
+		bfrags = 0;
+		bdeaths = 0;
+	}
+
+	if (afrags < bfrags)
+		return ascending ? -1 : 1;
+	if (afrags > bfrags)
+		return ascending ? 1 : -1;
+	if (adeaths < bdeaths)
+		return ascending ? 1 : -1;
+	if (adeaths > bdeaths)
+		return ascending ? -1 : 1;
+	
+	return 0;
+}
+
+int G_PlayerSortAscending (void const *a, void const *b)
+{
+	return PlayerSort(a, b, true);
+}
+
+int G_PlayerSortDescending (void const *a, void const *b)
+{
+	return PlayerSort(a, b, false);
+}
+
 #if defined WIN32_VARIANT
 //useful rounding func
 int round(double number)
