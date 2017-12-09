@@ -1,15 +1,17 @@
 ground_texture
 {	
 	{
-		map textures/ctf-frost/canyon1_blendtex.tga		
-		blendmap 3		
+		map textures/ctf-terminal/ground_blendmap1.tga	
+		map2 textures/ctf-terminal/ground_blendmap2.tga	
+		blendmap 4		
 			200 textures/ctf-frost/frozengrass1.tga						
-			400 textures/desert/cliffmiddle.tga	
-			200 textures/dm-dismal/snow.tga	
+			400 textures/desert/cliffmiddle.tga
+			400 textures/desert/clifftop.tga
+			200 textures/dm-dismal/snow.tga			
 		blendnormalmap 3 
 			0 textures/ctf-frost/frozengrass1_nm.tga	
 			1 textures/desert/cliffmiddle_nm.tga	
-			2 textures/dm-dismal/snow_nm.tga	
+			2 textures/desert/clifftop_nm.tga	
 	}
 }
 textures/arena7/light1
