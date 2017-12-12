@@ -17,6 +17,9 @@ nobase_dist_levelshots_DATA = \
 	ctf-frost.jpg \
 	ctf-frost.txt \
 	ctf-frost_p.tga \
+	ctf-terminal.jpg \
+	ctf-terminal.txt \
+	ctf-terminal_p.tga \
 	ctf-violator.jpg \
 	ctf-violator.txt \
 	ctf-violator_p.tga \

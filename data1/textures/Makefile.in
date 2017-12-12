@@ -453,6 +453,7 @@ nobase_dist_textures_DATA = \
 	arena10/neonsign29.tga \
 	arena10/neonsign2.tga \
 	arena10/neonsign30.tga \
+	arena10/neonsign31.tga \
 	arena10/neonsign3.tga \
 	arena10/neonsign4.tga \
 	arena10/neonsign5.tga \
@@ -1266,6 +1267,11 @@ nobase_dist_textures_DATA = \
 	ctf-frost/snow1.tga \
 	ctf-frost/snow1_blendtex.tga \
 	ctf-frost/snow1_lightmaptex.tga \
+	ctf-terminal/ground.tga \
+	ctf-terminal/ground_blendmap1.tga \
+	ctf-terminal/ground_blendmap2.tga \
+	ctf-terminal/ground_lightmaptex.tga \
+	ctf-terminal/ground_vegetation.tga \
 	decals/damage1.tga \
 	decals/damage2.tga \
 	decals/damage3.tga \
@@ -1396,6 +1402,7 @@ nobase_dist_textures_DATA = \
 	desert/rustymetal1.tga \
 	desert/rustymetal1_hm.tga \
 	desert/rustymetal1_nm.tga \
+	desert/shoesonwire.tga \
 	desert/sign1.tga \
 	desert/skullsupp2.tga \
 	desert/tent1.tga \

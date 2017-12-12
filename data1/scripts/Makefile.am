@@ -12,6 +12,7 @@ nobase_dist_scripts_DATA = \
 	maps/ctf-cryogenic.rscript \
 	maps/ctf-extermination.rscript \
 	maps/ctf-frost.rscript \
+	maps/ctf-terminal.rscript \
 	maps/ctf-violator.rscript \
 	maps/ctf-zion.rscript \
 	maps/dm-annihilation.rscript \
