@@ -54,6 +54,7 @@ nobase_dist_botinfo_DATA = \
 	nav/ctf-cryogenic.nod \
 	nav/ctf-extermination.nod \
 	nav/ctf-frost.nod \
+	nav/ctf-terminal.nod \
 	nav/ctf-violator.nod \
 	nav/ctf-zion.nod \
 	nav/dm-annihilation.nod \

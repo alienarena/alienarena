@@ -133,6 +133,9 @@ nobase_dist_maps_DATA = \
 	meshes/ctf-frost/snow1.terrain \
 	meshes/ctf-frost/snow1.terrainr \
 	meshes/ctf-frost/snow1.terrainx \
+	meshes/ctf-terminal/ground.terrain \
+	meshes/ctf-terminal/ground.terrainr \
+	meshes/ctf-terminal/ground.terrainx \
 	meshes/desert/barrel.jpg \
 	meshes/desert/barrel.md2 \
 	meshes/desert/barrel_normal.jpg \
@@ -885,6 +888,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-extermination.mus \
 	scripts/ctf-frost.fog \
 	scripts/ctf-frost.mus \
+	scripts/ctf-terminal.fog \
+	scripts/ctf-terminal.mus \
 	scripts/ctf-violator.fog \
 	scripts/ctf-violator.mus \
 	scripts/ctf-zion.fog \
