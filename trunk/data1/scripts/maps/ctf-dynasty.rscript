@@ -12,14 +12,3 @@ ground_texture
 			2 textures/desert/clifftop_nm.tga	
 	}
 }
-textures/arena10/factoryfloorg
-{
-	{
-		map gfx/weed3.tga
-		scale static 4 static 4
-		colormap .7 .6 .5
-		grass
-		grasstype 0
-	}	
-}
-
