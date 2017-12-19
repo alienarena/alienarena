@@ -12,3 +12,10 @@ maps/meshes/tropical/fern1
 		normalmap
 	}
 }
+maps/meshes/tropical/tree1
+{
+	{
+		map maps/meshes/tropical/tree1_normal.jpg
+		normalmap
+	}
+}
