@@ -232,6 +232,7 @@ nobase_dist_scripts_DATA = \
 	interactive/textures.rscript \
 	maps/ctf-abyss.rscript \
 	maps/ctf-cryogenic.rscript \
+	maps/ctf-dynasty.rscript \
 	maps/ctf-extermination.rscript \
 	maps/ctf-frost.rscript \
 	maps/ctf-terminal.rscript \
@@ -260,6 +261,7 @@ nobase_dist_scripts_DATA = \
 	normals/gothic.rscript \
 	normals/newtech.rscript \
 	normals/normals.rscript \
+	normals/tropical.rscript \
 	normals/tundra.rscript \
 	normals/undersea.rscript \
 	normals/urban.rscript \
