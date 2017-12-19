@@ -6320,6 +6320,7 @@
 "origin" "1464.000000 672.000000 256.000000"
 "model" "maps/meshes/desert/oiltank.md2"
 "angle" "-21.228628"
+"spawnflags" "1"
 }
 // entity 69
 {
@@ -6584,7 +6585,7 @@
 "classname" "misc_mapmodel"
 "model" "maps/meshes/flagpad.md2"
 "origin" "1249.000000 768.000000 263.000000"
-"spawnflags" "65"
+"spawnflags" "1"
 }
 // entity 104
 {
@@ -6905,6 +6906,7 @@
 "origin" "-1463.999878 672.000305 256.000000"
 "model" "maps/meshes/desert/oiltank.md2"
 "angle" "23.337046"
+"spawnflags" "1"
 }
 // entity 153
 {
@@ -7169,7 +7171,7 @@
 "classname" "misc_mapmodel"
 "model" "maps/meshes/flagpad.md2"
 "origin" "-1249.000000 768.000000 263.000000"
-"spawnflags" "65"
+"spawnflags" "1"
 }
 // entity 188
 {
@@ -7230,6 +7232,7 @@
 "origin" "-134.000046 892.000000 416.000000"
 "model" "maps/meshes/urban/pallette.md2"
 "angle" "-38.232601"
+"spawnflags" "1"
 }
 // entity 198
 {
@@ -7268,12 +7271,14 @@
 "classname" "misc_mapmodel"
 "origin" "-282.000000 848.000000 426.000000"
 "model" "maps/meshes/toxicbarrell.md2"
+"spawnflags" "1"
 }
 // entity 203
 {
 "classname" "misc_mapmodel"
 "origin" "282.000000 848.000000 426.000000"
 "model" "maps/meshes/toxicbarrell2.md2"
+"spawnflags" "1"
 }
 // entity 204
 {
@@ -7281,6 +7286,7 @@
 "origin" "-98.000031 941.999939 440.000000"
 "model" "maps/meshes/toxicbarrell2.md2"
 "angles" "-0.000000 -50.215511 -90.000000"
+"spawnflags" "1"
 }
 // entity 205
 {
@@ -7328,6 +7334,7 @@
 "origin" "0.999985 792.000000 440.000000"
 "model" "maps/meshes/tech/crate64.md2"
 "angle" "-23.038572"
+"spawnflags" "1"
 }
 // entity 211
 {
@@ -7335,6 +7342,7 @@
 "origin" "51.000000 763.000000 440.000000"
 "model" "maps/meshes/tech/crate32.md2"
 "angle" "-1.045829"
+"spawnflags" "1"
 }
 // entity 212
 {
@@ -7342,6 +7350,7 @@
 "origin" "-62.000008 789.000000 440.000000"
 "model" "maps/meshes/tech/crate32.md2"
 "angle" "-22.328751"
+"spawnflags" "1"
 }
 // entity 213
 {
@@ -7349,6 +7358,7 @@
 "origin" "26.999992 860.000000 450.000061"
 "model" "maps/meshes/tech/crate64.md2"
 "angles" "-0.961763 -35.895309 -42.146301"
+"spawnflags" "1"
 }
 // entity 214
 {
@@ -7356,6 +7366,7 @@
 "origin" "-8.000023 701.999939 440.000000"
 "model" "maps/meshes/tech/crate64.md2"
 "angle" "20.038200"
+"spawnflags" "1"
 }
 // entity 215
 {
@@ -7363,6 +7374,7 @@
 "origin" "45.000000 721.000000 440.000000"
 "model" "maps/meshes/tech/crate32.md2"
 "angle" "19.246244"
+"spawnflags" "1"
 }
 // entity 216
 {
@@ -7370,6 +7382,7 @@
 "origin" "-70.000000 732.000000 440.000000"
 "model" "maps/meshes/tech/crate32.md2"
 "angle" "-1.045829"
+"spawnflags" "1"
 }
 // entity 217
 {
