@@ -109,6 +109,9 @@ nobase_dist_maps_DATA = \
 	meshes/ctf-abyss/canyon1.terrainx \
 	meshes/ctf-abyss/rocks1.decal \
 	meshes/ctf-abyss/rocks2.decal \
+	meshes/ctf-dynasty/ground.terrain \
+	meshes/ctf-dynasty/ground.terrainr \
+	meshes/ctf-dynasty/ground.terrainx \
 	meshes/ctf-extermination/blood0.decal \
 	meshes/ctf-extermination/blood1.decal \
 	meshes/ctf-extermination/blood2.decal \
@@ -741,6 +744,24 @@ nobase_dist_maps_DATA = \
 	meshes/toxicbarrell2.tga \
 	meshes/toxicbarrell2_normal.jpg \
 	meshes/toxicbarrell_normal.jpg \
+	meshes/tropical/fern1.iqm \
+	meshes/tropical/fern1.md2 \
+	meshes/tropical/fern1.skin \
+	meshes/tropical/fern1.tga \
+	meshes/tropical/fern1_normal.jpg \
+	meshes/tropical/palm1.iqm \
+	meshes/tropical/palm1.md2 \
+	meshes/tropical/palm1.skin \
+	meshes/tropical/palm1.tga \
+	meshes/tropical/palm1_normal.jpg \
+	meshes/tropical/tree1.iqm \
+	meshes/tropical/tree1.md2 \
+	meshes/tropical/tree1.skin \
+	meshes/tropical/tree1.tga \
+	meshes/tropical/tree1_normal.jpg \
+	meshes/tropical/tree2.iqm \
+	meshes/tropical/tree2.md2 \
+	meshes/tropical/tree2.skin \
 	meshes/tube.jpg \
 	meshes/tube.md2 \
 	meshes/tube_fx.tga \
@@ -841,8 +862,14 @@ nobase_dist_maps_DATA = \
 	meshes/urban/neonarrow.jpg \
 	meshes/urban/neonarrow_fx.tga \
 	meshes/urban/neonarrow_normal.jpg \
+	meshes/urban/neonarrowb.jpg \
+	meshes/urban/neonarrowb_fx.tga \
 	meshes/urban/neonarrowl.md2 \
+	meshes/urban/neonarrowlb.md2 \
+	meshes/urban/neonarrowr.jpg \
 	meshes/urban/neonarrowr.md2 \
+	meshes/urban/neonarrowr_fx.tga \
+	meshes/urban/neonarrowrr.md2 \
 	meshes/weaponpad_fx.tga \
 	meshes/weaponpad.md2 \
 	meshes/weaponpad_normal.tga \

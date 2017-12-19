@@ -1241,6 +1241,10 @@ nobase_dist_textures_DATA = \
 	ctf-abyss/canyon1_blendtex2.tga \
 	ctf-abyss/canyon1_lightmaptex.tga \
 	ctf-abyss/canyon1_vegetation.tga \
+	ctf-dynasty/ground.tga \
+	ctf-dynasty/ground_blendmap1.tga \
+	ctf-dynasty/ground_lightmaptex.tga \
+	ctf-dynasty/ground_vegetation.tga \
 	ctf-extermination/rubble1.tga \
 	ctf-extermination/rubble1_blendtex.tga \
 	ctf-extermination/rubble1_lightmaptex.tga \
