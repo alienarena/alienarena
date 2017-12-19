@@ -139,6 +139,24 @@ maps/meshes/urban/neonarrow
 		glow
 	}
 }
+maps/meshes/urban/neonarrowr
+{
+	{
+		map maps/meshes/urban/neonarrow_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/neonarrowr_fx.tga
+		glow
+	}
+}
+maps/meshes/urban/neonarrowb
+{
+	{
+		map maps/meshes/urban/neonarrow_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/neonarrowb_fx.tga
+		glow
+	}
+}
 maps/meshes/urban/bulb
 {
 	{
