@@ -1053,9 +1053,21 @@ static void R_Mesh_DrawFrame (const entity_t *ent, const model_t *mod, const vec
 
 static void R_Mesh_DrawBlankMeshFrame (const entity_t *ent, const model_t *mod)
 {
+	image_t *skin;
+
 	glUseProgramObjectARB (g_blankmeshprogramObj);
-	R_Mesh_SetupAnimUniforms (ent, mod, &blankmesh_uniforms);
+	R_Mesh_SetupAnimUniforms (ent, mod, &blankmesh_uniforms.anim_uniforms);
 	
+	if (ent->skin) 
+		skin = ent->skin;
+	else
+		skin = mod->skins[0];
+	if (!skin)
+		skin = r_notexture;	// fallback..
+
+	GL_MBind (0, skin->texnum);
+	glUniform1iARB (blankmesh_uniforms.baseTex, 0);
+
 	R_Mesh_DrawVBO (ent, mod, ent->frame != 0 || mod->num_frames != 1);
 
 	glUseProgramObjectARB (0);
@@ -1219,9 +1231,13 @@ void R_Mesh_DrawCaster (entity_t *ent, const model_t *mod)
 		MD2_SelectFrame (ent, mod);
 	// New model types go here
 
+	GLSTATE_ENABLE_ALPHATEST
+
 	R_Mesh_DrawBlankMeshFrame (ent, mod);
 
 	qglPopMatrix();
+
+	GLSTATE_DISABLE_ALPHATEST
 }
 
 void R_Mesh_ExtractLightmap (entity_t *ent, const model_t *mod)

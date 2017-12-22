@@ -734,8 +734,14 @@ struct
 	GLuint							fog;
 } glass_uniforms;
 
+typedef struct
+{
+	mesh_anim_uniform_location_t	anim_uniforms;
+	GLuint							baseTex;
+} mesh_blank_uniform_location_t;
+
 // Uniform locations for blank meshes.
-mesh_anim_uniform_location_t blankmesh_uniforms;
+mesh_blank_uniform_location_t blankmesh_uniforms;
 
 // Uniform locations for dumping out the static lighting into a lightmap texture
 struct
