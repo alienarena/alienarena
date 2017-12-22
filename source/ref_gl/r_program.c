@@ -1341,13 +1341,18 @@ static char blankmesh_vertex_program[] = STRINGIFY (
 	{
 		anim_compute (false, false);
 		gl_Position = gl_ModelViewProjectionMatrix * anim_vertex;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
 	}
 );
 
 static char blankmesh_fragment_program[] = STRINGIFY (
+	uniform sampler2D baseTex;
+
 	void main (void)
 	{		
-		gl_FragColor = vec4(1.0);
+		vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
+
+		gl_FragColor = vec4(1.0, 1.0, 1.0, alphamask.a);
 	}
 );
 
@@ -2328,8 +2333,9 @@ void R_LoadGLSLPrograms(void)
 	R_LoadGLSLProgram ("Blankmesh", (char*)blankmesh_vertex_program, (char*)blankmesh_fragment_program, ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX, 0, &g_blankmeshprogramObj);
 
 	// Locate some parameters by name so we can set them later...
-	get_mesh_anim_uniform_locations (g_blankmeshprogramObj, &blankmesh_uniforms);
-	
+	get_mesh_anim_uniform_locations (g_blankmeshprogramObj, &blankmesh_uniforms.anim_uniforms);
+	blankmesh_uniforms.baseTex = glGetUniformLocationARB (g_blankmeshprogramObj, "baseTex");
+
 	//Per-pixel static lightmapped mesh rendered into texture space
 	R_LoadGLSLProgram ("Extract Lightmap", (char*)mesh_extract_lightmap_vertex_program, (char*)mesh_extract_lightmap_fragment_program, ATTRIBUTE_TANGENT|ATTRIBUTE_WEIGHTS|ATTRIBUTE_BONES|ATTRIBUTE_OLDVTX|ATTRIBUTE_OLDNORM|ATTRIBUTE_OLDTAN, 0, &g_extractlightmapmeshprogramObj);
 	

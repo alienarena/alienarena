@@ -19,3 +19,10 @@ maps/meshes/tropical/tree1
 		normalmap
 	}
 }
+maps/meshes/tropical/treasurechest
+{
+	{
+		map maps/meshes/tropical/treasurechest_normal.jpg
+		normalmap
+	}
+}
