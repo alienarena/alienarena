@@ -11,6 +11,9 @@ nobase_dist_levelshots_DATA = \
 	ctf-cryogenic.jpg \
 	ctf-cryogenic.txt \
 	ctf-cryogenic_p.tga \
+	ctf-dynasty.jpg \
+	ctf-dynasty.txt \
+	ctf-dynasty_p.tga \
 	ctf-extermination.jpg \
 	ctf-extermination.txt \
 	ctf-extermination_p.tga \

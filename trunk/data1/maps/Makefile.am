@@ -754,6 +754,9 @@ nobase_dist_maps_DATA = \
 	meshes/tropical/palm1.skin \
 	meshes/tropical/palm1.tga \
 	meshes/tropical/palm1_normal.jpg \
+	meshes/tropical/treasurechest.jpg \
+	meshes/tropical/treasurechest.md2 \
+	meshes/tropical/treasurechest_normal.jpg \
 	meshes/tropical/tree1.iqm \
 	meshes/tropical/tree1.md2 \
 	meshes/tropical/tree1.skin \
@@ -911,6 +914,8 @@ nobase_dist_maps_DATA = \
 	scripts/ctf-abyss.mus \
 	scripts/ctf-cryogenic.fog \
 	scripts/ctf-cryogenic.mus \
+	scripts/ctf-dynasty.fog \
+	scripts/ctf-dynasty.mus \
 	scripts/ctf-extermination.fog \
 	scripts/ctf-extermination.mus \
 	scripts/ctf-frost.fog \
