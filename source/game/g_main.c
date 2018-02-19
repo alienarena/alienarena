@@ -449,7 +449,7 @@ static void game_report( void )
 	time_t t = time(NULL);
 	struct tm tm = *gmtime(&t);
 
-	Com_sprintf(base_filename, sizeof(filename), "game report %04d-%02d-%02d %02d:%02d:%02d.json", 
+	Com_sprintf(base_filename, sizeof(filename), "game report %04d-%02d-%02d %02d.%02d.%02d.json", 
 				tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	gi.FullWritePath(filename, sizeof(filename), base_filename);
 
