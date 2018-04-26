@@ -772,7 +772,7 @@ void SP_worldspawn (edict_t *ent)
 	if (st.sky && st.sky[0])
 		gi.configstring (CS_SKY, st.sky);
 	else
-		gi.configstring (CS_SKY, "space1");
+		gi.configstring (CS_SKY, "hspace");
 
 	gi.configstring (CS_SKYROTATE, va("%f", st.skyrotate) );
 
