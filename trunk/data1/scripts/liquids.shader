@@ -1,3 +1,9 @@
+textures/water/algae_water
+{
+	qer_editorimage textures/water/algae_water.tga
+	qer_trans 0.5
+}
+
 textures/water/bluewater
 {
 	qer_editorimage textures/water/bluewater.tga
@@ -57,4 +63,11 @@ textures/water/waterpx
 	qer_editorimage textures/water/waterpx.tga
 	qer_trans 0.5
 }
+
+textures/desert/bloodlava
+{
+	qer_editorimage textures/desert/bloodlava.tga
+	qer_trans 0.5
+}
+
 
