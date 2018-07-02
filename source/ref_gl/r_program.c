@@ -1176,7 +1176,7 @@ static char mesh_fragment_program[] = STRINGIFY (
 		}
 		else
 		{
-			gl_FragColor.rgb = max (litColor, textureColour * 0.5) * staticLightColor;
+			gl_FragColor.rgb = max (litColor, textureColour * 0.25) * staticLightColor;
 			gl_FragColor.a = shellAlpha;
 		}
 
