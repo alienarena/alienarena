@@ -703,7 +703,7 @@ static void R_Mesh_SetupStandardRender (const entity_t *ent, const model_t *mod,
 		
 		VectorCopy (statLightColor, lightVal);
 		lightVal_magnitude = 1.65f * VectorNormalize (lightVal);
-		lightVal_magnitude = clamp (lightVal_magnitude, 0.1f, 0.35f * gl_modulate->value);
+		lightVal_magnitude = clamp (lightVal_magnitude, 0.35f, 0.35f * gl_modulate->value);
 		VectorScale (lightVal, lightVal_magnitude, lightVal);
 		glUniform3fvARB (uniforms->staticLightColor, 1, (const GLfloat *)lightVal);
 	}
