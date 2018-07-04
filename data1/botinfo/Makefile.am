@@ -52,6 +52,7 @@ nobase_dist_botinfo_DATA = \
 	tac-impact.tmp \
 	nav/ctf-abyss.nod \
 	nav/ctf-cryogenic.nod \
+	nav/ctf-dynasty.nod \
 	nav/ctf-extermination.nod \
 	nav/ctf-frost.nod \
 	nav/ctf-terminal.nod \
