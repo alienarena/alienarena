@@ -487,6 +487,9 @@ typedef struct
 extern glconfig_t  gl_config;
 extern glstate_t   gl_state;
 
+// fbo
+extern GLuint pp_FBO;
+
 // vertex arrays
 #define MAX_ARRAY (MAX_PARTICLES*4)
 
@@ -574,6 +577,7 @@ GLhandleARB g_colorscaleprogramObj;
 GLhandleARB g_colorexpprogramObj;
 GLhandleARB g_rblurprogramObj;
 GLhandleARB g_dropletsprogramObj;
+GLhandleARB g_DOFprogramObj;
 GLhandleARB g_godraysprogramObj;
 GLhandleARB g_vegetationprogramObj;
 GLhandleARB g_lensflareprogramObj;
@@ -750,75 +754,79 @@ struct
 	GLuint							staticLightPosition, staticLightColor;
 } mesh_extract_lightmap_uniforms;
 
-//fullscreen distortion effects
+// fullscreen distortion effects
 struct
 {
 	GLuint	framebuffTex, distortTex;
 	GLuint	intensity;
 } distort_uniforms;
 
-//color scale shader, gaussian blur, kawase filter, defringe
+// color scale shader, gaussian blur, kawase filter, defringe
 struct 
 {
 	GLuint  scale, source;
 } colorscale_uniforms, gaussian_uniforms, defringe_uniforms, kawase_uniforms;
 
-//color exponentiation shader
+// color exponentiation shader
 struct 
 {
 	GLuint  exponent, source;
 } colorexp_uniforms;
 
-//radial blur	
+// radial blur	
 GLuint		g_location_rsource;
 GLuint		g_location_rparams;
 
-//water droplets
+// water droplets
 GLuint		g_location_drSource;
 GLuint		g_location_drTex;
 GLuint		g_location_drTime;
 
-//god rays
+// DOF
+GLuint		g_location_dofSource;
+GLuint		g_location_dofDepth;
+
+// god rays
 GLuint		g_location_lightPositionOnScreen;
 GLuint		g_location_sunTex;
 GLuint		g_location_godrayScreenAspect;
 GLuint		g_location_sunRadius;
 
-//vegetation
+// vegetation
 struct
 {
 	GLuint	rsTime;
 	GLuint	up, right;
 } vegetation_uniforms;
 
-//lens flare
+// lens flare
 struct
 {
 	GLuint	up, right;
 } lensflare_uniforms;
 
-//Shared mesh items
+// Shared mesh items
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
-//iqm
+// iqm
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern qboolean IQM_InAnimGroup(int frame, int oldframe);
 extern void IQM_DrawFrame(int skinnum, qboolean ragdoll, float shellAlpha);
 extern void IQM_AnimateFrame (const entity_t *ent, const model_t *mod, matrix3x4_t outframe[SKELETAL_MAX_BONEMATS]);
 
-//md2
+// md2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
 void MD2_SelectFrame (entity_t *ent, const model_t *mod);
 
-//terrain
+// terrain
 void Mod_LoadTerrainModel (model_t *mod, void *_buf);
 // vegetation, rocks/pebbles, etc.
 void Mod_LoadTerrainDecorations (char *path, vec3_t angles, vec3_t origin);
 
-//terrain decals
+// terrain decals
 void R_Decals_InitFBO (void);
 void Mod_LoadDecalModel (model_t *mod, void *_buf);
 void R_ParseDecalEntity (char *match, char *block);
