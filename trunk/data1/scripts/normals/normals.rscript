@@ -43,6 +43,15 @@ players/martianenforcer/doctor_braino
 		glow
 	}
 }
+players/martianenforcer/deathray
+{
+	{
+		map players/martianenforcer/deathray_normal.tga
+		normalmap
+		map2 players/martianenforcer/deathrayfx.tga
+		glow
+	}
+}
 players/martianwarrior/red
 {
 	{

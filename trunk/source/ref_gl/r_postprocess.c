@@ -33,6 +33,7 @@ void R_DrawBloodEffect (void);
 
 image_t *r_framebuffer;
 image_t *r_colorbuffer;
+image_t *r_depthbuffer;
 image_t *r_distortwave;
 image_t *r_droplets;
 image_t	*r_blooddroplets;
@@ -46,7 +47,10 @@ float r_fbeffectTime;
 extern  cvar_t	*cl_raindist;
 
 // TODO: fix the way FBOs all over the codebase "leak" at vid_restart
-static GLuint distort_FBO, godray_FBO;
+// Note - this has been botched and hacked into a complete mess. It needs a complete overhaul, and 
+// should use the Frenzy engine's codebase. 
+static GLuint distort_FBO, godray_FBO, ppDepth_FBO;
+GLuint pp_FBO;
 
 /*
 =================
@@ -216,14 +220,14 @@ void R_GLSLDistortion(void)
 
 		glUniform1iARB( g_location_rsource, 0);
 
-		glUniform3fARB( g_location_rparams, vid.width/2.0, vid.height/2.0, 0.25);
+		glUniform3fARB( g_location_rparams, 1.0, 0.5, 0.5);
 
 		Distort_RenderQuad (0, 0, vid.width, vid.height);
 
 		glUseProgramObjectARB( 0 );
 	}
 
-	if(rs_realtime > r_fbeffectTime+r_fbeffectLen) 
+	if(rs_realtime > r_fbeffectTime + r_fbeffectLen) 
 		r_drawing_fbeffect = false; //done effect
 
 	return;
@@ -269,6 +273,81 @@ void R_GLSLWaterDroplets(void)
 	return;
 }
 
+void R_GLSLDOF(void)
+{	
+	glUseProgramObjectARB(g_DOFprogramObj); 
+
+	glUniform1iARB(g_location_dofSource, 0);
+
+	GL_MBind(1, r_depthbuffer->texnum);
+	glUniform1iARB(g_location_dofDepth, 1);
+
+	GL_MBind(0, r_colorbuffer->texnum);
+	glUniform1iARB(g_location_dofSource, 0);
+
+	//render quad 
+	GLSTATE_DISABLE_BLEND
+	qglDisable(GL_DEPTH_TEST);
+
+	GL_SetupWholeScreen2DVBO(wholescreen_fliptextured);
+	R_DrawVarrays(GL_QUADS, 0, 4);
+	R_KillVArrays();
+
+	qglPopMatrix();
+	qglMatrixMode(GL_PROJECTION);
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	GLSTATE_ENABLE_BLEND
+	qglEnable(GL_DEPTH_TEST);
+
+	glUseProgramObjectARB(0);
+
+	return;
+}
+
+/*
+=================
+R_GenPPFrameBuffer
+=================
+*/
+
+void R_GenPPFrameBuffer(void)
+{
+	// Create color buffer
+	//qglDeleteFramebuffersEXT(1, &pp_FBO);
+	qglGenFramebuffersEXT(1, &pp_FBO);
+	qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER, pp_FBO);
+
+	// Create depth buffer
+	//qglDeleteRenderbuffersEXT(1, &ppDepth_FBO);
+	qglGenRenderbuffersEXT(1, &ppDepth_FBO);
+	qglBindRenderbufferEXT(GL_RENDERBUFFER, ppDepth_FBO);
+	qglRenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, vid.width, vid.height);
+	qglBindRenderbufferEXT(GL_RENDERBUFFER, 0);
+
+	// Create color texture
+	qglGenTextures(1, &pp_FBO);
+	qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, vid.width, vid.height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	// Create depth texture
+	qglGenTextures(1, &ppDepth_FBO);
+	qglBindTexture(GL_TEXTURE_2D, r_depthbuffer->texnum);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, vid.width, vid.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+	// Attach textures to buffers
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, r_depthbuffer->texnum, 0);
+
+	if (qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		printf("framebuffer failed!\n");
+}
+
 /*
 =================
 R_FB_InitTextures
@@ -279,7 +358,6 @@ void R_FB_InitTextures( void )
 {
 	byte	*data;
 	int		size;
-	GLuint	rboId;
 	GLenum FBOstatus;
 
 	//init the various FBO textures
@@ -291,7 +369,8 @@ void R_FB_InitTextures( void )
 	r_framebuffer = R_Postprocess_AllocFBOTexture ("***r_framebuffer***", vid.width, vid.height, &distort_FBO);
 	
 	memset (data, 255, size);
-	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, vid.width, vid.height, it_pic, 3);
+	r_colorbuffer = GL_LoadPic ("***r_colorbuffer***", data, vid.width, vid.height, it_pic, 3);	
+	r_depthbuffer = GL_LoadPic ("***r_depthbuffer***", data, vid.width, vid.height, it_pic, 3);	
 
 	//FBO for capturing stencil volumes
 	qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
@@ -299,23 +378,13 @@ void R_FB_InitTextures( void )
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
 	qglGenFramebuffersEXT(1, &godray_FBO);
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO);
-
-	qglGenRenderbuffersEXT(1, &rboId);
-	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
-	qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, vid.width, vid.height);
-	qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO);	
 
 	// attach a texture to FBO color attachement point
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
 
 	// attach a renderbuffer to depth attachment point
-	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	// attach a renderbuffer to stencil attachment point
-	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, godray_FBO);
+	qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, godray_FBO);
 
 	// check FBO status
 	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
@@ -335,6 +404,8 @@ void R_FB_InitTextures( void )
 
 	// back to previous screen coordinates
 	R_SetupViewport ();
+
+	//R_GenPPFrameBuffer();
 
 	// switch back to window-system-provided framebuffer
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -545,6 +616,7 @@ void R_GLSLGodRays(void)
 
 void R_GLSLPostProcess(void)
 {
+	//R_GLSLDOF();
 	R_GLSLGodRays();
 	R_GLSLWaterDroplets();
 	R_GLSLDistortion();

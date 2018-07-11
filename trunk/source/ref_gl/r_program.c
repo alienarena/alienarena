@@ -1718,8 +1718,8 @@ static char kawase_fragment_program[] = STRINGIFY (
 static char rblur_vertex_program[] = STRINGIFY (
 	void main()
 	{
-		gl_Position = ftransform();
-		gl_TexCoord[0] =  gl_MultiTexCoord0;
+		gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
 	}
 );
 
@@ -1727,45 +1727,41 @@ static char rblur_fragment_program[] = STRINGIFY (
 	uniform sampler2D rtextureSource;
 	uniform vec3 radialBlurParams;
 	
-	void main(void)
-	{
-		float wScissor;
-		float hScissor;
+	const float sampleDist = 2.0;
+	const float sampleStrength = 2.0;
 
-		vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);
-		float dist = sqrt(dir.x*dir.x + dir.y*dir.y); 
-	  	dir = dir/dist;
-		vec4 color = texture2D(rtextureSource,gl_TexCoord[0].xy); 
+	void main()
+	{
+		float samples[10];
+		samples[0] = -0.08;
+		samples[1] = -0.05;
+		samples[2] = -0.03;
+		samples[3] = -0.02;
+		samples[4] = -0.01;
+		samples[5] = 0.01;
+		samples[6] = 0.02;
+		samples[7] = 0.03;
+		samples[8] = 0.05;
+		samples[9] = 0.08;
+
+		vec2 dir = vec2(0.5) - gl_TexCoord[0].st;
+		float dist = sqrt(dir.x*dir.x + dir.y*dir.y);
+		dir = dir / dist;
+
+		vec4 color = texture2D(rtextureSource, gl_TexCoord[0].st);
 		vec4 sum = color;
 
-		float strength = radialBlurParams.z;
-		vec2 pDir = vec2 (0.5) - gl_TexCoord[0].st;
-		float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);
-		clamp(pDist, 0.0, 1.0);
+		for (int i = 0; i < 10; i++)
+			sum += texture2D(rtextureSource, gl_TexCoord[0].st + dir * samples[i] * sampleDist);
 
-		 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.02 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.01 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.01 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.02 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.03 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.05 * strength * pDist );
-		sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.06 * strength * pDist );
+		sum *= 1.0 / 11.0;
+		float t = dist * sampleStrength;
+		t = clamp(t, 0.0, 1.0);
 
-		sum *= 1.0/11.0;
- 
-		float t = clamp (dist, 0.0, 1.0);
+		gl_FragColor = mix(color, sum, t);
 
-		vec4 final = mix (color, sum, t);
-
-		//clamp edges to prevent artifacts
-		if(gl_TexCoord[0].s > 0.008 && gl_TexCoord[0].s < 0.992 && gl_TexCoord[0].t > 0.008 && gl_TexCoord[0].t < 0.992)
-			gl_FragColor = final;
-		else
-			gl_FragColor = color;
+		// Shade depending on effect.
+		gl_FragColor *= vec4(radialBlurParams, 1.0);		
 	}
 );
 
@@ -1885,6 +1881,72 @@ static char rgodrays_fragment_program[] = STRINGIFY (
 			illuminationDecay *= decay;
 		}
 		gl_FragColor *= exposure;
+	}
+);
+
+static char DOF_vertex_program[] = STRINGIFY (
+	void main()
+	{
+		gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+		gl_TexCoord[0] = gl_MultiTexCoord0;
+	}
+);
+
+static char DOF_fragment_program[] = STRINGIFY (
+
+	uniform sampler2D renderedTexture;
+	uniform sampler2D depthTexture;
+
+	const float pi = 3.14159265f;
+	const float sigma = 3.0f;
+	const float blurSize = 1.0f / 512.0f; //Note - should be screen width
+
+	const vec2  blurMultiplyVecH = vec2(1.0f, 0.0f);
+	const vec2  blurMultiplyVecV = vec2(0.0f, 1.0f);
+
+	void main(void)
+	{
+		// Possible better way to use the depth
+		float n = 1.0;
+		float f = 3000.0;
+		float z = texture2D(depthTexture, gl_TexCoord[0].xy).x;
+		float blur = (2.0 * n) / (f + n - z*(f - n));
+
+		float numBlurPixelsPerSide = 3.0f * blur;
+		vec3 incrementalGaussian;
+		incrementalGaussian.x = 1.0f / (sqrt(2.0f * pi) * sigma);
+		incrementalGaussian.y = exp(-0.5f / (sigma * sigma));
+		incrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;
+
+		vec4 avgValue = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		float coefficientSum = 0.0f;
+
+		// Take the central sample first...
+		avgValue += texture2D(renderedTexture, gl_TexCoord[0].xy) * incrementalGaussian.x;
+		coefficientSum += incrementalGaussian.x;
+		incrementalGaussian.xy *= incrementalGaussian.yz;
+
+		for (float i = 1.0f; i <= numBlurPixelsPerSide; i++) {
+			avgValue += texture2D(renderedTexture, gl_TexCoord[0].xy - i * blurSize *
+				blurMultiplyVecV) * incrementalGaussian.x;
+			avgValue += texture2D(renderedTexture, gl_TexCoord[0].xy + i * blurSize *
+				blurMultiplyVecV) * incrementalGaussian.x;
+			coefficientSum += 2 * incrementalGaussian.x;
+			incrementalGaussian.xy *= incrementalGaussian.yz;
+		}
+
+		// Blur Horizontally
+		for (float i = 1.0f; i <= numBlurPixelsPerSide; i++) {
+			avgValue += texture2D(renderedTexture, gl_TexCoord[0].xy - i * blurSize *
+				blurMultiplyVecH) * incrementalGaussian.x;
+			avgValue += texture2D(renderedTexture, gl_TexCoord[0].xy + i * blurSize *
+				blurMultiplyVecH) * incrementalGaussian.x;
+			coefficientSum += 2 * incrementalGaussian.x;
+			incrementalGaussian.xy *= incrementalGaussian.yz;
+		}
+
+		gl_FragColor = mix(gl_FragColor, avgValue / coefficientSum, 1.0);
+		//gl_FragColor = vec4(blur, blur, blur, 1.0); // Uncomment to see depth buffer.
 	}
 );
 
@@ -2383,14 +2445,14 @@ void R_LoadGLSLPrograms(void)
 	colorexp_uniforms.exponent = glGetUniformLocationARB (g_colorexpprogramObj, "exponent");
 	colorexp_uniforms.source = glGetUniformLocationARB (g_colorexpprogramObj, "textureSource");
 	
-	//radial blur
+	// Radial blur
 	R_LoadGLSLProgram ("Framebuffer Radial Blur", (char*)rblur_vertex_program, (char*)rblur_fragment_program, NO_ATTRIBUTES, 0, &g_rblurprogramObj);
 
 	// Locate some parameters by name so we can set them later...
 	g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
 	g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
 
-	//water droplets
+	// Water droplets
 	R_LoadGLSLProgram ("Framebuffer Droplets", (char*)droplets_vertex_program, (char*)droplets_fragment_program, NO_ATTRIBUTES, 0, &g_dropletsprogramObj);
 
 	// Locate some parameters by name so we can set them later...
@@ -2398,7 +2460,14 @@ void R_LoadGLSLPrograms(void)
 	g_location_drTex = glGetUniformLocationARB( g_dropletsprogramObj, "drTex");
 	g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
 
-	//god rays
+	// Depth of field
+	R_LoadGLSLProgram("Framebuffer DOF", (char*)DOF_vertex_program, (char*)DOF_fragment_program, NO_ATTRIBUTES, 0, &g_DOFprogramObj);
+
+	// Locate some parameters by name so we can set them later...
+	g_location_dofSource = glGetUniformLocationARB(g_DOFprogramObj, "renderedTexture");
+	g_location_dofDepth = glGetUniformLocationARB(g_DOFprogramObj, "depthTexture");
+
+	// God rays
 	R_LoadGLSLProgram ("God Rays", (char*)rgodrays_vertex_program, (char*)rgodrays_fragment_program, NO_ATTRIBUTES, 0, &g_godraysprogramObj);
 
 	// Locate some parameters by name so we can set them later...
@@ -2407,14 +2476,14 @@ void R_LoadGLSLPrograms(void)
 	g_location_godrayScreenAspect = glGetUniformLocationARB( g_godraysprogramObj, "aspectRatio");
 	g_location_sunRadius = glGetUniformLocationARB( g_godraysprogramObj, "sunRadius");
 	
-	//vegetation
+	// Vegetation
 	R_LoadGLSLProgram ("Vegetation", (char*)vegetation_vertex_program, NULL, ATTRIBUTE_SWAYCOEF|ATTRIBUTE_ADDUP|ATTRIBUTE_ADDRIGHT, 0, &g_vegetationprogramObj);
 	
 	vegetation_uniforms.rsTime = glGetUniformLocationARB (g_vegetationprogramObj, "rsTime");
 	vegetation_uniforms.up = glGetUniformLocationARB (g_vegetationprogramObj, "up");
 	vegetation_uniforms.right = glGetUniformLocationARB (g_vegetationprogramObj, "right");
 	
-	//lens flare
+	// Lens flare
 	R_LoadGLSLProgram ("Lens Flare", (char*)lensflare_vertex_program, NULL, ATTRIBUTE_SIZE|ATTRIBUTE_ADDUP|ATTRIBUTE_ADDRIGHT, 0, &g_lensflareprogramObj);
 	
 	lensflare_uniforms.up = glGetUniformLocationARB (g_lensflareprogramObj, "up");

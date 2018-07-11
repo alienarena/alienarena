@@ -1412,3 +1412,44 @@
 "model" "maps/meshes/playerpose/martianwarrior_weapon.iqm"
 "angle" "51.980278"
 }
+// entity 39
+{
+"classname" "misc_mapmodel"
+"origin" "-806.961304 24.547363 280.000000"
+"model" "maps/meshes/playerpose/martianenforcer_run.iqm"
+}
+// entity 40
+{
+"classname" "misc_mapmodel"
+"origin" "-806.961304 24.547363 280.000000"
+"model" "maps/meshes/playerpose/martianenforcer_run_helmet.iqm"
+"spawnflags" "16"
+}
+// entity 41
+{
+"classname" "misc_mapmodel"
+"origin" "-806.961304 24.547363 280.000000"
+"model" "maps/meshes/playerpose/martianenforcer_run_weapon.iqm"
+}
+// entity 42
+{
+"classname" "misc_mapmodel"
+"origin" "-910.835938 7.847105 280.000000"
+"model" "maps/meshes/playerpose/martianenforcer_run.iqm"
+"angle" "-35.271275"
+}
+// entity 43
+{
+"classname" "misc_mapmodel"
+"origin" "-910.835938 7.847105 280.000000"
+"model" "maps/meshes/playerpose/martianenforcer_run_helmet.iqm"
+"spawnflags" "16"
+"angle" "-35.271275"
+}
+// entity 44
+{
+"classname" "misc_mapmodel"
+"origin" "-910.835938 7.847105 280.000000"
+"model" "maps/meshes/playerpose/martianenforcer_run_weapon.iqm"
+"angle" "-35.271275"
+}
