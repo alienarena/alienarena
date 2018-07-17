@@ -1096,7 +1096,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		use_fuzzy_aim = false; // avoid potential odd melee attack behaviour
 		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
 		{
-			ucmd->forwardmove += 400; //lunge at enemy
+			ucmd->forwardmove += 300; //lunge at enemy
 			self->backpedal = false;
 		}
 		goto attack;

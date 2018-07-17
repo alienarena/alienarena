@@ -304,7 +304,7 @@ static void R_Bloom_DoGaussian (void)
 	// is reached. i needs to stay odd, so it must be incremented by an even
 	// number each time. Choosing a higher increment value reduces the quality
 	// of the blur but improves performance.
-	for (i = 3; i <= maxscale; i += 4)
+	for (i = 3; i <= maxscale; i += 2)
 	{
 		int j;
 		image_t *swap_image;

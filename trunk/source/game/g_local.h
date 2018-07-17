@@ -874,7 +874,7 @@ char	*vtos (vec3_t v);
 float	vectoyaw (vec3_t vec);
  void vectoangles (vec3_t vec, vec3_t angles);
 #if defined WIN32_VARIANT
-int		round(double number);
+//int		round(double number);
 #endif
 
 //
@@ -1528,7 +1528,6 @@ struct edict_s
 #define ALIEN_TEAM				3
 #define HUMAN_TEAM				4
 
-
 	// DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
 	// EXPECTS THE FIELDS IN THAT ORDER!
 
@@ -1669,6 +1668,7 @@ struct edict_s
 	int last_sidemove;
 	float last_sidemove_time;
 	float sidemove_speed;
+	float last_weapon_change;
 
 	// For node code
 	int current_node; // current node
@@ -1687,7 +1687,7 @@ struct edict_s
 	float targDeltaY;
 	int targDirSwitchX;
 	int targDirSwitchY;
-	char		chatmsg[8][128];
+	char chatmsg[8][128];
 
 // ACEBOT_END
 
