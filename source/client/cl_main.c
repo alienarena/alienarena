@@ -1976,7 +1976,7 @@ void CL_InitLocal (void)
 	Cvar_Describe (cl_noskins, "for all players to be shown with the same skin.");
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", CVARDOC_BOOL);
 	cl_predict = Cvar_Get ("cl_predict", "1", CVARDOC_BOOL);
-	cl_maxfps = Cvar_Get ("cl_maxfps", "60", CVAR_ARCHIVE | CVARDOC_INT);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "120", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_maxfps, "limit the frames drawn per second using a busy-wait loop.");
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_showPlayerNames, "0 means no nametags, 1 means show one nametag in the center of the screen, 2 means show a nametag over each player.");

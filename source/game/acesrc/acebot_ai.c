@@ -697,6 +697,18 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	qboolean clear_shot;
 	qboolean suppress_favorite;
 
+	// Delay the thinking process to be more human like.
+	// This should make weapon switching delay around 1 second.
+	if (level.time - self->last_weapon_change > 3.0f)
+	{
+		self->last_weapon_change = level.time;
+		return;
+	}
+	else if (level.time - self->last_weapon_change < 2.0f)
+	{
+		return;
+	}
+
 	if (self->client->resp.powered)
 	{ //got enough reward points, use something
 		gitem_t *it;
@@ -848,8 +860,8 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	//  always favor the Vaporizer, unless close, then use the violator
 	if ( !self->in_vehicle && !g_tactical->integer && range < 200.0f && self->skill > 0 )
 	{
-		selected = ACEIT_ChangeWeapon( self, FindItem( "Violator" ));
-		assert( selected );
+		selected = ACEIT_ChangeWeapon(self, FindItem("Violator"));
+		assert(selected);
 		return;
 	}
 	if ( self->skill > 1 )

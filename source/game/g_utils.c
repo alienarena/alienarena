@@ -600,8 +600,8 @@ int G_PlayerSortDescending (void const *a, void const *b)
 
 #if defined WIN32_VARIANT
 //useful rounding func
-int round(double number)
-{
-    return (number >= 0) ? (int)(number + 0.5) : (int)(number - 0.5);
-}
+//int round(double number)
+//{
+//    return (number >= 0) ? (int)(number + 0.5) : (int)(number - 0.5);
+//}
 #endif
