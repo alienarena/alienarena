@@ -31600,14 +31600,14 @@
 // entity 179
 {
 "classname" "misc_mapmodel"
-"origin" "-243.517883 1096.785278 -207.932861"
+"origin" "-243.517883 1096.785278 -175.932861"
 "model" "maps/meshes/playerpose/cyborg.iqm"
 "angles" "1.924548 43.744415 -0.001383"
 }
 // entity 180
 {
 "classname" "misc_mapmodel"
-"origin" "-243.545746 1096.649048 -207.932861"
+"origin" "-243.545746 1096.649048 -175.932861"
 "model" "maps/meshes/playerpose/cyborg_helmet.iqm"
 "spawnflags" "16"
 "angles" "1.924548 45.955368 -0.001383"
@@ -31615,21 +31615,21 @@
 // entity 181
 {
 "classname" "misc_mapmodel"
-"origin" "-243.544189 1096.659546 -207.938889"
+"origin" "-243.544189 1096.659546 -175.938889"
 "model" "maps/meshes/playerpose/cyborg_weapon.iqm"
 "angles" "1.133126 45.782017 0.412600"
 }
 // entity 182
 {
 "classname" "misc_mapmodel"
-"origin" "-145.726593 1035.150024 -224.305466"
+"origin" "-145.726593 1035.150024 -192.305466"
 "model" "maps/meshes/playerpose/cyborg.iqm"
 "angles" "-6.935473 -4.667796 -1.233167"
 }
 // entity 183
 {
 "classname" "misc_mapmodel"
-"origin" "-145.726593 1035.150024 -224.305466"
+"origin" "-145.726593 1035.150024 -192.305466"
 "model" "maps/meshes/playerpose/cyborg_helmet.iqm"
 "spawnflags" "16"
 "angles" "-6.935473 -4.667796 -1.233167"
@@ -31637,7 +31637,7 @@
 // entity 184
 {
 "classname" "misc_mapmodel"
-"origin" "-145.715149 1035.160278 -224.266052"
+"origin" "-145.715149 1035.160278 -192.266052"
 "model" "maps/meshes/playerpose/cyborg_weapon.iqm"
 "angles" "-7.116801 -4.959964 -0.352018"
 }
