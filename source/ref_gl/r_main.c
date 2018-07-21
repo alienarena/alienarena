@@ -1418,7 +1418,7 @@ void R_Register( void )
 	// again elsewhere. TODO: work out any complications that may arise from
 	// deleting these duplicate initializations.
 	Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
-	Cvar_Get( "r_bloom_intensity", "1.0", CVAR_ARCHIVE);
+	Cvar_Get( "r_bloom_intensity", "0.75", CVAR_ARCHIVE);
 	Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE);
 	Cvar_Get( "vid_width", "640", CVAR_ARCHIVE);
 	Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
