@@ -62,3 +62,17 @@ maps/meshes/gothic/eyeball
 		glow
 	}
 }
+maps/meshes/gothic/banner1
+{
+	{
+		map maps/meshes/gothic/banner1_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/banner2
+{
+	{
+		map maps/meshes/gothic/banner1_normal.jpg
+		normalmap
+	}
+}

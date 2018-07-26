@@ -10557,3 +10557,83 @@
 "classname" "item_flag_red"
 "origin" "-72.000000 2296.000000 304.000000"
 }
+// entity 198
+{
+"classname" "misc_mapmodel"
+"origin" "76.459930 976.330078 336.000000"
+"model" "maps/meshes/gothic/banner.md2"
+"spawnflags" "34"
+"angle" "-90.000000"
+}
+// entity 199
+{
+"classname" "misc_mapmodel"
+"origin" "-83.540070 976.330078 336.000000"
+"model" "maps/meshes/gothic/banner.md2"
+"spawnflags" "34"
+"angle" "-90.000000"
+}
+// entity 200
+{
+"classname" "misc_mapmodel"
+"origin" "256.330078 1195.540039 336.000000"
+"model" "maps/meshes/gothic/banner.md2"
+"spawnflags" "34"
+"angle" "0.000003"
+}
+// entity 201
+{
+"classname" "misc_mapmodel"
+"origin" "-247.669922 1347.540039 336.000000"
+"model" "maps/meshes/gothic/banner.md2"
+"spawnflags" "34"
+"angle" "-179.999985"
+}
+// entity 202
+{
+"classname" "misc_mapmodel"
+"origin" "-324.459961 1583.669922 336.000000"
+"model" "maps/meshes/gothic/banner.md2"
+"spawnflags" "34"
+"angle" "-90.000000"
+}
+// entity 203
+{
+"classname" "misc_mapmodel"
+"origin" "76.459930 -1008.330078 336.000000"
+"model" "maps/meshes/gothic/banner2.md2"
+"spawnflags" "34"
+"angle" "90"
+}
+// entity 204
+{
+"classname" "misc_mapmodel"
+"origin" "-83.540070 -1008.330078 336.000000"
+"model" "maps/meshes/gothic/banner2.md2"
+"spawnflags" "34"
+"angle" "90"
+}
+// entity 205
+{
+"classname" "misc_mapmodel"
+"origin" "256.330078 -1227.540039 336.000000"
+"model" "maps/meshes/gothic/banner2.md2"
+"spawnflags" "34"
+"angle" "0.000003"
+}
+// entity 206
+{
+"classname" "misc_mapmodel"
+"origin" "-247.669922 -1379.539917 336.000000"
+"model" "maps/meshes/gothic/banner2.md2"
+"spawnflags" "34"
+"angle" "-179.999985"
+}
+// entity 207
+{
+"classname" "misc_mapmodel"
+"origin" "-324.459961 -1615.669922 336.000000"
+"model" "maps/meshes/gothic/banner2.md2"
+"spawnflags" "34"
+"angle" "90"
+}
