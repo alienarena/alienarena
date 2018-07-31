@@ -76,3 +76,10 @@ maps/meshes/gothic/banner2
 		normalmap
 	}
 }
+maps/meshes/gothic/flag
+{
+	{
+		map maps/meshes/gothic/flag_normal.jpg
+		normalmap
+	}
+}
