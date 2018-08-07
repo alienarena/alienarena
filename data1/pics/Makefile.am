@@ -63,6 +63,7 @@ nobase_dist_pics_DATA = \
 	crosshairs/tech2.tga \
 	crosshairs/transcircle.tga \
 	crosshairs/vista.tga \
+	crosshairs/xenos.tga \
 	ctf1.tga \
 	ctf2.tga \
 	dnarrow.tga \

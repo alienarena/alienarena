@@ -588,12 +588,21 @@ nobase_dist_maps_DATA = \
 	meshes/generator.jpg \
 	meshes/generator.md2 \
 	meshes/generator_normal.jpg \
+	meshes/gothic/banner.iqm \
+	meshes/gothic/banner.md2 \
+	meshes/gothic/banner.skin \
+	meshes/gothic/banner1.tga \
+	meshes/gothic/banner1_normal.jpg \
+	meshes/gothic/banner2.iqm \
+	meshes/gothic/banner2.md2 \
+	meshes/gothic/banner2.skin \
+	meshes/gothic/banner2.tga \
 	meshes/gothic/bigskull.md2 \
 	meshes/gothic/blade.jpg \
 	meshes/gothic/blade.md2 \
-	meshes/gothic/blade_normal.jpg \
 	meshes/gothic/blade2.md2 \
 	meshes/gothic/blade3.md2 \
+	meshes/gothic/blade_normal.jpg \
 	meshes/gothic/ceillamp.md2 \
 	meshes/gothic/column1.jpg \
 	meshes/gothic/column1.md2 \
@@ -611,35 +620,44 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/eyeball.skin \
 	meshes/gothic/eyeball_fx.tga \
 	meshes/gothic/eyeball_normal.jpg \
-	meshes/gothic/fdstatue_green.md2 \
 	meshes/gothic/fd_statue_normal.jpg \
+	meshes/gothic/fdstatue_green.md2 \
 	meshes/gothic/fdstatue_red.md2 \
+	meshes/gothic/flag.iqm \
+	meshes/gothic/flag.md2 \
+	meshes/gothic/flag.skin \
+	meshes/gothic/flag.tga \
+	meshes/gothic/flag_normal.jpg \
 	meshes/gothic/freedom_statue_green.jpg \
 	meshes/gothic/freedom_statue_red.jpg \
 	meshes/gothic/gargoyle.jpg \
 	meshes/gothic/gargoyle.md2 \
 	meshes/gothic/gargoyle_normal.jpg \
-	meshes/gothic/lamp2b_fx.tga \
+	meshes/gothic/lamp.md2 \
+	meshes/gothic/lamp.tga \
+	meshes/gothic/lamp2.md2 \
+	meshes/gothic/lamp2.tga \
+	meshes/gothic/lamp2_fx.tga \
+	meshes/gothic/lamp2_normal.tga \
 	meshes/gothic/lamp2b.md2 \
 	meshes/gothic/lamp2b.tga \
-	meshes/gothic/lamp2_fx.tga \
-	meshes/gothic/lamp2.md2 \
-	meshes/gothic/lamp2_normal.tga \
-	meshes/gothic/lamp2.tga \
+	meshes/gothic/lamp2b_fx.tga \
 	meshes/gothic/lamp_fx.tga \
-	meshes/gothic/lamp.md2 \
 	meshes/gothic/lamp_normal.tga \
-	meshes/gothic/lamp.tga \
 	meshes/gothic/lavacolumn.md2 \
 	meshes/gothic/lavacolumn.tga \
 	meshes/gothic/lavacolumn2.md2 \
 	meshes/gothic/lavacolumn_fx.jpg \
 	meshes/gothic/lavacolumn_normal.jpg \
+	meshes/gothic/meat1.iqm \
 	meshes/gothic/meat1.jpg \
 	meshes/gothic/meat1.md2 \
+	meshes/gothic/meat1.skin \
 	meshes/gothic/meat1_normal.jpg \
+	meshes/gothic/meat2.iqm \
 	meshes/gothic/meat2.jpg \
 	meshes/gothic/meat2.md2 \
+	meshes/gothic/meat2.skin \
 	meshes/gothic/meat2_normal.jpg \
 	meshes/gothic/meat3.iqm \
 	meshes/gothic/meat3.jpg \
@@ -652,10 +670,10 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/root.jpg \
 	meshes/gothic/root.md2 \
 	meshes/gothic/root_normal.jpg \
+	meshes/gothic/skeleton.jpg \
 	meshes/gothic/skeleton1.md2 \
 	meshes/gothic/skeleton2.md2 \
 	meshes/gothic/skeleton3.md2 \
-	meshes/gothic/skeleton.jpg \
 	meshes/gothic/skeleton_normal.jpg \
 	meshes/gothic/skull.tga \
 	meshes/gothic/skull1.md2 \
@@ -679,10 +697,6 @@ nobase_dist_maps_DATA = \
 	meshes/gothic/tree1.jpg \
 	meshes/gothic/tree1.md2 \
 	meshes/gothic/tree1_normal.jpg \
-	meshes/gothic/meat1.iqm \
-	meshes/gothic/meat1.skin \
-	meshes/gothic/meat2.iqm \
-	meshes/gothic/meat2.skin \
 	meshes/greenblob.iqm \
 	meshes/greenblob.jpg \
 	meshes/greenblob.md2 \
