@@ -97,6 +97,15 @@ players/martianwarrior/hedorah
 		glow
 	}
 }
+players/martianwarrior/invader
+{
+	{
+		map players/martianwarrior/default_normal.tga
+		normalmap
+		map2 players/martianwarrior/invaderfx.tga
+		glow
+	}
+}
 players/martianoverlord/red
 {
 	{
