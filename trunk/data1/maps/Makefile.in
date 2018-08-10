@@ -962,9 +962,6 @@ nobase_dist_maps_DATA = \
 	meshes/tech/crate32.md2 \
 	meshes/tech/crate64.md2 \
 	meshes/tech/crate96.md2 \
-	meshes/test/martian.jpg \
-	meshes/test/martian_fx.tga \
-	meshes/test/martian_normal.tga \
 	meshes/test/martianenforcer.iqm \
 	meshes/test/martianenforcer.skin \
 	meshes/test/weapon.iqm \
