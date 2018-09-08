@@ -673,6 +673,7 @@ extern  cvar_t	*sv_custombots;
 
 extern  cvar_t  *sv_tickrate;
 extern  cvar_t  *sv_gamereport;
+extern  cvar_t  *sv_gamereport_title;
 
 //mutators
 extern  cvar_t  *instagib;

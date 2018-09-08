@@ -198,6 +198,7 @@ cvar_t  *sv_custombots;
 cvar_t  *sv_tickrate;
 float   FRAMETIME;
 cvar_t  *sv_gamereport;
+cvar_t  *sv_gamereport_title;
 
 //unlagged
 cvar_t	*g_antilagdebug;
@@ -405,6 +406,28 @@ char *trimwhitespace(char *str)
 }
 
 /*
+** Returns a copy of the original string with invalid path/file characters 
+** and other unwanted characters replaced with underscores.
+*/
+char *ReplaceIllegalChars(char *str)
+{
+	char illegalChars[20] = " \\/:?\"'<>|*&=+-().";
+	int i;
+	static char copy[MAX_OSPATH];
+
+	strcpy(copy, str);
+
+	for (i = 0; i < strlen(copy); i++)
+	{
+		if (strchr(illegalChars, copy[i]) != NULL)
+		{
+			copy[i] = '_';
+		}
+	}
+	return copy;
+}
+
+/*
  * Log scores and stats into a game report file on the server in json format.
  * Bots will be skipped.
  *
@@ -444,13 +467,25 @@ static void game_report( void )
 	int	index[256];
 	char base_filename[MAX_OSPATH];
 	char filename[MAX_OSPATH];
+	char title[MAX_OSPATH];
 	FILE *jsonfile;
 
 	time_t t = time(NULL);
 	struct tm tm = *gmtime(&t);
 
-	Com_sprintf(base_filename, sizeof(filename), "game report %04d-%02d-%02d %02d.%02d.%02d.json", 
-				tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	if (sv_gamereport_title != NULL && *sv_gamereport_title->string != '\0')
+	{
+		sprintf(title, "_%s", ReplaceIllegalChars(sv_gamereport_title->string));
+	}
+	else
+	{
+		strcpy(title, "");
+	}
+
+	Com_sprintf(base_filename, sizeof(filename), "gamereport_%04d-%02d-%02d_%02d.%02d.%02d%s.json",
+				tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
+				title);
+
 	gi.FullWritePath(filename, sizeof(filename), base_filename);
 
 	jsonfile = fopen(filename, "w");

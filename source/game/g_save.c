@@ -197,7 +197,9 @@ void InitGame (void)
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
 	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");
 	sv_tickrate = gi.cvar("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_LATCH | CVARDOC_INT);
-	sv_gamereport = gi.cvar("sv_gamereport", "1", CVAR_LATCH | CVARDOC_BOOL);
+
+	sv_gamereport = gi.cvar("sv_gamereport", "1", CVAR_SERVERINFO | CVARDOC_BOOL);
+	sv_gamereport_title = gi.cvar("sv_gamereport_title", "", CVAR_SERVERINFO | CVARDOC_STR);
 
 	//mutator
 	instagib = gi.cvar ("instagib", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
