@@ -198,7 +198,6 @@ cvar_t  *sv_custombots;
 cvar_t  *sv_tickrate;
 float   FRAMETIME;
 cvar_t  *sv_gamereport;
-cvar_t  *sv_gamereport_title;
 
 //unlagged
 cvar_t	*g_antilagdebug;
@@ -411,7 +410,7 @@ char *trimwhitespace(char *str)
 */
 char *ReplaceIllegalChars(char *str)
 {
-	char illegalChars[20] = " \\/:?\"'<>|*&=+-().";
+	static const char allowedChars[62] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	int i;
 	static char copy[MAX_OSPATH];
 
@@ -419,13 +418,15 @@ char *ReplaceIllegalChars(char *str)
 
 	for (i = 0; i < strlen(copy); i++)
 	{
-		if (strchr(illegalChars, copy[i]) != NULL)
+		if (strchr(allowedChars, copy[i]) == NULL)
 		{
 			copy[i] = '_';
 		}
 	}
 	return copy;
 }
+
+extern char *Cvar_VariableString (const char *var_name);
 
 /*
  * Log scores and stats into a game report file on the server in json format.
@@ -459,38 +460,49 @@ static void game_report( void )
 		"vaporizer",      // 7
 		"violator"        // 8
 	};
+	static const int MAX_HOSTNAME = 27;
 
 	edict_t *pclient;
 	int i;
 	char *client_name;
 	int	count;
 	int	index[256];
-	char base_filename[MAX_OSPATH];
-	char filename[MAX_OSPATH];
-	char title[MAX_OSPATH];
+	
+	char jsonfilename[MAX_OSPATH];
+	char fullpath[MAX_OSPATH];
 	FILE *jsonfile;
 
 	time_t t = time(NULL);
 	struct tm tm = *gmtime(&t);
 
-	if (sv_gamereport_title != NULL && *sv_gamereport_title->string != '\0')
+	char *hostname = Cvar_VariableString("hostname");
+	char *sanitized_hostname = ReplaceIllegalChars(hostname);
+	char title[49];
+
+	if (sanitized_hostname != NULL && *sanitized_hostname != '\0' && strlen(sanitized_hostname) > 0)
 	{
-		sprintf(title, "_%s", ReplaceIllegalChars(sv_gamereport_title->string));
+		// The file name may not be longer than 63 characters, gi.FullWritePath() will fail.
+		// So truncate the host name part in case it's longer than 27.
+		if (strlen(sanitized_hostname) > MAX_HOSTNAME)
+		{
+			sanitized_hostname[MAX_HOSTNAME] = '\0';
+		}
+		sprintf(title, "_%s", sanitized_hostname);
 	}
 	else
 	{
 		strcpy(title, "");
 	}
 
-	Com_sprintf(base_filename, sizeof(filename), "gamereport_%04d-%02d-%02d_%02d.%02d.%02d%s.json",
+	Com_sprintf(jsonfilename, sizeof(jsonfilename), "gamereport_%04d-%02d-%02d_%02d.%02d.%02d%s.json",
 				tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
 				title);
 
-	gi.FullWritePath(filename, sizeof(filename), base_filename);
+	gi.FullWritePath(fullpath, sizeof(fullpath), jsonfilename);
 
-	jsonfile = fopen(filename, "w");
+	jsonfile = fopen(fullpath, "w");
 	if (!jsonfile) {
-		Com_Printf("ERROR: couldn't open %s.\n", filename);
+		Com_Printf("ERROR: couldn't open %s.\n", fullpath);
 		return;
 	}
 
