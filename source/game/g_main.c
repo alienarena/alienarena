@@ -405,6 +405,30 @@ char *trimwhitespace(char *str)
 }
 
 /*
+** Returns a copy of the original string with all color codes removed.
+*/
+char *StripColorCodes(char *str)
+{
+	static char copy[MAX_OSPATH];
+	int count = 0;
+
+	while (*str)
+	{
+		if ( *str == '^' && str[1] )
+		{
+			str += 2;
+			continue;
+		}
+		copy[count] = *str;
+		count++;
+		str++;
+	}
+	copy[count] = '\0';
+
+	return copy;
+}
+
+/*
 ** Returns a copy of the original string with invalid path/file characters 
 ** and other unwanted characters replaced with underscores.
 */
@@ -476,7 +500,7 @@ static void game_report( void )
 	struct tm tm = *gmtime(&t);
 
 	char *hostname = Cvar_VariableString("hostname");
-	char *sanitized_hostname = ReplaceIllegalChars(hostname);
+	char *sanitized_hostname = ReplaceIllegalChars(StripColorCodes(hostname));
 	char title[49];
 
 	if (sanitized_hostname != NULL && *sanitized_hostname != '\0' && strlen(sanitized_hostname) > 0)
