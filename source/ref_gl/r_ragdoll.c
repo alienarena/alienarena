@@ -90,7 +90,7 @@ static void RGD_addBody (const model_t *mod, int RagDollID, matrix3x4_t *bindmat
 	//radius at joints
 	VectorSubtract(p1, p2, temp);
 	length = VectorLength(temp) - radius;
-	if (length <= 0.0f)
+	if (length <= 0.1f) // minor glitch, not <=0.0f 2018-10-27
 		length = 0.1f;
 
 	//create body id
