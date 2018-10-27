@@ -1709,7 +1709,8 @@ cpuinfo_exit:
 
 	//Initialize ODE
 	// ODE assert failures sometimes occur, this may or may not help.
-	r_odeinit_success = dInitODE2(0);
+	// see in ODE: include/odeinit.h
+	r_odeinit_success = dInitODE2( dAllocateMaskAll );
 	//ODE - clear out any ragdolls;
 	if ( r_odeinit_success )
 	{
@@ -1773,6 +1774,7 @@ void R_Shutdown (void)
 	if ( r_odeinit_success )
 	{
 		Com_DPrintf("Closing ODE\n");
+		// see in ODE: include/odeinit.h
 		dCloseODE();
 	}
 }

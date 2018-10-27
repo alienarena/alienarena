@@ -18,7 +18,7 @@
 #
 
 AC_PREREQ([2.69])
-AC_INIT([alienarena],[7.71.0],[alienrace@comcast.net])
+AC_INIT([alienarena],[7.71.1],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -42,7 +42,7 @@ AM_MAINTAINER_MODE
 dnl
 dnl Options for specifying whether to include "nested" data1 package
 dnl  for make install and make distcheck. The default is to include
-dnl  data1. 
+dnl  data1.
 dnl
 AC_MSG_CHECKING([whether to include game resources package])
 AC_ARG_WITH([data1pkg],
@@ -65,6 +65,7 @@ AC_PROG_AWK
 AC_PROG_SED
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -193,6 +194,20 @@ AC_ARG_WITH(iconsdir,
 	[with_iconsdir=${datadir}/icons])
 AC_SUBST([iconsdir], [${with_icondir}])
 
+dnl
+dnl ODE (Open Dynamic Engine) Library
+dnl
+dnl if no option or "--without-system-libode" is specified, use the recommended
+dnl  integrated ODE.
+dnl if "--with-system-libode" is specified, check. look under BUILD_CLIENT
+dnl  for details.
+dnl
+AC_ARG_WITH([system-libode],
+	[AS_HELP_STRING([--with(out)-system-libode],
+		[use system-supplied libode (default:without)])],
+	[system_libode=${withval}],
+	[system_libode=no])
+
 #
 # Checks for libraries.
 #
@@ -200,7 +215,7 @@ AC_SUBST([iconsdir], [${with_icondir}])
 dnl ---- math
 AC_SEARCH_LIBS([acos],[m])
 
-dnl ---- dynamic 
+dnl ---- dynamic
 AC_SEARCH_LIBS([dlopen],[dl])
 
 dnl ---- real time
@@ -345,17 +360,38 @@ PKG_CHECK_MODULES([FREETYPE2],[freetype2],,[
 	AC_MSG_ERROR(["Required FreeType2 library not found"])
 ])
 
-dnl ---- ODE (client)
-PKG_CHECK_MODULES( [ODE],[ode],,[
-	AC_MSG_ERROR(["Required ODE (Open Dynamics Engine) library not found"])
+dnl
+dnl if option to use system libode, rather than integrated ODE, is selected
+dnl  use pkg-config to get cflags and libs. do not default to 
+dnl  integrated ODE on failure, as that is probably not what is wanted.
+dnl
+dnl for recommended integrated ODE build, setup client dependencies,
+dnl  and configuration. Double precision math is "hardwired" here and
+dnl  is not considered to be a user-specifiable option.
+dnl
+AS_IF([ test "x$system_libode" = "xyes" ],[
+	PKG_CHECK_MODULES([ODE],[ode],,[
+	AC_MSG_FAILURE(
+	[--with-system-libode specified, but the Open Dynamics Engine library could not be found])
+	])
+],[
+AC_SEARCH_LIBS([new_handler],[stdc++])
+dnl
+dnl config.h hacks from ODE configuration
+dnl intP is an integer type that can type convert to/from a pointer
+dnl TODO: verify what type to use
+dnl
+	AH_BOTTOM([
+typedef int intP;
+#define dEpsilon DBL_EPSILON
+	])
 ])
-
 
 ])
 dnl
 dnl ---- end of client-only library requirements
 dnl
-	
+
 #
 # Checks for header files
 #
@@ -426,14 +462,18 @@ AC_CHECK_HEADERS([GL/glx.h],,
 	[AC_MSG_ERROR("Required OpenGL header file, glx.h,  not found.")])
 
 dnl ---- ODE (client)
-AC_CHECK_HEADERS([ode/ode.h],,
-	[AC_MSG_ERROR("Required ODE header file, ode.h, not found.")]
-	[],
-	[
+AS_IF([ test "x$system_libode" = "xyes"],[ 
+	AC_CHECK_HEADERS([ode/ode.h],,
+		[AC_MSG_ERROR("with-system-libode: Required ODE header file, ode.h, not found.")]
+		[],
+		[
 #define dDOUBLE
+		])
 	])
-
 ])
+
+AM_CONDITIONAL([USE_SYSTEM_LIBODE],[ test "x$system_libode" = "xyes" ])
+
 dnl
 dnl ------------------------ end of client-only header requirements
 dnl
@@ -545,9 +585,11 @@ AS_IF([ test "x${hide_status}" = xno ],[
 	AS_ECHO(["LIBCURL:"])
 	AS_ECHO(["  cflags: ${LIBCURL_CFLAGS}"])
 	AS_ECHO(["  libs: ${LIBCURL_LIBS}"])
-	AS_ECHO(["ODE:"])
-	AS_ECHO(["  cflags: ${ODE_CFLAGS}"])
-	AS_ECHO(["  libs: ${ODE_LIBS}"])
+	AS_IF([ test "x$system_libode" = "xyes"],[
+		AS_ECHO(["ODE:"])
+		AS_ECHO(["  cflags: ${ODE_CFLAGS}"])
+		AS_ECHO(["  libs: ${ODE_LIBS}"])
+	])
 	AS_ECHO(["OGG:"])
 	AS_ECHO(["  cflags: ${OGG}"])
 	AS_ECHO(["  libs: ${OGG_LIBS}"])
