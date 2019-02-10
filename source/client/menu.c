@@ -298,8 +298,15 @@ static const char *offon_names[] =
 static const char *windowmode_names[] =
 {
 	"windowed",
-	"fullscreen (borderless window)",
-	"fullscreen (exclusive)",
+	"fullscreen",
+	0
+};
+
+static const char *windowmode_names_legacy[] =
+{
+	"windowed",
+	"fullscreen",
+	"fullscreen (legacy)", // previously called "fullscreen (exclusive)"
 	0
 };
 
@@ -1861,6 +1868,7 @@ static void NumberFieldOptionFunc (void *_self)
 	int num, clamped_num;
 	const fieldsize_t *fieldsize;
 	const char *cvarname;
+	int resolution_custom = -1;
 	
 	self = (menufield_s *)_self;
 	cvarname = self->generic.localstrings[0];
@@ -1874,6 +1882,12 @@ static void NumberFieldOptionFunc (void *_self)
 	self->cursor = clamp (self->cursor, 0, strlen (self->buffer));
 	if (num != clamped_num)
 		Com_sprintf (self->buffer, sizeof(self->buffer), "%d  ^1(%d)", num, clamped_num);
+	
+	if ((cvarname == "vid_width" || cvarname == "vid_height") &&
+		clamped_num != Cvar_Get(cvarname, "0", CVAR_ARCHIVE)->integer)
+	{
+		Cvar_SetValue ("gl_mode", resolution_custom);
+	}
 	
 	Cvar_SetValue (cvarname, clamped_num);
 }
@@ -1952,7 +1966,17 @@ static void Option_Setup (menumultival_s *item, option_name_t *optionname)
 	{
 		case option_spincontrol:
 			item->generic.type = MTYPE_SPINCONTROL;
+			
+			if (optionname->cvarname == "vid_fullscreen" &&
+				Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_INT)->integer == windowmode_exclusive_fullscreen)
+			{
+				// Show fullscreen (legacy) as well
+				// previously called fullscreen (exclusive)
+				optionname->names = windowmode_names_legacy;
+			}
+
 			item->itemnames = optionname->names;
+
 			if (!strcmp (optionname->cvarname, "background_music"))
 				// FIXME HACK
 				item->generic.callback = UpdateBGMusicFunc;
