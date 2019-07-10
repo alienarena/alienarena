@@ -14304,56 +14304,52 @@
 // entity 213
 {
 "classname" "item_invulnerability"
-}
-// entity 214
-{
-"classname" "item_invulnerability"
 "origin" "64.000000 0.000000 296.000000"
 }
-// entity 215
+// entity 214
 {
 "classname" "misc_decal"
 "origin" "-456.000000 -108.000000 54.000000"
 "model" "maps/decals/slime0.decal"
 }
-// entity 216
+// entity 215
 {
 "classname" "misc_decal"
 "origin" "-560.000000 -4.000000 54.000000"
 "model" "maps/decals/slime0.decal"
 }
-// entity 217
+// entity 216
 {
 "classname" "misc_decal"
 "origin" "-24.000000 676.000000 54.000000"
 "model" "maps/decals/slime0.decal"
 }
-// entity 218
+// entity 217
 {
 "classname" "misc_decal"
 "origin" "-56.000000 804.000000 54.000000"
 "model" "maps/decals/blood0.decal"
 }
-// entity 219
+// entity 218
 {
 "classname" "misc_decal"
 "origin" "-464.000000 372.000000 126.000000"
 "model" "maps/decals/blood1.decal"
 "angles" "90 0 0"
 }
-// entity 220
+// entity 219
 {
 "classname" "misc_decal"
 "origin" "-784.000000 632.000000 40.000000"
 "model" "maps/meshes/dm-violator/blood1.decal"
 }
-// entity 221
+// entity 220
 {
 "classname" "misc_decal"
 "origin" "-440.000000 220.000000 54.000000"
 "model" "maps/decals/slime0.decal"
 }
-// entity 222
+// entity 221
 {
 "classname" "misc_mapmodel"
 "origin" "-256.000000 104.000015 896.000000"
@@ -14361,7 +14357,7 @@
 "angles" "90.000000 0.000000 51.547958"
 "spawnflags" "1"
 }
-// entity 223
+// entity 222
 {
 "classname" "misc_mapmodel"
 "origin" "-247.999969 360.000031 896.000000"
@@ -14369,7 +14365,7 @@
 "angles" "90.000000 0.000000 112.668175"
 "spawnflags" "1"
 }
-// entity 224
+// entity 223
 {
 "classname" "misc_mapmodel"
 "origin" "-471.999969 -151.999985 896.000000"
@@ -14377,7 +14373,7 @@
 "angles" "90.000000 0.000000 21.099253"
 "spawnflags" "1"
 }
-// entity 225
+// entity 224
 {
 "classname" "misc_mapmodel"
 "origin" "112.000000 336.000031 896.000000"
@@ -14385,7 +14381,7 @@
 "angles" "90.000000 0.000000 -50.029652"
 "spawnflags" "1"
 }
-// entity 226
+// entity 225
 {
 "classname" "misc_mapmodel"
 "origin" "0.000010 -103.999985 896.000000"
@@ -14393,7 +14389,7 @@
 "angles" "90.000000 0.000000 77.086784"
 "spawnflags" "1"
 }
-// entity 227
+// entity 226
 {
 "classname" "misc_mapmodel"
 "origin" "-412.000000 -415.999969 1.000000"
@@ -14401,13 +14397,13 @@
 "angles" "90.000000 0.000000 -57.959358"
 "spawnflags" "1"
 }
-// entity 228
+// entity 227
 {
 "classname" "misc_decal"
 "origin" "-156.000000 0.000000 54.000000"
 "model" "maps/decals/slime0.decal"
 }
-// entity 229
+// entity 228
 {
 "classname" "trigger_hurt"
 "dmg" "500"
@@ -14421,7 +14417,7 @@
 ( -248 -72 672 ) ( -248 72 672 ) ( -248 -72 704 ) arena6/blacktrans 0 0 0 1 1
 }
 }
-// entity 230
+// entity 229
 {
 "classname" "trigger_hurt"
 "dmg" "500"
@@ -14435,7 +14431,7 @@
 ( -248 -216 512 ) ( -248 -72 512 ) ( -248 -216 544 ) arena6/blacktrans 16 96 0 1 1
 }
 }
-// entity 231
+// entity 230
 {
 "classname" "trigger_hurt"
 "dmg" "500"
@@ -14449,14 +14445,14 @@
 ( -248 176 520 ) ( -248 320 520 ) ( -248 176 552 ) arena6/blacktrans 8 104 0 1 1
 }
 }
-// entity 232
+// entity 231
 {
 "classname" "misc_mapmodel"
 "origin" "-856.000000 320.000092 168.000000"
 "model" "maps/meshes/hatch.md2"
 "angle" "90.000000"
 }
-// entity 233
+// entity 232
 {
 "classname" "misc_decal"
 "origin" "-904.000000 420.000000 158.000000"
