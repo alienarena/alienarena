@@ -327,6 +327,9 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 				continue;
 
 			node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY,NODE_ALL);
+			if (node == INVALID)
+				continue;
+
 			cost = ACEND_FindCost(current_node, node);
 
 			if(cost == INVALID || cost < 3) // ignore invalid and very short hops
