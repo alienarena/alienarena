@@ -363,7 +363,21 @@ void R_DrawSkyBox (void)
 
 	qglPushMatrix ();
 	qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
-	qglRotatef (r_newrefdef.time * skyrotate, skyaxis[0], skyaxis[1], skyaxis[2]);
+
+	if (skyrotate != 0)
+	{
+		qglRotatef (r_newrefdef.time * skyrotate, skyaxis[0], skyaxis[1], skyaxis[2]);
+	}
+	else
+	{
+		// Set angle based on fog script
+		if (r_skyangleX != 0)
+			qglRotatef (r_skyangleX, 1, 0, 0);
+		if (r_skyangleY != 0)
+			qglRotatef (r_skyangleY, 0, 1, 0);
+		if (r_skyangleZ != 0)
+			qglRotatef (r_skyangleZ, 0, 0, 1);
+	}
 	
 	// Scale the fog distances up so fog looks like it used to before 
 	// SKYDIST was increased. 

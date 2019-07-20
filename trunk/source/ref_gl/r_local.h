@@ -189,6 +189,9 @@ extern float		r_sunX;
 extern float		r_sunY;
 extern float		r_sunZ;
 extern float		r_sunIntens;
+extern float		r_skyangleX;
+extern float		r_skyangleY;
+extern float		r_skyangleZ;
 
 extern  cvar_t		*r_minimap;
 extern  cvar_t		*r_minimap_size;
