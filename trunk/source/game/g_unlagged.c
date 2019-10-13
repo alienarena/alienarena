@@ -104,6 +104,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 {
 	int		j, k;
 	char	str[MAX_STRING_CHARS];
+	int 	failSafeCounter;
 
 	VectorCopy( ent->mins, ent->client->saved.mins );
 	VectorCopy( ent->maxs, ent->client->saved.maxs );
@@ -139,10 +140,19 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
 	j = k = ent->client->historyHead;
+	
+	failSafeCounter = 0;
 	do {
 
 		if ( ent->client->history[j].leveltime <= time )
 			break;
+		
+		// Fail-safe to exit the loop in case it gets stuck.
+		// TODO: find out what the real problem is. Probably more log data needed for that.
+		if (failSafeCounter >= 100) {
+			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached 100, exit loop and exit G_TimeShiftClient. ***");
+			return;
+		}
 
 		k = j;
 		j--;
@@ -150,6 +160,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		{
 			j = (NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME);
 		}
+		failSafeCounter++;
 	}
 	while ( j != ent->client->historyHead );
 

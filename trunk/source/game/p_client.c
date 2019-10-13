@@ -300,7 +300,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message2 = "'s vaporizer";
 				break;
 			case MOD_MINDERASER:
-				message = "had it's mind erased by";
+				message = "had its mind erased by";
 				message2 = "'s alien seeker";
 				break;
 			case MOD_PLASMA_SPLASH: //blaster splash damage
