@@ -103,9 +103,7 @@ Move a client back to where he was at the specified time
 void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugger ) 
 {
 	int		j, k;
-	char	str[MAX_STRING_CHARS];
-	
-	int		maxTries = 50; 
+	char	str[MAX_STRING_CHARS];	
 	int 	failSafeCounter;
 
 	// Fix for rocket funround crash/loop,
@@ -156,9 +154,9 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		
 		// Fail-safe to exit the loop in case it gets stuck.
 		// TODO: leave this in for now, but it looks like it happened because this method was called with time=0.
-		if (failSafeCounter >= maxTries) {
-			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", maxTries);
-			Com_Printf("*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***\n", maxTries);
+		if (failSafeCounter > NUM_CLIENT_HISTORY) {
+			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", NUM_CLIENT_HISTORY);
+			Com_Printf("*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***\n", NUM_CLIENT_HISTORY);
 			Com_sprintf(str, sizeof(str), "head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n",
 				ent->client->historyHead,
 				ent->client->history[0].leveltime,
@@ -383,6 +381,10 @@ void G_AntilagProjectile( edict_t *ent )
 	{
 		// do the full lag compensation, without the "built in" lag
 		time = owner->client->attackTime - ping; 
+		if (g_antilagdebug->integer > 0)
+		{
+			Com_Printf("Full lag compensation, ping %d, time %d\n", ping, time);
+		}		
 		G_TimeShiftAllClients( time, owner );
 		G_RunEntity (ent, FRAMETIME);
 		G_UnTimeShiftAllClients( owner );
@@ -391,6 +393,10 @@ void G_AntilagProjectile( edict_t *ent )
 	}
 
 	time = owner->client->attackTime - ping; 
+	if (g_antilagdebug->integer > 0)
+	{
+		Com_Printf("Default lag compensation, ping %d, time %d\n", ping, time);
+	}		
 	G_TimeShiftAllClients( time, owner );
 	G_RunEntity (ent, (float)ping/1000.0f);
 	G_UnTimeShiftAllClients( owner );
