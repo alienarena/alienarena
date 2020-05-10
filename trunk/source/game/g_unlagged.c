@@ -104,7 +104,14 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 {
 	int		j, k;
 	char	str[MAX_STRING_CHARS];
+	
+	int		maxTries = 50; 
 	int 	failSafeCounter;
+
+	// Fix for rocket funround crash/loop,
+	// when time has value 0 it gets stuck in the do/while loop below.
+	if (time <= 0)
+		return;
 
 	VectorCopy( ent->mins, ent->client->saved.mins );
 	VectorCopy( ent->maxs, ent->client->saved.maxs );
@@ -148,9 +155,34 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 			break;
 		
 		// Fail-safe to exit the loop in case it gets stuck.
-		// TODO: find out what the real problem is. Probably more log data needed for that.
-		if (failSafeCounter >= 100) {
-			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached 100, exit loop and exit G_TimeShiftClient. ***");
+		// TODO: leave this in for now, but it looks like it happened because this method was called with time=0.
+		if (failSafeCounter >= maxTries) {
+			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", maxTries);
+			Com_Printf("*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***\n", maxTries);
+			Com_sprintf(str, sizeof(str), "head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n",
+				ent->client->historyHead,
+				ent->client->history[0].leveltime,
+				ent->client->history[1].leveltime,
+				ent->client->history[2].leveltime,
+				ent->client->history[3].leveltime,
+				ent->client->history[4].leveltime,
+				ent->client->history[5].leveltime,
+				ent->client->history[6].leveltime,
+				ent->client->history[7].leveltime,
+				ent->client->history[8].leveltime,
+				ent->client->history[9].leveltime,
+				ent->client->history[10].leveltime,
+				ent->client->history[11].leveltime,
+				ent->client->history[12].leveltime,
+				ent->client->history[13].leveltime,
+				ent->client->history[14].leveltime,
+				ent->client->history[15].leveltime,
+				ent->client->history[16].leveltime,
+				time );
+			Com_Printf("%s\n", str);
+
+			g_antilagprojectiles->integer = 0;
+			Cvar_SetValue( "g_antilagprojectiles", 0);
 			return;
 		}
 
@@ -206,7 +238,6 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		}
 	}
 }
-
 
 /*
 =====================
@@ -358,7 +389,7 @@ void G_AntilagProjectile( edict_t *ent )
 		if ( !ent->inuse )
 			return;
 	}
-	
+
 	time = owner->client->attackTime - ping; 
 	G_TimeShiftAllClients( time, owner );
 	G_RunEntity (ent, (float)ping/1000.0f);
