@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <assert.h>
 #include <windows.h>
+#include <winuser.h>
 #include "ref_gl/r_local.h"
 #include "glw_win.h"
 #include "winquake.h"
@@ -189,6 +190,11 @@ qboolean VID_CreateWindow(int x, int y, int width, int height, windowmode_t wind
 			
 		if (width >= workAreaWidth || height >= workAreaHeight)
 			showWindowMode = SW_SHOWMAXIMIZED;
+	}
+	else
+	{
+		// Ignore scaling
+		SetProcessDPIAware();
 	}
 
 	ShowWindow( glw_state.hWnd, showWindowMode );
