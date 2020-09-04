@@ -15,7 +15,10 @@
 # see the file, GPLv2.
 #
 
-noinst_LIBRARIES = libgame.a libode.a
+noinst_LIBRARIES = libgame.a
+if !USE_SYSTEM_LIBODE
+noinst_LIBRARIES += libode.a
+endif
 
 #
 # set location of `data1', etc
