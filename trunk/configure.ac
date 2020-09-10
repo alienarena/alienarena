@@ -149,7 +149,7 @@ AS_CASE([ ${unix_host} ],
 				[OpenGL dynamic lib path])
 		])
 		AC_DEFINE_UNQUOTED([OPENAL_DRIVER],
-			["@PREFIX@/lib/libopenal.dylib"],
+			["/System/Library/Frameworks/OpenAL.framework/OpenAL"],
 			[OpenAL dynamic lib path])
 		],[
 		AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
