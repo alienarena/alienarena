@@ -545,6 +545,7 @@ static void game_report( void )
 	qsort (index, count, sizeof(index[0]), G_PlayerSortDescending);
 
 	fprintf(jsonfile, "{\n");
+	fprintf(jsonfile, "\t\"map\": \"%s\",\n", level.mapname);
 	fprintf(jsonfile, "\t\"players\": [\n");
 
 	for ( i = 0; i < count; i++ )
