@@ -352,7 +352,7 @@
 #define PACKAGE_NAME "alienarena"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "alienarena 7.71.1"
+#define PACKAGE_STRING "alienarena 7.71.2"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "alienarena"
@@ -361,7 +361,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.71.1"
+#define PACKAGE_VERSION "7.71.2"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -385,7 +385,7 @@
 #define STEAM_VARIANT 1
 
 /* Version number of package */
-#define VERSION "7.71.1"
+#define VERSION "7.71.2"
 
 /* see select (2) man page for Mac OS X */
 /* #undef _DARWIN_UNLIMITED_SELECT */
