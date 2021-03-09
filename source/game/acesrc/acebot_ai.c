@@ -92,6 +92,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "game/m_player.h"
 
 #include "acebot.h"
+#include <string.h>
 
 ///////////////////////////////////////////////////////////////////////
 // Main Think function for bot
@@ -576,28 +577,28 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 			}
 			if(self->ctype == 1) 
 			{
-				if(target->classname == "hbomb")
+				if(strcmp(target->classname, "hbomb") == 0)
 					return false; //prevents them from accidently destorying a planted bomb
-				else if(target->classname == "alien computer")
+				else if(strcmp(target->classname, "alien computer") == 0)
 					self->enemy = target;
-				else if(target->classname == "alien powersrc")
+				else if(strcmp(target->classname, "alien powersrc") == 0)
 					self->enemy = target;
-				else if(target->classname == "alien ammodepot")
+				else if(strcmp(target->classname, "alien ammodepot") == 0)
 					self->enemy = target;
-				else if(target->classname == "alien backupgen")
+				else if(strcmp(target->classname, "alien backupgen") == 0)
 					self->enemy = target;
 			}
 			else if(self->ctype == 0)
 			{
-				if(target->classname == "abomb")
+				if(strcmp(target->classname, "abomb") == 0)
 					return false;
-				else if(target->classname == "human computer")
+				else if(strcmp(target->classname, "human computer") == 0)
 					self->enemy = target;
-				else if(target->classname == "human powersrc")
+				else if(strcmp(target->classname, "human powersrc") == 0)
 					self->enemy = target;
-				else if(target->classname == "human ammodepot")
+				else if(strcmp(target->classname, "human ammodepot") == 0)
 					self->enemy = target;
-				else if(target->classname == "human backupgen")
+				else if(strcmp(target->classname, "human backupgen") == 0)
 					self->enemy = target;
 			}		
 			target = findradius(target, self->s.origin, 200);
@@ -812,8 +813,8 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	if(g_tactical->integer) 
 	{
 		if(self->has_bomb && self->ctype == 0 
-			&& (self->enemy->classname == "human computer" || self->enemy->classname == "human powersrc" 
-			|| self->enemy->classname == "human ammodepot"))
+			&& (strcmp(self->enemy->classname, "human computer") == 0 || strcmp(self->enemy->classname, "human powersrc") == 0
+			|| strcmp(self->enemy->classname, "human ammodepot") == 0))
 		{		
 			if(range < 300.0f)
 			{
@@ -822,8 +823,8 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			}
 		}
 		else if(self->has_bomb && self->ctype == 1 
-			&& (self->enemy->classname == "alien computer" || self->enemy->classname == "alien powersrc" 
-			|| self->enemy->classname == "alien ammodepot"))
+			&& (strcmp(self->enemy->classname, "alien computer") == 0 || strcmp(self->enemy->classname, "alien powersrc") == 0
+			|| strcmp(self->enemy->classname, "alien ammodepot") == 0))
 		{
 			if(range < 300.0f)
 			{
