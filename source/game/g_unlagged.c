@@ -23,6 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
+#define NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE (int) (NUM_CLIENT_HISTORY - 1) / (120.0 * FRAMETIME)
+
 /*
 ============
 G_ResetHistory
@@ -38,7 +40,7 @@ void G_ResetHistory( edict_t *ent )
 	time = gi.Sys_Milliseconds();
 
 	// fill up the history with data (assume the current position)
-	ent->client->historyHead = (NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME);
+	ent->client->historyHead = NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
 	for ( i = ent->client->historyHead; i >= 0; i--, time -= 1000*FRAMETIME ) 
 	{
 		VectorCopy( ent->mins, ent->client->history[i].mins );
@@ -61,11 +63,11 @@ void G_StoreHistory( edict_t *ent )
 	int		head;
 
 	ent->client->historyHead++;
-	if ( ent->client->historyHead >= ((NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME) + 1) ) 
+	if ( ent->client->historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE )
 	{
 		ent->client->historyHead = 0;
 	}
-
+	
 	head = ent->client->historyHead;
 
 	// store all the collision-detection info and the time
@@ -108,8 +110,18 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 
 	// Fix for rocket funround crash/loop,
 	// when time has value 0 it gets stuck in the do/while loop below.
-	if (time <= 0)
+	if (time <= 0) {
+		Com_Printf("G_TimeShiftClient: time <= 0, %d, exit\n", time);
 		return;
+	}
+
+	if (ent->client->historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE) {
+		// historyHead should never be larger than this value, for example higher than 8 at tickrate 10 or 16 at tickrate 20
+		Com_Printf("G_TimeShiftClient: historyHead larger than expected: historyHead %d, historyHead leveltime: %i, FRAMETIME: %f, tickrate %f, exit\n",
+			ent->client->historyHead, ent->client->history[ent->client->historyHead].leveltime, FRAMETIME, 1.0 / FRAMETIME);
+
+		return;
+	}
 
 	VectorCopy( ent->mins, ent->client->saved.mins );
 	VectorCopy( ent->maxs, ent->client->saved.maxs );
@@ -139,13 +151,13 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 			ent->client->history[15].leveltime,
 			ent->client->history[16].leveltime,
 			time );
-		safe_cprintf(debugger, PRINT_HIGH, "%s\n", str);
+		// safe_cprintf(debugger, PRINT_HIGH, "%s\n", str);
 	}
 
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
 	j = k = ent->client->historyHead;
-	
+		
 	failSafeCounter = 0;
 	do {
 
@@ -154,30 +166,34 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		
 		// Fail-safe to exit the loop in case it gets stuck.
 		// TODO: leave this in for now, but it looks like it happened because this method was called with time=0.
-		if (failSafeCounter > NUM_CLIENT_HISTORY) {
-			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", NUM_CLIENT_HISTORY);
-			Com_Printf("*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***\n", NUM_CLIENT_HISTORY);
-			Com_sprintf(str, sizeof(str), "head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n",
-				ent->client->historyHead,
-				ent->client->history[0].leveltime,
-				ent->client->history[1].leveltime,
-				ent->client->history[2].leveltime,
-				ent->client->history[3].leveltime,
-				ent->client->history[4].leveltime,
-				ent->client->history[5].leveltime,
-				ent->client->history[6].leveltime,
-				ent->client->history[7].leveltime,
-				ent->client->history[8].leveltime,
-				ent->client->history[9].leveltime,
-				ent->client->history[10].leveltime,
-				ent->client->history[11].leveltime,
-				ent->client->history[12].leveltime,
-				ent->client->history[13].leveltime,
-				ent->client->history[14].leveltime,
-				ent->client->history[15].leveltime,
-				ent->client->history[16].leveltime,
-				time );
-			Com_Printf("%s\n", str);
+		if (failSafeCounter > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1) {
+			// safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
+			Com_Printf("*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***\n", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
+			
+			if (g_antilagdebug->integer <= 1) {
+				// If not printed above already
+				Com_sprintf(str, sizeof(str), "head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n",
+					ent->client->historyHead,
+					ent->client->history[0].leveltime,
+					ent->client->history[1].leveltime,
+					ent->client->history[2].leveltime,
+					ent->client->history[3].leveltime,
+					ent->client->history[4].leveltime,
+					ent->client->history[5].leveltime,
+					ent->client->history[6].leveltime,
+					ent->client->history[7].leveltime,
+					ent->client->history[8].leveltime,
+					ent->client->history[9].leveltime,
+					ent->client->history[10].leveltime,
+					ent->client->history[11].leveltime,
+					ent->client->history[12].leveltime,
+					ent->client->history[13].leveltime,
+					ent->client->history[14].leveltime,
+					ent->client->history[15].leveltime,
+					ent->client->history[16].leveltime,
+					time );
+				Com_Printf("%s\n", str);
+			}
 
 			g_antilagprojectiles->integer = 0;
 			Cvar_SetValue( "g_antilagprojectiles", 0);
@@ -188,7 +204,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		j--;
 		if ( j < 0 ) 
 		{
-			j = (NUM_CLIENT_HISTORY - 1)/(120.0 * FRAMETIME);
+			j = NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
 		}
 		failSafeCounter++;
 	}
@@ -344,7 +360,7 @@ Put everyone except for this client back where they were
 void G_UndoTimeShiftFor( edict_t *ent ) {
 
 	// don't un-time shift for mistakes or bots
-	if ( !ent->inuse || !ent->client || (ent->is_bot) ) 
+	if ( !ent->inuse || !ent->client || ent->is_bot ) 
 	{
 		return;
 	}
