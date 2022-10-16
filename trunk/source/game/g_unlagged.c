@@ -111,13 +111,13 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 	// Fix for rocket funround crash/loop,
 	// when time has value 0 it gets stuck in the do/while loop below.
 	if (time <= 0) {
-		Com_Printf("G_TimeShiftClient: time <= 0, %d, exit\n", time);
+		safe_cprintf(debugger, PRINT_HIGH, "G_TimeShiftClient: time <= 0, %d, exit\n", time);
 		return;
 	}
 
 	if (ent->client->historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE) {
 		// historyHead should never be larger than this value, for example higher than 8 at tickrate 10 or 16 at tickrate 20
-		Com_Printf("G_TimeShiftClient: historyHead larger than expected: historyHead %d, historyHead leveltime: %i, FRAMETIME: %f, tickrate %f, exit\n",
+		safe_cprintf(debugger, PRINT_HIGH, "G_TimeShiftClient: historyHead larger than expected: historyHead %d, historyHead leveltime: %i, FRAMETIME: %f, tickrate %f, exit\n",
 			ent->client->historyHead, ent->client->history[ent->client->historyHead].leveltime, FRAMETIME, 1.0 / FRAMETIME);
 
 		return;
@@ -151,7 +151,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 			ent->client->history[15].leveltime,
 			ent->client->history[16].leveltime,
 			time );
-		// safe_cprintf(debugger, PRINT_HIGH, "%s\n", str);
+		safe_cprintf(debugger, PRINT_HIGH, "%s\n", str);
 	}
 
 	// find two entries in the history whose times sandwich "time"
@@ -164,11 +164,9 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		if ( ent->client->history[j].leveltime <= time )
 			break;
 		
-		// Fail-safe to exit the loop in case it gets stuck.
-		// TODO: leave this in for now, but it looks like it happened because this method was called with time=0.
+		// Exit the loop in case the number of iterations is larger than the history
 		if (failSafeCounter > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1) {
-			// safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
-			Com_Printf("*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***\n", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
+			safe_cprintf(debugger, PRINT_HIGH, "*** Counter reached %d, exit loop and exit G_TimeShiftClient, g_antilagprojectiles switched off. ***", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
 			
 			if (g_antilagdebug->integer <= 1) {
 				// If not printed above already
@@ -192,7 +190,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 					ent->client->history[15].leveltime,
 					ent->client->history[16].leveltime,
 					time );
-				Com_Printf("%s\n", str);
+				safe_cprintf(debugger, PRINT_HIGH, "%s\n", str);
 			}
 
 			g_antilagprojectiles->integer = 0;
