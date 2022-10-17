@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
-#define NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE (int) (NUM_CLIENT_HISTORY - 1) / (120.0 * FRAMETIME)
+#define NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE (int) ((NUM_CLIENT_HISTORY - 1) / (120.0 * FRAMETIME))
 
 /*
 ============
