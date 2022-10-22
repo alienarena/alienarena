@@ -23,8 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
-#define NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE (int) ((NUM_CLIENT_HISTORY - 1) / (120.0 * FRAMETIME))
-
 /*
 ============
 G_ResetHistory
@@ -34,14 +32,11 @@ Clear out the given client's history (should be called when the teleport bit is 
 */
 void G_ResetHistory( edict_t *ent ) 
 {
-	int		i;
-	int	time;
-
-	time = gi.Sys_Milliseconds();
+	int		i, time;
 
 	// fill up the history with data (assume the current position)
 	ent->client->historyHead = NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
-	for ( i = ent->client->historyHead; i >= 0; i--, time -= 1000*FRAMETIME ) 
+	for ( i = ent->client->historyHead, time = level.leveltime; i >= 0; i--, time -= 1000*FRAMETIME ) 
 	{
 		VectorCopy( ent->mins, ent->client->history[i].mins );
 		VectorCopy( ent->maxs, ent->client->history[i].maxs );
@@ -75,7 +70,7 @@ void G_StoreHistory( edict_t *ent )
 	VectorCopy( ent->maxs, ent->client->history[head].maxs );
 	VectorCopy( ent->s.origin, ent->client->history[head].currentOrigin );
 	SnapVector( ent->client->history[head].currentOrigin );
-	ent->client->history[head].leveltime = gi.Sys_Milliseconds();
+	ent->client->history[head].leveltime = level.leveltime;
 }
 
 
@@ -122,11 +117,6 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 
 		return;
 	}
-
-	VectorCopy( ent->mins, ent->client->saved.mins );
-	VectorCopy( ent->maxs, ent->client->saved.maxs );
-	VectorCopy( ent->s.origin, ent->client->saved.currentOrigin );
-	ent->client->saved.leveltime = gi.Sys_Milliseconds();
 
 	if(g_antilagdebug->integer > 1) 
 	{ 
@@ -209,11 +199,19 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 	while ( j != ent->client->historyHead );
 
 	if(g_antilagdebug->value)
-		safe_cprintf(debugger, PRINT_HIGH, "reconciled time at: %i\n", k);
+		safe_cprintf(debugger, PRINT_HIGH, "Head: %i, reconciled time at: %i\n", ent->client->historyHead, k);
 	
 	// if we got past the first iteration above, we've sandwiched (or wrapped)
 	if ( j != k ) 
 	{
+		// make sure it doesn't get re-saved
+		if ( ent->client->saved.leveltime != level.leveltime ) {
+			VectorCopy( ent->mins, ent->client->saved.mins );
+			VectorCopy( ent->maxs, ent->client->saved.maxs );
+			VectorCopy( ent->s.origin, ent->client->saved.currentOrigin );
+			ent->client->saved.leveltime = level.leveltime;
+		}
+
 		// if we haven't wrapped back to the head, we've sandwiched, so
 		// we shift the client's position back to where he was at "time"
 		if ( j != ent->client->historyHead ) 
@@ -313,6 +311,8 @@ Move a client back to where he was before the time shift
 */
 void G_UnTimeShiftClient( edict_t *ent ) 
 {
+	// if it was saved
+	if ( ent->client->saved.leveltime == level.leveltime ) {
 		// move it back
 		VectorCopy( ent->client->saved.mins, ent->mins );
 		VectorCopy( ent->client->saved.maxs, ent->maxs );
@@ -321,6 +321,7 @@ void G_UnTimeShiftClient( edict_t *ent )
 
 		// this will recalculate absmin and absmax
 		gi.linkentity( ent );
+	}
 }
 
 
