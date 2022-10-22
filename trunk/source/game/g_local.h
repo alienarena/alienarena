@@ -70,7 +70,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
 #define TENFPS 0.1
-extern float FRAMETIME;
+
+extern float	FRAMETIME;
+extern int		NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
 
 //unlagged - true ping
 #define NUM_PING_SAMPLES 64
@@ -389,6 +391,7 @@ typedef struct
 {
 	int			framenum;
 	float		time;
+	int			leveltime;				// To store Sys_Milliseconds() at G_RunFrame(), used for antilag code
 
 	char		level_name[MAX_QPATH];	// the descriptive name (Outer Base, etc)
 	char		mapname[MAX_QPATH];		// the server name (base1, etc)
