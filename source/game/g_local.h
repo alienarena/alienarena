@@ -71,7 +71,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define TENFPS 0.1
 
-extern float	FRAMETIME;
+extern float	FRAMETIME;		// FRAMETIME in seconds, SPF
+extern int		FRAMETIME_MS; 	// FRAMETIME in milliseconds, as int
 extern int		NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
 
 //unlagged - true ping

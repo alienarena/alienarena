@@ -354,6 +354,7 @@ void InitGame (void)
 	else
 		FRAMETIME = 1.0/(float)sv_tickrate->integer;	
 	
+	FRAMETIME_MS = (int) (1000 * FRAMETIME);
 	NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE = (int) ((NUM_CLIENT_HISTORY - 1) / (120.0 * FRAMETIME));
 
 

@@ -36,7 +36,7 @@ void G_ResetHistory( edict_t *ent )
 
 	// fill up the history with data (assume the current position)
 	ent->client->historyHead = NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
-	for ( i = ent->client->historyHead, time = level.leveltime; i >= 0; i--, time -= 1000*FRAMETIME ) 
+	for ( i = ent->client->historyHead, time = level.leveltime; i >= 0; i--, time -= FRAMETIME_MS ) 
 	{
 		VectorCopy( ent->mins, ent->client->history[i].mins );
 		VectorCopy( ent->maxs, ent->client->history[i].maxs );
@@ -197,13 +197,15 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 		failSafeCounter++;
 	}
 	while ( j != ent->client->historyHead );
-
-	if(g_antilagdebug->value)
-		safe_cprintf(debugger, PRINT_HIGH, "Head: %i, reconciled time at: %i\n", ent->client->historyHead, k);
 	
 	// if we got past the first iteration above, we've sandwiched (or wrapped)
 	if ( j != k ) 
 	{
+		if(g_antilagdebug->value) {
+			safe_cprintf(debugger, PRINT_HIGH, "Head: %i, reconciled time at: %i, attacker ping: %i, client ping: %i\n",
+				ent->client->historyHead, j, debugger->client->ping, ent->client->ping);
+		}
+
 		// make sure it doesn't get re-saved
 		if ( ent->client->saved.leveltime != level.leveltime ) {
 			VectorCopy( ent->mins, ent->client->saved.mins );
@@ -295,8 +297,13 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	}
 
 	// do the full lag compensation
-	time = ent->client->attackTime - ent->client->ping - 1000*FRAMETIME; 
+	time = ent->client->attackTime - ent->client->ping - FRAMETIME_MS;
 	//100 ms is our "built-in" lag due to the 10fps server frame
+
+	if (g_antilagdebug->integer > 0) {
+		Com_Printf("leveltime: %i, ping: %i, attackTime: %i, compensation: %i, corrected time: %i\n",
+			level.leveltime, ent->client->ping, ent->client->attackTime, ent->client->ping + FRAMETIME_MS, time);
+	}
 
 	G_TimeShiftAllClients( time, ent );
 }
@@ -392,7 +399,7 @@ void G_AntilagProjectile( edict_t *ent )
 		return;
 	}
 	
-	for (ping = owner->client->ping; ping > FRAMETIME * 1000; ping -= FRAMETIME * 1000)
+	for (ping = owner->client->ping; ping > FRAMETIME_MS; ping -= FRAMETIME_MS)
 	{
 		// do the full lag compensation, without the "built in" lag
 		time = owner->client->attackTime - ping; 
