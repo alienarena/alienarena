@@ -196,8 +196,9 @@ cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;
 
 cvar_t  *sv_tickrate;
-float   FRAMETIME;
-int 	NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
+float	FRAMETIME;		// FRAMETIME in seconds, SPF
+int		FRAMETIME_MS; 	// FRAMETIME in milliseconds, as int
+int		NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
 cvar_t  *sv_gamereport;
 
 //unlagged
@@ -1695,7 +1696,7 @@ void G_RunFrame (void)
 	level.time = level.framenum*FRAMETIME;
 
 	// Used in antilag code
-	level.leveltime = Sys_Milliseconds();
+	level.leveltime = gi.Sys_Milliseconds();
 
 	/*
 	 * update bot info in first client always, and in other active clients
