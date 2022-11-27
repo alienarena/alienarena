@@ -1,0 +1,18 @@
+2017-10-14 Alien Arena Warriors of Mars Beta
+
+This is the Linux/Unix package for Alien Arena's Generation 3 Beta
+Release.
+
+Note that the this version is substantially modified compared to the
+previous official Version 7.66 release.
+
+1) The botinfo subdirectory is now a subdirectory of the data1
+directory.
+
+2) The user-writeable data directory is named `cor-games' and honors
+XDG_DATA_HOME.
+
+3) Maps from previous versions are not compatible.
+
+Please see the INSTALL and README documents for details.
+
