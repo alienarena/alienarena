@@ -106,16 +106,17 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@USE_SYSTEM_LIBODE_FALSE@am__append_1 = libode.a
 
 #
 # Setup the integrated ODE library.
 # note: the -isystem option is for making #include <ode/ode.h> look in
 #  the build directory before the system directory.
 #
-@USE_SYSTEM_LIBODE_FALSE@am__append_1 = -isystem $(top_srcdir)/source/unix
+@USE_SYSTEM_LIBODE_FALSE@am__append_2 = -isystem $(top_srcdir)/source/unix
 bin_PROGRAMS = alienarena-ded$(EXEEXT) $(am__EXEEXT_1)
-@BUILD_CLIENT_TRUE@am__append_2 = alienarena
-@USE_SYSTEM_LIBODE_TRUE@am__append_3 = $(ODE_CFLAGS) -DdDOUBLE
+@BUILD_CLIENT_TRUE@am__append_3 = alienarena
+@USE_SYSTEM_LIBODE_TRUE@am__append_4 = $(ODE_CFLAGS) -DdDOUBLE
 subdir = source
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_flag.m4 \
@@ -809,6 +810,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -818,14 +820,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libgame.a libode.a
+noinst_LIBRARIES = libgame.a $(am__append_1)
 
 #
 # set location of `data1', etc
 # set local include path
 #
 AM_CPPFLAGS = -DCOR_DATADIR='"$(pkgdatadir)"' -I$(top_srcdir)/source \
-	$(am__append_1)
+	$(am__append_2)
 
 # Dedicated Server libraries and flags
 alienarena_ded_CFLAGS = -DDEDICATED_ONLY $(AM_CPPFLAGS)
@@ -835,7 +837,7 @@ alienarena_ded_LDADD = libgame.a
 alienarena_CFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CFLAGS) \
 	$(XXF86VM_CFLAGS) $(XXF86DGA_CFLAGS) $(LIBCURL_CFLAGS) \
 	$(OGG_CFLAGS) $(VORBIS_CFLAGS) $(FREETYPE2_CFLAGS) \
-	$(ZLIB_CFLAGS) $(am__append_3)
+	$(ZLIB_CFLAGS) $(am__append_4)
 @USE_SYSTEM_LIBODE_FALSE@alienarena_LDADD = libode.a libgame.a \
 @USE_SYSTEM_LIBODE_FALSE@	$(PTHREAD_LIBS) $(X11_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(XXF86VM_LIBS) $(XXF86DGA_LIBS) \

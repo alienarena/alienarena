@@ -649,7 +649,6 @@ XXF86VM_LIBS
 XXF86VM_CFLAGS
 X11_LIBS
 X11_CFLAGS
-GL_LIBDIR
 PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
@@ -663,6 +662,7 @@ DOC_INSTALL_FALSE
 DOC_INSTALL_TRUE
 BUILD_CLIENT_FALSE
 BUILD_CLIENT_TRUE
+GL_LIBDIR
 host_os
 host_vendor
 host_cpu
@@ -753,6 +753,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -862,6 +863,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1114,6 +1116,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1251,7 +1262,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1404,6 +1415,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -5168,7 +5180,7 @@ $as_echo "no" >&6; }
 fi
 
 if  test "x${PKG_CONFIG}" = x ; then :
-  as_fn_error $? "required pkg-config utility not found." "$LINENO" 5
+  as_fn_error $? "required pkg-config utility not found" "$LINENO" 5
 fi
 
 #
@@ -5298,6 +5310,24 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+gl_dlopen_path=default
+if  test "x${unix_host}" = xdarwin ; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GL_LIBDIR (location of libGL.dylib)" >&5
+$as_echo_n "checking for GL_LIBDIR (location of libGL.dylib)... " >&6; }
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${GL_LIBDIR}" >&5
+$as_echo "${GL_LIBDIR}" >&6; }
+	if  test "x${GL_LIBDIR}" = x ; then :
+
+		gl_dlopen_path=${x_libraries}
+else
+
+		gl_dlopen_path=${GL_LIBDIR}
+fi
+
+fi
+
 case  ${unix_host}  in #(
    darwin ) :
     if  test "x${gl_dlopen_path}" = xdefault ; then :
@@ -5317,7 +5347,7 @@ _ACEOF
 fi
 
 cat >>confdefs.h <<_ACEOF
-#define OPENAL_DRIVER "@PREFIX@/lib/libopenal.dylib"
+#define OPENAL_DRIVER "/System/Library/Frameworks/OpenAL.framework/OpenAL"
 _ACEOF
 
 		 ;; #(
@@ -6362,7 +6392,7 @@ $as_echo "#define HAVE_PTHREAD 1" >>confdefs.h
         :
 else
         ax_pthread_ok=no
-        as_fn_error $? "\"Required pthreads support not found (or invalid CFLAGS).\"" "$LINENO" 5
+        as_fn_error $? "required pthreads support not found (or invalid CFLAGS)" "$LINENO" 5
 fi
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -6375,24 +6405,6 @@ if  test "x${PTHREAD_LIBS}" = x ; then :
   PTHREAD_LIBS="-pthread"
 fi
 
-
-gl_dlopen_path=default
-if  test "x${unix_host}" = xdarwin ; then :
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GL_LIBDIR (location of libGL.dylib)" >&5
-$as_echo_n "checking for GL_LIBDIR (location of libGL.dylib)... " >&6; }
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${GL_LIBDIR}" >&5
-$as_echo "${GL_LIBDIR}" >&6; }
-	if  test "x${GL_LIBDIR}" = x ; then :
-
-		gl_dlopen_path=${x_libraries}
-else
-
-		gl_dlopen_path=${GL_LIBDIR}
-fi
-
-fi
 
 
 pkg_failed=no
@@ -6454,13 +6466,13 @@ fi
 	echo "$X11_PKG_ERRORS" >&5
 
 
-	as_fn_error $? "\"Required Xll library not found\"" "$LINENO" 5
+	as_fn_error $? "required X11 library not found" "$LINENO" 5
 
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-	as_fn_error $? "\"Required Xll library not found\"" "$LINENO" 5
+	as_fn_error $? "required X11 library not found" "$LINENO" 5
 
 else
 	X11_CFLAGS=$pkg_cv_X11_CFLAGS
@@ -6884,7 +6896,7 @@ if test "$ac_res" != no; then :
 
 else
 
-	as_fn_error $? "\"Required jpeg library not found\"" "$LINENO" 5
+	as_fn_error $? "required jpeg library not found" "$LINENO" 5
 
 fi
 
@@ -6949,13 +6961,13 @@ fi
 	echo "$LIBCURL_PKG_ERRORS" >&5
 
 
-	as_fn_error $? "\"Required cURL library not found\"" "$LINENO" 5
+	as_fn_error $? "required cURL library not found" "$LINENO" 5
 
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-	as_fn_error $? "\"Required cURL library not found\"" "$LINENO" 5
+	as_fn_error $? "required cURL library not found" "$LINENO" 5
 
 else
 	LIBCURL_CFLAGS=$pkg_cv_LIBCURL_CFLAGS
@@ -7025,13 +7037,13 @@ fi
 	echo "$OGG_PKG_ERRORS" >&5
 
 
-	as_fn_error $? "\"Required Ogg libraries not found\"" "$LINENO" 5
+	as_fn_error $? "required Ogg libraries not found" "$LINENO" 5
 
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-	as_fn_error $? "\"Required Ogg libraries not found\"" "$LINENO" 5
+	as_fn_error $? "required Ogg libraries not found" "$LINENO" 5
 
 else
 	OGG_CFLAGS=$pkg_cv_OGG_CFLAGS
@@ -7101,13 +7113,13 @@ fi
 	echo "$VORBIS_PKG_ERRORS" >&5
 
 
-	as_fn_error $? "\"Required Vorbis libraries not found\"" "$LINENO" 5
+	as_fn_error $? "required Vorbis libraries not found" "$LINENO" 5
 
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-	as_fn_error $? "\"Required Vorbis libraries not found\"" "$LINENO" 5
+	as_fn_error $? "required Vorbis libraries not found" "$LINENO" 5
 
 else
 	VORBIS_CFLAGS=$pkg_cv_VORBIS_CFLAGS
@@ -7177,13 +7189,13 @@ fi
 	echo "$FREETYPE2_PKG_ERRORS" >&5
 
 
-	as_fn_error $? "\"Required FreeType2 library not found\"" "$LINENO" 5
+	as_fn_error $? "required FreeType2 library not found" "$LINENO" 5
 
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-	as_fn_error $? "\"Required FreeType2 library not found\"" "$LINENO" 5
+	as_fn_error $? "required FreeType2 library not found" "$LINENO" 5
 
 else
 	FREETYPE2_CFLAGS=$pkg_cv_FREETYPE2_CFLAGS
@@ -7899,7 +7911,7 @@ fi
 done
 
 if  test "x${jpeglib_h_found}" = xno ; then :
-  as_fn_error jpeglib.h "\"Required JPEG header file" "$LINENO" 5
+  as_fn_error $? "required JPEG header file, jpeglib.h, not found" "$LINENO" 5
 fi
 
 openal_h_found=no
@@ -7917,7 +7929,7 @@ fi
 done
 
 if  test "x${openal_h_found}" = xno ; then :
-  as_fn_error al.h "\"Required OpenAL header file" "$LINENO" 5
+  as_fn_error $? "required OpenAL header file, al.h, not found" "$LINENO" 5
 fi
 
 openalc_h_found=no
@@ -7935,7 +7947,7 @@ fi
 done
 
 if  test "x${openalc_h_found}" = xno ; then :
-  as_fn_error alc.h "\"Required OpenAL header file" "$LINENO" 5
+  as_fn_error $? "required OpenAL header file, alc.h, not found" "$LINENO" 5
 fi
 
 for ac_header in GL/gl.h
@@ -7947,7 +7959,7 @@ if test "x$ac_cv_header_GL_gl_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error gl.h "\"Required OpenGL header file" "$LINENO" 5
+  as_fn_error $? "required OpenGL header file, gl.h, not found" "$LINENO" 5
 fi
 
 done
@@ -7961,7 +7973,7 @@ if test "x$ac_cv_header_GL_glx_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error glx.h "\"Required OpenGL header file" "$LINENO" 5
+  as_fn_error $? "required OpenGL header file, glx.h, not found" "$LINENO" 5
 fi
 
 done
@@ -7981,7 +7993,7 @@ if test "x$ac_cv_header_ode_ode_h" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error ode.h "\"with-system-libode: Required ODE header file" "$LINENO" 5
+  as_fn_error $? "with-system-libode: required ODE header file, ode.h, not found" "$LINENO" 5
 
 fi
 
@@ -8615,6 +8627,8 @@ main ()
     if (*(data + i) != *(data3 + i))
       return 14;
   close (fd);
+  free (data);
+  free (data3);
   return 0;
 }
 _ACEOF
