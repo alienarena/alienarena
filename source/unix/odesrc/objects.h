@@ -33,7 +33,7 @@
 #include "array.h"
 #include "threading_base.h"
 
-
+struct dxJointNode;
 class dxStepWorkingMemory;
 class dxWorldProcessContext;
 

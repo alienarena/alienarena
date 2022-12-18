@@ -523,9 +523,11 @@ dnl
 dnl required gcc options.
 dnl  fast-math because strict adherence to IEEE standard is not needed.
 dnl  no-strict-aliasing because strict aliasing is not adhered to in places.
+dnl  -fcommon because -fnocommon became the default and results into duplicate definitions
 dnl
 AX_APPEND_FLAG([-ffast-math],[CFLAGS])
 AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
+AX_APPEND_FLAG([-fcommon],[CFLAGS])
 
 #
 # Outputs
