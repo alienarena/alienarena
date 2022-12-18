@@ -345,7 +345,12 @@ am__libode_a_SOURCES_DIST = unix/odesrc/nextafterf.c \
 	unix/odesrc/OPCODE/Ice/IceRevisitedRadix.h \
 	unix/odesrc/OPCODE/Ice/IceSegment.cpp \
 	unix/odesrc/OPCODE/Ice/IceSegment.h \
+	unix/odesrc/OPCODE/Ice/IceTypes.h \
+	unix/odesrc/OPCODE/Ice/IceTriangle.h \
+	unix/odesrc/OPCODE/Ice/IceTriList.h \
+	unix/odesrc/OPCODE/Ice/IceUtils.h \
 	unix/odesrc/OPCODE/Ice/IceTriangle.cpp \
+	unix/odesrc/util.h \
 	unix/odesrc/ousrc/atomic.cpp \
 	unix/odesrc/ousrc/customization.cpp \
 	unix/odesrc/ousrc/malloc.cpp \
@@ -1317,7 +1322,12 @@ libgame_a_SOURCES = \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceRevisitedRadix.h \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceSegment.cpp \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceSegment.h \
+@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTypes.h \
+@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTriangle.h \
+@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTriList.h \
+@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceUtils.h \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTriangle.cpp \
+@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/util.h \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/ousrc/atomic.cpp \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/ousrc/customization.cpp \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/ousrc/malloc.cpp \
