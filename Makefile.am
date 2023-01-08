@@ -34,7 +34,8 @@ dist_unixdoc_DATA = \
 	unix_dist/COPYING \
 	unix_dist/INSTALL \
 	unix_dist/GPLv2 \
-	unix_dist/NEWS
+	unix_dist/NEWS \
+	unix_dist/alien-arena.desktop
 endif
 
 #
@@ -43,7 +44,7 @@ endif
 if ICONS_INSTALL
 unixiconsdir=$(datadir)/icons/alienarena
 dist_unixicons_DATA = \
-	unix_dist/alienarena.png
+	unix_dist/alien-arena.png
 endif
 
 #
