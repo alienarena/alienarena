@@ -181,8 +181,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(arenadir)" "$(DESTDIR)$(unixdocdir)" \
 	"$(DESTDIR)$(unixiconsdir)"
 am__dist_unixdoc_DATA_DIST = unix_dist/README unix_dist/COPYING \
-	unix_dist/INSTALL unix_dist/GPLv2 unix_dist/NEWS
-am__dist_unixicons_DATA_DIST = unix_dist/alienarena.png
+	unix_dist/INSTALL unix_dist/GPLv2 unix_dist/NEWS unix_dist/alien-arena.desktop
+am__dist_unixicons_DATA_DIST = unix_dist/alien-arena.png
 DATA = $(dist_arena_DATA) $(dist_unixdoc_DATA) $(dist_unixicons_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -407,7 +407,8 @@ ACLOCAL_AMFLAGS = -I m4
 @DOC_INSTALL_TRUE@	unix_dist/COPYING \
 @DOC_INSTALL_TRUE@	unix_dist/INSTALL \
 @DOC_INSTALL_TRUE@	unix_dist/GPLv2 \
-@DOC_INSTALL_TRUE@	unix_dist/NEWS
+@DOC_INSTALL_TRUE@	unix_dist/NEWS \
+@DOC_INSTALL_TRUE@	unix_dist/alien-arena.desktop
 
 
 #
@@ -415,7 +416,7 @@ ACLOCAL_AMFLAGS = -I m4
 #
 @ICONS_INSTALL_TRUE@unixiconsdir = $(datadir)/icons/alienarena
 @ICONS_INSTALL_TRUE@dist_unixicons_DATA = \
-@ICONS_INSTALL_TRUE@	unix_dist/alienarena.png
+@ICONS_INSTALL_TRUE@	unix_dist/alien-arena.png
 
 
 #
