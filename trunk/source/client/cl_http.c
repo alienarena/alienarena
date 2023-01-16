@@ -45,8 +45,13 @@ typedef struct response_s {
 } response_t;
 
 response_t responses[] = {
-	{400, "Bad request"}, {401, "Unauthorized"}, {403, "Forbidden"},
-	{404, "Not found"}, {500, "Internal server error"}, {0, NULL}
+	{301, "Moved permanently"},
+	{400, "Bad request"}, 
+	{401, "Unauthorized"}, 
+	{403, "Forbidden"},
+	{404, "Not found"}, 
+	{500, "Internal server error"},
+	{0, NULL}
 };
 
 char curlerr[MAX_STRING_CHARS];  // curl's error buffer
@@ -132,6 +137,13 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 	// set url from which to retrieve the file
 	if (curl_easy_setopt(curl, CURLOPT_URL, url) != CURLE_OK) return false;
 
+	// Follow redirects to https - but this doesn't seem to be working (the two fixed urls are now both https, but the custom url might be http)
+	if (curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK) return false;
+	if (curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 3L) != CURLE_OK) return false;
+	
+	// Don't verify that the host matches the certificate
+	if (curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L) != CURLE_OK) return false;
+
 	// time out in 5s
 	if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return false;
 
@@ -181,7 +193,8 @@ If a download is currently taking place, clean it up.  This is called
 both to finalize completed downloads as well as abort incomplete ones.
 */
 void CL_HttpDownloadCleanup(){
-	char *c;
+	char *errorMessage;
+	char *statusDescription;
 
 	if(!cls.download || !cls.downloadhttp)
 		return;
@@ -194,6 +207,7 @@ void CL_HttpDownloadCleanup(){
 	cls.downloadpercent = 0;
 	cls.downloadhttp = false;
 
+	statusDescription = CL_HttpResponseCode(status);
 	status = length = 0;
 
 	if(success)
@@ -205,12 +219,12 @@ void CL_HttpDownloadCleanup(){
 	else
 	{  // retry via legacy udp download
 
-		c = strlen(curlerr) ? curlerr : CL_HttpResponseCode(status);
+		errorMessage = strlen(curlerr) ? curlerr : statusDescription;
 	
 		if (cls.downloadfromcommand)
-			Com_Printf ("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, c);
+			Com_Printf ("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, errorMessage);
 		else
-			Com_DPrintf ("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, c);
+			Com_DPrintf ("Failed to download %s from %s via HTTP: %s.\n", cls.downloadname, url, errorMessage);
 		
 		_unlink(dnld_file);  // delete partial or empty file
 		
