@@ -63,8 +63,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // NOTE: the game does *not* depend on these being the same for server and
 // client.
-#define DEFAULT_DOWNLOAD_URL_1 "http://red.planetarena.org/sv_downloadurl"
-#define DEFAULT_DOWNLOAD_URL_2 "http://martianbackup.com/sv_downloadurl"
+#define DEFAULT_DOWNLOAD_URL_1 "https://red.planetarena.org/sv_downloadurl"
+#define DEFAULT_DOWNLOAD_URL_2 "https://martianbackup.com/sv_downloadurl"
 
 /* ---- Relative path names for game data ---*/
 /*
