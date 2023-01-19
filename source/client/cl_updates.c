@@ -218,22 +218,22 @@ void getLatestGameVersion( void )
     memset( versionstr, 0, sizeof(versionstr) );
 	versionstr_sz = 0;
 
-	easyhandle = curl_easy_init() ;
+	easyhandle = curl_easy_init();
 
 	Com_sprintf(url, sizeof(url), "%s", cl_latest_game_version_url->string);
 
-	if (curl_easy_setopt( easyhandle, CURLOPT_URL, url ) != CURLE_OK) return ;
+	if (curl_easy_setopt(easyhandle, CURLOPT_URL, url) != CURLE_OK) return;
 
 	// time out in 5s
-	if (curl_easy_setopt(easyhandle, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return ;
+	if (curl_easy_setopt(easyhandle, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return;
 
-	if (curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) != CURLE_OK) return ;
+	if (curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data) != CURLE_OK) return;
 
-	if (curl_easy_perform( easyhandle ) != CURLE_OK) return;
+	if (curl_easy_perform(easyhandle) != CURLE_OK) return;
 
-	(void)curl_easy_cleanup( easyhandle );
+	(void)curl_easy_cleanup(easyhandle);
 
-	update_version( versionstr );
+	update_version(versionstr);
 }
 
 /**

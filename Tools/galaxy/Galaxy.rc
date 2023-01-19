@@ -436,7 +436,7 @@ BEGIN
     IDC_LINK2               """http://corent.proboards.com/index.cgi?"""
     IDC_LINK3               """http://www.chaingun.org"""
     IDC_LINK4               """http://www.alienarena.info"""
-    IDC_LINK5               """http://red.planetarena.org"""
+    IDC_LINK5               """https://martianbackup.com"""
     IDC_LINK6               """http://www.pcjcompositions.com"""
     IDC_LINK7               """http://planetquake.gamespy.com"""
 END

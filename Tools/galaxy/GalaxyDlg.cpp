@@ -1784,7 +1784,7 @@ void CGalaxyDlg::LookUpStats()
 		AfxMessageBox("Unable to connect to database at this time...");
 		return;
 	}
-	hFile = InternetOpenUrl( hINet, "http://stats.planetarena.org/playerrank.db", NULL, 0, 0, 0 );
+	hFile = InternetOpenUrl( hINet, "https://martianbackup.com/playerrank.db", NULL, 0, 0, 0 );
 	if(hFile) {
 		DWORD dwRead;
 		newlog.open("stats.db");
@@ -1869,7 +1869,7 @@ void CGalaxyDlg::LookUpPlayerStats(NMHDR* pNMHDR, LRESULT* pResult)
 		AfxMessageBox("Unable to connect to database at this time...");
 		return;
 	}
-	hFile = InternetOpenUrl( hINet, "http://stats.planetarena.org/playerrank.db", NULL, 0, 0, 0 );
+	hFile = InternetOpenUrl( hINet, "https://martianbackup.com/playerrank.db", NULL, 0, 0, 0 );
 	if(hFile) {
 		DWORD dwRead;
 		newlog.open("stats.db");
