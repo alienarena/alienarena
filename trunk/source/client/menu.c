@@ -1137,27 +1137,27 @@ void GetNews()
 	char line[256];
 	int i = 0;
 
-	CURL* easyhandle = curl_easy_init() ;
+	CURL* easyhandle = curl_easy_init();
 
-	file = newsfile_open( "w" ); //create new, blank file for writing
+	file = newsfile_open("w"); //create new, blank file for writing
 	if(file)
 		fclose(file);
 
-	Com_sprintf(newsserver, sizeof(newsserver), "http://stats.planetarena.org/newsfeed.db");
+	Com_sprintf(newsserver, sizeof(newsserver), "https://martianbackup.com/newsfeed.db");
 
-	curl_easy_setopt( easyhandle, CURLOPT_URL, newsserver ) ;
-
+	curl_easy_setopt(easyhandle, CURLOPT_URL, newsserver);
+	
 	// time out in 5s
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+	curl_easy_setopt(easyhandle, CURLOPT_CONNECTTIMEOUT, 5);
 
-	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;
+	curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data);
 
-	curl_easy_perform( easyhandle );
+	curl_easy_perform(easyhandle);
 
-	curl_easy_cleanup( easyhandle );
+	curl_easy_cleanup(easyhandle);
 
 	// parse the file and build string array
-	file = newsfile_open( "r" ) ;
+	file = newsfile_open("r") ;
 
 	if(file != NULL) 
 	{

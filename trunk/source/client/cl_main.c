@@ -2075,10 +2075,10 @@ void CL_InitLocal (void)
 	cl_hudimage3 = Cvar_Get("cl_hudimage3", "pics/i_ammo.tga", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//stats server
-	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_stats_server = Cvar_Get("cl_stats_server", "https://martianbackup.com", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//update checker
-	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "https://martianbackup.com/version/crx_version", CVAR_ARCHIVE | CVARDOC_STR);
 
 	//throwaway cvars
 	Cvar_Get("g_dm_lights", "1", CVAR_ARCHIVE | CVAR_GAMEINFO | CVARDOC_BOOL); //mark this as archived even if game code doesn't run.
