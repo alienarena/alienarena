@@ -22,12 +22,12 @@
 if [ $COR_GAME ] ; then
 aadir=$COR_GAME
 else
-aadir=~/.codered
+aadir=~/.local/share/cor-games
 fi
 
 ### Set your AA Binary Name or command string ($1 is the argument
 ### passed to the script)
-aabin="crx-ded +set game arena +exec $1"
+aabin="alienarena-ded +set game arena +exec $1"
 
 ########## you probably don't need to change anything below here 
 ##########

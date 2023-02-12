@@ -6,11 +6,11 @@
 
 name='Alien Arena'
 execpath=/usr/local/bin
-execname=crx-ded
+execname=alienarena-ded
 if [ ${COR_GAME} ]; then
 cfgpath=${COR_GAME}/arena
 else
-cfgpath=~/.codered/arena
+cfgpath=~/.local/share/cor-games/arena
 fi
 
 # use to generate core dumps after crashs

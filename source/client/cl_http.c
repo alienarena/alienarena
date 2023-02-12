@@ -133,6 +133,9 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 
 	// set handle to default state
 	curl_easy_reset(curl);
+	
+	// Set Http version to 1.1, somehow this seems to be needed for the multi-download
+	if (curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, (long) CURL_HTTP_VERSION_1_1) != CURLE_OK) return false;
 
 	// set url from which to retrieve the file
 	if (curl_easy_setopt(curl, CURLOPT_URL, url) != CURLE_OK) return false;
@@ -177,12 +180,16 @@ CL_HttpResponseCode
 */
 char *CL_HttpResponseCode(long code){
 	int i = 0;
+	static char codeAsString[15];
+
 	while(responses[i].code){
 		if(responses[i].code == code)
 			return responses[i].text;
 		i++;
 	}
-	return "Unknown";
+	memset(codeAsString, 0, sizeof(codeAsString));
+	Com_sprintf(codeAsString, sizeof(codeAsString) - 1, "Unknown - %ld", code);
+	return codeAsString;
 }
 
 
