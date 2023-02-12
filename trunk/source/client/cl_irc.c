@@ -2099,7 +2099,7 @@ static void IRC_WaitThread()
 void CL_IRCSetup(void)
 {
 	cl_IRC_connect_at_startup = Cvar_Get( "cl_IRC_connect_at_startup" , "1" , CVAR_ARCHIVE );
-	cl_IRC_server = Cvar_Get( "cl_IRC_server" , "irc.planetarena.org" , CVAR_ARCHIVE );
+	cl_IRC_server = Cvar_Get( "cl_IRC_server" , "hal.nanoid.net" , CVAR_ARCHIVE );
 	cl_IRC_channel = Cvar_Get( "cl_IRC_channel" , "alienarena" , CVAR_ARCHIVE );
 	cl_IRC_port = Cvar_Get( "cl_IRC_port" , "6667" , CVAR_ARCHIVE );
 	cl_IRC_override_nickname = Cvar_Get( "cl_IRC_override_nickname" , "0" , CVAR_ARCHIVE );
