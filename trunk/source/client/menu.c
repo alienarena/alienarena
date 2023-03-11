@@ -1143,9 +1143,19 @@ void GetNews()
 	if(file)
 		fclose(file);
 
-	Com_sprintf(newsserver, sizeof(newsserver), "https://martianbackup.com/newsfeed.db");
+	Com_sprintf(newsserver, sizeof(newsserver), NEWSFEED_URL);
 
 	curl_easy_setopt(easyhandle, CURLOPT_URL, newsserver);
+
+	// Set Http version to 1.1, somehow this seems to be needed for the multi-download
+	curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, (long) CURL_HTTP_VERSION_1_1);
+
+	// Follow redirects to https - but this doesn't seem to be working
+	curl_easy_setopt(easyhandle, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(easyhandle, CURLOPT_MAXREDIRS, 3L);
+	
+	// Don't verify that the host matches the certificate
+	curl_easy_setopt(easyhandle, CURLOPT_SSL_VERIFYHOST, 0L);
 	
 	// time out in 5s
 	curl_easy_setopt(easyhandle, CURLOPT_CONNECTTIMEOUT, 5);
@@ -1225,13 +1235,13 @@ static void M_Main_Draw (menuvec2_t offset)
 
 
 	/* check for more recent program version */
-	version_warning = VersionUpdateNotice();
+	version_warning = CL_VersionUpdateNotice();
 	if ( version_warning != NULL )
 	{
-		extern const float light_color[4];
+		const float warning_color[4] = {1, 1, 0, 1};
 		Menu_DrawString (
-			offset.x, offset.y + 5*scale,
-			version_warning, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_LEFT, light_color
+			viddef.width - offset.x, offset.y + 5*scale,
+			version_warning, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_RIGHT, warning_color
 		);
 	}
 	
@@ -1393,8 +1403,14 @@ static const char *M_Main_Key (int key)
 
 void M_Menu_Main_f (void)
 {
+	static qboolean latestGameVersionRetrieved = false;
+
 	S_StartMenuMusic();
 	GetNews();
+	if (!latestGameVersionRetrieved) {
+		CL_GetLatestGameVersion();
+		latestGameVersionRetrieved = true;
+	}
 	cls.key_dest = key_menu;
 	if (cls.state == ca_active)
 		mstate_reset ();
@@ -4277,7 +4293,7 @@ static void M_Menu_SelectedServer_f (void)
 			
 	if (!PLAYER_NAME_UNIQUE)
 		s_servers[serverindex].connect.generic.statusbar = "You must change your player name from the default before connecting!";
-	else if (serverIsOutdated (mservers[serverindex].szVersion))
+	else if (CL_ServerIsOutdated (mservers[serverindex].szVersion))
 		s_servers[serverindex].serverinfo_submenu.statusbar = "Warning: server is ^1outdated!^7 It may have bugs or different gameplay.";
 	else
 		s_servers[serverindex].connect.generic.statusbar = "Hit ENTER or CLICK to connect";
@@ -4749,7 +4765,6 @@ static void M_Menu_JoinServer_f (void)
 	if(!gotServers)
 	{
 		STATS_getStatsDB();
-		getLatestGameVersion();
 	}
 	
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
@@ -5559,7 +5574,7 @@ static void StartServerActionFunc (UNUSED void *self)
 		Cvar_ForceSet("dedicated", "0");
 #endif
 		Cvar_Set("sv_maplist", startmap);
-		Cbuf_AddText ("setmaster master.corservers.com master2.corservers.com\n");
+		Cbuf_AddText (sprintf("setmaster %s %s\n", DEFAULT_MASTER_1, DEFAULT_MASTER_2));
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "g_antilagprojectiles", s_antilagprojectiles_box.curvalue);

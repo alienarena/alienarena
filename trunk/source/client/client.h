@@ -490,6 +490,8 @@ void CL_PingServers_f (void);
 void CL_Snd_Restart_f (void);
 void CL_Precache_f (void);
 void CL_RequestNextDownload (void);
+void CL_RepairStringCvarIfDefault(cvar_t *cvar, char *oldDefault, char *newDefault);
+void CL_RepairStringCvar(cvar_t *cvar, char *newDefault);
 
 //
 // cl_input
@@ -597,9 +599,9 @@ void STATS_ST_Write (void);
 // cl_updates.c
 //
 
-void getLatestGameVersion( void );
-qboolean serverIsOutdated (char *server_vstring);
-char* VersionUpdateNotice( void );
+void CL_GetLatestGameVersion( void );
+qboolean CL_ServerIsOutdated (char *server_vstring);
+char* CL_VersionUpdateNotice( void );
 
 
 //
