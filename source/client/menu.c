@@ -4118,18 +4118,36 @@ static void ModList_SubmenuInit (void)
 static void ServerInfo_SubmenuInit (void)
 {
 	size_t sizes[2] = {sizeof(menutxt_s), sizeof(menutxt_s)};
+	#if STATS_ENABLED
+		#define rows 7
+	#else
+		#define rows 6
+	#endif
+
+	#if STATS_ENABLED
+		char *contents[2*rows+1] = {
+			"Map:",			mservers[serverindex].szMapName,
+			"Skill:",		mservers[serverindex].skill,
+			"Admin:",		mservers[serverindex].szAdmin,
+			"Website:",		mservers[serverindex].szWebsite,
+			"Fraglimit:",	mservers[serverindex].fraglimit,
+			"Timelimit:",	mservers[serverindex].timelimit,
+			"Version:",		mservers[serverindex].szVersion,
+			"Gameplay:"
+		};
+	#else
+		char *contents[2*rows+1] = {
+			"Map:",			mservers[serverindex].szMapName,
+			"Admin:",		mservers[serverindex].szAdmin,
+			"Website:",		mservers[serverindex].szWebsite,
+			"Fraglimit:",	mservers[serverindex].fraglimit,
+			"Timelimit:",	mservers[serverindex].timelimit,
+			"Version:",		mservers[serverindex].szVersion,
+			"Gameplay:"
+		};
+	#endif
 	
-	char *contents[2*7+1] = {
-		"Map:",			mservers[serverindex].szMapName,
-		"Skill:",		mservers[serverindex].skill,
-		"Admin:",		mservers[serverindex].szAdmin,
-		"Website:",		mservers[serverindex].szWebsite,
-		"Fraglimit:",	mservers[serverindex].fraglimit,
-		"Timelimit:",	mservers[serverindex].timelimit,
-		"Version:",		mservers[serverindex].szVersion,
-		"Gameplay:"
-	};
-	
+
 	Com_sprintf (
 		s_servers[serverindex].levelshot_path,
 		sizeof(s_servers[serverindex].levelshot_path),
@@ -4161,7 +4179,7 @@ static void ServerInfo_SubmenuInit (void)
 	s_servers[serverindex].serverinfo_columns[0][1].generic.type		= MTYPE_TEXT;
 	s_servers[serverindex].serverinfo_columns[0][1].generic.flags	= QMF_RIGHT_COLUMN;
 	
-	Menu_MakeTable (&s_servers[serverindex].serverinfo_table, 7, 2, sizes, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_columns, contents);
+	Menu_MakeTable (&s_servers[serverindex].serverinfo_table, rows, 2, sizes, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_rows, s_servers[serverindex].serverinfo_columns, contents);
 	
 	Menu_AddItem (&s_servers[serverindex].serverinfo_submenu, &s_servers[serverindex].serverinfo_table);
 	
@@ -4174,7 +4192,7 @@ static void ServerInfo_SubmenuInit (void)
 	LINK (s_servers[serverindex].serverinfo_rows[0].rwidth, s_servers[serverindex].serverinfo_rows[7].rwidth);
 	
 	s_servers[serverindex].serverinfo_columns[7][0].generic.type = MTYPE_TEXT;
-	s_servers[serverindex].serverinfo_columns[7][0].generic.name = contents[7*2+0];
+	s_servers[serverindex].serverinfo_columns[7][0].generic.name = contents[rows*2+0];
 	LINK (s_servers[serverindex].serverinfo_columns[0][0].generic.x, s_servers[serverindex].serverinfo_columns[7][0].generic.x);
 	Menu_AddItem (&s_servers[serverindex].serverinfo_rows[7], &s_servers[serverindex].serverinfo_columns[7][0]);
 	
@@ -4317,8 +4335,7 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 	
 	char playername[PLAYERNAME_SIZE];
 	char team[8];
-	int score, ping, rankTotal, starttime;
-	PLAYERSTATS	player;
+	int ping, starttime;
 
 	destserver->local_server_netadr = adr;
 	// starttime now sourced per server.
@@ -4391,90 +4408,95 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 		token = strtok( NULL, seps );
 	}	
 
-	//playerinfo
-	rankTotal = 0;
-	strcpy (seps, " ");
-	while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) 
-	{
-		/* Establish string and get the first token: */
-		token = strtok( rLine, seps);
-		score = atoi(token);
+	if (STATS_ENABLED) {		
+		int score, rankTotal;
+		PLAYERSTATS	player;
 
-		token = strtok( NULL, seps);
-		ping = atoi(token);
-
-		token = strtok( NULL, "\"");
-
-		if (token)
-			strncpy (playername, token, sizeof(playername)-1);
-		else
-			playername[0] = '\0';
-
-		playername[sizeof(playername)-1] = '\0';
-
-		token = strtok( NULL, "\"");
-		token = strtok( NULL, "\"");
-		token = strtok( NULL, seps);
-		if (token)
+		// playerinfo
+		rankTotal = 0;
+		strcpy (seps, " ");
+		while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) 
 		{
-			if(atoi(token) == 0)
-				strcpy(team, "red");
-			else if(atoi(token) == 1)
-				strcpy(team, "blue");
-			else if(atoi(token) == 3)
-				strcpy(team, "alien");
-			else if(atoi(token) == 4)
-				strcpy(team, "human");
+			/* Establish string and get the first token: */
+			token = strtok( rLine, seps);
+			score = atoi(token);
+
+			token = strtok( NULL, seps);
+			ping = atoi(token);
+
+			token = strtok( NULL, "\"");
+
+			if (token)
+				strncpy (playername, token, sizeof(playername)-1);
 			else
-				strcpy(team, "none");
+				playername[0] = '\0';
+
+			playername[sizeof(playername)-1] = '\0';
+
+			token = strtok( NULL, "\"");
+			token = strtok( NULL, "\"");
+			token = strtok( NULL, seps);
+			if (token)
+			{
+				if(atoi(token) == 0)
+					strcpy(team, "red");
+				else if(atoi(token) == 1)
+					strcpy(team, "blue");
+				else if(atoi(token) == 3)
+					strcpy(team, "alien");
+				else if(atoi(token) == 4)
+					strcpy(team, "human");
+				else
+					strcpy(team, "none");
+			}
+			else
+				strcpy(team, "unknown");
+
+			//get ranking
+			Q_strncpyz2( player.playername, playername, sizeof(player.playername));
+			player.totalfrags = player.totaltime = player.ranking = 0;
+			player = getPlayerRanking ( player );
+
+			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_NAME],
+							SVDATA_PLAYERINFO_COLSIZE,
+							"%s", playername
+						);
+			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_SCORE],
+							SVDATA_PLAYERINFO_COLSIZE,
+							"%i", score
+						);
+			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_PING],
+							SVDATA_PLAYERINFO_COLSIZE,
+							"%i", ping
+						);
+			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_TEAM],
+							SVDATA_PLAYERINFO_COLSIZE,
+							"%s", team
+						);
+			destserver->playerRankings[players] = player.ranking;
+
+			rankTotal += player.ranking;
+
+			players++;
+
+			if(ping == 0)
+				bots++;
+		}
+
+		if(players) 
+		{
+			if(thisPlayer.ranking < (rankTotal/players) - 100)
+				strcpy(skillLevel, "Your Skill is ^1Higher");
+			else if(thisPlayer.ranking > (rankTotal/players + 100))
+				strcpy(skillLevel, "Your Skill is ^4Lower");
+			else
+				strcpy(skillLevel, "Your Skill is ^3Even");
+
+			Com_sprintf(destserver->skill, sizeof(destserver->skill), "%s", skillLevel);
 		}
 		else
-			strcpy(team, "unknown");
-
-		//get ranking
-		Q_strncpyz2( player.playername, playername, sizeof(player.playername));
-		player.totalfrags = player.totaltime = player.ranking = 0;
-		player = getPlayerRanking ( player );
-
-		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_NAME],
-						SVDATA_PLAYERINFO_COLSIZE,
-						"%s", playername
-					);
-		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_SCORE],
-						SVDATA_PLAYERINFO_COLSIZE,
-						"%i", score
-					);
-		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_PING],
-						SVDATA_PLAYERINFO_COLSIZE,
-						"%i", ping
-					);
-		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_TEAM],
-						SVDATA_PLAYERINFO_COLSIZE,
-						"%s", team
-					);
-		destserver->playerRankings[players] = player.ranking;
-
-		rankTotal += player.ranking;
-
-		players++;
-
-		if(ping == 0)
-			bots++;
+			Com_sprintf(destserver->skill, sizeof(destserver->skill), "Unknown");
 	}
-
-	if(players) 
-	{
-		if(thisPlayer.ranking < (rankTotal/players) - 100)
-			strcpy(skillLevel, "Your Skill is ^1Higher");
-		else if(thisPlayer.ranking > (rankTotal/players + 100))
-			strcpy(skillLevel, "Your Skill is ^4Lower");
-		else
-			strcpy(skillLevel, "Your Skill is ^3Even");
-
-		Com_sprintf(destserver->skill, sizeof(destserver->skill), "%s", skillLevel);
-	}
-	else
-		Com_sprintf(destserver->skill, sizeof(destserver->skill), "Unknown");
 
 	destserver->players = players;
 
@@ -4751,7 +4773,10 @@ static void ServerListHeader_SubmenuInit (void)
 	// doesn't actually do anything yet
 	// add_action (s_joinserver_header, "Address Book", AddressBookFunc, 0);
 	add_action (s_joinserver_header, "Refresh", SearchLocalGamesFunc, 0);
-	add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
+	
+	if (STATS_ENABLED) {
+		add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
+	}
 
 	Menu_AddItem (&s_joinserver_menu, &s_joinserver_header);
 }
@@ -4762,15 +4787,18 @@ static void M_Menu_JoinServer_f (void)
 
 	static qboolean gotServers = false;
 
-	if(!gotServers)
+	if(!gotServers && STATS_ENABLED)
 	{
 		STATS_getStatsDB();
 	}
 	
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
-	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
-	thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
-	thisPlayer = getPlayerRanking ( thisPlayer );
+
+	if (STATS_ENABLED) {
+		Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
+		thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
+		thisPlayer = getPlayerRanking ( thisPlayer );
+	}
 
 	serverindex = -1;
 
@@ -6542,39 +6570,41 @@ static void PlayerConfig_MenuInit (void)
 	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
 	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
 	
-	// Horizontal submenu with two items. The first is a password field. The 
-	// second is an apply button for the password.
-	s_player_password_submenu.generic.type = MTYPE_SUBMENU;
-	// Keep the password field horizontally lined up:
-	s_player_password_submenu.generic.flags = QMF_SNUG_LEFT;
-	s_player_password_submenu.navagable = true;
-	s_player_password_submenu.horizontal = true;
-	s_player_password_submenu.nitems = 0;
-	
-	// sub-submenu for the password field. Purely for formatting/layout 
-	// purposes.
-	s_player_password_field_submenu.generic.type = MTYPE_SUBMENU;
-	s_player_password_field_submenu.navagable = true;
-	s_player_password_field_submenu.horizontal = true;
-	s_player_password_field_submenu.nitems = 0;
-	// keep the password field horizontally lined up:
-	LINK (s_player_config_menu.lwidth, s_player_password_field_submenu.lwidth);
-	// keep it vertically centered on the apply button
-	LINK (s_player_password_submenu.height, s_player_password_field_submenu.height);
-	
-	s_player_password_field.generic.type = MTYPE_FIELD;
-	s_player_password_field.generic.name = "password";
-	s_player_password_field.generic.flags = QMF_ACTION_WAIT;
-	s_player_password_field.generic.callback = PasswordCallback;
-	s_player_password_field.length	= 20;
-	s_player_password_field.generic.visible_length = LONGINPUT_SIZE;
-	s_player_password_field.generic.statusbar = "COR Entertainment is not responsible for lost or stolen passwords";
-	Q_strncpyz2( s_player_password_field.buffer, "********", sizeof(s_player_password_field.buffer) );
-	s_player_password_field.cursor = 0;
-	Menu_AddItem( &s_player_password_submenu, &s_player_password_field_submenu);
-	Menu_AddItem( &s_player_password_field_submenu, &s_player_password_field);
-	
-	add_action (s_player_password_submenu, "Apply", PConfigApplyFunc, 0);
+	if (STATS_ENABLED) {
+		// Horizontal submenu with two items. The first is a password field. The 
+		// second is an apply button for the password.
+		s_player_password_submenu.generic.type = MTYPE_SUBMENU;
+		// Keep the password field horizontally lined up:
+		s_player_password_submenu.generic.flags = QMF_SNUG_LEFT;
+		s_player_password_submenu.navagable = true;
+		s_player_password_submenu.horizontal = true;
+		s_player_password_submenu.nitems = 0;
+		
+		// sub-submenu for the password field. Purely for formatting/layout 
+		// purposes.
+		s_player_password_field_submenu.generic.type = MTYPE_SUBMENU;
+		s_player_password_field_submenu.navagable = true;
+		s_player_password_field_submenu.horizontal = true;
+		s_player_password_field_submenu.nitems = 0;
+		// keep the password field horizontally lined up:
+		LINK (s_player_config_menu.lwidth, s_player_password_field_submenu.lwidth);
+		// keep it vertically centered on the apply button
+		LINK (s_player_password_submenu.height, s_player_password_field_submenu.height);
+		
+		s_player_password_field.generic.type = MTYPE_FIELD;
+		s_player_password_field.generic.name = "password";
+		s_player_password_field.generic.flags = QMF_ACTION_WAIT;
+		s_player_password_field.generic.callback = PasswordCallback;
+		s_player_password_field.length	= 20;
+		s_player_password_field.generic.visible_length = LONGINPUT_SIZE;
+		s_player_password_field.generic.statusbar = "COR Entertainment is not responsible for lost or stolen passwords";
+		Q_strncpyz2( s_player_password_field.buffer, "********", sizeof(s_player_password_field.buffer) );
+		s_player_password_field.cursor = 0;
+		Menu_AddItem( &s_player_password_submenu, &s_player_password_field_submenu);
+		Menu_AddItem( &s_player_password_field_submenu, &s_player_password_field);
+		
+		add_action (s_player_password_submenu, "Apply", PConfigApplyFunc, 0);
+	}
 	
 	// Horizontal submenu with two items. The first is a submenu with the
 	// model/skin controls. The second is just a thumbnail of the current
@@ -6624,7 +6654,9 @@ static void PlayerConfig_MenuInit (void)
 	s_player_skin_preview_submenu.nitems = 0;
 	
 	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
-	Menu_AddItem( &s_player_config_menu, &s_player_password_submenu);
+	if (STATS_ENABLED) {
+		Menu_AddItem( &s_player_config_menu, &s_player_password_submenu);
+	}
 	Menu_AddItem( &s_player_config_menu, &s_player_skin_submenu);
 		
 	s_player_skin_preview.generic.type = MTYPE_NOT_INTERACTIVE;
