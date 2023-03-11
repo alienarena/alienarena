@@ -92,7 +92,7 @@ void STATS_getStatsDB( void )
 
 	Com_sprintf(statserver, sizeof(statserver), "%s%s", cl_stats_server->string, "/playerrank.db");
 
-	curl_easy_setopt( easyhandle, CURLOPT_URL, statserver ) ;
+	curl_easy_setopt(easyhandle, CURLOPT_URL, statserver);
 
 	// Set Http version to 1.1, somehow this seems to be needed for the multi-download
 	curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, (long) CURL_HTTP_VERSION_1_1);
@@ -105,13 +105,13 @@ void STATS_getStatsDB( void )
 	curl_easy_setopt(easyhandle, CURLOPT_SSL_VERIFYHOST, 0L);
 
 	// time out in 5s
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+	curl_easy_setopt(easyhandle, CURLOPT_CONNECTTIMEOUT, 5);
 
-	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;
+	curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data);
 
-	curl_easy_perform( easyhandle );
+	curl_easy_perform(easyhandle);
 
-	curl_easy_cleanup( easyhandle );
+	curl_easy_cleanup(easyhandle);
 }
 
 //parse the stats database, looking for player match
