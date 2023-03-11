@@ -648,7 +648,9 @@ void CL_Connect_f (void)
 	strncpy (cls.servername, server, sizeof(cls.servername)-1);
 	cls.connect_time = -99999;	// CL_CheckForResend() will fire immediately
 
-	STATS_RequestVerification();
+	if (STATS_ENABLED) {
+		STATS_RequestVerification();
+	}
 }
 
 
@@ -2105,7 +2107,7 @@ void CL_InitLocal (void)
 	cl_hudimage3 = Cvar_Get("cl_hudimage3", "pics/i_ammo.tga", CVAR_ARCHIVE | CVARDOC_STR);
 
 	// stats server
-	cl_stats_server = Cvar_Get("cl_stats_server", "https://martianbackup.com", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_stats_server = Cvar_Get("cl_stats_server", DEFAULT_STATS_URL, CVAR_ARCHIVE | CVARDOC_STR);
 
 	// update checker
 	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", DEFAULT_VERSION_CHECK_URL, CVAR_ARCHIVE | CVARDOC_STR);	
@@ -2897,7 +2899,9 @@ void CL_Shutdown(void)
 	}
 	isdown = true;
 
-	STATS_Logout();
+	if (STATS_ENABLED) {
+		STATS_Logout();
+	}
 
 	STATS_ST_Write();
 

@@ -94,6 +94,16 @@ void STATS_getStatsDB( void )
 
 	curl_easy_setopt( easyhandle, CURLOPT_URL, statserver ) ;
 
+	// Set Http version to 1.1, somehow this seems to be needed for the multi-download
+	curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, (long) CURL_HTTP_VERSION_1_1);
+
+	// Follow redirects to https - but this doesn't seem to be working
+	curl_easy_setopt(easyhandle, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(easyhandle, CURLOPT_MAXREDIRS, 3L);
+	
+	// Don't verify that the host matches the certificate
+	curl_easy_setopt(easyhandle, CURLOPT_SSL_VERIFYHOST, 0L);
+
 	// time out in 5s
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
 
