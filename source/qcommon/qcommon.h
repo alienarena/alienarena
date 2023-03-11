@@ -61,10 +61,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #endif
 
+// For testing:
+#define USE_ALIENARENA_ORG false
+#define USE_ALIENARENA_ORG_IRC false
+
+// Obsolete:
+#define VERSION_CHECK_PLANETARENA_URL "https://martianbackup.com/version/crx_version"
+#define VERSION_CHECK_MARTIANBACKUP_URL "https://martianbackup.com/version/crx_version"
+
+#define VERSION_CHECK_ALIENARENA_ORG_URL "https://invader.alienarena.org/version/crx_version"
+#define DEFAULT_VERSION_CHECK_URL (USE_ALIENARENA_ORG ? VERSION_CHECK_ALIENARENA_ORG_URL : VERSION_CHECK_MARTIANBACKUP_URL)
+
+// Obsolete:
+#define IRC_PLANETARENA "irc.planetarena.org"
+#define IRC_HAL_NANOID "hal.nanoid.net"
+
+#define IRC_ALIENARENA_ORG "irc.alienarena.org"
+#define DEFAULT_IRC_SERVER (USE_ALIENARENA_ORG_IRC ? IRC_ALIENARENA_ORG : IRC_HAL_NANOID)
+
+// Obsolete:
+#define DEFAULT_MASTER_COR_1 "master.corservers.com"
+#define DEFAULT_MASTER_COR_2 "master2.corservers.com"
+
+#define DEFAULT_MASTER_1 (USE_ALIENARENA_ORG ? "master.alienarena.org" : DEFAULT_MASTER_COR_1)
+#define DEFAULT_MASTER_2 (USE_ALIENARENA_ORG ? "master2.alienarena.org" : DEFAULT_MASTER_COR_2)
+
 // NOTE: the game does *not* depend on these being the same for server and
 // client.
-#define DEFAULT_DOWNLOAD_URL_1 "https://martianbackup.com/sv_downloadurl"
-#define DEFAULT_DOWNLOAD_URL_2 "https://red.planetarena.org/sv_downloadurl"
+#define DEFAULT_DOWNLOAD_URL_1 (USE_ALIENARENA_ORG ? "https://invader.alienarena.org/sv_downloadurl" : "https://martianbackup.com/sv_downloadurl")
+#define DEFAULT_DOWNLOAD_URL_2 (USE_ALIENARENA_ORG ? "https://martianbackup.com/sv_downloadurl" : "https://red.planetarena.org/sv_downloadurl")
+
+#define NEWSFEED_URL (USE_ALIENARENA_ORG ? "https://invader.alienarena.org/newsfeed.db" : "https://martianbackup.com/newsfeed.db")
 
 /* ---- Relative path names for game data ---*/
 /*

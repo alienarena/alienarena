@@ -1250,7 +1250,7 @@ void SV_HandleMasters (const char *message, const char *console_message)
 	{
 		if ( !sv_master )
 		{
-			sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
+			sv_master = Cvar_Get ("cl_master", DEFAULT_MASTER_1, CVAR_ARCHIVE);
 			updated_master = true;
 		}
 		else if ( sv_master->modified )

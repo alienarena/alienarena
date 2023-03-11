@@ -1933,6 +1933,32 @@ void CL_Precache_f (void)
 }
 
 /*
+In case equal to the old default, then change to the new default.
+Only usable for string cvars for now.
+*/
+void CL_RepairStringCvarIfDefault(cvar_t *cvar, char *oldDefault, char *newDefault)
+{
+	if (!Q_strcasecmp(cvar->string, oldDefault)) {
+		Com_Printf("%s changed from %s to %s\n", cvar->name, cvar->string, newDefault);
+		Cvar_Set(cvar->name, newDefault);
+		strcpy(cvar->string, newDefault);
+	}
+}
+
+/*
+In case not equal to the new default, then change to the new default.
+Only usable for string cvars for now.
+*/
+void CL_RepairStringCvar(cvar_t *cvar, char *newDefault)
+{
+	if (Q_strcasecmp(cvar->string, newDefault)) {
+		Com_Printf("%s changed from %s to %s\n", cvar->name, cvar->string, newDefault);
+		Cvar_Set(cvar->name, newDefault);
+		strcpy(cvar->string, newDefault);
+	}
+}
+
+/*
 =================
 CL_InitLocal
 =================
@@ -2066,21 +2092,28 @@ void CL_InitLocal (void)
 
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 
-	cl_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE | CVARDOC_STR);
-	cl_master2 = Cvar_Get ("cl_master2", "master2.corservers.com", CVAR_ARCHIVE | CVARDOC_STR);
+	cl_master = Cvar_Get ("cl_master", DEFAULT_MASTER_1, CVAR_ARCHIVE | CVARDOC_STR);
+	cl_master2 = Cvar_Get ("cl_master2", DEFAULT_MASTER_2, CVAR_ARCHIVE | CVARDOC_STR);	
+	if (USE_ALIENARENA_ORG) {
+		CL_RepairStringCvar(cl_master, DEFAULT_MASTER_1);
+		CL_RepairStringCvar(cl_master2, DEFAULT_MASTER_2);
+	}
 
-	//custom huds
+	// custom huds
 	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE | CVARDOC_STR);
 	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE | CVARDOC_STR);
 	cl_hudimage3 = Cvar_Get("cl_hudimage3", "pics/i_ammo.tga", CVAR_ARCHIVE | CVARDOC_STR);
 
-	//stats server
+	// stats server
 	cl_stats_server = Cvar_Get("cl_stats_server", "https://martianbackup.com", CVAR_ARCHIVE | CVARDOC_STR);
 
-	//update checker
-	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "https://martianbackup.com/version/crx_version", CVAR_ARCHIVE | CVARDOC_STR);
+	// update checker
+	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", DEFAULT_VERSION_CHECK_URL, CVAR_ARCHIVE | CVARDOC_STR);	
+	if (USE_ALIENARENA_ORG) {
+		CL_RepairStringCvar(cl_latest_game_version_url, VERSION_CHECK_ALIENARENA_ORG_URL);
+	}
 
-	//throwaway cvars
+	// throwaway cvars
 	Cvar_Get("g_dm_lights", "1", CVAR_ARCHIVE | CVAR_GAMEINFO | CVARDOC_BOOL); //mark this as archived even if game code doesn't run.
 
 	//

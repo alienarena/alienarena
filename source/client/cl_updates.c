@@ -138,7 +138,7 @@ static qboolean compare_version (const struct dotted_triple *version1, const str
 
 /**
  *  generate a version update notice, or nul the string
- *  see VersionUpdateNotice() below
+ *  see CL_VersionUpdateNotice() below
  * 
  * @param vstring  the latest version from the server
  *
@@ -149,6 +149,7 @@ static void update_version( const char* vstring )
 	qboolean update_message = false;
 	
 	valid_version = parse_version( vstring, &latest_version );
+
 	if ( valid_version )
 	{ /* valid from server */
 		valid_version = parse_version( VERSION, &this_version );
@@ -183,7 +184,7 @@ static void update_version( const char* vstring )
 				this_version.major, this_version.minor, this_version.point );
 		}
 		Com_sprintf( update_notice, sizeof(update_notice),
-			 	"version %s available (%s currently installed)", 
+			 	"Version %s available (%s currently installed)", 
 			 	latest_string, this_string );
 	}
 	else
@@ -210,15 +211,53 @@ static size_t write_data(const void *buffer, size_t size, size_t nmemb, void *us
 	return bytecount;
 }
 
-void getLatestGameVersion( void )
+// Note: This function returns a pointer to a substring of the original string.
+// If the given string was allocated dynamically, the caller must not overwrite
+// that pointer with the returned value, since the original pointer must be
+// deallocated using the same allocator with which it was allocated.  The return
+// value must NOT be deallocated using free() etc.
+char *trimblanks(char *str)
+{
+  char *end;
+
+  // Trim leading whitespace
+  while(isblank((unsigned char)*str) || *str == '\n' || *str == '\r') str++;
+
+  // All spaces?
+  if(*str == 0) {
+    return str;
+  }
+
+  // Trim trailing whitespace
+  end = str + strlen(str) - 1;
+  while(end > str && isblank((unsigned char)*end) || *end == '\n' || *end == '\r') end--;
+
+  // Write new null terminator character
+  end[1] = '\0';
+
+  return str;
+}
+
+void CL_GetLatestGameVersion( void )
 {
 	char url[128];
 	CURL* easyhandle;
+	CURLcode result;
 
     memset( versionstr, 0, sizeof(versionstr) );
 	versionstr_sz = 0;
 
 	easyhandle = curl_easy_init();
+
+	// Set Http version to 1.1, somehow this seems to be needed for the multi-download
+	if (curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, (long) CURL_HTTP_VERSION_1_1) != CURLE_OK) return false;
+
+	// Follow redirects to https - but this doesn't seem to be working
+	if (curl_easy_setopt(easyhandle, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK) return false;
+	if (curl_easy_setopt(easyhandle, CURLOPT_MAXREDIRS, 3L) != CURLE_OK) return false;
+	
+	// Don't verify that the host matches the certificate
+	if (curl_easy_setopt(easyhandle, CURLOPT_SSL_VERIFYHOST, 0L) != CURLE_OK) return false;
 
 	Com_sprintf(url, sizeof(url), "%s", cl_latest_game_version_url->string);
 
@@ -229,9 +268,17 @@ void getLatestGameVersion( void )
 
 	if (curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data) != CURLE_OK) return;
 
-	if (curl_easy_perform(easyhandle) != CURLE_OK) return;
+	result = curl_easy_perform(easyhandle);
+
+	if (result != CURLE_OK)	{
+		Com_Printf("Version check failed with error %ld.\n", result);
+		return;
+	}
 
 	(void)curl_easy_cleanup(easyhandle);
+
+	// Remove whitespace including linefeeds and carriage returns
+	trimblanks(versionstr);
 
 	update_version(versionstr);
 }
@@ -240,7 +287,7 @@ void getLatestGameVersion( void )
  *  
  * @returns NULL if program is latest version, pointer to update notice otherwise
  */
-char* VersionUpdateNotice( void )
+char* CL_VersionUpdateNotice( void )
 {
 	if ( update_notice[0] == '\0' )
 		return NULL;
@@ -253,10 +300,10 @@ char* VersionUpdateNotice( void )
  * @param server_vstring	the version string from a remote game server
  * @returns True if the the server is out of date or if the string is malformed, false otherwise.
  *
- * NOTE: getLatestGameVersion has to have been called at least once before
+ * NOTE: CL_GetLatestGameVersion has to have been called at least once before
  * calling this!
  */
-qboolean serverIsOutdated (char *server_vstring){
+qboolean CL_ServerIsOutdated (char *server_vstring){
 	char *end;
 	struct dotted_triple server_version;
 	qboolean valid_version;
