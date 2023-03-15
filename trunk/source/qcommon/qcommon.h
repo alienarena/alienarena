@@ -66,8 +66,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULT_STATS_URL "https://martianbackup.com"
 
 
-// For testing alienarena.org:
-#define USE_ALIENARENA_ORG false
+// All game operations except IRC
+#define USE_ALIENARENA_ORG true
+
+// Not yet
 #define USE_ALIENARENA_ORG_IRC false
 
 // Obsolete:
