@@ -10,7 +10,7 @@
 #
 
 AC_PREREQ([2.68])
-AC_INIT([alienarena], [7.71.3])
+AC_INIT([alienarena], [7.71.4])
 AC_CONFIG_SRCDIR([pics/colormap.pcx])
 AC_CONFIG_AUX_DIR([build-aux])
 
