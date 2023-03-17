@@ -4335,7 +4335,8 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 	
 	char playername[PLAYERNAME_SIZE];
 	char team[8];
-	int ping, starttime;
+	int score, ping, rankTotal, starttime;
+	PLAYERSTATS     player;
 
 	destserver->local_server_netadr = adr;
 	// starttime now sourced per server.
@@ -4408,95 +4409,90 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 		token = strtok( NULL, seps );
 	}	
 
-	if (STATS_ENABLED) {		
-		int score, rankTotal;
-		PLAYERSTATS	player;
+	// playerinfo
+	rankTotal = 0;
+	strcpy (seps, " ");
+	while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) 
+	{
+		/* Establish string and get the first token: */
+		token = strtok( rLine, seps);
+		score = atoi(token);
 
-		// playerinfo
-		rankTotal = 0;
-		strcpy (seps, " ");
-		while ((rLine = GetLine (&status_string, &result)) && players < MAX_PLAYERS) 
+		token = strtok( NULL, seps);
+		ping = atoi(token);
+
+		token = strtok( NULL, "\"");
+
+		if (token)
+			strncpy (playername, token, sizeof(playername)-1);
+		else
+			playername[0] = '\0';
+
+		playername[sizeof(playername)-1] = '\0';
+
+		token = strtok( NULL, "\"");
+		token = strtok( NULL, "\"");
+		token = strtok( NULL, seps);
+		if (token)
 		{
-			/* Establish string and get the first token: */
-			token = strtok( rLine, seps);
-			score = atoi(token);
-
-			token = strtok( NULL, seps);
-			ping = atoi(token);
-
-			token = strtok( NULL, "\"");
-
-			if (token)
-				strncpy (playername, token, sizeof(playername)-1);
+			if(atoi(token) == 0)
+				strcpy(team, "red");
+			else if(atoi(token) == 1)
+				strcpy(team, "blue");
+			else if(atoi(token) == 3)
+				strcpy(team, "alien");
+			else if(atoi(token) == 4)
+				strcpy(team, "human");
 			else
-				playername[0] = '\0';
-
-			playername[sizeof(playername)-1] = '\0';
-
-			token = strtok( NULL, "\"");
-			token = strtok( NULL, "\"");
-			token = strtok( NULL, seps);
-			if (token)
-			{
-				if(atoi(token) == 0)
-					strcpy(team, "red");
-				else if(atoi(token) == 1)
-					strcpy(team, "blue");
-				else if(atoi(token) == 3)
-					strcpy(team, "alien");
-				else if(atoi(token) == 4)
-					strcpy(team, "human");
-				else
-					strcpy(team, "none");
-			}
-			else
-				strcpy(team, "unknown");
-
-			//get ranking
-			Q_strncpyz2( player.playername, playername, sizeof(player.playername));
-			player.totalfrags = player.totaltime = player.ranking = 0;
-			player = getPlayerRanking ( player );
-
-			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_NAME],
-							SVDATA_PLAYERINFO_COLSIZE,
-							"%s", playername
-						);
-			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_SCORE],
-							SVDATA_PLAYERINFO_COLSIZE,
-							"%i", score
-						);
-			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_PING],
-							SVDATA_PLAYERINFO_COLSIZE,
-							"%i", ping
-						);
-			Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_TEAM],
-							SVDATA_PLAYERINFO_COLSIZE,
-							"%s", team
-						);
-			destserver->playerRankings[players] = player.ranking;
-
-			rankTotal += player.ranking;
-
-			players++;
-
-			if(ping == 0)
-				bots++;
-		}
-
-		if(players) 
-		{
-			if(thisPlayer.ranking < (rankTotal/players) - 100)
-				strcpy(skillLevel, "Your Skill is ^1Higher");
-			else if(thisPlayer.ranking > (rankTotal/players + 100))
-				strcpy(skillLevel, "Your Skill is ^4Lower");
-			else
-				strcpy(skillLevel, "Your Skill is ^3Even");
-
-			Com_sprintf(destserver->skill, sizeof(destserver->skill), "%s", skillLevel);
+				strcpy(team, "none");
 		}
 		else
-			Com_sprintf(destserver->skill, sizeof(destserver->skill), "Unknown");
+			strcpy(team, "unknown");
+
+		//get ranking
+		Q_strncpyz2( player.playername, playername, sizeof(player.playername));
+		player.totalfrags = player.totaltime = player.ranking = 0;
+		player = getPlayerRanking ( player );
+
+		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_NAME],
+						SVDATA_PLAYERINFO_COLSIZE,
+						"%s", playername
+					);
+		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_SCORE],
+						SVDATA_PLAYERINFO_COLSIZE,
+						"%i", score
+					);
+		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_PING],
+						SVDATA_PLAYERINFO_COLSIZE,
+						"%i", ping
+					);
+		Com_sprintf	(	destserver->playerInfo[players][SVDATA_PLAYERINFO_TEAM],
+						SVDATA_PLAYERINFO_COLSIZE,
+						"%s", team
+					);
+		destserver->playerRankings[players] = player.ranking;
+
+		rankTotal += player.ranking;
+
+		players++;
+
+		if(ping == 0)
+			bots++;
 	}
+
+	if(players) 
+	{
+		if(thisPlayer.ranking < (rankTotal/players) - 100)
+			strcpy(skillLevel, "Your Skill is ^1Higher");
+		else if(thisPlayer.ranking > (rankTotal/players + 100))
+			strcpy(skillLevel, "Your Skill is ^4Lower");
+		else
+			strcpy(skillLevel, "Your Skill is ^3Even");
+
+		Com_sprintf(destserver->skill, sizeof(destserver->skill), "%s", skillLevel);
+	}
+	else
+		Com_sprintf(destserver->skill, sizeof(destserver->skill), "Unknown");
 
 	destserver->players = players;
 
