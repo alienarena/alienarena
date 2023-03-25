@@ -66,11 +66,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULT_STATS_URL "https://martianbackup.com"
 
 
-// All game operations except IRC
+// All game operations including IRC
 #define USE_ALIENARENA_ORG true
-
-// Not yet
-#define USE_ALIENARENA_ORG_IRC false
+#define USE_ALIENARENA_ORG_IRC true
 
 // Obsolete:
 #define VERSION_CHECK_PLANETARENA_URL "https://martianbackup.com/version/crx_version"
