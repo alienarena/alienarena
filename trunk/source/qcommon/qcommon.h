@@ -28,6 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	VERSION		"7.7"
 #endif
 
+// To test the outdated version message:
+// #define	VERSION		"7.71.3"
+
 #define MENU_STATIC_WIDTH	720.0f
 
 #define DEFAULTMODEL		"martianenforcer"
@@ -63,7 +66,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // Enable/disable the old stats
 #define STATS_ENABLED false
-#define DEFAULT_STATS_URL "https://martianbackup.com"
+#define DEFAULT_STATS_URL "http://martianbackup.com"
 
 
 // All game operations including IRC
@@ -71,10 +74,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define USE_ALIENARENA_ORG_IRC true
 
 // Obsolete:
-#define VERSION_CHECK_PLANETARENA_URL "https://martianbackup.com/version/crx_version"
-#define VERSION_CHECK_MARTIANBACKUP_URL "https://martianbackup.com/version/crx_version"
+#define VERSION_CHECK_PLANETARENA_URL "http://martianbackup.com/version/crx_version"
+#define VERSION_CHECK_MARTIANBACKUP_URL "http://martianbackup.com/version/crx_version"
 
-#define VERSION_CHECK_ALIENARENA_ORG_URL "https://invader.alienarena.org/version/crx_version"
+#define VERSION_CHECK_ALIENARENA_ORG_URL "http://invader.alienarena.org/version/crx_version"
 #define DEFAULT_VERSION_CHECK_URL (USE_ALIENARENA_ORG ? VERSION_CHECK_ALIENARENA_ORG_URL : VERSION_CHECK_MARTIANBACKUP_URL)
 
 // Obsolete:
@@ -91,12 +94,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULT_MASTER_1 (USE_ALIENARENA_ORG ? "master.alienarena.org" : DEFAULT_MASTER_COR_1)
 #define DEFAULT_MASTER_2 (USE_ALIENARENA_ORG ? "master2.alienarena.org" : DEFAULT_MASTER_COR_2)
 
-// NOTE: the game does *not* depend on these being the same for server and
-// client.
-#define DEFAULT_DOWNLOAD_URL_1 (USE_ALIENARENA_ORG ? "https://invader.alienarena.org/sv_downloadurl" : "https://martianbackup.com/sv_downloadurl")
-#define DEFAULT_DOWNLOAD_URL_2 (USE_ALIENARENA_ORG ? "https://martianbackup.com/sv_downloadurl" : "https://red.planetarena.org/sv_downloadurl")
+// NOTE: the game does *not* depend on these being the same for server and client.
+#define DEFAULT_DOWNLOAD_URL_1 (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/sv_downloadurl" : "http://martianbackup.com/sv_downloadurl")
+#define DEFAULT_DOWNLOAD_URL_2 (USE_ALIENARENA_ORG ? "http://martianbackup.com/sv_downloadurl" : "http://red.planetarena.org/sv_downloadurl")
 
-#define NEWSFEED_URL (USE_ALIENARENA_ORG ? "https://invader.alienarena.org/newsfeed.db" : "https://martianbackup.com/newsfeed.db")
+#define NEWSFEED_URL (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/newsfeed.db" : "http://martianbackup.com/newsfeed.db")
 
 /* ---- Relative path names for game data ---*/
 /*
