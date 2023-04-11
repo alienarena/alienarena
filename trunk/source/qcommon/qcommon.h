@@ -64,6 +64,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #endif
 
+// All urls below use http and not https because on windows they are giving problems with libcurl.
+// It results into error "Protocol "https" not supported or disabled in libcurl."
+
 // Enable/disable the old stats
 #define STATS_ENABLED false
 #define DEFAULT_STATS_URL "http://martianbackup.com"
