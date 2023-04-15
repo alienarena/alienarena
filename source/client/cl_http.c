@@ -85,7 +85,7 @@ Queue up an http download-- get a specified file from a specified HTTP server.
 We use cURL's multi interface, even tho we only ever perform one download at a
 time, because it is non-blocking.
 */
-static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filename)
+static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filename, qboolean useGameFolder)
 {
 	const char *hostname;
 	char game[64];
@@ -129,7 +129,11 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 	}
 	
 	memset(url, 0, sizeof(url));  // construct url
-	Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", hostname, game, filename);
+	if (useGameFolder) {
+		Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", hostname, game, filename);
+	} else {
+		Com_sprintf(url, sizeof(url) - 1, "%s/%s", hostname, filename);
+	}
 
 	// set handle to default state
 	curl_easy_reset(curl);
@@ -171,7 +175,16 @@ perform one download at a time, because it is non-blocking.
 */
 qboolean CL_HttpDownload(void)
 {
-	return CL_HttpDownloadFromHost (default_1, cls.downloadname);
+	return CL_HttpDownloadFromHost (default_1, cls.downloadname, true);
+}
+
+/*
+Download map pack from specific location. Don't use the game folder in the url.
+*/
+qboolean CL_HttpDownloadMapPack(char *host)
+{
+	strcpy(cls.downloadurl, host);
+	return CL_HttpDownloadFromHost (server_custom, cls.downloadname, false);
 }
 
 
@@ -241,7 +254,7 @@ void CL_HttpDownloadCleanup(){
 		{
 			case default_1:
 				Com_DPrintf ("Trying next hardcoded HTTP.\n");
-				CL_HttpDownloadFromHost (currentHost+1, cls.downloadname);
+				CL_HttpDownloadFromHost (currentHost+1, cls.downloadname, true);
 				break;
 			case default_2:
 				if (	cls.downloadurl[0] &&
@@ -249,7 +262,7 @@ void CL_HttpDownloadCleanup(){
 						strcmp (cls.downloadurl, DEFAULT_DOWNLOAD_URL_2))
 				{
 					Com_DPrintf ("Trying server custom HTTP.\n");
-					CL_HttpDownloadFromHost (currentHost+1, cls.downloadname);
+					CL_HttpDownloadFromHost (currentHost+1, cls.downloadname, true);
 					break;
 				}
 			case server_custom:

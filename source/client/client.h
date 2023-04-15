@@ -265,6 +265,7 @@ typedef struct
 	char		downloadurl[MAX_OSPATH];  // for http downloads
 	qboolean	downloadhttp;
 	qboolean	downloadfromcommand;
+	qboolean	downloadmappack;
 
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;
@@ -556,6 +557,7 @@ void CL_ParseClientinfo (int player);
 void CL_DownloadFileName (char *dest, int destlen, char *fn);
 void CL_DownloadComplete (void);
 void CL_Download_f (void);
+void CL_InstallMap (void);
 
 //
 // cl_scrn.c
@@ -830,6 +832,7 @@ void M_Think_MouseCursor (void);
 void CL_InitHttpDownload(void);
 void CL_HttpDownloadCleanup(void);
 qboolean CL_HttpDownload(void);
+qboolean CL_HttpDownloadMapPack(char *host);
 void CL_HttpDownloadThink(void);
 void CL_ShutdownHttpDownload(void);
 

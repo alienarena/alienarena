@@ -317,7 +317,18 @@ libgame_a_SOURCES =  \
 	game/p_weapon.c \
 	game/q_shared.c \
 	game/q_shared.h \
-	qcommon/qfiles.h
+	qcommon/qfiles.h \
+	minizip/crypt.h \
+	minizip/ioapi.c \
+	minizip/ioapi.o \
+	minizip/miniunz.c \
+	minizip/minizip.c \
+	minizip/mztools.c \
+	minizip/mztools.h \
+	minizip/unzip.c \
+	minizip/unzip.h \
+	minizip/zip.c \
+	minizip/zip.h
 
 if !USE_SYSTEM_LIBODE
 #
