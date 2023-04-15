@@ -173,7 +173,13 @@ am_libgame_a_OBJECTS = game/acesrc/libgame_a-acebot_ai.$(OBJEXT) \
 	game/libgame_a-p_trail.$(OBJEXT) \
 	game/libgame_a-p_view.$(OBJEXT) \
 	game/libgame_a-p_weapon.$(OBJEXT) \
-	game/libgame_a-q_shared.$(OBJEXT)
+	game/libgame_a-q_shared.$(OBJEXT) \
+	minizip/libgame_a-ioapi.$(OBJEXT) \
+	minizip/libgame_a-miniunz.$(OBJEXT) \
+	minizip/libgame_a-minizip.$(OBJEXT) \
+	minizip/libgame_a-mztools.$(OBJEXT) \
+	minizip/libgame_a-unzip.$(OBJEXT) \
+	minizip/libgame_a-zip.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 libode_a_AR = $(AR) $(ARFLAGS)
 libode_a_LIBADD =
@@ -345,12 +351,7 @@ am__libode_a_SOURCES_DIST = unix/odesrc/nextafterf.c \
 	unix/odesrc/OPCODE/Ice/IceRevisitedRadix.h \
 	unix/odesrc/OPCODE/Ice/IceSegment.cpp \
 	unix/odesrc/OPCODE/Ice/IceSegment.h \
-	unix/odesrc/OPCODE/Ice/IceTypes.h \
-	unix/odesrc/OPCODE/Ice/IceTriangle.h \
-	unix/odesrc/OPCODE/Ice/IceTriList.h \
-	unix/odesrc/OPCODE/Ice/IceUtils.h \
 	unix/odesrc/OPCODE/Ice/IceTriangle.cpp \
-	unix/odesrc/util.h \
 	unix/odesrc/ousrc/atomic.cpp \
 	unix/odesrc/ousrc/customization.cpp \
 	unix/odesrc/ousrc/malloc.cpp \
@@ -1078,7 +1079,18 @@ libgame_a_SOURCES = \
 	game/p_weapon.c \
 	game/q_shared.c \
 	game/q_shared.h \
-	qcommon/qfiles.h
+	qcommon/qfiles.h \
+	minizip/crypt.h \
+	minizip/ioapi.c \
+	minizip/ioapi.o \
+	minizip/miniunz.c \
+	minizip/minizip.c \
+	minizip/mztools.c \
+	minizip/mztools.h \
+	minizip/unzip.c \
+	minizip/unzip.h \
+	minizip/zip.c \
+	minizip/zip.h
 
 
 #
@@ -1322,12 +1334,7 @@ libgame_a_SOURCES = \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceRevisitedRadix.h \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceSegment.cpp \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceSegment.h \
-@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTypes.h \
-@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTriangle.h \
-@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTriList.h \
-@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceUtils.h \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/OPCODE/Ice/IceTriangle.cpp \
-@USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/util.h \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/ousrc/atomic.cpp \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/ousrc/customization.cpp \
 @USE_SYSTEM_LIBODE_FALSE@	unix/odesrc/ousrc/malloc.cpp \
@@ -1475,6 +1482,24 @@ game/libgame_a-p_weapon.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 game/libgame_a-q_shared.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
+minizip/$(am__dirstamp):
+	@$(MKDIR_P) minizip
+	@: > minizip/$(am__dirstamp)
+minizip/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) minizip/$(DEPDIR)
+	@: > minizip/$(DEPDIR)/$(am__dirstamp)
+minizip/libgame_a-ioapi.$(OBJEXT): minizip/$(am__dirstamp) \
+	minizip/$(DEPDIR)/$(am__dirstamp)
+minizip/libgame_a-miniunz.$(OBJEXT): minizip/$(am__dirstamp) \
+	minizip/$(DEPDIR)/$(am__dirstamp)
+minizip/libgame_a-minizip.$(OBJEXT): minizip/$(am__dirstamp) \
+	minizip/$(DEPDIR)/$(am__dirstamp)
+minizip/libgame_a-mztools.$(OBJEXT): minizip/$(am__dirstamp) \
+	minizip/$(DEPDIR)/$(am__dirstamp)
+minizip/libgame_a-unzip.$(OBJEXT): minizip/$(am__dirstamp) \
+	minizip/$(DEPDIR)/$(am__dirstamp)
+minizip/libgame_a-zip.$(OBJEXT): minizip/$(am__dirstamp) \
+	minizip/$(DEPDIR)/$(am__dirstamp)
 
 libgame.a: $(libgame_a_OBJECTS) $(libgame_a_DEPENDENCIES) $(EXTRA_libgame_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libgame.a
@@ -2132,6 +2157,7 @@ mostlyclean-compile:
 	-rm -f client/*.$(OBJEXT)
 	-rm -f game/*.$(OBJEXT)
 	-rm -f game/acesrc/*.$(OBJEXT)
+	-rm -f minizip/*.$(OBJEXT)
 	-rm -f null/*.$(OBJEXT)
 	-rm -f qcommon/*.$(OBJEXT)
 	-rm -f ref_gl/*.$(OBJEXT)
@@ -2205,6 +2231,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/libgame_a-acebot_movement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/libgame_a-acebot_nodes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/libgame_a-acebot_spawn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@minizip/$(DEPDIR)/libgame_a-ioapi.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@minizip/$(DEPDIR)/libgame_a-miniunz.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@minizip/$(DEPDIR)/libgame_a-minizip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@minizip/$(DEPDIR)/libgame_a-mztools.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@minizip/$(DEPDIR)/libgame_a-unzip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@minizip/$(DEPDIR)/libgame_a-zip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@null/$(DEPDIR)/alienarena_ded-cl_null.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-binheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/alienarena-cmd.Po@am__quote@
@@ -2922,6 +2954,90 @@ game/libgame_a-q_shared.obj: game/q_shared.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='game/q_shared.c' object='game/libgame_a-q_shared.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o game/libgame_a-q_shared.obj `if test -f 'game/q_shared.c'; then $(CYGPATH_W) 'game/q_shared.c'; else $(CYGPATH_W) '$(srcdir)/game/q_shared.c'; fi`
+
+minizip/libgame_a-ioapi.o: minizip/ioapi.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-ioapi.o -MD -MP -MF minizip/$(DEPDIR)/libgame_a-ioapi.Tpo -c -o minizip/libgame_a-ioapi.o `test -f 'minizip/ioapi.c' || echo '$(srcdir)/'`minizip/ioapi.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-ioapi.Tpo minizip/$(DEPDIR)/libgame_a-ioapi.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/ioapi.c' object='minizip/libgame_a-ioapi.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-ioapi.o `test -f 'minizip/ioapi.c' || echo '$(srcdir)/'`minizip/ioapi.c
+
+minizip/libgame_a-ioapi.obj: minizip/ioapi.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-ioapi.obj -MD -MP -MF minizip/$(DEPDIR)/libgame_a-ioapi.Tpo -c -o minizip/libgame_a-ioapi.obj `if test -f 'minizip/ioapi.c'; then $(CYGPATH_W) 'minizip/ioapi.c'; else $(CYGPATH_W) '$(srcdir)/minizip/ioapi.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-ioapi.Tpo minizip/$(DEPDIR)/libgame_a-ioapi.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/ioapi.c' object='minizip/libgame_a-ioapi.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-ioapi.obj `if test -f 'minizip/ioapi.c'; then $(CYGPATH_W) 'minizip/ioapi.c'; else $(CYGPATH_W) '$(srcdir)/minizip/ioapi.c'; fi`
+
+minizip/libgame_a-miniunz.o: minizip/miniunz.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-miniunz.o -MD -MP -MF minizip/$(DEPDIR)/libgame_a-miniunz.Tpo -c -o minizip/libgame_a-miniunz.o `test -f 'minizip/miniunz.c' || echo '$(srcdir)/'`minizip/miniunz.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-miniunz.Tpo minizip/$(DEPDIR)/libgame_a-miniunz.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/miniunz.c' object='minizip/libgame_a-miniunz.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-miniunz.o `test -f 'minizip/miniunz.c' || echo '$(srcdir)/'`minizip/miniunz.c
+
+minizip/libgame_a-miniunz.obj: minizip/miniunz.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-miniunz.obj -MD -MP -MF minizip/$(DEPDIR)/libgame_a-miniunz.Tpo -c -o minizip/libgame_a-miniunz.obj `if test -f 'minizip/miniunz.c'; then $(CYGPATH_W) 'minizip/miniunz.c'; else $(CYGPATH_W) '$(srcdir)/minizip/miniunz.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-miniunz.Tpo minizip/$(DEPDIR)/libgame_a-miniunz.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/miniunz.c' object='minizip/libgame_a-miniunz.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-miniunz.obj `if test -f 'minizip/miniunz.c'; then $(CYGPATH_W) 'minizip/miniunz.c'; else $(CYGPATH_W) '$(srcdir)/minizip/miniunz.c'; fi`
+
+minizip/libgame_a-minizip.o: minizip/minizip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-minizip.o -MD -MP -MF minizip/$(DEPDIR)/libgame_a-minizip.Tpo -c -o minizip/libgame_a-minizip.o `test -f 'minizip/minizip.c' || echo '$(srcdir)/'`minizip/minizip.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-minizip.Tpo minizip/$(DEPDIR)/libgame_a-minizip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/minizip.c' object='minizip/libgame_a-minizip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-minizip.o `test -f 'minizip/minizip.c' || echo '$(srcdir)/'`minizip/minizip.c
+
+minizip/libgame_a-minizip.obj: minizip/minizip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-minizip.obj -MD -MP -MF minizip/$(DEPDIR)/libgame_a-minizip.Tpo -c -o minizip/libgame_a-minizip.obj `if test -f 'minizip/minizip.c'; then $(CYGPATH_W) 'minizip/minizip.c'; else $(CYGPATH_W) '$(srcdir)/minizip/minizip.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-minizip.Tpo minizip/$(DEPDIR)/libgame_a-minizip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/minizip.c' object='minizip/libgame_a-minizip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-minizip.obj `if test -f 'minizip/minizip.c'; then $(CYGPATH_W) 'minizip/minizip.c'; else $(CYGPATH_W) '$(srcdir)/minizip/minizip.c'; fi`
+
+minizip/libgame_a-mztools.o: minizip/mztools.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-mztools.o -MD -MP -MF minizip/$(DEPDIR)/libgame_a-mztools.Tpo -c -o minizip/libgame_a-mztools.o `test -f 'minizip/mztools.c' || echo '$(srcdir)/'`minizip/mztools.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-mztools.Tpo minizip/$(DEPDIR)/libgame_a-mztools.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/mztools.c' object='minizip/libgame_a-mztools.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-mztools.o `test -f 'minizip/mztools.c' || echo '$(srcdir)/'`minizip/mztools.c
+
+minizip/libgame_a-mztools.obj: minizip/mztools.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-mztools.obj -MD -MP -MF minizip/$(DEPDIR)/libgame_a-mztools.Tpo -c -o minizip/libgame_a-mztools.obj `if test -f 'minizip/mztools.c'; then $(CYGPATH_W) 'minizip/mztools.c'; else $(CYGPATH_W) '$(srcdir)/minizip/mztools.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-mztools.Tpo minizip/$(DEPDIR)/libgame_a-mztools.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/mztools.c' object='minizip/libgame_a-mztools.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-mztools.obj `if test -f 'minizip/mztools.c'; then $(CYGPATH_W) 'minizip/mztools.c'; else $(CYGPATH_W) '$(srcdir)/minizip/mztools.c'; fi`
+
+minizip/libgame_a-unzip.o: minizip/unzip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-unzip.o -MD -MP -MF minizip/$(DEPDIR)/libgame_a-unzip.Tpo -c -o minizip/libgame_a-unzip.o `test -f 'minizip/unzip.c' || echo '$(srcdir)/'`minizip/unzip.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-unzip.Tpo minizip/$(DEPDIR)/libgame_a-unzip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/unzip.c' object='minizip/libgame_a-unzip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-unzip.o `test -f 'minizip/unzip.c' || echo '$(srcdir)/'`minizip/unzip.c
+
+minizip/libgame_a-unzip.obj: minizip/unzip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-unzip.obj -MD -MP -MF minizip/$(DEPDIR)/libgame_a-unzip.Tpo -c -o minizip/libgame_a-unzip.obj `if test -f 'minizip/unzip.c'; then $(CYGPATH_W) 'minizip/unzip.c'; else $(CYGPATH_W) '$(srcdir)/minizip/unzip.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-unzip.Tpo minizip/$(DEPDIR)/libgame_a-unzip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/unzip.c' object='minizip/libgame_a-unzip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-unzip.obj `if test -f 'minizip/unzip.c'; then $(CYGPATH_W) 'minizip/unzip.c'; else $(CYGPATH_W) '$(srcdir)/minizip/unzip.c'; fi`
+
+minizip/libgame_a-zip.o: minizip/zip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-zip.o -MD -MP -MF minizip/$(DEPDIR)/libgame_a-zip.Tpo -c -o minizip/libgame_a-zip.o `test -f 'minizip/zip.c' || echo '$(srcdir)/'`minizip/zip.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-zip.Tpo minizip/$(DEPDIR)/libgame_a-zip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/zip.c' object='minizip/libgame_a-zip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-zip.o `test -f 'minizip/zip.c' || echo '$(srcdir)/'`minizip/zip.c
+
+minizip/libgame_a-zip.obj: minizip/zip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -MT minizip/libgame_a-zip.obj -MD -MP -MF minizip/$(DEPDIR)/libgame_a-zip.Tpo -c -o minizip/libgame_a-zip.obj `if test -f 'minizip/zip.c'; then $(CYGPATH_W) 'minizip/zip.c'; else $(CYGPATH_W) '$(srcdir)/minizip/zip.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) minizip/$(DEPDIR)/libgame_a-zip.Tpo minizip/$(DEPDIR)/libgame_a-zip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='minizip/zip.c' object='minizip/libgame_a-zip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgame_a_CFLAGS) $(CFLAGS) -c -o minizip/libgame_a-zip.obj `if test -f 'minizip/zip.c'; then $(CYGPATH_W) 'minizip/zip.c'; else $(CYGPATH_W) '$(srcdir)/minizip/zip.c'; fi`
 
 unix/odesrc/libode_a-nextafterf.o: unix/odesrc/nextafterf.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libode_a_CPPFLAGS) $(CPPFLAGS) $(libode_a_CFLAGS) $(CFLAGS) -MT unix/odesrc/libode_a-nextafterf.o -MD -MP -MF unix/odesrc/$(DEPDIR)/libode_a-nextafterf.Tpo -c -o unix/odesrc/libode_a-nextafterf.o `test -f 'unix/odesrc/nextafterf.c' || echo '$(srcdir)/'`unix/odesrc/nextafterf.c
@@ -6140,6 +6256,8 @@ distclean-generic:
 	-rm -f game/$(am__dirstamp)
 	-rm -f game/acesrc/$(DEPDIR)/$(am__dirstamp)
 	-rm -f game/acesrc/$(am__dirstamp)
+	-rm -f minizip/$(DEPDIR)/$(am__dirstamp)
+	-rm -f minizip/$(am__dirstamp)
 	-rm -f null/$(DEPDIR)/$(am__dirstamp)
 	-rm -f null/$(am__dirstamp)
 	-rm -f qcommon/$(DEPDIR)/$(am__dirstamp)
@@ -6170,7 +6288,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR) unix/odesrc/$(DEPDIR) unix/odesrc/OPCODE/$(DEPDIR) unix/odesrc/OPCODE/Ice/$(DEPDIR) unix/odesrc/joints/$(DEPDIR) unix/odesrc/ousrc/$(DEPDIR)
+	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) minizip/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR) unix/odesrc/$(DEPDIR) unix/odesrc/OPCODE/$(DEPDIR) unix/odesrc/OPCODE/Ice/$(DEPDIR) unix/odesrc/joints/$(DEPDIR) unix/odesrc/ousrc/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -6216,7 +6334,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR) unix/odesrc/$(DEPDIR) unix/odesrc/OPCODE/$(DEPDIR) unix/odesrc/OPCODE/Ice/$(DEPDIR) unix/odesrc/joints/$(DEPDIR) unix/odesrc/ousrc/$(DEPDIR)
+	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) minizip/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR) unix/odesrc/$(DEPDIR) unix/odesrc/OPCODE/$(DEPDIR) unix/odesrc/OPCODE/Ice/$(DEPDIR) unix/odesrc/joints/$(DEPDIR) unix/odesrc/ousrc/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

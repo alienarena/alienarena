@@ -2147,6 +2147,7 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("download", CL_Download_f);
 	Cmd_AddCommand ("downloadhttp", CL_Download_f);
+	Cmd_AddCommand ("installmap", CL_InstallMap);
 
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
 	Cmd_AddCommand ("irc_quit", CL_IRCInitiateShutdown);

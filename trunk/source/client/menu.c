@@ -3195,6 +3195,13 @@ option_name_t net_option_names[] =
 		NULL,
 		setnames (onoff_names)
 	},
+	{
+		option_spincontrol,
+		"allow_overwrite_maps",
+		"installmap overwrites map files",
+		NULL,
+		setnames (onoff_names)
+	},
 };
 
 static void M_Menu_Net_f (void)

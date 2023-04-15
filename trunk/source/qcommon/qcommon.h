@@ -103,6 +103,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define NEWSFEED_URL (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/newsfeed.db" : "http://martianbackup.com/newsfeed.db")
 
+#define MAPPACK_URL "http://invader.alienarena.org/arena/files"
+
 /* ---- Relative path names for game data ---*/
 /*
  * BASE_GAMEDATA : the principal resource subdirectory.

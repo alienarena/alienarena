@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
+#include "qcommon/qcommon.h"
+#include "minizip/unzip.h"
 
 char *svc_strings[256] =
 {
@@ -53,6 +55,8 @@ char *svc_strings[256] =
 };
 
 static size_t szr; // just for unused result warnings
+
+extern	cvar_t *allow_overwrite_maps;
 
 /*
 ==============
@@ -90,11 +94,20 @@ void CL_DownloadComplete (void)
 	// rename the temp file to it's final name
 	CL_DownloadFileName(oldn, sizeof(oldn), cls.downloadtempname);
 	CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
+	
 	r = rename (oldn, newn);
 	if (r)
 		Com_Printf ("failed to rename.\n");
 	else
 		Com_Printf("Download complete: %s\n", cls.downloadname );
+
+	if (cls.downloadmappack) {
+		if (CL_ExtractFiles(cls.downloadname)) {
+			Com_Printf("Installed map pack %s.\n", cls.downloadname);
+		}
+
+		cls.downloadmappack = false;
+	}
 }
 
 /*
@@ -299,6 +312,214 @@ void	CL_Download_f (void)
 		if (!CL_HttpDownload ())
 			Com_Printf ("Error initializing http download.\n");
 	}
+}
+
+/*
+** If the path in filename starts with "arena/", then it returns a copy of the original string without the "arena/" part.
+*/
+char *RemoveArenaFolderFromPath(char *filename) {
+	// Equal means that it starts with "arena/"
+	if (strstr(filename, "arena/") == filename) {
+		static char newFilename[MAX_OSPATH];
+		strcpy(newFilename, filename + 6);
+		return newFilename;
+	}
+	return filename;
+}
+
+/*
+===============
+CL_ExtractFiles
+
+Extracts downloaded zip containing one or more maps using minizip.
+The zip will be placed in the arena folder, but it also contains an arena folder.
+All files will be directly extracted from the read zip file to the place where they belong and the zip file remains in the arena folder.
+===============
+*/
+
+#define dir_delimiter '/'
+#define READ_SIZE 8192
+
+qboolean CL_ExtractFiles(char *zipFilename)
+{
+	char fullPath[MAX_OSPATH];
+	
+	CL_DownloadFileName(fullPath, sizeof(fullPath), zipFilename);
+
+    // Open the zip file
+    unzFile *zipfile = unzOpen(fullPath);
+    if ( zipfile == NULL )
+    {
+        Com_Printf("Not found: %s\n", fullPath);
+        return false;
+    }
+
+    // Get info about the zip file
+    unz_global_info global_info;
+    if (unzGetGlobalInfo(zipfile, &global_info) != UNZ_OK)
+    {
+        Com_Printf("Could not read file global info.\n");
+        unzClose( zipfile );
+        return false;
+    }
+
+    // Buffer to hold data read from the zip file.
+    char read_buffer[READ_SIZE];
+
+    // Loop to extract all files
+    uLong i;
+    for (i = 0; i < global_info.number_entry; ++i)
+    {
+        // Get info about current file.
+        unz_file_info file_info;
+        char originalFilename[MAX_OSPATH];
+        char filename[MAX_OSPATH];
+        if (unzGetCurrentFileInfo(
+            zipfile,
+            &file_info,
+            originalFilename,
+            MAX_OSPATH,
+            NULL, 0, NULL, 0) != UNZ_OK)
+        {
+            Com_Printf("Could not read file info.\n");
+            unzClose(zipfile);
+            return false;
+        }
+
+		// The zip has the "arena/" folder within the root, so correct for that
+		strcpy(filename, RemoveArenaFolderFromPath(originalFilename));
+
+		CL_DownloadFileName(fullPath, sizeof(fullPath), filename);
+
+        // Check if this entry is a directory or file.
+        const size_t filename_length = strlen(filename);
+        if (filename[filename_length - 1] == dir_delimiter)
+        {
+            // Entry is a directory, so create it.
+            mkdir(fullPath);
+        }
+        else if (filename[0] != 0)
+        {
+            // Entry is a file, so extract it.
+            if (unzOpenCurrentFile( zipfile ) != UNZ_OK)
+            {
+                Com_Printf("Could not open file.\n");
+                unzClose( zipfile );
+                return false;
+            }
+
+            // Check if the file exists first if overwrite maps is off
+            FILE *out = fopen(fullPath, allow_overwrite_maps->integer ? "rwb" : "rb");
+
+            if (out == NULL || allow_overwrite_maps->integer)
+            {
+				if (out == NULL) {
+					// Open for writing
+					out = fopen(fullPath, "wb"); // write / binary
+				}
+
+				int readResult = UNZ_OK;
+				do    
+				{
+					readResult = unzReadCurrentFile(zipfile, read_buffer, READ_SIZE);
+					if (readResult < 0) // Error
+					{
+						Com_Printf("Error: %d\n", readResult);
+						unzCloseCurrentFile( zipfile );
+						unzClose( zipfile );
+						return false;
+					}
+
+					// Write data to file.
+					if (readResult > 0) // No error
+					{
+						size_t writeResult;
+						writeResult = fwrite(read_buffer, readResult, 1, out);
+					}
+				} while (readResult > 0);
+				
+				fclose(out);
+				
+				Com_Printf("Extracted %s.\n", originalFilename);
+			} else {
+				fclose(out);
+			}
+        }
+
+        unzCloseCurrentFile(zipfile);
+
+        // Go to the next entry listed in the zip file.
+        if ((i + 1) < global_info.number_entry)
+        {
+            if (unzGoToNextFile(zipfile) != UNZ_OK)
+            {
+                Com_Printf("Could not read next file.\n");
+                unzClose(zipfile);
+                return false;
+            }
+        }
+    }
+
+    unzClose(zipfile);
+
+	return true;
+}
+
+/*
+===============
+CL_InstallMap
+
+From command "installmap". Request a map pack download from alienarena.org in zip format and extract the files.
+===============
+*/
+void CL_InstallMap (void)
+{
+	char filename[MAX_OSPATH];
+	char fullPath[MAX_OSPATH];
+	qboolean not_enough_args;
+	FILE *file;
+
+	not_enough_args = Cmd_Argc () != 2;
+
+	if (cls.download) {
+		Com_Printf ("Already downloading something.\n");
+	}
+
+	if (not_enough_args || cls.download)
+	{
+		Com_Printf ("Usage: installmap <filename> - Download and extract a map pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+		return;
+	}
+
+	Com_sprintf(filename, sizeof(filename), "%s", Cmd_Argv(1));
+
+	if (strstr(filename, ".."))
+	{
+		Com_Printf("Refusing to download a path with ..\n");
+		return;
+	}
+	
+	COM_StripExtension(COM_SkipPath(filename), filename);
+	Com_sprintf(cls.downloadname, sizeof(cls.downloadname), "%s.zip", filename);
+
+	CL_DownloadFileName(fullPath, sizeof(fullPath), cls.downloadname);
+	
+	if (!allow_overwrite_maps->integer && (file = fopen(fullPath, "rb")) != NULL) {
+		Com_Printf("Map pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
+		fclose(file);
+		cls.downloadname[0] = 0;
+		return;
+	}
+
+	Com_sprintf(cls.downloadtempname, sizeof(cls.downloadtempname), "%s.tmp", filename);
+	cls.downloadfromcommand = true;
+	cls.downloadmappack = true;
+
+	CL_HttpDownloadMapPack(MAPPACK_URL);
+	
+	Com_Printf("Map pack download started: %s\n", cls.downloadname);
+	
+	// The extracting part will be done in CL_ExtractFiles(), called from CL_DownloadComplete()
 }
 
 /*
