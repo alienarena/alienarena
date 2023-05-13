@@ -51,6 +51,10 @@ where the location of header files differs between systems.
 #define CPUSTRING "x86"
 #endif
 
+/* Steam version */
+// Enable for the steam build
+// #define STEAM_VARIANT 1
+
 /* Version number of package. UPDATE ON VERSION CHANGE */
 #define VERSION "7.71.4"
 

@@ -85,6 +85,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <IncludePath>$(LocalIncludeDir);$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Alteria_debug|Win32'">
     <CustomBuildAfterTargets />
@@ -92,6 +93,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
+    <IncludePath>$(LocalIncludeDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tactical|Win32'">
     <CustomBuildAfterTargets />
@@ -253,6 +255,13 @@
     <ClCompile Include="$(LibzlibSrcDir)trees.c" />
     <ClCompile Include="$(LibzlibSrcDir)uncompr.c" />
     <ClCompile Include="$(LibzlibSrcDir)zutil.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\ioapi.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\iowin32.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\miniunz.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\minizip.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\mztools.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\unzip.c" />
+    <ClCompile Include="libsrc\zlib-1.2.5\contrib\minizip\zip.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(LibzlibSrcDir)crc32.h" />
@@ -266,6 +275,12 @@
     <ClInclude Include="$(LibzlibSrcDir)zconf.h" />
     <ClInclude Include="$(LibzlibSrcDir)zlib.h" />
     <ClInclude Include="$(LibzlibSrcDir)zutil.h" />
+    <ClInclude Include="libsrc\zlib-1.2.5\contrib\minizip\crypt.h" />
+    <ClInclude Include="libsrc\zlib-1.2.5\contrib\minizip\ioapi.h" />
+    <ClInclude Include="libsrc\zlib-1.2.5\contrib\minizip\iowin32.h" />
+    <ClInclude Include="libsrc\zlib-1.2.5\contrib\minizip\mztools.h" />
+    <ClInclude Include="libsrc\zlib-1.2.5\contrib\minizip\unzip.h" />
+    <ClInclude Include="libsrc\zlib-1.2.5\contrib\minizip\zip.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

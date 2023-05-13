@@ -954,6 +954,11 @@ void FS_CreatePath( char *path );
  */
 qboolean FS_FileExists( char *path );
 
+/*
+Checks if a file exists with the specified full path.
+*/
+qboolean FS_CheckFile(const char * search_path);
+
 /**
  * @brief Get the absolute path to the game directory
  *        where configuration and non-official game

@@ -425,7 +425,7 @@ exists.
 */
 #if defined HAVE_STAT
 
-static qboolean FS_CheckFile( const char * search_path )
+qboolean FS_CheckFile( const char * search_path )
 {
 	struct stat statbfr;
 	int result;
@@ -435,7 +435,7 @@ static qboolean FS_CheckFile( const char * search_path )
 
 #else	// HAVE_STAT
 
-static qboolean FS_CheckFile( const char * search_path )
+qboolean FS_CheckFile( const char * search_path )
 {
 	FILE *pfile;
 
