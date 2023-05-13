@@ -318,17 +318,17 @@ libgame_a_SOURCES =  \
 	game/q_shared.c \
 	game/q_shared.h \
 	qcommon/qfiles.h \
-	minizip/crypt.h \
-	minizip/ioapi.c \
-	minizip/ioapi.o \
-	minizip/miniunz.c \
-	minizip/minizip.c \
-	minizip/mztools.c \
-	minizip/mztools.h \
-	minizip/unzip.c \
-	minizip/unzip.h \
-	minizip/zip.c \
-	minizip/zip.h
+	unix/minizip/crypt.h \
+	unix/minizip/ioapi.c \
+	unix/minizip/ioapi.o \
+	unix/minizip/miniunz.c \
+	unix/minizip/minizip.c \
+	unix/minizip/mztools.c \
+	unix/minizip/mztools.h \
+	unix/minizip/unzip.c \
+	unix/minizip/unzip.h \
+	unix/minizip/zip.c \
+	unix/minizip/zip.h
 
 if !USE_SYSTEM_LIBODE
 #

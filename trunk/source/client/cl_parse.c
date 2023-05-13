@@ -58,6 +58,8 @@ static size_t szr; // just for unused result warnings
 
 extern	cvar_t *allow_overwrite_maps;
 
+qboolean CL_ExtractFiles(char *zipFilename);
+
 /*
 ==============
 Q_strncpyz
@@ -96,14 +98,20 @@ void CL_DownloadComplete (void)
 	CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
 	
 	r = rename (oldn, newn);
-	if (r)
-		Com_Printf ("failed to rename.\n");
-	else
-		Com_Printf("Download complete: %s\n", cls.downloadname );
+	if (r) {
+		// File already exists?
+		Com_Printf("failed to rename %s to %s.\n", cls.downloadtempname, cls.downloadname);
+	}
+	else {
+		Com_Printf("Download complete: %s\n", cls.downloadname);
+	}
 
 	if (cls.downloadmappack) {
 		if (CL_ExtractFiles(cls.downloadname)) {
 			Com_Printf("Installed map pack %s.\n", cls.downloadname);
+		}
+		else {
+			Com_Printf("Couldn't install map pack %s.\n", cls.downloadname);
 		}
 
 		cls.downloadmappack = false;
@@ -396,7 +404,7 @@ qboolean CL_ExtractFiles(char *zipFilename)
         if (filename[filename_length - 1] == dir_delimiter)
         {
             // Entry is a directory, so create it.
-            mkdir(fullPath);
+			Sys_Mkdir(fullPath);
         }
         else if (filename[0] != 0)
         {
@@ -406,17 +414,11 @@ qboolean CL_ExtractFiles(char *zipFilename)
                 Com_Printf("Could not open file.\n");
                 unzClose( zipfile );
                 return false;
-            }
+            }	
 
-            // Check if the file exists first if overwrite maps is off
-            FILE *out = fopen(fullPath, allow_overwrite_maps->integer ? "rwb" : "rb");
-
-            if (out == NULL || allow_overwrite_maps->integer)
+            if (!FS_CheckFile(fullPath) || allow_overwrite_maps->integer)
             {
-				if (out == NULL) {
-					// Open for writing
-					out = fopen(fullPath, "wb"); // write / binary
-				}
+				FILE *out = fopen(fullPath, "wb"); // write / binary
 
 				int readResult = UNZ_OK;
 				do    
@@ -441,8 +443,6 @@ qboolean CL_ExtractFiles(char *zipFilename)
 				fclose(out);
 				
 				Com_Printf("Extracted %s.\n", originalFilename);
-			} else {
-				fclose(out);
 			}
         }
 
@@ -477,7 +477,6 @@ void CL_InstallMap (void)
 	char filename[MAX_OSPATH];
 	char fullPath[MAX_OSPATH];
 	qboolean not_enough_args;
-	FILE *file;
 
 	not_enough_args = Cmd_Argc () != 2;
 
@@ -504,11 +503,16 @@ void CL_InstallMap (void)
 
 	CL_DownloadFileName(fullPath, sizeof(fullPath), cls.downloadname);
 	
-	if (!allow_overwrite_maps->integer && (file = fopen(fullPath, "rb")) != NULL) {
-		Com_Printf("Map pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
-		fclose(file);
-		cls.downloadname[0] = 0;
-		return;
+	if (FS_CheckFile(fullPath)) {
+		if (!allow_overwrite_maps->integer) {
+			Com_Printf("Map pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
+			cls.downloadname[0] = 0;
+			return;
+		}
+		else {
+			// Delete existing zip file
+			remove(fullPath);
+		}
 	}
 
 	Com_sprintf(cls.downloadtempname, sizeof(cls.downloadtempname), "%s.tmp", filename);
