@@ -829,7 +829,7 @@ static void rs_stage_blendnormalmap (rs_stage_t *stage, char **token)
 // it anyway. Can't find any angle commands, but may as well handle those too.
 static void rs_stage_consume3 (rs_stage_t *stage, char **token)
 {
-	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token); 
+	Com_Printf ("WARN: deprecated Rscript command: %s\n", *token); 
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -839,7 +839,7 @@ static void rs_stage_consume3 (rs_stage_t *stage, char **token)
 // that have that command.
 static void rs_stage_consume1 (rs_stage_t *stage, char **token)
 {
-	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token); 
+	Com_Printf ("WARN: deprecated Rscript command: %s\n", *token); 
 	*token = strtok (NULL, TOK_DELIMINATORS);
 }
 
@@ -847,7 +847,7 @@ static void rs_stage_consume1 (rs_stage_t *stage, char **token)
 // that have that command.
 static void rs_stage_consume0 (rs_stage_t *stage, char **token)
 {
-	Com_Printf ("WARN: depreciated Rscript command: %s\n", *token);
+	Com_Printf ("WARN: deprecated Rscript command: %s\n", *token);
 }
 
 static struct 

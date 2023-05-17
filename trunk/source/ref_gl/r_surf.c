@@ -1232,7 +1232,7 @@ static void BSP_AddToTextureChain(msurface_t *surf, qboolean forEnt)
 	if(r_newrefdef.num_dlights && gl_dynamic->integer)
 	{
 		// Dynamic surfaces must have normalmaps, as the old fixed-function
-		// texture-based dynamic lighting system is depreciated.
+		// texture-based dynamic lighting system is deprecated.
 		is_dynamic = (surf->dlightframe == r_framecount && surf->texinfo->has_normalmap);
 	}
 	
