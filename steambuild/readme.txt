@@ -27,10 +27,12 @@ current version of ld is 2.34, already latest version on ubuntu 20.04
 Installation steps
 ---------------------------------------------------------------------------------------------------------
 
-1. Install steamworks sdk from here:
+a. Download steamworks sdk from here:
 https://partner.steamgames.com/doc/sdk
 
-2. Download steam runtime from here:
+b. Install it from .../sdk/tools/linux/setup.sh
+
+c. Download steam runtime from here:
 https://github.com/ValveSoftware/steam-runtime
 
 Use git clone https://github.com/ValveSoftware/steam-runtime to install in ~/steam-runtime
@@ -72,13 +74,16 @@ If not, there will be issues with the console making you look down, and exclusiv
 
 Build steps
 ---------------------------------------------------------------------------------------------------------
+10. This might be needed everytime:
+Run 64-bit shell from the steam SDK (assuming you installed it in ~/sdk):
+> ~/sdk/tools/linux/shell-amd64.sh
 
-10. cd into the build folder
+11. cd into the steambuild folder
 
-11. Do a make clean
+12. Do a make clean
 > make clean
 
-12. Make
+13. Make
 > sudo schroot --chroot steamrt_scout_amd64 -- make -j 4
 
-13. Copy alienarena.x86_64 to the steam folder to test it
+14. Copy alienarena.x86_64 to the steam folder to test it
