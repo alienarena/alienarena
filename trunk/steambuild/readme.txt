@@ -43,9 +43,9 @@ Build preparation steps, not needed every time
 
 3. Open a terminal
 
-4. Run 64-bit shell (assuming you installed it in ~/sdk):
-
-> ~/sdk/tools/linux/shell-amd64.sh
+Obsolete (seems not needed at all anymore):
+  4. Run 64-bit shell (assuming you installed it in ~/sdk):
+    > ~/sdk/tools/linux/shell-amd64.sh
 
 5. Setup Steam Runtime chroot (assuming you downloaded it in ~/steam-runtime):
 
@@ -74,16 +74,12 @@ If not, there will be issues with the console making you look down, and exclusiv
 
 Build steps
 ---------------------------------------------------------------------------------------------------------
-10. This might be needed everytime:
-Run 64-bit shell from the steam SDK (assuming you installed it in ~/sdk):
-> ~/sdk/tools/linux/shell-amd64.sh
+10. cd into the steambuild folder
 
-11. cd into the steambuild folder
-
-12. Do a make clean
+11. Do a make clean
 > make clean
 
-13. Make
+12. Make
 > sudo schroot --chroot steamrt_scout_amd64 -- make -j 4
 
-14. Copy alienarena.x86_64 to the steam folder to test it
+13. Copy alienarena.x86_64 to the steam folder to test it
