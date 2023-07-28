@@ -18,10 +18,10 @@ namespace AlienArenaInstaller
 		{
 			InitializeComponent();
 
-			// Get latest release
+			// Get latest version number
 			using (var versionClient = new WebClient())
 			{
-				var versionUrl = "http://alienarena.org/version/crx_version";
+				var versionUrl = "https://alienarena.org/version/crx_version";
 				try
 				{
 					var stream = versionClient.OpenRead(versionUrl);
@@ -34,6 +34,7 @@ namespace AlienArenaInstaller
 				}
 				catch
 				{
+					SetStatusText("An error occurred fetching the latest version number.");
 					txtRelease.Text = Settings.Default.Release;
 				}
 			}
@@ -44,11 +45,30 @@ namespace AlienArenaInstaller
 			txtWidth.Text = Settings.Default.Width;
 			txtHeight.Text = Settings.Default.Height;
 			chkFullscreen.Checked = Settings.Default.Fullscreen;
+
+			if (IsInstalled()) {
+				btnInstall.Text = "Update";
+			}
+
+			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+			FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+			lblInstallerVersion.Text = $"Version {fvi.FileVersion}  ©";
 		}
 
 		private void btnInstall_Click(object sender, EventArgs e)
 		{
-			if (MessageBox.Show("The installer will now download all files from svn, this may take five to fifteen minutes. After that it will run the OpenAL installer, if needed. Do you want to continue?", "Alien Arena Installer", MessageBoxButtons.YesNoCancel) == DialogResult.Yes) 
+			var continueMessage = "";
+			if (!IsInstalled()) {
+				continueMessage = "The installer will now download all files from svn, this may take five to fifteen minutes.";
+			} else {
+				continueMessage = "The installer will now download any new and modified files from svn, this may take a couple of minutes.";
+			}
+			if (!IsOpenALInstalled()) {
+				continueMessage += " After that it will run the OpenAL audio library installer.";
+			}
+			continueMessage += " Do you want to continue?";
+			
+			if (MessageBox.Show(continueMessage, "Alien Arena Installer", MessageBoxButtons.YesNoCancel) == DialogResult.Yes)
 			{
 				string url;
 				if (chkLatestUnstable.Checked)
@@ -75,7 +95,7 @@ namespace AlienArenaInstaller
 					{
 						client.CheckOut(new SvnUriTarget(url), txtInstallationFolder.Text);
 
-						SetStatusText($"Finished downloading.");
+						SetStatusText("Finished downloading.");
 						toolStripProgressBar.Value = 100;
 						downloadSucceeded = true;
 					};
@@ -144,21 +164,29 @@ namespace AlienArenaInstaller
 			statusStrip.Update();
 		}
 
+		private bool IsInstalled() {
+			return File.Exists(Path.Combine(txtInstallationFolder.Text, "alienarena.exe"));
+		}
+
+		private bool IsOpenALInstalled() {
+			return File.Exists(@"C:\Windows\System32\OpenAL32.dll");
+		}
+
 		private void InstallOpenAL()
 		{
-			if (!File.Exists(@"C:\Windows\System32\OpenAL32.dll"))
+			if (!IsOpenALInstalled())
 			{
 				var p = new Process();
 				p.StartInfo.WorkingDirectory = txtInstallationFolder.Text;
 				p.StartInfo.FileName = "oalinst.exe";
-				p.Start();				
+				p.Start();
 			}
 		}
 		private void StartAlienArena(bool confirm = false)
 		{
 			SaveSettings();
 
-			if (!File.Exists(Path.Combine(txtInstallationFolder.Text, "alienarena.exe")))
+			if (!IsInstalled())
 			{
 				MessageBox.Show("First press Install to install Alien Arena!", "Alien Arena Installer", MessageBoxButtons.OK);
 				return;
@@ -224,6 +252,11 @@ namespace AlienArenaInstaller
 				txtWidth.Text = Convert.ToString(scr.Bounds.Width);
 				txtHeight.Text = Convert.ToString(scr.Bounds.Height);
 			}
+		}
+
+		private void linkAlienArena_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			Process.Start("https://www.alienarena.org");
 		}
 	}
 }
