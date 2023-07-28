@@ -29,10 +29,11 @@
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Installer));
-			this.logo = new System.Windows.Forms.Panel();
 			this.lblExplanation = new System.Windows.Forms.Label();
 			this.folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
 			this.statusStrip = new System.Windows.Forms.StatusStrip();
+			this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+			this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.panelResolution = new System.Windows.Forms.Panel();
 			this.btnPlay = new System.Windows.Forms.Button();
@@ -51,34 +52,25 @@
 			this.btnSelectFolder = new System.Windows.Forms.Button();
 			this.lblInstallationFolder = new System.Windows.Forms.Label();
 			this.txtInstallationFolder = new System.Windows.Forms.TextBox();
-			this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
-			this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+			this.linkAlienArena = new System.Windows.Forms.LinkLabel();
+			this.lblInstallerVersion = new System.Windows.Forms.Label();
+			this.logo = new System.Windows.Forms.Panel();
 			this.statusStrip.SuspendLayout();
 			this.panelResolution.SuspendLayout();
 			this.panelInstallationOptions.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// logo
-			// 
-			this.logo.BackgroundImage = global::AlienArenaInstaller.Properties.Resources.logo;
-			this.logo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			this.logo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.logo.Location = new System.Drawing.Point(12, 12);
-			this.logo.Name = "logo";
-			this.logo.Size = new System.Drawing.Size(294, 42);
-			this.logo.TabIndex = 1;
-			// 
 			// lblExplanation
 			// 
 			this.lblExplanation.AutoSize = true;
-			this.lblExplanation.BackColor = System.Drawing.Color.Transparent;
+			this.lblExplanation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.lblExplanation.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.lblExplanation.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-			this.lblExplanation.Location = new System.Drawing.Point(8, 57);
+			this.lblExplanation.ForeColor = System.Drawing.SystemColors.InactiveCaption;
+			this.lblExplanation.Location = new System.Drawing.Point(12, 50);
 			this.lblExplanation.Name = "lblExplanation";
-			this.lblExplanation.Size = new System.Drawing.Size(603, 24);
+			this.lblExplanation.Size = new System.Drawing.Size(312, 24);
 			this.lblExplanation.TabIndex = 2;
-			this.lblExplanation.Text = "This program will download and install the latest release of Alien Arena.";
+			this.lblExplanation.Text = "Install, update or launch Alien Arena";
 			// 
 			// statusStrip
 			// 
@@ -89,6 +81,17 @@
 			this.statusStrip.Name = "statusStrip";
 			this.statusStrip.Size = new System.Drawing.Size(914, 22);
 			this.statusStrip.TabIndex = 8;
+			// 
+			// toolStripStatusLabel
+			// 
+			this.toolStripStatusLabel.Name = "toolStripStatusLabel";
+			this.toolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
+			// 
+			// toolStripProgressBar
+			// 
+			this.toolStripProgressBar.Name = "toolStripProgressBar";
+			this.toolStripProgressBar.RightToLeft = System.Windows.Forms.RightToLeft.No;
+			this.toolStripProgressBar.Size = new System.Drawing.Size(200, 16);
 			// 
 			// statusLabel
 			// 
@@ -106,9 +109,9 @@
 			this.panelResolution.Controls.Add(this.txtWidth);
 			this.panelResolution.Controls.Add(this.chkFullscreen);
 			this.panelResolution.Controls.Add(this.txtHeight);
-			this.panelResolution.Location = new System.Drawing.Point(12, 400);
+			this.panelResolution.Location = new System.Drawing.Point(12, 370);
 			this.panelResolution.Name = "panelResolution";
-			this.panelResolution.Size = new System.Drawing.Size(890, 112);
+			this.panelResolution.Size = new System.Drawing.Size(890, 115);
 			this.panelResolution.TabIndex = 13;
 			// 
 			// btnPlay
@@ -199,9 +202,9 @@
 			this.panelInstallationOptions.Controls.Add(this.btnSelectFolder);
 			this.panelInstallationOptions.Controls.Add(this.lblInstallationFolder);
 			this.panelInstallationOptions.Controls.Add(this.txtInstallationFolder);
-			this.panelInstallationOptions.Location = new System.Drawing.Point(12, 251);
+			this.panelInstallationOptions.Location = new System.Drawing.Point(12, 221);
 			this.panelInstallationOptions.Name = "panelInstallationOptions";
-			this.panelInstallationOptions.Size = new System.Drawing.Size(890, 133);
+			this.panelInstallationOptions.Size = new System.Drawing.Size(890, 131);
 			this.panelInstallationOptions.TabIndex = 14;
 			// 
 			// btnInstall
@@ -268,10 +271,12 @@
 			// 
 			// btnSelectFolder
 			// 
-			this.btnSelectFolder.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+			this.btnSelectFolder.BackColor = System.Drawing.SystemColors.ButtonFace;
 			this.btnSelectFolder.BackgroundImage = global::AlienArenaInstaller.Properties.Resources.browsefolder;
 			this.btnSelectFolder.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.btnSelectFolder.FlatAppearance.BorderSize = 0;
 			this.btnSelectFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.btnSelectFolder.ForeColor = System.Drawing.SystemColors.ActiveCaption;
 			this.btnSelectFolder.Location = new System.Drawing.Point(518, 85);
 			this.btnSelectFolder.Name = "btnSelectFolder";
 			this.btnSelectFolder.Size = new System.Drawing.Size(35, 25);
@@ -300,15 +305,45 @@
 			this.txtInstallationFolder.Size = new System.Drawing.Size(365, 22);
 			this.txtInstallationFolder.TabIndex = 10;
 			// 
-			// toolStripProgressBar
+			// linkAlienArena
 			// 
-			this.toolStripProgressBar.Name = "toolStripProgressBar";
-			this.toolStripProgressBar.Size = new System.Drawing.Size(100, 16);
+			this.linkAlienArena.ActiveLinkColor = System.Drawing.SystemColors.ControlLightLight;
+			this.linkAlienArena.AutoSize = true;
+			this.linkAlienArena.BackColor = System.Drawing.Color.Transparent;
+			this.linkAlienArena.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.linkAlienArena.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+			this.linkAlienArena.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+			this.linkAlienArena.LinkColor = System.Drawing.SystemColors.ControlLightLight;
+			this.linkAlienArena.Location = new System.Drawing.Point(116, 500);
+			this.linkAlienArena.Name = "linkAlienArena";
+			this.linkAlienArena.Size = new System.Drawing.Size(164, 16);
+			this.linkAlienArena.TabIndex = 8;
+			this.linkAlienArena.TabStop = true;
+			this.linkAlienArena.Text = "https://www.alienarena.org";
+			this.linkAlienArena.VisitedLinkColor = System.Drawing.SystemColors.ControlLightLight;
+			this.linkAlienArena.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkAlienArena_LinkClicked);
 			// 
-			// toolStripStatusLabel
+			// lblInstallerVersion
 			// 
-			this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-			this.toolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
+			this.lblInstallerVersion.AutoSize = true;
+			this.lblInstallerVersion.BackColor = System.Drawing.Color.Transparent;
+			this.lblInstallerVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.lblInstallerVersion.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+			this.lblInstallerVersion.Location = new System.Drawing.Point(12, 500);
+			this.lblInstallerVersion.Name = "lblInstallerVersion";
+			this.lblInstallerVersion.Size = new System.Drawing.Size(108, 16);
+			this.lblInstallerVersion.TabIndex = 16;
+			this.lblInstallerVersion.Text = "Version 1.0.0.7  ©";
+			// 
+			// logo
+			// 
+			this.logo.BackgroundImage = global::AlienArenaInstaller.Properties.Resources.logo;
+			this.logo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.logo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.logo.Location = new System.Drawing.Point(12, 9);
+			this.logo.Name = "logo";
+			this.logo.Size = new System.Drawing.Size(314, 42);
+			this.logo.TabIndex = 1;
 			// 
 			// Installer
 			// 
@@ -317,11 +352,14 @@
 			this.BackgroundImage = global::AlienArenaInstaller.Properties.Resources.alienarena9;
 			this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.ClientSize = new System.Drawing.Size(914, 550);
+			this.Controls.Add(this.lblExplanation);
+			this.Controls.Add(this.logo);
+			this.Controls.Add(this.lblInstallerVersion);
+			this.Controls.Add(this.linkAlienArena);
 			this.Controls.Add(this.panelInstallationOptions);
 			this.Controls.Add(this.panelResolution);
 			this.Controls.Add(this.statusStrip);
-			this.Controls.Add(this.lblExplanation);
-			this.Controls.Add(this.logo);
+			this.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
@@ -339,7 +377,6 @@
 		}
 
 		#endregion
-		private System.Windows.Forms.Panel logo;
 		private System.Windows.Forms.Label lblExplanation;
 		private System.Windows.Forms.FolderBrowserDialog folderBrowser;
 		private System.Windows.Forms.StatusStrip statusStrip;
@@ -363,6 +400,9 @@
 		private System.Windows.Forms.Button btnInstall;
 		private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar;
 		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
+		private System.Windows.Forms.LinkLabel linkAlienArena;
+		private System.Windows.Forms.Label lblInstallerVersion;
+		private System.Windows.Forms.Panel logo;
 	}
 }
 
