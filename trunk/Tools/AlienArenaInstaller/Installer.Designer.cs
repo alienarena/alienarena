@@ -63,10 +63,10 @@
 			// lblExplanation
 			// 
 			this.lblExplanation.AutoSize = true;
-			this.lblExplanation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+			this.lblExplanation.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.lblExplanation.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblExplanation.ForeColor = System.Drawing.SystemColors.InactiveCaption;
-			this.lblExplanation.Location = new System.Drawing.Point(12, 50);
+			this.lblExplanation.Location = new System.Drawing.Point(12, 51);
 			this.lblExplanation.Name = "lblExplanation";
 			this.lblExplanation.Size = new System.Drawing.Size(312, 24);
 			this.lblExplanation.TabIndex = 2;
@@ -309,12 +309,12 @@
 			// 
 			this.linkAlienArena.ActiveLinkColor = System.Drawing.SystemColors.ControlLightLight;
 			this.linkAlienArena.AutoSize = true;
-			this.linkAlienArena.BackColor = System.Drawing.Color.Transparent;
+			this.linkAlienArena.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.linkAlienArena.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.linkAlienArena.ForeColor = System.Drawing.SystemColors.ControlLightLight;
 			this.linkAlienArena.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
 			this.linkAlienArena.LinkColor = System.Drawing.SystemColors.ControlLightLight;
-			this.linkAlienArena.Location = new System.Drawing.Point(116, 500);
+			this.linkAlienArena.Location = new System.Drawing.Point(157, 500);
 			this.linkAlienArena.Name = "linkAlienArena";
 			this.linkAlienArena.Size = new System.Drawing.Size(164, 16);
 			this.linkAlienArena.TabIndex = 8;
@@ -326,14 +326,14 @@
 			// lblInstallerVersion
 			// 
 			this.lblInstallerVersion.AutoSize = true;
-			this.lblInstallerVersion.BackColor = System.Drawing.Color.Transparent;
+			this.lblInstallerVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.lblInstallerVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblInstallerVersion.ForeColor = System.Drawing.SystemColors.ControlLightLight;
 			this.lblInstallerVersion.Location = new System.Drawing.Point(12, 500);
 			this.lblInstallerVersion.Name = "lblInstallerVersion";
-			this.lblInstallerVersion.Size = new System.Drawing.Size(108, 16);
+			this.lblInstallerVersion.Size = new System.Drawing.Size(139, 16);
 			this.lblInstallerVersion.TabIndex = 16;
-			this.lblInstallerVersion.Text = "Version 1.0.0.7  ©";
+			this.lblInstallerVersion.Text = "Version 1.0.0.7  © 2023";
 			// 
 			// logo
 			// 
@@ -342,7 +342,7 @@
 			this.logo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.logo.Location = new System.Drawing.Point(12, 9);
 			this.logo.Name = "logo";
-			this.logo.Size = new System.Drawing.Size(314, 42);
+			this.logo.Size = new System.Drawing.Size(312, 42);
 			this.logo.TabIndex = 1;
 			// 
 			// Installer
