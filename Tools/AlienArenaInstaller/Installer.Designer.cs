@@ -36,6 +36,8 @@
 			this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.panelResolution = new System.Windows.Forms.Panel();
+			this.lblDisplay = new System.Windows.Forms.Label();
+			this.cmbScreen = new System.Windows.Forms.ComboBox();
 			this.btnPlay = new System.Windows.Forms.Button();
 			this.lblHeight = new System.Windows.Forms.Label();
 			this.lblWidth = new System.Windows.Forms.Label();
@@ -77,7 +79,7 @@
 			this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel,
             this.toolStripProgressBar});
-			this.statusStrip.Location = new System.Drawing.Point(0, 528);
+			this.statusStrip.Location = new System.Drawing.Point(0, 556);
 			this.statusStrip.Name = "statusStrip";
 			this.statusStrip.Size = new System.Drawing.Size(914, 22);
 			this.statusStrip.TabIndex = 8;
@@ -102,6 +104,8 @@
 			// 
 			this.panelResolution.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.panelResolution.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panelResolution.Controls.Add(this.lblDisplay);
+			this.panelResolution.Controls.Add(this.cmbScreen);
 			this.panelResolution.Controls.Add(this.btnPlay);
 			this.panelResolution.Controls.Add(this.lblHeight);
 			this.panelResolution.Controls.Add(this.lblWidth);
@@ -111,15 +115,40 @@
 			this.panelResolution.Controls.Add(this.txtHeight);
 			this.panelResolution.Location = new System.Drawing.Point(12, 370);
 			this.panelResolution.Name = "panelResolution";
-			this.panelResolution.Size = new System.Drawing.Size(890, 115);
+			this.panelResolution.Size = new System.Drawing.Size(890, 131);
 			this.panelResolution.TabIndex = 13;
+			// 
+			// lblDisplay
+			// 
+			this.lblDisplay.AutoSize = true;
+			this.lblDisplay.BackColor = System.Drawing.Color.Transparent;
+			this.lblDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.lblDisplay.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+			this.lblDisplay.Location = new System.Drawing.Point(301, 43);
+			this.lblDisplay.Name = "lblDisplay";
+			this.lblDisplay.RightToLeft = System.Windows.Forms.RightToLeft.No;
+			this.lblDisplay.Size = new System.Drawing.Size(60, 20);
+			this.lblDisplay.TabIndex = 20;
+			this.lblDisplay.Text = "Display";
+			// 
+			// cmbScreen
+			// 
+			this.cmbScreen.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbScreen.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.cmbScreen.FormattingEnabled = true;
+			this.cmbScreen.Location = new System.Drawing.Point(381, 44);
+			this.cmbScreen.MinimumSize = new System.Drawing.Size(120, 0);
+			this.cmbScreen.Name = "cmbScreen";
+			this.cmbScreen.Size = new System.Drawing.Size(249, 23);
+			this.cmbScreen.TabIndex = 7;
+			this.cmbScreen.SelectedIndexChanged += new System.EventHandler(this.cmbScreen_SelectedIndexChanged);
 			// 
 			// btnPlay
 			// 
 			this.btnPlay.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
 			this.btnPlay.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.btnPlay.ForeColor = System.Drawing.Color.SteelBlue;
-			this.btnPlay.Location = new System.Drawing.Point(668, 48);
+			this.btnPlay.Location = new System.Drawing.Point(668, 58);
 			this.btnPlay.Name = "btnPlay";
 			this.btnPlay.Size = new System.Drawing.Size(205, 45);
 			this.btnPlay.TabIndex = 2;
@@ -132,7 +161,7 @@
 			this.lblHeight.AutoSize = true;
 			this.lblHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblHeight.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-			this.lblHeight.Location = new System.Drawing.Point(3, 71);
+			this.lblHeight.Location = new System.Drawing.Point(3, 83);
 			this.lblHeight.Name = "lblHeight";
 			this.lblHeight.Size = new System.Drawing.Size(56, 20);
 			this.lblHeight.TabIndex = 18;
@@ -153,41 +182,44 @@
 			// 
 			this.lblResolutionOptions.AutoSize = true;
 			this.lblResolutionOptions.BackColor = System.Drawing.Color.DimGray;
-			this.lblResolutionOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.lblResolutionOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblResolutionOptions.ForeColor = System.Drawing.SystemColors.ControlLight;
 			this.lblResolutionOptions.Location = new System.Drawing.Point(-1, 0);
 			this.lblResolutionOptions.Name = "lblResolutionOptions";
-			this.lblResolutionOptions.Size = new System.Drawing.Size(72, 16);
+			this.lblResolutionOptions.Size = new System.Drawing.Size(109, 18);
 			this.lblResolutionOptions.TabIndex = 16;
-			this.lblResolutionOptions.Text = "Resolution";
+			this.lblResolutionOptions.Text = "Launch options";
 			// 
 			// txtWidth
 			// 
-			this.txtWidth.Location = new System.Drawing.Point(148, 45);
+			this.txtWidth.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.txtWidth.Location = new System.Drawing.Point(160, 44);
 			this.txtWidth.Name = "txtWidth";
-			this.txtWidth.Size = new System.Drawing.Size(59, 20);
+			this.txtWidth.Size = new System.Drawing.Size(59, 21);
 			this.txtWidth.TabIndex = 5;
 			// 
 			// chkFullscreen
 			// 
+			this.chkFullscreen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.chkFullscreen.AutoSize = true;
 			this.chkFullscreen.BackColor = System.Drawing.Color.Transparent;
 			this.chkFullscreen.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.chkFullscreen.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-			this.chkFullscreen.Location = new System.Drawing.Point(446, 43);
+			this.chkFullscreen.Location = new System.Drawing.Point(525, 81);
 			this.chkFullscreen.Name = "chkFullscreen";
 			this.chkFullscreen.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
 			this.chkFullscreen.Size = new System.Drawing.Size(105, 24);
-			this.chkFullscreen.TabIndex = 7;
+			this.chkFullscreen.TabIndex = 8;
 			this.chkFullscreen.Text = "Full screen";
 			this.chkFullscreen.UseVisualStyleBackColor = false;
 			this.chkFullscreen.CheckedChanged += new System.EventHandler(this.chkFullscreen_CheckedChanged);
 			// 
 			// txtHeight
 			// 
-			this.txtHeight.Location = new System.Drawing.Point(148, 73);
+			this.txtHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.txtHeight.Location = new System.Drawing.Point(160, 81);
 			this.txtHeight.Name = "txtHeight";
-			this.txtHeight.Size = new System.Drawing.Size(59, 20);
+			this.txtHeight.Size = new System.Drawing.Size(59, 21);
 			this.txtHeight.TabIndex = 6;
 			// 
 			// panelInstallationOptions
@@ -213,7 +245,7 @@
 			this.btnInstall.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
 			this.btnInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.btnInstall.ForeColor = System.Drawing.Color.SteelBlue;
-			this.btnInstall.Location = new System.Drawing.Point(668, 63);
+			this.btnInstall.Location = new System.Drawing.Point(668, 58);
 			this.btnInstall.Name = "btnInstall";
 			this.btnInstall.Size = new System.Drawing.Size(205, 45);
 			this.btnInstall.TabIndex = 1;
@@ -225,21 +257,22 @@
 			// 
 			this.lblInstallationOptions.AutoSize = true;
 			this.lblInstallationOptions.BackColor = System.Drawing.Color.DimGray;
-			this.lblInstallationOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.lblInstallationOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblInstallationOptions.ForeColor = System.Drawing.SystemColors.ControlLight;
 			this.lblInstallationOptions.Location = new System.Drawing.Point(-1, 0);
 			this.lblInstallationOptions.Name = "lblInstallationOptions";
-			this.lblInstallationOptions.Size = new System.Drawing.Size(118, 16);
+			this.lblInstallationOptions.Size = new System.Drawing.Size(130, 18);
 			this.lblInstallationOptions.TabIndex = 14;
 			this.lblInstallationOptions.Text = "Installation options";
 			// 
 			// chkLatestUnstable
 			// 
+			this.chkLatestUnstable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.chkLatestUnstable.AutoSize = true;
 			this.chkLatestUnstable.BackColor = System.Drawing.Color.Transparent;
 			this.chkLatestUnstable.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.chkLatestUnstable.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-			this.chkLatestUnstable.Location = new System.Drawing.Point(403, 47);
+			this.chkLatestUnstable.Location = new System.Drawing.Point(482, 44);
 			this.chkLatestUnstable.Name = "chkLatestUnstable";
 			this.chkLatestUnstable.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
 			this.chkLatestUnstable.Size = new System.Drawing.Size(148, 24);
@@ -263,10 +296,10 @@
 			// txtRelease
 			// 
 			this.txtRelease.Enabled = false;
-			this.txtRelease.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.txtRelease.Location = new System.Drawing.Point(147, 49);
+			this.txtRelease.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.txtRelease.Location = new System.Drawing.Point(160, 44);
 			this.txtRelease.Name = "txtRelease";
-			this.txtRelease.Size = new System.Drawing.Size(71, 22);
+			this.txtRelease.Size = new System.Drawing.Size(71, 21);
 			this.txtRelease.TabIndex = 8;
 			// 
 			// btnSelectFolder
@@ -277,9 +310,9 @@
 			this.btnSelectFolder.FlatAppearance.BorderSize = 0;
 			this.btnSelectFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.btnSelectFolder.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-			this.btnSelectFolder.Location = new System.Drawing.Point(518, 85);
+			this.btnSelectFolder.Location = new System.Drawing.Point(598, 81);
 			this.btnSelectFolder.Name = "btnSelectFolder";
-			this.btnSelectFolder.Size = new System.Drawing.Size(35, 25);
+			this.btnSelectFolder.Size = new System.Drawing.Size(32, 22);
 			this.btnSelectFolder.TabIndex = 4;
 			this.btnSelectFolder.UseVisualStyleBackColor = false;
 			this.btnSelectFolder.Click += new System.EventHandler(this.btnSelectFolder_Click);
@@ -299,22 +332,22 @@
 			// txtInstallationFolder
 			// 
 			this.txtInstallationFolder.Enabled = false;
-			this.txtInstallationFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.txtInstallationFolder.Location = new System.Drawing.Point(147, 86);
+			this.txtInstallationFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.txtInstallationFolder.Location = new System.Drawing.Point(160, 81);
 			this.txtInstallationFolder.Name = "txtInstallationFolder";
-			this.txtInstallationFolder.Size = new System.Drawing.Size(365, 22);
+			this.txtInstallationFolder.Size = new System.Drawing.Size(432, 21);
 			this.txtInstallationFolder.TabIndex = 10;
 			// 
 			// linkAlienArena
 			// 
 			this.linkAlienArena.ActiveLinkColor = System.Drawing.SystemColors.ControlLightLight;
 			this.linkAlienArena.AutoSize = true;
-			this.linkAlienArena.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+			this.linkAlienArena.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.linkAlienArena.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.linkAlienArena.ForeColor = System.Drawing.SystemColors.ControlLightLight;
 			this.linkAlienArena.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
 			this.linkAlienArena.LinkColor = System.Drawing.SystemColors.ControlLightLight;
-			this.linkAlienArena.Location = new System.Drawing.Point(157, 500);
+			this.linkAlienArena.Location = new System.Drawing.Point(154, 522);
 			this.linkAlienArena.Name = "linkAlienArena";
 			this.linkAlienArena.Size = new System.Drawing.Size(164, 16);
 			this.linkAlienArena.TabIndex = 8;
@@ -326,10 +359,10 @@
 			// lblInstallerVersion
 			// 
 			this.lblInstallerVersion.AutoSize = true;
-			this.lblInstallerVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+			this.lblInstallerVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
 			this.lblInstallerVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.lblInstallerVersion.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-			this.lblInstallerVersion.Location = new System.Drawing.Point(12, 500);
+			this.lblInstallerVersion.Location = new System.Drawing.Point(9, 522);
 			this.lblInstallerVersion.Name = "lblInstallerVersion";
 			this.lblInstallerVersion.Size = new System.Drawing.Size(139, 16);
 			this.lblInstallerVersion.TabIndex = 16;
@@ -351,7 +384,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackgroundImage = global::AlienArenaInstaller.Properties.Resources.alienarena9;
 			this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			this.ClientSize = new System.Drawing.Size(914, 550);
+			this.ClientSize = new System.Drawing.Size(914, 578);
 			this.Controls.Add(this.lblExplanation);
 			this.Controls.Add(this.logo);
 			this.Controls.Add(this.lblInstallerVersion);
@@ -365,6 +398,7 @@
 			this.MaximizeBox = false;
 			this.Name = "Installer";
 			this.Text = "Alien Arena Installer";
+			this.Closed += new System.EventHandler(this.Installer_Closed);
 			this.statusStrip.ResumeLayout(false);
 			this.statusStrip.PerformLayout();
 			this.panelResolution.ResumeLayout(false);
@@ -403,6 +437,8 @@
 		private System.Windows.Forms.LinkLabel linkAlienArena;
 		private System.Windows.Forms.Label lblInstallerVersion;
 		private System.Windows.Forms.Panel logo;
+		private System.Windows.Forms.Label lblDisplay;
+		private System.Windows.Forms.ComboBox cmbScreen;
 	}
 }
 
