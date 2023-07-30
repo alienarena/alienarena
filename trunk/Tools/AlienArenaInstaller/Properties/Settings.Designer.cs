@@ -94,5 +94,17 @@ namespace AlienArenaInstaller.Properties {
                 this["Fullscreen"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Screen {
+            get {
+                return ((int)(this["Screen"]));
+            }
+            set {
+                this["Screen"] = value;
+            }
+        }
     }
 }

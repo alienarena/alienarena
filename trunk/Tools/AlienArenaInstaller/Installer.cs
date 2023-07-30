@@ -5,6 +5,7 @@ using SharpSvn;
 using System.Diagnostics;
 using System.Net;
 using System.IO;
+using System.Threading;
 
 namespace AlienArenaInstaller
 {
@@ -13,6 +14,7 @@ namespace AlienArenaInstaller
 		// Approximately 1 GB
 		const double _totalDownloadSize = 1 * 1024 * 1024 * 1024;
 		string _latestRelease = Settings.Default.Release;
+		float _screenScalingFactor;
 
 		public Installer()
 		{
@@ -53,6 +55,44 @@ namespace AlienArenaInstaller
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
 			lblInstallerVersion.Text = $"Version {fvi.FileVersion}   © 2023 ";
+			linkAlienArena.Left = lblInstallerVersion.Left + lblInstallerVersion.Width;
+
+			_screenScalingFactor = GetScreenScalingFactor();
+
+			foreach (var screen in Screen.AllScreens)
+			{
+				cmbScreen.Items.Add($"{screen.FriendlyDeviceName()} - {screen.Bounds.Width} x {screen.Bounds.Height}");
+			}
+			if (Settings.Default.Screen < cmbScreen.Items.Count)
+			{
+				cmbScreen.SelectedIndex = Settings.Default.Screen;
+			}
+			else
+			{
+				cmbScreen.SelectedIndex = 0;
+			}
+		}
+
+		private void Installer_Closed(object sender, EventArgs e)
+		{
+			SaveSettings();
+		}
+
+		private float GetScreenScalingFactor()
+		{
+			float dx = 0.0f, dy = 0.0f;
+			using (var g = this.CreateGraphics())
+			{
+				try
+				{
+					dx = g.DpiX;
+					dy = g.DpiY;
+				}
+				catch
+				{
+				}
+			}
+			return dx > 0.0f ? dx / 96.0f : 1.0f;
 		}
 
 		private void btnInstall_Click(object sender, EventArgs e)
@@ -180,8 +220,15 @@ namespace AlienArenaInstaller
 				p.StartInfo.WorkingDirectory = txtInstallationFolder.Text;
 				p.StartInfo.FileName = "oalinst.exe";
 				p.Start();
+				while (!p.HasExited)
+				{
+					// Wait
+				}
+
+				SetStatusText("Installed OpenAL audio library.");
 			}
 		}
+
 		private void StartAlienArena(bool confirm = false)
 		{
 			SaveSettings();
@@ -194,7 +241,10 @@ namespace AlienArenaInstaller
 
 			if (!confirm || MessageBox.Show("Alien Arena is up-to-date. Do you want to run Alien Arena now?", "Alien Arena Installer", MessageBoxButtons.YesNoCancel) == DialogResult.Yes)
 			{
-				var scr = Screen.PrimaryScreen;
+				SetStatusText("");
+				toolStripProgressBar.Value = 0;
+
+				var scr = Screen.AllScreens[cmbScreen.SelectedIndex];
 				var fullscreen = chkFullscreen.Checked ? "1" : "0";
 				if (txtWidth.Text != Convert.ToString(scr.Bounds.Width) || txtHeight.Text != Convert.ToString(scr.Bounds.Height))
 				{
@@ -202,13 +252,15 @@ namespace AlienArenaInstaller
 				}
 				var parameters = $"+set vid_width {txtWidth.Text} +set vid_height {txtHeight.Text} +set vid_fullscreen {fullscreen};";
 
-				// TODO: find out how to adjust scaling to 100% before starting
-
 				var p = new Process();
 				p.StartInfo.WorkingDirectory = txtInstallationFolder.Text;
 				p.StartInfo.FileName = "alienarena.exe";
 				p.StartInfo.Arguments = parameters;
 				p.Start();
+
+				// A sleep is needed to make it move the window
+				Thread.Sleep(2000);
+				Screen.AllScreens[cmbScreen.SelectedIndex].Show(p.MainWindowHandle);
 			}
 		}
 
@@ -220,6 +272,7 @@ namespace AlienArenaInstaller
 			Settings.Default.Width = txtWidth.Text;
 			Settings.Default.Height = txtHeight.Text;
 			Settings.Default.Fullscreen = chkFullscreen.Checked;
+			Settings.Default.Screen = cmbScreen.SelectedIndex;
 			Settings.Default.Save();
 		}
 
@@ -246,9 +299,19 @@ namespace AlienArenaInstaller
 
 		private void chkFullscreen_CheckedChanged(object sender, EventArgs e)
 		{
-			if (chkFullscreen.Checked)
+			AdjustForFullScreen();
+		}
+
+		private void cmbScreen_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			AdjustForFullScreen();
+		}
+
+		private void AdjustForFullScreen()
+		{
+			if (chkFullscreen.Checked && cmbScreen.SelectedIndex >= 0)
 			{
-				var scr = Screen.PrimaryScreen;
+				var scr = Screen.AllScreens[cmbScreen.SelectedIndex];
 				txtWidth.Text = Convert.ToString(scr.Bounds.Width);
 				txtHeight.Text = Convert.ToString(scr.Bounds.Height);
 			}
