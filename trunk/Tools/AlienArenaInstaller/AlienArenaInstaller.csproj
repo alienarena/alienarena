@@ -31,8 +31,8 @@
     <PublisherName>alienarena.org</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>install.html</WebPage>
-    <ApplicationRevision>11</ApplicationRevision>
-    <ApplicationVersion>1.0.0.11</ApplicationVersion>
+    <ApplicationRevision>12</ApplicationRevision>
+    <ApplicationVersion>1.0.0.12</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -102,6 +102,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScreenExtensions.cs" />
+    <Compile Include="StringExtensions.cs" />
     <EmbeddedResource Include="Installer.resx">
       <DependentUpon>Installer.cs</DependentUpon>
     </EmbeddedResource>
