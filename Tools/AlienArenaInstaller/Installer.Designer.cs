@@ -194,9 +194,12 @@
 			// 
 			this.txtWidth.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.txtWidth.Location = new System.Drawing.Point(160, 44);
+			this.txtWidth.MaxLength = 5;
 			this.txtWidth.Name = "txtWidth";
 			this.txtWidth.Size = new System.Drawing.Size(59, 21);
 			this.txtWidth.TabIndex = 5;
+			this.txtWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.txtWidth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtWidth_KeyPress);
 			// 
 			// chkFullscreen
 			// 
@@ -218,9 +221,12 @@
 			// 
 			this.txtHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.txtHeight.Location = new System.Drawing.Point(160, 81);
+			this.txtHeight.MaxLength = 5;
 			this.txtHeight.Name = "txtHeight";
 			this.txtHeight.Size = new System.Drawing.Size(59, 21);
 			this.txtHeight.TabIndex = 6;
+			this.txtHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.txtHeight.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtHeight_KeyPress);
 			// 
 			// panelInstallationOptions
 			// 
@@ -299,8 +305,9 @@
 			this.txtRelease.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.txtRelease.Location = new System.Drawing.Point(160, 44);
 			this.txtRelease.Name = "txtRelease";
-			this.txtRelease.Size = new System.Drawing.Size(71, 21);
+			this.txtRelease.Size = new System.Drawing.Size(59, 21);
 			this.txtRelease.TabIndex = 8;
+			this.txtRelease.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
 			// 
 			// btnSelectFolder
 			// 

@@ -244,23 +244,26 @@ namespace AlienArenaInstaller
 				SetStatusText("");
 				toolStripProgressBar.Value = 0;
 
-				var scr = Screen.AllScreens[cmbScreen.SelectedIndex];
-				var fullscreen = chkFullscreen.Checked ? "1" : "0";
-				if (txtWidth.Text != Convert.ToString(scr.Bounds.Width) || txtHeight.Text != Convert.ToString(scr.Bounds.Height))
+				if (IsValid())
 				{
-					fullscreen = "0";
+					var scr = Screen.AllScreens[cmbScreen.SelectedIndex];
+					var fullscreen = chkFullscreen.Checked ? "1" : "0";
+					if (txtWidth.Text != Convert.ToString(scr.Bounds.Width) || txtHeight.Text != Convert.ToString(scr.Bounds.Height))
+					{
+						fullscreen = "0";
+					}
+					var parameters = $"+set vid_width {txtWidth.Text} +set vid_height {txtHeight.Text} +set vid_fullscreen {fullscreen};";
+
+					var p = new Process();
+					p.StartInfo.WorkingDirectory = txtInstallationFolder.Text;
+					p.StartInfo.FileName = "alienarena.exe";
+					p.StartInfo.Arguments = parameters;
+					p.Start();
+
+					// A sleep is needed to make it move the window
+					Thread.Sleep(2000);
+					Screen.AllScreens[cmbScreen.SelectedIndex].Show(p.MainWindowHandle);
 				}
-				var parameters = $"+set vid_width {txtWidth.Text} +set vid_height {txtHeight.Text} +set vid_fullscreen {fullscreen};";
-
-				var p = new Process();
-				p.StartInfo.WorkingDirectory = txtInstallationFolder.Text;
-				p.StartInfo.FileName = "alienarena.exe";
-				p.StartInfo.Arguments = parameters;
-				p.Start();
-
-				// A sleep is needed to make it move the window
-				Thread.Sleep(2000);
-				Screen.AllScreens[cmbScreen.SelectedIndex].Show(p.MainWindowHandle);
 			}
 		}
 
@@ -320,6 +323,51 @@ namespace AlienArenaInstaller
 		private void linkAlienArena_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			Process.Start("https://www.alienarena.org");
+		}
+
+		private void txtWidth_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			AllowOnlyDigits(e);
+		}
+
+		private void txtHeight_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			AllowOnlyDigits(e);
+		}
+
+		private void AllowOnlyDigits(KeyPressEventArgs e)
+		{
+			if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+			{
+				e.Handled = true;
+			}
+		}
+
+		private bool IsValid()
+		{
+			var errorMessage = "";
+
+			if (txtWidth.Text.ToInteger() < 640)
+			{
+				errorMessage += "Width must be at least 640.";
+			}
+
+			if (txtHeight.Text.ToInteger() < 480)
+			{
+				if (errorMessage.Length > 0)
+				{
+					errorMessage += "\n";
+				}
+				errorMessage += "Height must be at least 480.";
+			}
+
+			if (errorMessage.Length > 0)
+			{
+				MessageBox.Show(errorMessage, "Alien Arena Installer", MessageBoxButtons.OK);
+				return false;
+			}
+
+			return true;
 		}
 	}
 }
