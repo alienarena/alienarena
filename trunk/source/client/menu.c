@@ -6064,6 +6064,18 @@ static menuvec2_t PlayerModelSizeFunc (void *_self, FNT_font_t font)
 	return ret;
 }
 
+static char* stockModels[] = {
+	"martianenforcer",
+	"martiancyborg",
+	"martianoverlord",
+	"martianwarrior",
+	"enforcer",
+	"commander",
+	"femborg",
+	"slashbot",
+	"rustbot"
+};
+
 static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 {
 	refdef_t refdef;
@@ -6075,10 +6087,19 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	entity_t entity[5];
 	menumodel_s *self = (menumodel_s*) _self;
 	float old_frame = self->mframe;
-	
-	//181 - 197 to start from rising position
 
-	if(self->mframe == 0 || s_switched)
+	// For old/classic or other non-stock models skip the rising animation
+	int stockModelCount = (int)(sizeof(stockModels)/sizeof(stockModels[0]));
+	qboolean isStockModel = false;
+	for (i = 0; i < stockModelCount; i++) {
+		if (!Q_strcasecmp(self->name, stockModels[i])) {
+			isStockModel = true;
+			break;
+		}
+	}
+
+	//181 - 197 to start from rising position
+	if((self->mframe == 0 || s_switched) && isStockModel)
 		self->mframe = 181;
 
 	self->mframe += cls.frametime * 15.0f;
@@ -6102,7 +6123,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 		self->yaw += cls.frametime*50;
 	if (self->yaw > 360 )
 		self->yaw = 0;
-	if(s_switched)
+	if(s_switched && isStockModel)
 		self->yaw = 180;
 
 	if(s_switched)
@@ -6148,7 +6169,7 @@ static void PlayerModelDrawFunc (void *_self, FNT_font_t font)
 	entity[2].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 	refdef.num_entities = 3;
 
-	//if a helmet or other special devce
+	//if a helmet or other special device
 	Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.iqm", self->name );
 	FS_FOpenFile( scratch, &modelfile );
 	if ( modelfile )
@@ -6215,7 +6236,7 @@ static menuitem_s   	s_player_thumbnail;
 static menuframework_s	s_player_skin_preview_submenu;
 static menumodel_s		s_player_skin_preview;
 
-#define MAX_DISPLAYNAME 16
+#define MAX_DISPLAYNAME 30
 #define MAX_PLAYERMODELS 1024
 
 typedef struct
@@ -6410,7 +6431,7 @@ static void PlayerConfig_ScanDirectories( void )
 		else
 			c = b;
 
-		strncpy( s_pmi[s_numplayermodels].displayname, c + 1, MAX_DISPLAYNAME-1 );
+		strncpy( s_pmi[s_numplayermodels].displayname, c + 1, MAX_DISPLAYNAME - 1 );
 		strcpy( s_pmi[s_numplayermodels].directory, c + 1 );
 
 		FS_FreeFileList( pcxnames, npcxfiles );
