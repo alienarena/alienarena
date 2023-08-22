@@ -108,10 +108,10 @@ void CL_DownloadComplete (void)
 
 	if (cls.downloadmappack) {
 		if (CL_ExtractFiles(cls.downloadname)) {
-			Com_Printf("Installed map pack %s.\n", cls.downloadname);
+			Com_Printf("Installed %s.\n", cls.downloadname);
 		}
 		else {
-			Com_Printf("Couldn't install map pack %s.\n", cls.downloadname);
+			Com_Printf("Couldn't install %s.\n", cls.downloadname);
 		}
 
 		cls.downloadmappack = false;
@@ -465,6 +465,9 @@ qboolean CL_ExtractFiles(char *zipFilename)
 	return true;
 }
 
+#define INSTALL_TYPE_MAP 1
+#define INSTALL_TYPE_MODEL 2
+
 /*
 ===============
 CL_InstallMap
@@ -473,6 +476,30 @@ From command "installmap". Request a map pack download from alienarena.org in zi
 ===============
 */
 void CL_InstallMap (void)
+{
+	InstallMapOrModel(INSTALL_TYPE_MAP);
+}
+
+/*
+===============
+CL_InstallModel
+
+From command "installmodel". Request a model pack download from alienarena.org in zip format and extract the files.
+===============
+*/
+void CL_InstallModel (void)
+{
+	InstallMapOrModel(INSTALL_TYPE_MODEL);
+}
+
+/*
+===============
+CL_InstallMap
+
+From command "installmap" or "installmodel". Request a map/model pack download from alienarena.org in zip format and extract the files.
+===============
+*/
+void InstallMapOrModel (int type)
 {
 	char filename[MAX_OSPATH];
 	char fullPath[MAX_OSPATH];
@@ -486,7 +513,14 @@ void CL_InstallMap (void)
 
 	if (not_enough_args || cls.download)
 	{
-		Com_Printf ("Usage: installmap <filename> - Download and extract a map pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+		if (type == INSTALL_TYPE_MAP)
+		{
+			Com_Printf ("Usage: installmap <filename> - Download and extract a map pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+		}
+		else if (type == INSTALL_TYPE_MODEL)
+		{
+			Com_Printf ("Usage: installmodel <filename> - Download and extract a model pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+		}
 		return;
 	}
 
@@ -505,7 +539,14 @@ void CL_InstallMap (void)
 	
 	if (FS_CheckFile(fullPath)) {
 		if (!allow_overwrite_maps->integer) {
-			Com_Printf("Map pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
+			if (type == INSTALL_TYPE_MAP)
+			{
+				Com_Printf("Map pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
+			}
+			else if (type == INSTALL_TYPE_MODEL)
+			{
+				Com_Printf("Model pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
+			}
 			cls.downloadname[0] = 0;
 			return;
 		}
@@ -521,8 +562,15 @@ void CL_InstallMap (void)
 
 	CL_HttpDownloadMapPack(MAPPACK_URL);
 	
-	Com_Printf("Map pack download started: %s\n", cls.downloadname);
-	
+	if (type == INSTALL_TYPE_MAP)
+	{
+		Com_Printf("Map pack download started: %s\n", cls.downloadname);
+	}
+	else if (type == INSTALL_TYPE_MODEL)
+	{
+		Com_Printf("Model pack download started: %s\n", cls.downloadname);
+	}
+
 	// The extracting part will be done in CL_ExtractFiles(), called from CL_DownloadComplete()
 }
 
