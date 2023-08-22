@@ -3198,7 +3198,7 @@ option_name_t net_option_names[] =
 	{
 		option_spincontrol,
 		"allow_overwrite_maps",
-		"installmap overwrites map files",
+		"installmap and installmodel overwrite files",
 		NULL,
 		setnames (onoff_names)
 	},
