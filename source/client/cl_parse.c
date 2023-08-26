@@ -465,36 +465,12 @@ qboolean CL_ExtractFiles(char *zipFilename)
 	return true;
 }
 
-#define INSTALL_TYPE_MAP 1
-#define INSTALL_TYPE_MODEL 2
+#define INSTALL_TYPE_MAP	1
+#define INSTALL_TYPE_MODEL	2
 
 /*
 ===============
-CL_InstallMap
-
-From command "installmap". Request a map pack download from alienarena.org in zip format and extract the files.
-===============
-*/
-void CL_InstallMap (void)
-{
-	InstallMapOrModel(INSTALL_TYPE_MAP);
-}
-
-/*
-===============
-CL_InstallModel
-
-From command "installmodel". Request a model pack download from alienarena.org in zip format and extract the files.
-===============
-*/
-void CL_InstallModel (void)
-{
-	InstallMapOrModel(INSTALL_TYPE_MODEL);
-}
-
-/*
-===============
-CL_InstallMap
+CL_InstallMapOrModel
 
 From command "installmap" or "installmodel". Request a map/model pack download from alienarena.org in zip format and extract the files.
 ===============
@@ -572,6 +548,30 @@ void InstallMapOrModel (int type)
 	}
 
 	// The extracting part will be done in CL_ExtractFiles(), called from CL_DownloadComplete()
+}
+
+/*
+===============
+CL_InstallMap
+
+From command "installmap". Request a map pack download from alienarena.org in zip format and extract the files.
+===============
+*/
+void CL_InstallMap(void)
+{
+	InstallMapOrModel(INSTALL_TYPE_MAP);
+}
+
+/*
+===============
+CL_InstallModel
+
+From command "installmodel". Request a model pack download from alienarena.org in zip format and extract the files.
+===============
+*/
+void CL_InstallModel(void)
+{
+	InstallMapOrModel(INSTALL_TYPE_MODEL);
 }
 
 /*
