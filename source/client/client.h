@@ -558,6 +558,7 @@ void CL_DownloadFileName (char *dest, int destlen, char *fn);
 void CL_DownloadComplete (void);
 void CL_Download_f (void);
 void CL_InstallMap (void);
+void CL_InstallModel (void);
 
 //
 // cl_scrn.c

@@ -1414,7 +1414,7 @@ void SV_Init (void)
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
 	allow_overwrite_maps  = Cvar_Get ("allow_overwrite_maps", "0", CVAR_ARCHIVE);
-	Cvar_Describe (allow_overwrite_maps, "Used for command installmap. If set to 1, existing downloaded map packs will be overwritten and all files in it will be extracted, overwriting any existing files.");
+	Cvar_Describe (allow_overwrite_maps, "Used for command installmap and installmodel. If set to 1, existing downloaded map packs or model packs will be overwritten and all files in it will be extracted, overwriting any existing files.");
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
 	sv_tickrate = Cvar_Get("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_ARCHIVE);
 
