@@ -75,7 +75,7 @@ The player will have the following weapons:
 7.	Disruptor
 8.	Alien Vaporizer
 9.	Violator (automatically equipped at spawn)
-10. Minderaser(replaces re-spawning weapon every 2 minutes)
+10.	Minderaser(replaces re-spawning weapon every 2 minutes)
 
 Weapons also have alternate firing modes.  In you controls menu, select your secondary fire key and this will allow you to use these modes.  The default key for alternate fire is MOUSE2 (right click).
 
