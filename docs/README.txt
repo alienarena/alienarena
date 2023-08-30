@@ -58,7 +58,7 @@ This click-once installer will automatically check for future updates to the ins
 
 (Linux)
 
-This is depending on the Linux distribution. Fedora, Debian and Ubuntu already have it in the package repository. For other distributions, installing from Flathub is probably the easiest option.
+This is depending on the Linux distribution. Fedora, Debian and Ubuntu already have it in the package repository. For other distributions, installing from Flathub is probably the easiest option: https://flathub.org/apps/org.alienarena.alienarena.
 See also the README and INSTALL documentation files.
 
 * BASIC COMMANDS
