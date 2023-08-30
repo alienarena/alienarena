@@ -52,13 +52,13 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 (Windows)
 
-Installation has been made very simple.  After downloading, simply click on the .exe file and the installation will begin.  Follow the instructions of the program. If you are running Windows, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
-
-Once finished, you can click on the Alien Arena icon that has been placed on your desktop.
+Installation is very easy with the Alien Arena Installer. Download and run the setup.exe. Windows Defender might block the installation, if that happens, then click on "More info" and then on "Run anyway" to continue the installation.
+This click-once installer will automatically check for future updates to the installer. Click the Alien Arena icon on the desktop to run the installer. Click the Install button to install Alien Arena. After installing, you can press Launch to play or click the Update button to install the latest updates.
 
 (Linux)
 
-See the README and INSTALL documentation files.
+This is depending on the Linux distribution. Fedora, Debian and Ubuntu already have it in the package repository. For other distributions, installing from Flathub is probably the easiest option.
+See also the README and INSTALL documentation files.
 
 * BASIC COMMANDS
 
@@ -75,7 +75,7 @@ The player will have the following weapons:
 7.	Disruptor
 8.	Alien Vaporizer
 9.	Violator (automatically equipped at spawn)
-10.     Minderaser(replaces re-spawning weapon every 2 minutes)
+10. Minderaser(replaces re-spawning weapon every 2 minutes)
 
 Weapons also have alternate firing modes.  In you controls menu, select your secondary fire key and this will allow you to use these modes.  The default key for alternate fire is MOUSE2 (right click).
 
@@ -126,7 +126,7 @@ For Linux users, see the README documentation file.
 There is a long list of credits - ALIEN ARENA is greatly indebted to the following for its creation and completion:
 
 Design:  John Diamond, Max Eliaser, Jim Bower with input from the community at large.
-Programming:  John Diamond, Max Eliaser, Jim Bower, Dave Stewart, Emmanuel Benoit, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
+Programming:  John Diamond, Max Eliaser, Jim Bower, Dave Stewart, Emmanuel Benoit, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia, Raoul de Raadt
 Models and skins:  John Diamond, Dennis Zedlach
 Maps:  John Diamond, Charles Hudson
 Textures and Artwork:  John Diamond, Phillip K, Dennis Zedlach, Adam Saizlai, Yves Allaire
@@ -136,13 +136,15 @@ Music:  Divinity, Paul Joyce, Arteria Games, Whitelipper, and SoundRangers
 Linux Port: Shane Bayer, John Diamond, Jim Bower
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
-Debian packaging: Andres Mejia
-
-Public Relations:  Victor Balke
-Alien Arena IRC Channel: irc.planetarena.org #alienarena
-
+Debian packaging: Andres Mejia, Raoul de Raadt
+Public Relations / promotion:  Victor Balke, Raoul de Raadt
+Web server, game server and IRC server hosting: Alexis Grigoriou
 
 There are other major contributions from the gaming community, including MrG, Jay Dolan, Psychospaz, Barnes, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A special thanks for Lee Salzman for creating the new model format(IQM) and his assistance in getting it working for us.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
+
+IRC: irc.alienarena.org:6697 or irc.alienarena.org:6667, channel #alienarena
+Discord: https://discord.gg/Rd5fwBg
+Matrix: https://matrix.to/#/#alienarena:matrix.org
 
 8.	COPYRIGHT INFORMATION
 
@@ -160,7 +162,7 @@ The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and is licen
 
 ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
-Contact:  https://martianbackup.com
+Contact:  https://www.alienarena.org
 
 Privacy Policy: http://icculus.org/alienarena/rpa/privacy2.html
 
