@@ -150,7 +150,7 @@ Matrix: https://matrix.to/#/#alienarena:matrix.org
 
 ALIEN ARENA and it's original content are a copyright of COR Entertainment, LLC.  
 
-The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version. Source code can be located at https://martianbackup.com
+The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version. Source code is located at https://svn.icculus.org/alienarena and https://github.com/alienarena/alienarena.
 
 The included TrueType fonts (FreeSans and FreeMono) are from the GNU FreeFont package (http://www.gnu.org/software/freefont/); they are free software distributed under the terms of the GNU General Public License version 3 (http://www.gnu.org/licenses/gpl.html).
 
