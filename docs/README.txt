@@ -54,7 +54,7 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 Installation is very easy with the Alien Arena Installer. Download and run the setup.exe: https://www.alienarena.org/alienarenainstaller/setup.exe.
 Windows Defender might block the installation, if that happens, then click on "More info" and then on "Run anyway" to continue the installation.
-This click-once installer will automatically check for future updates to the installer. If the installer isn't opened automatically after installataion, click the Alien Arena icon on the desktop to run the installer. Click the Install button to install Alien Arena. After installing, you can press Launch to play or click the Update button to install the latest updates.
+This click-once installer will automatically check for future updates to the installer. If the installer isn't opened automatically after installation, click the Alien Arena icon on the desktop to run the installer. Click the Install button to install Alien Arena. After installing, you can press Launch to play or click the Update button to install the latest updates.
 
 (Linux)
 
