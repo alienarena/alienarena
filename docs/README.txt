@@ -118,8 +118,7 @@ In Alien Arena, you are given points for getting kills (one point for kill), two
 
 6.	HOW TO UNINSTALL ALIEN ARENA
 
-To uninstall Alien Arena, simply go to your start programs menu, select your Alien Arena folder, and click on "Uninstall".  You can also go into your control panel, and uninstall Alien Arena in the programs and software section.
-
+To uninstall Alien Arena on Windows, delete the folder where you installed Alien Arena from the Alien Arena Installer. To uninstall the Alien Arena Installer, go to Add/Remove programs and features and uninstall the Alien Arena Installer from there.
 For Linux users, see the README documentation file. 
 
 7.	CREDITS
