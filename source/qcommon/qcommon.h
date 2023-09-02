@@ -101,7 +101,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULT_DOWNLOAD_URL_1 (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/sv_downloadurl" : "http://martianbackup.com/sv_downloadurl")
 #define DEFAULT_DOWNLOAD_URL_2 (USE_ALIENARENA_ORG ? "http://martianbackup.com/sv_downloadurl" : "http://red.planetarena.org/sv_downloadurl")
 
-#define NEWSFEED_URL (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/newsfeed.db" : "http://martianbackup.com/newsfeed.db")
+// Set this to false to test a local news file
+#define DOWNLOADNEWS true
+// old news file with only entirely white or entirely yellow lines with + at the start
+// #define NEWSFILE "newsfeed.db"
+// new news file that supports color codes as well as entirely yellow lines with + at the start
+#define NEWSFILE "aanews.db"
+#define NEWSFEED_URL (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/" NEWSFILE : "http://martianbackup.com/" NEWSFILE)
 
 #define MAPPACK_URL "http://invader.alienarena.org/arena/files"
 

@@ -1090,12 +1090,13 @@ static const char *news[] =
 {
 	"+Alien Arena News Feed",
 	"",
-	"+LATEST AA NEWS!",
-	//"This is a test.",
-	//"Real news coming soon!",
+	"+LATEST ALIEN ARENA NEWS!",
 	0
 };
 
+// Empty lines with 5 spaces.
+// Yellow lines (as section headers) with a + as first character.
+// aanews.db (new format) also supports color codes.
 static char newsFeed[256][256];
 
 static FILE* newsfile_open( const char* mode )
@@ -1105,9 +1106,9 @@ static FILE* newsfile_open( const char* mode )
 
 #if defined WIN32_VARIANT
 	char *appData = getenv("AppData");
-	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/AAWoM/%s", appData, "newsfeed.db");
+	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/AAWoM/%s", appData, NEWSFILE);
 #else
-	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/%s", FS_Gamedir(), "newsfeed.db");
+	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/%s", FS_Gamedir(), NEWSFILE);
 #endif
 
 	file = fopen( pathbfr, mode );
@@ -1139,6 +1140,7 @@ void GetNews()
 
 	CURL* easyhandle = curl_easy_init();
 
+#if DOWNLOADNEWS
 	file = newsfile_open("w"); //create new, blank file for writing
 	if(file)
 		fclose(file);
@@ -1165,6 +1167,7 @@ void GetNews()
 	curl_easy_perform(easyhandle);
 
 	curl_easy_cleanup(easyhandle);
+#endif
 
 	// parse the file and build string array
 	file = newsfile_open("r") ;
@@ -1270,7 +1273,7 @@ static void M_Main_Draw (menuvec2_t offset)
 		Draw_StretchPic( xstart, (int)(ystart + i * 32.5*scale + 13*scale + hscaleoffs), xend-xstart, h*hscale*scale, litname );
 	}
 
-	//draw the news feed - this is temp, test code.  Actual news will be dynamically read in from http	
+	// Draw the news feed header
 	font = FNT_AutoGet( CL_menuFont );
 	scale = font->size / 8.0;
 
@@ -1294,24 +1297,25 @@ static void M_Main_Draw (menuvec2_t offset)
 		}
 	}
 
-	//add in dynamicly read news portions here.
+	// Add dynamically read news portions here.
 	for ( i = 0; strlen(newsFeed[i]) > 4; y += 12*scale, i++ )
 	{
-		if ( y <= 12*scale || y > 48*scale)
+		if ( y <= 12*scale || y > 48*scale) {
 			continue;
+		}
 
 		box.y = offset.y + y;
 		box.x = offset.x;
 		box.height = 0;
 		box.width = viddef.width/4.0;
 
-		if ( newsFeed[i][0] == '+' )
+		if (newsFeed[i][0] == '+')
 		{
-			FNT_BoundedPrint (font, newsFeed[i]+1, FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[3]);
+			FNT_BoundedPrint (font, newsFeed[i] + 1, FNT_CMODE_QUAKE_SRS, FNT_ALIGN_CENTER, &box, FNT_colors[3]);
 		}
 		else
 		{
-			FNT_BoundedPrint (font, newsFeed[i], FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[7]);
+			FNT_BoundedPrint (font, newsFeed[i], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_CENTER, &box, FNT_colors[7]);
 		}
 	}
 
@@ -3521,6 +3525,7 @@ static const char *idcredits[] =
 	"Stephan Stahl",
 	"Kyle Hunter",
 	"Andres Mejia",
+	"Raoul de Raadt",
 	"",
 	"+ART",
 	"John Diamond",
@@ -3573,6 +3578,7 @@ static const char *idcredits[] =
 	"",
 	"+DEBIAN PACKAGE",
 	"Andres Mejia",
+	"Raoul de Raadt",
 	"",
 	"+LANGUAGE TRANSLATIONS",
 	"Ken Deguisse",
