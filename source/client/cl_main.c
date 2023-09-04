@@ -132,6 +132,8 @@ cvar_t	*cl_vwep;
 cvar_t  *background_music;
 cvar_t	*background_music_vol;
 
+cvar_t	*cl_show_active_servers_only;
+
 cvar_t	*scriptsloaded;
 
 //master server
@@ -2066,6 +2068,9 @@ void CL_InitLocal (void)
 	rcon_client_password = Cvar_Get ("rcon_password", "", CVARDOC_STR);
 	rcon_address = Cvar_Get ("rcon_address", "", CVARDOC_STR);
 	
+	cl_show_active_servers_only = Cvar_Get("cl_show_active_servers_only", "0", CVARDOC_BOOL);
+	Cvar_Describe (cl_show_active_servers_only, "Only show active servers in the server list. Will not be remembered when quitting.");
+
 	cl_test = Cvar_Get ("cl_test", "0", CVAR_ARCHIVE);
 
 	//

@@ -4005,8 +4005,19 @@ static char *GetLine (char **contents, int *len)
 	return line;
 }
 
+static qboolean gotServers = false;
+
+static const int SERVERLIST_HEADER_COLUMN_NAME = 0;
+static const int SERVERLIST_HEADER_COLUMN_MAP = 1;
+static const int SERVERLIST_HEADER_COLUMN_PLAYERS = 2;
+static const int SERVERLIST_HEADER_COLUMN_PING = 3;
+
+static const int SORT_ASCENDING = 1;
+static const int SORT_DESCENDING = 2;
 
 SERVERDATA mservers[MAX_LOCAL_SERVERS];
+
+extern cvar_t *cl_show_active_servers_only;
 
 PLAYERSTATS thisPlayer;
 
@@ -4014,6 +4025,11 @@ PLAYERSTATS thisPlayer;
 
 static char local_mods_data[16][53]; //53 is measured max tooltip width
 
+static int QSortColumn = SERVERLIST_HEADER_COLUMN_PLAYERS;
+static int QSortType = SORT_DESCENDING;
+static void SortServerList_Func ( void *_self );
+
+static void ServerListHeader_SubmenuInit (void);
 
 static struct
 {
@@ -4349,6 +4365,8 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 	char playername[PLAYERNAME_SIZE];
 	char team[8];
 	int score, ping, rankTotal, starttime;
+	static const char botSingular[4] = "bot";
+	static const char botPlural[5] = "bots";
 	PLAYERSTATS     player;
 
 	destserver->local_server_netadr = adr;
@@ -4508,15 +4526,26 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 		Com_sprintf(destserver->skill, sizeof(destserver->skill), "Unknown");
 
 	destserver->players = players;
+	destserver->bots = bots;
 
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	if(strlen(destserver->maxClients) > 2)
 		strcpy(destserver->maxClients, "??");
 	
-	Com_sprintf (destserver->szPlayers, sizeof(destserver->szPlayers), "%i(%i)/%s", min(99,players), min(99,bots), destserver->maxClients);
-	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", min(9999,destserver->ping));
+	// Align player count to the right as two positions to handle sorting correctly.
+	Com_sprintf (destserver->szPlayers, sizeof(destserver->szPlayers), "%2i (%i %s)",
+		min(99, players - bots), min(99, bots), (bots == 1 ? botSingular : botPlural));
+	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", min(9999, destserver->ping));
 
-	return true;
+	if (cl_show_active_servers_only->integer == 1 && (players - bots) == 0) {
+		// Player count is including the bots.
+		// Don't add to list if only active servers are shown.
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 static menuframework_s	s_serverbrowser_screen;
@@ -4528,6 +4557,7 @@ static menuframework_s	s_joinserver_header;
 static menuframework_s	s_serverlist_submenu;
 static menuframework_s	s_serverlist_header;
 static menulist_s		s_serverlist_header_columns[SERVER_LIST_COLUMNS];
+static menulist_s		s_show_active_only;
 static menuframework_s	s_serverlist_rows[MAX_LOCAL_SERVERS];
 static menutxt_s		s_serverlist_columns[MAX_LOCAL_SERVERS][SERVER_LIST_COLUMNS];
 
@@ -4610,16 +4640,19 @@ static void SearchLocalGames (void)
 	
 	CON_Clear();
 	
+	// Execute sorting
+	SortServerList_Func (&s_serverlist_header_columns[QSortColumn]);
+
 	Com_Printf (" Got %d servers- stragglers may follow.\n", m_num_servers);
 }
 
 static void SearchLocalGamesFunc (UNUSED void *self)
 {
+	gotServers = false;
 	SearchLocalGames();
 }
 
 static qboolean QSortReverse;
-static int QSortColumn;
 
 static int SortServerList_Compare (const void *_a, const void *_b)
 {
@@ -4633,9 +4666,9 @@ static int SortServerList_Compare (const void *_a, const void *_b)
 	a_s = ((menutxt_s *)(a->items[QSortColumn]))->generic.name;
 	b_s = ((menutxt_s *)(b->items[QSortColumn]))->generic.name;
 	
-	if (QSortColumn > 1)
+	if (QSortColumn == SERVERLIST_HEADER_COLUMN_PING)
 	{
-		// do numeric sort for player count and ping
+		// do numeric sort for ping
 		if (atoi (a_s) > atoi (b_s))
 			ret = 1;
 		else if (atoi (a_s) < atoi (b_s))
@@ -4682,23 +4715,25 @@ static void SortServerList_Func ( void *_self )
 	for (i = 0; i < SERVER_LIST_COLUMNS; i++)
 		if (i != column_num)
 			s_serverlist_header_columns[i].curvalue = 0;
-	
+
+	// Handle default sorting, now on player count descending
 	if (self->curvalue == 0)
 	{
-		if (column_num == 3)
+		if (column_num == SERVERLIST_HEADER_COLUMN_PLAYERS)
 		{
-			self->curvalue = 1;
+			self->curvalue = SORT_DESCENDING;
 		}
 		else
 		{
-			s_serverlist_header_columns[3].curvalue = 1;
-			SortServerList_Func (&s_serverlist_header_columns[3]);
+			s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_PLAYERS].curvalue = SORT_DESCENDING;
+			SortServerList_Func (&s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_PLAYERS]);
 			return;
 		}
 	}
 	
 	QSortColumn = column_num;
-	QSortReverse = self->curvalue == 2;
+	QSortReverse = self->curvalue == SORT_DESCENDING;
+	QSortType = QSortReverse ? SORT_DESCENDING : SORT_ASCENDING;
 	
 	qsort (s_serverlist_submenu.items, s_serverlist_submenu.nitems, sizeof (void*), SortServerList_Compare);
 	s_serverlist_submenu.yscroll = 0;
@@ -4719,11 +4754,11 @@ static void ServerList_SubmenuInit (void)
 	s_serverlist_header.navagable = true;
 	s_serverlist_header.nitems = 0;
 	
-	s_serverlist_header_columns[0].generic.name = "^3Server";
-	s_serverlist_header_columns[1].generic.name = "^3Map";
-	s_serverlist_header_columns[2].generic.name = "^3Players";
-	s_serverlist_header_columns[3].generic.name = "^3Ping";
-	
+	s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_NAME].generic.name = "^3Server";
+	s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_MAP].generic.name = "^3Map";
+	s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_PLAYERS].generic.name = "^3Players";
+	s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_PING].generic.name = "^3Ping";
+
 	for (j = 0; j < SERVER_LIST_COLUMNS; j++)
 	{
 		s_serverlist_header_columns[j].generic.type = MTYPE_SPINCONTROL;
@@ -4735,10 +4770,12 @@ static void ServerList_SubmenuInit (void)
 		s_serverlist_header_columns[j].generic.callback = SortServerList_Func;
 		Menu_AddItem (&s_serverlist_header, &s_serverlist_header_columns[j]);
 	}
-	s_serverlist_header_columns[3].curvalue = 1;
-	
+
+	// QSortColumn and QSortType remember the sort column and ascending/descending when refreshing
+	s_serverlist_header_columns[QSortColumn].curvalue = QSortType;
+
 	Menu_AddItem (&s_joinserver_menu, &s_serverlist_header);
-	
+
 	for ( i = 0; i < MAX_LOCAL_SERVERS; i++ )
 	{
 		s_serverlist_rows[i].generic.type	= MTYPE_SUBMENU;
@@ -4757,6 +4794,7 @@ static void ServerList_SubmenuInit (void)
 			s_serverlist_columns[i][j].generic.type = MTYPE_TEXT;
 			s_serverlist_columns[i][j].generic.flags = QMF_RIGHT_COLUMN;
 			LINK(s_serverlist_header_columns[j].generic.x, s_serverlist_columns[i][j].generic.x);
+			
 			Menu_AddItem (&s_serverlist_rows[i], &s_serverlist_columns[i][j]);
 		}
 		
@@ -4772,6 +4810,34 @@ static void ServerList_SubmenuInit (void)
 	
 }
 
+static void ShowActiveOnlyFunc (void *_self)
+{
+	menulist_s *self;
+	const char *cvarname;
+	
+	self = (menulist_s *)_self;
+	cvarname = self->generic.localstrings[0];
+	
+	Cvar_SetValue( cvarname, self->curvalue );
+
+	if (serverindex >= 0) {
+		M_PopMenu();
+	}
+	DeselectServer ();
+	m_num_servers = 0;
+	s_serverlist_submenu.nitems = 0;
+	s_serverlist_submenu.yscroll = 0;
+
+	setup_window (s_serverbrowser_screen, s_joinserver_menu, "SERVER LIST");
+
+	ServerListHeader_SubmenuInit ();
+	ServerList_SubmenuInit ();
+	
+	SearchLocalGames();
+	
+	s_joinserver_menu.default_cursor_selection = (menuitem_s *)&s_serverlist_submenu;
+}
+
 static void ServerListHeader_SubmenuInit (void)
 {
 	s_joinserver_header.generic.type = MTYPE_SUBMENU;
@@ -4783,6 +4849,18 @@ static void ServerListHeader_SubmenuInit (void)
 	// add_action (s_joinserver_header, "Address Book", AddressBookFunc, 0);
 	add_action (s_joinserver_header, "Refresh", SearchLocalGamesFunc, 0);
 	
+	add_text (s_joinserver_header, "            ", 0); // spacer
+
+	setup_tickbox (s_show_active_only);
+	s_show_active_only.generic.name	= "Show active only";
+	s_show_active_only.generic.localstrings[0] = "cl_show_active_servers_only";
+	s_show_active_only.curvalue = cl_show_active_servers_only->integer != 0;
+	s_show_active_only.generic.callback = ShowActiveOnlyFunc;
+	Menu_AddItem (&s_joinserver_header, &s_show_active_only);
+
+	// Players tooltip
+	s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_PLAYERS].generic.tooltip = "Number of real players (number of bots)";
+
 	if (STATS_ENABLED) {
 		add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
 	}
@@ -4793,8 +4871,6 @@ static void ServerListHeader_SubmenuInit (void)
 static void M_Menu_JoinServer_f (void)
 {
 	extern cvar_t *name;
-
-	static qboolean gotServers = false;
 
 	if(!gotServers && STATS_ENABLED)
 	{

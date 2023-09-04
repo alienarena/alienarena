@@ -342,6 +342,8 @@ extern	cvar_t	*cl_vwep;
 
 extern  cvar_t  *background_music;
 
+extern 	cvar_t	*cl_show_active_servers_only;
+
 extern  cvar_t	*cl_IRC_connect_at_startup;
 extern	cvar_t	*cl_IRC_server;
 extern	cvar_t	*cl_IRC_channel;
@@ -753,7 +755,8 @@ typedef struct _SERVERDATA {
 	int	 playerRankings[MAX_PLAYERS];
 	char skill[32];
 	int players;
-	char szPlayers[11];
+	int bots;
+	char szPlayers[13];
 	int ping;
 	char szPing[6];
 	netadr_t local_server_netadr;
