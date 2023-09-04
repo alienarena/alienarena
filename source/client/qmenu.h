@@ -206,6 +206,7 @@ typedef struct
 {
 	menutype_t type;
 	const char *name;
+	const char *sortvalue;
 	LINKABLE(int) x, y;
 	int	visible_length;
 	struct _tag_menuframework *parent;

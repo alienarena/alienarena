@@ -757,6 +757,7 @@ typedef struct _SERVERDATA {
 	int players;
 	int bots;
 	char szPlayers[13];
+	char szPlayersSortvalue[8]; // needed for sorting on the combination of player count and ping
 	int ping;
 	char szPing[6];
 	netadr_t local_server_netadr;

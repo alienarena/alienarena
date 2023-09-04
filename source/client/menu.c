@@ -4532,9 +4532,14 @@ static qboolean M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA
 	if(strlen(destserver->maxClients) > 2)
 		strcpy(destserver->maxClients, "??");
 	
-	// Align player count to the right as two positions to handle sorting correctly.
+	// The Players column now shows two numbers: real players and bots, like "3 (1 bot)"
 	Com_sprintf (destserver->szPlayers, sizeof(destserver->szPlayers), "%2i (%i %s)",
 		min(99, players - bots), min(99, bots), (bots == 1 ? botSingular : botPlural));
+	
+	// Keep separate value to sort column Players on which is a combination of real player count and 9999 - ping
+	Com_sprintf(destserver->szPlayersSortvalue, sizeof(destserver->szPlayersSortvalue), "%2i %4i",
+		destserver->players - destserver->bots, 9999 - destserver->ping);
+
 	Com_sprintf (destserver->szPing, sizeof(destserver->szPing), "%i", min(9999, destserver->ping));
 
 	if (cl_show_active_servers_only->integer == 1 && (players - bots) == 0) {
@@ -4642,7 +4647,7 @@ static void SearchLocalGames (void)
 	
 	// Execute sorting
 	SortServerList_Func (&s_serverlist_header_columns[QSortColumn]);
-
+	
 	Com_Printf (" Got %d servers- stragglers may follow.\n", m_num_servers);
 }
 
@@ -4663,9 +4668,9 @@ static int SortServerList_Compare (const void *_a, const void *_b)
 	a = *(menuframework_s **)_a;
 	b = *(menuframework_s **)_b;
 	
-	a_s = ((menutxt_s *)(a->items[QSortColumn]))->generic.name;
-	b_s = ((menutxt_s *)(b->items[QSortColumn]))->generic.name;
-	
+	a_s = ((menutxt_s *)(a->items[QSortColumn]))->generic.sortvalue;
+	b_s = ((menutxt_s *)(b->items[QSortColumn]))->generic.sortvalue;
+
 	if (QSortColumn == SERVERLIST_HEADER_COLUMN_PING)
 	{
 		// do numeric sort for ping
@@ -4784,10 +4789,17 @@ static void ServerList_SubmenuInit (void)
 		s_serverlist_rows[i].horizontal = true;
 		s_serverlist_rows[i].enable_highlight = true;
 		
-		s_serverlist_columns[i][0].generic.name = mservers[i].szHostName;
-		s_serverlist_columns[i][1].generic.name = mservers[i].szMapName;
-		s_serverlist_columns[i][2].generic.name = mservers[i].szPlayers;
-		s_serverlist_columns[i][3].generic.name = mservers[i].szPing;
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_NAME].generic.name = mservers[i].szHostName;
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_NAME].generic.sortvalue = mservers[i].szHostName;
+
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_MAP].generic.name = mservers[i].szMapName;
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_MAP].generic.sortvalue = mservers[i].szMapName;
+
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_PLAYERS].generic.name = mservers[i].szPlayers;
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_PLAYERS].generic.sortvalue = mservers[i].szPlayersSortvalue;
+
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_PING].generic.name = mservers[i].szPing;
+		s_serverlist_columns[i][SERVERLIST_HEADER_COLUMN_PING].generic.sortvalue = mservers[i].szPing;
 		
 		for (j = 0; j < SERVER_LIST_COLUMNS; j++)
 		{
