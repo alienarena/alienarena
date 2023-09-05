@@ -162,7 +162,7 @@ The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and is licen
 
 ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
-Contact:  https://www.alienarena.org
+Contact:  jar-el@alienarena.org
 
 Privacy Policy: http://icculus.org/alienarena/rpa/privacy2.html
 
