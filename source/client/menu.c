@@ -4870,9 +4870,6 @@ static void ServerListHeader_SubmenuInit (void)
 	s_show_active_only.generic.callback = ShowActiveOnlyFunc;
 	Menu_AddItem (&s_joinserver_header, &s_show_active_only);
 
-	// Players tooltip
-	s_serverlist_header_columns[SERVERLIST_HEADER_COLUMN_PLAYERS].generic.tooltip = "Number of real players (number of bots)";
-
 	if (STATS_ENABLED) {
 		add_action (s_joinserver_header, "Rank/Stats", PlayerRankingFunc, 0);
 	}
