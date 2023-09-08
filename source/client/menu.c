@@ -168,8 +168,6 @@ static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
 
-#define PLAYER_NAME_UNIQUE (strcmp (Cvar_VariableString ("name"), "Player") != 0)
-
 void SetCrosshairNames (char **list);
 void SetHudNames (char **list);
 void SetFontNames (char **list);
@@ -206,7 +204,6 @@ static inline qboolean is_team_game (float rule_value)
 }
 
 // common callbacks
-
 static void StrFieldCallback( void *_self )
 {
 	menufield_s *self = (menufield_s *)_self;
@@ -3242,7 +3239,9 @@ static menufield_s		s_irc_reconnectdelay;
 static void JoinIRCFunc (UNUSED void *unused)
 {
 	if(PLAYER_NAME_UNIQUE)
+	{
 		CL_InitIRC();
+	}
 }
 
 static void QuitIRCFunc (UNUSED void *unused)
@@ -3267,7 +3266,9 @@ static void ApplyIRCSettings (UNUSED void *self)
 	Cvar_SetValue(	"cl_IRC_reconnect_delay" ,	atoi( s_irc_reconnectdelay.buffer ) );
 
 	if ( running )
+	{
 		CL_InitIRC( );
+	}
 
 	M_PopMenu( );
 }
@@ -3394,9 +3395,9 @@ static void IRC_MenuInit (void)
 
 static void IRC_MenuDraw (UNUSED menuframework_s *dummy, menuvec2_t offset)
 {
-	//warn user that they cannot join until changing default player name
+	// Warn user that they cannot join until changing default player name
 	if(!PLAYER_NAME_UNIQUE)
-		s_irc_menu.statusbar = "You must create your player name before joining a server!";
+		s_irc_menu.statusbar = "You must define your player name in the Player Setup before joining a server!";
 	else if(CL_IRCIsConnected())
 		s_irc_menu.statusbar = "Connected to IRC server.";
 	else if(CL_IRCIsRunning())
@@ -3814,6 +3815,10 @@ static void M_Menu_Game_f (void)
 	Menu_Center (&s_game_screen);
 	
 	M_PushMenu_Defaults (s_game_screen);
+
+	if(!PLAYER_NAME_UNIQUE) {
+		M_Menu_PlayerConfig_f();
+	}
 }
 
 static void SinglePlayerSelectSkillFunc (void *_self)
@@ -4911,6 +4916,10 @@ static void M_Menu_JoinServer_f (void)
 	gotServers = true;
 	
 	M_PushMenu_Defaults (s_serverbrowser_screen);
+
+	if(!PLAYER_NAME_UNIQUE) {
+		M_Menu_PlayerConfig_f();
+	}
 }
 
 /*
@@ -6797,7 +6806,13 @@ static void PlayerConfig_MenuInit (void)
 static void PlayerConfig_MenuDraw (UNUSED menuframework_s *dummy, menuvec2_t offset)
 {
 	if(!PLAYER_NAME_UNIQUE)
-		s_player_config_menu.statusbar = "You must change your player name before joining a server!";
+	{
+		s_player_config_menu.statusbar = "Change your player name to be able to join IRC and online game servers!";
+	}
+	else
+	{
+		s_player_config_menu.statusbar = "";
+	}
 
 	if ( s_pmi[s_player_model_box.curvalue].skindisplaynames )
 	{

@@ -769,6 +769,8 @@ typedef struct _SERVERDATA {
 
 SERVERDATA connectedserver;
 
+#define PLAYER_NAME_UNIQUE (strcmp (Cvar_VariableString ("name"), "Player") != 0)
+
 void M_Init (void);
 void M_Keydown (int key);
 void M_Draw (void);
