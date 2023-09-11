@@ -277,6 +277,8 @@ void InitGame (void)
 
 	//antilag
 	g_antilagprojectiles = gi.cvar ("g_antilagprojectiles", "1", CVAR_GAMEINFO | CVARDOC_BOOL);
+	
+	// Value 1 to print extra console messages, value 2 to also print messages to the screen
 	g_antilagdebug = gi.cvar("g_antilagdebug", "0", 0 /*CVAR_SERVERINFO*/);
 
 	// change anytime vars
