@@ -1429,8 +1429,8 @@ void R_Register( void )
 	Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
 	Cvar_Get( "r_bloom_intensity", "0.75", CVAR_ARCHIVE);
 	Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE);
-	Cvar_Get( "vid_width", "640", CVAR_ARCHIVE);
-	Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
+	Cvar_Get( "vid_width", "1024", CVAR_ARCHIVE);
+	Cvar_Get( "vid_height", "768", CVAR_ARCHIVE);
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );

@@ -252,7 +252,7 @@ namespace AlienArenaInstaller
 					{
 						fullscreen = "0";
 					}
-					var parameters = $"+set vid_width {txtWidth.Text} +set vid_height {txtHeight.Text} +set vid_fullscreen {fullscreen};";
+					var parameters = $"+set gl_mode -1 +set vid_width {txtWidth.Text} +set vid_height {txtHeight.Text} +set vid_fullscreen {fullscreen};";
 
 					var p = new Process();
 					p.StartInfo.WorkingDirectory = txtInstallationFolder.Text;
