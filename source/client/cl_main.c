@@ -2025,9 +2025,9 @@ void CL_InitLocal (void)
 	cl_flicker = Cvar_Get ("cl_flicker", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 	Cvar_Describe (cl_flicker, "enable flickering world lighting.");
 
-	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
+	cl_paindist = Cvar_Get ("cl_paindist", "0", CVAR_ARCHIVE);
 	Cvar_Describe (cl_paindist, "distort the screen when you take damage.");
-	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);
+	cl_explosiondist = Cvar_Get ("cl_explosiondist", "0", CVAR_ARCHIVE);
 	Cvar_Describe (cl_explosiondist, "distort the screen for explosions.");
 	cl_raindist = Cvar_Get ("cl_raindist", "1", CVAR_ARCHIVE);
 	Cvar_Describe (cl_raindist, "rain running down your visor.");
