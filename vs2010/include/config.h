@@ -56,7 +56,7 @@ where the location of header files differs between systems.
 // #define STEAM_VARIANT 1
 
 /* Version number of package. UPDATE ON VERSION CHANGE */
-#define VERSION "7.71.5"
+#define VERSION "7.71.6"
 
 /* OpenAL dll name */
 #define OPENAL_DRIVER "OpenAL32.dll"
