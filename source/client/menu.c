@@ -4030,8 +4030,8 @@ PLAYERSTATS thisPlayer;
 
 static char local_mods_data[16][53]; //53 is measured max tooltip width
 
-static int QSortColumn = SERVERLIST_HEADER_COLUMN_PLAYERS;
-static int QSortType = SORT_DESCENDING;
+static int QSortColumn = 2; // SERVERLIST_HEADER_COLUMN_PLAYERS;
+static int QSortType = 2; // SORT_DESCENDING;
 static void SortServerList_Func ( void *_self );
 
 static void ServerListHeader_SubmenuInit (void);
