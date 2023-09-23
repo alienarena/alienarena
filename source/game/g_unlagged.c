@@ -31,11 +31,11 @@ Clear out the given client's history (should be called when the teleport bit is 
 ============
 */
 void G_ResetHistory(edict_t* ent) {
-	int time = level.leveltime;
+	int i, time = level.leveltime;
 
 	// fill up the history with data (assume the current position)
 	ent->client->historyHead = NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE;
-	for (int i = ent->client->historyHead; i >= 0; --i, time -= FRAMETIME_MS) {
+	for (i = ent->client->historyHead; i >= 0; --i, time -= FRAMETIME_MS) {
 		clientHistory_t* history = &ent->client->history[i];
 
 		VectorCopy(ent->mins, history->mins);
@@ -82,7 +82,8 @@ Returns a vector "frac" times the distance between "start" and "end"
 =============
 */
 static void TimeShiftLerp(float frac, const vec3_t start, const vec3_t end, vec3_t result) {
-	for (int i = 0; i < 3; ++i) {
+	int i;
+	for (i = 0; i < 3; ++i) {
 		result[i] = start[i] + frac * (end[i] - start[i]);
 	}
 }
@@ -96,7 +97,7 @@ Move a client back to where he was at the specified time
 =================
 */
 void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger) {
-    int j, k;
+    int i, j, k;
     int failSafeCounter = 0;
  	// char	str[MAX_STRING_CHARS];
 
@@ -203,7 +204,7 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 				(float)(ent->client->history[k].leveltime - ent->client->history[j].leveltime);
 			
 			// interpolate between the two origins to give position at time index "time"
-			for (int i = 0; i < 3; ++i) {
+			for (i = 0; i < 3; ++i) {
 				ent->s.origin[i] = ent->client->history[j].currentOrigin[i] +
 					frac * (ent->client->history[k].currentOrigin[i] - ent->client->history[j].currentOrigin[i]);
 
