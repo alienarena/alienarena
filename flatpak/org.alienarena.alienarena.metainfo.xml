@@ -37,11 +37,15 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-3.0-or-later</project_license>
   <releases>
-    <release version="7.71.5" date="2023-08-26">
+    <release version="7.71.6" date="2023-09-23">
       <description>
         <ul>
-          <li>The player setup will handle classic player models better.</li>
-          <li>There is a new command to install classic player models: installmodel.</li>
+          <li>There is now a filter in the server list to show active servers only</li>
+          <li>It's easier to see the number of real players in the server list</li>
+          <li>The server list sorts on player count, ping by default</li>
+          <li>The newsfeed can show colors now</li>
+          <li>The antilag has been optimized for extra smooth gameplay</li>
+          <li>The explosion and pain distortion effects are now off by default</li>
         </ul>
       </description>
     </release>
