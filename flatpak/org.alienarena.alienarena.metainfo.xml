@@ -32,8 +32,14 @@
     </screenshot>
   </screenshots>
   <url type="homepage">https://alienarena.org</url>
-  <url type="source">https://svn.icculus.org/alienarena/trunk/</url>
-  <url type="help">https://alienarena.org/#support</url>
+  <url type="faq">https://alienarena.fandom.com/wiki/Frequently_Asked_Questions</url>
+  <url type="help">https://alienarena.fandom.com/wiki/New_Player_Guide</url>
+  <url type="help">https://steamcommunity.com/sharedfiles/filedetails/?id=1185832191</url>
+  <url type="vcs-browser">https://svn.icculus.org/alienarena/trunk</url>
+  <url type="vcs-browser">https://github.com/alienarena/alienarena</url>
+  <url type="donation">https://www.buymeacoffee.com/alienarena</url>
+  <url type="donation">https://github.com/sponsors/alienarena</url>
+  <url type="contact">https://discord.gg/Rd5fwBg</url>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-3.0-or-later</project_license>
   <releases>
