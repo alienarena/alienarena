@@ -108,6 +108,8 @@ void CL_DownloadComplete (void)
 
 	if (cls.downloadmappack) {
 		if (CL_ExtractFiles(cls.downloadname)) {
+			// Clear current map name so CM_LoadBSP() doesn't give a map difference error
+			map_name[0] = 0;
 			Com_Printf("Installed %s.\n", cls.downloadname);
 		}
 		else {
