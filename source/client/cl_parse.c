@@ -92,7 +92,14 @@ void CL_DownloadComplete (void)
 	int		r;
 	char	oldn[MAX_OSPATH];
 	char	newn[MAX_OSPATH];
-		
+
+	if (cls.downloadmappack) {
+		// Save map/model packs in folder "arena/downloads".
+		// cls.downloadname has to be excluding "downloads/" else it searches for the wrong location to download from.
+		// cls.downloadtempname already contains "downloads/".
+		Com_sprintf(cls.downloadname, sizeof(cls.downloadname), "downloads/%s", cls.downloadname);
+	}	
+
 	// rename the temp file to it's final name
 	CL_DownloadFileName(oldn, sizeof(oldn), cls.downloadtempname);
 	CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
@@ -116,7 +123,7 @@ void CL_DownloadComplete (void)
 			Com_Printf("Couldn't install %s.\n", cls.downloadname);
 		}
 
-		cls.downloadmappack = false;
+		cls.downloadmappack = 0;
 	}
 }
 
@@ -342,8 +349,8 @@ char *RemoveArenaFolderFromPath(char *filename) {
 CL_ExtractFiles
 
 Extracts downloaded zip containing one or more maps using minizip.
-The zip will be placed in the arena folder, but it also contains an arena folder.
-All files will be directly extracted from the read zip file to the place where they belong and the zip file remains in the arena folder.
+The zip will be located in the arena/downloads folder. The zip will contain an arena folder and everything else is in there.
+All files will be directly extracted from the read zip file to the place where they belong and the zip file remains in the arena/downloads folder.
 ===============
 */
 
@@ -421,30 +428,33 @@ qboolean CL_ExtractFiles(char *zipFilename)
             if (!FS_CheckFile(fullPath) || allow_overwrite_maps->integer)
             {
 				FILE *out = fopen(fullPath, "wb"); // write / binary
-
-				int readResult = UNZ_OK;
-				do    
-				{
-					readResult = unzReadCurrentFile(zipfile, read_buffer, READ_SIZE);
-					if (readResult < 0) // Error
+				if (out) {
+					int readResult = UNZ_OK;
+					do    
 					{
-						Com_Printf("Error: %d\n", readResult);
-						unzCloseCurrentFile( zipfile );
-						unzClose( zipfile );
-						return false;
-					}
+						readResult = unzReadCurrentFile(zipfile, read_buffer, READ_SIZE);
+						if (readResult < 0) // Error
+						{
+							Com_Printf("Error: %d\n", readResult);
+							unzCloseCurrentFile( zipfile );
+							unzClose( zipfile );
+							return false;
+						}
 
-					// Write data to file.
-					if (readResult > 0) // No error
-					{
-						size_t writeResult;
-						writeResult = fwrite(read_buffer, readResult, 1, out);
-					}
-				} while (readResult > 0);
-				
-				fclose(out);
-				
-				Com_Printf("Extracted %s.\n", originalFilename);
+						// Write data to file.
+						if (readResult > 0) // No error
+						{
+							size_t writeResult;
+							writeResult = fwrite(read_buffer, readResult, 1, out);
+						}
+					} while (readResult > 0);
+					
+					fclose(out);
+					
+					Com_Printf("Extracted %s.\n", originalFilename);
+				} else {
+					Com_Printf("Can't open file %s for writing.\n", fullPath);
+				}
 			}
         }
 
@@ -467,53 +477,64 @@ qboolean CL_ExtractFiles(char *zipFilename)
 	return true;
 }
 
-#define INSTALL_TYPE_MAP	1
-#define INSTALL_TYPE_MODEL	2
-
 /*
 ===============
 CL_InstallMapOrModel
 
 From command "installmap" or "installmodel". Request a map/model pack download from alienarena.org in zip format and extract the files.
+filenameArg: map or model name without extension.
+Return values:
+0: map pack doesn't exist and download was initiated
+1: invalid parameters or an error occurred
+2: map pack already exists
 ===============
 */
-void InstallMapOrModel (int type)
+int CL_InstallMapOrModel (int type, char *filenameArg)
 {
 	char filename[MAX_OSPATH];
 	char fullPath[MAX_OSPATH];
+	char destinationPath[MAX_OSPATH];
 	qboolean not_enough_args;
 
-	not_enough_args = Cmd_Argc () != 2;
+	if (!filenameArg || strlen(filenameArg) == 0) {
+		not_enough_args = Cmd_Argc () != 2;
 
-	if (cls.download) {
-		Com_Printf ("Already downloading something.\n");
-	}
-
-	if (not_enough_args || cls.download)
-	{
-		if (type == INSTALL_TYPE_MAP)
-		{
-			Com_Printf ("Usage: installmap <filename> - Download and extract a map pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+		if (cls.download) {
+			Com_Printf ("Already downloading something.\n");
 		}
-		else if (type == INSTALL_TYPE_MODEL)
-		{
-			Com_Printf ("Usage: installmodel <filename> - Download and extract a model pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
-		}
-		return;
-	}
 
-	Com_sprintf(filename, sizeof(filename), "%s", Cmd_Argv(1));
+		if (not_enough_args || cls.download)
+		{
+			if (type == INSTALL_TYPE_MAP)
+			{
+				Com_Printf ("Usage: installmap <filename> - Download and extract a map pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+			}
+			else if (type == INSTALL_TYPE_MODEL)
+			{
+				Com_Printf ("Usage: installmodel <filename> - Download and extract a model pack from alienarena.org.\nSee also cvar allow_overwrite_maps to force a reinstall.\n");
+			}
+			return INSTALL_MAP_RESULT_ERROR;
+		}
+	}
+	
+	if (filenameArg && strlen(filenameArg) > 0) {
+		Com_sprintf(filename, sizeof(filename), "%s", filenameArg);
+	} else {
+		Com_sprintf(filename, sizeof(filename), "%s", Cmd_Argv(1));
+	}
 
 	if (strstr(filename, ".."))
 	{
 		Com_Printf("Refusing to download a path with ..\n");
-		return;
+		return INSTALL_MAP_RESULT_ERROR;
 	}
 	
 	COM_StripExtension(COM_SkipPath(filename), filename);
+	// cls.downloadname contains only the map name as it will be downloaded from the server: ctf-map.zip
+	// but it will be stored in arena/downloads/ctf-map.zip
 	Com_sprintf(cls.downloadname, sizeof(cls.downloadname), "%s.zip", filename);
-
-	CL_DownloadFileName(fullPath, sizeof(fullPath), cls.downloadname);
+	Com_sprintf(destinationPath, sizeof(destinationPath), "downloads/%s", cls.downloadname);
+	CL_DownloadFileName(fullPath, sizeof(fullPath), destinationPath);
 	
 	if (FS_CheckFile(fullPath)) {
 		if (!allow_overwrite_maps->integer) {
@@ -526,7 +547,7 @@ void InstallMapOrModel (int type)
 				Com_Printf("Model pack already exists. Set allow_overwrite_maps to 1 to redownload and reinstall.\n");
 			}
 			cls.downloadname[0] = 0;
-			return;
+			return INSTALL_MAP_RESULT_ALREADY_EXISTS;
 		}
 		else {
 			// Delete existing zip file
@@ -534,9 +555,10 @@ void InstallMapOrModel (int type)
 		}
 	}
 
-	Com_sprintf(cls.downloadtempname, sizeof(cls.downloadtempname), "%s.tmp", filename);
+	// cls.downloadtempname contains "downloads/" from here already
+	Com_sprintf(cls.downloadtempname, sizeof(cls.downloadtempname), "downloads/%s.tmp", filename);
 	cls.downloadfromcommand = true;
-	cls.downloadmappack = true;
+	cls.downloadmappack = type;
 
 	CL_HttpDownloadMapPack(MAPPACK_URL);
 	
@@ -550,6 +572,7 @@ void InstallMapOrModel (int type)
 	}
 
 	// The extracting part will be done in CL_ExtractFiles(), called from CL_DownloadComplete()
+	return INSTALL_MAP_RESULT_DOWNLOAD_INITIATED;
 }
 
 /*
@@ -561,7 +584,7 @@ From command "installmap". Request a map pack download from alienarena.org in zi
 */
 void CL_InstallMap(void)
 {
-	InstallMapOrModel(INSTALL_TYPE_MAP);
+	CL_InstallMapOrModel(INSTALL_TYPE_MAP, NULL);
 }
 
 /*
@@ -573,7 +596,7 @@ From command "installmodel". Request a model pack download from alienarena.org i
 */
 void CL_InstallModel(void)
 {
-	InstallMapOrModel(INSTALL_TYPE_MODEL);
+	CL_InstallMapOrModel(INSTALL_TYPE_MODEL, NULL);
 }
 
 /*
@@ -615,6 +638,12 @@ static qboolean is_jpg()
 	return  !Q_strncasecmp( ".jpg", &cls.downloadname[exti], 4 );
 }
 
+static qboolean is_zip()
+{
+	size_t exti = strlen(cls.downloadname) - 4;
+	return  !Q_strncasecmp( ".zip", &cls.downloadname[exti], 4 );
+}
+
 /*
 =====================
 CL_ParseDownload
@@ -643,6 +672,21 @@ void CL_ParseDownload (void)
 		{
 			// Failed download was not a .jpg.
 			Com_Printf ("Server does not have file %s.\n", cls.downloadname);
+
+			if (is_zip() && cls.downloadmappack == INSTALL_TYPE_MAP) {
+				// If this is a non-existing map pack, then continue downloading the old way
+				Com_Printf("Revert to downloading map using sv_downloadurl.\n");
+
+				cls.downloadmappack = 0;
+				Com_sprintf(cls.downloadname, sizeof(cls.downloadname), "maps/%s", cls.downloadname);
+				COM_StripExtension(cls.downloadname, cls.downloadname);				
+				Com_sprintf(cls.downloadtempname, sizeof(cls.downloadtempname), "%s.tmp", cls.downloadname);				
+				strcat(cls.downloadname, ".bsp");
+
+				if (!CL_CheckOrDownloadFile(cls.downloadname)) {
+					return; // started a download
+				}
+			}
 
 			//nuke the temp filename, we don't want that getting left around.
 			cls.downloadtempname[0] = 0;

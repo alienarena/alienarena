@@ -3198,11 +3198,18 @@ option_name_t net_option_names[] =
 	},
 	{
 		option_spincontrol,
+		"auto_installmap",
+		"automatically download and install map packs before loading maps",
+		NULL,
+		setnames (onoff_names)
+	},
+	{
+		option_spincontrol,
 		"allow_overwrite_maps",
 		"installmap and installmodel overwrite files",
 		NULL,
 		setnames (onoff_names)
-	},
+	}
 };
 
 static void M_Menu_Net_f (void)

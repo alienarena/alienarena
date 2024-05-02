@@ -44,6 +44,7 @@ cvar_t	*allow_download_models;
 cvar_t	*allow_download_sounds;
 cvar_t	*allow_download_maps;
 cvar_t	*allow_overwrite_maps;
+cvar_t	*auto_installmap;
 
 cvar_t	*sv_airaccelerate;
 
@@ -1413,6 +1414,8 @@ void SV_Init (void)
 	allow_download_models = Cvar_Get ("allow_download_models", "1", CVAR_ARCHIVE);
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
+	auto_installmap  = Cvar_Get ("auto_installmap", "1", CVAR_ARCHIVE);
+	Cvar_Describe (auto_installmap, "Automatically download and install map packs before loading maps. See also cvar allow_overwrite_maps whether to overwrite existing files.");
 	allow_overwrite_maps  = Cvar_Get ("allow_overwrite_maps", "0", CVAR_ARCHIVE);
 	Cvar_Describe (allow_overwrite_maps, "Used for command installmap and installmodel. If set to 1, existing downloaded map packs or model packs will be overwritten and all files in it will be extracted, overwriting any existing files.");
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);

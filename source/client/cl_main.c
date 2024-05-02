@@ -174,6 +174,7 @@ extern	cvar_t *allow_download_players;
 extern	cvar_t *allow_download_models;
 extern	cvar_t *allow_download_sounds;
 extern	cvar_t *allow_download_maps;
+extern	cvar_t *auto_installmap;
 
 #if defined WIN32_VARIANT
 extern	char map_music[MAX_PATH];
@@ -1506,9 +1507,34 @@ void CL_RequestNextDownload (void)
 	if (precache_check == CS_MODELS) // confirm map
 	{
 		precache_check = CS_MODELS+2; // 0 isn't used
-		if (allow_download_maps->integer)
-			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
+		if (allow_download_maps->integer) {
+			
+			if (auto_installmap->integer && 
+				cl.configstrings[CS_MODELS + 1][0] == 'm' &&
+				cl.configstrings[CS_MODELS + 1][1] == 'a' &&
+				cl.configstrings[CS_MODELS + 1][2] == 'p' &&
+				cl.configstrings[CS_MODELS + 1][3] == 's' &&
+				cl.configstrings[CS_MODELS + 1][4] == '/') {
+				
+				char mapname[256];
+				
+				// Strip "maps/"
+				strcpy(mapname, cl.configstrings[CS_MODELS + 1] + 5);
+
+				if (strstr(mapname, ".bsp")) {
+					// Strip ".bsp"
+					mapname[strlen(mapname) - 4] = 0;
+
+					if (CL_InstallMapOrModel(INSTALL_TYPE_MAP, mapname) == INSTALL_MAP_RESULT_DOWNLOAD_INITIATED) {
+						return;
+					};
+				}
+			}
+
+			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1])) {
 				return; // started a download
+			}
+		}
 	}
 	
 redoSkins:

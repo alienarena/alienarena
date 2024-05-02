@@ -265,7 +265,12 @@ typedef struct
 	char		downloadurl[MAX_OSPATH];  // for http downloads
 	qboolean	downloadhttp;
 	qboolean	downloadfromcommand;
-	qboolean	downloadmappack;
+	
+	// 0 = not applicable
+	// 1 = downloading a map pack
+	// 2 = downloading a model pack
+	// see also INSTALL_TYPE_MAP and INSTALL_TYPE_MODEL
+	int			downloadmappack;
 
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;
@@ -559,8 +564,18 @@ void CL_ParseClientinfo (int player);
 void CL_DownloadFileName (char *dest, int destlen, char *fn);
 void CL_DownloadComplete (void);
 void CL_Download_f (void);
+
+// also used for cls.downloadmappack
+#define INSTALL_TYPE_MAP	1
+#define INSTALL_TYPE_MODEL	2
+
+#define INSTALL_MAP_RESULT_DOWNLOAD_INITIATED	0
+#define INSTALL_MAP_RESULT_ERROR 				1
+#define INSTALL_MAP_RESULT_ALREADY_EXISTS		2
+
 void CL_InstallMap (void);
 void CL_InstallModel (void);
+int CL_InstallMapOrModel (int type, char *filenameArg);
 
 //
 // cl_scrn.c
