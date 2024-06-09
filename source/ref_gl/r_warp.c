@@ -437,12 +437,19 @@ R_SetSky
 */
 // 3dstudio environment map names
 char	*suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
-void R_SetSky (char *name, float rotate, vec3_t axis)
+void R_SetSky (char *name, float rotate, vec3_t axis, qboolean force)
 {
 	int		i;
 	char	pathname[MAX_QPATH];
 
-	strncpy (skyname, name, sizeof(skyname)-1);
+	if (!force && r_skyname && r_skyname[0]) {
+		Com_Printf("Overruling sky from fog script: %s\n", r_skyname);
+		strncpy (skyname, r_skyname, sizeof(skyname) - 1);
+	}
+	else
+	{
+		strncpy (skyname, name, sizeof(skyname) - 1);
+	}
 	skyrotate = rotate;
 	VectorCopy (axis, skyaxis);
 

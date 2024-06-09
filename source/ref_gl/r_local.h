@@ -192,6 +192,7 @@ extern float		r_sunIntens;
 extern float		r_skyangleX;
 extern float		r_skyangleY;
 extern float		r_skyangleZ;
+extern char			r_skyname[MAX_QPATH];
 
 extern  cvar_t		*r_minimap;
 extern  cvar_t		*r_minimap_size;

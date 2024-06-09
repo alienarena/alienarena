@@ -204,11 +204,29 @@ float r_sunIntens;
 float r_skyangleX;
 float r_skyangleY;
 float r_skyangleZ;
+char r_skyname[MAX_QPATH];
 
 /*
 =================
 R_ReadFogScript
 =================
+
+0.0 - Ambient red
+0.0 - Ambient green
+0.0 - Ambient blue
+0 - Minimum fog distance
+0 - Maximum fog distance
+0.0 - Fog density
+0 - Ambience type (0 = nothing, 1 = raining, 2 = snowing, 3 = falling leaves, 4 = glowing embers, 5 = trash)
+0 = Draw sun, 1 = No sun.
+0 = Sun position X (Default: -140000)
+0 = Sun position Y (Default: 80000)
+0 = Sun position Z (Default: -45000)
+0 = Sun intensity (Default: 0.6)
+0 = Skybox angle X (in degrees, default 0)
+0 = Skybox angle Y (in degrees, default 0)
+0 = Skybox angle Z (in degrees, default 0)
+  = Skybox name (to overrule the one specified in the map)
 */
 
 void R_ReadFogScript( char *config_file )
@@ -236,36 +254,52 @@ void R_ReadFogScript( char *config_file )
 		{
 			s = buffer;
 
-			strcpy( a_string, COM_Parse( &s ) );
+			strcpy(a_string, COM_Parse(&s));
 			fog.red = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			fog.green = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			fog.blue = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			fog.start = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			fog.end = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			fog.density = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_weather = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_nosun = atoi(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_sunX = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_sunY = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_sunZ = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_sunIntens = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_skyangleX = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_skyangleY = atof(a_string);
-			strcpy( a_string, COM_Parse( &s ) );
+			
+			strcpy(a_string, COM_Parse(&s));
 			r_skyangleZ = atof(a_string);
+
+			strcpy(r_skyname, COM_Parse(&s));
 
 			if(fog.density > 0)
 				map_fog = true;

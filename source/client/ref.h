@@ -365,7 +365,7 @@ struct model_s	*R_RegisterModel (char *name);
 struct image_s	*R_RegisterSkin (char *name);
 struct image_s	*R_RegisterPic (const char *name);
 
-void	R_SetSky (char *name, float rotate, vec3_t axis);
+void	R_SetSky (char *name, float rotate, vec3_t axis, qboolean force);
 
 void	R_RegisterBasePlayerModels(void);
 void	R_RegisterCustomPlayerModels(void);
