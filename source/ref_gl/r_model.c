@@ -2082,6 +2082,7 @@ void R_BeginRegistration (char *model)
 	r_skyangleX = 0;
 	r_skyangleY = 0;
 	r_skyangleZ = 0;
+	r_skyname[0] = 0;
 	r_sunIntens = 1.0;
 	for(;;)
 	{
