@@ -288,7 +288,6 @@ nobase_dist_gfx_DATA = \
 	m_banner_main_mask.tga \
 	menubar1.tga \
 	menubar2.tga \
-	menubar3.tga \
 	menubar4.tga \
 	metalenvmap.jpg \
 	mirrorspec.tga \

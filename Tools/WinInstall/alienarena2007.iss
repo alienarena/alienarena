@@ -25,7 +25,7 @@ Compression=lzma
 SolidCompression=true
 UsePreviousAppDir=false
 UsePreviousGroup=false
-AppCopyright=© 2013 COR Entertainment LLC
+AppCopyright=ï¿½ 2013 COR Entertainment LLC
 ShowLanguageDialog=no
 AppComments=Please close application before running uninstall
 UninstallDisplayIcon={app}\Aa1.ico
@@ -4819,7 +4819,6 @@ Source: ..\..\Alien Arena 2007\botinfo\tac-extermination.tmp; DestDir: {app}\bot
 Source: ..\..\Alien Arena 2007\botinfo\nav\tca-invasion.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\Alien Arena 2007\botinfo\nav\tac-extermination.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\Alien Arena 2007\data1\gfx\menubar2.tga; DestDir: {app}\data1\gfx
-Source: ..\..\Alien Arena 2007\data1\gfx\menubar3.tga; DestDir: {app}\data1\gfx
 Source: ..\..\Alien Arena 2007\data1\gfx\menubar4.tga; DestDir: {app}\data1\gfx
 Source: ..\..\Alien Arena 2007\data1\gfx\menubar1.tga; DestDir: {app}\data1\gfx
 Source: ..\..\Alien Arena 2007\data1\fonts\agentred.ttf; DestDir: {app}\data1\fonts
