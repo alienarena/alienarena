@@ -448,7 +448,7 @@ void CON_Initialise( )
 	Com_Printf( "Console initialized.\n" );
 
 	// Register CVars
-	con_notifytime = Cvar_Get( "con_notifytime" , "3" , 0 );
+	con_notifytime = Cvar_Get( "con_notifytime" , "6" , CVARDOC_INT | CVAR_ARCHIVE );
 	con_ignorecolorcodes = Cvar_Get( "con_ignorecolorcodes", "0", CVARDOC_BOOL|CVAR_ARCHIVE );
 
 	// 0 = off
