@@ -190,6 +190,17 @@ void M_Menu_Main_f (void);
 
 	static void M_Menu_Credits_f (void);
 
+
+#define DISCORD_LINK "https://discord.gg/Rd5fwBg"
+void OpenDiscord();
+qboolean DiscordButtonSelected();
+int discordOpenedStartTime;
+
+// Button coordinates, x, y, x+w, y+h
+// This button works with coordinates based on the image
+int discordButtonCoordinates[4];
+
+
 qboolean	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 
@@ -1042,7 +1053,7 @@ char *main_names[] =
 	"m_main_host",
 	"m_main_options",
 	"m_main_quit",
-	"m_main_credits",
+	"m_main_credits"
 };
 #define MAIN_ITEMS static_array_size(main_names)
 
@@ -1315,6 +1326,13 @@ static void M_Main_Draw (menuvec2_t offset)
 			FNT_BoundedPrint (font, newsFeed[i], FNT_CMODE_QUAKE_SRS, FNT_ALIGN_CENTER, &box, FNT_colors[7]);
 		}
 	}
+	
+	// Draw the discord button
+	DrawDiscordButton(offset.x);
+	if (cls.realtime - discordOpenedStartTime < 1500)
+	{
+		ShowDiscordOpening();
+	}
 
 	if ( y <= 12*scale )
 		news_start_time = cls.realtime;
@@ -1329,6 +1347,13 @@ void CheckMainMenuMouse (void)
 	int i, oldhover;
 	float scale;
 	static int MainMenuMouseHover;
+
+	if (DiscordButtonSelected() && cursor.mouseaction && !cursor.buttonused[MOUSEBUTTON1] && cursor.buttonclicks[MOUSEBUTTON1] == 1)
+	{
+		refreshCursorButton(MOUSEBUTTON1);
+		OpenDiscord();
+		return;
+	}
 
 	scale = (float)(viddef.height)/600;
 
@@ -6838,6 +6863,61 @@ void M_Menu_PlayerConfig_f (void)
 /*
 =======================================================================
 
+DISCORD BUTTON IN THE MAIN MENU
+
+=======================================================================
+*/
+
+void DrawDiscordButton(int offsetx)
+{
+	float scale = ((float)(viddef.height)) / 1440.0;
+	float width = 214.0 * scale;
+	float height = 81.0 * scale;
+	discordButtonCoordinates[0] = offsetx * 1.25 + 50 * scale;
+	discordButtonCoordinates[1] = viddef.height - 120 * scale;
+	discordButtonCoordinates[2] = discordButtonCoordinates[0] + width;
+	discordButtonCoordinates[3] = discordButtonCoordinates[1] + height;
+
+	Draw_ScaledPic(discordButtonCoordinates[0], discordButtonCoordinates[1], scale, DiscordButtonSelected() ? "discordHighlight" : "discord");
+}
+
+qboolean DiscordButtonSelected()
+{
+	return cursor.x > discordButtonCoordinates[0] && cursor.x < discordButtonCoordinates[2] &&
+		cursor.y > discordButtonCoordinates[1] && cursor.y < discordButtonCoordinates[3];
+}
+
+void ShowDiscordOpening()
+{
+	Draw_Fill (0, 0, viddef.width, viddef.height, RGBA (0, 0, 0, 0.85));
+	SCR_CenterPrint ("Opening Discord link ...");
+	SCR_DrawCenterString ();
+}
+
+void OpenDiscord()
+{
+	char command[50];
+	
+	// Prevent opening multiple times by accident.
+	if (discordOpenedStartTime == 0 || cls.realtime - discordOpenedStartTime > 2000)
+	{
+		discordOpenedStartTime = cls.realtime;
+
+		ShowDiscordOpening();
+
+#if defined WIN32_VARIANT
+		sprintf(command, "start %s", DISCORD_LINK);
+#else
+		sprintf(command, "xdg-open %s", DISCORD_LINK);
+#endif
+		system(command);
+	}
+}
+
+
+/*
+=======================================================================
+
 ALIEN ARENA TACTICAL MENU
 
 =======================================================================
@@ -7150,7 +7230,7 @@ void M_Think_MouseCursor (void)
 	int coordidx;
 	menuframework_s *m; 
 	char * sound = NULL;
-	
+
 	if (mstate.state != mstate_steady)
 		return;
 	
