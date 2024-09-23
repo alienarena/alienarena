@@ -3,6 +3,7 @@
   <id>org.alienarena.alienarena</id>
   <launchable type="desktop-id">org.alienarena.alienarena.desktop</launchable>
   <name>Alien Arena</name>
+  <developer_name>Alien Arena team - previously COR Entertainment</developer_name>
   <summary>Ultra fast paced arena FPS</summary>
   <content_rating type="oars-1.0">
     <content_attribute id="violence-cartoon">moderate</content_attribute>
