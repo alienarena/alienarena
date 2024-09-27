@@ -192,6 +192,8 @@ void M_Menu_Main_f (void);
 
 
 #define DISCORD_LINK "https://discord.gg/Rd5fwBg"
+void DrawDiscordButton(int offsetx);
+void ShowDiscordOpening();
 void OpenDiscord();
 qboolean DiscordButtonSelected();
 int discordOpenedStartTime;
