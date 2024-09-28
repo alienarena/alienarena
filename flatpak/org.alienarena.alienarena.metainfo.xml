@@ -65,8 +65,8 @@
     <release version="7.71.7" date="2024-09-23">
       <description>
         <ul>
+          <li>Automatic and ultra-fast installation of map packs before loading a map (by default enabled)</li>
           <li>Added Discord button in the main menu to easily join the Discord server</li>
-          <li>Automatic installation of map packs before loading a map (by default enabled)</li>
           <li>Fixed a map difference error bug after reinstalling a map</li>
           <li>Added option to override the sky from the fog script (only relevant to mappers)</li>
           <li>Removed the sponsor banner</li>

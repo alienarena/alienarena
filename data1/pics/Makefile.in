@@ -289,6 +289,8 @@ nobase_dist_pics_DATA = \
 	crosshairs/xenos.tga \
 	ctf1.tga \
 	ctf2.tga \
+	discord.tga \
+	discordHighlight.tga \
 	dnarrow.tga \
 	help.tga \
 	i_ammo.tga \
