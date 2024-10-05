@@ -66,6 +66,7 @@
       <description>
         <ul>
           <li>Automatic and ultra-fast installation of map packs before loading a map (by default enabled)</li>
+          <li>Fixed a bug in single player mode that caused crashes with bot interaction</li>
           <li>Added Discord button in the main menu to easily join the Discord server</li>
           <li>Fixed a map difference error bug after reinstalling a map</li>
           <li>Added option to override the sky from the fog script (only relevant to mappers)</li>
