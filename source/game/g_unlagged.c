@@ -55,14 +55,14 @@ Keep track of where the client's been
 */
 void G_StoreHistory(edict_t* ent) {
 	int historyHead;
+	clientHistory_t* history;
 
 	++ent->client->historyHead;
 	if (ent->client->historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE) {
 		ent->client->historyHead = 0;
 	}
 	historyHead = ent->client->historyHead;
-
-	clientHistory_t* history = &ent->client->history[historyHead];
+	history = &ent->client->history[historyHead];
 
 	// store all the collision-detection info and the time
 	VectorCopy(ent->mins, history->mins);
@@ -99,6 +99,7 @@ Move a client back to where he was at the specified time
 void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger) {
     int i, j, k;
     int failSafeCounter = 0;
+	int historyHead;
  	// char	str[MAX_STRING_CHARS];
 
 	// Fix for rocket funround crash/loop,
@@ -111,7 +112,7 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
         return;
     }
 
-    int historyHead = ent->client->historyHead;
+    historyHead = ent->client->historyHead;
     if (historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE) {
 		// historyHead should never be larger than this value, for example higher than 8 at tickrate 10 or 16 at tickrate 20
         Com_Printf("G_TimeShiftClient: historyHead larger than expected...\n");
@@ -323,7 +324,7 @@ except for "skip"
 */
 void G_UnTimeShiftAllClients( edict_t *skip ) 
 {
-	int			i;
+	int 	i;
 	edict_t	*ent;
 
 	for (i=0 ; i<g_maxclients->value ; i++)
@@ -366,9 +367,9 @@ state of the game.
 */
 void G_AntilagProjectile(edict_t* ent) {
 	edict_t *owner;
-	int ping = ent->owner->client->ping;
-	int time = ent->owner->client->attackTime - ping;
 	int frameTime = FRAMETIME_MS;
+	int ping;
+	int time;
 
 	// Save a copy of the player who fired the shot. The reason not to refer
 	// to ent->owner directly is because if the projectile hits something,
@@ -380,6 +381,9 @@ void G_AntilagProjectile(edict_t* ent) {
 	{
 		return;
 	}
+
+	ping = ent->owner->client->ping;
+	time = ent->owner->client->attackTime - ping;
 
 	// Handle the full lag compensation frames
 	while (ping > frameTime) {
