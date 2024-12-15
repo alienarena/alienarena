@@ -167,7 +167,6 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 			}
 
 			g_antilagprojectiles->integer = 0;
-			Cvar_SetValue("g_antilagprojectiles", 0);
 			return;
 		}
 
