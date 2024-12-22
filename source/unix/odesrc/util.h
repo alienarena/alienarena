@@ -25,7 +25,7 @@
 
 #include "objects.h"
 #include "common.h"
-
+#include <stdint.h>
 
 /* the efficient alignment. most platforms align data structures to some
  * number of bytes, but this is not always the most efficient alignment.
@@ -47,12 +47,12 @@
 /* round something up to be a multiple of the EFFICIENT_ALIGNMENT */
 
 #define dEFFICIENT_SIZE(x) (((x) + (EFFICIENT_ALIGNMENT - 1)) & (int)(~(EFFICIENT_ALIGNMENT - 1))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dEFFICIENT_PTR(p) ((void *)dEFFICIENT_SIZE((uintptr)(p)))
-#define dOFFSET_EFFICIENTLY(p, b) ((void *)((uintptr)(p) + dEFFICIENT_SIZE(b)))
+#define dEFFICIENT_PTR(p) ((void *)dEFFICIENT_SIZE((uintptr_t)(p)))
+#define dOFFSET_EFFICIENTLY(p, b) ((void *)((uintptr_t)(p) + dEFFICIENT_SIZE(b)))
 
 #define dOVERALIGNED_SIZE(size, alignment) dEFFICIENT_SIZE((size) + ((alignment) - EFFICIENT_ALIGNMENT))
-#define dOVERALIGNED_PTR(buf_ptr, alignment) ((void *)(((uintptr)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dOFFSET_OVERALIGNEDLY(buf_ptr, size, alignment) ((void *)((uintptr)(buf_ptr) + dOVERALIGNED_SIZE(size, alignment)))
+#define dOVERALIGNED_PTR(buf_ptr, alignment) ((void *)(((uintptr_t)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
+#define dOFFSET_OVERALIGNEDLY(buf_ptr, size, alignment) ((void *)((uintptr_t)(buf_ptr) + dOVERALIGNED_SIZE(size, alignment)))
 
 /* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
  * up to 15 bytes per allocation, depending on what alloca() returns.
