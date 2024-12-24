@@ -101,7 +101,7 @@
     typedef ptrdiff_t       ddiffint;
     typedef size_t          dsizeint;
 
-#elif defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
+#elif defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__) || defined(__e2k__)
   #define X86_64_SYSTEM   1
 #if defined(_MSC_VER)
   typedef __int64         dint64;
