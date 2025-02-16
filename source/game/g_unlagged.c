@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "g_local.h"
+#include "qcommon/qcommon.h"
 
 /*
 ============
