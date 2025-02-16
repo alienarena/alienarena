@@ -828,6 +828,22 @@ void Player_ResetPowerups (edict_t *ent)
 	ent->client->next_regen_time = 0;
 }
 
+qboolean PlayerHasFlag(edict_t *self)
+{
+	gitem_t *redFlag, *blueFlag;
+
+	redFlag = blueFlag = NULL;
+
+	redFlag = FindItemByClassname("item_flag_red");
+	blueFlag = FindItemByClassname("item_flag_blue");
+
+	if (self->client->pers.inventory[ITEM_INDEX(redFlag)] || self->client->pers.inventory[ITEM_INDEX(blueFlag)])
+	{
+		return true;
+	}
+
+	return false;
+}
 
 /*
 ==================
@@ -841,8 +857,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int	got_vehicle = 0;
 	int	number_of_gibs = 0;
 	int	gib_effect = EF_GREENGIB;
-	int hasFlag = false;
-	gitem_t *flag1_item, *flag2_item;
 	int mod;
 
 	mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
@@ -926,19 +940,14 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 		if(ctf->value) 
 		{
-			//check to see if they had a flag
-			flag1_item = flag2_item = NULL;
-
-			flag1_item = FindItemByClassname("item_flag_red");
-			flag2_item = FindItemByClassname("item_flag_blue");
-
-			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)] || self->client->pers.inventory[ITEM_INDEX(flag1_item)])
-				hasFlag = true;
+			// Check to see if they had a flag
+			qboolean hasFlag = PlayerHasFlag(self);
 
 			CTFDeadDropFlag(self, attacker);
+
 			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) 
 			{
-				//make campers really pay for hiding flags
+				// Make campers really pay for hiding flags
 				if(self->dmteam == BLUE_TEAM)
 					CTFResetFlag(RED_TEAM);
 				else
@@ -2205,6 +2214,12 @@ void PutClientInServer (edict_t *ent)
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char userinfo[MAX_INFO_STRING];
+	qboolean hasFlag;
+
+	if (ctf->value)
+	{
+		hasFlag = PlayerHasFlag(ent);
+	}
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -2221,6 +2236,7 @@ void PutClientInServer (edict_t *ent)
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
+
 	if (ent->is_bot)
 	{
 		// TODO: make ClientUserinfoChanged handle bots correctly.
@@ -2363,6 +2379,24 @@ void PutClientInServer (edict_t *ent)
 		client->ps.gunindex = 0;
 		gi.linkentity (ent);
 
+		// Drop flag, if applicable
+		if(ctf->value)
+		{
+			CTFDeadDropFlag(ent, NULL);
+			
+			if (hasFlag)
+			{
+				if(ent->dmteam == BLUE_TEAM)
+				{
+					CTFResetFlag(RED_TEAM);
+				}
+				else
+				{
+					CTFResetFlag(BLUE_TEAM);
+				}	
+			}
+		}	
+		
 		// clear team affiliation
 		ent->dmteam = NO_TEAM;
 
@@ -3095,8 +3129,23 @@ void ClientDisconnect (edict_t *ent)
 	safe_bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 
     if(ctf->value)
-    { //if carrying flag, don't take it with you! no attacker points.
+    {
+		// Drop flag, if applicable
+		qboolean hasFlag = PlayerHasFlag(ent);
+
 		CTFDeadDropFlag(ent, NULL);
+
+		if (hasFlag)
+		{
+			if(ent->dmteam == BLUE_TEAM)
+			{
+				CTFResetFlag(RED_TEAM);
+			}
+			else
+			{
+				CTFResetFlag(BLUE_TEAM);
+			}	
+		}
     }
 
 	if(ent->deadflag && ent->client->chasetoggle == 1)
