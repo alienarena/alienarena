@@ -4193,7 +4193,7 @@ static void ServerInfo_SubmenuInit (void)
 	#endif
 
 	#if STATS_ENABLED
-		char *contents[2*rows+1] = {
+		const char *contents[2*rows+1] = {
 			"Map:",			mservers[serverindex].szMapName,
 			"Skill:",		mservers[serverindex].skill,
 			"Admin:",		mservers[serverindex].szAdmin,
@@ -4204,7 +4204,7 @@ static void ServerInfo_SubmenuInit (void)
 			"Gameplay:"
 		};
 	#else
-		char *contents[2*rows+1] = {
+		const char *contents[2*rows+1] = {
 			"Map:",			mservers[serverindex].szMapName,
 			"Admin:",		mservers[serverindex].szAdmin,
 			"Website:",		mservers[serverindex].szWebsite,
@@ -4280,7 +4280,7 @@ static void PlayerList_SubmenuInit (void)
 	int i, j;
 	//qboolean is_team_server = false;
 
-	char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
+	const char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
 	size_t sizes[SVDATA_PLAYERINFO]
 		= {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
 	
