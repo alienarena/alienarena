@@ -5739,7 +5739,7 @@ static void StartServerActionFunc (UNUSED void *self)
 		Cvar_ForceSet("dedicated", "0");
 #endif
 		Cvar_Set("sv_maplist", startmap);
-		Cbuf_AddText (sprintf("setmaster %s %s\n", DEFAULT_MASTER_1, DEFAULT_MASTER_2));
+		Cbuf_AddText(va("setmaster %s %s\n", DEFAULT_MASTER_1, DEFAULT_MASTER_2));
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "g_antilagprojectiles", s_antilagprojectiles_box.curvalue);
