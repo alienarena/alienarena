@@ -7147,7 +7147,7 @@ static void Slider_CheckSlide (menuslider_s *s)
 		s->curvalue = s->minvalue;
 
 	//TO DO - this generates a scary warning - incompatible menuslider_s vs menuitem_s * - there are several similar instances in the menu code.
-	Menu_ActivateItem (s);
+	Menu_ActivateItem ((menuitem_s *)s);
 }
 
 static void Menu_DragSlideItem (void)

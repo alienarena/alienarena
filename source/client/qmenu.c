@@ -185,7 +185,7 @@ qboolean Field_Key (int key)
 	menufield_s *f;
 	extern int keydown[];
 	
-	f = cursor.menuitem;
+	f = (menufield_s *)cursor.menuitem;
 	
 	if (f == NULL || f->generic.type != MTYPE_FIELD)
 		return false;
@@ -1001,7 +1001,7 @@ void Menu_AssignCursor (menuframework_s *menu)
 	if (menu->maxheight != 0 && CHASELINK(menu->height) > menu->maxheight && cursor.x > right)
 	{
 		// select the scrollbar
-		item = &menu->vertical_scrollbar;
+		item = (menuitem_s *) &menu->vertical_scrollbar;
 		Cursor_MouseSelectItem (item);
 	}
 	else for ( i = 0; i < menu->nitems; i++ )
@@ -1464,7 +1464,7 @@ void Menu_SetStatusBar( menuframework_s *m, const char *string )
 
 void Menu_SlideItem (int dir)
 {
-	menucommon_s *item = cursor.menuitem;
+	menucommon_s *item = (menucommon_s *)(cursor.menuitem);
 	
 	if ( item )
 	{
@@ -1512,7 +1512,7 @@ void Slider_DoSlide( menuslider_s *s, int dir )
 	else if ( s->curvalue < s->minvalue )
 		s->curvalue = s->minvalue;
 
-	Menu_ActivateItem (s);
+	Menu_ActivateItem ((menuitem_s *)s);
 }
 
 void Slider_Draw (menuslider_s *s, FNT_font_t font)
@@ -1571,7 +1571,7 @@ void SpinControl_DoSlide( menulist_s *s, int dir )
 			s->curvalue--;
 	}
 
-	Menu_ActivateItem (s);
+	Menu_ActivateItem ((menuitem_s *)s);
 }
 
 void SpinControl_Draw (menulist_s *s, FNT_font_t font)
