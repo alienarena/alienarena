@@ -106,14 +106,15 @@ static qboolean IsFemale (edict_t *ent)
 
 void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
-	int		mod=0, msg;
+	int			mod = 0, msg;
 	char		*message;
 	char		*message2;
+	char		*centermessage;
 	qboolean	ff;
 	char		*chatmsg;
 	char		*tauntmsg;
-	char cleanname[PLAYERNAME_SIZE];
-	char cleanname2[PLAYERNAME_SIZE];
+	char 		selfname_cleaned[PLAYERNAME_SIZE];
+	char 		attackername_cleaned[PLAYERNAME_SIZE];
 	int			i, pos, total, place;
 	edict_t		*cl_ent;
 
@@ -124,6 +125,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		message = NULL;
 		chatmsg = NULL;
 		tauntmsg = NULL;
+		centermessage = "";
 		message2 = "";
 
 		switch (mod)
@@ -211,8 +213,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		if (attacker && attacker->client)
 		{
 			//clean up names, get rid of escape chars
-			G_CleanPlayerName ( self->client->pers.netname , cleanname );
-			G_CleanPlayerName ( attacker->client->pers.netname , cleanname2 );
+			G_CleanPlayerName ( self->client->pers.netname , selfname_cleaned );
+			G_CleanPlayerName ( attacker->client->pers.netname , attackername_cleaned );
 
 			if(!attacker->is_bot) 
 			{
@@ -233,16 +235,16 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				switch(place)
 				{
 				case 0:
-					safe_centerprintf(attacker, "You fragged %s\n1st place with %i frags\n", cleanname, attacker->client->resp.score+1);
+					safe_centerprintf(attacker, "You fragged %s\n1st place with %i frags\n", selfname_cleaned, attacker->client->resp.score+1);
 					break;
 				case 1:
-					safe_centerprintf(attacker, "You fragged %s\n2nd place with %i frags\n", cleanname, attacker->client->resp.score+1);
+					safe_centerprintf(attacker, "You fragged %s\n2nd place with %i frags\n", selfname_cleaned, attacker->client->resp.score+1);
 					break;
 				case 2:
-					safe_centerprintf(attacker, "You fragged %s\n3rd place with %i frags\n", cleanname, attacker->client->resp.score+1);
+					safe_centerprintf(attacker, "You fragged %s\n3rd place with %i frags\n", selfname_cleaned, attacker->client->resp.score+1);
 					break;
 				default:
-					safe_centerprintf(attacker, "You fragged %s\n", cleanname);
+					safe_centerprintf(attacker, "You fragged %s\n", selfname_cleaned);
 					break;
 				}
 
@@ -256,67 +258,84 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			{
 			case MOD_BLASTER:
 				message = "was blasted by";
+				centermessage = "You were blasted by";
 				break;
 			case MOD_VIOLATOR:
 				message = "was probed by";
+				centermessage = "You were probed by";
 				break;
 			case MOD_CGALTFIRE:
 				message = "was blown away by";
+				centermessage = "You were blown away by";
 				message2 = "'s chaingun burst";
 				break;
 			case MOD_CHAINGUN:
 				message = "was cut in half by";
+				centermessage = "You were cut in half by";
 				message2 = "'s chaingun";
 				break;
 			case MOD_FLAME:
 				message = "was burned by";
+				centermessage = "You were burned by";
 				message2 = "'s napalm";
 				break;
 			case MOD_ROCKET:
 				message = "ate";
+				centermessage = "You ate";
 				message2 = "'s rocket";
 				break;
 			case MOD_R_SPLASH:
 				message = "almost dodged";
+				centermessage = "You almost dodged";
 				message2 = "'s rocket";
 				break;
 			case MOD_BEAMGUN:
 				message = "was melted by";
+				centermessage = "You were melted by";
 				message2 = "'s beamgun";
 				break;
 			case MOD_DISRUPTOR:
 				message = "was disrupted by";
+				centermessage = "You were disrupted by";
 				break;
 			case MOD_SMARTGUN:
 				message = "saw the pretty lights from";
+				centermessage = "You saw the pretty lights from";
 				message2 = "'s smartgun";
 				break;
 			case MOD_VAPORIZER:
 				message = "was disintegrated by";
+				centermessage = "You were disintegrated by";
 				message2 = "'s vaporizer blast";
 				break;
 			case MOD_VAPORALTFIRE:
 				message = "couldn't hide from";
+				centermessage = "You couldn't hide from";
 				message2 = "'s vaporizer";
 				break;
 			case MOD_MINDERASER:
 				message = "had its mind erased by";
+				centermessage = "You had your mind erased by";
 				message2 = "'s alien seeker";
 				break;
 			case MOD_PLASMA_SPLASH: //blaster splash damage
-				message = "was melted";
+				message = "was melted by";
+				centermessage = "You were melted by";
 				message2 = "'s plasma";
 				break;
 			case MOD_TELEFRAG:
 				message = "tried to invade";
+				centermessage = "You tried to invade";
 				message2 = "'s personal space";
 				break;
 			case MOD_GRAPPLE:
 				message = "was caught by";
+				centermessage = "You were caught by";
 				message2 = "'s grapple";
 				break;
 			case MOD_HEADSHOT:
 				message = "had its head blown off by";
+				centermessage = "You had your head blown off by";
 			}
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
@@ -413,6 +432,10 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			if (message)
 			{
 				safe_bprintf (PRINT_MEDIUM,"%s %s %s%s\n", self->client->pers.netname, message, attacker->client->pers.netname, message2);
+
+				// Print centered message to victim
+				// Note: for this the cvar fnt_game_size should be less than approximately 22 else this message overlaps with the scoreboard
+				safe_centerprintf(self, "%s %s%s\n", centermessage, attackername_cleaned, message2);
 
 				if (deathmatch->value)
 				{
@@ -521,7 +544,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
 										continue;
-									safe_centerprintf(cl_ent, "%s is on a killing spree!\n", cleanname2);
+									safe_centerprintf(cl_ent, "%s is on a killing spree!\n", attackername_cleaned);
 								}
 								if(!attacker->is_bot) 
 								{
@@ -537,7 +560,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
 										continue;
-									safe_centerprintf(cl_ent, "%s is on a rampage!\n", cleanname2);
+									safe_centerprintf(cl_ent, "%s is on a rampage!\n", attackername_cleaned);
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/rampage.wav"), 1, ATTN_NONE, 0);
 								PlayerGrantRewardPoints (attacker, 10);
@@ -555,7 +578,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
 										continue;
-									safe_centerprintf(cl_ent, "%s is unstoppable!\n", cleanname2);
+									safe_centerprintf(cl_ent, "%s is unstoppable!\n", attackername_cleaned);
 								}
 								if(!attacker->is_bot) 
 								{
@@ -571,7 +594,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
 										continue;
-									safe_centerprintf(cl_ent, "%s is a god!\n", cleanname2);
+									safe_centerprintf(cl_ent, "%s is a god!\n", attackername_cleaned);
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/godlike.wav"), 1, ATTN_NONE, 0);
 								PlayerGrantRewardPoints (attacker, 20);
@@ -593,7 +616,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
 									continue;
-								safe_centerprintf(cl_ent, "%s's killing spree\nended by %s!\n", cleanname, cleanname2);
+								safe_centerprintf(cl_ent, "%s's killing spree\nended by %s!\n", selfname_cleaned, attackername_cleaned);
 							}
 						}
 					}
