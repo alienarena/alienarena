@@ -2222,6 +2222,7 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("vote", NULL);
 	Cmd_AddCommand ("putaway", NULL);
 	Cmd_AddCommand ("playerlist", NULL);
+	Cmd_AddCommand ("teamselect", NULL);
 
 	Cvar_SetValue("scriptsloaded", 0);
 
