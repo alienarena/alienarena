@@ -270,6 +270,9 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 
 //	int wpflag = wpflags[ent->client->ps.weapon];
 	int time;
+	int ping;
+	int effectivePing;
+	float scale;
 
 	// don't time shift for mistakes or bots
 	if ( !ent->inuse || !ent->client || ent->is_bot ) 
@@ -277,13 +280,26 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 		return;
 	}
 
-	// do the full lag compensation
-	time = ent->client->attackTime - ent->client->ping - FRAMETIME_MS;
+	// compute effective ping: apply scale and clamp to max compensation if configured
+	ping = ent->client->ping;
+	effectivePing = ping;
+	if (g_antilag_compensation_scale) {
+		scale = g_antilag_compensation_scale->value;
+		if (scale < 0.0f) scale = 0.0f;
+		if (scale > 1.0f) scale = 1.0f;
+		effectivePing = (int)(ping * scale + 0.5f);
+	}
+	if (g_antilag_max_compensation && effectivePing > g_antilag_max_compensation->integer) {
+		effectivePing = g_antilag_max_compensation->integer;
+	}
+
+	// do the full lag compensation using effectivePing
+	time = ent->client->attackTime - effectivePing - FRAMETIME_MS;
 	//100 ms is our "built-in" lag due to the 10fps server frame
 
 	if (g_antilagdebug->integer > 0) {
-		Com_Printf("leveltime: %i, ping: %i, attackTime: %i, compensation: %i, corrected time: %i\n",
-			level.leveltime, ent->client->ping, ent->client->attackTime, ent->client->ping + FRAMETIME_MS, time);
+		Com_Printf("leveltime: %i, raw ping: %i, effectivePing: %i, attackTime: %i, compensation: %i, corrected time: %i\n",
+			level.leveltime, ping, effectivePing, ent->client->attackTime, effectivePing + FRAMETIME_MS, time);
 	}
 
 	G_TimeShiftAllClients( time, ent );
@@ -367,8 +383,10 @@ state of the game.
 void G_AntilagProjectile(edict_t* ent) {
 	edict_t *owner;
 	int frameTime = FRAMETIME_MS;
-	int ping;
+	int rawPing;
+	int effectivePing;
 	int time;
+	float scale;
 
 	// Save a copy of the player who fired the shot. The reason not to refer
 	// to ent->owner directly is because if the projectile hits something,
@@ -381,15 +399,26 @@ void G_AntilagProjectile(edict_t* ent) {
 		return;
 	}
 
-	ping = ent->owner->client->ping;
-	time = ent->owner->client->attackTime - ping;
+	rawPing = ent->owner->client->ping;
+	effectivePing = rawPing;
+	if (g_antilag_compensation_scale) {
+		scale = g_antilag_compensation_scale->value;
+		if (scale < 0.0f) scale = 0.0f;
+		if (scale > 1.0f) scale = 1.0f;
+		effectivePing = (int)(rawPing * scale + 0.5f);
+	}
+	if (g_antilag_max_compensation && effectivePing > g_antilag_max_compensation->integer) {
+		effectivePing = g_antilag_max_compensation->integer;
+	}
+
+	time = ent->owner->client->attackTime - effectivePing;
 
 	// Handle the full lag compensation frames
-	while (ping > frameTime) {
+	while (effectivePing > frameTime) {
 		time -= frameTime;
 		if (g_antilagdebug->integer > 0)
 		{
-			Com_Printf("Full lag compensation, ping %d, time %d\n", ping, time);
+			Com_Printf("Full lag compensation, raw ping %d, effective %d, time %d\n", rawPing, effectivePing, time);
 		}		
 		G_TimeShiftAllClients(time, owner);
 		G_RunEntity(ent, FRAMETIME); // Simulate the projectile for one frame
@@ -399,18 +428,18 @@ void G_AntilagProjectile(edict_t* ent) {
 			return;
 		}
 
-		ping -= frameTime;
+		effectivePing -= frameTime;
 	}
 
 	// Handle the remaining lag compensation (if any)
-	if (ping > 0) {
-		time -= ping;
+	if (effectivePing > 0) {
+		time -= effectivePing;
 		if (g_antilagdebug->integer > 0)
 		{
-			Com_Printf("Remaining lag compensation, ping %d, time %d\n", ping, time);
+			Com_Printf("Remaining lag compensation, raw ping %d, effective %d, time %d\n", rawPing, effectivePing, time);
 		}		
 		G_TimeShiftAllClients(time, owner);
-		G_RunEntity(ent, ping / 1000.0f); // Convert ping to seconds for the final frame
+		G_RunEntity(ent, effectivePing / 1000.0f); // Convert ping to seconds for the final frame
 		G_UnTimeShiftAllClients(owner);
 	}
 }

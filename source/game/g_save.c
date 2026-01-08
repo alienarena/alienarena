@@ -281,6 +281,12 @@ void InitGame (void)
 	// Value 1 to print extra console messages, value 2 to also print messages to the screen
 	g_antilagdebug = gi.cvar("g_antilagdebug", "0", 0 /*CVAR_SERVERINFO*/);
 
+	// tuning variables for antilag: scale applied to raw ping (0..1) and maximum compensation (ms)
+	g_antilag_compensation_scale = gi.cvar("g_antilag_compensation_scale", "0.75", CVAR_ARCHIVE);
+	gi.cvar_describe (g_antilag_compensation_scale, "scale applied to raw ping when computing lag compensation (0..1).");
+	g_antilag_max_compensation = gi.cvar("g_antilag_max_compensation", "300", CVAR_ARCHIVE);
+	gi.cvar_describe (g_antilag_max_compensation, "maximum lag compensation in milliseconds.");
+
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
 	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);

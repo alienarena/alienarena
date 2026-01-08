@@ -204,6 +204,8 @@ cvar_t  *sv_gamereport;
 //unlagged
 cvar_t	*g_antilagdebug;
 cvar_t	*g_antilagprojectiles;
+cvar_t	*g_antilag_compensation_scale;
+cvar_t	*g_antilag_max_compensation;
 
 void SpawnEntities (char *mapname, const char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
