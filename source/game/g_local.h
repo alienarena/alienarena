@@ -1794,8 +1794,8 @@ extern qboolean StringToFilter (char *s, ipfilter_t *f);
 //unlagged
 extern  cvar_t	*g_antilagdebug;
 extern	cvar_t	*g_antilagprojectiles;
-extern	cvar_t	*g_antilag_compensation_scale;
-extern	cvar_t	*g_antilag_max_compensation;
+extern	cvar_t	*g_antilag_ping_threshold;
+extern	cvar_t	*g_antilag_max_ping;
 
 // ACEBOT_ADD
 #include "acesrc/acebot.h"

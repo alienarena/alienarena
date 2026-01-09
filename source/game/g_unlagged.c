@@ -272,7 +272,8 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	int time;
 	int ping;
 	int effectivePing;
-	float scale;
+	int threshold;
+	int maxPing;
 
 	// don't time shift for mistakes or bots
 	if ( !ent->inuse || !ent->client || ent->is_bot ) 
@@ -280,17 +281,21 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 		return;
 	}
 
-	// compute effective ping: apply scale and clamp to max compensation if configured
+	// compute effective ping using piecewise diminishing returns formula
 	ping = ent->client->ping;
-	effectivePing = ping;
-	if (g_antilag_compensation_scale) {
-		scale = g_antilag_compensation_scale->value;
-		if (scale < 0.0f) scale = 0.0f;
-		if (scale > 1.0f) scale = 1.0f;
-		effectivePing = (int)(ping * scale + 0.5f);
+	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : 100;
+	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : 300;
+
+	// piecewise formula: full compensation below threshold, then 50% of excess
+	if (ping < threshold) {
+		effectivePing = ping;
+	} else {
+		effectivePing = threshold + ((ping - threshold) >> 1);  // >> 1 is faster than / 2
 	}
-	if (g_antilag_max_compensation && effectivePing > g_antilag_max_compensation->integer) {
-		effectivePing = g_antilag_max_compensation->integer;
+
+	// cap at maximum effective ping
+	if (effectivePing > maxPing) {
+		effectivePing = maxPing;
 	}
 
 	// do the full lag compensation using effectivePing
@@ -386,7 +391,8 @@ void G_AntilagProjectile(edict_t* ent) {
 	int rawPing;
 	int effectivePing;
 	int time;
-	float scale;
+	int threshold;
+	int maxPing;
 
 	// Save a copy of the player who fired the shot. The reason not to refer
 	// to ent->owner directly is because if the projectile hits something,
@@ -400,15 +406,19 @@ void G_AntilagProjectile(edict_t* ent) {
 	}
 
 	rawPing = ent->owner->client->ping;
-	effectivePing = rawPing;
-	if (g_antilag_compensation_scale) {
-		scale = g_antilag_compensation_scale->value;
-		if (scale < 0.0f) scale = 0.0f;
-		if (scale > 1.0f) scale = 1.0f;
-		effectivePing = (int)(rawPing * scale + 0.5f);
+	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : 100;
+	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : 300;
+
+	// piecewise formula: full compensation below threshold, then 50% of excess
+	if (rawPing < threshold) {
+		effectivePing = rawPing;
+	} else {
+		effectivePing = threshold + ((rawPing - threshold) >> 1);  // >> 1 is faster than / 2
 	}
-	if (g_antilag_max_compensation && effectivePing > g_antilag_max_compensation->integer) {
-		effectivePing = g_antilag_max_compensation->integer;
+
+	// cap at maximum effective ping
+	if (effectivePing > maxPing) {
+		effectivePing = maxPing;
 	}
 
 	time = ent->owner->client->attackTime - effectivePing;
