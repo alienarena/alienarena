@@ -2100,11 +2100,10 @@ void CL_IRCSetup(void)
 {
 	cl_IRC_connect_at_startup = Cvar_Get( "cl_IRC_connect_at_startup" , "1" , CVAR_ARCHIVE );
 	cl_IRC_server = Cvar_Get( "cl_IRC_server" , DEFAULT_IRC_SERVER , CVAR_ARCHIVE );
-	if (USE_ALIENARENA_ORG_IRC) {
-		// Repair if the old defaults are used
-		CL_RepairStringCvarIfDefault(cl_IRC_server, IRC_PLANETARENA, IRC_ALIENARENA_ORG);
-		CL_RepairStringCvarIfDefault(cl_IRC_server, IRC_HAL_NANOID, IRC_ALIENARENA_ORG);
-	}
+	// Repair if the old defaults are used
+	CL_RepairStringCvarIfDefault(cl_IRC_server, IRC_PLANETARENA, IRC_ALIENARENA_ORG);
+	CL_RepairStringCvarIfDefault(cl_IRC_server, IRC_HAL_NANOID, IRC_ALIENARENA_ORG);
+	
 	cl_IRC_channel = Cvar_Get( "cl_IRC_channel" , "alienarena" , CVAR_ARCHIVE );
 	cl_IRC_port = Cvar_Get( "cl_IRC_port" , "6667" , CVAR_ARCHIVE );
 	cl_IRC_override_nickname = Cvar_Get( "cl_IRC_override_nickname" , "0" , CVAR_ARCHIVE );

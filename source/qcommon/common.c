@@ -1196,6 +1196,7 @@ void Info_Print (char *s)
 	char	value[512];
 	char	*o;
 	int		l, i;
+	int		nameWidth = 25;
 
 	if (*s == '\\')
 		s++;
@@ -1212,10 +1213,10 @@ void Info_Print (char *s)
 		}
 
 		l = o - key;
-		if (l < 20)
+		if (l < nameWidth)
 		{
-			memset (o, ' ', 20-l);
-			key[20] = 0;
+			memset (o, ' ', nameWidth - l);
+			key[nameWidth] = 0;
 		}
 		else
 			*o = 0;

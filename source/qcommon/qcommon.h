@@ -70,39 +70,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // All urls below use http and not https because on windows they are giving problems with libcurl.
 // It results into error "Protocol "https" not supported or disabled in libcurl."
 
-// Enable/disable the old stats
+// Obsolete: old stats are disabled, martianbackup.com is not available anymore, and it's not available on any other location.
 #define STATS_ENABLED false
 #define DEFAULT_STATS_URL "http://martianbackup.com"
 
-
-// All game operations including IRC
-#define USE_ALIENARENA_ORG true
-#define USE_ALIENARENA_ORG_IRC true
-
-// Obsolete:
-#define VERSION_CHECK_PLANETARENA_URL "http://martianbackup.com/version/crx_version"
-#define VERSION_CHECK_MARTIANBACKUP_URL "http://martianbackup.com/version/crx_version"
-
 #define VERSION_CHECK_ALIENARENA_ORG_URL "http://invader.alienarena.org/version/crx_version"
-#define DEFAULT_VERSION_CHECK_URL (USE_ALIENARENA_ORG ? VERSION_CHECK_ALIENARENA_ORG_URL : VERSION_CHECK_MARTIANBACKUP_URL)
+#define DEFAULT_VERSION_CHECK_URL VERSION_CHECK_ALIENARENA_ORG_URL
 
-// Obsolete:
+// Obsolete, but used in repair functions
 #define IRC_PLANETARENA "irc.planetarena.org"
 #define IRC_HAL_NANOID "hal.nanoid.net"
 
 #define IRC_ALIENARENA_ORG "irc.alienarena.org"
-#define DEFAULT_IRC_SERVER (USE_ALIENARENA_ORG_IRC ? IRC_ALIENARENA_ORG : IRC_HAL_NANOID)
+#define DEFAULT_IRC_SERVER IRC_ALIENARENA_ORG
 
-// Obsolete:
-#define DEFAULT_MASTER_COR_1 "master.corservers.com"
-#define DEFAULT_MASTER_COR_2 "master2.corservers.com"
-
-#define DEFAULT_MASTER_1 (USE_ALIENARENA_ORG ? "master.alienarena.org" : DEFAULT_MASTER_COR_1)
-#define DEFAULT_MASTER_2 (USE_ALIENARENA_ORG ? "master2.alienarena.org" : DEFAULT_MASTER_COR_2)
+#define DEFAULT_MASTER_1 "master.alienarena.org"
+#define DEFAULT_MASTER_2 "master2.alienarena.org"
 
 // NOTE: the game does *not* depend on these being the same for server and client.
-#define DEFAULT_DOWNLOAD_URL_1 (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/sv_downloadurl" : "http://martianbackup.com/sv_downloadurl")
-#define DEFAULT_DOWNLOAD_URL_2 (USE_ALIENARENA_ORG ? "http://martianbackup.com/sv_downloadurl" : "http://red.planetarena.org/sv_downloadurl")
+#define DEFAULT_DOWNLOAD_URL_1 "http://invader.alienarena.org/sv_downloadurl"
+#define DEFAULT_DOWNLOAD_URL_2 "http://hal.nanoid.net/sv_downloadurl"
 
 // Set this to false to test a local news file
 #define DOWNLOADNEWS true
@@ -110,7 +97,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // #define NEWSFILE "newsfeed.db"
 // new news file that supports color codes as well as entirely yellow lines with + at the start
 #define NEWSFILE "aanews.db"
-#define NEWSFEED_URL (USE_ALIENARENA_ORG ? "http://invader.alienarena.org/" NEWSFILE : "http://martianbackup.com/" NEWSFILE)
+#define NEWSFEED_URL "http://invader.alienarena.org/" NEWSFILE
 
 #define MAPPACK_URL "http://invader.alienarena.org/arena/files"
 

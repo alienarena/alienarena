@@ -2127,11 +2127,9 @@ void CL_InitLocal (void)
 
 	cl_master = Cvar_Get ("cl_master", DEFAULT_MASTER_1, CVAR_ARCHIVE | CVARDOC_STR);
 	cl_master2 = Cvar_Get ("cl_master2", DEFAULT_MASTER_2, CVAR_ARCHIVE | CVARDOC_STR);	
-	if (USE_ALIENARENA_ORG) {
-		CL_RepairStringCvar(cl_master, DEFAULT_MASTER_1);
-		CL_RepairStringCvar(cl_master2, DEFAULT_MASTER_2);
-	}
-
+	CL_RepairStringCvar(cl_master, DEFAULT_MASTER_1);
+	CL_RepairStringCvar(cl_master2, DEFAULT_MASTER_2);
+	
 	// custom huds
 	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE | CVARDOC_STR);
 	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE | CVARDOC_STR);
@@ -2142,9 +2140,7 @@ void CL_InitLocal (void)
 
 	// update checker
 	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", DEFAULT_VERSION_CHECK_URL, CVAR_ARCHIVE | CVARDOC_STR);	
-	if (USE_ALIENARENA_ORG) {
-		CL_RepairStringCvar(cl_latest_game_version_url, VERSION_CHECK_ALIENARENA_ORG_URL);
-	}
+	CL_RepairStringCvar(cl_latest_game_version_url, VERSION_CHECK_ALIENARENA_ORG_URL);
 
 	// throwaway cvars
 	Cvar_Get("g_dm_lights", "1", CVAR_ARCHIVE | CVAR_GAMEINFO | CVARDOC_BOOL); //mark this as archived even if game code doesn't run.

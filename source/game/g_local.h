@@ -1792,6 +1792,14 @@ int			numipfilters;
 extern qboolean StringToFilter (char *s, ipfilter_t *f);
 
 //unlagged
+
+// Default for ping threshold, until this threshold of raw ping the full antilag is active,
+// above that only half of the raw ping is taken into account for the antilag.
+#define DEFAULT_ANTILAG_PING_THRESHOLD 150
+
+// Default for maximum effective ping
+#define DEFAULT_ANTILAG_MAX_PING 300
+
 extern  cvar_t	*g_antilagdebug;
 extern	cvar_t	*g_antilagprojectiles;
 extern	cvar_t	*g_antilag_ping_threshold;

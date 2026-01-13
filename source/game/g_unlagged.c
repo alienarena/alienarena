@@ -100,15 +100,11 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
     int i, j, k;
     int failSafeCounter = 0;
 	int historyHead;
- 	// char	str[MAX_STRING_CHARS];
 
 	// Fix for rocket funround crash/loop,
 	// when time has value 0 it gets stuck in the do/while loop below.
     if (time <= 0) {
         Com_Printf("G_TimeShiftClient: time <= 0, %d, exit\n", time);
-        if (g_antilagdebug->integer > 0) {
-            safe_cprintf(debugger, PRINT_HIGH, "G_TimeShiftClient: time <= 0, %d, exit\n", time);
-        }
         return;
     }
 
@@ -116,36 +112,8 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
     if (historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE) {
 		// historyHead should never be larger than this value, for example higher than 8 at tickrate 10 or 16 at tickrate 20
         Com_Printf("G_TimeShiftClient: historyHead larger than expected...\n");
-        if (g_antilagdebug->integer > 0) {
-            safe_cprintf(debugger, PRINT_HIGH, "G_TimeShiftClient: historyHead larger than expected...\n");
-        }
         return;
     }
-
-	// if (g_antilagdebug->integer > 1) { 
-	// 	Com_sprintf(str, sizeof(str), "head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n",
-	// 		historyHead,
-	// 		ent->client->history[0].leveltime,
-	// 		ent->client->history[1].leveltime,
-	// 		ent->client->history[2].leveltime,
-	// 		ent->client->history[3].leveltime,
-	// 		ent->client->history[4].leveltime,
-	// 		ent->client->history[5].leveltime,
-	// 		ent->client->history[6].leveltime,
-	// 		ent->client->history[7].leveltime,
-	// 		ent->client->history[8].leveltime,
-	// 		ent->client->history[9].leveltime,
-	// 		ent->client->history[10].leveltime,
-	// 		ent->client->history[11].leveltime,
-	// 		ent->client->history[12].leveltime,
-	// 		ent->client->history[13].leveltime,
-	// 		ent->client->history[14].leveltime,
-	// 		ent->client->history[15].leveltime,
-	// 		ent->client->history[16].leveltime,
-	// 		time );
-	// 	safe_cprintf(debugger, PRINT_HIGH, "%s\n", str);
-	// }
-
 
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
@@ -153,18 +121,16 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 
 	do {
 		if (ent->client->history[j].leveltime <= time) {
+			if (g_antilagdebug->integer > 0) {
+				Com_Printf("G_TimeShiftClient: found time at index %d (leveltime %d <= target time %d)\n",
+					j, ent->client->history[j].leveltime, time);
+			}
 			break;
 		}
 
 		// Exit the loop in case the number of iterations is larger than the history
 		if (failSafeCounter > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1) {
-			Com_Printf("G_TimeShiftClient: Counter reached %d, exiting...\n",
-				NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
-
-			if (g_antilagdebug->integer > 0) {
-				safe_cprintf(debugger, PRINT_HIGH, "G_TimeShiftClient: Counter reached %d, exiting...\n",
-					NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
-			}
+			Com_Printf("G_TimeShiftClient: Counter reached %d, exiting loop.\n", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
 
 			g_antilagprojectiles->integer = 0;
 			return;
@@ -181,10 +147,6 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 	// if we got past the first iteration above, we've sandwiched (or wrapped)
 	if (j != k) {
 		if (g_antilagdebug->integer > 0) {
-			if (g_antilagdebug->integer > 1) {
-				safe_cprintf(debugger, PRINT_HIGH, "Head: %i, reconciled time at: %i, attacker ping: %i, client ping: %i\n",
-					ent->client->historyHead, j, debugger->client->ping, ent->client->ping);
-			}
 			Com_Printf("Head: %i, reconciled time at: %i, attacker ping: %i, client ping: %i\n",
 				ent->client->historyHead, j, debugger->client->ping, ent->client->ping);
 		}
@@ -228,6 +190,7 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 		}
     }
 	else if (g_antilagdebug->integer > 0) {
+		// TODO: What does this mean? Create a more useful debug message.
 		Com_Printf("G_TimeShiftClient: j == k\n");
 	}
 }
@@ -283,8 +246,8 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 
 	// compute effective ping using piecewise diminishing returns formula
 	ping = ent->client->ping;
-	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : 100;
-	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : 300;
+	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : DEFAULT_ANTILAG_PING_THRESHOLD;
+	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
 
 	// piecewise formula: full compensation below threshold, then 50% of excess
 	if (ping < threshold) {
@@ -406,8 +369,8 @@ void G_AntilagProjectile(edict_t* ent) {
 	}
 
 	rawPing = ent->owner->client->ping;
-	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : 100;
-	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : 300;
+	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : DEFAULT_ANTILAG_PING_THRESHOLD;
+	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
 
 	// piecewise formula: full compensation below threshold, then 50% of excess
 	if (rawPing < threshold) {

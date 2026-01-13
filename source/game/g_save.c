@@ -276,15 +276,15 @@ void InitGame (void)
 	g_reward = gi.cvar("g_reward", "20", CVAR_SERVERINFO);
 
 	//antilag
-	g_antilagprojectiles = gi.cvar ("g_antilagprojectiles", "1", CVAR_GAMEINFO | CVARDOC_BOOL);
+	g_antilagprojectiles = gi.cvar ("g_antilagprojectiles", "1", CVAR_SERVERINFO | CVARDOC_BOOL);
 	
-	// Value 1 to print extra console messages, value 2 to also print messages to the screen
+	// Value 1 to print extra console messages for antilag debugging
 	g_antilagdebug = gi.cvar("g_antilagdebug", "0", 0 /*CVAR_SERVERINFO*/);
 
 	// tuning variables for antilag: ping threshold for diminishing returns and maximum effective ping
-	g_antilag_ping_threshold = gi.cvar("g_antilag_ping_threshold", "100", CVAR_ARCHIVE);
+	g_antilag_ping_threshold = gi.cvar("g_antilag_ping_threshold", va("%d", DEFAULT_ANTILAG_PING_THRESHOLD), CVAR_SERVERINFO);
 	gi.cvar_describe (g_antilag_ping_threshold, "ping threshold (knee) where diminishing returns start (ms).");
-	g_antilag_max_ping = gi.cvar("g_antilag_max_ping", "300", CVAR_ARCHIVE);
+	g_antilag_max_ping = gi.cvar("g_antilag_max_ping", va("%d", DEFAULT_ANTILAG_MAX_PING), CVAR_SERVERINFO);
 	gi.cvar_describe (g_antilag_max_ping, "maximum effective ping for lag compensation in milliseconds.");
 
 	// change anytime vars
