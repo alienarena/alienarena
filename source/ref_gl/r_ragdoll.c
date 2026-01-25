@@ -876,6 +876,7 @@ static void R_DestroyRagDoll (int RagDollID, qboolean nuke)
 	}
 	
 	RagDoll[RagDollID].destroyed = true; // Do not simulate
+	RagDoll[RagDollID].ent_number = -1;  // Clear entity number on destruction
 	RagDollEntity[RagDollID].nodraw = true; // Do not render
 
 	if(!nuke)
@@ -930,21 +931,35 @@ void R_ClearAllRagdolls( void )
 void RGD_AddNewRagdoll (const entity_t *ent, float velocity)
 {
 	int RagDollID, i;
-	vec3_t dist;
+	int active_ragdolls = 0;
 	vec3_t dir;
 	model_t *mod = ent->model;
 	if (!mod)
 	    return;
 
-	//check to see if we already have spawned a ragdoll for this entity
+	// Check to see if we already have spawned a ragdoll for this entity (by entity number)
+	// This prevents duplicate ragdolls when a player respawns or moves to a different location
 	for (RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
 		if (!RagDoll[RagDollID].destroyed)
 		{
-			VectorSubtract (ent->origin, RagDoll[RagDollID].origin, dist);
-			if (VectorLength (dist) < 64 && !strcmp (RagDoll[RagDollID].name, ent->name))
+			active_ragdolls++;
+			// Use entity number for reliable duplicate detection instead of distance + name
+			if (RagDoll[RagDollID].ent_number == ent->number)
+			{
+				if(r_ragdoll_debug->integer)
+					Com_Printf("Ragdoll already exists for entity %d, skipping duplicate\n", ent->number);
 				return;
+			}
 		}
+	}
+
+	// Safety check: if buffer is nearly full, don't allocate more to prevent overflow crashes
+	if (active_ragdolls >= MAX_RAGDOLLS - 2)
+	{
+		if(r_ragdoll_debug->integer)
+			Com_Printf("Ragdoll buffer full (%d/%d), skipping new ragdoll\n", active_ragdolls, MAX_RAGDOLLS);
+		return;
 	}
 
 	VectorSet(dir, 6, 6, 20); //note this is temporary hardcoded value(we should use the velocity of the ragdoll to influence this)
@@ -955,6 +970,7 @@ void RGD_AddNewRagdoll (const entity_t *ent, float velocity)
 		if (RagDoll[RagDollID].destroyed)
 		{
 			RGD_RagdollBody_Init (ent, mod, RagDollID, velocity);
+			RagDoll[RagDollID].ent_number = ent->number;  // Store entity number for duplicate detection
 
 			if (r_ragdoll_debug->integer == 2)
 			{
@@ -966,8 +982,8 @@ void RGD_AddNewRagdoll (const entity_t *ent, float velocity)
 			}
 
 			if(r_ragdoll_debug->integer)
-				Com_Printf ("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1],
-					RagDoll[RagDollID].origin[2]);
+				Com_Printf ("Added a ragdoll @ %4.2f,%4.2f,%4.2f (active: %d/%d, ent: %d)\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1],
+					RagDoll[RagDollID].origin[2], active_ragdolls + 1, MAX_RAGDOLLS, ent->number);
 
 			//break glass effect for helmets so we don't need to render them
 			if (mod->ragdoll.hasHelmet)
@@ -994,6 +1010,13 @@ void R_SimulateAllRagdolls ( void )
 		
 		if(RagDoll[RagDollID].destroyed)
 			continue;
+
+		// Safety check: skip if physics body is invalid
+		if(!RagDoll[RagDollID].RagDollObject[CHEST].body)
+		{
+			R_DestroyRagDoll(RagDollID, true);
+			continue;
+		}
 
 		dur = Sys_Milliseconds() - RagDoll[RagDollID].spawnTime;
 

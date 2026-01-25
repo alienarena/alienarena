@@ -488,13 +488,37 @@ void CL_ClearParticles (void)
 	particles[cl_numparticles-1].next = NULL;
 }
 
+// Forward declaration for use in new_particle()
+static inline void free_particle (particle_t *p);
+
 static inline particle_t *new_particle (void)
 {
 	particle_t	*p;
 	//int j;
 
 	if (!free_particles)
-		return NULL;
+	{
+		// FIFO: Drop the oldest active particle if buffer is full
+		particle_t *oldest = NULL;
+		particle_t *cur = active_particles;
+		float oldest_time = cl.time;
+
+		while (cur)
+		{
+			if (cur->time < oldest_time)
+			{
+				oldest_time = cur->time;
+				oldest = cur;
+			}
+			cur = cur->next;
+		}
+
+		if (!oldest)
+			return NULL; // No particles to drop
+
+		// Free the oldest particle
+		free_particle(oldest);
+	}
 
 	p = free_particles;
 	free_particles = p->next;

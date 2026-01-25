@@ -182,6 +182,7 @@ typedef struct RagDollWorld_s {
 typedef struct RagDoll_s {
 
 	char	name[MAX_QPATH];
+	int		ent_number;  // Entity index for duplicate detection
 
 	RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
 	dJointID RagDollJoint[MAX_RAGDOLL_JOINTS];
