@@ -28,14 +28,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 cvar_t	*in_mouse;
 cvar_t	*in_dgamouse;
 cvar_t	*in_joystick;
+cvar_t	*in_relative;
 cvar_t	*m_accel;
 
 void IN_Init(void)
 {
-
 	// mouse variables
 	in_mouse = Cvar_Get ("in_mouse", "1", CVAR_ARCHIVE);
 	in_dgamouse = Cvar_Get ("in_dgamouse", "1", CVAR_ARCHIVE);
+	in_relative = Cvar_Get ("in_relative", "0", CVAR_ARCHIVE);
+	Cvar_Describe(in_relative, "Enable relative mouse input mode: direct delta calculation from consecutive positions instead of center-relative, reduces input latency");
 	in_joystick     = Cvar_Get ("in_joystick", "0", CVAR_ARCHIVE);
 
 	Cmd_AddCommand ("+mlook", IN_MLookDown);

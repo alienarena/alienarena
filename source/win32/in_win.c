@@ -58,6 +58,7 @@ DWORD	dwControlMap[JOY_MAX_AXES];
 PDWORD	pdwRawValue[JOY_MAX_AXES];
 
 cvar_t	*in_mouse;
+cvar_t	*in_relative;
 cvar_t	*in_joystick;
 
 
@@ -324,6 +325,8 @@ void IN_Init (void)
 {
 	// mouse variables
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
+	in_relative				= Cvar_Get ("in_relative",				"0",		CVAR_ARCHIVE);
+	Cvar_Describe(in_relative, "Enable relative mouse input mode: direct delta calculation from consecutive positions instead of center-relative, reduces input latency");
 
 	// joystick variables
 	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);

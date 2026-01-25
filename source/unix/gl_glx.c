@@ -104,6 +104,8 @@ extern cvar_t	*vid_width;
 extern cvar_t	*vid_height;
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
+extern cvar_t	*in_relative;
+
 extern cvar_t	*r_antialiasing;
 static int win_x, win_y;
 
@@ -120,6 +122,7 @@ static qboolean vidmode_active = false;
 
 qboolean mouse_active = false;
 qboolean dgamouse = false;
+qboolean relative_mouse = false;
 qboolean vidmode_ext = false;
 
 static Cursor CreateNullCursor(Display *display, Window root)
@@ -490,6 +493,19 @@ void HandleEvents( void )
 	if ( !dpy )
 		return;
 
+	// Check if relative mouse mode has changed
+	if (in_relative && in_relative->integer && !relative_mouse)
+	{
+		relative_mouse = true;
+		// Initialize position to center
+		last_mouse_x = mwx;
+		last_mouse_y = mwy;
+	}
+	else if ((!in_relative || !in_relative->integer) && relative_mouse)
+	{
+		relative_mouse = false;
+	}
+
 	// do one read of time for consistency
 	// theory is that all pending events occurring before this point in time
 	// should be considered occurring at this single point in time.
@@ -512,8 +528,23 @@ void HandleEvents( void )
 			break;
 
 		case MotionNotify:
-			last_mouse_x = event.xmotion.x;
-			last_mouse_y = event.xmotion.y;
+			if (relative_mouse)
+			{
+				// Calculate and accumulate delta from last recorded position
+				// Warp-generated MotionNotify events contribute 0 delta since we already set last_mouse_x/y to center
+				int delta_x = event.xmotion.x - last_mouse_x;
+				int delta_y = event.xmotion.y - last_mouse_y;
+				mouse_diff_x += delta_x;
+				mouse_diff_y += delta_y;
+				last_mouse_x = event.xmotion.x;
+				last_mouse_y = event.xmotion.y;
+			}
+			else
+			{
+				// Normal absolute mode
+				last_mouse_x = event.xmotion.x;
+				last_mouse_y = event.xmotion.y;
+			}
 			break;
 
 		case ButtonPress:
@@ -672,6 +703,15 @@ void HandleEvents( void )
 		mouse_diff_x = last_mouse_x;
 		mouse_diff_y = last_mouse_y;
 	}
+	else if (relative_mouse)
+	{
+		// In relative mouse mode, only warp back to center if cursor has moved
+		// This avoids unnecessary warp events and reduces latency
+		if (last_mouse_x != mwx || last_mouse_y != mwy)
+		{
+			dowarp = true;
+		}
+	}
 	else
 	{
 		if ( dgamouse )
@@ -692,6 +732,13 @@ void HandleEvents( void )
 
 	if ( dowarp )
 	{ /* move the pointer back to the window center */
+		if (relative_mouse)
+		{
+			// Update position to center immediately to ensure next delta is correct
+			// Warp-generated MotionNotify will have 0 delta since we're at center
+			last_mouse_x = mwx;
+			last_mouse_y = mwy;
+		}
 		XWarpPointer( dpy, None, win, 0, 0, 0, 0, mwx, mwy );
 	}
 

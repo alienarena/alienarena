@@ -59,6 +59,10 @@ extern int window_center_x, window_center_y;
 extern qboolean mouse_available;
 extern int mouse_diff_x;
 extern int mouse_diff_y;
+extern cvar_t *in_relative;
+
+static int last_mouse_x = 0, last_mouse_y = 0;
+static qboolean relative_mouse = false;
 
 static HANDLE		qwclsemaphore;
 
@@ -754,11 +758,50 @@ void Sys_SendKeyEvents (void)
 		DispatchMessage (&msg);
 	}
 
-	if ( mouse_available && GetCursorPos( &current_pos) ) {
-		mouse_diff_x += current_pos.x - window_center_x;
-		mouse_diff_y += current_pos.y - window_center_y;
-		if ( mouse_diff_x || mouse_diff_y ) {
-			SetCursorPos( window_center_x, window_center_y );
+	// Check if relative mouse mode has changed
+	if (in_relative && in_relative->integer && !relative_mouse)
+	{
+		relative_mouse = true;
+		if (GetCursorPos(&current_pos))
+		{
+			last_mouse_x = current_pos.x;
+			last_mouse_y = current_pos.y;
+		}
+	}
+	else if ((!in_relative || !in_relative->integer) && relative_mouse)
+	{
+		relative_mouse = false;
+	}
+
+	if (mouse_available && GetCursorPos(&current_pos))
+	{
+		if (relative_mouse)
+		{
+			// Relative input mode: calculate delta from last position
+			int delta_x = current_pos.x - last_mouse_x;
+			int delta_y = current_pos.y - last_mouse_y;
+			mouse_diff_x += delta_x;
+			mouse_diff_y += delta_y;
+			last_mouse_x = current_pos.x;
+			last_mouse_y = current_pos.y;
+
+			// Only warp if cursor has moved away from center to avoid unnecessary warps
+			if (current_pos.x != window_center_x || current_pos.y != window_center_y)
+			{
+				SetCursorPos(window_center_x, window_center_y);
+				last_mouse_x = window_center_x;
+				last_mouse_y = window_center_y;
+			}
+		}
+		else
+		{
+			// Standard mode: calculate delta from center
+			mouse_diff_x += current_pos.x - window_center_x;
+			mouse_diff_y += current_pos.y - window_center_y;
+			if (mouse_diff_x || mouse_diff_y)
+			{
+				SetCursorPos(window_center_x, window_center_y);
+			}
 		}
 	}
 
