@@ -104,7 +104,7 @@ extern cvar_t	*vid_width;
 extern cvar_t	*vid_height;
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
-extern cvar_t	*in_relative;
+extern cvar_t	*m_direct;
 
 extern cvar_t	*r_antialiasing;
 static int win_x, win_y;
@@ -122,7 +122,7 @@ static qboolean vidmode_active = false;
 
 qboolean mouse_active = false;
 qboolean dgamouse = false;
-qboolean relative_mouse = false;
+qboolean direct_mouse = false;
 qboolean vidmode_ext = false;
 
 static Cursor CreateNullCursor(Display *display, Window root)
@@ -493,17 +493,17 @@ void HandleEvents( void )
 	if ( !dpy )
 		return;
 
-	// Check if relative mouse mode has changed
-	if (in_relative && in_relative->integer && !relative_mouse)
+	// Check if direct mouse mode has changed
+	if (m_direct && m_direct->integer && !direct_mouse)
 	{
-		relative_mouse = true;
+		direct_mouse = true;
 		// Initialize position to center
 		last_mouse_x = mwx;
 		last_mouse_y = mwy;
 	}
-	else if ((!in_relative || !in_relative->integer) && relative_mouse)
+	else if ((!m_direct || !m_direct->integer) && direct_mouse)
 	{
-		relative_mouse = false;
+		direct_mouse = false;
 	}
 
 	// do one read of time for consistency
@@ -528,7 +528,7 @@ void HandleEvents( void )
 			break;
 
 		case MotionNotify:
-			if (relative_mouse)
+			if (direct_mouse)
 			{
 				// Calculate and accumulate delta from last recorded position
 				// Warp-generated MotionNotify events contribute 0 delta since we already set last_mouse_x/y to center
@@ -703,9 +703,9 @@ void HandleEvents( void )
 		mouse_diff_x = last_mouse_x;
 		mouse_diff_y = last_mouse_y;
 	}
-	else if (relative_mouse)
+	else if (direct_mouse)
 	{
-		// In relative mouse mode, only warp back to center if cursor has moved
+		// In direct mouse mode, only warp back to center if cursor has moved
 		// This avoids unnecessary warp events and reduces latency
 		if (last_mouse_x != mwx || last_mouse_y != mwy)
 		{
@@ -732,7 +732,7 @@ void HandleEvents( void )
 
 	if ( dowarp )
 	{ /* move the pointer back to the window center */
-		if (relative_mouse)
+		if (direct_mouse)
 		{
 			// Update position to center immediately to ensure next delta is correct
 			// Warp-generated MotionNotify will have 0 delta since we're at center

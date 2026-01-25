@@ -59,10 +59,10 @@ extern int window_center_x, window_center_y;
 extern qboolean mouse_available;
 extern int mouse_diff_x;
 extern int mouse_diff_y;
-extern cvar_t *in_relative;
+extern cvar_t *m_direct;
 
 static int last_mouse_x = 0, last_mouse_y = 0;
-static qboolean relative_mouse = false;
+static qboolean direct_mouse = false;
 
 static HANDLE		qwclsemaphore;
 
@@ -758,26 +758,26 @@ void Sys_SendKeyEvents (void)
 		DispatchMessage (&msg);
 	}
 
-	// Check if relative mouse mode has changed
-	if (in_relative && in_relative->integer && !relative_mouse)
+	// Check if direct mouse mode has changed
+	if (m_direct && m_direct->integer && !direct_mouse)
 	{
-		relative_mouse = true;
+		direct_mouse = true;
 		if (GetCursorPos(&current_pos))
 		{
 			last_mouse_x = current_pos.x;
 			last_mouse_y = current_pos.y;
 		}
 	}
-	else if ((!in_relative || !in_relative->integer) && relative_mouse)
+	else if ((!m_direct || !m_direct->integer) && direct_mouse)
 	{
-		relative_mouse = false;
+		direct_mouse = false;
 	}
 
 	if (mouse_available && GetCursorPos(&current_pos))
 	{
-		if (relative_mouse)
+		if (direct_mouse)
 		{
-			// Relative input mode: calculate delta from last position
+			// Direct input mode: calculate delta from last position
 			int delta_x = current_pos.x - last_mouse_x;
 			int delta_y = current_pos.y - last_mouse_y;
 			mouse_diff_x += delta_x;
