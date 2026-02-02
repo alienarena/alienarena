@@ -282,10 +282,16 @@ void InitGame (void)
 	g_antilagdebug = gi.cvar("g_antilagdebug", "0", 0 /*CVAR_SERVERINFO*/);
 
 	// tuning variables for antilag: ping threshold for diminishing returns and maximum effective ping
-	g_antilag_ping_threshold = gi.cvar("g_antilag_ping_threshold", va("%d", DEFAULT_ANTILAG_PING_THRESHOLD), CVAR_SERVERINFO);
-	gi.cvar_describe (g_antilag_ping_threshold, "ping threshold (knee) where diminishing returns start (ms).");
-	g_antilag_max_ping = gi.cvar("g_antilag_max_ping", va("%d", DEFAULT_ANTILAG_MAX_PING), CVAR_SERVERINFO);
-	gi.cvar_describe (g_antilag_max_ping, "maximum effective ping for lag compensation in milliseconds.");
+	g_antilag_high_ping_threshold = gi.cvar("g_antilag_high_ping_threshold", va("%d", DEFAULT_ANTILAG_HIGH_PING_THRESHOLD), CVAR_ARCHIVE);
+	gi.cvar_describe (g_antilag_high_ping_threshold, "ping threshold (knee) where diminishing returns start (ms).");
+	g_antilag_low_ping_threshold = gi.cvar("g_antilag_low_ping_threshold", va("%d", DEFAULT_ANTILAG_LOW_PING_THRESHOLD), CVAR_ARCHIVE);
+	gi.cvar_describe (g_antilag_low_ping_threshold, "ping threshold for minimum lag compensation (ms).");
+	g_antilag_max_ping = gi.cvar("g_antilag_max_ping", va("%d", DEFAULT_ANTILAG_MAX_PING), CVAR_ARCHIVE);
+	gi.cvar_describe (g_antilag_max_ping, "maximum effective ping for lag compensation in milliseconds.");	
+	g_antilag_oneway = gi.cvar("g_antilag_oneway", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
+	gi.cvar_describe (g_antilag_oneway, "Enables new antilag calculation using one-way ping estimate (RTT/2) with low-ping cap for fairer hit registration.");
+	g_antilag_oneway_factor = gi.cvar("g_antilag_oneway_factor", "0.5", CVAR_ARCHIVE | CVARDOC_FLOAT);
+	gi.cvar_describe (g_antilag_oneway_factor, "Factor to convert RTT to one-way ping estimate. Default is 0.5 (RTT/2).");
 
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);

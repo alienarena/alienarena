@@ -235,8 +235,11 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	int time;
 	int ping;
 	int effectivePing;
-	int threshold;
+	int thresholdHigh;
+	int thresholdLow;
 	int maxPing;
+	qboolean useOnewayPing;
+	float onewayFactor;
 
 	// don't time shift for mistakes or bots
 	if ( !ent->inuse || !ent->client || ent->is_bot ) 
@@ -244,30 +247,38 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 		return;
 	}
 
-	// compute effective ping using piecewise diminishing returns formula
 	ping = ent->client->ping;
-	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : DEFAULT_ANTILAG_PING_THRESHOLD;
+	thresholdHigh = g_antilag_high_ping_threshold ? g_antilag_high_ping_threshold->integer : DEFAULT_ANTILAG_HIGH_PING_THRESHOLD;
+	thresholdLow = g_antilag_low_ping_threshold ? g_antilag_low_ping_threshold->integer : DEFAULT_ANTILAG_LOW_PING_THRESHOLD;
 	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
+	useOnewayPing = g_antilag_oneway ? (g_antilag_oneway->integer != 0) : false;
+	onewayFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
 
-	// piecewise formula: full compensation below threshold, then 50% of excess
-	if (ping < threshold) {
+	if (ping < thresholdHigh) {
 		effectivePing = ping;
 	} else {
-		effectivePing = threshold + ((ping - threshold) >> 1);  // >> 1 is faster than / 2
+		// Diminishing returns: full compensation below threshold, then 50% of ping above that
+		effectivePing = thresholdHigh + ((ping - thresholdHigh) >> 1);  // >> 1 is faster than / 2
 	}
 
-	// cap at maximum effective ping
-	if (effectivePing > maxPing) {
-		effectivePing = maxPing;
+	if (useOnewayPing) {
+		// Actual one-way ping is approximately half of RTT (round trip time)
+		// Subtracting FRAMETIME_MS as well will rewind too much
+		if (effectivePing < thresholdLow) {
+			// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
+			time = ent->client->attackTime - (thresholdLow * onewayFactor);
+		} else {
+			time = ent->client->attackTime - (effectivePing * onewayFactor);
+		}
+	} else {
+		// do the full lag compensation using effective ping
+		time = ent->client->attackTime - effectivePing - FRAMETIME_MS;
+		//100 ms is our "built-in" lag with the 10fps tickrate
 	}
-
-	// do the full lag compensation using effectivePing
-	time = ent->client->attackTime - effectivePing - FRAMETIME_MS;
-	//100 ms is our "built-in" lag due to the 10fps server frame
 
 	if (g_antilagdebug->integer > 0) {
 		Com_Printf("leveltime: %i, raw ping: %i, effectivePing: %i, attackTime: %i, compensation: %i, corrected time: %i\n",
-			level.leveltime, ping, effectivePing, ent->client->attackTime, effectivePing + FRAMETIME_MS, time);
+			level.leveltime, ping, effectivePing, ent->client->attackTime, ent->client->attackTime - time, time);
 	}
 
 	G_TimeShiftAllClients( time, ent );
@@ -354,8 +365,11 @@ void G_AntilagProjectile(edict_t* ent) {
 	int rawPing;
 	int effectivePing;
 	int time;
-	int threshold;
+	int thresholdHigh;
+	int thresholdLow;
 	int maxPing;
+	qboolean useOnewayPing;
+	float onewayFactor;
 
 	// Save a copy of the player who fired the shot. The reason not to refer
 	// to ent->owner directly is because if the projectile hits something,
@@ -369,14 +383,17 @@ void G_AntilagProjectile(edict_t* ent) {
 	}
 
 	rawPing = ent->owner->client->ping;
-	threshold = g_antilag_ping_threshold ? g_antilag_ping_threshold->integer : DEFAULT_ANTILAG_PING_THRESHOLD;
+	thresholdHigh = g_antilag_high_ping_threshold ? g_antilag_high_ping_threshold->integer : DEFAULT_ANTILAG_HIGH_PING_THRESHOLD;
+	thresholdLow = g_antilag_low_ping_threshold ? g_antilag_low_ping_threshold->integer : DEFAULT_ANTILAG_LOW_PING_THRESHOLD;
 	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
+	useOnewayPing = g_antilag_oneway ? (g_antilag_oneway->integer != 0) : false;
+	onewayFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
 
-	// piecewise formula: full compensation below threshold, then 50% of excess
-	if (rawPing < threshold) {
+	if (rawPing < thresholdHigh) {
 		effectivePing = rawPing;
 	} else {
-		effectivePing = threshold + ((rawPing - threshold) >> 1);  // >> 1 is faster than / 2
+		// Diminishing returns: full compensation below threshold, then 50% of ping above that
+		effectivePing = thresholdHigh + ((rawPing - thresholdHigh) >> 1);  // >> 1 is faster than / 2
 	}
 
 	// cap at maximum effective ping
@@ -384,11 +401,26 @@ void G_AntilagProjectile(edict_t* ent) {
 		effectivePing = maxPing;
 	}
 
-	time = ent->owner->client->attackTime - effectivePing;
+	if (useOnewayPing) {
+		// Actual one-way ping is approximately half of RTT (round trip time)
+		if (effectivePing < thresholdLow) {
+			// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
+			time = ent->owner->client->attackTime - (thresholdLow * onewayFactor);
+		} else {
+			time = ent->owner->client->attackTime - (effectivePing * onewayFactor);
+		}
+
+	} else {
+		time = ent->owner->client->attackTime - effectivePing;
+	}
 
 	// Handle the full lag compensation frames
 	while (effectivePing > frameTime) {
-		time -= frameTime;
+		if (!useOnewayPing) {
+			// Don't compensate extra for the built-in lag here
+			// Subtracting FRAMETIME_MS as well will rewind too much
+			time -= frameTime;
+		}
 		if (g_antilagdebug->integer > 0)
 		{
 			Com_Printf("Full lag compensation, raw ping %d, effective %d, time %d\n", rawPing, effectivePing, time);
