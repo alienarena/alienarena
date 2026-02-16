@@ -240,6 +240,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	int maxPing;
 	qboolean useOnewayPing;
 	float onewayFactor;
+	int compensation;
 
 	// don't time shift for mistakes or bots
 	if ( !ent->inuse || !ent->client || ent->is_bot ) 
@@ -266,19 +267,21 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 		// Subtracting FRAMETIME_MS as well will rewind too much
 		if (effectivePing < thresholdLow) {
 			// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
-			time = ent->client->attackTime - (thresholdLow * onewayFactor);
+			compensation = thresholdLow * onewayFactor;
 		} else {
-			time = ent->client->attackTime - (effectivePing * onewayFactor);
+			compensation = effectivePing * onewayFactor;
 		}
 	} else {
 		// do the full lag compensation using effective ping
-		time = ent->client->attackTime - effectivePing - FRAMETIME_MS;
-		//100 ms is our "built-in" lag with the 10fps tickrate
+		// 100 ms is our "built-in" lag with the 10fps tickrate
+		compensation = effectivePing + FRAMETIME_MS;
 	}
 
+	time = ent->client->attackTime - compensation;
+
 	if (g_antilagdebug->integer > 0) {
-		Com_Printf("leveltime: %i, raw ping: %i, effectivePing: %i, attackTime: %i, compensation: %i, corrected time: %i\n",
-			level.leveltime, ping, effectivePing, ent->client->attackTime, ent->client->attackTime - time, time);
+		Com_Printf("leveltime: %i, raw ping: %i, effectivePing: %i, attackTime: %i, low ping threshold: %i, compensation: %i, corrected time: %i\n",
+			level.leveltime, ping, effectivePing, ent->client->attackTime, thresholdLow, compensation, time);
 	}
 
 	G_TimeShiftAllClients( time, ent );
