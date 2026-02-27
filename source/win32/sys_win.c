@@ -63,6 +63,7 @@ extern cvar_t *m_direct;
 
 static int last_mouse_x = 0, last_mouse_y = 0;
 static qboolean direct_mouse = false;
+static qboolean just_warped = false;
 
 static HANDLE		qwclsemaphore;
 
@@ -780,17 +781,24 @@ void Sys_SendKeyEvents (void)
 			// Direct input mode: calculate delta from last position
 			int delta_x = current_pos.x - last_mouse_x;
 			int delta_y = current_pos.y - last_mouse_y;
-			mouse_diff_x += delta_x;
-			mouse_diff_y += delta_y;
+			
+			// If we just warped cursor to center, skip this delta to avoid counting warp as movement
+			// The warp is asynchronous, so this prevents corrupting input when it completes
+			if (!(just_warped && current_pos.x == window_center_x && current_pos.y == window_center_y))
+			{
+				mouse_diff_x += delta_x;
+				mouse_diff_y += delta_y;
+			}
+			
 			last_mouse_x = current_pos.x;
 			last_mouse_y = current_pos.y;
+			just_warped = false;
 
 			// Only warp if cursor has moved away from center to avoid unnecessary warps
 			if (current_pos.x != window_center_x || current_pos.y != window_center_y)
 			{
 				SetCursorPos(window_center_x, window_center_y);
-				last_mouse_x = window_center_x;
-				last_mouse_y = window_center_y;
+				just_warped = true;
 			}
 		}
 		else
