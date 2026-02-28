@@ -4193,7 +4193,7 @@ static void ServerInfo_SubmenuInit (void)
 	#endif
 
 	#if STATS_ENABLED
-		char *contents[2*rows+1] = {
+		const char *contents[2*rows+1] = {
 			"Map:",			mservers[serverindex].szMapName,
 			"Skill:",		mservers[serverindex].skill,
 			"Admin:",		mservers[serverindex].szAdmin,
@@ -4204,7 +4204,7 @@ static void ServerInfo_SubmenuInit (void)
 			"Gameplay:"
 		};
 	#else
-		char *contents[2*rows+1] = {
+		const char *contents[2*rows+1] = {
 			"Map:",			mservers[serverindex].szMapName,
 			"Admin:",		mservers[serverindex].szAdmin,
 			"Website:",		mservers[serverindex].szWebsite,
@@ -4280,7 +4280,7 @@ static void PlayerList_SubmenuInit (void)
 	int i, j;
 	//qboolean is_team_server = false;
 
-	char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
+	const char *local_player_info_ptrs[MAX_PLAYERS*SVDATA_PLAYERINFO];
 	size_t sizes[SVDATA_PLAYERINFO]
 		= {sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s), sizeof(menutxt_s)};
 	
@@ -5739,7 +5739,7 @@ static void StartServerActionFunc (UNUSED void *self)
 		Cvar_ForceSet("dedicated", "0");
 #endif
 		Cvar_Set("sv_maplist", startmap);
-		Cbuf_AddText (sprintf("setmaster %s %s\n", DEFAULT_MASTER_1, DEFAULT_MASTER_2));
+		Cbuf_AddText(va("setmaster %s %s\n", DEFAULT_MASTER_1, DEFAULT_MASTER_2));
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "g_antilagprojectiles", s_antilagprojectiles_box.curvalue);
@@ -7147,7 +7147,7 @@ static void Slider_CheckSlide (menuslider_s *s)
 		s->curvalue = s->minvalue;
 
 	//TO DO - this generates a scary warning - incompatible menuslider_s vs menuitem_s * - there are several similar instances in the menu code.
-	Menu_ActivateItem (s);
+	Menu_ActivateItem ((menuitem_s *)s);
 }
 
 static void Menu_DragSlideItem (void)
