@@ -40,7 +40,7 @@ void IN_Init(void)
 	m_direct = Cvar_Get ("m_direct", "0", CVAR_ARCHIVE);
 	Cvar_Describe(m_direct, "Enable direct delta mouse input: calculates mouse movement directly from consecutive positions instead of center-relative, reduces input latency");
 	in_poll_rate = Cvar_Get ("in_poll_rate", "0", CVAR_ARCHIVE);
-	Cvar_Describe(in_poll_rate, "Mouse poll frequency: 0=packet rate only (~62 Hz), 1=render rate (uncapped, highest responsiveness);");
+	Cvar_Describe(in_poll_rate, "Input poll frequency: 0 = packet rate only (~62 Hz), 1 = render rate (uncapped, highest responsiveness)");
 	in_joystick     = Cvar_Get ("in_joystick", "0", CVAR_ARCHIVE);
 
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
