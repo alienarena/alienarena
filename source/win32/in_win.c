@@ -60,6 +60,7 @@ PDWORD	pdwRawValue[JOY_MAX_AXES];
 cvar_t	*in_mouse;
 cvar_t	*m_direct;
 cvar_t	*in_joystick;
+cvar_t	*in_poll_rate;
 
 
 // none of these cvars are saved over a session
@@ -327,6 +328,8 @@ void IN_Init (void)
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
 	m_direct				= Cvar_Get ("m_direct",				"0",		CVAR_ARCHIVE);
 	Cvar_Describe(m_direct, "Enable direct delta mouse input: calculates mouse movement directly from consecutive positions instead of center-relative, reduces input latency");
+	in_poll_rate			= Cvar_Get ("in_poll_rate",				"0",		CVAR_ARCHIVE);
+	Cvar_Describe(in_poll_rate, "Mouse poll frequency: 0=packet rate only (~62 Hz), 1=render rate (uncapped, highest responsiveness);");
 
 	// joystick variables
 	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);

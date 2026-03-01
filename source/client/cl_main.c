@@ -2753,7 +2753,7 @@ void CL_Frame( int msec )
 	{
 		++render_counter; // counting renders since last packet
 		
-		if (!packet_trigger && cl_test->integer) //return cl_test - this was causing major issues with menu mouse in windows build
+		if (!packet_trigger && (cl_test->integer || (in_poll_rate && in_poll_rate->integer))) //return cl_test - this was causing major issues with menu mouse in windows build
 		{
 			/* 
 			 * system dependent keyboard and mouse input event polling

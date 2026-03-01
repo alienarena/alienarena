@@ -105,6 +105,7 @@ extern cvar_t	*vid_height;
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
 extern cvar_t	*m_direct;
+extern cvar_t	*in_poll_rate;
 
 extern cvar_t	*r_antialiasing;
 static int win_x, win_y;
