@@ -784,7 +784,7 @@ void Sys_SendKeyEvents (void)
 			
 			// If we just warped cursor to center, skip this delta to avoid counting warp as movement
 			// The warp is asynchronous, so this prevents corrupting input when it completes
-			if (!(just_warped && current_pos.x == window_center_x && current_pos.y == window_center_y))
+			if (!just_warped)
 			{
 				mouse_diff_x += delta_x;
 				mouse_diff_y += delta_y;
