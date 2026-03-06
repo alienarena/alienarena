@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+</head>
+<body>
+<h1>COMMANDS Documentation</h1>
+
+<h2>CLIENT SIDE COMMANDS</h2>
+
+<h3>Connection Commands</h3>
+
+<p><strong>connect</strong> <code>&lt;address&gt;[:port]</code></p>
+
+<p>Connect to a server. Example: <code>connect 192.168.1.100:27910</code> or <code>connect alienarena.com</code></p>
+
+<p><strong>disconnect</strong></p>
+
+<p>Disconnect from current server and return to main menu.</p>
+
+<p><strong>reconnect</strong></p>
+
+<p>Reconnect to the last server you were connected to.</p>
+
+<p><strong>rcon</strong> <code>&lt;password&gt; &lt;command&gt;</code></p>
+
+<p>Execute a remote console command on the server (if you have rcon password). Example: <code>rcon mypass say Hello everyone</code></p>
+
+<h3>Demo Commands</h3>
+
+<p><strong>record</strong> <code>&lt;demoname&gt;</code></p>
+
+<p>Start recording a demo with the given filename. Saved to demos/ folder. Example: <code>record ctf_battle</code></p>
+
+<p><strong>stop</strong></p>
+
+<p>Stop recording current demo.</p>
+
+<p><strong>timedemo</strong> <code>&lt;demoname&gt;</code></p>
+
+<p>Play back a demo at maximum speed while timing performance. Useful for benchmarking.</p>
+
+<h3>Input/Control Commands</h3>
+
+<p><strong>impulse</strong> <code>&lt;number&gt;</code></p>
+
+<p>Trigger an impulse action (weapon selection, item use, etc). Common impulses:</p>
+<ul>
+  <li>10-20: Select weapons (10=blaster, 11=shotgun, etc)</li>
+  <li>100: Centerview (center look)</li>
+  <li>200: Zoom in</li>
+  <li>201: Zoom out</li>
+</ul>
+
+<p><strong>force_centerview</strong></p>
+
+<p>Force camera to center view (used in scripts).</p>
+
+<h3>Client Status Commands</h3>
+
+<p><strong>status</strong></p>
+
+<p>Show current connection and player status.</p>
+
+<p><strong>pause</strong></p>
+
+<p>Pause or unpause the game.</p>
+
+<p><strong>ping</strong></p>
+
+<p>Ping the current server to check latency.</p>
+
+<p><strong>pingservers</strong></p>
+
+<p>Ping all servers in the server list to get latency info.</p>
+
+<h3>Server List Commands</h3>
+
+<p><strong>snd_restart</strong></p>
+
+<p>Restart the sound system (fixes audio issues).</p>
+
+<p><strong>skins</strong></p>
+
+<p>Display list of available character skins.</p>
+
+<p><strong>userinfo</strong></p>
+
+<p>Display current user info (name, skin, hand, etc).</p>
+
+<h3>Game State Commands</h3>
+
+<p><strong>quit</strong></p>
+
+<p>Exit Alien Arena completely.</p>
+
+<p><strong>map</strong> <code>&lt;mapname&gt;</code></p>
+
+<p>Load a map directly (offline/demo mode). Example: <code>map dm-proxycon</code></p>
+
+<h3>Download/Install Commands</h3>
+
+<p><strong>download</strong> <code>&lt;filename&gt;</code></p>
+
+<p>Download a file from the server. Example: <code>download dm-mymap.bsp</code></p>
+
+<p><strong>installmap</strong> <code>&lt;filename&gt;</code></p>
+
+<p>Install a downloaded map file. Example: <code>installmap dm-mymap.bsp</code></p>
+
+<p><strong>installmodel</strong> <code>&lt;filename&gt;</code></p>
+
+<p>Install a downloaded player model file.</p>
+
+<h3>IRC Commands</h3>
+
+<p><strong>irc_connect</strong></p>
+
+<p>Connect to IRC chat server (if configured).</p>
+
+<p><strong>irc_disconnect</strong></p>
+
+<p>Disconnect from IRC.</p>
+
+<h3>Demo/Demo Playback</h3>
+
+<p><strong>demomap</strong> <code>&lt;mapname&gt;</code></p>
+
+<p>Play a demo map (if available).</p>
+
+<h3>Debug/Testing Commands</h3>
+
+<p><strong>cl_test</strong> <code>&lt;value&gt;</code></p>
+
+<p>Enable testing features (internal development use).</p>
+
+<p><strong>cl_shownet</strong> <code>&lt;value&gt;</code></p>
+
+<p>Display network traffic: 0=off, 1=packets, 2=verbose</p>
+
+<p><strong>showfps</strong></p>
+
+<p>Toggle on-screen FPS display (alternative to cl_drawfps).</p>
+
+<hr>
+
+<h2>SERVER SIDE COMMANDS</h2>
+
+<h3>Server Management</h3>
+
+<p><strong>map</strong> <code>&lt;mapname&gt;</code></p>
+
+<p>Change the current map immediately. Example: <code>map dm-proxycon</code></p>
+
+<p><strong>startmap</strong> <code>&lt;mapname&gt;</code></p>
+
+<p>Load initial map when server starts.</p>
+
+<p><strong>demomap</strong> <code>&lt;mapname&gt;</code></p>
+
+<p>Play a demo map as the current level.</p>
+
+<p><strong>status</strong></p>
+
+<p>Display server status and currently connected players with IDs.</p>
+
+<p><strong>serverinfo</strong></p>
+
+<p>Show all server cvars and their current values.</p>
+
+<p><strong>heartbeat</strong></p>
+
+<p>Send manual heartbeat to master servers (for server visibility).</p>
+
+<p><strong>setmaster</strong> <code>&lt;servername&gt;</code></p>
+
+<p>Set the master server for server registration.</p>
+
+<p><strong>shutdown</strong></p>
+
+<p>Shut down the server immediately (all players disconnected).</p>
+
+<p><strong>killserver</strong></p>
+
+<p>Gracefully shut down the server.</p>
+
+<h3>Player Management</h3>
+
+<p><strong>kick</strong> <code>&lt;player_id_or_name&gt;</code></p>
+
+<p>Kick a player from the server. Example: <code>kick 2</code> or <code>kick PlayerName</code></p>
+
+<p><strong>kickban</strong> <code>&lt;player_id&gt;</code></p>
+
+<p>Kick and ban a player by IP address.</p>
+
+<p><strong>unban</strong> <code>&lt;ip_address&gt;</code></p>
+
+<p>Unban a previously banned IP address.</p>
+
+<p><strong>ban</strong> <code>&lt;ip_address&gt;</code></p>
+
+<p>Ban an IP address (prevents connections).</p>
+
+<p><strong>status</strong></p>
+
+<p>Shows player IDs which are needed for kick/ban commands.</p>
+
+<p><strong>dumpuser</strong> <code>&lt;player_id&gt;</code></p>
+
+<p>Display detailed information about a connected player.</p>
+
+<h3>Announcements/Communication</h3>
+
+<p><strong>say</strong> <code>&lt;message&gt;</code></p>
+
+<p>Broadcast a message to all players on the server. Example: <code>say Welcome to the CTF server!</code></p>
+
+<p><strong>sayteam</strong> <code>&lt;message&gt;</code></p>
+
+<p>Send a message to a specific team only.</p>
+
+<h3>Recording/Logging</h3>
+
+<p><strong>serverrecord</strong> <code>&lt;demoname&gt;</code></p>
+
+<p>Start recording a server-side demo (records all players). Useful for tournament replays.</p>
+
+<p><strong>serverstop</strong></p>
+
+<p>Stop server-side demo recording.</p>
+
+<h3>Server Command (sv subcommands)</h3>
+
+<p><strong>sv test</strong></p>
+
+<p>Test command (internal use).</p>
+
+<p><strong>sv addbot</strong> <code>&lt;name&gt; [model/skin]</code></p>
+
+<p>Add a bot to the server with optional model/skin. Example: <code>sv addbot "BotName" "male/visor"</code></p>
+
+<p><strong>sv removebot</strong> <code>&lt;name&gt;</code></p>
+
+<p>Remove a bot by name from the server. Example: <code>sv removebot BotName</code></p>
+
+<p><strong>sv addip</strong> <code>&lt;ip-mask&gt;</code></p>
+
+<p>Add IP address to server ban list (supports masks). Example: <code>sv addip 192.168.1.100</code> or <code>sv addip 192.168.1.*</code></p>
+
+<p><strong>sv removeip</strong> <code>&lt;ip-mask&gt;</code></p>
+
+<p>Remove IP address from ban list (must match exactly). Example: <code>sv removeip 192.168.1.100</code></p>
+
+<p><strong>sv listip</strong></p>
+
+<p>Display all currently banned IP addresses.</p>
+
+<p><strong>sv writeip</strong></p>
+
+<p>Save current IP ban list to listip.cfg file for persistent storage.</p>
+
+<p><strong>sv acedebug</strong> <code>&lt;on|off&gt;</code></p>
+
+<p>Enable or disable ACE bot debug mode.</p>
+
+<p><strong>sv savenodes</strong></p>
+
+<p>Save bot navigation nodes to file.</p>
+
+<h3>Configuration Commands (used in server.cfg)</h3>
+
+<p><strong>set</strong> <code>&lt;cvar&gt; &lt;value&gt;</code></p>
+
+<p>Set a cvar value. Used in config files: <code>set maxclients 16</code></p>
+
+<p><strong>seta</strong> <code>&lt;cvar&gt; &lt;value&gt;</code></p>
+
+<p>Set a cvar and archive it (save to config). <code>seta fraglimit 20</code></p>
+
+<p><strong>setf</strong> <code>&lt;cvar&gt; &lt;float_value&gt;</code></p>
+
+<p>Set a float cvar value. <code>setf g_antilag_oneway_factor 0.75</code></p>
+
+<hr>
+
+<h2>ADMIN/RCON COMMANDS (Server-side, accessible via rcon or admin console)</h2>
+
+<h3>Voting System</h3>
+
+<p><strong>callvote</strong> <code>&lt;type&gt; [arguments]</code></p>
+
+<p>Initiate a vote. Types: kickplayer, changemap, fraglimit, timelimit, etc.</p>
+
+<p><strong>vote</strong> <code>&lt;yes|no&gt;</code></p>
+
+<p>Vote yes or no on current vote.</p>
+
+<h3>Banning System</h3>
+
+<p><strong>addip</strong> <code>&lt;ip_prefix&gt;</code></p>
+
+<p>Add IP to server ban list. Example: <code>addip 192.168.*</code></p>
+
+<p><strong>removeip</strong> <code>&lt;ip_prefix&gt;</code></p>
+
+<p>Remove IP from ban list.</p>
+
+<p><strong>listip</strong></p>
+
+<p>Show all currently banned IPs.</p>
+
+<h3>Game Control</h3>
+
+<p><strong>fraglimit</strong> <code>&lt;value&gt;</code></p>
+
+<p>Set frag limit (set fraglimit 50).</p>
+
+<p><strong>timelimit</strong> <code>&lt;value&gt;</code></p>
+
+<p>Set time limit in minutes (set timelimit 30).</p>
+
+<p><strong>changemap</strong> <code>&lt;mapname&gt;</code></p>
+
+<p>Change map with fade/transition effects.</p>
+
+<p><strong>dmflags</strong> <code>&lt;value&gt;</code></p>
+
+<p>Set game flags (fall damage, instant items, etc).</p>
+
+<h3>Cheat Commands (when cheats enabled)</h3>
+
+<p><strong>god</strong></p>
+
+<p>Godmode - invulnerability.</p>
+
+<p><strong>noclip</strong></p>
+
+<p>Noclip mode - walk through walls.</p>
+
+<p><strong>notarget</strong></p>
+
+<p>Monsters/enemies ignore you.</p>
+
+<p><strong>give</strong> <code>&lt;item&gt;</code></p>
+
+<p>Give yourself an item. Examples: health, armor, weapons, ammo.</p>
+
+<p><strong>kill</strong></p>
+
+<p>Suicide (remove yourself from game).</p>
+
+<hr>
+
+<h2>Command Execution Order</h2>
+
+<h3>Config Files</h3>
+
+<p>Commands can be placed in config files (~/.alienarena/autoexec.cfg for personal config):</p>
+
+<pre><code>
+// Input settings
+set in_poll_rate 1
+set m_direct 1
+set cl_maxfps 300
+set sensitivity 3
+
+// Network
+set rate 15000
+
+// Graphics
+set gl_swapinterval 1
+
+// User info
+set name "PlayerName"
+set skin "male/doom"
+</code></pre>
+
+<h3>Server Config (server.cfg)</h3>
+
+<pre><code>
+// Server setup
+set hostname "My Awesome Server"
+set maxclients 16
+set sv_public 1
+
+// Game rules
+set fraglimit 50
+set timelimit 30
+set dmflags 8
+
+// Antilag
+set g_antilag 1
+set g_antilag_oneway 1
+set g_antilag_oneway_factor 0.75
+</code></pre>
+
+</body>
+</html>

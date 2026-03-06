@@ -1372,7 +1372,7 @@ void R_Register( void )
 
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE|CVARDOC_BOOL );
-	Cvar_Describe (gl_swapinterval, "Sync to Vblank. Eliminates \"tearing\" effects, but it can hurt framerates.");
+	Cvar_Describe (gl_swapinterval, "Sync to Vblank (0=off, 1=on). Keep enabled for smooth display and power efficiency. Disable only for competitive ultra-low-latency play (will cause screen tearing).");
 
 	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE|CVARDOC_BOOL);
 
