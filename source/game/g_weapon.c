@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "g_local.h"
+#include <string.h>
 
 #ifdef ALTERIA 
 
@@ -2136,7 +2137,7 @@ void tactical_bomb_think (edict_t *self)
 		gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "world/explosion1.wav" ), 1, ATTN_NONE, 0 );
 
 		gi.WriteByte (svc_temp_entity);
-		if(self->classname == "abomb")
+		if(strcmp(self->classname, "abomb") == 0)
 			gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		else
 			gi.WriteByte (TE_ROCKET_EXPLOSION); //might want different, massive effect here
@@ -2225,7 +2226,7 @@ void bomb_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	T_RadiusDamage(self, self->owner, self->radius_dmg/div, NULL, self->dmg_radius/div, MOD_R_SPLASH, 0);
 
 	gi.WriteByte (svc_temp_entity);
-	if(self->classname == "abomb")
+	if(strcmp(self->classname, "abomb") == 0)
 		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	else
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
