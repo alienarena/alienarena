@@ -2458,7 +2458,7 @@ extern unsigned sys_frame_time;   // TODO: ditto
  *  order to reduce the CPU usage of the process. Has to be a small fraction,
  *  to allow the OS enough time to switch back to this process.
  */
-#define PKTRATE_CAP 16
+#define PKTRATE_CAP 8  // 1000/8 = 125 PPS nominal, which is sufficient for 100 FPS
 #define PKTRATE_EARLY 12
 #define YIELD_MSEC 4
 

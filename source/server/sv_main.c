@@ -711,8 +711,9 @@ gotnewcl:
 
 	// send the connect packet to the client
 	Netchan_OutOfBandPrint(NS_SERVER, adr, "client_connect %s", sv_downloadurl->string);
-
 	Netchan_Setup (NS_SERVER, &newcl->netchan , adr, qport);
+	// Update expected_interval for jitter monitor
+	newcl->netchan.expected_interval = 1000 / sv_tickrate->integer;
 
 	newcl->state = cs_connected;
 
@@ -885,6 +886,9 @@ void SV_CalcPings (void)
 		else
 			cl->frame_latency[sv.framenum&(LATENCY_COUNTS-1)] = 0;
 #endif
+
+		// Update expected_interval for jitter monitor
+		cl->netchan.expected_interval = 1000 / sv_tickrate->integer;
 
 		total = 0;
 		count = 0;

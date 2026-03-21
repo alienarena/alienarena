@@ -646,6 +646,60 @@ void SV_ServerCommand_f (void)
 	ge->ServerCommand();
 }
 
+// Jitter monitor
+void SV_Jitters_f (void) {
+	int i, j, k, l;
+	qboolean expectColor;
+	client_t *cl;
+	qboolean isLocal;
+
+	if (!svs.clients) {
+		return;
+	}
+
+	Com_Printf("Name                 Ping      Jitter\n");
+	Com_Printf("-------------------- ---- -----------\n");
+
+	for (i = 0 ; i < maxclients->integer ; i++) {
+		cl = &svs.clients[i];
+		isLocal = (cl->netchan.remote_address.type == NA_LOOPBACK);
+
+		if (cl->state < cs_connected) {
+			continue;
+		}
+		
+		Com_Printf ("%s", cl->name);
+		l = strlen(cl->name);
+		expectColor = false;
+		for (j = k = 0; j < l; j ++) {
+			if (expectColor) {
+				if (cl->name[j] == '^' ) {
+					k++;
+				}
+				expectColor = false;
+			} else if (cl->name[j] == '^') {
+				expectColor = true;
+			} else {
+				k++;
+			}
+		}
+		if (expectColor) {
+			k++;
+		}
+		l = 20 - k;
+		for (j = 0; j < l; j++) {
+			Com_Printf(" ");
+		}
+
+		Com_Printf(" %4i %8.2f ms\n", cl->ping, cl->netchan.last_jitter);
+		if (isLocal && cl->netchan.last_jitter < -1.0f) {
+    		Com_Printf("\n[Note - only applicable to offline single player mode]\n");
+    		Com_Printf("The client is firing packets %ims BEFORE the server expects them.\n", (int)abs(cl->netchan.last_jitter));
+    		Com_Printf("This happens because your FPS is much higher than sv_tickrate.\n");
+		}	
+	}
+}
+
 //===========================================================
 
 /*
@@ -678,5 +732,8 @@ void SV_InitOperatorCommands (void)
 	Cmd_AddCommand ("killserver", SV_KillServer_f);
 
 	Cmd_AddCommand ("sv", SV_ServerCommand_f);
+
+	// Jitter monitor
+	Cmd_AddCommand ("sv_jitters", SV_Jitters_f);
 }
 

@@ -308,6 +308,7 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	unsigned	sequence, sequence_ack;
 	unsigned	reliable_ack, reliable_message;
 	int			qport;
+	int 		current_time;
 
 	// get sequence numbers
 	MSG_BeginReading (msg);
@@ -315,8 +316,34 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	sequence_ack = MSG_ReadLong (msg);
 
 	// read the qport if we are a server
-	if (chan->sock == NS_SERVER)
+	if (chan->sock == NS_SERVER) {
 		qport = MSG_ReadShort (msg);
+
+		// Jitter monitor
+		current_time = Sys_Milliseconds();
+		if (chan->last_jitter_time > 0) {
+			int interval = current_time - chan->last_jitter_time;
+
+			// Only calculate if some time has passed.
+			// If interval = 0, we ignore this packet.
+			if (interval > 0 && interval < 500) {
+				float deviation = (float)(interval - chan->expected_interval);
+				
+				// Exponential Moving Average
+				chan->jitter_sum = (chan->jitter_sum * 0.95f) + (deviation * 0.05f);
+				chan->last_jitter = (float)chan->jitter_sum;
+
+				chan->last_jitter_time = current_time;
+			} 
+			else if (interval >= 500) {
+				// Reset at too high interval
+				chan->last_jitter_time = current_time;
+			}
+			// We do nothing if interval = 0
+		} else {
+			chan->last_jitter_time = current_time;
+		}
+	}
 	
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
@@ -341,7 +368,7 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 				, reliable_ack);
 	}
 
-	if (sv_use_reorder_buffer->value) {
+	if (chan->sock == NS_SERVER && sv_use_reorder_buffer->value) {
 		int diff = (int)(sequence - chan->incoming_sequence);
 
 		if (diff < -MAX_REORDER_BUFFER * 4) {

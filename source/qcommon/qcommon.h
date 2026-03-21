@@ -721,6 +721,12 @@ typedef struct
 
 	reorder_packet_t	reorder_buffer[MAX_REORDER_BUFFER];
 	int 				buffer_overflow_count;
+
+	// Jitter monitor
+	int 				last_jitter_time;   // Time of previous calculation
+    double 				jitter_sum;         // Sum of all deviations
+    float 				last_jitter;        // Last calculated jitter value
+	int 				expected_interval;
 } netchan_t;
 
 extern	netadr_t	net_from;
