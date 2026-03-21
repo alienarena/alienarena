@@ -274,6 +274,15 @@ int Sys_Milliseconds (void)
 }
 #endif
 
+/*
+** Returns the current time in milliseconds but with higher precision
+*/
+double Sys_GetPreciseTime(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec * 1000.0 + (double)ts.tv_nsec / 1000000.0;
+}
+
 void Sys_Mkdir (char *path)
 {
 	int result;

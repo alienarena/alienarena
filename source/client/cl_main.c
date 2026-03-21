@@ -2032,7 +2032,7 @@ void CL_InitLocal (void)
 	Cvar_Describe (cl_noskins, "for all players to be shown with the same skin.");
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", CVARDOC_BOOL);
 	cl_predict = Cvar_Get ("cl_predict", "1", CVARDOC_BOOL);
-	cl_maxfps = Cvar_Get ("cl_maxfps", "60", CVAR_ARCHIVE | CVARDOC_INT);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "100", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_maxfps, "limit the frames drawn per second using a busy-wait loop.");
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (cl_showPlayerNames, "0 means no nametags, 1 means show one nametag in the center of the screen, 2 means show a nametag over each player.");
@@ -2480,6 +2480,32 @@ void CL_Frame( int msec )
 	static perftest_t *accelerometer = NULL;
 	float FRAMETIME = 1.0/(float)server_tickrate;
 
+	// Precise timers, in milliseconds
+	static double last_precise_time = 0;
+	static double precise_packet_timer = 0;
+	static double precise_render_timer = 0;
+
+	double current_precise_time = Sys_GetPreciseTime();
+	double precise_delta;
+
+	// Initialize precise times
+	if (last_precise_time == 0 || (current_precise_time - last_precise_time) > 2000.0 || (current_precise_time < last_precise_time)) {
+		last_precise_time = current_precise_time;
+		precise_delta = (double)msec; // Fallback to standard msec parameter
+	} else {
+		precise_delta = current_precise_time - last_precise_time;
+		last_precise_time = current_precise_time;
+	}
+
+	// Update the precise accumulators
+	precise_packet_timer += precise_delta;
+	precise_render_timer += precise_delta;
+
+	// Local timers for decoupling frame rate from packet rate
+	// Fill the old integer timers for the rest of the method logic with the precise ones
+	packet_timer = (int)precise_packet_timer;
+	render_timer = (int)precise_render_timer;
+
 	if ( dedicated->integer )
 	{ // crx running as dedicated server crashes without this.
 		return;
@@ -2489,9 +2515,6 @@ void CL_Frame( int msec )
 	cls.frametime = 0.0f;    // zero here for debug purposes, set below
 	cl.time += msec; // clamped to [cl.frame.servertime-100,cl.frame.servertime]
 
-	/* local timers for decoupling frame rate from packet rate */
-	packet_timer += msec;
-	render_timer += msec;
 	
     if (!speedometer) {
         speedometer = get_perftest("speedometer");
@@ -2660,8 +2683,11 @@ void CL_Frame( int msec )
 		 * calculate frametime in seconds for packet procedures
 		 * cls.frametime is source for the cmd.msecs byte
 		 *  in the client-to-server move message.
-		 */
-		cls.frametime  = ((float)packet_timer) / 1000.0f;
+		 */		
+		cls.frametime = (float)precise_packet_timer / 1000.0f;
+		// Make sure it's never zero to prevent shutdown of the game
+		if (cls.frametime < 0.001f) cls.frametime = 0.001f;
+
 		if ( cls.frametime >= 0.250f )
 		{ /* very long delay */
 			/*
@@ -2676,6 +2702,10 @@ void CL_Frame( int msec )
 			 */
 			render_trigger = false;
 			render_timer = 0;
+    		precise_render_timer = 0; 
+    
+    		packet_timer = 0;
+    		precise_packet_timer = 0;
 		}
 
 		/* process server-to-client packets */
@@ -2686,12 +2716,6 @@ void CL_Frame( int msec )
 
 		/* run cURL downloads */
 		CL_HttpDownloadThink();
-
-		/* 
-		 * system dependent keyboard and mouse input event polling
-		 * accumulate keyboard and mouse events
-		 */
-		Sys_SendKeyEvents();
 
 		/* joystick input. may or may not be working. */
 		IN_Commands();
@@ -2711,16 +2735,7 @@ void CL_Frame( int msec )
 
 		/* resend a connection request if necessary */
 		CL_CheckForResend();
-
-		/* retrigger packet send timer */
-		packet_timer = 0;
-
-		/*
-		 * predict movement for un-acked client-to-server packets
-		 * [The Quake trick that keeps players view smooth in on-line play.]
-		 */
-		CL_PredictMovement (packet_timer);
-		
+	
 		if (speedometer && speedometer->cvar->integer) {
 	        speedometer->counter = sqrt(
 	            cl.predicted_velocity[0]*cl.predicted_velocity[0]+
@@ -2743,6 +2758,11 @@ void CL_Frame( int msec )
 	        accelerometer->counter += new_vel-old_vel;
 	        old_vel = new_vel;
 	    }
+
+		// We don't set precise_packet_timer to 0 to take into account the fractions of milliseconds that are left over,
+		// to avoid accumulating latency from rounding errors over time.
+		precise_packet_timer -= (double)packet_timer;
+		packet_timer = 0; 
 	}
 
 	/*
@@ -2751,19 +2771,20 @@ void CL_Frame( int msec )
 	 */
 	if ( render_trigger )
 	{
-		++render_counter; // counting renders since last packet
+		++render_counter; // counting renders since last packet	
+
+		// Important for server logic regarding movement and input
+		// This value MUST be exact for the server-sync
+		float server_frametime = (float)precise_packet_timer / 1000.0f;
+		cls.frametime = (float)precise_packet_timer / 1000.0f;
+
+		/* 
+		* system dependent keyboard and mouse input event polling
+		* accumulate keyboard and mouse events
+		*/
+		Sys_SendKeyEvents();
 		
-		if (!packet_trigger && (cl_test->integer || (in_poll_rate && in_poll_rate->integer))) //return cl_test - this was causing major issues with menu mouse in windows build
-		{
-			/* 
-			 * system dependent keyboard and mouse input event polling
-			 * accumulate keyboard and mouse events
-			 */
-			cls.frametime  = ((float)packet_timer) / 1000.0f;
-			Sys_SendKeyEvents();
-			
-			CL_PredictMovement (packet_timer);
-		}
+		CL_PredictMovement ((int)precise_packet_timer);
 
 		/*
 		 * calculate cls.frametime in seconds for render procedures.
@@ -2773,8 +2794,11 @@ void CL_Frame( int msec )
 		 *
 		 * Using a simple lowpass filter, to smooth out irregular timing.
 		 */
+		
+		// For rendering and smoothness
+		float raw_render_time = (float)render_timer / 1000.0f;
 		cls.frametime = (float)(render_timer) / 1000.0f;
-		r_frametime = (r_frametime + cls.frametime + cls.frametime) / 3.0f;
+		r_frametime = (r_frametime + raw_render_time + raw_render_time) / 3.0f;
 		cls.frametime = r_frametime;
 
 		//  Update the display
@@ -2808,9 +2832,6 @@ void CL_Frame( int msec )
 		/* developer test for observing timers */
 		// Com_DPrintf("rt: %i cft: %f\n", render_timer, cls.frametime );
 
-		// retrigger render timing
-		render_timer = 0;
-
 #if 0
 		/* TODO: Check if this still works and/or is useful.
 		 */
@@ -2836,8 +2857,36 @@ void CL_Frame( int msec )
 		}
 #endif
 
+		// We have to restore the value in cls.frametime to the server time for the packet for CL_SendCmd()
+		cls.frametime = server_frametime;
+
+		// We don't set precise_render_timer to 0 to take into account the fractions of milliseconds that are left over,
+		// to avoid accumulating latency from rounding errors over time.
+		precise_render_timer -= (double)render_timer;
+		render_timer = 0;
 	}
 
+#if 0
+	// Timing check, "Local Drift" should be near zero, which means that the server almost never has to correct the client position with the new timing based on fractions of milliseconds.
+	static double totalRealMs = 0;
+	static double totalEngineMs = 0;
+	static int debugFrames = 0;
+
+	// Use the precise detla we calculated above
+	totalRealMs += precise_delta; 
+	totalEngineMs += (double)msec; // What the engine thinks
+
+	debugFrames++;
+
+	if (debugFrames % 1000 == 0) {
+		// This shows how much the "old" engine would have lost
+		// compared to the new precise timing system.
+		double localDrift = totalRealMs - totalEngineMs;
+
+		Com_Printf("PRECISION: Frames: %i | Real Delta: %.3fms | Engine Delta: %.0fms | Local Drift: %.3fms\n", 
+					debugFrames, totalRealMs, totalEngineMs, localDrift);
+	}
+#endif
 }
 
 //============================================================================

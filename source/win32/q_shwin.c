@@ -137,6 +137,21 @@ int Sys_Milliseconds (void)
 	return timeofday;
 }
 
+/*
+** Returns the current time in milliseconds but with higher precision
+*/
+double Sys_GetPreciseTime(void) {
+    static LARGE_INTEGER frequency;
+    static int started = 0;
+    if (!started) {
+        QueryPerformanceFrequency(&frequency);
+        started = 1;
+    }
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return ((double)counter.QuadPart * 1000.0) / (double)frequency.QuadPart;
+}
+
 void Sys_Mkdir (char *path)
 {
 	_mkdir (path);

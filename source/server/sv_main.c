@@ -69,7 +69,9 @@ cvar_t	*sv_downloadurl;
 
 cvar_t	*sv_iplogfile;			// Log file by IP address
 
-cvar_t  *sv_tickrate;			//server frame rate
+cvar_t  *sv_tickrate;			// server frame rate
+
+cvar_t	*sv_use_reorder_buffer;	// whether to use the reorder buffer for incoming packets
 
 int		sv_numbots;
 
@@ -988,6 +990,9 @@ void SV_ReadPackets (void)
 					cl->lastmessage = svs.realtime;	// don't timeout
 					SV_ExecuteClientMessage (cl);
 				}
+				if (sv_use_reorder_buffer->value) {
+					Netchan_ProcessReorderBuffer(&cl->netchan, cl, &net_message);
+				}
 			}
 			break;
 		}
@@ -1420,6 +1425,9 @@ void SV_Init (void)
 	Cvar_Describe (allow_overwrite_maps, "Used for command installmap and installmodel. If set to 1, existing downloaded map packs or model packs will be overwritten and all files in it will be extracted, overwriting any existing files.");
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
 	sv_tickrate = Cvar_Get("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_ARCHIVE);
+
+	sv_use_reorder_buffer = Cvar_Get ("sv_use_reorder_buffer", "0", 0);
+	Cvar_Describe (sv_use_reorder_buffer, "If 1, the server will use a reorder buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
 
 	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 

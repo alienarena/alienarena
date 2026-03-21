@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include "qcommon.h"
+#include "../server/server.h"
 
 /*
 
@@ -168,6 +168,7 @@ void Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	SZ_SetName (&chan->message, va("Net channel %s", NET_AdrToString(adr)), true);
 	chan->message.allowoverflow = true;
+	memset(chan->reorder_buffer, 0, sizeof(chan->reorder_buffer));
 }
 
 
@@ -308,7 +309,7 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	unsigned	reliable_ack, reliable_message;
 	int			qport;
 
-// get sequence numbers
+	// get sequence numbers
 	MSG_BeginReading (msg);
 	sequence = MSG_ReadLong (msg);
 	sequence_ack = MSG_ReadLong (msg);
@@ -316,7 +317,7 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	// read the qport if we are a server
 	if (chan->sock == NS_SERVER)
 		qport = MSG_ReadShort (msg);
-
+	
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
 
@@ -340,22 +341,93 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 				, reliable_ack);
 	}
 
-//
-// discard stale or duplicated packets
-//
-	if (sequence <= chan->incoming_sequence)
-	{
-		if (showdrop->value)
-			Com_Printf ("%s:Out of order packet %i at %i\n"
-				, NET_AdrToString (chan->remote_address)
-				,  sequence
-				, chan->incoming_sequence);
-		return false;
+	if (sv_use_reorder_buffer->value) {
+		int diff = (int)(sequence - chan->incoming_sequence);
+
+		if (diff < -MAX_REORDER_BUFFER * 4) {
+			// Force reset at client crash or reconnect, when the difference is suddenly very large (negative)
+			if (showdrop->value) Com_Printf("%s: Sequence reset\n", NET_AdrToString(chan->remote_address));
+
+			memset(chan->reorder_buffer, 0, sizeof(chan->reorder_buffer));
+			chan->incoming_sequence = sequence - 1; // Force diff to 1
+			diff = 1;
+		} else if (diff > MAX_REORDER_BUFFER) {
+			chan->buffer_overflow_count++;
+
+			// Log alleen bij substantiële problemen (bijv. elke 10 keer) om spam te voorkomen
+			if (chan->buffer_overflow_count % 10 == 1) {
+				Com_Printf("NETWORK WARNING: %s exceeded jitter buffer (Gap: %i). Connection unstable.\n", 
+					NET_AdrToString(chan->remote_address), diff);
+			}
+
+			// Too far in the future, prevent waiting for a packet that never comes anymore
+			if (showdrop->value) 
+				Com_Printf("%s: Gap too large (%i), jumping to current\n", NET_AdrToString(chan->remote_address), diff);
+			
+			// Clear the buffer and accept this new packet as new base
+			memset(chan->reorder_buffer, 0, sizeof(chan->reorder_buffer));
+			chan->incoming_sequence = sequence - 1; // Force diff to 1
+			chan->dropped = 0; // Prevent physics explosion and client disconnect
+			diff = 1;
+		} else if (diff <= 0) {
+			// Ignore duplicate or old packets
+			if (showdrop->value) Com_Printf("Duplicate or old packet %i ignored\n", sequence);
+
+			return false;
+		}
+		
+		// Buffer a newer packet that is out of order
+		if (diff > 1) {
+			int buffer_index = sequence % MAX_REORDER_BUFFER;
+			
+			if (chan->reorder_buffer[buffer_index].valid &&
+				chan->reorder_buffer[buffer_index].sequence != sequence) {
+				if (showdrop->value)				
+					Com_Printf ("%s:Reorder buffer collision at index %i\n", NET_AdrToString (chan->remote_address), buffer_index);
+				return false;
+			}
+
+			if (msg->cursize > MAX_MSGLEN) {
+				Com_Printf ("%s:Message too large for reorder buffer\n", NET_AdrToString (chan->remote_address));
+				return false;
+			}
+
+			reorder_packet_t *pkt = &chan->reorder_buffer[buffer_index];
+
+			// Copy the data
+			memcpy(pkt->data, msg->data, msg->cursize);
+
+			// Set all metadata
+			pkt->msg.data = pkt->data; // CRUCIAL: make the msg pointer point to the local data array
+			pkt->msg.cursize = msg->cursize;
+			pkt->msg.maxsize = MAX_MSGLEN;
+			pkt->sequence = sequence;
+			pkt->valid = true;
+			pkt->arrival_time = curtime;
+
+			if (showdrop->value)
+				Com_Printf ("%s:Buffered out-of-order packet %i (expected %i)\n", NET_AdrToString (chan->remote_address), sequence, chan->incoming_sequence + 1);
+
+			return false;
+		}
+	} else {
+		//
+		// discard stale or duplicated packets
+		//
+		if (sequence <= chan->incoming_sequence)
+		{
+			if (showdrop->value)
+				Com_Printf ("%s:Out of order packet %i at %i\n"
+					, NET_AdrToString (chan->remote_address)
+					,  sequence
+					, chan->incoming_sequence);
+			return false;
+		}
 	}
 
-//
-// dropped packets don't keep the message from being used
-//
+	//
+	// dropped packets don't keep the message from being used
+	//
 	chan->dropped = sequence - (chan->incoming_sequence+1);
 	if (chan->dropped > 0)
 	{
@@ -366,16 +438,16 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 			, sequence);
 	}
 
-//
-// if the current outgoing reliable message has been acknowledged
-// clear the buffer to make way for the next
-//
+	//
+	// if the current outgoing reliable message has been acknowledged
+	// clear the buffer to make way for the next
+	//
 	if (reliable_ack == chan->reliable_sequence)
 		chan->reliable_length = 0;	// it has been received
 
-//
-// if this message contains a reliable message, bump incoming_reliable_sequence
-//
+	//
+	// if this message contains a reliable message, bump incoming_reliable_sequence
+	//
 	chan->incoming_sequence = sequence;
 	chan->incoming_acknowledged = sequence_ack;
 	chan->incoming_reliable_acknowledged = reliable_ack;
@@ -384,11 +456,67 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 		chan->incoming_reliable_sequence ^= 1;
 	}
 
-//
-// the message can now be read from the current message pointer
-//
+	//
+	// the message can now be read from the current message pointer
+	//
 	chan->last_received = curtime;
 
 	return true;
 }
 
+void Netchan_ProcessReorderBuffer (netchan_t *chan, client_t *cl, sizebuf_t *msg)
+{
+    while (1)
+    {
+        unsigned next_sequence = chan->incoming_sequence + 1;
+        int buffer_index = next_sequence % MAX_REORDER_BUFFER;
+        reorder_packet_t *pkt = &chan->reorder_buffer[buffer_index];
+
+        // Check if the next expected sequence is in the reorder buffer and valid
+        if (!pkt->valid || pkt->sequence != next_sequence)
+            break;
+
+		// Extra check on not too old packets
+		if (curtime - pkt->arrival_time > MAX_REORDER_BUFFER_MSG_AGE_MS)
+        {
+            if (showdrop->value)
+                Com_Printf ("Discarding expired buffered packet %i (too old)\n", next_sequence);
+            
+            pkt->valid = false;
+            // Just wait for a newer packet to arrive
+            continue; 
+        }
+
+        // Copy the packet data back into the msg buffer for processing
+        if (pkt->msg.cursize > MAX_MSGLEN) {
+            pkt->valid = false;
+            break;
+        }
+
+        memcpy(msg->data, pkt->data, pkt->msg.cursize);
+        msg->cursize = pkt->msg.cursize;
+        msg->readcount = 0; // CRUCIAL: reset readcount so that processing starts from the beginning of the message
+
+        // Mark the reorder buffer slot as invalid since we're about to process it
+        pkt->valid = false;
+
+        // Call Netchan_Process with the reordered packet. This will update the incoming_sequence and related fields.
+        // Because sequence is now exactly equal to incoming_sequence + 1, 
+        // Netchan_Process will return true and update all acks/sequences.
+        if (Netchan_Process(chan, msg))
+        {
+            if (cl->state != cs_zombie)
+            {
+                cl->lastmessage = svs.realtime;
+				// The message has now been consumed by Netchan_Process,
+				// SV_ExecuteClientMessage will read the rest of the data.
+                SV_ExecuteClientMessage (cl);
+            }
+        }
+        else
+        {
+            // Should not happen if the data has been buffered correctly
+            break; 
+        }
+    }
+}

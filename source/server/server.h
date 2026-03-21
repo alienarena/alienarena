@@ -231,6 +231,8 @@ extern	cvar_t		*sv_airaccelerate;		// don't reload level state when reentering
 											// development tool
 extern	cvar_t		*sv_enforcetime;
 
+extern	cvar_t		*sv_use_reorder_buffer;	// whether to use the reorder buffer for incoming packets
+
 extern	client_t	*sv_client;
 extern	edict_t		*sv_player;
 extern  int			sv_numbots;
@@ -328,6 +330,10 @@ void SV_InitGameProgs (void);
 void SV_ShutdownGameProgs (void);
 void SV_InitEdict (edict_t *e);
 
+//
+// net_chan.c
+//
+void Netchan_ProcessReorderBuffer (netchan_t *chan, client_t *cl, sizebuf_t *msg);
 
 
 //============================================================

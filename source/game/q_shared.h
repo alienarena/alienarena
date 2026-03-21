@@ -333,6 +333,7 @@ SYSTEM SPECIFIC
 extern	int	curtime;		// time returned by last Sys_Milliseconds
 
 int		Sys_Milliseconds (void);
+double 	Sys_GetPreciseTime(void);
 void	Sys_Mkdir (char *path);
 
 // large block stack allocation routines

@@ -675,6 +675,17 @@ void		NET_Sleep(int msec);
 
 #define	MAX_LATENT	32
 
+#define MAX_REORDER_BUFFER 				16   // On purpose on the low side to not block too long on a lost packet
+#define MAX_REORDER_BUFFER_MSG_AGE_MS	1000
+
+typedef struct {
+	sizebuf_t	msg;
+	byte		data[MAX_MSGLEN];
+	unsigned	sequence;
+	qboolean	valid;
+	int			arrival_time;
+} reorder_packet_t;
+
 typedef struct
 {
 	qboolean	fatal_error;
@@ -707,6 +718,9 @@ typedef struct
 // message is copied to this buffer when it is first transfered
 	int			reliable_length;
 	byte		reliable_buf[MAX_MSGLEN-16];	// unacked reliable message
+
+	reorder_packet_t	reorder_buffer[MAX_REORDER_BUFFER];
+	int 				buffer_overflow_count;
 } netchan_t;
 
 extern	netadr_t	net_from;
