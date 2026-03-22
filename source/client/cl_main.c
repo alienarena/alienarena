@@ -1390,9 +1390,9 @@ void CL_DumpPackets (void)
 // Process buffered packets from the server, if cl_use_jitter_buffer is enabled.
 void CL_ProcessBufferedPackets(void)
 {
-    while (Netchan_GetNextBufferedPacket(&cls.netchan, &net_message)) {
-        CL_ParseServerMessage();
-    }
+	while (Netchan_GetNextBufferedPacket(&cls.netchan, &net_message)) {
+		CL_ParseServerMessage();
+	}
 }
 
 
@@ -2152,7 +2152,7 @@ void CL_InitLocal (void)
 	cl_show_active_servers_only = Cvar_Get("cl_show_active_servers_only", "0", CVARDOC_BOOL);
 	Cvar_Describe (cl_show_active_servers_only, "Only show active servers in the server list. Will not be remembered when quitting.");
 
-	cl_use_jitter_buffer = Cvar_Get ("cl_use_jitter_buffer", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	cl_use_jitter_buffer = Cvar_Get ("cl_use_jitter_buffer", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
 	Cvar_Describe (cl_use_jitter_buffer, "If 1, the client will use a packet buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
 
 	cl_test = Cvar_Get ("cl_test", "0", CVAR_ARCHIVE);

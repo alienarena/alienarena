@@ -1440,7 +1440,7 @@ void SV_Init (void)
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
 	sv_tickrate = Cvar_Get("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_ARCHIVE);
 
-	sv_use_jitter_buffer = Cvar_Get ("sv_use_jitter_buffer", "1", 0);
+	sv_use_jitter_buffer = Cvar_Get ("sv_use_jitter_buffer", "0", 0);
 	Cvar_Describe (sv_use_jitter_buffer, "If 1, the server will use a packet buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
 
 	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);

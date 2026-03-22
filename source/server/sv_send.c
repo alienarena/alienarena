@@ -26,8 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #include "server.h"
 #include "stdint.h"
 
-extern cvar_t  *sv_tickrate;
-
 /*
 =============================================================================
 
@@ -400,47 +398,26 @@ qboolean SV_SendClientDatagram (client_t *client)
 {
 	byte		msg_buf[MAX_MSGLEN];
 	sizebuf_t	msg;
-	qboolean	skip_snapshot = false; 
 
-	if (sv_tickrate->integer >= 100) {
-		if (client->rate < 10000) {
-			if ((sv.framenum % 3) != 0) {
-				// Only send 33Hz
-				skip_snapshot = true;
-			} 
-		} else if (client->rate < 30000) {
-			if ((sv.framenum % 2) != 0) {
-				// Only send 50Hz
-				skip_snapshot = true;
-			}
-		}
-	}
+	SV_BuildClientFrame (client);
 
 	SZ_Init (&msg, msg_buf, sizeof(msg_buf));
 	SZ_SetName (&msg, va("Client msg out buffer (%s)", NET_AdrToString(client->netchan.remote_address)), false);
 	msg.allowoverflow = true;
 
-	if (!skip_snapshot) {
-		SV_BuildClientFrame (client);
-		// send over all the relevant entity_state_t
-		// and the player_state_t
-		SV_WriteFrameToClient (client, &msg);
-	}
+	// send over all the relevant entity_state_t
+	// and the player_state_t
+	SV_WriteFrameToClient (client, &msg);
 
 	// copy the accumulated multicast datagram
 	// for this client out to the message
 	// it is necessary for this to be after the WriteEntities
 	// so that entity references will be current
-	if (client->datagram.overflowed) {
+	if (client->datagram.overflowed)
 		Com_Printf ("WARNING: datagram overflowed for %s\n", client->name);
-	} else {
+	else
 		SZ_Write (&msg, client->datagram.data, client->datagram.cursize);
-	}
 	SZ_Clear (&client->datagram);
-
-	if (msg.cursize == 0) {
-		return true; 
-	}
 
 	if (msg.overflowed)
 	{	// must have room left for the packet header
@@ -456,7 +433,6 @@ qboolean SV_SendClientDatagram (client_t *client)
 
 	return true;
 }
-
 
 /*
 ==================

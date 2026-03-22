@@ -676,7 +676,7 @@ void		NET_Sleep(int msec);
 #define	MAX_LATENT	32
 
 #define MAX_REORDER_BUFFER 				16   // On purpose on the low side to not block too long on a lost packet
-#define MAX_REORDER_BUFFER_MSG_AGE_MS	1000
+#define MAX_REORDER_BUFFER_MSG_AGE_MS	50	 // Small value to not block too long on a lost packet, but big enough to allow for some jitter
 
 typedef struct {
 	sizebuf_t	msg;

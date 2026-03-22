@@ -494,23 +494,33 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
 }
 
 qboolean Netchan_GetNextBufferedPacket(netchan_t *chan, sizebuf_t *msg) {
-    unsigned next_seq = chan->incoming_sequence + 1;
-    int index = next_seq % MAX_REORDER_BUFFER;
-    reorder_packet_t *pkt = &chan->reorder_buffer[index];
+	unsigned next_seq = chan->incoming_sequence + 1;
+	int index = next_seq % MAX_REORDER_BUFFER;
+	reorder_packet_t *pkt = &chan->reorder_buffer[index];
 
-    if (pkt->valid && pkt->sequence == next_seq) {
+	if (chan->last_received > 0 && (Sys_Milliseconds() - chan->last_received > MAX_REORDER_BUFFER_MSG_AGE_MS)) {
+		if (showdrop->integer) {
+			Com_Printf("BUFFER TIMEOUT: Skipping missing packet %i\n", next_seq);
+		}
+		chan->incoming_sequence++; // Close the gap
+		chan->last_received = Sys_Milliseconds(); // Reset timer for the next gap
+		// Return false, so that the loop in SV_ReadPackets can try to get the next one
+		return false; 
+    }
+
+	if (pkt->valid && pkt->sequence == next_seq) {
 		if (showdrop->integer) {
 			Com_Printf("BUFFERED PACKET RELEASED: seq %i\n", next_seq);
 		}		
-        // Copy data to msg
-        memcpy(msg->data, pkt->data, pkt->msg.cursize);
-        msg->cursize = pkt->msg.cursize;
-        msg->readcount = 0;
+		// Copy data to msg
+		memcpy(msg->data, pkt->data, pkt->msg.cursize);
+		msg->cursize = pkt->msg.cursize;
+		msg->readcount = 0;
 
-        chan->incoming_sequence = next_seq;
-        chan->last_received = Sys_Milliseconds();
-        pkt->valid = false;
-        return true;
-    }
-    return false;
+		chan->incoming_sequence = next_seq;
+		chan->last_received = Sys_Milliseconds();
+		pkt->valid = false;
+		return true;
+	}
+	return false;
 }
