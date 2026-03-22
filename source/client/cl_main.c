@@ -2441,26 +2441,17 @@ extern unsigned sys_frame_time;   // TODO: ditto
  *    equivalent to server frame number times 100msecs. see CL_ParseFrame()
  */
 
-/* Packet Rate Limiting Cap in milliseconds
- *  msecs=PPS :: 12=83, 13=76, 14=71, 15=66, 16=62
- * Current choice is 16msec/62PPS nominal.
- *  This matches the default cl_maxfps setting.
- *  Which is 60, of course, but because of msec rounding, the result is 62
- *  This results in 6 packets per server frame, mostly.
- * Packet rate limiting is not invoked unless the PPS is set higher than the FPS.
- * Seems like a good idea not to invoke packet rate limiting unless the
- *  cl_maxfps is set higher than the default.
- *
- *  PKTRATE_EARLY is the minimum msecs for catching up when packets are delayed
- *
+/* 
+ *  
  *  If neither the packet nor the render code will be triggered in the next
  *  YIELD_MSEC milliseconds, sleep the process for a fraction of that time in
  *  order to reduce the CPU usage of the process. Has to be a small fraction,
  *  to allow the OS enough time to switch back to this process.
+ * 
+ *  Disabled this functionality for now, because it's also not accurate enough on linux and it's probably better without the sleep.
+ *  #define YIELD_MSEC 4
  */
-#define PKTRATE_CAP 8  // 1000/8 = 125 PPS nominal, which is sufficient for 100 FPS
-#define PKTRATE_EARLY 12
-#define YIELD_MSEC 4
+#define MIN_PKTRATE_MSEC 16 // Minimum packet interval in ms on low tickrate servers to keep smooth movements
 
 void CL_Frame( int msec )
 {
@@ -2479,6 +2470,7 @@ void CL_Frame( int msec )
 	static perftest_t *speedometer = NULL;
 	static perftest_t *accelerometer = NULL;
 	float FRAMETIME = 1.0/(float)server_tickrate;
+	int target_packet_interval = 1000 / (int)server_tickrate;
 
 	// Precise timers, in milliseconds
 	static double last_precise_time = 0;
@@ -2566,33 +2558,20 @@ void CL_Frame( int msec )
 		Com_DPrintf("framerate_cap set to %i msec\n", framerate_cap );
 	}
 
-	/*
-	 * Set nominal milliseconds-per-packet for client-to-server messages.
-	 * Idea is to be timely in getting and transmitting player input without
-	 *   congesting the server.
-	 * Plan is to not implement a user setting for this unless a need for that
-	 *   is discovered.
-	 * If the cl_maxfps is set low, then FPS will limit PPS, and
-	 *  packet rate limiting is bypassed.
-	 */
-	if ( cls.state == ca_connected )
-	{ // receiving configstrings from the server, run at nominal 10PPS
-		// avoids unnecessary load on the server
-		if ( packetrate_cap != 1000*FRAMETIME )
-			Com_DPrintf("packet rate change: 10 PPS\n");
-		packetrate_cap = 1000*FRAMETIME;
+	// Previously the maximum packetrate was 62PPS (16ms interval), too low for a 100FPS tickrate.
+	// We need to align the packet rate as much as possible with the server tickrate for optimal synchronization and performance.
+	// Unless the server tickrate is low, then take the minimum.
+	// It's also important that it's not higher than the server tickrate,
+	// else the server will not receive the same amount of packets each tick, which causes microstutters and affects the antilag.
+	if (target_packet_interval > MIN_PKTRATE_MSEC) {
+		target_packet_interval = MIN_PKTRATE_MSEC;
 	}
-	else if ( framerate_cap >= PKTRATE_CAP )
-	{ // do not to throttle packet sending, run in sync with render
-		if ( packetrate_cap != -1)
-			Com_DPrintf("packetrate change: framerate\n");
-		packetrate_cap = -1;
-	}
-	else
-	{ // packet rate limiting
-		if ( packetrate_cap != PKTRATE_CAP )
-			Com_DPrintf("packetrate change: %iPPS\n", 1000/PKTRATE_CAP);
-		packetrate_cap = PKTRATE_CAP;
+	if (framerate_cap >= target_packet_interval) {
+	 	Com_DPrintf("packetrate change: framerate\n");
+		packetrate_cap = -1; // FPS is lower than server tickrate, send each frame
+	} else {
+		Com_DPrintf("packetrate change: server tickrate\n");
+		packetrate_cap = target_packet_interval; // FPS is higher, cap based on server tickrate
 	}
 
 	/* local triggers for decoupling framerate from packet rate  */
@@ -2611,10 +2590,12 @@ void CL_Frame( int msec )
 	else
 	{ /* normal operation. */
 		/* Sometimes, the packetrate_cap can be "in phase" with
-		 *  the frame rate affecting the average packets-per-server-frame.
-		 *  A little jitter in the framerate_cap counteracts that.
-		 */
-		if ( render_timer >= (framerate_cap + frcjitter[frcjitter_ix]) )
+		*  the frame rate affecting the average packets-per-server-frame.
+		*  A little jitter in the framerate_cap counteracts that.
+		*  Only do this for servers with a tickrate lower than 60 else it will only be harmful.
+		*/
+		int effective_frcjitter = (server_tickrate < 60) ? frcjitter[frcjitter_ix] : 0;
+		if ( render_timer >= (framerate_cap + effective_frcjitter) )
 		{
 			if ( ++frcjitter_ix > 3 ) frcjitter_ix = 0;
 			render_trigger = 1;
@@ -2627,9 +2608,14 @@ void CL_Frame( int msec )
 		{ // normal packet trigger
 			packet_trigger = 1;
 		}
-		else if ( packet_delay > 0 )
-		{ // packet sent in previous loop was delayed
-			if ( packet_timer >= PKTRATE_EARLY )
+		else if ( packet_delay > 0 && packetrate_cap > 0 )
+		{ 	// Packet sent in previous loop was delayed
+			
+			// Minimum msecs for catching up when packets are delayed
+			// Dynamic instead of harcoded because tickrate may vary
+			int dynamic_early = (packetrate_cap * 8) / 10;
+
+			if ( packet_timer >= dynamic_early )
 			{ // should be ok to send a packet early
 				/* idea is to try to maintain a steady number of
 				 * client-to-server packets per server frame.
@@ -2647,19 +2633,20 @@ void CL_Frame( int msec )
 			}
 		}
 	}
-	
-#ifdef UNIX_VARIANT
-	// TODO: make this work on Windows
-	// TODO: disable this if vsync is on
-	if (	!packet_trigger && !send_packet_now && !cls.download &&
-			!render_trigger &&
-			packet_timer + packet_delay >= YIELD_MSEC &&
-			render_timer >= YIELD_MSEC )
-	{
-		usleep ((YIELD_MSEC * 1000) / 6);
-		return;
-	}
-#endif
+
+// Disabled this functionality for now, because it's also not accurate enough on linux and it's probably better without the sleep.
+// #ifdef UNIX_VARIANT
+// 	// TODO: make this work on Windows
+// 	// TODO: disable this if vsync is on
+// 	if (	!packet_trigger && !send_packet_now && !cls.download &&
+// 			!render_trigger &&
+// 			packet_timer + packet_delay >= YIELD_MSEC &&
+// 			render_timer >= YIELD_MSEC )
+// 	{
+// 		usleep ((YIELD_MSEC * 1000) / 6);
+// 		return;
+// 	}
+// #endif
 
 	if ( packet_trigger || send_packet_now || cls.download)
 	{
