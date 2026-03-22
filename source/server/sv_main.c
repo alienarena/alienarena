@@ -71,7 +71,7 @@ cvar_t	*sv_iplogfile;			// Log file by IP address
 
 cvar_t  *sv_tickrate;			// server frame rate
 
-cvar_t	*sv_use_reorder_buffer;	// whether to use the reorder buffer for incoming packets
+cvar_t	*sv_use_jitter_buffer;	// whether to use the jitter buffer for incoming packets
 
 int		sv_numbots;
 
@@ -941,6 +941,16 @@ void SV_GiveMsec (void)
 	}
 }
 
+// Process buffered packets for a client, if the reorder buffer is enabled
+void SV_ProcessBufferedPackets (netchan_t *chan, client_t *cl, sizebuf_t *msg) {
+	while (Netchan_GetNextBufferedPacket(chan, msg)) {
+		if (cl->state != cs_zombie) {
+			cl->lastmessage = svs.realtime;
+			SV_ExecuteClientMessage(cl);
+		}
+	}
+}
+
 
 /*
 =================
@@ -987,15 +997,15 @@ void SV_ReadPackets (void)
 				cl->netchan.remote_address.port = net_from.port;
 			}
 
-			if (Netchan_Process(&cl->netchan, &net_message))
+			if (Netchan_Process(&cl->netchan, &net_message, sv_use_jitter_buffer->value))
 			{	// this is a valid, sequenced packet, so process it
 				if (cl->state != cs_zombie)
 				{
 					cl->lastmessage = svs.realtime;	// don't timeout
 					SV_ExecuteClientMessage (cl);
 				}
-				if (sv_use_reorder_buffer->value) {
-					Netchan_ProcessReorderBuffer(&cl->netchan, cl, &net_message);
+				if (sv_use_jitter_buffer->value) {
+					SV_ProcessBufferedPackets(&cl->netchan, cl, &net_message);
 				}
 			}
 			break;
@@ -1370,10 +1380,10 @@ void SV_UserinfoChanged (client_t *cl)
 	{
 		i = atoi(val);
 		cl->rate = i;
-		if (cl->rate < 100)
-			cl->rate = 100;
-		if (cl->rate > 15000)
-			cl->rate = 15000;
+		if (cl->rate < 2500)
+			cl->rate = 2500;
+		if (cl->rate > 100000)
+			cl->rate = 100000;
 	}
 	else
 		cl->rate = 5000;
@@ -1430,8 +1440,8 @@ void SV_Init (void)
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
 	sv_tickrate = Cvar_Get("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_ARCHIVE);
 
-	sv_use_reorder_buffer = Cvar_Get ("sv_use_reorder_buffer", "0", 0);
-	Cvar_Describe (sv_use_reorder_buffer, "If 1, the server will use a reorder buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
+	sv_use_jitter_buffer = Cvar_Get ("sv_use_jitter_buffer", "1", 0);
+	Cvar_Describe (sv_use_jitter_buffer, "If 1, the server will use a packet buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
 
 	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 

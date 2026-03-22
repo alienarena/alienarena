@@ -231,7 +231,7 @@ extern	cvar_t		*sv_airaccelerate;		// don't reload level state when reentering
 											// development tool
 extern	cvar_t		*sv_enforcetime;
 
-extern	cvar_t		*sv_use_reorder_buffer;	// whether to use the reorder buffer for incoming packets
+extern	cvar_t		*sv_use_jitter_buffer;	// whether to use the jitter buffer for incoming packets
 
 extern	client_t	*sv_client;
 extern	edict_t		*sv_player;

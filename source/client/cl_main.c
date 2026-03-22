@@ -162,6 +162,8 @@ cvar_t	*cl_latest_game_version_url;
 cvar_t	*cl_speedrecord;
 cvar_t	*cl_alltimespeedrecord;
 
+cvar_t	*cl_use_jitter_buffer;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -518,6 +520,42 @@ void CL_Quit_f (void)
 	S_StopAllSounds ();
 	CL_Disconnect ();
 	Com_Quit ();
+}
+
+// Client jitter monitor
+void CL_Jitters_f (void) {
+	if (cls.state < ca_connected) {
+		Com_Printf("Not connected to a server.\n");
+		return;
+	}
+
+	Com_Printf("Network statistics for: %s\n", cls.servername);
+	Com_Printf("----------------------- --------------------\n");
+
+	// The format % i or % .2f is used to reserve a space in case the number is positive, if negative it will have the minus sign.
+	if (cls.netchan.last_jitter > 15.0f || cls.netchan.last_jitter < -15.0f) {
+		Com_Printf("%-23s% .2f ms [UNSTABLE]\n", "Inbound jitter:", cls.netchan.last_jitter);
+	} else {
+		Com_Printf("%-23s% .2f ms [STABLE]\n", "Inbound jitter:", cls.netchan.last_jitter);
+	}
+
+	if (cl_use_jitter_buffer->integer) {
+		int i, count = 0;
+		for (i = 0; i < MAX_REORDER_BUFFER; i++) {
+			if (cls.netchan.reorder_buffer[i].valid) count++;
+		}
+		
+		Com_Printf("%-23s% i packets waiting\n", "Buffer status:", count);
+		
+		if (count > 0) {
+			Com_Printf("\n[Diagnosis]: Jitter buffer is active, smoothing out network gaps.\n");
+		} else if (cls.netchan.last_jitter > 15.0f || cls.netchan.last_jitter < -15.0f) {
+			Com_Printf("\n[Diagnosis]: High jitter detected. If gameplay feels 'choppy',\n");
+			Com_Printf("            ensure cl_use_jitter_buffer is set to 1.\n");
+		}
+	} else {
+		Com_Printf("%-24s  OFF\n", "Jitter buffer:");
+	}
 }
 
 /*
@@ -1349,6 +1387,15 @@ void CL_DumpPackets (void)
 	}
 }
 
+// Process buffered packets from the server, if cl_use_jitter_buffer is enabled.
+void CL_ProcessBufferedPackets(void)
+{
+    while (Netchan_GetNextBufferedPacket(&cls.netchan, &net_message)) {
+        CL_ParseServerMessage();
+    }
+}
+
+
 /*
 =================
 CL_ReadPackets
@@ -1357,6 +1404,9 @@ CL_ReadPackets
 int c_incoming_bytes = 0;
 static void CL_ReadPackets (void)
 {
+	// Needed for jitter monitor
+	cls.netchan.expected_interval = 1000 / server_tickrate;
+
 	while (NET_GetPacket (NS_CLIENT, &net_from, &net_message))
 	{
 		c_incoming_bytes += net_message.cursize;
@@ -1388,9 +1438,14 @@ static void CL_ReadPackets (void)
 				,NET_AdrToString(net_from));
 			continue;
 		}
-		if (!Netchan_Process(&cls.netchan, &net_message))
-			continue;		// wasn't accepted for some reason
-		CL_ParseServerMessage ();
+		
+		if (Netchan_Process(&cls.netchan, &net_message, cl_use_jitter_buffer->value)) {
+			CL_ParseServerMessage();
+
+			if (cl_use_jitter_buffer->value) {
+				CL_ProcessBufferedPackets();
+			}			
+		}
 	}
 
 	//
@@ -2097,6 +2152,9 @@ void CL_InitLocal (void)
 	cl_show_active_servers_only = Cvar_Get("cl_show_active_servers_only", "0", CVARDOC_BOOL);
 	Cvar_Describe (cl_show_active_servers_only, "Only show active servers in the server list. Will not be remembered when quitting.");
 
+	cl_use_jitter_buffer = Cvar_Get ("cl_use_jitter_buffer", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
+	Cvar_Describe (cl_use_jitter_buffer, "If 1, the client will use a packet buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
+
 	cl_test = Cvar_Get ("cl_test", "0", CVAR_ARCHIVE);
 
 	//
@@ -2114,7 +2172,7 @@ void CL_InitLocal (void)
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	/* */
 	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
-	rate = Cvar_Get ("rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);	// FIXME
+	rate = Cvar_Get ("rate", "50000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
 	msg = Cvar_Get ("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
 	hand = Cvar_Get ("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 	fov = Cvar_Get ("fov", "90", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
@@ -2180,6 +2238,8 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
 	Cmd_AddCommand ("irc_quit", CL_IRCInitiateShutdown);
 	Cmd_AddCommand ("irc_say", CL_IRCSay);
+
+	Cmd_AddCommand ("cl_jitters", CL_Jitters_f);
 
 	//
 	// forward to server commands

@@ -831,6 +831,11 @@ void CL_ParseServerData (void)
 	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 	Com_Printf ("%c%s\n", 2, str);
 
+	// Initialize jitter monitor
+	cls.netchan.expected_interval = server_tickrate;
+	cls.netchan.jitter_sum = 0;
+	cls.netchan.last_jitter = 0;
+
 	// need to prep refresh at next oportunity
 	cl.refresh_prepped = false;
 }

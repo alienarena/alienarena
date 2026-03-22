@@ -361,6 +361,8 @@ extern	cvar_t	*cl_IRC_reconnect_delay;
 
 extern	cvar_t	*cl_latest_game_version;
 
+extern	cvar_t	*cl_use_jitter_buffer;
+
 extern	cvar_t	*cl_test;
 
 typedef struct

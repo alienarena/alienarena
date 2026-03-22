@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include "../server/server.h"
+#include "qcommon.h"
 
 /*
 
@@ -303,7 +303,7 @@ called when the current net_message is from remote_address
 modifies net_message so that it points to the packet payload
 =================
 */
-qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
+qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
 {
 	unsigned	sequence, sequence_ack;
 	unsigned	reliable_ack, reliable_message;
@@ -318,7 +318,9 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	// read the qport if we are a server
 	if (chan->sock == NS_SERVER) {
 		qport = MSG_ReadShort (msg);
+	}
 
+	if (use_buffer) {
 		// Jitter monitor
 		current_time = Sys_Milliseconds();
 		if (chan->last_jitter_time > 0) {
@@ -344,7 +346,7 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 			chan->last_jitter_time = current_time;
 		}
 	}
-	
+
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
 
@@ -368,7 +370,7 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 				, reliable_ack);
 	}
 
-	if (chan->sock == NS_SERVER && sv_use_reorder_buffer->value) {
+	if (use_buffer) {
 		int diff = (int)(sequence - chan->incoming_sequence);
 
 		if (diff < -MAX_REORDER_BUFFER * 4) {
@@ -491,59 +493,24 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	return true;
 }
 
-void Netchan_ProcessReorderBuffer (netchan_t *chan, client_t *cl, sizebuf_t *msg)
-{
-    while (1)
-    {
-        unsigned next_sequence = chan->incoming_sequence + 1;
-        int buffer_index = next_sequence % MAX_REORDER_BUFFER;
-        reorder_packet_t *pkt = &chan->reorder_buffer[buffer_index];
+qboolean Netchan_GetNextBufferedPacket(netchan_t *chan, sizebuf_t *msg) {
+    unsigned next_seq = chan->incoming_sequence + 1;
+    int index = next_seq % MAX_REORDER_BUFFER;
+    reorder_packet_t *pkt = &chan->reorder_buffer[index];
 
-        // Check if the next expected sequence is in the reorder buffer and valid
-        if (!pkt->valid || pkt->sequence != next_sequence)
-            break;
-
-		// Extra check on not too old packets
-		if (curtime - pkt->arrival_time > MAX_REORDER_BUFFER_MSG_AGE_MS)
-        {
-            if (showdrop->value)
-                Com_Printf ("Discarding expired buffered packet %i (too old)\n", next_sequence);
-            
-            pkt->valid = false;
-            // Just wait for a newer packet to arrive
-            continue; 
-        }
-
-        // Copy the packet data back into the msg buffer for processing
-        if (pkt->msg.cursize > MAX_MSGLEN) {
-            pkt->valid = false;
-            break;
-        }
-
+    if (pkt->valid && pkt->sequence == next_seq) {
+		if (showdrop->integer) {
+			Com_Printf("BUFFERED PACKET RELEASED: seq %i\n", next_seq);
+		}		
+        // Copy data to msg
         memcpy(msg->data, pkt->data, pkt->msg.cursize);
         msg->cursize = pkt->msg.cursize;
-        msg->readcount = 0; // CRUCIAL: reset readcount so that processing starts from the beginning of the message
+        msg->readcount = 0;
 
-        // Mark the reorder buffer slot as invalid since we're about to process it
+        chan->incoming_sequence = next_seq;
+        chan->last_received = Sys_Milliseconds();
         pkt->valid = false;
-
-        // Call Netchan_Process with the reordered packet. This will update the incoming_sequence and related fields.
-        // Because sequence is now exactly equal to incoming_sequence + 1, 
-        // Netchan_Process will return true and update all acks/sequences.
-        if (Netchan_Process(chan, msg))
-        {
-            if (cl->state != cs_zombie)
-            {
-                cl->lastmessage = svs.realtime;
-				// The message has now been consumed by Netchan_Process,
-				// SV_ExecuteClientMessage will read the rest of the data.
-                SV_ExecuteClientMessage (cl);
-            }
-        }
-        else
-        {
-            // Should not happen if the data has been buffered correctly
-            break; 
-        }
+        return true;
     }
+    return false;
 }

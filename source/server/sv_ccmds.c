@@ -653,6 +653,11 @@ void SV_Jitters_f (void) {
 	client_t *cl;
 	qboolean isLocal;
 
+	if (!sv_use_jitter_buffer->value) {
+		Com_Printf("The jitter buffer is currently disabled. Enable it with sv_use_jitter_buffer 1 to use this command.\n");
+		return;
+	}
+
 	if (!svs.clients) {
 		return;
 	}

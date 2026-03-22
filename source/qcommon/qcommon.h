@@ -719,6 +719,7 @@ typedef struct
 	int			reliable_length;
 	byte		reliable_buf[MAX_MSGLEN-16];	// unacked reliable message
 
+	// Jitter buffer
 	reorder_packet_t	reorder_buffer[MAX_REORDER_BUFFER];
 	int 				buffer_overflow_count;
 
@@ -741,8 +742,8 @@ qboolean Netchan_NeedReliable (netchan_t *chan);
 void Netchan_Transmit (netchan_t *chan, int length, byte *data);
 void Netchan_OutOfBand (int net_socket, netadr_t adr, int length, byte *data);
 void Netchan_OutOfBandPrint (int net_socket, netadr_t adr, char *format, ...);
-qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg);
-
+qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer);
+qboolean Netchan_GetNextBufferedPacket(netchan_t *chan, sizebuf_t *msg);
 qboolean Netchan_CanReliable (netchan_t *chan);
 
 
