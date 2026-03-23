@@ -553,8 +553,8 @@ void CL_Jitters_f (void) {
 			Com_Printf("\n[Diagnosis]: High jitter detected. If gameplay feels 'choppy',\n");
 			Com_Printf("            ensure cl_use_jitter_buffer is set to 1.\n");
 		}
-	} else {
-		Com_Printf("%-24s  OFF\n", "Jitter buffer:");
+	//} else {
+	//	Com_Printf("%-24sOFF\n", "Jitter buffer:");
 	}
 }
 

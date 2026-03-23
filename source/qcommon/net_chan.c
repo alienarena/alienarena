@@ -320,31 +320,29 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
 		qport = MSG_ReadShort (msg);
 	}
 
-	if (use_buffer) {
-		// Jitter monitor
-		current_time = Sys_Milliseconds();
-		if (chan->last_jitter_time > 0) {
-			int interval = current_time - chan->last_jitter_time;
+	// Jitter monitor
+	current_time = Sys_Milliseconds();
+	if (chan->last_jitter_time > 0) {
+		int interval = current_time - chan->last_jitter_time;
 
-			// Only calculate if some time has passed.
-			// If interval = 0, we ignore this packet.
-			if (interval > 0 && interval < 500) {
-				float deviation = (float)(interval - chan->expected_interval);
-				
-				// Exponential Moving Average
-				chan->jitter_sum = (chan->jitter_sum * 0.95f) + (deviation * 0.05f);
-				chan->last_jitter = (float)chan->jitter_sum;
+		// Only calculate if some time has passed.
+		// If interval = 0, we ignore this packet.
+		if (interval > 0 && interval < 500) {
+			float deviation = (float)(interval - chan->expected_interval);
+			
+			// Exponential Moving Average
+			chan->jitter_sum = (chan->jitter_sum * 0.95f) + (deviation * 0.05f);
+			chan->last_jitter = (float)chan->jitter_sum;
 
-				chan->last_jitter_time = current_time;
-			} 
-			else if (interval >= 500) {
-				// Reset at too high interval
-				chan->last_jitter_time = current_time;
-			}
-			// We do nothing if interval = 0
-		} else {
+			chan->last_jitter_time = current_time;
+		} 
+		else if (interval >= 500) {
+			// Reset at too high interval
 			chan->last_jitter_time = current_time;
 		}
+		// We do nothing if interval = 0
+	} else {
+		chan->last_jitter_time = current_time;
 	}
 
 	reliable_message = sequence >> 31;
