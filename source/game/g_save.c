@@ -26,6 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define Function(f) {#f, f}
 
+#define MAX_TICKRATE 125
+
 int red_team_score;
 int blue_team_score;
 int reddiff;
@@ -196,7 +198,7 @@ void InitGame (void)
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
 	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");
-	sv_tickrate = gi.cvar("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_LATCH | CVARDOC_INT);
+	sv_tickrate = gi.cvar("sv_tickrate", "100", CVAR_SERVERINFO | CVAR_LATCH | CVARDOC_INT);
 
 	// To output a game report after a match (only on dedicated servers)
 	sv_gamereport = gi.cvar("sv_gamereport", "1", CVAR_SERVERINFO | CVARDOC_BOOL);
@@ -353,11 +355,11 @@ void InitGame (void)
 	red_team_score = 0;
 	blue_team_score = 0;
 
-	if(sv_tickrate->integer > 120)
+	if(sv_tickrate->integer > MAX_TICKRATE)
 	{
-		safe_bprintf(PRINT_HIGH, "Server rate too high, clamping at 120fps\n");
-		FRAMETIME = 1.0/120.0;
-		gi.cvar_set("sv_tickrate", "120");
+		safe_bprintf(PRINT_HIGH, "Server rate too high, clamping at %ifps\n", MAX_TICKRATE);
+		FRAMETIME = 1.0 / (float)MAX_TICKRATE;
+		gi.cvar_set("sv_tickrate", va("%i", MAX_TICKRATE));
 	}
 	else if(sv_tickrate->integer < 10)
 	{
@@ -366,10 +368,10 @@ void InitGame (void)
 		gi.cvar_set("sv_tickrate", "10");
 	}
 	else
-		FRAMETIME = 1.0/(float)sv_tickrate->integer;	
+		FRAMETIME = 1.0/(float)sv_tickrate->integer;
 	
 	FRAMETIME_MS = (int) (1000 * FRAMETIME);
-	NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE = (int) ((NUM_CLIENT_HISTORY - 1) / (120.0 * FRAMETIME));
+	NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE = (int) ((NUM_CLIENT_HISTORY - 1) / (((float)MAX_TICKRATE) * FRAMETIME));
 
 
 	if(g_tactical->integer)

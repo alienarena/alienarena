@@ -146,6 +146,18 @@ typedef struct client_s
 	int    			claimedmsec;        // how many msec claimed by the client
 	int             lastresettime;		// keeps track of 12-sec cycle
 	int				lasthang;			// msec since last server hang
+
+	// Project 100 flag (larger message size limit)
+	qboolean		p100;
+
+	// Jitter monitor
+	int 			last_jitter_time;
+	double 			jitter_sum;
+	float 			last_jitter;
+	float			jitter_max;
+	int				last_pps_time;
+	int				pps_count;
+	int				incoming_pps;
 } client_t;
 
 // a client can leave the server in one of four ways:
@@ -230,8 +242,6 @@ extern	cvar_t		*sv_noreload;			// don't reload level state when reentering
 extern	cvar_t		*sv_airaccelerate;		// don't reload level state when reentering
 											// development tool
 extern	cvar_t		*sv_enforcetime;
-
-extern	cvar_t		*sv_use_jitter_buffer;	// whether to use the jitter buffer for incoming packets
 
 extern	client_t	*sv_client;
 extern	edict_t		*sv_player;

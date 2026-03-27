@@ -71,8 +71,6 @@ cvar_t	*sv_iplogfile;			// Log file by IP address
 
 cvar_t  *sv_tickrate;			// server frame rate
 
-cvar_t	*sv_use_jitter_buffer;	// whether to use the jitter buffer for incoming packets
-
 int		sv_numbots;
 
 void Master_Shutdown (void);
@@ -476,6 +474,7 @@ void SVC_DirectConnect (void)
 	int			challenge;
 	int			previousclients;
 	int			botnum, botkick;
+	char*		p100;
 
 	adr = net_from;
 
@@ -712,8 +711,6 @@ gotnewcl:
 	// send the connect packet to the client
 	Netchan_OutOfBandPrint(NS_SERVER, adr, "client_connect %s", sv_downloadurl->string);
 	Netchan_Setup (NS_SERVER, &newcl->netchan , adr, qport);
-	// Update expected_interval for jitter monitor
-	newcl->netchan.expected_interval = 1000 / sv_tickrate->integer;
 
 	newcl->state = cs_connected;
 
@@ -723,6 +720,18 @@ gotnewcl:
 	newcl->datagram.allowoverflow = true;
 	newcl->lastmessage = svs.realtime;	// don't timeout
 	newcl->lastconnect = svs.realtime;
+	
+	p100 = Info_ValueForKey(cl->userinfo, "p100");
+    newcl->p100 = (p100 && p100[0] == '1');
+
+	// Initialize jitter monitor values
+	newcl->last_jitter_time = 0;
+	newcl->jitter_sum = 0;
+	newcl->last_jitter = 0;
+	newcl->jitter_max = 0;
+	newcl->last_pps_time = 0;
+	newcl->pps_count = 0;
+	newcl->incoming_pps = 0;
 	
 	ge->ForceExitIntermission ();
 	Cbuf_Execute ();
@@ -887,9 +896,6 @@ void SV_CalcPings (void)
 			cl->frame_latency[sv.framenum&(LATENCY_COUNTS-1)] = 0;
 #endif
 
-		// Update expected_interval for jitter monitor
-		cl->netchan.expected_interval = 1000 / sv_tickrate->integer;
-
 		total = 0;
 		count = 0;
 		for (j=0 ; j<LATENCY_COUNTS ; j++)
@@ -941,17 +947,6 @@ void SV_GiveMsec (void)
 	}
 }
 
-// Process buffered packets for a client, if the reorder buffer is enabled
-void SV_ProcessBufferedPackets (netchan_t *chan, client_t *cl, sizebuf_t *msg) {
-	while (Netchan_GetNextBufferedPacket(chan, msg)) {
-		if (cl->state != cs_zombie) {
-			cl->lastmessage = svs.realtime;
-			SV_ExecuteClientMessage(cl);
-		}
-	}
-}
-
-
 /*
 =================
 SV_ReadPackets
@@ -964,6 +959,8 @@ void SV_ReadPackets (void)
 	client_t	*cl;
 	int			qport;
 	sys_msec_as_of_packet_read = Sys_Milliseconds ();
+	int			current_time;
+	float		expected_interval = 1000.0f / (float)sv_tickrate->integer;
 
 	while (NET_GetPacket (NS_SERVER, &net_from, &net_message))
 	{
@@ -997,15 +994,49 @@ void SV_ReadPackets (void)
 				cl->netchan.remote_address.port = net_from.port;
 			}
 
-			if (Netchan_Process(&cl->netchan, &net_message, sv_use_jitter_buffer->value))
+			if (Netchan_Process(&cl->netchan, &net_message))
 			{	// this is a valid, sequenced packet, so process it
 				if (cl->state != cs_zombie)
 				{
+					// Jitter monitor
+					if (cl->state >= cs_connected) {
+						current_time = Sys_Milliseconds();
+						if (cl->last_jitter_time > 0) {
+							int interval = current_time - cl->last_jitter_time;
+
+							// Only calculate if some time has passed.
+							if (interval < 500) {
+								if (current_time - cl->last_pps_time >= 1000) {
+									cl->incoming_pps = cl->pps_count;
+									cl->pps_count = 0;
+									cl->last_pps_time = current_time;
+								}
+								cl->pps_count++;
+								
+								// If interval = 0, we ignore this packet for jitter calculation
+								if (interval > 0) {
+									float deviation = (float)(interval - expected_interval);
+
+									// Exponential Moving Average
+									cl->jitter_sum = (cl->jitter_sum * 0.95f) + (deviation * 0.05f);
+									cl->last_jitter = (float)cl->jitter_sum;
+									if (cl->last_jitter > cl->jitter_max) {
+										cl->jitter_max = cl->last_jitter;
+									}
+									cl->last_jitter_time = current_time;
+								}
+							} else {
+								// Reset at too high interval
+								cl->last_jitter_time = current_time;
+								cl->pps_count = 1;
+							}
+						} else {
+							cl->last_jitter_time = current_time;
+						}
+					}
+
 					cl->lastmessage = svs.realtime;	// don't timeout
 					SV_ExecuteClientMessage (cl);
-				}
-				if (sv_use_jitter_buffer->value) {
-					SV_ProcessBufferedPackets(&cl->netchan, cl, &net_message);
 				}
 			}
 			break;
@@ -1438,10 +1469,7 @@ void SV_Init (void)
 	allow_overwrite_maps  = Cvar_Get ("allow_overwrite_maps", "0", CVAR_ARCHIVE);
 	Cvar_Describe (allow_overwrite_maps, "Used for command installmap and installmodel. If set to 1, existing downloaded map packs or model packs will be overwritten and all files in it will be extracted, overwriting any existing files.");
 	sv_downloadurl = Cvar_Get("sv_downloadurl", DEFAULT_DOWNLOAD_URL_1, CVAR_SERVERINFO);
-	sv_tickrate = Cvar_Get("sv_tickrate", "10", CVAR_SERVERINFO | CVAR_ARCHIVE);
-
-	sv_use_jitter_buffer = Cvar_Get ("sv_use_jitter_buffer", "0", 0);
-	Cvar_Describe (sv_use_jitter_buffer, "If 1, the server will use a packet buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
+	sv_tickrate = Cvar_Get("sv_tickrate", "100", CVAR_SERVERINFO | CVAR_ARCHIVE);
 
 	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 

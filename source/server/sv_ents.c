@@ -42,13 +42,14 @@ SV_EmitPacketEntities
 Writes a delta update of an entity_state_t list to the message.
 =============
 */
-void SV_EmitPacketEntities (client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
+void SV_EmitPacketEntities (client_t *cl, client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
 {
 	entity_state_t	*oldent=NULL, *newent=NULL;
 	int		oldindex, newindex;
 	int		oldnum, newnum;
 	int		from_num_entities;
 	int		bits;
+	int 	max_safe_size = cl->p100 ? (MAX_MSGLEN_P100 - MAX_MSGLEN_PADDING) : (MAX_MSGLEN - MAX_MSGLEN_PADDING);
 
 #if 0
 	if (numprojs)
@@ -66,6 +67,11 @@ void SV_EmitPacketEntities (client_frame_t *from, client_frame_t *to, sizebuf_t 
 	oldindex = 0;
 	while (newindex < to->num_entities || oldindex < from_num_entities)
 	{
+		// Keep checking for message size to avoid sending packets to clients that are too large
+        if (msg->cursize > max_safe_size) {
+            break;
+        }
+
 		if (newindex >= to->num_entities)
 			newnum = 9999;
 		else
@@ -371,7 +377,7 @@ void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 	SV_WritePlayerstateToClient (oldframe, frame, msg);
 
 	// delta encode the entities
-	SV_EmitPacketEntities (oldframe, frame, msg);
+	SV_EmitPacketEntities (client, oldframe, frame, msg);
 }
 
 

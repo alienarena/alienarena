@@ -832,9 +832,12 @@ void CL_ParseServerData (void)
 	Com_Printf ("%c%s\n", 2, str);
 
 	// Initialize jitter monitor
-	cls.netchan.expected_interval = server_tickrate;
-	cls.netchan.jitter_sum = 0;
-	cls.netchan.last_jitter = 0;
+	cls.jitter_sum = 0;
+	cls.jitter_max = 0;
+	cls.last_jitter = 0;
+	cls.last_pps_time = 0;
+	cls.pps_count = 0;
+	cls.incoming_pps = 0;
 
 	// need to prep refresh at next oportunity
 	cl.refresh_prepped = false;

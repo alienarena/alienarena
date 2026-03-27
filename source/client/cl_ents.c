@@ -517,7 +517,7 @@ void CL_ParseFrame (void)
 	int			len;
 	frame_t		*old;
 	byte		new_areabits[MAX_MAP_AREAS/8];
-	float FRAMETIME = 1.0/(float)server_tickrate;
+	float 		FRAMETIME = 1.0/(float)server_tickrate;
 
 	//HACK: reduce the number of areabit changes detected
 	memcpy (new_areabits, cl.frame.areabits, MAX_MAP_AREAS/8);
@@ -612,7 +612,25 @@ void CL_ParseFrame (void)
 			VectorCopy (cl.frame.playerstate.viewangles, cl.predicted_angles);
 			if (cls.disable_servercount != cl.servercount
 				&& cl.refresh_prepped)
-				SCR_EndLoadingPlaque ();	// get rid of loading plaque
+				SCR_EndLoadingPlaque ();	// get rid of loading plaque		
+		} else if (cls.state == ca_active) {
+			static int active_start_time = 0;
+			int current_time = Sys_Milliseconds();
+
+			if (active_start_time == 0) {
+				active_start_time = current_time;
+			}
+
+			// Jitter monitoring: reset jitter values for the first few seconds after becoming active,
+			// to avoid skewing the jitter calculation with old frames that were received while the client was still loading
+			if (current_time - active_start_time < 5000) {
+				cls.jitter_max = 0;
+				cls.jitter_sum = 0;
+				cls.last_jitter = 0;
+				cls.last_pps_time = 0;
+				cls.pps_count = 0;
+				cls.incoming_pps = 0;
+			}
 		}
 		cl.sound_prepped = true;	// can start mixing ambient sounds
 

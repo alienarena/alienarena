@@ -635,8 +635,10 @@ NET
 
 #define	PORT_ANY	-1
 
-#define	MAX_MSGLEN		2800		// max length of a message
-#define	PACKET_HEADER	20			// two ints and a short
+#define	MAX_MSGLEN			2800		// max length of a message
+#define	MAX_MSGLEN_P100		16384		// max length of a message for project 100
+#define MAX_MSGLEN_PADDING	400			// Extra space reserved at the end to avoid going over the limit of the message size
+#define	PACKET_HEADER		20			// two ints and a short
 
 typedef enum {NA_LOOPBACK, NA_BROADCAST, NA_IP, NA_IPX, NA_BROADCAST_IPX} netadrtype_t;
 
@@ -675,17 +677,7 @@ void		NET_Sleep(int msec);
 
 #define	MAX_LATENT	32
 
-#define MAX_REORDER_BUFFER 				16   // On purpose on the low side to not block too long on a lost packet
-#define MAX_REORDER_BUFFER_MSG_AGE_MS	50	 // Small value to not block too long on a lost packet, but big enough to allow for some jitter
-
-typedef struct {
-	sizebuf_t	msg;
-	byte		data[MAX_MSGLEN];
-	unsigned	sequence;
-	qboolean	valid;
-	int			arrival_time;
-} reorder_packet_t;
-
+// IMPORTANT: Do not change this struct, to avoid mismatches between server/client1/client2 etc
 typedef struct
 {
 	qboolean	fatal_error;
@@ -718,16 +710,6 @@ typedef struct
 // message is copied to this buffer when it is first transfered
 	int			reliable_length;
 	byte		reliable_buf[MAX_MSGLEN-16];	// unacked reliable message
-
-	// Jitter buffer
-	reorder_packet_t	reorder_buffer[MAX_REORDER_BUFFER];
-	int 				buffer_overflow_count;
-
-	// Jitter monitor
-	int 				last_jitter_time;   // Time of previous calculation
-    double 				jitter_sum;         // Sum of all deviations
-    float 				last_jitter;        // Last calculated jitter value
-	int 				expected_interval;
 } netchan_t;
 
 extern	netadr_t	net_from;
@@ -742,8 +724,7 @@ qboolean Netchan_NeedReliable (netchan_t *chan);
 void Netchan_Transmit (netchan_t *chan, int length, byte *data);
 void Netchan_OutOfBand (int net_socket, netadr_t adr, int length, byte *data);
 void Netchan_OutOfBandPrint (int net_socket, netadr_t adr, char *format, ...);
-qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer);
-qboolean Netchan_GetNextBufferedPacket(netchan_t *chan, sizebuf_t *msg);
+qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg);
 qboolean Netchan_CanReliable (netchan_t *chan);
 
 

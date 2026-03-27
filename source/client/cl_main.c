@@ -108,6 +108,8 @@ cvar_t	*m_yaw;
 cvar_t	*m_forward;
 cvar_t	*m_side;
 
+cvar_t	*cl_maxpackets;
+
 cvar_t	*cl_test;
 
 //
@@ -126,6 +128,7 @@ cvar_t	*msg;
 cvar_t	*hand;
 cvar_t	*gender;
 cvar_t	*gender_auto;
+cvar_t	*p100;
 
 cvar_t	*cl_vwep;
 
@@ -161,8 +164,6 @@ cvar_t	*cl_latest_game_version_url;
 
 cvar_t	*cl_speedrecord;
 cvar_t	*cl_alltimespeedrecord;
-
-cvar_t	*cl_use_jitter_buffer;
 
 client_static_t	cls;
 client_state_t	cl;
@@ -529,33 +530,17 @@ void CL_Jitters_f (void) {
 		return;
 	}
 
-	Com_Printf("Network statistics for: %s\n", cls.servername);
-	Com_Printf("----------------------- --------------------\n");
+	Com_Printf("Network statistics for: %21s\n", cls.servername);
+	Com_Printf("----------------------- ---------------------\n");
+    Com_Printf("%-23s %11i packets/s\n", "Inbound rate:", cls.incoming_pps);
 
 	// The format % i or % .2f is used to reserve a space in case the number is positive, if negative it will have the minus sign.
-	if (cls.netchan.last_jitter > 15.0f || cls.netchan.last_jitter < -15.0f) {
-		Com_Printf("%-23s% .2f ms [UNSTABLE]\n", "Inbound jitter:", cls.netchan.last_jitter);
+	if (cls.last_jitter > 15.0f || cls.last_jitter < -15.0f) {
+		Com_Printf("%-23s %7.2f ms [UNSTABLE]\n", "Inbound jitter:", cls.last_jitter);
 	} else {
-		Com_Printf("%-23s% .2f ms [STABLE]\n", "Inbound jitter:", cls.netchan.last_jitter);
+		Com_Printf("%-23s %9.2f ms [STABLE]\n", "Inbound jitter:", cls.last_jitter);
 	}
-
-	if (cl_use_jitter_buffer->integer) {
-		int i, count = 0;
-		for (i = 0; i < MAX_REORDER_BUFFER; i++) {
-			if (cls.netchan.reorder_buffer[i].valid) count++;
-		}
-		
-		Com_Printf("%-23s% i packets waiting\n", "Buffer status:", count);
-		
-		if (count > 0) {
-			Com_Printf("\n[Diagnosis]: Jitter buffer is active, smoothing out network gaps.\n");
-		} else if (cls.netchan.last_jitter > 15.0f || cls.netchan.last_jitter < -15.0f) {
-			Com_Printf("\n[Diagnosis]: High jitter detected. If gameplay feels 'choppy',\n");
-			Com_Printf("            ensure cl_use_jitter_buffer is set to 1.\n");
-		}
-	//} else {
-	//	Com_Printf("%-24sOFF\n", "Jitter buffer:");
-	}
+    Com_Printf("%-23s %18.2f ms\n", "Session Peak:", cls.jitter_max);
 }
 
 /*
@@ -1387,15 +1372,6 @@ void CL_DumpPackets (void)
 	}
 }
 
-// Process buffered packets from the server, if cl_use_jitter_buffer is enabled.
-void CL_ProcessBufferedPackets(void)
-{
-	while (Netchan_GetNextBufferedPacket(&cls.netchan, &net_message)) {
-		CL_ParseServerMessage();
-	}
-}
-
-
 /*
 =================
 CL_ReadPackets
@@ -1404,11 +1380,50 @@ CL_ReadPackets
 int c_incoming_bytes = 0;
 static void CL_ReadPackets (void)
 {
-	// Needed for jitter monitor
-	cls.netchan.expected_interval = 1000 / server_tickrate;
+	// Jitter monitor
+	int current_time;
+	float expected_interval = 1000 / (float)server_tickrate;
 
 	while (NET_GetPacket (NS_CLIENT, &net_from, &net_message))
 	{
+		current_time = Sys_Milliseconds();
+
+		// Jitter monitor
+		if (cls.state >= ca_connected && NET_CompareAdr(net_from, cls.netchan.remote_address)) {
+			if (cls.last_jitter_time > 0) {
+				int interval = current_time - cls.last_jitter_time;
+
+				// Only calculate if some time has passed.
+				if (interval < 500) {
+					if (current_time - cls.last_pps_time >= 1000) {
+						cls.incoming_pps = cls.pps_count;
+						cls.pps_count = 0;
+						cls.last_pps_time = current_time;
+					}
+					cls.pps_count++;
+					
+					// If interval = 0, we ignore this packet for jitter calculation
+					if (interval > 0) {
+						float deviation = (float)(interval - expected_interval);
+
+						// Exponential Moving Average
+						cls.jitter_sum = (cls.jitter_sum * 0.95f) + (deviation * 0.05f);
+						cls.last_jitter = (float)cls.jitter_sum;
+						if (cls.last_jitter > cls.jitter_max) {
+							cls.jitter_max = cls.last_jitter;
+						}
+						cls.last_jitter_time = current_time;
+					}
+				} else {
+					// Reset at too high interval
+					cls.last_jitter_time = current_time;
+					cls.pps_count = 1;
+				}
+			} else {
+				cls.last_jitter_time = current_time;
+			}
+		}
+
 		c_incoming_bytes += net_message.cursize;
 
 		//
@@ -1439,12 +1454,8 @@ static void CL_ReadPackets (void)
 			continue;
 		}
 		
-		if (Netchan_Process(&cls.netchan, &net_message, cl_use_jitter_buffer->value)) {
+		if (Netchan_Process(&cls.netchan, &net_message)) {
 			CL_ParseServerMessage();
-
-			if (cl_use_jitter_buffer->value) {
-				CL_ProcessBufferedPackets();
-			}			
 		}
 	}
 
@@ -2152,8 +2163,8 @@ void CL_InitLocal (void)
 	cl_show_active_servers_only = Cvar_Get("cl_show_active_servers_only", "0", CVARDOC_BOOL);
 	Cvar_Describe (cl_show_active_servers_only, "Only show active servers in the server list. Will not be remembered when quitting.");
 
-	cl_use_jitter_buffer = Cvar_Get ("cl_use_jitter_buffer", "0", CVAR_ARCHIVE | CVARDOC_BOOL);
-	Cvar_Describe (cl_use_jitter_buffer, "If 1, the client will use a packet buffer to try to put out-of-order packets back in order. This can help reducing packet loss.");
+	cl_maxpackets = Cvar_Get ("cl_maxpackets", "100", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (cl_maxpackets, "Maximum number of packets to send per second. Will be limited by the server tickrate.");
 
 	cl_test = Cvar_Get ("cl_test", "0", CVAR_ARCHIVE);
 
@@ -2172,7 +2183,10 @@ void CL_InitLocal (void)
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	/* */
 	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
-	rate = Cvar_Get ("rate", "50000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
+	
+	rate = Cvar_Get ("rate", "30000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe(rate, "Maximum download bandwidth in bytes/sec. Use 30000+ for 100-tick servers to prevent choke and stuttering during heavy combat.");
+
 	msg = Cvar_Get ("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
 	hand = Cvar_Get ("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 	fov = Cvar_Get ("fov", "90", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
@@ -2180,6 +2194,9 @@ void CL_InitLocal (void)
 	gender = Cvar_Get ("gender", "male", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
 	gender_auto = Cvar_Get ("gender_auto", "1", CVAR_ARCHIVE);
 	gender->modified = false; // clear this so we know when user sets it manually
+
+	// Project-100 userinfo to allow servers to send larger messages to clients with this flag
+	p100 = Cvar_Get ("p100", "1", CVAR_USERINFO | CVAR_ROM);
 
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 
@@ -2511,7 +2528,8 @@ extern unsigned sys_frame_time;   // TODO: ditto
  *  Disabled this functionality for now, because it's also not accurate enough on linux and it's probably better without the sleep.
  *  #define YIELD_MSEC 4
  */
-#define MIN_PKTRATE_MSEC 16 // Minimum packet interval in ms on low tickrate servers to keep smooth movements
+
+#define MAX_PKT_INTERVAL_MSEC 20 // Maximum packet interval = minimum 50 PPS
 
 void CL_Frame( int msec )
 {
@@ -2530,7 +2548,16 @@ void CL_Frame( int msec )
 	static perftest_t *speedometer = NULL;
 	static perftest_t *accelerometer = NULL;
 	float FRAMETIME = 1.0/(float)server_tickrate;
-	int target_packet_interval = 1000 / (int)server_tickrate;
+	float ideal_pps = (float)cl_maxpackets->value;
+
+	if (ideal_pps > server_tickrate) {
+    	ideal_pps = (float)server_tickrate;
+	}
+	if (ideal_pps < 10.0f) {
+		ideal_pps = 10.0f;
+	}
+
+	float target_packet_interval = 1000.0f / ideal_pps;
 
 	// Precise timers, in milliseconds
 	static double last_precise_time = 0;
@@ -2623,16 +2650,11 @@ void CL_Frame( int msec )
 	// Unless the server tickrate is low, then take the minimum.
 	// It's also important that it's not higher than the server tickrate,
 	// else the server will not receive the same amount of packets each tick, which causes microstutters and affects the antilag.
-	if (target_packet_interval > MIN_PKTRATE_MSEC) {
-		target_packet_interval = MIN_PKTRATE_MSEC;
+	// We don't use -1 anymore to use the render rate.
+	if (target_packet_interval > (float)MAX_PKT_INTERVAL_MSEC) {
+		target_packet_interval = (float)MAX_PKT_INTERVAL_MSEC;
 	}
-	if (framerate_cap >= target_packet_interval) {
-	 	Com_DPrintf("packetrate change: framerate\n");
-		packetrate_cap = -1; // FPS is lower than server tickrate, send each frame
-	} else {
-		Com_DPrintf("packetrate change: server tickrate\n");
-		packetrate_cap = target_packet_interval; // FPS is higher, cap based on server tickrate
-	}
+	packetrate_cap = (int)target_packet_interval;
 
 	/* local triggers for decoupling framerate from packet rate  */
 	render_trigger = 0;
@@ -2660,11 +2682,7 @@ void CL_Frame( int msec )
 			if ( ++frcjitter_ix > 3 ) frcjitter_ix = 0;
 			render_trigger = 1;
 		}
-		if ( packetrate_cap == -1 )
-		{ // flagged to run same as framerate_cap
-			packet_trigger = render_trigger;
-		}
-		else if ( packet_timer >= packetrate_cap )
+		if ( packet_timer >= packetrate_cap )
 		{ // normal packet trigger
 			packet_trigger = 1;
 		}

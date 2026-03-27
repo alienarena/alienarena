@@ -276,6 +276,15 @@ typedef struct
 	qboolean	demorecording;
 	qboolean	demowaiting;	// don't record until a non-delta message is received
 	FILE		*demofile;
+
+	// Jitter monitor
+	int 		last_jitter_time;
+	double 		jitter_sum;
+	float 		last_jitter;
+	float		jitter_max;
+	int			last_pps_time;
+	int			pps_count;
+	int			incoming_pps;
 } client_static_t;
 
 extern client_static_t	cls;
@@ -360,8 +369,6 @@ extern	cvar_t	*cl_IRC_kick_rejoin;
 extern	cvar_t	*cl_IRC_reconnect_delay;
 
 extern	cvar_t	*cl_latest_game_version;
-
-extern	cvar_t	*cl_use_jitter_buffer;
 
 extern	cvar_t	*cl_test;
 

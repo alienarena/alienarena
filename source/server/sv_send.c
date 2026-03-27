@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #include "server.h"
 #include "stdint.h"
 
+extern cvar_t  *sv_tickrate;
+
 /*
 =============================================================================
 
@@ -275,12 +277,30 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel,
 					int soundindex, float volume,
 					float attenuation, float timeofs)
 {
-	int			sendchan;
-    int			flags;
-    int			i;
-	int			ent;
-	vec3_t		origin_v;
-	qboolean	use_phs;
+	int				sendchan;
+    int				flags;
+    int				i;
+	int				ent;
+	vec3_t			origin_v;
+	qboolean		use_phs;
+	static float 	last_sound_time[MAX_EDICTS][8];
+	int 			ent_idx = NUM_FOR_EDICT(entity);
+	static int 		last_sound_index[MAX_EDICTS][8];
+
+	// Prevent duplicate sounds
+	if (ent_idx >= 0 && ent_idx < MAX_EDICTS) {
+		int pure_chan = channel & 7;
+		float FRAMETIME = 1.0 / (float)sv_tickrate->integer;
+		float debounce_time = FRAMETIME * 2.1;
+
+		if (pure_chan == CHAN_VOICE || pure_chan == CHAN_AUTO) {
+			if (soundindex == last_sound_index[ent_idx][pure_chan] && sv.time < last_sound_time[ent_idx][pure_chan] + debounce_time) {
+				return; // Skip same sound
+			}
+			last_sound_time[ent_idx][pure_chan] = sv.time;
+			last_sound_index[ent_idx][pure_chan] = soundindex;
+		}
+	}	
 
 	if (volume < 0 || volume > 1.0)
 		Com_Error (ERR_FATAL, "SV_StartSound: volume = %f", volume);
@@ -387,7 +407,19 @@ FRAME UPDATES
 ===============================================================================
 */
 
+// Helper method to determine if a packet is too large for the client
+qboolean SV_IsPacketTooLarge(client_t *client, int length) {
+	// Flexible limit, for clients with the Project 100 flag the limit is higher
+	int limit = client->p100 ? MAX_MSGLEN_P100 : MAX_MSGLEN;
 
+	if (length > limit) {
+		// Log this with developer 1
+		Com_DPrintf("SV: Suppressing %i bytes for %s (Limit: %i)\n", length, client->name, limit);
+		return true; 
+	}
+
+	return false;
+}
 
 /*
 =======================
@@ -396,8 +428,9 @@ SV_SendClientDatagram
 */
 qboolean SV_SendClientDatagram (client_t *client)
 {
-	byte		msg_buf[MAX_MSGLEN];
+	byte		msg_buf[MAX_MSGLEN_P100];
 	sizebuf_t	msg;
+	int 		current_limit = (client->p100) ? (MAX_MSGLEN_P100 - MAX_MSGLEN_PADDING) : (MAX_MSGLEN - MAX_MSGLEN_PADDING);
 
 	SV_BuildClientFrame (client);
 
@@ -413,10 +446,16 @@ qboolean SV_SendClientDatagram (client_t *client)
 	// for this client out to the message
 	// it is necessary for this to be after the WriteEntities
 	// so that entity references will be current
-	if (client->datagram.overflowed)
+	if (client->datagram.overflowed) {
 		Com_Printf ("WARNING: datagram overflowed for %s\n", client->name);
-	else
-		SZ_Write (&msg, client->datagram.data, client->datagram.cursize);
+	} else {
+		if (msg.cursize + client->datagram.cursize > current_limit) {
+			// Don't write to the message anymore to prevent that it becomes too large
+			Com_DPrintf ("SV: Suppressing datagram for %s to prevent overflow\n", client->name);
+		} else {
+			SZ_Write (&msg, client->datagram.data, client->datagram.cursize);
+		}
+	}
 	SZ_Clear (&client->datagram);
 
 	if (msg.overflowed)
@@ -425,8 +464,12 @@ qboolean SV_SendClientDatagram (client_t *client)
 		SZ_Clear (&msg);
 	}
 
-	// send the datagram
-	Netchan_Transmit (&client->netchan, msg.cursize, msg.data);
+	if (!SV_IsPacketTooLarge(client, msg.cursize)) {
+		// send the datagram
+		Netchan_Transmit (&client->netchan, msg.cursize, msg.data);
+	} else {
+		msg.cursize = 0;
+	}
 
 	// record the size for rate estimation
 	client->message_size[sv.framenum % RATE_MESSAGES] = msg.cursize;
@@ -496,7 +539,7 @@ void SV_SendClientMessages (void)
 	int			i;
 	client_t	*c;
 	int			msglen;
-	byte		msgbuf[MAX_MSGLEN];
+	byte		msgbuf[MAX_MSGLEN_P100];
 
 	msglen = 0;
 
@@ -549,21 +592,18 @@ void SV_SendClientMessages (void)
 			SV_DropClient (c);
 		}
 
-		if (sv.state == ss_cinematic
-			|| sv.state == ss_demo
-			|| sv.state == ss_pic
-			)
-			Netchan_Transmit (&c->netchan, msglen, msgbuf);
-		else if (c->state == cs_spawned)
-		{
+		if (sv.state == ss_cinematic || sv.state == ss_demo || sv.state == ss_pic) {
+			if (!SV_IsPacketTooLarge(c, msglen)) {
+				Netchan_Transmit (&c->netchan, msglen, msgbuf);
+			}
+		} else if (c->state == cs_spawned) {
 			// don't overrun bandwidth
 			if (SV_RateDrop (c))
 				continue;
 
 			SV_SendClientDatagram (c);
-		}
-		else
-		{ // not spawned
+		} else { 
+			// not spawned
 			/* send accumulated reliable messages when buffer has enough data
 			 * or when a time limit is reached whichever comes first.
 			 * time limit is 1 sec, buffer size trigger is 2800/4 = 700
@@ -574,9 +614,10 @@ void SV_SendClientMessages (void)
 			 */
 			int timeout = curtime - c->netchan.last_sent ;
 			int cursize = c->netchan.message.cursize ;
-			if ( timeout > 1000 || cursize >= (MAX_MSGLEN)/4 )
-			{
-				Netchan_Transmit( &c->netchan, 0, NULL );
+			if ( timeout > 1000 || cursize >= (MAX_MSGLEN)/4 ) {
+				if (!SV_IsPacketTooLarge(c, cursize)) {
+					Netchan_Transmit( &c->netchan, 0, NULL );
+				}
 			}
 		}
 	}

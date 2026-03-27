@@ -168,7 +168,6 @@ void Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	SZ_SetName (&chan->message, va("Net channel %s", NET_AdrToString(adr)), true);
 	chan->message.allowoverflow = true;
-	memset(chan->reorder_buffer, 0, sizeof(chan->reorder_buffer));
 }
 
 
@@ -303,7 +302,7 @@ called when the current net_message is from remote_address
 modifies net_message so that it points to the packet payload
 =================
 */
-qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
+qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 {
 	unsigned	sequence, sequence_ack;
 	unsigned	reliable_ack, reliable_message;
@@ -318,31 +317,6 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
 	// read the qport if we are a server
 	if (chan->sock == NS_SERVER) {
 		qport = MSG_ReadShort (msg);
-	}
-
-	// Jitter monitor
-	current_time = Sys_Milliseconds();
-	if (chan->last_jitter_time > 0) {
-		int interval = current_time - chan->last_jitter_time;
-
-		// Only calculate if some time has passed.
-		// If interval = 0, we ignore this packet.
-		if (interval > 0 && interval < 500) {
-			float deviation = (float)(interval - chan->expected_interval);
-			
-			// Exponential Moving Average
-			chan->jitter_sum = (chan->jitter_sum * 0.95f) + (deviation * 0.05f);
-			chan->last_jitter = (float)chan->jitter_sum;
-
-			chan->last_jitter_time = current_time;
-		} 
-		else if (interval >= 500) {
-			// Reset at too high interval
-			chan->last_jitter_time = current_time;
-		}
-		// We do nothing if interval = 0
-	} else {
-		chan->last_jitter_time = current_time;
 	}
 
 	reliable_message = sequence >> 31;
@@ -368,88 +342,17 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
 				, reliable_ack);
 	}
 
-	if (use_buffer) {
-		int diff = (int)(sequence - chan->incoming_sequence);
-
-		if (diff < -MAX_REORDER_BUFFER * 4) {
-			// Force reset at client crash or reconnect, when the difference is suddenly very large (negative)
-			if (showdrop->value) Com_Printf("%s: Sequence reset\n", NET_AdrToString(chan->remote_address));
-
-			memset(chan->reorder_buffer, 0, sizeof(chan->reorder_buffer));
-			chan->incoming_sequence = sequence - 1; // Force diff to 1
-			diff = 1;
-		} else if (diff > MAX_REORDER_BUFFER) {
-			chan->buffer_overflow_count++;
-
-			// Log alleen bij substantiële problemen (bijv. elke 10 keer) om spam te voorkomen
-			if (chan->buffer_overflow_count % 10 == 1) {
-				Com_Printf("NETWORK WARNING: %s exceeded jitter buffer (Gap: %i). Connection unstable.\n", 
-					NET_AdrToString(chan->remote_address), diff);
-			}
-
-			// Too far in the future, prevent waiting for a packet that never comes anymore
-			if (showdrop->value) 
-				Com_Printf("%s: Gap too large (%i), jumping to current\n", NET_AdrToString(chan->remote_address), diff);
-			
-			// Clear the buffer and accept this new packet as new base
-			memset(chan->reorder_buffer, 0, sizeof(chan->reorder_buffer));
-			chan->incoming_sequence = sequence - 1; // Force diff to 1
-			chan->dropped = 0; // Prevent physics explosion and client disconnect
-			diff = 1;
-		} else if (diff <= 0) {
-			// Ignore duplicate or old packets
-			if (showdrop->value) Com_Printf("Duplicate or old packet %i ignored\n", sequence);
-
-			return false;
-		}
-		
-		// Buffer a newer packet that is out of order
-		if (diff > 1) {
-			int buffer_index = sequence % MAX_REORDER_BUFFER;
-			
-			if (chan->reorder_buffer[buffer_index].valid &&
-				chan->reorder_buffer[buffer_index].sequence != sequence) {
-				if (showdrop->value)				
-					Com_Printf ("%s:Reorder buffer collision at index %i\n", NET_AdrToString (chan->remote_address), buffer_index);
-				return false;
-			}
-
-			if (msg->cursize > MAX_MSGLEN) {
-				Com_Printf ("%s:Message too large for reorder buffer\n", NET_AdrToString (chan->remote_address));
-				return false;
-			}
-
-			reorder_packet_t *pkt = &chan->reorder_buffer[buffer_index];
-
-			// Copy the data
-			memcpy(pkt->data, msg->data, msg->cursize);
-
-			// Set all metadata
-			pkt->msg.data = pkt->data; // CRUCIAL: make the msg pointer point to the local data array
-			pkt->msg.cursize = msg->cursize;
-			pkt->msg.maxsize = MAX_MSGLEN;
-			pkt->sequence = sequence;
-			pkt->valid = true;
-			pkt->arrival_time = curtime;
-
-			if (showdrop->value)
-				Com_Printf ("%s:Buffered out-of-order packet %i (expected %i)\n", NET_AdrToString (chan->remote_address), sequence, chan->incoming_sequence + 1);
-
-			return false;
-		}
-	} else {
-		//
-		// discard stale or duplicated packets
-		//
-		if (sequence <= chan->incoming_sequence)
-		{
-			if (showdrop->value)
-				Com_Printf ("%s:Out of order packet %i at %i\n"
-					, NET_AdrToString (chan->remote_address)
-					,  sequence
-					, chan->incoming_sequence);
-			return false;
-		}
+	//
+	// discard stale or duplicated packets
+	//
+	if (sequence <= chan->incoming_sequence)
+	{
+		if (showdrop->value)
+			Com_Printf ("%s:Out of order packet %i at %i\n"
+				, NET_AdrToString (chan->remote_address)
+				,  sequence
+				, chan->incoming_sequence);
+		return false;
 	}
 
 	//
@@ -489,36 +392,4 @@ qboolean Netchan_Process (netchan_t *chan, sizebuf_t *msg, qboolean use_buffer)
 	chan->last_received = curtime;
 
 	return true;
-}
-
-qboolean Netchan_GetNextBufferedPacket(netchan_t *chan, sizebuf_t *msg) {
-	unsigned next_seq = chan->incoming_sequence + 1;
-	int index = next_seq % MAX_REORDER_BUFFER;
-	reorder_packet_t *pkt = &chan->reorder_buffer[index];
-
-	if (chan->last_received > 0 && (Sys_Milliseconds() - chan->last_received > MAX_REORDER_BUFFER_MSG_AGE_MS)) {
-		if (showdrop->integer) {
-			Com_Printf("BUFFER TIMEOUT: Skipping missing packet %i\n", next_seq);
-		}
-		chan->incoming_sequence++; // Close the gap
-		chan->last_received = Sys_Milliseconds(); // Reset timer for the next gap
-		// Return false, so that the loop in SV_ReadPackets can try to get the next one
-		return false; 
-    }
-
-	if (pkt->valid && pkt->sequence == next_seq) {
-		if (showdrop->integer) {
-			Com_Printf("BUFFERED PACKET RELEASED: seq %i\n", next_seq);
-		}		
-		// Copy data to msg
-		memcpy(msg->data, pkt->data, pkt->msg.cursize);
-		msg->cursize = pkt->msg.cursize;
-		msg->readcount = 0;
-
-		chan->incoming_sequence = next_seq;
-		chan->last_received = Sys_Milliseconds();
-		pkt->valid = false;
-		return true;
-	}
-	return false;
 }
