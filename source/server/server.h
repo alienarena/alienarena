@@ -58,7 +58,7 @@ typedef struct
 	// the multicast buffer is used to send a message to a set of clients
 	// it is only used to marshall data until SV_Multicast is called
 	sizebuf_t	multicast;
-	byte		multicast_buf[MAX_MSGLEN];
+	byte		multicast_buf[MAX_MSGLEN_P100];
 
 	// demo server information
 	FILE		*demofile;
@@ -127,7 +127,7 @@ typedef struct client_s
 	// The datagram is written to by sound calls, prints, temp ents, etc.
 	// It can be harmlessly overflowed.
 	sizebuf_t		datagram;
-	byte			datagram_buf[MAX_MSGLEN];
+	byte			datagram_buf[MAX_MSGLEN_P100];
 
 	client_frame_t	frames[UPDATE_BACKUP];	// updates can be delta'd from here
 

@@ -635,7 +635,7 @@ NET
 
 #define	PORT_ANY	-1
 
-#define	MAX_MSGLEN			2800		// max length of a message
+#define	MAX_MSGLEN			2800		// max length of a message - IMPORTANT: still used in critical places for backwards compatibility with old clients
 #define	MAX_MSGLEN_P100		16384		// max length of a message for project 100
 #define MAX_MSGLEN_PADDING	400			// Extra space reserved at the end to avoid going over the limit of the message size
 #define	PACKET_HEADER		20			// two ints and a short
