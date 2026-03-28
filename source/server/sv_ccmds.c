@@ -657,11 +657,11 @@ void SV_Jitters_f (void) {
 		return;
 	}
 
-	// Com_Printf("Name                 Ping      Jitter\n");
-	// Com_Printf("-------------------- ---- -----------\n");
+	// Note: Player PPS shows the PPS from the player to the server, which matches the name incoming_pps.
+	// This may be limited by their cl_maxfps or cl_maxpackets.
 
-	Com_Printf("Name                 Ping  PPS      Jitter\n");
-	Com_Printf("-------------------- ---- ---- -----------\n");
+	Com_Printf("Name                 Ping  Player PPS      Jitter\n");
+	Com_Printf("-------------------- ---- ----------- -----------\n");
 	for (i = 0 ; i < maxclients->integer ; i++) {
 		cl = &svs.clients[i];
 		isLocal = (cl->netchan.remote_address.type == NA_LOOPBACK);
@@ -693,7 +693,7 @@ void SV_Jitters_f (void) {
 			Com_Printf(" ");
 		}
 
-		Com_Printf(" %4i %4i %8.2f ms\n", cl->ping, cl->incoming_pps, cl->last_jitter);
+		Com_Printf(" %4i %11i %8.2f ms\n", cl->ping, cl->incoming_pps, cl->last_jitter);
 		if (isLocal && cl->last_jitter < -1.0f) {
     		Com_Printf("\n[Note - only applicable to offline single player mode]\n");
     		Com_Printf("The client is firing packets %ims BEFORE the server expects them.\n", (int)abs(cl->last_jitter));

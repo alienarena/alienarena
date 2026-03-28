@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
+#include <unistd.h>
 #if defined HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
@@ -397,7 +399,15 @@ void Sys_Quit(void)
 	CL_Shutdown();
 	Qcommon_Shutdown();
 
-	exit(0);
+	// exit(0);
+	// "exit(0)" tries to clean up and exit gracefully but can cause the system to freeze because of corrupted data caused by the IRC thread.
+	// Prevent cleaning up corrupted data, use "_exit(0)" to exit immediately.
+	_exit(0);
+}
+
+void Emergency_Exit(int sig) {
+    // No prints or logging just exit immediately on kernel-evel.
+    _exit(1); 
 }
 
 /**
@@ -597,11 +607,15 @@ int main( int argc, char** argv )
  * using a window manager's launcher, and may not be run using 
  * a terminal.
  */
-int
-main( int argc, char** argv )
+int main( int argc, char** argv )
 {
 	int dtime, oldtime, newtime;
 
+    signal(SIGABRT, Emergency_Exit); // Signaal 6 (IRC crash)
+    signal(SIGSEGV, Emergency_Exit); // Signal 11 (Segfault)
+    signal(SIGILL,  Emergency_Exit); // Invalid instruction
+    signal(SIGFPE,  Emergency_Exit); // Floating point error
+	
 	/* init setuid access, remember real and effective user IDs */
 	// init_setuid(); TBD.
 

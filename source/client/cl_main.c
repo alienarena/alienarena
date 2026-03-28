@@ -2550,6 +2550,10 @@ void CL_Frame( int msec )
 	float FRAMETIME = 1.0/(float)server_tickrate;
 	float ideal_pps = (float)cl_maxpackets->value;
 
+	// Determine ideal PPS
+	if (cl_maxfps->value > 0 && ideal_pps > (float)cl_maxfps->value) {
+		ideal_pps = (float)cl_maxfps->value;
+	}
 	if (ideal_pps > server_tickrate) {
     	ideal_pps = (float)server_tickrate;
 	}
