@@ -115,7 +115,7 @@ extern char		scr_playericon[MAX_OSPATH];
 extern char		scr_playername[PLAYERNAME_SIZE];
 extern float	scr_playericonalpha;
 
-#define	CMD_BACKUP		64	// allow a lot of command backups for very fast systems
+#define	CMD_BACKUP		128	// allow a lot of command backups for very fast systems
 
 //
 // the client_state_t structure is wiped completely at every
