@@ -341,8 +341,13 @@ void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 {
 	client_frame_t		*frame, *oldframe;
 	int					lastframe;
+	int                 max_history;
 
-//Com_Printf ("%i -> %i\n", client->lastframe, sv.framenum);
+	// Project 100 Smart Delta:
+	// For old clients keep a 3 frames margin to prevent wrapping errors.
+	max_history = client->p100 ? (UPDATE_BACKUP - 1) : (UPDATE_BACKUP - 3);
+
+	//Com_Printf ("%i -> %i\n", client->lastframe, sv.framenum);
 	// this is the frame we are creating
 	frame = &client->frames[sv.framenum & UPDATE_MASK];
 
@@ -351,7 +356,7 @@ void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 		oldframe = NULL;
 		lastframe = -1;
 	}
-	else if (sv.framenum - client->lastframe >= (UPDATE_BACKUP - 3) )
+	else if (sv.framenum - client->lastframe >= max_history)
 	{	// client hasn't gotten a good message through in a long time
 //		Com_Printf ("%s: Delta request from out-of-date packet.\n", client->name);
 		oldframe = NULL;

@@ -2184,8 +2184,8 @@ void CL_InitLocal (void)
 	/* */
 	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_STR);
 	
-	rate = Cvar_Get ("rate", "30000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
-	Cvar_Describe(rate, "Maximum download bandwidth in bytes/sec. Use 30000+ for 100-tick servers to prevent choke and stuttering during heavy combat.");
+	rate = Cvar_Get ("rate", "60000", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe(rate, "Maximum download bandwidth in bytes/sec. Use 60000+ for 100-tick servers to prevent choke and stuttering during heavy combat.");
 
 	msg = Cvar_Get ("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
 	hand = Cvar_Get ("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);

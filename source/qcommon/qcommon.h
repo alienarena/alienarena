@@ -261,7 +261,7 @@ PROTOCOL
 
 //=========================================
 
-#define	UPDATE_BACKUP	64	// copies of entity_state_t to keep buffered
+#define	UPDATE_BACKUP	16	// copies of entity_state_t to keep buffered
 							// must be power of two
 #define	UPDATE_MASK		(UPDATE_BACKUP-1)
 
