@@ -2438,6 +2438,7 @@ void PutClientInServer (edict_t *ent)
 	{	// could't spawn in?
 	}
 	ent->s.event = EV_OTHER_TELEPORT; //to fix "player flash" bug
+	ent->svflags |= SVF_ALWAYS_SEND;  // Ensure players/bots are always visible, never culled by distance
 	gi.linkentity (ent);
 
 	// force the current weapon up

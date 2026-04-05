@@ -1220,6 +1220,15 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	{
 		ent->s.effects |= EF_COLOR_SHELL;
 		ent->s.renderfx |= RF_SHELL_RED;
+		ent->svflags |= SVF_ALWAYS_SEND;
+	}
+
+	if (item->flags & (IT_WEAPON | IT_POWERUP) || item->pickup == Pickup_Powerup ||
+		!strcmp(ent->classname, "item_flag_red") || !strcmp(ent->classname, "item_flag_blue") || !strcmp(ent->classname, "item_jetpack")) {
+		ent->svflags |= SVF_ALWAYS_SEND;
+	} else  {
+		// Small items such as health, shards, ammo won't get the flag and well be culled.
+		ent->svflags &= ~SVF_ALWAYS_SEND;
 	}
 }
 

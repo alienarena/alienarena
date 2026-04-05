@@ -611,7 +611,7 @@ int main( int argc, char** argv )
 {
 	int dtime, oldtime, newtime;
 
-    signal(SIGABRT, Emergency_Exit); // Signaal 6 (IRC crash)
+    signal(SIGABRT, Emergency_Exit); // Signal 6 (IRC crash)
     signal(SIGSEGV, Emergency_Exit); // Signal 11 (Segfault)
     signal(SIGILL,  Emergency_Exit); // Invalid instruction
     signal(SIGFPE,  Emergency_Exit); // Floating point error

@@ -407,14 +407,17 @@ FRAME UPDATES
 ===============================================================================
 */
 
-// Helper method to determine if a packet is too large for the client
+// Helper method to determine if a packet is too large to be an unfragmented UDP packet, which would cause stuttering and low FPS for clients.
+// sv_mtu_check controls whether this check is enforced.
+extern cvar_t *sv_mtu_check;
 qboolean SV_IsPacketTooLarge(client_t *client, int length) {
-	// Flexible limit, for clients with the Project 100 flag the limit is higher
-	int limit = client->p100 ? MAX_MSGLEN_P100 : MAX_MSGLEN;
+	if (client->netchan.remote_address.type == NA_LOOPBACK) {
+		return false;
+	}
 
-	if (length > limit) {
+	if (sv_mtu_check->integer && length > MTU_SAFE_LIMIT) {
 		// Log this with developer 1
-		Com_DPrintf("SV: Suppressing %i bytes for %s (Limit: %i)\n", length, client->name, limit);
+		Com_DPrintf("SV: MTU limit reached!. Suppressing %i bytes for %s (limit: %i)\n", length, client->name, MTU_SAFE_LIMIT);
 		return true; 
 	}
 
@@ -428,9 +431,8 @@ SV_SendClientDatagram
 */
 qboolean SV_SendClientDatagram (client_t *client)
 {
-	byte		msg_buf[MAX_MSGLEN_P100];
+	byte		msg_buf[MAX_MSGLEN];
 	sizebuf_t	msg;
-	int 		current_limit = (client->p100) ? (MAX_MSGLEN_P100 - MAX_MSGLEN_PADDING) : (MAX_MSGLEN - MAX_MSGLEN_PADDING);
 
 	SV_BuildClientFrame (client);
 
@@ -449,9 +451,13 @@ qboolean SV_SendClientDatagram (client_t *client)
 	if (client->datagram.overflowed) {
 		Com_Printf ("WARNING: datagram overflowed for %s\n", client->name);
 	} else {
-		if (msg.cursize + client->datagram.cursize > current_limit) {
-			// Don't write to the message anymore to prevent that it becomes too large
-			Com_DPrintf ("SV: Suppressing datagram for %s to prevent overflow\n", client->name);
+		// Check for absolute MAX_MSGLEN limit (always enforced to prevent crashes, even for loopback)
+		if (msg.cursize + client->datagram.cursize > MAX_MSGLEN) {
+			Com_DPrintf ("SV: Datagram would exceed MAX_MSGLEN for %s, suppressing\n", client->name);
+		}
+		// Soft limit to avoid IP fragmentation (if MTU check enabled, skip loopback)
+		else if (sv_mtu_check->integer && client->netchan.remote_address.type != NA_LOOPBACK && msg.cursize + client->datagram.cursize > MTU_SAFE_LIMIT) {
+			Com_DPrintf ("SV: Suppressing datagram for %s to prevent fragmentation (MTU limit)\n", client->name);
 		} else {
 			SZ_Write (&msg, client->datagram.data, client->datagram.cursize);
 		}
@@ -494,6 +500,35 @@ void SV_DemoCompleted (void)
 	SV_Nextserver ();
 }
 
+// Calculate the dynamic rate limit based on the number of active players,
+// with a minimum of 15000 bytes/sec and a maximum of 45000 bytes/sec for one player,
+// decreasing by 3333 bytes/sec for each additional player.
+// Only used if sv_dynamic_rate cvar is enabled.
+extern int sv_active_player_count;
+extern cvar_t *sv_dynamic_rate;
+int SV_GetDynamicRateLimit(void) { 
+	// If dynamic rate limiting is disabled, always use RATE_MAX
+	if (!sv_dynamic_rate->integer) {
+		// Still update the cvar for visibility
+		Cvar_Set("sv_maxrate_active", va("%i", RATE_MAX));
+		return RATE_MAX;
+	}
+
+	if (sv_active_player_count <= 1) return RATE_MAX;
+
+	// Per player we subtract 3333 from the base rate, which means:
+	// 1 player: 45000
+	// 4 players: ~35000
+	// 7 players: ~25000
+	// 10 players and more: 15000
+	int dynamic_max = RATE_MAX - ((sv_active_player_count - 1) * RATE_LIMITED_STEP);
+
+	if (dynamic_max < RATE_LIMITED_MIN) dynamic_max = RATE_LIMITED_MIN;
+
+	Cvar_Set("sv_maxrate_active", va("%i", dynamic_max));
+
+	return dynamic_max;
+}
 
 /*
 =======================
@@ -507,19 +542,38 @@ qboolean SV_RateDrop (client_t *c)
 {
 	int		total;
 	int		i;
+	int     dynamic_limit;
+	int     active_limit;
+	int     num_packets;
 
 	// never drop over the loopback
 	if (c->netchan.remote_address.type == NA_LOOPBACK)
 		return false;
 
-	total = 0;
-
-	for (i = 0 ; i < RATE_MESSAGES ; i++)
-	{
-		total += c->message_size[i];
+	// Determine dynamic limit based on the number of players
+	dynamic_limit = SV_GetDynamicRateLimit();
+	if (c->rate < dynamic_limit) {
+		active_limit = c->rate;
+	} else {
+		active_limit = dynamic_limit;
 	}
 
-	if (total > c->rate)
+	num_packets = sv_tickrate->integer;
+	if (num_packets > RATE_MESSAGES) {
+		num_packets = RATE_MESSAGES;
+	}
+
+	// Caculate the total bytes sent to the client in the last second
+	total = 0;
+	for (i = 0; i < num_packets; i++) {
+		int index = (sv.framenum - i) % RATE_MESSAGES;
+        if (index < 0) {
+			index += RATE_MESSAGES;
+		}
+		total += c->message_size[index];
+	}
+
+	if (total > active_limit)
 	{
 		c->surpressCount++;
 		c->message_size[sv.framenum % RATE_MESSAGES] = 0;
@@ -539,9 +593,12 @@ void SV_SendClientMessages (void)
 	int			i;
 	client_t	*c;
 	int			msglen;
-	byte		msgbuf[MAX_MSGLEN_P100];
+	byte		msgbuf[MAX_MSGLEN];
 
 	msglen = 0;
+
+	// Update sv_maxrate_active to reflect current dynamic rate limit
+	SV_GetDynamicRateLimit();
 
 	// read the next demo message if needed
 	if (sv.state == ss_demo && sv.demofile)

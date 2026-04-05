@@ -27,7 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	SVF_NOCLIENT			0x00000001	// don't send entity to clients, even if it has effects
 #define	SVF_DEADMONSTER			0x00000002	// treat as CONTENTS_DEADMONSTER for collision
 #define	SVF_MONSTER				0x00000004	// treat as CONTENTS_MONSTER for collision
-#define SVF_FAKECLIENT		0x00000020	// do not try to send anything to this client
+#define SVF_FAKECLIENT			0x00000020	// do not try to send anything to this client
+#define SVF_ALWAYS_SEND			0x00000040	// always send to clients, never cull by distance (e.g., flags, important items)
 
 // edict->solid values
 

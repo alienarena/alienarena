@@ -71,7 +71,15 @@ cvar_t	*sv_iplogfile;			// Log file by IP address
 
 cvar_t  *sv_tickrate;			// server frame rate
 
+cvar_t  *sv_maxrate_active;		// maximum rate for active players
+cvar_t  *sv_mtu_check;			// enable/disable MTU safety checks for packet entities
+cvar_t  *sv_dynamic_rate;		// enable/disable dynamic rate limiting based on player count
+cvar_t  *sv_cull_distance;		// distance at which entities are culled (not sent to clients)
+
 int		sv_numbots;
+int 	sv_active_player_count = 0;
+float 	sv_cull_dist_sq;
+
 
 void Master_Shutdown (void);
 
@@ -125,6 +133,9 @@ void SV_DropClient (client_t *drop)
 
 	if (drop->state == cs_spawned)
 	{
+        sv_active_player_count--;
+        if (sv_active_player_count < 0) sv_active_player_count = 0;
+
 		// call the prog function for removing a client
 		// this will remove the body, among other things
 		ge->ClientDisconnect (drop->edict);
@@ -1168,6 +1179,12 @@ void SV_Frame (int msec)
 	int tmp_systime, tmp_hangtime;
 	static int old_systime = 0;
 	float FRAMETIME = 1.0/(float)sv_tickrate->integer;
+	static float last_cull_val = -1.0f;
+
+	if (sv_cull_distance->value != last_cull_val) {
+		last_cull_val = sv_cull_distance->value;
+		sv_cull_dist_sq = last_cull_val * last_cull_val;
+	}
 
 	if (!old_systime)
 		old_systime = Sys_Milliseconds ();
@@ -1407,19 +1424,18 @@ void SV_UserinfoChanged (client_t *cl)
 
 	// rate command
 	val = Info_ValueForKey (cl->userinfo, "rate");
-	if (strlen(val))
-	{
+	if (strlen(val)) {
 		i = atoi(val);
 		cl->rate = i;
-		if (cl->p100 && cl->rate < 60000)
-        	cl->rate = 60000;
-    	else if (cl->rate < 2500)
-			cl->rate = 2500;
-		if (cl->rate > 100000)
-			cl->rate = 100000;
+	} else {
+		cl->rate = RATE_DEFAULT;
 	}
-	else
-		cl->rate = cl->p100 ? 60000 : 25000;
+	
+	// Enforce minimum and maximum rate limits for all clients
+	if (cl->rate < RATE_MIN)
+		cl->rate = RATE_MIN;
+	if (cl->rate > RATE_MAX)
+		cl->rate = RATE_MAX;
 
 	// msg command
 	val = Info_ValueForKey (cl->userinfo, "msg");
@@ -1488,8 +1504,21 @@ void SV_Init (void)
 	sv_reconnect_limit = Cvar_Get ("sv_reconnect_limit", "3", CVAR_ARCHIVE);
 
 	sv_ratelimit_status = Cvar_Get ("sv_ratelimit_status", "15", 0);
-
+	
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
+
+	// Read-only cvar to report the current maxrate limit to clients
+	sv_maxrate_active = Cvar_Get ("sv_maxrate_active", va("%i", RATE_MAX), 0);
+	Cvar_Describe (sv_maxrate_active, "Read-only: Shows the current maximum rate limit in effect.");
+
+	sv_cull_distance = Cvar_Get ("sv_cull_distance", "3000", CVAR_ARCHIVE);
+	Cvar_Describe (sv_cull_distance, "Maximum distance at which entities will be sent to clients. Set to 0 to disable culling.");
+
+	sv_mtu_check = Cvar_Get ("sv_mtu_check", "0", CVAR_ARCHIVE);
+	Cvar_Describe (sv_mtu_check, "Enable/disable MTU safety checks (1=enabled, 0=disabled). Default is off for best performance. Enable on servers with fragmentation issues or poor connectivity.");
+
+	sv_dynamic_rate = Cvar_Get ("sv_dynamic_rate", "0", CVAR_ARCHIVE);
+	Cvar_Describe (sv_dynamic_rate, "Enable/disable dynamic rate limiting based on player count (1=enabled, 0=disabled). Default is off for best gameplay. Enable on bandwidth-limited servers.");
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
 	SZ_SetName (&net_message, "Net message buffer", true);

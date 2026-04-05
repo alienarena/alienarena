@@ -155,10 +155,13 @@ clients along with it.
 
 ================
 */
+extern int 		sv_active_player_count;
+extern cvar_t*	maxentities;
 void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
 {
 	int			i;
 	unsigned	checksum;
+	int 		used_edicts = 0;
 
 	if (attractloop)
 		Cvar_Set ("paused", "0");
@@ -209,7 +212,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 			svs.clients[i].state = cs_connected;
 		svs.clients[i].lastframe = -1;
 	}
-
+	sv_active_player_count = 0;
 	sv.time = 1000;
 
 	strcpy (sv.name, server);
@@ -257,6 +260,21 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	// run two frames to allow everything to settle
 	ge->RunFrame ();
 	ge->RunFrame ();
+
+	// Warn if there are more than 90% of maxentities
+	for (int i = 0; i < maxentities->integer; i++) {
+		if (EDICT_NUM(i)->inuse) {
+			used_edicts++;
+		}
+	}
+	Com_Printf("Loaded %d entities\n", used_edicts);
+	float usage_pct = (float)used_edicts / (float)maxentities->integer;
+	if (usage_pct > 0.90f) {
+		Com_Printf("*********************************\n");
+		Com_Printf("WARNING: High entity usage: %i/%i (%.1lf%%)\n", used_edicts, (int)maxentities->value, (double)usage_pct * 100.0);
+		Com_Printf("Consider lowering sv_cull_distance.\n");
+		Com_Printf("*********************************\n");
+	}
 
 	// all precaches are complete
 	sv.state = serverstate;

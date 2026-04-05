@@ -189,6 +189,7 @@ void ED_CallSpawn (edict_t *ent)
 		if (!strcmp(s->name, ent->classname))
 		{	// found it
 			s->spawn (ent);
+
 			if (ent != g_edicts && ent->inuse)
 				ED_PostSpawn_SanityCheck (ent);
 			return;

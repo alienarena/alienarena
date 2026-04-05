@@ -955,6 +955,10 @@ G_RunEntity
 */
 void G_RunEntity (edict_t *ent, float timespan)
 {
+	// Skip static entities
+	if (ent->movetype == MOVETYPE_NONE && !ent->prethink && ent->nextthink <= 0)
+ 		return;
+
 	if (ent->prethink)
 		ent->prethink (ent);
 

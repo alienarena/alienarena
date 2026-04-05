@@ -42,6 +42,7 @@ SV_EmitPacketEntities
 Writes a delta update of an entity_state_t list to the message.
 =============
 */
+extern cvar_t *sv_mtu_check;
 void SV_EmitPacketEntities (client_t *cl, client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
 {
 	entity_state_t	*oldent=NULL, *newent=NULL;
@@ -49,7 +50,6 @@ void SV_EmitPacketEntities (client_t *cl, client_frame_t *from, client_frame_t *
 	int		oldnum, newnum;
 	int		from_num_entities;
 	int		bits;
-	int 	max_safe_size = cl->p100 ? (MAX_MSGLEN_P100 - MAX_MSGLEN_PADDING) : (MAX_MSGLEN - MAX_MSGLEN_PADDING);
 
 #if 0
 	if (numprojs)
@@ -67,10 +67,15 @@ void SV_EmitPacketEntities (client_t *cl, client_frame_t *from, client_frame_t *
 	oldindex = 0;
 	while (newindex < to->num_entities || oldindex < from_num_entities)
 	{
-		// Keep checking for message size to avoid sending packets to clients that are too large
-        if (msg->cursize > max_safe_size) {
-            break;
-        }
+		// Hard limit: always prevent overflow to MAX_MSGLEN to prevent crashes (even for loopback/single-player)
+		if (msg->cursize > MAX_MSGLEN) {
+			break;
+		}
+		
+		// Soft limit: prevent fragmentation at MTU_SAFE_LIMIT (controlled by sv_mtu_check cvar, skip loopback)
+		if (sv_mtu_check->integer && cl->netchan.remote_address.type != NA_LOOPBACK && msg->cursize > MTU_SAFE_LIMIT) {
+			break;
+		}
 
 		if (newindex >= to->num_entities)
 			newnum = 9999;
@@ -451,6 +456,7 @@ Decides which entities are going to be visible to the client, and
 copies off the playerstat and areabits.
 =============
 */
+extern float sv_cull_dist_sq;
 void SV_BuildClientFrame (client_t *client)
 {
 	int		e, i;
@@ -543,6 +549,31 @@ void SV_BuildClientFrame (client_t *client)
 		// ignore if not touching a PV leaf
 		if (ent != clent)
 		{
+			// Cull entities that are far away to keep the server performant.
+			// Skip brushes, should be indexed as 1 until 64, these could be doors, elevators, etc
+			if (sv_cull_dist_sq > 0 && !(ent->svflags & SVF_ALWAYS_SEND) && (ent->s.modelindex == 0 || ent->s.modelindex > 64)) {
+				vec3_t dist_vec;
+				float  dist_sq;
+				int		i;
+
+				// Quick bounding box check, important for water and other large entities. If the entity is outside the box, calculate distance to the box instead of the origin.
+				for (i = 0; i < 3; i++) {
+					if (org[i] < ent->absmin[i])
+						dist_vec[i] = ent->absmin[i] - org[i];
+					else if (org[i] > ent->absmax[i])
+						dist_vec[i] = org[i] - ent->absmax[i];
+					else
+						dist_vec[i] = 0;
+				}
+
+				dist_sq = DotProduct(dist_vec, dist_vec);
+
+				// Use quadratic distance to avoid an expensive square root calculation
+				if (dist_sq > sv_cull_dist_sq && dist_sq >= 562500) { // minimum 750 (750 * 750)
+					continue;
+				}
+			}
+
 			// check area
 			if (!CM_AreasConnected (clientarea, ent->areanum))
 			{	// doors can legally straddle two areas, so

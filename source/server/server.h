@@ -99,7 +99,7 @@ typedef struct
 } client_frame_t;
 
 #define	LATENCY_COUNTS	16
-#define	RATE_MESSAGES	10
+#define	RATE_MESSAGES	128	// High enough to contain one second of data with max tickrate 125
 
 typedef struct client_s
 {

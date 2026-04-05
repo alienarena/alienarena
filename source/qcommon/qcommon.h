@@ -636,9 +636,16 @@ NET
 #define	PORT_ANY	-1
 
 #define	MAX_MSGLEN			2800		// max length of a message - IMPORTANT: still used in critical places for backwards compatibility with old clients
-#define	MAX_MSGLEN_P100		16384		// max length of a message for project 100
+#define	MAX_MSGLEN_P100		16384		// max length of a message for project 100 for internal buffers only
 #define MAX_MSGLEN_PADDING	400			// Extra space reserved at the end to avoid going over the limit of the message size
 #define	PACKET_HEADER		20			// two ints and a short
+#define MTU_SAFE_LIMIT 		1472		// Safe limit for unfragmented MTU packets (standard MTU 1500 - IP header 20 - UDP 8)
+
+#define RATE_MIN			2500
+#define RATE_DEFAULT		40000
+#define RATE_MAX			75000
+#define RATE_LIMITED_MIN	15000
+#define RATE_LIMITED_STEP	3333
 
 typedef enum {NA_LOOPBACK, NA_BROADCAST, NA_IP, NA_IPX, NA_BROADCAST_IPX} netadrtype_t;
 
