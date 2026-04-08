@@ -456,7 +456,9 @@ Decides which entities are going to be visible to the client, and
 copies off the playerstat and areabits.
 =============
 */
-extern float sv_cull_dist_sq;
+extern float sv_entity_cull_rad;
+extern float sv_entity_cull_tan_sq;
+extern float sv_model_bounds[MAX_MODELS];
 void SV_BuildClientFrame (client_t *client)
 {
 	int		e, i;
@@ -550,31 +552,35 @@ void SV_BuildClientFrame (client_t *client)
 		if (ent != clent)
 		{
 			// Cull entities that are far away to keep the server performant.
-			// Skip brushes, should be indexed as 1 until 64, these could be doors, elevators, etc
-			if (sv_cull_dist_sq > 0 && !(ent->svflags & SVF_ALWAYS_SEND) && (ent->s.modelindex == 0 || ent->s.modelindex > 64)) {
-				vec3_t dist_vec;
-				float  dist_sq;
-				int		i;
+			// Protection layers:
+			// 1. SVF_ALWAYS_SEND - gameplay critical items
+			// 2. Brush models (inline models, name starts with '*') - never cull map structure
+			// 3. Zero/tiny bounding box (<=4) - projectiles/effects, never cull
+			// 4. Angular size culling for all other entities
+			if (sv_entity_cull_rad > 0 && !(ent->svflags & SVF_ALWAYS_SEND) &&
+				(ent->s.modelindex == 0 || sv.configstrings[CS_MODELS + ent->s.modelindex][0] != '*')) {
 
-				// Quick bounding box check, important for water and other large entities. If the entity is outside the box, calculate distance to the box instead of the origin.
-				for (i = 0; i < 3; i++) {
-					if (org[i] < ent->absmin[i])
-						dist_vec[i] = ent->absmin[i] - org[i];
-					else if (org[i] > ent->absmax[i])
-						dist_vec[i] = org[i] - ent->absmax[i];
-					else
-						dist_vec[i] = 0;
-				}
+				// Entity size from cached model bounds (side-array, doesn't touch ent->mins/maxs)
+				float entity_size = 0;
+				if (ent->s.modelindex > 0 && ent->s.modelindex < MAX_MODELS)
+					entity_size = sv_model_bounds[ent->s.modelindex];
 
-				dist_sq = DotProduct(dist_vec, dist_vec);
+				// Only cull entities with a known model size (>0 means SV_ReadModelBounds succeeded)
+				if (entity_size > 0) {
+					vec3_t	dist_vec;
+					float	dist_sq;
 
-				// Use quadratic distance to avoid an expensive square root calculation
-				if (dist_sq > sv_cull_dist_sq && dist_sq >= 562500) { // minimum 750 (750 * 750)
-					continue;
+					// Distance to entity origin (not absbox — we intentionally don't
+					// inflate the entity's absbox, so use origin directly)
+					VectorSubtract(org, ent->s.origin, dist_vec);
+					dist_sq = DotProduct(dist_vec, dist_vec);
+
+					// atan(size/dist) < threshold  <=>  size^2 < dist_sq * tan^2(threshold)
+					if (entity_size * entity_size < dist_sq * sv_entity_cull_tan_sq)
+						continue;  // Angular size too small, cull it
 				}
 			}
 
-			// check area
 			if (!CM_AreasConnected (clientarea, ent->areanum))
 			{	// doors can legally straddle two areas, so
 				// we may need to check another one

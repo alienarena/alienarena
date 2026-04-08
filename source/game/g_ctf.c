@@ -671,6 +671,7 @@ void CTFDeadDropFlag(edict_t *self, edict_t *other)
 		dropped->touch = CTFDropFlagTouch;
 		dropped->s.frame = 175;
 		dropped->s.effects = EF_ROTATE;
+		dropped->svflags |= SVF_ALWAYS_SEND;
 	}
 }
 qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)

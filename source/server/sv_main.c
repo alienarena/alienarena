@@ -74,11 +74,14 @@ cvar_t  *sv_tickrate;			// server frame rate
 cvar_t  *sv_maxrate_active;		// maximum rate for active players
 cvar_t  *sv_mtu_check;			// enable/disable MTU safety checks for packet entities
 cvar_t  *sv_dynamic_rate;		// enable/disable dynamic rate limiting based on player count
-cvar_t  *sv_cull_distance;		// distance at which entities are culled (not sent to clients)
+cvar_t  *sv_entity_cull;		// entity culling threshold (in radians) - 0=disabled
+
 
 int		sv_numbots;
 int 	sv_active_player_count = 0;
-float 	sv_cull_dist_sq;
+float 	sv_entity_cull_rad;
+float	sv_entity_cull_tan_sq;			// tan(sv_entity_cull_rad)^2, for fast squared-distance culling
+float	sv_model_bounds[MAX_MODELS];	// cached max visual dimension per modelindex
 
 
 void Master_Shutdown (void);
@@ -1179,11 +1182,13 @@ void SV_Frame (int msec)
 	int tmp_systime, tmp_hangtime;
 	static int old_systime = 0;
 	float FRAMETIME = 1.0/(float)sv_tickrate->integer;
-	static float last_cull_val = -1.0f;
+	static float last_entity_cull = -1.0f;
 
-	if (sv_cull_distance->value != last_cull_val) {
-		last_cull_val = sv_cull_distance->value;
-		sv_cull_dist_sq = last_cull_val * last_cull_val;
+	if (sv_entity_cull->value != last_entity_cull) {
+		last_entity_cull = sv_entity_cull->value;
+		sv_entity_cull_rad = last_entity_cull * 3.14159f / 180.0f;
+		float t = tan(sv_entity_cull_rad);
+		sv_entity_cull_tan_sq = t * t;
 	}
 
 	if (!old_systime)
@@ -1511,8 +1516,9 @@ void SV_Init (void)
 	sv_maxrate_active = Cvar_Get ("sv_maxrate_active", va("%i", RATE_MAX), 0);
 	Cvar_Describe (sv_maxrate_active, "Read-only: Shows the current maximum rate limit in effect.");
 
-	sv_cull_distance = Cvar_Get ("sv_cull_distance", "3000", CVAR_ARCHIVE);
-	Cvar_Describe (sv_cull_distance, "Maximum distance at which entities will be sent to clients. Set to 0 to disable culling.");
+	sv_entity_cull = Cvar_Get ("sv_entity_cull", "1.0", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to disable culling.");
+
 
 	sv_mtu_check = Cvar_Get ("sv_mtu_check", "0", CVAR_ARCHIVE);
 	Cvar_Describe (sv_mtu_check, "Enable/disable MTU safety checks (1=enabled, 0=disabled). Default is off for best performance. Enable on servers with fragmentation issues or poor connectivity.");

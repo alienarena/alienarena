@@ -174,7 +174,7 @@ void ED_CallSpawn (edict_t *ent)
 		if (!strcmp(item->classname, ent->classname))
 		{	// found it
 			SpawnItem (ent, item);
-			return;
+			return; // SpawnItem sets SVF_ALWAYS_SEND
 		}
 	}
 
@@ -189,6 +189,12 @@ void ED_CallSpawn (edict_t *ent)
 		if (!strcmp(s->name, ent->classname))
 		{	// found it
 			s->spawn (ent);
+
+			// Only misc_mapmodel and ambient effects are cullable; everything else always sends.
+			if (strcmp(ent->classname, "misc_mapmodel") != 0 &&
+				strcmp(ent->classname, "misc_watersplash") != 0 &&
+				strcmp(ent->classname, "misc_electroflash") != 0)
+				ent->svflags |= SVF_ALWAYS_SEND;
 
 			if (ent != g_edicts && ent->inuse)
 				ED_PostSpawn_SanityCheck (ent);

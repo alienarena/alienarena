@@ -971,8 +971,6 @@ typedef struct entity_state_s
 	vec3_t	spawn_pos;  //used for remembering the original spawn position of an entity
 } entity_state_t;
 
-//==============================================
-
 //bot score info
 //data used to track bot scores for server status strings
 typedef struct

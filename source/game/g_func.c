@@ -1601,7 +1601,10 @@ again:
 			return;
 		}
 		first = false;
-		VectorSubtract (ent->s.origin, self->mins, self->s.origin);
+		if (self->solid == SOLID_BSP)
+			VectorSubtract (ent->s.origin, self->mins, self->s.origin);
+		else
+			VectorCopy (ent->s.origin, self->s.origin);
 		VectorCopy (self->s.origin, self->s.old_origin);
 		self->s.event = EV_OTHER_TELEPORT;
 		gi.linkentity (self);
@@ -1621,7 +1624,10 @@ again:
 			self->s.sound = gi.soundindex ("world/turbine1.wav");
 	}
 
-	VectorSubtract (ent->s.origin, self->mins, dest);
+	if (self->solid == SOLID_BSP)
+		VectorSubtract (ent->s.origin, self->mins, dest);
+	else
+		VectorCopy (ent->s.origin, dest);
 	self->moveinfo.state = STATE_TOP;
 	VectorCopy (self->s.origin, self->moveinfo.start_origin);
 	VectorCopy (dest, self->moveinfo.end_origin);
@@ -1664,7 +1670,10 @@ void train_resume (edict_t *self)
 
 	ent = self->target_ent;
 
-	VectorSubtract (ent->s.origin, self->mins, dest);
+	if (self->solid == SOLID_BSP)
+		VectorSubtract (ent->s.origin, self->mins, dest);
+	else
+		VectorCopy (ent->s.origin, dest);
 	self->moveinfo.state = STATE_TOP;
 	VectorCopy (self->s.origin, self->moveinfo.start_origin);
 	VectorCopy (dest, self->moveinfo.end_origin);
@@ -1689,7 +1698,10 @@ void func_train_find (edict_t *self)
 	}
 	self->target = ent->target;
 
-	VectorSubtract (ent->s.origin, self->mins, self->s.origin);
+	if (self->solid == SOLID_BSP)
+		VectorSubtract (ent->s.origin, self->mins, self->s.origin);
+	else
+		VectorCopy (ent->s.origin, self->s.origin);
 
 	gi.linkentity (self);
 

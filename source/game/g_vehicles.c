@@ -313,6 +313,7 @@ void SpawnJetpack(edict_t *ent)
 	SetRespawn (ent, 1000000); //huge delay until jetpack is picked up from pad.			
 	jetpack->replaced_weapon = ent; //remember this entity
 
+	jetpack->svflags |= SVF_ALWAYS_SEND;
 	jetpack->nextthink = level.time + TENFPS;
 	jetpack->think = VehicleThink;
 

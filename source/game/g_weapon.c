@@ -1380,6 +1380,7 @@ void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
 
 	spud->s.sound = gi.soundindex ("weapons/seeker.wav"); 
 	spud->classname = "seeker"; //to do - make sure bots know to run like hell away from these things
+	spud->svflags |= SVF_ALWAYS_SEND;
 
 	gi.linkentity (spud);
 }
@@ -1684,6 +1685,7 @@ void fire_smartgrenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	floater->dmg_radius = damage_radius;
 	floater->s.sound = gi.soundindex ("weapons/electroball.wav");
 	floater->classname = "grenade";
+	floater->svflags |= SVF_ALWAYS_SEND;
 	floater->nade_timer = 0;
 
 	gi.linkentity (floater);
@@ -1718,6 +1720,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	prox->radius_dmg = radius_damage;
 	prox->dmg_radius = damage_radius;
 	prox->classname = "mine";
+	prox->svflags |= SVF_ALWAYS_SEND;
 	prox->takedamage = DAMAGE_YES;
 	prox->health = 20;
 	prox->die = prox_die;
@@ -2276,6 +2279,7 @@ void fire_tacticalbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
     bomb->dmg = 1000; //insane amount of damage power
 	bomb->radius_dmg = 1000;
 	bomb->dmg_radius = 512;	
+	bomb->svflags |= SVF_ALWAYS_SEND;
 	bomb->takedamage = DAMAGE_YES;
 	bomb->health = 500; //make it somewhat hard to destroy
 	bomb->die = bomb_die; 

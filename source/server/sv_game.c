@@ -25,6 +25,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "server.h"
 
+
+
+// Minimal IQM structs needed for reading model bounds server-side.
+// (The full IQM header lives in ref_gl/r_iqm.h which the server doesn't include.)
+typedef struct {
+	char         id[16];
+	unsigned int version;
+	unsigned int filesize;
+	unsigned int flags;
+	unsigned int num_text, ofs_text;
+	unsigned int num_meshes, ofs_meshes;
+	unsigned int num_vertexarrays, num_vertexes, ofs_vertexarrays;
+	unsigned int num_triangles, ofs_triangles, ofs_neighbors;
+	unsigned int num_joints, ofs_joints;
+	unsigned int num_poses, ofs_poses;
+	unsigned int num_anims, ofs_anims;
+	unsigned int num_frames, num_framechannels, ofs_frames, ofs_bounds;
+	unsigned int num_comment, ofs_comment;
+	unsigned int num_extensions, ofs_extensions;
+} sv_iqmheader_t;
+
+typedef struct {
+	float mins[3], maxs[3];
+	float xyradius, radius;
+} sv_iqmbounds_t;
+
 game_export_t	*ge;
 
 
@@ -158,11 +184,91 @@ void PF_error (char *fmt, ...)
 
 /*
 =================
+SV_ReadModelBounds
+
+Reads the bounding box of a model file into mins/maxs.
+Mirrors the renderer's IQM-over-MD2 preference: tries a .iqm file first
+(replacing extension if needed), then falls back to .md2, then to ±16.
+=================
+*/
+static void SV_ReadModelBounds (const char *name, vec3_t mins, vec3_t maxs)
+{
+	int			loaded = 0;
+	int			i;
+	const char	*ext = strrchr(name, '.');
+
+	// --- Try IQM (either directly or by swapping .md2 -> .iqm) ---
+	if (ext && (!Q_strcasecmp(ext, ".md2") || !Q_strcasecmp(ext, ".iqm"))) {
+		char	iqmname[MAX_QPATH];
+		void	*buf = NULL;
+		int		len;
+
+		if (!Q_strcasecmp(ext, ".md2")) {
+			COM_StripExtension(name, iqmname);
+			strcat(iqmname, ".iqm");
+		} else {
+			strncpy(iqmname, name, sizeof(iqmname) - 1);
+			iqmname[sizeof(iqmname) - 1] = '\0';
+		}
+
+		len = FS_LoadFile(iqmname, &buf);
+		if (buf && len > (int)sizeof(sv_iqmheader_t)) {
+			sv_iqmheader_t *hdr = (sv_iqmheader_t *)buf;
+			unsigned int ofs_b = LittleLong(hdr->ofs_bounds);
+			unsigned int num_f = LittleLong(hdr->num_frames);
+			if (!memcmp(hdr->id, "INTERQUAKEMODEL", 16) &&
+			    (LittleLong(hdr->version) == 1 || LittleLong(hdr->version) == 2) &&
+			    num_f > 0 && ofs_b != 0 &&
+			    ofs_b + (int)sizeof(sv_iqmbounds_t) <= (unsigned int)len) {
+				sv_iqmbounds_t *bounds = (sv_iqmbounds_t *)((byte *)buf + ofs_b);
+				for (i = 0; i < 3; i++) {
+					mins[i] = LittleFloat(bounds->mins[i]);
+					maxs[i] = LittleFloat(bounds->maxs[i]);
+				}
+				loaded = 1;
+			}
+		}
+		if (buf)
+			FS_FreeFile(buf);
+	}
+
+	// --- Try MD2 (only when original name was .md2 and IQM failed) ---
+	if (!loaded && ext && !Q_strcasecmp(ext, ".md2")) {
+		void	*buf = NULL;
+		int		len = FS_LoadFile(name, &buf);
+		if (buf && len > (int)sizeof(dmdl_t)) {
+			dmdl_t	*hdr = (dmdl_t *)buf;
+			if (LittleLong(hdr->ident) == IDALIASHEADER &&
+			    LittleLong(hdr->version) == ALIAS_VERSION &&
+			    LittleLong(hdr->ofs_frames) + (int)sizeof(daliasframe_t) <= len) {
+				daliasframe_t *frame = (daliasframe_t *)((byte *)buf + LittleLong(hdr->ofs_frames));
+				for (i = 0; i < 3; i++) {
+					mins[i] = LittleFloat(frame->translate[i]);
+					maxs[i] = mins[i] + LittleFloat(frame->scale[i]) * 255.0f;
+				}
+				loaded = 1;
+			}
+		}
+		if (buf)
+			FS_FreeFile(buf);
+	}
+
+	if (!loaded) {
+		// Fallback for unknown formats or IQM without frame bounds
+		VectorSet(mins, -16, -16, -16);
+		VectorSet(maxs,  16,  16,  16);
+	}
+}
+
+/*
+=================
 PF_setmodel
 
 Also sets mins and maxs for inline bmodels
+For regular models, sets default mins/maxs to prevent culling issues
 =================
 */
+extern float sv_model_bounds[MAX_MODELS];
 void PF_setmodel (edict_t *ent, char *name)
 {
 	int		i;
@@ -183,6 +289,24 @@ void PF_setmodel (edict_t *ent, char *name)
 		mod = CM_InlineModel (name);
 		VectorCopy (mod->mins, ent->mins);
 		VectorCopy (mod->maxs, ent->maxs);
+		SV_LinkEdict (ent);
+	}
+	else if (name[0] != 0)
+	{
+		// Cache model bounds for angular-size culling (side-array, not ent->mins/maxs,
+		// so we don't change the entity's PVS leaf placement).
+		if (i > 0 && i < MAX_MODELS && sv_model_bounds[i] == 0.0f) {
+			vec3_t bmins, bmaxs;
+			SV_ReadModelBounds(name, bmins, bmaxs);
+			float sx = bmaxs[0] - bmins[0];
+			float sy = bmaxs[1] - bmins[1];
+			float sz = bmaxs[2] - bmins[2];
+			float ms = sx > sy ? sx : sy;
+			if (sz > ms) ms = sz;
+			if (ms < 1.0f) ms = 1.0f;
+			sv_model_bounds[i] = ms;
+		}
+
 		SV_LinkEdict (ent);
 	}
 

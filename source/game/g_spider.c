@@ -240,6 +240,7 @@ void spawn_spider (edict_t *owner, vec3_t origin, vec3_t angle)
 	self->s.modelindex3 = gi.modelindex("models/objects/spider/helmet.iqm");
 
 	self->classname = "proj_spider";
+	self->svflags |= SVF_ALWAYS_SEND;
 
 	VectorSet (self->mins, -16, -16, 0);
 	VectorSet (self->maxs, 16, 16, 24);
@@ -340,6 +341,7 @@ void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
    
 	spider->s.sound = gi.soundindex ("weapons/electroball.wav");
 	spider->classname = "proj_spider";
+	spider->svflags |= SVF_ALWAYS_SEND;
 
 	gi.linkentity (spider);
 }

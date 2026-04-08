@@ -157,6 +157,7 @@ clients along with it.
 */
 extern int 		sv_active_player_count;
 extern cvar_t*	maxentities;
+extern float 	sv_model_bounds[MAX_MODELS];
 void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
 {
 	int			i;
@@ -183,7 +184,9 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 
 	// wipe the entire per-level structure
 	memset (&sv, 0, sizeof(sv));
-	svs.realtime = 0;
+	svs.realtime = 0;		
+	memset(sv_model_bounds, 0, sizeof(sv_model_bounds));
+
 	sv.attractloop = attractloop;
 
 	// save name for levels that don't set message
