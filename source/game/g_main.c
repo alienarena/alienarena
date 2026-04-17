@@ -753,10 +753,54 @@ void EndDMLevel (void)
 		return;
 	}
 
-	if(ctf->integer && !g_dedicated->integer)
-	{ //ctf will just stay on same level unless specified by dedicated list
-		BeginIntermission (CreateTargetChangeLevel (level.mapname));
-		return;
+	// Single player team modes: advance only if the player's team won
+	if((ctf->integer || g_tactical->integer) && !g_dedicated->integer)
+	{
+		edict_t *player = NULL;
+		int player_team;
+		qboolean player_team_won = false;
+
+		// Find the human player
+		for (i = 0; i < g_maxclients->integer; i++)
+		{
+			player = &g_edicts[i + 1];
+			if (player->inuse && !player->is_bot && player->client)
+				break;
+			player = NULL;
+		}
+
+		if (player)
+		{
+			player_team = player->dmteam;
+			if (g_tactical->integer)
+			{
+				// Tactical: team wins by destroying all enemy objectives
+				if (player_team == HUMAN_TEAM)
+					player_team_won = (!tacticalScore.alienAmmoDepot
+						&& !tacticalScore.alienComputer
+						&& !tacticalScore.alienPowerSource);
+				else if (player_team == ALIEN_TEAM)
+					player_team_won = (!tacticalScore.humanAmmoDepot
+						&& !tacticalScore.humanComputer
+						&& !tacticalScore.humanPowerSource);
+			}
+			else
+			{
+				// CTF: team with higher score wins
+				if (player_team == RED_TEAM)
+					player_team_won = (red_team_score > blue_team_score);
+				else if (player_team == BLUE_TEAM)
+					player_team_won = (blue_team_score > red_team_score);
+			}
+		}
+
+		if (!player_team_won)
+		{
+			// Player's team lost or tied: repeat same map
+			BeginIntermission (CreateTargetChangeLevel (level.mapname));
+			return;
+		}
+		// Player's team won: fall through to map rotation below
 	}
 	// see if it's in the map list
 	if (*sv_maplist->string) {
@@ -784,21 +828,22 @@ void EndDMLevel (void)
 		free(s);
 	}
 
-	if(ctf->integer) { //wasn't in the dedicated list
-		BeginIntermission (CreateTargetChangeLevel (level.mapname));
-		return;
+	if(ctf->integer) { //wasn't in the dedicated list, but SP CTF falls through
+		if (g_dedicated->integer)
+		{
+			BeginIntermission (CreateTargetChangeLevel (level.mapname));
+			return;
+		}
+		// non-dedicated CTF: fall through to maps.lst with prefix filtering
 	}
 
     //check the maps.lst file and read in those, which will overide anything in the level
-	//write this code here
 
 	/*
-	** load the list of map names
+	** load the list of map names, filtered by game mode prefix
 	*/
 	if ( !gi.FullPath( mapsname, sizeof(mapsname), "maps.lst" ) )
 	{ // no maps.lst.
-		// note: originally this was looked for in "./data1/" only
-		//   hope it is ok to use FullPath() search path.
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
 		return;
 	}
@@ -828,48 +873,76 @@ void EndDMLevel (void)
 
 	buf_cursor = buffer;
 
-	for ( i = 0; i < nummaps; i++ )
 	{
-		char  shortname[MAX_TOKEN_CHARS];
-		char  longname[MAX_TOKEN_CHARS];
-		char  scratch[200];
-#if defined WIN32_VARIANT
-		int  j;
-#endif
-		int l;
+		// Filter maps by prefix based on current game mode
+		const char *prefix1 = "dm-";
+		const char *prefix2 = "tourney-";
+		int k = 0;
 
-		strcpy (shortname, COM_Parse (&buf_cursor));
-		l = strlen(shortname);
-#if defined WIN32_VARIANT
-		for (j=0 ; j<l ; j++)
-			shortname[j] = toupper(shortname[j]);
-#endif
-		strcpy (longname, COM_Parse (&buf_cursor));
-		Com_sprintf( scratch, sizeof( scratch ), "%s", shortname );
+		if (ctf->integer)
+		{
+			prefix1 = "ctf-";
+			prefix2 = NULL;
+		}
+		else if (g_tactical->integer)
+		{
+			prefix1 = "tac-";
+			prefix2 = NULL;
+		}
 
-		mapnames[i] = malloc( strlen( scratch ) + 1 );
-		strcpy( mapnames[i], scratch );
+		for ( i = 0; i < nummaps; i++ )
+		{
+			char  shortname[MAX_TOKEN_CHARS];
+			char  longname[MAX_TOKEN_CHARS];
+#if defined WIN32_VARIANT
+			int  j;
+#endif
+			int l;
+
+			strcpy (shortname, COM_Parse (&buf_cursor));
+			l = strlen(shortname);
+#if defined WIN32_VARIANT
+			for (j=0 ; j<l ; j++)
+				shortname[j] = toupper(shortname[j]);
+#endif
+			strcpy (longname, COM_Parse (&buf_cursor));
+
+			// Only include maps matching our mode prefix
+			if (!Q_strncasecmp(shortname, prefix1, strlen(prefix1))
+				|| (prefix2 && !Q_strncasecmp(shortname, prefix2, strlen(prefix2))))
+			{
+				mapnames[k] = malloc( strlen( shortname ) + 1 );
+				strcpy( mapnames[k], shortname );
+				k++;
+			}
+		}
+		mapnames[k] = 0;
+		nummaps = k;
 	}
-	mapnames[nummaps] = 0;
 
 	fclose(fp);
 	free( buffer );
 
-	//find map, goto next map - if one doesn't exist, repeat list
-	//stick something in here to filter out CTF, and just make it loop back
+	//find map, goto next map within the filtered list - wrap around at end
 	for (i = 0; i < nummaps; i++) {
 		if (Q_strcasecmp(mapnames[i], level.mapname) == 0) {
-			if(mapnames[i+1])
-			{
-				if(mapnames[i+1][0])
-					BeginIntermission (CreateTargetChangeLevel (mapnames[i+1]) );
-				else if(mapnames[0][0]) //no more maps, repeat list
-					BeginIntermission (CreateTargetChangeLevel (mapnames[0]) );
-			}
-			else
+			if(i + 1 < nummaps && mapnames[i+1] && mapnames[i+1][0])
+				BeginIntermission (CreateTargetChangeLevel (mapnames[i+1]) );
+			else if(nummaps > 0 && mapnames[0][0]) //wrap to first
 				BeginIntermission (CreateTargetChangeLevel (mapnames[0]) );
+			else
+				BeginIntermission (CreateTargetChangeLevel (level.mapname) );
+
+			for (i = 0; i < nummaps; i++)
+				free(mapnames[i]);
+			free(mapnames);
+			return;
 		}
 	}
+
+	for (i = 0; i < nummaps; i++)
+		free(mapnames[i]);
+	free(mapnames);
 
 	if (level.nextmap[0]) // go to a specific map
 		BeginIntermission (CreateTargetChangeLevel (level.nextmap) );

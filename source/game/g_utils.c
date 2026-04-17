@@ -379,6 +379,11 @@ edict_t *G_Spawn (void)
 		}
 	}
 
+	if (i > game.maxentities * 0.75) {
+		// Give a warning when we are past 75% of the maximum entities
+		gi.dprintf("WARNING: %i entities allocated, only %i allowed\n",	globals.num_edicts, game.maxentities);
+	}
+
 	if (i == game.maxentities)
 		gi.error ("ED_Alloc: no free edicts");
 

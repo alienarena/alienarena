@@ -470,12 +470,12 @@ qboolean SV_SendClientDatagram (client_t *client)
 		SZ_Clear (&msg);
 	}
 
-	if (!SV_IsPacketTooLarge(client, msg.cursize)) {
-		// send the datagram
-		Netchan_Transmit (&client->netchan, msg.cursize, msg.data);
-	} else {
+	// If the unreliable payload is too large, drop it but still
+	// transmit so the reliable message buffer gets drained.
+	if (SV_IsPacketTooLarge(client, msg.cursize)) {
 		msg.cursize = 0;
 	}
+	Netchan_Transmit (&client->netchan, msg.cursize, msg.data);
 
 	// record the size for rate estimation
 	client->message_size[sv.framenum % RATE_MESSAGES] = msg.cursize;
@@ -650,16 +650,15 @@ void SV_SendClientMessages (void)
 		}
 
 		if (sv.state == ss_cinematic || sv.state == ss_demo || sv.state == ss_pic) {
-			if (!SV_IsPacketTooLarge(c, msglen)) {
-				Netchan_Transmit (&c->netchan, msglen, msgbuf);
-			}
+			Netchan_Transmit (&c->netchan, SV_IsPacketTooLarge(c, msglen) ? 0 : msglen, msgbuf);
 		} else if (c->state == cs_spawned) {
+
 			// don't overrun bandwidth
 			if (SV_RateDrop (c))
 				continue;
 
 			SV_SendClientDatagram (c);
-		} else { 
+		} else {
 			// not spawned
 			/* send accumulated reliable messages when buffer has enough data
 			 * or when a time limit is reached whichever comes first.
@@ -672,9 +671,7 @@ void SV_SendClientMessages (void)
 			int timeout = curtime - c->netchan.last_sent ;
 			int cursize = c->netchan.message.cursize ;
 			if ( timeout > 1000 || cursize >= (MAX_MSGLEN)/4 ) {
-				if (!SV_IsPacketTooLarge(c, cursize)) {
-					Netchan_Transmit( &c->netchan, 0, NULL );
-				}
+				Netchan_Transmit( &c->netchan, 0, NULL );
 			}
 		}
 	}

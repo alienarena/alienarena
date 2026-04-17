@@ -938,6 +938,8 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	switch ( self->skill )
 	{
 	case -1:
+		accuracy *= 0.5f;
+		break;
 	case 0:
 		accuracy *= ktgt_skill[0];
 		break;

@@ -194,8 +194,7 @@ void InitGame (void)
 	g_tactical = gi.cvar ("g_tactical", "0", CVAR_LATCH | CVAR_GAMEINFO | CVARDOC_BOOL);
 
 	skill = gi.cvar ("skill", "1", CVAR_LATCH | CVARDOC_INT);
-	// maxentities used to be 1024 but to improve performance we decreased it with 25%
-	maxentities = gi.cvar ("maxentities", "768", CVAR_LATCH | CVARDOC_INT);
+	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH | CVARDOC_INT);
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
 	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");

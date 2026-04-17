@@ -3758,33 +3758,159 @@ GAME MENU
 =============================================================================
 */
 
-static void StartGame( void )
-{
-	extern cvar_t *name;
-	char pw[64];
+// Models allowed in Tactical mode (must match g_client.c check)
+static const char *tactical_models[] = {
+	"martianenforcer",
+	"martianwarrior",
+	"martianoverlord",
+	"femborg",
+	"enforcer",
+	"commander",
+	NULL
+};
 
+static qboolean IsTacticalModel (const char *model)
+{
+	int i;
+	for (i = 0; tactical_models[i]; i++)
+		if (!Q_strcasecmp (model, tactical_models[i]))
+			return true;
+	return false;
+}
+
+// Returns a tooltip describing the tactical class for a given model directory.
+// Returns NULL if the model is not a recognized tactical model.
+static const char *GetTacticalModelTooltip (const char *directory)
+{
+	if (!Q_strcasecmp (directory, "martianenforcer"))
+		return "Alien - 130 HP, Jacket armor, Detonator";
+	if (!Q_strcasecmp (directory, "martianwarrior"))
+		return "Alien - 120 HP, Combat armor, Bomb carrier";
+	if (!Q_strcasecmp (directory, "martianoverlord"))
+		return "Alien - 150 HP, Minderaser, Bomb defuser";
+	if (!Q_strcasecmp (directory, "femborg"))
+		return "Human - 130 HP, Jacket armor, Detonator";
+	if (!Q_strcasecmp (directory, "enforcer"))
+		return "Human - 120 HP, Combat armor, Bomb carrier";
+	if (!Q_strcasecmp (directory, "commander"))
+		return "Human - 150 HP, Vaporizer, Bomb defuser";
+	return NULL;
+}
+
+// When true, PlayerConfig_MenuInit filters to tactical models only
+static qboolean s_tactical_model_filter = false;
+static int s_numplayermodels;
+
+static void StartGameEx (enum Game_mode mode, int weapon_mode)
+{
 	// disable updates
 	cl.servercount = -1;
 	M_ForceMenuOff ();
-	Cvar_SetValue( "deathmatch", 1 );
-	Cvar_SetValue( "ctf", 0 );
 
-	//listen servers are passworded
-	sprintf(pw, "%s%4.2f", name->string, crand());
-	Cvar_Set ("password", pw);
+	SetGameModeCvars (mode);
 
-	Cvar_SetValue( "gamerules", 0 );		//PGM
+	// weapon mode: 0=all, 1=instagib, 2=insta+rockets (mutually exclusive)
+	Cvar_ForceSet ("instagib", weapon_mode == 1 ? "1" : "0");
+	Cvar_ForceSet ("insta_rockets", weapon_mode == 2 ? "1" : "0");
 
-	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
+	// bot count: threshold = desired team size. Bots fill all slots,
+	// then when the player joins, one bot on their team is kicked.
+	Cvar_ForceSet ("sv_botkickthreshold",
+		mode == mode_tac ? "6" : mode == mode_ctf ? "4" : "0");
+
+	// Tactical: ensure player has a valid model, default to martianenforcer
+	if (mode == mode_tac)
+	{
+		char model[MAX_QPATH];
+		const char *s = Cvar_VariableString ("skin");
+		const char *slash = strchr (s, '/');
+		size_t len = slash ? (size_t)(slash - s) : strlen (s);
+		if (len >= sizeof(model))
+			len = sizeof(model) - 1;
+		memcpy (model, s, len);
+		model[len] = '\0';
+		if (!IsTacticalModel (model))
+			Cvar_Set ("skin", "martianenforcer/default");
+	}
+
+	// single player: no password needed (avoids spurious "password required" messages)
+	Cvar_Set ("password", "");
+
+	if (mode == mode_ctf)
+		Cbuf_AddText ("loading ; killserver ; wait ; newgame_ctf\n");
+	else if (mode == mode_tac)
+		Cbuf_AddText ("loading ; killserver ; wait ; newgame_tac\n");
+	else
+		Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
+
 	cls.key_dest = key_game;
+}
+
+// keep original StartGame for backward compat (newgame alias, etc.)
+static void StartGame( void )
+{
+	StartGameEx (mode_dm, 0);
+}
+
+static menulist_s	s_sp_gamemode;
+static menulist_s	s_sp_weaponmode;
+
+static const char *sp_gamemode_names[] = { "Deathmatch", "Capture the Flag", "Tactical", NULL };
+static const char *sp_weaponmode_names[] = { "All Weapons", "Instagib", "Insta/Rockets", NULL };
+
+static void SPWeaponModeChanged (UNUSED void *self)
+{
+	// Tactical mode forces All Weapons
+	if (s_sp_gamemode.curvalue == 2)
+		s_sp_weaponmode.curvalue = 0;
+}
+
+static void SPGameModeChanged (UNUSED void *self)
+{
+	if (s_sp_gamemode.curvalue == 2)
+	{
+		// Tactical: force All Weapons and lock weapon spinner
+		s_sp_weaponmode.curvalue = 0;
+		// Filter player models to tactical-only and open player config
+		s_tactical_model_filter = true;
+		s_numplayermodels = 0; // force rescan with filter
+		M_Menu_PlayerConfig_f();
+	}
+	else
+	{
+		if (s_tactical_model_filter)
+		{
+			s_tactical_model_filter = false;
+			s_numplayermodels = 0; // force rescan without filter
+		}
+	}
 }
 
 static void SinglePlayerGameFunc (void *data)
 {
 	char skill[3];
-	Com_sprintf(skill, sizeof(skill), "%d", ((menuaction_s*)data)->generic.localints[0]);
+	int skill_val;
+	enum Game_mode mode;
+	int weapon_mode;
+
+	skill_val = ((menuaction_s*)data)->generic.localints[0];
+
+	switch (s_sp_gamemode.curvalue)
+	{
+		case 1:  mode = mode_ctf; break;
+		case 2:  mode = mode_tac; break;
+		default: mode = mode_dm;  break;
+	}
+	weapon_mode = (mode == mode_tac) ? 0 : s_sp_weaponmode.curvalue;
+
+	// Instagib modes are instant-kill, so reduce bot skill by one notch
+	if (weapon_mode >= 1 && skill_val > -1)
+		skill_val--;
+
+	Com_sprintf(skill, sizeof(skill), "%d", skill_val);
 	Cvar_ForceSet ("skill", skill);
-	StartGame ();
+
+	StartGameEx (mode, weapon_mode);
 }
 
 static void SinglePlayerGameFuncPrototype (void *_self)
@@ -3833,7 +3959,21 @@ static void M_Menu_Game_f (void)
 	int i;
 	
 	setup_window (s_game_screen, s_game_menu, "PRACTICE");
-	
+
+	s_sp_gamemode.generic.type = MTYPE_SPINCONTROL;
+	s_sp_gamemode.generic.name = "Game mode";
+	s_sp_gamemode.generic.callback = SPGameModeChanged;
+	s_sp_gamemode.itemnames = sp_gamemode_names;
+	Menu_AddItem (&s_game_menu, &s_sp_gamemode);
+
+	s_sp_weaponmode.generic.type = MTYPE_SPINCONTROL;
+	s_sp_weaponmode.generic.name = "Weapon mode";
+	s_sp_weaponmode.generic.callback = SPWeaponModeChanged;
+	s_sp_weaponmode.itemnames = sp_weaponmode_names;
+	Menu_AddItem (&s_game_menu, &s_sp_weaponmode);
+
+	add_text (s_game_menu, NULL, 0); // spacer
+
 	for (i = 0; i < num_singleplayer_skill_levels; i++)
 	{
 		s_singleplayer_game_actions[i].generic.type = MTYPE_ACTION;
@@ -6383,12 +6523,15 @@ typedef struct
 
 static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
 static char *s_pmnames[MAX_PLAYERMODELS];
-static int s_numplayermodels = 0;
+/* s_numplayermodels declared earlier for SPGameModeChanged access */
 
 static void ModelCallback (UNUSED void *unused)
 {
 	s_player_skin_box.itemnames = (const char **) s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
+
+	if (s_tactical_model_filter)
+		s_player_model_box.generic.statusbar = GetTacticalModelTooltip (s_pmi[s_player_model_box.curvalue].directory);
 
 	s_switched = true;
 	
@@ -6696,6 +6839,22 @@ static void PlayerConfig_MenuInit (void)
 
 	qsort( s_pmi, s_numplayermodels, sizeof( s_pmi[0] ), pmicmpfnc );
 
+	// Filter to tactical models only when opened from tactical mode selection
+	if (s_tactical_model_filter)
+	{
+		int dst = 0;
+		for ( i = 0; i < s_numplayermodels; i++ )
+		{
+			if (IsTacticalModel (s_pmi[i].directory))
+			{
+				if (dst != i)
+					s_pmi[dst] = s_pmi[i];
+				dst++;
+			}
+		}
+		s_numplayermodels = dst;
+	}
+
 	memset( s_pmnames, 0, sizeof( s_pmnames ) );
 	for ( i = 0; i < s_numplayermodels; i++ )
 	{
@@ -6725,6 +6884,9 @@ static void PlayerConfig_MenuInit (void)
 	s_player_name_field.generic.callback = StrFieldCallback;
 	s_player_name_field.length	= 20;
 	s_player_name_field.generic.visible_length = LONGINPUT_SIZE;
+	if (s_tactical_model_filter) {
+		s_player_name_field.generic.statusbar = "For Tactical you must pick your team via player model";
+	}
 	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
 	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
 	
@@ -6787,11 +6949,27 @@ static void PlayerConfig_MenuInit (void)
 	s_player_model_box.generic.callback = ModelCallback;
 	s_player_model_box.curvalue = currentdirectoryindex;
 	s_player_model_box.itemnames = (const char **) s_pmnames;
+	if (s_tactical_model_filter)
+		s_player_model_box.generic.statusbar = GetTacticalModelTooltip (s_pmi[currentdirectoryindex].directory);
+	else
+		s_player_model_box.generic.statusbar = NULL;
 
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_skin_box.generic.callback = SkinCallback;
 	s_player_skin_box.generic.name = "skin";
 	s_player_skin_box.curvalue = currentskinindex;
+	s_player_skin_box.itemnames = (const char **) s_pmi[currentdirectoryindex].skindisplaynames;
+
+	// Tactical filter: sync the skin cvar to the displayed selection so
+	// it stays correct even if the user doesn't touch the spinner.
+	if (s_tactical_model_filter)
+	{
+		char scratch[MAX_QPATH];
+		Com_sprintf (scratch, sizeof(scratch), "%s/%s",
+			s_pmi[currentdirectoryindex].directory,
+			s_pmi[currentdirectoryindex].skindisplaynames[currentskinindex]);
+		Cvar_Set ("skin", scratch);
+	}
 	s_player_skin_box.itemnames = (const char **) s_pmi[currentdirectoryindex].skindisplaynames;
 	
 	Menu_AddItem( &s_player_skin_controls_submenu, &s_player_model_box );

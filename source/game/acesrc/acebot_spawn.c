@@ -341,6 +341,7 @@ void ACESP_SaveBots( void )
 
 }
 
+
 /*
 ======
  ACESP_FindBot
@@ -468,13 +469,14 @@ static void loadbots_team_botkick( edict_t *ent )
 		if ( teamcensus.bots_blue > 0 && teamcensus.bots_red > 0 )
 		{ // bots on both teams,
 			botreplace_team = ent->dmteam; // replace same team, unless...
-			if ( ent->dmteam == RED_TEAM && teamcensus.red < teamcensus.blue )
+			
+			if ( (ent->dmteam == RED_TEAM || ent->dmteam == ALIEN_TEAM) && teamcensus.red < teamcensus.blue )
 			{
-				botreplace_team = BLUE_TEAM;
+				botreplace_team = (g_tactical->integer ? HUMAN_TEAM : BLUE_TEAM);
 			}
-			else if ( ent->dmteam == BLUE_TEAM && teamcensus.blue < teamcensus.red )
+			else if ( (ent->dmteam == BLUE_TEAM || ent->dmteam == HUMAN_TEAM) && teamcensus.blue < teamcensus.red )
 			{
-				botreplace_team = RED_TEAM;
+				botreplace_team = (g_tactical->integer ? ALIEN_TEAM : RED_TEAM);
 			}
 		}
 	}
@@ -491,7 +493,7 @@ static void loadbots_team_botkick( edict_t *ent )
 		}
 
 		name = Info_ValueForKey( userinfo, "name" );
-		pbot = ACESP_FindBot( name );
+		pbot = ACESP_FindBot(name);
 		if ( pbot == NULL )
 		{ // not on server
 			if ( !replace_bot )
@@ -558,10 +560,11 @@ static void loadbots_team( void )
 	}
 }
 
-static void loadbots_nonteam_botkick( void )
+static void loadbots_nonteam_botkick( edict_t *ent )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
+	char *skin;
 	int rec_count;
 	int spawnkicknum;
 	int ingame_players;
@@ -570,6 +573,19 @@ static void loadbots_nonteam_botkick( void )
 	edict_t *pbot;
 	int result;
 	gamecensus_t gamecensus;
+	char playermodel[MAX_QPATH];
+	char botmodel[MAX_QPATH];
+	char *playerskin = Info_ValueForKey(ent->client->pers.userinfo, "skin");
+	char *slash = strchr(playerskin, '/');
+	size_t len;
+
+	if (g_tactical && g_tactical->integer && playerskin != NULL) {
+		len = slash ? (size_t)(slash - playerskin) : strlen (playerskin);
+		if (len >= sizeof(playermodel))
+			len = sizeof(playermodel) - 1;
+		memcpy (playermodel, playerskin, len);
+		playermodel[len] = '\0';
+	}
 
 	game_census( &gamecensus );
 
@@ -615,7 +631,25 @@ static void loadbots_nonteam_botkick( void )
 		}
 
 		name = Info_ValueForKey( userinfo, "name" );
-		pbot = ACESP_FindBot( name );
+		skin = Info_ValueForKey( userinfo, "skin" );
+		pbot = ACESP_FindBot(name);
+
+		if (g_tactical && g_tactical->integer) {
+			slash = strchr (skin, '/');
+			len = slash ? (size_t)(slash - skin) : strlen (skin);
+			if (len >= sizeof(botmodel))
+				len = sizeof(botmodel) - 1;
+			memcpy (botmodel, skin, len);
+			botmodel[len] = '\0';
+
+			// A bot with the same model as the player should be kicked if present, or never added if not present
+			if (!strcmp(botmodel, playermodel)) {
+				if (pbot == NULL) {
+					continue;
+				}
+			}
+		}
+
 		if ( pbot == NULL )
 		{ // not on server, spawn a bot if bot kick threshold allows
 			if ( (ingame_players + ingame_bots) < spawnkicknum  )
@@ -689,7 +723,7 @@ void ACESP_LoadBots( edict_t *ent )
 		}
 		else
 		{
-			loadbots_nonteam_botkick();
+			loadbots_nonteam_botkick( ent );
 		}
 	}
 	else
@@ -711,6 +745,7 @@ void ACESP_LoadBots( edict_t *ent )
 
 	loadbots_closefile();
 
+	// TODO: in single player mode and the bots tmp file got overwritten, we might need to add additional bots here
 }
 
 /*

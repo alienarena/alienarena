@@ -2619,7 +2619,7 @@ static void ClientBeginDeathmatch (edict_t *ent)
 	PutClientInServer (ent);
 
 	//kick and blackhole a player in tactical that is not using an authorized character!
-	if(g_tactical->integer)
+	if(g_tactical->integer && ent->charModel[0])
 	{
 		//we want to actually check their model to be one of the valid ones we use
 		if(strcmp("martianenforcer", ent->charModel) && strcmp("martianwarrior", ent->charModel) && strcmp("martianoverlord", ent->charModel)
@@ -2631,6 +2631,7 @@ static void ClientBeginDeathmatch (edict_t *ent)
 			}
 			else
 			{
+				safe_centerprintf(ent, "Kicked: invalid character class\n%s is not a tactical model", ent->charModel);
 				safe_bprintf(PRINT_HIGH, "%s was kicked for using invalid character class!\n", ent->client->pers.netname);
 				ClientDisconnect (ent);
 			}
@@ -2827,8 +2828,10 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	}
 	// end skin check
 
-	// Do tactical checks.
-	if(g_tactical->integer)
+	// Do tactical checks — only for INGAME updates where ctype is already
+	// established from a prior spawn. During CONNECT/SPAWN ctype is not yet
+	// set, so this check would wrongly reject human-team models.
+	if(g_tactical->integer && whereFrom == INGAME)
 	{
 		copychar = false;
 		strcpy( playermodel, " " );
@@ -3273,22 +3276,22 @@ void TeamCensus( teamcensus_t *teamcensus )
 			dmteam = g_edicts[i].dmteam;
 			if ( g_edicts[i].is_bot )
 			{
-				if ( dmteam == RED_TEAM )
+				if ( dmteam == RED_TEAM || dmteam == ALIEN_TEAM )
 				{
 					++bots_red;
 				}
-				else if ( dmteam == BLUE_TEAM )
+				else if ( dmteam == BLUE_TEAM || dmteam == HUMAN_TEAM )
 				{
 					++bots_blue;
 				}
 			}
 			else
 			{
-				if ( dmteam == RED_TEAM )
+				if ( dmteam == RED_TEAM || dmteam == ALIEN_TEAM )
 				{
 					++real_red;
 				}
-				else if ( dmteam == BLUE_TEAM )
+				else if ( dmteam == BLUE_TEAM || dmteam == HUMAN_TEAM )
 				{
 					++real_blue;
 				}
