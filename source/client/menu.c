@@ -145,6 +145,10 @@ static void SetGameModeCvars (enum Game_mode mode)
 static int	m_main_cursor;
 static int news_start_time;
 
+// When true, PlayerConfig_MenuInit filters to tactical models only
+static qboolean s_tactical_model_filter = false;
+static int s_numplayermodels;
+
 extern int CL_GetPingStartTime(netadr_t adr);
 
 extern void RS_LoadScript(char *script);
@@ -985,6 +989,11 @@ static const char *Default_MenuKey (UNUSED menuframework_s *m, int key)
 	// this should work no matter what
 	if (key == K_ESCAPE)
 	{
+		if (s_tactical_model_filter) {
+			s_tactical_model_filter = false; // Always reset tactical model filter on menu exit
+			s_numplayermodels = 0; 			 // force rescan of player models without filter
+		}
+
 		M_PopMenu();
 		return menu_out_sound;
 	}
@@ -3797,10 +3806,6 @@ static const char *GetTacticalModelTooltip (const char *directory)
 	return NULL;
 }
 
-// When true, PlayerConfig_MenuInit filters to tactical models only
-static qboolean s_tactical_model_filter = false;
-static int s_numplayermodels;
-
 static void StartGameEx (enum Game_mode mode, int weapon_mode)
 {
 	// disable updates
@@ -3867,22 +3872,16 @@ static void SPWeaponModeChanged (UNUSED void *self)
 
 static void SPGameModeChanged (UNUSED void *self)
 {
-	if (s_sp_gamemode.curvalue == 2)
-	{
+	if (s_sp_gamemode.curvalue == 2) {
 		// Tactical: force All Weapons and lock weapon spinner
 		s_sp_weaponmode.curvalue = 0;
 		// Filter player models to tactical-only and open player config
 		s_tactical_model_filter = true;
 		s_numplayermodels = 0; // force rescan with filter
 		M_Menu_PlayerConfig_f();
-	}
-	else
-	{
-		if (s_tactical_model_filter)
-		{
-			s_tactical_model_filter = false;
-			s_numplayermodels = 0; // force rescan without filter
-		}
+	} else if (s_tactical_model_filter) {
+		s_tactical_model_filter = false;
+		s_numplayermodels = 0; // force rescan without filter
 	}
 }
 
@@ -6523,15 +6522,12 @@ typedef struct
 
 static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
 static char *s_pmnames[MAX_PLAYERMODELS];
-/* s_numplayermodels declared earlier for SPGameModeChanged access */
 
 static void ModelCallback (UNUSED void *unused)
 {
 	s_player_skin_box.itemnames = (const char **) s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
-
-	if (s_tactical_model_filter)
-		s_player_model_box.generic.statusbar = GetTacticalModelTooltip (s_pmi[s_player_model_box.curvalue].directory);
+	s_player_model_box.generic.statusbar = s_tactical_model_filter ? GetTacticalModelTooltip (s_pmi[s_player_model_box.curvalue].directory) : NULL;
 
 	s_switched = true;
 	
@@ -6840,15 +6836,13 @@ static void PlayerConfig_MenuInit (void)
 	qsort( s_pmi, s_numplayermodels, sizeof( s_pmi[0] ), pmicmpfnc );
 
 	// Filter to tactical models only when opened from tactical mode selection
-	if (s_tactical_model_filter)
-	{
+	if (s_tactical_model_filter) {
 		int dst = 0;
-		for ( i = 0; i < s_numplayermodels; i++ )
-		{
-			if (IsTacticalModel (s_pmi[i].directory))
-			{
-				if (dst != i)
+		for ( i = 0; i < s_numplayermodels; i++ ) {
+			if (IsTacticalModel (s_pmi[i].directory)) {
+				if (dst != i) {
 					s_pmi[dst] = s_pmi[i];
+				}
 				dst++;
 			}
 		}
@@ -6884,9 +6878,8 @@ static void PlayerConfig_MenuInit (void)
 	s_player_name_field.generic.callback = StrFieldCallback;
 	s_player_name_field.length	= 20;
 	s_player_name_field.generic.visible_length = LONGINPUT_SIZE;
-	if (s_tactical_model_filter) {
-		s_player_name_field.generic.statusbar = "For Tactical you must pick your team via player model";
-	}
+	s_player_name_field.generic.statusbar = s_tactical_model_filter ? "For Tactical you must pick your team via player model" : NULL;
+
 	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
 	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
 	
@@ -6949,21 +6942,16 @@ static void PlayerConfig_MenuInit (void)
 	s_player_model_box.generic.callback = ModelCallback;
 	s_player_model_box.curvalue = currentdirectoryindex;
 	s_player_model_box.itemnames = (const char **) s_pmnames;
-	if (s_tactical_model_filter)
-		s_player_model_box.generic.statusbar = GetTacticalModelTooltip (s_pmi[currentdirectoryindex].directory);
-	else
-		s_player_model_box.generic.statusbar = NULL;
+	s_player_model_box.generic.statusbar = s_tactical_model_filter ? GetTacticalModelTooltip (s_pmi[currentdirectoryindex].directory) : NULL;
 
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_skin_box.generic.callback = SkinCallback;
 	s_player_skin_box.generic.name = "skin";
 	s_player_skin_box.curvalue = currentskinindex;
-	s_player_skin_box.itemnames = (const char **) s_pmi[currentdirectoryindex].skindisplaynames;
 
 	// Tactical filter: sync the skin cvar to the displayed selection so
 	// it stays correct even if the user doesn't touch the spinner.
-	if (s_tactical_model_filter)
-	{
+	if (s_tactical_model_filter) {
 		char scratch[MAX_QPATH];
 		Com_sprintf (scratch, sizeof(scratch), "%s/%s",
 			s_pmi[currentdirectoryindex].directory,
