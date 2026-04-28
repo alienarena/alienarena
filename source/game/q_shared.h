@@ -799,7 +799,7 @@ typedef struct
 // modifier flags
 #define	CHAN_NO_PHS_ADD			8	// send to all clients, not just ones in PHS (ATTN 0 will also do this)
 #define	CHAN_RELIABLE			16	// send by reliable message, not datagram
-
+#define	CHAN_MASK				7	// Mask to extract channel number (0-7) from packed channel value
 
 // sound attenuation values
 #define	ATTN_NONE               0	// full volume the entire level

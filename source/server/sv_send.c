@@ -288,14 +288,20 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel,
 	static int 		last_sound_index[MAX_EDICTS][8];
 
 	// Prevent duplicate sounds
+	// CHAN_AUTO (auto-allocated channels) should NOT be filtered - these are for events like flag grabs, item pickups
+	// where legitimate overlaps are expected. Static cache persisting across entity destruction causes problems.
+	// CHAN_VOICE (speech) can have legitimate filtering to prevent repeated announcements in same frame.
 	if (ent_idx >= 0 && ent_idx < MAX_EDICTS) {
-		int pure_chan = channel & 7;
-		float FRAMETIME = 1.0 / (float)sv_tickrate->integer;
-		float debounce_time = FRAMETIME * 2.1;
+		int pure_chan = channel & CHAN_MASK;  // Extract channel number (0-7)
 
-		if (pure_chan == CHAN_VOICE || pure_chan == CHAN_AUTO) {
+		// Only apply duplicate filtering to CHAN_VOICE (0) - speech/announcements
+		// Do NOT filter CHAN_AUTO (4) as it causes legitimate event sounds to be blocked
+		if (pure_chan == CHAN_VOICE) {
+			float FRAMETIME = 1.0 / (float)sv_tickrate->integer;
+			float debounce_time = FRAMETIME * 5.0;  // 50ms @ 100Hz - sufficient for voice protection
+
 			if (soundindex == last_sound_index[ent_idx][pure_chan] && sv.time < last_sound_time[ent_idx][pure_chan] + debounce_time) {
-				return; // Skip same sound
+				return; // Skip duplicate voice sound
 			}
 			last_sound_time[ent_idx][pure_chan] = sv.time;
 			last_sound_index[ent_idx][pure_chan] = soundindex;
@@ -319,12 +325,12 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel,
 	if (channel & 8)	// no PHS flag
 	{
 		use_phs = false;
-		channel &= 7;
+		channel &= CHAN_MASK;
 	}
 	else
 		use_phs = true;
 
-	sendchan = (ent<<3) | (channel&7);
+	sendchan = (ent<<3) | (channel & CHAN_MASK);
 
 	flags = 0;
 	if (volume != DEFAULT_SOUND_PACKET_VOLUME)
