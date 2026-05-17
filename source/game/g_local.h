@@ -1799,7 +1799,6 @@ extern qboolean StringToFilter (char *s, ipfilter_t *f);
 
 // Default for low ping threshold, for the mininum antilag rewind time
 // This is actually RTT, but commonly considered as "ping"
-// Only used if g_antilag_oneway is set to true
 #define DEFAULT_ANTILAG_LOW_PING_THRESHOLD 50
 
 // Default for maximum effective ping
@@ -1813,7 +1812,6 @@ extern	cvar_t	*g_antilagprojectiles;
 extern	cvar_t	*g_antilag_high_ping_threshold;
 extern	cvar_t	*g_antilag_low_ping_threshold;
 extern	cvar_t	*g_antilag_max_ping;
-extern	cvar_t	*g_antilag_oneway;
 extern	cvar_t	*g_antilag_oneway_factor;
 
 // ACEBOT_ADD

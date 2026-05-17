@@ -413,23 +413,6 @@ FRAME UPDATES
 ===============================================================================
 */
 
-// Helper method to determine if a packet is too large to be an unfragmented UDP packet, which would cause stuttering and low FPS for clients.
-// sv_mtu_check controls whether this check is enforced.
-extern cvar_t *sv_mtu_check;
-qboolean SV_IsPacketTooLarge(client_t *client, int length) {
-	if (client->netchan.remote_address.type == NA_LOOPBACK) {
-		return false;
-	}
-
-	if (sv_mtu_check->integer && length > MTU_SAFE_LIMIT) {
-		// Log this with developer 1
-		Com_DPrintf("SV: MTU limit reached!. Suppressing %i bytes for %s (limit: %i)\n", length, client->name, MTU_SAFE_LIMIT);
-		return true; 
-	}
-
-	return false;
-}
-
 /*
 =======================
 SV_SendClientDatagram
@@ -462,9 +445,10 @@ qboolean SV_SendClientDatagram (client_t *client)
 			Com_DPrintf ("SV: Datagram would exceed MAX_MSGLEN for %s, suppressing\n", client->name);
 		}
 		// Soft limit to avoid IP fragmentation (if MTU check enabled, skip loopback)
-		else if (sv_mtu_check->integer && client->netchan.remote_address.type != NA_LOOPBACK && msg.cursize + client->datagram.cursize > MTU_SAFE_LIMIT) {
-			Com_DPrintf ("SV: Suppressing datagram for %s to prevent fragmentation (MTU limit)\n", client->name);
-		} else {
+		// else if (sv_mtu_check->integer && client->netchan.remote_address.type != NA_LOOPBACK && msg.cursize + client->datagram.cursize > MTU_SAFE_LIMIT) {
+		// 	Com_DPrintf ("SV: Suppressing datagram for %s to prevent fragmentation (MTU limit)\n", client->name);
+		//} 
+		else {
 			SZ_Write (&msg, client->datagram.data, client->datagram.cursize);
 		}
 	}
@@ -478,9 +462,6 @@ qboolean SV_SendClientDatagram (client_t *client)
 
 	// If the unreliable payload is too large, drop it but still
 	// transmit so the reliable message buffer gets drained.
-	if (SV_IsPacketTooLarge(client, msg.cursize)) {
-		msg.cursize = 0;
-	}
 	Netchan_Transmit (&client->netchan, msg.cursize, msg.data);
 
 	// record the size for rate estimation
@@ -506,36 +487,6 @@ void SV_DemoCompleted (void)
 	SV_Nextserver ();
 }
 
-// Calculate the dynamic rate limit based on the number of active players,
-// with a minimum of 15000 bytes/sec and a maximum of 45000 bytes/sec for one player,
-// decreasing by 3333 bytes/sec for each additional player.
-// Only used if sv_dynamic_rate cvar is enabled.
-extern int sv_active_player_count;
-extern cvar_t *sv_dynamic_rate;
-int SV_GetDynamicRateLimit(void) { 
-	// If dynamic rate limiting is disabled, always use RATE_MAX
-	if (!sv_dynamic_rate->integer) {
-		// Still update the cvar for visibility
-		Cvar_Set("sv_maxrate_active", va("%i", RATE_MAX));
-		return RATE_MAX;
-	}
-
-	if (sv_active_player_count <= 1) return RATE_MAX;
-
-	// Per player we subtract 3333 from the base rate, which means:
-	// 1 player: 45000
-	// 4 players: ~35000
-	// 7 players: ~25000
-	// 10 players and more: 15000
-	int dynamic_max = RATE_MAX - ((sv_active_player_count - 1) * RATE_LIMITED_STEP);
-
-	if (dynamic_max < RATE_LIMITED_MIN) dynamic_max = RATE_LIMITED_MIN;
-
-	Cvar_Set("sv_maxrate_active", va("%i", dynamic_max));
-
-	return dynamic_max;
-}
-
 /*
 =======================
 SV_RateDrop
@@ -548,7 +499,6 @@ qboolean SV_RateDrop (client_t *c)
 {
 	int		total;
 	int		i;
-	int     dynamic_limit;
 	int     active_limit;
 	int     num_packets;
 
@@ -557,11 +507,10 @@ qboolean SV_RateDrop (client_t *c)
 		return false;
 
 	// Determine dynamic limit based on the number of players
-	dynamic_limit = SV_GetDynamicRateLimit();
-	if (c->rate < dynamic_limit) {
+	if (c->rate < RATE_MAX) {
 		active_limit = c->rate;
 	} else {
-		active_limit = dynamic_limit;
+		active_limit = RATE_MAX;
 	}
 
 	num_packets = sv_tickrate->integer;
@@ -602,9 +551,6 @@ void SV_SendClientMessages (void)
 	byte		msgbuf[MAX_MSGLEN];
 
 	msglen = 0;
-
-	// Update sv_maxrate_active to reflect current dynamic rate limit
-	SV_GetDynamicRateLimit();
 
 	// read the next demo message if needed
 	if (sv.state == ss_demo && sv.demofile)
@@ -656,7 +602,7 @@ void SV_SendClientMessages (void)
 		}
 
 		if (sv.state == ss_cinematic || sv.state == ss_demo || sv.state == ss_pic) {
-			Netchan_Transmit (&c->netchan, SV_IsPacketTooLarge(c, msglen) ? 0 : msglen, msgbuf);
+			Netchan_Transmit (&c->netchan, msglen, msgbuf);
 		} else if (c->state == cs_spawned) {
 
 			// don't overrun bandwidth

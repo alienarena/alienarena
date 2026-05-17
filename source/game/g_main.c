@@ -207,7 +207,6 @@ cvar_t	*g_antilagprojectiles;
 cvar_t	*g_antilag_high_ping_threshold;
 cvar_t	*g_antilag_low_ping_threshold;
 cvar_t	*g_antilag_max_ping;
-cvar_t	*g_antilag_oneway;
 cvar_t	*g_antilag_oneway_factor;
 
 void SpawnEntities (char *mapname, const char *entities, char *spawnpoint);

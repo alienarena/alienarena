@@ -71,14 +71,10 @@ cvar_t	*sv_iplogfile;			// Log file by IP address
 
 cvar_t  *sv_tickrate;			// server frame rate
 
-cvar_t  *sv_maxrate_active;		// maximum rate for active players
-cvar_t  *sv_mtu_check;			// enable/disable MTU safety checks for packet entities
-cvar_t  *sv_dynamic_rate;		// enable/disable dynamic rate limiting based on player count
 cvar_t  *sv_entity_cull;		// entity culling threshold (in radians) - 0=disabled
 
 
 int		sv_numbots;
-int 	sv_active_player_count = 0;
 float 	sv_entity_cull_rad;
 float	sv_entity_cull_tan_sq;			// tan(sv_entity_cull_rad)^2, for fast squared-distance culling
 float	sv_model_bounds[MAX_MODELS];	// cached max visual dimension per modelindex
@@ -136,9 +132,6 @@ void SV_DropClient (client_t *drop)
 
 	if (drop->state == cs_spawned)
 	{
-        sv_active_player_count--;
-        if (sv_active_player_count < 0) sv_active_player_count = 0;
-
 		// call the prog function for removing a client
 		// this will remove the body, among other things
 		ge->ClientDisconnect (drop->edict);
@@ -1512,19 +1505,8 @@ void SV_Init (void)
 	
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
-	// Read-only cvar to report the current maxrate limit to clients
-	sv_maxrate_active = Cvar_Get ("sv_maxrate_active", va("%i", RATE_MAX), 0);
-	Cvar_Describe (sv_maxrate_active, "Read-only: Shows the current maximum rate limit in effect.");
-
 	sv_entity_cull = Cvar_Get ("sv_entity_cull", "1.0", CVAR_ARCHIVE);
 	Cvar_Describe (sv_entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to disable culling.");
-
-
-	sv_mtu_check = Cvar_Get ("sv_mtu_check", "0", CVAR_ARCHIVE);
-	Cvar_Describe (sv_mtu_check, "Enable/disable MTU safety checks (1=enabled, 0=disabled). Default is off for best performance. Enable on servers with fragmentation issues or poor connectivity.");
-
-	sv_dynamic_rate = Cvar_Get ("sv_dynamic_rate", "0", CVAR_ARCHIVE);
-	Cvar_Describe (sv_dynamic_rate, "Enable/disable dynamic rate limiting based on player count (1=enabled, 0=disabled). Default is off for best gameplay. Enable on bandwidth-limited servers.");
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
 	SZ_SetName (&net_message, "Net message buffer", true);

@@ -155,7 +155,6 @@ clients along with it.
 
 ================
 */
-extern int 		sv_active_player_count;
 extern cvar_t*	maxentities;
 extern float 	sv_model_bounds[MAX_MODELS];
 void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
@@ -215,7 +214,6 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 			svs.clients[i].state = cs_connected;
 		svs.clients[i].lastframe = -1;
 	}
-	sv_active_player_count = 0;
 	sv.time = 1000;
 
 	strcpy (sv.name, server);

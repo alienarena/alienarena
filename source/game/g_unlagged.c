@@ -100,6 +100,7 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
     int i, j, k;
     int failSafeCounter = 0;
 	int historyHead;
+	qboolean corruption_detected = false;
 
 	// Fix for rocket funround crash/loop,
 	// when time has value 0 it gets stuck in the do/while loop below.
@@ -109,10 +110,63 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
     }
 
     historyHead = ent->client->historyHead;
+    
+    // ===== CORRUPTION DETECTION: Validate historyHead bounds =====
     if (historyHead > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE) {
-		// historyHead should never be larger than this value, for example higher than 8 at tickrate 10 or 16 at tickrate 20
-        Com_Printf("G_TimeShiftClient: historyHead larger than expected...\n");
+		Com_Printf("G_TimeShiftClient: CORRUPTION DETECTED - historyHead %d exceeds max %d\n", 
+			historyHead, NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE);
+        G_ResetHistory(ent);
         return;
+    }
+    
+    if (historyHead < 0) {
+		Com_Printf("G_TimeShiftClient: CORRUPTION DETECTED - historyHead %d is negative\n", historyHead);
+        G_ResetHistory(ent);
+        return;
+    }
+
+	// ===== CORRUPTION DETECTION: Validate leveltime consistency =====
+	// Check that leveltime values are reasonable (not wildly out of sequence)
+	int leveltime_checks_passed = 0;
+	int leveltime_checks_failed = 0;
+	
+	// Spot-check several recent history entries for monotonicity and reasonable gaps
+	// Only check indices within the active buffer range (0 to NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE)
+	for (i = 0; i < 3 && i <= NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE; ++i) {
+		// Walk backwards in the circular buffer, staying within valid range
+		int check_idx = historyHead - i;
+		if (check_idx < 0) {
+			check_idx += NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1;
+		}
+		
+		// Safety: don't check beyond the active buffer
+		if (check_idx > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE || check_idx < 0) {
+			continue;
+		}
+		
+		int stored_leveltime = ent->client->history[check_idx].leveltime;
+		
+		if (stored_leveltime > level.leveltime) {
+			Com_Printf("G_TimeShiftClient: CORRUPTION DETECTED - history[%d].leveltime (%d) > current leveltime (%d)\n",
+				check_idx, stored_leveltime, level.leveltime);
+			corruption_detected = true;
+			leveltime_checks_failed++;
+		} else {
+			leveltime_checks_passed++;
+		}
+	}
+	
+	if (g_antilagdebug->integer > 1) {
+		Com_Printf("G_TimeShiftClient: leveltime consistency check - passed: %d, failed: %d\n",
+			leveltime_checks_passed, leveltime_checks_failed);
+	}
+
+	// ===== AUTO-RESET ON CORRUPTION =====
+	if (corruption_detected) {
+		Com_Printf("G_TimeShiftClient: Initiating AUTO-RESET due to detected corruption for client %d\n",
+			ent - g_edicts - 1);
+		G_ResetHistory(ent);
+		return;
     }
 
 	// find two entries in the history whose times sandwich "time"
@@ -130,9 +184,13 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 
 		// Exit the loop in case the number of iterations is larger than the history
 		if (failSafeCounter > NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1) {
-			Com_Printf("G_TimeShiftClient: Counter reached %d, exiting loop.\n", NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
+			Com_Printf("G_TimeShiftClient: FAILSAFE - Counter reached %d, exiting loop. Attempting auto-reset.\n", 
+				NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
+			Com_Printf("G_TimeShiftClient: Client %d - searching for time %d from historyHead %d\n",
+				ent - g_edicts - 1, time, historyHead);
 
-			g_antilagprojectiles->integer = 0;
+			// Failsafe triggered - likely corrupted state
+			G_ResetHistory(ent);
 			return;
 		}
 
@@ -189,9 +247,45 @@ void G_TimeShiftClient(edict_t *ent, int time, qboolean debug, edict_t *debugger
 			gi.linkentity(ent);
 		}
     }
-	else if (g_antilagdebug->integer > 0) {
-		// TODO: What does this mean? Create a more useful debug message.
-		Com_Printf("G_TimeShiftClient: j == k\n");
+	else {
+		// Could not find matching history pair - use appropriate fallback entry
+		int oldest_idx = (historyHead + 1) % (NUM_CLIENT_HISTORY_FOR_CURRENT_TICKRATE + 1);
+		int oldest_time = ent->client->history[oldest_idx].leveltime;
+		int newest_time = ent->client->history[historyHead].leveltime;
+		int fallback_idx;
+		
+		// Choose fallback based on which side of the history window we're on
+		if (time < oldest_time) {
+			// Target is too old - use oldest entry
+			fallback_idx = oldest_idx;
+			if (g_antilagdebug->integer > 0) {
+				Com_Printf("G_TimeShiftClient: target time %d is %dms TOO OLD, using oldest entry at index %d\n", 
+					time, oldest_time - time, oldest_idx);
+			}
+		} else {
+			// Target is too new - use newest entry (current position)
+			fallback_idx = historyHead;
+			if (g_antilagdebug->integer > 0) {
+				Com_Printf("G_TimeShiftClient: target time %d is %dms TOO NEW, using newest entry at index %d\n", 
+					time, time - newest_time, historyHead);
+			}
+		}
+		
+		// make sure it doesn't get re-saved
+		if (ent->client->saved.leveltime != level.leveltime) {
+			VectorCopy(ent->mins, ent->client->saved.mins);
+			VectorCopy(ent->maxs, ent->client->saved.maxs);
+			VectorCopy(ent->s.origin, ent->client->saved.currentOrigin);
+			ent->client->saved.leveltime = level.leveltime;
+		}
+		
+		// Apply fallback position
+		VectorCopy(ent->client->history[fallback_idx].currentOrigin, ent->s.origin);
+		VectorCopy(ent->client->history[fallback_idx].mins, ent->mins);
+		VectorCopy(ent->client->history[fallback_idx].maxs, ent->maxs);
+
+		// this will recalculate absmin and absmax
+		gi.linkentity(ent);
 	}
 }
 
@@ -238,7 +332,6 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	int thresholdHigh;
 	int thresholdLow;
 	int maxPing;
-	qboolean useOnewayPing;
 	float onewayFactor;
 	int compensation;
 
@@ -252,7 +345,6 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	thresholdHigh = g_antilag_high_ping_threshold ? g_antilag_high_ping_threshold->integer : DEFAULT_ANTILAG_HIGH_PING_THRESHOLD;
 	thresholdLow = g_antilag_low_ping_threshold ? g_antilag_low_ping_threshold->integer : DEFAULT_ANTILAG_LOW_PING_THRESHOLD;
 	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
-	useOnewayPing = g_antilag_oneway ? (g_antilag_oneway->integer != 0) : false;
 	onewayFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
 
 	if (ping < thresholdHigh) {
@@ -262,19 +354,12 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 		effectivePing = thresholdHigh + ((ping - thresholdHigh) >> 1);  // >> 1 is faster than / 2
 	}
 
-	if (useOnewayPing) {
-		// Actual one-way ping is approximately half of RTT (round trip time)
-		// Subtracting FRAMETIME_MS as well will rewind too much
-		if (effectivePing < thresholdLow) {
-			// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
-			compensation = thresholdLow * onewayFactor;
-		} else {
-			compensation = effectivePing * onewayFactor;
-		}
+	// One-way ping is approximately half of RTT (round trip time)
+	if (effectivePing < thresholdLow) {
+		// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
+		compensation = thresholdLow * onewayFactor;
 	} else {
-		// do the full lag compensation using effective ping
-		// 100 ms is our "built-in" lag with the 10fps tickrate
-		compensation = effectivePing + FRAMETIME_MS;
+		compensation = effectivePing * onewayFactor;
 	}
 
 	time = ent->client->attackTime - compensation;
@@ -371,7 +456,6 @@ void G_AntilagProjectile(edict_t* ent) {
 	int thresholdHigh;
 	int thresholdLow;
 	int maxPing;
-	qboolean useOnewayPing;
 	float onewayFactor;
 
 	// Save a copy of the player who fired the shot. The reason not to refer
@@ -389,7 +473,6 @@ void G_AntilagProjectile(edict_t* ent) {
 	thresholdHigh = g_antilag_high_ping_threshold ? g_antilag_high_ping_threshold->integer : DEFAULT_ANTILAG_HIGH_PING_THRESHOLD;
 	thresholdLow = g_antilag_low_ping_threshold ? g_antilag_low_ping_threshold->integer : DEFAULT_ANTILAG_LOW_PING_THRESHOLD;
 	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
-	useOnewayPing = g_antilag_oneway ? (g_antilag_oneway->integer != 0) : false;
 	onewayFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
 
 	if (rawPing < thresholdHigh) {
@@ -404,26 +487,18 @@ void G_AntilagProjectile(edict_t* ent) {
 		effectivePing = maxPing;
 	}
 
-	if (useOnewayPing) {
-		// Actual one-way ping is approximately half of RTT (round trip time)
-		if (effectivePing < thresholdLow) {
-			// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
-			time = ent->owner->client->attackTime - (thresholdLow * onewayFactor);
-		} else {
-			time = ent->owner->client->attackTime - (effectivePing * onewayFactor);
-		}
-
+	// One-way ping is approximately half of RTT (round trip time)
+	if (effectivePing < thresholdLow) {
+		// Use a low-ping threshold to keep fairness, stability and to limit ping inflation abuse
+		time = ent->owner->client->attackTime - (thresholdLow * onewayFactor);
 	} else {
-		time = ent->owner->client->attackTime - effectivePing;
+		time = ent->owner->client->attackTime - (effectivePing * onewayFactor);
 	}
+	// }
 
 	// Handle the full lag compensation frames
 	while (effectivePing > frameTime) {
-		if (!useOnewayPing) {
-			// Don't compensate extra for the built-in lag here
-			// Subtracting FRAMETIME_MS as well will rewind too much
-			time -= frameTime;
-		}
+		// We're using one-way ping estimation, so don't subtract frameTime
 		if (g_antilagdebug->integer > 0)
 		{
 			Com_Printf("Full lag compensation, raw ping %d, effective %d, time %d\n", rawPing, effectivePing, time);

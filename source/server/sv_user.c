@@ -256,7 +256,7 @@ void SV_Baselines_f (void)
 SV_Begin_f
 ==================
 */
-extern int sv_active_player_count;
+//extern int sv_active_player_count;
 void SV_Begin_f (void)
 {
 	Com_DPrintf ("Begin() from %s\n", sv_client->name);
@@ -269,9 +269,9 @@ void SV_Begin_f (void)
 		return;
 	}
 	
-	if (sv_client->state != cs_spawned) {
-		sv_active_player_count++;
-	}	
+	// if (sv_client->state != cs_spawned) {
+	// 	sv_active_player_count++;
+	// }	
 
 	sv_client->state = cs_spawned;
 

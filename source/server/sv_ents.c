@@ -42,7 +42,6 @@ SV_EmitPacketEntities
 Writes a delta update of an entity_state_t list to the message.
 =============
 */
-extern cvar_t *sv_mtu_check;
 void SV_EmitPacketEntities (client_t *cl, client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
 {
 	entity_state_t	*oldent=NULL, *newent=NULL;
@@ -69,11 +68,6 @@ void SV_EmitPacketEntities (client_t *cl, client_frame_t *from, client_frame_t *
 	{
 		// Hard limit: always prevent overflow to MAX_MSGLEN to prevent crashes (even for loopback/single-player)
 		if (msg->cursize > MAX_MSGLEN) {
-			break;
-		}
-		
-		// Soft limit: prevent fragmentation at MTU_SAFE_LIMIT (controlled by sv_mtu_check cvar, skip loopback)
-		if (sv_mtu_check->integer && cl->netchan.remote_address.type != NA_LOOPBACK && msg->cursize > MTU_SAFE_LIMIT) {
 			break;
 		}
 
