@@ -657,6 +657,8 @@ not_a_duplicate:;
 		if (index_table[vertnum] != 0)
 			new_verts[index_table[vertnum]-1] = out->verts[vertnum];
 	}
+	if (newidx > DECAL_VERTS)
+		Com_Error (ERR_FATAL, "ReUnifyVertexes: DECAL_VERTS");
 	memcpy (out->verts, new_verts, newidx*sizeof(decalrawvertex_t));
 	
 	out->nverts = newidx;
@@ -992,16 +994,17 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 	qboolean maxborder;
 	char *buf = (char *)_buf;
 	const char *line;
+	char *strtok_saveptr;
 	decalorientation_t pos;
 	int final_lightmap_size[2];
 	decal_vertgroup_t *groups;
 	int numgroups;
 	
-	line = strtok (buf, ";");
+	line = strtok_r (buf, ";", &strtok_saveptr);
 	while (line)
 	{
 		token = COM_Parse (&line);
-		if (!line && !(line = strtok (NULL, ";")))
+		if (!line && !(line = strtok_r (NULL, ";", &strtok_saveptr)))
 			break;
 
 #define FILENAME_ATTR(cmd_name,out) \
@@ -1040,7 +1043,7 @@ void Mod_LoadDecalModel (model_t *mod, void *_buf)
 		//arguments supplied to it, then this is probably supported in a newer
 		//newer version of CRX. But the best we can do is just fast-forward
 		//through it.
-		line = strtok (NULL, ";");
+		line = strtok_r (NULL, ";", &strtok_saveptr);
 	}
 
 	/*
@@ -1170,6 +1173,7 @@ void R_ParseDecalEntity (char *match, char *block)
 		{
 			// Must insure the entity's angles and origin are loaded first
 			strncpy (model_path, Com_ParseExt(&bl, false), sizeof(model_path));
+			model_path[sizeof(model_path)-1] = '\0';
 		}
 		else if (!Q_strcasecmp("angles", tok))
 		{
