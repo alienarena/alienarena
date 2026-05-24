@@ -2530,6 +2530,7 @@ extern unsigned sys_frame_time;   // TODO: ditto
  */
 
 #define MAX_PKT_INTERVAL_MSEC 20 // Maximum packet interval = minimum 50 PPS
+#define SYNC_RATE_TOLERANCE_PERCENT 15 // Sync rates if they differ by <= 15%
 
 void CL_Frame( int msec )
 {
@@ -2543,6 +2544,9 @@ void CL_Frame( int msec )
 	static int render_timer   = 0;
 	static int render_counter = 0;
 	static int packet_delay = 0;
+	static int cached_packetrate_cap = 0;
+	static int cached_framerate_cap = 0;
+	static qboolean should_sync_rates = false;
 	int render_trigger;
 	int packet_trigger;
 	static perftest_t *speedometer = NULL;
@@ -2660,6 +2664,14 @@ void CL_Frame( int msec )
 	}
 	packetrate_cap = (int)target_packet_interval;
 
+	// Recalculate sync threshold if packet or frame rate changed
+	if (packetrate_cap != cached_packetrate_cap || framerate_cap != cached_framerate_cap) {
+		// Sync packet rate to frame rate if there is less than or equal to SYNC_RATE_TOLERANCE_PERCENT difference.
+		should_sync_rates = (packetrate_cap > 0 && abs(packetrate_cap - framerate_cap) <= (packetrate_cap * SYNC_RATE_TOLERANCE_PERCENT / 100) && framerate_cap > (1000 / server_tickrate));
+		cached_packetrate_cap = packetrate_cap;
+		cached_framerate_cap = framerate_cap;
+	}
+
 	/* local triggers for decoupling framerate from packet rate  */
 	render_trigger = 0;
 	packet_trigger = 0;
@@ -2690,6 +2702,12 @@ void CL_Frame( int msec )
 		{ // normal packet trigger
 			packet_trigger = 1;
 		}
+		else if ( render_trigger && should_sync_rates && packet_timer >= (packetrate_cap - (packetrate_cap * SYNC_RATE_TOLERANCE_PERCENT / 100)) )
+		{ // Force sync when render fires and packet is in the final sync window (within tolerance)
+		  // This prevents stuttering when framerate is lower than tickrate and rates are nearly identical
+		  // (e.g., 60 FPS with 100 tickrate server). Restores 7.71.7 behavior for this scenario.
+			packet_trigger = render_trigger;
+		}
 		else if ( packet_delay > 0 && packetrate_cap > 0 )
 		{ 	// Packet sent in previous loop was delayed
 			
@@ -2707,8 +2725,7 @@ void CL_Frame( int msec )
 				 *  try to catch up
 				 * Otherwise, do nothing, the next loop should occur soon.
 				 */
-				if ( render_trigger
-					|| ((packet_timer + packet_delay) >= packetrate_cap) )
+				if ( render_trigger || ((packet_timer + packet_delay) >= packetrate_cap) )
 				{
 					packet_trigger = 1;
 				}
@@ -2786,6 +2803,12 @@ void CL_Frame( int msec )
 		/* run cURL downloads */
 		CL_HttpDownloadThink();
 
+		/* 
+		 * system dependent keyboard and mouse input event polling
+		 * accumulate keyboard and mouse events
+		 */
+		Sys_SendKeyEvents();
+
 		/* joystick input. may or may not be working. */
 		IN_Commands();
 
@@ -2850,8 +2873,11 @@ void CL_Frame( int msec )
 		/* 
 		* system dependent keyboard and mouse input event polling
 		* accumulate keyboard and mouse events
+		* Skip if packet was already processed this frame to avoid double input
 		*/
-		Sys_SendKeyEvents();
+		if (!packet_trigger) {
+			Sys_SendKeyEvents();
+		}
 		
 		CL_PredictMovement ((int)precise_packet_timer);
 

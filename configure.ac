@@ -18,7 +18,7 @@
 #
 
 AC_PREREQ([2.69])
-AC_INIT([alienarena],[7.72],[alienrace@comcast.net])
+AC_INIT([alienarena],[7.72.1],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])

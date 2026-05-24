@@ -157,7 +157,18 @@ void ACEAI_Think (edict_t *self)
 		self->client->ps.pmove.pm_flags &= ~ PMF_SNEAKING;
 
 		ACEAI_ChooseWeapon( self );
-		ACEMV_Attack( self, &ucmd );
+		
+		if (level.time >= self->next_fire_time) {
+			ACEMV_Attack( self, &ucmd );
+
+			// Dynamic adjustment based on the server's weapon throttling logic
+			// This calculates the precise firing interval intended for the current weapon.
+			// It uses the same 'round(0.1 / FRAMETIME)' math p_weapon.c uses, converted safely to seconds.
+			float weapon_delay = (float)round(0.1 / FRAMETIME) * FRAMETIME;
+
+			// Prevent immediate re-clicking for exactly that weapon's interval
+			self->next_fire_time = level.time + weapon_delay;
+		}
 	}
 	else
 	{

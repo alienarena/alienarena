@@ -1693,6 +1693,8 @@ struct edict_s
 	int targDirSwitchY;
 	char chatmsg[8][128];
 
+	// For attacking
+	float next_fire_time;
 // ACEBOT_END
 
 	// for deathcam to remember position of player's death
