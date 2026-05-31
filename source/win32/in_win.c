@@ -58,7 +58,6 @@ DWORD	dwControlMap[JOY_MAX_AXES];
 PDWORD	pdwRawValue[JOY_MAX_AXES];
 
 cvar_t	*in_mouse;
-cvar_t	*m_direct;
 cvar_t	*in_joystick;
 
 // none of these cvars are saved over a session
@@ -324,8 +323,6 @@ void IN_Init (void)
 {
 	// mouse variables
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
-	m_direct				= Cvar_Get ("m_direct",				"0",		CVAR_ARCHIVE);
-	Cvar_Describe(m_direct, "Enable direct delta mouse input: calculates mouse movement directly from consecutive positions instead of center-relative, reduces input latency");
 	
 	// joystick variables
 	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);
