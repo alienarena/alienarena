@@ -9,6 +9,9 @@ Linux:
 
 z_crc_t was removed from zlib (now just uint32_t) source:https://github.com/zlib-ng/zlib-ng/commit/4db4cfdb5badc8860f7410732b12c45216d709b3
 change line 160 of unix/minizip/zip.c: "z_crc_t" to "unsigned long"
+[Jar-El]
+This might not be needed anymore because I upgraded minizip to a new version in 7.72(.1)
+For the changes to compile the linux-steam version for 7.72.1, see steamlinux.diff.
 
 METROIDHunter_ used distrobox here, it might work with docker as well.
 
@@ -21,4 +24,4 @@ make
 
 
 Remarks about alienarena.zip:
-It's the last uploaded zip to steam, it doesn't contain all changes of 7.71.7 combined.
+It's the last uploaded zip to steam for windows and linux users for 7.72.1.

@@ -1,0 +1,79 @@
+diff --git a/source/server/sv_init.c b/source/server/sv_init.c
+index 97fb6625..ff0b7af0 100755
+--- a/source/server/sv_init.c
++++ b/source/server/sv_init.c
+@@ -263,7 +263,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
+ 	ge->RunFrame ();
+ 
+ 	// Warn if there are more than 90% of maxentities
+-	for (int i = 0; i < maxentities->integer; i++) {
++	for (i = 0; i < maxentities->integer; i++) {
+ 		if (EDICT_NUM(i)->inuse) {
+ 			used_edicts++;
+ 		}
+diff --git a/source/unix/minizip/crypt.h b/source/unix/minizip/crypt.h
+index dd548938..1c66d65e 100755
+--- a/source/unix/minizip/crypt.h
++++ b/source/unix/minizip/crypt.h
+@@ -29,7 +29,7 @@
+ /***********************************************************************
+  * Return the next byte in the pseudo-random sequence
+  */
+-static int decrypt_byte(unsigned long* pkeys, const z_crc_t* pcrc_32_tab) {
++static int decrypt_byte(unsigned long* pkeys, const int* pcrc_32_tab) {
+     unsigned temp;  /* POTENTIAL BUG:  temp*(temp^1) may overflow in an
+                      * unpredictable manner on 16-bit systems; not a problem
+                      * with any known compiler so far, though */
+@@ -42,7 +42,7 @@ static int decrypt_byte(unsigned long* pkeys, const z_crc_t* pcrc_32_tab) {
+ /***********************************************************************
+  * Update the encryption keys with the next byte of plain text
+  */
+-static int update_keys(unsigned long* pkeys, const z_crc_t* pcrc_32_tab, int c) {
++static int update_keys(unsigned long* pkeys, const int* pcrc_32_tab, int c) {
+     (*(pkeys+0)) = CRC32((*(pkeys+0)), c);
+     (*(pkeys+1)) += (*(pkeys+0)) & 0xff;
+     (*(pkeys+1)) = (*(pkeys+1)) * 134775813L + 1;
+@@ -58,7 +58,7 @@ static int update_keys(unsigned long* pkeys, const z_crc_t* pcrc_32_tab, int c)
+  * Initialize the encryption keys and the random header according to
+  * the given password.
+  */
+-static void init_keys(const char* passwd, unsigned long* pkeys, const z_crc_t* pcrc_32_tab) {
++static void init_keys(const char* passwd, unsigned long* pkeys, const int* pcrc_32_tab) {
+     *(pkeys+0) = 305419896L;
+     *(pkeys+1) = 591751049L;
+     *(pkeys+2) = 878082192L;
+@@ -86,7 +86,7 @@ static unsigned crypthead(const char* passwd,       /* password string */
+                           unsigned char* buf,       /* where to write header */
+                           int bufSize,
+                           unsigned long* pkeys,
+-                          const z_crc_t* pcrc_32_tab,
++                          const int* pcrc_32_tab,
+                           unsigned long crcForCrypting) {
+     unsigned n;                  /* index in random header */
+     int t;                       /* temporary */
+diff --git a/source/unix/minizip/unzip.c b/source/unix/minizip/unzip.c
+index d7ff21cb..9072bf2d 100755
+--- a/source/unix/minizip/unzip.c
++++ b/source/unix/minizip/unzip.c
+@@ -181,7 +181,7 @@ typedef struct
+ 
+ #    ifndef NOUNCRYPT
+     unsigned long keys[3];     /* keys defining the pseudo-random sequence */
+-    const z_crc_t* pcrc_32_tab;
++    const int* pcrc_32_tab;
+ #    endif
+ } unz64_s;
+ 
+diff --git a/source/unix/minizip/zip.c b/source/unix/minizip/zip.c
+index 31005c51..584ada99 100755
+--- a/source/unix/minizip/zip.c
++++ b/source/unix/minizip/zip.c
+@@ -170,7 +170,7 @@ typedef struct
+     ZPOS64_T totalUncompressedData;
+ #ifndef NOCRYPT
+     unsigned long keys[3];     /* keys defining the pseudo-random sequence */
+-    const z_crc_t* pcrc_32_tab;
++    const int* pcrc_32_tab;
+     unsigned crypt_header_size;
+ #endif
+ } curfile64_info;
