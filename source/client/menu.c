@@ -46,6 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
+#include <string.h>
 #include "curl/curl.h"
 
 #include "client.h"
@@ -1756,7 +1757,7 @@ static void SpinOptionFunc (void *_self)
 	
 	Cvar_SetValue( cvarname, self->curvalue );
 
-	if (cvarname == "vid_fullscreen" && 
+	if (strcmp(cvarname, "vid_fullscreen") == 0 && 
 		(self->curvalue == windowmode_borderless_windowed || self->curvalue == windowmode_exclusive_fullscreen))
 	{
 		// Store preferred full screen mode for toggling between windowed and fullscreen with alt-enter
@@ -1936,7 +1937,7 @@ static void NumberFieldOptionFunc (void *_self)
 	if (num != clamped_num)
 		Com_sprintf (self->buffer, sizeof(self->buffer), "%d  ^1(%d)", num, clamped_num);
 	
-	if ((cvarname == "vid_width" || cvarname == "vid_height") &&
+	if ((strcmp(cvarname, "vid_width") == 0 || strcmp(cvarname, "vid_height") == 0) &&
 		clamped_num != Cvar_Get(cvarname, "0", CVAR_ARCHIVE)->integer)
 	{
 		Cvar_SetValue ("gl_mode", resolution_custom);
@@ -2020,7 +2021,7 @@ static void Option_Setup (menumultival_s *item, option_name_t *optionname)
 		case option_spincontrol:
 			item->generic.type = MTYPE_SPINCONTROL;
 			
-			if (optionname->cvarname == "vid_fullscreen" &&
+			if (strcmp(optionname->cvarname, "vid_fullscreen") == 0 &&
 				Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE|CVARDOC_INT)->integer == windowmode_exclusive_fullscreen)
 			{
 				// Show fullscreen (legacy) as well

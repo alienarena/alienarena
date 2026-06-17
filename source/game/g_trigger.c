@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "g_local.h"
-
+#include <string.h>
 
 void InitTrigger (edict_t *self)
 {
@@ -544,7 +544,7 @@ void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 	if (other->svflags & SVF_DEADMONSTER)
 		return;
 
-	if((other->s.effects & EF_GIB) || (other->classname == "g_gib"))
+	if((other->s.effects & EF_GIB) || strcmp(other->classname, "g_gib") == 0)
 		return;
 
 // set XY even if not on ground, so the jump will clear lips
