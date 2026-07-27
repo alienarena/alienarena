@@ -450,9 +450,109 @@ Decides which entities are going to be visible to the client, and
 copies off the playerstat and areabits.
 =============
 */
-extern float sv_entity_cull_rad;
-extern float sv_entity_cull_tan_sq;
 extern float sv_model_bounds[MAX_MODELS];
+extern cvar_t *sv_entity_cull;
+extern cvar_t *sv_entity_cull_max;
+extern cvar_t *sv_entity_budget;
+extern cvar_t *sv_entity_budget_max;
+extern cvar_t *sv_tickrate;
+extern cvar_t *sv_entity_cull_vel_away_dot;
+
+#define ENTITY_CULL_WINDOW_MS		1000	// how often (ms) to re-evaluate the adaptive angle
+#define ENTITY_CULL_CONFIRM_WINDOWS	2		// consecutive over-budget windows required before escalating
+
+/*
+=============
+SV_UpdateAdaptiveEntityCull
+
+Re-evaluates a client's adaptive entity culling angle, at most once every
+ENTITY_CULL_WINDOW_MS. Uses the LEAST number of entities seen visible to
+this client during the window (not the average or latest), and only
+escalates culling after ENTITY_CULL_CONFIRM_WINDOWS consecutive windows
+confirm sustained overload - biasing the whole system toward rendering
+entities rather than culling them when in doubt. Relaxes back down
+immediately (single window) once load drops, since there's no reason to
+delay showing more detail once it's cheap enough again.
+
+This only reacts to what's actually visible to THIS client right now (PVS
+and angular culling already applied), so it naturally adapts to map layout
+and player position - a cluttered but well-compartmentalized map won't
+trigger this the way an open map exposing lots of entities at once will,
+without needing any per-map tuning.
+=============
+*/
+static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
+{
+	float	tickrate_scale;
+	float	budget, budget_max;
+	float	t;
+	float	cull, rad, tanv;
+
+	client->auto_entity_last_count = sent_entities;	// for status/diagnostics display only
+
+	if (client->entity_cull > 0.0f)
+		return;		// client has an explicit override, adaptive scaling doesn't apply
+
+	// Track the least-loaded frame seen this window.
+	if (client->auto_entity_window_min < 0 || sent_entities < client->auto_entity_window_min)
+		client->auto_entity_window_min = sent_entities;
+
+	if (svs.realtime < client->auto_entity_cull_next_update)
+		return;		// not time to re-evaluate yet, keep the current angle
+
+	client->auto_entity_cull_next_update = svs.realtime + ENTITY_CULL_WINDOW_MS;
+
+	if (sv_entity_cull->value <= 0.0f)
+	{
+		// sv_entity_cull 0 means culling is fully disabled; don't let
+		// adaptive scaling re-enable it.
+		client->auto_entity_cull = 0.0f;
+		client->auto_entity_cull_tan_sq = 0.0f;
+		client->auto_entity_window_min = -1;
+		client->auto_entity_over_streak = 0;
+		return;
+	}
+
+	tickrate_scale = 100.0f / (float)sv_tickrate->integer;
+	budget = sv_entity_budget->value * tickrate_scale;
+	budget_max = sv_entity_budget_max->value * tickrate_scale;
+
+	if (client->auto_entity_window_min > budget) {
+		// Over budget this window - only escalate after a few consecutive
+		// confirming windows (sustained load), not on a single spike.
+		if (client->auto_entity_over_streak < ENTITY_CULL_CONFIRM_WINDOWS - 1)
+		{
+			client->auto_entity_over_streak++;
+			client->auto_entity_window_min = -1;
+			return;		// not confirmed yet, keep the current (less aggressive) angle
+		}
+	} else {
+		client->auto_entity_over_streak = 0;
+	}
+
+	if (budget_max <= budget) {
+		t = (client->auto_entity_window_min > budget) ? 1.0f : 0.0f;
+	} else {
+		t = (client->auto_entity_window_min - budget) / (budget_max - budget);
+		if (t < 0.0f)
+			t = 0.0f;
+		if (t > 1.0f)
+			t = 1.0f;
+	}
+
+	cull = sv_entity_cull->value + t * (sv_entity_cull_max->value - sv_entity_cull->value);
+
+	client->auto_entity_window_min = -1;
+
+	if (cull == client->auto_entity_cull)
+		return;		// no change, skip recomputing tan_sq
+
+	client->auto_entity_cull = cull;
+	rad = cull * 3.14159f / 180.0f;
+	tanv = tanf(rad);
+	client->auto_entity_cull_tan_sq = tanv * tanv;
+}
+
 void SV_BuildClientFrame (client_t *client)
 {
 	int		e, i;
@@ -471,6 +571,7 @@ void SV_BuildClientFrame (client_t *client)
 	
 	client_t	*redir_client;
 	int			redir_num;
+	float		entity_cull_tan_sq;
 	
 	orig_clent = client->edict;
 	if (!orig_clent->client)
@@ -523,15 +624,55 @@ void SV_BuildClientFrame (client_t *client)
 	SV_FatPVS (org);
 	clientphs = CM_ClusterPHS (clientcluster);
 
+	if (client->entity_cull > 0.0f) {
+		entity_cull_tan_sq = client->entity_cull_tan_sq;
+	} else {
+		entity_cull_tan_sq = client->auto_entity_cull_tan_sq;
+	}
+
+	// Persistence rule: once an entity has been sent to this client, it
+	// stays exempt from angular-size culling as long as the player isn't
+	// clearly moving away from it (this includes standing still, where
+	// there's no clear direction at all - default to "not moving away").
+	// This avoids entities popping out mid-approach or flickering as the
+	// adaptive angle changes, without instantly revealing far-away
+	// not-yet-visible entities just because the player is facing them.
+	vec3_t	player_vel_dir;
+	float	player_speed;
+	qboolean has_vel_dir = false;
+
+	player_vel_dir[0] = clent->client->ps.pmove.velocity[0] * 0.125f;
+	player_vel_dir[1] = clent->client->ps.pmove.velocity[1] * 0.125f;
+	player_vel_dir[2] = clent->client->ps.pmove.velocity[2] * 0.125f;
+	player_speed = VectorLength (player_vel_dir);
+
+	if (player_speed > 1.0f)	// enough speed for a meaningful direction
+	{
+		VectorScale (player_vel_dir, 1.0f / player_speed, player_vel_dir);
+		has_vel_dir = true;
+	}
+
 	// build up the list of visible entities
 	frame->num_entities = 0;
 	frame->first_entity = svs.next_client_entities;
 
 	c_fullsend = 0;
 
+	// Raw count of entities that pass every check EXCEPT the angular-size
+	// cull itself (i.e. what WOULD be sent if entity_cull_tan_sq were 0).
+	// This is what the adaptive system measures load with - using the
+	// post-cull frame->num_entities instead would create a feedback loop
+	// (escalating cull reduces the count, which then looks "under budget",
+	// causing it to relax, which raises the count again, causing it to
+	// re-escalate... an oscillation, seen as entities flickering in and
+	// out every few seconds even while standing still).
+	int raw_visible_count = 0;
+
 	for (e=1 ; e<ge->num_edicts ; e++)
 	{
 		ent = EDICT_NUM(e);
+		qboolean angular_culled = false;
+		qboolean entity_added = false;
 
 		// ignore ents without visible models
 		if (ent->svflags & SVF_NOCLIENT)
@@ -545,42 +686,12 @@ void SV_BuildClientFrame (client_t *client)
 		// ignore if not touching a PV leaf
 		if (ent != clent)
 		{
-			// Cull entities that are far away to keep the server performant.
-			// Protection layers:
-			// 1. SVF_ALWAYS_SEND - gameplay critical items
-			// 2. Brush models (inline models, name starts with '*') - never cull map structure
-			// 3. Zero/tiny bounding box (<=4) - projectiles/effects, never cull
-			// 4. Angular size culling for all other entities
-			if (sv_entity_cull_rad > 0 && !(ent->svflags & SVF_ALWAYS_SEND) &&
-				(ent->s.modelindex == 0 || sv.configstrings[CS_MODELS + ent->s.modelindex][0] != '*')) {
-
-				// Entity size from cached model bounds (side-array, doesn't touch ent->mins/maxs)
-				float entity_size = 0;
-				if (ent->s.modelindex > 0 && ent->s.modelindex < MAX_MODELS)
-					entity_size = sv_model_bounds[ent->s.modelindex];
-
-				// Only cull entities with a known model size (>0 means SV_ReadModelBounds succeeded)
-				if (entity_size > 0) {
-					vec3_t	dist_vec;
-					float	dist_sq;
-
-					// Distance to entity origin (not absbox — we intentionally don't
-					// inflate the entity's absbox, so use origin directly)
-					VectorSubtract(org, ent->s.origin, dist_vec);
-					dist_sq = DotProduct(dist_vec, dist_vec);
-
-					// atan(size/dist) < threshold  <=>  size^2 < dist_sq * tan^2(threshold)
-					if (entity_size * entity_size < dist_sq * sv_entity_cull_tan_sq)
-						continue;  // Angular size too small, cull it
-				}
-			}
-
 			if (!CM_AreasConnected (clientarea, ent->areanum))
 			{	// doors can legally straddle two areas, so
 				// we may need to check another one
 				if (!ent->areanum2
 					|| !CM_AreasConnected (clientarea, ent->areanum2))
-					continue;		// blocked by a door
+					goto entity_persistence_update;		// blocked by a door
 			}
 
 			// FIXME: if an ent has a model and a sound, but isn't
@@ -595,7 +706,7 @@ void SV_BuildClientFrame (client_t *client)
 			if (ent->num_clusters == -1)
 			{	// too many leafs for individual check, go by headnode
 				if (!CM_HeadnodeVisible (ent->headnode, bitvector))
-					continue;
+					goto entity_persistence_update;
 				c_fullsend++;
 			}
 			else
@@ -607,7 +718,7 @@ void SV_BuildClientFrame (client_t *client)
 						break;
 				}
 				if (i == ent->num_clusters)
-					continue;		// not visible
+					goto entity_persistence_update;		// not visible
 			}
 
 			if (!ent->s.modelindex)
@@ -618,8 +729,70 @@ void SV_BuildClientFrame (client_t *client)
 				VectorSubtract (org, ent->s.origin, delta);
 				len = VectorLength (delta);
 				if (len > 400)
-					continue;
+					goto entity_persistence_update;
 			}
+
+			// This entity passed every check above - it's "visible" for
+			// load-measurement purposes regardless of angular culling.
+			raw_visible_count++;
+
+			// Cull entities that are far away to keep the server performant.
+			// Protection layers:
+			// 1. SVF_ALWAYS_SEND - gameplay critical items
+			// 2. Brush models (inline models, name starts with '*') - never cull map structure
+			// 3. Zero/tiny bounding box (<=4) - projectiles/effects, never cull
+			// 4. Angular size culling for all other entities
+			// 5. Persistence - once visible, stays visible unless the player
+			//    is clearly moving away from it (see sv_entity_cull_vel_away_dot)
+			if (entity_cull_tan_sq > 0.0f && !(ent->svflags & SVF_ALWAYS_SEND) &&
+				(ent->s.modelindex == 0 || sv.configstrings[CS_MODELS + ent->s.modelindex][0] != '*')) {
+
+				// Entity size from cached model bounds (side-array, doesn't touch ent->mins/maxs)
+				float entity_size = 0;
+				if (ent->s.modelindex > 0 && ent->s.modelindex < MAX_MODELS)
+					entity_size = sv_model_bounds[ent->s.modelindex];
+
+				// Only cull entities with a known model size (>0 means SV_ReadModelBounds succeeded)
+				if (entity_size > 0) {
+					vec3_t	dist_vec;
+					float	dist_sq;
+					qboolean was_visible, moving_away = false;
+					int		byte_idx = e >> 3;
+					byte	bit_mask = 1 << (e & 7);
+
+					was_visible = (client->entity_was_visible[byte_idx] & bit_mask) != 0;
+
+					// Distance to entity origin (not absbox — we intentionally don't
+					// inflate the entity's absbox, so use origin directly)
+					VectorSubtract(org, ent->s.origin, dist_vec);
+					dist_sq = DotProduct(dist_vec, dist_vec);
+
+					if (was_visible && has_vel_dir && dist_sq > 0.0f)
+					{
+						float	inv_dist = 1.0f / sqrtf(dist_sq);
+						vec3_t	to_ent_dir;
+						float	dot;
+
+						// dist_vec points from entity to player (org - origin);
+						// negate it to get the direction from player to entity.
+						to_ent_dir[0] = -dist_vec[0] * inv_dist;
+						to_ent_dir[1] = -dist_vec[1] * inv_dist;
+						to_ent_dir[2] = -dist_vec[2] * inv_dist;
+
+						dot = DotProduct (player_vel_dir, to_ent_dir);	// +1 ahead, -1 behind
+
+						if (dot < sv_entity_cull_vel_away_dot->value)
+							moving_away = true;
+					}
+
+					// atan(size/dist) < threshold  <=>  size^2 < dist_sq * tan^2(threshold)
+					if (!(was_visible && !moving_away) && entity_size * entity_size < dist_sq * entity_cull_tan_sq)
+						angular_culled = true;  // Angular size too small, cull it
+				}
+			}
+
+			if (angular_culled)
+				goto entity_persistence_update;
 		}
 		
 		if (ent->s.number != e)
@@ -632,7 +805,7 @@ void SV_BuildClientFrame (client_t *client)
 		if (ent == orig_clent && orig_clent != clent)
 		{
 			Com_Printf ("CAN'T HAPPEN?\n");
-			continue;
+			goto entity_persistence_update;
 		}
 		
 		// add it to the circular client_entities array
@@ -647,7 +820,22 @@ void SV_BuildClientFrame (client_t *client)
 
 		svs.next_client_entities++;
 		frame->num_entities++;
+		entity_added = true;
+
+entity_persistence_update:
+		if (ent != clent)
+		{
+			int		byte_idx = e >> 3;
+			byte	bit_mask = 1 << (e & 7);
+
+			if (entity_added)
+				client->entity_was_visible[byte_idx] |= bit_mask;
+			else
+				client->entity_was_visible[byte_idx] &= ~bit_mask;
+		}
 	}
+
+	SV_UpdateAdaptiveEntityCull (client, raw_visible_count);
 }
 
 

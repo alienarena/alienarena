@@ -158,6 +158,36 @@ typedef struct client_s
 	int				last_pps_time;
 	int				pps_count;
 	int				incoming_pps;
+
+	float			entity_cull;
+	float			entity_cull_tan_sq;
+
+	// Adaptive entity culling (per-client, PVS-aware): tracks how many
+	// entities are actually visible to THIS client. Re-evaluated at most
+	// once per second (not every frame) to avoid entities flickering in
+	// and out as the threshold jitters. Biased toward rendering rather
+	// than culling: uses the LEAST-loaded frame seen in the window (a
+	// brief spike shouldn't trigger more aggressive culling), and only
+	// escalates culling after a couple of consecutive over-budget windows
+	// (sustained load), while relaxing back down after just one
+	// under-budget window. Only used when entity_cull (above) hasn't been
+	// set by the client.
+	float			auto_entity_cull;
+	float			auto_entity_cull_tan_sq;
+	int				auto_entity_cull_next_update;	// svs.realtime ms of next re-evaluation
+	int				auto_entity_window_min;			// least num_entities seen since last re-evaluation (-1 = no samples yet)
+	int				auto_entity_over_streak;		// consecutive windows found over budget
+	int				auto_entity_last_count;			// most recent frame's sent entity count, for diagnostics/status display only
+
+	// Per-entity persistence for angular-size culling: once an entity has
+	// been sent to this client, it stays exempt from angular-size culling
+	// for as long as the player isn't clearly moving away from it (even
+	// while standing still) - so entities never pop out mid-approach or
+	// flicker due to the adaptive angle changing. Only entities the player
+	// is moving away from become eligible for normal culling again. This
+	// does NOT override PVS/area visibility - occluded entities still
+	// disappear normally.
+	byte			entity_was_visible[(MAX_EDICTS+7)/8];
 } client_t;
 
 // a client can leave the server in one of four ways:

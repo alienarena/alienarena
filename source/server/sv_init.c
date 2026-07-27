@@ -213,6 +213,20 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 		if (svs.clients[i].state > cs_connected)
 			svs.clients[i].state = cs_connected;
 		svs.clients[i].lastframe = -1;
+
+		// svs.realtime resets to 0 below for the new map, but
+		// auto_entity_cull_next_update is an absolute svs.realtime
+		// timestamp from the previous map - reset it too, or the
+		// adaptive entity culling system would stay frozen until
+		// svs.realtime catches back up to the old stale value.
+		svs.clients[i].auto_entity_cull_next_update = 0;
+		svs.clients[i].auto_entity_window_min = -1;
+		svs.clients[i].auto_entity_over_streak = 0;
+
+		// entity indices mean completely different things on the new map,
+		// so any "was visible" persistence state from the old map is
+		// meaningless and must not carry over.
+		memset (svs.clients[i].entity_was_visible, 0, sizeof(svs.clients[i].entity_was_visible));
 	}
 	sv.time = 1000;
 

@@ -500,6 +500,8 @@ static inline particle_t *new_particle (void)
 	{
 		// FIFO: Drop the oldest active particle if buffer is full
 		particle_t *oldest = NULL;
+		particle_t *oldest_prev = NULL;
+		particle_t *prev = NULL;
 		particle_t *cur = active_particles;
 		float oldest_time = cl.time;
 
@@ -509,12 +511,20 @@ static inline particle_t *new_particle (void)
 			{
 				oldest_time = cur->time;
 				oldest = cur;
+				oldest_prev = prev;
 			}
+			prev = cur;
 			cur = cur->next;
 		}
 
 		if (!oldest)
 			return NULL; // No particles to drop
+
+		// Unlink the oldest particle from active_particles before freeing it
+		if (oldest_prev)
+			oldest_prev->next = oldest->next;
+		else
+			active_particles = oldest->next;
 
 		// Free the oldest particle
 		free_particle(oldest);

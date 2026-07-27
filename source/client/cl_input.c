@@ -218,9 +218,27 @@ static float CL_KeyState (kbutton_t *key, qboolean reset_accum)
 
 	if ((key->state & 1))
 	{	// non-impulse keypress
-		msec += sys_frame_time - key->downtime;
-		if (reset_accum)
+		if (reset_accum && msec == 0)
+		{
+			// Key has been continuously held across calls with no up/down
+			// edge contributing to msec this slice. Treat the whole slice
+			// as held rather than recomputing from sys_frame_time -
+			// downtime: when sub-tick catch-up processing (see CL_Frame's
+			// packet-slicing loop) calls this several times in quick
+			// succession, sys_frame_time (millisecond resolution) can
+			// sample the same value twice in a row, making that
+			// recomputation read as ~0 even though the key never actually
+			// released - which briefly reports 0 movement for a held key,
+			// and can spuriously trigger the server's tap-dodge detector.
+			msec = frame_msec;
 			key->downtime = sys_frame_time;
+		}
+		else
+		{
+			msec += sys_frame_time - key->downtime;
+			if (reset_accum)
+				key->downtime = sys_frame_time;
+		}
 	}
 
 #if 0
@@ -550,10 +568,12 @@ void CL_SendCmd (void)
 	// send a userinfo update if needed
 	if (userinfo_modified)
 	{
+		char userinfo[MAX_INFO_STRING];
 		CL_FixUpGender();
 		userinfo_modified = false;
 		MSG_WriteByte (&cls.netchan.message, clc_userinfo);
-		MSG_WriteString (&cls.netchan.message, Cvar_Userinfo() );
+		Q_strncpyz2 (userinfo, Cvar_Userinfo(), sizeof(userinfo));
+		MSG_WriteString (&cls.netchan.message, userinfo);
 	}
 
 	SZ_Init (&buf, data, sizeof(data));

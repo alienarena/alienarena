@@ -129,6 +129,7 @@ cvar_t	*hand;
 cvar_t	*gender;
 cvar_t	*gender_auto;
 cvar_t	*p100;
+cvar_t  *entity_cull;
 
 cvar_t	*cl_vwep;
 
@@ -2197,6 +2198,8 @@ void CL_InitLocal (void)
 
 	// Project-100 userinfo to allow servers to send larger messages to clients with this flag
 	p100 = Cvar_Get ("p100", "1", CVAR_USERINFO | CVAR_ROM);
+	entity_cull = Cvar_Get ("entity_cull", "0", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_FLOAT);
+	Cvar_Describe (entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to use the server default.");
 
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE | CVARDOC_BOOL);
 
@@ -2747,51 +2750,59 @@ void CL_Frame( int msec )
 // 	}
 // #endif
 
-	if ( packet_trigger || send_packet_now || cls.download)
+	// Use sub-tick slicing to fix mouse sensitivity issues on high ping because of delayed packets.
+	// Loop to handle accumulated time debt in precise, predictable increments.
+	// This prevents high-ping spikes from bloating a single input frame.
+	qboolean packet_processed_this_frame = (packet_trigger || send_packet_now || cls.download);
+	while ( packet_trigger || send_packet_now || cls.download )
 	{
 		send_packet_now = false; // used during downloads
 
-		if ( packetrate_cap > 0 && packet_timer > packetrate_cap )
-		{ // difference between cap and timer, a delayed packet
+		// Establish the baseline interval for this network tick execution.
+		// A double preserves the sub-millisecond precision of precise_packet_timer
+		// for the normal (no backlog) case - only the backlog-catchup case uses
+		// the fixed integer packetrate_cap, since that's a deliberate regular
+		// tick size, not meant to reflect actual elapsed time.
+		double current_slice = packetrate_cap;
+		
+		// If the timer has bloated due to high ping, slice it down to the ideal packet interval
+		if (packetrate_cap > 0 && packet_timer > packetrate_cap) 
+		{
 			packet_delay = packet_timer - packetrate_cap;
+			// Force this specific execution loop to only use the exact target tick duration
+			current_slice = (double)packetrate_cap; 
 		}
 		else
 		{
 			packet_delay = 0;
+			current_slice = precise_packet_timer;
 		}
 
 		render_counter = 0; // for counting renders since last packet
 
 		/* let the mouse activate or deactivate */
-		IN_Frame();
+		//IN_Frame();
 
 		/*
 		 * calculate frametime in seconds for packet procedures
 		 * cls.frametime is source for the cmd.msecs byte
-		 *  in the client-to-server move message.
+		 * Use the current sliced time step rather than the bloated total accumulator
 		 */		
-		cls.frametime = (float)precise_packet_timer / 1000.0f;
-		// Make sure it's never zero to prevent shutdown of the game
+		cls.frametime = (float)(current_slice / 1000.0);
+		
+		// Prevent zero or negative allocations
 		if (cls.frametime < 0.001f) cls.frametime = 0.001f;
 
 		if ( cls.frametime >= 0.250f )
 		{ /* very long delay */
-			/*
-			 * server checks for cmd.msecs to be <= 250
-			 */
-			Com_DPrintf("CL_Frame(): cls.frametime clamped from %0.8f to 0.24999\n",
-					cls.frametime );
+			Com_DPrintf("CL_Frame(): cls.frametime clamped from %0.8f to 0.24999\n", cls.frametime );
 			cls.frametime = 0.24999f ;
-			/*
-			 * try to throttle the video frame rate by overriding the
-			 * render trigger.
-			 */
 			render_trigger = false;
 			render_timer = 0;
-    		precise_render_timer = 0; 
-    
-    		packet_timer = 0;
-    		precise_packet_timer = 0;
+			precise_render_timer = 0; 
+			packet_timer = 0;
+			precise_packet_timer = 0;
+			break; // Break out of the slice loop on catastrophic delays
 		}
 
 		/* process server-to-client packets */
@@ -2803,24 +2814,7 @@ void CL_Frame( int msec )
 		/* run cURL downloads */
 		CL_HttpDownloadThink();
 
-		/* 
-		 * system dependent keyboard and mouse input event polling
-		 * accumulate keyboard and mouse events
-		 */
-		Sys_SendKeyEvents();
-
-		/* joystick input. may or may not be working. */
-		IN_Commands();
-
-		/* execute pending commands */
-		Cbuf_Execute();
-
-		/*
-		 * send client commands to server
-		 * these are construced from accumulated keyboard and mouse events,
-		 * which are then reset
-		 */
-		CL_SendCmd();
+		// All input handling is done below under 'if (render_trigger)' so that it is tied to the framerate, not the packet rate.
 
 		/* clear various cvars unless single player */
 		CL_FixCvarCheats ();
@@ -2829,32 +2823,54 @@ void CL_Frame( int msec )
 		CL_CheckForResend();
 	
 		if (speedometer && speedometer->cvar->integer) {
-	        speedometer->counter = sqrt(
-	            cl.predicted_velocity[0]*cl.predicted_velocity[0]+
-	            cl.predicted_velocity[1]*cl.predicted_velocity[1]
-	        );
-	        if (speedometer->counter > cl_speedrecord->value) {
-	        	Cvar_SetValue ("cl_speedrecord", speedometer->counter);
-	        	if (speedometer->counter > cl_alltimespeedrecord->value) 
-	        		Cvar_SetValue ("cl_alltimespeedrecord", speedometer->counter);
-	        }
-	    }
-	    
-	    if (accelerometer && accelerometer->cvar->integer) {
-	    	static float old_vel;
-	    	float new_vel;
-	    	new_vel = sqrt(
-	            cl.predicted_velocity[0]*cl.predicted_velocity[0]+
-	            cl.predicted_velocity[1]*cl.predicted_velocity[1]
-	        );
-	        accelerometer->counter += new_vel-old_vel;
-	        old_vel = new_vel;
-	    }
+			speedometer->counter = sqrt(
+				cl.predicted_velocity[0]*cl.predicted_velocity[0]+
+				cl.predicted_velocity[1]*cl.predicted_velocity[1]
+			);
+			if (speedometer->counter > cl_speedrecord->value) {
+				Cvar_SetValue ("cl_speedrecord", speedometer->counter);
+				if (speedometer->counter > cl_alltimespeedrecord->value) 
+					Cvar_SetValue ("cl_alltimespeedrecord", speedometer->counter);
+			}
+		}
+		
+		if (accelerometer && accelerometer->cvar->integer) {
+			static float old_vel;
+			float new_vel;
+			new_vel = sqrt(
+				cl.predicted_velocity[0]*cl.predicted_velocity[0]+
+				cl.predicted_velocity[1]*cl.predicted_velocity[1]
+			);
+			accelerometer->counter += new_vel-old_vel;
+			old_vel = new_vel;
+		}
 
-		// We don't set precise_packet_timer to 0 to take into account the fractions of milliseconds that are left over,
-		// to avoid accumulating latency from rounding errors over time.
-		precise_packet_timer -= (double)packet_timer;
-		packet_timer = 0; 
+		// Determine the exact step to subtract based on the active dynamic cap.
+		// If packetrate_cap is invalid or 0, fallback to a 1ms step to drain safely.
+		int decrement_step = (packetrate_cap > 0) ? packetrate_cap : 1;
+		if (precise_packet_timer >= (double)decrement_step) {
+			precise_packet_timer -= (double)decrement_step;
+		} else {
+			precise_packet_timer = 0;
+		}
+
+		// Recalculate the integer timer check for the next iteration
+		packet_timer = (int)precise_packet_timer;
+
+		// Only loop again if we have enough accumulated time left to fulfill
+		// another full dynamic tick requirement.
+		if (packetrate_cap > 0 && packet_timer >= packetrate_cap) {
+			packet_trigger = 1;
+		} else {
+			packet_trigger = 0;
+			break; 
+		}
+	}
+
+	// --- TRANSMIT MOVEMENT DATA TO SERVER ---
+	// Only send the command if the network loop actually processed a packet this frame
+	if (packet_processed_this_frame) {
+		CL_SendCmd();
 	}
 
 	/*
@@ -2870,14 +2886,19 @@ void CL_Frame( int msec )
 		float server_frametime = (float)precise_packet_timer / 1000.0f;
 		cls.frametime = (float)precise_packet_timer / 1000.0f;
 
-		/* 
-		* system dependent keyboard and mouse input event polling
-		* accumulate keyboard and mouse events
-		* Skip if packet was already processed this frame to avoid double input
-		*/
-		if (!packet_trigger) {
-			Sys_SendKeyEvents();
-		}
+		// IN_Frame() added, Sys_SendKeyEvents() not depending on 'if (!packet_trigger)', added IN_Commands(),
+		// Removed from while loop above: IN_Frame(), Sys_SendKeyEvents(), IN_Commands(), Cbuf_Execute(), CL_SendCmd()
+		// This should all be tied to the framerate, not packet rate.
+
+		/* let the mouse activate or deactivate */
+		IN_Frame();
+
+		/* system dependent keyboard and mouse input event polling */
+		Sys_SendKeyEvents();
+
+		/* joystick input */
+		IN_Commands();
+
 		
 		CL_PredictMovement ((int)precise_packet_timer);
 

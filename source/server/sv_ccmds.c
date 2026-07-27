@@ -706,6 +706,75 @@ void SV_Jitters_f (void) {
 
 /*
 ==================
+SV_EntityCullStatus_f
+
+Prints the currently active entity culling values, useful for checking
+what the adaptive system has calculated for each connected client without
+having to guess or wait for a fresh connect.
+==================
+*/
+extern cvar_t	*sv_entity_cull;
+extern cvar_t	*sv_entity_cull_max;
+extern cvar_t	*sv_entity_budget;
+extern cvar_t	*sv_entity_budget_max;
+void SV_EntityCullStatus_f (void)
+{
+	client_t	*cl;
+	int			i, j, k, l;
+	qboolean	expectColor;
+
+	Com_Printf ("Entity culling status for map '%s':\n", sv.name);
+	Com_Printf ("  sv_entity_cull (floor): %.2f  sv_entity_cull_max (ceiling): %.2f\n",
+		sv_entity_cull->value, sv_entity_cull_max->value);
+	Com_Printf ("  sv_entity_budget: %.0f  sv_entity_budget_max: %.0f\n",
+		sv_entity_budget->value, sv_entity_budget_max->value);
+	Com_Printf ("  (auto values below are per-client, based on their own actual visible entity count)\n");
+
+	if (!svs.clients)
+		return;
+
+	Com_Printf ("\nPer-client effective cull angle:\n");
+	Com_Printf ("%-20s %-11s %-11s %-11s %-11s %s\n", "Name", "Value", "Entities", "WindowMin", "Streak", "Source");
+	Com_Printf ("-------------------- ----------- ----------- ----------- ----------- ----------\n");
+	for (i = 0 ; i < maxclients->integer ; i++)
+	{
+		cl = &svs.clients[i];
+		if (cl->state < cs_connected)
+			continue;
+
+		// Pad the name to 20 visible columns, ignoring ^-color codes (which
+		// take up bytes in cl->name but don't render), same as SV_Jitters_f.
+		Com_Printf ("%s", cl->name);
+		l = strlen(cl->name);
+		expectColor = false;
+		for (j = k = 0; j < l; j++)
+		{
+			if (expectColor)
+			{
+				if (cl->name[j] == '^')
+					k++;
+				expectColor = false;
+			}
+			else if (cl->name[j] == '^')
+				expectColor = true;
+			else
+				k++;
+		}
+		if (expectColor)
+			k++;
+		for (j = 0 ; j < 20 - k ; j++)
+			Com_Printf (" ");
+
+		if (cl->entity_cull > 0.0f)
+			Com_Printf (" %-11.2f %-11d %-11d %-11d %s\n", cl->entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, "client override");
+		else
+			Com_Printf (" %-11.2f %-11d %-11d %-11d %s\n", cl->auto_entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, "server auto");
+	}
+}
+
+
+/*
+==================
 SV_InitOperatorCommands
 ==================
 */
@@ -737,5 +806,8 @@ void SV_InitOperatorCommands (void)
 
 	// Jitter monitor
 	Cmd_AddCommand ("sv_jitters", SV_Jitters_f);
+
+	// Entity culling status
+	Cmd_AddCommand ("sv_entity_cull_status", SV_EntityCullStatus_f);
 }
 

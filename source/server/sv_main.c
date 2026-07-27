@@ -71,14 +71,15 @@ cvar_t	*sv_iplogfile;			// Log file by IP address
 
 cvar_t  *sv_tickrate;			// server frame rate
 
-cvar_t  *sv_entity_cull;		// entity culling threshold (in radians) - 0=disabled
+cvar_t  *sv_entity_cull;		// entity culling threshold (in degrees) - 0=disabled - minimum/floor value
+cvar_t  *sv_entity_cull_max;	// adaptive entity culling ceiling (in degrees)
+cvar_t  *sv_entity_budget;		// visible entity count (at tickrate 100) where adaptive culling starts increasing
+cvar_t  *sv_entity_budget_max;	// visible entity count (at tickrate 100) where adaptive culling reaches sv_entity_cull_max
+cvar_t  *sv_entity_cull_vel_away_dot;	// dot-product threshold below which the player is considered to be moving away from an already-visible entity, making it eligible for culling again
 
 
 int		sv_numbots;
-float 	sv_entity_cull_rad;
-float	sv_entity_cull_tan_sq;			// tan(sv_entity_cull_rad)^2, for fast squared-distance culling
 float	sv_model_bounds[MAX_MODELS];	// cached max visual dimension per modelindex
-
 
 void Master_Shutdown (void);
 
@@ -1175,14 +1176,6 @@ void SV_Frame (int msec)
 	int tmp_systime, tmp_hangtime;
 	static int old_systime = 0;
 	float FRAMETIME = 1.0/(float)sv_tickrate->integer;
-	static float last_entity_cull = -1.0f;
-
-	if (sv_entity_cull->value != last_entity_cull) {
-		last_entity_cull = sv_entity_cull->value;
-		sv_entity_cull_rad = last_entity_cull * 3.14159f / 180.0f;
-		float t = tan(sv_entity_cull_rad);
-		sv_entity_cull_tan_sq = t * t;
-	}
 
 	if (!old_systime)
 		old_systime = Sys_Milliseconds ();
@@ -1442,6 +1435,46 @@ void SV_UserinfoChanged (client_t *cl)
 		cl->messagelevel = atoi(val);
 	}
 
+	// Parse an optional per-client entity cull override from userinfo.
+	// If absent, the server default remains in effect.
+	val = Info_ValueForKey (cl->userinfo, "entity_cull");
+	if (val && val[0])
+	{
+		float cull = atof(val);
+		if (cull > 0.0f)
+		{
+			float rad = cull * 3.14159f / 180.0f;
+			float t = tanf(rad);
+			cl->entity_cull = cull;
+			cl->entity_cull_tan_sq = t * t;
+		}
+		else
+		{
+			cl->entity_cull = 0.0f;
+			cl->entity_cull_tan_sq = 0.0f;
+		}
+	}
+	else
+	{
+		cl->entity_cull = 0.0f;
+		cl->entity_cull_tan_sq = 0.0f;
+	}
+
+	// Initialize the adaptive auto-cull state to the server floor on first
+	// connect only (client_t is zero-initialized, so 0 here means "never
+	// set yet"). Don't reset it on later userinfo changes (e.g. name/skin
+	// changes), so it keeps adapting across those, and persists across
+	// map changes since client_t isn't cleared then.
+	if (cl->auto_entity_cull <= 0.0f)
+	{
+		float rad = sv_entity_cull->value * 3.14159f / 180.0f;
+		float t = tanf(rad);
+		cl->auto_entity_cull = sv_entity_cull->value;
+		cl->auto_entity_cull_tan_sq = t * t;
+		cl->auto_entity_window_min = -1;	// -1 = no samples yet this window
+		cl->auto_entity_over_streak = 0;
+		cl->auto_entity_cull_next_update = 0;
+	}
 }
 
 
@@ -1506,7 +1539,19 @@ void SV_Init (void)
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
 	sv_entity_cull = Cvar_Get ("sv_entity_cull", "1.0", CVAR_ARCHIVE);
-	Cvar_Describe (sv_entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to disable culling.");
+	Cvar_Describe (sv_entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to disable culling. Acts as the minimum (floor) value when adaptive scaling is active.");
+
+	sv_entity_cull_max = Cvar_Get ("sv_entity_cull_max", "10.0", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_cull_max, "Maximum angular size (in degrees) adaptive entity culling will scale up to when a client's visible entity count exceeds sv_entity_budget_max.");
+
+	sv_entity_budget = Cvar_Get ("sv_entity_budget", "80", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_budget, "Number of visible entities per client (at sv_tickrate 100) below which entity culling stays at the sv_entity_cull minimum. Scaled automatically for other tickrates.");
+
+	sv_entity_budget_max = Cvar_Get ("sv_entity_budget_max", "150", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_budget_max, "Number of visible entities per client (at sv_tickrate 100) at or above which entity culling reaches the sv_entity_cull_max ceiling. Scaled automatically for other tickrates.");
+
+	sv_entity_cull_vel_away_dot = Cvar_Get ("sv_entity_cull_vel_away_dot", "0.0", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_cull_vel_away_dot, "Dot-product threshold (-1 to 1) for the persistence rule: once an entity has been visible to a client, it stays exempt from angular-size culling unless the player is moving away from it more directly than this (lower = more lenient, entity stays visible even when moving somewhat away; higher = stricter, entity gets re-culled sooner when leaving).");
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
 	SZ_SetName (&net_message, "Net message buffer", true);
