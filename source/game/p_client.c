@@ -987,7 +987,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			Cmd_Score_f( self );
 		}
 
-		if (self->health < -40 && attacker &&  attacker->client) 
+		if (self->health < -40 && attacker && attacker->client && attacker != self)
 			PlayerGrantRewardPoints (attacker, 1);
 	}
 

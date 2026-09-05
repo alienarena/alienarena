@@ -574,9 +574,9 @@ char *dm_statusbar =
 
 // timer
 "if 9 "
-"	xv	262 "
+"	xv	246 "
 "   yb  -24 "
-"	num	2	10 "
+"	num	3	10 "
 "	xv	296 "
 "   yb  -32 "
 "	pic	9 "
@@ -635,9 +635,9 @@ char *team_statusbar =
 
 // timer
 "if 9 "
-"	xv	262 "
+"	xv	246 "
 "   yb  -24 "
-"	num	2	10 "
+"	num	3	10 "
 "	xv	296 "
 "   yb  -32 "
 "	pic	9 "
