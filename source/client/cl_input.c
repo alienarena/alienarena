@@ -400,6 +400,7 @@ void CL_FinishMove (usercmd_t *cmd)
 		cmd->buttons |= BUTTON_ATTACK2;
 	in_attack2.state &= ~2;
 
+#if ALLOW_LEAN
 	//leaning
 	if ( in_leanright.state & 3 )
 		cmd->buttons |= BUTTON_LEANRIGHT;
@@ -407,6 +408,7 @@ void CL_FinishMove (usercmd_t *cmd)
 	if ( in_leanleft.state & 3 )
 		cmd->buttons |= BUTTON_LEANLEFT;
 	in_leanleft.state &= ~2;
+#endif
 
 	//sneaking
 	if ( in_sneak.state & 3 )
@@ -513,11 +515,13 @@ void CL_InitInput (void)
 	//alt fire
 	Cmd_AddCommand ("+attack2", IN_Attack2Down);
 	Cmd_AddCommand ("-attack2", IN_Attack2Up);
+#if ALLOW_LEAN
 	//leaning
 	Cmd_AddCommand ("+leanright", IN_LeanRightDown);
 	Cmd_AddCommand ("-leanright", IN_LeanRightUp);
 	Cmd_AddCommand ("+leanleft", IN_LeanLeftDown);
 	Cmd_AddCommand ("-leanleft", IN_LeanLeftUp);
+#endif
 	//sneaking
 	Cmd_AddCommand ("+sneak", IN_SneakDown);
 	Cmd_AddCommand ("-sneak", IN_SneakUp);

@@ -3638,7 +3638,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		ucmd->forwardmove *= 1.3;		
 
-		//leaning
+		//leaning - compiled out entirely unless ALLOW_LEAN (can be used to peek through walls)
+#if ALLOW_LEAN
 		if (ucmd->buttons & BUTTON_LEANRIGHT)
 		{
 			AngleVectors (client->v_angle, NULL, right, NULL);
@@ -3668,6 +3669,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			client->lean_angles[ROLL] = client->lean;
 			VectorScale (right, client->lean, ent->client->lean_origin);
 		}
+#else
+		client->lean = 0;
+		VectorClear (client->lean_angles);
+		VectorClear (client->lean_origin);
+#endif
 
 		//sneaking
 		if(ucmd->buttons & BUTTON_SNEAK)

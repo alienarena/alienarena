@@ -587,6 +587,10 @@ typedef struct
 #define BUTTON_SNEAK		64
 #define	BUTTON_ANY			128			// any key whatsoever
 
+// leaning around corners can also be used to peek through walls -
+// disabled at compile time until there's a better implementation
+#define ALLOW_LEAN 0
+
 // usercmd_t is sent to the server each client frame
 typedef struct usercmd_s
 {

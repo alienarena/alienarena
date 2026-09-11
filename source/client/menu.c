@@ -1477,8 +1477,10 @@ char *bindnames[][2] =
 {"+left",			"turn left (keyboard)"},
 {"+right",			"turn right (keyboard)"},
 
+#if ALLOW_LEAN
 {"+leanright",		"lean right"},
 {"+leanleft",		"lean left"},
+#endif
 {"+sneak",			"sneak"},
 {"+zoom",			"zoom"},
 
