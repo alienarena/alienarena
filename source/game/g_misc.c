@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "g_local.h"
+#include <string.h>
 
 
 /*QUAKED func_group (0 0 0) ?
@@ -1294,7 +1295,7 @@ void SP_misc_laser (edict_t *ent)
 //computers
 void computer_think (edict_t *ent)
 {
-	if(ent->classname == "alien computer")
+	if(strcmp(ent->classname, "alien computer") == 0)
 		tacticalScore.alienComputerHealth = ent->health/15;
 	else
 		tacticalScore.humanComputerHealth = ent->health/15;
@@ -1312,7 +1313,7 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	self->activator = attacker;
 
 	gi.WriteByte (svc_temp_entity);
-	if(self->classname == "alien computer")
+	if(strcmp(self->classname, "alien computer") == 0)
 	{
 		tacticalScore.alienComputer = false;
 		tacticalScore.alienComputerHealth = 0;
@@ -1327,7 +1328,7 @@ void computer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
-	if(self->classname == "alien computer")
+	if(strcmp(self->classname, "alien computer") == 0)
 	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
@@ -1418,7 +1419,7 @@ void SP_misc_humancomputer (edict_t *ent)
 //power sources
 void powersrc_think (edict_t *ent)
 {
-	if(ent->classname == "alien powersrc")
+	if(strcmp(ent->classname, "alien powersrc") == 0)
 		tacticalScore.alienPowerSourceHealth = ent->health/15;
 	else
 		tacticalScore.humanPowerSourceHealth = ent->health/15;
@@ -1435,7 +1436,7 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	self->activator = attacker;
 
 	gi.WriteByte (svc_temp_entity);
-	if(self->classname == "alien powersrc")
+	if(strcmp(self->classname, "alien powersrc") == 0)
 	{
 		tacticalScore.alienPowerSource = false;
 		tacticalScore.alienPowerSourceHealth = 0;
@@ -1450,7 +1451,7 @@ void powersrc_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
-	if(self->classname == "alien powersrc")
+	if(strcmp(self->classname, "alien powersrc") == 0)
 	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
@@ -1541,7 +1542,7 @@ void SP_misc_humanpowersrc (edict_t *ent)
 //ammo depots
 void ammodepot_think (edict_t *ent)
 {
-	if(ent->classname == "alien ammodepot")
+	if(strcmp(ent->classname, "alien ammodepot") == 0)
 		tacticalScore.alienAmmoDepotHealth = ent->health/15;
 	else
 		tacticalScore.humanAmmoDepotHealth = ent->health/15;
@@ -1557,7 +1558,7 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	self->activator = attacker;
 
 	gi.WriteByte (svc_temp_entity);
-	if(self->classname == "alien ammodepot")
+	if(strcmp(self->classname, "alien ammodepot") == 0)
 	{
 		tacticalScore.alienAmmoDepot = false;
 		tacticalScore.alienAmmoDepotHealth = 0;
@@ -1572,7 +1573,7 @@ void ammodepot_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
-	if(self->classname == "alien ammodepot")
+	if(strcmp(self->classname, "alien ammodepot") == 0)
 	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
@@ -1663,7 +1664,7 @@ void SP_misc_humanammodepot (edict_t *ent)
 //Backup generators
 void backupgen_think (edict_t *ent)
 {
-	if(ent->classname == "alien backupgen")
+	if(strcmp(ent->classname, "alien backupgen") == 0)
 	{
 		if(!tacticalScore.alienPowerSource)
 		{
@@ -1692,7 +1693,7 @@ void backupgen_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	self->activator = attacker;
 
 	gi.WriteByte (svc_temp_entity);
-	if(self->classname == "alien backupgen")
+	if(strcmp(self->classname, "alien backupgen") == 0)
 	{
 		tacticalScore.alienBackupGen = false;
 		gi.WriteByte (TE_BFG_BIGEXPLOSION); 
@@ -1705,7 +1706,7 @@ void backupgen_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
-	if(self->classname == "alien backupgen")
+	if(strcmp(self->classname, "alien backupgen") == 0)
 	{
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{
@@ -1820,35 +1821,35 @@ void Check_tactical_items(edict_t *self)
 			if (self->client->pers.weapon == FindItem("Alien Bomb")) 
 				safe_centerprintf(self, "Press <fire> to plant a bomb!");
 
-			if(ent->classname == "human powersrc")
+			if(strcmp(ent->classname, "human powersrc") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on power source.");
 				else
 					safe_centerprintf(self, "Fire weapon on power source to destroy it!");
 			}
-			else if(ent->classname == "human ammodepot")
+			else if(strcmp(ent->classname, "human ammodepot") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on ammo depot.");
 				else
 					safe_centerprintf(self, "Fire weapon on ammo depot to destroy it!");
 			}
-			else if(ent->classname == "human computer")
+			else if(strcmp(ent->classname, "human computer") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on computer.");
 				else
 					safe_centerprintf(self, "Fire weapon on computer to destroy it!");
 			}
-			else if(ent->classname == "human backupgen")
+			else if(strcmp(ent->classname, "human backupgen") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on backup generator.");
 				else
 					safe_centerprintf(self, "Fire weapon on backup generator to destroy it!");
 			}
-			else if(ent->classname == "abomb")
+			else if(strcmp(ent->classname, "abomb") == 0)
 			{
 				if(self->has_detonator)
 					safe_centerprintf(self, "Touch this bomb to activate it!");
@@ -1859,35 +1860,35 @@ void Check_tactical_items(edict_t *self)
 			if (self->client->pers.weapon == FindItem("Human Bomb")) 
 				safe_centerprintf(self, "Press <fire> to plant a bomb!");
 
-			if(ent->classname == "alien powersrc")
+			if(strcmp(ent->classname, "alien powersrc") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on power source.");
 				else
 					safe_centerprintf(self, "Fire weapon on power source to destroy it!");
 			}
-			else if(ent->classname == "alien ammodepot")
+			else if(strcmp(ent->classname, "alien ammodepot") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on ammo depot.");
 				else
 					safe_centerprintf(self, "Fire weapon on ammo depot to destroy it!");
 			}
-			else if(ent->classname == "alien computer")
+			else if(strcmp(ent->classname, "alien computer") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on computer.");
 				else
 					safe_centerprintf(self, "Fire weapon on computer to destroy it!");
 			}
-			else if(ent->classname == "alien backupgen")
+			else if(strcmp(ent->classname, "alien backupgen") == 0)
 			{
 				if(self->has_bomb)
 					safe_centerprintf(self, "Plant a bomb here or fire weapon on backup generator.");
 				else
 					safe_centerprintf(self, "Fire weapon on backup generator to destroy it!");
 			}
-			else if(ent->classname == "hbomb")
+			else if(strcmp(ent->classname, "hbomb") == 0)
 			{
 				if(self->has_detonator)
 					safe_centerprintf(self, "Touch this bomb to activate it!");
