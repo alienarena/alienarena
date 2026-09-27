@@ -868,6 +868,24 @@ qboolean PlayerHasFlag(edict_t *self)
 	return false;
 }
 
+// which flag (if any) self is carrying, determined from inventory rather than
+// dmteam, since dmteam may already have been cleared to NO_TEAM (team switch)
+// by the time this needs to be checked.
+int PlayerCarriedFlagTeam(edict_t *self)
+{
+	gitem_t *redFlag, *blueFlag;
+
+	redFlag = FindItemByClassname("item_flag_red");
+	blueFlag = FindItemByClassname("item_flag_blue");
+
+	if (self->client->pers.inventory[ITEM_INDEX(redFlag)])
+		return RED_TEAM;
+	if (self->client->pers.inventory[ITEM_INDEX(blueFlag)])
+		return BLUE_TEAM;
+
+	return NO_TEAM;
+}
+
 /*
 ==================
 player_die
@@ -965,16 +983,14 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		{
 			// Check to see if they had a flag
 			qboolean hasFlag = PlayerHasFlag(self);
+			int carried_flag_team = PlayerCarriedFlagTeam(self);
 
 			CTFDeadDropFlag(self, attacker);
 
 			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) 
 			{
 				// Make campers really pay for hiding flags
-				if(self->dmteam == BLUE_TEAM)
-					CTFResetFlag(RED_TEAM);
-				else
-					CTFResetFlag(BLUE_TEAM);
+				CTFResetFlag(carried_flag_team);
 			}
 		}
 
@@ -2238,10 +2254,12 @@ void PutClientInServer (edict_t *ent)
 	FILE *file;
 	char userinfo[MAX_INFO_STRING];
 	qboolean hasFlag;
+	int carried_flag_team = NO_TEAM;
 
 	if (ctf->value)
 	{
 		hasFlag = PlayerHasFlag(ent);
+		carried_flag_team = PlayerCarriedFlagTeam(ent);
 	}
 
 	// find a spawn point
@@ -2409,14 +2427,7 @@ void PutClientInServer (edict_t *ent)
 			
 			if (hasFlag)
 			{
-				if(ent->dmteam == BLUE_TEAM)
-				{
-					CTFResetFlag(RED_TEAM);
-				}
-				else
-				{
-					CTFResetFlag(BLUE_TEAM);
-				}	
+				CTFResetFlag(carried_flag_team);
 			}
 		}	
 		
@@ -3159,19 +3170,13 @@ void ClientDisconnect (edict_t *ent)
     {
 		// Drop flag, if applicable
 		qboolean hasFlag = PlayerHasFlag(ent);
+		int carried_flag_team = PlayerCarriedFlagTeam(ent);
 
 		CTFDeadDropFlag(ent, NULL);
 
 		if (hasFlag)
 		{
-			if(ent->dmteam == BLUE_TEAM)
-			{
-				CTFResetFlag(RED_TEAM);
-			}
-			else
-			{
-				CTFResetFlag(BLUE_TEAM);
-			}	
+			CTFResetFlag(carried_flag_team);
 		}
     }
 
