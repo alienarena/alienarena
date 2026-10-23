@@ -1,8 +1,8 @@
 diff --git a/source/server/sv_init.c b/source/server/sv_init.c
-index 97fb6625..ff0b7af0 100755
+index d71bc9fc..8aae63a7 100755
 --- a/source/server/sv_init.c
 +++ b/source/server/sv_init.c
-@@ -263,7 +263,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
+@@ -277,7 +277,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
  	ge->RunFrame ();
  
  	// Warn if there are more than 90% of maxentities
@@ -12,7 +12,7 @@ index 97fb6625..ff0b7af0 100755
  			used_edicts++;
  		}
 diff --git a/source/unix/minizip/crypt.h b/source/unix/minizip/crypt.h
-index dd548938..1c66d65e 100755
+index dd548938..485b2777 100755
 --- a/source/unix/minizip/crypt.h
 +++ b/source/unix/minizip/crypt.h
 @@ -29,7 +29,7 @@
@@ -20,7 +20,7 @@ index dd548938..1c66d65e 100755
   * Return the next byte in the pseudo-random sequence
   */
 -static int decrypt_byte(unsigned long* pkeys, const z_crc_t* pcrc_32_tab) {
-+static int decrypt_byte(unsigned long* pkeys, const int* pcrc_32_tab) {
++static int decrypt_byte(unsigned long* pkeys, const uint32_t* pcrc_32_tab) {
      unsigned temp;  /* POTENTIAL BUG:  temp*(temp^1) may overflow in an
                       * unpredictable manner on 16-bit systems; not a problem
                       * with any known compiler so far, though */
@@ -29,7 +29,7 @@ index dd548938..1c66d65e 100755
   * Update the encryption keys with the next byte of plain text
   */
 -static int update_keys(unsigned long* pkeys, const z_crc_t* pcrc_32_tab, int c) {
-+static int update_keys(unsigned long* pkeys, const int* pcrc_32_tab, int c) {
++static int update_keys(unsigned long* pkeys, const uint32_t* pcrc_32_tab, int c) {
      (*(pkeys+0)) = CRC32((*(pkeys+0)), c);
      (*(pkeys+1)) += (*(pkeys+0)) & 0xff;
      (*(pkeys+1)) = (*(pkeys+1)) * 134775813L + 1;
@@ -38,7 +38,7 @@ index dd548938..1c66d65e 100755
   * the given password.
   */
 -static void init_keys(const char* passwd, unsigned long* pkeys, const z_crc_t* pcrc_32_tab) {
-+static void init_keys(const char* passwd, unsigned long* pkeys, const int* pcrc_32_tab) {
++static void init_keys(const char* passwd, unsigned long* pkeys, const uint32_t* pcrc_32_tab) {
      *(pkeys+0) = 305419896L;
      *(pkeys+1) = 591751049L;
      *(pkeys+2) = 878082192L;
@@ -47,33 +47,53 @@ index dd548938..1c66d65e 100755
                            int bufSize,
                            unsigned long* pkeys,
 -                          const z_crc_t* pcrc_32_tab,
-+                          const int* pcrc_32_tab,
++                          const uint32_t* pcrc_32_tab,
                            unsigned long crcForCrypting) {
      unsigned n;                  /* index in random header */
      int t;                       /* temporary */
 diff --git a/source/unix/minizip/unzip.c b/source/unix/minizip/unzip.c
-index d7ff21cb..9072bf2d 100755
+index d7ff21cb..fc30b85e 100755
 --- a/source/unix/minizip/unzip.c
 +++ b/source/unix/minizip/unzip.c
-@@ -181,7 +181,7 @@ typedef struct
+@@ -64,6 +64,7 @@
+ 
+ 
+ #include <stdio.h>
++#include <stdint.h>
+ #include <stdlib.h>
+ #include <string.h>
+ 
+@@ -181,7 +182,7 @@ typedef struct
  
  #    ifndef NOUNCRYPT
      unsigned long keys[3];     /* keys defining the pseudo-random sequence */
 -    const z_crc_t* pcrc_32_tab;
-+    const int* pcrc_32_tab;
++    const uint32_t* pcrc_32_tab;
  #    endif
  } unz64_s;
  
 diff --git a/source/unix/minizip/zip.c b/source/unix/minizip/zip.c
-index 31005c51..584ada99 100755
+index 31005c51..96ea2792 100755
 --- a/source/unix/minizip/zip.c
 +++ b/source/unix/minizip/zip.c
-@@ -170,7 +170,7 @@ typedef struct
+@@ -24,6 +24,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <stdint.h>
+ #include <time.h>
+ #ifndef ZLIB_CONST
+ #  define ZLIB_CONST
+@@ -170,7 +171,7 @@ typedef struct
      ZPOS64_T totalUncompressedData;
  #ifndef NOCRYPT
      unsigned long keys[3];     /* keys defining the pseudo-random sequence */
 -    const z_crc_t* pcrc_32_tab;
-+    const int* pcrc_32_tab;
++    const uint32_t* pcrc_32_tab;
      unsigned crypt_header_size;
  #endif
  } curfile64_info;
+diff --git a/steam/alienarena.x86_64 b/steam/alienarena.x86_64
+deleted file mode 100644
+index ce725470..00000000
+Binary files a/steam/alienarena.x86_64 and /dev/null differ

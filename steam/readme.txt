@@ -15,13 +15,14 @@ For the changes to compile the linux-steam version for 7.72.1, see steamlinux.di
 
 METROIDHunter_ used distrobox here, it might work with docker as well.
 
+For the 7.72.3 release, see all changes in steamlinux.diff
+
 distrobox create --image registry.gitlab.steamos.cloud/steamrt/scout/sdk scout
 distrobox enter scout
 ./configure
 echo "#define STEAM_VARIANT 1" >> config/config.h
-sed -i 's/z_crc_t/unsigned\ long/g' source/unix/minizip/zip.c
 make
 
 
 Remarks about alienarena.zip:
-It's the last uploaded zip to steam for windows and linux users for 7.72.1.
+It's the last uploaded zip to steam for windows and linux users for 7.72.3.
