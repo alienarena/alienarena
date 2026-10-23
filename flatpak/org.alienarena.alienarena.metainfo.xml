@@ -76,6 +76,16 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="7.72.2" date="2026-08-09">
+      <description>
+        <ul>
+          <li>Improved culling to be auto-adaptive with optional client override</li>
+          <li>Fixed freeze bug with particle buffer</li>
+          <li>Fixed issue with fluctuating mouse sensitivity on high ping</li>
+          <li>Fixed bug with unintended double-tap registration</li>
+        </ul>
+      </description>
+    </release>
     <release version="7.72.1" date="2026-05-24">
       <description>
         <ul>
