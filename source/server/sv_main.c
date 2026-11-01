@@ -77,6 +77,16 @@ cvar_t  *sv_entity_budget;		// visible entity count (at tickrate 100) where adap
 cvar_t  *sv_entity_budget_max;	// visible entity count (at tickrate 100) where adaptive culling reaches sv_entity_cull_max
 cvar_t  *sv_entity_cull_vel_away_dot;	// dot-product threshold below which the player is considered to be moving away from an already-visible entity, making it eligible for culling again
 
+cvar_t  *sv_entity_cull_distress;		// fraction of ticks needing a full resync (0-1) where adaptive culling starts increasing due to connection distress
+cvar_t  *sv_entity_cull_distress_max;	// fraction of ticks needing a full resync (0-1) where adaptive culling reaches sv_entity_cull_max due to connection distress
+cvar_t  *sv_entity_cull_distress_cooldown_ms;	// ms for the distress-driven part of adaptive culling to ease back down from max to floor once distress stops
+
+cvar_t  *sv_netdebug;			// per-client network/delta-window diagnostics, printed once a second per client when non-zero
+
+cvar_t  *sv_resync_throttle_ms;	// minimum ms between forced full (non-delta) resyncs sent to a given client
+
+cvar_t  *sv_hitch_threshold_ms;	// log a breakdown of any server tick that takes longer than this (ms)
+
 
 int		sv_numbots;
 float	sv_model_bounds[MAX_MODELS];	// cached max visual dimension per modelindex
@@ -730,7 +740,7 @@ gotnewcl:
 	newcl->lastconnect = svs.realtime;
 	
 	p100 = Info_ValueForKey(cl->userinfo, "p100");
-    newcl->p100 = (p100 && p100[0] == '1');
+    newcl->p100 = p100 ? atoi(p100) : 0;
 
 	// Initialize jitter monitor values
 	newcl->last_jitter_time = 0;
@@ -925,6 +935,31 @@ void SV_CalcPings (void)
 
 		// let the game dll know about the ping
 		cl->edict->client->ping = cl->ping;
+
+		// standard deviation of the same latency samples, used by the game dll
+		// to widen the antilag rewind for players with an unstable ping
+		cl->edict->client->pingStdDev = 0.0f;
+		if (count >= 4)
+		{
+			float mean = (float)total / (float)count;
+			float sumSq = 0.0f;
+			for (j=0 ; j<LATENCY_COUNTS ; j++)
+			{
+				if (cl->frame_latency[j] > 0)
+				{
+					float d = (float)cl->frame_latency[j] - mean;
+					sumSq += d * d;
+				}
+			}
+			cl->edict->client->pingStdDev = sqrtf(sumSq / (float)count);
+		}
+
+		// expose server-measured, EMA-smoothed uplink/downlink loss rates so the
+		// game dll can derive a per-player antilag oneway-factor bias (see
+		// g_unlagged.c); the EMA is updated in sv_user.c as samples arrive, so
+		// this is just a plain copy here
+		cl->edict->client->uplinkLossRate = cl->antilag_uplink_loss_ema;
+		cl->edict->client->downlinkLossRate = cl->antilag_downlink_loss_ema;
 	}
 }
 
@@ -1149,14 +1184,6 @@ void SV_RunGameFrame (void)
 	if (!sv_paused->integer || maxclients->integer > 1)
 	{
 		ge->RunFrame ();
-
-		// never get more than one tic behind
-		if (sv.time < svs.realtime)
-		{
-			if (sv_showclamp->integer)
-				Com_Printf ("sv highclamp\n");
-			svs.realtime = sv.time;
-		}
 	}
 
 	if (host_speeds->integer)
@@ -1176,6 +1203,7 @@ void SV_Frame (int msec)
 	int tmp_systime, tmp_hangtime;
 	static int old_systime = 0;
 	float FRAMETIME = 1.0/(float)sv_tickrate->integer;
+	int t0, hitch_read_ms;
 
 	if (!old_systime)
 		old_systime = Sys_Milliseconds ();
@@ -1194,7 +1222,9 @@ void SV_Frame (int msec)
 	SV_CheckTimeouts ();
 
 	// get packets from clients
+	t0 = Sys_Milliseconds ();
 	SV_ReadPackets ();
+	hitch_read_ms = Sys_Milliseconds () - t0;
 
 	// move autonomous things around if enough time has passed
 	if (!sv_timedemo->integer && svs.realtime < sv.time)
@@ -1216,11 +1246,49 @@ void SV_Frame (int msec)
 	// give the clients some timeslices
 	SV_GiveMsec ();
 
-	// let everything in the world think and move
-	SV_RunGameFrame ();
+	// Reset per-tick hitch diagnostics now that we know this call is
+	// actually doing a tick (not an early "not yet time" return above) -
+	// see sv_hitch_threshold_ms. SV_SendClientMessages (sv_send.c)
+	// accumulates into hitch_total_send_ms/hitch_worst_client_* as it goes;
+	// we add our own read/game-frame timings around it below.
+	svs.hitch_read_packets_ms = hitch_read_ms;
+	svs.hitch_game_frame_ms = 0;
+	svs.hitch_total_send_ms = 0;
+	svs.hitch_worst_client_ms = 0;
+	svs.hitch_worst_client_name[0] = 0;
+	svs.hitch_worst_client_resync = false;
 
-	// send messages back to the clients that had packets read this frame
-	SV_SendClientMessages ();
+	// let everything in the world think and move. If a frame hitch (render
+	// cost, etc. sharing this loop with a listen server, or a CPU spike on a
+	// dedicated server) left us behind real time, run extra catch-up ticks
+	// here instead of SV_RunGameFrame() silently resetting the clock - that
+	// used to make the whole simulation run in slow motion relative to real
+	// time any time the requested tickrate's budget was routinely missed.
+	// Bounded to guard against a spiral of death on a truly long stall.
+#define MAX_CATCHUP_TICKS 30
+	{
+		int ticks_run = 0;
+		do
+		{
+			int game_t0 = Sys_Milliseconds ();
+			SV_RunGameFrame ();
+			svs.hitch_game_frame_ms += Sys_Milliseconds () - game_t0;
+
+			// send messages back to the clients that had packets read this frame
+			SV_SendClientMessages ();
+
+			ticks_run++;
+		} while (svs.realtime >= sv.time && ticks_run < MAX_CATCHUP_TICKS);
+	}
+
+	// still behind after the bounded catch-up: drop the remaining backlog
+	// rather than spiraling, this is the genuine-stall fallback
+	if (svs.realtime > sv.time)
+	{
+		if (sv_showclamp->integer)
+			Com_Printf ("sv highclamp\n");
+		svs.realtime = sv.time;
+	}
 
 	// save the entire world state if recording a serverdemo
 	SV_RecordDemoMessage ();
@@ -1236,6 +1304,24 @@ void SV_Frame (int msec)
 	old_systime = tmp_systime;
 	if (tmp_hangtime > FRAMETIME * 1500) {
 		sys_lasthang = tmp_systime;
+	}
+
+	// Log a breakdown of any tick that ran unusually long, independent of
+	// sv_netdebug - this is meant to stay on so a rare stall/hiccup leaves a
+	// trace without needing per-client logging already running. "other_ms"
+	// (whatever tmp_hangtime isn't accounted for by read/game/send) covers
+	// NET_Sleep/OS-scheduling gaps rather than anything our own code did.
+	if (sv_hitch_threshold_ms->integer > 0 && tmp_hangtime > sv_hitch_threshold_ms->integer)
+	{
+		int other_ms = tmp_hangtime - svs.hitch_read_packets_ms - svs.hitch_game_frame_ms - svs.hitch_total_send_ms;
+
+		Com_Printf ("HITCH: server tick took %dms (budget %.0fms) - read=%dms game=%dms send_total=%dms other=%dms"
+			" worst_client=%s(%dms%s)\n",
+			tmp_hangtime, FRAMETIME*1000,
+			svs.hitch_read_packets_ms, svs.hitch_game_frame_ms, svs.hitch_total_send_ms, other_ms,
+			svs.hitch_worst_client_name[0] ? svs.hitch_worst_client_name : "-",
+			svs.hitch_worst_client_ms,
+			svs.hitch_worst_client_resync ? ", needed resync" : "");
 	}
 
 }
@@ -1474,6 +1560,7 @@ void SV_UserinfoChanged (client_t *cl)
 		cl->auto_entity_window_min = -1;	// -1 = no samples yet this window
 		cl->auto_entity_over_streak = 0;
 		cl->auto_entity_cull_next_update = 0;
+		cl->auto_distress_cull_held = sv_entity_cull->value;
 	}
 }
 
@@ -1552,6 +1639,24 @@ void SV_Init (void)
 
 	sv_entity_cull_vel_away_dot = Cvar_Get ("sv_entity_cull_vel_away_dot", "0.0", CVAR_ARCHIVE);
 	Cvar_Describe (sv_entity_cull_vel_away_dot, "Dot-product threshold (-1 to 1) for the persistence rule: once an entity has been visible to a client, it stays exempt from angular-size culling unless the player is moving away from it more directly than this (lower = more lenient, entity stays visible even when moving somewhat away; higher = stricter, entity gets re-culled sooner when leaving).");
+
+	sv_entity_cull_distress = Cvar_Get ("sv_entity_cull_distress", "0.1", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_cull_distress, "Fraction (0-1) of ticks a client needs a full resync (see sv_resync_throttle_ms) below which adaptive culling isn't increased for this reason. A client with a poor connection can need stronger culling than its visible entity count alone would suggest - this reacts to that directly instead of relying on raw entity count or ping as a proxy. Whichever of this or the entity-count scaling is worse wins; a healthy connection (0 fraction) is never affected by this.");
+
+	sv_entity_cull_distress_max = Cvar_Get ("sv_entity_cull_distress_max", "0.5", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_cull_distress_max, "Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches sv_entity_cull_max due to connection distress alone, regardless of visible entity count.");
+
+	sv_entity_cull_distress_cooldown_ms = Cvar_Get ("sv_entity_cull_distress_cooldown_ms", "5000", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (sv_entity_cull_distress_cooldown_ms, "Milliseconds for the connection-distress part of adaptive culling to ease back down from sv_entity_cull_max to the floor once distress stops - it still rises immediately when distress increases, this only slows how fast it comes back down. Prevents a fluctuating connection (a few bad seconds, then a few good ones) from making the angle flap up and down as much as the connection does. 0 = relax immediately, no cooldown.");
+
+	sv_netdebug = Cvar_Get ("sv_netdebug", "0", 0);
+	Cvar_Describe (sv_netdebug, "Prints one diagnostic line per connected client per second: delta-window gap, forced full-resends, bytes sent, rate drops/overflows, and current entity-cull angle. Not tied to developer - intended to be left on only while diagnosing a specific client's stutter, since normal developer logging is too noisy for this. 0 = off (default).");
+
+	sv_resync_throttle_ms = Cvar_Get ("sv_resync_throttle_ms", "150", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (sv_resync_throttle_ms, "Minimum milliseconds between forced full (non-delta) resyncs sent to a client that has fallen out of its delta-compression window. Without this, such a client would get hit with the most expensive packet every single tick for as long as the condition lasts. Ticks in between are skipped entirely (same as a rate-drop) rather than repeating the resync.");
+
+	sv_hitch_threshold_ms = Cvar_Get ("sv_hitch_threshold_ms", "100", CVAR_ARCHIVE | CVARDOC_INT);
+	Cvar_Describe (sv_hitch_threshold_ms, "If a server tick takes longer than this many milliseconds (wall clock, not CPU time), print a breakdown: time in packet reading, game simulation, and total/worst-single-client send time (including whether that client needed a full resync). Independent of sv_netdebug - intended to stay on by default to catch rare stalls/hiccups without needing per-client logging running. 0 disables this check.");
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
 	SZ_SetName (&net_message, "Net message buffer", true);

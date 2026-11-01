@@ -1779,8 +1779,11 @@ void Qcommon_Frame (int msec)
 		rf = time_after_ref - time_before_ref;
 		sv -= gm;
 		cl -= rf;
-		Com_Printf ("all:%3i sv:%3i gm:%3i cl:%3i rf:%3i\n",
-			all, sv, gm, cl, rf);
+		// host_speeds 1 prints every frame; values above 1 are a minimum "all" ms
+		// to print, so a slow frame buried in a stream of normal ones can be spotted
+		if (host_speeds->value == 1 || all >= host_speeds->value)
+			Com_Printf ("all:%3i sv:%3i gm:%3i cl:%3i rf:%3i\n",
+				all, sv, gm, cl, rf);
 	}
 }
 

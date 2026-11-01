@@ -652,6 +652,7 @@ void SV_Jitters_f (void) {
 	qboolean expectColor;
 	client_t *cl;
 	qboolean isLocal;
+	float baseFactor, upLoss, downLoss, bias, usedFactor;
 
 	if (!svs.clients) {
 		return;
@@ -660,8 +661,11 @@ void SV_Jitters_f (void) {
 	// Note: Player PPS shows the PPS from the player to the server, which matches the name incoming_pps.
 	// This may be limited by their cl_maxfps or cl_maxpackets.
 
-	Com_Printf("Name                 Ping  Player PPS      Jitter\n");
-	Com_Printf("-------------------- ---- ----------- -----------\n");
+	// read by name since this cvar is owned/registered by the game dll, not the server
+	baseFactor = Cvar_VariableValue ("g_antilag_oneway_factor");
+
+	Com_Printf("Name                 Ping  PingSD  Player PPS      Jitter  UpLoss%% DnLoss%%    Bias Factor (base->used)\n");
+	Com_Printf("-------------------- ---- ------- ----------- ----------- -------- ------- ------- -------------------\n");
 	for (i = 0 ; i < maxclients->integer ; i++) {
 		cl = &svs.clients[i];
 		isLocal = (cl->netchan.remote_address.type == NA_LOOPBACK);
@@ -693,7 +697,23 @@ void SV_Jitters_f (void) {
 			Com_Printf(" ");
 		}
 
-		Com_Printf(" %4i %11i %8.2f ms\n", cl->ping, cl->incoming_pps, cl->last_jitter);
+		// computed once in G_AntilagOnewayFactor() (g_unlagged.c), refreshed every
+		// server frame in ClientEndServerFrame(); just displaying it here
+		upLoss = cl->edict->client->uplinkLossRate;
+		downLoss = cl->edict->client->downlinkLossRate;
+		bias = cl->edict->client->antilagBias;
+		usedFactor = cl->edict->client->antilagUsedFactor;
+
+		// clamp purely for column alignment; upLoss/downLoss are sanity-capped at the
+		// source already, but baseFactor is an unclamped cvar an admin could set oddly
+		if (upLoss > 9.999f) upLoss = 9.999f;
+		if (downLoss > 9.999f) downLoss = 9.999f;
+		if (baseFactor > 9.99f) baseFactor = 9.99f;
+		else if (baseFactor < 0.0f) baseFactor = 0.0f;
+
+		Com_Printf(" %4i %7.1f %11i %8.2f ms  %6.2f%% %6.2f%%  %6.2f %4.2f -> %4.2f\n",
+			cl->ping, cl->edict->client->pingStdDev, cl->incoming_pps, cl->last_jitter,
+			upLoss * 100.0f, downLoss * 100.0f, bias, baseFactor, usedFactor);
 		if (isLocal && cl->last_jitter < -1.0f) {
     		Com_Printf("\n[Note - only applicable to offline single player mode]\n");
     		Com_Printf("The client is firing packets %ims BEFORE the server expects them.\n", (int)abs(cl->last_jitter));
@@ -717,25 +737,33 @@ extern cvar_t	*sv_entity_cull;
 extern cvar_t	*sv_entity_cull_max;
 extern cvar_t	*sv_entity_budget;
 extern cvar_t	*sv_entity_budget_max;
+extern cvar_t	*sv_entity_cull_distress;
+extern cvar_t	*sv_entity_cull_distress_max;
+extern cvar_t	*sv_entity_cull_distress_cooldown_ms;
 void SV_EntityCullStatus_f (void)
 {
 	client_t	*cl;
 	int			i, j, k, l;
 	qboolean	expectColor;
+	float		distress;
 
 	Com_Printf ("Entity culling status for map '%s':\n", sv.name);
 	Com_Printf ("  sv_entity_cull (floor): %.2f  sv_entity_cull_max (ceiling): %.2f\n",
 		sv_entity_cull->value, sv_entity_cull_max->value);
 	Com_Printf ("  sv_entity_budget: %.0f  sv_entity_budget_max: %.0f\n",
 		sv_entity_budget->value, sv_entity_budget_max->value);
-	Com_Printf ("  (auto values below are per-client, based on their own actual visible entity count)\n");
+	Com_Printf ("  sv_entity_cull_distress: %.2f  sv_entity_cull_distress_max: %.2f  sv_entity_cull_distress_cooldown_ms: %.0f\n",
+		sv_entity_cull_distress->value, sv_entity_cull_distress_max->value, sv_entity_cull_distress_cooldown_ms->value);
+	Com_Printf ("  (auto values below are per-client; whichever of entity count or connection\n"
+		"   distress - fraction of ticks needing a full resync - is worse determines the angle;\n"
+		"   distress rises immediately but only eases back down over the cooldown above)\n");
 
 	if (!svs.clients)
 		return;
 
 	Com_Printf ("\nPer-client effective cull angle:\n");
-	Com_Printf ("%-20s %-11s %-11s %-11s %-11s %s\n", "Name", "Value", "Entities", "WindowMin", "Streak", "Source");
-	Com_Printf ("-------------------- ----------- ----------- ----------- ----------- ----------\n");
+	Com_Printf ("%-20s %-11s %-11s %-11s %-11s %-11s %s\n", "Name", "Value", "Entities", "WindowMin", "Streak", "Distress", "Source");
+	Com_Printf ("-------------------- ----------- ----------- ----------- ----------- ----------- ----------\n");
 	for (i = 0 ; i < maxclients->integer ; i++)
 	{
 		cl = &svs.clients[i];
@@ -765,10 +793,16 @@ void SV_EntityCullStatus_f (void)
 		for (j = 0 ; j < 20 - k ; j++)
 			Com_Printf (" ");
 
+		// Live/in-progress fraction since the last evaluation window was
+		// consumed - same semi-raw diagnostic nature as WindowMin/Streak.
+		distress = (cl->auto_distress_ticks_total > 0)
+			? (float)cl->auto_distress_ticks_needed / (float)cl->auto_distress_ticks_total
+			: 0.0f;
+
 		if (cl->entity_cull > 0.0f)
-			Com_Printf (" %-11.2f %-11d %-11d %-11d %s\n", cl->entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, "client override");
+			Com_Printf (" %-11.2f %-11d %-11d %-11d %-11.2f %s\n", cl->entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, distress, "client override");
 		else
-			Com_Printf (" %-11.2f %-11d %-11d %-11d %s\n", cl->auto_entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, "server auto");
+			Com_Printf (" %-11.2f %-11d %-11d %-11d %-11.2f %s\n", cl->auto_entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, distress, "server auto");
 	}
 }
 

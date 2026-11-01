@@ -336,30 +336,78 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 SV_WriteFrameToClient
 ==================
 */
+
+/*
+=============
+SV_ClientMaxHistory
+
+How many ticks back a given client can be delta-compressed from, based on
+its advertised p100 capability level. Clients advertising p100 level 2+
+were built with the widened UPDATE_BACKUP window and keep that much
+history themselves, so they can be delta'd across a much longer gap
+(helps high-ping players - see UPDATE_BACKUP_LEGACY in qcommon.h). Older
+clients only ever allocated UPDATE_BACKUP_LEGACY frames on their own side,
+so they must stay capped there regardless of what this server now keeps,
+or the client would look up the wrong (aliased) history slot. For
+pre-p100 clients keep an extra 2 frame margin (3 vs 1) to prevent
+wrapping errors.
+
+Shared between SV_WriteFrameToClient and SV_ResyncThrottled (sv_send.c)
+so the two can never disagree about what counts as "out of window".
+=============
+*/
+int SV_ClientMaxHistory (client_t *client)
+{
+	if (client->p100 >= 2)
+		return UPDATE_BACKUP - 1;
+	else if (client->p100 == 1)
+		return UPDATE_BACKUP_LEGACY - 1;
+	else
+		return UPDATE_BACKUP_LEGACY - 3;
+}
+
+/*
+=============
+SV_ClientNeedsFullResync
+
+True if building this client's next frame would require a full (non-delta)
+resync: either the client itself has no valid frame to delta from, or the
+server's last-acked frame for it has fallen out of its usable window.
+=============
+*/
+qboolean SV_ClientNeedsFullResync (client_t *client)
+{
+	if (client->lastframe <= 0)
+		return true;
+	return (sv.framenum - client->lastframe) >= SV_ClientMaxHistory (client);
+}
+
 void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 {
 	client_frame_t		*frame, *oldframe;
 	int					lastframe;
 	int                 max_history;
 
-	// Project 100 Smart Delta:
-	// For old clients keep a 3 frames margin to prevent wrapping errors.
-	max_history = client->p100 ? (UPDATE_BACKUP - 1) : (UPDATE_BACKUP - 3);
+	max_history = SV_ClientMaxHistory (client);
 
 	//Com_Printf ("%i -> %i\n", client->lastframe, sv.framenum);
 	// this is the frame we are creating
 	frame = &client->frames[sv.framenum & UPDATE_MASK];
 
+	client->dbg_frames_built++;
+
 	if (client->lastframe <= 0)
 	{	// client is asking for a retransmit
 		oldframe = NULL;
 		lastframe = -1;
+		client->dbg_client_resends++;
 	}
 	else if (sv.framenum - client->lastframe >= max_history)
 	{	// client hasn't gotten a good message through in a long time
 //		Com_Printf ("%s: Delta request from out-of-date packet.\n", client->name);
 		oldframe = NULL;
 		lastframe = -1;
+		client->dbg_oow_resends++;
 	}
 	else
 	{	// we have a valid message to delta from
@@ -455,6 +503,9 @@ extern cvar_t *sv_entity_cull;
 extern cvar_t *sv_entity_cull_max;
 extern cvar_t *sv_entity_budget;
 extern cvar_t *sv_entity_budget_max;
+extern cvar_t *sv_entity_cull_distress;
+extern cvar_t *sv_entity_cull_distress_max;
+extern cvar_t *sv_entity_cull_distress_cooldown_ms;
 extern cvar_t *sv_tickrate;
 extern cvar_t *sv_entity_cull_vel_away_dot;
 
@@ -466,25 +517,39 @@ extern cvar_t *sv_entity_cull_vel_away_dot;
 SV_UpdateAdaptiveEntityCull
 
 Re-evaluates a client's adaptive entity culling angle, at most once every
-ENTITY_CULL_WINDOW_MS. Uses the LEAST number of entities seen visible to
-this client during the window (not the average or latest), and only
-escalates culling after ENTITY_CULL_CONFIRM_WINDOWS consecutive windows
-confirm sustained overload - biasing the whole system toward rendering
-entities rather than culling them when in doubt. Relaxes back down
-immediately (single window) once load drops, since there's no reason to
-delay showing more detail once it's cheap enough again.
+ENTITY_CULL_WINDOW_MS, from two independent signals - whichever is worse
+wins:
 
-This only reacts to what's actually visible to THIS client right now (PVS
-and angular culling already applied), so it naturally adapts to map layout
-and player position - a cluttered but well-compartmentalized map won't
-trigger this the way an open map exposing lots of entities at once will,
-without needing any per-map tuning.
+1. Entity count: uses the LEAST number of entities seen visible to this
+   client during the window (not the average or latest), and only
+   escalates after ENTITY_CULL_CONFIRM_WINDOWS consecutive windows confirm
+   sustained overload - biasing toward rendering entities rather than
+   culling them when in doubt. Relaxes back down immediately (single
+   window) once load drops. This only reacts to what's actually visible to
+   THIS client right now (PVS and angular culling already applied), so it
+   naturally adapts to map layout and player position without needing any
+   per-map tuning.
+
+2. Connection distress: the fraction of ticks this client actually needed
+   a full (non-delta) resync. Two clients can see the exact same entity
+   count on the same busy map, but only the one with a struggling
+   connection needs more aggressive culling - entity count alone can't
+   tell them apart. Unlike entity count, this isn't shaped by the culling
+   decision itself (culling doesn't change your ping or packet loss), so it
+   doesn't need the same wait-for-confirmation delay and reacts the moment
+   a window looks worse. But it only relaxes gradually (over
+   sv_entity_cull_distress_cooldown_ms, see auto_distress_cull_held) rather
+   than immediately - on a fluctuating connection (a few bad seconds, then
+   a few good ones), reacting instantly in both directions would make the
+   angle flap up and down right along with the connection.
 =============
 */
 static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 {
 	float	tickrate_scale;
 	float	budget, budget_max;
+	float	distress_fraction, distress_budget, distress_budget_max, t_distress;
+	float	distress_cull, cooldown_ms, max_decrease;
 	float	t;
 	float	cull, rad, tanv;
 
@@ -510,7 +575,62 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 		client->auto_entity_cull_tan_sq = 0.0f;
 		client->auto_entity_window_min = -1;
 		client->auto_entity_over_streak = 0;
+		client->auto_distress_ticks_total = 0;
+		client->auto_distress_ticks_needed = 0;
+		client->auto_distress_cull_held = 0.0f;
 		return;
+	}
+
+	// Distress fraction for this window, computed up front so it's
+	// available regardless of which branch the entity-count side below
+	// takes (including its own early return while awaiting confirmation -
+	// distress isn't subject to that wait-for-confirmation delay and
+	// shouldn't be blocked by it).
+	distress_fraction = (client->auto_distress_ticks_total > 0)
+		? (float)client->auto_distress_ticks_needed / (float)client->auto_distress_ticks_total
+		: 0.0f;
+	client->auto_distress_ticks_total = 0;
+	client->auto_distress_ticks_needed = 0;
+
+	distress_budget = sv_entity_cull_distress->value;
+	distress_budget_max = sv_entity_cull_distress_max->value;
+	if (distress_budget_max <= distress_budget) {
+		t_distress = (distress_fraction > distress_budget) ? 1.0f : 0.0f;
+	} else {
+		t_distress = (distress_fraction - distress_budget) / (distress_budget_max - distress_budget);
+		if (t_distress < 0.0f)
+			t_distress = 0.0f;
+		if (t_distress > 1.0f)
+			t_distress = 1.0f;
+	}
+
+	// What this window's distress reading alone would call for, before the
+	// peak-hold/cooldown below. Rises to meet this immediately; only eases
+	// back down toward it gradually.
+	distress_cull = sv_entity_cull->value + t_distress * (sv_entity_cull_max->value - sv_entity_cull->value);
+
+	if (distress_cull >= client->auto_distress_cull_held)
+	{
+		client->auto_distress_cull_held = distress_cull;
+	}
+	else
+	{
+		cooldown_ms = sv_entity_cull_distress_cooldown_ms->value;
+		if (cooldown_ms <= 0.0f)
+		{
+			client->auto_distress_cull_held = distress_cull;	// 0 = no cooldown, relax immediately
+		}
+		else
+		{
+			max_decrease = (sv_entity_cull_max->value - sv_entity_cull->value)
+				* ((float)ENTITY_CULL_WINDOW_MS / cooldown_ms);
+			client->auto_distress_cull_held -= max_decrease;
+			// don't overshoot past what this window's reading actually
+			// calls for - if distress gets worse again mid-cooldown, this
+			// lets it jump straight back up from wherever it currently is
+			if (client->auto_distress_cull_held < distress_cull)
+				client->auto_distress_cull_held = distress_cull;
+		}
 	}
 
 	tickrate_scale = 100.0f / (float)sv_tickrate->integer;
@@ -518,13 +638,23 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 	budget_max = sv_entity_budget_max->value * tickrate_scale;
 
 	if (client->auto_entity_window_min > budget) {
-		// Over budget this window - only escalate after a few consecutive
-		// confirming windows (sustained load), not on a single spike.
+		// Over budget this window - only escalate the ENTITY-COUNT reason
+		// after a few consecutive confirming windows (sustained load), not
+		// on a single spike. Doesn't block the distress-based component
+		// above, which doesn't wait for confirmation like this does.
 		if (client->auto_entity_over_streak < ENTITY_CULL_CONFIRM_WINDOWS - 1)
 		{
 			client->auto_entity_over_streak++;
 			client->auto_entity_window_min = -1;
-			return;		// not confirmed yet, keep the current (less aggressive) angle
+
+			if (client->auto_distress_cull_held > client->auto_entity_cull)
+			{
+				client->auto_entity_cull = client->auto_distress_cull_held;
+				rad = client->auto_entity_cull * 3.14159f / 180.0f;
+				tanv = tanf(rad);
+				client->auto_entity_cull_tan_sq = tanv * tanv;
+			}
+			return;		// entity-count escalation not confirmed yet, keep the current (less aggressive) angle for that reason
 		}
 	} else {
 		client->auto_entity_over_streak = 0;
@@ -541,6 +671,9 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 	}
 
 	cull = sv_entity_cull->value + t * (sv_entity_cull_max->value - sv_entity_cull->value);
+
+	if (client->auto_distress_cull_held > cull)
+		cull = client->auto_distress_cull_held;
 
 	client->auto_entity_window_min = -1;
 

@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #include "stdint.h"
 
 extern cvar_t  *sv_tickrate;
+extern cvar_t  *sv_netdebug;
+extern cvar_t  *sv_resync_throttle_ms;
 
 /*
 =============================================================================
@@ -457,6 +459,10 @@ qboolean SV_SendClientDatagram (client_t *client)
 	if (msg.overflowed)
 	{	// must have room left for the packet header
 		Com_Printf ("WARNING: msg overflowed for %s\n", client->name);
+		// frame content (header+entities) was just wiped below; the client won't
+		// ack this frame number at all, which looks like downlink loss but isn't
+		client->antilag_overflow_skipped++;
+		client->dbg_overflows++;
 		SZ_Clear (&msg);
 	}
 
@@ -466,6 +472,7 @@ qboolean SV_SendClientDatagram (client_t *client)
 
 	// record the size for rate estimation
 	client->message_size[sv.framenum % RATE_MESSAGES] = msg.cursize;
+	client->dbg_bytes_sent += msg.cursize;
 
 	return true;
 }
@@ -531,11 +538,112 @@ qboolean SV_RateDrop (client_t *c)
 	if (total > active_limit)
 	{
 		c->surpressCount++;
+		c->antilag_ratedrop_skipped++;
+		c->dbg_ratedrops++;
 		c->message_size[sv.framenum % RATE_MESSAGES] = 0;
 		return true;
 	}
 
 	return false;
+}
+
+/*
+=======================
+SV_ResyncThrottled
+
+A client that has fallen out of its delta-compression window (see
+SV_ClientNeedsFullResync in sv_ents.c) needs a full, non-delta resync -
+by far the most expensive packet the server builds. Without this, a
+client stuck in that state (e.g. sustained high ping/jitter, or an old
+client that can't use the widened UPDATE_BACKUP window) would get hit
+with that worst-case packet on literally every tick for as long as the
+condition lasts, which is itself enough to cause stuttering independent
+of how many entities are involved.
+
+Returns true if this client needs a resync but one was already sent
+within sv_resync_throttle_ms, in which case the caller should skip
+sending to this client entirely this tick - exactly like a rate-drop.
+The client's existing handling for a missed packet (interpolate/
+extrapolate from its last good frame, same as ordinary packet loss)
+carries it over until the next resync is allowed through. A healthy
+client (not in the resync condition) is never throttled here.
+=======================
+*/
+qboolean SV_ResyncThrottled (client_t *c)
+{
+	if (!SV_ClientNeedsFullResync (c))
+		return false;		// healthy delta chain, nothing to throttle
+
+	if (svs.realtime < c->resync_throttle_next_allowed)
+	{
+		c->antilag_resync_throttle_skipped++;
+		c->dbg_resync_throttled++;
+		return true;		// still cooling down - skip this tick
+	}
+
+	// allow this one through, then cool down before the next
+	c->resync_throttle_next_allowed = svs.realtime + sv_resync_throttle_ms->integer;
+	return false;
+}
+
+/*
+=======================
+SV_NetDebug_Report
+
+Prints (and resets) one diagnostic line for a client, at most once a
+second per client, when sv_netdebug is non-zero. Deliberately NOT tied
+to developer - developer 1 is far too noisy for a focused test with a
+single high-ping player, since it logs everything else in the engine too.
+
+Intended to confirm/deny whether stutter on a given map is caused by the
+client being pushed out of the delta-compression window (UPDATE_BACKUP
+ticks, ~160ms at 100 ticks) rather than by entity count: oow (out-of-window
+forced full resends) climbing while dbg_frames_built stays flat is the
+signature of that, and it will correlate with ping and with "open" maps
+much more than with raw entity counts.
+=======================
+*/
+static void SV_NetDebug_Report (client_t *c)
+{
+	float	cull;
+	int		gap;
+
+	if (c->dbg_next_report == 0)
+	{
+		// first time seeing this client since connect/map change - start
+		// the window now instead of reporting on an incomplete sample
+		c->dbg_next_report = svs.realtime + 1000;
+		return;
+	}
+
+	if (svs.realtime < c->dbg_next_report)
+		return;		// not time to report yet
+
+	// lastframe<=0 is a sentinel ("no valid frame to delta from" - client
+	// is mid-resync), not a real frame number. sv.framenum - lastframe
+	// would then compute against -1/0 and produce a huge meaningless
+	// value (roughly the server's absolute tick count) instead of an
+	// actual staleness gap - report -1 instead so it reads as "resyncing"
+	// rather than looking like the client is thousands of ticks behind.
+	gap = (c->lastframe > 0) ? (sv.framenum - c->lastframe) : -1;
+
+	cull = (c->entity_cull > 0.0f) ? c->entity_cull : c->auto_entity_cull;
+
+	Com_Printf ("netdebug: %-16s ping=%-4d gap=%-3d frames=%-3d resend(client=%d oow=%d) "
+		"bytes=%-6d avg=%-4d ratedrop=%-3d overflow=%-3d resync_throttled=%-3d cull=%.1f ents=%d\n",
+		c->name, c->ping, gap, c->dbg_frames_built,
+		c->dbg_client_resends, c->dbg_oow_resends,
+		c->dbg_bytes_sent, c->dbg_frames_built ? c->dbg_bytes_sent / c->dbg_frames_built : 0,
+		c->dbg_ratedrops, c->dbg_overflows, c->dbg_resync_throttled, cull, c->auto_entity_last_count);
+
+	c->dbg_next_report = svs.realtime + 1000;
+	c->dbg_frames_built = 0;
+	c->dbg_client_resends = 0;
+	c->dbg_oow_resends = 0;
+	c->dbg_bytes_sent = 0;
+	c->dbg_ratedrops = 0;
+	c->dbg_overflows = 0;
+	c->dbg_resync_throttled = 0;
 }
 
 /*
@@ -605,11 +713,56 @@ void SV_SendClientMessages (void)
 			Netchan_Transmit (&c->netchan, msglen, msgbuf);
 		} else if (c->state == cs_spawned) {
 
-			// don't overrun bandwidth
-			if (SV_RateDrop (c))
-				continue;
+			// Checked once per tick, unconditionally - this feeds the
+			// connection-distress component of adaptive entity culling
+			// (SV_UpdateAdaptiveEntityCull in sv_ents.c), which needs to
+			// see every tick a resync was actually needed, including the
+			// ones skipped below by rate-drop/resync-throttle. Those
+			// skipped ticks ARE the distress it's meant to catch, so this
+			// must not be gated behind whether a datagram actually got sent.
+			qboolean needed_resync = SV_ClientNeedsFullResync (c);
+			c->auto_distress_ticks_total++;
+			if (needed_resync)
+				c->auto_distress_ticks_needed++;
 
-			SV_SendClientDatagram (c);
+			// don't overrun bandwidth
+			qboolean ratedropped = SV_RateDrop (c);
+
+			// a client needing a full resync but already sent one
+			// recently gets skipped entirely too, instead of repeating
+			// the most expensive packet on every single tick
+			qboolean resync_throttled = !ratedropped && SV_ResyncThrottled (c);
+
+			if (!ratedropped && !resync_throttled)
+			{
+				// timed individually (not just the overall tick) so a
+				// hitch can be attributed to one specific client rather
+				// than only "the server was slow" - see sv_hitch_threshold_ms
+				int send_t0 = Sys_Milliseconds ();
+
+				SV_SendClientDatagram (c);
+
+				{
+					int send_ms = Sys_Milliseconds () - send_t0;
+					svs.hitch_total_send_ms += send_ms;
+					if (send_ms > svs.hitch_worst_client_ms)
+					{
+						svs.hitch_worst_client_ms = send_ms;
+						Q_strncpyz2 (svs.hitch_worst_client_name, c->name, sizeof (svs.hitch_worst_client_name));
+						svs.hitch_worst_client_resync = needed_resync;
+					}
+				}
+			}
+
+			// Checked here (before the skip-continue below) so a client
+			// stuck being rate-dropped or resync-throttled every tick
+			// still gets reported instead of silently never reaching
+			// this line.
+			if (sv_netdebug->integer)
+				SV_NetDebug_Report (c);
+
+			if (ratedropped || resync_throttled)
+				continue;
 		} else {
 			// not spawned
 			/* send accumulated reliable messages when buffer has enough data

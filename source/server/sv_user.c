@@ -23,7 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#include <math.h>
 #include "server.h"
+
+extern cvar_t *sv_tickrate;
 
 edict_t	*sv_player;
 
@@ -636,14 +639,92 @@ void SV_ExecuteClientMessage (client_t *cl)
 			checksumIndex = net_message.readcount;
 			checksum      = MSG_ReadByte (&net_message);
 			lastframe     = MSG_ReadLong (&net_message);
-			if ( lastframe != cl->lastframe )
 			{
-				cl->lastframe = lastframe;
-				if ( cl->lastframe > 0 )
+				// a gap in acked frame numbers means one or more outgoing snapshots
+				// were never acked (downlink loss proxy); paired with netchan.dropped
+				// (uplink loss, freshly computed per packet by Netchan_Process just
+				// before this runs) this feeds the antilag oneway-factor asymmetry
+				// bias. Sampled on every move, not gated on lastframe having changed -
+				// a client reporting faster than the server ticks can repeat the same
+				// lastframe for several moves in a row, which silently hid real
+				// uplink loss from the average when this was gated on that instead
+				int downlinkLost = 0;
+				int uplinkLost = 0;
+				float dt = ( cl->antilag_loss_last_sample_time > 0 ) ?
+					(svs.realtime - cl->antilag_loss_last_sample_time) / 1000.0f : 0.0f;
+
+				// accrue real ticks elapsed since the last sample as spendable credit;
+				// this already represents the "one tick normally expected" baseline,
+				// so gaps below are measured against the full frame delta, not delta-1
+				if ( dt > 0.0f && sv_tickrate->integer > 0 )
 				{
-					cl->frame_latency[cl->lastframe & (LATENCY_COUNTS - 1)]
-						= svs.realtime - cl->frames[cl->lastframe & UPDATE_MASK].senttime;
+					cl->antilag_tick_credit += dt * sv_tickrate->integer;
+					if ( cl->antilag_tick_credit > sv_tickrate->integer )
+						cl->antilag_tick_credit = (float)sv_tickrate->integer;	// don't let idle credit mask a later loss spike
 				}
+
+				// the loopback channel's tiny fixed-size queue (see NET_GetLoopPacket)
+				// can overrun under normal scheduling jitter even with a perfect local
+				// connection; that's not real loss, so don't sample it for local clients
+				if ( cl->netchan.remote_address.type != NA_LOOPBACK )
+				{
+					if ( cl->lastframe > 0 && lastframe > cl->lastframe && lastframe - cl->lastframe < 64 )
+					{
+						int frameDelta = lastframe - cl->lastframe;
+						// frames SV_RateDrop chose not to send (bandwidth throttling), a
+						// MAX_MSGLEN overflow that wiped the content (too many visible
+						// entities to fit one packet), or a resync deliberately held back
+						// by SV_ResyncThrottled (sv_send.c) aren't real network loss
+						int explained = cl->antilag_ratedrop_skipped + cl->antilag_overflow_skipped
+							+ cl->antilag_resync_throttle_skipped;
+						if ( explained > frameDelta )
+							explained = frameDelta;
+
+						// spend accrued tick credit on whatever gap remains: a client
+						// whose own move rate is below the server tickrate only reports
+						// its latest received frame once per move, not once per tick,
+						// so the ticks it never got a chance to report aren't losses
+						if ( frameDelta > explained )
+						{
+							int remaining = frameDelta - explained;
+							int fromCredit = (int)cl->antilag_tick_credit;
+							if ( fromCredit > remaining )
+								fromCredit = remaining;
+							cl->antilag_tick_credit -= fromCredit;
+							explained += fromCredit;
+						}
+						downlinkLost = frameDelta - explained;
+					}
+					// reconnects/long outages can spike netchan.dropped into the hundreds;
+					// discard those as a resync event rather than let one sample skew the average
+					if ( cl->netchan.dropped > 0 && cl->netchan.dropped < 64 )
+						uplinkLost = cl->netchan.dropped;
+				}
+				cl->antilag_ratedrop_skipped = 0;
+				cl->antilag_overflow_skipped = 0;
+				cl->antilag_resync_throttle_skipped = 0;
+
+				// EMA over real elapsed time, not sample count, so the result reflects
+				// several seconds of sustained loss rather than a brief burst of packets
+				if ( cl->antilag_loss_last_sample_time == 0 )
+				{
+					cl->antilag_uplink_loss_ema = (float)uplinkLost;
+					cl->antilag_downlink_loss_ema = (float)downlinkLost;
+				}
+				else if ( dt > 0.0f )
+				{
+					float alpha = 1.0f - (float)exp (-dt / ANTILAG_LOSS_EMA_TAU_SEC);
+					cl->antilag_uplink_loss_ema += alpha * ((float)uplinkLost - cl->antilag_uplink_loss_ema);
+					cl->antilag_downlink_loss_ema += alpha * ((float)downlinkLost - cl->antilag_downlink_loss_ema);
+				}
+				cl->antilag_loss_last_sample_time = svs.realtime;
+
+				if ( lastframe > 0 && lastframe != cl->lastframe )
+				{
+					cl->frame_latency[lastframe & (LATENCY_COUNTS - 1)]
+						= svs.realtime - cl->frames[lastframe & UPDATE_MASK].senttime;
+				}
+				cl->lastframe = lastframe;
 			}
 
 			memset (&nullcmd, 0, sizeof(nullcmd));

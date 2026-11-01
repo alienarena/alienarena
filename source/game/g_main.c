@@ -207,7 +207,11 @@ cvar_t	*g_antilagprojectiles;
 cvar_t	*g_antilag_high_ping_threshold;
 cvar_t	*g_antilag_low_ping_threshold;
 cvar_t	*g_antilag_max_ping;
+cvar_t	*g_antilag_jitter_sigma;
+cvar_t	*g_antilag_jitter_max;
 cvar_t	*g_antilag_oneway_factor;
+cvar_t	*g_antilag_loss_bias_strength;
+cvar_t	*g_antilag_loss_bias_confidence_threshold;
 
 void SpawnEntities (char *mapname, const char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);

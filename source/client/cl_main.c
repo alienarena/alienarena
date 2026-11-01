@@ -2196,8 +2196,11 @@ void CL_InitLocal (void)
 	gender_auto = Cvar_Get ("gender_auto", "1", CVAR_ARCHIVE);
 	gender->modified = false; // clear this so we know when user sets it manually
 
-	// Project-100 userinfo to allow servers to send larger messages to clients with this flag
-	p100 = Cvar_Get ("p100", "1", CVAR_USERINFO | CVAR_ROM);
+	// Project-100 userinfo to allow servers to send larger messages to clients with this flag.
+	// Level 2 additionally advertises support for the widened UPDATE_BACKUP delta-history
+	// window (see UPDATE_BACKUP_LEGACY in qcommon.h) - bump this only alongside a client-side
+	// UPDATE_BACKUP/MAX_PARSE_ENTITIES increase, never on its own.
+	p100 = Cvar_Get ("p100", "2", CVAR_USERINFO | CVAR_ROM);
 	entity_cull = Cvar_Get ("entity_cull", "0", CVAR_USERINFO | CVAR_ARCHIVE | CVARDOC_FLOAT);
 	Cvar_Describe (entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to use the server default.");
 
@@ -2754,6 +2757,9 @@ void CL_Frame( int msec )
 	// Loop to handle accumulated time debt in precise, predictable increments.
 	// This prevents high-ping spikes from bloating a single input frame.
 	qboolean packet_processed_this_frame = (packet_trigger || send_packet_now || cls.download);
+	// Sum of every slice consumed below, so a backlog spanning several iterations
+	// still reports its full elapsed time to the single cmd sent after the loop.
+	double total_slice = 0;
 	while ( packet_trigger || send_packet_now || cls.download )
 	{
 		send_packet_now = false; // used during downloads
@@ -2777,6 +2783,8 @@ void CL_Frame( int msec )
 			packet_delay = 0;
 			current_slice = precise_packet_timer;
 		}
+
+		total_slice += current_slice;
 
 		render_counter = 0; // for counting renders since last packet
 
@@ -2870,6 +2878,9 @@ void CL_Frame( int msec )
 	// --- TRANSMIT MOVEMENT DATA TO SERVER ---
 	// Only send the command if the network loop actually processed a packet this frame
 	if (packet_processed_this_frame) {
+		// Use the full backlog span, not just the last slice, so caught-up ticks aren't lost time.
+		cls.frametime = (float)(total_slice / 1000.0);
+		if (cls.frametime < 0.001f) cls.frametime = 0.001f;
 		CL_SendCmd();
 	}
 

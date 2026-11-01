@@ -1321,6 +1321,22 @@ struct gclient_s
 	player_state_t	ps;				// communicated by server to clients
 	int				ping;
 
+	// server-measured uplink/downlink packet-loss rates (0..1), written by
+	// SV_CalcPings; used to derive a per-player antilag oneway-factor bias
+	float			uplinkLossRate;
+	float			downlinkLossRate;
+
+	// cached output of G_AntilagOnewayFactor(), refreshed every server frame
+	// in ClientEndServerFrame(); read-only from the server's point of view
+	// (sv_jitters display), so sv_ccmds.c never has to re-derive this math.
+	// antilagBias is 0..1: higher means downlink loss dominates; uplink-dominant loss never lowers it
+	float			antilagBias;
+	float			antilagUsedFactor;
+
+	// standard deviation (ms) of the recent latency samples, written by
+	// SV_CalcPings; used to add a safety margin to the antilag rewind
+	float			pingStdDev;
+
 	// private to game
 	client_persistant_t	pers;
 	client_respawn_t	resp;
@@ -1809,12 +1825,36 @@ extern qboolean StringToFilter (char *s, ipfilter_t *f);
 // Default factor for converting full RTT to one-way delay
 #define DEFAULT_ONEWAY_FACTOR 0.5f
 
+// Default strength of the per-player uplink/downlink loss-asymmetry bias.
+// 0 disables the bias entirely (plain g_antilag_oneway_factor is used as-is).
+#define DEFAULT_ANTILAG_LOSS_BIAS_STRENGTH 0.8f
+
+// Combined uplink+downlink loss rate (0..1) at which the measured asymmetry
+// is fully trusted; below this, the bias is scaled down so trace/noise-level
+// loss can't swing the factor as hard as a clearly lossy connection can.
+#define DEFAULT_ANTILAG_LOSS_BIAS_CONFIDENCE_THRESHOLD 0.3f
+
+// Default number of ping standard deviations added to the ping used for antilag,
+// to compensate players with an unstable ping. 0 disables it.
+#define DEFAULT_ANTILAG_JITTER_SIGMA 1.0f
+
+// Default cap in milliseconds for the ping added by the jitter compensation
+#define DEFAULT_ANTILAG_JITTER_MAX 50
+
+extern	cvar_t	*g_antilag_jitter_sigma;
+extern	cvar_t	*g_antilag_jitter_max;
 extern  cvar_t	*g_antilagdebug;
 extern	cvar_t	*g_antilagprojectiles;
 extern	cvar_t	*g_antilag_high_ping_threshold;
 extern	cvar_t	*g_antilag_low_ping_threshold;
 extern	cvar_t	*g_antilag_max_ping;
 extern	cvar_t	*g_antilag_oneway_factor;
+extern	cvar_t	*g_antilag_loss_bias_strength;
+extern	cvar_t	*g_antilag_loss_bias_confidence_threshold;
+
+// defined in g_unlagged.c; also called from ClientEndServerFrame() each frame
+// to keep client->antilagBias/antilagUsedFactor fresh for the sv_jitters display
+float G_AntilagOnewayFactor(gclient_t *client, float baseFactor);
 
 // ACEBOT_ADD
 #include "acesrc/acebot.h"

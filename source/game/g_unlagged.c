@@ -91,6 +91,81 @@ static void TimeShiftLerp(float frac, const vec3_t start, const vec3_t end, vec3
 
 /*
 =================
+G_AntilagOnewayFactor
+
+Blend the global oneway factor with a per-player bias derived from the
+server-measured uplink vs downlink packet-loss asymmetry for this client.
+g_antilag_loss_bias_strength 0 disables the bias (baseFactor is returned as-is).
+=================
+*/
+float G_AntilagOnewayFactor(gclient_t *client, float baseFactor) {
+	float strength, upLoss, downLoss, bias, result;
+
+	strength = g_antilag_loss_bias_strength ? g_antilag_loss_bias_strength->value : DEFAULT_ANTILAG_LOSS_BIAS_STRENGTH;
+	if (strength <= 0.0f) {
+		client->antilagBias = 0.0f;
+		client->antilagUsedFactor = baseFactor;
+		return baseFactor;
+	}
+
+	upLoss = client->uplinkLossRate;
+	downLoss = client->downlinkLossRate;
+	{
+		float confidenceThreshold = g_antilag_loss_bias_confidence_threshold ? g_antilag_loss_bias_confidence_threshold->value : DEFAULT_ANTILAG_LOSS_BIAS_CONFIDENCE_THRESHOLD;
+		float totalLoss = downLoss + upLoss;
+		// epsilon keeps this defined (and near 0) when both rates are 0, i.e. no loss observed yet
+		// skew is -1..1: negative = uplink loss dominates, positive = downlink loss dominates
+		float skew = (downLoss - upLoss) / (totalLoss + 0.001f);
+		// scale by how much combined loss was actually observed, so a trace
+		// amount of one-sided loss can't swing the bias as hard as real loss can
+		float confidence = confidenceThreshold > 0.0f ? totalLoss / confidenceThreshold : 1.0f;
+		if (confidence > 1.0f) confidence = 1.0f;
+		// uplink-dominant loss is at least as likely to be an ordinary asymmetric
+		// connection (slow upload) as it is a lag-switch style exploit, so only
+		// let downlink-dominant loss raise compensation; never lower it below baseFactor
+		if (skew < 0.0f) skew = 0.0f;
+		bias = skew * confidence;	// 0..1
+	}
+
+	result = baseFactor + 0.5f * bias * strength;
+	if (result < 0.0f) result = 0.0f;
+	else if (result > 1.0f) result = 1.0f;
+
+	// cached so sv_jitters can display this without re-deriving the formula
+	client->antilagBias = bias;
+	client->antilagUsedFactor = result;
+	return result;
+}
+
+
+/*
+=================
+G_AntilagJitterMargin
+
+Extra ping (ms) added to a player's measured ping before lag compensation:
+g_antilag_jitter_sigma standard deviations of their recent ping samples,
+capped at g_antilag_jitter_max. Stable connections get ~0.
+=================
+*/
+static int G_AntilagJitterMargin(gclient_t *client) {
+	float sigma = g_antilag_jitter_sigma ? g_antilag_jitter_sigma->value : DEFAULT_ANTILAG_JITTER_SIGMA;
+	int maxMargin = g_antilag_jitter_max ? g_antilag_jitter_max->integer : DEFAULT_ANTILAG_JITTER_MAX;
+	int margin;
+
+	if (sigma <= 0.0f || maxMargin <= 0) {
+		return 0;
+	}
+
+	margin = (int)(client->pingStdDev * sigma);
+	if (margin > maxMargin) {
+		margin = maxMargin;
+	}
+	return margin;
+}
+
+
+/*
+=================
 G_TimeShiftClient
 
 Move a client back to where he was at the specified time
@@ -342,10 +417,14 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	}
 
 	ping = ent->client->ping;
+	if (ping > 0) {
+		ping += G_AntilagJitterMargin(ent->client);
+	}
 	thresholdHigh = g_antilag_high_ping_threshold ? g_antilag_high_ping_threshold->integer : DEFAULT_ANTILAG_HIGH_PING_THRESHOLD;
 	thresholdLow = g_antilag_low_ping_threshold ? g_antilag_low_ping_threshold->integer : DEFAULT_ANTILAG_LOW_PING_THRESHOLD;
 	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
 	onewayFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
+	onewayFactor = G_AntilagOnewayFactor(ent->client, onewayFactor);
 
 	if (ping < thresholdHigh) {
 		effectivePing = ping;
@@ -470,10 +549,14 @@ void G_AntilagProjectile(edict_t* ent) {
 	}
 
 	rawPing = ent->owner->client->ping;
+	if (rawPing > 0) {
+		rawPing += G_AntilagJitterMargin(ent->owner->client);
+	}
 	thresholdHigh = g_antilag_high_ping_threshold ? g_antilag_high_ping_threshold->integer : DEFAULT_ANTILAG_HIGH_PING_THRESHOLD;
 	thresholdLow = g_antilag_low_ping_threshold ? g_antilag_low_ping_threshold->integer : DEFAULT_ANTILAG_LOW_PING_THRESHOLD;
 	maxPing = g_antilag_max_ping ? g_antilag_max_ping->integer : DEFAULT_ANTILAG_MAX_PING;
 	onewayFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
+	onewayFactor = G_AntilagOnewayFactor(owner->client, onewayFactor);
 
 	if (rawPing < thresholdHigh) {
 		effectivePing = rawPing;

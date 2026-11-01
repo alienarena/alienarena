@@ -100,6 +100,7 @@ typedef struct
 
 #define	LATENCY_COUNTS	16
 #define	RATE_MESSAGES	128	// High enough to contain one second of data with max tickrate 125
+#define ANTILAG_LOSS_EMA_TAU_SEC	4.0f	// time constant: brief bursts fade, sustained loss dominates
 
 typedef struct client_s
 {
@@ -116,10 +117,37 @@ typedef struct client_s
 	int				frame_latency[LATENCY_COUNTS];
 	int				ping;
 
+	// Time-smoothed (EMA) uplink/downlink loss estimates, server-measured only,
+	// for the antilag oneway-factor asymmetry bias. uplink = clc_move packets lost
+	// (netchan.dropped), downlink = acked snapshot frames skipped (lastframe gaps).
+	// Smoothed over ANTILAG_LOSS_EMA_TAU_SEC so brief bursts don't swing the bias;
+	// only loss sustained over several seconds should move it meaningfully.
+	float			antilag_uplink_loss_ema;
+	float			antilag_downlink_loss_ema;
+	int				antilag_loss_last_sample_time;	// svs.realtime of last EMA update, 0 = none yet
+	// fractional server ticks elapsed since the last sample that haven't yet been
+	// "spent" explaining a lastframe gap; a client reporting slower than tickrate
+	// accrues a fraction of a tick per sample, which must carry over (not be
+	// truncated away each time) or slow-reporting clients look like steady loss
+	float			antilag_tick_credit;
+
 	int				message_size[RATE_MESSAGES];	// used to rate drop packets
 	int				rate;
 	int				surpressCount;		// number of messages rate supressed
-
+	// frames SV_RateDrop skipped sending entirely (bandwidth throttling, e.g. a
+	// map with many visible entities exceeding the client's rate); consumed and
+	// reset in SV_ExecuteClientMessage so these aren't miscounted as downlink loss
+	int			antilag_ratedrop_skipped;
+	// frames whose content was wiped because the built message overflowed
+	// MAX_MSGLEN (too many visible entities to fit one packet); same idea as
+	// antilag_ratedrop_skipped, consumed/reset in SV_ExecuteClientMessage
+	int			antilag_overflow_skipped;
+	// ticks where this client needed a full (non-delta) resync but one was
+	// already sent within sv_resync_throttle_ms - skipped entirely rather
+	// than repeating the expensive resync every tick (see SV_ResyncThrottled
+	// in sv_send.c); same "not real loss" accounting as the two above
+	int			antilag_resync_throttle_skipped;
+	int			resync_throttle_next_allowed;	// svs.realtime ms of next allowed full resync (see SV_ResyncThrottled in sv_send.c)
 	edict_t			*edict;				// EDICT_NUM(clientnum+1)
 	char			name[PLAYERNAME_SIZE]; // extracted from userinfo, high bits masked
 	int				messagelevel;		// for filtering printed messages
@@ -147,8 +175,13 @@ typedef struct client_s
 	int             lastresettime;		// keeps track of 12-sec cycle
 	int				lasthang;			// msec since last server hang
 
-	// Project 100 flag (larger message size limit)
-	qboolean		p100;
+	// Project 100 capability level (larger message size, and from level 2 on,
+	// the widened UPDATE_BACKUP delta-history window). Raw integer advertised
+	// by the client's "p100" userinfo value, NOT a boolean - see
+	// UPDATE_BACKUP_LEGACY in qcommon.h and its use in SV_WriteFrameToClient.
+	// 0 = pre-project100 client, 1 = project100 but legacy (16-frame) window,
+	// 2+ = supports the widened window.
+	int				p100;
 
 	// Jitter monitor
 	int 			last_jitter_time;
@@ -179,6 +212,34 @@ typedef struct client_s
 	int				auto_entity_over_streak;		// consecutive windows found over budget
 	int				auto_entity_last_count;			// most recent frame's sent entity count, for diagnostics/status display only
 
+	// Connection-distress component of the same adaptive system: tracks
+	// what fraction of ticks this client actually needed a full (non-delta)
+	// resync (see SV_ClientNeedsFullResync in sv_ents.c), over the same
+	// once-a-second window as the entity-count tracking above. Entity count
+	// alone can't distinguish a struggling connection from a healthy one on
+	// the same busy map (both see the same entities) - this fraction is a
+	// direct measurement of the actual problem instead of a proxy for it
+	// (e.g. ping), and unlike entity count it isn't shaped by the culling
+	// decision itself, so it doesn't need the same wait-for-confirmation
+	// delay the entity-count side uses below, and can react immediately.
+	// Incremented every tick in SV_SendClientMessages (sv_send.c), *before*
+	// any rate-drop/resync-throttle skip - those skipped ticks are exactly
+	// the distress this is meant to catch, so it can't only sample the
+	// ticks where a datagram was actually built.
+	int				auto_distress_ticks_total;		// ticks checked since last re-evaluation
+	int				auto_distress_ticks_needed;		// of those, how many needed a full resync
+
+	// Peak-hold value (in degrees) for the distress side specifically: on
+	// a fluctuating connection, reacting instantly in both directions would
+	// make the angle flap up and down right along with the connection. This
+	// rises immediately to match a worse reading (no delay, see above), but
+	// on a better reading it's only allowed to ease down gradually, over
+	// sv_entity_cull_distress_cooldown_ms, rather than snapping straight
+	// back down the moment one good window is seen. If the connection gets
+	// worse again before it's finished easing down, it jumps straight back
+	// up from wherever it currently is.
+	float			auto_distress_cull_held;
+
 	// Per-entity persistence for angular-size culling: once an entity has
 	// been sent to this client, it stays exempt from angular-size culling
 	// for as long as the player isn't clearly moving away from it (even
@@ -188,6 +249,19 @@ typedef struct client_s
 	// does NOT override PVS/area visibility - occluded entities still
 	// disappear normally.
 	byte			entity_was_visible[(MAX_EDICTS+7)/8];
+
+	// Network/delta-window diagnostics (sv_netdebug), accumulated over a
+	// rolling ~1 second window and flushed to the console, independent of
+	// the antilag_* counters above (those get consumed/reset elsewhere on
+	// a different schedule, so reusing them here would corrupt both).
+	int				dbg_next_report;		// svs.realtime ms of next flush
+	int				dbg_frames_built;		// SV_WriteFrameToClient calls this window
+	int				dbg_client_resends;	// lastframe<=0: client itself asked for a retransmit (normal at connect/pause)
+	int				dbg_oow_resends;		// sv.framenum - lastframe >= max_history: forced full resend, the thing we're trying to catch
+	int				dbg_bytes_sent;		// total bytes transmitted this window
+	int				dbg_ratedrops;			// SV_RateDrop() returned true this window
+	int				dbg_overflows;			// msg.overflowed this window
+	int				dbg_resync_throttled;	// SV_ResyncThrottled() skipped a tick this window
 } client_t;
 
 // a client can leave the server in one of four ways:
@@ -237,6 +311,19 @@ typedef struct
 
 	// rate limit status requests
 	ratelimit_t	ratelimit_status;
+
+	// Per-tick hitch diagnostics (sv_hitch_threshold_ms), reset once at the
+	// start of each SV_Frame() call and accumulated across it (including any
+	// internal catch-up iterations - see MAX_CATCHUP_TICKS in SV_Frame), so a
+	// single slow tick's breakdown is reported in full. Independent of
+	// sv_netdebug - this is meant to be left on by default and only prints
+	// when a tick is genuinely anomalous.
+	int			hitch_read_packets_ms;		// time spent in SV_ReadPackets this tick
+	int			hitch_game_frame_ms;		// cumulative SV_RunGameFrame time this tick
+	int			hitch_total_send_ms;		// cumulative time across all clients' SV_SendClientDatagram calls this tick
+	int			hitch_worst_client_ms;		// longest single client's SV_SendClientDatagram call this tick
+	char		hitch_worst_client_name[PLAYERNAME_SIZE];	// which client that was
+	qboolean	hitch_worst_client_resync;	// was that client in the full-resync condition at the time
 
 } server_static_t;
 
@@ -357,6 +444,8 @@ void SV_Status_f (void);
 void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg);
 void SV_RecordDemoMessage (void);
 void SV_BuildClientFrame (client_t *client);
+int SV_ClientMaxHistory (client_t *client);
+qboolean SV_ClientNeedsFullResync (client_t *client);
 
 
 void SV_Error (char *error, ...);

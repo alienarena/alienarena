@@ -389,7 +389,9 @@ extern	cdlight_t	cl_dlights[MAX_DLIGHTS];
 // the cl_parse_entities must be large enough to hold UPDATE_BACKUP frames of
 // entities, so that when a delta compressed message arives from the server
 // it can be un-deltad from the original
-#define	MAX_PARSE_ENTITIES	1024
+// sized for UPDATE_BACKUP (64) frames * sv_entity_budget_max (150) entities,
+// rounded up to a power of 2 (64*150=9600 -> 16384)
+#define	MAX_PARSE_ENTITIES	16384
 extern	entity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
 
 //=============================================================================

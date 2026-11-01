@@ -222,11 +222,29 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 		svs.clients[i].auto_entity_cull_next_update = 0;
 		svs.clients[i].auto_entity_window_min = -1;
 		svs.clients[i].auto_entity_over_streak = 0;
+		svs.clients[i].auto_distress_ticks_total = 0;
+		svs.clients[i].auto_distress_ticks_needed = 0;
 
 		// entity indices mean completely different things on the new map,
 		// so any "was visible" persistence state from the old map is
 		// meaningless and must not carry over.
 		memset (svs.clients[i].entity_was_visible, 0, sizeof(svs.clients[i].entity_was_visible));
+
+		// same svs.realtime-wraparound reasoning as auto_entity_cull_next_update
+		// above applies to the sv_netdebug report timer.
+		svs.clients[i].dbg_next_report = 0;
+		svs.clients[i].dbg_frames_built = 0;
+		svs.clients[i].dbg_client_resends = 0;
+		svs.clients[i].dbg_oow_resends = 0;
+		svs.clients[i].dbg_bytes_sent = 0;
+		svs.clients[i].dbg_ratedrops = 0;
+		svs.clients[i].dbg_overflows = 0;
+		svs.clients[i].dbg_resync_throttled = 0;
+
+		// same svs.realtime-wraparound reasoning again, for the
+		// full-resync throttle cooldown.
+		svs.clients[i].resync_throttle_next_allowed = 0;
+		svs.clients[i].antilag_resync_throttle_skipped = 0;
 	}
 	sv.time = 1000;
 
@@ -364,7 +382,7 @@ void SV_InitGame (void)
 
 	svs.spawncount = rand();
 	svs.clients = Z_Malloc (sizeof(client_t)*maxclients->value);
-	svs.num_client_entities = maxclients->value*UPDATE_BACKUP*64;
+	svs.num_client_entities = maxclients->value*UPDATE_BACKUP*150;	// matches sv_entity_budget_max
 	svs.client_entities = Z_Malloc (sizeof(entity_state_t)*svs.num_client_entities);
 
 	// init network stuff

@@ -290,8 +290,16 @@ void InitGame (void)
 	gi.cvar_describe (g_antilag_low_ping_threshold, "ping threshold for minimum lag compensation (ms).");
 	g_antilag_max_ping = gi.cvar("g_antilag_max_ping", va("%d", DEFAULT_ANTILAG_MAX_PING), CVAR_ARCHIVE);
 	gi.cvar_describe (g_antilag_max_ping, "maximum effective ping for lag compensation in milliseconds.");	
+	g_antilag_jitter_sigma = gi.cvar("g_antilag_jitter_sigma", va("%.1f", DEFAULT_ANTILAG_JITTER_SIGMA), CVAR_ARCHIVE | CVARDOC_FLOAT);
+	gi.cvar_describe (g_antilag_jitter_sigma, "Number of ping standard deviations added to a player's ping for lag compensation, so players with an unstable ping get more rewind. 0 disables it.");
+	g_antilag_jitter_max = gi.cvar("g_antilag_jitter_max", va("%d", DEFAULT_ANTILAG_JITTER_MAX), CVAR_ARCHIVE);
+	gi.cvar_describe (g_antilag_jitter_max, "Maximum extra ping in milliseconds that the ping jitter compensation may add.");
 	g_antilag_oneway_factor = gi.cvar("g_antilag_oneway_factor", "0.5", CVAR_ARCHIVE | CVARDOC_FLOAT);
 	gi.cvar_describe (g_antilag_oneway_factor, "Factor to convert RTT to one-way ping estimate. Default is 0.5 (RTT/2).");
+	g_antilag_loss_bias_strength = gi.cvar("g_antilag_loss_bias_strength", va("%.1f", DEFAULT_ANTILAG_LOSS_BIAS_STRENGTH), CVAR_ARCHIVE | CVARDOC_FLOAT);
+	gi.cvar_describe (g_antilag_loss_bias_strength, "Per-player bias applied to the oneway factor based on measured uplink/downlink packet-loss asymmetry. 0 disables it (plain g_antilag_oneway_factor is used).");
+	g_antilag_loss_bias_confidence_threshold = gi.cvar("g_antilag_loss_bias_confidence_threshold", va("%.2f", DEFAULT_ANTILAG_LOSS_BIAS_CONFIDENCE_THRESHOLD), CVAR_ARCHIVE | CVARDOC_FLOAT);
+	gi.cvar_describe (g_antilag_loss_bias_confidence_threshold, "Combined uplink+downlink loss rate (0..1) needed to fully trust the loss-bias direction. Higher = more loss required before the bias saturates.");
 
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);

@@ -62,6 +62,23 @@ struct gclient_s
 	player_state_t	ps;		// communicated by server to clients
 	int				ping;
 
+	// server-measured uplink/downlink packet-loss rates (0..1), written by
+	// SV_CalcPings; must stay in this exact position to match g_local.h's
+	// full gclient_s layout (see the antilag oneway-factor bias)
+	float			uplinkLossRate;
+	float			downlinkLossRate;
+
+	// cached output of G_AntilagOnewayFactor(), refreshed every server frame
+	// in ClientEndServerFrame(); read-only from the server's point of view
+	// (sv_jitters display), so sv_ccmds.c never has to re-derive this math.
+	// antilagBias is 0..1: higher means downlink loss dominates; uplink-dominant loss never lowers it
+	float			antilagBias;
+	float			antilagUsedFactor;
+
+	// standard deviation (ms) of the recent latency samples, written by
+	// SV_CalcPings; must stay in this exact position to match g_local.h
+	float			pingStdDev;
+
 	// the game dll can add anything it wants after
 	// this point in the structure
 

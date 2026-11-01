@@ -1276,7 +1276,15 @@ void ClientEndServerFrame (edict_t *ent)
 	int		i;
 	current_player = ent;
 	current_client = ent->client;
-	
+
+	// refresh the cached antilag bias/factor every frame (not just on shots),
+	// so the sv_jitters display and anything else reading it never goes stale
+	if ( !ent->is_bot )
+	{
+		float baseFactor = g_antilag_oneway_factor ? g_antilag_oneway_factor->value : DEFAULT_ONEWAY_FACTOR;
+		G_AntilagOnewayFactor (ent->client, baseFactor);
+	}
+
 	if (ent->client->chase_target != NULL && !player_participating (ent))
 	{
 		ent->redirect_number = ent->client->chase_target->s.number;

@@ -129,10 +129,21 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 	}
 	
 	memset(url, 0, sizeof(url));  // construct url
-	if (useGameFolder) {
-		Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", hostname, game, filename);
+
+	// Ensure the URL string uses secure HTTPS on modern operating systems (could be the url from the server config, which we want to keep using http for old clients)
+	if (strncmp(hostname, "http://", 7) == 0) {
+		// Replace "http://" with "https://" automatically
+		if (useGameFolder) {
+			Com_sprintf(url, sizeof(url) - 1, "https://%s/%s/%s", hostname + 7, game, filename);
+		} else {
+			Com_sprintf(url, sizeof(url) - 1, "https://%s/%s", hostname + 7, filename);
+		}
 	} else {
-		Com_sprintf(url, sizeof(url) - 1, "%s/%s", hostname, filename);
+		if (useGameFolder) {
+			Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", hostname, game, filename);
+		} else {
+			Com_sprintf(url, sizeof(url) - 1, "%s/%s", hostname, filename);
+		}
 	}
 
 	// set handle to default state
@@ -147,9 +158,16 @@ static qboolean CL_HttpDownloadFromHost (downloadhost_t host, const char *filena
 	// Follow redirects to https - but this doesn't seem to be working (the two fixed urls are now both https, but the custom url might be http)
 	if (curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK) return false;
 	if (curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 3L) != CURLE_OK) return false;
-	
-	// Don't verify that the host matches the certificate
+
+	// Allow libcurl to use both HTTP and HTTPS for initial connections
+	if (curl_easy_setopt(curl, CURLOPT_PROTOCOLS, (long)(CURLPROTO_HTTP | CURLPROTO_HTTPS)) != CURLE_OK) return false;
+
+	// CRITICAL: Explicitly tell libcurl it is allowed to redirect from HTTP to HTTPS
+	if (curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, (long)(CURLPROTO_HTTP | CURLPROTO_HTTPS)) != CURLE_OK) return false;
+
+	// Turn off both verification steps to fully bypass Windows certificate checks
 	if (curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L) != CURLE_OK) return false;
+	if (curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK) return false;
 
 	// time out in 5s
 	if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return false;

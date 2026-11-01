@@ -74,7 +74,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define STATS_ENABLED false
 #define DEFAULT_STATS_URL "http://martianbackup.com"
 
-#define VERSION_CHECK_ALIENARENA_ORG_URL "http://invader.alienarena.org/version/crx_version"
+#define VERSION_CHECK_ALIENARENA_ORG_URL "https://invader.alienarena.org/version/crx_version"
 #define DEFAULT_VERSION_CHECK_URL VERSION_CHECK_ALIENARENA_ORG_URL
 
 // Obsolete, but used in repair functions
@@ -88,8 +88,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULT_MASTER_2 "master2.alienarena.org"
 
 // NOTE: the game does *not* depend on these being the same for server and client.
-#define DEFAULT_DOWNLOAD_URL_1 "http://invader.alienarena.org/sv_downloadurl"
-#define DEFAULT_DOWNLOAD_URL_2 "http://hal.nanoid.net/sv_downloadurl"
+#define DEFAULT_DOWNLOAD_URL_1 "https://invader.alienarena.org/sv_downloadurl"
+#define DEFAULT_DOWNLOAD_URL_2 "https://hal.nanoid.net/sv_downloadurl"
 
 // Set this to false to test a local news file
 #define DOWNLOADNEWS true
@@ -97,9 +97,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // #define NEWSFILE "newsfeed.db"
 // new news file that supports color codes as well as entirely yellow lines with + at the start
 #define NEWSFILE "aanews.db"
-#define NEWSFEED_URL "http://invader.alienarena.org/" NEWSFILE
+#define NEWSFEED_URL "https://invader.alienarena.org/" NEWSFILE
 
-#define MAPPACK_URL "http://invader.alienarena.org/arena/files"
+#define MAPPACK_URL "https://invader.alienarena.org/arena/files"
 
 /* ---- Relative path names for game data ---*/
 /*
@@ -261,9 +261,20 @@ PROTOCOL
 
 //=========================================
 
-#define	UPDATE_BACKUP	16	// copies of entity_state_t to keep buffered
+#define	UPDATE_BACKUP	64	// copies of entity_state_t to keep buffered (640ms of
+							// history at 100 ticks - the old value of 16 (160ms) was
+							// too short for players with ping above ~150ms, forcing
+							// constant full (non-delta) resends; see UPDATE_BACKUP_LEGACY
 							// must be power of two
 #define	UPDATE_MASK		(UPDATE_BACKUP-1)
+
+// Clients built before the window above was widened only allocate a 16-frame
+// ring buffer on their own side (their UPDATE_BACKUP was compiled as 16), so
+// the server must never delta-reference a frame older than that for them,
+// regardless of how much history the server itself now keeps. Selected per
+// client in SV_WriteFrameToClient based on the "p100" userinfo capability
+// level (see client_t.p100 in server.h).
+#define UPDATE_BACKUP_LEGACY	16
 
 
 
