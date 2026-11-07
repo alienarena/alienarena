@@ -39,6 +39,10 @@ cvar_t			*con_ignorecolorcodes;
 #define cmode	(con_ignorecolorcodes != NULL && con_ignorecolorcodes->integer ? FNT_CMODE_NONE : FNT_CMODE_QUAKE_SRS)
 cvar_t			*con_color;
 
+// Amount of chat lines (wrapped screen lines, not raw messages) shown by
+// the chat overlay
+cvar_t			*cl_chatlines;
+
 float consolecolors[ 6 ][ 4 ] =
 {
 	{0.0, 0.0, 0.0, 0.2},
@@ -70,18 +74,37 @@ extern viddef_t vid;
  */
 void CON_ToggleConsole( void )
 {
+	// remembers whether the console was opened over the menu, so closing it
+	// (tilde or escape) goes back to the menu instead of always dumping the
+	// player into the game - and so the menu's own navigation state isn't
+	// wiped out from under it by the M_ForceMenuOff() below while it does
+	static qboolean con_entered_from_menu = false;
+
 	SCR_EndLoadingPlaque ();	// get rid of loading plaque
 
 	CON_ClearNotify( );
 
 	if (cls.key_dest == key_console)
 	{
-		M_ForceMenuOff ();
-		Cvar_Set ("paused", "0");
+		if (con_entered_from_menu)
+		{
+			cls.key_dest = key_menu;
+			Key_ClearStates ();
+			if (Cvar_VariableValue ("maxclients") == 1
+				&& Com_ServerState ())
+				Cvar_Set ("paused", "1");
+		}
+		else
+		{
+			M_ForceMenuOff ();
+			Cvar_Set ("paused", "0");
+		}
 	}
 	else
 	{
-		M_ForceMenuOff ();
+		con_entered_from_menu = (cls.key_dest == key_menu);
+		if (!con_entered_from_menu)
+			M_ForceMenuOff ();
 		cls.key_dest = key_console;
 
 		if (Cvar_VariableValue ("maxclients") == 1
@@ -318,31 +341,6 @@ void CON_DrawNotify( )
 	box.x = 0;
 	box.y = 0;
 
-	if (cls.key_dest == key_message) {
-		const char *	to_draw;
-		int		height;
-
-		if (chat_team) {
-			to_draw = "say_team: ";
-		} else if (chat_irc) {
-			to_draw = "say_IRC: ";
-		} else {
-			to_draw = "say: ";
-		}
-		box.width = viddef.width;
-		box.height = 0;
-		FNT_BoundedPrint( font , to_draw , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
-		height = box.height;
-
-		box.x = box.width + 1;
-		box.width = viddef.width - box.width;
-		box.height = 0;
-		FNT_WrappedPrint( font , chat_buffer , FNT_CMODE_NONE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
-
-		box.x = 0;
-		box.y = ( height > box.height ) ? height : box.height;
-	}
-
 	// Find the first logical line to display
 	line = _CON_FindLineStart( CON_console.curLine );
 	bLines = CON_console.lines - CON_console.lCount[ line ];
@@ -381,6 +379,233 @@ void CON_DrawNotify( )
 		timeIndex = ( timeIndex + 1 ) % CON_MAX_NOTIFY;
 		count --;
 	}
+}
+
+
+
+/**************************************************************************/
+/* CHAT OVERLAY                                                           */
+/**************************************************************************/
+
+/* Ring buffer storing the lines for one chat history (say/team/IRC) */
+typedef struct
+{
+	char	lines[ CON_CHAT_HISTORY_LINES ][ CON_CHAT_LINE_LENGTH ];
+	int	count;	// amount of valid entries, caps at CON_CHAT_HISTORY_LINES
+	int	next;	// index at which the next line will be written
+} chatHistory_t;
+
+static chatHistory_t	chatHistory[ CHAT_HISTORY_COUNT ];
+
+
+/* Add a line to the specified chat history, stripping any trailing newline */
+void CON_ChatHistoryAdd( chatHistoryType_t type , const char * text )
+{
+	chatHistory_t *	hist;
+	char *			dest;
+	size_t			len;
+
+	if ( type < 0 || type >= CHAT_HISTORY_COUNT ) {
+		return;
+	}
+
+	hist = &chatHistory[ type ];
+	dest = hist->lines[ hist->next ];
+	Q_strncpyz2( dest , text , CON_CHAT_LINE_LENGTH );
+
+	len = strlen( dest );
+	while ( len > 0 && ( dest[ len - 1 ] == '\n' || dest[ len - 1 ] == '\r' ) ) {
+		dest[ -- len ] = 0;
+	}
+
+	hist->next = ( hist->next + 1 ) % CON_CHAT_HISTORY_LINES;
+	if ( hist->count < CON_CHAT_HISTORY_LINES ) {
+		hist->count ++;
+	}
+}
+
+
+/* Auto-detect say vs team chat (from the server's "[TEAM] " prefix) and store it */
+void CON_ChatCapture( const char * text )
+{
+	CON_ChatHistoryAdd( ! strncmp( text , "[TEAM] " , 7 ) ? CHAT_HISTORY_TEAM : CHAT_HISTORY_SAY , text );
+}
+
+
+/*
+ * Fetch a line from a chat history by its distance from the most recently
+ * added line (0 = newest).
+ *
+ * Returns:
+ *	the requested line, or NULL if fromNewest is out of range
+ */
+static const char * _CON_ChatHistoryGet( chatHistory_t * hist , int fromNewest )
+{
+	int idx;
+
+	if ( fromNewest < 0 || fromNewest >= hist->count ) {
+		return NULL;
+	}
+
+	idx = ( hist->next - 1 - fromNewest + CON_CHAT_HISTORY_LINES * 2 ) % CON_CHAT_HISTORY_LINES;
+	return hist->lines[ idx ];
+}
+
+
+/*
+ * Draw the console-styled background panel (tinted fill plus decorative
+ * corner/edge tiles) used by the chat overlay. This mirrors the in-game
+ * styling used by CON_DrawConsole (same con_color palette and tile
+ * graphics), but is kept separate since the chat overlay never needs the
+ * "from menu" styling used while disconnected.
+ *
+ * Parameters:
+ *	font	the font whose size drives the tile scaling
+ *	height	the height of the panel's content area, in pixels
+ */
+static void _CON_DrawPanelBackground( FNT_font_t font , int height )
+{
+	int	_tile_w , _tile_h;
+	float	tile_w , tile_h;
+	int	color = con_color->integer;
+
+	Draw_GetPicSize( &_tile_w , &_tile_h , "menu/m_topcorner" );
+
+	tile_w = (float)_tile_w / 64.0 * (float)font->size * 4.0;
+	tile_h = (float)_tile_h / 64.0 * (float)font->size * 4.0;
+
+	if ( color < 0 || color > 5 ) {
+		color = 0;
+	}
+
+	if ( color > 0 ) {
+		Draw_Fill_CutCorners( font->size / 3 , 0 , viddef.width - font->size / 1.5 , height + font->size * 1.5 ,
+			consolecolors[ color ] , font->size , RCF_BOTTOMLEFT|RCF_BOTTOMRIGHT );
+	}
+
+	Draw_AlphaStretchTilingPic( -tile_w/4 , height-tile_h/2 , tile_w , tile_h , "menu/m_bottomcorner" , 1 );
+	Draw_AlphaStretchTilingPic( viddef.width+tile_w/4 , height-tile_h/2 , -tile_w , tile_h , "menu/m_bottomcorner" , 1 );
+
+	Draw_AlphaStretchTilingPic( tile_w*0.75 , height-tile_h/2 , viddef.width-tile_w*1.5 , tile_h , "menu/m_bottom" , 1 );
+
+	Draw_AlphaStretchTilingPic( -tile_w/4 , 0 , tile_w , height-tile_h/2 , "menu/m_side" , 1 );
+	Draw_AlphaStretchTilingPic( viddef.width+tile_w/4 , 0 , -tile_w , height-tile_h/2 , "menu/m_side" , 1 );
+	Draw_AlphaStretchTilingPic( tile_w*0.75 , 0 , viddef.width-tile_w*1.5 , height-tile_h/2 , "menu/m_background" , 1 );
+}
+
+
+/* Draw the chat overlay: history of the active chat channel plus the input line */
+void CON_DrawChatOverlay( void )
+{
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	chatHistoryType_t	type;
+	chatHistory_t *		hist;
+	const char *		prompt;
+	int			maxLines;
+	int			textWidth;
+	int			includedHeights[ CON_CHAT_HISTORY_LINES ];
+	int			includedCount;
+	int			totalScreenLines;
+	int			textHeight;
+	int			inputRowHeight;
+	int			panelHeight;
+	int			i , y;
+
+	font = FNT_AutoGet( CL_gameFont );
+
+	if ( chat_team ) {
+		type = CHAT_HISTORY_TEAM;
+		prompt = "say_team: ";
+	} else if ( chat_irc ) {
+		type = CHAT_HISTORY_IRC;
+		prompt = "say_IRC: ";
+	} else {
+		type = CHAT_HISTORY_SAY;
+		prompt = "say: ";
+	}
+	hist = &chatHistory[ type ];
+
+	maxLines = cl_chatlines->integer;
+	if ( maxLines < 1 ) {
+		maxLines = 1;
+	}
+	if ( maxLines > CON_CHAT_HISTORY_LINES ) {
+		maxLines = CON_CHAT_HISTORY_LINES;
+	}
+
+	textWidth = viddef.width - font->size * 5;
+
+	// Walk backwards from the most recent message, measuring its wrapped
+	// height (in screen lines) off-screen, until the requested amount of
+	// screen lines is reached. Always include at least one message.
+	includedCount = 0;
+	totalScreenLines = 0;
+	for ( i = 0 ; i < hist->count ; i ++ ) {
+		const char *	text = _CON_ChatHistoryGet( hist , i );
+		int		lines;
+
+		box.x = 0;
+		box.y = viddef.height;	// draw off-screen, we only want the resulting height
+		box.width = textWidth;
+		box.height = 0;
+		FNT_WrappedPrint( font , text , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 2 ] );
+
+		lines = box.height / font->height;
+		if ( lines < 1 ) {
+			lines = 1;
+		}
+
+		if ( includedCount > 0 && totalScreenLines + lines > maxLines ) {
+			break;
+		}
+
+		includedHeights[ includedCount ] = box.height;
+		includedCount ++;
+		totalScreenLines += lines;
+
+		if ( totalScreenLines >= maxLines ) {
+			break;
+		}
+	}
+
+	textHeight = 0;
+	for ( i = 0 ; i < includedCount ; i ++ ) {
+		textHeight += includedHeights[ i ];
+	}
+
+	inputRowHeight = font->height + font->size / 2;
+	panelHeight = textHeight + inputRowHeight;
+
+	_CON_DrawPanelBackground( font , panelHeight );
+
+	// Draw history, oldest (top) to newest (bottom), clipped to the text area
+	qglScissor( 0 , viddef.height - textHeight , viddef.width , textHeight );
+	qglEnable( GL_SCISSOR_TEST );
+
+	y = 0;
+	for ( i = includedCount - 1 ; i >= 0 ; i -- ) {
+		box.x = font->size * 2;
+		box.y = y;
+		box.width = textWidth;
+		box.height = 0;
+		FNT_WrappedPrint( font , _CON_ChatHistoryGet( hist , i ) , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 2 ] );
+		y += box.height;
+	}
+
+	qglDisable( GL_SCISSOR_TEST );
+
+	// Draw the input prompt and currently typed text
+	box.x = font->size * 2;
+	box.y = panelHeight - inputRowHeight + font->size / 4;
+	box.width = viddef.width;
+	box.height = 0;
+	FNT_BoundedPrint( font , prompt , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
+
+	box.x = font->size * 2 + box.width + 1;
+	box.width = viddef.width - box.x - font->size * 2;
+	box.height = 0;
+	FNT_WrappedPrint( font , chat_buffer , FNT_CMODE_NONE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 }
 
 
@@ -458,6 +683,8 @@ void CON_Initialise( )
 	// 4 = cyan
 	// 5 = purple
 	con_color = Cvar_Get( "con_color", "0", CVARDOC_INT|CVAR_ARCHIVE );
+
+	cl_chatlines = Cvar_Get( "cl_chatlines" , "10" , CVARDOC_INT|CVAR_ARCHIVE );
 
 	// Register commands
 	Cmd_AddCommand( "toggleconsole", CON_ToggleConsole );

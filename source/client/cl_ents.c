@@ -491,6 +491,16 @@ void CL_FireEntityEvents (frame_t *frame)
 {
 	entity_state_t		*s1;
 	int					pnum, num;
+	// EF_TELEPORTER particles were tuned for a roughly 10 fps rate; gate by
+	// wall-clock time so the effect looks right at any server tickrate.
+	static int			lastTeleParticleTime = 0;
+	qboolean			spawnTeleParticles = false;
+
+	if (Sys_Milliseconds() - lastTeleParticleTime > 100)
+	{
+		lastTeleParticleTime = Sys_Milliseconds();
+		spawnTeleParticles = true;
+	}
 
 	for (pnum = 0 ; pnum<frame->num_entities ; pnum++)
 	{
@@ -500,7 +510,7 @@ void CL_FireEntityEvents (frame_t *frame)
 			CL_EntityEvent (s1);
 
 		// EF_TELEPORTER acts like an event, but is not cleared each frame
-		if (s1->effects & EF_TELEPORTER)
+		if ((s1->effects & EF_TELEPORTER) && spawnTeleParticles)
 			CL_BigTeleportParticles(s1->origin);
 	}
 }

@@ -504,7 +504,7 @@ static void CTFFlagThink(edict_t *ent)
 {
 	if (ent->solid != SOLID_NOT)
 		ent->s.frame = 173 + (((ent->s.frame - 173) + 1) % 16);
-	ent->nextthink = level.time + FRAMETIME;
+	ent->nextthink = level.time + TENFPS;
 }
 void CTFFlagSetup (edict_t *ent)
 {

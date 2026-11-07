@@ -348,6 +348,9 @@ void IRC_SetNextLine( int len , const char *buffer )
 	// Copy string
 	Q_strncpyz2( to_set , buffer , SCR_IRC_LENGTH );
 
+	// Also keep it in the IRC chat history, for the chat overlay
+	CON_ChatHistoryAdd( CHAT_HISTORY_IRC , buffer );
+
 	// Restore IRC display and update time-related variables
 	scr_IRCtime_off = 15;
 	scr_IRCtime_start = cl.time;
@@ -381,6 +384,11 @@ void SCR_CheckDrawIRCString (void)
 
 	scr_IRCtime_off -= cls.frametime;
 	if (scr_IRCtime_off <= 0 || scr_IRC_display == SCR_IRC_DISPLAY_HIDE)
+		return;
+
+	// The IRC chat overlay already shows this history persistently; avoid
+	// overlapping it with the fading notification box.
+	if (cls.key_dest == key_message && chat_irc)
 		return;
 
 	last_line = ( scr_IRC_display == SCR_IRC_DISPLAY_FULL ) ? scr_IRC_lines : ( scr_IRC_lines - 1 );
@@ -901,10 +909,13 @@ void SCR_DrawConsole (void)
 	{
 		CON_DrawConsole( scr_con_current );
 	}
-	else
+	else if (cls.key_dest == key_message)
 	{
-		if (cls.key_dest == key_game || cls.key_dest == key_message)
-			CON_DrawNotify ();	// only draw notify in game
+		CON_DrawChatOverlay ();	// history + input line for the active chat channel
+	}
+	else if (cls.key_dest == key_game)
+	{
+		CON_DrawNotify ();	// only draw notify in game
 	}
 
 	//draw chat bubble

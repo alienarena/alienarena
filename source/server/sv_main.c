@@ -1311,7 +1311,11 @@ void SV_Frame (int msec)
 	// trace without needing per-client logging already running. "other_ms"
 	// (whatever tmp_hangtime isn't accounted for by read/game/send) covers
 	// NET_Sleep/OS-scheduling gaps rather than anything our own code did.
-	if (sv_hitch_threshold_ms->integer > 0 && tmp_hangtime > sv_hitch_threshold_ms->integer)
+	// sv_hitch_threshold_ms is how much *longer than the expected per-tick
+	// budget* counts as a hitch, not an absolute ceiling - at low tickrates
+	// (e.g. 10, a 100ms budget) the budget alone would otherwise exceed a
+	// flat threshold on every normal tick from ordinary scheduling jitter.
+	if (sv_hitch_threshold_ms->integer > 0 && tmp_hangtime > FRAMETIME * 1000 + sv_hitch_threshold_ms->integer)
 	{
 		int other_ms = tmp_hangtime - svs.hitch_read_packets_ms - svs.hitch_game_frame_ms - svs.hitch_total_send_ms;
 
@@ -1656,7 +1660,7 @@ void SV_Init (void)
 	Cvar_Describe (sv_resync_throttle_ms, "Minimum milliseconds between forced full (non-delta) resyncs sent to a client that has fallen out of its delta-compression window. Without this, such a client would get hit with the most expensive packet every single tick for as long as the condition lasts. Ticks in between are skipped entirely (same as a rate-drop) rather than repeating the resync.");
 
 	sv_hitch_threshold_ms = Cvar_Get ("sv_hitch_threshold_ms", "100", CVAR_ARCHIVE | CVARDOC_INT);
-	Cvar_Describe (sv_hitch_threshold_ms, "If a server tick takes longer than this many milliseconds (wall clock, not CPU time), print a breakdown: time in packet reading, game simulation, and total/worst-single-client send time (including whether that client needed a full resync). Independent of sv_netdebug - intended to stay on by default to catch rare stalls/hiccups without needing per-client logging running. 0 disables this check.");
+	Cvar_Describe (sv_hitch_threshold_ms, "If a server tick takes longer than this many milliseconds (wall clock, not CPU time) beyond the current tickrate's per-tick budget, print a breakdown: time in packet reading, game simulation, and total/worst-single-client send time (including whether that client needed a full resync). Independent of sv_netdebug - intended to stay on by default to catch rare stalls/hiccups without needing per-client logging running. 0 disables this check.");
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
 	SZ_SetName (&net_message, "Net message buffer", true);

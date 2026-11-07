@@ -42,6 +42,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /* Maximal amount of in-game notifications */
 #define CON_MAX_NOTIFY		4
 
+/* Maximal amount of stored lines per chat history (say/team/IRC) */
+#define CON_CHAT_HISTORY_LINES	64
+
+/* Maximal length of a stored chat history line */
+#define CON_CHAT_LINE_LENGTH	256
+
 
 
 /**************************************************************************/
@@ -90,6 +96,18 @@ struct CON_console_s
 
 /* The console's main structure */
 extern struct CON_console_s	CON_console;
+
+
+/*
+ * The kinds of chat history tracked for the chat overlay.
+ */
+typedef enum
+{
+	CHAT_HISTORY_SAY = 0,
+	CHAT_HISTORY_TEAM,
+	CHAT_HISTORY_IRC,
+	CHAT_HISTORY_COUNT
+} chatHistoryType_t;
 
 
 
@@ -160,6 +178,38 @@ void CON_ClearNotify( );
  * Draw the few last lines of the console transparently over the game.
  */
 void CON_DrawNotify( );
+
+
+
+/**************************************************************************/
+/* CHAT OVERLAY FUNCTIONS                                                 */
+/**************************************************************************/
+
+/*
+ * Add a line to the specified chat history, for later display by the chat
+ * overlay. Any trailing newline(s) are stripped.
+ *
+ * Parameters:
+ *	type	the chat history to add the line to
+ *	text	the text to add
+ */
+void CON_ChatHistoryAdd( chatHistoryType_t type , const char * text );
+
+/*
+ * Add a line of in-game chat text (say/say_team) to the appropriate chat
+ * history, auto-detecting team messages from their "[TEAM] " prefix.
+ *
+ * Parameters:
+ *	text	the text to add
+ */
+void CON_ChatCapture( const char * text );
+
+/*
+ * Draw the chat overlay: a console-styled panel showing the last lines of
+ * the currently active chat channel (say, team or IRC), with the input
+ * line underneath. Only meaningful while cls.key_dest == key_message.
+ */
+void CON_DrawChatOverlay( void );
 
 
 

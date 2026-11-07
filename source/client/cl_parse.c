@@ -1285,11 +1285,13 @@ void CL_ParseServerMessage (void)
 
 		case svc_print:
 			i = MSG_ReadByte (&net_message);
+			s = MSG_ReadString (&net_message);
 			if (i == PRINT_CHAT)
 			{
 				S_StartLocalSound ("misc/talk.wav");
+				CON_ChatCapture (s);
 			}
-			Com_Printf ("%s", MSG_ReadString (&net_message));
+			Com_Printf ("%s", s);
 			break;
 
 		case svc_centerprint:

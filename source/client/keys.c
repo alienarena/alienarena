@@ -945,8 +945,17 @@ void Key_Event (int key, qboolean down, unsigned time)
 		case key_menu:
 			M_Keydown (key);
 			break;
-		case key_game:
 		case key_console:
+			// just close the console (back to the game, or back to the
+			// menu if it was opened over one) - same as the tilde key,
+			// not also pop open the main menu
+			if (cls.state == ca_disconnected) {
+				M_Menu_Main_f ();
+				break;
+			}
+			CON_ToggleConsole ();
+			break;
+		case key_game:
 			M_Menu_Main_f ();
 			break;
 		default:
