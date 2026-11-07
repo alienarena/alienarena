@@ -207,17 +207,11 @@ void CON_ChatCapture( const char * text );
 /*
  * Draw the chat overlay: a console-styled panel showing the last lines of
  * the currently active chat channel (say, team or IRC), with the input
- * line underneath. Only meaningful while cls.key_dest == key_message.
+ * line underneath, plus a one-line notice below the panel for any other
+ * channel that received a message recently. Only meaningful while
+ * cls.key_dest == key_message.
  */
 void CON_DrawChatOverlay( void );
-
-/*
- * Height, in pixels, of the chat overlay's panel as of the last time it was
- * drawn this session. Returns 0 if the chat overlay isn't currently shown
- * (cls.key_dest != key_message). Used by other screen elements (e.g. the
- * IRC fading notification) to avoid being covered by the overlay's panel.
- */
-int CON_ChatOverlayHeight( void );
 
 
 

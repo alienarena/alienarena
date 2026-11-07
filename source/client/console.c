@@ -391,14 +391,12 @@ void CON_DrawNotify( )
 typedef struct
 {
 	char	lines[ CON_CHAT_HISTORY_LINES ][ CON_CHAT_LINE_LENGTH ];
-	int	count;	// amount of valid entries, caps at CON_CHAT_HISTORY_LINES
-	int	next;	// index at which the next line will be written
+	int	count;		// amount of valid entries, caps at CON_CHAT_HISTORY_LINES
+	int	next;		// index at which the next line will be written
+	float	lastAddTime;	// cls.realtime of the most recent addition
 } chatHistory_t;
 
 static chatHistory_t	chatHistory[ CHAT_HISTORY_COUNT ];
-
-/* Panel height from the last time the chat overlay was drawn */
-static int		chatOverlayLastHeight = 0;
 
 
 /* Add a line to the specified chat history, stripping any trailing newline */
@@ -425,6 +423,7 @@ void CON_ChatHistoryAdd( chatHistoryType_t type , const char * text )
 	if ( hist->count < CON_CHAT_HISTORY_LINES ) {
 		hist->count ++;
 	}
+	hist->lastAddTime = cls.realtime;
 }
 
 
@@ -465,12 +464,20 @@ static const char * _CON_ChatHistoryGet( chatHistory_t * hist , int fromNewest )
  * Parameters:
  *	font	the font whose size drives the tile scaling
  *	height	the height of the panel's content area, in pixels
+ *
+ * Returns:
+ *	the panel's actual visual bottom edge, in pixels - this extends past
+ *	"height" because the bottom corner/edge tiles and the tinted fill both
+ *	overshoot it; callers that need to avoid overlapping the panel
+ *	entirely (not just its content area) should use this instead of
+ *	"height" itself.
  */
-static void _CON_DrawPanelBackground( FNT_font_t font , int height )
+static int _CON_DrawPanelBackground( FNT_font_t font , int height )
 {
 	int	_tile_w , _tile_h;
 	float	tile_w , tile_h;
 	int	color = con_color->integer;
+	int	fillBottom , tileBottom;
 
 	Draw_GetPicSize( &_tile_w , &_tile_h , "menu/m_topcorner" );
 
@@ -494,6 +501,10 @@ static void _CON_DrawPanelBackground( FNT_font_t font , int height )
 	Draw_AlphaStretchTilingPic( -tile_w/4 , 0 , tile_w , height-tile_h/2 , "menu/m_side" , 1 );
 	Draw_AlphaStretchTilingPic( viddef.width+tile_w/4 , 0 , -tile_w , height-tile_h/2 , "menu/m_side" , 1 );
 	Draw_AlphaStretchTilingPic( tile_w*0.75 , 0 , viddef.width-tile_w*1.5 , height-tile_h/2 , "menu/m_background" , 1 );
+
+	fillBottom = ( color > 0 ) ? (int)( height + font->size * 1.5 ) : height;
+	tileBottom = (int)( height + tile_h / 2 );
+	return ( tileBottom > fillBottom ) ? tileBottom : fillBottom;
 }
 
 
@@ -513,6 +524,7 @@ void CON_DrawChatOverlay( void )
 	int			textHeight;
 	int			inputRowHeight;
 	int			panelHeight;
+	int			panelVisualBottom;
 	int			i , y;
 
 	font = FNT_AutoGet( CL_gameFont );
@@ -579,9 +591,8 @@ void CON_DrawChatOverlay( void )
 
 	inputRowHeight = font->height + font->size / 2;
 	panelHeight = textHeight + inputRowHeight;
-	chatOverlayLastHeight = panelHeight;
 
-	_CON_DrawPanelBackground( font , panelHeight );
+	panelVisualBottom = _CON_DrawPanelBackground( font , panelHeight );
 
 	// Draw history, oldest (top) to newest (bottom), clipped to the text area
 	qglScissor( 0 , viddef.height - textHeight , viddef.width , textHeight );
@@ -610,16 +621,35 @@ void CON_DrawChatOverlay( void )
 	box.width = viddef.width - box.x - font->size * 2;
 	box.height = 0;
 	FNT_WrappedPrint( font , chat_buffer , FNT_CMODE_NONE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
-}
 
+	// A message on a channel that isn't currently open would otherwise be
+	// completely invisible while chatting - show the latest line from each
+	// other channel (if recent) just below the panel, so nothing is missed.
+	y = panelVisualBottom + font->size / 4;
+	for ( i = 0 ; i < CHAT_HISTORY_COUNT ; i ++ ) {
+		chatHistory_t *	other;
+		const char *	latest;
 
-/* Height of the chat overlay's panel, or 0 if it isn't currently shown */
-int CON_ChatOverlayHeight( void )
-{
-	if ( cls.key_dest != key_message ) {
-		return 0;
+		if ( i == type ) {
+			continue;
+		}
+
+		other = &chatHistory[ i ];
+		if ( other->count == 0
+				|| cls.realtime - other->lastAddTime > con_notifytime->value * 1000 ) {
+			continue;
+		}
+
+		latest = _CON_ChatHistoryGet( other , 0 );
+
+		box.x = font->size * 2;
+		box.y = y;
+		box.width = textWidth;
+		box.height = 0;
+		FNT_WrappedPrint( font , latest , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 3 ] );
+
+		y += ( box.height > font->height ) ? box.height : font->height;
 	}
-	return chatOverlayLastHeight;
 }
 
 
