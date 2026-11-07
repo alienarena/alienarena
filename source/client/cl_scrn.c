@@ -387,7 +387,7 @@ void SCR_CheckDrawIRCString (void)
 		return;
 
 	// The IRC chat overlay already shows this history persistently; avoid
-	// overlapping it with the fading notification box.
+	// duplicating it with the fading notification box.
 	if (cls.key_dest == key_message && chat_irc)
 		return;
 
@@ -399,6 +399,19 @@ void SCR_CheckDrawIRCString (void)
 
 	box.x = 0;
 	box.y = font->size * 5;
+	// Avoid being covered by the say/team chat overlay's panel: push this
+	// box down below it instead, so a new IRC message is never missed
+	// while chatting on a different channel.
+	if (cls.key_dest == key_message) {
+		int overlayHeight = CON_ChatOverlayHeight();
+		if (overlayHeight > box.y)
+			box.y = overlayHeight;
+	}
+	// If the overlay already fills the area this box would use, there's no
+	// room left to draw into this frame (box.height is unsigned, so don't
+	// let box.y reach or pass the ceiling below).
+	if (box.y >= font->size * 15)
+		return;
 	for ( i = 0 ; i <= last_line ; i++ ) {
 		box.width = viddef.width;
 		box.height = font->size * 15 - box.y;

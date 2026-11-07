@@ -397,6 +397,9 @@ typedef struct
 
 static chatHistory_t	chatHistory[ CHAT_HISTORY_COUNT ];
 
+/* Panel height from the last time the chat overlay was drawn */
+static int		chatOverlayLastHeight = 0;
+
 
 /* Add a line to the specified chat history, stripping any trailing newline */
 void CON_ChatHistoryAdd( chatHistoryType_t type , const char * text )
@@ -576,6 +579,7 @@ void CON_DrawChatOverlay( void )
 
 	inputRowHeight = font->height + font->size / 2;
 	panelHeight = textHeight + inputRowHeight;
+	chatOverlayLastHeight = panelHeight;
 
 	_CON_DrawPanelBackground( font , panelHeight );
 
@@ -606,6 +610,16 @@ void CON_DrawChatOverlay( void )
 	box.width = viddef.width - box.x - font->size * 2;
 	box.height = 0;
 	FNT_WrappedPrint( font , chat_buffer , FNT_CMODE_NONE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
+}
+
+
+/* Height of the chat overlay's panel, or 0 if it isn't currently shown */
+int CON_ChatOverlayHeight( void )
+{
+	if ( cls.key_dest != key_message ) {
+		return 0;
+	}
+	return chatOverlayLastHeight;
 }
 
 

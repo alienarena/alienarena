@@ -211,6 +211,14 @@ void CON_ChatCapture( const char * text );
  */
 void CON_DrawChatOverlay( void );
 
+/*
+ * Height, in pixels, of the chat overlay's panel as of the last time it was
+ * drawn this session. Returns 0 if the chat overlay isn't currently shown
+ * (cls.key_dest != key_message). Used by other screen elements (e.g. the
+ * IRC fading notification) to avoid being covered by the overlay's panel.
+ */
+int CON_ChatOverlayHeight( void );
+
 
 
 /**************************************************************************/
