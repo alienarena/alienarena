@@ -399,6 +399,37 @@ typedef struct
 static chatHistory_t	chatHistory[ CHAT_HISTORY_COUNT ];
 
 
+/*
+ * Say/team chat lines are always built by the server as "name: message"
+ * (optionally with a "[TEAM] " prefix first) - the name comes first, so
+ * the *first* ": " in the string is always the end of it. If the player's
+ * name ends with a color code and never resets it, that color would
+ * otherwise bleed into the whole message with no explicit reset of its
+ * own (now that history lines are drawn with persisting color codes, see
+ * CON_DrawChatOverlay). Insert an explicit reset right there.
+ */
+static void _CON_ChatResetColorAfterName( char * buf , size_t bufSize )
+{
+	char *	sep = strstr( buf , ": " );
+	size_t	len;
+	size_t	insertAt;
+
+	if ( ! sep ) {
+		return;
+	}
+
+	insertAt = ( sep - buf ) + 2;	// right after ": "
+	len = strlen( buf );
+	if ( len + 2 >= bufSize ) {
+		return;	// no room to insert without truncating content
+	}
+
+	memmove( buf + insertAt + 2 , buf + insertAt , len - insertAt + 1 );	// +1 for the NUL
+	buf[ insertAt ] = '^';
+	buf[ insertAt + 1 ] = '7';
+}
+
+
 /* Add a line to the specified chat history, stripping any trailing newline */
 void CON_ChatHistoryAdd( chatHistoryType_t type , const char * text )
 {
@@ -430,7 +461,13 @@ void CON_ChatHistoryAdd( chatHistoryType_t type , const char * text )
 /* Auto-detect say vs team chat (from the server's "[TEAM] " prefix) and store it */
 void CON_ChatCapture( const char * text )
 {
-	CON_ChatHistoryAdd( ! strncmp( text , "[TEAM] " , 7 ) ? CHAT_HISTORY_TEAM : CHAT_HISTORY_SAY , text );
+	chatHistoryType_t	type = ! strncmp( text , "[TEAM] " , 7 ) ? CHAT_HISTORY_TEAM : CHAT_HISTORY_SAY;
+	char			fixed[ CON_CHAT_LINE_LENGTH ];
+
+	Q_strncpyz2( fixed , text , sizeof( fixed ) );
+	_CON_ChatResetColorAfterName( fixed , sizeof( fixed ) );
+
+	CON_ChatHistoryAdd( type , fixed );
 }
 
 
@@ -564,7 +601,13 @@ void CON_DrawChatOverlay( void )
 		box.y = viddef.height;	// draw off-screen, we only want the resulting height
 		box.width = textWidth;
 		box.height = 0;
-		FNT_WrappedPrint( font , text , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 2 ] );
+		// FNT_CMODE_QUAKE (not _SRS): chat messages are free text where a
+		// color code is meant to persist across multiple words - SRS mode
+		// resets to the base color at every space, corrupting that.
+		// FNT_colors[7] (white): matches the existing plain console
+		// notification's default, so uncolored text (e.g. the "[TEAM] "
+		// prefix) looks the same regardless of which element shows it.
+		FNT_WrappedPrint( font , text , FNT_CMODE_QUAKE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 
 		lines = box.height / font->height;
 		if ( lines < 1 ) {
@@ -604,7 +647,7 @@ void CON_DrawChatOverlay( void )
 		box.y = y;
 		box.width = textWidth;
 		box.height = 0;
-		FNT_WrappedPrint( font , _CON_ChatHistoryGet( hist , i ) , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 2 ] );
+		FNT_WrappedPrint( font , _CON_ChatHistoryGet( hist , i ) , FNT_CMODE_QUAKE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 		y += box.height;
 	}
 
@@ -646,7 +689,7 @@ void CON_DrawChatOverlay( void )
 		box.y = y;
 		box.width = textWidth;
 		box.height = 0;
-		FNT_WrappedPrint( font , latest , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 3 ] );
+		FNT_WrappedPrint( font , latest , FNT_CMODE_QUAKE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 
 		y += ( box.height > font->height ) ? box.height : font->height;
 	}
