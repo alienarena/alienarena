@@ -16,10 +16,6 @@
 
 <p>Enable/disable mouse input processing.</p>
 
-<p><strong>in_poll_rate</strong>: BOOL (default: 0)</p>
-
-<p>Mouse poll frequency. 0=packet rate only (~62 Hz), 1=render rate (uncapped, highest responsiveness).</p>
-
 <p><strong>in_dgamouse</strong>: BOOL (default: 1)</p>
 
 <p>Use DGA mouse on Linux for raw input (improved precision).</p>
@@ -98,6 +94,18 @@
 <p>Enable conversion of ANSI colour codes to the internal colour format on Unix terminals.  If disabled the codes are left intact.</p>
 
 
+<p><strong>paused</strong>: BOOL (default: 0)</p>
+
+<p>Set while the game is paused.</p>
+
+<p><strong>p100</strong>: INT (default: 2, read-only)</p>
+
+<p>Internal userinfo value sent to the server (used for compatibility with the server).</p>
+
+<p><strong>basedir</strong>: STRING (default: ".", read-only)</p>
+
+<p>Base directory of the game data.</p>
+
 <h3>Movement CVARs</h3>
 
 <p><strong>cl_upspeed</strong>: INT (default: 200)</p>
@@ -142,9 +150,13 @@
 
 <h3>Display/Graphics CVARs</h3>
 
-<p><strong>cl_maxfps</strong>: INT (default: 60)</p>
+<p><strong>cl_maxfps</strong>: INT (default: 100)</p>
 
 <p>Limit frames drawn per second using a busy-wait loop. Higher values = more responsive input.</p>
+
+<p><strong>cl_maxpackets</strong>: INT (default: 100)</p>
+
+<p>Maximum number of packets to send to the server per second. Limited by the server tickrate (<code>sv_tickrate</code>).</p>
 
 <p><strong>cl_drawfps</strong>: BOOL (default: 0)</p>
 
@@ -172,11 +184,11 @@
 
 <p><strong>cl_flicker</strong>: BOOL (default: 1)</p>
 
-<p>Enable flickering light effects.</p>
+<p>Enable flickering world lighting.</p>
 
 <p><strong>cl_simpleitems</strong>: BOOL (default: 0)</p>
 
-<p>Use flat item icons instead of 3D models.</p>
+<p>Show sprites instead of models for pickup items.</p>
 
 <p><strong>cl_centerprint</strong>: BOOL (default: 1)</p>
 
@@ -200,9 +212,17 @@
 
 <h3>Network/Rate Control CVARs</h3>
 
-<p><strong>rate</strong>: INT (default: 25000, clamped to max 15000)</p>
+<p><strong>rate</strong>: INT (default: 40000)</p>
 
-<p>Bandwidth limit in bytes/second. Server enforces maximum of 15000.</p>
+<p>Bandwidth limit in bytes/second (userinfo cvar). The server clamps it to the range 2500 to 75000.</p>
+
+<p><strong>entity_cull</strong>: FLOAT (default: 0)</p>
+
+<p>Per-client entity culling override (userinfo cvar): cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. 0 uses the server default (<code>sv_entity_cull</code>).</p>
+
+<p><strong>cl_nodelta</strong>: BOOL (default: 0)</p>
+
+<p>Ask the server for full (non-delta) updates only. Debugging only, uses a lot of bandwidth.</p>
 
 <p><strong>cl_timeout</strong>: INT (default: 120)</p>
 
@@ -211,6 +231,62 @@
 <p><strong>cl_shownet</strong>: INT (default: 0)</p>
 
 <p>Show network traffic debug info. Higher values = more detail.</p>
+
+<p><strong>cl_showmiss</strong>: BOOL (default: 0)</p>
+
+<p>Print a message when the client prediction does not match the server.</p>
+
+<p><strong>showclamp</strong>: BOOL (default: 0)</p>
+
+<p>Print a message when the client time is clamped.</p>
+
+<p><strong>netgraph</strong>: BOOL (default: 0)</p>
+
+<p>Draw the network graph on screen (see also <code>graphheight</code>, <code>graphscale</code>, <code>graphshift</code>, <code>debuggraph</code>, <code>timegraph</code>).</p>
+
+<p><strong>cl_drawbandwidth</strong>: BOOL (default: 0)</p>
+
+<p>Show the incoming bandwidth from the server on screen, in KiB/s.</p>
+
+<p><strong>cl_drawframesover</strong>: INT (default: 0)</p>
+
+<p>Show on screen the number of frames per second that took longer than this many milliseconds (a measure of frame time jitter). 0 = off.</p>
+
+<p><strong>cl_drawtimer</strong>: BOOL (default: 0)</p>
+
+<p>Show a timer on screen.</p>
+
+<p><strong>net_shownet</strong>: INT (default: 0)</p>
+
+<p>(Windows) Show network debug output.</p>
+
+<p><strong>noudp</strong>, <strong>noipx</strong>: BOOL (default: 0)</p>
+
+<p>Disable the UDP or IPX network protocol (set on the command line).</p>
+
+<p><strong>ip</strong>: STRING (default: "localhost")</p>
+
+<p>IP address of the server to use (read-only, set on the command line).</p>
+
+<p><strong>port</strong>: INT (default: 27910)</p>
+
+<p>UDP port of the server (read-only, set on the command line).</p>
+
+<p><strong>clientport</strong>, <strong>hostport</strong>, <strong>ip_clientport</strong>, <strong>ip_hostport</strong>, <strong>ipx_clientport</strong>, <strong>ipx_hostport</strong>: INT (default: 0 for the host and IP ports)</p>
+
+<p>(Windows) Ports used for network sockets (read-only, set on the command line).</p>
+
+<p><strong>qport</strong>: INT (default: random)</p>
+
+<p>Random port number that identifies the client to the server independent of its NAT address (read-only).</p>
+
+<p><strong>showdrop</strong>: BOOL (default: 0)</p>
+
+<p>Print a message when packets are dropped.</p>
+
+<p><strong>showpackets</strong>: BOOL (default: 0)</p>
+
+<p>Print all sent and received packets.</p>
 
 <h3>User Info CVARs</h3>
 
@@ -224,7 +300,7 @@
 
 <p><strong>hand</strong>: INT (default: 0)</p>
 
-<p>Weapon hand: 0=right, 1=center, 2=left.</p>
+<p>Weapon hand: 0=gun shown on the right, 1=gun shown on the left, 2=gun hidden.</p>
 
 <p><strong>gender</strong>: STRING (default: "male")</p>
 
@@ -262,7 +338,7 @@
 
 <p><strong>cl_precachecustom</strong>: BOOL (default: 0)</p>
 
-<p>Precache custom models on startup (uses more memory/time).</p>
+<p>Precache 3rd-party and custom player skins at the first map load (uses more memory/time).</p>
 
 <p><strong>cl_playtaunts</strong>: BOOL (default: 1)</p>
 
@@ -276,29 +352,29 @@
 
 <p>Enable test features/debug mode.</p>
 
-<p><strong>cl_timedemo</strong>: BOOL (default: 0)</p>
+<p><strong>timedemo</strong>: BOOL (default: 0)</p>
 
-<p>Benchmark mode - runs demo at maximum speed and prints timing stats.</p>
+<p>Play back demos (recorded games) in benchmark mode: runs the demo at maximum speed and prints timing stats.</p>
 
-<p><strong>cl_demoquit</strong>: BOOL (default: 0)</p>
+<p><strong>demoquit</strong>: BOOL (default: 0)</p>
 
-<p>Auto-quit after running a demo.</p>
+<p>Quit automatically after a demo has finished.</p>
 
 <p><strong>cl_showplayernames</strong>: INT (default: 0)</p>
 
-<p>Display player names: 0=off, 1=teammates, 2=all players.</p>
+<p>Player nametags: 0=none, 1=one nametag in the center of the screen, 2=a nametag over each player.</p>
 
-<p><strong>cl_paindist</strong>: INT (default: 0)</p>
+<p><strong>cl_paindist</strong>: BOOL (default: 0)</p>
 
-<p>Sound distance for pain sounds.</p>
+<p>Distort the screen when you take damage.</p>
 
-<p><strong>cl_explosiondist</strong>: INT (default: 0)</p>
+<p><strong>cl_explosiondist</strong>: BOOL (default: 0)</p>
 
-<p>Sound distance for explosion sounds.</p>
+<p>Distort the screen for explosions.</p>
 
-<p><strong>cl_raindist</strong>: INT (default: 1)</p>
+<p><strong>cl_raindist</strong>: BOOL (default: 1)</p>
 
-<p>Sound distance for rain/ambient sounds.</p>
+<p>Show rain running down your visor.</p>
 
 <p><strong>cl_dm_lights</strong>: BOOL (default: 0)</p>
 
@@ -306,7 +382,7 @@
 
 <p><strong>cl_disbeamclr</strong>: INT (default: 0)</p>
 
-<p>Disable specific beam color effects (0-7).</p>
+<p>Beam color of the disruptor weapon: 0=green, 1=blue, 2=red, 3=yellow, 4=purple.</p>
 
 <p><strong>cl_showspeedometer</strong>: BOOL (default: 0)</p>
 
@@ -336,15 +412,23 @@
 
 <p><strong>cl_show_active_servers_only</strong>: BOOL (default: 0)</p>
 
-<p>Filter server list to show only active servers.</p>
+<p>Only show active servers in the server list. Not remembered when quitting.</p>
+
+<p><strong>stats_password</strong>: STRING (default: "password")</p>
+
+<p>Password for your player stats account on the stats server (stored in your profile).</p>
+
+<p><strong>stats_pw_hashed</strong>: BOOL (default: 0)</p>
+
+<p>Set automatically when <code>stats_password</code> has been stored as a hash.</p>
 
 <p><strong>cl_stats_server</strong>: STRING (default: "http://martianbackup.com")</p>
 
 <p>Stats collection server URL for player rankings.</p>
 
-<p><strong>cl_latest_game_version_url</strong>: STRING (default: "http://invader.alienarena.org/version/crx_version")</p>
+<p><strong>cl_latest_game_version_server</strong>: STRING (default: "https://invader.alienarena.org/version/crx_version")</p>
 
-<p>URL for checking latest game version updates.</p>
+<p>URL for checking the latest game version.</p>
 
 <p><strong>cl_speedrecord</strong>: INT (default: 450)</p>
 
@@ -404,6 +488,342 @@
 
 <p>Menu font size (0 = auto).</p>
 
+<h3>Chat/IRC CVARs</h3>
+
+<p><strong>cl_chatlines</strong>: INT (default: 10)</p>
+
+<p>Number of chat messages shown in the chat overlay.</p>
+
+<p><strong>cl_IRC_server</strong>: STRING (default: "irc.alienarena.org")</p>
+
+<p>IRC server to connect to.</p>
+
+<p><strong>cl_IRC_port</strong>: INT (default: 6667)</p>
+
+<p>IRC server port.</p>
+
+<p><strong>cl_IRC_channel</strong>: STRING (default: "alienarena")</p>
+
+<p>IRC channel to join.</p>
+
+<p><strong>cl_IRC_nickname</strong>: STRING (default: "")</p>
+
+<p>IRC nickname. Empty = use your player name.</p>
+
+<p><strong>cl_IRC_override_nickname</strong>: BOOL (default: 0)</p>
+
+<p>Use <code>cl_IRC_nickname</code> instead of the player name.</p>
+
+<p><strong>cl_IRC_connect_at_startup</strong>: BOOL (default: 1)</p>
+
+<p>Connect to IRC when the game starts.</p>
+
+<p><strong>cl_IRC_kick_rejoin</strong>: BOOL (default: 0)</p>
+
+<p>Rejoin the channel automatically after being kicked.</p>
+
+<p><strong>cl_IRC_reconnect_delay</strong>: INT (default: 100)</p>
+
+<p>Delay before reconnecting after an IRC disconnect (minimum 5).</p>
+
+<h3>Screen/HUD CVARs</h3>
+
+<p><strong>crosshair</strong>: INT (default: 0)</p>
+
+<p>Crosshair selection (0 = none).</p>
+
+<p><strong>scr_centertime</strong>: FLOAT (default: 2.5)</p>
+
+<p>Seconds that center-screen messages stay visible.</p>
+
+<p><strong>scr_consize</strong>: FLOAT (default: 0.5)</p>
+
+<p>Fraction of the screen covered by the console.</p>
+
+<p><strong>scr_conspeed</strong>: FLOAT (default: 3)</p>
+
+<p>Speed at which the console slides down and up.</p>
+
+<p><strong>scr_printspeed</strong>: FLOAT (default: 8)</p>
+
+<p>Speed at which center-screen text is printed.</p>
+
+<p><strong>scr_showpause</strong>: BOOL (default: 0), <strong>scr_showturtle</strong>: BOOL (default: 0)</p>
+
+<p>Show the pause and the "turtle" (slow frame) indicators.</p>
+
+<p><strong>cl_stereo</strong>: BOOL (default: 0), <strong>cl_stereo_separation</strong>: FLOAT (default: 0.4)</p>
+
+<p>Stereo rendering and the separation between the two views.</p>
+
+<p><strong>fnt_center_size</strong>: INT (default: 0)</p>
+
+<p>Font size of center-screen messages (0 = auto).</p>
+
+<p><strong>gender_auto</strong>: BOOL (default: 1)</p>
+
+<p>Automatically set <code>gender</code> from the selected player model.</p>
+
+<p><strong>adr0</strong> to <strong>adr8</strong>: STRING (default: "")</p>
+
+<p>Address book entries of the server browser.</p>
+
+<p><strong>con_font</strong>: STRING (default: "default")</p>
+
+<p>Font used for the console.</p>
+
+<h3>Sound CVARs</h3>
+
+<p><strong>s_volume</strong>: FLOAT (default: 0.1)</p>
+
+<p>Sound effects volume.</p>
+
+<p><strong>s_device</strong>: STRING (default: "Default")</p>
+
+<p>OpenAL sound device to use.</p>
+
+<p><strong>s_doppler</strong>: FLOAT (default: 0.0)</p>
+
+<p>Doppler effect factor (0 = off).</p>
+
+<p><strong>s_initsound</strong>: BOOL (default: 1)</p>
+
+<p>Initialise the sound system at startup.</p>
+
+<p><strong>s_minsources</strong>, <strong>s_maxsources</strong>: INT</p>
+
+<p>Lower and upper limits on the number of OpenAL sound sources generated (maximum 128).</p>
+
+<p><strong>snd_developer</strong>: BOOL (default: 0)</p>
+
+<p>Print extra sound system information.</p>
+
+<h3>Video/Renderer CVARs</h3>
+
+<p><strong>vid_ref</strong>: STRING (default: "gl", read-only)</p>
+
+<p>Video renderer.</p>
+
+<p><strong>vid_fullscreen</strong>: INT (default: 1)</p>
+
+<p>Fullscreen mode.</p>
+
+<p><strong>vid_preferred_fullscreen</strong>: INT (default: 1)</p>
+
+<p>Preferred fullscreen mode.</p>
+
+<p><strong>vid_width</strong>, <strong>vid_height</strong>: INT (default: 1024, 768)</p>
+
+<p>Custom resolution, used when <code>gl_mode</code> is -1.</p>
+
+<p><strong>gl_mode</strong>: INT (default: 3)</p>
+
+<p>Video mode (see <code>vid_modelist</code>).</p>
+
+<p><strong>vid_xpos</strong>, <strong>vid_ypos</strong>: INT (default: 0)</p>
+
+<p>Window position.</p>
+
+<p><strong>vid_gamma</strong>: FLOAT (default: 1.0), <strong>vid_contrast</strong>: FLOAT (default: 1.0)</p>
+
+<p>Gamma and contrast of the display.</p>
+
+<p><strong>vid_displayfrequency</strong>: INT (default: 0), <strong>win_noalttab</strong>: BOOL (default: 0)</p>
+
+<p>(Windows) Display refresh rate and disabling of Alt-Tab.</p>
+
+<p><strong>r_fakeFullscreen</strong>: BOOL (default: 0)</p>
+
+<p>(Linux) Use a borderless fullscreen window instead of exclusive fullscreen.</p>
+
+<p><strong>r_firstrun</strong>: BOOL (default: 0)</p>
+
+<p>Set this to 0 if you want the game to auto detect your graphics settings next time you run it.</p>
+
+<p><strong>gl_swapinterval</strong>: BOOL (default: 1)</p>
+
+<p>Sync to Vblank (0=off, 1=on). Keep enabled for smooth display and power efficiency. Disable only for competitive ultra-low-latency play (will cause screen tearing).</p>
+
+<p><strong>gl_modulate</strong>: FLOAT (default: 2)</p>
+
+<p>Brightness setting. Higher means brighter.</p>
+
+<p><strong>gl_picmip</strong>: INT (default: 0)</p>
+
+<p>Texture detail. 0 means full detail. Each higher setting has 1/4 less detail.</p>
+
+<p><strong>gl_texturemode</strong>: STRING (default: "GL_LINEAR_MIPMAP_LINEAR")</p>
+
+<p>Texture filtering mode. See also <code>r_anisotropic</code>, <code>r_ext_max_anisotropy</code> and <code>r_alphamasked_anisotropic</code>.</p>
+
+<p><strong>r_antialiasing</strong>: INT (default: 0)</p>
+
+<p>Multisample antialiasing samples (needs a video restart).</p>
+
+<p><strong>gl_finish</strong>: BOOL (default: 0)</p>
+
+<p>Wait for the graphics driver to finish drawing each frame before drawing the next one. Hurts performance but may improve smoothness on very low-end machines.</p>
+
+<p><strong>gl_cull</strong>: BOOL (default: 1)</p>
+
+<p>Avoid rendering anything that's off the edge of the screen. Good for performance, recommend leaving it on.</p>
+
+<p><strong>gl_fog</strong>: BOOL (default: 1)</p>
+
+<p>Fog and weather effects.</p>
+
+<p><strong>gl_dynamic</strong>: BOOL (default: 1)</p>
+
+<p>Dynamic lighting.</p>
+
+<p><strong>gl_vlights</strong>: BOOL (default: 1)</p>
+
+<p>Vertex lighting on models.</p>
+
+<p><strong>gl_mirror</strong>: BOOL (default: 1)</p>
+
+<p>Reflective surfaces.</p>
+
+<p><strong>gl_shadowmaps</strong>: BOOL (default: 0), <strong>r_shadowcutoff</strong>: FLOAT (default: 880), <strong>r_shadowmapscale</strong>: FLOAT (default: 1)</p>
+
+<p>Shadow maps, the distance beyond which shadows are not drawn, and the shadow map resolution scale.</p>
+
+<p><strong>r_shaders</strong>: BOOL (default: 1), <strong>r_meshnormalmaps</strong>: BOOL (default: 1), <strong>r_worldnormalmaps</strong>: BOOL (default: 0)</p>
+
+<p>Shader effects and normal mapping on models and on the world.</p>
+
+<p><strong>r_lightmapfiles</strong>: BOOL (default: 1)</p>
+
+<p>Enables the loading of .lightmap files, with more detailed light and shadow. Turn this off if video RAM is limited.</p>
+
+<p><strong>r_optimize</strong>: BOOL (default: 1)</p>
+
+<p>Skip BSP recursion unless you move. Good for performance, recommend leaving it on.</p>
+
+<p><strong>r_overbrightbits</strong>: INT (default: 2)</p>
+
+<p>Overbright lighting.</p>
+
+<p><strong>r_bloom</strong>: BOOL (default: 1)</p>
+
+<p>Bloom effect. Fine tuning: <code>r_bloom_alpha</code> (0.2), <code>r_bloom_intensity</code> (0.75), <code>r_bloom_darken</code> (8), <code>r_bloom_sample_scaledown</code> (2), <code>r_bloom_diamond_size</code> (8), <code>r_bloom_autoexposure</code> (1).</p>
+
+<p><strong>r_godrays</strong>: BOOL (default: 0), <strong>r_godray_intensity</strong>: FLOAT (default: 1.0)</p>
+
+<p>Light shafts from the sun and their intensity.</p>
+
+<p><strong>r_drawsun</strong>: INT (default: 2)</p>
+
+<p>Sun rendering (0 = off).</p>
+
+<p><strong>r_lensflare</strong>: BOOL (default: 1), <strong>r_lensflare_intens</strong>: INT (default: 3), <strong>r_lightbeam</strong>: BOOL (default: 1)</p>
+
+<p>Lens flares, their intensity, and light beams.</p>
+
+<p><strong>r_vegetation</strong>: BOOL (default: 1)</p>
+
+<p>Draw grass and other vegetation.</p>
+
+<p><strong>r_ragdolls</strong>: BOOL (default: 1)</p>
+
+<p>Ragdoll physics for dead players.</p>
+
+<p><strong>r_minimap</strong>: BOOL (default: 0), <strong>r_minimap_size</strong>: INT (default: 256), <strong>r_minimap_style</strong>: INT (default: 1), <strong>r_minimap_zoom</strong>: FLOAT (default: 1)</p>
+
+<p>On-screen minimap and its size, style and zoom.</p>
+
+<p><strong>gl_screenshot_type</strong>: STRING (default: "jpeg"), <strong>gl_screenshot_jpeg_quality</strong>: INT (default: 85)</p>
+
+<p>Screenshot format and JPEG quality.</p>
+
+<p><strong>ttf_autohint</strong>: BOOL (default: 0), <strong>ttf_subpixel</strong>: BOOL (default: 0)</p>
+
+<p>TrueType font rendering options.</p>
+
+<p><strong>sys_priority</strong>: BOOL (default: 0)</p>
+
+<p>(Windows) Raise the process priority while running in exclusive fullscreen.</p>
+
+<p><strong>sys_affinity</strong>: INT (default: 1)</p>
+
+<p>(Windows only, ignored elsewhere) CPU core(s) the game process is restricted to, as a bitmask: 0 = don't set affinity, 1 = core 0 only, 2 = core 1 only, 3 = cores 0 and 1 (two cores/threads instead of one). Values above 3 are clamped to 3. Only applied on machines with more than one core.</p>
+
+<h3>Joystick CVARs</h3>
+
+<p><strong>in_initmouse</strong>, <strong>in_initjoy</strong>: BOOL (default: 1)</p>
+
+<p>(Windows) Initialise the mouse and the joystick at startup.</p>
+
+<p><strong>joy_name</strong>: STRING (default: "joystick")</p>
+
+<p>Joystick name.</p>
+
+<p><strong>joy_advanced</strong>: BOOL (default: 0)</p>
+
+<p>Use the advanced joystick axis mapping (<code>joy_advaxisx</code>, <code>joy_advaxisy</code>, <code>joy_advaxisz</code>, <code>joy_advaxisr</code>, <code>joy_advaxisu</code>, <code>joy_advaxisv</code>).</p>
+
+<p><strong>joy_forwardsensitivity</strong>, <strong>joy_sidesensitivity</strong>, <strong>joy_upsensitivity</strong>, <strong>joy_yawsensitivity</strong>: FLOAT (default: -1), <strong>joy_pitchsensitivity</strong>: FLOAT (default: 1)</p>
+
+<p>Joystick axis sensitivities.</p>
+
+<p><strong>joy_pitchthreshold</strong>, <strong>joy_yawthreshold</strong>: FLOAT (default: 0.15)</p>
+
+<p>Joystick pitch and yaw dead zones.</p>
+
+<p><strong>v_centermove</strong>: FLOAT (default: 0.15), <strong>v_centerspeed</strong>: FLOAT (default: 500)</p>
+
+<p>Look-spring tuning.</p>
+
+<h3>Debug CVARs (client)</h3>
+
+<p><strong>cl_stats</strong>, <strong>cl_testblend</strong>, <strong>cl_testentities</strong>, <strong>cl_testlights</strong>, <strong>cl_testparticles</strong>: BOOL (default: 0)</p>
+
+<p>Test and statistics output for the client view.</p>
+
+<p><strong>debuggraph</strong>, <strong>timegraph</strong>: BOOL (default: 0), <strong>graphheight</strong>: INT (default: 32), <strong>graphscale</strong>: FLOAT (default: 1), <strong>graphshift</strong>: FLOAT (default: 0)</p>
+
+<p>Draw a debug or timing graph on screen.</p>
+
+<p><strong>rspeed_beams</strong>, <strong>rspeed_epolys</strong>, <strong>rspeed_flares</strong>, <strong>rspeed_grasses</strong>, <strong>rspeed_particles</strong>, <strong>rspeed_vbobatches</strong>, <strong>rspeed_wpolys</strong>: BOOL (default: 0)</p>
+
+<p>Show renderer counters on screen.</p>
+
+<p><strong>scr_timerefcount</strong>: INT (default: 128)</p>
+
+<p>Number of frames of the <code>timerefresh</code> benchmark.</p>
+
+<p><strong>gl_lightmap</strong>, <strong>gl_lockpvs</strong>, <strong>gl_nobind</strong>, <strong>gl_nosubimage</strong>, <strong>gl_polyblend</strong>, <strong>gl_showtris</strong>, <strong>gl_skymip</strong>, <strong>gl_clear</strong>, <strong>gl_bitdepth</strong>, <strong>gl_drawbuffer</strong>, <strong>gl_driver</strong>, <strong>gl_texturealphamode</strong>, <strong>gl_texturesolidmode</strong>, <strong>r_drawentities</strong>, <strong>r_drawworld</strong>, <strong>r_fullbright</strong>, <strong>r_lerpmodels</strong>, <strong>r_nocull</strong>, <strong>r_norefresh</strong>, <strong>r_novis</strong>, <strong>r_test</strong>, <strong>flushmap</strong>, <strong>scriptsloaded</strong></p>
+
+<p>Renderer debugging and test cvars; leave them at their defaults.</p>
+
+<p><strong>gl_showpolys</strong>: INT (default: 0)</p>
+
+<p>Useful tool for mappers. 1 means show world polygon outlines for visible surfaces. 2 means show outlines for all surfaces in the PVS, even if they are hidden.</p>
+
+<p><strong>gl_showcollisionmesh</strong>: INT (default: 0)</p>
+
+<p>Useful tool for mappers. Shows all the collision geometry for terrain in wireframe. 2 disables depth culling for this wireframe.</p>
+
+<p><strong>gl_showdecals</strong>: INT (default: 0)</p>
+
+<p>Set this to 1 to show terrain decal bounding boxes. Set this to 2 to show terrain decals in wireframe.</p>
+
+<p><strong>r_showpolycounts</strong>: BOOL (default: 0)</p>
+
+<p>Set this to 1 to show the polycount of each mesh, hovering over the mesh itself.</p>
+
+<p><strong>r_showbox</strong>: STRING (default: "")</p>
+
+<p>Shows a box the size of the player's bounding box at the specified coordinates.</p>
+
+<p><strong>r_tracetest</strong>: INT (default: 0), <strong>r_fasttracetest</strong>: INT (default: 0), <strong>r_tracebox</strong>: STRING (default: ""), <strong>r_tracetestlength</strong>: FLOAT (default: 8192)</p>
+
+<p>Performance and visual tests for the collision traces, starting at the player's origin along the view vector. <code>r_tracetestlength</code> is the trace length in game units.</p>
+
+<p><strong>r_ragdoll_debug</strong>: BOOL (default: 0)</p>
+
+<p>Show ragdoll debug information.</p>
+
 <hr>
 
 <h2>SERVER SIDE CVARs</h2>
@@ -442,9 +862,73 @@
 
 <p>When running a dedicated server, generate a post‑match game report file.</p>
 
+<p><strong>maxspectators</strong>: INT (default: 4)</p>
+
+<p>Maximum number of spectators allowed on the server.</p>
+
+<p><strong>needpass</strong>: INT (default: 0)</p>
+
+<p>Set automatically when the server requires a <code>password</code> or <code>spectator_password</code> (shown in the server list).</p>
+
+<p><strong>maxentities</strong>: INT (default: 1024)</p>
+
+<p>Maximum number of entities in the game (latched, needs a map restart).</p>
+
+<p><strong>g_teamgame</strong>: INT (read-only)</p>
+
+<p>Set automatically: 1 when the game is a team game (skin teams in <code>dmflags</code>, or CTF), otherwise 0.</p>
+
+<p><strong>zombietime</strong>: INT (default: 2)</p>
+
+<p>Seconds a dropped client stays in the zombie state before its slot is freed.</p>
+
+<p><strong>sv_ratelimit_status</strong>: INT (default: 15)</p>
+
+<p>Maximum number of server status requests answered per sampling period; further requests are dropped (flood protection).</p>
+
+<p><strong>sv_enforcetime</strong>: BOOL (default: 0)</p>
+
+<p>Enable speed cheat detection: kick clients that claim significantly more simulation time than actually elapsed.</p>
+
+<p><strong>sv_noreload</strong>: BOOL (default: 0)</p>
+
+<p>Legacy Quake 2 cvar (do not reload level state when re-entering a level); currently has no effect.</p>
+
+<p><strong>filterban</strong>: BOOL (default: 1)</p>
+
+<p>If 1, IP addresses that match the ban list (<code>sv addip</code>) are refused. If 0, only addresses that match the list are allowed, which makes it easy to set up a private game.</p>
+
+<p><strong>flood_msgs</strong>: INT (default: 4), <strong>flood_persecond</strong>: INT (default: 4), <strong>flood_waitdelay</strong>: INT (default: 10)</p>
+
+<p>Chat flood protection. A player who sends <code>flood_msgs</code> messages within <code>flood_persecond</code> seconds can not chat for <code>flood_waitdelay</code> seconds.</p>
+
+<p><strong>motdfile</strong>: STRING (default: "motd.txt")</p>
+
+<p>File with the message of the day shown to joining players.</p>
+
+<p><strong>motdforce</strong>: INT (default: 0)</p>
+
+<p>Number of frames the message of the day is forced on screen when a player joins. 0 = not forced.</p>
+
+<p><strong>dedicated</strong>: BOOL (default: 0, read-only)</p>
+
+<p>Set by the <code>+set dedicated 1</code> command line option to run a dedicated server.</p>
+
+<p><strong>protocol</strong>: INT (default: 36, read-only)</p>
+
+<p>Network protocol version of the server (shown in the server info).</p>
+
+<p><strong>game</strong>, <strong>gamedir</strong>: STRING</p>
+
+<p>Game directory (mod) in use. Set <code>game</code> on the command line.</p>
+
+<p><strong>gamedate</strong>, <strong>gamename</strong>: STRING (read-only)</p>
+
+<p>Build date and game name, shown in the server info.</p>
+
 <p><strong>sv_botkickthreshold</strong>: INT (default: 0)</p>
 
-<p>Ping threshold in milliseconds above which bots are automatically kicked. 0 disables.</p>
+<p>Number of players the server tries to keep filled. Bots fill the empty slots up to this number, and are kicked one by one as human players join. When the number of human players reaches this value, all bots are removed. 0 disables this and allows <code>sv addbot</code> / <code>sv removebot</code>. Duel mode (<code>g_duel</code>) forces this behavior.</p>
 
 <p><strong>sv_custombots</strong>: INT (default: 0)</p>
 
@@ -472,31 +956,47 @@
 
 <p>Allow downloading map files.</p>
 
-<p><strong>sv_downloadurl</strong>: STRING (default: "http://invader.alienarena.org/sv_downloadurl")</p>
+<p><strong>sv_downloadurl</strong>: STRING (default: "https://invader.alienarena.org/sv_downloadurl")</p>
 
-<p>HTTP URL for alternative download location (avoids server bandwidth).</p>
+<p>HTTP(S) URL for an alternative download location (avoids server bandwidth). Maps can be downloaded over https.</p>
 
 <p><strong>auto_installmap</strong>: BOOL (default: 1)</p>
 
-<p>Automatically install downloaded maps without player confirmation.</p>
+<p>Automatically download and install map packs before loading maps. See also <code>allow_overwrite_maps</code>.</p>
 
 <p><strong>allow_overwrite_maps</strong>: BOOL (default: 0)</p>
 
-<p>Allow download to overwrite existing map files.</p>
+<p>Used by the commands <code>installmap</code> and <code>installmodel</code>. If 1, existing downloaded map packs or model packs are overwritten and all files in them are extracted, replacing existing files.</p>
 
 <h3>Game Mode CVARs</h3>
 
-<p><strong>deathmatch</strong>: INT (default: 0)</p>
+<p><strong>deathmatch</strong>: BOOL (default: 1)</p>
 
-<p>Enable Deathmatch mode (free-for-all). 0=off, 1=on.</p>
+<p>Alien Arena is always deathmatch; the server sets this to 1.</p>
 
-<p><strong>ctf</strong>: INT (default: 0)</p>
+<p><strong>ctf</strong>: BOOL (default: 0)</p>
 
-<p>Enable Capture the Flag mode.</p>
+<p>Enable Capture the Flag mode (team based).</p>
+
+<p><strong>g_duel</strong>: BOOL (default: 0)</p>
+
+<p>Enable duel mode (one on one). Forces the bot auto-kick behavior of <code>sv_botkickthreshold</code>.</p>
+
+<p><strong>g_tactical</strong>: BOOL (default: 0)</p>
+
+<p>Enable Tactical mode (team based, objective-based).</p>
 
 <p><strong>skill</strong>: INT (default: 1)</p>
 
 <p>Difficulty level for bots (0=easy, 1=medium, 2=hard, 3=nightmare).</p>
+
+<p><strong>g_autobalance</strong>: BOOL (default: 0)</p>
+
+<p>In team games, players are assigned to the team with fewer players automatically instead of choosing a team.</p>
+
+<p><strong>g_reward</strong>: INT (default: 20)</p>
+
+<p>Reward points a player needs to earn the reward powerup.</p>
 
 <p><strong>fraglimit</strong>: INT (default: 0)</p>
 
@@ -506,9 +1006,34 @@
 
 <p>End game after this many minutes (0 = unlimited).</p>
 
-<p><strong>dmflags</strong>: INT</p>
+<p><strong>dmflags</strong>: INT (default: 2097168)</p>
 
-<p>Deathmatch flags bitmask controlling game rules (instant items, falling damage, etc).</p>
+<p>Deathmatch flags bitmask controlling game rules. Add up the values of the options you want:</p>
+
+<ul>
+  <li>1: no health pickups</li>
+  <li>2: no item pickups</li>
+  <li>4: weapons stay</li>
+  <li>8: no falling damage</li>
+  <li>16: instant items</li>
+  <li>32: same level (do not advance to the next map)</li>
+  <li>64: skin teams</li>
+  <li>256: no friendly fire</li>
+  <li>512: spawn farthest</li>
+  <li>1024: force respawn</li>
+  <li>2048: no armor</li>
+  <li>4096: allow exit</li>
+  <li>8192: infinite ammo</li>
+  <li>16384: quad drop</li>
+  <li>65536: quad fire drop</li>
+  <li>131072: bots autosave nodes</li>
+  <li>262144: bot chat</li>
+  <li>524288: bot fuzzy aim</li>
+  <li>1048576: disable bots</li>
+  <li>2097152: bot level advance (advance to the next map even if a bot won)</li>
+</ul>
+
+<p>The default is 16 (instant items) + 2097152 (bot level advance).</p>
 
 <p><strong>cheats</strong>: BOOL (default: 0)</p>
 
@@ -518,9 +1043,9 @@
 
 <p>Number of seconds of invulnerability granted immediately after spawning.</p>
 
-<p><strong>warmuptime</strong>: INT (default: 0)</p>
+<p><strong>warmuptime</strong>: INT (default: 0 for a single player game, 30 with <code>maxclients</code> above 1)</p>
 
-<p>Warm‑up period in seconds before the match begins (30 by default in multiplayer).</p>
+<p>Warm‑up period in seconds before the match begins.</p>
 
 <p><strong>anticamp</strong>: BOOL (default: 0)</p>
 
@@ -548,37 +1073,81 @@
 
 <p><strong>g_voterand</strong>: BOOL (default: 0)</p>
 
-<p>Randomize the order of map choices when voting.</p>
+<p>Resolve a tie in the end-of-level map vote randomly.</p>
 
 <p><strong>g_votemode</strong>: INT (default: 0)</p>
 
-<p>Voting mode (rules for how maps are selected).</p>
+<p>How the four maps of the end-of-level vote are chosen from <code>sv_maplist</code>: 0 = the next four maps in the list, any other value = four random maps from the list.</p>
 
 <p><strong>g_votesame</strong>: BOOL (default: 1)</p>
 
-<p>Allow players to vote for the currently playing map.</p>
+<p>Allow the currently playing map to be voted for again.</p>
+
+<p><strong>sv_maplist</strong>: STRING (default: "")</p>
+
+<p>Space separated list of maps used for the map vote and for the rotation at the end of a level. Example: <code>set sv_maplist "dm-deathray dm-dynamo dm-turbo"</code></p>
 
 <p><strong>g_callvote</strong>: BOOL (default: 1)</p>
 
-<p>Allow players to initiate vote commands.</p>
+<p>Allow players to initiate votes with <code>callvote</code>.</p>
+
+<p><strong>g_select_empty</strong>: BOOL (default: 0)</p>
+
+<p>Allow selecting weapons that are out of ammo.</p>
+
+<p><strong>g_spawnhealth</strong>: INT (default: 125)</p>
+
+<p>Health of a player at spawn.</p>
+
+<p><strong>g_maxhealth</strong>: INT (default: 100)</p>
+
+<p>Maximum health a player can reach by normal pickups.</p>
+
+<p><strong>g_maxbullets</strong>: INT (default: 200), <strong>g_maxshells</strong>: INT (default: 100), <strong>g_maxrockets</strong>: INT (default: 50), <strong>g_maxgrenades</strong>: INT (default: 50), <strong>g_maxcells</strong>: INT (default: 200), <strong>g_maxslugs</strong>: INT (default: 50), <strong>g_maxseekers</strong>: INT (default: 1), <strong>g_maxbombs</strong>: INT (default: 1)</p>
+
+<p>Maximum ammo a player can carry for each ammo type (shells are the alien smart grenades, grenades the napalm).</p>
+
+<p><strong>wep_selfdmgmulti</strong>: FLOAT (default: 1.0)</p>
+
+<p>Multiplier for the damage players do to themselves with their own weapons.</p>
+
+<p><strong>quickweap</strong>: INT (default: 0)</p>
+
+<p>Fast weapon switching.</p>
+
+<p><strong>playerspeed</strong>: BOOL (default: 0)</p>
+
+<p>Use the faster maximum player speed (450 instead of 300), as in excessive mode.</p>
 
 <h3>Antilag CVARs</h3>
 
-<p><strong>g_antilag_oneway</strong>: BOOL (default: 0)</p>
-
-<p>Use one-way ping estimation for antilag (fairer to low-ping players).</p>
-
 <p><strong>g_antilag_oneway_factor</strong>: FLOAT (default: 0.5)</p>
 
-<p>Antilag compensation multiplier (0.5 = 50% of Round Trip Time).</p>
+<p>Factor to convert the round trip time (RTT) to a one-way ping estimate, which is the amount of rewind used for lag compensation. 0.5 = RTT/2.</p>
+
+<p><strong>g_antilag_jitter_sigma</strong>: FLOAT (default: 1.0)</p>
+
+<p>Number of ping standard deviations added to a player's ping for lag compensation, so players with an unstable ping get more rewind. 0 disables it.</p>
+
+<p><strong>g_antilag_jitter_max</strong>: INT (default: 50)</p>
+
+<p>Maximum extra ping in milliseconds that the ping jitter compensation may add.</p>
+
+<p><strong>g_antilag_loss_bias_strength</strong>: FLOAT (default: 0.8)</p>
+
+<p>Per-player bias applied to the one-way factor based on the measured uplink/downlink packet loss asymmetry, to compensate players with packet loss. 0 disables it (the plain <code>g_antilag_oneway_factor</code> is used).</p>
+
+<p><strong>g_antilag_loss_bias_confidence_threshold</strong>: FLOAT (default: 0.3)</p>
+
+<p>Combined uplink and downlink loss rate (0..1) needed to fully trust the loss-bias direction. Higher = more loss required before the bias saturates.</p>
 
 <p><strong>g_antilag_low_ping_threshold</strong>: INT (default: 50)</p>
 
-<p>Minimum ping (ms) for lag compensation.</p>
+<p>Ping threshold (ms) for the minimum lag compensation.</p>
 
 <p><strong>g_antilag_high_ping_threshold</strong>: INT (default: 250)</p>
 
-<p>Ping threshold (ms) where diminishing returns start for antilag compensation.</p>
+<p>Ping threshold (ms) (the knee) where diminishing returns start for antilag compensation.</p>
 
 <p><strong>g_antilag_max_ping</strong>: INT (default: 300)</p>
 
@@ -586,7 +1155,7 @@
 
 <p><strong>g_antilagdebug</strong>: INT (default: 0)</p>
 
-<p>Debug antilag system. 0=off, 1=normal, 2=verbose.</p>
+<p>Print extra console messages for antilag debugging. 0=off, 1=normal, 2=verbose.</p>
 
 <p><strong>g_antilagprojectiles</strong>: BOOL (default: 1)</p>
 
@@ -596,19 +1165,15 @@
 
 <p><strong>sv_joustmode</strong>: BOOL (default: 0)</p>
 
-<p>Enable Joust mode (mid-air combat with unlimited jumping).</p>
-
-<p><strong>g_tactical</strong>: BOOL (default: 0)</p>
-
-<p>Enable Tactical Ops mode (objective-based).</p>
+<p>Joust mode: players can jump in midair.</p>
 
 <p><strong>excessive</strong>: BOOL (default: 0)</p>
 
 <p>Enable Excessive mode (high damage/fast-paced).</p>
 
-<p><strong>sv_airaccelerate</strong>: BOOL (default: 0)</p>
+<p><strong>sv_airaccelerate</strong>: FLOAT (default: 0)</p>
 
-<p>Use alternative air movement physics (faster air strafing).</p>
+<p>Air acceleration of players in deathmatch. 0 = default movement, higher values = faster air control.</p>
 
 <p><strong>instagib</strong>: BOOL (default: 0)</p>
 
@@ -648,11 +1213,11 @@
 
 <p><strong>g_losehealth</strong>: BOOL (default: 1)</p>
 
-<p>Enable the health‑loss mechanic (used by some mutators).</p>
+<p>Players lose one health point per second while their health is above <code>g_losehealth_num</code>. Not applied when <code>regeneration</code>, <code>excessive</code> or <code>vampire</code> is on.</p>
 
 <p><strong>g_losehealth_num</strong>: INT (default: 100)</p>
 
-<p>Amount of health lost per second when g_losehealth is active.</p>
+<p>Health level above which players lose health when <code>g_losehealth</code> is on.</p>
 
 
 <h3>Physics/Game Balance CVARs</h3>
@@ -661,45 +1226,128 @@
 
 <p>World gravity acceleration (standard units). Higher = heavier gravity.</p>
 
-<p><strong>sv_friction</strong>: FLOAT (default: 6.0)</p>
+<p><strong>sv_maxvelocity</strong>: INT (default: 2000)</p>
 
-<p>Ground friction multiplier. Higher = more friction, slower sliding.</p>
+<p>Maximum velocity of any entity.</p>
 
-<h3>Server Tickrate CVARs</h3>
+<p><strong>sv_rollspeed</strong>: FLOAT (default: 200), <strong>sv_rollangle</strong>: FLOAT (default: 2)</p>
 
-<p><strong>sv_tickrate</strong>: INT (default: 10)</p>
+<p>Speed at which the view rolls while strafing, and the maximum roll angle.</p>
 
-<p>Server frame rate (ticks per second). Higher = more server updates but more CPU usage.</p>
+<p><strong>run_pitch</strong>: FLOAT (default: 0.002), <strong>run_roll</strong>: FLOAT (default: 0.005), <strong>bob_up</strong>: FLOAT (default: 0.005), <strong>bob_pitch</strong>: FLOAT (default: 0.002), <strong>bob_roll</strong>: FLOAT (default: 0.002)</p>
 
-<h3>Bot CVARs</h3>
+<p>View bobbing while running and walking.</p>
 
-<p><strong>sv_botphysics</strong>: BOOL (default: 1)</p>
+<p><strong>gun_x</strong>, <strong>gun_y</strong>, <strong>gun_z</strong>: FLOAT (default: 0)</p>
 
-<p>Enable custom bot physics and movement.</p>
+<p>Offset of the weapon model.</p>
+
+<h3>Server Tickrate and Netcode CVARs</h3>
+
+<p><strong>sv_tickrate</strong>: INT (default: 100)</p>
+
+<p>Server frame rate (ticks per second). Higher = more server updates but more CPU usage. A client's <code>cl_maxpackets</code> is limited by this.</p>
+
+<p><strong>sv_netdebug</strong>: BOOL (default: 0)</p>
+
+<p>Print one diagnostic line per connected client per second: delta-window gap, forced full-resends, bytes sent, rate drops/overflows, and the current entity-cull angle. Intended to be left on only while diagnosing the stutter of a specific client.</p>
+
+<p><strong>sv_resync_throttle_ms</strong>: INT (default: 150)</p>
+
+<p>Minimum milliseconds between forced full (non-delta) resyncs sent to a client that has fallen out of its delta-compression window. Without this, such a client would get the most expensive packet every tick for as long as the condition lasts. Ticks in between are skipped (as with a rate drop) instead of repeating the resync.</p>
+
+<p><strong>sv_hitch_threshold_ms</strong>: INT (default: 100)</p>
+
+<p>If a server tick takes more than this many milliseconds (wall clock) beyond the per-tick budget of the current tickrate, print a breakdown: time in packet reading, game simulation, and total/worst-single-client send time. Independent of <code>sv_netdebug</code>. 0 disables this check.</p>
+
+<h3>Entity Culling CVARs</h3>
+
+<p>The server culls entities that are too small (in angular size) to be seen by a client, which saves bandwidth. The cull angle adapts per client between <code>sv_entity_cull</code> (floor) and <code>sv_entity_cull_max</code> (ceiling), based on the number of visible entities and on the connection quality of the client. Clients can ask for a different value with the <code>entity_cull</code> userinfo cvar. Use <code>sv_entity_cull_status</code> to see the effective values.</p>
+
+<p><strong>sv_entity_cull</strong>: FLOAT (default: 1.0)</p>
+
+<p>Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. 0 disables culling. Acts as the minimum (floor) when adaptive scaling is active.</p>
+
+<p><strong>sv_entity_cull_max</strong>: FLOAT (default: 10.0)</p>
+
+<p>Maximum angular size (in degrees) adaptive entity culling scales up to when the visible entity count of a client exceeds <code>sv_entity_budget_max</code>.</p>
+
+<p><strong>sv_entity_budget</strong>: INT (default: 80)</p>
+
+<p>Number of visible entities per client (at sv_tickrate 100) below which culling stays at the <code>sv_entity_cull</code> minimum. Scaled automatically for other tickrates.</p>
+
+<p><strong>sv_entity_budget_max</strong>: INT (default: 150)</p>
+
+<p>Number of visible entities per client (at sv_tickrate 100) at or above which culling reaches the <code>sv_entity_cull_max</code> ceiling. Scaled automatically for other tickrates.</p>
+
+<p><strong>sv_entity_cull_vel_away_dot</strong>: FLOAT (default: 0.0)</p>
+
+<p>Dot-product threshold (-1 to 1) for the persistence rule: once an entity has been visible to a client, it stays exempt from angular-size culling unless the player moves away from it more directly than this. Lower = more lenient, higher = entities are re-culled sooner when the player leaves.</p>
+
+<p><strong>sv_entity_cull_distress</strong>: FLOAT (default: 0.1)</p>
+
+<p>Fraction (0-1) of ticks a client needs a full resync (see <code>sv_resync_throttle_ms</code>) below which adaptive culling isn't increased for this reason. A client with a poor connection can need stronger culling than its entity count suggests. Whichever of this or the entity-count scaling is worse wins; a healthy connection is never affected.</p>
+
+<p><strong>sv_entity_cull_distress_max</strong>: FLOAT (default: 0.5)</p>
+
+<p>Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches <code>sv_entity_cull_max</code> due to connection distress alone, regardless of the visible entity count.</p>
+
+<p><strong>sv_entity_cull_distress_cooldown_ms</strong>: INT (default: 5000)</p>
+
+<p>Milliseconds for the connection-distress part of adaptive culling to ease back down from <code>sv_entity_cull_max</code> to the floor once distress stops. It still rises immediately when distress increases. Prevents a fluctuating connection from making the angle flap up and down. 0 = relax immediately.</p>
 
 <h3>Special Features</h3>
 
 <p><strong>g_dm_lights</strong>: BOOL (default: 1)</p>
 
-<p>Enable Deathmatch-specific dynamic lighting optimizations.</p>
+<p>Give players in non-team deathmatch a colored glow (not in tactical mode).</p>
 
-<h3>Statistics CVARs</h3>
+<h3>Engine/Debug CVARs (server)</h3>
 
-<p><strong>sv_ratelimit_status</strong>: INT (default: 15)</p>
+<p><strong>timescale</strong>: FLOAT (default: 1), <strong>fixedtime</strong>: INT (default: 0)</p>
 
-<p>Rate limit threshold for connection flood protection.</p>
+<p>Scale the game time or force a fixed frame time (testing only).</p>
+
+<p><strong>host_speeds</strong>: BOOL (default: 0), <strong>log_stats</strong>: BOOL (default: 0), <strong>showtrace</strong>: BOOL (default: 0)</p>
+
+<p>Print frame timing, log statistics or trace counts.</p>
+
+<p><strong>logfile</strong>: INT (default: 1), <strong>logname</strong>: STRING (default: "qconsole.log")</p>
+
+<p>Write the console output to a log file (0 = off, 1 = buffered, 2 = flush after each print) and the name of that file.</p>
+
+<p><strong>log_dest_udp</strong>: STRING (default: "")</p>
+
+<p>Also send the console log to this UDP address.</p>
+
+<p><strong>developer</strong>: INT (default: 0)</p>
+
+<p>Print extra developer messages.</p>
+
+<p><strong>map_noareas</strong>: BOOL (default: 0)</p>
+
+<p>Ignore area portals in the map (testing only).</p>
+
+<p><strong>fasttrace_verify</strong>: BOOL (default: 0)</p>
+
+<p>Verify the fast trace results against the full trace (testing only).</p>
+
+<p><strong>testcode</strong>, <strong>testmap</strong>, <strong>test</strong>: (default: 0)</p>
+
+<p>Internal test cvars.</p>
 
 <hr>
 
 <h2>Network Rate Information</h2>
 
-<p><strong>Server-side rate clamping</strong>: The server clamps all client <code>rate</code> values to a maximum of <strong>15000 bytes/sec</strong>, even if clients report higher values. The minimum is 100 bytes/sec.</p>
+<p><strong>Server-side rate clamping</strong>: The server clamps all client <code>rate</code> values to the range <strong>2500 to 75000 bytes/sec</strong>. A client without a rate gets the default of 40000.</p>
 
 <p><strong>Recommended rate settings</strong>:</p>
 <ul>
-  <li>Good internet connection: <code>set rate 15000</code> (use server maximum)</li>
-  <li>Limited bandwidth: <code>set rate 8000</code> (conservative, reduces lag if connection unstable)</li>
-  <li>Very poor connection: <code>set rate 4000</code> (minimal, may see lag compensation artifacts)</li>
+  <li>Good internet connection: <code>set rate 75000</code> (use server maximum)</li>
+  <li>Default: <code>set rate 40000</code></li>
+  <li>Limited bandwidth: <code>set rate 15000</code></li>
+  <li>Very poor connection: <code>set rate 5000</code> (may see more resyncs and lag compensation artifacts)</li>
 </ul>
 
 </body>

@@ -8,6 +8,8 @@
 <body>
 <h1>COMMANDS Documentation</h1>
 
+<p>Use <code>cmdlist</code> in the console to list every command registered in your build, and <code>cvarlist</code> to list all cvars (see CVAR.md).</p>
+
 <h2>CLIENT SIDE COMMANDS</h2>
 
 <h3>Connection Commands</h3>
@@ -24,71 +26,207 @@
 
 <p>Reconnect to the last server you were connected to.</p>
 
-<p><strong>rcon</strong> <code>&lt;password&gt; &lt;command&gt;</code></p>
+<p><strong>rcon</strong> <code>&lt;command&gt;</code></p>
 
-<p>Execute a remote console command on the server (if you have rcon password). Example: <code>rcon mypass say Hello everyone</code></p>
+<p>Execute a remote console command on the server. Requires <code>rcon_password</code> (and <code>rcon_address</code> when not connected) to be set. Example: <code>set rcon_password mypass</code> then <code>rcon say Hello everyone</code></p>
+
+<p><strong>cmd</strong> <code>&lt;command&gt;</code></p>
+
+<p>Forward a command string to the server as-is.</p>
+
+<p><strong>changing</strong></p>
+
+<p>Internal; shown while the server is changing level.</p>
+
+<p><strong>precache</strong></p>
+
+<p>Internal; sent by the server when loading a level, to precache the models, sounds and images.</p>
+
+<p><strong>pingservers</strong></p>
+
+<p>Ping all servers in the server list to get latency and player info.</p>
+
+<p><strong>cl_jitters</strong></p>
+
+<p>Show the inbound packet rate and jitter (current and session peak) of the connection to the server.</p>
 
 <h3>Demo Commands</h3>
 
 <p><strong>record</strong> <code>&lt;demoname&gt;</code></p>
 
-<p>Start recording a demo with the given filename. Saved to demos/ folder. Example: <code>record ctf_battle</code></p>
+<p>Start recording a demo with the given filename. Saved to the demos/ folder. Example: <code>record ctf_battle</code></p>
 
 <p><strong>stop</strong></p>
 
-<p>Stop recording current demo.</p>
+<p>Stop recording the current demo.</p>
 
-<p><strong>timedemo</strong> <code>&lt;demoname&gt;</code></p>
+<p><strong>demomap</strong> <code>&lt;demoname&gt;</code></p>
 
-<p>Play back a demo at maximum speed while timing performance. Useful for benchmarking.</p>
+<p>Play back a recorded demo. Use the <code>timedemo</code> cvar to play it in benchmark mode.</p>
 
 <h3>Input/Control Commands</h3>
 
+<p><strong>+forward / -forward</strong>, <strong>+back / -back</strong>, <strong>+moveleft / -moveleft</strong>, <strong>+moveright / -moveright</strong>, <strong>+moveup / -moveup</strong>, <strong>+movedown / -movedown</strong></p>
+
+<p>Movement. The <code>+</code> form starts the action when a key is pressed, the <code>-</code> form stops it when the key is released. Normally used in <code>bind</code>.</p>
+
+<p><strong>+left / -left</strong>, <strong>+right / -right</strong>, <strong>+lookup / -lookup</strong>, <strong>+lookdown / -lookdown</strong></p>
+
+<p>Turn or look using the keyboard (speed set by <code>cl_yawspeed</code> and <code>cl_pitchspeed</code>).</p>
+
+<p><strong>+attack / -attack</strong>, <strong>+attack2 / -attack2</strong></p>
+
+<p>Fire the current weapon (primary / secondary).</p>
+
+<p><strong>+use / -use</strong></p>
+
+<p>Use or activate (for example vehicles and some map objects).</p>
+
+<p><strong>+speed / -speed</strong></p>
+
+<p>Walk or run, depending on <code>cl_run</code>.</p>
+
+<p><strong>+sneak / -sneak</strong></p>
+
+<p>Sneak (move slowly and quietly).</p>
+
+<p><strong>+strafe / -strafe</strong></p>
+
+<p>Turn keys strafe instead of turn while held.</p>
+
+<p><strong>+klook / -klook</strong>, <strong>+mlook / -mlook</strong></p>
+
+<p>Keyboard look and mouse look while held.</p>
+
+<p><strong>+zoom / -zoom</strong></p>
+
+<p>Zoom in while held.</p>
+
+<p><strong>centerview</strong></p>
+
+<p>Center the view vertically.</p>
+
 <p><strong>impulse</strong> <code>&lt;number&gt;</code></p>
 
-<p>Trigger an impulse action (weapon selection, item use, etc). Common impulses:</p>
-<ul>
-  <li>10-20: Select weapons (10=blaster, 11=shotgun, etc)</li>
-  <li>100: Centerview (center look)</li>
-  <li>200: Zoom in</li>
-  <li>201: Zoom out</li>
-</ul>
+<p>Send an impulse number to the game.</p>
 
-<p><strong>force_centerview</strong></p>
+<p><strong>bind</strong> <code>&lt;key&gt; [command]</code></p>
 
-<p>Force camera to center view (used in scripts).</p>
+<p>Bind a command to a key. Without a command, shows the current binding. Example: <code>bind mouse1 +attack</code></p>
+
+<p><strong>unbind</strong> <code>&lt;key&gt;</code></p>
+
+<p>Remove the binding of a key.</p>
+
+<p><strong>unbindall</strong></p>
+
+<p>Remove all key bindings.</p>
+
+<p><strong>bindlist</strong></p>
+
+<p>List all current key bindings.</p>
+
+<p><strong>joy_advancedupdate</strong></p>
+
+<p>(Windows) Apply the advanced joystick settings (<code>joy_adv*</code> cvars).</p>
+
+<h3>Chat and Communication Commands</h3>
+
+<p><strong>say</strong> <code>&lt;message&gt;</code></p>
+
+<p>Send a chat message to all players.</p>
+
+<p><strong>say_team</strong> <code>&lt;message&gt;</code></p>
+
+<p>Send a chat message to your team only.</p>
+
+<p><strong>messagemode</strong></p>
+
+<p>Open the chat input line for a message to all players.</p>
+
+<p><strong>messagemode2</strong></p>
+
+<p>Open the chat input line for a team message.</p>
+
+<p><strong>messagemode3</strong></p>
+
+<p>Open the chat input line for IRC chat.</p>
+
+<p><strong>togglechat</strong></p>
+
+<p>Show or hide the chat overlay (see <code>cl_chatlines</code>).</p>
+
+<p><strong>vtaunt</strong> <code>&lt;1-5&gt;</code></p>
+
+<p>Play a voice taunt of your player model. An invalid number plays a random one. Limited to one taunt every 2 seconds.</p>
+
+<p><strong>wave</strong> <code>&lt;0-4&gt;</code></p>
+
+<p>Play a gesture animation.</p>
+
+<p><strong>chatbubble</strong></p>
+
+<p>Show a chat bubble above your player's head.</p>
 
 <h3>Client Status Commands</h3>
 
-<p><strong>status</strong></p>
+<p><strong>players</strong>, <strong>playerlist</strong></p>
 
-<p>Show current connection and player status.</p>
+<p>List the players on the server with their score and ping.</p>
 
-<p><strong>pause</strong></p>
+<p><strong>score</strong></p>
 
-<p>Pause or unpause the game.</p>
-
-<p><strong>ping</strong></p>
-
-<p>Ping the current server to check latency.</p>
-
-<p><strong>pingservers</strong></p>
-
-<p>Ping all servers in the server list to get latency info.</p>
-
-<h3>Server List Commands</h3>
-
-<p><strong>snd_restart</strong></p>
-
-<p>Restart the sound system (fixes audio issues).</p>
-
-<p><strong>skins</strong></p>
-
-<p>Display list of available character skins.</p>
+<p>Show the scoreboard.</p>
 
 <p><strong>userinfo</strong></p>
 
-<p>Display current user info (name, skin, hand, etc).</p>
+<p>Display your current userinfo (name, skin, rate, hand, etc.).</p>
+
+<p><strong>skins</strong></p>
+
+<p>Display the skins of all connected players.</p>
+
+<p><strong>pause</strong></p>
+
+<p>Pause or unpause the game (single player or when allowed).</p>
+
+<p><strong>viewpos</strong></p>
+
+<p>Print your current position and view angle (used by mappers).</p>
+
+<p><strong>info</strong></p>
+
+<p>Show information about the current server.</p>
+
+<h3>Item and Weapon Commands</h3>
+
+<p><strong>use</strong> <code>&lt;item&gt;</code></p>
+
+<p>Use an item or switch to a weapon by name.</p>
+
+<p><strong>drop</strong> <code>&lt;item&gt;</code></p>
+
+<p>Drop an item (for example a flag or a weapon).</p>
+
+<p><strong>weapnext</strong>, <strong>weapprev</strong>, <strong>weaplast</strong></p>
+
+<p>Select the next, previous or previously used weapon.</p>
+
+<p><strong>putaway</strong></p>
+
+<p>Close the inventory or scoreboard.</p>
+
+<p><strong>inven</strong>, <strong>invnext</strong>, <strong>invprev</strong>, <strong>invnextw</strong>, <strong>invprevw</strong>, <strong>invnextp</strong>, <strong>invprevp</strong>, <strong>invuse</strong>, <strong>invdrop</strong></p>
+
+<p>Inventory handling: show the inventory, move the selection (any item, weapon or powerup) and use or drop the selected item.</p>
+
+<p><strong>kill</strong></p>
+
+<p>Suicide.</p>
+
+<p><strong>teamselect</strong></p>
+
+<p>Open the team selection.</p>
 
 <h3>Game State Commands</h3>
 
@@ -98,131 +236,245 @@
 
 <p><strong>map</strong> <code>&lt;mapname&gt;</code></p>
 
-<p>Load a map directly (offline/demo mode). Example: <code>map dm-proxycon</code></p>
+<p>Start a local game on the given map. Example: <code>map dm-proxycon</code></p>
 
 <h3>Download/Install Commands</h3>
 
 <p><strong>download</strong> <code>&lt;filename&gt;</code></p>
 
-<p>Download a file from the server. Example: <code>download dm-mymap.bsp</code></p>
+<p>Download a file from the server.</p>
+
+<p><strong>downloadhttp</strong> <code>&lt;filename&gt;</code></p>
+
+<p>Same as <code>download</code>, but over HTTP(S) from the download URL of the server (<code>sv_downloadurl</code>).</p>
 
 <p><strong>installmap</strong> <code>&lt;filename&gt;</code></p>
 
-<p>Install a downloaded map file. Example: <code>installmap dm-mymap.bsp</code></p>
+<p>Install a downloaded map pack. Existing files are only overwritten if <code>allow_overwrite_maps</code> is 1.</p>
 
 <p><strong>installmodel</strong> <code>&lt;filename&gt;</code></p>
 
-<p>Install a downloaded player model file.</p>
+<p>Install a downloaded player model pack.</p>
 
 <h3>IRC Commands</h3>
 
 <p><strong>irc_connect</strong></p>
 
-<p>Connect to IRC chat server (if configured).</p>
+<p>Connect to the IRC chat server (see the <code>cl_IRC_*</code> cvars).</p>
 
-<p><strong>irc_disconnect</strong></p>
+<p><strong>irc_quit</strong></p>
 
 <p>Disconnect from IRC.</p>
 
-<h3>Demo/Demo Playback</h3>
+<p><strong>irc_say</strong> <code>&lt;message&gt;</code></p>
 
-<p><strong>demomap</strong> <code>&lt;mapname&gt;</code></p>
+<p>Say something in the IRC channel.</p>
 
-<p>Play a demo map (if available).</p>
+<h3>Menu and Console Commands</h3>
 
-<h3>Debug/Testing Commands</h3>
+<p><strong>toggleconsole</strong></p>
 
-<p><strong>cl_test</strong> <code>&lt;value&gt;</code></p>
+<p>Open or close the console (Escape also closes it).</p>
 
-<p>Enable testing features (internal development use).</p>
+<p><strong>menu_main</strong></p>
 
-<p><strong>cl_shownet</strong> <code>&lt;value&gt;</code></p>
+<p>Open the main menu.</p>
 
-<p>Display network traffic: 0=off, 1=packets, 2=verbose</p>
+<p><strong>menu_quit</strong></p>
 
-<p><strong>showfps</strong></p>
+<p>Open the quit menu.</p>
 
-<p>Toggle on-screen FPS display (alternative to cl_drawfps).</p>
+<p><strong>clear</strong></p>
+
+<p>Clear the console text.</p>
+
+<p><strong>condump</strong> <code>&lt;filename&gt;</code></p>
+
+<p>Write the console text to a file.</p>
+
+<h3>Sound Commands</h3>
+
+<p><strong>snd_restart</strong></p>
+
+<p>Restart the sound system (fixes audio issues).</p>
+
+<p><strong>playsound</strong> <code>&lt;sound&gt;</code></p>
+
+<p>Play a sound file.</p>
+
+<p><strong>stopsound</strong></p>
+
+<p>Stop all sounds.</p>
+
+<p><strong>soundinfo</strong></p>
+
+<p>Print information about the sound device.</p>
+
+<p><strong>soundlist</strong></p>
+
+<p>List the loaded sounds.</p>
+
+<h3>Video Commands</h3>
+
+<p><strong>vid_restart</strong></p>
+
+<p>Restart the video system, to apply changed video cvars.</p>
+
+<p><strong>vid_modelist</strong></p>
+
+<p>List the available video modes.</p>
+
+<p><strong>vid_front</strong></p>
+
+<p>(Windows) Bring the game window to the front.</p>
+
+<p><strong>screenshot</strong></p>
+
+<p>Take a screenshot (format set by <code>gl_screenshot_type</code>).</p>
+
+<p><strong>gl_strings</strong></p>
+
+<p>Print the OpenGL vendor, renderer and extensions.</p>
+
+<p><strong>imagelist</strong></p>
+
+<p>List the loaded images.</p>
+
+<p><strong>modellist</strong></p>
+
+<p>List the loaded models.</p>
+
+<p><strong>sky</strong> <code>&lt;basename&gt; [rotate] [x y z]</code></p>
+
+<p>Change the sky of the current map.</p>
+
+<p><strong>timerefresh</strong> <code>&lt;1|2&gt;</code></p>
+
+<p>Benchmark the renderer: 1 = rotate through 360 degrees, 2 = fixed view.</p>
+
+<p><strong>loading</strong></p>
+
+<p>Show the loading screen.</p>
+
+<h3>Console and Scripting Commands</h3>
+
+<p><strong>exec</strong> <code>&lt;filename&gt;</code></p>
+
+<p>Execute the commands in a config file. Example: <code>exec autoexec.cfg</code></p>
+
+<p><strong>echo</strong> <code>&lt;text&gt;</code></p>
+
+<p>Print text to the console.</p>
+
+<p><strong>alias</strong> <code>&lt;name&gt; [commands]</code></p>
+
+<p>Create a command alias. Without commands, shows the alias. Example: <code>alias fastswitch "weapnext; wait; weapnext"</code></p>
+
+<p><strong>unalias</strong> <code>&lt;name&gt;</code></p>
+
+<p>Remove an alias.</p>
+
+<p><strong>wait</strong></p>
+
+<p>Wait one frame before executing the rest of the commands.</p>
+
+<p><strong>set</strong> <code>&lt;cvar&gt; &lt;value&gt; [u|s|g]</code></p>
+
+<p>Set a cvar and create it if needed. The optional flag makes it a userinfo (<code>u</code>), serverinfo (<code>s</code>) or gameinfo (<code>g</code>) cvar. Example: <code>set sensitivity 4</code></p>
+
+<p><strong>setenv</strong> <code>&lt;name&gt; [value]</code></p>
+
+<p>Set or show an operating system environment variable.</p>
+
+<p><strong>help</strong> <code>&lt;cvar&gt;</code></p>
+
+<p>Show the type, value and description of a cvar.</p>
+
+<p><strong>cvarlist</strong></p>
+
+<p>List all cvars.</p>
+
+<p><strong>cmdlist</strong></p>
+
+<p>List all commands.</p>
+
+<p><strong>path</strong></p>
+
+<p>Show the search paths of the file system.</p>
+
+<p><strong>dir</strong> <code>&lt;pattern&gt;</code></p>
+
+<p>List the files matching a pattern. Example: <code>dir maps/*.bsp</code></p>
+
+<h3>Debug Commands</h3>
+
+<p><strong>z_stats</strong></p>
+
+<p>Print the memory zone statistics.</p>
+
+<p><strong>error</strong> <code>&lt;message&gt;</code></p>
+
+<p>Force an engine error (testing only).</p>
+
+<p><strong>hang</strong> <code>&lt;msec&gt;</code></p>
+
+<p>Simulate a hang of the game for the given number of milliseconds (testing only).</p>
 
 <hr>
 
 <h2>SERVER SIDE COMMANDS</h2>
 
+<p>These commands can be typed in the console of a dedicated server, in the console of a listen server, in a config file, or sent from a client with <code>rcon</code>.</p>
+
 <h3>Server Management</h3>
 
 <p><strong>map</strong> <code>&lt;mapname&gt;</code></p>
 
-<p>Change the current map immediately. Example: <code>map dm-proxycon</code></p>
+<p>Change to the given map immediately. Example: <code>map dm-proxycon</code></p>
 
 <p><strong>startmap</strong> <code>&lt;mapname&gt;</code></p>
 
-<p>Load initial map when server starts.</p>
+<p>Load the initial map when the server starts (used in server.cfg).</p>
 
-<p><strong>demomap</strong> <code>&lt;mapname&gt;</code></p>
+<p><strong>demomap</strong> <code>&lt;demoname&gt;</code></p>
 
-<p>Play a demo map as the current level.</p>
+<p>Play a demo as the current level.</p>
 
 <p><strong>status</strong></p>
 
-<p>Display server status and currently connected players with IDs.</p>
+<p>Display the map and the connected players with their IDs, score, ping and address.</p>
 
 <p><strong>serverinfo</strong></p>
 
-<p>Show all server cvars and their current values.</p>
+<p>Show all serverinfo cvars and their current values.</p>
 
 <p><strong>heartbeat</strong></p>
 
-<p>Send manual heartbeat to master servers (for server visibility).</p>
+<p>Send a manual heartbeat to the master servers (for server visibility).</p>
 
-<p><strong>setmaster</strong> <code>&lt;servername&gt;</code></p>
+<p><strong>setmaster</strong> <code>&lt;master1&gt; [master2 ...]</code></p>
 
-<p>Set the master server for server registration.</p>
-
-<p><strong>shutdown</strong></p>
-
-<p>Shut down the server immediately (all players disconnected).</p>
+<p>Set the master servers the server registers with (on a dedicated server) and make the server public.</p>
 
 <p><strong>killserver</strong></p>
 
-<p>Gracefully shut down the server.</p>
-
-<h3>Player Management</h3>
-
-<p><strong>kick</strong> <code>&lt;player_id_or_name&gt;</code></p>
-
-<p>Kick a player from the server. Example: <code>kick 2</code> or <code>kick PlayerName</code></p>
-
-<p><strong>kickban</strong> <code>&lt;player_id&gt;</code></p>
-
-<p>Kick and ban a player by IP address.</p>
-
-<p><strong>unban</strong> <code>&lt;ip_address&gt;</code></p>
-
-<p>Unban a previously banned IP address.</p>
-
-<p><strong>ban</strong> <code>&lt;ip_address&gt;</code></p>
-
-<p>Ban an IP address (prevents connections).</p>
-
-<p><strong>status</strong></p>
-
-<p>Shows player IDs which are needed for kick/ban commands.</p>
-
-<p><strong>dumpuser</strong> <code>&lt;player_id&gt;</code></p>
-
-<p>Display detailed information about a connected player.</p>
-
-<h3>Announcements/Communication</h3>
+<p>Shut down the server and return to the main menu or exit (dedicated).</p>
 
 <p><strong>say</strong> <code>&lt;message&gt;</code></p>
 
-<p>Broadcast a message to all players on the server. Example: <code>say Welcome to the CTF server!</code></p>
+<p>(Dedicated server only) Broadcast a message to all players as the server console.</p>
 
-<p><strong>sayteam</strong> <code>&lt;message&gt;</code></p>
+<h3>Player Management</h3>
 
-<p>Send a message to a specific team only.</p>
+<p><strong>kick</strong> <code>&lt;userid&gt;</code></p>
 
-<h3>Recording/Logging</h3>
+<p>Kick a player from the server. The userid is the number shown by <code>status</code>. Example: <code>kick 2</code></p>
+
+<p><strong>dumpuser</strong> <code>&lt;userid&gt;</code></p>
+
+<p>Display the userinfo of a connected player.</p>
+
+<h3>Recording</h3>
 
 <p><strong>serverrecord</strong> <code>&lt;demoname&gt;</code></p>
 
@@ -232,27 +484,39 @@
 
 <p>Stop server-side demo recording.</p>
 
-<h3>Server Command (sv subcommands)</h3>
+<h3>Diagnostics</h3>
+
+<p><strong>sv_jitters</strong></p>
+
+<p>Show per-player network statistics: ping, ping deviation, packets per second, jitter, uplink and downlink packet loss, and the antilag bias and factor in use.</p>
+
+<p><strong>sv_entity_cull_status</strong></p>
+
+<p>Show the adaptive entity culling settings and the effective cull angle per client (see the <code>sv_entity_cull*</code> cvars).</p>
+
+<h3>Server Commands (sv subcommands)</h3>
+
+<p>These are handled by the game module: <code>sv &lt;subcommand&gt; [arguments]</code>.</p>
 
 <p><strong>sv test</strong></p>
 
 <p>Test command (internal use).</p>
 
-<p><strong>sv addbot</strong> <code>&lt;name&gt; [model/skin]</code></p>
+<p><strong>sv addbot</strong> <code>[name] [skin]</code></p>
 
-<p>Add a bot to the server with optional model/skin. Example: <code>sv addbot "BotName" "male/visor"</code></p>
+<p>Add a bot to the server with optional name and model/skin. Example: <code>sv addbot "BotName" "enforcer/blue"</code>. Disabled when bots are disabled in <code>dmflags</code> or when <code>sv_botkickthreshold</code> is set or <code>g_duel</code> is on.</p>
 
 <p><strong>sv removebot</strong> <code>&lt;name&gt;</code></p>
 
-<p>Remove a bot by name from the server. Example: <code>sv removebot BotName</code></p>
+<p>Remove a bot by name from the server. Example: <code>sv removebot BotName</code>. Disabled under the same conditions as <code>sv addbot</code>.</p>
 
 <p><strong>sv addip</strong> <code>&lt;ip-mask&gt;</code></p>
 
-<p>Add IP address to server ban list (supports masks). Example: <code>sv addip 192.168.1.100</code> or <code>sv addip 192.168.1.*</code></p>
+<p>Add an IP address to the server ban list (addresses with fewer than four parts act as a prefix mask). Example: <code>sv addip 192.168.1.100</code></p>
 
 <p><strong>sv removeip</strong> <code>&lt;ip-mask&gt;</code></p>
 
-<p>Remove IP address from ban list (must match exactly). Example: <code>sv removeip 192.168.1.100</code></p>
+<p>Remove an IP address from the ban list (must match exactly). Example: <code>sv removeip 192.168.1.100</code></p>
 
 <p><strong>sv listip</strong></p>
 
@@ -260,77 +524,47 @@
 
 <p><strong>sv writeip</strong></p>
 
-<p>Save current IP ban list to listip.cfg file for persistent storage.</p>
+<p>Save the current IP ban list to listip.cfg for persistent storage.</p>
 
 <p><strong>sv acedebug</strong> <code>&lt;on|off&gt;</code></p>
 
-<p>Enable or disable ACE bot debug mode.</p>
+<p>Enable or disable ACE bot debug mode (enables the node editing commands below).</p>
 
 <p><strong>sv savenodes</strong></p>
 
-<p>Save bot navigation nodes to file.</p>
+<p>Save the bot navigation nodes to file.</p>
+
+<h3>Bot Node Editing Commands</h3>
+
+<p>Available in the game console of a player, only after <code>sv acedebug on</code>.</p>
+
+<p><strong>addnode</strong> <code>&lt;type&gt;</code>, <strong>removelink</strong> <code>&lt;from&gt; &lt;to&gt;</code>, <strong>addlink</strong> <code>&lt;from&gt; &lt;to&gt;</code>, <strong>showpath</strong> <code>&lt;node&gt;</code>, <strong>shownode</strong> <code>&lt;node&gt;</code>, <strong>hidenode</strong> <code>&lt;node&gt;</code>, <strong>findnode</strong> <code>[node]</code>, <strong>movenode</strong> <code>&lt;node&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;</code></p>
+
+<p>Create, link, inspect and move bot navigation nodes.</p>
 
 <h3>Configuration Commands (used in server.cfg)</h3>
 
-<p><strong>set</strong> <code>&lt;cvar&gt; &lt;value&gt;</code></p>
+<p><strong>set</strong> <code>&lt;cvar&gt; &lt;value&gt; [u|s|g]</code></p>
 
 <p>Set a cvar value. Used in config files: <code>set maxclients 16</code></p>
 
-<p><strong>seta</strong> <code>&lt;cvar&gt; &lt;value&gt;</code></p>
-
-<p>Set a cvar and archive it (save to config). <code>seta fraglimit 20</code></p>
-
-<p><strong>setf</strong> <code>&lt;cvar&gt; &lt;float_value&gt;</code></p>
-
-<p>Set a float cvar value. <code>setf g_antilag_oneway_factor 0.75</code></p>
-
 <hr>
 
-<h2>ADMIN/RCON COMMANDS (Server-side, accessible via rcon or admin console)</h2>
+<h2>PLAYER COMMANDS HANDLED BY THE SERVER</h2>
+
+<p>These are sent by clients to the game module (and can be typed in the console of a connected client).</p>
 
 <h3>Voting System</h3>
 
-<p><strong>callvote</strong> <code>&lt;type&gt; [arguments]</code></p>
+<p><strong>callvote</strong> <code>&lt;command&gt; [argument]</code></p>
 
-<p>Initiate a vote. Types: kickplayer, changemap, fraglimit, timelimit, etc.</p>
+<p>Start a vote. Not possible during warmup or while another vote is running, and only if <code>g_callvote</code> is 1. Supported commands are <code>kick &lt;player&gt;</code>, <code>kickban &lt;player&gt;</code>, <code>fraglimit &lt;value&gt;</code>, <code>timelimit &lt;value&gt;</code> and <code>map &lt;mapname&gt;</code>. Example: <code>callvote map dm-proxycon</code></p>
 
-<p><strong>vote</strong> <code>&lt;yes|no&gt;</code></p>
+<p><strong>vote</strong> <code>&lt;1|2&gt;</code></p>
 
-<p>Vote yes or no on current vote.</p>
+<p>Vote yes (1) or no (2) on the current vote. During the end-of-level map vote (<code>g_mapvote</code>), the number selects the map.</p>
 
-<h3>Banning System</h3>
-
-<p><strong>addip</strong> <code>&lt;ip_prefix&gt;</code></p>
-
-<p>Add IP to server ban list. Example: <code>addip 192.168.*</code></p>
-
-<p><strong>removeip</strong> <code>&lt;ip_prefix&gt;</code></p>
-
-<p>Remove IP from ban list.</p>
-
-<p><strong>listip</strong></p>
-
-<p>Show all currently banned IPs.</p>
-
-<h3>Game Control</h3>
-
-<p><strong>fraglimit</strong> <code>&lt;value&gt;</code></p>
-
-<p>Set frag limit (set fraglimit 50).</p>
-
-<p><strong>timelimit</strong> <code>&lt;value&gt;</code></p>
-
-<p>Set time limit in minutes (set timelimit 30).</p>
-
-<p><strong>changemap</strong> <code>&lt;mapname&gt;</code></p>
-
-<p>Change map with fade/transition effects.</p>
-
-<p><strong>dmflags</strong> <code>&lt;value&gt;</code></p>
-
-<p>Set game flags (fall damage, instant items, etc).</p>
-
-<h3>Cheat Commands (when cheats enabled)</h3>
+<h3>Cheat Commands (when <code>cheats</code> is 1)</h3>
 
 <p><strong>god</strong></p>
 
@@ -346,11 +580,7 @@
 
 <p><strong>give</strong> <code>&lt;item&gt;</code></p>
 
-<p>Give yourself an item. Examples: health, armor, weapons, ammo.</p>
-
-<p><strong>kill</strong></p>
-
-<p>Suicide (remove yourself from game).</p>
+<p>Give yourself an item. Examples: <code>give all</code>, <code>give health</code>, <code>give weapons</code>, <code>give ammo</code>, <code>give armor</code>, or an item name.</p>
 
 <hr>
 
@@ -358,24 +588,24 @@
 
 <h3>Config Files</h3>
 
-<p>Commands can be placed in config files (~/.alienarena/autoexec.cfg for personal config):</p>
+<p>Commands can be placed in config files (autoexec.cfg in your user game folder for personal config; config.cfg is written by the game):</p>
 
 <pre><code>
 // Input settings
-set in_poll_rate 1
 set m_direct 1
 set cl_maxfps 300
 set sensitivity 3
 
 // Network
-set rate 15000
+set rate 40000
+set cl_maxpackets 100
 
 // Graphics
 set gl_swapinterval 1
 
 // User info
 set name "PlayerName"
-set skin "male/doom"
+set skin "enforcer/default"
 </code></pre>
 
 <h3>Server Config (server.cfg)</h3>
@@ -391,11 +621,10 @@ set fraglimit 50
 set timelimit 30
 set dmflags 8
 
-// Antilag
-set g_antilag 1
-set g_antilag_oneway 1
-set g_antilag_oneway_factor 0.75
+// Network and antilag
+set sv_tickrate 100
+set g_antilagprojectiles 1
+set g_antilag_oneway_factor 0.5
 </code></pre>
-
 </body>
 </html>
