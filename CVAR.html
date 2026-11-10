@@ -934,6 +934,14 @@
 
 <p>Selects a custom botinfo file; 0 uses the built‑in bots, other values load botinfo/custom&lt;N&gt;.tmp.</p>
 
+<p><strong>bot_reactiontime</strong>: FLOAT (default: 0.5)</p>
+
+<p>Seconds a bot must have an enemy continuously in sight before it is allowed to open fire. 0 = instant/legacy behavior. Scaled by bot skill: higher-skill bots react faster (shorter effective delay), lower-skill bots react slower.</p>
+
+<p><strong>bot_sightrange</strong>: FLOAT (default: 1200)</p>
+
+<p>Maximum distance (map units) at which bots will acquire and engage enemies. 0 = unlimited (legacy behavior). Lower this to stop bots from engaging across very open maps.</p>
+
 <h3>Download CVARs</h3>
 
 <p><strong>allow_download</strong>: BOOL (default: 1)</p>
@@ -1028,7 +1036,7 @@
   <li>65536: quad fire drop</li>
   <li>131072: bots autosave nodes</li>
   <li>262144: bot chat</li>
-  <li>524288: bot fuzzy aim</li>
+  <li>524288: bot perfect aim (by default fuzzy)</li>
   <li>1048576: disable bots</li>
   <li>2097152: bot level advance (advance to the next map even if a bot won)</li>
 </ul>

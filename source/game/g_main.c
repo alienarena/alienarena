@@ -194,6 +194,8 @@ cvar_t  *g_background_music;
 
 cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;
+cvar_t  *bot_reactiontime;
+cvar_t  *bot_sightrange;
 
 cvar_t  *sv_tickrate;
 float	FRAMETIME;		// FRAMETIME in seconds, SPF

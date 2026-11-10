@@ -198,6 +198,10 @@ void InitGame (void)
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH | CVARDOC_INT);
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH | CVARDOC_INT);
 	gi.cvar_describe (sv_custombots, "0 uses default botfile. Any other value selects a botfile of the form botinfo/custom<value>.tmp.");
+	bot_reactiontime = gi.cvar("bot_reactiontime", "0.5", CVARDOC_FLOAT);
+	gi.cvar_describe (bot_reactiontime, "Seconds a bot must have an enemy in sight before it is allowed to open fire. 0 = instant (legacy behavior). Scaled by bot skill: higher-skill bots react faster, lower-skill bots slower.");
+	bot_sightrange = gi.cvar("bot_sightrange", "1200", CVARDOC_FLOAT);
+	gi.cvar_describe (bot_sightrange, "Maximum distance (map units) at which bots will acquire and engage enemies. 0 = unlimited (legacy behavior).");
 	sv_tickrate = gi.cvar("sv_tickrate", "100", CVAR_SERVERINFO | CVAR_LATCH | CVARDOC_INT);
 
 	// To output a game report after a match (only on dedicated servers)

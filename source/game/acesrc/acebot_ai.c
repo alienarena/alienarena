@@ -156,6 +156,16 @@ void ACEAI_Think (edict_t *self)
 	{
 		self->client->ps.pmove.pm_flags &= ~ PMF_SNEAKING;
 
+		// track how long this specific enemy has been continuously in
+		// sight, so we can withhold fire for bot_reactiontime seconds
+		// (independent of sv_tickrate) before the bot is allowed to shoot
+		if ( self->enemy != self->sighted_enemy )
+		{
+			self->sighted_enemy = self->enemy;
+			self->enemy_sighted_time = level.time;
+			self->aim_locked = false;
+		}
+
 		ACEAI_ChooseWeapon( self );
 		
 		if (level.time >= self->next_fire_time) {
@@ -172,6 +182,9 @@ void ACEAI_Think (edict_t *self)
 	}
 	else
 	{
+		self->sighted_enemy = NULL;
+		self->aim_locked = false;
+
 		// high skill bots will just strafejump all over and murder you
 		// under 3, and they'll take some time to quietly sneak around
 		if( self->skill < 3 )
@@ -623,7 +636,14 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 
 	if(self->oldenemy != NULL) //(was shot from behind)
 	{
-		if(!OnSameTeam(self, self->oldenemy))
+		if(!self->oldenemy->inuse || self->oldenemy->deadflag)
+		{
+			// attacker died (or is gone) before we got a chance to retaliate -
+			// forget it and fall through to the normal nearest-enemy scan
+			// below, instead of shooting at a corpse.
+			self->oldenemy = NULL;
+		}
+		else if(!OnSameTeam(self, self->oldenemy))
 		{
 			//to do - add code to ask for help if carrying the flag
 			self->enemy = self->oldenemy;
@@ -644,6 +664,11 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		{
 			VectorSubtract(self->s.origin, ent->s.origin, dist);
 			weight = VectorLength( dist );
+
+			// admin-configurable max engagement range, so bots don't
+			// snipe across wide open maps (0 = unlimited)
+			if ( bot_sightrange->value > 0.0f && weight > bot_sightrange->value )
+				continue;
 
 			//add some more checks here, for health and armor, just slight, but enough to make them favor going for the weaker player
 

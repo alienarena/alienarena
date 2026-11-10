@@ -926,6 +926,14 @@ Number of players the server tries to keep filled. Bots fill the empty slots up 
 
 Selects a custom botinfo file; 0 uses the built‑in bots, other values load botinfo/custom<N>.tmp.
 
+**bot_reactiontime**: FLOAT (default: 0.5)
+
+Seconds a bot must have an enemy continuously in sight before it is allowed to open fire. 0 = instant/legacy behavior. Scaled by bot skill: higher-skill bots react faster (shorter effective delay), lower-skill bots react slower.
+
+**bot_sightrange**: FLOAT (default: 1200)
+
+Maximum distance (map units) at which bots will acquire and engage enemies. 0 = unlimited (legacy behavior). Lower this to stop bots from engaging across very open maps.
+
 ### Download CVARs
 
 **allow_download**: BOOL (default: 1)
@@ -1019,7 +1027,7 @@ Deathmatch flags bitmask controlling game rules. Add up the values of the option
 - 65536: quad fire drop
 - 131072: bots autosave nodes
 - 262144: bot chat
-- 524288: bot fuzzy aim
+- 524288: bot perfect aim (by default fuzzy)
 - 1048576: disable bots
 - 2097152: bot level advance (advance to the next map even if a bot won)
 

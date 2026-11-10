@@ -345,7 +345,21 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 //
 // Modified from the original id ChangeYaw code...
 ///////////////////////////////////////////////////////////////////////
+void ACEMV_TurnTowardMoveVector (edict_t *ent, float max_degrees);
+
 void ACEMV_ChangeBotAngle (edict_t *ent)
+{
+	ACEMV_TurnTowardMoveVector (ent, ent->yaw_speed);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Same turn-rate-limited angle change as above, but with an explicit
+// max-degrees-per-call instead of ent->yaw_speed. ent->yaw_speed is
+// calibrated assuming a call every FRAMETIME tick; callers that only run
+// periodically (e.g. ACEMV_Attack, throttled to the weapon fire rate)
+// need to pass their own rate calibrated for their actual call interval.
+///////////////////////////////////////////////////////////////////////
+void ACEMV_TurnTowardMoveVector (edict_t *ent, float max_degrees)
 {
 	float	ideal_yaw;
 	float   ideal_pitch;
@@ -370,7 +384,7 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 	if (current_yaw != ideal_yaw)
 	{
 		move = ideal_yaw - current_yaw;
-		speed = ent->yaw_speed;
+		speed = max_degrees;
 		if (ideal_yaw > current_yaw)
 		{
 			if (move >= 180.0f)
@@ -398,7 +412,7 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 	if (current_pitch != ideal_pitch)
 	{
 		move = ideal_pitch - current_pitch;
-		speed = ent->yaw_speed;
+		speed = max_degrees;
 		if (ideal_pitch > current_pitch)
 		{
 			if (move >= 180.0f)
@@ -868,6 +882,19 @@ static const float ktgt_skill[4] =
 //accuracy factor = ktgt_skill[0] * self->accuracy minimum clamp
 static const float ktgt_acc = 0.35;
 
+/* reaction-time scaling by skill (-1, 0, 1, 2 & 3): higher skill bots
+ * notice/react faster, so bot_reactiontime is multiplied down for them
+ * and multiplied up (slower) for the easier skill levels */
+static const float ktgt_reaction_skill[5] =
+	{ 1.6f, 1.3f, 1.0f, 0.7f, 0.4f }; //index by self->skill + 1
+
+/* how close (degrees, yaw only) the bot's current aim must be to the real
+ * enemy direction before it's considered "aimed in" and allowed to fire */
+static const float kaim_lock_tolerance = 6.0f;
+
+/* degrees/sec a bot turns to face a newly spotted enemy before firing */
+static const float kaim_turn_rate = 370.0f;
+
 /*
 1 : 1.0 //blaster accuracy
 2 : 1.0 //alien disruptor accuracy
@@ -1331,14 +1358,84 @@ attack:
 		use_fuzzy_aim = false;
 	}
 
-	// Aim
-	VectorCopy(self->enemy->s.origin,target);
-	if ( use_fuzzy_aim  )
+	// Withhold fire until the bot has had this enemy in sight for an
+	// effective reaction time (bot_reactiontime scaled by skill - higher
+	// skill bots notice/react faster).
+	if ( bot_reactiontime->value > 0.0f )
 	{
-		fuzzy_target( self, &target[0], &target[1] );
+		int reaction_idx = self->skill + 1; // self->skill is -1..3
+		float effective_reaction_time;
+
+		if ( reaction_idx < 0 )
+			reaction_idx = 0;
+		else if ( reaction_idx > 4 )
+			reaction_idx = 4;
+
+		effective_reaction_time = bot_reactiontime->value * ktgt_reaction_skill[reaction_idx];
+
+		if ( (level.time - self->enemy_sighted_time) < effective_reaction_time )
+			ucmd->buttons = 0;
 	}
-	// Set movement direction toward targeted enemy
-	VectorSubtract (target, self->s.origin, self->move_vector);
-	vectoangles (self->move_vector, angles);
-	VectorCopy(angles,self->s.angles);
+
+	// Aim
+	{
+		// ACEMV_Attack (this function) only runs when next_fire_time
+		// allows it, not every tick - measure the real elapsed time since
+		// the last call so the turn rate below is correct regardless of
+		// sv_tickrate or weapon fire rate.
+		float attack_dt = level.time - self->last_attack_time;
+		self->last_attack_time = level.time;
+		if ( attack_dt <= 0.0f || attack_dt > 0.25f )
+			attack_dt = 0.1f; // first call / long gap: assume one typical interval
+
+		// Checked only once per engagement (self->aim_locked persists
+		// until self->sighted_enemy changes) - re-checking every tick would
+		// have the fuzzy aim wobble below fight this alignment check, since
+		// the wobble itself can swing several degrees off the real direction.
+		if ( !self->aim_locked )
+		{
+			vec3_t real_dir;
+			float yaw_diff;
+
+			// Check how far the bot's current view is from the real
+			// (un-fuzzed) enemy direction. This gates firing and drives a
+			// gradual, visible turn (kaim_turn_rate deg/sec) instead of an
+			// instant snap - so a bot that spots you from the side of its
+			// FOV has to actually turn to face you (on top of the
+			// reaction-time delay above, whichever takes longer) before it
+			// can shoot.
+			VectorSubtract (self->enemy->s.origin, self->s.origin, real_dir);
+			vectoangles (real_dir, angles);
+			yaw_diff = anglemod (angles[YAW] - anglemod (self->s.angles[YAW]));
+			if ( yaw_diff > 180.0f )
+				yaw_diff -= 360.0f;
+
+			if ( fabs (yaw_diff) <= kaim_lock_tolerance )
+			{
+				self->aim_locked = true;
+			}
+			else
+			{
+				// Still turning to face the target - withhold fire and
+				// rotate gradually instead of snapping instantly.
+				ucmd->buttons = 0;
+				VectorCopy (real_dir, self->move_vector);
+				ACEMV_TurnTowardMoveVector (self, kaim_turn_rate * attack_dt);
+			}
+		}
+
+		if ( self->aim_locked )
+		{
+			// Already facing the target - apply fuzzy aim wobble (if any)
+			// for the actual shot, now that we're locked on.
+			VectorCopy (self->enemy->s.origin, target);
+			if ( use_fuzzy_aim )
+				fuzzy_target( self, &target[0], &target[1] );
+
+			VectorSubtract (target, self->s.origin, self->move_vector);
+			vectoangles (self->move_vector, angles);
+			VectorCopy(angles,self->s.angles);
+		}
+	}
 }
+

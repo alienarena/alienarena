@@ -674,6 +674,8 @@ extern  cvar_t  *g_background_music;
 
 extern  cvar_t  *sv_botkickthreshold;
 extern  cvar_t	*sv_custombots;
+extern  cvar_t	*bot_reactiontime;
+extern  cvar_t	*bot_sightrange;
 
 extern  cvar_t  *sv_tickrate;
 extern  cvar_t  *sv_gamereport;
@@ -1711,6 +1713,24 @@ struct edict_s
 
 	// For attacking
 	float next_fire_time;
+
+	// For reaction-time delay: tracks which enemy is currently in sight
+	// and when it was first spotted, so fire can be withheld briefly
+	// (see bot_reactiontime) regardless of sv_tickrate.
+	edict_t *sighted_enemy;
+	float enemy_sighted_time;
+
+	// Set once the bot has turned to roughly face sighted_enemy (see
+	// kaim_lock_tolerance in acebot_movement.c); reset whenever
+	// sighted_enemy changes. Checked only once per engagement so the
+	// fuzzy aim wobble can't fight the alignment check every tick.
+	qboolean aim_locked;
+
+	// Wall-clock time of the previous ACEMV_Attack call, used to measure
+	// the actual elapsed time between calls (ACEMV_Attack only runs when
+	// next_fire_time allows it, not every tick) so the turn-to-face-target
+	// rate can be calibrated correctly regardless of weapon fire rate.
+	float last_attack_time;
 // ACEBOT_END
 
 	// for deathcam to remember position of player's death
