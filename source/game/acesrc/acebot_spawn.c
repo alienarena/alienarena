@@ -1173,6 +1173,8 @@ qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 	/*
 	 * adjust skill according to cvar. Single Player menu selections
 	 *  force the cvar.
+	 *  -1 : forces all to -1 skill (single player very easy: half health,
+	 *       slow walking, lowest accuracy)
 	 *   0 : forces all to 0 skill (single player easy)
 	 *   1 : skill is cfg setting  (single player medium)
 	 *   2 : skill is cfg setting setting plus 1 (single player hard)

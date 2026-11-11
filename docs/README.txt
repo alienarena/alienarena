@@ -110,7 +110,7 @@ In your Deathmatch options, you can configure other options such as chatting, no
 
 These bots are fully configurable using the Botconfigurator program.  You can change their skill levels, accuracy, weapon favoring, awareness, and chat strings.
 
-Skill level 0 bots are quite easy to beat.  Skill level 1 bots are a little tougher, and do more dodging and are more accurate.  Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate.  Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level.  They will also taunt you after killing you.  If in Alien Arena, you play the single player tournament against the bots, selecting "easy" will make all bots skill level 0.  Selecting "normal" will leave them at whatever level they are configured. Selecting "hard" will make them all move up 1 skill level.
+Skill level 0 bots are quite easy to beat.  Skill level 1 bots are a little tougher, and do more dodging and are more accurate.  Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate.  Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level.  They will also taunt you after killing you.  If in Alien Arena, you play the single player tournament against the bots, selecting "very easy" will make all bots skill level -1, an even weaker level than 0 (bots have half health, walk slowly and aim poorly).  Selecting "easy" will make all bots skill level 0.  Selecting "normal" will leave them at whatever level they are configured. Selecting "hard" will make them all move up 1 skill level.
 
 5.	THE REWARDS SYSTEM
 

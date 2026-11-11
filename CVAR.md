@@ -988,7 +988,13 @@ Enable Tactical mode (team based, objective-based).
 
 **skill**: INT (default: 1)
 
-Difficulty level for bots (0=easy, 1=medium, 2=hard, 3=nightmare).
+Difficulty level for bots (-1=very easy, 0=easy, 1=medium, 2=hard, 3=ultra). The server clamps values outside -1..3.
+
+-1 and 0 force every bot to that skill level, ignoring the skill in its botinfo .cfg file. 1 uses each bot's configured skill. 2 raises each bot's configured skill by one level (maximum 3). 3 forces every bot to skill 3.
+
+-1 is the weakest level: on top of the easy-level behavior, bots start with half health, walk much slower, never use special unstick moves, have an even lower aim accuracy multiplier (0.5 instead of 0.7) and the longest `bot_reactiontime` multiplier. Human players also get double spawn protection time. The Practice menu uses -1 for "Very Easy", and lowers the skill by one level (down to -1) in instagib/rocket modes.
+
+Changes to this cvar take effect when the next map loads.
 
 **g_autobalance**: BOOL (default: 0)
 
