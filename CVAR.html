@@ -1268,7 +1268,7 @@
 
 <p><strong>sv_resync_throttle_ms</strong>: INT (default: 150)</p>
 
-<p>Minimum milliseconds between forced full (non-delta) resyncs sent to a client that has fallen out of its delta-compression window. Without this, such a client would get the most expensive packet every tick for as long as the condition lasts. Ticks in between are skipped (as with a rate drop) instead of repeating the resync.</p>
+<p>Minimum milliseconds between forced full (non-delta) resyncs sent when a client's delta frame or its entity states are no longer available. Without this, such a client would get the most expensive packet every tick for as long as the condition lasts. Ticks in between are skipped (as with a rate drop) instead of repeating the resync.</p>
 
 <p><strong>sv_hitch_threshold_ms</strong>: INT (default: 100)</p>
 
@@ -1276,23 +1276,27 @@
 
 <h3>Entity Culling CVARs</h3>
 
-<p>The server culls entities that are too small (in angular size) to be seen by a client, which saves bandwidth. The cull angle adapts per client between <code>sv_entity_cull</code> (floor) and <code>sv_entity_cull_max</code> (ceiling), based on the number of visible entities and on the connection quality of the client. Clients can ask for a different value with the <code>entity_cull</code> userinfo cvar. Use <code>sv_entity_cull_status</code> to see the effective values.</p>
+<p>The server can cull small entities by angular size to save bandwidth. Automatic culling is disabled at or below the entity budget; above the budget its angle adapts per client between <code>sv_entity_cull</code> and <code>sv_entity_cull_max</code>, based on entity count and connection distress. The count is measured after PVS checks and before angular culling. Clients can request a fixed angle with <code>entity_cull</code>, bypassing automatic culling. Use <code>sv_entity_cull_status</code> to see the effective values.</p>
 
 <p><strong>sv_entity_cull</strong>: FLOAT (default: 1.0)</p>
 
-<p>Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. 0 disables culling. Acts as the minimum (floor) when adaptive scaling is active.</p>
+<p>Minimum angular size (degrees) when automatic culling is active above budget. Higher values cull more aggressively. 0 disables automatic culling, but a positive client <code>entity_cull</code> override still applies.</p>
 
 <p><strong>sv_entity_cull_max</strong>: FLOAT (default: 10.0)</p>
 
 <p>Maximum angular size (in degrees) adaptive entity culling scales up to when the visible entity count of a client exceeds <code>sv_entity_budget_max</code>.</p>
 
-<p><strong>sv_entity_budget</strong>: INT (default: 80)</p>
+<p><strong>sv_entity_budget</strong>: INT (default: 120)</p>
 
-<p>Number of visible entities per client (at sv_tickrate 100) below which culling stays at the <code>sv_entity_cull</code> minimum. Scaled automatically for other tickrates.</p>
+<p>For clients advertising <code>p100=2</code>, the visible entity count (at sv_tickrate 100) at or below which automatic angular culling, including distress-based culling, is disabled. A drop to this level takes effect on the next frame. Scaled automatically for other tickrates. Existing archived settings retain their configured value when the default changes.</p>
+
+<p><strong>sv_entity_budget_legacy</strong>: INT (default: 80)</p>
+
+<p>The equivalent budget for clients not advertising <code>p100=2</code>. It scales with tickrate in the same way as <code>sv_entity_budget</code>.</p>
 
 <p><strong>sv_entity_budget_max</strong>: INT (default: 150)</p>
 
-<p>Number of visible entities per client (at sv_tickrate 100) at or above which culling reaches the <code>sv_entity_cull_max</code> ceiling. Scaled automatically for other tickrates.</p>
+<p>Number of visible entities per client (at sv_tickrate 100) at or above which culling reaches the <code>sv_entity_cull_max</code> ceiling. Applies to both client budgets and scales automatically for other tickrates.</p>
 
 <p><strong>sv_entity_cull_vel_away_dot</strong>: FLOAT (default: 0.0)</p>
 
@@ -1300,15 +1304,15 @@
 
 <p><strong>sv_entity_cull_distress</strong>: FLOAT (default: 0.1)</p>
 
-<p>Fraction (0-1) of ticks a client needs a full resync (see <code>sv_resync_throttle_ms</code>) below which adaptive culling isn't increased for this reason. A client with a poor connection can need stronger culling than its entity count suggests. Whichever of this or the entity-count scaling is worse wins; a healthy connection is never affected.</p>
+<p>Fraction (0-1) of ticks a client needs a full resync (see <code>sv_resync_throttle_ms</code>) below which adaptive culling isn't increased for this reason. Above the entity budget, whichever of distress or entity-count scaling is worse wins; at or below the budget, distress does not enable automatic culling.</p>
 
 <p><strong>sv_entity_cull_distress_max</strong>: FLOAT (default: 0.5)</p>
 
-<p>Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches <code>sv_entity_cull_max</code> due to connection distress alone, regardless of the visible entity count.</p>
+<p>Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches <code>sv_entity_cull_max</code> due to connection distress when the visible entity count exceeds the budget.</p>
 
 <p><strong>sv_entity_cull_distress_cooldown_ms</strong>: INT (default: 5000)</p>
 
-<p>Milliseconds for the connection-distress part of adaptive culling to ease back down from <code>sv_entity_cull_max</code> to the floor once distress stops. It still rises immediately when distress increases. Prevents a fluctuating connection from making the angle flap up and down. 0 = relax immediately.</p>
+<p>Milliseconds for the connection-distress part of adaptive culling to ease back down from <code>sv_entity_cull_max</code> to zero once distress stops. It still rises immediately when distress increases and is cleared at or below budget. 0 = relax immediately.</p>
 
 <h3>Special Features</h3>
 
@@ -1363,6 +1367,5 @@
   <li>Limited bandwidth: <code>set rate 15000</code></li>
   <li>Very poor connection: <code>set rate 5000</code> (may see more resyncs and lag compensation artifacts)</li>
 </ul>
-
 </body>
 </html>

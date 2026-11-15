@@ -370,26 +370,28 @@ int SV_ClientMaxHistory (client_t *client)
 =============
 SV_ClientNeedsFullResync
 
-True if building this client's next frame would require a full (non-delta)
-resync: either the client itself has no valid frame to delta from, or the
-server's last-acked frame for it has fallen out of its usable window.
+True if a full (non-delta) resync is needed: the client has no valid
+delta frame, its frame history is too old, or its entity states have been
+overwritten in the shared server ring.
 =============
 */
 qboolean SV_ClientNeedsFullResync (client_t *client)
 {
+	client_frame_t *oldframe;
+
 	if (client->lastframe <= 0)
 		return true;
-	return (sv.framenum - client->lastframe) >= SV_ClientMaxHistory (client);
+	if ((sv.framenum - client->lastframe) >= SV_ClientMaxHistory (client))
+		return true;
+
+	oldframe = &client->frames[client->lastframe & UPDATE_MASK];
+	return svs.next_client_entities - oldframe->first_entity > svs.num_client_entities;
 }
 
 void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 {
 	client_frame_t		*frame, *oldframe;
 	int					lastframe;
-	int                 max_history;
-
-	max_history = SV_ClientMaxHistory (client);
-
 	//Com_Printf ("%i -> %i\n", client->lastframe, sv.framenum);
 	// this is the frame we are creating
 	frame = &client->frames[sv.framenum & UPDATE_MASK];
@@ -402,8 +404,8 @@ void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 		lastframe = -1;
 		client->dbg_client_resends++;
 	}
-	else if (sv.framenum - client->lastframe >= max_history)
-	{	// client hasn't gotten a good message through in a long time
+	else if (SV_ClientNeedsFullResync (client))
+	{	// The frame or its entity states are no longer available.
 //		Com_Printf ("%s: Delta request from out-of-date packet.\n", client->name);
 		oldframe = NULL;
 		lastframe = -1;
@@ -502,6 +504,7 @@ extern float sv_model_bounds[MAX_MODELS];
 extern cvar_t *sv_entity_cull;
 extern cvar_t *sv_entity_cull_max;
 extern cvar_t *sv_entity_budget;
+extern cvar_t *sv_entity_budget_legacy;
 extern cvar_t *sv_entity_budget_max;
 extern cvar_t *sv_entity_cull_distress;
 extern cvar_t *sv_entity_cull_distress_max;
@@ -512,21 +515,27 @@ extern cvar_t *sv_entity_cull_vel_away_dot;
 #define ENTITY_CULL_WINDOW_MS		1000	// how often (ms) to re-evaluate the adaptive angle
 #define ENTITY_CULL_CONFIRM_WINDOWS	2		// consecutive over-budget windows required before escalating
 
+float SV_ClientEntityBudget (const client_t *client)
+{
+	float budget = client->p100 == 2 ? sv_entity_budget->value : sv_entity_budget_legacy->value;
+	return budget * (100.0f / (float)sv_tickrate->integer);
+}
+
 /*
 =============
 SV_UpdateAdaptiveEntityCull
 
-Re-evaluates a client's adaptive entity culling angle, at most once every
-ENTITY_CULL_WINDOW_MS, from two independent signals - whichever is worse
-wins:
+Disables automatic angular culling at or below the entity budget. Above
+budget, re-evaluates the angle at most once every ENTITY_CULL_WINDOW_MS
+from the entity count and connection distress, whichever is worse.
 
 1. Entity count: uses the LEAST number of entities seen visible to this
    client during the window (not the average or latest), and only
    escalates after ENTITY_CULL_CONFIRM_WINDOWS consecutive windows confirm
    sustained overload - biasing toward rendering entities rather than
-   culling them when in doubt. Relaxes back down immediately (single
-   window) once load drops. This only reacts to what's actually visible to
-   THIS client right now (PVS and angular culling already applied), so it
+   culling them when in doubt. Relaxes on the next frame when load drops
+   to or below budget. This only reacts to what's actually visible to
+   THIS client right now (PVS applied, but before angular culling), so it
    naturally adapts to map layout and player position without needing any
    per-map tuning.
 
@@ -558,6 +567,33 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 	if (client->entity_cull > 0.0f)
 		return;		// client has an explicit override, adaptive scaling doesn't apply
 
+	tickrate_scale = 100.0f / (float)sv_tickrate->integer;
+	budget = SV_ClientEntityBudget (client);
+	budget_max = sv_entity_budget_max->value * tickrate_scale;
+
+	// A calm frame relaxes culling for the next frame without waiting for
+	// the next one-second evaluation.
+	if (sv_entity_cull->value <= 0.0f)
+	{
+		client->auto_entity_cull = 0.0f;
+		client->auto_entity_cull_tan_sq = 0.0f;
+		client->auto_entity_cull_next_update = 0;
+		client->auto_entity_window_min = -1;
+		client->auto_entity_over_streak = 0;
+		client->auto_distress_ticks_total = 0;
+		client->auto_distress_ticks_needed = 0;
+		client->auto_distress_cull_held = 0.0f;
+		return;
+	}
+
+	if (sent_entities <= budget)
+	{
+		client->auto_entity_cull = 0.0f;
+		client->auto_entity_cull_tan_sq = 0.0f;
+		client->auto_entity_over_streak = 0;
+		client->auto_distress_cull_held = 0.0f;
+	}
+
 	// Track the least-loaded frame seen this window.
 	if (client->auto_entity_window_min < 0 || sent_entities < client->auto_entity_window_min)
 		client->auto_entity_window_min = sent_entities;
@@ -567,10 +603,10 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 
 	client->auto_entity_cull_next_update = svs.realtime + ENTITY_CULL_WINDOW_MS;
 
-	if (sv_entity_cull->value <= 0.0f)
+	if (client->auto_entity_window_min <= budget)
 	{
-		// sv_entity_cull 0 means culling is fully disabled; don't let
-		// adaptive scaling re-enable it.
+		// An under-budget window suppresses both count- and distress-based
+		// automatic culling.
 		client->auto_entity_cull = 0.0f;
 		client->auto_entity_cull_tan_sq = 0.0f;
 		client->auto_entity_window_min = -1;
@@ -607,7 +643,9 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 	// What this window's distress reading alone would call for, before the
 	// peak-hold/cooldown below. Rises to meet this immediately; only eases
 	// back down toward it gradually.
-	distress_cull = sv_entity_cull->value + t_distress * (sv_entity_cull_max->value - sv_entity_cull->value);
+	distress_cull = t_distress > 0.0f
+		? sv_entity_cull->value + t_distress * (sv_entity_cull_max->value - sv_entity_cull->value)
+		: 0.0f;
 
 	if (distress_cull >= client->auto_distress_cull_held)
 	{
@@ -622,8 +660,7 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 		}
 		else
 		{
-			max_decrease = (sv_entity_cull_max->value - sv_entity_cull->value)
-				* ((float)ENTITY_CULL_WINDOW_MS / cooldown_ms);
+			max_decrease = sv_entity_cull_max->value * ((float)ENTITY_CULL_WINDOW_MS / cooldown_ms);
 			client->auto_distress_cull_held -= max_decrease;
 			// don't overshoot past what this window's reading actually
 			// calls for - if distress gets worse again mid-cooldown, this
@@ -632,10 +669,6 @@ static void SV_UpdateAdaptiveEntityCull (client_t *client, int sent_entities)
 				client->auto_distress_cull_held = distress_cull;
 		}
 	}
-
-	tickrate_scale = 100.0f / (float)sv_tickrate->integer;
-	budget = sv_entity_budget->value * tickrate_scale;
-	budget_max = sv_entity_budget_max->value * tickrate_scale;
 
 	if (client->auto_entity_window_min > budget) {
 		// Over budget this window - only escalate the ENTITY-COUNT reason
@@ -1028,4 +1061,3 @@ void SV_RecordDemoMessage (void)
 	szr = fwrite (&len, 4, 1, svs.demofile);
 	szr = fwrite (buf.data, buf.cursize, 1, svs.demofile);
 }
-

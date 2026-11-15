@@ -551,8 +551,8 @@ qboolean SV_RateDrop (client_t *c)
 =======================
 SV_ResyncThrottled
 
-A client that has fallen out of its delta-compression window (see
-SV_ClientNeedsFullResync in sv_ents.c) needs a full, non-delta resync -
+A client whose delta frame or its entity states are no longer available
+(see SV_ClientNeedsFullResync in sv_ents.c) needs a full, non-delta resync -
 by far the most expensive packet the server builds. Without this, a
 client stuck in that state (e.g. sustained high ping/jitter, or an old
 client that can't use the widened UPDATE_BACKUP window) would get hit
@@ -595,12 +595,9 @@ second per client, when sv_netdebug is non-zero. Deliberately NOT tied
 to developer - developer 1 is far too noisy for a focused test with a
 single high-ping player, since it logs everything else in the engine too.
 
-Intended to confirm/deny whether stutter on a given map is caused by the
-client being pushed out of the delta-compression window (UPDATE_BACKUP
-ticks, ~160ms at 100 ticks) rather than by entity count: oow (out-of-window
-forced full resends) climbing while dbg_frames_built stays flat is the
-signature of that, and it will correlate with ping and with "open" maps
-much more than with raw entity counts.
+The oow counter includes resends caused by an out-of-window delta frame or
+its entity states being overwritten in the shared server history. The
+usable frame window depends on the client's p100 capability and tickrate.
 =======================
 */
 static void SV_NetDebug_Report (client_t *c)
@@ -781,4 +778,3 @@ void SV_SendClientMessages (void)
 		}
 	}
 }
-

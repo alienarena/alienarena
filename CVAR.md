@@ -1258,7 +1258,7 @@ Print one diagnostic line per connected client per second: delta-window gap, for
 
 **sv_resync_throttle_ms**: INT (default: 150)
 
-Minimum milliseconds between forced full (non-delta) resyncs sent to a client that has fallen out of its delta-compression window. Without this, such a client would get the most expensive packet every tick for as long as the condition lasts. Ticks in between are skipped (as with a rate drop) instead of repeating the resync.
+Minimum milliseconds between forced full (non-delta) resyncs sent when a client's delta frame or its entity states are no longer available. Without this, such a client would get the most expensive packet every tick for as long as the condition lasts. Ticks in between are skipped (as with a rate drop) instead of repeating the resync.
 
 **sv_hitch_threshold_ms**: INT (default: 100)
 
@@ -1266,23 +1266,27 @@ If a server tick takes more than this many milliseconds (wall clock) beyond the 
 
 ### Entity Culling CVARs
 
-The server culls entities that are too small (in angular size) to be seen by a client, which saves bandwidth. The cull angle adapts per client between `sv_entity_cull` (floor) and `sv_entity_cull_max` (ceiling), based on the number of visible entities and on the connection quality of the client. Clients can ask for a different value with the `entity_cull` userinfo cvar. Use `sv_entity_cull_status` to see the effective values.
+The server can cull small entities by angular size to save bandwidth. Automatic culling is disabled at or below the entity budget; above the budget its angle adapts per client between `sv_entity_cull` and `sv_entity_cull_max`, based on entity count and connection distress. The count is measured after PVS checks and before angular culling. Clients can request a fixed angle with `entity_cull`, bypassing automatic culling. Use `sv_entity_cull_status` to see the effective values.
 
 **sv_entity_cull**: FLOAT (default: 1.0)
 
-Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. 0 disables culling. Acts as the minimum (floor) when adaptive scaling is active.
+Minimum angular size (degrees) when automatic culling is active above budget. Higher values cull more aggressively. 0 disables automatic culling, but a positive client `entity_cull` override still applies.
 
 **sv_entity_cull_max**: FLOAT (default: 10.0)
 
 Maximum angular size (in degrees) adaptive entity culling scales up to when the visible entity count of a client exceeds `sv_entity_budget_max`.
 
-**sv_entity_budget**: INT (default: 80)
+**sv_entity_budget**: INT (default: 120)
 
-Number of visible entities per client (at sv_tickrate 100) below which culling stays at the `sv_entity_cull` minimum. Scaled automatically for other tickrates.
+For clients advertising `p100=2`, the visible entity count (at sv_tickrate 100) at or below which automatic angular culling, including distress-based culling, is disabled. A drop to this level takes effect on the next frame. Scaled automatically for other tickrates. Existing archived settings retain their configured value when the default changes.
+
+**sv_entity_budget_legacy**: INT (default: 80)
+
+The equivalent budget for clients not advertising `p100=2`. It scales with tickrate in the same way as `sv_entity_budget`.
 
 **sv_entity_budget_max**: INT (default: 150)
 
-Number of visible entities per client (at sv_tickrate 100) at or above which culling reaches the `sv_entity_cull_max` ceiling. Scaled automatically for other tickrates.
+Number of visible entities per client (at sv_tickrate 100) at or above which culling reaches the `sv_entity_cull_max` ceiling. Applies to both client budgets and scales automatically for other tickrates.
 
 **sv_entity_cull_vel_away_dot**: FLOAT (default: 0.0)
 
@@ -1290,15 +1294,15 @@ Dot-product threshold (-1 to 1) for the persistence rule: once an entity has bee
 
 **sv_entity_cull_distress**: FLOAT (default: 0.1)
 
-Fraction (0-1) of ticks a client needs a full resync (see `sv_resync_throttle_ms`) below which adaptive culling isn't increased for this reason. A client with a poor connection can need stronger culling than its entity count suggests. Whichever of this or the entity-count scaling is worse wins; a healthy connection is never affected.
+Fraction (0-1) of ticks a client needs a full resync (see `sv_resync_throttle_ms`) below which adaptive culling isn't increased for this reason. Above the entity budget, whichever of distress or entity-count scaling is worse wins; at or below the budget, distress does not enable automatic culling.
 
 **sv_entity_cull_distress_max**: FLOAT (default: 0.5)
 
-Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches `sv_entity_cull_max` due to connection distress alone, regardless of the visible entity count.
+Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches `sv_entity_cull_max` due to connection distress when the visible entity count exceeds the budget.
 
 **sv_entity_cull_distress_cooldown_ms**: INT (default: 5000)
 
-Milliseconds for the connection-distress part of adaptive culling to ease back down from `sv_entity_cull_max` to the floor once distress stops. It still rises immediately when distress increases. Prevents a fluctuating connection from making the angle flap up and down. 0 = relax immediately.
+Milliseconds for the connection-distress part of adaptive culling to ease back down from `sv_entity_cull_max` to zero once distress stops. It still rises immediately when distress increases and is cleared at or below budget. 0 = relax immediately.
 
 ### Special Features
 
@@ -1351,4 +1355,3 @@ Internal test cvars.
 - Default: `set rate 40000`
 - Limited bandwidth: `set rate 15000`
 - Very poor connection: `set rate 5000` (may see more resyncs and lag compensation artifacts)
-

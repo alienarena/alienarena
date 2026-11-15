@@ -220,10 +220,13 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 		// adaptive entity culling system would stay frozen until
 		// svs.realtime catches back up to the old stale value.
 		svs.clients[i].auto_entity_cull_next_update = 0;
+		svs.clients[i].auto_entity_cull = 0.0f;
+		svs.clients[i].auto_entity_cull_tan_sq = 0.0f;
 		svs.clients[i].auto_entity_window_min = -1;
 		svs.clients[i].auto_entity_over_streak = 0;
 		svs.clients[i].auto_distress_ticks_total = 0;
 		svs.clients[i].auto_distress_ticks_needed = 0;
+		svs.clients[i].auto_distress_cull_held = 0.0f;
 
 		// entity indices mean completely different things on the new map,
 		// so any "was visible" persistence state from the old map is

@@ -71,9 +71,10 @@ cvar_t	*sv_iplogfile;			// Log file by IP address
 
 cvar_t  *sv_tickrate;			// server frame rate
 
-cvar_t  *sv_entity_cull;		// entity culling threshold (in degrees) - 0=disabled - minimum/floor value
+cvar_t  *sv_entity_cull;		// minimum active adaptive culling angle (degrees); 0 disables automatic culling
 cvar_t  *sv_entity_cull_max;	// adaptive entity culling ceiling (in degrees)
-cvar_t  *sv_entity_budget;		// visible entity count (at tickrate 100) where adaptive culling starts increasing
+cvar_t  *sv_entity_budget;		// p100=2 visible entity budget at tickrate 100
+cvar_t  *sv_entity_budget_legacy;	// visible entity budget for other clients at tickrate 100
 cvar_t  *sv_entity_budget_max;	// visible entity count (at tickrate 100) where adaptive culling reaches sv_entity_cull_max
 cvar_t  *sv_entity_cull_vel_away_dot;	// dot-product threshold below which the player is considered to be moving away from an already-visible entity, making it eligible for culling again
 
@@ -700,6 +701,7 @@ gotnewcl:
 	// accept the new client
 	// this is the only place a client_t is ever initialized
 	*newcl = temp;
+	newcl->auto_entity_window_min = -1;
 	sv_client = newcl;
 	edictnum = (newcl-svs.clients)+1;
 	ent = EDICT_NUM(edictnum);
@@ -739,7 +741,7 @@ gotnewcl:
 	newcl->lastmessage = svs.realtime;	// don't timeout
 	newcl->lastconnect = svs.realtime;
 	
-	p100 = Info_ValueForKey(cl->userinfo, "p100");
+	p100 = Info_ValueForKey(newcl->userinfo, "p100");
     newcl->p100 = p100 ? atoi(p100) : 0;
 
 	// Initialize jitter monitor values
@@ -1525,6 +1527,8 @@ void SV_UserinfoChanged (client_t *cl)
 		cl->messagelevel = atoi(val);
 	}
 
+	float old_entity_cull = cl->entity_cull;
+
 	// Parse an optional per-client entity cull override from userinfo.
 	// If absent, the server default remains in effect.
 	val = Info_ValueForKey (cl->userinfo, "entity_cull");
@@ -1550,21 +1554,17 @@ void SV_UserinfoChanged (client_t *cl)
 		cl->entity_cull_tan_sq = 0.0f;
 	}
 
-	// Initialize the adaptive auto-cull state to the server floor on first
-	// connect only (client_t is zero-initialized, so 0 here means "never
-	// set yet"). Don't reset it on later userinfo changes (e.g. name/skin
-	// changes), so it keeps adapting across those, and persists across
-	// map changes since client_t isn't cleared then.
-	if (cl->auto_entity_cull <= 0.0f)
+	// Start a fresh observation window when switching to or from an override.
+	if ((old_entity_cull > 0.0f) != (cl->entity_cull > 0.0f))
 	{
-		float rad = sv_entity_cull->value * 3.14159f / 180.0f;
-		float t = tanf(rad);
-		cl->auto_entity_cull = sv_entity_cull->value;
-		cl->auto_entity_cull_tan_sq = t * t;
-		cl->auto_entity_window_min = -1;	// -1 = no samples yet this window
+		cl->auto_entity_cull = 0.0f;
+		cl->auto_entity_cull_tan_sq = 0.0f;
+		cl->auto_entity_window_min = -1;
 		cl->auto_entity_over_streak = 0;
 		cl->auto_entity_cull_next_update = 0;
-		cl->auto_distress_cull_held = sv_entity_cull->value;
+		cl->auto_distress_ticks_total = 0;
+		cl->auto_distress_ticks_needed = 0;
+		cl->auto_distress_cull_held = 0.0f;
 	}
 }
 
@@ -1630,13 +1630,16 @@ void SV_Init (void)
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
 	sv_entity_cull = Cvar_Get ("sv_entity_cull", "1.0", CVAR_ARCHIVE);
-	Cvar_Describe (sv_entity_cull, "Cull entities smaller than this angular size (in degrees). Higher values = cull more aggressively. Set to 0 to disable culling. Acts as the minimum (floor) value when adaptive scaling is active.");
+	Cvar_Describe (sv_entity_cull, "Minimum angular culling size in degrees when the adaptive entity budget is exceeded. Set to 0 to disable automatic angular culling. A positive client entity_cull override still applies.");
 
 	sv_entity_cull_max = Cvar_Get ("sv_entity_cull_max", "10.0", CVAR_ARCHIVE);
 	Cvar_Describe (sv_entity_cull_max, "Maximum angular size (in degrees) adaptive entity culling will scale up to when a client's visible entity count exceeds sv_entity_budget_max.");
 
-	sv_entity_budget = Cvar_Get ("sv_entity_budget", "80", CVAR_ARCHIVE);
-	Cvar_Describe (sv_entity_budget, "Number of visible entities per client (at sv_tickrate 100) below which entity culling stays at the sv_entity_cull minimum. Scaled automatically for other tickrates.");
+	sv_entity_budget = Cvar_Get ("sv_entity_budget", "120", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_budget, "Visible entities for p100=2 clients (at sv_tickrate 100) at or below which automatic angular culling is disabled, including distress-based culling. Scaled automatically for other tickrates.");
+
+	sv_entity_budget_legacy = Cvar_Get ("sv_entity_budget_legacy", "80", CVAR_ARCHIVE);
+	Cvar_Describe (sv_entity_budget_legacy, "Visible entities for clients without p100=2 (at sv_tickrate 100) at or below which automatic angular culling is disabled, including distress-based culling. Scaled automatically for other tickrates.");
 
 	sv_entity_budget_max = Cvar_Get ("sv_entity_budget_max", "150", CVAR_ARCHIVE);
 	Cvar_Describe (sv_entity_budget_max, "Number of visible entities per client (at sv_tickrate 100) at or above which entity culling reaches the sv_entity_cull_max ceiling. Scaled automatically for other tickrates.");
@@ -1645,19 +1648,19 @@ void SV_Init (void)
 	Cvar_Describe (sv_entity_cull_vel_away_dot, "Dot-product threshold (-1 to 1) for the persistence rule: once an entity has been visible to a client, it stays exempt from angular-size culling unless the player is moving away from it more directly than this (lower = more lenient, entity stays visible even when moving somewhat away; higher = stricter, entity gets re-culled sooner when leaving).");
 
 	sv_entity_cull_distress = Cvar_Get ("sv_entity_cull_distress", "0.1", CVAR_ARCHIVE);
-	Cvar_Describe (sv_entity_cull_distress, "Fraction (0-1) of ticks a client needs a full resync (see sv_resync_throttle_ms) below which adaptive culling isn't increased for this reason. A client with a poor connection can need stronger culling than its visible entity count alone would suggest - this reacts to that directly instead of relying on raw entity count or ping as a proxy. Whichever of this or the entity-count scaling is worse wins; a healthy connection (0 fraction) is never affected by this.");
+	Cvar_Describe (sv_entity_cull_distress, "Fraction (0-1) of ticks needing a full resync below which distress does not increase adaptive culling. Distress can increase culling only above the client's entity budget; whichever of distress or entity-count scaling is worse wins.");
 
 	sv_entity_cull_distress_max = Cvar_Get ("sv_entity_cull_distress_max", "0.5", CVAR_ARCHIVE);
-	Cvar_Describe (sv_entity_cull_distress_max, "Fraction (0-1) of ticks a client needs a full resync at or above which adaptive culling reaches sv_entity_cull_max due to connection distress alone, regardless of visible entity count.");
+	Cvar_Describe (sv_entity_cull_distress_max, "Fraction (0-1) of ticks needing a full resync at or above which distress raises adaptive culling to sv_entity_cull_max, when the visible entity count exceeds the client's entity budget.");
 
 	sv_entity_cull_distress_cooldown_ms = Cvar_Get ("sv_entity_cull_distress_cooldown_ms", "5000", CVAR_ARCHIVE | CVARDOC_INT);
-	Cvar_Describe (sv_entity_cull_distress_cooldown_ms, "Milliseconds for the connection-distress part of adaptive culling to ease back down from sv_entity_cull_max to the floor once distress stops - it still rises immediately when distress increases, this only slows how fast it comes back down. Prevents a fluctuating connection (a few bad seconds, then a few good ones) from making the angle flap up and down as much as the connection does. 0 = relax immediately, no cooldown.");
+	Cvar_Describe (sv_entity_cull_distress_cooldown_ms, "Milliseconds for distress-based culling to ease from sv_entity_cull_max to zero once distress stops. It still rises immediately and is cleared when the visible count drops to or below budget. 0 = relax immediately.");
 
 	sv_netdebug = Cvar_Get ("sv_netdebug", "0", 0);
 	Cvar_Describe (sv_netdebug, "Prints one diagnostic line per connected client per second: delta-window gap, forced full-resends, bytes sent, rate drops/overflows, and current entity-cull angle. Not tied to developer - intended to be left on only while diagnosing a specific client's stutter, since normal developer logging is too noisy for this. 0 = off (default).");
 
 	sv_resync_throttle_ms = Cvar_Get ("sv_resync_throttle_ms", "150", CVAR_ARCHIVE | CVARDOC_INT);
-	Cvar_Describe (sv_resync_throttle_ms, "Minimum milliseconds between forced full (non-delta) resyncs sent to a client that has fallen out of its delta-compression window. Without this, such a client would get hit with the most expensive packet every single tick for as long as the condition lasts. Ticks in between are skipped entirely (same as a rate-drop) rather than repeating the resync.");
+	Cvar_Describe (sv_resync_throttle_ms, "Minimum milliseconds between forced full (non-delta) resyncs when a client's delta frame or its entity states are no longer available. Ticks in between are skipped entirely (same as a rate-drop) rather than repeating the resync.");
 
 	sv_hitch_threshold_ms = Cvar_Get ("sv_hitch_threshold_ms", "100", CVAR_ARCHIVE | CVARDOC_INT);
 	Cvar_Describe (sv_hitch_threshold_ms, "If a server tick takes longer than this many milliseconds (wall clock, not CPU time) beyond the current tickrate's per-tick budget, print a breakdown: time in packet reading, game simulation, and total/worst-single-client send time (including whether that client needed a full resync). Independent of sv_netdebug - intended to stay on by default to catch rare stalls/hiccups without needing per-client logging running. 0 disables this check.");

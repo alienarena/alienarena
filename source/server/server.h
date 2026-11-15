@@ -196,21 +196,20 @@ typedef struct client_s
 	float			entity_cull_tan_sq;
 
 	// Adaptive entity culling (per-client, PVS-aware): tracks how many
-	// entities are actually visible to THIS client. Re-evaluated at most
-	// once per second (not every frame) to avoid entities flickering in
+	// entities pass visibility checks before angular culling. Escalation is
+	// re-evaluated at most once per second to avoid entities flickering in
 	// and out as the threshold jitters. Biased toward rendering rather
 	// than culling: uses the LEAST-loaded frame seen in the window (a
 	// brief spike shouldn't trigger more aggressive culling), and only
 	// escalates culling after a couple of consecutive over-budget windows
-	// (sustained load), while relaxing back down after just one
-	// under-budget window. Only used when entity_cull (above) hasn't been
-	// set by the client.
+	// (sustained load). An under-budget frame disables automatic culling
+	// for the next frame. Only used without a client entity_cull override.
 	float			auto_entity_cull;
 	float			auto_entity_cull_tan_sq;
 	int				auto_entity_cull_next_update;	// svs.realtime ms of next re-evaluation
 	int				auto_entity_window_min;			// least num_entities seen since last re-evaluation (-1 = no samples yet)
 	int				auto_entity_over_streak;		// consecutive windows found over budget
-	int				auto_entity_last_count;			// most recent frame's sent entity count, for diagnostics/status display only
+	int				auto_entity_last_count;			// most recent pre-angular-cull count, for diagnostics/status display only
 
 	// Connection-distress component of the same adaptive system: tracks
 	// what fraction of ticks this client actually needed a full (non-delta)
@@ -221,7 +220,8 @@ typedef struct client_s
 	// direct measurement of the actual problem instead of a proxy for it
 	// (e.g. ping), and unlike entity count it isn't shaped by the culling
 	// decision itself, so it doesn't need the same wait-for-confirmation
-	// delay the entity-count side uses below, and can react immediately.
+	// delay the entity-count side uses below, and can react immediately
+	// above the entity budget. At or below budget it is suppressed.
 	// Incremented every tick in SV_SendClientMessages (sv_send.c), *before*
 	// any rate-drop/resync-throttle skip - those skipped ticks are exactly
 	// the distress this is meant to catch, so it can't only sample the
@@ -446,6 +446,7 @@ void SV_RecordDemoMessage (void);
 void SV_BuildClientFrame (client_t *client);
 int SV_ClientMaxHistory (client_t *client);
 qboolean SV_ClientNeedsFullResync (client_t *client);
+float SV_ClientEntityBudget (const client_t *client);
 
 
 void SV_Error (char *error, ...);

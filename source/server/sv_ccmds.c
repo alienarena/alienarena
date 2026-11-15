@@ -736,6 +736,7 @@ having to guess or wait for a fresh connect.
 extern cvar_t	*sv_entity_cull;
 extern cvar_t	*sv_entity_cull_max;
 extern cvar_t	*sv_entity_budget;
+extern cvar_t	*sv_entity_budget_legacy;
 extern cvar_t	*sv_entity_budget_max;
 extern cvar_t	*sv_entity_cull_distress;
 extern cvar_t	*sv_entity_cull_distress_max;
@@ -748,22 +749,22 @@ void SV_EntityCullStatus_f (void)
 	float		distress;
 
 	Com_Printf ("Entity culling status for map '%s':\n", sv.name);
-	Com_Printf ("  sv_entity_cull (floor): %.2f  sv_entity_cull_max (ceiling): %.2f\n",
+	Com_Printf ("  sv_entity_cull (active minimum): %.2f  sv_entity_cull_max (ceiling): %.2f\n",
 		sv_entity_cull->value, sv_entity_cull_max->value);
-	Com_Printf ("  sv_entity_budget: %.0f  sv_entity_budget_max: %.0f\n",
-		sv_entity_budget->value, sv_entity_budget_max->value);
+	Com_Printf ("  sv_entity_budget: %.0f  sv_entity_budget_legacy: %.0f  sv_entity_budget_max: %.0f\n",
+		sv_entity_budget->value, sv_entity_budget_legacy->value, sv_entity_budget_max->value);
 	Com_Printf ("  sv_entity_cull_distress: %.2f  sv_entity_cull_distress_max: %.2f  sv_entity_cull_distress_cooldown_ms: %.0f\n",
 		sv_entity_cull_distress->value, sv_entity_cull_distress_max->value, sv_entity_cull_distress_cooldown_ms->value);
-	Com_Printf ("  (auto values below are per-client; whichever of entity count or connection\n"
-		"   distress - fraction of ticks needing a full resync - is worse determines the angle;\n"
-		"   distress rises immediately but only eases back down over the cooldown above)\n");
+	Com_Printf ("  (automatic culling is off at or below budget; above budget, the worse of\n"
+		"   entity count or connection distress determines the angle. Distress rises\n"
+		"   immediately but only eases back down over the cooldown above.)\n");
 
 	if (!svs.clients)
 		return;
 
 	Com_Printf ("\nPer-client effective cull angle:\n");
-	Com_Printf ("%-20s %-11s %-11s %-11s %-11s %-11s %s\n", "Name", "Value", "Entities", "WindowMin", "Streak", "Distress", "Source");
-	Com_Printf ("-------------------- ----------- ----------- ----------- ----------- ----------- ----------\n");
+	Com_Printf ("%-20s %-6s %-11s %-11s %-11s %-11s %-11s %-11s %s\n", "Name", "P100", "Budget", "Value", "Entities", "WindowMin", "Streak", "Distress", "Source");
+	Com_Printf ("-------------------- ------ ----------- ----------- ----------- ----------- ----------- ----------- ----------\n");
 	for (i = 0 ; i < maxclients->integer ; i++)
 	{
 		cl = &svs.clients[i];
@@ -800,9 +801,9 @@ void SV_EntityCullStatus_f (void)
 			: 0.0f;
 
 		if (cl->entity_cull > 0.0f)
-			Com_Printf (" %-11.2f %-11d %-11d %-11d %-11.2f %s\n", cl->entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, distress, "client override");
+			Com_Printf (" %-6d %-11.2f %-11.2f %-11d %-11d %-11d %-11.2f %s\n", cl->p100, SV_ClientEntityBudget(cl), cl->entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, distress, "client override");
 		else
-			Com_Printf (" %-11.2f %-11d %-11d %-11d %-11.2f %s\n", cl->auto_entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, distress, "server auto");
+			Com_Printf (" %-6d %-11.2f %-11.2f %-11d %-11d %-11d %-11.2f %s\n", cl->p100, SV_ClientEntityBudget(cl), cl->auto_entity_cull, cl->auto_entity_last_count, cl->auto_entity_window_min, cl->auto_entity_over_streak, distress, "server auto");
 	}
 }
 
@@ -844,4 +845,3 @@ void SV_InitOperatorCommands (void)
 	// Entity culling status
 	Cmd_AddCommand ("sv_entity_cull_status", SV_EntityCullStatus_f);
 }
-
